@@ -38,6 +38,10 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
+import org.apache.mahout.utils.DistanceMeasure;
+import org.apache.mahout.utils.EuclideanDistanceMeasure;
+import org.apache.mahout.utils.ManhattanDistanceMeasure;
+import org.apache.mahout.utils.UserDefinedDistanceMeasure;
 
 public class TestCanopyCreation extends TestCase {
   static final float[][] raw = { { 1, 1 }, { 2, 1 }, { 1, 2 }, { 2, 2 },

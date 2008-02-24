@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.mahout.clustering.canopy;
+package org.apache.mahout.utils;
 
 import org.apache.hadoop.mapred.JobConfigurable;
 

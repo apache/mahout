@@ -1,4 +1,6 @@
-package org.apache.mahout.clustering.canopy;
+package org.apache.mahout.utils;
+
+import org.apache.mahout.utils.ManhattanDistanceMeasure;
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more

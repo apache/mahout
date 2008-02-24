@@ -23,6 +23,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.mahout.utils.DistanceMeasure;
 
 /**
  * This class models a canopy as a center point, the number of points that are
