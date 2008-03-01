@@ -1,11 +1,10 @@
-package org.apache.mahout.clustering.canopy;
-/**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+/* Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -15,32 +14,33 @@ package org.apache.mahout.clustering.canopy;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.mahout.clustering.canopy;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.utils.Point;
 
 import java.io.IOException;
 import java.util.Iterator;
 
-public class CanopyCombiner extends MapReduceBase implements Reducer {
+public class CanopyCombiner extends MapReduceBase implements Reducer<Text, Text, Text, Text> {
 
-  public void reduce(WritableComparable key, Iterator values,
-                     OutputCollector output, Reporter reporter) throws IOException {
+  public void reduce(Text key, Iterator<Text> values,
+                     OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
     Writable value = (Writable) values.next();
-    Float[] center = Canopy.decodePoint(value.toString());
+    Float[] center = Point.decodePoint(value.toString());
     Canopy canopy = new Canopy(center);
     while (values.hasNext()) {
       value = (Writable) values.next();
-      Float[] point = Canopy.decodePoint(value.toString());
+      Float[] point = Point.decodePoint(value.toString());
       canopy.addPoint(point);
     }
-    output.collect(new Text("centroid"), new Text(Canopy.formatPoint(canopy
+    output.collect(new Text("centroid"), new Text(Point.formatPoint(canopy
             .computeCentroid())));
   }
 

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.mahout.clustering.canopy;
+package org.apache.mahout.clustering.kmeans;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
@@ -25,43 +25,25 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.utils.Point;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
-public class CanopyReducer extends MapReduceBase implements
+public class KMeansCombiner extends MapReduceBase implements
         Reducer<Text, Text, Text, Text> {
 
-  List<Canopy> canopies = new ArrayList<Canopy>();
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.Reducer#reduce(org.apache.hadoop.io.WritableComparable,
-   *      java.util.Iterator, org.apache.hadoop.mapred.OutputCollector,
-   *      org.apache.hadoop.mapred.Reporter)
-   */
   public void reduce(Text key, Iterator<Text> values,
                      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
-    while (values.hasNext()) {
-      Text value = (Text) values.next();
-      Float[] point = Point.decodePoint(value.toString());
-      Canopy.addPointToCanopies(point, canopies);
+    Cluster cluster = Cluster.decodeCluster(key.toString());
+    while (values.hasNext()){
+      cluster.addPoint(Point.decodePoint(values.next().toString()));
     }
-    for (Canopy canopy : canopies)
-      output.collect(new Text(canopy.getIdentifier()), new Text(Canopy
-              .formatCanopy(canopy)));
+    output.collect(key, new Text(cluster.getNumPoints() + ", "
+            + Point.formatPoint(cluster.getPointTotal())));
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.MapReduceBase#configure(org.apache.hadoop.mapred.JobConf)
-   */
   @Override
   public void configure(JobConf job) {
     super.configure(job);
-    Canopy.configure(job);
+    Cluster.configure(job);
   }
 
 }

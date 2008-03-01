@@ -16,35 +16,36 @@
  */
 package org.apache.mahout.clustering.canopy;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.utils.Point;
 
-public class ClusterMapper extends MapReduceBase implements Mapper {
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ClusterMapper extends MapReduceBase implements
+        Mapper<WritableComparable, Text, Text, Text> {
 
   List<Canopy> canopies;
 
-  public void map(WritableComparable key, Writable values,
-      OutputCollector output, Reporter reporter) throws IOException {
-    Float[] point = Canopy.decodePoint(values.toString());
+  public void map(WritableComparable key, Text values,
+                  OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+    Float[] point = Point.decodePoint(values.toString());
     Canopy.emitPointToExistingCanopies(point, canopies, values, output);
   }
 
   /**
    * Configure the mapper by providing its canopies. Used by unit tests.
-   * 
+   *
    * @param canopies a List<Canopy>
    */
   public void config(List<Canopy> canopies) {
@@ -72,7 +73,7 @@ public class ClusterMapper extends MapReduceBase implements Mapper {
         Text key = new Text();
         Text value = new Text();
         while (reader.next(key, value)) {
-          Canopy canopy = new Canopy(Canopy.decodePoint(value.toString()));
+          Canopy canopy = Canopy.decodeCanopy(value.toString());
           canopies.add(canopy);
         }
       } finally {

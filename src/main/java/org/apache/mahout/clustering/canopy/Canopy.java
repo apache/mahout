@@ -16,21 +16,20 @@
  */
 package org.apache.mahout.clustering.canopy;
 
-import java.io.IOException;
-import java.util.List;
-
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.utils.DistanceMeasure;
+import org.apache.mahout.utils.Point;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * This class models a canopy as a center point, the number of points that are
  * contained within it according to the application of some distance metric, and
  * a point total which is the sum of all the points and is used to compute the
  * centroid when needed.
- * 
  */
 public class Canopy {
 
@@ -69,7 +68,7 @@ public class Canopy {
 
   /**
    * Create a new Canopy containing the given point
-   * 
+   *
    * @param point a Float[]
    */
   public Canopy(Float[] point) {
@@ -82,8 +81,8 @@ public class Canopy {
 
   /**
    * Create a new Canopy containing the given point and canopyId
-   * 
-   * @param point a Float[]
+   *
+   * @param point    a Float[]
    * @param canopyId an int identifying the canopy local to this process only
    */
   public Canopy(Float[] point, int canopyId) {
@@ -96,7 +95,7 @@ public class Canopy {
 
   /**
    * Configure the Canopy and its distance measure
-   * 
+   *
    * @param job the JobConf for this job
    */
   public static void configure(JobConf job) {
@@ -114,6 +113,7 @@ public class Canopy {
 
   /**
    * Configure the Canopy for unit tests
+   *
    * @param aMeasure
    * @param aT1
    * @param aT2
@@ -130,10 +130,10 @@ public class Canopy {
    * existing canopies instead of the points. Because of this it does not need
    * to actually store the points, instead storing a total points vector and the
    * number of points. From this a centroid can be computed.
-   * 
+   * <p/>
    * This method is used by the CanopyReducer.
-   * 
-   * @param point the Float[] defining the point to be added
+   *
+   * @param point    the Float[] defining the point to be added
    * @param canopies the List<Canopy> to be appended
    */
   public static void addPointToCanopies(Float[] point, List<Canopy> canopies) {
@@ -152,13 +152,13 @@ public class Canopy {
    * This method is used by the CanopyMapper to perform canopy inclusion tests
    * and to emit the point and its covering canopies to the output. The
    * CanopyCombiner will then sum the canopy points and produce the centroids.
-   * 
-   * @param point the Float[] defining the point to be added
-   * @param canopies the List<Canopy> to be appended
+   *
+   * @param point     the Float[] defining the point to be added
+   * @param canopies  the List<Canopy> to be appended
    * @param collector an OutputCollector in which to emit the point
    */
   public static void emitPointToNewCanopies(Float[] point,
-      List<Canopy> canopies, OutputCollector collector) throws IOException {
+                                            List<Canopy> canopies, OutputCollector<Text, Text> collector) throws IOException {
     boolean pointStronglyBound = false;
     for (Canopy canopy : canopies) {
       float dist = measure.distance(canopy.getCenter(), point);
@@ -178,16 +178,16 @@ public class Canopy {
    * and to emit the point keyed by its covering canopies to the output. if the
    * point is not covered by any canopies (due to canopy centroid clustering),
    * emit the point to the closest covering canopy.
-   * 
-   * @param point the Float[] defining the point to be added
-   * @param canopies the List<Canopy> to be appended
-   * @param writable the original Writable from the input, may include arbitrary
-   *        payload information after the point [...]<payload>
+   *
+   * @param point     the Float[] defining the point to be added
+   * @param canopies  the List<Canopy> to be appended
+   * @param writable  the original Writable from the input, may include arbitrary
+   *                  payload information after the point [...]<payload>
    * @param collector an OutputCollector in which to emit the point
    */
   public static void emitPointToExistingCanopies(Float[] point,
-      List<Canopy> canopies, Writable writable, OutputCollector collector)
-      throws IOException {
+                                                 List<Canopy> canopies, Text writable, OutputCollector<Text, Text> collector)
+          throws IOException {
     float minDist = Float.MAX_VALUE;
     Canopy closest = null;
     boolean isCovered = false;
@@ -208,64 +208,19 @@ public class Canopy {
   }
 
   /**
-   * Returns a print string for the point
-   * 
-   * @param out a String to append to
-   * @param pt the Float[] point
-   * @return
-   */
-  public static String ptOut(String out, Float[] pt) {
-    out += formatPoint(pt);
-    return out;
-  }
-
-  /**
-   * Format the point for input to a Mapper or Reducer
-   * 
-   * @param point a Float[]
-   * @return a String
-   */
-  public static String formatPoint(Float[] point) {
-    String out = "";
-    out += "[";
-    for (int i = 0; i < point.length; i++)
-      out += point[i] + ", ";
-    out += "] ";
-    String ptOut = out;
-    return ptOut;
-  }
-
-  /**
-   * Decodes a point from its string representation.
-   * 
-   * @param formattedString a comma-terminated String of the form
-   *        "[v1,v2,...,vn,]"
-   * @return the Float[] defining an n-dimensional point
-   */
-  public static Float[] decodePoint(String formattedString) {
-    String[] pts = formattedString.split(",");
-    Float[] point = new Float[pts.length - 1];
-    for (int i = 0; i < point.length; i++)
-      if (pts[i].startsWith("["))
-        point[i] = new Float(pts[i].substring(1));
-      else if (!pts[i].startsWith("]"))
-        point[i] = new Float(pts[i]);
-    return point;
-  }
-
-  /**
    * Format the canopy for output
-   * 
+   *
    * @param canopy
    * @return
    */
   public static String formatCanopy(Canopy canopy) {
-    return "C" + canopy.canopyId + ": " + formatPoint(canopy.computeCentroid());
+    return "C" + canopy.canopyId + ": "
+            + Point.formatPoint(canopy.computeCentroid());
   }
 
   /**
    * Decodes and returns a Canopy from the formattedString
-   * 
+   *
    * @param formattedString a String prouced by formatCanopy
    * @return a new Canopy
    */
@@ -275,7 +230,7 @@ public class Canopy {
     String centroid = formattedString.substring(beginIndex);
     if (id.startsWith("C")) {
       int canopyId = new Integer(formattedString.substring(1, beginIndex - 2));
-      Float[] canopyCentroid = decodePoint(centroid);
+      Float[] canopyCentroid = Point.decodePoint(centroid);
       return new Canopy(canopyCentroid, canopyId);
     }
     return null;
@@ -283,7 +238,7 @@ public class Canopy {
 
   /**
    * Add a point to the canopy
-   * 
+   *
    * @param point a Float[]
    */
   public void addPoint(Float[] point) {
@@ -295,22 +250,27 @@ public class Canopy {
   /**
    * Emit the point to the collector, keyed by the canopy's formatted
    * representation
-   * 
+   *
    * @param point a Float[]
    */
-  public void emitPoint(Float[] point, OutputCollector collector)
-      throws IOException {
-    collector.collect(new Text(formatCanopy(this)), new Text(ptOut("", point)));
+  public void emitPoint(Float[] point, OutputCollector<Text, Text> collector)
+          throws IOException {
+    collector.collect(new Text(formatCanopy(this)), new Text(Point.ptOut("",
+            point)));
   }
 
   /**
    * Return a printable representation of this object, using the user supplied
    * identifier
-   * 
+   *
    * @return
    */
   public String toString() {
-    return "C" + canopyId + " - " + ptOut("", getCenter());
+    return getIdentifier() + " - " + Point.ptOut("", getCenter());
+  }
+
+  public String getIdentifier() {
+    return "C" + canopyId;
   }
 
   public int getCanopyId() {
@@ -319,7 +279,7 @@ public class Canopy {
 
   /**
    * Return the center point
-   * 
+   *
    * @return a Float[]
    */
   public Float[] getCenter() {
@@ -328,7 +288,7 @@ public class Canopy {
 
   /**
    * Return the number of points in the Canopy
-   * 
+   *
    * @return
    */
   public int getNumPoints() {
@@ -337,7 +297,7 @@ public class Canopy {
 
   /**
    * Compute the centroid by averaging the pointTotals
-   * 
+   *
    * @return a Float[] which is the new centroid
    */
   public Float[] computeCentroid() {
@@ -349,7 +309,7 @@ public class Canopy {
 
   /**
    * Return if the point is covered by this canopy
-   * 
+   *
    * @param point a Float[] point
    * @return if the point is covered
    */

@@ -33,7 +33,7 @@ public class ClusterDriver {
     float t1 = new Float(args[4]);
     float t2 = new Float(args[5]);
     String jarLocation = "apache-mahout-0.1-dev.jar";
-    if (args.length > 6){
+    if (args.length > 6) {
       jarLocation = args[6];
     }
     runJob(points, canopies, output, measureClassName, t1, t2, jarLocation);
@@ -41,20 +41,20 @@ public class ClusterDriver {
 
   /**
    * Run the job
-   * 
-   * @param points the input points directory pathname String
-   * @param canopies the input canopies directory pathname String
-   * @param output the output directory pathname String
+   *
+   * @param points           the input points directory pathname String
+   * @param canopies         the input canopies directory pathname String
+   * @param output           the output directory pathname String
    * @param measureClassName the DistanceMeasure class name
-   * @param t1 the T1 distance threshold
-   * @param t2 the T2 distance threshold
+   * @param t1               the T1 distance threshold
+   * @param t2               the T2 distance threshold
    * @param jarLocation
    */
   public static void runJob(String points, String canopies, String output,
                             String measureClassName, float t1, float t2, String jarLocation) {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(
-        org.apache.mahout.clustering.canopy.ClusterDriver.class);
+            org.apache.mahout.clustering.canopy.ClusterDriver.class);
     conf.setJar(jarLocation);
     conf.set(Canopy.DISTANCE_MEASURE_KEY, measureClassName);
     conf.set(Canopy.T1_KEY, "" + t1);

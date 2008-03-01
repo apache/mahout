@@ -16,6 +16,9 @@ package org.apache.mahout.clustering.canopy;
  * limitations under the License.
  */
 
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.OutputCollector;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,32 +26,28 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.OutputCollector;
+public class DummyOutputCollector implements OutputCollector<Text, Text> {
 
-public class DummyOutputCollector implements OutputCollector {
+  Map<String, List<Text>> data = new TreeMap<String, List<Text>>();
 
-  Map<String, List<Writable>> data = new TreeMap<String, List<Writable>>();
-
-  public void collect(WritableComparable key, Writable values)
-      throws IOException {
-    List<Writable> points = data.get(key.toString());
+  public void collect(Text key, Text values)
+          throws IOException {
+    List<Text> points = data.get(key.toString());
     if (points == null) {
-      points = new ArrayList<Writable>();
+      points = new ArrayList<Text>();
       data.put(key.toString(), points);
     }
     points.add(values);
   }
 
-  public Map<String, List<Writable>> getData() {
+  public Map<String, List<Text>> getData() {
     return data;
   }
 
-  public List<Writable> getValue(String key) {
+  public List<Text> getValue(String key) {
     return data.get(key);
   }
-  
+
   public Set<String> getKeys() {
     return data.keySet();
   }

@@ -14,8 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.mahout.clustering.canopy;
+package org.apache.mahout.clustering.kmeans;
 
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -29,23 +32,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CanopyMapper extends MapReduceBase implements
+public class KMeansMapper extends MapReduceBase implements
         Mapper<WritableComparable, Text, Text, Text> {
 
-  List<Canopy> canopies = new ArrayList<Canopy>();
+  List<Cluster> clusters;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.Mapper#map(org.apache.hadoop.io.WritableComparable,
-   *      org.apache.hadoop.io.Writable,
-   *      org.apache.hadoop.mapred.OutputCollector,
-   *      org.apache.hadoop.mapred.Reporter)
-   */
   public void map(WritableComparable key, Text values,
                   OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
     Float[] point = Point.decodePoint(values.toString());
-    Canopy.emitPointToNewCanopies(point, canopies, output);
+    Cluster.emitPointToNearestCluster(point, clusters, values, output);
+  }
+
+  /**
+   * Configure the mapper by providing its clusters. Used by unit tests.
+   *
+   * @param clusters a List<Cluster>
+   */
+  void config(List<Cluster> clusters) {
+    this.clusters = clusters;
   }
 
   /*
@@ -56,7 +60,29 @@ public class CanopyMapper extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     super.configure(job);
-    Canopy.configure(job);
-  }
+    Cluster.configure(job);
 
+    String clusterPath = job.get(Cluster.CLUSTER_PATH_KEY);
+    clusters = new ArrayList<Cluster>();
+
+    try {
+      FileSystem fs = FileSystem.get(job);
+      Path path = new Path(clusterPath + "/part-00000");
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
+      try {
+        Text key = new Text();
+        Text value = new Text();
+        while (reader.next(key, value)) {
+          Cluster cluster = Cluster.decodeCluster(value.toString());
+          // add the center so the centroid will be correct on output formatting
+          cluster.addPoint(cluster.getCenter());
+          clusters.add(cluster);
+        }
+      } finally {
+        reader.close();
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
 }

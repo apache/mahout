@@ -7,9 +7,9 @@ package org.apache.mahout.clustering.canopy;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,7 +30,7 @@ public class CanopyClusteringJob {
     float t1 = new Float(args[3]);
     float t2 = new Float(args[4]);
     String jarLocation = "apache-mahout-0.1-dev.jar";
-    if (args.length > 5){
+    if (args.length > 5) {
       jarLocation = args[5];
     }
     runJob(input, output, measureClassName, t1, t2, jarLocation);
@@ -38,15 +38,15 @@ public class CanopyClusteringJob {
 
   /**
    * Run the job
-   * 
-   * @param input the input pathname String
-   * @param output the output pathname String
+   *
+   * @param input            the input pathname String
+   * @param output           the output pathname String
    * @param measureClassName the DistanceMeasure class name
-   * @param t1 the T1 distance threshold
-   * @param t2 the T2 distance threshold
+   * @param t1               the T1 distance threshold
+   * @param t2               the T2 distance threshold
    */
   public static void runJob(String input, String output,
-      String measureClassName, float t1, float t2, String jarLocation) {
+                            String measureClassName, float t1, float t2, String jarLocation) {
     CanopyDriver.runJob(input, output + "/canopies", measureClassName, t1, t2, jarLocation);
     ClusterDriver.runJob(input, output + "/canopies", output, measureClassName, t1, t2, jarLocation);
   }
