@@ -20,8 +20,13 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class Point {
+  /**
+   * Split pattern for {@link #decodePoint(String)}.
+   */
+  private final static Pattern splitPattern = Pattern.compile("[,]");
 
   /**
    * Format the point for input to a Mapper or Reducer
@@ -30,30 +35,39 @@ public class Point {
    * @return a String
    */
   public static String formatPoint(Float[] point) {
-    String out = "";
-    out += "[";
-    for (int i = 0; i < point.length; i++)
-      out += point[i] + ", ";
-    out += "] ";
-    String ptOut = out;
-    return ptOut;
+    if (point.length == 0) {
+      return "[]";
+    }
+
+    final StringBuilder out = new StringBuilder();
+    out.append('[');
+    for (int i = 0; i < point.length; i++) {
+      if (i > 0) out.append(", ");
+      out.append(point[i]);
+    }
+    out.append(']');
+    return out.toString();
   }
 
   /**
    * Decodes a point from its string representation.
    *
    * @param formattedString a comma-terminated String of the form
-   *                        "[v1,v2,...,vn,]"
+   *                        "[v1,v2,...,vn]"
    * @return the Float[] defining an n-dimensional point
    */
   public static Float[] decodePoint(String formattedString) {
-    String[] pts = formattedString.split(",");
-    Float[] point = new Float[pts.length - 1];
-    for (int i = 0; i < point.length; i++)
-      if (pts[i].startsWith("["))
-        point[i] = new Float(pts[i].substring(1));
-      else if (!pts[i].startsWith("]"))
-        point[i] = new Float(pts[i]);
+    if (formattedString.charAt(0) != '[' 
+      || formattedString.charAt(formattedString.length() - 1) != ']') {
+      throw new IllegalArgumentException(formattedString);
+    }
+    formattedString = formattedString.substring(1, formattedString.length() - 2);
+
+    final String[] pts = splitPattern.split(formattedString);
+    final Float[] point = new Float[pts.length];
+    for (int i = 0; i < point.length; i++) {
+      point[i] = new Float(pts[i]);
+    }
     return point;
   }
 
@@ -65,8 +79,7 @@ public class Point {
    * @return
    */
   public static String ptOut(String out, Float[] pt) {
-    out += formatPoint(pt);
-    return out;
+    return out + formatPoint(pt);
   }
 
   /**
