@@ -479,10 +479,10 @@ public class TestCanopyCreation extends TestCase {
     Text value = new Text();
     assertTrue("more to come", reader.next(key, value));
     assertEquals("1st key", "C0", key.toString());
-    assertEquals("1st value", "C0: [1.5, 1.5, ] ", value.toString());
+    assertEquals("1st value", "C0: [1.5, 1.5]", value.toString());
     assertTrue("more to come", reader.next(key, value));
     assertEquals("2nd key", "C1", key.toString());
-    assertEquals("2nd value", "C1: [4.333333, 4.333333, ] ", value.toString());
+    assertEquals("2nd value", "C1: [4.333333, 4.333333]", value.toString());
     assertFalse("more to come", reader.next(key, value));
     reader.close();
   }
@@ -515,10 +515,10 @@ public class TestCanopyCreation extends TestCase {
     Text value = new Text();
     assertTrue("more to come", reader.next(key, value));
     assertEquals("1st key", "C0", key.toString());
-    assertEquals("1st value", "C0: [1.8, 1.8, ] ", value.toString());
+    assertEquals("1st value", "C0: [1.8, 1.8]", value.toString());
     assertTrue("more to come", reader.next(key, value));
     assertEquals("2nd key", "C1", key.toString());
-    assertEquals("2nd value", "C1: [4.4333334, 4.4333334, ] ", value.toString());
+    assertEquals("2nd value", "C1: [4.4333334, 4.4333334]", value.toString());
     assertFalse("more to come", reader.next(key, value));
     reader.close();
   }
@@ -814,10 +814,10 @@ public class TestCanopyCreation extends TestCase {
     Text value = new Text();
     assertTrue("more to come", reader.next(key, value));
     assertEquals("1st key", "C0", key.toString());
-    assertEquals("1st value", "C0: [1.5, 1.5, ] ", value.toString());
+    assertEquals("1st value", "C0: [1.5, 1.5]", value.toString());
     assertTrue("more to come", reader.next(key, value));
     assertEquals("2nd key", "C1", key.toString());
-    assertEquals("2nd value", "C1: [4.333333, 4.333333, ] ", value.toString());
+    assertEquals("2nd value", "C1: [4.333333, 4.333333]", value.toString());
     assertFalse("more to come", reader.next(key, value));
     reader.close();
   }

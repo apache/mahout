@@ -52,16 +52,18 @@ public class Point {
   /**
    * Decodes a point from its string representation.
    *
-   * @param formattedString a comma-terminated String of the form
-   *                        "[v1,v2,...,vn]"
+   * @param formattedString a comma-terminated String of the form 
+   *    "[v1,v2,...,vn]payload". Note the payload remainder: it is optional,
+   *    but can be present.
    * @return the Float[] defining an n-dimensional point
    */
   public static Float[] decodePoint(String formattedString) {
-    if (formattedString.charAt(0) != '[' 
-      || formattedString.charAt(formattedString.length() - 1) != ']') {
+    final int closingBracketIndex = formattedString.indexOf(']'); 
+    if (formattedString.charAt(0) != '[' || closingBracketIndex < 0) {
       throw new IllegalArgumentException(formattedString);
     }
-    formattedString = formattedString.substring(1, formattedString.length() - 1);
+
+    formattedString = formattedString.substring(1, closingBracketIndex);
 
     final String[] pts = splitPattern.split(formattedString);
     final Float[] point = new Float[pts.length];

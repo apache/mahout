@@ -35,4 +35,10 @@ public class TestPoint extends TestCase {
         Arrays.asList(new Float [] {1.0f, 2.5f}), 
         Arrays.asList(Point.decodePoint("[1.0, 2.5]")));
   }
+  
+  public void testDecodePointWithPayload() {
+    assertEquals(
+        Arrays.asList(new Float [] {1.0f, 2.5f}), 
+        Arrays.asList(Point.decodePoint("[1.0, 2.5] payloadhere, blah [][]")));
+  }
 }
