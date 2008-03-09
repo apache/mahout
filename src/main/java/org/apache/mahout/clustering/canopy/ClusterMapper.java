@@ -80,7 +80,7 @@ public class ClusterMapper extends MapReduceBase implements
         reader.close();
       }
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
   }
 }

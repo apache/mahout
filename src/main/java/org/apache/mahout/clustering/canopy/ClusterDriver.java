@@ -78,7 +78,7 @@ public class ClusterDriver {
         dfs.delete(outPath);
       JobClient.runJob(conf);
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
   }
 

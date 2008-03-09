@@ -104,7 +104,7 @@ public class Canopy {
       measure = (DistanceMeasure) cl.newInstance();
       measure.configure(job);
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
     nextCanopyId = 0;
     t1 = new Float(job.get(T1_KEY));

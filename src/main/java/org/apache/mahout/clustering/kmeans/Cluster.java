@@ -101,7 +101,7 @@ public class Cluster {
       convergenceDelta = new Float(job.get(CLUSTER_CONVERGENCE_KEY));
       nextClusterId = 0;
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
   }
 
