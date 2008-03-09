@@ -1,5 +1,7 @@
 package org.apache.mahout.utils;
 
+import java.util.Arrays;
+
 import junit.framework.TestCase;
 
 /**
@@ -26,5 +28,11 @@ public class TestPoint extends TestCase {
   
   public void testPtOut() {
     assertEquals("abc[1.0, 1.5]", Point.ptOut("abc", new Float [] {1.0f, 1.5f}));
+  }
+  
+  public void testDecodePoint() {
+    assertEquals(
+        Arrays.asList(new Float [] {1.0f, 2.5f}), 
+        Arrays.asList(Point.decodePoint("[1.0, 2.5]")));
   }
 }

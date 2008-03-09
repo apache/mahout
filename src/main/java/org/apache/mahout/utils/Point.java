@@ -61,7 +61,7 @@ public class Point {
       || formattedString.charAt(formattedString.length() - 1) != ']') {
       throw new IllegalArgumentException(formattedString);
     }
-    formattedString = formattedString.substring(1, formattedString.length() - 2);
+    formattedString = formattedString.substring(1, formattedString.length() - 1);
 
     final String[] pts = splitPattern.split(formattedString);
     final Float[] point = new Float[pts.length];
