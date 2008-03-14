@@ -29,11 +29,7 @@ public class CanopyClusteringJob {
     String measureClassName = args[2];
     float t1 = new Float(args[3]);
     float t2 = new Float(args[4]);
-    String jarLocation = "apache-mahout-0.1-dev.jar";
-    if (args.length > 5) {
-      jarLocation = args[5];
-    }
-    runJob(input, output, measureClassName, t1, t2, jarLocation);
+    runJob(input, output, measureClassName, t1, t2);
   }
 
   /**
@@ -46,9 +42,9 @@ public class CanopyClusteringJob {
    * @param t2               the T2 distance threshold
    */
   public static void runJob(String input, String output,
-                            String measureClassName, float t1, float t2, String jarLocation) {
-    CanopyDriver.runJob(input, output + "/canopies", measureClassName, t1, t2, jarLocation);
-    ClusterDriver.runJob(input, output + "/canopies", output, measureClassName, t1, t2, jarLocation);
+                            String measureClassName, float t1, float t2) {
+    CanopyDriver.runJob(input, output + "/canopies", measureClassName, t1, t2);
+    ClusterDriver.runJob(input, output + "/canopies", output, measureClassName, t1, t2);
   }
 
 }

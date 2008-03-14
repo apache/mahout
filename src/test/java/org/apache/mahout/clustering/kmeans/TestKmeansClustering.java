@@ -372,9 +372,8 @@ public class TestKmeansClustering extends TestCase {
       writer.close();
 
       // now run the Job
-      String jarLocation = "dist/apache-mahout-0.1-dev.jar";
       KMeansDriver.runJob("testdata/points", "testdata/clusters", "output",
-              EuclideanDistanceMeasure.class.getName(), "0.001", "10", jarLocation);
+              EuclideanDistanceMeasure.class.getName(), "0.001", "10");
 
       // now compare the expected clusters with actual
       File outDir = new File("output/points");
@@ -422,13 +421,11 @@ public class TestKmeansClustering extends TestCase {
 
     // now run the Canopy job
     CanopyDriver.runJob("testdata/points", "testdata/canopies",
-            ManhattanDistanceMeasure.class.getName(), (float) 3.1, (float) 2.1,
-            "dist/apache-mahout-0.1-dev.jar");
+            ManhattanDistanceMeasure.class.getName(), (float) 3.1, (float) 2.1);
 
     // now run the KMeans job
-    String jarLocation = "dist/apache-mahout-0.1-dev.jar";
     KMeansDriver.runJob("testdata/points", "testdata/canopies", "output",
-            EuclideanDistanceMeasure.class.getName(), "0.001", "10", jarLocation);
+            EuclideanDistanceMeasure.class.getName(), "0.001", "10");
 
     // now compare the expected clusters with actual
     File outDir = new File("output/points");

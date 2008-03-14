@@ -466,8 +466,7 @@ public class TestCanopyCreation extends TestCase {
     writePointsToFile(points, "testdata/file2");
     // now run the Canopy Driver
     CanopyDriver.runJob("testdata", "output/canopies",
-            ManhattanDistanceMeasure.class.getName(), (float) 3.1, (float) 2.1,
-            "dist/apache-mahout-0.1-dev.jar");
+            ManhattanDistanceMeasure.class.getName(), (float) 3.1, (float) 2.1);
 
     // verify output from sequence file
     JobConf job = new JobConf(
@@ -502,8 +501,7 @@ public class TestCanopyCreation extends TestCase {
     writePointsToFile(points, "testdata/file2");
     // now run the Canopy Driver
     CanopyDriver.runJob("testdata", "output/canopies",
-            EuclideanDistanceMeasure.class.getName(), (float) 3.1, (float) 2.1,
-            "dist/apache-mahout-0.1-dev.jar");
+            EuclideanDistanceMeasure.class.getName(), (float) 3.1, (float) 2.1);
 
     // verify output from sequence file
     JobConf job = new JobConf(
@@ -676,8 +674,7 @@ public class TestCanopyCreation extends TestCase {
     writePointsToFile(points, "testdata/file2");
     // now run the Job
     CanopyClusteringJob.runJob("testdata", "output",
-            ManhattanDistanceMeasure.class.getName(), (float) 3.1, (float) 2.1,
-            "dist/apache-mahout-0.1-dev.jar");
+            ManhattanDistanceMeasure.class.getName(), (float) 3.1, (float) 2.1);
     BufferedReader reader = new BufferedReader(new FileReader(
             "output/clusters/part-00000"));
     int count = 0;
@@ -705,8 +702,7 @@ public class TestCanopyCreation extends TestCase {
     writePointsToFile(points, "testdata/file2");
     // now run the Job
     CanopyClusteringJob.runJob("testdata", "output",
-            EuclideanDistanceMeasure.class.getName(), (float) 3.1, (float) 2.1,
-            "dist/apache-mahout-0.1-dev.jar");
+            EuclideanDistanceMeasure.class.getName(), (float) 3.1, (float) 2.1);
     BufferedReader reader = new BufferedReader(new FileReader(
             "output/clusters/part-00000"));
     int count = 0;
@@ -736,8 +732,7 @@ public class TestCanopyCreation extends TestCase {
     writePointsToFileWithPayload(points, "testdata/file2", "file2");
     // now run the Job
     CanopyClusteringJob.runJob("testdata", "output",
-            ManhattanDistanceMeasure.class.getName(), (float) 3.1, (float) 2.1,
-            "dist/apache-mahout-0.1-dev.jar");
+            ManhattanDistanceMeasure.class.getName(), (float) 3.1, (float) 2.1);
     BufferedReader reader = new BufferedReader(new FileReader(
             "output/clusters/part-00000"));
     int count = 0;
@@ -769,8 +764,7 @@ public class TestCanopyCreation extends TestCase {
     writePointsToFileWithPayload(points, "testdata/file2", "file2");
     // now run the Job
     CanopyClusteringJob.runJob("testdata", "output",
-            EuclideanDistanceMeasure.class.getName(), (float) 3.1, (float) 2.1,
-            "dist/apache-mahout-0.1-dev.jar");
+            EuclideanDistanceMeasure.class.getName(), (float) 3.1, (float) 2.1);
     BufferedReader reader = new BufferedReader(new FileReader(
             "output/clusters/part-00000"));
     int count = 0;
@@ -801,8 +795,7 @@ public class TestCanopyCreation extends TestCase {
     // now run the Canopy Driver. User defined measure happens to be a Manhattan
     // subclass so results are same.
     CanopyDriver.runJob("testdata", "output/canopies",
-            UserDefinedDistanceMeasure.class.getName(), (float) 3.1, (float) 2.1,
-            "dist/apache-mahout-0.1-dev.jar");
+            UserDefinedDistanceMeasure.class.getName(), (float) 3.1, (float) 2.1);
 
     // verify output from sequence file
     JobConf job = new JobConf(

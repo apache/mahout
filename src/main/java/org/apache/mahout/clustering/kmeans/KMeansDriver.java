@@ -35,12 +35,7 @@ public class KMeansDriver {
     String measureClass = args[3];
     String convergenceDelta = args[4];
     String maxIterations = args[5];
-    String jarLocation = "dist/apache-mahout-0.1-dev.jar";
-    if (args.length > 6) {
-      jarLocation = args[6];
-    }
-    runJob(input, clusters, output, measureClass, convergenceDelta,
-            maxIterations, jarLocation);
+    runJob(input, clusters, output, measureClass, convergenceDelta, maxIterations);
   }
 
   /**
@@ -55,7 +50,7 @@ public class KMeansDriver {
    * @param jarLocation      The location of the Mahout jar
    */
   public static void runJob(String input, String clustersIn, String output,
-                            String measureClass, String convergenceDelta, String maxIterations, String jarLocation) {
+                            String measureClass, String convergenceDelta, String maxIterations) {
     int maxIter = new Integer(maxIterations);
     try {
       // delete the output directory
@@ -75,7 +70,7 @@ public class KMeansDriver {
         // point the output to a new directory per iteration
         String clustersOut = output + "/clusters-" + iteration;
         converged = runIteration(input, clustersIn, clustersOut, measureClass,
-                convergenceDelta, jarLocation);
+                convergenceDelta);
         // now point the input to the old output directory
         clustersIn = output + "/clusters-" + iteration;
         iteration++;
@@ -83,7 +78,7 @@ public class KMeansDriver {
       // now actually cluster the points
       System.out.println("Clustering ");
       runClustering(input, clustersIn, output + "/points", measureClass,
-              convergenceDelta, jarLocation);
+              convergenceDelta);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -97,14 +92,12 @@ public class KMeansDriver {
    * @param clustersOut      the directory pathname for output clusters
    * @param measureClass     the classname of the DistanceMeasure
    * @param convergenceDelta the convergence delta value
-   * @param jarLocation      The location of the mahout jar
    * @return true if the iteration successfully runs
    */
   static boolean runIteration(String input, String clustersIn,
-                              String clustersOut, String measureClass, String convergenceDelta, String jarLocation) {
+                              String clustersOut, String measureClass, String convergenceDelta) {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(KMeansDriver.class);
-    conf.setJar(jarLocation);
 
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(Text.class);
@@ -141,13 +134,11 @@ public class KMeansDriver {
    * @param output           the directory pathname for output points
    * @param measureClass     the classname of the DistanceMeasure
    * @param convergenceDelta the convergence delta value
-   * @param jarLocation      The location of the mahout jar
    */
   static void runClustering(String input, String clustersIn, String output,
-                            String measureClass, String convergenceDelta, String jarLocation) {
+                            String measureClass, String convergenceDelta) {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(KMeansDriver.class);
-    conf.setJar(jarLocation);
 
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(Text.class);

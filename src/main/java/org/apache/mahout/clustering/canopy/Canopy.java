@@ -100,7 +100,8 @@ public class Canopy {
    */
   public static void configure(JobConf job) {
     try {
-      Class cl = Class.forName(job.get(DISTANCE_MEASURE_KEY));
+      final ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+      Class cl = ccl.loadClass(job.get(DISTANCE_MEASURE_KEY));
       measure = (DistanceMeasure) cl.newInstance();
       measure.configure(job);
     } catch (Exception e) {
