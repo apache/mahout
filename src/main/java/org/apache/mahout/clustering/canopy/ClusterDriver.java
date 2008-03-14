@@ -44,7 +44,6 @@ public class ClusterDriver {
    * @param measureClassName the DistanceMeasure class name
    * @param t1               the T1 distance threshold
    * @param t2               the T2 distance threshold
-   * @param jarLocation
    */
   public static void runJob(String points, String canopies, String output,
                             String measureClassName, float t1, float t2) {

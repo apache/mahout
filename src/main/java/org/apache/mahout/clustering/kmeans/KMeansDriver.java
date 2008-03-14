@@ -47,7 +47,6 @@ public class KMeansDriver {
    * @param measureClass     the classname of the DistanceMeasure
    * @param convergenceDelta the convergence delta value
    * @param maxIterations    the maximum number of iterations
-   * @param jarLocation      The location of the Mahout jar
    */
   public static void runJob(String input, String clustersIn, String output,
                             String measureClass, String convergenceDelta, String maxIterations) {
