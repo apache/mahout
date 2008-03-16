@@ -1,0 +1,308 @@
+/* Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.mahout.matrix;
+
+import org.apache.hadoop.io.WritableComparable;
+
+
+/**
+ * The basic interface including numerous convenience functions
+ * 
+ */
+public interface Matrix {
+
+  /**
+   * Return a formatted WritableComparable suitable for output
+   * 
+   * @return formatted WritableComparable
+   */
+  WritableComparable asWritableComparable();
+
+  /**
+   * Assign the value to all elements of the receiver
+   * 
+   * @param value a double value
+   * @return the modified receiver
+   */
+  Matrix assign(double value);
+
+  /**
+   * Assign the values to the receiver
+   * 
+   * @param values a double[] of values
+   * @return the modified receiver
+   * @throws CardinalityException if the cardinalities differ
+   */
+  Matrix assign(double[][] values) throws CardinalityException;
+
+  /**
+   * Assign the other vector values to the receiver
+   * 
+   * @param other a Matrix
+   * @return the modified receiver
+   * @throws CardinalityException if the cardinalities differ
+   */
+  Matrix assign(Matrix other) throws CardinalityException;
+
+  /**
+   * Apply the function to each element of the receiver
+   * 
+   * @param function a UnaryFunction to apply
+   * @return the modified receiver
+   */
+  Matrix assign(UnaryFunction function);
+
+  /**
+   * Apply the function to each element of the receiver and the corresponding
+   * element of the other argument
+   * 
+   * @param other a Matrix containing the second arguments to the function
+   * @param function a BinaryFunction to apply
+   * @return the modified receiver
+   * @throws CardinalityException if the cardinalities differ
+   */
+  Matrix assign(Matrix other, BinaryFunction function)
+      throws CardinalityException;
+
+  /**
+   * Assign the other vector values to the column of the receiver
+   * 
+   * @param column the int row to assign
+   * @param other a Vector
+   * 
+   * @return the modified receiver
+   * @throws CardinalityException if the cardinalities differ
+   */
+  Matrix assignColumn(int column, Vector other) throws CardinalityException;
+
+  /**
+   * Assign the other vector values to the row of the receiver
+   * 
+   * @param row the int row to assign
+   * @param other a Vector
+   * 
+   * @return the modified receiver
+   * @throws CardinalityException if the cardinalities differ
+   */
+  Matrix assignRow(int row, Vector other) throws CardinalityException;
+
+  /**
+   * Return the cardinality of the recipient (the maximum number of values)
+   * 
+   * @return an int[2]
+   */
+  int[] cardinality();
+
+  /**
+   * Return a copy of the recipient
+   * 
+   * @return a new Matrix
+   */
+  Matrix copy();
+
+  /**
+   * Return a new matrix containing the values of the recipient divided by the
+   * argument
+   * 
+   * @param x a double value
+   * @return a new Matrix
+   */
+  Matrix divide(double x);
+
+  /**
+   * Return the value at the given indexes
+   * 
+   * @param row an int row index
+   * @param column an int column index
+   * @return the double at the index
+   * @throws IndexException if the index is out of bounds
+   */
+  double get(int row, int column) throws IndexException;
+
+  /**
+   * Return the column at the given index
+   * 
+   * @param column an int column index
+   * @return a Vector at the index
+   * @throws IndexException if the index is out of bounds
+   */
+  Vector getColumn(int column) throws IndexException;
+
+  /**
+   * Return the row at the given index
+   * 
+   * @param row an int row index
+   * @return a Vector at the index
+   * @throws IndexException if the index is out of bounds
+   */
+  Vector getRow(int row) throws IndexException;
+
+  /**
+   * Return the value at the given indexes, without checking bounds
+   * 
+   * @param row an int row index
+   * @param column an int column index
+   * @return the double at the index
+   */
+  double getQuick(int row, int column);
+
+  /**
+   * Return if the other matrix and the receiver share any underlying data cells
+   * 
+   * @param other a Matrix
+   * @return true if the other matrix has common data cells
+   */
+  boolean haveSharedCells(Matrix other);
+
+  /**
+   * Return an empty matrix of the same underlying class as the receiver
+   * 
+   * @return a Matrix
+   */
+  Matrix like();
+
+  /**
+   * Return an empty matrix of the same underlying class as the receiver and of
+   * the given cardinality
+   * 
+   * @param rows the int number of rows
+   * @param columns the int number of columns
+   * @return
+   */
+  Matrix like(int rows, int columns);
+
+  /**
+   * Return a new matrix containing the element by element difference of the
+   * recipient and the argument
+   * 
+   * @param x a Matrix
+   * @return a new Matrix
+   * @throws CardinalityException if the cardinalities differ
+   */
+  Matrix minus(Matrix x) throws CardinalityException;
+
+  /**
+   * Return a new matrix containing the sum of each value of the recipient and
+   * the argument
+   * 
+   * @param x a double
+   * @return a new Matrix
+   */
+  Matrix plus(double x);
+
+  /**
+   * Return a new matrix containing the element by element sum of the recipient
+   * and the argument
+   * 
+   * @param x a Matrix
+   * @return a new Matrix
+   * @throws CardinalityException if the cardinalities differ
+   */
+  Matrix plus(Matrix x) throws CardinalityException;
+
+  /**
+   * Set the value at the given index
+   * 
+   * @param row an int row index into the receiver
+   * @param column an int column index into the receiver
+   * @param value a double value to set
+   * @throws IndexException if the index is out of bounds
+   */
+  void set(int row, int column, double value) throws IndexException;
+
+  /**
+   * Set the value at the given index, without checking bounds
+   * 
+   * @param row an int row index into the receiver
+   * @param column an int column index into the receiver
+   * @param value a double value to set
+   */
+  void setQuick(int row, int column, double value);
+
+  /**
+   * Return the number of values in the recipient
+   * 
+   * @return an int[2] containing [row, column] count
+   */
+  int[] size();
+
+  /**
+   * Return a new matrix containing the product of each value of the recipient
+   * and the argument
+   * 
+   * @param x a double argument
+   * @return a new Matrix
+   */
+  Matrix times(double x);
+
+  /**
+   * Return a new matrix containing the product of the recipient and the
+   * argument
+   * 
+   * @param x a Matrix argument
+   * @return a new Matrix
+   * @throws CardinalityException if the cardinalities are incompatible
+   */
+  Matrix times(Matrix x) throws CardinalityException;
+
+  /**
+   * Return a new matrix that is the transpose of the receiver
+   * 
+   * @return the transpose
+   */
+  Matrix transpose();
+
+  /**
+   * Return the element of the recipient as a double[]
+   * 
+   * @return a double[][]
+   */
+  double[][] toArray();
+
+  /**
+   * Return a new matrix containing the subset of the recipient
+   * 
+   * @param offset an int[2] offset into the receiver
+   * @param size the int[2] size of the desired result
+   * @return a new Matrix
+   * @throws CardinalityException if the length is greater than the cardinality
+   *         of the receiver
+   * @throws IndexException if the offset is negative or the offset+length is
+   *         outside of the receiver
+   */
+  Matrix viewPart(int[] offset, int[] size) throws CardinalityException,
+      IndexException;
+
+  /**
+   * Return the sum of all the elements of the receiver
+   * 
+   * @return a double
+   */
+  double zSum();
+
+  /*
+   * Need stories for these but keeping them here for now.
+   * 
+   */
+  // void getNonZeros(IntArrayList jx, DoubleArrayList values);
+  // void foreachNonZero(IntDoubleFunction f);
+  // double aggregate(DoubleDoubleFunction aggregator, DoubleFunction map);
+  // double aggregate(Matrix other, DoubleDoubleFunction aggregator,
+  // DoubleDoubleFunction map);
+  // NewMatrix assign(Matrix y, DoubleDoubleFunction function, IntArrayList
+  // nonZeroIndexes);
+}
