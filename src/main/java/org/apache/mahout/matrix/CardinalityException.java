@@ -20,7 +20,7 @@ package org.apache.mahout.matrix;
  * Exception thrown when there is a cardinality mismatch in matrix operations
  * 
  */
-public class CardinalityException extends Exception {
+public class CardinalityException extends RuntimeException {
 
   private static final long serialVersionUID = 1L;
 

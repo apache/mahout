@@ -17,10 +17,10 @@
 package org.apache.mahout.matrix;
 
 /**
- * Exception thrown when there is an index outside of the cardinality
+ * Exception thrown when there is an index outside of [0, cardinality)
  * 
  */
-public class IndexException extends Exception {
+public class IndexException extends RuntimeException {
 
   private static final long serialVersionUID = 1L;
 
