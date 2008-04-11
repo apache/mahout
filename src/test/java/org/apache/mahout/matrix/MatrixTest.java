@@ -472,4 +472,10 @@ public abstract class MatrixTest extends TestCase {
       assertTrue(true);
     }
   }
+
+  public void testDetermitant() {
+    Matrix m = matrixFactory(new double[][] { {1,3,4},{5,2,3},{1,4,2} });
+    assertEquals("determinant", 43.0, m.determinant());
+  }
+
 }

@@ -200,6 +200,45 @@ public abstract class AbstractMatrix implements Matrix {
 
   /*
    * (non-Javadoc)
+   *
+   * @see org.apache.mahout.matrix.Matrix#determinant()
+   */
+   public double determinant() throws CardinalityException {
+   int card[] = cardinality();
+   int rowSize = card[ROW];
+   int columnSize = card[COL];
+   if(rowSize!=columnSize) throw new CardinalityException();
+
+   if(rowSize==2)
+       return getQuick(0,0)*getQuick(1,1)-getQuick(0,1) * getQuick(1,0);
+   else {
+       int sign = 1;
+       double ret = 0;
+
+       for(int i = 0; i<columnSize; i++){
+               Matrix minor = new DenseMatrix(rowSize-1,columnSize-1);
+               for(int j = 1; j<rowSize; j++){
+                   boolean flag = false; /* column offset flag */
+                   for(int k = 0; k<columnSize; k++){
+                       if(k==i) {
+                           flag = true;
+                           continue;
+                       }
+                       minor.set(j-1,flag ? k-1 : k, getQuick(j,k));
+                   }
+               }
+               ret += getQuick(0,i)*sign*minor.determinant();
+               sign*=-1;
+
+           }
+
+           return ret;
+       }
+
+   }
+
+  /*
+   * (non-Javadoc)
    * 
    * @see org.apache.mahout.matrix.Matrix#divide(double)
    */
@@ -284,6 +323,15 @@ public abstract class AbstractMatrix implements Matrix {
     if (row < 0 || column < 0 || row >= c[ROW] || column >= c[COL])
       throw new IndexException();
     setQuick(row, column, value);
+  }
+
+  public void set(int row, double[] data) throws IndexException,CardinalityException {
+    int[] c = cardinality();
+      if(c[COL] < data.length) throw new CardinalityException();
+      if( (c[ROW] < row) || (row < 0) ) throw new IndexException();
+
+    for(int i = 0; i<c[COL]; i++)
+        setQuick(row,i,data[i]);
   }
 
   /*

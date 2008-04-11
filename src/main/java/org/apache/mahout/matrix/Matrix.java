@@ -114,6 +114,13 @@ public interface Matrix {
    */
   Matrix copy();
 
+    /**
+     * Returns matrix determinator using Laplace theorem
+     *
+     * @return a matrix determinator
+     */
+  double determinant();
+
   /**
    * Return a new matrix containing the values of the recipient divided by the
    * argument
@@ -223,6 +230,8 @@ public interface Matrix {
    * @throws IndexException if the index is out of bounds
    */
   void set(int row, int column, double value) throws IndexException;
+
+  void set(int row, double[] data) throws IndexException,CardinalityException; 
 
   /**
    * Set the value at the given index, without checking bounds
