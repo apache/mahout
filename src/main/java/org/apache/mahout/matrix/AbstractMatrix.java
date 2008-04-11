@@ -312,7 +312,7 @@ public abstract class AbstractMatrix implements Matrix {
       throw new CardinalityException();
     Matrix result = like(c[ROW], o[COL]);
     for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++) {
+      for (int col = 0; col < o[COL]; col++) {
         double sum = 0;
         for (int k = 0; k < c[COL]; k++)
           sum += getQuick(row, k) * other.getQuick(k, col);
