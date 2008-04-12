@@ -19,6 +19,8 @@ package org.apache.mahout.matrix;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 
+import java.util.Iterator;
+
 /**
  * Implements subset view of a Vector
  */
@@ -113,5 +115,34 @@ public class VectorView extends AbstractVector {
       return other == this || vector.haveSharedCells(other);
     else
       return other.haveSharedCells(vector);
+  }
+
+  /*
+   * (Non-Javadoc)
+   * Returns true if index is a valid index in the underlying Vector
+   */
+  private boolean isInView(int index) { 
+    return index>=offset && index<offset+cardinality;
+  }
+
+  @Override
+  public Iterator<Vector.Element> iterator() { return new ViewIterator(); }
+  public class ViewIterator implements Iterator<Vector.Element> {
+    Iterator<Vector.Element> it;
+    Vector.Element el;
+    public ViewIterator() {
+      it=vector.iterator();
+      while(it.hasNext())
+      {	el=it.next();
+	if(isInView(el.index())) return;
+      }
+      el=null;	// No element was found
+    }
+    public Vector.Element next() { return el; }
+    public boolean hasNext() { return el!=null; }
+    /** @throws UnsupportedOperationException all the time. method not
+     * implemented.
+     */
+    public void remove() { throw new UnsupportedOperationException(); }
   }
 }

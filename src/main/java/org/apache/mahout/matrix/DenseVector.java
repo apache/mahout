@@ -131,4 +131,22 @@ public class DenseVector extends AbstractVector {
     else
       return other.haveSharedCells(this);
   }
+
+  /**
+   * Returns an iterator that traverses this Vector from 0 
+   * to cardinality-1, in that order.
+   * @see java.lang.Iterable#iterator
+   */
+  @Override
+  public java.util.Iterator<Vector.Element> iterator() {
+    return new Iterator();
+  }
+
+  private class Iterator implements java.util.Iterator<Vector.Element> {
+    private int ind;
+    public Iterator() { ind=0; }
+    public boolean hasNext() { return ind<values.length; }
+    public Vector.Element next() { return new Element(ind++); }
+    public void remove() { throw new UnsupportedOperationException(); }
+  }
 }

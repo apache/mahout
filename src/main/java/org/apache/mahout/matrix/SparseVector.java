@@ -148,4 +148,16 @@ public class SparseVector extends AbstractVector {
     return new SparseVector(newCardinality);
   }
 
+  @Override
+  public java.util.Iterator<Vector.Element> iterator() {
+    return new Iterator();
+  }
+
+  private class Iterator implements java.util.Iterator<Vector.Element> {
+    private java.util.Iterator<Map.Entry<Integer,Double>> it;
+    public Iterator() { it=values.entrySet().iterator(); }
+    public boolean hasNext() { return it.hasNext(); }
+    public Element next() { return new Element(it.next().getKey()); }
+    public void remove() { throw new UnsupportedOperationException(); }
+  }
 }

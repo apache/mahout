@@ -23,7 +23,7 @@ import org.apache.hadoop.io.WritableComparable;
  * The basic interface including numerous convenience functions
  * 
  */
-public interface Vector {
+public interface Vector extends Iterable<Vector.Element>{
 
   /**
    * Return a formatted WritableComparable suitable for output
@@ -91,6 +91,29 @@ public interface Vector {
    * @return a new Vector
    */
   Vector copy();
+
+  /**
+   * Return an object of Vector.Element representing an element
+   * of this Vector. Useful when designing new iterator types.
+   * @param index Index of the Vector.Element required
+   * @return The Vector.Element Object
+   */
+  Element getElement(int index);
+
+  public interface Element {
+    /**
+     * @return the value of this vector element.
+     */
+    double get();
+    /**
+     * @return the index of this vector element.
+     */
+    int index();
+    /**
+     * @param value Set the current element to value.
+     */
+    void set(double value);
+  }
 
   /**
    * Return a new matrix containing the values of the recipient divided by the
@@ -277,4 +300,5 @@ public interface Vector {
   // DoubleDoubleFunction map);
   // NewVector assign(Vector y, DoubleDoubleFunction function, IntArrayList
   // nonZeroIndexes);
+
 }
