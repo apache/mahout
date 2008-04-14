@@ -126,23 +126,42 @@ public class VectorView extends AbstractVector {
   }
 
   @Override
-  public Iterator<Vector.Element> iterator() { return new ViewIterator(); }
+  public Iterator<Vector.Element> iterator() {
+    return new ViewIterator();
+  }
+
   public class ViewIterator implements Iterator<Vector.Element> {
-    Iterator<Vector.Element> it;
-    Vector.Element el;
+    private Iterator<Vector.Element> it;
+    private  Vector.Element el;
+
     public ViewIterator() {
-      it=vector.iterator();
-      while(it.hasNext())
-      {	el=it.next();
-	if(isInView(el.index())) return;
-      }
-      el=null;	// No element was found
+      it = vector.iterator();
+      buffer();
     }
-    public Vector.Element next() { return el; }
-    public boolean hasNext() { return el!=null; }
+
+    private void buffer() {
+      while (it.hasNext()) {
+        el = it.next();
+        if (isInView(el.index())) return;
+      }
+      el = null;  // No element was found
+    }
+
+    public Vector.Element next() {
+      Vector.Element buffer = el;
+      buffer();
+      return buffer;
+    }
+
+    public boolean hasNext() {
+      return el != null;
+    }
+
     /** @throws UnsupportedOperationException all the time. method not
      * implemented.
      */
-    public void remove() { throw new UnsupportedOperationException(); }
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
   }
 }
