@@ -17,6 +17,8 @@
 package org.apache.mahout.utils;
 
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.mahout.matrix.CardinalityException;
+import org.apache.mahout.matrix.Vector;
 
 /**
  * This class implements a "manhattan distance" metric by summing the absolute
@@ -37,11 +39,28 @@ public class ManhattanDistanceMeasure implements DistanceMeasure {
     return result;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.hadoop.mapred.JobConfigurable#configure(org.apache.hadoop.mapred.JobConf)
    */
   public void configure(JobConf job) {
     // nothing to do
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.mahout.utils.DistanceMeasure#distance(org.apache.mahout.matrix.Vector,
+   *      org.apache.mahout.matrix.Vector)
+   */
+ public double distance(Vector v1, Vector v2) throws CardinalityException {
+    if (v1.cardinality() != v2.cardinality())
+      throw new CardinalityException();
+    double result = 0;
+    for (int i = 0; i < v1.cardinality(); i++)
+      result += Math.abs(v2.getQuick(i) - v1.getQuick(i));
+    return result;
   }
 
 }

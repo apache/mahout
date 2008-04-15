@@ -17,6 +17,8 @@
 package org.apache.mahout.utils;
 
 import org.apache.hadoop.mapred.JobConfigurable;
+import org.apache.mahout.matrix.CardinalityException;
+import org.apache.mahout.matrix.Vector;
 
 /**
  * This interface is used for objects which can determine a distance metric
@@ -26,11 +28,22 @@ public interface DistanceMeasure extends JobConfigurable {
 
   /**
    * Returns the distance metric applied to the arguments
-   *
+   * 
    * @param p1 a Float[] defining a multidimensional point in some feature space
    * @param p2 a Float[] defining a multidimensional point in some feature space
    * @return a scalar float of the distance
+   * @deprecated in favor of the Vector method
    */
   public float distance(Float[] p1, Float[] p2);
+
+  /**
+   * Returns the distance metric applied to the arguments
+   * 
+   * @param p1 a Vector defining a multidimensional point in some feature space
+   * @param p2 a Vector defining a multidimensional point in some feature space
+   * @return a scalar doubles of the distance
+   * @throws CardinalityException
+   */
+  public double distance(Vector v1, Vector v2) throws CardinalityException;
 
 }

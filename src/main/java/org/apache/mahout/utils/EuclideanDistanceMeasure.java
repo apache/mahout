@@ -17,6 +17,8 @@
 package org.apache.mahout.utils;
 
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.mahout.matrix.CardinalityException;
+import org.apache.mahout.matrix.Vector;
 
 /**
  * This class implements a Euclidian distance metric by summing the square root
@@ -24,15 +26,20 @@ import org.apache.hadoop.mapred.JobConf;
  */
 public class EuclideanDistanceMeasure implements DistanceMeasure {
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.hadoop.mapred.JobConfigurable#configure(org.apache.hadoop.mapred.JobConf)
    */
   public void configure(JobConf job) {
     // nothing to do
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.canopy.DistanceMeasure#distance(java.lang.Float[], java.lang.Float[])
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.mahout.clustering.canopy.DistanceMeasure#distance(java.lang.Float[],
+   *      java.lang.Float[])
    */
   public float distance(Float[] p1, Float[] p2) {
     float result = 0;
@@ -41,6 +48,23 @@ public class EuclideanDistanceMeasure implements DistanceMeasure {
       result += delta * delta;
     }
     return (float) Math.sqrt(result);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.mahout.utils.DistanceMeasure#distance(org.apache.mahout.matrix.Vector,
+   *      org.apache.mahout.matrix.Vector)
+   */
+  public double distance(Vector v1, Vector v2) throws CardinalityException {
+    if (v1.cardinality() != v2.cardinality())
+      throw new CardinalityException();
+    double result = 0;
+    for (int i = 0; i < v1.cardinality(); i++) {
+      double delta = v2.getQuick(i) - v1.getQuick(i);
+      result += delta * delta;
+    }
+    return Math.sqrt(result);
   }
 
 }

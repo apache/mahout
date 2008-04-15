@@ -66,12 +66,17 @@ public class DenseVector extends AbstractVector {
 
   @Override
   public WritableComparable asWritableComparable() {
+    return new Text(toString());
+  }
+
+  @Override
+  public String toString() {
     StringBuilder out = new StringBuilder();
     out.append("[, ");
     for (int i = 0; i < values.length; i++)
       out.append(values[i]).append(", ");
     out.append("] ");
-    return new Text(out.toString());
+    return out.toString();
   }
 
   @Override
