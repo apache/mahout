@@ -83,8 +83,8 @@ public class SparseVector extends AbstractVector {
   }
 
   @Override
-  public Vector copy() {
-    Vector result = like();
+  public SparseVector copy() {
+    SparseVector result = like();
     for (Integer index : values.keySet())
       result.setQuick(index, values.get(index));
     return result;
@@ -139,7 +139,7 @@ public class SparseVector extends AbstractVector {
   }
 
   @Override
-  public Vector like() {
+  public SparseVector like() {
     return new SparseVector(cardinality);
   }
 

@@ -85,7 +85,7 @@ public class DenseVector extends AbstractVector {
   }
 
   @Override
-  public Vector copy() {
+  public DenseVector copy() {
     return new DenseVector(values);
   }
 
@@ -95,7 +95,7 @@ public class DenseVector extends AbstractVector {
   }
 
   @Override
-  public Vector like() {
+  public DenseVector like() {
     return new DenseVector(cardinality());
   }
 
