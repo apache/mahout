@@ -46,16 +46,14 @@ public class SparseVectorWritable implements VectorWritable {
 
   public void readFields(DataInput dataInput) throws IOException {
     int cardinality = dataInput.readInt();
-    if (vector == null || vector.cardinality() != cardinality) {
-      vector = new SparseVector(cardinality);
-    }
+    vector = new SparseVector(cardinality);    
     int size = dataInput.readInt();
     for (int i = 0; i < size; i++) {
       vector.set(dataInput.readInt(), dataInput.readDouble());
     }
   }
 
-  public Vector get() {
+  public SparseVector get() {
     return vector;
   }
 

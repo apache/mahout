@@ -44,9 +44,7 @@ public class DenseVectorWritable implements VectorWritable {
 
   public void readFields(DataInput dataInput) throws IOException {
     int cardinality = dataInput.readInt();
-    if (vector == null || vector.cardinality() != cardinality) {
-      vector = new DenseVector(cardinality);
-    }
+    vector = new DenseVector(cardinality);    
     for (int i = 0; i < cardinality; i++) {
       vector.set(i, dataInput.readDouble());
     }
