@@ -132,7 +132,7 @@ public class VectorView extends AbstractVector {
 
   public class ViewIterator implements Iterator<Vector.Element> {
     private Iterator<Vector.Element> it;
-    private  Vector.Element el;
+    private Vector.Element el;
 
     public ViewIterator() {
       it = vector.iterator();
@@ -142,7 +142,23 @@ public class VectorView extends AbstractVector {
     private void buffer() {
       while (it.hasNext()) {
         el = it.next();
-        if (isInView(el.index())) return;
+        if (isInView(el.index())) {
+          final Vector.Element decorated = el;
+          el = new Vector.Element() {
+            public double get() {
+              return decorated.get();
+            }
+
+            public int index() {
+              return decorated.index() - offset;
+            }
+
+            public void set(double value) {
+              el.set(value);
+            }
+          };
+          return;
+        }
       }
       el = null;  // No element was found
     }

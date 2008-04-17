@@ -18,6 +18,9 @@ package org.apache.mahout.matrix;
 
 import junit.framework.TestCase;
 
+import java.util.Map;
+import java.util.LinkedHashMap;
+
 public class VectorTest extends TestCase {
 
 
@@ -64,5 +67,38 @@ public class VectorTest extends TestCase {
     VectorView vecV1 = new VectorView(vec1, 0, 3);
     VectorView vecV2 = new VectorView(vec2, 2, 3);
     testVectors(vecV1, vecV2);
+  }
+
+  /**
+   * Asserts a vector using enumeration equals a given dense vector
+   */
+  public void testEnumeration(double[] apriori, Vector vector) throws Exception {
+    double[] test = new double[apriori.length];
+    for (Vector.Element e : vector) {
+      test[e.index()] = e.get();
+    }
+
+    for (int i = 0; i<test.length; i++) {
+      assertEquals(apriori[i], test[i]);
+    }
+  }
+
+  public void testEnumeration() throws Exception {
+    double[] apriori = new double[]{0, 1, 2, 3, 4};
+
+    testEnumeration(apriori, new VectorView(new DenseVector(new double[]{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9}), 2, 5));
+    
+    testEnumeration(apriori, new DenseVector(new double[]{0, 1, 2, 3, 4}));
+
+    SparseVector sparse = new SparseVector(5);
+    sparse.set(0, 0);
+    sparse.set(1, 1);
+    sparse.set(2, 2);
+    sparse.set(3, 3);
+    sparse.set(4, 4);
+    testEnumeration(apriori, sparse);
+
+
+
   }
 }
