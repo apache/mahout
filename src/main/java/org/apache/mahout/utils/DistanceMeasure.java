@@ -39,8 +39,8 @@ public interface DistanceMeasure extends JobConfigurable {
   /**
    * Returns the distance metric applied to the arguments
    * 
-   * @param p1 a Vector defining a multidimensional point in some feature space
-   * @param p2 a Vector defining a multidimensional point in some feature space
+   * @param v1 a Vector defining a multidimensional point in some feature space
+   * @param v2 a Vector defining a multidimensional point in some feature space
    * @return a scalar doubles of the distance
    * @throws CardinalityException
    */
