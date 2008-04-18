@@ -19,7 +19,6 @@ package org.apache.mahout.matrix;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 
-
 /**
  * Implements subset view of a Matrix
  */
@@ -35,6 +34,7 @@ public class MatrixView extends AbstractMatrix {
 
   /**
    * Construct a view of the matrix with given offset and cardinality
+   * 
    * @param matrix an underlying Matrix
    * @param offset the int[2] offset into the underlying matrix
    * @param cardinality the int[2] cardinality of the view
@@ -46,15 +46,18 @@ public class MatrixView extends AbstractMatrix {
     this.cardinality = cardinality;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.mahout.matrix.AbstractMatrix#asFormatString()
    */
   @Override
   public WritableComparable asWritableComparable() {
     StringBuilder out = new StringBuilder();
-    out.append("[[, ");
-    for (int row = offset[ROW]; row < offset[ROW] + cardinality[ROW]; row++) {
-      for (int col = offset[COL]; col < offset[COL] + cardinality[COL]; row++)
+    out.append("[, ");
+    for (int row = 0; row < cardinality[ROW]; row++) {
+      out.append("[, ");
+      for (int col = 0; col < cardinality[COL]; col++)
         out.append(getQuick(row, col)).append(", ");
       out.append("], ");
     }
@@ -62,7 +65,9 @@ public class MatrixView extends AbstractMatrix {
     return new Text(out.toString());
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.mahout.matrix.AbstractMatrix#cardinality()
    */
   @Override
@@ -70,7 +75,9 @@ public class MatrixView extends AbstractMatrix {
     return cardinality;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.mahout.matrix.AbstractMatrix#copy()
    */
   @Override
@@ -78,7 +85,9 @@ public class MatrixView extends AbstractMatrix {
     return new MatrixView(matrix.copy(), offset, cardinality);
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.mahout.matrix.AbstractMatrix#getQuick(int, int)
    */
   @Override
@@ -86,15 +95,19 @@ public class MatrixView extends AbstractMatrix {
     return matrix.getQuick(offset[ROW] + row, offset[COL] + column);
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.mahout.matrix.AbstractMatrix#like()
    */
   @Override
   public Matrix like() {
-    return matrix.like();
+    return matrix.like(cardinality[ROW], cardinality[COL]);
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.mahout.matrix.AbstractMatrix#like(int, int)
    */
   @Override
@@ -103,7 +116,9 @@ public class MatrixView extends AbstractMatrix {
     return matrix.like(rows, columns);
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.mahout.matrix.AbstractMatrix#setQuick(int, int, double)
    */
   @Override
@@ -111,7 +126,9 @@ public class MatrixView extends AbstractMatrix {
     matrix.setQuick(offset[ROW] + row, offset[COL] + column, value);
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.mahout.matrix.AbstractMatrix#size()
    */
   @Override
@@ -119,7 +136,9 @@ public class MatrixView extends AbstractMatrix {
     return cardinality;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.mahout.matrix.AbstractMatrix#toArray()
    */
   @Override
@@ -147,7 +166,9 @@ public class MatrixView extends AbstractMatrix {
     return result;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.mahout.matrix.AbstractMatrix#haveSharedCells(org.apache.mahout.matrix.Matrix)
    */
   @Override
@@ -158,46 +179,62 @@ public class MatrixView extends AbstractMatrix {
       return other.haveSharedCells(matrix);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.matrix.AbstractMatrix#assignColumn(int, org.apache.mahout.vector.Vector)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.mahout.matrix.AbstractMatrix#assignColumn(int,
+   *      org.apache.mahout.vector.Vector)
    */
   @Override
   public Matrix assignColumn(int column, Vector other)
       throws CardinalityException {
     if (cardinality[ROW] != other.cardinality())
       throw new CardinalityException();
-    matrix.assignColumn(column + offset[COL], other);
+    for (int row = 0; row < cardinality[ROW]; row++)
+      matrix.setQuick(row + offset[ROW], column + offset[COL], other
+          .getQuick(row));
     return this;
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.matrix.AbstractMatrix#assignRow(int, org.apache.mahout.vector.Vector)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.mahout.matrix.AbstractMatrix#assignRow(int,
+   *      org.apache.mahout.vector.Vector)
    */
   @Override
   public Matrix assignRow(int row, Vector other) throws CardinalityException {
     if (cardinality[COL] != other.cardinality())
       throw new CardinalityException();
-    matrix.assignRow(row + offset[ROW], other);
+    for (int col = 0; col < cardinality[COL]; col++)
+      matrix
+          .setQuick(row + offset[ROW], col + offset[COL], other.getQuick(col));
     return this;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.mahout.matrix.AbstractMatrix#getColumn(int)
    */
   @Override
   public Vector getColumn(int column) throws IndexException {
     if (column < 0 || column >= cardinality[COL])
       throw new IndexException();
-    return matrix.getColumn(column + offset[COL]);
+    return new VectorView(matrix.getColumn(column + offset[COL]), offset[ROW],
+        cardinality[ROW]);
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.mahout.matrix.AbstractMatrix#getRow(int)
    */
   @Override
   public Vector getRow(int row) throws IndexException {
     if (row < 0 || row >= cardinality[ROW])
       throw new IndexException();
-    return matrix.getRow(row + offset[ROW]);
+    return new VectorView(matrix.getRow(row + offset[ROW]), offset[COL],
+        cardinality[COL]);
   }
 }
