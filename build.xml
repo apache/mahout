@@ -92,7 +92,7 @@
   <property name="junit.includes" value="**/Test*.java,**/*Test.java"/>
   <property name="tests.verbose" value="false"/>
 
-  <property name="junit.excludes" value="**/MatrixTest.java"/>
+  <property name="junit.excludes" value="**/MatrixTest.java, **/DefaultDistanceMeasureTest.java, **/DefaultWeightedDistanceMeasureTest.java"/>
   <property name="junit.jar" value="junit-3.8.2.jar"/>
   <property name="junit-location.jar" value="${lib}/${junit.jar}"/>
   <path id="junit-path">

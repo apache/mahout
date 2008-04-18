@@ -32,7 +32,7 @@ public interface DistanceMeasure extends JobConfigurable {
    * @param p1 a Float[] defining a multidimensional point in some feature space
    * @param p2 a Float[] defining a multidimensional point in some feature space
    * @return a scalar float of the distance
-   * @deprecated in favor of the Vector method
+   * @deprecated use {@link #distance(org.apache.mahout.matrix.Vector, org.apache.mahout.matrix.Vector)}
    */
   public float distance(Float[] p1, Float[] p2);
 
