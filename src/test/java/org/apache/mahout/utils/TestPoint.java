@@ -2,6 +2,9 @@ package org.apache.mahout.utils;
 
 import java.util.Arrays;
 
+import org.apache.mahout.matrix.SparseVector;
+import org.apache.mahout.matrix.Vector;
+
 import junit.framework.TestCase;
 
 /**
@@ -23,22 +26,26 @@ import junit.framework.TestCase;
 
 public class TestPoint extends TestCase {
   public void testFormatPoint() {
-    assertEquals("[1.0, 1.5]", Point.formatPoint(new Float [] {1.0f, 1.5f}));
+    Vector vec = new SparseVector(2);
+    vec.assign(new double [] {1.0, 1.5});
+    assertEquals("[1.0, 1.5]", Point.formatPoint(vec));
   }
   
   public void testPtOut() {
-    assertEquals("abc[1.0, 1.5]", Point.ptOut("abc", new Float [] {1.0f, 1.5f}));
+    Vector vec = new SparseVector(2);
+    vec.assign(new double [] {1.0, 1.5});
+    assertEquals("abc[1.0, 1.5]", Point.ptOut("abc", vec));
   }
   
   public void testDecodePoint() {
-    assertEquals(
-        Arrays.asList(new Float [] {1.0f, 2.5f}), 
-        Arrays.asList(Point.decodePoint("[1.0, 2.5]")));
+    assertTrue(
+        Arrays.equals((new double [] {1.0, 2.5}), 
+        Point.decodePoint("[1.0, 2.5]").toArray()));
   }
   
   public void testDecodePointWithPayload() {
-    assertEquals(
-        Arrays.asList(new Float [] {1.0f, 2.5f}), 
-        Arrays.asList(Point.decodePoint("[1.0, 2.5] payloadhere, blah [][]")));
+    assertTrue(
+        Arrays.equals(new double [] {1.0, 2.5}, 
+        Point.decodePoint("[1.0, 2.5] payloadhere, blah [][]").toArray()));
   }
 }

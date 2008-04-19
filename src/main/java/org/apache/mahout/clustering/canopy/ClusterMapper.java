@@ -26,6 +26,7 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.Point;
 
 import java.io.IOException;
@@ -39,7 +40,7 @@ public class ClusterMapper extends MapReduceBase implements
 
   public void map(WritableComparable key, Text values,
                   OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
-    Float[] point = Point.decodePoint(values.toString());
+    Vector point = Point.decodePoint(values.toString());
     Canopy.emitPointToExistingCanopies(point, canopies, values, output);
   }
 

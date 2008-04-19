@@ -19,6 +19,8 @@ package org.apache.mahout.clustering.canopy;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.mahout.matrix.SparseVector;
+import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
 import org.apache.mahout.utils.Point;
 
@@ -46,10 +48,10 @@ public class Canopy {
   private static int nextCanopyId = 0;
 
   // the T1 distance threshold
-  private static float t1;
+  private static double t1;
 
   // the T2 distance threshold
-  private static float t2;
+  private static double t2;
 
   // the distance measure
   private static DistanceMeasure measure;
@@ -58,38 +60,38 @@ public class Canopy {
   private int canopyId;
 
   // the current center
-  private Float[] center = new Float[0];
+  private Vector center = new SparseVector(0);
 
   // the number of points in the canopy
   private int numPoints = 0;
 
   // the total of all points added to the canopy
-  private Float[] pointTotal = null;
+  private Vector pointTotal = null;
 
   /**
    * Create a new Canopy containing the given point
    *
-   * @param point a Float[]
+   * @param point a point in vector space
    */
-  public Canopy(Float[] point) {
+  public Canopy(Vector point) {
     super();
     this.canopyId = nextCanopyId++;
     this.center = point;
-    this.pointTotal = point.clone();
+    this.pointTotal = point.copy();
     this.numPoints = 1;
   }
 
   /**
    * Create a new Canopy containing the given point and canopyId
    *
-   * @param point    a Float[]
+   * @param point    a point in vector space
    * @param canopyId an int identifying the canopy local to this process only
    */
-  public Canopy(Float[] point, int canopyId) {
+  public Canopy(Vector point, int canopyId) {
     super();
     this.canopyId = canopyId;
     this.center = point;
-    this.pointTotal = point.clone();
+    this.pointTotal = point.copy();
     this.numPoints = 1;
   }
 
@@ -108,8 +110,8 @@ public class Canopy {
       throw new RuntimeException(e);
     }
     nextCanopyId = 0;
-    t1 = new Float(job.get(T1_KEY));
-    t2 = new Float(job.get(T2_KEY));
+    t1 = new Double(job.get(T1_KEY));
+    t2 = new Double(job.get(T2_KEY));
   }
 
   /**
@@ -119,7 +121,7 @@ public class Canopy {
    * @param aT1
    * @param aT2
    */
-  public static void config(DistanceMeasure aMeasure, float aT1, float aT2) {
+  public static void config(DistanceMeasure aMeasure, double aT1, double aT2) {
     nextCanopyId = 0;
     measure = aMeasure;
     t1 = aT1;
@@ -134,13 +136,13 @@ public class Canopy {
    * <p/>
    * This method is used by the CanopyReducer.
    *
-   * @param point    the Float[] defining the point to be added
+   * @param point    the point to be added
    * @param canopies the List<Canopy> to be appended
    */
-  public static void addPointToCanopies(Float[] point, List<Canopy> canopies) {
+  public static void addPointToCanopies(Vector point, List<Canopy> canopies) {
     boolean pointStronglyBound = false;
     for (Canopy canopy : canopies) {
-      float dist = measure.distance(canopy.getCenter(), point);
+      double dist = measure.distance(canopy.getCenter(), point);
       if (dist < t1)
         canopy.addPoint(point);
       pointStronglyBound = pointStronglyBound | (dist < t2);
@@ -154,15 +156,15 @@ public class Canopy {
    * and to emit the point and its covering canopies to the output. The
    * CanopyCombiner will then sum the canopy points and produce the centroids.
    *
-   * @param point     the Float[] defining the point to be added
+   * @param point     the point to be added
    * @param canopies  the List<Canopy> to be appended
    * @param collector an OutputCollector in which to emit the point
    */
-  public static void emitPointToNewCanopies(Float[] point,
+  public static void emitPointToNewCanopies(Vector point,
                                             List<Canopy> canopies, OutputCollector<Text, Text> collector) throws IOException {
     boolean pointStronglyBound = false;
     for (Canopy canopy : canopies) {
-      float dist = measure.distance(canopy.getCenter(), point);
+      double dist = measure.distance(canopy.getCenter(), point);
       if (dist < t1)
         canopy.emitPoint(point, collector);
       pointStronglyBound = pointStronglyBound | (dist < t2);
@@ -180,20 +182,20 @@ public class Canopy {
    * point is not covered by any canopies (due to canopy centroid clustering),
    * emit the point to the closest covering canopy.
    *
-   * @param point     the Float[] defining the point to be added
+   * @param point     the point to be added
    * @param canopies  the List<Canopy> to be appended
    * @param writable  the original Writable from the input, may include arbitrary
    *                  payload information after the point [...]<payload>
    * @param collector an OutputCollector in which to emit the point
    */
-  public static void emitPointToExistingCanopies(Float[] point,
+  public static void emitPointToExistingCanopies(Vector point,
                                                  List<Canopy> canopies, Text writable, OutputCollector<Text, Text> collector)
           throws IOException {
-    float minDist = Float.MAX_VALUE;
+    double minDist = Double.MAX_VALUE;
     Canopy closest = null;
     boolean isCovered = false;
     for (Canopy canopy : canopies) {
-      float dist = measure.distance(canopy.getCenter(), point);
+      double dist = measure.distance(canopy.getCenter(), point);
       if (dist < t1) {
         isCovered = true;
         collector.collect(new Text(Canopy.formatCanopy(canopy)), writable);
@@ -231,7 +233,7 @@ public class Canopy {
     String centroid = formattedString.substring(beginIndex);
     if (id.startsWith("C")) {
       int canopyId = new Integer(formattedString.substring(1, beginIndex - 2));
-      Float[] canopyCentroid = Point.decodePoint(centroid);
+      Vector canopyCentroid = Point.decodePoint(centroid);
       return new Canopy(canopyCentroid, canopyId);
     }
     return null;
@@ -240,32 +242,27 @@ public class Canopy {
   /**
    * Add a point to the canopy
    *
-   * @param point a Float[]
+   * @param point some point to add
    */
-  public void addPoint(Float[] point) {
+  public void addPoint(Vector point) {
     numPoints++;
-    for (int i = 0; i < point.length; i++)
-      pointTotal[i] = new Float(point[i] + pointTotal[i]);
+    for (int i = 0; i < point.cardinality(); i++)
+      pointTotal.set(i, new Double(point.get(i) + pointTotal.get(i)));
   }
 
   /**
    * Emit the point to the collector, keyed by the canopy's formatted
    * representation
    *
-   * @param point a Float[]
+   * @param point a point to emit.
    */
-  public void emitPoint(Float[] point, OutputCollector<Text, Text> collector)
+  public void emitPoint(Vector point, OutputCollector<Text, Text> collector)
           throws IOException {
     collector.collect(new Text(formatCanopy(this)), new Text(Point.ptOut("",
             point)));
   }
 
-  /**
-   * Return a printable representation of this object, using the user supplied
-   * identifier
-   *
-   * @return
-   */
+  @Override
   public String toString() {
     return getIdentifier() + " - " + Point.ptOut("", getCenter());
   }
@@ -281,16 +278,16 @@ public class Canopy {
   /**
    * Return the center point
    *
-   * @return a Float[]
+   * @return the center of the Canopy
    */
-  public Float[] getCenter() {
+  public Vector getCenter() {
     return center;
   }
 
   /**
    * Return the number of points in the Canopy
    *
-   * @return
+   * @return the number of points in the canopy.
    */
   public int getNumPoints() {
     return numPoints;
@@ -299,22 +296,22 @@ public class Canopy {
   /**
    * Compute the centroid by averaging the pointTotals
    *
-   * @return a Float[] which is the new centroid
+   * @return a point which is the new centroid
    */
-  public Float[] computeCentroid() {
-    Float[] result = new Float[pointTotal.length];
-    for (int i = 0; i < pointTotal.length; i++)
-      result[i] = new Float(pointTotal[i] / numPoints);
+  public Vector computeCentroid() {
+    Vector result = new SparseVector(pointTotal.cardinality());
+    for (int i = 0; i < pointTotal.cardinality(); i++)
+      result.set(i, new Double(pointTotal.get(i) / numPoints));
     return result;
   }
 
   /**
    * Return if the point is covered by this canopy
    *
-   * @param point a Float[] point
+   * @param point a point
    * @return if the point is covered
    */
-  public boolean covers(Float[] point) {
+  public boolean covers(Vector point) {
     return measure.distance(center, point) < t1;
   }
 }

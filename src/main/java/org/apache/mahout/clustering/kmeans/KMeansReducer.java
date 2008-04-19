@@ -22,6 +22,7 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.Point;
 
 import java.io.IOException;
@@ -30,7 +31,7 @@ import java.util.Iterator;
 public class KMeansReducer extends MapReduceBase implements
         Reducer<Text, Text, Text, Text> {
 
-  float delta = 0;
+  double delta = 0;
 
   public void reduce(Text key, Iterator<Text> values,
                      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
@@ -39,7 +40,7 @@ public class KMeansReducer extends MapReduceBase implements
       String value = values.next().toString();
       int ix = value.indexOf(',');
       int count = new Integer(value.substring(0, ix));
-      Float[] total = Point.decodePoint(value.substring(ix + 2));
+      Vector total = Point.decodePoint(value.substring(ix + 2));
       cluster.addPoints(count, total);
     }
     // force convergence calculation

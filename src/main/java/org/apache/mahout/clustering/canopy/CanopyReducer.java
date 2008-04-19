@@ -22,6 +22,7 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.Point;
 
 import java.io.IOException;
@@ -45,7 +46,7 @@ public class CanopyReducer extends MapReduceBase implements
                      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
     while (values.hasNext()) {
       Text value = (Text) values.next();
-      Float[] point = Point.decodePoint(value.toString());
+      Vector point = Point.decodePoint(value.toString());
       Canopy.addPointToCanopies(point, canopies);
     }
     for (Canopy canopy : canopies)

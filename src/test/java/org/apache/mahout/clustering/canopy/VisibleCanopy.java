@@ -16,6 +16,7 @@ package org.apache.mahout.clustering.canopy;
  * limitations under the License.
  */
 
+import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.Point;
 
 import java.util.ArrayList;
@@ -27,9 +28,9 @@ import java.util.List;
  * for production use since it holds onto all its points.
  */
 public class VisibleCanopy extends Canopy {
-  private List<Float[]> points = new ArrayList<Float[]>();
+  private List<Vector> points = new ArrayList<Vector>();
 
-  public VisibleCanopy(Float[] point) {
+  public VisibleCanopy(Vector point) {
     super(point);
     points.add(point);
   }
@@ -37,9 +38,9 @@ public class VisibleCanopy extends Canopy {
   /**
    * Add a point to the canopy
    *
-   * @param point a Float[]
+   * @param point a point
    */
-  public void addPoint(Float[] point) {
+  public void addPoint(Vector point) {
     super.addPoint(point);
     points.add(point);
   }
@@ -52,7 +53,7 @@ public class VisibleCanopy extends Canopy {
    */
   public String toString() {
     String out = super.toString() + ": ";
-    for (Float[] pt : points)
+    for (Vector pt : points)
       out = Point.ptOut(out, pt);
     return out;
   }

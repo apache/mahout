@@ -30,8 +30,8 @@ public class ClusterDriver {
     String canopies = args[1];
     String output = args[2];
     String measureClassName = args[3];
-    float t1 = new Float(args[4]);
-    float t2 = new Float(args[5]);
+    double t1 = new Double(args[4]);
+    double t2 = new Double(args[5]);
     runJob(points, canopies, output, measureClassName, t1, t2);
   }
 
@@ -46,7 +46,7 @@ public class ClusterDriver {
    * @param t2               the T2 distance threshold
    */
   public static void runJob(String points, String canopies, String output,
-                            String measureClassName, float t1, float t2) {
+                            String measureClassName, double t1, double t2) {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(
             org.apache.mahout.clustering.canopy.ClusterDriver.class);

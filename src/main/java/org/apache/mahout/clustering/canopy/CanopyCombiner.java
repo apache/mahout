@@ -23,6 +23,7 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.Point;
 
 import java.io.IOException;
@@ -33,11 +34,11 @@ public class CanopyCombiner extends MapReduceBase implements Reducer<Text, Text,
   public void reduce(Text key, Iterator<Text> values,
                      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
     Writable value = (Writable) values.next();
-    Float[] center = Point.decodePoint(value.toString());
+    Vector center = Point.decodePoint(value.toString());
     Canopy canopy = new Canopy(center);
     while (values.hasNext()) {
       value = (Writable) values.next();
-      Float[] point = Point.decodePoint(value.toString());
+      Vector point = Point.decodePoint(value.toString());
       canopy.addPoint(point);
     }
     output.collect(new Text("centroid"), new Text(Point.formatPoint(canopy

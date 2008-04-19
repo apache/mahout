@@ -27,8 +27,8 @@ public class CanopyClusteringJob {
     String input = args[0];
     String output = args[1];
     String measureClassName = args[2];
-    float t1 = new Float(args[3]);
-    float t2 = new Float(args[4]);
+    double t1 = new Double(args[3]);
+    double t2 = new Double(args[4]);
     runJob(input, output, measureClassName, t1, t2);
   }
 
@@ -42,7 +42,7 @@ public class CanopyClusteringJob {
    * @param t2               the T2 distance threshold
    */
   public static void runJob(String input, String output,
-                            String measureClassName, float t1, float t2) {
+                            String measureClassName, double t1, double t2) {
     CanopyDriver.runJob(input, output + "/canopies", measureClassName, t1, t2);
     ClusterDriver.runJob(input, output + "/canopies", output, measureClassName, t1, t2);
   }

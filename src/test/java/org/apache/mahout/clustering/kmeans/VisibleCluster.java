@@ -16,6 +16,7 @@
  */
 package org.apache.mahout.clustering.kmeans;
 
+import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.Point;
 
 import java.util.ArrayList;
@@ -28,24 +29,24 @@ import java.util.List;
  */
 public class VisibleCluster extends Cluster {
 
-  private List<Float[]> points = new ArrayList<Float[]>();
+  private List<Vector> points = new ArrayList<Vector>();
 
   @Override
   public void recomputeCenter() {
     super.recomputeCenter();
-    points = new ArrayList<Float[]>();
+    points = new ArrayList<Vector>();
   }
 
-  public VisibleCluster(Float[] point) {
+  public VisibleCluster(Vector point) {
     super(point);
   }
 
   /**
    * Add a point to the canopy
    *
-   * @param point a Float[]
+   * @param point a Double[]
    */
-  public void addPoint(Float[] point) {
+  public void addPoint(Vector point) {
     super.addPoint(point);
     points.add(point);
   }
@@ -58,7 +59,7 @@ public class VisibleCluster extends Cluster {
    */
   public String toString() {
     String out = super.toString() + ": ";
-    for (Float[] pt : points)
+    for (Vector pt : points)
       out += Point.formatPoint(pt);
     return out;
   }

@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.mahout.matrix.SparseVector;
+import org.apache.mahout.matrix.Vector;
+
 public class Point {
   /**
    * Split pattern for {@link #decodePoint(String)}.
@@ -31,19 +34,19 @@ public class Point {
   /**
    * Format the point for input to a Mapper or Reducer
    *
-   * @param point a Float[]
+   * @param point a point to format
    * @return a String
    */
-  public static String formatPoint(Float[] point) {
-    if (point.length == 0) {
+  public static String formatPoint(Vector point) {
+    if (point.cardinality() == 0) {
       return "[]";
     }
 
     final StringBuilder out = new StringBuilder();
     out.append('[');
-    for (int i = 0; i < point.length; i++) {
+    for (int i = 0; i < point.cardinality(); i++) {
       if (i > 0) out.append(", ");
-      out.append(point[i]);
+      out.append(point.get(i));
     }
     out.append(']');
     return out.toString();
@@ -55,9 +58,9 @@ public class Point {
    * @param formattedString a comma-terminated String of the form 
    *    "[v1,v2,...,vn]payload". Note the payload remainder: it is optional,
    *    but can be present.
-   * @return the Float[] defining an n-dimensional point
+   * @return the n-dimensional point
    */
-  public static Float[] decodePoint(String formattedString) {
+  public static Vector decodePoint(String formattedString) {
     final int closingBracketIndex = formattedString.indexOf(']'); 
     if (formattedString.charAt(0) != '[' || closingBracketIndex < 0) {
       throw new IllegalArgumentException(formattedString);
@@ -66,10 +69,11 @@ public class Point {
     formattedString = formattedString.substring(1, closingBracketIndex);
 
     final String[] pts = splitPattern.split(formattedString);
-    final Float[] point = new Float[pts.length];
-    for (int i = 0; i < point.length; i++) {
-      point[i] = new Float(pts[i]);
+    final Vector point = new SparseVector(pts.length);
+    for (int i = 0; i < point.cardinality(); i++) {
+      point.set(i, Double.parseDouble(pts[i]));
     }
+
     return point;
   }
 
@@ -77,10 +81,10 @@ public class Point {
    * Returns a print string for the point
    *
    * @param out a String to append to
-   * @param pt  the Float[] point
+   * @param pt  the point
    * @return
    */
-  public static String ptOut(String out, Float[] pt) {
+  public static String ptOut(String out, Vector pt) {
     return out + formatPoint(pt);
   }
 
@@ -88,38 +92,37 @@ public class Point {
    * Return a point with length dimensions and zero values
    *
    * @param length
-   * @return a Float[] representing [0,0,0,...,0]
+   * @return a point representing [0,0,0,...,0]
    */
-  public static Float[] origin(int length) {
-    Float[] result = new Float[length];
-    for (int i = 0; i < length; i++)
-      result[i] = new Float(0);
-    return result;
+  public static Vector origin(int length) {
+    
+    Vector point = new SparseVector(length);
+    point.assign(0);
+
+    return point;
   }
 
   /**
    * Return the sum of the two points
    *
-   * @param pt1 a Float[] point
-   * @param pt2 a Float[] point
+   * @param pt1 first point to add
+   * @param pt2 second point to add
    * @return
    */
-  public static Float[] sum(Float[] pt1, Float[] pt2) {
-    Float[] result = pt1.clone();
-    for (int i = 0; i < pt1.length; i++)
-      result[i] += pt2[i];
-    return result;
+  public static Vector sum(Vector v1, Vector v2) {
+    Vector sum = v1.plus(v2);
+    return sum;
   }
 
-  public static void writePointsToFile(List<Float[]> points, String fileName)
+  public static void writePointsToFile(List<Vector> points, String fileName)
           throws IOException {
     writePointsToFileWithPayload(points, fileName, "");
   }
 
-  public static void writePointsToFileWithPayload(List<Float[]> points,
+  public static void writePointsToFileWithPayload(List<Vector> points,
                                                   String fileName, String payload) throws IOException {
     BufferedWriter output = new BufferedWriter(new FileWriter(fileName));
-    for (Float[] point : points) {
+    for (Vector point : points) {
       output.write(org.apache.mahout.utils.Point.formatPoint(point));
       output.write(payload);
       output.write("\n");
