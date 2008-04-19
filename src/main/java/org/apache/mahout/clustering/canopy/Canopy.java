@@ -103,7 +103,7 @@ public class Canopy {
   public static void configure(JobConf job) {
     try {
       final ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class cl = ccl.loadClass(job.get(DISTANCE_MEASURE_KEY));
+      Class<?> cl = ccl.loadClass(job.get(DISTANCE_MEASURE_KEY));
       measure = (DistanceMeasure) cl.newInstance();
       measure.configure(job);
     } catch (Exception e) {
@@ -145,7 +145,7 @@ public class Canopy {
       double dist = measure.distance(canopy.getCenter(), point);
       if (dist < t1)
         canopy.addPoint(point);
-      pointStronglyBound = pointStronglyBound | (dist < t2);
+      pointStronglyBound = pointStronglyBound || (dist < t2);
     }
     if (!pointStronglyBound)
       canopies.add(new Canopy(point));
@@ -167,7 +167,7 @@ public class Canopy {
       double dist = measure.distance(canopy.getCenter(), point);
       if (dist < t1)
         canopy.emitPoint(point, collector);
-      pointStronglyBound = pointStronglyBound | (dist < t2);
+      pointStronglyBound = pointStronglyBound || (dist < t2);
     }
     if (!pointStronglyBound) {
       Canopy canopy = new Canopy(point);

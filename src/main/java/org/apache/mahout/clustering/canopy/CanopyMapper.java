@@ -33,7 +33,7 @@ import java.util.List;
 public class CanopyMapper extends MapReduceBase implements
         Mapper<WritableComparable, Text, Text, Text> {
 
-  List<Canopy> canopies = new ArrayList<Canopy>();
+  private List<Canopy> canopies = new ArrayList<Canopy>();
 
   /*
    * (non-Javadoc)

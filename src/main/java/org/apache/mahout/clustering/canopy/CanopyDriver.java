@@ -25,6 +25,9 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 
 public class CanopyDriver {
 
+  private CanopyDriver() {
+  }
+
   public static void main(String[] args) {
     String input = args[0];
     String output = args[1];
@@ -49,8 +52,8 @@ public class CanopyDriver {
     JobConf conf = new JobConf(
             org.apache.mahout.clustering.canopy.CanopyDriver.class);
     conf.set(Canopy.DISTANCE_MEASURE_KEY, measureClassName);
-    conf.set(Canopy.T1_KEY, "" + t1);
-    conf.set(Canopy.T2_KEY, "" + t2);
+    conf.set(Canopy.T1_KEY, String.valueOf(t1));
+    conf.set(Canopy.T2_KEY, String.valueOf(t2));
 
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(Text.class);

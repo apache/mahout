@@ -98,7 +98,7 @@ public class Cluster {
   public static void configure(JobConf job) {
     try {
       final ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class cl = ccl.loadClass(job.get(DISTANCE_MEASURE_KEY));
+      Class<?> cl = ccl.loadClass(job.get(DISTANCE_MEASURE_KEY));
       measure = (DistanceMeasure) cl.newInstance();
       measure.configure(job);
       convergenceDelta = new Double(job.get(CLUSTER_CONVERGENCE_KEY));

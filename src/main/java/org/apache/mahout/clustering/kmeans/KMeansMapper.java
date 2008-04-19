@@ -36,7 +36,7 @@ import java.util.List;
 public class KMeansMapper extends MapReduceBase implements
         Mapper<WritableComparable, Text, Text, Text> {
 
-  List<Cluster> clusters;
+  private List<Cluster> clusters;
 
   public void map(WritableComparable key, Text values,
                   OutputCollector<Text, Text> output, Reporter reporter) throws IOException {

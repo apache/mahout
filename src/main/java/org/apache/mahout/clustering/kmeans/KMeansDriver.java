@@ -28,6 +28,9 @@ import java.io.IOException;
 
 public class KMeansDriver {
 
+  private KMeansDriver() {
+  }
+
   public static void main(String[] args) {
     String input = args[0];
     String clusters = args[1];
@@ -93,7 +96,7 @@ public class KMeansDriver {
    * @param convergenceDelta the convergence delta value
    * @return true if the iteration successfully runs
    */
-  static boolean runIteration(String input, String clustersIn,
+  private static boolean runIteration(String input, String clustersIn,
                               String clustersOut, String measureClass, String convergenceDelta) {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(KMeansDriver.class);
@@ -134,7 +137,7 @@ public class KMeansDriver {
    * @param measureClass     the classname of the DistanceMeasure
    * @param convergenceDelta the convergence delta value
    */
-  static void runClustering(String input, String clustersIn, String output,
+  private static void runClustering(String input, String clustersIn, String output,
                             String measureClass, String convergenceDelta) {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(KMeansDriver.class);
@@ -169,14 +172,13 @@ public class KMeansDriver {
    * @return true if all Clusters are converged
    * @throws IOException if there was an IO error
    */
-  static boolean isConverged(String filePath, JobConf conf, FileSystem fs)
+  private static boolean isConverged(String filePath, JobConf conf, FileSystem fs)
           throws IOException {
-    boolean converged;
     Path outPart = new Path(filePath);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, outPart, conf);
     Text key = new Text();
     Text value = new Text();
-    converged = true;
+    boolean converged = true;
     while (reader.next(key, value)) {
       Cluster cluster = Cluster.decodeCluster(value.toString());
       converged = converged && cluster.isConverged();

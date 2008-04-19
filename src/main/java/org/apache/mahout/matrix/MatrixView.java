@@ -34,7 +34,7 @@ public class MatrixView extends AbstractMatrix {
 
   /**
    * Construct a view of the matrix with given offset and cardinality
-   * 
+   *
    * @param matrix an underlying Matrix
    * @param offset the int[2] offset into the underlying matrix
    * @param cardinality the int[2] cardinality of the view
@@ -48,7 +48,7 @@ public class MatrixView extends AbstractMatrix {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.apache.mahout.matrix.AbstractMatrix#asFormatString()
    */
   @Override
@@ -67,7 +67,7 @@ public class MatrixView extends AbstractMatrix {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.apache.mahout.matrix.AbstractMatrix#cardinality()
    */
   @Override
@@ -77,7 +77,7 @@ public class MatrixView extends AbstractMatrix {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.apache.mahout.matrix.AbstractMatrix#copy()
    */
   @Override
@@ -87,7 +87,7 @@ public class MatrixView extends AbstractMatrix {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.apache.mahout.matrix.AbstractMatrix#getQuick(int, int)
    */
   @Override
@@ -97,7 +97,7 @@ public class MatrixView extends AbstractMatrix {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.apache.mahout.matrix.AbstractMatrix#like()
    */
   @Override
@@ -107,7 +107,7 @@ public class MatrixView extends AbstractMatrix {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.apache.mahout.matrix.AbstractMatrix#like(int, int)
    */
   @Override
@@ -118,7 +118,7 @@ public class MatrixView extends AbstractMatrix {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.apache.mahout.matrix.AbstractMatrix#setQuick(int, int, double)
    */
   @Override
@@ -128,7 +128,7 @@ public class MatrixView extends AbstractMatrix {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.apache.mahout.matrix.AbstractMatrix#size()
    */
   @Override
@@ -138,7 +138,7 @@ public class MatrixView extends AbstractMatrix {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.apache.mahout.matrix.AbstractMatrix#toArray()
    */
   @Override
@@ -152,7 +152,7 @@ public class MatrixView extends AbstractMatrix {
   }
 
   @Override
-  public Matrix viewPart(int offset[], int[] size) throws CardinalityException,
+  public Matrix viewPart(int[] offset, int[] size) throws CardinalityException,
       IndexException {
     if (size[ROW] > cardinality[ROW] || size[COL] > cardinality[COL])
       throw new CardinalityException();
@@ -162,13 +162,12 @@ public class MatrixView extends AbstractMatrix {
     int[] origin = offset.clone();
     origin[ROW] += offset[ROW];
     origin[COL] += offset[COL];
-    Matrix result = new MatrixView(matrix, origin, size);
-    return result;
+    return new MatrixView(matrix, origin, size);
   }
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.apache.mahout.matrix.AbstractMatrix#haveSharedCells(org.apache.mahout.matrix.Matrix)
    */
   @Override
@@ -181,7 +180,7 @@ public class MatrixView extends AbstractMatrix {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.apache.mahout.matrix.AbstractMatrix#assignColumn(int,
    *      org.apache.mahout.vector.Vector)
    */
@@ -198,7 +197,7 @@ public class MatrixView extends AbstractMatrix {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.apache.mahout.matrix.AbstractMatrix#assignRow(int,
    *      org.apache.mahout.vector.Vector)
    */
@@ -214,7 +213,7 @@ public class MatrixView extends AbstractMatrix {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.apache.mahout.matrix.AbstractMatrix#getColumn(int)
    */
   @Override
@@ -227,7 +226,7 @@ public class MatrixView extends AbstractMatrix {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.apache.mahout.matrix.AbstractMatrix#getRow(int)
    */
   @Override

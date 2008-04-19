@@ -33,9 +33,9 @@ import org.apache.mahout.matrix.CardinalityException;
 public class MeanShiftCanopyReducer extends MapReduceBase implements
     Reducer<Text, WritableComparable, Text, WritableComparable> {
 
-  List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
+  private List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
 
-  OutputCollector<Text, WritableComparable> collector;
+  private OutputCollector<Text, WritableComparable> collector;
 
   /*
    * (non-Javadoc)

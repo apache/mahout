@@ -47,7 +47,7 @@ public class MeanShiftCanopyCombiner extends MapReduceBase implements
     MeanShiftCanopy canopy = new MeanShiftCanopy(key.toString());
     try {
       while (values.hasNext()) {
-        Writable value = (Writable) values.next();
+        Writable value = values.next();
         String valueStr = value.toString();
         if (valueStr.startsWith("new"))
           canopy.init(MeanShiftCanopy.decodeCanopy(valueStr.substring(4)));

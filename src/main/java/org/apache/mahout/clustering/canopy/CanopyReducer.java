@@ -33,7 +33,7 @@ import java.util.List;
 public class CanopyReducer extends MapReduceBase implements
         Reducer<Text, Text, Text, Text> {
 
-  List<Canopy> canopies = new ArrayList<Canopy>();
+  private List<Canopy> canopies = new ArrayList<Canopy>();
 
   /*
    * (non-Javadoc)
@@ -45,7 +45,7 @@ public class CanopyReducer extends MapReduceBase implements
   public void reduce(Text key, Iterator<Text> values,
                      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
     while (values.hasNext()) {
-      Text value = (Text) values.next();
+      Text value = values.next();
       Vector point = Point.decodePoint(value.toString());
       Canopy.addPointToCanopies(point, canopies);
     }

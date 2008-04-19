@@ -204,7 +204,7 @@ public abstract class AbstractMatrix implements Matrix {
    * @see org.apache.mahout.matrix.Matrix#determinant()
    */
    public double determinant() throws CardinalityException {
-   int card[] = cardinality();
+   int[] card = cardinality();
    int rowSize = card[ROW];
    int columnSize = card[COL];
    if(rowSize!=columnSize) throw new CardinalityException();

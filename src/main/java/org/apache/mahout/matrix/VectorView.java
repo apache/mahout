@@ -48,7 +48,7 @@ public class VectorView extends AbstractVector {
   @Override
   public WritableComparable asWritableComparable() {
     StringBuilder out = new StringBuilder();
-    out.append("[");
+    out.append('[');
     for (int i = offset; i < offset + cardinality; i++)
       out.append(getQuick(i)).append(", ");
     out.append("] ");
@@ -105,8 +105,7 @@ public class VectorView extends AbstractVector {
       throw new CardinalityException();
     if (offset < 0 || offset + length > cardinality)
       throw new IndexException();
-    Vector result = new VectorView(vector, offset + this.offset, length);
-    return result;
+    return new VectorView(vector, offset + this.offset, length);
   }
 
   @Override

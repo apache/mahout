@@ -27,7 +27,7 @@ import org.apache.hadoop.io.WritableComparable;
  */
 public class SparseMatrix extends AbstractMatrix {
 
-  int[] cardinality;
+  private int[] cardinality;
 
   private Map<Integer, Vector> rows;
 
@@ -41,7 +41,7 @@ public class SparseMatrix extends AbstractMatrix {
     this.cardinality = cardinality.clone();
     this.rows = new HashMap<Integer, Vector>();
     for (Integer row : rows.keySet())
-      this.rows.put(row, (SparseVector) rows.get(row).copy());
+      this.rows.put(row, rows.get(row).copy());
   }
 
   /**
@@ -63,7 +63,7 @@ public class SparseMatrix extends AbstractMatrix {
   @Override
   public WritableComparable asWritableComparable() {
     StringBuilder out = new StringBuilder();
-    out.append("[s" + cardinality[ROW] + ", ");
+    out.append("[s").append(cardinality[ROW]).append(", ");
     for (Integer row : rows.keySet())
       out.append(rows.get(row).asWritableComparable());
     out.append("] ");
@@ -89,7 +89,7 @@ public class SparseMatrix extends AbstractMatrix {
   public Matrix copy() {
     SparseMatrix copy = new SparseMatrix(cardinality);
     for (Integer row : rows.keySet())
-      copy.rows.put(row, (SparseVector) rows.get(row).copy());
+      copy.rows.put(row, rows.get(row).copy());
     return copy;
   }
 
@@ -235,7 +235,7 @@ public class SparseMatrix extends AbstractMatrix {
   public Matrix assignRow(int row, Vector other) throws CardinalityException {
     if (row >= cardinality[ROW] || other.cardinality() != cardinality[COL])
       throw new CardinalityException();
-    rows.put(new Integer(row), other);
+    rows.put(row, other);
     return this;
   }
 

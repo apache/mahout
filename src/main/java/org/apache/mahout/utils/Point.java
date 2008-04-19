@@ -29,7 +29,7 @@ public class Point {
   /**
    * Split pattern for {@link #decodePoint(String)}.
    */
-  private final static Pattern splitPattern = Pattern.compile("[,]");
+  private static final Pattern splitPattern = Pattern.compile("[,]");
 
   /**
    * Format the point for input to a Mapper or Reducer
@@ -55,13 +55,13 @@ public class Point {
   /**
    * Decodes a point from its string representation.
    *
-   * @param formattedString a comma-terminated String of the form 
+   * @param formattedString a comma-terminated String of the form
    *    "[v1,v2,...,vn]payload". Note the payload remainder: it is optional,
    *    but can be present.
    * @return the n-dimensional point
    */
   public static Vector decodePoint(String formattedString) {
-    final int closingBracketIndex = formattedString.indexOf(']'); 
+    final int closingBracketIndex = formattedString.indexOf(']');
     if (formattedString.charAt(0) != '[' || closingBracketIndex < 0) {
       throw new IllegalArgumentException(formattedString);
     }
@@ -95,7 +95,7 @@ public class Point {
    * @return a point representing [0,0,0,...,0]
    */
   public static Vector origin(int length) {
-    
+
     Vector point = new SparseVector(length);
     point.assign(0);
 

@@ -25,9 +25,9 @@ import org.apache.hadoop.io.WritableComparable;
  */
 public class SparseColumnMatrix extends AbstractMatrix {
 
-  int[] cardinality;
+  private int[] cardinality;
 
-  Vector[] columns;
+  private Vector[] columns;
 
   /**
    * Construct a matrix of the given cardinality with the given data columns

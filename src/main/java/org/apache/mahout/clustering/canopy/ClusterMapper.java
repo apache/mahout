@@ -36,7 +36,7 @@ import java.util.List;
 public class ClusterMapper extends MapReduceBase implements
         Mapper<WritableComparable, Text, Text, Text> {
 
-  List<Canopy> canopies;
+  private List<Canopy> canopies;
 
   public void map(WritableComparable key, Text values,
                   OutputCollector<Text, Text> output, Reporter reporter) throws IOException {

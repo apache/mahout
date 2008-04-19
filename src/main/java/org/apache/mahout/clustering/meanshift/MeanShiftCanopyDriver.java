@@ -68,9 +68,9 @@ public class MeanShiftCanopyDriver {
       conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     conf.set(MeanShiftCanopy.DISTANCE_MEASURE_KEY, measureClassName);
-    conf.set(MeanShiftCanopy.CLUSTER_CONVERGENCE_KEY, "" + convergenceDelta);
-    conf.set(MeanShiftCanopy.T1_KEY, "" + t1);
-    conf.set(MeanShiftCanopy.T2_KEY, "" + t2);
+    conf.set(MeanShiftCanopy.CLUSTER_CONVERGENCE_KEY, String.valueOf(convergenceDelta));
+    conf.set(MeanShiftCanopy.T1_KEY, String.valueOf(t1));
+    conf.set(MeanShiftCanopy.T2_KEY, String.valueOf(t2));
 
     client.setConf(conf);
     try {

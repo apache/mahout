@@ -87,7 +87,7 @@ public class MeanShiftCanopy {
    */
   public static void configure(JobConf job) {
     try {
-      Class cl = Class.forName(job.get(DISTANCE_MEASURE_KEY));
+      Class<?> cl = Class.forName(job.get(DISTANCE_MEASURE_KEY));
       measure = (DistanceMeasure) cl.newInstance();
       measure.configure(job);
     } catch (Exception e) {
@@ -105,7 +105,7 @@ public class MeanShiftCanopy {
    * @param aMeasure
    * @param aT1
    * @param aT2
-   * @param convergenceDelta the convergence criteria
+   * @param aDelta the convergence criteria
    */
   public static void config(DistanceMeasure aMeasure, double aT1, double aT2,
       double aDelta) {
@@ -226,7 +226,7 @@ public class MeanShiftCanopy {
   /**
    * Create a new Canopy with the given canopyId
    * 
-   * @param point a Vector
+   * @param id
    */
   public MeanShiftCanopy(String id) {
     super();
@@ -328,8 +328,6 @@ public class MeanShiftCanopy {
 
   /**
    * Emit the new canopy to the collector, keyed by the canopy's Id
-   * 
-   * @param point a Vector
    */
   void emitCanopy(MeanShiftCanopy canopy,
       OutputCollector<Text, WritableComparable> collector) throws IOException {

@@ -52,7 +52,6 @@ public class MeanShiftCanopyJob {
   public static void runJob(String input, String output,
       String measureClassName, double t1, double t2, double convergenceDelta,
       int maxIterations) {
-    int maxIter = new Integer(maxIterations);
     try {
       // delete the output directory
       JobConf conf = new JobConf(MeanShiftCanopyDriver.class);
@@ -67,7 +66,7 @@ public class MeanShiftCanopyJob {
       boolean inputIsSequenceFile = false;
       int iteration = 0;
       String clustersIn = input;
-      while (!converged && iteration < maxIter) {
+      while (!converged && iteration < maxIterations) {
         System.out.println("Iteration " + iteration);
         // point the output to a new directory per iteration
         String clustersOut = output + "/canopies-" + iteration;
@@ -94,14 +93,13 @@ public class MeanShiftCanopyJob {
    * @return true if all canopies are converged
    * @throws IOException if there was an IO error
    */
-  static boolean isConverged(String filePath, JobConf conf, FileSystem fs)
+  private static boolean isConverged(String filePath, JobConf conf, FileSystem fs)
       throws IOException {
-    boolean converged;
     Path outPart = new Path(filePath);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, outPart, conf);
     Text key = new Text();
     Text value = new Text();
-    converged = true;
+    boolean converged = true;
     while (converged && reader.next(key, value))
       converged = converged && value.toString().startsWith("V");
     return converged;

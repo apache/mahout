@@ -25,6 +25,9 @@ import org.apache.hadoop.mapred.lib.IdentityReducer;
 
 public class ClusterDriver {
 
+  private ClusterDriver() {
+  }
+
   public static void main(String[] args) {
     String points = args[0];
     String canopies = args[1];
@@ -52,8 +55,8 @@ public class ClusterDriver {
             org.apache.mahout.clustering.canopy.ClusterDriver.class);
 
     conf.set(Canopy.DISTANCE_MEASURE_KEY, measureClassName);
-    conf.set(Canopy.T1_KEY, "" + t1);
-    conf.set(Canopy.T2_KEY, "" + t2);
+    conf.set(Canopy.T1_KEY, String.valueOf(t1));
+    conf.set(Canopy.T2_KEY, String.valueOf(t2));
     conf.set(Canopy.CANOPY_PATH_KEY, canopies);
 
     conf.setOutputKeyClass(Text.class);

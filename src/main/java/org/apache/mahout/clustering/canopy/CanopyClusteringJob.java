@@ -20,6 +20,9 @@ package org.apache.mahout.clustering.canopy;
 
 public class CanopyClusteringJob {
 
+  private CanopyClusteringJob() {
+  }
+
   /**
    * @param args
    */

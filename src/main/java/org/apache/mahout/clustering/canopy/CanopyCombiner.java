@@ -33,11 +33,11 @@ public class CanopyCombiner extends MapReduceBase implements Reducer<Text, Text,
 
   public void reduce(Text key, Iterator<Text> values,
                      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
-    Writable value = (Writable) values.next();
+    Writable value = values.next();
     Vector center = Point.decodePoint(value.toString());
     Canopy canopy = new Canopy(center);
     while (values.hasNext()) {
-      value = (Writable) values.next();
+      value = values.next();
       Vector point = Point.decodePoint(value.toString());
       canopy.addPoint(point);
     }
