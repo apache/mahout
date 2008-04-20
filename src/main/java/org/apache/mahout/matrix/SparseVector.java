@@ -160,4 +160,27 @@ public class SparseVector extends AbstractVector {
     public Element next() { return new Element(it.next().getKey()); }
     public void remove() { throw new UnsupportedOperationException(); }
   }
+  
+  @Override
+  public double zSum() {
+	  java.util.Iterator<Double> iter = values.values().iterator(); 
+	  double result = 0;
+	  while (iter.hasNext())
+		  result += iter.next();
+	  return result;
+  }
+
+  @Override
+  public double dot(Vector x) throws CardinalityException {
+	  if (cardinality() != x.cardinality())
+		  throw new CardinalityException();
+	  java.util.Iterator<Integer> iter = values.keySet().iterator(); 
+	  double result = 0;
+	  while (iter.hasNext()){
+		  int nextIndex = iter.next();
+		  result += getQuick(nextIndex) * x.getQuick(nextIndex);
+	  }
+	  return result;
+  }
+  
 }
