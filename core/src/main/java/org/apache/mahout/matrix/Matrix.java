@@ -33,6 +33,12 @@ public interface Matrix {
   WritableComparable asWritableComparable();
 
   /**
+   * Return a formatted String suitable for output
+   * 
+   * @return
+   */
+  String asFormatString();
+  /**
    * Assign the value to all elements of the receiver
    * 
    * @param value a double value

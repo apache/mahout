@@ -25,6 +25,14 @@ import org.apache.hadoop.io.WritableComparable;
 /**
  * Doubly sparse matrix. Implemented as a Map of SparseVector rows
  */
+/**
+ * @author jeff
+ * 
+ */
+/**
+ * @author jeff
+ * 
+ */
 public class SparseMatrix extends AbstractMatrix {
 
   private int[] cardinality;
@@ -34,8 +42,10 @@ public class SparseMatrix extends AbstractMatrix {
   /**
    * Construct a matrix of the given cardinality with the given row map
    * 
-   * @param cardinality the int[2] cardinality desired
-   * @param rows a Map<Integer, SparseVector> of rows
+   * @param cardinality
+   *            the int[2] cardinality desired
+   * @param rows
+   *            a Map<Integer, SparseVector> of rows
    */
   public SparseMatrix(int[] cardinality, Map<Integer, SparseVector> rows) {
     this.cardinality = cardinality.clone();
@@ -47,7 +57,8 @@ public class SparseMatrix extends AbstractMatrix {
   /**
    * Construct a matrix of the given cardinality
    * 
-   * @param cardinality the int[2] cardinality desired
+   * @param cardinality
+   *            the int[2] cardinality desired
    */
   public SparseMatrix(int[] cardinality) {
     super();
@@ -62,12 +73,23 @@ public class SparseMatrix extends AbstractMatrix {
    */
   @Override
   public WritableComparable asWritableComparable() {
+    String out = asFormatString();
+    return new Text(out);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.mahout.matrix.AbstractMatrix#asFormatString()
+   */
+  @Override
+  public String asFormatString() {
     StringBuilder out = new StringBuilder();
     out.append("[s").append(cardinality[ROW]).append(", ");
     for (Integer row : rows.keySet())
       out.append(rows.get(row).asWritableComparable());
     out.append("] ");
-    return new Text(out.toString());
+    return out.toString();
   }
 
   /*
@@ -146,8 +168,7 @@ public class SparseMatrix extends AbstractMatrix {
   /*
    * (non-Javadoc)
    * 
-   * @see org.apache.mahout.matrix.AbstractMatrix#setQuick(int, int,
-   *      double)
+   * @see org.apache.mahout.matrix.AbstractMatrix#setQuick(int, int, double)
    */
   @Override
   public void setQuick(int row, int column, double value) {

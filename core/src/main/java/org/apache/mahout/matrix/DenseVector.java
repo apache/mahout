@@ -28,7 +28,8 @@ public class DenseVector extends AbstractVector {
   /**
    * Decode a new instance from the formatted string
    * 
-   * @param formattedString a string produced by the asFormatString method
+   * @param formattedString
+   *            a string produced by the asFormatString method
    * @return a DenseVector
    */
   public static Vector decodeFormat(WritableComparable formattedString) {
@@ -66,11 +67,11 @@ public class DenseVector extends AbstractVector {
 
   @Override
   public WritableComparable asWritableComparable() {
-    return new Text(toString());
+    return new Text(asFormatString());
   }
 
   @Override
-  public String toString() {
+  public String asFormatString() {
     StringBuilder out = new StringBuilder();
     out.append("[, ");
     for (int i = 0; i < values.length; i++)
@@ -138,8 +139,9 @@ public class DenseVector extends AbstractVector {
   }
 
   /**
-   * Returns an iterator that traverses this Vector from 0 
-   * to cardinality-1, in that order.
+   * Returns an iterator that traverses this Vector from 0 to cardinality-1, in
+   * that order.
+   * 
    * @see java.lang.Iterable#iterator
    */
   @Override
@@ -149,9 +151,21 @@ public class DenseVector extends AbstractVector {
 
   private class Iterator implements java.util.Iterator<Vector.Element> {
     private int ind;
-    public Iterator() { ind=0; }
-    public boolean hasNext() { return ind<values.length; }
-    public Vector.Element next() { return new Element(ind++); }
-    public void remove() { throw new UnsupportedOperationException(); }
+
+    public Iterator() {
+      ind = 0;
+    }
+
+    public boolean hasNext() {
+      return ind < values.length;
+    }
+
+    public Vector.Element next() {
+      return new Element(ind++);
+    }
+
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
   }
 }

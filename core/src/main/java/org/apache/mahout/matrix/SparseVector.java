@@ -35,7 +35,8 @@ public class SparseVector extends AbstractVector {
   /**
    * Decode a new instance from the formatted string
    * 
-   * @param formattedString a string produced by the asFormatString method
+   * @param formattedString
+   *            a string produced by the asFormatString method
    * @return a DenseVector
    */
   public static Vector decodeFormat(WritableComparable formattedString) {
@@ -69,12 +70,18 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public WritableComparable asWritableComparable() {
+    String out = asFormatString();
+    return new Text(out);
+  }
+
+  @Override
+  public String asFormatString() {
     StringBuilder out = new StringBuilder();
     out.append("[s").append(cardinality).append(", ");
     for (Integer index : values.keySet())
       out.append(index).append(':').append(values.get(index)).append(", ");
     out.append("] ");
-    return new Text(out.toString());
+    return out.toString();
   }
 
   @Override
@@ -154,33 +161,45 @@ public class SparseVector extends AbstractVector {
   }
 
   private class Iterator implements java.util.Iterator<Vector.Element> {
-    private java.util.Iterator<Map.Entry<Integer,Double>> it;
-    public Iterator() { it=values.entrySet().iterator(); }
-    public boolean hasNext() { return it.hasNext(); }
-    public Element next() { return new Element(it.next().getKey()); }
-    public void remove() { throw new UnsupportedOperationException(); }
+    private java.util.Iterator<Map.Entry<Integer, Double>> it;
+
+    public Iterator() {
+      it = values.entrySet().iterator();
+    }
+
+    public boolean hasNext() {
+      return it.hasNext();
+    }
+
+    public Element next() {
+      return new Element(it.next().getKey());
+    }
+
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
   }
-  
+
   @Override
   public double zSum() {
-	  java.util.Iterator<Double> iter = values.values().iterator(); 
-	  double result = 0;
-	  while (iter.hasNext())
-		  result += iter.next();
-	  return result;
+    java.util.Iterator<Double> iter = values.values().iterator();
+    double result = 0;
+    while (iter.hasNext())
+      result += iter.next();
+    return result;
   }
 
   @Override
   public double dot(Vector x) throws CardinalityException {
-	  if (cardinality() != x.cardinality())
-		  throw new CardinalityException();
-	  java.util.Iterator<Integer> iter = values.keySet().iterator(); 
-	  double result = 0;
-	  while (iter.hasNext()){
-		  int nextIndex = iter.next();
-		  result += getQuick(nextIndex) * x.getQuick(nextIndex);
-	  }
-	  return result;
+    if (cardinality() != x.cardinality())
+      throw new CardinalityException();
+    java.util.Iterator<Integer> iter = values.keySet().iterator();
+    double result = 0;
+    while (iter.hasNext()) {
+      int nextIndex = iter.next();
+      result += getQuick(nextIndex) * x.getQuick(nextIndex);
+    }
+    return result;
   }
-  
+
 }

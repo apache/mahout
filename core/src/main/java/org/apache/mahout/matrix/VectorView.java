@@ -47,12 +47,18 @@ public class VectorView extends AbstractVector {
 
   @Override
   public WritableComparable asWritableComparable() {
+    String out = asFormatString();
+    return new Text(out);
+  }
+
+  @Override
+  public String asFormatString() {
     StringBuilder out = new StringBuilder();
     out.append('[');
     for (int i = offset; i < offset + cardinality; i++)
       out.append(getQuick(i)).append(", ");
     out.append("] ");
-    return new Text(out.toString());
+    return out.toString();
   }
 
   @Override
@@ -117,11 +123,11 @@ public class VectorView extends AbstractVector {
   }
 
   /*
-   * (Non-Javadoc)
-   * Returns true if index is a valid index in the underlying Vector
+   * (Non-Javadoc) Returns true if index is a valid index in the underlying
+   * Vector
    */
-  private boolean isInView(int index) { 
-    return index>=offset && index<offset+cardinality;
+  private boolean isInView(int index) {
+    return index >= offset && index < offset + cardinality;
   }
 
   @Override
@@ -159,7 +165,7 @@ public class VectorView extends AbstractVector {
           return;
         }
       }
-      el = null;  // No element was found
+      el = null; // No element was found
     }
 
     public Vector.Element next() {
@@ -172,8 +178,9 @@ public class VectorView extends AbstractVector {
       return el != null;
     }
 
-    /** @throws UnsupportedOperationException all the time. method not
-     * implemented.
+    /**
+     * @throws UnsupportedOperationException
+     *             all the time. method not implemented.
      */
     public void remove() {
       throw new UnsupportedOperationException();

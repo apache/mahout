@@ -32,8 +32,10 @@ public class SparseRowMatrix extends AbstractMatrix {
   /**
    * Construct a matrix of the given cardinality with the given rows
    * 
-   * @param cardinality the int[2] cardinality desired
-   * @param rows a SparseVector[] array of rows
+   * @param cardinality
+   *            the int[2] cardinality desired
+   * @param rows
+   *            a SparseVector[] array of rows
    */
   public SparseRowMatrix(int[] cardinality, SparseVector[] rows) {
     this.cardinality = cardinality.clone();
@@ -45,7 +47,8 @@ public class SparseRowMatrix extends AbstractMatrix {
   /**
    * Construct a matrix of the given cardinality
    * 
-   * @param cardinality the int[2] cardinality desired
+   * @param cardinality
+   *            the int[2] cardinality desired
    */
   public SparseRowMatrix(int[] cardinality) {
     super();
@@ -62,6 +65,17 @@ public class SparseRowMatrix extends AbstractMatrix {
    */
   @Override
   public WritableComparable asWritableComparable() {
+    String out = asFormatString();
+    return new Text(out);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.mahout.matrix.AbstractMatrix#asFormatString()
+   */
+  @Override
+  public String asFormatString() {
     StringBuilder out = new StringBuilder();
     out.append("[[, ");
     for (int row = 0; row < rows.length; row++) {
@@ -70,7 +84,7 @@ public class SparseRowMatrix extends AbstractMatrix {
       out.append("], ");
     }
     out.append("] ");
-    return new Text(out.toString());
+    return out.toString();
   }
 
   /*
@@ -147,8 +161,7 @@ public class SparseRowMatrix extends AbstractMatrix {
   /*
    * (non-Javadoc)
    * 
-   * @see org.apache.mahout.matrix.AbstractMatrix#setQuick(int, int,
-   *      double)
+   * @see org.apache.mahout.matrix.AbstractMatrix#setQuick(int, int, double)
    */
   @Override
   public void setQuick(int row, int column, double value) {

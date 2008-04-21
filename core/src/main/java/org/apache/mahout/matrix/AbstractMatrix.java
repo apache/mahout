@@ -18,7 +18,6 @@ package org.apache.mahout.matrix;
 
 import org.apache.hadoop.io.WritableComparable;
 
-
 /**
  * A few universal implementations of convenience functions
  * 
@@ -38,9 +37,28 @@ public abstract class AbstractMatrix implements Matrix {
    */
   public abstract WritableComparable asWritableComparable();
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.mahout.matrix.Matrix#asFormatString()
+   */
+  public abstract String asFormatString();
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.mahout.matrix.Matrix#assignColumn(int,
+   *      org.apache.mahout.matrix.Vector)
+   */
   public abstract Matrix assignColumn(int column, Vector other)
       throws CardinalityException;
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.mahout.matrix.Matrix#assignRow(int,
+   *      org.apache.mahout.matrix.Vector)
+   */
   public abstract Matrix assignRow(int row, Vector other)
       throws CardinalityException;
 
@@ -58,6 +76,11 @@ public abstract class AbstractMatrix implements Matrix {
    */
   public abstract Matrix copy();
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.mahout.matrix.Matrix#getColumn(int)
+   */
   public abstract Vector getColumn(int column) throws IndexException;
 
   /*
@@ -200,42 +223,43 @@ public abstract class AbstractMatrix implements Matrix {
 
   /*
    * (non-Javadoc)
-   *
+   * 
    * @see org.apache.mahout.matrix.Matrix#determinant()
    */
-   public double determinant() throws CardinalityException {
-   int[] card = cardinality();
-   int rowSize = card[ROW];
-   int columnSize = card[COL];
-   if(rowSize!=columnSize) throw new CardinalityException();
+  public double determinant() throws CardinalityException {
+    int[] card = cardinality();
+    int rowSize = card[ROW];
+    int columnSize = card[COL];
+    if (rowSize != columnSize)
+      throw new CardinalityException();
 
-   if(rowSize==2)
-       return getQuick(0,0)*getQuick(1,1)-getQuick(0,1) * getQuick(1,0);
-   else {
-       int sign = 1;
-       double ret = 0;
+    if (rowSize == 2)
+      return getQuick(0, 0) * getQuick(1, 1) - getQuick(0, 1) * getQuick(1, 0);
+    else {
+      int sign = 1;
+      double ret = 0;
 
-       for(int i = 0; i<columnSize; i++){
-               Matrix minor = new DenseMatrix(rowSize-1,columnSize-1);
-               for(int j = 1; j<rowSize; j++){
-                   boolean flag = false; /* column offset flag */
-                   for(int k = 0; k<columnSize; k++){
-                       if(k==i) {
-                           flag = true;
-                           continue;
-                       }
-                       minor.set(j-1,flag ? k-1 : k, getQuick(j,k));
-                   }
-               }
-               ret += getQuick(0,i)*sign*minor.determinant();
-               sign*=-1;
+      for (int i = 0; i < columnSize; i++) {
+        Matrix minor = new DenseMatrix(rowSize - 1, columnSize - 1);
+        for (int j = 1; j < rowSize; j++) {
+          boolean flag = false; /* column offset flag */
+          for (int k = 0; k < columnSize; k++) {
+            if (k == i) {
+              flag = true;
+              continue;
+            }
+            minor.set(j - 1, flag ? k - 1 : k, getQuick(j, k));
+          }
+        }
+        ret += getQuick(0, i) * sign * minor.determinant();
+        sign *= -1;
 
-           }
+      }
 
-           return ret;
-       }
+      return ret;
+    }
 
-   }
+  }
 
   /*
    * (non-Javadoc)
@@ -325,13 +349,16 @@ public abstract class AbstractMatrix implements Matrix {
     setQuick(row, column, value);
   }
 
-  public void set(int row, double[] data) throws IndexException,CardinalityException {
+  public void set(int row, double[] data) throws IndexException,
+      CardinalityException {
     int[] c = cardinality();
-      if(c[COL] < data.length) throw new CardinalityException();
-      if( (c[ROW] < row) || (row < 0) ) throw new IndexException();
+    if (c[COL] < data.length)
+      throw new CardinalityException();
+    if ((c[ROW] < row) || (row < 0))
+      throw new IndexException();
 
-    for(int i = 0; i<c[COL]; i++)
-        setQuick(row,i,data[i]);
+    for (int i = 0; i < c[COL]; i++)
+      setQuick(row, i, data[i]);
   }
 
   /*

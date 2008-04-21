@@ -38,7 +38,8 @@ public class DenseMatrix extends AbstractMatrix {
   /**
    * Construct a matrix from the given values
    * 
-   * @param values a double[][]
+   * @param values
+   *            a double[][]
    */
   public DenseMatrix(double[][] values) {
     super();
@@ -67,6 +68,16 @@ public class DenseMatrix extends AbstractMatrix {
    */
   @Override
   public WritableComparable asWritableComparable() {
+    return new Text(asFormatString());
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.mahout.matrix.AbstractMatrix#asFormatString()
+   */
+  @Override
+  public String asFormatString() {
     StringBuilder out = new StringBuilder();
     out.append("[[, ");
     for (int row = 0; row < rowSize(); row++) {
@@ -75,7 +86,7 @@ public class DenseMatrix extends AbstractMatrix {
       out.append("], ");
     }
     out.append("] ");
-    return new Text(out.toString());
+    return out.toString();
   }
 
   /*
@@ -147,8 +158,7 @@ public class DenseMatrix extends AbstractMatrix {
   /*
    * (non-Javadoc)
    * 
-   * @see org.apache.mahout.matrix.AbstractMatrix#setQuick(int, int,
-   *      double)
+   * @see org.apache.mahout.matrix.AbstractMatrix#setQuick(int, int, double)
    */
   @Override
   public void setQuick(int row, int column, double value) {

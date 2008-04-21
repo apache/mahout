@@ -71,8 +71,10 @@ public abstract class AbstractVector implements Vector {
   /**
    * Subclasses must override to return an appropriately sparse or dense result
    * 
-   * @param rows the row cardinality
-   * @param columns the column cardinality
+   * @param rows
+   *            the row cardinality
+   * @param columns
+   *            the column cardinality
    * @return a Matrix
    */
   protected abstract Matrix matrixLike(int rows, int columns);
@@ -106,30 +108,46 @@ public abstract class AbstractVector implements Vector {
   public abstract Vector viewPart(int offset, int length)
       throws CardinalityException, IndexException;
 
-
   /**
-   *  Returns an iterator for traversing the Vector, but not in
-   *  any particular order. The actual implementations may  make 
-   *  some guarantees about the order in which the vector is 
-   *  traversed. Otherwise, the traversal order is undefined.
-   *  @see java.lang.Iterable#iterator()
+   * Returns an iterator for traversing the Vector, but not in any particular
+   * order. The actual implementations may make some guarantees about the order
+   * in which the vector is traversed. Otherwise, the traversal order is
+   * undefined.
+   * 
+   * @see java.lang.Iterable#iterator()
    */
   public abstract java.util.Iterator<Vector.Element> iterator();
 
   /*
    * (non-Javadoc)
+   * 
    * @see org.apache.mahout.matrix.Vector#getElement
    */
-  //@Override JDK 1.6
-  public Vector.Element getElement(int index) { return new Element(index); }
+  // @Override JDK 1.6
+  public Vector.Element getElement(int index) {
+    return new Element(index);
+  }
 
   public class Element implements Vector.Element {
     private int ind;
-    public Element(int ind) { this.ind=ind; }
-    public double get() { return getQuick(ind); }
-    public int index() { return ind; }
-    public void set(double value) { setQuick(ind,value); }
+
+    public Element(int ind) {
+      this.ind = ind;
+    }
+
+    public double get() {
+      return getQuick(ind);
+    }
+
+    public int index() {
+      return ind;
+    }
+
+    public void set(double value) {
+      setQuick(ind, value);
+    }
   }
+
   /*
    * (non-Javadoc)
    * 
@@ -351,5 +369,12 @@ public abstract class AbstractVector implements Vector {
       }
     return result;
   }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.mahout.matrix.Vector#asFormatString()
+   */
+  public abstract String asFormatString();
 
 }
