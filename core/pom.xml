@@ -62,7 +62,7 @@
               <goal>install-file</goal>
             </goals>
             <configuration>
-              <file>lib/hadoop-${hadoop.version}-core.jar</file>
+              <file>lib/kfs-${kfs.version}.jar</file>
               <groupId>org.kosmix.kosmofs</groupId>
               <artifactId>kfs</artifactId>
               <packaging>jar</packaging>
@@ -79,7 +79,7 @@
               <goal>install-file</goal>
             </goals>
             <configuration>
-              <file>lib/hadoop-${hadoop.version}-core.jar</file>
+              <file>lib/jets3t-${hadoop.version}.jar</file>
               <groupId>jets3t</groupId>
               <artifactId>jets3t</artifactId>
               <packaging>jar</packaging>
@@ -97,7 +97,7 @@
               <goal>install-file</goal>
             </goals>
             <configuration>
-              <file>lib/hadoop-${hadoop.version}-core.jar</file>
+              <file>lib/xmlenc-${xmlenc.version}.jar</file>
               <groupId>org.znerd.xmlenc</groupId>
               <artifactId>xmlenc</artifactId>
               <packaging>jar</packaging>
