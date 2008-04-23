@@ -101,7 +101,7 @@ public class MeanShiftCanopyJob {
     Text value = new Text();
     boolean converged = true;
     while (converged && reader.next(key, value))
-      converged = converged && value.toString().startsWith("V");
+      converged = value.toString().startsWith("V");
     return converged;
   }
 

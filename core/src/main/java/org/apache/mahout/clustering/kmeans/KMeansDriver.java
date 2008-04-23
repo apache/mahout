@@ -179,9 +179,8 @@ public class KMeansDriver {
     Text key = new Text();
     Text value = new Text();
     boolean converged = true;
-    while (reader.next(key, value)) {
-      Cluster cluster = Cluster.decodeCluster(value.toString());
-      converged = converged && cluster.isConverged();
+    while (converged && reader.next(key, value)) {
+      converged = value.toString().startsWith("V");
     }
     return converged;
   }
