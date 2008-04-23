@@ -79,7 +79,7 @@
               <goal>install-file</goal>
             </goals>
             <configuration>
-              <file>lib/jets3t-${hadoop.version}.jar</file>
+              <file>lib/jets3t-${jets3t.version}.jar</file>
               <groupId>jets3t</groupId>
               <artifactId>jets3t</artifactId>
               <packaging>jar</packaging>
