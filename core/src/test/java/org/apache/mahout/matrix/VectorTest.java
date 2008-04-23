@@ -18,9 +18,6 @@ package org.apache.mahout.matrix;
 
 import junit.framework.TestCase;
 
-import java.util.Map;
-import java.util.LinkedHashMap;
-
 public class VectorTest extends TestCase {
 
 

@@ -18,23 +18,31 @@ package org.apache.mahout.matrix;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.io.DataInput;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 
 /**
  * Implements vector that only stores non-zero doubles
- * 
+ *
  */
 public class SparseVector extends AbstractVector {
 
-  private Map<Integer, Double> values = new HashMap<Integer, Double>();
+  /** For serialization purposes only. */
+  public SparseVector() {
+  }
+
+  private Map<Integer, Double> values;
+
 
   private int cardinality;
 
   /**
    * Decode a new instance from the formatted string
-   * 
+   *
    * @param formattedString
    *            a string produced by the asFormatString method
    * @return a DenseVector
@@ -59,6 +67,7 @@ public class SparseVector extends AbstractVector {
 
   public SparseVector(int cardinality) {
     super();
+    values = new HashMap<Integer, Double>();
     this.cardinality = cardinality;
   }
 
@@ -160,6 +169,26 @@ public class SparseVector extends AbstractVector {
     return new Iterator();
   }
 
+
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    SparseVector that = (SparseVector) o;
+
+    if (cardinality != that.cardinality) return false;
+    if (values != null ? !values.equals(that.values) : that.values != null) return false;
+
+    return true;
+  }
+
+  public int hashCode() {
+    int result;
+    result = (values != null ? values.hashCode() : 0);
+    result = 31 * result + cardinality;
+    return result;
+  }
+
   private class Iterator implements java.util.Iterator<Vector.Element> {
     private java.util.Iterator<Map.Entry<Integer, Double>> it;
 
@@ -200,6 +229,28 @@ public class SparseVector extends AbstractVector {
       result += getQuick(nextIndex) * x.getQuick(nextIndex);
     }
     return result;
+  }
+
+  public void write(DataOutput dataOutput) throws IOException {
+    dataOutput.writeInt(cardinality());
+    dataOutput.writeInt(size());
+    for (Vector.Element element : this) {
+      if (element.get() != 0d) {
+        dataOutput.writeInt(element.index());
+        dataOutput.writeDouble(element.get());
+      }
+    }
+  }
+
+  public void readFields(DataInput dataInput) throws IOException {
+    int cardinality = dataInput.readInt();
+    Map<Integer, Double> values = new HashMap<Integer, Double>();
+    int size = dataInput.readInt();
+    for (int i = 0; i < size; i++) {
+      values.put(dataInput.readInt(), dataInput.readDouble());
+    }
+    this.cardinality = cardinality;
+    this.values = values;
   }
 
 }

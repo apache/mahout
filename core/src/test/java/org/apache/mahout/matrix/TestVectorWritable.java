@@ -27,9 +27,9 @@ public class TestVectorWritable extends TestCase {
 
   private static final int cardinality = 10;
 
-  public void test(VectorWritable writable) throws Exception {
+  public void test(Vector writable) throws Exception {
     for (int i = 0; i < cardinality; i++) {
-      writable.get().set(i, i);
+      writable.set(i, i);
     }
     DataOutputBuffer out = new DataOutputBuffer();
     writable.write(out);
@@ -39,28 +39,27 @@ public class TestVectorWritable extends TestCase {
     writable.readFields(in);
     in.close();
 
-    assertEquals(cardinality, writable.get().cardinality());
+    assertEquals(cardinality, writable.cardinality());
     for (int i = 0; i < cardinality; i++) {
-      assertEquals((double)i, writable.get().get(i));
+      assertEquals((double)i, writable.get(i));
     }
 
-    // also make sure it creates the vector correct even if it is not set.
-    writable.set(null);
+    //
 
     in = new DataInputStream(new ByteArrayInputStream(out.getData()));
     writable.readFields(in);
     in.close();
 
-    assertEquals(cardinality, writable.get().cardinality());
+    assertEquals(cardinality, writable.cardinality());
     for (int i = 0; i < cardinality; i++) {
-      assertEquals((double)i, writable.get().get(i));
+      assertEquals((double)i, writable.get(i));
     }
 
 
   }
 
   public void test() throws Exception {
-    test(new SparseVectorWritable(new SparseVector(cardinality)));
-    test(new DenseVectorWritable(new DenseVector(cardinality)));
+    test(new SparseVector(cardinality));
+    test(new DenseVector(cardinality));
   }
 }

@@ -17,12 +17,13 @@
 package org.apache.mahout.matrix;
 
 import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.io.Writable;
 
 /**
  * Implementations of generic capabilities like sum of elements and dot products
  * 
  */
-public abstract class AbstractVector implements Vector {
+public abstract class AbstractVector implements Vector, Writable {
 
   /*
    * (non-Javadoc)

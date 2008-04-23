@@ -19,10 +19,19 @@ package org.apache.mahout.matrix;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 
+import java.io.DataOutput;
+import java.io.IOException;
+import java.io.DataInput;
+
 /**
  * Implements vector as an array of doubles
  */
 public class DenseVector extends AbstractVector {
+
+  /** For serialization purposes only */
+  public DenseVector() {
+  }
+
   private double[] values;
 
   /**
@@ -167,5 +176,21 @@ public class DenseVector extends AbstractVector {
     public void remove() {
       throw new UnsupportedOperationException();
     }
+  }
+
+
+  public void write(DataOutput dataOutput) throws IOException {
+    dataOutput.writeInt(cardinality());
+    for (Vector.Element element : this) {
+      dataOutput.writeDouble(element.get());
+    }
+  }
+
+  public void readFields(DataInput dataInput) throws IOException {
+    double[] values = new double[dataInput.readInt()];
+    for (int i = 0; i < values.length; i++) {
+      values[i] = dataInput.readDouble();
+    }
+    this.values = values;
   }
 }

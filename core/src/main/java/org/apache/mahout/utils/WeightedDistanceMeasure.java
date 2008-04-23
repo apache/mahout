@@ -19,14 +19,11 @@ package org.apache.mahout.utils;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.mahout.matrix.DenseVectorWritable;
-import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.matrix.VectorWritable;
-import org.apache.mahout.matrix.SparseVectorWritable;
+import org.apache.mahout.matrix.*;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.FileNotFoundException;
 
 /**
  * Abstract implementation of DistanceMeasure with support for weights.
@@ -50,15 +47,15 @@ public abstract class WeightedDistanceMeasure extends AbstractDistanceMeasure {
       FileSystem fs = FileSystem.get(jobConf);
       String weightsPathName = WeightedDistanceMeasure.class.getName() + ".sparseVector";
       if (weightsPathName != null) {
-        VectorWritable writable = new SparseVectorWritable();
+        Vector weights = new SparseVector();
         Path weightsPath = new Path(weightsPathName);
         if (!fs.exists(weightsPath)) {
           throw new FileNotFoundException(weightsPath.toString());
         }
         DataInputStream in = fs.open(weightsPath);
-        writable.readFields(in);
+        weights.readFields(in);
         in.close();
-        weights = writable.get();
+        this.weights = weights;
       }
     } catch (Exception e) {
       throw new RuntimeException(e);

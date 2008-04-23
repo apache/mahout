@@ -17,30 +17,31 @@
 package org.apache.mahout.matrix;
 
 import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.io.Writable;
 
 /**
  * The basic interface including numerous convenience functions
- * 
+ *
  */
-public interface Vector extends Iterable<Vector.Element> {
+public interface Vector extends Iterable<Vector.Element>, Writable {
 
   /**
    * Return a formatted WritableComparable suitable for output
-   * 
+   *
    * @return formatted WritableComparable
    */
   WritableComparable asWritableComparable();
 
   /**
    * Return a formatted String suitable for output
-   * 
+   *
    * @return
    */
   String asFormatString();
 
   /**
    * Assign the value to all elements of the receiver
-   * 
+   *
    * @param value
    *            a double value
    * @return the modified receiver
@@ -49,7 +50,7 @@ public interface Vector extends Iterable<Vector.Element> {
 
   /**
    * Assign the values to the receiver
-   * 
+   *
    * @param values
    *            a double[] of values
    * @return the modified receiver
@@ -60,7 +61,7 @@ public interface Vector extends Iterable<Vector.Element> {
 
   /**
    * Assign the other matrix values to the receiver
-   * 
+   *
    * @param other
    *            a Vector
    * @return the modified receiver
@@ -71,7 +72,7 @@ public interface Vector extends Iterable<Vector.Element> {
 
   /**
    * Apply the function to each element of the receiver
-   * 
+   *
    * @param function
    *            a DoubleFunction to apply
    * @return the modified receiver
@@ -81,7 +82,7 @@ public interface Vector extends Iterable<Vector.Element> {
   /**
    * Apply the function to each element of the receiver and the corresponding
    * element of the other argument
-   * 
+   *
    * @param other
    *            a Vector containing the second arguments to the function
    * @param function
@@ -95,14 +96,14 @@ public interface Vector extends Iterable<Vector.Element> {
 
   /**
    * Return the cardinality of the recipient (the maximum number of values)
-   * 
+   *
    * @return an int
    */
   int cardinality();
 
   /**
    * Return a copy of the recipient
-   * 
+   *
    * @return a new Vector
    */
   Vector copy();
@@ -110,7 +111,7 @@ public interface Vector extends Iterable<Vector.Element> {
   /**
    * Return an object of Vector.Element representing an element of this Vector.
    * Useful when designing new iterator types.
-   * 
+   *
    * @param index
    *            Index of the Vector.Element required
    * @return The Vector.Element Object
@@ -138,7 +139,7 @@ public interface Vector extends Iterable<Vector.Element> {
   /**
    * Return a new matrix containing the values of the recipient divided by the
    * argument
-   * 
+   *
    * @param x
    *            a double value
    * @return a new Vector
@@ -147,7 +148,7 @@ public interface Vector extends Iterable<Vector.Element> {
 
   /**
    * Return the dot product of the recipient and the argument
-   * 
+   *
    * @param x
    *            a Vector
    * @return a new Vector
@@ -158,7 +159,7 @@ public interface Vector extends Iterable<Vector.Element> {
 
   /**
    * Return the value at the given index
-   * 
+   *
    * @param index
    *            an int index
    * @return the double at the index
@@ -169,7 +170,7 @@ public interface Vector extends Iterable<Vector.Element> {
 
   /**
    * Return the value at the given index, without checking bounds
-   * 
+   *
    * @param index
    *            an int index
    * @return the double at the index
@@ -178,7 +179,7 @@ public interface Vector extends Iterable<Vector.Element> {
 
   /**
    * Return if the other matrix and the receiver share any underlying data cells
-   * 
+   *
    * @param other
    *            a Vector
    * @return true if the other matrix has common data cells
@@ -187,7 +188,7 @@ public interface Vector extends Iterable<Vector.Element> {
 
   /**
    * Return an empty matrix of the same underlying class as the receiver
-   * 
+   *
    * @return a Vector
    */
   Vector like();
@@ -195,7 +196,7 @@ public interface Vector extends Iterable<Vector.Element> {
   /**
    * Return an empty matrix of the same underlying class as the receiver and of
    * the given cardinality
-   * 
+   *
    * @param cardinality
    *            an int specifying the desired cardinality
    * @return a Vector
@@ -205,7 +206,7 @@ public interface Vector extends Iterable<Vector.Element> {
   /**
    * Return a new matrix containing the element by element difference of the
    * recipient and the argument
-   * 
+   *
    * @param x
    *            a Vector
    * @return a new Vector
@@ -216,7 +217,7 @@ public interface Vector extends Iterable<Vector.Element> {
 
   /**
    * Return a new matrix containing the normalized values of the recipient
-   * 
+   *
    * @return a new Vector
    */
   Vector normalize();
@@ -224,7 +225,7 @@ public interface Vector extends Iterable<Vector.Element> {
   /**
    * Return a new matrix containing the sum of each value of the recipient and
    * the argument
-   * 
+   *
    * @param x
    *            a double
    * @return a new Vector
@@ -234,7 +235,7 @@ public interface Vector extends Iterable<Vector.Element> {
   /**
    * Return a new matrix containing the element by element sum of the recipient
    * and the argument
-   * 
+   *
    * @param x
    *            a Vector
    * @return a new Vector
@@ -245,7 +246,7 @@ public interface Vector extends Iterable<Vector.Element> {
 
   /**
    * Set the value at the given index
-   * 
+   *
    * @param index
    *            an int index into the receiver
    * @param value
@@ -257,7 +258,7 @@ public interface Vector extends Iterable<Vector.Element> {
 
   /**
    * Set the value at the given index, without checking bounds
-   * 
+   *
    * @param index
    *            an int index into the receiver
    * @param value
@@ -267,7 +268,7 @@ public interface Vector extends Iterable<Vector.Element> {
 
   /**
    * Return the number of values in the recipient
-   * 
+   *
    * @return an int
    */
   int size();
@@ -275,7 +276,7 @@ public interface Vector extends Iterable<Vector.Element> {
   /**
    * Return a new matrix containing the product of each value of the recipient
    * and the argument
-   * 
+   *
    * @param x
    *            a double argument
    * @return a new Vector
@@ -285,7 +286,7 @@ public interface Vector extends Iterable<Vector.Element> {
   /**
    * Return a new matrix containing the element-wise product of the recipient
    * and the argument
-   * 
+   *
    * @param x
    *            a Vector argument
    * @return a new Vector
@@ -296,14 +297,14 @@ public interface Vector extends Iterable<Vector.Element> {
 
   /**
    * Return the element of the recipient as a double[]
-   * 
+   *
    * @return a double[]
    */
   double[] toArray();
 
   /**
    * Return a new matrix containing the subset of the recipient
-   * 
+   *
    * @param offset
    *            an int offset into the receiver
    * @param length
@@ -320,14 +321,14 @@ public interface Vector extends Iterable<Vector.Element> {
 
   /**
    * Return the sum of all the elements of the receiver
-   * 
+   *
    * @return a double
    */
   double zSum();
 
   /**
    * Return the cross product of the receiver and the other vector
-   * 
+   *
    * @param other
    *            another Vector
    * @return a Matrix
@@ -336,7 +337,7 @@ public interface Vector extends Iterable<Vector.Element> {
 
   /*
    * Need stories for these but keeping them here for now.
-   * 
+   *
    */
   // void getNonZeros(IntArrayList jx, DoubleArrayList values);
   // void foreachNonZero(IntDoubleFunction f);

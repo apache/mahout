@@ -19,12 +19,20 @@ package org.apache.mahout.matrix;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.Iterator;
 
 /**
  * Implements subset view of a Vector
  */
 public class VectorView extends AbstractVector {
+
+  /** For serialization purposes only */
+  public VectorView() {
+  }
+
   private Vector vector;
 
   // the offset into the Vector
@@ -185,5 +193,34 @@ public class VectorView extends AbstractVector {
     public void remove() {
       throw new UnsupportedOperationException();
     }
+  }
+
+
+  public void write(DataOutput dataOutput) throws IOException {
+    dataOutput.writeInt(offset);
+    dataOutput.writeInt(cardinality);
+    String vectorClassName = vector.getClass().getName();
+    dataOutput.writeInt(vectorClassName.length() * 2);
+    dataOutput.write(vectorClassName.getBytes());
+    vector.write(dataOutput);
+  }
+
+  public void readFields(DataInput dataInput) throws IOException {
+    int offset = dataInput.readInt();
+    int cardinality = dataInput.readInt();
+    byte[] buf = new byte[dataInput.readInt()];
+    dataInput.readFully(buf);
+    String vectorClassName = new String(buf);
+    Vector vector;
+    try {
+      vector = (Vector) Class.forName(vectorClassName).newInstance();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    vector.readFields(dataInput);
+
+    this.offset = offset;
+    this.cardinality = cardinality;
+    this.vector = vector;
   }
 }

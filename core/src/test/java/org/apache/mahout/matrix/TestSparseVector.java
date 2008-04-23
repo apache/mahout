@@ -18,8 +18,6 @@ import junit.framework.TestCase;
  * limitations under the License.
  */
 
-import junit.framework.TestCase;
-
 public class TestSparseVector extends TestCase {
 
   double[] values = {1.1, 2.2, 3.3};
