@@ -19,6 +19,10 @@ package org.apache.mahout.utils;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.matrix.CardinalityException;
 import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.utils.parameters.Parameter;
+
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * This class implements a "manhattan distance" metric by summing the absolute
@@ -42,9 +46,19 @@ public class ManhattanDistanceMeasure implements DistanceMeasure {
   /*
    * (non-Javadoc)
    * 
-   * @see org.apache.hadoop.mapred.JobConfigurable#configure(org.apache.hadoop.mapred.JobConf)
+   * @see org.apache.hadoop.mapred.JobConfigurable#createParameters(org.apache.hadoop.mapred.JobConf)
    */
   public void configure(JobConf job) {
+    // nothing to do
+  }
+
+
+  @SuppressWarnings("unchecked")
+  public Collection<Parameter> getParameters() {
+    return Collections.EMPTY_LIST;
+  }
+
+  public void createParameters(String prefix, JobConf jobConf) {
     // nothing to do
   }
 

@@ -19,6 +19,10 @@ package org.apache.mahout.utils;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.matrix.CardinalityException;
 import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.utils.parameters.Parameter;
+
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * This class implements a Euclidian distance metric by summing the square root
@@ -34,6 +38,16 @@ public class EuclideanDistanceMeasure implements DistanceMeasure {
   public void configure(JobConf job) {
     // nothing to do
   }
+
+
+  public Collection<Parameter> getParameters() {
+    return Collections.emptyList();
+  }
+
+  public void createParameters(String prefix, JobConf jobConf) {
+    // nothing to do
+  }
+
 
   /*
    * (non-Javadoc)

@@ -20,39 +20,51 @@ package org.apache.mahout.utils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.mahout.matrix.*;
+import org.apache.mahout.matrix.DenseVector;
+import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.utils.parameters.ClassParameter;
+import org.apache.mahout.utils.parameters.Parameter;
+import org.apache.mahout.utils.parameters.PathParameter;
 
 import java.io.DataInputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Abstract implementation of DistanceMeasure with support for weights.
  */
 public abstract class WeightedDistanceMeasure extends AbstractDistanceMeasure {
 
+  protected List<Parameter> parameters;
+  protected Parameter<Path> weightsFile;
+  protected Parameter<Class> vectorClass;
   protected Vector weights;
 
-  /**
-   * If existing, loads weights using a SparseVectorWritable
-   * from file set in jobConf parameter "org.apache.mahout.utils.WeightedDistanceMeasure.sparseVector"
-   *
-   * todo: should be able to handle any sort of vector. perhaps start the file with what class it is?
-   * todo: some nice static helper method to write and read the file,
-   * todo: or should it be a new writable that decorates any given vector?
-   *
-   * @param jobConf
-   */
+
+  public void createParameters(String prefix, JobConf jobConf) {
+    parameters = new ArrayList<Parameter>();
+    parameters.add(weightsFile = new PathParameter(prefix, "weightsFile", jobConf, null, "Path on DFS to a file containing the weights."));
+    parameters.add(vectorClass = new ClassParameter(prefix, "vectorClass", jobConf, DenseVector.class, "Class<Vector> file specified in parameter weightsFile has been serialized with."));
+  }
+
+  public Collection<Parameter> getParameters() {
+    return parameters;
+  }
+
   public void configure(JobConf jobConf) {
+    if (parameters == null) {
+      ParameteredGeneralizations.configureParameters(this, jobConf);
+    }
     try {
       FileSystem fs = FileSystem.get(jobConf);
-      String weightsPathName = WeightedDistanceMeasure.class.getName() + ".sparseVector";
-      if (weightsPathName != null) {
-        Vector weights = new SparseVector();
-        Path weightsPath = new Path(weightsPathName);
-        if (!fs.exists(weightsPath)) {
-          throw new FileNotFoundException(weightsPath.toString());
+      if (weightsFile.get() != null) {
+        Vector weights = (Vector) vectorClass.get().newInstance();
+        if (!fs.exists(weightsFile.get())) {
+          throw new FileNotFoundException(weightsFile.get().toString());
         }
-        DataInputStream in = fs.open(weightsPath);
+        DataInputStream in = fs.open(weightsFile.get());
         weights.readFields(in);
         in.close();
         this.weights = weights;
@@ -69,8 +81,6 @@ public abstract class WeightedDistanceMeasure extends AbstractDistanceMeasure {
   public void setWeights(Vector weights) {
     this.weights = weights;
   }
-
-
 
 
 }
