@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.
+org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.apache.lucene.mahout</groupId>
+  <artifactId>mahout</artifactId>
+  <packaging>pom</packaging>
+  <version>0.1-SNAPSHOT</version>
+  <name>Apache Lucene Mahout</name>
+  <description>Scalable machine learning libraries</description>
+
+  <properties>
+    <junit.version>3.8.2</junit.version>
+    <hadoop.version>0.16.0</hadoop.version>
+    <kfs.version>0.1</kfs.version>
+    <xmlenc.version>0.52</xmlenc.version>
+    <jets3t.version>0.5.0</jets3t.version>
+  </properties>
+
+  <mailingLists>
+    <mailingList>
+      <name>User list</name>
+      <subscribe>mahout-user-subscribe@lucene.apache.org</subscribe>
+      <unsubscribe>mahout-user-unsubscribe@lucene.apache.org</unsubscribe>
+      <post>mahout-user@lucene.apache.org</post>
+      <archive>http://mail-archives.apache.org/mod_mbox/lucene-mahout-user/</archive>
+      <otherArchives>
+        <otherArchive>http://lucene.apache.org/mail/mahout-user/</otherArchive>
+        <otherArchive>http://mahout.markmail.org/</otherArchive>
+        <otherArchive>http://www.nabble.com/Mahout-User-List-f32042.html</otherArchive>
+      </otherArchives>
+    </mailingList>
+    <mailingList>
+      <name>Developers List</name>
+      <subscribe>mahout-dev-subscribe@lucene.apache.org</subscribe>
+      <unsubscribe>mahout-dev-unsubscribe@lucene.apache.org</unsubscribe>
+      <post>mahout-dev@lucene.apache.org</post>
+      <archive>http://mail-archives.apache.org/mod_mbox/lucene-mahout-dev/</archive>
+      <otherArchives>
+        <otherArchive>http://lucene.apache.org/mail/mahout-dev/</otherArchive>
+        <otherArchive>http://mahout.markmail.org/</otherArchive>
+        <otherArchive>http://www.nabble.com/Mahout-Developer-List-f32041.html</otherArchive>
+      </otherArchives>
+    </mailingList>
+    <mailingList>
+      <name>Commit notifications</name>
+      <subscribe>mahout-commits-subscribe@lucene.apache.org</subscribe>
+      <unsubscribe>mahout-commits-unsubscribe@lucene.apache.org</unsubscribe>
+      <archive>http://mail-archives.apache.org/mod_mbox/lucene-mahout-commits/</archive>
+      <otherArchives>
+        <otherArchive>http://lucene.apache.org/mail/mahout-commits/</otherArchive>
+      </otherArchives>
+    </mailingList>
+  </mailingLists>
+
+  <scm>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout</developerConnection>
+  </scm>
+
+
+
+  <modules>
+    <module>core</module>
+  </modules>
+
+  <repositories>
+    <!--repository>
+      <id>Apache snapshots</id>
+      <url>http://people.apache.org/maven-snapshot-repository</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </repository-->
+  </repositories>
+
+
+  <issueManagement>
+    <system>Jira</system>
+    <url>https://issues.apache.org/jira/browse/MAHOUT</url>
+  </issueManagement>
+
+</project>
+  
