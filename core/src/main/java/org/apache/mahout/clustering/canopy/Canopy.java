@@ -16,16 +16,16 @@
  */
 package org.apache.mahout.clustering.canopy;
 
+import java.io.IOException;
+import java.util.List;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
-import org.apache.mahout.utils.Point;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * This class models a canopy as a center point, the number of points that are
@@ -70,8 +70,9 @@ public class Canopy {
 
   /**
    * Create a new Canopy containing the given point
-   *
-   * @param point a point in vector space
+   * 
+   * @param point
+   *            a point in vector space
    */
   public Canopy(Vector point) {
     super();
@@ -83,9 +84,11 @@ public class Canopy {
 
   /**
    * Create a new Canopy containing the given point and canopyId
-   *
-   * @param point    a point in vector space
-   * @param canopyId an int identifying the canopy local to this process only
+   * 
+   * @param point
+   *            a point in vector space
+   * @param canopyId
+   *            an int identifying the canopy local to this process only
    */
   public Canopy(Vector point, int canopyId) {
     super();
@@ -97,8 +100,9 @@ public class Canopy {
 
   /**
    * Configure the Canopy and its distance measure
-   *
-   * @param job the JobConf for this job
+   * 
+   * @param job
+   *            the JobConf for this job
    */
   public static void configure(JobConf job) {
     try {
@@ -116,7 +120,7 @@ public class Canopy {
 
   /**
    * Configure the Canopy for unit tests
-   *
+   * 
    * @param aMeasure
    * @param aT1
    * @param aT2
@@ -132,12 +136,13 @@ public class Canopy {
    * This is the same algorithm as the reference but inverted to iterate over
    * existing canopies instead of the points. Because of this it does not need
    * to actually store the points, instead storing a total points vector and the
-   * number of points. From this a centroid can be computed.
-   * <p/>
-   * This method is used by the CanopyReducer.
-   *
-   * @param point    the point to be added
-   * @param canopies the List<Canopy> to be appended
+   * number of points. From this a centroid can be computed. <p/> This method is
+   * used by the CanopyReducer.
+   * 
+   * @param point
+   *            the point to be added
+   * @param canopies
+   *            the List<Canopy> to be appended
    */
   public static void addPointToCanopies(Vector point, List<Canopy> canopies) {
     boolean pointStronglyBound = false;
@@ -155,13 +160,17 @@ public class Canopy {
    * This method is used by the CanopyMapper to perform canopy inclusion tests
    * and to emit the point and its covering canopies to the output. The
    * CanopyCombiner will then sum the canopy points and produce the centroids.
-   *
-   * @param point     the point to be added
-   * @param canopies  the List<Canopy> to be appended
-   * @param collector an OutputCollector in which to emit the point
+   * 
+   * @param point
+   *            the point to be added
+   * @param canopies
+   *            the List<Canopy> to be appended
+   * @param collector
+   *            an OutputCollector in which to emit the point
    */
   public static void emitPointToNewCanopies(Vector point,
-                                            List<Canopy> canopies, OutputCollector<Text, Text> collector) throws IOException {
+      List<Canopy> canopies, OutputCollector<Text, Text> collector)
+      throws IOException {
     boolean pointStronglyBound = false;
     for (Canopy canopy : canopies) {
       double dist = measure.distance(canopy.getCenter(), point);
@@ -181,16 +190,20 @@ public class Canopy {
    * and to emit the point keyed by its covering canopies to the output. if the
    * point is not covered by any canopies (due to canopy centroid clustering),
    * emit the point to the closest covering canopy.
-   *
-   * @param point     the point to be added
-   * @param canopies  the List<Canopy> to be appended
-   * @param writable  the original Writable from the input, may include arbitrary
-   *                  payload information after the point [...]<payload>
-   * @param collector an OutputCollector in which to emit the point
+   * 
+   * @param point
+   *            the point to be added
+   * @param canopies
+   *            the List<Canopy> to be appended
+   * @param writable
+   *            the original Writable from the input, may include arbitrary
+   *            payload information after the point [...]<payload>
+   * @param collector
+   *            an OutputCollector in which to emit the point
    */
   public static void emitPointToExistingCanopies(Vector point,
-                                                 List<Canopy> canopies, Text writable, OutputCollector<Text, Text> collector)
-          throws IOException {
+      List<Canopy> canopies, Text writable,
+      OutputCollector<Text, Text> collector) throws IOException {
     double minDist = Double.MAX_VALUE;
     Canopy closest = null;
     boolean isCovered = false;
@@ -212,19 +225,20 @@ public class Canopy {
 
   /**
    * Format the canopy for output
-   *
+   * 
    * @param canopy
    * @return
    */
   public static String formatCanopy(Canopy canopy) {
     return "C" + canopy.canopyId + ": "
-            + Point.formatPoint(canopy.computeCentroid());
+        + canopy.computeCentroid().asFormatString();
   }
 
   /**
    * Decodes and returns a Canopy from the formattedString
-   *
-   * @param formattedString a String prouced by formatCanopy
+   * 
+   * @param formattedString
+   *            a String prouced by formatCanopy
    * @return a new Canopy
    */
   public static Canopy decodeCanopy(String formattedString) {
@@ -233,7 +247,7 @@ public class Canopy {
     String centroid = formattedString.substring(beginIndex);
     if (id.startsWith("C")) {
       int canopyId = new Integer(formattedString.substring(1, beginIndex - 2));
-      Vector canopyCentroid = Point.decodePoint(centroid);
+      Vector canopyCentroid = AbstractVector.decodeVector(centroid);
       return new Canopy(canopyCentroid, canopyId);
     }
     return null;
@@ -241,8 +255,9 @@ public class Canopy {
 
   /**
    * Add a point to the canopy
-   *
-   * @param point some point to add
+   * 
+   * @param point
+   *            some point to add
    */
   public void addPoint(Vector point) {
     numPoints++;
@@ -253,18 +268,19 @@ public class Canopy {
   /**
    * Emit the point to the collector, keyed by the canopy's formatted
    * representation
-   *
-   * @param point a point to emit.
+   * 
+   * @param point
+   *            a point to emit.
    */
   public void emitPoint(Vector point, OutputCollector<Text, Text> collector)
-          throws IOException {
-    collector.collect(new Text(formatCanopy(this)), new Text(Point.ptOut("",
-            point)));
+      throws IOException {
+    collector.collect(new Text(formatCanopy(this)), new Text(point
+        .asFormatString()));
   }
 
   @Override
   public String toString() {
-    return getIdentifier() + " - " + Point.ptOut("", getCenter());
+    return getIdentifier() + " - " + getCenter().asFormatString();
   }
 
   public String getIdentifier() {
@@ -277,7 +293,7 @@ public class Canopy {
 
   /**
    * Return the center point
-   *
+   * 
    * @return the center of the Canopy
    */
   public Vector getCenter() {
@@ -286,7 +302,7 @@ public class Canopy {
 
   /**
    * Return the number of points in the Canopy
-   *
+   * 
    * @return the number of points in the canopy.
    */
   public int getNumPoints() {
@@ -295,7 +311,7 @@ public class Canopy {
 
   /**
    * Compute the centroid by averaging the pointTotals
-   *
+   * 
    * @return a point which is the new centroid
    */
   public Vector computeCentroid() {
@@ -307,8 +323,9 @@ public class Canopy {
 
   /**
    * Return if the point is covered by this canopy
-   *
-   * @param point a point
+   * 
+   * @param point
+   *            a point
    * @return if the point is covered
    */
   public boolean covers(Vector point) {

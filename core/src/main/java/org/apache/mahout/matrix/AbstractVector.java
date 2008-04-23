@@ -378,4 +378,33 @@ public abstract class AbstractVector implements Vector, Writable {
    */
   public abstract String asFormatString();
 
+  /**
+   * Decodes a point from its WritableComparable representation.
+   * 
+   * @param writableComparable
+   *            a WritableComparable produced by asWritableComparable. Note the
+   *            payload remainder: it is optional, but can be present.
+   * @return the n-dimensional point
+   */
+  public static Vector decodeVector(WritableComparable writableComparable) {
+    return decodeVector(writableComparable.toString());
+  }
+
+  /**
+   * Decodes a point from its string representation.
+   * 
+   * @param formattedString
+   *            a formatted String produced by asFormatString. Note the payload
+   *            remainder: it is optional, but can be present.
+   * @return the n-dimensional point
+   */
+  public static Vector decodeVector(String formattedString) {
+    Vector result;
+    if (formattedString.trim().startsWith("[s"))
+      result = SparseVector.decodeFormat(formattedString);
+    else
+      result = DenseVector.decodeFormat(formattedString);
+    return result;
+  }
+
 }

@@ -16,6 +16,10 @@
  */
 package org.apache.mahout.clustering.canopy;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -23,12 +27,8 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.Point;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class CanopyMapper extends MapReduceBase implements
         Mapper<WritableComparable, Text, Text, Text> {
@@ -43,9 +43,12 @@ public class CanopyMapper extends MapReduceBase implements
    *      org.apache.hadoop.mapred.OutputCollector,
    *      org.apache.hadoop.mapred.Reporter)
    */
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapred.Mapper#map(org.apache.hadoop.io.WritableComparable, org.apache.hadoop.io.Writable, org.apache.hadoop.mapred.OutputCollector, org.apache.hadoop.mapred.Reporter)
+   */
   public void map(WritableComparable key, Text values,
                   OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
-    Vector point = Point.decodePoint(values.toString());
+    Vector point = AbstractVector.decodeVector(values.toString());
     Canopy.emitPointToNewCanopies(point, canopies, output);
   }
 

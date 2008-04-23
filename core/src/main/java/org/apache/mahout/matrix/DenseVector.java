@@ -35,14 +35,25 @@ public class DenseVector extends AbstractVector {
   private double[] values;
 
   /**
+   * Decode a new instance from the argument
+   * 
+   * @param writableComparable
+   *            a WritableComparable produced by the asWritableComparable method
+   * @return a DenseVector
+   */
+  public static Vector decodeFormat(WritableComparable writableComparable) {
+    return decodeFormat(writableComparable.toString());
+  }
+
+  /**
    * Decode a new instance from the formatted string
    * 
    * @param formattedString
-   *            a string produced by the asFormatString method
+   *            a String produced by asFormatString()
    * @return a DenseVector
    */
-  public static Vector decodeFormat(WritableComparable formattedString) {
-    String[] pts = formattedString.toString().split(",");
+  public static Vector decodeFormat(String formattedString) {
+    String[] pts = formattedString.split(",");
     double[] point = new double[pts.length - 2];
     for (int i = 1; i < pts.length - 1; i++)
       point[i - 1] = new Double(pts[i]);

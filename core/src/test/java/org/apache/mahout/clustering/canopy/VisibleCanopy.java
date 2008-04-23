@@ -16,11 +16,10 @@ package org.apache.mahout.clustering.canopy;
  * limitations under the License.
  */
 
-import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.Point;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.mahout.matrix.Vector;
 
 /**
  * This Canopy subclass maintains a list of points in the canopy so it can
@@ -54,7 +53,7 @@ public class VisibleCanopy extends Canopy {
   public String toString() {
     String out = super.toString() + ": ";
     for (Vector pt : points)
-      out = Point.ptOut(out, pt);
+      out = pt.asFormatString();
     return out;
   }
 

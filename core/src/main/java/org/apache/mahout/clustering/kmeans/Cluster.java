@@ -16,16 +16,16 @@
  */
 package org.apache.mahout.clustering.kmeans;
 
+import java.io.IOException;
+import java.util.List;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
-import org.apache.mahout.utils.Point;
-
-import java.io.IOException;
-import java.util.List;
 
 public class Cluster {
 
@@ -61,19 +61,21 @@ public class Cluster {
 
   /**
    * Format the cluster for output
-   *
-   * @param cluster the Cluster
+   * 
+   * @param cluster
+   *            the Cluster
    * @return
    */
   public static String formatCluster(Cluster cluster) {
     return cluster.getIdentifier() + ": "
-            + Point.formatPoint(cluster.computeCentroid());
+        + cluster.computeCentroid().asFormatString();
   }
 
   /**
    * Decodes and returns a Cluster from the formattedString
-   *
-   * @param formattedString a String produced by formatCluster
+   * 
+   * @param formattedString
+   *            a String produced by formatCluster
    * @return a new Canopy
    */
   public static Cluster decodeCluster(String formattedString) {
@@ -82,7 +84,7 @@ public class Cluster {
     String center = formattedString.substring(beginIndex);
     if (id.startsWith("C") || id.startsWith("V")) {
       int clusterId = new Integer(formattedString.substring(1, beginIndex - 2));
-      Vector clusterCenter = Point.decodePoint(center);
+      Vector clusterCenter = AbstractVector.decodeVector(center);
       Cluster cluster = new Cluster(clusterCenter, clusterId);
       cluster.converged = id.startsWith("V");
       return cluster;
@@ -92,8 +94,9 @@ public class Cluster {
 
   /**
    * Configure the distance measure from the job
-   *
-   * @param job the JobConf for the job
+   * 
+   * @param job
+   *            the JobConf for the job
    */
   public static void configure(JobConf job) {
     try {
@@ -110,9 +113,11 @@ public class Cluster {
 
   /**
    * Configure the distance measure directly. Used by unit tests.
-   *
-   * @param aMeasure          the DistanceMeasure
-   * @param aConvergenceDelta the delta value used to define convergence
+   * 
+   * @param aMeasure
+   *            the DistanceMeasure
+   * @param aConvergenceDelta
+   *            the delta value used to define convergence
    */
   public static void config(DistanceMeasure aMeasure, double aConvergenceDelta) {
     measure = aMeasure;
@@ -122,17 +127,21 @@ public class Cluster {
 
   /**
    * Emit the point to the nearest cluster center
-   *
-   * @param point    a point
-   * @param clusters a List<Cluster> to test
-   * @param values   a Writable containing the input point and possible other
-   *                 values of interest (payload)
-   * @param output   the OutputCollector to emit into
+   * 
+   * @param point
+   *            a point
+   * @param clusters
+   *            a List<Cluster> to test
+   * @param values
+   *            a Writable containing the input point and possible other values
+   *            of interest (payload)
+   * @param output
+   *            the OutputCollector to emit into
    * @throws IOException
    */
   public static void emitPointToNearestCluster(Vector point,
-                                               List<Cluster> clusters, Text values, OutputCollector<Text, Text> output)
-          throws IOException {
+      List<Cluster> clusters, Text values, OutputCollector<Text, Text> output)
+      throws IOException {
     Cluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
     for (Cluster cluster : clusters) {
@@ -147,7 +156,7 @@ public class Cluster {
 
   /**
    * Compute the centroid by averaging the pointTotals
-   *
+   * 
    * @return the new centroid
    */
   private Vector computeCentroid() {
@@ -162,33 +171,35 @@ public class Cluster {
 
   /**
    * Construct a new cluster with the given point as its center
-   *
-   * @param center the center point
+   * 
+   * @param center
+   *            the center point
    */
   public Cluster(Vector center) {
     super();
     this.clusterId = nextClusterId++;
     this.center = center;
     this.numPoints = 0;
-    this.pointTotal = Point.origin(center.cardinality());
+    this.pointTotal = center.like();
   }
 
   /**
    * Construct a new cluster with the given point as its center
-   *
-   * @param center the center point
+   * 
+   * @param center
+   *            the center point
    */
   public Cluster(Vector center, int clusterId) {
     super();
     this.clusterId = clusterId;
     this.center = center;
     this.numPoints = 0;
-    this.pointTotal = Point.origin(center.cardinality());
+    this.pointTotal = center.like();
   }
 
   @Override
   public String toString() {
-    return getIdentifier() + " - " + Point.formatPoint(center);
+    return getIdentifier() + " - " + center.asFormatString();
   }
 
   public String getIdentifier() {
@@ -200,8 +211,9 @@ public class Cluster {
 
   /**
    * Add the point to the cluster
-   *
-   * @param point a point to add
+   * 
+   * @param point
+   *            a point to add
    */
   public void addPoint(Vector point) {
     centroid = null;
@@ -214,9 +226,11 @@ public class Cluster {
 
   /**
    * Add the point to the cluster
-   *
-   * @param count the number of points in the delta
-   * @param delta a point to add
+   * 
+   * @param count
+   *            the number of points in the delta
+   * @param delta
+   *            a point to add
    */
   public void addPoints(int count, Vector delta) {
     centroid = null;
@@ -241,12 +255,12 @@ public class Cluster {
   public void recomputeCenter() {
     center = computeCentroid();
     numPoints = 0;
-    pointTotal = Point.origin(center.cardinality());
+    pointTotal = center.like();
   }
 
   /**
    * Return if the cluster is converged by comparing its center and centroid.
-   *
+   * 
    * @return if the cluster is converged
    */
   public boolean computeConvergence() {

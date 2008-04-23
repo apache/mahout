@@ -16,11 +16,10 @@
  */
 package org.apache.mahout.clustering.kmeans;
 
-import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.Point;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.mahout.matrix.Vector;
 
 /**
  * This Cluster subclass maintains a list of points in the cluster so it can
@@ -43,8 +42,9 @@ public class VisibleCluster extends Cluster {
 
   /**
    * Add a point to the canopy
-   *
-   * @param point a Double[]
+   * 
+   * @param point
+   *            a Double[]
    */
   public void addPoint(Vector point) {
     super.addPoint(point);
@@ -54,13 +54,13 @@ public class VisibleCluster extends Cluster {
   /**
    * Return a printable representation of this object, using the user supplied
    * identifier
-   *
+   * 
    * @return
    */
   public String toString() {
     String out = super.toString() + ": ";
     for (Vector pt : points)
-      out += Point.formatPoint(pt);
+      out += pt.asFormatString();
     return out;
   }
 

@@ -16,6 +16,9 @@
  */
 package org.apache.mahout.clustering.canopy;
 
+import java.io.IOException;
+import java.util.Iterator;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
@@ -23,26 +26,24 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.Point;
 
-import java.io.IOException;
-import java.util.Iterator;
-
-public class CanopyCombiner extends MapReduceBase implements Reducer<Text, Text, Text, Text> {
+public class CanopyCombiner extends MapReduceBase implements
+    Reducer<Text, Text, Text, Text> {
 
   public void reduce(Text key, Iterator<Text> values,
-                     OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
     Writable value = values.next();
-    Vector center = Point.decodePoint(value.toString());
+    Vector center = AbstractVector.decodeVector(value.toString());
     Canopy canopy = new Canopy(center);
     while (values.hasNext()) {
       value = values.next();
-      Vector point = Point.decodePoint(value.toString());
+      Vector point = AbstractVector.decodeVector(value.toString());
       canopy.addPoint(point);
     }
-    output.collect(new Text("centroid"), new Text(Point.formatPoint(canopy
-            .computeCentroid())));
+    output.collect(new Text("centroid"), new Text(canopy.computeCentroid()
+        .asFormatString()));
   }
 
   /*
