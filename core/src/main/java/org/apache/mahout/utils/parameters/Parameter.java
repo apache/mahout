@@ -26,9 +26,9 @@ package org.apache.mahout.utils.parameters;
  * in that DistanceMeasure implementation.
  */
 public interface Parameter<T> extends Parametered {
-  /** @return job configuration setting key prefix */
+  /** @return job configuration setting key prefix, e.g. 'org.apache.mahout.util.WeightedDistanceMeasure.' */
   public abstract String prefix();
-  /** @return configuration parameters name, e.g. org.apache.mahout.util.WeightedDistanceMeasure.weightsFile */
+  /** @return configuration parameters name, e.g. 'weightsFile' */
   public abstract String name();
   /** @return human readable description of parameters */
   public abstract String description();
