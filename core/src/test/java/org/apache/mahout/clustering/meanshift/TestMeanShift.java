@@ -37,6 +37,7 @@ import org.apache.mahout.matrix.CardinalityException;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
+import org.apache.mahout.utils.DummyOutputCollector;
 import org.apache.mahout.utils.EuclideanDistanceMeasure;
 import org.apache.mahout.utils.ManhattanDistanceMeasure;
 

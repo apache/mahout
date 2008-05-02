@@ -42,6 +42,7 @@ import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
+import org.apache.mahout.utils.DummyOutputCollector;
 import org.apache.mahout.utils.EuclideanDistanceMeasure;
 import org.apache.mahout.utils.ManhattanDistanceMeasure;
 import org.apache.mahout.utils.UserDefinedDistanceMeasure;
@@ -345,7 +346,7 @@ public class TestCanopyCreation extends TestCase {
   public void testCanopyMapperManhattan() throws Exception {
     CanopyMapper mapper = new CanopyMapper();
     CanopyCombiner combiner = new CanopyCombiner();
-    DummyOutputCollector collector = new DummyOutputCollector();
+    DummyOutputCollector<Text,Text> collector = new DummyOutputCollector<Text,Text>();
     Canopy.config(manhattanDistanceMeasure, (3.1), (2.1));
     List<Vector> points = getPoints(raw);
     // map the data
@@ -355,7 +356,7 @@ public class TestCanopyCreation extends TestCase {
     // now combine the mapper output
     Canopy.config(manhattanDistanceMeasure, (3.1), (2.1));
     Map<String, List<Text>> mapData = collector.getData();
-    collector = new DummyOutputCollector();
+    collector = new DummyOutputCollector<Text,Text>();
     for (String key : mapData.keySet())
       combiner.reduce(new Text(key), mapData.get(key).iterator(), collector,
           null);
@@ -378,7 +379,7 @@ public class TestCanopyCreation extends TestCase {
   public void testCanopyMapperEuclidean() throws Exception {
     CanopyMapper mapper = new CanopyMapper();
     CanopyCombiner combiner = new CanopyCombiner();
-    DummyOutputCollector collector = new DummyOutputCollector();
+    DummyOutputCollector<Text,Text> collector = new DummyOutputCollector<Text,Text>();
     Canopy.config(euclideanDistanceMeasure, (3.1), (2.1));
     List<Vector> points = getPoints(raw);
     // map the data
@@ -388,7 +389,7 @@ public class TestCanopyCreation extends TestCase {
     // now combine the mapper output
     Canopy.config(euclideanDistanceMeasure, (3.1), (2.1));
     Map<String, List<Text>> mapData = collector.getData();
-    collector = new DummyOutputCollector();
+    collector = new DummyOutputCollector<Text,Text>();
     for (String key : mapData.keySet())
       combiner.reduce(new Text(key), mapData.get(key).iterator(), collector,
           null);
@@ -410,7 +411,7 @@ public class TestCanopyCreation extends TestCase {
    */
   public void testCanopyReducerManhattan() throws Exception {
     CanopyReducer reducer = new CanopyReducer();
-    DummyOutputCollector collector = new DummyOutputCollector();
+    DummyOutputCollector<Text,Text> collector = new DummyOutputCollector<Text,Text>();
     Canopy.config(manhattanDistanceMeasure, (3.1), (2.1));
     List<Vector> points = getPoints(raw);
     List<Text> texts = getFormattedPoints(points);
@@ -437,7 +438,7 @@ public class TestCanopyCreation extends TestCase {
    */
   public void testCanopyReducerEuclidean() throws Exception {
     CanopyReducer reducer = new CanopyReducer();
-    DummyOutputCollector collector = new DummyOutputCollector();
+    DummyOutputCollector<Text,Text> collector = new DummyOutputCollector<Text,Text>();
     Canopy.config(euclideanDistanceMeasure, (3.1), (2.1));
     List<Vector> points = getPoints(raw);
     List<Text> texts = getFormattedPoints(points);
@@ -537,7 +538,7 @@ public class TestCanopyCreation extends TestCase {
     Canopy.config(manhattanDistanceMeasure, (3.1), (2.1));
     ClusterMapper mapper = new ClusterMapper();
     List<Canopy> canopies = new ArrayList<Canopy>();
-    DummyOutputCollector collector = new DummyOutputCollector();
+    DummyOutputCollector<Text,Text> collector = new DummyOutputCollector<Text,Text>();
     for (Vector centroid : manhattanCentroids)
       canopies.add(new Canopy(centroid));
     mapper.config(canopies);
@@ -566,7 +567,7 @@ public class TestCanopyCreation extends TestCase {
     Canopy.config(euclideanDistanceMeasure, (3.1), (2.1));
     ClusterMapper mapper = new ClusterMapper();
     List<Canopy> canopies = new ArrayList<Canopy>();
-    DummyOutputCollector collector = new DummyOutputCollector();
+    DummyOutputCollector<Text,Text> collector = new DummyOutputCollector<Text,Text>();
     for (Vector centroid : euclideanCentroids)
       canopies.add(new Canopy(centroid));
     mapper.config(canopies);
@@ -595,7 +596,7 @@ public class TestCanopyCreation extends TestCase {
     Canopy.config(manhattanDistanceMeasure, (3.1), (2.1));
     ClusterMapper mapper = new ClusterMapper();
     List<Canopy> canopies = new ArrayList<Canopy>();
-    DummyOutputCollector collector = new DummyOutputCollector();
+    DummyOutputCollector<Text,Text> collector = new DummyOutputCollector<Text,Text>();
     for (Vector centroid : manhattanCentroids)
       canopies.add(new Canopy(centroid));
     mapper.config(canopies);
@@ -607,8 +608,8 @@ public class TestCanopyCreation extends TestCase {
     assertEquals("Number of map results", canopies.size(), data.size());
 
     // reduce the data
-    Reducer reducer = new IdentityReducer();
-    collector = new DummyOutputCollector();
+    Reducer<Text, Text, Text, Text> reducer = new IdentityReducer<Text, Text>();
+    collector = new DummyOutputCollector<Text,Text>();
     for (String key : data.keySet())
       reducer.reduce(new Text(key), data.get(key).iterator(), collector, null);
 
@@ -633,7 +634,7 @@ public class TestCanopyCreation extends TestCase {
     Canopy.config(euclideanDistanceMeasure, (3.1), (2.1));
     ClusterMapper mapper = new ClusterMapper();
     List<Canopy> canopies = new ArrayList<Canopy>();
-    DummyOutputCollector collector = new DummyOutputCollector();
+    DummyOutputCollector<Text,Text> collector = new DummyOutputCollector<Text,Text>();
     for (Vector centroid : euclideanCentroids)
       canopies.add(new Canopy(centroid));
     mapper.config(canopies);
@@ -644,8 +645,8 @@ public class TestCanopyCreation extends TestCase {
     Map<String, List<Text>> data = collector.getData();
 
     // reduce the data
-    Reducer reducer = new IdentityReducer();
-    collector = new DummyOutputCollector();
+    Reducer<Text, Text, Text, Text> reducer = new IdentityReducer<Text, Text>();
+    collector = new DummyOutputCollector<Text,Text>();
     for (String key : data.keySet())
       reducer.reduce(new Text(key), data.get(key).iterator(), collector, null);
 

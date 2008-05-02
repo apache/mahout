@@ -1,4 +1,4 @@
-package org.apache.mahout.clustering.canopy;
+package org.apache.mahout.utils;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,9 +16,6 @@ package org.apache.mahout.clustering.canopy;
  * limitations under the License.
  */
 
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.OutputCollector;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,25 +23,29 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class DummyOutputCollector implements OutputCollector<Text, Text> {
+import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapred.OutputCollector;
 
-  Map<String, List<Text>> data = new TreeMap<String, List<Text>>();
+public class DummyOutputCollector<K extends WritableComparable, V extends Writable> implements OutputCollector<K, V> {
 
-  public void collect(Text key, Text values)
+  Map<String, List<V>> data = new TreeMap<String, List<V>>();
+
+  public void collect(K key, V values)
           throws IOException {
-    List<Text> points = data.get(key.toString());
+    List<V> points = data.get(key.toString());
     if (points == null) {
-      points = new ArrayList<Text>();
+      points = new ArrayList<V>();
       data.put(key.toString(), points);
     }
     points.add(values);
   }
 
-  public Map<String, List<Text>> getData() {
+  public Map<String, List<V>> getData() {
     return data;
   }
 
-  public List<Text> getValue(String key) {
+  public List<V> getValue(String key) {
     return data.get(key);
   }
 

@@ -379,4 +379,71 @@
                    value="${java.compat.version}"/>
      </manifest>
   </target>
+
+  <!-- EXAMPLES -->
+
+  <target name="compile-examples"
+          description="Compile the examples source code."
+          depends="compile"
+          >
+    <mahout-javac destdir="${dest}/examples"
+                  classpathref="examples.classpath">
+      <src path="${src}/main/examples/bayes"/>
+      <!-- Add other example sources here -->
+    </mahout-javac>
+  </target>
+
+  <path id="examples.classpath">
+    <path refid="compile.classpath"/>
+    <pathelement location="${dest}/classes"/>
+  </path>
+  <path id="examples.run.classpath">
+    <path refid="examples.classpath"/>
+    <pathelement location="${dest}/examples"/>
+  </path>
+
+  <property name="working.dir" value="work"/>
+  <target name="check-files">
+    <available file="temp/20news-18828.tar.gz" property="20news-18828.exists"/>
+    <available file="${working.dir}/20news-18828" property="20news-18828.expanded"/>
+
+  </target>
+
+  <target name="get-20news-18828" unless="20news-18828.exists">
+    <get src="http://people.csail.mit.edu/jrennie/20Newsgroups/20news-18828.tar.gz"
+         dest="temp/20news-18828.tar.gz"/>
+
+  </target>
+  <target name="expand-20news-18828" unless="20news-18828.expanded">
+    <gunzip src="temp/20news-18828.tar.gz" dest="temp"/>
+    <untar src="temp/20news-18828.tar" dest="${working.dir}"/>
+  </target>
+
+  <target name="extract-20news-18828" depends="check-files, compile-examples" unless="reuters.extracted">
+    <mkdir dir="${working.dir}/20news-18828-collapse"/>
+    <java classname="org.apache.mahout.classifiers.bayes.ExtractTwentyNewsgroups" maxmemory="1024M" fork="true">
+      <classpath refid="examples.run.classpath"/>
+      <!--
+      Input format is:
+      inputDir outputDir label Analyzer character set
+      -->
+      <arg line="-p ${working.dir}/20news-18828/ -o ${working.dir}/20news-18828-collapse -a org.apache.lucene.analysis.standard.StandardAnalyzer -c UTF-8"/>
+    </java>
+  </target>
+
+  <target name="get-files" depends="check-files">
+    <mkdir dir="temp"/>
+    <antcall target="get-20news-18828"/>
+    <antcall target="expand-20news-18828"/>
+    <!--<antcall target="extract-20news-18828"/>-->
+  </target>
+  <target name="examples-job" depends="compile,compile-examples" description="Build example Job jar">
+    <jar jarfile="${dest}/${fullnamever}-ex.jar">
+      <zipfileset dir="${dest}/classes"/>
+      <zipfileset dir="${dest}/examples"/>
+      <zipfileset dir="${lib}" prefix="lib"
+                  includes="**/*.jar" excludes="hadoop-*.jar"/>
+    </jar>
+  </target>
+
 </project>
