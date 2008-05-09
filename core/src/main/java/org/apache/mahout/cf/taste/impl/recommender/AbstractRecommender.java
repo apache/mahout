@@ -1,0 +1,128 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.mahout.cf.taste.impl.recommender;
+
+import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.model.DataModel;
+import org.apache.mahout.cf.taste.model.Item;
+import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.recommender.RecommendedItem;
+import org.apache.mahout.cf.taste.recommender.Recommender;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public abstract class AbstractRecommender implements Recommender {
+
+  private static final Logger log = Logger.getLogger(AbstractRecommender.class.getName());
+
+  private final DataModel dataModel;
+  private final ReentrantLock refreshLock;
+
+  protected AbstractRecommender(DataModel dataModel) {
+    if (dataModel == null) {
+      throw new IllegalArgumentException("dataModel is null");
+    }
+    this.dataModel = dataModel;
+    this.refreshLock = new ReentrantLock();
+  }
+
+  /**
+   * <p>Default implementation which just calls
+   * {@link Recommender#recommend(Object, int, org.apache.mahout.cf.taste.recommender.Rescorer)},
+   * with a {@link org.apache.mahout.cf.taste.recommender.Rescorer} that does nothing.</p>
+   */
+  public List<RecommendedItem> recommend(Object userID, int howMany) throws TasteException {
+    return recommend(userID, howMany, NullRescorer.getItemInstance());
+  }
+
+  /**
+   * <p>Default implementation which just calls {@link DataModel#setPreference(Object, Object, double)}.</p>
+   *
+   * @throws IllegalArgumentException if userID or itemID is <code>null</code>, or if value is
+   * {@link Double#NaN}
+   */
+  public void setPreference(Object userID, Object itemID, double value) throws TasteException {
+    if (userID == null || itemID == null) {
+      throw new IllegalArgumentException("userID or itemID is null");
+    }
+    if (Double.isNaN(value)) {
+      throw new IllegalArgumentException("Invalid value: " + value);
+    }
+    if (log.isLoggable(Level.FINE)) {
+      log.fine("Setting preference for user '" + userID + "', item '" + itemID + "', value " + value);
+    }
+    dataModel.setPreference(userID, itemID, value);
+  }
+
+  /**
+   * <p>Default implementation which just calls
+   * {@link DataModel#removePreference(Object, Object)} (Object, Object)}.</p>
+   *
+   * @throws IllegalArgumentException if userID or itemID is <code>null</code>
+   */
+  public void removePreference(Object userID, Object itemID) throws TasteException {
+    if (userID == null || itemID == null) {
+      throw new IllegalArgumentException("userID or itemID is null");
+    }
+    if (log.isLoggable(Level.FINE)) {
+      log.fine("Remove preference for user '" + userID + "', item '" + itemID + '\'');
+    }
+    dataModel.removePreference(userID, itemID);
+  }
+
+  public DataModel getDataModel() {
+    return dataModel;
+  }
+
+  public void refresh() {
+    if (refreshLock.isLocked()) {
+      return;
+    }
+    try {
+      refreshLock.lock();
+      dataModel.refresh();
+    } finally {
+      refreshLock.unlock();
+    }
+  }
+
+  /**
+   * @param theUser {@link User} being evaluated
+   * @return all {@link Item}s in the {@link DataModel} for which the {@link User} has not expressed a preference
+   * @throws TasteException if an error occurs while listing {@link Item}s
+   */
+  protected Set<Item> getAllOtherItems(User theUser) throws TasteException {
+    if (theUser == null) {
+      throw new IllegalArgumentException("theUser is null");
+    }
+    Set<Item> allItems = new HashSet<Item>(dataModel.getNumItems());
+    for (Item item : dataModel.getItems()) {
+      // If not already preferred by the user, add it
+      if (theUser.getPreferenceFor(item.getID()) == null) {
+        allItems.add(item);
+      }
+    }
+    return allItems;
+  }
+
+}

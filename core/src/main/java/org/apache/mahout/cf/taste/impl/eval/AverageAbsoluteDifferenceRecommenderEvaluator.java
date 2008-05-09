@@ -1,0 +1,72 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.mahout.cf.taste.impl.eval;
+
+import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
+import org.apache.mahout.cf.taste.impl.common.RunningAverage;
+import org.apache.mahout.cf.taste.model.Preference;
+import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.recommender.Recommender;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * <p>A {@link org.apache.mahout.cf.taste.eval.RecommenderEvaluator} which computes the average absolute difference
+ * between predicted and actual ratings for users.</p>
+ *
+ * <p>This algorithm is also called "mean average error".</p>
+ */
+public final class AverageAbsoluteDifferenceRecommenderEvaluator extends AbstractDifferenceRecommenderEvaluator {
+
+  private static final Logger log = Logger.getLogger(AverageAbsoluteDifferenceRecommenderEvaluator.class.getName());
+
+  @Override
+  double getEvaluation(Map<User, Collection<Preference>> testUserPrefs,
+                       Recommender recommender)
+          throws TasteException {
+    RunningAverage average = new FullRunningAverage();
+    for (Map.Entry<User, Collection<Preference>> entry : testUserPrefs.entrySet()) {
+      for (Preference realPref : entry.getValue()) {
+        User testUser = entry.getKey();
+        try {
+          double estimatedPreference =
+                  recommender.estimatePreference(testUser.getID(), realPref.getItem().getID());
+          if (!Double.isNaN(estimatedPreference)) {
+            average.addDatum(Math.abs(realPref.getValue() - estimatedPreference));
+          }
+        } catch (NoSuchElementException nsee) {
+          // It's possible that an item exists in the test data but not training data in which case
+          // NSEE will be thrown. Just ignore it and move on.
+          log.log(Level.INFO, "Element exists in test data but not training data: " + testUser.getID(), nsee);
+        }
+      }
+    }
+    return average.getAverage();
+  }
+
+  @Override
+  public String toString() {
+    return "AverageAbsoluteDifferenceRecommenderEvaluator";
+  }
+
+}
