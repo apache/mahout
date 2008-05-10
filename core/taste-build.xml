@@ -28,16 +28,14 @@
   <property name="release-jar" value="${name}.jar"/>
   <property name="release-ejb-jar" value="${name}-ejb.jar"/>
   <property name="release-war" value="${name}.war"/>
-  <property name="release-zip" value="${name}-${version}.zip"/>
 
   <target name="init">
     <tstamp/>
     <available file="${proguard.jar}" property="proguard.jar.present"/>
-    <available file="${mysql.jar}" property="mysql.jar.present"/>
     <available type="dir" file="${axis.jars}" property="axis.jars.present"/>
   </target>
 
-  <target depends="init" name="build-except-jdbc" description="Compiles all but JDBC-related code">
+  <target depends="init" name="build" description="Compiles all code">
     <mkdir dir="build"/>
     <javac source="1.5"
            target="1.5"
@@ -50,34 +48,11 @@
       <classpath>
         <pathelement location="${ejb.jar}"/>
         <pathelement location="${servlet.jar}"/>
-      </classpath>
-      <include name="org/apache/mahout/cf/taste/**"/>
-      <exclude name="org/apache/mahout/cf/taste/impl/model/jdbc/**"/>
-      <exclude name="org/apache/mahout/cf/taste/impl/recommender/slopeone/jdbc/**"/>
-    </javac>
-  </target>
-
-  <target depends="init,build-except-jdbc" name="build-jdbc" description="Compiles JDBC-related code" if="mysql.jar.present">
-    <javac source="1.5"
-           target="1.5"
-           deprecation="true"
-           destdir="build"
-           debug="true"
-           optimize="true"
-           srcdir="src/main/java">
-      <compilerarg value="-Xlint:all,-serial,-unchecked"/>
-      <classpath>
         <pathelement location="${dbcp.jar}"/>
         <pathelement location="${pool.jar}"/>
-        <pathelement location="${mysql.jar}"/>
-        <pathelement location="build"/>
       </classpath>
-      <include name="org/apache/mahout/cf/taste/impl/model/jdbc/**"/>
-      <include name="org/apache/mahout/cf/taste/impl/recommender/slopeone/jdbc/**"/>
+      <include name="org/apache/mahout/cf/taste/**"/>
     </javac>
-  </target>
-
-  <target depends="init,build-except-jdbc,build-jdbc" name="build" description="Compiles all code">
     <jar jarfile="${release-jar}">
       <fileset dir="build">
         <include name="org/apache/mahout/cf/taste/**"/>        
@@ -145,7 +120,6 @@
       <compilerarg value="-Xlint:all,-serial"/>
       <classpath>
         <pathelement location="${junit.jar}"/>
-        <pathelement location="${mysql.jar}"/>
         <pathelement location="${release-jar}"/>
       </classpath>
       <include name="org/apache/mahout/cf/taste/**"/>
@@ -229,7 +203,7 @@
     </java>
   </target>
 
-  <target depends="build,optimize,build-test" name="test-quick" description="Runs quick unit tests">
+  <target depends="build,optimize,build-test" name="test" description="Runs unit tests">
     <junit printsummary="on" haltonfailure="on" haltonerror="on" fork="on">
       <formatter type="plain" usefile="false"/>
       <classpath>
@@ -243,51 +217,6 @@
       <batchtest>
         <fileset dir="src/test/java">
           <include name="org/apache/mahout/cf/taste/**/*Test.java"/>
-          <exclude name="org/apache/mahout/cf/taste/impl/model/jdbc/*.java"/>
-          <exclude name="org/apache/mahout/cf/taste/impl/LoadTest.java"/>
-        </fileset>
-      </batchtest>
-    </junit>
-  </target>
-
-  <target depends="test-quick,test-jdbc,test-load" name="test" description="Runs all unit tests"/>
-
-  <target depends="build,optimize,build-test" name="test-jdbc" unless="notestjdbc" description="Runs JDBC unit tests">
-    <junit printsummary="on" haltonfailure="on" haltonerror="on" fork="on">
-      <formatter type="plain" usefile="false"/>
-      <classpath>
-        <pathelement location="${junit.jar}"/>
-        <pathelement location="${mysql.jar}"/>
-        <pathelement location="${release-jar}"/>
-        <pathelement location="build-test"/>
-      </classpath>
-      <assertions>
-        <enable/>
-      </assertions>
-      <batchtest>
-        <fileset dir="src/test/java">
-          <include name="org/apache/mahout/cf/taste/impl/model/jdbc/*Test.java"/>
-        </fileset>
-      </batchtest>
-    </junit>
-  </target>
-
-  <target depends="build,optimize,build-test" name="test-load" unless="notestload" description="Runs load tests">
-    <junit printsummary="on" haltonfailure="on" haltonerror="on" fork="on">
-      <formatter type="plain" usefile="false"/>
-      <classpath>
-        <pathelement location="${junit.jar}"/>
-        <pathelement location="${release-jar}"/>
-        <pathelement location="build-test"/>
-      </classpath>
-      <assertions>
-        <disable/>
-      </assertions>
-      <jvmarg value="-server"/>
-      <jvmarg value="-Xmx512m"/>
-      <batchtest>
-        <fileset dir="src/test/java">
-          <include name="org/apache/mahout/cf/taste/impl/LoadTest.java"/>
         </fileset>
       </batchtest>
     </junit>
@@ -304,38 +233,15 @@
         <pathelement location="${servlet.jar}"/>
         <pathelement location="${dbcp.jar}"/>
         <pathelement location="${pool.jar}"/>
-        <pathelement location="${mysql.jar}"/>
       </classpath>
     </javadoc>
-  </target>
-
-  <target depends="clean,test,build-grouplens-example,javadoc" name="release"
-          description="Builds a release package">
-    <zip destfile="${release-zip}" basedir=".">
-      <include name="${release-jar}"/>
-      <include name="src/main/java/org/apache/mahout/cf/taste/**"/>
-      <include name="src/main/examples/org/apache/mahout/cf/taste/**"/>
-      <include name="src/test/java/org/apache/mahout/cf/taste/**"/>
-      <!-- Make sure GroupLens data is not redistributed -->
-      <exclude name="src/**/*.dat"/>
-      <include name="docs/**"/>
-      <include name="lib/**"/>
-      <exclude name="lib/mysql*"/>
-      <exclude name="lib/proguard*"/>
-      <include name="build.xml"/>
-      <include name="build.properties"/>
-      <include name="CHANGES"/>
-      <include name="LICENSE"/>
-    </zip>
   </target>
 
   <target depends="init" name="clean" description="Deletes build products">
     <delete dir="build"/>
     <delete dir="build-test"/>
     <delete dir="docs/javadoc"/>
-    <delete dir="target"/>
     <delete file="${release-jar}"/>
-    <delete file="${release-zip}"/>
     <delete file="${release-war}"/>
     <delete>
       <fileset dir=".">

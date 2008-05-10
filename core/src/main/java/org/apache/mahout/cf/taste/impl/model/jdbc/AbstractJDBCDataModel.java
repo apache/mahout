@@ -475,6 +475,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       try {
         connection = dataSource.getConnection();
         statement = connection.createStatement();
+        statement.setFetchDirection(ResultSet.FETCH_UNKNOWN);
         if (log.isLoggable(Level.FINE)) {
           log.fine("Executing SQL query: " + getUsersSQL);
         }
@@ -577,6 +578,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       try {
         connection = dataSource.getConnection();
         statement = connection.createStatement();
+        statement.setFetchDirection(ResultSet.FETCH_FORWARD);
         if (log.isLoggable(Level.FINE)) {
           log.fine("Executing SQL query: " + getItemsSQL);
         }

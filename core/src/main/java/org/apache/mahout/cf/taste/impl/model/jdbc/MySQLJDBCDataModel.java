@@ -141,8 +141,8 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
           // getNumUsersSQL
           "SELECT COUNT(DISTINCT " + userIDColumn + ") FROM " + preferenceTable,
           // setPreferenceSQL
-          "INSERT INTO " + preferenceTable + " SET " + userIDColumn + "=?, " + itemIDColumn +
-          "=?, " + preferenceColumn + "=? ON DUPLICATE KEY UPDATE " + preferenceColumn + "=?",
+          "INSERT INTO " + preferenceTable + '(' + userIDColumn + ',' + itemIDColumn + ',' + preferenceColumn + 
+          ") VALUES (?,?,?) ON DUPLICATE KEY UPDATE " + preferenceColumn + "=?",
           // removePreference SQL
           "DELETE FROM " + preferenceTable + " WHERE " + userIDColumn + "=? AND " + itemIDColumn + "=?",
           // getUsersSQL
