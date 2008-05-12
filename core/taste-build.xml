@@ -26,7 +26,6 @@
   <property environment="env"/>
   <property name="name" value="${ant.project.name}"/>
   <property name="release-jar" value="${name}.jar"/>
-  <property name="release-ejb-jar" value="${name}-ejb.jar"/>
   <property name="release-war" value="${name}.war"/>
 
   <target name="init">
@@ -46,7 +45,6 @@
            srcdir="src/main/java">
       <compilerarg value="-Xlint:all,-serial,-unchecked"/>
       <classpath>
-        <pathelement location="${ejb.jar}"/>
         <pathelement location="${servlet.jar}"/>
         <pathelement location="${dbcp.jar}"/>
         <pathelement location="${pool.jar}"/>
@@ -57,7 +55,6 @@
       <fileset dir="build">
         <include name="org/apache/mahout/cf/taste/**"/>        
         <exclude name="org/apache/mahout/cf/taste/web/**"/>
-        <exclude name="org/apache/mahout/cf/taste/ejb/**"/>
         <exclude name="org/apache/mahout/cf/taste/example/**"/>
       </fileset>
     </jar>
@@ -87,25 +84,6 @@
       <arg value="-verbose"/>
     </java>
     <delete file="temp.jar"/>
-  </target>
-
-  <target depends="build,optimize" name="build-ejb" description="Builds deployable EJB component">
-    <fail unless="my-recommender.jar" message="Please set -Dmy-recommender.jar=XXX"/>
-    <fail unless="my-recommender-class" message="Please set -Dmy-recommender-class=XXX"/>
-    <property name="my-ejb-jar.xml" value="${java.io.tmpdir}/ejb-jar.xml"/>
-    <copy file="src/main/java/org/apache/mahout/cf/taste/ejb/ejb-jar.xml" tofile="${my-ejb-jar.xml}">
-      <filterset>
-        <filter token="RECOMMENDER_CLASS" value="${my-recommender-class}"/>
-      </filterset>
-    </copy>
-    <jar jarfile="${release-ejb-jar}">
-      <fileset dir="build">
-        <include name="org/apache/mahout/cf/taste/ejb/**"/>
-      </fileset>
-      <zipfileset src="${release-jar}"/>
-      <metainf file="${my-ejb-jar.xml}"/>
-    </jar>
-    <delete file="${my-ejb-jar.xml}"/>
   </target>
 
   <target depends="build" name="build-test" description="Builds test classes">
@@ -229,7 +207,6 @@
         <include name="**/*.java"/>
       </fileset>
       <classpath>
-        <pathelement location="${ejb.jar}"/>
         <pathelement location="${servlet.jar}"/>
         <pathelement location="${dbcp.jar}"/>
         <pathelement location="${pool.jar}"/>
