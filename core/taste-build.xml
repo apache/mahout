@@ -22,7 +22,15 @@
 
 <project basedir="." default="build" name="mahout-taste">
 
-  <property file="taste-build.properties"/>
+  <property file="build.properties"/>
+
+  <property name="axis.jars" location="lib/axis/"/>
+  <property name="dbcp.jar" location="lib/commons-dbcp-1.2.2.jar"/>
+  <property name="junit.jar" location="lib/junit-3.8.2.jar"/>
+  <property name="pool.jar" location="lib/commons-pool-1.4.jar"/>
+  <property name="proguard.jar" location="lib/proguard.jar"/>
+  <property name="servlet.jar" location="lib/servlet-api.jar"/>
+
   <property environment="env"/>
   <property name="name" value="${ant.project.name}"/>
   <property name="release-jar" value="${name}.jar"/>
