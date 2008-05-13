@@ -91,60 +91,109 @@ public final class RecommenderServlet extends HttpServlet {
     String howManyString = request.getParameter("howMany");
     int howMany = howManyString == null ? DEFAULT_HOW_MANY : Integer.parseInt(howManyString);
     boolean debug = Boolean.valueOf(request.getParameter("debug"));
+    String format = request.getParameter("format");
+    if (format == null) {
+      format = "text";
+    }
 
     try {
-
       List<RecommendedItem> items = recommender.recommend(userID, howMany);
-
-      response.setContentType("text/plain");
-      response.setCharacterEncoding("UTF-8");
-      response.setHeader("Cache-Control", "no-cache");
-
-      PrintWriter writer = response.getWriter();
-      if (debug) {
-        DataModel dataModel = recommender.getDataModel();
-        writer.print("User:");
-        writer.println(dataModel.getUser(userID));
-        writer.print("Recommender: ");
-        writer.println(recommender);
-        writer.println();
-        writer.print("Top ");
-        writer.print(NUM_TOP_PREFERENCES);
-        writer.println(" Preferences:");
-        Preference[] rawPrefs = dataModel.getUser(userID).getPreferencesAsArray();
-        int length = rawPrefs.length;
-        Preference[] sortedPrefs = new Preference[length];
-        System.arraycopy(rawPrefs, 0, sortedPrefs, 0, length);
-        Arrays.sort(sortedPrefs, Collections.reverseOrder(ByValuePreferenceComparator.getInstance()));
-        // Cap this at 20 just to be brief
-        int max = Math.min(NUM_TOP_PREFERENCES, length);
-        for (int i = 0; i < max; i++) {
-          Preference pref = sortedPrefs[i];
-          writer.print(pref.getValue());
-          writer.print('\t');
-          writer.println(pref.getItem());
-        }
-        writer.println();
-        writer.println("Recommendations:");
-        for (RecommendedItem recommendedItem : items) {
-          writer.print(recommendedItem.getValue());
-          writer.print('\t');
-          writer.println(recommendedItem.getItem());
-        }
+      if ("text".equals(format)) {
+        writePlainText(response, userID, debug, items);
+      } else if ("xml".equals(format)) {
+        writeXML(response, items);
+      } else if ("json".equals(format)) {
+        writeJSON(response, items);
       } else {
-        for (RecommendedItem recommendedItem : items) {
-          writer.print(recommendedItem.getValue());
-          writer.print('\t');
-          writer.println(recommendedItem.getItem().getID());
-        }
+        throw new ServletException("Bad format parameter: " + format);
       }
-
     } catch (TasteException te) {
       throw new ServletException(te);
     } catch (IOException ioe) {
       throw new ServletException(ioe);
     }
 
+  }
+
+  private void writeXML(HttpServletResponse response, Iterable<RecommendedItem> items)
+      throws IOException, TasteException {
+    response.setContentType("text/xml");
+    response.setCharacterEncoding("UTF-8");
+    response.setHeader("Cache-Control", "no-cache");
+    PrintWriter writer = response.getWriter();
+    writer.print("<?xml version=\"1.0\" encoding=\"UTF-8\"?><recommendedItems>");
+    for (RecommendedItem recommendedItem : items) {
+      writer.print("<item><value>");
+      writer.print(recommendedItem.getValue());
+      writer.print("</value><id>");
+      writer.print(recommendedItem.getItem().getID());
+      writer.print("</id></item>");
+    }
+    writer.println("</recommendedItems>");
+  }
+
+  private void writeJSON(HttpServletResponse response, Iterable<RecommendedItem> items)
+      throws IOException, TasteException {
+    response.setContentType("text/plain");
+    response.setCharacterEncoding("UTF-8");
+    response.setHeader("Cache-Control", "no-cache");
+    PrintWriter writer = response.getWriter();
+    writer.print("{\"recommendedItems\":{\"item\":[");
+    for (RecommendedItem recommendedItem : items) {
+      writer.print("{\"value\":\"");
+      writer.print(recommendedItem.getValue());
+      writer.print("\",\"id\":\"");
+      writer.print(recommendedItem.getItem().getID());
+      writer.print("\"},");
+    }
+    writer.println("]}}");
+  }
+
+  private void writePlainText(HttpServletResponse response,
+                              String userID,
+                              boolean debug,
+                              Iterable<RecommendedItem> items) throws IOException, TasteException {
+    response.setContentType("text/plain");
+    response.setCharacterEncoding("UTF-8");
+    response.setHeader("Cache-Control", "no-cache");
+    PrintWriter writer = response.getWriter();
+    if (debug) {
+      DataModel dataModel = recommender.getDataModel();
+      writer.print("User:");
+      writer.println(dataModel.getUser(userID));
+      writer.print("Recommender: ");
+      writer.println(recommender);
+      writer.println();
+      writer.print("Top ");
+      writer.print(NUM_TOP_PREFERENCES);
+      writer.println(" Preferences:");
+      Preference[] rawPrefs = dataModel.getUser(userID).getPreferencesAsArray();
+      int length = rawPrefs.length;
+      Preference[] sortedPrefs = new Preference[length];
+      System.arraycopy(rawPrefs, 0, sortedPrefs, 0, length);
+      Arrays.sort(sortedPrefs, Collections.reverseOrder(ByValuePreferenceComparator.getInstance()));
+      // Cap this at 20 just to be brief
+      int max = Math.min(NUM_TOP_PREFERENCES, length);
+      for (int i = 0; i < max; i++) {
+        Preference pref = sortedPrefs[i];
+        writer.print(pref.getValue());
+        writer.print('\t');
+        writer.println(pref.getItem());
+      }
+      writer.println();
+      writer.println("Recommendations:");
+      for (RecommendedItem recommendedItem : items) {
+        writer.print(recommendedItem.getValue());
+        writer.print('\t');
+        writer.println(recommendedItem.getItem());
+      }
+    } else {
+      for (RecommendedItem recommendedItem : items) {
+        writer.print(recommendedItem.getValue());
+        writer.print('\t');
+        writer.println(recommendedItem.getItem().getID());
+      }
+    }
   }
 
   @Override
