@@ -133,22 +133,4 @@ public final class MySQLJDBCDiffStorage extends AbstractJDBCDiffStorage {
           minDiffCount);
   }
 
-  /*
-   public static void main(final String... args) throws Exception {
-     Logger.getLogger("org.apache.mahout.cf.taste").setLevel(Level.FINE);
-     final MysqlDataSource dataSource = new MysqlDataSource();
-     dataSource.setUser("mysql");
-     dataSource.setDatabaseName("test");
-     dataSource.setServerName("localhost");
-     final DataSource pooledDataSource = new ConnectionPoolDataSource(dataSource);
-     final MySQLJDBCDataModel model = new MySQLJDBCDataModel(pooledDataSource);
-     final MySQLJDBCDiffStorage diffStorage = new MySQLJDBCDiffStorage(model);
-     final Recommender slopeOne = new SlopeOneRecommender(model, true, false, diffStorage);
-     long start = System.currentTimeMillis();
-     System.out.println(slopeOne.recommend(args[0], 20));
-     long end = System.currentTimeMillis();
-     System.out.println(end - start);
-   }
-    */
-
 }

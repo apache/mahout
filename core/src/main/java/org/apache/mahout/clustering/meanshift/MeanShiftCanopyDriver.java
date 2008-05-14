@@ -22,8 +22,12 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MeanShiftCanopyDriver {
+
+  private static final Logger log = LoggerFactory.getLogger(MeanShiftCanopyDriver.class);
 
   public static void main(String[] args) {
     String input = args[0];
@@ -76,7 +80,7 @@ public class MeanShiftCanopyDriver {
     try {
       JobClient.runJob(conf);
     } catch (Exception e) {
-      e.printStackTrace();
+      log.warn(e.toString(), e);
     }
   }
 }

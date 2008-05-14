@@ -23,10 +23,14 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class KMeansDriver {
+
+  private static final Logger log = LoggerFactory.getLogger(KMeansDriver.class);
 
   private KMeansDriver() {
   }
@@ -68,7 +72,7 @@ public class KMeansDriver {
       int iteration = 0;
 
       while (!converged && iteration < maxIter) {
-        System.out.println("Iteration " + iteration);
+        log.info("Iteration {}", iteration);
         // point the output to a new directory per iteration
         String clustersOut = output + "/clusters-" + iteration;
         converged = runIteration(input, clustersIn, clustersOut, measureClass,
@@ -78,7 +82,7 @@ public class KMeansDriver {
         iteration++;
       }
       // now actually cluster the points
-      System.out.println("Clustering ");
+      log.info("Clustering ");
       runClustering(input, clustersIn, output + "/points", measureClass,
               convergenceDelta);
     } catch (Exception e) {
@@ -123,7 +127,7 @@ public class KMeansDriver {
       FileSystem fs = FileSystem.get(conf);
       return isConverged(clustersOut + "/part-00000", conf, fs);
     } catch (Exception e) {
-      e.printStackTrace();
+      log.warn(e.toString(), e);
       return true;
     }
   }
@@ -159,7 +163,7 @@ public class KMeansDriver {
     try {
       JobClient.runJob(conf);
     } catch (Exception e) {
-      e.printStackTrace();
+      log.warn(e.toString(), e);
     }
   }
 

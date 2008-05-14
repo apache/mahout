@@ -16,15 +16,19 @@
  */
 package org.apache.mahout.clustering.meanshift;
 
-import java.io.IOException;
-
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 public class MeanShiftCanopyJob {
+
+  private static final Logger log = LoggerFactory.getLogger(MeanShiftCanopyJob.class);
 
   public static void main(String[] args) {
     String input = args[0];
@@ -67,7 +71,7 @@ public class MeanShiftCanopyJob {
       int iteration = 0;
       String clustersIn = input;
       while (!converged && iteration < maxIterations) {
-        System.out.println("Iteration " + iteration);
+        log.info("Iteration {}", iteration);
         // point the output to a new directory per iteration
         String clustersOut = output + "/canopies-" + iteration;
         MeanShiftCanopyDriver.runJob(clustersIn, clustersOut, measureClassName,
