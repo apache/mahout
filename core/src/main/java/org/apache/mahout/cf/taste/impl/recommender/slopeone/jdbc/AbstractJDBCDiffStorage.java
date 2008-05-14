@@ -24,6 +24,8 @@ import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.JDBCDataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.recommender.slopeone.DiffStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -33,8 +35,6 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>A  {@link DiffStorage} which stores diffs in a database. Database-specific implementations subclass
@@ -44,7 +44,7 @@ import java.util.logging.Logger;
  */
 public abstract class AbstractJDBCDiffStorage implements DiffStorage {
 
-  private static final Logger log = Logger.getLogger(AbstractJDBCDiffStorage.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(AbstractJDBCDiffStorage.class);
 
   public static final String DEFAULT_DIFF_TABLE = "taste_slopeone_diffs";
   public static final String DEFAULT_ITEM_A_COLUMN = "item_id_a";
@@ -115,9 +115,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
       stmt.setObject(2, itemID2);
       stmt.setObject(3, itemID2);
       stmt.setObject(4, itemID1);
-      if (log.isLoggable(Level.FINE)) {
-        log.fine("Executing SQL query: " + getDiffSQL);
-      }
+      log.debug("Executing SQL query: {}", getDiffSQL);
       rs = stmt.executeQuery();
       if (rs.next()) {
         return new FixedRunningAverage(rs.getInt(1), rs.getDouble(2));
@@ -125,7 +123,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
         return null;
       }
     } catch (SQLException sqle) {
-      log.log(Level.WARNING, "Exception while retrieving diff", sqle);
+      log.warn("Exception while retrieving diff", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.safeClose(rs, stmt, conn);
@@ -144,9 +142,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
       stmt = conn.prepareStatement(getDiffsSQL);
       stmt.setObject(1, itemID);
       stmt.setObject(2, userID);
-      if (log.isLoggable(Level.FINE)) {
-        log.fine("Executing SQL query: " + getDiffsSQL);
-      }
+      log.debug("Executing SQL query: {}", getDiffsSQL);
       rs = stmt.executeQuery();
       // We should have up to one result for each Preference in prefs
       // They are both ordered by item. Step through and create a RunningAverage[]
@@ -162,7 +158,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
         i++;
       }
     } catch (SQLException sqle) {
-      log.log(Level.WARNING, "Exception while retrieving diff", sqle);
+      log.warn("Exception while retrieving diff", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.safeClose(rs, stmt, conn);
@@ -178,9 +174,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
       conn = dataSource.getConnection();
       stmt = conn.prepareStatement(getAverageItemPrefSQL);
       stmt.setObject(1, itemID);
-      if (log.isLoggable(Level.FINE)) {
-        log.fine("Executing SQL query: " + getAverageItemPrefSQL);
-      }
+      log.debug("Executing SQL query: {}", getAverageItemPrefSQL);
       rs = stmt.executeQuery();
       if (rs.next()) {
         int count = rs.getInt(1);
@@ -190,7 +184,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
       }
       return null;
     } catch (SQLException sqle) {
-      log.log(Level.WARNING, "Exception while retrieving average item pref", sqle);
+      log.warn("Exception while retrieving average item pref", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.safeClose(rs, stmt, conn);
@@ -211,7 +205,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
         stmt = doPartialUpdate(updateDiffSQLs[1], itemID, prefDelta, conn);
       }
     } catch (SQLException sqle) {
-      log.log(Level.WARNING, "Exception while updating item diff", sqle);
+      log.warn("Exception while updating item diff", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.safeClose(null, stmt, conn);
@@ -225,9 +219,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
     PreparedStatement stmt = conn.prepareStatement(sql);
     stmt.setDouble(1, prefDelta);
     stmt.setObject(2, itemID);
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Executing SQL update: " + sql);
-    }
+    log.debug("Executing SQL update: {}", sql);
     stmt.executeUpdate();
     return stmt;
   }
@@ -242,9 +234,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
       stmt.setObject(1, userID);
       stmt.setObject(2, userID);
       stmt.setObject(3, userID);
-      if (log.isLoggable(Level.FINE)) {
-        log.fine("Executing SQL query: " + getRecommendableItemsSQL);
-      }
+      log.debug("Executing SQL query: {}", getRecommendableItemsSQL);
       rs = stmt.executeQuery();
       Set<Item> items = new HashSet<Item>();
       while (rs.next()) {
@@ -252,7 +242,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
       }
       return items;
     } catch (SQLException sqle) {
-      log.log(Level.WARNING, "Exception while retrieving recommendable items", sqle);
+      log.warn("Exception while retrieving recommendable items", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.safeClose(rs, stmt, conn);
@@ -265,12 +255,10 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
     try {
       conn = dataSource.getConnection();
       stmt = conn.prepareStatement(deleteDiffsSQL);
-      if (log.isLoggable(Level.FINE)) {
-        log.fine("Executing SQL update: " + deleteDiffsSQL);
-      }
+      log.debug("Executing SQL update: {}", deleteDiffsSQL);
       stmt.executeUpdate();
     } catch (SQLException sqle) {
-      log.log(Level.WARNING, "Exception while deleting diffs", sqle);
+      log.warn("Exception while deleting diffs", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.safeClose(null, stmt, conn);
@@ -279,12 +267,10 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
       conn = dataSource.getConnection();
       stmt = conn.prepareStatement(createDiffsSQL);
       stmt.setInt(1, minDiffCount);
-      if (log.isLoggable(Level.FINE)) {
-        log.fine("Executing SQL update: " + createDiffsSQL);
-      }
+      log.debug("Executing SQL update: {}", createDiffsSQL);
       stmt.executeUpdate();
     } catch (SQLException sqle) {
-      log.log(Level.WARNING, "Exception while creating diffs", sqle);
+      log.warn("Exception while creating diffs", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.safeClose(null, stmt, conn);
@@ -298,14 +284,12 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
     try {
       conn = dataSource.getConnection();
       stmt = conn.prepareStatement(diffsExistSQL);
-      if (log.isLoggable(Level.FINE)) {
-        log.fine("Executing SQL query: " + diffsExistSQL);
-      }
+      log.debug("Executing SQL query: {}", diffsExistSQL);
       rs = stmt.executeQuery();
       rs.next();
       return rs.getInt(1) > 0;
     } catch (SQLException sqle) {
-      log.log(Level.WARNING, "Exception while deleting diffs", sqle);
+      log.warn("Exception while deleting diffs", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.safeClose(rs, stmt, conn);
@@ -322,7 +306,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
       try {
         buildAverageDiffs();
       } catch (TasteException te) {
-        log.log(Level.WARNING, "Unexpected exception while refreshing", te);
+        log.warn("Unexpected exception while refreshing", te);
       }
     } finally {
       refreshLock.unlock();

@@ -23,13 +23,13 @@ import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>Implements an "inverse user frequency" transformation, which boosts preference values for items for which few
@@ -47,7 +47,7 @@ import java.util.logging.Logger;
  */
 public final class InverseUserFrequency implements PreferenceTransform2 {
 
-  private static final Logger log = Logger.getLogger(InverseUserFrequency.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(InverseUserFrequency.class);
 
   private final DataModel dataModel;
   private final double logBase;
@@ -110,7 +110,7 @@ public final class InverseUserFrequency implements PreferenceTransform2 {
         iufFactors.set(Collections.unmodifiableMap(newIufFactors));
       }
     } catch (TasteException dme) {
-      log.log(Level.WARNING, "Unable to refresh", dme);
+      log.warn("Unable to refresh", dme);
     }
   }
 

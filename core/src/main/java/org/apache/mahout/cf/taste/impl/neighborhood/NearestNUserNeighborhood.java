@@ -22,6 +22,8 @@ import org.apache.mahout.cf.taste.correlation.UserCorrelation;
 import org.apache.mahout.cf.taste.impl.common.SoftCache;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,8 +31,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>Computes a neigbhorhood consisting of the nearest n {@link User}s to a given {@link User}.
@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  */
 public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
 
-  private static final Logger log = Logger.getLogger(NearestNUserNeighborhood.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(NearestNUserNeighborhood.class);
 
   private final SoftCache<Object, Collection<User>> cache;
 
@@ -93,9 +93,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
     }
 
     public Collection<User> getValue(Object key) throws TasteException {
-      if (log.isLoggable(Level.FINER)) {
-        log.fine("Computing neighborhood around user ID '" + key + '\'');
-      }
+      log.trace("Computing neighborhood around user ID '{}'", key);
 
       DataModel dataModel = getDataModel();
       User theUser = dataModel.getUser(key);
@@ -130,9 +128,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
         neighborhood.add(pair.user);
       }
 
-      if (log.isLoggable(Level.FINER)) {
-        log.fine("UserNeighborhood around user ID '" + key + "' is: " + neighborhood);
-      }
+      log.trace("UserNeighborhood around user ID '{}' is: {}", key, neighborhood);
 
       return Collections.unmodifiableList(neighborhood);
     }

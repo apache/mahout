@@ -38,6 +38,8 @@ import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,15 +50,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>Generates load on the whole implementation, for profiling purposes mostly.</p>
  */
 public final class LoadTest extends TasteTestCase {
 
-  private static final Logger log = Logger.getLogger(LoadTest.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(LoadTest.class);
 
   private static final int NUM_USERS = 1600;
   private static final int NUM_ITEMS = 800;
@@ -68,7 +68,6 @@ public final class LoadTest extends TasteTestCase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    setLogLevel(Level.INFO);
   }
 
   public void testSlopeOneLoad() throws Exception {
@@ -130,7 +129,7 @@ public final class LoadTest extends TasteTestCase {
     }
     long end = System.currentTimeMillis();
     long timeMS = end - start;
-    log.info("Load test completed in " + timeMS + "ms");
+    log.info("Load test completed in {}ms", timeMS);
     assertTrue(timeMS < 1000L * (long) allowedTimeSec);
   }
 

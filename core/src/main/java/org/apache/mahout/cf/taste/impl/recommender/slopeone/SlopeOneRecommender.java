@@ -29,12 +29,12 @@ import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 import org.apache.mahout.cf.taste.recommender.slopeone.DiffStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>A basic "slope one" recommender. (See an <a href="http://www.daniel-lemire.com/fr/abstracts/SDM2005.html">
@@ -46,7 +46,7 @@ import java.util.logging.Logger;
  */
 public final class SlopeOneRecommender extends AbstractRecommender {
 
-  private static final Logger log = Logger.getLogger(SlopeOneRecommender.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(SlopeOneRecommender.class);
 
   private final boolean weighted;
   private final boolean stdDevWeighted;
@@ -102,9 +102,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
     if (rescorer == null) {
       throw new IllegalArgumentException("rescorer is null");
     }
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Recommending items for user ID '" + userID + '\'');
-    }
+    log.debug("Recommending items for user ID '{}'", userID);
 
     User theUser = getDataModel().getUser(userID);
     Set<Item> allItems = diffStorage.getRecommendableItems(userID);
@@ -113,9 +111,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
 
     List<RecommendedItem> topItems = TopItems.getTopItems(howMany, allItems, rescorer, estimator);
 
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Recommendations are: " + topItems);
-    }
+    log.debug("Recommendations are: {}", topItems);
     return topItems;
   }
 

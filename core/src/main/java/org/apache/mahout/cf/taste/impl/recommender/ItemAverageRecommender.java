@@ -26,6 +26,8 @@ import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -35,8 +37,6 @@ import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>A simple recommender that always estimates preference for an {@link Item} to be the average of
@@ -46,7 +46,7 @@ import java.util.logging.Logger;
  */
 public final class ItemAverageRecommender extends AbstractRecommender {
 
-  private static final Logger log = Logger.getLogger(ItemAverageRecommender.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(ItemAverageRecommender.class);
 
   private final Map<Object, RunningAverage> itemAverages;
   private boolean averagesBuilt;
@@ -71,9 +71,7 @@ public final class ItemAverageRecommender extends AbstractRecommender {
     if (rescorer == null) {
       throw new IllegalArgumentException("rescorer is null");
     }
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Recommending items for user ID '" + userID + '\'');
-    }
+    log.debug("Recommending items for user ID '{}'", userID);
     checkAverageDiffsBuilt();
 
     User theUser = getDataModel().getUser(userID);
@@ -83,9 +81,7 @@ public final class ItemAverageRecommender extends AbstractRecommender {
 
     List<RecommendedItem> topItems = TopItems.getTopItems(howMany, allItems, rescorer, estimator);
 
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Recommendations are: " + topItems);
-    }
+    log.debug("Recommendations are: {}", topItems);
     return topItems;
   }
 
@@ -198,7 +194,7 @@ public final class ItemAverageRecommender extends AbstractRecommender {
       try {
         buildAverageDiffs();
       } catch (TasteException te) {
-        log.log(Level.WARNING, "Unexpected excpetion while refreshing", te);
+        log.warn("Unexpected excpetion while refreshing", te);
       }
     } finally {
       refreshLock.unlock();

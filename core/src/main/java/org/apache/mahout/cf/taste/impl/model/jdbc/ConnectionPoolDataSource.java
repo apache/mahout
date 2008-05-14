@@ -21,19 +21,20 @@ import org.apache.commons.dbcp.PoolingDataSource;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.StackObjectPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.logging.Logger;
 
 /**
  * <p>A wrapper {@link DataSource} which pools connections. Why can't Jakarta Commons DBCP provide this directly?</p>
  */
 public final class ConnectionPoolDataSource implements DataSource {
 
-  private static final Logger log = Logger.getLogger(ConnectionPoolDataSource.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(ConnectionPoolDataSource.class);
 
   private final DataSource delegate;
 
@@ -97,12 +98,12 @@ public final class ConnectionPoolDataSource implements DataSource {
     }
 
     public Object makeObject() throws SQLException {
-      log.fine("Obtaining pooled connection");
+      log.debug("Obtaining pooled connection");
       return dataSource.getConnection();
     }
 
     public void destroyObject(Object o) throws SQLException {
-      log.fine("Closing pooled connection");
+      log.debug("Closing pooled connection");
       ((Connection) o).close();
     }
 

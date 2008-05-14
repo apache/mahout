@@ -30,6 +30,8 @@ import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.slopeone.DiffStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,8 +41,6 @@ import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>An implementation of {@link DiffStorage} that merely stores item-item diffs in memory.
@@ -48,7 +48,7 @@ import java.util.logging.Logger;
  */
 public final class MemoryDiffStorage implements DiffStorage {
 
-  private static final Logger log = Logger.getLogger(MemoryDiffStorage.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(MemoryDiffStorage.class);
 
   private final DataModel dataModel;
   private final boolean stdDevWeighted;
@@ -203,9 +203,7 @@ public final class MemoryDiffStorage implements DiffStorage {
       buildAverageDiffsLock.writeLock().lock();
       long averageCount = 0L;
       for (User user : dataModel.getUsers()) {
-        if (log.isLoggable(Level.FINE)) {
-          log.fine("Processing prefs for user " + user + "...");
-        }
+        log.debug("Processing prefs for user {}", user);
         // Save off prefs for the life of this loop iteration
         Preference[] userPreferences = user.getPreferencesAsArray();
         int length = userPreferences.length;
@@ -282,7 +280,7 @@ public final class MemoryDiffStorage implements DiffStorage {
       try {
         buildAverageDiffs();
       } catch (TasteException te) {
-        log.log(Level.WARNING, "Unexpected exception while refreshing", te);
+        log.warn("Unexpected exception while refreshing", te);
       }
     } finally {
       refreshLock.unlock();

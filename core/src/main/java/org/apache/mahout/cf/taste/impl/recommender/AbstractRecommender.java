@@ -23,17 +23,17 @@ import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public abstract class AbstractRecommender implements Recommender {
 
-  private static final Logger log = Logger.getLogger(AbstractRecommender.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(AbstractRecommender.class);
 
   private final DataModel dataModel;
   private final ReentrantLock refreshLock;
@@ -68,8 +68,8 @@ public abstract class AbstractRecommender implements Recommender {
     if (Double.isNaN(value)) {
       throw new IllegalArgumentException("Invalid value: " + value);
     }
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Setting preference for user '" + userID + "', item '" + itemID + "', value " + value);
+    if (log.isDebugEnabled()) {
+      log.debug("Setting preference for user '" + userID + "', item '" + itemID + "', value " + value);
     }
     dataModel.setPreference(userID, itemID, value);
   }
@@ -84,9 +84,7 @@ public abstract class AbstractRecommender implements Recommender {
     if (userID == null || itemID == null) {
       throw new IllegalArgumentException("userID or itemID is null");
     }
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Remove preference for user '" + userID + "', item '" + itemID + '\'');
-    }
+    log.debug("Remove preference for user '{}', item '{}'", userID, itemID);
     dataModel.removePreference(userID, itemID);
   }
 

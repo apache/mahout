@@ -27,9 +27,8 @@ import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.transforms.CorrelationTransform;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform2;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>An implementation of the Pearson correlation. For {@link User}s X and Y, the following values
@@ -57,7 +56,7 @@ import java.util.logging.Logger;
  */
 public final class PearsonCorrelation implements UserCorrelation, ItemCorrelation {
 
-  private static final Logger log = Logger.getLogger(PearsonCorrelation.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(PearsonCorrelation.class);
 
   private final DataModel dataModel;
   private PreferenceInferrer inferrer;
@@ -263,8 +262,8 @@ public final class PearsonCorrelation implements UserCorrelation, ItemCorrelatio
       result = normalizeWeightResult(result, count, dataModel.getNumItems());
     }
 
-    if (log.isLoggable(Level.FINER)) {
-      log.finer("UserCorrelation between " + user1 + " and " + user2 + " is " + result);
+    if (log.isTraceEnabled()) {
+      log.trace("UserCorrelation between " + user1 + " and " + user2 + " is " + result);
     }
     return result;
   }
@@ -345,8 +344,8 @@ public final class PearsonCorrelation implements UserCorrelation, ItemCorrelatio
       result = normalizeWeightResult(result, count, dataModel.getNumUsers());
     }
 
-    if (log.isLoggable(Level.FINER)) {
-      log.finer("UserCorrelation between " + item1 + " and " + item2 + " is " + result);
+    if (log.isTraceEnabled()) {
+      log.trace("UserCorrelation between " + item1 + " and " + item2 + " is " + result);
     }
     return result;
   }

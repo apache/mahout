@@ -29,6 +29,8 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 import org.apache.mahout.cf.taste.recommender.UserBasedRecommender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -36,8 +38,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>A simple {@link Recommender} which uses a given {@link DataModel} and {@link UserNeighborhood}
@@ -45,7 +45,7 @@ import java.util.logging.Logger;
  */
 public final class GenericUserBasedRecommender extends AbstractRecommender implements UserBasedRecommender {
 
-  private static final Logger log = Logger.getLogger(GenericUserBasedRecommender.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(GenericUserBasedRecommender.class);
 
   private final UserNeighborhood neighborhood;
   private final UserCorrelation correlation;
@@ -75,32 +75,24 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
       throw new IllegalArgumentException("rescorer is null");
     }
 
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Recommending items for user ID '" + userID + '\'');
-    }
+    log.debug("Recommending items for user ID '{}'", userID);
 
     User theUser = getDataModel().getUser(userID);
     Collection<User> theNeighborhood = neighborhood.getUserNeighborhood(userID);
-    if (log.isLoggable(Level.FINER)) {
-      log.finer("UserNeighborhood is: " + neighborhood);
-    }
+    log.trace("UserNeighborhood is: {}", neighborhood);
 
     if (theNeighborhood.isEmpty()) {
       return Collections.emptyList();
     }
 
     Set<Item> allItems = getAllOtherItems(theNeighborhood, theUser);
-    if (log.isLoggable(Level.FINER)) {
-      log.finer("Items in neighborhood which user doesn't prefer already are: " + allItems);
-    }
+    log.trace("Items in neighborhood which user doesn't prefer already are: {}", allItems);
 
     TopItems.Estimator<Item> estimator = new Estimator(theUser, theNeighborhood);
 
     List<RecommendedItem> topItems = TopItems.getTopItems(howMany, allItems, rescorer, estimator);
 
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Recommendations are: " + topItems);
-    }
+    log.debug("Recommendations are: {}", topItems);
     return topItems;
   }
 

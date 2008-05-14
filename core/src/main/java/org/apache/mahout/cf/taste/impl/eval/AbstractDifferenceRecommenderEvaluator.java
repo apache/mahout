@@ -30,21 +30,21 @@ import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>Abstract superclass of a couple implementations, providing shared functionality.</p>
  */
 abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEvaluator {
 
-  private static final Logger log = Logger.getLogger(AbstractDifferenceRecommenderEvaluator.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(AbstractDifferenceRecommenderEvaluator.class);
 
   private final Random random;
 
@@ -92,10 +92,8 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
             testPrefs.add(newPref);
           }
         }
-        if (log.isLoggable(Level.FINE)) {
-          log.fine("Training against " + trainingPrefs.size() + " preferences");
-          log.fine("Evaluating accuracy of " + testPrefs.size() + " preferences");
-        }
+        log.debug("Training against {} preferences", trainingPrefs.size());
+        log.debug("Evaluating accuracy of {} preferences", testPrefs.size());
         if (!trainingPrefs.isEmpty()) {
           User trainingUser = new GenericUser<String>(user.getID().toString(), trainingPrefs);
           trainingUsers.add(trainingUser);

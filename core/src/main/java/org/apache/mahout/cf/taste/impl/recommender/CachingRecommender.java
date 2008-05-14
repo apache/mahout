@@ -25,14 +25,14 @@ import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.ref.SoftReference;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>A {@link Recommender} which caches the results from another {@link Recommender} in memory.
@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  */
 public final class CachingRecommender implements Recommender {
 
-  private static final Logger log = Logger.getLogger(CachingRecommender.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(CachingRecommender.class);
 
   private final Recommender recommender;
   private final AtomicInteger maxHowMany;
@@ -137,9 +137,7 @@ public final class CachingRecommender implements Recommender {
    * @param userID clear cached data associated with this user ID
    */
   public void clear(Object userID) {
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Clearing recommendations for user ID '" + userID + "'...");
-    }
+    log.debug("Clearing recommendations for user ID '{}'", userID);
     recommendationCache.remove(userID);
   }
 
@@ -147,7 +145,7 @@ public final class CachingRecommender implements Recommender {
    * <p>Clears all cached recommendations.</p>
    */
   public void clear() {
-    log.fine("Clearing all recommendations...");
+    log.debug("Clearing all recommendations...");
     recommendationCache.clear();
   }
 
@@ -167,9 +165,7 @@ public final class CachingRecommender implements Recommender {
     }
 
     public Recommendations getValue(Object key) throws TasteException {
-      if (log.isLoggable(Level.FINE)) {
-        log.fine("Retrieving new recommendations for user ID '" + key + '\'');
-      }
+      log.debug("Retrieving new recommendations for user ID '{}'", key);
       return new Recommendations(Collections.unmodifiableList(recommender.recommend(key, maxHowMany.get())));
     }
   }
@@ -185,10 +181,7 @@ public final class CachingRecommender implements Recommender {
     public Double getValue(Pair<?, ?> key) throws TasteException {
       Object userID = key.getFirst();
       Object itemID = key.getSecond();
-      if (log.isLoggable(Level.FINE)) {
-        log.fine("Retrieving estimated preference for user ID '" + userID + "\' and item ID \'" +
-                 itemID + '\'');
-      }
+      log.debug("Retrieving estimated preference for user ID '{}' and item ID '{}'", userID, itemID);
       return recommender.estimatePreference(userID, itemID);
     }
   }

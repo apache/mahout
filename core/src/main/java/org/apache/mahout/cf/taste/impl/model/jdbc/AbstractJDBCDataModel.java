@@ -28,6 +28,8 @@ import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.JDBCDataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -43,8 +45,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>An abstract superclass for JDBC-related {@link DataModel} implementations, providing most of the common
@@ -69,7 +69,7 @@ import java.util.logging.Logger;
  */
 public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
-  private static final Logger log = Logger.getLogger(AbstractJDBCDataModel.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(AbstractJDBCDataModel.class);
 
   public static final String DEFAULT_DATASOURCE_NAME = "jdbc/taste";
   public static final String DEFAULT_PREFERENCE_TABLE = "taste_preferences";
@@ -100,7 +100,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
                                   String getPrefsForItemSQL,
                                   String getUsersPreferringItemSQL) {
 
-    log.fine("Creating AbstractJDBCModel...");
+    log.debug("Creating AbstractJDBCModel...");
     checkNotNullAndLog("dataSource", dataSource);
     checkNotNullAndLog("getUserSQL", getUserSQL);
     checkNotNullAndLog("getNumItemsSQL", getNumItemsSQL);
@@ -114,8 +114,8 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     checkNotNullAndLog("getUsersPreferringItemSQL", getUsersPreferringItemSQL);
 
     if (!(dataSource instanceof ConnectionPoolDataSource)) {
-      log.warning("You are not using ConnectionPoolDataSource. Make sure your DataSource pools connections " +
-                  "to the database itself, or database performance will be severely reduced.");
+      log.warn("You are not using ConnectionPoolDataSource. Make sure your DataSource pools connections " +
+               "to the database itself, or database performance will be severely reduced.");
     }
 
     this.dataSource = dataSource;
@@ -134,9 +134,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     if (value == null || value.toString().length() == 0) {
       throw new IllegalArgumentException(argName + " is null or empty");
     }
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(argName + ": " + value);
-    }
+    log.debug("{}: {}", argName, value);
   }
 
   /**
@@ -159,7 +157,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
         try {
           context.close();
         } catch (NamingException ne) {
-          log.log(Level.WARNING, "Error while closing Context; continuing...", ne);
+          log.warn("Error while closing Context; continuing...", ne);
         }
       }
     }
@@ -173,7 +171,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
   }
 
   public final Iterable<? extends User> getUsers() throws TasteException {
-    log.fine("Retrieving all users...");
+    log.debug("Retrieving all users...");
     return new IteratorIterable<User>(new ResultSetUserIterator(dataSource, getUsersSQL));
   }
 
@@ -182,9 +180,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
    */
   public final User getUser(Object id) throws TasteException {
 
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Retrieving user ID '" + id + "'...");
-    }
+    log.debug("Retrieving user ID '{}'", id);
 
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -197,9 +193,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       stmt = conn.prepareStatement(getUserSQL);
       stmt.setObject(1, id);
 
-      if (log.isLoggable(Level.FINE)) {
-        log.fine("Executing SQL query: " + getUserSQL);
-      }
+      log.debug("Executing SQL query: {}", getUserSQL);
       rs = stmt.executeQuery();
 
       List<Preference> prefs = new ArrayList<Preference>();
@@ -214,7 +208,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       return buildUser(idString, prefs);
 
     } catch (SQLException sqle) {
-      log.log(Level.WARNING, "Exception while retrieving user", sqle);
+      log.warn("Exception while retrieving user", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.safeClose(rs, stmt, conn);
@@ -223,7 +217,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
   }
 
   public final Iterable<? extends Item> getItems() throws TasteException {
-    log.fine("Retrieving all items...");
+    log.debug("Retrieving all items...");
     return new IteratorIterable<Item>(new ResultSetItemIterator(dataSource, getItemsSQL));
   }
 
@@ -237,9 +231,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       return buildItem((String) id);
     }
 
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Retrieving item ID '" + id + "'...");
-    }
+    log.debug("Retrieving item ID '{}'", id);
 
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -250,9 +242,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       stmt = conn.prepareStatement(getItemSQL);
       stmt.setObject(1, id);
 
-      if (log.isLoggable(Level.FINE)) {
-        log.fine("Executing SQL query: " + getItemSQL);
-      }
+      log.debug("Executing SQL query: {}", getItemSQL);
       rs = stmt.executeQuery();
       if (rs.next()) {
         return buildItem((String) id);
@@ -260,7 +250,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
         throw new NoSuchElementException();
       }
     } catch (SQLException sqle) {
-      log.log(Level.WARNING, "Exception while retrieving item", sqle);
+      log.warn("Exception while retrieving item", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.safeClose(rs, stmt, conn);
@@ -277,9 +267,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
   }
 
   private List<? extends Preference> doGetPreferencesForItem(Object itemID) throws TasteException {
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Retrieving preferences for item ID '" + itemID + "'...");
-    }
+    log.debug("Retrieving preferences for item ID '{}'", itemID);
     Item item = getItem(itemID);
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -289,9 +277,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       stmt = conn.prepareStatement(getPrefsForItemSQL);
       stmt.setObject(1, itemID);
 
-      if (log.isLoggable(Level.FINE)) {
-        log.fine("Executing SQL query: " + getPrefsForItemSQL);
-      }
+      log.debug("Executing SQL query: {}", getPrefsForItemSQL);
       rs = stmt.executeQuery();
       List<Preference> prefs = new ArrayList<Preference>();
       while (rs.next()) {
@@ -302,7 +288,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       }
       return prefs;
     } catch (SQLException sqle) {
-      log.log(Level.WARNING, "Exception while retrieving prefs for item", sqle);
+      log.warn("Exception while retrieving prefs for item", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.safeClose(rs, stmt, conn);
@@ -318,21 +304,19 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
   }
 
   private int getNumThings(String name, String sql) throws TasteException {
-    log.fine("Retrieving number of " + name + " in model...");
+    log.debug("Retrieving number of {} in model", name);
     Connection conn = null;
     Statement stmt = null;
     ResultSet rs = null;
     try {
       conn = dataSource.getConnection();
       stmt = conn.createStatement();
-      if (log.isLoggable(Level.FINE)) {
-        log.fine("Executing SQL query: " + sql);
-      }
+      log.debug("Executing SQL query: {}", sql);
       rs = stmt.executeQuery(sql);
       rs.next();
       return rs.getInt(1);
     } catch (SQLException sqle) {
-      log.log(Level.WARNING, "Exception while retrieving number of " + name, sqle);
+      log.warn("Exception while retrieving number of " + name, sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.safeClose(rs, stmt, conn);
@@ -348,8 +332,8 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       throw new IllegalArgumentException("Invalid value: " + value);
     }
 
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Setting preference for user '" + userID + "', item '" + itemID + "', value " + value);
+    if (log.isDebugEnabled()) {
+      log.debug("Setting preference for user '" + userID + "', item '" + itemID + "', value " + value);
     }
 
     Connection conn = null;
@@ -364,13 +348,11 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       stmt.setDouble(3, value);
       stmt.setDouble(4, value);
 
-      if (log.isLoggable(Level.FINE)) {
-        log.fine("Executing SQL update: " + setPreferenceSQL);
-      }
+      log.debug("Executing SQL update: {}", setPreferenceSQL);
       stmt.executeUpdate();
 
     } catch (SQLException sqle) {
-      log.log(Level.WARNING, "Exception while setting preference", sqle);
+      log.warn("Exception while setting preference", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.safeClose(null, stmt, conn);
@@ -383,9 +365,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       throw new IllegalArgumentException("userID or itemID is null");
     }
 
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Removing preference for user '" + userID + "', item '" + itemID + '\'');
-    }
+    log.debug("Removing preference for user '{}', item '{}'", userID, itemID);
 
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -397,13 +377,11 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       stmt.setObject(1, userID);
       stmt.setObject(2, itemID);
 
-      if (log.isLoggable(Level.FINE)) {
-        log.fine("Executing SQL update: " + removePreferenceSQL);
-      }
+      log.debug("Executing SQL update: {}", removePreferenceSQL);
       stmt.executeUpdate();
 
     } catch (SQLException sqle) {
-      log.log(Level.WARNING, "Exception while removing preference", sqle);
+      log.warn("Exception while removing preference", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.safeClose(null, stmt, conn);
@@ -476,9 +454,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
         connection = dataSource.getConnection();
         statement = connection.createStatement();
         statement.setFetchDirection(ResultSet.FETCH_UNKNOWN);
-        if (log.isLoggable(Level.FINE)) {
-          log.fine("Executing SQL query: " + getUsersSQL);
-        }
+        log.debug("Executing SQL query: {}", getUsersSQL);
         resultSet = statement.executeQuery(getUsersSQL);
       } catch (SQLException sqle) {
         close();
@@ -498,7 +474,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
             nextExists = true;
           }
         } catch (SQLException sqle) {
-          log.log(Level.WARNING, "Unexpected exception while accessing ResultSet; continuing...", sqle);
+          log.warn("Unexpected exception while accessing ResultSet; continuing...", sqle);
           close();
         }
       }
@@ -532,7 +508,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
         }
       } catch (SQLException sqle) {
         // No good way to handle this since we can't throw an exception
-        log.log(Level.WARNING, "Exception while iterating over users", sqle);
+        log.warn("Exception while iterating over users", sqle);
         close();
         throw new NoSuchElementException("Can't retrieve more due to exception: " + sqle);
       }
@@ -579,9 +555,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
         connection = dataSource.getConnection();
         statement = connection.createStatement();
         statement.setFetchDirection(ResultSet.FETCH_FORWARD);
-        if (log.isLoggable(Level.FINE)) {
-          log.fine("Executing SQL query: " + getItemsSQL);
-        }
+        log.debug("Executing SQL query: {}", getItemsSQL);
         resultSet = statement.executeQuery(getItemsSQL);
       } catch (SQLException sqle) {
         close();
@@ -601,7 +575,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
             nextExists = true;
           }
         } catch (SQLException sqle) {
-          log.log(Level.WARNING, "Unexpected exception while accessing ResultSet; continuing...", sqle);
+          log.warn("Unexpected exception while accessing ResultSet; continuing...", sqle);
           close();
         }
       }
@@ -622,7 +596,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
         }
       } catch (SQLException sqle) {
         // No good way to handle this since we can't throw an exception
-        log.log(Level.WARNING, "Exception while iterating over items", sqle);
+        log.warn("Exception while iterating over items", sqle);
         close();
         throw new NoSuchElementException("Can't retrieve more due to exception: " + sqle);
       }

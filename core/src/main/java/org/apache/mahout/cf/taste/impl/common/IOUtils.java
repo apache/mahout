@@ -17,21 +17,22 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>I/O-related utility methods that don't have a better home.</p>
  */
 public final class IOUtils {
 
-  private static final Logger log = Logger.getLogger(IOUtils.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(IOUtils.class);
 
   private IOUtils() {
   }
@@ -41,7 +42,7 @@ public final class IOUtils {
       try {
         closeable.close();
       } catch (IOException ioe) {
-        log.log(Level.WARNING, "Unexpected exception while closing " + closeable + "; continuing", ioe);
+        log.warn("Unexpected exception while closing " + closeable + "; continuing", ioe);
       }
     }
   }
@@ -53,7 +54,7 @@ public final class IOUtils {
       try {
         closeable.close();
       } catch (SQLException sqle) {
-        log.log(Level.WARNING, "Unexpected exception while closing " + closeable + "; continuing", sqle);
+        log.warn("Unexpected exception while closing " + closeable + "; continuing", sqle);
       }
     }
   }
@@ -63,7 +64,7 @@ public final class IOUtils {
       try {
         closeable.close();
       } catch (SQLException sqle) {
-        log.log(Level.WARNING, "Unexpected exception while closing " + closeable + "; continuing", sqle);
+        log.warn("Unexpected exception while closing " + closeable + "; continuing", sqle);
       }
     }
   }
@@ -73,7 +74,7 @@ public final class IOUtils {
       try {
         closeable.close();
       } catch (SQLException sqle) {
-        log.log(Level.WARNING, "Unexpected exception while closing " + closeable + "; continuing", sqle);
+        log.warn("Unexpected exception while closing " + closeable + "; continuing", sqle);
       }
     }
   }

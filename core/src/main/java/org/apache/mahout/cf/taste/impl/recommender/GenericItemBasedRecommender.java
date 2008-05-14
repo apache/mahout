@@ -29,6 +29,8 @@ import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.ItemBasedRecommender;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,8 +39,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>A simple {@link org.apache.mahout.cf.taste.recommender.Recommender} which uses a given
@@ -57,7 +57,7 @@ import java.util.logging.Logger;
  */
 public final class GenericItemBasedRecommender extends AbstractRecommender implements ItemBasedRecommender {
 
-  private static final Logger log = Logger.getLogger(GenericItemBasedRecommender.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(GenericItemBasedRecommender.class);
 
   private final ItemCorrelation correlation;
   private final ReentrantLock refreshLock;
@@ -84,9 +84,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
       throw new IllegalArgumentException("rescorer is null");
     }
 
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Recommending items for user ID '" + userID + '\'');
-    }
+    log.debug("Recommending items for user ID '{}'", userID);
 
     User theUser = getDataModel().getUser(userID);
     if (getNumPreferences(theUser) == 0) {
@@ -99,9 +97,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
 
     List<RecommendedItem> topItems = TopItems.getTopItems(howMany, allItems, rescorer, estimator);
 
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Recommendations are: " + topItems);
-    }
+    log.debug("Recommendations are: {}", topItems);
     return topItems;
   }
 

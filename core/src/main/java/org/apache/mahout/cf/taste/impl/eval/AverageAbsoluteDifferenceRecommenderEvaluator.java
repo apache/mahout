@@ -23,12 +23,12 @@ import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>A {@link org.apache.mahout.cf.taste.eval.RecommenderEvaluator} which computes the average absolute difference
@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  */
 public final class AverageAbsoluteDifferenceRecommenderEvaluator extends AbstractDifferenceRecommenderEvaluator {
 
-  private static final Logger log = Logger.getLogger(AverageAbsoluteDifferenceRecommenderEvaluator.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(AverageAbsoluteDifferenceRecommenderEvaluator.class);
 
   @Override
   double getEvaluation(Map<User, Collection<Preference>> testUserPrefs,
@@ -57,7 +57,7 @@ public final class AverageAbsoluteDifferenceRecommenderEvaluator extends Abstrac
         } catch (NoSuchElementException nsee) {
           // It's possible that an item exists in the test data but not training data in which case
           // NSEE will be thrown. Just ignore it and move on.
-          log.log(Level.INFO, "Element exists in test data but not training data: " + testUser.getID(), nsee);
+          log.info("Element exists in test data but not training data: {}", testUser.getID(), nsee);
         }
       }
     }

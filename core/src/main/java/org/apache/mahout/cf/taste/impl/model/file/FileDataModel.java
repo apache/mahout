@@ -27,6 +27,8 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -41,8 +43,6 @@ import java.util.NoSuchElementException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>A {@link DataModel} backed by a comma-delimited file. This class assumes that each line of the
@@ -57,7 +57,7 @@ import java.util.logging.Logger;
  */
 public class FileDataModel implements DataModel {
 
-  private static final Logger log = Logger.getLogger(FileDataModel.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(FileDataModel.class);
 
   private static final Timer timer = new Timer(true);
   private static final long RELOAD_CHECK_INTERVAL_MS = 60L * 1000L;
@@ -121,9 +121,7 @@ public class FileDataModel implements DataModel {
       while (notDone) {
         String line = reader.readLine();
         if (line != null && line.length() > 0) {
-          if (log.isLoggable(Level.FINE)) {
-            log.fine("Read line: " + line);
-          }
+          log.debug("Read line: {}", line);
           processLine(line, data);
         } else {
           notDone = false;
@@ -149,9 +147,7 @@ public class FileDataModel implements DataModel {
       data.put(userID, prefs);
     }
     Item item = buildItem(itemID);
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Read item " + item + " for user ID " + userID);
-    }
+      log.debug("Read item '{}' for user ID '{}'", item, userID);
     prefs.add(buildPreference(null, item, preferenceValue));
   }
 
@@ -231,7 +227,7 @@ public class FileDataModel implements DataModel {
       try {
         reload();
       } catch (IOException ioe) {
-        log.log(Level.WARNING, "Unexpected exception while refreshing", ioe);
+        log.warn("Unexpected exception while refreshing", ioe);
       }
     } finally {
       refreshLock.unlock();
@@ -284,12 +280,12 @@ public class FileDataModel implements DataModel {
       if (loaded) {
         long newModified = dataFile.lastModified();
         if (newModified > lastModified) {
-          log.fine("File has changed; reloading...");
+          log.debug("File has changed; reloading...");
           lastModified = newModified;
           try {
             reload();
           } catch (IOException ioe) {
-            log.log(Level.WARNING, "Error while reloading file", ioe);
+            log.warn("Error while reloading file", ioe);
           }
         }
       }

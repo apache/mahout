@@ -30,9 +30,6 @@ import org.apache.mahout.cf.taste.model.User;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public abstract class TasteTestCase extends TestCase {
 
@@ -44,17 +41,7 @@ public abstract class TasteTestCase extends TestCase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    // make sure we always show all log output during tests
-    setLogLevel(Level.FINEST);
     RandomUtils.useTestSeed();
-  }
-
-  protected static void setLogLevel(Level level) {
-    Logger log = Logger.getLogger("org.apache.mahout.cf.taste.impl");
-    log.setLevel(level);
-    for (Handler handler : log.getHandlers()) {
-      handler.setLevel(level);
-    }
   }
 
   public static User getUser(String userID, double... values) {

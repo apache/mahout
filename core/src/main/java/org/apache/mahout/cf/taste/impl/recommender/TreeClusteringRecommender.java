@@ -29,6 +29,8 @@ import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.ClusteringRecommender;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,8 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>A {@link org.apache.mahout.cf.taste.recommender.Recommender} that clusters {@link User}s, then determines
@@ -57,7 +57,7 @@ import java.util.logging.Logger;
  */
 public final class TreeClusteringRecommender extends AbstractRecommender implements ClusteringRecommender {
 
-  private static final Logger log = Logger.getLogger(TreeClusteringRecommender.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(TreeClusteringRecommender.class);
 
   private final ClusterSimilarity clusterSimilarity;
   private final int numClusters;
@@ -175,9 +175,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     }
     checkClustersBuilt();
 
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Recommending items for user ID '" + userID + '\'');
-    }
+    log.debug("Recommending items for user ID '{}'", userID);
 
     List<RecommendedItem> recommended = topRecsByUserID.get(userID);
     if (recommended == null) {
@@ -369,9 +367,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     List<RecommendedItem> topItems =
             TopItems.getTopItems(Integer.MAX_VALUE, allItems, NullRescorer.getItemInstance(), estimator);
 
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Recommendations are: " + topItems);
-    }
+    log.debug("Recommendations are: {}", topItems);
     return Collections.unmodifiableList(topItems);
   }
 
@@ -397,7 +393,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
       try {
         buildClusters();
       } catch (TasteException te) {
-        log.log(Level.WARNING, "Unexpected excpetion while refreshing", te);
+        log.warn("Unexpected excpetion while refreshing", te);
       }
     } finally {
       refreshLock.unlock();
