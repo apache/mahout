@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobClient;
@@ -70,8 +71,18 @@ public final class RecommenderJob {
                                      String userIDFile,
                                      String dataModelFile,
                                      String outputPath,
-                                     int numMappers) {
+                                     int numMappers) throws IOException {
+
+    Path userIDFilePath = new Path(userIDFile);
+    Path outputPathPath = new Path(outputPath);
+
     JobConf jobConf = new JobConf(Recommender.class);
+
+    FileSystem fs = FileSystem.get(jobConf);
+    if (fs.exists(outputPathPath)) {
+      fs.delete(outputPathPath);
+    }
+    fs.mkdirs(outputPathPath);
 
     jobConf.set(RecommenderMapper.RECOMMENDER_CLASS_NAME, recommendClassName);
     jobConf.set(RecommenderMapper.RECOMMENDATIONS_PER_USER, String.valueOf(recommendationsPerUser));
@@ -80,7 +91,7 @@ public final class RecommenderJob {
     jobConf.setJobName(RecommenderJob.class.getSimpleName());
 
     jobConf.setInputFormat(TextInputFormat.class);
-    jobConf.setInputPath(new Path(userIDFile));
+    jobConf.setInputPath(userIDFilePath);
 
     jobConf.setNumMapTasks(numMappers);
     jobConf.setMapperClass(RecommenderMapper.class);
@@ -93,7 +104,8 @@ public final class RecommenderJob {
     jobConf.setOutputValueClass(RecommendedItemsWritable.class);
 
     jobConf.setOutputFormat(TextOutputFormat.class);
-    jobConf.setOutputPath(new Path(outputPath));
+    jobConf.setOutputPath(outputPathPath);
+
     return jobConf;
   }
 

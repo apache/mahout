@@ -17,6 +17,8 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
@@ -31,7 +33,6 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -77,13 +78,17 @@ public final class RecommenderMapper
   @Override
   public void configure(JobConf jobConf) {
     String dataModelFile = jobConf.get(DATA_MODEL_FILE);
+    String recommenderClassName = jobConf.get(RECOMMENDER_CLASS_NAME);
     FileDataModel fileDataModel;
     try {
-      fileDataModel = new FileDataModel(new File(dataModelFile));
-    } catch (FileNotFoundException fnfe) {
-      throw new RuntimeException(fnfe);
+      FileSystem fs = FileSystem.get(jobConf);
+      File tempDataFile = File.createTempFile("mahout-taste-hadoop", "txt");
+      tempDataFile.deleteOnExit();
+      fs.copyToLocalFile(new Path(dataModelFile), new Path(tempDataFile.getAbsolutePath()));
+      fileDataModel = new FileDataModel(tempDataFile);
+    } catch (IOException ioe) {
+      throw new RuntimeException(ioe);
     }
-    String recommenderClassName = jobConf.get(RECOMMENDER_CLASS_NAME);
     try {
       Class<? extends Recommender> recommenderClass =
           (Class<? extends Recommender>) Class.forName(recommenderClassName);
