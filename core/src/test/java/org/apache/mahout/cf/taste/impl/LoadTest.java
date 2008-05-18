@@ -73,14 +73,14 @@ public final class LoadTest extends TasteTestCase {
   public void testSlopeOneLoad() throws Exception {
     DataModel model = createModel();
     Recommender recommender = new CachingRecommender(new SlopeOneRecommender(model));
-    doTestLoad(recommender, 30);
+    doTestLoad(recommender, 60);
   }
 
   public void testItemLoad() throws Exception {
     DataModel model = createModel();
     ItemCorrelation itemCorrelation = new PearsonCorrelation(model);
     Recommender recommender = new CachingRecommender(new GenericItemBasedRecommender(model, itemCorrelation));
-    doTestLoad(recommender, 120);
+    doTestLoad(recommender, 240);
   }
 
   public void testUserLoad() throws Exception {
@@ -89,7 +89,7 @@ public final class LoadTest extends TasteTestCase {
     UserNeighborhood neighborhood = new NearestNUserNeighborhood(10, userCorrelation, model);
     Recommender recommender =
             new CachingRecommender(new GenericUserBasedRecommender(model, neighborhood, userCorrelation));
-    doTestLoad(recommender, 20);
+    doTestLoad(recommender, 40);
   }
 
   private DataModel createModel() {
