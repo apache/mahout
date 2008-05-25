@@ -76,13 +76,12 @@ public final class RecommenderJob {
     Path userIDFilePath = new Path(userIDFile);
     Path outputPathPath = new Path(outputPath);
 
-    JobConf jobConf = new JobConf(Recommender.class);
+    JobConf jobConf = new JobConf(RecommenderJob.class);
 
     FileSystem fs = FileSystem.get(jobConf);
     if (fs.exists(outputPathPath)) {
       fs.delete(outputPathPath);
     }
-    fs.mkdirs(outputPathPath);
 
     jobConf.set(RecommenderMapper.RECOMMENDER_CLASS_NAME, recommendClassName);
     jobConf.set(RecommenderMapper.RECOMMENDATIONS_PER_USER, String.valueOf(recommendationsPerUser));
