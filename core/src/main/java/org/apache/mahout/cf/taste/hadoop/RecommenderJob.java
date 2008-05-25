@@ -24,6 +24,8 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
+import org.apache.hadoop.mapred.FileInputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 
@@ -60,9 +62,8 @@ public final class RecommenderJob {
     String userIDFile = args[2];
     String dataModelFile = args[3];
     String outputPath = args[4];
-    int numMappers = Integer.parseInt(args[5]);
     JobConf jobConf =
-        buildJobConf(recommendClassName, recommendationsPerUser, userIDFile, dataModelFile, outputPath, numMappers);
+        buildJobConf(recommendClassName, recommendationsPerUser, userIDFile, dataModelFile, outputPath);
     JobClient.runJob(jobConf);
   }
 
@@ -70,8 +71,7 @@ public final class RecommenderJob {
                                      int recommendationsPerUser,
                                      String userIDFile,
                                      String dataModelFile,
-                                     String outputPath,
-                                     int numMappers) throws IOException {
+                                     String outputPath) throws IOException {
 
     Path userIDFilePath = new Path(userIDFile);
     Path outputPathPath = new Path(outputPath);
@@ -80,30 +80,26 @@ public final class RecommenderJob {
 
     FileSystem fs = FileSystem.get(jobConf);
     if (fs.exists(outputPathPath)) {
-      fs.delete(outputPathPath);
+      fs.delete(outputPathPath, true);
     }
 
     jobConf.set(RecommenderMapper.RECOMMENDER_CLASS_NAME, recommendClassName);
     jobConf.set(RecommenderMapper.RECOMMENDATIONS_PER_USER, String.valueOf(recommendationsPerUser));
     jobConf.set(RecommenderMapper.DATA_MODEL_FILE, dataModelFile);
 
-    jobConf.setJobName(RecommenderJob.class.getSimpleName());
-
     jobConf.setInputFormat(TextInputFormat.class);
-    jobConf.setInputPath(userIDFilePath);
+    FileInputFormat.setInputPaths(jobConf, userIDFilePath);
 
-    jobConf.setNumMapTasks(numMappers);
     jobConf.setMapperClass(RecommenderMapper.class);
     jobConf.setMapOutputKeyClass(Text.class);
     jobConf.setMapOutputValueClass(RecommendedItemsWritable.class);
 
-    jobConf.setNumReduceTasks(1);
     jobConf.setReducerClass(IdentityReducer.class);
     jobConf.setOutputKeyClass(Text.class);
     jobConf.setOutputValueClass(RecommendedItemsWritable.class);
 
     jobConf.setOutputFormat(TextOutputFormat.class);
-    jobConf.setOutputPath(outputPathPath);
+    FileOutputFormat.setOutputPath(jobConf, outputPathPath);
 
     return jobConf;
   }
