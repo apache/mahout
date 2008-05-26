@@ -62,7 +62,7 @@ public class MeanShiftCanopyJob {
       Path outPath = new Path(output);
       FileSystem fs = FileSystem.get(conf);
       if (fs.exists(outPath)) {
-        fs.delete(outPath);
+        fs.delete(outPath, true);
       }
       fs.mkdirs(outPath);
       // iterate until the clusters converge

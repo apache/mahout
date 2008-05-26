@@ -21,6 +21,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.FileInputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
 
 public class ClusterDriver {
@@ -62,9 +64,9 @@ public class ClusterDriver {
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(Text.class);
 
-    conf.setInputPath(new Path(points));
+    FileInputFormat.setInputPaths(conf, new Path(points));
     Path outPath = new Path(output + "/clusters");
-    conf.setOutputPath(outPath);
+    FileOutputFormat.setOutputPath(conf, outPath);
 
     conf.setMapperClass(ClusterMapper.class);
     conf.setReducerClass(IdentityReducer.class);
@@ -73,7 +75,7 @@ public class ClusterDriver {
     try {
       FileSystem dfs = FileSystem.get(conf);
       if (dfs.exists(outPath))
-        dfs.delete(outPath);
+        dfs.delete(outPath, true);
       JobClient.runJob(conf);
     } catch (Exception e) {
       throw new RuntimeException(e);

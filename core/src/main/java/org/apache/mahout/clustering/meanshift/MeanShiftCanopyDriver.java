@@ -22,6 +22,8 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapred.FileInputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,9 +62,9 @@ public class MeanShiftCanopyDriver {
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(Text.class);
 
-    conf.setInputPath(new Path(input));
+    FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(output);
-    conf.setOutputPath(outPath);
+    FileOutputFormat.setOutputPath(conf, outPath);
 
     conf.setMapperClass(MeanShiftCanopyMapper.class);
     conf.setCombinerClass(MeanShiftCanopyCombiner.class);

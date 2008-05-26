@@ -22,6 +22,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapred.FileInputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
 
 public class CanopyDriver {
 
@@ -58,9 +60,9 @@ public class CanopyDriver {
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(Text.class);
 
-    conf.setInputPath(new Path(input));
+    FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(output);
-    conf.setOutputPath(outPath);
+    FileOutputFormat.setOutputPath(conf, outPath);
 
     conf.setMapperClass(CanopyMapper.class);
     conf.setCombinerClass(CanopyCombiner.class);
@@ -72,7 +74,7 @@ public class CanopyDriver {
     try {
       FileSystem dfs = FileSystem.get(conf);
       if (dfs.exists(outPath))
-        dfs.delete(outPath);
+        dfs.delete(outPath, true);
       JobClient.runJob(conf);
     } catch (Exception e) {
       throw new RuntimeException(e);
