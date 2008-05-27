@@ -55,7 +55,7 @@ public class KMeansJob {
       Path outPath = new Path(output);
       FileSystem fs = FileSystem.get(conf);
       if (fs.exists(outPath)) {
-        fs.delete(outPath);
+        fs.delete(outPath, true);
       }
       fs.mkdirs(outPath);
       KMeansDriver.runJob(input, clustersIn, output, measureClass,

@@ -60,14 +60,6 @@ public class KMeansDriver {
   public static void runJob(String input, String clustersIn, String output,
                             String measureClass, double convergenceDelta, int maxIterations) {
     try {
-      // delete the output directory
-      JobConf conf = new JobConf(KMeansDriver.class);
-      Path outPath = new Path(output);
-      FileSystem fs = FileSystem.get(conf);
-      if (fs.exists(outPath)) {
-        fs.delete(outPath, true);
-      }
-      fs.mkdirs(outPath);
       // iterate until the clusters converge
       boolean converged = false;
       int iteration = 0;
