@@ -397,8 +397,8 @@ public class TestKmeansClustering extends TestCase {
       writer.close();
 
       // now run the Job
-      KMeansDriver.runJob("testdata/points", "testdata/clusters", "output",
-          EuclideanDistanceMeasure.class.getName(), "0.001", "10");
+      KMeansJob.runJob("testdata/points", "testdata/clusters", "output",
+          EuclideanDistanceMeasure.class.getName(), 0.001, 10);
 
       // now compare the expected clusters with actual
       File outDir = new File("output/points");
@@ -449,8 +449,8 @@ public class TestKmeansClustering extends TestCase {
         ManhattanDistanceMeasure.class.getName(), 3.1, 2.1);
 
     // now run the KMeans job
-    KMeansDriver.runJob("testdata/points", "testdata/canopies", "output",
-        EuclideanDistanceMeasure.class.getName(), "0.001", "10");
+    KMeansJob.runJob("testdata/points", "testdata/canopies", "output",
+        EuclideanDistanceMeasure.class.getName(), 0.001, 10);
 
     // now compare the expected clusters with actual
     File outDir = new File("output/points");

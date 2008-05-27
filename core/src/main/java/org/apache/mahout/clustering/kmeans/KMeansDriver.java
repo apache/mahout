@@ -42,8 +42,8 @@ public class KMeansDriver {
     String clusters = args[1];
     String output = args[2];
     String measureClass = args[3];
-    String convergenceDelta = args[4];
-    String maxIterations = args[5];
+    double convergenceDelta = new Double(args[4]);
+    int maxIterations = new Integer(args[5]);
     runJob(input, clusters, output, measureClass, convergenceDelta, maxIterations);
   }
 
@@ -58,8 +58,7 @@ public class KMeansDriver {
    * @param maxIterations    the maximum number of iterations
    */
   public static void runJob(String input, String clustersIn, String output,
-                            String measureClass, String convergenceDelta, String maxIterations) {
-    int maxIter = new Integer(maxIterations);
+                            String measureClass, double convergenceDelta, int maxIterations) {
     try {
       // delete the output directory
       JobConf conf = new JobConf(KMeansDriver.class);
@@ -72,13 +71,14 @@ public class KMeansDriver {
       // iterate until the clusters converge
       boolean converged = false;
       int iteration = 0;
+      String delta = Double.toString(convergenceDelta);
 
-      while (!converged && iteration < maxIter) {
+      while (!converged && iteration < maxIterations) {
         log.info("Iteration {}", iteration);
         // point the output to a new directory per iteration
         String clustersOut = output + "/clusters-" + iteration;
         converged = runIteration(input, clustersIn, clustersOut, measureClass,
-                convergenceDelta);
+                delta);
         // now point the input to the old output directory
         clustersIn = output + "/clusters-" + iteration;
         iteration++;
@@ -86,7 +86,7 @@ public class KMeansDriver {
       // now actually cluster the points
       log.info("Clustering ");
       runClustering(input, clustersIn, output + "/points", measureClass,
-              convergenceDelta);
+              delta);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
