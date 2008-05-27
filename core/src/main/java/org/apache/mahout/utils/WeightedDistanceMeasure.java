@@ -35,7 +35,7 @@ import java.util.List;
 /**
  * Abstract implementation of DistanceMeasure with support for weights.
  */
-public abstract class WeightedDistanceMeasure extends AbstractDistanceMeasure {
+public abstract class WeightedDistanceMeasure implements DistanceMeasure {
 
   protected List<Parameter> parameters;
   protected Parameter<Path> weightsFile;
