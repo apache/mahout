@@ -18,7 +18,7 @@
 package org.apache.mahout.cf.taste.impl.transforms;
 
 import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.transforms.PreferenceTransform2;
+import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
 
 /**
  * <p>Tests {@link ZScore}.</p>
@@ -27,13 +27,13 @@ public final class ZScoreTest extends TransformTestCase {
 
   public void testOnePref() throws Exception {
     User user = getUser("test", 1.0);
-    PreferenceTransform2 zScore = new ZScore();
+    PreferenceTransform zScore = new ZScore();
     assertEquals(0.0, zScore.getTransformedValue(user.getPreferenceFor("0")), EPSILON);
   }
 
   public void testAllSame() throws Exception {
     User user = getUser("test", 1.0, 1.0, 1.0);
-    PreferenceTransform2 zScore = new ZScore();
+    PreferenceTransform zScore = new ZScore();
     assertEquals(0.0, zScore.getTransformedValue(user.getPreferenceFor("0")), EPSILON);
     assertEquals(0.0, zScore.getTransformedValue(user.getPreferenceFor("1")), EPSILON);
     assertEquals(0.0, zScore.getTransformedValue(user.getPreferenceFor("2")), EPSILON);
@@ -41,14 +41,14 @@ public final class ZScoreTest extends TransformTestCase {
 
   public void testStdev() throws Exception {
     User user = getUser("test", -1.0, -2.0);
-    PreferenceTransform2 zScore = new ZScore();
+    PreferenceTransform zScore = new ZScore();
     assertEquals(0.707107, zScore.getTransformedValue(user.getPreferenceFor("0")), EPSILON);
     assertEquals(-0.707107, zScore.getTransformedValue(user.getPreferenceFor("1")), EPSILON);
   }
 
   public void testExample() throws Exception {
     User user = getUser("test", 5.0, 7.0, 9.0);
-    PreferenceTransform2 zScore = new ZScore();
+    PreferenceTransform zScore = new ZScore();
     assertEquals(-1.0, zScore.getTransformedValue(user.getPreferenceFor("0")), EPSILON);
     assertEquals(0.0, zScore.getTransformedValue(user.getPreferenceFor("1")), EPSILON);
     assertEquals(1.0, zScore.getTransformedValue(user.getPreferenceFor("2")), EPSILON);

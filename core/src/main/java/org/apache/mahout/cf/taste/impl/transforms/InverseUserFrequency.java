@@ -22,7 +22,7 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.transforms.PreferenceTransform2;
+import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * number of users who express a preference for each item in your model. If each item has about 100 preferences
  * on average, 100.0 is a good log base.</p>
  */
-public final class InverseUserFrequency implements PreferenceTransform2 {
+public final class InverseUserFrequency implements PreferenceTransform {
 
   private static final Logger log = LoggerFactory.getLogger(InverseUserFrequency.class);
 

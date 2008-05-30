@@ -25,7 +25,7 @@ import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.transforms.CorrelationTransform;
-import org.apache.mahout.cf.taste.transforms.PreferenceTransform2;
+import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,7 @@ abstract class AbstractCorrelation implements UserCorrelation, ItemCorrelation {
 
   private final DataModel dataModel;
   private PreferenceInferrer inferrer;
-  private PreferenceTransform2 prefTransform;
+  private PreferenceTransform prefTransform;
   private CorrelationTransform<Object> correlationTransform;
   private boolean weighted;
 
@@ -83,11 +83,11 @@ abstract class AbstractCorrelation implements UserCorrelation, ItemCorrelation {
     this.inferrer = inferrer;
   }
 
-  public final PreferenceTransform2 getPrefTransform() {
+  public final PreferenceTransform getPrefTransform() {
     return prefTransform;
   }
 
-  public final void setPrefTransform(PreferenceTransform2 prefTransform) {
+  public final void setPrefTransform(PreferenceTransform prefTransform) {
     this.prefTransform = prefTransform;
   }
 

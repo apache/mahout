@@ -23,7 +23,7 @@ import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.SoftCache;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.transforms.PreferenceTransform2;
+import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
 
 /**
  * <p>Normalizes preference values for a {@link User} by converting them to
@@ -36,7 +36,7 @@ import org.apache.mahout.cf.taste.transforms.PreferenceTransform2;
  * transform normalizes away the difference in scale used by the two users so that both
  * have a mean preference of 0.0 and a standard deviation of 1.0.</p>
  */
-public final class ZScore implements PreferenceTransform2 {
+public final class ZScore implements PreferenceTransform {
 
   private final SoftCache<User, RunningAverageAndStdDev> meanAndStdevs;
 
