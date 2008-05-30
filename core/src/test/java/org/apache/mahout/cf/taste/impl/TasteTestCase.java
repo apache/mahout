@@ -44,11 +44,13 @@ public abstract class TasteTestCase extends TestCase {
     RandomUtils.useTestSeed();
   }
 
-  public static User getUser(String userID, double... values) {
+  public static User getUser(String userID, Double... values) {
     List<Preference> prefs = new ArrayList<Preference>(values.length);
     int i = 0;
-    for (double value : values) {
-      prefs.add(new GenericPreference(null, new GenericItem<String>(String.valueOf(i)), value));
+    for (Double value : values) {
+      if (value != null) {
+        prefs.add(new GenericPreference(null, new GenericItem<String>(String.valueOf(i)), value));
+      }
       i++;
     }
     return new GenericUser<String>(userID, prefs);
