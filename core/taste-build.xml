@@ -30,6 +30,10 @@
   <property name="pool.jar" location="lib/commons-pool-1.4.jar"/>
   <property name="proguard.jar" location="lib/proguard.jar"/>
   <property name="servlet.jar" location="lib/servlet-api.jar"/>
+  <property name="hadoop.jar" location="lib/hadoop-0.17.0-core.jar"/>
+  <property name="slf4j-api.jar" location="lib/slf4j-api-1.5.0.jar"/>
+  <property name="slf4j.jar" location="lib/slf4j-jcl-1.5.0.jar"/>
+  <property name="commons-logging.jar" location="lib/commons-logging-1.1.1.jar"/>
 
   <property environment="env"/>
   <property name="name" value="${ant.project.name}"/>
@@ -56,6 +60,8 @@
         <pathelement location="${servlet.jar}"/>
         <pathelement location="${dbcp.jar}"/>
         <pathelement location="${pool.jar}"/>
+        <pathelement location="${hadoop.jar}"/>
+        <pathelement location="${slf4j-api.jar}"/>
       </classpath>
       <include name="org/apache/mahout/cf/taste/**"/>
     </javac>
@@ -106,6 +112,7 @@
       <compilerarg value="-Xlint:all,-serial"/>
       <classpath>
         <pathelement location="${junit.jar}"/>
+        <pathelement location="${slf4j-api.jar}"/>
         <pathelement location="${release-jar}"/>
       </classpath>
       <include name="org/apache/mahout/cf/taste/**"/>
@@ -194,6 +201,9 @@
       <formatter type="plain" usefile="false"/>
       <classpath>
         <pathelement location="${junit.jar}"/>
+        <pathelement location="${slf4j-api.jar}"/>
+        <pathelement location="${slf4j.jar}"/>
+        <pathelement location="${commons-logging.jar}"/>
         <pathelement location="${release-jar}"/>
         <pathelement location="build-test"/>
       </classpath>
