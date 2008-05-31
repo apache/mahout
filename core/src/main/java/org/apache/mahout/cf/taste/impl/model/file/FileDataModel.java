@@ -204,6 +204,11 @@ public class FileDataModel implements DataModel {
     return delegate.getNumUsers();
   }
 
+  public int getNumUsersWithPreferenceFor(Object... itemIDs) throws TasteException {
+    checkLoaded();
+    return delegate.getNumUsersWithPreferenceFor(itemIDs);
+  }
+
   /**
    * @throws UnsupportedOperationException
    */

@@ -33,6 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * <p>A simple {@link DataModel} which uses a given {@link List} of {@link User}s as
@@ -159,6 +161,36 @@ public final class GenericDataModel implements DataModel, Serializable {
 
   public int getNumUsers() {
     return users.size();
+  }
+
+  public int getNumUsersWithPreferenceFor(Object... itemIDs) throws TasteException {
+    if (itemIDs == null) {
+      throw new IllegalArgumentException("itemIDs is null");
+    }
+    int length = itemIDs.length;
+    if (length == 0 || length > 2) {
+      throw new IllegalArgumentException("Illegal number of item IDs: " + length);
+    }
+    if (length == 1) {
+      Preference[] prefs = preferenceForItems.get(itemIDs[0]);
+      return prefs == null ? 0 : prefs.length;
+    } else {
+      Preference[] prefs1 = preferenceForItems.get(itemIDs[0]);
+      Preference[] prefs2 = preferenceForItems.get(itemIDs[1]);
+      if (prefs1 == null || prefs2 == null) {
+        return 0;
+      }
+      Set<Object> users1 = new HashSet<Object>(prefs1.length);
+      for (int i = 0; i < prefs1.length; i++) {
+        users1.add(prefs1[i].getUser().getID());
+      }
+      Set<Object> users2 = new HashSet<Object>(prefs2.length);
+      for (int i = 0; i < prefs2.length; i++) {
+        users2.add(prefs2[i].getUser().getID());
+      }
+      users1.retainAll(users2);
+      return users1.size();
+    }
   }
 
   /**

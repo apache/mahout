@@ -115,6 +115,13 @@ public final class FileDataModelTest extends TasteTestCase {
     assertEquals(4, model.getNumUsers());
   }
 
+  public void testNumUsersPreferring() throws Exception {
+    assertEquals(2, model.getNumUsersWithPreferenceFor("456"));
+    assertEquals(0, model.getNumUsersWithPreferenceFor("111"));
+    assertEquals(0, model.getNumUsersWithPreferenceFor("111", "456"));
+    assertEquals(2, model.getNumUsersWithPreferenceFor("123", "234"));
+  }
+
   public void testSetPreference() throws Exception {
     try {
       model.setPreference(null, null, 0.0);

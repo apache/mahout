@@ -76,7 +76,7 @@ import javax.sql.DataSource;
  *
  * <p>Thanks to Amila Jayasooriya for contributing MySQL notes above as part of Google Summer of Code 2007.</p>
  */
-public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
+public final class MySQLJDBCDataModel extends AbstractJDBCDataModel {
 
   /**
    * <p>Creates a {@link MySQLJDBCDataModel} using the default {@link DataSource}
@@ -155,9 +155,12 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
           // getPrefsForItemSQL
           "SELECT " + preferenceColumn + ", " + userIDColumn + " FROM " +
           preferenceTable + " WHERE " + itemIDColumn + "=? ORDER BY " + userIDColumn,
-          // getUsersPreferringItemSQL
-          "SELECT DISTINCT " + userIDColumn + " FROM " + preferenceTable + " WHERE " + itemIDColumn +
-          "=? ORDER BY " + userIDColumn);
+          // getNumPreferenceForItemSQL
+          "SELECT COUNT(1) FROM " + preferenceTable + " WHERE " + itemIDColumn + "=?",
+          // getNumPreferenceForItemsSQL
+          "SELECT COUNT(1) FROM " + preferenceTable + " tp1 INNER JOIN " + preferenceColumn + " tp2 " +
+          "ON (tp1." + userIDColumn + "=tp2." + userIDColumn + ") " +
+          "WHERE tp1." + itemIDColumn + "=? and tp2." + itemIDColumn + "=?");
   }
 
 }

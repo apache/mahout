@@ -85,6 +85,15 @@ public interface DataModel extends Refreshable {
   int getNumUsers() throws TasteException;
 
   /**
+   * @param itemIDs item IDs to check for
+   * @return the number of users who have expressed a preference for all of the items
+   * @throws TasteException if an error occurs while accessing the data
+   * @throws IllegalArgumentException if itemIDs is null, empty, or larger than 2 elements
+   *  since currently only queries of up to 2 items are needed and supported
+   */
+  int getNumUsersWithPreferenceFor(Object... itemIDs) throws TasteException;
+
+  /**
    * <p>Sets a particular preference (item plus rating) for a user.</p>
    *
    * @param userID user to set preference for

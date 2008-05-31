@@ -35,7 +35,7 @@ import java.util.Properties;
  * If you are using this class to support a major database, consider contributing a specialized implementation
  * of {@link AbstractJDBCDataModel} to the project for this database.</p>
  */
-public class GenericJDBCDataModel extends AbstractJDBCDataModel {
+public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
 
   public static final String DATA_SOURCE_KEY = "dataSource";
   public static final String GET_USER_SQL_KEY = "getUserSQL";
@@ -47,7 +47,8 @@ public class GenericJDBCDataModel extends AbstractJDBCDataModel {
   public static final String GET_ITEMS_SQL_KEY = "getItemsSQL";
   public static final String GET_ITEM_SQL_KEY = "getItemSQL";
   public static final String GET_PREFS_FOR_ITEM_SQL_KEY = "getPrefsForItemSQL";
-  public static final String GET_USERS_PREFERRING_ITEM_SQL_KEY = "getUsersPreferringItemSQL";
+  public static final String GET_NUM_PREFERENCE_FOR_ITEM_KEY = "getNumPreferenceForItemSQL";
+  public static final String GET_NUM_PREFERENCE_FOR_ITEMS_KEY = "getNumPreferenceForItemsSQL";
 
   /**
    * <p>Specifies all SQL queries in a {@link Properties} object. See the <code>*_KEY</code>
@@ -68,7 +69,8 @@ public class GenericJDBCDataModel extends AbstractJDBCDataModel {
           props.getProperty(GET_ITEMS_SQL_KEY),
           props.getProperty(GET_ITEM_SQL_KEY),
           props.getProperty(GET_PREFS_FOR_ITEM_SQL_KEY),
-          props.getProperty(GET_USERS_PREFERRING_ITEM_SQL_KEY));
+          props.getProperty(GET_NUM_PREFERENCE_FOR_ITEM_KEY),
+          props.getProperty(GET_NUM_PREFERENCE_FOR_ITEMS_KEY));
   }
 
   /**

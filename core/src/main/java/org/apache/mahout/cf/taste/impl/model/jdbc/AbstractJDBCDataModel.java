@@ -87,6 +87,8 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
   private final String getItemsSQL;
   private final String getItemSQL;
   private final String getPrefsForItemSQL;
+  private final String getNumPreferenceForItemSQL;
+  private final String getNumPreferenceForItemsSQL;
 
   protected AbstractJDBCDataModel(DataSource dataSource,
                                   String getUserSQL,
@@ -98,7 +100,8 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
                                   String getItemsSQL,
                                   String getItemSQL,
                                   String getPrefsForItemSQL,
-                                  String getUsersPreferringItemSQL) {
+                                  String getNumPreferenceForItemSQL,
+                                  String getNumPreferenceForItemsSQL) {
 
     log.debug("Creating AbstractJDBCModel...");
     checkNotNullAndLog("dataSource", dataSource);
@@ -111,7 +114,8 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     checkNotNullAndLog("getItemsSQL", getItemsSQL);
     checkNotNullAndLog("getItemSQL", getItemSQL);
     checkNotNullAndLog("getPrefsForItemSQL", getPrefsForItemSQL);
-    checkNotNullAndLog("getUsersPreferringItemSQL", getUsersPreferringItemSQL);
+    checkNotNullAndLog("getNumPreferenceForItemSQL", getNumPreferenceForItemSQL);
+    checkNotNullAndLog("getgetNumPreferenceForItemsSQL", getNumPreferenceForItemsSQL);
 
     if (!(dataSource instanceof ConnectionPoolDataSource)) {
       log.warn("You are not using ConnectionPoolDataSource. Make sure your DataSource pools connections " +
@@ -128,6 +132,8 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     this.getItemsSQL = getItemsSQL;
     this.getItemSQL = getItemSQL;
     this.getPrefsForItemSQL = getPrefsForItemSQL;
+    this.getNumPreferenceForItemSQL = getNumPreferenceForItemSQL;
+    this.getNumPreferenceForItemsSQL = getNumPreferenceForItemsSQL;
   }
 
   private static void checkNotNullAndLog(String argName, Object value) {
@@ -303,16 +309,37 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     return getNumThings("users", getNumUsersSQL);
   }
 
-  private int getNumThings(String name, String sql) throws TasteException {
+  public final int getNumUsersWithPreferenceFor(Object... itemIDs) throws TasteException {
+    if (itemIDs == null) {
+      throw new IllegalArgumentException("itemIDs is null");
+    }
+    int length = itemIDs.length;
+    if (length == 0 || length > 2) {
+      throw new IllegalArgumentException("Illegal number of item IDs: " + length);
+    }
+    if (length == 1) {
+      return getNumThings("user preferring item", getNumPreferenceForItemSQL, itemIDs);
+    } else {
+      return getNumThings("user preferring items", getNumPreferenceForItemsSQL, itemIDs);
+    }
+  }
+
+
+  private int getNumThings(String name, String sql, Object... args) throws TasteException {
     log.debug("Retrieving number of {} in model", name);
     Connection conn = null;
-    Statement stmt = null;
+    PreparedStatement stmt = null;
     ResultSet rs = null;
     try {
       conn = dataSource.getConnection();
-      stmt = conn.createStatement();
+      stmt = conn.prepareStatement(sql);
+      if (args != null) {
+        for (int i = 1; i <= args.length; i++) {
+          stmt.setObject(i, args[i - 1]);
+        }
+      }
       log.debug("Executing SQL query: {}", sql);
-      rs = stmt.executeQuery(sql);
+      rs = stmt.executeQuery();
       rs.next();
       return rs.getInt(1);
     } catch (SQLException sqle) {
