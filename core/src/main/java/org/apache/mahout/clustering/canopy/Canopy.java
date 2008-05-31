@@ -262,7 +262,7 @@ public class Canopy {
   public void addPoint(Vector point) {
     numPoints++;
     for (int i = 0; i < point.cardinality(); i++)
-      pointTotal.set(i, new Double(point.get(i) + pointTotal.get(i)));
+      pointTotal.set(i, point.get(i) + pointTotal.get(i));
   }
 
   /**
@@ -317,7 +317,7 @@ public class Canopy {
   public Vector computeCentroid() {
     Vector result = new SparseVector(pointTotal.cardinality());
     for (int i = 0; i < pointTotal.cardinality(); i++)
-      result.set(i, new Double(pointTotal.get(i) / numPoints));
+      result.set(i, pointTotal.get(i) / numPoints);
     return result;
   }
 

@@ -31,7 +31,7 @@ import org.apache.mahout.matrix.Vector;
 public class KMeansReducer extends MapReduceBase implements
         Reducer<Text, Text, Text, Text> {
 
-  double delta = 0;
+  //double delta = 0;
 
   public void reduce(Text key, Iterator<Text> values,
                      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {

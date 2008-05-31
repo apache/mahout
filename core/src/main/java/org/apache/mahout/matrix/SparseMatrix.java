@@ -24,12 +24,7 @@ import org.apache.hadoop.io.WritableComparable;
 
 /**
  * Doubly sparse matrix. Implemented as a Map of SparseVector rows
- */
-/**
- * @author jeff
- * 
- */
-/**
+ *
  * @author jeff
  * 
  */
@@ -50,8 +45,8 @@ public class SparseMatrix extends AbstractMatrix {
   public SparseMatrix(int[] cardinality, Map<Integer, SparseVector> rows) {
     this.cardinality = cardinality.clone();
     this.rows = new HashMap<Integer, Vector>();
-    for (Integer row : rows.keySet())
-      this.rows.put(row, rows.get(row).copy());
+    for (Map.Entry<Integer, SparseVector> entry : rows.entrySet())
+      this.rows.put(entry.getKey(), entry.getValue().copy());
   }
 
   /**

@@ -167,7 +167,7 @@ public interface Parametered extends JobConfigurable {
       private int longestName = 0;
       private int numChars = 100; // a few extra just to be sure
 
-      int distanceBetweenNameAndDescription = 4;
+      //int distanceBetweenNameAndDescription = 4;
 
       private void recurseCount(Parametered parametered) {
         for (Parameter parameter : parametered.getParameters()) {
