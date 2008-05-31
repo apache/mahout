@@ -24,24 +24,21 @@ import org.apache.mahout.cf.taste.model.User;
 import java.io.Serializable;
 
 /**
- * <p>A simple {@link Preference} encapsulating an {@link Item} and preference value.</p>
+ * Encapsulates a simple boolean "preference" for an {@link Item} whose value does not matter (is fixed
+ * at 1.0). This is appropriate in situations where users conceptually have only a general "yes" preference
+ * for items, rather than a spectrum of preference values.
  */
-public class GenericPreference implements Preference, SettableUserPreference, Serializable {
+public final class BooleanPreference implements Preference, SettableUserPreference, Serializable {
 
   private User user;
   private final Item item;
-  private double value;
 
-  public GenericPreference(User user, Item item, double value) {
+  public BooleanPreference(User user, Item item) {
     if (item == null) {
       throw new IllegalArgumentException("item is null");
     }
-    if (Double.isNaN(value)) {
-      throw new IllegalArgumentException("Invalid value: " + value);
-    }
     this.user = user;
     this.item = item;
-    this.value = value;
   }
 
   public User getUser() {
@@ -63,19 +60,16 @@ public class GenericPreference implements Preference, SettableUserPreference, Se
   }
 
   public double getValue() {
-    return value;
+    return 1.0;
   }
 
   public void setValue(double value) {
-    if (Double.isNaN(value)) {
-      throw new IllegalArgumentException("Invalid value: " + value);
-    }
-    this.value = value;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public String toString() {
-    return "GenericPreference[user: " + user + ", item:" + item + ", value:" + value + ']';
+    return "BooleanPreference[user: " + user + ", item:" + item + ']';
   }
 
 }

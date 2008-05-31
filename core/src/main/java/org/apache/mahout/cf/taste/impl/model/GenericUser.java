@@ -54,8 +54,8 @@ public class GenericUser<K extends Comparable<K>> implements User, Serializable 
       values = preferences.toArray(new Preference[preferences.size()]);
       for (Preference preference : values) {
         // Is this hacky?
-        if (preference instanceof GenericPreference) {
-          ((GenericPreference) preference).setUser(this);
+        if (preference instanceof SettableUserPreference) {
+          ((SettableUserPreference) preference).setUser(this);
         }
         data.put(preference.getItem().getID(), preference);
       }
