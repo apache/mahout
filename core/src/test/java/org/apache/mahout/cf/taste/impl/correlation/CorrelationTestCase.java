@@ -22,6 +22,7 @@ import org.apache.mahout.cf.taste.impl.TasteTestCase;
 abstract class CorrelationTestCase extends TasteTestCase {
 
   static void assertCorrelationEquals(double expected, double actual) {
+    assertTrue("Correlation is NaN", !Double.isNaN(actual));
     assertTrue("Correlation > 1.0", actual <= 1.0);
     assertTrue("Correlation < -1.0", actual >= -1.0);
     assertEquals(expected, actual, EPSILON);
