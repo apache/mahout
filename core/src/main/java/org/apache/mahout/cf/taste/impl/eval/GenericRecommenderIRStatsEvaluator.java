@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Random;
+import java.util.List;
 
 /**
  * <p>For each {@link org.apache.mahout.cf.taste.model.User}, these implementation determine the top <code>n</code> preferences,
@@ -91,10 +92,10 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
         }
         int numRelevantItems = relevantItems.size();
         if (numRelevantItems > 0) {
-          Collection<User> trainingUsers = new ArrayList<User>(dataModel.getNumUsers());
+          List<User> trainingUsers = new ArrayList<User>(dataModel.getNumUsers());
           for (User user2 : dataModel.getUsers()) {
             if (id.equals(user2.getID())) {
-              Collection<Preference> trainingPrefs = new ArrayList<Preference>();
+              List<Preference> trainingPrefs = new ArrayList<Preference>();
               Preference[] prefs2 = user2.getPreferencesAsArray();
               for (int i = 0; i < prefs2.length; i++) {
                 Preference pref = prefs2[i];

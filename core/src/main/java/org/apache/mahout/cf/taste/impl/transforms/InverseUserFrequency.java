@@ -23,11 +23,11 @@ import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
+import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -69,7 +69,7 @@ public final class InverseUserFrequency implements PreferenceTransform {
     }
     this.dataModel = dataModel;
     this.logBase = logBase;
-    this.iufFactors = new AtomicReference<Map<Item, Double>>(new HashMap<Item, Double>(1009));
+    this.iufFactors = new AtomicReference<Map<Item, Double>>(new FastMap<Item, Double>());
     refresh();
   }
 
@@ -100,8 +100,7 @@ public final class InverseUserFrequency implements PreferenceTransform {
           }
           numUsers++;
         }
-        Map<Item, Double> newIufFactors =
-                new HashMap<Item, Double>(1 + (4 * itemPreferenceCounts.size()) / 3, 0.75f);
+        Map<Item, Double> newIufFactors = new FastMap<Item, Double>(itemPreferenceCounts.size());
         double logFactor = Math.log(logBase);
         for (Map.Entry<Item, Counters.MutableInteger> entry : itemPreferenceCounts.getEntrySet()) {
           newIufFactors.put(entry.getKey(),

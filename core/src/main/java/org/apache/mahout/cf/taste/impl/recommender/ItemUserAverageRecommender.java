@@ -20,6 +20,7 @@ package org.apache.mahout.cf.taste.impl.recommender;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
+import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -29,7 +30,6 @@ import org.apache.mahout.cf.taste.recommender.Rescorer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -58,8 +58,8 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
 
   public ItemUserAverageRecommender(DataModel dataModel) {
     super(dataModel);
-    this.itemAverages = new HashMap<Object, RunningAverage>(1003);
-    this.userAverages = new HashMap<Object, RunningAverage>(1003);
+    this.itemAverages = new FastMap<Object, RunningAverage>();
+    this.userAverages = new FastMap<Object, RunningAverage>();
     this.overallAveragePrefValue = new FullRunningAverage();
     this.refreshLock = new ReentrantLock();
     this.buildAveragesLock = new ReentrantReadWriteLock();

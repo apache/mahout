@@ -21,6 +21,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.eval.RecommenderBuilder;
 import org.apache.mahout.cf.taste.eval.RecommenderEvaluator;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
+import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
@@ -35,9 +36,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.List;
 
 /**
  * <p>Abstract superclass of a couple implementations, providing shared functionality.</p>
@@ -75,12 +76,12 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     int numUsers = dataModel.getNumUsers();
     Collection<User> trainingUsers = new ArrayList<User>(1 + (int) (trainingPercentage * (double) numUsers));
     Map<User, Collection<Preference>> testUserPrefs =
-            new HashMap<User, Collection<Preference>>(1 + (int) ((1.0 - trainingPercentage) * (double) numUsers));
+            new FastMap<User, Collection<Preference>>(1 + (int) ((1.0 - trainingPercentage) * (double) numUsers));
 
     for (User user : dataModel.getUsers()) {
       if (random.nextDouble() < evaluationPercentage) {
-        Collection<Preference> trainingPrefs = new ArrayList<Preference>();
-        Collection<Preference> testPrefs = new ArrayList<Preference>();
+        List<Preference> trainingPrefs = new ArrayList<Preference>();
+        List<Preference> testPrefs = new ArrayList<Preference>();
         Preference[] prefs = user.getPreferencesAsArray();
         for (int i = 0; i < prefs.length; i++) {
           Preference pref = prefs[i];

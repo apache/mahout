@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl.model;
 
 import org.apache.mahout.cf.taste.impl.common.ArrayIterator;
+import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 
@@ -25,8 +26,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 /**
  * <p>A simple {@link User} which has simply an ID and some {@link Collection} of
@@ -41,7 +42,7 @@ public class GenericUser<K extends Comparable<K>> implements User, Serializable 
   // Use an array for maximum performance
   private final Preference[] values;
 
-  public GenericUser(K id, Collection<Preference> preferences) {
+  public GenericUser(K id, List<Preference> preferences) {
     if (id == null) {
       throw new IllegalArgumentException("id is null");
     }
@@ -50,9 +51,12 @@ public class GenericUser<K extends Comparable<K>> implements User, Serializable 
       data = Collections.emptyMap();
       values = NO_PREFS;
     } else {
-      data = new HashMap<Object, Preference>();
-      values = preferences.toArray(new Preference[preferences.size()]);
-      for (Preference preference : values) {
+      data = new FastMap<Object, Preference>();
+      int size = preferences.size();
+      values = new Preference[size];
+      for (int i = 0; i < size; i++) {
+        Preference preference = preferences.get(i);
+        values[i] = preference;
         // Is this hacky?
         if (preference instanceof SettableUserPreference) {
           ((SettableUserPreference) preference).setUser(this);

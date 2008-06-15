@@ -17,7 +17,8 @@
 
 package org.apache.mahout.cf.taste.impl.transforms;
 
-import java.util.HashMap;
+import org.apache.mahout.cf.taste.impl.common.FastMap;
+
 import java.util.Map;
 
 /**
@@ -25,7 +26,7 @@ import java.util.Map;
  */
 final class Counters<T> {
 
-  private final Map<T, MutableInteger> counts = new HashMap<T, MutableInteger>(1009);
+  private final Map<T, MutableInteger> counts = new FastMap<T, MutableInteger>();
 
   void increment(T key) {
     MutableInteger count = counts.get(key);

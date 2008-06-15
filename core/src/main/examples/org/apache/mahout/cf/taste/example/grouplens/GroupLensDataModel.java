@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.example.grouplens;
 
+import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.model.Item;
@@ -32,7 +33,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -54,7 +54,7 @@ public final class GroupLensDataModel extends FileDataModel {
     super(convertGLFile(ratingsFile, true));
     File convertedMoviesFile = convertGLFile(moviesFile, false);
     BufferedReader reader = new BufferedReader(new FileReader(convertedMoviesFile));
-    movieMap = new HashMap<String, Movie>(5001);
+    movieMap = new FastMap<String, Movie>(5001);
     try {
       for (String line; (line = reader.readLine()) != null;) {
         String[] tokens = line.split(",");

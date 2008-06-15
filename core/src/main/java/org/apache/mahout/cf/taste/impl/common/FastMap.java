@@ -49,8 +49,7 @@ public final class FastMap<K, V> implements Map<K, V> {
   public static final int NO_MAX_SIZE = Integer.MAX_VALUE;
 
   /**
-   * Dummy object used to represent a key that has been removed. Package-private to allow direct access
-   * by inner classes. No harm in exposing it.
+   * Dummy object used to represent a key that has been removed.
    */
   private static final Object REMOVED = new Object();
 

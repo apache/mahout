@@ -33,7 +33,6 @@ import org.apache.mahout.cf.taste.recommender.slopeone.DiffStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -100,8 +99,8 @@ public final class MemoryDiffStorage implements DiffStorage {
     this.stdDevWeighted = stdDevWeighted;
     this.compactAverages = compactAverages;
     this.maxEntries = maxEntries;
-    this.averageDiffs = new FastMap<Object, Map<Object, RunningAverage>>(1003);
-    this.averageItemPref = new FastMap<Object, RunningAverage>(101);
+    this.averageDiffs = new FastMap<Object, Map<Object, RunningAverage>>();
+    this.averageItemPref = new FastMap<Object, RunningAverage>();
     this.buildAverageDiffsLock = new ReentrantReadWriteLock();
     this.refreshLock = new ReentrantLock();
     buildAverageDiffs();
@@ -213,7 +212,7 @@ public final class MemoryDiffStorage implements DiffStorage {
           Object itemIDA = prefA.getItem().getID();
           Map<Object, RunningAverage> aMap = averageDiffs.get(itemIDA);
           if (aMap == null) {
-            aMap = new HashMap<Object, RunningAverage>();
+            aMap = new FastMap<Object, RunningAverage>();
             averageDiffs.put(itemIDA, aMap);
           }
           for (int j = i + 1; j < length; j++) {

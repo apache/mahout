@@ -22,6 +22,7 @@ import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
+import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -35,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -341,7 +341,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
 
   private static Map<Object, List<RecommendedItem>> computeTopRecsPerUserID(
           Iterable<Collection<User>> clusters) throws TasteException {
-    Map<Object, List<RecommendedItem>> recsPerUser = new HashMap<Object, List<RecommendedItem>>();
+    Map<Object, List<RecommendedItem>> recsPerUser = new FastMap<Object, List<RecommendedItem>>();
     for (Collection<User> cluster : clusters) {
       List<RecommendedItem> recs = computeTopRecsForCluster(cluster);
       for (User user : cluster) {
@@ -372,7 +372,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   }
 
   private static Map<Object, Collection<User>> computeClustersPerUserID(Collection<Collection<User>> clusters) {
-    Map<Object, Collection<User>> clustersPerUser = new HashMap<Object, Collection<User>>(clusters.size());
+    Map<Object, Collection<User>> clustersPerUser = new FastMap<Object, Collection<User>>(clusters.size());
     for (Collection<User> cluster : clusters) {
       for (User user : cluster) {
         clustersPerUser.put(user.getID(), cluster);

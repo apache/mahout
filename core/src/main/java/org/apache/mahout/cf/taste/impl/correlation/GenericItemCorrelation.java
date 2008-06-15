@@ -21,11 +21,11 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.correlation.ItemCorrelation;
 import org.apache.mahout.cf.taste.impl.common.IteratorIterable;
 import org.apache.mahout.cf.taste.impl.common.IteratorUtils;
+import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +43,7 @@ import java.util.NoSuchElementException;
  */
 public final class GenericItemCorrelation implements ItemCorrelation {
 
-  private final Map<Item, Map<Item, Double>> correlationMaps = new HashMap<Item, Map<Item, Double>>(1009);
+  private final Map<Item, Map<Item, Double>> correlationMaps = new FastMap<Item, Map<Item, Double>>();
 
   /**
    * <p>Creates a {@link GenericItemCorrelation} from a precomputed list of {@link ItemItemCorrelation}s. Each
@@ -88,8 +88,7 @@ public final class GenericItemCorrelation implements ItemCorrelation {
    * @param dataModel data model to get {@link Item}s from
    * @throws TasteException if an error occurs while accessing the {@link DataModel} items
    */
-  public GenericItemCorrelation(ItemCorrelation otherCorrelation, DataModel dataModel)
-          throws TasteException {
+  public GenericItemCorrelation(ItemCorrelation otherCorrelation, DataModel dataModel) throws TasteException {
     List<? extends Item> items = IteratorUtils.iterableToList(dataModel.getItems());
     Iterator<ItemItemCorrelation> it = new DataModelCorrelationsIterator(otherCorrelation, items);
     initCorrelationMaps(new IteratorIterable<ItemItemCorrelation>(it));
@@ -134,7 +133,7 @@ public final class GenericItemCorrelation implements ItemCorrelation {
         }
         Map<Item, Double> map = correlationMaps.get(item1);
         if (map == null) {
-          map = new HashMap<Item, Double>(1009);
+          map = new FastMap<Item, Double>();
           correlationMaps.put(item1, map);
         }
         map.put(item2, iic.getValue());

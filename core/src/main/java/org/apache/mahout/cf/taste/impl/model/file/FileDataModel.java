@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.impl.model.file;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.IOUtils;
+import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
@@ -36,7 +37,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -95,7 +95,7 @@ public class FileDataModel implements DataModel {
   protected void reload() throws IOException {
     try {
       reloadLock.lock();
-      Map<String, List<Preference>> data = new HashMap<String, List<Preference>>(1003);
+      Map<String, List<Preference>> data = new FastMap<String, List<Preference>>();
 
       processFile(data);
 

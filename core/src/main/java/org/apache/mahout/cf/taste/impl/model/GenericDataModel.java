@@ -20,6 +20,7 @@ package org.apache.mahout.cf.taste.impl.model;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.ArrayIterator;
 import org.apache.mahout.cf.taste.impl.common.EmptyIterable;
+import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -29,7 +30,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -63,11 +63,11 @@ public final class GenericDataModel implements DataModel, Serializable {
       throw new IllegalArgumentException("users is null");
     }
 
-    this.userMap = new HashMap<Object, User>();
-    this.itemMap = new HashMap<Object, Item>();
+    this.userMap = new FastMap<Object, User>();
+    this.itemMap = new FastMap<Object, Item>();
     // I'm abusing generics a little here since I want to use this (huge) map to hold Lists,
     // then arrays, and don't want to allocate two Maps at once here.
-    Map<Object, Object> prefsForItems = new HashMap<Object, Object>();
+    Map<Object, Object> prefsForItems = new FastMap<Object, Object>();
     for (User user : users) {
       userMap.put(user.getID(), user);
       Preference[] prefsArray = user.getPreferencesAsArray();
