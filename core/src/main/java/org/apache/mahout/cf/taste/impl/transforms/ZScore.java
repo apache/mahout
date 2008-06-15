@@ -20,7 +20,7 @@ package org.apache.mahout.cf.taste.impl.transforms;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
-import org.apache.mahout.cf.taste.impl.common.SoftCache;
+import org.apache.mahout.cf.taste.impl.common.Cache;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
@@ -38,10 +38,10 @@ import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
  */
 public final class ZScore implements PreferenceTransform {
 
-  private final SoftCache<User, RunningAverageAndStdDev> meanAndStdevs;
+  private final Cache<User, RunningAverageAndStdDev> meanAndStdevs;
 
   public ZScore() {
-    this.meanAndStdevs = new SoftCache<User, RunningAverageAndStdDev>(new MeanStdevRetriever());
+    this.meanAndStdevs = new Cache<User, RunningAverageAndStdDev>(new MeanStdevRetriever());
     refresh();
   }
 
@@ -65,7 +65,7 @@ public final class ZScore implements PreferenceTransform {
     return "ZScore";
   }
 
-  private static class MeanStdevRetriever implements SoftCache.Retriever<User, RunningAverageAndStdDev> {
+  private static class MeanStdevRetriever implements Cache.Retriever<User, RunningAverageAndStdDev> {
 
     public RunningAverageAndStdDev getValue(User user) throws TasteException {
       RunningAverageAndStdDev running = new FullRunningAverageAndStdDev();

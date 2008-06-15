@@ -19,7 +19,7 @@ package org.apache.mahout.cf.taste.impl.neighborhood;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.correlation.UserCorrelation;
-import org.apache.mahout.cf.taste.impl.common.SoftCache;
+import org.apache.mahout.cf.taste.impl.common.Cache;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
 import org.slf4j.Logger;
@@ -40,7 +40,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
 
   private static final Logger log = LoggerFactory.getLogger(NearestNUserNeighborhood.class);
 
-  private final SoftCache<Object, Collection<User>> cache;
+  private final Cache<Object, Collection<User>> cache;
 
   /**
    * @param n neighborhood size
@@ -71,7 +71,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
     if (n < 1) {
       throw new IllegalArgumentException("n must be at least 1");
     }
-    this.cache = new SoftCache<Object, Collection<User>>(new Retriever(n), dataModel.getNumUsers());
+    this.cache = new Cache<Object, Collection<User>>(new Retriever(n), dataModel.getNumUsers());
   }
 
   public Collection<User> getUserNeighborhood(Object userID) throws TasteException {
@@ -84,7 +84,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
   }
 
 
-  private final class Retriever implements SoftCache.Retriever<Object, Collection<User>> {
+  private final class Retriever implements Cache.Retriever<Object, Collection<User>> {
 
     private final int n;
 

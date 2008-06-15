@@ -19,7 +19,7 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.Pair;
-import org.apache.mahout.cf.taste.impl.common.SoftCache;
+import org.apache.mahout.cf.taste.impl.common.Cache;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
@@ -45,8 +45,8 @@ public final class CachingRecommender implements Recommender {
 
   private final Recommender recommender;
   private final AtomicInteger maxHowMany;
-  private final SoftCache<Object, Recommendations> recommendationCache;
-  private final SoftCache<Pair<?, ?>, Double> estimatedPrefCache;
+  private final Cache<Object, Recommendations> recommendationCache;
+  private final Cache<Pair<?, ?>, Double> estimatedPrefCache;
   private final ReentrantLock refreshLock;
 
   public CachingRecommender(Recommender recommender) throws TasteException {
@@ -58,11 +58,11 @@ public final class CachingRecommender implements Recommender {
     // Use "num users" as an upper limit on cache size. Rough guess.
     int numUsers = recommender.getDataModel().getNumUsers();
     this.recommendationCache =
-            new SoftCache<Object, Recommendations>(
+            new Cache<Object, Recommendations>(
                     new RecommendationRetriever(this.recommender, this.maxHowMany),
                     numUsers);
     this.estimatedPrefCache =
-            new SoftCache<Pair<?, ?>, Double>(new EstimatedPrefRetriever(this.recommender), numUsers);
+            new Cache<Pair<?, ?>, Double>(new EstimatedPrefRetriever(this.recommender), numUsers);
     this.refreshLock = new ReentrantLock();
   }
 
@@ -154,7 +154,7 @@ public final class CachingRecommender implements Recommender {
     return "CachingRecommender[recommender:" + recommender + ']';
   }
 
-  private static final class RecommendationRetriever implements SoftCache.Retriever<Object, Recommendations> {
+  private static final class RecommendationRetriever implements Cache.Retriever<Object, Recommendations> {
 
     private final Recommender recommender;
     private final AtomicInteger maxHowMany;
@@ -170,7 +170,7 @@ public final class CachingRecommender implements Recommender {
     }
   }
 
-  private static final class EstimatedPrefRetriever implements SoftCache.Retriever<Pair<?, ?>, Double> {
+  private static final class EstimatedPrefRetriever implements Cache.Retriever<Pair<?, ?>, Double> {
 
     private final Recommender recommender;
 

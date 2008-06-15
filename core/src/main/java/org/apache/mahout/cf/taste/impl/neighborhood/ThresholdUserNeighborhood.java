@@ -19,7 +19,7 @@ package org.apache.mahout.cf.taste.impl.neighborhood;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.correlation.UserCorrelation;
-import org.apache.mahout.cf.taste.impl.common.SoftCache;
+import org.apache.mahout.cf.taste.impl.common.Cache;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
 import org.slf4j.Logger;
@@ -40,7 +40,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
 
   private static final Logger log = LoggerFactory.getLogger(ThresholdUserNeighborhood.class);
 
-  private final SoftCache<Object, Collection<User>> cache;
+  private final Cache<Object, Collection<User>> cache;
 
   /**
    * @param threshold similarity threshold
@@ -74,7 +74,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
     if (Double.isNaN(threshold)) {
       throw new IllegalArgumentException("threshold must not be NaN");
     }
-    this.cache = new SoftCache<Object, Collection<User>>(new Retriever(threshold), dataModel.getNumUsers());
+    this.cache = new Cache<Object, Collection<User>>(new Retriever(threshold), dataModel.getNumUsers());
   }
 
   public Collection<User> getUserNeighborhood(Object userID) throws TasteException {
@@ -87,7 +87,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
   }
 
 
-  private final class Retriever implements SoftCache.Retriever<Object, Collection<User>> {
+  private final class Retriever implements Cache.Retriever<Object, Collection<User>> {
 
     private final double threshold;
 

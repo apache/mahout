@@ -21,7 +21,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.correlation.PreferenceInferrer;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
-import org.apache.mahout.cf.taste.impl.common.SoftCache;
+import org.apache.mahout.cf.taste.impl.common.Cache;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -34,12 +34,12 @@ import org.apache.mahout.cf.taste.model.User;
  */
 public final class AveragingPreferenceInferrer implements PreferenceInferrer {
 
-  private static final SoftCache.Retriever<User, Double> RETRIEVER = new PrefRetriever();
+  private static final Cache.Retriever<User, Double> RETRIEVER = new PrefRetriever();
 
-  private final SoftCache<User, Double> averagePreferenceValue;
+  private final Cache<User, Double> averagePreferenceValue;
 
   public AveragingPreferenceInferrer(DataModel dataModel) throws TasteException {
-    averagePreferenceValue = new SoftCache<User, Double>(RETRIEVER, dataModel.getNumUsers());
+    averagePreferenceValue = new Cache<User, Double>(RETRIEVER, dataModel.getNumUsers());
     refresh();
   }
 
@@ -54,7 +54,7 @@ public final class AveragingPreferenceInferrer implements PreferenceInferrer {
     averagePreferenceValue.clear();
   }
 
-  private static final class PrefRetriever implements SoftCache.Retriever<User, Double> {
+  private static final class PrefRetriever implements Cache.Retriever<User, Double> {
 
     public Double getValue(User key) {
       RunningAverage average = new FullRunningAverage();
