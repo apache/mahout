@@ -18,7 +18,6 @@
 package org.apache.mahout.cf.taste.transforms;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
-import org.apache.mahout.cf.taste.common.TasteException;
 
 /**
  * <p>Implementations encapsulate some transformation on correlation values between two
@@ -34,6 +33,6 @@ public interface CorrelationTransform<T> extends Refreshable {
    * (should be in [-1,1])
    * @return transformed correlation (should be in [-1,1])
    */
-  double transformCorrelation(T thing1, T thing2, double value) throws TasteException;
+  double transformCorrelation(T thing1, T thing2, double value);
 
 }

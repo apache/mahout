@@ -48,7 +48,7 @@ public class Pair<A, B> {
            isEqualOrNulls(second, otherPair.second);
   }
 
-  static boolean isEqualOrNulls(Object obj1, Object obj2) {
+  private static boolean isEqualOrNulls(Object obj1, Object obj2) {
     return obj1 == null ? obj2 == null : obj1.equals(obj2);
   }
 
@@ -60,7 +60,7 @@ public class Pair<A, B> {
     return (firstHash >>> 16 | firstHash << 16) ^ hashCodeNull(second);
   }
 
-  static int hashCodeNull(Object obj) {
+  private static int hashCodeNull(Object obj) {
     return obj == null ? 0 : obj.hashCode();
   }
 

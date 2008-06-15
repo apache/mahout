@@ -202,41 +202,7 @@ public final class MemoryDiffStorage implements DiffStorage {
       buildAverageDiffsLock.writeLock().lock();
       long averageCount = 0L;
       for (User user : dataModel.getUsers()) {
-        log.debug("Processing prefs for user {}", user);
-        // Save off prefs for the life of this loop iteration
-        Preference[] userPreferences = user.getPreferencesAsArray();
-        int length = userPreferences.length;
-        for (int i = 0; i < length; i++) {
-          Preference prefA = userPreferences[i];
-          double prefAValue = prefA.getValue();
-          Object itemIDA = prefA.getItem().getID();
-          Map<Object, RunningAverage> aMap = averageDiffs.get(itemIDA);
-          if (aMap == null) {
-            aMap = new FastMap<Object, RunningAverage>();
-            averageDiffs.put(itemIDA, aMap);
-          }
-          for (int j = i + 1; j < length; j++) {
-            // This is a performance-critical block
-            Preference prefB = userPreferences[j];
-            Object itemIDB = prefB.getItem().getID();
-            RunningAverage average = aMap.get(itemIDB);
-            if (average == null && averageCount < maxEntries) {
-              average = buildRunningAverage();
-              aMap.put(itemIDB, average);
-              averageCount++;
-            }
-            if (average != null) {
-              average.addDatum(prefB.getValue() - prefAValue);
-            }
-
-          }
-          RunningAverage itemAverage = averageItemPref.get(itemIDA);
-          if (itemAverage == null) {
-            itemAverage = buildRunningAverage();
-            averageItemPref.put(itemIDA, itemAverage);
-          }
-          itemAverage.addDatum(prefAValue);
-        }
+        averageCount = processOneUser(averageCount, user);
       }
 
       // Go back and prune inconsequential diffs. "Inconsequential" means, here, an average
@@ -259,6 +225,45 @@ public final class MemoryDiffStorage implements DiffStorage {
     } finally {
       buildAverageDiffsLock.writeLock().unlock();
     }
+  }
+
+  private long processOneUser(long averageCount, User user) {
+    log.debug("Processing prefs for user {}", user);
+    // Save off prefs for the life of this loop iteration
+    Preference[] userPreferences = user.getPreferencesAsArray();
+    int length = userPreferences.length;
+    for (int i = 0; i < length; i++) {
+      Preference prefA = userPreferences[i];
+      double prefAValue = prefA.getValue();
+      Object itemIDA = prefA.getItem().getID();
+      Map<Object, RunningAverage> aMap = averageDiffs.get(itemIDA);
+      if (aMap == null) {
+        aMap = new FastMap<Object, RunningAverage>();
+        averageDiffs.put(itemIDA, aMap);
+      }
+      for (int j = i + 1; j < length; j++) {
+        // This is a performance-critical block
+        Preference prefB = userPreferences[j];
+        Object itemIDB = prefB.getItem().getID();
+        RunningAverage average = aMap.get(itemIDB);
+        if (average == null && averageCount < maxEntries) {
+          average = buildRunningAverage();
+          aMap.put(itemIDB, average);
+          averageCount++;
+        }
+        if (average != null) {
+          average.addDatum(prefB.getValue() - prefAValue);
+        }
+
+      }
+      RunningAverage itemAverage = averageItemPref.get(itemIDA);
+      if (itemAverage == null) {
+        itemAverage = buildRunningAverage();
+        averageItemPref.put(itemIDA, itemAverage);
+      }
+      itemAverage.addDatum(prefAValue);
+    }
+    return averageCount;
   }
 
   private RunningAverage buildRunningAverage() {

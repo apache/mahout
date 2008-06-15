@@ -65,11 +65,6 @@ public final class LoadTest extends TasteTestCase {
 
   private final Random random = RandomUtils.getRandom();
 
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-  }
-
   public void testSlopeOneLoad() throws Exception {
     DataModel model = createModel();
     Recommender recommender = new CachingRecommender(new SlopeOneRecommender(model));

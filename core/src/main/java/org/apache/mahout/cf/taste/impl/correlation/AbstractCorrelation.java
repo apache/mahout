@@ -50,7 +50,7 @@ abstract class AbstractCorrelation implements UserCorrelation, ItemCorrelation {
    *
    * @param dataModel
    */
-  public AbstractCorrelation(DataModel dataModel) {
+  AbstractCorrelation(DataModel dataModel) {
     this(dataModel, false);
   }
 
@@ -60,7 +60,7 @@ abstract class AbstractCorrelation implements UserCorrelation, ItemCorrelation {
    * @param dataModel
    * @param weighted
    */
-  public AbstractCorrelation(DataModel dataModel, boolean weighted) {
+  AbstractCorrelation(DataModel dataModel, boolean weighted) {
     if (dataModel == null) {
       throw new IllegalArgumentException("dataModel is null");
     }

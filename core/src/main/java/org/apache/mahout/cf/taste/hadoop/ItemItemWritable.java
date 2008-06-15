@@ -23,8 +23,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-/**
- */
 public final class ItemItemWritable implements WritableComparable {
 
   private String itemAID;

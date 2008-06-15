@@ -179,11 +179,11 @@ public final class TopItems {
       return user.getPreferencesAsArray();
     }
 
-    public User getUser() {
+    User getUser() {
       return user;
     }
 
-    public double getSimilarity() {
+    double getSimilarity() {
       return similarity;
     }
 
