@@ -300,6 +300,13 @@
         <fileset dir="${src}/test/java" includes="**/${testcase}.java"/>
       </batchtest>
     </junit>
+    <junitreport todir="${junit.output.dir}">
+      <fileset dir="${junit.output.dir}">
+        <include name="TEST-*.xml"/>
+      </fileset>
+      <report format="frames" todir="${junit.output.dir}/html"/>
+    </junitreport>
+
     <!-- create this file, then if we don't fail, delete it -->
     <!-- this meme makes it easy to tell if contribs have failed later -->
     <echo file="${dest}/junitfailed.flag">MAYBE</echo>
