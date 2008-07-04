@@ -218,9 +218,12 @@ abstract class AbstractCorrelation implements UserCorrelation, ItemCorrelation {
     double n = (double) count;
     double meanX = sumX / n;
     double meanY = sumY / n;
-    double centeredSumXY = sumXY - meanY * sumX - meanX * sumY + n * meanX * meanY;
-    double centeredSumX2 = sumX2 - 2.0 * meanX * sumX + n * meanX * meanX;
-    double centeredSumY2 = sumY2 - 2.0 * meanY * sumY + n * meanY * meanY;
+    // double centeredSumXY = sumXY - meanY * sumX - meanX * sumY + n * meanX * meanY;
+    double centeredSumXY = sumXY - meanY * sumX;
+    // double centeredSumX2 = sumX2 - 2.0 * meanX * sumX + n * meanX * meanX;
+    double centeredSumX2 = sumX2 - meanX * sumX;
+    // double centeredSumY2 = sumY2 - 2.0 * meanY * sumY + n * meanY * meanY;
+    double centeredSumY2 = sumY2 - meanY * sumY;
 
     double result = computeResult(count, centeredSumXY, centeredSumX2, centeredSumY2, sumXYdiff2);
 
@@ -303,9 +306,12 @@ abstract class AbstractCorrelation implements UserCorrelation, ItemCorrelation {
     double n = (double) count;
     double meanX = sumX / n;
     double meanY = sumY / n;
-    double centeredSumXY = sumXY - meanY * sumX - meanX * sumY + n * meanX * meanY;
-    double centeredSumX2 = sumX2 - 2.0 * meanX * sumX + n * meanX * meanX;
-    double centeredSumY2 = sumY2 - 2.0 * meanY * sumY + n * meanY * meanY;
+    // double centeredSumXY = sumXY - meanY * sumX - meanX * sumY + n * meanX * meanY;
+    double centeredSumXY = sumXY - meanY * sumX;
+    // double centeredSumX2 = sumX2 - 2.0 * meanX * sumX + n * meanX * meanX;
+    double centeredSumX2 = sumX2 - meanX * sumX;
+    // double centeredSumY2 = sumY2 - 2.0 * meanY * sumY + n * meanY * meanY;
+    double centeredSumY2 = sumY2 - meanY * sumY;
 
     double result = computeResult(count, centeredSumXY, centeredSumX2, centeredSumY2, sumXYdiff2);
 
