@@ -25,7 +25,7 @@ import java.util.Iterator;
  */
 public final class IteratorIterable<T> implements Iterable<T> {
 
-  private final Iterator<T> iterator;
+  private Iterator<T> iterator;
 
   /**
    * <p>Constructs an {@link IteratorIterable} for an {@link Iterator}.</p>
@@ -40,7 +40,12 @@ public final class IteratorIterable<T> implements Iterable<T> {
   }
 
   public Iterator<T> iterator() {
-    return iterator;
+    if (iterator == null) {
+      throw new IllegalStateException("iterator() has already been called");
+    }
+    Iterator<T> result = iterator;
+    iterator = null;
+    return result;
   }
 
   @Override
