@@ -48,6 +48,9 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
     List<RecommendedItem> recommended = recommender.recommend("test1", 1);
     assertNotNull(recommended);
     assertEquals(0, recommended.size());
+    recommender.refresh();
+    assertNotNull(recommended);
+    assertEquals(0, recommended.size());
   }
 
   public void testHowMany() throws Exception {
@@ -63,6 +66,10 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
     Recommender recommender = new TreeClusteringRecommender(dataModel, similarity, 2);
     List<RecommendedItem> fewRecommended = recommender.recommend("test1", 2);
     List<RecommendedItem> moreRecommended = recommender.recommend("test1", 4);
+    for (int i = 0; i < fewRecommended.size(); i++) {
+      assertEquals(fewRecommended.get(i).getItem(), moreRecommended.get(i).getItem());
+    }
+    recommender.refresh();
     for (int i = 0; i < fewRecommended.size(); i++) {
       assertEquals(fewRecommended.get(i).getItem(), moreRecommended.get(i).getItem());
     }

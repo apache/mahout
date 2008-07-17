@@ -200,6 +200,7 @@ public final class MemoryDiffStorage implements DiffStorage {
     log.info("Building average diffs...");
     try {
       buildAverageDiffsLock.writeLock().lock();
+      averageDiffs.clear();
       long averageCount = 0L;
       for (User user : dataModel.getUsers()) {
         averageCount = processOneUser(averageCount, user);

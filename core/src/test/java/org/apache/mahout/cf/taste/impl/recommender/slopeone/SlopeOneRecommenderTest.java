@@ -44,6 +44,9 @@ public final class SlopeOneRecommenderTest extends TasteTestCase {
     RecommendedItem firstRecommended = recommended.get(0);
     assertEquals(new GenericItem<String>("2"), firstRecommended.getItem());
     assertEquals(0.34803885284992736, firstRecommended.getValue(), EPSILON);
+    recommender.refresh();
+    assertEquals(new GenericItem<String>("2"), firstRecommended.getItem());
+    assertEquals(0.34803885284992736, firstRecommended.getValue(), EPSILON);
   }
 
   public void testHowMany() throws Exception {
@@ -57,6 +60,10 @@ public final class SlopeOneRecommenderTest extends TasteTestCase {
     Recommender recommender = new SlopeOneRecommender(dataModel);
     List<RecommendedItem> fewRecommended = recommender.recommend("test1", 2);
     List<RecommendedItem> moreRecommended = recommender.recommend("test1", 4);
+    for (int i = 0; i < fewRecommended.size(); i++) {
+      assertEquals(fewRecommended.get(i).getItem(), moreRecommended.get(i).getItem());
+    }
+    recommender.refresh();
     for (int i = 0; i < fewRecommended.size(); i++) {
       assertEquals(fewRecommended.get(i).getItem(), moreRecommended.get(i).getItem());
     }

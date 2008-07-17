@@ -48,6 +48,9 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
     RecommendedItem firstRecommended = recommended.get(0);
     assertEquals(new GenericItem<String>("2"), firstRecommended.getItem());
     assertEquals(0.3, firstRecommended.getValue());
+    recommender.refresh();
+    assertEquals(new GenericItem<String>("2"), firstRecommended.getItem());
+    assertEquals(0.3, firstRecommended.getValue());
   }
 
   public void testHowMany() throws Exception {
@@ -63,6 +66,10 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
     Recommender recommender = new GenericUserBasedRecommender(dataModel, neighborhood, correlation);
     List<RecommendedItem> fewRecommended = recommender.recommend("test1", 2);
     List<RecommendedItem> moreRecommended = recommender.recommend("test1", 4);
+    for (int i = 0; i < fewRecommended.size(); i++) {
+      assertEquals(fewRecommended.get(i).getItem(), moreRecommended.get(i).getItem());
+    }
+    recommender.refresh();
     for (int i = 0; i < fewRecommended.size(); i++) {
       assertEquals(fewRecommended.get(i).getItem(), moreRecommended.get(i).getItem());
     }
