@@ -18,8 +18,8 @@
 package org.apache.mahout.cf.taste.impl.model.file;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
+import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
@@ -31,10 +31,8 @@ import org.apache.mahout.cf.taste.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -114,21 +112,11 @@ public class FileDataModel implements DataModel {
 
   private void processFile(Map<String, List<Preference>> data) throws IOException {
     log.info("Reading file info...");
-    BufferedReader reader = null;
-    try {
-      reader = new BufferedReader(new FileReader(dataFile));
-      boolean notDone = true;
-      while (notDone) {
-        String line = reader.readLine();
-        if (line != null && line.length() > 0) {
-          log.debug("Read line: {}", line);
-          processLine(line, data);
-        } else {
-          notDone = false;
-        }
+    for (String line : new FileLineIterable(dataFile)) {
+      if (line.length() > 0) {
+        log.debug("Read line: {}", line);
+        processLine(line, data);
       }
-    } finally {
-      IOUtils.quietClose(reader);
     }
   }
 

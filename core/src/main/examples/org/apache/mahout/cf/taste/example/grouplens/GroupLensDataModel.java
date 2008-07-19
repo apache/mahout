@@ -19,15 +19,13 @@ package org.apache.mahout.cf.taste.example.grouplens;
 
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.IOUtils;
+import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.model.Item;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,16 +51,11 @@ public final class GroupLensDataModel extends FileDataModel {
   public GroupLensDataModel(File ratingsFile, File moviesFile) throws IOException {
     super(convertGLFile(ratingsFile, true));
     File convertedMoviesFile = convertGLFile(moviesFile, false);
-    BufferedReader reader = new BufferedReader(new FileReader(convertedMoviesFile));
     movieMap = new FastMap<String, Movie>(5001);
-    try {
-      for (String line; (line = reader.readLine()) != null;) {
-        String[] tokens = line.split(",");
-        String id = tokens[0];
-        movieMap.put(id, new Movie(id, tokens[1], tokens[2]));
-      }
-    } finally {
-      IOUtils.quietClose(reader);
+    for (String line : new FileLineIterable(convertedMoviesFile)) {
+      String[] tokens = line.split(",");
+      String id = tokens[0];
+      movieMap.put(id, new Movie(id, tokens[1], tokens[2]));
     }
   }
 
@@ -80,12 +73,10 @@ public final class GroupLensDataModel extends FileDataModel {
     File resultFile = new File(new File(System.getProperty("java.io.tmpdir")),
                                      "taste." + (ratings ? "ratings" : "movies") + ".txt");
     if (!resultFile.exists()) {
-      BufferedReader reader = null;
       PrintWriter writer = null;
       try {
-        reader = new BufferedReader(new FileReader(originalFile), 32768);
         writer = new PrintWriter(new FileWriter(resultFile));
-        for (String line; (line = reader.readLine()) != null;) {
+        for (String line : new FileLineIterable(originalFile)) {
           String convertedLine;
           if (ratings) {
             // toss the last column of data, which is a timestamp we don't want
@@ -96,15 +87,11 @@ public final class GroupLensDataModel extends FileDataModel {
           writer.println(convertedLine);
         }
         writer.flush();
-      } catch (FileNotFoundException fnfe) {
-        resultFile.delete();
-        throw fnfe;
       } catch (IOException ioe) {
         resultFile.delete();
         throw ioe;
       } finally {
         IOUtils.quietClose(writer);
-        IOUtils.quietClose(reader);
       }
     }
     return resultFile;
