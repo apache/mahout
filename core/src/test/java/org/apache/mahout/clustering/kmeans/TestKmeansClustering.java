@@ -49,7 +49,7 @@ public class TestKmeansClustering extends TestCase {
   static final double[][] reference = { { 1, 1 }, { 2, 1 }, { 1, 2 }, { 2, 2 },
       { 3, 3 }, { 4, 4 }, { 5, 4 }, { 4, 5 }, { 5, 5 } };
 
-  static int[][] expectedNumPoints = { { 9 }, { 4, 5 }, { 4, 5, 0 },
+  static final int[][] expectedNumPoints = { { 9 }, { 4, 5 }, { 4, 5, 0 },
       { 1, 2, 1, 5 }, { 1, 1, 1, 2, 4 }, { 1, 1, 1, 1, 1, 4 },
       { 1, 1, 1, 1, 1, 2, 2 }, { 1, 1, 1, 1, 1, 1, 2, 1 },
       { 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
@@ -485,9 +485,8 @@ public class TestKmeansClustering extends TestCase {
   }
 
   /**
-   * Split pattern for {@link #decodePoint(String)}.
+   * Split pattern for <code>decodePoint(String)</code>
    */
-
   public static void writePointsToFile(List<Vector> points, String fileName)
       throws IOException {
     writePointsToFileWithPayload(points, fileName, "");

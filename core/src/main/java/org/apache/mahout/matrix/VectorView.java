@@ -144,7 +144,7 @@ public class VectorView extends AbstractVector {
   }
 
   public class ViewIterator implements Iterator<Vector.Element> {
-    private Iterator<Vector.Element> it;
+    private final Iterator<Vector.Element> it;
     private Vector.Element el;
 
     public ViewIterator() {

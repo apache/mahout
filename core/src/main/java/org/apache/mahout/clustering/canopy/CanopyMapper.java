@@ -33,7 +33,7 @@ import org.apache.mahout.matrix.Vector;
 public class CanopyMapper extends MapReduceBase implements
         Mapper<WritableComparable, Text, Text, Text> {
 
-  private List<Canopy> canopies = new ArrayList<Canopy>();
+  private final List<Canopy> canopies = new ArrayList<Canopy>();
 
   /*
    * (non-Javadoc)

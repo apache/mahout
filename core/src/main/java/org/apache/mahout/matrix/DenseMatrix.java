@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.mahout.matrix;
 
 import org.apache.hadoop.io.Text;
@@ -25,7 +26,7 @@ import org.apache.hadoop.io.WritableComparable;
  */
 public class DenseMatrix extends AbstractMatrix {
 
-  private double[][] values;
+  private final double[][] values;
 
   private int columnSize() {
     return values[0].length;

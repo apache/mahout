@@ -20,9 +20,9 @@ import junit.framework.TestCase;
 
 public class TestSparseVector extends TestCase {
 
-  double[] values = {1.1, 2.2, 3.3};
+  final double[] values = {1.1, 2.2, 3.3};
 
-  Vector test = new SparseVector(values.length + 2);
+  final Vector test = new SparseVector(values.length + 2);
 
   public TestSparseVector(String name) {
     super(name);

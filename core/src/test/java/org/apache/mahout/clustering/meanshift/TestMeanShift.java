@@ -47,7 +47,7 @@ public class TestMeanShift extends TestCase {
 
   DistanceMeasure manhattanDistanceMeasure = new ManhattanDistanceMeasure();
 
-  DistanceMeasure euclideanDistanceMeasure = new EuclideanDistanceMeasure();
+  final DistanceMeasure euclideanDistanceMeasure = new EuclideanDistanceMeasure();
 
   public TestMeanShift(String name) {
     super(name);

@@ -33,9 +33,7 @@ import org.apache.mahout.matrix.CardinalityException;
 public class MeanShiftCanopyReducer extends MapReduceBase implements
     Reducer<Text, WritableComparable, Text, WritableComparable> {
 
-  private List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
-
-  private OutputCollector<Text, WritableComparable> collector;
+  private final List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
 
   /*
    * (non-Javadoc)
@@ -47,7 +45,6 @@ public class MeanShiftCanopyReducer extends MapReduceBase implements
   public void reduce(Text key, Iterator<WritableComparable> values,
       OutputCollector<Text, WritableComparable> output, Reporter reporter)
       throws IOException {
-    collector = output;
     try {
       while (values.hasNext()) {
         Text value = (Text) values.next();
@@ -57,7 +54,7 @@ public class MeanShiftCanopyReducer extends MapReduceBase implements
 
       for (MeanShiftCanopy canopy : canopies) {
         canopy.shiftToMean();
-        collector.collect(new Text(canopy.getIdentifier()), new Text(
+        output.collect(new Text(canopy.getIdentifier()), new Text(
             MeanShiftCanopy.formatCanopy(canopy)));
       }
     } catch (CardinalityException e) {

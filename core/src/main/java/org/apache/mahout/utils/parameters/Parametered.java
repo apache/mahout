@@ -103,7 +103,7 @@ public interface Parametered extends JobConfigurable {
     }
 
     private static class Help {
-      private StringBuilder sb;
+      private final StringBuilder sb;
 
       public String toString() {
         return sb.toString();
@@ -112,7 +112,7 @@ public interface Parametered extends JobConfigurable {
       private int longestName = 0;
       private int numChars = 100; // a few extra just to be sure
 
-      int distanceBetweenNameAndDescription = 8; // todo: hmmm in the end this is 5 letters less that it says.. not sure why  
+      final int distanceBetweenNameAndDescription = 8; // todo: hmmm in the end this is 5 letters less that it says.. not sure why
 
       private void recurseCount(Parametered parametered) {
         for (Parameter parameter : parametered.getParameters()) {
@@ -158,7 +158,7 @@ public interface Parametered extends JobConfigurable {
 
 
     private static class Conf {
-      private StringBuilder sb;
+      private final StringBuilder sb;
 
       public String toString() {
         return sb.toString();

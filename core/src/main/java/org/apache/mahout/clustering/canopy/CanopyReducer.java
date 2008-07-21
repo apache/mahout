@@ -33,7 +33,7 @@ import org.apache.mahout.matrix.Vector;
 public class CanopyReducer extends MapReduceBase implements
         Reducer<Text, Text, Text, Text> {
 
-  private List<Canopy> canopies = new ArrayList<Canopy>();
+  private final List<Canopy> canopies = new ArrayList<Canopy>();
 
   /*
    * (non-Javadoc)

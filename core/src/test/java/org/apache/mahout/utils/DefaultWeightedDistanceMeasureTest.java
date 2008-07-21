@@ -25,7 +25,7 @@ public abstract class DefaultWeightedDistanceMeasureTest extends DefaultDistance
 
   public abstract WeightedDistanceMeasure distanceMeasureFactory();
 
-  public void testMeasureWeighted() throws Exception {
+  public void testMeasureWeighted() {
 
     WeightedDistanceMeasure distanceMeasure = distanceMeasureFactory();
 

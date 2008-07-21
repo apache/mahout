@@ -20,11 +20,12 @@ package org.apache.mahout.matrix;
 import junit.framework.TestCase;
 
 public abstract class MatrixTest extends TestCase {
-  protected static int ROW = AbstractMatrix.ROW;
 
-  protected static int COL = AbstractMatrix.COL;
+  protected static final int ROW = AbstractMatrix.ROW;
 
-  protected double[][] values = {{1.1, 2.2}, {3.3, 4.4}, {5.5, 6.6}};
+  protected static final int COL = AbstractMatrix.COL;
+
+  protected final double[][] values = {{1.1, 2.2}, {3.3, 4.4}, {5.5, 6.6}};
 
   protected Matrix test;
 
@@ -107,7 +108,7 @@ public abstract class MatrixTest extends TestCase {
                 array[row][col]);
   }
 
-  public void testViewPart() throws Exception {
+  public void testViewPart() {
     int[] offset = {1, 1};
     int[] size = {2, 1};
     Matrix view = test.viewPart(offset, size);
@@ -166,7 +167,7 @@ public abstract class MatrixTest extends TestCase {
                 row, col));
   }
 
-  public void testAssignDoubleArrayArray() throws Exception {
+  public void testAssignDoubleArrayArray() {
     int[] c = test.cardinality();
     test.assign(new double[3][2]);
     for (int row = 0; row < c[ROW]; row++)
@@ -185,7 +186,7 @@ public abstract class MatrixTest extends TestCase {
     }
   }
 
-  public void testAssignMatrixBinaryFunction() throws Exception {
+  public void testAssignMatrixBinaryFunction() {
     int[] c = test.cardinality();
     test.assign(test, new PlusFunction());
     for (int row = 0; row < c[ROW]; row++)
@@ -203,7 +204,7 @@ public abstract class MatrixTest extends TestCase {
     }
   }
 
-  public void testAssignMatrix() throws Exception {
+  public void testAssignMatrix() {
     int[] c = test.cardinality();
     Matrix value = test.like();
     value.assign(test);
@@ -240,7 +241,7 @@ public abstract class MatrixTest extends TestCase {
                 values[row][col] / 4.53, value.getQuick(row, col));
   }
 
-  public void testGet() throws Exception {
+  public void testGet() {
     int[] c = test.cardinality();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
@@ -272,7 +273,7 @@ public abstract class MatrixTest extends TestCase {
     }
   }
 
-  public void testMinus() throws Exception {
+  public void testMinus() {
     int[] c = test.cardinality();
     Matrix value = test.minus(test);
     for (int row = 0; row < c[ROW]; row++)
@@ -299,7 +300,7 @@ public abstract class MatrixTest extends TestCase {
                 values[row][col] + 4.53, value.getQuick(row, col));
   }
 
-  public void testPlusMatrix() throws Exception {
+  public void testPlusMatrix() {
     int[] c = test.cardinality();
     Matrix value = test.plus(test);
     for (int row = 0; row < c[ROW]; row++)
@@ -352,7 +353,7 @@ public abstract class MatrixTest extends TestCase {
                 values[row][col] * 4.53, value.getQuick(row, col));
   }
 
-  public void testTimesMatrix() throws Exception {
+  public void testTimesMatrix() {
     int[] c = test.cardinality();
     Matrix transpose = test.transpose();
     Matrix value = test.times(transpose);
@@ -392,7 +393,7 @@ public abstract class MatrixTest extends TestCase {
     assertEquals("zsum", 23.1, sum);
   }
 
-  public void testAssignRow() throws Exception {
+  public void testAssignRow() {
     double[] data = {2.1, 3.2};
     test.assignRow(1, new DenseVector(data));
     assertEquals("test[1][0]", 2.1, test.getQuick(1, 0));
@@ -409,7 +410,7 @@ public abstract class MatrixTest extends TestCase {
     }
   }
 
-  public void testAssignColumn() throws Exception {
+  public void testAssignColumn() {
     double[] data = {2.1, 3.2, 4.3};
     test.assignColumn(1, new DenseVector(data));
     assertEquals("test[0][1]", 2.1, test.getQuick(0, 1));
@@ -427,7 +428,7 @@ public abstract class MatrixTest extends TestCase {
     }
   }
 
-  public void testGetRow() throws Exception {
+  public void testGetRow() {
     Vector row = test.getRow(1);
     assertEquals("row size", 2, row.size());
   }
@@ -450,7 +451,7 @@ public abstract class MatrixTest extends TestCase {
     }
   }
 
-  public void testGetColumn() throws Exception {
+  public void testGetColumn() {
     Vector column = test.getColumn(1);
     assertEquals("row size", 3, column.size());
   }

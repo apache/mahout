@@ -23,9 +23,9 @@ import junit.framework.TestCase;
 
 public class TestDenseVector extends TestCase {
 
-  double[] values = {1.1, 2.2, 3.3};
+  final double[] values = {1.1, 2.2, 3.3};
 
-  Vector test = new DenseVector(values);
+  final Vector test = new DenseVector(values);
 
   public TestDenseVector(String name) {
     super(name);

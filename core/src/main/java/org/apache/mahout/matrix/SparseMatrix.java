@@ -30,9 +30,9 @@ import org.apache.hadoop.io.WritableComparable;
  */
 public class SparseMatrix extends AbstractMatrix {
 
-  private int[] cardinality;
+  private final int[] cardinality;
 
-  private Map<Integer, Vector> rows;
+  private final Map<Integer, Vector> rows;
 
   /**
    * Construct a matrix of the given cardinality with the given row map

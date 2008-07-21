@@ -27,7 +27,6 @@ import org.apache.hadoop.io.WritableComparable;
 
 /**
  * Implements vector that only stores non-zero doubles
- *
  */
 public class SparseVector extends AbstractVector {
 
@@ -187,10 +186,7 @@ public class SparseVector extends AbstractVector {
 
     SparseVector that = (SparseVector) o;
 
-    if (cardinality != that.cardinality) return false;
-    if (values != null ? !values.equals(that.values) : that.values != null) return false;
-
-    return true;
+    return cardinality == that.cardinality && (values == null ? that.values == null : values.equals(that.values));
   }
 
   public int hashCode() {
@@ -201,7 +197,7 @@ public class SparseVector extends AbstractVector {
   }
 
   private class Iterator implements java.util.Iterator<Vector.Element> {
-    private java.util.Iterator<Map.Entry<Integer, Double>> it;
+    private final java.util.Iterator<Map.Entry<Integer, Double>> it;
 
     public Iterator() {
       it = values.entrySet().iterator();

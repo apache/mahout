@@ -57,7 +57,7 @@ public class Canopy {
   private static DistanceMeasure measure;
 
   // this canopy's canopyId
-  private int canopyId;
+  private final int canopyId;
 
   // the current center
   private Vector center = new SparseVector(0);

@@ -24,13 +24,13 @@ import org.apache.hadoop.io.WritableComparable;
  */
 public class MatrixView extends AbstractMatrix {
 
-  private Matrix matrix;
+  private final Matrix matrix;
 
   // the offset into the Matrix
-  private int[] offset;
+  private final int[] offset;
 
   // the cardinality of the view
-  private int[] cardinality;
+  private final int[] cardinality;
 
   /**
    * Construct a view of the matrix with given offset and cardinality

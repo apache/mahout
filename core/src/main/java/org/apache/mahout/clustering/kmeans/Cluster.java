@@ -38,7 +38,7 @@ public class Cluster {
   private static int nextClusterId = 0;
 
   // this cluster's clusterId
-  private int clusterId;
+  private final int clusterId;
 
   // the current center
   private Vector center = new SparseVector(0);

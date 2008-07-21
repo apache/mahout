@@ -130,7 +130,7 @@ public abstract class AbstractVector implements Vector, Writable {
   }
 
   public class Element implements Vector.Element {
-    private int ind;
+    private final int ind;
 
     public Element(int ind) {
       this.ind = ind;

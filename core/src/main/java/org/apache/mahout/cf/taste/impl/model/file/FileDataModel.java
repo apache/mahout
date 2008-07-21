@@ -110,7 +110,7 @@ public class FileDataModel implements DataModel {
     }
   }
 
-  private void processFile(Map<String, List<Preference>> data) throws IOException {
+  private void processFile(Map<String, List<Preference>> data) {
     log.info("Reading file info...");
     for (String line : new FileLineIterable(dataFile)) {
       if (line.length() > 0) {

@@ -265,43 +265,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
             newCluster.add(user);
             newClusters.add(newCluster);
           }
-          if (clusteringByThreshold) {
-            Pair<Collection<User>, Collection<User>> nearestPair = findNearestClusters(newClusters);
-            if (nearestPair != null) {
-              Collection<User> cluster1 = nearestPair.getFirst();
-              Collection<User> cluster2 = nearestPair.getSecond();
-              while (clusterSimilarity.getSimilarity(cluster1, cluster2) >= clusteringThreshold) {
-                newClusters.remove(cluster1);
-                newClusters.remove(cluster2);
-                Collection<User> merged = new HashSet<User>(cluster1.size() + cluster2.size());
-                merged.addAll(cluster1);
-                merged.addAll(cluster2);
-                newClusters.add(merged);
-                nearestPair = findNearestClusters(newClusters);
-                if (nearestPair == null) {
-                  break;
-                }
-                cluster1 = nearestPair.getFirst();
-                cluster2 = nearestPair.getSecond();
-              }
-            }
-          } else {
-            while (newClusters.size() > numClusters) {
-              Pair<Collection<User>, Collection<User>> nearestPair =
-                      findNearestClusters(newClusters);
-              if (nearestPair == null) {
-                break;
-              }
-              Collection<User> cluster1 = nearestPair.getFirst();
-              Collection<User> cluster2 = nearestPair.getSecond();
-              newClusters.remove(cluster1);
-              newClusters.remove(cluster2);
-              Collection<User> merged = new HashSet<User>(cluster1.size() + cluster2.size());
-              merged.addAll(cluster1);
-              merged.addAll(cluster2);
-              newClusters.add(merged);
-            }
-          }
+          findClusters(newClusters);
         }
         topRecsByUserID = computeTopRecsPerUserID(newClusters);
         clustersByUserID = computeClustersPerUserID(newClusters);
@@ -314,6 +278,46 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
       clustersBuilt = true;
     } finally {
       buildClustersLock.unlock();
+    }
+  }
+
+  private void findClusters(List<Collection<User>> newClusters) throws TasteException {
+    if (clusteringByThreshold) {
+      Pair<Collection<User>, Collection<User>> nearestPair = findNearestClusters(newClusters);
+      if (nearestPair != null) {
+        Collection<User> cluster1 = nearestPair.getFirst();
+        Collection<User> cluster2 = nearestPair.getSecond();
+        while (clusterSimilarity.getSimilarity(cluster1, cluster2) >= clusteringThreshold) {
+          newClusters.remove(cluster1);
+          newClusters.remove(cluster2);
+          Collection<User> merged = new HashSet<User>(cluster1.size() + cluster2.size());
+          merged.addAll(cluster1);
+          merged.addAll(cluster2);
+          newClusters.add(merged);
+          nearestPair = findNearestClusters(newClusters);
+          if (nearestPair == null) {
+            break;
+          }
+          cluster1 = nearestPair.getFirst();
+          cluster2 = nearestPair.getSecond();
+        }
+      }
+    } else {
+      while (newClusters.size() > numClusters) {
+        Pair<Collection<User>, Collection<User>> nearestPair =
+                findNearestClusters(newClusters);
+        if (nearestPair == null) {
+          break;
+        }
+        Collection<User> cluster1 = nearestPair.getFirst();
+        Collection<User> cluster2 = nearestPair.getSecond();
+        newClusters.remove(cluster1);
+        newClusters.remove(cluster2);
+        Collection<User> merged = new HashSet<User>(cluster1.size() + cluster2.size());
+        merged.addAll(cluster1);
+        merged.addAll(cluster2);
+        newClusters.add(merged);
+      }
     }
   }
 

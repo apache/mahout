@@ -27,7 +27,8 @@ import org.apache.mahout.matrix.Vector;
  * for production use since it holds onto all its points.
  */
 public class VisibleCanopy extends Canopy {
-  private List<Vector> points = new ArrayList<Vector>();
+
+  private final List<Vector> points = new ArrayList<Vector>();
 
   public VisibleCanopy(Vector point) {
     super(point);

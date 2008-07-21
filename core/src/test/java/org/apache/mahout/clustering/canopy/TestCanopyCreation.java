@@ -53,13 +53,13 @@ public class TestCanopyCreation extends TestCase {
 
   List<Canopy> referenceManhattan;
 
-  DistanceMeasure manhattanDistanceMeasure = new ManhattanDistanceMeasure();
+  final DistanceMeasure manhattanDistanceMeasure = new ManhattanDistanceMeasure();
 
   List<Vector> manhattanCentroids;
 
   List<Canopy> referenceEuclidean;
 
-  DistanceMeasure euclideanDistanceMeasure = new EuclideanDistanceMeasure();
+  final DistanceMeasure euclideanDistanceMeasure = new EuclideanDistanceMeasure();
 
   List<Vector> euclideanCentroids;
 

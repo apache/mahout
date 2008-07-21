@@ -56,7 +56,7 @@ public class Job {
    * 
    * @param input the String denoting the input directory path
    * @param output the String denoting the output directory path
-   * @param measureClassName the String class name of the DistanceMeasure to use
+   * @param measureClass the String class name of the DistanceMeasure to use
    * @param t1 the canopy T1 threshold
    * @param t2 the canopy T2 threshold
    * @param convergenceDelta the double convergence criteria for iterations

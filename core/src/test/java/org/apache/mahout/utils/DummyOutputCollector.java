@@ -29,7 +29,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 
 public class DummyOutputCollector<K extends WritableComparable, V extends Writable> implements OutputCollector<K, V> {
 
-  Map<String, List<V>> data = new TreeMap<String, List<V>>();
+  final Map<String, List<V>> data = new TreeMap<String, List<V>>();
 
   public void collect(K key, V values)
           throws IOException {

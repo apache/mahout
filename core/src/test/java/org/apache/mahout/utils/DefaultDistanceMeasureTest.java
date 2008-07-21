@@ -26,7 +26,7 @@ public abstract class DefaultDistanceMeasureTest extends TestCase {
 
   public abstract DistanceMeasure distanceMeasureFactory();
 
-  public void testMeasure() throws Exception {
+  public void testMeasure() {
 
     DistanceMeasure distanceMeasure = distanceMeasureFactory();
 

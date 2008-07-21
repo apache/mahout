@@ -24,9 +24,9 @@ public class TestVectorView extends TestCase {
 
   private static final int offset = 1;
 
-  double[] values = {0.0, 1.1, 2.2, 3.3, 4.4, 5.5};
+  final double[] values = {0.0, 1.1, 2.2, 3.3, 4.4, 5.5};
 
-  Vector test = new VectorView(new DenseVector(values), offset, cardinality);
+  final Vector test = new VectorView(new DenseVector(values), offset, cardinality);
 
   public TestVectorView(String name) {
     super(name);
