@@ -113,6 +113,11 @@
     <pathelement location="${dest}/test-classes"/>
     <pathelement location="${dest}/classes"/>
   </path>
+  <path id="examples-test.classpath">
+    <path refid="test.classpath"/>
+    <pathelement location="${dest}/examples-test-classes"/>
+    <pathelement location="${dest}/examples"/>
+  </path>
 
 
   <path id="junit.classpath">
@@ -121,6 +126,11 @@
     <pathelement location="${dest}/classes"/>
     <path refid="compile.classpath"/>
     <pathelement path="${java.class.path}"/>
+  </path>
+  <path id="junit.examples.classpath">
+    <path refid="junit.classpath"/>
+    <pathelement location="${dest}/examples-test-classes"/>
+    <pathelement location="${dest}/examples"/>
   </path>
 
   <!-- Macro for compilation -->
@@ -272,6 +282,24 @@
   </target>
 
 
+  <target name="compile-examples-test" depends="compile-examples, compile-test">
+    <mahout-javac
+      destdir="${dest}/examples-test-classes/" classpathref="examples-test.classpath">
+      <src path="${src}/test/examples"/>
+      </mahout-javac>
+
+    <!-- Copy any data files present to the classpath -->
+    <copy todir="${dest}/examples-test-classes">
+      <fileset dir="src/test/examples" excludes="**/*.java"/>
+    </copy>
+
+    <!-- Copy any data files present to the classpath -->
+    <copy todir="${dest}/examples-test-classes">
+      <fileset dir="src/test/resources"/>
+    </copy>
+  	
+  </target>
+
 
   <target name="test" depends="compile-test, dist-jar" description="Runs unit tests">
     <mkdir dir="${junit.output.dir}"/>
@@ -312,8 +340,44 @@
     <echo file="${dest}/junitfailed.flag">MAYBE</echo>
     <fail if="tests.failed">Tests failed!</fail>
     <!-- life would be easier if echo had an 'if' attribute like fail -->
-    <delete file="${dest}/test/junitfailed.flag" />
+    <delete file="${dest}/junitfailed.flag" />
 
+  </target>
+
+  <target name="examples-test" depends="compile-examples-test, dist-jar" description="Runs unit tests for the examples">
+    <mkdir dir="${junit.output.dir}/examples"/>
+    <junit printsummary="off" haltonfailure="no"
+      errorProperty="tests.failed" failureProperty="tests.failed" maxmemory="128m">
+      <classpath refid="junit.examples.classpath"/>
+      <assertions>
+        <enable package="org.apache.mahout"/>
+      </assertions>
+
+      <!-- allow tests to control debug prints -->
+      <sysproperty key="tests.verbose" value="${tests.verbose}"/>
+
+      <!-- TODO: create propertyset for test properties, so each project can have its own set -->
+      <sysproperty key="dataDir" file="src/test"/>
+      <sysproperty key="tempDir" file="${dest}/test"/>
+      <sysproperty key="java.io.tmpdir" file="${dest}/test"/>
+
+      <formatter type="xml"/>
+      <formatter type="brief" usefile="false"/>
+      <batchtest fork="yes" todir="${junit.output.dir}/examples" unless="testcase">
+        <fileset dir="${src}/test/examples" includes="${junit.includes}" excludes="${junit.excludes}"/>
+      </batchtest>
+      <batchtest fork="yes" todir="${junit.output.dir}/examples" if="testcase">
+        <fileset dir="${src}/test/examples" includes="**/${testcase}.java"/>
+      </batchtest>
+    </junit>
+    <junitreport todir="${junit.output.dir}/examples">
+      <fileset dir="${junit.output.dir}/examples">
+        <include name="TEST-*.xml"/>
+      </fileset>
+      <report format="frames" todir="${junit.output.dir}/examples/html"/>
+    </junitreport>
+
+    <fail if="tests.failed">Tests failed!</fail>
   </target>
 
   <target name="job" depends="compile">
@@ -395,8 +459,9 @@
           >
     <mahout-javac destdir="${dest}/examples"
                   classpathref="examples.classpath">
-      <src path="${src}/main/examples/bayes"/>
+      <!--src path="${src}/main/examples/bayes"/-->
       <!-- Add other example sources here -->
+      <src path="${src}/main/examples"/>
     </mahout-javac>
   </target>
 
