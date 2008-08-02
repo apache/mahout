@@ -43,9 +43,9 @@ public class DatasetSplit {
 
   static final String TRAINING = "traintest.training";
 
-  private byte[] seed;
+  private final byte[] seed;
 
-  private double threshold;
+  private final double threshold;
 
   private boolean training;
 
@@ -132,9 +132,9 @@ public class DatasetSplit {
 
     private boolean training;
 
-    private LongWritable k = new LongWritable();
+    private final LongWritable k = new LongWritable();
 
-    private Text v = new Text();
+    private final Text v = new Text();
 
     public RndLineRecordReader(RecordReader<LongWritable, Text> reader,
         JobConf conf) {

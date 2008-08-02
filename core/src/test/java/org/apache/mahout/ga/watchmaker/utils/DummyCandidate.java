@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DummyCandidate {
-  private int index;
+
+  private final int index;
 
   public int getIndex() {
     return index;
@@ -39,6 +40,11 @@ public class DummyCandidate {
 
     DummyCandidate dc = (DummyCandidate) obj;
     return index == dc.index;
+  }
+
+  @Override
+  public int hashCode() {
+    return index;
   }
 
   public static List<DummyCandidate> generatePopulation(int size) {

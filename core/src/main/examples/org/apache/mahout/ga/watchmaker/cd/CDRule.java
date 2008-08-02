@@ -55,8 +55,6 @@ public class CDRule implements Rule {
   private double[] values;
 
   /**
-   * 
-   * @param nbConditions
    * @param threshold condition activation threshold
    */
   public CDRule(double threshold) {
@@ -256,6 +254,16 @@ public class CDRule implements Rule {
     }
 
     return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int value = 0;
+    for (int index = 0; index < nbConditions; index++) {
+      value *= 31;
+      value += Double.doubleToLongBits(getW(index)) + (getO(index) ? 1 : 0) + getV(index);
+    }
+    return value;
   }
 
   /**

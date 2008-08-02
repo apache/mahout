@@ -26,7 +26,7 @@ import org.uncommons.watchmaker.framework.factories.AbstractCandidateFactory;
  */
 public class CDFactory extends AbstractCandidateFactory<CDRule> {
 
-  private double threshold;
+  private final double threshold;
 
   /**
    * 

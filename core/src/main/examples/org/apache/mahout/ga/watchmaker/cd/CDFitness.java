@@ -94,6 +94,11 @@ public class CDFitness implements Writable {
   }
 
   @Override
+  public int hashCode() {
+    return tp + 31 * (fp + 31 * (tn + 31 * fn));    
+  }
+
+  @Override
   public String toString() {
     return "[TP=" + tp + ", FP=" + fp + ", TN=" + tn + ", FN=" + fn + "]";
   }

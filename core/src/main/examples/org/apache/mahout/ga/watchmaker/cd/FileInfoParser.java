@@ -59,7 +59,7 @@ public class FileInfoParser {
    * Initializes a dataset using an info file.
    * 
    * @param fs file system
-   * @param file info file
+   * @param inpath info file
    * @return Initialized Dataset
    */
   public static DataSet parseFile(FileSystem fs, Path inpath)

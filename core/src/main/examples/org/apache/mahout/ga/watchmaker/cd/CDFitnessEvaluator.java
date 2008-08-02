@@ -36,7 +36,7 @@ public class CDFitnessEvaluator extends STFitnessEvaluator<Rule> {
 
   private final DatasetSplit split;
 
-  private List<CDFitness> evals = new ArrayList<CDFitness>();
+  private final List<CDFitness> evals = new ArrayList<CDFitness>();
 
   /**
    * 

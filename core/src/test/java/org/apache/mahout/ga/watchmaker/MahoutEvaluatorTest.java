@@ -67,7 +67,7 @@ public class MahoutEvaluatorTest extends TestCase {
   }
 
   private void storeLoadPopulation(List<DummyCandidate> population)
-      throws IOException, ClassNotFoundException {
+      throws IOException {
     FileSystem fs = FileSystem.get(new Configuration());
     Path f = new Path("build/test.txt");
 
@@ -87,11 +87,10 @@ public class MahoutEvaluatorTest extends TestCase {
   }
 
   private void loadPopulation(FileSystem fs, Path f,
-      List<DummyCandidate> population) throws IOException,
-      ClassNotFoundException {
+      List<DummyCandidate> population) throws IOException {
     FSDataInputStream in = fs.open(f);
     BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-    String s = null;
+    String s;
 
     try {
       while ((s = reader.readLine()) != null) {

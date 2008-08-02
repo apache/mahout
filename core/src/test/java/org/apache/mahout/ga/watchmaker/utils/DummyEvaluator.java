@@ -31,9 +31,10 @@ import org.uncommons.watchmaker.framework.FitnessEvaluator;
  */
 public class DummyEvaluator implements FitnessEvaluator<DummyCandidate> {
 
-  private Random rng = new Random();
+  private final Random rng = new Random();
 
-  private static Map<Integer, Float> evaluations = new HashMap<Integer, Float>();
+  private static final Map<Integer, Float> evaluations = new HashMap<Integer, Float>();
+
   public static Float getFitness(Integer key) {
     if (!evaluations.containsKey(key))
       throw new RuntimeException("Fitness not found");

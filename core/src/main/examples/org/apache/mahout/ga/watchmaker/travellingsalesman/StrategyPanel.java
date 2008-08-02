@@ -56,10 +56,6 @@ import org.uncommons.watchmaker.framework.selection.TruncationSelection;
  */
 @SuppressWarnings("serial")
 final class StrategyPanel extends JPanel {
-  private final SelectionStrategy<?>[] selectionStrategies = {
-      new RankSelection(), new RouletteWheelSelection(),
-      new StochasticUniversalSampling(), new TournamentSelection(0.95d),
-      new TruncationSelection(0.5d) };
 
   private final DistanceLookup distances;
 
@@ -162,6 +158,12 @@ final class StrategyPanel extends JPanel {
 
       selectionLabel = new JLabel("Selection Strategy: ");
       innerPanel.add(selectionLabel);
+
+      SelectionStrategy<?>[] selectionStrategies = {
+          new RankSelection(), new RouletteWheelSelection(),
+          new StochasticUniversalSampling(), new TournamentSelection(0.95d),
+          new TruncationSelection(0.5d)};
+
       selectionCombo = new JComboBox(selectionStrategies);
       selectionCombo.setRenderer(new DefaultListCellRenderer() {
         @Override

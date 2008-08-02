@@ -90,7 +90,7 @@ public class FileDataModel implements DataModel {
     timer.schedule(new RefreshTimerTask(), RELOAD_CHECK_INTERVAL_MS, RELOAD_CHECK_INTERVAL_MS);
   }
 
-  protected void reload() throws IOException {
+  protected void reload() {
     try {
       reloadLock.lock();
       Map<String, List<Preference>> data = new FastMap<String, List<Preference>>();

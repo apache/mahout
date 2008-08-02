@@ -42,13 +42,12 @@ public class CDMutation implements EvolutionaryOperator<CDRule> {
 
   /**
    * 
-   * @param dataset
    * @param rate probability of mutating a variable
    * @param range max step-size for each variable
    * @param k mutation precision
    * 
    * See
-   * {@link http://www.geatbx.com/docu/algindex-04.html#P659_42386 real valued mutation}
+   * {@see http://www.geatbx.com/docu/algindex-04.html#P659_42386 real valued mutation}
    * for more information about the parameters
    */
   public CDMutation(double rate, double range, int k) {
@@ -98,10 +97,6 @@ public class CDMutation implements EvolutionaryOperator<CDRule> {
 
   /**
    * returns a random double in the interval [min, max ].
-   * 
-   * @param domain
-   * @param rng
-   * @return
    */
   double rndDouble(double value, double min, double max, Random rng) {
     double s = rng.nextDouble() * 2.0 - 1.0; // [-1, +1]

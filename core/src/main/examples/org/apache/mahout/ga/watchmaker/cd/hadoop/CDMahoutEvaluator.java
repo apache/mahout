@@ -118,7 +118,6 @@ public class CDMahoutEvaluator {
    * Configure the job
    * 
    * @param conf
-   * @param evaluator FitnessEvaluator passed to the mapper
    * @param inpath input <code>Path</code>
    * @param outpath output <code>Path</code>
    */

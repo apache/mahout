@@ -50,7 +50,6 @@ public class DataSet {
     /**
      * Converts a string value of a nominal attribute to an <code>int</code>.
      * 
-     * @param index of the attribute
      * @param value
      * @return an <code>int</code> representing the value
      * @throws RuntimeException if the value is not found.
@@ -89,11 +88,11 @@ public class DataSet {
   /** Singleton */
   private static DataSet dataset;
 
-  private List<Integer> ignoredAttributes;
+  private final List<Integer> ignoredAttributes;
 
-  private int labelIndex;
+  private final int labelIndex;
 
-  private List<Attribute> attributes;
+  private final List<Attribute> attributes;
 
   DataSet(List<Attribute> attributes, List<Integer> ignored, int labelIndex) {
     this.attributes = attributes;

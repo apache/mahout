@@ -26,7 +26,7 @@ import java.util.StringTokenizer;
  */
 public class DataLine {
 
-  private double[] attributes;
+  private final double[] attributes;
 
   public DataLine() {
     int nba = DataSet.getDataSet().getNbAttributes();

@@ -121,7 +121,7 @@ public class MahoutEvaluator {
    * Stores a population of candidates in the output file path.
    * 
    * @param fs FileSystem used to create the output file
-   * @param outFile output file path
+   * @param f output file path
    * @param population population to store
    * @throws IOException
    */

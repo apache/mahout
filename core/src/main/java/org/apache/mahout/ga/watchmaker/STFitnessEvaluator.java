@@ -27,7 +27,7 @@ import org.uncommons.watchmaker.framework.FitnessEvaluator;
  */
 public abstract class STFitnessEvaluator<T> implements FitnessEvaluator<T> {
 
-  private List<Float> evaluations = new ArrayList<Float>();
+  private final List<Float> evaluations = new ArrayList<Float>();
 
   private List<? extends T> population;
 

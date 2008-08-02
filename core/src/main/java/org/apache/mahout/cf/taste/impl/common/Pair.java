@@ -20,7 +20,7 @@ package org.apache.mahout.cf.taste.impl.common;
 /**
  * A simple (ordered) pair of two objects. Elements may be null.
  */
-public class Pair<A, B> {
+public final class Pair<A, B> {
 
   private final A first;
   private final B second;

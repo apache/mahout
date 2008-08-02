@@ -39,6 +39,11 @@ public class StringUtilsTest extends TestCase {
       return field == dt.field;
     }
 
+    @Override
+    public int hashCode() {
+      return field;
+    }
+
   }
 
   public void testStringConversion() throws Exception {
