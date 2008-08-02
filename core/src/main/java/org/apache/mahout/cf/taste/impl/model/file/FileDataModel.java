@@ -141,11 +141,7 @@ public class FileDataModel implements DataModel {
 
   private void checkLoaded() throws TasteException {
     if (!loaded) {
-      try {
-        reload();
-      } catch (IOException ioe) {
-        throw new TasteException(ioe);
-      }
+      reload();
     }
   }
 
@@ -217,11 +213,7 @@ public class FileDataModel implements DataModel {
     }
     try {
       refreshLock.lock();
-      try {
-        reload();
-      } catch (IOException ioe) {
-        log.warn("Unexpected exception while refreshing", ioe);
-      }
+      reload();
     } finally {
       refreshLock.unlock();
     }
@@ -275,11 +267,7 @@ public class FileDataModel implements DataModel {
         if (newModified > lastModified) {
           log.debug("File has changed; reloading...");
           lastModified = newModified;
-          try {
-            reload();
-          } catch (IOException ioe) {
-            log.warn("Error while reloading file", ioe);
-          }
+          reload();
         }
       }
     }
