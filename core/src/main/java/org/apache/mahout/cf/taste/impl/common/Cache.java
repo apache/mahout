@@ -29,7 +29,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
  * <p>Thanks to Amila Jayasooriya for helping evaluate performance of the rewrite of this class, as part of a
  * Google Summer of Code 2007 project.</p>
  */
-public final class Cache<K, V> {
+public final class Cache<K, V> implements Retriever<K, V> {
 
   private final FastMap<K, V> cache;
   private final Retriever<? super K, ? extends V> retriever;
@@ -99,7 +99,7 @@ public final class Cache<K, V> {
   }
 
   private V getAndCacheValue(K key) throws TasteException {
-    V value = retriever.getValue(key);
+    V value = retriever.get(key);
     synchronized (cache) {
       cache.put(key, value);
     }
@@ -109,19 +109,6 @@ public final class Cache<K, V> {
   @Override
   public String toString() {
     return "Cache[retriever:" + retriever + ']';
-  }
-
-  /**
-   * <p>Implementations can retrieve a value for a given key.</p>
-   */
-  public static interface Retriever<KK, VV> {
-
-    /**
-     * @param key key for which a value should be retrieved
-     * @return value for key
-     * @throws TasteException if an error occurs while retrieving the value
-     */
-    VV getValue(KK key) throws TasteException;
   }
 
 }

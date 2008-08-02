@@ -84,7 +84,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
   }
 
 
-  private final class Retriever implements Cache.Retriever<Object, Collection<User>> {
+  private final class Retriever implements org.apache.mahout.cf.taste.impl.common.Retriever<Object, Collection<User>> {
 
     private final int n;
 
@@ -92,7 +92,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
       this.n = n;
     }
 
-    public Collection<User> getValue(Object key) throws TasteException {
+    public Collection<User> get(Object key) throws TasteException {
       log.trace("Computing neighborhood around user ID '{}'", key);
 
       DataModel dataModel = getDataModel();

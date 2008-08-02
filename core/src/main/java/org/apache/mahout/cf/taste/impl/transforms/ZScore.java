@@ -21,6 +21,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.Cache;
+import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
@@ -65,9 +66,9 @@ public final class ZScore implements PreferenceTransform {
     return "ZScore";
   }
 
-  private static class MeanStdevRetriever implements Cache.Retriever<User, RunningAverageAndStdDev> {
+  private static class MeanStdevRetriever implements Retriever<User, RunningAverageAndStdDev> {
 
-    public RunningAverageAndStdDev getValue(User user) throws TasteException {
+    public RunningAverageAndStdDev get(User user) throws TasteException {
       RunningAverageAndStdDev running = new FullRunningAverageAndStdDev();
       Preference[] prefs = user.getPreferencesAsArray();
       for (int i = 0; i < prefs.length; i++) {

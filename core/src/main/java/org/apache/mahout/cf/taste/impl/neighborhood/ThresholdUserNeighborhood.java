@@ -87,7 +87,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
   }
 
 
-  private final class Retriever implements Cache.Retriever<Object, Collection<User>> {
+  private final class Retriever implements org.apache.mahout.cf.taste.impl.common.Retriever<Object, Collection<User>> {
 
     private final double threshold;
 
@@ -95,7 +95,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
       this.threshold = threshold;
     }
 
-    public Collection<User> getValue(Object key) throws TasteException {
+    public Collection<User> get(Object key) throws TasteException {
       log.trace("Computing neighborhood around user ID '{}'", key);
 
       DataModel dataModel = getDataModel();

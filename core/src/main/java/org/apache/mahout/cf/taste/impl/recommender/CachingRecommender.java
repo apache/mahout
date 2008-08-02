@@ -20,6 +20,7 @@ package org.apache.mahout.cf.taste.impl.recommender;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.Cache;
+import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
@@ -154,7 +155,7 @@ public final class CachingRecommender implements Recommender {
     return "CachingRecommender[recommender:" + recommender + ']';
   }
 
-  private static final class RecommendationRetriever implements Cache.Retriever<Object, Recommendations> {
+  private static final class RecommendationRetriever implements Retriever<Object, Recommendations> {
 
     private final Recommender recommender;
     private final AtomicInteger maxHowMany;
@@ -164,13 +165,13 @@ public final class CachingRecommender implements Recommender {
       this.maxHowMany = maxHowMany;
     }
 
-    public Recommendations getValue(Object key) throws TasteException {
+    public Recommendations get(Object key) throws TasteException {
       log.debug("Retrieving new recommendations for user ID '{}'", key);
       return new Recommendations(Collections.unmodifiableList(recommender.recommend(key, maxHowMany.get())));
     }
   }
 
-  private static final class EstimatedPrefRetriever implements Cache.Retriever<Pair<?, ?>, Double> {
+  private static final class EstimatedPrefRetriever implements Retriever<Pair<?, ?>, Double> {
 
     private final Recommender recommender;
 
@@ -178,7 +179,7 @@ public final class CachingRecommender implements Recommender {
       this.recommender = recommender;
     }
 
-    public Double getValue(Pair<?, ?> key) throws TasteException {
+    public Double get(Pair<?, ?> key) throws TasteException {
       Object userID = key.getFirst();
       Object itemID = key.getSecond();
       log.debug("Retrieving estimated preference for user ID '{}' and item ID '{}'", userID, itemID);

@@ -22,6 +22,7 @@ import org.apache.mahout.cf.taste.correlation.PreferenceInferrer;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.common.Cache;
+import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -34,7 +35,7 @@ import org.apache.mahout.cf.taste.model.User;
  */
 public final class AveragingPreferenceInferrer implements PreferenceInferrer {
 
-  private static final Cache.Retriever<User, Double> RETRIEVER = new PrefRetriever();
+  private static final Retriever<User, Double> RETRIEVER = new PrefRetriever();
 
   private final Cache<User, Double> averagePreferenceValue;
 
@@ -54,9 +55,9 @@ public final class AveragingPreferenceInferrer implements PreferenceInferrer {
     averagePreferenceValue.clear();
   }
 
-  private static final class PrefRetriever implements Cache.Retriever<User, Double> {
+  private static final class PrefRetriever implements Retriever<User, Double> {
 
-    public Double getValue(User key) {
+    public Double get(User key) {
       RunningAverage average = new FullRunningAverage();
       Preference[] prefs = key.getPreferencesAsArray();
       if (prefs.length == 0) {
