@@ -17,6 +17,7 @@
     <kfs.version>0.1</kfs.version>
     <xmlenc.version>0.52</xmlenc.version>
     <jets3t.version>0.5.0</jets3t.version>
+    <watchmaker.version>0.4.3</watchmaker.version>
   </properties>
 
   <mailingLists>

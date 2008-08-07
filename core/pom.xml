@@ -35,7 +35,9 @@
       <plugin>
         <artifactId>maven-install-plugin</artifactId>
 
-        <!-- Copy dependencies with no official Maven artifacts from libs to local Maven repositoty -->
+        <!-- Copy dependencies with no official Maven artifacts from libs to local Maven repository -->
+
+        <!-- hadoop -->
 
         <executions>
           <execution>
@@ -107,7 +109,74 @@
             </configuration>
           </execution>
 
+          <!-- watchmaker -->
+
+          <execution>
+            <id>create-watchmaker-framework-artifact</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>install-file</goal>
+            </goals>
+            <configuration>
+              <file>lib/watchmaker-framework-${watchmaker.version}.jar</file>
+              <groupId>org.uncommons.watchmaker</groupId>
+              <artifactId>watchmaker-framework</artifactId>
+              <packaging>jar</packaging>
+              <version>${watchmaker.version}</version>
+              <generatePom>true</generatePom>
+              <createChecksum>true</createChecksum>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>create-watchmaker-swing-artifact</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>install-file</goal>
+            </goals>
+            <configuration>
+              <file>lib/watchmaker-swing-${watchmaker.version}.jar</file>
+              <groupId>org.uncommons.watchmaker</groupId>
+              <artifactId>watchmaker-swing</artifactId>
+              <packaging>jar</packaging>
+              <version>${watchmaker.version}</version>
+              <generatePom>true</generatePom>
+              <createChecksum>true</createChecksum>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>create-uncommons-math-artifact</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>install-file</goal>
+            </goals>
+            <configuration>
+              <file>lib/uncommons-maths-1.0.2.jar</file>
+              <groupId>org.uncommons.math</groupId>
+              <artifactId>uncommons-math</artifactId>
+              <packaging>jar</packaging>
+              <version>1.0.2</version>
+              <generatePom>true</generatePom>
+              <createChecksum>true</createChecksum>
+            </configuration>
+          </execution>
+
+
         </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <forkMode>pertest</forkMode>
+          <argLine>-Xms256m -Xmx512m</argLine>
+          <testFailureIgnore>false</testFailureIgnore>
+          <skip>false</skip>
+          <includes/>
+          <excludes/>
+        </configuration>
       </plugin>
 
     </plugins>
@@ -173,7 +242,21 @@
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
-      <version>1.2.15</version>
+      <version>1.2.15</version>      
+      <exclusions>
+        <exclusion>
+          <groupId>com.sun.jdmk</groupId>
+          <artifactId>jmxtools</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.sun.jmx</groupId>
+          <artifactId>jmxri</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>javax.jms</groupId>
+          <artifactId>jms</artifactId> 
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -187,6 +270,32 @@
       <artifactId>slf4j-jcl</artifactId>
       <version>1.5.2</version>
     </dependency>
+
+
+    <dependency>
+      <groupId>org.uncommons.watchmaker</groupId>
+      <artifactId>watchmaker-framework</artifactId>
+      <version>${watchmaker.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.uncommons.watchmaker</groupId>
+      <artifactId>watchmaker-swing</artifactId>
+      <version>${watchmaker.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.uncommons.math</groupId>
+      <artifactId>uncommons-math</artifactId>
+      <version>1.0.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.thoughtworks.xstream</groupId>
+      <artifactId>xstream</artifactId>
+      <version>1.2.1</version>
+    </dependency>
+
 
     <dependency>
       <groupId>junit</groupId>
