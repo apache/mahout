@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.impl.correlation;
 
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.common.TasteException;
 
 /**
  * <p>Tests {@link SpearmanCorrelation}.</p>
@@ -57,7 +58,7 @@ public final class SpearmanCorrelationTest extends CorrelationTestCase {
     assertCorrelationEquals(-0.5, correlation);
   }
 
-  public void testRefresh() {
+  public void testRefresh() throws TasteException {
     // Make sure this doesn't throw an exception
     new SpearmanCorrelation(getDataModel()).refresh();
   }

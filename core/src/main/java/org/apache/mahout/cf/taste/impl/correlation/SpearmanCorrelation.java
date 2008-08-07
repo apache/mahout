@@ -41,7 +41,7 @@ public final class SpearmanCorrelation implements UserCorrelation {
   private final UserCorrelation rankingUserCorrelation;
   private final ReentrantLock refreshLock;
 
-  public SpearmanCorrelation(DataModel dataModel) {
+  public SpearmanCorrelation(DataModel dataModel) throws TasteException {
     if (dataModel == null) {
       throw new IllegalArgumentException("dataModel is null");
     }

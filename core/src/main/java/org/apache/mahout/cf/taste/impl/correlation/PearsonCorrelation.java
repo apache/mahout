@@ -20,6 +20,8 @@ package org.apache.mahout.cf.taste.impl.correlation;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Weighting;
 
 /**
  * <p>An implementation of the Pearson correlation. For {@link User}s X and Y, the following values
@@ -47,12 +49,12 @@ import org.apache.mahout.cf.taste.model.User;
  */
 public final class PearsonCorrelation extends AbstractCorrelation {
 
-  public PearsonCorrelation(DataModel dataModel) {
+  public PearsonCorrelation(DataModel dataModel) throws TasteException {
     super(dataModel);
   }
 
-  public PearsonCorrelation(DataModel dataModel, boolean weighted) {
-    super(dataModel, weighted);
+  public PearsonCorrelation(DataModel dataModel, Weighting weighting) throws TasteException {
+    super(dataModel, weighting);
   }
 
   double computeResult(int n, double sumXY, double sumX2, double sumY2, double sumXYdiff2) {

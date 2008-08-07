@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.correlation;
 
+import org.apache.mahout.cf.taste.common.Weighting;
 import org.apache.mahout.cf.taste.correlation.ItemCorrelation;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
@@ -44,7 +45,7 @@ public final class PearsonCorrelationTest extends CorrelationTestCase {
     User user1 = getUser("test1", 3.0, -2.0);
     User user2 = getUser("test2", 3.0, -2.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new PearsonCorrelation(dataModel, true).userCorrelation(user1, user2);
+    double correlation = new PearsonCorrelation(dataModel, Weighting.WEIGHTED).userCorrelation(user1, user2);
     assertCorrelationEquals(1.0, correlation);
   }
 
@@ -69,7 +70,7 @@ public final class PearsonCorrelationTest extends CorrelationTestCase {
     User user1 = getUser("test1", 3.0, -2.0);
     User user2 = getUser("test2", -3.0, 2.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new PearsonCorrelation(dataModel, true).userCorrelation(user1, user2);
+    double correlation = new PearsonCorrelation(dataModel, Weighting.WEIGHTED).userCorrelation(user1, user2);
     assertCorrelationEquals(-1.0, correlation);
   }
 
@@ -103,7 +104,7 @@ public final class PearsonCorrelationTest extends CorrelationTestCase {
     User user1 = getUser("test1", 1.0, 2.0, 3.0);
     User user2 = getUser("test2", 2.0, 5.0, 6.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new PearsonCorrelation(dataModel, true).userCorrelation(user1, user2);
+    double correlation = new PearsonCorrelation(dataModel, Weighting.WEIGHTED).userCorrelation(user1, user2);
     assertCorrelationEquals(0.9901922307076306, correlation);
   }
 
@@ -171,12 +172,12 @@ public final class PearsonCorrelationTest extends CorrelationTestCase {
     User user2 = getUser("test2", 2.0, 5.0);
     User user3 = getUser("test3", 3.0, 6.0);
     DataModel dataModel = getDataModel(user1, user2, user3);
-    ItemCorrelation itemCorrelation = new PearsonCorrelation(dataModel, true);
+    ItemCorrelation itemCorrelation = new PearsonCorrelation(dataModel, Weighting.WEIGHTED);
     double correlation = itemCorrelation.itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1"));
     assertCorrelationEquals(0.9901922307076306, correlation);
   }
 
-  public void testRefresh() {
+  public void testRefresh() throws Exception {
     // Make sure this doesn't throw an exception
     new PearsonCorrelation(getDataModel()).refresh();
   }

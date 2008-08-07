@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -128,7 +127,7 @@ public class FileDataModel implements DataModel {
     }
     String userID = line.substring(0, commaOne);
     String itemID = line.substring(commaOne + 1, commaTwo);
-    double preferenceValue = Double.valueOf(line.substring(commaTwo + 1));
+    double preferenceValue = Double.parseDouble(line.substring(commaTwo + 1));
     List<Preference> prefs = data.get(userID);
     if (prefs == null) {
       prefs = new ArrayList<Preference>();

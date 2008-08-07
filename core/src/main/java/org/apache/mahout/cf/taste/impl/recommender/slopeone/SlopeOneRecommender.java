@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl.recommender.slopeone;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Weighting;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.recommender.AbstractRecommender;
@@ -58,7 +59,10 @@ public final class SlopeOneRecommender extends AbstractRecommender {
    * @param dataModel data model
    */
   public SlopeOneRecommender(DataModel dataModel) throws TasteException {
-    this(dataModel, true, true, new MemoryDiffStorage(dataModel, true, false, Long.MAX_VALUE));
+    this(dataModel,
+         Weighting.WEIGHTED,
+         Weighting.WEIGHTED,
+         new MemoryDiffStorage(dataModel, true, false, Long.MAX_VALUE));
   }
 
   /**
@@ -69,25 +73,24 @@ public final class SlopeOneRecommender extends AbstractRecommender {
    * item-item ratings diffs with lower standard deviation more highly, on the theory that they are more
    * reliable.</p>
    *
-   * @param dataModel
-   * @param weighted if <code>true</code>, acts as a weighted slope one recommender
-   * @param stdDevWeighted use optional standard deviation weighting of diffs
+   * @param weighting if {@link Weighting#WEIGHTED}, acts as a weighted slope one recommender
+   * @param stdDevWeighting use optional standard deviation weighting of diffs
    * @throws IllegalArgumentException if <code>diffStorage</code> is null, or stdDevWeighted is set
    * when weighted is not set
    */
   public SlopeOneRecommender(DataModel dataModel,
-                             boolean weighted,
-                             boolean stdDevWeighted,
+                             Weighting weighting,
+                             Weighting stdDevWeighting,
                              DiffStorage diffStorage) {
     super(dataModel);
-    if (stdDevWeighted && !weighted) {
+    if (stdDevWeighting == Weighting.WEIGHTED && weighting == Weighting.UNWEIGHTED) {
       throw new IllegalArgumentException("weighted required when stdDevWeighted is set");
     }
     if (diffStorage == null) {
       throw new IllegalArgumentException("diffStorage is null");
     }
-    this.weighted = weighted;
-    this.stdDevWeighted = stdDevWeighted;
+    this.weighted = weighting == Weighting.WEIGHTED;
+    this.stdDevWeighted = stdDevWeighting == Weighting.WEIGHTED;
     this.diffStorage = diffStorage;
   }
 

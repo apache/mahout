@@ -27,6 +27,7 @@ import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.transforms.CorrelationTransform;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Weighting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,28 +45,27 @@ abstract class AbstractCorrelation implements UserCorrelation, ItemCorrelation {
   private PreferenceTransform prefTransform;
   private CorrelationTransform<Object> correlationTransform;
   private boolean weighted;
+  private int cachedNumItems;
+  private int cachedNumUsers;
 
   /**
-   * <p>Creates a normal (unweighted) {@link org.apache.mahout.cf.taste.impl.correlation.PearsonCorrelation}.</p>
-   *
-   * @param dataModel
+   * <p>Creates a normal (unweighted) {@link AbstractCorrelation}.</p>
    */
-  AbstractCorrelation(DataModel dataModel) {
-    this(dataModel, false);
+  AbstractCorrelation(DataModel dataModel) throws TasteException {
+    this(dataModel, Weighting.UNWEIGHTED);
   }
 
   /**
-   * <p>Creates a weighted {@link org.apache.mahout.cf.taste.impl.correlation.PearsonCorrelation}.</p>
-   *
-   * @param dataModel
-   * @param weighted
+   * <p>Creates a possibly weighted {@link AbstractCorrelation}.</p>
    */
-  AbstractCorrelation(DataModel dataModel, boolean weighted) {
+  AbstractCorrelation(DataModel dataModel, Weighting weighting) throws TasteException {
     if (dataModel == null) {
       throw new IllegalArgumentException("dataModel is null");
     }
     this.dataModel = dataModel;
-    this.weighted = weighted;
+    this.weighted = weighting == Weighting.WEIGHTED;
+    this.cachedNumItems = dataModel.getNumItems();
+    this.cachedNumUsers = dataModel.getNumUsers();
   }
 
   final DataModel getDataModel() {
@@ -232,7 +232,7 @@ abstract class AbstractCorrelation implements UserCorrelation, ItemCorrelation {
     }
 
     if (!Double.isNaN(result)) {
-      result = normalizeWeightResult(result, count, dataModel.getNumItems());
+      result = normalizeWeightResult(result, count, cachedNumItems);
     }
 
     if (log.isTraceEnabled()) {
@@ -320,7 +320,7 @@ abstract class AbstractCorrelation implements UserCorrelation, ItemCorrelation {
     }
 
     if (!Double.isNaN(result)) {
-      result = normalizeWeightResult(result, count, dataModel.getNumUsers());
+      result = normalizeWeightResult(result, count, cachedNumUsers);
     }
 
     if (log.isTraceEnabled()) {
@@ -349,6 +349,13 @@ abstract class AbstractCorrelation implements UserCorrelation, ItemCorrelation {
 
   public final void refresh() {
     dataModel.refresh();
+    try {
+      cachedNumItems = dataModel.getNumItems();
+      cachedNumUsers = dataModel.getNumUsers();
+    } catch (TasteException te) {
+      // hmm, continue?
+      log.warn("Unable to refresh number of users and items", te);
+    }
     if (inferrer != null) {
       inferrer.refresh();
     }

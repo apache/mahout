@@ -18,6 +18,8 @@
 package org.apache.mahout.cf.taste.impl.correlation;
 
 import org.apache.mahout.cf.taste.model.DataModel;
+import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Weighting;
 
 /**
  * <p>An implementation of a "correlation" based on the Euclidean "distance" between two
@@ -30,12 +32,12 @@ import org.apache.mahout.cf.taste.model.DataModel;
  */
 public final class EuclideanDistanceCorrelation extends AbstractCorrelation {
 
-  public EuclideanDistanceCorrelation(DataModel dataModel) {
+  public EuclideanDistanceCorrelation(DataModel dataModel) throws TasteException {
     super(dataModel);
   }
 
-  public EuclideanDistanceCorrelation(DataModel dataModel, boolean weighted) {
-    super(dataModel, weighted);
+  public EuclideanDistanceCorrelation(DataModel dataModel, Weighting weighting) throws TasteException {
+    super(dataModel, weighting);
   }
 
   double computeResult(int n, double sumXY, double sumX2, double sumY2, double sumXYdiff2) {
