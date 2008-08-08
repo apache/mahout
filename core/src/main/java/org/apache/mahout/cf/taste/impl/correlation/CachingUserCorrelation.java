@@ -20,6 +20,7 @@ package org.apache.mahout.cf.taste.impl.correlation;
 import org.apache.mahout.cf.taste.correlation.UserCorrelation;
 import org.apache.mahout.cf.taste.correlation.PreferenceInferrer;
 import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.Cache;
@@ -33,12 +34,13 @@ public final class CachingUserCorrelation implements UserCorrelation {
   private final UserCorrelation correlation;
   private final Cache<Pair<User, User>, Double> correlationCache;
 
-  public CachingUserCorrelation(UserCorrelation correlation) {
+  public CachingUserCorrelation(UserCorrelation correlation, DataModel dataModel) throws TasteException {
     if (correlation == null) {
       throw new IllegalArgumentException("correlation is null");
     }
     this.correlation = correlation;
-    this.correlationCache = new Cache<Pair<User, User>, Double>(new CorrelationRetriever(correlation));
+    int maxCacheSize = dataModel.getNumUsers(); // just a dumb heuristic for sizing    
+    this.correlationCache = new Cache<Pair<User, User>, Double>(new CorrelationRetriever(correlation), maxCacheSize);
   }
 
   public double userCorrelation(User user1, User user2) throws TasteException {

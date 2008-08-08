@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.impl.neighborhood;
 
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.Cache;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
@@ -33,12 +34,13 @@ public final class CachingUserNeighborhood implements UserNeighborhood {
   private final UserNeighborhood neighborhood;
   private final Cache<Object, Collection<User>> neighborhoodCache;
 
-  public CachingUserNeighborhood(UserNeighborhood neighborhood) {
+  public CachingUserNeighborhood(UserNeighborhood neighborhood, DataModel dataModel) throws TasteException {
     if (neighborhood == null) {
       throw new IllegalArgumentException("neighborhood is null");
     }
     this.neighborhood = neighborhood;
-    this.neighborhoodCache = new Cache<Object, Collection<User>>(new NeighborhoodRetriever(neighborhood));
+    int maxCacheSize = (int) Math.sqrt(dataModel.getNumUsers()); // just a dumb heuristic for sizing
+    this.neighborhoodCache = new Cache<Object, Collection<User>>(new NeighborhoodRetriever(neighborhood), maxCacheSize);
   }
 
   public Collection<User> getUserNeighborhood(Object userID) throws TasteException {

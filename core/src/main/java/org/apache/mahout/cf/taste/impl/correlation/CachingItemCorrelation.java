@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.impl.correlation;
 
 import org.apache.mahout.cf.taste.correlation.ItemCorrelation;
 import org.apache.mahout.cf.taste.model.Item;
+import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.Cache;
@@ -32,12 +33,13 @@ public final class CachingItemCorrelation implements ItemCorrelation {
   private final ItemCorrelation correlation;
   private final Cache<Pair<Item, Item>, Double> correlationCache;
 
-  public CachingItemCorrelation(ItemCorrelation correlation) {
+  public CachingItemCorrelation(ItemCorrelation correlation, DataModel dataModel) throws TasteException {
     if (correlation == null) {
       throw new IllegalArgumentException("correlation is null");
     }
     this.correlation = correlation;
-    this.correlationCache = new Cache<Pair<Item, Item>, Double>(new CorrelationRetriever(correlation));
+    int maxCacheSize = dataModel.getNumItems(); // just a dumb heuristic for sizing
+    this.correlationCache = new Cache<Pair<Item, Item>, Double>(new CorrelationRetriever(correlation), maxCacheSize);
   }
 
   public double itemCorrelation(Item item1, Item item2) throws TasteException {
