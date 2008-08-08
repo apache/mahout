@@ -19,7 +19,6 @@ package org.apache.mahout.cf.taste.impl.neighborhood;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.correlation.UserCorrelation;
-import org.apache.mahout.cf.taste.impl.common.Cache;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
 import org.slf4j.Logger;
@@ -40,7 +39,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
 
   private static final Logger log = LoggerFactory.getLogger(ThresholdUserNeighborhood.class);
 
-  private final Cache<Object, Collection<User>> cache;
+  private final double threshold;
 
   /**
    * @param threshold similarity threshold
@@ -74,50 +73,36 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
     if (Double.isNaN(threshold)) {
       throw new IllegalArgumentException("threshold must not be NaN");
     }
-    this.cache = new Cache<Object, Collection<User>>(new Retriever(threshold), dataModel.getNumUsers());
+    this.threshold = threshold;
   }
 
   public Collection<User> getUserNeighborhood(Object userID) throws TasteException {
-    return cache.get(userID);
+    log.trace("Computing neighborhood around user ID '{}'", userID);
+
+    DataModel dataModel = getDataModel();
+    User theUser = dataModel.getUser(userID);
+    List<User> neighborhood = new ArrayList<User>();
+    Iterator<? extends User> users = dataModel.getUsers().iterator();
+    UserCorrelation userCorrelationImpl = getUserCorrelation();
+
+    while (users.hasNext()) {
+      User user = users.next();
+      if (sampleForUser() && !userID.equals(user.getID())) {
+        double theCorrelation = userCorrelationImpl.userCorrelation(theUser, user);
+        if (!Double.isNaN(theCorrelation) && theCorrelation >= threshold) {
+          neighborhood.add(user);
+        }
+      }
+    }
+
+    log.trace("UserNeighborhood around user ID '{}' is: {}", userID, neighborhood);
+
+    return Collections.unmodifiableList(neighborhood);
   }
 
   @Override
   public String toString() {
     return "ThresholdUserNeighborhood";
-  }
-
-
-  private final class Retriever implements org.apache.mahout.cf.taste.impl.common.Retriever<Object, Collection<User>> {
-
-    private final double threshold;
-
-    private Retriever(double threshold) {
-      this.threshold = threshold;
-    }
-
-    public Collection<User> get(Object key) throws TasteException {
-      log.trace("Computing neighborhood around user ID '{}'", key);
-
-      DataModel dataModel = getDataModel();
-      User theUser = dataModel.getUser(key);
-      List<User> neighborhood = new ArrayList<User>();
-      Iterator<? extends User> users = dataModel.getUsers().iterator();
-      UserCorrelation userCorrelationImpl = getUserCorrelation();
-
-      while (users.hasNext()) {
-        User user = users.next();
-        if (sampleForUser() && !key.equals(user.getID())) {
-          double theCorrelation = userCorrelationImpl.userCorrelation(theUser, user);
-          if (!Double.isNaN(theCorrelation) && theCorrelation >= threshold) {
-            neighborhood.add(user);
-          }
-        }
-      }
-
-      log.trace("UserNeighborhood around user ID '{}' is: {}", key, neighborhood);
-
-      return Collections.unmodifiableList(neighborhood);
-    }
   }
 
 }

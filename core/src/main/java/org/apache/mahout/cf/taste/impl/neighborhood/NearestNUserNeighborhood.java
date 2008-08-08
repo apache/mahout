@@ -19,7 +19,6 @@ package org.apache.mahout.cf.taste.impl.neighborhood;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.correlation.UserCorrelation;
-import org.apache.mahout.cf.taste.impl.common.Cache;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
 import org.slf4j.Logger;
@@ -40,7 +39,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
 
   private static final Logger log = LoggerFactory.getLogger(NearestNUserNeighborhood.class);
 
-  private final Cache<Object, Collection<User>> cache;
+  private final int n;
 
   /**
    * @param n neighborhood size
@@ -71,67 +70,53 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
     if (n < 1) {
       throw new IllegalArgumentException("n must be at least 1");
     }
-    this.cache = new Cache<Object, Collection<User>>(new Retriever(n), dataModel.getNumUsers());
+    this.n = n;
   }
 
   public Collection<User> getUserNeighborhood(Object userID) throws TasteException {
-    return cache.get(userID);
+    log.trace("Computing neighborhood around user ID '{}'", userID);
+
+    DataModel dataModel = getDataModel();
+    User theUser = dataModel.getUser(userID);
+    UserCorrelation userCorrelationImpl = getUserCorrelation();
+
+    LinkedList<UserCorrelationPair> queue = new LinkedList<UserCorrelationPair>();
+    boolean full = false;
+    for (User user : dataModel.getUsers()) {
+      if (sampleForUser() && !userID.equals(user.getID())) {
+        double theCorrelation = userCorrelationImpl.userCorrelation(theUser, user);
+        if (!Double.isNaN(theCorrelation) && (!full || theCorrelation > queue.getLast().theCorrelation)) {
+          ListIterator<UserCorrelationPair> iterator = queue.listIterator(queue.size());
+          while (iterator.hasPrevious()) {
+            if (theCorrelation <= iterator.previous().theCorrelation) {
+              iterator.next();
+              break;
+            }
+          }
+          iterator.add(new UserCorrelationPair(user, theCorrelation));
+          if (full) {
+            queue.removeLast();
+          } else if (queue.size() > n) {
+            full = true;
+            queue.removeLast();
+          }
+        }
+      }
+    }
+
+    List<User> neighborhood = new ArrayList<User>(queue.size());
+    for (UserCorrelationPair pair : queue) {
+      neighborhood.add(pair.user);
+    }
+
+    log.trace("UserNeighborhood around user ID '{}' is: {}", userID, neighborhood);
+
+    return Collections.unmodifiableList(neighborhood);
   }
 
   @Override
   public String toString() {
     return "NearestNUserNeighborhood";
-  }
-
-
-  private final class Retriever implements org.apache.mahout.cf.taste.impl.common.Retriever<Object, Collection<User>> {
-
-    private final int n;
-
-    private Retriever(int n) {
-      this.n = n;
-    }
-
-    public Collection<User> get(Object key) throws TasteException {
-      log.trace("Computing neighborhood around user ID '{}'", key);
-
-      DataModel dataModel = getDataModel();
-      User theUser = dataModel.getUser(key);
-      UserCorrelation userCorrelationImpl = getUserCorrelation();
-
-      LinkedList<UserCorrelationPair> queue = new LinkedList<UserCorrelationPair>();
-      boolean full = false;
-      for (User user : dataModel.getUsers()) {
-        if (sampleForUser() && !key.equals(user.getID())) {
-          double theCorrelation = userCorrelationImpl.userCorrelation(theUser, user);
-          if (!Double.isNaN(theCorrelation) && (!full || theCorrelation > queue.getLast().theCorrelation)) {
-            ListIterator<UserCorrelationPair> iterator = queue.listIterator(queue.size());
-            while (iterator.hasPrevious()) {
-              if (theCorrelation <= iterator.previous().theCorrelation) {
-                iterator.next();
-                break;
-              }
-            }
-            iterator.add(new UserCorrelationPair(user, theCorrelation));
-            if (full) {
-              queue.removeLast();
-            } else if (queue.size() > n) {
-              full = true;
-              queue.removeLast();
-            }
-          }
-        }
-      }
-
-      List<User> neighborhood = new ArrayList<User>(queue.size());
-      for (UserCorrelationPair pair : queue) {
-        neighborhood.add(pair.user);
-      }
-
-      log.trace("UserNeighborhood around user ID '{}' is: {}", key, neighborhood);
-
-      return Collections.unmodifiableList(neighborhood);
-    }
   }
 
   private static final class UserCorrelationPair implements Comparable<UserCorrelationPair> {
