@@ -37,9 +37,9 @@ import java.util.List;
  */
 public abstract class WeightedDistanceMeasure implements DistanceMeasure {
 
-  protected List<Parameter> parameters;
-  protected Parameter<Path> weightsFile;
-  protected Parameter<Class> vectorClass;
+  private List<Parameter> parameters;
+  private Parameter<Path> weightsFile;
+  private Parameter<Class> vectorClass;
   protected Vector weights;
 
 

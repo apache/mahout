@@ -26,13 +26,6 @@ import org.apache.mahout.matrix.Vector;
 public class WeightedEuclideanDistanceMeasure extends WeightedDistanceMeasure {
 
   /* (non-Javadoc)
-   * @see org.apache.hadoop.mapred.JobConfigurable#configure(org.apache.hadoop.mapred.JobConf)
-   */
-  public void configure(JobConf job) {
-    super.configure(job);
-  }
-
-  /* (non-Javadoc)
    * @see org.apache.mahout.utils.DistanceMeasure#distance(org.apache.mahout.matrix.Vector, org.apache.mahout.matrix.Vector)
    */
   public double distance(Vector p1, Vector p2) {

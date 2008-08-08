@@ -26,7 +26,7 @@ public class DoubleParameter extends AbstractParameter<Double> {
   }
 
   public void setStringValue(String stringValue) {
-    set(Double.parseDouble(stringValue));
+    set(Double.valueOf(stringValue));
   }
 
 }

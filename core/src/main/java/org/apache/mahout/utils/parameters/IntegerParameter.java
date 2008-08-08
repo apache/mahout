@@ -9,7 +9,7 @@ public class IntegerParameter extends AbstractParameter<Integer> {
   }
 
   public void setStringValue(String stringValue) {
-    set(Integer.parseInt(stringValue));
+    set(Integer.valueOf(stringValue));
   }
 
 }

@@ -63,7 +63,7 @@ public class SparseVector extends AbstractVector {
     for (int i = 0; i < pts.length; i++) {
       String pt = pts[i].trim();
       if (pt.startsWith("[s")) {
-        int c = new Integer(pts[i].substring(2));
+        int c = Integer.parseInt(pts[i].substring(2));
         result = new SparseVector(c);
       } else if (!pt.startsWith("]")) {
         int ix = pt.indexOf(':');

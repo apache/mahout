@@ -48,13 +48,4 @@ public class WeightedManhattanDistanceMeasure extends WeightedDistanceMeasure {
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.apache.hadoop.mapred.JobConfigurable#configure(org.apache.hadoop.mapred.JobConf)
-   */
-  public void configure(JobConf job) {
-    super.configure(job);
-  }
-
 }

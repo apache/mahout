@@ -115,7 +115,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     checkNotNullAndLog("getItemSQL", getItemSQL);
     checkNotNullAndLog("getPrefsForItemSQL", getPrefsForItemSQL);
     checkNotNullAndLog("getNumPreferenceForItemSQL", getNumPreferenceForItemSQL);
-    checkNotNullAndLog("getgetNumPreferenceForItemsSQL", getNumPreferenceForItemsSQL);
+    checkNotNullAndLog("getNumPreferenceForItemsSQL", getNumPreferenceForItemsSQL);
 
     if (!(dataSource instanceof ConnectionPoolDataSource)) {
       log.warn("You are not using ConnectionPoolDataSource. Make sure your DataSource pools connections " +

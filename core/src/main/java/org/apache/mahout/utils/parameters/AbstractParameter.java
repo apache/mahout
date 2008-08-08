@@ -25,11 +25,11 @@ import java.util.Collections;
 public abstract class AbstractParameter<T> implements Parameter<T> {
 
   protected T value;
-  protected final String prefix;
-  protected final String name;
-  protected final String description;
-  protected final Class<T> type;
-  protected final String defaultValue;
+  private final String prefix;
+  private final String name;
+  private final String description;
+  private final Class<T> type;
+  private final String defaultValue;
 
 
   public void configure(JobConf jobConf) {
