@@ -179,7 +179,7 @@ public final class PearsonCorrelationTest extends CorrelationTestCase {
 
   public void testRefresh() throws Exception {
     // Make sure this doesn't throw an exception
-    new PearsonCorrelation(getDataModel()).refresh();
+    new PearsonCorrelation(getDataModel()).refresh(null);
   }
 
 }

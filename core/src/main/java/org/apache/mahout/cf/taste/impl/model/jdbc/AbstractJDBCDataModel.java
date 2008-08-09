@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl.model.jdbc;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.common.IteratorIterable;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
@@ -415,7 +416,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     }
   }
 
-  public final void refresh() {
+  public final void refresh(Collection<Refreshable> alreadyRefreshed) {
     // do nothing
   }
 

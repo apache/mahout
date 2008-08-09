@@ -42,7 +42,7 @@ public final class CachingRecommenderTest extends TasteTestCase {
     assertEquals(2, recommendCount.get());
     cachingRecommender.recommend("2", 1);
     assertEquals(2, recommendCount.get());
-    cachingRecommender.refresh();
+    cachingRecommender.refresh(null);
     cachingRecommender.recommend("1", 1);
     assertEquals(3, recommendCount.get());
     cachingRecommender.recommend("2", 1);
@@ -52,7 +52,7 @@ public final class CachingRecommenderTest extends TasteTestCase {
 
     // Results from this recommend() method can't be cached:
     Rescorer<Item> rescorer = NullRescorer.getItemInstance();
-    cachingRecommender.refresh();
+    cachingRecommender.refresh(null);
     cachingRecommender.recommend("1", 1, rescorer);
     assertEquals(6, recommendCount.get());
     cachingRecommender.recommend("2", 1, rescorer);
@@ -62,7 +62,7 @@ public final class CachingRecommenderTest extends TasteTestCase {
     cachingRecommender.recommend("2", 1, rescorer);
     assertEquals(9, recommendCount.get());
 
-    cachingRecommender.refresh();
+    cachingRecommender.refresh(null);
     cachingRecommender.estimatePreference("test1", "1");
     assertEquals(10, recommendCount.get());
     cachingRecommender.estimatePreference("test1", "2");

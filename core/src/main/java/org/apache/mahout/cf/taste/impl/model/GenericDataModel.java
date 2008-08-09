@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl.model;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.impl.common.ArrayIterator;
 import org.apache.mahout.cf.taste.impl.common.EmptyIterable;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
@@ -35,6 +36,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Collection;
 
 /**
  * <p>A simple {@link DataModel} which uses a given {@link List} of {@link User}s as
@@ -207,7 +209,7 @@ public final class GenericDataModel implements DataModel, Serializable {
     throw new UnsupportedOperationException();
   }
 
-  public void refresh() {
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
     // Does nothing
   }
 

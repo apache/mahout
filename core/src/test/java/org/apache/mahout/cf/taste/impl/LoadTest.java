@@ -140,7 +140,7 @@ public final class LoadTest extends TasteTestCase {
       for (int i = 0; i < NUM_USERS / 2; i++) {
         recommender.recommend(String.valueOf(random.nextInt(NUM_USERS)), 10);
       }
-      recommender.refresh();
+      recommender.refresh(null);
       for (int i = NUM_USERS / 2; i < NUM_USERS; i++) {
         recommender.recommend(String.valueOf(random.nextInt(NUM_USERS)), 10);
       }

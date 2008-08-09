@@ -60,7 +60,7 @@ public final class SpearmanCorrelationTest extends CorrelationTestCase {
 
   public void testRefresh() throws TasteException {
     // Make sure this doesn't throw an exception
-    new SpearmanCorrelation(getDataModel()).refresh();
+    new SpearmanCorrelation(getDataModel()).refresh(null);
   }
 
 }

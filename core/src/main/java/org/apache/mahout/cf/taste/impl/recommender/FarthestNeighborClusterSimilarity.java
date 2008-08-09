@@ -18,8 +18,10 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.correlation.UserCorrelation;
 import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 
 import java.util.Collection;
 
@@ -36,8 +38,6 @@ public final class FarthestNeighborClusterSimilarity implements ClusterSimilarit
   /**
    * <p>Constructs a {@link FarthestNeighborClusterSimilarity} based on the given {@link UserCorrelation}.
    * All user-user correlations are examined.</p>
-   *
-   * @param correlation
    */
   public FarthestNeighborClusterSimilarity(UserCorrelation correlation) {
     this(correlation, 1.0);
@@ -48,9 +48,6 @@ public final class FarthestNeighborClusterSimilarity implements ClusterSimilarit
    * By setting <code>samplingPercentage</code> to a value less than 1.0, this implementation will only examine
    * that fraction of all user-user correlations between two clusters, increasing performance at the expense
    * of accuracy.</p>
-   *
-   * @param correlation
-   * @param samplingPercentage
    */
   public FarthestNeighborClusterSimilarity(UserCorrelation correlation, double samplingPercentage) {
     if (correlation == null) {
@@ -86,8 +83,9 @@ public final class FarthestNeighborClusterSimilarity implements ClusterSimilarit
     return leastCorrelation;
   }
 
-  public void refresh() {
-    correlation.refresh();
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
+    alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
+    RefreshHelper.maybeRefresh(alreadyRefreshed, correlation);
   }
 
   @Override

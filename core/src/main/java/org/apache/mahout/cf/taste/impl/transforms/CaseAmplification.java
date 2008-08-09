@@ -18,6 +18,9 @@
 package org.apache.mahout.cf.taste.impl.transforms;
 
 import org.apache.mahout.cf.taste.transforms.CorrelationTransform;
+import org.apache.mahout.cf.taste.common.Refreshable;
+
+import java.util.Collection;
 
 /**
  * <p>Applies "case amplification" to correlations. This essentially makes big values bigger
@@ -55,7 +58,7 @@ public final class CaseAmplification implements CorrelationTransform<Object> {
     return value < 0.0 ? -Math.pow(-value, factor) : Math.pow(value, factor);
   }
 
-  public void refresh() {
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
     // do nothing
   }
 

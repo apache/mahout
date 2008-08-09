@@ -21,9 +21,13 @@ import org.apache.mahout.cf.taste.correlation.ItemCorrelation;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.Cache;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
+import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
+
+import java.util.Collection;
 
 /**
  * Caches the results from an underlying {@link ItemCorrelation} implementation.
@@ -52,9 +56,10 @@ public final class CachingItemCorrelation implements ItemCorrelation {
     return correlationCache.get(key);
   }
 
-  public void refresh() {
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
     correlationCache.clear();
-    correlation.refresh();
+    alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
+    RefreshHelper.maybeRefresh(alreadyRefreshed, correlation);
   }
 
   private static final class CorrelationRetriever implements Retriever<Pair<Item, Item>, Double> {

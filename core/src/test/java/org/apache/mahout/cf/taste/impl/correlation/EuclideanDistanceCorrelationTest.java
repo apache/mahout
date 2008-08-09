@@ -179,7 +179,7 @@ public final class EuclideanDistanceCorrelationTest extends CorrelationTestCase 
 
   public void testRefresh() throws TasteException {
     // Make sure this doesn't throw an exception
-    new EuclideanDistanceCorrelation(getDataModel()).refresh();
+    new EuclideanDistanceCorrelation(getDataModel()).refresh(null);
   }
 
 }

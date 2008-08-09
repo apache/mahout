@@ -18,9 +18,11 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.Cache;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
+import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
@@ -32,8 +34,10 @@ import org.slf4j.LoggerFactory;
 import java.lang.ref.SoftReference;
 import java.util.Collections;
 import java.util.List;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.Callable;
 
 /**
  * <p>A {@link Recommender} which caches the results from another {@link Recommender} in memory.
@@ -48,7 +52,7 @@ public final class CachingRecommender implements Recommender {
   private final AtomicInteger maxHowMany;
   private final Cache<Object, Recommendations> recommendationCache;
   private final Cache<Pair<?, ?>, Double> estimatedPrefCache;
-  private final ReentrantLock refreshLock;
+  private final RefreshHelper refreshHelper;
 
   public CachingRecommender(Recommender recommender) throws TasteException {
     if (recommender == null) {
@@ -64,7 +68,13 @@ public final class CachingRecommender implements Recommender {
                     numUsers);
     this.estimatedPrefCache =
             new Cache<Pair<?, ?>, Double>(new EstimatedPrefRetriever(this.recommender), numUsers);
-    this.refreshLock = new ReentrantLock();
+    this.refreshHelper = new RefreshHelper(new Callable<Object>() {
+      public Object call() {
+        clear();
+        return null;
+      }
+    });
+    this.refreshHelper.addDependency(recommender);
   }
 
   public List<RecommendedItem> recommend(Object userID, int howMany) throws TasteException {
@@ -82,17 +92,17 @@ public final class CachingRecommender implements Recommender {
     }
 
     Recommendations recommendations = recommendationCache.get(userID);
-    if (recommendations.items.size() < howMany && !recommendations.noMoreRecommendableItems) {
+    if (recommendations.getItems().size() < howMany && !recommendations.noMoreRecommendableItems) {
       clear(userID);
       recommendations = recommendationCache.get(userID);
-      if (recommendations.items.size() < howMany) {
+      if (recommendations.getItems().size() < howMany) {
         recommendations.noMoreRecommendableItems = true;
       }
     }
 
-    return recommendations.items.size() > howMany ?
-           recommendations.items.subList(0, howMany) :
-           recommendations.items;
+    return recommendations.getItems().size() > howMany ?
+           recommendations.getItems().subList(0, howMany) :
+           recommendations.getItems();
   }
 
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
@@ -119,17 +129,8 @@ public final class CachingRecommender implements Recommender {
     return recommender.getDataModel();
   }
 
-  public void refresh() {
-    if (refreshLock.isLocked()) {
-      return;
-    }
-    try {
-      refreshLock.lock();
-      recommender.refresh();
-      clear();
-    } finally {
-      refreshLock.unlock();
-    }
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
+    refreshHelper.refresh(alreadyRefreshed);
   }
 
   /**
@@ -195,6 +196,10 @@ public final class CachingRecommender implements Recommender {
     private Recommendations(List<RecommendedItem> items) {
       this.items = items;
       this.noMoreRecommendableItems = false;
+    }
+
+    private List<RecommendedItem> getItems() {
+      return items;
     }
   }
 

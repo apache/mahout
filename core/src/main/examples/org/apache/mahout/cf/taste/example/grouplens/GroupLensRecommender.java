@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.example.grouplens;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.impl.recommender.CachingRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -28,6 +29,7 @@ import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Collection;
 
 /**
  * A simple {@link Recommender} implemented for the GroupLens demo.
@@ -80,8 +82,8 @@ public final class GroupLensRecommender implements Recommender {
     return recommender.getDataModel();
   }
 
-  public void refresh() {
-    recommender.refresh();
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
+    recommender.refresh(alreadyRefreshed);
   }
 
   @Override

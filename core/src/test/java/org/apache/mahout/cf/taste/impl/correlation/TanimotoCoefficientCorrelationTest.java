@@ -83,7 +83,7 @@ public final class TanimotoCoefficientCorrelationTest extends CorrelationTestCas
 
   public void testRefresh() {
     // Make sure this doesn't throw an exception
-    new TanimotoCoefficientCorrelation(getDataModel()).refresh();
+    new TanimotoCoefficientCorrelation(getDataModel()).refresh(null);
   }
 
 }

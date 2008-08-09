@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl.correlation;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.correlation.ItemCorrelation;
 import org.apache.mahout.cf.taste.impl.common.IteratorIterable;
 import org.apache.mahout.cf.taste.impl.common.IteratorUtils;
@@ -30,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Collection;
 
 /**
  * <p>A "generic" {@link ItemCorrelation} which takes a static list of precomputed {@link Item}
@@ -173,7 +175,7 @@ public final class GenericItemCorrelation implements ItemCorrelation {
     return correlation == null ? Double.NaN : correlation;
   }
 
-  public void refresh() {
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
     // Do nothing
   }
 

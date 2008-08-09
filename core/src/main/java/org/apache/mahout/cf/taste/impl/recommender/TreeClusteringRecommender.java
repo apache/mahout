@@ -18,11 +18,8 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
-import org.apache.mahout.cf.taste.impl.common.Pair;
-import org.apache.mahout.cf.taste.impl.common.RandomUtils;
-import org.apache.mahout.cf.taste.impl.common.RunningAverage;
-import org.apache.mahout.cf.taste.impl.common.FastMap;
+import org.apache.mahout.cf.taste.common.Refreshable;
+import org.apache.mahout.cf.taste.impl.common.*;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -41,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.Callable;
 
 /**
  * <p>A {@link org.apache.mahout.cf.taste.recommender.Recommender} that clusters {@link User}s, then determines
@@ -68,8 +66,8 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   private Collection<Collection<User>> allClusters;
   private Map<Object, Collection<User>> clustersByUserID;
   private boolean clustersBuilt;
-  private final ReentrantLock refreshLock;
   private final ReentrantLock buildClustersLock;
+  private final RefreshHelper refreshHelper;
 
   /**
    * @param dataModel {@link DataModel} which provdes {@link User}s
@@ -113,8 +111,15 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     this.clusteringThreshold = Double.NaN;
     this.clusteringByThreshold = false;
     this.samplingPercentage = samplingPercentage;
-    this.refreshLock = new ReentrantLock();
     this.buildClustersLock = new ReentrantLock();
+    this.refreshHelper = new RefreshHelper(new Callable<Object>() {
+      public Object call() throws TasteException {
+        buildClusters();
+        return null;
+      }
+    });
+    refreshHelper.addDependency(dataModel);
+    refreshHelper.addDependency(clusterSimilarity);
   }
 
   /**
@@ -161,8 +166,15 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     this.clusteringThreshold = clusteringThreshold;
     this.clusteringByThreshold = true;
     this.samplingPercentage = samplingPercentage;
-    this.refreshLock = new ReentrantLock();
     this.buildClustersLock = new ReentrantLock();
+    this.refreshHelper = new RefreshHelper(new Callable<Object>() {
+      public Object call() throws TasteException {
+        buildClusters();
+        return null;
+      }
+    });
+    refreshHelper.addDependency(dataModel);
+    refreshHelper.addDependency(clusterSimilarity);
   }
 
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
@@ -385,23 +397,8 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     return clustersPerUser;
   }
 
-  @Override
-  public void refresh() {
-    if (refreshLock.isLocked()) {
-      return;
-    }
-    try {
-      refreshLock.lock();
-      super.refresh();
-      clusterSimilarity.refresh();
-      try {
-        buildClusters();
-      } catch (TasteException te) {
-        log.warn("Unexpected excpetion while refreshing", te);
-      }
-    } finally {
-      refreshLock.unlock();
-    }
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
+    refreshHelper.refresh(alreadyRefreshed);
   }
 
   @Override

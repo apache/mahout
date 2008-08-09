@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.model.file;
 
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
@@ -34,9 +35,9 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
@@ -63,7 +64,6 @@ public class FileDataModel implements DataModel {
   private long lastModified;
   private boolean loaded;
   private DataModel delegate;
-  private final ReentrantLock refreshLock;
   private final ReentrantLock reloadLock;
 
   /**
@@ -82,7 +82,6 @@ public class FileDataModel implements DataModel {
 
     this.dataFile = dataFile;
     this.lastModified = dataFile.lastModified();
-    this.refreshLock = new ReentrantLock();
     this.reloadLock = new ReentrantLock();
 
     // Schedule next refresh
@@ -149,9 +148,6 @@ public class FileDataModel implements DataModel {
     return delegate.getUsers();
   }
 
-  /**
-   * @throws NoSuchElementException if there is no such user
-   */
   public User getUser(Object id) throws TasteException {
     checkLoaded();
     return delegate.getUser(id);
@@ -206,17 +202,8 @@ public class FileDataModel implements DataModel {
     throw new UnsupportedOperationException();
   }
 
-  public void refresh() {
-    if (refreshLock.isLocked()) {
-      return;
-    }
-    try {
-      refreshLock.lock();
-      reload();
-    } finally {
-      refreshLock.unlock();
-    }
-
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
+    reload();
   }
 
   /**

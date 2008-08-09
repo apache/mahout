@@ -28,8 +28,13 @@ import org.apache.mahout.cf.taste.transforms.CorrelationTransform;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Weighting;
+import org.apache.mahout.cf.taste.common.Refreshable;
+import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.concurrent.Callable;
 
 /**
  * Abstract superclass encapsulating functionality that is common to most
@@ -47,6 +52,7 @@ abstract class AbstractCorrelation implements UserCorrelation, ItemCorrelation {
   private boolean weighted;
   private int cachedNumItems;
   private int cachedNumUsers;
+  private final RefreshHelper refreshHelper;
 
   /**
    * <p>Creates a normal (unweighted) {@link AbstractCorrelation}.</p>
@@ -66,6 +72,17 @@ abstract class AbstractCorrelation implements UserCorrelation, ItemCorrelation {
     this.weighted = weighting == Weighting.WEIGHTED;
     this.cachedNumItems = dataModel.getNumItems();
     this.cachedNumUsers = dataModel.getNumUsers();
+    this.refreshHelper = new RefreshHelper(new Callable<Object>() {
+      public Object call() throws Exception {
+        cachedNumItems = AbstractCorrelation.this.dataModel.getNumItems();
+        cachedNumUsers = AbstractCorrelation.this.dataModel.getNumUsers();
+        return null;
+      }
+    });
+    this.refreshHelper.addDependency(this.dataModel);
+    this.refreshHelper.addDependency(this.inferrer);
+    this.refreshHelper.addDependency(this.prefTransform);
+    this.refreshHelper.addDependency(this.correlationTransform);
   }
 
   final DataModel getDataModel() {
@@ -347,24 +364,8 @@ abstract class AbstractCorrelation implements UserCorrelation, ItemCorrelation {
     return result;
   }
 
-  public final void refresh() {
-    dataModel.refresh();
-    try {
-      cachedNumItems = dataModel.getNumItems();
-      cachedNumUsers = dataModel.getNumUsers();
-    } catch (TasteException te) {
-      // hmm, continue?
-      log.warn("Unable to refresh number of users and items", te);
-    }
-    if (inferrer != null) {
-      inferrer.refresh();
-    }
-    if (prefTransform != null) {
-      prefTransform.refresh();
-    }
-    if (correlationTransform != null) {
-      correlationTransform.refresh();
-    }
+  public final void refresh(Collection<Refreshable> alreadyRefreshed) {
+    refreshHelper.refresh(alreadyRefreshed);
   }
 
   @Override

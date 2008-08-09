@@ -18,16 +18,19 @@
 package org.apache.mahout.cf.taste.impl.correlation;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.correlation.PreferenceInferrer;
 import org.apache.mahout.cf.taste.correlation.UserCorrelation;
 import org.apache.mahout.cf.taste.impl.model.ByItemPreferenceComparator;
 import org.apache.mahout.cf.taste.impl.model.ByValuePreferenceComparator;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
+import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -39,14 +42,12 @@ import java.util.concurrent.locks.ReentrantLock;
 public final class SpearmanCorrelation implements UserCorrelation {
 
   private final UserCorrelation rankingUserCorrelation;
-  private final ReentrantLock refreshLock;
 
   public SpearmanCorrelation(DataModel dataModel) throws TasteException {
     if (dataModel == null) {
       throw new IllegalArgumentException("dataModel is null");
     }
     this.rankingUserCorrelation = new PearsonCorrelation(dataModel);
-    this.refreshLock = new ReentrantLock();
   }
 
   public SpearmanCorrelation(UserCorrelation rankingUserCorrelation) {
@@ -54,7 +55,6 @@ public final class SpearmanCorrelation implements UserCorrelation {
       throw new IllegalArgumentException("rankingUserCorrelation is null");
     }
     this.rankingUserCorrelation = rankingUserCorrelation;
-    this.refreshLock = new ReentrantLock();
   }
 
   public double userCorrelation(User user1, User user2) throws TasteException {
@@ -69,16 +69,9 @@ public final class SpearmanCorrelation implements UserCorrelation {
     rankingUserCorrelation.setPreferenceInferrer(inferrer);
   }
 
-  public void refresh() {
-    if (refreshLock.isLocked()) {
-      return;
-    }
-    try {
-      refreshLock.lock();
-      rankingUserCorrelation.refresh();
-    } finally {
-      refreshLock.unlock();
-    }
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
+    alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
+    RefreshHelper.maybeRefresh(alreadyRefreshed, rankingUserCorrelation);
   }
 
 

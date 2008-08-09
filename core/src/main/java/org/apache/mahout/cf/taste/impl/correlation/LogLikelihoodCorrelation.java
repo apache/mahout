@@ -20,7 +20,11 @@ package org.apache.mahout.cf.taste.impl.correlation;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.correlation.ItemCorrelation;
+import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
+
+import java.util.Collection;
 
 /**
  * See <a href="http://citeseer.ist.psu.edu/29096.html">http://citeseer.ist.psu.edu/29096.html</a>.
@@ -59,8 +63,9 @@ public final class LogLikelihoodCorrelation implements ItemCorrelation {
     return d <= 0.0 ? 0 : Math.log(d);
   }
 
-  public void refresh() {
-    dataModel.refresh();
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
+    alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
+    RefreshHelper.maybeRefresh(alreadyRefreshed, dataModel);
   }
 
   @Override

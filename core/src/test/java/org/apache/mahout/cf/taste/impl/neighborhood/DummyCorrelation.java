@@ -22,6 +22,9 @@ import org.apache.mahout.cf.taste.correlation.PreferenceInferrer;
 import org.apache.mahout.cf.taste.correlation.UserCorrelation;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.common.Refreshable;
+
+import java.util.Collection;
 
 final class DummyCorrelation implements UserCorrelation, ItemCorrelation {
 
@@ -39,7 +42,7 @@ final class DummyCorrelation implements UserCorrelation, ItemCorrelation {
     throw new UnsupportedOperationException();
   }
 
-  public void refresh() {
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
     // do nothing
   }
 

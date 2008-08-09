@@ -18,10 +18,12 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.correlation.ItemCorrelation;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
+import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -38,7 +40,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * <p>A simple {@link org.apache.mahout.cf.taste.recommender.Recommender} which uses a given
@@ -60,7 +61,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
   private static final Logger log = LoggerFactory.getLogger(GenericItemBasedRecommender.class);
 
   private final ItemCorrelation correlation;
-  private final ReentrantLock refreshLock;
+  private final RefreshHelper refreshHelper;
 
   public GenericItemBasedRecommender(DataModel dataModel, ItemCorrelation correlation) {
     super(dataModel);
@@ -68,7 +69,9 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
       throw new IllegalArgumentException("correlation is null");
     }
     this.correlation = correlation;
-    this.refreshLock = new ReentrantLock();
+    this.refreshHelper = new RefreshHelper(null);
+    refreshHelper.addDependency(dataModel);
+    refreshHelper.addDependency(correlation);
   }
 
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
@@ -217,18 +220,8 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
     return theUser.getPreferencesAsArray().length;
   }
 
-  @Override
-  public void refresh() {
-    if (refreshLock.isLocked()) {
-      return;
-    }
-    try {
-      refreshLock.lock();
-      super.refresh();
-      correlation.refresh();
-    } finally {
-      refreshLock.unlock();
-    }
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
+    refreshHelper.refresh(alreadyRefreshed);
   }
 
   @Override

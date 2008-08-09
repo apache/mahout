@@ -60,7 +60,7 @@ public final class LogLikelihoodCorrelationTest extends CorrelationTestCase {
 
   public void testRefresh() {
     // Make sure this doesn't throw an exception
-    new LogLikelihoodCorrelation(getDataModel()).refresh();
+    new LogLikelihoodCorrelation(getDataModel()).refresh(null);
   }
 
 }

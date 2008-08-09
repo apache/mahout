@@ -56,7 +56,7 @@ public final class ZScoreTest extends TransformTestCase {
 
   public void testRefresh() {
     // Make sure this doesn't throw an exception
-    new ZScore().refresh();
+    new ZScore().refresh(null);
   }
 
 }

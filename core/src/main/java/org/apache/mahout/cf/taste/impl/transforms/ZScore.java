@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl.transforms;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.Cache;
@@ -25,6 +26,8 @@ import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
+
+import java.util.Collection;
 
 /**
  * <p>Normalizes preference values for a {@link User} by converting them to
@@ -43,7 +46,7 @@ public final class ZScore implements PreferenceTransform {
 
   public ZScore() {
     this.meanAndStdevs = new Cache<User, RunningAverageAndStdDev>(new MeanStdevRetriever());
-    refresh();
+    refresh(null);
   }
 
   public double getTransformedValue(Preference pref) throws TasteException {
@@ -57,7 +60,7 @@ public final class ZScore implements PreferenceTransform {
     return 0.0;
   }
 
-  public void refresh() {
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
     // do nothing
   }
 

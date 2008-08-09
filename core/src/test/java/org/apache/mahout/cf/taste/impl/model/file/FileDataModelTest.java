@@ -58,7 +58,7 @@ public final class FileDataModelTest extends TasteTestCase {
     assertEquals(1, recommender.recommend("C345", 3).size());
 
     // Make sure this doesn't throw an exception
-    model.refresh();
+    model.refresh(null);
   }
 
   public void testItem() throws Exception {

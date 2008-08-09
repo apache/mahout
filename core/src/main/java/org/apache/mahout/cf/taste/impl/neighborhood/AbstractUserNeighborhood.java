@@ -20,6 +20,10 @@ package org.apache.mahout.cf.taste.impl.neighborhood;
 import org.apache.mahout.cf.taste.correlation.UserCorrelation;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
+import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
+import org.apache.mahout.cf.taste.common.Refreshable;
+
+import java.util.Collection;
 
 /**
  * <p>Contains methods and resources useful to all classes in this package.</p>
@@ -29,6 +33,7 @@ abstract class AbstractUserNeighborhood implements UserNeighborhood {
   private final UserCorrelation userCorrelation;
   private final DataModel dataModel;
   private final double samplingRate;
+  private final RefreshHelper refreshHelper;
 
   AbstractUserNeighborhood(UserCorrelation userCorrelation,
                            DataModel dataModel,
@@ -42,6 +47,9 @@ abstract class AbstractUserNeighborhood implements UserNeighborhood {
     this.userCorrelation = userCorrelation;
     this.dataModel = dataModel;
     this.samplingRate = samplingRate;
+    this.refreshHelper = new RefreshHelper(null);
+    this.refreshHelper.addDependency(this.dataModel);
+    this.refreshHelper.addDependency(this.userCorrelation);
   }
 
   final UserCorrelation getUserCorrelation() {
@@ -56,9 +64,8 @@ abstract class AbstractUserNeighborhood implements UserNeighborhood {
     return samplingRate >= 1.0 || Math.random() < samplingRate;
   }
 
-  public final void refresh() {
-    userCorrelation.refresh();
-    dataModel.refresh();
+  public final void refresh(Collection<Refreshable> alreadyRefreshed) {
+    refreshHelper.refresh(alreadyRefreshed);
   }
 
 }

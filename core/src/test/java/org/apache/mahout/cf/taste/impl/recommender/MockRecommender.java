@@ -27,10 +27,12 @@ import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
+import org.apache.mahout.cf.taste.common.Refreshable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -78,7 +80,7 @@ final class MockRecommender implements Recommender {
     return new GenericDataModel(users);
   }
 
-  public void refresh() {
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
     // do nothing
   }
 

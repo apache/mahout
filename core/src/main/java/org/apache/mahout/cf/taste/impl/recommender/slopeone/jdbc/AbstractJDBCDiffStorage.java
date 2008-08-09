@@ -18,8 +18,10 @@
 package org.apache.mahout.cf.taste.impl.recommender.slopeone.jdbc;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
+import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.JDBCDataModel;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -34,7 +36,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.Collection;
+import java.util.concurrent.Callable;
 
 /**
  * <p>A  {@link DiffStorage} which stores diffs in a database. Database-specific implementations subclass
@@ -64,7 +67,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
   private final String createDiffsSQL;
   private final String diffsExistSQL;
   private final int minDiffCount;
-  private final ReentrantLock refreshLock;
+  private final RefreshHelper refreshHelper;
 
   protected AbstractJDBCDiffStorage(JDBCDataModel dataModel,
                                     String getDiffSQL,
@@ -95,7 +98,13 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
     this.createDiffsSQL = createDiffsSQL;
     this.diffsExistSQL = diffsExistSQL;
     this.minDiffCount = minDiffCount;
-    this.refreshLock = new ReentrantLock();
+    this.refreshHelper = new RefreshHelper(new Callable<Object>() {
+      public Object call() throws TasteException {
+        buildAverageDiffs();
+        return null;
+      }
+    });
+    refreshHelper.addDependency(dataModel);
     if (isDiffsExist()) {
       log.info("Diffs already exist in database; using them instead of recomputing");
     } else {
@@ -296,21 +305,8 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
     }
   }
 
-  public void refresh() {
-    if (refreshLock.isLocked()) {
-      return;
-    }
-    try {
-      refreshLock.lock();
-      dataModel.refresh();
-      try {
-        buildAverageDiffs();
-      } catch (TasteException te) {
-        log.warn("Unexpected exception while refreshing", te);
-      }
-    } finally {
-      refreshLock.unlock();
-    }
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
+    refreshHelper.refresh(alreadyRefreshed);
   }
 
   private static class FixedRunningAverage implements RunningAverage {

@@ -22,11 +22,15 @@ import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.correlation.UserCorrelation;
 import org.apache.mahout.cf.taste.correlation.ItemCorrelation;
 import org.apache.mahout.cf.taste.correlation.PreferenceInferrer;
+import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
 
 /**
  * <p>An implementation of a "correlation" based on the
@@ -166,8 +170,9 @@ public final class TanimotoCoefficientCorrelation implements UserCorrelation, It
     return result;
   }
 
-  public void refresh() {
-    dataModel.refresh();
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
+    alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
+    RefreshHelper.maybeRefresh(alreadyRefreshed, dataModel);
   }
 
   @Override

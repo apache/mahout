@@ -18,13 +18,8 @@
 package org.apache.mahout.cf.taste.impl.recommender.slopeone;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.CompactRunningAverage;
-import org.apache.mahout.cf.taste.impl.common.CompactRunningAverageAndStdDev;
-import org.apache.mahout.cf.taste.impl.common.FastMap;
-import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
-import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
-import org.apache.mahout.cf.taste.impl.common.RunningAverage;
-import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
+import org.apache.mahout.cf.taste.common.Refreshable;
+import org.apache.mahout.cf.taste.impl.common.*;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -37,9 +32,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collection;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.Callable;
 
 /**
  * <p>An implementation of {@link DiffStorage} that merely stores item-item diffs in memory.
@@ -56,7 +53,7 @@ public final class MemoryDiffStorage implements DiffStorage {
   private final Map<Object, Map<Object, RunningAverage>> averageDiffs;
   private final Map<Object, RunningAverage> averageItemPref;
   private final ReadWriteLock buildAverageDiffsLock;
-  private final ReentrantLock refreshLock;
+  private final RefreshHelper refreshHelper;
 
   /**
    * <p>Creates a new {@link MemoryDiffStorage}.</p>
@@ -102,7 +99,13 @@ public final class MemoryDiffStorage implements DiffStorage {
     this.averageDiffs = new FastMap<Object, Map<Object, RunningAverage>>();
     this.averageItemPref = new FastMap<Object, RunningAverage>();
     this.buildAverageDiffsLock = new ReentrantReadWriteLock();
-    this.refreshLock = new ReentrantLock();
+    this.refreshHelper = new RefreshHelper(new Callable<Object>() {
+      public Object call() throws TasteException {
+        buildAverageDiffs();
+        return null;
+      }
+    });
+    refreshHelper.addDependency(dataModel);
     buildAverageDiffs();
   }
 
@@ -275,21 +278,8 @@ public final class MemoryDiffStorage implements DiffStorage {
     }
   }
 
-  public void refresh() {
-    if (refreshLock.isLocked()) {
-      return;
-    }
-    try {
-      refreshLock.lock();
-      dataModel.refresh();
-      try {
-        buildAverageDiffs();
-      } catch (TasteException te) {
-        log.warn("Unexpected exception while refreshing", te);
-      }
-    } finally {
-      refreshLock.unlock();
-    }
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
+    refreshHelper.refresh(alreadyRefreshed);
   }
 
   @Override

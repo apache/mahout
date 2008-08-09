@@ -60,7 +60,7 @@ public final class ThresholdNeighborhoodTest extends TasteTestCase {
   public void testRefresh() throws Exception {
     // Make sure this doesn't throw an exception
     DataModel dataModel = new GenericDataModel(Collections.singletonList(getUser("test1", 0.1)));
-    new ThresholdUserNeighborhood(20.0, new DummyCorrelation(), dataModel).refresh();
+    new ThresholdUserNeighborhood(20.0, new DummyCorrelation(), dataModel).refresh(null);
   }
 
 }

@@ -18,9 +18,11 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
+import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -34,9 +36,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.Collection;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.Callable;
 
 /**
  * <p>A simple recommender that always estimates preference for an {@link Item} to be the average of
@@ -50,14 +53,20 @@ public final class ItemAverageRecommender extends AbstractRecommender {
 
   private final Map<Object, RunningAverage> itemAverages;
   private boolean averagesBuilt;
-  private final ReentrantLock refreshLock;
   private final ReadWriteLock buildAveragesLock;
+  private final RefreshHelper refreshHelper;
 
   public ItemAverageRecommender(DataModel dataModel) {
     super(dataModel);
     this.itemAverages = new FastMap<Object, RunningAverage>();
-    this.refreshLock = new ReentrantLock();
     this.buildAveragesLock = new ReentrantReadWriteLock();
+    this.refreshHelper = new RefreshHelper(new Callable<Object>() {
+      public Object call() throws TasteException {
+        buildAverageDiffs();
+        return null;
+      }
+    });
+    refreshHelper.addDependency(dataModel);
   }
 
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
@@ -183,22 +192,8 @@ public final class ItemAverageRecommender extends AbstractRecommender {
     }
   }
 
-  @Override
-  public void refresh() {
-    if (refreshLock.isLocked()) {
-      return;
-    }
-    try {
-      refreshLock.lock();
-      super.refresh();
-      try {
-        buildAverageDiffs();
-      } catch (TasteException te) {
-        log.warn("Unexpected excpetion while refreshing", te);
-      }
-    } finally {
-      refreshLock.unlock();
-    }
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
+    refreshHelper.refresh(alreadyRefreshed);
   }
 
   @Override

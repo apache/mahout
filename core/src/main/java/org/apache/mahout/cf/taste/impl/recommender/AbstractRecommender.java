@@ -29,21 +29,18 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
 
 public abstract class AbstractRecommender implements Recommender {
 
   private static final Logger log = LoggerFactory.getLogger(AbstractRecommender.class);
 
   private final DataModel dataModel;
-  private final ReentrantLock refreshLock;
 
   protected AbstractRecommender(DataModel dataModel) {
     if (dataModel == null) {
       throw new IllegalArgumentException("dataModel is null");
     }
     this.dataModel = dataModel;
-    this.refreshLock = new ReentrantLock();
   }
 
   /**
@@ -90,18 +87,6 @@ public abstract class AbstractRecommender implements Recommender {
 
   public DataModel getDataModel() {
     return dataModel;
-  }
-
-  public void refresh() {
-    if (refreshLock.isLocked()) {
-      return;
-    }
-    try {
-      refreshLock.lock();
-      dataModel.refresh();
-    } finally {
-      refreshLock.unlock();
-    }
   }
 
   /**

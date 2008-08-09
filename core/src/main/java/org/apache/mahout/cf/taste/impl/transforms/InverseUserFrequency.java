@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl.transforms;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -60,7 +62,7 @@ public final class InverseUserFrequency implements PreferenceTransform {
    * @param logBase calculation logarithm base
    * @throws IllegalArgumentException if dataModel is <code>null</code> or logBase is {@link Double#NaN} or &lt;= 1.0
    */
-  public InverseUserFrequency(DataModel dataModel, double logBase) {
+  public InverseUserFrequency(DataModel dataModel, double logBase) throws TasteException {
     if (dataModel == null) {
       throw new IllegalArgumentException("dataModel is null");
     }
@@ -70,7 +72,7 @@ public final class InverseUserFrequency implements PreferenceTransform {
     this.dataModel = dataModel;
     this.logBase = logBase;
     this.iufFactors = new AtomicReference<Map<Item, Double>>(new FastMap<Item, Double>());
-    refresh();
+    recompute();
   }
 
   /**
@@ -88,29 +90,31 @@ public final class InverseUserFrequency implements PreferenceTransform {
     return pref.getValue();
   }
 
-  public void refresh() {
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
     try {
-      Counters<Item> itemPreferenceCounts = new Counters<Item>();
-      synchronized (this) {
-        int numUsers = 0;
-        for (User user : dataModel.getUsers()) {
-          Preference[] prefs = user.getPreferencesAsArray();
-          for (int i = 0; i < prefs.length; i++) {
-            itemPreferenceCounts.increment(prefs[i].getItem());
-          }
-          numUsers++;
-        }
-        Map<Item, Double> newIufFactors = new FastMap<Item, Double>(itemPreferenceCounts.size());
-        double logFactor = Math.log(logBase);
-        for (Map.Entry<Item, Counters.MutableInteger> entry : itemPreferenceCounts.getEntrySet()) {
-          newIufFactors.put(entry.getKey(),
-                            Math.log((double) numUsers / (double) entry.getValue().value) / logFactor);
-        }
-        iufFactors.set(Collections.unmodifiableMap(newIufFactors));
-      }
-    } catch (TasteException dme) {
-      log.warn("Unable to refresh", dme);
+      recompute();
+    } catch (TasteException te) {
+      log.warn("Unable to refresh", te);
     }
+  }
+
+  private synchronized void recompute() throws TasteException {
+    Counters<Item> itemPreferenceCounts = new Counters<Item>();
+    int numUsers = 0;
+    for (User user : dataModel.getUsers()) {
+      Preference[] prefs = user.getPreferencesAsArray();
+      for (int i = 0; i < prefs.length; i++) {
+        itemPreferenceCounts.increment(prefs[i].getItem());
+      }
+      numUsers++;
+    }
+    Map<Item, Double> newIufFactors = new FastMap<Item, Double>(itemPreferenceCounts.size());
+    double logFactor = Math.log(logBase);
+    for (Map.Entry<Item, Counters.MutableInteger> entry : itemPreferenceCounts.getEntrySet()) {
+      newIufFactors.put(entry.getKey(),
+                        Math.log((double) numUsers / (double) entry.getValue().value) / logFactor);
+    }
+    iufFactors.set(Collections.unmodifiableMap(newIufFactors));
   }
 
   @Override

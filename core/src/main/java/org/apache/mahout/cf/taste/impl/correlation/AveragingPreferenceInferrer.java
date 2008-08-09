@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl.correlation;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.correlation.PreferenceInferrer;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
@@ -27,6 +28,8 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
+
+import java.util.Collection;
 
 /**
  * <p>Implementations of this interface compute an inferred preference for a {@link User} and an {@link Item}
@@ -41,7 +44,7 @@ public final class AveragingPreferenceInferrer implements PreferenceInferrer {
 
   public AveragingPreferenceInferrer(DataModel dataModel) throws TasteException {
     averagePreferenceValue = new Cache<User, Double>(RETRIEVER, dataModel.getNumUsers());
-    refresh();
+    refresh(null);
   }
 
   public double inferPreference(User user, Item item) throws TasteException {
@@ -51,7 +54,7 @@ public final class AveragingPreferenceInferrer implements PreferenceInferrer {
     return averagePreferenceValue.get(user);
   }
 
-  public void refresh() {
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
     averagePreferenceValue.clear();
   }
 

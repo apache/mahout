@@ -29,7 +29,7 @@ import java.util.List;
  */
 public final class InverseUserFrequencyTest extends TransformTestCase {
 
-  public void testIUF() {
+  public void testIUF() throws Exception {
     List<User> users = new ArrayList<User>(5);
     users.add(getUser("test1", 0.1));
     users.add(getUser("test2", 0.2, 0.3));
@@ -49,7 +49,7 @@ public final class InverseUserFrequencyTest extends TransformTestCase {
     }
 
     // Make sure this doesn't throw an exception
-    iuf.refresh();
+    iuf.refresh(null);
   }
 
 }

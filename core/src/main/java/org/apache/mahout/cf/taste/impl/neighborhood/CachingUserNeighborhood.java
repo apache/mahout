@@ -21,8 +21,10 @@ import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.impl.common.Cache;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
+import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 
 import java.util.Collection;
 
@@ -47,9 +49,10 @@ public final class CachingUserNeighborhood implements UserNeighborhood {
     return neighborhoodCache.get(userID);
   }
 
-  public void refresh() {
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
     neighborhoodCache.clear();
-    neighborhood.refresh();
+    alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
+    RefreshHelper.maybeRefresh(alreadyRefreshed, neighborhood);
   }
 
   private static final class NeighborhoodRetriever implements Retriever<Object, Collection<User>> {

@@ -15,21 +15,31 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.transforms;
+package org.apache.mahout.cf.taste.impl.common;
+
+import org.apache.mahout.cf.taste.common.Refreshable;
+
+import java.util.Collection;
+import java.util.concurrent.Callable;
 
 /**
- * <p>Tests {@link CaseAmplification}.</p>
+ * A mock {@link Refreshable} which counts the number of times it has been refreshed, for use in tests.
  */
-public final class CaseAmplificationTest extends TransformTestCase {
+final class MockRefreshable implements Refreshable, Callable<Object> {
 
-  public void testOneValue() {
-    assertEquals(2.0, new CaseAmplification(0.5).transformCorrelation(null, null, 4.0), EPSILON);
-    assertEquals(-2.0, new CaseAmplification(0.5).transformCorrelation(null, null, -4.0), EPSILON);
+  private int callCount;
+
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
+    call();
   }
 
-  public void testRefresh() {
-    // Make sure this doesn't throw an exception
-    new CaseAmplification(1.0).refresh(null);
+  public Object call() {
+    callCount++;
+    return null;
+  }
+
+  int getCallCount() {
+    return callCount;
   }
 
 }

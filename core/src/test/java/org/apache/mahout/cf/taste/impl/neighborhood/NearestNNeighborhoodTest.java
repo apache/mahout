@@ -62,7 +62,7 @@ public final class NearestNNeighborhoodTest extends TasteTestCase {
   public void testRefresh() throws Exception {
     // Make sure this doesn't throw an exception
     DataModel dataModel = new GenericDataModel(Collections.singletonList(getUser("test1", 0.1)));
-    new NearestNUserNeighborhood(1, new DummyCorrelation(), dataModel).refresh();
+    new NearestNUserNeighborhood(1, new DummyCorrelation(), dataModel).refresh(null);
   }
 
 }
