@@ -88,7 +88,7 @@ public final class IOUtils {
    * @param statement {@link Statement} to close
    * @param connection {@link Connection} to close
    */
-  public static void safeClose(ResultSet resultSet, Statement statement, Connection connection) {
+  public static void quietClose(ResultSet resultSet, Statement statement, Connection connection) {
     quietClose(resultSet);
     quietClose(statement);
     quietClose(connection);

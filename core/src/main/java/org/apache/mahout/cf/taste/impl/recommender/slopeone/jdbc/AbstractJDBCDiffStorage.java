@@ -135,7 +135,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
       log.warn("Exception while retrieving diff", sqle);
       throw new TasteException(sqle);
     } finally {
-      IOUtils.safeClose(rs, stmt, conn);
+      IOUtils.quietClose(rs, stmt, conn);
     }
   }
 
@@ -170,7 +170,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
       log.warn("Exception while retrieving diff", sqle);
       throw new TasteException(sqle);
     } finally {
-      IOUtils.safeClose(rs, stmt, conn);
+      IOUtils.quietClose(rs, stmt, conn);
     }
     return result;
   }
@@ -196,7 +196,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
       log.warn("Exception while retrieving average item pref", sqle);
       throw new TasteException(sqle);
     } finally {
-      IOUtils.safeClose(rs, stmt, conn);
+      IOUtils.quietClose(rs, stmt, conn);
     }
   }
 
@@ -208,16 +208,20 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
       conn = dataSource.getConnection();
       if (remove) {
         stmt = doPartialUpdate(removeDiffSQLs[0], itemID, prefDelta, conn);
+        IOUtils.quietClose(stmt);
         stmt = doPartialUpdate(removeDiffSQLs[1], itemID, prefDelta, conn);
+        IOUtils.quietClose(stmt);
       } else {
         stmt = doPartialUpdate(updateDiffSQLs[0], itemID, prefDelta, conn);
+        IOUtils.quietClose(stmt);        
         stmt = doPartialUpdate(updateDiffSQLs[1], itemID, prefDelta, conn);
+        IOUtils.quietClose(stmt);
       }
     } catch (SQLException sqle) {
       log.warn("Exception while updating item diff", sqle);
       throw new TasteException(sqle);
     } finally {
-      IOUtils.safeClose(null, stmt, conn);
+      IOUtils.quietClose(null, stmt, conn);
     }
   }
 
@@ -254,35 +258,35 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
       log.warn("Exception while retrieving recommendable items", sqle);
       throw new TasteException(sqle);
     } finally {
-      IOUtils.safeClose(rs, stmt, conn);
+      IOUtils.quietClose(rs, stmt, conn);
     }
   }
 
   private void buildAverageDiffs() throws TasteException {
     Connection conn = null;
-    PreparedStatement stmt = null;
     try {
       conn = dataSource.getConnection();
-      stmt = conn.prepareStatement(deleteDiffsSQL);
-      log.debug("Executing SQL update: {}", deleteDiffsSQL);
-      stmt.executeUpdate();
+      PreparedStatement stmt = null;
+      try {
+        stmt = conn.prepareStatement(deleteDiffsSQL);
+        log.debug("Executing SQL update: {}", deleteDiffsSQL);
+        stmt.executeUpdate();
+      } finally {
+        IOUtils.quietClose(stmt);
+      }
+      try {
+        stmt = conn.prepareStatement(createDiffsSQL);
+        stmt.setInt(1, minDiffCount);
+        log.debug("Executing SQL update: {}", createDiffsSQL);
+        stmt.executeUpdate();
+      } finally {
+        IOUtils.quietClose(stmt);
+      }
     } catch (SQLException sqle) {
-      log.warn("Exception while deleting diffs", sqle);
+      log.warn("Exception while updating/deleting diffs", sqle);
       throw new TasteException(sqle);
     } finally {
-      IOUtils.safeClose(null, stmt, conn);
-    }
-    try {
-      conn = dataSource.getConnection();
-      stmt = conn.prepareStatement(createDiffsSQL);
-      stmt.setInt(1, minDiffCount);
-      log.debug("Executing SQL update: {}", createDiffsSQL);
-      stmt.executeUpdate();
-    } catch (SQLException sqle) {
-      log.warn("Exception while creating diffs", sqle);
-      throw new TasteException(sqle);
-    } finally {
-      IOUtils.safeClose(null, stmt, conn);
+      IOUtils.quietClose(conn);
     }
   }
 
@@ -301,7 +305,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
       log.warn("Exception while deleting diffs", sqle);
       throw new TasteException(sqle);
     } finally {
-      IOUtils.safeClose(rs, stmt, conn);
+      IOUtils.quietClose(rs, stmt, conn);
     }
   }
 

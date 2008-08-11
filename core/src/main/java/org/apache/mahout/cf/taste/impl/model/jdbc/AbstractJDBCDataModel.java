@@ -218,7 +218,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       log.warn("Exception while retrieving user", sqle);
       throw new TasteException(sqle);
     } finally {
-      IOUtils.safeClose(rs, stmt, conn);
+      IOUtils.quietClose(rs, stmt, conn);
     }
 
   }
@@ -260,7 +260,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       log.warn("Exception while retrieving item", sqle);
       throw new TasteException(sqle);
     } finally {
-      IOUtils.safeClose(rs, stmt, conn);
+      IOUtils.quietClose(rs, stmt, conn);
     }
   }
 
@@ -298,7 +298,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       log.warn("Exception while retrieving prefs for item", sqle);
       throw new TasteException(sqle);
     } finally {
-      IOUtils.safeClose(rs, stmt, conn);
+      IOUtils.quietClose(rs, stmt, conn);
     }
   }
 
@@ -347,7 +347,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       log.warn("Exception while retrieving number of " + name, sqle);
       throw new TasteException(sqle);
     } finally {
-      IOUtils.safeClose(rs, stmt, conn);
+      IOUtils.quietClose(rs, stmt, conn);
     }
   }
 
@@ -383,7 +383,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       log.warn("Exception while setting preference", sqle);
       throw new TasteException(sqle);
     } finally {
-      IOUtils.safeClose(null, stmt, conn);
+      IOUtils.quietClose(null, stmt, conn);
     }
   }
 
@@ -412,7 +412,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       log.warn("Exception while removing preference", sqle);
       throw new TasteException(sqle);
     } finally {
-      IOUtils.safeClose(null, stmt, conn);
+      IOUtils.quietClose(null, stmt, conn);
     }
   }
 
@@ -473,17 +473,17 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
   private final class ResultSetUserIterator implements Iterator<User> {
 
     private final Connection connection;
-    private final Statement statement;
+    private final PreparedStatement statement;
     private final ResultSet resultSet;
     private boolean closed;
 
     private ResultSetUserIterator(DataSource dataSource, String getUsersSQL) throws TasteException {
       try {
         connection = dataSource.getConnection();
-        statement = connection.createStatement();
+        statement = connection.prepareStatement(getUsersSQL);
         statement.setFetchDirection(ResultSet.FETCH_UNKNOWN);
         log.debug("Executing SQL query: {}", getUsersSQL);
-        resultSet = statement.executeQuery(getUsersSQL);
+        resultSet = statement.executeQuery();
       } catch (SQLException sqle) {
         close();
         throw new TasteException(sqle);
@@ -558,7 +558,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
     private void close() {
       closed = true;
-      IOUtils.safeClose(resultSet, statement, connection);
+      IOUtils.quietClose(resultSet, statement, connection);
     }
 
   }
@@ -574,17 +574,17 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
   private final class ResultSetItemIterator implements Iterator<Item> {
 
     private final Connection connection;
-    private final Statement statement;
+    private final PreparedStatement statement;
     private final ResultSet resultSet;
     private boolean closed;
 
     private ResultSetItemIterator(DataSource dataSource, String getItemsSQL) throws TasteException {
       try {
         connection = dataSource.getConnection();
-        statement = connection.createStatement();
+        statement = connection.prepareStatement(getItemsSQL);
         statement.setFetchDirection(ResultSet.FETCH_FORWARD);
         log.debug("Executing SQL query: {}", getItemsSQL);
-        resultSet = statement.executeQuery(getItemsSQL);
+        resultSet = statement.executeQuery();
       } catch (SQLException sqle) {
         close();
         throw new TasteException(sqle);
@@ -640,7 +640,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
     private void close() {
       closed = true;
-      IOUtils.safeClose(resultSet, statement, connection);
+      IOUtils.quietClose(resultSet, statement, connection);
     }
 
   }
