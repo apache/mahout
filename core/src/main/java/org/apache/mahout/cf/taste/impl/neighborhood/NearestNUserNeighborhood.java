@@ -49,7 +49,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
    */
   public NearestNUserNeighborhood(int n,
                                   UserCorrelation userCorrelation,
-                                  DataModel dataModel) throws TasteException {
+                                  DataModel dataModel) {
     this(n, userCorrelation, dataModel, 1.0);
   }
 
@@ -65,7 +65,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
   public NearestNUserNeighborhood(int n,
                                   UserCorrelation userCorrelation,
                                   DataModel dataModel,
-                                  double samplingRate) throws TasteException {
+                                  double samplingRate) {
     super(userCorrelation, dataModel, samplingRate);
     if (n < 1) {
       throw new IllegalArgumentException("n must be at least 1");

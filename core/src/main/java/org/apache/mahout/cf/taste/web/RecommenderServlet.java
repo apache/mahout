@@ -90,7 +90,7 @@ public final class RecommenderServlet extends HttpServlet {
     }
     String howManyString = request.getParameter("howMany");
     int howMany = howManyString == null ? DEFAULT_HOW_MANY : Integer.parseInt(howManyString);
-    boolean debug = Boolean.valueOf(request.getParameter("debug"));
+    boolean debug = Boolean.parseBoolean(request.getParameter("debug"));
     String format = request.getParameter("format");
     if (format == null) {
       format = "text";
@@ -156,41 +156,50 @@ public final class RecommenderServlet extends HttpServlet {
     response.setHeader("Cache-Control", "no-cache");
     PrintWriter writer = response.getWriter();
     if (debug) {
-      DataModel dataModel = recommender.getDataModel();
-      writer.print("User:");
-      writer.println(dataModel.getUser(userID));
-      writer.print("Recommender: ");
-      writer.println(recommender);
-      writer.println();
-      writer.print("Top ");
-      writer.print(NUM_TOP_PREFERENCES);
-      writer.println(" Preferences:");
-      Preference[] rawPrefs = dataModel.getUser(userID).getPreferencesAsArray();
-      int length = rawPrefs.length;
-      Preference[] sortedPrefs = new Preference[length];
-      System.arraycopy(rawPrefs, 0, sortedPrefs, 0, length);
-      Arrays.sort(sortedPrefs, Collections.reverseOrder(ByValuePreferenceComparator.getInstance()));
-      // Cap this at 20 just to be brief
-      int max = Math.min(NUM_TOP_PREFERENCES, length);
-      for (int i = 0; i < max; i++) {
-        Preference pref = sortedPrefs[i];
-        writer.print(pref.getValue());
-        writer.print('\t');
-        writer.println(pref.getItem());
-      }
-      writer.println();
-      writer.println("Recommendations:");
-      for (RecommendedItem recommendedItem : items) {
-        writer.print(recommendedItem.getValue());
-        writer.print('\t');
-        writer.println(recommendedItem.getItem());
-      }
+      writeDebugRecommendations(userID, items, writer);
     } else {
-      for (RecommendedItem recommendedItem : items) {
-        writer.print(recommendedItem.getValue());
-        writer.print('\t');
-        writer.println(recommendedItem.getItem().getID());
-      }
+      writeRecommendations(items, writer);
+    }
+  }
+
+  private void writeRecommendations(Iterable<RecommendedItem> items, PrintWriter writer) {
+    for (RecommendedItem recommendedItem : items) {
+      writer.print(recommendedItem.getValue());
+      writer.print('\t');
+      writer.println(recommendedItem.getItem().getID());
+    }
+  }
+
+  private void writeDebugRecommendations(String userID, Iterable<RecommendedItem> items, PrintWriter writer)
+      throws TasteException {
+    DataModel dataModel = recommender.getDataModel();
+    writer.print("User:");
+    writer.println(dataModel.getUser(userID));
+    writer.print("Recommender: ");
+    writer.println(recommender);
+    writer.println();
+    writer.print("Top ");
+    writer.print(NUM_TOP_PREFERENCES);
+    writer.println(" Preferences:");
+    Preference[] rawPrefs = dataModel.getUser(userID).getPreferencesAsArray();
+    int length = rawPrefs.length;
+    Preference[] sortedPrefs = new Preference[length];
+    System.arraycopy(rawPrefs, 0, sortedPrefs, 0, length);
+    Arrays.sort(sortedPrefs, Collections.reverseOrder(ByValuePreferenceComparator.getInstance()));
+    // Cap this at NUM_TOP_PREFERENCES just to be brief
+    int max = Math.min(NUM_TOP_PREFERENCES, length);
+    for (int i = 0; i < max; i++) {
+      Preference pref = sortedPrefs[i];
+      writer.print(pref.getValue());
+      writer.print('\t');
+      writer.println(pref.getItem());
+    }
+    writer.println();
+    writer.println("Recommendations:");
+    for (RecommendedItem recommendedItem : items) {
+      writer.print(recommendedItem.getValue());
+      writer.print('\t');
+      writer.println(recommendedItem.getItem());
     }
   }
 

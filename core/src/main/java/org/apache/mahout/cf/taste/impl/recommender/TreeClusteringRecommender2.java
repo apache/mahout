@@ -309,115 +309,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
 
         boolean done = false;
         while (!done) {
-
-          // We find a certain number of closest clusters...
-          boolean full = false;
-          LinkedList<ClusterClusterPair> queue = new LinkedList<ClusterClusterPair>();
-          int i = 0;
-          for (Collection<User> cluster1 : clusters) {
-            i++;
-            ListIterator<Collection<User>> it2 = clusters.listIterator(i);
-            while (it2.hasNext()) {
-              Collection<User> cluster2 = it2.next();
-              double similarity = clusterSimilarity.getSimilarity(cluster1, cluster2);
-              if (!Double.isNaN(similarity) &&
-                  (!full || similarity > queue.getLast().getSimilarity())) {
-                ListIterator<ClusterClusterPair> queueIterator =
-                        queue.listIterator(queue.size());
-                while (queueIterator.hasPrevious()) {
-                  if (similarity <= queueIterator.previous().getSimilarity()) {
-                    queueIterator.next();
-                    break;
-                  }
-                }
-                queueIterator.add(new ClusterClusterPair(cluster1, cluster2, similarity));
-                if (full) {
-                  queue.removeLast();
-                } else if (queue.size() > numUsers) { // use numUsers as queue size limit
-                  full = true;
-                  queue.removeLast();
-                }
-              }
-            }
-          }
-
-          // The first one is definitely the closest pair in existence so we can cluster
-          // the two together, put it back into the set of clusters, and start again. Instead
-          // we assume everything else in our list of closest cluster pairs is still pretty good,
-          // and we cluster them too.
-
-          while (!queue.isEmpty()) {
-
-            if (!clusteringByThreshold && clusters.size() <= numClusters) {
-              done = true;
-              break;
-            }
-
-            ClusterClusterPair top = queue.removeFirst();
-
-            if (clusteringByThreshold && top.getSimilarity() < clusteringThreshold) {
-              done = true;
-              break;
-            }
-
-            Collection<User> cluster1 = top.getCluster1();
-            Collection<User> cluster2 = top.getCluster2();
-
-            // Pull out current two clusters from clusters
-            Iterator<Collection<User>> clusterIterator = clusters.iterator();
-            boolean removed1 = false;
-            boolean removed2 = false;
-            while (clusterIterator.hasNext() && !(removed1 && removed2)) {
-              Collection<User> current = clusterIterator.next();
-              // Yes, use == here
-              if (!removed1 && cluster1 == current) {
-                clusterIterator.remove();
-                removed1 = true;
-              } else if (!removed2 && cluster2 == current) {
-                clusterIterator.remove();
-                removed2 = true;
-              }
-            }
-
-            // The only catch is if a cluster showed it twice in the list of best cluster pairs;
-            // have to remove the others. Pull out anything referencing these clusters from queue
-            for (Iterator<ClusterClusterPair> queueIterator = queue.iterator();
-                 queueIterator.hasNext();) {
-              ClusterClusterPair pair = queueIterator.next();
-              Collection<User> pair1 = pair.getCluster1();
-              Collection<User> pair2 = pair.getCluster2();
-              if (pair1 == cluster1 || pair1 == cluster2 || pair2 == cluster1 || pair2 == cluster2) {
-                queueIterator.remove();
-              }
-            }
-
-            // Make new merged cluster
-            Collection<User> merged = new HashSet<User>(cluster1.size() + cluster2.size());
-            merged.addAll(cluster1);
-            merged.addAll(cluster2);
-
-            // Compare against other clusters; update queue if needed
-            // That new pair we're just adding might be pretty close to something else, so
-            // catch that case here and put it back into our queue
-            for (Collection<User> cluster : clusters) {
-              double similarity = clusterSimilarity.getSimilarity(merged, cluster);
-              if (similarity > queue.getLast().getSimilarity()) {
-                ListIterator<ClusterClusterPair> queueIterator = queue.listIterator();
-                while (queueIterator.hasNext()) {
-                  if (similarity > queueIterator.next().getSimilarity()) {
-                    queueIterator.previous();
-                    break;
-                  }
-                }
-                queueIterator.add(new ClusterClusterPair(merged, cluster, similarity));
-              }
-            }
-
-            // Finally add new cluster to list
-            clusters.add(merged);
-
-          }
-
+          done = mergeClosestClusters(numUsers, clusters, done);
         }
 
         topRecsByUserID = computeTopRecsPerUserID(clusters);
@@ -430,6 +322,117 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
     } finally {
       buildClustersLock.unlock();
     }
+  }
+
+  private boolean mergeClosestClusters(int numUsers, List<Collection<User>> clusters, boolean done) throws TasteException {
+    // We find a certain number of closest clusters...
+    boolean full = false;
+    LinkedList<ClusterClusterPair> queue = new LinkedList<ClusterClusterPair>();
+    int i = 0;
+    for (Collection<User> cluster1 : clusters) {
+      i++;
+      ListIterator<Collection<User>> it2 = clusters.listIterator(i);
+      while (it2.hasNext()) {
+        Collection<User> cluster2 = it2.next();
+        double similarity = clusterSimilarity.getSimilarity(cluster1, cluster2);
+        if (!Double.isNaN(similarity) &&
+            (!full || similarity > queue.getLast().getSimilarity())) {
+          ListIterator<ClusterClusterPair> queueIterator =
+                  queue.listIterator(queue.size());
+          while (queueIterator.hasPrevious()) {
+            if (similarity <= queueIterator.previous().getSimilarity()) {
+              queueIterator.next();
+              break;
+            }
+          }
+          queueIterator.add(new ClusterClusterPair(cluster1, cluster2, similarity));
+          if (full) {
+            queue.removeLast();
+          } else if (queue.size() > numUsers) { // use numUsers as queue size limit
+            full = true;
+            queue.removeLast();
+          }
+        }
+      }
+    }
+
+    // The first one is definitely the closest pair in existence so we can cluster
+    // the two together, put it back into the set of clusters, and start again. Instead
+    // we assume everything else in our list of closest cluster pairs is still pretty good,
+    // and we cluster them too.
+
+    while (!queue.isEmpty()) {
+
+      if (!clusteringByThreshold && clusters.size() <= numClusters) {
+        done = true;
+        break;
+      }
+
+      ClusterClusterPair top = queue.removeFirst();
+
+      if (clusteringByThreshold && top.getSimilarity() < clusteringThreshold) {
+        done = true;
+        break;
+      }
+
+      Collection<User> cluster1 = top.getCluster1();
+      Collection<User> cluster2 = top.getCluster2();
+
+      // Pull out current two clusters from clusters
+      Iterator<Collection<User>> clusterIterator = clusters.iterator();
+      boolean removed1 = false;
+      boolean removed2 = false;
+      while (clusterIterator.hasNext() && !(removed1 && removed2)) {
+        Collection<User> current = clusterIterator.next();
+        // Yes, use == here
+        if (!removed1 && cluster1 == current) {
+          clusterIterator.remove();
+          removed1 = true;
+        } else if (!removed2 && cluster2 == current) {
+          clusterIterator.remove();
+          removed2 = true;
+        }
+      }
+
+      // The only catch is if a cluster showed it twice in the list of best cluster pairs;
+      // have to remove the others. Pull out anything referencing these clusters from queue
+      for (Iterator<ClusterClusterPair> queueIterator = queue.iterator();
+           queueIterator.hasNext();) {
+        ClusterClusterPair pair = queueIterator.next();
+        Collection<User> pair1 = pair.getCluster1();
+        Collection<User> pair2 = pair.getCluster2();
+        if (pair1 == cluster1 || pair1 == cluster2 || pair2 == cluster1 || pair2 == cluster2) {
+          queueIterator.remove();
+        }
+      }
+
+      // Make new merged cluster
+      Collection<User> merged = new HashSet<User>(cluster1.size() + cluster2.size());
+      merged.addAll(cluster1);
+      merged.addAll(cluster2);
+
+      // Compare against other clusters; update queue if needed
+      // That new pair we're just adding might be pretty close to something else, so
+      // catch that case here and put it back into our queue
+      for (Collection<User> cluster : clusters) {
+        double similarity = clusterSimilarity.getSimilarity(merged, cluster);
+        if (similarity > queue.getLast().getSimilarity()) {
+          ListIterator<ClusterClusterPair> queueIterator = queue.listIterator();
+          while (queueIterator.hasNext()) {
+            if (similarity > queueIterator.next().getSimilarity()) {
+              queueIterator.previous();
+              break;
+            }
+          }
+          queueIterator.add(new ClusterClusterPair(merged, cluster, similarity));
+        }
+      }
+
+      // Finally add new cluster to list
+      clusters.add(merged);
+
+    }
+    return done;
   }
 
   private static Map<Object, List<RecommendedItem>> computeTopRecsPerUserID(Iterable<Collection<User>> clusters)

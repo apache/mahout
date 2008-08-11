@@ -22,11 +22,12 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 import java.util.Comparator;
+import java.io.Serializable;
 
 /**
  * <p>A simple {@link org.apache.mahout.cf.taste.recommender.Rescorer} which always returns the original score.</p>
  */
-final class ByRescoreComparator implements Comparator<RecommendedItem> {
+final class ByRescoreComparator implements Comparator<RecommendedItem>, Serializable {
 
   private final Rescorer<Item> rescorer;
 

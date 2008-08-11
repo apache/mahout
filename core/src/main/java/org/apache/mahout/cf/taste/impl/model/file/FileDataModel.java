@@ -137,7 +137,7 @@ public class FileDataModel implements DataModel {
     prefs.add(buildPreference(null, item, preferenceValue));
   }
 
-  private void checkLoaded() throws TasteException {
+  private void checkLoaded() {
     if (!loaded) {
       reload();
     }

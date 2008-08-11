@@ -80,28 +80,7 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
 
     for (User user : dataModel.getUsers()) {
       if (random.nextDouble() < evaluationPercentage) {
-        List<Preference> trainingPrefs = new ArrayList<Preference>();
-        List<Preference> testPrefs = new ArrayList<Preference>();
-        Preference[] prefs = user.getPreferencesAsArray();
-        for (int i = 0; i < prefs.length; i++) {
-          Preference pref = prefs[i];
-          Item itemCopy = new GenericItem<String>(pref.getItem().getID().toString());
-          Preference newPref = new GenericPreference(null, itemCopy, pref.getValue());
-          if (random.nextDouble() < trainingPercentage) {
-            trainingPrefs.add(newPref);
-          } else {
-            testPrefs.add(newPref);
-          }
-        }
-        log.debug("Training against {} preferences", trainingPrefs.size());
-        log.debug("Evaluating accuracy of {} preferences", testPrefs.size());
-        if (!trainingPrefs.isEmpty()) {
-          User trainingUser = new GenericUser<String>(user.getID().toString(), trainingPrefs);
-          trainingUsers.add(trainingUser);
-          if (!testPrefs.isEmpty()) {
-            testUserPrefs.put(trainingUser, testPrefs);
-          }
-        }
+        processOneUser(trainingPercentage, trainingUsers, testUserPrefs, user);
       }
     }
 
@@ -114,8 +93,35 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     return result;
   }
 
-  abstract double getEvaluation(Map<User, Collection<Preference>> testUserPrefs,
-                                Recommender recommender)
-          throws TasteException;
+  private void processOneUser(double trainingPercentage,
+                              Collection<User> trainingUsers,
+                              Map<User, Collection<Preference>> testUserPrefs,
+                              User user) {
+    List<Preference> trainingPrefs = new ArrayList<Preference>();
+    List<Preference> testPrefs = new ArrayList<Preference>();
+    Preference[] prefs = user.getPreferencesAsArray();
+    for (int i = 0; i < prefs.length; i++) {
+      Preference pref = prefs[i];
+      Item itemCopy = new GenericItem<String>(pref.getItem().getID().toString());
+      Preference newPref = new GenericPreference(null, itemCopy, pref.getValue());
+      if (random.nextDouble() < trainingPercentage) {
+        trainingPrefs.add(newPref);
+      } else {
+        testPrefs.add(newPref);
+      }
+    }
+    log.debug("Training against {} preferences", trainingPrefs.size());
+    log.debug("Evaluating accuracy of {} preferences", testPrefs.size());
+    if (!trainingPrefs.isEmpty()) {
+      User trainingUser = new GenericUser<String>(user.getID().toString(), trainingPrefs);
+      trainingUsers.add(trainingUser);
+      if (!testPrefs.isEmpty()) {
+        testUserPrefs.put(trainingUser, testPrefs);
+      }
+    }
+  }
+
+  abstract double getEvaluation(Map<User, Collection<Preference>> testUserPrefs, Recommender recommender)
+      throws TasteException;
 
 }

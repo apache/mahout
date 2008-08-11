@@ -80,8 +80,8 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
     RunningAverage precision = new FullRunningAverage();
     RunningAverage recall = new FullRunningAverage();
     for (User user : dataModel.getUsers()) {
-      Object id = user.getID();
       if (random.nextDouble() < evaluationPercentage) {
+        Object id = user.getID();
         Collection<Item> relevantItems = new HashSet<Item>(at);
         Preference[] prefs = user.getPreferencesAsArray();
         for (int i = 0; i < prefs.length; i++) {
@@ -94,23 +94,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
         if (numRelevantItems > 0) {
           List<User> trainingUsers = new ArrayList<User>(dataModel.getNumUsers());
           for (User user2 : dataModel.getUsers()) {
-            if (id.equals(user2.getID())) {
-              List<Preference> trainingPrefs = new ArrayList<Preference>();
-              Preference[] prefs2 = user2.getPreferencesAsArray();
-              for (int i = 0; i < prefs2.length; i++) {
-                Preference pref = prefs2[i];
-                if (!relevantItems.contains(pref.getItem())) {
-                  trainingPrefs.add(pref);
-                }
-              }
-              if (!trainingPrefs.isEmpty()) {
-                User trainingUser = new GenericUser<String>(id.toString(), trainingPrefs);
-                trainingUsers.add(trainingUser);
-              }
-            } else {
-              trainingUsers.add(user2);
-            }
-
+            processOtherUser(id, relevantItems, trainingUsers, user2);
           }
           DataModel trainingModel = new GenericDataModel(trainingUsers);
           Recommender recommender = recommenderBuilder.buildRecommender(trainingModel);
@@ -134,6 +118,25 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
     }
 
     return new IRStatisticsImpl(precision.getAverage(), recall.getAverage());
+  }
+
+  private void processOtherUser(Object id, Collection<Item> relevantItems, List<User> trainingUsers, User user2) {
+    if (id.equals(user2.getID())) {
+      List<Preference> trainingPrefs = new ArrayList<Preference>();
+      Preference[] prefs2 = user2.getPreferencesAsArray();
+      for (int i = 0; i < prefs2.length; i++) {
+        Preference pref = prefs2[i];
+        if (!relevantItems.contains(pref.getItem())) {
+          trainingPrefs.add(pref);
+        }
+      }
+      if (!trainingPrefs.isEmpty()) {
+        User trainingUser = new GenericUser<String>(id.toString(), trainingPrefs);
+        trainingUsers.add(trainingUser);
+      }
+    } else {
+      trainingUsers.add(user2);
+    }
   }
 
 }

@@ -17,11 +17,9 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
-import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import junit.framework.TestCase;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Collection;
 

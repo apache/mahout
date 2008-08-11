@@ -189,8 +189,8 @@ public class CDRule implements Rule {
         if (!empty)
           buffer.append(" && ");
 
-        buffer.append("attr" + attributeIndex(condInd) + " "
-            + (getO(condInd) ? ">=" : "<") + " " + getV(condInd));
+        buffer.append("attr").append(attributeIndex(condInd)).append(" ").append(getO(condInd) ? ">=" : "<");
+        buffer.append(" ").append(getV(condInd));
 
         empty = false;
       }

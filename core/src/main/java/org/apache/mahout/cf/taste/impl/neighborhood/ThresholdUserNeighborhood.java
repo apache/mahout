@@ -51,7 +51,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
    */
   public ThresholdUserNeighborhood(double threshold,
                                    UserCorrelation userCorrelation,
-                                   DataModel dataModel) throws TasteException {
+                                   DataModel dataModel) {
     this(threshold, userCorrelation, dataModel, 1.0);
   }
 
@@ -68,7 +68,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
   public ThresholdUserNeighborhood(double threshold,
                                    UserCorrelation userCorrelation,
                                    DataModel dataModel,
-                                   double samplingRate) throws TasteException {
+                                   double samplingRate) {
     super(userCorrelation, dataModel, samplingRate);
     if (Double.isNaN(threshold)) {
       throw new IllegalArgumentException("threshold must not be NaN");
