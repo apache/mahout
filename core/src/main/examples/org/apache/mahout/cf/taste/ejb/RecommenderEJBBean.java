@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.ejb;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
@@ -30,6 +31,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.util.List;
+import java.util.Collection;
 
 /**
  * <p>Recommender EJB bean implementation.</p>
@@ -64,8 +66,8 @@ public class RecommenderEJBBean implements SessionBean {
     recommender.removePreference(userID, itemID);
   }
 
-  public void refresh() {
-    recommender.refresh();
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
+    recommender.refresh(alreadyRefreshed);
   }
 
   public void setSessionContext(SessionContext sessionContext) {
