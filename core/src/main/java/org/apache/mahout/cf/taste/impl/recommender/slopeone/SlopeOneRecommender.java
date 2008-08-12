@@ -65,7 +65,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
     this(dataModel,
          Weighting.WEIGHTED,
          Weighting.WEIGHTED,
-         new MemoryDiffStorage(dataModel, true, false, Long.MAX_VALUE));
+         new MemoryDiffStorage(dataModel, Weighting.WEIGHTED, false, Long.MAX_VALUE));
   }
 
   /**

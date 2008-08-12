@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.impl.recommender.slopeone;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Refreshable;
+import org.apache.mahout.cf.taste.common.Weighting;
 import org.apache.mahout.cf.taste.impl.common.*;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
@@ -83,7 +84,7 @@ public final class MemoryDiffStorage implements DiffStorage {
    * is null
    */
   public MemoryDiffStorage(DataModel dataModel,
-                           boolean stdDevWeighted,
+                           Weighting stdDevWeighted,
                            boolean compactAverages,
                            long maxEntries) throws TasteException {
     if (dataModel == null) {
@@ -93,7 +94,7 @@ public final class MemoryDiffStorage implements DiffStorage {
       throw new IllegalArgumentException("maxEntries must be positive");
     }
     this.dataModel = dataModel;
-    this.stdDevWeighted = stdDevWeighted;
+    this.stdDevWeighted = stdDevWeighted == Weighting.WEIGHTED;
     this.compactAverages = compactAverages;
     this.maxEntries = maxEntries;
     this.averageDiffs = new FastMap<Object, Map<Object, RunningAverage>>();
