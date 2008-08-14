@@ -154,10 +154,7 @@ public class SparseMatrix extends AbstractMatrix {
    */
   @Override
   public Matrix like(int rows, int columns) {
-    int[] c = new int[2];
-    c[ROW] = rows;
-    c[COL] = columns;
-    return new SparseMatrix(c);
+    return new SparseMatrix(new int[] { rows, columns });
   }
 
   /*
@@ -167,9 +164,13 @@ public class SparseMatrix extends AbstractMatrix {
    */
   @Override
   public void setQuick(int row, int column, double value) {
-    if (rows.get(row) == null)
-      rows.put(row, new SparseVector(cardinality[COL]));
-    rows.get(row).setQuick(column, value);
+    Integer rowKey = Integer.valueOf(row);
+    Vector r = rows.get(rowKey);
+    if (r == null) {
+      r = new SparseVector(cardinality[COL]);
+      rows.put(rowKey, r);
+    }
+    r.setQuick(column, value);
   }
 
   /*
@@ -230,10 +231,11 @@ public class SparseMatrix extends AbstractMatrix {
     for (int row = 0; row < cardinality[ROW]; row++) {
       double val = other.getQuick(row);
       if (val != 0.0) {
-        Vector r = rows.get(row);
+        Integer rowKey = Integer.valueOf(row);
+        Vector r = rows.get(rowKey);
         if (r == null) {
           r = new SparseVector(cardinality[ROW]);
-          rows.put(row, r);
+          rows.put(rowKey, r);
         }
         r.setQuick(column, val);
       }

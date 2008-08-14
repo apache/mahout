@@ -30,8 +30,8 @@ public class KMeansJob {
     String clusters = args[1];
     String output = args[2];
     String measureClass = args[3];
-    double convergenceDelta = new Double(args[4]);
-    int maxIterations = new Integer(args[5]);
+    double convergenceDelta = Double.parseDouble(args[4]);
+    int maxIterations = Integer.parseInt(args[5]);
     runJob(input, clusters, output, measureClass, convergenceDelta,
         maxIterations);
   }

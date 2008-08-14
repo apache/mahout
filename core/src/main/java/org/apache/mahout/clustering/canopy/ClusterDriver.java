@@ -35,8 +35,8 @@ public class ClusterDriver {
     String canopies = args[1];
     String output = args[2];
     String measureClassName = args[3];
-    double t1 = new Double(args[4]);
-    double t2 = new Double(args[5]);
+    double t1 = Double.parseDouble(args[4]);
+    double t2 = Double.parseDouble(args[5]);
     runJob(points, canopies, output, measureClassName, t1, t2);
   }
 

@@ -27,13 +27,15 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 
+import java.io.IOException;
+
 public class OutputDriver {
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
     runJob(args[0], args[1]);
   }
 
-  public static void runJob(String input, String output) {
+  public static void runJob(String input, String output) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(
         org.apache.mahout.clustering.syntheticcontrol.meanshift.OutputDriver.class);
@@ -51,11 +53,7 @@ public class OutputDriver {
     conf.setNumReduceTasks(0);
 
     client.setConf(conf);
-    try {
-      JobClient.runJob(conf);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    JobClient.runJob(conf);
   }
 
 }

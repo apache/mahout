@@ -165,7 +165,7 @@ public class FileInfoParser {
     double value;
 
     try {
-      value = Double.valueOf(token);
+      value = Double.parseDouble(token);
     } catch (NumberFormatException e) {
       throw new RuntimeException("Exception while parsing info file", e);
     }

@@ -65,7 +65,7 @@ public class DataLine {
     // load attributes
     for (int index = 0; index < dataset.getNbAttributes(); index++) {
       if (dataset.isNumerical(index)) {
-        attributes[index] = Double.valueOf(tokens.get(index));
+        attributes[index] = Double.parseDouble(tokens.get(index));
       } else {
         attributes[index] = dataset.valueIndex(index, tokens.get(index));
       }

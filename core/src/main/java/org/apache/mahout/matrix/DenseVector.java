@@ -56,7 +56,7 @@ public class DenseVector extends AbstractVector {
     String[] pts = formattedString.split(",");
     double[] point = new double[pts.length - 2];
     for (int i = 1; i < pts.length - 1; i++)
-      point[i - 1] = new Double(pts[i]);
+      point[i - 1] = Double.parseDouble(pts[i]);
     return new DenseVector(point);
   }
 

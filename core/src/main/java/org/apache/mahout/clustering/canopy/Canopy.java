@@ -114,8 +114,8 @@ public class Canopy {
       throw new RuntimeException(e);
     }
     nextCanopyId = 0;
-    t1 = new Double(job.get(T1_KEY));
-    t2 = new Double(job.get(T2_KEY));
+    t1 = Double.parseDouble(job.get(T1_KEY));
+    t2 = Double.parseDouble(job.get(T2_KEY));
   }
 
   /**

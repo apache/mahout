@@ -34,10 +34,10 @@ public class MeanShiftCanopyJob {
     String input = args[0];
     String output = args[1];
     String measureClassName = args[2];
-    double t1 = new Double(args[3]);
-    double t2 = new Double(args[4]);
-    double convergenceDelta = new Double(args[5]);
-    int maxIterations = new Integer(args[6]);
+    double t1 = Double.parseDouble(args[3]);
+    double t2 = Double.parseDouble(args[4]);
+    double convergenceDelta = Double.parseDouble(args[5]);
+    int maxIterations = Integer.parseInt(args[6]);
     runJob(input, output, measureClassName, t1, t2, convergenceDelta,
         maxIterations);
   }

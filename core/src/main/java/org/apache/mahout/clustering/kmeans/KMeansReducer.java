@@ -39,7 +39,7 @@ public class KMeansReducer extends MapReduceBase implements
     while (values.hasNext()) {
       String value = values.next().toString();
       int ix = value.indexOf(',');
-      int count = new Integer(value.substring(0, ix));
+      int count = Integer.parseInt(value.substring(0, ix));
       Vector total = AbstractVector.decodeVector(value.substring(ix + 2));
       cluster.addPoints(count, total);
     }

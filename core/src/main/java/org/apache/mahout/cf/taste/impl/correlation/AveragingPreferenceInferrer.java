@@ -39,6 +39,7 @@ import java.util.Collection;
 public final class AveragingPreferenceInferrer implements PreferenceInferrer {
 
   private static final Retriever<User, Double> RETRIEVER = new PrefRetriever();
+  private static final Double ZERO = new Double(0.0);
 
   private final Cache<User, Double> averagePreferenceValue;
 
@@ -64,7 +65,7 @@ public final class AveragingPreferenceInferrer implements PreferenceInferrer {
       RunningAverage average = new FullRunningAverage();
       Preference[] prefs = key.getPreferencesAsArray();
       if (prefs.length == 0) {
-        return 0.0;
+        return ZERO;
       }
       for (int i = 0; i < prefs.length; i++) {
         average.addDatum(prefs[i].getValue());

@@ -55,8 +55,7 @@ public class MeanShiftCanopyCombiner extends MapReduceBase implements
           canopy.merge(MeanShiftCanopy.decodeCanopy(valueStr.substring(6)));
         else {
           Vector formatString = DenseVector.decodeFormat(new Text(valueStr));
-          int number = new Integer(valueStr
-              .substring(valueStr.indexOf(']') + 2));
+          int number = Integer.parseInt(valueStr.substring(valueStr.indexOf(']') + 2));
           canopy.addPoints(formatString, number);
         }
       }

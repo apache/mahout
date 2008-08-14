@@ -83,7 +83,7 @@ public class Cluster {
     String id = formattedString.substring(0, beginIndex);
     String center = formattedString.substring(beginIndex);
     if (id.startsWith("C") || id.startsWith("V")) {
-      int clusterId = new Integer(formattedString.substring(1, beginIndex - 2));
+      int clusterId = Integer.parseInt(formattedString.substring(1, beginIndex - 2));
       Vector clusterCenter = AbstractVector.decodeVector(center);
       Cluster cluster = new Cluster(clusterCenter, clusterId);
       cluster.converged = id.startsWith("V");
@@ -104,7 +104,7 @@ public class Cluster {
       Class<?> cl = ccl.loadClass(job.get(DISTANCE_MEASURE_KEY));
       measure = (DistanceMeasure) cl.newInstance();
       measure.configure(job);
-      convergenceDelta = new Double(job.get(CLUSTER_CONVERGENCE_KEY));
+      convergenceDelta = Double.parseDouble(job.get(CLUSTER_CONVERGENCE_KEY));
       nextClusterId = 0;
     } catch (Exception e) {
       throw new RuntimeException(e);

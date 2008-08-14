@@ -106,7 +106,7 @@ public class DatasetSplit {
     if (thrstr == null)
       throw new RuntimeException("THRESHOLD job parameter not found");
 
-    return Double.valueOf(thrstr);
+    return Double.parseDouble(thrstr);
   }
 
   static boolean isTraining(JobConf conf) {
@@ -171,8 +171,9 @@ public class DatasetSplit {
 
     public boolean next(LongWritable key, Text value) throws IOException {
       boolean read;
-      while ((read = reader.next(k, v)) && !selected())
-        ;
+      do {
+        read = reader.next(k, v);
+      } while (read && !selected());
 
       if (!read)
         return false;

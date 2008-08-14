@@ -79,13 +79,13 @@ public class CDGA {
 
     if (args.length == 8) {
       dataset = args[0];
-      threshold = new Double(args[1]);
-      crosspnts = new Integer(args[2]);
-      mutrate = new Double(args[3]);
-      mutrange = new Double(args[4]);
-      mutprec = new Integer(args[5]);
-      popSize = new Integer(args[6]);
-      genCount = new Integer(args[7]);
+      threshold = Double.parseDouble(args[1]);
+      crosspnts = Integer.parseInt(args[2]);
+      mutrate = Double.parseDouble(args[3]);
+      mutrange = Double.parseDouble(args[4]);
+      mutprec = Integer.parseInt(args[5]);
+      popSize = Integer.parseInt(args[6]);
+      genCount = Integer.parseInt(args[7]);
     }
 
     runJob(dataset, threshold, crosspnts, mutrate, mutrange, mutprec, popSize,

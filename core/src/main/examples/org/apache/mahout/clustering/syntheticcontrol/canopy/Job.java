@@ -23,15 +23,17 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.canopy.CanopyClusteringJob;
 
+import java.io.IOException;
+
 public class Job {
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
     if (args.length == 5) {
       String input = args[0];
       String output = args[1];
       String measureClassName = args[2];
-      double t1 = new Double(args[3]);
-      double t2 = new Double(args[4]);
+      double t1 = Double.parseDouble(args[3]);
+      double t2 = Double.parseDouble(args[4]);
       runJob(input, output, measureClassName, t1, t2);
     } else
       runJob("testdata", "output",
@@ -56,23 +58,20 @@ public class Job {
    * @param t2 the canopy T2 threshold
    */
   private static void runJob(String input, String output,
-      String measureClassName, double t1, double t2) {
+      String measureClassName, double t1, double t2) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(Job.class);
 
     Path outPath = new Path(output);
     client.setConf(conf);
-    try {
-      FileSystem dfs = FileSystem.get(conf);
-      if (dfs.exists(outPath))
-        dfs.delete(outPath, true);
-      InputDriver.runJob(input, output + "/data");
-      CanopyClusteringJob.runJob(output + "/data", output, measureClassName,
-          t1, t2);
-      OutputDriver.runJob(output + "/clusters", output + "/clustered-points");
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    FileSystem dfs = FileSystem.get(conf);
+    if (dfs.exists(outPath))
+      dfs.delete(outPath, true);
+    InputDriver.runJob(input, output + "/data");
+    CanopyClusteringJob.runJob(output + "/data", output, measureClassName,
+        t1, t2);
+    OutputDriver.runJob(output + "/clusters", output + "/clustered-points");
+
   }
 
 }

@@ -94,9 +94,9 @@ public class MeanShiftCanopy {
       throw new RuntimeException(e);
     }
     nextCanopyId = 0;
-    t1 = new Double(job.get(T1_KEY));
-    t2 = new Double(job.get(T2_KEY));
-    convergenceDelta = new Double(job.get(CLUSTER_CONVERGENCE_KEY));
+    t1 = Double.parseDouble(job.get(T1_KEY));
+    t2 = Double.parseDouble(job.get(T2_KEY));
+    convergenceDelta = Double.parseDouble(job.get(CLUSTER_CONVERGENCE_KEY));
   }
 
   /**
@@ -207,7 +207,7 @@ public class MeanShiftCanopy {
     String boundPoints = formattedString.substring(endIndex + 1).trim();
     boolean startsWithV = id.startsWith("V");
     if (id.startsWith("C") || startsWithV) {
-      int canopyId = new Integer(formattedString.substring(1, beginIndex - 3));
+      int canopyId = Integer.parseInt(formattedString.substring(1, beginIndex - 3));
       Vector canopyCentroid = DenseVector.decodeFormat(new Text(centroid));
       List<Vector> canopyBoundPoints = new ArrayList<Vector>();
       while (boundPoints.length() > 0) {
@@ -230,7 +230,7 @@ public class MeanShiftCanopy {
    */
   public MeanShiftCanopy(String id) {
     super();
-    this.canopyId = new Integer(id.substring(1));
+    this.canopyId = Integer.parseInt(id.substring(1));
     this.center = null;
     this.pointTotal = null;
     this.numPoints = 0;

@@ -67,8 +67,8 @@ public class SparseVector extends AbstractVector {
         result = new SparseVector(c);
       } else if (!pt.startsWith("]")) {
         int ix = pt.indexOf(':');
-        Integer index = new Integer(pt.substring(0, ix).trim());
-        Double value = new Double(pt.substring(ix + 1));
+        int index = Integer.parseInt(pt.substring(0, ix).trim());
+        double value = Double.parseDouble(pt.substring(ix + 1));
         result.setQuick(index, value);
       }
     }
@@ -97,8 +97,9 @@ public class SparseVector extends AbstractVector {
   public String asFormatString() {
     StringBuilder out = new StringBuilder();
     out.append("[s").append(cardinality).append(", ");
-    for (Integer index : values.keySet())
-      out.append(index).append(':').append(values.get(index)).append(", ");
+    for (Map.Entry<Integer, Double> entry : values.entrySet()) {
+      out.append(entry.getKey()).append(':').append(entry.getValue()).append(", ");
+    }
     out.append("] ");
     return out.toString();
   }
@@ -111,8 +112,9 @@ public class SparseVector extends AbstractVector {
   @Override
   public SparseVector copy() {
     SparseVector result = like();
-    for (Integer index : values.keySet())
-      result.setQuick(index, values.get(index));
+    for (Map.Entry<Integer, Double> entry : values.entrySet()) {
+      result.setQuick(entry.getKey(), entry.getValue());
+    }
     return result;
   }
 
@@ -120,14 +122,14 @@ public class SparseVector extends AbstractVector {
   public double getQuick(int index) {
     Double value = values.get(index);
     if (value == null)
-      return 0;
+      return 0.0;
     else
       return value;
   }
 
   @Override
   public void setQuick(int index, double value) {
-    if (value == 0)
+    if (value == 0.0)
       values.remove(index);
     else
       values.put(index, value);
@@ -141,8 +143,9 @@ public class SparseVector extends AbstractVector {
   @Override
   public double[] toArray() {
     double[] result = new double[cardinality];
-    for (int i = 0; i < cardinality; i++)
-      result[i] = getQuick(i);
+    for (Map.Entry<Integer, Double> entry : values.entrySet()) {
+      result[entry.getKey()] = entry.getValue();
+    }
     return result;
   }
 
@@ -218,10 +221,10 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public double zSum() {
-    java.util.Iterator<Double> iter = values.values().iterator();
-    double result = 0;
-    while (iter.hasNext())
-      result += iter.next();
+    double result = 0.0;
+    for (Double value : values.values()) {
+      result += value;
+    }
     return result;
   }
 
@@ -229,11 +232,9 @@ public class SparseVector extends AbstractVector {
   public double dot(Vector x) throws CardinalityException {
     if (cardinality() != x.cardinality())
       throw new CardinalityException();
-    java.util.Iterator<Integer> iter = values.keySet().iterator();
-    double result = 0;
-    while (iter.hasNext()) {
-      int nextIndex = iter.next();
-      result += getQuick(nextIndex) * x.getQuick(nextIndex);
+    double result = 0.0;
+    for (Map.Entry<Integer, Double> entry : values.entrySet()) {
+      result += entry.getValue() * x.getQuick(entry.getKey());
     }
     return result;
   }
@@ -251,8 +252,8 @@ public class SparseVector extends AbstractVector {
 
   public void readFields(DataInput dataInput) throws IOException {
     int cardinality = dataInput.readInt();
-    Map<Integer, Double> values = new HashMap<Integer, Double>();
     int size = dataInput.readInt();
+    Map<Integer, Double> values = new HashMap<Integer, Double>(size);
     for (int i = 0; i < size; i++) {
       values.put(dataInput.readInt(), dataInput.readDouble());
     }

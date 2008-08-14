@@ -24,17 +24,19 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyJob;
 import org.apache.mahout.clustering.syntheticcontrol.meanshift.InputDriver;
 
+import java.io.IOException;
+
 public class Job {
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
     if (args.length == 7) {
       String input = args[0];
       String output = args[1];
       String measureClassName = args[2];
-      double t1 = new Double(args[3]);
-      double t2 = new Double(args[4]);
-      double convergenceDelta = new Double(args[5]);
-      int maxIterations = new Integer(args[6]);
+      double t1 = Double.parseDouble(args[3]);
+      double t2 = Double.parseDouble(args[4]);
+      double convergenceDelta = Double.parseDouble(args[5]);
+      int maxIterations = Integer.parseInt(args[6]);
       runJob(input, output, measureClassName, t1, t2, convergenceDelta,
           maxIterations);
     } else
@@ -63,25 +65,21 @@ public class Job {
    */
   private static void runJob(String input, String output,
       String measureClassName, double t1, double t2, double convergenceDelta,
-      int maxIterations) {
+      int maxIterations) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(Job.class);
 
     Path outPath = new Path(output);
     client.setConf(conf);
-    try {
-      FileSystem dfs = FileSystem.get(conf);
-      if (dfs.exists(outPath))
-        dfs.delete(outPath, true);
-      InputDriver.runJob(input, output + "/data");
-      MeanShiftCanopyJob.runJob(output + "/data", output + "/meanshift",
-          measureClassName, t1, t2, convergenceDelta, maxIterations);
-      FileStatus[] status = dfs.listStatus(new Path(output + "/meanshift"));
-      OutputDriver.runJob(status[status.length - 1].getPath().toString(),
-          output + "/clustered-points");
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    FileSystem dfs = FileSystem.get(conf);
+    if (dfs.exists(outPath))
+      dfs.delete(outPath, true);
+    InputDriver.runJob(input, output + "/data");
+    MeanShiftCanopyJob.runJob(output + "/data", output + "/meanshift",
+        measureClassName, t1, t2, convergenceDelta, maxIterations);
+    FileStatus[] status = dfs.listStatus(new Path(output + "/meanshift"));
+    OutputDriver.runJob(status[status.length - 1].getPath().toString(),
+        output + "/clustered-points");
   }
 
 }
