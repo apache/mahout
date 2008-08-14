@@ -18,11 +18,13 @@
 package org.apache.mahout.cf.taste.ejb;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 import javax.ejb.EJBLocalObject;
 import java.util.List;
+import java.util.Collection;
 
 /**
  * <p>Recommender EJB local component interface.</p>
@@ -58,8 +60,8 @@ public interface RecommenderEJBLocal extends EJBLocalObject {
   void removePreference(Object userID, Object itemID) throws TasteException;
 
   /**
-   * @see org.apache.mahout.cf.taste.recommender.Recommender#refresh()
+   * @see org.apache.mahout.cf.taste.recommender.Recommender#refresh(Collection<Refreshable>)
    */
-  void refresh();
+  void refresh(Collection<Refreshable> alreadyRefreshed);
 
 }

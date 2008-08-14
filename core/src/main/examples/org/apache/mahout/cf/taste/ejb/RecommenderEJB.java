@@ -18,12 +18,14 @@
 package org.apache.mahout.cf.taste.ejb;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 import javax.ejb.EJBObject;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Collection;
 
 /**
  * <p>Recommender EJB component interface.</p>
@@ -39,7 +41,7 @@ public interface RecommenderEJB extends EJBObject {
   List<Item> recommend(Object userID, int howMany) throws TasteException, RemoteException;
 
   /**
-   * @see org.apache.mahout.cf.taste.recommender.Recommender#recommend(Object, int, org.apache.mahout.cf.taste.recommender.Rescorer)
+   * @see org.apache.mahout.cf.taste.recommender.Recommender#recommend(Object, int, Rescorer)
    */
   List<Item> recommend(Object userID, int howMany, Rescorer<Item> rescorer) throws TasteException, RemoteException;
 
@@ -60,8 +62,8 @@ public interface RecommenderEJB extends EJBObject {
   void removePreference(Object userID, Object itemID) throws TasteException, RemoteException;
 
   /**
-   * @see org.apache.mahout.cf.taste.recommender.Recommender#refresh()
+   * @see org.apache.mahout.cf.taste.recommender.Recommender#refresh(Collection<Refreshable>)
    */
-  void refresh();
+  void refresh(Collection<Refreshable> alreadyRefreshed);
 
 }
