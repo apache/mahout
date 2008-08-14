@@ -61,10 +61,9 @@
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout</developerConnection>
   </scm>
 
-
-
   <modules>
     <module>core</module>
+    <module>examples</module>
   </modules>
 
   <repositories>

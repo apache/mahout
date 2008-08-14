@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache.lucene.mahout</groupId>
+    <artifactId>mahout</artifactId>
+    <version>0.1-SNAPSHOT</version>
+  </parent>
+
+  <groupId>org.apache.lucene.mahout</groupId>
+  <artifactId>examples</artifactId>
+  <version>${parent.version}</version>
+  <name>Mahout examples</name>
+  <description>Scalable machine learning library examples</description>
+
+  <packaging>jar</packaging>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <encoding>UTF-8</encoding>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-install-plugin</artifactId>
+
+        <!-- Copy dependencies with no official Maven artifacts from libs to local Maven repository -->
+
+        <executions>
+          <execution>
+            <id>create-javaee-api-artifact</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>install-file</goal>
+            </goals>
+            <configuration>
+              <file>../core/lib/javaee-api-5.0-1.jar</file>
+              <groupId>javax.ejb</groupId>
+              <artifactId>javaee-api</artifactId>
+              <packaging>jar</packaging>
+              <version>5.0.1</version>
+              <generatePom>true</generatePom>
+              <createChecksum>true</createChecksum>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+  </build>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>org.apache.lucene.mahout</groupId>
+      <artifactId>core</artifactId>
+      <version>${parent.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.ejb</groupId>
+      <artifactId>javaee-api</artifactId>
+      <version>5.0.1</version>
+    </dependency>
+
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.2</version>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+
+</project>
