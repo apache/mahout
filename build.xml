@@ -7,6 +7,12 @@
     <ant dir="examples" antfile="build.xml" target="dist-jar"/>
   </target>
 
+  <target name="clean">
+    <ant dir="core" antfile="build.xml" target="clean"/>
+    <ant dir="examples" antfile="build.xml" target="clean"/>
+    <delete dir="build"/>
+    
+  </target>
 </project>
 
   

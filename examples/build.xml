@@ -102,7 +102,7 @@
       <include name="*.jar" />
       <exclude name="junit*.jar"/>
     </fileset>
-    <filelist files="../core/dist/apache-mahout-core-${version}.jar"/>
+    <filelist files="${basedir}/../core/dist/apache-mahout-core-${version}.jar"/>
   </path>
   <path id="test.classpath">
     <path refid="junit-path"/>
@@ -211,15 +211,21 @@
   <!-- ========================================================================= -->
   <!-- ===================== COMPILATION-RELATED TASKS ========================= -->
   <!-- ========================================================================= -->
-
+  <available property="core-built" file="${basedir}/../core/dist/apache-mahout-core-${version}.jar"/>
   <!-- Compile the project. -->
-  <target name="compile"
-          description="Compile the source code."
-          >
+  <target name="compile-examples" if="core-built">
     <mahout-javac destdir="${dest}/classes"
                 classpathref="compile.classpath">
       <src path="${src}/main/java" />
     </mahout-javac>
+  </target>
+  <target name="no-compile" unless="core-built">
+    <fail>You must build the core jar first</fail>
+  </target>
+  <target name="compile"
+          description="Compile the source code." depends="compile-examples, no-compile"
+          >
+
   </target>
 
   <target name="javadoc" depends="compile"
