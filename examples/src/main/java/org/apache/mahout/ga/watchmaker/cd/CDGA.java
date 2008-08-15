@@ -69,6 +69,7 @@ public class CDGA {
    */
   public static void main(String[] args) throws IOException {
     String dataset = "build/classes/wdbc";
+    int target = 1;
     double threshold = 0.5;
     int crosspnts = 1;
     double mutrate = 0.1;
@@ -89,11 +90,11 @@ public class CDGA {
     }
 
     runJob(dataset, threshold, crosspnts, mutrate, mutrange, mutprec, popSize,
-        genCount);
+        genCount, target);
   }
 
   private static void runJob(String dataset, double threshold, int crosspnts,
-      double mutrate, double mutrange, int mutprec, int popSize, int genCount)
+                             double mutrate, double mutrange, int mutprec, int popSize, int genCount, int target)
       throws IOException {
     Path inpath = new Path(dataset);
     CDMahoutEvaluator.InitializeDataSet(inpath);
@@ -112,7 +113,7 @@ public class CDGA {
 
     // Fitness Evaluator (defaults to training)
     STFitnessEvaluator<? super Rule> evaluator = new CDFitnessEvaluator(
-        dataset, split);
+        dataset, target, split);
     // Selection Strategy
     SelectionStrategy selection = new RouletteWheelSelection();
 
@@ -127,16 +128,32 @@ public class CDGA {
 
     // evolve the rules over the training set
     Rule solution = engine.evolve(popSize, 1, new GenerationCount(genCount));
-    
+
     // fitness over the training set
-    CDFitness bestTrainFit = CDMahoutEvaluator.evaluate(solution, inpath, split);
+    CDFitness bestTrainFit = CDMahoutEvaluator.evaluate(solution, target,
+        inpath, split);
 
     // fitness over the testing set
     split.setTraining(false);
-    CDFitness bestTestFit = CDMahoutEvaluator.evaluate(solution, inpath, split);
+    CDFitness bestTestFit = CDMahoutEvaluator.evaluate(solution, target,
+        inpath, split);
 
     // evaluate the solution over the testing set
     System.out.println("Best solution fitness (train set) : " + bestTrainFit);
     System.out.println("Best solution fitness (test set) : " + bestTestFit);
+  }
+
+  static void printElapsedTime(long milli) {
+    long seconds = milli / 1000;
+    milli = milli % 1000;
+
+    long minutes = seconds / 60;
+    seconds = seconds % 60;
+
+    long hours = minutes / 60;
+    minutes = minutes % 60;
+
+    System.out.println("Elapsed time (Hours:minutes:seconds:milli) : " + hours
+        + ":" + minutes + ":" + seconds + ":" + milli);
   }
 }

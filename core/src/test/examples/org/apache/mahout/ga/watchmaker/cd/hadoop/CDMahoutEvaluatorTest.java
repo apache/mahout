@@ -19,11 +19,12 @@ public class CDMahoutEvaluatorTest extends TestCase {
   public void testEvaluate() throws Exception {
     int nbrules = 100;
     Random rng = new MersenneTwisterRNG();
+    int target = 1;
 
     // random rules
     List<Rule> rules = new ArrayList<Rule>();
     for (int index = 0; index < nbrules; index++) {
-      rules.add(new RandomRule(index, rng));
+      rules.add(new RandomRule(index, target, rng));
     }
 
     // dataset
@@ -32,7 +33,7 @@ public class CDMahoutEvaluatorTest extends TestCase {
 
     // evaluate the rules
     List<CDFitness> results = new ArrayList<CDFitness>();
-    CDMahoutEvaluator.evaluate(rules, input, results);
+    CDMahoutEvaluator.evaluate(rules, target, input, results);
 
     // check the results
     for (int index = 0; index < nbrules; index++) {

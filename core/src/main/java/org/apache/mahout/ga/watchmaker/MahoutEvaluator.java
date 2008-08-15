@@ -1,4 +1,5 @@
 package org.apache.mahout.ga.watchmaker;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,6 +24,7 @@ import java.util.List;
 
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -80,9 +82,12 @@ public class MahoutEvaluator {
       throws IOException {
     Path inpath = new Path(fs.getWorkingDirectory(), "input");
 
-    if (!fs.exists(inpath)) {
-      fs.mkdirs(inpath);
+    // Delete the input if it already exists
+    if (fs.exists(inpath)) {
+      FileUtil.fullyDelete(fs, inpath);
     }
+
+    fs.mkdirs(inpath);
 
     storePopulation(fs, new Path(inpath, "population"), population);
 

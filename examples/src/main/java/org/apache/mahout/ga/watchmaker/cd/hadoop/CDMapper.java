@@ -30,17 +30,24 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.utils.StringUtils;
 import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 import org.apache.mahout.ga.watchmaker.cd.DataLine;
+import org.apache.mahout.ga.watchmaker.cd.DataSet;
 import org.apache.mahout.ga.watchmaker.cd.Rule;
 
 /**
- * Hadoop Mapper. Evaluate all the rules with the input data line.  
+ * Hadoop Mapper. Evaluate all the rules with the input data line.
  */
 public class CDMapper extends MapReduceBase implements
     Mapper<LongWritable, Text, LongWritable, CDFitness> {
 
   public static final String CLASSDISCOVERY_RULES = "mahout.ga.classdiscovery.rules";
 
+  public static final String CLASSDISCOVERY_DATASET = "mahout.ga.classdiscovery.dataset";
+
+  public static final String CLASSDISCOVERY_TARGET_LABEL = "mahout.ga.classdiscovery.target";
+
   private List<Rule> rules;
+
+  private int target;
 
   @Override
   public void configure(JobConf job) {
@@ -49,38 +56,66 @@ public class CDMapper extends MapReduceBase implements
       throw new RuntimeException("Job Parameter (" + CLASSDISCOVERY_RULES
           + ") not found!");
 
-    configure((List<Rule>) StringUtils.fromString(rstr));
+    String datastr = job.get(CLASSDISCOVERY_DATASET);
+    if (datastr == null)
+      throw new RuntimeException("Job Parameter (" + CLASSDISCOVERY_DATASET
+          + ") not found!");
+
+    int target = job.getInt(CLASSDISCOVERY_TARGET_LABEL, -1);
+    if (target == -1)
+      throw new RuntimeException("Job Parameter ("
+          + CLASSDISCOVERY_TARGET_LABEL + ") not found!");
+
+    initializeDataSet((DataSet) StringUtils.fromString(datastr));
+    configure((List<Rule>) StringUtils.fromString(rstr), target);
 
     super.configure(job);
   }
 
-  void configure(List<Rule> rules) {
+  void initializeDataSet(DataSet dataset) {
+    assert dataset != null : "bad 'dataset' configuration parameter";
+    DataSet.initialize(dataset);
+  }
+
+  void configure(List<Rule> rules, int target) {
+    assert rules != null && !rules.isEmpty() : "bad 'rules' configuration parameter";
+    assert target >= 0 : "bad 'target' configuration parameter";
+
     this.rules = rules;
+    this.target = target;
+
   }
 
   public void map(LongWritable key, Text value,
       OutputCollector<LongWritable, CDFitness> output, Reporter reporter)
       throws IOException {
     DataLine dl = new DataLine(value.toString());
-    
+
     map(key, dl, output);
   }
 
   void map(LongWritable key, DataLine dl,
       OutputCollector<LongWritable, CDFitness> output) throws IOException {
     for (int index = 0; index < rules.size(); index++) {
-      CDFitness eval = evaluate(rules.get(index).classify(dl), dl.getLabel());
+      CDFitness eval = evaluate(target, rules.get(index).classify(dl), dl
+          .getLabel());
       output.collect(new LongWritable(index), eval);
     }
   }
 
-  public static CDFitness evaluate(int prediction, int label) {
-    // TODO for now we assume their are only two classes 0 and 1
-
-    int tp = (label == 1 && prediction == 1) ? 1 : 0;
-    int fp = (label == 0 && prediction == 1) ? 1 : 0;
-    int tn = (label == 0 && prediction == 0) ? 1 : 0;
-    int fn = (label == 1 && prediction == 0) ? 1 : 0;
+  /**
+   * Evaluate a given prediction.
+   * 
+   * @param target expected label
+   * @param prediction
+   * @param label actual label
+   * @return
+   */
+  public static CDFitness evaluate(int target, int prediction, int label) {
+    int tp = (label == target && prediction == 1) ? 1 : 0;
+    int fp = (label != target && prediction == 1) ? 1 : 0;
+    int tn = (label != target && prediction == 0) ? 1 : 0;
+    int fn = (label == target && prediction == 0) ? 1 : 0;
 
     return new CDFitness(tp, fp, tn, fn);
   }

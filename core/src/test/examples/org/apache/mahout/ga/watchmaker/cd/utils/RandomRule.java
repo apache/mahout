@@ -9,12 +9,15 @@ import org.apache.mahout.ga.watchmaker.cd.hadoop.CDMapper;
 
 public class RandomRule implements Rule {
 
-  private Random rng;
+  private final Random rng;
 
-  private int ruleid;
+  private final int ruleid;
+  
+  private final int target;
 
-  public RandomRule(int ruleid, Random rng) {
+  public RandomRule(int ruleid, int target, Random rng) {
     this.ruleid = ruleid;
+    this.target = target;
     this.rng = rng;
   }
 
@@ -22,7 +25,7 @@ public class RandomRule implements Rule {
     int label = dl.getLabel();
     int prediction = rng.nextInt(2);
 
-    CDFitness fitness = CDMapper.evaluate(prediction, label);
+    CDFitness fitness = CDMapper.evaluate(target, prediction, label);
     RandomRuleResults.addResult(ruleid, fitness);
 
     return prediction;

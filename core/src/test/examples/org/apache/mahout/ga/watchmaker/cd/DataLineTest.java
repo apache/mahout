@@ -16,18 +16,21 @@ public class DataLineTest extends TestCase {
   public void testSet() throws Exception {
     FileSystem fs = FileSystem.get(new Configuration());
     Path inpath = new Path("build/examples-test-classes/wdbc");
-    DataSet.initialize(FileInfoParser.parseFile(fs, inpath));
+    DataSet dataset = FileInfoParser.parseFile(fs, inpath);
+    DataSet.initialize(dataset);
     
     DataLine dl = new DataLine();
     
+    int labelpos = dataset.getLabelIndex();
+    
     dl.set(datalines[0]);
-    assertEquals(1, dl.getLabel());
+    assertEquals(dataset.valueIndex(labelpos, "M"), dl.getLabel());
     
     dl.set(datalines[1]);
-    assertEquals(0, dl.getLabel());
+    assertEquals(dataset.valueIndex(labelpos, "B"), dl.getLabel());
     
     dl.set(datalines[2]);
-    assertEquals(1, dl.getLabel());
+    assertEquals(dataset.valueIndex(labelpos, "M"), dl.getLabel());
   }
 
 }

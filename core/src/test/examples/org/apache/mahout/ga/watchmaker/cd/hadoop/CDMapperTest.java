@@ -77,10 +77,10 @@ public class CDMapperTest extends TestCase {
 
   public void testEvaluate() {
     // test the evaluation
-    assertEquals(TP, CDMapper.evaluate(1, 1));
-    assertEquals(FP, CDMapper.evaluate(1, 0));
-    assertEquals(TN, CDMapper.evaluate(0, 0));
-    assertEquals(FN, CDMapper.evaluate(0, 1));
+    assertEquals(TP, CDMapper.evaluate(1, 1, 1));
+    assertEquals(FP, CDMapper.evaluate(1, 1, 0));
+    assertEquals(TN, CDMapper.evaluate(1, 0, 0));
+    assertEquals(FN, CDMapper.evaluate(1, 0, 1));
   }
 
   public void testMap() throws Exception {
@@ -90,7 +90,7 @@ public class CDMapperTest extends TestCase {
     // create and configure the mapper
     CDMapper mapper = new CDMapper();
     List<Rule> rules = Arrays.asList(rule, rule, rule, rule);
-    mapper.configure(rules);
+    mapper.configure(rules, 1);
 
     // test the mapper
     DummyOutputCollector<LongWritable, CDFitness> collector = new DummyOutputCollector<LongWritable, CDFitness>();

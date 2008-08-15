@@ -37,14 +37,17 @@ public class CDFitnessEvaluator extends STFitnessEvaluator<Rule> {
   private final DatasetSplit split;
 
   private final List<CDFitness> evals = new ArrayList<CDFitness>();
+  
+  private final int target;
 
   /**
    * 
    * @param dataset dataset path
    * @param split
    */
-  public CDFitnessEvaluator(String dataset, DatasetSplit split) {
+  public CDFitnessEvaluator(String dataset, int target, DatasetSplit split) {
     this.dataset = new Path(dataset);
+    this.target = target;
     this.split = split;
   }
 
@@ -59,7 +62,7 @@ public class CDFitnessEvaluator extends STFitnessEvaluator<Rule> {
     evals.clear();
 
     try {
-      CDMahoutEvaluator.evaluate(population, dataset, evals, split);
+      CDMahoutEvaluator.evaluate(population, target, dataset, evals, split);
     } catch (IOException e) {
       throw new RuntimeException("Exception while evaluating the population", e);
     }

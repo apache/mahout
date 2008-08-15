@@ -39,7 +39,7 @@ import org.apache.mahout.ga.watchmaker.cd.DataSet.NumericalAttr;
  * if the attribute is ignored</li>
  * <li><code>LABEL, val1, val2, ...</code><br>
  * if the attribute is the label, and its possible values</li>
- * <li><code>NOMINAL, val1, val2, ...</code><br>
+ * <li><code>CATEGORICAL, val1, val2, ...</code><br>
  * if the attribute is nominal, and its possible values</li>
  * <li><code>NUMERICAL, min, max</code><br>
  * if the attribute is numerical, and its min and max values</li>
@@ -47,13 +47,13 @@ import org.apache.mahout.ga.watchmaker.cd.DataSet.NumericalAttr;
  */
 public class FileInfoParser {
 
-  private static final String IGNORED_TOKEN = "IGNORED";
+  public static final String IGNORED_TOKEN = "IGNORED";
 
-  private static final String LABEL_TOKEN = "LABEL";
+  public  static final String LABEL_TOKEN = "LABEL";
 
-  private static final String NOMINAL_TOKEN = "NOMINAL";
+  public  static final String NOMINAL_TOKEN = "CATEGORICAL";
 
-  private static final String NUMERICAL_TOKEN = "NUMERICAL";
+  public static final String NUMERICAL_TOKEN = "NUMERICAL";
 
   /**
    * Initializes a dataset using an info file.
@@ -105,16 +105,16 @@ public class FileInfoParser {
   }
 
   /**
-   * Prepares the path fot he info file corresponding to the input path.
+   * Prepares the path for the info file corresponding to the input path.
    * 
    * @param fs file system
    * @param inpath
    * @return
    * @throws IOException
    */
-  private static Path getInfoFile(FileSystem fs, Path inpath)
+  public static Path getInfoFile(FileSystem fs, Path inpath)
       throws IOException {
-    assert inpath != null : "null file parameter";
+    assert inpath != null : "null inpath parameter";
     if (!fs.exists(inpath))
       throw new RuntimeException("Input path does not exist");
     if (!fs.getFileStatus(inpath).isDir())

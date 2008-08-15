@@ -51,15 +51,17 @@ public class CDMahoutEvaluator {
    * The input path contains the dataset
    * 
    * @param rules classification rules to evaluate
+   * @param target label value to evaluate the rules for
    * @param inpath input path (the dataset)
-   * @param evaluations <code>List&lt;Fitness&gt;</code> that contains the
+   * @param evaluations <code>List&lt;CDFitness&gt;</code> that contains the
    *        evaluated fitness for each candidate from the input population,
    *        sorted in the same order as the candidates.
    * @param split DatasetSplit used to separate training and testing input
    * @throws IOException
    */
-  public static void evaluate(List<? extends Rule> rules, Path inpath,
-      List<CDFitness> evaluations, DatasetSplit split) throws IOException {
+  public static void evaluate(List<? extends Rule> rules, int target,
+      Path inpath, List<CDFitness> evaluations, DatasetSplit split)
+      throws IOException {
     JobConf conf = new JobConf(CDMahoutEvaluator.class);
     FileSystem fs = FileSystem.get(conf);
 
@@ -69,12 +71,18 @@ public class CDMahoutEvaluator {
 
     Path outpath = OutputUtils.prepareOutput(fs);
 
-    configureJob(conf, rules, inpath, outpath, split);
+    configureJob(conf, rules, target, inpath, outpath, split);
     JobClient.runJob(conf);
 
     importEvaluations(fs, conf, outpath, evaluations);
   }
 
+  /**
+   * Initializes the dataset
+   * 
+   * @param inpath input path (the dataset)
+   * @throws IOException
+   */
   public static void InitializeDataSet(Path inpath) throws IOException {
     JobConf conf = new JobConf(CDMahoutEvaluator.class);
     FileSystem fs = FileSystem.get(conf);
@@ -86,17 +94,18 @@ public class CDMahoutEvaluator {
   /**
    * Evaluate a single rule.
    * 
-   * @param rule
-   * @param inpath
-   * @param split
+   * @param rule classification rule to evaluate
+   * @param target label value to evaluate the rules for
+   * @param inpath input path (the dataset)
+   * @param split DatasetSplit used to separate training and testing input
    * @return the evaluation
    * @throws IOException
    */
-  public static CDFitness evaluate(Rule rule, Path inpath, DatasetSplit split)
-      throws IOException {
+  public static CDFitness evaluate(Rule rule, int target, Path inpath,
+      DatasetSplit split) throws IOException {
     List<CDFitness> evals = new ArrayList<CDFitness>();
 
-    evaluate(Arrays.asList(rule), inpath, evals, split);
+    evaluate(Arrays.asList(rule), target, inpath, evals, split);
 
     return evals.get(0);
   }
@@ -104,25 +113,31 @@ public class CDMahoutEvaluator {
   /**
    * Use all the dataset for training.
    * 
-   * @param rules
-   * @param inpath
-   * @param evaluations
+   * @param rules classification rules to evaluate
+   * @param target label value to evaluate the rules for
+   * @param inpath input path (the dataset)
+   * @param evaluations <code>List&lt;CDFitness&gt;</code> that contains the
+   *        evaluated fitness for each candidate from the input population,
+   *        sorted in the same order as the candidates.
    * @throws IOException
    */
-  public static void evaluate(List<? extends Rule> rules, Path inpath,
-      List<CDFitness> evaluations) throws IOException {
-    evaluate(rules, inpath, evaluations, new DatasetSplit(1));
+  public static void evaluate(List<? extends Rule> rules, int target,
+      Path inpath, List<CDFitness> evaluations) throws IOException {
+    evaluate(rules, target, inpath, evaluations, new DatasetSplit(1));
   }
 
   /**
    * Configure the job
    * 
-   * @param conf
-   * @param inpath input <code>Path</code>
+   * @param conf Job to configure
+   * @param rules classification rules to evaluate
+   * @param target label value to evaluate the rules for
+   * @param inpath input path (the dataset)
    * @param outpath output <code>Path</code>
+   * @param split DatasetSplit used to separate training and testing input
    */
   private static void configureJob(JobConf conf, List<? extends Rule> rules,
-      Path inpath, Path outpath, DatasetSplit split) {
+      int target, Path inpath, Path outpath, DatasetSplit split) {
     split.storeJobParameters(conf);
 
     DatasetTextInputFormat.setInputPaths(conf, inpath);
@@ -138,17 +153,22 @@ public class CDMahoutEvaluator {
     conf.setInputFormat(DatasetTextInputFormat.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
 
-    // store the stringified rules
+    // store the parameters
     conf.set(CDMapper.CLASSDISCOVERY_RULES, StringUtils.toString(rules));
+    conf.set(CDMapper.CLASSDISCOVERY_DATASET, StringUtils.toString(DataSet
+        .getDataSet()));
+    conf.setInt(CDMapper.CLASSDISCOVERY_TARGET_LABEL, target);
   }
 
   /**
    * Reads back the evaluations.
    * 
-   * @param fs
-   * @param conf
+   * @param fs File System
+   * @param conf Job configuration
    * @param outpath output <code>Path</code>
-   * @param evaluations List of evaluations
+   * @param evaluations <code>List&lt;Fitness&gt;</code> that contains the
+   *        evaluated fitness for each candidate from the input population,
+   *        sorted in the same order as the candidates.
    * @throws IOException
    */
   private static void importEvaluations(FileSystem fs, JobConf conf,
