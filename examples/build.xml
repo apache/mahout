@@ -359,6 +359,7 @@
       <zipfileset dir="${dest}/classes"/>
       <zipfileset dir="${lib}" prefix="lib"
                   includes="**/*.jar" excludes="hadoop-*.jar"/>
+      <zipfileset dir="${basedir}/../core/dist/" prefix="lib" includes="apache-mahout-core-${version}.jar"/>
     </jar>
   </target>
 
