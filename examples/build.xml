@@ -109,14 +109,12 @@
     <path refid="compile.classpath"/>
     <pathelement location="${dest}/test-classes"/>
     <pathelement location="${dest}/classes"/>
+    <pathelement location="${basedir}/../core/build/test-classes"/>
   </path>
 
 
   <path id="junit.classpath">
-    <path refid="junit-path"/>
-    <pathelement location="${dest}/test-classes"/>
-    <pathelement location="${dest}/classes"/>
-    <path refid="compile.classpath"/>
+    <path refid="test.classpath"/>
     <pathelement path="${java.class.path}"/>
   </path>
 
