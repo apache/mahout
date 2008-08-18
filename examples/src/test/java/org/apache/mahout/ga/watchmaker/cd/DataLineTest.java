@@ -15,7 +15,7 @@ public class DataLineTest extends TestCase {
 
   public void testSet() throws Exception {
     FileSystem fs = FileSystem.get(new Configuration());
-    Path inpath = new Path("build/examples-test-classes/wdbc");
+    Path inpath = new Path("build/test-classes/wdbc");
     DataSet dataset = FileInfoParser.parseFile(fs, inpath);
     DataSet.initialize(dataset);
     

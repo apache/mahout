@@ -28,7 +28,7 @@ public class CDMahoutEvaluatorTest extends TestCase {
     }
 
     // dataset
-    Path input = new Path("build/examples-test-classes/wdbc");
+    Path input = new Path("build/test-classes/wdbc");
     CDMahoutEvaluator.InitializeDataSet(input);
 
     // evaluate the rules

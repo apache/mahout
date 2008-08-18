@@ -34,12 +34,12 @@ public class FileInfosDatasetTest extends TestCase {
 
   public void testRanges() throws IOException {
     FileSystem fs = FileSystem.get(new Configuration());
-    Path inpath = new Path("build/examples-test-classes/wdbc");
+    Path inpath = new Path("build/test-classes/wdbc");
     
     DataSet dataset = FileInfoParser.parseFile(fs, inpath);
     DataSet.initialize(dataset);
 
-    String filename = "build/examples-test-classes/wdbc/wdbc.data";
+    String filename = "build/test-classes/wdbc/wdbc.data";
     BufferedReader in = new BufferedReader(new FileReader(filename));
 
     String line;

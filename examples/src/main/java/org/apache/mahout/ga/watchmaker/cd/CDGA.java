@@ -78,27 +78,36 @@ public class CDGA {
     int popSize = 10;
     int genCount = 10;
 
-    if (args.length == 8) {
+    if (args.length == 9) {
       dataset = args[0];
-      threshold = Double.parseDouble(args[1]);
-      crosspnts = Integer.parseInt(args[2]);
-      mutrate = Double.parseDouble(args[3]);
-      mutrange = Double.parseDouble(args[4]);
-      mutprec = Integer.parseInt(args[5]);
-      popSize = Integer.parseInt(args[6]);
-      genCount = Integer.parseInt(args[7]);
-    }
+      target = Integer.parseInt(args[1]);
+      threshold = Double.parseDouble(args[2]);
+      crosspnts = Integer.parseInt(args[3]);
+      mutrate = Double.parseDouble(args[4]);
+      mutrange = Double.parseDouble(args[5]);
+      mutprec = Integer.parseInt(args[6]);
+      popSize = Integer.parseInt(args[7]);
+      genCount = Integer.parseInt(args[8]);
+    } else {
+      System.out.println("Invalid arguments, working with default parameters instead");
+	}
 
-    runJob(dataset, threshold, crosspnts, mutrate, mutrange, mutprec, popSize,
-        genCount, target);
+    long start = System.currentTimeMillis();
+
+    runJob(dataset, target, threshold, crosspnts, mutrate, mutrange, mutprec,
+        popSize, genCount);
+
+    long end = System.currentTimeMillis();
+
+    printElapsedTime(end - start);
   }
 
-  private static void runJob(String dataset, double threshold, int crosspnts,
-                             double mutrate, double mutrange, int mutprec, int popSize, int genCount, int target)
-      throws IOException {
+  private static void runJob(String dataset, int target, double threshold,
+      int crosspnts, double mutrate, double mutrange, int mutprec, int popSize,
+      int genCount) throws IOException {
     Path inpath = new Path(dataset);
     CDMahoutEvaluator.InitializeDataSet(inpath);
-    
+
     // Candidate Factory
     CandidateFactory factory = new CDFactory(threshold);
 
