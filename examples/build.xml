@@ -43,7 +43,9 @@
   <property name="version" value="0.1-dev" />
 
   <!-- 3rd party libraries for compilation -->
-  <property name="lib" value="../core/lib" />
+  <property name="shared-lib" value="../lib" />
+  <property name="examples-lib" value="lib" />
+  <property name="core-lib" value="../core/lib" />
 
   <!-- mahout source files -->
   <property name="src" value="src" />
@@ -90,7 +92,7 @@
   <property name="tests.verbose" value="false"/>
 
   <property name="junit.jar" value="junit-3.8.2.jar"/>
-  <property name="junit-location.jar" value="${lib}/${junit.jar}"/>
+  <property name="junit-location.jar" value="${shared-lib}/${junit.jar}"/>
   <path id="junit-path">
     <pathelement location="${junit-location.jar}"/>
   </path>
@@ -98,10 +100,16 @@
 
   <!-- The compilation classpath -->
   <path id="compile.classpath">
-    <fileset dir="${lib}">
+    <fileset dir="${shared-lib}">
       <include name="*.jar" />
       <exclude name="junit*.jar"/>
     </fileset>
+    <fileset dir="${examples-lib}">
+      <include name="*.jar" />
+    </fileset>
+    <fileset dir="${core-lib}">
+      <include name="*.jar" />
+    </fileset>    
     <filelist files="${basedir}/../core/dist/apache-mahout-core-${version}.jar"/>
   </path>
   <path id="test.classpath">
@@ -209,21 +217,16 @@
   <!-- ========================================================================= -->
   <!-- ===================== COMPILATION-RELATED TASKS ========================= -->
   <!-- ========================================================================= -->
-  <available property="core-built" file="${basedir}/../core/dist/apache-mahout-core-${version}.jar"/>
   <!-- Compile the project. -->
-  <target name="compile-examples" if="core-built">
+  <target name="compile"
+    description="Compile the source code." depends="build-core">
     <mahout-javac destdir="${dest}/classes"
-                classpathref="compile.classpath">
+      classpathref="compile.classpath">
       <src path="${src}/main/java" />
     </mahout-javac>
   </target>
-  <target name="no-compile" unless="core-built">
-    <fail>You must build the core jar first</fail>
-  </target>
-  <target name="compile"
-          description="Compile the source code." depends="compile-examples, no-compile"
-          >
-
+  <target name="build-core">
+    <ant inheritAll="false" dir="../core" antfile="build.xml" target="dist-jar"/>
   </target>
 
   <target name="javadoc" depends="compile"
@@ -254,12 +257,11 @@
     </javadoc>
   </target>
 
-  <target name="compile-test" depends="compile">
+  <target name="compile-test" depends="compile, compile-core-test">
     <mahout-javac
-
       destdir="${dest}/test-classes/" classpathref="test.classpath">
       <src path="${src}/test/java"/>
-      </mahout-javac>
+    </mahout-javac>
 
     <!-- Copy any data files present to the classpath -->
     <copy todir="${dest}/test-classes">
@@ -270,7 +272,9 @@
     <copy todir="${dest}/test-classes">
       <fileset dir="src/test/resources"/>
     </copy>
-
+  </target>
+  <target name="compile-core-test">
+    <ant inheritAll="false" dir="../core" antfile="build.xml" target="compile-test"/>
   </target>
 
   <target name="test" depends="compile-test, dist-jar" description="Runs unit tests">
@@ -355,7 +359,11 @@
   <target name="job" depends="compile">
     <jar jarfile="${dest}/${fullnamever}.job">
       <zipfileset dir="${dest}/classes"/>
-      <zipfileset dir="${lib}" prefix="lib"
+      <zipfileset dir="${shared-lib}" prefix="lib"
+                  includes="**/*.jar"/>
+      <zipfileset dir="${examples-lib}" prefix="lib"
+                  includes="**/*.jar"/>
+      <zipfileset dir="${core-lib}" prefix="lib"
                   includes="**/*.jar" excludes="hadoop-*.jar"/>
       <zipfileset dir="${basedir}/../core/dist/" prefix="lib" includes="apache-mahout-core-${version}.jar"/>
     </jar>

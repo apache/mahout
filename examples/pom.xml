@@ -43,7 +43,7 @@
               <goal>install-file</goal>
             </goals>
             <configuration>
-              <file>../core/lib/javaee-api-5.0-1.jar</file>
+              <file>lib/javaee-api-5.0-1.jar</file>
               <groupId>javax.ejb</groupId>
               <artifactId>javaee-api</artifactId>
               <packaging>jar</packaging>

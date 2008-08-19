@@ -43,7 +43,8 @@
   <property name="version" value="0.1-dev" />
 
   <!-- 3rd party libraries for compilation -->
-  <property name="lib" value="lib" />
+  <property name="core-lib" value="lib" />
+  <property name="shared-lib" value="../lib" />
 
   <!-- mahout source files -->
   <property name="src" value="src" />
@@ -94,7 +95,7 @@
 
   <property name="junit.excludes" value="**/MatrixTest.java, **/DefaultDistanceMeasureTest.java, **/DefaultWeightedDistanceMeasureTest.java"/>
   <property name="junit.jar" value="junit-3.8.2.jar"/>
-  <property name="junit-location.jar" value="${lib}/${junit.jar}"/>
+  <property name="junit-location.jar" value="${shared-lib}/${junit.jar}"/>
   <path id="junit-path">
     <pathelement location="${junit-location.jar}"/>
   </path>
@@ -102,9 +103,12 @@
 
   <!-- The compilation classpath -->
   <path id="compile.classpath">
-    <fileset dir="${lib}">
+    <fileset dir="${shared-lib}">
       <include name="*.jar" />
       <exclude name="junit*.jar"/>
+    </fileset>
+    <fileset dir="${core-lib}">
+      <include name="*.jar" />
     </fileset>
   </path>
   <path id="test.classpath">
@@ -383,8 +387,10 @@
   <target name="job" depends="compile">
     <jar jarfile="${dest}/${fullnamever}.job">
       <zipfileset dir="${dest}/classes"/>
-      <zipfileset dir="${lib}" prefix="lib"
+      <zipfileset dir="${core-lib}" prefix="lib"
                   includes="**/*.jar" excludes="hadoop-*.jar"/>
+      <zipfileset dir="${shared-lib}" prefix="lib"
+                  includes="**/*.jar"/>
     </jar>
   </target>
   
