@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+job<?xml version="1.0"?>
 
 <!--
     Licensed to the Apache Software Foundation (ASF) under one or more
@@ -362,7 +362,7 @@
       <zipfileset dir="${shared-lib}" prefix="lib"
                   includes="**/*.jar"/>
       <zipfileset dir="${examples-lib}" prefix="lib"
-                  includes="**/*.jar"/>
+                  includes="**/*.jar" excludes="easymock*.jar"/>
       <zipfileset dir="${core-lib}" prefix="lib"
                   includes="**/*.jar" excludes="hadoop-*.jar"/>
       <zipfileset dir="${basedir}/../core/dist/" prefix="lib" includes="apache-mahout-core-${version}.jar"/>
