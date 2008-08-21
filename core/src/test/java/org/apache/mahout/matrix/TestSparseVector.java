@@ -37,7 +37,7 @@ public class TestSparseVector extends TestCase {
 
   public void testAsFormatString() {
     String formatString = test.asWritableComparable().toString();
-    assertEquals("format", "[s5, 2:2.2, 1:1.1, 3:3.3, ] ", formatString);
+    assertEquals("format", "[s5, 1:1.1, 2:2.2, 3:3.3, ] ", formatString);
   }
 
   public void testCardinality() {

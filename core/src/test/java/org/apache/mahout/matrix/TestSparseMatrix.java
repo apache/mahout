@@ -38,7 +38,7 @@ public class TestSparseMatrix extends MatrixTest {
   public void testAsFormatString() {
     assertEquals(
             "format",
-            "[s3, [s2, 1:6.6, 0:5.5, ] [s2, 1:4.4, 0:3.3, ] [s2, 1:2.2, 0:1.1, ] ] ",
+            "[s3, [s2, 0:1.1, 1:2.2, ] [s2, 0:3.3, 1:4.4, ] [s2, 0:5.5, 1:6.6, ] ] ",
             test.asWritableComparable().toString());
   }
 

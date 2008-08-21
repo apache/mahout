@@ -18,6 +18,8 @@ package org.apache.mahout.matrix;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.DataInput;
@@ -97,7 +99,13 @@ public class SparseVector extends AbstractVector {
   public String asFormatString() {
     StringBuilder out = new StringBuilder();
     out.append("[s").append(cardinality).append(", ");
-    for (Map.Entry<Integer, Double> entry : values.entrySet()) {
+    Map.Entry<Integer, Double>[] entries = values.entrySet().toArray(new Map.Entry[values.size()]);
+    Arrays.sort(entries, new Comparator<Map.Entry<Integer, Double>>(){
+      public int compare(Map.Entry<Integer, Double> e1, Map.Entry<Integer, Double> e2) {
+        return e1.getKey().compareTo(e2.getKey());
+      }
+    });
+    for (Map.Entry<Integer, Double> entry : entries) {
       out.append(entry.getKey()).append(':').append(entry.getValue()).append(", ");
     }
     out.append("] ");

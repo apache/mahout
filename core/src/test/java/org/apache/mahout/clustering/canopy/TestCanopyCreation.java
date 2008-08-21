@@ -483,10 +483,10 @@ public class TestCanopyCreation extends TestCase {
     Text value = new Text();
     assertTrue("more to come", reader.next(key, value));
     assertEquals("1st key", "C0", key.toString());
-    assertEquals("1st value", "C0: [s2, 1:1.5, 0:1.5, ] ", value.toString());
+    assertEquals("1st value", "C0: [s2, 0:1.5, 1:1.5, ] ", value.toString());
     assertTrue("more to come", reader.next(key, value));
     assertEquals("2nd key", "C1", key.toString());
-    assertEquals("2nd value", "C1: [s2, 1:4.333333333333334, 0:4.333333333333334, ] ",
+    assertEquals("2nd value", "C1: [s2, 0:4.333333333333334, 1:4.333333333333334, ] ",
         value.toString());
     assertFalse("more to come", reader.next(key, value));
     reader.close();
@@ -519,10 +519,10 @@ public class TestCanopyCreation extends TestCase {
     Text value = new Text();
     assertTrue("more to come", reader.next(key, value));
     assertEquals("1st key", "C0", key.toString());
-    assertEquals("1st value", "C0: [s2, 1:1.8, 0:1.8, ] ", value.toString());
+    assertEquals("1st value", "C0: [s2, 0:1.8, 1:1.8, ] ", value.toString());
     assertTrue("more to come", reader.next(key, value));
     assertEquals("2nd key", "C1", key.toString());
-    assertEquals("2nd value", "C1: [s2, 1:4.433333333333334, 0:4.433333333333334, ] ",
+    assertEquals("2nd value", "C1: [s2, 0:4.433333333333334, 1:4.433333333333334, ] ",
         value.toString());
     assertFalse("more to come", reader.next(key, value));
     reader.close();
@@ -810,10 +810,10 @@ public class TestCanopyCreation extends TestCase {
     Text value = new Text();
     assertTrue("more to come", reader.next(key, value));
     assertEquals("1st key", "C0", key.toString());
-    assertEquals("1st value", "C0: [s2, 1:1.5, 0:1.5, ] ", value.toString());
+    assertEquals("1st value", "C0: [s2, 0:1.5, 1:1.5, ] ", value.toString());
     assertTrue("more to come", reader.next(key, value));
     assertEquals("2nd key", "C1", key.toString());
-    assertEquals("2nd value", "C1: [s2, 1:4.333333333333334, 0:4.333333333333334, ] ",
+    assertEquals("2nd value", "C1: [s2, 0:4.333333333333334, 1:4.333333333333334, ] ",
         value.toString());
     assertFalse("more to come", reader.next(key, value));
     reader.close();

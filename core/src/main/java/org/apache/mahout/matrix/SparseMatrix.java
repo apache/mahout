@@ -18,6 +18,7 @@ package org.apache.mahout.matrix;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Arrays;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
@@ -81,8 +82,10 @@ public class SparseMatrix extends AbstractMatrix {
   public String asFormatString() {
     StringBuilder out = new StringBuilder();
     out.append("[s").append(cardinality[ROW]).append(", ");
-    for (Integer row : rows.keySet())
-      out.append(rows.get(row).asWritableComparable());
+    Integer[] rows = this.rows.keySet().toArray(new Integer[this.rows.size()]);
+    Arrays.sort(rows);
+    for (Integer row : rows)
+      out.append(this.rows.get(row).asWritableComparable());
     out.append("] ");
     return out.toString();
   }
