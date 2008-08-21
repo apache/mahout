@@ -64,6 +64,6 @@ public interface RecommenderEJB extends EJBObject {
   /**
    * @see org.apache.mahout.cf.taste.recommender.Recommender#refresh(Collection<Refreshable>)
    */
-  void refresh(Collection<Refreshable> alreadyRefreshed);
+  void refresh(Collection<Refreshable> alreadyRefreshed) throws RemoteException;
 
 }
