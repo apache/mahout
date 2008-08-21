@@ -16,9 +16,7 @@ package org.apache.mahout.classifier.bayes.common;
  * limitations under the License.
  */
 
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.KeyValueTextInputFormat;
+import org.apache.hadoop.mapred.*;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.FloatWritable;
@@ -61,10 +59,12 @@ public class BayesFeatureDriver {
     
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(FloatWritable.class);
-    
-    conf.setInputPath(new Path(input));
+
+    //conf.setInputPath(new Path(input));
+    FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(output);
-    conf.setOutputPath(outPath);
+    //conf.setOutputPath(outPath);
+    FileOutputFormat.setOutputPath(conf, outPath);
     conf.setNumMapTasks(100);
     //conf.setNumReduceTasks(1);
     conf.setMapperClass(BayesFeatureMapper.class);

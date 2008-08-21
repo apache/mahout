@@ -38,7 +38,7 @@ public class WikipediaDatasetCreatorDriver {
    * Takes in two arguments:
    * <ol>
    * <li>The input {@link org.apache.hadoop.fs.Path} where the input documents live</li>
-   * <li>The output {@link org.apache.hadoop.fs.Path} where to write the {@link org.apache.mahout.classifier.bayes.Model} as a {@link org.apache.hadoop.io.SequenceFile}</li>
+   * <li>The output {@link org.apache.hadoop.fs.Path} where to write the {@link org.apache.mahout.classifier.bayes.BayesModel} as a {@link org.apache.hadoop.io.SequenceFile}</li>
    * </ol>
    * @param args The args
    */
@@ -68,9 +68,11 @@ public class WikipediaDatasetCreatorDriver {
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(Text.class);
     
-    conf.setInputPath(new Path(input));
+//    conf.setInputPath(new Path(input));
+    FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(output);
-    conf.setOutputPath(outPath);
+//    conf.setOutputPath(outPath);
+    FileOutputFormat.setOutputPath(conf, outPath);
 
     conf.setMapperClass(WikipediaDatasetCreatorMapper.class);
     conf.setNumMapTasks(100);
