@@ -36,6 +36,11 @@ public interface IRStatistics {
   double getRecall();
 
   /**
+   * <p>See <a href="http://en.wikipedia.org/wiki/Information_retrieval#Fall-Out">Fall-Out</a>.</p>
+   */
+  double getFallOut();
+
+  /**
    * <p>See <a href="http://en.wikipedia.org/wiki/Information_retrieval#F-measure">F-measure</a>.</p>
    */
   double getF1Measure();

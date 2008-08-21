@@ -25,16 +25,21 @@ public final class IRStatisticsImpl implements IRStatistics, Serializable {
 
   private final double precision;
   private final double recall;
+  private final double fallOut;
 
-  IRStatisticsImpl(double precision, double recall) {
+  IRStatisticsImpl(double precision, double recall, double fallOut) {
     if (precision < 0.0 || precision > 1.0) {
       throw new IllegalArgumentException("Illegal precision: " + precision);
     }
     if (recall < 0.0 || recall > 1.0) {
       throw new IllegalArgumentException("Illegal recall: " + recall);
     }
+    if (fallOut < 0.0 || fallOut > 1.0) {
+      throw new IllegalArgumentException("Illegal fallOut: " + fallOut);
+    }
     this.precision = precision;
     this.recall = recall;
+    this.fallOut = fallOut;
   }
 
   public double getPrecision() {
@@ -43,6 +48,10 @@ public final class IRStatisticsImpl implements IRStatistics, Serializable {
 
   public double getRecall() {
     return recall;
+  }
+
+  public double getFallOut() {
+    return fallOut;
   }
 
   public double getF1Measure() {

@@ -36,7 +36,7 @@ public final class GenericRecommenderIRStatsEvaluatorImplTest extends TasteTestC
       }
     };
     RecommenderIRStatsEvaluator evaluator = new GenericRecommenderIRStatsEvaluator();
-    IRStatistics stats = evaluator.evaluate(builder, model, 5, 0.2, 1.0);
+    IRStatistics stats = evaluator.evaluate(builder, model, null, 5, 0.2, 1.0);
     assertNotNull(stats);
     assertEquals(0.2, stats.getPrecision(), EPSILON);
     assertEquals(1.0, stats.getRecall(), EPSILON);

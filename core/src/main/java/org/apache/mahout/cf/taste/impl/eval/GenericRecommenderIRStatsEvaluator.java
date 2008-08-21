@@ -32,6 +32,7 @@ import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,11 +42,11 @@ import java.util.Random;
 import java.util.List;
 
 /**
- * <p>For each {@link org.apache.mahout.cf.taste.model.User}, these implementation determine the top <code>n</code> preferences,
+ * <p>For each {@link User}, these implementation determine the top <code>n</code> preferences,
  * then evaluate the IR statistics based on a {@link DataModel} that does not have these values.
  * This number <code>n</code> is the "at" value, as in "precision at 5". For example, this would mean precision
  * evaluated by removing the top 5 preferences for a {@link User} and then finding the percentage of those 5
- * {@link org.apache.mahout.cf.taste.model.Item}s included in the top 5 recommendations for that user.</p>
+ * {@link Item}s included in the top 5 recommendations for that user.</p>
  */
 public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRStatsEvaluator {
 
@@ -57,6 +58,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
 
   public IRStatistics evaluate(RecommenderBuilder recommenderBuilder,
                                DataModel dataModel,
+                               Rescorer<Item> rescorer,
                                int at,
                                double relevanceThreshold,
                                double evaluationPercentage) throws TasteException {
@@ -79,6 +81,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
 
     RunningAverage precision = new FullRunningAverage();
     RunningAverage recall = new FullRunningAverage();
+    RunningAverage fallOut = new FullRunningAverage();
     for (User user : dataModel.getUsers()) {
       if (random.nextDouble() < evaluationPercentage) {
         Object id = user.getID();
@@ -106,21 +109,27 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
           }
 
           int intersectionSize = 0;
-          for (RecommendedItem recommendedItem : recommender.recommend(id, at)) {
+          for (RecommendedItem recommendedItem : recommender.recommend(id, at, rescorer)) {
             if (relevantItems.contains(recommendedItem.getItem())) {
               intersectionSize++;
             }
           }
           precision.addDatum((double) intersectionSize / (double) at);
           recall.addDatum((double) intersectionSize / (double) numRelevantItems);
+          if (numRelevantItems < prefs.length) {
+            fallOut.addDatum((double) (at - intersectionSize) / (double) (prefs.length - numRelevantItems));
+          }
         }
       }
     }
 
-    return new IRStatisticsImpl(precision.getAverage(), recall.getAverage());
+    return new IRStatisticsImpl(precision.getAverage(), recall.getAverage(), fallOut.getAverage());
   }
 
-  private void processOtherUser(Object id, Collection<Item> relevantItems, List<User> trainingUsers, User user2) {
+  private void processOtherUser(Object id,
+                                Collection<Item> relevantItems,
+                                Collection<User> trainingUsers,
+                                User user2) {
     if (id.equals(user2.getID())) {
       List<Preference> trainingPrefs = new ArrayList<Preference>();
       Preference[] prefs2 = user2.getPreferencesAsArray();
