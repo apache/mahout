@@ -46,10 +46,10 @@ import org.apache.mahout.utils.ManhattanDistanceMeasure;
 
 public class TestKmeansClustering extends TestCase {
 
-  static final double[][] reference = { { 1, 1 }, { 2, 1 }, { 1, 2 }, { 2, 2 },
+  public static final double[][] reference = { { 1, 1 }, { 2, 1 }, { 1, 2 }, { 2, 2 },
       { 3, 3 }, { 4, 4 }, { 5, 4 }, { 4, 5 }, { 5, 5 } };
 
-  static final int[][] expectedNumPoints = { { 9 }, { 4, 5 }, { 4, 5, 0 },
+  public static final int[][] expectedNumPoints = { { 9 }, { 4, 5 }, { 4, 5, 0 },
       { 1, 2, 1, 5 }, { 1, 1, 1, 2, 4 }, { 1, 1, 1, 1, 1, 4 },
       { 1, 1, 1, 1, 1, 2, 2 }, { 1, 1, 1, 1, 1, 1, 2, 1 },
       { 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
@@ -141,7 +141,7 @@ public class TestKmeansClustering extends TestCase {
     return converged;
   }
 
-  private List<Vector> getPoints(double[][] raw) {
+  public static List<Vector> getPoints(double[][] raw) {
     List<Vector> points = new ArrayList<Vector>();
     for (int i = 0; i < raw.length; i++) {
       double[] fr = raw[i];
