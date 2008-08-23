@@ -120,10 +120,14 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
               intersectionSize++;
             }
           }
-          precision.addDatum((double) intersectionSize / (double) at);
+          int numRecommendedItems = recommendedItems.size();
+          if (numRecommendedItems > 0) {
+            precision.addDatum((double) intersectionSize / (double) numRecommendedItems);
+          }
           recall.addDatum((double) intersectionSize / (double) numRelevantItems);
           if (numRelevantItems < prefs.length) {
-            fallOut.addDatum((double) (at - intersectionSize) / (double) (prefs.length - numRelevantItems));
+            fallOut.addDatum((double) (numRecommendedItems - intersectionSize) /
+                             (double) (prefs.length - numRelevantItems));
           }
         }
       }
