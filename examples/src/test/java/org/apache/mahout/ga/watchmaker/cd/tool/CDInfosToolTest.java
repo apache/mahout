@@ -16,6 +16,15 @@ package org.apache.mahout.ga.watchmaker.cd.tool;
  * limitations under the License.
  */
 
+import junit.framework.TestCase;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileUtil;
+import org.apache.hadoop.fs.Path;
+import org.apache.mahout.ga.watchmaker.cd.tool.DescriptionUtils.Range;
+import org.uncommons.maths.random.MersenneTwisterRNG;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -24,16 +33,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
-
-import junit.framework.TestCase;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.FileUtil;
-import org.apache.hadoop.fs.Path;
-import org.apache.mahout.ga.watchmaker.cd.tool.DescriptionUtils.Range;
-import org.uncommons.maths.random.MersenneTwisterRNG;
 
 public class CDInfosToolTest extends TestCase {
 

@@ -18,8 +18,8 @@
 package org.apache.mahout.cf.taste.example.grouplens;
 
 import org.apache.mahout.cf.taste.impl.common.FastMap;
-import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
+import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.model.Item;
 

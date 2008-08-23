@@ -1,18 +1,16 @@
 package org.apache.mahout.ga.watchmaker.cd.hadoop;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import junit.framework.TestCase;
-
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 import org.apache.mahout.ga.watchmaker.cd.Rule;
-import org.apache.mahout.ga.watchmaker.cd.hadoop.CDMahoutEvaluator;
 import org.apache.mahout.ga.watchmaker.cd.utils.RandomRule;
 import org.apache.mahout.ga.watchmaker.cd.utils.RandomRuleResults;
 import org.uncommons.maths.random.MersenneTwisterRNG;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class CDMahoutEvaluatorTest extends TestCase {
 

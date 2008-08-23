@@ -16,8 +16,6 @@ package org.apache.mahout.ga.watchmaker;
  * limitations under the License.
  */
 
-import java.io.IOException;
-
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -28,6 +26,8 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.utils.StringUtils;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
+
+import java.io.IOException;
 
 /**
  * <p>

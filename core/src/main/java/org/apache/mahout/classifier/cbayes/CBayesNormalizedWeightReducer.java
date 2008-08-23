@@ -31,11 +31,8 @@ import java.util.Iterator;
 /**
  *  Can also be used as a local Combiner beacuse only two values should be there inside the values
  *
- **/
-
+ */
 public class CBayesNormalizedWeightReducer extends MapReduceBase implements Reducer<Text, FloatWritable, Text, FloatWritable> {
-  
-
   
   public void reduce(Text key, Iterator<FloatWritable> values, OutputCollector<Text, FloatWritable> output, Reporter reporter) throws IOException {
     //Key is label,word, value is the number of times we've seen this label word per local node.  Output is the same
@@ -44,7 +41,7 @@ public class CBayesNormalizedWeightReducer extends MapReduceBase implements Redu
     while (values.hasNext()) {
       weight += values.next().get();
     }
-    if(token.equalsIgnoreCase(new String("rec.motorcycles,miller")))
+    if(token.equalsIgnoreCase("rec.motorcycles,miller"))
       System.out.println(token + "=>" + weight);
     output.collect(key, new FloatWritable(weight));
   }

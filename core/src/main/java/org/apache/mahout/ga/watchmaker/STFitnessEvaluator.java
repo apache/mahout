@@ -17,10 +17,10 @@
 
 package org.apache.mahout.ga.watchmaker;
 
+import org.uncommons.watchmaker.framework.FitnessEvaluator;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
 /**
  * Special Fitness Evaluator that evaluates all the population ones.

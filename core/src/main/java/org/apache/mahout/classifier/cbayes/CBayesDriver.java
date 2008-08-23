@@ -17,9 +17,9 @@ package org.apache.mahout.classifier.cbayes;
  * limitations under the License.
  */
 
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.classifier.bayes.common.BayesFeatureDriver;
 import org.apache.mahout.classifier.bayes.common.BayesTfIdfDriver;
 import org.apache.mahout.classifier.bayes.common.BayesWeightSummerDriver;

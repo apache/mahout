@@ -17,10 +17,10 @@
 
 package org.apache.mahout.ga.watchmaker;
 
+import org.uncommons.watchmaker.framework.FitnessEvaluator;
+
 import java.io.IOException;
 import java.util.List;
-
-import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
 /**
  * Watchmaker compatible Fitness Evaluator that delegates the evaluation of the

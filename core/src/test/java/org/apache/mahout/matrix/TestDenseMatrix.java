@@ -22,10 +22,6 @@ public class TestDenseMatrix extends MatrixTest {
     super(name);
   }
 
-  protected void setUp() throws Exception {
-    super.setUp();
-  }
-
   public Matrix matrixFactory(double[][] values) {
     return new DenseMatrix(values);
   }

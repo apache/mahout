@@ -17,9 +17,9 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import java.util.Random;
-
 import org.uncommons.watchmaker.framework.factories.AbstractCandidateFactory;
+
+import java.util.Random;
 
 /**
  * Factory used by Watchmaker to generate the initial population.

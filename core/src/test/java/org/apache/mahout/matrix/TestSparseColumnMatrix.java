@@ -16,18 +16,11 @@ package org.apache.mahout.matrix;
  * limitations under the License.
  */
 
-import junit.framework.TestCase;
-
 public class TestSparseColumnMatrix extends MatrixTest {
 
   public TestSparseColumnMatrix(String name) {
     super(name);
   }
-
-  protected void setUp() throws Exception {
-    super.setUp();
-  }
-
 
   public Matrix matrixFactory(double[][] values) {
     int[] cardinality = {values.length, values[0].length};

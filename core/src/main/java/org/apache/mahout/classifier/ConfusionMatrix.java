@@ -1,9 +1,12 @@
 package org.apache.mahout.classifier;
 
-import java.util.*;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.mahout.common.Summarizable;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with this
@@ -28,7 +31,7 @@ public class ConfusionMatrix implements Summarizable {
 
   Collection<String> labels = new ArrayList<String>();
 
-  Map<String, Integer> labelMap = new HashMap<String, Integer>();
+  final Map<String, Integer> labelMap = new HashMap<String, Integer>();
 
   int[][] confusionMatrix = null;
 
@@ -53,10 +56,7 @@ public class ConfusionMatrix implements Summarizable {
   
   public int getCorrect(String label){
     int labelId = labelMap.get(label).intValue();
-    int correct = 0;    
-    correct = confusionMatrix[labelId][labelId];
-  
-    return correct;
+    return confusionMatrix[labelId][labelId];
   }
   
   public float getTotal(String label){
@@ -123,8 +123,8 @@ public class ConfusionMatrix implements Summarizable {
     if (this.getLabels().size() != b.getLabels().size())
       throw new Exception("The Labels do not Match");
 
-    if (this.getLabels().containsAll(b.getLabels()))
-      ;
+    //if (this.getLabels().containsAll(b.getLabels()))
+    //  ;
     for (String correctLabel : this.labels) {
       for (String classifiedLabel : this.labels) {
         incrementCount(correctLabel, classifiedLabel, b.getCount(correctLabel,
@@ -144,8 +144,7 @@ public class ConfusionMatrix implements Summarizable {
 
     for (String correctLabel : this.labels) {
       returnString.append(StringUtils.rightPad(getSmallLabel(labelMap.get(
-          correctLabel).intValue()), 5)
-          + "\t");
+          correctLabel).intValue()), 5)).append('\t');
     }
 
     returnString.append("<--Classified as\n");
@@ -153,16 +152,13 @@ public class ConfusionMatrix implements Summarizable {
     for (String correctLabel : this.labels) {
       Integer labelTotal = 0;
       for (String classifiedLabel : this.labels) {
-        returnString.append(StringUtils.rightPad(new Integer(getCount(
-            correctLabel, classifiedLabel)).toString(), 5)
-            + "\t");
+        returnString.append(StringUtils.rightPad(Integer.toString(getCount(
+            correctLabel, classifiedLabel)), 5)).append('\t');
         labelTotal+=getCount(correctLabel, classifiedLabel);
       }
-      returnString.append(" |  "
-          + StringUtils.rightPad(labelTotal.toString(), 6)
-          + "\t"
-          + StringUtils.rightPad(getSmallLabel(labelMap.get(correctLabel)
-              .intValue()), 5) + " = " + correctLabel + "\n");
+      returnString.append(" |  ").append(StringUtils.rightPad(labelTotal.toString(), 6)).append('\t')
+          .append(StringUtils.rightPad(getSmallLabel(labelMap.get(correctLabel).intValue()), 5))
+          .append(" = ").append(correctLabel).append('\n');
     }
     returnString.append("\n");
     return returnString.toString();

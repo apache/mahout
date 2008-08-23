@@ -17,12 +17,8 @@ package org.apache.mahout.classifier.bayes;
  */
 
 import junit.framework.TestCase;
-
-import java.util.Collection;
-
 import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.classifier.cbayes.CBayesModel;
-import org.apache.mahout.common.Model;
 
 public class CBayesClassifierTest extends TestCase {
   protected CBayesModel model;
@@ -34,10 +30,10 @@ public class CBayesClassifierTest extends TestCase {
 
   protected void setUp() {
     model = new CBayesModel();
-    String[] labels = new String[]{"a", "b", "c", "d", "e"};
-    long[] labelCounts = new long[]{6, 20, 60, 100, 200};
-    String[] features = new String[]{"aa", "bb", "cc", "dd", "ee"};
-    model.setSigma_jSigma_k(500f);
+    //String[] labels = new String[]{"a", "b", "c", "d", "e"};
+    //long[] labelCounts = new long[]{6, 20, 60, 100, 200};
+    //String[] features = new String[]{"aa", "bb", "cc", "dd", "ee"};
+    model.setSigma_jSigma_k(500.0f);
     
     model.setSumFeatureWeight("aa", 80);
     model.setSumFeatureWeight("bb", 21);

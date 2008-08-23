@@ -16,13 +16,12 @@ package org.apache.mahout.ga.watchmaker.cd.tool;
  * limitations under the License.
  */
 
+import junit.framework.TestCase;
+import org.apache.mahout.ga.watchmaker.cd.tool.DescriptionUtils.Range;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.apache.mahout.ga.watchmaker.cd.tool.DescriptionUtils.Range;
-
-import junit.framework.TestCase;
 
 public class DescriptionUtilsTest extends TestCase {
 

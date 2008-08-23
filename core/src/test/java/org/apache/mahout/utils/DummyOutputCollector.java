@@ -16,16 +16,16 @@ package org.apache.mahout.utils;
  * limitations under the License.
  */
 
+import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapred.OutputCollector;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.OutputCollector;
 
 public class DummyOutputCollector<K extends WritableComparable, V extends Writable> implements OutputCollector<K, V> {
 

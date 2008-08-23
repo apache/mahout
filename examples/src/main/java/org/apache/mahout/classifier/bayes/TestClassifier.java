@@ -17,34 +17,33 @@ package org.apache.mahout.classifier.bayes;
  * limitations under the License.
  */
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Option;
-import org.apache.mahout.classifier.ClassifierResult;
-import org.apache.mahout.classifier.ResultAnalyzer;
-import org.apache.mahout.classifier.bayes.BayesClassifier;
-import org.apache.mahout.classifier.bayes.BayesModel;
-import org.apache.mahout.common.Classifier;
-import org.apache.mahout.common.Model;
-import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
-import org.apache.mahout.classifier.cbayes.CBayesClassifier;
-import org.apache.mahout.classifier.cbayes.CBayesModel;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.mahout.classifier.ClassifierResult;
+import org.apache.mahout.classifier.ResultAnalyzer;
+import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
+import org.apache.mahout.classifier.cbayes.CBayesClassifier;
+import org.apache.mahout.classifier.cbayes.CBayesModel;
+import org.apache.mahout.common.Classifier;
+import org.apache.mahout.common.Model;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import java.util.*;
-
-/**
- * 
- * 
- */
 public class TestClassifier {
 
   @SuppressWarnings({ "static-access", "unchecked" })
@@ -73,7 +72,7 @@ public class TestClassifier {
         .hasArg().withDescription("Type of classifier").create("type");
     options.addOption(typeOpt);
 
-    CommandLine cmdLine = null;
+    CommandLine cmdLine;
     try {
       PosixParser parser = new PosixParser();
       cmdLine = parser.parse(options, args);
@@ -154,13 +153,14 @@ public class TestClassifier {
           System.out.print(correctLabel);
           BufferedReader fileReader = new BufferedReader(new InputStreamReader(
               new FileInputStream(subdirs[loop].getPath()), encoding));
-          String line = null;
+          String line;
           while ((line = fileReader.readLine()) != null) {
             
             Map<String, List<String>> document = Model.generateNGrams(line, gramSize);
             for (String labelName : document.keySet()) {
+              List<String> strings = document.get(labelName);
               ClassifierResult classifiedLabel = classifier.classify(model,
-                  (String[]) document.get(labelName).toArray(new String[0]),
+                  strings.toArray(new String[strings.size()]),
                   defaultCat);
               resultAnalyzer.addInstance(correctLabel, classifiedLabel);
             }

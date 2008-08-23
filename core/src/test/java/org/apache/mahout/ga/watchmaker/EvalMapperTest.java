@@ -16,11 +16,7 @@ package org.apache.mahout.ga.watchmaker;
  * limitations under the License.
  */
 
-import java.util.List;
-import java.util.Set;
-
 import junit.framework.TestCase;
-
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -30,6 +26,9 @@ import org.apache.mahout.ga.watchmaker.utils.DummyEvaluator;
 import org.apache.mahout.utils.DummyOutputCollector;
 import org.apache.mahout.utils.StringUtils;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
+
+import java.util.List;
+import java.util.Set;
 
 public class EvalMapperTest extends TestCase {
 

@@ -17,11 +17,11 @@ package org.apache.mahout.classifier.bayes;
  * limitations under the License.
  */
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Option;
 
 import java.io.IOException;
 
@@ -45,7 +45,7 @@ public class WikipediaDatasetCreator {
         .withDescription("Location of the Countries File").create("c");
     options.addOption(countriesFileOpt);
     
-    CommandLine cmdLine = null;
+    CommandLine cmdLine;
     try {
       PosixParser parser = new PosixParser();
       cmdLine = parser.parse(options, args);

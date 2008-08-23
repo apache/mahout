@@ -16,12 +16,14 @@ package org.apache.mahout.classifier.bayes.common;
  * limitations under the License.
  */
 
-import org.apache.hadoop.mapred.*;
-import org.apache.hadoop.io.DefaultStringifier;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.DefaultStringifier;
+import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.KeyValueTextInputFormat;
 
 
 /**
@@ -49,22 +51,19 @@ public class BayesFeatureDriver {
    *
    * @param input            the input pathname String
    * @param output           the output pathname String
-
    */
-  
+
   @SuppressWarnings("deprecation")
   public static void runJob(String input, String output, int gramSize) {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(BayesFeatureDriver.class);
-    
+
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(FloatWritable.class);
 
-    //conf.setInputPath(new Path(input));
-    FileInputFormat.setInputPaths(conf, new Path(input));
+    conf.setInputPath(new Path(input));
     Path outPath = new Path(output);
-    //conf.setOutputPath(outPath);
-    FileOutputFormat.setOutputPath(conf, outPath);
+    conf.setOutputPath(outPath);
     conf.setNumMapTasks(100);
     //conf.setNumReduceTasks(1);
     conf.setMapperClass(BayesFeatureMapper.class);

@@ -17,11 +17,6 @@
 
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
@@ -30,6 +25,11 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.utils.StringUtils;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Combines attribute values into a String.<br>
@@ -45,7 +45,7 @@ import org.apache.mahout.utils.StringUtils;
 public class ToolCombiner extends MapReduceBase implements
     Reducer<LongWritable, Text, LongWritable, Text> {
 
-  private Set<String> distinct = new HashSet<String>();
+  private final Set<String> distinct = new HashSet<String>();
 
   private Descriptors descriptors;
 

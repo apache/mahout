@@ -16,12 +16,17 @@ package org.apache.mahout.classifier;
  * limitations under the License.
  */
 
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.classifier.bayes.BayesClassifier;
 import org.apache.mahout.classifier.bayes.BayesModel;
 import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
@@ -29,17 +34,14 @@ import org.apache.mahout.classifier.cbayes.CBayesClassifier;
 import org.apache.mahout.classifier.cbayes.CBayesModel;
 import org.apache.mahout.common.Classifier;
 import org.apache.mahout.common.Model;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.analysis.Analyzer;
 
-import java.io.IOException;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.io.FileInputStream;
-import java.util.*;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -67,7 +69,7 @@ public class Classify {
     options.addOption(typeOpt);
     
     
-    CommandLine cmdLine = null;
+    CommandLine cmdLine;
     try {
       PosixParser parser = new PosixParser();
       cmdLine = parser.parse(options, args);
@@ -146,7 +148,7 @@ public class Classify {
       List<String> doc = Model.generateNGramsWithoutLabel(line.toString(), gramSize) ;
       System.out.println("Done converting");
       System.out.println("Classifying document: " + docPath);      
-      ClassifierResult category = classifier.classify(model, doc.toArray(new String[]{}), defaultCat);
+      ClassifierResult category = classifier.classify(model, doc.toArray(new String[doc.size()]), defaultCat);
       System.out.println("Category for " + docPath + " is " + category);
     }
     catch (ParseException exp) {

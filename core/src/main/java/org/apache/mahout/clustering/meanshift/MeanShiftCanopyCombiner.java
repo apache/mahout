@@ -16,9 +16,6 @@
  */
 package org.apache.mahout.clustering.meanshift;
 
-import java.io.IOException;
-import java.util.Iterator;
-
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
@@ -30,6 +27,9 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.matrix.CardinalityException;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
+
+import java.io.IOException;
+import java.util.Iterator;
 
 public class MeanShiftCanopyCombiner extends MapReduceBase implements
     Reducer<Text, WritableComparable, Text, WritableComparable> {

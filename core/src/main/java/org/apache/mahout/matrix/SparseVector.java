@@ -16,16 +16,16 @@
  */
 package org.apache.mahout.matrix;
 
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.WritableComparable;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.io.DataOutput;
-import java.io.IOException;
-import java.io.DataInput;
-
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.WritableComparable;
 
 /**
  * Implements vector that only stores non-zero doubles
@@ -43,7 +43,7 @@ public class SparseVector extends AbstractVector {
 
   /**
    * Decode a new instance from the argument
-   * 
+   *
    * @param writableComparable
    *            a writableComparable produced by the asWritableComparable method
    * @return a DenseVector

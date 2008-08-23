@@ -17,10 +17,6 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.ga.watchmaker.STEvolutionEngine;
 import org.apache.mahout.ga.watchmaker.STFitnessEvaluator;
@@ -36,6 +32,10 @@ import org.uncommons.watchmaker.framework.SelectionStrategy;
 import org.uncommons.watchmaker.framework.operators.EvolutionPipeline;
 import org.uncommons.watchmaker.framework.selection.RouletteWheelSelection;
 import org.uncommons.watchmaker.framework.termination.GenerationCount;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class Discovery Genetic Algorithm main class. Has the following parameters:
@@ -63,10 +63,6 @@ import org.uncommons.watchmaker.framework.termination.GenerationCount;
  */
 public class CDGA {
 
-  /**
-   * @param args
-   * @throws IOException
-   */
   public static void main(String[] args) throws IOException {
     String dataset = "build/classes/wdbc";
     int target = 1;
@@ -90,7 +86,7 @@ public class CDGA {
       genCount = Integer.parseInt(args[8]);
     } else {
       System.out.println("Invalid arguments, working with default parameters instead");
-	}
+	  }
 
     long start = System.currentTimeMillis();
 
@@ -154,13 +150,13 @@ public class CDGA {
 
   static void printElapsedTime(long milli) {
     long seconds = milli / 1000;
-    milli = milli % 1000;
+    milli %= 1000;
 
     long minutes = seconds / 60;
-    seconds = seconds % 60;
+    seconds %= 60;
 
     long hours = minutes / 60;
-    minutes = minutes % 60;
+    minutes %= 60;
 
     System.out.println("Elapsed time (Hours:minutes:seconds:milli) : " + hours
         + ":" + minutes + ":" + seconds + ":" + milli);

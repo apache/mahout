@@ -22,7 +22,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyJob;
-import org.apache.mahout.clustering.syntheticcontrol.meanshift.InputDriver;
 
 import java.io.IOException;
 

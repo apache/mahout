@@ -17,9 +17,9 @@ package org.apache.mahout.ga.watchmaker.cd;
  * limitations under the License.
  */
 
-import java.util.Random;
-
 import org.uncommons.maths.binary.BitString;
+
+import java.util.Random;
 
 /**
  * Binary classification rule of the form:

@@ -17,15 +17,14 @@
 
 package org.apache.mahout.ga.watchmaker.cd.utils;
 
-import static org.easymock.classextension.EasyMock.expect;
+import org.apache.mahout.ga.watchmaker.cd.DataSet;
+import org.easymock.classextension.EasyMock;
 import static org.easymock.classextension.EasyMock.createMock;
+import static org.easymock.classextension.EasyMock.expect;
 import static org.easymock.classextension.EasyMock.replay;
 import static org.easymock.classextension.EasyMock.reset;
 
 import java.util.Random;
-
-import org.apache.mahout.ga.watchmaker.cd.DataSet;
-import org.easymock.classextension.EasyMock;
 
 /**
  * Generate a mock dataset using EasyMock. The dataset contains a random number

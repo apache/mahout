@@ -16,12 +16,12 @@
  */
 package org.apache.mahout.matrix;
 
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.WritableComparable;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Arrays;
-
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.WritableComparable;
 
 /**
  * Doubly sparse matrix. Implemented as a Map of SparseVector rows

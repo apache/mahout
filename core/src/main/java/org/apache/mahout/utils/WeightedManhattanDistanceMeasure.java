@@ -17,7 +17,6 @@ package org.apache.mahout.utils;
  * limitations under the License.
  */
 
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.matrix.Vector;
 
 /**

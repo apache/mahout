@@ -17,11 +17,11 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
+import org.uncommons.watchmaker.framework.EvolutionaryOperator;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import org.uncommons.watchmaker.framework.EvolutionaryOperator;
 
 /**
  * Mutation operator.

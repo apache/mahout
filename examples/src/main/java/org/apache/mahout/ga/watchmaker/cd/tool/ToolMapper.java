@@ -17,11 +17,6 @@
 
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
-
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
@@ -30,6 +25,11 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.utils.StringUtils;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  * Extract the attribute values from a dataline. Skip ignored attributes<br>
@@ -52,7 +52,7 @@ public class ToolMapper extends MapReduceBase implements
 
   public static final String ATTRIBUTES = "cdtool.attributes";
 
-  private List<String> attributes = new ArrayList<String>();
+  private final List<String> attributes = new ArrayList<String>();
 
   private Descriptors descriptors;
   

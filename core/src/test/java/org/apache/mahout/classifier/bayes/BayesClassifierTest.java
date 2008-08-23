@@ -17,9 +17,6 @@ package org.apache.mahout.classifier.bayes;
  */
 
 import junit.framework.TestCase;
-
-import java.util.Collection;
-
 import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.common.Model;
 
@@ -33,10 +30,10 @@ public class BayesClassifierTest extends TestCase {
 
   protected void setUp() {
     model = new BayesModel();
-    String[] labels = new String[]{"a", "b", "c", "d", "e"};
-    long[] labelCounts = new long[]{6, 20, 60, 100, 200};
-    String[] features = new String[]{"aa", "bb", "cc", "dd", "ee"};
-    model.setSigma_jSigma_k(100f);
+    //String[] labels = new String[]{"a", "b", "c", "d", "e"};
+    //long[] labelCounts = new long[]{6, 20, 60, 100, 200};
+    //String[] features = new String[]{"aa", "bb", "cc", "dd", "ee"};
+    model.setSigma_jSigma_k(100.0f);
     
     model.setSumFeatureWeight("aa", 100);
     model.setSumFeatureWeight("bb", 100);

@@ -22,9 +22,9 @@ import org.apache.mahout.common.Classifier;
 import org.apache.mahout.common.Model;
 
 import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * Classifies documents based on a {@link CBayesModel}.  
@@ -43,7 +43,7 @@ public class CBayesClassifier implements Classifier{
   public Collection<ClassifierResult> classify(Model model, String[] document, String defaultCategory, int numResults) {
     Collection<String> categories = model.getLabels();
     PriorityQueue pq = new ClassifierResultPriorityQueue(numResults);
-    ClassifierResult tmp = null;
+    ClassifierResult tmp;
     for (String category : categories){
       float prob = documentProbability(model, category, document);
       if (prob < 0) {
@@ -97,7 +97,7 @@ public class CBayesClassifier implements Classifier{
    */
   public float documentProbability(Model model, String label, String[] document) {
     float result = 0.0f;
-    Hashtable<String, Integer> wordList = new Hashtable<String, Integer>(1000);
+    Map<String, Integer> wordList = new HashMap<String, Integer>(1000);
     for (String word : document) {
       if (wordList.containsKey(word)) {
         Integer count = wordList.get(word);
@@ -107,9 +107,9 @@ public class CBayesClassifier implements Classifier{
         wordList.put(word, 1);
       }      
     }
-    for (Enumeration<String> e = wordList.keys(); e.hasMoreElements();) {      
-      String word = e.nextElement();
-      Integer count = wordList.get(word);
+    for (Map.Entry<String, Integer> entry : wordList.entrySet()) {
+      String word = entry.getKey();
+      Integer count = entry.getValue();
       result += count * model.FeatureWeight(label, word);
     }
     return result;

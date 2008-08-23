@@ -17,11 +17,6 @@ package org.apache.mahout.ga.watchmaker.cd.hadoop;
  * limitations under the License.
  */
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
@@ -31,12 +26,17 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.ga.watchmaker.OutputUtils;
-import org.apache.mahout.utils.StringUtils;
 import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 import org.apache.mahout.ga.watchmaker.cd.DataSet;
 import org.apache.mahout.ga.watchmaker.cd.FileInfoParser;
 import org.apache.mahout.ga.watchmaker.cd.Rule;
 import org.apache.mahout.ga.watchmaker.cd.hadoop.DatasetSplit.DatasetTextInputFormat;
+import org.apache.mahout.utils.StringUtils;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Mahout distributed evaluator. takes a list of classification rules and an

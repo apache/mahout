@@ -16,8 +16,8 @@
  */
 package org.apache.mahout.matrix;
 
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
 
 /**
  * The basic interface including numerous convenience functions

@@ -28,12 +28,8 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.GenericsUtil;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
 
-/**
- * 
- * 
- */
 public class BayesThetaNormalizerMapper extends MapReduceBase implements
     Mapper<Text, FloatWritable, Text, FloatWritable> {
 

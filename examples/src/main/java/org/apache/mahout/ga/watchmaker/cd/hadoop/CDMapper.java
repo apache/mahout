@@ -17,9 +17,6 @@
 
 package org.apache.mahout.ga.watchmaker.cd.hadoop;
 
-import java.io.IOException;
-import java.util.List;
-
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
@@ -27,11 +24,14 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.utils.StringUtils;
 import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 import org.apache.mahout.ga.watchmaker.cd.DataLine;
 import org.apache.mahout.ga.watchmaker.cd.DataSet;
 import org.apache.mahout.ga.watchmaker.cd.Rule;
+import org.apache.mahout.utils.StringUtils;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Hadoop Mapper. Evaluate all the rules with the input data line.

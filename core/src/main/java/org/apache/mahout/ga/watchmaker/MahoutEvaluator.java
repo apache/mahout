@@ -17,11 +17,6 @@ package org.apache.mahout.ga.watchmaker;
  * limitations under the License.
  */
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.List;
-
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
@@ -34,6 +29,11 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.mahout.utils.StringUtils;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.List;
 
 /**
  * Generic Mahout distributed evaluator. takes an evaluator and a population and

@@ -22,9 +22,9 @@ import org.apache.mahout.common.Classifier;
 import org.apache.mahout.common.Model;
 
 import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 
 /**
@@ -45,7 +45,7 @@ public class BayesClassifier implements Classifier {
     Collection<String> categories = model.getLabels();
     
     PriorityQueue pq = new ClassifierResultPriorityQueue(numResults);
-    ClassifierResult tmp = null;
+    ClassifierResult tmp;
     for (String category : categories){
       float prob = documentProbability(model, category, document);
       if (prob < 0) {
@@ -99,8 +99,8 @@ public class BayesClassifier implements Classifier {
    * @see Model#FeatureWeight(String, String)
    */
   public float documentProbability(Model model, String label, String[] document) {
-    float result = 0f;
-    Hashtable<String, Integer> wordList = new Hashtable<String, Integer>(1000);
+    float result = 0.0f;
+    Map<String, Integer> wordList = new HashMap<String, Integer>(1000);
     for (String word : document) {
       if (wordList.containsKey(word)) {
         Integer count = wordList.get(word);
@@ -108,11 +108,11 @@ public class BayesClassifier implements Classifier {
         wordList.put(word, count);
       } else {
         wordList.put(word, 1);
-      }      
+      }
     }
-    for (Enumeration<String> e = wordList.keys(); e.hasMoreElements();) {      
-      String word = e.nextElement();
-      Integer count = wordList.get(word);
+    for (Map.Entry<String, Integer> entry : wordList.entrySet()) {
+      String word = entry.getKey();
+      Integer count = entry.getValue();
       result += count * model.FeatureWeight(label, word);
     }
     return result;

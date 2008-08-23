@@ -16,10 +16,10 @@ package org.apache.mahout.clustering.canopy;
  * limitations under the License.
  */
 
+import org.apache.mahout.matrix.Vector;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.mahout.matrix.Vector;
 
 /**
  * This Canopy subclass maintains a list of points in the canopy so it can

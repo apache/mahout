@@ -16,8 +16,9 @@
  */
 package org.apache.mahout.ga.watchmaker.travellingsalesman;
 
-import java.util.List;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
+
+import java.util.List;
 
 /**
  * Fitness evalator that measures the total distance of a route in the travelling salesman

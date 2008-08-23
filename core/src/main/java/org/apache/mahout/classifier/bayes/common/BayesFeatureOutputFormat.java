@@ -16,10 +16,7 @@ package org.apache.mahout.classifier.bayes.common;
  * limitations under the License.
  */
 
-import java.io.IOException;
-
 import org.apache.hadoop.fs.FileSystem;
-
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
@@ -28,6 +25,8 @@ import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.lib.MultipleOutputFormat;
 import org.apache.hadoop.util.Progressable;
+
+import java.io.IOException;
 
 /**
  * This class extends the MultipleOutputFormat, allowing to write the output data to different output files in sequence file output format.

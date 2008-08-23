@@ -19,12 +19,11 @@ package org.apache.mahout.common;
 
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 
-
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 /**
@@ -33,23 +32,23 @@ import java.util.StringTokenizer;
  */
 public abstract class Model {
 
-  protected List<Map<Integer, Float>> featureLabelWeights = new ArrayList<Map<Integer, Float>>();
+  protected final List<Map<Integer, Float>> featureLabelWeights = new ArrayList<Map<Integer, Float>>();
 
-  protected Map<String, Integer> featureList = new FastMap<String, Integer>();
+  protected final Map<String, Integer> featureList = new FastMap<String, Integer>();
 
-  protected Map<String, Integer> labelList = new HashMap<String, Integer>();
+  protected final Map<String, Integer> labelList = new HashMap<String, Integer>();
 
-  protected List<Float> sumFeatureWeight = new ArrayList<Float>();
+  protected final List<Float> sumFeatureWeight = new ArrayList<Float>();
 
-  protected Map<Integer, Float> sumLabelWeight = new HashMap<Integer, Float>();
+  protected final Map<Integer, Float> sumLabelWeight = new HashMap<Integer, Float>();
 
-  protected Map<Integer, Float> thetaNormalizer = new HashMap<Integer, Float>();
+  protected final Map<Integer, Float> thetaNormalizer = new HashMap<Integer, Float>();
 
   protected Float sigma_jSigma_k = new Float(0);
 
-  protected Float alpha_i = 1.0f; // alpha_i can be improved upon for increased smoothing
+  protected final Float alpha_i = 1.0f; // alpha_i can be improved upon for increased smoothing
   
-  public static float  DEFAULT_PROBABILITY = 0.5f;
+  public static final float DEFAULT_PROBABILITY = 0.5f;
   
   
   protected abstract float FeatureWeight(Integer label, Integer feature);
@@ -63,10 +62,10 @@ public abstract class Model {
   public abstract void GenerateModel();
   
   protected float getSumLabelWeight(Integer label) {
-    float result = 0;
+    float result = 0.0f;
     Float numSeen = sumLabelWeight.get(label);
     if (numSeen != null) {
-      result = ((float) numSeen);
+      result = numSeen;
     }
     return result;
   }
@@ -75,16 +74,16 @@ public abstract class Model {
     float result = 0.0f;
     Float numSeen = thetaNormalizer.get(label);
     if (numSeen != null) {
-      result = ((float) numSeen);
+      result = numSeen;
     }
     return result;
   }
 
   protected float getSumFeatureWeight(Integer feature) {
-    float result = 0;
+    float result = 0.0f;
     Float numSeen = sumFeatureWeight.get(feature);
     if (numSeen != null) {
-      result = ((float) numSeen);
+      result = numSeen;
     }
     return result;
   }
@@ -95,8 +94,7 @@ public abstract class Model {
       Integer labelId = Integer.valueOf(labelList.size());
       labelList.put(label, labelId);
     }
-    Integer labelId = labelList.get(label);
-    return labelId;
+    return labelList.get(label);
   }
 
   protected Integer getFeature(String feature) {
@@ -105,8 +103,7 @@ public abstract class Model {
       Integer featureId = Integer.valueOf(featureList.size());
       featureList.put(feature, featureId);
     }
-    Integer featureId = featureList.get(feature);
-    return featureId;
+    return featureList.get(feature);
   }
 
   protected void setWeight(String labelString, String featureString, Float weight)

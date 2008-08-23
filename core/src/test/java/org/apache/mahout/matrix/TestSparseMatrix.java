@@ -22,10 +22,6 @@ public class TestSparseMatrix extends MatrixTest {
     super(name);
   }
 
-  protected void setUp() throws Exception {
-    super.setUp();
-  }
-
   public Matrix matrixFactory(double[][] values) {
     int[] cardinality = {values.length, values[0].length};
     Matrix matrix = new SparseMatrix(cardinality);

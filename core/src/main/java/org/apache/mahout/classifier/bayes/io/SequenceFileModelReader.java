@@ -17,19 +17,20 @@ package org.apache.mahout.classifier.bayes.io;
  * limitations under the License.
  */
 
-import org.apache.mahout.common.Model;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.MapFile;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.Writable;
+import org.apache.mahout.common.Model;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This Class reads the different interim  files created during the Training stage as well as the Model File during testing.
@@ -207,7 +208,7 @@ public class SequenceFileModelReader {
         } else {
           int idx = keyStr.indexOf(",");
           if (idx != -1) {
-            HashMap<String, Float> data = new HashMap<String, Float>();
+            Map<String, Float> data = new HashMap<String, Float>();
             data.put(keyStr.substring(0, idx), new Float(value.get()));
             writer.append(new Text(key.toString()), value);
           }
@@ -287,8 +288,7 @@ public class SequenceFileModelReader {
       }
     }
 
-    Float sigma_jSigma_k = weightSum.get("*");
-    return sigma_jSigma_k;
+    return weightSum.get("*");
   }
 
   public Float readVocabCount(FileSystem fs, Path pathPattern,
@@ -314,8 +314,7 @@ public class SequenceFileModelReader {
       }
     }
 
-    Float sigma_jSigma_k = weightSum.get("*vocabCount");
-    return sigma_jSigma_k;
+    return weightSum.get("*vocabCount");
   }
 
 }

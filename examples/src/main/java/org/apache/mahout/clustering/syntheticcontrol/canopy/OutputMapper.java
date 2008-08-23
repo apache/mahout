@@ -17,8 +17,6 @@ package org.apache.mahout.clustering.syntheticcontrol.canopy;
  * limitations under the License.
  */
 
-import java.io.IOException;
-
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -28,6 +26,8 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.Vector;
+
+import java.io.IOException;
 
 public class OutputMapper extends MapReduceBase implements
     Mapper<LongWritable, Text, Text, Text> {

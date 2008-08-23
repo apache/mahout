@@ -17,16 +17,12 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import java.util.Random;
-
 import junit.framework.TestCase;
-
 import org.apache.mahout.ga.watchmaker.cd.utils.MockDataSet;
 import org.uncommons.maths.random.MersenneTwisterRNG;
 
-/**
- * 
- */
+import java.util.Random;
+
 public class CDMutationTest extends TestCase {
 
   private Random rng;

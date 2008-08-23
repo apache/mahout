@@ -17,18 +17,13 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
+import junit.framework.TestCase;
+import static org.easymock.classextension.EasyMock.*;
+import org.uncommons.maths.random.MersenneTwisterRNG;
+
 import java.util.List;
 import java.util.Random;
 
-import org.apache.mahout.ga.watchmaker.cd.CDCrossover;
-import org.apache.mahout.ga.watchmaker.cd.CDRule;
-import org.uncommons.maths.random.MersenneTwisterRNG;
-import static org.easymock.classextension.EasyMock.*;
-import junit.framework.TestCase;
-
-/**
- * 
- */
 public class CDCrossoverTest extends TestCase {
 
   /**

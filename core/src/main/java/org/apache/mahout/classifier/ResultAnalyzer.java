@@ -1,10 +1,10 @@
 package org.apache.mahout.classifier;
 
-import java.text.*;
-import java.util.*;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.mahout.common.Summarizable;
+
+import java.text.DecimalFormat;
+import java.util.Collection;
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -74,25 +74,15 @@ public class ResultAnalyzer implements Summarizable {
     DecimalFormat decimalFormatter = new DecimalFormat("0.####");
 
     returnString.append(StringUtils.rightPad("Correctly Classified Instances",
-        40)
-        + ": "
-        + StringUtils.leftPad(new Integer(correctlyClassified).toString(), 10)
-        + "\t"
-        + StringUtils.leftPad(decimalFormatter.format(percentageCorrect), 10)
-        + "%\n");
+        40)).append(": ").append(StringUtils.leftPad(Integer.toString(correctlyClassified), 10))
+        .append('\t').append(StringUtils.leftPad(decimalFormatter.format(percentageCorrect), 10)).append("%\n");
     returnString.append(StringUtils.rightPad(
-        "Incorrectly Classified Instances", 40)
-        + ": "
-        + StringUtils
-            .leftPad(new Integer(incorrectlyClassified).toString(), 10)
-        + "\t"
-        + StringUtils.leftPad(decimalFormatter.format(percentageIncorrect), 10)
-        + "%\n");
-    returnString.append(StringUtils.rightPad("Total Classified Instances", 40)
-        + ": "
-        + StringUtils.leftPad(new Integer(totalClassified).toString(), 10)
-        + "\n");
-    returnString.append("\n");
+        "Incorrectly Classified Instances", 40)).append(": ").append(StringUtils
+        .leftPad(Integer.toString(incorrectlyClassified), 10)).append('\t')
+        .append(StringUtils.leftPad(decimalFormatter.format(percentageIncorrect), 10)).append("%\n");
+    returnString.append(StringUtils.rightPad("Total Classified Instances", 40)).append(": ")
+        .append(StringUtils.leftPad(Integer.toString(totalClassified), 10)).append('\n');
+    returnString.append('\n');
 
     returnString.append(confusionMatrix.summarize());
 

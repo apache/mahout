@@ -17,15 +17,15 @@
 
 package org.apache.mahout.cf.taste.ejb;
 
-import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Refreshable;
+import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 import javax.ejb.EJBObject;
 import java.rmi.RemoteException;
-import java.util.List;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * <p>Recommender EJB component interface.</p>

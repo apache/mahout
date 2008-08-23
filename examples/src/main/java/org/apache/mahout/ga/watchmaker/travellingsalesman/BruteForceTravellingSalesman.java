@@ -15,12 +15,13 @@
 // ============================================================================
 package org.apache.mahout.ga.watchmaker.travellingsalesman;
 
+import org.uncommons.maths.PermutationGenerator;
+import org.uncommons.watchmaker.framework.FitnessEvaluator;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import org.uncommons.maths.PermutationGenerator;
-import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
 /**
  * Naive brute-force solution to the travelling salesman problem. It would take about

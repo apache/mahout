@@ -17,14 +17,12 @@
 
 package org.apache.mahout.ga.watchmaker;
 
+import junit.framework.TestCase;
+import org.uncommons.maths.random.MersenneTwisterRNG;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import org.apache.mahout.ga.watchmaker.STFitnessEvaluator;
-import org.uncommons.maths.random.MersenneTwisterRNG;
-
-import junit.framework.TestCase;
 
 public class STFitnessEvaluatorTest extends TestCase {
 

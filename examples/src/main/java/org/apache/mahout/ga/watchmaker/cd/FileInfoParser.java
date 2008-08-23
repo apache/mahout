@@ -17,19 +17,19 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
-import java.util.StringTokenizer;
-
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.ga.watchmaker.cd.DataSet.Attribute;
 import org.apache.mahout.ga.watchmaker.cd.DataSet.NominalAttr;
 import org.apache.mahout.ga.watchmaker.cd.DataSet.NumericalAttr;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
+import java.util.StringTokenizer;
 
 /**
  * Initializes a DataSet using a special format file.<br>

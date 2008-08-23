@@ -16,14 +16,14 @@ package org.apache.mahout.classifier.bayes.common;
  * limitations under the License.
  */
 
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.FileSystem;
 
 
 /**
@@ -51,7 +51,6 @@ public class BayesWeightSummerDriver {
    *
    * @param input            the input pathname String
    * @param output           the output pathname String
-
    */
   public static void runJob(String input, String output) {
     JobClient client = new JobClient();

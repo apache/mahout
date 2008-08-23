@@ -17,24 +17,25 @@ package org.apache.mahout.classifier.bayes;
  * limitations under the License.
  */
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Option;
-import java.io.*;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.text.DecimalFormat;
 
-
-/**
- * 
- * 
- */
 public class WikipediaXmlSplitter {
 
   @SuppressWarnings("static-access")
-  public static void main(String[] args) throws IOException,
-      ClassNotFoundException, IllegalAccessException, InstantiationException {
+  public static void main(String[] args) throws Exception {
     Options options = new Options();
     Option dumpFileOpt = OptionBuilder.withLongOpt("dumpfile").isRequired().hasArg().withDescription("The path to the wikipedia dump file").create("d");
     options.addOption(dumpFileOpt);
@@ -42,7 +43,7 @@ public class WikipediaXmlSplitter {
     options.addOption(outputDirOpt);
     Option chunkSizeOpt = OptionBuilder.withLongOpt("chunkSize").isRequired().hasArg().withDescription("the Size of chunk in Megabytes").create("c");
     options.addOption(chunkSizeOpt);
-    CommandLine cmdLine = null;
+    CommandLine cmdLine;
     try {
       PosixParser parser = new PosixParser();
       cmdLine = parser.parse(options, args);

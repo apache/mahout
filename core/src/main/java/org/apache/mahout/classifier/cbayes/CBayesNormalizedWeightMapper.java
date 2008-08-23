@@ -17,8 +17,8 @@ package org.apache.mahout.classifier.cbayes;
  * limitations under the License.
  */
 
-import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.DefaultStringifier;
+import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -28,12 +28,9 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.GenericsUtil;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
 
-/**
- * 
- * 
- */
+
 public class CBayesNormalizedWeightMapper extends MapReduceBase implements
     Mapper<Text, FloatWritable, Text, FloatWritable> {
 
@@ -58,7 +55,7 @@ public class CBayesNormalizedWeightMapper extends MapReduceBase implements
     String labelFeaturePair = key.toString();
 
     String label = labelFeaturePair.split(",")[0];
-    output.collect(key, new FloatWritable((float)(-1.0f * (float)Math.log(value.get())/thetaNormalizer.get(label))));// output -D_ij
+    output.collect(key, new FloatWritable((-1.0f * (float)Math.log(value.get())/thetaNormalizer.get(label))));// output -D_ij
 
   }
 

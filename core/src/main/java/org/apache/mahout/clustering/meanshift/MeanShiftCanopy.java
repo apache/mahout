@@ -16,10 +16,6 @@
  */
 package org.apache.mahout.clustering.meanshift;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -30,6 +26,10 @@ import org.apache.mahout.matrix.PlusFunction;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
 import org.apache.mahout.utils.EuclideanDistanceMeasure;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class models a canopy as a center point, the number of points that are

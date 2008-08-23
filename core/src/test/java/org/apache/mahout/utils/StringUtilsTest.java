@@ -16,12 +16,10 @@ package org.apache.mahout.utils;
  * limitations under the License.
  */
 
+import junit.framework.TestCase;
+
 import java.util.Arrays;
 import java.util.List;
-
-import org.apache.mahout.utils.StringUtils;
-
-import junit.framework.TestCase;
 
 public class StringUtilsTest extends TestCase {
 

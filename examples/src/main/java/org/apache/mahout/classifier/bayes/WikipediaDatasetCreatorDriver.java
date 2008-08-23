@@ -16,23 +16,24 @@ package org.apache.mahout.classifier.bayes;
  * limitations under the License.
  */
 
+import org.apache.hadoop.util.GenericsUtil;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.DefaultStringifier;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapred.JobConf;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.util.*;
-import org.apache.hadoop.mapred.*;
-import org.apache.hadoop.util.GenericsUtil;
-import org.apache.hadoop.io.DefaultStringifier;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.FileSystem;
-
-
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Create and run the Bayes Trainer.
  *
- **/
+ */
 public class WikipediaDatasetCreatorDriver {
   /**
    * Takes in two arguments:
@@ -46,7 +47,7 @@ public class WikipediaDatasetCreatorDriver {
     String input = args[0];
     String output = args[1];
     String countriesFile = args[2];
-    
+
     runJob(input, output,countriesFile);
   }
 
@@ -61,45 +62,43 @@ public class WikipediaDatasetCreatorDriver {
   public static void runJob(String input, String output, String countriesFile) {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(WikipediaDatasetCreatorDriver.class);
-    
+
     conf.set("key.value.separator.in.input.line", " ");
     conf.set("xmlinput.start", "<text xml:space=\"preserve\">");
     conf.set("xmlinput.end", "</text>");
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(Text.class);
-    
-//    conf.setInputPath(new Path(input));
-    FileInputFormat.setInputPaths(conf, new Path(input));
+
+    conf.setInputPath(new Path(input));
     Path outPath = new Path(output);
-//    conf.setOutputPath(outPath);
-    FileOutputFormat.setOutputPath(conf, outPath);
+    conf.setOutputPath(outPath);
 
     conf.setMapperClass(WikipediaDatasetCreatorMapper.class);
     conf.setNumMapTasks(100);
     conf.setInputFormat(XmlInputFormat.class);
     //conf.setCombinerClass(WikipediaDatasetCreatorReducer.class);
-    conf.setReducerClass(WikipediaDatasetCreatorReducer.class);    
+    conf.setReducerClass(WikipediaDatasetCreatorReducer.class);
     conf.setOutputFormat(WikipediaDatasetCreatorOutputFormat.class);
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization"); // Dont ever forget this. People should keep track of how hadoop conf parameters and make or break a piece of code
-      
-    
+
+
     try {
       FileSystem dfs = FileSystem.get(conf);
       if (dfs.exists(outPath))
         dfs.delete(outPath, true);
-      
-      HashSet<String> countries= new HashSet<String>();
-      
-      
+
+      Set<String> countries= new HashSet<String>();
+
+
       BufferedReader reader = new BufferedReader(new InputStreamReader(
           new FileInputStream(countriesFile), "UTF-8"));
-      String line = null;
+      String line;
       while((line = reader.readLine())!=null){
         countries.add(line);
       }
       reader.close();
       
-      DefaultStringifier<HashSet<String>> setStringifier = new DefaultStringifier<HashSet<String>>(conf,GenericsUtil.getClass(countries));
+      DefaultStringifier<Set<String>> setStringifier = new DefaultStringifier<Set<String>>(conf,GenericsUtil.getClass(countries));
 
       String countriesString = setStringifier.toString(countries);  
 

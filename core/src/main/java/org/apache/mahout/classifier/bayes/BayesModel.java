@@ -54,7 +54,7 @@ public class BayesModel extends Model {
 
   @Override
   protected float getWeightUnprocessed(Integer label, Integer feature) {
-    float result = 0.0f;
+    float result;
     Map<Integer, Float> featureWeights = featureLabelWeights.get(feature);
 
     if (featureWeights.containsKey(label)) {
@@ -99,6 +99,7 @@ public class BayesModel extends Model {
 
           float D_ij = getWeightUnprocessed(label, feature);
           float sumLabelWeight = getSumLabelWeight(label);
+          // TODO srowen says sigma_j is unused
           float sigma_j = getSumFeatureWeight(feature);
 
           float numerator = D_ij + alpha_i;
@@ -153,8 +154,7 @@ public class BayesModel extends Model {
    */
   @Override
   public float FeatureWeight(Integer label, Integer feature) {
-    float weight = getWeight(label, feature);
-    return weight;
+    return getWeight(label, feature);
   }
 
 }

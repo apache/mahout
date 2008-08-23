@@ -17,11 +17,11 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
+import org.uncommons.watchmaker.framework.operators.AbstractCrossover;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import org.uncommons.watchmaker.framework.operators.AbstractCrossover;
 
 /**
  * Crossover operator.

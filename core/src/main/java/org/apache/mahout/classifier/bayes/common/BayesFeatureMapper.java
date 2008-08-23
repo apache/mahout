@@ -29,11 +29,9 @@ import org.apache.mahout.classifier.BayesFileFormatter;
 import org.apache.mahout.common.Model;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
-import java.util.StringTokenizer;
-import java.util.Hashtable;
-import java.util.Enumeration;
 
 /**
  * Reads the input train set(preprocessed using the {@link BayesFileFormatter}). 
@@ -41,9 +39,9 @@ import java.util.Enumeration;
  */
 public class BayesFeatureMapper extends MapReduceBase implements
     Mapper<Text, Text, Text, FloatWritable> {
-  private final static FloatWritable one = new FloatWritable(1.00f);
+  private final static FloatWritable one = new FloatWritable(1.0f);
 
-  private Text labelWord = new Text();
+  private final Text labelWord = new Text();
 
   private int gramSize = 1;
 
@@ -63,35 +61,34 @@ public class BayesFeatureMapper extends MapReduceBase implements
       OutputCollector<Text, FloatWritable> output, Reporter reporter)
       throws IOException {
     String line = value.toString();
-    StringTokenizer itr = new StringTokenizer(line);
     String label = key.toString();
     int keyLen = label.length();
 
-    Hashtable<String, Integer> wordList = new Hashtable<String, Integer>(1000);
+    Map<String, Integer> wordList = new HashMap<String, Integer>(1000);
+    // TODO: srowen wonders where wordList is ever updated?
 
     StringBuilder builder = new StringBuilder(label);
     builder.ensureCapacity(32);// make sure we have a reasonably size buffer to
                                // begin with
-    List<String> previousN_1Grams  = Model.generateNGramsWithoutLabel(line, keyLen);    
+    // TODO: srowen says this var isn't used right now
+    List<String> previousN_1Grams  = Model.generateNGramsWithoutLabel(line, keyLen);
     
-    Double lengthNormalisation = new Double(0.0d);
-    for (Enumeration<String> e = wordList.keys(); e.hasMoreElements();) {
+    double lengthNormalisation = 0.0;
+    for (double D_kj : wordList.values()) {
       // key is label,word
-      String token = e.nextElement();
-      Double D_kj = new Double(wordList.get(token).doubleValue());
-      lengthNormalisation += (double) (D_kj * D_kj);
+      lengthNormalisation += D_kj * D_kj;
     }
     lengthNormalisation = Math.sqrt(lengthNormalisation);
 
     // Ouput Length Normalized + TF Transformed Frequency per Word per Class
     // Log(1 + D_ij)/SQRT( SIGMA(k, D_kj) )
-    for (Enumeration<String> e = wordList.keys(); e.hasMoreElements();) {
+    for (Map.Entry<String, Integer> entry : wordList.entrySet()) {
       // key is label,word
-      String token = e.nextElement();
+      String token = entry.getKey();
       builder.append(",").append(token);
       labelWord.set(builder.toString());
       FloatWritable f = new FloatWritable((float) (Math
-          .log((double) (1 + wordList.get(token))) / lengthNormalisation));
+          .log(1.0 + entry.getValue()) / lengthNormalisation));
       output.collect(labelWord, f);
       builder.setLength(keyLen);// truncate back
     }
@@ -100,9 +97,8 @@ public class BayesFeatureMapper extends MapReduceBase implements
     String dflabel = "-" + label;
     int dfKeyLen = dflabel.length();
     builder = new StringBuilder(dflabel);
-    for (Enumeration<String> e = wordList.keys(); e.hasMoreElements();) {
+    for (String token : wordList.keySet()) {
       // key is label,word
-      String token = e.nextElement();
       builder.append(",").append(token);
       labelWord.set(builder.toString());
       output.collect(labelWord, one);

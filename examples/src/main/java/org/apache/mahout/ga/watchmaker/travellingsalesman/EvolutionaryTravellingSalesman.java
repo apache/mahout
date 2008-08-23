@@ -16,12 +16,6 @@
  */
 package org.apache.mahout.ga.watchmaker.travellingsalesman;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
-
 import org.apache.mahout.ga.watchmaker.MahoutFitnessEvaluator;
 import org.apache.mahout.ga.watchmaker.STEvolutionEngine;
 import org.apache.mahout.ga.watchmaker.STFitnessEvaluator;
@@ -39,6 +33,12 @@ import org.uncommons.watchmaker.framework.operators.EvolutionPipeline;
 import org.uncommons.watchmaker.framework.operators.ListOrderCrossover;
 import org.uncommons.watchmaker.framework.operators.ListOrderMutation;
 import org.uncommons.watchmaker.framework.termination.GenerationCount;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Evolutionary algorithm for finding (approximate) solutions to the travelling

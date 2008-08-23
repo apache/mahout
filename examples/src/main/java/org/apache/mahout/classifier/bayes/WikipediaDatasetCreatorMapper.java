@@ -17,6 +17,7 @@ package org.apache.mahout.classifier.bayes;
  * limitations under the License.
  */
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
@@ -25,21 +26,22 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.GenericsUtil;
-import org.apache.lucene.analysis.*;
-import org.apache.lucene.analysis.standard.*;
-import org.apache.commons.lang.StringEscapeUtils;
-import java.io.*;
-import java.util.*;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.Token;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-/**
- * 
- * 
- */
 public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
     Mapper<Text, Text, Text, Text> {
 
-  static HashSet<String> countries = null;
+  static Set<String> countries = null;
 
   
   @SuppressWarnings("deprecation")
@@ -55,7 +57,7 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
     
     String country = getCountry(categories);
     
-    if(country != "Unknown"){
+    if(!country.equals("Unknown")){
       document = StringEscapeUtils.unescapeHtml(document.replaceFirst("<text xml:space=\"preserve\">", "").replaceAll("</text>", ""));
       TokenStream stream = analyzer.tokenStream(country, new StringReader(document));
       while(true){
@@ -68,7 +70,7 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
     }
   }
   
-  public String getCountry(HashSet<String> categories)
+  public String getCountry(Set<String> categories)
   {
     for(String category : categories)
     {
@@ -85,7 +87,7 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
   public List<String> findAllCategories(String document){
     List<String> categories =  new ArrayList<String>();
     int startIndex = 0;
-    int categoryIndex = -1;
+    int categoryIndex;
     
     while((categoryIndex = document.indexOf("[[Category:", startIndex))!=-1)
     {
@@ -107,7 +109,7 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
       if(countries ==null){
         countries = new HashSet<String>();
 
-        DefaultStringifier<HashSet<String>> setStringifier = new DefaultStringifier<HashSet<String>>(job,GenericsUtil.getClass(countries));
+        DefaultStringifier<Set<String>> setStringifier = new DefaultStringifier<Set<String>>(job,GenericsUtil.getClass(countries));
 
         String countriesString = setStringifier.toString(countries);  
         countriesString = job.get("wikipedia.countries", countriesString);

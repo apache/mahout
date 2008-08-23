@@ -16,13 +16,12 @@ package org.apache.mahout.ga.watchmaker.cd.tool;
  * limitations under the License.
  */
 
+import junit.framework.TestCase;
+import org.apache.hadoop.io.Text;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
-
-import junit.framework.TestCase;
-
-import org.apache.hadoop.io.Text;
 
 public class ToolCombinerTest extends TestCase {
 

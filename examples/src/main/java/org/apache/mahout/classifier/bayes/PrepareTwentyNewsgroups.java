@@ -16,19 +16,15 @@ package org.apache.mahout.classifier.bayes;
  * limitations under the License.
  */
 
-import org.apache.mahout.classifier.BayesFileFormatter;
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.PosixParser;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.Options;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.PosixParser;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.mahout.classifier.BayesFileFormatter;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.Charset;
 
 
@@ -38,12 +34,11 @@ import java.nio.charset.Charset;
  * This class takes the directory containing the extracted newsgroups and collapses them into a single file per category, with
  * one document per line (first token on each line is the label) 
  *
- **/
+ */
 public class PrepareTwentyNewsgroups {
-  private transient static Log log = LogFactory.getLog(PrepareTwentyNewsgroups.class);
+
   @SuppressWarnings("static-access")
-  public static void main(String[] args) throws ClassNotFoundException, IllegalAccessException, InstantiationException, IOException {
-    CommandLine cmdLine = null;
+  public static void main(String[] args) throws Exception {
     Options options = new Options();
     Option parentOpt = OptionBuilder.withLongOpt("parent").isRequired().hasArg().withDescription("Parent dir containing the newsgroups").create("p");
     options.addOption(parentOpt);
@@ -54,14 +49,9 @@ public class PrepareTwentyNewsgroups {
     Option charsetOpt = OptionBuilder.withLongOpt("charset").hasArg().isRequired().withDescription("The name of the character encoding of the input files").create("c");
     options.addOption(charsetOpt);
 
-    try {
+    PosixParser parser = new PosixParser();
+    CommandLine cmdLine = parser.parse(options, args);
 
-      PosixParser parser = new PosixParser();
-      cmdLine = parser.parse(options, args);
-    }
-    catch (ParseException exp) {
-      log.error("Cmd line Syntax Error: " + exp.getMessage(), exp);
-    }
     File parentDir = new File(cmdLine.getOptionValue(parentOpt.getOpt()));
     File outputDir = new File(cmdLine.getOptionValue(outputDirOpt.getOpt()));
     String analyzerName = cmdLine.getOptionValue(analyzerNameOpt.getOpt());

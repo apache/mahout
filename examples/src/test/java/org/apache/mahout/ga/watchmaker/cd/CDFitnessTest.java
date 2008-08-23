@@ -17,15 +17,11 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import java.util.Random;
-
+import junit.framework.TestCase;
 import org.uncommons.maths.random.MersenneTwisterRNG;
 
-import junit.framework.TestCase;
+import java.util.Random;
 
-/**
- * 
- */
 public class CDFitnessTest extends TestCase {
 
   /**

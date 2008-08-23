@@ -23,7 +23,12 @@ import org.apache.hadoop.io.DataOutputBuffer;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.*;
+import org.apache.hadoop.mapred.FileSplit;
+import org.apache.hadoop.mapred.InputSplit;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.RecordReader;
+import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapred.TextInputFormat;
 
 import java.io.IOException;
 
@@ -33,10 +38,6 @@ import java.io.IOException;
 public class XmlInputFormat extends TextInputFormat {
     public static final String START_TAG_KEY = "xmlinput.start";
     public static final String END_TAG_KEY = "xmlinput.end";
-
-    public void configure(JobConf jobConf) {
-        super.configure(jobConf);
-    }
 
     @SuppressWarnings("unchecked")
     public RecordReader getRecordReader(InputSplit inputSplit, JobConf jobConf, Reporter reporter) throws IOException {
@@ -49,7 +50,7 @@ public class XmlInputFormat extends TextInputFormat {
         private long start;
         private long end;
         private FSDataInputStream fsin;
-        private DataOutputBuffer buffer = new DataOutputBuffer();
+        private final DataOutputBuffer buffer = new DataOutputBuffer();
 
         public XmlRecordReader(FileSplit split, JobConf jobConf) throws IOException {
             startTag = jobConf.get("xmlinput.start").getBytes("utf-8");

@@ -17,21 +17,30 @@ package org.apache.mahout.classifier;
  * limitations under the License.
  */
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Flatten a file into format that can be read by the Bayes M/R job. <p/> One
@@ -39,7 +48,8 @@ import java.util.*;
  * line are the terms.
  */
 public class BayesFileFormatter {
-  private static String LINE_SEP = System.getProperty("line.separator");
+
+  private static final String LINE_SEP = System.getProperty("line.separator");
 
   /**
    * Collapse all the files in the inputDir into a single file in the proper
@@ -90,13 +100,13 @@ public class BayesFileFormatter {
    * directories and don't have to loop the list twice
    */
   private static class FileProcessor implements FileFilter {
-    private String label;
+    private final String label;
 
-    private Analyzer analyzer;
+    private final Analyzer analyzer;
 
     private File outputDir;
 
-    private Charset charset;
+    private final Charset charset;
 
     private Writer writer;
 
@@ -180,7 +190,8 @@ public class BayesFileFormatter {
     // TextInputFormat
     Token token = new Token();
     CharArraySet seen = new CharArraySet(256, false);
-    long numTokens = 0;
+    // TODO srowen wonders that 'seen' is updated but not used?
+    //long numTokens = 0;
     while ((token = ts.next(token)) != null) {
       char[] termBuffer = token.termBuffer();
       int termLen = token.termLength();   
@@ -191,7 +202,7 @@ public class BayesFileFormatter {
       System.arraycopy(termBuffer, 0, tmp, 0, termLen);
       seen.add(tmp);// do this b/c CharArraySet doesn't allow offsets
     }
-    numTokens++;
+    ///numTokens++;
 
   }
 
@@ -207,7 +218,7 @@ public class BayesFileFormatter {
       throws IOException {
     TokenStream ts = analyzer.tokenStream("", reader);
 
-    Token token = null;
+    Token token;
     List<String> coll = new ArrayList<String>();
     while ((token = ts.next()) != null) {
       char[] termBuffer = token.termBuffer();
@@ -215,7 +226,7 @@ public class BayesFileFormatter {
       String val = new String(termBuffer, 0, termLen);
       coll.add(val);
     }
-    return (String[]) coll.toArray(new String[coll.size()]);
+    return coll.toArray(new String[coll.size()]);
   }
 
   /**
@@ -259,18 +270,18 @@ public class BayesFileFormatter {
     Option helpOpt = OptionBuilder.withLongOpt("help").withDescription(
         "Print out help info").create("h");
     options.addOption(helpOpt);
-    CommandLine cmdLine = null;
+    CommandLine cmdLine;
     try {
       PosixParser parser = new PosixParser();
       cmdLine = parser.parse(options, args);
       if (cmdLine.hasOption(helpOpt.getOpt())) {
         System.out.println("Options: " + options);
-        System.exit(0);
+        return;
       }
       File input = new File(cmdLine.getOptionValue(inputOpt.getOpt()));
       File output = new File(cmdLine.getOptionValue(outputOpt.getOpt()));
       String label = cmdLine.getOptionValue(labelOpt.getOpt());
-      Analyzer analyzer = null;
+      Analyzer analyzer;
       if (cmdLine.hasOption(analyzerOpt.getOpt())) {
         analyzer = (Analyzer) Class.forName(
             cmdLine.getOptionValue(analyzerOpt.getOpt())).newInstance();

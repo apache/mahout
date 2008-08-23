@@ -89,7 +89,7 @@ public class BayesFileFormatterTest extends TestCase {
     files = out.listFiles();
     assertTrue("files Size: " + files.length + " is not: " + 1, files.length == 1);
     BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(files[0]), charset));
-    String line = null;
+    String line;
     int count = 0;
     while ((line = reader.readLine()) != null){
       assertTrue("line does not start with label", line.startsWith("animal"));

@@ -17,25 +17,21 @@
 
 package org.apache.mahout.ga.watchmaker.cd.hadoop;
 
+import junit.framework.TestCase;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.mahout.ga.watchmaker.cd.CDFitness;
+import org.apache.mahout.ga.watchmaker.cd.DataLine;
+import org.apache.mahout.ga.watchmaker.cd.Rule;
+import org.apache.mahout.utils.DummyOutputCollector;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
-
 import org.easymock.classextension.EasyMock;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-
-import junit.framework.TestCase;
-
-import org.apache.hadoop.io.LongWritable;
-import org.apache.mahout.ga.watchmaker.cd.CDFitness;
-import org.apache.mahout.ga.watchmaker.cd.DataLine;
-import org.apache.mahout.ga.watchmaker.cd.Rule;
-import org.apache.mahout.ga.watchmaker.cd.hadoop.CDMapper;
-import org.apache.mahout.utils.DummyOutputCollector;
 
 public class CDMapperTest extends TestCase {
 
@@ -43,13 +39,13 @@ public class CDMapperTest extends TestCase {
 
   Rule rule;
 
-  CDFitness TP = new CDFitness(1, 0, 0, 0);
+  final CDFitness TP = new CDFitness(1, 0, 0, 0);
 
-  CDFitness FP = new CDFitness(0, 1, 0, 0);
+  final CDFitness FP = new CDFitness(0, 1, 0, 0);
 
-  CDFitness TN = new CDFitness(0, 0, 1, 0);
+  final CDFitness TN = new CDFitness(0, 0, 1, 0);
 
-  CDFitness FN = new CDFitness(0, 0, 0, 1);
+  final CDFitness FN = new CDFitness(0, 0, 0, 1);
 
   @Override
   protected void setUp() throws Exception {

@@ -18,8 +18,8 @@ package org.apache.mahout.classifier.bayes.common;
  */
 
 
-import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.DefaultStringifier;
+import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -28,14 +28,9 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.GenericsUtil;
 
-
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
 
-/**
- * 
- * 
- */
 public class BayesTfIdfMapper extends MapReduceBase implements
     Mapper<Text, FloatWritable, Text, FloatWritable> {
 

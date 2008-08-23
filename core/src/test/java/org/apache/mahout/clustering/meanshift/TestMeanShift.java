@@ -16,17 +16,7 @@
  */
 package org.apache.mahout.clustering.meanshift;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import junit.framework.TestCase;
-
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
@@ -40,6 +30,15 @@ import org.apache.mahout.utils.DistanceMeasure;
 import org.apache.mahout.utils.DummyOutputCollector;
 import org.apache.mahout.utils.EuclideanDistanceMeasure;
 import org.apache.mahout.utils.ManhattanDistanceMeasure;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TestMeanShift extends TestCase {
 
@@ -151,10 +150,6 @@ public class TestMeanShift extends TestCase {
           v.setQuick(2, 4.5);
         raw[ix] = v;
       }
-  }
-
-  protected void tearDown() throws Exception {
-    super.tearDown();
   }
 
   /**

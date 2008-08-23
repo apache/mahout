@@ -17,11 +17,6 @@
 
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
@@ -31,6 +26,11 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.ga.watchmaker.cd.tool.DescriptionUtils.Range;
 import org.apache.mahout.utils.StringUtils;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Combines attribute description strings into a String.<br>
@@ -48,7 +48,7 @@ public class ToolReducer extends MapReduceBase implements
 
   private Descriptors descriptors;
 
-  private Set<String> distinct = new HashSet<String>();
+  private final Set<String> distinct = new HashSet<String>();
 
   @Override
   public void configure(JobConf job) {

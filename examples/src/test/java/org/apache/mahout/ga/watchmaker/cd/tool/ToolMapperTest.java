@@ -16,13 +16,12 @@ package org.apache.mahout.ga.watchmaker.cd.tool;
  * limitations under the License.
  */
 
-import java.util.List;
-
 import junit.framework.TestCase;
-
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.utils.DummyOutputCollector;
+
+import java.util.List;
 
 public class ToolMapperTest extends TestCase {
 

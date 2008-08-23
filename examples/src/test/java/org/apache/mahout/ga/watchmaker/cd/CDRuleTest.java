@@ -1,14 +1,11 @@
 package org.apache.mahout.ga.watchmaker.cd;
 
-import java.util.Random;
-
-import org.apache.mahout.ga.watchmaker.cd.CDRule;
-import org.apache.mahout.ga.watchmaker.cd.DataLine;
+import junit.framework.TestCase;
 import org.apache.mahout.ga.watchmaker.cd.utils.MockDataSet;
 import org.uncommons.maths.random.MersenneTwisterRNG;
 import static org.easymock.classextension.EasyMock.*;
 
-import junit.framework.TestCase;
+import java.util.Random;
 
 public class CDRuleTest extends TestCase {
 

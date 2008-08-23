@@ -17,14 +17,14 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.ga.watchmaker.STFitnessEvaluator;
 import org.apache.mahout.ga.watchmaker.cd.hadoop.CDMahoutEvaluator;
 import org.apache.mahout.ga.watchmaker.cd.hadoop.DatasetSplit;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class Discovery Fitness Evaluator. Delegates to Mahout the task of evaluating

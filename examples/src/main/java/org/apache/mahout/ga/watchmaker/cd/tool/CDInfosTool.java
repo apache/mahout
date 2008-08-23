@@ -17,22 +17,15 @@ package org.apache.mahout.ga.watchmaker.cd.tool;
  * limitations under the License.
  */
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.io.SequenceFile.Sorter;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
@@ -40,6 +33,13 @@ import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.mahout.ga.watchmaker.OutputUtils;
 import org.apache.mahout.ga.watchmaker.cd.FileInfoParser;
 import org.apache.mahout.utils.StringUtils;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 /**
  * Gathers additional information about a given dataset. Takes a descriptor
@@ -200,7 +200,7 @@ public class CDInfosTool {
     // command-line parameters
     if (args.length == 0) {
       System.out.println("Usage: CDInfosTool dataset_path");
-      System.exit(-1);
+      throw new IllegalArgumentException();
     }
 
     FileSystem fs = FileSystem.get(new Configuration());

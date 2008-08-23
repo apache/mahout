@@ -1,11 +1,11 @@
 package org.apache.mahout.ga.watchmaker.cd.utils;
 
-import java.util.Random;
-
 import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 import org.apache.mahout.ga.watchmaker.cd.DataLine;
 import org.apache.mahout.ga.watchmaker.cd.Rule;
 import org.apache.mahout.ga.watchmaker.cd.hadoop.CDMapper;
+
+import java.util.Random;
 
 public class RandomRule implements Rule {
 

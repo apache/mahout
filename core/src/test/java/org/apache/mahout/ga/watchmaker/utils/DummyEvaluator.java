@@ -17,12 +17,12 @@
 
 package org.apache.mahout.ga.watchmaker.utils;
 
+import org.uncommons.watchmaker.framework.FitnessEvaluator;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
-import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
 /**
  * Dummy FitnessEvaluator that stores the evaluations it calculates. Uses a

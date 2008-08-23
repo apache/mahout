@@ -16,16 +16,12 @@ package org.apache.mahout.classifier.bayes;
  * limitations under the License.
  */
 
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-//import org.apache.mahout.classifier.cbayes.CModelTrainerDriver;
-import org.apache.mahout.classifier.bayes.BayesDriver;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.PosixParser;
+import org.apache.commons.cli.ParseException;
 import org.apache.mahout.classifier.cbayes.CBayesDriver;
 
 /**
@@ -47,11 +43,8 @@ import org.apache.mahout.classifier.cbayes.CBayesDriver;
  * </ol>
  *  </li>
  * </ol>
- *
- **/
+ */
 public class TrainClassifier {
-
-  private transient static Log log = LogFactory.getLog(TrainClassifier.class);
 
   public void trainNaiveBayes(String dir, String outputDir, int gramSize){
     BayesDriver.runJob(dir, outputDir, gramSize);
@@ -62,7 +55,7 @@ public class TrainClassifier {
   }
   
   @SuppressWarnings("static-access")
-  public static void main(String[] args) {
+  public static void main(String[] args) throws ParseException {
     Options options = new Options();
     Option trainOpt = OptionBuilder.withLongOpt("train").withDescription("Train the classifier").create("t");
     options.addOption(trainOpt);
@@ -75,30 +68,23 @@ public class TrainClassifier {
     Option typeOpt = OptionBuilder.withLongOpt("classifierType").isRequired().hasArg().withDescription("Type of classifier").create("type");
     options.addOption(typeOpt);
     
-    CommandLine cmdLine = null;
-    try {
-      PosixParser parser = new PosixParser();
-      cmdLine = parser.parse(options, args);
+    PosixParser parser = new PosixParser();
+    CommandLine cmdLine = parser.parse(options, args);
 
-      boolean train = cmdLine.hasOption(trainOpt.getOpt());
-      TrainClassifier tn = new TrainClassifier();
-      if (train == true){;
-        String classifierType = cmdLine.getOptionValue(typeOpt.getOpt());
-        if(classifierType.equalsIgnoreCase("bayes")){
-          System.out.println("Training Bayes Classifier");
-          tn.trainNaiveBayes(cmdLine.getOptionValue(inputDirOpt.getOpt()), cmdLine.getOptionValue(outputOpt.getOpt()), Integer.parseInt(cmdLine.getOptionValue(gramSizeOpt.getOpt())));
-          
-        }
-        else if(classifierType.equalsIgnoreCase("cbayes"))
-        {
-          System.out.println("Training Complementary Bayes Classifier");
+    boolean train = cmdLine.hasOption(trainOpt.getOpt());
+    TrainClassifier tn = new TrainClassifier();
+    if (train == true){
+      String classifierType = cmdLine.getOptionValue(typeOpt.getOpt());
+      if(classifierType.equalsIgnoreCase("bayes")){
+        System.out.println("Training Bayes Classifier");
+        tn.trainNaiveBayes(cmdLine.getOptionValue(inputDirOpt.getOpt()), cmdLine.getOptionValue(outputOpt.getOpt()), Integer.parseInt(cmdLine.getOptionValue(gramSizeOpt.getOpt())));
+
+      } else if(classifierType.equalsIgnoreCase("cbayes")) {
+        System.out.println("Training Complementary Bayes Classifier");
         //setup the HDFS and copy the files there, then run the trainer
         tn.trainCNaiveBayes(cmdLine.getOptionValue(inputDirOpt.getOpt()), cmdLine.getOptionValue(outputOpt.getOpt()), Integer.parseInt(cmdLine.getOptionValue(gramSizeOpt.getOpt())));
-        }
-      }      
+      }
     }
-    catch (ParseException exp) {
-      log.error("Cmd line Syntax Error: " + exp.getMessage(), exp);
-    }
+
   }
 }

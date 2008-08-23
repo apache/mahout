@@ -19,9 +19,9 @@ package org.apache.mahout.matrix;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 
+import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.io.DataInput;
 
 /**
  * Implements vector as an array of doubles

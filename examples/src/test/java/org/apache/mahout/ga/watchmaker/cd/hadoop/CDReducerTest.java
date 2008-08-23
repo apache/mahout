@@ -1,21 +1,19 @@
 package org.apache.mahout.ga.watchmaker.cd.hadoop;
 
+import junit.framework.TestCase;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.mahout.ga.watchmaker.cd.CDFitness;
+import org.apache.mahout.utils.DummyOutputCollector;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import junit.framework.TestCase;
-
-import org.apache.hadoop.io.LongWritable;
-import org.apache.mahout.ga.watchmaker.cd.CDFitness;
-import org.apache.mahout.ga.watchmaker.cd.hadoop.CDReducer;
-import org.apache.mahout.utils.DummyOutputCollector;
-
 public class CDReducerTest extends TestCase {
 
-  private int nbevals = 100;
+  private final int nbevals = 100;
 
   private List<CDFitness> evaluations;
 

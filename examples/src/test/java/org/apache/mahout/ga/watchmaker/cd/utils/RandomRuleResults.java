@@ -1,13 +1,13 @@
 package org.apache.mahout.ga.watchmaker.cd.utils;
 
+import org.apache.mahout.ga.watchmaker.cd.CDFitness;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.mahout.ga.watchmaker.cd.CDFitness;
-
 public class RandomRuleResults {
 
-  private static Map<Integer, CDFitness> results = new HashMap<Integer, CDFitness>();
+  private static final Map<Integer, CDFitness> results = new HashMap<Integer, CDFitness>();
 
   public static synchronized void addResult(int ruleid, CDFitness fit) {
     CDFitness f = results.get(ruleid);

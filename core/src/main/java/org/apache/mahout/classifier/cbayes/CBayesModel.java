@@ -17,16 +17,10 @@ package org.apache.mahout.classifier.cbayes;
  * limitations under the License.
  */
 
-
 import org.apache.mahout.common.Model;
 
 import java.util.Map;
 
-
-/**
- * 
- * 
- */
 public class CBayesModel extends Model {
 
   @Override
@@ -51,7 +45,7 @@ public class CBayesModel extends Model {
 
   @Override
   protected float getWeightUnprocessed(Integer label, Integer feature) {
-    float result = 0.0f;
+    float result;
     Map<Integer, Float> featureWeights = featureLabelWeights.get(feature);
 
     if (featureWeights.containsKey(label)) {
@@ -187,8 +181,7 @@ public class CBayesModel extends Model {
    */
   @Override
   public float FeatureWeight(Integer label, Integer feature) {
-    float weight = getWeight(label, feature);
-    return weight;
+    return getWeight(label, feature);
   }
 
 }

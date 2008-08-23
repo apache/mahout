@@ -16,10 +16,6 @@ package org.apache.mahout.ga.watchmaker;
  * limitations under the License.
  */
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
@@ -30,10 +26,18 @@ import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.io.SequenceFile.Sorter;
 import org.apache.hadoop.mapred.JobConf;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Utility Class that deals with the output.
  */
 public class OutputUtils {
+
+  private OutputUtils() {
+    // do nothing
+  }
 
   /**
    * Removes the output directory if it already exists.

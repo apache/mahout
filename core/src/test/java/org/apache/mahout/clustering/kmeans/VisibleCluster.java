@@ -16,10 +16,10 @@
  */
 package org.apache.mahout.clustering.kmeans;
 
+import org.apache.mahout.matrix.Vector;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.mahout.matrix.Vector;
 
 /**
  * This Cluster subclass maintains a list of points in the cluster so it can

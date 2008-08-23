@@ -18,7 +18,6 @@ package org.apache.mahout.common;
 
 
 import org.apache.mahout.classifier.ClassifierResult;
-import org.apache.mahout.common.Model;
 
 import java.util.Collection;
 

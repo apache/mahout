@@ -16,10 +16,6 @@ package org.apache.mahout.clustering.syntheticcontrol.canopy;
  * limitations under the License.
  */
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -28,6 +24,10 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class InputMapper extends MapReduceBase implements
     Mapper<LongWritable, Text, Text, Text> {

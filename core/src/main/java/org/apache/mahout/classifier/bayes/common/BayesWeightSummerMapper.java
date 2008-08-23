@@ -24,13 +24,9 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 
-
 import java.io.IOException;
 
-/**
- * 
- * 
- */
+
 public class BayesWeightSummerMapper extends MapReduceBase implements
     Mapper<Text, FloatWritable, Text, FloatWritable> {
 
