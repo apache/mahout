@@ -17,14 +17,14 @@
 
 package org.apache.mahout.cf.taste.impl.neighborhood;
 
-import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
-import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Refreshable;
+import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.Cache;
-import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
+import org.apache.mahout.cf.taste.impl.common.Retriever;
+import org.apache.mahout.cf.taste.model.DataModel;
+import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 
 import java.util.Collection;
 

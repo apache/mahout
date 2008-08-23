@@ -17,10 +17,10 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
-import org.apache.mahout.cf.taste.impl.TasteTestCase;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

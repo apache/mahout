@@ -17,8 +17,8 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
-import java.util.Comparator;
 import java.io.Serializable;
+import java.util.Comparator;
 
 final class ByItemIDComparator implements Comparator<ItemPrefWritable>, Serializable {
 

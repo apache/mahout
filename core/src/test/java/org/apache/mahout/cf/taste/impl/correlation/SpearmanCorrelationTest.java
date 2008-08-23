@@ -17,9 +17,9 @@
 
 package org.apache.mahout.cf.taste.impl.correlation;
 
+import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.common.TasteException;
 
 /**
  * <p>Tests {@link SpearmanCorrelation}.</p>

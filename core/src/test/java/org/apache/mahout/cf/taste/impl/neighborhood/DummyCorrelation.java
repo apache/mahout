@@ -17,12 +17,12 @@
 
 package org.apache.mahout.cf.taste.impl.neighborhood;
 
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.correlation.ItemCorrelation;
 import org.apache.mahout.cf.taste.correlation.PreferenceInferrer;
 import org.apache.mahout.cf.taste.correlation.UserCorrelation;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.common.Refreshable;
 
 import java.util.Collection;
 

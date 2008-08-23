@@ -17,16 +17,16 @@
 
 package org.apache.mahout.cf.taste.impl.correlation;
 
-import org.apache.mahout.cf.taste.correlation.UserCorrelation;
-import org.apache.mahout.cf.taste.correlation.PreferenceInferrer;
-import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Refreshable;
-import org.apache.mahout.cf.taste.impl.common.Pair;
+import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.correlation.PreferenceInferrer;
+import org.apache.mahout.cf.taste.correlation.UserCorrelation;
 import org.apache.mahout.cf.taste.impl.common.Cache;
-import org.apache.mahout.cf.taste.impl.common.Retriever;
+import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
+import org.apache.mahout.cf.taste.impl.common.Retriever;
+import org.apache.mahout.cf.taste.model.DataModel;
+import org.apache.mahout.cf.taste.model.User;
 
 import java.util.Collection;
 

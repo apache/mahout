@@ -17,20 +17,20 @@
 
 package org.apache.mahout.cf.taste.impl.transforms;
 
-import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Refreshable;
+import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
-import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**

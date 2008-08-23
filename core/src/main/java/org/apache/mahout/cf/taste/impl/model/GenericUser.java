@@ -26,8 +26,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>A simple {@link User} which has simply an ID and some {@link Collection} of

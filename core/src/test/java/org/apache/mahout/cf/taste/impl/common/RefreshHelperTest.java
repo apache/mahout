@@ -17,11 +17,11 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
-import org.apache.mahout.cf.taste.common.Refreshable;
 import junit.framework.TestCase;
+import org.apache.mahout.cf.taste.common.Refreshable;
 
-import java.util.HashSet;
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * Tests {@link RefreshHelper}

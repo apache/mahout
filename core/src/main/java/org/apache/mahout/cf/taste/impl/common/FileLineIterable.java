@@ -17,9 +17,9 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
-import java.util.Iterator;
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 
 /**
  * Iterable representing the lines of a text file. It can produce an {@link Iterator} over those lines.

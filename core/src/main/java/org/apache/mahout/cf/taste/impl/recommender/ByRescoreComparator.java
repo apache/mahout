@@ -21,8 +21,8 @@ import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 
-import java.util.Comparator;
 import java.io.Serializable;
+import java.util.Comparator;
 
 /**
  * <p>A simple {@link org.apache.mahout.cf.taste.recommender.Rescorer} which always returns the original score.</p>

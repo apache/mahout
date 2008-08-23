@@ -17,8 +17,8 @@
 
 package org.apache.mahout.cf.taste.impl.transforms;
 
-import org.apache.mahout.cf.taste.transforms.CorrelationTransform;
 import org.apache.mahout.cf.taste.common.Refreshable;
+import org.apache.mahout.cf.taste.transforms.CorrelationTransform;
 
 import java.util.Collection;
 

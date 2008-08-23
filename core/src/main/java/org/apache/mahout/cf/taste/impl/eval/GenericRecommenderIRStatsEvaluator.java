@@ -37,9 +37,9 @@ import org.apache.mahout.cf.taste.recommender.Rescorer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
-import java.util.List;
 
 /**
  * <p>For each {@link User}, these implementation determine the top <code>n</code> preferences,
@@ -109,7 +109,13 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
           }
 
           int intersectionSize = 0;
-          for (RecommendedItem recommendedItem : recommender.recommend(id, at, rescorer)) {
+          List<RecommendedItem> recommendedItems;
+          if (rescorer == null) {
+            recommendedItems = recommender.recommend(id, at);
+          } else {
+            recommendedItems = recommender.recommend(id, at, rescorer);
+          }
+          for (RecommendedItem recommendedItem : recommendedItems) {
             if (relevantItems.contains(recommendedItem.getItem())) {
               intersectionSize++;
             }

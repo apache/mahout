@@ -17,11 +17,11 @@
 
 package org.apache.mahout.cf.taste.impl.recommender.slopeone;
 
+import org.apache.mahout.cf.taste.common.Weighting;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.common.Weighting;
 
 /**
  * Tests {@link MemoryDiffStorage}.

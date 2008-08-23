@@ -17,11 +17,11 @@
 
 package org.apache.mahout.cf.taste.impl.correlation;
 
+import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.Weighting;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.common.Weighting;
 
 /**
  * <p>An implementation of the Pearson correlation. For {@link User}s X and Y, the following values
