@@ -27,6 +27,8 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.Model;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -34,9 +36,10 @@ import java.util.Map;
 
 /**
  * This Class reads the different interim  files created during the Training stage as well as the Model File during testing.
- * 
  */
 public class SequenceFileModelReader {
+
+  private static final Logger log = LoggerFactory.getLogger(SequenceFileModelReader.class);  
 
   public Model loadModel(Model model, FileSystem fs, Map<String, Path> pathPatterns,
       Configuration conf) throws IOException {
@@ -63,7 +66,7 @@ public class SequenceFileModelReader {
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
-      System.out.println(path.toString());
+      log.info("{}", path);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
 
       // the key is either _label_ or label,feature
@@ -90,7 +93,7 @@ public class SequenceFileModelReader {
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
-      System.out.println(path.toString());
+      log.info("{}", path);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
 
       // the key is either _label_ or label,feature
@@ -114,7 +117,7 @@ public class SequenceFileModelReader {
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
-      System.out.println(path.toString());
+      log.info("{}", path);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
 
       // the key is either _label_ or label,feature
@@ -139,7 +142,7 @@ public class SequenceFileModelReader {
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
-      System.out.println(path.toString());
+      log.info("{}", path);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
 
       // the key is either _label_ or label,feature
@@ -164,7 +167,7 @@ public class SequenceFileModelReader {
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
-      System.out.println(path.toString());
+      log.info("{}", path);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
 
       // the key is either _label_ or label,feature
@@ -174,7 +177,7 @@ public class SequenceFileModelReader {
         if (keyStr.startsWith("*")) { // Sum of weights for all Feature
           // and all Labels
           model.setSigma_jSigma_k(value.get());
-          System.out.println(value.get());
+          log.info("{}", value.get());
         }
       }
     }
@@ -193,7 +196,7 @@ public class SequenceFileModelReader {
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
-      System.out.println(path.toString());
+      log.info("{}", path);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
       // the key is either _label_ or label,feature
       while (reader.next(key, value)) {

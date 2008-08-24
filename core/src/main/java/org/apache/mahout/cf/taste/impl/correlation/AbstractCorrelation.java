@@ -73,7 +73,7 @@ abstract class AbstractCorrelation implements UserCorrelation, ItemCorrelation {
     this.cachedNumItems = dataModel.getNumItems();
     this.cachedNumUsers = dataModel.getNumUsers();
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
-      public Object call() throws Exception {
+      public Object call() throws TasteException {
         cachedNumItems = AbstractCorrelation.this.dataModel.getNumItems();
         cachedNumUsers = AbstractCorrelation.this.dataModel.getNumUsers();
         return null;

@@ -25,12 +25,13 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 
+import java.io.IOException;
 
 /**
  * Create and run the Bayes Trainer.
- *
- **/
+ */
 public class BayesWeightSummerDriver {
+
   /**
    * Takes in two arguments:
    * <ol>
@@ -39,7 +40,7 @@ public class BayesWeightSummerDriver {
    * </ol>
    * @param args The args
    */
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     String input = args[0];
     String output = args[1];
 
@@ -52,7 +53,7 @@ public class BayesWeightSummerDriver {
    * @param input            the input pathname String
    * @param output           the output pathname String
    */
-  public static void runJob(String input, String output) {
+  public static void runJob(String input, String output) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(BayesWeightSummerDriver.class);
     
@@ -71,17 +72,11 @@ public class BayesWeightSummerDriver {
     conf.setCombinerClass(BayesWeightSummerReducer.class);
     conf.setReducerClass(BayesWeightSummerReducer.class);    
     conf.setOutputFormat(BayesWeightSummerOutputFormat.class);
-      try {
-      FileSystem dfs = FileSystem.get(conf);
-      if (dfs.exists(outPath))
-        dfs.delete(outPath, true);
-      client.setConf(conf);    
-    
-      JobClient.runJob(conf);      
-      
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    
+    FileSystem dfs = FileSystem.get(conf);
+    if (dfs.exists(outPath))
+      dfs.delete(outPath, true);
+    client.setConf(conf);
+
+    JobClient.runJob(conf);
   }
 }

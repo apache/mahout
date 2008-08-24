@@ -24,13 +24,20 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.KeyValueTextInputFormat;
+import org.apache.hadoop.mapred.FileInputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 
 /**
  * Create and run the Bayes Feature Reader Step.
- *
- **/
+ */
 public class BayesFeatureDriver {
+
+  private static final Logger log = LoggerFactory.getLogger(BayesFeatureDriver.class);  
+
   /**
    * Takes in two arguments:
    * <ol>
@@ -39,7 +46,7 @@ public class BayesFeatureDriver {
    * </ol>
    * @param args The args
    */
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     String input = args[0];
     String output = args[1];
 
@@ -52,18 +59,16 @@ public class BayesFeatureDriver {
    * @param input            the input pathname String
    * @param output           the output pathname String
    */
-
-  @SuppressWarnings("deprecation")
-  public static void runJob(String input, String output, int gramSize) {
+  public static void runJob(String input, String output, int gramSize) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(BayesFeatureDriver.class);
 
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(FloatWritable.class);
 
-    conf.setInputPath(new Path(input));
+    FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(output);
-    conf.setOutputPath(outPath);
+    FileOutputFormat.setOutputPath(conf, outPath);
     conf.setNumMapTasks(100);
     //conf.setNumReduceTasks(1);
     conf.setMapperClass(BayesFeatureMapper.class);
@@ -73,27 +78,23 @@ public class BayesFeatureDriver {
     conf.setReducerClass(BayesFeatureReducer.class);    
     conf.setOutputFormat(BayesFeatureOutputFormat.class);
 
-    conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization"); // Dont ever forget this. People should keep track of how hadoop conf parameters and make or break a piece of code
-    
-    try {
-      FileSystem dfs = FileSystem.get(conf);
-      if (dfs.exists(outPath))
-        dfs.delete(outPath, true);
-      
-      DefaultStringifier<Integer> intStringifier = new DefaultStringifier<Integer>(conf, Integer.class);     
-      String gramSizeString = intStringifier.toString(new Integer(gramSize));
-      
-      Integer retGramSize = intStringifier.fromString(gramSizeString);      
-      System.out.println(retGramSize);
-      conf.set("bayes.gramSize", gramSizeString);
-      
-      client.setConf(conf);    
-      JobClient.runJob(conf);      
-      
-      
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    conf.set("io.serializations",
+             "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization"); 
+    // Dont ever forget this. People should keep track of how hadoop conf parameters and make or break a piece of code
+
+    FileSystem dfs = FileSystem.get(conf);
+    if (dfs.exists(outPath))
+      dfs.delete(outPath, true);
+
+    DefaultStringifier<Integer> intStringifier = new DefaultStringifier<Integer>(conf, Integer.class);
+    String gramSizeString = intStringifier.toString(new Integer(gramSize));
+
+    Integer retGramSize = intStringifier.fromString(gramSizeString);
+    log.info("{}", retGramSize);
+    conf.set("bayes.gramSize", gramSizeString);
+
+    client.setConf(conf);
+    JobClient.runJob(conf);
     
   }
 }

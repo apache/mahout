@@ -90,7 +90,11 @@ public class MeanShiftCanopy {
       Class<?> cl = Class.forName(job.get(DISTANCE_MEASURE_KEY));
       measure = (DistanceMeasure) cl.newInstance();
       measure.configure(job);
-    } catch (Exception e) {
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    } catch (InstantiationException e) {
       throw new RuntimeException(e);
     }
     nextCanopyId = 0;

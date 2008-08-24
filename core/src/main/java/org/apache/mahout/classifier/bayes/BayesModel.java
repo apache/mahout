@@ -19,15 +19,14 @@ package org.apache.mahout.classifier.bayes;
 
 
 import org.apache.mahout.common.Model;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-
-/**
- * 
- * 
- */
 public class BayesModel extends Model {
+
+  private static final Logger log = LoggerFactory.getLogger(BayesModel.class);
 
   @Override
   protected float getWeight(Integer label, Integer feature) {
@@ -69,7 +68,7 @@ public class BayesModel extends Model {
   public void InitializeNormalizer() {
     float perLabelWeightSumNormalisationFactor = Float.MAX_VALUE;
 
-    System.out.println(thetaNormalizer);
+    log.info("{}", thetaNormalizer);
     for (Integer label : thetaNormalizer.keySet()) {
       float Sigma_W_ij = thetaNormalizer.get(label);
       if (perLabelWeightSumNormalisationFactor > Math.abs(Sigma_W_ij)) {
@@ -82,12 +81,11 @@ public class BayesModel extends Model {
       thetaNormalizer.put(label, Sigma_W_ij
           / perLabelWeightSumNormalisationFactor);
     }
-    System.out.println(thetaNormalizer);
+    log.info("{}", thetaNormalizer);
   }
 
   @Override
   public void GenerateModel() {
-    try {
       float vocabCount = featureList.size();
 
       float[] perLabelThetaNormalizer = new float[labelList.size()];
@@ -114,7 +112,7 @@ public class BayesModel extends Model {
 
         }
       }
-      System.out.println("Normalizing Weights");
+      log.info("Normalizing Weights");
       for (int label = 0, maxLabels = labelList.size(); label < maxLabels; label++) {
         float Sigma_W_ij = perLabelThetaNormalizer[label];
         if (perLabelWeightSumNormalisationFactor > Math.abs(Sigma_W_ij)) {
@@ -138,10 +136,7 @@ public class BayesModel extends Model {
           setWeight(label, feature, normalizedWeight);
         }
       }
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+
   }
 
   

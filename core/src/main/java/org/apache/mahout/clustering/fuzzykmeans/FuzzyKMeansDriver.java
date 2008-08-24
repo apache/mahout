@@ -48,9 +48,9 @@ public class FuzzyKMeansDriver {
     String clusters = args[1];
     String output = args[2];
     String measureClass = args[3];
-    double convergenceDelta = new Double(args[4]);
-    int maxIterations = new Integer(args[5]);
-    int m = new Integer(args[6]);
+    double convergenceDelta = Double.parseDouble(args[4]);
+    int maxIterations = Integer.parseInt(args[5]);
+    int m = Integer.parseInt(args[6]);
     runJob(input, clusters, output, measureClass, convergenceDelta,
         maxIterations, 10,m);
   }
@@ -69,34 +69,30 @@ public class FuzzyKMeansDriver {
   public static void runJob(String input, String clustersIn, String output,
       String measureClass, double convergenceDelta, int maxIterations,
       int numMapTasks, int m) {
-    try {
-      
-      boolean converged = false;
-      int iteration = 0;
-      String delta = Double.toString(convergenceDelta);
 
-      // iterate until the clusters converge
-      while (!converged && iteration < maxIterations) {
-        log.info("Iteration {" + iteration + "}");
+    boolean converged = false;
+    int iteration = 0;
+    String delta = Double.toString(convergenceDelta);
 
-        // point the output to a new directory per iteration
-        String clustersOut = output + File.separator + "clusters-" + iteration;
-        converged = runIteration(input, clustersIn, clustersOut, measureClass,
-            delta, numMapTasks, iteration, m);
+    // iterate until the clusters converge
+    while (!converged && iteration < maxIterations) {
+      log.info("Iteration {" + iteration + "}");
 
-        // now point the input to the old output directory
-        clustersIn = output + File.separator + "clusters-" + iteration;
-        iteration++;
-      }
+      // point the output to a new directory per iteration
+      String clustersOut = output + File.separator + "clusters-" + iteration;
+      converged = runIteration(input, clustersIn, clustersOut, measureClass,
+          delta, numMapTasks, iteration, m);
 
-      // now actually cluster the points
-      log.info("Clustering ");
-
-      runClustering(input, clustersIn, output + File.separator + "points",
-          measureClass, delta, numMapTasks, m);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+      // now point the input to the old output directory
+      clustersIn = output + File.separator + "clusters-" + iteration;
+      iteration++;
     }
+
+    // now actually cluster the points
+    log.info("Clustering ");
+
+    runClustering(input, clustersIn, output + File.separator + "points",
+        measureClass, delta, numMapTasks, m);
   }
 
   /**
@@ -142,7 +138,7 @@ public class FuzzyKMeansDriver {
       JobClient.runJob(conf);
       FileSystem fs = FileSystem.get(conf);
       return isConverged(clustersOut, conf, fs);
-    } catch (Exception e) {
+    } catch (IOException e) {
       log.warn(e.toString(), e);
       return true;
     }
@@ -184,7 +180,7 @@ public class FuzzyKMeansDriver {
     conf.set(SoftCluster.M_KEY, String.valueOf(m));
     try {
       JobClient.runJob(conf);
-    } catch (Exception e) {
+    } catch (IOException e) {
       log.warn(e.toString(), e);
     }
   }

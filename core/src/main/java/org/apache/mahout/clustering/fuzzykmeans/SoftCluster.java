@@ -115,10 +115,14 @@ public class SoftCluster {
       Class<?> cl = ccl.loadClass(job.get(DISTANCE_MEASURE_KEY));
       measure = (DistanceMeasure) cl.newInstance();
       measure.configure(job);
-      convergenceDelta = new Double(job.get(CLUSTER_CONVERGENCE_KEY));
+      convergenceDelta = Double.parseDouble(job.get(CLUSTER_CONVERGENCE_KEY));
       nextClusterId = 0;
       m = Float.parseFloat(job.get(M_KEY)); 
-    } catch (Exception e) {
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    } catch (InstantiationException e) {
       throw new RuntimeException(e);
     }
   }
@@ -217,8 +221,7 @@ public class SoftCluster {
       denom += Math.pow(clusterDistance / eachCDist, (double) 2 / (m - 1));
 
     }
-    double val = (double) (1) / denom;
-    return val;
+    return 1.0 / denom;
   }
 
   /**

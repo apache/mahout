@@ -18,10 +18,14 @@ package org.apache.mahout.classifier.cbayes;
  */
 
 import org.apache.mahout.common.Model;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
 public class CBayesModel extends Model {
+
+  private static final Logger log = LoggerFactory.getLogger(CBayesModel.class);
 
   @Override
   protected float getWeight(Integer label, Integer feature) {
@@ -61,7 +65,7 @@ public class CBayesModel extends Model {
     float perLabelWeightSumNormalisationFactor = Float.MAX_VALUE;
 
     
-    System.out.println(thetaNormalizer);
+    log.info("{}", thetaNormalizer);
     for (Integer label : thetaNormalizer.keySet()) {
       float Sigma_W_ij = thetaNormalizer.get(label);
       if (perLabelWeightSumNormalisationFactor > Math.abs(Sigma_W_ij)) {
@@ -74,7 +78,7 @@ public class CBayesModel extends Model {
       thetaNormalizer.put(label, Sigma_W_ij
           / perLabelWeightSumNormalisationFactor);
     }
-    System.out.println(thetaNormalizer);
+    log.info("{}", thetaNormalizer);
     
     /*for (int label = 0, maxLabels = labelList.size(); label < maxLabels; label++) {
       thetaNormalizer.put(label, new Float(0));
@@ -97,7 +101,7 @@ public class CBayesModel extends Model {
       }
     }
     perLabelWeightSumNormalisationFactor = Float.MAX_VALUE;
-    System.out.println(thetaNormalizer);
+    log.info("{}", thetaNormalizer);
     for (Integer label : thetaNormalizer.keySet()) {
       float Sigma_W_ij = thetaNormalizer.get(label);
       if (perLabelWeightSumNormalisationFactor > Math.abs(Sigma_W_ij)) {
@@ -110,12 +114,11 @@ public class CBayesModel extends Model {
       thetaNormalizer.put(label, Sigma_W_ij
           / perLabelWeightSumNormalisationFactor);
     }
-    System.out.println(thetaNormalizer);*/
+    log.info("{}", thetaNormalizer);*/
   }
 
   @Override
   public void GenerateModel() {
-    try {
       float vocabCount = featureList.size();
 
       float[] perLabelThetaNormalizer = new float[labelList.size()];
@@ -141,7 +144,7 @@ public class CBayesModel extends Model {
 
         }
       }
-      System.out.println("Normalizing Weights");
+      log.info("Normalizing Weights");
       for (int label = 0, maxLabels = labelList.size(); label < maxLabels; label++) {
         float Sigma_W_ij = perLabelThetaNormalizer[label];
         if (perLabelWeightSumNormalisationFactor > Math.abs(Sigma_W_ij)) {
@@ -165,10 +168,6 @@ public class CBayesModel extends Model {
           setWeight(label, feature, normalizedWeight);
         }
       }
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
   }
 
   

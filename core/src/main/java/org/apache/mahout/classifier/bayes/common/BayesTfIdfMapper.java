@@ -17,7 +17,6 @@ package org.apache.mahout.classifier.bayes.common;
  * limitations under the License.
  */
 
-
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.Text;
@@ -27,6 +26,8 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.GenericsUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -34,8 +35,11 @@ import java.util.HashMap;
 public class BayesTfIdfMapper extends MapReduceBase implements
     Mapper<Text, FloatWritable, Text, FloatWritable> {
 
+  private static final Logger log = LoggerFactory.getLogger(BayesTfIdfMapper.class);  
+
   public HashMap<String, Float> labelDocumentCounts = null;
   String labelDocumentCountString =" ";
+
   /**
    * We need to calculate the Tf-Idf of each feature in each label
    * 
@@ -51,7 +55,6 @@ public class BayesTfIdfMapper extends MapReduceBase implements
       throws IOException {
  
     String labelFeaturePair = key.toString();
-   
 
     if (labelFeaturePair.startsWith("-")) { // if it is the termDocumentCount
       labelFeaturePair = labelFeaturePair.substring(1);
@@ -66,34 +69,29 @@ public class BayesTfIdfMapper extends MapReduceBase implements
       float logIdf = (float)Math.log(labelDocumentCount.floatValue()  / value.get());
       
       output.collect(new Text(labelFeaturePair), new FloatWritable(logIdf));
-    } 
-    else if (labelFeaturePair.startsWith(",")) {
+    } else if (labelFeaturePair.startsWith(",")) {
       output.collect(new Text("*vocabCount"), new FloatWritable(1.0f));
-    }
-    else {
+    } else {
       output.collect(key, value);
     }
   }
   
   @Override
   public void configure(JobConf job) {
-    try
-    {
-      if(labelDocumentCounts ==null){
+    try {
+      if (labelDocumentCounts == null){
         labelDocumentCounts = new HashMap<String, Float>();
 
-        DefaultStringifier<HashMap<String,Float>> mapStringifier = new DefaultStringifier<HashMap<String,Float>>(job,GenericsUtil.getClass(labelDocumentCounts));
+        DefaultStringifier<HashMap<String,Float>> mapStringifier =
+            new DefaultStringifier<HashMap<String,Float>>(job,GenericsUtil.getClass(labelDocumentCounts));
 
         labelDocumentCountString = mapStringifier.toString(labelDocumentCounts);  
         labelDocumentCountString = job.get("cnaivebayes.labelDocumentCounts", labelDocumentCountString);
         
-        
         labelDocumentCounts = mapStringifier.fromString(labelDocumentCountString);
       }
-    }
-    catch(IOException ex){
-      
-      ex.printStackTrace();
+    } catch(IOException ex){
+      log.warn(ex.toString(), ex);
     }
   }
 }

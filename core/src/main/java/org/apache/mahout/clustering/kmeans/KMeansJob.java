@@ -20,12 +20,14 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 
+import java.io.IOException;
+
 public class KMeansJob {
 
   private KMeansJob() {
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     String input = args[0];
     String clusters = args[1];
     String output = args[2];
@@ -48,20 +50,16 @@ public class KMeansJob {
    * @param maxIterations the maximum number of iterations
    */
   public static void runJob(String input, String clustersIn, String output,
-      String measureClass, double convergenceDelta, int maxIterations) {
-    try {
-      // delete the output directory
-      JobConf conf = new JobConf(KMeansJob.class);
-      Path outPath = new Path(output);
-      FileSystem fs = FileSystem.get(conf);
-      if (fs.exists(outPath)) {
-        fs.delete(outPath, true);
-      }
-      fs.mkdirs(outPath);
-      KMeansDriver.runJob(input, clustersIn, output, measureClass,
-          convergenceDelta, maxIterations);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+      String measureClass, double convergenceDelta, int maxIterations) throws IOException {
+    // delete the output directory
+    JobConf conf = new JobConf(KMeansJob.class);
+    Path outPath = new Path(output);
+    FileSystem fs = FileSystem.get(conf);
+    if (fs.exists(outPath)) {
+      fs.delete(outPath, true);
     }
+    fs.mkdirs(outPath);
+    KMeansDriver.runJob(input, clustersIn, output, measureClass,
+        convergenceDelta, maxIterations);
   }
 }

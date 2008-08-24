@@ -20,14 +20,19 @@ import java.io.IOException;
 
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.utils.ManhattanDistanceMeasure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FuzzyKMeansJob {
+
+  private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansJob.class);
 
   public static void main(String[] args) throws IOException {
 
     if (args.length != 9) {
-      System.out.println("Expected num Arguments: 9  received:" + args.length);
+      log.warn("Expected num Arguments: 9  received: {}", args.length);
       printMessage();
+      return;
     }
     int index = 0;
     String input = args[index++];
@@ -49,9 +54,7 @@ public class FuzzyKMeansJob {
    * Prints Error Message
    */
   private static void printMessage() {
-    System.out
-        .println("Usage: inputDir clusterDir OutputDir ConvergenceDelata  maxIterations numMapTasks doCanopy");
-    System.exit(1);
+    log.warn("Usage: inputDir clusterDir OutputDir ConvergenceDelata  maxIterations numMapTasks doCanopy");
   }
 
   /**
@@ -69,20 +72,17 @@ public class FuzzyKMeansJob {
    */
   public static void runJob(String input, String clustersIn, String output,
       String measureClass, double convergenceDelta, int maxIterations,
-      int numMapTasks, boolean doCanopy, int m) {
-    try {
+      int numMapTasks, boolean doCanopy, int m) throws IOException {
 
-      // run canopy to find initial clusters
-      if (doCanopy) {
-        CanopyDriver.runJob(input, clustersIn, ManhattanDistanceMeasure.class
-            .getName(), 100.1, 50.1);
+    // run canopy to find initial clusters
+    if (doCanopy) {
+      CanopyDriver.runJob(input, clustersIn, ManhattanDistanceMeasure.class
+          .getName(), 100.1, 50.1);
 
-      }
-      // run fuzzy k -means
-      FuzzyKMeansDriver.runJob(input, clustersIn, output, measureClass,
-          convergenceDelta, maxIterations, numMapTasks,m);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
     }
+    // run fuzzy k -means
+    FuzzyKMeansDriver.runJob(input, clustersIn, output, measureClass,
+        convergenceDelta, maxIterations, numMapTasks,m);
+
   }
 }

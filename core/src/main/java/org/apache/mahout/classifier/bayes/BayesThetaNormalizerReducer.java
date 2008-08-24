@@ -31,9 +31,7 @@ import java.util.Iterator;
 /**
  * Can also be used as a local Combiner beacuse only two values should be there
  * inside the values
- * 
  */
-
 public class BayesThetaNormalizerReducer extends MapReduceBase implements
     Reducer<Text, FloatWritable, Text, FloatWritable> {
 
@@ -49,21 +47,19 @@ public class BayesThetaNormalizerReducer extends MapReduceBase implements
 
   String vocabCountString = " ";
   
-  @SuppressWarnings("unused")
   public void reduce(Text key, Iterator<FloatWritable> values,
       OutputCollector<Text, FloatWritable> output, Reporter reporter)
       throws IOException {
     // Key is label,word, value is the number of times we've seen this label
     // word per local node. Output is the same
     
-    String token = key.toString();
+    //String token = key.toString();
 
     float weightSumPerLabel = 0.0f;
 
     while (values.hasNext()) {
       weightSumPerLabel += values.next().get();
     }
-    // System.out.println(token + "=>"+ weightSumPerLabel);
     output.collect(key, new FloatWritable(weightSumPerLabel));
 
   }

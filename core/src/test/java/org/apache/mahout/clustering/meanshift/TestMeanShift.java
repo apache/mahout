@@ -190,7 +190,7 @@ public class TestMeanShift extends TestCase {
   public void testCanopyMapperEuclidean() throws Exception {
     MeanShiftCanopyMapper mapper = new MeanShiftCanopyMapper();
     MeanShiftCanopyCombiner combiner = new MeanShiftCanopyCombiner();
-    DummyOutputCollector collector = new DummyOutputCollector();
+    DummyOutputCollector<Text,WritableComparable> collector = new DummyOutputCollector<Text,WritableComparable>();
     MeanShiftCanopy.config(euclideanDistanceMeasure, 4, 1, 0.5);
     // get the initial canopies
     List<MeanShiftCanopy> canopies = getInitialCanopies();
@@ -206,7 +206,7 @@ public class TestMeanShift extends TestCase {
     // now combine the mapper output
     MeanShiftCanopy.config(euclideanDistanceMeasure, 4, 1, 0.5);
     Map<String, List<WritableComparable>> mapData = collector.getData();
-    collector = new DummyOutputCollector();
+    collector = new DummyOutputCollector<Text,WritableComparable>();
     for (String key : mapData.keySet())
       combiner.reduce(new Text(key), mapData.get(key).iterator(), collector,
           null);
@@ -252,7 +252,7 @@ public class TestMeanShift extends TestCase {
     MeanShiftCanopyMapper mapper = new MeanShiftCanopyMapper();
     MeanShiftCanopyCombiner combiner = new MeanShiftCanopyCombiner();
     MeanShiftCanopyReducer reducer = new MeanShiftCanopyReducer();
-    DummyOutputCollector collector = new DummyOutputCollector();
+    DummyOutputCollector<Text,WritableComparable> collector = new DummyOutputCollector<Text,WritableComparable>();
     MeanShiftCanopy.config(euclideanDistanceMeasure, 4, 1, 0.5);
     // get the initial canopies
     List<MeanShiftCanopy> canopies = getInitialCanopies();
@@ -275,12 +275,12 @@ public class TestMeanShift extends TestCase {
     // now combine the mapper output
     MeanShiftCanopy.config(euclideanDistanceMeasure, 4, 1, 0.5);
     Map<String, List<WritableComparable>> mapData = collector.getData();
-    collector = new DummyOutputCollector();
+    collector = new DummyOutputCollector<Text,WritableComparable>();
     for (String key : mapData.keySet())
       combiner.reduce(new Text(key), mapData.get(key).iterator(), collector,
           null);
     // now reduce the combiner output
-    DummyOutputCollector collector2 = new DummyOutputCollector();
+    DummyOutputCollector<Text,WritableComparable> collector2 = new DummyOutputCollector<Text,WritableComparable>();
     reducer.reduce(new Text("canopy"), collector.getValue("canopy").iterator(),
         collector2, null);
 

@@ -27,6 +27,8 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.classifier.BayesFileFormatter;
 import org.apache.mahout.common.Model;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -34,12 +36,14 @@ import java.util.Map;
 import java.util.List;
 
 /**
- * Reads the input train set(preprocessed using the {@link BayesFileFormatter}). 
- * 
+ * Reads the input train set(preprocessed using the {@link BayesFileFormatter}).
  */
 public class BayesFeatureMapper extends MapReduceBase implements
     Mapper<Text, Text, Text, FloatWritable> {
-  private final static FloatWritable one = new FloatWritable(1.0f);
+
+  private static final Logger log = LoggerFactory.getLogger(BayesFeatureMapper.class);
+
+  private static final FloatWritable one = new FloatWritable(1.0f);
 
   private final Text labelWord = new Text();
 
@@ -47,8 +51,10 @@ public class BayesFeatureMapper extends MapReduceBase implements
 
   /**
    * We need to count the number of times we've seen a term with a given label
-   * and we need to output that. But this Mapper does more than just outputing the count. It first does weight normalisation.
-   * Secondly, it outputs for each unique word in a document value 1 for summing up as the Term Document Frequency. Which later is used to calculate the Idf
+   * and we need to output that. But this Mapper does more than just outputing the count. It first does weight
+   * normalisation.
+   * Secondly, it outputs for each unique word in a document value 1 for summing up as the Term Document Frequency.
+   * Which later is used to calculate the Idf
    * Thirdly, it outputs for each label the number of times a document was seen(Also used in Idf Calculation)
    * 
    * @param key The label
@@ -123,8 +129,7 @@ public class BayesFeatureMapper extends MapReduceBase implements
       gramSize = intStringifier.fromString(gramSizeString);
 
     } catch (IOException ex) {
-
-      ex.printStackTrace();
+      log.warn(ex.toString(), ex);
     }
   }
 }

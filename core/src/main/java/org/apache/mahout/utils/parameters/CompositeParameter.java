@@ -30,7 +30,11 @@ public class CompositeParameter<T extends Parametered> extends AbstractParameter
   public void setStringValue(String className) {
     try {
       set((T) Class.forName(className).newInstance());
-    } catch (Exception e) {
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    } catch (InstantiationException e) {
       throw new RuntimeException(e);
     }
   }

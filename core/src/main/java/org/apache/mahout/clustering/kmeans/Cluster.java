@@ -106,7 +106,11 @@ public class Cluster {
       measure.configure(job);
       convergenceDelta = Double.parseDouble(job.get(CLUSTER_CONVERGENCE_KEY));
       nextClusterId = 0;
-    } catch (Exception e) {
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    } catch (InstantiationException e) {
       throw new RuntimeException(e);
     }
   }

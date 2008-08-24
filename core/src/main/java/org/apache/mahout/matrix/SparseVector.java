@@ -96,6 +96,7 @@ public class SparseVector extends AbstractVector {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public String asFormatString() {
     StringBuilder out = new StringBuilder();
     out.append("[s").append(cardinality).append(", ");

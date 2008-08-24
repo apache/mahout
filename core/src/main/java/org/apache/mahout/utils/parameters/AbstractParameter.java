@@ -46,10 +46,8 @@ public abstract class AbstractParameter<T> implements Parameter<T> {
     return value.toString();
   }
 
-
-  @SuppressWarnings("unchecked")
   public Collection<Parameter> getParameters() {
-    return Collections.EMPTY_LIST;
+    return Collections.emptyList();
   }
 
   protected AbstractParameter(Class<T> type, String prefix, String name, JobConf jobConf, T defaultValue, String description) {

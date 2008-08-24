@@ -27,15 +27,20 @@ import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.io.IOException;
 
 /**
  * The Driver which drives the Tf-Idf Generation
- *
- **/
+ */
 public class BayesTfIdfDriver {
+
+  private static final Logger log = LoggerFactory.getLogger(BayesTfIdfDriver.class);
+
   /**
    * Takes in two arguments:
    * <ol>
@@ -44,7 +49,7 @@ public class BayesTfIdfDriver {
    * </ol>
    * @param args The args
    */
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     String input = args[0];
     String output = args[1];
 
@@ -57,7 +62,7 @@ public class BayesTfIdfDriver {
    * @param input            the input pathname String
    * @param output           the output pathname String
    */
-  public static void runJob(String input, String output) {
+  public static void runJob(String input, String output) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(BayesTfIdfDriver.class);
     
@@ -79,33 +84,27 @@ public class BayesTfIdfDriver {
     conf.setOutputFormat(BayesTfIdfOutputFormat.class);
     
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization"); // Dont ever forget this. People should keep track of how hadoop conf parameters and make or break a piece of code
-     try {
-      FileSystem dfs = FileSystem.get(conf);
-      if (dfs.exists(outPath))
-        dfs.delete(outPath, true);
-      
-      SequenceFileModelReader reader = new SequenceFileModelReader();
-      
-      Path interimFile = new Path(output+"/trainer-docCount/part-*");      
-      
-      HashMap<String,Float> labelDocumentCounts= reader.readLabelDocumentCounts(dfs, interimFile, conf);
+    FileSystem dfs = FileSystem.get(conf);
+    if (dfs.exists(outPath))
+      dfs.delete(outPath, true);
 
-      DefaultStringifier<HashMap<String,Float>> mapStringifier = new DefaultStringifier<HashMap<String,Float>>(conf,GenericsUtil.getClass(labelDocumentCounts));
-      
-      String labelDocumentCountString = mapStringifier.toString(labelDocumentCounts);
-      System.out.println("Counts of documents in Each Label");
-      Map<String,Float> c = mapStringifier.fromString(labelDocumentCountString);
-      System.out.println(c);
-      
-      conf.set("cnaivebayes.labelDocumentCounts", labelDocumentCountString);
-      
-      client.setConf(conf);    
-    
-      JobClient.runJob(conf);      
-      
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    
+    SequenceFileModelReader reader = new SequenceFileModelReader();
+
+    Path interimFile = new Path(output+"/trainer-docCount/part-*");
+
+    HashMap<String,Float> labelDocumentCounts= reader.readLabelDocumentCounts(dfs, interimFile, conf);
+
+    DefaultStringifier<HashMap<String,Float>> mapStringifier = new DefaultStringifier<HashMap<String,Float>>(conf,GenericsUtil.getClass(labelDocumentCounts));
+
+    String labelDocumentCountString = mapStringifier.toString(labelDocumentCounts);
+    log.info("Counts of documents in Each Label");
+    Map<String,Float> c = mapStringifier.fromString(labelDocumentCountString);
+    log.info("{}", c);
+
+    conf.set("cnaivebayes.labelDocumentCounts", labelDocumentCountString);
+
+    client.setConf(conf);
+
+    JobClient.runJob(conf);
   }
 }

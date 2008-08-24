@@ -52,10 +52,8 @@ public class ManhattanDistanceMeasure implements DistanceMeasure {
     // nothing to do
   }
 
-
-  @SuppressWarnings("unchecked")
   public Collection<Parameter> getParameters() {
-    return Collections.EMPTY_LIST;
+    return Collections.emptyList();
   }
 
   public void createParameters(String prefix, JobConf jobConf) {

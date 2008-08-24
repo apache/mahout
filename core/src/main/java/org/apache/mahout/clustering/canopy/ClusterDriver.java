@@ -25,12 +25,14 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
 
+import java.io.IOException;
+
 public class ClusterDriver {
 
   private ClusterDriver() {
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     String points = args[0];
     String canopies = args[1];
     String output = args[2];
@@ -51,7 +53,7 @@ public class ClusterDriver {
    * @param t2               the T2 distance threshold
    */
   public static void runJob(String points, String canopies, String output,
-                            String measureClassName, double t1, double t2) {
+                            String measureClassName, double t1, double t2) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(
             org.apache.mahout.clustering.canopy.ClusterDriver.class);
@@ -72,14 +74,10 @@ public class ClusterDriver {
     conf.setReducerClass(IdentityReducer.class);
 
     client.setConf(conf);
-    try {
-      FileSystem dfs = FileSystem.get(conf);
-      if (dfs.exists(outPath))
-        dfs.delete(outPath, true);
-      JobClient.runJob(conf);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    FileSystem dfs = FileSystem.get(conf);
+    if (dfs.exists(outPath))
+      dfs.delete(outPath, true);
+    JobClient.runJob(conf);
   }
 
 }

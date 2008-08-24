@@ -32,9 +32,7 @@ import java.util.Iterator;
 /**
  * Can also be used as a local Combiner beacuse only two values should be there
  * inside the values
- * 
  */
-
 public class CBayesThetaNormalizerReducer extends MapReduceBase implements
     Reducer<Text, FloatWritable, Text, FloatWritable> {
 
@@ -61,7 +59,6 @@ public class CBayesThetaNormalizerReducer extends MapReduceBase implements
     while (values.hasNext()) {
       weightSumPerLabel += values.next().get();
     }
-    // System.out.println(token + "=>"+ weightSumPerLabel);
     output.collect(key, new FloatWritable(weightSumPerLabel));
 
   }

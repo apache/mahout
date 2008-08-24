@@ -18,6 +18,8 @@ package org.apache.mahout.common;
  */
 
 import org.apache.mahout.cf.taste.impl.common.FastMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,6 +33,10 @@ import java.util.StringTokenizer;
  * 
  */
 public abstract class Model {
+
+  private static final Logger log = LoggerFactory.getLogger(Model.class);
+
+  public static final float DEFAULT_PROBABILITY = 0.5f;
 
   protected final List<Map<Integer, Float>> featureLabelWeights = new ArrayList<Map<Integer, Float>>();
 
@@ -47,9 +53,6 @@ public abstract class Model {
   protected Float sigma_jSigma_k = new Float(0);
 
   protected final Float alpha_i = 1.0f; // alpha_i can be improved upon for increased smoothing
-  
-  public static final float DEFAULT_PROBABILITY = 0.5f;
-  
   
   protected abstract float FeatureWeight(Integer label, Integer feature);
   
@@ -106,32 +109,28 @@ public abstract class Model {
     return featureList.get(feature);
   }
 
-  protected void setWeight(String labelString, String featureString, Float weight)
-      throws Exception {
+  protected void setWeight(String labelString, String featureString, Float weight) {
     Integer feature = getFeature(featureString);
     Integer label = getLabel(labelString);
     setWeight(label, feature, weight);
   }
 
-  protected void setWeight(Integer label, Integer feature, Float weight) throws Exception {
+  protected void setWeight(Integer label, Integer feature, Float weight) {
     if (featureLabelWeights.size() <= feature) {
-      // System.out.println(feature + "," + featureLabelWeights.size());
-      // System.in.read();
-      throw new Exception("This should not happen");
-
+      throw new IllegalStateException("This should not happen");
     }
     featureLabelWeights.get(feature).put(label, new Float(weight));
   }
 
-  protected void setSumFeatureWeight(Integer feature, float sum) throws Exception {
+  protected void setSumFeatureWeight(Integer feature, float sum) {
     if (sumFeatureWeight.size() != feature)
-      throw new Exception("This should not happen");
+      throw new IllegalStateException("This should not happen");
     sumFeatureWeight.add(feature, new Float(sum));
   }
 
-  protected void setSumLabelWeight(Integer label, float sum) throws Exception {
+  protected void setSumLabelWeight(Integer label, float sum) {
     if (sumLabelWeight.size() != label)
-      throw new Exception("This should not happen");
+      throw new IllegalStateException("This should not happen");
     sumLabelWeight.put(label, new Float(sum));
   }
 
@@ -140,7 +139,7 @@ public abstract class Model {
   }
 
   public void initializeWeightMatrix() {
-    System.out.println(featureList.size());
+    log.info("{}", featureList.size());
 
     for (int i = 0; i < featureList.size(); i++)
       featureLabelWeights.add(new HashMap<Integer, Float>(1));
@@ -152,37 +151,20 @@ public abstract class Model {
 
   public void loadFeatureWeight(String labelString, String featureString,
       float weight) {
-    try {
-      setWeight(labelString, featureString, weight);
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+    setWeight(labelString, featureString, weight);
   }
 
   public void setSumFeatureWeight(String feature, float sum) {
-    try {
-      setSumFeatureWeight(getFeature(feature), sum);
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+    setSumFeatureWeight(getFeature(feature), sum);
   }
 
   public void setSumLabelWeight(String label, float sum) {
-    try {
-      setSumLabelWeight(getLabel(label), sum);
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+    setSumLabelWeight(getLabel(label), sum);
   }
 
   public void setThetaNormalizer(String label, float sum) {
     setThetaNormalizer(getLabel(label), sum);
   }
-
-  
 
   /**
    * Get the weighted probability of the feature.
@@ -198,8 +180,6 @@ public abstract class Model {
     Integer label = getLabel(labelString);
     return FeatureWeight(label, feature);
   }
-
-
 
   public Collection<String> getLabels() {
     return labelList.keySet();

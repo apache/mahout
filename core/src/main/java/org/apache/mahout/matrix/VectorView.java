@@ -214,7 +214,11 @@ public class VectorView extends AbstractVector {
     Vector vector;
     try {
       vector = (Vector) Class.forName(vectorClassName).newInstance();
-    } catch (Exception e) {
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    } catch (InstantiationException e) {
       throw new RuntimeException(e);
     }
     vector.readFields(dataInput);

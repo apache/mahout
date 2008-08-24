@@ -77,31 +77,28 @@ public class ConfusionMatrix implements Summarizable {
     }
   }
   
-  public void addInstance(String correctLabel, ClassifierResult classifiedResult) throws Exception{
+  public void addInstance(String correctLabel, ClassifierResult classifiedResult) {
     incrementCount(correctLabel, classifiedResult.getLabel());
   }  
   
-  public void addInstance(String correctLabel, String classifiedLabel) throws Exception{
+  public void addInstance(String correctLabel, String classifiedLabel) {
     incrementCount(correctLabel, classifiedLabel);
   }
   
-  public int getCount(String correctLabel, String classifiedLabel)
-      throws Exception {
+  public int getCount(String correctLabel, String classifiedLabel) {
     if (this.getLabels().contains(correctLabel)
         && this.getLabels().contains(classifiedLabel) == false) {
-      //System.err.println(correctLabel + " " + classifiedLabel);
-      throw new Exception("Label not found " +correctLabel + " " +classifiedLabel );
+      throw new IllegalArgumentException("Label not found " +correctLabel + " " +classifiedLabel );
     }
     int correctId = labelMap.get(correctLabel).intValue();
     int classifiedId = labelMap.get(classifiedLabel).intValue();
     return confusionMatrix[correctId][classifiedId];
   }
 
-  public void putCount(String correctLabel, String classifiedLabel, int count)
-      throws Exception {
+  public void putCount(String correctLabel, String classifiedLabel, int count) {
     if (this.getLabels().contains(correctLabel)
         && this.getLabels().contains(classifiedLabel) == false) {
-      throw new Exception("Label not found");
+      throw new IllegalArgumentException("Label not found");
     }
     int correctId = labelMap.get(correctLabel).intValue();
     int classifiedId = labelMap.get(classifiedLabel).intValue();
@@ -109,19 +106,18 @@ public class ConfusionMatrix implements Summarizable {
   }
 
   public void incrementCount(String correctLabel, String classifiedLabel,
-      int count) throws Exception {
+      int count) {
     putCount(correctLabel, classifiedLabel, count
         + getCount(correctLabel, classifiedLabel));
   }
 
-  public void incrementCount(String correctLabel, String classifiedLabel)
-      throws Exception {
+  public void incrementCount(String correctLabel, String classifiedLabel) {
     incrementCount(correctLabel, classifiedLabel, 1);
   }
 
-  public ConfusionMatrix Merge(ConfusionMatrix b) throws Exception {
+  public ConfusionMatrix Merge(ConfusionMatrix b) {
     if (this.getLabels().size() != b.getLabels().size())
-      throw new Exception("The Labels do not Match");
+      throw new IllegalArgumentException("The Labels do not Match");
 
     //if (this.getLabels().containsAll(b.getLabels()))
     //  ;
@@ -134,7 +130,7 @@ public class ConfusionMatrix implements Summarizable {
     return this;
   }
 
-  public String summarize() throws Exception {
+  public String summarize() {
     StringBuilder returnString = new StringBuilder();
     returnString
         .append("=======================================================\n");

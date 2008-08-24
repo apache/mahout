@@ -23,6 +23,8 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -30,10 +32,11 @@ import java.util.Iterator;
 
 /**
  *  Can also be used as a local Combiner beacuse only two values should be there inside the values
- *
  */
 public class CBayesNormalizedWeightReducer extends MapReduceBase implements Reducer<Text, FloatWritable, Text, FloatWritable> {
-  
+
+  private static final Logger log = LoggerFactory.getLogger(CBayesNormalizedWeightReducer.class);      
+
   public void reduce(Text key, Iterator<FloatWritable> values, OutputCollector<Text, FloatWritable> output, Reporter reporter) throws IOException {
     //Key is label,word, value is the number of times we've seen this label word per local node.  Output is the same
     String token = key.toString();  
@@ -42,7 +45,7 @@ public class CBayesNormalizedWeightReducer extends MapReduceBase implements Redu
       weight += values.next().get();
     }
     if(token.equalsIgnoreCase("rec.motorcycles,miller"))
-      System.out.println(token + "=>" + weight);
+      log.info("{}=>{}", token, weight);
     output.collect(key, new FloatWritable(weight));
   }
 

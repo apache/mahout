@@ -30,7 +30,7 @@ public class MeanShiftCanopyJob {
 
   private static final Logger log = LoggerFactory.getLogger(MeanShiftCanopyJob.class);
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     String input = args[0];
     String output = args[1];
     String measureClassName = args[2];
@@ -55,36 +55,32 @@ public class MeanShiftCanopyJob {
    */
   public static void runJob(String input, String output,
       String measureClassName, double t1, double t2, double convergenceDelta,
-      int maxIterations) {
-    try {
-      // delete the output directory
-      JobConf conf = new JobConf(MeanShiftCanopyDriver.class);
-      Path outPath = new Path(output);
-      FileSystem fs = FileSystem.get(conf);
-      if (fs.exists(outPath)) {
-        fs.delete(outPath, true);
-      }
-      fs.mkdirs(outPath);
-      // iterate until the clusters converge
-      boolean converged = false;
-      boolean inputIsSequenceFile = false;
-      int iteration = 0;
-      String clustersIn = input;
-      while (!converged && iteration < maxIterations) {
-        log.info("Iteration {}", iteration);
-        // point the output to a new directory per iteration
-        String clustersOut = output + "/canopies-" + iteration;
-        MeanShiftCanopyDriver.runJob(clustersIn, clustersOut, measureClassName,
-            t1, t2, convergenceDelta, inputIsSequenceFile);
-        converged = isConverged(clustersOut + "/part-00000", conf, FileSystem
-            .get(conf));
-        // now point the input to the old output directory
-        clustersIn = output + "/canopies-" + iteration;
-        iteration++;
-        inputIsSequenceFile = true;
-      }
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+      int maxIterations) throws IOException {
+    // delete the output directory
+    JobConf conf = new JobConf(MeanShiftCanopyDriver.class);
+    Path outPath = new Path(output);
+    FileSystem fs = FileSystem.get(conf);
+    if (fs.exists(outPath)) {
+      fs.delete(outPath, true);
+    }
+    fs.mkdirs(outPath);
+    // iterate until the clusters converge
+    boolean converged = false;
+    boolean inputIsSequenceFile = false;
+    int iteration = 0;
+    String clustersIn = input;
+    while (!converged && iteration < maxIterations) {
+      log.info("Iteration {}", iteration);
+      // point the output to a new directory per iteration
+      String clustersOut = output + "/canopies-" + iteration;
+      MeanShiftCanopyDriver.runJob(clustersIn, clustersOut, measureClassName,
+          t1, t2, convergenceDelta, inputIsSequenceFile);
+      converged = isConverged(clustersOut + "/part-00000", conf, FileSystem
+          .get(conf));
+      // now point the input to the old output directory
+      clustersIn = output + "/canopies-" + iteration;
+      iteration++;
+      inputIsSequenceFile = true;
     }
   }
 

@@ -26,12 +26,16 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.GenericsUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
 
 public class BayesThetaNormalizerMapper extends MapReduceBase implements
     Mapper<Text, FloatWritable, Text, FloatWritable> {
+
+  private static final Logger log = LoggerFactory.getLogger(BayesThetaNormalizerMapper.class);
 
   public HashMap<String, Float> labelWeightSum = null;
 
@@ -93,8 +97,7 @@ public class BayesThetaNormalizerMapper extends MapReduceBase implements
 
       }
     } catch (IOException ex) {
-
-      ex.printStackTrace();
+      log.warn(ex.toString(), ex);
     }
   }
 

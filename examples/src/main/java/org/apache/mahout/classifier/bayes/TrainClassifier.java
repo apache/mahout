@@ -24,6 +24,8 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.ParseException;
 import org.apache.mahout.classifier.cbayes.CBayesDriver;
 
+import java.io.IOException;
+
 /**
  * Train the Naive Bayes Complement classifier with improved weighting on the Twenty Newsgroups data (http://people.csail.mit.edu/jrennie/20Newsgroups/20news-18828.tar.gz)
  *
@@ -46,16 +48,16 @@ import org.apache.mahout.classifier.cbayes.CBayesDriver;
  */
 public class TrainClassifier {
 
-  public void trainNaiveBayes(String dir, String outputDir, int gramSize){
+  public void trainNaiveBayes(String dir, String outputDir, int gramSize) throws IOException {
     BayesDriver.runJob(dir, outputDir, gramSize);
   }
   
-  public void trainCNaiveBayes(String dir, String outputDir, int gramSize){
+  public void trainCNaiveBayes(String dir, String outputDir, int gramSize) throws IOException {
     CBayesDriver.runJob(dir, outputDir, gramSize);
   }
   
   @SuppressWarnings("static-access")
-  public static void main(String[] args) throws ParseException {
+  public static void main(String[] args) throws IOException, ParseException {
     Options options = new Options();
     Option trainOpt = OptionBuilder.withLongOpt("train").withDescription("Train the classifier").create("t");
     options.addOption(trainOpt);

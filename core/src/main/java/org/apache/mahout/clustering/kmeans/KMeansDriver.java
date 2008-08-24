@@ -59,29 +59,25 @@ public class KMeansDriver {
    */
   public static void runJob(String input, String clustersIn, String output,
                             String measureClass, double convergenceDelta, int maxIterations) {
-    try {
-      // iterate until the clusters converge
-      boolean converged = false;
-      int iteration = 0;
-      String delta = Double.toString(convergenceDelta);
+    // iterate until the clusters converge
+    boolean converged = false;
+    int iteration = 0;
+    String delta = Double.toString(convergenceDelta);
 
-      while (!converged && iteration < maxIterations) {
-        log.info("Iteration {}", iteration);
-        // point the output to a new directory per iteration
-        String clustersOut = output + "/clusters-" + iteration;
-        converged = runIteration(input, clustersIn, clustersOut, measureClass,
-                delta);
-        // now point the input to the old output directory
-        clustersIn = output + "/clusters-" + iteration;
-        iteration++;
-      }
-      // now actually cluster the points
-      log.info("Clustering ");
-      runClustering(input, clustersIn, output + "/points", measureClass,
+    while (!converged && iteration < maxIterations) {
+      log.info("Iteration {}", iteration);
+      // point the output to a new directory per iteration
+      String clustersOut = output + "/clusters-" + iteration;
+      converged = runIteration(input, clustersIn, clustersOut, measureClass,
               delta);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+      // now point the input to the old output directory
+      clustersIn = output + "/clusters-" + iteration;
+      iteration++;
     }
+    // now actually cluster the points
+    log.info("Clustering ");
+    runClustering(input, clustersIn, output + "/points", measureClass,
+            delta);
   }
 
   /**
@@ -120,7 +116,7 @@ public class KMeansDriver {
       JobClient.runJob(conf);
       FileSystem fs = FileSystem.get(conf);
       return isConverged(clustersOut + "/part-00000", conf, fs);
-    } catch (Exception e) {
+    } catch (IOException e) {
       log.warn(e.toString(), e);
       return true;
     }
@@ -156,7 +152,7 @@ public class KMeansDriver {
     client.setConf(conf);
     try {
       JobClient.runJob(conf);
-    } catch (Exception e) {
+    } catch (IOException e) {
       log.warn(e.toString(), e);
     }
   }

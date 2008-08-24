@@ -80,8 +80,7 @@ public class CBayesClassifierTest extends TestCase {
   public void test() {
     BayesClassifier classifier = new BayesClassifier();
     ClassifierResult result;
-    String [] document;
-    document = new String[]{"aa", "ff"};
+    String[] document = new String[]{"aa", "ff"};
     result = classifier.classify(model, document, "unknown");
     assertTrue("category is null and it shouldn't be", result != null);
     assertTrue(result + " is not equal to " + "e", result.getLabel().equals("e") == true);
@@ -99,8 +98,7 @@ public class CBayesClassifierTest extends TestCase {
 
   public void testResults() throws Exception {
     BayesClassifier classifier = new BayesClassifier();
-    String [] document;
-    document = new String[]{"aa", "ff"};
+    String[] document = new String[]{"aa", "ff"};
     ClassifierResult result = classifier.classify(model, document, "unknown");
     assertTrue("category is null and it shouldn't be", result != null);    
     System.out.println("Result: " + result);

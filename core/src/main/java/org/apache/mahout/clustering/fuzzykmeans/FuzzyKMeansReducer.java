@@ -27,9 +27,13 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.Vector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FuzzyKMeansReducer extends MapReduceBase implements
     Reducer<Text, Text, Text, Text> {
+
+  private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansReducer.class);
 
   public void reduce(Text key, Iterator<Text> values,
       OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
@@ -39,13 +43,13 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
 
       int ix = value.indexOf(',');
       try {
-        double partialSumPtProb = new Double(value.substring(0, ix));
+        double partialSumPtProb = Double.parseDouble(value.substring(0, ix));
         Vector total = AbstractVector.decodeVector(value.substring(ix + 2));
         cluster.addPoints(partialSumPtProb, total);
-      } catch (Exception e) {
+      } catch (Exception e) { 
+        // TODO srowen thinks this should be replaced with a more specific catch, or not use exceptions to control flow
         // Escaped from Combiner. So, let's do that processing too:
-        System.out.println("Escaped from combiner: Key:" + key.toString()
-            + " Value:" + value);
+        log.info("Escaped from combiner: Key: {} Value: {}", key, value);
         double pointProb = Double.parseDouble(value.substring(0, value
             .indexOf(":")));
 
@@ -57,8 +61,7 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
 
     // force convergence calculation
     cluster.computeConvergence();
-    output.collect(new Text(cluster.getIdentifier()), new Text(SoftCluster
-        .formatCluster(cluster)));
+    output.collect(new Text(cluster.getIdentifier()), new Text(SoftCluster.formatCluster(cluster)));
   }
 
   @Override

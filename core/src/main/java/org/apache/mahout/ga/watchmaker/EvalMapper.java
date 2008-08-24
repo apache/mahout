@@ -44,7 +44,7 @@ public class EvalMapper extends MapReduceBase implements
   /** Parameter used to store the "stringified" evaluator */
   public static final String MAHOUT_GA_EVALUATOR = "mahout.ga.evaluator";
 
-  private FitnessEvaluator evaluator = null;
+  private FitnessEvaluator<Object> evaluator = null;
 
   @Override
   public void configure(JobConf job) {
@@ -54,7 +54,7 @@ public class EvalMapper extends MapReduceBase implements
           "'MAHOUT_GA_EVALUATOR' job parameter non found");
     }
 
-    evaluator = (FitnessEvaluator) StringUtils.fromString(evlstr);
+    evaluator = (FitnessEvaluator<Object>) StringUtils.fromString(evlstr);
 
     super.configure(job);
   }

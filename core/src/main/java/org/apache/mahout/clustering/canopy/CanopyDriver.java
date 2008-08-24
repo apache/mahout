@@ -25,12 +25,14 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 
+import java.io.IOException;
+
 public class CanopyDriver {
 
   private CanopyDriver() {
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     String input = args[0];
     String output = args[1];
     String measureClassName = args[2];
@@ -49,7 +51,7 @@ public class CanopyDriver {
    * @param t2               the T2 distance threshold
    */
   public static void runJob(String input, String output,
-                            String measureClassName, double t1, double t2) {
+                            String measureClassName, double t1, double t2) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(
             org.apache.mahout.clustering.canopy.CanopyDriver.class);
@@ -71,14 +73,10 @@ public class CanopyDriver {
     conf.setOutputFormat(SequenceFileOutputFormat.class);
 
     client.setConf(conf);
-    try {
-      FileSystem dfs = FileSystem.get(conf);
-      if (dfs.exists(outPath))
-        dfs.delete(outPath, true);
-      JobClient.runJob(conf);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    FileSystem dfs = FileSystem.get(conf);
+    if (dfs.exists(outPath))
+      dfs.delete(outPath, true);
+    JobClient.runJob(conf);
   }
 
 }

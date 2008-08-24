@@ -27,6 +27,8 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 public class MeanShiftCanopyDriver {
 
   private static final Logger log = LoggerFactory.getLogger(MeanShiftCanopyDriver.class);
@@ -81,7 +83,7 @@ public class MeanShiftCanopyDriver {
     client.setConf(conf);
     try {
       JobClient.runJob(conf);
-    } catch (Exception e) {
+    } catch (IOException e) {
       log.warn(e.toString(), e);
     }
   }

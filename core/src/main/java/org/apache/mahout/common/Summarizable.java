@@ -21,7 +21,10 @@ package org.apache.mahout.common;
  * A Summarizable Interface. All Classes which implements this has to have a summarize function
  * which generates a string summary of the data contained in it 
  */
-public interface Summarizable{
-   /** @return Summary of the data inside the class */
-  public abstract String summarize() throws Exception;
+public interface Summarizable {
+
+  /**
+   * @return Summary of the data inside the class
+   */
+  String summarize();
 }

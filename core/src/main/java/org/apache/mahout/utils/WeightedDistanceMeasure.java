@@ -28,6 +28,7 @@ import org.apache.mahout.utils.parameters.PathParameter;
 
 import java.io.DataInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -42,11 +43,12 @@ public abstract class WeightedDistanceMeasure implements DistanceMeasure {
   private Parameter<Class> vectorClass;
   protected Vector weights;
 
-
   public void createParameters(String prefix, JobConf jobConf) {
     parameters = new ArrayList<Parameter>();
-    parameters.add(weightsFile = new PathParameter(prefix, "weightsFile", jobConf, null, "Path on DFS to a file containing the weights."));
-    parameters.add(vectorClass = new ClassParameter(prefix, "vectorClass", jobConf, DenseVector.class, "Class<Vector> file specified in parameter weightsFile has been serialized with."));
+    weightsFile = new PathParameter(prefix, "weightsFile", jobConf, null, "Path on DFS to a file containing the weights.");
+    parameters.add(weightsFile);
+    vectorClass = new ClassParameter(prefix, "vectorClass", jobConf, DenseVector.class, "Class<Vector> file specified in parameter weightsFile has been serialized with.");
+    parameters.add(vectorClass);
   }
 
   public Collection<Parameter> getParameters() {
@@ -69,7 +71,11 @@ public abstract class WeightedDistanceMeasure implements DistanceMeasure {
         in.close();
         this.weights = weights;
       }
-    } catch (Exception e) {
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    } catch (InstantiationException e) {
       throw new RuntimeException(e);
     }
   }

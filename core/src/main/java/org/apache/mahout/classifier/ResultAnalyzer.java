@@ -45,8 +45,7 @@ public class ResultAnalyzer implements Summarizable {
   public ConfusionMatrix getConfusionMatrix(){
     return this.confusionMatrix;
   }
-  public void addInstance(String correctLabel, ClassifierResult classifiedResult)
-      throws Exception {
+  public void addInstance(String correctLabel, ClassifierResult classifiedResult) {
     if (correctLabel.equals(classifiedResult.getLabel()))
       correctlyClassified++;
     else
@@ -58,7 +57,7 @@ public class ResultAnalyzer implements Summarizable {
     return "";
   }
 
-  public String summarize() throws Exception {
+  public String summarize() {
     StringBuilder returnString = new StringBuilder();
 
     returnString

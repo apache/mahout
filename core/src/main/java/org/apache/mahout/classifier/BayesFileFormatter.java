@@ -28,6 +28,8 @@ import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -48,6 +50,8 @@ import java.util.List;
  * line are the terms.
  */
 public class BayesFileFormatter {
+
+  private static final Logger log = LoggerFactory.getLogger(BayesFileFormatter.class);
 
   private static final String LINE_SEP = System.getProperty("line.separator");
 
@@ -275,7 +279,7 @@ public class BayesFileFormatter {
       PosixParser parser = new PosixParser();
       cmdLine = parser.parse(options, args);
       if (cmdLine.hasOption(helpOpt.getOpt())) {
-        System.out.println("Options: " + options);
+        log.info("Options: {}", options);
         return;
       }
       File input = new File(cmdLine.getOptionValue(inputOpt.getOpt()));
@@ -301,8 +305,8 @@ public class BayesFileFormatter {
       }
 
     } catch (ParseException exp) {
-      exp.printStackTrace();
-      System.out.println("Options: " + options);
+      log.warn(exp.toString(), exp);
+      log.info("Options: {}", options);
     }
   }
 }

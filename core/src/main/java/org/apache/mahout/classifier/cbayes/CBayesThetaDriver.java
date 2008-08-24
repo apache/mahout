@@ -27,24 +27,30 @@ import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.io.IOException;
 
 /**
  * Create and run the Bayes Trainer.
- *
- **/
+ */
 public class CBayesThetaDriver {
+
+  private static final Logger log = LoggerFactory.getLogger(CBayesThetaDriver.class);
+
   /**
    * Takes in two arguments:
    * <ol>
    * <li>The input {@link org.apache.hadoop.fs.Path} where the input documents live</li>
-   * <li>The output {@link org.apache.hadoop.fs.Path} where to write the {@link org.apache.mahout.common.Model} as a {@link org.apache.hadoop.io.SequenceFile}</li>
+   * <li>The output {@link org.apache.hadoop.fs.Path} where to write the {@link org.apache.mahout.common.Model} as a
+   * {@link org.apache.hadoop.io.SequenceFile}</li>
    * </ol>
    * @param args The args
    */
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     String input = args[0];
     String output = args[1];
 
@@ -57,7 +63,7 @@ public class CBayesThetaDriver {
    * @param input            the input pathname String
    * @param output           the output pathname String
    */
-  public static void runJob(String input, String output) {
+  public static void runJob(String input, String output) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(CBayesThetaDriver.class);
     
@@ -77,51 +83,48 @@ public class CBayesThetaDriver {
     conf.setReducerClass(CBayesThetaReducer.class);    
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     
-    conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization"); // Dont ever forget this. People should keep track of how hadoop conf parameters and make or break a piece of code
-     try {
-      FileSystem dfs = FileSystem.get(conf);
-      if (dfs.exists(outPath))
-        dfs.delete(outPath, true);
-      
-      SequenceFileModelReader reader = new SequenceFileModelReader();
-      
-      Path Sigma_kFiles = new Path(output+"/trainer-weights/Sigma_k/*");         
-      HashMap<String,Float> labelWeightSum= reader.readLabelSums(dfs, Sigma_kFiles, conf);
-      DefaultStringifier<HashMap<String,Float>> mapStringifier = new DefaultStringifier<HashMap<String,Float>>(conf, GenericsUtil.getClass(labelWeightSum));     
-      String labelWeightSumString = mapStringifier.toString(labelWeightSum);
-      
-      System.out.println("Sigma_k for Each Label");
-      Map<String,Float> c = mapStringifier.fromString(labelWeightSumString);
-      System.out.println(c);
-      conf.set("cnaivebayes.sigma_k", labelWeightSumString);
-      
-      
-      Path sigma_kSigma_jFile = new Path(output+"/trainer-weights/Sigma_kSigma_j/*");         
-      Float sigma_jSigma_k = reader.readSigma_jSigma_k(dfs, sigma_kSigma_jFile, conf);
-      DefaultStringifier<Float> floatStringifier = new DefaultStringifier<Float>(conf, Float.class);     
-      String sigma_jSigma_kString = floatStringifier.toString(sigma_jSigma_k);
-      
-      System.out.println("Sigma_kSigma_j for each Label and for each Features");
-      Float retSigma_jSigma_k = floatStringifier.fromString(sigma_jSigma_kString);      
-      System.out.println(retSigma_jSigma_k);
-      conf.set("cnaivebayes.sigma_jSigma_k", sigma_jSigma_kString);
-      
-      Path vocabCountFile = new Path(output+"/trainer-tfIdf/trainer-vocabCount/*"); 
-      Float vocabCount = reader.readVocabCount(dfs, vocabCountFile, conf);
-      String vocabCountString = floatStringifier.toString(vocabCount);
-      
-      System.out.println("Vocabulary Count");
-      conf.set("cnaivebayes.vocabCount", vocabCountString);
-      Float retvocabCount = floatStringifier.fromString(vocabCountString);
-      System.out.println(retvocabCount);
-      
-      client.setConf(conf);    
-    
-      JobClient.runJob(conf);      
-      
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    
+    conf.set("io.serializations",
+             "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
+    // Dont ever forget this. People should keep track of how hadoop conf parameters and make or break a piece of code
+    FileSystem dfs = FileSystem.get(conf);
+    if (dfs.exists(outPath))
+      dfs.delete(outPath, true);
+
+    SequenceFileModelReader reader = new SequenceFileModelReader();
+
+    Path Sigma_kFiles = new Path(output+"/trainer-weights/Sigma_k/*");
+    HashMap<String,Float> labelWeightSum= reader.readLabelSums(dfs, Sigma_kFiles, conf);
+    DefaultStringifier<HashMap<String,Float>> mapStringifier =
+        new DefaultStringifier<HashMap<String,Float>>(conf, GenericsUtil.getClass(labelWeightSum));
+    String labelWeightSumString = mapStringifier.toString(labelWeightSum);
+
+    log.info("Sigma_k for Each Label");
+    Map<String,Float> c = mapStringifier.fromString(labelWeightSumString);
+    log.info("{}", c);
+    conf.set("cnaivebayes.sigma_k", labelWeightSumString);
+
+
+    Path sigma_kSigma_jFile = new Path(output+"/trainer-weights/Sigma_kSigma_j/*");
+    Float sigma_jSigma_k = reader.readSigma_jSigma_k(dfs, sigma_kSigma_jFile, conf);
+    DefaultStringifier<Float> floatStringifier = new DefaultStringifier<Float>(conf, Float.class);
+    String sigma_jSigma_kString = floatStringifier.toString(sigma_jSigma_k);
+
+    log.info("Sigma_kSigma_j for each Label and for each Features");
+    Float retSigma_jSigma_k = floatStringifier.fromString(sigma_jSigma_kString);
+    log.info("{}", retSigma_jSigma_k);
+    conf.set("cnaivebayes.sigma_jSigma_k", sigma_jSigma_kString);
+
+    Path vocabCountFile = new Path(output+"/trainer-tfIdf/trainer-vocabCount/*");
+    Float vocabCount = reader.readVocabCount(dfs, vocabCountFile, conf);
+    String vocabCountString = floatStringifier.toString(vocabCount);
+
+    log.info("Vocabulary Count");
+    conf.set("cnaivebayes.vocabCount", vocabCountString);
+    Float retvocabCount = floatStringifier.fromString(vocabCountString);
+    log.info("{}", retvocabCount);
+
+    client.setConf(conf);
+
+    JobClient.runJob(conf);
   }
 }

@@ -11,7 +11,7 @@ public class ClassParameter extends AbstractParameter<Class> {
   public void setStringValue(String stringValue) {
     try {
       set(Class.forName(stringValue));
-    } catch (Exception e) {
+    } catch (ClassNotFoundException e) {
       throw new RuntimeException(e);
     }
   }

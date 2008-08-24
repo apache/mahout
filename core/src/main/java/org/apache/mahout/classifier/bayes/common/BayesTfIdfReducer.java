@@ -22,38 +22,39 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
 
-
 /**
  *  Can also be used as a local Combiner beacuse only two values should be there inside the values
- *
- **/
-
+ */
 public class BayesTfIdfReducer extends MapReduceBase implements Reducer<Text, FloatWritable, Text, FloatWritable> {
-  public void reduce(Text key, Iterator<FloatWritable> values, OutputCollector<Text, FloatWritable> output, Reporter reporter) throws IOException {
+
+  private static final Logger log = LoggerFactory.getLogger(BayesTfIdfReducer.class);
+
+  public void reduce(Text key,
+                     Iterator<FloatWritable> values,
+                     OutputCollector<Text, FloatWritable> output,
+                     Reporter reporter) throws IOException {
     //Key is label,word, value is the number of times we've seen this label word per local node.  Output is the same
     String token = key.toString();  
-    if(token.startsWith("*vocabCount"))
-    {
+    if(token.startsWith("*vocabCount")) {
       float vocabCount = 0;
       while (values.hasNext()) {
         vocabCount += values.next().get();
       }
-      System.out.println(token + "\t"+vocabCount);
+      log.info("{}\t{}", token, vocabCount);
       output.collect(key, new FloatWritable(vocabCount));
-    }
-    else
-    {
+    } else {
       float idfTimes_D_ij = 1.0f;
-      int numberofValues = 0;
+      //int numberofValues = 0;
       while (values.hasNext()) {
         idfTimes_D_ij *= values.next().get();
-        numberofValues ++;
+        //numberofValues ++;
       }
-      //System.out.println(token + "\t" + numberofValues + "\t"+idfTimes_D_ij);
       //if(numberofValues!=2) throw new IOException("Number of values should be exactly 2");
       
       output.collect(key, new FloatWritable(idfTimes_D_ij));
