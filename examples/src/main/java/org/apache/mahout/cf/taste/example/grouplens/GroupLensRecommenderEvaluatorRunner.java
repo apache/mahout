@@ -20,6 +20,8 @@ package org.apache.mahout.cf.taste.example.grouplens;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.eval.RecommenderEvaluator;
 import org.apache.mahout.cf.taste.impl.eval.AverageAbsoluteDifferenceRecommenderEvaluator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -28,6 +30,8 @@ import java.io.IOException;
  * implementation of {@link GroupLensRecommender}.</p>
  */
 public final class GroupLensRecommenderEvaluatorRunner {
+
+  private static final Logger log = LoggerFactory.getLogger(GroupLensRecommenderEvaluatorRunner.class);
 
   private GroupLensRecommenderEvaluatorRunner() {
     // do nothing
@@ -39,7 +43,7 @@ public final class GroupLensRecommenderEvaluatorRunner {
                                                  new GroupLensDataModel(),
                                                  0.9,
                                                  0.1);
-    System.out.println(evaluation);
+    log.info(String.valueOf(evaluation));
   }
 
 }

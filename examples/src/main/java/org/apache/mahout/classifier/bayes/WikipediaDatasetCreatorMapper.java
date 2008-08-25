@@ -42,18 +42,15 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
     Mapper<Text, Text, Text, Text> {
 
   static Set<String> countries = null;
-
   
-  @SuppressWarnings("deprecation")
   public void map(Text key, Text value,
       OutputCollector<Text, Text> output, Reporter reporter)
       throws IOException {
     String document = value.toString();
     Analyzer analyzer = new StandardAnalyzer();
     StringBuilder contents = new StringBuilder();
-    
-    
-    HashSet<String> categories = new HashSet<String>(findAllCategories(document));
+
+    Set<String> categories = new HashSet<String>(findAllCategories(document));
     
     String country = getCountry(categories);
     
@@ -63,9 +60,8 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
       while(true){
         Token token = stream.next();
         if(token==null) break;
-        contents.append(token.termText()).append(" ");
+        contents.append(token.termBuffer(), 0, token.termLength()).append(' ');
       }
-      //System.err.println(country+"\t"+contents.toString());
       output.collect(new Text(country.replace(" ","_")), new Text(contents.toString()));
     }
   }
@@ -104,12 +100,12 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
   
   @Override
   public void configure(JobConf job) {
-    try
-    {
+    try {
       if(countries ==null){
         countries = new HashSet<String>();
 
-        DefaultStringifier<Set<String>> setStringifier = new DefaultStringifier<Set<String>>(job,GenericsUtil.getClass(countries));
+        DefaultStringifier<Set<String>> setStringifier =
+            new DefaultStringifier<Set<String>>(job,GenericsUtil.getClass(countries));
 
         String countriesString = setStringifier.toString(countries);  
         countriesString = job.get("wikipedia.countries", countriesString);
@@ -117,10 +113,8 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
         countries = setStringifier.fromString(countriesString);
         
       }
-    }
-    catch(IOException ex){
-      
-      ex.printStackTrace();
+    } catch(IOException ex){
+      throw new RuntimeException(ex);
     }
   }
 }

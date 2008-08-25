@@ -22,18 +22,15 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.cli.ParseException;
 
 import java.io.IOException;
 
-/**
- * 
- * 
- */
 public class WikipediaDatasetCreator {
 
   @SuppressWarnings("static-access")
   public static void main(String[] args) throws IOException,
-      ClassNotFoundException, IllegalAccessException, InstantiationException {
+      ClassNotFoundException, IllegalAccessException, InstantiationException, ParseException {
     Options options = new Options();
     Option dirInputPathOpt = OptionBuilder.withLongOpt("dirInputPath").isRequired().hasArg()
         .withDescription("The input Directory Path").create("i");
@@ -45,18 +42,14 @@ public class WikipediaDatasetCreator {
         .withDescription("Location of the Countries File").create("c");
     options.addOption(countriesFileOpt);
     
-    CommandLine cmdLine;
-    try {
-      PosixParser parser = new PosixParser();
-      cmdLine = parser.parse(options, args);
+    PosixParser parser = new PosixParser();
+    CommandLine cmdLine = parser.parse(options, args);
 
-      String dirInputPath = cmdLine.getOptionValue(dirInputPathOpt.getOpt());
-      String dirOutputPath = cmdLine.getOptionValue(dirOutputPathOpt.getOpt());
-      String countriesFile = cmdLine.getOptionValue(countriesFileOpt.getOpt());
+    String dirInputPath = cmdLine.getOptionValue(dirInputPathOpt.getOpt());
+    String dirOutputPath = cmdLine.getOptionValue(dirOutputPathOpt.getOpt());
+    String countriesFile = cmdLine.getOptionValue(countriesFileOpt.getOpt());
 
-      WikipediaDatasetCreatorDriver.runJob(dirInputPath, dirOutputPath, countriesFile);
-    } catch (Exception exp) {
-      exp.printStackTrace(System.err);
-    }
+    WikipediaDatasetCreatorDriver.runJob(dirInputPath, dirOutputPath, countriesFile);
+
   }
 }

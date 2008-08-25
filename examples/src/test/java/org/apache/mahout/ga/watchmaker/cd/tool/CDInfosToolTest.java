@@ -39,7 +39,7 @@ public class CDInfosToolTest extends TestCase {
   Random rng;
 
   @Override
-  protected void setUp() throws Exception {
+  protected void setUp() {
     rng = new MersenneTwisterRNG();
   }
 

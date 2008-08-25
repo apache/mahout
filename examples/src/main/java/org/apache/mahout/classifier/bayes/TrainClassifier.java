@@ -23,6 +23,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.ParseException;
 import org.apache.mahout.classifier.cbayes.CBayesDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -47,6 +49,8 @@ import java.io.IOException;
  * </ol>
  */
 public class TrainClassifier {
+
+  private static final Logger log = LoggerFactory.getLogger(TrainClassifier.class);
 
   public void trainNaiveBayes(String dir, String outputDir, int gramSize) throws IOException {
     BayesDriver.runJob(dir, outputDir, gramSize);
@@ -78,11 +82,11 @@ public class TrainClassifier {
     if (train == true){
       String classifierType = cmdLine.getOptionValue(typeOpt.getOpt());
       if(classifierType.equalsIgnoreCase("bayes")){
-        System.out.println("Training Bayes Classifier");
+        log.info("Training Bayes Classifier");
         tn.trainNaiveBayes(cmdLine.getOptionValue(inputDirOpt.getOpt()), cmdLine.getOptionValue(outputOpt.getOpt()), Integer.parseInt(cmdLine.getOptionValue(gramSizeOpt.getOpt())));
 
       } else if(classifierType.equalsIgnoreCase("cbayes")) {
-        System.out.println("Training Complementary Bayes Classifier");
+        log.info("Training Complementary Bayes Classifier");
         //setup the HDFS and copy the files there, then run the trainer
         tn.trainCNaiveBayes(cmdLine.getOptionValue(inputDirOpt.getOpt()), cmdLine.getOptionValue(outputOpt.getOpt()), Integer.parseInt(cmdLine.getOptionValue(gramSizeOpt.getOpt())));
       }

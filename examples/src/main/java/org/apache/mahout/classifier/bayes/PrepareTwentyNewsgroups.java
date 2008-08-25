@@ -21,10 +21,12 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.cli.ParseException;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.classifier.BayesFileFormatter;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 
 
@@ -38,7 +40,8 @@ import java.nio.charset.Charset;
 public class PrepareTwentyNewsgroups {
 
   @SuppressWarnings("static-access")
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws IOException, ParseException,
+      ClassNotFoundException, InstantiationException, IllegalAccessException {
     Options options = new Options();
     Option parentOpt = OptionBuilder.withLongOpt("parent").isRequired().hasArg().withDescription("Parent dir containing the newsgroups").create("p");
     options.addOption(parentOpt);

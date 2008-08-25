@@ -29,7 +29,7 @@ import java.io.IOException;
 
 public class InputDriver {
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws IOException {
     runJob(args[0], args[1]);
   }
 

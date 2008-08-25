@@ -49,7 +49,7 @@ public class CDRuleTest extends TestCase {
   }
 
   @Override
-  protected void setUp() throws Exception {
+  protected void setUp() {
     rng = new MersenneTwisterRNG();
     mock = new MockDataSet(rng, 50);
   }

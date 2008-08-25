@@ -22,6 +22,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.cli.ParseException;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -30,12 +31,13 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
 
 public class WikipediaXmlSplitter {
 
   @SuppressWarnings("static-access")
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws IOException, ParseException {
     Options options = new Options();
     Option dumpFileOpt = OptionBuilder.withLongOpt("dumpfile").isRequired().hasArg().withDescription("The path to the wikipedia dump file").create("d");
     options.addOption(dumpFileOpt);
@@ -43,89 +45,83 @@ public class WikipediaXmlSplitter {
     options.addOption(outputDirOpt);
     Option chunkSizeOpt = OptionBuilder.withLongOpt("chunkSize").isRequired().hasArg().withDescription("the Size of chunk in Megabytes").create("c");
     options.addOption(chunkSizeOpt);
-    CommandLine cmdLine;
-    try {
-      PosixParser parser = new PosixParser();
-      cmdLine = parser.parse(options, args);
 
-      String dumpFilePath = cmdLine.getOptionValue(dumpFileOpt.getOpt());
-      String outputDirPath = cmdLine.getOptionValue(outputDirOpt.getOpt());
-      int chunkSize = 1024 * 1024 * Integer.parseInt(cmdLine.getOptionValue(chunkSizeOpt.getOpt()));
-      
-      BufferedReader dumpReader = new BufferedReader(new InputStreamReader(
-          new FileInputStream(dumpFilePath), "UTF-8"));
+    PosixParser parser = new PosixParser();
+    CommandLine cmdLine = parser.parse(options, args);
 
-      File dir = new File(outputDirPath);
-      dir.getPath();
-      
+    String dumpFilePath = cmdLine.getOptionValue(dumpFileOpt.getOpt());
+    String outputDirPath = cmdLine.getOptionValue(outputDirOpt.getOpt());
+    int chunkSize = 1024 * 1024 * Integer.parseInt(cmdLine.getOptionValue(chunkSizeOpt.getOpt()));
 
-      String header = ""
-          + "<mediawiki xmlns=\"http://www.mediawiki.org/xml/export-0.3/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.mediawiki.org/xml/export-0.3/ http://www.mediawiki.org/xml/export-0.3.xsd\" version=\"0.3\" xml:lang=\"en\">\n"
-          + "  <siteinfo>\n" + "<sitename>Wikipedia</sitename>\n"
-          + "    <base>http://en.wikipedia.org/wiki/Main_Page</base>\n"
-          + "    <generator>MediaWiki 1.13alpha</generator>\n"
-          + "    <case>first-letter</case>\n" 
-          + "    <namespaces>\n"
-          + "      <namespace key=\"-2\">Media</namespace>\n"
-          + "      <namespace key=\"-1\">Special</namespace>\n"
-          + "      <namespace key=\"0\" />\n"
-          + "      <namespace key=\"1\">Talk</namespace>\n"
-          + "      <namespace key=\"2\">User</namespace>\n"
-          + "      <namespace key=\"3\">User talk</namespace>\n"
-          + "      <namespace key=\"4\">Wikipedia</namespace>\n"
-          + "      <namespace key=\"5\">Wikipedia talk</namespace>\n"
-          + "      <namespace key=\"6\">Image</namespace>\n"
-          + "      <namespace key=\"7\">Image talk</namespace>\n"
-          + "      <namespace key=\"8\">MediaWiki</namespace>\n"
-          + "      <namespace key=\"9\">MediaWiki talk</namespace>\n"
-          + "      <namespace key=\"10\">Template</namespace>\n"
-          + "      <namespace key=\"11\">Template talk</namespace>\n"
-          + "      <namespace key=\"12\">Help</namespace>\n"
-          + "      <namespace key=\"13\">Help talk</namespace>\n"
-          + "      <namespace key=\"14\">Category</namespace>\n"
-          + "      <namespace key=\"15\">Category talk</namespace>\n"
-          + "      <namespace key=\"100\">Portal</namespace>\n"
-          + "      <namespace key=\"101\">Portal talk</namespace>\n"
-          + "    </namespaces>\n" 
-          + "  </siteinfo>\n";
-      String thisLine;
-      StringBuilder content = new StringBuilder();
-      content.append(header);
-      Integer filenumber = new Integer(0);
-      DecimalFormat decimalFormatter = new DecimalFormat("0000");
-      while ((thisLine = dumpReader.readLine()) != null) 
-      {
-        boolean end = false;
-        if(thisLine.trim().startsWith("<page>")){
-          while(thisLine.trim().startsWith("</page>")==false){
-            content.append(thisLine).append("\n"); 
-            if ((thisLine = dumpReader.readLine()) == null){
-              end=true;
-              break;
-            }
-          }
+    BufferedReader dumpReader = new BufferedReader(new InputStreamReader(
+        new FileInputStream(dumpFilePath), "UTF-8"));
+
+    File dir = new File(outputDirPath);
+    dir.getPath();
+
+
+    String header =
+          "<mediawiki xmlns=\"http://www.mediawiki.org/xml/export-0.3/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.mediawiki.org/xml/export-0.3/ http://www.mediawiki.org/xml/export-0.3.xsd\" version=\"0.3\" xml:lang=\"en\">\n"
+        + "  <siteinfo>\n" + "<sitename>Wikipedia</sitename>\n"
+        + "    <base>http://en.wikipedia.org/wiki/Main_Page</base>\n"
+        + "    <generator>MediaWiki 1.13alpha</generator>\n"
+        + "    <case>first-letter</case>\n"
+        + "    <namespaces>\n"
+        + "      <namespace key=\"-2\">Media</namespace>\n"
+        + "      <namespace key=\"-1\">Special</namespace>\n"
+        + "      <namespace key=\"0\" />\n"
+        + "      <namespace key=\"1\">Talk</namespace>\n"
+        + "      <namespace key=\"2\">User</namespace>\n"
+        + "      <namespace key=\"3\">User talk</namespace>\n"
+        + "      <namespace key=\"4\">Wikipedia</namespace>\n"
+        + "      <namespace key=\"5\">Wikipedia talk</namespace>\n"
+        + "      <namespace key=\"6\">Image</namespace>\n"
+        + "      <namespace key=\"7\">Image talk</namespace>\n"
+        + "      <namespace key=\"8\">MediaWiki</namespace>\n"
+        + "      <namespace key=\"9\">MediaWiki talk</namespace>\n"
+        + "      <namespace key=\"10\">Template</namespace>\n"
+        + "      <namespace key=\"11\">Template talk</namespace>\n"
+        + "      <namespace key=\"12\">Help</namespace>\n"
+        + "      <namespace key=\"13\">Help talk</namespace>\n"
+        + "      <namespace key=\"14\">Category</namespace>\n"
+        + "      <namespace key=\"15\">Category talk</namespace>\n"
+        + "      <namespace key=\"100\">Portal</namespace>\n"
+        + "      <namespace key=\"101\">Portal talk</namespace>\n"
+        + "    </namespaces>\n"
+        + "  </siteinfo>\n";
+    String thisLine;
+    StringBuilder content = new StringBuilder();
+    content.append(header);
+    int filenumber = 0;
+    DecimalFormat decimalFormatter = new DecimalFormat("0000");
+    while ((thisLine = dumpReader.readLine()) != null)
+    {
+      boolean end = false;
+      if(thisLine.trim().startsWith("<page>")){
+        while(thisLine.trim().startsWith("</page>")==false){
           content.append(thisLine).append("\n");
-          
-          if(content.length()>chunkSize || end){
-            content.append("</mediawiki>");
-            filenumber++;
-            
-            BufferedWriter chunkWriter = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(dir.getPath()+"/chunk-"+ decimalFormatter.format(filenumber)+".xml"), "UTF-8"));
-            
-            chunkWriter.write(content.toString(), 0, content.length());
-            chunkWriter.close();
-            
-            content = new StringBuilder();
-            
-            content.append(header);
-            
+          if ((thisLine = dumpReader.readLine()) == null){
+            end=true;
+            break;
           }
         }
-      } 
+        content.append(thisLine).append("\n");
 
-    } catch (Exception exp) {
-      exp.printStackTrace(System.err);
+        if(content.length()>chunkSize || end){
+          content.append("</mediawiki>");
+          filenumber++;
+
+          BufferedWriter chunkWriter = new BufferedWriter(new OutputStreamWriter(
+              new FileOutputStream(dir.getPath()+"/chunk-"+ decimalFormatter.format(filenumber)+".xml"), "UTF-8"));
+
+          chunkWriter.write(content.toString(), 0, content.length());
+          chunkWriter.close();
+
+          content = new StringBuilder();
+          content.append(header);
+        }
+      }
     }
+
   }
 }

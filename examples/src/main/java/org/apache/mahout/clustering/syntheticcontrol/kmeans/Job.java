@@ -29,7 +29,7 @@ import java.io.IOException;
 
 public class Job {
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws IOException {
     if (args.length == 6) {
       String input = args[0];
       String output = args[1];

@@ -33,6 +33,8 @@ import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.mahout.ga.watchmaker.OutputUtils;
 import org.apache.mahout.ga.watchmaker.cd.FileInfoParser;
 import org.apache.mahout.utils.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -44,9 +46,10 @@ import java.util.Scanner;
 /**
  * Gathers additional information about a given dataset. Takes a descriptor
  * about the attributes, and generates a description for each one.
- * 
  */
 public class CDInfosTool {
+
+  private static final Logger log = LoggerFactory.getLogger(CDInfosTool.class);
 
   /**
    * Uses Mahout to gather the information about a dataset.
@@ -199,21 +202,21 @@ public class CDInfosTool {
   public static void main(String[] args) throws IOException {
     // command-line parameters
     if (args.length == 0) {
-      System.out.println("Usage: CDInfosTool dataset_path");
+      log.warn("Usage: CDInfosTool dataset_path");
       throw new IllegalArgumentException();
     }
 
     FileSystem fs = FileSystem.get(new Configuration());
     Path inpath = new Path(args[0]);
 
-    System.out.println("Loading Descriptors...");
+    log.info("Loading Descriptors...");
     Descriptors descriptors = loadDescriptors(fs, inpath);
 
-    System.out.println("Gathering informations...");
+    log.info("Gathering informations...");
     List<String> descriptions = new ArrayList<String>();
     gatherInfos(descriptors, inpath, descriptions);
 
-    System.out.println("Storing Descriptions...");
+    log.info("Storing Descriptions...");
     storeDescriptions(fs, inpath, descriptors, descriptions);
   }
 }

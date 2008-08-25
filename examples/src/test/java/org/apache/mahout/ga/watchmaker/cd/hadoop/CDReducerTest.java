@@ -20,7 +20,7 @@ public class CDReducerTest extends TestCase {
   private CDFitness expected;
 
   @Override
-  protected void setUp() throws Exception {
+  protected void setUp() {
     // generate random evaluatons and calculate expectations
     evaluations = new ArrayList<CDFitness>();
     Random rng = new Random();

@@ -32,6 +32,8 @@ import org.uncommons.watchmaker.framework.SelectionStrategy;
 import org.uncommons.watchmaker.framework.operators.EvolutionPipeline;
 import org.uncommons.watchmaker.framework.selection.RouletteWheelSelection;
 import org.uncommons.watchmaker.framework.termination.GenerationCount;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,6 +65,8 @@ import java.util.List;
  */
 public class CDGA {
 
+  private static final Logger log = LoggerFactory.getLogger(CDGA.class);
+
   public static void main(String[] args) throws IOException {
     String dataset = "build/classes/wdbc";
     int target = 1;
@@ -85,7 +89,7 @@ public class CDGA {
       popSize = Integer.parseInt(args[7]);
       genCount = Integer.parseInt(args[8]);
     } else {
-      System.out.println("Invalid arguments, working with default parameters instead");
+      log.warn("Invalid arguments, working with default parameters instead");
 	  }
 
     long start = System.currentTimeMillis();
@@ -127,7 +131,7 @@ public class CDGA {
 
     engine.addEvolutionObserver(new EvolutionObserver<Rule>() {
       public void populationUpdate(PopulationData<Rule> data) {
-        System.out.println("Generation " + data.getGenerationNumber());
+        log.info("Generation {}", data.getGenerationNumber());
       }
     });
 
@@ -144,8 +148,8 @@ public class CDGA {
         inpath, split);
 
     // evaluate the solution over the testing set
-    System.out.println("Best solution fitness (train set) : " + bestTrainFit);
-    System.out.println("Best solution fitness (test set) : " + bestTestFit);
+    log.info("Best solution fitness (train set) : {}", bestTrainFit);
+    log.info("Best solution fitness (test set) : {}", bestTestFit);
   }
 
   static void printElapsedTime(long milli) {
@@ -158,7 +162,6 @@ public class CDGA {
     long hours = minutes / 60;
     minutes %= 60;
 
-    System.out.println("Elapsed time (Hours:minutes:seconds:milli) : " + hours
-        + ":" + minutes + ":" + seconds + ":" + milli);
+    log.info("Elapsed time (Hours:minutes:seconds:milli) : {}:{}:{}:{}", new Object[] {hours, minutes, seconds, milli});
   }
 }

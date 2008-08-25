@@ -24,11 +24,15 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
 import org.apache.mahout.matrix.Vector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class OutputMapper extends MapReduceBase implements
     Mapper<Text, Text, Text, Text> {
+
+  private static final Logger log = LoggerFactory.getLogger(OutputMapper.class);
 
   int clusters = 0;
 
@@ -43,7 +47,7 @@ public class OutputMapper extends MapReduceBase implements
 
   @Override
   public void close() throws IOException {
-    System.out.println("+++ Clusters=" + clusters);
+    log.info("+++ Clusters={}", clusters);
     super.close();
   }
 
