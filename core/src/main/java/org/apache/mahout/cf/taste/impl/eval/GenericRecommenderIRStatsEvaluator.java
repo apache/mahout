@@ -33,6 +33,8 @@ import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,6 +51,8 @@ import java.util.Random;
  * {@link Item}s included in the top 5 recommendations for that user.</p>
  */
 public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRStatsEvaluator {
+
+  private static final Logger log = LoggerFactory.getLogger(GenericRecommenderIRStatsEvaluator.class);
 
   private final Random random;
 
@@ -129,6 +133,10 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
             fallOut.addDatum((double) (numRecommendedItems - intersectionSize) /
                              (double) (prefs.length - numRelevantItems));
           }
+
+          log.info("Precision/recall/fall-out: {} / {} / {}", new Object[] {
+              precision.getAverage(), recall.getAverage(), fallOut.getAverage()
+          });
         }
       }
     }
