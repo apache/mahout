@@ -83,6 +83,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
       throw new IllegalArgumentException("Invalid relevanceThreshold: " + evaluationPercentage);
     }
 
+    int numItems = dataModel.getNumItems();
     RunningAverage precision = new FullRunningAverage();
     RunningAverage recall = new FullRunningAverage();
     RunningAverage fallOut = new FullRunningAverage();
@@ -131,7 +132,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
           recall.addDatum((double) intersectionSize / (double) numRelevantItems);
           if (numRelevantItems < prefs.length) {
             fallOut.addDatum((double) (numRecommendedItems - intersectionSize) /
-                             (double) (prefs.length - numRelevantItems));
+                             (double) (numItems - numRelevantItems));
           }
 
           log.info("Precision/recall/fall-out: {} / {} / {}", new Object[] {
