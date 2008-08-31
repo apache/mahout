@@ -87,8 +87,7 @@ public class MeanShiftCanopy {
    */
   public static void configure(JobConf job) {
     try {
-      Class<?> cl = Class.forName(job.get(DISTANCE_MEASURE_KEY));
-      measure = (DistanceMeasure) cl.newInstance();
+      measure = Class.forName(job.get(DISTANCE_MEASURE_KEY)).asSubclass(DistanceMeasure.class).newInstance();
       measure.configure(job);
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(e);

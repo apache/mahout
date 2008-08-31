@@ -287,8 +287,8 @@ public class BayesFileFormatter {
       String label = cmdLine.getOptionValue(labelOpt.getOpt());
       Analyzer analyzer;
       if (cmdLine.hasOption(analyzerOpt.getOpt())) {
-        analyzer = (Analyzer) Class.forName(
-            cmdLine.getOptionValue(analyzerOpt.getOpt())).newInstance();
+        analyzer = Class.forName(
+            cmdLine.getOptionValue(analyzerOpt.getOpt())).asSubclass(Analyzer.class).newInstance();
       } else {
         analyzer = new StandardAnalyzer();
       }

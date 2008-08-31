@@ -42,7 +42,7 @@ public class CBayesModel extends Model {
     float numerator = sigma_j - result + alpha_i;
     float denominator =(sigma_jSigma_k - sumLabelWeight + vocabCount);
     
-    float weight = new Double(Math.log(numerator /denominator)).floatValue();
+    float weight = (float) Math.log(numerator /denominator);
     result = (-1.0f * (weight / getThetaNormalizer(label)));
     return result;
   }
@@ -81,7 +81,7 @@ public class CBayesModel extends Model {
     log.info("{}", thetaNormalizer);
     
     /*for (int label = 0, maxLabels = labelList.size(); label < maxLabels; label++) {
-      thetaNormalizer.put(label, new Float(0));
+      thetaNormalizer.put(label, 0.0f);
     }
     for (int feature = 0, maxFeatures = featureList.size(); feature < maxFeatures; feature++) {
       for (int label = 0, maxLabels = labelList.size(); label < maxLabels; label++) {

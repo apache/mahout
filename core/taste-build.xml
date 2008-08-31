@@ -26,14 +26,15 @@
 
   <property name="axis.jars" location="lib/axis/"/>
   <property name="dbcp.jar" location="lib/commons-dbcp-1.2.2.jar"/>
-  <property name="junit.jar" location="lib/junit-3.8.2.jar"/>
+  <property name="junit.jar" location="../lib/junit-3.8.2.jar"/>
   <property name="pool.jar" location="lib/commons-pool-1.4.jar"/>
   <property name="proguard.jar" location="lib/proguard.jar"/>
   <property name="servlet.jar" location="lib/servlet-api.jar"/>
-  <property name="hadoop.jar" location="lib/hadoop-0.17.1-core.jar"/>
+  <property name="hadoop.jar" location="lib/hadoop-0.18.0-core.jar"/>
   <property name="slf4j-api.jar" location="lib/slf4j-api-1.5.2.jar"/>
   <property name="slf4j.jar" location="lib/slf4j-jcl-1.5.2.jar"/>
   <property name="commons-logging.jar" location="lib/commons-logging-1.1.1.jar"/>
+  <property name="uncommons-math.jar" location="lib/uncommons-maths-1.0.2.jar"/>
 
   <property environment="env"/>
   <property name="name" value="${ant.project.name}"/>
@@ -48,8 +49,8 @@
 
   <target depends="init" name="build" description="Compiles all code">
     <mkdir dir="build"/>
-    <javac source="1.5"
-           target="1.5"
+    <javac source="6"
+           target="6"
            deprecation="true"
            destdir="build"
            debug="true"
@@ -62,6 +63,7 @@
         <pathelement location="${pool.jar}"/>
         <pathelement location="${hadoop.jar}"/>
         <pathelement location="${slf4j-api.jar}"/>
+        <pathelement location="${uncommons-math.jar}"/>
       </classpath>
       <include name="org/apache/mahout/cf/taste/**"/>
     </javac>
@@ -94,7 +96,7 @@
       <arg value="-dontobfuscate"/>
       <arg value="-optimizationpasses 6"/>
       <arg value="-keep public class * { public protected *; }"/>
-      <arg value="-target 5"/>
+      <arg value="-target 6"/>
       <arg value="-verbose"/>
     </java>
     <delete file="temp.jar"/>
@@ -102,8 +104,8 @@
 
   <target depends="build" name="build-test" description="Builds test classes">
     <mkdir dir="build-test"/>
-    <javac source="1.5"
-           target="1.5"
+    <javac source="6"
+           target="6"
            debug="true"
            debuglevel="lines,vars,source"
            deprecation="true"
@@ -157,8 +159,8 @@
         </not>
       </condition>
     </fail>
-    <javac source="1.5"
-           target="1.5"
+    <javac source="6"
+           target="6"
            deprecation="true"
            debug="true"
            optimize="true"
@@ -204,6 +206,7 @@
         <pathelement location="${slf4j-api.jar}"/>
         <pathelement location="${slf4j.jar}"/>
         <pathelement location="${commons-logging.jar}"/>
+        <pathelement location="${uncommons-math.jar}"/>
         <pathelement location="${release-jar}"/>
         <pathelement location="build-test"/>
       </classpath>

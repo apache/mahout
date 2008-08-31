@@ -85,7 +85,6 @@ public class FuzzyKMeansMapper extends MapReduceBase implements
    * Configure the mapper with the cluster info
    * 
    * @param job
-   * @param clusters
    */
   protected void configureWithClusterInfo(JobConf job) {
     // Get the path location where the cluster Info is stored
@@ -116,7 +115,7 @@ public class FuzzyKMeansMapper extends MapReduceBase implements
         try {
           Text key = new Text();
           Text value = new Text();
-          int counter = 1;
+          //int counter = 1;
           while (reader.next(key, value)) {
             // get the cluster info
             SoftCluster cluster = SoftCluster.decodeCluster(value.toString());

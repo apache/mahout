@@ -21,9 +21,11 @@ import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.correlation.UserCorrelation;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
+import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.model.User;
 
 import java.util.Collection;
+import java.util.Random;
 
 /**
  * <p>Defines cluster similarity as the <em>smallest</em> correlation between any two
@@ -31,6 +33,8 @@ import java.util.Collection;
  * when <em>all pairs</em> of their members have relatively high correlation.</p>
  */
 public final class FarthestNeighborClusterSimilarity implements ClusterSimilarity {
+
+  private static final Random random = RandomUtils.getRandom();
 
   private final UserCorrelation correlation;
   private final double samplingPercentage;
@@ -67,7 +71,7 @@ public final class FarthestNeighborClusterSimilarity implements ClusterSimilarit
     }
     double leastCorrelation = Double.POSITIVE_INFINITY;
     for (User user1 : cluster1) {
-      if (samplingPercentage >= 1.0 || Math.random() < samplingPercentage) {
+      if (samplingPercentage >= 1.0 || random.nextDouble() < samplingPercentage) {
         for (User user2 : cluster2) {
           double theCorrelation = correlation.userCorrelation(user1, user2);
           if (theCorrelation < leastCorrelation) {

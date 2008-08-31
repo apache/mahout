@@ -37,11 +37,14 @@ import org.apache.mahout.utils.ManhattanDistanceMeasure;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.nio.charset.Charset;
 
 public class TestKmeansClustering extends TestCase {
 
@@ -264,13 +267,13 @@ public class TestKmeansClustering extends TestCase {
         assertEquals("too many values", 1, values.size());
         String value = values.get(0).toString();
         int ix = value.indexOf(",");
-        count += new Integer(value.substring(0, ix));
+        count += Integer.parseInt(value.substring(0, ix));
         total = total
             .plus(AbstractVector.decodeVector(value.substring(ix + 2)));
       }
       assertEquals("total points", 9, count);
-      assertEquals("point total[0]", 27, (new Double(total.get(0))).intValue());
-      assertEquals("point total[1]", 27, (new Double(total.get(1))).intValue());
+      assertEquals("point total[0]", 27, (int) total.get(0));
+      assertEquals("point total[1]", 27, (int) total.get(1));
     }
   }
 
@@ -399,8 +402,8 @@ public class TestKmeansClustering extends TestCase {
       assertTrue("output dir exists?", outDir.exists());
       String[] outFiles = outDir.list();
       assertEquals("output dir files?", 4, outFiles.length);
-      BufferedReader reader = new BufferedReader(new FileReader(
-          "output/points/part-00000"));
+      BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(
+          "output/points/part-00000"), Charset.forName("UTF-8")));
       int[] expect = expectedNumPoints[k];
       DummyOutputCollector<Text, Text> collector = new DummyOutputCollector<Text, Text>();
       while (reader.ready()) {
@@ -451,8 +454,8 @@ public class TestKmeansClustering extends TestCase {
     assertTrue("output dir exists?", outDir.exists());
     String[] outFiles = outDir.list();
     assertEquals("output dir files?", 4, outFiles.length);
-    BufferedReader reader = new BufferedReader(new FileReader(
-        "output/points/part-00000"));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(
+        "output/points/part-00000"), Charset.forName("UTF-8")));
     DummyOutputCollector<Text, Text> collector = new DummyOutputCollector<Text, Text>();
     while (reader.ready()) {
       String line = reader.readLine();
@@ -468,11 +471,11 @@ public class TestKmeansClustering extends TestCase {
 
   public static void writePointsToFileWithPayload(List<Vector> points,
       String fileName, String payload) throws IOException {
-    BufferedWriter output = new BufferedWriter(new FileWriter(fileName));
+    BufferedWriter output = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), Charset.forName("UTF-8")));
     for (Vector point : points) {
       output.write(point.asFormatString());
       output.write(payload);
-      output.write("\n");
+      output.write('\n');
     }
     output.flush();
     output.close();

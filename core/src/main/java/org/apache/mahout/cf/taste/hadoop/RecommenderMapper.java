@@ -90,8 +90,7 @@ public final class RecommenderMapper
       throw new RuntimeException(ioe);
     }
     try {
-      Class<? extends Recommender> recommenderClass =
-          (Class<? extends Recommender>) Class.forName(recommenderClassName);
+      Class<? extends Recommender> recommenderClass = Class.forName(recommenderClassName).asSubclass(Recommender.class);
       Constructor<? extends Recommender> constructor = recommenderClass.getConstructor(DataModel.class);
       recommender = constructor.newInstance(fileDataModel);
     } catch (NoSuchMethodException nsme) {

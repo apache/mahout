@@ -50,7 +50,7 @@ public class SoftCluster {
   private static int nextClusterId = 0;
 
   // this cluster's clusterId
-  private int clusterId;
+  private final int clusterId;
 
   // the current center
   private Vector center = new SparseVector(0);
@@ -92,10 +92,8 @@ public class SoftCluster {
     String id = formattedString.substring(0, beginIndex);
     String center = formattedString.substring(beginIndex);
     if (id.startsWith("C") || id.startsWith("V")) {
-      int clusterId = new Integer(formattedString.substring(1, beginIndex - 2));
-      Vector clusterCenter = null;
-
-      clusterCenter = AbstractVector.decodeVector(center);
+      int clusterId = Integer.parseInt(formattedString.substring(1, beginIndex - 2));
+      Vector clusterCenter = AbstractVector.decodeVector(center);
 
       SoftCluster cluster = new SoftCluster(clusterCenter, clusterId);
       cluster.converged = id.startsWith("V");

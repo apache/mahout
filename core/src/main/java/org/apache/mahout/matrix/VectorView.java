@@ -213,7 +213,7 @@ public class VectorView extends AbstractVector {
     String vectorClassName = new String(buf);
     Vector vector;
     try {
-      vector = (Vector) Class.forName(vectorClassName).newInstance();
+      vector = Class.forName(vectorClassName).asSubclass(Vector.class).newInstance();
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(e);
     } catch (IllegalAccessException e) {

@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.nio.charset.Charset;
 
 public class Classify {
 
@@ -85,8 +86,8 @@ public class Classify {
 
     log.info("Loading model from: {}", modelPaths);
 
-    Model model = null;
-    Classifier classifier = null;
+    Model model;
+    Classifier classifier;
 
     String classifierType = cmdLine.getOptionValue(typeOpt.getOpt());
 
@@ -98,6 +99,8 @@ public class Classify {
       log.info("Testing Complementary Bayes Classifier");
       model = new CBayesModel();
       classifier = new CBayesClassifier();
+    } else {
+      throw new IllegalArgumentException("Unrecognized classifier type: " + classifierType);
     }
 
     model = reader.loadModel(model, fs, modelPaths, conf);
@@ -119,8 +122,7 @@ public class Classify {
     Analyzer analyzer = null;
     if (cmdLine.hasOption(analyzerOpt.getOpt())) {
       String className = cmdLine.getOptionValue(analyzerOpt.getOpt());
-      Class clazz = Class.forName(className);
-      analyzer = (Analyzer) clazz.newInstance();
+      analyzer = Class.forName(className).asSubclass(Analyzer.class).newInstance();
     }
     if (analyzer == null) {
       analyzer = new StandardAnalyzer();
@@ -134,7 +136,7 @@ public class Classify {
     }
 
     log.info("Converting input document to proper format");
-    String[] document = BayesFileFormatter.readerToDocument(analyzer, new InputStreamReader(new FileInputStream(docPath), encoding));
+    String[] document = BayesFileFormatter.readerToDocument(analyzer, new InputStreamReader(new FileInputStream(docPath), Charset.forName(encoding)));
     StringBuilder line = new StringBuilder();
     for(String token : document)
     {

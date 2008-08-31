@@ -26,14 +26,12 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.classifier.BayesFileFormatter;
-import org.apache.mahout.common.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.List;
 
 /**
  * Reads the input train set(preprocessed using the {@link BayesFileFormatter}).
@@ -66,7 +64,7 @@ public class BayesFeatureMapper extends MapReduceBase implements
   public void map(Text key, Text value,
       OutputCollector<Text, FloatWritable> output, Reporter reporter)
       throws IOException {
-    String line = value.toString();
+    //String line = value.toString();
     String label = key.toString();
     int keyLen = label.length();
 
@@ -77,7 +75,7 @@ public class BayesFeatureMapper extends MapReduceBase implements
     builder.ensureCapacity(32);// make sure we have a reasonably size buffer to
                                // begin with
     // TODO: srowen says this var isn't used right now
-    List<String> previousN_1Grams  = Model.generateNGramsWithoutLabel(line, keyLen);
+    //List<String> previousN_1Grams  = Model.generateNGramsWithoutLabel(line, keyLen);
     
     double lengthNormalisation = 0.0;
     for (double D_kj : wordList.values()) {

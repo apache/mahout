@@ -37,14 +37,17 @@ import org.apache.mahout.utils.UserDefinedDistanceMeasure;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.nio.charset.Charset;
 
 public class TestCanopyCreation extends TestCase {
   static final double[][] raw = { { 1, 1 }, { 2, 1 }, { 1, 2 }, { 2, 2 },
@@ -144,11 +147,11 @@ public class TestCanopyCreation extends TestCase {
 
   private void writePointsToFileWithPayload(List<Vector> points,
       String fileName, String payload) throws IOException {
-    BufferedWriter output = new BufferedWriter(new FileWriter(fileName));
+    BufferedWriter output = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), Charset.forName("UTF-8")));
     for (Vector point : points) {
       output.write(point.asFormatString());
       output.write(payload);
-      output.write("\n");
+      output.write('\n');
     }
     output.flush();
     output.close();
@@ -674,8 +677,8 @@ public class TestCanopyCreation extends TestCase {
     // now run the Job
     CanopyClusteringJob.runJob("testdata", "output",
         ManhattanDistanceMeasure.class.getName(), 3.1, 2.1);
-    BufferedReader reader = new BufferedReader(new FileReader(
-        "output/clusters/part-00000"));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(
+        "output/clusters/part-00000"), Charset.forName("UTF-8")));
     int count = 0;
     while (reader.ready()) {
       System.out.println(reader.readLine());
@@ -702,8 +705,8 @@ public class TestCanopyCreation extends TestCase {
     // now run the Job
     CanopyClusteringJob.runJob("testdata", "output",
         EuclideanDistanceMeasure.class.getName(), 3.1, 2.1);
-    BufferedReader reader = new BufferedReader(new FileReader(
-        "output/clusters/part-00000"));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(
+        "output/clusters/part-00000"), Charset.forName("UTF-8")));
     int count = 0;
     while (reader.ready()) {
       System.out.println(reader.readLine());
@@ -732,8 +735,8 @@ public class TestCanopyCreation extends TestCase {
     // now run the Job
     CanopyClusteringJob.runJob("testdata", "output",
         ManhattanDistanceMeasure.class.getName(), 3.1, 2.1);
-    BufferedReader reader = new BufferedReader(new FileReader(
-        "output/clusters/part-00000"));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(
+        "output/clusters/part-00000"), Charset.forName("UTF-8")));
     int count = 0;
     while (reader.ready()) {
       String line = reader.readLine();
@@ -764,8 +767,8 @@ public class TestCanopyCreation extends TestCase {
     // now run the Job
     CanopyClusteringJob.runJob("testdata", "output",
         EuclideanDistanceMeasure.class.getName(), 3.1, 2.1);
-    BufferedReader reader = new BufferedReader(new FileReader(
-        "output/clusters/part-00000"));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(
+        "output/clusters/part-00000"), Charset.forName("UTF-8")));
     int count = 0;
     while (reader.ready()) {
       String line = reader.readLine();

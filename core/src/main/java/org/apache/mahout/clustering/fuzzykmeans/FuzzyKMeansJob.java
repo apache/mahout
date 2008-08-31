@@ -39,8 +39,8 @@ public class FuzzyKMeansJob {
     String clusters = args[index++];
     String output = args[index++];
      String measureClass = args[index++];
-    double convergenceDelta = new Double(args[index++]);
-    int maxIterations = new Integer(args[index++]);
+    double convergenceDelta = Double.parseDouble(args[index++]);
+    int maxIterations = Integer.parseInt(args[index++]);
     int numMapTasks = Integer.parseInt(args[index++]);
     boolean doCanopy = Boolean.parseBoolean(args[index++]);
     int m = Integer.parseInt(args[index++]);

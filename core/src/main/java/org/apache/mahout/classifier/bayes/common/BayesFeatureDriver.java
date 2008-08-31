@@ -87,7 +87,7 @@ public class BayesFeatureDriver {
       dfs.delete(outPath, true);
 
     DefaultStringifier<Integer> intStringifier = new DefaultStringifier<Integer>(conf, Integer.class);
-    String gramSizeString = intStringifier.toString(new Integer(gramSize));
+    String gramSizeString = intStringifier.toString(Integer.valueOf(gramSize));
 
     Integer retGramSize = intStringifier.fromString(gramSizeString);
     log.info("{}", retGramSize);

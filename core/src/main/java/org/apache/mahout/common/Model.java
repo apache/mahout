@@ -30,7 +30,6 @@ import java.util.StringTokenizer;
 
 /**
  * The Base Model Class. Currently there are some Bayes Model elements which have to be refactored out later.
- * 
  */
 public abstract class Model {
 
@@ -50,9 +49,9 @@ public abstract class Model {
 
   protected final Map<Integer, Float> thetaNormalizer = new HashMap<Integer, Float>();
 
-  protected Float sigma_jSigma_k = new Float(0);
+  protected float sigma_jSigma_k = 0.0f;
 
-  protected final Float alpha_i = 1.0f; // alpha_i can be improved upon for increased smoothing
+  protected final float alpha_i = 1.0f; // alpha_i can be improved upon for increased smoothing
   
   protected abstract float FeatureWeight(Integer label, Integer feature);
   
@@ -119,23 +118,23 @@ public abstract class Model {
     if (featureLabelWeights.size() <= feature) {
       throw new IllegalStateException("This should not happen");
     }
-    featureLabelWeights.get(feature).put(label, new Float(weight));
+    featureLabelWeights.get(feature).put(label, weight);
   }
 
   protected void setSumFeatureWeight(Integer feature, float sum) {
     if (sumFeatureWeight.size() != feature)
       throw new IllegalStateException("This should not happen");
-    sumFeatureWeight.add(feature, new Float(sum));
+    sumFeatureWeight.add(feature, sum);
   }
 
   protected void setSumLabelWeight(Integer label, float sum) {
     if (sumLabelWeight.size() != label)
       throw new IllegalStateException("This should not happen");
-    sumLabelWeight.put(label, new Float(sum));
+    sumLabelWeight.put(label, sum);
   }
 
   protected void setThetaNormalizer(Integer label, float sum) {
-    thetaNormalizer.put(label, new Float(sum));
+    thetaNormalizer.put(label, sum);
   }
 
   public void initializeWeightMatrix() {
@@ -145,7 +144,7 @@ public abstract class Model {
       featureLabelWeights.add(new HashMap<Integer, Float>(1));
   }
 
-  public void setSigma_jSigma_k(Float sigma_jSigma_k) {
+  public void setSigma_jSigma_k(float sigma_jSigma_k) {
     this.sigma_jSigma_k = sigma_jSigma_k;
   }
 
@@ -203,8 +202,7 @@ public abstract class Model {
       
       StringBuilder gramBuilder = new StringBuilder();
      
-      for(String gram: previousN_1Grams)
-      {
+      for (String gram : previousN_1Grams) {
         gramBuilder.append(gram);
         String token = gramBuilder.toString();        
         tokens.add(token);
@@ -232,12 +230,11 @@ public abstract class Model {
       
       StringBuilder gramBuilder = new StringBuilder();
      
-      for(String gram: previousN_1Grams)
-      {
+      for (String gram : previousN_1Grams) {
         gramBuilder.append(gram);
         String token = gramBuilder.toString();        
         tokens.add(token);
-        gramBuilder.append(" ");
+        gramBuilder.append(' ');
       }
     }
     

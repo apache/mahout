@@ -23,6 +23,9 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+/**
+ * A {@link WritableComparable} encapsulating two {@link org.apache.mahout.cf.taste.model.Item}s.
+ */
 public final class ItemItemWritable implements WritableComparable {
 
   private String itemAID;

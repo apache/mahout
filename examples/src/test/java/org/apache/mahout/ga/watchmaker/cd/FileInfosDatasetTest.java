@@ -23,12 +23,11 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
+import java.nio.charset.Charset;
 
-/**
- * 
- */
 public class FileInfosDatasetTest extends TestCase {
 
   public void testRanges() throws IOException {
@@ -39,7 +38,7 @@ public class FileInfosDatasetTest extends TestCase {
     DataSet.initialize(dataset);
 
     String filename = "build/test-classes/wdbc/wdbc.data";
-    BufferedReader in = new BufferedReader(new FileReader(filename));
+    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(filename), Charset.forName("UTF-8")));
 
     String line;
     DataLine dl = new DataLine();

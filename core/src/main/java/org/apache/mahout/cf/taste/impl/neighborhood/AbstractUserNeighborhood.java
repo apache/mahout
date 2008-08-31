@@ -20,15 +20,19 @@ package org.apache.mahout.cf.taste.impl.neighborhood;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.correlation.UserCorrelation;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
+import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 
 import java.util.Collection;
+import java.util.Random;
 
 /**
  * <p>Contains methods and resources useful to all classes in this package.</p>
  */
 abstract class AbstractUserNeighborhood implements UserNeighborhood {
+
+  private static final Random random = RandomUtils.getRandom();
 
   private final UserCorrelation userCorrelation;
   private final DataModel dataModel;
@@ -61,7 +65,7 @@ abstract class AbstractUserNeighborhood implements UserNeighborhood {
   }
 
   final boolean sampleForUser() {
-    return samplingRate >= 1.0 || Math.random() < samplingRate;
+    return samplingRate >= 1.0 || random.nextDouble() < samplingRate;
   }
 
   public final void refresh(Collection<Refreshable> alreadyRefreshed) {

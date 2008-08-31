@@ -26,13 +26,14 @@ import org.apache.mahout.cf.taste.model.Item;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.OutputStreamWriter;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.nio.charset.Charset;
 
 public final class GroupLensDataModel extends FileDataModel {
 
@@ -75,7 +76,7 @@ public final class GroupLensDataModel extends FileDataModel {
     if (!resultFile.exists()) {
       PrintWriter writer = null;
       try {
-        writer = new PrintWriter(new FileWriter(resultFile));
+        writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charset.forName("UTF-8")));
         for (String line : new FileLineIterable(originalFile)) {
           String convertedLine;
           if (ratings) {

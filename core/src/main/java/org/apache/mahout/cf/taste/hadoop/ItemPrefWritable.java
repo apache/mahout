@@ -24,6 +24,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 /**
+ * A {@link Writable} encapsulating a {@link org.apache.mahout.cf.taste.model.Item} and a preference value.
  */
 public final class ItemPrefWritable implements Writable {
 

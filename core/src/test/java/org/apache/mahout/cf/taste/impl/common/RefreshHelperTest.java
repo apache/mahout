@@ -17,8 +17,8 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
-import junit.framework.TestCase;
 import org.apache.mahout.cf.taste.common.Refreshable;
+import org.apache.mahout.cf.taste.impl.TasteTestCase;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -26,7 +26,7 @@ import java.util.HashSet;
 /**
  * Tests {@link RefreshHelper}
  */
-public final class RefreshHelperTest extends TestCase {
+public final class RefreshHelperTest extends TasteTestCase {
 
   public void testCallable() {
     MockRefreshable mock = new MockRefreshable();

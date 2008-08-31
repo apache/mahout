@@ -250,7 +250,7 @@ public class Canopy {
     String id = formattedString.substring(0, beginIndex);
     String centroid = formattedString.substring(beginIndex);
     if (id.startsWith("C")) {
-      int canopyId = new Integer(formattedString.substring(1, beginIndex - 2));
+      int canopyId = Integer.parseInt(formattedString.substring(1, beginIndex - 2));
       Vector canopyCentroid = AbstractVector.decodeVector(centroid);
       return new Canopy(canopyCentroid, canopyId);
     }

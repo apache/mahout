@@ -45,7 +45,7 @@ public class BayesModel extends Model {
     float numerator =  result + alpha_i;
     float denominator =(sumLabelWeight + vocabCount);
     
-    float weight = new Double(Math.log(numerator /denominator)).floatValue();
+    float weight = (float) Math.log(numerator /denominator);
     result = (-1.0f * (weight));
 
     return result;
@@ -98,7 +98,7 @@ public class BayesModel extends Model {
           float D_ij = getWeightUnprocessed(label, feature);
           float sumLabelWeight = getSumLabelWeight(label);
           // TODO srowen says sigma_j is unused
-          float sigma_j = getSumFeatureWeight(feature);
+          //float sigma_j = getSumFeatureWeight(feature);
 
           float numerator = D_ij + alpha_i;
           float denominator = sumLabelWeight + vocabCount;

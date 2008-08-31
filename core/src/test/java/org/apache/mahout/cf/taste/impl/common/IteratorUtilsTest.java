@@ -17,15 +17,15 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
-import junit.framework.TestCase;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
 
-public final class IteratorUtilsTest extends TestCase {
+import org.apache.mahout.cf.taste.impl.TasteTestCase;
+
+public final class IteratorUtilsTest extends TasteTestCase {
 
   private static final List<String> TEST_DATA;
 

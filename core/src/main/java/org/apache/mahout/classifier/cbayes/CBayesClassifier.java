@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Deque;
 
 /**
  * Classifies documents based on a {@link CBayesModel}.  
@@ -52,7 +53,7 @@ public class CBayesClassifier implements Classifier{
       }
     }
 
-    LinkedList<ClassifierResult> result = new LinkedList<ClassifierResult>();
+    Deque<ClassifierResult> result = new LinkedList<ClassifierResult>();
     while ((tmp = (ClassifierResult) pq.pop()) != null) {
       result.addLast(tmp);
     }

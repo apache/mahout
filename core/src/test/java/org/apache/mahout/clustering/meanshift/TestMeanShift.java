@@ -33,12 +33,14 @@ import org.apache.mahout.utils.ManhattanDistanceMeasure;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.nio.charset.Charset;
 
 public class TestMeanShift extends TestCase {
 
@@ -73,11 +75,11 @@ public class TestMeanShift extends TestCase {
    */
   private void writePointsToFileWithPayload(Vector[] points, String fileName,
       String payload) throws IOException {
-    BufferedWriter output = new BufferedWriter(new FileWriter(fileName));
+    BufferedWriter output = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), Charset.forName("UTF-8")));
     for (Vector point : points) {
       output.write(new MeanShiftCanopy(point).toString());
       output.write(payload);
-      output.write("\n");
+      output.write('\n');
     }
     output.flush();
     output.close();

@@ -324,37 +324,10 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
     }
   }
 
-  private boolean mergeClosestClusters(int numUsers, List<Collection<User>> clusters, boolean done) throws TasteException {
+  private boolean mergeClosestClusters(int numUsers, List<Collection<User>> clusters, boolean done) 
+      throws TasteException {
     // We find a certain number of closest clusters...
-    boolean full = false;
-    LinkedList<ClusterClusterPair> queue = new LinkedList<ClusterClusterPair>();
-    int i = 0;
-    for (Collection<User> cluster1 : clusters) {
-      i++;
-      ListIterator<Collection<User>> it2 = clusters.listIterator(i);
-      while (it2.hasNext()) {
-        Collection<User> cluster2 = it2.next();
-        double similarity = clusterSimilarity.getSimilarity(cluster1, cluster2);
-        if (!Double.isNaN(similarity) &&
-            (!full || similarity > queue.getLast().getSimilarity())) {
-          ListIterator<ClusterClusterPair> queueIterator =
-                  queue.listIterator(queue.size());
-          while (queueIterator.hasPrevious()) {
-            if (similarity <= queueIterator.previous().getSimilarity()) {
-              queueIterator.next();
-              break;
-            }
-          }
-          queueIterator.add(new ClusterClusterPair(cluster1, cluster2, similarity));
-          if (full) {
-            queue.removeLast();
-          } else if (queue.size() > numUsers) { // use numUsers as queue size limit
-            full = true;
-            queue.removeLast();
-          }
-        }
-      }
-    }
+    LinkedList<ClusterClusterPair> queue = findClosestClusters(numUsers, clusters);
 
     // The first one is definitely the closest pair in existence so we can cluster
     // the two together, put it back into the set of clusters, and start again. Instead
@@ -433,6 +406,40 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
 
     }
     return done;
+  }
+
+  private LinkedList<ClusterClusterPair> findClosestClusters(int numUsers, List<Collection<User>> clusters)
+      throws TasteException {
+    boolean full = false;
+    LinkedList<ClusterClusterPair> queue = new LinkedList<ClusterClusterPair>();
+    int i = 0;
+    for (Collection<User> cluster1 : clusters) {
+      i++;
+      ListIterator<Collection<User>> it2 = clusters.listIterator(i);
+      while (it2.hasNext()) {
+        Collection<User> cluster2 = it2.next();
+        double similarity = clusterSimilarity.getSimilarity(cluster1, cluster2);
+        if (!Double.isNaN(similarity) &&
+            (!full || similarity > queue.getLast().getSimilarity())) {
+          ListIterator<ClusterClusterPair> queueIterator =
+                  queue.listIterator(queue.size());
+          while (queueIterator.hasPrevious()) {
+            if (similarity <= queueIterator.previous().getSimilarity()) {
+              queueIterator.next();
+              break;
+            }
+          }
+          queueIterator.add(new ClusterClusterPair(cluster1, cluster2, similarity));
+          if (full) {
+            queue.removeLast();
+          } else if (queue.size() > numUsers) { // use numUsers as queue size limit
+            full = true;
+            queue.removeLast();
+          }
+        }
+      }
+    }
+    return queue;
   }
 
   private static Map<Object, List<RecommendedItem>> computeTopRecsPerUserID(Iterable<Collection<User>> clusters)

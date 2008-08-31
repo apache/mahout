@@ -18,12 +18,13 @@ package org.apache.mahout.clustering.fuzzykmeans;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.nio.charset.Charset;
 
 import junit.framework.TestCase;
 
@@ -63,7 +64,7 @@ public class TestFuzzyKmeansClustering extends TestCase {
 
     // Shift the decimal the correct number of places
     // to the right.
-    val = val * factor;
+    val *= factor;
 
     // Round to the nearest integer.
     long tmp = Math.round(val);
@@ -88,6 +89,7 @@ public class TestFuzzyKmeansClustering extends TestCase {
     DistanceMeasure measure = (DistanceMeasure) cl.newInstance();
     SoftCluster.config(measure, threshold);
     boolean converged = false;
+    // TODO srowen notes that converged is always false?
     for (int iter = 0; !converged && iter < numIter; iter++) {
       iterateReference(points, clusterList, measure);
     }
@@ -158,14 +160,9 @@ public class TestFuzzyKmeansClustering extends TestCase {
       // run reference FuzzyKmeans algorithm
       referenceFuzzyKMeans(points, clusterList, pointClusterInfo,
           EuclideanDistanceMeasure.class.getName(), 0.001, 2);
-      Iterator<Map.Entry<String, String>> iterator = pointClusterInfo
-          .entrySet().iterator();
 
       // iterate for each point
-      while (iterator.hasNext()) {
-        Map.Entry<String, String> entry = iterator.next();
-        String value = entry.getValue();
-
+      for (String value : pointClusterInfo.values()) {
         String clusterInfoStr = value.substring(1, value.length() - 1);
         String[] clusterInfoList = clusterInfoStr.split(" ");
         assertEquals("Number of clusters", k + 1, clusterInfoList.length);
@@ -232,8 +229,8 @@ public class TestFuzzyKmeansClustering extends TestCase {
       assertTrue("output dir exists?", outDir.exists());
       String[] outFiles = outDir.list();
       assertEquals("output dir files?", 4, outFiles.length);
-      BufferedReader reader = new BufferedReader(new FileReader(
-          "output/points/part-00000"));
+      BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(
+          "output/points/part-00000"), Charset.forName("UTF-8")));
 
       while (reader.ready()) {
         String line = reader.readLine();
@@ -298,7 +295,8 @@ public class TestFuzzyKmeansClustering extends TestCase {
       Map<String, Double> pointTotalProbMap = new HashMap<String, Double>();
 
       for (String key : mapCollector.getKeys()) {
-        SoftCluster cluster = SoftCluster.decodeCluster(key);
+        //SoftCluster cluster = SoftCluster.decodeCluster(key);
+        // TODO srowen says cluster is not used?
         List<Text> values = mapCollector.getValue(key);
 
         for (Text value : values) {
@@ -318,11 +316,8 @@ public class TestFuzzyKmeansClustering extends TestCase {
           pointTotalProbMap.put(encodedVector, probVal + pointProb);
         }
       }
-      Iterator<Map.Entry<String, Double>> iterator = pointTotalProbMap
-          .entrySet().iterator();
 
-      while (iterator.hasNext()) {
-        Map.Entry<String, Double> entry = iterator.next();
+      for (Map.Entry<String, Double> entry : pointTotalProbMap.entrySet()) {
         String key = entry.getKey();
         double value = round(entry.getValue(), 1);
 

@@ -201,7 +201,7 @@ public class SequenceFileModelReader {
       // the key is either _label_ or label,feature
       while (reader.next(key, value)) {
         String keyStr = key.toString();
-
+        // TODO srowen says we should probably collapse these empty branches?
         if (keyStr.startsWith("_")) {
 
         } else if (keyStr.startsWith(",")) {
@@ -211,8 +211,9 @@ public class SequenceFileModelReader {
         } else {
           int idx = keyStr.indexOf(",");
           if (idx != -1) {
+            // TODO srowen says data is not used?
             Map<String, Float> data = new HashMap<String, Float>();
-            data.put(keyStr.substring(0, idx), new Float(value.get()));
+            data.put(keyStr.substring(0, idx), value.get());
             writer.append(new Text(key.toString()), value);
           }
         }
@@ -237,7 +238,7 @@ public class SequenceFileModelReader {
       while (reader.next(key, value)) {
         String keyStr = key.toString();
         if (keyStr.startsWith("_")) { // Sum of weights of labels
-          labelSum.put(keyStr.substring(1), new Float(value.get()));
+          labelSum.put(keyStr.substring(1), value.get());
         }
 
       }
@@ -260,7 +261,7 @@ public class SequenceFileModelReader {
       while (reader.next(key, value)) {
         String keyStr = key.toString();
         if (keyStr.startsWith("_")) { // Count of Documents in a Label
-          labelDocumentCounts.put(keyStr.substring(1), new Float(value.get()));
+          labelDocumentCounts.put(keyStr.substring(1), value.get());
         }
 
       }
@@ -285,7 +286,7 @@ public class SequenceFileModelReader {
         if (weightSum.size() > 1) {
           throw new IOException("Incorrect Sum File");
         } else if (keyStr.startsWith("*")) {
-          weightSum.put(keyStr, new Float(value.get()));
+          weightSum.put(keyStr, value.get());
         }
 
       }
@@ -311,7 +312,7 @@ public class SequenceFileModelReader {
           throw new IOException("Incorrect vocabCount File");
         }
         if (keyStr.startsWith("*")) {
-          weightSum.put(keyStr, new Float(value.get()));
+          weightSum.put(keyStr, value.get());
         }
 
       }

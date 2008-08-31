@@ -63,7 +63,12 @@ public final class LoadTest extends TasteTestCase {
   private static final int NUM_PREFS = 20;
   private static final int NUM_THREADS = 4;
 
-  private final Random random = RandomUtils.getRandom();
+  private Random random;
+
+  public void setUp() throws Exception {
+    super.setUp();
+    random = RandomUtils.getRandom();
+  }
 
   public void testSlopeOneLoad() throws Exception {
     DataModel model = createModel();

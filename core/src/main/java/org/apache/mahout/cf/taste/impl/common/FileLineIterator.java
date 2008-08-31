@@ -25,10 +25,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.nio.charset.Charset;
 
 /**
  * Iterates over the lines of a text file. This assumes the text file is UTF-8 encoded
@@ -46,13 +45,7 @@ public final class FileLineIterator implements Iterator<String>, Closeable {
    */
   public FileLineIterator(File file) throws IOException {
     InputStream is = new FileInputStream(file);
-    Reader fileReader;
-    try {
-      fileReader = new InputStreamReader(is, "UTF8");
-    } catch (UnsupportedEncodingException uee) {
-      throw new AssertionError(uee);
-    }
-    reader = new BufferedReader(fileReader);
+    reader = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
     nextLine = reader.readLine();
   }
 

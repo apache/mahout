@@ -98,8 +98,8 @@ public class TestClassifier {
 
     log.info("Loading model from: {}", modelPaths);
 
-    Model model = null;
-    Classifier classifier = null;
+    Model model;
+    Classifier classifier;
 
     String classifierType = cmdLine.getOptionValue(typeOpt.getOpt());
 
@@ -111,6 +111,8 @@ public class TestClassifier {
       log.info("Testing Complementary Bayes Classifier");
       model = new CBayesModel();
       classifier = new CBayesClassifier();
+    } else {
+      throw new IllegalArgumentException("Unrecognized classifier type: " + classifierType);
     }
 
     model = reader.loadModel(model, fs, modelPaths, conf);

@@ -17,6 +17,8 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
+import org.uncommons.maths.random.MersenneTwisterRNG;
+
 import java.util.Random;
 
 /**
@@ -25,7 +27,12 @@ import java.util.Random;
  */
 public final class RandomUtils {
 
-  private static final long STANDARD_SEED = 0xCAFEBABEL;
+  private static final byte[] STANDARD_SEED = {
+      (byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE,
+      (byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE,
+      (byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE,
+      (byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE,
+  };
   private static boolean testSeed;
 
   private RandomUtils() {
@@ -36,7 +43,7 @@ public final class RandomUtils {
   }
 
   public static Random getRandom() {
-    return testSeed ? new Random(STANDARD_SEED) : new Random();
+    return testSeed ? new MersenneTwisterRNG(STANDARD_SEED) : new MersenneTwisterRNG();
   }
 
 }
