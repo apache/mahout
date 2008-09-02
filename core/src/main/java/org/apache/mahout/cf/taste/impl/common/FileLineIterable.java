@@ -20,23 +20,36 @@ package org.apache.mahout.cf.taste.impl.common;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import java.nio.charset.Charset;
 
 /**
  * Iterable representing the lines of a text file. It can produce an {@link Iterator} over those lines.
- * This assumes the text file is UTF-8 encoded and that its lines are delimited in a manner
+ * This assumes the text file's lines are delimited in a manner
  * consistent with how {@link java.io.BufferedReader} defines lines.
  */
 public final class FileLineIterable implements Iterable<String> {
 
   private final File file;
+  private final Charset encoding;
 
+  /**
+   * Creates a {@link FileLineIterable} over a given file, assuming a UTF-8 encoding.
+   */
   public FileLineIterable(File file) {
+    this(file, Charset.forName("UTF-8"));
+  }
+
+  /**
+   * Creates a {@link FileLineIterable} over a given file, using the given encoding.
+   */
+  public FileLineIterable(File file, Charset encoding) {
     this.file = file;
+    this.encoding = encoding;
   }
 
   public Iterator<String> iterator() {
     try {
-      return new FileLineIterator(file);
+      return new FileLineIterator(file, encoding);
     } catch (IOException ioe) {
       throw new IllegalStateException(ioe);
     }

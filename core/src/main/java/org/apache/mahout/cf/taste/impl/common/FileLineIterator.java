@@ -30,8 +30,8 @@ import java.util.NoSuchElementException;
 import java.nio.charset.Charset;
 
 /**
- * Iterates over the lines of a text file. This assumes the text file is UTF-8 encoded
- * and that its lines are delimited in a manner consistent with how {@link BufferedReader}
+ * Iterates over the lines of a text file. This assumes the text file's lines
+ * are delimited in a manner consistent with how {@link BufferedReader}
  * defines lines.
  */
 public final class FileLineIterator implements Iterator<String>, Closeable {
@@ -40,12 +40,24 @@ public final class FileLineIterator implements Iterator<String>, Closeable {
   private String nextLine;
 
   /**
+   * Creates a {@link FileLineIterator} over a given file, assuming a UTF-8 encoding.
+   *
    * @throws FileNotFoundException if the file does not exist
    * @throws IOException if the file cannot be read
    */
   public FileLineIterator(File file) throws IOException {
+    this(file, Charset.forName("UTF-8"));
+  }
+
+  /**
+   * Creates a {@link FileLineIterator} over a given file, using the given encoding.
+   *
+   * @throws FileNotFoundException if the file does not exist
+   * @throws IOException if the file cannot be read
+   */
+  public FileLineIterator(File file, Charset encoding) throws IOException {
     InputStream is = new FileInputStream(file);
-    reader = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+    reader = new BufferedReader(new InputStreamReader(is, encoding));
     nextLine = reader.readLine();
   }
 
