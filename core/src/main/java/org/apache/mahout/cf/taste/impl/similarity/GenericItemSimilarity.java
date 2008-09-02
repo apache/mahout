@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.correlation;
+package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.correlation.ItemCorrelation;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.IteratorIterable;
 import org.apache.mahout.cf.taste.impl.common.IteratorUtils;
@@ -34,21 +34,21 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
- * <p>A "generic" {@link ItemCorrelation} which takes a static list of precomputed {@link Item}
+ * <p>A "generic" {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity} which takes a static list of precomputed {@link Item}
  * correlations and bases its responses on that alone. The values may have been precomputed
  * offline by another process, stored in a file, and then read and fed into an instance of this class.</p>
  *
- * <p>This is perhaps the best {@link ItemCorrelation} to use with
+ * <p>This is perhaps the best {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity} to use with
  * {@link org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender}, for now, since the point of item-based
  * recommenders is that they can take advantage of the fact that item similarity is relatively static,
  * can be precomputed, and then used in computation to gain a significant performance advantage.</p>
  */
-public final class GenericItemCorrelation implements ItemCorrelation {
+public final class GenericItemSimilarity implements ItemSimilarity {
 
   private final Map<Item, Map<Item, Double>> correlationMaps = new FastMap<Item, Map<Item, Double>>();
 
   /**
-   * <p>Creates a {@link GenericItemCorrelation} from a precomputed list of {@link ItemItemCorrelation}s. Each
+   * <p>Creates a {@link GenericItemSimilarity} from a precomputed list of {@link ItemItemCorrelation}s. Each
    * represents the correlation between two distinct items. Since correlation is assumed to be symmetric,
    * it is not necessary to specify correlation between item1 and item2, and item2 and item1. Both are the same.
    * It is also not necessary to specify a correlation between any item and itself; these are assumed to be 1.0.</p>
@@ -58,7 +58,7 @@ public final class GenericItemCorrelation implements ItemCorrelation {
    *
    * @param correlations set of {@link ItemItemCorrelation}s on which to base this instance
    */
-  public GenericItemCorrelation(Iterable<ItemItemCorrelation> correlations) {
+  public GenericItemSimilarity(Iterable<ItemItemCorrelation> correlations) {
     initCorrelationMaps(correlations);
   }
 
@@ -72,46 +72,46 @@ public final class GenericItemCorrelation implements ItemCorrelation {
    * @param correlations set of {@link ItemItemCorrelation}s on which to base this instance
    * @param maxToKeep maximum number of correlations to keep
    */
-  public GenericItemCorrelation(Iterable<ItemItemCorrelation> correlations, int maxToKeep) {
+  public GenericItemSimilarity(Iterable<ItemItemCorrelation> correlations, int maxToKeep) {
     Iterable<ItemItemCorrelation> keptCorrelations = TopItems.getTopItemItemCorrelations(maxToKeep, correlations);
     initCorrelationMaps(keptCorrelations);
   }
 
   /**
-   * <p>Builds a list of item-item correlations given an {@link ItemCorrelation} implementation and a
+   * <p>Builds a list of item-item correlations given an {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity} implementation and a
    * {@link DataModel}, rather than a list of {@link ItemItemCorrelation}s.</p>
    *
-   * <p>It's valid to build a {@link GenericItemCorrelation} this way, but perhaps missing some of the point
+   * <p>It's valid to build a {@link GenericItemSimilarity} this way, but perhaps missing some of the point
    * of an item-based recommender. Item-based recommenders use the assumption that item-item correlations
    * are relatively fixed, and might be known already independent of user preferences. Hence it is useful
    * to inject that information, using {@link #GenericItemCorrelation(Iterable)}.</p>
    *
-   * @param otherCorrelation other {@link ItemCorrelation} to get correlations from
+   * @param otherSimilarity other {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity} to get correlations from
    * @param dataModel data model to get {@link Item}s from
    * @throws TasteException if an error occurs while accessing the {@link DataModel} items
    */
-  public GenericItemCorrelation(ItemCorrelation otherCorrelation, DataModel dataModel) throws TasteException {
+  public GenericItemSimilarity(ItemSimilarity otherSimilarity, DataModel dataModel) throws TasteException {
     List<? extends Item> items = IteratorUtils.iterableToList(dataModel.getItems());
-    Iterator<ItemItemCorrelation> it = new DataModelCorrelationsIterator(otherCorrelation, items);
+    Iterator<ItemItemCorrelation> it = new DataModelCorrelationsIterator(otherSimilarity, items);
     initCorrelationMaps(new IteratorIterable<ItemItemCorrelation>(it));
   }
 
   /**
-   * <p>Like {@link #GenericItemCorrelation(ItemCorrelation, DataModel)} )}, but will only
+   * <p>Like {@link #GenericItemCorrelation(org.apache.mahout.cf.taste.similarity.ItemSimilarity , DataModel)} )}, but will only
    * keep the specified number of correlations from the given {@link DataModel}.
    * It will keep those with the highest correlation -- those that are therefore most important.</p>
    *
    * <p>Thanks to tsmorton for suggesting this and providing part of the implementation.</p>
    *
-   * @param otherCorrelation other {@link ItemCorrelation} to get correlations from
+   * @param otherSimilarity other {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity} to get correlations from
    * @param dataModel data model to get {@link Item}s from
    * @param maxToKeep maximum number of correlations to keep
    * @throws TasteException if an error occurs while accessing the {@link DataModel} items
    */
-  public GenericItemCorrelation(ItemCorrelation otherCorrelation, DataModel dataModel, int maxToKeep)
+  public GenericItemSimilarity(ItemSimilarity otherSimilarity, DataModel dataModel, int maxToKeep)
           throws TasteException {
     List<? extends Item> items = IteratorUtils.iterableToList(dataModel.getItems());
-    Iterator<ItemItemCorrelation> it = new DataModelCorrelationsIterator(otherCorrelation, items);
+    Iterator<ItemItemCorrelation> it = new DataModelCorrelationsIterator(otherSimilarity, items);
     Iterable<ItemItemCorrelation> keptCorrelations =
             TopItems.getTopItemItemCorrelations(maxToKeep, new IteratorIterable<ItemItemCorrelation>(it));
     initCorrelationMaps(keptCorrelations);
@@ -140,7 +140,7 @@ public final class GenericItemCorrelation implements ItemCorrelation {
         }
         map.put(item2, iic.getValue());
       }
-      // else correlation between item and itself already assumed to be 1.0
+      // else similarity between item and itself already assumed to be 1.0
     }
   }
 
@@ -230,15 +230,15 @@ public final class GenericItemCorrelation implements ItemCorrelation {
 
   private static final class DataModelCorrelationsIterator implements Iterator<ItemItemCorrelation> {
 
-    private final ItemCorrelation otherCorrelation;
+    private final ItemSimilarity otherSimilarity;
     private final List<? extends Item> items;
     private final int size;
     private int i;
     private Item item1;
     private int j;
 
-    private DataModelCorrelationsIterator(ItemCorrelation otherCorrelation, List<? extends Item> items) {
-      this.otherCorrelation = otherCorrelation;
+    private DataModelCorrelationsIterator(ItemSimilarity otherSimilarity, List<? extends Item> items) {
+      this.otherSimilarity = otherSimilarity;
       this.items = items;
       this.size = items.size();
       i = 0;
@@ -257,7 +257,7 @@ public final class GenericItemCorrelation implements ItemCorrelation {
       Item item2 = items.get(j);
       double correlation;
       try {
-        correlation = otherCorrelation.itemCorrelation(item1, item2);
+        correlation = otherSimilarity.itemCorrelation(item1, item2);
       } catch (TasteException te) {
         // ugly:
         throw new RuntimeException(te);

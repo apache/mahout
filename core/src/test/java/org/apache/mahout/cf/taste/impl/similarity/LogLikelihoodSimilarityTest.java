@@ -15,15 +15,15 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.correlation;
+package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
 
 /**
- * <p>Tests {@link LogLikelihoodCorrelation}.</p>
+ * <p>Tests {@link LogLikelihoodSimilarity}.</p>
  */
-public final class LogLikelihoodCorrelationTest extends CorrelationTestCase {
+public final class LogLikelihoodSimilarityTest extends SimilarityTestCase {
 
   public void testCorrelation() throws Exception {
     User user1 = getUser("test1", 1.0,  1.0);
@@ -33,34 +33,34 @@ public final class LogLikelihoodCorrelationTest extends CorrelationTestCase {
     User user5 = getUser("test5", null, 1.0,  1.0,  1.0,  1.0);
     DataModel dataModel = getDataModel(user1, user2, user3, user4, user5);
 
-    double correlation = new LogLikelihoodCorrelation(dataModel).
+    double correlation = new LogLikelihoodSimilarity(dataModel).
         itemCorrelation(dataModel.getItem("1"), dataModel.getItem("0"));
     assertCorrelationEquals(0.12160727029227925, correlation);
 
-    correlation = new LogLikelihoodCorrelation(dataModel).
+    correlation = new LogLikelihoodSimilarity(dataModel).
         itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1"));
     assertCorrelationEquals(0.12160727029227925, correlation);
 
-    correlation = new LogLikelihoodCorrelation(dataModel).
+    correlation = new LogLikelihoodSimilarity(dataModel).
         itemCorrelation(dataModel.getItem("2"), dataModel.getItem("1"));
     assertCorrelationEquals(0.5423213660693733, correlation);
 
-    correlation = new LogLikelihoodCorrelation(dataModel).
+    correlation = new LogLikelihoodSimilarity(dataModel).
         itemCorrelation(dataModel.getItem("2"), dataModel.getItem("3"));
     assertCorrelationEquals(0.6905400104897509, correlation);
 
-    correlation = new LogLikelihoodCorrelation(dataModel).
+    correlation = new LogLikelihoodSimilarity(dataModel).
         itemCorrelation(dataModel.getItem("3"), dataModel.getItem("4"));
     assertCorrelationEquals(0.8706358464330881, correlation);
 
-    correlation = new LogLikelihoodCorrelation(dataModel).
+    correlation = new LogLikelihoodSimilarity(dataModel).
         itemCorrelation(dataModel.getItem("4"), dataModel.getItem("3"));
     assertCorrelationEquals(0.8706358464330881, correlation);
   }
 
   public void testRefresh() {
     // Make sure this doesn't throw an exception
-    new LogLikelihoodCorrelation(getDataModel()).refresh(null);
+    new LogLikelihoodSimilarity(getDataModel()).refresh(null);
   }
 
 }

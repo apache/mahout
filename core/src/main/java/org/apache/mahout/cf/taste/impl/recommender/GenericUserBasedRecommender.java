@@ -19,7 +19,7 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.correlation.UserCorrelation;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -49,21 +49,21 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
   private static final Logger log = LoggerFactory.getLogger(GenericUserBasedRecommender.class);
 
   private final UserNeighborhood neighborhood;
-  private final UserCorrelation correlation;
+  private final UserSimilarity similarity;
   private final RefreshHelper refreshHelper;
 
   public GenericUserBasedRecommender(DataModel dataModel,
                                      UserNeighborhood neighborhood,
-                                     UserCorrelation correlation) {
+                                     UserSimilarity similarity) {
     super(dataModel);
     if (neighborhood == null) {
       throw new IllegalArgumentException("neighborhood is null");
     }
     this.neighborhood = neighborhood;
-    this.correlation = correlation;
+    this.similarity = similarity;
     this.refreshHelper = new RefreshHelper(null);
     refreshHelper.addDependency(dataModel);
-    refreshHelper.addDependency(correlation);
+    refreshHelper.addDependency(similarity);
     refreshHelper.addDependency(neighborhood);
   }
 
@@ -123,7 +123,7 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
       throw new IllegalArgumentException("rescorer is null");
     }
     User toUser = getDataModel().getUser(userID);
-    TopItems.Estimator<User> estimator = new MostSimilarEstimator(toUser, correlation, rescorer);
+    TopItems.Estimator<User> estimator = new MostSimilarEstimator(toUser, similarity, rescorer);
     return doMostSimilarUsers(userID, howMany, estimator);
   }
 
@@ -152,7 +152,7 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
         // See GenericItemBasedRecommender.doEstimatePreference() too
         Preference pref = user.getPreferenceFor(item.getID());
         if (pref != null) {
-          double theCorrelation = correlation.userCorrelation(theUser, user) + 1.0;
+          double theCorrelation = similarity.userCorrelation(theUser, user) + 1.0;
           if (!Double.isNaN(theCorrelation)) {
             preference += theCorrelation * pref.getValue();
             totalCorrelation += theCorrelation;
@@ -190,14 +190,14 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
   private static class MostSimilarEstimator implements TopItems.Estimator<User> {
 
     private final User toUser;
-    private final UserCorrelation correlation;
+    private final UserSimilarity similarity;
     private final Rescorer<Pair<User, User>> rescorer;
 
     private MostSimilarEstimator(User toUser,
-                                 UserCorrelation correlation,
+                                 UserSimilarity similarity,
                                  Rescorer<Pair<User, User>> rescorer) {
       this.toUser = toUser;
-      this.correlation = correlation;
+      this.similarity = similarity;
       this.rescorer = rescorer;
     }
 
@@ -206,7 +206,7 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
       if (rescorer.isFiltered(pair)) {
         return Double.NaN;
       }
-      double originalEstimate = correlation.userCorrelation(toUser, user);
+      double originalEstimate = similarity.userCorrelation(toUser, user);
       return rescorer.rescore(pair, originalEstimate);
     }
   }

@@ -18,7 +18,7 @@
 package org.apache.mahout.cf.taste.impl.neighborhood;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
-import org.apache.mahout.cf.taste.correlation.UserCorrelation;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -34,30 +34,30 @@ abstract class AbstractUserNeighborhood implements UserNeighborhood {
 
   private static final Random random = RandomUtils.getRandom();
 
-  private final UserCorrelation userCorrelation;
+  private final UserSimilarity userSimilarity;
   private final DataModel dataModel;
   private final double samplingRate;
   private final RefreshHelper refreshHelper;
 
-  AbstractUserNeighborhood(UserCorrelation userCorrelation,
+  AbstractUserNeighborhood(UserSimilarity userSimilarity,
                            DataModel dataModel,
                            double samplingRate) {
-    if (userCorrelation == null || dataModel == null) {
-      throw new IllegalArgumentException("userCorrelation or dataModel is null");
+    if (userSimilarity == null || dataModel == null) {
+      throw new IllegalArgumentException("userSimilarity or dataModel is null");
     }
     if (Double.isNaN(samplingRate) || samplingRate <= 0.0 || samplingRate > 1.0) {
       throw new IllegalArgumentException("samplingRate must be in (0,1]");
     }
-    this.userCorrelation = userCorrelation;
+    this.userSimilarity = userSimilarity;
     this.dataModel = dataModel;
     this.samplingRate = samplingRate;
     this.refreshHelper = new RefreshHelper(null);
     this.refreshHelper.addDependency(this.dataModel);
-    this.refreshHelper.addDependency(this.userCorrelation);
+    this.refreshHelper.addDependency(this.userSimilarity);
   }
 
-  final UserCorrelation getUserCorrelation() {
-    return userCorrelation;
+  final UserSimilarity getUserCorrelation() {
+    return userSimilarity;
   }
 
   final DataModel getDataModel() {

@@ -15,22 +15,22 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.correlation;
+package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
 
 /**
- * <p>Tests {@link SpearmanCorrelation}.</p>
+ * <p>Tests {@link SpearmanCorrelationSimilarity}.</p>
  */
-public final class SpearmanCorrelationTest extends CorrelationTestCase {
+public final class SpearmanCorrelationSimilarityTest extends SimilarityTestCase {
 
   public void testFullCorrelation1() throws Exception {
     User user1 = getUser("test1", 1.0, 2.0, 3.0);
     User user2 = getUser("test2", 1.0, 2.0, 3.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new SpearmanCorrelation(dataModel).userCorrelation(user1, user2);
+    double correlation = new SpearmanCorrelationSimilarity(dataModel).userCorrelation(user1, user2);
     assertCorrelationEquals(1.0, correlation);
   }
 
@@ -38,7 +38,7 @@ public final class SpearmanCorrelationTest extends CorrelationTestCase {
     User user1 = getUser("test1", 1.0, 2.0, 3.0);
     User user2 = getUser("test2", 4.0, 5.0, 6.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new SpearmanCorrelation(dataModel).userCorrelation(user1, user2);
+    double correlation = new SpearmanCorrelationSimilarity(dataModel).userCorrelation(user1, user2);
     assertCorrelationEquals(1.0, correlation);
   }
 
@@ -46,7 +46,7 @@ public final class SpearmanCorrelationTest extends CorrelationTestCase {
     User user1 = getUser("test1", 1.0, 2.0, 3.0);
     User user2 = getUser("test2", 3.0, 2.0, 1.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new SpearmanCorrelation(dataModel).userCorrelation(user1, user2);
+    double correlation = new SpearmanCorrelationSimilarity(dataModel).userCorrelation(user1, user2);
     assertCorrelationEquals(-1.0, correlation);
   }
 
@@ -54,13 +54,13 @@ public final class SpearmanCorrelationTest extends CorrelationTestCase {
     User user1 = getUser("test1", 1.0, 2.0, 3.0);
     User user2 = getUser("test2", 2.0, 3.0, 1.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new SpearmanCorrelation(dataModel).userCorrelation(user1, user2);
+    double correlation = new SpearmanCorrelationSimilarity(dataModel).userCorrelation(user1, user2);
     assertCorrelationEquals(-0.5, correlation);
   }
 
   public void testRefresh() throws TasteException {
     // Make sure this doesn't throw an exception
-    new SpearmanCorrelation(getDataModel()).refresh(null);
+    new SpearmanCorrelationSimilarity(getDataModel()).refresh(null);
   }
 
 }

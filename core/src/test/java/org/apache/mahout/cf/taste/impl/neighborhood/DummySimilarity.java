@@ -15,28 +15,35 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.correlation;
+package org.apache.mahout.cf.taste.impl.neighborhood;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
-import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
+import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 
-/**
- * <p>Implementations of this interface compute an inferred preference for a {@link User} and an {@link Item}
- * that the user has not expressed any preference for. This might be an average of other preferences scores
- * from that user, for example. This technique is sometimes called "default voting".</p>
- */
-public interface PreferenceInferrer extends Refreshable {
+import java.util.Collection;
 
-  /**
-   * <p>Infers the given {@link User}'s preference value for an {@link Item}.</p>
-   *
-   * @param user {@link User} to infer preference for
-   * @param item {@link Item} to infer preference for
-   * @return inferred preference
-   * @throws TasteException if an error occurs while inferring
-   */
-  double inferPreference(User user, Item item) throws TasteException;
+final class DummySimilarity implements UserSimilarity, ItemSimilarity {
+
+  public double userCorrelation(User user1, User user2) {
+    return 1.0 / Math.abs(user1.getPreferencesAsArray()[0].getValue() -
+                          user2.getPreferencesAsArray()[0].getValue());
+  }
+
+  public double itemCorrelation(Item item1, Item item2) {
+    // Make up something wacky
+    return (double) (item1.hashCode() - item2.hashCode());
+  }
+
+  public void setPreferenceInferrer(PreferenceInferrer inferrer) {
+    throw new UnsupportedOperationException();
+  }
+
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
+    // do nothing
+  }
 
 }

@@ -19,7 +19,7 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.correlation.ItemCorrelation;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
@@ -43,35 +43,35 @@ import java.util.Set;
 
 /**
  * <p>A simple {@link org.apache.mahout.cf.taste.recommender.Recommender} which uses a given
- * {@link org.apache.mahout.cf.taste.model.DataModel} and {@link org.apache.mahout.cf.taste.correlation.ItemCorrelation}
+ * {@link org.apache.mahout.cf.taste.model.DataModel} and {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity}
  * to produce recommendations. This class represents Taste's support for item-based recommenders.</p>
  *
- * <p>The {@link ItemCorrelation} is the most important point to discuss here. Item-based recommenders
+ * <p>The {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity} is the most important point to discuss here. Item-based recommenders
  * are useful because they can take advantage of something to be very fast: they base their computations
  * on item correlation, not user correlation, and item correlation is relatively static. It can be
  * precomputed, instead of re-computed in real time.</p>
  *
- * <p>Thus it's strongly recommended that you use {@link org.apache.mahout.cf.taste.impl.correlation.GenericItemCorrelation}
+ * <p>Thus it's strongly recommended that you use {@link org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity}
  * with pre-computed correlations if you're going to use this class. You can use
- * {@link org.apache.mahout.cf.taste.impl.correlation.PearsonCorrelation} too, which computes correlations in real-time,
+ * {@link org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity} too, which computes correlations in real-time,
  * but will probably find this painfully slow for large amounts of data.</p>
  */
 public final class GenericItemBasedRecommender extends AbstractRecommender implements ItemBasedRecommender {
 
   private static final Logger log = LoggerFactory.getLogger(GenericItemBasedRecommender.class);
 
-  private final ItemCorrelation correlation;
+  private final ItemSimilarity similarity;
   private final RefreshHelper refreshHelper;
 
-  public GenericItemBasedRecommender(DataModel dataModel, ItemCorrelation correlation) {
+  public GenericItemBasedRecommender(DataModel dataModel, ItemSimilarity similarity) {
     super(dataModel);
-    if (correlation == null) {
-      throw new IllegalArgumentException("correlation is null");
+    if (similarity == null) {
+      throw new IllegalArgumentException("similarity is null");
     }
-    this.correlation = correlation;
+    this.similarity = similarity;
     this.refreshHelper = new RefreshHelper(null);
     refreshHelper.addDependency(dataModel);
-    refreshHelper.addDependency(correlation);
+    refreshHelper.addDependency(similarity);
   }
 
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
@@ -126,7 +126,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
       throw new IllegalArgumentException("rescorer is null");
     }
     Item toItem = getDataModel().getItem(itemID);
-    TopItems.Estimator<Item> estimator = new MostSimilarEstimator(toItem, correlation, rescorer);
+    TopItems.Estimator<Item> estimator = new MostSimilarEstimator(toItem, similarity, rescorer);
     return doMostSimilarItems(itemID, howMany, estimator);
   }
 
@@ -145,7 +145,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
     for (Object itemID : itemIDs) {
       toItems.add(model.getItem(itemID));
     }
-    TopItems.Estimator<Item> estimator = new MultiMostSimilarEstimator(toItems, correlation, rescorer);
+    TopItems.Estimator<Item> estimator = new MultiMostSimilarEstimator(toItems, similarity, rescorer);
     Collection<Item> allItems = new HashSet<Item>(model.getNumItems());
     for (Item item : model.getItems()) {
       allItems.add(item);
@@ -172,7 +172,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
     DataModel model = getDataModel();
     User user = model.getUser(userID);
     Item recommendedItem = model.getItem(itemID);
-    TopItems.Estimator<Item> estimator = new RecommendedBecauseEstimator(user, recommendedItem, correlation);
+    TopItems.Estimator<Item> estimator = new RecommendedBecauseEstimator(user, recommendedItem, similarity);
 
     Collection<Item> allUserItems = new HashSet<Item>();
     Preference[] prefs = user.getPreferencesAsArray();
@@ -203,9 +203,9 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
     Preference[] prefs = theUser.getPreferencesAsArray();
     for (int i = 0; i < prefs.length; i++) {
       Preference pref = prefs[i];
-      double theCorrelation = correlation.itemCorrelation(item, pref.getItem());
+      double theCorrelation = similarity.itemCorrelation(item, pref.getItem());
       if (!Double.isNaN(theCorrelation)) {
-        // Why + 1.0? correlation ranges from -1.0 to 1.0, and we want to use it as a simple
+        // Why + 1.0? similarity ranges from -1.0 to 1.0, and we want to use it as a simple
         // weight. To avoid negative values, we add 1.0 to put it in
         // the [0.0,2.0] range which is reasonable for weights
         theCorrelation += 1.0;
@@ -226,20 +226,20 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
 
   @Override
   public String toString() {
-    return "GenericItemBasedRecommender[correlation:" + correlation + ']';
+    return "GenericItemBasedRecommender[similarity:" + similarity + ']';
   }
 
   private static class MostSimilarEstimator implements TopItems.Estimator<Item> {
 
     private final Item toItem;
-    private final ItemCorrelation correlation;
+    private final ItemSimilarity similarity;
     private final Rescorer<Pair<Item, Item>> rescorer;
 
     private MostSimilarEstimator(Item toItem,
-                                 ItemCorrelation correlation,
+                                 ItemSimilarity similarity,
                                  Rescorer<Pair<Item, Item>> rescorer) {
       this.toItem = toItem;
-      this.correlation = correlation;
+      this.similarity = similarity;
       this.rescorer = rescorer;
     }
 
@@ -248,7 +248,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
       if (rescorer.isFiltered(pair)) {
         return Double.NaN;
       }
-      double originalEstimate = correlation.itemCorrelation(toItem, item);
+      double originalEstimate = similarity.itemCorrelation(toItem, item);
       return rescorer.rescore(pair, originalEstimate);
     }
   }
@@ -269,14 +269,14 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
   private static class MultiMostSimilarEstimator implements TopItems.Estimator<Item> {
 
     private final List<Item> toItems;
-    private final ItemCorrelation correlation;
+    private final ItemSimilarity similarity;
     private final Rescorer<Pair<Item, Item>> rescorer;
 
     private MultiMostSimilarEstimator(List<Item> toItems,
-                                      ItemCorrelation correlation,
+                                      ItemSimilarity similarity,
                                       Rescorer<Pair<Item, Item>> rescorer) {
       this.toItems = toItems;
-      this.correlation = correlation;
+      this.similarity = similarity;
       this.rescorer = rescorer;
     }
 
@@ -287,7 +287,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
         if (rescorer.isFiltered(pair)) {
           continue;
         }
-        double estimate = correlation.itemCorrelation(toItem, item);
+        double estimate = similarity.itemCorrelation(toItem, item);
         estimate = rescorer.rescore(pair, estimate);
         average.addDatum(estimate);
       }
@@ -299,14 +299,14 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
 
     private final User user;
     private final Item recommendedItem;
-    private final ItemCorrelation correlation;
+    private final ItemSimilarity similarity;
 
     private RecommendedBecauseEstimator(User user,
                                         Item recommendedItem,
-                                        ItemCorrelation correlation) {
+                                        ItemSimilarity similarity) {
       this.user = user;
       this.recommendedItem = recommendedItem;
-      this.correlation = correlation;
+      this.similarity = similarity;
     }
 
     public double estimate(Item item) throws TasteException {
@@ -314,7 +314,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
       if (pref == null) {
         return Double.NaN;
       }
-      double correlationValue = correlation.itemCorrelation(recommendedItem, item);
+      double correlationValue = similarity.itemCorrelation(recommendedItem, item);
       return (1.0 + correlationValue) * pref.getValue();
     }
   }

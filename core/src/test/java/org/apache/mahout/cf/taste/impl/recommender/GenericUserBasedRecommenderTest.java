@@ -17,9 +17,9 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
-import org.apache.mahout.cf.taste.correlation.UserCorrelation;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
-import org.apache.mahout.cf.taste.impl.correlation.PearsonCorrelation;
+import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
@@ -61,9 +61,9 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
     users.add(getUser("test4", 0.1, 0.4, 0.5, 0.8, 0.9, 1.0));
     users.add(getUser("test5", 0.2, 0.3, 0.6, 0.7, 0.1, 0.2));
     DataModel dataModel = new GenericDataModel(users);
-    UserCorrelation correlation = new PearsonCorrelation(dataModel);
-    UserNeighborhood neighborhood = new NearestNUserNeighborhood(2, correlation, dataModel);
-    Recommender recommender = new GenericUserBasedRecommender(dataModel, neighborhood, correlation);
+    UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
+    UserNeighborhood neighborhood = new NearestNUserNeighborhood(2, similarity, dataModel);
+    Recommender recommender = new GenericUserBasedRecommender(dataModel, neighborhood, similarity);
     List<RecommendedItem> fewRecommended = recommender.recommend("test1", 2);
     List<RecommendedItem> moreRecommended = recommender.recommend("test1", 4);
     for (int i = 0; i < fewRecommended.size(); i++) {
@@ -81,9 +81,9 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
     users.add(getUser("test2", 0.2, 0.3, 0.3, 0.6));
     users.add(getUser("test3", 0.4, 0.4, 0.5, 0.9));
     DataModel dataModel = new GenericDataModel(users);
-    UserCorrelation correlation = new PearsonCorrelation(dataModel);
-    UserNeighborhood neighborhood = new NearestNUserNeighborhood(1, correlation, dataModel);
-    Recommender recommender = new GenericUserBasedRecommender(dataModel, neighborhood, correlation);
+    UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
+    UserNeighborhood neighborhood = new NearestNUserNeighborhood(1, similarity, dataModel);
+    Recommender recommender = new GenericUserBasedRecommender(dataModel, neighborhood, similarity);
     List<RecommendedItem> originalRecommended = recommender.recommend("test1", 2);
     List<RecommendedItem> rescoredRecommended =
             recommender.recommend("test1", 2, new ReversingRescorer<Item>());
@@ -129,9 +129,9 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
     users.add(getUser("test3", 0.4, 0.4, 0.5, 0.9));
     users.add(getUser("test4"));
     DataModel dataModel = new GenericDataModel(users);
-    UserCorrelation correlation = new PearsonCorrelation(dataModel);
-    UserNeighborhood neighborhood = new NearestNUserNeighborhood(3, correlation, dataModel);
-    UserBasedRecommender recommender = new GenericUserBasedRecommender(dataModel, neighborhood, correlation);
+    UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
+    UserNeighborhood neighborhood = new NearestNUserNeighborhood(3, similarity, dataModel);
+    UserBasedRecommender recommender = new GenericUserBasedRecommender(dataModel, neighborhood, similarity);
     Collection<User> mostSimilar = recommender.mostSimilarUsers("test4", 3);
     assertNotNull(mostSimilar);
     assertEquals(0, mostSimilar.size());
@@ -139,9 +139,9 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
 
   private static UserBasedRecommender buildRecommender() throws Exception {
     DataModel dataModel = new GenericDataModel(getMockUsers());
-    UserCorrelation correlation = new PearsonCorrelation(dataModel);
-    UserNeighborhood neighborhood = new NearestNUserNeighborhood(1, correlation, dataModel);
-    return new GenericUserBasedRecommender(dataModel, neighborhood, correlation);
+    UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
+    UserNeighborhood neighborhood = new NearestNUserNeighborhood(1, similarity, dataModel);
+    return new GenericUserBasedRecommender(dataModel, neighborhood, similarity);
   }
 
 }

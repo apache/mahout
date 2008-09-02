@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.correlation;
+package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.correlation.ItemCorrelation;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
@@ -29,11 +29,11 @@ import java.util.Collection;
 /**
  * See <a href="http://citeseer.ist.psu.edu/29096.html">http://citeseer.ist.psu.edu/29096.html</a>.
  */
-public final class LogLikelihoodCorrelation implements ItemCorrelation {
+public final class LogLikelihoodSimilarity implements ItemSimilarity {
 
   private final DataModel dataModel;
 
-  public LogLikelihoodCorrelation(DataModel dataModel) {
+  public LogLikelihoodSimilarity(DataModel dataModel) {
     this.dataModel = dataModel;
   }
 
@@ -70,7 +70,7 @@ public final class LogLikelihoodCorrelation implements ItemCorrelation {
 
   @Override
   public final String toString() {
-    return "LogLikelihoodCorrelation[dataModel:" + dataModel + ']';
+    return "LogLikelihoodSimilarity[dataModel:" + dataModel + ']';
   }
 
 }

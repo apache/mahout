@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.correlation;
+package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Weighting;
@@ -30,13 +30,13 @@ import org.apache.mahout.cf.taste.model.DataModel;
  * along each dimension. The correlation is then computed as 1 / (1 + distance), so the
  * resulting values are in the range (0,1].</p>
  */
-public final class EuclideanDistanceCorrelation extends AbstractCorrelation {
+public final class EuclideanDistanceSimilarity extends AbstractSimilarity {
 
-  public EuclideanDistanceCorrelation(DataModel dataModel) throws TasteException {
+  public EuclideanDistanceSimilarity(DataModel dataModel) throws TasteException {
     super(dataModel);
   }
 
-  public EuclideanDistanceCorrelation(DataModel dataModel, Weighting weighting) throws TasteException {
+  public EuclideanDistanceSimilarity(DataModel dataModel, Weighting weighting) throws TasteException {
     super(dataModel, weighting);
   }
 
@@ -50,7 +50,7 @@ public final class EuclideanDistanceCorrelation extends AbstractCorrelation {
     }
     // normalize a bit for magnitude
     sumXYdiff2 /= denominator;
-    // divide by n below to not automatically give users with more overlap more correlation
+    // divide by n below to not automatically give users with more overlap more similarity
     return 1.0 / (1.0 + (Math.sqrt(sumXYdiff2) / (double) n));
   }
 

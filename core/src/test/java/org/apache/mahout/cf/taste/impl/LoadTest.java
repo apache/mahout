@@ -19,10 +19,10 @@ package org.apache.mahout.cf.taste.impl;
 
 import junit.textui.TestRunner;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.correlation.ItemCorrelation;
-import org.apache.mahout.cf.taste.correlation.UserCorrelation;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
-import org.apache.mahout.cf.taste.impl.correlation.PearsonCorrelation;
+import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
@@ -78,17 +78,17 @@ public final class LoadTest extends TasteTestCase {
 
   public void testItemLoad() throws Exception {
     DataModel model = createModel();
-    ItemCorrelation itemCorrelation = new PearsonCorrelation(model);
-    Recommender recommender = new CachingRecommender(new GenericItemBasedRecommender(model, itemCorrelation));
+    ItemSimilarity itemSimilarity = new PearsonCorrelationSimilarity(model);
+    Recommender recommender = new CachingRecommender(new GenericItemBasedRecommender(model, itemSimilarity));
     doTestLoad(recommender, 240);
   }
 
   public void testUserLoad() throws Exception {
     DataModel model = createModel();
-    UserCorrelation userCorrelation = new PearsonCorrelation(model);
-    UserNeighborhood neighborhood = new NearestNUserNeighborhood(10, userCorrelation, model);
+    UserSimilarity userSimilarity = new PearsonCorrelationSimilarity(model);
+    UserNeighborhood neighborhood = new NearestNUserNeighborhood(10, userSimilarity, model);
     Recommender recommender =
-            new CachingRecommender(new GenericUserBasedRecommender(model, neighborhood, userCorrelation));
+            new CachingRecommender(new GenericUserBasedRecommender(model, neighborhood, userSimilarity));
     doTestLoad(recommender, 40);
   }
 

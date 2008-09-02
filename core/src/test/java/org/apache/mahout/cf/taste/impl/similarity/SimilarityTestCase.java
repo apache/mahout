@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.correlation;
+package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 
-abstract class CorrelationTestCase extends TasteTestCase {
+abstract class SimilarityTestCase extends TasteTestCase {
 
   static void assertCorrelationEquals(double expected, double actual) {
     assertTrue("Correlation is NaN", !Double.isNaN(actual));

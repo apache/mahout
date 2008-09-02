@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.correlation;
+package org.apache.mahout.cf.taste.impl.similarity;
 
+import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Weighting;
-import org.apache.mahout.cf.taste.correlation.ItemCorrelation;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
@@ -29,15 +30,15 @@ import org.apache.mahout.cf.taste.model.User;
 import java.util.Collections;
 
 /**
- * <p>Tests {@link PearsonCorrelation}.</p>
+ * <p>Tests {@link EuclideanDistanceSimilarity}.</p>
  */
-public final class PearsonCorrelationTest extends CorrelationTestCase {
+public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
 
   public void testFullCorrelation1() throws Exception {
     User user1 = getUser("test1", 3.0, -2.0);
     User user2 = getUser("test2", 3.0, -2.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new PearsonCorrelation(dataModel).userCorrelation(user1, user2);
+    double correlation = new EuclideanDistanceSimilarity(dataModel).userCorrelation(user1, user2);
     assertCorrelationEquals(1.0, correlation);
   }
 
@@ -45,7 +46,7 @@ public final class PearsonCorrelationTest extends CorrelationTestCase {
     User user1 = getUser("test1", 3.0, -2.0);
     User user2 = getUser("test2", 3.0, -2.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new PearsonCorrelation(dataModel, Weighting.WEIGHTED).userCorrelation(user1, user2);
+    double correlation = new EuclideanDistanceSimilarity(dataModel, Weighting.WEIGHTED).userCorrelation(user1, user2);
     assertCorrelationEquals(1.0, correlation);
   }
 
@@ -53,8 +54,7 @@ public final class PearsonCorrelationTest extends CorrelationTestCase {
     User user1 = getUser("test1", 3.0, 3.0);
     User user2 = getUser("test2", 3.0, 3.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new PearsonCorrelation(dataModel).userCorrelation(user1, user2);
-    // Yeah, undefined in this case
+    double correlation = new EuclideanDistanceSimilarity(dataModel).userCorrelation(user1, user2);
     assertTrue(Double.isNaN(correlation));
   }
 
@@ -62,16 +62,16 @@ public final class PearsonCorrelationTest extends CorrelationTestCase {
     User user1 = getUser("test1", 3.0, -2.0);
     User user2 = getUser("test2", -3.0, 2.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new PearsonCorrelation(dataModel).userCorrelation(user1, user2);
-    assertCorrelationEquals(-1.0, correlation);
+    double correlation = new EuclideanDistanceSimilarity(dataModel).userCorrelation(user1, user2);
+    assertCorrelationEquals(0.424465381883345, correlation);
   }
 
   public void testNoCorrelation1Weighted() throws Exception {
     User user1 = getUser("test1", 3.0, -2.0);
     User user2 = getUser("test2", -3.0, 2.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new PearsonCorrelation(dataModel, Weighting.WEIGHTED).userCorrelation(user1, user2);
-    assertCorrelationEquals(-1.0, correlation);
+    double correlation = new EuclideanDistanceSimilarity(dataModel, Weighting.WEIGHTED).userCorrelation(user1, user2);
+    assertCorrelationEquals(0.8081551272944483, correlation);
   }
 
   public void testNoCorrelation2() throws Exception {
@@ -80,7 +80,7 @@ public final class PearsonCorrelationTest extends CorrelationTestCase {
     Preference pref2 = new GenericPreference(null, new GenericItem<String>("2"), 1.0);
     GenericUser<String> user2 = new GenericUser<String>("test2", Collections.singletonList(pref2));
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new PearsonCorrelation(dataModel).userCorrelation(user1, user2);
+    double correlation = new EuclideanDistanceSimilarity(dataModel).userCorrelation(user1, user2);
     assertTrue(Double.isNaN(correlation));
   }
 
@@ -88,24 +88,24 @@ public final class PearsonCorrelationTest extends CorrelationTestCase {
     User user1 = getUser("test1", 90.0, 80.0, 70.0);
     User user2 = getUser("test2", 70.0, 80.0, 90.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new PearsonCorrelation(dataModel).userCorrelation(user1, user2);
-    assertCorrelationEquals(-1.0, correlation);
+    double correlation = new EuclideanDistanceSimilarity(dataModel).userCorrelation(user1, user2);
+    assertCorrelationEquals(0.3606507916004517, correlation);
   }
 
   public void testSimple() throws Exception {
     User user1 = getUser("test1", 1.0, 2.0, 3.0);
     User user2 = getUser("test2", 2.0, 5.0, 6.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new PearsonCorrelation(dataModel).userCorrelation(user1, user2);
-    assertCorrelationEquals(0.9607689228305227, correlation);
+    double correlation = new EuclideanDistanceSimilarity(dataModel).userCorrelation(user1, user2);
+    assertCorrelationEquals(0.5896248568217328, correlation);
   }
 
   public void testSimpleWeighted() throws Exception {
     User user1 = getUser("test1", 1.0, 2.0, 3.0);
     User user2 = getUser("test2", 2.0, 5.0, 6.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new PearsonCorrelation(dataModel, Weighting.WEIGHTED).userCorrelation(user1, user2);
-    assertCorrelationEquals(0.9901922307076306, correlation);
+    double correlation = new EuclideanDistanceSimilarity(dataModel, Weighting.WEIGHTED).userCorrelation(user1, user2);
+    assertCorrelationEquals(0.8974062142054332, correlation);
   }
 
   public void testFullItemCorrelation1() throws Exception {
@@ -113,7 +113,7 @@ public final class PearsonCorrelationTest extends CorrelationTestCase {
     User user2 = getUser("test2", -2.0, -2.0);
     DataModel dataModel = getDataModel(user1, user2);
     double correlation =
-            new PearsonCorrelation(dataModel).itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1"));
+            new EuclideanDistanceSimilarity(dataModel).itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1"));
     assertCorrelationEquals(1.0, correlation);
   }
 
@@ -122,7 +122,7 @@ public final class PearsonCorrelationTest extends CorrelationTestCase {
     User user2 = getUser("test2", 3.0, 3.0);
     DataModel dataModel = getDataModel(user1, user2);
     double correlation =
-            new PearsonCorrelation(dataModel).itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1"));
+            new EuclideanDistanceSimilarity(dataModel).itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1"));
     // Yeah, undefined in this case
     assertTrue(Double.isNaN(correlation));
   }
@@ -132,8 +132,8 @@ public final class PearsonCorrelationTest extends CorrelationTestCase {
     User user2 = getUser("test2", -2.0, 2.0);
     DataModel dataModel = getDataModel(user1, user2);
     double correlation =
-            new PearsonCorrelation(dataModel).itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1"));
-    assertCorrelationEquals(-1.0, correlation);
+            new EuclideanDistanceSimilarity(dataModel).itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1"));
+    assertCorrelationEquals(0.424465381883345, correlation);
   }
 
   public void testNoItemCorrelation2() throws Exception {
@@ -143,7 +143,7 @@ public final class PearsonCorrelationTest extends CorrelationTestCase {
     GenericUser<String> user2 = new GenericUser<String>("test2", Collections.singletonList(pref2));
     DataModel dataModel = getDataModel(user1, user2);
     double correlation =
-            new PearsonCorrelation(dataModel).itemCorrelation(dataModel.getItem("1"), dataModel.getItem("2"));
+            new EuclideanDistanceSimilarity(dataModel).itemCorrelation(dataModel.getItem("1"), dataModel.getItem("2"));
     assertTrue(Double.isNaN(correlation));
   }
 
@@ -153,8 +153,8 @@ public final class PearsonCorrelationTest extends CorrelationTestCase {
     User user3 = getUser("test3", 70.0, 90.0);
     DataModel dataModel = getDataModel(user1, user2, user3);
     double correlation =
-            new PearsonCorrelation(dataModel).itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1"));
-    assertCorrelationEquals(-1.0, correlation);
+            new EuclideanDistanceSimilarity(dataModel).itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1"));
+    assertCorrelationEquals(0.3606507916004517, correlation);
   }
 
   public void testSimpleItem() throws Exception {
@@ -163,8 +163,8 @@ public final class PearsonCorrelationTest extends CorrelationTestCase {
     User user3 = getUser("test3", 3.0, 6.0);
     DataModel dataModel = getDataModel(user1, user2, user3);
     double correlation =
-            new PearsonCorrelation(dataModel).itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1"));
-    assertCorrelationEquals(0.9607689228305227, correlation);
+            new EuclideanDistanceSimilarity(dataModel).itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1"));
+    assertCorrelationEquals(0.5896248568217328, correlation);
   }
 
   public void testSimpleItemWeighted() throws Exception {
@@ -172,14 +172,14 @@ public final class PearsonCorrelationTest extends CorrelationTestCase {
     User user2 = getUser("test2", 2.0, 5.0);
     User user3 = getUser("test3", 3.0, 6.0);
     DataModel dataModel = getDataModel(user1, user2, user3);
-    ItemCorrelation itemCorrelation = new PearsonCorrelation(dataModel, Weighting.WEIGHTED);
-    double correlation = itemCorrelation.itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1"));
-    assertCorrelationEquals(0.9901922307076306, correlation);
+    ItemSimilarity itemSimilarity = new EuclideanDistanceSimilarity(dataModel, Weighting.WEIGHTED);
+    double correlation = itemSimilarity.itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1"));
+    assertCorrelationEquals(0.8974062142054332, correlation);
   }
 
-  public void testRefresh() throws Exception {
+  public void testRefresh() throws TasteException {
     // Make sure this doesn't throw an exception
-    new PearsonCorrelation(getDataModel()).refresh(null);
+    new EuclideanDistanceSimilarity(getDataModel()).refresh(null);
   }
 
 }

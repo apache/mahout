@@ -15,31 +15,28 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.correlation;
+package org.apache.mahout.cf.taste.similarity;
 
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.correlation.PreferenceInferrer;
-import org.apache.mahout.cf.taste.impl.TasteTestCase;
-import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
-import org.apache.mahout.cf.taste.impl.model.GenericItem;
-import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 
-import java.util.Collections;
-
 /**
- * <p>Tests {@link AveragingPreferenceInferrer}.</p>
+ * <p>Implementations of this interface compute an inferred preference for a {@link User} and an {@link Item}
+ * that the user has not expressed any preference for. This might be an average of other preferences scores
+ * from that user, for example. This technique is sometimes called "default voting".</p>
  */
-public final class AveragingPreferenceInferrerTest extends TasteTestCase {
+public interface PreferenceInferrer extends Refreshable {
 
-  public void testInferrer() throws TasteException {
-    User user1 = getUser("test1", 3.0, -2.0, 5.0);
-    Item item = new GenericItem<String>("3");
-    DataModel model = new GenericDataModel(Collections.singletonList(user1));
-    PreferenceInferrer inferrer = new AveragingPreferenceInferrer(model);
-    double inferred = inferrer.inferPreference(user1, item);
-    assertEquals(2.0, inferred);
-  }
+  /**
+   * <p>Infers the given {@link User}'s preference value for an {@link Item}.</p>
+   *
+   * @param user {@link User} to infer preference for
+   * @param item {@link Item} to infer preference for
+   * @return inferred preference
+   * @throws TasteException if an error occurs while inferring
+   */
+  double inferPreference(User user, Item item) throws TasteException;
 
 }

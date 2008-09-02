@@ -17,9 +17,9 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
-import org.apache.mahout.cf.taste.correlation.ItemCorrelation;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
-import org.apache.mahout.cf.taste.impl.correlation.GenericItemCorrelation;
+import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -59,18 +59,18 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     users.add(getUser("test4", 0.1, 0.4, 0.5, 0.8, 0.9, 1.0));
     users.add(getUser("test5", 0.2, 0.3, 0.6, 0.7, 0.1, 0.2));
     DataModel dataModel = new GenericDataModel(users);
-    Collection<GenericItemCorrelation.ItemItemCorrelation> correlations =
-            new ArrayList<GenericItemCorrelation.ItemItemCorrelation>(6);
+    Collection<GenericItemSimilarity.ItemItemCorrelation> correlations =
+            new ArrayList<GenericItemSimilarity.ItemItemCorrelation>(6);
     for (int i = 0; i < 6; i++) {
       for (int j = i + 1; j < 6; j++) {
         correlations.add(
-                new GenericItemCorrelation.ItemItemCorrelation(new GenericItem<String>(String.valueOf(i)),
+                new GenericItemSimilarity.ItemItemCorrelation(new GenericItem<String>(String.valueOf(i)),
                                                                new GenericItem<String>(String.valueOf(j)),
                                                                1.0 / (1.0 + (double) i + (double) j)));
       }
     }
-    ItemCorrelation correlation = new GenericItemCorrelation(correlations);
-    Recommender recommender = new GenericItemBasedRecommender(dataModel, correlation);
+    ItemSimilarity similarity = new GenericItemSimilarity(correlations);
+    Recommender recommender = new GenericItemBasedRecommender(dataModel, similarity);
     List<RecommendedItem> fewRecommended = recommender.recommend("test1", 2);
     List<RecommendedItem> moreRecommended = recommender.recommend("test1", 4);
     for (int i = 0; i < fewRecommended.size(); i++) {
@@ -92,16 +92,16 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     Item item2 = new GenericItem<String>("1");
     Item item3 = new GenericItem<String>("2");
     Item item4 = new GenericItem<String>("3");
-    Collection<GenericItemCorrelation.ItemItemCorrelation> correlations =
-            new ArrayList<GenericItemCorrelation.ItemItemCorrelation>(6);
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item1, item2, 1.0));
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item1, item3, 0.5));
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item1, item4, 0.2));
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item2, item3, 0.7));
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item2, item4, 0.5));
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item3, item4, 0.9));
-    ItemCorrelation correlation = new GenericItemCorrelation(correlations);
-    Recommender recommender = new GenericItemBasedRecommender(dataModel, correlation);
+    Collection<GenericItemSimilarity.ItemItemCorrelation> correlations =
+            new ArrayList<GenericItemSimilarity.ItemItemCorrelation>(6);
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item1, item2, 1.0));
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item1, item3, 0.5));
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item1, item4, 0.2));
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item2, item3, 0.7));
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item2, item4, 0.5));
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item3, item4, 0.9));
+    ItemSimilarity similarity = new GenericItemSimilarity(correlations);
+    Recommender recommender = new GenericItemBasedRecommender(dataModel, similarity);
     List<RecommendedItem> originalRecommended = recommender.recommend("test1", 2);
     List<RecommendedItem> rescoredRecommended =
             recommender.recommend("test1", 2, new ReversingRescorer<Item>());
@@ -181,15 +181,15 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
 
   private static ItemBasedRecommender buildRecommender() {
     DataModel dataModel = new GenericDataModel(getMockUsers());
-    Collection<GenericItemCorrelation.ItemItemCorrelation> correlations =
-            new ArrayList<GenericItemCorrelation.ItemItemCorrelation>(2);
+    Collection<GenericItemSimilarity.ItemItemCorrelation> correlations =
+            new ArrayList<GenericItemSimilarity.ItemItemCorrelation>(2);
     Item item1 = new GenericItem<String>("0");
     Item item2 = new GenericItem<String>("1");
     Item item3 = new GenericItem<String>("2");
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item1, item2, 1.0));
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item1, item3, 0.5));
-    ItemCorrelation correlation = new GenericItemCorrelation(correlations);
-    return new GenericItemBasedRecommender(dataModel, correlation);
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item1, item2, 1.0));
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item1, item3, 0.5));
+    ItemSimilarity similarity = new GenericItemSimilarity(correlations);
+    return new GenericItemBasedRecommender(dataModel, similarity);
   }
 
   private static ItemBasedRecommender buildRecommender2() {
@@ -199,25 +199,25 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     users.add(getUser("test3", 0.4, 0.3, 0.5, 0.1, 0.1));
     users.add(getUser("test4", 0.7, 0.3, 0.8, 0.5, 0.6));
     DataModel dataModel = new GenericDataModel(users);
-    Collection<GenericItemCorrelation.ItemItemCorrelation> correlations =
-            new ArrayList<GenericItemCorrelation.ItemItemCorrelation>(10);
+    Collection<GenericItemSimilarity.ItemItemCorrelation> correlations =
+            new ArrayList<GenericItemSimilarity.ItemItemCorrelation>(10);
     Item item1 = new GenericItem<String>("0");
     Item item2 = new GenericItem<String>("1");
     Item item3 = new GenericItem<String>("2");
     Item item4 = new GenericItem<String>("3");
     Item item5 = new GenericItem<String>("4");
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item1, item2, 1.0));
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item1, item3, 0.8));
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item1, item4, -0.6));
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item1, item5, 1.0));
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item2, item3, 0.9));
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item2, item4, 0.0));
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item2, item2, 1.0));
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item3, item4, -0.1));
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item3, item5, 0.1));
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item4, item5, -0.5));
-    ItemCorrelation correlation = new GenericItemCorrelation(correlations);
-    return new GenericItemBasedRecommender(dataModel, correlation);
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item1, item2, 1.0));
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item1, item3, 0.8));
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item1, item4, -0.6));
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item1, item5, 1.0));
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item2, item3, 0.9));
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item2, item4, 0.0));
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item2, item2, 1.0));
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item3, item4, -0.1));
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item3, item5, 0.1));
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item4, item5, -0.5));
+    ItemSimilarity similarity = new GenericItemSimilarity(correlations);
+    return new GenericItemBasedRecommender(dataModel, similarity);
   }
 
 }

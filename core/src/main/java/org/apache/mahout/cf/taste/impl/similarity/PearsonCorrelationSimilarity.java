@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.correlation;
+package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Weighting;
@@ -47,13 +47,13 @@ import org.apache.mahout.cf.taste.model.User;
  * receives is assumed to be centered -- mean is 0. The correlation may be interpreted as the cosine of the
  * angle between the two vectors defined by the users' preference values.</p>
  */
-public final class PearsonCorrelation extends AbstractCorrelation {
+public final class PearsonCorrelationSimilarity extends AbstractSimilarity {
 
-  public PearsonCorrelation(DataModel dataModel) throws TasteException {
+  public PearsonCorrelationSimilarity(DataModel dataModel) throws TasteException {
     super(dataModel);
   }
 
-  public PearsonCorrelation(DataModel dataModel, Weighting weighting) throws TasteException {
+  public PearsonCorrelationSimilarity(DataModel dataModel, Weighting weighting) throws TasteException {
     super(dataModel, weighting);
   }
 
@@ -68,7 +68,7 @@ public final class PearsonCorrelation extends AbstractCorrelation {
     double denominator = xTerm * yTerm;
     if (denominator == 0.0) {
       // One or both parties has -all- the same ratings;
-      // can't really say much correlation under this measure
+      // can't really say much similarity under this measure
       return Double.NaN;
     }
     return sumXY / denominator;

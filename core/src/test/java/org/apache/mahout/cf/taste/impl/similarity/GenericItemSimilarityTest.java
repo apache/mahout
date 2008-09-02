@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.mahout.cf.taste.impl.correlation;
+package org.apache.mahout.cf.taste.impl.similarity;
 
-import org.apache.mahout.cf.taste.correlation.ItemCorrelation;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
@@ -26,22 +26,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>Tests {@link GenericItemCorrelation}.</p>
+ * <p>Tests {@link GenericItemSimilarity}.</p>
  */
-public final class GenericItemCorrelationTest extends CorrelationTestCase {
+public final class GenericItemSimilarityTest extends SimilarityTestCase {
 
   public void testSimple() {
     Item item1 = new GenericItem<String>("1");
     Item item2 = new GenericItem<String>("2");
     Item item3 = new GenericItem<String>("3");
     Item item4 = new GenericItem<String>("4");
-    List<GenericItemCorrelation.ItemItemCorrelation> correlations =
-            new ArrayList<GenericItemCorrelation.ItemItemCorrelation>(4);
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item1, item2, 0.5));
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item2, item1, 0.6));
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item1, item1, 0.5));
-    correlations.add(new GenericItemCorrelation.ItemItemCorrelation(item1, item3, 0.3));
-    GenericItemCorrelation itemCorrelation = new GenericItemCorrelation(correlations);
+    List<GenericItemSimilarity.ItemItemCorrelation> correlations =
+            new ArrayList<GenericItemSimilarity.ItemItemCorrelation>(4);
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item1, item2, 0.5));
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item2, item1, 0.6));
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item1, item1, 0.5));
+    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item1, item3, 0.3));
+    GenericItemSimilarity itemCorrelation = new GenericItemSimilarity(correlations);
     assertEquals(1.0, itemCorrelation.itemCorrelation(item1, item1));
     assertEquals(0.6, itemCorrelation.itemCorrelation(item1, item2));
     assertEquals(0.6, itemCorrelation.itemCorrelation(item2, item1));
@@ -54,12 +54,12 @@ public final class GenericItemCorrelationTest extends CorrelationTestCase {
     User user2 = getUser("test2", 2.0, 5.0);
     User user3 = getUser("test3", 3.0, 6.0);
     DataModel dataModel = getDataModel(user1, user2, user3);
-    ItemCorrelation otherCorrelation = new PearsonCorrelation(dataModel);
-    ItemCorrelation itemCorrelation = new GenericItemCorrelation(otherCorrelation, dataModel);
+    ItemSimilarity otherSimilarity = new PearsonCorrelationSimilarity(dataModel);
+    ItemSimilarity itemSimilarity = new GenericItemSimilarity(otherSimilarity, dataModel);
     assertCorrelationEquals(1.0,
-                            itemCorrelation.itemCorrelation(dataModel.getItem("0"), dataModel.getItem("0")));
+                            itemSimilarity.itemCorrelation(dataModel.getItem("0"), dataModel.getItem("0")));
     assertCorrelationEquals(0.960768922830523,
-                            itemCorrelation.itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1")));
+                            itemSimilarity.itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1")));
   }
 
 }

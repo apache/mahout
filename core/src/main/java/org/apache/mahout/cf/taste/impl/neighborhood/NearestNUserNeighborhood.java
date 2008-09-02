@@ -18,7 +18,7 @@
 package org.apache.mahout.cf.taste.impl.neighborhood;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.correlation.UserCorrelation;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
 import org.slf4j.Logger;
@@ -33,7 +33,7 @@ import java.util.ListIterator;
 
 /**
  * <p>Computes a neigbhorhood consisting of the nearest n {@link User}s to a given {@link User}.
- * "Nearest" is defined by the given {@link UserCorrelation}.</p>
+ * "Nearest" is defined by the given {@link org.apache.mahout.cf.taste.similarity.UserSimilarity}.</p>
  */
 public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
 
@@ -43,19 +43,19 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
 
   /**
    * @param n neighborhood size
-   * @param userCorrelation nearness metric
+   * @param userSimilarity nearness metric
    * @param dataModel data model
    * @throws IllegalArgumentException if n &lt; 1, or userCorrelation or dataModel are <code>null</code>
    */
   public NearestNUserNeighborhood(int n,
-                                  UserCorrelation userCorrelation,
+                                  UserSimilarity userSimilarity,
                                   DataModel dataModel) {
-    this(n, userCorrelation, dataModel, 1.0);
+    this(n, userSimilarity, dataModel, 1.0);
   }
 
   /**
    * @param n neighborhood size
-   * @param userCorrelation nearness metric
+   * @param userSimilarity nearness metric
    * @param dataModel data model
    * @param samplingRate percentage of users to consider when building neighborhood -- decrease to
    * trade quality for performance
@@ -63,10 +63,10 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
    * or userCorrelation or dataModel are <code>null</code>
    */
   public NearestNUserNeighborhood(int n,
-                                  UserCorrelation userCorrelation,
+                                  UserSimilarity userSimilarity,
                                   DataModel dataModel,
                                   double samplingRate) {
-    super(userCorrelation, dataModel, samplingRate);
+    super(userSimilarity, dataModel, samplingRate);
     if (n < 1) {
       throw new IllegalArgumentException("n must be at least 1");
     }
@@ -78,13 +78,13 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
 
     DataModel dataModel = getDataModel();
     User theUser = dataModel.getUser(userID);
-    UserCorrelation userCorrelationImpl = getUserCorrelation();
+    UserSimilarity userSimilarityImpl = getUserCorrelation();
 
     LinkedList<UserCorrelationPair> queue = new LinkedList<UserCorrelationPair>();
     boolean full = false;
     for (User user : dataModel.getUsers()) {
       if (sampleForUser() && !userID.equals(user.getID())) {
-        double theCorrelation = userCorrelationImpl.userCorrelation(theUser, user);
+        double theCorrelation = userSimilarityImpl.userCorrelation(theUser, user);
         if (!Double.isNaN(theCorrelation) && (!full || theCorrelation > queue.getLast().theCorrelation)) {
           ListIterator<UserCorrelationPair> iterator = queue.listIterator(queue.size());
           while (iterator.hasPrevious()) {

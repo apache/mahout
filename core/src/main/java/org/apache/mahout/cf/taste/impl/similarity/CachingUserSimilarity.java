@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.correlation;
+package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.correlation.PreferenceInferrer;
-import org.apache.mahout.cf.taste.correlation.UserCorrelation;
+import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.impl.common.Cache;
 import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
@@ -31,20 +31,20 @@ import org.apache.mahout.cf.taste.model.User;
 import java.util.Collection;
 
 /**
- * Caches the results from an underlying {@link UserCorrelation} implementation.
+ * Caches the results from an underlying {@link org.apache.mahout.cf.taste.similarity.UserSimilarity} implementation.
  */
-public final class CachingUserCorrelation implements UserCorrelation {
+public final class CachingUserSimilarity implements UserSimilarity {
 
-  private final UserCorrelation correlation;
+  private final UserSimilarity similarity;
   private final Cache<Pair<User, User>, Double> correlationCache;
 
-  public CachingUserCorrelation(UserCorrelation correlation, DataModel dataModel) throws TasteException {
-    if (correlation == null) {
-      throw new IllegalArgumentException("correlation is null");
+  public CachingUserSimilarity(UserSimilarity similarity, DataModel dataModel) throws TasteException {
+    if (similarity == null) {
+      throw new IllegalArgumentException("similarity is null");
     }
-    this.correlation = correlation;
+    this.similarity = similarity;
     int maxCacheSize = dataModel.getNumUsers(); // just a dumb heuristic for sizing    
-    this.correlationCache = new Cache<Pair<User, User>, Double>(new CorrelationRetriever(correlation), maxCacheSize);
+    this.correlationCache = new Cache<Pair<User, User>, Double>(new CorrelationRetriever(similarity), maxCacheSize);
   }
 
   public double userCorrelation(User user1, User user2) throws TasteException {
@@ -59,22 +59,23 @@ public final class CachingUserCorrelation implements UserCorrelation {
 
   public void setPreferenceInferrer(PreferenceInferrer inferrer) {
     correlationCache.clear();
-    correlation.setPreferenceInferrer(inferrer);
+    similarity.setPreferenceInferrer(inferrer);
   }
 
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     correlationCache.clear();
     alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
-    RefreshHelper.maybeRefresh(alreadyRefreshed, correlation);
+    RefreshHelper.maybeRefresh(alreadyRefreshed, similarity);
   }
 
   private static final class CorrelationRetriever implements Retriever<Pair<User, User>, Double> {
-    private final UserCorrelation correlation;
-    private CorrelationRetriever(UserCorrelation correlation) {
-      this.correlation = correlation;
+    private final UserSimilarity similarity;
+
+    private CorrelationRetriever(UserSimilarity similarity) {
+      this.similarity = similarity;
     }
     public Double get(Pair<User, User> key) throws TasteException {
-      return correlation.userCorrelation(key.getFirst(), key.getSecond());
+      return similarity.userCorrelation(key.getFirst(), key.getSecond());
     }
   }
 

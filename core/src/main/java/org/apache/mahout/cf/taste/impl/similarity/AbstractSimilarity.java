@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.correlation;
+package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Weighting;
-import org.apache.mahout.cf.taste.correlation.ItemCorrelation;
-import org.apache.mahout.cf.taste.correlation.PreferenceInferrer;
-import org.apache.mahout.cf.taste.correlation.UserCorrelation;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
+import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
@@ -41,9 +41,9 @@ import java.util.concurrent.Callable;
  * implementations in this package, including the basic correlation algorithm,
  * normalization, transforms, etc.
  */
-abstract class AbstractCorrelation implements UserCorrelation, ItemCorrelation {
+abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
 
-  private static final Logger log = LoggerFactory.getLogger(AbstractCorrelation.class);
+  private static final Logger log = LoggerFactory.getLogger(AbstractSimilarity.class);
 
   private final DataModel dataModel;
   private PreferenceInferrer inferrer;
@@ -55,16 +55,16 @@ abstract class AbstractCorrelation implements UserCorrelation, ItemCorrelation {
   private final RefreshHelper refreshHelper;
 
   /**
-   * <p>Creates a normal (unweighted) {@link AbstractCorrelation}.</p>
+   * <p>Creates a normal (unweighted) {@link AbstractSimilarity}.</p>
    */
-  AbstractCorrelation(DataModel dataModel) throws TasteException {
+  AbstractSimilarity(DataModel dataModel) throws TasteException {
     this(dataModel, Weighting.UNWEIGHTED);
   }
 
   /**
-   * <p>Creates a possibly weighted {@link AbstractCorrelation}.</p>
+   * <p>Creates a possibly weighted {@link AbstractSimilarity}.</p>
    */
-  AbstractCorrelation(DataModel dataModel, Weighting weighting) throws TasteException {
+  AbstractSimilarity(DataModel dataModel, Weighting weighting) throws TasteException {
     if (dataModel == null) {
       throw new IllegalArgumentException("dataModel is null");
     }
@@ -74,8 +74,8 @@ abstract class AbstractCorrelation implements UserCorrelation, ItemCorrelation {
     this.cachedNumUsers = dataModel.getNumUsers();
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
       public Object call() throws TasteException {
-        cachedNumItems = AbstractCorrelation.this.dataModel.getNumItems();
-        cachedNumUsers = AbstractCorrelation.this.dataModel.getNumUsers();
+        cachedNumItems = AbstractSimilarity.this.dataModel.getNumItems();
+        cachedNumUsers = AbstractSimilarity.this.dataModel.getNumUsers();
         return null;
       }
     });
@@ -253,7 +253,7 @@ abstract class AbstractCorrelation implements UserCorrelation, ItemCorrelation {
     }
 
     if (log.isTraceEnabled()) {
-      log.trace("UserCorrelation between " + user1 + " and " + user2 + " is " + result);
+      log.trace("UserSimilarity between " + user1 + " and " + user2 + " is " + result);
     }
     return result;
   }
@@ -341,7 +341,7 @@ abstract class AbstractCorrelation implements UserCorrelation, ItemCorrelation {
     }
 
     if (log.isTraceEnabled()) {
-      log.trace("ItemCorrelation between " + item1 + " and " + item2 + " is " + result);
+      log.trace("ItemSimilarity between " + item1 + " and " + item2 + " is " + result);
     }
     return result;
   }

@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.correlation;
+package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.correlation.PreferenceInferrer;
-import org.apache.mahout.cf.taste.correlation.UserCorrelation;
+import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.model.ByItemPreferenceComparator;
 import org.apache.mahout.cf.taste.impl.model.ByValuePreferenceComparator;
@@ -33,44 +33,44 @@ import java.util.Arrays;
 import java.util.Collection;
 
 /**
- * <p>Like {@link PearsonCorrelation}, but compares relative ranking of preference values instead of preference
+ * <p>Like {@link PearsonCorrelationSimilarity}, but compares relative ranking of preference values instead of preference
  * values themselves. That is, each {@link User}'s preferences are sorted and then assign a rank as their preference
  * value, with 1 being assigned to the least preferred item. Then the Pearson itemCorrelation of these rank values is
  * computed.</p>
  */
-public final class SpearmanCorrelation implements UserCorrelation {
+public final class SpearmanCorrelationSimilarity implements UserSimilarity {
 
-  private final UserCorrelation rankingUserCorrelation;
+  private final UserSimilarity rankingUserSimilarity;
 
-  public SpearmanCorrelation(DataModel dataModel) throws TasteException {
+  public SpearmanCorrelationSimilarity(DataModel dataModel) throws TasteException {
     if (dataModel == null) {
       throw new IllegalArgumentException("dataModel is null");
     }
-    this.rankingUserCorrelation = new PearsonCorrelation(dataModel);
+    this.rankingUserSimilarity = new PearsonCorrelationSimilarity(dataModel);
   }
 
-  public SpearmanCorrelation(UserCorrelation rankingUserCorrelation) {
-    if (rankingUserCorrelation == null) {
-      throw new IllegalArgumentException("rankingUserCorrelation is null");
+  public SpearmanCorrelationSimilarity(UserSimilarity rankingUserSimilarity) {
+    if (rankingUserSimilarity == null) {
+      throw new IllegalArgumentException("rankingUserSimilarity is null");
     }
-    this.rankingUserCorrelation = rankingUserCorrelation;
+    this.rankingUserSimilarity = rankingUserSimilarity;
   }
 
   public double userCorrelation(User user1, User user2) throws TasteException {
     if (user1 == null || user2 == null) {
       throw new IllegalArgumentException("user1 or user2 is null");
     }
-    return rankingUserCorrelation.userCorrelation(new RankedPreferenceUser(user1),
+    return rankingUserSimilarity.userCorrelation(new RankedPreferenceUser(user1),
                                                   new RankedPreferenceUser(user2));
   }
 
   public void setPreferenceInferrer(PreferenceInferrer inferrer) {
-    rankingUserCorrelation.setPreferenceInferrer(inferrer);
+    rankingUserSimilarity.setPreferenceInferrer(inferrer);
   }
 
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
-    RefreshHelper.maybeRefresh(alreadyRefreshed, rankingUserCorrelation);
+    RefreshHelper.maybeRefresh(alreadyRefreshed, rankingUserSimilarity);
   }
 
 

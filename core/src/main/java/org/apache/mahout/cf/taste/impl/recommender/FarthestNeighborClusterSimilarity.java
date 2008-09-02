@@ -19,7 +19,7 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.correlation.UserCorrelation;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.model.User;
@@ -36,31 +36,31 @@ public final class FarthestNeighborClusterSimilarity implements ClusterSimilarit
 
   private static final Random random = RandomUtils.getRandom();
 
-  private final UserCorrelation correlation;
+  private final UserSimilarity similarity;
   private final double samplingPercentage;
 
   /**
-   * <p>Constructs a {@link FarthestNeighborClusterSimilarity} based on the given {@link UserCorrelation}.
+   * <p>Constructs a {@link FarthestNeighborClusterSimilarity} based on the given {@link org.apache.mahout.cf.taste.similarity.UserSimilarity}.
    * All user-user correlations are examined.</p>
    */
-  public FarthestNeighborClusterSimilarity(UserCorrelation correlation) {
-    this(correlation, 1.0);
+  public FarthestNeighborClusterSimilarity(UserSimilarity similarity) {
+    this(similarity, 1.0);
   }
 
   /**
-   * <p>Constructs a {@link FarthestNeighborClusterSimilarity} based on the given {@link UserCorrelation}.
+   * <p>Constructs a {@link FarthestNeighborClusterSimilarity} based on the given {@link org.apache.mahout.cf.taste.similarity.UserSimilarity}.
    * By setting <code>samplingPercentage</code> to a value less than 1.0, this implementation will only examine
    * that fraction of all user-user correlations between two clusters, increasing performance at the expense
    * of accuracy.</p>
    */
-  public FarthestNeighborClusterSimilarity(UserCorrelation correlation, double samplingPercentage) {
-    if (correlation == null) {
-      throw new IllegalArgumentException("correlation is null");
+  public FarthestNeighborClusterSimilarity(UserSimilarity similarity, double samplingPercentage) {
+    if (similarity == null) {
+      throw new IllegalArgumentException("similarity is null");
     }
     if (Double.isNaN(samplingPercentage) || samplingPercentage <= 0.0 || samplingPercentage > 1.0) {
       throw new IllegalArgumentException("samplingPercentage is invalid: " + samplingPercentage);
     }
-    this.correlation = correlation;
+    this.similarity = similarity;
     this.samplingPercentage = samplingPercentage;
   }
 
@@ -73,7 +73,7 @@ public final class FarthestNeighborClusterSimilarity implements ClusterSimilarit
     for (User user1 : cluster1) {
       if (samplingPercentage >= 1.0 || random.nextDouble() < samplingPercentage) {
         for (User user2 : cluster2) {
-          double theCorrelation = correlation.userCorrelation(user1, user2);
+          double theCorrelation = similarity.userCorrelation(user1, user2);
           if (theCorrelation < leastCorrelation) {
             leastCorrelation = theCorrelation;
           }
@@ -82,19 +82,19 @@ public final class FarthestNeighborClusterSimilarity implements ClusterSimilarit
     }
     // We skipped everything? well, at least try comparing the first Users to get some value
     if (leastCorrelation == Double.POSITIVE_INFINITY) {
-      return correlation.userCorrelation(cluster1.iterator().next(), cluster2.iterator().next());
+      return similarity.userCorrelation(cluster1.iterator().next(), cluster2.iterator().next());
     }
     return leastCorrelation;
   }
 
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
-    RefreshHelper.maybeRefresh(alreadyRefreshed, correlation);
+    RefreshHelper.maybeRefresh(alreadyRefreshed, similarity);
   }
 
   @Override
   public String toString() {
-    return "FarthestNeighborClusterSimilarity[correlation:" + correlation + ']';
+    return "FarthestNeighborClusterSimilarity[similarity:" + similarity + ']';
   }
 
 }

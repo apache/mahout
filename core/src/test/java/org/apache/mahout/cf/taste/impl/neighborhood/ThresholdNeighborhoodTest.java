@@ -37,18 +37,18 @@ public final class ThresholdNeighborhoodTest extends TasteTestCase {
     DataModel dataModel = new GenericDataModel(users);
 
     Collection<User> neighborhood =
-            new ThresholdUserNeighborhood(20.0, new DummyCorrelation(), dataModel).getUserNeighborhood("test1");
+            new ThresholdUserNeighborhood(20.0, new DummySimilarity(), dataModel).getUserNeighborhood("test1");
     assertNotNull(neighborhood);
     assertTrue(neighborhood.isEmpty());
 
     Collection<User> neighborhood2 =
-            new ThresholdUserNeighborhood(10.0, new DummyCorrelation(), dataModel).getUserNeighborhood("test1");
+            new ThresholdUserNeighborhood(10.0, new DummySimilarity(), dataModel).getUserNeighborhood("test1");
     assertNotNull(neighborhood2);
     assertEquals(1, neighborhood2.size());
     assertTrue(neighborhood2.contains(users.get(1)));
 
     Collection<User> neighborhood3 =
-            new ThresholdUserNeighborhood(1.0, new DummyCorrelation(), dataModel).getUserNeighborhood("test2");
+            new ThresholdUserNeighborhood(1.0, new DummySimilarity(), dataModel).getUserNeighborhood("test2");
     assertNotNull(neighborhood3);
     assertEquals(3, neighborhood3.size());
     assertTrue(neighborhood3.contains(users.get(0)));
@@ -60,7 +60,7 @@ public final class ThresholdNeighborhoodTest extends TasteTestCase {
   public void testRefresh() throws Exception {
     // Make sure this doesn't throw an exception
     DataModel dataModel = new GenericDataModel(Collections.singletonList(getUser("test1", 0.1)));
-    new ThresholdUserNeighborhood(20.0, new DummyCorrelation(), dataModel).refresh(null);
+    new ThresholdUserNeighborhood(20.0, new DummySimilarity(), dataModel).refresh(null);
   }
 
 }

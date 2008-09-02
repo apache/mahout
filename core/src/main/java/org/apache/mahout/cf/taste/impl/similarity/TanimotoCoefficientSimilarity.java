@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.correlation;
+package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.correlation.ItemCorrelation;
-import org.apache.mahout.cf.taste.correlation.PreferenceInferrer;
-import org.apache.mahout.cf.taste.correlation.UserCorrelation;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
+import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
@@ -43,13 +43,13 @@ import java.util.Collection;
  *
  * <p>The value returned is in [0,1].</p>
  */
-public final class TanimotoCoefficientCorrelation implements UserCorrelation, ItemCorrelation {
+public final class TanimotoCoefficientSimilarity implements UserSimilarity, ItemSimilarity {
 
-  private static final Logger log = LoggerFactory.getLogger(TanimotoCoefficientCorrelation.class);
+  private static final Logger log = LoggerFactory.getLogger(TanimotoCoefficientSimilarity.class);
 
   private final DataModel dataModel;
 
-  public TanimotoCoefficientCorrelation(DataModel dataModel) {
+  public TanimotoCoefficientSimilarity(DataModel dataModel) {
     this.dataModel = dataModel;
   }
 
@@ -110,7 +110,7 @@ public final class TanimotoCoefficientCorrelation implements UserCorrelation, It
     double result = (double) intersectionSize / (double) unionSize;
 
     if (log.isTraceEnabled()) {
-      log.trace("User correlation between " + user1 + " and " + user2 + " is " + result);
+      log.trace("User similarity between " + user1 + " and " + user2 + " is " + result);
     }
     return result;
   }
@@ -165,7 +165,7 @@ public final class TanimotoCoefficientCorrelation implements UserCorrelation, It
     double result = (double) intersectionSize / (double) unionSize;
 
     if (log.isTraceEnabled()) {
-      log.trace("Item correlation between " + item1 + " and " + item2 + " is " + result);
+      log.trace("Item similarity between " + item1 + " and " + item2 + " is " + result);
     }
     return result;
   }
@@ -177,7 +177,7 @@ public final class TanimotoCoefficientCorrelation implements UserCorrelation, It
 
   @Override
   public final String toString() {
-    return "TanimotoCoefficientCorrelation[dataModel:" + dataModel + ']';
+    return "TanimotoCoefficientSimilarity[dataModel:" + dataModel + ']';
   }
 
 }

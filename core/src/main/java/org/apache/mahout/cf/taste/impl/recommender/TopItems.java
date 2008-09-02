@@ -18,7 +18,7 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.correlation.GenericItemCorrelation;
+import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
@@ -116,18 +116,18 @@ public final class TopItems {
   /**
    * <p>Thanks to tsmorton for suggesting this functionality and writing part of the code.</p>
    *
-   * @see GenericItemCorrelation#GenericItemCorrelation(Iterable, int)
-   * @see GenericItemCorrelation#GenericItemCorrelation(org.apache.mahout.cf.taste.correlation.ItemCorrelation , org.apache.mahout.cf.taste.model.DataModel , int)
+   * @see org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity#GenericItemCorrelation(Iterable, int)
+   * @see org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity#GenericItemCorrelation(org.apache.mahout.cf.taste.similarity.ItemSimilarity , org.apache.mahout.cf.taste.model.DataModel , int)
    */
-  public static List<GenericItemCorrelation.ItemItemCorrelation> getTopItemItemCorrelations(
-          int howMany, Iterable<GenericItemCorrelation.ItemItemCorrelation> allCorrelations) {
-    LinkedList<GenericItemCorrelation.ItemItemCorrelation> topCorrelations =
-            new LinkedList<GenericItemCorrelation.ItemItemCorrelation>();
+  public static List<GenericItemSimilarity.ItemItemCorrelation> getTopItemItemCorrelations(
+          int howMany, Iterable<GenericItemSimilarity.ItemItemCorrelation> allCorrelations) {
+    LinkedList<GenericItemSimilarity.ItemItemCorrelation> topCorrelations =
+            new LinkedList<GenericItemSimilarity.ItemItemCorrelation>();
     boolean full = false;
-    for (GenericItemCorrelation.ItemItemCorrelation correlation : allCorrelations) {
+    for (GenericItemSimilarity.ItemItemCorrelation correlation : allCorrelations) {
       double value = correlation.getValue();
       if (!full || value > topCorrelations.getLast().getValue()) {
-        ListIterator<GenericItemCorrelation.ItemItemCorrelation> iterator =
+        ListIterator<GenericItemSimilarity.ItemItemCorrelation> iterator =
                 topCorrelations.listIterator(topCorrelations.size());
         while (iterator.hasPrevious()) {
           if (value <= iterator.previous().getValue()) {

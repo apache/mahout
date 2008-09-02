@@ -15,30 +15,37 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.correlation;
+package org.apache.mahout.cf.taste.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.model.Item;
+import org.apache.mahout.cf.taste.model.User;
 
 /**
  * <p>Implementations of this interface define a notion of itemCorrelation between two
- * {@link org.apache.mahout.cf.taste.model.Item}s. Implementations should return values in the range -1.0 to 1.0, with
+ * {@link User}s. Implementations should return values in the range -1.0 to 1.0, with
  * 1.0 representing perfect correlation.</p>
  *
- * @see UserCorrelation
+ * @see ItemSimilarity
  */
-public interface ItemCorrelation extends Refreshable {
+public interface UserSimilarity extends Refreshable {
 
   /**
-   * <p>Returns the "itemCorrelation", or degree of similarity, of two {@link org.apache.mahout.cf.taste.model.Item}s, based
-   * on the preferences that {@link org.apache.mahout.cf.taste.model.User}s have expressed for the items.</p>
+   * <p>Returns the "itemCorrelation", or degree of similarity, of two {@link User}s, based
+   * on the their preferences.</p>
    *
-   * @param item1 first item
-   * @param item2 second item
-   * @return itemCorrelation between the {@link org.apache.mahout.cf.taste.model.Item}s
+   * @param user1 first user
+   * @param user2 second user
+   * @return itemCorrelation between the two users
    * @throws TasteException if an error occurs while accessing the data
    */
-  double itemCorrelation(Item item1, Item item2) throws TasteException;
+  double userCorrelation(User user1, User user2) throws TasteException;
+
+  /**
+   * <p>Attaches a {@link PreferenceInferrer} to the {@link UserSimilarity} implementation.</p>
+   *
+   * @param inferrer {@link PreferenceInferrer}
+   */
+  void setPreferenceInferrer(PreferenceInferrer inferrer);
 
 }

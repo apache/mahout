@@ -18,9 +18,9 @@
 package org.apache.mahout.cf.taste.impl.model.file;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.correlation.UserCorrelation;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
-import org.apache.mahout.cf.taste.impl.correlation.PearsonCorrelation;
+import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
 import org.apache.mahout.cf.taste.impl.recommender.GenericUserBasedRecommender;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -50,9 +50,9 @@ public final class FileDataModelTest extends TasteTestCase {
   }
 
   public void testFile() throws Exception {
-    UserCorrelation userCorrelation = new PearsonCorrelation(model);
-    UserNeighborhood neighborhood = new NearestNUserNeighborhood(2, userCorrelation, model);
-    Recommender recommender = new GenericUserBasedRecommender(model, neighborhood, userCorrelation);
+    UserSimilarity userSimilarity = new PearsonCorrelationSimilarity(model);
+    UserNeighborhood neighborhood = new NearestNUserNeighborhood(2, userSimilarity, model);
+    Recommender recommender = new GenericUserBasedRecommender(model, neighborhood, userSimilarity);
     assertEquals(2, recommender.recommend("A123", 3).size());
     assertEquals(2, recommender.recommend("B234", 3).size());
     assertEquals(1, recommender.recommend("C345", 3).size());
