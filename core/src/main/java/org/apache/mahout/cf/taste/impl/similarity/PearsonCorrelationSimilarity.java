@@ -20,7 +20,6 @@ package org.apache.mahout.cf.taste.impl.similarity;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Weighting;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 
 /**
@@ -37,8 +36,6 @@ import org.apache.mahout.cf.taste.model.User;
  * <p>The correlation is then:
  *
  * <p><code>sumXY / sqrt(sumX2 * sumY2)</code></p>
- *
- * <p>where <code>size</code> is the number of {@link Item}s in the {@link DataModel}.</p>
  *
  * <p>Note that this correlation "centers" its data, shifts the user's preference values so that
  * each of their means is 0. This is necessary to achieve expected behavior on all data sets.</p>

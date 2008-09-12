@@ -24,6 +24,8 @@ import org.apache.mahout.cf.taste.eval.RecommenderIRStatsEvaluator;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
+import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
+import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -53,6 +55,13 @@ import java.util.Random;
 public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRStatsEvaluator {
 
   private static final Logger log = LoggerFactory.getLogger(GenericRecommenderIRStatsEvaluator.class);
+
+  /**
+   * Pass as "relevanceThreshold" argument to
+   * {@link #evaluate(RecommenderBuilder, DataModel, Rescorer, int, double, double)} to have it attempt
+   * to compute a reasonable threshold. Note that this will impact performance.
+   */
+  public static final double CHOOSE_THRESHOLD = Double.NaN;
 
   private final Random random;
 
@@ -92,9 +101,15 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
         Object id = user.getID();
         Collection<Item> relevantItems = new HashSet<Item>(at);
         Preference[] prefs = user.getPreferencesAsArray();
+        double theRelevanceThreshold;
+        if (Double.isNaN(relevanceThreshold)) {
+          theRelevanceThreshold = computeThreshold(prefs);
+        } else {
+          theRelevanceThreshold = relevanceThreshold;
+        }
         for (int i = 0; i < prefs.length; i++) {
           Preference pref = prefs[i];
-          if (pref.getValue() >= relevanceThreshold) {
+          if (pref.getValue() >= theRelevanceThreshold) {
             relevantItems.add(pref.getItem());
           }
         }
@@ -165,6 +180,18 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
     } else {
       trainingUsers.add(user2);
     }
+  }
+
+  private static double computeThreshold(Preference[] prefs) {
+    if (prefs.length < 2) {
+      // Not enough data points -- return a threshold that allows everything
+      return Double.NEGATIVE_INFINITY;
+    }
+    RunningAverageAndStdDev stdDev = new FullRunningAverageAndStdDev();
+    for (int i = 0; i < prefs.length; i++) {
+      stdDev.addDatum(prefs[i].getValue());
+    }
+    return stdDev.getAverage() + stdDev.getStandardDeviation();
   }
 
 }
