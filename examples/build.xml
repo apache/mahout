@@ -40,7 +40,7 @@
        By default, this should be set to "X.Y.N-dev" where X.Y.N is
        "1 greater" then the last version released (on this branch).
     -->
-  <property name="version" value="0.1-dev" />
+  <property name="version" value="0.2-dev" />
 
   <!-- 3rd party libraries for compilation -->
   <property name="shared-lib" value="../lib" />
@@ -70,7 +70,7 @@
        By default, this should be set to "X.Y.M.${dateversion}"
        where X.Y.M is the last version released (on this branch).
     -->
-  <property name="specversion" value="1.2.${dateversion}" />
+  <property name="specversion" value="0.1.${dateversion}" />
 
   <!-- Javadoc properties -->
   <property name="javadoc.years" value="2006 - ${year}" />
