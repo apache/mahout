@@ -7,16 +7,16 @@
   <groupId>org.apache.lucene.mahout</groupId>
   <artifactId>mahout</artifactId>
   <packaging>pom</packaging>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.2-SNAPSHOT</version>
   <name>Apache Lucene Mahout</name>
   <description>Scalable machine learning libraries</description>
 
   <properties>
     <junit.version>3.8.2</junit.version>
-    <hadoop.version>0.17.1</hadoop.version>
-    <kfs.version>0.1</kfs.version>
+    <hadoop.version>0.18.0</hadoop.version>
+    <kfs.version>0.2.1</kfs.version>
     <xmlenc.version>0.52</xmlenc.version>
-    <jets3t.version>0.5.0</jets3t.version>
+    <jets3t.version>0.6.1</jets3t.version>
     <watchmaker.version>0.4.3</watchmaker.version>
   </properties>
 
