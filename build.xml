@@ -2,17 +2,90 @@
 
 <project name="mahout" default="dist" basedir=".">
 
+  <property name="version" value="0.2-dev" />
+
   <target name="dist">
     <ant dir="core" antfile="build.xml" target="dist-jar"/>
     <ant dir="examples" antfile="build.xml" target="dist-jar"/>
   </target>
 
   <target name="clean">
-    <ant dir="core" antfile="build.xml" target="clean"/>
-    <ant dir="examples" antfile="build.xml" target="clean"/>
+    <ant dir="core" antfile="build.xml" target="clean" />
+    <ant dir="examples" antfile="build.xml" target="clean" />
     <delete dir="build"/>
-    
+    <delete dir="${dist}" />
   </target>
+
+  <target name="javadoc">
+    <ant dir="core" antfile="build.xml" target="javadoc"/>
+  </target>
+
+  <!-- make a distribution -->
+  <target name="package"
+          description="Packages the Mahout distribution files and documentation."
+          depends="dist, javadoc">
+
+    <property name="fullname" value="apache-${ant.project.name}"/>
+    <property name="fullnamever" value="apache-${ant.project.name}-${version}"/>
+
+    <property name="dist" value="dist" />
+
+    <mkdir dir="${dist}"/>
+
+    <tar destfile="${dist}/${fullnamever}.tgz" compression="gzip">
+      <tarfileset dir="."
+        prefix="${fullnamever}"
+        includes="KEYS LICENSE.txt NOTICE.txt README.txt build.xml pom.xml lib/"
+        excludes=""/>
+      <tarfileset dir="./core"
+        prefix="${fullnamever}/core"
+        includes="build.properties build.xml taste-build.xml pom.xml src/ lib/"
+        excludes=""/>
+      <tarfileset dir="./examples"
+        prefix="${fullnamever}/examples"
+        includes="build.properties build.xml pom.xml src/ lib/"
+        excludes=""/>
+      <tarfileset dir="./core/build/docs/api"
+        prefix="${fullnamever}/docs/api" />
+      <tarfileset dir="./core/dist/"
+        prefix="${fullnamever}"
+        includes="*.jar"/>
+    </tar>
+
+    <!-- unpack tarball and create zipball -->
+
+    <property name="dest" value="build"/>
+    <mkdir dir="${dest}"/>
+
+    <gunzip src="${dist}/${fullnamever}.tgz" dest="${dest}/${fullnamever}.tar"/>
+    <untar src="${dest}/${fullnamever}.tar" dest="${dest}"/>
+
+    <zip destfile="${dist}/${fullnamever}.zip">
+      <zipfileset dir="${dest}/${fullnamever}"
+        prefix="${fullnamever}"/>
+    </zip>
+
+    <delete dir="${dest}" />
+
+    <!-- pgp arm tgz and zip -->
+    <exec command="gpg --armor --output ${dist}/${fullnamever}.tgz.asc --detach-sig ${dist}/${fullnamever}.tgz"/>
+    <exec command="gpg --armor --output ${dist}/${fullnamever}.zip.asc --detach-sig ${dist}/${fullnamever}.zip"/>
+
+    <!-- create md5 sum for tgz and zip -->
+    <exec command="openssl dgst -md5 -out ${dist}/${fullnamever}.tgz.md5 ${dist}/${fullnamever}.tgz"/>
+    <exec command="openssl dgst -md5 -out ${dist}/${fullnamever}.zip.md5 ${dist}/${fullnamever}.zip"/>
+
+    <!-- create maven artifacts -->
+    <exec command="mvn -Dtest=false deploy"/>
+    <mkdir dir="${dist}/maven"/>
+    <copy todir="${dist}/maven">
+      <fileset dir="core/dist/maven"/>
+    </copy>
+
+
+  </target>
+
+
+
 </project>
 
-  
