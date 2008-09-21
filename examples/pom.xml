@@ -79,6 +79,15 @@
       <version>${parent.version}</version>
     </dependency>
 
+    <!-- core test -->
+    <dependency>
+      <groupId>org.apache.lucene.mahout</groupId>
+      <artifactId>core</artifactId>
+      <version>${parent.version}</version>
+      <classifier>tests</classifier>
+      <scope>test</scope>
+    </dependency>    
+
     <dependency>
       <groupId>javax.ejb</groupId>
       <artifactId>javaee-api</artifactId>
