@@ -13,7 +13,7 @@
     <ant dir="core" antfile="build.xml" target="clean" />
     <ant dir="examples" antfile="build.xml" target="clean" />
     <delete dir="build"/>
-    <delete dir="${dist}" />
+    <delete dir="dist" />
   </target>
 
   <target name="javadoc">

@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.apache.lucene.mahout</groupId>
-  <artifactId>mahout</artifactId>
+  <artifactId>mahout-parent</artifactId>
   <packaging>pom</packaging>
   <version>0.2-SNAPSHOT</version>
   <name>Apache Lucene Mahout</name>

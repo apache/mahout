@@ -6,7 +6,7 @@
 
   <parent>
     <groupId>org.apache.lucene.mahout</groupId>
-    <artifactId>mahout</artifactId>
+    <artifactId>mahout-parent</artifactId>
     <version>0.2-SNAPSHOT</version>
   </parent>
 
