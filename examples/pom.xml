@@ -5,12 +5,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.apache.lucene.mahout</groupId>
+    <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-parent</artifactId>
     <version>0.2-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.apache.lucene.mahout</groupId>
+  <groupId>org.apache.mahout</groupId>
   <artifactId>examples</artifactId>
   <version>${parent.version}</version>
   <name>Mahout examples</name>
