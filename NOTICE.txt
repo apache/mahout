@@ -22,3 +22,4 @@ This product includes libraries developed by the Kosmos project (http://kosmosfs
 
 This product includes software developed by the Jets3T project (https://jets3t.dev.java.net/) 
 
+This product includes libraries developed by the CGLib project (http://cglib.sourceforge.net/)
