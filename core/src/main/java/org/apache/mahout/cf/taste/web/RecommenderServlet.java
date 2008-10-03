@@ -51,7 +51,7 @@ import java.util.List;
  *
  * <p>For example, you can get 10 recommendations for user 123 from the following URL (assuming
  * you are running taste in a web application running locally on port 8080):<br/>
- * <code>http://localhost:8080/taste/RecommenderServlet?userID=123&amp;howMany=1</code></p>
+ * <code>http://localhost:8080/taste/RecommenderServlet?userID=123&amp;howMany=10</code></p>
  *
  * <p>This servlet requires one <code>init-param</code> in <code>web.xml</code>: it must find
  * a parameter named "recommender-class" which is the name of a class that implements

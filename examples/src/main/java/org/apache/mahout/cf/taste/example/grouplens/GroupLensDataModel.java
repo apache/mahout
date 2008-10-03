@@ -40,8 +40,8 @@ public final class GroupLensDataModel extends FileDataModel {
   private final Map<String, Movie> movieMap;
 
   GroupLensDataModel() throws IOException {
-    this(readResourceToTempFile("/org/apache/mahout/cf//taste/example/grouplens/ratings.dat"),
-         readResourceToTempFile("/org/apache/mahout/cf//taste/example/grouplens/movies.dat"));
+    this(readResourceToTempFile("/org/apache/mahout/cf/taste/example/grouplens/ratings.dat"),
+         readResourceToTempFile("/org/apache/mahout/cf/taste/example/grouplens/movies.dat"));
   }
 
   /**
