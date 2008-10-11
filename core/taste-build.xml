@@ -148,7 +148,8 @@
   </target>
 
   <target depends="init,build" name="build-grouplens-example" description="Builds deployable GroupLens example">
-    <property name="grouplens-location" value="src/main/examples/org/apache/mahout/cf/taste/example/grouplens"/>
+      <property name="examples-base" value="../examples/src/main/java"/>
+    <property name="grouplens-location" value="${examples-base}/org/apache/mahout/cf/taste/example/grouplens"/>
     <fail message="Please download and install the GroupLens .dat files to ${grouplens-location}">
       <condition>
         <not>
@@ -165,11 +166,13 @@
            debug="true"
            optimize="true"
            destdir="build"
-           srcdir="src/main/examples">
+           srcdir="${examples-base}">
       <compilerarg value="-Xlint:all,-serial"/>
       <classpath>
         <pathelement location="${release-jar}"/>
+        <pathelement location="${slf4j-api.jar}"/>          
       </classpath>
+      <include name="org/apache/mahout/cf/taste/example/grouplens/**"/>
     </javac>
     <jar jarfile="grouplens.jar">
       <include name="${grouplens-location}/ratings.dat"/>
