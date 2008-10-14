@@ -101,16 +101,15 @@ public class CBayesClassifier implements Classifier{
     Map<String, Integer> wordList = new HashMap<String, Integer>(1000);
     for (String word : document) {
       if (wordList.containsKey(word)) {
-        Integer count = wordList.get(word);
-        count++;
-        wordList.put(word, count);
+        int count = wordList.get(word);
+        wordList.put(word, count + 1);
       } else {
         wordList.put(word, 1);
       }      
     }
     for (Map.Entry<String, Integer> entry : wordList.entrySet()) {
       String word = entry.getKey();
-      Integer count = entry.getValue();
+      int count = entry.getValue();
       result += count * model.FeatureWeight(label, word);
     }
     return result;

@@ -21,6 +21,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,7 +132,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
 
     @Override
     public int hashCode() {
-      return user.hashCode() ^ Double.valueOf(theCorrelation).hashCode();
+      return user.hashCode() ^ RandomUtils.hashDouble(theCorrelation);
     }
 
     @Override

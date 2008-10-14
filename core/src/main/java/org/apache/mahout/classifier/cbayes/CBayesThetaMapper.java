@@ -66,13 +66,13 @@ public class CBayesThetaMapper extends MapReduceBase implements
                                             // (feature weight Sum)
       String feature = labelFeaturePair.substring(1);
       for (String label : labelWeightSum.keySet()) {
-        double inverseDenominator = 1.0d /(sigma_jSigma_k - labelWeightSum.get(label) + vocabCount);
+        double inverseDenominator = 1.0 /(sigma_jSigma_k - labelWeightSum.get(label) + vocabCount);
         FloatWritable weight = new FloatWritable((float)((value.get() + alpha_i)*inverseDenominator ));
         output.collect(new Text((label + "," + feature).trim()), weight); //output Sigma_j
       }
     } else {
       String label = labelFeaturePair.split(",")[0];
-      double inverseDenominator = 1.0d /(sigma_jSigma_k - labelWeightSum.get(label) + vocabCount);
+      double inverseDenominator = 1.0 /(sigma_jSigma_k - labelWeightSum.get(label) + vocabCount);
       FloatWritable weight = new FloatWritable((float)(-1 * value.get()  * inverseDenominator));
       output.collect(key, weight);//output -D_ij       
     }

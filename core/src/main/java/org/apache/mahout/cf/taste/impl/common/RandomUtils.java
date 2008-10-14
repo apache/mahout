@@ -46,4 +46,13 @@ public final class RandomUtils {
     return testSeed ? new MersenneTwisterRNG(STANDARD_SEED) : new MersenneTwisterRNG();
   }
 
+  /**
+   * @return what {@link Double#hashCode()} would return for the same value
+   */
+  public static int hashDouble(double value) {
+    // Just copied from Double.hashCode
+    long bits = Double.doubleToLongBits(value);
+    return (int) (bits ^ (bits >>> 32));
+  }
+
 }

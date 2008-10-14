@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
+import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 
 import java.io.Serializable;
 
@@ -61,7 +62,7 @@ public final class GenericRecommendedItem implements RecommendedItem, Serializab
 
   @Override
   public int hashCode() {
-    return item.hashCode() ^ Double.valueOf(value).hashCode();
+    return item.hashCode() ^ RandomUtils.hashDouble(value);
   }
 
   @Override

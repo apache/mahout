@@ -40,11 +40,11 @@ public class CBayesThetaNormalizerReducer extends MapReduceBase implements
 
   String labelWeightSumString = " ";
 
-  Float sigma_jSigma_k = 0f;
+  Float sigma_jSigma_k = 0.0f;
 
   String sigma_jSigma_kString = " ";
 
-  Float vocabCount = 0f;
+  Float vocabCount = 0.0f;
 
   String vocabCountString = " ";
 

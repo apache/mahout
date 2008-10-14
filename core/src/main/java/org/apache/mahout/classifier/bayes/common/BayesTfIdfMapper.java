@@ -65,8 +65,8 @@ public class BayesTfIdfMapper extends MapReduceBase implements
         throw new IOException(label);
       }
       
-      Float labelDocumentCount = labelDocumentCounts.get(label);
-      float logIdf = (float)Math.log(labelDocumentCount.floatValue()  / value.get());
+      float labelDocumentCount = labelDocumentCounts.get(label);
+      float logIdf = (float) Math.log(labelDocumentCount  / value.get());
       
       output.collect(new Text(labelFeaturePair), new FloatWritable(logIdf));
     } else if (labelFeaturePair.startsWith(",")) {

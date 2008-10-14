@@ -89,7 +89,7 @@ public class BayesFeatureMapper extends MapReduceBase implements
     for (Map.Entry<String, Integer> entry : wordList.entrySet()) {
       // key is label,word
       String token = entry.getKey();
-      builder.append(",").append(token);
+      builder.append(',').append(token);
       labelWord.set(builder.toString());
       FloatWritable f = new FloatWritable((float) (Math
           .log(1.0 + entry.getValue()) / lengthNormalisation));
@@ -103,7 +103,7 @@ public class BayesFeatureMapper extends MapReduceBase implements
     builder = new StringBuilder(dflabel);
     for (String token : wordList.keySet()) {
       // key is label,word
-      builder.append(",").append(token);
+      builder.append(',').append(token);
       labelWord.set(builder.toString());
       output.collect(labelWord, one);
       output.collect(new Text("," + token), one);

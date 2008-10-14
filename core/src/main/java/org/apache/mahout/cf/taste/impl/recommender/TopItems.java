@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
+import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
@@ -116,8 +117,9 @@ public final class TopItems {
   /**
    * <p>Thanks to tsmorton for suggesting this functionality and writing part of the code.</p>
    *
-   * @see org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity#GenericItemCorrelation(Iterable, int)
-   * @see org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity#GenericItemCorrelation(org.apache.mahout.cf.taste.similarity.ItemSimilarity , org.apache.mahout.cf.taste.model.DataModel , int)
+   * @see GenericItemSimilarity#GenericItemSimilarity(Iterable, int)
+   * @see GenericItemSimilarity#GenericItemSimilarity(org.apache.mahout.cf.taste.similarity.ItemSimilarity,
+   *  org.apache.mahout.cf.taste.model.DataModel, int)
    */
   public static List<GenericItemSimilarity.ItemItemCorrelation> getTopItemItemCorrelations(
           int howMany, Iterable<GenericItemSimilarity.ItemItemCorrelation> allCorrelations) {
@@ -189,7 +191,7 @@ public final class TopItems {
 
     @Override
     public int hashCode() {
-      return user.hashCode() ^ Double.valueOf(similarity).hashCode();
+      return user.hashCode() ^ RandomUtils.hashDouble(similarity);
     }
 
     @Override

@@ -22,6 +22,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.cli.Parser;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
@@ -69,7 +70,7 @@ public class Classify {
     Option typeOpt = OptionBuilder.withLongOpt("classifierType").isRequired().hasArg().withDescription("Type of classifier").create("type");
     options.addOption(typeOpt);
 
-    PosixParser parser = new PosixParser();
+    Parser parser = new PosixParser();
     CommandLine cmdLine = parser.parse(options, args);
     SequenceFileModelReader reader = new SequenceFileModelReader();
     JobConf conf = new JobConf(Classify.class);

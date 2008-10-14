@@ -16,10 +16,6 @@ package org.apache.mahout.utils;
  */
 
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.matrix.Matrix;
-import org.apache.mahout.utils.DistanceMeasure;
-import org.apache.mahout.utils.WeightedDistanceMeasure;
-import org.apache.hadoop.mapred.JobConf;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -52,25 +48,25 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
     
     Set<Integer> featuresSeen = new HashSet<Integer>((int)((vector0.size() + vector1.size()) * 0.75));
 
-    double ab = 0;
-    double a2 = 0;
-    double b2 = 0;
-
-    Double a;
-    Double b;
-    Double weight;
+    double ab = 0.0;
+    double a2 = 0.0;
+    double b2 = 0.0;
 
     for (Vector.Element feature : vector0) {
       if (!featuresSeen.add(feature.index())) {
 
-        a = feature.get();
+        double a = feature.get();
 
-        b = vector1.get(feature.index());
-        if (b == null) {
-          b = 0d;
+        Double bValue = vector1.get(feature.index());
+        double b;
+        if (bValue == null) {
+          b = 0.0;
+        } else {
+          b = bValue;
         }
 
-        weight = getWeights() == null ? 1d : getWeights().get(feature.index());
+        Vector weights = getWeights();
+        double weight = weights == null ? 1.0 : weights.get(feature.index());
 
         ab += a * b * weight;
         a2 += a * a * weight;
@@ -82,14 +78,18 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
     for (Vector.Element feature : vector1) {
       if (!featuresSeen.add(feature.index())) {
 
-        a = vector0.get(feature.index());
-        if (a == null) {
-          a = 0d;
+        Double aValue = vector0.get(feature.index());
+        double a;
+        if (aValue == null) {
+          a = 0.0;
+        } else {
+          a = aValue;
         }
 
-        b = feature.get();
+        double b = feature.get();
 
-        weight = getWeights() == null ? 1d : getWeights().get(feature.index());
+        Vector weights = getWeights();
+        double weight = weights == null ? 1.0 : weights.get(feature.index());
 
         ab += a * b * weight;
         a2 += a * a * weight;

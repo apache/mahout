@@ -191,8 +191,8 @@ public class SoftCluster {
     for (int i = 0; i < clusters.size(); i++) {
       double probWeight = computeProbWeight(clusterDistanceList.get(i),
           clusterDistanceList);
-      outputValue.append(clusters.get(i).clusterId).append(":").append(
-          probWeight).append(" ");
+      outputValue.append(clusters.get(i).clusterId).append(':').append(
+          probWeight).append(' ');
     }
     output.collect(new Text(outputKey.trim()), new Text(outputValue.toString()
         .trim()
@@ -209,10 +209,10 @@ public class SoftCluster {
   public static double computeProbWeight(double clusterDistance,
       List<Double> clusterDistanceList) {
     double denom = 0.0;
-    if (clusterDistance == 0) {
+    if (clusterDistance == 0.0) {
       clusterDistance = minimalValue;
     }
-    for (Double eachCDist : clusterDistanceList) {
+    for (double eachCDist : clusterDistanceList) {
       if (eachCDist == 0)
         eachCDist = minimalValue;
 

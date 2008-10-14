@@ -22,6 +22,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.Parser;
 import org.apache.mahout.classifier.cbayes.CBayesDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,12 +75,12 @@ public class TrainClassifier {
     Option typeOpt = OptionBuilder.withLongOpt("classifierType").isRequired().hasArg().withDescription("Type of classifier").create("type");
     options.addOption(typeOpt);
     
-    PosixParser parser = new PosixParser();
+    Parser parser = new PosixParser();
     CommandLine cmdLine = parser.parse(options, args);
 
     boolean train = cmdLine.hasOption(trainOpt.getOpt());
     TrainClassifier tn = new TrainClassifier();
-    if (train == true){
+    if (train){
       String classifierType = cmdLine.getOptionValue(typeOpt.getOpt());
       if(classifierType.equalsIgnoreCase("bayes")){
         log.info("Training Bayes Classifier");

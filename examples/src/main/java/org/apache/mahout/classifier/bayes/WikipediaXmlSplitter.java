@@ -23,6 +23,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.Parser;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -33,6 +34,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 public class WikipediaXmlSplitter {
 
@@ -46,7 +48,7 @@ public class WikipediaXmlSplitter {
     Option chunkSizeOpt = OptionBuilder.withLongOpt("chunkSize").isRequired().hasArg().withDescription("the Size of chunk in Megabytes").create("c");
     options.addOption(chunkSizeOpt);
 
-    PosixParser parser = new PosixParser();
+    Parser parser = new PosixParser();
     CommandLine cmdLine = parser.parse(options, args);
 
     String dumpFilePath = cmdLine.getOptionValue(dumpFileOpt.getOpt());
@@ -58,7 +60,7 @@ public class WikipediaXmlSplitter {
 
     File dir = new File(outputDirPath);
     dir.getPath();
-
+    // TODO srowen asks if the call to getPath() is needed?
 
     String header =
           "<mediawiki xmlns=\"http://www.mediawiki.org/xml/export-0.3/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.mediawiki.org/xml/export-0.3/ http://www.mediawiki.org/xml/export-0.3.xsd\" version=\"0.3\" xml:lang=\"en\">\n"
@@ -89,23 +91,24 @@ public class WikipediaXmlSplitter {
         + "      <namespace key=\"101\">Portal talk</namespace>\n"
         + "    </namespaces>\n"
         + "  </siteinfo>\n";
+
     String thisLine;
     StringBuilder content = new StringBuilder();
     content.append(header);
     int filenumber = 0;
-    DecimalFormat decimalFormatter = new DecimalFormat("0000");
+    NumberFormat decimalFormatter = new DecimalFormat("0000");
     while ((thisLine = dumpReader.readLine()) != null)
     {
       boolean end = false;
       if(thisLine.trim().startsWith("<page>")){
-        while(thisLine.trim().startsWith("</page>")==false){
-          content.append(thisLine).append("\n");
+        while(thisLine.trim().startsWith("</page>") == false){
+          content.append(thisLine).append('\n');
           if ((thisLine = dumpReader.readLine()) == null){
             end=true;
             break;
           }
         }
-        content.append(thisLine).append("\n");
+        content.append(thisLine).append('\n');
 
         if(content.length()>chunkSize || end){
           content.append("</mediawiki>");

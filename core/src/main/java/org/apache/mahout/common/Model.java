@@ -64,36 +64,35 @@ public abstract class Model {
   public abstract void GenerateModel();
   
   protected float getSumLabelWeight(Integer label) {
-    float result = 0.0f;
     Float numSeen = sumLabelWeight.get(label);
     if (numSeen != null) {
-      result = numSeen;
+      return numSeen;
+    } else {
+      return 0.0f;
     }
-    return result;
   }
 
   protected float getThetaNormalizer(Integer label) {
-    float result = 0.0f;
     Float numSeen = thetaNormalizer.get(label);
     if (numSeen != null) {
-      result = numSeen;
+      return numSeen;
+    } else {
+      return 0.0f;
     }
-    return result;
   }
 
   protected float getSumFeatureWeight(Integer feature) {
-    float result = 0.0f;
     Float numSeen = sumFeatureWeight.get(feature);
     if (numSeen != null) {
-      result = numSeen;
+      return numSeen;
+    } else {
+      return 0.0f;
     }
-    return result;
   }
 
   protected Integer getLabel(String label) {
     if (!labelList.containsKey(label)) {
-      
-      Integer labelId = Integer.valueOf(labelList.size());
+      Integer labelId = labelList.size();
       labelList.put(label, labelId);
     }
     return labelList.get(label);
@@ -102,7 +101,7 @@ public abstract class Model {
   protected Integer getFeature(String feature) {
     if (!featureList.containsKey(feature)) {
       
-      Integer featureId = Integer.valueOf(featureList.size());
+      Integer featureId = featureList.size();
       featureList.put(feature, featureId);
     }
     return featureList.get(feature);
@@ -206,7 +205,7 @@ public abstract class Model {
         gramBuilder.append(gram);
         String token = gramBuilder.toString();        
         tokens.add(token);
-        gramBuilder.append(" ");
+        gramBuilder.append(' ');
       }
     }
     returnDocument.put(labelName, tokens);

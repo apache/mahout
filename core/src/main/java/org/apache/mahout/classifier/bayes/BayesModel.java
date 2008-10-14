@@ -57,9 +57,9 @@ public class BayesModel extends Model {
     Map<Integer, Float> featureWeights = featureLabelWeights.get(feature);
 
     if (featureWeights.containsKey(label)) {
-      result = featureWeights.get(label).floatValue();
+      result = featureWeights.get(label);
     } else {
-      result = 0;
+      result = 0.0f;
     }
     return result;
   }
@@ -93,20 +93,22 @@ public class BayesModel extends Model {
       float perLabelWeightSumNormalisationFactor = Float.MAX_VALUE;
 
       for (int feature = 0, maxFeatures = featureList.size(); feature < maxFeatures; feature++) {
+        Integer featureInt = feature;
         for (int label = 0, maxLabels = labelList.size(); label < maxLabels; label++) {
 
-          float D_ij = getWeightUnprocessed(label, feature);
-          float sumLabelWeight = getSumLabelWeight(label);
+          Integer labelInt = label;
+          float D_ij = getWeightUnprocessed(labelInt, featureInt);
+          float sumLabelWeight = getSumLabelWeight(labelInt);
           // TODO srowen says sigma_j is unused
-          //float sigma_j = getSumFeatureWeight(feature);
+          //float sigma_j = getSumFeatureWeight(featureInt);
 
           float numerator = D_ij + alpha_i;
           float denominator = sumLabelWeight + vocabCount;
 
-          Float weight = (float) Math.log(numerator / denominator);
+          float weight = (float) Math.log(numerator / denominator);
 
           if (D_ij != 0)
-            setWeight(label, feature, weight);
+            setWeight(labelInt, featureInt, weight);
 
           perLabelThetaNormalizer[label] += weight;
 
@@ -127,13 +129,15 @@ public class BayesModel extends Model {
       }
 
       for (int feature = 0, maxFeatures = featureList.size(); feature < maxFeatures; feature++) {
+        Integer featureInt = feature;
         for (int label = 0, maxLabels = labelList.size(); label < maxLabels; label++) {
-          float W_ij = getWeightUnprocessed(label, feature);
+          Integer labelInt = label;
+          float W_ij = getWeightUnprocessed(labelInt, featureInt);
           if (W_ij == 0)
             continue;
           float Sigma_W_ij = perLabelThetaNormalizer[label];
           float normalizedWeight = -1.0f * (W_ij / Sigma_W_ij);
-          setWeight(label, feature, normalizedWeight);
+          setWeight(labelInt, featureInt, normalizedWeight);
         }
       }
 

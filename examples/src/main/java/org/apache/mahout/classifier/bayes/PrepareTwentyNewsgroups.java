@@ -22,6 +22,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.Parser;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.classifier.BayesFileFormatter;
 
@@ -52,7 +53,7 @@ public class PrepareTwentyNewsgroups {
     Option charsetOpt = OptionBuilder.withLongOpt("charset").hasArg().isRequired().withDescription("The name of the character encoding of the input files").create("c");
     options.addOption(charsetOpt);
 
-    PosixParser parser = new PosixParser();
+    Parser parser = new PosixParser();
     CommandLine cmdLine = parser.parse(options, args);
 
     File parentDir = new File(cmdLine.getOptionValue(parentOpt.getOpt()));

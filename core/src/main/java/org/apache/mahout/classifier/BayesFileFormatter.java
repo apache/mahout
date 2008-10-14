@@ -23,6 +23,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.cli.Parser;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.Token;
@@ -71,6 +72,7 @@ public class BayesFileFormatter {
     Writer writer = new OutputStreamWriter(new FileOutputStream(outputFile),
         charset);
     inputDir.listFiles(new FileProcessor(label, analyzer, charset, writer));
+    // TODO srowen asks why call this when return value isn't used?
     writer.close();
 
   }
@@ -96,6 +98,7 @@ public class BayesFileFormatter {
       writer.close();
     } else {
       input.listFiles(new FileProcessor(label, analyzer, charset, outDir));
+      // TODO srowen asks why call this when return value isn't used?
     }
   }
 
@@ -147,7 +150,7 @@ public class BayesFileFormatter {
     }
 
     public boolean accept(File file) {
-      if (file.isFile() == true) {
+      if (file.isFile()) {
         try {
           Writer theWriter;
           if (writer == null) {
@@ -172,6 +175,7 @@ public class BayesFileFormatter {
         }
       } else {
         file.listFiles(this);
+        // TODO srowen asks why call this when return value isn't used?
       }
       return false;
     }
@@ -276,7 +280,7 @@ public class BayesFileFormatter {
     options.addOption(helpOpt);
     CommandLine cmdLine;
     try {
-      PosixParser parser = new PosixParser();
+      Parser parser = new PosixParser();
       cmdLine = parser.parse(options, args);
       if (cmdLine.hasOption(helpOpt.getOpt())) {
         log.info("Options: {}", options);
@@ -298,7 +302,7 @@ public class BayesFileFormatter {
       }
       boolean collapse = cmdLine.hasOption(collapseOpt.getOpt());
 
-      if (collapse == true) {
+      if (collapse) {
         collapse(label, analyzer, input, charset, output);
       } else {
         format(label, analyzer, input, charset, output);

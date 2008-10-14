@@ -41,11 +41,11 @@ public class BayesThetaNormalizerMapper extends MapReduceBase implements
 
   String labelWeightSumString = " ";
 
-  Float sigma_jSigma_k = 0f;
+  Float sigma_jSigma_k = 0.0f;
 
   String sigma_jSigma_kString = " ";
 
-  Float vocabCount = 0f;
+  Float vocabCount = 0.0f;
 
   String vocabCountString = " ";
 
@@ -63,7 +63,7 @@ public class BayesThetaNormalizerMapper extends MapReduceBase implements
       throws IOException {
 
     String labelFeaturePair = key.toString();
-    Float alpha_i = 1.0f;
+    float alpha_i = 1.0f;
 
     String label = labelFeaturePair.split(",")[0];
     float weight = (float) Math.log((value.get() + alpha_i) / (labelWeightSum.get(label) + vocabCount));

@@ -1,12 +1,5 @@
 package org.apache.mahout.classifier;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.mahout.common.Summarizable;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with this
@@ -14,15 +7,23 @@ import java.util.Map;
  * licenses this file to You under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.mahout.common.Summarizable;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The ConfusionMatrix Class stores the result of Classification of a Test Dataset.
@@ -44,7 +45,7 @@ public class ConfusionMatrix implements Summarizable {
   }
   
   public float getAccuracy(String label){
-    int labelId = labelMap.get(label).intValue();
+    int labelId = labelMap.get(label);
     int labelTotal = 0;
     int correct = 0;    
     for(int i = 0 ;i < labels.size() ;i++){
@@ -55,12 +56,12 @@ public class ConfusionMatrix implements Summarizable {
   }
   
   public int getCorrect(String label){
-    int labelId = labelMap.get(label).intValue();
+    int labelId = labelMap.get(label);
     return confusionMatrix[labelId][labelId];
   }
   
   public float getTotal(String label){
-    int labelId = labelMap.get(label).intValue();
+    int labelId = labelMap.get(label);
     int labelTotal = 0;
     for(int i = 0 ;i < labels.size() ;i++){
       labelTotal+= confusionMatrix[labelId][i];
@@ -90,8 +91,8 @@ public class ConfusionMatrix implements Summarizable {
         && this.getLabels().contains(classifiedLabel) == false) {
       throw new IllegalArgumentException("Label not found " +correctLabel + " " +classifiedLabel );
     }
-    int correctId = labelMap.get(correctLabel).intValue();
-    int classifiedId = labelMap.get(classifiedLabel).intValue();
+    int correctId = labelMap.get(correctLabel);
+    int classifiedId = labelMap.get(classifiedLabel);
     return confusionMatrix[correctId][classifiedId];
   }
 
@@ -100,8 +101,8 @@ public class ConfusionMatrix implements Summarizable {
         && this.getLabels().contains(classifiedLabel) == false) {
       throw new IllegalArgumentException("Label not found");
     }
-    int correctId = labelMap.get(correctLabel).intValue();
-    int classifiedId = labelMap.get(classifiedLabel).intValue();
+    int correctId = labelMap.get(correctLabel);
+    int classifiedId = labelMap.get(classifiedLabel);
     confusionMatrix[correctId][classifiedId] = count;
   }
 
@@ -139,24 +140,23 @@ public class ConfusionMatrix implements Summarizable {
         .append("-------------------------------------------------------\n");
 
     for (String correctLabel : this.labels) {
-      returnString.append(StringUtils.rightPad(getSmallLabel(labelMap.get(
-          correctLabel).intValue()), 5)).append('\t');
+      returnString.append(StringUtils.rightPad(getSmallLabel(labelMap.get(correctLabel)), 5)).append('\t');
     }
 
     returnString.append("<--Classified as\n");
 
     for (String correctLabel : this.labels) {
-      Integer labelTotal = 0;
+      int labelTotal = 0;
       for (String classifiedLabel : this.labels) {
         returnString.append(StringUtils.rightPad(Integer.toString(getCount(
             correctLabel, classifiedLabel)), 5)).append('\t');
-        labelTotal+=getCount(correctLabel, classifiedLabel);
+        labelTotal += getCount(correctLabel, classifiedLabel);
       }
-      returnString.append(" |  ").append(StringUtils.rightPad(labelTotal.toString(), 6)).append('\t')
-          .append(StringUtils.rightPad(getSmallLabel(labelMap.get(correctLabel).intValue()), 5))
+      returnString.append(" |  ").append(StringUtils.rightPad(String.valueOf(labelTotal), 6)).append('\t')
+          .append(StringUtils.rightPad(getSmallLabel(labelMap.get(correctLabel)), 5))
           .append(" = ").append(correctLabel).append('\n');
     }
-    returnString.append("\n");
+    returnString.append('\n');
     return returnString.toString();
   }
 

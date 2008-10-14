@@ -23,6 +23,7 @@ import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
+import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -258,7 +259,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
 
     @Override
     public int hashCode() {
-      return cluster1.hashCode() ^ cluster2.hashCode() ^ Double.valueOf(similarity).hashCode();
+      return cluster1.hashCode() ^ cluster2.hashCode() ^ RandomUtils.hashDouble(similarity);
     }
 
     @Override

@@ -59,7 +59,7 @@ public class DescriptionUtils {
     for (String value : values) {
       buffer.append(value);
       if (++ind < values.size())
-        buffer.append(",");
+        buffer.append(',');
     }
 
     return buffer.toString();
@@ -67,8 +67,8 @@ public class DescriptionUtils {
 
   public static Range extractNumericalRange(String description) {
     StringTokenizer tokenizer = new StringTokenizer(description, ",");
-    float min = Float.valueOf(tokenizer.nextToken());
-    float max = Float.valueOf(tokenizer.nextToken());
+    float min = Float.parseFloat(tokenizer.nextToken());
+    float max = Float.parseFloat(tokenizer.nextToken());
     
     return new Range(min, max);
   }

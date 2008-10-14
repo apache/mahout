@@ -23,6 +23,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.Parser;
 
 import java.io.IOException;
 
@@ -42,7 +43,7 @@ public class WikipediaDatasetCreator {
         .withDescription("Location of the Countries File").create("c");
     options.addOption(countriesFileOpt);
     
-    PosixParser parser = new PosixParser();
+    Parser parser = new PosixParser();
     CommandLine cmdLine = parser.parse(options, args);
 
     String dirInputPath = cmdLine.getOptionValue(dirInputPathOpt.getOpt());

@@ -98,7 +98,7 @@ public class CDMapperTest extends TestCase {
 
     CDFitness[] expected = { TP, FP, TN, FN };
     for (String key : keys) {
-      int index = Integer.valueOf(key);
+      int index = Integer.parseInt(key);
       assertEquals("Values for key " + key, 1, collector.getValue(key).size());
       CDFitness eval = collector.getValue(key).get(0);
 

@@ -131,11 +131,11 @@ public class CDInfosToolTest extends TestCase {
         buffer.append(descriptions[index][vindex]);
       } else {
         // ignored attribute (any value is correct)
-        buffer.append("I");
+        buffer.append('I');
       }
 
       if (index < descriptors.size() - 1) {
-        buffer.append(",");
+        buffer.append(',');
       }
     }
 

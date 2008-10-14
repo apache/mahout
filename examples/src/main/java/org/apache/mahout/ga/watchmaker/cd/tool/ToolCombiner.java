@@ -106,7 +106,7 @@ public class ToolCombiner extends MapReduceBase implements
     float max = Float.MIN_VALUE;
 
     while (values.hasNext()) {
-      float value = Float.valueOf(values.next().toString());
+      float value = Float.parseFloat(values.next().toString());
       if (value < min)
         min = value;
       else if (value > max)

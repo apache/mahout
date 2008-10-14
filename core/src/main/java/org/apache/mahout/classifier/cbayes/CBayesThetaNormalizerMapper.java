@@ -41,11 +41,11 @@ public class CBayesThetaNormalizerMapper extends MapReduceBase implements
 
   String labelWeightSumString = " ";
 
-  Float sigma_jSigma_k = 0.0f;
+  float sigma_jSigma_k = 0.0f;
 
   String sigma_jSigma_kString = " ";
 
-  Float vocabCount = 0.0f;
+  float vocabCount = 0.0f;
 
   String vocabCountString = " ";
 
@@ -64,7 +64,7 @@ public class CBayesThetaNormalizerMapper extends MapReduceBase implements
       throws IOException {
 
     String labelFeaturePair = key.toString();
-    Float alpha_i = 1.0f;
+    float alpha_i = 1.0f;
     if (labelFeaturePair.startsWith(",")) { // if it is from the Sigma_j folder
            
       for (String label : labelWeightSum.keySet()) {

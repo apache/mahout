@@ -34,11 +34,11 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
- * <p>A "generic" {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity} which takes a static list of precomputed {@link Item}
+ * <p>A "generic" {@link ItemSimilarity} which takes a static list of precomputed {@link Item}
  * correlations and bases its responses on that alone. The values may have been precomputed
  * offline by another process, stored in a file, and then read and fed into an instance of this class.</p>
  *
- * <p>This is perhaps the best {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity} to use with
+ * <p>This is perhaps the best {@link ItemSimilarity} to use with
  * {@link org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender}, for now, since the point of item-based
  * recommenders is that they can take advantage of the fact that item similarity is relatively static,
  * can be precomputed, and then used in computation to gain a significant performance advantage.</p>
@@ -63,7 +63,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
   }
 
   /**
-   * <p>Like {@link #GenericItemCorrelation(Iterable)}, but will only keep the specified number of correlations
+   * <p>Like {@link #GenericItemSimilarity(Iterable)}, but will only keep the specified number of correlations
    * from the given {@link Iterable} of correlations. It will keep those with the highest correlation --
    * those that are therefore most important.</p>
    *
@@ -78,15 +78,15 @@ public final class GenericItemSimilarity implements ItemSimilarity {
   }
 
   /**
-   * <p>Builds a list of item-item correlations given an {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity} implementation and a
+   * <p>Builds a list of item-item correlations given an {@link ItemSimilarity} implementation and a
    * {@link DataModel}, rather than a list of {@link ItemItemCorrelation}s.</p>
    *
    * <p>It's valid to build a {@link GenericItemSimilarity} this way, but perhaps missing some of the point
    * of an item-based recommender. Item-based recommenders use the assumption that item-item correlations
    * are relatively fixed, and might be known already independent of user preferences. Hence it is useful
-   * to inject that information, using {@link #GenericItemCorrelation(Iterable)}.</p>
+   * to inject that information, using {@link #GenericItemSimilarity(Iterable)}.</p>
    *
-   * @param otherSimilarity other {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity} to get correlations from
+   * @param otherSimilarity other {@link ItemSimilarity} to get correlations from
    * @param dataModel data model to get {@link Item}s from
    * @throws TasteException if an error occurs while accessing the {@link DataModel} items
    */
@@ -97,13 +97,13 @@ public final class GenericItemSimilarity implements ItemSimilarity {
   }
 
   /**
-   * <p>Like {@link #GenericItemCorrelation(org.apache.mahout.cf.taste.similarity.ItemSimilarity , DataModel)} )}, but will only
+   * <p>Like {@link #GenericItemSimilarity(ItemSimilarity, DataModel)} )}, but will only
    * keep the specified number of correlations from the given {@link DataModel}.
    * It will keep those with the highest correlation -- those that are therefore most important.</p>
    *
    * <p>Thanks to tsmorton for suggesting this and providing part of the implementation.</p>
    *
-   * @param otherSimilarity other {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity} to get correlations from
+   * @param otherSimilarity other {@link ItemSimilarity} to get correlations from
    * @param dataModel data model to get {@link Item}s from
    * @param maxToKeep maximum number of correlations to keep
    * @throws TasteException if an error occurs while accessing the {@link DataModel} items

@@ -130,8 +130,8 @@ public class TestFuzzyKmeansClustering extends TestCase {
       for (int i = 0; i < clusterList.size(); i++) {
         double probWeight = SoftCluster.computeProbWeight(clusterDistanceList
             .get(i), clusterDistanceList);
-        outputValue.append(clusterList.get(i).getClusterId()).append(":")
-            .append(probWeight).append(" ");
+        outputValue.append(clusterList.get(i).getClusterId()).append(':')
+            .append(probWeight).append(' ');
       }
 
       pointClusterInfo.put(point.asFormatString().trim(), outputValue
