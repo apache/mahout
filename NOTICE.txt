@@ -26,3 +26,6 @@ This product includes libraries developed by the CGLib project (http://cglib.sou
 
 This product includes a JUnit jar: http://junit.sourceforge.net/
 License: Common Public License - v 1.0 (http://junit.sourceforge.net/cpl-v10.html)
+
+This product includes tests written with EasyMock Copyright 2001-2007
+Tammo Freese (http://www.easymock.org/)
