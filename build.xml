@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project name="mahout" default="dist" basedir=".">
+    <import file="common-build.xml"/>
 
-  <property name="version" value="0.1-dev" />
 
   <target name="dist">
     <ant dir="core" antfile="build.xml" target="dist-jar"/>
@@ -72,8 +72,10 @@
     <exec command="gpg --armor --output ${dist}/${fullnamever}.zip.asc --detach-sig ${dist}/${fullnamever}.zip"/>
 
     <!-- create md5 sum for tgz and zip -->
-    <exec command="openssl dgst -md5 -out ${dist}/${fullnamever}.tgz.md5 ${dist}/${fullnamever}.tgz"/>
-    <exec command="openssl dgst -md5 -out ${dist}/${fullnamever}.zip.md5 ${dist}/${fullnamever}.zip"/>
+    <!--<exec command="openssl dgst -md5 -out ${dist}/${fullnamever}.tgz.md5 ${dist}/${fullnamever}.tgz"/>
+    <exec command="openssl dgst -md5 -out ${dist}/${fullnamever}.zip.md5 ${dist}/${fullnamever}.zip"/>-->
+    <mahout-checksum file="${dist}/${fullnamever}.tgz"/>
+    <mahout-checksum file="${dist}/${fullnamever}.zip"/>
 
     <!-- create maven artifacts -->
     <exec command="mvn -Dtest=false deploy"/>
