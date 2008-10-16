@@ -75,7 +75,7 @@
   <property name="specversion" value="0.1.${dateversion}" />
 
   <!-- Javadoc properties -->
-  <property name="javadoc.years" value="2006 - ${year}" />
+  <property name="javadoc.years" value="2008 - ${year}" />
   <property name="build.docs" value="${dest}/docs"/>
   <property name="build.javadoc" value="${build.docs}/api"/>
   <property name="javadoc.access" value="protected"/>
