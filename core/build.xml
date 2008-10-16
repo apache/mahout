@@ -40,7 +40,7 @@
        By default, this should be set to "X.Y.N-dev" where X.Y.N is
        "1 greater" then the last version released (on this branch).
     -->
-  <property name="version" value="0.2-dev" />
+  <property name="version" value="0.1-dev" />
 
   <!-- 3rd party libraries for compilation -->
   <property name="core-lib" value="lib" />
