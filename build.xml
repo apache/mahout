@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project name="mahout" default="dist" basedir=".">
-    <import file="common-build.xml"/>
+  <import file="common-build.xml"/>
 
 
   <target name="dist">
@@ -10,14 +10,53 @@
   </target>
 
   <target name="clean">
-    <ant dir="core" antfile="build.xml" target="clean" />
-    <ant dir="examples" antfile="build.xml" target="clean" />
+    <ant dir="core" antfile="build.xml" target="clean"/>
+    <ant dir="examples" antfile="build.xml" target="clean"/>
     <delete dir="build"/>
-    <delete dir="dist" />
+    <delete dir="dist"/>
   </target>
 
+  <path id="javadoc.classpath">
+    <fileset dir="${shared-lib}">
+      <include name="*.jar" />
+      <exclude name="junit*.jar"/>
+    </fileset>
+    <fileset dir="core/lib">
+      <include name="*.jar" />
+    </fileset>
+    <fileset dir="examples/lib">
+      <include name="*.jar" />
+    </fileset>
+  </path>
+
+  <property name="Name" value="Apache Mahout"/>
   <target name="javadoc">
+    <!-- build separate ones -->
     <ant dir="core" antfile="build.xml" target="javadoc"/>
+    <ant dir="examples" antfile="build.xml" target="javadoc"/>
+    <!-- build a full one -->
+    <mkdir dir="${build.javadoc}"/>
+
+    <javadoc
+            destdir="${build.javadoc}"
+            author="true"
+            version="true"
+            failonerror="true"
+            use="true"
+            encoding="utf8"
+            overview="core/src/main/java/overview.html"
+            access="${javadoc.access}"
+            windowtitle="${Name} ${version} API"
+            doctitle="${Name} ${version} API (${specversion})"
+            bottom="Copyright &amp;copy; ${javadoc.years} The Apache Software Foundation"
+            >
+      <packageset dir="core/src/main/java"/>
+      <packageset dir="examples/src/main/java"/>
+      <link href="${javadoc.link.java}"/>
+      <link href="${javadoc.link.junit}"/>
+      <classpath refid="javadoc.classpath"/>
+    </javadoc>
+
   </target>
 
   <!-- make a distribution -->
@@ -28,28 +67,35 @@
     <property name="fullname" value="apache-${ant.project.name}"/>
     <property name="fullnamever" value="apache-${ant.project.name}-${version}"/>
 
-    <property name="dist" value="dist" />
+    <property name="dist" value="dist"/>
 
     <mkdir dir="${dist}"/>
 
     <tar destfile="${dist}/${fullnamever}.tgz" compression="gzip">
       <tarfileset dir="."
-        prefix="${fullnamever}"
-        includes="KEYS LICENSE.txt NOTICE.txt README.txt build.xml pom.xml lib/"
-        excludes=""/>
+                  prefix="${fullnamever}"
+                  includes="KEYS LICENSE.txt NOTICE.txt README.txt build.xml pom.xml lib/"
+                  excludes=""/>
       <tarfileset dir="./core"
-        prefix="${fullnamever}/core"
-        includes="build.properties build.xml taste-build.xml pom.xml src/ lib/"
-        excludes=""/>
+                  prefix="${fullnamever}/core"
+                  includes="build.properties build.xml taste-build.xml pom.xml src/ lib/"
+                  excludes=""/>
       <tarfileset dir="./examples"
-        prefix="${fullnamever}/examples"
-        includes="build.properties build.xml pom.xml src/ lib/"
-        excludes=""/>
+                  prefix="${fullnamever}/examples"
+                  includes="build.properties build.xml pom.xml src/ lib/"
+                  excludes=""/>
       <tarfileset dir="./core/build/docs/api"
-        prefix="${fullnamever}/docs/api" />
+                  prefix="${fullnamever}/docs/core/api"/>
+
+      <tarfileset dir="./examples/build/docs/api"
+                  prefix="${fullnamever}/docs/examples/api"/>
+      <!-- full set of apis -->
+      <tarfileset dir="./build/docs/api"
+                  prefix="${fullnamever}/docs/api"/>
+
       <tarfileset dir="./core/dist/"
-        prefix="${fullnamever}"
-        includes="*.jar"/>
+                  prefix="${fullnamever}"
+                  includes="*.jar"/>
     </tar>
 
     <!-- unpack tarball and create zipball -->
@@ -62,10 +108,10 @@
 
     <zip destfile="${dist}/${fullnamever}.zip">
       <zipfileset dir="${dest}/${fullnamever}"
-        prefix="${fullnamever}"/>
+                  prefix="${fullnamever}"/>
     </zip>
 
-    <delete dir="${dest}" />
+    <delete dir="${dest}"/>
 
     <!-- pgp arm tgz and zip -->
     <exec command="gpg --armor --output ${dist}/${fullnamever}.tgz.asc --detach-sig ${dist}/${fullnamever}.tgz"/>
@@ -87,19 +133,19 @@
 
   </target>
 
-<target name="-taskdef">
+  <target name="-taskdef">
     <typedef resource="org/apache/rat/anttasks/antlib.xml" uri="antlib:rat.anttasks">
       <classpath>
         <fileset dir="." includes="rat*.jar"/>
       </classpath>
     </typedef>
   </target>
-<target name="rat-sources" depends="-taskdef"
-    description="runs the tasks over src/java excluding the license directory">
+  <target name="rat-sources" depends="-taskdef"
+          description="runs the tasks over src/java excluding the license directory">
     <rat:report xmlns:rat="antlib:org.apache.rat.anttasks">
       <fileset dir="core/src/main/java">
         <exclude name="**/CHANGES.*"/>
-       </fileset>
+      </fileset>
       <fileset dir="examples/src/main/java">
         <exclude name="**/CHANGES.*"/>
       </fileset>

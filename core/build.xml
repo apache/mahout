@@ -48,11 +48,6 @@
   <property name="junit.excludes" value="**/MatrixTest.java, **/DefaultDistanceMeasureTest.java, **/DefaultWeightedDistanceMeasureTest.java"/>
 
 
-  <path id="junit-path">
-    <pathelement location="${junit-location.jar}"/>
-  </path>
-
-
   <!-- The compilation classpath -->
   <path id="compile.classpath">
     <fileset dir="${shared-lib}">
@@ -142,6 +137,7 @@
       use="true"
       encoding="utf8"
       access="${javadoc.access}"
+      overview="./src/main/java/overview.html"
       windowtitle="${Name} ${version} API"
       doctitle="${Name} ${version} API (${specversion})"
       bottom="Copyright &amp;copy; ${javadoc.years} The Apache Software Foundation"

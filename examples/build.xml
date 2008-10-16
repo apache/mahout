@@ -122,6 +122,7 @@
       failonerror="true"
       use="true"
       encoding="utf8"
+      overview="./src/main/java/overview.html"            
       access="${javadoc.access}"
       windowtitle="${Name} ${version} API"
       doctitle="${Name} ${version} API (${specversion})"
