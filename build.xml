@@ -2,7 +2,7 @@
 
 <project name="mahout" default="dist" basedir=".">
 
-  <property name="version" value="0.2-dev" />
+  <property name="version" value="0.1-dev" />
 
   <target name="dist">
     <ant dir="core" antfile="build.xml" target="dist-jar"/>
