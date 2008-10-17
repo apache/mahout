@@ -17,13 +17,15 @@ package org.apache.mahout.classifier.bayes;
  * limitations under the License.
  */
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.PosixParser;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.Parser;
+
+import org.apache.commons.cli2.CommandLine;
+import org.apache.commons.cli2.Option;
+import org.apache.commons.cli2.Group;
+import org.apache.commons.cli2.OptionException;
+import org.apache.commons.cli2.commandline.Parser;
+import org.apache.commons.cli2.builder.DefaultOptionBuilder;
+import org.apache.commons.cli2.builder.ArgumentBuilder;
+import org.apache.commons.cli2.builder.GroupBuilder;
 
 import java.io.IOException;
 
@@ -31,24 +33,35 @@ public class WikipediaDatasetCreator {
 
   @SuppressWarnings("static-access")
   public static void main(String[] args) throws IOException,
-      ClassNotFoundException, IllegalAccessException, InstantiationException, ParseException {
-    Options options = new Options();
-    Option dirInputPathOpt = OptionBuilder.withLongOpt("dirInputPath").isRequired().hasArg()
-        .withDescription("The input Directory Path").create("i");
-    options.addOption(dirInputPathOpt);
-    Option dirOutputPathOpt = OptionBuilder.withLongOpt("dirOuputPath").isRequired().hasArg()
-        .withDescription("The output Directory Path").create("o");
-    options.addOption(dirOutputPathOpt);
-    Option countriesFileOpt = OptionBuilder.withLongOpt("countriesFile").isRequired().hasArg()
-        .withDescription("Location of the Countries File").create("c");
-    options.addOption(countriesFileOpt);
-    
-    Parser parser = new PosixParser();
-    CommandLine cmdLine = parser.parse(options, args);
+          ClassNotFoundException, IllegalAccessException, InstantiationException, OptionException {
+    final DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    final ArgumentBuilder abuilder = new ArgumentBuilder();
+    final GroupBuilder gbuilder = new GroupBuilder();
 
-    String dirInputPath = cmdLine.getOptionValue(dirInputPathOpt.getOpt());
-    String dirOutputPath = cmdLine.getOptionValue(dirOutputPathOpt.getOpt());
-    String countriesFile = cmdLine.getOptionValue(countriesFileOpt.getOpt());
+    Option dirInputPathOpt = obuilder.withLongName("dirInputPath").withRequired(true).withArgument(
+            abuilder.withName("dirInputPath").withMinimum(1).withMaximum(1).create()).
+            withDescription("The input directory path").withShortName("i").create();
+
+    Option dirOutputPathOpt = obuilder.withLongName("dirOutputPath").withRequired(true).withArgument(
+            abuilder.withName("dirOutputPath").withMinimum(1).withMaximum(1).create()).
+            withDescription("The output directory Path").withShortName("o").create();
+
+    Option countriesFileOpt = obuilder.withLongName("countriesFile").withRequired(true).withArgument(
+            abuilder.withName("countriesFile").withMinimum(1).withMaximum(1).create()).
+            withDescription("Location of the countries file").withShortName("c").create();
+
+    Group group = gbuilder.withName("Options").withOption(countriesFileOpt).withOption(dirInputPathOpt).withOption(dirOutputPathOpt).create();
+
+    CommandLine cmdLine;
+    Parser parser = new Parser();
+    parser.setGroup(group);
+    cmdLine = parser.parse(args);
+    
+
+
+    String dirInputPath = (String) cmdLine.getValue(dirInputPathOpt);
+    String dirOutputPath = (String) cmdLine.getValue(dirOutputPathOpt);
+    String countriesFile = (String) cmdLine.getValue(countriesFileOpt);
 
     WikipediaDatasetCreatorDriver.runJob(dirInputPath, dirOutputPath, countriesFile);
 

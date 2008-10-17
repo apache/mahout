@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-parent</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.1-SNAPSHOT</version>
   </parent>
 
   <groupId>org.apache.mahout</groupId>
@@ -74,14 +74,14 @@
   <dependencies>
 
     <dependency>
-      <groupId>org.apache.lucene.mahout</groupId>
+      <groupId>org.apache.mahout</groupId>
       <artifactId>core</artifactId>
       <version>${parent.version}</version>
     </dependency>
 
     <!-- core test -->
     <dependency>
-      <groupId>org.apache.lucene.mahout</groupId>
+      <groupId>org.apache.mahout</groupId>
       <artifactId>core</artifactId>
       <version>${parent.version}</version>
       <classifier>tests</classifier>
@@ -123,6 +123,18 @@
       <artifactId>junit</artifactId>
       <version>3.8.2</version>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.5.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-jcl</artifactId>
+      <version>1.5.2</version>
     </dependency>
 
   </dependencies>

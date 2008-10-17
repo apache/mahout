@@ -16,15 +16,16 @@ package org.apache.mahout.classifier.bayes;
  * limitations under the License.
  */
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.PosixParser;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.Parser;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.classifier.BayesFileFormatter;
+import org.apache.commons.cli2.Option;
+import org.apache.commons.cli2.CommandLine;
+import org.apache.commons.cli2.Group;
+import org.apache.commons.cli2.OptionException;
+import org.apache.commons.cli2.commandline.Parser;
+import org.apache.commons.cli2.builder.DefaultOptionBuilder;
+import org.apache.commons.cli2.builder.ArgumentBuilder;
+import org.apache.commons.cli2.builder.GroupBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,25 +42,40 @@ import java.nio.charset.Charset;
 public class PrepareTwentyNewsgroups {
 
   @SuppressWarnings("static-access")
-  public static void main(String[] args) throws IOException, ParseException,
-      ClassNotFoundException, InstantiationException, IllegalAccessException {
-    Options options = new Options();
-    Option parentOpt = OptionBuilder.withLongOpt("parent").isRequired().hasArg().withDescription("Parent dir containing the newsgroups").create("p");
-    options.addOption(parentOpt);
-    Option outputDirOpt = OptionBuilder.withLongOpt("outputDir").isRequired().hasArg().withDescription("The output directory").create("o");
-    options.addOption(outputDirOpt);
-    Option analyzerNameOpt = OptionBuilder.withLongOpt("analyzerName").isRequired().hasArg().withDescription("The class name of the analyzer").create("a");
-    options.addOption(analyzerNameOpt);
-    Option charsetOpt = OptionBuilder.withLongOpt("charset").hasArg().isRequired().withDescription("The name of the character encoding of the input files").create("c");
-    options.addOption(charsetOpt);
+  public static void main(String[] args) throws IOException,
+          ClassNotFoundException, InstantiationException, IllegalAccessException, OptionException {
+    final DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    final ArgumentBuilder abuilder = new ArgumentBuilder();
+    final GroupBuilder gbuilder = new GroupBuilder();
 
-    Parser parser = new PosixParser();
-    CommandLine cmdLine = parser.parse(options, args);
+    Option parentOpt = obuilder.withLongName("parent").withRequired(true).withArgument(
+            abuilder.withName("parent").withMinimum(1).withMaximum(1).create()).
+            withDescription("Parent dir containing the newsgroups").withShortName("p").create();
 
-    File parentDir = new File(cmdLine.getOptionValue(parentOpt.getOpt()));
-    File outputDir = new File(cmdLine.getOptionValue(outputDirOpt.getOpt()));
-    String analyzerName = cmdLine.getOptionValue(analyzerNameOpt.getOpt());
-    Charset charset = Charset.forName(cmdLine.getOptionValue(charsetOpt.getOpt()));
+    Option outputDirOpt = obuilder.withLongName("outputDir").withRequired(true).withArgument(
+            abuilder.withName("outputDir").withMinimum(1).withMaximum(1).create()).
+            withDescription("The output directory").withShortName("o").create();
+
+    Option analyzerNameOpt = obuilder.withLongName("analyzerName").withRequired(true).withArgument(
+            abuilder.withName("analyzerName").withMinimum(1).withMaximum(1).create()).
+            withDescription("The class name of the analyzer").withShortName("a").create();
+
+    Option charsetOpt = obuilder.withLongName("charset").withRequired(true).withArgument(
+            abuilder.withName("charset").withMinimum(1).withMaximum(1).create()).
+            withDescription("The name of the character encoding of the input files").withShortName("c").create();
+
+    Group group = gbuilder.withName("Options").withOption(analyzerNameOpt).withOption(charsetOpt).withOption(outputDirOpt).withOption(parentOpt).create();
+
+    CommandLine cmdLine;
+    Parser parser = new Parser();
+    parser.setGroup(group);
+    cmdLine = parser.parse(args);
+
+
+    File parentDir = new File((String) cmdLine.getValue(parentOpt));
+    File outputDir = new File((String) cmdLine.getValue(outputDirOpt));
+    String analyzerName = (String) cmdLine.getValue(analyzerNameOpt);
+    Charset charset = Charset.forName((String) cmdLine.getValue(charsetOpt));
     Analyzer analyzer = (Analyzer) Class.forName(analyzerName).newInstance();
     //parent dir contains dir by category
     File [] categoryDirs = parentDir.listFiles();

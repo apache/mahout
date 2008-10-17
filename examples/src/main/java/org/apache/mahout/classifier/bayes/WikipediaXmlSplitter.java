@@ -17,13 +17,15 @@ package org.apache.mahout.classifier.bayes;
  * limitations under the License.
  */
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.PosixParser;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.Parser;
+
+import org.apache.commons.cli2.Option;
+import org.apache.commons.cli2.CommandLine;
+import org.apache.commons.cli2.Group;
+import org.apache.commons.cli2.OptionException;
+import org.apache.commons.cli2.commandline.Parser;
+import org.apache.commons.cli2.builder.DefaultOptionBuilder;
+import org.apache.commons.cli2.builder.ArgumentBuilder;
+import org.apache.commons.cli2.builder.GroupBuilder;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -39,21 +41,31 @@ import java.text.NumberFormat;
 public class WikipediaXmlSplitter {
 
   @SuppressWarnings("static-access")
-  public static void main(String[] args) throws IOException, ParseException {
-    Options options = new Options();
-    Option dumpFileOpt = OptionBuilder.withLongOpt("dumpfile").isRequired().hasArg().withDescription("The path to the wikipedia dump file").create("d");
-    options.addOption(dumpFileOpt);
-    Option outputDirOpt = OptionBuilder.withLongOpt("outputDir").isRequired().hasArg().withDescription("The output directory to place the splits in").create("o");
-    options.addOption(outputDirOpt);
-    Option chunkSizeOpt = OptionBuilder.withLongOpt("chunkSize").isRequired().hasArg().withDescription("the Size of chunk in Megabytes").create("c");
-    options.addOption(chunkSizeOpt);
+  public static void main(String[] args) throws IOException, OptionException {
+    final DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    final ArgumentBuilder abuilder = new ArgumentBuilder();
+    final GroupBuilder gbuilder = new GroupBuilder();
 
-    Parser parser = new PosixParser();
-    CommandLine cmdLine = parser.parse(options, args);
+    Option dumpFileOpt = obuilder.withLongName("dumpFile").withRequired(true).withArgument(
+            abuilder.withName("dumpFile").withMinimum(1).withMaximum(1).create()).
+            withDescription("The path to the wikipedia dump file").withShortName("d").create();
 
-    String dumpFilePath = cmdLine.getOptionValue(dumpFileOpt.getOpt());
-    String outputDirPath = cmdLine.getOptionValue(outputDirOpt.getOpt());
-    int chunkSize = 1024 * 1024 * Integer.parseInt(cmdLine.getOptionValue(chunkSizeOpt.getOpt()));
+    Option outputDirOpt = obuilder.withLongName("outputDir").withRequired(true).withArgument(
+            abuilder.withName("outputDir").withMinimum(1).withMaximum(1).create()).
+            withDescription("The output directory to place the splits in").withShortName("o").create();
+
+    Option chunkSizeOpt = obuilder.withLongName("chunkSize").withRequired(true).withArgument(
+            abuilder.withName("chunkSize").withMinimum(1).withMaximum(1).create()).
+            withDescription("The Size of the chunk, in megabytes").withShortName("c").create();
+    Group group = gbuilder.withName("Options").withOption(dumpFileOpt).withOption(outputDirOpt).withOption(chunkSizeOpt).create();
+    CommandLine cmdLine;
+    Parser parser = new Parser();
+    parser.setGroup(group);
+    cmdLine = parser.parse(args);
+
+    String dumpFilePath = (String) cmdLine.getValue(dumpFileOpt);
+    String outputDirPath = (String) cmdLine.getValue(outputDirOpt);
+    int chunkSize = 1024 * 1024 * Integer.parseInt((String) cmdLine.getValue(chunkSizeOpt));
 
     BufferedReader dumpReader = new BufferedReader(new InputStreamReader(
         new FileInputStream(dumpFilePath), "UTF-8"));

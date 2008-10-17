@@ -62,7 +62,9 @@
   <property name="dist" value="dist" />
 
 
-  <property name="shared-lib" value="./lib" />
+  <dirname file="${ant.file.common}" property="common.dir"/>
+
+  <property name="shared-lib" value="${common.dir}/lib" />
 
   <!-- Javadoc properties -->
   <property name="javadoc.years" value="2008 - ${year}" />

@@ -16,13 +16,14 @@ package org.apache.mahout.classifier.bayes;
  * limitations under the License.
  */
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.PosixParser;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.Parser;
+import org.apache.commons.cli2.CommandLine;
+import org.apache.commons.cli2.Group;
+import org.apache.commons.cli2.Option;
+import org.apache.commons.cli2.OptionException;
+import org.apache.commons.cli2.builder.ArgumentBuilder;
+import org.apache.commons.cli2.builder.DefaultOptionBuilder;
+import org.apache.commons.cli2.builder.GroupBuilder;
+import org.apache.commons.cli2.commandline.Parser;
 import org.apache.mahout.classifier.cbayes.CBayesDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,7 @@ import java.io.IOException;
 
 /**
  * Train the Naive Bayes Complement classifier with improved weighting on the Twenty Newsgroups data (http://people.csail.mit.edu/jrennie/20Newsgroups/20news-18828.tar.gz)
- *
+ * <p/>
  * To run:
  * Assume MAHOUT_HOME refers to the location where you checked out/installed Mahout
  * <ol>
@@ -40,13 +41,13 @@ import java.io.IOException;
  * <li>Start up Hadoop and copy the files to the system. See http://hadoop.apache.org/core/docs/r0.16.2/quickstart.html</li>
  * <li>From the Hadoop dir (where Hadoop is installed):
  * <ol>
- *      <li>emacs conf/hadoop-site.xml (add in local settings per quickstart)</li>
- *      <li>bin/hadoop namenode -format  //Format the HDFS</li>
- *      <li>bin/start-all.sh  //Start Hadoop</li>
- *      <li>bin/hadoop dfs -put &lt;MAHOUT_HOME&gt;/work/20news-18828-collapse 20newsInput  //Copies the extracted text to HDFS</li>
- *      <li>bin/hadoop jar &lt;MAHOUT_HOME&gt;/build/apache-mahout-0.1-dev-ex.jar org.apache.mahout.examples.classifiers.cbayes.TwentyNewsgroups -t -i 20newsInput -o 20newsOutput</li>
+ * <li>emacs conf/hadoop-site.xml (add in local settings per quickstart)</li>
+ * <li>bin/hadoop namenode -format  //Format the HDFS</li>
+ * <li>bin/start-all.sh  //Start Hadoop</li>
+ * <li>bin/hadoop dfs -put &lt;MAHOUT_HOME&gt;/work/20news-18828-collapse 20newsInput  //Copies the extracted text to HDFS</li>
+ * <li>bin/hadoop jar &lt;MAHOUT_HOME&gt;/build/apache-mahout-0.1-dev-ex.jar org.apache.mahout.examples.classifiers.cbayes.TwentyNewsgroups -t -i 20newsInput -o 20newsOutput</li>
  * </ol>
- *  </li>
+ * </li>
  * </ol>
  */
 public class TrainClassifier {
@@ -60,36 +61,47 @@ public class TrainClassifier {
   public void trainCNaiveBayes(String dir, String outputDir, int gramSize) throws IOException {
     CBayesDriver.runJob(dir, outputDir, gramSize);
   }
-  
+
   @SuppressWarnings("static-access")
-  public static void main(String[] args) throws IOException, ParseException {
-    Options options = new Options();
-    Option trainOpt = OptionBuilder.withLongOpt("train").withDescription("Train the classifier").create("t");
-    options.addOption(trainOpt);
-    Option inputDirOpt = OptionBuilder.withLongOpt("inputDir").hasArg().withDescription("The Directory on HDFS containing the collapsed, properly formatted files").create("i");
-    options.addOption(inputDirOpt);
-    Option outputOpt = OptionBuilder.withLongOpt("output").isRequired().hasArg().withDescription("The location of the model on the HDFS").create("o");
-    options.addOption(outputOpt);
-    Option gramSizeOpt = OptionBuilder.withLongOpt("gramSize").hasArg().withDescription("Size of the n-gram").create("ng");
-    options.addOption(gramSizeOpt);
-    Option typeOpt = OptionBuilder.withLongOpt("classifierType").isRequired().hasArg().withDescription("Type of classifier").create("type");
-    options.addOption(typeOpt);
-    
-    Parser parser = new PosixParser();
-    CommandLine cmdLine = parser.parse(options, args);
+  public static void main(String[] args) throws IOException, OptionException {
+    final DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    final ArgumentBuilder abuilder = new ArgumentBuilder();
+    final GroupBuilder gbuilder = new GroupBuilder();
+    Option trainOpt = obuilder.withLongName("train").withRequired(true).
+            withDescription("Train the classifier").withShortName("t").create();
 
-    boolean train = cmdLine.hasOption(trainOpt.getOpt());
+    Option inputDirOpt = obuilder.withLongName("inputDir").withRequired(true).withArgument(
+            abuilder.withName("inputDir").withMinimum(1).withMaximum(1).create()).
+            withDescription("The Directory on HDFS containing the collapsed, properly formatted files").withShortName("i").create();
+
+    Option outputOpt = obuilder.withLongName("output").withRequired(true).withArgument(
+            abuilder.withName("output").withMinimum(1).withMaximum(1).create()).
+            withDescription("The location of the modelon the HDFS").withShortName("o").create();
+
+    Option gramSizeOpt = obuilder.withLongName("gramSize").withRequired(true).withArgument(
+            abuilder.withName("gramSize").withMinimum(1).withMaximum(1).create()).
+            withDescription("Size of the n-gram").withShortName("ng").create();
+
+    Option typeOpt = obuilder.withLongName("classifierType").withRequired(true).withArgument(
+            abuilder.withName("classifierType").withMinimum(1).withMaximum(1).create()).
+            withDescription("Type of classifier: bayes or cbayes").withShortName("type").create();
+    Group group = gbuilder.withName("Options").withOption(gramSizeOpt).withOption(inputDirOpt).withOption(outputOpt).withOption(trainOpt).withOption(typeOpt).create();
+    CommandLine cmdLine;
+    Parser parser = new Parser();
+    parser.setGroup(group);
+    cmdLine = parser.parse(args);
+    boolean train = cmdLine.hasOption(trainOpt);
     TrainClassifier tn = new TrainClassifier();
-    if (train){
-      String classifierType = cmdLine.getOptionValue(typeOpt.getOpt());
-      if(classifierType.equalsIgnoreCase("bayes")){
+    if (train) {
+      String classifierType = (String) cmdLine.getValue(typeOpt);
+      if (classifierType.equalsIgnoreCase("bayes")) {
         log.info("Training Bayes Classifier");
-        tn.trainNaiveBayes(cmdLine.getOptionValue(inputDirOpt.getOpt()), cmdLine.getOptionValue(outputOpt.getOpt()), Integer.parseInt(cmdLine.getOptionValue(gramSizeOpt.getOpt())));
+        tn.trainNaiveBayes((String)cmdLine.getValue(inputDirOpt), (String)cmdLine.getValue(outputOpt), Integer.parseInt((String) cmdLine.getValue(gramSizeOpt)));
 
-      } else if(classifierType.equalsIgnoreCase("cbayes")) {
+      } else if (classifierType.equalsIgnoreCase("cbayes")) {
         log.info("Training Complementary Bayes Classifier");
         //setup the HDFS and copy the files there, then run the trainer
-        tn.trainCNaiveBayes(cmdLine.getOptionValue(inputDirOpt.getOpt()), cmdLine.getOptionValue(outputOpt.getOpt()), Integer.parseInt(cmdLine.getOptionValue(gramSizeOpt.getOpt())));
+        tn.trainCNaiveBayes((String) cmdLine.getValue(inputDirOpt), (String) cmdLine.getValue(outputOpt), Integer.parseInt((String) cmdLine.getValue(gramSizeOpt)));
       }
     }
 

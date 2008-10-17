@@ -124,7 +124,18 @@
     <mahout-checksum file="${dist}/${fullnamever}.zip"/>
 
     <!-- create maven artifacts -->
-    <exec command="mvn -Dtest=false deploy"/>
+    <!--<exec command="mvn -Dtest=false deploy"/>-->
+    <input message="Enter the GPG Passphrase" addproperty="gpg.passphrase"/>
+    <exec executable="mvn">
+      <arg value="-Dtest=false"/>
+      <arg value="install"/>
+      <arg value="-Dgpg.passphrase=${gpg.passphrase}"/>
+    </exec>
+    <exec executable="mvn">
+      <arg value="-Dtest=false"/>
+      <arg value="deploy"/>
+      <arg value="-Dgpg.passphrase=${gpg.passphrase}"/>
+    </exec>
     <mkdir dir="${dist}/maven"/>
     <copy todir="${dist}/maven">
       <fileset dir="core/dist/maven"/>
