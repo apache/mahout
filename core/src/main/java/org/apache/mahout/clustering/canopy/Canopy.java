@@ -278,7 +278,7 @@ public class Canopy {
    */
   public void emitPoint(Vector point, OutputCollector<Text, Text> collector)
       throws IOException {
-    collector.collect(new Text(formatCanopy(this)), new Text(point
+    collector.collect(new Text(this.getIdentifier()), new Text(point
         .asFormatString()));
   }
 
