@@ -326,7 +326,7 @@
       <version>2.3.2</version>
     </dependency>
     <dependency>
-      <groupId>commons-cli</groupId>
+      <groupId>org.apache.commons</groupId>
       <artifactId>commons-cli</artifactId>
       <version>2.0-SNAPSHOT</version>
     </dependency>
@@ -338,6 +338,17 @@
     </dependency>
 
   </dependencies>
-
+  <repositories>
+    <repository>
+      <id>Apache snapshots</id>
+      <url>http://people.apache.org/maven-snapshot-repository</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </repository>
+  </repositories>
 
 </project>

@@ -79,7 +79,7 @@
   </modules>
 
   <repositories>
-    <!--repository>
+    <repository>
       <id>Apache snapshots</id>
       <url>http://people.apache.org/maven-snapshot-repository</url>
       <snapshots>
@@ -88,7 +88,7 @@
       <releases>
         <enabled>false</enabled>
       </releases>
-    </repository-->
+    </repository>
   </repositories>
 
 

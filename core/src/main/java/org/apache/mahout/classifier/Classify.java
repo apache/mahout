@@ -16,13 +16,15 @@ package org.apache.mahout.classifier;
  * limitations under the License.
  */
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
-import org.apache.commons.cli.Parser;
+import org.apache.commons.cli2.CommandLine;
+import org.apache.commons.cli2.Option;
+import org.apache.commons.cli2.Group;
+import org.apache.commons.cli2.OptionException;
+import org.apache.commons.cli2.commandline.Parser;
+import org.apache.commons.cli2.builder.DefaultOptionBuilder;
+import org.apache.commons.cli2.builder.ArgumentBuilder;
+import org.apache.commons.cli2.builder.GroupBuilder;
+
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
@@ -53,30 +55,49 @@ public class Classify {
 
   @SuppressWarnings({ "static-access" })
   public static void main(String[] args)
-      throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException, ParseException {
-    Options options = new Options();
-    Option pathOpt = OptionBuilder.withLongOpt("path").isRequired().hasArg().withDescription("The local file system path").create("p");
-    options.addOption(pathOpt);
-    Option classifyOpt = OptionBuilder.withLongOpt("classify").isRequired().hasArg().withDescription("The document to classify").create("c");
-    options.addOption(classifyOpt);
-    Option encodingOpt = OptionBuilder.withLongOpt("encoding").hasArg().withDescription("The file encoding.  defaults to UTF-8").create("e");
-    options.addOption(encodingOpt);
-    Option analyzerOpt = OptionBuilder.withLongOpt("analyzer").hasArg().withDescription("The Analyzer to use").create("a");
-    options.addOption(analyzerOpt);
-    Option defaultCatOpt = OptionBuilder.withLongOpt("defaultCat").hasArg().withDescription("The default category").create("d");
-    options.addOption(defaultCatOpt);
-    Option gramSizeOpt = OptionBuilder.withLongOpt("gramSize").hasArg().withDescription("Size of the n-gram").create("ng");
-    options.addOption(gramSizeOpt);
-    Option typeOpt = OptionBuilder.withLongOpt("classifierType").isRequired().hasArg().withDescription("Type of classifier").create("type");
-    options.addOption(typeOpt);
+          throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException, OptionException {
+    final DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    final ArgumentBuilder abuilder = new ArgumentBuilder();
+    final GroupBuilder gbuilder = new GroupBuilder();
 
-    Parser parser = new PosixParser();
-    CommandLine cmdLine = parser.parse(options, args);
+    Option pathOpt = obuilder.withLongName("path").withRequired(true).withArgument(
+            abuilder.withName("path").withMinimum(1).withMaximum(1).create()).withDescription("The local file system path").withShortName("p").create();
+
+    Option classifyOpt = obuilder.withLongName("classify").withRequired(true).withArgument(
+            abuilder.withName("classify").withMinimum(1).withMaximum(1).create()).
+            withDescription("The doc to classify").withShortName("").create();
+
+    Option encodingOpt = obuilder.withLongName("encoding").withRequired(true).withArgument(
+            abuilder.withName("encoding").withMinimum(1).withMaximum(1).create()).
+            withDescription("The file encoding.  Default: UTF-8").withShortName("e").create();
+
+    Option analyzerOpt = obuilder.withLongName("analyzer").withRequired(true).withArgument(
+            abuilder.withName("analyzer").withMinimum(1).withMaximum(1).create()).
+            withDescription("The Analyzer to use").withShortName("a").create();
+
+    Option defaultCatOpt = obuilder.withLongName("defaultCat").withRequired(true).withArgument(
+            abuilder.withName("defaultCat").withMinimum(1).withMaximum(1).create()).
+            withDescription("The default category").withShortName("d").create();
+
+    Option gramSizeOpt = obuilder.withLongName("gramSize").withRequired(true).withArgument(
+            abuilder.withName("gramSize").withMinimum(1).withMaximum(1).create()).
+            withDescription("Size of the n-gram").withShortName("ng").create();
+
+    Option typeOpt = obuilder.withLongName("classifierType").withRequired(true).withArgument(
+            abuilder.withName("classifierType").withMinimum(1).withMaximum(1).create()).
+            withDescription("Type of classifier").withShortName("type").create();
+
+    Group options = gbuilder.withName("Options").withOption(pathOpt).withOption(classifyOpt).withOption(encodingOpt).withOption(analyzerOpt).withOption(defaultCatOpt).withOption(gramSizeOpt).withOption(typeOpt).create();
+
+    Parser parser = new Parser();
+    parser.setGroup(options);
+    CommandLine cmdLine = parser.parse(args);
+
     SequenceFileModelReader reader = new SequenceFileModelReader();
     JobConf conf = new JobConf(Classify.class);
 
     Map<String, Path> modelPaths = new HashMap<String, Path>();
-    String modelBasePath = cmdLine.getOptionValue(pathOpt.getOpt());
+    String modelBasePath = (String) cmdLine.getValue(pathOpt);
     modelPaths.put("sigma_j", new Path(modelBasePath + "/trainer-weights/Sigma_j/part-*"));
     modelPaths.put("sigma_k", new Path(modelBasePath + "/trainer-weights/Sigma_k/part-*"));
     modelPaths.put("sigma_kSigma_j", new Path(modelBasePath + "/trainer-weights/Sigma_kSigma_j/part-*"));
@@ -90,7 +111,7 @@ public class Classify {
     Model model;
     Classifier classifier;
 
-    String classifierType = cmdLine.getOptionValue(typeOpt.getOpt());
+    String classifierType = (String) cmdLine.getValue(typeOpt);
 
     if (classifierType.equalsIgnoreCase("bayes")) {
       log.info("Testing Bayes Classifier");
@@ -112,17 +133,17 @@ public class Classify {
 
 
     String defaultCat = "unknown";
-    if (cmdLine.hasOption(defaultCatOpt.getOpt())) {
-      defaultCat = cmdLine.getOptionValue(defaultCatOpt.getOpt());
+    if (cmdLine.hasOption(defaultCatOpt)) {
+      defaultCat = (String) cmdLine.getValue(defaultCatOpt);
     }
-    File docPath = new File(cmdLine.getOptionValue(classifyOpt.getOpt()));
+    File docPath = new File((String) cmdLine.getValue(classifyOpt));
     String encoding = "UTF-8";
-    if (cmdLine.hasOption(encodingOpt.getOpt())) {
-      encoding = cmdLine.getOptionValue(encodingOpt.getOpt());
+    if (cmdLine.hasOption(encodingOpt)) {
+      encoding = (String) cmdLine.getValue(encodingOpt);
     }
     Analyzer analyzer = null;
-    if (cmdLine.hasOption(analyzerOpt.getOpt())) {
-      String className = cmdLine.getOptionValue(analyzerOpt.getOpt());
+    if (cmdLine.hasOption(analyzerOpt)) {
+      String className = (String) cmdLine.getValue(analyzerOpt);
       analyzer = Class.forName(className).asSubclass(Analyzer.class).newInstance();
     }
     if (analyzer == null) {
@@ -130,9 +151,9 @@ public class Classify {
     }
 
     int gramSize = 1;
-    if (cmdLine.hasOption(gramSizeOpt.getOpt())) {
-      gramSize = Integer.parseInt(cmdLine
-          .getOptionValue(gramSizeOpt.getOpt()));
+    if (cmdLine.hasOption(gramSizeOpt)) {
+      gramSize = Integer.parseInt((String) cmdLine
+          .getValue(gramSizeOpt));
 
     }
 

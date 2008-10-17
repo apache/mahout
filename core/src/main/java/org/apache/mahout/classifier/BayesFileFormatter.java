@@ -17,13 +17,15 @@ package org.apache.mahout.classifier;
  * limitations under the License.
  */
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
-import org.apache.commons.cli.Parser;
+
+import org.apache.commons.cli2.builder.DefaultOptionBuilder;
+import org.apache.commons.cli2.builder.ArgumentBuilder;
+import org.apache.commons.cli2.builder.GroupBuilder;
+import org.apache.commons.cli2.Option;
+import org.apache.commons.cli2.CommandLine;
+import org.apache.commons.cli2.Group;
+import org.apache.commons.cli2.OptionException;
+import org.apache.commons.cli2.commandline.Parser;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.Token;
@@ -249,58 +251,62 @@ public class BayesFileFormatter {
   @SuppressWarnings("static-access")
   public static void main(String[] args) throws ClassNotFoundException,
       IllegalAccessException, InstantiationException, IOException {
-    Options options = new Options();
-    Option inputOpt = OptionBuilder.withLongOpt("input").isRequired().hasArg()
-        .withDescription("The input file").create("i");
-    options.addOption(inputOpt);
-    Option outputOpt = OptionBuilder.withLongOpt("output").isRequired()
-        .hasArg().withDescription("The output file").create("o");
-    options.addOption(outputOpt);
-    Option labelOpt = OptionBuilder.withLongOpt("label").isRequired().hasArg()
-        .withDescription("The label of the file").create("l");
-    options.addOption(labelOpt);
-    Option analyzerOpt = OptionBuilder
-        .withLongOpt("analyzer")
-        .hasArg()
-        .withDescription(
-            "The fully qualified class name of the analyzer to use.  Must have a no-arg constructor.  Default is the StandardAnalyzer")
-        .create("a");
-    options.addOption(analyzerOpt);
-    Option charsetOpt = OptionBuilder.withLongOpt("charset").hasArg()
-        .withDescription("The character encoding of the input file")
-        .create("c");
-    options.addOption(charsetOpt);
-    Option collapseOpt = OptionBuilder.withLongOpt("collapse").hasArg()
-        .withDescription(
-            "Collapse a whole directory to a single file, one doc per line")
-        .create("p");
-    options.addOption(collapseOpt);
-    Option helpOpt = OptionBuilder.withLongOpt("help").withDescription(
-        "Print out help info").create("h");
-    options.addOption(helpOpt);
+    final DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    final ArgumentBuilder abuilder = new ArgumentBuilder();
+    final GroupBuilder gbuilder = new GroupBuilder();
+
+    Option inputOpt = obuilder.withLongName("input").withRequired(true).withArgument(
+            abuilder.withName("input").withMinimum(1).withMaximum(1).create()).
+            withDescription("The Input file").withShortName("i").create();
+
+    Option outputOpt = obuilder.withLongName("output").withRequired(true).withArgument(
+            abuilder.withName("output").withMinimum(1).withMaximum(1).create()).
+            withDescription("The output file").withShortName("o").create();
+
+    Option labelOpt = obuilder.withLongName("label").withRequired(true).withArgument(
+            abuilder.withName("label").withMinimum(1).withMaximum(1).create()).
+            withDescription("The label of the file").withShortName("l").create();
+
+    Option analyzerOpt = obuilder.withLongName("analyzer").withRequired(true).withArgument(
+            abuilder.withName("analyzer").withMinimum(1).withMaximum(1).create()).
+            withDescription("The fully qualified class name of the analyzer to use.  Must have a no-arg constructor.  Default is the StandardAnalyzer").withShortName("a").create();
+
+    Option charsetOpt = obuilder.withLongName("charset").withRequired(true).withArgument(
+            abuilder.withName("charset").withMinimum(1).withMaximum(1).create()).
+            withDescription("The character encoding of the input file").withShortName("c").create();
+
+    Option collapseOpt = obuilder.withLongName("collapse").withRequired(true).withArgument(
+            abuilder.withName("collapse").withMinimum(1).withMaximum(1).create()).
+            withDescription("Collapse a whole directory to a single file, one doc per line").withShortName("p").create();
+
+    Option helpOpt = obuilder.withLongName("help").withRequired(true).
+            withDescription("Print out help").withShortName("h").create();
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(labelOpt).withOption(analyzerOpt).withOption(charsetOpt).withOption(collapseOpt).withOption(helpOpt).create();
     CommandLine cmdLine;
     try {
-      Parser parser = new PosixParser();
-      cmdLine = parser.parse(options, args);
-      if (cmdLine.hasOption(helpOpt.getOpt())) {
-        log.info("Options: {}", options);
+      Parser parser = new Parser();
+      parser.setGroup(group);
+      cmdLine = parser.parse(args);
+
+      if (cmdLine.hasOption(helpOpt)) {
+        
         return;
       }
-      File input = new File(cmdLine.getOptionValue(inputOpt.getOpt()));
-      File output = new File(cmdLine.getOptionValue(outputOpt.getOpt()));
-      String label = cmdLine.getOptionValue(labelOpt.getOpt());
+      File input = new File((String) cmdLine.getValue(inputOpt));
+      File output = new File((String) cmdLine.getValue(outputOpt));
+      String label = (String) cmdLine.getValue(labelOpt);
       Analyzer analyzer;
-      if (cmdLine.hasOption(analyzerOpt.getOpt())) {
+      if (cmdLine.hasOption(analyzerOpt)) {
         analyzer = Class.forName(
-            cmdLine.getOptionValue(analyzerOpt.getOpt())).asSubclass(Analyzer.class).newInstance();
+                (String) cmdLine.getValue(analyzerOpt)).asSubclass(Analyzer.class).newInstance();
       } else {
         analyzer = new StandardAnalyzer();
       }
       Charset charset = Charset.forName("UTF-8");
-      if (cmdLine.hasOption(charsetOpt.getOpt())) {
-        charset = Charset.forName(cmdLine.getOptionValue(charsetOpt.getOpt()));
+      if (cmdLine.hasOption(charsetOpt)) {
+        charset = Charset.forName((String) cmdLine.getValue(charsetOpt));
       }
-      boolean collapse = cmdLine.hasOption(collapseOpt.getOpt());
+      boolean collapse = cmdLine.hasOption(collapseOpt);
 
       if (collapse) {
         collapse(label, analyzer, input, charset, output);
@@ -308,9 +314,8 @@ public class BayesFileFormatter {
         format(label, analyzer, input, charset, output);
       }
 
-    } catch (ParseException exp) {
-      log.warn(exp.toString(), exp);
-      log.info("Options: {}", options);
+    } catch (OptionException e) {
+      log.error("Exception", e);
     }
   }
 }
