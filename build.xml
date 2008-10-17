@@ -4,12 +4,12 @@
   <import file="common-build.xml"/>
 
 
-  <target name="dist">
+  <target name="dist" description="Build the distribution">
     <ant dir="core" antfile="build.xml" target="dist-jar"/>
     <ant dir="examples" antfile="build.xml" target="dist-jar"/>
   </target>
 
-  <target name="clean">
+  <target name="clean" description="Clean out the build output areas">
     <ant dir="core" antfile="build.xml" target="clean"/>
     <ant dir="examples" antfile="build.xml" target="clean"/>
     <delete dir="build"/>
@@ -30,7 +30,7 @@
   </path>
 
   <property name="Name" value="Apache Mahout"/>
-  <target name="javadoc">
+  <target name="javadoc" description="Build the javadocs for the core, examples and both (combined)">
     <!-- build separate ones -->
     <ant dir="core" antfile="build.xml" target="javadoc"/>
     <ant dir="examples" antfile="build.xml" target="javadoc"/>
