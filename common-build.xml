@@ -61,6 +61,8 @@
   <!-- Destination for distribution files (demo WAR, src distro, etc.) -->
   <property name="dist" value="dist" />
 
+  <property name="memory" value="256m"/>
+
 
   <dirname file="${ant.file.common}" property="common.dir"/>
 

@@ -158,7 +158,7 @@
   <target name="test" depends="compile-test, dist-jar" description="Runs unit tests">
     <mkdir dir="${junit.output.dir}"/>
     <junit printsummary="off" haltonfailure="no"
-      errorProperty="tests.failed" failureProperty="tests.failed" maxmemory="256m">
+      errorProperty="tests.failed" failureProperty="tests.failed" maxmemory="${memory}">
       <classpath refid="junit.classpath"/>
       <assertions>
         <enable package="org.apache.mahout"/>

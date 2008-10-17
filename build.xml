@@ -74,7 +74,7 @@
     <tar destfile="${dist}/${fullnamever}.tgz" compression="gzip">
       <tarfileset dir="."
                   prefix="${fullnamever}"
-                  includes="KEYS LICENSE.txt NOTICE.txt README.txt build.xml pom.xml lib/"
+                  includes="KEYS LICENSE.txt NOTICE.txt README.txt build.xml pom.xml common-build.xml lib/"
                   excludes=""/>
       <tarfileset dir="./core"
                   prefix="${fullnamever}/core"
