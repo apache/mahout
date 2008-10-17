@@ -37,7 +37,7 @@ import java.io.IOException;
  * Assume MAHOUT_HOME refers to the location where you checked out/installed Mahout
  * <ol>
  * <li>From the main dir: ant extract-20news-18828</li>
- * <li>ant examples-job</li>
+ * <li>ant job</li>
  * <li>Start up Hadoop and copy the files to the system. See http://hadoop.apache.org/core/docs/r0.16.2/quickstart.html</li>
  * <li>From the Hadoop dir (where Hadoop is installed):
  * <ol>
