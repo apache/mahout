@@ -95,6 +95,16 @@ public interface Vector extends Iterable<Vector.Element>, Writable {
       throws CardinalityException;
 
   /**
+   * Apply the function to each element of the receiver, using the y value as
+   * the second argument of the BinaryFunction
+   * 
+   * @param f a BinaryFunction to be applied
+   * @param y a double value to be argument to the function
+   * @return the modified receiver
+   */
+  Vector assign(BinaryFunction f, double y);
+         
+  /**
    * Return the cardinality of the recipient (the maximum number of values)
    *
    * @return an int

@@ -270,6 +270,18 @@ public class TestVectorView extends TestCase {
       assertEquals("value[" + i + "]", 2 * values[i + 1], test.getQuick(i));
   }
 
+  public void testAssignBinaryFunction2() throws Exception {
+    test.assign(new PlusFunction(), 4);
+    for (int i = 0; i < test.cardinality(); i++)
+      assertEquals("value[" + i + "]", values[i + 1] + 4, test.getQuick(i));
+  }
+
+  public void testAssignBinaryFunction3() throws Exception {
+    test.assign(new TimesFunction(), 4);
+    for (int i = 0; i < test.cardinality(); i++)
+      assertEquals("value[" + i + "]", values[i + 1] * 4, test.getQuick(i));
+  }
+
   public void testAssignBinaryFunctionCardinality() {
     try {
       test.assign(test.like(2), new PlusFunction());

@@ -329,6 +329,16 @@ public abstract class AbstractVector implements Vector, Writable {
     return this;
   }
 
+  /* (non-Javadoc)
+   * @see org.apache.mahout.matrix.Vector#assign(org.apache.mahout.matrix.BinaryFunction, double)
+   */
+  public Vector assign(BinaryFunction f, double y) {
+    for (int i = 0; i < cardinality(); i++) {
+      setQuick(i, f.apply(getQuick(i), y));
+    }
+    return this;
+  }
+
   /*
    * (non-Javadoc)
    * 

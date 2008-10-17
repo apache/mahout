@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 
 public class TestDenseVector extends TestCase {
 
-  final double[] values = {1.1, 2.2, 3.3};
+  final double[] values = { 1.1, 2.2, 3.3 };
 
   final Vector test = new DenseVector(values);
 
@@ -267,6 +267,18 @@ public class TestDenseVector extends TestCase {
       assertEquals("value[" + i + "]", 2 * values[i], test.getQuick(i));
   }
 
+  public void testAssignBinaryFunction2() throws Exception {
+    test.assign(new PlusFunction(), 4);
+    for (int i = 0; i < values.length; i++)
+      assertEquals("value[" + i + "]", values[i] + 4, test.getQuick(i));
+  }
+
+  public void testAssignBinaryFunction3() throws Exception {
+    test.assign(new TimesFunction(), 4);
+    for (int i = 0; i < values.length; i++)
+      assertEquals("value[" + i + "]", values[i] * 4, test.getQuick(i));
+  }
+
   public void testAssignBinaryFunctionCardinality() {
     try {
       test.assign(test.like(2), new PlusFunction());
@@ -310,6 +322,6 @@ public class TestDenseVector extends TestCase {
     for (int row = 0; row < result.cardinality()[0]; row++)
       for (int col = 0; col < result.cardinality()[1]; col++)
         assertEquals("cross[" + row + "][" + col + "]", test.getQuick(row)
-                * test.getQuick(col), result.getQuick(row, col));
+            * test.getQuick(col), result.getQuick(row, col));
   }
 }

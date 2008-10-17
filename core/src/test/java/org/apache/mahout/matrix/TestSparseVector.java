@@ -1,6 +1,7 @@
 package org.apache.mahout.matrix;
 
 import junit.framework.TestCase;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -20,7 +21,7 @@ import junit.framework.TestCase;
 
 public class TestSparseVector extends TestCase {
 
-  final double[] values = {1.1, 2.2, 3.3};
+  final double[] values = { 1.1, 2.2, 3.3 };
 
   final Vector test = new SparseVector(values.length + 2);
 
@@ -238,7 +239,7 @@ public class TestSparseVector extends TestCase {
         assertEquals("get [" + i + "]", 0.0, val.get(i));
       else
         assertEquals("get [" + i + "]", values[i - 1] * values[i - 1], val
-                .get(i));
+            .get(i));
   }
 
   public void testTimesVectorCardinality() {
@@ -315,6 +316,24 @@ public class TestSparseVector extends TestCase {
         assertEquals("value[" + i + "]", 2 * values[i - 1], test.getQuick(i));
   }
 
+  public void testAssignBinaryFunction2() throws Exception {
+    test.assign(new PlusFunction(), 4);
+    for (int i = 0; i < values.length; i++)
+      if (i == 0 || i == 4)
+        assertEquals("get [" + i + "]", 4.0, test.get(i));
+      else
+        assertEquals("value[" + i + "]", values[i - 1] + 4, test.getQuick(i));
+  }
+
+  public void testAssignBinaryFunction3() throws Exception {
+    test.assign(new TimesFunction(), 4);
+    for (int i = 0; i < values.length; i++)
+      if (i == 0 || i == 4)
+        assertEquals("get [" + i + "]", 0.0, test.get(i));
+      else
+        assertEquals("value[" + i + "]", values[i - 1] * 4, test.getQuick(i));
+  }
+
   public void testAssignBinaryFunctionCardinality() {
     try {
       test.assign(test.like(2), new PlusFunction());
@@ -360,6 +379,6 @@ public class TestSparseVector extends TestCase {
     for (int row = 0; row < result.cardinality()[0]; row++)
       for (int col = 0; col < result.cardinality()[1]; col++)
         assertEquals("cross[" + row + "][" + col + "]", test.getQuick(row)
-                * test.getQuick(col), result.getQuick(row, col));
+            * test.getQuick(col), result.getQuick(row, col));
   }
 }

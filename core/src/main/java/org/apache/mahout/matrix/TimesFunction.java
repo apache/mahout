@@ -16,22 +16,15 @@
  */
 package org.apache.mahout.matrix;
 
-/**
- * This interface allows the formulation of binary functions to be applied to
- * matrices inside the inner loops of their implementations.
- * 
- */
-public interface BinaryFunction {
-  public final static BinaryFunction plus = new PlusFunction();
-  public final static BinaryFunction times = new TimesFunction();
-
+public class TimesFunction implements BinaryFunction {
   /**
-   * Apply the function to the arguments and return the result
-   * 
-   * @param arg1 a double for the first argument
-   * @param arg2 a double for the second argument
-   * @return the result of applying the function
+   * Computes the product of two numbers.
+   *
+   * @param x first argument
+   * @param y second argument
+   * @return the product
    */
-  public double apply(double arg1, double arg2);
-
+  public double apply(double x, double y) {
+    return x * y;
+  }
 }
