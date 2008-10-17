@@ -292,7 +292,7 @@
     </java>
   </target>
 
-  <target name="get-files" depends="check-files">
+  <target name="get-files" depends="check-files"  description="Get and extract the 20 Newsgroups data">
     <mkdir dir="temp"/>
     <antcall target="get-20news-18828"/>
     <antcall target="expand-20news-18828"/>
