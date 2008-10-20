@@ -1,10 +1,10 @@
-/* Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.mahout.clustering.fuzzykmeans;
 
 import java.io.IOException;
@@ -39,7 +40,7 @@ public class SoftCluster {
   public static final String M_KEY = "org.apache.mahout.clustering.fuzzykmeans.m";
 
   private static float m = 2; //default value
-  public static final double minimalValue = 0.0000000001; // using it for adding
+  public static final double MINIMAL_VALUE = 0.0000000001; // using it for adding
 
   // exception
   // this value to any
@@ -210,11 +211,11 @@ public class SoftCluster {
       List<Double> clusterDistanceList) {
     double denom = 0.0;
     if (clusterDistance == 0.0) {
-      clusterDistance = minimalValue;
+      clusterDistance = MINIMAL_VALUE;
     }
     for (double eachCDist : clusterDistanceList) {
       if (eachCDist == 0)
-        eachCDist = minimalValue;
+        eachCDist = MINIMAL_VALUE;
 
       denom += Math.pow(clusterDistance / eachCDist, (double) 2 / (m - 1));
 

@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.mahout.ga.watchmaker.travellingsalesman;
 
 import java.util.List;
@@ -26,8 +27,8 @@ import java.util.List;
  * The original code is from <b>the Watchmaker project</b>
  * (https://watchmaker.dev.java.net/).
  */
-public interface DistanceLookup
-{
+public interface DistanceLookup {
+
     /**
      * @return The list of cities that this object knows about.
      */

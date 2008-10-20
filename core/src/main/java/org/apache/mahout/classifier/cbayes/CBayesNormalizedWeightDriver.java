@@ -1,4 +1,3 @@
-package org.apache.mahout.classifier.cbayes;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,8 @@ package org.apache.mahout.classifier.cbayes;
  * limitations under the License.
  */
 
+package org.apache.mahout.classifier.cbayes;
+
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DefaultStringifier;
@@ -30,7 +31,6 @@ import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.io.IOException;
 
@@ -45,7 +45,8 @@ public class CBayesNormalizedWeightDriver {
    * Takes in two arguments:
    * <ol>
    * <li>The input {@link org.apache.hadoop.fs.Path} where the input documents live</li>
-   * <li>The output {@link org.apache.hadoop.fs.Path} where to write the {@link org.apache.mahout.common.Model} as a {@link org.apache.hadoop.io.SequenceFile}</li>
+   * <li>The output {@link org.apache.hadoop.fs.Path} where to write the {@link org.apache.mahout.common.Model}
+   * as a {@link org.apache.hadoop.io.SequenceFile}</li>
    * </ol>
    * @param args The args
    */
@@ -90,7 +91,7 @@ public class CBayesNormalizedWeightDriver {
     SequenceFileModelReader reader = new SequenceFileModelReader();
 
     Path thetaNormalizationsFiles = new Path(output+"/trainer-thetaNormalizer/part*");
-    HashMap<String,Float> thetaNormalizer= reader.readLabelSums(dfs, thetaNormalizationsFiles, conf);
+    Map<String,Float> thetaNormalizer= reader.readLabelSums(dfs, thetaNormalizationsFiles, conf);
     float perLabelWeightSumNormalisationFactor = Float.MAX_VALUE;
     for(String label: thetaNormalizer.keySet())
     {
@@ -108,7 +109,8 @@ public class CBayesNormalizedWeightDriver {
     }
 
 
-    DefaultStringifier<HashMap<String,Float>> mapStringifier = new DefaultStringifier<HashMap<String,Float>>(conf, GenericsUtil.getClass(thetaNormalizer));
+    DefaultStringifier<Map<String,Float>> mapStringifier =
+        new DefaultStringifier<Map<String,Float>>(conf, GenericsUtil.getClass(thetaNormalizer));
     String thetaNormalizationsString = mapStringifier.toString(thetaNormalizer);
 
     Map<String,Float> c = mapStringifier.fromString(thetaNormalizationsString);

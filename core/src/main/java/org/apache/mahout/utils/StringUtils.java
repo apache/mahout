@@ -1,4 +1,3 @@
-package org.apache.mahout.utils;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,13 +15,14 @@ package org.apache.mahout.utils;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils;
+
 import com.thoughtworks.xstream.XStream;
 
 /**
- * offers two methods to convert an object to a string representation and
+ * Offers two methods to convert an object to a string representation and
  * restore the object given its string representation. Should use Hadoop
  * Stringifier whenever available.
- * 
  */
 public class StringUtils {
 

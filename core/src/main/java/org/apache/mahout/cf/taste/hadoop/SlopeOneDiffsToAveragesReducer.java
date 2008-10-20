@@ -26,8 +26,6 @@ import org.apache.hadoop.mapred.Reporter;
 import java.io.IOException;
 import java.util.Iterator;
 
-/**
- */
 public final class SlopeOneDiffsToAveragesReducer
     extends MapReduceBase
     implements Reducer<ItemItemWritable, FloatWritable, ItemItemWritable, FloatWritable> {

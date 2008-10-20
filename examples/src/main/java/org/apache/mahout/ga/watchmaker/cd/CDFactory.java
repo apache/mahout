@@ -29,7 +29,6 @@ public class CDFactory extends AbstractCandidateFactory<CDRule> {
   private final double threshold;
 
   /**
-   * 
    * @param threshold condition activation threshold
    */
   public CDFactory(double threshold) {

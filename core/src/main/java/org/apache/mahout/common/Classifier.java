@@ -1,4 +1,3 @@
-package org.apache.mahout.common;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,7 @@ package org.apache.mahout.common;
  * limitations under the License.
  */
 
+package org.apache.mahout.common;
 
 import org.apache.mahout.classifier.ClassifierResult;
 
@@ -32,7 +32,8 @@ public interface Classifier {
    * @param model           The model
    * @param document        The document to classify
    * @param defaultCategory The default category to assign
-   * @param numResults      The maximum number of results to return, ranked by score.  Ties are broken by comparing the category
+   * @param numResults      The maximum number of results to return, ranked by score.
+   * Ties are broken by comparing the category
    * @return A Collection of {@link org.apache.mahout.classifier.ClassifierResult}s.
    */
   public  Collection<ClassifierResult> classify(Model model, String[] document, String defaultCategory, int numResults);
@@ -49,7 +50,8 @@ public interface Classifier {
   public  ClassifierResult classify(Model model, String[] document, String defaultCategory);
 
   /**
-   * Calculate the document probability as the multiplication of the {@link org.apache.mahout.common.Model#FeatureWeight(String, String)} for each word given the label
+   * Calculate the document probability as the multiplication of the
+   * {@link org.apache.mahout.common.Model#FeatureWeight(String, String)} for each word given the label
    *
    * @param model       The {@link org.apache.mahout.common.Model}
    * @param label       The label to calculate the probability of

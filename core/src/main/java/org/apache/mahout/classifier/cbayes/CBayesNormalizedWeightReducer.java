@@ -1,4 +1,3 @@
-package org.apache.mahout.classifier.cbayes;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,7 @@ package org.apache.mahout.classifier.cbayes;
  * limitations under the License.
  */
 
+package org.apache.mahout.classifier.cbayes;
 
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.Text;
@@ -29,15 +29,18 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Iterator;
 
-
 /**
  *  Can also be used as a local Combiner beacuse only two values should be there inside the values
  */
-public class CBayesNormalizedWeightReducer extends MapReduceBase implements Reducer<Text, FloatWritable, Text, FloatWritable> {
+public class CBayesNormalizedWeightReducer extends MapReduceBase
+    implements Reducer<Text, FloatWritable, Text, FloatWritable> {
 
   private static final Logger log = LoggerFactory.getLogger(CBayesNormalizedWeightReducer.class);      
 
-  public void reduce(Text key, Iterator<FloatWritable> values, OutputCollector<Text, FloatWritable> output, Reporter reporter) throws IOException {
+  public void reduce(Text key,
+                     Iterator<FloatWritable> values,
+                     OutputCollector<Text, FloatWritable> output,
+                     Reporter reporter) throws IOException {
     //Key is label,word, value is the number of times we've seen this label word per local node.  Output is the same
     String token = key.toString();  
     float weight = 0.0f;

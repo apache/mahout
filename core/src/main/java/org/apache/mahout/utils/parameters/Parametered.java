@@ -1,10 +1,10 @@
-/* Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -35,7 +35,8 @@ public interface Parametered extends JobConfigurable {
   public abstract Collection<Parameter> getParameters();
 
   /**
-   * EXPERT: consumers should never have to call this method. It would be friendly visible to {@link ParameteredGeneralizations} if java supported it.
+   * EXPERT: consumers should never have to call this method. It would be friendly visible to
+   * {@link ParameteredGeneralizations} if java supported it.
    * Calling this method should create a new list of parameters and is called
    * @see ParameteredGeneralizations#configureParameters(String,Parametered,org.apache.hadoop.mapred.JobConf) invoking method
    * @see ParameteredGeneralizations#configureParametersRecusivly(Parametered,String,org.apache.hadoop.mapred.JobConf) invoking method
@@ -112,7 +113,8 @@ public interface Parametered extends JobConfigurable {
       private int longestName = 0;
       private int numChars = 100; // a few extra just to be sure
 
-      final int distanceBetweenNameAndDescription = 8; // todo: hmmm in the end this is 5 letters less that it says.. not sure why
+      final int distanceBetweenNameAndDescription = 8;
+      // todo: hmmm in the end this is 5 letters less that it says.. not sure why
 
       private void recurseCount(Parametered parametered) {
         for (Parameter parameter : parametered.getParameters()) {
@@ -140,8 +142,8 @@ public interface Parametered extends JobConfigurable {
         for (Parameter parameter : parametered.getParameters()) {
           sb.append(parameter.prefix());
           sb.append(parameter.name());
-          for (int i = 0; i < longestName - parameter.name().length() - parameter.prefix().length() + distanceBetweenNameAndDescription; i++)
-          {
+          int max = longestName - parameter.name().length() - parameter.prefix().length() + distanceBetweenNameAndDescription;
+          for (int i = 0; i < max; i++) {
             sb.append(' ');
           }
           sb.append(parameter.description());

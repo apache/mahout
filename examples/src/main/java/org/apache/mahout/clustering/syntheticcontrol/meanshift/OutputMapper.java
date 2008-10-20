@@ -1,5 +1,3 @@
-package org.apache.mahout.clustering.syntheticcontrol.meanshift;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +14,8 @@ package org.apache.mahout.clustering.syntheticcontrol.meanshift;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.clustering.syntheticcontrol.meanshift;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -34,7 +34,7 @@ public class OutputMapper extends MapReduceBase implements
 
   private static final Logger log = LoggerFactory.getLogger(OutputMapper.class);
 
-  int clusters = 0;
+  private int clusters = 0;
 
   public void map(Text key, Text values, OutputCollector<Text, Text> output,
       Reporter reporter) throws IOException {

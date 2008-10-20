@@ -152,7 +152,7 @@ public class CDGA {
     log.info("Best solution fitness (test set) : {}", bestTestFit);
   }
 
-  static void printElapsedTime(long milli) {
+  private static void printElapsedTime(long milli) {
     long seconds = milli / 1000;
     milli %= 1000;
 

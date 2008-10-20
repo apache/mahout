@@ -1,5 +1,3 @@
-package org.apache.mahout.classifier;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,6 +15,7 @@ package org.apache.mahout.classifier;
  * limitations under the License.
  */
 
+package org.apache.mahout.classifier;
 
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.ArgumentBuilder;

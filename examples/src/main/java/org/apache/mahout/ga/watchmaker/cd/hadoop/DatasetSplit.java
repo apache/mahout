@@ -37,11 +37,11 @@ import java.util.Random;
  */
 public class DatasetSplit {
 
-  static final String SEED = "traintest.seed";
+  private static final String SEED = "traintest.seed";
 
-  static final String THRESHOLD = "traintest.threshold";
+  private static final String THRESHOLD = "traintest.threshold";
 
-  static final String TRAINING = "traintest.training";
+  private static final String TRAINING = "traintest.training";
 
   private final byte[] seed;
 

@@ -1,4 +1,3 @@
-package org.apache.mahout.classifier.cbayes;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -15,6 +14,8 @@ package org.apache.mahout.classifier.cbayes;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.classifier.cbayes;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -93,9 +94,9 @@ public class CBayesThetaDriver {
     SequenceFileModelReader reader = new SequenceFileModelReader();
 
     Path Sigma_kFiles = new Path(output+"/trainer-weights/Sigma_k/*");
-    HashMap<String,Float> labelWeightSum= reader.readLabelSums(dfs, Sigma_kFiles, conf);
-    DefaultStringifier<HashMap<String,Float>> mapStringifier =
-        new DefaultStringifier<HashMap<String,Float>>(conf, GenericsUtil.getClass(labelWeightSum));
+    Map<String,Float> labelWeightSum= reader.readLabelSums(dfs, Sigma_kFiles, conf);
+    DefaultStringifier<Map<String,Float>> mapStringifier =
+        new DefaultStringifier<Map<String,Float>>(conf, GenericsUtil.getClass(labelWeightSum));
     String labelWeightSumString = mapStringifier.toString(labelWeightSum);
 
     log.info("Sigma_k for Each Label");

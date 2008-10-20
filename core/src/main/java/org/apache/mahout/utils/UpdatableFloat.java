@@ -1,5 +1,3 @@
-package org.apache.mahout.utils;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,6 +15,7 @@ package org.apache.mahout.utils;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils;
 
 public class UpdatableFloat {
   public float value;

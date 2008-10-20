@@ -1,5 +1,3 @@
-package org.apache.mahout.classifier.cbayes;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,6 +15,8 @@ package org.apache.mahout.classifier.cbayes;
  * limitations under the License.
  */
 
+package org.apache.mahout.classifier.cbayes;
+
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.Text;
@@ -31,19 +31,19 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
-
+import java.util.Map;
 
 public class CBayesThetaMapper extends MapReduceBase implements
     Mapper<Text, FloatWritable, Text, FloatWritable> {
 
   private static final Logger log = LoggerFactory.getLogger(CBayesThetaMapper.class);   
 
-  public HashMap<String, Float> labelWeightSum = null;
-  String labelWeightSumString = " ";
-  Float sigma_jSigma_k = 0.0f;
-  String sigma_jSigma_kString = " ";
-  Float vocabCount = 0.0f;
-  String vocabCountString = " ";
+  private Map<String, Float> labelWeightSum = null;
+  private String labelWeightSumString = " ";
+  private float sigma_jSigma_k = 0.0f;
+  private String sigma_jSigma_kString = " ";
+  private float vocabCount = 0.0f;
+  private String vocabCountString = " ";
   
   /**
    * We need to calculate the idf of each feature in each label
@@ -84,7 +84,7 @@ public class CBayesThetaMapper extends MapReduceBase implements
       if (labelWeightSum == null) {
         labelWeightSum = new HashMap<String, Float>();
 
-        DefaultStringifier<HashMap<String, Float>> mapStringifier = new DefaultStringifier<HashMap<String, Float>>(
+        DefaultStringifier<Map<String, Float>> mapStringifier = new DefaultStringifier<Map<String, Float>>(
             job, GenericsUtil.getClass(labelWeightSum));
 
         labelWeightSumString = mapStringifier.toString(labelWeightSum);

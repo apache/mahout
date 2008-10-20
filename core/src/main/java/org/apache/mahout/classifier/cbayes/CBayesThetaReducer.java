@@ -1,4 +1,3 @@
-package org.apache.mahout.classifier.cbayes;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -15,6 +14,8 @@ package org.apache.mahout.classifier.cbayes;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.classifier.cbayes;
 
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.Text;
@@ -35,7 +36,10 @@ public class CBayesThetaReducer extends MapReduceBase implements Reducer<Text, F
   
   private static final Logger log = LoggerFactory.getLogger(CBayesThetaReducer.class);
   
-  public void reduce(Text key, Iterator<FloatWritable> values, OutputCollector<Text, FloatWritable> output, Reporter reporter) throws IOException {
+  public void reduce(Text key,
+                     Iterator<FloatWritable> values,
+                     OutputCollector<Text, FloatWritable> output,
+                     Reporter reporter) throws IOException {
     //Key is label,word, value is the number of times we've seen this label word per local node.  Output is the same
     String token = key.toString();  
     float weight = 0.0f;

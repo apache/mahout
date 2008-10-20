@@ -1,4 +1,3 @@
-package org.apache.mahout.classifier.bayes.common;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -15,6 +14,8 @@ package org.apache.mahout.classifier.bayes.common;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.classifier.bayes.common;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.Text;
@@ -45,6 +46,7 @@ public class BayesFeatureOutputFormat extends
     }
     return theSequenceFileOutputFormat.getRecordWriter(fs, job, name, arg3);
   }
+
   @Override
   protected String generateFileNameForKeyValue(WritableComparable k, Writable v,
       String name) {

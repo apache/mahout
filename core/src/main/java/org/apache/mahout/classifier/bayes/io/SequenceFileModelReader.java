@@ -1,5 +1,3 @@
-package org.apache.mahout.classifier.bayes.io;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +14,8 @@ package org.apache.mahout.classifier.bayes.io;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.classifier.bayes.io;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -35,7 +35,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This Class reads the different interim  files created during the Training stage as well as the Model File during testing.
+ * This Class reads the different interim  files created during the Training stage
+ * as well as the Model File during testing.
  */
 public class SequenceFileModelReader {
 
@@ -58,7 +59,7 @@ public class SequenceFileModelReader {
     return model;
   }
 
-  public Model loadWeightMatrix(Model model, FileSystem fs, Path pathPattern, Configuration conf) throws IOException {
+  public void loadWeightMatrix(Model model, FileSystem fs, Path pathPattern, Configuration conf) throws IOException {
 
     Writable key = new Text();
     FloatWritable value = new FloatWritable();
@@ -80,8 +81,6 @@ public class SequenceFileModelReader {
 
       }
     }
-
-    return model;
   }
 
   public Model loadFeatureWeights(Model model, FileSystem fs, Path pathPattern,
@@ -223,9 +222,8 @@ public class SequenceFileModelReader {
     // return model;
   }
 
-  public HashMap<String, Float> readLabelSums(FileSystem fs, Path pathPattern,
-      Configuration conf) throws IOException {
-    HashMap<String, Float> labelSum = new HashMap<String, Float>();
+  public Map<String, Float> readLabelSums(FileSystem fs, Path pathPattern, Configuration conf) throws IOException {
+    Map<String, Float> labelSum = new HashMap<String, Float>();
     Writable key = new Text();
     FloatWritable value = new FloatWritable();
 
@@ -247,9 +245,9 @@ public class SequenceFileModelReader {
     return labelSum;
   }
 
-  public HashMap<String, Float> readLabelDocumentCounts(FileSystem fs,
-      Path pathPattern, Configuration conf) throws IOException {
-    HashMap<String, Float> labelDocumentCounts = new HashMap<String, Float>();
+  public Map<String, Float> readLabelDocumentCounts(FileSystem fs, Path pathPattern, Configuration conf)
+      throws IOException {
+    Map<String, Float> labelDocumentCounts = new HashMap<String, Float>();
     Writable key = new Text();
     FloatWritable value = new FloatWritable();
 
@@ -272,7 +270,7 @@ public class SequenceFileModelReader {
 
   public Float readSigma_jSigma_k(FileSystem fs, Path pathPattern,
       Configuration conf) throws IOException {
-    HashMap<String, Float> weightSum = new HashMap<String, Float>();
+    Map<String, Float> weightSum = new HashMap<String, Float>();
     Writable key = new Text();
     FloatWritable value = new FloatWritable();
 
@@ -297,7 +295,7 @@ public class SequenceFileModelReader {
 
   public Float readVocabCount(FileSystem fs, Path pathPattern,
       Configuration conf) throws IOException {
-    HashMap<String, Float> weightSum = new HashMap<String, Float>();
+    Map<String, Float> weightSum = new HashMap<String, Float>();
     Writable key = new Text();
     FloatWritable value = new FloatWritable();
 

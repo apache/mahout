@@ -1,11 +1,3 @@
-package org.apache.mahout.matrix;
-
-import junit.framework.TestCase;
-import org.apache.hadoop.io.DataOutputBuffer;
-
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,6 +14,14 @@ import java.io.DataInputStream;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.matrix;
+
+import junit.framework.TestCase;
+import org.apache.hadoop.io.DataOutputBuffer;
+
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 
 public class TestVectorWritable extends TestCase {
 

@@ -1,4 +1,3 @@
-package org.apache.mahout.classifier.cbayes;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -15,6 +14,8 @@ package org.apache.mahout.classifier.cbayes;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.classifier.cbayes;
 
 import org.apache.hadoop.util.PriorityQueue;
 import org.apache.mahout.classifier.ClassifierResult;
@@ -38,7 +39,8 @@ public class CBayesClassifier implements Classifier{
    * @param model           The model
    * @param document        The document to classify
    * @param defaultCategory The default category to assign
-   * @param numResults      The maximum number of results to return, ranked by score.  Ties are broken by comparing the category
+   * @param numResults      The maximum number of results to return, ranked by score.
+   *  Ties are broken by comparing the category
    * @return A Collection of {@link org.apache.mahout.classifier.ClassifierResult}s.
    */
   public Collection<ClassifierResult> classify(Model model, String[] document, String defaultCategory, int numResults) {
@@ -88,7 +90,8 @@ public class CBayesClassifier implements Classifier{
   }
 
   /**
-   * Calculate the document probability as the multiplication of the {@link org.apache.mahout.common.Model#FeatureWeight(String, String)} for each word given the label
+   * Calculate the document probability as the multiplication of the
+   * {@link Model#FeatureWeight(String, String)} for each word given the label
    *
    * @param model       The {@link org.apache.mahout.common.Model}
    * @param label       The label to calculate the probability of

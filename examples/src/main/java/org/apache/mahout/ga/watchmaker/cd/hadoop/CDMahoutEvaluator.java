@@ -1,5 +1,3 @@
-package org.apache.mahout.ga.watchmaker.cd.hadoop;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +14,8 @@ package org.apache.mahout.ga.watchmaker.cd.hadoop;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.ga.watchmaker.cd.hadoop;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -42,7 +42,6 @@ import java.util.List;
  * Mahout distributed evaluator. takes a list of classification rules and an
  * input path and launch a Hadoop job to evaluate the fitness of each rule. At
  * the end loads the evaluations from the job output.
- * 
  */
 public class CDMahoutEvaluator {
 

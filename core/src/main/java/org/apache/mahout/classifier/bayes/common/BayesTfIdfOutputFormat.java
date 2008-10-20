@@ -1,4 +1,3 @@
-package org.apache.mahout.classifier.bayes.common;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,9 @@ package org.apache.mahout.classifier.bayes.common;
  * limitations under the License.
  */
 
+package org.apache.mahout.classifier.bayes.common;
+
+
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
@@ -29,7 +31,8 @@ import org.apache.hadoop.util.Progressable;
 import java.io.IOException;
 
 /**
- * This class extends the MultipleOutputFormat, allowing to write the output data to different output files in sequence file output format.
+ * This class extends the MultipleOutputFormat, allowing to write the output data to
+ * different output files in sequence file output format.
  */
 public class BayesTfIdfOutputFormat extends
     MultipleOutputFormat<WritableComparable, Writable> {

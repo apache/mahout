@@ -1,4 +1,3 @@
-package org.apache.mahout.classifier.bayes;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,8 @@ package org.apache.mahout.classifier.bayes;
  * limitations under the License.
  */
 
+package org.apache.mahout.classifier.bayes;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -27,7 +28,6 @@ import java.util.Iterator;
 
 /**
  *  Can also be used as a local Combiner
- *
  */
 public class WikipediaDatasetCreatorReducer extends MapReduceBase implements Reducer<Text, Text, Text, Text> {
   public void reduce(Text key, Iterator<Text> values, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {

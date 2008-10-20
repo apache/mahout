@@ -1,5 +1,3 @@
-package org.apache.mahout.classifier.bayes.common;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,6 +15,8 @@ package org.apache.mahout.classifier.bayes.common;
  * limitations under the License.
  */
 
+package org.apache.mahout.classifier.bayes.common;
+
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.Text;
@@ -31,14 +31,15 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 public class BayesTfIdfMapper extends MapReduceBase implements
     Mapper<Text, FloatWritable, Text, FloatWritable> {
 
   private static final Logger log = LoggerFactory.getLogger(BayesTfIdfMapper.class);  
 
-  public HashMap<String, Float> labelDocumentCounts = null;
-  String labelDocumentCountString =" ";
+  private Map<String, Float> labelDocumentCounts = null;
+  private String labelDocumentCountString = " ";
 
   /**
    * We need to calculate the Tf-Idf of each feature in each label
@@ -82,8 +83,8 @@ public class BayesTfIdfMapper extends MapReduceBase implements
       if (labelDocumentCounts == null){
         labelDocumentCounts = new HashMap<String, Float>();
 
-        DefaultStringifier<HashMap<String,Float>> mapStringifier =
-            new DefaultStringifier<HashMap<String,Float>>(job,GenericsUtil.getClass(labelDocumentCounts));
+        DefaultStringifier<Map<String,Float>> mapStringifier =
+            new DefaultStringifier<Map<String,Float>>(job,GenericsUtil.getClass(labelDocumentCounts));
 
         labelDocumentCountString = mapStringifier.toString(labelDocumentCounts);  
         labelDocumentCountString = job.get("cnaivebayes.labelDocumentCounts", labelDocumentCountString);

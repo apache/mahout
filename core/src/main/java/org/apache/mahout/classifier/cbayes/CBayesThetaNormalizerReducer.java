@@ -1,5 +1,3 @@
-package org.apache.mahout.classifier.cbayes;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,6 +15,7 @@ package org.apache.mahout.classifier.cbayes;
  * limitations under the License.
  */
 
+package org.apache.mahout.classifier.cbayes;
 
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.Text;
@@ -26,8 +25,8 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Can also be used as a local Combiner beacuse only two values should be there
@@ -36,17 +35,17 @@ import java.util.Iterator;
 public class CBayesThetaNormalizerReducer extends MapReduceBase implements
     Reducer<Text, FloatWritable, Text, FloatWritable> {
 
-  public HashMap<String, Float> labelWeightSum = null;
+  private Map<String, Float> labelWeightSum = null;
 
-  String labelWeightSumString = " ";
+  private String labelWeightSumString = " ";
 
-  Float sigma_jSigma_k = 0.0f;
+  private Float sigma_jSigma_k = 0.0f;
 
-  String sigma_jSigma_kString = " ";
+  private String sigma_jSigma_kString = " ";
 
-  Float vocabCount = 0.0f;
+  private Float vocabCount = 0.0f;
 
-  String vocabCountString = " ";
+  private String vocabCountString = " ";
 
   public void reduce(Text key, Iterator<FloatWritable> values,
       OutputCollector<Text, FloatWritable> output, Reporter reporter)

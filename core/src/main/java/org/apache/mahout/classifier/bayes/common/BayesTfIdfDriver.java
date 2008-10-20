@@ -1,4 +1,3 @@
-package org.apache.mahout.classifier.bayes.common;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,8 @@ package org.apache.mahout.classifier.bayes.common;
  * limitations under the License.
  */
 
+package org.apache.mahout.classifier.bayes.common;
+
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DefaultStringifier;
@@ -30,7 +31,6 @@ import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.io.IOException;
 
@@ -83,7 +83,9 @@ public class BayesTfIdfDriver {
     conf.setReducerClass(BayesTfIdfReducer.class);    
     conf.setOutputFormat(BayesTfIdfOutputFormat.class);
     
-    conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization"); // Dont ever forget this. People should keep track of how hadoop conf parameters and make or break a piece of code
+    conf.set("io.serializations",
+             "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
+    // Dont ever forget this. People should keep track of how hadoop conf parameters and make or break a piece of code
     FileSystem dfs = FileSystem.get(conf);
     if (dfs.exists(outPath))
       dfs.delete(outPath, true);
@@ -92,9 +94,10 @@ public class BayesTfIdfDriver {
 
     Path interimFile = new Path(output+"/trainer-docCount/part-*");
 
-    HashMap<String,Float> labelDocumentCounts= reader.readLabelDocumentCounts(dfs, interimFile, conf);
+    Map<String,Float> labelDocumentCounts= reader.readLabelDocumentCounts(dfs, interimFile, conf);
 
-    DefaultStringifier<HashMap<String,Float>> mapStringifier = new DefaultStringifier<HashMap<String,Float>>(conf,GenericsUtil.getClass(labelDocumentCounts));
+    DefaultStringifier<Map<String,Float>> mapStringifier =
+        new DefaultStringifier<Map<String,Float>>(conf,GenericsUtil.getClass(labelDocumentCounts));
 
     String labelDocumentCountString = mapStringifier.toString(labelDocumentCounts);
     log.info("Counts of documents in Each Label");

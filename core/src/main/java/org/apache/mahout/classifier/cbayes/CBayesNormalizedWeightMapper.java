@@ -1,5 +1,3 @@
-package org.apache.mahout.classifier.cbayes;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,6 +15,8 @@ package org.apache.mahout.classifier.cbayes;
  * limitations under the License.
  */
 
+package org.apache.mahout.classifier.cbayes;
+
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.Text;
@@ -31,16 +31,16 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
-
+import java.util.Map;
 
 public class CBayesNormalizedWeightMapper extends MapReduceBase implements
     Mapper<Text, FloatWritable, Text, FloatWritable> {
 
   private static final Logger log = LoggerFactory.getLogger(CBayesNormalizedWeightMapper.class);    
 
-  public HashMap<String, Float> thetaNormalizer = null;
+  private Map<String, Float> thetaNormalizer = null;
 
-  String thetaNormalizationsString = " ";
+  private String thetaNormalizationsString = " ";
 
   /**
    * We need to calculate the idf of each feature in each label
@@ -69,7 +69,7 @@ public class CBayesNormalizedWeightMapper extends MapReduceBase implements
       if (thetaNormalizer == null) {
         thetaNormalizer = new HashMap<String, Float>();
 
-        DefaultStringifier<HashMap<String, Float>> mapStringifier = new DefaultStringifier<HashMap<String, Float>>(
+        DefaultStringifier<Map<String, Float>> mapStringifier = new DefaultStringifier<Map<String, Float>>(
             job, GenericsUtil.getClass(thetaNormalizer));
 
         thetaNormalizationsString = mapStringifier.toString(thetaNormalizer);

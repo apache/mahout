@@ -1,5 +1,3 @@
-package org.apache.mahout.classifier.bayes;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +14,8 @@ package org.apache.mahout.classifier.bayes;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.classifier.bayes;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.hadoop.io.DefaultStringifier;
@@ -41,7 +41,7 @@ import java.util.Set;
 public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
     Mapper<Text, Text, Text, Text> {
 
-  static Set<String> countries = null;
+  private static Set<String> countries = null;
   
   public void map(Text key, Text value,
       OutputCollector<Text, Text> output, Reporter reporter)
