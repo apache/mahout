@@ -31,15 +31,9 @@ import java.util.Collections;
  */
 public class EuclideanDistanceMeasure implements DistanceMeasure {
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.JobConfigurable#configure(org.apache.hadoop.mapred.JobConf)
-   */
   public void configure(JobConf job) {
     // nothing to do
   }
-
 
   public Collection<Parameter> getParameters() {
     return Collections.emptyList();
@@ -49,29 +43,16 @@ public class EuclideanDistanceMeasure implements DistanceMeasure {
     // nothing to do
   }
 
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.clustering.canopy.DistanceMeasure#distance(java.lang.Float[],
-   *      java.lang.Float[])
-   */
-  public float distance(Float[] p1, Float[] p2) {
-    float result = 0;
+  public double distance(double[] p1, double[] p2) {
+    double result = 0.0;
     for (int i = 0; i < p1.length; i++) {
-      float delta = p2[i] - p1[i];
+      double delta = p2[i] - p1[i];
       result += delta * delta;
     }
-    return (float) Math.sqrt(result);
+    return Math.sqrt(result);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.utils.DistanceMeasure#distance(org.apache.mahout.matrix.Vector,
-   *      org.apache.mahout.matrix.Vector)
-   */
-  public double distance(Vector v1, Vector v2) throws CardinalityException {
+  public double distance(Vector v1, Vector v2) {
     if (v1.cardinality() != v2.cardinality())
       throw new CardinalityException();
     double result = 0;

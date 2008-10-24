@@ -17,9 +17,9 @@
 
 package org.apache.mahout.ga.watchmaker;
 
-import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
@@ -40,7 +40,7 @@ import java.io.IOException;
  * fitness: evaluated fitness for the given candidate.
  */
 public class EvalMapper extends MapReduceBase implements
-    Mapper<LongWritable, Text, LongWritable, FloatWritable> {
+    Mapper<LongWritable, Text, LongWritable, DoubleWritable> {
 
   /** Parameter used to store the "stringified" evaluator */
   public static final String MAHOUT_GA_EVALUATOR = "mahout.ga.evaluator";
@@ -48,6 +48,7 @@ public class EvalMapper extends MapReduceBase implements
   private FitnessEvaluator<Object> evaluator = null;
 
   @Override
+  @SuppressWarnings("unchecked")  
   public void configure(JobConf job) {
     String evlstr = job.get(EvalMapper.MAHOUT_GA_EVALUATOR);
     if (evlstr == null) {
@@ -61,13 +62,13 @@ public class EvalMapper extends MapReduceBase implements
   }
 
   public void map(LongWritable key, Text value,
-      OutputCollector<LongWritable, FloatWritable> output, Reporter reporter)
+      OutputCollector<LongWritable,DoubleWritable> output, Reporter reporter)
       throws IOException {
     Object candidate = StringUtils.fromString(value.toString());
 
     double fitness = evaluator.getFitness(candidate, null);
 
-    output.collect(key, new FloatWritable((float) fitness));
+    output.collect(key, new DoubleWritable(fitness));
   }
 
 }

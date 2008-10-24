@@ -52,7 +52,7 @@ public interface Matrix {
    * @return the modified receiver
    * @throws CardinalityException if the cardinalities differ
    */
-  Matrix assign(double[][] values) throws CardinalityException;
+  Matrix assign(double[][] values);
 
   /**
    * Assign the other vector values to the receiver
@@ -61,7 +61,7 @@ public interface Matrix {
    * @return the modified receiver
    * @throws CardinalityException if the cardinalities differ
    */
-  Matrix assign(Matrix other) throws CardinalityException;
+  Matrix assign(Matrix other);
 
   /**
    * Apply the function to each element of the receiver
@@ -80,8 +80,7 @@ public interface Matrix {
    * @return the modified receiver
    * @throws CardinalityException if the cardinalities differ
    */
-  Matrix assign(Matrix other, BinaryFunction function)
-      throws CardinalityException;
+  Matrix assign(Matrix other, BinaryFunction function);
 
   /**
    * Assign the other vector values to the column of the receiver
@@ -92,7 +91,7 @@ public interface Matrix {
    * @return the modified receiver
    * @throws CardinalityException if the cardinalities differ
    */
-  Matrix assignColumn(int column, Vector other) throws CardinalityException;
+  Matrix assignColumn(int column, Vector other);
 
   /**
    * Assign the other vector values to the row of the receiver
@@ -103,7 +102,7 @@ public interface Matrix {
    * @return the modified receiver
    * @throws CardinalityException if the cardinalities differ
    */
-  Matrix assignRow(int row, Vector other) throws CardinalityException;
+  Matrix assignRow(int row, Vector other);
 
   /**
    * Return the cardinality of the recipient (the maximum number of values)
@@ -143,7 +142,7 @@ public interface Matrix {
    * @return the double at the index
    * @throws IndexException if the index is out of bounds
    */
-  double get(int row, int column) throws IndexException;
+  double get(int row, int column);
 
   /**
    * Return the column at the given index
@@ -152,7 +151,7 @@ public interface Matrix {
    * @return a Vector at the index
    * @throws IndexException if the index is out of bounds
    */
-  Vector getColumn(int column) throws IndexException;
+  Vector getColumn(int column);
 
   /**
    * Return the row at the given index
@@ -161,7 +160,7 @@ public interface Matrix {
    * @return a Vector at the index
    * @throws IndexException if the index is out of bounds
    */
-  Vector getRow(int row) throws IndexException;
+  Vector getRow(int row);
 
   /**
    * Return the value at the given indexes, without checking bounds
@@ -205,7 +204,7 @@ public interface Matrix {
    * @return a new Matrix
    * @throws CardinalityException if the cardinalities differ
    */
-  Matrix minus(Matrix x) throws CardinalityException;
+  Matrix minus(Matrix x);
 
   /**
    * Return a new matrix containing the sum of each value of the recipient and
@@ -224,7 +223,7 @@ public interface Matrix {
    * @return a new Matrix
    * @throws CardinalityException if the cardinalities differ
    */
-  Matrix plus(Matrix x) throws CardinalityException;
+  Matrix plus(Matrix x);
 
   /**
    * Set the value at the given index
@@ -234,9 +233,9 @@ public interface Matrix {
    * @param value a double value to set
    * @throws IndexException if the index is out of bounds
    */
-  void set(int row, int column, double value) throws IndexException;
+  void set(int row, int column, double value);
 
-  void set(int row, double[] data) throws IndexException,CardinalityException; 
+  void set(int row, double[] data);
 
   /**
    * Set the value at the given index, without checking bounds
@@ -271,7 +270,7 @@ public interface Matrix {
    * @return a new Matrix
    * @throws CardinalityException if the cardinalities are incompatible
    */
-  Matrix times(Matrix x) throws CardinalityException;
+  Matrix times(Matrix x);
 
   /**
    * Return a new matrix that is the transpose of the receiver
@@ -298,8 +297,7 @@ public interface Matrix {
    * @throws IndexException if the offset is negative or the offset+length is
    *         outside of the receiver
    */
-  Matrix viewPart(int[] offset, int[] size) throws CardinalityException,
-      IndexException;
+  Matrix viewPart(int[] offset, int[] size);
 
   /**
    * Return the sum of all the elements of the receiver

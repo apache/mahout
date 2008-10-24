@@ -18,7 +18,7 @@
 package org.apache.mahout.classifier.cbayes;
 
 import org.apache.hadoop.io.DefaultStringifier;
-import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -34,13 +34,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CBayesNormalizedWeightMapper extends MapReduceBase implements
-    Mapper<Text, FloatWritable, Text, FloatWritable> {
+    Mapper<Text, DoubleWritable, Text, DoubleWritable> {
 
   private static final Logger log = LoggerFactory.getLogger(CBayesNormalizedWeightMapper.class);    
 
-  private Map<String, Float> thetaNormalizer = null;
-
-  private String thetaNormalizationsString = " ";
+  private Map<String,Double> thetaNormalizer = null;
 
   /**
    * We need to calculate the idf of each feature in each label
@@ -52,14 +50,14 @@ public class CBayesNormalizedWeightMapper extends MapReduceBase implements
    * @param reporter
    * @throws IOException
    */
-  public void map(Text key, FloatWritable value,
-      OutputCollector<Text, FloatWritable> output, Reporter reporter)
+  public void map(Text key, DoubleWritable value,
+      OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {
 
     String labelFeaturePair = key.toString();
 
     String label = labelFeaturePair.split(",")[0];
-    output.collect(key, new FloatWritable((-1.0f * (float)Math.log(value.get())/thetaNormalizer.get(label))));// output -D_ij
+    output.collect(key, new DoubleWritable(-Math.log(value.get()) / thetaNormalizer.get(label)));// output -D_ij
 
   }
 
@@ -67,12 +65,12 @@ public class CBayesNormalizedWeightMapper extends MapReduceBase implements
   public void configure(JobConf job) {
     try {
       if (thetaNormalizer == null) {
-        thetaNormalizer = new HashMap<String, Float>();
+        thetaNormalizer = new HashMap<String,Double>();
 
-        DefaultStringifier<Map<String, Float>> mapStringifier = new DefaultStringifier<Map<String, Float>>(
+        DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(
             job, GenericsUtil.getClass(thetaNormalizer));
 
-        thetaNormalizationsString = mapStringifier.toString(thetaNormalizer);
+        String thetaNormalizationsString = mapStringifier.toString(thetaNormalizer);
         thetaNormalizationsString = job.get("cnaivebayes.thetaNormalizations",
             thetaNormalizationsString);
         thetaNormalizer = mapStringifier.fromString(thetaNormalizationsString);

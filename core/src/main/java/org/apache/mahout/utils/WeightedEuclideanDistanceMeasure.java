@@ -25,9 +25,6 @@ import org.apache.mahout.matrix.Vector;
  */
 public class WeightedEuclideanDistanceMeasure extends WeightedDistanceMeasure {
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.utils.DistanceMeasure#distance(org.apache.mahout.matrix.Vector, org.apache.mahout.matrix.Vector)
-   */
   public double distance(Vector p1, Vector p2) {
     double result = 0;
     Vector res = p2.minus(p1);

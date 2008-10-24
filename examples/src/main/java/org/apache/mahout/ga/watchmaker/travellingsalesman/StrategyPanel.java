@@ -55,7 +55,6 @@ import org.uncommons.watchmaker.framework.selection.TruncationSelection;
  * The <code>EvolutionPanel</code> has been modified to add a "distributed
  * (mahout)" JCheckBox.
  */
-@SuppressWarnings("serial")
 final class StrategyPanel extends JPanel {
 
   private final DistanceLookup distances;

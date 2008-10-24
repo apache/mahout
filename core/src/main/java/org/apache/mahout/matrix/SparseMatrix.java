@@ -60,22 +60,12 @@ public class SparseMatrix extends AbstractMatrix {
     this.rows = new HashMap<Integer, Vector>();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.AbstractMatrix#asFormatString()
-   */
   @Override
   public WritableComparable asWritableComparable() {
     String out = asFormatString();
     return new Text(out);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.AbstractMatrix#asFormatString()
-   */
   @Override
   public String asFormatString() {
     StringBuilder out = new StringBuilder();
@@ -88,21 +78,11 @@ public class SparseMatrix extends AbstractMatrix {
     return out.toString();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.AbstractMatrix#cardinality()
-   */
   @Override
   public int[] cardinality() {
     return cardinality;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.AbstractMatrix#copy()
-   */
   @Override
   public Matrix copy() {
     SparseMatrix copy = new SparseMatrix(cardinality);
@@ -111,11 +91,6 @@ public class SparseMatrix extends AbstractMatrix {
     return copy;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.AbstractMatrix#getQuick(int, int)
-   */
   @Override
   public double getQuick(int row, int column) {
     Vector r = rows.get(row);
@@ -125,11 +100,6 @@ public class SparseMatrix extends AbstractMatrix {
       return r.getQuick(column);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.AbstractMatrix#haveSharedCells(org.apache.mahout.matrix.Matrix)
-   */
   @Override
   public boolean haveSharedCells(Matrix other) {
     if (other instanceof SparseMatrix)
@@ -138,34 +108,19 @@ public class SparseMatrix extends AbstractMatrix {
       return other.haveSharedCells(this);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.AbstractMatrix#like()
-   */
   @Override
   public Matrix like() {
     return new SparseMatrix(cardinality);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.AbstractMatrix#like(int, int)
-   */
   @Override
   public Matrix like(int rows, int columns) {
     return new SparseMatrix(new int[] { rows, columns });
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.AbstractMatrix#setQuick(int, int, double)
-   */
   @Override
   public void setQuick(int row, int column, double value) {
-    Integer rowKey = Integer.valueOf(row);
+    Integer rowKey = row;
     Vector r = rows.get(rowKey);
     if (r == null) {
       r = new SparseVector(cardinality[COL]);
@@ -174,11 +129,6 @@ public class SparseMatrix extends AbstractMatrix {
     r.setQuick(column, value);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.AbstractMatrix#size()
-   */
   @Override
   public int[] size() {
     int[] result = new int[2];
@@ -188,11 +138,6 @@ public class SparseMatrix extends AbstractMatrix {
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.AbstractMatrix#toArray()
-   */
   @Override
   public double[][] toArray() {
     double[][] result = new double[cardinality[ROW]][cardinality[COL]];
@@ -202,14 +147,8 @@ public class SparseMatrix extends AbstractMatrix {
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.AbstractMatrix#viewPart(int[], int[])
-   */
   @Override
-  public Matrix viewPart(int[] offset, int[] size) throws CardinalityException,
-      IndexException {
+  public Matrix viewPart(int[] offset, int[] size) {
     if (size[ROW] > cardinality[ROW] || size[COL] > cardinality[COL])
       throw new CardinalityException();
     if (offset[ROW] < 0 || offset[ROW] + size[ROW] > cardinality[ROW]
@@ -218,21 +157,14 @@ public class SparseMatrix extends AbstractMatrix {
     return new MatrixView(this, offset, size);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.AbstractMatrix#assignColumn(int,
-   *      org.apache.mahout.vector.Vector)
-   */
   @Override
-  public Matrix assignColumn(int column, Vector other)
-      throws CardinalityException {
+  public Matrix assignColumn(int column, Vector other) {
     if (other.cardinality() != cardinality[ROW] || column >= cardinality[COL])
       throw new CardinalityException();
     for (int row = 0; row < cardinality[ROW]; row++) {
       double val = other.getQuick(row);
       if (val != 0.0) {
-        Integer rowKey = Integer.valueOf(row);
+        Integer rowKey = row;
         Vector r = rows.get(rowKey);
         if (r == null) {
           r = new SparseVector(cardinality[ROW]);
@@ -244,27 +176,16 @@ public class SparseMatrix extends AbstractMatrix {
     return this;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.AbstractMatrix#assignRow(int,
-   *      org.apache.mahout.vector.Vector)
-   */
   @Override
-  public Matrix assignRow(int row, Vector other) throws CardinalityException {
+  public Matrix assignRow(int row, Vector other) {
     if (row >= cardinality[ROW] || other.cardinality() != cardinality[COL])
       throw new CardinalityException();
     rows.put(row, other);
     return this;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.AbstractMatrix#getColumn(int)
-   */
   @Override
-  public Vector getColumn(int column) throws IndexException {
+  public Vector getColumn(int column) {
     if (column < 0 || column >= cardinality[COL])
       throw new IndexException();
     double[] d = new double[cardinality[ROW]];
@@ -273,13 +194,8 @@ public class SparseMatrix extends AbstractMatrix {
     return new DenseVector(d);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.AbstractMatrix#getRow(int)
-   */
   @Override
-  public Vector getRow(int row) throws IndexException {
+  public Vector getRow(int row) {
     if (row < 0 || row >= cardinality[ROW])
       throw new IndexException();
     Vector res = rows.get(row);

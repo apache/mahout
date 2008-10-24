@@ -58,13 +58,7 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
 
         double a = feature.get();
 
-        Double bValue = vector1.get(feature.index());
-        double b;
-        if (bValue == null) {
-          b = 0.0;
-        } else {
-          b = bValue;
-        }
+        double b = vector1.get(feature.index());
 
         Vector weights = getWeights();
         double weight = weights == null ? 1.0 : weights.get(feature.index());
@@ -79,13 +73,7 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
     for (Vector.Element feature : vector1) {
       if (!featuresSeen.add(feature.index())) {
 
-        Double aValue = vector0.get(feature.index());
-        double a;
-        if (aValue == null) {
-          a = 0.0;
-        } else {
-          a = aValue;
-        }
+        double a = vector0.get(feature.index());
 
         double b = feature.get();
 
@@ -98,7 +86,7 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
       }
     }
 
-    return (float)((a2 + b2 - ab) / ab) - 1;
+    return ((a2 + b2 - ab) / ab) - 1.0;
   }
 
 }

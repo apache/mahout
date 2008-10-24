@@ -36,25 +36,12 @@ public class CanopyMapper extends MapReduceBase implements
 
   private final List<Canopy> canopies = new ArrayList<Canopy>();
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.Mapper#map(org.apache.hadoop.io.WritableComparable,
-   *      org.apache.hadoop.io.Writable,
-   *      org.apache.hadoop.mapred.OutputCollector,
-   *      org.apache.hadoop.mapred.Reporter)
-   */
   public void map(WritableComparable key, Text values,
                   OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
     Vector point = AbstractVector.decodeVector(values.toString());
     Canopy.emitPointToNewCanopies(point, canopies, output);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.MapReduceBase#configure(org.apache.hadoop.mapred.JobConf)
-   */
   @Override
   public void configure(JobConf job) {
     super.configure(job);

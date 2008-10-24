@@ -47,11 +47,6 @@ public class CanopyCombiner extends MapReduceBase implements
         .asFormatString()));
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.MapReduceBase#configure(org.apache.hadoop.mapred.JobConf)
-   */
   @Override
   public void configure(JobConf job) {
     super.configure(job);

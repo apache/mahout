@@ -39,7 +39,7 @@ public class SoftCluster {
 
   public static final String M_KEY = "org.apache.mahout.clustering.fuzzykmeans.m";
 
-  private static float m = 2; //default value
+  private static double m = 2.0; //default value
   public static final double MINIMAL_VALUE = 0.0000000001; // using it for adding
 
   // exception
@@ -116,7 +116,7 @@ public class SoftCluster {
       measure.configure(job);
       convergenceDelta = Double.parseDouble(job.get(CLUSTER_CONVERGENCE_KEY));
       nextClusterId = 0;
-      m = Float.parseFloat(job.get(M_KEY)); 
+      m = Double.parseDouble(job.get(M_KEY));
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(e);
     } catch (IllegalAccessException e) {
@@ -161,8 +161,7 @@ public class SoftCluster {
           clusterDistanceList);
 
       Text key = new Text(formatCluster(clusters.get(i)));
-      Text value = new Text(Double.toString(probWeight) + ":"
-          + values.toString());
+      Text value = new Text(probWeight + ":" + values);
       output.collect(key, value);
     }
   }
@@ -347,10 +346,8 @@ public class SoftCluster {
     return clusterId;
   }
 
-  public static float getM() {
+  public static double getM() {
     return m;
   }
-
-
 
 }

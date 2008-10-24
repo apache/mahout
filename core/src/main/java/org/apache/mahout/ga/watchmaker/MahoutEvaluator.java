@@ -21,7 +21,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
@@ -50,13 +50,13 @@ public class MahoutEvaluator {
    * 
    * @param evaluator FitnessEvaluator to use
    * @param population input population
-   * @param evaluations <code>List&lt;Float&gt;</code> that contains the
+   * @param evaluations <code>List&lt;Double&gt;</code> that contains the
    *        evaluated fitness for each candidate from the input population,
    *        sorted in the same order as the candidates.
    * @throws IOException
    */
   public static void evaluate(FitnessEvaluator evaluator, List population,
-      List<Float> evaluations) throws IOException {
+      List<Double> evaluations) throws IOException {
     JobConf conf = new JobConf(MahoutEvaluator.class);
     FileSystem fs = FileSystem.get(conf);
 
@@ -108,7 +108,7 @@ public class MahoutEvaluator {
     SequenceFileOutputFormat.setOutputPath(conf, outpath);
 
     conf.setOutputKeyClass(LongWritable.class);
-    conf.setOutputValueClass(FloatWritable.class);
+    conf.setOutputValueClass(DoubleWritable.class);
 
     conf.setMapperClass(EvalMapper.class);
     // no combiner

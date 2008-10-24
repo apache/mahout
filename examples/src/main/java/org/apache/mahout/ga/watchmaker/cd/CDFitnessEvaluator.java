@@ -58,7 +58,7 @@ public class CDFitnessEvaluator extends STFitnessEvaluator<Rule> {
 
   @Override
   protected void evaluate(List<? extends Rule> population,
-      List<Float> evaluations) {
+      List<Double> evaluations) {
     evals.clear();
 
     try {

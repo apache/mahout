@@ -25,48 +25,18 @@ import org.apache.hadoop.io.WritableComparable;
  */
 public abstract class AbstractVector implements Vector, Writable {
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#asFormatString()
-   */
   public abstract WritableComparable asWritableComparable();
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#cardinality()
-   */
   public abstract int cardinality();
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#copy()
-   */
   public abstract Vector copy();
 
   public abstract boolean haveSharedCells(Vector other);
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#getQuick(int)
-   */
   public abstract double getQuick(int index);
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#like()
-   */
   public abstract Vector like();
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#like(int)
-   */
   public abstract Vector like(int cardinality);
 
   /**
@@ -80,34 +50,13 @@ public abstract class AbstractVector implements Vector, Writable {
    */
   protected abstract Matrix matrixLike(int rows, int columns);
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#setQuick(int, double)
-   */
   public abstract void setQuick(int index, double value);
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#size()
-   */
   public abstract int size();
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#toArray()
-   */
   public abstract double[] toArray();
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#viewPart(int, int)
-   */
-  public abstract Vector viewPart(int offset, int length)
-      throws CardinalityException, IndexException;
+  public abstract Vector viewPart(int offset, int length);
 
   /**
    * Returns an iterator for traversing the Vector, but not in any particular
@@ -119,11 +68,6 @@ public abstract class AbstractVector implements Vector, Writable {
    */
   public abstract java.util.Iterator<Vector.Element> iterator();
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#getElement
-   */
   // @Override JDK 1.6
   public Vector.Element getElement(int index) {
     return new Element(index);
@@ -149,11 +93,6 @@ public abstract class AbstractVector implements Vector, Writable {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#normalize(double)
-   */
   public Vector divide(double x) {
     Vector result = copy();
     for (int i = 0; i < result.cardinality(); i++)
@@ -161,12 +100,7 @@ public abstract class AbstractVector implements Vector, Writable {
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#dot(org.apache.mahout.matrix.Vector)
-   */
-  public double dot(Vector x) throws CardinalityException {
+  public double dot(Vector x) {
     if (cardinality() != x.cardinality())
       throw new CardinalityException();
     double result = 0;
@@ -175,24 +109,14 @@ public abstract class AbstractVector implements Vector, Writable {
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#get(int)
-   */
-  public double get(int index) throws IndexException {
+  public double get(int index) {
     if (index >= 0 && index < cardinality())
       return getQuick(index);
     else
       throw new IndexException();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#minus(org.apache.mahout.matrix.Vector)
-   */
-  public Vector minus(Vector x) throws CardinalityException {
+  public Vector minus(Vector x) {
     if (cardinality() != x.cardinality())
       throw new CardinalityException();
     Vector result = copy();
@@ -201,26 +125,11 @@ public abstract class AbstractVector implements Vector, Writable {
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#normalize()
-   */
   public Vector normalize() {
-    double divSq = 0;
-    try {
-      divSq = Math.sqrt(dot(this));
-    } catch (CardinalityException e) {
-      // cannot occur with dot(this)
-    }
+    double divSq = Math.sqrt(dot(this));
     return divide(divSq);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#plus(double)
-   */
   public Vector plus(double x) {
     Vector result = copy();
     for (int i = 0; i < result.cardinality(); i++)
@@ -228,12 +137,7 @@ public abstract class AbstractVector implements Vector, Writable {
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#plus(org.apache.mahout.matrix.Vector)
-   */
-  public Vector plus(Vector x) throws CardinalityException {
+  public Vector plus(Vector x) {
     if (cardinality() != x.cardinality())
       throw new CardinalityException();
     Vector result = copy();
@@ -242,23 +146,13 @@ public abstract class AbstractVector implements Vector, Writable {
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#set(int, double)
-   */
-  public void set(int index, double value) throws IndexException {
+  public void set(int index, double value) {
     if (index >= 0 && index < cardinality())
       setQuick(index, value);
     else
       throw new IndexException();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#times(double)
-   */
   public Vector times(double x) {
     Vector result = copy();
     for (int i = 0; i < result.cardinality(); i++)
@@ -266,12 +160,7 @@ public abstract class AbstractVector implements Vector, Writable {
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#times(org.apache.mahout.matrix.Vector)
-   */
-  public Vector times(Vector x) throws CardinalityException {
+  public Vector times(Vector x) {
     if (cardinality() != x.cardinality())
       throw new CardinalityException();
     Vector result = copy();
@@ -280,11 +169,6 @@ public abstract class AbstractVector implements Vector, Writable {
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#zSum()
-   */
   public double zSum() {
     double result = 0;
     for (int i = 0; i < cardinality(); i++)
@@ -292,23 +176,13 @@ public abstract class AbstractVector implements Vector, Writable {
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#assign(double)
-   */
   public Vector assign(double value) {
     for (int i = 0; i < cardinality(); i++)
       setQuick(i, value);
     return this;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#assign(double[])
-   */
-  public Vector assign(double[] values) throws CardinalityException {
+  public Vector assign(double[] values) {
     if (values.length != cardinality())
       throw new CardinalityException();
     for (int i = 0; i < cardinality(); i++)
@@ -316,12 +190,7 @@ public abstract class AbstractVector implements Vector, Writable {
     return this;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#assign(org.apache.mahout.matrix.Vector)
-   */
-  public Vector assign(Vector other) throws CardinalityException {
+  public Vector assign(Vector other) {
     if (other.cardinality() != cardinality())
       throw new CardinalityException();
     for (int i = 0; i < cardinality(); i++)
@@ -329,9 +198,6 @@ public abstract class AbstractVector implements Vector, Writable {
     return this;
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.matrix.Vector#assign(org.apache.mahout.matrix.BinaryFunction, double)
-   */
   public Vector assign(BinaryFunction f, double y) {
     for (int i = 0; i < cardinality(); i++) {
       setQuick(i, f.apply(getQuick(i), y));
@@ -339,25 +205,13 @@ public abstract class AbstractVector implements Vector, Writable {
     return this;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#assign(org.apache.mahout.utils.matrix.DoubleFunction)
-   */
   public Vector assign(UnaryFunction function) {
     for (int i = 0; i < cardinality(); i++)
       setQuick(i, function.apply(getQuick(i)));
     return this;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#assign(org.apache.mahout.matrix.Vector,
-   *      org.apache.mahout.utils.matrix.DoubleDoubleFunction)
-   */
-  public Vector assign(Vector other, BinaryFunction function)
-      throws CardinalityException {
+  public Vector assign(Vector other, BinaryFunction function) {
     if (other.cardinality() != cardinality())
       throw new CardinalityException();
     for (int i = 0; i < cardinality(); i++)
@@ -365,27 +219,13 @@ public abstract class AbstractVector implements Vector, Writable {
     return this;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#cross(org.apache.mahout.matrix.Vector)
-   */
   public Matrix cross(Vector other) {
     Matrix result = matrixLike(cardinality(), other.cardinality());
     for (int row = 0; row < cardinality(); row++)
-      try {
-        result.assignRow(row, other.times(getQuick(row)));
-      } catch (CardinalityException e) {
-        // cannot happen since result is other's cardinality
-      }
+      result.assignRow(row, other.times(getQuick(row)));
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#asFormatString()
-   */
   public abstract String asFormatString();
 
   /**

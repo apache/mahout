@@ -36,13 +36,6 @@ public class CanopyReducer extends MapReduceBase implements
 
   private final List<Canopy> canopies = new ArrayList<Canopy>();
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.Reducer#reduce(org.apache.hadoop.io.WritableComparable,
-   *      java.util.Iterator, org.apache.hadoop.mapred.OutputCollector,
-   *      org.apache.hadoop.mapred.Reporter)
-   */
   public void reduce(Text key, Iterator<Text> values,
                      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
     while (values.hasNext()) {
@@ -55,11 +48,6 @@ public class CanopyReducer extends MapReduceBase implements
               .formatCanopy(canopy)));
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.MapReduceBase#configure(org.apache.hadoop.mapred.JobConf)
-   */
   @Override
   public void configure(JobConf job) {
     super.configure(job);

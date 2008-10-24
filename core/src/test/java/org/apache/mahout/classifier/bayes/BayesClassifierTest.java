@@ -34,7 +34,7 @@ public class BayesClassifierTest extends TestCase {
     //String[] labels = new String[]{"a", "b", "c", "d", "e"};
     //long[] labelCounts = new long[]{6, 20, 60, 100, 200};
     //String[] features = new String[]{"aa", "bb", "cc", "dd", "ee"};
-    model.setSigma_jSigma_k(100.0f);
+    model.setSigma_jSigma_k(100.0);
     
     model.setSumFeatureWeight("aa", 100);
     model.setSumFeatureWeight("bb", 100);

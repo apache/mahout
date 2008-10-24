@@ -44,15 +44,16 @@ public class ConfusionMatrix implements Summarizable {
     return labels;
   }
   
-  public float getAccuracy(String label){
+  public double getAccuracy(String label){
     int labelId = labelMap.get(label);
     int labelTotal = 0;
     int correct = 0;    
     for(int i = 0 ;i < labels.size() ;i++){
-      labelTotal+= confusionMatrix[labelId][i];
-      if(i==labelId) correct = confusionMatrix[labelId][i];
+      labelTotal += confusionMatrix[labelId][i];
+      if(i == labelId)
+        correct = confusionMatrix[labelId][i];
     }
-    return (float)100 * correct / labelTotal;
+    return 100.0 * correct / labelTotal;
   }
   
   public int getCorrect(String label){
@@ -60,10 +61,10 @@ public class ConfusionMatrix implements Summarizable {
     return confusionMatrix[labelId][labelId];
   }
   
-  public float getTotal(String label){
+  public double getTotal(String label){
     int labelId = labelMap.get(label);
     int labelTotal = 0;
-    for(int i = 0 ;i < labels.size() ;i++){
+    for (int i = 0 ;i < labels.size() ;i++){
       labelTotal+= confusionMatrix[labelId][i];
     }
     return labelTotal;

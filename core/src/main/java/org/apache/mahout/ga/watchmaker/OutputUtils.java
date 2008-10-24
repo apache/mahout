@@ -21,7 +21,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.io.SequenceFile.Sorter;
@@ -92,9 +92,8 @@ public class OutputUtils {
    * @throws IOException
    */
   public static void importEvaluations(FileSystem fs, JobConf conf,
-      Path outpath, List<Float> evaluations) throws IOException {
-    Sorter sorter = new Sorter(fs, LongWritable.class, FloatWritable.class,
-        conf);
+      Path outpath, List<Double> evaluations) throws IOException {
+    Sorter sorter = new Sorter(fs, LongWritable.class, DoubleWritable.class, conf);
 
     // merge and sort the outputs
     Path[] outfiles = listOutputFiles(fs, outpath);
@@ -103,7 +102,7 @@ public class OutputUtils {
 
     // import the evaluations
     LongWritable key = new LongWritable();
-    FloatWritable value = new FloatWritable();
+    DoubleWritable value = new DoubleWritable();
     Reader reader = new Reader(fs, output, conf);
 
     while (reader.next(key, value)) {

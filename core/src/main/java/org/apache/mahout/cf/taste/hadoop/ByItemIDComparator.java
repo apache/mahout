@@ -22,9 +22,9 @@ import java.util.Comparator;
 
 final class ByItemIDComparator implements Comparator<ItemPrefWritable>, Serializable {
 
-  private static final Comparator instance = new ByItemIDComparator();
+  private static final Comparator<ItemPrefWritable> instance = new ByItemIDComparator();
 
-  public static Comparator getInstance() {
+  public static Comparator<ItemPrefWritable> getInstance() {
     return instance;
   }
 

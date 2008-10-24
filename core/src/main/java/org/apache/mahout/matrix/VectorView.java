@@ -24,6 +24,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Iterator;
+import java.nio.charset.Charset;
 
 /**
  * Implements subset view of a Vector
@@ -114,8 +115,7 @@ public class VectorView extends AbstractVector {
   }
 
   @Override
-  public Vector viewPart(int offset, int length) throws CardinalityException,
-      IndexException {
+  public Vector viewPart(int offset, int length) {
     if (length > cardinality)
       throw new CardinalityException();
     if (offset < 0 || offset + length > cardinality)
@@ -131,9 +131,8 @@ public class VectorView extends AbstractVector {
       return other.haveSharedCells(vector);
   }
 
-  /*
-   * (Non-Javadoc) Returns true if index is a valid index in the underlying
-   * Vector
+  /**
+   * @return true if index is a valid index in the underlying Vector
    */
   private boolean isInView(int index) {
     return index >= offset && index < offset + cardinality;
@@ -211,7 +210,7 @@ public class VectorView extends AbstractVector {
     int cardinality = dataInput.readInt();
     byte[] buf = new byte[dataInput.readInt()];
     dataInput.readFully(buf);
-    String vectorClassName = new String(buf);
+    String vectorClassName = new String(buf, Charset.forName("UTF-8"));
     Vector vector;
     try {
       vector = Class.forName(vectorClassName).asSubclass(Vector.class).newInstance();

@@ -25,7 +25,6 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.matrix.CardinalityException;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
 
@@ -35,50 +34,36 @@ import java.util.Iterator;
 public class MeanShiftCanopyCombiner extends MapReduceBase implements
     Reducer<Text, WritableComparable, Text, WritableComparable> {
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.Reducer#reduce(org.apache.hadoop.io.WritableComparable,
-   *      java.util.Iterator, org.apache.hadoop.mapred.OutputCollector,
-   *      org.apache.hadoop.mapred.Reporter)
-   */
   public void reduce(Text key, Iterator<WritableComparable> values,
       OutputCollector<Text, WritableComparable> output, Reporter reporter)
       throws IOException {
     MeanShiftCanopy canopy = new MeanShiftCanopy(key.toString());
-    try {
-      while (values.hasNext()) {
-        Writable value = values.next();
-        String valueStr = value.toString();
-        if (valueStr.startsWith("new"))
-          canopy.init(MeanShiftCanopy.decodeCanopy(valueStr.substring(4)));
-        else if (valueStr.startsWith("merge"))
-          canopy.merge(MeanShiftCanopy.decodeCanopy(valueStr.substring(6)));
-        else {
-          Vector formatString = DenseVector.decodeFormat(new Text(valueStr));
-          int number = Integer.parseInt(valueStr.substring(valueStr.indexOf(']') + 2));
-          canopy.addPoints(formatString, number);
-        }
+
+    while (values.hasNext()) {
+      Writable value = values.next();
+      String valueStr = value.toString();
+      if (valueStr.startsWith("new"))
+        canopy.init(MeanShiftCanopy.decodeCanopy(valueStr.substring(4)));
+      else if (valueStr.startsWith("merge"))
+        canopy.merge(MeanShiftCanopy.decodeCanopy(valueStr.substring(6)));
+      else {
+        Vector formatString = DenseVector.decodeFormat(new Text(valueStr));
+        int number = Integer.parseInt(valueStr.substring(valueStr.indexOf(']') + 2));
+        canopy.addPoints(formatString, number);
       }
-      // Combiner may see situations where a canopy touched others in the mapper
-      // before it was merged. This causes points to be added to it in the
-      // combiner, but since the canopy was merged it has no center. Ignore
-      // these cases.
-      if (canopy.getCenter() != null) {
-        canopy.shiftToMean();
-        output.collect(new Text("canopy"), new Text(MeanShiftCanopy
-            .formatCanopy(canopy)));
-      }
-    } catch (CardinalityException e) {
-      throw new RuntimeException(e);
     }
+    // Combiner may see situations where a canopy touched others in the mapper
+    // before it was merged. This causes points to be added to it in the
+    // combiner, but since the canopy was merged it has no center. Ignore
+    // these cases.
+    if (canopy.getCenter() != null) {
+      canopy.shiftToMean();
+      output.collect(new Text("canopy"), new Text(MeanShiftCanopy
+          .formatCanopy(canopy)));
+    }
+
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.MapReduceBase#configure(org.apache.hadoop.mapred.JobConf)
-   */
   @Override
   public void configure(JobConf job) {
     super.configure(job);

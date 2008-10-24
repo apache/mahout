@@ -37,7 +37,6 @@ import javax.swing.SwingUtilities;
  * The original code is from <b>the Watchmaker project</b>
  * (https://watchmaker.dev.java.net/).
  */
-@SuppressWarnings("serial")
 final class ExecutionPanel extends JPanel implements ProgressListener
 {
     private final JButton startButton;

@@ -91,8 +91,8 @@ public class ToolReducer extends MapReduceBase implements
   }
 
   String numericDescription(Iterator<Text> values) {
-    float min = Float.MAX_VALUE;
-    float max = Float.MIN_VALUE;
+    double min = Double.POSITIVE_INFINITY;
+    double max = Double.NEGATIVE_INFINITY;
 
     while (values.hasNext()) {
       Range range = DescriptionUtils.extractNumericalRange(values.next().toString());

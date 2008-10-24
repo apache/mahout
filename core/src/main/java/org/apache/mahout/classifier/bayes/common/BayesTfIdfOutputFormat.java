@@ -34,24 +34,23 @@ import java.io.IOException;
  * This class extends the MultipleOutputFormat, allowing to write the output data to
  * different output files in sequence file output format.
  */
-public class BayesTfIdfOutputFormat extends
-    MultipleOutputFormat<WritableComparable, Writable> {
+public class BayesTfIdfOutputFormat extends MultipleOutputFormat<WritableComparable,Writable> {
 
-  private SequenceFileOutputFormat theSequenceFileOutputFormat = null;
+  private SequenceFileOutputFormat<WritableComparable,Writable> theSequenceFileOutputFormat = null;
 
   @Override
   protected RecordWriter<WritableComparable, Writable> getBaseRecordWriter(
       FileSystem fs, JobConf job, String name, Progressable arg3)
       throws IOException {
     if (theSequenceFileOutputFormat == null) {
-      theSequenceFileOutputFormat = new SequenceFileOutputFormat();
+      theSequenceFileOutputFormat = new SequenceFileOutputFormat<WritableComparable,Writable>();
     }
     return theSequenceFileOutputFormat.getRecordWriter(fs, job, name, arg3);
   }
   @Override
   protected String generateFileNameForKeyValue(WritableComparable k, Writable v,
       String name) {
-    Text key = (Text)k;
+    Text key = (Text) k;
 
     if(key.toString().startsWith("*"))
       return "trainer-vocabCount/"+name;

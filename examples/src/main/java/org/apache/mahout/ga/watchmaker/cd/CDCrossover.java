@@ -28,16 +28,10 @@ import java.util.Random;
  */
 public class CDCrossover extends AbstractCrossover<CDRule> {
 
-  /**
-   * {@inheritDoc}
-   */
   public CDCrossover(int crossoverPoints) {
     super(crossoverPoints);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   public CDCrossover(int crossoverPoints, double crossoverProbability) {
     super(crossoverPoints, crossoverProbability);
   }

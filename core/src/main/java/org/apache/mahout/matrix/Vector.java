@@ -57,7 +57,7 @@ public interface Vector extends Iterable<Vector.Element>, Writable {
    * @throws CardinalityException
    *             if the cardinalities differ
    */
-  Vector assign(double[] values) throws CardinalityException;
+  Vector assign(double[] values);
 
   /**
    * Assign the other matrix values to the receiver
@@ -68,7 +68,7 @@ public interface Vector extends Iterable<Vector.Element>, Writable {
    * @throws CardinalityException
    *             if the cardinalities differ
    */
-  Vector assign(Vector other) throws CardinalityException;
+  Vector assign(Vector other);
 
   /**
    * Apply the function to each element of the receiver
@@ -91,8 +91,7 @@ public interface Vector extends Iterable<Vector.Element>, Writable {
    * @throws CardinalityException
    *             if the cardinalities differ
    */
-  Vector assign(Vector other, BinaryFunction function)
-      throws CardinalityException;
+  Vector assign(Vector other, BinaryFunction function);
 
   /**
    * Apply the function to each element of the receiver, using the y value as
@@ -165,7 +164,7 @@ public interface Vector extends Iterable<Vector.Element>, Writable {
    * @throws CardinalityException
    *             if the cardinalities differ
    */
-  double dot(Vector x) throws CardinalityException;
+  double dot(Vector x);
 
   /**
    * Return the value at the given index
@@ -176,7 +175,7 @@ public interface Vector extends Iterable<Vector.Element>, Writable {
    * @throws IndexException
    *             if the index is out of bounds
    */
-  double get(int index) throws IndexException;
+  double get(int index);
 
   /**
    * Return the value at the given index, without checking bounds
@@ -223,7 +222,7 @@ public interface Vector extends Iterable<Vector.Element>, Writable {
    * @throws CardinalityException
    *             if the cardinalities differ
    */
-  Vector minus(Vector x) throws CardinalityException;
+  Vector minus(Vector x);
 
   /**
    * Return a new matrix containing the normalized values of the recipient
@@ -252,7 +251,7 @@ public interface Vector extends Iterable<Vector.Element>, Writable {
    * @throws CardinalityException
    *             if the cardinalities differ
    */
-  Vector plus(Vector x) throws CardinalityException;
+  Vector plus(Vector x);
 
   /**
    * Set the value at the given index
@@ -264,7 +263,7 @@ public interface Vector extends Iterable<Vector.Element>, Writable {
    * @throws IndexException
    *             if the index is out of bounds
    */
-  void set(int index, double value) throws IndexException;
+  void set(int index, double value);
 
   /**
    * Set the value at the given index, without checking bounds
@@ -303,7 +302,7 @@ public interface Vector extends Iterable<Vector.Element>, Writable {
    * @throws CardinalityException
    *             if the cardinalities differ
    */
-  Vector times(Vector x) throws CardinalityException;
+  Vector times(Vector x);
 
   /**
    * Return the element of the recipient as a double[]
@@ -326,8 +325,7 @@ public interface Vector extends Iterable<Vector.Element>, Writable {
    *             if the offset is negative or the offset+length is outside of
    *             the receiver
    */
-  Vector viewPart(int offset, int length) throws CardinalityException,
-      IndexException;
+  Vector viewPart(int offset, int length);
 
   /**
    * Return the sum of all the elements of the receiver

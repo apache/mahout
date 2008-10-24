@@ -40,7 +40,7 @@ public class VectorTest extends TestCase {
 
   }
 
-  private void testVectors(Vector left, Vector right) throws CardinalityException, IndexException {
+  private void testVectors(Vector left, Vector right) {
     left.setQuick(0, 1);
     left.setQuick(1, 2);
     left.setQuick(2, 3);

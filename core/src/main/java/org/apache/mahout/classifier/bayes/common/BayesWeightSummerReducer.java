@@ -17,7 +17,7 @@
 
 package org.apache.mahout.classifier.bayes.common;
 
-import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -32,18 +32,18 @@ import java.util.Iterator;
  * Can also be used as a local Combiner
  */
 public class BayesWeightSummerReducer extends MapReduceBase
-    implements Reducer<Text, FloatWritable, Text, FloatWritable> {
+    implements Reducer<Text, DoubleWritable, Text, DoubleWritable> {
 
   public void reduce(Text key,
-                     Iterator<FloatWritable> values,
-                     OutputCollector<Text, FloatWritable> output,
+                     Iterator<DoubleWritable> values,
+                     OutputCollector<Text, DoubleWritable> output,
                      Reporter reporter) throws IOException {
     //Key is label,word, value is the tfidf of the feature  of times we've seen this label word per local node.  Output is the same
 
-    float sum = 0;
+    double sum = 0.0;
     while (values.hasNext()) {
       sum += values.next().get();
     }
-    output.collect(key, new FloatWritable(sum));
+    output.collect(key, new DoubleWritable(sum));
   }
 }

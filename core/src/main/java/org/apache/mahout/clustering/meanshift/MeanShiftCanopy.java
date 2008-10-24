@@ -130,10 +130,9 @@ public class MeanShiftCanopy {
    * @param aCanopy a MeanShiftCanopy to be merged
    * @param canopies the List<Canopy> to be appended
    */
-  public static void mergeCanopy(MeanShiftCanopy aCanopy,
-      List<MeanShiftCanopy> canopies) throws CardinalityException {
+  public static void mergeCanopy(MeanShiftCanopy aCanopy, List<MeanShiftCanopy> canopies) {
     MeanShiftCanopy closestCoveringCanopy = null;
-    double closestNorm = Float.MAX_VALUE;
+    double closestNorm = Double.MAX_VALUE;
     for (MeanShiftCanopy canopy : canopies) {
       double norm = measure.distance(canopy.getCenter(), aCanopy.getCenter());
       if (norm < t1)
@@ -161,8 +160,7 @@ public class MeanShiftCanopy {
    */
   public static void mergeCanopy(MeanShiftCanopy aCanopy,
       List<MeanShiftCanopy> canopies,
-      OutputCollector<Text, WritableComparable> collector) throws IOException,
-      CardinalityException {
+      OutputCollector<Text, WritableComparable> collector) throws IOException {
     MeanShiftCanopy closestCoveringCanopy = null;
     double closestNorm = 0;
     for (MeanShiftCanopy canopy : canopies) {
@@ -280,7 +278,7 @@ public class MeanShiftCanopy {
    * @param nPoints the number of times to add the point
    * @throws CardinalityException if the cardinalities disagree
    */
-  void addPoints(Vector point, int nPoints) throws CardinalityException {
+  void addPoints(Vector point, int nPoints) {
     numPoints += nPoints;
     Vector subTotal = (nPoints == 1) ? point.copy() : point.times(nPoints);
     pointTotal = (pointTotal == null) ? subTotal : pointTotal.plus(subTotal);
@@ -292,7 +290,7 @@ public class MeanShiftCanopy {
    * @param point a Vector point
    * @return if the point is covered
    */
-  public boolean closelyBound(Vector point) throws CardinalityException {
+  public boolean closelyBound(Vector point) {
     return measure.distance(center, point) < t2;
   }
 
@@ -301,7 +299,7 @@ public class MeanShiftCanopy {
    * 
    * @return a Vector which is the new bound centroid
    */
-  public Vector computeBoundCentroid() throws CardinalityException {
+  public Vector computeBoundCentroid() {
     Vector result = new DenseVector(center.cardinality());
     for (Vector v : boundPoints)
       result.assign(v, new PlusFunction());
@@ -326,7 +324,7 @@ public class MeanShiftCanopy {
    * @param point a Vector point
    * @return if the point is covered
    */
-  boolean covers(Vector point) throws CardinalityException {
+  boolean covers(Vector point) {
     return measure.distance(center, point) < t1;
   }
 
@@ -385,7 +383,7 @@ public class MeanShiftCanopy {
     return numPoints;
   }
 
-  void init(MeanShiftCanopy canopy) throws CardinalityException {
+  void init(MeanShiftCanopy canopy) {
     canopyId = canopy.canopyId;
     center = canopy.center;
     addPoints(center, 1);
@@ -418,7 +416,7 @@ public class MeanShiftCanopy {
         + canopy.toString()));
   }
 
-  public boolean shiftToMean() throws CardinalityException {
+  public boolean shiftToMean() {
     Vector centroid = computeCentroid();
     converged = new EuclideanDistanceMeasure().distance(centroid, center) < convergenceDelta;
     center = centroid;
@@ -427,9 +425,6 @@ public class MeanShiftCanopy {
     return converged;
   }
 
-  /* (non-Javadoc)
-   * @see java.lang.Object#toString()
-   */
   public String toString() {
     return formatCanopy(this);
   }
@@ -439,7 +434,7 @@ public class MeanShiftCanopy {
    * 
    * @param canopy an existing MeanShiftCanopy
    */
-  void touch(MeanShiftCanopy canopy) throws CardinalityException {
+  void touch(MeanShiftCanopy canopy) {
     canopy.addPoints(getCenter(), boundPoints.size());
     addPoints(canopy.center, canopy.boundPoints.size());
   }

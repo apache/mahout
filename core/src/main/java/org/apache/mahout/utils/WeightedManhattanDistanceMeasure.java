@@ -25,10 +25,6 @@ import org.apache.mahout.matrix.Vector;
  */
 public class WeightedManhattanDistanceMeasure extends WeightedDistanceMeasure {
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.utils.DistanceMeasure#distance(org.apache.mahout.matrix.Vector,
-   * org.apache.mahout.matrix.Vector)
-   */
   public double distance(Vector p1, Vector p2) {
     double result = 0;
 

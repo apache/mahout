@@ -17,7 +17,7 @@
 
 package org.apache.mahout.classifier.bayes.common;
 
-import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -32,25 +32,25 @@ import java.util.Iterator;
 /**
  *  Can also be used as a local Combiner beacuse only two values should be there inside the values
  */
-public class BayesTfIdfReducer extends MapReduceBase implements Reducer<Text, FloatWritable, Text, FloatWritable> {
+public class BayesTfIdfReducer extends MapReduceBase implements Reducer<Text, DoubleWritable, Text, DoubleWritable> {
 
   private static final Logger log = LoggerFactory.getLogger(BayesTfIdfReducer.class);
 
   public void reduce(Text key,
-                     Iterator<FloatWritable> values,
-                     OutputCollector<Text, FloatWritable> output,
+                     Iterator<DoubleWritable> values,
+                     OutputCollector<Text, DoubleWritable> output,
                      Reporter reporter) throws IOException {
     //Key is label,word, value is the number of times we've seen this label word per local node.  Output is the same
     String token = key.toString();  
     if(token.startsWith("*vocabCount")) {
-      float vocabCount = 0;
+      double vocabCount = 0.0;
       while (values.hasNext()) {
         vocabCount += values.next().get();
       }
       log.info("{}\t{}", token, vocabCount);
-      output.collect(key, new FloatWritable(vocabCount));
+      output.collect(key, new DoubleWritable(vocabCount));
     } else {
-      float idfTimes_D_ij = 1.0f;
+      double idfTimes_D_ij = 1.0;
       //int numberofValues = 0;
       while (values.hasNext()) {
         idfTimes_D_ij *= values.next().get();
@@ -58,7 +58,7 @@ public class BayesTfIdfReducer extends MapReduceBase implements Reducer<Text, Fl
       }
       //if(numberofValues!=2) throw new IOException("Number of values should be exactly 2");
       
-      output.collect(key, new FloatWritable(idfTimes_D_ij));
+      output.collect(key, new DoubleWritable(idfTimes_D_ij));
     }
   }
 }

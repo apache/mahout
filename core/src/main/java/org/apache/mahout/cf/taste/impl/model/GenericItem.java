@@ -64,6 +64,7 @@ public class GenericItem<K extends Comparable<K>> implements Item, Serializable 
     return "Item[id:" + String.valueOf(id) + ']';
   }
 
+  @SuppressWarnings("unchecked")
   public int compareTo(Item item) {
     return id.compareTo((K) item.getID());
   }

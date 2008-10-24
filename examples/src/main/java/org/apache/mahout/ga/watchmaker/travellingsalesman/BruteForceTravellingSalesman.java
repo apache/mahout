@@ -49,10 +49,6 @@ public class BruteForceTravellingSalesman implements TravellingSalesmanStrategy
         this.distances = distances;
     }
 
-    
-    /**
-     * {@inheritDoc}
-     */
     public String getDescription()
     {
         return "Brute Force";

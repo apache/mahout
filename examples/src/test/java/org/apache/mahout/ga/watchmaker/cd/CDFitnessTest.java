@@ -31,7 +31,7 @@ public class CDFitnessTest extends TestCase {
     int n = 100;
     Random rng = new MersenneTwisterRNG();
     int tp, tn, fp, fn;
-    float se, sp;
+    double se, sp;
 
     for (int nloop = 0; nloop < n; nloop++) {
       tp = rng.nextInt(1000);
@@ -40,8 +40,8 @@ public class CDFitnessTest extends TestCase {
       fn = rng.nextInt(1000);
 
       CDFitness fitness = new CDFitness(tp, fp, tn, fn);
-      se = (float) tp / (tp + fn);
-      sp = (float) tn / (tn + fp);
+      se = ((double) tp) / (tp + fn);
+      sp = ((double) tn) / (tn + fp);
 
       assertEquals(se * sp, fitness.get());
     }

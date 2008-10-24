@@ -62,11 +62,6 @@ public class FuzzyKMeansMapper extends MapReduceBase implements
     this.clusters = clusters;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.MapReduceBase#configure(org.apache.hadoop.mapred.JobConf)
-   */
   @Override
   public void configure(JobConf job) {
 

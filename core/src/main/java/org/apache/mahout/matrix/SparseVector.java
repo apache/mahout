@@ -97,11 +97,11 @@ public class SparseVector extends AbstractVector {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked")  
   public String asFormatString() {
     StringBuilder out = new StringBuilder();
     out.append("[s").append(cardinality).append(", ");
-    Map.Entry<Integer, Double>[] entries = values.entrySet().toArray(new Map.Entry[values.size()]);
+    Map.Entry<Integer, Double>[] entries = (Map.Entry<Integer, Double>[]) values.entrySet().toArray(new Map.Entry[values.size()]);
     Arrays.sort(entries, new Comparator<Map.Entry<Integer, Double>>(){
       public int compare(Map.Entry<Integer, Double> e1, Map.Entry<Integer, Double> e2) {
         return e1.getKey().compareTo(e2.getKey());
@@ -131,10 +131,7 @@ public class SparseVector extends AbstractVector {
   @Override
   public double getQuick(int index) {
     Double value = values.get(index);
-    if (value == null)
-      return 0.0;
-    else
-      return value;
+    return value == null ? 0.0 : value;
   }
 
   @Override
@@ -160,8 +157,7 @@ public class SparseVector extends AbstractVector {
   }
 
   @Override
-  public Vector viewPart(int offset, int length) throws CardinalityException,
-      IndexException {
+  public Vector viewPart(int offset, int length) {
     if (length > cardinality)
       throw new CardinalityException();
     if (offset < 0 || offset + length > cardinality)
@@ -239,7 +235,7 @@ public class SparseVector extends AbstractVector {
   }
 
   @Override
-  public double dot(Vector x) throws CardinalityException {
+  public double dot(Vector x) {
     if (cardinality() != x.cardinality())
       throw new CardinalityException();
     double result = 0.0;

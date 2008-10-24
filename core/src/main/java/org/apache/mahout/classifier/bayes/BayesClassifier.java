@@ -40,7 +40,8 @@ public class BayesClassifier implements Classifier {
    * @param model           The model
    * @param document        The document to classify
    * @param defaultCategory The default category to assign
-   * @param numResults      The maximum number of results to return, ranked by score.  Ties are broken by comparing the category
+   * @param numResults      The maximum number of results to return, ranked by score.
+   *                        Ties are broken by comparing the category
    * @return A Collection of {@link org.apache.mahout.classifier.ClassifierResult}s.
    */
   public Collection<ClassifierResult> classify(Model model, String[] document, String defaultCategory, int numResults) {
@@ -49,8 +50,8 @@ public class BayesClassifier implements Classifier {
     PriorityQueue pq = new ClassifierResultPriorityQueue(numResults);
     ClassifierResult tmp;
     for (String category : categories){
-      float prob = documentProbability(model, category, document);
-      if (prob < 0) {
+      double prob = documentProbability(model, category, document);
+      if (prob < 0.0) {
         tmp = new ClassifierResult(category, prob);
         pq.insert(tmp);
       }
@@ -76,12 +77,11 @@ public class BayesClassifier implements Classifier {
    */
   public ClassifierResult classify(Model model, String[] document, String defaultCategory) {
     ClassifierResult result = new ClassifierResult(defaultCategory);
-    float min = 0.0f;
+    double min = 0.0;
     Collection<String> categories = model.getLabels();
 
     for (String category : categories) {
-      float prob = documentProbability(model, category, document);
-
+      double prob = documentProbability(model, category, document);
       if (prob < min) {
         min = prob;
         result.setLabel(category);
@@ -92,7 +92,8 @@ public class BayesClassifier implements Classifier {
   }
 
   /**
-   * Calculate the document probability as the multiplication of the {@link org.apache.mahout.common.Model#FeatureWeight(String, String)} for each word given the label
+   * Calculate the document probability as the multiplication of the
+   * {@link org.apache.mahout.common.Model#FeatureWeight(String, String)} for each word given the label
    *
    * @param model       The {@link org.apache.mahout.common.Model}
    * @param label       The label to calculate the probability of
@@ -100,8 +101,8 @@ public class BayesClassifier implements Classifier {
    * @return The probability
    * @see Model#FeatureWeight(String, String)
    */
-  public float documentProbability(Model model, String label, String[] document) {
-    float result = 0.0f;
+  public double documentProbability(Model model, String label, String[] document) {
+    double result = 0.0;
     Map<String, Integer> wordList = new HashMap<String, Integer>(1000);
     for (String word : document) {
       if (wordList.containsKey(word)) {
@@ -130,8 +131,8 @@ public class BayesClassifier implements Classifier {
       ClassifierResult cr1 = (ClassifierResult) a;
       ClassifierResult cr2 = (ClassifierResult) b;
 
-      float score1 = cr1.getScore();
-      float score2 = cr2.getScore();
+      double score1 = cr1.getScore();
+      double score2 = cr2.getScore();
       return score1 == score2 ? cr1.getLabel().compareTo(cr2.getLabel()) < 0 : score1 < score2;
     }
   }

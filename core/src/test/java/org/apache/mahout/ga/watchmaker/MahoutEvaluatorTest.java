@@ -45,7 +45,7 @@ public class MahoutEvaluatorTest extends TestCase {
     DummyEvaluator evaluator = new DummyEvaluator();
 
     // run MahoutEvaluator
-    List<Float> results = new ArrayList<Float>();
+    List<Double> results = new ArrayList<Double>();
     MahoutEvaluator.evaluate(evaluator, population, results);
 
     // check results

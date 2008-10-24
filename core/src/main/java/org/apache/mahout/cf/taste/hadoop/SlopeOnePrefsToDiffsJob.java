@@ -19,9 +19,9 @@ package org.apache.mahout.cf.taste.hadoop;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
@@ -64,7 +64,7 @@ public final class SlopeOnePrefsToDiffsJob {
 
     jobConf.setReducerClass(SlopeOnePrefsToDiffsReducer.class);
     jobConf.setOutputKeyClass(ItemItemWritable.class);
-    jobConf.setOutputValueClass(FloatWritable.class);
+    jobConf.setOutputValueClass(DoubleWritable.class);
 
     jobConf.setOutputFormat(SequenceFileOutputFormat.class);
     SequenceFileOutputFormat.setOutputCompressionType(jobConf, SequenceFile.CompressionType.RECORD);

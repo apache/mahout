@@ -104,12 +104,12 @@ public class CDFitness implements Writable {
   }
 
   /**
-   * Calculates the float fitness corresponding to this evaluation.
+   * Calculates the fitness corresponding to this evaluation.
    * @return
    */
-  public float get() {
-    float se = (float)tp / (tp + fn); // sensitivity
-    float sp = (float)tn / (tn + fp); // specificity
+  public double get() {
+    double se = ((double) tp) / (tp + fn); // sensitivity
+    double sp = ((double) tn) / (tn + fp); // specificity
     
     return se * sp;
   }

@@ -35,9 +35,7 @@ public class DescriptionUtilsTest extends TestCase {
   }
 
   public void testCreateNumericalDescription() {
-    String description = DescriptionUtils.createNumericalDescription(-5.1f,
-        12.32f);
-
+    String description = DescriptionUtils.createNumericalDescription(-5.1, 12.32);
     assertEquals("-5.1,12.32", description);
   }
 
@@ -58,8 +56,8 @@ public class DescriptionUtilsTest extends TestCase {
     
     Range range = DescriptionUtils.extractNumericalRange(description);
     
-    assertEquals(-2.06f, range.min);
-    assertEquals(12.32f, range.max);
+    assertEquals(-2.06, range.min);
+    assertEquals(12.32, range.max);
   }
 
 }

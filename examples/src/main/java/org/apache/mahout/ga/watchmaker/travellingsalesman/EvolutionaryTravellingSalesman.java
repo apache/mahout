@@ -108,9 +108,6 @@ public class EvolutionaryTravellingSalesman implements
     this.mahout = mahout;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   public String getDescription() {
     String selectionName = selectionStrategy.getClass().getSimpleName();
     return (mahout ? "Mahout " : "") + "Evolution (pop: " + populationSize

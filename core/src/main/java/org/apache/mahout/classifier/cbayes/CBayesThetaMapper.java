@@ -18,7 +18,7 @@
 package org.apache.mahout.classifier.cbayes;
 
 import org.apache.hadoop.io.DefaultStringifier;
-import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -34,17 +34,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CBayesThetaMapper extends MapReduceBase implements
-    Mapper<Text, FloatWritable, Text, FloatWritable> {
+    Mapper<Text, DoubleWritable, Text, DoubleWritable> {
 
   private static final Logger log = LoggerFactory.getLogger(CBayesThetaMapper.class);   
 
-  private Map<String, Float> labelWeightSum = null;
-  private String labelWeightSumString = " ";
-  private float sigma_jSigma_k = 0.0f;
-  private String sigma_jSigma_kString = " ";
-  private float vocabCount = 0.0f;
-  private String vocabCountString = " ";
-  
+  private Map<String,Double> labelWeightSum = null;
+  private double sigma_jSigma_k = 0.0;
+  private double vocabCount = 0.0;
+
   /**
    * We need to calculate the idf of each feature in each label
    * 
@@ -55,25 +52,25 @@ public class CBayesThetaMapper extends MapReduceBase implements
    * @param reporter
    * @throws IOException
    */
-  public void map(Text key, FloatWritable value,
-      OutputCollector<Text, FloatWritable> output, Reporter reporter)
+  public void map(Text key, DoubleWritable value,
+      OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {
 
     String labelFeaturePair = key.toString();
-    float alpha_i = 1.0f;
+    double alpha_i = 1.0;
     
     if (labelFeaturePair.startsWith(",")) { // if it is from the Sigma_j folder
                                             // (feature weight Sum)
       String feature = labelFeaturePair.substring(1);
       for (String label : labelWeightSum.keySet()) {
-        double inverseDenominator = 1.0 /(sigma_jSigma_k - labelWeightSum.get(label) + vocabCount);
-        FloatWritable weight = new FloatWritable((float)((value.get() + alpha_i)*inverseDenominator ));
+        double inverseDenominator = 1.0 / (sigma_jSigma_k - labelWeightSum.get(label) + vocabCount);
+        DoubleWritable weight = new DoubleWritable((value.get() + alpha_i)*inverseDenominator);
         output.collect(new Text((label + "," + feature).trim()), weight); //output Sigma_j
       }
     } else {
       String label = labelFeaturePair.split(",")[0];
       double inverseDenominator = 1.0 /(sigma_jSigma_k - labelWeightSum.get(label) + vocabCount);
-      FloatWritable weight = new FloatWritable((float)(-1 * value.get()  * inverseDenominator));
+      DoubleWritable weight = new DoubleWritable(-value.get() * inverseDenominator);
       output.collect(key, weight);//output -D_ij       
     }
   }
@@ -82,27 +79,27 @@ public class CBayesThetaMapper extends MapReduceBase implements
   public void configure(JobConf job) {
     try {
       if (labelWeightSum == null) {
-        labelWeightSum = new HashMap<String, Float>();
+        labelWeightSum = new HashMap<String,Double>();
 
-        DefaultStringifier<Map<String, Float>> mapStringifier = new DefaultStringifier<Map<String, Float>>(
+        DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(
             job, GenericsUtil.getClass(labelWeightSum));
 
-        labelWeightSumString = mapStringifier.toString(labelWeightSum);
+        String labelWeightSumString = mapStringifier.toString(labelWeightSum);
         labelWeightSumString = job.get("cnaivebayes.sigma_k",
             labelWeightSumString);
         labelWeightSum = mapStringifier.fromString(labelWeightSumString);
 
-        DefaultStringifier<Float> floatStringifier = new DefaultStringifier<Float>(
+        DefaultStringifier<Double> stringifier = new DefaultStringifier<Double>(
             job, GenericsUtil.getClass(sigma_jSigma_k));
-        sigma_jSigma_kString = floatStringifier.toString(sigma_jSigma_k);
+        String sigma_jSigma_kString = stringifier.toString(sigma_jSigma_k);
         sigma_jSigma_kString = job.get("cnaivebayes.sigma_jSigma_k",
             sigma_jSigma_kString);
-        sigma_jSigma_k = floatStringifier.fromString(sigma_jSigma_kString);
-        
-        vocabCountString = floatStringifier.toString(vocabCount);
+        sigma_jSigma_k = stringifier.fromString(sigma_jSigma_kString);
+
+        String vocabCountString = stringifier.toString(vocabCount);
         vocabCountString = job.get("cnaivebayes.vocabCount",
             vocabCountString);
-        vocabCount = floatStringifier.fromString(vocabCountString);
+        vocabCount = stringifier.fromString(vocabCountString);
        
       }
     } catch (IOException ex) {

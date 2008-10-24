@@ -131,11 +131,6 @@ public class TestMeanShift extends TestCase {
     return canopies;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see junit.framework.TestCase#setUp()
-   */
   protected void setUp() throws Exception {
     super.setUp();
     rmr("output");
@@ -161,8 +156,8 @@ public class TestMeanShift extends TestCase {
    * 
    * @throws CardinalityException
    */
-  public void testReferenceImplementation() throws CardinalityException {
-    MeanShiftCanopy.config(new EuclideanDistanceMeasure(), (float) 4, 1.0, 0.5);
+  public void testReferenceImplementation() {
+    MeanShiftCanopy.config(new EuclideanDistanceMeasure(), 4.0, 1.0, 0.5);
     List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
     // add all points to the canopies
     for (int i = 0; i < raw.length; i++)

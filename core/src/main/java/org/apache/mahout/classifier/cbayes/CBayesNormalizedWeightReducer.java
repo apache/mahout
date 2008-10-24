@@ -17,7 +17,7 @@
 
 package org.apache.mahout.classifier.cbayes;
 
-import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -33,23 +33,23 @@ import java.util.Iterator;
  *  Can also be used as a local Combiner beacuse only two values should be there inside the values
  */
 public class CBayesNormalizedWeightReducer extends MapReduceBase
-    implements Reducer<Text, FloatWritable, Text, FloatWritable> {
+    implements Reducer<Text, DoubleWritable, Text, DoubleWritable> {
 
   private static final Logger log = LoggerFactory.getLogger(CBayesNormalizedWeightReducer.class);      
 
   public void reduce(Text key,
-                     Iterator<FloatWritable> values,
-                     OutputCollector<Text, FloatWritable> output,
+                     Iterator<DoubleWritable> values,
+                     OutputCollector<Text, DoubleWritable> output,
                      Reporter reporter) throws IOException {
     //Key is label,word, value is the number of times we've seen this label word per local node.  Output is the same
     String token = key.toString();  
-    float weight = 0.0f;
+    double weight = 0.0;
     while (values.hasNext()) {
       weight += values.next().get();
     }
     if(token.equalsIgnoreCase("rec.motorcycles,miller"))
       log.info("{}=>{}", token, weight);
-    output.collect(key, new FloatWritable(weight));
+    output.collect(key, new DoubleWritable(weight));
   }
 
  

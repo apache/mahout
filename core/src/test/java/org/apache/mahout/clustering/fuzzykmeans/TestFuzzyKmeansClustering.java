@@ -309,7 +309,7 @@ public class TestFuzzyKmeansClustering extends TestCase {
               .substring(pointInfo.indexOf(":") + 1);
 
           Double val = pointTotalProbMap.get(encodedVector);
-          double probVal = 0;
+          double probVal = 0.0;
           if (val != null) {
             probVal = val;
           }

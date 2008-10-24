@@ -60,6 +60,7 @@ public final class GenericDataModel implements DataModel, Serializable {
    *
    * @param users {@link User}s to include in this {@link GenericDataModel}
    */
+  @SuppressWarnings("unchecked")
   public GenericDataModel(Iterable<? extends User> users) {
     if (users == null) {
       throw new IllegalArgumentException("users is null");

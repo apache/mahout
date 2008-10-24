@@ -98,6 +98,7 @@ public class GenericUser<K extends Comparable<K>> implements User, Serializable 
     return "User[id:" + String.valueOf(id) + ']';
   }
 
+  @SuppressWarnings("unchecked")
   public int compareTo(User o) {
     return id.compareTo((K) o.getID());
   }

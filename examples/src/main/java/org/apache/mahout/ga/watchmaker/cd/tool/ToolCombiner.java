@@ -102,11 +102,11 @@ public class ToolCombiner extends MapReduceBase implements
   }
 
   String numericalDescription(Iterator<Text> values) {
-    float min = Float.MAX_VALUE;
-    float max = Float.MIN_VALUE;
+    double min = Double.POSITIVE_INFINITY;
+    double max = Double.NEGATIVE_INFINITY;
 
     while (values.hasNext()) {
-      float value = Float.parseFloat(values.next().toString());
+      double value = Double.parseDouble(values.next().toString());
       if (value < min)
         min = value;
       else if (value > max)

@@ -36,7 +36,7 @@ public interface Classifier {
    * Ties are broken by comparing the category
    * @return A Collection of {@link org.apache.mahout.classifier.ClassifierResult}s.
    */
-  public  Collection<ClassifierResult> classify(Model model, String[] document, String defaultCategory, int numResults);
+  public Collection<ClassifierResult> classify(Model model, String[] document, String defaultCategory, int numResults);
    
 
   /**
@@ -47,7 +47,7 @@ public interface Classifier {
    * @param defaultCategory The default category to assign if one cannot be determined
    * @return The single best category
    */
-  public  ClassifierResult classify(Model model, String[] document, String defaultCategory);
+  public ClassifierResult classify(Model model, String[] document, String defaultCategory);
 
   /**
    * Calculate the document probability as the multiplication of the
@@ -59,7 +59,7 @@ public interface Classifier {
    * @return The probability
    * @see Model#FeatureWeight(String, String)
    */
-  public float documentProbability(Model model, String label, String[] document);
+  public double documentProbability(Model model, String label, String[] document);
 
   
 }

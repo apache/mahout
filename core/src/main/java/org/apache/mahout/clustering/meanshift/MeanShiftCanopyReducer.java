@@ -24,7 +24,6 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.matrix.CardinalityException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,38 +35,24 @@ public class MeanShiftCanopyReducer extends MapReduceBase implements
 
   private final List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.Reducer#reduce(org.apache.hadoop.io.WritableComparable,
-   *      java.util.Iterator, org.apache.hadoop.mapred.OutputCollector,
-   *      org.apache.hadoop.mapred.Reporter)
-   */
   public void reduce(Text key, Iterator<WritableComparable> values,
       OutputCollector<Text, WritableComparable> output, Reporter reporter)
       throws IOException {
-    try {
-      while (values.hasNext()) {
-        Text value = (Text) values.next();
-        MeanShiftCanopy canopy = MeanShiftCanopy.decodeCanopy(value.toString());
-        MeanShiftCanopy.mergeCanopy(canopy, canopies);
-      }
 
-      for (MeanShiftCanopy canopy : canopies) {
-        canopy.shiftToMean();
-        output.collect(new Text(canopy.getIdentifier()), new Text(
-            MeanShiftCanopy.formatCanopy(canopy)));
-      }
-    } catch (CardinalityException e) {
-      throw new RuntimeException(e);
+    while (values.hasNext()) {
+      Text value = (Text) values.next();
+      MeanShiftCanopy canopy = MeanShiftCanopy.decodeCanopy(value.toString());
+      MeanShiftCanopy.mergeCanopy(canopy, canopies);
     }
+
+    for (MeanShiftCanopy canopy : canopies) {
+      canopy.shiftToMean();
+      output.collect(new Text(canopy.getIdentifier()), new Text(
+          MeanShiftCanopy.formatCanopy(canopy)));
+    }
+
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.MapReduceBase#configure(org.apache.hadoop.mapred.JobConf)
-   */
   @Override
   public void configure(JobConf job) {
     super.configure(job);

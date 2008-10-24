@@ -44,12 +44,11 @@ public class CDInfosToolTest extends TestCase {
     rng = new MersenneTwisterRNG();
   }
 
-  private Descriptors randomDescriptors(int nbattributes, float numRate,
-      float catRate) {
+  private Descriptors randomDescriptors(int nbattributes, double numRate, double catRate) {
     char[] descriptors = new char[nbattributes];
-    float rnd;
+    double rnd;
     for (int index = 0; index < nbattributes; index++) {
-      rnd = rng.nextFloat();
+      rnd = rng.nextDouble();
       if (rnd < numRate) {
         // numerical attribute
         descriptors[index] = 'N';
@@ -68,18 +67,17 @@ public class CDInfosToolTest extends TestCase {
   private Object[][] randomDescriptions(Descriptors descriptors) {
     int nbattrs = descriptors.size();
     Object[][] descriptions = new Object[nbattrs][];
-    double min, max;
 
     for (int index = 0; index < nbattrs; index++) {
       if (descriptors.isNumerical(index)) {
         // numerical attribute
-        descriptions[index] = new Object[2];
-        min = rng.nextDouble() * (Float.MAX_VALUE - Float.MIN_VALUE)
-            + Float.MIN_VALUE;
-        max = rng.nextDouble() * (Float.MAX_VALUE - min) + min;
 
-        descriptions[index][0] = (float) min;
-        descriptions[index][1] = (float) max;
+        // srowen: I 'fixed' this to not use Double.{MAX,MIN}_VALUE since
+        // it does not seem like that has the desired effect
+        double min = rng.nextDouble() * ((long) Integer.MAX_VALUE - Integer.MIN_VALUE) + Integer.MIN_VALUE;
+        double max = rng.nextDouble() * (Integer.MAX_VALUE - min) + min;
+
+        descriptions[index] = new Double[] { min, max };
       } else if (descriptors.isNominal(index)) {
         // categorical attribute
         int nbvalues = rng.nextInt(50) + 1;
@@ -119,9 +117,9 @@ public class CDInfosToolTest extends TestCase {
     for (int index = 0; index < descriptors.size(); index++) {
       if (descriptors.isNumerical(index)) {
         // numerical attribute
-        float min = (Float) descriptions[index][0];
-        float max = (Float) descriptions[index][1];
-        float value = rng.nextFloat() * (max - min) + min;
+        double min = (Double) descriptions[index][0];
+        double max = (Double) descriptions[index][1];
+        double value = rng.nextDouble() * (max - min) + min;
 
         buffer.append(value);
       } else if (descriptors.isNominal(index)) {
@@ -158,8 +156,8 @@ public class CDInfosToolTest extends TestCase {
     int nbattrs = rng.nextInt(maxattr) + 1;
 
     // random descriptors
-    float numRate = rng.nextFloat();
-    float catRate = rng.nextFloat() * (1f - numRate);
+    double numRate = rng.nextDouble();
+    double catRate = rng.nextDouble() * (1.0 - numRate);
     Descriptors descriptors = randomDescriptors(nbattrs, numRate, catRate);
 
     // random descriptions
@@ -192,8 +190,8 @@ public class CDInfosToolTest extends TestCase {
 
       if (descriptors.isNumerical(index)) {
         // numerical attribute
-        float min = (Float) descriptions[index][0];
-        float max = (Float) descriptions[index][1];
+        double min = (Double) descriptions[index][0];
+        double max = (Double) descriptions[index][1];
         Range range = DescriptionUtils.extractNumericalRange(description);
 
         assertTrue("bad min value for attribute (" + index + ")",

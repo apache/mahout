@@ -157,7 +157,7 @@ public class FuzzyKMeansDriver {
    */
   private static void runClustering(String input, String clustersIn,
       String output, String measureClass, String convergenceDelta,
-      int numMapTasks, float m) {
+      int numMapTasks, double m) {
 
     JobConf conf = new JobConf(FuzzyKMeansDriver.class);
     conf.setJobName("Fuzzy K Means Clustering");

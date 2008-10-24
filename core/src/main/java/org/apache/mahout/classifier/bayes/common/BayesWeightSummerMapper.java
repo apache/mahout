@@ -17,7 +17,7 @@
 
 package org.apache.mahout.classifier.bayes.common;
 
-import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
@@ -28,7 +28,7 @@ import java.io.IOException;
 
 
 public class BayesWeightSummerMapper extends MapReduceBase implements
-    Mapper<Text, FloatWritable, Text, FloatWritable> {
+    Mapper<Text, DoubleWritable, Text, DoubleWritable> {
 
 
   /**
@@ -41,8 +41,8 @@ public class BayesWeightSummerMapper extends MapReduceBase implements
    * @param reporter
    * @throws IOException
    */
-  public void map(Text key, FloatWritable value,
-      OutputCollector<Text, FloatWritable> output, Reporter reporter)
+  public void map(Text key, DoubleWritable value,
+      OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {
 
     String labelFeaturePair = key.toString();

@@ -41,7 +41,6 @@ import org.uncommons.watchmaker.framework.FitnessEvaluator;
  * This class has been modified to add a main function that runs the JApplet
  * inside a JDialog.
  */
-@SuppressWarnings("serial")
 public final class TravellingSalesman extends JApplet {
   private final ItineraryPanel itineraryPanel;
 

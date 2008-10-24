@@ -57,11 +57,11 @@ public class MockDataSet {
    * Generate a new dataset.
    * 
    * @param numRate numerical attributes rate.<br>
-   *        0f : all attributes are categorical<br>
-   *        1f : all attributes are numerical<br>
+   *        0.0 : all attributes are categorical<br>
+   *        1.0 : all attributes are numerical<br>
    *        otherwise : both numerical an categorical attributes are probable
    */
-  public void randomDataset(float numRate) {
+  public void randomDataset(double numRate) {
     reset(dataset);
 
     int nba = rng.nextInt(maxnba) + 1;
@@ -89,21 +89,21 @@ public class MockDataSet {
    * categorical.
    */
   public void randomDataset() {
-    randomDataset(0.5f);
+    randomDataset(0.5);
   }
 
   /**
    * Generate a new dataset. All the attributes are numerical.
    */
   public void numericalDataset() {
-    randomDataset(1f);
+    randomDataset(1.0);
   }
 
   /**
    * Generate a new dataset. All the attributes are categorical.
    */
   public void categoricalDataset() {
-    randomDataset(0f);
+    randomDataset(0.0);
   }
 
   /**
@@ -116,9 +116,11 @@ public class MockDataSet {
   }
 
   private void prepareNumericalAttribute(int index) {
-    double max = rng.nextDouble() * (Float.MAX_VALUE - Float.MIN_VALUE)
-        + Float.MIN_VALUE;
-    double min = rng.nextDouble() * (max - Float.MIN_VALUE) + Float.MIN_VALUE;
+
+    // srowen: I 'fixed' this to not use Double.{MAX,MIN}_VALUE since
+    // it does not seem like that has the desired effect 
+    double max = rng.nextDouble() * ((long) Integer.MAX_VALUE - Integer.MIN_VALUE) + Integer.MIN_VALUE;
+    double min = rng.nextDouble() * (max - Integer.MIN_VALUE) + Integer.MIN_VALUE;
 
     expect(dataset.isNumerical(index)).andReturn(true).anyTimes();
     expect(dataset.getMax(index)).andReturn(max).anyTimes();

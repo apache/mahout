@@ -42,7 +42,7 @@ public class InputMapper extends MapReduceBase implements
     for (int i = 0; i < numbers.length; i++) {
       String value = numbers[i];
       if (value.length() > 0)
-        doubles.add(new Double(value));
+        doubles.add(Double.valueOf(value));
     }
     Vector point = new DenseVector(doubles.size());
     int index = 0;

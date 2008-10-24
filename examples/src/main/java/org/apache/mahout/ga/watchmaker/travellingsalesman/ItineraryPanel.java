@@ -39,7 +39,6 @@ import javax.swing.JPanel;
  * The original code is from <b>the Watchmaker project</b>
  * (https://watchmaker.dev.java.net/).
  */
-@SuppressWarnings("serial")
 final class ItineraryPanel extends JPanel
 {
     private final Collection<JCheckBox> checkBoxes;

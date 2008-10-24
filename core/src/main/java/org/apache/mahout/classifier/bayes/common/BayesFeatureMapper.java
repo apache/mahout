@@ -18,7 +18,7 @@
 package org.apache.mahout.classifier.bayes.common;
 
 import org.apache.hadoop.io.DefaultStringifier;
-import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -37,11 +37,11 @@ import java.util.Map;
  * Reads the input train set(preprocessed using the {@link BayesFileFormatter}).
  */
 public class BayesFeatureMapper extends MapReduceBase implements
-    Mapper<Text, Text, Text, FloatWritable> {
+    Mapper<Text, Text, Text, DoubleWritable> {
 
   private static final Logger log = LoggerFactory.getLogger(BayesFeatureMapper.class);
 
-  private static final FloatWritable one = new FloatWritable(1.0f);
+  private static final DoubleWritable one = new DoubleWritable(1.0);
 
   private final Text labelWord = new Text();
 
@@ -62,7 +62,7 @@ public class BayesFeatureMapper extends MapReduceBase implements
    * @throws IOException
    */
   public void map(Text key, Text value,
-      OutputCollector<Text, FloatWritable> output, Reporter reporter)
+      OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {
     //String line = value.toString();
     String label = key.toString();
@@ -91,8 +91,7 @@ public class BayesFeatureMapper extends MapReduceBase implements
       String token = entry.getKey();
       builder.append(',').append(token);
       labelWord.set(builder.toString());
-      FloatWritable f = new FloatWritable((float) (Math
-          .log(1.0 + entry.getValue()) / lengthNormalisation));
+      DoubleWritable f = new DoubleWritable(Math.log(1.0 + entry.getValue()) / lengthNormalisation);
       output.collect(labelWord, f);
       builder.setLength(keyLen);// truncate back
     }

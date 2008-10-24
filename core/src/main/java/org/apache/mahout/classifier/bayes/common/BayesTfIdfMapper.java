@@ -18,7 +18,7 @@
 package org.apache.mahout.classifier.bayes.common;
 
 import org.apache.hadoop.io.DefaultStringifier;
-import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -34,12 +34,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BayesTfIdfMapper extends MapReduceBase implements
-    Mapper<Text, FloatWritable, Text, FloatWritable> {
+    Mapper<Text, DoubleWritable, Text, DoubleWritable> {
 
   private static final Logger log = LoggerFactory.getLogger(BayesTfIdfMapper.class);  
 
-  private Map<String, Float> labelDocumentCounts = null;
-  private String labelDocumentCountString = " ";
+  private Map<String,Double> labelDocumentCounts = null;
 
   /**
    * We need to calculate the Tf-Idf of each feature in each label
@@ -51,8 +50,8 @@ public class BayesTfIdfMapper extends MapReduceBase implements
    * @param reporter
    * @throws IOException
    */
-  public void map(Text key, FloatWritable value,
-      OutputCollector<Text, FloatWritable> output, Reporter reporter)
+  public void map(Text key, DoubleWritable value,
+      OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {
  
     String labelFeaturePair = key.toString();
@@ -61,17 +60,17 @@ public class BayesTfIdfMapper extends MapReduceBase implements
       labelFeaturePair = labelFeaturePair.substring(1);
       String label = labelFeaturePair.split(",")[0];
       
-      if(labelDocumentCounts.containsKey(label)==false){
+      if(labelDocumentCounts.containsKey(label) == false){
         
         throw new IOException(label);
       }
       
-      float labelDocumentCount = labelDocumentCounts.get(label);
-      float logIdf = (float) Math.log(labelDocumentCount  / value.get());
+      double labelDocumentCount = labelDocumentCounts.get(label);
+      double logIdf = Math.log(labelDocumentCount / value.get());
       
-      output.collect(new Text(labelFeaturePair), new FloatWritable(logIdf));
+      output.collect(new Text(labelFeaturePair), new DoubleWritable(logIdf));
     } else if (labelFeaturePair.startsWith(",")) {
-      output.collect(new Text("*vocabCount"), new FloatWritable(1.0f));
+      output.collect(new Text("*vocabCount"), new DoubleWritable(1.0));
     } else {
       output.collect(key, value);
     }
@@ -81,12 +80,12 @@ public class BayesTfIdfMapper extends MapReduceBase implements
   public void configure(JobConf job) {
     try {
       if (labelDocumentCounts == null){
-        labelDocumentCounts = new HashMap<String, Float>();
+        labelDocumentCounts = new HashMap<String,Double>();
 
-        DefaultStringifier<Map<String,Float>> mapStringifier =
-            new DefaultStringifier<Map<String,Float>>(job,GenericsUtil.getClass(labelDocumentCounts));
+        DefaultStringifier<Map<String,Double>> mapStringifier =
+            new DefaultStringifier<Map<String,Double>>(job,GenericsUtil.getClass(labelDocumentCounts));
 
-        labelDocumentCountString = mapStringifier.toString(labelDocumentCounts);  
+        String labelDocumentCountString = mapStringifier.toString(labelDocumentCounts);
         labelDocumentCountString = job.get("cnaivebayes.labelDocumentCounts", labelDocumentCountString);
         
         labelDocumentCounts = mapStringifier.fromString(labelDocumentCountString);

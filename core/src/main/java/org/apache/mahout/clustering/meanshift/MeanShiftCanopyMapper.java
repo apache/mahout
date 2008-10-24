@@ -24,7 +24,6 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.matrix.CardinalityException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,30 +34,13 @@ public class MeanShiftCanopyMapper extends MapReduceBase implements
 
   private final List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.Mapper#map(org.apache.hadoop.io.WritableComparable,
-   *      org.apache.hadoop.io.Writable,
-   *      org.apache.hadoop.mapred.OutputCollector,
-   *      org.apache.hadoop.mapred.Reporter)
-   */
   public void map(WritableComparable key, Text values,
       OutputCollector<Text, WritableComparable> output, Reporter reporter)
       throws IOException {
     MeanShiftCanopy canopy = MeanShiftCanopy.decodeCanopy(values.toString());
-    try {
-      MeanShiftCanopy.mergeCanopy(canopy, canopies, output);
-    } catch (CardinalityException e) {
-      throw new RuntimeException(e);
-    }
+    MeanShiftCanopy.mergeCanopy(canopy, canopies, output);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.MapReduceBase#configure(org.apache.hadoop.mapred.JobConf)
-   */
   @Override
   public void configure(JobConf job) {
     super.configure(job);

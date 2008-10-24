@@ -36,7 +36,7 @@ public class CDRuleTest extends TestCase {
    */
   public void testRandomCDRule() {
     DataSet dataset = DataSet.getDataSet();
-    double threshold = 0f;
+    double threshold = 0.0;
 
     int n = 100;
     for (int nloop = 0; nloop < n; nloop++) {

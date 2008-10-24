@@ -27,6 +27,10 @@ import com.thoughtworks.xstream.XStream;
 public class StringUtils {
 
   private static final XStream xstream = new XStream();
+
+  private StringUtils() {
+    // do nothing
+  }
   
   /**
    * Converts the object to a one-line string representation

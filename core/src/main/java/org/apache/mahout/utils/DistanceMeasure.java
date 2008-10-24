@@ -36,6 +36,6 @@ public interface DistanceMeasure extends JobConfigurable, Parametered {
    * @return a scalar doubles of the distance
    * @throws CardinalityException
    */
-  public double distance(Vector v1, Vector v2) throws CardinalityException;
+  public double distance(Vector v1, Vector v2);
 
 }

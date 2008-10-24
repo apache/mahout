@@ -81,6 +81,7 @@ public final class FastMap<K, V> implements Map<K, V> {
    * @param maxSize max capacity
    * @throws IllegalArgumentException if size is less than 1 or at least half of {@link #MAX_INT_SMALLER_TWIN_PRIME}
    */
+  @SuppressWarnings("unchecked")
   public FastMap(int size, int maxSize) throws IllegalArgumentException {
     if (size < 1) {
       throw new IllegalArgumentException("size must be at least 1");
@@ -292,6 +293,7 @@ public final class FastMap<K, V> implements Map<K, V> {
     rehash(nextTwinPrime(2 * hashSize));
   }
 
+  @SuppressWarnings("unchecked")
   private void rehash(int newHashSize) {
     K[] oldKeys = keys;
     V[] oldValues = values;

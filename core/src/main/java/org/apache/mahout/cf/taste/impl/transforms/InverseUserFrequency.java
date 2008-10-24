@@ -110,9 +110,9 @@ public final class InverseUserFrequency implements PreferenceTransform {
     }
     Map<Item, Double> newIufFactors = new FastMap<Item, Double>(itemPreferenceCounts.size());
     double logFactor = Math.log(logBase);
-    for (Map.Entry<Item, Counters.MutableInteger> entry : itemPreferenceCounts.getEntrySet()) {
+    for (Map.Entry<Item, int[]> entry : itemPreferenceCounts.getEntrySet()) {
       newIufFactors.put(entry.getKey(),
-                        Math.log((double) numUsers / (double) entry.getValue().value) / logFactor);
+                        Math.log((double) numUsers / (double) entry.getValue()[0]) / logFactor);
     }
     iufFactors.set(Collections.unmodifiableMap(newIufFactors));
   }

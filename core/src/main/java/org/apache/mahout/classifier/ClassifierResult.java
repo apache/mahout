@@ -22,12 +22,12 @@ package org.apache.mahout.classifier;
  */
 public class ClassifierResult {
   private String label;
-  private float score;
+  private double score;
 
   public ClassifierResult() {
   }
 
-  public ClassifierResult(String label, float score) {
+  public ClassifierResult(String label, double score) {
     this.label = label;
     this.score = score;
   }
@@ -40,7 +40,7 @@ public class ClassifierResult {
     return label;
   }  
 
-  public float getScore() {
+  public double getScore() {
     return score;
   }
   
@@ -48,7 +48,7 @@ public class ClassifierResult {
     this.label = label;
   }  
 
-  public void setScore(float score) {
+  public void setScore(double score) {
     this.score = score;
   }
 

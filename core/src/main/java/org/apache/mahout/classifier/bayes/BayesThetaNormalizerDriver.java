@@ -20,7 +20,7 @@ package org.apache.mahout.classifier.bayes;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DefaultStringifier;
-import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
@@ -31,7 +31,6 @@ import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.io.IOException;
 
@@ -70,7 +69,7 @@ public class BayesThetaNormalizerDriver {
     
 
     conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(FloatWritable.class);
+    conf.setOutputValueClass(DoubleWritable.class);
     SequenceFileInputFormat.addInputPath(conf, new Path(output + "/trainer-tfIdf/trainer-tfIdf"));
     Path outPath = new Path(output + "/trainer-thetaNormalizer");
     SequenceFileOutputFormat.setOutputPath(conf, outPath);
@@ -92,34 +91,34 @@ public class BayesThetaNormalizerDriver {
     SequenceFileModelReader reader = new SequenceFileModelReader();
 
     Path Sigma_kFiles = new Path(output+"/trainer-weights/Sigma_k/*");
-    Map<String,Float> labelWeightSum= reader.readLabelSums(dfs, Sigma_kFiles, conf);
-    DefaultStringifier<Map<String,Float>> mapStringifier =
-        new DefaultStringifier<Map<String,Float>>(conf, GenericsUtil.getClass(labelWeightSum));
+    Map<String,Double> labelWeightSum = reader.readLabelSums(dfs, Sigma_kFiles, conf);
+    DefaultStringifier<Map<String,Double>> mapStringifier =
+        new DefaultStringifier<Map<String,Double>>(conf, GenericsUtil.getClass(labelWeightSum));
     String labelWeightSumString = mapStringifier.toString(labelWeightSum);
 
     log.info("Sigma_k for Each Label");
-    Map<String,Float> c = mapStringifier.fromString(labelWeightSumString);
+    Map<String,Double> c = mapStringifier.fromString(labelWeightSumString);
     log.info("{}", c);
     conf.set("cnaivebayes.sigma_k", labelWeightSumString);
 
 
     Path sigma_kSigma_jFile = new Path(output+"/trainer-weights/Sigma_kSigma_j/*");
-    Float sigma_jSigma_k = reader.readSigma_jSigma_k(dfs, sigma_kSigma_jFile, conf);
-    DefaultStringifier<Float> floatStringifier = new DefaultStringifier<Float>(conf, Float.class);
-    String sigma_jSigma_kString = floatStringifier.toString(sigma_jSigma_k);
+    double sigma_jSigma_k = reader.readSigma_jSigma_k(dfs, sigma_kSigma_jFile, conf);
+    DefaultStringifier<Double> stringifier = new DefaultStringifier<Double>(conf, Double.class);
+    String sigma_jSigma_kString = stringifier.toString(sigma_jSigma_k);
 
     log.info("Sigma_kSigma_j for each Label and for each Features");
-    Float retSigma_jSigma_k = floatStringifier.fromString(sigma_jSigma_kString);
+    double retSigma_jSigma_k = stringifier.fromString(sigma_jSigma_kString);
     log.info("{}", retSigma_jSigma_k);
     conf.set("cnaivebayes.sigma_jSigma_k", sigma_jSigma_kString);
 
     Path vocabCountFile = new Path(output+"/trainer-tfIdf/trainer-vocabCount/*");
-    Float vocabCount = reader.readVocabCount(dfs, vocabCountFile, conf);
-    String vocabCountString = floatStringifier.toString(vocabCount);
+    double vocabCount = reader.readVocabCount(dfs, vocabCountFile, conf);
+    String vocabCountString = stringifier.toString(vocabCount);
 
     log.info("Vocabulary Count");
     conf.set("cnaivebayes.vocabCount", vocabCountString);
-    Float retvocabCount = floatStringifier.fromString(vocabCountString);
+    double retvocabCount = stringifier.fromString(vocabCountString);
     log.info("{}", retvocabCount);
 
     client.setConf(conf);

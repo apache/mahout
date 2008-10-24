@@ -33,9 +33,9 @@ public class DummyEvaluator implements FitnessEvaluator<DummyCandidate> {
 
   private final Random rng = new Random();
 
-  private static final Map<Integer, Float> evaluations = new HashMap<Integer, Float>();
+  private static final Map<Integer,Double> evaluations = new HashMap<Integer,Double>();
 
-  public static Float getFitness(Integer key) {
+  public static double getFitness(Integer key) {
     if (!evaluations.containsKey(key))
       throw new RuntimeException("Fitness not found");
     return evaluations.get(key);
@@ -51,7 +51,7 @@ public class DummyEvaluator implements FitnessEvaluator<DummyCandidate> {
       throw new RuntimeException("Duplicate Fitness");
     
     double fitness = rng.nextDouble();
-    evaluations.put(candidate.getIndex(), (float) fitness);
+    evaluations.put(candidate.getIndex(), fitness);
     
     return fitness;
   }

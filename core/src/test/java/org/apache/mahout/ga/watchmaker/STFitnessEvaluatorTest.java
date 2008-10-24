@@ -29,9 +29,9 @@ public class STFitnessEvaluatorTest extends TestCase {
   private class STFitnessEvaluatorMock<T> extends STFitnessEvaluator<T> {
     private int nbcalls;
 
-    private List<Float> evaluations;
+    private List<Double> evaluations;
 
-    public void shouldReturn(List<Float> evaluations) {
+    public void shouldReturn(List<Double> evaluations) {
       this.evaluations = evaluations;
     }
 
@@ -41,7 +41,7 @@ public class STFitnessEvaluatorTest extends TestCase {
 
     @Override
     protected void evaluate(List<? extends T> population,
-        List<Float> evaluations) {
+        List<Double> evaluations) {
       nbcalls++;
       evaluations.addAll(this.evaluations);
     }
@@ -67,13 +67,12 @@ public class STFitnessEvaluatorTest extends TestCase {
     int size = 100;
     List<Integer> population = randomInts(size, rng);
 
-    List<Float> evaluations = randomFloats(size, rng);
+    List<Double> evaluations = randomFloats(size, rng);
     mock.shouldReturn(evaluations);
 
     for (int index = 0; index < size; index++) {
       Integer candidate = population.get(index);
-      assertEquals(evaluations.get(index), (float) mock.getFitness(candidate,
-          population));
+      assertEquals(evaluations.get(index), mock.getFitness(candidate, population));
     }
 
     // getFitness() should be called once
@@ -95,7 +94,7 @@ public class STFitnessEvaluatorTest extends TestCase {
     int size = 100;
     List<Integer> population = randomInts(size, rng);
 
-    List<Float> evaluations = randomFloats(size, rng);
+    List<Double> evaluations = randomFloats(size, rng);
     mock.shouldReturn(evaluations);
 
     // call with population A
@@ -119,10 +118,10 @@ public class STFitnessEvaluatorTest extends TestCase {
     return population;
   }
 
-  private List<Float> randomFloats(int size, Random rng) {
-    List<Float> population = new ArrayList<Float>();
+  private List<Double> randomFloats(int size, Random rng) {
+    List<Double> population = new ArrayList<Double>();
     for (int index = 0; index < size; index++)
-      population.add(rng.nextFloat());
+      population.add(rng.nextDouble());
 
     return population;
   }

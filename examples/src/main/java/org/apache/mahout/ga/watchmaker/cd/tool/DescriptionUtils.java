@@ -26,10 +26,10 @@ import java.util.StringTokenizer;
 public class DescriptionUtils {
 
   public static class Range {
-    public final float min;
-    public final float max;
+    public final double min;
+    public final double max;
     
-    public Range(float min, float max) {
+    public Range(double min, double max) {
       this.max = max;
       this.min = min;
     }
@@ -42,7 +42,7 @@ public class DescriptionUtils {
    * @param max
    * @return
    */
-  public static String createNumericalDescription(float min, float max) {
+  public static String createNumericalDescription(double min, double max) {
     return min + "," + max;
   }
 
@@ -67,8 +67,8 @@ public class DescriptionUtils {
 
   public static Range extractNumericalRange(String description) {
     StringTokenizer tokenizer = new StringTokenizer(description, ",");
-    float min = Float.parseFloat(tokenizer.nextToken());
-    float max = Float.parseFloat(tokenizer.nextToken());
+    double min = Double.parseDouble(tokenizer.nextToken());
+    double max = Double.parseDouble(tokenizer.nextToken());
     
     return new Range(min, max);
   }

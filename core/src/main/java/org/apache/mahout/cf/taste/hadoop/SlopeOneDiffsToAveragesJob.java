@@ -19,7 +19,7 @@ package org.apache.mahout.cf.taste.hadoop;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
@@ -59,11 +59,11 @@ public final class SlopeOneDiffsToAveragesJob {
 
     jobConf.setMapperClass(IdentityMapper.class);
     jobConf.setMapOutputKeyClass(ItemItemWritable.class);
-    jobConf.setMapOutputValueClass(FloatWritable.class);
+    jobConf.setMapOutputValueClass(DoubleWritable.class);
 
     jobConf.setReducerClass(SlopeOneDiffsToAveragesReducer.class);
     jobConf.setOutputKeyClass(ItemItemWritable.class);
-    jobConf.setOutputValueClass(FloatWritable.class);
+    jobConf.setOutputValueClass(DoubleWritable.class);
 
     jobConf.setOutputFormat(TextOutputFormat.class);
     FileOutputFormat.setOutputPath(jobConf, outputPathPath);

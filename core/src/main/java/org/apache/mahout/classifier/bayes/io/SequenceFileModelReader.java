@@ -21,7 +21,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.MapFile;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
@@ -62,7 +62,7 @@ public class SequenceFileModelReader {
   public void loadWeightMatrix(Model model, FileSystem fs, Path pathPattern, Configuration conf) throws IOException {
 
     Writable key = new Text();
-    FloatWritable value = new FloatWritable();
+    DoubleWritable value = new DoubleWritable();
 
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
@@ -87,7 +87,7 @@ public class SequenceFileModelReader {
       Configuration conf) throws IOException {
 
     Writable key = new Text();
-    FloatWritable value = new FloatWritable();
+    DoubleWritable value = new DoubleWritable();
     
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
@@ -111,7 +111,7 @@ public class SequenceFileModelReader {
   public Model loadLabelWeights(Model model,FileSystem fs, Path pathPattern,
       Configuration conf) throws IOException {
     Writable key = new Text();
-    FloatWritable value = new FloatWritable();
+    DoubleWritable value = new DoubleWritable();
 
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
@@ -136,7 +136,7 @@ public class SequenceFileModelReader {
   public Model loadThetaNormalizer(Model model,FileSystem fs, Path pathPattern,
       Configuration conf) throws IOException {
     Writable key = new Text();
-    FloatWritable value = new FloatWritable();
+    DoubleWritable value = new DoubleWritable();
 
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
@@ -161,7 +161,7 @@ public class SequenceFileModelReader {
       Configuration conf) throws IOException {
 
     Writable key = new Text();
-    FloatWritable value = new FloatWritable();
+    DoubleWritable value = new DoubleWritable();
 
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
@@ -187,9 +187,9 @@ public class SequenceFileModelReader {
       throws IOException {
 
     Writable key = new Text();
-    FloatWritable value = new FloatWritable();
+    DoubleWritable value = new DoubleWritable();
     MapFile.Writer writer = new MapFile.Writer(conf, fs, "data.mapfile",
-        Text.class, FloatWritable.class);
+        Text.class, DoubleWritable.class);
     MapFile.Writer.setIndexInterval(conf, 3);
 
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
@@ -211,7 +211,7 @@ public class SequenceFileModelReader {
           int idx = keyStr.indexOf(",");
           if (idx != -1) {
             // TODO srowen says data is not used?
-            Map<String, Float> data = new HashMap<String, Float>();
+            Map<String,Double> data = new HashMap<String,Double>();
             data.put(keyStr.substring(0, idx), value.get());
             writer.append(new Text(key.toString()), value);
           }
@@ -222,10 +222,10 @@ public class SequenceFileModelReader {
     // return model;
   }
 
-  public Map<String, Float> readLabelSums(FileSystem fs, Path pathPattern, Configuration conf) throws IOException {
-    Map<String, Float> labelSum = new HashMap<String, Float>();
+  public Map<String,Double> readLabelSums(FileSystem fs, Path pathPattern, Configuration conf) throws IOException {
+    Map<String,Double> labelSum = new HashMap<String,Double>();
     Writable key = new Text();
-    FloatWritable value = new FloatWritable();
+    DoubleWritable value = new DoubleWritable();
 
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
    
@@ -245,11 +245,11 @@ public class SequenceFileModelReader {
     return labelSum;
   }
 
-  public Map<String, Float> readLabelDocumentCounts(FileSystem fs, Path pathPattern, Configuration conf)
+  public Map<String,Double> readLabelDocumentCounts(FileSystem fs, Path pathPattern, Configuration conf)
       throws IOException {
-    Map<String, Float> labelDocumentCounts = new HashMap<String, Float>();
+    Map<String,Double> labelDocumentCounts = new HashMap<String,Double>();
     Writable key = new Text();
-    FloatWritable value = new FloatWritable();
+    DoubleWritable value = new DoubleWritable();
 
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
@@ -268,11 +268,11 @@ public class SequenceFileModelReader {
     return labelDocumentCounts;
   }
 
-  public Float readSigma_jSigma_k(FileSystem fs, Path pathPattern,
+  public double readSigma_jSigma_k(FileSystem fs, Path pathPattern,
       Configuration conf) throws IOException {
-    Map<String, Float> weightSum = new HashMap<String, Float>();
+    Map<String,Double> weightSum = new HashMap<String,Double>();
     Writable key = new Text();
-    FloatWritable value = new FloatWritable();
+    DoubleWritable value = new DoubleWritable();
 
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
@@ -293,11 +293,11 @@ public class SequenceFileModelReader {
     return weightSum.get("*");
   }
 
-  public Float readVocabCount(FileSystem fs, Path pathPattern,
+  public double readVocabCount(FileSystem fs, Path pathPattern,
       Configuration conf) throws IOException {
-    Map<String, Float> weightSum = new HashMap<String, Float>();
+    Map<String,Double> weightSum = new HashMap<String,Double>();
     Writable key = new Text();
-    FloatWritable value = new FloatWritable();
+    DoubleWritable value = new DoubleWritable();
 
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {

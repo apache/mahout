@@ -17,7 +17,7 @@
 
 package org.apache.mahout.classifier.bayes;
 
-import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -26,41 +26,28 @@ import org.apache.hadoop.mapred.Reporter;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.Map;
 
 /**
  * Can also be used as a local Combiner beacuse only two values should be there
  * inside the values
  */
 public class BayesThetaNormalizerReducer extends MapReduceBase implements
-    Reducer<Text, FloatWritable, Text, FloatWritable> {
-
-  private Map<String, Float> labelWeightSum = null;
-
-  private String labelWeightSumString = " ";
-
-  private Float sigma_jSigma_k = 0.0f;
-
-  private String sigma_jSigma_kString = " ";
-
-  private Float vocabCount = 0.0f;
-
-  private String vocabCountString = " ";
+    Reducer<Text, DoubleWritable, Text, DoubleWritable> {
   
-  public void reduce(Text key, Iterator<FloatWritable> values,
-      OutputCollector<Text, FloatWritable> output, Reporter reporter)
+  public void reduce(Text key, Iterator<DoubleWritable> values,
+      OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {
     // Key is label,word, value is the number of times we've seen this label
     // word per local node. Output is the same
     
     //String token = key.toString();
 
-    float weightSumPerLabel = 0.0f;
+    double weightSumPerLabel = 0.0;
 
     while (values.hasNext()) {
       weightSumPerLabel += values.next().get();
     }
-    output.collect(key, new FloatWritable(weightSumPerLabel));
+    output.collect(key, new DoubleWritable(weightSumPerLabel));
 
   }
 

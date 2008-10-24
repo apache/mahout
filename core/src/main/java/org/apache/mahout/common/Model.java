@@ -35,59 +35,48 @@ public abstract class Model {
 
   private static final Logger log = LoggerFactory.getLogger(Model.class);
 
-  public static final float DEFAULT_PROBABILITY = 0.5f;
+  public static final double DEFAULT_PROBABILITY = 0.5;
 
-  protected final List<Map<Integer, Float>> featureLabelWeights = new ArrayList<Map<Integer, Float>>();
+  protected final List<Map<Integer, Double>> featureLabelWeights = new ArrayList<Map<Integer, Double>>();
 
   protected final Map<String, Integer> featureList = new FastMap<String, Integer>();
 
   protected final Map<String, Integer> labelList = new HashMap<String, Integer>();
 
-  protected final List<Float> sumFeatureWeight = new ArrayList<Float>();
+  protected final List<Double> sumFeatureWeight = new ArrayList<Double>();
 
-  protected final Map<Integer, Float> sumLabelWeight = new HashMap<Integer, Float>();
+  protected final Map<Integer, Double> sumLabelWeight = new HashMap<Integer, Double>();
 
-  protected final Map<Integer, Float> thetaNormalizer = new HashMap<Integer, Float>();
+  protected final Map<Integer, Double> thetaNormalizer = new HashMap<Integer, Double>();
 
-  protected float sigma_jSigma_k = 0.0f;
+  protected double sigma_jSigma_k = 0.0;
 
-  protected final float alpha_i = 1.0f; // alpha_i can be improved upon for increased smoothing
+  protected final double alpha_i = 1.0; // alpha_i can be improved upon for increased smoothing
   
-  protected abstract float FeatureWeight(Integer label, Integer feature);
+  protected abstract double FeatureWeight(Integer label, Integer feature);
   
-  protected abstract float getWeight(Integer label, Integer feature);
+  protected abstract double getWeight(Integer label, Integer feature);
 
-  protected abstract float getWeightUnprocessed(Integer label, Integer feature);
+  protected abstract double getWeightUnprocessed(Integer label, Integer feature);
   
   public abstract void InitializeNormalizer();
 
   public abstract void GenerateModel();
   
-  protected float getSumLabelWeight(Integer label) {
-    Float numSeen = sumLabelWeight.get(label);
-    if (numSeen != null) {
-      return numSeen;
-    } else {
-      return 0.0f;
-    }
+  protected double getSumLabelWeight(Integer label) {
+    return nullToZero(sumLabelWeight.get(label));
   }
 
-  protected float getThetaNormalizer(Integer label) {
-    Float numSeen = thetaNormalizer.get(label);
-    if (numSeen != null) {
-      return numSeen;
-    } else {
-      return 0.0f;
-    }
+  protected double getThetaNormalizer(Integer label) {
+    return nullToZero(thetaNormalizer.get(label));
   }
 
-  protected float getSumFeatureWeight(Integer feature) {
-    Float numSeen = sumFeatureWeight.get(feature);
-    if (numSeen != null) {
-      return numSeen;
-    } else {
-      return 0.0f;
-    }
+  protected double getSumFeatureWeight(Integer feature) {
+    return nullToZero(sumFeatureWeight.get(feature));
+  }
+
+  private static double nullToZero(Double value) {
+    return value == null ? 0.0 : value;
   }
 
   protected Integer getLabel(String label) {
@@ -107,32 +96,32 @@ public abstract class Model {
     return featureList.get(feature);
   }
 
-  protected void setWeight(String labelString, String featureString, Float weight) {
+  protected void setWeight(String labelString, String featureString, Double weight) {
     Integer feature = getFeature(featureString);
     Integer label = getLabel(labelString);
     setWeight(label, feature, weight);
   }
 
-  protected void setWeight(Integer label, Integer feature, Float weight) {
+  protected void setWeight(Integer label, Integer feature, Double weight) {
     if (featureLabelWeights.size() <= feature) {
       throw new IllegalStateException("This should not happen");
     }
     featureLabelWeights.get(feature).put(label, weight);
   }
 
-  protected void setSumFeatureWeight(Integer feature, float sum) {
+  protected void setSumFeatureWeight(Integer feature, double sum) {
     if (sumFeatureWeight.size() != feature)
       throw new IllegalStateException("This should not happen");
     sumFeatureWeight.add(feature, sum);
   }
 
-  protected void setSumLabelWeight(Integer label, float sum) {
+  protected void setSumLabelWeight(Integer label, double sum) {
     if (sumLabelWeight.size() != label)
       throw new IllegalStateException("This should not happen");
     sumLabelWeight.put(label, sum);
   }
 
-  protected void setThetaNormalizer(Integer label, float sum) {
+  protected void setThetaNormalizer(Integer label, double sum) {
     thetaNormalizer.put(label, sum);
   }
 
@@ -140,27 +129,26 @@ public abstract class Model {
     log.info("{}", featureList.size());
 
     for (int i = 0; i < featureList.size(); i++)
-      featureLabelWeights.add(new HashMap<Integer, Float>(1));
+      featureLabelWeights.add(new HashMap<Integer,Double>(1));
   }
 
-  public void setSigma_jSigma_k(float sigma_jSigma_k) {
+  public void setSigma_jSigma_k(double sigma_jSigma_k) {
     this.sigma_jSigma_k = sigma_jSigma_k;
   }
 
-  public void loadFeatureWeight(String labelString, String featureString,
-      float weight) {
+  public void loadFeatureWeight(String labelString, String featureString, double weight) {
     setWeight(labelString, featureString, weight);
   }
 
-  public void setSumFeatureWeight(String feature, float sum) {
+  public void setSumFeatureWeight(String feature, double sum) {
     setSumFeatureWeight(getFeature(feature), sum);
   }
 
-  public void setSumLabelWeight(String label, float sum) {
+  public void setSumLabelWeight(String label, double sum) {
     setSumLabelWeight(getLabel(label), sum);
   }
 
-  public void setThetaNormalizer(String label, float sum) {
+  public void setThetaNormalizer(String label, double sum) {
     setThetaNormalizer(getLabel(label), sum);
   }
 
@@ -171,9 +159,9 @@ public abstract class Model {
    * @param featureString The feature to calc. the prob. for
    * @return The weighted probability
    */
-  public float FeatureWeight(String labelString, String featureString) {
+  public double FeatureWeight(String labelString, String featureString) {
     if (featureList.containsKey(featureString) == false)
-      return 0.0f;
+      return 0.0;
     Integer feature = getFeature(featureString);
     Integer label = getLabel(labelString);
     return FeatureWeight(label, feature);

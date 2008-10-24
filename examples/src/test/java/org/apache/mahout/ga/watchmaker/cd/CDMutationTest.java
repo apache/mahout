@@ -50,7 +50,7 @@ public class CDMutationTest extends TestCase {
       double range = rng.nextDouble();
       int k = rng.nextInt(1000);
       CDMutation mutation = new CDMutation(1.0, range, k);
-      CDRule rule = new CDRule(0f, rng);
+      CDRule rule = new CDRule(0.0, rng);
 
       CDRule mutated = mutation.mutate(new CDRule(rule), rng);
 

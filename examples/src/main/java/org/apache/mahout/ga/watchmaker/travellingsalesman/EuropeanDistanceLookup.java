@@ -309,10 +309,6 @@ public final class EuropeanDistanceLookup implements DistanceLookup
         DISTANCES.put("Vienna", vienna);
     }
 
-
-    /**
-     * {@inheritDoc}
-     */
     public List<String> getKnownCities()
     {
         List<String> cities = new ArrayList<String>(DISTANCES.keySet());
@@ -320,10 +316,6 @@ public final class EuropeanDistanceLookup implements DistanceLookup
         return cities;
     }
 
-
-    /**
-     * {@inheritDoc}
-     */
     public int getDistance(String startingCity, String destinationCity)
     {
         return DISTANCES.get(startingCity).get(destinationCity);

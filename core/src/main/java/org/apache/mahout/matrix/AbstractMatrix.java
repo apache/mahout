@@ -31,123 +31,38 @@ public abstract class AbstractMatrix implements Matrix {
   // index into int[2] for row value
   public static final int ROW = 0;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#asFormatString()
-   */
   public abstract WritableComparable asWritableComparable();
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#asFormatString()
-   */
   public abstract String asFormatString();
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#assignColumn(int,
-   *      org.apache.mahout.matrix.Vector)
-   */
-  public abstract Matrix assignColumn(int column, Vector other)
-      throws CardinalityException;
+  public abstract Matrix assignColumn(int column, Vector other);
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#assignRow(int,
-   *      org.apache.mahout.matrix.Vector)
-   */
-  public abstract Matrix assignRow(int row, Vector other)
-      throws CardinalityException;
+  public abstract Matrix assignRow(int row, Vector other);
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#cardinality()
-   */
   public abstract int[] cardinality();
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#copy()
-   */
   public abstract Matrix copy();
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#getColumn(int)
-   */
-  public abstract Vector getColumn(int column) throws IndexException;
+  public abstract Vector getColumn(int column);
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#getQuick(int, int)
-   */
   public abstract double getQuick(int row, int column);
 
-  public abstract Vector getRow(int row) throws IndexException;
+  public abstract Vector getRow(int row);
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#haveSharedCells(org.apache.mahout.matrix.Matrix)
-   */
   public abstract boolean haveSharedCells(Matrix other);
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#like()
-   */
   public abstract Matrix like();
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#like(int, int)
-   */
   public abstract Matrix like(int rows, int columns);
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#setQuick(int, int, double)
-   */
   public abstract void setQuick(int row, int column, double value);
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#size()
-   */
   public abstract int[] size();
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#toArray()
-   */
   public abstract double[][] toArray();
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#viewPart(int[], int[])
-   */
-  public abstract Matrix viewPart(int[] offset, int[] length)
-      throws CardinalityException, IndexException;
+  public abstract Matrix viewPart(int[] offset, int[] length);
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#assign(double)
-   */
   public Matrix assign(double value) {
     int[] c = cardinality();
     for (int row = 0; row < c[ROW]; row++)
@@ -156,12 +71,7 @@ public abstract class AbstractMatrix implements Matrix {
     return this;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#assign(double[][])
-   */
-  public Matrix assign(double[][] values) throws CardinalityException {
+  public Matrix assign(double[][] values) {
     int[] c = cardinality();
     if (c[ROW] != values.length)
       throw new CardinalityException();
@@ -174,14 +84,7 @@ public abstract class AbstractMatrix implements Matrix {
     return this;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#assign(org.apache.mahout.matrix.Matrix,
-   *      org.apache.mahout.function.BinaryFunction)
-   */
-  public Matrix assign(Matrix other, BinaryFunction function)
-      throws CardinalityException {
+  public Matrix assign(Matrix other, BinaryFunction function) {
     int[] c = cardinality();
     int[] o = other.cardinality();
     if (c[ROW] != o[ROW] || c[COL] != o[COL])
@@ -193,12 +96,7 @@ public abstract class AbstractMatrix implements Matrix {
     return this;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#assign(org.apache.mahout.matrix.Matrix)
-   */
-  public Matrix assign(Matrix other) throws CardinalityException {
+  public Matrix assign(Matrix other) {
     int[] c = cardinality();
     int[] o = other.cardinality();
     if (c[ROW] != o[ROW] || c[COL] != o[COL])
@@ -209,11 +107,6 @@ public abstract class AbstractMatrix implements Matrix {
     return this;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#assign(org.apache.mahout.function.UnaryFunction)
-   */
   public Matrix assign(UnaryFunction function) {
     int[] c = cardinality();
     for (int row = 0; row < c[ROW]; row++)
@@ -222,12 +115,7 @@ public abstract class AbstractMatrix implements Matrix {
     return this;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#determinant()
-   */
-  public double determinant() throws CardinalityException {
+  public double determinant() {
     int[] card = cardinality();
     int rowSize = card[ROW];
     int columnSize = card[COL];
@@ -262,11 +150,6 @@ public abstract class AbstractMatrix implements Matrix {
 
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#divide(double)
-   */
   public Matrix divide(double x) {
     Matrix result = copy();
     int[] c = cardinality();
@@ -276,24 +159,14 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#get(int, int)
-   */
-  public double get(int row, int column) throws IndexException {
+  public double get(int row, int column) {
     int[] c = cardinality();
     if (row < 0 || column < 0 || row >= c[ROW] || column >= c[COL])
       throw new IndexException();
     return getQuick(row, column);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#minus(org.apache.mahout.matrix.Matrix)
-   */
-  public Matrix minus(Matrix other) throws CardinalityException {
+  public Matrix minus(Matrix other) {
     int[] c = cardinality();
     int[] o = other.cardinality();
     if (c[ROW] != o[ROW] || c[COL] != o[COL])
@@ -306,11 +179,6 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#plus(double)
-   */
   public Matrix plus(double x) {
     Matrix result = copy();
     int[] c = cardinality();
@@ -320,12 +188,7 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#plus(org.apache.mahout.matrix.Matrix)
-   */
-  public Matrix plus(Matrix other) throws CardinalityException {
+  public Matrix plus(Matrix other) {
     int[] c = cardinality();
     int[] o = other.cardinality();
     if (c[ROW] != o[ROW] || c[COL] != o[COL])
@@ -338,20 +201,14 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#set(int, int, double)
-   */
-  public void set(int row, int column, double value) throws IndexException {
+  public void set(int row, int column, double value) {
     int[] c = cardinality();
     if (row < 0 || column < 0 || row >= c[ROW] || column >= c[COL])
       throw new IndexException();
     setQuick(row, column, value);
   }
 
-  public void set(int row, double[] data) throws IndexException,
-      CardinalityException {
+  public void set(int row, double[] data) {
     int[] c = cardinality();
     if (c[COL] < data.length)
       throw new CardinalityException();
@@ -362,11 +219,6 @@ public abstract class AbstractMatrix implements Matrix {
       setQuick(row, i, data[i]);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#times(double)
-   */
   public Matrix times(double x) {
     Matrix result = copy();
     int[] c = cardinality();
@@ -376,12 +228,7 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#times(org.apache.mahout.matrix.Matrix)
-   */
-  public Matrix times(Matrix other) throws CardinalityException {
+  public Matrix times(Matrix other) {
     int[] c = cardinality();
     int[] o = other.cardinality();
     if (c[COL] != o[ROW])
@@ -397,11 +244,6 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#transpose()
-   */
   public Matrix transpose() {
     int[] card = cardinality();
     Matrix result = like(card[COL], card[ROW]);
@@ -411,11 +253,6 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Matrix#zSum()
-   */
   public double zSum() {
     double result = 0;
     int[] c = cardinality();

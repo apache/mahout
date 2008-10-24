@@ -39,7 +39,7 @@ import java.util.Collection;
 public final class AveragingPreferenceInferrer implements PreferenceInferrer {
 
   private static final Retriever<User, Double> RETRIEVER = new PrefRetriever();
-  private static final Double ZERO = new Double(0.0);
+  private static final Double ZERO = 0.0;
 
   private final Cache<User, Double> averagePreferenceValue;
 

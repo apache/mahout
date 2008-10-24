@@ -27,7 +27,7 @@ import java.util.List;
  */
 public abstract class STFitnessEvaluator<T> implements FitnessEvaluator<T> {
 
-  private final List<Float> evaluations = new ArrayList<Float>();
+  private final List<Double> evaluations = new ArrayList<Double>();
 
   private List<? extends T> population;
 
@@ -46,14 +46,7 @@ public abstract class STFitnessEvaluator<T> implements FitnessEvaluator<T> {
     return evaluations.get(index);
   }
 
-  /**
-   * 
-   * @param population
-   * @param evaluations
-   * @return
-   */
-  protected abstract void evaluate(List<? extends T> population,
-      List<Float> evaluations);
+  protected abstract void evaluate(List<? extends T> population, List<Double> evaluations);
 
   public abstract boolean isNatural();
 

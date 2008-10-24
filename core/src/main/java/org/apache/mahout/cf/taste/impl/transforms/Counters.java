@@ -26,47 +26,35 @@ import java.util.Map;
  */
 final class Counters<T> {
 
-  private final Map<T, MutableInteger> counts = new FastMap<T, MutableInteger>();
+  private final Map<T, int[]> counts = new FastMap<T, int[]>();
 
   void increment(T key) {
-    MutableInteger count = counts.get(key);
+    int[] count = counts.get(key);
     if (count == null) {
-      MutableInteger newCount = new MutableInteger();
-      newCount.value = 1;
+      int[] newCount = new int[1];
+      newCount[0] = 1;
       counts.put(key, newCount);
     } else {
-      count.value++;
+      count[0]++;
     }
   }
 
   int getCount(T key) {
-    MutableInteger count = counts.get(key);
-    return count == null ? 0 : count.value;
+    int[] count = counts.get(key);
+    return count == null ? 0 : count[0];
   }
 
   int size() {
     return counts.size();
   }
 
-  Iterable<Map.Entry<T, MutableInteger>> getEntrySet() {
+  Iterable<Map.Entry<T, int[]>> getEntrySet() {
     return counts.entrySet();
   }
 
   @Override
   public String toString() {
     return "Counters[" + counts + ']';
-  }
-
-  static final class MutableInteger {
-
-    // This is intentionally package-private in order to allow access from the containing Counters class
-    // without making the compiler generate a synthetic accessor
-    int value;
-
-    @Override
-    public String toString() {
-      return "MutableInteger[" + value + ']';
-    }
   }
 
 }

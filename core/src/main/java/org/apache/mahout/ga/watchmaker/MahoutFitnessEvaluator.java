@@ -35,7 +35,7 @@ public class MahoutFitnessEvaluator<T> extends STFitnessEvaluator<T> {
   }
 
   @Override
-  protected void evaluate(List<? extends T> population, List<Float> evaluations) {
+  protected void evaluate(List<? extends T> population, List<Double> evaluations) {
     try {
       MahoutEvaluator.evaluate(evaluator, population, evaluations);
     } catch (IOException e) {

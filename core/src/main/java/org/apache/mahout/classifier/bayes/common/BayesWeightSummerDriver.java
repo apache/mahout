@@ -19,7 +19,7 @@ package org.apache.mahout.classifier.bayes.common;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
@@ -37,7 +37,8 @@ public class BayesWeightSummerDriver {
    * Takes in two arguments:
    * <ol>
    * <li>The input {@link org.apache.hadoop.fs.Path} where the input documents live</li>
-   * <li>The output {@link org.apache.hadoop.fs.Path} where to write the the interim files as a {@link org.apache.hadoop.io.SequenceFile}</li>
+   * <li>The output {@link org.apache.hadoop.fs.Path} where to write the the interim files as a
+   *  {@link org.apache.hadoop.io.SequenceFile}</li>
    * </ol>
    * @param args The args
    */
@@ -60,7 +61,7 @@ public class BayesWeightSummerDriver {
     
 
     conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(FloatWritable.class);
+    conf.setOutputValueClass(DoubleWritable.class);
     
     SequenceFileInputFormat.addInputPath(conf, new Path(output + "/trainer-tfIdf/trainer-tfIdf"));
     Path outPath = new Path(output + "/trainer-weights");

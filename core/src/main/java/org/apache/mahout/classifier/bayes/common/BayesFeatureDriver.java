@@ -20,7 +20,7 @@ package org.apache.mahout.classifier.bayes.common;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DefaultStringifier;
-import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
@@ -65,7 +65,7 @@ public class BayesFeatureDriver {
     JobConf conf = new JobConf(BayesFeatureDriver.class);
 
     conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(FloatWritable.class);
+    conf.setOutputValueClass(DoubleWritable.class);
 
     FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(output);
@@ -90,8 +90,7 @@ public class BayesFeatureDriver {
     DefaultStringifier<Integer> intStringifier = new DefaultStringifier<Integer>(conf, Integer.class);
     String gramSizeString = intStringifier.toString(gramSize);
 
-    Integer retGramSize = intStringifier.fromString(gramSizeString);
-    log.info("{}", retGramSize);
+    log.info("{}", intStringifier.fromString(gramSizeString));
     conf.set("bayes.gramSize", gramSizeString);
 
     client.setConf(conf);

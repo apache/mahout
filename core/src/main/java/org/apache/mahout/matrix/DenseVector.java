@@ -142,8 +142,7 @@ public class DenseVector extends AbstractVector {
   }
 
   @Override
-  public Vector viewPart(int offset, int length) throws CardinalityException,
-      IndexException {
+  public Vector viewPart(int offset, int length) {
     if (length > values.length)
       throw new CardinalityException();
     if (offset < 0 || offset + length > values.length)

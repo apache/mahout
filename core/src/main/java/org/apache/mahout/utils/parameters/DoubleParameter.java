@@ -21,7 +21,7 @@ import org.apache.hadoop.mapred.JobConf;
 
 public class DoubleParameter extends AbstractParameter<Double> {
 
-  public DoubleParameter(String prefix, String name, JobConf jobConf, Double defaultValue, String description) {
+  public DoubleParameter(String prefix, String name, JobConf jobConf, double defaultValue, String description) {
     super(Double.class, prefix, name, jobConf, defaultValue, description);
   }
 
