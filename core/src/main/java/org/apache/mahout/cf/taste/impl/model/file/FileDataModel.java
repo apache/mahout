@@ -52,6 +52,11 @@ import java.util.concurrent.locks.ReentrantLock;
  * <p>This class is not intended for use with very large amounts of data (over, say, a million rows). For
  * that, a JDBC-backed {@link DataModel} and a database are more appropriate.
  * The file will be periodically reloaded if a change is detected.</p>
+ *
+ * <p>It is possible and likely useful to subclass this class and customize its behavior to accommodate
+ * application-specific needs and input formats. See {@link #processLine(String, Map)},
+ * {@link #buildItem(String)}, {@link #buildUser(String, List)}
+ * and {@link #buildPreference(User, Item, double)}.</p>
  */
 public class FileDataModel implements DataModel {
 
@@ -118,7 +123,24 @@ public class FileDataModel implements DataModel {
     }
   }
 
-  private void processLine(String line, Map<String, List<Preference>> data) {
+  /**
+   * <p>Reads one line from the input file and adds the data to a {@link Map} data structure
+   * which maps user IDs to preferences. This assumes that each line of the input file
+   * corresponds to one preference. After reading a line and determining which user and item
+   * the preference pertains to, the method should look to see if the data contains a mapping
+   * for the user ID already, and if not, add an empty {@link List} of {@link Preference}s to
+   * the data.</p>
+   *
+   * <p>The method should use {@link #buildItem(String)} to create an {@link Item} representing
+   * the item in question if needed, and use {@link #buildPreference(User, Item, double)} to
+   * build {@link Preference} objects as needed.</p>
+   *
+   * @param line line from input data file
+   * @param data all data read so far, as a mapping from user IDs to preferences
+   * @see #buildPreference(User, Item, double)
+   * @see #buildItem(String)
+   */
+  protected void processLine(String line, Map<String, List<Preference>> data) {
     int commaOne = line.indexOf((int) ',');
     int commaTwo = line.indexOf((int) ',', commaOne + 1);
     if (commaOne < 0 || commaTwo < 0) {
@@ -208,6 +230,9 @@ public class FileDataModel implements DataModel {
 
   /**
    * Subclasses may override to return a different {@link User} implementation.
+   * The default implemenation always builds a new {@link GenericUser}. This may not
+   * be desirable; it may be better to return an existing {@link User} object
+   * in some applications rather than create a new object.
    *
    * @param id user ID
    * @param prefs user preferences
@@ -219,6 +244,9 @@ public class FileDataModel implements DataModel {
 
   /**
    * Subclasses may override to return a different {@link Item} implementation.
+   * The default implementation always builds a new {@link GenericItem}; likewise
+   * it may be better here to return an existing object encapsulating the item
+   * instead.
    *
    * @param id item ID
    * @return {@link GenericItem} by default
@@ -229,6 +257,7 @@ public class FileDataModel implements DataModel {
 
   /**
    * Subclasses may override to return a different {@link Preference} implementation.
+   * The default implementation builds a new {@link GenericPreference}.
    *
    * @param user {@link User} who expresses the preference
    * @param item preferred {@link Item}
