@@ -98,7 +98,6 @@ public class BayesModel extends Model {
           Integer labelInt = label;
           double D_ij = getWeightUnprocessed(labelInt, featureInt);
           double sumLabelWeight = getSumLabelWeight(labelInt);
-          // TODO srowen says sigma_j is unused
           //double sigma_j = getSumFeatureWeight(featureInt);
 
           double numerator = D_ij + alpha_i;

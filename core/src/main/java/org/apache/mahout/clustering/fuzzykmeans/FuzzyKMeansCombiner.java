@@ -36,10 +36,9 @@ public class FuzzyKMeansCombiner extends MapReduceBase implements
     SoftCluster cluster = SoftCluster.decodeCluster(key.toString());
     while (values.hasNext()) {
       String pointInfo = values.next().toString();
-      double pointProb = Double.parseDouble(pointInfo.substring(0, pointInfo
-          .indexOf(":")));
+      double pointProb = Double.parseDouble(pointInfo.substring(0, pointInfo.indexOf(':')));
 
-      String encodedVector = pointInfo.substring(pointInfo.indexOf(":") + 1);
+      String encodedVector = pointInfo.substring(pointInfo.indexOf(':') + 1);
       cluster.addPoint(AbstractVector.decodeVector(encodedVector), pointProb
           * SoftCluster.getM());
     }

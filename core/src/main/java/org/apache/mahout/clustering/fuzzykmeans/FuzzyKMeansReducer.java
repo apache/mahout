@@ -47,16 +47,14 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
         double partialSumPtProb = Double.parseDouble(value.substring(0, ix));
         Vector total = AbstractVector.decodeVector(value.substring(ix + 2));
         cluster.addPoints(partialSumPtProb, total);
-      } catch (Exception e) { 
+      } catch (RuntimeException e) {
         // TODO srowen thinks this should be replaced with a more specific catch, or not use exceptions to control flow
         // Escaped from Combiner. So, let's do that processing too:
         log.info("Escaped from combiner: Key: {} Value: {}", key, value);
-        double pointProb = Double.parseDouble(value.substring(0, value
-            .indexOf(":")));
+        double pointProb = Double.parseDouble(value.substring(0, value.indexOf(':')));
 
-        String encodedVector = value.substring(value.indexOf(":") + 1);
-        cluster.addPoint(AbstractVector.decodeVector(encodedVector), pointProb
-            * SoftCluster.getM());
+        String encodedVector = value.substring(value.indexOf(':') + 1);
+        cluster.addPoint(AbstractVector.decodeVector(encodedVector), pointProb * SoftCluster.getM());
       }
     }
 

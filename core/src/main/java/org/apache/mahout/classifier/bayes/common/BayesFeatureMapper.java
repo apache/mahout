@@ -74,7 +74,6 @@ public class BayesFeatureMapper extends MapReduceBase implements
     StringBuilder builder = new StringBuilder(label);
     builder.ensureCapacity(32);// make sure we have a reasonably size buffer to
                                // begin with
-    // TODO: srowen says this var isn't used right now
     //List<String> previousN_1Grams  = Model.generateNGramsWithoutLabel(line, keyLen);
     
     double lengthNormalisation = 0.0;

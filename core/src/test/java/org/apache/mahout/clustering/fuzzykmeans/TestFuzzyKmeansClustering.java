@@ -89,9 +89,9 @@ public class TestFuzzyKmeansClustering extends TestCase {
 
     DistanceMeasure measure = (DistanceMeasure) cl.newInstance();
     SoftCluster.config(measure, threshold);
-    boolean converged = false;
-    // TODO srowen notes that converged is always false?
-    for (int iter = 0; !converged && iter < numIter; iter++) {
+    //boolean converged = false;
+    //for (int iter = 0; !converged && iter < numIter; iter++) {
+    for (int iter = 0; iter < numIter; iter++) {
       iterateReference(points, clusterList, measure);
     }
     computeCluster(points, clusterList, measure, pointClusterInfo);
@@ -297,16 +297,15 @@ public class TestFuzzyKmeansClustering extends TestCase {
 
       for (String key : mapCollector.getKeys()) {
         //SoftCluster cluster = SoftCluster.decodeCluster(key);
-        // TODO srowen says cluster is not used?
         List<Text> values = mapCollector.getValue(key);
 
         for (Text value : values) {
           String pointInfo = value.toString();
           double pointProb = Double.parseDouble(pointInfo.substring(0,
-              pointInfo.indexOf(":")));
+              pointInfo.indexOf(':')));
 
           String encodedVector = pointInfo
-              .substring(pointInfo.indexOf(":") + 1);
+              .substring(pointInfo.indexOf(':') + 1);
 
           Double val = pointTotalProbMap.get(encodedVector);
           double probVal = 0.0;

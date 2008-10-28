@@ -73,7 +73,7 @@ public class BayesFileFormatter {
     Writer writer = new OutputStreamWriter(new FileOutputStream(outputFile),
         charset);
     inputDir.listFiles(new FileProcessor(label, analyzer, charset, writer));
-    // TODO srowen asks why call this when return value isn't used?
+    // listFiles() is called here as a way to recursively visit files, actually
     writer.close();
 
   }
@@ -91,15 +91,14 @@ public class BayesFileFormatter {
    */
   public static void format(String label, Analyzer analyzer, File input,
       Charset charset, File outDir) throws IOException {
-    if (input.isDirectory() == false) {
+    if (input.isDirectory()) {
+      input.listFiles(new FileProcessor(label, analyzer, charset, outDir));
+    } else {
       Writer writer = new OutputStreamWriter(new FileOutputStream(new File(
           outDir, input.getName())), charset);
       writeFile(label, analyzer, new InputStreamReader(new FileInputStream(
           input), charset), writer);
       writer.close();
-    } else {
-      input.listFiles(new FileProcessor(label, analyzer, charset, outDir));
-      // TODO srowen asks why call this when return value isn't used?
     }
   }
 
@@ -176,7 +175,6 @@ public class BayesFileFormatter {
         }
       } else {
         file.listFiles(this);
-        // TODO srowen asks why call this when return value isn't used?
       }
       return false;
     }
@@ -198,8 +196,7 @@ public class BayesFileFormatter {
     writer.write('\t'); // edit: Inorder to match Hadoop standard
     // TextInputFormat
     Token token = new Token();
-    CharArraySet seen = new CharArraySet(256, false);
-    // TODO srowen wonders that 'seen' is updated but not used?
+    //CharArraySet seen = new CharArraySet(256, false);
     //long numTokens = 0;
     while ((token = ts.next(token)) != null) {
       char[] termBuffer = token.termBuffer();
@@ -209,7 +206,7 @@ public class BayesFileFormatter {
       writer.write(' ');
       char[] tmp = new char[termLen];
       System.arraycopy(termBuffer, 0, tmp, 0, termLen);
-      seen.add(tmp);// do this b/c CharArraySet doesn't allow offsets
+      //seen.add(tmp);// do this b/c CharArraySet doesn't allow offsets
     }
     ///numTokens++;
 

@@ -266,7 +266,7 @@ public class TestKmeansClustering extends TestCase {
         List<Text> values = collector2.getValue(key);
         assertEquals("too many values", 1, values.size());
         String value = values.get(0).toString();
-        int ix = value.indexOf(",");
+        int ix = value.indexOf(',');
         count += Integer.parseInt(value.substring(0, ix));
         total = total
             .plus(AbstractVector.decodeVector(value.substring(ix + 2)));

@@ -46,7 +46,7 @@ public class BayesWeightSummerMapper extends MapReduceBase implements
       throws IOException {
 
     String labelFeaturePair = key.toString();
-    int i = labelFeaturePair.indexOf(",");
+    int i = labelFeaturePair.indexOf(',');
     
     String label = labelFeaturePair.substring(0,i);
     String feature = labelFeaturePair.substring(i+1);

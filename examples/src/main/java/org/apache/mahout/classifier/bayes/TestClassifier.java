@@ -148,16 +148,15 @@ public class TestClassifier {
     if (cmdLine.hasOption(encodingOpt)) {
       encoding = (String) cmdLine.getValue(encodingOpt);
     }
-    Analyzer analyzer = null;
-    if (cmdLine.hasOption(analyzerOpt)) {
-      String className = (String) cmdLine.getValue(analyzerOpt);
-      Class clazz = Class.forName(className);
-      analyzer = (Analyzer) clazz.newInstance();
-    }
-    if (analyzer == null) {
-      analyzer = new StandardAnalyzer();
-    }
-    // TODO srowen says analyzer is never used?
+    //Analyzer analyzer = null;
+    //if (cmdLine.hasOption(analyzerOpt)) {
+      //String className = (String) cmdLine.getValue(analyzerOpt);
+      //Class clazz = Class.forName(className);
+      //analyzer = (Analyzer) clazz.newInstance();
+    //}
+    //if (analyzer == null) {
+    //  analyzer = new StandardAnalyzer();
+    //}
     int gramSize = 1;
     if (cmdLine.hasOption(gramSizeOpt)) {
       gramSize = Integer.parseInt((String) cmdLine

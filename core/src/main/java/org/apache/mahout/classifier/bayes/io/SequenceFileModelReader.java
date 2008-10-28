@@ -74,7 +74,7 @@ public class SequenceFileModelReader {
       while (reader.next(key, value)) {
         String keyStr = key.toString();
 
-        int idx = keyStr.indexOf(",");
+        int idx = keyStr.indexOf(',');
         if (idx != -1) {
           model.loadFeatureWeight(keyStr.substring(0, idx), keyStr.substring(idx + 1), value.get());
         }
@@ -200,19 +200,11 @@ public class SequenceFileModelReader {
       // the key is either _label_ or label,feature
       while (reader.next(key, value)) {
         String keyStr = key.toString();
-        // TODO srowen says we should probably collapse these empty branches?
-        if (keyStr.startsWith("_")) {
-
-        } else if (keyStr.startsWith(",")) {
-
-        } else if (keyStr.startsWith("*")) {
-
-        } else {
-          int idx = keyStr.indexOf(",");
+        if (!keyStr.startsWith("_") && !keyStr.startsWith(",") && !keyStr.startsWith("*")) {
+          int idx = keyStr.indexOf(',');
           if (idx != -1) {
-            // TODO srowen says data is not used?
-            Map<String,Double> data = new HashMap<String,Double>();
-            data.put(keyStr.substring(0, idx), value.get());
+            //Map<String,Double> data = new HashMap<String,Double>();
+            //data.put(keyStr.substring(0, idx), value.get());
             writer.append(new Text(key.toString()), value);
           }
         }
