@@ -54,7 +54,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * The file will be periodically reloaded if a change is detected.</p>
  *
  * <p>It is possible and likely useful to subclass this class and customize its behavior to accommodate
- * application-specific needs and input formats. See {@link #processLine(String, Map)},
+ * application-specific needs and input formats. See {@link #processLine(String, Map, Map)},
  * {@link #buildItem(String)}, {@link #buildUser(String, List)}
  * and {@link #buildPreference(User, Item, double)}.</p>
  */
@@ -115,10 +115,11 @@ public class FileDataModel implements DataModel {
 
   private void processFile(Map<String, List<Preference>> data) {
     log.info("Reading file info...");
+    Map<String, Item> itemCache = new FastMap<String, Item>(1001);
     for (String line : new FileLineIterable(dataFile)) {
       if (line.length() > 0) {
         log.debug("Read line: {}", line);
-        processLine(line, data);
+        processLine(line, data, itemCache);
       }
     }
   }
@@ -140,7 +141,7 @@ public class FileDataModel implements DataModel {
    * @see #buildPreference(User, Item, double)
    * @see #buildItem(String)
    */
-  protected void processLine(String line, Map<String, List<Preference>> data) {
+  protected void processLine(String line, Map<String, List<Preference>> data, Map<String, Item> itemCache) {
     int commaOne = line.indexOf((int) ',');
     int commaTwo = line.indexOf((int) ',', commaOne + 1);
     if (commaOne < 0 || commaTwo < 0) {
@@ -154,8 +155,12 @@ public class FileDataModel implements DataModel {
       prefs = new ArrayList<Preference>();
       data.put(userID, prefs);
     }
-    Item item = buildItem(itemID);
-      log.debug("Read item '{}' for user ID '{}'", item, userID);
+    Item item = itemCache.get(itemID);
+    if (item == null) {
+      item = buildItem(itemID);
+      itemCache.put(itemID, item);
+    }
+    log.debug("Read item '{}' for user ID '{}'", item, userID);
     prefs.add(buildPreference(null, item, preferenceValue));
   }
 
