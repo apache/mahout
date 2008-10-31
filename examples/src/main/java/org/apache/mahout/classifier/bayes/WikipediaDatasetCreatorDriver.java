@@ -35,7 +35,7 @@ import java.util.Set;
 import java.util.HashSet;
 
 /**
- * Create and run the Bayes Trainer.
+ * Create and run the Wikipedia Dataset Creator.
  */
 public class WikipediaDatasetCreatorDriver {
 
