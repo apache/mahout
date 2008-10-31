@@ -52,6 +52,7 @@ public final class CachingRecommender implements Recommender {
   private final Cache<Object, Recommendations> recommendationCache;
   private final Cache<Pair<?, ?>, Double> estimatedPrefCache;
   private final RefreshHelper refreshHelper;
+  private Rescorer<Item> currentRescorer;
 
   public CachingRecommender(Recommender recommender) throws TasteException {
     if (recommender == null) {
@@ -62,9 +63,7 @@ public final class CachingRecommender implements Recommender {
     // Use "num users" as an upper limit on cache size. Rough guess.
     int numUsers = recommender.getDataModel().getNumUsers();
     this.recommendationCache =
-            new Cache<Object, Recommendations>(
-                    new RecommendationRetriever(this.recommender, this.maxHowMany),
-                    numUsers);
+        new Cache<Object, Recommendations>(new RecommendationRetriever(this.recommender), numUsers);
     this.estimatedPrefCache =
             new Cache<Pair<?, ?>, Double>(new EstimatedPrefRetriever(this.recommender), numUsers);
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
@@ -76,9 +75,28 @@ public final class CachingRecommender implements Recommender {
     this.refreshHelper.addDependency(recommender);
   }
 
+  private synchronized void setCurrentRescorer(Rescorer<Item> rescorer) {
+    if (rescorer == null) {
+      if (currentRescorer != null) {
+        currentRescorer = null;
+        clear();
+      }
+    } else {
+      if (!rescorer.equals(currentRescorer)) {
+        currentRescorer = rescorer;
+        clear();
+      }
+    }
+  }
+
   public List<RecommendedItem> recommend(Object userID, int howMany) throws TasteException {
+    return recommend(userID, howMany, null);
+  }
+
+  public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
+          throws TasteException {
     if (userID == null) {
-      throw new IllegalArgumentException("user ID is null");
+      throw new IllegalArgumentException("userID is null");
     }
     if (howMany < 1) {
       throw new IllegalArgumentException("howMany must be at least 1");
@@ -89,6 +107,8 @@ public final class CachingRecommender implements Recommender {
         maxHowMany.set(howMany);
       }
     }
+
+    setCurrentRescorer(rescorer);
 
     Recommendations recommendations = recommendationCache.get(userID);
     if (recommendations.getItems().size() < howMany && !recommendations.noMoreRecommendableItems) {
@@ -102,12 +122,6 @@ public final class CachingRecommender implements Recommender {
     return recommendations.getItems().size() > howMany ?
            recommendations.getItems().subList(0, howMany) :
            recommendations.getItems();
-  }
-
-  public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
-          throws TasteException {
-    // Hmm, hard to recommendationCache this since the rescorer may change
-    return recommender.recommend(userID, howMany, rescorer);
   }
 
   public double estimatePreference(Object userID, Object itemID) throws TasteException {
@@ -155,19 +169,18 @@ public final class CachingRecommender implements Recommender {
     return "CachingRecommender[recommender:" + recommender + ']';
   }
 
-  private static final class RecommendationRetriever implements Retriever<Object, Recommendations> {
+  private final class RecommendationRetriever implements Retriever<Object, Recommendations> {
 
     private final Recommender recommender;
-    private final AtomicInteger maxHowMany;
 
-    private RecommendationRetriever(Recommender recommender, AtomicInteger maxHowMany) {
+    private RecommendationRetriever(Recommender recommender) {
       this.recommender = recommender;
-      this.maxHowMany = maxHowMany;
     }
 
     public Recommendations get(Object key) throws TasteException {
       log.debug("Retrieving new recommendations for user ID '{}'", key);
-      return new Recommendations(Collections.unmodifiableList(recommender.recommend(key, maxHowMany.get())));
+      return new Recommendations(
+          Collections.unmodifiableList(recommender.recommend(key, maxHowMany.get(), currentRescorer)));
     }
   }
 
