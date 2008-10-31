@@ -91,13 +91,13 @@ public class CBayesClassifier implements Classifier{
 
   /**
    * Calculate the document probability as the multiplication of the
-   * {@link Model#FeatureWeight(String, String)} for each word given the label
+   * {@link Model#featureWeight(String, String)} for each word given the label
    *
    * @param model       The {@link org.apache.mahout.common.Model}
    * @param label       The label to calculate the probability of
    * @param document    The document
    * @return The probability
-   * @see Model#FeatureWeight(String, String)
+   * @see Model# featureWeight (String, String)
    */
   public double documentProbability(Model model, String label, String[] document) {
     double result = 0.0;
@@ -113,7 +113,7 @@ public class CBayesClassifier implements Classifier{
     for (Map.Entry<String, Integer> entry : wordList.entrySet()) {
       String word = entry.getKey();
       int count = entry.getValue();
-      result += count * model.FeatureWeight(label, word);
+      result += count * model.featureWeight(label, word);
     }
     return result;
   }

@@ -54,7 +54,7 @@ public class SequenceFileModelReader {
     model.initializeWeightMatrix();
     
     loadWeightMatrix(model, fs, pathPatterns.get("weight"), conf);
-    model.InitializeNormalizer();
+    model.initializeNormalizer();
     //model.GenerateComplementaryModel();
     return model;
   }

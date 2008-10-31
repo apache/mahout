@@ -51,13 +51,13 @@ public interface Classifier {
 
   /**
    * Calculate the document probability as the multiplication of the
-   * {@link org.apache.mahout.common.Model#FeatureWeight(String, String)} for each word given the label
+   * {@link org.apache.mahout.common.Model#featureWeight(String, String)} for each word given the label
    *
    * @param model       The {@link org.apache.mahout.common.Model}
    * @param label       The label to calculate the probability of
    * @param document    The document
    * @return The probability
-   * @see Model#FeatureWeight(String, String)
+   * @see Model#featureWeight (String, String)
    */
   public double documentProbability(Model model, String label, String[] document);
 

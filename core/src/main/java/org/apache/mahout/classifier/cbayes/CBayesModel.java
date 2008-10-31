@@ -61,7 +61,7 @@ public class CBayesModel extends Model {
   }
 
   @Override
-  public void InitializeNormalizer() {
+  public void initializeNormalizer() {
     double perLabelWeightSumNormalisationFactor = Double.MAX_VALUE;
 
     
@@ -118,7 +118,7 @@ public class CBayesModel extends Model {
   }
 
   @Override
-  public void GenerateModel() {
+  public void generateModel() {
       double vocabCount = featureList.size();
 
       double[] perLabelThetaNormalizer = new double[labelList.size()];
@@ -183,7 +183,7 @@ public class CBayesModel extends Model {
    * @return The weighted probability
    */
   @Override
-  public double FeatureWeight(Integer label, Integer feature) {
+  public double featureWeight(Integer label, Integer feature) {
     return getWeight(label, feature);
   }
 

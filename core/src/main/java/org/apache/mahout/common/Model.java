@@ -53,15 +53,15 @@ public abstract class Model {
 
   protected final double alpha_i = 1.0; // alpha_i can be improved upon for increased smoothing
   
-  protected abstract double FeatureWeight(Integer label, Integer feature);
+  protected abstract double featureWeight(Integer label, Integer feature);
   
   protected abstract double getWeight(Integer label, Integer feature);
 
   protected abstract double getWeightUnprocessed(Integer label, Integer feature);
   
-  public abstract void InitializeNormalizer();
+  public abstract void initializeNormalizer();
 
-  public abstract void GenerateModel();
+  public abstract void generateModel();
   
   protected double getSumLabelWeight(Integer label) {
     return nullToZero(sumLabelWeight.get(label));
@@ -159,12 +159,12 @@ public abstract class Model {
    * @param featureString The feature to calc. the prob. for
    * @return The weighted probability
    */
-  public double FeatureWeight(String labelString, String featureString) {
+  public double featureWeight(String labelString, String featureString) {
     if (featureList.containsKey(featureString) == false)
       return 0.0;
     Integer feature = getFeature(featureString);
     Integer label = getLabel(labelString);
-    return FeatureWeight(label, feature);
+    return featureWeight(label, feature);
   }
 
   public Collection<String> getLabels() {

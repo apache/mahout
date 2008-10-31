@@ -54,7 +54,7 @@ public class CBayesClassifierTest extends TestCase {
     model.setThetaNormalizer("d", -100);
     model.setThetaNormalizer("e", -100);
     
-    model.InitializeNormalizer();
+    model.initializeNormalizer();
     model.initializeWeightMatrix();
    
     model.loadFeatureWeight("a", "aa", 5);
