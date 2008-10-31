@@ -300,8 +300,8 @@
 
   <target name="extract-20news-18828" depends="check-files, compile" unless="reuters.extracted">
     <mkdir dir="${working.dir}/20news-18828-collapse"/>
-    <java classname="org.apache.mahout.classifiers.bayes.ExtractTwentyNewsgroups" maxmemory="1024M" fork="true">
-      <classpath refid="compile.classpath"/>
+    <java classname="org.apache.mahout.classifier.bayes.PrepareTwentyNewsgroups" maxmemory="1024M" fork="true">
+      <classpath refid="test.classpath"/>
       <!--
       Input format is:
       inputDir outputDir label Analyzer character set
