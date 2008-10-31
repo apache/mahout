@@ -46,7 +46,7 @@ import java.io.IOException;
  * <li>bin/hadoop namenode -format  //Format the HDFS</li>
  * <li>bin/start-all.sh  //Start Hadoop</li>
  * <li>bin/hadoop dfs -put &lt;MAHOUT_HOME&gt;/work/20news-18828-collapse 20newsInput  //Copies the extracted text to HDFS</li>
- * <li>bin/hadoop jar &lt;MAHOUT_HOME&gt;/build/apache-mahout-0.1-dev-ex.jar org.apache.mahout.examples.classifiers.cbayes.TwentyNewsgroups -t -i 20newsInput -o 20newsOutput</li>
+ * <li>bin/hadoop jar &lt;MAHOUT_HOME&gt;/build/apache-mahout-0.1-dev-ex.jar org.apache.mahout.classifier.bayes.TraingClassifier -t -i 20newsInput -o 20newsOutput</li>
  * </ol>
  * </li>
  * </ol>
