@@ -20,6 +20,7 @@ package org.apache.mahout.classifier.bayes;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
@@ -39,11 +40,11 @@ import java.util.List;
 import java.util.Set;
 
 public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
-    Mapper<Text, Text, Text, Text> {
+    Mapper<LongWritable, Text, Text, Text> {
 
   private static Set<String> countries = null;
   
-  public void map(Text key, Text value,
+  public void map(LongWritable key, Text value,
       OutputCollector<Text, Text> output, Reporter reporter)
       throws IOException {
     String document = value.toString();
