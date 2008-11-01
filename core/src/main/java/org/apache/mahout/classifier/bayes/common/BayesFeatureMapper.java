@@ -104,7 +104,7 @@ public class BayesFeatureMapper extends MapReduceBase implements
       builder.setLength(keyLen);// truncate back
     }
 
-    // Ouput Document Frequency per Word per Class
+    // Output Document Frequency per Word per Class
     String dflabel = "-" + label;
     int dfKeyLen = dflabel.length();
     builder = new StringBuilder(dflabel);
@@ -118,7 +118,7 @@ public class BayesFeatureMapper extends MapReduceBase implements
 
     }
 
-    // ouput that we have seen the label to calculate the Count of Document per
+    // output that we have seen the label to calculate the Count of Document per
     // class
     output.collect(new Text("_" + label), one);
   }
