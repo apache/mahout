@@ -72,11 +72,11 @@ public class TestClassifier {
             abuilder.withName("testDir").withMinimum(1).withMaximum(1).create()).
             withDescription("The directory where test documents resides in").withShortName("t").create();
 
-    Option encodingOpt = obuilder.withLongName("encoding").withRequired(true).withArgument(
+    Option encodingOpt = obuilder.withLongName("encoding").withArgument(
             abuilder.withName("encoding").withMinimum(1).withMaximum(1).create()).
             withDescription("The file encoding.  Defaults to UTF-8").withShortName("e").create();
 
-    Option analyzerOpt = obuilder.withLongName("analyzer").withRequired(true).withArgument(
+    Option analyzerOpt = obuilder.withLongName("analyzer").withArgument(
             abuilder.withName("analyzer").withMinimum(1).withMaximum(1).create()).
             withDescription("The Analyzer to use").withShortName("a").create();
 
