@@ -80,7 +80,7 @@ public class TestClassifier {
             abuilder.withName("analyzer").withMinimum(1).withMaximum(1).create()).
             withDescription("The Analyzer to use").withShortName("a").create();
 
-    Option defaultCatOpt = obuilder.withLongName("defaultCat").withRequired(true).withArgument(
+    Option defaultCatOpt = obuilder.withLongName("defaultCat").withArgument(
             abuilder.withName("defaultCat").withMinimum(1).withMaximum(1).create()).
             withDescription("The default category").withShortName("d").create();
 
