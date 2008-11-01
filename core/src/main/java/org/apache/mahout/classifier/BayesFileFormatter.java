@@ -263,11 +263,11 @@ public class BayesFileFormatter {
             abuilder.withName("label").withMinimum(1).withMaximum(1).create()).
             withDescription("The label of the file").withShortName("l").create();
 
-    Option analyzerOpt = obuilder.withLongName("analyzer").withRequired(true).withArgument(
+    Option analyzerOpt = obuilder.withLongName("analyzer").withArgument(
             abuilder.withName("analyzer").withMinimum(1).withMaximum(1).create()).
             withDescription("The fully qualified class name of the analyzer to use.  Must have a no-arg constructor.  Default is the StandardAnalyzer").withShortName("a").create();
 
-    Option charsetOpt = obuilder.withLongName("charset").withRequired(true).withArgument(
+    Option charsetOpt = obuilder.withLongName("charset").withArgument(
             abuilder.withName("charset").withMinimum(1).withMaximum(1).create()).
             withDescription("The character encoding of the input file").withShortName("c").create();
 
