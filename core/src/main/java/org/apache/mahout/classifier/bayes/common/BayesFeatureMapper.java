@@ -26,12 +26,14 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.classifier.BayesFileFormatter;
+import org.apache.mahout.common.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 /**
  * Reads the input train set(preprocessed using the {@link BayesFileFormatter}).
@@ -57,8 +59,8 @@ public class BayesFeatureMapper extends MapReduceBase implements
    * 
    * @param key The label
    * @param value the features (all unique) associated w/ this label
-   * @param output
-   * @param reporter
+   * @param output The OutputCollector to write the results to
+   * @param reporter Not used
    * @throws IOException
    */
   public void map(Text key, Text value,
@@ -68,29 +70,36 @@ public class BayesFeatureMapper extends MapReduceBase implements
     String label = key.toString();
     int keyLen = label.length();
 
-    Map<String, Integer> wordList = new HashMap<String, Integer>(1000);
-    // TODO: srowen wonders where wordList is ever updated?
+    Map<String, Integer[]> wordList = new HashMap<String, Integer[]>(1000);
 
     StringBuilder builder = new StringBuilder(label);
     builder.ensureCapacity(32);// make sure we have a reasonably size buffer to
                                // begin with
-    //List<String> previousN_1Grams  = Model.generateNGramsWithoutLabel(line, keyLen);
-    
+    List<String> ngrams  = Model.generateNGramsWithoutLabel(value.toString(), gramSize);
+    for (String ngram : ngrams) {
+      Integer[] count = wordList.get(ngram);
+      if (count == null) {
+        count = new Integer[1];
+        count[0] = 0;
+        wordList.put(ngram, count);
+      }
+      count[0]++;
+    }
     double lengthNormalisation = 0.0;
-    for (double D_kj : wordList.values()) {
+    for (Integer[] D_kj : wordList.values()) {
       // key is label,word
-      lengthNormalisation += D_kj * D_kj;
+      lengthNormalisation += D_kj[0].doubleValue() * D_kj[0].doubleValue();
     }
     lengthNormalisation = Math.sqrt(lengthNormalisation);
 
-    // Ouput Length Normalized + TF Transformed Frequency per Word per Class
+    // Output Length Normalized + TF Transformed Frequency per Word per Class
     // Log(1 + D_ij)/SQRT( SIGMA(k, D_kj) )
-    for (Map.Entry<String, Integer> entry : wordList.entrySet()) {
+    for (Map.Entry<String, Integer[]> entry : wordList.entrySet()) {
       // key is label,word
       String token = entry.getKey();
       builder.append(',').append(token);
       labelWord.set(builder.toString());
-      DoubleWritable f = new DoubleWritable(Math.log(1.0 + entry.getValue()) / lengthNormalisation);
+      DoubleWritable f = new DoubleWritable(Math.log(1.0 + entry.getValue()[0]) / lengthNormalisation);
       output.collect(labelWord, f);
       builder.setLength(keyLen);// truncate back
     }
