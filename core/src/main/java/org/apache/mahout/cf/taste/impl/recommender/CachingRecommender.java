@@ -179,8 +179,13 @@ public final class CachingRecommender implements Recommender {
 
     public Recommendations get(Object key) throws TasteException {
       log.debug("Retrieving new recommendations for user ID '{}'", key);
-      return new Recommendations(
-          Collections.unmodifiableList(recommender.recommend(key, maxHowMany.get(), currentRescorer)));
+      List<RecommendedItem> recommendations;
+      if (currentRescorer == null) {
+        recommendations = recommender.recommend(key, maxHowMany.get());
+      } else {
+        recommendations = recommender.recommend(key, maxHowMany.get(), currentRescorer);
+      }
+      return new Recommendations(Collections.unmodifiableList(recommendations));
     }
   }
 
