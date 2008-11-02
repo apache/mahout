@@ -41,11 +41,6 @@ import java.util.Set;
  */
 public final class FastMap<K, V> implements Map<K, V> {
 
-  /**
-   * The largest prime less than 2<sup>31</sup>-1 that is the smaller of a twin prime pair.
-   */
-  private static final int MAX_INT_SMALLER_TWIN_PRIME = 2147482949;
-
   public static final int NO_MAX_SIZE = Integer.MAX_VALUE;
 
   /**
@@ -79,20 +74,21 @@ public final class FastMap<K, V> implements Map<K, V> {
    *
    * @param size desired capacity
    * @param maxSize max capacity
-   * @throws IllegalArgumentException if size is less than 1 or at least half of {@link #MAX_INT_SMALLER_TWIN_PRIME}
+   * @throws IllegalArgumentException if size is less than 1 or at least half of
+   *  {@link RandomUtils#MAX_INT_SMALLER_TWIN_PRIME}
    */
   @SuppressWarnings("unchecked")
   public FastMap(int size, int maxSize) throws IllegalArgumentException {
     if (size < 1) {
       throw new IllegalArgumentException("size must be at least 1");
     }
-    if (size >= MAX_INT_SMALLER_TWIN_PRIME >> 1) {
-      throw new IllegalArgumentException("size must be less than " + (MAX_INT_SMALLER_TWIN_PRIME >> 1));
+    if (size >= RandomUtils.MAX_INT_SMALLER_TWIN_PRIME >> 1) {
+      throw new IllegalArgumentException("size must be less than " + (RandomUtils.MAX_INT_SMALLER_TWIN_PRIME >> 1));
     }
     if (maxSize < 1) {
       throw new IllegalArgumentException("maxSize must be at least 1");
     }
-    int hashSize = nextTwinPrime(2 * size);
+    int hashSize = RandomUtils.nextTwinPrime(2 * size);
     keys = (K[]) new Object[hashSize];
     values = (V[]) new Object[hashSize];
     this.maxSize = maxSize;
@@ -287,10 +283,10 @@ public final class FastMap<K, V> implements Map<K, V> {
 
   private void growAndRehash() {
     int hashSize = keys.length;
-    if (hashSize >= MAX_INT_SMALLER_TWIN_PRIME >> 1) {
+    if (hashSize >= RandomUtils.MAX_INT_SMALLER_TWIN_PRIME >> 1) {
       throw new IllegalStateException("Can't grow any more");
     }
-    rehash(nextTwinPrime(2 * hashSize));
+    rehash(RandomUtils.nextTwinPrime(2 * hashSize));
   }
 
   @SuppressWarnings("unchecked")
@@ -311,57 +307,6 @@ public final class FastMap<K, V> implements Map<K, V> {
         put(key, oldValues[i]);
       }
     }
-  }
-
-  // Simple methods for finding a next larger prime
-
-
-  /**
-   * <p>Finds next-largest "twin primes": numbers p and p+2 such that both are prime. Finds the smallest such p such
-   * that the smaller twin, p, is greater than or equal to n. Returns p+2, the larger of the two twins.</p>
-   */
-  private static int nextTwinPrime(int n) {
-    if (n > MAX_INT_SMALLER_TWIN_PRIME) {
-      throw new IllegalArgumentException();
-    }
-    int next = nextPrime(n);
-    while (isNotPrime(next + 2)) {
-      next = nextPrime(next + 4);
-    }
-    return next + 2;
-  }
-
-  /**
-   * <p>Finds smallest prime p such that p is greater than or equal to n.</p>
-   */
-  private static int nextPrime(int n) {
-    // Make sure the number is odd. Is this too clever?
-    n |= 0x1;
-    // There is no problem with overflow since Integer.MAX_INT is prime, as it happens
-    while (isNotPrime(n)) {
-      n += 2;
-    }
-    return n;
-  }
-
-  /**
-   * @param n
-   * @return <code>true</code> iff n is not a prime
-   */
-  private static boolean isNotPrime(int n) {
-    if (n < 2) {
-      throw new IllegalArgumentException();
-    }
-    if ((n & 0x1) == 0) { // even
-      return true;
-    }
-    int max = 1 + (int) Math.sqrt((double) n);
-    for (int d = 3; d <= max; d += 2) {
-      if (n % d == 0) {
-        return true;
-      }
-    }
-    return false;
   }
 
   private void iteratorRemove(int lastNext) {
