@@ -65,7 +65,7 @@ public class EvalMapperTest extends TestCase {
     for (String key : keys) {
       DummyCandidate candidate = population.get(Integer.parseInt(key));
       assertEquals("Values for key " + key, 1, collector.getValue(key).size());
-      double fitness = (double) collector.getValue(key).get(0).get();
+      double fitness = collector.getValue(key).get(0).get();
       assertEquals("Evaluation of the candidate " + key, DummyEvaluator
           .getFitness(candidate.getIndex()), fitness);
     }
