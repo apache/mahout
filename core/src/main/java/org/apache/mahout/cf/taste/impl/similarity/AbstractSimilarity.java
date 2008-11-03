@@ -139,7 +139,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
    */
   abstract double computeResult(int n, double sumXY, double sumX2, double sumY2, double sumXYdiff2);
 
-  public double userCorrelation(User user1, User user2) throws TasteException {
+  public double userSimilarity(User user1, User user2) throws TasteException {
 
     if (user1 == null || user2 == null) {
       throw new IllegalArgumentException("user1 or user2 is null");
@@ -258,7 +258,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     return result;
   }
 
-  public final double itemCorrelation(Item item1, Item item2) throws TasteException {
+  public final double itemSimilarity(Item item1, Item item2) throws TasteException {
 
     if (item1 == null || item2 == null) {
       throw new IllegalArgumentException("item1 or item2 is null");

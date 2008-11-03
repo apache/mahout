@@ -203,7 +203,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
     Preference[] prefs = theUser.getPreferencesAsArray();
     for (int i = 0; i < prefs.length; i++) {
       Preference pref = prefs[i];
-      double theCorrelation = similarity.itemCorrelation(item, pref.getItem());
+      double theCorrelation = similarity.itemSimilarity(item, pref.getItem());
       if (!Double.isNaN(theCorrelation)) {
         // Why + 1.0? similarity ranges from -1.0 to 1.0, and we want to use it as a simple
         // weight. To avoid negative values, we add 1.0 to put it in
@@ -248,7 +248,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
       if (rescorer.isFiltered(pair)) {
         return Double.NaN;
       }
-      double originalEstimate = similarity.itemCorrelation(toItem, item);
+      double originalEstimate = similarity.itemSimilarity(toItem, item);
       return rescorer.rescore(pair, originalEstimate);
     }
   }
@@ -287,7 +287,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
         if (rescorer.isFiltered(pair)) {
           continue;
         }
-        double estimate = similarity.itemCorrelation(toItem, item);
+        double estimate = similarity.itemSimilarity(toItem, item);
         estimate = rescorer.rescore(pair, estimate);
         average.addDatum(estimate);
       }
@@ -314,7 +314,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
       if (pref == null) {
         return Double.NaN;
       }
-      double correlationValue = similarity.itemCorrelation(recommendedItem, item);
+      double correlationValue = similarity.itemSimilarity(recommendedItem, item);
       return (1.0 + correlationValue) * pref.getValue();
     }
   }

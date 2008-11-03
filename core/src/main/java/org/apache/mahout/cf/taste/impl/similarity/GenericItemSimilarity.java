@@ -153,7 +153,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
    * @param item2 second item
    * @return correlation between the two
    */
-  public double itemCorrelation(Item item1, Item item2) {
+  public double itemSimilarity(Item item1, Item item2) {
     int compare = item1.compareTo(item2);
     if (compare == 0) {
       return 1.0;
@@ -257,7 +257,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
       Item item2 = items.get(j);
       double correlation;
       try {
-        correlation = otherSimilarity.itemCorrelation(item1, item2);
+        correlation = otherSimilarity.itemSimilarity(item1, item2);
       } catch (TasteException te) {
         // ugly:
         throw new RuntimeException(te);

@@ -47,7 +47,7 @@ public final class CachingUserSimilarity implements UserSimilarity {
     this.correlationCache = new Cache<Pair<User, User>, Double>(new CorrelationRetriever(similarity), maxCacheSize);
   }
 
-  public double userCorrelation(User user1, User user2) throws TasteException {
+  public double userSimilarity(User user1, User user2) throws TasteException {
     Pair<User, User> key;
     if (user1.compareTo(user2) < 0) {
       key = new Pair<User, User>(user1, user2);
@@ -75,7 +75,7 @@ public final class CachingUserSimilarity implements UserSimilarity {
       this.similarity = similarity;
     }
     public Double get(Pair<User, User> key) throws TasteException {
-      return similarity.userCorrelation(key.getFirst(), key.getSecond());
+      return similarity.userSimilarity(key.getFirst(), key.getSecond());
     }
   }
 

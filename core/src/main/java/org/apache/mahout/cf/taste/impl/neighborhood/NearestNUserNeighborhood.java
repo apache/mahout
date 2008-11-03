@@ -85,7 +85,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
     boolean full = false;
     for (User user : dataModel.getUsers()) {
       if (sampleForUser() && !userID.equals(user.getID())) {
-        double theCorrelation = userSimilarityImpl.userCorrelation(theUser, user);
+        double theCorrelation = userSimilarityImpl.userSimilarity(theUser, user);
         if (!Double.isNaN(theCorrelation) && (!full || theCorrelation > queue.getLast().theCorrelation)) {
           ListIterator<UserCorrelationPair> iterator = queue.listIterator(queue.size());
           while (iterator.hasPrevious()) {

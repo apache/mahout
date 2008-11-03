@@ -73,7 +73,7 @@ public final class NearestNeighborClusterSimilarity implements ClusterSimilarity
     for (User user1 : cluster1) {
       if (samplingPercentage >= 1.0 || random.nextDouble() < samplingPercentage) {
         for (User user2 : cluster2) {
-          double theCorrelation = similarity.userCorrelation(user1, user2);
+          double theCorrelation = similarity.userSimilarity(user1, user2);
           if (theCorrelation > greatestCorrelation) {
             greatestCorrelation = theCorrelation;
           }
@@ -82,7 +82,7 @@ public final class NearestNeighborClusterSimilarity implements ClusterSimilarity
     }
     // We skipped everything? well, at least try comparing the first Users to get some value
     if (greatestCorrelation == Double.NEGATIVE_INFINITY) {
-      return similarity.userCorrelation(cluster1.iterator().next(), cluster2.iterator().next());
+      return similarity.userSimilarity(cluster1.iterator().next(), cluster2.iterator().next());
     }
     return greatestCorrelation;
   }

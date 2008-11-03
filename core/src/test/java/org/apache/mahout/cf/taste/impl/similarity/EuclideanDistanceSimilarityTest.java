@@ -38,7 +38,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     User user1 = getUser("test1", 3.0, -2.0);
     User user2 = getUser("test2", 3.0, -2.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new EuclideanDistanceSimilarity(dataModel).userCorrelation(user1, user2);
+    double correlation = new EuclideanDistanceSimilarity(dataModel).userSimilarity(user1, user2);
     assertCorrelationEquals(1.0, correlation);
   }
 
@@ -46,7 +46,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     User user1 = getUser("test1", 3.0, -2.0);
     User user2 = getUser("test2", 3.0, -2.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new EuclideanDistanceSimilarity(dataModel, Weighting.WEIGHTED).userCorrelation(user1, user2);
+    double correlation = new EuclideanDistanceSimilarity(dataModel, Weighting.WEIGHTED).userSimilarity(user1, user2);
     assertCorrelationEquals(1.0, correlation);
   }
 
@@ -54,7 +54,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     User user1 = getUser("test1", 3.0, 3.0);
     User user2 = getUser("test2", 3.0, 3.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new EuclideanDistanceSimilarity(dataModel).userCorrelation(user1, user2);
+    double correlation = new EuclideanDistanceSimilarity(dataModel).userSimilarity(user1, user2);
     assertTrue(Double.isNaN(correlation));
   }
 
@@ -62,7 +62,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     User user1 = getUser("test1", 3.0, -2.0);
     User user2 = getUser("test2", -3.0, 2.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new EuclideanDistanceSimilarity(dataModel).userCorrelation(user1, user2);
+    double correlation = new EuclideanDistanceSimilarity(dataModel).userSimilarity(user1, user2);
     assertCorrelationEquals(0.424465381883345, correlation);
   }
 
@@ -70,7 +70,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     User user1 = getUser("test1", 3.0, -2.0);
     User user2 = getUser("test2", -3.0, 2.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new EuclideanDistanceSimilarity(dataModel, Weighting.WEIGHTED).userCorrelation(user1, user2);
+    double correlation = new EuclideanDistanceSimilarity(dataModel, Weighting.WEIGHTED).userSimilarity(user1, user2);
     assertCorrelationEquals(0.8081551272944483, correlation);
   }
 
@@ -80,7 +80,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     Preference pref2 = new GenericPreference(null, new GenericItem<String>("2"), 1.0);
     GenericUser<String> user2 = new GenericUser<String>("test2", Collections.singletonList(pref2));
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new EuclideanDistanceSimilarity(dataModel).userCorrelation(user1, user2);
+    double correlation = new EuclideanDistanceSimilarity(dataModel).userSimilarity(user1, user2);
     assertTrue(Double.isNaN(correlation));
   }
 
@@ -88,7 +88,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     User user1 = getUser("test1", 90.0, 80.0, 70.0);
     User user2 = getUser("test2", 70.0, 80.0, 90.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new EuclideanDistanceSimilarity(dataModel).userCorrelation(user1, user2);
+    double correlation = new EuclideanDistanceSimilarity(dataModel).userSimilarity(user1, user2);
     assertCorrelationEquals(0.3606507916004517, correlation);
   }
 
@@ -96,7 +96,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     User user1 = getUser("test1", 1.0, 2.0, 3.0);
     User user2 = getUser("test2", 2.0, 5.0, 6.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new EuclideanDistanceSimilarity(dataModel).userCorrelation(user1, user2);
+    double correlation = new EuclideanDistanceSimilarity(dataModel).userSimilarity(user1, user2);
     assertCorrelationEquals(0.5896248568217328, correlation);
   }
 
@@ -104,7 +104,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     User user1 = getUser("test1", 1.0, 2.0, 3.0);
     User user2 = getUser("test2", 2.0, 5.0, 6.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new EuclideanDistanceSimilarity(dataModel, Weighting.WEIGHTED).userCorrelation(user1, user2);
+    double correlation = new EuclideanDistanceSimilarity(dataModel, Weighting.WEIGHTED).userSimilarity(user1, user2);
     assertCorrelationEquals(0.8974062142054332, correlation);
   }
 
@@ -113,7 +113,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     User user2 = getUser("test2", -2.0, -2.0);
     DataModel dataModel = getDataModel(user1, user2);
     double correlation =
-            new EuclideanDistanceSimilarity(dataModel).itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1"));
+            new EuclideanDistanceSimilarity(dataModel).itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
     assertCorrelationEquals(1.0, correlation);
   }
 
@@ -122,7 +122,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     User user2 = getUser("test2", 3.0, 3.0);
     DataModel dataModel = getDataModel(user1, user2);
     double correlation =
-            new EuclideanDistanceSimilarity(dataModel).itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1"));
+            new EuclideanDistanceSimilarity(dataModel).itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
     // Yeah, undefined in this case
     assertTrue(Double.isNaN(correlation));
   }
@@ -132,7 +132,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     User user2 = getUser("test2", -2.0, 2.0);
     DataModel dataModel = getDataModel(user1, user2);
     double correlation =
-            new EuclideanDistanceSimilarity(dataModel).itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1"));
+            new EuclideanDistanceSimilarity(dataModel).itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
     assertCorrelationEquals(0.424465381883345, correlation);
   }
 
@@ -143,7 +143,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     GenericUser<String> user2 = new GenericUser<String>("test2", Collections.singletonList(pref2));
     DataModel dataModel = getDataModel(user1, user2);
     double correlation =
-            new EuclideanDistanceSimilarity(dataModel).itemCorrelation(dataModel.getItem("1"), dataModel.getItem("2"));
+            new EuclideanDistanceSimilarity(dataModel).itemSimilarity(dataModel.getItem("1"), dataModel.getItem("2"));
     assertTrue(Double.isNaN(correlation));
   }
 
@@ -153,7 +153,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     User user3 = getUser("test3", 70.0, 90.0);
     DataModel dataModel = getDataModel(user1, user2, user3);
     double correlation =
-            new EuclideanDistanceSimilarity(dataModel).itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1"));
+            new EuclideanDistanceSimilarity(dataModel).itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
     assertCorrelationEquals(0.3606507916004517, correlation);
   }
 
@@ -163,7 +163,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     User user3 = getUser("test3", 3.0, 6.0);
     DataModel dataModel = getDataModel(user1, user2, user3);
     double correlation =
-            new EuclideanDistanceSimilarity(dataModel).itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1"));
+            new EuclideanDistanceSimilarity(dataModel).itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
     assertCorrelationEquals(0.5896248568217328, correlation);
   }
 
@@ -173,7 +173,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     User user3 = getUser("test3", 3.0, 6.0);
     DataModel dataModel = getDataModel(user1, user2, user3);
     ItemSimilarity itemSimilarity = new EuclideanDistanceSimilarity(dataModel, Weighting.WEIGHTED);
-    double correlation = itemSimilarity.itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1"));
+    double correlation = itemSimilarity.itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
     assertCorrelationEquals(0.8974062142054332, correlation);
   }
 

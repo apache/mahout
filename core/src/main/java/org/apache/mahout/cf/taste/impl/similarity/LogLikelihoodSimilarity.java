@@ -37,7 +37,7 @@ public final class LogLikelihoodSimilarity implements ItemSimilarity {
     this.dataModel = dataModel;
   }
 
-  public final double itemCorrelation(Item item1, Item item2) throws TasteException {
+  public final double itemSimilarity(Item item1, Item item2) throws TasteException {
     if (item1 == null || item2 == null) {
       throw new IllegalArgumentException("item1 or item2 is null");
     }

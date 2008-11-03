@@ -88,7 +88,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
     while (users.hasNext()) {
       User user = users.next();
       if (sampleForUser() && !userID.equals(user.getID())) {
-        double theCorrelation = userSimilarityImpl.userCorrelation(theUser, user);
+        double theCorrelation = userSimilarityImpl.userSimilarity(theUser, user);
         if (!Double.isNaN(theCorrelation) && theCorrelation >= threshold) {
           neighborhood.add(user);
         }

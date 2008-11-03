@@ -152,7 +152,7 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
         // See GenericItemBasedRecommender.doEstimatePreference() too
         Preference pref = user.getPreferenceFor(item.getID());
         if (pref != null) {
-          double theCorrelation = similarity.userCorrelation(theUser, user) + 1.0;
+          double theCorrelation = similarity.userSimilarity(theUser, user) + 1.0;
           if (!Double.isNaN(theCorrelation)) {
             preference += theCorrelation * pref.getValue();
             totalCorrelation += theCorrelation;
@@ -206,7 +206,7 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
       if (rescorer.isFiltered(pair)) {
         return Double.NaN;
       }
-      double originalEstimate = similarity.userCorrelation(toUser, user);
+      double originalEstimate = similarity.userSimilarity(toUser, user);
       return rescorer.rescore(pair, originalEstimate);
     }
   }

@@ -29,7 +29,7 @@ public final class TanimotoCoefficientSimilarityTest extends SimilarityTestCase 
     User user1 = getUser("test1");
     User user2 = getUser("test2");
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new TanimotoCoefficientSimilarity(dataModel).userCorrelation(user1, user2);
+    double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity(user1, user2);
     assertTrue(Double.isNaN(correlation));
   }
 
@@ -37,7 +37,7 @@ public final class TanimotoCoefficientSimilarityTest extends SimilarityTestCase 
     User user1 = getUser("test1");
     User user2 = getUser("test2", 1.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new TanimotoCoefficientSimilarity(dataModel).userCorrelation(user1, user2);
+    double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity(user1, user2);
     assertCorrelationEquals(0.0, correlation);
   }
 
@@ -45,7 +45,7 @@ public final class TanimotoCoefficientSimilarityTest extends SimilarityTestCase 
     User user1 = getUser("test1", null, 2.0, 3.0);
     User user2 = getUser("test2", 1.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new TanimotoCoefficientSimilarity(dataModel).userCorrelation(user1, user2);
+    double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity(user1, user2);
     assertCorrelationEquals(0.0, correlation);
   }
 
@@ -53,7 +53,7 @@ public final class TanimotoCoefficientSimilarityTest extends SimilarityTestCase 
     User user1 = getUser("test1", 1.0);
     User user2 = getUser("test2", 1.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new TanimotoCoefficientSimilarity(dataModel).userCorrelation(user1, user2);
+    double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity(user1, user2);
     assertCorrelationEquals(1.0, correlation);
   }
 
@@ -61,7 +61,7 @@ public final class TanimotoCoefficientSimilarityTest extends SimilarityTestCase 
     User user1 = getUser("test1", 1.0, 2.0, 3.0);
     User user2 = getUser("test2", 1.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new TanimotoCoefficientSimilarity(dataModel).userCorrelation(user1, user2);
+    double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity(user1, user2);
     assertCorrelationEquals(0.3333333333333333, correlation);
   }
 
@@ -69,7 +69,7 @@ public final class TanimotoCoefficientSimilarityTest extends SimilarityTestCase 
     User user1 = getUser("test1", null, 2.0, 3.0);
     User user2 = getUser("test2", 1.0, 1.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new TanimotoCoefficientSimilarity(dataModel).userCorrelation(user1, user2);
+    double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity(user1, user2);
     assertEquals(0.3333333333333333, correlation);
   }
 
@@ -77,7 +77,7 @@ public final class TanimotoCoefficientSimilarityTest extends SimilarityTestCase 
     User user1 = getUser("test1", null, 2.0, 3.0, 1.0);
     User user2 = getUser("test2", 1.0, 1.0, null, 0.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new TanimotoCoefficientSimilarity(dataModel).userCorrelation(user1, user2);
+    double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity(user1, user2);
     assertEquals(0.5, correlation);
   }
 

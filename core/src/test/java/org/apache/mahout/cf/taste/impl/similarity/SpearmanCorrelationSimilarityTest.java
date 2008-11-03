@@ -30,7 +30,7 @@ public final class SpearmanCorrelationSimilarityTest extends SimilarityTestCase 
     User user1 = getUser("test1", 1.0, 2.0, 3.0);
     User user2 = getUser("test2", 1.0, 2.0, 3.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new SpearmanCorrelationSimilarity(dataModel).userCorrelation(user1, user2);
+    double correlation = new SpearmanCorrelationSimilarity(dataModel).userSimilarity(user1, user2);
     assertCorrelationEquals(1.0, correlation);
   }
 
@@ -38,7 +38,7 @@ public final class SpearmanCorrelationSimilarityTest extends SimilarityTestCase 
     User user1 = getUser("test1", 1.0, 2.0, 3.0);
     User user2 = getUser("test2", 4.0, 5.0, 6.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new SpearmanCorrelationSimilarity(dataModel).userCorrelation(user1, user2);
+    double correlation = new SpearmanCorrelationSimilarity(dataModel).userSimilarity(user1, user2);
     assertCorrelationEquals(1.0, correlation);
   }
 
@@ -46,7 +46,7 @@ public final class SpearmanCorrelationSimilarityTest extends SimilarityTestCase 
     User user1 = getUser("test1", 1.0, 2.0, 3.0);
     User user2 = getUser("test2", 3.0, 2.0, 1.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new SpearmanCorrelationSimilarity(dataModel).userCorrelation(user1, user2);
+    double correlation = new SpearmanCorrelationSimilarity(dataModel).userSimilarity(user1, user2);
     assertCorrelationEquals(-1.0, correlation);
   }
 
@@ -54,7 +54,7 @@ public final class SpearmanCorrelationSimilarityTest extends SimilarityTestCase 
     User user1 = getUser("test1", 1.0, 2.0, 3.0);
     User user2 = getUser("test2", 2.0, 3.0, 1.0);
     DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new SpearmanCorrelationSimilarity(dataModel).userCorrelation(user1, user2);
+    double correlation = new SpearmanCorrelationSimilarity(dataModel).userSimilarity(user1, user2);
     assertCorrelationEquals(-0.5, correlation);
   }
 

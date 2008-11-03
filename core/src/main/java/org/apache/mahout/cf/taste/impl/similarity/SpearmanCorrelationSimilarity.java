@@ -56,11 +56,11 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
     this.rankingUserSimilarity = rankingUserSimilarity;
   }
 
-  public double userCorrelation(User user1, User user2) throws TasteException {
+  public double userSimilarity(User user1, User user2) throws TasteException {
     if (user1 == null || user2 == null) {
       throw new IllegalArgumentException("user1 or user2 is null");
     }
-    return rankingUserSimilarity.userCorrelation(new RankedPreferenceUser(user1),
+    return rankingUserSimilarity.userSimilarity(new RankedPreferenceUser(user1),
                                                   new RankedPreferenceUser(user2));
   }
 

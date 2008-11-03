@@ -28,12 +28,12 @@ import java.util.Collection;
 
 final class DummySimilarity implements UserSimilarity, ItemSimilarity {
 
-  public double userCorrelation(User user1, User user2) {
+  public double userSimilarity(User user1, User user2) {
     return 1.0 / Math.abs(user1.getPreferencesAsArray()[0].getValue() -
                           user2.getPreferencesAsArray()[0].getValue());
   }
 
-  public double itemCorrelation(Item item1, Item item2) {
+  public double itemSimilarity(Item item1, Item item2) {
     // Make up something wacky
     return (double) (item1.hashCode() - item2.hashCode());
   }

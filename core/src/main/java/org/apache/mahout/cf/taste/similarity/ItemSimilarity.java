@@ -22,23 +22,23 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.model.Item;
 
 /**
- * <p>Implementations of this interface define a notion of itemCorrelation between two
- * {@link org.apache.mahout.cf.taste.model.Item}s. Implementations should return values in the range -1.0 to 1.0, with
- * 1.0 representing perfect correlation.</p>
+ * <p>Implementations of this interface define a notion of similarity between two
+ * {@link Item}s. Implementations should return values in the range -1.0 to 1.0, with
+ * 1.0 representing perfect similarity.</p>
  *
  * @see UserSimilarity
  */
 public interface ItemSimilarity extends Refreshable {
 
   /**
-   * <p>Returns the "itemCorrelation", or degree of similarity, of two {@link org.apache.mahout.cf.taste.model.Item}s, based
+   * <p>Returns the degree of similarity, of two {@link Item}s, based
    * on the preferences that {@link org.apache.mahout.cf.taste.model.User}s have expressed for the items.</p>
    *
    * @param item1 first item
    * @param item2 second item
-   * @return itemCorrelation between the {@link org.apache.mahout.cf.taste.model.Item}s
+   * @return similarity between the {@link Item}s, in [-1,1]
    * @throws TasteException if an error occurs while accessing the data
    */
-  double itemCorrelation(Item item1, Item item2) throws TasteException;
+  double itemSimilarity(Item item1, Item item2) throws TasteException;
 
 }

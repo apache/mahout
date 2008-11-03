@@ -60,7 +60,7 @@ public final class TanimotoCoefficientSimilarity implements UserSimilarity, Item
     throw new UnsupportedOperationException();
   }
 
-  public final double userCorrelation(User user1, User user2) throws TasteException {
+  public final double userSimilarity(User user1, User user2) throws TasteException {
 
     if (user1 == null || user2 == null) {
       throw new IllegalArgumentException("user1 or user2 is null");
@@ -115,7 +115,7 @@ public final class TanimotoCoefficientSimilarity implements UserSimilarity, Item
     return result;
   }
 
-  public final double itemCorrelation(Item item1, Item item2) throws TasteException {
+  public final double itemSimilarity(Item item1, Item item2) throws TasteException {
 
     if (item1 == null || item2 == null) {
       throw new IllegalArgumentException("item1 or item2 is null");

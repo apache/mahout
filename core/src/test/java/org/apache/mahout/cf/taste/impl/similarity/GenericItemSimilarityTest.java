@@ -42,11 +42,11 @@ public final class GenericItemSimilarityTest extends SimilarityTestCase {
     correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item1, item1, 0.5));
     correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item1, item3, 0.3));
     GenericItemSimilarity itemCorrelation = new GenericItemSimilarity(correlations);
-    assertEquals(1.0, itemCorrelation.itemCorrelation(item1, item1));
-    assertEquals(0.6, itemCorrelation.itemCorrelation(item1, item2));
-    assertEquals(0.6, itemCorrelation.itemCorrelation(item2, item1));
-    assertEquals(0.3, itemCorrelation.itemCorrelation(item1, item3));
-    assertTrue(Double.isNaN(itemCorrelation.itemCorrelation(item3, item4)));
+    assertEquals(1.0, itemCorrelation.itemSimilarity(item1, item1));
+    assertEquals(0.6, itemCorrelation.itemSimilarity(item1, item2));
+    assertEquals(0.6, itemCorrelation.itemSimilarity(item2, item1));
+    assertEquals(0.3, itemCorrelation.itemSimilarity(item1, item3));
+    assertTrue(Double.isNaN(itemCorrelation.itemSimilarity(item3, item4)));
   }
 
   public void testFromCorrelation() throws Exception {
@@ -57,9 +57,9 @@ public final class GenericItemSimilarityTest extends SimilarityTestCase {
     ItemSimilarity otherSimilarity = new PearsonCorrelationSimilarity(dataModel);
     ItemSimilarity itemSimilarity = new GenericItemSimilarity(otherSimilarity, dataModel);
     assertCorrelationEquals(1.0,
-                            itemSimilarity.itemCorrelation(dataModel.getItem("0"), dataModel.getItem("0")));
+                            itemSimilarity.itemSimilarity(dataModel.getItem("0"), dataModel.getItem("0")));
     assertCorrelationEquals(0.960768922830523,
-                            itemSimilarity.itemCorrelation(dataModel.getItem("0"), dataModel.getItem("1")));
+                            itemSimilarity.itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1")));
   }
 
 }
