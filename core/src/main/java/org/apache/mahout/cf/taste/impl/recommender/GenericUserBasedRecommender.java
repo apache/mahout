@@ -22,6 +22,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -36,7 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -132,7 +132,7 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
                                         TopItems.Estimator<User> estimator) throws TasteException {
     DataModel model = getDataModel();
     User toUser = model.getUser(userID);
-    Collection<User> allUsers = new HashSet<User>(model.getNumUsers());
+    Collection<User> allUsers = new FastSet<User>(model.getNumUsers());
     for (User user : model.getUsers()) {
       allUsers.add(user);
     }
@@ -164,7 +164,7 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
   }
 
   private static Set<Item> getAllOtherItems(Iterable<User> theNeighborhood, User theUser) {
-    Set<Item> allItems = new HashSet<Item>();
+    Set<Item> allItems = new FastSet<Item>();
     for (User user : theNeighborhood) {
       Preference[] prefs = user.getPreferencesAsArray();
       for (int i = 0; i < prefs.length; i++) {

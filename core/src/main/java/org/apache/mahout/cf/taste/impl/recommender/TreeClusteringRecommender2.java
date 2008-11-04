@@ -24,6 +24,7 @@ import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -37,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -303,7 +303,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
         List<Collection<User>> clusters = new LinkedList<Collection<User>>();
         // Begin with a cluster for each user:
         for (User user : model.getUsers()) {
-          Collection<User> newCluster = new HashSet<User>();
+          Collection<User> newCluster = new FastSet<User>();
           newCluster.add(user);
           clusters.add(newCluster);
         }
@@ -381,7 +381,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
       }
 
       // Make new merged cluster
-      Collection<User> merged = new HashSet<User>(cluster1.size() + cluster2.size());
+      Collection<User> merged = new FastSet<User>(cluster1.size() + cluster2.size());
       merged.addAll(cluster1);
       merged.addAll(cluster2);
 
@@ -458,7 +458,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
   private static List<RecommendedItem> computeTopRecsForCluster(Collection<User> cluster)
           throws TasteException {
 
-    Collection<Item> allItems = new HashSet<Item>();
+    Collection<Item> allItems = new FastSet<Item>();
     for (User user : cluster) {
       Preference[] prefs = user.getPreferencesAsArray();
       for (int i = 0; i < prefs.length; i++) {

@@ -22,6 +22,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.ArrayIterator;
 import org.apache.mahout.cf.taste.impl.common.EmptyIterable;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -32,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -183,11 +183,11 @@ public final class GenericDataModel implements DataModel, Serializable {
       if (prefs1 == null || prefs2 == null) {
         return 0;
       }
-      Set<Object> users1 = new HashSet<Object>(prefs1.length);
+      Set<Object> users1 = new FastSet<Object>(prefs1.length);
       for (int i = 0; i < prefs1.length; i++) {
         users1.add(prefs1[i].getUser().getID());
       }
-      Set<Object> users2 = new HashSet<Object>(prefs2.length);
+      Set<Object> users2 = new FastSet<Object>(prefs2.length);
       for (int i = 0; i < prefs2.length; i++) {
         users2.add(prefs2[i].getUser().getID());
       }

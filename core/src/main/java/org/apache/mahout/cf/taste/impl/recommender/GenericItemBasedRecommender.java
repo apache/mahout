@@ -24,6 +24,7 @@ import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -37,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -146,7 +146,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
       toItems.add(model.getItem(itemID));
     }
     TopItems.Estimator<Item> estimator = new MultiMostSimilarEstimator(toItems, similarity, rescorer);
-    Collection<Item> allItems = new HashSet<Item>(model.getNumItems());
+    Collection<Item> allItems = new FastSet<Item>(model.getNumItems());
     for (Item item : model.getItems()) {
       allItems.add(item);
     }
@@ -174,7 +174,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
     Item recommendedItem = model.getItem(itemID);
     TopItems.Estimator<Item> estimator = new RecommendedBecauseEstimator(user, recommendedItem, similarity);
 
-    Collection<Item> allUserItems = new HashSet<Item>();
+    Collection<Item> allUserItems = new FastSet<Item>();
     Preference[] prefs = user.getPreferencesAsArray();
     for (int i = 0; i < prefs.length; i++) {
       allUserItems.add(prefs[i].getItem());
@@ -189,7 +189,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
                                                    TopItems.Estimator<Item> estimator) throws TasteException {
     DataModel model = getDataModel();
     Item toItem = model.getItem(itemID);
-    Collection<Item> allItems = new HashSet<Item>(model.getNumItems());
+    Collection<Item> allItems = new FastSet<Item>(model.getNumItems());
     for (Item item : model.getItems()) {
       allItems.add(item);
     }

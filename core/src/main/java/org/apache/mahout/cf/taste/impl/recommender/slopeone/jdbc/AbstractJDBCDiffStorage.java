@@ -22,6 +22,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.JDBCDataModel;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -35,7 +36,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -249,7 +249,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
       stmt.setObject(3, userID);
       log.debug("Executing SQL query: {}", getRecommendableItemsSQL);
       rs = stmt.executeQuery();
-      Set<Item> items = new HashSet<Item>();
+      Set<Item> items = new FastSet<Item>();
       while (rs.next()) {
         items.add(dataModel.getItem(rs.getObject(1), true));
       }

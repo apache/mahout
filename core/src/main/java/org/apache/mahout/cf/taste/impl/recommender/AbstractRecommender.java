@@ -23,10 +23,10 @@ import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -98,7 +98,7 @@ public abstract class AbstractRecommender implements Recommender {
     if (theUser == null) {
       throw new IllegalArgumentException("theUser is null");
     }
-    Set<Item> allItems = new HashSet<Item>(dataModel.getNumItems());
+    Set<Item> allItems = new FastSet<Item>(dataModel.getNumItems());
     for (Item item : dataModel.getItems()) {
       // If not already preferred by the user, add it
       if (theUser.getPreferenceFor(item.getID()) == null) {

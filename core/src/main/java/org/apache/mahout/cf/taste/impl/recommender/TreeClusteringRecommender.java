@@ -25,6 +25,7 @@ import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -38,7 +39,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -278,7 +278,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
         } else {
           // Begin with a cluster for each user:
           for (User user : model.getUsers()) {
-            Collection<User> newCluster = new HashSet<User>();
+            Collection<User> newCluster = new FastSet<User>();
             newCluster.add(user);
             newClusters.add(newCluster);
           }
@@ -307,7 +307,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
         while (clusterSimilarity.getSimilarity(cluster1, cluster2) >= clusteringThreshold) {
           newClusters.remove(cluster1);
           newClusters.remove(cluster2);
-          Collection<User> merged = new HashSet<User>(cluster1.size() + cluster2.size());
+          Collection<User> merged = new FastSet<User>(cluster1.size() + cluster2.size());
           merged.addAll(cluster1);
           merged.addAll(cluster2);
           newClusters.add(merged);
@@ -330,7 +330,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
         Collection<User> cluster2 = nearestPair.getSecond();
         newClusters.remove(cluster1);
         newClusters.remove(cluster2);
-        Collection<User> merged = new HashSet<User>(cluster1.size() + cluster2.size());
+        Collection<User> merged = new FastSet<User>(cluster1.size() + cluster2.size());
         merged.addAll(cluster1);
         merged.addAll(cluster2);
         newClusters.add(merged);
@@ -375,7 +375,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   private static List<RecommendedItem> computeTopRecsForCluster(Collection<User> cluster)
           throws TasteException {
 
-    Collection<Item> allItems = new HashSet<Item>();
+    Collection<Item> allItems = new FastSet<Item>();
     for (User user : cluster) {
       Preference[] prefs = user.getPreferencesAsArray();
       for (int i = 0; i < prefs.length; i++) {

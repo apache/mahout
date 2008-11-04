@@ -28,6 +28,7 @@ import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -37,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -196,7 +196,7 @@ public final class MemoryDiffStorage implements DiffStorage {
 
   public Set<Item> getRecommendableItems(Object userID) throws TasteException {
     User user = dataModel.getUser(userID);
-    Set<Item> result = new HashSet<Item>(dataModel.getNumItems());
+    Set<Item> result = new FastSet<Item>(dataModel.getNumItems());
     for (Item item : dataModel.getItems()) {
       // If not already preferred by the user, add it
       if (user.getPreferenceFor(item.getID()) == null) {

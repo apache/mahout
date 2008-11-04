@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.locks.ReentrantLock;
@@ -73,7 +72,7 @@ public final class RefreshHelper implements Refreshable {
   }
 
   public static Collection<Refreshable> buildRefreshed(Collection<Refreshable> currentAlreadyRefreshed) {
-    return currentAlreadyRefreshed == null ? new HashSet<Refreshable>(3) : currentAlreadyRefreshed;
+    return currentAlreadyRefreshed == null ? new FastSet<Refreshable>(3) : currentAlreadyRefreshed;
   }
 
   public static void maybeRefresh(Collection<Refreshable> alreadyRefreshed, Refreshable refreshable) {

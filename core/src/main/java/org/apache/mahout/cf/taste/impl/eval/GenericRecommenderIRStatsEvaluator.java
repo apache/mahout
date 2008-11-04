@@ -26,6 +26,7 @@ import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -40,7 +41,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -99,7 +99,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
     for (User user : dataModel.getUsers()) {
       if (random.nextDouble() < evaluationPercentage) {
         Object id = user.getID();
-        Collection<Item> relevantItems = new HashSet<Item>(at);
+        Collection<Item> relevantItems = new FastSet<Item>(at);
         Preference[] prefs = user.getPreferencesAsArray();
         double theRelevanceThreshold;
         if (Double.isNaN(relevanceThreshold)) {
