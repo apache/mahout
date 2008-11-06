@@ -37,6 +37,10 @@ public interface Rescorer<T> {
    */
   double rescore(T thing, double originalScore);
 
+  /**
+   * Returns <code>true</code> to exclude the given thing.
+   * @param thing the thing to filter
+   * @return <code>true</code> to exclude, <code>false</code> otherwise
+   */
   boolean isFiltered(T thing);
-
 }
