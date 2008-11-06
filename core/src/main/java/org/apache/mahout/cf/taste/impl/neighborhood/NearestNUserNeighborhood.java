@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
- * <p>Computes a neigbhorhood consisting of the nearest n {@link User}s to a given {@link User}.
+ * <p>Computes a neighborhood consisting of the nearest n {@link User}s to a given {@link User}.
  * "Nearest" is defined by the given {@link org.apache.mahout.cf.taste.similarity.UserSimilarity}.</p>
  */
 public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
