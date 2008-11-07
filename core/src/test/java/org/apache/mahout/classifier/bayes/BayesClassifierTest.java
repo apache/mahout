@@ -82,7 +82,7 @@ public class BayesClassifierTest extends TestCase {
     document = new String[]{"ff"};
     result = classifier.classify(model, document, "unknown");
     assertTrue("category is null and it shouldn't be", result != null);
-    assertTrue(result + " is not equal to " + "unknown", result.getLabel().equals("unknown"));
+    assertTrue(result + " is not equal to " + "d", result.getLabel().equals("d"));//GSI: was unknown, but we now just pick the first cat
 
     document = new String[]{"cc"};
     result = classifier.classify(model, document, "unknown");

@@ -50,8 +50,8 @@ public class BayesClassifier implements Classifier {
     PriorityQueue pq = new ClassifierResultPriorityQueue(numResults);
     ClassifierResult tmp;
     for (String category : categories){
-      double prob = documentProbability(model, category, document);
-      if (prob < 0.0) {
+      double prob = documentWeight(model, category, document);
+      if (prob > 0.0) {
         tmp = new ClassifierResult(category, prob);
         pq.insert(tmp);
       }
@@ -77,22 +77,22 @@ public class BayesClassifier implements Classifier {
    */
   public ClassifierResult classify(Model model, String[] document, String defaultCategory) {
     ClassifierResult result = new ClassifierResult(defaultCategory);
-    double min = 0.0;
+    double max = Double.MAX_VALUE;
     Collection<String> categories = model.getLabels();
 
     for (String category : categories) {
-      double prob = documentProbability(model, category, document);
-      if (prob < min) {
-        min = prob;
+      double prob = documentWeight(model, category, document);
+      if (prob < max) {
+        max = prob;
         result.setLabel(category);
       }
     }
-    result.setScore(min);
+    result.setScore(max);
     return result;
   }
 
   /**
-   * Calculate the document probability as the multiplication of the
+   * Calculate the document weight as the multiplication of the
    * {@link org.apache.mahout.common.Model#featureWeight(String, String)} for each word given the label
    *
    * @param model       The {@link org.apache.mahout.common.Model}
@@ -101,20 +101,21 @@ public class BayesClassifier implements Classifier {
    * @return The probability
    * @see Model# featureWeight (String, String)
    */
-  public double documentProbability(Model model, String label, String[] document) {
+  public double documentWeight(Model model, String label, String[] document) {
     double result = 0.0;
-    Map<String, Integer> wordList = new HashMap<String, Integer>(1000);
+    Map<String, Integer[]> wordList = new HashMap<String, Integer[]>(1000);
     for (String word : document) {
-      if (wordList.containsKey(word)) {
-        int count = wordList.get(word);
-        wordList.put(word, count + 1);
-      } else {
-        wordList.put(word, 1);
+      Integer [] count = wordList.get(word);
+      if (count == null) {
+        count = new Integer[1];
+        count[0] = 0;
+        wordList.put(word, count);
       }
+      count[0]++;
     }
-    for (Map.Entry<String, Integer> entry : wordList.entrySet()) {
+    for (Map.Entry<String, Integer[]> entry : wordList.entrySet()) {
       String word = entry.getKey();
-      int count = entry.getValue();
+      int count = entry.getValue()[0];
       result += count * model.featureWeight(label, word);
     }
     return result;

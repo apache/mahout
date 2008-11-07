@@ -39,8 +39,8 @@ public class ResultAnalyzer implements Summarizable {
 
   private int incorrectlyClassified = 0;
 
-  public ResultAnalyzer(Collection<String> labelSet) {
-    confusionMatrix = new ConfusionMatrix(labelSet);
+  public ResultAnalyzer(Collection<String> labelSet, String defaultLabel) {
+    confusionMatrix = new ConfusionMatrix(labelSet, defaultLabel);
   }
 
   public ConfusionMatrix getConfusionMatrix(){

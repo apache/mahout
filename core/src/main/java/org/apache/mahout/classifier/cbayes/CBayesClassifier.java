@@ -48,7 +48,7 @@ public class CBayesClassifier implements Classifier{
     PriorityQueue pq = new ClassifierResultPriorityQueue(numResults);
     ClassifierResult tmp;
     for (String category : categories){
-      double prob = documentProbability(model, category, document);
+      double prob = documentWeight(model, category, document);
       if (prob < 0.0) {
         tmp = new ClassifierResult(category, prob);
         pq.insert(tmp);
@@ -79,7 +79,7 @@ public class CBayesClassifier implements Classifier{
     Collection<String> categories = model.getLabels();
 
     for (String category : categories) {
-      double prob = documentProbability(model, category, document);
+      double prob = documentWeight(model, category, document);
       if (prob < min) {
         min = prob;
         result.setLabel(category);
@@ -90,7 +90,7 @@ public class CBayesClassifier implements Classifier{
   }
 
   /**
-   * Calculate the document probability as the multiplication of the
+   * Calculate the document weight as the multiplication of the
    * {@link Model#featureWeight(String, String)} for each word given the label
    *
    * @param model       The {@link org.apache.mahout.common.Model}
@@ -99,20 +99,21 @@ public class CBayesClassifier implements Classifier{
    * @return The probability
    * @see Model# featureWeight (String, String)
    */
-  public double documentProbability(Model model, String label, String[] document) {
+  public double documentWeight(Model model, String label, String[] document) {
     double result = 0.0;
-    Map<String, Integer> wordList = new HashMap<String, Integer>(1000);
+    Map<String, Integer[]> wordList = new HashMap<String, Integer[]>(1000);
     for (String word : document) {
-      if (wordList.containsKey(word)) {
-        int count = wordList.get(word);
-        wordList.put(word, count + 1);
-      } else {
-        wordList.put(word, 1);
-      }      
+      Integer [] count = wordList.get(word);
+      if (count == null) {
+        count = new Integer[1];
+        count[0] = 0;
+        wordList.put(word, count);
+      }
+      count[0]++;
     }
-    for (Map.Entry<String, Integer> entry : wordList.entrySet()) {
+    for (Map.Entry<String, Integer[]> entry : wordList.entrySet()) {
       String word = entry.getKey();
-      int count = entry.getValue();
+      int count = entry.getValue()[0];
       result += count * model.featureWeight(label, word);
     }
     return result;

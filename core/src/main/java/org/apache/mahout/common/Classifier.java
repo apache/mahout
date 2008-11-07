@@ -59,7 +59,7 @@ public interface Classifier {
    * @return The probability
    * @see Model#featureWeight (String, String)
    */
-  public double documentProbability(Model model, String label, String[] document);
+  public double documentWeight(Model model, String label, String[] document);
 
   
 }

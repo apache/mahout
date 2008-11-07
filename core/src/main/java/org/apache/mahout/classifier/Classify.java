@@ -34,7 +34,6 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.classifier.bayes.BayesClassifier;
 import org.apache.mahout.classifier.bayes.BayesModel;
 import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
-import org.apache.mahout.classifier.cbayes.CBayesClassifier;
 import org.apache.mahout.classifier.cbayes.CBayesModel;
 import org.apache.mahout.common.Classifier;
 import org.apache.mahout.common.Model;
@@ -117,14 +116,13 @@ public class Classify {
     if (classifierType.equalsIgnoreCase("bayes")) {
       log.info("Testing Bayes Classifier");
       model = new BayesModel();
-      classifier = new BayesClassifier();
     } else if (classifierType.equalsIgnoreCase("cbayes")) {
       log.info("Testing Complementary Bayes Classifier");
       model = new CBayesModel();
-      classifier = new CBayesClassifier();
     } else {
       throw new IllegalArgumentException("Unrecognized classifier type: " + classifierType);
     }
+    classifier = new BayesClassifier();
 
     model = reader.loadModel(model, fs, modelPaths, conf);
 

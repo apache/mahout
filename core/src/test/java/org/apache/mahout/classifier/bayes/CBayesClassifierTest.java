@@ -89,7 +89,7 @@ public class CBayesClassifierTest extends TestCase {
     document = new String[]{"ff"};
     result = classifier.classify(model, document, "unknown");
     assertTrue("category is null and it shouldn't be", result != null);
-    assertTrue(result + " is not equal to " + "unknown", result.getLabel().equals("unknown"));
+    assertTrue(result + " is not equal to " + "d", result.getLabel().equals("d"));
 
     document = new String[]{"cc"};
     result = classifier.classify(model, document, "unknown");

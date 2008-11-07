@@ -168,7 +168,7 @@ public class TestClassifier {
     File dir = new File(testDirPath);
     File[] subdirs = dir.listFiles();
 
-    ResultAnalyzer resultAnalyzer = new ResultAnalyzer(model.getLabels());
+    ResultAnalyzer resultAnalyzer = new ResultAnalyzer(model.getLabels(), defaultCat);
 
     if (subdirs != null) {
       for (int loop = 0; loop < subdirs.length; loop++) {
