@@ -150,8 +150,8 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
 
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
           throws TasteException {
-    if (userID == null || rescorer == null) {
-      throw new IllegalArgumentException("userID or rescorer is null");
+    if (userID == null) {
+      throw new IllegalArgumentException("userID is null");
     }
     if (howMany < 1) {
       throw new IllegalArgumentException("howMany must be at least 1");
@@ -171,11 +171,11 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
     // And that the rescorer doesn't "reject".
     for (RecommendedItem recommendedItem : recommended) {
       Item item = recommendedItem.getItem();
-      if (rescorer.isFiltered(item)) {
+      if (rescorer != null && rescorer.isFiltered(item)) {
         continue;
       }
       if (theUser.getPreferenceFor(item.getID()) == null &&
-          !Double.isNaN(rescorer.rescore(item, recommendedItem.getValue()))) {
+          (rescorer == null || !Double.isNaN(rescorer.rescore(item, recommendedItem.getValue())))) {
         rescored.add(recommendedItem);
       }
     }
@@ -469,7 +469,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
     TopItems.Estimator<Item> estimator = new Estimator(cluster);
 
     List<RecommendedItem> topItems =
-            TopItems.getTopItems(Integer.MAX_VALUE, allItems, NullRescorer.getItemInstance(), estimator);
+            TopItems.getTopItems(Integer.MAX_VALUE, allItems, null, estimator);
 
     log.debug("Recommendations are: {}", topItems);
     return Collections.unmodifiableList(topItems);

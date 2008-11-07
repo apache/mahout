@@ -105,9 +105,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
     if (howMany < 1) {
       throw new IllegalArgumentException("howMany must be at least 1");
     }
-    if (rescorer == null) {
-      throw new IllegalArgumentException("rescorer is null");
-    }
+
     log.debug("Recommending items for user ID '{}'", userID);
 
     User theUser = getDataModel().getUser(userID);

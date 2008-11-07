@@ -32,15 +32,19 @@ final class ByRescoreComparator implements Comparator<RecommendedItem>, Serializ
   private final Rescorer<Item> rescorer;
 
   ByRescoreComparator(Rescorer<Item> rescorer) {
-    if (rescorer == null) {
-      throw new IllegalArgumentException("rescorer is null");
-    }
     this.rescorer = rescorer;
   }
 
   public int compare(RecommendedItem o1, RecommendedItem o2) {
-    double rescored1 = rescorer.rescore(o1.getItem(), o1.getValue());
-    double rescored2 = rescorer.rescore(o2.getItem(), o2.getValue());
+    double rescored1;
+    double rescored2;
+    if (rescorer == null) {
+      rescored1 = o1.getValue();
+      rescored2 = o2.getValue();
+    } else {
+      rescored1 = rescorer.rescore(o1.getItem(), o1.getValue());
+      rescored2 = rescorer.rescore(o2.getItem(), o2.getValue());
+    }
     if (rescored1 < rescored2) {
       return 1;
     } else if (rescored1 > rescored2) {

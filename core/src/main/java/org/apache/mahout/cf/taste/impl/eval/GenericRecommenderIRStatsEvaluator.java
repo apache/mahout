@@ -129,12 +129,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
           }
 
           int intersectionSize = 0;
-          List<RecommendedItem> recommendedItems;
-          if (rescorer == null) {
-            recommendedItems = recommender.recommend(id, at);
-          } else {
-            recommendedItems = recommender.recommend(id, at, rescorer);
-          }
+          List<RecommendedItem> recommendedItems = recommender.recommend(id, at, rescorer);
           for (RecommendedItem recommendedItem : recommendedItems) {
             if (relevantItems.contains(recommendedItem.getItem())) {
               intersectionSize++;

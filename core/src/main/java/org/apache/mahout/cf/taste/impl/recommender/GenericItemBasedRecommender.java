@@ -83,9 +83,6 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
     if (howMany < 1) {
       throw new IllegalArgumentException("howMany must be at least 1");
     }
-    if (rescorer == null) {
-      throw new IllegalArgumentException("rescorer is null");
-    }
 
     log.debug("Recommending items for user ID '{}'", userID);
 
@@ -116,30 +113,24 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
   }
 
   public List<RecommendedItem> mostSimilarItems(Object itemID, int howMany) throws TasteException {
-    return mostSimilarItems(itemID, howMany, NullRescorer.getItemItemPairInstance());
+    return mostSimilarItems(itemID, howMany, null);
   }
 
   public List<RecommendedItem> mostSimilarItems(Object itemID,
                                                 int howMany,
                                                 Rescorer<Pair<Item, Item>> rescorer) throws TasteException {
-    if (rescorer == null) {
-      throw new IllegalArgumentException("rescorer is null");
-    }
     Item toItem = getDataModel().getItem(itemID);
     TopItems.Estimator<Item> estimator = new MostSimilarEstimator(toItem, similarity, rescorer);
     return doMostSimilarItems(itemID, howMany, estimator);
   }
 
   public List<RecommendedItem> mostSimilarItems(List<Object> itemIDs, int howMany) throws TasteException {
-    return mostSimilarItems(itemIDs, howMany, NullRescorer.getItemItemPairInstance());
+    return mostSimilarItems(itemIDs, howMany, null);
   }
 
   public List<RecommendedItem> mostSimilarItems(List<Object> itemIDs,
                                                 int howMany,
                                                 Rescorer<Pair<Item, Item>> rescorer) throws TasteException {
-    if (rescorer == null) {
-      throw new IllegalArgumentException("rescorer is null");
-    }
     DataModel model = getDataModel();
     List<Item> toItems = new ArrayList<Item>(itemIDs.size());
     for (Object itemID : itemIDs) {
@@ -153,7 +144,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
     for (Item item : toItems) {
       allItems.remove(item);
     }
-    return TopItems.getTopItems(howMany, allItems, NullRescorer.getItemInstance(), estimator);
+    return TopItems.getTopItems(howMany, allItems, null, estimator);
   }
 
   public List<RecommendedItem> recommendedBecause(Object userID,
@@ -181,7 +172,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
     }
     allUserItems.remove(recommendedItem);
 
-    return TopItems.getTopItems(howMany, allUserItems, NullRescorer.getItemInstance(), estimator);
+    return TopItems.getTopItems(howMany, allUserItems, null, estimator);
   }
 
   private List<RecommendedItem> doMostSimilarItems(Object itemID,
@@ -194,7 +185,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
       allItems.add(item);
     }
     allItems.remove(toItem);
-    return TopItems.getTopItems(howMany, allItems, NullRescorer.getItemInstance(), estimator);
+    return TopItems.getTopItems(howMany, allItems, null, estimator);
   }
 
   private double doEstimatePreference(User theUser, Item item) throws TasteException {
@@ -245,11 +236,11 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
 
     public double estimate(Item item) throws TasteException {
       Pair<Item, Item> pair = new Pair<Item, Item>(toItem, item);
-      if (rescorer.isFiltered(pair)) {
+      if (rescorer != null && rescorer.isFiltered(pair)) {
         return Double.NaN;
       }
       double originalEstimate = similarity.itemSimilarity(toItem, item);
-      return rescorer.rescore(pair, originalEstimate);
+      return rescorer == null ? originalEstimate : rescorer.rescore(pair, originalEstimate);
     }
   }
 
@@ -284,11 +275,13 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
       RunningAverage average = new FullRunningAverage();
       for (Item toItem : toItems) {
         Pair<Item, Item> pair = new Pair<Item, Item>(toItem, item);
-        if (rescorer.isFiltered(pair)) {
+        if (rescorer != null && rescorer.isFiltered(pair)) {
           continue;
         }
         double estimate = similarity.itemSimilarity(toItem, item);
-        estimate = rescorer.rescore(pair, estimate);
+        if (rescorer != null) {
+          estimate = rescorer.rescore(pair, estimate);
+        }
         average.addDatum(estimate);
       }
       return average.getAverage();

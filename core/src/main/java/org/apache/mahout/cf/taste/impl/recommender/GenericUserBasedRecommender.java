@@ -75,9 +75,6 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
     if (howMany < 1) {
       throw new IllegalArgumentException("howMany must be at least 1");
     }
-    if (rescorer == null) {
-      throw new IllegalArgumentException("rescorer is null");
-    }
 
     log.debug("Recommending items for user ID '{}'", userID);
 
@@ -113,15 +110,12 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
   }
 
   public List<User> mostSimilarUsers(Object userID, int howMany) throws TasteException {
-    return mostSimilarUsers(userID, howMany, NullRescorer.getUserUserPairInstance());
+    return mostSimilarUsers(userID, howMany, null);
   }
 
   public List<User> mostSimilarUsers(Object userID,
                                      int howMany,
                                      Rescorer<Pair<User, User>> rescorer) throws TasteException {
-    if (rescorer == null) {
-      throw new IllegalArgumentException("rescorer is null");
-    }
     User toUser = getDataModel().getUser(userID);
     TopItems.Estimator<User> estimator = new MostSimilarEstimator(toUser, similarity, rescorer);
     return doMostSimilarUsers(userID, howMany, estimator);
@@ -137,7 +131,7 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
       allUsers.add(user);
     }
     allUsers.remove(toUser);
-    return TopItems.getTopUsers(howMany, allUsers, NullRescorer.getUserInstance(), estimator);
+    return TopItems.getTopUsers(howMany, allUsers, null, estimator);
   }
 
   private double doEstimatePreference(User theUser, Collection<User> theNeighborhood, Item item)
@@ -203,11 +197,11 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
 
     public double estimate(User user) throws TasteException {
       Pair<User, User> pair = new Pair<User, User>(toUser, user);
-      if (rescorer.isFiltered(pair)) {
+      if (rescorer != null && rescorer.isFiltered(pair)) {
         return Double.NaN;
       }
       double originalEstimate = similarity.userSimilarity(toUser, user);
-      return rescorer.rescore(pair, originalEstimate);
+      return rescorer == null ? originalEstimate : rescorer.rescore(pair, originalEstimate);
     }
   }
 

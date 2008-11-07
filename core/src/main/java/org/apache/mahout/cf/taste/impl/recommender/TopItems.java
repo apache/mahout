@@ -44,15 +44,15 @@ public final class TopItems {
                                                   Iterable<Item> allItems,
                                                   Rescorer<Item> rescorer,
                                                   Estimator<Item> estimator) throws TasteException {
-    if (allItems == null || rescorer == null || estimator == null) {
+    if (allItems == null || estimator == null) {
       throw new IllegalArgumentException("argument is null");
     }
     LinkedList<RecommendedItem> topItems = new LinkedList<RecommendedItem>();
     boolean full = false;
     for (Item item : allItems) {
-      if (item.isRecommendable() && !rescorer.isFiltered(item)) {
+      if (item.isRecommendable() && (rescorer == null || !rescorer.isFiltered(item))) {
         double preference = estimator.estimate(item);
-        double rescoredPref = rescorer.rescore(item, preference);
+        double rescoredPref = rescorer == null ? preference : rescorer.rescore(item, preference);
         if (!Double.isNaN(rescoredPref) && (!full || rescoredPref > topItems.getLast().getValue())) {
           // I think this is faster than Collections.binarySearch() over a LinkedList since our
           // comparisons are cheap, which binarySearch() economizes at the expense of more traversals.
@@ -84,11 +84,11 @@ public final class TopItems {
     LinkedList<SimilarUser> topUsers = new LinkedList<SimilarUser>();
     boolean full = false;
     for (User user : allUsers) {
-      if (rescorer.isFiltered(user)) {
+      if (rescorer != null && rescorer.isFiltered(user)) {
         continue;
       }
       double similarity = estimator.estimate(user);
-      double rescoredSimilarity = rescorer.rescore(user, similarity);
+      double rescoredSimilarity = rescorer == null ? similarity : rescorer.rescore(user, similarity);
       if (!Double.isNaN(rescoredSimilarity) &&
           (!full || rescoredSimilarity > topUsers.getLast().getSimilarity())) {
         ListIterator<SimilarUser> iterator = topUsers.listIterator(topUsers.size());

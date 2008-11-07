@@ -49,7 +49,7 @@ public abstract class AbstractRecommender implements Recommender {
    * with a {@link org.apache.mahout.cf.taste.recommender.Rescorer} that does nothing.</p>
    */
   public List<RecommendedItem> recommend(Object userID, int howMany) throws TasteException {
-    return recommend(userID, howMany, NullRescorer.getItemInstance());
+    return recommend(userID, howMany, null);
   }
 
   /**
