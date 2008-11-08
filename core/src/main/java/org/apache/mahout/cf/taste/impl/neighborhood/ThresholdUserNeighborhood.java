@@ -46,7 +46,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
    * @param userSimilarity similarity metric
    * @param dataModel data model
    * @throws IllegalArgumentException if threshold is {@link Double#NaN},
-   * or if samplingRate is not positive and less than or equal to 1.0, or if userCorrelation
+   * or if samplingRate is not positive and less than or equal to 1.0, or if userSimilarity
    * or dataModel are <code>null</code>
    */
   public ThresholdUserNeighborhood(double threshold,
@@ -62,7 +62,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
    * @param samplingRate percentage of users to consider when building neighborhood -- decrease to
    * trade quality for performance
    * @throws IllegalArgumentException if threshold or samplingRate is {@link Double#NaN},
-   * or if samplingRate is not positive and less than or equal to 1.0, or if userCorrelation
+   * or if samplingRate is not positive and less than or equal to 1.0, or if userSimilarity
    * or dataModel are <code>null</code>
    */
   public ThresholdUserNeighborhood(double threshold,
@@ -83,13 +83,13 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
     User theUser = dataModel.getUser(userID);
     List<User> neighborhood = new ArrayList<User>();
     Iterator<? extends User> users = dataModel.getUsers().iterator();
-    UserSimilarity userSimilarityImpl = getUserCorrelation();
+    UserSimilarity userSimilarityImpl = getUserSimilarity();
 
     while (users.hasNext()) {
       User user = users.next();
       if (sampleForUser() && !userID.equals(user.getID())) {
-        double theCorrelation = userSimilarityImpl.userSimilarity(theUser, user);
-        if (!Double.isNaN(theCorrelation) && theCorrelation >= threshold) {
+        double theSimilarity = userSimilarityImpl.userSimilarity(theUser, user);
+        if (!Double.isNaN(theSimilarity) && theSimilarity >= threshold) {
           neighborhood.add(user);
         }
       }

@@ -19,21 +19,19 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
-import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.model.Item;
-import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
-import java.util.ListIterator;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 /**
- * <p>A simple class that refactors the "find top N recommended items" logic that is used in
- * several places in Taste.</p>
+ * <p>A simple class that refactors the "find top N things" logic that is used in several places.</p>
  */
 public final class TopItems {
 
@@ -47,68 +45,60 @@ public final class TopItems {
     if (allItems == null || estimator == null) {
       throw new IllegalArgumentException("argument is null");
     }
-    LinkedList<RecommendedItem> topItems = new LinkedList<RecommendedItem>();
+    Queue<RecommendedItem> topItems = new PriorityQueue<RecommendedItem>(howMany + 1, Collections.reverseOrder());
     boolean full = false;
+    double lowestTopValue = Double.NEGATIVE_INFINITY;
     for (Item item : allItems) {
       if (item.isRecommendable() && (rescorer == null || !rescorer.isFiltered(item))) {
         double preference = estimator.estimate(item);
         double rescoredPref = rescorer == null ? preference : rescorer.rescore(item, preference);
-        if (!Double.isNaN(rescoredPref) && (!full || rescoredPref > topItems.getLast().getValue())) {
-          // I think this is faster than Collections.binarySearch() over a LinkedList since our
-          // comparisons are cheap, which binarySearch() economizes at the expense of more traversals.
-          // We also know that the right position tends to be at the end of the list.
-          ListIterator<RecommendedItem> iterator = topItems.listIterator(topItems.size());
-          while (iterator.hasPrevious()) {
-            if (rescoredPref <= iterator.previous().getValue()) {
-              iterator.next();
-              break;
-            }
-          }
-          iterator.add(new GenericRecommendedItem(item, rescoredPref));
+        if (!Double.isNaN(rescoredPref) && (!full || rescoredPref > lowestTopValue)) {
+          topItems.add(new GenericRecommendedItem(item, rescoredPref));
           if (full) {
-            topItems.removeLast();
+            topItems.poll();
           } else if (topItems.size() > howMany) {
             full = true;
-            topItems.removeLast();
+            topItems.poll();
           }
+          lowestTopValue = topItems.peek().getValue();
         }
       }
     }
-    return topItems;
+    List<RecommendedItem> result = new ArrayList<RecommendedItem>(topItems.size());
+    result.addAll(topItems);
+    Collections.sort(result);
+    return result;
   }
 
   public static List<User> getTopUsers(int howMany,
-                                       Iterable<User> allUsers,
+                                       Iterable<? extends User> allUsers,
                                        Rescorer<User> rescorer,
                                        Estimator<User> estimator) throws TasteException {
-    LinkedList<SimilarUser> topUsers = new LinkedList<SimilarUser>();
+    Queue<SimilarUser> topUsers = new PriorityQueue<SimilarUser>(howMany + 1, Collections.reverseOrder());
     boolean full = false;
+    double lowestTopValue = Double.NEGATIVE_INFINITY;
     for (User user : allUsers) {
       if (rescorer != null && rescorer.isFiltered(user)) {
         continue;
       }
       double similarity = estimator.estimate(user);
       double rescoredSimilarity = rescorer == null ? similarity : rescorer.rescore(user, similarity);
-      if (!Double.isNaN(rescoredSimilarity) &&
-          (!full || rescoredSimilarity > topUsers.getLast().getSimilarity())) {
-        ListIterator<SimilarUser> iterator = topUsers.listIterator(topUsers.size());
-        while (iterator.hasPrevious()) {
-          if (rescoredSimilarity <= iterator.previous().getSimilarity()) {
-            iterator.next();
-            break;
-          }
-        }
-        iterator.add(new SimilarUser(user, similarity));
+      if (!Double.isNaN(rescoredSimilarity) && (!full || rescoredSimilarity > lowestTopValue)) {
+        topUsers.add(new SimilarUser(user, similarity));
         if (full) {
-          topUsers.removeLast();
+          topUsers.poll();
         } else if (topUsers.size() > howMany) {
           full = true;
-          topUsers.removeLast();
+          topUsers.poll();
         }
+        lowestTopValue = topUsers.peek().getSimilarity();
       }
     }
-    List<User> result = new ArrayList<User>(topUsers.size());
-    for (SimilarUser similarUser : topUsers) {
+    List<SimilarUser> sorted = new ArrayList<SimilarUser>(topUsers.size());
+    sorted.addAll(topUsers);
+    Collections.sort(sorted);
+    List<User> result = new ArrayList<User>(sorted.size());
+    for (SimilarUser similarUser : sorted) {
       result.add(similarUser.getUser());
     }
     return result;
@@ -121,91 +111,35 @@ public final class TopItems {
    * @see GenericItemSimilarity#GenericItemSimilarity(org.apache.mahout.cf.taste.similarity.ItemSimilarity,
    *  org.apache.mahout.cf.taste.model.DataModel, int)
    */
-  public static List<GenericItemSimilarity.ItemItemCorrelation> getTopItemItemCorrelations(
-          int howMany, Iterable<GenericItemSimilarity.ItemItemCorrelation> allCorrelations) {
-    LinkedList<GenericItemSimilarity.ItemItemCorrelation> topCorrelations =
-            new LinkedList<GenericItemSimilarity.ItemItemCorrelation>();
+  public static List<GenericItemSimilarity.ItemItemSimilarity> getTopItemItemSimilarities(
+          int howMany, Iterable<GenericItemSimilarity.ItemItemSimilarity> allSimilarities) {
+    Queue<GenericItemSimilarity.ItemItemSimilarity> topSimilarities =
+            new PriorityQueue<GenericItemSimilarity.ItemItemSimilarity>(howMany + 1, Collections.reverseOrder());
     boolean full = false;
-    for (GenericItemSimilarity.ItemItemCorrelation correlation : allCorrelations) {
-      double value = correlation.getValue();
-      if (!full || value > topCorrelations.getLast().getValue()) {
-        ListIterator<GenericItemSimilarity.ItemItemCorrelation> iterator =
-                topCorrelations.listIterator(topCorrelations.size());
-        while (iterator.hasPrevious()) {
-          if (value <= iterator.previous().getValue()) {
-            iterator.next();
-            break;
-          }
-        }
-        iterator.add(correlation);
+    double lowestTopValue = Double.NEGATIVE_INFINITY;
+    for (GenericItemSimilarity.ItemItemSimilarity similarity : allSimilarities) {
+      double value = similarity.getValue();
+      if (!full || value > lowestTopValue) {
+        topSimilarities.add(similarity);
         if (full) {
-          topCorrelations.removeLast();
-        } else if (topCorrelations.size() > howMany) {
+          topSimilarities.poll();
+        } else if (topSimilarities.size() > howMany) {
           full = true;
-          topCorrelations.removeLast();
+          topSimilarities.poll();
         }
+        lowestTopValue = topSimilarities.peek().getValue();
       }
     }
-    return topCorrelations;
+    List<GenericItemSimilarity.ItemItemSimilarity> result =
+      new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(topSimilarities.size());
+    result.addAll(topSimilarities);
+    Collections.sort(result);
+    return result;
   }
 
   public static interface Estimator<T> {
 
     double estimate(T thing) throws TasteException;
-  }
-
-  // Hmm, should this be exposed publicly like RecommendedItem?
-  private static class SimilarUser implements User {
-
-    private final User user;
-    private final double similarity;
-
-    private SimilarUser(User user, double similarity) {
-      this.user = user;
-      this.similarity = similarity;
-    }
-
-    public Object getID() {
-      return user.getID();
-    }
-
-    public Preference getPreferenceFor(Object itemID) {
-      return user.getPreferenceFor(itemID);
-    }
-
-    public Iterable<Preference> getPreferences() {
-      return user.getPreferences();
-    }
-
-    public Preference[] getPreferencesAsArray() {
-      return user.getPreferencesAsArray();
-    }
-
-    User getUser() {
-      return user;
-    }
-
-    double getSimilarity() {
-      return similarity;
-    }
-
-    @Override
-    public int hashCode() {
-      return user.hashCode() ^ RandomUtils.hashDouble(similarity);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (!(o instanceof SimilarUser)) {
-        return false;
-      }
-      SimilarUser other = (SimilarUser) o;
-      return user.equals(other.user) && similarity == other.similarity;
-    }
-
-    public int compareTo(User user) {
-      return this.user.compareTo(user);
-    }
   }
 
 }

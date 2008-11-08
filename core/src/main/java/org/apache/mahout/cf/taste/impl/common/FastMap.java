@@ -62,7 +62,7 @@ public final class FastMap<K, V> implements Map<K, V> {
    * Creates a new {@link FastMap} with default capacity.
    */
   public FastMap() {
-    this(11, NO_MAX_SIZE);
+    this(5, NO_MAX_SIZE);
   }
 
   public FastMap(int size) {

@@ -118,20 +118,13 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
                                      Rescorer<Pair<User, User>> rescorer) throws TasteException {
     User toUser = getDataModel().getUser(userID);
     TopItems.Estimator<User> estimator = new MostSimilarEstimator(toUser, similarity, rescorer);
-    return doMostSimilarUsers(userID, howMany, estimator);
+    return doMostSimilarUsers(howMany, estimator);
   }
 
-  private List<User> doMostSimilarUsers(Object userID,
-                                        int howMany,
+  private List<User> doMostSimilarUsers(int howMany,
                                         TopItems.Estimator<User> estimator) throws TasteException {
     DataModel model = getDataModel();
-    User toUser = model.getUser(userID);
-    Collection<User> allUsers = new FastSet<User>(model.getNumUsers());
-    for (User user : model.getUsers()) {
-      allUsers.add(user);
-    }
-    allUsers.remove(toUser);
-    return TopItems.getTopUsers(howMany, allUsers, null, estimator);
+    return TopItems.getTopUsers(howMany, model.getUsers(), null, estimator);
   }
 
   private double doEstimatePreference(User theUser, Collection<User> theNeighborhood, Item item)
@@ -140,21 +133,21 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
       return Double.NaN;
     }
     double preference = 0.0;
-    double totalCorrelation = 0.0;
+    double totalSimilarity = 0.0;
     for (User user : theNeighborhood) {
       if (!user.equals(theUser)) {
         // See GenericItemBasedRecommender.doEstimatePreference() too
         Preference pref = user.getPreferenceFor(item.getID());
         if (pref != null) {
-          double theCorrelation = similarity.userSimilarity(theUser, user) + 1.0;
-          if (!Double.isNaN(theCorrelation)) {
-            preference += theCorrelation * pref.getValue();
-            totalCorrelation += theCorrelation;
+          double theSimilarity = similarity.userSimilarity(theUser, user) + 1.0;
+          if (!Double.isNaN(theSimilarity)) {
+            preference += theSimilarity * pref.getValue();
+            totalSimilarity += theSimilarity;
           }
         }
       }
     }
-    return totalCorrelation == 0.0 ? Double.NaN : preference / totalCorrelation;
+    return totalSimilarity == 0.0 ? Double.NaN : preference / totalSimilarity;
   }
 
   private static Set<Item> getAllOtherItems(Iterable<User> theNeighborhood, User theUser) {
@@ -196,6 +189,10 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
     }
 
     public double estimate(User user) throws TasteException {
+      // Don't consider the user itself as a possible most similar user
+      if (user.equals(toUser)) {
+        return Double.NaN;
+      }
       Pair<User, User> pair = new Pair<User, User>(toUser, user);
       if (rescorer != null && rescorer.isFiltered(pair)) {
         return Double.NaN;

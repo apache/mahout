@@ -21,16 +21,13 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.impl.common.RandomUtils;
+import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 
 /**
  * <p>Computes a neighborhood consisting of the nearest n {@link User}s to a given {@link User}.
@@ -46,7 +43,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
    * @param n neighborhood size
    * @param userSimilarity nearness metric
    * @param dataModel data model
-   * @throws IllegalArgumentException if n &lt; 1, or userCorrelation or dataModel are <code>null</code>
+   * @throws IllegalArgumentException if n &lt; 1, or userSimilarity or dataModel are <code>null</code>
    */
   public NearestNUserNeighborhood(int n,
                                   UserSimilarity userSimilarity,
@@ -61,7 +58,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
    * @param samplingRate percentage of users to consider when building neighborhood -- decrease to
    * trade quality for performance
    * @throws IllegalArgumentException if n &lt; 1 or samplingRate is NaN or not in (0,1],
-   * or userCorrelation or dataModel are <code>null</code>
+   * or userSimilarity or dataModel are <code>null</code>
    */
   public NearestNUserNeighborhood(int n,
                                   UserSimilarity userSimilarity,
@@ -79,36 +76,11 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
 
     DataModel dataModel = getDataModel();
     User theUser = dataModel.getUser(userID);
-    UserSimilarity userSimilarityImpl = getUserCorrelation();
+    UserSimilarity userSimilarityImpl = getUserSimilarity();
 
-    LinkedList<UserCorrelationPair> queue = new LinkedList<UserCorrelationPair>();
-    boolean full = false;
-    for (User user : dataModel.getUsers()) {
-      if (sampleForUser() && !userID.equals(user.getID())) {
-        double theCorrelation = userSimilarityImpl.userSimilarity(theUser, user);
-        if (!Double.isNaN(theCorrelation) && (!full || theCorrelation > queue.getLast().theCorrelation)) {
-          ListIterator<UserCorrelationPair> iterator = queue.listIterator(queue.size());
-          while (iterator.hasPrevious()) {
-            if (theCorrelation <= iterator.previous().theCorrelation) {
-              iterator.next();
-              break;
-            }
-          }
-          iterator.add(new UserCorrelationPair(user, theCorrelation));
-          if (full) {
-            queue.removeLast();
-          } else if (queue.size() > n) {
-            full = true;
-            queue.removeLast();
-          }
-        }
-      }
-    }
+    TopItems.Estimator<User> estimator = new Estimator(userSimilarityImpl, theUser);
 
-    List<User> neighborhood = new ArrayList<User>(queue.size());
-    for (UserCorrelationPair pair : queue) {
-      neighborhood.add(pair.user);
-    }
+    List<User> neighborhood = TopItems.getTopUsers(n, dataModel.getUsers(), null, estimator);
 
     log.trace("UserNeighborhood around user ID '{}' is: {}", userID, neighborhood);
 
@@ -120,34 +92,20 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
     return "NearestNUserNeighborhood";
   }
 
-  private static final class UserCorrelationPair implements Comparable<UserCorrelationPair> {
+  private static class Estimator implements TopItems.Estimator<User> {
+    private final UserSimilarity userSimilarityImpl;
+    private final User theUser;
 
-    final User user;
-    final double theCorrelation;
-
-    private UserCorrelationPair(User user, double theCorrelation) {
-      this.user = user;
-      this.theCorrelation = theCorrelation;
+    public Estimator(UserSimilarity userSimilarityImpl, User theUser) {
+      this.userSimilarityImpl = userSimilarityImpl;
+      this.theUser = theUser;
     }
 
-    @Override
-    public int hashCode() {
-      return user.hashCode() ^ RandomUtils.hashDouble(theCorrelation);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (!(o instanceof UserCorrelationPair)) {
-        return false;
+    public double estimate(User user) throws TasteException {
+      if (user.equals(theUser)) {
+        return Double.NaN;
       }
-      UserCorrelationPair other = (UserCorrelationPair) o;
-      return user.equals(other.user) && theCorrelation == other.theCorrelation;
-    }
-
-    public int compareTo(UserCorrelationPair otherPair) {
-      double otherCorrelation = otherPair.theCorrelation;
-      return theCorrelation > otherCorrelation ? -1 : theCorrelation < otherCorrelation ? 1 : 0;
+      return userSimilarityImpl.userSimilarity(theUser, user);
     }
   }
-
 }

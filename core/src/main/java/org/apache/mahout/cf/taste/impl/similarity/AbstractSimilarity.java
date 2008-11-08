@@ -28,7 +28,7 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.transforms.CorrelationTransform;
+import org.apache.mahout.cf.taste.transforms.SimilarityTransform;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,8 +38,7 @@ import java.util.concurrent.Callable;
 
 /**
  * Abstract superclass encapsulating functionality that is common to most
- * implementations in this package, including the basic correlation algorithm,
- * normalization, transforms, etc.
+ * implementations in this package.
  */
 abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
 
@@ -48,7 +47,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
   private final DataModel dataModel;
   private PreferenceInferrer inferrer;
   private PreferenceTransform prefTransform;
-  private CorrelationTransform<Object> correlationTransform;
+  private SimilarityTransform<Object> similarityTransform;
   private boolean weighted;
   private int cachedNumItems;
   private int cachedNumUsers;
@@ -82,7 +81,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     this.refreshHelper.addDependency(this.dataModel);
     this.refreshHelper.addDependency(this.inferrer);
     this.refreshHelper.addDependency(this.prefTransform);
-    this.refreshHelper.addDependency(this.correlationTransform);
+    this.refreshHelper.addDependency(this.similarityTransform);
   }
 
   final DataModel getDataModel() {
@@ -108,12 +107,12 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     this.prefTransform = prefTransform;
   }
 
-  public final CorrelationTransform<Object> getCorrelationTransform() {
-    return correlationTransform;
+  public final SimilarityTransform<Object> getSimilarityTransform() {
+    return similarityTransform;
   }
 
-  public final void setCorrelationTransform(CorrelationTransform<Object> correlationTransform) {
-    this.correlationTransform = correlationTransform;
+  public final void setSimilarityTransform(SimilarityTransform<Object> similarityTransform) {
+    this.similarityTransform = similarityTransform;
   }
 
   final boolean isWeighted() {
@@ -121,12 +120,12 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
   }
 
   /**
-   * <p>Several subclasses in this package implement this method to actually compute the correlation
+   * <p>Several subclasses in this package implement this method to actually compute the similarity
    * from figures computed over users or items. Note that the computations in this class "center" the
    * data, such that X and Y's mean are 0.</p>
    *
    * <p>Note that the sum of all X and Y values must then be 0. This value isn't passed down into
-   * the standard correlation computations as a result.</p>
+   * the standard similarity computations as a result.</p>
    *
    * @param n total number of users or items
    * @param sumXY sum of product of user/item preference values, over all items/users prefererred by
@@ -134,7 +133,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
    * @param sumX2 sum of the square of user/item preference values, over the first item/user
    * @param sumY2 sum of the square of the user/item preference values, over the second item/user
    * @param sumXYdiff2 sum of squares of differences in X and Y values
-   * @return correlation value between -1.0 and 1.0, inclusive, or {@link Double#NaN} if no correlation
+   * @return similarity value between -1.0 and 1.0, inclusive, or {@link Double#NaN} if no similarity
    *         can be computed (e.g. when no {@link Item}s have been rated by both {@link User}s
    */
   abstract double computeResult(int n, double sumXY, double sumX2, double sumY2, double sumXYdiff2);
@@ -244,8 +243,8 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
 
     double result = computeResult(count, centeredSumXY, centeredSumX2, centeredSumY2, sumXYdiff2);
 
-    if (correlationTransform != null) {
-      result = correlationTransform.transformCorrelation(user1, user2, result);
+    if (similarityTransform != null) {
+      result = similarityTransform.transformSimilarity(user1, user2, result);
     }
 
     if (!Double.isNaN(result)) {
@@ -332,8 +331,8 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
 
     double result = computeResult(count, centeredSumXY, centeredSumX2, centeredSumY2, sumXYdiff2);
 
-    if (correlationTransform != null) {
-      result = correlationTransform.transformCorrelation(item1, item2, result);
+    if (similarityTransform != null) {
+      result = similarityTransform.transformSimilarity(item1, item2, result);
     }
 
     if (!Double.isNaN(result)) {

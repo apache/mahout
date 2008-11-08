@@ -18,16 +18,16 @@
 package org.apache.mahout.cf.taste.impl.transforms;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
-import org.apache.mahout.cf.taste.transforms.CorrelationTransform;
+import org.apache.mahout.cf.taste.transforms.SimilarityTransform;
 
 import java.util.Collection;
 
 /**
- * <p>Applies "case amplification" to correlations. This essentially makes big values bigger
+ * <p>Applies "case amplification" to similarities. This essentially makes big values bigger
  * and small values smaller by raising each score to a power. It could however be used to achieve the
  * opposite effect.</p>
  */
-public final class CaseAmplification implements CorrelationTransform<Object> {
+public final class CaseAmplification implements SimilarityTransform<Object> {
 
   private final double factor;
 
@@ -45,16 +45,16 @@ public final class CaseAmplification implements CorrelationTransform<Object> {
   }
 
   /**
-   * <p>Transforms one correlation value. This implementation is such that it's possible to define this
+   * <p>Transforms one similarity value. This implementation is such that it's possible to define this
    * transformation on one value in isolation. The "thing" parameters are therefore unused.</p>
    *
    * @param thing1 unused
    * @param thing2 unused
-   * @param value correlation to transform
+   * @param value similarity to transform
    * @return <code>value<sup>factor</sup></code> if value is nonnegative;
    *         <code>-value<sup>-factor</sup></code> otherwise
    */
-  public double transformCorrelation(Object thing1, Object thing2, double value) {
+  public double transformSimilarity(Object thing1, Object thing2, double value) {
     return value < 0.0 ? -Math.pow(-value, factor) : Math.pow(value, factor);
   }
 

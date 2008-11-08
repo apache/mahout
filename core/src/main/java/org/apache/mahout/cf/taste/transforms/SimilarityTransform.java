@@ -20,19 +20,18 @@ package org.apache.mahout.cf.taste.transforms;
 import org.apache.mahout.cf.taste.common.Refreshable;
 
 /**
- * <p>Implementations encapsulate some transformation on correlation values between two
- * things, where things might be {@link org.apache.mahout.cf.taste.model.User}s or {@link org.apache.mahout.cf.taste.model.Item}s or
+ * <p>Implementations encapsulate some transformation on similarity values between two
+ * things, where things might be {@link org.apache.mahout.cf.taste.model.User}s or
+ * {@link org.apache.mahout.cf.taste.model.Item}s or
  * something else.</p>
  */
-public interface CorrelationTransform<T> extends Refreshable {
+public interface SimilarityTransform<T> extends Refreshable {
 
   /**
-   * @param thing1
-   * @param thing2
-   * @param value original correlation between thing1 and thing2
+   * @param value original similarity between thing1 and thing2
    * (should be in [-1,1])
-   * @return transformed correlation (should be in [-1,1])
+   * @return transformed similarity (should be in [-1,1])
    */
-  double transformCorrelation(T thing1, T thing2, double value);
+  double transformSimilarity(T thing1, T thing2, double value);
 
 }

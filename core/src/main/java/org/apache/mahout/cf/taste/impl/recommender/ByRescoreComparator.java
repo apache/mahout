@@ -25,7 +25,8 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 /**
- * <p>A simple {@link org.apache.mahout.cf.taste.recommender.Rescorer} which always returns the original score.</p>
+ * <p>Defines ordering on {@link RecommendedItem} by the rescored value of the recommendations' estimated
+ * preference value, from high to low.</p>
  */
 final class ByRescoreComparator implements Comparator<RecommendedItem>, Serializable {
 

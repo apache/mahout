@@ -35,7 +35,7 @@ import java.util.Collection;
 public final class CachingItemSimilarity implements ItemSimilarity {
 
   private final ItemSimilarity similarity;
-  private final Cache<Pair<Item, Item>, Double> correlationCache;
+  private final Cache<Pair<Item, Item>, Double> similarityCache;
 
   public CachingItemSimilarity(ItemSimilarity similarity, DataModel dataModel) throws TasteException {
     if (similarity == null) {
@@ -43,7 +43,7 @@ public final class CachingItemSimilarity implements ItemSimilarity {
     }
     this.similarity = similarity;
     int maxCacheSize = dataModel.getNumItems(); // just a dumb heuristic for sizing
-    this.correlationCache = new Cache<Pair<Item, Item>, Double>(new CorrelationRetriever(similarity), maxCacheSize);
+    this.similarityCache = new Cache<Pair<Item, Item>, Double>(new SimilarityRetriever(similarity), maxCacheSize);
   }
 
   public double itemSimilarity(Item item1, Item item2) throws TasteException {
@@ -53,21 +53,22 @@ public final class CachingItemSimilarity implements ItemSimilarity {
     } else {
       key = new Pair<Item, Item>(item2, item1);
     }
-    return correlationCache.get(key);
+    return similarityCache.get(key);
   }
 
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    correlationCache.clear();
+    similarityCache.clear();
     alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
     RefreshHelper.maybeRefresh(alreadyRefreshed, similarity);
   }
 
-  private static final class CorrelationRetriever implements Retriever<Pair<Item, Item>, Double> {
+  private static final class SimilarityRetriever implements Retriever<Pair<Item, Item>, Double> {
     private final ItemSimilarity similarity;
 
-    private CorrelationRetriever(ItemSimilarity similarity) {
+    private SimilarityRetriever(ItemSimilarity similarity) {
       this.similarity = similarity;
     }
+
     public Double get(Pair<Item, Item> key) throws TasteException {
       return similarity.itemSimilarity(key.getFirst(), key.getSecond());
     }

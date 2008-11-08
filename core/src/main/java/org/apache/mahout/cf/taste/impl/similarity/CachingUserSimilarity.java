@@ -36,7 +36,7 @@ import java.util.Collection;
 public final class CachingUserSimilarity implements UserSimilarity {
 
   private final UserSimilarity similarity;
-  private final Cache<Pair<User, User>, Double> correlationCache;
+  private final Cache<Pair<User, User>, Double> similarityCache;
 
   public CachingUserSimilarity(UserSimilarity similarity, DataModel dataModel) throws TasteException {
     if (similarity == null) {
@@ -44,7 +44,7 @@ public final class CachingUserSimilarity implements UserSimilarity {
     }
     this.similarity = similarity;
     int maxCacheSize = dataModel.getNumUsers(); // just a dumb heuristic for sizing    
-    this.correlationCache = new Cache<Pair<User, User>, Double>(new CorrelationRetriever(similarity), maxCacheSize);
+    this.similarityCache = new Cache<Pair<User, User>, Double>(new SimilarityRetriever(similarity), maxCacheSize);
   }
 
   public double userSimilarity(User user1, User user2) throws TasteException {
@@ -54,26 +54,27 @@ public final class CachingUserSimilarity implements UserSimilarity {
     } else {
       key = new Pair<User, User>(user2, user1);
     }
-    return correlationCache.get(key);
+    return similarityCache.get(key);
   }
 
   public void setPreferenceInferrer(PreferenceInferrer inferrer) {
-    correlationCache.clear();
+    similarityCache.clear();
     similarity.setPreferenceInferrer(inferrer);
   }
 
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    correlationCache.clear();
+    similarityCache.clear();
     alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
     RefreshHelper.maybeRefresh(alreadyRefreshed, similarity);
   }
 
-  private static final class CorrelationRetriever implements Retriever<Pair<User, User>, Double> {
+  private static final class SimilarityRetriever implements Retriever<Pair<User, User>, Double> {
     private final UserSimilarity similarity;
 
-    private CorrelationRetriever(UserSimilarity similarity) {
+    private SimilarityRetriever(UserSimilarity similarity) {
       this.similarity = similarity;
     }
+
     public Double get(Pair<User, User> key) throws TasteException {
       return similarity.userSimilarity(key.getFirst(), key.getSecond());
     }

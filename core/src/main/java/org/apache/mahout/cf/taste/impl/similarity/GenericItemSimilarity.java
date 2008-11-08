@@ -35,7 +35,7 @@ import java.util.NoSuchElementException;
 
 /**
  * <p>A "generic" {@link ItemSimilarity} which takes a static list of precomputed {@link Item}
- * correlations and bases its responses on that alone. The values may have been precomputed
+ * similarities and bases its responses on that alone. The values may have been precomputed
  * offline by another process, stored in a file, and then read and fed into an instance of this class.</p>
  *
  * <p>This is perhaps the best {@link ItemSimilarity} to use with
@@ -45,98 +45,104 @@ import java.util.NoSuchElementException;
  */
 public final class GenericItemSimilarity implements ItemSimilarity {
 
-  private final Map<Item, Map<Item, Double>> correlationMaps = new FastMap<Item, Map<Item, Double>>();
+  private final Map<Item, Map<Item, Double>> similarityMaps = new FastMap<Item, Map<Item, Double>>();
 
   /**
-   * <p>Creates a {@link GenericItemSimilarity} from a precomputed list of {@link ItemItemCorrelation}s. Each
-   * represents the correlation between two distinct items. Since correlation is assumed to be symmetric,
-   * it is not necessary to specify correlation between item1 and item2, and item2 and item1. Both are the same.
-   * It is also not necessary to specify a correlation between any item and itself; these are assumed to be 1.0.</p>
+   * <p>Creates a {@link GenericItemSimilarity} from a precomputed list of
+   * {@link org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity.ItemItemSimilarity}s. Each
+   * represents the similarity between two distinct items. Since similarity is assumed to be symmetric,
+   * it is not necessary to specify similarity between item1 and item2, and item2 and item1. Both are the same.
+   * It is also not necessary to specify a similarity between any item and itself; these are assumed to be 1.0.</p>
    *
-   * <p>Note that specifying a correlation between two items twice is not an error, but, the later value will
+   * <p>Note that specifying a similarity between two items twice is not an error, but, the later value will
    * win.</p>
    *
-   * @param correlations set of {@link ItemItemCorrelation}s on which to base this instance
+   * @param similarities set of
+   *  {@link org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity.ItemItemSimilarity}s
+   *  on which to base this instance
    */
-  public GenericItemSimilarity(Iterable<ItemItemCorrelation> correlations) {
-    initCorrelationMaps(correlations);
+  public GenericItemSimilarity(Iterable<ItemItemSimilarity> similarities) {
+    initSimilarityMaps(similarities);
   }
 
   /**
-   * <p>Like {@link #GenericItemSimilarity(Iterable)}, but will only keep the specified number of correlations
-   * from the given {@link Iterable} of correlations. It will keep those with the highest correlation --
+   * <p>Like {@link #GenericItemSimilarity(Iterable)}, but will only keep the specified number of similarities
+   * from the given {@link Iterable} of similarities. It will keep those with the highest similarity --
    * those that are therefore most important.</p>
    *
    * <p>Thanks to tsmorton for suggesting this and providing part of the implementation.</p>
    *
-   * @param correlations set of {@link ItemItemCorrelation}s on which to base this instance
-   * @param maxToKeep maximum number of correlations to keep
+   * @param similarities set of
+   *  {@link org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity.ItemItemSimilarity}s
+   *  on which to base this instance
+   * @param maxToKeep maximum number of similarities to keep
    */
-  public GenericItemSimilarity(Iterable<ItemItemCorrelation> correlations, int maxToKeep) {
-    Iterable<ItemItemCorrelation> keptCorrelations = TopItems.getTopItemItemCorrelations(maxToKeep, correlations);
-    initCorrelationMaps(keptCorrelations);
+  public GenericItemSimilarity(Iterable<ItemItemSimilarity> similarities, int maxToKeep) {
+    Iterable<ItemItemSimilarity> keptSimilarities = TopItems.getTopItemItemSimilarities(maxToKeep, similarities);
+    initSimilarityMaps(keptSimilarities);
   }
 
   /**
-   * <p>Builds a list of item-item correlations given an {@link ItemSimilarity} implementation and a
-   * {@link DataModel}, rather than a list of {@link ItemItemCorrelation}s.</p>
+   * <p>Builds a list of item-item similarities given an {@link ItemSimilarity} implementation and a
+   * {@link DataModel}, rather than a list of
+   * {@link org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity.ItemItemSimilarity}s.</p>
    *
    * <p>It's valid to build a {@link GenericItemSimilarity} this way, but perhaps missing some of the point
-   * of an item-based recommender. Item-based recommenders use the assumption that item-item correlations
+   * of an item-based recommender. Item-based recommenders use the assumption that item-item similarities
    * are relatively fixed, and might be known already independent of user preferences. Hence it is useful
    * to inject that information, using {@link #GenericItemSimilarity(Iterable)}.</p>
    *
-   * @param otherSimilarity other {@link ItemSimilarity} to get correlations from
+   * @param otherSimilarity other {@link ItemSimilarity} to get similarities from
    * @param dataModel data model to get {@link Item}s from
    * @throws TasteException if an error occurs while accessing the {@link DataModel} items
    */
   public GenericItemSimilarity(ItemSimilarity otherSimilarity, DataModel dataModel) throws TasteException {
     List<? extends Item> items = IteratorUtils.iterableToList(dataModel.getItems());
-    Iterator<ItemItemCorrelation> it = new DataModelCorrelationsIterator(otherSimilarity, items);
-    initCorrelationMaps(new IteratorIterable<ItemItemCorrelation>(it));
+    Iterator<ItemItemSimilarity> it = new DataModelSimilaritiesIterator(otherSimilarity, items);
+    initSimilarityMaps(new IteratorIterable<ItemItemSimilarity>(it));
   }
 
   /**
    * <p>Like {@link #GenericItemSimilarity(ItemSimilarity, DataModel)} )}, but will only
-   * keep the specified number of correlations from the given {@link DataModel}.
-   * It will keep those with the highest correlation -- those that are therefore most important.</p>
+   * keep the specified number of similarities from the given {@link DataModel}.
+   * It will keep those with the highest similarity -- those that are therefore most important.</p>
    *
    * <p>Thanks to tsmorton for suggesting this and providing part of the implementation.</p>
    *
-   * @param otherSimilarity other {@link ItemSimilarity} to get correlations from
+   * @param otherSimilarity other {@link ItemSimilarity} to get similarities from
    * @param dataModel data model to get {@link Item}s from
-   * @param maxToKeep maximum number of correlations to keep
+   * @param maxToKeep maximum number of similarities to keep
    * @throws TasteException if an error occurs while accessing the {@link DataModel} items
    */
   public GenericItemSimilarity(ItemSimilarity otherSimilarity, DataModel dataModel, int maxToKeep)
           throws TasteException {
     List<? extends Item> items = IteratorUtils.iterableToList(dataModel.getItems());
-    Iterator<ItemItemCorrelation> it = new DataModelCorrelationsIterator(otherSimilarity, items);
-    Iterable<ItemItemCorrelation> keptCorrelations =
-            TopItems.getTopItemItemCorrelations(maxToKeep, new IteratorIterable<ItemItemCorrelation>(it));
-    initCorrelationMaps(keptCorrelations);
+    Iterator<ItemItemSimilarity> it = new DataModelSimilaritiesIterator(otherSimilarity, items);
+    Iterable<ItemItemSimilarity> keptSimilarities =
+            TopItems.getTopItemItemSimilarities(maxToKeep, new IteratorIterable<ItemItemSimilarity>(it));
+    initSimilarityMaps(keptSimilarities);
   }
 
-  private void initCorrelationMaps(Iterable<ItemItemCorrelation> correlations) {
-    for (ItemItemCorrelation iic : correlations) {
-      Item correlationItem1 = iic.getItem1();
-      Item correlationItem2 = iic.getItem2();
-      int compare = correlationItem1.compareTo(correlationItem2);
+  private void initSimilarityMaps(Iterable<ItemItemSimilarity> similarities) {
+    for (ItemItemSimilarity iic : similarities) {
+      Item similarityItem1 = iic.getItem1();
+      Item similarityItem2 = iic.getItem2();
+      int compare = similarityItem1.compareTo(similarityItem2);
       if (compare != 0) {
         // Order them -- first key should be the "smaller" one
         Item item1;
         Item item2;
         if (compare < 0) {
-          item1 = correlationItem1;
-          item2 = correlationItem2;
+          item1 = similarityItem1;
+          item2 = similarityItem2;
         } else {
-          item1 = correlationItem2;
-          item2 = correlationItem1;
+          item1 = similarityItem2;
+          item2 = similarityItem1;
         }
-        Map<Item, Double> map = correlationMaps.get(item1);
+        Map<Item, Double> map = similarityMaps.get(item1);
         if (map == null) {
           map = new FastMap<Item, Double>();
-          correlationMaps.put(item1, map);
+          similarityMaps.put(item1, map);
         }
         map.put(item2, iic.getValue());
       }
@@ -145,13 +151,13 @@ public final class GenericItemSimilarity implements ItemSimilarity {
   }
 
   /**
-   * <p>Returns the correlation between two items. Note that correlation is assumed to be symmetric, that
-   * <code>itemCorrelation(item1, item2) == itemCorrelation(item2, item1)</code>, and that
-   * <code>itemCorrelation(item1, item1) == 1.0</code> for all items.</p>
+   * <p>Returns the similarity between two items. Note that similarity is assumed to be symmetric, that
+   * <code>itemSimilarity(item1, item2) == itemSimilarity(item2, item1)</code>, and that
+   * <code>itemSimilarity(item1, item1) == 1.0</code> for all items.</p>
    *
    * @param item1 first item
    * @param item2 second item
-   * @return correlation between the two
+   * @return similarity between the two
    */
   public double itemSimilarity(Item item1, Item item2) {
     int compare = item1.compareTo(item2);
@@ -167,12 +173,12 @@ public final class GenericItemSimilarity implements ItemSimilarity {
       first = item2;
       second = item1;
     }
-    Map<Item, Double> nextMap = correlationMaps.get(first);
+    Map<Item, Double> nextMap = similarityMaps.get(first);
     if (nextMap == null) {
       return Double.NaN;
     }
-    Double correlation = nextMap.get(second);
-    return correlation == null ? Double.NaN : correlation;
+    Double similarity = nextMap.get(second);
+    return similarity == null ? Double.NaN : similarity;
   }
 
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
@@ -180,12 +186,9 @@ public final class GenericItemSimilarity implements ItemSimilarity {
   }
 
   /**
-   * Encapsulates a correlation between two items. Correlation must be in the range [-1.0,1.0].
+   * Encapsulates a similarity between two items. Similarity must be in the range [-1.0,1.0].
    */
-  public static final class ItemItemCorrelation {
-
-    // Somehow I think this class should be a top-level class now.
-    // But I have a love affair with inner classes.
+  public static final class ItemItemSimilarity implements Comparable<ItemItemSimilarity> {
 
     private final Item item1;
     private final Item item2;
@@ -194,10 +197,10 @@ public final class GenericItemSimilarity implements ItemSimilarity {
     /**
      * @param item1 first item
      * @param item2 second item
-     * @param value correlation between the two
+     * @param value similarity between the two
      * @throws IllegalArgumentException if value is NaN, less than -1.0 or greater than 1.0
      */
-    public ItemItemCorrelation(Item item1, Item item2, double value) {
+    public ItemItemSimilarity(Item item1, Item item2, double value) {
       if (item1 == null || item2 == null) {
         throw new IllegalArgumentException("An item is null");
       }
@@ -223,12 +226,20 @@ public final class GenericItemSimilarity implements ItemSimilarity {
 
     @Override
     public String toString() {
-      return "ItemItemCorrelation[" + item1 + ',' + item2 + ':' + value + ']';
+      return "ItemItemSimilarity[" + item1 + ',' + item2 + ':' + value + ']';
+    }
+
+    /**
+     * Defines an ordering from highest similarity to lowest.
+     */
+    public int compareTo(ItemItemSimilarity other) {
+      double otherValue = other.value;
+      return value > otherValue ? -1 : value < otherValue ? 1 : 0;
     }
 
   }
 
-  private static final class DataModelCorrelationsIterator implements Iterator<ItemItemCorrelation> {
+  private static final class DataModelSimilaritiesIterator implements Iterator<ItemItemSimilarity> {
 
     private final ItemSimilarity otherSimilarity;
     private final List<? extends Item> items;
@@ -237,7 +248,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
     private Item item1;
     private int j;
 
-    private DataModelCorrelationsIterator(ItemSimilarity otherSimilarity, List<? extends Item> items) {
+    private DataModelSimilaritiesIterator(ItemSimilarity otherSimilarity, List<? extends Item> items) {
       this.otherSimilarity = otherSimilarity;
       this.items = items;
       this.size = items.size();
@@ -250,19 +261,19 @@ public final class GenericItemSimilarity implements ItemSimilarity {
       return i < size - 1;
     }
 
-    public ItemItemCorrelation next() {
+    public ItemItemSimilarity next() {
       if (!hasNext()) {
         throw new NoSuchElementException();
       }
       Item item2 = items.get(j);
-      double correlation;
+      double similarity;
       try {
-        correlation = otherSimilarity.itemSimilarity(item1, item2);
+        similarity = otherSimilarity.itemSimilarity(item1, item2);
       } catch (TasteException te) {
         // ugly:
         throw new RuntimeException(te);
       }
-      ItemItemCorrelation result = new ItemItemCorrelation(item1, item2, correlation);
+      ItemItemSimilarity result = new ItemItemSimilarity(item1, item2, similarity);
       j++;
       if (j == size) {
         i++;

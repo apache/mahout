@@ -28,9 +28,9 @@ import java.util.Collection;
 import java.util.Random;
 
 /**
- * <p>Defines cluster similarity as the <em>smallest</em> correlation between any two
+ * <p>Defines cluster similarity as the <em>smallest</em> similarity between any two
  * {@link org.apache.mahout.cf.taste.model.User}s in the clusters -- that is, it says that clusters are close
- * when <em>all pairs</em> of their members have relatively high correlation.</p>
+ * when <em>all pairs</em> of their members have relatively high similarity.</p>
  */
 public final class FarthestNeighborClusterSimilarity implements ClusterSimilarity {
 
@@ -40,17 +40,17 @@ public final class FarthestNeighborClusterSimilarity implements ClusterSimilarit
   private final double samplingPercentage;
 
   /**
-   * <p>Constructs a {@link FarthestNeighborClusterSimilarity} based on the given {@link org.apache.mahout.cf.taste.similarity.UserSimilarity}.
-   * All user-user correlations are examined.</p>
+   * <p>Constructs a {@link FarthestNeighborClusterSimilarity} based on the given {@link UserSimilarity}.
+   * All user-user similarities are examined.</p>
    */
   public FarthestNeighborClusterSimilarity(UserSimilarity similarity) {
     this(similarity, 1.0);
   }
 
   /**
-   * <p>Constructs a {@link FarthestNeighborClusterSimilarity} based on the given {@link org.apache.mahout.cf.taste.similarity.UserSimilarity}.
+   * <p>Constructs a {@link FarthestNeighborClusterSimilarity} based on the given {@link UserSimilarity}.
    * By setting <code>samplingPercentage</code> to a value less than 1.0, this implementation will only examine
-   * that fraction of all user-user correlations between two clusters, increasing performance at the expense
+   * that fraction of all user-user similarities between two clusters, increasing performance at the expense
    * of accuracy.</p>
    */
   public FarthestNeighborClusterSimilarity(UserSimilarity similarity, double samplingPercentage) {
@@ -69,22 +69,22 @@ public final class FarthestNeighborClusterSimilarity implements ClusterSimilarit
     if (cluster1.isEmpty() || cluster2.isEmpty()) {
       return Double.NaN;
     }
-    double leastCorrelation = Double.POSITIVE_INFINITY;
+    double leastSimilarity = Double.POSITIVE_INFINITY;
     for (User user1 : cluster1) {
       if (samplingPercentage >= 1.0 || random.nextDouble() < samplingPercentage) {
         for (User user2 : cluster2) {
-          double theCorrelation = similarity.userSimilarity(user1, user2);
-          if (theCorrelation < leastCorrelation) {
-            leastCorrelation = theCorrelation;
+          double theSimilarity = similarity.userSimilarity(user1, user2);
+          if (theSimilarity < leastSimilarity) {
+            leastSimilarity = theSimilarity;
           }
         }
       }
     }
     // We skipped everything? well, at least try comparing the first Users to get some value
-    if (leastCorrelation == Double.POSITIVE_INFINITY) {
+    if (leastSimilarity == Double.POSITIVE_INFINITY) {
       return similarity.userSimilarity(cluster1.iterator().next(), cluster2.iterator().next());
     }
-    return leastCorrelation;
+    return leastSimilarity;
   }
 
   public void refresh(Collection<Refreshable> alreadyRefreshed) {

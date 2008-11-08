@@ -35,13 +35,13 @@ public final class GenericItemSimilarityTest extends SimilarityTestCase {
     Item item2 = new GenericItem<String>("2");
     Item item3 = new GenericItem<String>("3");
     Item item4 = new GenericItem<String>("4");
-    List<GenericItemSimilarity.ItemItemCorrelation> correlations =
-            new ArrayList<GenericItemSimilarity.ItemItemCorrelation>(4);
-    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item1, item2, 0.5));
-    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item2, item1, 0.6));
-    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item1, item1, 0.5));
-    correlations.add(new GenericItemSimilarity.ItemItemCorrelation(item1, item3, 0.3));
-    GenericItemSimilarity itemCorrelation = new GenericItemSimilarity(correlations);
+    List<GenericItemSimilarity.ItemItemSimilarity> similarities =
+            new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(4);
+    similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item1, item2, 0.5));
+    similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item2, item1, 0.6));
+    similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item1, item1, 0.5));
+    similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item1, item3, 0.3));
+    GenericItemSimilarity itemCorrelation = new GenericItemSimilarity(similarities);
     assertEquals(1.0, itemCorrelation.itemSimilarity(item1, item1));
     assertEquals(0.6, itemCorrelation.itemSimilarity(item1, item2));
     assertEquals(0.6, itemCorrelation.itemSimilarity(item2, item1));

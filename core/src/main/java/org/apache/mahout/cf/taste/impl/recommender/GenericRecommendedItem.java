@@ -82,13 +82,7 @@ public final class GenericRecommendedItem implements RecommendedItem, Serializab
    */
   public int compareTo(RecommendedItem other) {
     double otherValue = other.getValue();
-    if (value < otherValue) {
-      return 1;
-    } else if (value > otherValue) {
-      return -1;
-    } else {
-      return 0;
-    }
+    return value > otherValue ? -1 : value < otherValue ? 1 : 0;
   }
 
 }

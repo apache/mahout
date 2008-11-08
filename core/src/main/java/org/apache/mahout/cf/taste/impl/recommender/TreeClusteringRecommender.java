@@ -385,8 +385,8 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
 
     TopItems.Estimator<Item> estimator = new Estimator(cluster);
 
-    List<RecommendedItem> topItems =
-            TopItems.getTopItems(Integer.MAX_VALUE, allItems, null, estimator);
+    // TODO don't hardcode 100, figure out some reasonable value
+    List<RecommendedItem> topItems = TopItems.getTopItems(100, allItems, null, estimator);
 
     log.debug("Recommendations are: {}", topItems);
     return Collections.unmodifiableList(topItems);

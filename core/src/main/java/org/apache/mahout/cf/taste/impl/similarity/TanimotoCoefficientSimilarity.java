@@ -33,8 +33,9 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 
 /**
- * <p>An implementation of a "correlation" based on the
- * <a href="http://en.wikipedia.org/wiki/Jaccard_index#Tanimoto_coefficient_.28extended_Jaccard_coefficient.29">Tanimoto coefficient</a>,
+ * <p>An implementation of a "similarity" based on the
+ * <a href="http://en.wikipedia.org/wiki/Jaccard_index#Tanimoto_coefficient_.28extended_Jaccard_coefficient.29">
+ * Tanimoto coefficient</a>,
  * or extended <a href="http://en.wikipedia.org/wiki/Jaccard_index">Jaccard coefficient</a>.</p>
  *
  * <p>This is intended for "binary" data sets where a user either expresses a generic "yes" preference

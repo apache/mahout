@@ -46,14 +46,16 @@ import java.util.Set;
  * {@link org.apache.mahout.cf.taste.model.DataModel} and {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity}
  * to produce recommendations. This class represents Taste's support for item-based recommenders.</p>
  *
- * <p>The {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity} is the most important point to discuss here. Item-based recommenders
- * are useful because they can take advantage of something to be very fast: they base their computations
- * on item correlation, not user correlation, and item correlation is relatively static. It can be
+ * <p>The {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity} is the most important point to discuss here.
+ * Item-based recommenders are useful because they can take advantage of something to be very fast: they base
+ * their computations on item similarity, not user similarity, and item similarity is relatively static. It can be
  * precomputed, instead of re-computed in real time.</p>
  *
- * <p>Thus it's strongly recommended that you use {@link org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity}
- * with pre-computed correlations if you're going to use this class. You can use
- * {@link org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity} too, which computes correlations in real-time,
+ * <p>Thus it's strongly recommended that you use
+ * {@link org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity}
+ * with pre-computed similarities if you're going to use this class. You can use
+ * {@link org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity} too, 
+ * which computes similarities in real-time,
  * but will probably find this painfully slow for large amounts of data.</p>
  */
 public final class GenericItemBasedRecommender extends AbstractRecommender implements ItemBasedRecommender {
@@ -190,21 +192,21 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
 
   private double doEstimatePreference(User theUser, Item item) throws TasteException {
     double preference = 0.0;
-    double totalCorrelation = 0.0;
+    double totalSimilarity = 0.0;
     Preference[] prefs = theUser.getPreferencesAsArray();
     for (int i = 0; i < prefs.length; i++) {
       Preference pref = prefs[i];
-      double theCorrelation = similarity.itemSimilarity(item, pref.getItem());
-      if (!Double.isNaN(theCorrelation)) {
+      double theSimilarity = similarity.itemSimilarity(item, pref.getItem());
+      if (!Double.isNaN(theSimilarity)) {
         // Why + 1.0? similarity ranges from -1.0 to 1.0, and we want to use it as a simple
         // weight. To avoid negative values, we add 1.0 to put it in
         // the [0.0,2.0] range which is reasonable for weights
-        theCorrelation += 1.0;
-        preference += theCorrelation * pref.getValue();
-        totalCorrelation += theCorrelation;
+        theSimilarity += 1.0;
+        preference += theSimilarity * pref.getValue();
+        totalSimilarity += theSimilarity;
       }
     }
-    return totalCorrelation == 0.0 ? Double.NaN : preference / totalCorrelation;
+    return totalSimilarity == 0.0 ? Double.NaN : preference / totalSimilarity;
   }
 
   private static int getNumPreferences(User theUser) {
@@ -307,8 +309,8 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
       if (pref == null) {
         return Double.NaN;
       }
-      double correlationValue = similarity.itemSimilarity(recommendedItem, item);
-      return (1.0 + correlationValue) * pref.getValue();
+      double similarityValue = similarity.itemSimilarity(recommendedItem, item);
+      return (1.0 + similarityValue) * pref.getValue();
     }
   }
 

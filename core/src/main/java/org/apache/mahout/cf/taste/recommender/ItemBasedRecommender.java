@@ -39,7 +39,7 @@ public interface ItemBasedRecommender extends Recommender {
   /**
    * @param itemID ID of {@link Item} for which to find most similar other {@link Item}s
    * @param howMany desired number of most similar {@link Item}s to find
-   * @param rescorer {@link Rescorer} which can adjust item-item correlation
+   * @param rescorer {@link Rescorer} which can adjust item-item similarity
    * estimates used to determine most similar items
    * @return {@link Item}s most similar to the given item, ordered from most similar to least
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
@@ -60,7 +60,7 @@ public interface ItemBasedRecommender extends Recommender {
   /**
    * @param itemIDs IDs of {@link Item} for which to find most similar other {@link Item}s
    * @param howMany desired number of most similar {@link Item}s to find
-   * @param rescorer {@link Rescorer} which can adjust item-item correlation
+   * @param rescorer {@link Rescorer} which can adjust item-item similarity
    * estimates used to determine most similar items
    * @return {@link Item}s most similar to the given items, ordered from most similar to least
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}

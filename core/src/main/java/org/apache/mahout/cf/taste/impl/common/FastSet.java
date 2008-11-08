@@ -53,7 +53,7 @@ public final class FastSet<K> implements Set<K> {
    * Creates a new {@link FastSet} with default capacity.
    */
   public FastSet() {
-    this(11);
+    this(5);
   }
 
   public FastSet(Collection<? extends K> c) {

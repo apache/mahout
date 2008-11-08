@@ -56,7 +56,7 @@ abstract class AbstractUserNeighborhood implements UserNeighborhood {
     this.refreshHelper.addDependency(this.userSimilarity);
   }
 
-  final UserSimilarity getUserCorrelation() {
+  final UserSimilarity getUserSimilarity() {
     return userSimilarity;
   }
 

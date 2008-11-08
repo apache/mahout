@@ -35,7 +35,7 @@ import java.util.Collection;
 /**
  * <p>Like {@link PearsonCorrelationSimilarity}, but compares relative ranking of preference values instead of preference
  * values themselves. That is, each {@link User}'s preferences are sorted and then assign a rank as their preference
- * value, with 1 being assigned to the least preferred item. Then the Pearson itemCorrelation of these rank values is
+ * value, with 1 being assigned to the least preferred item. Then the Pearson correlation of these rank values is
  * computed.</p>
  */
 public final class SpearmanCorrelationSimilarity implements UserSimilarity {
