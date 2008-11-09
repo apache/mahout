@@ -70,31 +70,32 @@ public class BayesFeatureMapper extends MapReduceBase implements
     String label = key.toString();
     int keyLen = label.length();
 
-    Map<String, Integer[]> wordList = new HashMap<String, Integer[]>(1000);
+    Map<String, int[]> wordList = new HashMap<String, int[]>(1000);
 
     StringBuilder builder = new StringBuilder(label);
     builder.ensureCapacity(32);// make sure we have a reasonably size buffer to
                                // begin with
     List<String> ngrams  = Model.generateNGramsWithoutLabel(value.toString(), gramSize);
     for (String ngram : ngrams) {
-      Integer[] count = wordList.get(ngram);
+      int[] count = wordList.get(ngram);
       if (count == null) {
-        count = new Integer[1];
+        count = new int[1];
         count[0] = 0;
         wordList.put(ngram, count);
       }
       count[0]++;
     }
     double lengthNormalisation = 0.0;
-    for (Integer[] D_kj : wordList.values()) {
+    for (int[] D_kj : wordList.values()) {
       // key is label,word
-      lengthNormalisation += D_kj[0].doubleValue() * D_kj[0].doubleValue();
+      double dkjValue = (double) D_kj[0];
+      lengthNormalisation += dkjValue * dkjValue;
     }
     lengthNormalisation = Math.sqrt(lengthNormalisation);
 
     // Output Length Normalized + TF Transformed Frequency per Word per Class
     // Log(1 + D_ij)/SQRT( SIGMA(k, D_kj) )
-    for (Map.Entry<String, Integer[]> entry : wordList.entrySet()) {
+    for (Map.Entry<String, int[]> entry : wordList.entrySet()) {
       // key is label,word
       String token = entry.getKey();
       builder.append(',').append(token);

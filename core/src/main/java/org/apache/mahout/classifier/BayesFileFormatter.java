@@ -204,8 +204,8 @@ public class BayesFileFormatter {
        
       writer.write(termBuffer, 0, termLen);
       writer.write(' ');
-      char[] tmp = new char[termLen];
-      System.arraycopy(termBuffer, 0, tmp, 0, termLen);
+      //char[] tmp = new char[termLen];
+      //System.arraycopy(termBuffer, 0, tmp, 0, termLen);
       //seen.add(tmp);// do this b/c CharArraySet doesn't allow offsets
     }
     ///numTokens++;

@@ -83,15 +83,16 @@ public abstract class Model {
     if (!labelList.containsKey(label)) {
       Integer labelId = labelList.size();
       labelList.put(label, labelId);
+      return labelId;
     }
     return labelList.get(label);
   }
 
   protected Integer getFeature(String feature) {
     if (!featureList.containsKey(feature)) {
-      
       Integer featureId = featureList.size();
       featureList.put(feature, featureId);
+      return featureId;
     }
     return featureList.get(feature);
   }

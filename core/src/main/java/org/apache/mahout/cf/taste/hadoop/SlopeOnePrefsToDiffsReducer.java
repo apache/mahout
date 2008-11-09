@@ -27,7 +27,6 @@ import org.apache.hadoop.mapred.Reporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -43,7 +42,7 @@ public final class SlopeOnePrefsToDiffsReducer
     while (values.hasNext()) {
       prefs.add(new ItemPrefWritable(values.next()));
     }
-    Collections.sort(prefs, (Comparator<? super ItemPrefWritable>) ByItemIDComparator.getInstance());
+    Collections.sort(prefs, ByItemIDComparator.getInstance());
     int size = prefs.size();
     for (int i = 0; i < size; i++) {
       ItemPrefWritable first = prefs.get(i);
