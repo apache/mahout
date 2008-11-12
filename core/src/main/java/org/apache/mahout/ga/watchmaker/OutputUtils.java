@@ -104,12 +104,13 @@ public class OutputUtils {
     LongWritable key = new LongWritable();
     DoubleWritable value = new DoubleWritable();
     Reader reader = new Reader(fs, output, conf);
-
-    while (reader.next(key, value)) {
-      evaluations.add(value.get());
+    try {
+      while (reader.next(key, value)) {
+        evaluations.add(value.get());
+      }
+    } finally {
+      reader.close();
     }
-
-    reader.close();
   }
 
 }

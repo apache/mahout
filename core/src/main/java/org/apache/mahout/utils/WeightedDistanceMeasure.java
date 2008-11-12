@@ -67,8 +67,11 @@ public abstract class WeightedDistanceMeasure implements DistanceMeasure {
           throw new FileNotFoundException(weightsFile.get().toString());
         }
         DataInputStream in = fs.open(weightsFile.get());
-        weights.readFields(in);
-        in.close();
+        try {
+          weights.readFields(in);
+        } finally {
+          in.close();
+        }
         this.weights = weights;
       }
     } catch (IOException e) {

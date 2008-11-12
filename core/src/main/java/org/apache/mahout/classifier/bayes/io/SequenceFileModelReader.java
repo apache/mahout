@@ -192,26 +192,28 @@ public class SequenceFileModelReader {
         Text.class, DoubleWritable.class);
     MapFile.Writer.setIndexInterval(conf, 3);
 
-    FileStatus[] outputFiles = fs.globStatus(pathPattern);
-    for (FileStatus fileStatus : outputFiles) {
-      Path path = fileStatus.getPath();
-      log.info("{}", path);
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-      // the key is either _label_ or label,feature
-      while (reader.next(key, value)) {
-        String keyStr = key.toString();
-        if (!keyStr.startsWith("_") && !keyStr.startsWith(",") && !keyStr.startsWith("*")) {
-          int idx = keyStr.indexOf(',');
-          if (idx != -1) {
-            //Map<String,Double> data = new HashMap<String,Double>();
-            //data.put(keyStr.substring(0, idx), value.get());
-            writer.append(new Text(key.toString()), value);
+    try {
+      FileStatus[] outputFiles = fs.globStatus(pathPattern);
+      for (FileStatus fileStatus : outputFiles) {
+        Path path = fileStatus.getPath();
+        log.info("{}", path);
+        SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
+        // the key is either _label_ or label,feature
+        while (reader.next(key, value)) {
+          String keyStr = key.toString();
+          if (!keyStr.startsWith("_") && !keyStr.startsWith(",") && !keyStr.startsWith("*")) {
+            int idx = keyStr.indexOf(',');
+            if (idx != -1) {
+              //Map<String,Double> data = new HashMap<String,Double>();
+              //data.put(keyStr.substring(0, idx), value.get());
+              writer.append(new Text(key.toString()), value);
+            }
           }
         }
       }
+    } finally {
+      writer.close();
     }
-    writer.close();
-    // return model;
   }
 
   public Map<String,Double> readLabelSums(FileSystem fs, Path pathPattern, Configuration conf) throws IOException {

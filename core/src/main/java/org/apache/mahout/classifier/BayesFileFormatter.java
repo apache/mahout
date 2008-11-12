@@ -26,7 +26,6 @@ import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.OptionException;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -42,6 +41,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.io.Closeable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,10 +72,12 @@ public class BayesFileFormatter {
       Charset charset, File outputFile) throws IOException {
     Writer writer = new OutputStreamWriter(new FileOutputStream(outputFile),
         charset);
-    inputDir.listFiles(new FileProcessor(label, analyzer, charset, writer));
-    // listFiles() is called here as a way to recursively visit files, actually
-    writer.close();
-
+    try {
+      inputDir.listFiles(new FileProcessor(label, analyzer, charset, writer));
+      // listFiles() is called here as a way to recursively visit files, actually
+    } finally {
+      quietClose(writer);
+    }
   }
 
   /**
@@ -96,9 +98,11 @@ public class BayesFileFormatter {
     } else {
       Writer writer = new OutputStreamWriter(new FileOutputStream(new File(
           outDir, input.getName())), charset);
-      writeFile(label, analyzer, new InputStreamReader(new FileInputStream(
-          input), charset), writer);
-      writer.close();
+      try {
+        writeFile(label, analyzer, input, charset, writer);
+      } finally {
+        quietClose(writer);
+      }
     }
   }
 
@@ -151,27 +155,26 @@ public class BayesFileFormatter {
 
     public boolean accept(File file) {
       if (file.isFile()) {
+        Writer theWriter = null;
         try {
-          Writer theWriter;
           if (writer == null) {
             theWriter = new OutputStreamWriter(new FileOutputStream(new File(
                 outputDir, file.getName())), charset);
           } else {
             theWriter = writer;
           }
-          writeFile(label, analyzer, new InputStreamReader(new FileInputStream(
-              file), charset), theWriter);
-          if (writer == null) {
-            theWriter.close();// we are writing a single file per input file
-          } else {
+          writeFile(label, analyzer, file, charset, theWriter);
+          if (writer != null) {
             // just write a new line
             theWriter.write(LINE_SEP);
-
           }
-
         } catch (IOException e) {
           // TODO: report failed files instead of throwing exception
           throw new RuntimeException(e);
+        } finally {
+          if (writer == null) {
+            quietClose(theWriter);
+          }
         }
       } else {
         file.listFiles(this);
@@ -185,31 +188,39 @@ public class BayesFileFormatter {
    * 
    * @param label The label
    * @param analyzer The analyzer to use
-   * @param reader The reader to pass to the Analyzer
+   * @param inFile the file to read and whose contents are passed to the analyzer
+   * @param charset character encoding to assume when reading the input file
    * @param writer The Writer, is not closed by this method
    * @throws java.io.IOException if there was a problem w/ the reader
    */
-  public static void writeFile(String label, Analyzer analyzer, Reader reader,
-      Writer writer) throws IOException {
-    TokenStream ts = analyzer.tokenStream(label, reader);
-    writer.write(label);
-    writer.write('\t'); // edit: Inorder to match Hadoop standard
-    // TextInputFormat
-    Token token = new Token();
-    //CharArraySet seen = new CharArraySet(256, false);
-    //long numTokens = 0;
-    while ((token = ts.next(token)) != null) {
-      char[] termBuffer = token.termBuffer();
-      int termLen = token.termLength();   
-       
-      writer.write(termBuffer, 0, termLen);
-      writer.write(' ');
-      //char[] tmp = new char[termLen];
-      //System.arraycopy(termBuffer, 0, tmp, 0, termLen);
-      //seen.add(tmp);// do this b/c CharArraySet doesn't allow offsets
+  private static void writeFile(String label, Analyzer analyzer, File inFile,
+      Charset charset, Writer writer) throws IOException {
+    Reader reader = new InputStreamReader(new FileInputStream(inFile), charset);
+    try {
+      TokenStream ts = analyzer.tokenStream(label, reader);
+      writer.write(label);
+      writer.write('\t'); // edit: Inorder to match Hadoop standard
+      // TextInputFormat
+      Token token = new Token();
+      while ((token = ts.next(token)) != null) {
+        char[] termBuffer = token.termBuffer();
+        int termLen = token.termLength();
+        writer.write(termBuffer, 0, termLen);
+        writer.write(' ');
+      }
+    } finally {
+      quietClose(reader);
     }
-    ///numTokens++;
+  }
 
+  private static void quietClose(Closeable closeable) {
+    if (closeable != null) {
+      try {
+        closeable.close();
+      } catch (IOException ioe) {
+        // continue
+      }
+    }
   }
 
   /**
