@@ -30,7 +30,7 @@
   <property name="pool.jar" location="lib/commons-pool-1.4.jar"/>
   <property name="proguard.jar" location="lib/proguard.jar"/>
   <property name="servlet.jar" location="lib/servlet-api.jar"/>
-  <property name="hadoop.jar" location="lib/hadoop-0.18.0-core.jar"/>
+  <property name="hadoop.jar" location="lib/hadoop-0.18.1-core.jar"/>
   <property name="slf4j-api.jar" location="lib/slf4j-api-1.5.2.jar"/>
   <property name="slf4j.jar" location="lib/slf4j-jcl-1.5.2.jar"/>
   <property name="commons-logging.jar" location="lib/commons-logging-1.1.1.jar"/>
@@ -134,6 +134,10 @@
     <war destfile="${release-war}" webxml="${my-web.xml}">
       <lib dir=".">
         <include name="${release-jar}"/>
+        <include name="${slf4j-api.jar}"/>
+        <include name="${slf4j.jar}"/>
+        <include name="${commons-logging.jar}"/>
+        <include name="${uncommons-math.jar}"/>          
         <include name="${my-recommender.jar}"/>
       </lib>
       <lib dir="${axis.jars}"/>
@@ -148,7 +152,7 @@
   </target>
 
   <target depends="init,build" name="build-grouplens-example" description="Builds deployable GroupLens example">
-      <property name="examples-base" value="../examples/src/main/java"/>
+    <property name="examples-base" value="../examples/src/main/java"/>
     <property name="grouplens-location" value="${examples-base}/org/apache/mahout/cf/taste/example/grouplens"/>
     <fail message="Please download and install the GroupLens .dat files to ${grouplens-location}">
       <condition>
@@ -175,8 +179,9 @@
       <include name="org/apache/mahout/cf/taste/example/grouplens/**"/>
     </javac>
     <jar jarfile="grouplens.jar">
-      <include name="${grouplens-location}/ratings.dat"/>
-      <include name="${grouplens-location}/movies.dat"/>
+      <fileset dir="${examples-base}">
+        <include name="**/*.dat"/>
+      </fileset>
       <fileset dir="build">
         <include name="org/apache/mahout/cf/taste/example/grouplens/**"/>
       </fileset>
