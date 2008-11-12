@@ -21,7 +21,7 @@ import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 
 /**
- * Simply encapuslates a {@link User} and a similarity value.
+ * Simply encapsulates a {@link User} and a similarity value.
  */
 public final class SimilarUser implements Comparable<SimilarUser> {
 
