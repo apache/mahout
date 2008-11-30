@@ -39,8 +39,10 @@ public class SoftCluster {
 
   public static final String M_KEY = "org.apache.mahout.clustering.fuzzykmeans.m";
 
-  private static double m = 2.0; //default value
-  public static final double MINIMAL_VALUE = 0.0000000001; // using it for adding
+  private static double m = 2.0; // default value
+
+  public static final double MINIMAL_VALUE = 0.0000000001; // using it for
+                                                            // adding
 
   // exception
   // this value to any
@@ -69,6 +71,7 @@ public class SoftCluster {
   private boolean converged = false;
 
   private static DistanceMeasure measure;
+
   private static double convergenceDelta = 0;
 
   /**
@@ -93,8 +96,9 @@ public class SoftCluster {
     String id = formattedString.substring(0, beginIndex);
     String center = formattedString.substring(beginIndex);
     if (id.startsWith("C") || id.startsWith("V")) {
-      int clusterId = Integer.parseInt(formattedString.substring(1, beginIndex - 2));
-      Vector clusterCenter = AbstractVector.decodeVector(center);
+      int clusterId = new Integer(formattedString.substring(1, beginIndex - 2));
+      Vector clusterCenter = null;
+      clusterCenter = AbstractVector.decodeVector(center);
 
       SoftCluster cluster = new SoftCluster(clusterCenter, clusterId);
       cluster.converged = id.startsWith("V");
@@ -153,15 +157,18 @@ public class SoftCluster {
       OutputCollector<Text, Text> output) throws IOException {
     List<Double> clusterDistanceList = new ArrayList<Double>();
     for (SoftCluster cluster : clusters) {
-      clusterDistanceList.add(measure.distance(point, cluster.getCenter()));
+      clusterDistanceList.add(measure.distance(cluster.getCenter(), point));
     }
 
     for (int i = 0; i < clusters.size(); i++) {
       double probWeight = computeProbWeight(clusterDistanceList.get(i),
           clusterDistanceList);
-
-      Text key = new Text(formatCluster(clusters.get(i)));
-      Text value = new Text(probWeight + ":" + values);
+      Text key = new Text(clusters.get(i).getIdentifier()); // just output the
+                                                            // identifier,avoids
+                                                            // too much data
+                                                            // traffic
+      Text value = new Text(Double.toString(probWeight)
+          + FuzzyKMeansDriver.MAPPER_VALUE_SEPARATOR + values.toString());
       output.collect(key, value);
     }
   }
@@ -176,8 +183,8 @@ public class SoftCluster {
    * @param output the OutputCollector to emit into
    * @throws IOException
    */
-  public static void outputPointWithClusterProbabilities(Vector point,
-      List<SoftCluster> clusters, Text values,
+  public static void outputPointWithClusterProbabilities(String key,
+      Vector point, List<SoftCluster> clusters, Text values,
       OutputCollector<Text, Text> output) throws IOException {
 
     String outputKey = values.toString();
@@ -189,10 +196,12 @@ public class SoftCluster {
     }
 
     for (int i = 0; i < clusters.size(); i++) {
+      // System.out.print("cluster:" + i + "\t" + clusterDistanceList.get(i));
+
       double probWeight = computeProbWeight(clusterDistanceList.get(i),
           clusterDistanceList);
-      outputValue.append(clusters.get(i).clusterId).append(':').append(
-          probWeight).append(' ');
+      outputValue.append(clusters.get(i).clusterId).append(":").append(
+          probWeight).append(" ");
     }
     output.collect(new Text(outputKey.trim()), new Text(outputValue.toString()
         .trim()
@@ -209,17 +218,18 @@ public class SoftCluster {
   public static double computeProbWeight(double clusterDistance,
       List<Double> clusterDistanceList) {
     double denom = 0.0;
-    if (clusterDistance == 0.0) {
+    if (clusterDistance == 0) {
       clusterDistance = MINIMAL_VALUE;
     }
-    for (double eachCDist : clusterDistanceList) {
+    for (Double eachCDist : clusterDistanceList) {
       if (eachCDist == 0)
         eachCDist = MINIMAL_VALUE;
 
       denom += Math.pow(clusterDistance / eachCDist, (double) 2 / (m - 1));
 
     }
-    return 1.0 / denom;
+    double val = (double) (1) / denom;
+    return val;
   }
 
   /**
@@ -264,6 +274,19 @@ public class SoftCluster {
     this.weightedPointTotal = center.like();
   }
 
+  /**
+   * Construct a new softcluster with the given clusterID
+   * 
+   * @param clusterId
+   */
+  public SoftCluster(String clusterId) {
+
+    this.clusterId = Integer.parseInt((clusterId.substring(1)));
+    this.pointProbSum = 0;
+    // this.weightedPointTotal = center.like();
+    this.converged = clusterId.startsWith("V");
+  }
+
   @Override
   public String toString() {
     return getIdentifier() + " - " + center.asFormatString();
@@ -288,22 +311,22 @@ public class SoftCluster {
     if (weightedPointTotal == null)
       weightedPointTotal = point.copy().times(ptProb);
     else
-      weightedPointTotal = point.times(ptProb).plus(weightedPointTotal);
+      weightedPointTotal = weightedPointTotal.plus(point.times(ptProb));
   }
 
   /**
-   * Add the point to the SoftCluster
-   *
-   * @param partialSumPtProb
+   * Add the point to the cluster
+   * 
+   * @param count the number of points in the delta
    * @param delta a point to add
    */
-  public void addPoints(double partialSumPtProb, Vector delta) {
+  public void addPoints(Vector delta, double partialSumPtProb) {
     centroid = null;
     pointProbSum += partialSumPtProb;
     if (weightedPointTotal == null)
       weightedPointTotal = delta.copy();
     else
-      weightedPointTotal = delta.plus(weightedPointTotal);
+      weightedPointTotal = weightedPointTotal.plus(delta);
   }
 
   public Vector getCenter() {
@@ -330,7 +353,7 @@ public class SoftCluster {
    */
   public boolean computeConvergence() {
     Vector centroid = computeCentroid();
-    converged = measure.distance(centroid, center) <= convergenceDelta;
+    converged = measure.distance(center, centroid) <= convergenceDelta;
     return converged;
   }
 
@@ -338,8 +361,16 @@ public class SoftCluster {
     return weightedPointTotal;
   }
 
+  public void setWeightedPointTotal(Vector v) {
+    this.weightedPointTotal = v;
+  }
+
   public boolean isConverged() {
     return converged;
+  }
+
+  public static void main(String[] args) {
+
   }
 
   public int getClusterId() {

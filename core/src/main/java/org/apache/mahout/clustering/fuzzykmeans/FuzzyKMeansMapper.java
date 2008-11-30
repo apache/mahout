@@ -21,12 +21,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.FileUtil;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.PathFilter;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -62,6 +56,11 @@ public class FuzzyKMeansMapper extends MapReduceBase implements
     this.clusters = clusters;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.hadoop.mapred.MapReduceBase#configure(org.apache.hadoop.mapred.JobConf)
+   */
   @Override
   public void configure(JobConf job) {
 
@@ -71,62 +70,11 @@ public class FuzzyKMeansMapper extends MapReduceBase implements
     log.info("In Mapper Configure:");
     clusters = new ArrayList<SoftCluster>();
 
-    configureWithClusterInfo(job);
+    FuzzyKMeansUtil.configureWithClusterInfo(job
+        .get(SoftCluster.CLUSTER_PATH_KEY), clusters);
 
     if (clusters.size() == 0)
       throw new NullPointerException("Cluster is empty!!!");
   }
 
-  /**
-   * Configure the mapper with the cluster info
-   * 
-   * @param job
-   */
-  protected void configureWithClusterInfo(JobConf job) {
-    // Get the path location where the cluster Info is stored
-    String clusterPathStr = job.get(SoftCluster.CLUSTER_PATH_KEY);
-    Path clusterPath = new Path(clusterPathStr);
-    List<Path> result = new ArrayList<Path>();
-
-    // filter out the files
-    PathFilter clusterFileFilter = new PathFilter() {
-      public boolean accept(Path path) {
-        return path.getName().startsWith("part");
-      }
-    };
-
-    try {
-      // get all filtered file names in result list
-      FileSystem fs = clusterPath.getFileSystem(job);
-      FileStatus[] matches = fs.listStatus(FileUtil.stat2Paths(fs.globStatus(
-          clusterPath, clusterFileFilter)), clusterFileFilter);
-
-      for (FileStatus match : matches) {
-        result.add(fs.makeQualified(match.getPath()));
-      }
-
-      // iterate thru the result path list
-      for (Path path : result) {
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
-        try {
-          Text key = new Text();
-          Text value = new Text();
-          //int counter = 1;
-          while (reader.next(key, value)) {
-            // get the cluster info
-            SoftCluster cluster = SoftCluster.decodeCluster(value.toString());
-            // add the center so the centroid will be correct on output
-            // formatting
-            cluster.addPoint(cluster.getCenter(), 1);
-            clusters.add(cluster);
-          }
-        } finally {
-          reader.close();
-        }
-      }
-
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
 }

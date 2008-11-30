@@ -27,33 +27,60 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
+import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.KeyValueLineRecordReader;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FuzzyKMeansDriver {
 
-  private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansDriver.class);
+  private static final Logger log = LoggerFactory
+      .getLogger(FuzzyKMeansDriver.class);
+
+  public static final String MAPPER_VALUE_SEPARATOR = "~";
+
+  public static final String COMBINER_VALUE_SEPARATOR = "\t";
 
   private FuzzyKMeansDriver() {
   }
 
+  private static void printMessage() {
+    System.out
+        .println("Usage: input clusterIn output measureClass convergenceDelta maxIterations m [doClusteringOnly]");
+  }
+
   public static void main(String[] args) {
-    String input = args[0];
-    String clusters = args[1];
-    String output = args[2];
-    String measureClass = args[3];
-    double convergenceDelta = Double.parseDouble(args[4]);
-    int maxIterations = Integer.parseInt(args[5]);
-    int m = Integer.parseInt(args[6]);
-    runJob(input, clusters, output, measureClass, convergenceDelta,
-        maxIterations, 10,m);
+    if (args.length < 7) {
+      System.out.println("Expected number of arguments: 7 or 8 : received:"
+          + args.length);
+      printMessage();
+    }
+    int index = 0;
+    String input = args[index++];
+    String clusters = args[index++];
+    String output = args[index++];
+    String measureClass = args[index++];
+    double convergenceDelta = Double.parseDouble(args[index++]);
+    int maxIterations = new Integer(args[index++]);
+    float m = Float.parseFloat(args[index++]);
+    boolean doClustering = false;
+    if (args.length > 7)
+      doClustering = Boolean.parseBoolean(args[index++]);
+    if (doClustering) {
+      runClustering(input, clusters, output, measureClass, Double
+          .toString(convergenceDelta), 500, m);
+    } else {
+      runJob(input, clusters, output, measureClass, convergenceDelta,
+          maxIterations, 10, 10, m);
+
+    }
+
   }
 
   /**
@@ -69,7 +96,7 @@ public class FuzzyKMeansDriver {
    */
   public static void runJob(String input, String clustersIn, String output,
       String measureClass, double convergenceDelta, int maxIterations,
-      int numMapTasks, int m) {
+      int numMapTasks, int numReduceTasks, float m) {
 
     boolean converged = false;
     int iteration = 0;
@@ -82,7 +109,7 @@ public class FuzzyKMeansDriver {
       // point the output to a new directory per iteration
       String clustersOut = output + File.separator + "clusters-" + iteration;
       converged = runIteration(input, clustersIn, clustersOut, measureClass,
-          delta, numMapTasks, iteration, m);
+          delta, numMapTasks, numReduceTasks, iteration, m);
 
       // now point the input to the old output directory
       clustersIn = output + File.separator + "clusters-" + iteration;
@@ -110,8 +137,8 @@ public class FuzzyKMeansDriver {
    * @return true if the iteration successfully runs
    */
   private static boolean runIteration(String input, String clustersIn,
-                                      String clustersOut, String measureClass, String convergenceDelta,
-                                      int numMapTasks, int iterationNumber, int m) {
+      String clustersOut, String measureClass, String convergenceDelta,
+      int numMapTasks, int numReduceTasks, int iterationNumber, float m) {
 
     JobConf conf = new JobConf(FuzzyKMeansJob.class);
     conf.setJobName("Fuzzy K Means{" + iterationNumber + "}");
@@ -127,13 +154,15 @@ public class FuzzyKMeansDriver {
     conf.setCombinerClass(FuzzyKMeansCombiner.class);
     conf.setReducerClass(FuzzyKMeansReducer.class);
     conf.setNumMapTasks(numMapTasks);
-    conf.setNumReduceTasks(numMapTasks);
-
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
+    conf.setNumReduceTasks(numReduceTasks);
+    
     conf.set(SoftCluster.CLUSTER_PATH_KEY, clustersIn);
     conf.set(SoftCluster.DISTANCE_MEASURE_KEY, measureClass);
     conf.set(SoftCluster.CLUSTER_CONVERGENCE_KEY, convergenceDelta);
     conf.set(SoftCluster.M_KEY, String.valueOf(m));
+
+    // uncomment it to run locally
+    // conf.set("mapred.job.tracker", "local");
 
     try {
       JobClient.runJob(conf);
@@ -157,7 +186,7 @@ public class FuzzyKMeansDriver {
    */
   private static void runClustering(String input, String clustersIn,
       String output, String measureClass, String convergenceDelta,
-      int numMapTasks, double m) {
+      int numMapTasks, float m) {
 
     JobConf conf = new JobConf(FuzzyKMeansDriver.class);
     conf.setJobName("Fuzzy K Means Clustering");
@@ -216,12 +245,21 @@ public class FuzzyKMeansDriver {
     boolean converged = true;
 
     for (Path p : result) {
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, p, conf);
-      Text key = new Text();
-      Text value = new Text();
 
-      while (converged && reader.next(key, value)) {
-        converged = value.toString().startsWith("V");
+      KeyValueLineRecordReader reader = null;
+
+      try {
+        reader = new KeyValueLineRecordReader(conf, new FileSplit(p, 0, fs
+            .getFileStatus(p).getLen(), (String[]) null));
+        Text key = new Text();
+        Text value = new Text();
+        while (converged && reader.next(key, value)) {
+          converged = value.toString().startsWith("V");
+        }
+      } finally {
+        if (reader != null) {
+          reader.close();
+        }
       }
     }
 

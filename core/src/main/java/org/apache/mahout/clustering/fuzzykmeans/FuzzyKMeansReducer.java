@@ -18,7 +18,11 @@
 package org.apache.mahout.clustering.fuzzykmeans;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
@@ -34,39 +38,79 @@ import org.slf4j.LoggerFactory;
 public class FuzzyKMeansReducer extends MapReduceBase implements
     Reducer<Text, Text, Text, Text> {
 
-  private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansReducer.class);
+  private static final Logger log = LoggerFactory
+      .getLogger(FuzzyKMeansReducer.class);
+
+  protected Map<String, SoftCluster> clusterMap;
 
   public void reduce(Text key, Iterator<Text> values,
       OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
-    SoftCluster cluster = SoftCluster.decodeCluster(key.toString());
+
+    SoftCluster cluster = clusterMap.get(key.toString());
+
     while (values.hasNext()) {
       String value = values.next().toString();
-
-      int ix = value.indexOf(',');
-      try {
-        double partialSumPtProb = Double.parseDouble(value.substring(0, ix));
-        Vector total = AbstractVector.decodeVector(value.substring(ix + 2));
-        cluster.addPoints(partialSumPtProb, total);
-      } catch (RuntimeException e) {
-        // TODO srowen thinks this should be replaced with a more specific catch, or not use exceptions to control flow
-        // Escaped from Combiner. So, let's do that processing too:
-        log.info("Escaped from combiner: Key: {} Value: {}", key, value);
-        double pointProb = Double.parseDouble(value.substring(0, value.indexOf(':')));
-
-        String encodedVector = value.substring(value.indexOf(':') + 1);
-        cluster.addPoint(AbstractVector.decodeVector(encodedVector), pointProb * SoftCluster.getM());
+      int mapperSepIndex = value
+          .indexOf(FuzzyKMeansDriver.MAPPER_VALUE_SEPARATOR); // tild separator
+      // is used in
+      // mapper
+      int combinerSepIndex = value
+          .indexOf(FuzzyKMeansDriver.COMBINER_VALUE_SEPARATOR); // tab separator
+      // is used in
+      // combiner
+      int index = mapperSepIndex == -1 ? combinerSepIndex : mapperSepIndex;// needed
+      // to
+      // split
+      // prob and vector
+      double partialSumPtProb = new Double(value.substring(0, index));
+      Vector total = AbstractVector.decodeVector(value.substring(index + 1));
+      if (mapperSepIndex != -1) // escaped from combiner
+      {
+        cluster.addPoint(total, Math.pow(partialSumPtProb, SoftCluster.getM()));
+      } else {
+        cluster.addPoints(total, partialSumPtProb);
       }
-    }
 
+    }
     // force convergence calculation
     cluster.computeConvergence();
-    output.collect(new Text(cluster.getIdentifier()), new Text(SoftCluster.formatCluster(cluster)));
+    output.collect(new Text(cluster.getIdentifier()), new Text(SoftCluster
+        .formatCluster(cluster)));
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.hadoop.mapred.MapReduceBase#configure(org.apache.hadoop.mapred.JobConf)
+   */
   @Override
   public void configure(JobConf job) {
+
     super.configure(job);
     SoftCluster.configure(job);
+    clusterMap = new HashMap<String, SoftCluster>();
+
+    List<SoftCluster> clusters = new ArrayList<SoftCluster>();
+    FuzzyKMeansUtil.configureWithClusterInfo(job
+        .get(SoftCluster.CLUSTER_PATH_KEY), clusters);
+    setClusterMap(clusters);
+
+    if (clusterMap.size() == 0)
+      throw new NullPointerException("Cluster is empty!!!");
+  }
+
+  private void setClusterMap(List<SoftCluster> clusters) {
+    clusterMap = new HashMap<String, SoftCluster>();
+    for (SoftCluster cluster : clusters) {
+      clusterMap.put(cluster.getIdentifier(), cluster);
+    }
+    clusters.clear();
+    clusters = null;
+  }
+
+  public void config(List<SoftCluster> clusters) {
+    setClusterMap(clusters);
+
   }
 
 }

@@ -28,10 +28,9 @@ import org.apache.mahout.matrix.Vector;
 
 public class FuzzyKMeansClusterMapper extends FuzzyKMeansMapper {
   public void map(WritableComparable key, Text values,
-      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+      OutputCollector<Text, Text> output, Reporter reporter) throws IOException
+  {
     Vector point = AbstractVector.decodeVector(values.toString());
-    SoftCluster.outputPointWithClusterProbabilities(point, clusters, values,
-        output);
-  }
-
+    SoftCluster.outputPointWithClusterProbabilities(key.toString(), point, clusters, values, output);
+  }  
 }

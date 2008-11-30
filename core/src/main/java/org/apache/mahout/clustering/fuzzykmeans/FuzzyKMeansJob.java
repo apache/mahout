@@ -26,12 +26,13 @@ import org.slf4j.LoggerFactory;
 
 public class FuzzyKMeansJob {
 
-  private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansJob.class);
+  private static final Logger log = LoggerFactory
+      .getLogger(FuzzyKMeansJob.class);
 
   public static void main(String[] args) throws IOException {
 
-    if (args.length != 9) {
-      log.warn("Expected num Arguments: 9  received: {}", args.length);
+    if (args.length != 10) {
+      log.warn("Expected num Arguments: 10  received: {}", args.length);
       printMessage();
       return;
     }
@@ -39,23 +40,24 @@ public class FuzzyKMeansJob {
     String input = args[index++];
     String clusters = args[index++];
     String output = args[index++];
-     String measureClass = args[index++];
+    String measureClass = args[index++];
     double convergenceDelta = Double.parseDouble(args[index++]);
     int maxIterations = Integer.parseInt(args[index++]);
     int numMapTasks = Integer.parseInt(args[index++]);
+    int numReduceTasks = Integer.parseInt(args[index++]);
     boolean doCanopy = Boolean.parseBoolean(args[index++]);
-    int m = Integer.parseInt(args[index++]);
+    float m = Float.parseFloat(args[index++]);
 
-    runJob(input, clusters, output,
-        measureClass, convergenceDelta,
-        maxIterations, numMapTasks, doCanopy,m);
+    runJob(input, clusters, output, measureClass, convergenceDelta,
+        maxIterations, numMapTasks, numReduceTasks, doCanopy, m);
   }
 
   /**
    * Prints Error Message
    */
   private static void printMessage() {
-    log.warn("Usage: inputDir clusterDir OutputDir ConvergenceDelata  maxIterations numMapTasks doCanopy");
+    log
+        .warn("Usage: inputDir clusterDir OutputDir measureClass ConvergenceDelata  maxIterations numMapTasks numReduceTasks doCanopy m");
   }
 
   /**
@@ -73,7 +75,8 @@ public class FuzzyKMeansJob {
    */
   public static void runJob(String input, String clustersIn, String output,
       String measureClass, double convergenceDelta, int maxIterations,
-      int numMapTasks, boolean doCanopy, int m) throws IOException {
+      int numMapTasks, int numReduceTasks, boolean doCanopy, float m)
+      throws IOException {
 
     // run canopy to find initial clusters
     if (doCanopy) {
@@ -83,7 +86,7 @@ public class FuzzyKMeansJob {
     }
     // run fuzzy k -means
     FuzzyKMeansDriver.runJob(input, clustersIn, output, measureClass,
-        convergenceDelta, maxIterations, numMapTasks,m);
+        convergenceDelta, maxIterations, numMapTasks, numReduceTasks, m);
 
   }
 }

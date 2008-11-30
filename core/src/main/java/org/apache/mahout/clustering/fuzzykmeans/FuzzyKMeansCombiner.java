@@ -27,22 +27,41 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.matrix.AbstractVector;
+import org.apache.mahout.matrix.Vector;
 
 public class FuzzyKMeansCombiner extends MapReduceBase implements
     Reducer<Text, Text, Text, Text> {
 
   public void reduce(Text key, Iterator<Text> values,
       OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
-    SoftCluster cluster = SoftCluster.decodeCluster(key.toString());
+    SoftCluster cluster = new SoftCluster(key.toString().trim());
     while (values.hasNext()) {
       String pointInfo = values.next().toString();
-      double pointProb = Double.parseDouble(pointInfo.substring(0, pointInfo.indexOf(':')));
+      // check whether this is already processed
+      int mapperSepIndex = pointInfo
+          .indexOf(FuzzyKMeansDriver.MAPPER_VALUE_SEPARATOR); // ~ separator is
+      // used in mapper
+      int combinerSepIndex = pointInfo
+          .indexOf(FuzzyKMeansDriver.COMBINER_VALUE_SEPARATOR); // tab separator
+      // is used in
+      // combiner
+      int index = mapperSepIndex == -1 ? combinerSepIndex : mapperSepIndex;// needed
+      // to
+      // split
+      // prob and vector
+      double pointProb = Double.parseDouble(pointInfo.substring(0, index));
 
-      String encodedVector = pointInfo.substring(pointInfo.indexOf(':') + 1);
-      cluster.addPoint(AbstractVector.decodeVector(encodedVector), pointProb
-          * SoftCluster.getM());
+      String encodedVector = pointInfo.substring(index + 1);
+      Vector v = AbstractVector.decodeVector(encodedVector);
+      if (mapperSepIndex != -1) // first time thru combiner
+      {
+        cluster.addPoint(v, Math.pow(pointProb, SoftCluster.getM()));
+      } else {
+        cluster.addPoints(v, pointProb);
+      }
     }
-    output.collect(key, new Text(cluster.getPointProbSum() + ", "
+    output.collect(key, new Text(cluster.getPointProbSum()
+        + FuzzyKMeansDriver.COMBINER_VALUE_SEPARATOR
         + cluster.getWeightedPointTotal().asFormatString()));
   }
 
