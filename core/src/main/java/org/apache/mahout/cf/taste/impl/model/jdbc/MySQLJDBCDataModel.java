@@ -133,6 +133,10 @@ public final class MySQLJDBCDataModel extends AbstractJDBCDataModel {
                             String itemIDColumn,
                             String preferenceColumn) {
     super(dataSource,
+          preferenceTable,
+          userIDColumn,
+          itemIDColumn,
+          preferenceColumn,
           // getUserSQL
           "SELECT " + itemIDColumn + ", " + preferenceColumn + " FROM " + preferenceTable +
           " WHERE " + userIDColumn + "=? ORDER BY " + itemIDColumn,

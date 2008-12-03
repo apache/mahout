@@ -78,6 +78,10 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
   public static final String DEFAULT_PREFERENCE_COLUMN = "preference";
 
   private final DataSource dataSource;
+  private final String preferenceTable;
+  private final String userIDColumn;
+  private final String itemIDColumn;
+  private final String preferenceColumn;
   private final String getUserSQL;
   private final String getNumItemsSQL;
   private final String getNumUsersSQL;
@@ -102,8 +106,48 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
                                   String getPrefsForItemSQL,
                                   String getNumPreferenceForItemSQL,
                                   String getNumPreferenceForItemsSQL) {
+    this(dataSource,
+         DEFAULT_PREFERENCE_TABLE,
+         DEFAULT_USER_ID_COLUMN,
+         DEFAULT_ITEM_ID_COLUMN,
+         DEFAULT_PREFERENCE_COLUMN,
+         getUserSQL,
+         getNumItemsSQL,
+         getNumUsersSQL,
+         setPreferenceSQL,
+         removePreferenceSQL,
+         getUsersSQL,
+         getItemsSQL,
+         getItemSQL,
+         getPrefsForItemSQL,
+         getNumPreferenceForItemSQL,
+         getNumPreferenceForItemsSQL);
+  }
+
+  protected AbstractJDBCDataModel(DataSource dataSource,
+                                  String preferenceTable,
+                                  String userIDColumn,
+                                  String itemIDColumn,
+                                  String preferenceColumn,
+                                  String getUserSQL,
+                                  String getNumItemsSQL,
+                                  String getNumUsersSQL,
+                                  String setPreferenceSQL,
+                                  String removePreferenceSQL,
+                                  String getUsersSQL,
+                                  String getItemsSQL,
+                                  String getItemSQL,
+                                  String getPrefsForItemSQL,
+                                  String getNumPreferenceForItemSQL,
+                                  String getNumPreferenceForItemsSQL) {
 
     log.debug("Creating AbstractJDBCModel...");
+
+    checkNotNullAndLog("preferenceTable", preferenceTable);
+    checkNotNullAndLog("userIDColumn", userIDColumn);
+    checkNotNullAndLog("itemIDColumn", itemIDColumn);
+    checkNotNullAndLog("preferenceColumn", preferenceColumn);
+
     checkNotNullAndLog("dataSource", dataSource);
     checkNotNullAndLog("getUserSQL", getUserSQL);
     checkNotNullAndLog("getNumItemsSQL", getNumItemsSQL);
@@ -121,6 +165,11 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       log.warn("You are not using ConnectionPoolDataSource. Make sure your DataSource pools connections " +
                "to the database itself, or database performance will be severely reduced.");
     }
+
+    this.preferenceTable = preferenceTable;
+    this.userIDColumn = userIDColumn;
+    this.itemIDColumn = itemIDColumn;
+    this.preferenceColumn = preferenceColumn;
 
     this.dataSource = dataSource;
     this.getUserSQL = getUserSQL;
@@ -174,6 +223,22 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
    */
   public DataSource getDataSource() {
     return dataSource;
+  }
+
+  public String getPreferenceTable() {
+    return preferenceTable;
+  }
+
+  public String getUserIDColumn() {
+    return userIDColumn;
+  }
+
+  public String getItemIDColumn() {
+    return itemIDColumn;
+  }
+
+  public String getPreferenceColumn() {
+    return preferenceColumn;
   }
 
   public final Iterable<? extends User> getUsers() throws TasteException {
