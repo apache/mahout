@@ -104,9 +104,9 @@ public final class MySQLJDBCDiffStorage extends AbstractJDBCDiffStorage {
           // getRecommendableItemsSQL
           "SELECT id FROM " +
           "(SELECT " + itemIDAColumn + " AS id FROM " + diffsTable + ", " + dataModel.getPreferenceTable() +
-          " WHERE " + itemIDBColumn + " = id AND " + dataModel.getUserIDColumn() + "=? UNION DISTINCT" +
+          " WHERE " + itemIDBColumn + " = " + dataModel.getItemIDColumn() + " AND " + dataModel.getUserIDColumn() + "=? UNION DISTINCT" +
           " SELECT " + itemIDBColumn + " AS id FROM " + diffsTable + ", " + dataModel.getPreferenceTable() +
-          " WHERE " + itemIDAColumn + " = id AND " + dataModel.getUserIDColumn() +
+          " WHERE " + itemIDAColumn + " = " + dataModel.getItemIDColumn() + " AND " + dataModel.getUserIDColumn() +
           "=?) possible_item_ids WHERE id NOT IN (SELECT " + dataModel.getItemIDColumn() + " FROM " + dataModel.getPreferenceTable() +
           " WHERE " + dataModel.getUserIDColumn() + "=?)",
           // deleteDiffsSQL
