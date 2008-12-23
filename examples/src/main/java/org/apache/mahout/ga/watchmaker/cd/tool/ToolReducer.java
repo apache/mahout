@@ -67,6 +67,7 @@ public class ToolReducer extends MapReduceBase implements
     this.descriptors = new Descriptors(descriptors);
   }
 
+  @Override
   public void reduce(LongWritable key, Iterator<Text> values,
       OutputCollector<LongWritable, Text> output, Reporter reporter)
       throws IOException {
@@ -90,7 +91,7 @@ public class ToolReducer extends MapReduceBase implements
       throw new RuntimeException("");
   }
 
-  String numericDescription(Iterator<Text> values) {
+  static String numericDescription(Iterator<Text> values) {
     double min = Double.POSITIVE_INFINITY;
     double max = Double.NEGATIVE_INFINITY;
 

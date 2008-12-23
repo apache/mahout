@@ -34,6 +34,9 @@ public class MeanShiftCanopyDriver {
 
   private static final Logger log = LoggerFactory.getLogger(MeanShiftCanopyDriver.class);
 
+  private MeanShiftCanopyDriver() {
+  }
+
   public static void main(String[] args) {
     String input = args[0];
     String output = args[1];

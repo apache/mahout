@@ -37,7 +37,8 @@ public final class LogLikelihoodSimilarity implements ItemSimilarity {
     this.dataModel = dataModel;
   }
 
-  public final double itemSimilarity(Item item1, Item item2) throws TasteException {
+  @Override
+  public double itemSimilarity(Item item1, Item item2) throws TasteException {
     if (item1 == null || item2 == null) {
       throw new IllegalArgumentException("item1 or item2 is null");
     }
@@ -63,13 +64,14 @@ public final class LogLikelihoodSimilarity implements ItemSimilarity {
     return d <= 0.0 ? 0 : Math.log(d);
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
     RefreshHelper.maybeRefresh(alreadyRefreshed, dataModel);
   }
 
   @Override
-  public final String toString() {
+  public String toString() {
     return "LogLikelihoodSimilarity[dataModel:" + dataModel + ']';
   }
 

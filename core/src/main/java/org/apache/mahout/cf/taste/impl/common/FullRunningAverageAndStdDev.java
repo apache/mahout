@@ -29,6 +29,7 @@ public final class FullRunningAverageAndStdDev extends FullRunningAverage implem
     stdDev = Double.NaN;
   }
 
+  @Override
   public double getStandardDeviation() {
     return stdDev;
   }

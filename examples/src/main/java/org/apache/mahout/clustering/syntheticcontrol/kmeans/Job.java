@@ -28,6 +28,8 @@ import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
 import java.io.IOException;
 
 public class Job {
+  private Job() {
+  }
 
   public static void main(String[] args) throws IOException {
     if (args.length == 7) {

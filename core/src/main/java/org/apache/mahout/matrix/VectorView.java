@@ -24,6 +24,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.nio.charset.Charset;
 
 /**
@@ -44,7 +45,6 @@ public class VectorView extends AbstractVector {
   private int cardinality;
 
   public VectorView(Vector vector, int offset, int cardinality) {
-    super();
     this.vector = vector;
     this.offset = offset;
     this.cardinality = cardinality;
@@ -56,7 +56,7 @@ public class VectorView extends AbstractVector {
   }
 
   @Override
-  public WritableComparable asWritableComparable() {
+  public WritableComparable<?> asWritableComparable() {
     String out = asFormatString();
     return new Text(out);
   }
@@ -158,14 +158,17 @@ public class VectorView extends AbstractVector {
         if (isInView(el.index())) {
           final Vector.Element decorated = el;
           el = new Vector.Element() {
+            @Override
             public double get() {
               return decorated.get();
             }
 
+            @Override
             public int index() {
               return decorated.index() - offset;
             }
 
+            @Override
             public void set(double value) {
               el.set(value);
             }
@@ -176,12 +179,17 @@ public class VectorView extends AbstractVector {
       el = null; // No element was found
     }
 
+    @Override
     public Vector.Element next() {
+      if (!hasNext()) {
+        throw new NoSuchElementException();
+      }
       Vector.Element buffer = el;
       buffer();
       return buffer;
     }
 
+    @Override
     public boolean hasNext() {
       return el != null;
     }
@@ -190,12 +198,14 @@ public class VectorView extends AbstractVector {
      * @throws UnsupportedOperationException
      *             all the time. method not implemented.
      */
+    @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
   }
 
 
+  @Override
   public void write(DataOutput dataOutput) throws IOException {
     dataOutput.writeInt(offset);
     dataOutput.writeInt(cardinality);
@@ -205,6 +215,7 @@ public class VectorView extends AbstractVector {
     vector.write(dataOutput);
   }
 
+  @Override
   public void readFields(DataInput dataInput) throws IOException {
     int offset = dataInput.readInt();
     int cardinality = dataInput.readInt();

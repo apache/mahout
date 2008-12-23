@@ -25,6 +25,7 @@ import org.apache.mahout.matrix.Vector;
  */
 public class WeightedManhattanDistanceMeasure extends WeightedDistanceMeasure {
 
+  @Override
   public double distance(Vector p1, Vector p2) {
     double result = 0;
 

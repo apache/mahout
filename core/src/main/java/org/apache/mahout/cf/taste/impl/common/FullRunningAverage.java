@@ -38,6 +38,7 @@ public class FullRunningAverage implements RunningAverage, Serializable {
   /**
    * @param datum new item to add to the running average
    */
+  @Override
   public void addDatum(double datum) {
     if (++count == 1) {
       average = datum;
@@ -50,6 +51,7 @@ public class FullRunningAverage implements RunningAverage, Serializable {
    * @param datum item to remove to the running average
    * @throws IllegalStateException if count is 0
    */
+  @Override
   public void removeDatum(double datum) {
     if (count == 0) {
       throw new IllegalStateException();
@@ -65,6 +67,7 @@ public class FullRunningAverage implements RunningAverage, Serializable {
    * @param delta amount by which to change a datum in the running average
    * @throws IllegalStateException if count is 0
    */
+  @Override
   public void changeDatum(double delta) {
     if (count == 0) {
       throw new IllegalStateException();
@@ -72,10 +75,12 @@ public class FullRunningAverage implements RunningAverage, Serializable {
     average += delta / (double) count;
   }
 
+  @Override
   public int getCount() {
     return count;
   }
 
+  @Override
   public double getAverage() {
     return average;
   }

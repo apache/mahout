@@ -49,6 +49,7 @@ public class BruteForceTravellingSalesman implements TravellingSalesmanStrategy
         this.distances = distances;
     }
 
+    @Override
     public String getDescription()
     {
         return "Brute Force";
@@ -66,6 +67,7 @@ public class BruteForceTravellingSalesman implements TravellingSalesmanStrategy
      * algorithm as it progresses.  May be null.
      * @return The shortest route that visits each of the specified cities once.
      */
+    @Override
     public List<String> calculateShortestRoute(Collection<String> cities,
                                                ProgressListener progressListener)
     {

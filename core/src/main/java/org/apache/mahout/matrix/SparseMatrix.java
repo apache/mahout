@@ -55,13 +55,12 @@ public class SparseMatrix extends AbstractMatrix {
    *            the int[2] cardinality desired
    */
   public SparseMatrix(int[] cardinality) {
-    super();
     this.cardinality = cardinality.clone();
     this.rows = new HashMap<Integer, Vector>();
   }
 
   @Override
-  public WritableComparable asWritableComparable() {
+  public WritableComparable<?> asWritableComparable() {
     String out = asFormatString();
     return new Text(out);
   }
@@ -86,8 +85,8 @@ public class SparseMatrix extends AbstractMatrix {
   @Override
   public Matrix copy() {
     SparseMatrix copy = new SparseMatrix(cardinality);
-    for (Integer row : rows.keySet())
-      copy.rows.put(row, rows.get(row).copy());
+    for (Map.Entry<Integer, Vector> entry : rows.entrySet())
+      copy.rows.put(entry.getKey(), entry.getValue().copy());
     return copy;
   }
 
@@ -133,8 +132,8 @@ public class SparseMatrix extends AbstractMatrix {
   public int[] size() {
     int[] result = new int[2];
     result[ROW] = rows.size();
-    for (Integer row : rows.keySet())
-      result[COL] = Math.max(result[COL], rows.get(row).size());
+    for (Map.Entry<Integer, Vector> integerVectorEntry : rows.entrySet())
+      result[COL] = Math.max(result[COL], integerVectorEntry.getValue().size());
     return result;
   }
 

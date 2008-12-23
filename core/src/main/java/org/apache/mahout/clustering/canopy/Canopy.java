@@ -76,7 +76,6 @@ public class Canopy {
    *            a point in vector space
    */
   public Canopy(Vector point) {
-    super();
     this.canopyId = nextCanopyId++;
     this.center = point;
     this.pointTotal = point.copy();
@@ -92,7 +91,6 @@ public class Canopy {
    *            an int identifying the canopy local to this process only
    */
   public Canopy(Vector point, int canopyId) {
-    super();
     this.canopyId = canopyId;
     this.center = point;
     this.pointTotal = point.copy();
@@ -107,7 +105,7 @@ public class Canopy {
    */
   public static void configure(JobConf job) {
     try {
-      final ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
       Class<?> cl = ccl.loadClass(job.get(DISTANCE_MEASURE_KEY));
       measure = (DistanceMeasure) cl.newInstance();
       measure.configure(job);
@@ -216,7 +214,7 @@ public class Canopy {
       double dist = measure.distance(canopy.getCenter(), point);
       if (dist < t1) {
         isCovered = true;
-        collector.collect(new Text(Canopy.formatCanopy(canopy)), writable);
+        collector.collect(new Text(formatCanopy(canopy)), writable);
       } else if (dist < minDist) {
         minDist = dist;
         closest = canopy;
@@ -225,7 +223,7 @@ public class Canopy {
     // if the point is not contained in any canopies (due to canopy centroid
     // clustering), emit the point to the closest covering canopy.
     if (!isCovered)
-      collector.collect(new Text(Canopy.formatCanopy(closest)), writable);
+      collector.collect(new Text(formatCanopy(closest)), writable);
   }
 
   /**
@@ -250,7 +248,7 @@ public class Canopy {
     int beginIndex = formattedString.indexOf('[');
     String id = formattedString.substring(0, beginIndex);
     String centroid = formattedString.substring(beginIndex);
-    if (id.startsWith("C")) {
+    if (id.charAt(0) == 'C') {
       int canopyId = Integer.parseInt(formattedString.substring(1, beginIndex - 2));
       Vector canopyCentroid = AbstractVector.decodeVector(centroid);
       return new Canopy(canopyCentroid, canopyId);

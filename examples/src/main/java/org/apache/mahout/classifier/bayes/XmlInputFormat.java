@@ -40,6 +40,7 @@ public class XmlInputFormat extends TextInputFormat {
   public static final String START_TAG_KEY = "xmlinput.start";
   public static final String END_TAG_KEY = "xmlinput.end";
 
+  @Override
   public RecordReader<LongWritable, Text> getRecordReader(InputSplit inputSplit, JobConf jobConf, Reporter reporter)
       throws IOException {
     return new XmlRecordReader((FileSplit) inputSplit, jobConf);
@@ -66,6 +67,7 @@ public class XmlInputFormat extends TextInputFormat {
       fsin.seek(start);
     }
 
+    @Override
     public boolean next(LongWritable key, Text value) throws IOException {
       if (fsin.getPos() < end) {
         if (readUntilMatch(startTag, false)) {
@@ -84,22 +86,27 @@ public class XmlInputFormat extends TextInputFormat {
       return false;
     }
 
+    @Override
     public LongWritable createKey() {
       return new LongWritable();
     }
 
+    @Override
     public Text createValue() {
       return new Text();
     }
 
+    @Override
     public long getPos() throws IOException {
       return fsin.getPos();
     }
 
+    @Override
     public void close() throws IOException {
       fsin.close();
     }
 
+    @Override
     public float getProgress() throws IOException {
       return (float) ((fsin.getPos() - start) / (end - start));
     }

@@ -46,10 +46,10 @@ public class SparseVector extends AbstractVector {
    * Decode a new instance from the argument
    *
    * @param writableComparable
-   *            a writableComparable produced by the asWritableComparable method
+   *            a writableComparable produced by the asWritableComparable<?> method
    * @return a DenseVector
    */
-  public static Vector decodeFormat(WritableComparable writableComparable) {
+  public static Vector decodeFormat(WritableComparable<?> writableComparable) {
     return decodeFormat(writableComparable.toString());
   }
 
@@ -68,7 +68,7 @@ public class SparseVector extends AbstractVector {
       if (pt.startsWith("[s")) {
         int c = Integer.parseInt(pts[i].substring(2));
         result = new SparseVector(c);
-      } else if (!pt.startsWith("]")) {
+      } else if (pt.charAt(0) != ']') {
         int ix = pt.indexOf(':');
         int index = Integer.parseInt(pt.substring(0, ix).trim());
         double value = Double.parseDouble(pt.substring(ix + 1));
@@ -79,7 +79,6 @@ public class SparseVector extends AbstractVector {
   }
 
   public SparseVector(int cardinality) {
-    super();
     values = new HashMap<Integer, Double>();
     this.cardinality = cardinality;
   }
@@ -91,7 +90,7 @@ public class SparseVector extends AbstractVector {
   }
 
   @Override
-  public WritableComparable asWritableComparable() {
+  public WritableComparable<?> asWritableComparable() {
     String out = asFormatString();
     return new Text(out);
   }
@@ -103,6 +102,7 @@ public class SparseVector extends AbstractVector {
     out.append("[s").append(cardinality).append(", ");
     Map.Entry<Integer, Double>[] entries = (Map.Entry<Integer, Double>[]) values.entrySet().toArray(new Map.Entry[values.size()]);
     Arrays.sort(entries, new Comparator<Map.Entry<Integer, Double>>(){
+      @Override
       public int compare(Map.Entry<Integer, Double> e1, Map.Entry<Integer, Double> e2) {
         return e1.getKey().compareTo(e2.getKey());
       }
@@ -189,6 +189,7 @@ public class SparseVector extends AbstractVector {
   }
 
 
+  @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
@@ -198,9 +199,9 @@ public class SparseVector extends AbstractVector {
     return cardinality == that.cardinality && (values == null ? that.values == null : values.equals(that.values));
   }
 
+  @Override
   public int hashCode() {
-    int result;
-    result = (values != null ? values.hashCode() : 0);
+    int result = (values != null ? values.hashCode() : 0);
     result = 31 * result + cardinality;
     return result;
   }
@@ -208,18 +209,21 @@ public class SparseVector extends AbstractVector {
   private class Iterator implements java.util.Iterator<Vector.Element> {
     private final java.util.Iterator<Map.Entry<Integer, Double>> it;
 
-    public Iterator() {
+    Iterator() {
       it = values.entrySet().iterator();
     }
 
+    @Override
     public boolean hasNext() {
       return it.hasNext();
     }
 
+    @Override
     public Element next() {
       return new Element(it.next().getKey());
     }
 
+    @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
@@ -245,17 +249,19 @@ public class SparseVector extends AbstractVector {
     return result;
   }
 
+  @Override
   public void write(DataOutput dataOutput) throws IOException {
     dataOutput.writeInt(cardinality());
     dataOutput.writeInt(size());
     for (Vector.Element element : this) {
-      if (element.get() != 0d) {
+      if (element.get() != 0.0d) {
         dataOutput.writeInt(element.index());
         dataOutput.writeDouble(element.get());
       }
     }
   }
 
+  @Override
   public void readFields(DataInput dataInput) throws IOException {
     int cardinality = dataInput.readInt();
     int size = dataInput.readInt();

@@ -38,12 +38,14 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 public class WikipediaXmlSplitter {
+  private WikipediaXmlSplitter() {
+  }
 
   @SuppressWarnings("static-access")
   public static void main(String[] args) throws IOException, OptionException {
-    final DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
-    final ArgumentBuilder abuilder = new ArgumentBuilder();
-    final GroupBuilder gbuilder = new GroupBuilder();
+    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    ArgumentBuilder abuilder = new ArgumentBuilder();
+    GroupBuilder gbuilder = new GroupBuilder();
 
     Option dumpFileOpt = obuilder.withLongName("dumpFile").withRequired(true).withArgument(
             abuilder.withName("dumpFile").withMinimum(1).withMaximum(1).create()).
@@ -57,10 +59,9 @@ public class WikipediaXmlSplitter {
             abuilder.withName("chunkSize").withMinimum(1).withMaximum(1).create()).
             withDescription("The Size of the chunk, in megabytes").withShortName("c").create();
     Group group = gbuilder.withName("Options").withOption(dumpFileOpt).withOption(outputDirOpt).withOption(chunkSizeOpt).create();
-    CommandLine cmdLine;
     Parser parser = new Parser();
     parser.setGroup(group);
-    cmdLine = parser.parse(args);
+    CommandLine cmdLine = parser.parse(args);
 
     String dumpFilePath = (String) cmdLine.getValue(dumpFileOpt);
     String outputDirPath = (String) cmdLine.getValue(outputDirOpt);
@@ -101,15 +102,15 @@ public class WikipediaXmlSplitter {
         + "    </namespaces>\n"
         + "  </siteinfo>\n";
 
-    String thisLine;
     StringBuilder content = new StringBuilder();
     content.append(header);
     int filenumber = 0;
     NumberFormat decimalFormatter = new DecimalFormat("0000");
+    String thisLine;
     while ((thisLine = dumpReader.readLine()) != null)
     {
-      boolean end = false;
       if(thisLine.trim().startsWith("<page>")){
+        boolean end = false;
         while(thisLine.trim().startsWith("</page>") == false){
           content.append(thisLine).append('\n');
           if ((thisLine = dumpReader.readLine()) == null){

@@ -47,6 +47,7 @@ public final class FileLineIterable implements Iterable<String> {
     this.encoding = encoding;
   }
 
+  @Override
   public Iterator<String> iterator() {
     try {
       return new FileLineIterator(file, encoding);

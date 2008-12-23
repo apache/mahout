@@ -36,6 +36,7 @@ final class ByRescoreComparator implements Comparator<RecommendedItem>, Serializ
     this.rescorer = rescorer;
   }
 
+  @Override
   public int compare(RecommendedItem o1, RecommendedItem o2) {
     double rescored1;
     double rescored2;

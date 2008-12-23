@@ -29,6 +29,7 @@ public final class CompactRunningAverageAndStdDev extends CompactRunningAverage 
     stdDev = Float.NaN;
   }
 
+  @Override
   public double getStandardDeviation() {
     return (double) stdDev;
   }

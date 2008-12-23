@@ -20,7 +20,6 @@ package org.apache.mahout.classifier;
 import org.apache.commons.lang.StringUtils;
 import org.apache.mahout.common.Summarizable;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +31,7 @@ import java.util.Map;
  */
 public class ConfusionMatrix implements Summarizable {
 
-  private Collection<String> labels;
+  private final Collection<String> labels;
 
   private final Map<String, Integer> labelMap = new HashMap<String, Integer>();
 
@@ -63,8 +62,9 @@ public class ConfusionMatrix implements Summarizable {
     int correct = 0;
     for(int i = 0 ;i < labels.size() ;i++){
       labelTotal += confusionMatrix[labelId][i];
-      if(i == labelId)
+      if (i == labelId) {
         correct = confusionMatrix[labelId][i];
+      }
     }
     return 100.0 * correct / labelTotal;
   }
@@ -95,7 +95,7 @@ public class ConfusionMatrix implements Summarizable {
   public int getCount(String correctLabel, String classifiedLabel) {
     if (labels.contains(correctLabel)
         && labels.contains(classifiedLabel) == false && defaultLabel.equals(classifiedLabel) == false) {
-      throw new IllegalArgumentException("Label not found " +correctLabel + " " +classifiedLabel );
+      throw new IllegalArgumentException("Label not found " +correctLabel + ' ' +classifiedLabel );
     }
     int correctId = labelMap.get(correctLabel);
     int classifiedId = labelMap.get(classifiedLabel);
@@ -137,6 +137,7 @@ public class ConfusionMatrix implements Summarizable {
     return this;
   }
 
+  @Override
   public String summarize() {
     String lineSep = System.getProperty("line.separator");
     StringBuilder returnString = new StringBuilder();
@@ -168,7 +169,7 @@ public class ConfusionMatrix implements Summarizable {
     return returnString.toString();
   }
 
-  String getSmallLabel(int i) {
+  static String getSmallLabel(int i) {
     int val = i;
     StringBuilder returnString = new StringBuilder();
     do{

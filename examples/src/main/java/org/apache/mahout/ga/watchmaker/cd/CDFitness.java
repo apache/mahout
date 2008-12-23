@@ -100,7 +100,7 @@ public class CDFitness implements Writable {
 
   @Override
   public String toString() {
-    return "[TP=" + tp + ", FP=" + fp + ", TN=" + tn + ", FN=" + fn + "]";
+    return "[TP=" + tp + ", FP=" + fp + ", TN=" + tn + ", FN=" + fn + ']';
   }
 
   /**
@@ -114,6 +114,7 @@ public class CDFitness implements Writable {
     return se * sp;
   }
 
+  @Override
   public void readFields(DataInput in) throws IOException {
     tp = in.readInt();
     fp = in.readInt();
@@ -121,6 +122,7 @@ public class CDFitness implements Writable {
     fn = in.readInt();
   }
 
+  @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(tp);
     out.writeInt(fp);

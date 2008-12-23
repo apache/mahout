@@ -30,6 +30,6 @@ public interface UnaryFunction {
    * @param arg1 double for the argument
    * @return the result of applying the function
    */
-  public double apply(double arg1);
+  double apply(double arg1);
 
 }

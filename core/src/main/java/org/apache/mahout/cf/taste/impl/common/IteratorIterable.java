@@ -39,6 +39,7 @@ public final class IteratorIterable<T> implements Iterable<T> {
     this.iterator = iterator;
   }
 
+  @Override
   public Iterator<T> iterator() {
     if (iterator == null) {
       throw new IllegalStateException("iterator() has already been called");

@@ -35,6 +35,9 @@ public class BayesDriver {
 
   private static final Logger log = LoggerFactory.getLogger(BayesDriver.class);
 
+  private BayesDriver() {
+  }
+
   /**
    * Takes in two arguments:
    * <ol>

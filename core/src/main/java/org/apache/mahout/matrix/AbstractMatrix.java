@@ -17,8 +17,6 @@
 
 package org.apache.mahout.matrix;
 
-import org.apache.hadoop.io.WritableComparable;
-
 /**
  * A few universal implementations of convenience functions
  * 
@@ -31,38 +29,7 @@ public abstract class AbstractMatrix implements Matrix {
   // index into int[2] for row value
   public static final int ROW = 0;
 
-  public abstract WritableComparable asWritableComparable();
-
-  public abstract String asFormatString();
-
-  public abstract Matrix assignColumn(int column, Vector other);
-
-  public abstract Matrix assignRow(int row, Vector other);
-
-  public abstract int[] cardinality();
-
-  public abstract Matrix copy();
-
-  public abstract Vector getColumn(int column);
-
-  public abstract double getQuick(int row, int column);
-
-  public abstract Vector getRow(int row);
-
-  public abstract boolean haveSharedCells(Matrix other);
-
-  public abstract Matrix like();
-
-  public abstract Matrix like(int rows, int columns);
-
-  public abstract void setQuick(int row, int column, double value);
-
-  public abstract int[] size();
-
-  public abstract double[][] toArray();
-
-  public abstract Matrix viewPart(int[] offset, int[] length);
-
+  @Override
   public Matrix assign(double value) {
     int[] c = cardinality();
     for (int row = 0; row < c[ROW]; row++)
@@ -71,6 +38,7 @@ public abstract class AbstractMatrix implements Matrix {
     return this;
   }
 
+  @Override
   public Matrix assign(double[][] values) {
     int[] c = cardinality();
     if (c[ROW] != values.length)
@@ -84,6 +52,7 @@ public abstract class AbstractMatrix implements Matrix {
     return this;
   }
 
+  @Override
   public Matrix assign(Matrix other, BinaryFunction function) {
     int[] c = cardinality();
     int[] o = other.cardinality();
@@ -96,6 +65,7 @@ public abstract class AbstractMatrix implements Matrix {
     return this;
   }
 
+  @Override
   public Matrix assign(Matrix other) {
     int[] c = cardinality();
     int[] o = other.cardinality();
@@ -107,6 +77,7 @@ public abstract class AbstractMatrix implements Matrix {
     return this;
   }
 
+  @Override
   public Matrix assign(UnaryFunction function) {
     int[] c = cardinality();
     for (int row = 0; row < c[ROW]; row++)
@@ -115,6 +86,7 @@ public abstract class AbstractMatrix implements Matrix {
     return this;
   }
 
+  @Override
   public double determinant() {
     int[] card = cardinality();
     int rowSize = card[ROW];
@@ -150,6 +122,7 @@ public abstract class AbstractMatrix implements Matrix {
 
   }
 
+  @Override
   public Matrix divide(double x) {
     Matrix result = copy();
     int[] c = cardinality();
@@ -159,6 +132,7 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
+  @Override
   public double get(int row, int column) {
     int[] c = cardinality();
     if (row < 0 || column < 0 || row >= c[ROW] || column >= c[COL])
@@ -166,6 +140,7 @@ public abstract class AbstractMatrix implements Matrix {
     return getQuick(row, column);
   }
 
+  @Override
   public Matrix minus(Matrix other) {
     int[] c = cardinality();
     int[] o = other.cardinality();
@@ -179,6 +154,7 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
+  @Override
   public Matrix plus(double x) {
     Matrix result = copy();
     int[] c = cardinality();
@@ -188,6 +164,7 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
+  @Override
   public Matrix plus(Matrix other) {
     int[] c = cardinality();
     int[] o = other.cardinality();
@@ -201,6 +178,7 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
+  @Override
   public void set(int row, int column, double value) {
     int[] c = cardinality();
     if (row < 0 || column < 0 || row >= c[ROW] || column >= c[COL])
@@ -208,6 +186,7 @@ public abstract class AbstractMatrix implements Matrix {
     setQuick(row, column, value);
   }
 
+  @Override
   public void set(int row, double[] data) {
     int[] c = cardinality();
     if (c[COL] < data.length)
@@ -219,6 +198,7 @@ public abstract class AbstractMatrix implements Matrix {
       setQuick(row, i, data[i]);
   }
 
+  @Override
   public Matrix times(double x) {
     Matrix result = copy();
     int[] c = cardinality();
@@ -228,6 +208,7 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
+  @Override
   public Matrix times(Matrix other) {
     int[] c = cardinality();
     int[] o = other.cardinality();
@@ -244,6 +225,7 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
+  @Override
   public Matrix transpose() {
     int[] card = cardinality();
     Matrix result = like(card[COL], card[ROW]);
@@ -253,6 +235,7 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
+  @Override
   public double zSum() {
     double result = 0;
     int[] c = cardinality();

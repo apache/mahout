@@ -73,6 +73,7 @@ public class ToolMapper extends MapReduceBase implements
     this.descriptors = new Descriptors(descriptors);
   }
 
+  @Override
   public void map(LongWritable key, Text value,
       OutputCollector<LongWritable, Text> output, Reporter reporter)
       throws IOException {
@@ -97,7 +98,7 @@ public class ToolMapper extends MapReduceBase implements
    * @param value
    * @param attributes
    */
-  void extractAttributes(Text value, List<String> attributes) {
+  static void extractAttributes(Text value, List<String> attributes) {
     StringTokenizer tokenizer = new StringTokenizer(value.toString(), ",");
 
     attributes.clear();

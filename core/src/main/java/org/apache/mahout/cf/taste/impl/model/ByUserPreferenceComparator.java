@@ -37,6 +37,7 @@ public final class ByUserPreferenceComparator implements Comparator<Preference>,
     return instance;
   }
 
+  @Override
   public int compare(Preference o1, Preference o2) {
     return o1.getUser().compareTo(o2.getUser());
   }

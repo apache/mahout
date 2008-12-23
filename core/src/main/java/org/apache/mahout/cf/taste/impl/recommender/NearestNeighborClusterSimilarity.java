@@ -64,6 +64,7 @@ public final class NearestNeighborClusterSimilarity implements ClusterSimilarity
     this.samplingPercentage = samplingPercentage;
   }
 
+  @Override
   public double getSimilarity(Collection<User> cluster1,
                               Collection<User> cluster2) throws TasteException {
     if (cluster1.isEmpty() || cluster2.isEmpty()) {
@@ -87,6 +88,7 @@ public final class NearestNeighborClusterSimilarity implements ClusterSimilarity
     return greatestSimilarity;
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
     RefreshHelper.maybeRefresh(alreadyRefreshed, similarity);

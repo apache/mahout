@@ -55,6 +55,9 @@ public class FileInfoParser {
 
   public static final String NUMERICAL_TOKEN = "NUMERICAL";
 
+  private FileInfoParser() {
+  }
+
   /**
    * Initializes a dataset using an info file.
    * 
@@ -73,13 +76,12 @@ public class FileInfoParser {
     List<Attribute> attributes = new ArrayList<Attribute>();
     int labelIndex = -1;
 
-    String line, token;
     int index = 0;
 
     while (reader.hasNextLine()) {
-      line = reader.nextLine();
+      String line = reader.nextLine();
       StringTokenizer tokenizer = new StringTokenizer(line, ", ");
-      token = nextToken(tokenizer);
+      String token = nextToken(tokenizer);
       if (IGNORED_TOKEN.equals(token)) {
         ignored.add(index);
       } else if (LABEL_TOKEN.equals(token)) {
@@ -121,8 +123,7 @@ public class FileInfoParser {
       throw new RuntimeException("Input path should be a directory");
 
     // info file name
-    Path infoPath = new Path(inpath.getParent(), inpath.getName().concat(
-        ".infos"));
+    Path infoPath = new Path(inpath.getParent(), inpath.getName() + ".infos");
     if (!fs.exists(infoPath))
       throw new RuntimeException("Info file does not exist");
 

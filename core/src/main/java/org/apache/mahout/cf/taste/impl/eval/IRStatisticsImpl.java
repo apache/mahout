@@ -42,22 +42,27 @@ public final class IRStatisticsImpl implements IRStatistics, Serializable {
     this.fallOut = fallOut;
   }
 
+  @Override
   public double getPrecision() {
     return precision;
   }
 
+  @Override
   public double getRecall() {
     return recall;
   }
 
+  @Override
   public double getFallOut() {
     return fallOut;
   }
 
+  @Override
   public double getF1Measure() {
     return getFNMeasure(1.0);
   }
 
+  @Override
   public double getFNMeasure(double n) {
     double sum = n * precision + recall;
     return sum == 0.0 ? Double.NaN : (1.0 + n) * precision * recall / sum;

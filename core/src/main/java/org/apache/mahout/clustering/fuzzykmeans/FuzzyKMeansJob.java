@@ -29,6 +29,9 @@ public class FuzzyKMeansJob {
   private static final Logger log = LoggerFactory
       .getLogger(FuzzyKMeansJob.class);
 
+  private FuzzyKMeansJob() {
+  }
+
   public static void main(String[] args) throws IOException {
 
     if (args.length != 10) {

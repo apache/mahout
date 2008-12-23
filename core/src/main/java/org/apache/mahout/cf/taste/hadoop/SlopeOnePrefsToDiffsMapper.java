@@ -32,6 +32,7 @@ public final class SlopeOnePrefsToDiffsMapper
     extends MapReduceBase
     implements Mapper<LongWritable, Text, Text, ItemPrefWritable> {
 
+  @Override
   public void map(LongWritable key,
                   Text value,
                   OutputCollector<Text, ItemPrefWritable> output,

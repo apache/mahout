@@ -30,19 +30,23 @@ public class CompositeParameter<T extends Parametered> extends AbstractParameter
     super(type, prefix, name, jobConf, defaultValue, description);
   }
 
+  @Override
   public void createParameters(String prefix, JobConf jobConf) {
     get().createParameters(prefix, jobConf);
   }
 
-  public Collection<Parameter> getParameters() {
+  @Override
+  public Collection<Parameter<?>> getParameters() {
     return get().getParameters();
   }
 
 
+  @Override
   public void configure(JobConf jobConf) {
     get().configure(jobConf);
   }
 
+  @Override
   @SuppressWarnings("unchecked")
   public void setStringValue(String className) {
     try {
@@ -56,6 +60,7 @@ public class CompositeParameter<T extends Parametered> extends AbstractParameter
     }
   }
 
+  @Override
   public String getStringValue() {
     if (value == null) {
       return null;

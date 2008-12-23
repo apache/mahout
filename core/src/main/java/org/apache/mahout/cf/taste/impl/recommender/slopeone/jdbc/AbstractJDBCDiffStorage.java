@@ -99,6 +99,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
     this.diffsExistSQL = diffsExistSQL;
     this.minDiffCount = minDiffCount;
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
+      @Override
       public Object call() throws TasteException {
         buildAverageDiffs();
         return null;
@@ -113,6 +114,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
     }
   }
 
+  @Override
   public RunningAverage getDiff(Object itemID1, Object itemID2) throws TasteException {
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -139,6 +141,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
     }
   }
 
+  @Override
   public RunningAverage[] getDiffs(Object userID, Object itemID, Preference[] prefs)
           throws TasteException {
     int size = prefs.length;
@@ -175,6 +178,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
     return result;
   }
 
+  @Override
   public RunningAverage getAverageItemPref(Object itemID) throws TasteException {
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -200,6 +204,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
     }
   }
 
+  @Override
   public void updateItemPref(Object itemID, double prefDelta, boolean remove)
           throws TasteException {
     Connection conn = null;
@@ -237,6 +242,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
     return stmt;
   }
 
+  @Override
   public Set<Item> getRecommendableItems(Object userID) throws TasteException {
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -309,6 +315,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
     }
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     refreshHelper.refresh(alreadyRefreshed);
   }
@@ -323,22 +330,27 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
       this.average = average;
     }
 
+    @Override
     public void addDatum(double datum) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public void removeDatum(double datum) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public void changeDatum(double delta) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public int getCount() {
       return count;
     }
 
+    @Override
     public double getAverage() {
       return average;
     }

@@ -31,6 +31,7 @@ public abstract class STFitnessEvaluator<T> implements FitnessEvaluator<T> {
 
   private List<? extends T> population;
 
+  @Override
   public double getFitness(T candidate, List<? extends T> population) {
     // evaluate the population, when needed
     if (this.population == null || this.population != population) {
@@ -47,7 +48,5 @@ public abstract class STFitnessEvaluator<T> implements FitnessEvaluator<T> {
   }
 
   protected abstract void evaluate(List<? extends T> population, List<Double> evaluations);
-
-  public abstract boolean isNatural();
 
 }

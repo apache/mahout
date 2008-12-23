@@ -57,10 +57,12 @@ public final class NullRescorer<T> implements Rescorer<T> {
    * @param originalScore current score for {@link Item}
    * @return same originalScore as new score, always
    */
+  @Override
   public double rescore(T thing, double originalScore) {
     return originalScore;
   }
 
+  @Override
   public boolean isFiltered(T thing) {
     return false;
   }

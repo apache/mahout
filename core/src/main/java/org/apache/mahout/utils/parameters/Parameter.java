@@ -27,21 +27,21 @@ package org.apache.mahout.utils.parameters;
  */
 public interface Parameter<T> extends Parametered {
   /** @return job configuration setting key prefix, e.g. 'org.apache.mahout.util.WeightedDistanceMeasure.' */
-  public abstract String prefix();
+  String prefix();
   /** @return configuration parameters name, e.g. 'weightsFile' */
-  public abstract String name();
+  String name();
   /** @return human readable description of parameters */
-  public abstract String description();
+  String description();
   /** @return value class type */
-  public abstract Class<T> type();
+  Class<T> type();
   /** @param stringValue value string representation */
-  public abstract void setStringValue(String stringValue);
+  void setStringValue(String stringValue);
   /** @return value string reprentation of current value */
-  public abstract String getStringValue();
+  String getStringValue();
   /** @param value new parameters value */
-  public abstract void set(T value);
+  void set(T value);
   /** @return current parameters value */
-  public abstract T get();
+  T get();
   /** @return value used if not set by consumer */
-  public abstract String defaultValue();
+  String defaultValue();
 }

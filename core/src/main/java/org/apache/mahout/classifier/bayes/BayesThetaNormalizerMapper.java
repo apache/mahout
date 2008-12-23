@@ -51,6 +51,7 @@ public class BayesThetaNormalizerMapper extends MapReduceBase implements
    * @param reporter
    * @throws IOException
    */
+  @Override
   public void map(Text key, DoubleWritable value,
       OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {
@@ -60,7 +61,7 @@ public class BayesThetaNormalizerMapper extends MapReduceBase implements
 
     String label = labelFeaturePair.split(",")[0];
     double weight = Math.log((value.get() + alpha_i) / (labelWeightSum.get(label) + vocabCount));
-    output.collect(new Text(("_" + label).trim()), new DoubleWritable(weight));
+    output.collect(new Text(('_' + label).trim()), new DoubleWritable(weight));
   }
 
   @Override

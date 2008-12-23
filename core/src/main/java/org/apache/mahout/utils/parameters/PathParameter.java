@@ -20,14 +20,13 @@ package org.apache.mahout.utils.parameters;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 
-
 public class PathParameter extends AbstractParameter<Path> {
 
   public PathParameter(String prefix, String name, JobConf jobConf, Path defaultValue, String description) {
     super(Path.class, prefix, name, jobConf, defaultValue, description);
   }
 
-
+  @Override
   public void setStringValue(String stringValue) {
     set(new Path(stringValue));
   }

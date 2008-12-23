@@ -49,6 +49,7 @@ public final class ZScore implements PreferenceTransform {
     refresh(null);
   }
 
+  @Override
   public double getTransformedValue(Preference pref) throws TasteException {
     RunningAverageAndStdDev meanAndStdev = meanAndStdevs.get(pref.getUser());
     if (meanAndStdev.getCount() > 1) {
@@ -60,6 +61,7 @@ public final class ZScore implements PreferenceTransform {
     return 0.0;
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     // do nothing
   }
@@ -71,6 +73,7 @@ public final class ZScore implements PreferenceTransform {
 
   private static class MeanStdevRetriever implements Retriever<User, RunningAverageAndStdDev> {
 
+    @Override
     public RunningAverageAndStdDev get(User user) throws TasteException {
       RunningAverageAndStdDev running = new FullRunningAverageAndStdDev();
       Preference[] prefs = user.getPreferencesAsArray();

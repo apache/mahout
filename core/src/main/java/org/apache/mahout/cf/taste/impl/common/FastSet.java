@@ -99,14 +99,17 @@ public final class FastSet<K> implements Set<K> {
     return index;
   }
 
+  @Override
   public int size() {
     return numEntries;
   }
 
+  @Override
   public boolean isEmpty() {
     return numEntries == 0;
   }
 
+  @Override
   public boolean contains(Object key) {
     return key != null && keys[find(key)] != null;
   }
@@ -114,6 +117,7 @@ public final class FastSet<K> implements Set<K> {
   /**
    * @throws NullPointerException if key is null
    */
+  @Override
   public boolean add(K key) {
     if (key == null) {
       throw new NullPointerException();
@@ -133,10 +137,12 @@ public final class FastSet<K> implements Set<K> {
     return false;
   }
 
+  @Override
   public Iterator<K> iterator() {
     return new KeyIterator();
   }
 
+  @Override
   public boolean remove(Object key) {
     if (key == null) {
       return false;
@@ -152,6 +158,7 @@ public final class FastSet<K> implements Set<K> {
     // Could un-set recentlyAccessed's bit but doesn't matter
   }
 
+  @Override
   public boolean containsAll(Collection<?> c) {
     for (Object o : c) {
       if (o == null || keys[find(o)] == null) {
@@ -161,6 +168,7 @@ public final class FastSet<K> implements Set<K> {
     return true;
   }
 
+  @Override
   public boolean addAll(Collection<? extends K> c) {
     boolean changed = false;
     for (K k : c) {
@@ -171,6 +179,7 @@ public final class FastSet<K> implements Set<K> {
     return changed;
   }
 
+  @Override
   public boolean retainAll(Collection<?> c) {
     boolean changed = false;
     Iterator<K> iterator = iterator();
@@ -184,6 +193,7 @@ public final class FastSet<K> implements Set<K> {
     return changed;
   }
 
+  @Override
   public boolean removeAll(Collection<?> c) {
     boolean changed = false;
     for (Object o : c) {
@@ -194,17 +204,20 @@ public final class FastSet<K> implements Set<K> {
     return changed;
   }
 
+  @Override
   public void clear() {
     numEntries = 0;
     numSlotsUsed = 0;
     Arrays.fill(keys, null);
   }
 
+  @Override
   public Object[] toArray() {
     return toArray(new Object[numEntries]);
   }
 
-  @SuppressWarnings("unchecked")  
+  @Override
+  @SuppressWarnings("unchecked")
   public <T> T[] toArray(T[] a) {
     if (a.length < numEntries) {
       a = (T[]) Array.newInstance(a.getClass().getComponentType(), numEntries);
@@ -251,7 +264,7 @@ public final class FastSet<K> implements Set<K> {
    * Convenience method to quickly compute just the size of the intersection with another {@link FastSet}.
    */
   @SuppressWarnings("unchecked")  
-  public int intersectionSize(FastSet other) {
+  public int intersectionSize(FastSet<?> other) {
     int count = 0;
     K[] otherKeys = (K[]) other.keys;
     for (int i = 0; i < otherKeys.length; i++) {
@@ -268,11 +281,13 @@ public final class FastSet<K> implements Set<K> {
     private int position;
     private int lastNext = -1;
 
+    @Override
     public boolean hasNext() {
       goToNext();
       return position < getKeys().length;
     }
 
+    @Override
     public K next() {
       goToNext();
       lastNext = position;
@@ -291,6 +306,7 @@ public final class FastSet<K> implements Set<K> {
       }
     }
 
+    @Override
     public void remove() {
       if (lastNext >= keys.length) {
         throw new NoSuchElementException();

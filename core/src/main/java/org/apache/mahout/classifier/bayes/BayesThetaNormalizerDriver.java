@@ -26,6 +26,8 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
+import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
 import org.slf4j.Logger;
@@ -40,6 +42,9 @@ import java.io.IOException;
 public class BayesThetaNormalizerDriver {
 
   private static final Logger log = LoggerFactory.getLogger(BayesThetaNormalizerDriver.class);
+
+  private BayesThetaNormalizerDriver() {
+  }
 
   /**
    * Takes in two arguments:
@@ -70,9 +75,9 @@ public class BayesThetaNormalizerDriver {
 
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(DoubleWritable.class);
-    SequenceFileInputFormat.addInputPath(conf, new Path(output + "/trainer-tfIdf/trainer-tfIdf"));
+    FileInputFormat.addInputPath(conf, new Path(output + "/trainer-tfIdf/trainer-tfIdf"));
     Path outPath = new Path(output + "/trainer-thetaNormalizer");
-    SequenceFileOutputFormat.setOutputPath(conf, outPath);
+    FileOutputFormat.setOutputPath(conf, outPath);
     conf.setNumMapTasks(100);
     //conf.setNumReduceTasks(1);
     conf.setMapperClass(BayesThetaNormalizerMapper.class);
@@ -91,7 +96,7 @@ public class BayesThetaNormalizerDriver {
     SequenceFileModelReader reader = new SequenceFileModelReader();
 
     Path Sigma_kFiles = new Path(output+"/trainer-weights/Sigma_k/*");
-    Map<String,Double> labelWeightSum = reader.readLabelSums(dfs, Sigma_kFiles, conf);
+    Map<String,Double> labelWeightSum = SequenceFileModelReader.readLabelSums(dfs, Sigma_kFiles, conf);
     DefaultStringifier<Map<String,Double>> mapStringifier =
         new DefaultStringifier<Map<String,Double>>(conf, GenericsUtil.getClass(labelWeightSum));
     String labelWeightSumString = mapStringifier.toString(labelWeightSum);
@@ -103,7 +108,7 @@ public class BayesThetaNormalizerDriver {
 
 
     Path sigma_kSigma_jFile = new Path(output+"/trainer-weights/Sigma_kSigma_j/*");
-    double sigma_jSigma_k = reader.readSigma_jSigma_k(dfs, sigma_kSigma_jFile, conf);
+    double sigma_jSigma_k = SequenceFileModelReader.readSigma_jSigma_k(dfs, sigma_kSigma_jFile, conf);
     DefaultStringifier<Double> stringifier = new DefaultStringifier<Double>(conf, Double.class);
     String sigma_jSigma_kString = stringifier.toString(sigma_jSigma_k);
 
@@ -113,7 +118,7 @@ public class BayesThetaNormalizerDriver {
     conf.set("cnaivebayes.sigma_jSigma_k", sigma_jSigma_kString);
 
     Path vocabCountFile = new Path(output+"/trainer-tfIdf/trainer-vocabCount/*");
-    double vocabCount = reader.readVocabCount(dfs, vocabCountFile, conf);
+    double vocabCount = SequenceFileModelReader.readVocabCount(dfs, vocabCountFile, conf);
     String vocabCountString = stringifier.toString(vocabCount);
 
     log.info("Vocabulary Count");

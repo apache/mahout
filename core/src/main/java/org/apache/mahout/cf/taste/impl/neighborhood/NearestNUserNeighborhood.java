@@ -71,6 +71,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
     this.n = n;
   }
 
+  @Override
   public Collection<User> getUserNeighborhood(Object userID) throws TasteException {
     log.trace("Computing neighborhood around user ID '{}'", userID);
 
@@ -96,11 +97,12 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
     private final UserSimilarity userSimilarityImpl;
     private final User theUser;
 
-    public Estimator(UserSimilarity userSimilarityImpl, User theUser) {
+    private Estimator(UserSimilarity userSimilarityImpl, User theUser) {
       this.userSimilarityImpl = userSimilarityImpl;
       this.theUser = theUser;
     }
 
+    @Override
     public double estimate(User user) throws TasteException {
       if (user.equals(theUser)) {
         return Double.NaN;

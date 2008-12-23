@@ -55,19 +55,22 @@ public class TrainClassifier {
 
   private static final Logger log = LoggerFactory.getLogger(TrainClassifier.class);
 
-  public void trainNaiveBayes(String dir, String outputDir, int gramSize) throws IOException {
+  private TrainClassifier() {
+  }
+
+  public static void trainNaiveBayes(String dir, String outputDir, int gramSize) throws IOException {
     BayesDriver.runJob(dir, outputDir, gramSize);
   }
   
-  public void trainCNaiveBayes(String dir, String outputDir, int gramSize) throws IOException {
+  public static void trainCNaiveBayes(String dir, String outputDir, int gramSize) throws IOException {
     CBayesDriver.runJob(dir, outputDir, gramSize);
   }
 
   @SuppressWarnings("static-access")
   public static void main(String[] args) throws IOException, OptionException {
-    final DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
-    final ArgumentBuilder abuilder = new ArgumentBuilder();
-    final GroupBuilder gbuilder = new GroupBuilder();
+    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    ArgumentBuilder abuilder = new ArgumentBuilder();
+    GroupBuilder gbuilder = new GroupBuilder();
 
     Option inputDirOpt = obuilder.withLongName("inputDir").withRequired(true).withArgument(
             abuilder.withName("inputDir").withMinimum(1).withMaximum(1).create()).
@@ -85,20 +88,18 @@ public class TrainClassifier {
             abuilder.withName("classifierType").withMinimum(1).withMaximum(1).create()).
             withDescription("Type of classifier: bayes or cbayes").withShortName("type").create();
     Group group = gbuilder.withName("Options").withOption(gramSizeOpt).withOption(inputDirOpt).withOption(outputOpt).withOption(typeOpt).create();
-    CommandLine cmdLine;
     Parser parser = new Parser();
     parser.setGroup(group);
-    cmdLine = parser.parse(args);
-    TrainClassifier tn = new TrainClassifier();
+    CommandLine cmdLine = parser.parse(args);
     String classifierType = (String) cmdLine.getValue(typeOpt);
     if (classifierType.equalsIgnoreCase("bayes")) {
       log.info("Training Bayes Classifier");
-      tn.trainNaiveBayes((String)cmdLine.getValue(inputDirOpt), (String)cmdLine.getValue(outputOpt), Integer.parseInt((String) cmdLine.getValue(gramSizeOpt)));
+      trainNaiveBayes((String)cmdLine.getValue(inputDirOpt), (String)cmdLine.getValue(outputOpt), Integer.parseInt((String) cmdLine.getValue(gramSizeOpt)));
 
     } else if (classifierType.equalsIgnoreCase("cbayes")) {
       log.info("Training Complementary Bayes Classifier");
       //setup the HDFS and copy the files there, then run the trainer
-      tn.trainCNaiveBayes((String) cmdLine.getValue(inputDirOpt), (String) cmdLine.getValue(outputOpt), Integer.parseInt((String) cmdLine.getValue(gramSizeOpt)));
+      trainCNaiveBayes((String) cmdLine.getValue(inputDirOpt), (String) cmdLine.getValue(outputOpt), Integer.parseInt((String) cmdLine.getValue(gramSizeOpt)));
     }
   }
 }

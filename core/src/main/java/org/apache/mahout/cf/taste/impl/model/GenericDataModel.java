@@ -118,6 +118,7 @@ public final class GenericDataModel implements DataModel, Serializable {
     this(dataModel.getUsers());
   }
 
+  @Override
   public Iterable<? extends User> getUsers() {
     return users;
   }
@@ -125,6 +126,7 @@ public final class GenericDataModel implements DataModel, Serializable {
   /**
    * @throws NoSuchElementException if there is no such {@link User}
    */
+  @Override
   public User getUser(Object id) {
     User user = userMap.get(id);
     if (user == null) {
@@ -133,6 +135,7 @@ public final class GenericDataModel implements DataModel, Serializable {
     return user;
   }
 
+  @Override
   public Iterable<? extends Item> getItems() {
     return items;
   }
@@ -140,6 +143,7 @@ public final class GenericDataModel implements DataModel, Serializable {
   /**
    * @throws NoSuchElementException if there is no such {@link Item}
    */
+  @Override
   public Item getItem(Object id) {
     Item item = itemMap.get(id);
     if (item == null) {
@@ -148,25 +152,30 @@ public final class GenericDataModel implements DataModel, Serializable {
     return item;
   }
 
+  @Override
   public Iterable<? extends Preference> getPreferencesForItem(Object itemID) {
     Preference[] prefs = preferenceForItems.get(itemID);
-    return prefs == null ? NO_PREFS_ITERABLE : new ArrayIterator<Preference>(getPreferencesForItemAsArray(itemID));
+    return prefs == null ? NO_PREFS_ITERABLE : new ArrayIterator<Preference>(prefs);
   }
 
+  @Override
   public Preference[] getPreferencesForItemAsArray(Object itemID) {
     Preference[] prefs = preferenceForItems.get(itemID);
     return prefs == null ? NO_PREFS_ARRAY : prefs;
   }
 
+  @Override
   public int getNumItems() {
     return items.size();
   }
 
+  @Override
   public int getNumUsers() {
     return users.size();
   }
 
-  public int getNumUsersWithPreferenceFor(Object... itemIDs) throws TasteException {
+  @Override
+  public int getNumUsersWithPreferenceFor(Object... itemIDs) {
     if (itemIDs == null) {
       throw new IllegalArgumentException("itemIDs is null");
     }
@@ -199,6 +208,7 @@ public final class GenericDataModel implements DataModel, Serializable {
   /**
    * @throws UnsupportedOperationException
    */
+  @Override
   public void setPreference(Object userID, Object itemID, double value) {
     throw new UnsupportedOperationException();
   }
@@ -206,10 +216,12 @@ public final class GenericDataModel implements DataModel, Serializable {
   /**
    * @throws UnsupportedOperationException
    */
+  @Override
   public void removePreference(Object userID, Object itemID) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     // Does nothing
   }

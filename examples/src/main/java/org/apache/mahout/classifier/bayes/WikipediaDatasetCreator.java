@@ -29,13 +29,15 @@ import org.apache.commons.cli2.builder.GroupBuilder;
 import java.io.IOException;
 
 public class WikipediaDatasetCreator {
+  private WikipediaDatasetCreator() {
+  }
 
   @SuppressWarnings("static-access")
   public static void main(String[] args) throws IOException,
-          ClassNotFoundException, IllegalAccessException, InstantiationException, OptionException {
-    final DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
-    final ArgumentBuilder abuilder = new ArgumentBuilder();
-    final GroupBuilder gbuilder = new GroupBuilder();
+      OptionException {
+    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    ArgumentBuilder abuilder = new ArgumentBuilder();
+    GroupBuilder gbuilder = new GroupBuilder();
 
     Option dirInputPathOpt = obuilder.withLongName("dirInputPath").withRequired(true).withArgument(
             abuilder.withName("dirInputPath").withMinimum(1).withMaximum(1).create()).
@@ -51,11 +53,9 @@ public class WikipediaDatasetCreator {
 
     Group group = gbuilder.withName("Options").withOption(countriesFileOpt).withOption(dirInputPathOpt).withOption(dirOutputPathOpt).create();
 
-    CommandLine cmdLine;
     Parser parser = new Parser();
     parser.setGroup(group);
-    cmdLine = parser.parse(args);
-    
+    CommandLine cmdLine = parser.parse(args);
 
 
     String dirInputPath = (String) cmdLine.getValue(dirInputPathOpt);

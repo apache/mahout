@@ -67,6 +67,7 @@ public final class CachingRecommender implements Recommender {
     this.estimatedPrefCache =
             new Cache<Pair<?, ?>, Double>(new EstimatedPrefRetriever(this.recommender), numUsers);
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
+      @Override
       public Object call() {
         clear();
         return null;
@@ -89,10 +90,12 @@ public final class CachingRecommender implements Recommender {
     }
   }
 
+  @Override
   public List<RecommendedItem> recommend(Object userID, int howMany) throws TasteException {
     return recommend(userID, howMany, null);
   }
 
+  @Override
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
           throws TasteException {
     if (userID == null) {
@@ -111,37 +114,43 @@ public final class CachingRecommender implements Recommender {
     setCurrentRescorer(rescorer);
 
     Recommendations recommendations = recommendationCache.get(userID);
-    if (recommendations.getItems().size() < howMany && !recommendations.noMoreRecommendableItems) {
+    if (recommendations.getItems().size() < howMany && !recommendations.isNoMoreRecommendableItems()) {
       clear(userID);
       recommendations = recommendationCache.get(userID);
       if (recommendations.getItems().size() < howMany) {
-        recommendations.noMoreRecommendableItems = true;
+        recommendations.setNoMoreRecommendableItems(true);
       }
     }
 
-    return recommendations.getItems().size() > howMany ?
-           recommendations.getItems().subList(0, howMany) :
-           recommendations.getItems();
+    List<RecommendedItem> recommendedItems = recommendations.getItems();
+    return recommendedItems.size() > howMany ?
+           recommendedItems.subList(0, howMany) :
+           recommendedItems;
   }
 
+  @Override
   public double estimatePreference(Object userID, Object itemID) throws TasteException {
     return estimatedPrefCache.get(new Pair<Object, Object>(userID, itemID));
   }
 
+  @Override
   public void setPreference(Object userID, Object itemID, double value) throws TasteException {
     recommender.setPreference(userID, itemID, value);
     clear(userID);
   }
 
+  @Override
   public void removePreference(Object userID, Object itemID) throws TasteException {
     recommender.removePreference(userID, itemID);
     clear(userID);
   }
 
+  @Override
   public DataModel getDataModel() {
     return recommender.getDataModel();
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     refreshHelper.refresh(alreadyRefreshed);
   }
@@ -177,13 +186,15 @@ public final class CachingRecommender implements Recommender {
       this.recommender = recommender;
     }
 
+    @Override
     public Recommendations get(Object key) throws TasteException {
       log.debug("Retrieving new recommendations for user ID '{}'", key);
       List<RecommendedItem> recommendations;
+      int howMany = maxHowMany.get();
       if (currentRescorer == null) {
-        recommendations = recommender.recommend(key, maxHowMany.get());
+        recommendations = recommender.recommend(key, howMany);
       } else {
-        recommendations = recommender.recommend(key, maxHowMany.get(), currentRescorer);
+        recommendations = recommender.recommend(key, howMany, currentRescorer);
       }
       return new Recommendations(Collections.unmodifiableList(recommendations));
     }
@@ -197,6 +208,7 @@ public final class CachingRecommender implements Recommender {
       this.recommender = recommender;
     }
 
+    @Override
     public Double get(Pair<?, ?> key) throws TasteException {
       Object userID = key.getFirst();
       Object itemID = key.getSecond();
@@ -212,11 +224,18 @@ public final class CachingRecommender implements Recommender {
 
     private Recommendations(List<RecommendedItem> items) {
       this.items = items;
-      this.noMoreRecommendableItems = false;
     }
 
-    private List<RecommendedItem> getItems() {
+    List<RecommendedItem> getItems() {
       return items;
+    }
+
+    boolean isNoMoreRecommendableItems() {
+      return noMoreRecommendableItems;
+    }
+
+    void setNoMoreRecommendableItems(boolean noMoreRecommendableItems) {
+      this.noMoreRecommendableItems = noMoreRecommendableItems;
     }
   }
 

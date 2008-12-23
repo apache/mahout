@@ -20,8 +20,6 @@ package org.apache.mahout.classifier.bayes;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.classifier.ResultAnalyzer;
 import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
@@ -59,10 +57,10 @@ public class TestClassifier {
 
   @SuppressWarnings({ "static-access", "unchecked" })
   public static void main(String[] args) throws IOException,
-          ClassNotFoundException, IllegalAccessException, InstantiationException, OptionException {
-    final DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
-    final ArgumentBuilder abuilder = new ArgumentBuilder();
-    final GroupBuilder gbuilder = new GroupBuilder();
+      OptionException {
+    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    ArgumentBuilder abuilder = new ArgumentBuilder();
+    GroupBuilder gbuilder = new GroupBuilder();
 
     Option pathOpt = obuilder.withLongName("path").withRequired(true).withArgument(
             abuilder.withName("path").withMinimum(1).withMaximum(1).create()).
@@ -95,10 +93,9 @@ public class TestClassifier {
     Group group = gbuilder.withName("Options").withOption(analyzerOpt).withOption(defaultCatOpt).withOption(dirOpt).withOption(encodingOpt).withOption(gramSizeOpt).withOption(pathOpt)
             .withOption(typeOpt).create();
 
-    CommandLine cmdLine;
     Parser parser = new Parser();
     parser.setGroup(group);
-    cmdLine = parser.parse(args);
+    CommandLine cmdLine = parser.parse(args);
 
 
     SequenceFileModelReader reader = new SequenceFileModelReader();
@@ -133,7 +130,7 @@ public class TestClassifier {
       throw new IllegalArgumentException("Unrecognized classifier type: " + classifierType);
     }
 
-    model = reader.loadModel(model, fs, modelPaths, conf);
+    reader.loadModel(model, fs, modelPaths, conf);
 
     log.info("Done loading model: # labels: {}", model.getLabels().size());
 
@@ -180,8 +177,8 @@ public class TestClassifier {
         while ((line = fileReader.readLine()) != null) {
 
           Map<String, List<String>> document = Model.generateNGrams(line, gramSize);
-          for (String labelName : document.keySet()) {
-            List<String> strings = document.get(labelName);
+          for (Map.Entry<String, List<String>> stringListEntry : document.entrySet()) {
+            List<String> strings = stringListEntry.getValue();
             ClassifierResult classifiedLabel = classifier.classify(model,
                 strings.toArray(new String[strings.size()]),
                 defaultCat);

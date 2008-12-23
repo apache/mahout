@@ -95,13 +95,14 @@ public class SoftCluster {
     int beginIndex = formattedString.indexOf('[');
     String id = formattedString.substring(0, beginIndex);
     String center = formattedString.substring(beginIndex);
-    if (id.startsWith("C") || id.startsWith("V")) {
+    char firstChar = id.charAt(0);
+    boolean startsWithV = firstChar == 'V';
+    if (firstChar == 'C' || startsWithV) {
       int clusterId = new Integer(formattedString.substring(1, beginIndex - 2));
-      Vector clusterCenter = null;
-      clusterCenter = AbstractVector.decodeVector(center);
+      Vector clusterCenter = AbstractVector.decodeVector(center);
 
       SoftCluster cluster = new SoftCluster(clusterCenter, clusterId);
-      cluster.converged = id.startsWith("V");
+      cluster.converged = startsWithV;
       return cluster;
     }
     return null;
@@ -114,7 +115,7 @@ public class SoftCluster {
    */
   public static void configure(JobConf job) {
     try {
-      final ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
       Class<?> cl = ccl.loadClass(job.get(DISTANCE_MEASURE_KEY));
       measure = (DistanceMeasure) cl.newInstance();
       measure.configure(job);
@@ -188,7 +189,7 @@ public class SoftCluster {
       OutputCollector<Text, Text> output) throws IOException {
 
     String outputKey = values.toString();
-    StringBuffer outputValue = new StringBuffer("[");
+    StringBuilder outputValue = new StringBuilder("[");
     List<Double> clusterDistanceList = new ArrayList<Double>();
 
     for (SoftCluster cluster : clusters) {
@@ -200,12 +201,12 @@ public class SoftCluster {
 
       double probWeight = computeProbWeight(clusterDistanceList.get(i),
           clusterDistanceList);
-      outputValue.append(clusters.get(i).clusterId).append(":").append(
-          probWeight).append(" ");
+      outputValue.append(clusters.get(i).clusterId).append(':').append(
+          probWeight).append(' ');
     }
     output.collect(new Text(outputKey.trim()), new Text(outputValue.toString()
         .trim()
-        + "]"));
+        + ']'));
   }
 
   /**
@@ -217,19 +218,18 @@ public class SoftCluster {
    */
   public static double computeProbWeight(double clusterDistance,
       List<Double> clusterDistanceList) {
-    double denom = 0.0;
     if (clusterDistance == 0) {
       clusterDistance = MINIMAL_VALUE;
     }
+    double denom = 0.0;
     for (Double eachCDist : clusterDistanceList) {
       if (eachCDist == 0)
         eachCDist = MINIMAL_VALUE;
 
-      denom += Math.pow(clusterDistance / eachCDist, (double) 2 / (m - 1));
+      denom += Math.pow(clusterDistance / eachCDist, 2.0 / (m - 1));
 
     }
-    double val = (double) (1) / denom;
-    return val;
+    return 1.0 / denom;
   }
 
   /**
@@ -253,7 +253,6 @@ public class SoftCluster {
    * @param center the center point
    */
   public SoftCluster(Vector center) {
-    super();
     this.clusterId = nextClusterId++;
     this.center = center;
     this.pointProbSum = 0;
@@ -267,7 +266,6 @@ public class SoftCluster {
    * @param center the center point
    */
   public SoftCluster(Vector center, int clusterId) {
-    super();
     this.clusterId = clusterId;
     this.center = center;
     this.pointProbSum = 0;
@@ -284,7 +282,7 @@ public class SoftCluster {
     this.clusterId = Integer.parseInt((clusterId.substring(1)));
     this.pointProbSum = 0;
     // this.weightedPointTotal = center.like();
-    this.converged = clusterId.startsWith("V");
+    this.converged = clusterId.charAt(0) == 'V';
   }
 
   @Override
@@ -317,7 +315,6 @@ public class SoftCluster {
   /**
    * Add the point to the cluster
    * 
-   * @param count the number of points in the delta
    * @param delta a point to add
    */
   public void addPoints(Vector delta, double partialSumPtProb) {
@@ -367,10 +364,6 @@ public class SoftCluster {
 
   public boolean isConverged() {
     return converged;
-  }
-
-  public static void main(String[] args) {
-
   }
 
   public int getClusterId() {

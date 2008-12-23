@@ -26,7 +26,7 @@ import java.io.IOException;
 /**
  * A {@link WritableComparable} encapsulating two {@link org.apache.mahout.cf.taste.model.Item}s.
  */
-public final class ItemItemWritable implements WritableComparable {
+public final class ItemItemWritable implements WritableComparable<ItemItemWritable> {
 
   private String itemAID;
   private String itemBID;
@@ -48,11 +48,13 @@ public final class ItemItemWritable implements WritableComparable {
     return itemBID;
   }
 
+  @Override
   public void write(DataOutput out) throws IOException {
     out.writeUTF(getItemAID());
     out.writeUTF(getItemBID());
   }
 
+  @Override
   public void readFields(DataInput in) throws IOException {
     itemAID = in.readUTF();
     itemBID = in.readUTF();
@@ -64,8 +66,8 @@ public final class ItemItemWritable implements WritableComparable {
     return writable;
   }
 
-  public int compareTo(Object o) {
-    ItemItemWritable that = (ItemItemWritable) o;
+  @Override
+  public int compareTo(ItemItemWritable that) {
     if (this == that) {
       return 0;
     }

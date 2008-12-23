@@ -129,6 +129,7 @@ public final class FastMap<K, V> implements Map<K, V> {
     return index;
   }
 
+  @Override
   public V get(Object key) {
     if (key == null) {
       return null;
@@ -140,18 +141,22 @@ public final class FastMap<K, V> implements Map<K, V> {
     return values[index];
   }
 
+  @Override
   public int size() {
     return numEntries;
   }
 
+  @Override
   public boolean isEmpty() {
     return numEntries == 0;
   }
 
+  @Override
   public boolean containsKey(Object key) {
     return key != null && keys[find(key)] != null;
   }
 
+  @Override
   public boolean containsValue(Object value) {
     if (value == null) {
       return false;
@@ -167,6 +172,7 @@ public final class FastMap<K, V> implements Map<K, V> {
   /**
    * @throws NullPointerException if key or value is null
    */
+  @Override
   public V put(K key, V value) {
     if (key == null || value == null) {
       throw new NullPointerException();
@@ -219,6 +225,7 @@ public final class FastMap<K, V> implements Map<K, V> {
     values[index] = null;
   }
 
+  @Override
   public void putAll(Map<? extends K, ? extends V> map) {
     if (map == null) {
       throw new NullPointerException();
@@ -228,6 +235,7 @@ public final class FastMap<K, V> implements Map<K, V> {
     }
   }
 
+  @Override
   public V remove(Object key) {
     if (key == null) {
       return null;
@@ -246,6 +254,7 @@ public final class FastMap<K, V> implements Map<K, V> {
     // Could un-set recentlyAccessed's bit but doesn't matter
   }
 
+  @Override
   public void clear() {
     numEntries = 0;
     numSlotsUsed = 0;
@@ -256,6 +265,7 @@ public final class FastMap<K, V> implements Map<K, V> {
     }
   }
 
+  @Override
   public Set<K> keySet() {
     if (keySet == null) {
       keySet = new KeySet();
@@ -263,6 +273,7 @@ public final class FastMap<K, V> implements Map<K, V> {
     return keySet;
   }
 
+  @Override
   public Collection<V> values() {
     if (valueCollection == null) {
       valueCollection = new ValueCollection();
@@ -270,6 +281,7 @@ public final class FastMap<K, V> implements Map<K, V> {
     return valueCollection;
   }
 
+  @Override
   public Set<Entry<K, V>> entrySet() {
     if (entrySet == null) {
       entrySet = new EntrySet();
@@ -381,14 +393,17 @@ public final class FastMap<K, V> implements Map<K, V> {
         this.index = index;
       }
 
+      @Override
       public K getKey() {
         return getKeys()[index];
       }
 
+      @Override
       public V getValue() {
         return getValues()[index];
       }
 
+      @Override
       public V setValue(V value) {
         if (value == null) {
           throw new IllegalArgumentException();
@@ -405,11 +420,13 @@ public final class FastMap<K, V> implements Map<K, V> {
       private int position;
       private int lastNext = -1;
 
+      @Override
       public boolean hasNext() {
         goToNext();
         return position < getKeys().length;
       }
 
+      @Override
       public Entry<K, V> next() {
         goToNext();
         lastNext = position;
@@ -428,6 +445,7 @@ public final class FastMap<K, V> implements Map<K, V> {
         }
       }
 
+      @Override
       public void remove() {
         iteratorRemove(lastNext);
       }
@@ -492,11 +510,13 @@ public final class FastMap<K, V> implements Map<K, V> {
       private int position;
       private int lastNext = -1;
 
+      @Override
       public boolean hasNext() {
         goToNext();
         return position < getKeys().length;
       }
 
+      @Override
       public K next() {
         goToNext();
         lastNext = position;
@@ -515,6 +535,7 @@ public final class FastMap<K, V> implements Map<K, V> {
         }
       }
 
+      @Override
       public void remove() {
         iteratorRemove(lastNext);
       }
@@ -579,11 +600,13 @@ public final class FastMap<K, V> implements Map<K, V> {
       private int position;
       private int lastNext = -1;
 
+      @Override
       public boolean hasNext() {
         goToNext();
         return position < getValues().length;
       }
 
+      @Override
       public V next() {
         goToNext();
         lastNext = position;
@@ -602,6 +625,7 @@ public final class FastMap<K, V> implements Map<K, V> {
         }
       }
 
+      @Override
       public void remove() {
         iteratorRemove(lastNext);
       }

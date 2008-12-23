@@ -36,6 +36,7 @@ public class BayesTfIdfReducer extends MapReduceBase implements Reducer<Text, Do
 
   private static final Logger log = LoggerFactory.getLogger(BayesTfIdfReducer.class);
 
+  @Override
   public void reduce(Text key,
                      Iterator<DoubleWritable> values,
                      OutputCollector<Text, DoubleWritable> output,

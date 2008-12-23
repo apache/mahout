@@ -53,6 +53,7 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     random = RandomUtils.getRandom();
   }
 
+  @Override
   public double evaluate(RecommenderBuilder recommenderBuilder,
                          DataModel dataModel,
                          double trainingPercentage,

@@ -35,11 +35,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ClusterMapper extends MapReduceBase implements
-        Mapper<WritableComparable, Text, Text, Text> {
+        Mapper<WritableComparable<?>, Text, Text, Text> {
 
   private List<Canopy> canopies;
 
-  public void map(WritableComparable key, Text values,
+  @Override
+  public void map(WritableComparable<?> key, Text values,
                   OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
     Vector point = AbstractVector.decodeVector(values.toString());
     Canopy.emitPointToExistingCanopies(point, canopies, values, output);

@@ -44,10 +44,12 @@ public final class ArrayIterator<T> implements Iterator<T>, Iterable<T> {
     this.max = array.length;
   }
 
+  @Override
   public boolean hasNext() {
     return position < max;
   }
 
+  @Override
   public T next() {
     if (position >= array.length) {
       throw new NoSuchElementException();
@@ -58,10 +60,12 @@ public final class ArrayIterator<T> implements Iterator<T>, Iterable<T> {
   /**
    * @throws UnsupportedOperationException
    */
+  @Override
   public void remove() {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public Iterator<T> iterator() {
     return this;
   }

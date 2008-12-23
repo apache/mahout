@@ -67,6 +67,7 @@ public final class Cache<K, V> implements Retriever<K, V> {
    * @return value for that key
    * @throws TasteException if an exception occurs while retrieving a new cached value
    */
+  @Override
   public V get(K key) throws TasteException {
     V value;
     synchronized (cache) {

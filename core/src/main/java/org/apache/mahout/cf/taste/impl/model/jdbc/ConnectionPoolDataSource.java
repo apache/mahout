@@ -47,26 +47,32 @@ public final class ConnectionPoolDataSource implements DataSource {
     this.delegate = new PoolingDataSource(connectionPool);
   }
 
+  @Override
   public Connection getConnection() throws SQLException {
     return delegate.getConnection();
   }
 
+  @Override
   public Connection getConnection(String username, String password) throws SQLException {
     return delegate.getConnection(username, password);
   }
 
+  @Override
   public PrintWriter getLogWriter() throws SQLException {
     return delegate.getLogWriter();
   }
 
+  @Override
   public void setLogWriter(PrintWriter printWriter) throws SQLException {
     delegate.setLogWriter(printWriter);
   }
 
+  @Override
   public void setLoginTimeout(int timeout) throws SQLException {
     delegate.setLoginTimeout(timeout);
   }
 
+  @Override
   public int getLoginTimeout() throws SQLException {
     return delegate.getLoginTimeout();
   }
@@ -78,6 +84,7 @@ public final class ConnectionPoolDataSource implements DataSource {
   /**
    * @throws SQLException always
    */
+  @Override
   public <T> T unwrap(Class<T> iface) throws SQLException {
     throw new SQLException("Unsupported operation");
   }
@@ -85,6 +92,7 @@ public final class ConnectionPoolDataSource implements DataSource {
   /**
    * @return false always
    */
+  @Override
   public boolean isWrapperFor(Class<?> iface) {
     return false;
   }
@@ -97,24 +105,29 @@ public final class ConnectionPoolDataSource implements DataSource {
       this.dataSource = dataSource;
     }
 
+    @Override
     public Object makeObject() throws SQLException {
       log.debug("Obtaining pooled connection");
       return dataSource.getConnection();
     }
 
+    @Override
     public void destroyObject(Object o) throws SQLException {
       log.debug("Closing pooled connection");
       ((Connection) o).close();
     }
 
+    @Override
     public boolean validateObject(Object o) {
       return true;
     }
 
+    @Override
     public void activateObject(Object o) {
       // do nothing
     }
 
+    @Override
     public void passivateObject(Object o) {
       // do nothing
     }

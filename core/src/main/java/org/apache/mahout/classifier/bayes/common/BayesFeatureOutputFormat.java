@@ -32,33 +32,32 @@ import java.io.IOException;
 /**
  * This class extends the MultipleOutputFormat, allowing to write the output data to different output files in sequence file output format.
  */
-public class BayesFeatureOutputFormat extends MultipleOutputFormat<WritableComparable,Writable>{
+public class BayesFeatureOutputFormat extends MultipleOutputFormat<WritableComparable<?>,Writable>{
 
-  private SequenceFileOutputFormat<WritableComparable,Writable> theSequenceFileOutputFormat = null;
+  private SequenceFileOutputFormat<WritableComparable<?>,Writable> theSequenceFileOutputFormat = null;
 
   @Override
-  protected RecordWriter<WritableComparable, Writable> getBaseRecordWriter(
+  protected RecordWriter<WritableComparable<?>, Writable> getBaseRecordWriter(
       FileSystem fs, JobConf job, String name, Progressable arg3)
       throws IOException {
     if (theSequenceFileOutputFormat == null) {
-      theSequenceFileOutputFormat = new SequenceFileOutputFormat<WritableComparable,Writable>();
+      theSequenceFileOutputFormat = new SequenceFileOutputFormat<WritableComparable<?>,Writable>();
     }
     return theSequenceFileOutputFormat.getRecordWriter(fs, job, name, arg3);
   }
 
   @Override
-  protected String generateFileNameForKeyValue(WritableComparable k, Writable v,
-      String name) {
+  protected String generateFileNameForKeyValue(WritableComparable<?> k, Writable v, String name) {
     Text key = (Text) k;
-   
-    if(key.toString().startsWith("_"))
-      return "trainer-docCount/"+name;
-    else if(key.toString().startsWith("-"))
-      return "trainer-termDocCount/"+name;
-    else if(key.toString().startsWith(","))
-      return "trainer-featureCount/"+name;
-    else
-      return "trainer-wordFreq/"+name;
+    char firstChar = key.toString().charAt(0);
+    if (firstChar == '_') {
+      return "trainer-docCount/" + name;
+    } else if (firstChar == '-') {
+      return "trainer-termDocCount/" + name;
+    } else if (firstChar == ',') {
+      return "trainer-featureCount/" + name;
+    }
+    return "trainer-wordFreq/" + name;
   }
 
 }

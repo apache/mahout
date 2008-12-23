@@ -34,6 +34,8 @@ import java.io.IOException;
 /**
  */
 public final class SlopeOnePrefsToDiffsJob {
+  private SlopeOnePrefsToDiffsJob() {
+  }
 
   public static void main(String[] args) throws IOException {
     String prefsFile = args[0];

@@ -58,6 +58,7 @@ public final class RecommenderMapper
   private Recommender recommender;
   private int recommendationsPerUser;
 
+  @Override
   public void map(LongWritable key,
                   Text value,
                   OutputCollector<Text, RecommendedItemsWritable> output,

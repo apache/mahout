@@ -29,6 +29,7 @@ public final class WeightedRunningAverage implements RunningAverage, Serializabl
     average = Double.NaN;
   }
 
+  @Override
   public void addDatum(double datum) {
     addDatum(datum, 1.0);
   }
@@ -43,6 +44,7 @@ public final class WeightedRunningAverage implements RunningAverage, Serializabl
     }
   }
 
+  @Override
   public void removeDatum(double datum) {
     removeDatum(datum, 1.0);
   }
@@ -58,6 +60,7 @@ public final class WeightedRunningAverage implements RunningAverage, Serializabl
     }
   }
 
+  @Override
   public void changeDatum(double delta) {
     changeDatum(delta, 1.0);
   }
@@ -76,10 +79,12 @@ public final class WeightedRunningAverage implements RunningAverage, Serializabl
   /**
    * @return {@link #getTotalWeight()}
    */
+  @Override
   public int getCount() {
     return (int) totalWeight;
   }
 
+  @Override
   public double getAverage() {
     return average;
   }

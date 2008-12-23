@@ -24,7 +24,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
+import org.apache.hadoop.mapred.FileInputFormat;
 
 import java.io.IOException;
 
@@ -32,6 +33,8 @@ import java.io.IOException;
  * Create and run the Bayes Trainer.
  */
 public class BayesWeightSummerDriver {
+  private BayesWeightSummerDriver() {
+  }
 
   /**
    * Takes in two arguments:
@@ -62,10 +65,10 @@ public class BayesWeightSummerDriver {
 
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(DoubleWritable.class);
-    
-    SequenceFileInputFormat.addInputPath(conf, new Path(output + "/trainer-tfIdf/trainer-tfIdf"));
+
+    FileInputFormat.addInputPath(conf, new Path(output + "/trainer-tfIdf/trainer-tfIdf"));
     Path outPath = new Path(output + "/trainer-weights");
-    SequenceFileOutputFormat.setOutputPath(conf, outPath);
+    FileOutputFormat.setOutputPath(conf, outPath);
     //conf.setNumReduceTasks(1);
     conf.setNumMapTasks(100);
     conf.setMapperClass(BayesWeightSummerMapper.class);

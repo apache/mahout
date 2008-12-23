@@ -24,7 +24,7 @@ import com.thoughtworks.xstream.XStream;
  * restore the object given its string representation. Should use Hadoop
  * Stringifier whenever available.
  */
-public class StringUtils {
+public final class StringUtils {
 
   private static final XStream xstream = new XStream();
 

@@ -52,7 +52,6 @@ public class SparseRowMatrix extends AbstractMatrix {
    *            the int[2] cardinality desired
    */
   public SparseRowMatrix(int[] cardinality) {
-    super();
     this.cardinality = cardinality.clone();
     this.rows = new SparseVector[cardinality[ROW]];
     for (int row = 0; row < cardinality[ROW]; row++)
@@ -60,7 +59,7 @@ public class SparseRowMatrix extends AbstractMatrix {
   }
 
   @Override
-  public WritableComparable asWritableComparable() {
+  public WritableComparable<?> asWritableComparable() {
     String out = asFormatString();
     return new Text(out);
   }

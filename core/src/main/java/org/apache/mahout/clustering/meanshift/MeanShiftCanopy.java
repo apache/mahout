@@ -160,7 +160,7 @@ public class MeanShiftCanopy {
    */
   public static void mergeCanopy(MeanShiftCanopy aCanopy,
       List<MeanShiftCanopy> canopies,
-      OutputCollector<Text, WritableComparable> collector) throws IOException {
+      OutputCollector<Text, WritableComparable<?>> collector) throws IOException {
     MeanShiftCanopy closestCoveringCanopy = null;
     double closestNorm = 0;
     for (MeanShiftCanopy canopy : canopies) {
@@ -207,8 +207,9 @@ public class MeanShiftCanopy {
     String id = formattedString.substring(0, beginIndex);
     String centroid = formattedString.substring(beginIndex, endIndex);
     String boundPoints = formattedString.substring(endIndex + 1).trim();
-    boolean startsWithV = id.startsWith("V");
-    if (id.startsWith("C") || startsWithV) {
+    char firstChar = id.charAt(0);
+    boolean startsWithV = firstChar == 'V';
+    if (firstChar == 'C' || startsWithV) {
       int canopyId = Integer.parseInt(formattedString.substring(1, beginIndex - 3));
       Vector canopyCentroid = DenseVector.decodeFormat(new Text(centroid));
       List<Vector> canopyBoundPoints = new ArrayList<Vector>();
@@ -231,7 +232,6 @@ public class MeanShiftCanopy {
    * @param id
    */
   public MeanShiftCanopy(String id) {
-    super();
     this.canopyId = Integer.parseInt(id.substring(1));
     this.center = null;
     this.pointTotal = null;
@@ -244,7 +244,6 @@ public class MeanShiftCanopy {
    * @param point a Vector
    */
   public MeanShiftCanopy(Vector point) {
-    super();
     this.canopyId = nextCanopyId++;
     this.center = point;
     this.pointTotal = point.copy();
@@ -262,7 +261,6 @@ public class MeanShiftCanopy {
    */
   MeanShiftCanopy(Vector point, int canopyId, List<Vector> boundPoints,
       boolean converged) {
-    super();
     this.canopyId = canopyId;
     this.center = point;
     this.pointTotal = point.copy();
@@ -332,7 +330,7 @@ public class MeanShiftCanopy {
    * Emit the new canopy to the collector, keyed by the canopy's Id
    */
   void emitCanopy(MeanShiftCanopy canopy,
-      OutputCollector<Text, WritableComparable> collector) throws IOException {
+      OutputCollector<Text, WritableComparable<?>> collector) throws IOException {
     String identifier = this.getIdentifier();
     collector.collect(new Text(identifier),
         new Text("new " + canopy.toString()));
@@ -347,7 +345,7 @@ public class MeanShiftCanopy {
    * @throws IOException if there is an IO problem with the collector
    */
   void emitCanopyCentroid(MeanShiftCanopy canopy,
-      OutputCollector<Text, WritableComparable> collector) throws IOException {
+      OutputCollector<Text, WritableComparable<?>> collector) throws IOException {
     collector.collect(new Text(this.getIdentifier()), new Text(canopy
         .computeCentroid().asWritableComparable().toString()
         + boundPoints.size()));
@@ -411,7 +409,7 @@ public class MeanShiftCanopy {
    * @param canopy an existing MeanShiftCanopy
    */
   void merge(MeanShiftCanopy canopy,
-      OutputCollector<Text, WritableComparable> collector) throws IOException {
+      OutputCollector<Text, WritableComparable<?>> collector) throws IOException {
     collector.collect(new Text(getIdentifier()), new Text("merge "
         + canopy.toString()));
   }
@@ -425,6 +423,7 @@ public class MeanShiftCanopy {
     return converged;
   }
 
+  @Override
   public String toString() {
     return formatCanopy(this);
   }
@@ -446,7 +445,7 @@ public class MeanShiftCanopy {
    * @param canopy
    * @throws IOException
    */
-  void touch(OutputCollector<Text, WritableComparable> collector,
+  void touch(OutputCollector<Text, WritableComparable<?>> collector,
       MeanShiftCanopy canopy) throws IOException {
     canopy.emitCanopyCentroid(this, collector);
     emitCanopyCentroid(canopy, collector);

@@ -25,16 +25,14 @@ import org.apache.hadoop.io.WritableComparable;
 public interface Matrix {
 
   /**
-   * Return a formatted WritableComparable suitable for output
+   * Return a formatted WritableComparable<?> suitable for output
    * 
    * @return formatted WritableComparable
    */
-  WritableComparable asWritableComparable();
+  WritableComparable<?> asWritableComparable();
 
   /**
-   * Return a formatted String suitable for output
-   * 
-   * @return
+   * @return a formatted String suitable for output
    */
   String asFormatString();
   /**

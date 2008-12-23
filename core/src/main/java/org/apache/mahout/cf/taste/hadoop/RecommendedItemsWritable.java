@@ -51,6 +51,7 @@ public final class RecommendedItemsWritable implements Writable {
     return recommended;
   }
 
+  @Override
   public void write(DataOutput out) throws IOException {
     for (RecommendedItem item : recommended) {
       out.writeUTF(item.getItem().getID().toString());
@@ -59,6 +60,7 @@ public final class RecommendedItemsWritable implements Writable {
 
   }
 
+  @Override
   public void readFields(DataInput in) throws IOException {
     recommended = new ArrayList<RecommendedItem>();
     try {

@@ -72,6 +72,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     this.cachedNumItems = dataModel.getNumItems();
     this.cachedNumUsers = dataModel.getNumUsers();
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
+      @Override
       public Object call() throws TasteException {
         cachedNumItems = AbstractSimilarity.this.dataModel.getNumItems();
         cachedNumUsers = AbstractSimilarity.this.dataModel.getNumUsers();
@@ -92,6 +93,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     return inferrer;
   }
 
+  @Override
   public final void setPreferenceInferrer(PreferenceInferrer inferrer) {
     if (inferrer == null) {
       throw new IllegalArgumentException("inferrer is null");
@@ -138,6 +140,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
    */
   abstract double computeResult(int n, double sumXY, double sumX2, double sumY2, double sumXYdiff2);
 
+  @Override
   public double userSimilarity(User user1, User user2) throws TasteException {
 
     if (user1 == null || user2 == null) {
@@ -257,6 +260,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     return result;
   }
 
+  @Override
   public final double itemSimilarity(Item item1, Item item2) throws TasteException {
 
     if (item1 == null || item2 == null) {
@@ -363,6 +367,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     return result;
   }
 
+  @Override
   public final void refresh(Collection<Refreshable> alreadyRefreshed) {
     refreshHelper.refresh(alreadyRefreshed);
   }

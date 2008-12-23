@@ -43,6 +43,7 @@ public class DataSet {
       return values.length;
     }
 
+    @Override
     public boolean isNumerical() {
       return false;
     }
@@ -65,7 +66,8 @@ public class DataSet {
   }
 
   public static class NumericalAttr implements Attribute {
-    private final double min, max;
+    private final double min;
+    private final double max;
 
     public NumericalAttr(double min, double max) {
       this.min = min;
@@ -80,6 +82,7 @@ public class DataSet {
       return max;
     }
 
+    @Override
     public boolean isNumerical() {
       return true;
     }

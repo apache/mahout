@@ -31,6 +31,7 @@ public final class EmptyIterable<T> implements Iterable<T> {
     iterator = new EmptyIterator<T>();
   }
 
+  @Override
   public Iterator<T> iterator() {
     return iterator;
   }

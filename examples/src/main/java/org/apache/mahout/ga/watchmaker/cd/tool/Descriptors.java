@@ -31,7 +31,7 @@ package org.apache.mahout.ga.watchmaker.cd.tool;
  */
 public class Descriptors {
 
-  private char[] descriptors;
+  private final char[] descriptors;
 
   public Descriptors(char[] descriptors) {
     assert descriptors != null && descriptors.length > 0;

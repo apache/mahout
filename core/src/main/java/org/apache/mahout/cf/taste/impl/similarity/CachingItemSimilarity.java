@@ -46,6 +46,7 @@ public final class CachingItemSimilarity implements ItemSimilarity {
     this.similarityCache = new Cache<Pair<Item, Item>, Double>(new SimilarityRetriever(similarity), maxCacheSize);
   }
 
+  @Override
   public double itemSimilarity(Item item1, Item item2) throws TasteException {
     Pair<Item, Item> key;
     if (item1.compareTo(item2) < 0) {
@@ -56,6 +57,7 @@ public final class CachingItemSimilarity implements ItemSimilarity {
     return similarityCache.get(key);
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     similarityCache.clear();
     alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
@@ -69,6 +71,7 @@ public final class CachingItemSimilarity implements ItemSimilarity {
       this.similarity = similarity;
     }
 
+    @Override
     public Double get(Pair<Item, Item> key) throws TasteException {
       return similarity.itemSimilarity(key.getFirst(), key.getSecond());
     }

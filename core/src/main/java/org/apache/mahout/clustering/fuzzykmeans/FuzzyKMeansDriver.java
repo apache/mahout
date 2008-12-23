@@ -34,7 +34,6 @@ import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.KeyValueLineRecordReader;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,7 +103,7 @@ public class FuzzyKMeansDriver {
 
     // iterate until the clusters converge
     while (!converged && iteration < maxIterations) {
-      log.info("Iteration {" + iteration + "}");
+      log.info("Iteration {" + iteration + '}');
 
       // point the output to a new directory per iteration
       String clustersOut = output + File.separator + "clusters-" + iteration;
@@ -141,7 +140,7 @@ public class FuzzyKMeansDriver {
       int numMapTasks, int numReduceTasks, int iterationNumber, float m) {
 
     JobConf conf = new JobConf(FuzzyKMeansJob.class);
-    conf.setJobName("Fuzzy K Means{" + iterationNumber + "}");
+    conf.setJobName("Fuzzy K Means{" + iterationNumber + '}');
 
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(Text.class);
@@ -231,6 +230,7 @@ public class FuzzyKMeansDriver {
     List<Path> result = new ArrayList<Path>();
 
     PathFilter clusterFileFilter = new PathFilter() {
+      @Override
       public boolean accept(Path path) {
         return path.getName().startsWith("part");
       }
@@ -254,7 +254,7 @@ public class FuzzyKMeansDriver {
         Text key = new Text();
         Text value = new Text();
         while (converged && reader.next(key, value)) {
-          converged = value.toString().startsWith("V");
+          converged = value.toString().charAt(0) == 'V';
         }
       } finally {
         if (reader != null) {

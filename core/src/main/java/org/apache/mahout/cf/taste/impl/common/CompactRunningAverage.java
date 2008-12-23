@@ -34,6 +34,7 @@ public class CompactRunningAverage implements RunningAverage, Serializable {
     average = Float.NaN;
   }
 
+  @Override
   public void addDatum(double datum) {
     if ((int) count < 65535) { // = 65535 = 2^16 - 1
       if ((int) ++count == 1) {
@@ -45,6 +46,7 @@ public class CompactRunningAverage implements RunningAverage, Serializable {
     }
   }
 
+  @Override
   public void removeDatum(double datum) {
     if ((int) count == 0) {
       throw new IllegalStateException();
@@ -57,6 +59,7 @@ public class CompactRunningAverage implements RunningAverage, Serializable {
     }
   }
 
+  @Override
   public void changeDatum(double delta) {
     if ((int) count == 0) {
       throw new IllegalStateException();
@@ -64,10 +67,12 @@ public class CompactRunningAverage implements RunningAverage, Serializable {
     average += (float) (delta / (double) count);
   }
 
+  @Override
   public int getCount() {
     return (int) count;
   }
 
+  @Override
   public double getAverage() {
     return (double) average;
   }

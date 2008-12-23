@@ -23,6 +23,7 @@ import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.IteratorIterable;
 import org.apache.mahout.cf.taste.impl.common.IteratorUtils;
+import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
@@ -49,7 +50,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
 
   /**
    * <p>Creates a {@link GenericItemSimilarity} from a precomputed list of
-   * {@link org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity.ItemItemSimilarity}s. Each
+   * {@link ItemItemSimilarity}s. Each
    * represents the similarity between two distinct items. Since similarity is assumed to be symmetric,
    * it is not necessary to specify similarity between item1 and item2, and item2 and item1. Both are the same.
    * It is also not necessary to specify a similarity between any item and itself; these are assumed to be 1.0.</p>
@@ -58,7 +59,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
    * win.</p>
    *
    * @param similarities set of
-   *  {@link org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity.ItemItemSimilarity}s
+   *  {@link ItemItemSimilarity}s
    *  on which to base this instance
    */
   public GenericItemSimilarity(Iterable<ItemItemSimilarity> similarities) {
@@ -73,7 +74,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
    * <p>Thanks to tsmorton for suggesting this and providing part of the implementation.</p>
    *
    * @param similarities set of
-   *  {@link org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity.ItemItemSimilarity}s
+   *  {@link ItemItemSimilarity}s
    *  on which to base this instance
    * @param maxToKeep maximum number of similarities to keep
    */
@@ -85,7 +86,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
   /**
    * <p>Builds a list of item-item similarities given an {@link ItemSimilarity} implementation and a
    * {@link DataModel}, rather than a list of
-   * {@link org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity.ItemItemSimilarity}s.</p>
+   * {@link ItemItemSimilarity}s.</p>
    *
    * <p>It's valid to build a {@link GenericItemSimilarity} this way, but perhaps missing some of the point
    * of an item-based recommender. Item-based recommenders use the assumption that item-item similarities
@@ -159,6 +160,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
    * @param item2 second item
    * @return similarity between the two
    */
+  @Override
   public double itemSimilarity(Item item1, Item item2) {
     int compare = item1.compareTo(item2);
     if (compare == 0) {
@@ -181,6 +183,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
     return similarity == null ? Double.NaN : similarity;
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     // Do nothing
   }
@@ -232,9 +235,24 @@ public final class GenericItemSimilarity implements ItemSimilarity {
     /**
      * Defines an ordering from highest similarity to lowest.
      */
+    @Override
     public int compareTo(ItemItemSimilarity other) {
       double otherValue = other.value;
       return value > otherValue ? -1 : value < otherValue ? 1 : 0;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+      if (!(other instanceof ItemItemSimilarity)) {
+        return false;
+      }
+      ItemItemSimilarity otherSimilarity = (ItemItemSimilarity) other;
+      return otherSimilarity.item1.equals(item1) && otherSimilarity.item2.equals(item2) && otherSimilarity.value == value;
+    }
+
+    @Override
+    public int hashCode() {
+      return item1.hashCode() ^ item2.hashCode() ^ RandomUtils.hashDouble(value);
     }
 
   }
@@ -257,10 +275,12 @@ public final class GenericItemSimilarity implements ItemSimilarity {
       j = 1;
     }
 
+    @Override
     public boolean hasNext() {
       return i < size - 1;
     }
 
+    @Override
     public ItemItemSimilarity next() {
       if (!hasNext()) {
         throw new NoSuchElementException();
@@ -283,6 +303,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
       return result;
     }
 
+    @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }

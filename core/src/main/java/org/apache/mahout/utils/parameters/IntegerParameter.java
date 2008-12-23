@@ -25,6 +25,7 @@ public class IntegerParameter extends AbstractParameter<Integer> {
     super(Integer.class, prefix, name, jobConf, defaultValue, description);
   }
 
+  @Override
   public void setStringValue(String stringValue) {
     set(Integer.valueOf(stringValue));
   }

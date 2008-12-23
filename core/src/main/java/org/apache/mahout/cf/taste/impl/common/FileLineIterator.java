@@ -61,10 +61,12 @@ public final class FileLineIterator implements Iterator<String>, Closeable {
     nextLine = reader.readLine();
   }
 
+  @Override
   public boolean hasNext() {
     return nextLine != null;
   }
 
+  @Override
   public String next() {
     if (nextLine == null) {
       throw new NoSuchElementException();
@@ -86,10 +88,12 @@ public final class FileLineIterator implements Iterator<String>, Closeable {
   /**
    * @throws UnsupportedOperationException
    */
+  @Override
   public void remove() {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public void close() {
     nextLine = null;
     IOUtils.quietClose(reader);

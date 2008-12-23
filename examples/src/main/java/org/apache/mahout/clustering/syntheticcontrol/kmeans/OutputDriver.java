@@ -29,6 +29,8 @@ import org.apache.hadoop.mapred.Reducer;
 import java.io.IOException;
 
 public class OutputDriver {
+  private OutputDriver() {
+  }
 
   public static void main(String[] args) throws IOException {
     runJob(args[0], args[1]);

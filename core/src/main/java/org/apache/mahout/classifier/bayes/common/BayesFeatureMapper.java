@@ -63,6 +63,7 @@ public class BayesFeatureMapper extends MapReduceBase implements
    * @param reporter Not used
    * @throws IOException
    */
+  @Override
   public void map(Text key, Text value,
       OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {
@@ -106,7 +107,7 @@ public class BayesFeatureMapper extends MapReduceBase implements
     }
 
     // Output Document Frequency per Word per Class
-    String dflabel = "-" + label;
+    String dflabel = '-' + label;
     int dfKeyLen = dflabel.length();
     builder = new StringBuilder(dflabel);
     for (String token : wordList.keySet()) {
@@ -114,14 +115,14 @@ public class BayesFeatureMapper extends MapReduceBase implements
       builder.append(',').append(token);
       labelWord.set(builder.toString());
       output.collect(labelWord, one);
-      output.collect(new Text("," + token), one);
+      output.collect(new Text(',' + token), one);
       builder.setLength(dfKeyLen);// truncate back
 
     }
 
     // output that we have seen the label to calculate the Count of Document per
     // class
-    output.collect(new Text("_" + label), one);
+    output.collect(new Text('_' + label), one);
   }
 
   @Override

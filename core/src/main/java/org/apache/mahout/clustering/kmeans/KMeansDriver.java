@@ -175,7 +175,7 @@ public class KMeansDriver {
     Text value = new Text();
     boolean converged = true;
     while (converged && reader.next(key, value)) {
-      converged = value.toString().startsWith("V");
+      converged = value.toString().charAt(0) == 'V';
     }
     return converged;
   }

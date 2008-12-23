@@ -118,6 +118,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     this.samplingPercentage = samplingPercentage;
     this.buildClustersLock = new ReentrantLock();
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
+      @Override
       public Object call() throws TasteException {
         buildClusters();
         return null;
@@ -173,6 +174,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     this.samplingPercentage = samplingPercentage;
     this.buildClustersLock = new ReentrantLock();
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
+      @Override
       public Object call() throws TasteException {
         buildClusters();
         return null;
@@ -182,6 +184,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     refreshHelper.addDependency(clusterSimilarity);
   }
 
+  @Override
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
           throws TasteException {
     if (userID == null) {
@@ -218,6 +221,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     return rescored;
   }
 
+  @Override
   public double estimatePreference(Object userID, Object itemID) throws TasteException {
     if (userID == null || itemID == null) {
       throw new IllegalArgumentException("userID or itemID is null");
@@ -241,6 +245,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     return Double.NaN;
   }
 
+  @Override
   public Collection<User> getCluster(Object userID) throws TasteException {
     if (userID == null) {
       throw new IllegalArgumentException("userID is null");
@@ -254,6 +259,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     }
   }
 
+  @Override
   public Collection<Collection<User>> getClusters() throws TasteException {
     checkClustersBuilt();
     return allClusters;
@@ -266,8 +272,8 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   }
 
   private void buildClusters() throws TasteException {
+    buildClustersLock.lock();    
     try {
-      buildClustersLock.lock();
       DataModel model = getDataModel();
       int numUsers = model.getNumUsers();
       if (numUsers > 0) {
@@ -402,6 +408,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     return clustersPerUser;
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     refreshHelper.refresh(alreadyRefreshed);
   }
@@ -419,6 +426,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
       this.cluster = cluster;
     }
 
+    @Override
     public double estimate(Item item) {
       RunningAverage average = new FullRunningAverage();
       for (User user : cluster) {

@@ -24,13 +24,14 @@ import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.List;
 
-import javax.swing.JApplet;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-
 import org.uncommons.swing.SwingBackgroundTask;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
+
+import javax.swing.JApplet;
+import javax.swing.JPanel;
+import javax.swing.JOptionPane;
+import javax.swing.JDialog;
+import javax.swing.WindowConstants;
 
 /**
  * Applet for comparing evolutionary and brute force approaches to the
@@ -66,6 +67,7 @@ public final class TravellingSalesman extends JApplet {
     add(innerPanel, BorderLayout.CENTER);
 
     executionPanel.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent actionEvent) {
         Collection<String> cities = itineraryPanel.getSelectedCities();
         if (cities.size() < 4) {
@@ -101,6 +103,7 @@ public final class TravellingSalesman extends JApplet {
     return new SwingBackgroundTask<List<String>>() {
       private long elapsedTime = 0;
 
+      @Override
       protected List<String> performTask() {
         long startTime = System.currentTimeMillis();
         List<String> result = strategy.calculateShortestRoute(cities,
@@ -109,6 +112,7 @@ public final class TravellingSalesman extends JApplet {
         return result;
       }
 
+      @Override
       protected void postProcessing(List<String> result) {
         executionPanel.appendOutput(createResultString(strategy
             .getDescription(), result, evaluator.getFitness(result, null),
@@ -121,7 +125,7 @@ public final class TravellingSalesman extends JApplet {
   /**
    * Helper method for formatting a result as a string for display.
    */
-  private String createResultString(String strategyDescription,
+  private static String createResultString(String strategyDescription,
       List<String> shortestRoute, double distance, long elapsedTime) {
     StringBuilder buffer = new StringBuilder();
     buffer.append('[');
@@ -161,7 +165,7 @@ public final class TravellingSalesman extends JApplet {
   public static void main(String[] args) {
     JDialog dialog = new JDialog((Frame) null, "Travelling Salesman Frame",
         true);
-    dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+    dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
     dialog.getContentPane().add(new TravellingSalesman());
     dialog.pack();

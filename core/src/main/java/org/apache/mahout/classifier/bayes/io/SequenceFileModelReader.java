@@ -42,7 +42,7 @@ public class SequenceFileModelReader {
 
   private static final Logger log = LoggerFactory.getLogger(SequenceFileModelReader.class);  
 
-  public Model loadModel(Model model, FileSystem fs, Map<String, Path> pathPatterns,
+  public static void loadModel(Model model, FileSystem fs, Map<String, Path> pathPatterns,
       Configuration conf) throws IOException {
 
     loadFeatureWeights(model, fs, pathPatterns.get("sigma_j"), conf);
@@ -56,10 +56,9 @@ public class SequenceFileModelReader {
     loadWeightMatrix(model, fs, pathPatterns.get("weight"), conf);
     model.initializeNormalizer();
     //model.GenerateComplementaryModel();
-    return model;
   }
 
-  public void loadWeightMatrix(Model model, FileSystem fs, Path pathPattern, Configuration conf) throws IOException {
+  public static void loadWeightMatrix(Model model, FileSystem fs, Path pathPattern, Configuration conf) throws IOException {
 
     Writable key = new Text();
     DoubleWritable value = new DoubleWritable();
@@ -83,7 +82,7 @@ public class SequenceFileModelReader {
     }
   }
 
-  public Model loadFeatureWeights(Model model, FileSystem fs, Path pathPattern,
+  public static void loadFeatureWeights(Model model, FileSystem fs, Path pathPattern,
       Configuration conf) throws IOException {
 
     Writable key = new Text();
@@ -99,16 +98,15 @@ public class SequenceFileModelReader {
       while (reader.next(key, value)) {
         String keyStr = key.toString();
 
-        if (keyStr.startsWith(",")) { // Sum of weights for a Feature
+        if (keyStr.charAt(0) == ',') { // Sum of weights for a Feature
           model.setSumFeatureWeight(keyStr.substring(1),
               value.get());
         }
       }
     }
-    return model;
   }
 
-  public Model loadLabelWeights(Model model,FileSystem fs, Path pathPattern,
+  public static void loadLabelWeights(Model model,FileSystem fs, Path pathPattern,
       Configuration conf) throws IOException {
     Writable key = new Text();
     DoubleWritable value = new DoubleWritable();
@@ -123,17 +121,15 @@ public class SequenceFileModelReader {
       while (reader.next(key, value)) {
         String keyStr = key.toString();
 
-        if (keyStr.startsWith("_")) { // Sum of weights in a Label
+        if (keyStr.charAt(0) == '_') { // Sum of weights in a Label
           model.setSumLabelWeight(keyStr.substring(1), value
               .get());
         }
       }
     }
-
-    return model;
   }
   
-  public Model loadThetaNormalizer(Model model,FileSystem fs, Path pathPattern,
+  public static void loadThetaNormalizer(Model model,FileSystem fs, Path pathPattern,
       Configuration conf) throws IOException {
     Writable key = new Text();
     DoubleWritable value = new DoubleWritable();
@@ -147,17 +143,15 @@ public class SequenceFileModelReader {
       // the key is either _label_ or label,feature
       while (reader.next(key, value)) {
         String keyStr = key.toString();        
-        if (keyStr.startsWith("_")) { // Sum of weights in a Label
+        if (keyStr.charAt(0) == '_') { // Sum of weights in a Label
           model.setThetaNormalizer(keyStr.substring(1), value
               .get());
         }
       }
     }
-
-    return model;
   }
 
-  public Model loadSumWeight(Model model, FileSystem fs, Path pathPattern,
+  public static void loadSumWeight(Model model, FileSystem fs, Path pathPattern,
       Configuration conf) throws IOException {
 
     Writable key = new Text();
@@ -173,17 +167,16 @@ public class SequenceFileModelReader {
       while (reader.next(key, value)) {
         String keyStr = key.toString();
 
-        if (keyStr.startsWith("*")) { // Sum of weights for all Feature
+        if (keyStr.charAt(0) == '*') { // Sum of weights for all Feature
           // and all Labels
           model.setSigma_jSigma_k(value.get());
           log.info("{}", value.get());
         }
       }
     }
-    return model;
   }
 
-  public void createMapFile(FileSystem fs, Path pathPattern, Configuration conf)
+  public static void createMapFile(FileSystem fs, Path pathPattern, Configuration conf)
       throws IOException {
 
     Writable key = new Text();
@@ -201,7 +194,8 @@ public class SequenceFileModelReader {
         // the key is either _label_ or label,feature
         while (reader.next(key, value)) {
           String keyStr = key.toString();
-          if (!keyStr.startsWith("_") && !keyStr.startsWith(",") && !keyStr.startsWith("*")) {
+          char firstChar = keyStr.charAt(0);
+          if (firstChar != '_' && firstChar != ',' && firstChar != '*') {
             int idx = keyStr.indexOf(',');
             if (idx != -1) {
               //Map<String,Double> data = new HashMap<String,Double>();
@@ -216,7 +210,7 @@ public class SequenceFileModelReader {
     }
   }
 
-  public Map<String,Double> readLabelSums(FileSystem fs, Path pathPattern, Configuration conf) throws IOException {
+  public static Map<String,Double> readLabelSums(FileSystem fs, Path pathPattern, Configuration conf) throws IOException {
     Map<String,Double> labelSum = new HashMap<String,Double>();
     Writable key = new Text();
     DoubleWritable value = new DoubleWritable();
@@ -229,7 +223,7 @@ public class SequenceFileModelReader {
       // the key is either _label_ or label,feature
       while (reader.next(key, value)) {
         String keyStr = key.toString();
-        if (keyStr.startsWith("_")) { // Sum of weights of labels
+        if (keyStr.charAt(0) == '_') { // Sum of weights of labels
           labelSum.put(keyStr.substring(1), value.get());
         }
 
@@ -239,7 +233,7 @@ public class SequenceFileModelReader {
     return labelSum;
   }
 
-  public Map<String,Double> readLabelDocumentCounts(FileSystem fs, Path pathPattern, Configuration conf)
+  public static Map<String,Double> readLabelDocumentCounts(FileSystem fs, Path pathPattern, Configuration conf)
       throws IOException {
     Map<String,Double> labelDocumentCounts = new HashMap<String,Double>();
     Writable key = new Text();
@@ -252,7 +246,7 @@ public class SequenceFileModelReader {
       // the key is either _label_ or label,feature
       while (reader.next(key, value)) {
         String keyStr = key.toString();
-        if (keyStr.startsWith("_")) { // Count of Documents in a Label
+        if (keyStr.charAt(0) == '_') { // Count of Documents in a Label
           labelDocumentCounts.put(keyStr.substring(1), value.get());
         }
 
@@ -262,7 +256,7 @@ public class SequenceFileModelReader {
     return labelDocumentCounts;
   }
 
-  public double readSigma_jSigma_k(FileSystem fs, Path pathPattern,
+  public static double readSigma_jSigma_k(FileSystem fs, Path pathPattern,
       Configuration conf) throws IOException {
     Map<String,Double> weightSum = new HashMap<String,Double>();
     Writable key = new Text();
@@ -277,7 +271,7 @@ public class SequenceFileModelReader {
         String keyStr = key.toString();
         if (weightSum.size() > 1) {
           throw new IOException("Incorrect Sum File");
-        } else if (keyStr.startsWith("*")) {
+        } else if (keyStr.charAt(0) == '*') {
           weightSum.put(keyStr, value.get());
         }
 
@@ -287,7 +281,7 @@ public class SequenceFileModelReader {
     return weightSum.get("*");
   }
 
-  public double readVocabCount(FileSystem fs, Path pathPattern,
+  public static double readVocabCount(FileSystem fs, Path pathPattern,
       Configuration conf) throws IOException {
     Map<String,Double> weightSum = new HashMap<String,Double>();
     Writable key = new Text();
@@ -303,7 +297,7 @@ public class SequenceFileModelReader {
         if (weightSum.size() > 1) {
           throw new IOException("Incorrect vocabCount File");
         }
-        if (keyStr.startsWith("*")) {
+        if (keyStr.charAt(0) == '*') {
           weightSum.put(keyStr, value.get());
         }
 

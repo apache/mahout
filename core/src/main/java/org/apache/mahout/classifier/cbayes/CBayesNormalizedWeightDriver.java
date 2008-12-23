@@ -26,6 +26,8 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
+import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
 import org.slf4j.Logger;
@@ -39,7 +41,10 @@ import java.io.IOException;
  */
 public class CBayesNormalizedWeightDriver {
 
-  private static final Logger log = LoggerFactory.getLogger(CBayesNormalizedWeightDriver.class);      
+  private static final Logger log = LoggerFactory.getLogger(CBayesNormalizedWeightDriver.class);
+
+  private CBayesNormalizedWeightDriver() {
+  }
 
   /**
    * Takes in two arguments:
@@ -70,9 +75,9 @@ public class CBayesNormalizedWeightDriver {
 
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(DoubleWritable.class);
-    SequenceFileInputFormat.addInputPath(conf, new Path(output + "/trainer-theta"));
+    FileInputFormat.addInputPath(conf, new Path(output + "/trainer-theta"));
     Path outPath = new Path(output + "/trainer-weight");
-    SequenceFileOutputFormat.setOutputPath(conf, outPath);
+    FileOutputFormat.setOutputPath(conf, outPath);
     conf.setNumMapTasks(100);
     //conf.setNumReduceTasks(1);
     conf.setMapperClass(CBayesNormalizedWeightMapper.class);
@@ -91,21 +96,21 @@ public class CBayesNormalizedWeightDriver {
     SequenceFileModelReader reader = new SequenceFileModelReader();
 
     Path thetaNormalizationsFiles = new Path(output+"/trainer-thetaNormalizer/part*");
-    Map<String,Double> thetaNormalizer= reader.readLabelSums(dfs, thetaNormalizationsFiles, conf);
+    Map<String,Double> thetaNormalizer= SequenceFileModelReader.readLabelSums(dfs, thetaNormalizationsFiles, conf);
     double perLabelWeightSumNormalisationFactor = Double.MAX_VALUE;
-    for(String label: thetaNormalizer.keySet())
+    for(Map.Entry<String, Double> stringDoubleEntry1 : thetaNormalizer.entrySet())
     {
 
-      double Sigma_W_ij = thetaNormalizer.get(label);
+      double Sigma_W_ij = stringDoubleEntry1.getValue();
       if(perLabelWeightSumNormalisationFactor > Math.abs(Sigma_W_ij)){
         perLabelWeightSumNormalisationFactor = Math.abs(Sigma_W_ij);
       }
     }
 
-    for(String label: thetaNormalizer.keySet())
+    for(Map.Entry<String, Double> stringDoubleEntry : thetaNormalizer.entrySet())
     {
-      double Sigma_W_ij = thetaNormalizer.get(label);
-      thetaNormalizer.put(label, Sigma_W_ij / perLabelWeightSumNormalisationFactor) ;
+      double Sigma_W_ij = stringDoubleEntry.getValue();
+      thetaNormalizer.put(stringDoubleEntry.getKey(), Sigma_W_ij / perLabelWeightSumNormalisationFactor) ;
     }
 
 

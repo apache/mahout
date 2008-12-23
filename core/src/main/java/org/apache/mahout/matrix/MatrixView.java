@@ -44,14 +44,13 @@ public class MatrixView extends AbstractMatrix {
    *            the int[2] cardinality of the view
    */
   public MatrixView(Matrix matrix, int[] offset, int[] cardinality) {
-    super();
     this.matrix = matrix;
     this.offset = offset;
     this.cardinality = cardinality;
   }
 
   @Override
-  public WritableComparable asWritableComparable() {
+  public WritableComparable<?> asWritableComparable() {
     String out = asFormatString();
     return new Text(out);
   }

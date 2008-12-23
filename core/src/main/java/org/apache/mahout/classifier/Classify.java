@@ -53,12 +53,15 @@ public class Classify {
 
   private static final Logger log = LoggerFactory.getLogger(Classify.class);
 
+  private Classify() {
+  }
+
   @SuppressWarnings({ "static-access" })
   public static void main(String[] args)
           throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException, OptionException {
-    final DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
-    final ArgumentBuilder abuilder = new ArgumentBuilder();
-    final GroupBuilder gbuilder = new GroupBuilder();
+    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    ArgumentBuilder abuilder = new ArgumentBuilder();
+    GroupBuilder gbuilder = new GroupBuilder();
 
     Option pathOpt = obuilder.withLongName("path").withRequired(true).withArgument(
             abuilder.withName("path").withMinimum(1).withMaximum(1).create()).withDescription("The local file system path").withShortName("p").create();
@@ -109,7 +112,6 @@ public class Classify {
     log.info("Loading model from: {}", modelPaths);
 
     Model model;
-    Classifier classifier;
 
     String classifierType = (String) cmdLine.getValue(typeOpt);
 
@@ -122,9 +124,9 @@ public class Classify {
     } else {
       throw new IllegalArgumentException("Unrecognized classifier type: " + classifierType);
     }
-    classifier = new BayesClassifier();
+    Classifier classifier = new BayesClassifier();
 
-    model = reader.loadModel(model, fs, modelPaths, conf);
+    reader.loadModel(model, fs, modelPaths, conf);
 
     log.info("Done loading model: # labels: {}", model.getLabels().size());
 

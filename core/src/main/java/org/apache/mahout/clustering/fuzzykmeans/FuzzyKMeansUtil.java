@@ -37,6 +37,9 @@ import java.util.List;
 public class FuzzyKMeansUtil {
   private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansUtil.class);
 
+  private FuzzyKMeansUtil() {
+  }
+
   /**
    * Configure the mapper with the cluster info
    *
@@ -51,6 +54,7 @@ public class FuzzyKMeansUtil {
 //    log.info("I am here");
     //filter out the files
     PathFilter clusterFileFilter = new PathFilter() {
+      @Override
       public boolean accept(Path path) {
         return path.getName().startsWith("part");
       }
@@ -74,7 +78,7 @@ public class FuzzyKMeansUtil {
           recordReader = new KeyValueLineRecordReader(job, new FileSplit(path, 0, fs.getFileStatus(path).getLen(), (String[]) null));
           Text key = new Text();
           Text value = new Text();
-          int counter = 1;
+          //int counter = 1;
           while (recordReader.next(key, value)) {
             //get the cluster info
             SoftCluster cluster = SoftCluster.decodeCluster(value.toString());
@@ -93,7 +97,6 @@ public class FuzzyKMeansUtil {
 
     } catch (IOException e) {
       log.info("Exception occurred in loading clusters:", e);
-      e.printStackTrace();
       throw new RuntimeException(e);
     }
   }

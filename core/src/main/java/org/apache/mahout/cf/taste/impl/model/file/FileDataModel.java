@@ -94,8 +94,8 @@ public class FileDataModel implements DataModel {
   }
 
   protected void reload() {
+    reloadLock.lock();    
     try {
-      reloadLock.lock();
       Map<String, List<Preference>> data = new FastMap<String, List<Preference>>();
 
       processFile(data);
@@ -170,46 +170,55 @@ public class FileDataModel implements DataModel {
     }
   }
 
+  @Override
   public Iterable<? extends User> getUsers() throws TasteException {
     checkLoaded();
     return delegate.getUsers();
   }
 
+  @Override
   public User getUser(Object id) throws TasteException {
     checkLoaded();
     return delegate.getUser(id);
   }
 
+  @Override
   public Iterable<? extends Item> getItems() throws TasteException {
     checkLoaded();
     return delegate.getItems();
   }
 
+  @Override
   public Item getItem(Object id) throws TasteException {
     checkLoaded();
     return delegate.getItem(id);
   }
 
+  @Override
   public Iterable<? extends Preference> getPreferencesForItem(Object itemID) throws TasteException {
     checkLoaded();
     return delegate.getPreferencesForItem(itemID);
   }
 
+  @Override
   public Preference[] getPreferencesForItemAsArray(Object itemID) throws TasteException {
     checkLoaded();
     return delegate.getPreferencesForItemAsArray(itemID);
   }
 
+  @Override
   public int getNumItems() throws TasteException {
     checkLoaded();
     return delegate.getNumItems();
   }
 
+  @Override
   public int getNumUsers() throws TasteException {
     checkLoaded();
     return delegate.getNumUsers();
   }
 
+  @Override
   public int getNumUsersWithPreferenceFor(Object... itemIDs) throws TasteException {
     checkLoaded();
     return delegate.getNumUsersWithPreferenceFor(itemIDs);
@@ -218,6 +227,7 @@ public class FileDataModel implements DataModel {
   /**
    * @throws UnsupportedOperationException
    */
+  @Override
   public void setPreference(Object userID, Object itemID, double value) {
     throw new UnsupportedOperationException();
   }
@@ -225,10 +235,12 @@ public class FileDataModel implements DataModel {
   /**
    * @throws UnsupportedOperationException
    */
+  @Override
   public void removePreference(Object userID, Object itemID) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     reload();
   }

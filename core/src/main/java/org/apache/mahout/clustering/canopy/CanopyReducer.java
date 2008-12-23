@@ -36,6 +36,7 @@ public class CanopyReducer extends MapReduceBase implements
 
   private final List<Canopy> canopies = new ArrayList<Canopy>();
 
+  @Override
   public void reduce(Text key, Iterator<Text> values,
                      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
     while (values.hasNext()) {

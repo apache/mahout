@@ -25,6 +25,8 @@ import org.apache.hadoop.io.SequenceFile.Sorter;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
+import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.mahout.ga.watchmaker.OutputUtils;
 import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 import org.apache.mahout.ga.watchmaker.cd.DataSet;
@@ -44,6 +46,8 @@ import java.util.List;
  * the end loads the evaluations from the job output.
  */
 public class CDMahoutEvaluator {
+  private CDMahoutEvaluator() {
+  }
 
   /**
    * Uses Mahout to evaluate the classification rules using the given evaluator.
@@ -139,8 +143,8 @@ public class CDMahoutEvaluator {
       int target, Path inpath, Path outpath, DatasetSplit split) {
     split.storeJobParameters(conf);
 
-    DatasetTextInputFormat.setInputPaths(conf, inpath);
-    SequenceFileOutputFormat.setOutputPath(conf, outpath);
+    FileInputFormat.setInputPaths(conf, inpath);
+    FileOutputFormat.setOutputPath(conf, outpath);
 
     conf.setOutputKeyClass(LongWritable.class);
     conf.setOutputValueClass(CDFitness.class);

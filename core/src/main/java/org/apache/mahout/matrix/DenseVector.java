@@ -23,6 +23,7 @@ import org.apache.hadoop.io.WritableComparable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 /**
  * Implements vector as an array of doubles
@@ -39,10 +40,10 @@ public class DenseVector extends AbstractVector {
    * Decode a new instance from the argument
    * 
    * @param writableComparable
-   *            a WritableComparable produced by the asWritableComparable method
+   *            a WritableComparable<?> produced by the asWritableComparable<?> method
    * @return a DenseVector
    */
-  public static Vector decodeFormat(WritableComparable writableComparable) {
+  public static Vector decodeFormat(WritableComparable<?> writableComparable) {
     return decodeFormat(writableComparable.toString());
   }
 
@@ -67,7 +68,6 @@ public class DenseVector extends AbstractVector {
    * @param values
    */
   public DenseVector(double[] values) {
-    super();
     this.values = values.clone();
   }
 
@@ -77,7 +77,6 @@ public class DenseVector extends AbstractVector {
    * @param cardinality
    */
   public DenseVector(int cardinality) {
-    super();
     this.values = new double[cardinality];
   }
 
@@ -87,7 +86,7 @@ public class DenseVector extends AbstractVector {
   }
 
   @Override
-  public WritableComparable asWritableComparable() {
+  public WritableComparable<?> asWritableComparable() {
     return new Text(asFormatString());
   }
 
@@ -172,24 +171,31 @@ public class DenseVector extends AbstractVector {
   private class Iterator implements java.util.Iterator<Vector.Element> {
     private int ind;
 
-    public Iterator() {
+    private Iterator() {
       ind = 0;
     }
 
+    @Override
     public boolean hasNext() {
       return ind < values.length;
     }
 
+    @Override
     public Vector.Element next() {
+      if (!hasNext()) {
+        throw new NoSuchElementException();
+      }
       return new Element(ind++);
     }
 
+    @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
   }
 
 
+  @Override
   public void write(DataOutput dataOutput) throws IOException {
     dataOutput.writeInt(cardinality());
     for (Vector.Element element : this) {
@@ -197,6 +203,7 @@ public class DenseVector extends AbstractVector {
     }
   }
 
+  @Override
   public void readFields(DataInput dataInput) throws IOException {
     double[] values = new double[dataInput.readInt()];
     for (int i = 0; i < values.length; i++) {

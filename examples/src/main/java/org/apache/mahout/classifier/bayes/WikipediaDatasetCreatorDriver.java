@@ -38,6 +38,8 @@ import java.util.HashSet;
  * Create and run the Wikipedia Dataset Creator.
  */
 public class WikipediaDatasetCreatorDriver {
+  private WikipediaDatasetCreatorDriver() {
+  }
 
   /**
    * Takes in two arguments:

@@ -70,6 +70,7 @@ public class RecommenderEJBBean implements SessionBean {
     recommender.refresh(alreadyRefreshed);
   }
 
+  @Override
   public void setSessionContext(SessionContext sessionContext) {
     // Do nothing
   }
@@ -109,14 +110,17 @@ public class RecommenderEJBBean implements SessionBean {
     }
   }
 
+  @Override
   public void ejbRemove() {
     // Do nothing
   }
 
+  @Override
   public void ejbActivate() {
     // Do nothing: stateless session beans are not passivated/activated
   }
 
+  @Override
   public void ejbPassivate() {
     // Do nothing: stateless session beans are not passivated/activated
   }

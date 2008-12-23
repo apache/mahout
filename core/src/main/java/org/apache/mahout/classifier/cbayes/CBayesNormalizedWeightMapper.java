@@ -50,6 +50,7 @@ public class CBayesNormalizedWeightMapper extends MapReduceBase implements
    * @param reporter
    * @throws IOException
    */
+  @Override
   public void map(Text key, DoubleWritable value,
       OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {

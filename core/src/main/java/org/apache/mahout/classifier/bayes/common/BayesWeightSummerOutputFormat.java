@@ -33,31 +33,33 @@ import java.io.IOException;
  * This class extends the MultipleOutputFormat, allowing to write the output data to
  * different output files in sequence file output format.
  */
-public class BayesWeightSummerOutputFormat extends MultipleOutputFormat<WritableComparable,Writable> {
+public class BayesWeightSummerOutputFormat extends MultipleOutputFormat<WritableComparable<?>,Writable> {
 
-  private SequenceFileOutputFormat<WritableComparable,Writable> theSequenceFileOutputFormat = null;
+  private SequenceFileOutputFormat<WritableComparable<?>,Writable> theSequenceFileOutputFormat = null;
 
   @Override
-  protected RecordWriter<WritableComparable, Writable> getBaseRecordWriter(
+  protected RecordWriter<WritableComparable<?>, Writable> getBaseRecordWriter(
       FileSystem fs, JobConf job, String name, Progressable arg3)
       throws IOException {
     if (theSequenceFileOutputFormat == null) {
-      theSequenceFileOutputFormat = new SequenceFileOutputFormat<WritableComparable,Writable>();
+      theSequenceFileOutputFormat = new SequenceFileOutputFormat<WritableComparable<?>,Writable>();
     }
     return theSequenceFileOutputFormat.getRecordWriter(fs, job, name, arg3);
   }
 
   @Override
-  protected String generateFileNameForKeyValue(WritableComparable k, Writable v,
+  protected String generateFileNameForKeyValue(WritableComparable<?> k, Writable v,
       String name) {
     Text key = (Text) k;
-    
-    if(key.toString().startsWith("*"))//sum of weight of all features for all label Sigma_kSigma_j
-      return "Sigma_kSigma_j/"+name;
-    else if(key.toString().startsWith(","))//sum of weight for all labels for a feature Sigma_j
-      return "Sigma_j/"+name;
-    else if(key.toString().startsWith("_")) //sum of weights for all features for a label Sigma_k
+
+    char firstChar = key.toString().charAt(0);
+    if (firstChar == '*') { //sum of weight of all features for all label Sigma_kSigma_j
+      return "Sigma_kSigma_j/" + name;
+    } else if (firstChar == ',') { //sum of weight for all labels for a feature Sigma_j
+      return "Sigma_j/" + name;
+    } else if (firstChar == '_') { //sum of weights for all features for a label Sigma_k
       return "Sigma_k/"+name;
+    }
     return "JunkFileThisShouldNotHappen";
   }
 

@@ -52,17 +52,18 @@ public class CBayesThetaNormalizerMapper extends MapReduceBase implements
    * @param reporter
    * @throws IOException
    */
+  @Override
   public void map(Text key, DoubleWritable value,
       OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {
 
     String labelFeaturePair = key.toString();
-    double alpha_i = 1.0;
-    if (labelFeaturePair.startsWith(",")) { // if it is from the Sigma_j folder
-           
-      for (String label : labelWeightSum.keySet()) {
-        double weight = Math.log((value.get() + alpha_i)/(sigma_jSigma_k - labelWeightSum.get(label) + vocabCount));
-        output.collect(new Text(("_" +label).trim()), new DoubleWritable(weight)); //output Sigma_j
+    if (labelFeaturePair.charAt(0) == ',') { // if it is from the Sigma_j folder
+
+      double alpha_i = 1.0;
+      for (Map.Entry<String, Double> stringDoubleEntry : labelWeightSum.entrySet()) {
+        double weight = Math.log((value.get() + alpha_i)/(sigma_jSigma_k - stringDoubleEntry.getValue() + vocabCount));
+        output.collect(new Text(('_' + stringDoubleEntry.getKey()).trim()), new DoubleWritable(weight)); //output Sigma_j
 
       }
       
@@ -72,8 +73,8 @@ public class CBayesThetaNormalizerMapper extends MapReduceBase implements
       
       double D_ij = value.get();
       double denominator = 0.5 *((sigma_jSigma_k / vocabCount) + (D_ij * this.labelWeightSum.size()));
-      double weight = Math.log( 1 - D_ij / denominator);
-      output.collect(new Text(("_" +label).trim()), new DoubleWritable(weight));//output -D_ij
+      double weight = Math.log(1.0 - D_ij / denominator);
+      output.collect(new Text(('_' +label).trim()), new DoubleWritable(weight));//output -D_ij
      
     }
     

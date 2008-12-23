@@ -24,6 +24,7 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
 
 final class GroupLensRecommenderBuilder implements RecommenderBuilder {
 
+  @Override
   public Recommender buildRecommender(DataModel dataModel) throws TasteException {
     return new GroupLensRecommender(dataModel);
   }

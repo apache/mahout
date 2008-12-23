@@ -17,27 +17,12 @@
 
 package org.apache.mahout.matrix;
 
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 
 /**
  * Implementations of generic capabilities like sum of elements and dot products
  */
-public abstract class AbstractVector implements Vector, Writable {
-
-  public abstract WritableComparable asWritableComparable();
-
-  public abstract int cardinality();
-
-  public abstract Vector copy();
-
-  public abstract boolean haveSharedCells(Vector other);
-
-  public abstract double getQuick(int index);
-
-  public abstract Vector like();
-
-  public abstract Vector like(int cardinality);
+public abstract class AbstractVector implements Vector {
 
   /**
    * Subclasses must override to return an appropriately sparse or dense result
@@ -50,14 +35,6 @@ public abstract class AbstractVector implements Vector, Writable {
    */
   protected abstract Matrix matrixLike(int rows, int columns);
 
-  public abstract void setQuick(int index, double value);
-
-  public abstract int size();
-
-  public abstract double[] toArray();
-
-  public abstract Vector viewPart(int offset, int length);
-
   /**
    * Returns an iterator for traversing the Vector, but not in any particular
    * order. The actual implementations may make some guarantees about the order
@@ -66,9 +43,10 @@ public abstract class AbstractVector implements Vector, Writable {
    * 
    * @see java.lang.Iterable#iterator()
    */
+  @Override
   public abstract java.util.Iterator<Vector.Element> iterator();
 
-  // @Override JDK 1.6
+  @Override
   public Vector.Element getElement(int index) {
     return new Element(index);
   }
@@ -80,19 +58,23 @@ public abstract class AbstractVector implements Vector, Writable {
       this.ind = ind;
     }
 
+    @Override
     public double get() {
       return getQuick(ind);
     }
 
+    @Override
     public int index() {
       return ind;
     }
 
+    @Override
     public void set(double value) {
       setQuick(ind, value);
     }
   }
 
+  @Override
   public Vector divide(double x) {
     Vector result = copy();
     for (int i = 0; i < result.cardinality(); i++)
@@ -100,6 +82,7 @@ public abstract class AbstractVector implements Vector, Writable {
     return result;
   }
 
+  @Override
   public double dot(Vector x) {
     if (cardinality() != x.cardinality())
       throw new CardinalityException();
@@ -109,6 +92,7 @@ public abstract class AbstractVector implements Vector, Writable {
     return result;
   }
 
+  @Override
   public double get(int index) {
     if (index >= 0 && index < cardinality())
       return getQuick(index);
@@ -116,6 +100,7 @@ public abstract class AbstractVector implements Vector, Writable {
       throw new IndexException();
   }
 
+  @Override
   public Vector minus(Vector x) {
     if (cardinality() != x.cardinality())
       throw new CardinalityException();
@@ -125,11 +110,13 @@ public abstract class AbstractVector implements Vector, Writable {
     return result;
   }
 
+  @Override
   public Vector normalize() {
     double divSq = Math.sqrt(dot(this));
     return divide(divSq);
   }
 
+  @Override
   public Vector plus(double x) {
     Vector result = copy();
     for (int i = 0; i < result.cardinality(); i++)
@@ -137,6 +124,7 @@ public abstract class AbstractVector implements Vector, Writable {
     return result;
   }
 
+  @Override
   public Vector plus(Vector x) {
     if (cardinality() != x.cardinality())
       throw new CardinalityException();
@@ -146,6 +134,7 @@ public abstract class AbstractVector implements Vector, Writable {
     return result;
   }
 
+  @Override
   public void set(int index, double value) {
     if (index >= 0 && index < cardinality())
       setQuick(index, value);
@@ -153,6 +142,7 @@ public abstract class AbstractVector implements Vector, Writable {
       throw new IndexException();
   }
 
+  @Override
   public Vector times(double x) {
     Vector result = copy();
     for (int i = 0; i < result.cardinality(); i++)
@@ -160,6 +150,7 @@ public abstract class AbstractVector implements Vector, Writable {
     return result;
   }
 
+  @Override
   public Vector times(Vector x) {
     if (cardinality() != x.cardinality())
       throw new CardinalityException();
@@ -169,6 +160,7 @@ public abstract class AbstractVector implements Vector, Writable {
     return result;
   }
 
+  @Override
   public double zSum() {
     double result = 0;
     for (int i = 0; i < cardinality(); i++)
@@ -176,12 +168,14 @@ public abstract class AbstractVector implements Vector, Writable {
     return result;
   }
 
+  @Override
   public Vector assign(double value) {
     for (int i = 0; i < cardinality(); i++)
       setQuick(i, value);
     return this;
   }
 
+  @Override
   public Vector assign(double[] values) {
     if (values.length != cardinality())
       throw new CardinalityException();
@@ -190,6 +184,7 @@ public abstract class AbstractVector implements Vector, Writable {
     return this;
   }
 
+  @Override
   public Vector assign(Vector other) {
     if (other.cardinality() != cardinality())
       throw new CardinalityException();
@@ -198,6 +193,7 @@ public abstract class AbstractVector implements Vector, Writable {
     return this;
   }
 
+  @Override
   public Vector assign(BinaryFunction f, double y) {
     for (int i = 0; i < cardinality(); i++) {
       setQuick(i, f.apply(getQuick(i), y));
@@ -205,12 +201,14 @@ public abstract class AbstractVector implements Vector, Writable {
     return this;
   }
 
+  @Override
   public Vector assign(UnaryFunction function) {
     for (int i = 0; i < cardinality(); i++)
       setQuick(i, function.apply(getQuick(i)));
     return this;
   }
 
+  @Override
   public Vector assign(Vector other, BinaryFunction function) {
     if (other.cardinality() != cardinality())
       throw new CardinalityException();
@@ -219,6 +217,7 @@ public abstract class AbstractVector implements Vector, Writable {
     return this;
   }
 
+  @Override
   public Matrix cross(Vector other) {
     Matrix result = matrixLike(cardinality(), other.cardinality());
     for (int row = 0; row < cardinality(); row++)
@@ -226,17 +225,15 @@ public abstract class AbstractVector implements Vector, Writable {
     return result;
   }
 
-  public abstract String asFormatString();
-
   /**
-   * Decodes a point from its WritableComparable representation.
+   * Decodes a point from its WritableComparable<?> representation.
    * 
    * @param writableComparable
-   *            a WritableComparable produced by asWritableComparable. Note the
+   *            a WritableComparable<?> produced by asWritableComparable. Note the
    *            payload remainder: it is optional, but can be present.
    * @return the n-dimensional point
    */
-  public static Vector decodeVector(WritableComparable writableComparable) {
+  public static Vector decodeVector(WritableComparable<?> writableComparable) {
     return decodeVector(writableComparable.toString());
   }
 

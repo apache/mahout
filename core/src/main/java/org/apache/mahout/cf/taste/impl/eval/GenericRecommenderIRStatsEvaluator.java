@@ -69,6 +69,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
     random = RandomUtils.getRandom();
   }
 
+  @Override
   public IRStatistics evaluate(RecommenderBuilder recommenderBuilder,
                                DataModel dataModel,
                                Rescorer<Item> rescorer,

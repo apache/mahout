@@ -57,11 +57,13 @@ public final class TanimotoCoefficientSimilarity implements UserSimilarity, Item
   /**
    * @throws UnsupportedOperationException
    */
+  @Override
   public void setPreferenceInferrer(PreferenceInferrer inferrer) {
     throw new UnsupportedOperationException();
   }
 
-  public final double userSimilarity(User user1, User user2) throws TasteException {
+  @Override
+  public double userSimilarity(User user1, User user2) {
 
     if (user1 == null || user2 == null) {
       throw new IllegalArgumentException("user1 or user2 is null");
@@ -116,7 +118,8 @@ public final class TanimotoCoefficientSimilarity implements UserSimilarity, Item
     return result;
   }
 
-  public final double itemSimilarity(Item item1, Item item2) throws TasteException {
+  @Override
+  public double itemSimilarity(Item item1, Item item2) throws TasteException {
 
     if (item1 == null || item2 == null) {
       throw new IllegalArgumentException("item1 or item2 is null");
@@ -171,13 +174,14 @@ public final class TanimotoCoefficientSimilarity implements UserSimilarity, Item
     return result;
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
     RefreshHelper.maybeRefresh(alreadyRefreshed, dataModel);
   }
 
   @Override
-  public final String toString() {
+  public String toString() {
     return "TanimotoCoefficientSimilarity[dataModel:" + dataModel + ']';
   }
 

@@ -33,6 +33,8 @@ import java.io.IOException;
 /**
  */
 public final class SlopeOneDiffsToAveragesJob {
+  private SlopeOneDiffsToAveragesJob() {
+  }
 
   public static void main(String[] args) throws IOException {
     String prefsFile = args[0];

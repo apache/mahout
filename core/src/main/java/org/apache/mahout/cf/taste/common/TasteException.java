@@ -23,7 +23,6 @@ package org.apache.mahout.cf.taste.common;
 public final class TasteException extends Exception {
 
   public TasteException() {
-    super();
   }
 
   public TasteException(String message) {

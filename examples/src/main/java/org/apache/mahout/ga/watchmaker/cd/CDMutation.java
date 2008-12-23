@@ -29,16 +29,16 @@ import java.util.Random;
 public class CDMutation implements EvolutionaryOperator<CDRule> {
 
   /** probability of mutating a variable */
-  private double rate;
+  private final double rate;
 
   /** max size of the change (step-size) for each mutated variable */
-  private double range;
+  private final double range;
 
   /**
    * mutation precision. Defines indirectly the minimal step-size and the
    * distribution of mutation steps inside the mutation range.
    */
-  private int k;
+  private final int k;
 
   /**
    * 
@@ -63,6 +63,7 @@ public class CDMutation implements EvolutionaryOperator<CDRule> {
     this.k = k;
   }
 
+  @Override
   @SuppressWarnings("unchecked")
   public <S extends CDRule> List<S> apply(List<S> selectedCandidates, Random rng) {
     List<S> mutatedPopulation = new ArrayList<S>(selectedCandidates.size());
@@ -79,7 +80,7 @@ public class CDMutation implements EvolutionaryOperator<CDRule> {
       if (rng.nextDouble() > rate)
         continue;
 
-      int attrInd = rule.attributeIndex(condInd);
+      int attrInd = CDRule.attributeIndex(condInd);
 
       rule.setW(condInd, rndDouble(rule.getW(condInd), 0.0, 1.0, rng));
 
@@ -113,7 +114,7 @@ public class CDMutation implements EvolutionaryOperator<CDRule> {
     return value;
   }
 
-  int rndInt(double value, int nbcategories, Random rng) {
+  static int rndInt(double value, int nbcategories, Random rng) {
     return rng.nextInt(nbcategories);
   }
 }

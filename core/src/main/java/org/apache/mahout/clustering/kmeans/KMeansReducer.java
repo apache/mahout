@@ -34,6 +34,7 @@ public class KMeansReducer extends MapReduceBase implements
 
   //double delta = 0;
 
+  @Override
   public void reduce(Text key, Iterator<Text> values,
                      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
     Cluster cluster = Cluster.decodeCluster(key.toString());

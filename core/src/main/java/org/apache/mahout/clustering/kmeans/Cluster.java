@@ -83,11 +83,13 @@ public class Cluster {
     int beginIndex = formattedString.indexOf('[');
     String id = formattedString.substring(0, beginIndex);
     String center = formattedString.substring(beginIndex);
-    if (id.startsWith("C") || id.startsWith("V")) {
+    char firstChar = id.charAt(0);
+    boolean startsWithV = firstChar == 'V';
+    if (firstChar == 'C' || startsWithV) {
       int clusterId = Integer.parseInt(formattedString.substring(1, beginIndex - 2));
       Vector clusterCenter = AbstractVector.decodeVector(center);
       Cluster cluster = new Cluster(clusterCenter, clusterId);
-      cluster.converged = id.startsWith("V");
+      cluster.converged = startsWithV;
       return cluster;
     }
     return null;
@@ -101,7 +103,7 @@ public class Cluster {
    */
   public static void configure(JobConf job) {
     try {
-      final ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
       Class<?> cl = ccl.loadClass(job.get(DISTANCE_MEASURE_KEY));
       measure = (DistanceMeasure) cl.newInstance();
       measure.configure(job);
@@ -181,7 +183,6 @@ public class Cluster {
    *            the center point
    */
   public Cluster(Vector center) {
-    super();
     this.clusterId = nextClusterId++;
     this.center = center;
     this.numPoints = 0;
@@ -195,7 +196,6 @@ public class Cluster {
    *            the center point
    */
   public Cluster(Vector center, int clusterId) {
-    super();
     this.clusterId = clusterId;
     this.center = center;
     this.numPoints = 0;

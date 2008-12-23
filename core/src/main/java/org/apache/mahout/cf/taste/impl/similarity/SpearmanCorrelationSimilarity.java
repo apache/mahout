@@ -56,6 +56,7 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
     this.rankingUserSimilarity = rankingUserSimilarity;
   }
 
+  @Override
   public double userSimilarity(User user1, User user2) throws TasteException {
     if (user1 == null || user2 == null) {
       throw new IllegalArgumentException("user1 or user2 is null");
@@ -64,10 +65,12 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
                                                   new RankedPreferenceUser(user2));
   }
 
+  @Override
   public void setPreferenceInferrer(PreferenceInferrer inferrer) {
     rankingUserSimilarity.setPreferenceInferrer(inferrer);
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
     RefreshHelper.maybeRefresh(alreadyRefreshed, rankingUserSimilarity);
@@ -86,18 +89,22 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
       this.delegate = delegate;
     }
 
+    @Override
     public Object getID() {
       return delegate.getID();
     }
 
+    @Override
     public Preference getPreferenceFor(Object itemID) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public Iterable<Preference> getPreferences() {
       return Arrays.asList(getPreferencesAsArray());
     }
 
+    @Override
     public Preference[] getPreferencesAsArray() {
       Preference[] source = delegate.getPreferencesAsArray();
       int length = source.length;
@@ -121,6 +128,7 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
       return o instanceof RankedPreferenceUser && delegate.equals(((RankedPreferenceUser) o).delegate);
     }
 
+    @Override
     public int compareTo(User user) {
       return delegate.compareTo(user);
     }

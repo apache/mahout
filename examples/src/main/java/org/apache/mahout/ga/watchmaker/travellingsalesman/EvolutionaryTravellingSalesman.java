@@ -108,11 +108,12 @@ public class EvolutionaryTravellingSalesman implements
     this.mahout = mahout;
   }
 
+  @Override
   public String getDescription() {
     String selectionName = selectionStrategy.getClass().getSimpleName();
     return (mahout ? "Mahout " : "") + "Evolution (pop: " + populationSize
         + ", gen: " + generationCount + ", elite: " + eliteCount + ", "
-        + selectionName + ")";
+        + selectionName + ')';
   }
 
   /**
@@ -125,6 +126,7 @@ public class EvolutionaryTravellingSalesman implements
    * @return The (approximate) shortest route that visits each of the specified
    *         cities once.
    */
+  @Override
   public List<String> calculateShortestRoute(Collection<String> cities,
       final ProgressListener progressListener) {
     Random rng = new MersenneTwisterRNG();
@@ -148,6 +150,7 @@ public class EvolutionaryTravellingSalesman implements
     EvolutionEngine<List<String>> engine = getEngine(candidateFactory,
         pipeline, rng);
     engine.addEvolutionObserver(new EvolutionObserver<List<String>>() {
+      @Override
       public void populationUpdate(PopulationData<List<String>> data) {
         if (progressListener != null) {
           progressListener

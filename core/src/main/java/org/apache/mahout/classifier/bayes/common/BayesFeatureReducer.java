@@ -33,6 +33,7 @@ import java.util.Iterator;
 public class BayesFeatureReducer extends MapReduceBase
     implements Reducer<Text, DoubleWritable, Text, DoubleWritable> {
 
+  @Override
   public void reduce(Text key,
                      Iterator<DoubleWritable> values,
                      OutputCollector<Text, DoubleWritable> output,

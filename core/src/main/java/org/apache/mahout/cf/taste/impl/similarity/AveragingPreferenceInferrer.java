@@ -48,6 +48,7 @@ public final class AveragingPreferenceInferrer implements PreferenceInferrer {
     refresh(null);
   }
 
+  @Override
   public double inferPreference(User user, Item item) throws TasteException {
     if (user == null || item == null) {
       throw new IllegalArgumentException("user or item is null");
@@ -55,12 +56,14 @@ public final class AveragingPreferenceInferrer implements PreferenceInferrer {
     return averagePreferenceValue.get(user);
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     averagePreferenceValue.clear();
   }
 
   private static final class PrefRetriever implements Retriever<User, Double> {
 
+    @Override
     public Double get(User key) {
       RunningAverage average = new FullRunningAverage();
       Preference[] prefs = key.getPreferencesAsArray();

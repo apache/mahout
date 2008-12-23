@@ -45,10 +45,12 @@ public final class CachingUserNeighborhood implements UserNeighborhood {
     this.neighborhoodCache = new Cache<Object, Collection<User>>(new NeighborhoodRetriever(neighborhood), maxCacheSize);
   }
 
+  @Override
   public Collection<User> getUserNeighborhood(Object userID) throws TasteException {
     return neighborhoodCache.get(userID);
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     neighborhoodCache.clear();
     alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
@@ -60,6 +62,7 @@ public final class CachingUserNeighborhood implements UserNeighborhood {
     private NeighborhoodRetriever(UserNeighborhood neighborhood) {
       this.neighborhood = neighborhood;
     }
+    @Override
     public Collection<User> get(Object key) throws TasteException {
       return neighborhood.getUserNeighborhood(key);
     }

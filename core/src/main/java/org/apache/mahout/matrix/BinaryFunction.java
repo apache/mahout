@@ -23,8 +23,8 @@ package org.apache.mahout.matrix;
  * 
  */
 public interface BinaryFunction {
-  public final static BinaryFunction plus = new PlusFunction();
-  public final static BinaryFunction times = new TimesFunction();
+  BinaryFunction plus = new PlusFunction();
+  BinaryFunction times = new TimesFunction();
 
   /**
    * Apply the function to the arguments and return the result
@@ -33,6 +33,6 @@ public interface BinaryFunction {
    * @param arg2 a double for the second argument
    * @return the result of applying the function
    */
-  public double apply(double arg1, double arg2);
+  double apply(double arg1, double arg2);
 
 }

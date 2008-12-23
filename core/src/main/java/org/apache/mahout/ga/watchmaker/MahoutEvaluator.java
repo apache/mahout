@@ -27,6 +27,8 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.TextInputFormat;
+import org.apache.hadoop.mapred.FileInputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.mahout.utils.StringUtils;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
@@ -40,9 +42,10 @@ import java.util.List;
  * launches a Hadoop job. The job evaluates the fitness of each individual of the
  * population using the given evaluator. Takes care of storing the population
  * into an input file, and loading the fitness from job outputs.
- * 
  */
 public class MahoutEvaluator {
+  private MahoutEvaluator() {
+  }
 
   /**
    * Uses Mahout to evaluate every candidate from the input population using the
@@ -55,7 +58,7 @@ public class MahoutEvaluator {
    *        sorted in the same order as the candidates.
    * @throws IOException
    */
-  public static void evaluate(FitnessEvaluator evaluator, List population,
+  public static void evaluate(FitnessEvaluator<?> evaluator, List<?> population,
       List<Double> evaluations) throws IOException {
     JobConf conf = new JobConf(MahoutEvaluator.class);
     FileSystem fs = FileSystem.get(conf);
@@ -75,10 +78,10 @@ public class MahoutEvaluator {
    * @param fs <code>FileSystem</code> to use
    * @param population population to store
    * @return input <code>Path</code>
-   * 
+   *
    * @throws IOException
    */
-  private static Path prepareInput(FileSystem fs, List population)
+  private static Path prepareInput(FileSystem fs, List<?> population)
       throws IOException {
     Path inpath = new Path(fs.getWorkingDirectory(), "input");
 
@@ -102,10 +105,10 @@ public class MahoutEvaluator {
    * @param inpath input <code>Path</code>
    * @param outpath output <code>Path</code>
    */
-  private static void configureJob(JobConf conf, FitnessEvaluator evaluator,
+  private static void configureJob(JobConf conf, FitnessEvaluator<?> evaluator,
       Path inpath, Path outpath) {
-    TextInputFormat.setInputPaths(conf, inpath);
-    SequenceFileOutputFormat.setOutputPath(conf, outpath);
+    FileInputFormat.setInputPaths(conf, inpath);
+    FileOutputFormat.setOutputPath(conf, outpath);
 
     conf.setOutputKeyClass(LongWritable.class);
     conf.setOutputValueClass(DoubleWritable.class);
@@ -130,7 +133,7 @@ public class MahoutEvaluator {
    * @param population population to store
    * @throws IOException
    */
-  static void storePopulation(FileSystem fs, Path f, List population)
+  static void storePopulation(FileSystem fs, Path f, List<?> population)
       throws IOException {
     FSDataOutputStream out = fs.create(f);
     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));

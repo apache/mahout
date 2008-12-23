@@ -27,7 +27,8 @@ import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.Vector;
 
 public class FuzzyKMeansClusterMapper extends FuzzyKMeansMapper {
-  public void map(WritableComparable key, Text values,
+  @Override
+  public void map(WritableComparable<?> key, Text values,
       OutputCollector<Text, Text> output, Reporter reporter) throws IOException
   {
     Vector point = AbstractVector.decodeVector(values.toString());

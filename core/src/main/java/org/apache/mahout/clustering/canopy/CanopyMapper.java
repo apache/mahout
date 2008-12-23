@@ -32,11 +32,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CanopyMapper extends MapReduceBase implements
-        Mapper<WritableComparable, Text, Text, Text> {
+        Mapper<WritableComparable<?>, Text, Text, Text> {
 
   private final List<Canopy> canopies = new ArrayList<Canopy>();
 
-  public void map(WritableComparable key, Text values,
+  @Override
+  public void map(WritableComparable<?> key, Text values,
                   OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
     Vector point = AbstractVector.decodeVector(values.toString());
     Canopy.emitPointToNewCanopies(point, canopies, output);

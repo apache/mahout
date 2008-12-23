@@ -52,6 +52,7 @@ public class ClassifierResult {
     this.score = score;
   }
 
+  @Override
   public String toString() {
     return "ClassifierResult{" +
             "category='" + label + '\'' +

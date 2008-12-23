@@ -26,11 +26,11 @@ import org.apache.hadoop.io.WritableComparable;
 public interface Vector extends Iterable<Vector.Element>, Writable {
 
   /**
-   * Return a formatted WritableComparable suitable for output
+   * Return a formatted WritableComparable<?> suitable for output
    *
    * @return formatted WritableComparable
    */
-  WritableComparable asWritableComparable();
+  WritableComparable<?> asWritableComparable();
 
   /**
    * Return a formatted String suitable for output
@@ -127,7 +127,7 @@ public interface Vector extends Iterable<Vector.Element>, Writable {
    */
   Element getElement(int index);
 
-  public interface Element {
+  interface Element {
     /**
      * @return the value of this vector element.
      */

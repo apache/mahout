@@ -34,14 +34,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FuzzyKMeansMapper extends MapReduceBase implements
-    Mapper<WritableComparable, Text, Text, Text> {
+    Mapper<WritableComparable<?>, Text, Text, Text> {
 
   private static final Logger log = LoggerFactory
       .getLogger(FuzzyKMeansMapper.class);
 
   protected List<SoftCluster> clusters;
 
-  public void map(WritableComparable key, Text values,
+  @Override
+  public void map(WritableComparable<?> key, Text values,
       OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
     Vector point = AbstractVector.decodeVector(values.toString());
     SoftCluster.emitPointProbToCluster(point, clusters, values, output);
@@ -73,7 +74,7 @@ public class FuzzyKMeansMapper extends MapReduceBase implements
     FuzzyKMeansUtil.configureWithClusterInfo(job
         .get(SoftCluster.CLUSTER_PATH_KEY), clusters);
 
-    if (clusters.size() == 0)
+    if (clusters.isEmpty())
       throw new NullPointerException("Cluster is empty!!!");
   }
 

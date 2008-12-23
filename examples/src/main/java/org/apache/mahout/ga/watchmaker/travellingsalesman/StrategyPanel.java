@@ -71,12 +71,13 @@ final class StrategyPanel extends JPanel {
    * @param distances Data used by the strategy in order to calculate shortest
    *        routes.
    */
-  public StrategyPanel(DistanceLookup distances) {
+  StrategyPanel(DistanceLookup distances) {
     super(new BorderLayout());
     this.distances = distances;
     evolutionOption = new JRadioButton("Evolution", true);
     bruteForceOption = new JRadioButton("Brute Force", false);
     evolutionOption.addItemListener(new ItemListener() {
+      @Override
       public void itemStateChanged(ItemEvent itemEvent) {
         evolutionPanel.setEnabled(evolutionOption.isSelected());
       }
@@ -133,7 +134,7 @@ final class StrategyPanel extends JPanel {
 
     private final JCheckBox distributedCheckbox;
 
-    public EvolutionPanel() {
+    EvolutionPanel() {
       super(new FlowLayout(FlowLayout.LEFT, 0, 0));
       JPanel innerPanel = new JPanel(new SpringLayout());
 

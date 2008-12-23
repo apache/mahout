@@ -67,6 +67,9 @@ public class CDGA {
 
   private static final Logger log = LoggerFactory.getLogger(CDGA.class);
 
+  private CDGA() {
+  }
+
   public static void main(String[] args) throws IOException {
     String dataset = "build/classes/wdbc";
     int target = 1;
@@ -109,28 +112,29 @@ public class CDGA {
     CDMahoutEvaluator.InitializeDataSet(inpath);
 
     // Candidate Factory
-    CandidateFactory factory = new CDFactory(threshold);
+    CandidateFactory<CDRule> factory = new CDFactory(threshold);
 
     // Evolution Scheme
-    List<EvolutionaryOperator<? extends Rule>> operators = new ArrayList<EvolutionaryOperator<? extends Rule>>();
+    List<EvolutionaryOperator<? super CDRule>> operators = new ArrayList<EvolutionaryOperator<? super CDRule>>();
     operators.add(new CDCrossover(crosspnts));
     operators.add(new CDMutation(mutrate, mutrange, mutprec));
-    EvolutionPipeline pipeline = new EvolutionPipeline(operators);
+    EvolutionPipeline<CDRule> pipeline = new EvolutionPipeline<CDRule>(operators);
 
     // 75 % of the dataset is dedicated to training
     DatasetSplit split = new DatasetSplit(0.75);
 
     // Fitness Evaluator (defaults to training)
-    STFitnessEvaluator<? super Rule> evaluator = new CDFitnessEvaluator(
+    STFitnessEvaluator<? super CDRule> evaluator = new CDFitnessEvaluator(
         dataset, target, split);
     // Selection Strategy
-    SelectionStrategy selection = new RouletteWheelSelection();
+    SelectionStrategy<? super CDRule> selection = new RouletteWheelSelection();
 
-    EvolutionEngine<Rule> engine = new STEvolutionEngine<Rule>(factory,
+    EvolutionEngine<CDRule> engine = new STEvolutionEngine<CDRule>(factory,
         pipeline, evaluator, selection, new MersenneTwisterRNG());
 
-    engine.addEvolutionObserver(new EvolutionObserver<Rule>() {
-      public void populationUpdate(PopulationData<Rule> data) {
+    engine.addEvolutionObserver(new EvolutionObserver<CDRule>() {
+      @Override
+      public void populationUpdate(PopulationData<CDRule> data) {
         log.info("Generation {}", data.getGenerationNumber());
       }
     });

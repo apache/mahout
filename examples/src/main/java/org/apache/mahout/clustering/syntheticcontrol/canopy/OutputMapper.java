@@ -32,6 +32,7 @@ import java.io.IOException;
 public class OutputMapper extends MapReduceBase implements
     Mapper<LongWritable, Text, Text, Text> {
 
+  @Override
   public void map(LongWritable key, Text values,
       OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
     String foo = values.toString();

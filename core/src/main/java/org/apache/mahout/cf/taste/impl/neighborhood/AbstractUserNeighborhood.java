@@ -68,6 +68,7 @@ abstract class AbstractUserNeighborhood implements UserNeighborhood {
     return samplingRate >= 1.0 || random.nextDouble() < samplingRate;
   }
 
+  @Override
   public final void refresh(Collection<Refreshable> alreadyRefreshed) {
     refreshHelper.refresh(alreadyRefreshed);
   }

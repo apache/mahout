@@ -39,7 +39,7 @@ public final class GroupLensDataModel extends FileDataModel {
 
   private final Map<String, Movie> movieMap;
 
-  GroupLensDataModel() throws IOException {
+  public GroupLensDataModel() throws IOException {
     this(readResourceToTempFile("/org/apache/mahout/cf/taste/example/grouplens/ratings.dat"),
          readResourceToTempFile("/org/apache/mahout/cf/taste/example/grouplens/movies.dat"));
   }
@@ -101,7 +101,7 @@ public final class GroupLensDataModel extends FileDataModel {
   private static File readResourceToTempFile(String resourceName) throws IOException {
     InputStream is = GroupLensRecommender.class.getResourceAsStream(resourceName);
     if (is == null) {
-      is = new FileInputStream("src/example" + resourceName);
+      is = new FileInputStream("src/main/java" + resourceName);
     }
     try {
       File tempFile = File.createTempFile("taste", null);

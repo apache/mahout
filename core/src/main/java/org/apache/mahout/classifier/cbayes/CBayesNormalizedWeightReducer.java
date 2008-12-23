@@ -37,6 +37,7 @@ public class CBayesNormalizedWeightReducer extends MapReduceBase
 
   private static final Logger log = LoggerFactory.getLogger(CBayesNormalizedWeightReducer.class);      
 
+  @Override
   public void reduce(Text key,
                      Iterator<DoubleWritable> values,
                      OutputCollector<Text, DoubleWritable> output,

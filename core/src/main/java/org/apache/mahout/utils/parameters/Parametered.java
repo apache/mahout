@@ -29,10 +29,9 @@ import java.util.Collection;
  */
 public interface Parametered extends JobConfigurable {
 
-  public static final Logger log = LoggerFactory.getLogger(Parametered.class);
+  Logger log = LoggerFactory.getLogger(Parametered.class);
 
-
-  public abstract Collection<Parameter> getParameters();
+  Collection<Parameter<?>> getParameters();
 
   /**
    * EXPERT: consumers should never have to call this method. It would be friendly visible to
@@ -43,13 +42,15 @@ public interface Parametered extends JobConfigurable {
    * @param prefix ends with a dot if not empty.
    * @param jobConf configuration used for retreiving values
    */
-  public abstract void createParameters(String prefix, JobConf jobConf);
+  void createParameters(String prefix, JobConf jobConf);
 
 
   /**
    * "multiple inheritance"
    */
-  public static class ParameteredGeneralizations {
+  class ParameteredGeneralizations {
+    private ParameteredGeneralizations() {
+    }
 
 
     /**
@@ -60,7 +61,7 @@ public interface Parametered extends JobConfigurable {
      * @param jobConf configuration used for retreiving values
      */
     public static void configureParameters(Parametered parametered, JobConf jobConf) {
-      configureParameters(parametered.getClass().getSimpleName() + ".", parametered, jobConf);
+      configureParameters(parametered.getClass().getSimpleName() + '.', parametered, jobConf);
 
     }
 
@@ -82,14 +83,14 @@ public interface Parametered extends JobConfigurable {
     }
 
     private static void configureParametersRecusivly(Parametered parametered, String prefix, JobConf jobConf) {
-      for (Parameter parameter : parametered.getParameters()) {
+      for (Parameter<?> parameter : parametered.getParameters()) {
         if (log.isDebugEnabled()) {
           log.debug("Configuring " + prefix + parameter.name());
         }
-        String name = prefix + parameter.name() + ".";
+        String name = prefix + parameter.name() + '.';
         parameter.createParameters(name, jobConf);
         parameter.configure(jobConf);
-        if (parameter.getParameters().size() > 0) {
+        if (!parameter.getParameters().isEmpty()) {
           configureParametersRecusivly(parameter, name, jobConf);
         }
       }
@@ -106,6 +107,7 @@ public interface Parametered extends JobConfigurable {
     private static class Help {
       private final StringBuilder sb;
 
+      @Override
       public String toString() {
         return sb.toString();
       }
@@ -113,11 +115,11 @@ public interface Parametered extends JobConfigurable {
       private int longestName = 0;
       private int numChars = 100; // a few extra just to be sure
 
-      final int distanceBetweenNameAndDescription = 8;
+      static final int distanceBetweenNameAndDescription = 8;
       // todo: hmmm in the end this is 5 letters less that it says.. not sure why
 
       private void recurseCount(Parametered parametered) {
-        for (Parameter parameter : parametered.getParameters()) {
+        for (Parameter<?> parameter : parametered.getParameters()) {
           int parameterNameLength = parameter.name().length();
           if (parameterNameLength > longestName) {
             longestName = parameterNameLength;
@@ -139,7 +141,7 @@ public interface Parametered extends JobConfigurable {
       }
 
       private void recurseWrite(Parametered parametered) {
-        for (Parameter parameter : parametered.getParameters()) {
+        for (Parameter<?> parameter : parametered.getParameters()) {
           sb.append(parameter.prefix());
           sb.append(parameter.name());
           int max = longestName - parameter.name().length() - parameter.prefix().length() + distanceBetweenNameAndDescription;
@@ -162,6 +164,7 @@ public interface Parametered extends JobConfigurable {
     private static class Conf {
       private final StringBuilder sb;
 
+      @Override
       public String toString() {
         return sb.toString();
       }
@@ -172,7 +175,7 @@ public interface Parametered extends JobConfigurable {
       //int distanceBetweenNameAndDescription = 4;
 
       private void recurseCount(Parametered parametered) {
-        for (Parameter parameter : parametered.getParameters()) {
+        for (Parameter<?> parameter : parametered.getParameters()) {
           int parameterNameLength = parameter.prefix().length() + parameter.name().length();
           if (parameterNameLength > longestName) {
             longestName = parameterNameLength;
@@ -200,7 +203,7 @@ public interface Parametered extends JobConfigurable {
       }
 
       private void recurseWrite(Parametered parametered) {
-        for (Parameter parameter : parametered.getParameters()) {
+        for (Parameter<?> parameter : parametered.getParameters()) {
           sb.append("# ");
           sb.append(parameter.description());
           sb.append('\n');

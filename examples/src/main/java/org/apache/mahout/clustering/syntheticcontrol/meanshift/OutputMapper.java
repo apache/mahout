@@ -36,6 +36,7 @@ public class OutputMapper extends MapReduceBase implements
 
   private int clusters = 0;
 
+  @Override
   public void map(Text key, Text values, OutputCollector<Text, Text> output,
       Reporter reporter) throws IOException {
     clusters++;

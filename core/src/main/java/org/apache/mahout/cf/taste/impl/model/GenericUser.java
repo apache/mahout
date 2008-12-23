@@ -67,18 +67,22 @@ public class GenericUser<K extends Comparable<K>> implements User, Serializable 
     }
   }
 
+  @Override
   public K getID() {
     return id;
   }
 
+  @Override
   public Preference getPreferenceFor(Object itemID) {
     return data.get(itemID);
   }
 
+  @Override
   public Iterable<Preference> getPreferences() {
     return new ArrayIterator<Preference>(values);
   }
 
+  @Override
   public Preference[] getPreferencesAsArray() {
     return values;
   }
@@ -95,9 +99,10 @@ public class GenericUser<K extends Comparable<K>> implements User, Serializable 
 
   @Override
   public String toString() {
-    return "User[id:" + String.valueOf(id) + ']';
+    return "User[id:" + id + ']';
   }
 
+  @Override
   @SuppressWarnings("unchecked")
   public int compareTo(User o) {
     return id.compareTo((K) o.getID());

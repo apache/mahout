@@ -47,6 +47,7 @@ public final class CachingUserSimilarity implements UserSimilarity {
     this.similarityCache = new Cache<Pair<User, User>, Double>(new SimilarityRetriever(similarity), maxCacheSize);
   }
 
+  @Override
   public double userSimilarity(User user1, User user2) throws TasteException {
     Pair<User, User> key;
     if (user1.compareTo(user2) < 0) {
@@ -57,11 +58,13 @@ public final class CachingUserSimilarity implements UserSimilarity {
     return similarityCache.get(key);
   }
 
+  @Override
   public void setPreferenceInferrer(PreferenceInferrer inferrer) {
     similarityCache.clear();
     similarity.setPreferenceInferrer(inferrer);
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     similarityCache.clear();
     alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
@@ -75,6 +78,7 @@ public final class CachingUserSimilarity implements UserSimilarity {
       this.similarity = similarity;
     }
 
+    @Override
     public Double get(Pair<User, User> key) throws TasteException {
       return similarity.userSimilarity(key.getFirst(), key.getSecond());
     }

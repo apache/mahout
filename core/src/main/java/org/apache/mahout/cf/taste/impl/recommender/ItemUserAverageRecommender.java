@@ -66,6 +66,7 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
     this.overallAveragePrefValue = new FullRunningAverage();
     this.buildAveragesLock = new ReentrantReadWriteLock();
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
+      @Override
       public Object call() throws TasteException {
         buildAverageDiffs();
         return null;
@@ -74,6 +75,7 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
     refreshHelper.addDependency(dataModel);
   }
 
+  @Override
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
           throws TasteException {
     if (userID == null) {
@@ -96,6 +98,7 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
     return topItems;
   }
 
+  @Override
   public double estimatePreference(Object userID, Object itemID) throws TasteException {
     DataModel model = getDataModel();
     User theUser = model.getUser(userID);
@@ -227,6 +230,7 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
     }
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     refreshHelper.refresh(alreadyRefreshed);
   }
@@ -244,6 +248,7 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
       this.userID = userID;
     }
 
+    @Override
     public double estimate(Item item) {
       return doEstimatePreference(userID, item.getID());
     }

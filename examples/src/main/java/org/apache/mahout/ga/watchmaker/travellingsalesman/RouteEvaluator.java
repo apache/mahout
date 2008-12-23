@@ -53,6 +53,7 @@ public class RouteEvaluator implements FitnessEvaluator<List<String>>
      * @return The total distance (in kilometres) of a journey that visits
      * each city in order and returns to the starting point.
      */
+    @Override
     public double getFitness(List<String> candidate,
                              List<? extends List<String>> population)
     {
@@ -73,6 +74,7 @@ public class RouteEvaluator implements FitnessEvaluator<List<String>>
      * Returns false since shorter distances represent fitter candidates.
      * @return false
      */
+    @Override
     public boolean isNatural()
     {
         return false;

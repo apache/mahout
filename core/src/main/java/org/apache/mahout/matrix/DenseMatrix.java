@@ -43,7 +43,6 @@ public class DenseMatrix extends AbstractMatrix {
    *            a double[][]
    */
   public DenseMatrix(double[][] values) {
-    super();
     // clone the rows
     this.values = values.clone();
     // be careful, need to clone the columns too
@@ -58,12 +57,11 @@ public class DenseMatrix extends AbstractMatrix {
    * @param columns
    */
   public DenseMatrix(int rows, int columns) {
-    super();
     this.values = new double[rows][columns];
   }
 
   @Override
-  public WritableComparable asWritableComparable() {
+  public WritableComparable<?> asWritableComparable() {
     return new Text(asFormatString());
   }
 

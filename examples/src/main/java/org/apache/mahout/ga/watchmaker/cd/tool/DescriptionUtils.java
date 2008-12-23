@@ -24,6 +24,8 @@ import java.util.StringTokenizer;
  * Utility functions to handle Attribute's description strings.
  */
 public class DescriptionUtils {
+  private DescriptionUtils() {
+  }
 
   public static class Range {
     public final double min;
@@ -53,7 +55,7 @@ public class DescriptionUtils {
    * @return
    */
   public static String createNominalDescription(Collection<String> values) {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     int ind = 0;
 
     for (String value : values) {

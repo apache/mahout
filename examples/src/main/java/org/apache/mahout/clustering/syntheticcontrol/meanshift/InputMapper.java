@@ -34,6 +34,7 @@ import java.util.List;
 public class InputMapper extends MapReduceBase implements
     Mapper<LongWritable, Text, Text, Text> {
 
+  @Override
   public void map(LongWritable key, Text values,
       OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
     String[] numbers = values.toString().split(" ");

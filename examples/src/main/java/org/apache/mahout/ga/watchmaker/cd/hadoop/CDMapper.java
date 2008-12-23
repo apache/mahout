@@ -50,6 +50,7 @@ public class CDMapper extends MapReduceBase implements
   private int target;
 
   @Override
+  @SuppressWarnings("unchecked")
   public void configure(JobConf job) {
     String rstr = job.get(CLASSDISCOVERY_RULES);
     if (rstr == null)
@@ -72,7 +73,7 @@ public class CDMapper extends MapReduceBase implements
     super.configure(job);
   }
 
-  void initializeDataSet(DataSet dataset) {
+  static void initializeDataSet(DataSet dataset) {
     assert dataset != null : "bad 'dataset' configuration parameter";
     DataSet.initialize(dataset);
   }
@@ -86,6 +87,7 @@ public class CDMapper extends MapReduceBase implements
 
   }
 
+  @Override
   public void map(LongWritable key, Text value,
       OutputCollector<LongWritable, CDFitness> output, Reporter reporter)
       throws IOException {

@@ -31,12 +31,13 @@ import java.util.Iterator;
 import java.util.List;
 
 public class MeanShiftCanopyReducer extends MapReduceBase implements
-    Reducer<Text, WritableComparable, Text, WritableComparable> {
+    Reducer<Text, WritableComparable<?>, Text, WritableComparable<?>> {
 
   private final List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
 
-  public void reduce(Text key, Iterator<WritableComparable> values,
-      OutputCollector<Text, WritableComparable> output, Reporter reporter)
+  @Override
+  public void reduce(Text key, Iterator<WritableComparable<?>> values,
+      OutputCollector<Text, WritableComparable<?>> output, Reporter reporter)
       throws IOException {
 
     while (values.hasNext()) {

@@ -19,6 +19,7 @@ package org.apache.mahout.matrix;
 
 public class NegateFunction implements UnaryFunction {
 
+  @Override
   public double apply(double arg1) {
     return -arg1;
   }

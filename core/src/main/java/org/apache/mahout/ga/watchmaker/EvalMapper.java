@@ -50,7 +50,7 @@ public class EvalMapper extends MapReduceBase implements
   @Override
   @SuppressWarnings("unchecked")  
   public void configure(JobConf job) {
-    String evlstr = job.get(EvalMapper.MAHOUT_GA_EVALUATOR);
+    String evlstr = job.get(MAHOUT_GA_EVALUATOR);
     if (evlstr == null) {
       throw new RuntimeException(
           "'MAHOUT_GA_EVALUATOR' job parameter non found");
@@ -61,6 +61,7 @@ public class EvalMapper extends MapReduceBase implements
     super.configure(job);
   }
 
+  @Override
   public void map(LongWritable key, Text value,
       OutputCollector<LongWritable,DoubleWritable> output, Reporter reporter)
       throws IOException {

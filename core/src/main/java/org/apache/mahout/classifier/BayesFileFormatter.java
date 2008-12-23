@@ -57,6 +57,9 @@ public class BayesFileFormatter {
 
   private static final String LINE_SEP = System.getProperty("line.separator");
 
+  private BayesFileFormatter() {
+  }
+
   /**
    * Collapse all the files in the inputDir into a single file in the proper
    * Bayes format, 1 document per line
@@ -153,6 +156,7 @@ public class BayesFileFormatter {
       this.outputDir = outputDir;
     }
 
+    @Override
     public boolean accept(File file) {
       if (file.isFile()) {
         Writer theWriter = null;
@@ -258,9 +262,9 @@ public class BayesFileFormatter {
   @SuppressWarnings("static-access")
   public static void main(String[] args) throws ClassNotFoundException,
       IllegalAccessException, InstantiationException, IOException {
-    final DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
-    final ArgumentBuilder abuilder = new ArgumentBuilder();
-    final GroupBuilder gbuilder = new GroupBuilder();
+    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    ArgumentBuilder abuilder = new ArgumentBuilder();
+    GroupBuilder gbuilder = new GroupBuilder();
 
     Option inputOpt = obuilder.withLongName("input").withRequired(true).withArgument(
             abuilder.withName("input").withMinimum(1).withMaximum(1).create()).
@@ -289,11 +293,10 @@ public class BayesFileFormatter {
     Option helpOpt = obuilder.withLongName("help").withRequired(true).
             withDescription("Print out help").withShortName("h").create();
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(labelOpt).withOption(analyzerOpt).withOption(charsetOpt).withOption(collapseOpt).withOption(helpOpt).create();
-    CommandLine cmdLine;
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
-      cmdLine = parser.parse(args);
+      CommandLine cmdLine = parser.parse(args);
 
       if (cmdLine.hasOption(helpOpt)) {
         

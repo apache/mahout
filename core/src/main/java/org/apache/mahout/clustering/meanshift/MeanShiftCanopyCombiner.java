@@ -32,10 +32,11 @@ import java.io.IOException;
 import java.util.Iterator;
 
 public class MeanShiftCanopyCombiner extends MapReduceBase implements
-    Reducer<Text, WritableComparable, Text, WritableComparable> {
+    Reducer<Text, WritableComparable<?>, Text, WritableComparable<?>> {
 
-  public void reduce(Text key, Iterator<WritableComparable> values,
-      OutputCollector<Text, WritableComparable> output, Reporter reporter)
+  @Override
+  public void reduce(Text key, Iterator<WritableComparable<?>> values,
+      OutputCollector<Text, WritableComparable<?>> output, Reporter reporter)
       throws IOException {
     MeanShiftCanopy canopy = new MeanShiftCanopy(key.toString());
 

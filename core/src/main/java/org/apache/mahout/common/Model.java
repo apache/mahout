@@ -51,7 +51,7 @@ public abstract class Model {
 
   protected double sigma_jSigma_k = 0.0;
 
-  protected final double alpha_i = 1.0; // alpha_i can be improved upon for increased smoothing
+  protected static final double alpha_i = 1.0; // alpha_i can be improved upon for increased smoothing
   
   protected abstract double featureWeight(Integer label, Integer feature);
   

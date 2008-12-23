@@ -33,6 +33,7 @@ import java.util.Iterator;
 public class CDReducer extends MapReduceBase implements
     Reducer<LongWritable, CDFitness, LongWritable, CDFitness> {
 
+  @Override
   public void reduce(LongWritable key, Iterator<CDFitness> values,
       OutputCollector<LongWritable, CDFitness> output, Reporter reporter)
       throws IOException {

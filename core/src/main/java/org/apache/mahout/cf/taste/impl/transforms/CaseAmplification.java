@@ -54,10 +54,12 @@ public final class CaseAmplification implements SimilarityTransform<Object> {
    * @return <code>value<sup>factor</sup></code> if value is nonnegative;
    *         <code>-value<sup>-factor</sup></code> otherwise
    */
+  @Override
   public double transformSimilarity(Object thing1, Object thing2, double value) {
     return value < 0.0 ? -Math.pow(-value, factor) : Math.pow(value, factor);
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     // do nothing
   }

@@ -30,6 +30,8 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.TextInputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
+import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.mahout.ga.watchmaker.OutputUtils;
 import org.apache.mahout.ga.watchmaker.cd.FileInfoParser;
 import org.apache.mahout.utils.StringUtils;
@@ -50,6 +52,9 @@ import java.util.Scanner;
 public class CDInfosTool {
 
   private static final Logger log = LoggerFactory.getLogger(CDInfosTool.class);
+
+  private CDInfosTool() {
+  }
 
   /**
    * Uses Mahout to gather the information about a dataset.
@@ -87,8 +92,8 @@ public class CDInfosTool {
    */
   private static void configureJob(JobConf conf, Descriptors descriptors,
       Path inpath, Path outpath) {
-    TextInputFormat.setInputPaths(conf, inpath);
-    SequenceFileOutputFormat.setOutputPath(conf, outpath);
+    FileInputFormat.setInputPaths(conf, inpath);
+    FileOutputFormat.setOutputPath(conf, outpath);
 
     conf.setOutputKeyClass(LongWritable.class);
     conf.setOutputValueClass(Text.class);

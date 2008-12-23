@@ -309,6 +309,7 @@ public final class EuropeanDistanceLookup implements DistanceLookup
         DISTANCES.put("Vienna", vienna);
     }
 
+    @Override
     public List<String> getKnownCities()
     {
         List<String> cities = new ArrayList<String>(DISTANCES.keySet());
@@ -316,6 +317,7 @@ public final class EuropeanDistanceLookup implements DistanceLookup
         return cities;
     }
 
+    @Override
     public int getDistance(String startingCity, String destinationCity)
     {
         return DISTANCES.get(startingCity).get(destinationCity);

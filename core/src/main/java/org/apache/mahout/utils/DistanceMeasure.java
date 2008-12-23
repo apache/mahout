@@ -17,7 +17,6 @@
 
 package org.apache.mahout.utils;
 
-import org.apache.hadoop.mapred.JobConfigurable;
 import org.apache.mahout.matrix.CardinalityException;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.parameters.Parametered;
@@ -26,7 +25,7 @@ import org.apache.mahout.utils.parameters.Parametered;
  * This interface is used for objects which can determine a distance metric
  * between two points
  */
-public interface DistanceMeasure extends JobConfigurable, Parametered {
+public interface DistanceMeasure extends Parametered {
 
   /**
    * Returns the distance metric applied to the arguments
@@ -36,6 +35,6 @@ public interface DistanceMeasure extends JobConfigurable, Parametered {
    * @return a scalar doubles of the distance
    * @throws CardinalityException
    */
-  public double distance(Vector v1, Vector v2);
+  double distance(Vector v1, Vector v2);
 
 }

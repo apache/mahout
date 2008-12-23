@@ -67,6 +67,7 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
     refreshHelper.addDependency(neighborhood);
   }
 
+  @Override
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
           throws TasteException {
     if (userID == null) {
@@ -97,6 +98,7 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
     return topItems;
   }
 
+  @Override
   public double estimatePreference(Object userID, Object itemID) throws TasteException {
     DataModel model = getDataModel();
     User theUser = model.getUser(userID);
@@ -109,10 +111,12 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
     return doEstimatePreference(theUser, theNeighborhood, item);
   }
 
+  @Override
   public List<User> mostSimilarUsers(Object userID, int howMany) throws TasteException {
     return mostSimilarUsers(userID, howMany, null);
   }
 
+  @Override
   public List<User> mostSimilarUsers(Object userID,
                                      int howMany,
                                      Rescorer<Pair<User, User>> rescorer) throws TasteException {
@@ -165,6 +169,7 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
     return allItems;
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     refreshHelper.refresh(alreadyRefreshed);
   }
@@ -188,6 +193,7 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
       this.rescorer = rescorer;
     }
 
+    @Override
     public double estimate(User user) throws TasteException {
       // Don't consider the user itself as a possible most similar user
       if (user.equals(toUser)) {
@@ -212,6 +218,7 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
       this.theNeighborhood = theNeighborhood;
     }
 
+    @Override
     public double estimate(Item item) throws TasteException {
       return doEstimatePreference(theUser, theNeighborhood, item);
     }

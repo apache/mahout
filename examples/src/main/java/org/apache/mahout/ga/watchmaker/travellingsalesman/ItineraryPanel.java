@@ -45,7 +45,7 @@ final class ItineraryPanel extends JPanel
     private final JButton selectAllButton;
     private final JButton clearButton;
 
-    public ItineraryPanel(List<String> cities)
+    ItineraryPanel(List<String> cities)
     {
         super(new BorderLayout());
 
@@ -67,6 +67,7 @@ final class ItineraryPanel extends JPanel
         ActionListener buttonListener = new ActionListener()
         {
 
+            @Override
             public void actionPerformed(ActionEvent actionEvent)
             {
                 boolean select = actionEvent.getSource() == selectAllButton;

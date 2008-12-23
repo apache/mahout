@@ -34,7 +34,7 @@ import java.util.List;
 /**
  * Utility Class that deals with the output.
  */
-public class OutputUtils {
+public final class OutputUtils {
 
   private OutputUtils() {
     // do nothing

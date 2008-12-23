@@ -42,12 +42,15 @@ import java.nio.charset.Charset;
  */
 public class PrepareTwentyNewsgroups {
 
+  private PrepareTwentyNewsgroups() {
+  }
+
   @SuppressWarnings("static-access")
   public static void main(String[] args) throws IOException,
           ClassNotFoundException, InstantiationException, IllegalAccessException, OptionException {
-    final DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
-    final ArgumentBuilder abuilder = new ArgumentBuilder();
-    final GroupBuilder gbuilder = new GroupBuilder();
+    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    ArgumentBuilder abuilder = new ArgumentBuilder();
+    GroupBuilder gbuilder = new GroupBuilder();
 
     Option parentOpt = obuilder.withLongName("parent").withRequired(true).withArgument(
             abuilder.withName("parent").withMinimum(1).withMaximum(1).create()).
@@ -67,10 +70,9 @@ public class PrepareTwentyNewsgroups {
 
     Group group = gbuilder.withName("Options").withOption(analyzerNameOpt).withOption(charsetOpt).withOption(outputDirOpt).withOption(parentOpt).create();
 
-    CommandLine cmdLine;
     Parser parser = new Parser();
     parser.setGroup(group);
-    cmdLine = parser.parse(args);
+    CommandLine cmdLine = parser.parse(args);
 
 
     File parentDir = new File((String) cmdLine.getValue(parentOpt));

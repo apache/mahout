@@ -29,6 +29,8 @@ import org.apache.mahout.matrix.Vector;
 import java.io.IOException;
 
 public class InputDriver {
+  private InputDriver() {
+  }
 
   public static void main(String[] args) throws IOException {
     runJob(args[0], args[1]);

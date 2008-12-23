@@ -55,6 +55,8 @@ import java.io.IOException;
  * <p>TODO I am not a bit sure this works yet in a real distributed environment.</p>
  */
 public final class RecommenderJob {
+  private RecommenderJob() {
+  }
 
   public static void main(String[] args) throws IOException {
     String recommendClassName = args[0];

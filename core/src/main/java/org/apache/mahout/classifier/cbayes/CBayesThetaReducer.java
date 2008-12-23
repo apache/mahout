@@ -36,6 +36,7 @@ public class CBayesThetaReducer extends MapReduceBase implements Reducer<Text, D
   
   private static final Logger log = LoggerFactory.getLogger(CBayesThetaReducer.class);
   
+  @Override
   public void reduce(Text key,
                      Iterator<DoubleWritable> values,
                      OutputCollector<Text, DoubleWritable> output,

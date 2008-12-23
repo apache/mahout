@@ -34,6 +34,7 @@ import java.util.Iterator;
 public class BayesThetaNormalizerReducer extends MapReduceBase implements
     Reducer<Text, DoubleWritable, Text, DoubleWritable> {
   
+  @Override
   public void reduce(Text key, Iterator<DoubleWritable> values,
       OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {

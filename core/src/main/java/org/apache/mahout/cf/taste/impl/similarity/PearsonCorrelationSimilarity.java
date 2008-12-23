@@ -54,6 +54,7 @@ public final class PearsonCorrelationSimilarity extends AbstractSimilarity {
     super(dataModel, weighting);
   }
 
+  @Override
   double computeResult(int n, double sumXY, double sumX2, double sumY2, double sumXYdiff2) {
     if (n == 0) {
       return Double.NaN;

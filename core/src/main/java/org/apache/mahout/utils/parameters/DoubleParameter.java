@@ -25,6 +25,7 @@ public class DoubleParameter extends AbstractParameter<Double> {
     super(Double.class, prefix, name, jobConf, defaultValue, description);
   }
 
+  @Override
   public void setStringValue(String stringValue) {
     set(Double.valueOf(stringValue));
   }

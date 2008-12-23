@@ -43,6 +43,7 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
 
   protected Map<String, SoftCluster> clusterMap;
 
+  @Override
   public void reduce(Text key, Iterator<Text> values,
       OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
 
@@ -95,7 +96,7 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
         .get(SoftCluster.CLUSTER_PATH_KEY), clusters);
     setClusterMap(clusters);
 
-    if (clusterMap.size() == 0)
+    if (clusterMap.isEmpty())
       throw new NullPointerException("Cluster is empty!!!");
   }
 
@@ -105,7 +106,6 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
       clusterMap.put(cluster.getIdentifier(), cluster);
     }
     clusters.clear();
-    clusters = null;
   }
 
   public void config(List<SoftCluster> clusters) {

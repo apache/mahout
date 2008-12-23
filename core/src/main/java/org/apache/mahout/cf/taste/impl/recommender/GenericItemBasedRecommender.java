@@ -76,6 +76,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
     refreshHelper.addDependency(similarity);
   }
 
+  @Override
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
           throws TasteException {
 
@@ -103,6 +104,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
     return topItems;
   }
 
+  @Override
   public double estimatePreference(Object userID, Object itemID) throws TasteException {
     DataModel model = getDataModel();
     User theUser = model.getUser(userID);
@@ -114,10 +116,12 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
     return doEstimatePreference(theUser, item);
   }
 
+  @Override
   public List<RecommendedItem> mostSimilarItems(Object itemID, int howMany) throws TasteException {
     return mostSimilarItems(itemID, howMany, null);
   }
 
+  @Override
   public List<RecommendedItem> mostSimilarItems(Object itemID,
                                                 int howMany,
                                                 Rescorer<Pair<Item, Item>> rescorer) throws TasteException {
@@ -126,10 +130,12 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
     return doMostSimilarItems(itemID, howMany, estimator);
   }
 
+  @Override
   public List<RecommendedItem> mostSimilarItems(List<Object> itemIDs, int howMany) throws TasteException {
     return mostSimilarItems(itemIDs, howMany, null);
   }
 
+  @Override
   public List<RecommendedItem> mostSimilarItems(List<Object> itemIDs,
                                                 int howMany,
                                                 Rescorer<Pair<Item, Item>> rescorer) throws TasteException {
@@ -149,6 +155,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
     return TopItems.getTopItems(howMany, allItems, null, estimator);
   }
 
+  @Override
   public List<RecommendedItem> recommendedBecause(Object userID,
                                                   Object itemID,
                                                   int howMany) throws TasteException {
@@ -213,6 +220,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
     return theUser.getPreferencesAsArray().length;
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     refreshHelper.refresh(alreadyRefreshed);
   }
@@ -236,6 +244,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
       this.rescorer = rescorer;
     }
 
+    @Override
     public double estimate(Item item) throws TasteException {
       Pair<Item, Item> pair = new Pair<Item, Item>(toItem, item);
       if (rescorer != null && rescorer.isFiltered(pair)) {
@@ -254,6 +263,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
       this.theUser = theUser;
     }
 
+    @Override
     public double estimate(Item item) throws TasteException {
       return doEstimatePreference(theUser, item);
     }
@@ -273,6 +283,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
       this.rescorer = rescorer;
     }
 
+    @Override
     public double estimate(Item item) throws TasteException {
       RunningAverage average = new FullRunningAverage();
       for (Item toItem : toItems) {
@@ -304,6 +315,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
       this.similarity = similarity;
     }
 
+    @Override
     public double estimate(Item item) throws TasteException {
       Preference pref = user.getPreferenceFor(item.getID());
       if (pref == null) {

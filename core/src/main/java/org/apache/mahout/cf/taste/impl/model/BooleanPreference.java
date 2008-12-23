@@ -18,7 +18,6 @@
 package org.apache.mahout.cf.taste.impl.model;
 
 import org.apache.mahout.cf.taste.model.Item;
-import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 
 import java.io.Serializable;
@@ -28,7 +27,7 @@ import java.io.Serializable;
  * at 1.0). This is appropriate in situations where users conceptually have only a general "yes" preference
  * for items, rather than a spectrum of preference values.
  */
-public final class BooleanPreference implements Preference, SettableUserPreference, Serializable {
+public final class BooleanPreference implements SettableUserPreference, Serializable {
 
   private User user;
   private final Item item;
@@ -41,6 +40,7 @@ public final class BooleanPreference implements Preference, SettableUserPreferen
     this.item = item;
   }
 
+  @Override
   public User getUser() {
     if (user == null) {
       throw new IllegalStateException("User was never set");
@@ -48,6 +48,7 @@ public final class BooleanPreference implements Preference, SettableUserPreferen
     return user;
   }
 
+  @Override
   public void setUser(User user) {
     if (user == null) {
       throw new IllegalArgumentException("user is null");
@@ -55,14 +56,17 @@ public final class BooleanPreference implements Preference, SettableUserPreferen
     this.user = user;
   }
 
+  @Override
   public Item getItem() {
     return item;
   }
 
+  @Override
   public double getValue() {
     return 1.0;
   }
 
+  @Override
   public void setValue(double value) {
     throw new UnsupportedOperationException();
   }

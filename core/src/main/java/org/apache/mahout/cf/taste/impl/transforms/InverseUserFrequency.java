@@ -82,6 +82,7 @@ public final class InverseUserFrequency implements PreferenceTransform {
     return logBase;
   }
 
+  @Override
   public double getTransformedValue(Preference pref) {
     Double factor = iufFactors.get().get(pref.getItem());
     if (factor != null) {
@@ -90,6 +91,7 @@ public final class InverseUserFrequency implements PreferenceTransform {
     return pref.getValue();
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     try {
       recompute();

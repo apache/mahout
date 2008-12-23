@@ -66,7 +66,7 @@ public final class Pair<A, B> {
 
   @Override
   public String toString() {
-    return '(' + String.valueOf(first) + ',' + String.valueOf(second) + ')';
+    return '(' + String.valueOf(first) + ',' + second + ')';
   }
 
 }

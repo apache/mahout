@@ -37,7 +37,10 @@ import java.io.IOException;
  */
 public class BayesFeatureDriver {
 
-  private static final Logger log = LoggerFactory.getLogger(BayesFeatureDriver.class);  
+  private static final Logger log = LoggerFactory.getLogger(BayesFeatureDriver.class);
+
+  private BayesFeatureDriver() {
+  }
 
   /**
    * Takes in two arguments:

@@ -47,10 +47,12 @@ public final class GenericRecommendedItem implements RecommendedItem, Serializab
     this.value = value;
   }
 
+  @Override
   public Item getItem() {
     return item;
   }
 
+  @Override
   public double getValue() {
     return value;
   }
@@ -80,6 +82,7 @@ public final class GenericRecommendedItem implements RecommendedItem, Serializab
    * @param other
    * @return 1, -1, 0 as this value is less than, greater than or equal to the other's value
    */
+  @Override
   public int compareTo(RecommendedItem other) {
     double otherValue = other.getValue();
     return value > otherValue ? -1 : value < otherValue ? 1 : 0;

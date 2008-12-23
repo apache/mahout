@@ -63,6 +63,7 @@ public final class SimilarUser implements Comparable<SimilarUser> {
   /**
    * Defines an ordering from most similar to least similar.
    */
+  @Override
   public int compareTo(SimilarUser other) {
     double otherSimilarity = other.similarity;
     return similarity > otherSimilarity ? -1 : similarity < otherSimilarity ? 1 : 0;

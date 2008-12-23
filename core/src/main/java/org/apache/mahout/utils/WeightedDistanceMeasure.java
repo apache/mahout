@@ -38,23 +38,26 @@ import java.util.List;
  */
 public abstract class WeightedDistanceMeasure implements DistanceMeasure {
 
-  private List<Parameter> parameters;
+  private List<Parameter<?>> parameters;
   private Parameter<Path> weightsFile;
   private Parameter<Class> vectorClass;
   protected Vector weights;
 
+  @Override
   public void createParameters(String prefix, JobConf jobConf) {
-    parameters = new ArrayList<Parameter>();
+    parameters = new ArrayList<Parameter<?>>();
     weightsFile = new PathParameter(prefix, "weightsFile", jobConf, null, "Path on DFS to a file containing the weights.");
     parameters.add(weightsFile);
     vectorClass = new ClassParameter(prefix, "vectorClass", jobConf, DenseVector.class, "Class<Vector> file specified in parameter weightsFile has been serialized with.");
     parameters.add(vectorClass);
   }
 
-  public Collection<Parameter> getParameters() {
+  @Override
+  public Collection<Parameter<?>> getParameters() {
     return parameters;
   }
 
+  @Override
   public void configure(JobConf jobConf) {
     if (parameters == null) {
       ParameteredGeneralizations.configureParameters(this, jobConf);

@@ -27,6 +27,8 @@ import org.apache.mahout.clustering.meanshift.MeanShiftCanopyJob;
 import java.io.IOException;
 
 public class Job {
+  private Job() {
+  }
 
   public static void main(String[] args) throws IOException {
     if (args.length == 7) {

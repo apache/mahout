@@ -33,7 +33,10 @@ import java.io.IOException;
  */
 public class CBayesDriver {
 
-  private static final Logger log = LoggerFactory.getLogger(CBayesDriver.class);    
+  private static final Logger log = LoggerFactory.getLogger(CBayesDriver.class);
+
+  private CBayesDriver() {
+  }
 
   /**
    * Takes in two arguments:

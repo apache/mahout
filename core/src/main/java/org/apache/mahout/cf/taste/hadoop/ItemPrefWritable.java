@@ -52,11 +52,13 @@ public final class ItemPrefWritable implements Writable {
     return prefValue;
   }
 
+  @Override
   public void write(DataOutput out) throws IOException {
     out.writeUTF(itemID);
     out.writeDouble(prefValue);
   }
 
+  @Override
   public void readFields(DataInput in) throws IOException {
     itemID = in.readUTF();
     prefValue = in.readDouble();

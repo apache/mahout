@@ -50,13 +50,15 @@ public class BayesTfIdfMapper extends MapReduceBase implements
    * @param reporter
    * @throws IOException
    */
+  @Override
   public void map(Text key, DoubleWritable value,
       OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {
  
     String labelFeaturePair = key.toString();
 
-    if (labelFeaturePair.startsWith("-")) { // if it is the termDocumentCount
+    char firstChar = labelFeaturePair.charAt(0);
+    if (firstChar == '-') { // if it is the termDocumentCount
       labelFeaturePair = labelFeaturePair.substring(1);
       String label = labelFeaturePair.split(",")[0];
       
@@ -69,7 +71,7 @@ public class BayesTfIdfMapper extends MapReduceBase implements
       double logIdf = Math.log(labelDocumentCount / value.get());
       
       output.collect(new Text(labelFeaturePair), new DoubleWritable(logIdf));
-    } else if (labelFeaturePair.startsWith(",")) {
+    } else if (firstChar == ',') {
       output.collect(new Text("*vocabCount"), new DoubleWritable(1.0));
     } else {
       output.collect(key, value);

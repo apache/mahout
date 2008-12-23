@@ -28,6 +28,7 @@ final class EmptyIterator<T> implements Iterator<T> {
   /**
    * @return false
    */
+  @Override
   public boolean hasNext() {
     return false;
   }
@@ -36,6 +37,7 @@ final class EmptyIterator<T> implements Iterator<T> {
    * @return never returns anything
    * @throws NoSuchElementException
    */
+  @Override
   public T next() {
     throw new NoSuchElementException();
   }
@@ -43,6 +45,7 @@ final class EmptyIterator<T> implements Iterator<T> {
   /**
    * @throws UnsupportedOperationException
    */
+  @Override
   public void remove() {
     throw new UnsupportedOperationException();
   }

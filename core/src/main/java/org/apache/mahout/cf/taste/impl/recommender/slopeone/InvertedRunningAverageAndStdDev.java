@@ -27,26 +27,32 @@ final class InvertedRunningAverageAndStdDev implements RunningAverageAndStdDev {
     this.delegate = delegate;
   }
 
+  @Override
   public void addDatum(double datum) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public void removeDatum(double datum) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public void changeDatum(double delta) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public int getCount() {
     return delegate.getCount();
   }
 
+  @Override
   public double getAverage() {
     return -delegate.getAverage();
   }
 
+  @Override
   public double getStandardDeviation() {
     return delegate.getStandardDeviation();
   }

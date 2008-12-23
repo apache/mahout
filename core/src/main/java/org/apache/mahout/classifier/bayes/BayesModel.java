@@ -65,19 +65,19 @@ public class BayesModel extends Model {
 
   @Override
   public void initializeNormalizer() {
-    double perLabelWeightSumNormalisationFactor = Double.MAX_VALUE;
 
     log.info("{}", thetaNormalizer);
-    for (Integer label : thetaNormalizer.keySet()) {
-      double Sigma_W_ij = thetaNormalizer.get(label);
+    double perLabelWeightSumNormalisationFactor = Double.MAX_VALUE;
+    for (Map.Entry<Integer, Double> integerDoubleEntry1 : thetaNormalizer.entrySet()) {
+      double Sigma_W_ij = integerDoubleEntry1.getValue();
       if (perLabelWeightSumNormalisationFactor > Math.abs(Sigma_W_ij)) {
         perLabelWeightSumNormalisationFactor = Math.abs(Sigma_W_ij);
       }
     }
 
-    for (Integer label : thetaNormalizer.keySet()) {
-      double Sigma_W_ij = thetaNormalizer.get(label);
-      thetaNormalizer.put(label, Sigma_W_ij
+    for (Map.Entry<Integer, Double> integerDoubleEntry : thetaNormalizer.entrySet()) {
+      double Sigma_W_ij = integerDoubleEntry.getValue();
+      thetaNormalizer.put(integerDoubleEntry.getKey(), Sigma_W_ij
           / perLabelWeightSumNormalisationFactor);
     }
     log.info("{}", thetaNormalizer);
@@ -89,9 +89,7 @@ public class BayesModel extends Model {
 
       double[] perLabelThetaNormalizer = new double[labelList.size()];
 
-      double perLabelWeightSumNormalisationFactor = Double.MAX_VALUE;
-
-      for (int feature = 0, maxFeatures = featureList.size(); feature < maxFeatures; feature++) {
+    for (int feature = 0, maxFeatures = featureList.size(); feature < maxFeatures; feature++) {
         Integer featureInt = feature;
         for (int label = 0, maxLabels = labelList.size(); label < maxLabels; label++) {
 
@@ -113,7 +111,8 @@ public class BayesModel extends Model {
         }
       }
       log.info("Normalizing Weights");
-      for (int label = 0, maxLabels = labelList.size(); label < maxLabels; label++) {
+    double perLabelWeightSumNormalisationFactor = Double.MAX_VALUE;
+    for (int label = 0, maxLabels = labelList.size(); label < maxLabels; label++) {
         double Sigma_W_ij = perLabelThetaNormalizer[label];
         if (perLabelWeightSumNormalisationFactor > Math.abs(Sigma_W_ij)) {
           perLabelWeightSumNormalisationFactor = Math.abs(Sigma_W_ij);

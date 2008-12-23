@@ -54,10 +54,12 @@ public class ResultAnalyzer implements Summarizable {
     confusionMatrix.addInstance(correctLabel, classifiedResult);
   }
 
+  @Override
   public String toString() {
     return "";
   }
 
+  @Override
   public String summarize() {
     StringBuilder returnString = new StringBuilder();
 

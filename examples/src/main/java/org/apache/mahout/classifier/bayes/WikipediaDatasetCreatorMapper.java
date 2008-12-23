@@ -44,6 +44,7 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
 
   private static Set<String> countries = null;
   
+  @Override
   public void map(LongWritable key, Text value,
       OutputCollector<Text, Text> output, Reporter reporter)
       throws IOException {
@@ -67,12 +68,12 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
     }
   }
   
-  public String getCountry(Set<String> categories)
+  public static String getCountry(Set<String> categories)
   {
     for(String category : categories)
     {
       for(String country: countries){        
-        if(category.indexOf(country)!=-1){
+        if(category.contains(country)){
           return country;
           
         }
@@ -81,7 +82,7 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
     return "Unknown";
   }
   
-  public List<String> findAllCategories(String document){
+  public static List<String> findAllCategories(String document){
     List<String> categories =  new ArrayList<String>();
     int startIndex = 0;
     int categoryIndex;

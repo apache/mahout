@@ -137,7 +137,7 @@ public final class TopItems {
     return result;
   }
 
-  public static interface Estimator<T> {
+  public interface Estimator<T> {
 
     double estimate(T thing) throws TasteException;
   }

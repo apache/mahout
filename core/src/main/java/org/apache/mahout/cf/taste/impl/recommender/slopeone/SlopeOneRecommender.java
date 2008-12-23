@@ -97,6 +97,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
     this.diffStorage = diffStorage;
   }
 
+  @Override
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
           throws TasteException {
     if (userID == null) {
@@ -119,6 +120,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
     return topItems;
   }
 
+  @Override
   public double estimatePreference(Object userID, Object itemID) throws TasteException {
     DataModel model = getDataModel();
     User theUser = model.getUser(userID);
@@ -194,6 +196,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
     }
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
     RefreshHelper.maybeRefresh(alreadyRefreshed, diffStorage);
@@ -213,6 +216,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
       this.theUser = theUser;
     }
 
+    @Override
     public double estimate(Item item) throws TasteException {
       return doEstimatePreference(theUser, item.getID());
     }

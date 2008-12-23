@@ -66,6 +66,7 @@ public class ToolCombiner extends MapReduceBase implements
     this.descriptors = new Descriptors(descriptors);
   }
 
+  @Override
   public void reduce(LongWritable key, Iterator<Text> values,
       OutputCollector<LongWritable, Text> output, Reporter reporter)
       throws IOException {
@@ -101,7 +102,7 @@ public class ToolCombiner extends MapReduceBase implements
     return DescriptionUtils.createNominalDescription(distinct);
   }
 
-  String numericalDescription(Iterator<Text> values) {
+  static String numericalDescription(Iterator<Text> values) {
     double min = Double.POSITIVE_INFINITY;
     double max = Double.NEGATIVE_INFINITY;
 

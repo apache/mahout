@@ -48,6 +48,7 @@ public abstract class AbstractRecommender implements Recommender {
    * {@link Recommender#recommend(Object, int, org.apache.mahout.cf.taste.recommender.Rescorer)},
    * with a {@link org.apache.mahout.cf.taste.recommender.Rescorer} that does nothing.</p>
    */
+  @Override
   public List<RecommendedItem> recommend(Object userID, int howMany) throws TasteException {
     return recommend(userID, howMany, null);
   }
@@ -58,6 +59,7 @@ public abstract class AbstractRecommender implements Recommender {
    * @throws IllegalArgumentException if userID or itemID is <code>null</code>, or if value is
    * {@link Double#NaN}
    */
+  @Override
   public void setPreference(Object userID, Object itemID, double value) throws TasteException {
     if (userID == null || itemID == null) {
       throw new IllegalArgumentException("userID or itemID is null");
@@ -77,6 +79,7 @@ public abstract class AbstractRecommender implements Recommender {
    *
    * @throws IllegalArgumentException if userID or itemID is <code>null</code>
    */
+  @Override
   public void removePreference(Object userID, Object itemID) throws TasteException {
     if (userID == null || itemID == null) {
       throw new IllegalArgumentException("userID or itemID is null");
@@ -85,6 +88,7 @@ public abstract class AbstractRecommender implements Recommender {
     dataModel.removePreference(userID, itemID);
   }
 
+  @Override
   public DataModel getDataModel() {
     return dataModel;
   }

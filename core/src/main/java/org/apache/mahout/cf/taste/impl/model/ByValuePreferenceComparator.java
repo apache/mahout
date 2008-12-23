@@ -37,6 +37,7 @@ public final class ByValuePreferenceComparator implements Comparator<Preference>
     return instance;
   }
 
+  @Override
   public int compare(Preference o1, Preference o2) {
     double value1 = o1.getValue();
     double value2 = o2.getValue();

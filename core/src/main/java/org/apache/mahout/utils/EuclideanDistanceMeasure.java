@@ -31,19 +31,22 @@ import java.util.Collections;
  */
 public class EuclideanDistanceMeasure implements DistanceMeasure {
 
+  @Override
   public void configure(JobConf job) {
     // nothing to do
   }
 
-  public Collection<Parameter> getParameters() {
+  @Override
+  public Collection<Parameter<?>> getParameters() {
     return Collections.emptyList();
   }
 
+  @Override
   public void createParameters(String prefix, JobConf jobConf) {
     // nothing to do
   }
 
-  public double distance(double[] p1, double[] p2) {
+  public static double distance(double[] p1, double[] p2) {
     double result = 0.0;
     for (int i = 0; i < p1.length; i++) {
       double delta = p2[i] - p1[i];
@@ -52,6 +55,7 @@ public class EuclideanDistanceMeasure implements DistanceMeasure {
     return Math.sqrt(result);
   }
 
+  @Override
   public double distance(Vector v1, Vector v2) {
     if (v1.cardinality() != v2.cardinality())
       throw new CardinalityException();

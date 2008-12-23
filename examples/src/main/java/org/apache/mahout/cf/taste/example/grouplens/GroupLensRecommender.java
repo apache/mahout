@@ -57,31 +57,38 @@ public final class GroupLensRecommender implements Recommender {
     recommender = new CachingRecommender(new SlopeOneRecommender(dataModel));
   }
 
+  @Override
   public List<RecommendedItem> recommend(Object userID, int howMany) throws TasteException {
     return recommender.recommend(userID, howMany);
   }
 
+  @Override
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
           throws TasteException {
     return recommender.recommend(userID, howMany, rescorer);
   }
 
+  @Override
   public double estimatePreference(Object userID, Object itemID) throws TasteException {
     return recommender.estimatePreference(userID, itemID);
   }
 
+  @Override
   public void setPreference(Object userID, Object itemID, double value) throws TasteException {
     recommender.setPreference(userID, itemID, value);
   }
 
+  @Override
   public void removePreference(Object userID, Object itemID) throws TasteException {
     recommender.removePreference(userID, itemID);
   }
 
+  @Override
   public DataModel getDataModel() {
     return recommender.getDataModel();
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     recommender.refresh(alreadyRefreshed);
   }

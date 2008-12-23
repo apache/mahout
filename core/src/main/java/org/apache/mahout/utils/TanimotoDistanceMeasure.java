@@ -30,8 +30,6 @@ import java.util.Set;
  */
 public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
 
-  public TanimotoDistanceMeasure() {
-  }
 
   /**
    * Calculates the distance between two vectors.
@@ -42,6 +40,7 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
    * @param vector1
    * @return 0 for perfect match, > 0 for greater distance
    */
+  @Override
   public double distance(Vector vector0, Vector vector1) {
 
     // this whole distance measurent thing

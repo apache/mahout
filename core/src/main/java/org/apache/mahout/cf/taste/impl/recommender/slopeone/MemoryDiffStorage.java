@@ -107,6 +107,7 @@ public final class MemoryDiffStorage implements DiffStorage {
     this.averageItemPref = new FastMap<Object, RunningAverage>();
     this.buildAverageDiffsLock = new ReentrantReadWriteLock();
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
+      @Override
       public Object call() throws TasteException {
         buildAverageDiffs();
         return null;
@@ -116,6 +117,7 @@ public final class MemoryDiffStorage implements DiffStorage {
     buildAverageDiffs();
   }
 
+  @Override
   public RunningAverage getDiff(Object itemID1, Object itemID2) {
     Map<Object, RunningAverage> level2Map = averageDiffs.get(itemID1);
     RunningAverage average = null;
@@ -142,6 +144,7 @@ public final class MemoryDiffStorage implements DiffStorage {
     }
   }
 
+  @Override
   public RunningAverage[] getDiffs(Object userID, Object itemID, Preference[] prefs) {
     try {
       buildAverageDiffsLock.readLock().lock();
@@ -156,10 +159,12 @@ public final class MemoryDiffStorage implements DiffStorage {
     }
   }
 
+  @Override
   public RunningAverage getAverageItemPref(Object itemID) {
     return averageItemPref.get(itemID);
   }
 
+  @Override
   public void updateItemPref(Object itemID, double prefDelta, boolean remove) {
     if (!remove && stdDevWeighted) {
       throw new UnsupportedOperationException("Can't update only when stdDevWeighted is set");
@@ -194,6 +199,7 @@ public final class MemoryDiffStorage implements DiffStorage {
     }
   }
 
+  @Override
   public Set<Item> getRecommendableItems(Object userID) throws TasteException {
     User user = dataModel.getUser(userID);
     Set<Item> result = new FastSet<Item>(dataModel.getNumItems());
@@ -285,6 +291,7 @@ public final class MemoryDiffStorage implements DiffStorage {
     }
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     refreshHelper.refresh(alreadyRefreshed);
   }

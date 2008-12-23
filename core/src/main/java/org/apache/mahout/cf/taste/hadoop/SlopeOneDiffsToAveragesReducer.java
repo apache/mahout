@@ -30,6 +30,7 @@ public final class SlopeOneDiffsToAveragesReducer
     extends MapReduceBase
     implements Reducer<ItemItemWritable, DoubleWritable, ItemItemWritable, DoubleWritable> {
 
+  @Override
   public void reduce(ItemItemWritable key,
                      Iterator<DoubleWritable> values,
                      OutputCollector<ItemItemWritable, DoubleWritable> output,

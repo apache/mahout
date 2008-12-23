@@ -25,6 +25,7 @@ import org.apache.hadoop.mapred.lib.MultipleTextOutputFormat;
  * different output files in sequence file output format.
  */
 public class WikipediaDatasetCreatorOutputFormat extends MultipleTextOutputFormat<Text, Text> {
+  @Override
   protected String generateFileNameForKeyValue(Text key, Text v, String name) {
     
     return key.toString() + ".txt";

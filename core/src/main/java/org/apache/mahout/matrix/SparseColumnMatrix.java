@@ -39,7 +39,6 @@ public class SparseColumnMatrix extends AbstractMatrix {
    *            a SparseVector[] array of columns
    */
   public SparseColumnMatrix(int[] cardinality, SparseVector[] columns) {
-    super();
     this.cardinality = cardinality.clone();
     this.columns = columns.clone();
     for (int col = 0; col < cardinality[COL]; col++)
@@ -53,7 +52,6 @@ public class SparseColumnMatrix extends AbstractMatrix {
    *            the int[2] cardinality
    */
   public SparseColumnMatrix(int[] cardinality) {
-    super();
     this.cardinality = cardinality.clone();
     this.columns = new SparseVector[cardinality[COL]];
     for (int col = 0; col < cardinality[COL]; col++)
@@ -61,7 +59,7 @@ public class SparseColumnMatrix extends AbstractMatrix {
   }
 
   @Override
-  public WritableComparable asWritableComparable() {
+  public WritableComparable<?> asWritableComparable() {
     String out = asFormatString();
     return new Text(out);
   }

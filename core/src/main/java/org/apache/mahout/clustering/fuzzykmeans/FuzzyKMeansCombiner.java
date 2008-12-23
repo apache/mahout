@@ -32,6 +32,7 @@ import org.apache.mahout.matrix.Vector;
 public class FuzzyKMeansCombiner extends MapReduceBase implements
     Reducer<Text, Text, Text, Text> {
 
+  @Override
   public void reduce(Text key, Iterator<Text> values,
       OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
     SoftCluster cluster = new SoftCluster(key.toString().trim());

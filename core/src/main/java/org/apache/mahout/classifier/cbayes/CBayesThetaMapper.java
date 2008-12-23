@@ -52,20 +52,20 @@ public class CBayesThetaMapper extends MapReduceBase implements
    * @param reporter
    * @throws IOException
    */
+  @Override
   public void map(Text key, DoubleWritable value,
       OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {
 
     String labelFeaturePair = key.toString();
-    double alpha_i = 1.0;
-    
-    if (labelFeaturePair.startsWith(",")) { // if it is from the Sigma_j folder
-                                            // (feature weight Sum)
+
+    if (labelFeaturePair.charAt(0) == ',') { // if it is from the Sigma_j folder (feature weight Sum)
       String feature = labelFeaturePair.substring(1);
-      for (String label : labelWeightSum.keySet()) {
-        double inverseDenominator = 1.0 / (sigma_jSigma_k - labelWeightSum.get(label) + vocabCount);
+      double alpha_i = 1.0;
+      for (Map.Entry<String, Double> stringDoubleEntry : labelWeightSum.entrySet()) {
+        double inverseDenominator = 1.0 / (sigma_jSigma_k - stringDoubleEntry.getValue() + vocabCount);
         DoubleWritable weight = new DoubleWritable((value.get() + alpha_i)*inverseDenominator);
-        output.collect(new Text((label + "," + feature).trim()), weight); //output Sigma_j
+        output.collect(new Text((stringDoubleEntry.getKey() + ',' + feature).trim()), weight); //output Sigma_j
       }
     } else {
       String label = labelFeaturePair.split(",")[0];

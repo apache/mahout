@@ -25,7 +25,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
+import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
 import org.slf4j.Logger;
@@ -40,6 +41,9 @@ import java.io.IOException;
 public class BayesTfIdfDriver {
 
   private static final Logger log = LoggerFactory.getLogger(BayesTfIdfDriver.class);
+
+  private BayesTfIdfDriver() {
+  }
 
   /**
    * Takes in two arguments:
@@ -70,12 +74,12 @@ public class BayesTfIdfDriver {
 
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(DoubleWritable.class);
-    
-    SequenceFileInputFormat.addInputPath(conf, new Path(output + "/trainer-termDocCount"));
-    SequenceFileInputFormat.addInputPath(conf, new Path(output + "/trainer-wordFreq"));
-    SequenceFileInputFormat.addInputPath(conf, new Path(output + "/trainer-featureCount"));
+
+    FileInputFormat.addInputPath(conf, new Path(output + "/trainer-termDocCount"));
+    FileInputFormat.addInputPath(conf, new Path(output + "/trainer-wordFreq"));
+    FileInputFormat.addInputPath(conf, new Path(output + "/trainer-featureCount"));
     Path outPath = new Path(output + "/trainer-tfIdf");
-    SequenceFileOutputFormat.setOutputPath(conf, outPath);
+    FileOutputFormat.setOutputPath(conf, outPath);
     conf.setNumMapTasks(100);
     
     conf.setMapperClass(BayesTfIdfMapper.class);
@@ -95,7 +99,7 @@ public class BayesTfIdfDriver {
 
     Path interimFile = new Path(output+"/trainer-docCount/part-*");
 
-    Map<String,Double> labelDocumentCounts= reader.readLabelDocumentCounts(dfs, interimFile, conf);
+    Map<String,Double> labelDocumentCounts = SequenceFileModelReader.readLabelDocumentCounts(dfs, interimFile, conf);
 
     DefaultStringifier<Map<String,Double>> mapStringifier =
         new DefaultStringifier<Map<String,Double>>(conf,GenericsUtil.getClass(labelDocumentCounts));

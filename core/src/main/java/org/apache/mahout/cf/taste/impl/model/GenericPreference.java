@@ -26,7 +26,7 @@ import java.io.Serializable;
 /**
  * <p>A simple {@link Preference} encapsulating an {@link Item} and preference value.</p>
  */
-public class GenericPreference implements Preference, SettableUserPreference, Serializable {
+public class GenericPreference implements SettableUserPreference, Serializable {
 
   private User user;
   private final Item item;
@@ -44,6 +44,7 @@ public class GenericPreference implements Preference, SettableUserPreference, Se
     this.value = value;
   }
 
+  @Override
   public User getUser() {
     if (user == null) {
       throw new IllegalStateException("User was never set");
@@ -51,6 +52,7 @@ public class GenericPreference implements Preference, SettableUserPreference, Se
     return user;
   }
 
+  @Override
   public void setUser(User user) {
     if (user == null) {
       throw new IllegalArgumentException("user is null");
@@ -58,14 +60,17 @@ public class GenericPreference implements Preference, SettableUserPreference, Se
     this.user = user;
   }
 
+  @Override
   public Item getItem() {
     return item;
   }
 
+  @Override
   public double getValue() {
     return value;
   }
 
+  @Override
   public void setValue(double value) {
     if (Double.isNaN(value)) {
       throw new IllegalArgumentException("Invalid value: " + value);

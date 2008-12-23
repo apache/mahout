@@ -94,13 +94,13 @@ public class CDRule implements Rule {
     }
   }
 
-  protected double randomNumerical(DataSet dataset, int attrInd, Random rng) {
+  protected static double randomNumerical(DataSet dataset, int attrInd, Random rng) {
     double max = dataset.getMax(attrInd);
     double min = dataset.getMin(attrInd);
     return rng.nextDouble() * (max - min) + min;
   }
 
-  protected double randomCategorical(DataSet dataset, int attrInd, Random rng) {
+  protected static double randomCategorical(DataSet dataset, int attrInd, Random rng) {
     int nbcategories = dataset.getNbValues(attrInd);
     return rng.nextInt(nbcategories);
   }
@@ -122,6 +122,7 @@ public class CDRule implements Rule {
   /**
    * if all the active conditions are met returns 1, else returns 0.
    */
+  @Override
   public int classify(DataLine dl) {
     for (int condInd = 0; condInd < nbConditions; condInd++) {
       if (!condition(condInd, dl))
@@ -136,7 +137,7 @@ public class CDRule implements Rule {
    * @param condInd condition index
    * @return attribute index
    */
-  public int attributeIndex(int condInd) {
+  public static int attributeIndex(int condInd) {
     int labelpos = DataSet.getDataSet().getLabelIndex();
     return (condInd < labelpos) ? condInd : condInd + 1;
   }
@@ -180,7 +181,7 @@ public class CDRule implements Rule {
 
   @Override
   public String toString() {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     buffer.append("CDRule = [");
     boolean empty = true;
@@ -189,13 +190,13 @@ public class CDRule implements Rule {
         if (!empty)
           buffer.append(" && ");
 
-        buffer.append("attr").append(attributeIndex(condInd)).append(" ").append(getO(condInd) ? ">=" : "<");
-        buffer.append(" ").append(getV(condInd));
+        buffer.append("attr").append(attributeIndex(condInd)).append(' ').append(getO(condInd) ? ">=" : "<");
+        buffer.append(' ').append(getV(condInd));
 
         empty = false;
       }
     }
-    buffer.append("]");
+    buffer.append(']');
 
     return buffer.toString();
   }

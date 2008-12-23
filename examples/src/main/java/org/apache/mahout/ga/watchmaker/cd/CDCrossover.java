@@ -64,17 +64,15 @@ public class CDCrossover extends AbstractCrossover<CDRule> {
     return result;
   }
 
-  void swap(CDRule ind1, CDRule ind2, int index) {
-    double dtemp;
-    boolean btemp;
-    
+  static void swap(CDRule ind1, CDRule ind2, int index) {
+
     // swap W
-    dtemp = ind1.getW(index);
+    double dtemp = ind1.getW(index);
     ind1.setW(index, ind2.getW(index));
     ind2.setW(index, dtemp);
     
     // swap O
-    btemp = ind1.getO(index);
+    boolean btemp = ind1.getO(index);
     ind1.setO(index, ind2.getO(index));
     ind2.setO(index, btemp);
     

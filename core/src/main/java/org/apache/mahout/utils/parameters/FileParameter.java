@@ -27,10 +27,12 @@ public class FileParameter extends AbstractParameter<File>{
     super(File.class, prefix, name, jobConf, defaultValue, description);
   }
 
+  @Override
   public void setStringValue(String stringValue) {
     set(new File(stringValue));
   }
 
+  @Override
   public String getStringValue() {
     if (value == null) {
       return null;

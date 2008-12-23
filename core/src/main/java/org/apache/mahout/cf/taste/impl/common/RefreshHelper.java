@@ -50,6 +50,7 @@ public final class RefreshHelper implements Refreshable {
     }
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     if (!refreshLock.isLocked()) {
       refreshLock.lock();

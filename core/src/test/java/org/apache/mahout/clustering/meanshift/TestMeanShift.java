@@ -188,7 +188,7 @@ public class TestMeanShift extends TestCase {
   public void testCanopyMapperEuclidean() throws Exception {
     MeanShiftCanopyMapper mapper = new MeanShiftCanopyMapper();
     MeanShiftCanopyCombiner combiner = new MeanShiftCanopyCombiner();
-    DummyOutputCollector<Text,WritableComparable> collector = new DummyOutputCollector<Text,WritableComparable>();
+    DummyOutputCollector<Text,WritableComparable<?>> collector = new DummyOutputCollector<Text,WritableComparable<?>>();
     MeanShiftCanopy.config(euclideanDistanceMeasure, 4, 1, 0.5);
     // get the initial canopies
     List<MeanShiftCanopy> canopies = getInitialCanopies();
@@ -203,14 +203,14 @@ public class TestMeanShift extends TestCase {
     assertEquals("Number of map results", 100, collector.getData().size());
     // now combine the mapper output
     MeanShiftCanopy.config(euclideanDistanceMeasure, 4, 1, 0.5);
-    Map<String, List<WritableComparable>> mapData = collector.getData();
-    collector = new DummyOutputCollector<Text,WritableComparable>();
+    Map<String, List<WritableComparable<?>>> mapData = collector.getData();
+    collector = new DummyOutputCollector<Text,WritableComparable<?>>();
     for (String key : mapData.keySet())
       combiner.reduce(new Text(key), mapData.get(key).iterator(), collector,
           null);
 
     // now verify the output
-    List<WritableComparable> data = collector.getValue("canopy");
+    List<WritableComparable<?>> data = collector.getValue("canopy");
     assertEquals("Number of canopies", refCanopies.size(), data.size());
     // add all points to the reference canopies
     Map<String, MeanShiftCanopy> refCanopyMap = new HashMap<String, MeanShiftCanopy>();
@@ -250,7 +250,7 @@ public class TestMeanShift extends TestCase {
     MeanShiftCanopyMapper mapper = new MeanShiftCanopyMapper();
     MeanShiftCanopyCombiner combiner = new MeanShiftCanopyCombiner();
     MeanShiftCanopyReducer reducer = new MeanShiftCanopyReducer();
-    DummyOutputCollector<Text,WritableComparable> collector = new DummyOutputCollector<Text,WritableComparable>();
+    DummyOutputCollector<Text,WritableComparable<?>> collector = new DummyOutputCollector<Text,WritableComparable<?>>();
     MeanShiftCanopy.config(euclideanDistanceMeasure, 4, 1, 0.5);
     // get the initial canopies
     List<MeanShiftCanopy> canopies = getInitialCanopies();
@@ -272,13 +272,13 @@ public class TestMeanShift extends TestCase {
     assertEquals("Number of map results", 100, collector.getData().size());
     // now combine the mapper output
     MeanShiftCanopy.config(euclideanDistanceMeasure, 4, 1, 0.5);
-    Map<String, List<WritableComparable>> mapData = collector.getData();
-    collector = new DummyOutputCollector<Text,WritableComparable>();
+    Map<String, List<WritableComparable<?>>> mapData = collector.getData();
+    collector = new DummyOutputCollector<Text,WritableComparable<?>>();
     for (String key : mapData.keySet())
       combiner.reduce(new Text(key), mapData.get(key).iterator(), collector,
           null);
     // now reduce the combiner output
-    DummyOutputCollector<Text,WritableComparable> collector2 = new DummyOutputCollector<Text,WritableComparable>();
+    DummyOutputCollector<Text,WritableComparable<?>> collector2 = new DummyOutputCollector<Text,WritableComparable<?>>();
     reducer.reduce(new Text("canopy"), collector.getValue("canopy").iterator(),
         collector2, null);
 
@@ -294,7 +294,7 @@ public class TestMeanShift extends TestCase {
     for (String id : refCanopyMap.keySet()) {
       MeanShiftCanopy ref = refCanopyMap.get(id);
 
-      List<WritableComparable> values = collector2
+      List<WritableComparable<?>> values = collector2
           .getValue((ref.isConverged() ? "V" : "C")
               + (ref.getCanopyId() - raw.length));
       assertEquals("values", 1, values.size());

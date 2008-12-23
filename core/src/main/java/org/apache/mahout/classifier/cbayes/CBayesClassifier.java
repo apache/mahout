@@ -43,6 +43,7 @@ public class CBayesClassifier implements Classifier{
    *  Ties are broken by comparing the category
    * @return A Collection of {@link org.apache.mahout.classifier.ClassifierResult}s.
    */
+  @Override
   public Collection<ClassifierResult> classify(Model model, String[] document, String defaultCategory, int numResults) {
     Collection<String> categories = model.getLabels();
     PriorityQueue pq = new ClassifierResultPriorityQueue(numResults);
@@ -73,6 +74,7 @@ public class CBayesClassifier implements Classifier{
    * @param defaultCategory The default category to assign if one cannot be determined
    * @return The single best category
    */
+  @Override
   public ClassifierResult classify(Model model, String[] document, String defaultCategory) {
     ClassifierResult result = new ClassifierResult(defaultCategory);
     double min = 0.0;
@@ -99,8 +101,8 @@ public class CBayesClassifier implements Classifier{
    * @return The probability
    * @see Model# featureWeight (String, String)
    */
+  @Override
   public double documentWeight(Model model, String label, String[] document) {
-    double result = 0.0;
     Map<String, Integer[]> wordList = new HashMap<String, Integer[]>(1000);
     for (String word : document) {
       Integer [] count = wordList.get(word);
@@ -111,6 +113,7 @@ public class CBayesClassifier implements Classifier{
       }
       count[0]++;
     }
+    double result = 0.0;
     for (Map.Entry<String, Integer[]> entry : wordList.entrySet()) {
       String word = entry.getKey();
       int count = entry.getValue()[0];
@@ -126,6 +129,7 @@ public class CBayesClassifier implements Classifier{
       initialize(numResults);
     }
 
+    @Override
     protected boolean lessThan(Object a, Object b) {
       ClassifierResult cr1 = (ClassifierResult) a;
       ClassifierResult cr2 = (ClassifierResult) b;
