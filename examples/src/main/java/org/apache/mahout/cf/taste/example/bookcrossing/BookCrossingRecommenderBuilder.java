@@ -24,9 +24,15 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
 
 final class BookCrossingRecommenderBuilder implements RecommenderBuilder {
 
+  private final BookCrossingDataModel bcModel;
+
+  BookCrossingRecommenderBuilder(BookCrossingDataModel bcModel) {
+    this.bcModel = bcModel;
+  }
+
   @Override
   public Recommender buildRecommender(DataModel dataModel) throws TasteException {
-    return new BookCrossingRecommender(dataModel);
+    return new BookCrossingRecommender(dataModel, bcModel);
   }
 
 }

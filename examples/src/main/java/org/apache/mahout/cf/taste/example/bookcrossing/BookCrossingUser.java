@@ -24,17 +24,29 @@ import java.util.List;
 
 final class BookCrossingUser extends GenericUser<String> {
 
-  private final String location;
+  private final String city;
+  private final String state;
+  private final String country;
   private final Integer age;
 
-  BookCrossingUser(String id, List<Preference> prefs, String location, Integer age) {
+  BookCrossingUser(String id, List<Preference> prefs, String city, String state, String country, Integer age) {
     super(id, prefs);
-    this.location = location;
+    this.city = city;
+    this.state = state;
+    this.country = country;
     this.age = age;
   }
 
-  String getLocation() {
-    return location;
+  String getCity() {
+    return city;
+  }
+
+  String getState() {
+    return state;
+  }
+
+  String getCountry() {
+    return country;
   }
 
   Integer getAge() {

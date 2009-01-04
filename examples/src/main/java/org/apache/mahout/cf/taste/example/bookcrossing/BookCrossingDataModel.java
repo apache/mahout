@@ -145,8 +145,20 @@ public final class BookCrossingDataModel extends FileDataModel {
       throw new NoSuchElementException();
     }
     String location = userData[0];
+    String[] locationTokens = location.split(",");
+    for (int i = 0; i < locationTokens.length; i++) {
+      if (locationTokens[i] != null) {
+        locationTokens[i] = locationTokens[i].trim();
+        if (locationTokens[i].length() == 0) {
+          locationTokens[i] = null;
+        }
+      }
+    }
+    String city = locationTokens[0];
+    String state = locationTokens.length > 1 ? locationTokens[1] : null;
+    String country = locationTokens.length > 2 ? locationTokens[2] : null;
     Integer age = userData[1] == null ? null : Integer.valueOf(userData[1]);
-    return new BookCrossingUser(id, prefs, location, age);
+    return new BookCrossingUser(id, prefs, city, state, country, age);
   }
 
   @Override

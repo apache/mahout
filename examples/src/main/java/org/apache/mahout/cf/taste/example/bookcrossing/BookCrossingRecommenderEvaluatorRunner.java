@@ -39,8 +39,9 @@ public final class BookCrossingRecommenderEvaluatorRunner {
 
   public static void main(String... args) throws IOException, TasteException {
     RecommenderEvaluator evaluator = new AverageAbsoluteDifferenceRecommenderEvaluator();
-    double evaluation = evaluator.evaluate(new BookCrossingRecommenderBuilder(),
-                                                 new BookCrossingDataModel(),
+    BookCrossingDataModel model = new BookCrossingDataModel();
+    double evaluation = evaluator.evaluate(new BookCrossingRecommenderBuilder(model),
+                                                 model,
                                                  0.9,
                                                  0.1);
     log.info(String.valueOf(evaluation));
