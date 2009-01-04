@@ -31,26 +31,28 @@ public final class FileLineIterable implements Iterable<String> {
 
   private final File file;
   private final Charset encoding;
+  private final boolean skipFirstLine;
 
   /**
    * Creates a {@link FileLineIterable} over a given file, assuming a UTF-8 encoding.
    */
-  public FileLineIterable(File file) {
-    this(file, Charset.forName("UTF-8"));
+  public FileLineIterable(File file, boolean skipFirstLine) {
+    this(file, Charset.forName("UTF-8"), skipFirstLine);
   }
 
   /**
    * Creates a {@link FileLineIterable} over a given file, using the given encoding.
    */
-  public FileLineIterable(File file, Charset encoding) {
+  public FileLineIterable(File file, Charset encoding, boolean skipFirstLine) {
     this.file = file;
     this.encoding = encoding;
+    this.skipFirstLine = skipFirstLine;
   }
 
   @Override
   public Iterator<String> iterator() {
     try {
-      return new FileLineIterator(file, encoding);
+      return new FileLineIterator(file, encoding, skipFirstLine);
     } catch (IOException ioe) {
       throw new IllegalStateException(ioe);
     }

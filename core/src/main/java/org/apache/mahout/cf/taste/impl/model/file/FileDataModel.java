@@ -116,7 +116,7 @@ public class FileDataModel implements DataModel {
   private void processFile(Map<String, List<Preference>> data) {
     log.info("Reading file info...");
     Map<String, Item> itemCache = new FastMap<String, Item>(1001);
-    for (String line : new FileLineIterable(dataFile)) {
+    for (String line : new FileLineIterable(dataFile, false)) {
       if (line.length() > 0) {
         log.debug("Read line: {}", line);
         processLine(line, data, itemCache);

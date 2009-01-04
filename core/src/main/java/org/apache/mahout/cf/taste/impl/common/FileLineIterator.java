@@ -45,8 +45,8 @@ public final class FileLineIterator implements Iterator<String>, Closeable {
    * @throws FileNotFoundException if the file does not exist
    * @throws IOException if the file cannot be read
    */
-  public FileLineIterator(File file) throws IOException {
-    this(file, Charset.forName("UTF-8"));
+  public FileLineIterator(File file, boolean skipFirstLine) throws IOException {
+    this(file, Charset.forName("UTF-8"), skipFirstLine);
   }
 
   /**
@@ -55,9 +55,12 @@ public final class FileLineIterator implements Iterator<String>, Closeable {
    * @throws FileNotFoundException if the file does not exist
    * @throws IOException if the file cannot be read
    */
-  public FileLineIterator(File file, Charset encoding) throws IOException {
+  public FileLineIterator(File file, Charset encoding, boolean skipFirstLine) throws IOException {
     InputStream is = new FileInputStream(file);
     reader = new BufferedReader(new InputStreamReader(is, encoding));
+    if (skipFirstLine) {
+      reader.readLine();
+    }
     nextLine = reader.readLine();
   }
 

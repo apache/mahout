@@ -37,7 +37,8 @@ import java.nio.charset.Charset;
 
 public final class GroupLensDataModel extends FileDataModel {
 
-  private final Map<String, Movie> movieMap;
+  private Map<String, Movie> movieMap;
+  private final File moviesFile;
 
   public GroupLensDataModel() throws IOException {
     this(readResourceToTempFile("/org/apache/mahout/cf/taste/example/grouplens/ratings.dat"),
@@ -51,13 +52,7 @@ public final class GroupLensDataModel extends FileDataModel {
    */
   public GroupLensDataModel(File ratingsFile, File moviesFile) throws IOException {
     super(convertGLFile(ratingsFile, true));
-    File convertedMoviesFile = convertGLFile(moviesFile, false);
-    movieMap = new FastMap<String, Movie>(5001);
-    for (String line : new FileLineIterable(convertedMoviesFile)) {
-      String[] tokens = line.split(",");
-      String id = tokens[0];
-      movieMap.put(id, new Movie(id, tokens[1], tokens[2]));
-    }
+    this.moviesFile = moviesFile;
   }
 
   @Override
@@ -69,6 +64,24 @@ public final class GroupLensDataModel extends FileDataModel {
     return item;
   }
 
+  @Override
+  protected void reload() {
+    File convertedMoviesFile;
+    try {
+      convertedMoviesFile = convertGLFile(moviesFile, false);
+    } catch (IOException ioe) {
+      throw new RuntimeException(ioe); // better way?
+    }
+    movieMap = new FastMap<String, Movie>(5001);
+    for (String line : new FileLineIterable(convertedMoviesFile, false)) {
+      String[] tokens = line.split(",");
+      String id = tokens[0];
+      movieMap.put(id, new Movie(id, tokens[1], tokens[2]));
+    }
+    super.reload();
+    movieMap = null;
+  }
+
   private static File convertGLFile(File originalFile, boolean ratings) throws IOException {
     // Now translate the file; remove commas, then convert "::" delimiter to comma
     File resultFile = new File(new File(System.getProperty("java.io.tmpdir")),
@@ -77,7 +90,7 @@ public final class GroupLensDataModel extends FileDataModel {
       PrintWriter writer = null;
       try {
         writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charset.forName("UTF-8")));
-        for (String line : new FileLineIterable(originalFile)) {
+        for (String line : new FileLineIterable(originalFile, false)) {
           String convertedLine;
           if (ratings) {
             // toss the last column of data, which is a timestamp we don't want
@@ -98,10 +111,11 @@ public final class GroupLensDataModel extends FileDataModel {
     return resultFile;
   }
 
-  private static File readResourceToTempFile(String resourceName) throws IOException {
+  public static File readResourceToTempFile(String resourceName) throws IOException {
     InputStream is = GroupLensRecommender.class.getResourceAsStream(resourceName);
     if (is == null) {
-      is = new FileInputStream("src/main/java" + resourceName);
+      // No resource found, try just using the file
+      return new File("src/main/java" + resourceName);
     }
     try {
       File tempFile = File.createTempFile("taste", null);
