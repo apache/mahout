@@ -55,11 +55,11 @@ public final class JesterDataModel extends FileDataModel {
   protected void processLine(String line, Map<String, List<Preference>> data, Map<String, Item> itemCache) {
     String userID = String.valueOf(userBeingRead);
     String[] jokePrefs = line.split(",");
-    int itemIDNum = 0;
     List<Preference> prefs = new ArrayList<Preference>(101);
-    for (String jokePref : jokePrefs) {
-      double jokePrefValue = Double.parseDouble(jokePref);
-      if (jokePrefValue >= -10.0 && jokePrefValue <= 10.0) {
+    for (int itemIDNum = 1; itemIDNum < jokePrefs.length; itemIDNum++) { // yes skip first one, just a count
+      String jokePref = jokePrefs[itemIDNum];
+      if (!"99".equals(jokePref)) {
+        double jokePrefValue = Double.parseDouble(jokePref);        
         String itemID = String.valueOf(itemIDNum);
         Item item = itemCache.get(itemID);
         if (item == null) {
@@ -68,7 +68,6 @@ public final class JesterDataModel extends FileDataModel {
         }
         prefs.add(new GenericPreference(null, item, jokePrefValue));
       }
-      itemIDNum++;
     }
     data.put(userID, prefs);
     userBeingRead++;
