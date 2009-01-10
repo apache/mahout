@@ -40,7 +40,9 @@ import java.util.Map;
  */
 public class SequenceFileModelReader {
 
-  private static final Logger log = LoggerFactory.getLogger(SequenceFileModelReader.class);  
+  private static final Logger log = LoggerFactory.getLogger(SequenceFileModelReader.class);
+
+  private SequenceFileModelReader() {}
 
   public static void loadModel(Model model, FileSystem fs, Map<String, Path> pathPatterns,
       Configuration conf) throws IOException {

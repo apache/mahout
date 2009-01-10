@@ -93,8 +93,6 @@ public class CBayesNormalizedWeightDriver {
     if (dfs.exists(outPath))
       dfs.delete(outPath, true);
 
-    SequenceFileModelReader reader = new SequenceFileModelReader();
-
     Path thetaNormalizationsFiles = new Path(output+"/trainer-thetaNormalizer/part*");
     Map<String,Double> thetaNormalizer= SequenceFileModelReader.readLabelSums(dfs, thetaNormalizationsFiles, conf);
     double perLabelWeightSumNormalisationFactor = Double.MAX_VALUE;

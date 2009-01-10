@@ -95,8 +95,6 @@ public class BayesTfIdfDriver {
     if (dfs.exists(outPath))
       dfs.delete(outPath, true);
 
-    SequenceFileModelReader reader = new SequenceFileModelReader();
-
     Path interimFile = new Path(output+"/trainer-docCount/part-*");
 
     Map<String,Double> labelDocumentCounts = SequenceFileModelReader.readLabelDocumentCounts(dfs, interimFile, conf);

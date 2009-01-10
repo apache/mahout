@@ -96,7 +96,6 @@ public class Classify {
     parser.setGroup(options);
     CommandLine cmdLine = parser.parse(args);
 
-    SequenceFileModelReader reader = new SequenceFileModelReader();
     JobConf conf = new JobConf(Classify.class);
 
     Map<String, Path> modelPaths = new HashMap<String, Path>();
@@ -126,7 +125,7 @@ public class Classify {
     }
     Classifier classifier = new BayesClassifier();
 
-    reader.loadModel(model, fs, modelPaths, conf);
+    SequenceFileModelReader.loadModel(model, fs, modelPaths, conf);
 
     log.info("Done loading model: # labels: {}", model.getLabels().size());
 

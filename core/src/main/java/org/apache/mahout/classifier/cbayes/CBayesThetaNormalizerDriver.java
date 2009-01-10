@@ -94,8 +94,6 @@ public class CBayesThetaNormalizerDriver {
     if (dfs.exists(outPath))
       dfs.delete(outPath, true);
 
-    SequenceFileModelReader reader = new SequenceFileModelReader();
-
     Path Sigma_kFiles = new Path(output+"/trainer-weights/Sigma_k/*");
     Map<String,Double> labelWeightSum= SequenceFileModelReader.readLabelSums(dfs, Sigma_kFiles, conf);
     DefaultStringifier<Map<String,Double>> mapStringifier =
