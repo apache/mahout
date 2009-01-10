@@ -384,8 +384,8 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     Collection<Item> allItems = new FastSet<Item>();
     for (User user : cluster) {
       Preference[] prefs = user.getPreferencesAsArray();
-      for (int i = 0; i < prefs.length; i++) {
-        allItems.add(prefs[i].getItem());
+      for (Preference pref : prefs) {
+        allItems.add(pref.getItem());
       }
     }
 

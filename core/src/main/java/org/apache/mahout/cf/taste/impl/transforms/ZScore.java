@@ -77,8 +77,8 @@ public final class ZScore implements PreferenceTransform {
     public RunningAverageAndStdDev get(User user) throws TasteException {
       RunningAverageAndStdDev running = new FullRunningAverageAndStdDev();
       Preference[] prefs = user.getPreferencesAsArray();
-      for (int i = 0; i < prefs.length; i++) {
-        running.addDatum(prefs[i].getValue());
+      for (Preference pref : prefs) {
+        running.addDatum(pref.getValue());
       }
       return running;
     }

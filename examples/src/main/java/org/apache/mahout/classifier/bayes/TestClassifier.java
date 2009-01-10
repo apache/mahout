@@ -97,8 +97,6 @@ public class TestClassifier {
     parser.setGroup(group);
     CommandLine cmdLine = parser.parse(args);
 
-
-    SequenceFileModelReader reader = new SequenceFileModelReader();
     JobConf conf = new JobConf(TestClassifier.class);
 
     Map<String, Path> modelPaths = new HashMap<String, Path>();
@@ -130,7 +128,7 @@ public class TestClassifier {
       throw new IllegalArgumentException("Unrecognized classifier type: " + classifierType);
     }
 
-    reader.loadModel(model, fs, modelPaths, conf);
+    SequenceFileModelReader.loadModel(model, fs, modelPaths, conf);
 
     log.info("Done loading model: # labels: {}", model.getLabels().size());
 
@@ -168,30 +166,33 @@ public class TestClassifier {
     ResultAnalyzer resultAnalyzer = new ResultAnalyzer(model.getLabels(), defaultCat);
 
     if (subdirs != null) {
-      for (int loop = 0; loop < subdirs.length; loop++) {
+      for (File subdir : subdirs) {
 
-        String correctLabel = subdirs[loop].getName().split(".txt")[0];
+        String correctLabel = subdir.getName().split(".txt")[0];
         BufferedReader fileReader = new BufferedReader(new InputStreamReader(
-            new FileInputStream(subdirs[loop].getPath()), encoding));
-        String line;
-        while ((line = fileReader.readLine()) != null) {
-
-          Map<String, List<String>> document = Model.generateNGrams(line, gramSize);
-          for (Map.Entry<String, List<String>> stringListEntry : document.entrySet()) {
-            List<String> strings = stringListEntry.getValue();
-            ClassifierResult classifiedLabel = classifier.classify(model,
-                strings.toArray(new String[strings.size()]),
-                defaultCat);
-            resultAnalyzer.addInstance(correctLabel, classifiedLabel);
+            new FileInputStream(subdir.getPath()), encoding));
+        try {
+          String line;
+          while ((line = fileReader.readLine()) != null) {
+  
+            Map<String, List<String>> document = Model.generateNGrams(line, gramSize);
+            for (Map.Entry<String, List<String>> stringListEntry : document.entrySet()) {
+              List<String> strings = stringListEntry.getValue();
+              ClassifierResult classifiedLabel = classifier.classify(model,
+                  strings.toArray(new String[strings.size()]),
+                  defaultCat);
+              resultAnalyzer.addInstance(correctLabel, classifiedLabel);
+            }
           }
-        }
-        log.info("{}\t{}\t{}/{}", new Object[] {
-            correctLabel,
-            resultAnalyzer.getConfusionMatrix().getAccuracy(correctLabel),
-            resultAnalyzer.getConfusionMatrix().getCorrect(correctLabel),
-            resultAnalyzer.getConfusionMatrix().getTotal(correctLabel)
+          log.info("{}\t{}\t{}/{}", new Object[]{
+              correctLabel,
+              resultAnalyzer.getConfusionMatrix().getAccuracy(correctLabel),
+              resultAnalyzer.getConfusionMatrix().getCorrect(correctLabel),
+              resultAnalyzer.getConfusionMatrix().getTotal(correctLabel)
           });
-
+        } finally {
+          fileReader.close();
+        }
       }
 
     }

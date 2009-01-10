@@ -158,8 +158,8 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
     Set<Item> allItems = new FastSet<Item>();
     for (User user : theNeighborhood) {
       Preference[] prefs = user.getPreferencesAsArray();
-      for (int i = 0; i < prefs.length; i++) {
-        Item item = prefs[i].getItem();
+      for (Preference pref : prefs) {
+        Item item = pref.getItem();
         // If not already preferred by the user, add it
         if (theUser.getPreferenceFor(item.getID()) == null) {
           allItems.add(item);

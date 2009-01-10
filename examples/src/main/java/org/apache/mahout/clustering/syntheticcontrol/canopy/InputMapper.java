@@ -39,8 +39,7 @@ public class InputMapper extends MapReduceBase implements
     String[] numbers = values.toString().split(" ");
     // sometimes there are multiple separator spaces
     List<Double> doubles = new ArrayList<Double>();
-    for (int i = 0; i < numbers.length; i++) {
-      String value = numbers[i];
+    for (String value : numbers) {
       if (value.length() > 0)
         doubles.add(Double.valueOf(value));
     }

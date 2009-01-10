@@ -74,8 +74,7 @@ public final class GenericDataModel implements DataModel, Serializable {
     for (User user : users) {
       userMap.put(user.getID(), user);
       Preference[] prefsArray = user.getPreferencesAsArray();
-      for (int i = 0; i < prefsArray.length; i++) {
-        Preference preference = prefsArray[i];
+      for (Preference preference : prefsArray) {
         Item item = preference.getItem();
         Object itemID = item.getID();
         itemMap.put(itemID, item);
@@ -193,12 +192,12 @@ public final class GenericDataModel implements DataModel, Serializable {
         return 0;
       }
       Set<Object> users1 = new FastSet<Object>(prefs1.length);
-      for (int i = 0; i < prefs1.length; i++) {
-        users1.add(prefs1[i].getUser().getID());
+      for (Preference aPrefs1 : prefs1) {
+        users1.add(aPrefs1.getUser().getID());
       }
       Set<Object> users2 = new FastSet<Object>(prefs2.length);
-      for (int i = 0; i < prefs2.length; i++) {
-        users2.add(prefs2[i].getUser().getID());
+      for (Preference aPrefs2 : prefs2) {
+        users2.add(aPrefs2.getUser().getID());
       }
       users1.retainAll(users2);
       return users1.size();

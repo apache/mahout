@@ -267,8 +267,7 @@ public final class FastSet<K> implements Set<K> {
   public int intersectionSize(FastSet<?> other) {
     int count = 0;
     K[] otherKeys = (K[]) other.keys;
-    for (int i = 0; i < otherKeys.length; i++) {
-      K key = otherKeys[i];
+    for (K key : otherKeys) {
       if (key != null && key != REMOVED && keys[find(key)] != null) {
         count++;
       }

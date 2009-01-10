@@ -94,8 +94,9 @@ public class DenseVector extends AbstractVector {
   public String asFormatString() {
     StringBuilder out = new StringBuilder();
     out.append("[, ");
-    for (int i = 0; i < values.length; i++)
-      out.append(values[i]).append(", ");
+    for (double value : values) {
+      out.append(value).append(", ");
+    }
     out.append("] ");
     return out.toString();
   }

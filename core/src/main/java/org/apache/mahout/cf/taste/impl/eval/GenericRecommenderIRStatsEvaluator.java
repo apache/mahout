@@ -108,8 +108,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
         } else {
           theRelevanceThreshold = relevanceThreshold;
         }
-        for (int i = 0; i < prefs.length; i++) {
-          Preference pref = prefs[i];
+        for (Preference pref : prefs) {
           if (pref.getValue() >= theRelevanceThreshold) {
             relevantItems.add(pref.getItem());
           }
@@ -163,8 +162,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
     if (id.equals(user2.getID())) {
       List<Preference> trainingPrefs = new ArrayList<Preference>();
       Preference[] prefs2 = user2.getPreferencesAsArray();
-      for (int i = 0; i < prefs2.length; i++) {
-        Preference pref = prefs2[i];
+      for (Preference pref : prefs2) {
         if (!relevantItems.contains(pref.getItem())) {
           trainingPrefs.add(pref);
         }
@@ -184,8 +182,8 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
       return Double.NEGATIVE_INFINITY;
     }
     RunningAverageAndStdDev stdDev = new FullRunningAverageAndStdDev();
-    for (int i = 0; i < prefs.length; i++) {
-      stdDev.addDatum(prefs[i].getValue());
+    for (Preference pref : prefs) {
+      stdDev.addDatum(pref.getValue());
     }
     return stdDev.getAverage() + stdDev.getStandardDeviation();
   }

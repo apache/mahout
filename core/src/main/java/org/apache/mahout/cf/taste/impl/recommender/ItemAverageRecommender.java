@@ -127,8 +127,7 @@ public final class ItemAverageRecommender extends AbstractRecommender {
       DataModel dataModel = getDataModel();
       for (User user : dataModel.getUsers()) {
         Preference[] prefs = user.getPreferencesAsArray();
-        for (int i = 0; i < prefs.length; i++) {
-          Preference pref = prefs[i];
+        for (Preference pref : prefs) {
           Object itemID = pref.getItem().getID();
           RunningAverage average = itemAverages.get(itemID);
           if (average == null) {

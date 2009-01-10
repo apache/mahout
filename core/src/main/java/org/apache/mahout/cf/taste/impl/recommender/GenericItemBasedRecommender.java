@@ -176,8 +176,8 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
 
     Collection<Item> allUserItems = new FastSet<Item>();
     Preference[] prefs = user.getPreferencesAsArray();
-    for (int i = 0; i < prefs.length; i++) {
-      allUserItems.add(prefs[i].getItem());
+    for (Preference pref : prefs) {
+      allUserItems.add(pref.getItem());
     }
     allUserItems.remove(recommendedItem);
 
@@ -201,8 +201,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
     double preference = 0.0;
     double totalSimilarity = 0.0;
     Preference[] prefs = theUser.getPreferencesAsArray();
-    for (int i = 0; i < prefs.length; i++) {
-      Preference pref = prefs[i];
+    for (Preference pref : prefs) {
       double theSimilarity = similarity.itemSimilarity(item, pref.getItem());
       if (!Double.isNaN(theSimilarity)) {
         // Why + 1.0? similarity ranges from -1.0 to 1.0, and we want to use it as a simple

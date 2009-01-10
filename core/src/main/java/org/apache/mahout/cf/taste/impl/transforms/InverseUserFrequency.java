@@ -105,8 +105,8 @@ public final class InverseUserFrequency implements PreferenceTransform {
     int numUsers = 0;
     for (User user : dataModel.getUsers()) {
       Preference[] prefs = user.getPreferencesAsArray();
-      for (int i = 0; i < prefs.length; i++) {
-        itemPreferenceCounts.increment(prefs[i].getItem());
+      for (Preference pref : prefs) {
+        itemPreferenceCounts.increment(pref.getItem());
       }
       numUsers++;
     }

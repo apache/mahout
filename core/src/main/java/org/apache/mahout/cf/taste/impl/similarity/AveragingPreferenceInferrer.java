@@ -70,8 +70,8 @@ public final class AveragingPreferenceInferrer implements PreferenceInferrer {
       if (prefs.length == 0) {
         return ZERO;
       }
-      for (int i = 0; i < prefs.length; i++) {
-        average.addDatum(prefs[i].getValue());
+      for (Preference pref : prefs) {
+        average.addDatum(pref.getValue());
       }
       return average.getAverage();
     }

@@ -101,8 +101,7 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     List<Preference> trainingPrefs = new ArrayList<Preference>();
     List<Preference> testPrefs = new ArrayList<Preference>();
     Preference[] prefs = user.getPreferencesAsArray();
-    for (int i = 0; i < prefs.length; i++) {
-      Preference pref = prefs[i];
+    for (Preference pref : prefs) {
       Item itemCopy = new GenericItem<String>(pref.getItem().getID().toString());
       Preference newPref = new GenericPreference(null, itemCopy, pref.getValue());
       if (random.nextDouble() < trainingPercentage) {
