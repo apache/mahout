@@ -21,10 +21,11 @@ import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
-import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
-import org.apache.mahout.cf.taste.impl.model.GenericUser;
+import org.apache.mahout.cf.taste.impl.model.BooleanPrefUser;
+import org.apache.mahout.cf.taste.impl.model.BooleanUserGenericDataModel;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -43,24 +44,11 @@ import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * <p>A {@link DataModel} backed by a comma-delimited file. This class assumes that each line of the
- * file contains a user ID, followed by item ID, followed by preferences value, separated by commas.
- * The preference value is assumed to be parseable as a <code>double</code>. The user and item IDs
- * are ready literally as Strings and treated as such in the API. Note that this means that whitespace
- * matters in the data file; they will be treated as part of the ID values.</p>
- *
- * <p>This class is not intended for use with very large amounts of data (over, say, a million rows). For
- * that, a JDBC-backed {@link DataModel} and a database are more appropriate.
- * The file will be periodically reloaded if a change is detected.</p>
- *
- * <p>It is possible and likely useful to subclass this class and customize its behavior to accommodate
- * application-specific needs and input formats. See {@link #processLine(String, Map, Map)},
- * {@link #buildItem(String)}, {@link #buildUser(String, List)}
- * and {@link #buildPreference(User, Item, double)}.</p>
+ * A variant on {@link FileDataModel} which uses the "boolean" classes like {@link BooleanPrefUser}.
  */
-public class FileDataModel implements DataModel {
+public class BooleanPrefUserFileDataModel implements DataModel {
 
-  private static final Logger log = LoggerFactory.getLogger(FileDataModel.class);
+  private static final Logger log = LoggerFactory.getLogger(BooleanPrefUserFileDataModel.class);
 
   private static final Timer timer = new Timer(true);
   private static final long RELOAD_CHECK_INTERVAL_MS = 60L * 1000L;
@@ -73,9 +61,9 @@ public class FileDataModel implements DataModel {
 
   /**
    * @param dataFile file containing preferences data
-   * @throws FileNotFoundException if dataFile does not exist
+   * @throws java.io.FileNotFoundException if dataFile does not exist
    */
-  public FileDataModel(File dataFile) throws FileNotFoundException {
+  public BooleanPrefUserFileDataModel(File dataFile) throws FileNotFoundException {
     if (dataFile == null) {
       throw new IllegalArgumentException("dataFile is null");
     }
@@ -93,23 +81,19 @@ public class FileDataModel implements DataModel {
     timer.schedule(new RefreshTimerTask(), RELOAD_CHECK_INTERVAL_MS, RELOAD_CHECK_INTERVAL_MS);
   }
 
-  public File getDataFile() {
-    return dataFile;
-  }
-
   protected void reload() {
-    reloadLock.lock();    
+    reloadLock.lock();
     try {
-      Map<String, List<Preference>> data = new FastMap<String, List<Preference>>();
+      Map<String, FastSet<Object>> data = new FastMap<String, FastSet<Object>>();
 
       processFile(data);
 
       List<User> users = new ArrayList<User>(data.size());
-      for (Map.Entry<String, List<Preference>> entries : data.entrySet()) {
+      for (Map.Entry<String, FastSet<Object>> entries : data.entrySet()) {
         users.add(buildUser(entries.getKey(), entries.getValue()));
       }
 
-      delegate = new GenericDataModel(users);
+      delegate = new BooleanUserGenericDataModel(users);
       loaded = true;
 
     } finally {
@@ -117,35 +101,34 @@ public class FileDataModel implements DataModel {
     }
   }
 
-  protected void processFile(Map<String, List<Preference>> data) {
+  private void processFile(Map<String, FastSet<Object>> data) {
     log.info("Reading file info...");
-    Map<String, Item> itemCache = new FastMap<String, Item>(1001);
     for (String line : new FileLineIterable(dataFile, false)) {
       if (line.length() > 0) {
         log.debug("Read line: {}", line);
-        processLine(line, data, itemCache);
+        processLine(line, data);
       }
     }
   }
 
   /**
-   * <p>Reads one line from the input file and adds the data to a {@link Map} data structure
+   * <p>Reads one line from the input file and adds the data to a {@link java.util.Map} data structure
    * which maps user IDs to preferences. This assumes that each line of the input file
    * corresponds to one preference. After reading a line and determining which user and item
    * the preference pertains to, the method should look to see if the data contains a mapping
-   * for the user ID already, and if not, add an empty {@link List} of {@link Preference}s to
+   * for the user ID already, and if not, add an empty {@link java.util.List} of {@link org.apache.mahout.cf.taste.model.Preference}s to
    * the data.</p>
    *
-   * <p>The method should use {@link #buildItem(String)} to create an {@link Item} representing
-   * the item in question if needed, and use {@link #buildPreference(User, Item, double)} to
-   * build {@link Preference} objects as needed.</p>
+   * <p>The method should use {@link #buildItem(String)} to create an {@link org.apache.mahout.cf.taste.model.Item} representing
+   * the item in question if needed, and use {@link #buildPreference(org.apache.mahout.cf.taste.model.User, org.apache.mahout.cf.taste.model.Item, double)} to
+   * build {@link org.apache.mahout.cf.taste.model.Preference} objects as needed.</p>
    *
    * @param line line from input data file
    * @param data all data read so far, as a mapping from user IDs to preferences
-   * @see #buildPreference(User, Item, double)
+   * @see #buildPreference(org.apache.mahout.cf.taste.model.User, org.apache.mahout.cf.taste.model.Item, double)
    * @see #buildItem(String)
    */
-  protected void processLine(String line, Map<String, List<Preference>> data, Map<String, Item> itemCache) {
+  protected void processLine(String line, Map<String, FastSet<Object>> data) {
     int commaOne = line.indexOf((int) ',');
     int commaTwo = line.indexOf((int) ',', commaOne + 1);
     if (commaOne < 0 || commaTwo < 0) {
@@ -153,19 +136,13 @@ public class FileDataModel implements DataModel {
     }
     String userID = line.substring(0, commaOne);
     String itemID = line.substring(commaOne + 1, commaTwo);
-    double preferenceValue = Double.parseDouble(line.substring(commaTwo + 1));
-    List<Preference> prefs = data.get(userID);
+    FastSet<Object> prefs = data.get(userID);
     if (prefs == null) {
-      prefs = new ArrayList<Preference>();
+      prefs = new FastSet<Object>();
       data.put(userID, prefs);
     }
-    Item item = itemCache.get(itemID);
-    if (item == null) {
-      item = buildItem(itemID);
-      itemCache.put(itemID, item);
-    }
-    log.debug("Read item '{}' for user ID '{}'", item, userID);
-    prefs.add(buildPreference(null, item, preferenceValue));
+    prefs.add(itemID);
+    log.debug("Read item '{}' for user ID '{}'", itemID, userID);
   }
 
   private void checkLoaded() {
@@ -228,17 +205,11 @@ public class FileDataModel implements DataModel {
     return delegate.getNumUsersWithPreferenceFor(itemIDs);
   }
 
-  /**
-   * @throws UnsupportedOperationException
-   */
   @Override
   public void setPreference(Object userID, Object itemID, double value) {
     throw new UnsupportedOperationException();
   }
 
-  /**
-   * @throws UnsupportedOperationException
-   */
   @Override
   public void removePreference(Object userID, Object itemID) {
     throw new UnsupportedOperationException();
@@ -249,49 +220,21 @@ public class FileDataModel implements DataModel {
     reload();
   }
 
-  /**
-   * Subclasses may override to return a different {@link User} implementation.
-   * The default implemenation always builds a new {@link GenericUser}. This may not
-   * be desirable; it may be better to return an existing {@link User} object
-   * in some applications rather than create a new object.
-   *
-   * @param id user ID
-   * @param prefs user preferences
-   * @return {@link GenericUser} by default
-   */
-  protected User buildUser(String id, List<Preference> prefs) {
-    return new GenericUser<String>(id, prefs);
+  protected User buildUser(String id, FastSet<Object> prefs) {
+    return new BooleanPrefUser<String>(id, prefs);
   }
 
-  /**
-   * Subclasses may override to return a different {@link Item} implementation.
-   * The default implementation always builds a new {@link GenericItem}; likewise
-   * it may be better here to return an existing object encapsulating the item
-   * instead.
-   *
-   * @param id item ID
-   * @return {@link GenericItem} by default
-   */
   protected Item buildItem(String id) {
     return new GenericItem<String>(id);
   }
 
-  /**
-   * Subclasses may override to return a different {@link Preference} implementation.
-   * The default implementation builds a new {@link GenericPreference}.
-   *
-   * @param user {@link User} who expresses the preference
-   * @param item preferred {@link Item}
-   * @param value preference value
-   * @return {@link GenericPreference} by default
-   */
   protected Preference buildPreference(User user, Item item, double value) {
     return new GenericPreference(user, item, value);
   }
 
   @Override
   public String toString() {
-    return "FileDataModel[dataFile:" + dataFile + ']';
+    return "BooleanPrefUserFileDataModel[dataFile:" + dataFile + ']';
   }
 
   private final class RefreshTimerTask extends TimerTask {

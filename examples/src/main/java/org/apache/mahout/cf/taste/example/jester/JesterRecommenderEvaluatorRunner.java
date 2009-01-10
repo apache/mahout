@@ -44,7 +44,7 @@ public final class JesterRecommenderEvaluatorRunner {
     double evaluation = evaluator.evaluate(new JesterRecommenderBuilder(),
                                                  model,
                                                  0.9,
-                                                 0.1);
+                                                 1.0);
     log.info(String.valueOf(evaluation));
   }
 
