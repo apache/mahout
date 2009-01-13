@@ -210,7 +210,7 @@ public final class BooleanUserGenericUserBasedRecommender extends AbstractRecomm
 
   @Override
   public String toString() {
-    return "GenericUserBasedRecommender[neighborhood:" + neighborhood + ']';
+    return "BooleanUserGenericUserBasedRecommender[neighborhood:" + neighborhood + ']';
   }
 
   private static class MostSimilarEstimator implements TopItems.Estimator<User> {
