@@ -18,6 +18,11 @@
 package org.apache.mahout.cf.taste.example.netflix;
 
 import org.apache.mahout.cf.taste.model.Item;
+import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.io.File;
 
 final class NetflixMovie implements Item {
 
@@ -64,6 +69,21 @@ final class NetflixMovie implements Item {
 	@Override
 	public String toString() {
 		return id + ":" + title;
+	}
+
+  static List<NetflixMovie> readMovies(File dataDirectory) {
+		List<NetflixMovie> movies = new ArrayList<NetflixMovie>(17770);
+    for (String line : new FileLineIterable(new File(dataDirectory, "movie_titles.txt"), false)) {
+			int firstComma = line.indexOf((int) ',');
+			int id = Integer.parseInt(line.substring(0, firstComma));
+			int secondComma = line.indexOf((int) ',', firstComma + 1);
+			String title = line.substring(secondComma + 1);
+			movies.add(new NetflixMovie(id, title));
+      if (id != movies.size()) {
+        throw new IllegalStateException("A movie is missing from movie_titles.txt");
+      }
+		}
+		return movies;
 	}
 
 }

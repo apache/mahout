@@ -71,7 +71,7 @@ public final class NetflixDataModel implements DataModel {
 		log.info("Creating NetflixDataModel for directory: {}", dataDirectory);
 
 		log.info("Reading movie data...");
-		List<NetflixMovie> movies = readMovies(dataDirectory);
+		List<NetflixMovie> movies = NetflixMovie.readMovies(dataDirectory);
 
 		log.info("Reading preference data...");
 		List<User> users = readUsers(dataDirectory, movies);
@@ -88,10 +88,7 @@ public final class NetflixDataModel implements DataModel {
 		for (File movieFile : new File(dataDirectory, "training_set").listFiles(filenameFilter)) {
       Iterator<String> lineIterator = new FileLineIterable(movieFile, false).iterator();
 			String line = lineIterator.next();
-			if (line == null) {
-				throw new IOException("Can't read first line of file " + movieFile);
-			}
-			int movieID = Integer.parseInt(line.substring(0, line.length() - 1));
+			int movieID = Integer.parseInt(line.substring(0, line.length() - 1)); // strip colon
 			NetflixMovie movie = movies.get(movieID - 1);
 			if (movie == null) {
 				throw new IllegalArgumentException("No such movie: " + movieID);
