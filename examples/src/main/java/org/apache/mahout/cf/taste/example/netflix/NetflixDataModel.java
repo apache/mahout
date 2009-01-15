@@ -28,6 +28,8 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -38,7 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.logging.Logger;
 
 /**
  * <p>This is a {@link DataModel} that reads the Netflix data set, as represented in its
@@ -47,7 +48,7 @@ import java.util.logging.Logger;
  */
 public final class NetflixDataModel implements DataModel {
 
-	private static final Logger log = Logger.getLogger(NetflixDataModel.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(NetflixDataModel.class);
 
 	private final DataModel delegate;
   private final boolean useSubset;
@@ -67,7 +68,7 @@ public final class NetflixDataModel implements DataModel {
 
     this.useSubset = useSubset;
 
-		log.info("Creating NetflixDataModel for directory: " + dataDirectory);
+		log.info("Creating NetflixDataModel for directory: {}", dataDirectory);
 
 		log.info("Reading movie data...");
 		List<NetflixMovie> movies = readMovies(dataDirectory);
@@ -99,7 +100,7 @@ public final class NetflixDataModel implements DataModel {
         line = lineIterator.next();
 				counter++;
 				if (counter % 100000 == 0) {
-					log.info("Processed " + counter + " prefs");
+					log.info("Processed {} prefs", counter);
 				}
 				int firstComma = line.indexOf((int) ',');
 				Integer userID = Integer.valueOf(line.substring(0, firstComma));
