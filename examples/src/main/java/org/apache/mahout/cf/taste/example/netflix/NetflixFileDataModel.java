@@ -131,4 +131,9 @@ public final class NetflixFileDataModel implements DataModel {
     // do nothing
   }
 
+  @Override
+  public String toString() {
+    return "NetflixFileDataModel";
+  }
+
 }

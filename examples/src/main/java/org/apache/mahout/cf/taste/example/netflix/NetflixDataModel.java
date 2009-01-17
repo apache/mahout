@@ -119,18 +119,6 @@ public final class NetflixDataModel implements DataModel {
 		return users;
 	}
 
-	private static List<NetflixMovie> readMovies(File dataDirectory) {
-		List<NetflixMovie> movies = new ArrayList<NetflixMovie>();
-    for (String line : new FileLineIterable(new File(dataDirectory, "movie_titles.txt"), false)) {
-			int firstComma = line.indexOf((int) ',');
-			Integer id = Integer.valueOf(line.substring(0, firstComma));
-			int secondComma = line.indexOf((int) ',', firstComma + 1);
-			String title = line.substring(secondComma + 1);
-			movies.add(new NetflixMovie(id, title));
-		}
-		return movies;
-	}
-
 	@Override
   public Iterable<? extends User> getUsers() throws TasteException {
 		return delegate.getUsers();
@@ -197,4 +185,10 @@ public final class NetflixDataModel implements DataModel {
       return filename.startsWith(useSubset ? "mv_0000" : "mv_");
     }
   }
+
+  @Override
+  public String toString() {
+    return "NetflixDataModel";
+  }
+
 }
