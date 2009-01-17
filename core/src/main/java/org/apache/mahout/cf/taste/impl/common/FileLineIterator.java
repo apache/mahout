@@ -27,12 +27,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipInputStream;
 import java.nio.charset.Charset;
 
 /**
  * Iterates over the lines of a text file. This assumes the text file's lines
  * are delimited in a manner consistent with how {@link BufferedReader}
  * defines lines.
+ *
+ * This class will uncompress files that end in .zip or .gz accordingly, too.
  */
 public final class FileLineIterator implements Iterator<String>, Closeable {
 
@@ -56,12 +60,24 @@ public final class FileLineIterator implements Iterator<String>, Closeable {
    * @throws IOException if the file cannot be read
    */
   public FileLineIterator(File file, Charset encoding, boolean skipFirstLine) throws IOException {
-    InputStream is = new FileInputStream(file);
+    InputStream is = getFileInputStream(file);
     reader = new BufferedReader(new InputStreamReader(is, encoding));
     if (skipFirstLine) {
       reader.readLine();
     }
     nextLine = reader.readLine();
+  }
+
+  private static InputStream getFileInputStream(File file) throws IOException {
+    InputStream is = new FileInputStream(file);
+    String name = file.getName();
+    if (name.endsWith(".gz")) {
+      return new GZIPInputStream(is);
+    } else if (name.endsWith(".zip")) {
+      return new ZipInputStream(is);
+    } else {
+      return is;
+    }
   }
 
   @Override

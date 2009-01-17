@@ -72,7 +72,8 @@ public class FileDataModel implements DataModel {
   private final ReentrantLock reloadLock;
 
   /**
-   * @param dataFile file containing preferences data
+   * @param dataFile file containing preferences data. If file is compressed (and name ends in .gz
+   *  or .zip accordingly) it will be decompressed as it is read)
    * @throws FileNotFoundException if dataFile does not exist
    */
   public FileDataModel(File dataFile) throws FileNotFoundException {

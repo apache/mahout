@@ -26,6 +26,8 @@ import java.nio.charset.Charset;
  * Iterable representing the lines of a text file. It can produce an {@link Iterator} over those lines.
  * This assumes the text file's lines are delimited in a manner
  * consistent with how {@link java.io.BufferedReader} defines lines.
+ *
+ * This class will uncompress files that end in .zip or .gz accordingly, too.
  */
 public final class FileLineIterable implements Iterable<String> {
 
