@@ -39,7 +39,7 @@ public final class JesterDataModel extends FileDataModel {
 
   /**
    * @param ratingsFile Jester ratings file in CSV format
-   * @throws java.io.IOException if an error occurs while reading or writing files
+   * @throws IOException if an error occurs while reading or writing files
    */
   public JesterDataModel(File ratingsFile) throws IOException {
     super(ratingsFile);

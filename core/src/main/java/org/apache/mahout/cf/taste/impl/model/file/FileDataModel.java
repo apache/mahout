@@ -40,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Iterator;
+import java.util.Collections;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -103,7 +105,10 @@ public class FileDataModel implements DataModel {
     try {
       Map<String, List<Preference>> data = new FastMap<String, List<Preference>>();
 
-      processFile(data);
+      processFile(dataFile, data);
+      for (File updateFile : findUpdateFiles()) {
+        processFile(updateFile, data);
+      }
 
       List<User> users = new ArrayList<User>(data.size());
       for (Map.Entry<String, List<Preference>> entries : data.entrySet()) {
@@ -118,10 +123,22 @@ public class FileDataModel implements DataModel {
     }
   }
 
-  protected void processFile(Map<String, List<Preference>> data) {
+  private Iterable<File> findUpdateFiles() {
+    File parentDir = dataFile.getParentFile();
+    List<File> updateFiles = new ArrayList<File>();
+    for (File updateFile : parentDir.listFiles()) {
+      if (!updateFile.getName().equals(dataFile.getName())) {
+        updateFiles.add(updateFile);
+      }
+    }
+    Collections.sort(updateFiles);
+    return updateFiles;
+  }
+
+  protected void processFile(File dataOrUpdateFile, Map<String, List<Preference>> data) {
     log.info("Reading file info...");
     Map<String, Item> itemCache = new FastMap<String, Item>(1001);
-    for (String line : new FileLineIterable(dataFile, false)) {
+    for (String line : new FileLineIterable(dataOrUpdateFile, false)) {
       if (line.length() > 0) {
         log.debug("Read line: {}", line);
         processLine(line, data, itemCache);
@@ -154,19 +171,34 @@ public class FileDataModel implements DataModel {
     }
     String userID = line.substring(0, commaOne);
     String itemID = line.substring(commaOne + 1, commaTwo);
-    double preferenceValue = Double.parseDouble(line.substring(commaTwo + 1));
+    String preferenceValueString = line.substring(commaTwo + 1);
     List<Preference> prefs = data.get(userID);
     if (prefs == null) {
       prefs = new ArrayList<Preference>();
       data.put(userID, prefs);
     }
-    Item item = itemCache.get(itemID);
-    if (item == null) {
-      item = buildItem(itemID);
-      itemCache.put(itemID, item);
+
+    if (preferenceValueString.length() == 0) {
+      // remove pref
+      Iterator<Preference> prefsIterator = prefs.iterator();
+      while (prefsIterator.hasNext()) {
+        Preference pref = prefsIterator.next();
+        if (pref.getItem().getID().equals(itemID)) {
+          prefsIterator.remove();
+          break;
+        }
+      }
+    } else {
+      // add pref -- assume it does not already exist
+      double preferenceValue = Double.parseDouble(preferenceValueString);
+      Item item = itemCache.get(itemID);
+      if (item == null) {
+        item = buildItem(itemID);
+        itemCache.put(itemID, item);
+      }
+      log.debug("Read item '{}' for user ID '{}'", item, userID);
+      prefs.add(buildPreference(null, item, preferenceValue));
     }
-    log.debug("Read item '{}' for user ID '{}'", item, userID);
-    prefs.add(buildPreference(null, item, preferenceValue));
   }
 
   private void checkLoaded() {
