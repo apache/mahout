@@ -25,18 +25,18 @@ import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.model.BooleanPrefUser;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
 /**
- * Variant of {@link TanimotoCoefficientSimilarity} which is appropriate
- * for use with the "boolean" classes like {@link BooleanPrefUser}
+ * <p>Variant of {@link TanimotoCoefficientSimilarity} which is appropriate
+ * for use with the "boolean" classes like {@link BooleanPrefUser}.</p>
+ *
+ * <p>If you need an {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity},
+ * just use {@link org.apache.mahout.cf.taste.impl.similarity.TanimotoCoefficientSimilarity},
+ * even with "boolean" classes.</p>
  */
 public final class BooleanTanimotoCoefficientSimilarity implements UserSimilarity {
-
-  private static final Logger log = LoggerFactory.getLogger(BooleanTanimotoCoefficientSimilarity.class);
 
   private final DataModel dataModel;
 
@@ -71,12 +71,7 @@ public final class BooleanTanimotoCoefficientSimilarity implements UserSimilarit
 
     int unionSize = prefs1.size() + prefs2.size() - intersectionSize;
 
-    double result = (double) intersectionSize / (double) unionSize;
-
-    if (log.isTraceEnabled()) {
-      log.trace("User similarity between " + user1 + " and " + user2 + " is " + result);
-    }
-    return result;
+    return (double) intersectionSize / (double) unionSize;
   }
 
 

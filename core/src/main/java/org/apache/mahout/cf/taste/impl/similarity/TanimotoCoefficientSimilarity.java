@@ -27,8 +27,6 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
@@ -45,8 +43,6 @@ import java.util.Collection;
  * <p>The value returned is in [0,1].</p>
  */
 public final class TanimotoCoefficientSimilarity implements UserSimilarity, ItemSimilarity {
-
-  private static final Logger log = LoggerFactory.getLogger(TanimotoCoefficientSimilarity.class);
 
   private final DataModel dataModel;
 
@@ -110,68 +106,18 @@ public final class TanimotoCoefficientSimilarity implements UserSimilarity, Item
 
     int unionSize = xPrefs.length + yPrefs.length - intersectionSize;
 
-    double result = (double) intersectionSize / (double) unionSize;
-
-    if (log.isTraceEnabled()) {
-      log.trace("User similarity between " + user1 + " and " + user2 + " is " + result);
-    }
-    return result;
+    return (double) intersectionSize / (double) unionSize;
   }
 
   @Override
   public double itemSimilarity(Item item1, Item item2) throws TasteException {
-
     if (item1 == null || item2 == null) {
       throw new IllegalArgumentException("item1 or item2 is null");
     }
-
-    Preference[] xPrefs = dataModel.getPreferencesForItemAsArray(item1.getID());
-    Preference[] yPrefs = dataModel.getPreferencesForItemAsArray(item2.getID());
-
-    if (xPrefs.length == 0 && yPrefs.length == 0) {
-      return Double.NaN;
-    }
-    if (xPrefs.length == 0 || yPrefs.length == 0) {
-      return 0.0;
-    }
-
-    Preference xPref = xPrefs[0];
-    Preference yPref = yPrefs[0];
-    User xIndex = xPref.getUser();
-    User yIndex = yPref.getUser();
-    int xPrefIndex = 1;
-    int yPrefIndex = 1;
-
-    int intersectionSize = 0;
-    while (true) {
-      int compare = xIndex.compareTo(yIndex);
-      if (compare == 0) {
-        intersectionSize++;
-      }
-      if (compare <= 0) {
-        if (xPrefIndex == xPrefs.length) {
-          break;
-        }
-        xPref = xPrefs[xPrefIndex++];
-        xIndex = xPref.getUser();
-      }
-      if (compare >= 0) {
-        if (yPrefIndex == yPrefs.length) {
-          break;
-        }
-        yPref = yPrefs[yPrefIndex++];
-        yIndex = yPref.getUser();
-      }
-    }
-
-    int unionSize = xPrefs.length + yPrefs.length - intersectionSize;
-
-    double result = (double) intersectionSize / (double) unionSize;
-
-    if (log.isTraceEnabled()) {
-      log.trace("Item similarity between " + item1 + " and " + item2 + " is " + result);
-    }
-    return result;
+    int preferring1and2 = dataModel.getNumUsersWithPreferenceFor(item1.getID(), item2.getID());
+    int preferring1 = dataModel.getNumUsersWithPreferenceFor(item1.getID());
+    int preferring2 = dataModel.getNumUsersWithPreferenceFor(item2.getID());
+    return (double) preferring1and2 / (double) (preferring1 + preferring2 - preferring1and2);
   }
 
   @Override

@@ -37,6 +37,9 @@ public final class LogLikelihoodSimilarity implements ItemSimilarity {
     this.dataModel = dataModel;
   }
 
+  // TODO also implement UserSimilarity if someone wants it
+  // This would involve refactoring out the bits that are similar to TanimotoCoefficientSimilarity
+
   @Override
   public double itemSimilarity(Item item1, Item item2) throws TasteException {
     if (item1 == null || item2 == null) {
