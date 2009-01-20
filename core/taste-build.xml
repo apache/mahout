@@ -20,7 +20,7 @@
 <!-- Temporarily, this ex-Taste build file is separate.
   Next step is to integrate it. -->
 
-<project basedir="." default="build" name="mahout-taste">
+<project basedir="." name="mahout-taste">
 
   <property file="build.properties"/>
 
@@ -28,7 +28,6 @@
   <property name="dbcp.jar" location="lib/commons-dbcp-1.2.2.jar"/>
   <property name="junit.jar" location="../lib/junit-3.8.2.jar"/>
   <property name="pool.jar" location="lib/commons-pool-1.4.jar"/>
-  <property name="proguard.jar" location="lib/proguard.jar"/>
   <property name="servlet.jar" location="lib/servlet-api.jar"/>
   <property name="hadoop.jar" location="lib/hadoop-0.18.1-core.jar"/>
   <property name="slf4j-api.jar" location="lib/slf4j-api-1.5.5.jar"/>
@@ -38,90 +37,15 @@
 
   <property environment="env"/>
   <property name="name" value="${ant.project.name}"/>
-  <property name="release-jar" value="${name}.jar"/>
+  <property name="release-jar" value="dist/apache-mahout-core-0.1-dev.jar"/>
   <property name="release-war" value="${name}.war"/>
 
   <target name="init">
     <tstamp/>
-    <available file="${proguard.jar}" property="proguard.jar.present"/>
     <available type="dir" file="${axis.jars}" property="axis.jars.present"/>
   </target>
 
-  <target depends="init" name="build" description="Compiles all code">
-    <mkdir dir="build"/>
-    <javac source="6"
-           target="6"
-           deprecation="true"
-           destdir="build"
-           debug="true"
-           optimize="true"
-           srcdir="src/main/java">
-      <compilerarg value="-Xlint:all,-serial,-unchecked"/>
-      <classpath>
-        <pathelement location="${servlet.jar}"/>
-        <pathelement location="${dbcp.jar}"/>
-        <pathelement location="${pool.jar}"/>
-        <pathelement location="${hadoop.jar}"/>
-        <pathelement location="${slf4j-api.jar}"/>
-        <pathelement location="${uncommons-math.jar}"/>
-      </classpath>
-      <include name="org/apache/mahout/cf/taste/**"/>
-    </javac>
-    <jar jarfile="${release-jar}">
-      <fileset dir="build">
-        <include name="org/apache/mahout/cf/taste/**"/>        
-        <exclude name="org/apache/mahout/cf/taste/web/**"/>
-        <exclude name="org/apache/mahout/cf/taste/example/**"/>
-      </fileset>
-    </jar>
-  </target>
-
-  <target depends="build" name="optimize" description="Optimizes code" if="proguard.jar.present">
-    <property name="rt.jar" value="${env.JDK_HOME}/jre/lib/rt.jar"/>
-    <fail message="Can't find JDK classes at ${rt.jar}; is JDK_HOME set?">
-      <condition>
-        <not>
-          <available type="file" file="${rt.jar}"/>
-        </not>
-      </condition>
-    </fail>
-    <move file="${release-jar}" tofile="temp.jar"/>
-    <java jar="${proguard.jar}" fork="true" failonerror="true">
-      <arg value="-injars temp.jar"/>
-      <arg value="-outjars ${release-jar}"/>
-      <arg value="-libraryjars ${env.JDK_HOME}/jre/lib/rt.jar"/>
-      <arg value="-libraryjars ${pool.jar}"/>
-      <arg value="-ignorewarnings"/>
-      <arg value="-dontshrink"/>
-      <arg value="-dontobfuscate"/>
-      <arg value="-optimizationpasses 6"/>
-      <arg value="-keep public class * { public protected *; }"/>
-      <arg value="-target 6"/>
-      <arg value="-verbose"/>
-    </java>
-    <delete file="temp.jar"/>
-  </target>
-
-  <target depends="build" name="build-test" description="Builds test classes">
-    <mkdir dir="build-test"/>
-    <javac source="6"
-           target="6"
-           debug="true"
-           debuglevel="lines,vars,source"
-           deprecation="true"
-           destdir="build-test"
-           srcdir="src/test/java">
-      <compilerarg value="-Xlint:all,-serial"/>
-      <classpath>
-        <pathelement location="${junit.jar}"/>
-        <pathelement location="${slf4j-api.jar}"/>
-        <pathelement location="${release-jar}"/>
-      </classpath>
-      <include name="org/apache/mahout/cf/taste/**"/>
-    </javac>
-  </target>
-
-  <target depends="build,optimize" name="build-server" description="Builds deployable web-based Taste server">
+  <target depends="init" name="build-server" description="Builds deployable web-based Taste server">
     <fail unless="my-recommender.jar" message="Please set -Dmy-recommender.jar=XXX"/>
     <fail unless="my-recommender-class" message="Please set -Dmy-recommender-class=XXX"/>
     <fail unless="axis.jars.present" message="Please copy all Axis Java 1.4 .jar files from its lib directory into ${axis.jars}"/>
@@ -151,7 +75,7 @@
     <delete file="${my-web.xml}"/>
   </target>
 
-  <target depends="init,build" name="build-grouplens-example" description="Builds deployable GroupLens example">
+  <target depends="init" name="build-grouplens-example" description="Builds deployable GroupLens example">
     <property name="examples-base" value="../examples/src/main/java"/>
     <property name="grouplens-location" value="${examples-base}/org/apache/mahout/cf/taste/example/grouplens"/>
     <fail message="Please download and install the GroupLens .dat files to ${grouplens-location}">
@@ -206,48 +130,10 @@
     </java>
   </target>
 
-  <target depends="build,optimize,build-test" name="test" description="Runs unit tests">
-    <junit printsummary="on" haltonfailure="on" haltonerror="on" fork="on">
-      <formatter type="plain" usefile="false"/>
-      <classpath>
-        <pathelement location="${junit.jar}"/>
-        <pathelement location="${slf4j-api.jar}"/>
-        <pathelement location="${slf4j.jar}"/>
-        <pathelement location="${commons-logging.jar}"/>
-        <pathelement location="${uncommons-math.jar}"/>
-        <pathelement location="${release-jar}"/>
-        <pathelement location="build-test"/>
-      </classpath>
-      <assertions>
-        <enable/>
-      </assertions>
-      <batchtest>
-        <fileset dir="src/test/java">
-          <include name="org/apache/mahout/cf/taste/**/*Test.java"/>
-        </fileset>
-      </batchtest>
-    </junit>
-  </target>
-
-  <target depends="init" name="javadoc" description="Builds javadoc documentation">
-    <mkdir dir="docs/javadoc"/>
-    <javadoc destdir="docs/javadoc">
-      <fileset dir="src/main/java">
-        <include name="**/*.java"/>
-      </fileset>
-      <classpath>
-        <pathelement location="${servlet.jar}"/>
-        <pathelement location="${dbcp.jar}"/>
-        <pathelement location="${pool.jar}"/>
-      </classpath>
-    </javadoc>
-  </target>
-
   <target depends="init" name="clean" description="Deletes build products">
     <delete dir="build"/>
     <delete dir="build-test"/>
     <delete dir="docs/javadoc"/>
-    <delete file="${release-jar}"/>
     <delete file="${release-war}"/>
     <delete>
       <fileset dir=".">

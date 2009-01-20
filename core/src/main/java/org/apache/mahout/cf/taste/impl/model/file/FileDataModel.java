@@ -124,10 +124,13 @@ public class FileDataModel implements DataModel {
   }
 
   private Iterable<File> findUpdateFiles() {
+    String dataFileName = dataFile.getName();
+    int period = dataFileName.indexOf('.');
+    String startName = period < 0 ? dataFileName : dataFileName.substring(0, period);
     File parentDir = dataFile.getParentFile();
     List<File> updateFiles = new ArrayList<File>();
     for (File updateFile : parentDir.listFiles()) {
-      if (!updateFile.getName().equals(dataFile.getName())) {
+      if (!updateFile.getName().startsWith(startName)) {
         updateFiles.add(updateFile);
       }
     }
