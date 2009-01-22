@@ -19,6 +19,8 @@ package org.apache.mahout.cf.taste.impl.model;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.NoSuchUserException;
+import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.impl.common.ArrayIterator;
 import org.apache.mahout.cf.taste.impl.common.EmptyIterable;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
@@ -35,7 +37,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
@@ -123,13 +124,13 @@ public final class GenericDataModel implements DataModel, Serializable {
   }
 
   /**
-   * @throws NoSuchElementException if there is no such {@link User}
+   * @throws NoSuchUserException if there is no such {@link User}
    */
   @Override
-  public User getUser(Object id) {
+  public User getUser(Object id) throws NoSuchUserException {
     User user = userMap.get(id);
     if (user == null) {
-      throw new NoSuchElementException();
+      throw new NoSuchUserException();
     }
     return user;
   }
@@ -140,13 +141,13 @@ public final class GenericDataModel implements DataModel, Serializable {
   }
 
   /**
-   * @throws NoSuchElementException if there is no such {@link Item}
+   * @throws NoSuchItemException if there is no such {@link Item}
    */
   @Override
-  public Item getItem(Object id) {
+  public Item getItem(Object id) throws NoSuchItemException {
     Item item = itemMap.get(id);
     if (item == null) {
-      throw new NoSuchElementException();
+      throw new NoSuchItemException();
     }
     return item;
   }

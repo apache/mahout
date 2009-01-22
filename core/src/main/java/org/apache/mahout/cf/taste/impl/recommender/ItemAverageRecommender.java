@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
@@ -35,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -151,7 +151,7 @@ public final class ItemAverageRecommender extends AbstractRecommender {
       User theUser = dataModel.getUser(userID);
       Preference oldPref = theUser.getPreferenceFor(itemID);
       prefDelta = oldPref == null ? value : value - oldPref.getValue();
-    } catch (NoSuchElementException nsee) {
+    } catch (NoSuchUserException nsee) {
       prefDelta = value;
     }
     super.setPreference(userID, itemID, value);

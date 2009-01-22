@@ -20,6 +20,7 @@ package org.apache.mahout.cf.taste.impl.recommender.slopeone;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Weighting;
+import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
@@ -37,7 +38,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
@@ -178,7 +178,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
       User theUser = dataModel.getUser(userID);
       Preference oldPref = theUser.getPreferenceFor(itemID);
       prefDelta = oldPref == null ? value : value - oldPref.getValue();
-    } catch (NoSuchElementException nsee) {
+    } catch (NoSuchUserException nsee) {
       prefDelta = value;
     }
     super.setPreference(userID, itemID, value);

@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.impl.model;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -75,10 +76,10 @@ public final class BooleanUserGenericDataModel implements DataModel, Serializabl
   }
 
   @Override
-  public User getUser(Object id) {
+  public User getUser(Object id) throws NoSuchUserException {
     User user = userMap.get(id);
     if (user == null) {
-      throw new NoSuchElementException();
+      throw new NoSuchUserException();
     }
     return user;
   }

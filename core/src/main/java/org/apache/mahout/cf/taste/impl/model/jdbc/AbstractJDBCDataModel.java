@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.impl.model.jdbc;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.common.IteratorIterable;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
@@ -249,7 +250,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
   }
 
   /**
-   * @throws NoSuchElementException if there is no such user
+   * @throws NoSuchUserException if there is no such user
    */
   @Override
   public final User getUser(Object id) throws TasteException {
@@ -276,7 +277,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       }
 
       if (prefs.isEmpty()) {
-        throw new NoSuchElementException();
+        throw new NoSuchUserException();
       }
 
       return buildUser(idString, prefs);

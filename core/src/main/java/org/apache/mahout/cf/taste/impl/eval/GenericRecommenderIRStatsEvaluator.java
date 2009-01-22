@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl.eval;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.eval.IRStatistics;
 import org.apache.mahout.cf.taste.eval.RecommenderBuilder;
 import org.apache.mahout.cf.taste.eval.RecommenderIRStatsEvaluator;
@@ -42,7 +43,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Random;
 
 /**
@@ -124,7 +124,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
 
           try {
             trainingModel.getUser(id);
-          } catch (NoSuchElementException nsee) {
+          } catch (NoSuchUserException nsee) {
             continue; // Oops we excluded all prefs for the user -- just move on
           }
 

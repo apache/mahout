@@ -38,7 +38,7 @@ public interface DataModel extends Refreshable {
    * @param id user ID
    * @return {@link User} who has that ID
    * @throws TasteException if an error occurs while accessing the data
-   * @throws java.util.NoSuchElementException if there is no such {@link User}
+   * @throws org.apache.mahout.cf.taste.common.NoSuchUserException if there is no such {@link User}
    */
   User getUser(Object id) throws TasteException;
 
@@ -52,7 +52,7 @@ public interface DataModel extends Refreshable {
    * @param id item ID
    * @return {@link Item} that has that ID
    * @throws TasteException if an error occurs while accessing the data
-   * @throws java.util.NoSuchElementException if there is no such {@link Item}
+   * @throws org.apache.mahout.cf.taste.common.NoSuchItemException if there is no such {@link Item}
    */
   Item getItem(Object id) throws TasteException;
 

@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl.eval;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -28,7 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 /**
  * <p>A {@link org.apache.mahout.cf.taste.eval.RecommenderEvaluator} which computes the "root mean squared" difference
@@ -54,7 +54,7 @@ public final class RMSRecommenderEvaluator extends AbstractDifferenceRecommender
             double diff = realPref.getValue() - estimatedPreference;
             average.addDatum(diff * diff);
           }
-        } catch (NoSuchElementException nsee) {
+        } catch (NoSuchUserException nsee) {
           // It's possible that an item exists in the test data but not training data in which case
           // NSEE will be thrown. Just ignore it and move on.
           log.info("Element exists in test data but not training data: {}", testUser.getID(), nsee);
