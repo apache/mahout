@@ -79,11 +79,11 @@
       <zipfileset dir="./core"
                   prefix="${fullnamever}/core"
                   includes="build.properties build.xml taste-build.xml pom.xml src/ lib/"
-                  excludes=""/>
+                  excludes="**/*.iml"/>
       <zipfileset dir="./examples"
                   prefix="${fullnamever}/examples"
                   includes="build.properties build.xml pom.xml src/ lib/"
-                  excludes=""/>
+                  excludes="**/*.csv **/*.iml"/>
       <zipfileset dir="./core/build/docs/api"
                   prefix="${fullnamever}/docs/core/api"/>
 
