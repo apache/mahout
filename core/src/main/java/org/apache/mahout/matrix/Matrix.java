@@ -190,7 +190,6 @@ public interface Matrix {
    * 
    * @param rows the int number of rows
    * @param columns the int number of columns
-   * @return
    */
   Matrix like(int rows, int columns);
 

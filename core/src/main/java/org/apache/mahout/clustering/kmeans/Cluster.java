@@ -63,9 +63,7 @@ public class Cluster {
   /**
    * Format the cluster for output
    * 
-   * @param cluster
-   *            the Cluster
-   * @return
+   * @param cluster the Cluster
    */
   public static String formatCluster(Cluster cluster) {
     return cluster.getIdentifier() + ": "

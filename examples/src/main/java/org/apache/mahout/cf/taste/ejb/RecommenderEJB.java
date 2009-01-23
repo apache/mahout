@@ -62,7 +62,7 @@ public interface RecommenderEJB extends EJBObject {
   void removePreference(Object userID, Object itemID) throws TasteException, RemoteException;
 
   /**
-   * @see org.apache.mahout.cf.taste.recommender.Recommender#refresh(Collection<Refreshable>)
+   * @see org.apache.mahout.cf.taste.recommender.Recommender#refresh(java.util.Collection)
    */
   void refresh(Collection<Refreshable> alreadyRefreshed) throws RemoteException;
 

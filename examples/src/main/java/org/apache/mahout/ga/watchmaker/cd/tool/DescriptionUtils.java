@@ -42,7 +42,6 @@ public class DescriptionUtils {
    * 
    * @param min
    * @param max
-   * @return
    */
   public static String createNumericalDescription(double min, double max) {
     return min + "," + max;
@@ -52,7 +51,6 @@ public class DescriptionUtils {
    * Create a nominal description from the possible values.
    * 
    * @param values
-   * @return
    */
   public static String createNominalDescription(Collection<String> values) {
     StringBuilder buffer = new StringBuilder();

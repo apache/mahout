@@ -230,7 +230,6 @@ public class Canopy {
    * Format the canopy for output
    * 
    * @param canopy
-   * @return
    */
   public static String formatCanopy(Canopy canopy) {
     return "C" + canopy.canopyId + ": "

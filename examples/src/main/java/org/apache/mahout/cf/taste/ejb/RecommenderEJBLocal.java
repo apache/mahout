@@ -60,7 +60,7 @@ public interface RecommenderEJBLocal extends EJBLocalObject {
   void removePreference(Object userID, Object itemID) throws TasteException;
 
   /**
-   * @see org.apache.mahout.cf.taste.recommender.Recommender#refresh(Collection<Refreshable>)
+   * @see org.apache.mahout.cf.taste.recommender.Recommender#refresh(Collection)
    */
   void refresh(Collection<Refreshable> alreadyRefreshed);
 

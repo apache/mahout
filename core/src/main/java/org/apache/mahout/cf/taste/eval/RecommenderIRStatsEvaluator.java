@@ -35,7 +35,7 @@ public interface RecommenderIRStatsEvaluator {
    * @param recommenderBuilder object that can build a
    * {@link org.apache.mahout.cf.taste.recommender.Recommender} to test
    * @param dataModel dataset to test on
-   * @param rescorer, if any, to use when computing recommendations
+   * @param rescorer if any, to use when computing recommendations
    * @param at as in, "precision at 5". The number of recommendations to consider when evaluating
    * precision, etc.
    * @param relevanceThreshold {@link Item}s whose preference value is at least

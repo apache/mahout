@@ -46,8 +46,7 @@ public class CDMutation implements EvolutionaryOperator<CDRule> {
    * @param range max step-size for each variable
    * @param k mutation precision
    * 
-   * See
-   * {@see http://www.geatbx.com/docu/algindex-04.html#P659_42386 real valued mutation}
+   * See http://www.geatbx.com/docu/algindex-04.html#P659_42386 real valued mutation
    * for more information about the parameters
    */
   public CDMutation(double rate, double range, int k) {

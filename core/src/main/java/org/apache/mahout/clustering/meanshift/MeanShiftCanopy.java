@@ -184,7 +184,6 @@ public class MeanShiftCanopy {
    * Format the canopy for output
    * 
    * @param canopy
-   * @return
    */
   public static String formatCanopy(MeanShiftCanopy canopy) {
     StringBuilder builder = new StringBuilder();
@@ -373,9 +372,7 @@ public class MeanShiftCanopy {
   }
 
   /**
-   * Return the number of points under the Canopy
-   * 
-   * @return
+   * @return the number of points under the Canopy
    */
   public int getNumPoints() {
     return numPoints;

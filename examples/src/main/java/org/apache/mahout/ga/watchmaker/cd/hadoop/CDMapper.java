@@ -111,7 +111,6 @@ public class CDMapper extends MapReduceBase implements
    * @param target expected label
    * @param prediction
    * @param label actual label
-   * @return
    */
   public static CDFitness evaluate(int target, int prediction, int label) {
     int tp = (label == target && prediction == 1) ? 1 : 0;

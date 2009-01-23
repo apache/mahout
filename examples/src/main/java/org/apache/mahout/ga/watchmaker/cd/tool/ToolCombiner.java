@@ -40,7 +40,7 @@ import java.util.Set;
  * found.</li>
  * </ul>
  * 
- * @see Descriptors, for more informations about the job parameter
+ * See Descriptors, for more informations about the job parameter
  */
 public class ToolCombiner extends MapReduceBase implements
     Reducer<LongWritable, Text, LongWritable, Text> {

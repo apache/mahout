@@ -45,7 +45,7 @@ import java.util.StringTokenizer;
  * <li> Text : attribute value </li>
  * </ul>
  * 
- * @see Descriptors, for more informations about the job parameter
+ * See Descriptors, for more informations about the job parameter
  */
 public class ToolMapper extends MapReduceBase implements
     Mapper<LongWritable, Text, LongWritable, Text> {

@@ -106,7 +106,6 @@ public class DataSet {
   /**
    * Singleton DataSet
    * 
-   * @return
    * @throws RuntimeException if the dataset has not been initialized
    */
   public static DataSet getDataSet() {
@@ -125,16 +124,13 @@ public class DataSet {
   }
 
   /**
-   * Number of non-ignored attributes.
-   * 
-   * @return
+   * @return number of non-ignored attributes.
    */
   public int getNbAttributes() {
     return attributes.size();
   }
 
   /**
-   * 
    * @return Indexes of the ignored attributes, if any.
    */
   public List<Integer> getIgnoredAttributes() {
@@ -142,9 +138,7 @@ public class DataSet {
   }
 
   /**
-   * zero-based position of the label in the dataset.
-   * 
-   * @return
+   * @return zero-based position of the label in the dataset.
    */
   public int getLabelIndex() {
     return labelIndex;
@@ -154,7 +148,6 @@ public class DataSet {
    * Maximum possible value for an attribute
    * 
    * @param index of the attribute
-   * @return
    * @throws RuntimeException if the attribute is nominal
    */
   public double getMax(int index) {
@@ -168,7 +161,6 @@ public class DataSet {
    * Minimum possible value for an attribute
    * 
    * @param index of the attribute
-   * @return
    * @throws RuntimeException if the attribute is nominal
    */
   public double getMin(int index) {
@@ -182,7 +174,6 @@ public class DataSet {
    * Number of values for a nominal attribute
    * 
    * @param index of the attribute
-   * @return
    * @throws RuntimeException if the attribute is numerical
    */
   public int getNbValues(int index) {

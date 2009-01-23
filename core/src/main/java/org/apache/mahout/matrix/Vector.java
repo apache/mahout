@@ -33,9 +33,7 @@ public interface Vector extends Iterable<Vector.Element>, Writable {
   WritableComparable<?> asWritableComparable();
 
   /**
-   * Return a formatted String suitable for output
-   *
-   * @return
+   * @return a formatted String suitable for output
    */
   String asFormatString();
 

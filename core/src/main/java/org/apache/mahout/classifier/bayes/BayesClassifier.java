@@ -101,7 +101,7 @@ public class BayesClassifier implements Classifier {
    * @param label       The label to calculate the probability of
    * @param document    The document
    * @return The probability
-   * @see Model# featureWeight (String, String)
+   * @see Model#featureWeight(String, String)
    */
   @Override
   public double documentWeight(Model model, String label, String[] document) {

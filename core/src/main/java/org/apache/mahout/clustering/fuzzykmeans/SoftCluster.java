@@ -78,7 +78,6 @@ public class SoftCluster {
    * Format the SoftCluster for output
    * 
    * @param cluster the Cluster
-   * @return
    */
   public static String formatCluster(SoftCluster cluster) {
     return cluster.getIdentifier() + ": "
@@ -89,7 +88,6 @@ public class SoftCluster {
    * Decodes and returns a SoftCluster from the formattedString
    * 
    * @param formattedString a String produced by formatCluster
-   * @return
    */
   public static SoftCluster decodeCluster(String formattedString) {
     int beginIndex = formattedString.indexOf('[');
@@ -214,7 +212,6 @@ public class SoftCluster {
    * 
    * @param clusterDistance
    * @param clusterDistanceList
-   * @return
    */
   public static double computeProbWeight(double clusterDistance,
       List<Double> clusterDistanceList) {

@@ -105,7 +105,6 @@ public class CDFitness implements Writable {
 
   /**
    * Calculates the fitness corresponding to this evaluation.
-   * @return
    */
   public double get() {
     double se = ((double) tp) / (tp + fn); // sensitivity

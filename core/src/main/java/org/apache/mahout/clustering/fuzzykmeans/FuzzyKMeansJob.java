@@ -73,8 +73,8 @@ public class FuzzyKMeansJob {
    * @param convergenceDelta the convergence delta value
    * @param maxIterations the maximum number of iterations
    * @param numMapTasks the number of maptasks
-   * @doCanopy does canopy needed for initial clusters
-   * @m param needed to fuzzify the cluster membership values
+   * @param doCanopy does canopy needed for initial clusters
+   * @param m param needed to fuzzify the cluster membership values
    */
   public static void runJob(String input, String clustersIn, String output,
       String measureClass, double convergenceDelta, int maxIterations,

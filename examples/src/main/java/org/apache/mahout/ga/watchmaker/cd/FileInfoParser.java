@@ -111,7 +111,6 @@ public class FileInfoParser {
    * 
    * @param fs file system
    * @param inpath
-   * @return
    * @throws IOException
    */
   public static Path getInfoFile(FileSystem fs, Path inpath)
@@ -134,7 +133,6 @@ public class FileInfoParser {
    * Parse a nominal attribute.
    * 
    * @param tokenizer
-   * @return
    */
   private static NominalAttr parseNominal(StringTokenizer tokenizer) {
     List<String> vlist = new ArrayList<String>();
@@ -151,7 +149,6 @@ public class FileInfoParser {
    * Parse a numerical attribute.
    * 
    * @param tokenizer
-   * @return
    */
   private static NumericalAttr parseNumerical(StringTokenizer tokenizer) {
     double min = nextDouble(tokenizer);
