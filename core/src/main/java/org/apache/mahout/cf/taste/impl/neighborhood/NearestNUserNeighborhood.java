@@ -38,6 +38,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
   private static final Logger log = LoggerFactory.getLogger(NearestNUserNeighborhood.class);
 
   private final int n;
+  private final double minSimilarity;
 
   /**
    * @param n neighborhood size
@@ -48,11 +49,25 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
   public NearestNUserNeighborhood(int n,
                                   UserSimilarity userSimilarity,
                                   DataModel dataModel) {
-    this(n, userSimilarity, dataModel, 1.0);
+    this(n, 0.0, userSimilarity, dataModel, 1.0);
   }
 
   /**
    * @param n neighborhood size
+   * @param minSimilarity minimal similarity required for neighbors
+   * @param userSimilarity nearness metric
+   * @param dataModel data model
+   * @throws IllegalArgumentException if n &lt; 1, or userSimilarity or dataModel are <code>null</code>
+   */
+  public NearestNUserNeighborhood(int n, double minSimilarity,
+                                  UserSimilarity userSimilarity,
+                                  DataModel dataModel) {
+    this(n, minSimilarity, userSimilarity, dataModel, 1.0);
+  }
+
+  /**
+   * @param n neighborhood size
+   * @param minSimilarity minimal similarity required for neighbors
    * @param userSimilarity nearness metric
    * @param dataModel data model
    * @param samplingRate percentage of users to consider when building neighborhood -- decrease to
@@ -60,7 +75,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
    * @throws IllegalArgumentException if n &lt; 1 or samplingRate is NaN or not in (0,1],
    * or userSimilarity or dataModel are <code>null</code>
    */
-  public NearestNUserNeighborhood(int n,
+  public NearestNUserNeighborhood(int n, double minSimilarity,
                                   UserSimilarity userSimilarity,
                                   DataModel dataModel,
                                   double samplingRate) {
@@ -69,6 +84,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
       throw new IllegalArgumentException("n must be at least 1");
     }
     this.n = n;
+    this.minSimilarity = minSimilarity;
   }
 
   @Override
@@ -79,7 +95,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
     User theUser = dataModel.getUser(userID);
     UserSimilarity userSimilarityImpl = getUserSimilarity();
 
-    TopItems.Estimator<User> estimator = new Estimator(userSimilarityImpl, theUser);
+    TopItems.Estimator<User> estimator = new Estimator(userSimilarityImpl, theUser, minSimilarity);
 
     List<User> neighborhood = TopItems.getTopUsers(n, dataModel.getUsers(), null, estimator);
 
@@ -96,10 +112,18 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
   private static class Estimator implements TopItems.Estimator<User> {
     private final UserSimilarity userSimilarityImpl;
     private final User theUser;
+    private final double minSim;
 
     private Estimator(UserSimilarity userSimilarityImpl, User theUser) {
       this.userSimilarityImpl = userSimilarityImpl;
       this.theUser = theUser;
+      this.minSim = Double.NEGATIVE_INFINITY;
+    }
+
+    private Estimator(UserSimilarity userSimilarityImpl, User theUser, double minSim) {
+      this.userSimilarityImpl = userSimilarityImpl;
+      this.theUser = theUser;
+      this.minSim = minSim;
     }
 
     @Override
@@ -107,7 +131,8 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
       if (user.equals(theUser)) {
         return Double.NaN;
       }
-      return userSimilarityImpl.userSimilarity(theUser, user);
+      double sim = userSimilarityImpl.userSimilarity(theUser, user);
+      return (sim >= minSim) ? sim : Double.NaN; 
     }
   }
 }
