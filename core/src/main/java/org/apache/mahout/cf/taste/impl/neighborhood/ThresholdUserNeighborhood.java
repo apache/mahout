@@ -32,7 +32,7 @@ import java.util.List;
 
 /**
  * <p>Computes a neigbhorhood consisting of all {@link User}s whose similarity to the
- * given {@link User} meets or exceeds a certain threshold. Similartiy is defined by the given
+ * given {@link User} meets or exceeds a certain threshold. Similarity is defined by the given
  * {@link org.apache.mahout.cf.taste.similarity.UserSimilarity}.</p>
  */
 public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
