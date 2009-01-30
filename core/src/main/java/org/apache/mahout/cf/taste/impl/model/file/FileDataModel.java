@@ -38,8 +38,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.Iterator;
 import java.util.Collections;
 import java.util.concurrent.locks.ReentrantLock;
@@ -51,7 +49,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * are ready literally as Strings and treated as such in the API. Note that this means that whitespace
  * matters in the data file; they will be treated as part of the ID values.</p>
  *
- * <p>This class is not intended for use with very large amounts of data (over, say, a million rows). For
+ * <p>This class is not intended for use with very large amounts of data (over, say, several million rows). For
  * that, a JDBC-backed {@link DataModel} and a database are more appropriate.
  * The file will be periodically reloaded if a change is detected.</p>
  *
@@ -64,8 +62,7 @@ public class FileDataModel implements DataModel {
 
   private static final Logger log = LoggerFactory.getLogger(FileDataModel.class);
 
-  private static final Timer timer = new Timer(true);
-  private static final long RELOAD_CHECK_INTERVAL_MS = 60L * 1000L;
+  private static final long MIN_RELOAD_INTERVAL_MS = 60 * 1000L; // 1 minute?
 
   private final File dataFile;
   private long lastModified;
@@ -91,9 +88,6 @@ public class FileDataModel implements DataModel {
     this.dataFile = dataFile;
     this.lastModified = dataFile.lastModified();
     this.reloadLock = new ReentrantLock();
-
-    // Schedule next refresh
-    timer.schedule(new RefreshTimerTask(), RELOAD_CHECK_INTERVAL_MS, RELOAD_CHECK_INTERVAL_MS);
   }
 
   public File getDataFile() {
@@ -101,25 +95,27 @@ public class FileDataModel implements DataModel {
   }
 
   protected void reload() {
-    reloadLock.lock();    
-    try {
-      Map<String, List<Preference>> data = new FastMap<String, List<Preference>>();
+    if (!reloadLock.isLocked()) {
+      reloadLock.lock();
+      try {
+        Map<String, List<Preference>> data = new FastMap<String, List<Preference>>();
 
-      processFile(dataFile, data);
-      for (File updateFile : findUpdateFiles()) {
-        processFile(updateFile, data);
+        processFile(dataFile, data);
+        for (File updateFile : findUpdateFiles()) {
+          processFile(updateFile, data);
+        }
+
+        List<User> users = new ArrayList<User>(data.size());
+        for (Map.Entry<String, List<Preference>> entries : data.entrySet()) {
+          users.add(buildUser(entries.getKey(), entries.getValue()));
+        }
+
+        delegate = new GenericDataModel(users);
+        loaded = true;
+
+      } finally {
+        reloadLock.unlock();
       }
-
-      List<User> users = new ArrayList<User>(data.size());
-      for (Map.Entry<String, List<Preference>> entries : data.entrySet()) {
-        users.add(buildUser(entries.getKey(), entries.getValue()));
-      }
-
-      delegate = new GenericDataModel(users);
-      loaded = true;
-
-    } finally {
-      reloadLock.unlock();
     }
   }
 
@@ -282,7 +278,12 @@ public class FileDataModel implements DataModel {
 
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    reload();
+    long newModified = dataFile.lastModified();
+    if (newModified > lastModified + MIN_RELOAD_INTERVAL_MS) {
+      log.debug("File has changed; reloading...");
+      lastModified = newModified;
+      reload();
+    }
   }
 
   /**
@@ -328,21 +329,6 @@ public class FileDataModel implements DataModel {
   @Override
   public String toString() {
     return "FileDataModel[dataFile:" + dataFile + ']';
-  }
-
-  private final class RefreshTimerTask extends TimerTask {
-
-    @Override
-    public void run() {
-      if (loaded) {
-        long newModified = dataFile.lastModified();
-        if (newModified > lastModified) {
-          log.debug("File has changed; reloading...");
-          lastModified = newModified;
-          reload();
-        }
-      }
-    }
   }
 
 }
