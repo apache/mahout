@@ -17,6 +17,7 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
+import org.uncommons.watchmaker.framework.Probability;
 import org.uncommons.watchmaker.framework.operators.AbstractCrossover;
 
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ public class CDCrossover extends AbstractCrossover<CDRule> {
     super(crossoverPoints);
   }
 
-  public CDCrossover(int crossoverPoints, double crossoverProbability) {
+  public CDCrossover(int crossoverPoints, Probability crossoverProbability) {
     super(crossoverPoints, crossoverProbability);
   }
   

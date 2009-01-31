@@ -38,6 +38,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SpringLayout;
 
 import org.uncommons.swing.SpringUtilities;
+import org.uncommons.watchmaker.framework.Probability;
 import org.uncommons.watchmaker.framework.SelectionStrategy;
 import org.uncommons.watchmaker.framework.selection.RankSelection;
 import org.uncommons.watchmaker.framework.selection.RouletteWheelSelection;
@@ -162,7 +163,7 @@ final class StrategyPanel extends JPanel {
 
       SelectionStrategy<?>[] selectionStrategies = {
           new RankSelection(), new RouletteWheelSelection(),
-          new StochasticUniversalSampling(), new TournamentSelection(0.95d),
+          new StochasticUniversalSampling(), new TournamentSelection(new Probability(0.95d)),
           new TruncationSelection(0.5d)};
 
       selectionCombo = new JComboBox(selectionStrategies);

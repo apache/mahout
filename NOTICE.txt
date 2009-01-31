@@ -29,3 +29,6 @@ License: Common Public License - v 1.0 (http://junit.sourceforge.net/cpl-v10.htm
 
 This product includes tests written with EasyMock Copyright 2001-2007
 Tammo Freese (http://www.easymock.org/)
+
+This product uses the Breast Cancer Wisconsin (Diagnostic) Dataset from the
+UCI Machine Learning Repository [http://www.ics.uci.edu/~mlearn/MLRepository.html]. 

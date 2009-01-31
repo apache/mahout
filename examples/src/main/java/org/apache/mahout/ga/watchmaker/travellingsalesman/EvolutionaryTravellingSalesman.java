@@ -18,17 +18,17 @@
 package org.apache.mahout.ga.watchmaker.travellingsalesman;
 
 import org.apache.mahout.ga.watchmaker.MahoutFitnessEvaluator;
-import org.apache.mahout.ga.watchmaker.STEvolutionEngine;
-import org.apache.mahout.ga.watchmaker.STFitnessEvaluator;
 import org.uncommons.maths.random.MersenneTwisterRNG;
 import org.uncommons.maths.random.PoissonGenerator;
 import org.uncommons.watchmaker.framework.CandidateFactory;
+import org.uncommons.watchmaker.framework.ConcurrentEvolutionEngine;
 import org.uncommons.watchmaker.framework.EvolutionEngine;
 import org.uncommons.watchmaker.framework.EvolutionObserver;
 import org.uncommons.watchmaker.framework.EvolutionaryOperator;
+import org.uncommons.watchmaker.framework.FitnessEvaluator;
 import org.uncommons.watchmaker.framework.PopulationData;
 import org.uncommons.watchmaker.framework.SelectionStrategy;
-import org.uncommons.watchmaker.framework.StandaloneEvolutionEngine;
+import org.uncommons.watchmaker.framework.SequentialEvolutionEngine;
 import org.uncommons.watchmaker.framework.factories.ListPermutationFactory;
 import org.uncommons.watchmaker.framework.operators.EvolutionPipeline;
 import org.uncommons.watchmaker.framework.operators.ListOrderCrossover;
@@ -151,7 +151,7 @@ public class EvolutionaryTravellingSalesman implements
         pipeline, rng);
     engine.addEvolutionObserver(new EvolutionObserver<List<String>>() {
       @Override
-      public void populationUpdate(PopulationData<List<String>> data) {
+      public void populationUpdate(PopulationData<? extends List<String>> data) {
         if (progressListener != null) {
           progressListener
               .updateProgress(((double) data.getGenerationNumber() + 1)
@@ -169,14 +169,14 @@ public class EvolutionaryTravellingSalesman implements
     if (mahout) {
       // This is what we need to do to distribute the fitness evaluation.
       // First create a STFitnessEvaluator that wraps our FitnessEvaluator
-      STFitnessEvaluator<List<String>> evaluator = new MahoutFitnessEvaluator<List<String>>(
+      FitnessEvaluator<List<String>> evaluator = new MahoutFitnessEvaluator<List<String>>(
           new RouteEvaluator(distances));
-      // Then use a STEvolutionEngine instead of a StandaloneEvolutionEngine.
+      // Then use a SequentialEvolutionEngine instead of a StandaloneEvolutionEngine.
       // Its parameters remain the same.
-      return new STEvolutionEngine<List<String>>(candidateFactory, pipeline,
+      return new SequentialEvolutionEngine<List<String>>(candidateFactory, pipeline,
           evaluator, selectionStrategy, rng);
     } else {
-      return new StandaloneEvolutionEngine<List<String>>(candidateFactory,
+      return new ConcurrentEvolutionEngine<List<String>>(candidateFactory,
           pipeline, new RouteEvaluator(distances), selectionStrategy, rng);
     }
   }

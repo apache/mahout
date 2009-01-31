@@ -18,8 +18,6 @@
 package org.apache.mahout.ga.watchmaker.cd;
 
 import org.apache.hadoop.fs.Path;
-import org.apache.mahout.ga.watchmaker.STEvolutionEngine;
-import org.apache.mahout.ga.watchmaker.STFitnessEvaluator;
 import org.apache.mahout.ga.watchmaker.cd.hadoop.CDMahoutEvaluator;
 import org.apache.mahout.ga.watchmaker.cd.hadoop.DatasetSplit;
 import org.uncommons.maths.random.MersenneTwisterRNG;
@@ -27,8 +25,10 @@ import org.uncommons.watchmaker.framework.CandidateFactory;
 import org.uncommons.watchmaker.framework.EvolutionEngine;
 import org.uncommons.watchmaker.framework.EvolutionObserver;
 import org.uncommons.watchmaker.framework.EvolutionaryOperator;
+import org.uncommons.watchmaker.framework.FitnessEvaluator;
 import org.uncommons.watchmaker.framework.PopulationData;
 import org.uncommons.watchmaker.framework.SelectionStrategy;
+import org.uncommons.watchmaker.framework.SequentialEvolutionEngine;
 import org.uncommons.watchmaker.framework.operators.EvolutionPipeline;
 import org.uncommons.watchmaker.framework.selection.RouletteWheelSelection;
 import org.uncommons.watchmaker.framework.termination.GenerationCount;
@@ -124,17 +124,17 @@ public class CDGA {
     DatasetSplit split = new DatasetSplit(0.75);
 
     // Fitness Evaluator (defaults to training)
-    STFitnessEvaluator<? super CDRule> evaluator = new CDFitnessEvaluator(
+    FitnessEvaluator<? super CDRule> evaluator = new CDFitnessEvaluator(
         dataset, target, split);
     // Selection Strategy
     SelectionStrategy<? super CDRule> selection = new RouletteWheelSelection();
 
-    EvolutionEngine<CDRule> engine = new STEvolutionEngine<CDRule>(factory,
+    EvolutionEngine<CDRule> engine = new SequentialEvolutionEngine<CDRule>(factory,
         pipeline, evaluator, selection, new MersenneTwisterRNG());
 
     engine.addEvolutionObserver(new EvolutionObserver<CDRule>() {
       @Override
-      public void populationUpdate(PopulationData<CDRule> data) {
+      public void populationUpdate(PopulationData<? extends CDRule> data) {
         log.info("Generation {}", data.getGenerationNumber());
       }
     });
