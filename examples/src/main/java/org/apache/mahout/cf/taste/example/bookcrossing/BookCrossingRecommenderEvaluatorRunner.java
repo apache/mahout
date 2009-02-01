@@ -25,10 +25,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-/**
- * <p>A simple example "runner" class which will evaluate the performance of the current
- * implementation of {@link org.apache.mahout.cf.taste.example.grouplens.GroupLensRecommender}.</p>
- */
 public final class BookCrossingRecommenderEvaluatorRunner {
 
   private static final Logger log = LoggerFactory.getLogger(BookCrossingRecommenderEvaluatorRunner.class);

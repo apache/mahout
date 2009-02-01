@@ -23,11 +23,9 @@ import org.apache.mahout.cf.taste.eval.RecommenderEvaluator;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
-import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.Recommender;
@@ -102,8 +100,7 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     List<Preference> testPrefs = new ArrayList<Preference>();
     Preference[] prefs = user.getPreferencesAsArray();
     for (Preference pref : prefs) {
-      Item itemCopy = new GenericItem<String>(pref.getItem().getID().toString());
-      Preference newPref = new GenericPreference(null, itemCopy, pref.getValue());
+      Preference newPref = new GenericPreference(null, pref.getItem(), pref.getValue());
       if (random.nextDouble() < trainingPercentage) {
         trainingPrefs.add(newPref);
       } else {

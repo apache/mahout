@@ -25,6 +25,7 @@ import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
+import org.apache.mahout.cf.taste.impl.model.BooleanPreference;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -43,15 +44,31 @@ import java.util.Collections;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * <p>A {@link DataModel} backed by a comma-delimited file. This class assumes that each line of the
- * file contains a user ID, followed by item ID, followed by preferences value, separated by commas.
- * The preference value is assumed to be parseable as a <code>double</code>. The user and item IDs
+ * <p>A {@link DataModel} backed by a comma-delimited file. This class typically expects a file where each
+ * line contains a user ID, followed by item ID, followed by preferences value, separated by commas. You may
+ * also use tabs.</p>
+ *
+ * <p>The preference value is assumed to be parseable as a <code>double</code>. The user and item IDs
  * are ready literally as Strings and treated as such in the API. Note that this means that whitespace
  * matters in the data file; they will be treated as part of the ID values.</p>
  *
- * <p>This class is not intended for use with very large amounts of data (over, say, several million rows). For
- * that, a JDBC-backed {@link DataModel} and a database are more appropriate.
- * The file will be periodically reloaded if a change is detected.</p>
+ * <p>This class will reload data from the data file when {@link #refresh(Collection)} is called, unless
+ * the file has been reloaded very recently already.</p>
+ *
+ * <p>This class will also look for update "delta" files in the same directory, with file names that start
+ * the same way (up to the first period). These files should have the same format, and provide updated data
+ * that supersedes what is in the main data file. This is a mechanism that allows an application to push
+ * updates to {@link FileDataModel} without re-copying the entire data file.</p>
+ *
+ * <p>The line may contain a blank preference value (e.g. "123,ABC,"). This is interpreted to mean "delete
+ * preference", and is only useful in the context of an update delta file (see above).</p>
+ *
+ * <p>Finally, for application that have no notion of a preference value (that is, the user simply expresses
+ * a preference for an item, but no degree of preference), the caller can simply omit the third token in
+ * each line altogether -- for example, "123,ABC".</p>
+ *
+ * <p>This class is not intended for use with very large amounts of data (over, say, tens of millions of rows).
+ * For that, a JDBC-backed {@link DataModel} and a database are more appropriate.</p>
  *
  * <p>It is possible and likely useful to subclass this class and customize its behavior to accommodate
  * application-specific needs and input formats. See {@link #processLine(String, Map, Map)},
@@ -63,9 +80,11 @@ public class FileDataModel implements DataModel {
   private static final Logger log = LoggerFactory.getLogger(FileDataModel.class);
 
   private static final long MIN_RELOAD_INTERVAL_MS = 60 * 1000L; // 1 minute?
+  private static final char UNKNOWN_DELIMITER = '\0';
 
   private final File dataFile;
   private long lastModified;
+  private char delimiter;
   private boolean loaded;
   private DataModel delegate;
   private final ReentrantLock reloadLock;
@@ -82,6 +101,8 @@ public class FileDataModel implements DataModel {
     if (!dataFile.exists() || dataFile.isDirectory()) {
       throw new FileNotFoundException(dataFile.toString());
     }
+
+    this.delimiter = UNKNOWN_DELIMITER;
 
     log.info("Creating FileDataModel for file " + dataFile);
 
@@ -119,6 +140,12 @@ public class FileDataModel implements DataModel {
     }
   }
 
+  /**
+   * Finds update delta files in the same directory as the data file. This finds any file whose
+   * name starts the same way as the data file (up to first period) but isn't the data file itself.
+   * For example, if the data file is /foo/data.txt.gz, you might place update files at
+   * /foo/data.1.txt.gz, /foo/data.2.txt.gz, etc.
+   */
   private Iterable<File> findUpdateFiles() {
     String dataFileName = dataFile.getName();
     int period = dataFileName.indexOf('.');
@@ -126,7 +153,8 @@ public class FileDataModel implements DataModel {
     File parentDir = dataFile.getParentFile();
     List<File> updateFiles = new ArrayList<File>();
     for (File updateFile : parentDir.listFiles()) {
-      if (!updateFile.getName().startsWith(startName)) {
+      String updateFileName = updateFile.getName();
+      if (updateFileName.startsWith(startName) && !updateFileName.equals(dataFileName)) {
         updateFiles.add(updateFile);
       }
     }
@@ -140,9 +168,22 @@ public class FileDataModel implements DataModel {
     for (String line : new FileLineIterable(dataOrUpdateFile, false)) {
       if (line.length() > 0) {
         log.debug("Read line: {}", line);
+        if (delimiter == UNKNOWN_DELIMITER) {
+          delimiter = determineDelimiter(line);
+        }
         processLine(line, data, itemCache);
       }
     }
+  }
+
+  private static char determineDelimiter(String line) {
+    if (line.indexOf(',') >= 0) {
+      return ',';
+    }
+    if (line.indexOf('\t') >= 0) {
+      return '\t';
+    }
+    throw new IllegalArgumentException("Did not find a delimiter in first line");
   }
 
   /**
@@ -163,21 +204,29 @@ public class FileDataModel implements DataModel {
    * @see #buildItem(String)
    */
   protected void processLine(String line, Map<String, List<Preference>> data, Map<String, Item> itemCache) {
-    int commaOne = line.indexOf((int) ',');
-    int commaTwo = line.indexOf((int) ',', commaOne + 1);
-    if (commaOne < 0 || commaTwo < 0) {
+    int delimiterOne = line.indexOf((int) delimiter);
+    int delimiterTwo = line.indexOf((int) delimiter, delimiterOne + 1);
+    if (delimiterOne < 0) {
       throw new IllegalArgumentException("Bad line: " + line);
     }
-    String userID = line.substring(0, commaOne);
-    String itemID = line.substring(commaOne + 1, commaTwo);
-    String preferenceValueString = line.substring(commaTwo + 1);
+
+    String userID = line.substring(0, delimiterOne);
+    String itemID;
+    String preferenceValueString;
+    if (delimiterTwo >= 0) {
+      itemID = line.substring(delimiterOne + 1, delimiterTwo);
+      preferenceValueString = line.substring(delimiterTwo + 1);
+    } else {
+      itemID = line.substring(delimiterOne + 1);
+      preferenceValueString = null;
+    }
     List<Preference> prefs = data.get(userID);
     if (prefs == null) {
       prefs = new ArrayList<Preference>();
       data.put(userID, prefs);
     }
 
-    if (preferenceValueString.length() == 0) {
+    if (preferenceValueString != null && preferenceValueString.length() == 0) {
       // remove pref
       Iterator<Preference> prefsIterator = prefs.iterator();
       while (prefsIterator.hasNext()) {
@@ -189,14 +238,18 @@ public class FileDataModel implements DataModel {
       }
     } else {
       // add pref -- assume it does not already exist
-      double preferenceValue = Double.parseDouble(preferenceValueString);
       Item item = itemCache.get(itemID);
       if (item == null) {
         item = buildItem(itemID);
         itemCache.put(itemID, item);
       }
       log.debug("Read item '{}' for user ID '{}'", item, userID);
-      prefs.add(buildPreference(null, item, preferenceValue));
+      if (preferenceValueString == null) {
+        prefs.add(new BooleanPreference(null, item));
+      } else {
+        double preferenceValue = Double.parseDouble(preferenceValueString);
+        prefs.add(buildPreference(null, item, preferenceValue));
+      }
     }
   }
 
@@ -278,10 +331,13 @@ public class FileDataModel implements DataModel {
 
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    long newModified = dataFile.lastModified();
-    if (newModified > lastModified + MIN_RELOAD_INTERVAL_MS) {
+    long mostRecentModification = dataFile.lastModified();
+    for (File updateFile : findUpdateFiles()) {
+      mostRecentModification = Math.max(mostRecentModification, updateFile.lastModified());
+    }
+    if (mostRecentModification > lastModified + MIN_RELOAD_INTERVAL_MS) {
       log.debug("File has changed; reloading...");
-      lastModified = newModified;
+      lastModified = mostRecentModification;
       reload();
     }
   }
