@@ -17,26 +17,36 @@
     limitations under the License.
  -->
 
-<project name="mahout-examples" default="dist-jar" basedir=".">
-    <import file="../common-build.xml"/>
+<project name="mahout-core" default="dist-jar" basedir=".">
+    <import file="../common-build-deprecated.xml"/>
   <property file="build.properties" />
-  <property name="Name" value="Examples" />
+  <property name="Name" value="Mahout" />
 
 
 
 
   <!-- 3rd party libraries for compilation -->
-
-  <property name="examples-lib" value="lib" />
-  <property name="core-lib" value="../core/lib" />
+  <property name="core-lib" value="lib" />
+  
 
   <!-- mahout source files -->
   <property name="src" value="src" />
 
 
-  
+
+  <!-- Example directory -->
+  <property name="example" value="example" />
+
   <property name="fullname" value="apache-${ant.project.name}"/>
   <property name="fullnamever" value="apache-${ant.project.name}-${version}"/>
+
+  
+
+
+  <!-- JUnit properties -->
+
+  <property name="junit.excludes" value="**/MatrixTest.java, **/DefaultDistanceMeasureTest.java, **/DefaultWeightedDistanceMeasureTest.java"/>
+
 
   <!-- The compilation classpath -->
   <path id="compile.classpath">
@@ -44,30 +54,35 @@
       <include name="*.jar" />
       <exclude name="junit*.jar"/>
     </fileset>
-    <fileset dir="${examples-lib}">
-      <include name="*.jar" />
-    </fileset>
     <fileset dir="${core-lib}">
       <include name="*.jar" />
-    </fileset>    
-    <filelist files="${basedir}/../core/dist/apache-mahout-core-${version}.jar"/>
+    </fileset>
   </path>
   <path id="test.classpath">
     <path refid="junit-path"/>
     <path refid="compile.classpath"/>
     <pathelement location="${dest}/test-classes"/>
     <pathelement location="${dest}/classes"/>
-    <pathelement location="${basedir}/../core/build/test-classes"/>
+  </path>
+  <path id="examples-test.classpath">
+    <path refid="test.classpath"/>
+    <pathelement location="${dest}/examples-test-classes"/>
+    <pathelement location="${dest}/examples"/>
   </path>
 
 
   <path id="junit.classpath">
-    <path refid="test.classpath"/>
+    <path refid="junit-path"/>
+    <pathelement location="${dest}/test-classes"/>
+    <pathelement location="${dest}/classes"/>
+    <path refid="compile.classpath"/>
     <pathelement path="${java.class.path}"/>
   </path>
-
-
-
+  <path id="junit.examples.classpath">
+    <path refid="junit.classpath"/>
+    <pathelement location="${dest}/examples-test-classes"/>
+    <pathelement location="${dest}/examples"/>
+  </path>
 
 
   <!-- Default target: usage.  Prints out instructions. -->
@@ -94,16 +109,15 @@
   <!-- ========================================================================= -->
   <!-- ===================== COMPILATION-RELATED TASKS ========================= -->
   <!-- ========================================================================= -->
+
   <!-- Compile the project. -->
   <target name="compile"
-    description="Compile the source code." depends="build-core">
+          description="Compile the source code."
+          >
     <mahout-javac destdir="${dest}/classes"
-      classpathref="compile.classpath">
+                classpathref="compile.classpath">
       <src path="${src}/main/java" />
     </mahout-javac>
-  </target>
-  <target name="build-core">
-    <ant inheritAll="false" dir="../core" antfile="build.xml" target="dist-jar"/>
   </target>
 
   <target name="javadoc" depends="compile"
@@ -122,8 +136,8 @@
       failonerror="true"
       use="true"
       encoding="utf8"
-      overview="./src/main/java/overview.html"            
       access="${javadoc.access}"
+      overview="./src/main/java/overview.html"
       windowtitle="${Name} ${version} API"
       doctitle="${Name} ${version} API (${specversion})"
       bottom="Copyright &amp;copy; ${javadoc.years} The Apache Software Foundation"
@@ -135,11 +149,12 @@
     </javadoc>
   </target>
 
-  <target name="compile-test" depends="compile, compile-core-test">
+  <target name="compile-test" depends="compile">
     <mahout-javac
+
       destdir="${dest}/test-classes/" classpathref="test.classpath">
       <src path="${src}/test/java"/>
-    </mahout-javac>
+      </mahout-javac>
 
     <!-- Copy any data files present to the classpath -->
     <copy todir="${dest}/test-classes">
@@ -150,11 +165,30 @@
     <copy todir="${dest}/test-classes">
       <fileset dir="src/test/resources"/>
     </copy>
-  </target>
-  <target name="compile-core-test">
-    <ant inheritAll="false" dir="../core" antfile="build.xml" target="compile-test"/>
+
   </target>
 
+
+  <target name="compile-examples-test" depends="compile-test">
+    <mahout-javac
+      destdir="${dest}/examples-test-classes/" classpathref="examples-test.classpath">
+      <src path="${src}/test/examples"/>
+      </mahout-javac>
+
+    <!-- Copy any data files present to the classpath -->
+    <copy todir="${dest}/examples-test-classes">
+      <fileset dir="src/test/examples" excludes="**/*.java"/>
+    </copy>
+
+    <!-- Copy any data files present to the classpath -->
+    <copy todir="${dest}/examples-test-classes">
+      <fileset dir="src/test/resources"/>
+    </copy>
+  	
+  </target>
+
+
+  
   <target name="test" depends="compile-test, dist-jar" description="Runs unit tests">
     <mkdir dir="${junit.output.dir}"/>
     <junit printsummary="off" haltonfailure="no"
@@ -198,11 +232,11 @@
 
   </target>
 
-  <target name="examples-test" depends="compile-test, dist-jar" description="Runs unit tests for the examples">
+  <target name="examples-test" depends="compile-examples-test, dist-jar" description="Runs unit tests for the examples">
     <mkdir dir="${junit.output.dir}/examples"/>
     <junit printsummary="off" haltonfailure="no"
       errorProperty="tests.failed" failureProperty="tests.failed" maxmemory="256m">
-      <classpath refid="junit.classpath"/>
+      <classpath refid="junit.examples.classpath"/>
       <assertions>
         <enable package="org.apache.mahout"/>
       </assertions>
@@ -237,16 +271,13 @@
   <target name="job" depends="compile">
     <jar jarfile="${dest}/${fullnamever}.job">
       <zipfileset dir="${dest}/classes"/>
-      <zipfileset dir="${shared-lib}" prefix="lib"
-                  includes="**/*.jar"/>
-      <zipfileset dir="${examples-lib}" prefix="lib"
-                  includes="**/*.jar" excludes="easymock*.jar"/>
       <zipfileset dir="${core-lib}" prefix="lib"
                   includes="**/*.jar" excludes="hadoop-*.jar"/>
-      <zipfileset dir="${basedir}/../core/dist/" prefix="lib" includes="apache-mahout-core-${version}.jar"/>
+      <zipfileset dir="${shared-lib}" prefix="lib"
+                  includes="**/*.jar"/>
     </jar>
   </target>
-
+  
 
   <target name="dist-jar"
           description="Creates the Mahout JAR Distribution file."
@@ -259,62 +290,5 @@
   </target>
 
   
-  <!-- EXAMPLES -->
-
-
-
-  <property name="working.dir" value="work"/>
-  <target name="check-files">
-    <available file="temp/20news-18828.tar.gz" property="20news-18828.exists"/>
-    <available file="${working.dir}/20news-18828" property="20news-18828.expanded"/>
-    <available file="temp/enwiki-20070527-pages-articles.xml.bz2" property="enwiki.exists"/>
-      <available file="temp/enwiki-20070527-pages-articles.xml" property="enwiki.expanded"/>
-      
-  </target>
-
-  <target name="enwiki-files" depends="check-files">
-        <mkdir dir="temp"/>
-        <antcall target="get-enwiki"/>
-        <antcall target="expand-enwiki"/>
-    </target>
-
-    <target name="get-enwiki" unless="enwiki.exists">
-        <get src="http://people.apache.org/~gsingers/wikipedia/enwiki-20070527-pages-articles.xml.bz2"
-             dest="temp/enwiki-20070527-pages-articles.xml.bz2"/>
-    </target>
-
-    <target name="expand-enwiki"  unless="enwiki.expanded">
-        <bunzip2 src="temp/enwiki-20070527-pages-articles.xml.bz2" dest="temp"/>
-    </target>
-
-
-  <target name="get-20news-18828" unless="20news-18828.exists">
-    <get src="http://people.csail.mit.edu/jrennie/20Newsgroups/20news-18828.tar.gz"
-         dest="temp/20news-18828.tar.gz"/>
-
-  </target>
-  <target name="expand-20news-18828" unless="20news-18828.expanded">
-    <gunzip src="temp/20news-18828.tar.gz" dest="temp"/>
-    <untar src="temp/20news-18828.tar" dest="${working.dir}"/>
-  </target>
-
-  <target name="extract-20news-18828" depends="check-files, compile" unless="reuters.extracted">
-    <mkdir dir="${working.dir}/20news-18828-collapse"/>
-    <java classname="org.apache.mahout.classifier.bayes.PrepareTwentyNewsgroups" maxmemory="1024M" fork="true">
-      <classpath refid="test.classpath"/>
-      <!--
-      Input format is:
-      inputDir outputDir label Analyzer character set
-      -->
-      <arg line="-p ${working.dir}/20news-18828/ -o ${working.dir}/20news-18828-collapse -a org.apache.lucene.analysis.standard.StandardAnalyzer -c UTF-8"/>
-    </java>
-  </target>
-
-  <target name="get-files" depends="check-files"  description="Get and extract the 20 Newsgroups data">
-    <mkdir dir="temp"/>
-    <antcall target="get-20news-18828"/>
-    <antcall target="expand-20news-18828"/>
-    <!--<antcall target="extract-20news-18828"/>-->
-  </target>
 
 </project>
