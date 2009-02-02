@@ -30,6 +30,7 @@ import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,13 +40,36 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public final class FileDataModelTest extends TasteTestCase {
 
-  private static final File testFile = new File("src/test/java/org/apache/mahout/cf/taste/impl/model/file/test1.txt");
+  //private static final File testFile = new File("src/test/resources/file-data-model-test.txt");
 
   private DataModel model;
+
+  private static final String [] DATA = {
+          "A123,456,0.1",
+          "A123,789,0.6",
+          "A123,654,0.7",
+          "B234,123,0.5",
+          "B234,234,1.0",
+          "C345,789,0.6",
+          "C345,654,0.7",
+          "C345,123,1.0",
+          "C345,234,0.5",
+          "D456,456,0.1"};
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
+    File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+    File tmpLoc = new File(tmpDir, "fileDataModel");
+    tmpLoc.mkdirs();
+    File testFile = File.createTempFile("test", ".txt", tmpLoc);
+    FileWriter writer = new FileWriter(testFile);
+    String lineSep = System.getProperty("line.separator");
+    for (int i = 0; i < DATA.length; i++) {
+      writer.write(DATA[i]);
+      writer.write(lineSep);
+    }
+    writer.close();
     model = new FileDataModel(testFile);
   }
 
