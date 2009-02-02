@@ -30,19 +30,18 @@ import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.nio.charset.Charset;
 
 /**
  * <p>Tests {@link FileDataModel}.</p>
  */
 public final class FileDataModelTest extends TasteTestCase {
-
-  //private static final File testFile = new File("src/test/resources/file-data-model-test.txt");
-
-  private DataModel model;
 
   private static final String [] DATA = {
           "A123,456,0.1",
@@ -56,6 +55,8 @@ public final class FileDataModelTest extends TasteTestCase {
           "C345,234,0.5",
           "D456,456,0.1"};
 
+  private DataModel model;
+
   @Override
   public void setUp() throws Exception {
     super.setUp();
@@ -63,13 +64,16 @@ public final class FileDataModelTest extends TasteTestCase {
     File tmpLoc = new File(tmpDir, "fileDataModel");
     tmpLoc.mkdirs();
     File testFile = File.createTempFile("test", ".txt", tmpLoc);
-    FileWriter writer = new FileWriter(testFile);
-    String lineSep = System.getProperty("line.separator");
-    for (int i = 0; i < DATA.length; i++) {
-      writer.write(DATA[i]);
-      writer.write(lineSep);
+    testFile.deleteOnExit();
+    PrintWriter writer =
+        new PrintWriter(new OutputStreamWriter(new FileOutputStream(testFile), Charset.forName("UTF-8")));
+    try {
+      for (String data : DATA) {
+        writer.println(data);
+      }
+    } finally {
+      writer.close();
     }
-    writer.close();
     model = new FileDataModel(testFile);
   }
 
@@ -158,6 +162,7 @@ public final class FileDataModelTest extends TasteTestCase {
   public void testRefresh() throws Exception {
     final AtomicBoolean initialized = new AtomicBoolean(false);
     Runnable initializer = new Runnable() {
+      @Override
       public void run() {
         try {
           model.getNumUsers();

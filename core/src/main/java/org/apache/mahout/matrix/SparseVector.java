@@ -63,10 +63,10 @@ public class SparseVector extends AbstractVector {
   public static Vector decodeFormat(String formattedString) {
     String[] pts = formattedString.split(",");
     SparseVector result = null;
-    for (int i = 0; i < pts.length; i++) {
-      String pt = pts[i].trim();
+    for (String pt1 : pts) {
+      String pt = pt1.trim();
       if (pt.startsWith("[s")) {
-        int c = Integer.parseInt(pts[i].substring(2));
+        int c = Integer.parseInt(pt1.substring(2));
         result = new SparseVector(c);
       } else if (pt.charAt(0) != ']') {
         int ix = pt.indexOf(':');

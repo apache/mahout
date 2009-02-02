@@ -33,7 +33,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 /**
  * A variant on {@link GenericDataModel} which uses the "boolean" classes like {@link BooleanPrefUser}.
