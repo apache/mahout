@@ -49,7 +49,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
   public NearestNUserNeighborhood(int n,
                                   UserSimilarity userSimilarity,
                                   DataModel dataModel) {
-    this(n, 0.0, userSimilarity, dataModel, 1.0);
+    this(n, Double.NEGATIVE_INFINITY, userSimilarity, dataModel, 1.0);
   }
 
   /**
@@ -113,12 +113,6 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
     private final UserSimilarity userSimilarityImpl;
     private final User theUser;
     private final double minSim;
-
-    private Estimator(UserSimilarity userSimilarityImpl, User theUser) {
-      this.userSimilarityImpl = userSimilarityImpl;
-      this.theUser = theUser;
-      this.minSim = Double.NEGATIVE_INFINITY;
-    }
 
     private Estimator(UserSimilarity userSimilarityImpl, User theUser, double minSim) {
       this.userSimilarityImpl = userSimilarityImpl;
