@@ -1,0 +1,1 @@
+This directory contains those libraries that aren't currently published to the Maven repository.  We should periodically check back with the repository to see if they become available, then we can remove the JAR from here.
