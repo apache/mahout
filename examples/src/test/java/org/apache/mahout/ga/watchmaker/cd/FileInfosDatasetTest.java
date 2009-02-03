@@ -32,12 +32,12 @@ public class FileInfosDatasetTest extends TestCase {
 
   public void testRanges() throws IOException {
     FileSystem fs = FileSystem.get(new Configuration());
-    Path inpath = new Path("build/test-classes/wdbc");
+    Path inpath = new Path("target/test-classes/wdbc");
     
     DataSet dataset = FileInfoParser.parseFile(fs, inpath);
     DataSet.initialize(dataset);
 
-    String filename = "build/test-classes/wdbc/wdbc.data";
+    String filename = "target/test-classes/wdbc/wdbc.data";
     BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(filename), Charset.forName("UTF-8")));
 
     String line;

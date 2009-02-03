@@ -42,32 +42,6 @@
           <excludes/>
         </configuration>
       </plugin>
-
-      <plugin>
-        <artifactId>maven-install-plugin</artifactId>
-
-        <!-- Copy dependencies with no official Maven artifacts from libs to local Maven repository -->
-
-        <executions>
-          <execution>
-            <id>create-javaee-api-artifact</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/javaee-api-5.0-1.jar</file>
-              <groupId>javax.ejb</groupId>
-              <artifactId>javaee-api</artifactId>
-              <packaging>jar</packaging>
-              <version>5.0.1</version>
-              <generatePom>true</generatePom>
-              <createChecksum>true</createChecksum>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
     </plugins>
   </build>
 

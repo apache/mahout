@@ -71,7 +71,7 @@ public class CDGA {
   }
 
   public static void main(String[] args) throws IOException {
-    String dataset = "build/classes/wdbc";
+    String dataset = "target/classes/wdbc";
     int target = 1;
     double threshold = 0.5;
     int crosspnts = 1;
