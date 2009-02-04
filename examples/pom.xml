@@ -11,7 +11,7 @@
   </parent>
 
   <groupId>org.apache.mahout</groupId>
-  <artifactId>examples</artifactId>
+  <artifactId>mahout-examples</artifactId>
   <version>${parent.version}</version>
   <name>Mahout examples</name>
   <description>Scalable machine learning library examples</description>
@@ -29,6 +29,29 @@
           <target>1.6</target>
         </configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-invoker-plugin</artifactId>
+        <version>1.3</version>
+        <configuration>
+          <setupIncludes>
+            <setupInclude>../core/pom.xml</setupInclude>
+          </setupIncludes>
+          <pomIncludes>
+            <pomInclude>*/pom.xml</pomInclude>
+          </pomIncludes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>test</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+
 
      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -49,18 +72,18 @@
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>core</artifactId>
+      <artifactId>mahout-core</artifactId>
       <version>${parent.version}</version>
     </dependency>
 
     <!-- core test -->
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>core</artifactId>
+      <artifactId>mahout-core</artifactId>
       <version>${parent.version}</version>
-      <classifier>tests</classifier>
+      <type>test-jar</type>
       <scope>test</scope>
-    </dependency>    
+    </dependency>
 
     <dependency>
       <groupId>org.apache.openejb</groupId>
