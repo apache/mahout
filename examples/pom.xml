@@ -29,29 +29,47 @@
           <target>1.6</target>
         </configuration>
       </plugin>
+      <!-- Build the Job Jar -->
       <plugin>
-        <artifactId>maven-invoker-plugin</artifactId>
-        <version>1.3</version>
-        <configuration>
-          <setupIncludes>
-            <setupInclude>../core/pom.xml</setupInclude>
-          </setupIncludes>
-          <pomIncludes>
-            <pomInclude>*/pom.xml</pomInclude>
-          </pomIncludes>
-        </configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
-            <id>test</id>
-            <phase>validate</phase>
+            <id>copy-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <!-- configure the plugin here -->
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <configuration>
+               <tasks>
+                 <ant antfile="../maven/build.xml" target="example-job">
+                   <property name="dest" value="${project.build.directory}"/>
+                    <property name="fullnamever" value="${project.artifactId}-${project.version}"/>
+                    <property name="core-lib" value="../core/lib"/>
+                   <property name="shared-lib" value="../lib"/>
+                   <property name="version" value="${project.version}"/>
+                 </ant>
+               </tasks>
+
+            </configuration>
             <goals>
               <goal>run</goal>
             </goals>
           </execution>
         </executions>
       </plugin>
-
-
 
      <plugin>
         <groupId>org.apache.maven.plugins</groupId>

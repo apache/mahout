@@ -23,9 +23,9 @@
 
  -->
 
-<project name="mahout" default="job" basedir=".">
+<project name="mahout" default="core-job" basedir=".">
   
-  <target name="job" >
+  <target name="core-job" >
     <jar jarfile="${dest}/${fullnamever}.job">
       <zipfileset dir="${dest}/classes"/>
       <zipfileset dir="${core-lib}" prefix="lib"
@@ -37,5 +37,20 @@
     </jar>
   </target>
 
+
+  <target name="example-job" depends="">
+    <jar jarfile="${dest}/${fullnamever}.job">
+      <zipfileset dir="${dest}/classes"/>
+      <zipfileset dir="${shared-lib}" prefix="lib"
+                  includes="**/*.jar"/>
+      <zipfileset dir="${core-lib}" prefix="lib"
+                  includes="**/*.jar" excludes="hadoop-*.jar"/>
+      <zipfileset dir="../core/target/" prefix="lib" includes="apache-mahout-core-${version}.jar"/>
+      <zipfileset dir="${dest}/dependency" prefix="lib"
+                  includes="**/*.jar"/>
+      <zipfileset dir="../core/target/dependency" prefix="lib"
+                  includes="**/*.jar"/>
+    </jar>
+  </target>
 
 </project>
