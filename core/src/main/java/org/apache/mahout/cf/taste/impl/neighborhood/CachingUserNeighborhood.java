@@ -41,7 +41,7 @@ public final class CachingUserNeighborhood implements UserNeighborhood {
       throw new IllegalArgumentException("neighborhood is null");
     }
     this.neighborhood = neighborhood;
-    int maxCacheSize = (int) Math.sqrt(dataModel.getNumUsers()); // just a dumb heuristic for sizing
+    int maxCacheSize = dataModel.getNumUsers(); // just a dumb heuristic for sizing
     this.neighborhoodCache = new Cache<Object, Collection<User>>(new NeighborhoodRetriever(neighborhood), maxCacheSize);
   }
 

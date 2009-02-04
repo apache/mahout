@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Iterator;
 import java.util.Collections;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * <p>A {@link DataModel} backed by a comma-delimited file. This class typically expects a file where each
@@ -126,12 +127,7 @@ public class FileDataModel implements DataModel {
           processFile(updateFile, data);
         }
 
-        List<User> users = new ArrayList<User>(data.size());
-        for (Map.Entry<String, List<Preference>> entries : data.entrySet()) {
-          users.add(buildUser(entries.getKey(), entries.getValue()));
-        }
-
-        delegate = new GenericDataModel(users);
+        delegate = new GenericDataModel(new UserIteratableOverData(data));
         loaded = true;
 
       } finally {
@@ -165,6 +161,7 @@ public class FileDataModel implements DataModel {
   protected void processFile(File dataOrUpdateFile, Map<String, List<Preference>> data) {
     log.info("Reading file info...");
     Map<String, Item> itemCache = new FastMap<String, Item>(1001);
+    AtomicInteger count = new AtomicInteger();
     for (String line : new FileLineIterable(dataOrUpdateFile, false)) {
       if (line.length() > 0) {
         log.debug("Read line: {}", line);
@@ -172,6 +169,10 @@ public class FileDataModel implements DataModel {
           delimiter = determineDelimiter(line);
         }
         processLine(line, data, itemCache);
+        int currentCount = count.incrementAndGet();
+        if (currentCount % 100000 == 0) {
+          log.info("Processed {} lines", currentCount);
+        }
       }
     }
   }
@@ -385,6 +386,38 @@ public class FileDataModel implements DataModel {
   @Override
   public String toString() {
     return "FileDataModel[dataFile:" + dataFile + ']';
+  }
+
+
+  private final class UserIteratableOverData implements Iterable<User> {
+    private final Map<String, List<Preference>> data;
+    private UserIteratableOverData(Map<String, List<Preference>> data) {
+      this.data = data;
+    }
+    @Override
+    public Iterator<User> iterator() {
+      return new UserIteratorOverData(data.entrySet().iterator());
+    }
+  }
+
+  private final class UserIteratorOverData implements Iterator<User> {
+    private final Iterator<Map.Entry<String, List<Preference>>> dataIterator;
+    private UserIteratorOverData(Iterator<Map.Entry<String, List<Preference>>> dataIterator) {
+      this.dataIterator = dataIterator;
+    }
+    @Override
+    public boolean hasNext() {
+      return dataIterator.hasNext();
+    }
+    @Override
+    public User next() {
+      Map.Entry<String, List<Preference>> datum = dataIterator.next();
+      return buildUser(datum.getKey(), datum.getValue());
+    }
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
   }
 
 }

@@ -253,10 +253,6 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     if (!Double.isNaN(result)) {
       result = normalizeWeightResult(result, count, cachedNumItems);
     }
-
-    if (log.isTraceEnabled()) {
-      log.trace("UserSimilarity between " + user1 + " and " + user2 + " is " + result);
-    }
     return result;
   }
 
@@ -341,10 +337,6 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
 
     if (!Double.isNaN(result)) {
       result = normalizeWeightResult(result, count, cachedNumUsers);
-    }
-
-    if (log.isTraceEnabled()) {
-      log.trace("ItemSimilarity between " + item1 + " and " + item2 + " is " + result);
     }
     return result;
   }

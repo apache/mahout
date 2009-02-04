@@ -24,14 +24,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.Writer;
 import java.io.OutputStreamWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
+import java.nio.charset.Charset;
 
 public final class TransposeToByUser {
 
@@ -100,11 +101,11 @@ public final class TransposeToByUser {
   }
 
   private static void appendStringsToFile(List<String> strings, File file) throws IOException {
-    Writer outputStreamWriter = new OutputStreamWriter(new FileOutputStream(file, true));
+    PrintWriter outputStreamWriter =
+        new PrintWriter(new OutputStreamWriter(new FileOutputStream(file, true), Charset.forName("UTF-8")));
     try {
       for (String s : strings) {
-        outputStreamWriter.write(s);
-        outputStreamWriter.write('\n');
+        outputStreamWriter.println(s);
       }
     } finally {
       IOUtils.quietClose(outputStreamWriter);

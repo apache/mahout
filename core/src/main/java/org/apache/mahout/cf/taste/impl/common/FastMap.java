@@ -227,9 +227,6 @@ public final class FastMap<K, V> implements Map<K, V> {
 
   @Override
   public void putAll(Map<? extends K, ? extends V> map) {
-    if (map == null) {
-      throw new NullPointerException();
-    }
     for (Entry<? extends K, ? extends V> entry : map.entrySet()) {
       put(entry.getKey(), entry.getValue());
     }
