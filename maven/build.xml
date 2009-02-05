@@ -24,7 +24,7 @@
  -->
 
 <project name="mahout" default="core-job" basedir=".">
-  
+  <!-- Run in core during the package phase -->
   <target name="core-job" >
     <jar jarfile="${dest}/${fullnamever}.job">
       <zipfileset dir="${dest}/classes"/>
@@ -37,7 +37,7 @@
     </jar>
   </target>
 
-
+  <!-- Run in examples during the package phase -->
   <target name="example-job" depends="">
     <jar jarfile="${dest}/${fullnamever}.job">
       <zipfileset dir="${dest}/classes"/>
@@ -50,6 +50,18 @@
                   includes="**/*.jar"/>
       <zipfileset dir="../core/target/dependency" prefix="lib"
                   includes="**/*.jar"/>
+    </jar>
+  </target>
+
+  <!-- Run in examples during the package phase -->
+  <target name="build-grouplens-jar">
+    <jar jarfile="${dest}/grouplens.jar">
+      <fileset dir="${examples-base}">
+        <include name="**/*.dat"/>
+      </fileset>
+      <fileset dir="${dest}/classes">
+        <include name="org/apache/mahout/cf/taste/example/grouplens/**"/>
+      </fileset>
     </jar>
   </target>
 

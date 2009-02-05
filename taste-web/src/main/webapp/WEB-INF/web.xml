@@ -28,7 +28,7 @@
     <servlet-class>org.apache.mahout.cf.taste.web.RecommenderServlet</servlet-class>
     <init-param>
       <param-name>recommender-class</param-name>
-      <param-value>@RECOMMENDER_CLASS@</param-value>
+      <param-value>${recommender.class}</param-value>
     </init-param>
   </servlet>
 
