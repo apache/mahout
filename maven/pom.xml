@@ -131,6 +131,15 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.0-beta-8</version>
+        <configuration>
+          <tagBase>https://svn.apache.org/repos/asf/maven/components/releases</tagBase>
+        </configuration>
+      </plugin>
+
     </plugins>
   </build>
 
