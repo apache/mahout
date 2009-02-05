@@ -13,6 +13,7 @@
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-examples</artifactId>
+  <version>0.1-SNAPSHOT</version>
   <name>Mahout examples</name>
   <description>Scalable machine learning library examples</description>
 
