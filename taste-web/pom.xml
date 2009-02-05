@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -13,7 +11,7 @@
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-taste-webapp</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.1</version>
   <name>Mahout Taste Webapp</name>
   <description>Mahout Taste Collaborative Filtering Web App</description>
 
@@ -64,8 +62,8 @@
           <argLine>-Xms256m -Xmx512m</argLine>
           <testFailureIgnore>false</testFailureIgnore>
           <skip>false</skip>
-          <includes/>
-          <excludes/>
+          <includes />
+          <excludes />
         </configuration>
       </plugin>
 
@@ -130,4 +128,9 @@
     </repository>
   </repositories>
 
+
+  <scm>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/maven/components/releases/mahout-0.1-taste-webapp</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/components/releases/mahout-0.1-taste-webapp</developerConnection>
+  </scm>
 </project>
