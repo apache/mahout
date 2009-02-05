@@ -8,11 +8,11 @@
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-parent</artifactId>
     <version>0.1-SNAPSHOT</version>
+    <relativePath>../maven</relativePath>
   </parent>
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-taste-webapp</artifactId>
-  <version>${parent.version}</version>
   <name>Mahout Taste Webapp</name>
   <description>Mahout Taste Collaborative Filtering Web App</description>
 
@@ -42,7 +42,7 @@
         <version>2.1-alpha-2</version>
         <configuration>
           <filteringDeploymentDescriptors>true</filteringDeploymentDescriptors>
-          <filters><filter>recommender.properties</filter></filters>
+          <filters><filter>${basedir}/recommender.properties</filter></filters>
         </configuration>
       </plugin>
 
