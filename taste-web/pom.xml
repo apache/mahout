@@ -11,7 +11,7 @@
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-taste-webapp</artifactId>
-  <version>0.1</version>
+  <version>0.1-SNAPSHOT</version>
   <name>Mahout Taste Webapp</name>
   <description>Mahout Taste Collaborative Filtering Web App</description>
 
