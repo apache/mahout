@@ -7,7 +7,7 @@
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.1</version>
 
   <properties>
     <junit.version>3.8.2</junit.version>
