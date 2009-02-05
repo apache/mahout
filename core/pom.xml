@@ -11,7 +11,7 @@
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-core</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.1</version>
   <name>Mahout core</name>
   <description>Scalable machine learning libraries</description>
 
