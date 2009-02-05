@@ -178,8 +178,15 @@ public final class FastMap<K, V> implements Map<K, V> {
       throw new NullPointerException();
     }
     int hashSize = keys.length;
+    // If less than half the slots are open, let's clear it up
     if (numSlotsUsed >= hashSize >> 1) {
-      growAndRehash();
+      // If over half the slots used are actual entries, let's grow
+      if (numEntries >= numSlotsUsed >> 1) {
+        growAndRehash();
+      } else {
+        // Otherwise just rehash to clear REMOVED entries and don't grow
+        rehash();
+      }
     }
     // Here we may later consider implementing Brent's variation described on page 532
     int index = find(key);

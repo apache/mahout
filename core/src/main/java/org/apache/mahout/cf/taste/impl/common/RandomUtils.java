@@ -30,12 +30,7 @@ import java.util.Random;
  */
 public final class RandomUtils {
 
-  private static final byte[] STANDARD_SEED = {
-      (byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE,
-      (byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE,
-      (byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE,
-      (byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE,
-  };
+  private static final long STANDARD_SEED = 0xCAFEBABECAFEBABEL;
   private static boolean testSeed;
 
   /**
@@ -51,7 +46,7 @@ public final class RandomUtils {
   }
 
   public static Random getRandom() {
-    return testSeed ? new MersenneTwisterRNG(STANDARD_SEED) : new MersenneTwisterRNG();
+    return testSeed ? new Random(STANDARD_SEED) : new Random();
   }
 
   /**
