@@ -19,6 +19,7 @@
     <xmlenc.version>0.52</xmlenc.version>
     <jets3t.version>0.6.1</jets3t.version>
     <watchmaker.version>0.5.0</watchmaker.version>
+    <tagBase>https://svn.apache.org/repos/asf/lucene/mahout</tagBase>
   </properties>
 
   <licenses>
