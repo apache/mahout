@@ -7,7 +7,10 @@
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.1-SNAPSHOT</version>
+  <!-- This is labeled this way b/c this pom isn't changing as frequently.
+   Plus, for some reason there seems to be a bug in Maven about parent dependency versions
+   -->
+  <version>1.0</version>
 
   <properties>
     <junit.version>3.8.2</junit.version>
