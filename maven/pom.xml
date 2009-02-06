@@ -103,16 +103,16 @@
   <distributionManagement>
     <repository>
       <uniqueVersion>false</uniqueVersion>
-      <id>dist</id>
+      <id>mahout.dist</id>
       <name>dist</name>
-      <url>file://${basedir}/dist/maven</url>
+      <url>scp://people.apache.org/home/${username}/public_html/staging-repo/mahout</url>
       <layout>default</layout>
     </repository>
     <snapshotRepository>
       <uniqueVersion>true</uniqueVersion>
-      <id>dist</id>
+      <id>mahout.dist</id>
       <name>dist</name>
-      <url>file://${basedir}/dist/maven</url>
+      <url>scp://people.apache.org/home/${username}/public_html/staging-repo/mahout</url>
       <layout>default</layout>
     </snapshotRepository>
   </distributionManagement>
@@ -175,123 +175,7 @@
             <configuration>
               <altDeploymentRepository>${deploy.altRepository}</altDeploymentRepository>
               <updateReleaseInfo>true</updateReleaseInfo>
-              <url>${deploy.altUrl}</url>
             </configuration>
-            <executions>
-              <execution>
-                <id>create-hadoop-core-artifact</id>
-                <phase>deploy</phase>
-                <goals>
-                  <goal>deploy-file</goal>
-                </goals>
-                <configuration>
-                  <file>lib/hadoop-${hadoop.version}-core.jar</file>
-                  <groupId>org.apache.mahout.hadoop</groupId>
-                  <artifactId>hadoop-core</artifactId>
-                  <packaging>jar</packaging>
-                  <version>${hadoop.version}</version>
-                  <generatePom>true</generatePom>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>create-kfs-artifact</id>
-                <phase>deploy</phase>
-                <goals>
-                  <goal>deploy-file</goal>
-                </goals>
-                <configuration>
-                  <file>lib/kfs-${kfs.version}.jar</file>
-                  <groupId>org.apache.mahout.kosmofs</groupId>
-                  <artifactId>kfs</artifactId>
-                  <packaging>jar</packaging>
-                  <version>${kfs.version}</version>
-                  <generatePom>true</generatePom>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>create-jets3t-artifact</id>
-                <phase>deploy</phase>
-                <goals>
-                  <goal>deploy-file</goal>
-                </goals>
-                <configuration>
-                  <file>lib/jets3t-${jets3t.version}.jar</file>
-                  <groupId>org.apache.mahout.jets3t</groupId>
-                  <artifactId>jets3t</artifactId>
-                  <packaging>jar</packaging>
-                  <version>${jets3t.version}</version>
-                  <generatePom>true</generatePom>
-                </configuration>
-              </execution>
-
-              <!-- watchmaker -->
-
-              <execution>
-                <id>create-watchmaker-framework-artifact</id>
-                <phase>deploy</phase>
-                <goals>
-                  <goal>deploy-file</goal>
-                </goals>
-                <configuration>
-                  <file>lib/watchmaker-framework-${watchmaker.version}.jar</file>
-                  <groupId>org.apache.mahout.watchmaker</groupId>
-                  <artifactId>watchmaker-framework</artifactId>
-                  <packaging>jar</packaging>
-                  <version>${watchmaker.version}</version>
-                  <generatePom>true</generatePom>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>create-watchmaker-swing-artifact</id>
-                <phase>deploy</phase>
-                <goals>
-                  <goal>deploy-file</goal>
-                </goals>
-                <configuration>
-                  <file>lib/watchmaker-swing-${watchmaker.version}.jar</file>
-                  <groupId>org.apache.mahout.watchmaker</groupId>
-                  <artifactId>watchmaker-swing</artifactId>
-                  <packaging>jar</packaging>
-                  <version>${watchmaker.version}</version>
-                  <generatePom>true</generatePom>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>create-uncommons-math-artifact</id>
-                <phase>deploy</phase>
-                <goals>
-                  <goal>deploy-file</goal>
-                </goals>
-                <configuration>
-                  <file>lib/uncommons-maths-1.0.2.jar</file>
-                  <groupId>org.apache.mahout.uncommons.math</groupId>
-                  <artifactId>uncommons-math</artifactId>
-                  <packaging>jar</packaging>
-                  <version>1.0.2</version>
-                  <generatePom>true</generatePom>
-                </configuration>
-              </execution>
-              <execution>
-                <id>create-commons-cli</id>
-                <phase>deploy</phase>
-                <goals>
-                  <goal>deploy-file</goal>
-                </goals>
-                <configuration>
-                  <file>lib/commons-cli-2.0-mahout.jar</file>
-                  <groupId>org.apache.mahout.commons</groupId>
-                  <artifactId>commons-cli</artifactId>
-                  <packaging>jar</packaging>
-                  <version>2.0-mahout</version>
-                  <generatePom>true</generatePom>
-
-                </configuration>
-              </execution>
-            </executions>
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
