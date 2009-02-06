@@ -179,7 +179,7 @@
         <artifactId>maven-deploy-plugin</artifactId>
         <configuration>
           <altDeploymentRepository>${deploy.altRepository}</altDeploymentRepository>
-          <url>${deploy.altUrl}</url>
+          <url>${deploy.url}</url>
           <repositoryId>mahout.dist</repositoryId>
           <updateReleaseInfo>true</updateReleaseInfo>
         </configuration>

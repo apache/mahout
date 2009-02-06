@@ -105,14 +105,14 @@
       <uniqueVersion>false</uniqueVersion>
       <id>mahout.dist</id>
       <name>dist</name>
-      <url>scp://people.apache.org/home/${username}/public_html/staging-repo/mahout</url>
+      <url>${deploy.url}</url>
       <layout>default</layout>
     </repository>
     <snapshotRepository>
       <uniqueVersion>true</uniqueVersion>
       <id>mahout.dist</id>
       <name>dist</name>
-      <url>scp://people.apache.org/home/${username}/public_html/staging-repo/mahout</url>
+      <url>${deploy.url}</url>
       <layout>default</layout>
     </snapshotRepository>
   </distributionManagement>
