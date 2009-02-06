@@ -45,67 +45,7 @@
 
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.1</version>
-        <executions>
-          <execution>
-            <id>attach-artifacts</id>
-            <phase>package</phase>
-            <goals>
-              <goal>attach-artifact</goal>
-            </goals>
-            <configuration>
-              <artifacts>
-                <artifact>
-                  <file>lib/hadoop-${hadoop.version}-core.jar</file>
-                  <type>jar</type>
-                  <classifier>hadoop</classifier>
-                </artifact>
-                <artifact>
-                  <file>lib/kfs-${kfs.version}.jar</file>
-                  <type>jar</type>
-                  <classifier>kfs</classifier>
-                </artifact>
-                <artifact>
-                  <file>lib/jets3t-${jets3t.version}.jar</file>
-                  <type>jar</type>
-                  <classifier>jets3t</classifier>
-                </artifact>
-                <artifact>
-                  <file>lib/xmlenc-${xmlenc.version}.jar</file>
-                  <type>jar</type>
-                  <classifier>xmlenc</classifier>
-                </artifact>
-                <artifact>
-                  <file>lib/commons-cli-2.0-mahout.jar</file>
-                  <type>jar</type>
-                  <classifier>commons-cli</classifier>
-                </artifact>
-                <!-- watchmaker -->
-                <artifact>
-                  <file>lib/watchmaker-framework-${watchmaker.version}.jar</file>
-                  <type>jar</type>
-                  <classifier>watchmaker-framework</classifier>
-                </artifact>
-                <artifact>
-                  <file>lib/watchmaker-swing-${watchmaker.version}.jar</file>
-                  <type>jar</type>
-                  <classifier>watchmaker-swing</classifier>
-                </artifact>
-                <artifact>
-                  <!--<groupId>org.apache.hadoop</groupId>-->
-                  <file>lib/uncommons-maths-1.0.2.jar</file>
-                  <type>jar</type>
-                  <classifier>uncommons-math</classifier>
-                </artifact>
-                
-              </artifacts>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+
       
       <!-- Copy dependencies with no official Maven artifacts from libs to local Maven repository -->
       <plugin>
@@ -121,7 +61,7 @@
             </goals>
             <configuration>
               <file>lib/hadoop-${hadoop.version}-core.jar</file>
-              <groupId>org.apache.hadoop</groupId>
+              <groupId>org.apache.mahout.hadoop</groupId>
               <artifactId>hadoop-core</artifactId>
               <packaging>jar</packaging>
               <version>${hadoop.version}</version>
@@ -138,7 +78,7 @@
             </goals>
             <configuration>
               <file>lib/kfs-${kfs.version}.jar</file>
-              <groupId>org.kosmix.kosmofs</groupId>
+              <groupId>org.apache.mahout.kosmofs</groupId>
               <artifactId>kfs</artifactId>
               <packaging>jar</packaging>
               <version>${kfs.version}</version>
@@ -155,7 +95,7 @@
             </goals>
             <configuration>
               <file>lib/jets3t-${jets3t.version}.jar</file>
-              <groupId>jets3t</groupId>
+              <groupId>org.apache.mahout.jets3t</groupId>
               <artifactId>jets3t</artifactId>
               <packaging>jar</packaging>
               <version>${jets3t.version}</version>
@@ -163,25 +103,6 @@
               <createChecksum>true</createChecksum>
             </configuration>
           </execution>
-
-
-          <execution>
-            <id>create-xmlenc-artifact</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/xmlenc-${xmlenc.version}.jar</file>
-              <groupId>org.znerd.xmlenc</groupId>
-              <artifactId>xmlenc</artifactId>
-              <packaging>jar</packaging>
-              <version>${xmlenc.version}</version>
-              <generatePom>true</generatePom>
-              <createChecksum>true</createChecksum>
-            </configuration>
-          </execution>
-
           <!-- watchmaker -->
 
           <execution>
@@ -192,7 +113,7 @@
             </goals>
             <configuration>
               <file>lib/watchmaker-framework-${watchmaker.version}.jar</file>
-              <groupId>org.uncommons.watchmaker</groupId>
+              <groupId>org.apache.mahout.watchmaker</groupId>
               <artifactId>watchmaker-framework</artifactId>
               <packaging>jar</packaging>
               <version>${watchmaker.version}</version>
@@ -209,7 +130,7 @@
             </goals>
             <configuration>
               <file>lib/watchmaker-swing-${watchmaker.version}.jar</file>
-              <groupId>org.uncommons.watchmaker</groupId>
+              <groupId>org.apache.mahout.watchmaker</groupId>
               <artifactId>watchmaker-swing</artifactId>
               <packaging>jar</packaging>
               <version>${watchmaker.version}</version>
@@ -226,7 +147,7 @@
             </goals>
             <configuration>
               <file>lib/uncommons-maths-1.0.2.jar</file>
-              <groupId>org.uncommons.math</groupId>
+              <groupId>org.apache.mahout.uncommons.math</groupId>
               <artifactId>uncommons-math</artifactId>
               <packaging>jar</packaging>
               <version>1.0.2</version>
@@ -242,7 +163,7 @@
             </goals>
             <configuration>
               <file>lib/commons-cli-2.0-mahout.jar</file>
-              <groupId>org.apache.commons</groupId>
+              <groupId>org.apache.mahout.commons</groupId>
               <artifactId>commons-cli</artifactId>
               <packaging>jar</packaging>
               <version>2.0-mahout</version>
@@ -252,6 +173,9 @@
           </execution>
         </executions>
       </plugin>
+
+      
+
 
 
       <!-- Build the Job Jar -->
@@ -317,25 +241,25 @@
   <dependencies>
 
     <dependency>
-      <groupId>org.apache.hadoop</groupId>
+      <groupId>org.apache.mahout.hadoop</groupId>
       <artifactId>hadoop-core</artifactId>
       <version>${hadoop.version}</version>
     </dependency>
     
     <dependency>
-      <groupId>org.kosmix.kosmofs</groupId>
+      <groupId>org.apache.mahout.kosmofs</groupId>
       <artifactId>kfs</artifactId>
       <version>${kfs.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>jets3t</groupId>
+      <groupId>org.apache.mahout.jets3t</groupId>
       <artifactId>jets3t</artifactId>
       <version>${jets3t.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>org.znerd.xmlenc</groupId>
+      <groupId>xmlenc</groupId>
       <artifactId>xmlenc</artifactId>
       <version>${xmlenc.version}</version>
     </dependency>
@@ -405,19 +329,19 @@
 
 
     <dependency>
-      <groupId>org.uncommons.watchmaker</groupId>
+      <groupId>org.apache.mahout.watchmaker</groupId>
       <artifactId>watchmaker-framework</artifactId>
       <version>${watchmaker.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>org.uncommons.watchmaker</groupId>
+      <groupId>org.apache.mahout.watchmaker</groupId>
       <artifactId>watchmaker-swing</artifactId>
       <version>${watchmaker.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>org.uncommons.math</groupId>
+      <groupId>org.apache.mahout.uncommons.math</groupId>
       <artifactId>uncommons-math</artifactId>
       <version>1.0.2</version>
     </dependency>
@@ -438,7 +362,7 @@
       <version>2.3.2</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.commons</groupId>
+      <groupId>org.apache.mahout.commons</groupId>
       <artifactId>commons-cli</artifactId>
       <version>2.0-mahout</version>
     </dependency>
