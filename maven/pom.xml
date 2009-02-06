@@ -175,6 +175,7 @@
             <configuration>
               <altDeploymentRepository>${deploy.altRepository}</altDeploymentRepository>
               <updateReleaseInfo>true</updateReleaseInfo>
+              <url>${deploy.altUrl}</url>
             </configuration>
             <executions>
               <execution>
