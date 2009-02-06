@@ -11,7 +11,7 @@
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-core</artifactId>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.1-SNAPSHOT</version>
   <name>Mahout core</name>
   <description>Scalable machine learning libraries</description>
 
@@ -179,7 +179,7 @@
         <artifactId>maven-deploy-plugin</artifactId>
         <configuration>
           <altDeploymentRepository>${deploy.altRepository}</altDeploymentRepository>
-          <url>scp://people.apache.org/home/${username}/public_html/staging-repo/mahout</url>
+          <url>${deploy.altUrl}</url>
           <repositoryId>mahout.dist</repositoryId>
           <updateReleaseInfo>true</updateReleaseInfo>
         </configuration>
@@ -342,7 +342,31 @@
           </execution>
         </executions>
       </plugin>
+      <!-- attach the Job jar -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.1</version>
+        <executions>
+          <execution>
+            <id>attach-artifacts</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>${project.build.directory}/${artifactId}-${version}.job</file>
+                  <type>job</type>
+                  <!--<classifier>job</classifier>-->
+                </artifact>
 
+              </artifacts>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

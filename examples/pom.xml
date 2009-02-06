@@ -11,7 +11,7 @@
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-examples</artifactId>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.1-SNAPSHOT</version>
   <name>Mahout examples</name>
   <description>Scalable machine learning library examples</description>
 
@@ -28,7 +28,6 @@
           <target>1.6</target>
         </configuration>
       </plugin>
-      <!-- Build the Job Jar -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -88,7 +87,33 @@
           <excludes />
         </configuration>
       </plugin>
+      <!-- Attach the Job Jar -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.1</version>
+        <executions>
+          <execution>
+            <id>attach-artifacts</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>${project.build.directory}/${artifactId}-${version}.job</file>
+                  <type>job</type>
+                  <!--<classifier>job</classifier>-->
+                </artifact>
+
+              </artifacts>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
+
   </build>
 
   <dependencies>
