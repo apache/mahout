@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -12,7 +11,7 @@
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-core</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.1</version>
   <name>Mahout core</name>
   <description>Scalable machine learning libraries</description>
 
@@ -357,10 +356,10 @@
             <configuration>
               <tasks>
                 <ant antfile="../maven/build.xml" target="core-job">
-                  <property name="dest" value="${project.build.directory}"/>
-                  <property name="fullnamever" value="${project.artifactId}-${project.version}"/>
-                  <property name="core-lib" value="lib"/>
-                  <property name="shared-lib" value="../lib"/>
+                  <property name="dest" value="${project.build.directory}" />
+                  <property name="fullnamever" value="${project.artifactId}-${project.version}" />
+                  <property name="core-lib" value="lib" />
+                  <property name="shared-lib" value="../lib" />
                 </ant>
               </tasks>
 
@@ -405,8 +404,8 @@
           <argLine>-Xms256m -Xmx512m</argLine>
           <testFailureIgnore>false</testFailureIgnore>
           <skip>false</skip>
-          <includes/>
-          <excludes/>
+          <includes />
+          <excludes />
         </configuration>
       </plugin>
 
@@ -567,5 +566,6 @@
     <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.1-core</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.1-core
     </developerConnection>
+    <url>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.1-core</url>
   </scm>
 </project>
