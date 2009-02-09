@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -41,11 +42,39 @@
               <goal>test-jar</goal>
             </goals>
           </execution>
-
-
         </executions>
       </plugin>
-
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.3</version>
+        <configuration>
+          <encoding>UTF-8</encoding>
+        </configuration>
+        <executions>
+          <execution>
+            <id>copy-resources</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>
+                ${project.build.directory}/classes/META-INF
+              </outputDirectory>
+              <resources>
+                <resource>
+                  <directory>..</directory>
+                  <includes>
+                    <include>README.txt</include>
+                    <include>NOTICE.txt</include>
+                    <include>LICENSE.txt</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
       <!-- Copy dependencies with no official Maven artifacts from libs to local Maven repository -->
       <plugin>
@@ -328,10 +357,10 @@
             <configuration>
               <tasks>
                 <ant antfile="../maven/build.xml" target="core-job">
-                  <property name="dest" value="${project.build.directory}" />
-                  <property name="fullnamever" value="${project.artifactId}-${project.version}" />
-                  <property name="core-lib" value="lib" />
-                  <property name="shared-lib" value="../lib" />
+                  <property name="dest" value="${project.build.directory}"/>
+                  <property name="fullnamever" value="${project.artifactId}-${project.version}"/>
+                  <property name="core-lib" value="lib"/>
+                  <property name="shared-lib" value="../lib"/>
                 </ant>
               </tasks>
 
@@ -376,8 +405,8 @@
           <argLine>-Xms256m -Xmx512m</argLine>
           <testFailureIgnore>false</testFailureIgnore>
           <skip>false</skip>
-          <includes />
-          <excludes />
+          <includes/>
+          <excludes/>
         </configuration>
       </plugin>
 

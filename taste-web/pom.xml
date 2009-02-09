@@ -36,6 +36,37 @@
     </testResources>
     <plugins>
       <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.3</version>
+        <configuration>
+          <encoding>UTF-8</encoding>
+        </configuration>
+        <executions>
+          <execution>
+            <id>copy-resources</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>
+                ${project.build.directory}/classes/META-INF
+              </outputDirectory>
+              <resources>
+                <resource>
+                  <directory>..</directory>
+                  <includes>
+                    <include>README.txt</include>
+                    <include>NOTICE.txt</include>
+                    <include>LICENSE.txt</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
         <version>2.1-alpha-2</version>

@@ -73,6 +73,7 @@
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout</developerConnection>
+    <url>https://svn.apache.org/repos/asf/lucene/mahout</url>
   </scm>
 
   <repositories>
@@ -119,19 +120,26 @@
 
   <build>
     <plugins>
-      <!--<plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-gpg-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>sign-artifacts</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>sign</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>-->
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <index>true</index>
+            <manifest>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+            </manifest>
+            <manifestEntries>
+              <Extension-Name>org.apache.mahout</Extension-Name>
+              <Built-By>${username}</Built-By>
+              <url>http://lucene.apache.org/mahout</url>
+            </manifestEntries>
+          </archive>
+        </configuration>
+
+      </plugin>
+      
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
