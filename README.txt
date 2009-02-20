@@ -15,5 +15,4 @@ Mahout is a scalable machine learning library that implements many different app
 
 Documentation
 
-See http://lucene.apache.org/mahout and http://cwiki.apache.org/MAHOUT.  Also, see the docs directory included in the
-distribution.
+See http://lucene.apache.org/mahout and http://cwiki.apache.org/MAHOUT.
