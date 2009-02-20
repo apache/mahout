@@ -27,10 +27,11 @@
         <include>org.apache.mahout:mahout-core</include>
       </includes>
       <binaries>
-        <outputDirectory>mahout-core</outputDirectory>
+        <outputDirectory>core</outputDirectory>
         <unpack>false</unpack>
       </binaries>
       <sources>
+        <outputDirectoryMapping>core</outputDirectoryMapping>
         <fileSets>
           <fileSet>
             <!--<directory>core</directory>-->
@@ -38,7 +39,6 @@
               <include>src/**</include>
               <include>pom.xml</include>
             </includes>
-            <!--<outputDirectory>mahout-core</outputDirectory>-->
           </fileSet>
         </fileSets>
       </sources>
@@ -48,13 +48,14 @@
         <include>org.apache.mahout:mahout-examples</include>
       </includes>
       <binaries>
-        <outputDirectory>mahout-examples</outputDirectory>
+        <outputDirectory>examples</outputDirectory>
         <unpack>false</unpack>
       </binaries>
       <sources>
+        <outputDirectoryMapping>examples</outputDirectoryMapping>
         <fileSets>
           <fileSet>
-            <!--<outputDirectory>mahout-examples</outputDirectory>-->
+            <outputDirectory>examples</outputDirectory>
             <includes>
               <include>src/**</include>
               <include>pom.xml</include>
@@ -68,14 +69,15 @@
         <include>org.apache.mahout:mahout-taste-webapp</include>
       </includes>
       <binaries>
-        <outputDirectory>mahout-taste-webapp</outputDirectory>
+        <outputDirectory>taste-webapp</outputDirectory>
         <unpack>false</unpack>
       </binaries>
       <sources>
+        <outputDirectoryMapping>taste-webapp</outputDirectoryMapping>
         <fileSets>
           <fileSet>
             <!--<directory>taste-web</directory>-->
-            <!--<outputDirectory>mahout-taste-webapp</outputDirectory>-->
+            <outputDirectory>taste-webapp</outputDirectory>
             <includes>
               <include>src/**</include>
               <include>pom.xml</include>
