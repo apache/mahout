@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.impl.recommender.slopeone.jdbc;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.model.jdbc.MySQLJDBCDataModel;
+import org.apache.mahout.cf.taste.impl.model.jdbc.AbstractJDBCDataModel;
 
 /**
  * <p>MySQL-specific implementation. Should be used in conjunction with a
@@ -55,7 +56,7 @@ public final class MySQLJDBCDiffStorage extends AbstractJDBCDiffStorage {
 
   private static final int DEFAULT_MIN_DIFF_COUNT = 2;
 
-  public MySQLJDBCDiffStorage(MySQLJDBCDataModel dataModel) throws TasteException {
+  public MySQLJDBCDiffStorage(AbstractJDBCDataModel dataModel) throws TasteException {
     this(dataModel,
          DEFAULT_DIFF_TABLE,
          DEFAULT_ITEM_A_COLUMN,
@@ -65,7 +66,7 @@ public final class MySQLJDBCDiffStorage extends AbstractJDBCDiffStorage {
          DEFAULT_MIN_DIFF_COUNT);
   }
 
-  public MySQLJDBCDiffStorage(MySQLJDBCDataModel dataModel,
+  public MySQLJDBCDiffStorage(AbstractJDBCDataModel dataModel,
                               String diffsTable,
                               String itemIDAColumn,
                               String itemIDBColumn,

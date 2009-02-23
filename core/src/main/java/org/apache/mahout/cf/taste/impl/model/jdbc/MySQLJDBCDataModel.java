@@ -76,7 +76,7 @@ import javax.sql.DataSource;
  *
  * <p>Thanks to Amila Jayasooriya for contributing MySQL notes above as part of Google Summer of Code 2007.</p>
  */
-public final class MySQLJDBCDataModel extends AbstractJDBCDataModel {
+public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
 
   /**
    * <p>Creates a {@link MySQLJDBCDataModel} using the default {@link DataSource}
