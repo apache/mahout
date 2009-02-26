@@ -114,7 +114,7 @@ public final class SlopeOneRecommenderTest extends TasteTestCase {
     users.add(getUser("test2", 0.2, 0.3, 0.6));
     DataModel dataModel = new GenericDataModel(users);
     Recommender recommender = new SlopeOneRecommender(dataModel);
-    assertEquals(0.5, recommender.estimatePreference("test1", "2"), EPSILON);
+    assertEquals(0.6, recommender.estimatePreference("test1", "2"), EPSILON);
   }
 
   private static Recommender buildRecommender() throws TasteException {

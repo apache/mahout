@@ -35,8 +35,8 @@ public final class RMSRecommenderEvaluatorTest extends TasteTestCase {
       }
     };
     RecommenderEvaluator evaluator = new RMSRecommenderEvaluator();
-    double eval = evaluator.evaluate(builder, model, 0.75, 1.0);
-    assertEquals(0.387776185924781, eval, EPSILON);
+    double eval = evaluator.evaluate(builder, model, 0.85, 1.0);
+    assertEquals(0.3004147161079469, eval, EPSILON);
   }
 
 }
