@@ -52,7 +52,7 @@ public final class FastMap<K, V> implements Map<K, V> {
   private int numEntries;
   private int numSlotsUsed;
   private int maxSize;
-  private final BitSet recentlyAccessed;
+  private BitSet recentlyAccessed;
   private final boolean countingAccesses;
 
   /**
@@ -90,7 +90,7 @@ public final class FastMap<K, V> implements Map<K, V> {
     values = (V[]) new Object[hashSize];
     this.maxSize = maxSize;
     this.countingAccesses = maxSize != Integer.MAX_VALUE;
-    this.recentlyAccessed = countingAccesses ? new BitSet(maxSize) : null;
+    this.recentlyAccessed = countingAccesses ? new BitSet(hashSize) : null;
   }
 
   /**
@@ -301,7 +301,7 @@ public final class FastMap<K, V> implements Map<K, V> {
     numEntries = 0;
     numSlotsUsed = 0;
     if (countingAccesses) {
-      recentlyAccessed.clear();
+      recentlyAccessed = new BitSet(newHashSize);
     }
     keys = (K[]) new Object[newHashSize];
     values = (V[]) new Object[newHashSize];
