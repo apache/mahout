@@ -28,7 +28,7 @@ final class BitSet implements Serializable {
 
   BitSet(int numBits) {
     int numLongs = numBits >>> 6;
-    if (numBits % 64 != 0) {
+    if ((numBits & 0x3F) != 0) {
       numLongs++;
     }
     bits = new long[numLongs];
@@ -36,20 +36,17 @@ final class BitSet implements Serializable {
 
   boolean get(int index) {
     // skipping range check for speed
-    int offset = index >>> 6;
-    return (bits[offset] & (1L << (index & 0x3F))) != 0L;
+    return (bits[index >>> 6] & (1L << (index & 0x3F))) != 0L;
   }
 
   void set(int index) {
     // skipping range check for speed
-    int offset = index >>> 6;
-    bits[offset] |= (1L << (index & 0x3F));
+    bits[index >>> 6] |= (1L << (index & 0x3F));
   }
 
   void clear(int index) {
     // skipping range check for speed
-    int offset = index >>> 6;
-    bits[offset] &= ~(1L << (index & 0x3F));
+    bits[index >>> 6] &= ~(1L << (index & 0x3F));
   }
 
   void clear() {
