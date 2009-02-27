@@ -108,7 +108,7 @@ public class XmlInputFormat extends TextInputFormat {
 
     @Override
     public float getProgress() throws IOException {
-      return (float) ((fsin.getPos() - start) / (end - start));
+      return ((fsin.getPos() - start) / (float) (end - start));
     }
 
     private boolean readUntilMatch(byte[] match, boolean withinBlock) throws IOException {

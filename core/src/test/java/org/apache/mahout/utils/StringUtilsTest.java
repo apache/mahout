@@ -24,7 +24,7 @@ import java.util.List;
 
 public class StringUtilsTest extends TestCase {
 
-  private class DummyTest {
+  private static class DummyTest {
     public int field;
 
     @Override

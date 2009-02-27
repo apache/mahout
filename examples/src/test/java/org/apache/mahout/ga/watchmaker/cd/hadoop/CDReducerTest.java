@@ -30,7 +30,7 @@ import java.util.Set;
 
 public class CDReducerTest extends TestCase {
 
-  private final int nbevals = 100;
+  private static final int nbevals = 100;
 
   private List<CDFitness> evaluations;
 

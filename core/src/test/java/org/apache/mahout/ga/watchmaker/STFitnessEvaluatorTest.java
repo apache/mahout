@@ -26,7 +26,7 @@ import java.util.Random;
 
 public class STFitnessEvaluatorTest extends TestCase {
 
-  private class STFitnessEvaluatorMock<T> extends STFitnessEvaluator<T> {
+  private static class STFitnessEvaluatorMock<T> extends STFitnessEvaluator<T> {
     private int nbcalls;
 
     private List<Double> evaluations;

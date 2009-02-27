@@ -30,7 +30,6 @@ import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
 import org.apache.mahout.utils.DummyOutputCollector;
 import org.apache.mahout.utils.EuclideanDistanceMeasure;
-import org.apache.mahout.utils.ManhattanDistanceMeasure;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -47,7 +46,7 @@ public class TestMeanShift extends TestCase {
 
   Vector[] raw = null;
 
-  DistanceMeasure manhattanDistanceMeasure = new ManhattanDistanceMeasure();
+  //DistanceMeasure manhattanDistanceMeasure = new ManhattanDistanceMeasure();
 
   final DistanceMeasure euclideanDistanceMeasure = new EuclideanDistanceMeasure();
 
@@ -92,7 +91,7 @@ public class TestMeanShift extends TestCase {
    * @param path
    * @throws Exception
    */
-  private void rmr(String path) throws Exception {
+  private static void rmr(String path) throws Exception {
     File f = new File(path);
     if (f.exists()) {
       if (f.isDirectory()) {
@@ -110,7 +109,7 @@ public class TestMeanShift extends TestCase {
    * 
    * @param canopies
    */
-  private void printImage(List<MeanShiftCanopy> canopies) {
+  private static void printImage(List<MeanShiftCanopy> canopies) {
     char[][] out = new char[10][10];
     for (int i = 0; i < out.length; i++)
       for (int j = 0; j < out[0].length; j++)
@@ -131,6 +130,7 @@ public class TestMeanShift extends TestCase {
     return canopies;
   }
 
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
     rmr("output");
@@ -205,8 +205,8 @@ public class TestMeanShift extends TestCase {
     MeanShiftCanopy.config(euclideanDistanceMeasure, 4, 1, 0.5);
     Map<String, List<WritableComparable<?>>> mapData = collector.getData();
     collector = new DummyOutputCollector<Text,WritableComparable<?>>();
-    for (String key : mapData.keySet())
-      combiner.reduce(new Text(key), mapData.get(key).iterator(), collector,
+    for (Map.Entry<String, List<WritableComparable<?>>> stringListEntry : mapData.entrySet())
+      combiner.reduce(new Text(stringListEntry.getKey()), stringListEntry.getValue().iterator(), collector,
           null);
 
     // now verify the output
@@ -274,8 +274,8 @@ public class TestMeanShift extends TestCase {
     MeanShiftCanopy.config(euclideanDistanceMeasure, 4, 1, 0.5);
     Map<String, List<WritableComparable<?>>> mapData = collector.getData();
     collector = new DummyOutputCollector<Text,WritableComparable<?>>();
-    for (String key : mapData.keySet())
-      combiner.reduce(new Text(key), mapData.get(key).iterator(), collector,
+    for (Map.Entry<String, List<WritableComparable<?>>> stringListEntry : mapData.entrySet())
+      combiner.reduce(new Text(stringListEntry.getKey()), stringListEntry.getValue().iterator(), collector,
           null);
     // now reduce the combiner output
     DummyOutputCollector<Text,WritableComparable<?>> collector2 = new DummyOutputCollector<Text,WritableComparable<?>>();
@@ -291,8 +291,8 @@ public class TestMeanShift extends TestCase {
       refCanopyMap.put(canopy.getIdentifier(), canopy);
     }
     // compare the maps
-    for (String id : refCanopyMap.keySet()) {
-      MeanShiftCanopy ref = refCanopyMap.get(id);
+    for (Map.Entry<String, MeanShiftCanopy> stringMeanShiftCanopyEntry : refCanopyMap.entrySet()) {
+      MeanShiftCanopy ref = stringMeanShiftCanopyEntry.getValue();
 
       List<WritableComparable<?>> values = collector2
           .getValue((ref.isConverged() ? "V" : "C")
@@ -301,7 +301,7 @@ public class TestMeanShift extends TestCase {
       MeanShiftCanopy canopy = MeanShiftCanopy.decodeCanopy(values.get(0)
           .toString());
       assertEquals("ids", ref.getCanopyId(), canopy.getCanopyId() + 100);
-      assertEquals("centers(" + id + ")", ref.getCenter()
+      assertEquals("centers(" + stringMeanShiftCanopyEntry.getKey() + ')', ref.getCenter()
           .asWritableComparable().toString(), canopy.getCenter()
           .asWritableComparable().toString());
       assertEquals("bound points", ref.getBoundPoints().size(), canopy

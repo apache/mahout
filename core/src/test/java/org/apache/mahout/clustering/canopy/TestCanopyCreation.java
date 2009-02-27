@@ -123,7 +123,7 @@ public class TestCanopyCreation extends TestCase {
       Vector refCentroid = refCanopy.computeCentroid();
       Vector testCentroid = testCanopy.computeCentroid();
       for (int pointIx = 0; pointIx < refCentroid.cardinality(); pointIx++) {
-        assertEquals("canopy centroid " + canopyIx + "[" + pointIx + "]",
+        assertEquals("canopy centroid " + canopyIx + '[' + pointIx + ']',
             refCentroid.get(pointIx), testCentroid.get(pointIx));
       }
     }
@@ -357,8 +357,8 @@ public class TestCanopyCreation extends TestCase {
     Canopy.config(manhattanDistanceMeasure, (3.1), (2.1));
     Map<String, List<Text>> mapData = collector.getData();
     collector = new DummyOutputCollector<Text,Text>();
-    for (String key : mapData.keySet())
-      combiner.reduce(new Text(key), mapData.get(key).iterator(), collector,
+    for (Map.Entry<String, List<Text>> stringListEntry : mapData.entrySet())
+      combiner.reduce(new Text(stringListEntry.getKey()), stringListEntry.getValue().iterator(), collector,
           null);
     // now verify the output
     List<Text> data = collector.getValue("centroid");
@@ -390,8 +390,8 @@ public class TestCanopyCreation extends TestCase {
     Canopy.config(euclideanDistanceMeasure, (3.1), (2.1));
     Map<String, List<Text>> mapData = collector.getData();
     collector = new DummyOutputCollector<Text,Text>();
-    for (String key : mapData.keySet())
-      combiner.reduce(new Text(key), mapData.get(key).iterator(), collector,
+    for (Map.Entry<String, List<Text>> stringListEntry : mapData.entrySet())
+      combiner.reduce(new Text(stringListEntry.getKey()), stringListEntry.getValue().iterator(), collector,
           null);
     // now verify the output
     List<Text> data = collector.getValue("centroid");
@@ -548,9 +548,9 @@ public class TestCanopyCreation extends TestCase {
       mapper.map(new Text(), new Text(point.asFormatString()), collector, null);
     Map<String, List<Text>> data = collector.getData();
     assertEquals("Number of map results", canopies.size(), data.size());
-    for (String canopyDef : data.keySet()) {
-      Canopy canopy = Canopy.decodeCanopy(canopyDef);
-      List<Text> pts = data.get(canopyDef);
+    for (Map.Entry<String, List<Text>> stringListEntry : data.entrySet()) {
+      Canopy canopy = Canopy.decodeCanopy(stringListEntry.getKey());
+      List<Text> pts = stringListEntry.getValue();
       for (Writable ptDef : pts)
         assertTrue("Point not in canopy", canopy.covers(AbstractVector.decodeVector(ptDef
             .toString())));
@@ -577,9 +577,9 @@ public class TestCanopyCreation extends TestCase {
       mapper.map(new Text(), new Text(point.asFormatString()), collector, null);
     Map<String, List<Text>> data = collector.getData();
     assertEquals("Number of map results", canopies.size(), data.size());
-    for (String canopyDef : data.keySet()) {
-      Canopy canopy = Canopy.decodeCanopy(canopyDef);
-      List<Text> pts = data.get(canopyDef);
+    for (Map.Entry<String, List<Text>> stringListEntry : data.entrySet()) {
+      Canopy canopy = Canopy.decodeCanopy(stringListEntry.getKey());
+      List<Text> pts = stringListEntry.getValue();
       for (Writable ptDef : pts)
         assertTrue("Point not in canopy", canopy.covers(AbstractVector.decodeVector(ptDef
             .toString())));
@@ -610,14 +610,14 @@ public class TestCanopyCreation extends TestCase {
     // reduce the data
     Reducer<Text, Text, Text, Text> reducer = new IdentityReducer<Text, Text>();
     collector = new DummyOutputCollector<Text,Text>();
-    for (String key : data.keySet())
-      reducer.reduce(new Text(key), data.get(key).iterator(), collector, null);
+    for (Map.Entry<String, List<Text>> stringListEntry : data.entrySet())
+      reducer.reduce(new Text(stringListEntry.getKey()), stringListEntry.getValue().iterator(), collector, null);
 
     // check the output
     data = collector.getData();
-    for (String canopyDef : data.keySet()) {
-      Canopy canopy = Canopy.decodeCanopy(canopyDef);
-      List<Text> pts = data.get(canopyDef);
+    for (Map.Entry<String, List<Text>> stringListEntry : data.entrySet()) {
+      Canopy canopy = Canopy.decodeCanopy(stringListEntry.getKey());
+      List<Text> pts = stringListEntry.getValue();
       for (Writable ptDef : pts)
         assertTrue("Point not in canopy", canopy.covers(AbstractVector.decodeVector(ptDef
             .toString())));
@@ -647,15 +647,15 @@ public class TestCanopyCreation extends TestCase {
     // reduce the data
     Reducer<Text, Text, Text, Text> reducer = new IdentityReducer<Text, Text>();
     collector = new DummyOutputCollector<Text,Text>();
-    for (String key : data.keySet())
-      reducer.reduce(new Text(key), data.get(key).iterator(), collector, null);
+    for (Map.Entry<String, List<Text>> stringListEntry : data.entrySet())
+      reducer.reduce(new Text(stringListEntry.getKey()), stringListEntry.getValue().iterator(), collector, null);
 
     // check the output
     data = collector.getData();
     assertEquals("Number of map results", canopies.size(), data.size());
-    for (String canopyDef : data.keySet()) {
-      Canopy canopy = Canopy.decodeCanopy(canopyDef);
-      List<Text> pts = data.get(canopyDef);
+    for (Map.Entry<String, List<Text>> stringListEntry : data.entrySet()) {
+      Canopy canopy = Canopy.decodeCanopy(stringListEntry.getKey());
+      List<Text> pts = stringListEntry.getValue();
       for (Writable ptDef : pts)
         assertTrue("Point not in canopy", canopy.covers(AbstractVector.decodeVector(ptDef
             .toString())));

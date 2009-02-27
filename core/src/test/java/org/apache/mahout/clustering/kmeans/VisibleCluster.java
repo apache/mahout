@@ -29,16 +29,17 @@ import java.util.List;
  */
 public class VisibleCluster extends Cluster {
 
-  private List<Vector> points = new ArrayList<Vector>();
+  private List<Vector> points;
+
+  public VisibleCluster(Vector point) {
+    super(point);
+    points = new ArrayList<Vector>();
+  }
 
   @Override
   public void recomputeCenter() {
     super.recomputeCenter();
     points = new ArrayList<Vector>();
-  }
-
-  public VisibleCluster(Vector point) {
-    super(point);
   }
 
   /**
@@ -47,6 +48,7 @@ public class VisibleCluster extends Cluster {
    * @param point
    *            a Double[]
    */
+  @Override
   public void addPoint(Vector point) {
     super.addPoint(point);
     points.add(point);
@@ -58,11 +60,15 @@ public class VisibleCluster extends Cluster {
    * 
    * @return
    */
+  @Override
   public String toString() {
-    String out = super.toString() + ": ";
-    for (Vector pt : points)
-      out += pt.asFormatString();
-    return out;
+    StringBuilder result = new StringBuilder();
+    result.append(super.toString());
+    result.append(": ");
+    for (Vector pt : points) {
+      result.append(pt.asFormatString());
+    }
+    return result.toString();
   }
 
 }

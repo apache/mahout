@@ -38,7 +38,7 @@ public class DatasetSplitTest extends TestCase {
   /**
    * Mock RecordReader that returns a sequence of keys in the range [0, size[
    */
-  private class MockReader implements RecordReader<LongWritable, Text> {
+  private static class MockReader implements RecordReader<LongWritable, Text> {
 
     private long current;
 

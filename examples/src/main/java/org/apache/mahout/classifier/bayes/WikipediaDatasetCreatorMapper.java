@@ -103,13 +103,13 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     try {
-      if(countries ==null){
-        countries = new HashSet<String>();
+      if (countries == null){
+        Set<String> newCountries = new HashSet<String>();
 
         DefaultStringifier<Set<String>> setStringifier =
-            new DefaultStringifier<Set<String>>(job,GenericsUtil.getClass(countries));
+            new DefaultStringifier<Set<String>>(job,GenericsUtil.getClass(newCountries));
 
-        String countriesString = setStringifier.toString(countries);  
+        String countriesString = setStringifier.toString(newCountries);
         countriesString = job.get("wikipedia.countries", countriesString);
         
         countries = setStringifier.fromString(countriesString);
