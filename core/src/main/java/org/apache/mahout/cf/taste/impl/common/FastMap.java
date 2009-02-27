@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.io.Serializable;
 
 /**
  * <p>This is an optimized {@link Map} implementation, based on algorithms described in Knuth's
@@ -38,7 +39,7 @@ import java.util.Set;
  *
  * <p>This implementation does not allow <code>null</code> as a key or value.</p>
  */
-public final class FastMap<K, V> implements Map<K, V> {
+public final class FastMap<K, V> implements Map<K, V>, Serializable {
 
   public static final int NO_MAX_SIZE = Integer.MAX_VALUE;
 
@@ -175,9 +176,8 @@ public final class FastMap<K, V> implements Map<K, V> {
     if (key == null || value == null) {
       throw new NullPointerException();
     }
-    int hashSize = keys.length;
     // If less than half the slots are open, let's clear it up
-    if (numSlotsUsed >= hashSize >> 1) {
+    if (numSlotsUsed >= keys.length >> 1) {
       // If over half the slots used are actual entries, let's grow
       if (numEntries >= numSlotsUsed >> 1) {
         growAndRehash();
@@ -208,11 +208,10 @@ public final class FastMap<K, V> implements Map<K, V> {
 
   private void clearStaleEntry(int index) {
     while (true) {
-      int hashSize = keys.length;
       K currentKey;
       do {
         if (index == 0) {
-          index = hashSize - 1;
+          index = keys.length - 1;
         } else {
           index--;
         }
@@ -283,15 +282,14 @@ public final class FastMap<K, V> implements Map<K, V> {
   }
 
   public void rehash() {
-    rehash(keys.length);
+    rehash(RandomUtils.nextTwinPrime(numEntries << 1));
   }
 
   private void growAndRehash() {
-    int hashSize = keys.length;
-    if (hashSize >= RandomUtils.MAX_INT_SMALLER_TWIN_PRIME >> 1) {
+    if (keys.length >= RandomUtils.MAX_INT_SMALLER_TWIN_PRIME >> 1) {
       throw new IllegalStateException("Can't grow any more");
     }
-    rehash(RandomUtils.nextTwinPrime(2 * hashSize));
+    rehash(RandomUtils.nextTwinPrime(keys.length << 1));
   }
 
   @SuppressWarnings("unchecked")
@@ -378,7 +376,7 @@ public final class FastMap<K, V> implements Map<K, V> {
       FastMap.this.clear();
     }
 
-    final class MapEntry implements Entry<K, V> {
+    private final class MapEntry implements Entry<K, V> {
 
       private final int index;
 

@@ -70,7 +70,7 @@ import java.util.NoSuchElementException;
  */
 public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
-  private static final Logger log = LoggerFactory.getLogger(AbstractJDBCDataModel.class);
+  static final Logger log = LoggerFactory.getLogger(AbstractJDBCDataModel.class);
 
   public static final String DEFAULT_DATASOURCE_NAME = "jdbc/taste";
   public static final String DEFAULT_PREFERENCE_TABLE = "taste_preferences";
@@ -394,11 +394,9 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     if (length == 0 || length > 2) {
       throw new IllegalArgumentException("Illegal number of item IDs: " + length);
     }
-    if (length == 1) {
-      return getNumThings("user preferring item", getNumPreferenceForItemSQL, itemIDs);
-    } else {
-      return getNumThings("user preferring items", getNumPreferenceForItemsSQL, itemIDs);
-    }
+    return length == 1 ?
+        getNumThings("user preferring item", getNumPreferenceForItemSQL, itemIDs) :
+        getNumThings("user preferring items", getNumPreferenceForItemsSQL, itemIDs);
   }
 
 

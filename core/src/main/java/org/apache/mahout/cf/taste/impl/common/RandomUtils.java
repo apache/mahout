@@ -17,8 +17,6 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
-import org.uncommons.maths.random.MersenneTwisterRNG;
-
 import java.util.Random;
 
 /**

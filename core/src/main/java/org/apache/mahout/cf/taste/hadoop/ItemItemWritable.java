@@ -72,11 +72,7 @@ public final class ItemItemWritable implements WritableComparable<ItemItemWritab
       return 0;
     }
     int compare = itemAID.compareTo(that.itemAID);
-    if (compare == 0) {
-      return itemBID.compareTo(that.itemBID);
-    } else {
-      return compare;
-    }
+    return compare == 0 ? itemBID.compareTo(that.itemBID) : compare;
   }
 
   @Override

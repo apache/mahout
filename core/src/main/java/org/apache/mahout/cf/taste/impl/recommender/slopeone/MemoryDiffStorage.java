@@ -224,9 +224,11 @@ public final class MemoryDiffStorage implements DiffStorage {
 
       // Go back and prune inconsequential diffs. "Inconsequential" means, here, only represented by one
       // data point, so possibly unreliable
-      for (Iterator<FastMap<Object, RunningAverage>> it1 = averageDiffs.values().iterator(); it1.hasNext();) {
+      Iterator<FastMap<Object, RunningAverage>> it1 = averageDiffs.values().iterator();
+      while (it1.hasNext()) {
         FastMap<Object, RunningAverage> map = it1.next();
-        for (Iterator<RunningAverage> it2 = map.values().iterator(); it2.hasNext();) {
+        Iterator<RunningAverage> it2 = map.values().iterator();
+        while (it2.hasNext()) {
           RunningAverage average = it2.next();
           if (average.getCount() <= 1) {
             it2.remove();

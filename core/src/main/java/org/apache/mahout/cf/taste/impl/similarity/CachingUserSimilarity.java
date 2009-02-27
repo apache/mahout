@@ -49,12 +49,9 @@ public final class CachingUserSimilarity implements UserSimilarity {
 
   @Override
   public double userSimilarity(User user1, User user2) throws TasteException {
-    Pair<User, User> key;
-    if (user1.compareTo(user2) < 0) {
-      key = new Pair<User, User>(user1, user2);
-    } else {
-      key = new Pair<User, User>(user2, user1);
-    }
+    Pair<User, User> key = user1.compareTo(user2) < 0 ?
+        new Pair<User, User>(user1, user2) :
+        new Pair<User, User>(user2, user1);
     return similarityCache.get(key);
   }
 

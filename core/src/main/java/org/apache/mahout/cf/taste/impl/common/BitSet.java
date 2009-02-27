@@ -17,10 +17,12 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
+import java.io.Serializable;
+
 /**
  * A simplified and streamlined version of {@link java.util.BitSet}.
  */
-final class BitSet {
+final class BitSet implements Serializable {
 
   private final long[] bits;
 
@@ -35,19 +37,19 @@ final class BitSet {
   boolean get(int index) {
     // skipping range check for speed
     int offset = index >>> 6;
-    return (bits[offset] & (1L << (index - (offset << 6)))) != 0L;
+    return (bits[offset] & (1L << (index & 0x3F))) != 0L;
   }
 
   void set(int index) {
     // skipping range check for speed
     int offset = index >>> 6;
-    bits[offset] |= (1L << (index - (offset << 6)));
+    bits[offset] |= (1L << (index & 0x3F));
   }
 
   void clear(int index) {
     // skipping range check for speed
     int offset = index >>> 6;
-    bits[offset] &= ~(1L << (index - (offset << 6)));
+    bits[offset] &= ~(1L << (index & 0x3F));
   }
 
   void clear() {

@@ -128,11 +128,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
       stmt.setObject(4, itemID1);
       log.debug("Executing SQL query: {}", getDiffSQL);
       rs = stmt.executeQuery();
-      if (rs.next()) {
-        return new FixedRunningAverage(rs.getInt(1), rs.getDouble(2));
-      } else {
-        return null;
-      }
+      return rs.next() ? new FixedRunningAverage(rs.getInt(1), rs.getDouble(2)) : null;
     } catch (SQLException sqle) {
       log.warn("Exception while retrieving diff", sqle);
       throw new TasteException(sqle);

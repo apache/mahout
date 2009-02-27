@@ -48,12 +48,9 @@ public final class CachingItemSimilarity implements ItemSimilarity {
 
   @Override
   public double itemSimilarity(Item item1, Item item2) throws TasteException {
-    Pair<Item, Item> key;
-    if (item1.compareTo(item2) < 0) {
-      key = new Pair<Item, Item>(item1, item2);
-    } else {
-      key = new Pair<Item, Item>(item2, item1);
-    }
+    Pair<Item, Item> key = item1.compareTo(item2) < 0 ?
+        new Pair<Item, Item>(item1, item2) :
+        new Pair<Item, Item>(item2, item1);
     return similarityCache.get(key);
   }
 

@@ -102,12 +102,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
         Object id = user.getID();
         Collection<Item> relevantItems = new FastSet<Item>(at);
         Preference[] prefs = user.getPreferencesAsArray();
-        double theRelevanceThreshold;
-        if (Double.isNaN(relevanceThreshold)) {
-          theRelevanceThreshold = computeThreshold(prefs);
-        } else {
-          theRelevanceThreshold = relevanceThreshold;
-        }
+        double theRelevanceThreshold = Double.isNaN(relevanceThreshold) ? computeThreshold(prefs) : relevanceThreshold;
         for (Preference pref : prefs) {
           if (pref.getValue() >= theRelevanceThreshold) {
             relevantItems.add(pref.getItem());

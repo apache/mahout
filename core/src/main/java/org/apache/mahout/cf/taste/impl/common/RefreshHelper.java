@@ -50,6 +50,12 @@ public final class RefreshHelper implements Refreshable {
     }
   }
 
+  public void removeDependency(Refreshable refreshable) {
+    if (refreshable != null) {
+      dependencies.remove(refreshable);
+    }
+  }
+
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     if (!refreshLock.isLocked()) {

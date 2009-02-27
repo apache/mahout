@@ -63,7 +63,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
   /**
    * <p>Creates a possibly weighted {@link AbstractSimilarity}.</p>
    */
-  AbstractSimilarity(DataModel dataModel, Weighting weighting) throws TasteException {
+  AbstractSimilarity(final DataModel dataModel, Weighting weighting) throws TasteException {
     if (dataModel == null) {
       throw new IllegalArgumentException("dataModel is null");
     }
@@ -74,15 +74,12 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
       @Override
       public Object call() throws TasteException {
-        cachedNumItems = AbstractSimilarity.this.dataModel.getNumItems();
-        cachedNumUsers = AbstractSimilarity.this.dataModel.getNumUsers();
+        cachedNumItems = dataModel.getNumItems();
+        cachedNumUsers = dataModel.getNumUsers();
         return null;
       }
     });
     this.refreshHelper.addDependency(this.dataModel);
-    this.refreshHelper.addDependency(this.inferrer);
-    this.refreshHelper.addDependency(this.prefTransform);
-    this.refreshHelper.addDependency(this.similarityTransform);
   }
 
   final DataModel getDataModel() {
@@ -98,6 +95,8 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     if (inferrer == null) {
       throw new IllegalArgumentException("inferrer is null");
     }
+    refreshHelper.addDependency(inferrer);
+    refreshHelper.removeDependency(this.inferrer);
     this.inferrer = inferrer;
   }
 
@@ -106,6 +105,8 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
   }
 
   public final void setPrefTransform(PreferenceTransform prefTransform) {
+    refreshHelper.addDependency(prefTransform);
+    refreshHelper.removeDependency(this.prefTransform);
     this.prefTransform = prefTransform;
   }
 
@@ -114,6 +115,8 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
   }
 
   public final void setSimilarityTransform(SimilarityTransform<Object> similarityTransform) {
+    refreshHelper.addDependency(similarityTransform);
+    refreshHelper.removeDependency(this.similarityTransform);
     this.similarityTransform = similarityTransform;
   }
 
@@ -191,21 +194,13 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
           // as if the other user expressed that preference
           if (compare < 0) {
             // X has a value; infer Y's
-            if (hasPrefTransform) {
-              x = prefTransform.getTransformedValue(xPref);
-            } else {
-              x = xPref.getValue();
-            }
+            x = hasPrefTransform ? prefTransform.getTransformedValue(xPref) : xPref.getValue();
             y = inferrer.inferPreference(user2, xIndex);
           } else {
             // compare > 0
             // Y has a value; infer X's
             x = inferrer.inferPreference(user1, yIndex);
-            if (hasPrefTransform) {
-              y = prefTransform.getTransformedValue(yPref);
-            } else {
-              y = yPref.getValue();
-            }
+            y = hasPrefTransform ? prefTransform.getTransformedValue(yPref) : yPref.getValue();
           }
         }
         sumXY += x * y;

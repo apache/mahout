@@ -218,11 +218,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
     }
     checkClustersBuilt();
     Collection<User> cluster = clustersByUserID.get(userID);
-    if (cluster == null) {
-      return Collections.emptyList();
-    } else {
-      return cluster;
-    }
+    return cluster == null ? Collections.<User>emptyList() : cluster;
   }
 
   @Override

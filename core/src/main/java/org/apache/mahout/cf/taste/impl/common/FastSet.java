@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.lang.reflect.Array;
+import java.io.Serializable;
 
 /**
  * <p>This is an optimized {@link Set} implementation, based on algorithms described in Knuth's
@@ -38,7 +39,7 @@ import java.lang.reflect.Array;
  *
  * @see FastMap
  */
-public final class FastSet<K> implements Set<K> {
+public final class FastSet<K> implements Set<K>, Serializable {
 
   /**
    * Dummy object used to represent a key that has been removed.
@@ -122,9 +123,8 @@ public final class FastSet<K> implements Set<K> {
     if (key == null) {
       throw new NullPointerException();
     }
-    int hashSize = keys.length;
     // If less than half the slots are open, let's clear it up
-    if (numSlotsUsed >= hashSize >> 1) {
+    if (numSlotsUsed >= keys.length >> 1) {
       // If over half the slots used are actual entries, let's grow
       if (numEntries >= numSlotsUsed >> 1) {
         growAndRehash();
@@ -241,15 +241,14 @@ public final class FastSet<K> implements Set<K> {
   }
 
   private void growAndRehash() {
-    int hashSize = keys.length;
-    if (hashSize >= RandomUtils.MAX_INT_SMALLER_TWIN_PRIME >> 1) {
+    if (keys.length >= RandomUtils.MAX_INT_SMALLER_TWIN_PRIME >> 1) {
       throw new IllegalStateException("Can't grow any more");
     }
-    rehash(RandomUtils.nextTwinPrime(2 * hashSize));
+    rehash(RandomUtils.nextTwinPrime(keys.length << 1));
   }
 
   public void rehash() {
-    rehash(keys.length);
+    rehash(RandomUtils.nextTwinPrime(numEntries << 1));
   }
 
   @SuppressWarnings("unchecked")
