@@ -11,7 +11,7 @@
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-taste-webapp</artifactId>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.1</version>
   <name>Mahout Taste Webapp</name>
   <description>Mahout Taste Collaborative Filtering Web App</description>
 
@@ -163,6 +163,6 @@
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.1-taste-webapp</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.1-taste-webapp</developerConnection>
-    <url>https://svn.apache.org/repos/asf/lucene/mahout/mahout-taste-webapp</url>
+    <url>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.1-taste-webapp</url>
   </scm>
 </project>
