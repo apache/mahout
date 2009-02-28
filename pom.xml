@@ -12,7 +12,7 @@
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Lucene Mahout</name>
