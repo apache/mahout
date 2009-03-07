@@ -84,7 +84,7 @@ public final class GroupLensDataModel extends FileDataModel {
   private static File convertGLFile(File originalFile, boolean ratings) throws IOException {
     // Now translate the file; remove commas, then convert "::" delimiter to comma
     File resultFile = new File(new File(System.getProperty("java.io.tmpdir")),
-                                     "taste." + (ratings ? "ratings" : "movies") + ".txt");
+                                        (ratings ? "ratings" : "movies") + ".txt");
     if (!resultFile.exists()) {
       PrintWriter writer = null;
       try {
