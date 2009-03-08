@@ -204,25 +204,14 @@ public final class MemoryDiffStorage implements DiffStorage {
   @Override
   public Set<Item> getRecommendableItems(Object userID) throws TasteException {
     User user = dataModel.getUser(userID);
-    Set<Item> result = new FastSet<Item>(dataModel.getNumItems());
-    for (Item item : dataModel.getItems()) {
-      // If not already preferred by the user, add it
-      if (user.getPreferenceFor(item.getID()) == null) {
-        result.add(item);
-      }
-    }
-    return result;
-    /*
-    User user = dataModel.getUser(userID);
     Set<Item> result = allRecommendableItemIDs.clone();
     Iterator<Item> it = result.iterator();
     while (it.hasNext()) {
-      if (user.getPreferenceFor(it.next().getID()) == null) {
+      if (user.getPreferenceFor(it.next().getID()) != null) {
         it.remove();
       }
     }
     return result;
-     */
   }
 
   private void buildAverageDiffs() throws TasteException {
