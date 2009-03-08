@@ -39,7 +39,7 @@ import java.io.Serializable;
  *
  * <p>This implementation does not allow <code>null</code> as a key or value.</p>
  */
-public final class FastMap<K, V> implements Map<K, V>, Serializable {
+public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
 
   public static final int NO_MAX_SIZE = Integer.MAX_VALUE;
 
@@ -322,6 +322,23 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable {
     values[lastNext] = null;
     ((Object[]) keys)[lastNext] = REMOVED;
     numEntries--;
+  }
+
+  @Override
+  public FastMap<K,V> clone() {
+    FastMap<K,V> clone;
+    try {
+      clone = (FastMap<K,V>) super.clone();
+    } catch (CloneNotSupportedException cnse) {
+      throw new AssertionError();
+    }
+    int length = keys.length;
+    clone.keys = (K[]) new Object[length];
+    clone.values = (V[]) new Object[length];
+    System.arraycopy(keys, 0, clone.keys, 0, length);
+    System.arraycopy(values, 0, clone.values,  0, length);
+    clone.recentlyAccessed = countingAccesses ? new BitSet(length) : null;
+    return clone;
   }
 
   private final class EntrySet extends AbstractSet<Entry<K, V>> {

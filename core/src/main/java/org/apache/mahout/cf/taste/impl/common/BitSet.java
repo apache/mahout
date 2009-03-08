@@ -22,7 +22,7 @@ import java.io.Serializable;
 /**
  * A simplified and streamlined version of {@link java.util.BitSet}.
  */
-final class BitSet implements Serializable {
+final class BitSet implements Serializable, Cloneable {
 
   private final long[] bits;
 
@@ -50,8 +50,18 @@ final class BitSet implements Serializable {
   }
 
   void clear() {
-    for (int i = 0; i < bits.length; i++) {
+    int length = bits.length;
+    for (int i = 0; i < length; i++) {
       bits[i] = 0L;
+    }
+  }
+
+  @Override
+  public BitSet clone() {
+    try {
+      return (BitSet) super.clone();
+    } catch (CloneNotSupportedException cnse) {
+      throw new AssertionError();
     }
   }
 
