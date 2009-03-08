@@ -70,10 +70,9 @@ public class TestCanopyCreation extends TestCase {
     super(name);
   }
 
-  private List<Vector> getPoints(double[][] raw) {
+  private static List<Vector> getPoints(double[][] raw) {
     List<Vector> points = new ArrayList<Vector>();
-    for (int i = 0; i < raw.length; i++) {
-      double[] fr = raw[i];
+    for (double[] fr : raw) {
       Vector vec = new SparseVector(fr.length);
       vec.assign(fr);
       points.add(vec);
@@ -81,10 +80,11 @@ public class TestCanopyCreation extends TestCase {
     return points;
   }
 
-  private List<Text> getFormattedPoints(List<Vector> points) {
+  private static List<Text> getFormattedPoints(List<Vector> points) {
     List<Text> result = new ArrayList<Text>();
-    for (Vector point : points)
+    for (Vector point : points) {
       result.add(new Text(point.asFormatString()));
+    }
     return result;
   }
 
@@ -113,7 +113,7 @@ public class TestCanopyCreation extends TestCase {
    * 
    * @param canopies
    */
-  private void verifyCanopies(List<Canopy> canopies, List<Canopy> reference) {
+  private static void verifyCanopies(List<Canopy> canopies, List<Canopy> reference) {
     assertEquals("number of canopies", reference.size(), canopies.size());
     for (int canopyIx = 0; canopyIx < canopies.size(); canopyIx++) {
       Canopy refCanopy = reference.get(canopyIx);
@@ -135,18 +135,18 @@ public class TestCanopyCreation extends TestCase {
    * @param canopies
    *            a List<Canopy>
    */
-  private void prtCanopies(List<Canopy> canopies) {
+  private static void printCanopies(List<Canopy> canopies) {
     for (Canopy canopy : canopies) {
       System.out.println(canopy.toString());
     }
   }
 
-  private void writePointsToFile(List<Vector> points, String fileName)
+  private static void writePointsToFile(List<Vector> points, String fileName)
       throws IOException {
     writePointsToFileWithPayload(points, fileName, "");
   }
 
-  private void writePointsToFileWithPayload(List<Vector> points,
+  private static void writePointsToFileWithPayload(List<Vector> points,
       String fileName, String payload) throws IOException {
     BufferedWriter output = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), Charset.forName("UTF-8")));
     for (Vector point : points) {
@@ -158,18 +158,20 @@ public class TestCanopyCreation extends TestCase {
     output.close();
   }
 
-  private void rmr(String path) throws Exception {
+  private static void rmr(String path) throws Exception {
     File f = new File(path);
     if (f.exists()) {
       if (f.isDirectory()) {
         String[] contents = f.list();
-        for (int i = 0; i < contents.length; i++)
-          rmr(f.toString() + File.separator + contents[i]);
+        for (String content : contents) {
+          rmr(f.toString() + File.separator + content);
+        }
       }
       f.delete();
     }
   }
 
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
     rmr("output");
@@ -189,7 +191,7 @@ public class TestCanopyCreation extends TestCase {
    *            a List<Canopy>
    * @return the List<Vector>
    */
-  List<Vector> populateCentroids(List<Canopy> canopies) {
+  static List<Vector> populateCentroids(List<Canopy> canopies) {
     List<Vector> result = new ArrayList<Vector>();
     for (Canopy canopy : canopies)
       result.add(canopy.computeCentroid());
@@ -209,7 +211,7 @@ public class TestCanopyCreation extends TestCase {
    *            the T2 distance threshold
    * @return the List<Canopy> created
    */
-  List<Canopy> populateCanopies(DistanceMeasure measure, List<Vector> points,
+  static List<Canopy> populateCanopies(DistanceMeasure measure, List<Vector> points,
       double t1, double t2) {
     List<Canopy> canopies = new ArrayList<Canopy>();
     Canopy.config(measure, t1, t2);
@@ -253,7 +255,7 @@ public class TestCanopyCreation extends TestCase {
   public void testReferenceManhattan() throws Exception {
     System.out.println("testReferenceManhattan");
     // see setUp for cluster creation
-    prtCanopies(referenceManhattan);
+    printCanopies(referenceManhattan);
     assertEquals("number of canopies", 3, referenceManhattan.size());
     for (int canopyIx = 0; canopyIx < referenceManhattan.size(); canopyIx++) {
       Canopy testCanopy = referenceManhattan.get(canopyIx);
@@ -265,7 +267,7 @@ public class TestCanopyCreation extends TestCase {
       double[] refCentroid = expectedCentroids[canopyIx];
       Vector testCentroid = testCanopy.computeCentroid();
       for (int pointIx = 0; pointIx < refCentroid.length; pointIx++) {
-        assertEquals("canopy centroid " + canopyIx + "[" + pointIx + "]",
+        assertEquals("canopy centroid " + canopyIx + '[' + pointIx + ']',
             refCentroid[pointIx], testCentroid.get(pointIx));
       }
     }
@@ -280,7 +282,7 @@ public class TestCanopyCreation extends TestCase {
   public void testReferenceEuclidean() throws Exception {
     System.out.println("testReferenceEuclidean()");
     // see setUp for cluster creation
-    prtCanopies(referenceEuclidean);
+    printCanopies(referenceEuclidean);
     assertEquals("number of canopies", 3, referenceManhattan.size());
     for (int canopyIx = 0; canopyIx < referenceManhattan.size(); canopyIx++) {
       Canopy testCanopy = referenceEuclidean.get(canopyIx);
@@ -292,7 +294,7 @@ public class TestCanopyCreation extends TestCase {
       double[] refCentroid = expectedCentroids[canopyIx];
       Vector testCentroid = testCanopy.computeCentroid();
       for (int pointIx = 0; pointIx < refCentroid.length; pointIx++) {
-        assertEquals("canopy centroid " + canopyIx + "[" + pointIx + "]",
+        assertEquals("canopy centroid " + canopyIx + '[' + pointIx + ']',
             refCentroid[pointIx], testCentroid.get(pointIx));
       }
     }
@@ -313,7 +315,7 @@ public class TestCanopyCreation extends TestCase {
       Canopy.addPointToCanopies(point, canopies);
 
     System.out.println("testIterativeManhattan");
-    prtCanopies(canopies);
+    printCanopies(canopies);
     verifyManhattanCanopies(canopies);
   }
 
@@ -332,7 +334,7 @@ public class TestCanopyCreation extends TestCase {
       Canopy.addPointToCanopies(point, canopies);
 
     System.out.println("testIterativeEuclidean");
-    prtCanopies(canopies);
+    printCanopies(canopies);
     verifyEuclideanCanopies(canopies);
   }
 

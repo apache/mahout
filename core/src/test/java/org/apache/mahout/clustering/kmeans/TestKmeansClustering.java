@@ -56,18 +56,20 @@ public class TestKmeansClustering extends TestCase {
       { 1, 1, 1, 1, 1, 2, 2 }, { 1, 1, 1, 1, 1, 1, 2, 1 },
       { 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
 
-  private void rmr(String path) throws Exception {
+  private static void rmr(String path) throws Exception {
     File f = new File(path);
     if (f.exists()) {
       if (f.isDirectory()) {
         String[] contents = f.list();
-        for (int i = 0; i < contents.length; i++)
-          rmr(f.toString() + File.separator + contents[i]);
+        for (String content : contents) {
+          rmr(f.toString() + File.separator + content);
+        }
       }
       f.delete();
     }
   }
 
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
     rmr("output");
@@ -88,7 +90,7 @@ public class TestKmeansClustering extends TestCase {
    * @param maxIter
    *            the maximum number of iterations
    */
-  private void referenceKmeans(List<Vector> points, List<Cluster> clusters,
+  private static void referenceKmeans(List<Vector> points, List<Cluster> clusters,
       DistanceMeasure measure, int maxIter) {
     boolean converged = false;
     int iteration = 0;
@@ -109,10 +111,8 @@ public class TestKmeansClustering extends TestCase {
    *            a DistanceMeasure to use
    * @return
    */
-  private boolean iterateReference(List<Vector> points, List<Cluster> clusters,
+  private static boolean iterateReference(List<Vector> points, List<Cluster> clusters,
       DistanceMeasure measure) {
-    boolean converged;
-    converged = true;
     // iterate through all points, assigning each to the nearest cluster
     for (Vector point : points) {
       Cluster closestCluster = null;
@@ -127,6 +127,7 @@ public class TestKmeansClustering extends TestCase {
       closestCluster.addPoint(point);
     }
     // test for convergence
+    boolean converged = true;
     for (Cluster cluster : clusters) {
       if (!cluster.computeConvergence())
         converged = false;
@@ -140,8 +141,7 @@ public class TestKmeansClustering extends TestCase {
 
   public static List<Vector> getPoints(double[][] raw) {
     List<Vector> points = new ArrayList<Vector>();
-    for (int i = 0; i < raw.length; i++) {
-      double[] fr = raw[i];
+    for (double[] fr : raw) {
       Vector vec = new SparseVector(fr.length);
       vec.assign(fr);
       points.add(vec);
@@ -160,7 +160,7 @@ public class TestKmeansClustering extends TestCase {
     Cluster.config(measure, 0.001);
     // try all possible values of k
     for (int k = 0; k < points.size(); k++) {
-      System.out.println("Test k=" + (k + 1) + ":");
+      System.out.println("Test k=" + (k + 1) + ':');
       // pick k initial cluster centers at random
       List<Cluster> clusters = new ArrayList<Cluster>();
       for (int i = 0; i < k + 1; i++) {
@@ -337,8 +337,7 @@ public class TestKmeansClustering extends TestCase {
 
       // now verify that all clusters have correct centers
       converged = true;
-      for (int i = 0; i < reference.size(); i++) {
-        Cluster ref = reference.get(i);
+      for (Cluster ref : reference) {
         String key = ref.getIdentifier();
         List<Text> values = collector3.getValue(key);
         String value = values.get(0).toString();
@@ -416,10 +415,10 @@ public class TestKmeansClustering extends TestCase {
       reader.close();
       if (k == 2)
         // cluster 3 is empty so won't appear in output
-        assertEquals("clusters[" + k + "]", expect.length - 1, collector
+        assertEquals("clusters[" + k + ']', expect.length - 1, collector
             .getKeys().size());
       else
-        assertEquals("clusters[" + k + "]", expect.length, collector.getKeys()
+        assertEquals("clusters[" + k + ']', expect.length, collector.getKeys()
             .size());
     }
   }
@@ -430,7 +429,7 @@ public class TestKmeansClustering extends TestCase {
    * 
    * @throws Exception
    */
-  public void textKMeansWithCanopyClusterInput() throws Exception {
+  public static void textKMeansWithCanopyClusterInput() throws Exception {
     List<Vector> points = getPoints(reference);
     File testData = new File("testdata");
     if (!testData.exists())

@@ -23,6 +23,7 @@ public class TestSparseMatrix extends MatrixTest {
     super(name);
   }
 
+  @Override
   public Matrix matrixFactory(double[][] values) {
     int[] cardinality = {values.length, values[0].length};
     Matrix matrix = new SparseMatrix(cardinality);

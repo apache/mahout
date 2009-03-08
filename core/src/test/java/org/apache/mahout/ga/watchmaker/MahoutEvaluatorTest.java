@@ -66,7 +66,7 @@ public class MahoutEvaluatorTest extends TestCase {
     storeLoadPopulation(population);
   }
 
-  private void storeLoadPopulation(List<DummyCandidate> population)
+  private static void storeLoadPopulation(List<DummyCandidate> population)
       throws IOException {
     FileSystem fs = FileSystem.get(new Configuration());
     Path f = new Path("build/test.txt");
@@ -86,13 +86,13 @@ public class MahoutEvaluatorTest extends TestCase {
     }
   }
 
-  private void loadPopulation(FileSystem fs, Path f,
+  private static void loadPopulation(FileSystem fs, Path f,
       List<DummyCandidate> population) throws IOException {
     FSDataInputStream in = fs.open(f);
     BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-    String s;
 
     try {
+      String s;
       while ((s = reader.readLine()) != null) {
         population.add((DummyCandidate) StringUtils.fromString(s));
       }

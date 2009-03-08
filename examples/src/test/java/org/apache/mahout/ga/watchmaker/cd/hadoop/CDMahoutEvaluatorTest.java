@@ -44,7 +44,7 @@ public class CDMahoutEvaluatorTest extends TestCase {
 
     // dataset
     Path input = new Path("target/test-classes/wdbc");
-    CDMahoutEvaluator.InitializeDataSet(input);
+    CDMahoutEvaluator.initializeDataSet(input);
 
     // evaluate the rules
     List<CDFitness> results = new ArrayList<CDFitness>();

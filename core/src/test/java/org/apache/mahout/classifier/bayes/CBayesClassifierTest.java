@@ -22,26 +22,28 @@ import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.classifier.cbayes.CBayesModel;
 
 public class CBayesClassifierTest extends TestCase {
-  protected CBayesModel model;
 
+  protected CBayesModel model;
 
   public CBayesClassifierTest(String s) {
     super(s);
   }
 
-  protected void setUp() {
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
     model = new CBayesModel();
     //String[] labels = new String[]{"a", "b", "c", "d", "e"};
     //long[] labelCounts = new long[]{6, 20, 60, 100, 200};
     //String[] features = new String[]{"aa", "bb", "cc", "dd", "ee"};
     model.setSigma_jSigma_k(500.0);
-    
+
     model.setSumFeatureWeight("aa", 80);
     model.setSumFeatureWeight("bb", 21);
     model.setSumFeatureWeight("cc", 60);
     model.setSumFeatureWeight("dd", 115);
     model.setSumFeatureWeight("ee", 100);
-    
+
     model.setSumLabelWeight("a", 100);
     model.setSumLabelWeight("b", 100);
     model.setSumLabelWeight("c", 100);
@@ -53,10 +55,10 @@ public class CBayesClassifierTest extends TestCase {
     model.setThetaNormalizer("c", -100);
     model.setThetaNormalizer("d", -100);
     model.setThetaNormalizer("e", -100);
-    
+
     model.initializeNormalizer();
     model.initializeWeightMatrix();
-   
+
     model.loadFeatureWeight("a", "aa", 5);
     model.loadFeatureWeight("a", "bb", 1);
 
@@ -74,34 +76,29 @@ public class CBayesClassifierTest extends TestCase {
     model.loadFeatureWeight("e", "dd", 50);
   }
 
-  protected void tearDown() {
-
-  }
-
   public void test() {
     BayesClassifier classifier = new BayesClassifier();
-    ClassifierResult result;
-    String[] document = new String[]{"aa", "ff"};
-    result = classifier.classify(model, document, "unknown");
-    assertTrue("category is null and it shouldn't be", result != null);
-    assertTrue(result + " is not equal to " + "e", result.getLabel().equals("e"));
+    String[] document = {"aa", "ff"};
+    ClassifierResult result = classifier.classify(model, document, "unknown");
+    assertNotNull("category is null and it shouldn't be", result);
+    assertEquals(result + " is not equal to e", "e", result.getLabel());
 
     document = new String[]{"ff"};
     result = classifier.classify(model, document, "unknown");
-    assertTrue("category is null and it shouldn't be", result != null);
-    assertTrue(result + " is not equal to " + "d", result.getLabel().equals("d"));
+    assertNotNull("category is null and it shouldn't be", result);
+    assertEquals(result + " is not equal to d", "d", result.getLabel());
 
     document = new String[]{"cc"};
     result = classifier.classify(model, document, "unknown");
-    assertTrue("category is null and it shouldn't be", result != null);
-    assertTrue(result + " is not equal to " + "d", result.getLabel().equals("d"));
+    assertNotNull("category is null and it shouldn't be", result);
+    assertEquals(result + " is not equal to d", "d", result.getLabel());
   }
 
   public void testResults() throws Exception {
     BayesClassifier classifier = new BayesClassifier();
-    String[] document = new String[]{"aa", "ff"};
+    String[] document = {"aa", "ff"};
     ClassifierResult result = classifier.classify(model, document, "unknown");
-    assertTrue("category is null and it shouldn't be", result != null);    
+    assertNotNull("category is null and it shouldn't be", result);
     System.out.println("Result: " + result);
   }
 }

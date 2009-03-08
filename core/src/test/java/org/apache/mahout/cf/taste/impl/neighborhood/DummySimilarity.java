@@ -28,20 +28,24 @@ import java.util.Collection;
 
 final class DummySimilarity implements UserSimilarity, ItemSimilarity {
 
+  @Override
   public double userSimilarity(User user1, User user2) {
     return 1.0 / Math.abs(user1.getPreferencesAsArray()[0].getValue() -
                           user2.getPreferencesAsArray()[0].getValue());
   }
 
+  @Override
   public double itemSimilarity(Item item1, Item item2) {
     // Make up something wacky
     return (double) (item1.hashCode() - item2.hashCode());
   }
 
+  @Override
   public void setPreferenceInferrer(PreferenceInferrer inferrer) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     // do nothing
   }

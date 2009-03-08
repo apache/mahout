@@ -41,12 +41,12 @@ public class TestDenseVector extends TestCase {
   public void testCopy() throws Exception {
     Vector copy = test.copy();
     for (int i = 0; i < test.cardinality(); i++)
-      assertEquals("copy [" + i + "]", test.get(i), copy.get(i));
+      assertEquals("copy [" + i + ']', test.get(i), copy.get(i));
   }
 
   public void testGet() throws Exception {
     for (int i = 0; i < test.cardinality(); i++)
-      assertEquals("get [" + i + "]", values[i], test.get(i));
+      assertEquals("get [" + i + ']', values[i], test.get(i));
   }
 
   public void testGetOver() {
@@ -71,9 +71,9 @@ public class TestDenseVector extends TestCase {
     test.set(2, 4.5);
     for (int i = 0; i < test.cardinality(); i++)
       if (i == 2)
-        assertEquals("set [" + i + "]", 4.5, test.get(i));
+        assertEquals("set [" + i + ']', 4.5, test.get(i));
       else
-        assertEquals("set [" + i + "]", values[i], test.get(i));
+        assertEquals("set [" + i + ']', values[i], test.get(i));
   }
 
   public void testSize() throws Exception {
@@ -83,14 +83,14 @@ public class TestDenseVector extends TestCase {
   public void testToArray() throws Exception {
     double[] val = test.toArray();
     for (int i = 0; i < test.cardinality(); i++)
-      assertEquals("get [" + i + "]", val[i], test.get(i));
+      assertEquals("get [" + i + ']', val[i], test.get(i));
   }
 
   public void testViewPart() throws Exception {
     Vector part = test.viewPart(1, 2);
     assertEquals("part size", 2, part.size());
     for (int i = 0; i < part.cardinality(); i++)
-      assertEquals("part[" + i + "]", values[i + 1], part.get(i));
+      assertEquals("part[" + i + ']', values[i + 1], part.get(i));
   }
 
   public void testViewPartUnder() {
@@ -129,19 +129,19 @@ public class TestDenseVector extends TestCase {
   public void testDecodeFormat() throws Exception {
     Vector val = DenseVector.decodeFormat(test.asWritableComparable());
     for (int i = 0; i < test.cardinality(); i++)
-      assertEquals("get [" + i + "]", test.get(i), val.get(i));
+      assertEquals("get [" + i + ']', test.get(i), val.get(i));
   }
 
   public void testDenseVectorDoubleArray() throws Exception {
     for (int i = 0; i < test.cardinality(); i++)
-      assertEquals("test[" + i + "]", values[i], test.get(i));
+      assertEquals("test[" + i + ']', values[i], test.get(i));
   }
 
   public void testDenseVectorInt() throws Exception {
     Vector val = new DenseVector(4);
     assertEquals("cardinality", 4, val.cardinality());
     for (int i = 0; i < test.cardinality(); i++)
-      assertEquals("get [" + i + "]", 0.0, val.get(i));
+      assertEquals("get [" + i + ']', 0.0, val.get(i));
   }
 
   public void testDot() throws Exception {
@@ -169,21 +169,21 @@ public class TestDenseVector extends TestCase {
     Vector val = test.minus(test);
     assertEquals("cardinality", 3, val.cardinality());
     for (int i = 0; i < test.cardinality(); i++)
-      assertEquals("get [" + i + "]", 0.0, val.get(i));
+      assertEquals("get [" + i + ']', 0.0, val.get(i));
   }
 
   public void testPlusDouble() throws Exception {
     Vector val = test.plus(1);
     assertEquals("cardinality", 3, val.cardinality());
     for (int i = 0; i < test.cardinality(); i++)
-      assertEquals("get [" + i + "]", values[i] + 1, val.get(i));
+      assertEquals("get [" + i + ']', values[i] + 1, val.get(i));
   }
 
   public void testPlusVector() throws Exception {
     Vector val = test.plus(test);
     assertEquals("cardinality", 3, val.cardinality());
     for (int i = 0; i < test.cardinality(); i++)
-      assertEquals("get [" + i + "]", values[i] * 2, val.get(i));
+      assertEquals("get [" + i + ']', values[i] * 2, val.get(i));
   }
 
   public void testPlusVectorCardinality() {
@@ -199,21 +199,21 @@ public class TestDenseVector extends TestCase {
     Vector val = test.times(3);
     assertEquals("cardinality", 3, val.cardinality());
     for (int i = 0; i < test.cardinality(); i++)
-      assertEquals("get [" + i + "]", values[i] * 3, val.get(i));
+      assertEquals("get [" + i + ']', values[i] * 3, val.get(i));
   }
 
   public void testDivideDouble() throws Exception {
     Vector val = test.divide(3);
     assertEquals("cardinality", 3, val.cardinality());
     for (int i = 0; i < test.cardinality(); i++)
-      assertEquals("get [" + i + "]", values[i] / 3, val.get(i));
+      assertEquals("get [" + i + ']', values[i] / 3, val.get(i));
   }
 
   public void testTimesVector() throws Exception {
     Vector val = test.times(test);
     assertEquals("cardinality", 3, val.cardinality());
     for (int i = 0; i < test.cardinality(); i++)
-      assertEquals("get [" + i + "]", values[i] * values[i], val.get(i));
+      assertEquals("get [" + i + ']', values[i] * values[i], val.get(i));
   }
 
   public void testTimesVectorCardinality() {
@@ -227,22 +227,25 @@ public class TestDenseVector extends TestCase {
 
   public void testZSum() {
     double expected = 0;
-    for (int i = 0; i < values.length; i++)
-      expected += values[i];
+    for (double value : values) {
+      expected += value;
+    }
     assertEquals("wrong zSum", expected, test.zSum());
   }
 
   public void testAssignDouble() {
     test.assign(0);
-    for (int i = 0; i < values.length; i++)
-      assertEquals("value[" + i + "]", 0.0, test.getQuick(i));
+    for (int i = 0; i < values.length; i++) {
+      assertEquals("value[" + i + ']', 0.0, test.getQuick(i));
+    }
   }
 
   public void testAssignDoubleArray() throws Exception {
     double[] array = new double[test.cardinality()];
     test.assign(array);
-    for (int i = 0; i < values.length; i++)
-      assertEquals("value[" + i + "]", 0.0, test.getQuick(i));
+    for (int i = 0; i < values.length; i++) {
+      assertEquals("value[" + i + ']', 0.0, test.getQuick(i));
+    }
   }
 
   public void testAssignDoubleArrayCardinality() {
@@ -258,8 +261,9 @@ public class TestDenseVector extends TestCase {
   public void testAssignVector() throws Exception {
     Vector other = new DenseVector(test.cardinality());
     test.assign(other);
-    for (int i = 0; i < values.length; i++)
-      assertEquals("value[" + i + "]", 0.0, test.getQuick(i));
+    for (int i = 0; i < values.length; i++) {
+      assertEquals("value[" + i + ']', 0.0, test.getQuick(i));
+    }
   }
 
   public void testAssignVectorCardinality() {
@@ -274,26 +278,29 @@ public class TestDenseVector extends TestCase {
 
   public void testAssignUnaryFunction() {
     test.assign(new NegateFunction());
-    for (int i = 0; i < values.length; i++)
-      assertEquals("value[" + i + "]", -values[i], test.getQuick(i));
+    for (int i = 0; i < values.length; i++) {
+      assertEquals("value[" + i + ']', -values[i], test.getQuick(i));
+    }
   }
 
   public void testAssignBinaryFunction() throws Exception {
     test.assign(test, new PlusFunction());
-    for (int i = 0; i < values.length; i++)
-      assertEquals("value[" + i + "]", 2 * values[i], test.getQuick(i));
+    for (int i = 0; i < values.length; i++) {
+      assertEquals("value[" + i + ']', 2 * values[i], test.getQuick(i));
+    }
   }
 
   public void testAssignBinaryFunction2() throws Exception {
     test.assign(new PlusFunction(), 4);
-    for (int i = 0; i < values.length; i++)
-      assertEquals("value[" + i + "]", values[i] + 4, test.getQuick(i));
+    for (int i = 0; i < values.length; i++) {
+      assertEquals("value[" + i + ']', values[i] + 4, test.getQuick(i));
+    }
   }
 
   public void testAssignBinaryFunction3() throws Exception {
     test.assign(new TimesFunction(), 4);
     for (int i = 0; i < values.length; i++)
-      assertEquals("value[" + i + "]", values[i] * 4, test.getQuick(i));
+      assertEquals("value[" + i + ']', values[i] * 4, test.getQuick(i));
   }
 
   public void testAssignBinaryFunctionCardinality() {
@@ -336,9 +343,11 @@ public class TestDenseVector extends TestCase {
     Matrix result = test.cross(test);
     assertEquals("row cardinality", test.cardinality(), result.cardinality()[0]);
     assertEquals("col cardinality", test.cardinality(), result.cardinality()[1]);
-    for (int row = 0; row < result.cardinality()[0]; row++)
-      for (int col = 0; col < result.cardinality()[1]; col++)
-        assertEquals("cross[" + row + "][" + col + "]", test.getQuick(row)
+    for (int row = 0; row < result.cardinality()[0]; row++) {
+      for (int col = 0; col < result.cardinality()[1]; col++) {
+        assertEquals("cross[" + row + "][" + col + ']', test.getQuick(row)
             * test.getQuick(col), result.getQuick(row, col));
+      }
+    }
   }
 }

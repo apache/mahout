@@ -21,26 +21,17 @@ import junit.framework.TestCase;
 
 public class VectorTest extends TestCase {
 
-
   public VectorTest(String s) {
     super(s);
-  }
-
-  protected void setUp() {
-  }
-
-  protected void tearDown() {
-
   }
 
   public void testSparseVector() throws Exception {
     SparseVector vec1 = new SparseVector(3);
     SparseVector vec2 = new SparseVector(3);
-    testVectors(vec1, vec2);
-
+    doTestVectors(vec1, vec2);
   }
 
-  private void testVectors(Vector left, Vector right) {
+  private static void doTestVectors(Vector left, Vector right) {
     left.setQuick(0, 1);
     left.setQuick(1, 2);
     left.setQuick(2, 3);
@@ -48,14 +39,14 @@ public class VectorTest extends TestCase {
     right.setQuick(1, 5);
     right.setQuick(2, 6);
     double result = left.dot(right);
-    assertTrue(result + " does not equal: " + 32, result == 32);
+    assertEquals(result + " does not equal: " + 32, 32.0, result);
   }
 
 
   public void testDenseVector() throws Exception {
     DenseVector vec1 = new DenseVector(3);
     DenseVector vec2 = new DenseVector(3);
-    testVectors(vec1, vec2);
+    doTestVectors(vec1, vec2);
 
   }
 
@@ -64,13 +55,13 @@ public class VectorTest extends TestCase {
     SparseVector vec2 = new SparseVector(6);
     VectorView vecV1 = new VectorView(vec1, 0, 3);
     VectorView vecV2 = new VectorView(vec2, 2, 3);
-    testVectors(vecV1, vecV2);
+    doTestVectors(vecV1, vecV2);
   }
 
   /**
    * Asserts a vector using enumeration equals a given dense vector
    */
-  public void testEnumeration(double[] apriori, Vector vector) throws Exception {
+  private static void doTestEnumeration(double[] apriori, Vector vector) {
     double[] test = new double[apriori.length];
     for (Vector.Element e : vector) {
       test[e.index()] = e.get();
@@ -82,11 +73,11 @@ public class VectorTest extends TestCase {
   }
 
   public void testEnumeration() throws Exception {
-    double[] apriori = new double[]{0, 1, 2, 3, 4};
+    double[] apriori = {0, 1, 2, 3, 4};
 
-    testEnumeration(apriori, new VectorView(new DenseVector(new double[]{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9}), 2, 5));
+    doTestEnumeration(apriori, new VectorView(new DenseVector(new double[]{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9}), 2, 5));
     
-    testEnumeration(apriori, new DenseVector(new double[]{0, 1, 2, 3, 4}));
+    doTestEnumeration(apriori, new DenseVector(new double[]{0, 1, 2, 3, 4}));
 
     SparseVector sparse = new SparseVector(5);
     sparse.set(0, 0);
@@ -94,9 +85,7 @@ public class VectorTest extends TestCase {
     sparse.set(2, 2);
     sparse.set(3, 3);
     sparse.set(4, 4);
-    testEnumeration(apriori, sparse);
-
-
-
+    doTestEnumeration(apriori, sparse);
   }
+
 }

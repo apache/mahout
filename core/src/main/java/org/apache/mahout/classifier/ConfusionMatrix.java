@@ -122,7 +122,7 @@ public class ConfusionMatrix implements Summarizable {
     incrementCount(correctLabel, classifiedLabel, 1);
   }
 
-  public ConfusionMatrix Merge(ConfusionMatrix b) {
+  public ConfusionMatrix merge(ConfusionMatrix b) {
     if (labels.size() != b.getLabels().size())
       throw new IllegalArgumentException("The Labels do not Match");
 

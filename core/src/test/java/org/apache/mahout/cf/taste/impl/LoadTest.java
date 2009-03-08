@@ -65,6 +65,7 @@ public final class LoadTest extends TasteTestCase {
 
   private Random random;
 
+  @Override
   public void setUp() throws Exception {
     super.setUp();
     random = RandomUtils.getRandom();
@@ -141,6 +142,7 @@ public final class LoadTest extends TasteTestCase {
       this.recommender = recommender;
     }
 
+    @Override
     public Object call() throws TasteException {
       for (int i = 0; i < NUM_USERS / 2; i++) {
         recommender.recommend(String.valueOf(random.nextInt(NUM_USERS)), 10);

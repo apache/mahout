@@ -30,7 +30,7 @@ public abstract class DefaultDistanceMeasureTest extends TestCase {
 
     DistanceMeasure distanceMeasure = distanceMeasureFactory();
 
-    Vector[] vectors = new Vector[]{
+    Vector[] vectors = {
         new DenseVector(new double[]{1, 1, 1, 1, 1, 1}),
         new DenseVector(new double[]{2, 2, 2, 2, 2, 2}),
         new DenseVector(new double[]{6, 6, 6, 6, 6, 6})
@@ -44,15 +44,15 @@ public abstract class DefaultDistanceMeasureTest extends TestCase {
       }
     }
 
-    assertEquals(0d, distanceMatrix[0][0]);
+    assertEquals(0.0, distanceMatrix[0][0]);
     assertTrue(distanceMatrix[0][0] < distanceMatrix[0][1]);
     assertTrue(distanceMatrix[0][1] < distanceMatrix[0][2]);
 
-    assertEquals(0d, distanceMatrix[1][1]);
+    assertEquals(0.0, distanceMatrix[1][1]);
     assertTrue(distanceMatrix[1][0] > distanceMatrix[1][1]);
     assertTrue(distanceMatrix[1][2] > distanceMatrix[1][0]);
 
-    assertEquals(0d, distanceMatrix[2][2]);
+    assertEquals(0.0, distanceMatrix[2][2]);
     assertTrue(distanceMatrix[2][0] > distanceMatrix[2][1]);
     assertTrue(distanceMatrix[2][1] > distanceMatrix[2][2]);
 

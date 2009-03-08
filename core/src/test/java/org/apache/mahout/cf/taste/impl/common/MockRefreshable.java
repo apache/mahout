@@ -29,10 +29,12 @@ final class MockRefreshable implements Refreshable, Callable<Object> {
 
   private int callCount;
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     call();
   }
 
+  @Override
   public Object call() {
     callCount++;
     return null;

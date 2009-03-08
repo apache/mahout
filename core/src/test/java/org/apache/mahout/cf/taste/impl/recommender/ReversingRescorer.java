@@ -25,10 +25,12 @@ import org.apache.mahout.cf.taste.recommender.Rescorer;
  */
 public final class ReversingRescorer<T> implements Rescorer<T> {
 
+  @Override
   public double rescore(T thing, double originalScore) {
     return Double.isNaN(originalScore) ? Double.NaN : -originalScore;
   }
 
+  @Override
   public boolean isFiltered(T thing) {
     return false;
   }

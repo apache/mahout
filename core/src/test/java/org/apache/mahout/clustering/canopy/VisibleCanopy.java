@@ -41,6 +41,7 @@ public class VisibleCanopy extends Canopy {
    *
    * @param point a point
    */
+  @Override
   public void addPoint(Vector point) {
     super.addPoint(point);
     points.add(point);
@@ -52,6 +53,7 @@ public class VisibleCanopy extends Canopy {
    *
    * @return
    */
+  @Override
   public String toString() {
     String out = super.toString() + ": ";
     for (Vector pt : points)

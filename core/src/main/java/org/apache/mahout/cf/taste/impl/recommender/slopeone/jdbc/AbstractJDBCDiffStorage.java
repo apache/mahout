@@ -204,38 +204,34 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
   public void updateItemPref(Object itemID, double prefDelta, boolean remove)
           throws TasteException {
     Connection conn = null;
-    PreparedStatement stmt = null;
     try {
       conn = dataSource.getConnection();
       if (remove) {
-        stmt = doPartialUpdate(removeDiffSQLs[0], itemID, prefDelta, conn);
-        IOUtils.quietClose(stmt);
-        stmt = doPartialUpdate(removeDiffSQLs[1], itemID, prefDelta, conn);
-        IOUtils.quietClose(stmt);
+        doPartialUpdate(removeDiffSQLs[0], itemID, prefDelta, conn);
+        doPartialUpdate(removeDiffSQLs[1], itemID, prefDelta, conn);
       } else {
-        stmt = doPartialUpdate(updateDiffSQLs[0], itemID, prefDelta, conn);
-        IOUtils.quietClose(stmt);        
-        stmt = doPartialUpdate(updateDiffSQLs[1], itemID, prefDelta, conn);
-        IOUtils.quietClose(stmt);
+        doPartialUpdate(updateDiffSQLs[0], itemID, prefDelta, conn);
+        doPartialUpdate(updateDiffSQLs[1], itemID, prefDelta, conn);
       }
     } catch (SQLException sqle) {
       log.warn("Exception while updating item diff", sqle);
       throw new TasteException(sqle);
     } finally {
-      IOUtils.quietClose(null, stmt, conn);
+      IOUtils.quietClose(conn);
     }
   }
 
-  private static PreparedStatement doPartialUpdate(String sql,
-                                                   Object itemID,
-                                                   double prefDelta,
-                                                   Connection conn) throws SQLException {
+  private static void doPartialUpdate(String sql, Object itemID, double prefDelta, Connection conn)
+      throws SQLException {
     PreparedStatement stmt = conn.prepareStatement(sql);
-    stmt.setDouble(1, prefDelta);
-    stmt.setObject(2, itemID);
-    log.debug("Executing SQL update: {}", sql);
-    stmt.executeUpdate();
-    return stmt;
+    try {
+      stmt.setDouble(1, prefDelta);
+      stmt.setObject(2, itemID);
+      log.debug("Executing SQL update: {}", sql);
+      stmt.executeUpdate();
+    } finally {
+      IOUtils.quietClose(stmt);
+    }
   }
 
   @Override

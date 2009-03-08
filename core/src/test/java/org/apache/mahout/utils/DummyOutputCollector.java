@@ -32,6 +32,7 @@ public class DummyOutputCollector<K extends WritableComparable, V extends Writab
 
   final Map<String, List<V>> data = new TreeMap<String, List<V>>();
 
+  @Override
   public void collect(K key, V values)
           throws IOException {
     List<V> points = data.get(key.toString());

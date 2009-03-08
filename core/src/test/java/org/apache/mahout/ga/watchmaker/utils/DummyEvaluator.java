@@ -45,6 +45,7 @@ public class DummyEvaluator implements FitnessEvaluator<DummyCandidate> {
     evaluations.clear();
   }
   
+  @Override
   public double getFitness(DummyCandidate candidate,
       List<? extends DummyCandidate> population) {
     if (evaluations.containsKey(candidate.getIndex()))
@@ -56,6 +57,7 @@ public class DummyEvaluator implements FitnessEvaluator<DummyCandidate> {
     return fitness;
   }
 
+  @Override
   public boolean isNatural() {
     return false;
   }

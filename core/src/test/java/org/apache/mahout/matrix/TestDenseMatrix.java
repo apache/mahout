@@ -23,6 +23,7 @@ public class TestDenseMatrix extends MatrixTest {
     super(name);
   }
 
+  @Override
   public Matrix matrixFactory(double[][] values) {
     return new DenseMatrix(values);
   }

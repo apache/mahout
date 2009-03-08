@@ -19,6 +19,7 @@ package org.apache.mahout.utils;
 
 public class TestManhattanDistanceMeasure extends DefaultDistanceMeasureTest {
 
+  @Override
   public DistanceMeasure distanceMeasureFactory() {
     return new ManhattanDistanceMeasure();
   }

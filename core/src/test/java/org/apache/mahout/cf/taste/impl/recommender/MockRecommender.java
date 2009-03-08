@@ -44,31 +44,37 @@ final class MockRecommender implements Recommender {
     this.recommendCount = recommendCount;
   }
 
+  @Override
   public List<RecommendedItem> recommend(Object userID, int howMany) {
     recommendCount.incrementAndGet();
     return Collections.<RecommendedItem>singletonList(
             new GenericRecommendedItem(new GenericItem<String>("1"), 1.0));
   }
 
+  @Override
   public List<RecommendedItem> recommend(Object userID,
                                          int howMany,
                                          Rescorer<Item> rescorer) {
     return recommend(userID, howMany);
   }
 
+  @Override
   public double estimatePreference(Object userID, Object itemID) {
     recommendCount.incrementAndGet();
     return 0.0;
   }
 
+  @Override
   public void setPreference(Object userID, Object itemID, double value) {
     // do nothing
   }
 
+  @Override
   public void removePreference(Object userID, Object itemID) {
     // do nothing
   }
 
+  @Override
   public DataModel getDataModel() {
     User user1 = new GenericUser<String>("1", Collections.<Preference>emptyList());
     User user2 = new GenericUser<String>("2", Collections.<Preference>emptyList());
@@ -80,6 +86,7 @@ final class MockRecommender implements Recommender {
     return new GenericDataModel(users);
   }
 
+  @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     // do nothing
   }
