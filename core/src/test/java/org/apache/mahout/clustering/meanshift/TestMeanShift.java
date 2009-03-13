@@ -226,7 +226,7 @@ public class TestMeanShift extends TestCase {
     }
     // build a map of the combiner output
     Map<String, MeanShiftCanopy> canopyMap = new HashMap<String, MeanShiftCanopy>();
-    for (WritableComparable d : data) {
+    for (WritableComparable<?> d : data) {
       MeanShiftCanopy dc = MeanShiftCanopy.decodeCanopy(d.toString());
       canopyMap.put(dc.getIdentifier(), dc);
     }

@@ -19,10 +19,6 @@ package org.apache.mahout.ga.watchmaker.cd.utils;
 
 import org.apache.mahout.ga.watchmaker.cd.DataSet;
 import org.easymock.classextension.EasyMock;
-import static org.easymock.classextension.EasyMock.createMock;
-import static org.easymock.classextension.EasyMock.expect;
-import static org.easymock.classextension.EasyMock.replay;
-import static org.easymock.classextension.EasyMock.reset;
 
 import java.util.Random;
 
@@ -49,7 +45,7 @@ public class MockDataSet {
     this.rng = rng;
     this.maxnba = maxnba;
 
-    dataset = createMock(DataSet.class);
+    dataset = EasyMock.createMock(DataSet.class);
     DataSet.initialize(dataset);
   }
 
@@ -62,14 +58,14 @@ public class MockDataSet {
    *        otherwise : both numerical an categorical attributes are probable
    */
   public void randomDataset(double numRate) {
-    reset(dataset);
+    EasyMock.reset(dataset);
 
     int nba = rng.nextInt(maxnba) + 1;
-    expect(dataset.getNbAttributes()).andReturn(nba).anyTimes();
+    EasyMock.expect(dataset.getNbAttributes()).andReturn(nba).anyTimes();
 
     // label at random position
     int labelpos = rng.nextInt(nba);
-    expect(dataset.getLabelIndex()).andReturn(labelpos).anyTimes();
+    EasyMock.expect(dataset.getLabelIndex()).andReturn(labelpos).anyTimes();
 
     for (int index = 0; index < nba; index++) {
       if (index == labelpos) {
@@ -81,7 +77,7 @@ public class MockDataSet {
         prepareCategoricalAttribute(index, rng.nextInt(100) + 1);
     }
 
-    replay(dataset);
+    EasyMock.replay(dataset);
   }
 
   /**
@@ -122,14 +118,14 @@ public class MockDataSet {
     double max = rng.nextDouble() * ((long) Integer.MAX_VALUE - Integer.MIN_VALUE) + Integer.MIN_VALUE;
     double min = rng.nextDouble() * (max - Integer.MIN_VALUE) + Integer.MIN_VALUE;
 
-    expect(dataset.isNumerical(index)).andReturn(true).anyTimes();
-    expect(dataset.getMax(index)).andReturn(max).anyTimes();
-    expect(dataset.getMin(index)).andReturn(min).anyTimes();
+    EasyMock.expect(dataset.isNumerical(index)).andReturn(true).anyTimes();
+    EasyMock.expect(dataset.getMax(index)).andReturn(max).anyTimes();
+    EasyMock.expect(dataset.getMin(index)).andReturn(min).anyTimes();
   }
 
   private void prepareCategoricalAttribute(int index, int nbcats) {
-    expect(dataset.isNumerical(index)).andReturn(false).anyTimes();
-    expect(dataset.getNbValues(index)).andReturn(nbcats).anyTimes();
+    EasyMock.expect(dataset.isNumerical(index)).andReturn(false).anyTimes();
+    EasyMock.expect(dataset.getNbValues(index)).andReturn(nbcats).anyTimes();
   }
 
 }

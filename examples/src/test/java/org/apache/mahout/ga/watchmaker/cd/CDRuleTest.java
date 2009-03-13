@@ -18,9 +18,10 @@
 package org.apache.mahout.ga.watchmaker.cd;
 
 import junit.framework.TestCase;
+import junit.framework.Assert;
 import org.apache.mahout.ga.watchmaker.cd.utils.MockDataSet;
 import org.uncommons.maths.random.MersenneTwisterRNG;
-import static org.easymock.classextension.EasyMock.*;
+import org.easymock.classextension.EasyMock;
 
 import java.util.Random;
 
@@ -61,8 +62,8 @@ public class CDRuleTest extends TestCase {
   }
 
   private void assertInRange(double value, double min, double max) {
-    TestCase.assertTrue("value < min", value >= min);
-    TestCase.assertTrue("value > max", value <= max);
+    Assert.assertTrue("value < min", value >= min);
+    Assert.assertTrue("value > max", value <= max);
   }
 
   @Override
@@ -79,9 +80,9 @@ public class CDRuleTest extends TestCase {
     int n = 100; // repeat the test n times
 
     // the dataline has all its attributes set to 0d
-    DataLine dl = createMock(DataLine.class);
-    expect(dl.getAttribut(anyInt())).andReturn(0d).atLeastOnce();
-    replay(dl);
+    DataLine dl = EasyMock.createMock(DataLine.class);
+    EasyMock.expect(dl.getAttribut(EasyMock.anyInt())).andReturn(0d).atLeastOnce();
+    EasyMock.replay(dl);
 
     // all the conditions are : attribut < 0
     for (int nloop = 0; nloop < n; nloop++) {
@@ -107,7 +108,7 @@ public class CDRuleTest extends TestCase {
       mock.verify();
     }
 
-    verify(dl);
+    EasyMock.verify(dl);
   }
 
   /**
@@ -118,9 +119,9 @@ public class CDRuleTest extends TestCase {
     int n = 100; // repeat the test n times
 
     // the dataline has all its attributes set to 1d
-    DataLine dl = createMock(DataLine.class);
-    expect(dl.getAttribut(anyInt())).andReturn(1d).atLeastOnce();
-    replay(dl);
+    DataLine dl = EasyMock.createMock(DataLine.class);
+    EasyMock.expect(dl.getAttribut(EasyMock.anyInt())).andReturn(1d).atLeastOnce();
+    EasyMock.replay(dl);
 
     for (int nloop = 0; nloop < n; nloop++) {
       mock.numericalDataset();
@@ -143,7 +144,7 @@ public class CDRuleTest extends TestCase {
       mock.verify();
     }
 
-    verify(dl);
+    EasyMock.verify(dl);
   }
 
   /**
@@ -154,9 +155,9 @@ public class CDRuleTest extends TestCase {
     int n = 100; // repeat the test n times
 
     // the dataline has all its attributes set to 1d
-    DataLine dl = createMock(DataLine.class);
-    expect(dl.getAttribut(anyInt())).andReturn(1d).atLeastOnce();
-    replay(dl);
+    DataLine dl = EasyMock.createMock(DataLine.class);
+    EasyMock.expect(dl.getAttribut(EasyMock.anyInt())).andReturn(1d).atLeastOnce();
+    EasyMock.replay(dl);
 
     Random rng = new MersenneTwisterRNG();
     for (int nloop = 0; nloop < n; nloop++) {
@@ -184,7 +185,7 @@ public class CDRuleTest extends TestCase {
       mock.verify();
     }
 
-    verify(dl);
+    EasyMock.verify(dl);
   }
 
 }
