@@ -29,9 +29,10 @@
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
-          <descriptors>
-            <descriptor>./maven/mahout-assembly.xml</descriptor>
-          </descriptors>
+          <descriptorRefs>
+            <descriptorRef>project</descriptorRef>
+          </descriptorRefs>
+
         </configuration>
         <executions>
           <execution>
@@ -52,7 +53,7 @@
          <doapOptions>
            <programmingLanguage>java</programmingLanguage>
            <category>library</category>
-           
+
          </doapOptions>
 
           <asfExtOptions>
