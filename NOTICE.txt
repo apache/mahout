@@ -32,3 +32,6 @@ Tammo Freese (http://www.easymock.org/)
 
 This product uses the Breast Cancer Wisconsin (Diagnostic) Dataset from the
 UCI Machine Learning Repository [http://www.ics.uci.edu/~mlearn/MLRepository.html]. 
+
+This product contains parts of the Bayesian Logic (BLOG) Inference Engine.
+Copyright (c) 2005, Regents of the University of California
