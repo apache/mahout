@@ -1,10 +1,11 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -17,11 +18,11 @@
 
 package org.apache.mahout.clustering.kmeans;
 
+import java.io.IOException;
+
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
-
-import java.io.IOException;
 
 public class KMeansJob {
 
@@ -29,14 +30,25 @@ public class KMeansJob {
   }
 
   public static void main(String[] args) throws IOException {
-    String input = args[0];
-    String clusters = args[1];
-    String output = args[2];
-    String measureClass = args[3];
-    double convergenceDelta = Double.parseDouble(args[4]);
-    int maxIterations = Integer.parseInt(args[5]);
+    int index = 0;
+
+    if (args.length != 7) {
+      System.out.println("Expected number of arguments 10 and received:"
+          + args.length);
+      System.out
+          .println("Usage:input clustersIn output measureClass convergenceDelta maxIterations numCentroids");
+      System.exit(1);
+    }
+    String input = args[index++];
+    String clusters = args[index++];
+    String output = args[index++];
+    String measureClass = args[index++];
+    double convergenceDelta = Double.parseDouble(args[index++]);
+    int maxIterations = Integer.parseInt(args[index++]);
+    int numCentroids = Integer.parseInt(args[index++]);
+
     runJob(input, clusters, output, measureClass, convergenceDelta,
-        maxIterations);
+        maxIterations, numCentroids);
   }
 
   /**
@@ -51,7 +63,8 @@ public class KMeansJob {
    * @param maxIterations the maximum number of iterations
    */
   public static void runJob(String input, String clustersIn, String output,
-      String measureClass, double convergenceDelta, int maxIterations) throws IOException {
+      String measureClass, double convergenceDelta, int maxIterations,
+      int numCentroids) throws IOException {
     // delete the output directory
     JobConf conf = new JobConf(KMeansJob.class);
     Path outPath = new Path(output);
@@ -60,7 +73,8 @@ public class KMeansJob {
       fs.delete(outPath, true);
     }
     fs.mkdirs(outPath);
+
     KMeansDriver.runJob(input, clustersIn, output, measureClass,
-        convergenceDelta, maxIterations);
+        convergenceDelta, maxIterations, numCentroids);
   }
 }

@@ -1,10 +1,10 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+/* Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.mahout.clustering.kmeans;
 
 import org.apache.hadoop.io.Text;
@@ -64,6 +63,7 @@ public class Cluster {
    * Format the cluster for output
    * 
    * @param cluster the Cluster
+   * @return
    */
   public static String formatCluster(Cluster cluster) {
     return cluster.getIdentifier() + ": "
@@ -73,8 +73,7 @@ public class Cluster {
   /**
    * Decodes and returns a Cluster from the formattedString
    * 
-   * @param formattedString
-   *            a String produced by formatCluster
+   * @param formattedString a String produced by formatCluster
    * @return a new Canopy
    */
   public static Cluster decodeCluster(String formattedString) {
@@ -83,8 +82,8 @@ public class Cluster {
     String center = formattedString.substring(beginIndex);
     char firstChar = id.charAt(0);
     boolean startsWithV = firstChar == 'V';
-    if (firstChar == 'C' || startsWithV) {
-      int clusterId = Integer.parseInt(formattedString.substring(1, beginIndex - 2));
+     if (firstChar == 'C' || startsWithV) {
+      int clusterId = Integer.parseInt(formattedString.substring(1, beginIndex - 2));    
       Vector clusterCenter = AbstractVector.decodeVector(center);
       Cluster cluster = new Cluster(clusterCenter, clusterId);
       cluster.converged = startsWithV;
@@ -96,12 +95,11 @@ public class Cluster {
   /**
    * Configure the distance measure from the job
    * 
-   * @param job
-   *            the JobConf for the job
+   * @param job the JobConf for the job
    */
   public static void configure(JobConf job) {
     try {
-      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+      final ClassLoader ccl = Thread.currentThread().getContextClassLoader();
       Class<?> cl = ccl.loadClass(job.get(DISTANCE_MEASURE_KEY));
       measure = (DistanceMeasure) cl.newInstance();
       measure.configure(job);
@@ -119,10 +117,8 @@ public class Cluster {
   /**
    * Configure the distance measure directly. Used by unit tests.
    * 
-   * @param aMeasure
-   *            the DistanceMeasure
-   * @param aConvergenceDelta
-   *            the delta value used to define convergence
+   * @param aMeasure the DistanceMeasure
+   * @param aConvergenceDelta the delta value used to define convergence
    */
   public static void config(DistanceMeasure aMeasure, double aConvergenceDelta) {
     measure = aMeasure;
@@ -133,15 +129,11 @@ public class Cluster {
   /**
    * Emit the point to the nearest cluster center
    * 
-   * @param point
-   *            a point
-   * @param clusters
-   *            a List<Cluster> to test
-   * @param values
-   *            a Writable containing the input point and possible other values
-   *            of interest (payload)
-   * @param output
-   *            the OutputCollector to emit into
+   * @param point a point
+   * @param clusters a List<Cluster> to test
+   * @param values a Writable containing the input point and possible other
+   *        values of interest (payload)
+   * @param output the OutputCollector to emit into
    * @throws IOException
    */
   public static void emitPointToNearestCluster(Vector point,
@@ -156,7 +148,26 @@ public class Cluster {
         nearestDistance = distance;
       }
     }
-    output.collect(new Text(formatCluster(nearestCluster)), values);
+    // emit only clusterID
+    String outKey = nearestCluster.getIdentifier();
+    String value = "1\t" + values.toString();
+    output.collect(new Text(outKey), new Text(value));
+  }
+
+  public static void outputPointWithClusterInfo(String key, Vector point,
+      List<Cluster> clusters, Text values, OutputCollector<Text, Text> output)
+      throws IOException {
+    Cluster nearestCluster = null;
+    double nearestDistance = Double.MAX_VALUE;
+    for (Cluster cluster : clusters) {
+      double distance = measure.distance(point, cluster.getCenter());
+      if (nearestCluster == null || distance < nearestDistance) {
+        nearestCluster = cluster;
+        nearestDistance = distance;
+      }
+    }
+    output.collect(new Text(key), new Text(Integer
+        .toString(nearestCluster.clusterId)));
   }
 
   /**
@@ -177,10 +188,10 @@ public class Cluster {
   /**
    * Construct a new cluster with the given point as its center
    * 
-   * @param center
-   *            the center point
+   * @param center the center point
    */
   public Cluster(Vector center) {
+    super();
     this.clusterId = nextClusterId++;
     this.center = center;
     this.numPoints = 0;
@@ -190,14 +201,26 @@ public class Cluster {
   /**
    * Construct a new cluster with the given point as its center
    * 
-   * @param center
-   *            the center point
+   * @param center the center point
    */
   public Cluster(Vector center, int clusterId) {
+    super();
     this.clusterId = clusterId;
     this.center = center;
     this.numPoints = 0;
     this.pointTotal = center.like();
+  }
+
+  /**
+   * Construct a new clsuter with the given id as identifier
+   * 
+   * @param identifier
+   */
+  public Cluster(String clusterId) {
+
+    this.clusterId = Integer.parseInt((clusterId.substring(1)));
+    this.numPoints = 0;
+    this.converged = clusterId.startsWith("V");
   }
 
   @Override
@@ -215,25 +238,17 @@ public class Cluster {
   /**
    * Add the point to the cluster
    * 
-   * @param point
-   *            a point to add
+   * @param point a point to add
    */
   public void addPoint(Vector point) {
-    centroid = null;
-    numPoints++;
-    if (pointTotal == null)
-      pointTotal = point.copy();
-    else
-      pointTotal = point.plus(pointTotal);
+    addPoints(1, point);
   }
 
   /**
    * Add the point to the cluster
    * 
-   * @param count
-   *            the number of points in the delta
-   * @param delta
-   *            a point to add
+   * @param count the number of points in the delta
+   * @param delta a point to add
    */
   public void addPoints(int count, Vector delta) {
     centroid = null;
@@ -241,7 +256,7 @@ public class Cluster {
     if (pointTotal == null)
       pointTotal = delta.copy();
     else
-      pointTotal = delta.plus(pointTotal);
+      pointTotal = pointTotal.plus(delta);
   }
 
   public Vector getCenter() {

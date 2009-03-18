@@ -17,10 +17,24 @@
 
 package org.apache.mahout.clustering.kmeans;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import junit.framework.TestCase;
+
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
@@ -34,42 +48,28 @@ import org.apache.mahout.utils.DummyOutputCollector;
 import org.apache.mahout.utils.EuclideanDistanceMeasure;
 import org.apache.mahout.utils.ManhattanDistanceMeasure;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.InputStreamReader;
-import java.io.FileInputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.nio.charset.Charset;
-
 public class TestKmeansClustering extends TestCase {
 
-  public static final double[][] reference = { { 1, 1 }, { 2, 1 }, { 1, 2 }, { 2, 2 },
-      { 3, 3 }, { 4, 4 }, { 5, 4 }, { 4, 5 }, { 5, 5 } };
+  public static final double[][] reference = { { 1, 1 }, { 2, 1 }, { 1, 2 },
+      { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 4 }, { 4, 5 }, { 5, 5 } };
 
-  public static final int[][] expectedNumPoints = { { 9 }, { 4, 5 }, { 4, 5, 0 },
-      { 1, 2, 1, 5 }, { 1, 1, 1, 2, 4 }, { 1, 1, 1, 1, 1, 4 },
+  public static final int[][] expectedNumPoints = { { 9 }, { 4, 5 },
+      { 4, 5, 0 }, { 1, 2, 1, 5 }, { 1, 1, 1, 2, 4 }, { 1, 1, 1, 1, 1, 4 },
       { 1, 1, 1, 1, 1, 2, 2 }, { 1, 1, 1, 1, 1, 1, 2, 1 },
       { 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
 
-  private static void rmr(String path) throws Exception {
+  private void rmr(String path) throws Exception {
     File f = new File(path);
     if (f.exists()) {
       if (f.isDirectory()) {
         String[] contents = f.list();
-        for (String content : contents) {
-          rmr(f.toString() + File.separator + content);
-        }
+        for (int i = 0; i < contents.length; i++)
+          rmr(f.toString() + File.separator + contents[i]);
       }
       f.delete();
     }
   }
 
-  @Override
   protected void setUp() throws Exception {
     super.setUp();
     rmr("output");
@@ -81,16 +81,12 @@ public class TestKmeansClustering extends TestCase {
    * over the points and clusters until their centers converge or until the
    * maximum number of iterations is exceeded.
    * 
-   * @param points
-   *            the input List<Vector> of points
-   * @param clusters
-   *            the initial List<Cluster> of clusters
-   * @param measure
-   *            the DistanceMeasure to use
-   * @param maxIter
-   *            the maximum number of iterations
+   * @param points the input List<Vector> of points
+   * @param clusters the initial List<Cluster> of clusters
+   * @param measure the DistanceMeasure to use
+   * @param maxIter the maximum number of iterations
    */
-  private static void referenceKmeans(List<Vector> points, List<Cluster> clusters,
+  private void referenceKmeans(List<Vector> points, List<Cluster> clusters,
       DistanceMeasure measure, int maxIter) {
     boolean converged = false;
     int iteration = 0;
@@ -103,16 +99,15 @@ public class TestKmeansClustering extends TestCase {
    * Perform a single iteration over the points and clusters, assigning points
    * to clusters and returning if the iterations are completed.
    * 
-   * @param points
-   *            the List<Vector> having the input points
-   * @param clusters
-   *            the List<Cluster> clusters
-   * @param measure
-   *            a DistanceMeasure to use
+   * @param points the List<Vector> having the input points
+   * @param clusters the List<Cluster> clusters
+   * @param measure a DistanceMeasure to use
    * @return
    */
-  private static boolean iterateReference(List<Vector> points, List<Cluster> clusters,
+  private boolean iterateReference(List<Vector> points, List<Cluster> clusters,
       DistanceMeasure measure) {
+    boolean converged;
+    converged = true;
     // iterate through all points, assigning each to the nearest cluster
     for (Vector point : points) {
       Cluster closestCluster = null;
@@ -127,7 +122,6 @@ public class TestKmeansClustering extends TestCase {
       closestCluster.addPoint(point);
     }
     // test for convergence
-    boolean converged = true;
     for (Cluster cluster : clusters) {
       if (!cluster.computeConvergence())
         converged = false;
@@ -141,7 +135,8 @@ public class TestKmeansClustering extends TestCase {
 
   public static List<Vector> getPoints(double[][] raw) {
     List<Vector> points = new ArrayList<Vector>();
-    for (double[] fr : raw) {
+    for (int i = 0; i < raw.length; i++) {
+      double[] fr = raw[i];
       Vector vec = new SparseVector(fr.length);
       vec.assign(fr);
       points.add(vec);
@@ -160,7 +155,7 @@ public class TestKmeansClustering extends TestCase {
     Cluster.config(measure, 0.001);
     // try all possible values of k
     for (int k = 0; k < points.size(); k++) {
-      System.out.println("Test k=" + (k + 1) + ':');
+      System.out.println("Test k=" + (k + 1) + ":");
       // pick k initial cluster centers at random
       List<Cluster> clusters = new ArrayList<Cluster>();
       for (int i = 0; i < k + 1; i++) {
@@ -179,6 +174,15 @@ public class TestKmeansClustering extends TestCase {
     }
   }
 
+  private Map<String, Cluster> loadClusterMap(List<Cluster> clusters) {
+    Map<String, Cluster> clusterMap = new HashMap<String, Cluster>();
+
+    for (Cluster cluster : clusters) {
+      clusterMap.put(cluster.getIdentifier(), cluster);
+    }
+    return clusterMap;
+  }
+
   /**
    * Story: test that the mapper will map input points to the nearest cluster
    * 
@@ -193,12 +197,15 @@ public class TestKmeansClustering extends TestCase {
       // pick k initial cluster centers at random
       DummyOutputCollector<Text, Text> collector = new DummyOutputCollector<Text, Text>();
       List<Cluster> clusters = new ArrayList<Cluster>();
+
       for (int i = 0; i < k + 1; i++) {
         Cluster cluster = new Cluster(points.get(i));
         // add the center so the centroid will be correct upon output
         cluster.addPoint(cluster.getCenter());
         clusters.add(cluster);
       }
+
+      Map<String, Cluster> clusterMap = loadClusterMap(clusters);
       mapper.config(clusters);
       // map the data
       for (Vector point : points) {
@@ -208,10 +215,12 @@ public class TestKmeansClustering extends TestCase {
       assertEquals("Number of map results", k + 1, collector.getData().size());
       // now verify that all points are correctly allocated
       for (String key : collector.getKeys()) {
-        Cluster cluster = Cluster.decodeCluster(key);
+        Cluster cluster = clusterMap.get(key);
         List<Text> values = collector.getValue(key);
         for (Writable value : values) {
-          Vector point = AbstractVector.decodeVector(value.toString());
+          String[] pointInfo = value.toString().split("\t");
+
+          Vector point = AbstractVector.decodeVector(pointInfo[1]);
           double distance = euclideanDistanceMeasure.distance(cluster
               .getCenter(), point);
           for (Cluster c : clusters)
@@ -266,10 +275,10 @@ public class TestKmeansClustering extends TestCase {
         List<Text> values = collector2.getValue(key);
         assertEquals("too many values", 1, values.size());
         String value = values.get(0).toString();
-        int ix = value.indexOf(',');
-        count += Integer.parseInt(value.substring(0, ix));
-        total = total
-            .plus(AbstractVector.decodeVector(value.substring(ix + 2)));
+
+        String[] pointInfo = value.split("\t");
+        count += Integer.parseInt(pointInfo[0]);
+        total = total.plus(AbstractVector.decodeVector(pointInfo[1]));
       }
       assertEquals("total points", 9, count);
       assertEquals("point total[0]", 27, (int) total.get(0));
@@ -297,7 +306,7 @@ public class TestKmeansClustering extends TestCase {
         Vector vec = points.get(i);
         Cluster cluster = new Cluster(vec, i);
         // add the center so the centroid will be correct upon output
-        cluster.addPoint(cluster.getCenter());
+        // cluster.addPoint(cluster.getCenter());
         clusters.add(cluster);
       }
       mapper.config(clusters);
@@ -315,6 +324,7 @@ public class TestKmeansClustering extends TestCase {
 
       // now reduce the data
       KMeansReducer reducer = new KMeansReducer();
+      reducer.config(clusters);
       DummyOutputCollector<Text, Text> collector3 = new DummyOutputCollector<Text, Text>();
       for (String key : collector2.getKeys())
         reducer.reduce(new Text(key), collector2.getValue(key).iterator(),
@@ -337,7 +347,8 @@ public class TestKmeansClustering extends TestCase {
 
       // now verify that all clusters have correct centers
       converged = true;
-      for (Cluster ref : reference) {
+      for (int i = 0; i < reference.size(); i++) {
+        Cluster ref = reference.get(i);
         String key = ref.getIdentifier();
         List<Text> values = collector3.getValue(key);
         String value = values.get(0).toString();
@@ -373,52 +384,52 @@ public class TestKmeansClustering extends TestCase {
 
     writePointsToFile(points, "testdata/points/file1");
     writePointsToFile(points, "testdata/points/file2");
-    for (int k = 0; k < points.size(); k++) {
+    for (int k = 1; k < points.size(); k++) {
       System.out.println("testKMeansMRJob k= " + k);
       // pick k initial cluster centers at random
       JobConf job = new JobConf(KMeansDriver.class);
       FileSystem fs = FileSystem.get(job);
       Path path = new Path("testdata/clusters/part-00000");
-      SequenceFile.Writer writer = new SequenceFile.Writer(fs, job, path,
-          Text.class, Text.class);
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fs
+          .create(path)));
+
       for (int i = 0; i < k + 1; i++) {
         Vector vec = points.get(i);
 
-        Cluster cluster = new Cluster(vec);
+        Cluster cluster = new Cluster(vec, i);
         // add the center so the centroid will be correct upon output
         cluster.addPoint(cluster.getCenter());
-        writer.append(new Text(cluster.getIdentifier()), new Text(Cluster
-            .formatCluster(cluster)));
+        writer.write(cluster.getIdentifier() + "\t"
+            + Cluster.formatCluster(cluster) + "\n");
       }
       writer.close();
-
       // now run the Job
       KMeansJob.runJob("testdata/points", "testdata/clusters", "output",
-          EuclideanDistanceMeasure.class.getName(), 0.001, 10);
-
+          EuclideanDistanceMeasure.class.getName(), 0.001, 10, k + 1);
       // now compare the expected clusters with actual
       File outDir = new File("output/points");
       assertTrue("output dir exists?", outDir.exists());
       String[] outFiles = outDir.list();
-      assertEquals("output dir files?", 4, outFiles.length);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(
-          "output/points/part-00000"), Charset.forName("UTF-8")));
+      // assertEquals("output dir files?", 4, outFiles.length);
+      BufferedReader reader = new BufferedReader(new InputStreamReader(
+          new FileInputStream("output/points/part-00000"), Charset
+              .forName("UTF-8")));
       int[] expect = expectedNumPoints[k];
       DummyOutputCollector<Text, Text> collector = new DummyOutputCollector<Text, Text>();
       while (reader.ready()) {
         String line = reader.readLine();
         String[] lineParts = line.split("\t");
         assertEquals("line parts", 2, lineParts.length);
-        String cl = line.substring(0, line.indexOf(':'));
-        collector.collect(new Text(cl), new Text(lineParts[1]));
+        // String cl = line.substring(0, line.indexOf(':'));
+        collector.collect(new Text(lineParts[1]), new Text(lineParts[0]));
       }
       reader.close();
       if (k == 2)
         // cluster 3 is empty so won't appear in output
-        assertEquals("clusters[" + k + ']', expect.length - 1, collector
+        assertEquals("clusters[" + k + "]", expect.length - 1, collector
             .getKeys().size());
       else
-        assertEquals("clusters[" + k + ']', expect.length, collector.getKeys()
+        assertEquals("clusters[" + k + "]", expect.length, collector.getKeys()
             .size());
     }
   }
@@ -429,7 +440,7 @@ public class TestKmeansClustering extends TestCase {
    * 
    * @throws Exception
    */
-  public static void textKMeansWithCanopyClusterInput() throws Exception {
+  public void textKMeansWithCanopyClusterInput() throws Exception {
     List<Vector> points = getPoints(reference);
     File testData = new File("testdata");
     if (!testData.exists())
@@ -446,15 +457,16 @@ public class TestKmeansClustering extends TestCase {
 
     // now run the KMeans job
     KMeansJob.runJob("testdata/points", "testdata/canopies", "output",
-        EuclideanDistanceMeasure.class.getName(), 0.001, 10);
+        EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1);
 
     // now compare the expected clusters with actual
     File outDir = new File("output/points");
     assertTrue("output dir exists?", outDir.exists());
     String[] outFiles = outDir.list();
     assertEquals("output dir files?", 4, outFiles.length);
-    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(
-        "output/points/part-00000"), Charset.forName("UTF-8")));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(
+        new FileInputStream("output/points/part-00000"), Charset
+            .forName("UTF-8")));
     DummyOutputCollector<Text, Text> collector = new DummyOutputCollector<Text, Text>();
     while (reader.ready()) {
       String line = reader.readLine();
@@ -470,7 +482,8 @@ public class TestKmeansClustering extends TestCase {
 
   public static void writePointsToFileWithPayload(List<Vector> points,
       String fileName, String payload) throws IOException {
-    BufferedWriter output = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), Charset.forName("UTF-8")));
+    BufferedWriter output = new BufferedWriter(new OutputStreamWriter(
+        new FileOutputStream(fileName), Charset.forName("UTF-8")));
     for (Vector point : points) {
       output.write(point.asFormatString());
       output.write(payload);

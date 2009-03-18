@@ -80,7 +80,7 @@ public class Job {
     CanopyClusteringJob
         .runJob(output + "/data", output, measureClass, t1, t2);
     KMeansDriver.runJob(output + "/data", output + "/canopies", output,
-        measureClass, convergenceDelta, maxIterations);
+        measureClass, convergenceDelta, maxIterations,1);
     OutputDriver.runJob(output + "/points", output + "/clustered-points");
   }
 }
