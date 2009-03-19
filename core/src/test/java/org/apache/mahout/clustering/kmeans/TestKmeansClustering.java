@@ -17,24 +17,11 @@
 
 package org.apache.mahout.clustering.kmeans;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import junit.framework.TestCase;
-
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
@@ -47,6 +34,20 @@ import org.apache.mahout.utils.DistanceMeasure;
 import org.apache.mahout.utils.DummyOutputCollector;
 import org.apache.mahout.utils.EuclideanDistanceMeasure;
 import org.apache.mahout.utils.ManhattanDistanceMeasure;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.nio.charset.Charset;
 
 public class TestKmeansClustering extends TestCase {
 
@@ -155,7 +156,7 @@ public class TestKmeansClustering extends TestCase {
     Cluster.config(measure, 0.001);
     // try all possible values of k
     for (int k = 0; k < points.size(); k++) {
-      System.out.println("Test k=" + (k + 1) + ":");
+      System.out.println("Test k=" + (k + 1) + ':');
       // pick k initial cluster centers at random
       List<Cluster> clusters = new ArrayList<Cluster>();
       for (int i = 0; i < k + 1; i++) {
@@ -390,8 +391,8 @@ public class TestKmeansClustering extends TestCase {
       JobConf job = new JobConf(KMeansDriver.class);
       FileSystem fs = FileSystem.get(job);
       Path path = new Path("testdata/clusters/part-00000");
-      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fs
-          .create(path)));
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, job, path,
+          Text.class, Text.class);
 
       for (int i = 0; i < k + 1; i++) {
         Vector vec = points.get(i);
@@ -399,8 +400,8 @@ public class TestKmeansClustering extends TestCase {
         Cluster cluster = new Cluster(vec, i);
         // add the center so the centroid will be correct upon output
         cluster.addPoint(cluster.getCenter());
-        writer.write(cluster.getIdentifier() + "\t"
-            + Cluster.formatCluster(cluster) + "\n");
+        writer.append(new Text(cluster.getIdentifier()), new Text(Cluster
+            .formatCluster(cluster)));
       }
       writer.close();
       // now run the Job

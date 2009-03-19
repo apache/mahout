@@ -24,15 +24,14 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.KeyValueLineRecordReader;
-import org.apache.hadoop.mapred.TextInputFormat;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +101,6 @@ public class KMeansDriver {
       int numReduceTasks) {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(KMeansDriver.class);
-    conf.setInputFormat(TextInputFormat.class);
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(Text.class);
 
@@ -110,6 +108,7 @@ public class KMeansDriver {
     Path outPath = new Path(clustersOut);
     FileOutputFormat.setOutputPath(conf, outPath);
 
+    conf.setOutputFormat(SequenceFileOutputFormat.class);
     conf.setMapperClass(KMeansMapper.class);
     conf.setCombinerClass(KMeansCombiner.class);
     conf.setReducerClass(KMeansReducer.class);
@@ -119,9 +118,9 @@ public class KMeansDriver {
     conf.set(Cluster.DISTANCE_MEASURE_KEY, measureClass);
     conf.set(Cluster.CLUSTER_CONVERGENCE_KEY, convergenceDelta);
 
-    conf.set("mapred.child.java.opts", "-Xmx1536m");
+//    conf.set("mapred.child.java.opts", "-Xmx1536m");
     // uncomment it to run locally
-    conf.set("mapred.job.tracker", "local");
+//    conf.set("mapred.job.tracker", "local");
 
     client.setConf(conf);
     try {
@@ -164,7 +163,7 @@ public class KMeansDriver {
     client.setConf(conf);
     // uncomment it to run locally
     // conf.set("mapred.job.tracker", "local");
-    conf.set("mapred.child.java.opts", "-Xmx1536m");
+//    conf.set("mapred.child.java.opts", "-Xmx1536m");
     try {
       JobClient.runJob(conf);
     } catch (IOException e) {
@@ -174,52 +173,24 @@ public class KMeansDriver {
 
   /**
    * Return if all of the Clusters in the filePath have converged or not
-   * 
+   *
    * @param filePath the file path to the single file containing the clusters
-   * @param conf the JobConf
-   * @param fs the FileSystem
+   * @param conf     the JobConf
+   * @param fs       the FileSystem
    * @return true if all Clusters are converged
    * @throws IOException if there was an IO error
    */
-  private static boolean isConverged(String filePath, JobConf conf,
-      FileSystem fs) throws IOException {
-    Path clusterPath = new Path(filePath);
-    List<Path> result = new ArrayList<Path>();
-
-    PathFilter clusterFileFilter = new PathFilter() {
-      public boolean accept(Path path) {
-        return path.getName().startsWith("part");
-      }
-    };
-
-    FileStatus[] matches = fs.listStatus(FileUtil.stat2Paths(fs.globStatus(
-        clusterPath, clusterFileFilter)), clusterFileFilter);
-
-    for (FileStatus match : matches) {
-      result.add(fs.makeQualified(match.getPath()));
-    }
+ private static boolean isConverged(String filePath, JobConf conf, FileSystem fs)
+          throws IOException {
+    Path outPart = new Path(filePath);
+    SequenceFile.Reader reader = new SequenceFile.Reader(fs, outPart, conf);
+    Text key = new Text();
+    Text value = new Text();
     boolean converged = true;
-
-    for (Path p : result) {
-      KeyValueLineRecordReader reader = null;
-
-      try {
-        reader = new KeyValueLineRecordReader(conf, new FileSplit(p, 0, fs
-            .getFileStatus(p).getLen(), (String[]) null));
-        Text key = new Text();
-        Text value = new Text();
-
-        while (converged && reader.next(key, value)) {
-          converged = value.toString().startsWith("V");
-        }
-      } finally {
-        if (reader != null) {
-          reader.close();
-        }
-      }
-
+    while (converged && reader.next(key, value)) {
+      converged = value.toString().charAt(0) == 'V';
     }
-
     return converged;
   }
 }
+   

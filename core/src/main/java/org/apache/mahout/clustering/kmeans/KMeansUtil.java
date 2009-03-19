@@ -25,11 +25,9 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.KeyValueLineRecordReader;
-import org.apache.hadoop.mapred.RecordReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +41,8 @@ public class KMeansUtil {
    * @param clusters
    */
   public static void configureWithClusterInfo(String clusterPathStr,
-      List<Cluster> clusters) {
+      List<Cluster> clusters) {    
+    
     // Get the path location where the cluster Info is stored
     JobConf job = new JobConf(KMeansUtil.class);
     Path clusterPath = new Path(clusterPathStr);
@@ -68,23 +67,22 @@ public class KMeansUtil {
 
       // iterate thru the result path list
       for (Path path : result) {
-        RecordReader<Text, Text> recordReader = null;
+        SequenceFile.Reader reader = null;
+//        RecordReader<Text, Text> recordReader = null;
         try {
-          recordReader = new KeyValueLineRecordReader(job, new FileSplit(path,
-              0, fs.getFileStatus(path).getLen(), (String[]) null));
+          reader =new SequenceFile.Reader(fs, path, job); 
           Text key = new Text();
           Text value = new Text();
           int counter = 1;
-          while (recordReader.next(key, value)) {
+          while (reader.next(key, value)) {
             // get the cluster info
             Cluster cluster = Cluster.decodeCluster(value.toString());
             clusters.add(cluster);
           }
         } finally {
-          if (recordReader != null) {
-            recordReader.close();
+          if (reader != null) {
+            reader.close();
           }
-
         }
       }
 
