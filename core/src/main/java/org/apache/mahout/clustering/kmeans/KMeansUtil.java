@@ -31,14 +31,15 @@ import org.apache.hadoop.mapred.JobConf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class KMeansUtil {
+public final class KMeansUtil {
+
   private static final Logger log = LoggerFactory.getLogger(KMeansUtil.class);
+
+  private KMeansUtil() {
+  }
 
   /**
    * Configure the mapper with the cluster info
-   * 
-   * @param job
-   * @param clusters
    */
   public static void configureWithClusterInfo(String clusterPathStr,
       List<Cluster> clusters) {    
@@ -50,6 +51,7 @@ public class KMeansUtil {
 
     // filter out the files
     PathFilter clusterFileFilter = new PathFilter() {
+      @Override
       public boolean accept(Path path) {
         return path.getName().startsWith("part");
       }
@@ -88,7 +90,6 @@ public class KMeansUtil {
 
     } catch (IOException e) {
       log.info("Exception occurred in loading clusters:", e);
-      e.printStackTrace();
       throw new RuntimeException(e);
     }
   }

@@ -18,7 +18,7 @@ package org.apache.mahout.clustering.dirichlet.models;
 
 import org.apache.mahout.matrix.Vector;
 
-public class SampledNormalModel extends NormalModel implements Model<Vector> {
+public class SampledNormalModel extends NormalModel {
 
   public SampledNormalModel() {
     super();
@@ -28,13 +28,14 @@ public class SampledNormalModel extends NormalModel implements Model<Vector> {
     super(mean, sd);
   }
 
+  @Override
   public String toString() {
     StringBuilder buf = new StringBuilder();
     buf.append("snm{n=").append(s0).append(" m=[");
     if (mean != null)
       for (int i = 0; i < mean.cardinality(); i++)
         buf.append(String.format("%.2f", mean.get(i))).append(", ");
-    buf.append("] sd=").append(String.format("%.2f", sd)).append("}");
+    buf.append("] sd=").append(String.format("%.2f", sd)).append('}');
     return buf.toString();
   }
 
@@ -42,6 +43,7 @@ public class SampledNormalModel extends NormalModel implements Model<Vector> {
    * Return an instance with the same parameters
    * @return an SampledNormalModel
    */
+  @Override
   NormalModel sample() {
     return new SampledNormalModel(mean, sd);
   }

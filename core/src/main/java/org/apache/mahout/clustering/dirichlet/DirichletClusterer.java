@@ -79,21 +79,21 @@ import org.apache.mahout.matrix.Vector;
 public class DirichletClusterer<Observation> {
 
   // observed data
-  private List<Observation> sampleData;
+  private final List<Observation> sampleData;
 
   // the ModelDistribution for the computation
-  private ModelDistribution<Observation> modelFactory;
+  private final ModelDistribution<Observation> modelFactory;
 
   // the state of the clustering process
-  private DirichletState<Observation> state;
+  private final DirichletState<Observation> state;
 
-  private int thin;
+  private final int thin;
 
-  private int burnin;
+  private final int burnin;
 
-  private int numClusters;
+  private final int numClusters;
 
-  public List<Model<Observation>[]> clusterSamples = new ArrayList<Model<Observation>[]>();
+  public final List<Model<Observation>[]> clusterSamples = new ArrayList<Model<Observation>[]>();
 
   /**
    * Create a new instance on the sample data with the given additional parameters

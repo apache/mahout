@@ -39,6 +39,7 @@ public class DirichletMapper extends MapReduceBase implements
 
   DirichletState<Vector> state;
 
+  @Override
   public void map(WritableComparable<?> key, Text values,
       OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
     Vector v = DenseVector.decodeFormat(values.toString());
@@ -47,7 +48,7 @@ public class DirichletMapper extends MapReduceBase implements
     // then pick one model by sampling a Multinomial distribution based upon them
     // see: http://en.wikipedia.org/wiki/Multinomial_distribution
     int k = UncommonDistributions.rMultinom(pi);
-    output.collect(new Text("" + k), values);
+    output.collect(new Text(String.valueOf(k)), values);
   }
 
   public void configure(DirichletState<Vector> state) {
@@ -106,7 +107,7 @@ public class DirichletMapper extends MapReduceBase implements
    * @param v an Vector
    * @return the Vector of probabilities
    */
-  private Vector normalizedProbabilities(DirichletState<Vector> state, Vector v) {
+  private static Vector normalizedProbabilities(DirichletState<Vector> state, Vector v) {
     Vector pi = new DenseVector(state.numClusters);
     double max = 0;
     for (int k = 0; k < state.numClusters; k++) {

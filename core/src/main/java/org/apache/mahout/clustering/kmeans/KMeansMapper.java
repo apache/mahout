@@ -51,11 +51,6 @@ public class KMeansMapper extends MapReduceBase implements
     this.clusters = clusters;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.MapReduceBase#configure(org.apache.hadoop.mapred.JobConf)
-   */
   @Override
   public void configure(JobConf job) {
     super.configure(job);
@@ -66,7 +61,7 @@ public class KMeansMapper extends MapReduceBase implements
     KMeansUtil.configureWithClusterInfo(job.get(Cluster.CLUSTER_PATH_KEY),
         clusters);
 
-    if (clusters.size() == 0)
+    if (clusters.isEmpty())
       throw new NullPointerException("Cluster is empty!!!");
   }
 }

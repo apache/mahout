@@ -46,7 +46,7 @@ public class DirichletState<Observation> {
     offset = alpha_0 / numClusters;
     // sample initial prior models
     clusters = new ArrayList<DirichletCluster<Observation>>();
-    for (Model m : modelFactory.sampleFromPrior(numClusters))
+    for (Model<?> m : modelFactory.sampleFromPrior(numClusters))
       clusters.add(new DirichletCluster(m, offset));
     // sample the mixture parameters from a Dirichlet distribution on the totalCounts 
     mixture = UncommonDistributions.rDirichlet(totalCounts());
@@ -87,8 +87,8 @@ public class DirichletState<Observation> {
     double pdf = clusters.get(k).model.pdf(x);
     double mix = mixture.get(k);
     double result = mix * pdf;
-    if (result < 0 || result > 1)
-      System.out.print("");
+    //if (result < 0 || result > 1)
+    //  System.out.print("");
     return result;
   }
 

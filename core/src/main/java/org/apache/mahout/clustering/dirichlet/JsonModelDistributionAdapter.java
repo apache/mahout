@@ -19,6 +19,8 @@ package org.apache.mahout.clustering.dirichlet;
 import java.lang.reflect.Type;
 
 import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -30,28 +32,30 @@ import com.google.gson.JsonSerializer;
 
 @SuppressWarnings("unchecked")
 public class JsonModelDistributionAdapter implements
-    JsonSerializer<ModelDistribution>, JsonDeserializer<ModelDistribution> {
+    JsonSerializer<ModelDistribution<?>>, JsonDeserializer<ModelDistribution<?>> {
 
-  public JsonElement serialize(ModelDistribution src, Type typeOfSrc,
+  private static final Logger log = LoggerFactory.getLogger(JsonModelDistributionAdapter.class);
+
+  public JsonElement serialize(ModelDistribution<?> src, Type typeOfSrc,
       JsonSerializationContext context) {
     return new JsonPrimitive(src.getClass().getName());
   }
 
-  public ModelDistribution deserialize(JsonElement json, Type typeOfT,
+  public ModelDistribution<?> deserialize(JsonElement json, Type typeOfT,
       JsonDeserializationContext context) throws JsonParseException {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     Class<?> cl = null;
     try {
       cl = ccl.loadClass(json.getAsString());
     } catch (ClassNotFoundException e) {
-      e.printStackTrace();
+      log.warn("Error while loading class", e);
     }
     try {
-      return (ModelDistribution) cl.newInstance();
+      return (ModelDistribution<?>) cl.newInstance();
     } catch (InstantiationException e) {
-      e.printStackTrace();
+      log.warn("Error while creating class", e);
     } catch (IllegalAccessException e) {
-      e.printStackTrace();
+      log.warn("Error while creating class", e);
     }
     return null;
   }

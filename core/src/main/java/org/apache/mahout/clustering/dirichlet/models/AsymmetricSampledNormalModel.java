@@ -19,6 +19,9 @@ package org.apache.mahout.clustering.dirichlet.models;
 import org.apache.mahout.matrix.Vector;
 
 public class AsymmetricSampledNormalModel implements Model<Vector> {
+
+  private static final double sqrt2pi = Math.sqrt(2.0 * Math.PI);
+
   // the parameters
   public Vector mean;
 
@@ -52,9 +55,7 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
     return new AsymmetricSampledNormalModel(mean, sd);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.dirichlet.Model#observe(java.lang.Object)
-   */
+  @Override
   public void observe(Vector x) {
     s0++;
     if (s1 == null)
@@ -67,9 +68,7 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
       s2 = s2.plus(x.times(x));
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.dirichlet.Model#computeParameters()
-   */
+  @Override
   public void computeParameters() {
     if (s0 == 0)
       return;
@@ -97,30 +96,26 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
     double sd2 = sd * sd;
     double exp = -(x.dot(x) - 2 * x.dot(mean) + mean.dot(mean)) / (2 * sd2);
     double ex = Math.exp(exp);
-    double pdf = ex / (sd * Math.sqrt(2 * Math.PI));
-    return pdf;
+    return ex / (sd * sqrt2pi);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.dirichlet.Model#pdf(java.lang.Object)
-   */
+  @Override
   public double pdf(Vector x) {
     // return the product of the two component pdfs
     assert x.size() == 2;
     double pdf0 = pdf(x, sd.get(0));
     double pdf1 = pdf(x, sd.get(1));
-    if (pdf0 < 0 || pdf0 > 1 || pdf1 < 0 || pdf1 > 1)
-      System.out.print("");
+    //if (pdf0 < 0 || pdf0 > 1 || pdf1 < 0 || pdf1 > 1)
+    //  System.out.print("");
     return pdf0 * pdf1;
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.dirichlet.Model#count()
-   */
+  @Override
   public int count() {
     return s0;
   }
 
+  @Override
   public String toString() {
     StringBuilder buf = new StringBuilder();
     buf.append("asnm{n=").append(s0).append(" m=[");

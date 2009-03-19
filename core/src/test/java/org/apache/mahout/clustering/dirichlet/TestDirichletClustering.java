@@ -33,11 +33,6 @@ public class TestDirichletClustering extends TestCase {
 
   private List<Vector> sampleData;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see junit.framework.TestCase#setUp()
-   */
   @Override
   protected void setUp() throws Exception {
     super.setUp();

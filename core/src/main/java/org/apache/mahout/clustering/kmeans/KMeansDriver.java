@@ -55,7 +55,7 @@ public class KMeansDriver {
 
   /**
    * Run the job using supplied arguments
-   * 
+   *
    * @param input the directory pathname for input points
    * @param clustersIn the directory pathname for initial & computed clusters
    * @param output the directory pathname for output points
@@ -88,7 +88,7 @@ public class KMeansDriver {
 
   /**
    * Run the job using supplied arguments
-   * 
+   *
    * @param input the directory pathname for input points
    * @param clustersIn the directory pathname for iniput clusters
    * @param clustersOut the directory pathname for output clusters
@@ -135,7 +135,7 @@ public class KMeansDriver {
 
   /**
    * Run the job using supplied arguments
-   * 
+   *
    * @param input the directory pathname for input points
    * @param clustersIn the directory pathname for input clusters
    * @param output the directory pathname for output points
@@ -193,4 +193,3 @@ public class KMeansDriver {
     return converged;
   }
 }
-   

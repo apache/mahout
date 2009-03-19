@@ -46,7 +46,7 @@ public class DirichletCluster<Observation> {
     this.totalCount += model.count();
   }
 
-  static Type typeOfModel = new TypeToken<DirichletCluster<Vector>>() {
+  static final Type typeOfModel = new TypeToken<DirichletCluster<Vector>>() {
   }.getType();
 
   public String asFormatString() {
@@ -58,7 +58,7 @@ public class DirichletCluster<Observation> {
   }
 
   @SuppressWarnings("unchecked")
-  public static DirichletCluster fromFormatString(String formatString) {
+  public static DirichletCluster<Vector> fromFormatString(String formatString) {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());

@@ -26,12 +26,9 @@ import org.apache.mahout.matrix.Vector;
  * DirichletCluster algorithm. Uses a Normal Distribution to sample the prior
  * model values.
  */
-public class SampledNormalDistribution extends NormalModelDistribution
-    implements ModelDistribution<Vector> {
+public class SampledNormalDistribution extends NormalModelDistribution {
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.dirichlet.ModelDistribution#sampleFromPrior(int)
-   */
+  @Override
   public Model<Vector>[] sampleFromPrior(int howMany) {
     Model<Vector>[] result = new SampledNormalModel[howMany];
     for (int i = 0; i < howMany; i++) {
@@ -43,9 +40,7 @@ public class SampledNormalDistribution extends NormalModelDistribution
     return result;
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.dirichlet.ModelDistribution#sampleFromPosterior(org.apache.mahout.clustering.dirichlet.Model<Observation>[])
-   */
+  @Override
   public Model<Vector>[] sampleFromPosterior(Model<Vector>[] posterior) {
     Model<Vector>[] result = new SampledNormalModel[posterior.length];
     for (int i = 0; i < posterior.length; i++) {

@@ -37,6 +37,7 @@ public class DirichletReducer extends MapReduceBase implements
 
   public Model<Vector>[] newModels;
 
+  @Override
   public void reduce(Text key, Iterator<Text> values,
       OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
     Integer k = new Integer(key.toString());

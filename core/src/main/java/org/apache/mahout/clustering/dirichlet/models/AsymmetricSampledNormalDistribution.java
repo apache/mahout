@@ -30,10 +30,7 @@ import org.apache.mahout.matrix.Vector;
 public class AsymmetricSampledNormalDistribution implements
     ModelDistribution<Vector> {
 
-
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.dirichlet.ModelDistribution#sampleFromPrior(int)
-   */
+  @Override
   public Model<Vector>[] sampleFromPrior(int howMany) {
     Model<Vector>[] result = new AsymmetricSampledNormalModel[howMany];
     for (int i = 0; i < howMany; i++) {
@@ -48,9 +45,7 @@ public class AsymmetricSampledNormalDistribution implements
     return result;
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.dirichlet.ModelDistribution#sampleFromPosterior(org.apache.mahout.clustering.dirichlet.Model<Observation>[])
-   */
+  @Override
   public Model<Vector>[] sampleFromPosterior(Model<Vector>[] posterior) {
     Model<Vector>[] result = new AsymmetricSampledNormalModel[posterior.length];
     for (int i = 0; i < posterior.length; i++) {

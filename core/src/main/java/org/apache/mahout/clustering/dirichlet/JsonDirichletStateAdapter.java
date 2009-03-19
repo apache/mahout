@@ -37,15 +37,15 @@ import com.google.gson.reflect.TypeToken;
 
 @SuppressWarnings("unchecked")
 public class JsonDirichletStateAdapter implements
-    JsonSerializer<DirichletState>, JsonDeserializer<DirichletState> {
+    JsonSerializer<DirichletState<?>>, JsonDeserializer<DirichletState<?>> {
 
-  Type typeOfModel = new TypeToken<List<DirichletCluster<Vector>>>() {
+  final Type typeOfModel = new TypeToken<List<DirichletCluster<Vector>>>() {
   }.getType();
 
-  Type typeOfModelDistribution = new TypeToken<ModelDistribution<Vector>>() {
+  final Type typeOfModelDistribution = new TypeToken<ModelDistribution<Vector>>() {
   }.getType();
 
-  public JsonElement serialize(DirichletState src, Type typeOfSrc,
+  public JsonElement serialize(DirichletState<?> src, Type typeOfSrc,
       JsonSerializationContext context) {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
@@ -65,7 +65,7 @@ public class JsonDirichletStateAdapter implements
     return obj;
   }
 
-  public DirichletState deserialize(JsonElement json, Type typeOfT,
+  public DirichletState<?> deserialize(JsonElement json, Type typeOfT,
       JsonDeserializationContext context) throws JsonParseException {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
@@ -74,7 +74,7 @@ public class JsonDirichletStateAdapter implements
         new JsonModelDistributionAdapter());
     Gson gson = builder.create();
     JsonObject obj = json.getAsJsonObject();
-    DirichletState state = new DirichletState();
+    DirichletState<?> state = new DirichletState();
     state.numClusters = obj.get("numClusters").getAsInt();
     state.offset = obj.get("offset").getAsDouble();
     state.modelFactory = gson.fromJson(obj.get("modelFactory").getAsString(),

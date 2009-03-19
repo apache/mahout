@@ -99,7 +99,7 @@ public class Cluster {
    */
   public static void configure(JobConf job) {
     try {
-      final ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
       Class<?> cl = ccl.loadClass(job.get(DISTANCE_MEASURE_KEY));
       measure = (DistanceMeasure) cl.newInstance();
       measure.configure(job);
@@ -213,8 +213,6 @@ public class Cluster {
 
   /**
    * Construct a new clsuter with the given id as identifier
-   * 
-   * @param identifier
    */
   public Cluster(String clusterId) {
 

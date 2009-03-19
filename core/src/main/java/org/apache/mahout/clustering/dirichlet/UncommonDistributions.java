@@ -17,8 +17,6 @@ package org.apache.mahout.clustering.dirichlet;
  * limitations under the License.
  */
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import org.apache.mahout.matrix.DenseVector;
@@ -26,11 +24,14 @@ import org.apache.mahout.matrix.Vector;
 import org.uncommons.maths.random.GaussianGenerator;
 import org.uncommons.maths.random.MersenneTwisterRNG;
 
-public class UncommonDistributions {
+public final class UncommonDistributions {
 
-  static final double sqrt2pi = Math.sqrt(2 * Math.PI);
+  private static final double sqrt2pi = Math.sqrt(2.0 * Math.PI);
 
   static Random random = new MersenneTwisterRNG();
+
+  private UncommonDistributions() {
+  }
 
   public static void init(byte[] seed) {
     random = new MersenneTwisterRNG(seed);
@@ -52,35 +53,35 @@ public class UncommonDistributions {
       double c = (k + Math.sqrt(2 * k - 1));
       double lam = Math.sqrt(2 * k - 1);
       double cheng = (1 + Math.log(4.5));
-      double u, v, x, y, z, r;
+      double x;
       do {
-        u = random.nextDouble();
-        v = random.nextDouble();
-        y = ((1 / lam) * Math.log(v / (1 - v)));
+        double u = random.nextDouble();
+        double v = random.nextDouble();
+        double y = ((1 / lam) * Math.log(v / (1 - v)));
         x = (k * Math.exp(y));
-        z = (u * v * v);
-        r = (b + (c * y) - x);
+        double z = (u * v * v);
+        double r = (b + (c * y) - x);
         if ((r >= ((4.5 * z) - cheng)) || (r >= Math.log(z))) {
           accept = true;
         }
       } while (!accept);
-      return new Double(x / lambda);
+      return x / lambda;
     } else {
       //Weibull algorithm
       double c = (1 / k);
       double d = ((1 - k) * Math.pow(k, (k / (1 - k))));
-      double u, v, z, e, x;
+      double x;
       do {
-        u = random.nextDouble();
-        v = random.nextDouble();
-        z = -Math.log(u); //generating random exponential variates
-        e = -Math.log(v);
+        double u = random.nextDouble();
+        double v = random.nextDouble();
+        double z = -Math.log(u);
+        double e = -Math.log(v);
         x = Math.pow(z, c);
         if ((z + e) >= (d + x)) {
           accept = true;
         }
       } while (!accept);
-      return new Double(x / lambda);
+      return x / lambda;
     }
   }
 
@@ -97,8 +98,7 @@ public class UncommonDistributions {
   public static double rBeta(double shape1, double shape2) {
     double gam1 = rGamma(shape1, 1);
     double gam2 = rGamma(shape2, 1);
-    double result = gam1 / (gam1 + gam2);
-    return result;
+    return gam1 / (gam1 + gam2);
 
   }
 
@@ -112,9 +112,9 @@ public class UncommonDistributions {
    * @return a Vector of samples
    */
   public static Vector rBeta(int K, double shape1, double shape2) {
-    List<Double> params = new ArrayList<Double>(2);
-    params.add(shape1);
-    params.add(Math.max(0, shape2));
+    //List<Double> params = new ArrayList<Double>(2);
+    //params.add(shape1);
+    //params.add(Math.max(0, shape2));
     Vector result = new DenseVector(K);
     for (int i = 0; i < K; i++)
       result.set(i, rBeta(shape1, shape2));
@@ -128,7 +128,7 @@ public class UncommonDistributions {
    * @return a double sample
    */
   public static double rChisq(double df) {
-    double result = 0;
+    double result = 0.0;
     for (int i = 0; i < df; i++) {
       double sample = rNorm(0, 1);
       result += sample * sample;
@@ -164,8 +164,7 @@ public class UncommonDistributions {
     double xms = (x - m) / s;
     double ex = (xms * xms) / 2;
     double exp = Math.exp(-ex);
-    double result = exp / (sqrt2pi * s);
-    return result;
+    return exp / (sqrt2pi * s);
   }
 
   /**
@@ -232,10 +231,9 @@ public class UncommonDistributions {
     double q = -Math.log(1 - p);
     double sum = 0;
     int x = 0;
-    double u, e;
     while (sum <= q) {
-      u = random.nextDouble();
-      e = -Math.log(u); //exponential random variate
+      double u = random.nextDouble();
+      double e = -Math.log(u);
       sum += (e / (n - x));
       x += 1;
     }
@@ -253,11 +251,10 @@ public class UncommonDistributions {
    */
   public static Vector rDirichlet(Vector alpha) {
     Vector r = alpha.like();
-    double a;
     double total = alpha.zSum();
     double remainder = 1;
     for (int i = 0; i < r.size(); i++) {
-      a = alpha.get(i);
+      double a = alpha.get(i);
       total -= a;
       double beta = rBeta(a, Math.max(0, total));
       double p = beta * remainder;

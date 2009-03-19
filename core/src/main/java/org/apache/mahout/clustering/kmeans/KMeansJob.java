@@ -30,15 +30,15 @@ public class KMeansJob {
   }
 
   public static void main(String[] args) throws IOException {
-    int index = 0;
 
     if (args.length != 7) {
-      System.out.println("Expected number of arguments 10 and received:"
+      System.err.println("Expected number of arguments 10 and received:"
           + args.length);
-      System.out
+      System.err
           .println("Usage:input clustersIn output measureClass convergenceDelta maxIterations numCentroids");
-      System.exit(1);
+      throw new IllegalArgumentException();
     }
+    int index = 0;
     String input = args[index++];
     String clusters = args[index++];
     String output = args[index++];

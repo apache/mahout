@@ -32,14 +32,9 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.Vector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class FuzzyKMeansReducer extends MapReduceBase implements
     Reducer<Text, Text, Text, Text> {
-
-  private static final Logger log = LoggerFactory
-      .getLogger(FuzzyKMeansReducer.class);
 
   protected Map<String, SoftCluster> clusterMap;
 
@@ -79,11 +74,6 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
         .formatCluster(cluster)));
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.MapReduceBase#configure(org.apache.hadoop.mapred.JobConf)
-   */
   @Override
   public void configure(JobConf job) {
 

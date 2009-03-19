@@ -53,11 +53,6 @@ public class KMeansReducer extends MapReduceBase implements
         .formatCluster(cluster)));
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.MapReduceBase#configure(org.apache.hadoop.mapred.JobConf)
-   */
   @Override
   public void configure(JobConf job) {
 
@@ -70,7 +65,7 @@ public class KMeansReducer extends MapReduceBase implements
         clusters);
     setClusterMap(clusters);
 
-    if (clusterMap.size() == 0)
+    if (clusterMap.isEmpty())
       throw new NullPointerException("Cluster is empty!!!");
   }
 
@@ -80,7 +75,6 @@ public class KMeansReducer extends MapReduceBase implements
       clusterMap.put(cluster.getIdentifier(), cluster);
     }
     clusters.clear();
-    clusters = null;
   }
 
   public void config(List<Cluster> clusters) {

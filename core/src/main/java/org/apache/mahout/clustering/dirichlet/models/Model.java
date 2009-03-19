@@ -28,13 +28,13 @@ public interface Model<Observation> {
    * 
    * @param x an Observation from the posterior
    */
-  public abstract void observe(Observation x);
+  void observe(Observation x);
 
   /**
    * Compute a new set of posterior parameters based upon the Observations 
    * that have been observed since my creation
    */
-  public abstract void computeParameters();
+  void computeParameters();
 
   /**
   * Return the probability that the observation is described by this model
@@ -42,12 +42,12 @@ public interface Model<Observation> {
   * @param x an Observation from the posterior
   * @return the probability that x is in the receiver
   */
-  public abstract double pdf(Observation x);
+  double pdf(Observation x);
 
   /**
    * Return the number of observations that have been observed by this model
    * 
    * @return an int
    */
-  public abstract int count();
+  int count();
 }

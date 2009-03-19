@@ -20,6 +20,8 @@ import java.lang.reflect.Type;
 
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.matrix.Vector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -33,10 +35,12 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 @SuppressWarnings("unchecked")
-public class JsonModelAdapter implements JsonSerializer<Model>,
-    JsonDeserializer<Model> {
+public class JsonModelAdapter implements JsonSerializer<Model<?>>,
+    JsonDeserializer<Model<?>> {
 
-  public JsonElement serialize(Model src, Type typeOfSrc,
+  private static final Logger log = LoggerFactory.getLogger(JsonModelAdapter.class);
+
+  public JsonElement serialize(Model<?> src, Type typeOfSrc,
       JsonSerializationContext context) {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
@@ -47,7 +51,7 @@ public class JsonModelAdapter implements JsonSerializer<Model>,
     return obj;
   }
 
-  public Model deserialize(JsonElement json, Type typeOfT,
+  public Model<?> deserialize(JsonElement json, Type typeOfT,
       JsonDeserializationContext context) throws JsonParseException {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
@@ -60,8 +64,8 @@ public class JsonModelAdapter implements JsonSerializer<Model>,
     try {
       cl = ccl.loadClass(klass);
     } catch (ClassNotFoundException e) {
-      e.printStackTrace();
+      log.warn("Error while loading class", e);
     }
-    return (Model) gson.fromJson(model, cl);
+    return (Model<?>) gson.fromJson(model, cl);
   }
 }

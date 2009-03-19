@@ -36,8 +36,7 @@ import org.slf4j.LoggerFactory;
 public class FuzzyKMeansMapper extends MapReduceBase implements
     Mapper<WritableComparable<?>, Text, Text, Text> {
 
-  private static final Logger log = LoggerFactory
-      .getLogger(FuzzyKMeansMapper.class);
+  private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansMapper.class);
 
   protected List<SoftCluster> clusters;
 
@@ -57,11 +56,6 @@ public class FuzzyKMeansMapper extends MapReduceBase implements
     this.clusters = clusters;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.MapReduceBase#configure(org.apache.hadoop.mapred.JobConf)
-   */
   @Override
   public void configure(JobConf job) {
 

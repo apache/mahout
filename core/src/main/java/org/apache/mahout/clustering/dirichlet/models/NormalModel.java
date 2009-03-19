@@ -20,6 +20,8 @@ import org.apache.mahout.matrix.Vector;
 
 public class NormalModel implements Model<Vector> {
 
+  private static final double sqrt2pi = Math.sqrt(2.0 * Math.PI);
+
   // the parameters
   public Vector mean;
 
@@ -27,17 +29,13 @@ public class NormalModel implements Model<Vector> {
 
   // the observation statistics, initialized by the first observation
   int s0 = 0;
-
   Vector s1;
-
   Vector s2;
 
   public NormalModel() {
-    super();
   }
 
   public NormalModel(Vector mean, double sd) {
-    super();
     this.mean = mean;
     this.sd = sd;
     this.s0 = 0;
@@ -53,9 +51,7 @@ public class NormalModel implements Model<Vector> {
     return new NormalModel(mean, sd);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.dirichlet.Model#observe(java.lang.Object)
-   */
+  @Override
   public void observe(Vector x) {
     s0++;
     if (s1 == null)
@@ -68,9 +64,7 @@ public class NormalModel implements Model<Vector> {
       s2 = s2.plus(x.times(x));
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.dirichlet.Model#computeParameters()
-   */
+  @Override
   public void computeParameters() {
     if (s0 == 0)
       return;
@@ -82,31 +76,28 @@ public class NormalModel implements Model<Vector> {
       sd = Double.MIN_VALUE;
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.dirichlet.Model#pdf(java.lang.Object)
-   */
+  @Override
   public double pdf(Vector x) {
     assert x.size() == 2;
     double sd2 = sd * sd;
     double exp = -(x.dot(x) - 2 * x.dot(mean) + mean.dot(mean)) / (2 * sd2);
     double ex = Math.exp(exp);
-    return ex / (sd * Math.sqrt(2 * Math.PI));
+    return ex / (sd * sqrt2pi);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.dirichlet.Model#count()
-   */
+  @Override
   public int count() {
     return s0;
   }
 
+  @Override
   public String toString() {
     StringBuilder buf = new StringBuilder();
     buf.append("nm{n=").append(s0).append(" m=[");
     if (mean != null)
       for (int i = 0; i < mean.cardinality(); i++)
         buf.append(String.format("%.2f", mean.get(i))).append(", ");
-    buf.append("] sd=").append(String.format("%.2f", sd)).append("}");
+    buf.append("] sd=").append(String.format("%.2f", sd)).append('}');
     return buf.toString();
   }
 }

@@ -26,14 +26,7 @@ import org.apache.mahout.matrix.Vector;
  */
 public class NormalModelDistribution implements ModelDistribution<Vector> {
 
-  public NormalModelDistribution() {
-    super();
-  }
-
-
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.dirichlet.ModelDistribution#sampleFromPrior(int)
-   */
+  @Override
   public Model<Vector>[] sampleFromPrior(int howMany) {
     Model<Vector>[] result = new NormalModel[howMany];
     for (int i = 0; i < howMany; i++)
@@ -41,9 +34,7 @@ public class NormalModelDistribution implements ModelDistribution<Vector> {
     return result;
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.dirichlet.ModelDistribution#sampleFromPosterior(org.apache.mahout.clustering.dirichlet.Model<Observation>[])
-   */
+  @Override
   public Model<Vector>[] sampleFromPosterior(Model<Vector>[] posterior) {
     Model<Vector>[] result = new NormalModel[posterior.length];
     for (int i = 0; i < posterior.length; i++) {

@@ -30,6 +30,7 @@ import org.apache.hadoop.mapred.Reporter;
 public class DirichletCombiner extends MapReduceBase implements
     Reducer<Text, Text, Text, Text> {
 
+  @Override
   public void reduce(Text key, Iterator<Text> values,
       OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
   }
