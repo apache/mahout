@@ -1,6 +1,5 @@
 package org.apache.mahout.clustering.dirichlet.models;
 
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -21,7 +20,7 @@ package org.apache.mahout.clustering.dirichlet.models;
 /**
  * A model distribution allows us to sample a model from its prior distribution.
  */
-public interface ModelDistribution<O> {
+public interface ModelDistribution<Observation> {
 
   /**
    * Return a list of models sampled from the prior
@@ -29,7 +28,7 @@ public interface ModelDistribution<O> {
    * @param howMany the int number of models to return
    * @return a Model<Observation>[] representing what is known apriori
    */
-  Model<O>[] sampleFromPrior(int howMany);
+  Model<Observation>[] sampleFromPrior(int howMany);
 
   /**
    * Return a list of models sampled from the posterior
@@ -37,6 +36,6 @@ public interface ModelDistribution<O> {
    * @param posterior the Model<Observation>[] after observations
    * @return a Model<Observation>[] representing what is known apriori
    */
-  Model<O>[] sampleFromPosterior(Model<O>[] posterior);
+  Model<Observation>[] sampleFromPosterior(Model<Observation>[] posterior);
 
 }

@@ -30,7 +30,6 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-@SuppressWarnings("unchecked")
 public class JsonModelDistributionAdapter implements
     JsonSerializer<ModelDistribution<?>>, JsonDeserializer<ModelDistribution<?>> {
 

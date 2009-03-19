@@ -57,7 +57,6 @@ public class DirichletCluster<Observation> {
     return gson.toJson(this, typeOfModel);
   }
 
-  @SuppressWarnings("unchecked")
   public static DirichletCluster<Vector> fromFormatString(String formatString) {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());

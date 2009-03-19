@@ -34,7 +34,6 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-@SuppressWarnings("unchecked")
 public class JsonModelAdapter implements JsonSerializer<Model<?>>,
     JsonDeserializer<Model<?>> {
 

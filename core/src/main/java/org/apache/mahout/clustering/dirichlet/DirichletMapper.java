@@ -61,7 +61,6 @@ public class DirichletMapper extends MapReduceBase implements
     state = getDirichletState(job);
   }
 
-  @SuppressWarnings("unchecked")
   public static DirichletState<Vector> getDirichletState(JobConf job) {
     String statePath = job.get(DirichletDriver.STATE_IN_KEY);
     String modelFactory = job.get(DirichletDriver.MODEL_FACTORY_KEY);
