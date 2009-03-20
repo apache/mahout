@@ -52,7 +52,7 @@ public final class OutputUtils {
     Path outpath = new Path(fs.getWorkingDirectory(), "output");
 
     if (fs.exists(outpath)) {
-      FileUtil.fullyDelete(fs, outpath);
+      fs.delete(outpath, true);
     }
 
     return outpath;

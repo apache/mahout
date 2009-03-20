@@ -87,7 +87,7 @@ public class MahoutEvaluator {
 
     // Delete the input if it already exists
     if (fs.exists(inpath)) {
-      FileUtil.fullyDelete(fs, inpath);
+      fs.delete(inpath, true);
     }
 
     fs.mkdirs(inpath);

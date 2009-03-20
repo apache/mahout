@@ -30,8 +30,8 @@
   <property name="pool.jar" location="lib/commons-pool-1.4.jar"/>
   <property name="servlet.jar" location="lib/servlet-api.jar"/>
   <property name="hadoop.jar" location="lib/hadoop-0.19.1-core.jar"/>
-  <property name="slf4j-api.jar" location="lib/slf4j-api-1.5.5.jar"/>
-  <property name="slf4j.jar" location="lib/slf4j-jcl-1.5.5.jar"/>
+  <property name="slf4j-api.jar" location="lib/slf4j-api-1.5.6.jar"/>
+  <property name="slf4j.jar" location="lib/slf4j-jcl-1.5.6.jar"/>
   <property name="commons-logging.jar" location="lib/commons-logging-1.1.1.jar"/>
   <property name="uncommons-math.jar" location="lib/uncommons-maths-1.0.2.jar"/>
 
