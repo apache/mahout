@@ -23,10 +23,6 @@ import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 import org.apache.mahout.ga.watchmaker.cd.DataLine;
 import org.apache.mahout.ga.watchmaker.cd.Rule;
 import org.apache.mahout.utils.DummyOutputCollector;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
 import org.easymock.classextension.EasyMock;
 
 import java.util.Arrays;
@@ -62,11 +58,11 @@ public class CDMapperTest extends TestCase {
     EasyMock.expect(dl.getLabel()).andReturn(0);
     EasyMock.expect(dl.getLabel()).andReturn(1);
 
-    rule = createMock(Rule.class);
-    expect(rule.classify(dl)).andReturn(1);
-    expect(rule.classify(dl)).andReturn(1);
-    expect(rule.classify(dl)).andReturn(0);
-    expect(rule.classify(dl)).andReturn(0);
+    rule = EasyMock.createMock(Rule.class);
+    EasyMock.expect(rule.classify(dl)).andReturn(1);
+    EasyMock.expect(rule.classify(dl)).andReturn(1);
+    EasyMock.expect(rule.classify(dl)).andReturn(0);
+    EasyMock.expect(rule.classify(dl)).andReturn(0);
 
     super.setUp();
   }
@@ -80,7 +76,7 @@ public class CDMapperTest extends TestCase {
   }
 
   public void testMap() throws Exception {
-    replay(rule);
+    EasyMock.replay(rule);
     EasyMock.replay(dl);
 
     // create and configure the mapper
@@ -105,7 +101,7 @@ public class CDMapperTest extends TestCase {
       assertEquals("Evaluation of the rule " + key, expected[index], eval);
     }
 
-    verify(rule);
+    EasyMock.verify(rule);
     EasyMock.verify(dl);
   }
 

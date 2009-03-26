@@ -46,9 +46,8 @@ public class StringUtilsTest extends TestCase {
   }
 
   public void testStringConversion() throws Exception {
-    List<String> expected;
 
-    expected = Arrays.asList("A", "B", "C");
+    List<String> expected = Arrays.asList("A", "B", "C");
     assertEquals(expected, StringUtils.fromString(StringUtils
         .toString(expected)));
 

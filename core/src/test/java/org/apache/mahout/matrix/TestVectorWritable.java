@@ -27,7 +27,7 @@ public class TestVectorWritable extends TestCase {
 
   private static final int cardinality = 10;
 
-  public void test(Vector writable) throws Exception {
+  private static void doTest(Vector writable) throws Exception {
     for (int i = 0; i < cardinality; i++) {
       writable.set(i, i);
     }
@@ -44,8 +44,6 @@ public class TestVectorWritable extends TestCase {
       assertEquals((double)i, writable.get(i));
     }
 
-    //
-
     in = new DataInputStream(new ByteArrayInputStream(out.getData()));
     writable.readFields(in);
     in.close();
@@ -54,12 +52,10 @@ public class TestVectorWritable extends TestCase {
     for (int i = 0; i < cardinality; i++) {
       assertEquals((double)i, writable.get(i));
     }
-
-
   }
 
-  public void test() throws Exception {
-    test(new SparseVector(cardinality));
-    test(new DenseVector(cardinality));
+  public void testVectors() throws Exception {
+    doTest(new SparseVector(cardinality));
+    doTest(new DenseVector(cardinality));
   }
 }

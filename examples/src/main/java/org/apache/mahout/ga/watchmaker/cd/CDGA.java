@@ -109,7 +109,7 @@ public class CDGA {
       int crosspnts, double mutrate, double mutrange, int mutprec, int popSize,
       int genCount) throws IOException {
     Path inpath = new Path(dataset);
-    CDMahoutEvaluator.InitializeDataSet(inpath);
+    CDMahoutEvaluator.initializeDataSet(inpath);
 
     // Candidate Factory
     CandidateFactory<CDRule> factory = new CDFactory(threshold);

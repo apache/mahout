@@ -106,18 +106,6 @@
         </executions>
       </plugin>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <forkMode>pertest</forkMode>
-          <argLine>-Xms256m -Xmx512m</argLine>
-          <testFailureIgnore>false</testFailureIgnore>
-          <skip>false</skip>
-          <includes />
-          <excludes />
-        </configuration>
-      </plugin>
       <!-- Attach the Job Jar -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -174,14 +162,14 @@
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
-      <version>2.0</version>
+      <version>2.4</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymockclassextension</artifactId>
-      <version>2.2</version>
+      <version>2.4</version>
       <scope>test</scope>
     </dependency>
 
@@ -204,13 +192,13 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.5.5</version>
+      <version>1.5.6</version>
     </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-jcl</artifactId>
-      <version>1.5.5</version>
+      <version>1.5.6</version>
     </dependency>
 
   </dependencies>

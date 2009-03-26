@@ -33,16 +33,18 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 
 public class BayesFileFormatterTest extends TestCase {
+
   protected File input;
   protected File out;
   protected String[] words;
-
 
   public BayesFileFormatterTest(String s) {
     super(s);
   }
 
-  protected void setUp() throws IOException {
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
     File tmpDir = new File(System.getProperty("java.io.tmpdir"));
     input = new File(tmpDir, "bayes/input");
     out = new File(tmpDir, "bayes/out");
@@ -61,36 +63,33 @@ public class BayesFileFormatterTest extends TestCase {
     }
   }
 
-  protected void tearDown() {
-
-  }
-
   public void test() throws IOException {
     Analyzer analyzer = new WhitespaceAnalyzer();
     File[] files = out.listFiles();
-    assertTrue("files Size: " + files.length + " is not: " + 0, files.length == 0);
+    assertEquals("files Size: " + files.length + " is not: " + 0, 0, files.length);
     Charset charset = Charset.forName("UTF-8");
     BayesFileFormatter.format("animal", analyzer, input, charset, out);
 
     files = out.listFiles();
-    assertTrue("files Size: " + files.length + " is not: " + words.length, files.length == words.length);
+    assertEquals("files Size: " + files.length + " is not: " + words.length, files.length, words.length);
     for (File file : files) {
       //should only be one line in the file, and it should be label label
       BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), charset));
       String line = reader.readLine().trim();
       String label = "animal" + '\t' + file.getName();
-      assertTrue(line + ":::: is not equal to " + label + "::::", line.equals(label));
+      assertEquals(line + ":::: is not equal to " + label + "::::", line, label);
+      reader.close();
     }
   }
 
   public void testCollapse() throws Exception {
     Analyzer analyzer = new WhitespaceAnalyzer();
     File[] files = out.listFiles();
-    assertTrue("files Size: " + files.length + " is not: " + 0, files.length == 0);
+    assertEquals("files Size: " + files.length + " is not: " + 0, 0, files.length);
     Charset charset = Charset.forName("UTF-8");
     BayesFileFormatter.collapse("animal", analyzer, input, charset, new File(out, "animal"));
     files = out.listFiles();
-    assertTrue("files Size: " + files.length + " is not: " + 1, files.length == 1);
+    assertEquals("files Size: " + files.length + " is not: " + 1, 1, files.length);
     BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(files[0]), charset));
     String line;
     int count = 0;
@@ -99,7 +98,8 @@ public class BayesFileFormatterTest extends TestCase {
       System.out.println("Line: " + line);
       count++;
     }
-    assertTrue(count + " does not equal: " + words.length, count == words.length);
+    reader.close();
+    assertEquals(count + " does not equal: " + words.length, count, words.length);
 
   }
 }

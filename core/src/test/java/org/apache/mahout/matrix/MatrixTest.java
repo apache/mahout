@@ -29,10 +29,11 @@ public abstract class MatrixTest extends TestCase {
 
   protected Matrix test;
 
-  public MatrixTest(String name) {
+  protected MatrixTest(String name) {
     super(name);
   }
 
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
     test = matrixFactory(values);
@@ -49,10 +50,10 @@ public abstract class MatrixTest extends TestCase {
   public void testCopy() {
     int[] c = test.cardinality();
     Matrix copy = test.copy();
-    assertTrue("wrong class", copy.getClass().equals(test.getClass()));
+    assertEquals("wrong class", copy.getClass(), test.getClass());
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]",
+        assertEquals("value[" + row + "][" + col + ']',
                 test.getQuick(row, col), copy.getQuick(row, col));
   }
 
@@ -60,7 +61,7 @@ public abstract class MatrixTest extends TestCase {
     int[] c = test.cardinality();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]", values[row][col], test
+        assertEquals("value[" + row + "][" + col + ']', values[row][col], test
                 .getQuick(row, col));
   }
 
@@ -71,14 +72,14 @@ public abstract class MatrixTest extends TestCase {
 
   public void testLike() {
     Matrix like = test.like();
-    assertTrue("type", like.getClass().equals(test.getClass()));
+    assertEquals("type", like.getClass(), test.getClass());
     assertEquals("rows", test.cardinality()[ROW], like.cardinality()[ROW]);
     assertEquals("columns", test.cardinality()[COL], like.cardinality()[COL]);
   }
 
   public void testLikeIntInt() {
     Matrix like = test.like(4, 4);
-    assertTrue("type", like.getClass().equals(test.getClass()));
+    assertEquals("type", like.getClass(), test.getClass());
     assertEquals("rows", 4, like.cardinality()[ROW]);
     assertEquals("columns", 4, like.cardinality()[COL]);
   }
@@ -88,7 +89,7 @@ public abstract class MatrixTest extends TestCase {
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++) {
         test.setQuick(row, col, 1.23);
-        assertEquals("value[" + row + "][" + col + "]", 1.23, test.getQuick(
+        assertEquals("value[" + row + "][" + col + ']', 1.23, test.getQuick(
                 row, col));
       }
   }
@@ -104,7 +105,7 @@ public abstract class MatrixTest extends TestCase {
     int[] c = test.cardinality();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]", values[row][col],
+        assertEquals("value[" + row + "][" + col + ']', values[row][col],
                 array[row][col]);
   }
 
@@ -115,7 +116,7 @@ public abstract class MatrixTest extends TestCase {
     int[] c = view.cardinality();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]",
+        assertEquals("value[" + row + "][" + col + ']',
                 values[row + 1][col + 1], view.getQuick(row, col));
   }
 
@@ -163,7 +164,7 @@ public abstract class MatrixTest extends TestCase {
     test.assign(4.53);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]", 4.53, test.getQuick(
+        assertEquals("value[" + row + "][" + col + ']', 4.53, test.getQuick(
                 row, col));
   }
 
@@ -172,7 +173,7 @@ public abstract class MatrixTest extends TestCase {
     test.assign(new double[3][2]);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]", 0.0, test.getQuick(row,
+        assertEquals("value[" + row + "][" + col + ']', 0.0, test.getQuick(row,
                 col));
   }
 
@@ -191,7 +192,7 @@ public abstract class MatrixTest extends TestCase {
     test.assign(test, new PlusFunction());
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]", 2 * values[row][col],
+        assertEquals("value[" + row + "][" + col + ']', 2 * values[row][col],
                 test.getQuick(row, col));
   }
 
@@ -210,7 +211,7 @@ public abstract class MatrixTest extends TestCase {
     value.assign(test);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]",
+        assertEquals("value[" + row + "][" + col + ']',
                 test.getQuick(row, col), value.getQuick(row, col));
   }
 
@@ -228,7 +229,7 @@ public abstract class MatrixTest extends TestCase {
     test.assign(new NegateFunction());
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]", -values[row][col], test
+        assertEquals("value[" + row + "][" + col + ']', -values[row][col], test
                 .getQuick(row, col));
   }
 
@@ -237,7 +238,7 @@ public abstract class MatrixTest extends TestCase {
     Matrix value = test.divide(4.53);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]",
+        assertEquals("value[" + row + "][" + col + ']',
                 values[row][col] / 4.53, value.getQuick(row, col));
   }
 
@@ -245,7 +246,7 @@ public abstract class MatrixTest extends TestCase {
     int[] c = test.cardinality();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]", values[row][col], test
+        assertEquals("value[" + row + "][" + col + ']', values[row][col], test
                 .get(row, col));
   }
 
@@ -278,7 +279,7 @@ public abstract class MatrixTest extends TestCase {
     Matrix value = test.minus(test);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]", 0.0, value.getQuick(
+        assertEquals("value[" + row + "][" + col + ']', 0.0, value.getQuick(
                 row, col));
   }
 
@@ -296,7 +297,7 @@ public abstract class MatrixTest extends TestCase {
     Matrix value = test.plus(4.53);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]",
+        assertEquals("value[" + row + "][" + col + ']',
                 values[row][col] + 4.53, value.getQuick(row, col));
   }
 
@@ -305,7 +306,7 @@ public abstract class MatrixTest extends TestCase {
     Matrix value = test.plus(test);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]", values[row][col] * 2,
+        assertEquals("value[" + row + "][" + col + ']', values[row][col] * 2,
                 value.getQuick(row, col));
   }
 
@@ -349,7 +350,7 @@ public abstract class MatrixTest extends TestCase {
     Matrix value = test.times(4.53);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]",
+        assertEquals("value[" + row + "][" + col + ']',
                 values[row][col] * 4.53, value.getQuick(row, col));
   }
 
@@ -384,7 +385,7 @@ public abstract class MatrixTest extends TestCase {
     assertEquals("cols", c[ROW], t[COL]);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]",
+        assertEquals("value[" + row + "][" + col + ']',
                 test.getQuick(row, col), transpose.getQuick(col, row));
   }
 

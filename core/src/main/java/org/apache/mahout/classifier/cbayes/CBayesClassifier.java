@@ -46,7 +46,7 @@ public class CBayesClassifier implements Classifier{
   @Override
   public Collection<ClassifierResult> classify(Model model, String[] document, String defaultCategory, int numResults) {
     Collection<String> categories = model.getLabels();
-    PriorityQueue pq = new ClassifierResultPriorityQueue(numResults);
+    PriorityQueue<ClassifierResult> pq = new ClassifierResultPriorityQueue(numResults);
     ClassifierResult tmp;
     for (String category : categories){
       double prob = documentWeight(model, category, document);
@@ -57,7 +57,7 @@ public class CBayesClassifier implements Classifier{
     }
 
     Deque<ClassifierResult> result = new LinkedList<ClassifierResult>();
-    while ((tmp = (ClassifierResult) pq.pop()) != null) {
+    while ((tmp = pq.pop()) != null) {
       result.addLast(tmp);
     }
     if (result.isEmpty()){
@@ -123,7 +123,7 @@ public class CBayesClassifier implements Classifier{
   }
 
   
-  private static class ClassifierResultPriorityQueue extends PriorityQueue {
+  private static class ClassifierResultPriorityQueue extends PriorityQueue<ClassifierResult> {
 
     private ClassifierResultPriorityQueue(int numResults) {
       initialize(numResults);

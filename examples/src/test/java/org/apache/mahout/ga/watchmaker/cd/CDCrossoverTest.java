@@ -18,8 +18,8 @@
 package org.apache.mahout.ga.watchmaker.cd;
 
 import junit.framework.TestCase;
-import static org.easymock.classextension.EasyMock.*;
 import org.uncommons.maths.random.MersenneTwisterRNG;
+import org.easymock.classextension.EasyMock;
 
 import java.util.List;
 import java.util.Random;
@@ -37,7 +37,7 @@ public class CDCrossoverTest extends TestCase {
     Random rng = new MersenneTwisterRNG();
 
     // Initialize dataset
-    DataSet dataset = createMock(DataSet.class);
+    DataSet dataset = EasyMock.createMock(DataSet.class);
     DataSet.initialize(dataset);
 
     for (int nloop = 0; nloop < n; nloop++) {
@@ -47,9 +47,9 @@ public class CDCrossoverTest extends TestCase {
       int crosspnts = rng.nextInt(maxcrosspnts) + 1;
 
       // prepare dataset mock
-      reset(dataset);
-      expect(dataset.getNbAttributes()).andReturn(nbattributes).times(2);
-      replay(dataset);
+      EasyMock.reset(dataset);
+      EasyMock.expect(dataset.getNbAttributes()).andReturn(nbattributes).times(2);
+      EasyMock.replay(dataset);
 
       CDCrossover crossover = new CDCrossover(crosspnts);
 
@@ -69,7 +69,7 @@ public class CDCrossoverTest extends TestCase {
             offspring1, offspring2, index));
       }
       
-      verify(dataset);
+      EasyMock.verify(dataset);
     }
   }
 
@@ -84,7 +84,7 @@ public class CDCrossoverTest extends TestCase {
     Random rng = new MersenneTwisterRNG();
 
     // Initialize dataset
-    DataSet dataset = createMock(DataSet.class);
+    DataSet dataset = EasyMock.createMock(DataSet.class);
     DataSet.initialize(dataset);
 
     for (int nloop = 0; nloop < n; nloop++) {
@@ -95,9 +95,9 @@ public class CDCrossoverTest extends TestCase {
         crosspnts = nbattributes - 1;
 
       // prepare dataset mock
-      reset(dataset);
-      expect(dataset.getNbAttributes()).andReturn(nbattributes).times(2);
-      replay(dataset);
+      EasyMock.reset(dataset);
+      EasyMock.expect(dataset.getNbAttributes()).andReturn(nbattributes).times(2);
+      EasyMock.replay(dataset);
 
       CDCrossover crossover = new CDCrossover(crosspnts);
 
@@ -122,7 +122,7 @@ public class CDCrossoverTest extends TestCase {
             nbareas <= (crosspnts + 1));
       }
 
-      verify(dataset);
+      EasyMock.verify(dataset);
     }
 
   }

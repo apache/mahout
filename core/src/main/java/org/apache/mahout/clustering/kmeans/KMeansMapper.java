@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.mahout.clustering.kmeans;
 
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -30,25 +30,21 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.Vector;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 public class KMeansMapper extends MapReduceBase implements
-        Mapper<WritableComparable<?>, Text, Text, Text> {
+    Mapper<WritableComparable<?>, Text, Text, Text> {
 
-  private List<Cluster> clusters;
+  protected List<Cluster> clusters;
 
   @Override
   public void map(WritableComparable<?> key, Text values,
-                  OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
     Vector point = AbstractVector.decodeVector(values.toString());
     Cluster.emitPointToNearestCluster(point, clusters, values, output);
   }
 
   /**
    * Configure the mapper by providing its clusters. Used by unit tests.
-   *
+   * 
    * @param clusters a List<Cluster>
    */
   void config(List<Cluster> clusters) {
@@ -60,27 +56,12 @@ public class KMeansMapper extends MapReduceBase implements
     super.configure(job);
     Cluster.configure(job);
 
-    String clusterPath = job.get(Cluster.CLUSTER_PATH_KEY);
     clusters = new ArrayList<Cluster>();
 
-    try {
-      FileSystem fs = FileSystem.get(job);
-      Path path = new Path(clusterPath + "/part-00000");
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
-      try {
-        Text key = new Text();
-        Text value = new Text();
-        while (reader.next(key, value)) {
-          Cluster cluster = Cluster.decodeCluster(value.toString());
-          // add the center so the centroid will be correct on output formatting
-          cluster.addPoint(cluster.getCenter());
-          clusters.add(cluster);
-        }
-      } finally {
-        reader.close();
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    KMeansUtil.configureWithClusterInfo(job.get(Cluster.CLUSTER_PATH_KEY),
+        clusters);
+
+    if (clusters.isEmpty())
+      throw new NullPointerException("Cluster is empty!!!");
   }
 }

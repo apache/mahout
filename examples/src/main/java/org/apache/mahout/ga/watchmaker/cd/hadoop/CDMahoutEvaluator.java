@@ -86,7 +86,7 @@ public class CDMahoutEvaluator {
    * @param inpath input path (the dataset)
    * @throws IOException
    */
-  public static void InitializeDataSet(Path inpath) throws IOException {
+  public static void initializeDataSet(Path inpath) throws IOException {
     JobConf conf = new JobConf(CDMahoutEvaluator.class);
     FileSystem fs = FileSystem.get(conf);
 

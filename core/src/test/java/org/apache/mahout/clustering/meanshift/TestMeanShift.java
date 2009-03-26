@@ -59,7 +59,7 @@ public class TestMeanShift extends TestCase {
    * 
    * @param canopies a List<Canopy>
    */
-  private void prtCanopies(List<MeanShiftCanopy> canopies) {
+  private static void printCanopies(List<MeanShiftCanopy> canopies) {
     for (MeanShiftCanopy canopy : canopies) {
       System.out.println(canopy.toString());
     }
@@ -73,7 +73,7 @@ public class TestMeanShift extends TestCase {
    * TODO: handle payloads associated with points. Currently they are ignored
    * @throws IOException
    */
-  private void writePointsToFileWithPayload(Vector[] points, String fileName,
+  private static void writePointsToFileWithPayload(Vector[] points, String fileName,
       String payload) throws IOException {
     BufferedWriter output = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), Charset.forName("UTF-8")));
     for (Vector point : points) {
@@ -96,8 +96,9 @@ public class TestMeanShift extends TestCase {
     if (f.exists()) {
       if (f.isDirectory()) {
         String[] contents = f.list();
-        for (int i = 0; i < contents.length; i++)
-          rmr(f.toString() + File.separator + contents[i]);
+        for (String content : contents) {
+          rmr(f.toString() + File.separator + content);
+        }
       }
       f.delete();
     }
@@ -119,14 +120,16 @@ public class TestMeanShift extends TestCase {
       for (Vector pt : canopy.getBoundPoints())
         out[(int) pt.getQuick(0)][(int) pt.getQuick(1)] = (char) ch;
     }
-    for (int i = 0; i < out.length; i++)
-      System.out.println(out[i]);
+    for (char[] anOut : out) {
+      System.out.println(anOut);
+    }
   }
 
   private List<MeanShiftCanopy> getInitialCanopies() {
     List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
-    for (int i = 0; i < raw.length; i++)
-      canopies.add(new MeanShiftCanopy(raw[i]));
+    for (Vector aRaw : raw) {
+      canopies.add(new MeanShiftCanopy(aRaw));
+    }
     return canopies;
   }
 
@@ -160,8 +163,9 @@ public class TestMeanShift extends TestCase {
     MeanShiftCanopy.config(new EuclideanDistanceMeasure(), 4.0, 1.0, 0.5);
     List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
     // add all points to the canopies
-    for (int i = 0; i < raw.length; i++)
-      MeanShiftCanopy.mergeCanopy(new MeanShiftCanopy(raw[i]), canopies);
+    for (Vector aRaw : raw) {
+      MeanShiftCanopy.mergeCanopy(new MeanShiftCanopy(aRaw), canopies);
+    }
     boolean done = false;
     int iter = 1;
     while (!done) {// shift canopies to their centroids
@@ -172,7 +176,7 @@ public class TestMeanShift extends TestCase {
         MeanShiftCanopy.mergeCanopy(canopy, migratedCanopies);
       }
       canopies = migratedCanopies;
-      prtCanopies(canopies);
+      printCanopies(canopies);
       printImage(canopies);
       System.out.println(iter++);
     }
@@ -194,12 +198,14 @@ public class TestMeanShift extends TestCase {
     List<MeanShiftCanopy> canopies = getInitialCanopies();
     // build the reference set
     List<MeanShiftCanopy> refCanopies = new ArrayList<MeanShiftCanopy>();
-    for (int i = 0; i < raw.length; i++)
-      MeanShiftCanopy.mergeCanopy(new MeanShiftCanopy(raw[i]), refCanopies);
+    for (Vector aRaw : raw) {
+      MeanShiftCanopy.mergeCanopy(new MeanShiftCanopy(aRaw), refCanopies);
+    }
 
     // map the data
-    for (MeanShiftCanopy canopy : canopies)
+    for (MeanShiftCanopy canopy : canopies) {
       mapper.map(new Text(), new Text(canopy.toString()), collector, null);
+    }
     assertEquals("Number of map results", 100, collector.getData().size());
     // now combine the mapper output
     MeanShiftCanopy.config(euclideanDistanceMeasure, 4, 1, 0.5);
@@ -220,18 +226,18 @@ public class TestMeanShift extends TestCase {
     }
     // build a map of the combiner output
     Map<String, MeanShiftCanopy> canopyMap = new HashMap<String, MeanShiftCanopy>();
-    for (WritableComparable d : data) {
+    for (WritableComparable<?> d : data) {
       MeanShiftCanopy dc = MeanShiftCanopy.decodeCanopy(d.toString());
       canopyMap.put(dc.getIdentifier(), dc);
     }
     // compare the maps
-    for (String id : refCanopyMap.keySet()) {
-      MeanShiftCanopy ref = refCanopyMap.get(id);
+    for (Map.Entry<String, MeanShiftCanopy> stringMeanShiftCanopyEntry : refCanopyMap.entrySet()) {
+      MeanShiftCanopy ref = stringMeanShiftCanopyEntry.getValue();
 
       MeanShiftCanopy canopy = canopyMap.get((ref.isConverged() ? "V" : "C")
           + (ref.getCanopyId() - raw.length));
       assertEquals("ids", ref.getCanopyId(), canopy.getCanopyId() + 100);
-      assertEquals("centers(" + ref.getIdentifier() + ")", ref.getCenter()
+      assertEquals("centers(" + ref.getIdentifier() + ')', ref.getCenter()
           .asWritableComparable().toString(), canopy.getCenter()
           .asWritableComparable().toString());
       assertEquals("bound points", ref.getBoundPoints().size(), canopy
@@ -256,19 +262,24 @@ public class TestMeanShift extends TestCase {
     List<MeanShiftCanopy> canopies = getInitialCanopies();
     // build the reference set
     List<MeanShiftCanopy> refCanopies = new ArrayList<MeanShiftCanopy>();
-    for (int i = 0; i < raw.length; i++)
-      MeanShiftCanopy.mergeCanopy(new MeanShiftCanopy(raw[i]), refCanopies);
+    for (Vector aRaw : raw) {
+      MeanShiftCanopy.mergeCanopy(new MeanShiftCanopy(aRaw), refCanopies);
+    }
     List<MeanShiftCanopy> refCanopies2 = new ArrayList<MeanShiftCanopy>();
-    for (MeanShiftCanopy canopy : refCanopies)
+    for (MeanShiftCanopy canopy : refCanopies) {
       canopy.shiftToMean();
-    for (MeanShiftCanopy canopy : refCanopies)
+    }
+    for (MeanShiftCanopy canopy : refCanopies) {
       MeanShiftCanopy.mergeCanopy(canopy, refCanopies2);
-    for (MeanShiftCanopy canopy : refCanopies)
+    }
+    for (MeanShiftCanopy canopy : refCanopies) {
       canopy.shiftToMean();
+    }
 
     // map the data
-    for (MeanShiftCanopy canopy : canopies)
+    for (MeanShiftCanopy canopy : canopies) {
       mapper.map(new Text(), new Text(canopy.toString()), collector, null);
+    }
     assertEquals("Number of map results", 100, collector.getData().size());
     // now combine the mapper output
     MeanShiftCanopy.config(euclideanDistanceMeasure, 4, 1, 0.5);

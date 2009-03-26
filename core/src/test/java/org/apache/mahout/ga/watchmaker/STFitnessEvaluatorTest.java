@@ -110,7 +110,7 @@ public class STFitnessEvaluatorTest extends TestCase {
     assertEquals(2, mock.getNbCalls());
   }
 
-  private List<Integer> randomInts(int size, Random rng) {
+  private static List<Integer> randomInts(int size, Random rng) {
     List<Integer> population = new ArrayList<Integer>();
     for (int index = 0; index < size; index++)
       population.add(rng.nextInt());
@@ -118,7 +118,7 @@ public class STFitnessEvaluatorTest extends TestCase {
     return population;
   }
 
-  private List<Double> randomFloats(int size, Random rng) {
+  private static List<Double> randomFloats(int size, Random rng) {
     List<Double> population = new ArrayList<Double>();
     for (int index = 0; index < size; index++)
       population.add(rng.nextDouble());

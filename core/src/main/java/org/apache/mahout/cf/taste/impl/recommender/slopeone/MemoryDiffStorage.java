@@ -59,6 +59,7 @@ public final class MemoryDiffStorage implements DiffStorage {
   private final long maxEntries;
   private final FastMap<Object, FastMap<Object, RunningAverage>> averageDiffs;
   private final Map<Object, RunningAverage> averageItemPref;
+  private final FastSet<Item> allRecommendableItemIDs;
   private final ReadWriteLock buildAverageDiffsLock;
   private final RefreshHelper refreshHelper;
 
@@ -106,6 +107,7 @@ public final class MemoryDiffStorage implements DiffStorage {
     this.averageDiffs = new FastMap<Object, FastMap<Object, RunningAverage>>();
     this.averageItemPref = new FastMap<Object, RunningAverage>();
     this.buildAverageDiffsLock = new ReentrantReadWriteLock();
+    this.allRecommendableItemIDs = new FastSet<Item>(dataModel.getNumItems());
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
       @Override
       public Object call() throws TasteException {
@@ -202,11 +204,11 @@ public final class MemoryDiffStorage implements DiffStorage {
   @Override
   public Set<Item> getRecommendableItems(Object userID) throws TasteException {
     User user = dataModel.getUser(userID);
-    Set<Item> result = new FastSet<Item>(dataModel.getNumItems());
-    for (Item item : dataModel.getItems()) {
-      // If not already preferred by the user, add it
-      if (user.getPreferenceFor(item.getID()) == null) {
-        result.add(item);
+    Set<Item> result = allRecommendableItemIDs.clone();
+    Iterator<Item> it = result.iterator();
+    while (it.hasNext()) {
+      if (user.getPreferenceFor(it.next().getID()) != null) {
+        it.remove();
       }
     }
     return result;
@@ -222,30 +224,49 @@ public final class MemoryDiffStorage implements DiffStorage {
         averageCount = processOneUser(averageCount, user);
       }
 
-      // Go back and prune inconsequential diffs. "Inconsequential" means, here, only represented by one
-      // data point, so possibly unreliable
-      Iterator<FastMap<Object, RunningAverage>> it1 = averageDiffs.values().iterator();
-      while (it1.hasNext()) {
-        FastMap<Object, RunningAverage> map = it1.next();
-        Iterator<RunningAverage> it2 = map.values().iterator();
-        while (it2.hasNext()) {
-          RunningAverage average = it2.next();
-          if (average.getCount() <= 1) {
-            it2.remove();
-          }
-        }
-        if (map.isEmpty()) {
-          it1.remove();
-        } else {
-          map.rehash();
-        }
-      }
-
-      averageDiffs.rehash();
+      pruneInconsequentialDiffs();
+      updateAllRecommendableItems();
 
     } finally {
       buildAverageDiffsLock.writeLock().unlock();
     }
+  }
+
+  private void pruneInconsequentialDiffs() {
+    // Go back and prune inconsequential diffs. "Inconsequential" means, here, only represented by one
+    // data point, so possibly unreliable
+    Iterator<FastMap<Object, RunningAverage>> it1 = averageDiffs.values().iterator();
+    while (it1.hasNext()) {
+      FastMap<Object, RunningAverage> map = it1.next();
+      Iterator<RunningAverage> it2 = map.values().iterator();
+      while (it2.hasNext()) {
+        RunningAverage average = it2.next();
+        if (average.getCount() <= 1) {
+          it2.remove();
+        }
+      }
+      if (map.isEmpty()) {
+        it1.remove();
+      } else {
+        map.rehash();
+      }
+    }
+    averageDiffs.rehash();
+  }
+
+  private void updateAllRecommendableItems() throws TasteException {
+    FastSet<Object> ids = new FastSet<Object>(dataModel.getNumItems());
+    for (Map.Entry<Object, FastMap<Object, RunningAverage>> entry : averageDiffs.entrySet()) {
+      ids.add(entry.getKey());
+      for (Object id : entry.getValue().keySet()) {
+        ids.add(id);
+      }
+    }
+    allRecommendableItemIDs.clear();
+    for (Object id : ids) {
+      allRecommendableItemIDs.add(dataModel.getItem(id));
+    }
+    allRecommendableItemIDs.rehash();
   }
 
   private long processOneUser(long averageCount, User user) {

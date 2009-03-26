@@ -22,34 +22,36 @@ import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.common.Model;
 
 public class BayesClassifierTest extends TestCase {
-  protected Model model;
 
+  protected Model model;
 
   public BayesClassifierTest(String s) {
     super(s);
   }
 
-  protected void setUp() {
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
     model = new BayesModel();
     //String[] labels = new String[]{"a", "b", "c", "d", "e"};
     //long[] labelCounts = new long[]{6, 20, 60, 100, 200};
     //String[] features = new String[]{"aa", "bb", "cc", "dd", "ee"};
     model.setSigma_jSigma_k(100.0);
-    
+
     model.setSumFeatureWeight("aa", 100);
     model.setSumFeatureWeight("bb", 100);
     model.setSumFeatureWeight("cc", 100);
     model.setSumFeatureWeight("dd", 100);
     model.setSumFeatureWeight("ee", 100);
-    
+
     model.setSumLabelWeight("a", 1);
     model.setSumLabelWeight("b", 1);
     model.setSumLabelWeight("c", 1);
     model.setSumLabelWeight("d", 1);
     model.setSumLabelWeight("e", 1);
-    
+
     model.initializeWeightMatrix();
-   
+
     model.loadFeatureWeight("a", "aa", 5);
     model.loadFeatureWeight("a", "bb", 1);
 
@@ -67,34 +69,29 @@ public class BayesClassifierTest extends TestCase {
     model.loadFeatureWeight("e", "dd", 50);
   }
 
-  protected void tearDown() {
-
-  }
-
   public void test() {
     BayesClassifier classifier = new BayesClassifier();
-    ClassifierResult result;
-    String[] document = new String[]{"aa", "ff"};
-    result = classifier.classify(model, document, "unknown");
-    assertTrue("category is null and it shouldn't be", result != null);
-    assertTrue(result + " is not equal to " + "e", result.getLabel().equals("e"));
+    String[] document = {"aa", "ff"};
+    ClassifierResult result = classifier.classify(model, document, "unknown");
+    assertNotNull("category is null and it shouldn't be", result);
+    assertEquals(result + " is not equal to e", "e", result.getLabel());
 
     document = new String[]{"ff"};
     result = classifier.classify(model, document, "unknown");
-    assertTrue("category is null and it shouldn't be", result != null);
-    assertTrue(result + " is not equal to " + "d", result.getLabel().equals("d"));//GSI: was unknown, but we now just pick the first cat
+    assertNotNull("category is null and it shouldn't be", result);
+    assertEquals(result + " is not equal to d", "d", result.getLabel());//GSI: was unknown, but we now just pick the first cat
 
     document = new String[]{"cc"};
     result = classifier.classify(model, document, "unknown");
-    assertTrue("category is null and it shouldn't be", result != null);
-    assertTrue(result + " is not equal to " + "d", result.getLabel().equals("d"));
+    assertNotNull("category is null and it shouldn't be", result);
+    assertEquals(result + " is not equal to d", "d", result.getLabel());
   }
 
   public void testResults() throws Exception {
     BayesClassifier classifier = new BayesClassifier();
-    String[] document = new String[]{"aa", "ff"};
+    String[] document = {"aa", "ff"};
     ClassifierResult result = classifier.classify(model, document, "unknown");
-    assertTrue("category is null and it shouldn't be", result != null);    
+    assertNotNull("category is null and it shouldn't be", result);
     System.out.println("Result: " + result);
   }
 }

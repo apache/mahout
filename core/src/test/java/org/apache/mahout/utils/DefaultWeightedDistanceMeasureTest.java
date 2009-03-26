@@ -22,13 +22,14 @@ import org.apache.mahout.matrix.Vector;
 
 public abstract class DefaultWeightedDistanceMeasureTest extends DefaultDistanceMeasureTest {
 
+  @Override
   public abstract WeightedDistanceMeasure distanceMeasureFactory();
 
   public void testMeasureWeighted() {
 
     WeightedDistanceMeasure distanceMeasure = distanceMeasureFactory();
 
-    Vector[] vectors = new Vector[]{
+    Vector[] vectors = {
         new DenseVector(new double[]{9, 9, 1}),
         new DenseVector(new double[]{1, 9, 9}),
         new DenseVector(new double[]{9, 1, 9}),
@@ -43,7 +44,7 @@ public abstract class DefaultWeightedDistanceMeasureTest extends DefaultDistance
       }
     }
 
-    assertEquals(0d, distanceMatrix[0][0]);
+    assertEquals(0.0, distanceMatrix[0][0]);
     assertTrue(distanceMatrix[0][1] < distanceMatrix[0][2]);
 
 

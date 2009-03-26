@@ -107,7 +107,7 @@ public class FileDataModel implements DataModel {
 
     log.info("Creating FileDataModel for file " + dataFile);
 
-    this.dataFile = dataFile;
+    this.dataFile = dataFile.getAbsoluteFile();
     this.lastModified = dataFile.lastModified();
     this.reloadLock = new ReentrantLock();
   }

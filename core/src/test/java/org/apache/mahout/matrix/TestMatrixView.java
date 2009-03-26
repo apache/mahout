@@ -34,6 +34,7 @@ public class TestMatrixView extends TestCase {
     super(name);
   }
 
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
     int[] offset = { 1, 1 };
@@ -59,7 +60,7 @@ public class TestMatrixView extends TestCase {
     assertTrue("wrong class", copy instanceof MatrixView);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]",
+        assertEquals("value[" + row + "][" + col + ']',
             test.getQuick(row, col), copy.getQuick(row, col));
   }
 
@@ -67,7 +68,7 @@ public class TestMatrixView extends TestCase {
     int[] c = test.cardinality();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]",
+        assertEquals("value[" + row + "][" + col + ']',
             values[row + 1][col + 1], test.getQuick(row, col));
   }
 
@@ -95,7 +96,7 @@ public class TestMatrixView extends TestCase {
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++) {
         test.setQuick(row, col, 1.23);
-        assertEquals("value[" + row + "][" + col + "]", 1.23, test.getQuick(
+        assertEquals("value[" + row + "][" + col + ']', 1.23, test.getQuick(
             row, col));
       }
   }
@@ -111,7 +112,7 @@ public class TestMatrixView extends TestCase {
     int[] c = test.cardinality();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]",
+        assertEquals("value[" + row + "][" + col + ']',
             values[row + 1][col + 1], array[row][col]);
   }
 
@@ -122,7 +123,7 @@ public class TestMatrixView extends TestCase {
     int[] c = view.cardinality();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]",
+        assertEquals("value[" + row + "][" + col + ']',
             values[row + 2][col + 2], view.getQuick(row, col));
   }
 
@@ -170,7 +171,7 @@ public class TestMatrixView extends TestCase {
     test.assign(4.53);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]", 4.53, test.getQuick(
+        assertEquals("value[" + row + "][" + col + ']', 4.53, test.getQuick(
             row, col));
   }
 
@@ -179,7 +180,7 @@ public class TestMatrixView extends TestCase {
     test.assign(new double[3][2]);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]", 0.0, test.getQuick(row,
+        assertEquals("value[" + row + "][" + col + ']', 0.0, test.getQuick(row,
             col));
   }
 
@@ -198,7 +199,7 @@ public class TestMatrixView extends TestCase {
     test.assign(test, new PlusFunction());
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]",
+        assertEquals("value[" + row + "][" + col + ']',
             2 * values[row + 1][col + 1], test.getQuick(row, col));
   }
 
@@ -217,7 +218,7 @@ public class TestMatrixView extends TestCase {
     value.assign(test);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]",
+        assertEquals("value[" + row + "][" + col + ']',
             test.getQuick(row, col), value.getQuick(row, col));
   }
 
@@ -235,7 +236,7 @@ public class TestMatrixView extends TestCase {
     test.assign(new NegateFunction());
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]",
+        assertEquals("value[" + row + "][" + col + ']',
             -values[row + 1][col + 1], test.getQuick(row, col));
   }
 
@@ -244,7 +245,7 @@ public class TestMatrixView extends TestCase {
     Matrix value = test.divide(4.53);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]",
+        assertEquals("value[" + row + "][" + col + ']',
             values[row + 1][col + 1] / 4.53, value.getQuick(row, col));
   }
 
@@ -252,7 +253,7 @@ public class TestMatrixView extends TestCase {
     int[] c = test.cardinality();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]",
+        assertEquals("value[" + row + "][" + col + ']',
             values[row + 1][col + 1], test.get(row, col));
   }
 
@@ -285,7 +286,7 @@ public class TestMatrixView extends TestCase {
     Matrix value = test.minus(test);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]", 0.0, value.getQuick(
+        assertEquals("value[" + row + "][" + col + ']', 0.0, value.getQuick(
             row, col));
   }
 
@@ -303,7 +304,7 @@ public class TestMatrixView extends TestCase {
     Matrix value = test.plus(4.53);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]",
+        assertEquals("value[" + row + "][" + col + ']',
             values[row + 1][col + 1] + 4.53, value.getQuick(row, col));
   }
 
@@ -312,7 +313,7 @@ public class TestMatrixView extends TestCase {
     Matrix value = test.plus(test);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]",
+        assertEquals("value[" + row + "][" + col + ']',
             values[row + 1][col + 1] * 2, value.getQuick(row, col));
   }
 
@@ -356,7 +357,7 @@ public class TestMatrixView extends TestCase {
     Matrix value = test.times(4.53);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]",
+        assertEquals("value[" + row + "][" + col + ']',
             values[row + 1][col + 1] * 4.53, value.getQuick(row, col));
   }
 
@@ -388,7 +389,7 @@ public class TestMatrixView extends TestCase {
     assertEquals("cols", c[ROW], t[COL]);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + "]",
+        assertEquals("value[" + row + "][" + col + ']',
             test.getQuick(row, col), transpose.getQuick(col, row));
   }
 

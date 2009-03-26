@@ -39,7 +39,7 @@ import java.io.Serializable;
  *
  * @see FastMap
  */
-public final class FastSet<K> implements Set<K>, Serializable {
+public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
 
   /**
    * Dummy object used to represent a key that has been removed.
@@ -279,6 +279,19 @@ public final class FastSet<K> implements Set<K>, Serializable {
       }
     }
     return count;
+  }
+
+  @Override
+  public FastSet<K> clone() {
+    FastSet<K> clone;
+    try {
+      clone = (FastSet<K>) super.clone();
+    } catch (CloneNotSupportedException cnse) {
+      throw new AssertionError();
+    }
+    clone.keys = (K[]) new Object[keys.length];
+    System.arraycopy(keys, 0, clone.keys, 0, keys.length);
+    return clone;
   }
 
   private final class KeyIterator implements Iterator<K> {

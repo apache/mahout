@@ -31,6 +31,7 @@ public final class GenericRecommenderIRStatsEvaluatorImplTest extends TasteTestC
   public void testEvaluate() throws Exception {
     DataModel model = getDataModel();
     RecommenderBuilder builder = new RecommenderBuilder() {
+      @Override
       public Recommender buildRecommender(DataModel dataModel) throws TasteException {
         return new SlopeOneRecommender(dataModel);
       }

@@ -1,10 +1,10 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+/* Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -14,22 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.mahout.clustering.kmeans;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
+import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 public class KMeansDriver {
 
@@ -45,21 +49,23 @@ public class KMeansDriver {
     String measureClass = args[3];
     double convergenceDelta = Double.parseDouble(args[4]);
     int maxIterations = Integer.parseInt(args[5]);
-    runJob(input, clusters, output, measureClass, convergenceDelta, maxIterations);
+    runJob(input, clusters, output, measureClass, convergenceDelta,
+        maxIterations, 2);
   }
 
   /**
    * Run the job using supplied arguments
    *
-   * @param input            the directory pathname for input points
-   * @param clustersIn       the directory pathname for initial & computed clusters
-   * @param output           the directory pathname for output points
-   * @param measureClass     the classname of the DistanceMeasure
+   * @param input the directory pathname for input points
+   * @param clustersIn the directory pathname for initial & computed clusters
+   * @param output the directory pathname for output points
+   * @param measureClass the classname of the DistanceMeasure
    * @param convergenceDelta the convergence delta value
-   * @param maxIterations    the maximum number of iterations
+   * @param maxIterations the maximum number of iterations
    */
   public static void runJob(String input, String clustersIn, String output,
-                            String measureClass, double convergenceDelta, int maxIterations) {
+      String measureClass, double convergenceDelta, int maxIterations,
+      int numCentroids) {
     // iterate until the clusters converge
     boolean converged = false;
     int iteration = 0;
@@ -70,32 +76,31 @@ public class KMeansDriver {
       // point the output to a new directory per iteration
       String clustersOut = output + "/clusters-" + iteration;
       converged = runIteration(input, clustersIn, clustersOut, measureClass,
-              delta);
+          delta, numCentroids);
       // now point the input to the old output directory
       clustersIn = output + "/clusters-" + iteration;
       iteration++;
     }
     // now actually cluster the points
     log.info("Clustering ");
-    runClustering(input, clustersIn, output + "/points", measureClass,
-            delta);
+    runClustering(input, clustersIn, output + "/points", measureClass, delta);
   }
 
   /**
    * Run the job using supplied arguments
    *
-   * @param input            the directory pathname for input points
-   * @param clustersIn       the directory pathname for iniput clusters
-   * @param clustersOut      the directory pathname for output clusters
-   * @param measureClass     the classname of the DistanceMeasure
+   * @param input the directory pathname for input points
+   * @param clustersIn the directory pathname for iniput clusters
+   * @param clustersOut the directory pathname for output clusters
+   * @param measureClass the classname of the DistanceMeasure
    * @param convergenceDelta the convergence delta value
    * @return true if the iteration successfully runs
    */
   private static boolean runIteration(String input, String clustersIn,
-                              String clustersOut, String measureClass, String convergenceDelta) {
+      String clustersOut, String measureClass, String convergenceDelta,
+      int numReduceTasks) {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(KMeansDriver.class);
-
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(Text.class);
 
@@ -103,14 +108,19 @@ public class KMeansDriver {
     Path outPath = new Path(clustersOut);
     FileOutputFormat.setOutputPath(conf, outPath);
 
+    conf.setOutputFormat(SequenceFileOutputFormat.class);
     conf.setMapperClass(KMeansMapper.class);
     conf.setCombinerClass(KMeansCombiner.class);
     conf.setReducerClass(KMeansReducer.class);
-    conf.setNumReduceTasks(1);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
+    // conf.setNumMapTasks(numMapTasks);
+    conf.setNumReduceTasks(numReduceTasks);
     conf.set(Cluster.CLUSTER_PATH_KEY, clustersIn);
     conf.set(Cluster.DISTANCE_MEASURE_KEY, measureClass);
     conf.set(Cluster.CLUSTER_CONVERGENCE_KEY, convergenceDelta);
+
+//    conf.set("mapred.child.java.opts", "-Xmx1536m");
+    // uncomment it to run locally
+//    conf.set("mapred.job.tracker", "local");
 
     client.setConf(conf);
     try {
@@ -126,14 +136,14 @@ public class KMeansDriver {
   /**
    * Run the job using supplied arguments
    *
-   * @param input            the directory pathname for input points
-   * @param clustersIn       the directory pathname for input clusters
-   * @param output           the directory pathname for output points
-   * @param measureClass     the classname of the DistanceMeasure
+   * @param input the directory pathname for input points
+   * @param clustersIn the directory pathname for input clusters
+   * @param output the directory pathname for output points
+   * @param measureClass the classname of the DistanceMeasure
    * @param convergenceDelta the convergence delta value
    */
-  private static void runClustering(String input, String clustersIn, String output,
-                            String measureClass, String convergenceDelta) {
+  private static void runClustering(String input, String clustersIn,
+      String output, String measureClass, String convergenceDelta) {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(KMeansDriver.class);
 
@@ -144,13 +154,16 @@ public class KMeansDriver {
     Path outPath = new Path(output);
     FileOutputFormat.setOutputPath(conf, outPath);
 
-    conf.setMapperClass(KMeansMapper.class);
+    conf.setMapperClass(KMeansClusterMapper.class);
     conf.setNumReduceTasks(0);
     conf.set(Cluster.CLUSTER_PATH_KEY, clustersIn);
     conf.set(Cluster.DISTANCE_MEASURE_KEY, measureClass);
     conf.set(Cluster.CLUSTER_CONVERGENCE_KEY, convergenceDelta);
 
     client.setConf(conf);
+    // uncomment it to run locally
+    // conf.set("mapred.job.tracker", "local");
+//    conf.set("mapred.child.java.opts", "-Xmx1536m");
     try {
       JobClient.runJob(conf);
     } catch (IOException e) {
@@ -167,7 +180,7 @@ public class KMeansDriver {
    * @return true if all Clusters are converged
    * @throws IOException if there was an IO error
    */
-  private static boolean isConverged(String filePath, JobConf conf, FileSystem fs)
+ private static boolean isConverged(String filePath, JobConf conf, FileSystem fs)
           throws IOException {
     Path outPart = new Path(filePath);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, outPart, conf);
