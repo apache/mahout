@@ -82,7 +82,7 @@
 
       <plugin>
         <groupId>org.mortbay.jetty</groupId>
-        <artifactId>maven-jetty-plugin</artifactId>
+        <artifactId>jetty-maven-plugin</artifactId>
         <configuration>
           <webApp>${project.build.directory}/${project.artifactId}-${project.version}.war</webApp>
         </configuration>
