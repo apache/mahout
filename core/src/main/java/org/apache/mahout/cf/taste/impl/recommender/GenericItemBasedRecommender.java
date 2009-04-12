@@ -58,7 +58,7 @@ import java.util.Set;
  * which computes similarities in real-time,
  * but will probably find this painfully slow for large amounts of data.</p>
  */
-public final class GenericItemBasedRecommender extends AbstractRecommender implements ItemBasedRecommender {
+public class GenericItemBasedRecommender extends AbstractRecommender implements ItemBasedRecommender {
 
   private static final Logger log = LoggerFactory.getLogger(GenericItemBasedRecommender.class);
 
@@ -74,6 +74,10 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
     this.refreshHelper = new RefreshHelper(null);
     refreshHelper.addDependency(dataModel);
     refreshHelper.addDependency(similarity);
+  }
+
+  public ItemSimilarity getSimilarity() {
+    return similarity;
   }
 
   @Override
@@ -197,7 +201,7 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
     return TopItems.getTopItems(howMany, allItems, null, estimator);
   }
 
-  private double doEstimatePreference(User theUser, Item item) throws TasteException {
+  protected double doEstimatePreference(User theUser, Item item) throws TasteException {
     double preference = 0.0;
     double totalSimilarity = 0.0;
     Preference[] prefs = theUser.getPreferencesAsArray();
@@ -229,15 +233,15 @@ public final class GenericItemBasedRecommender extends AbstractRecommender imple
     return "GenericItemBasedRecommender[similarity:" + similarity + ']';
   }
 
-  private static class MostSimilarEstimator implements TopItems.Estimator<Item> {
+  public static class MostSimilarEstimator implements TopItems.Estimator<Item> {
 
     private final Item toItem;
     private final ItemSimilarity similarity;
     private final Rescorer<Pair<Item, Item>> rescorer;
 
-    private MostSimilarEstimator(Item toItem,
-                                 ItemSimilarity similarity,
-                                 Rescorer<Pair<Item, Item>> rescorer) {
+    public MostSimilarEstimator(Item toItem,
+                                ItemSimilarity similarity,
+                                Rescorer<Pair<Item, Item>> rescorer) {
       this.toItem = toItem;
       this.similarity = similarity;
       this.rescorer = rescorer;
