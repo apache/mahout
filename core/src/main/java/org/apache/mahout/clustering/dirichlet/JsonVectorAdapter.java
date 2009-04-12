@@ -32,11 +32,13 @@ import com.google.gson.JsonSerializer;
 public class JsonVectorAdapter implements JsonSerializer<Vector>,
     JsonDeserializer<Vector> {
 
+  @Override
   public JsonElement serialize(Vector src, Type typeOfSrc,
       JsonSerializationContext context) {
     return new JsonPrimitive(src.asFormatString());
   }
 
+  @Override
   public Vector deserialize(JsonElement json, Type typeOfT,
       JsonDeserializationContext context) throws JsonParseException {
     return AbstractVector.decodeVector(json.getAsJsonPrimitive().getAsString());

@@ -45,6 +45,7 @@ public class JsonDirichletStateAdapter implements
   final Type typeOfModelDistribution = new TypeToken<ModelDistribution<Vector>>() {
   }.getType();
 
+  @Override
   public JsonElement serialize(DirichletState<?> src, Type typeOfSrc,
       JsonSerializationContext context) {
     GsonBuilder builder = new GsonBuilder();
@@ -65,6 +66,7 @@ public class JsonDirichletStateAdapter implements
     return obj;
   }
 
+  @Override
   public DirichletState<?> deserialize(JsonElement json, Type typeOfT,
       JsonDeserializationContext context) throws JsonParseException {
     GsonBuilder builder = new GsonBuilder();

@@ -282,7 +282,7 @@ public class Canopy {
 
   @Override
   public String toString() {
-    return getIdentifier() + " - " + getCenter().asFormatString();
+    return getIdentifier() + " - " + center.asFormatString();
   }
 
   public String getIdentifier() {

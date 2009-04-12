@@ -35,11 +35,13 @@ public class JsonModelDistributionAdapter implements
 
   private static final Logger log = LoggerFactory.getLogger(JsonModelDistributionAdapter.class);
 
+  @Override
   public JsonElement serialize(ModelDistribution<?> src, Type typeOfSrc,
       JsonSerializationContext context) {
     return new JsonPrimitive(src.getClass().getName());
   }
 
+  @Override
   public ModelDistribution<?> deserialize(JsonElement json, Type typeOfT,
       JsonDeserializationContext context) throws JsonParseException {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();

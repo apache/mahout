@@ -39,6 +39,7 @@ public class JsonModelAdapter implements JsonSerializer<Model<?>>,
 
   private static final Logger log = LoggerFactory.getLogger(JsonModelAdapter.class);
 
+  @Override
   public JsonElement serialize(Model<?> src, Type typeOfSrc,
       JsonSerializationContext context) {
     GsonBuilder builder = new GsonBuilder();
@@ -50,6 +51,7 @@ public class JsonModelAdapter implements JsonSerializer<Model<?>>,
     return obj;
   }
 
+  @Override
   public Model<?> deserialize(JsonElement json, Type typeOfT,
       JsonDeserializationContext context) throws JsonParseException {
     GsonBuilder builder = new GsonBuilder();

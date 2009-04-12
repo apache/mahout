@@ -50,8 +50,8 @@ public final class ItemItemWritable implements WritableComparable<ItemItemWritab
 
   @Override
   public void write(DataOutput out) throws IOException {
-    out.writeUTF(getItemAID());
-    out.writeUTF(getItemBID());
+    out.writeUTF(itemAID);
+    out.writeUTF(itemBID);
   }
 
   @Override

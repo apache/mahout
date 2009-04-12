@@ -431,7 +431,7 @@ public class MeanShiftCanopy {
    * @param canopy an existing MeanShiftCanopy
    */
   void touch(MeanShiftCanopy canopy) {
-    canopy.addPoints(getCenter(), boundPoints.size());
+    canopy.addPoints(center, boundPoints.size());
     addPoints(canopy.center, canopy.boundPoints.size());
   }
 
