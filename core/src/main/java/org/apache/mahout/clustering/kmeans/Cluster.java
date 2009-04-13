@@ -16,16 +16,17 @@
  */
 package org.apache.mahout.clustering.kmeans;
 
+import java.io.IOException;
+import java.util.List;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.SparseVector;
+import org.apache.mahout.matrix.SquareRootFunction;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
-
-import java.io.IOException;
-import java.util.List;
 
 public class Cluster {
 
@@ -46,11 +47,17 @@ public class Cluster {
   // the current centroid is lazy evaluated and may be null
   private Vector centroid = null;
 
+  // the standard deviation of the covered points
+  private double std;
+
   // the number of points in the cluster
   private int numPoints = 0;
 
   // the total of all points added to the cluster
   private Vector pointTotal = null;
+
+  // the total of all the points squared, used for std computation
+  private Vector pointSquaredTotal = null;
 
   // has the centroid converged with the center?
   private boolean converged = false;
@@ -82,8 +89,9 @@ public class Cluster {
     String center = formattedString.substring(beginIndex);
     char firstChar = id.charAt(0);
     boolean startsWithV = firstChar == 'V';
-     if (firstChar == 'C' || startsWithV) {
-      int clusterId = Integer.parseInt(formattedString.substring(1, beginIndex - 2));    
+    if (firstChar == 'C' || startsWithV) {
+      int clusterId = Integer.parseInt(formattedString.substring(1,
+          beginIndex - 2));
       Vector clusterCenter = AbstractVector.decodeVector(center);
       Cluster cluster = new Cluster(clusterCenter, clusterId);
       cluster.converged = startsWithV;
@@ -181,6 +189,10 @@ public class Cluster {
     else if (centroid == null) {
       // lazy compute new centroid
       centroid = pointTotal.divide(numPoints);
+      Vector stds = pointSquaredTotal.times(numPoints).minus(
+          pointTotal.times(pointTotal)).assign(new SquareRootFunction())
+          .divide(numPoints);
+      std = stds.zSum() / 2;
     }
     return centroid;
   }
@@ -196,6 +208,7 @@ public class Cluster {
     this.center = center;
     this.numPoints = 0;
     this.pointTotal = center.like();
+    this.pointSquaredTotal = center.like();
   }
 
   /**
@@ -209,6 +222,7 @@ public class Cluster {
     this.center = center;
     this.numPoints = 0;
     this.pointTotal = center.like();
+    this.pointSquaredTotal = center.like();
   }
 
   /**
@@ -251,10 +265,13 @@ public class Cluster {
   public void addPoints(int count, Vector delta) {
     centroid = null;
     numPoints += count;
-    if (pointTotal == null)
+    if (pointTotal == null) {
       pointTotal = delta.copy();
-    else
+      pointSquaredTotal = delta.times(delta);
+    } else {
       pointTotal = pointTotal.plus(delta);
+      pointSquaredTotal = pointSquaredTotal.plus(delta.times(delta));
+    }
   }
 
   public Vector getCenter() {
@@ -291,6 +308,13 @@ public class Cluster {
 
   public boolean isConverged() {
     return converged;
+  }
+
+  /**
+   * @return the std
+   */
+  public double getStd() {
+    return std;
   }
 
 }

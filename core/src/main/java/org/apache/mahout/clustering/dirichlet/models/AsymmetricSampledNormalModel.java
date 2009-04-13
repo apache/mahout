@@ -16,6 +16,7 @@
  */
 package org.apache.mahout.clustering.dirichlet.models;
 
+import org.apache.mahout.matrix.SquareRootFunction;
 import org.apache.mahout.matrix.Vector;
 
 public class AsymmetricSampledNormalModel implements Model<Vector> {
@@ -73,14 +74,12 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
     if (s0 == 0)
       return;
     mean = s1.divide(s0);
-    // the average of the two component stds
-    Vector ss = s2.times(s0).minus(s1.times(s1));
+    // compute the two component stds
     if (s0 > 1) {
-      sd.set(0, Math.sqrt(ss.get(0)) / s0);
-      sd.set(1, Math.sqrt(ss.get(1)) / s0);
+      sd = s2.times(s0).minus(s1.times(s1)).assign(new SquareRootFunction())
+          .divide(s0);
     } else {
-      sd.set(0, Double.MIN_NORMAL);
-      sd.set(1, Double.MIN_NORMAL);
+      sd.assign(Double.MIN_NORMAL);
     }
   }
 

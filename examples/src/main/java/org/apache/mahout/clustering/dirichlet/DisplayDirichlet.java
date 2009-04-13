@@ -19,7 +19,7 @@ import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.TimesFunction;
 import org.apache.mahout.matrix.Vector;
 
-class DisplayDirichlet extends Frame {
+public class DisplayDirichlet extends Frame {
   private static final long serialVersionUID = 1L;
 
   int res; //screen resolution
@@ -28,15 +28,15 @@ class DisplayDirichlet extends Frame {
 
   int size = 8; // screen size in inches
 
-  static List<Vector> sampleData = new ArrayList<Vector>();
+  public static List<Vector> sampleData = new ArrayList<Vector>();
 
-  static List<Model<Vector>[]> result;
+  protected static List<Model<Vector>[]> result;
 
-  static double significance = 0.05;
+  protected static double significance = 0.05;
 
   static List<Vector> sampleParams = new ArrayList<Vector>();
 
-  static Color[] colors = { Color.red, Color.orange, Color.yellow, Color.green,
+  protected static Color[] colors = { Color.red, Color.orange, Color.yellow, Color.green,
       Color.blue, Color.magenta, Color.lightGray };
 
   /**
@@ -56,11 +56,11 @@ class DisplayDirichlet extends Frame {
    * limitations under the License.
    */
 
-  DisplayDirichlet() {
+  public DisplayDirichlet() {
     initialize();
   }
 
-  void initialize() {
+  public void initialize() {
     //Get screen resolution
     res = Toolkit.getDefaultToolkit().getScreenResolution();
 
@@ -99,7 +99,7 @@ class DisplayDirichlet extends Frame {
     }
   }
 
-  void plotSampleData(Graphics g) {
+  public void plotSampleData(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
     double sx = (double) res / ds;
     g2.setTransform(AffineTransform.getScaleInstance(sx, sx));
@@ -123,7 +123,7 @@ class DisplayDirichlet extends Frame {
    * @param v a Vector of rectangle centers
    * @param dv a Vector of rectangle sizes
    */
-  void plotRectangle(Graphics2D g2, Vector v, Vector dv) {
+  public void plotRectangle(Graphics2D g2, Vector v, Vector dv) {
     int h = size / 2;
     double[] flip = { 1, -1 };
     Vector v2 = v.copy().assign(new DenseVector(flip), new TimesFunction());
@@ -140,7 +140,7 @@ class DisplayDirichlet extends Frame {
    * @param v a Vector of rectangle centers
    * @param dv a Vector of rectangle sizes
    */
-  void plotEllipse(Graphics2D g2, Vector v, Vector dv) {
+  public void plotEllipse(Graphics2D g2, Vector v, Vector dv) {
     int h = size / 2;
     double[] flip = { 1, -1 };
     Vector v2 = v.copy().assign(new DenseVector(flip), new TimesFunction());
@@ -167,13 +167,13 @@ class DisplayDirichlet extends Frame {
     System.out.println();
   }
 
-  static void generateSamples() {
+  public static void generateSamples() {
     generateSamples(400, 1, 1, 3);
     generateSamples(300, 1, 0, 0.5);
     generateSamples(300, 0, 2, 0.1);
   }
 
-  static void generate2dSamples() {
+  public static void generate2dSamples() {
     generate2dSamples(400, 1, 1, 3, 1);
     generate2dSamples(300, 1, 0, 0.5, 1);
     generate2dSamples(300, 0, 2, 0.1, 0.5);
@@ -217,14 +217,14 @@ class DisplayDirichlet extends Frame {
           UncommonDistributions.rNorm(my, sdy) }));
   }
 
-  static void generateResults(ModelDistribution<Vector> modelDist) {
+  public static void generateResults(ModelDistribution<Vector> modelDist) {
     DirichletClusterer<Vector> dc = new DirichletClusterer<Vector>(sampleData,
         modelDist, 1.0, 10, 2, 2);
     result = dc.cluster(20);
     printModels(result, 5);
   }
 
-  static boolean isSignificant(Model<Vector> model) {
+ public static boolean isSignificant(Model<Vector> model) {
     return (((double) model.count() / sampleData.size()) > significance);
   }
 

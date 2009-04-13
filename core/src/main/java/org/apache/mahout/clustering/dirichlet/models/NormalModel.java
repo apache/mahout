@@ -16,6 +16,7 @@
  */
 package org.apache.mahout.clustering.dirichlet.models;
 
+import org.apache.mahout.matrix.SquareRootFunction;
 import org.apache.mahout.matrix.Vector;
 
 public class NormalModel implements Model<Vector> {
@@ -29,7 +30,9 @@ public class NormalModel implements Model<Vector> {
 
   // the observation statistics, initialized by the first observation
   int s0 = 0;
+
   Vector s1;
+
   Vector s2;
 
   public NormalModel() {
@@ -69,10 +72,12 @@ public class NormalModel implements Model<Vector> {
     if (s0 == 0)
       return;
     mean = s1.divide(s0);
-    // the average of the two component stds
-    if (s0 > 1)
-      sd = Math.sqrt(s2.times(s0).minus(s1.times(s1)).zSum() / 2) / s0;
-    else
+    // compute the average of the component stds
+    if (s0 > 1) {
+      Vector std = s2.times(s0).minus(s1.times(s1)).assign(
+          new SquareRootFunction()).divide(s0);
+      sd = std.zSum() / s1.cardinality();
+    } else
       sd = Double.MIN_VALUE;
   }
 
