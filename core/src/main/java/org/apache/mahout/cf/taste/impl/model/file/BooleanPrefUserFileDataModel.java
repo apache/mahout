@@ -77,8 +77,8 @@ public class BooleanPrefUserFileDataModel implements DataModel {
     this.lastModified = dataFile.lastModified();
     this.reloadLock = new ReentrantLock();
 
-    // Schedule next refresh
-    timer.schedule(new RefreshTimerTask(), RELOAD_CHECK_INTERVAL_MS, RELOAD_CHECK_INTERVAL_MS);
+//    // Schedule next refresh
+//    timer.schedule(new RefreshTimerTask(), RELOAD_CHECK_INTERVAL_MS, RELOAD_CHECK_INTERVAL_MS);
   }
 
   protected void reload() {
@@ -109,6 +109,7 @@ public class BooleanPrefUserFileDataModel implements DataModel {
         processLine(line, data);
       }
     }
+    log.info("Done reading file: " + data.size());
   }
 
   /**
@@ -237,19 +238,19 @@ public class BooleanPrefUserFileDataModel implements DataModel {
     return "BooleanPrefUserFileDataModel[dataFile:" + dataFile + ']';
   }
 
-  private final class RefreshTimerTask extends TimerTask {
-
-    @Override
-    public void run() {
-      if (loaded) {
-        long newModified = dataFile.lastModified();
-        if (newModified > lastModified) {
-          log.debug("File has changed; reloading...");
-          lastModified = newModified;
-          reload();
-        }
-      }
-    }
-  }
+//  private final class RefreshTimerTask extends TimerTask {
+//
+//    @Override
+//    public void run() {
+//      if (loaded) {
+//        long newModified = dataFile.lastModified();
+//        if (newModified > lastModified) {
+//          log.debug("File has changed; reloading...");
+//          lastModified = newModified;
+//          reload();
+//        }
+//      }
+//    }
+//  }
 
 }
