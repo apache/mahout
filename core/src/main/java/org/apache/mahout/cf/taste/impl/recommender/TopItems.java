@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
+import org.apache.mahout.cf.taste.impl.similarity.GenericUserSimilarity;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
@@ -132,6 +133,32 @@ public final class TopItems {
     }
     List<GenericItemSimilarity.ItemItemSimilarity> result =
       new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(topSimilarities.size());
+    result.addAll(topSimilarities);
+    Collections.sort(result);
+    return result;
+  }
+
+  public static List<GenericUserSimilarity.UserUserSimilarity> getTopUserUserSimilarities(
+          int howMany, Iterable<GenericUserSimilarity.UserUserSimilarity> allSimilarities) {
+    Queue<GenericUserSimilarity.UserUserSimilarity> topSimilarities =
+            new PriorityQueue<GenericUserSimilarity.UserUserSimilarity>(howMany + 1, Collections.reverseOrder());
+    boolean full = false;
+    double lowestTopValue = Double.NEGATIVE_INFINITY;
+    for (GenericUserSimilarity.UserUserSimilarity similarity : allSimilarities) {
+      double value = similarity.getValue();
+      if (!full || value > lowestTopValue) {
+        topSimilarities.add(similarity);
+        if (full) {
+          topSimilarities.poll();
+        } else if (topSimilarities.size() > howMany) {
+          full = true;
+          topSimilarities.poll();
+        }
+        lowestTopValue = topSimilarities.peek().getValue();
+      }
+    }
+    List<GenericUserSimilarity.UserUserSimilarity> result =
+      new ArrayList<GenericUserSimilarity.UserUserSimilarity>(topSimilarities.size());
     result.addAll(topSimilarities);
     Collections.sort(result);
     return result;
