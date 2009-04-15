@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.mahout.clustering.canopy.Canopy;
-import org.apache.mahout.clustering.canopy.VisibleCanopy;
 import org.apache.mahout.clustering.dirichlet.DisplayDirichlet;
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 import org.apache.mahout.matrix.DenseVector;
@@ -158,7 +157,7 @@ class DisplayKMeans extends DisplayDirichlet {
       Iterator<Vector> ptIter = points.iterator();
       Vector p1 = ptIter.next();
       ptIter.remove();
-      Canopy canopy = new VisibleCanopy(p1);
+      Canopy canopy = new Canopy(p1);
       canopies.add(canopy);
       while (ptIter.hasNext()) {
         Vector p2 = ptIter.next();

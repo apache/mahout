@@ -90,7 +90,7 @@ class DisplayCanopy extends DisplayDirichlet {
       Iterator<Vector> ptIter = points.iterator();
       Vector p1 = ptIter.next();
       ptIter.remove();
-      Canopy canopy = new VisibleCanopy(p1);
+      Canopy canopy = new Canopy(p1);
       canopies.add(canopy);
       while (ptIter.hasNext()) {
         Vector p2 = ptIter.next();
