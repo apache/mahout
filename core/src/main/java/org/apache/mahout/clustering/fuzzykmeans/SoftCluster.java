@@ -329,11 +329,9 @@ public class SoftCluster {
       Vector radical = s2.times(s0).minus(s1.times(s1));
       radical = radical.times(radical).assign(new SquareRootFunction());
       Vector stds = radical.assign(new SquareRootFunction()).divide(s0);
-      double res = stds.zSum() / stds.cardinality();
-      System.out.println(res);
-      return res;
+      return stds.zSum() / stds.cardinality();
     } else
-      return 0.33;
+      return 0;
   }
 
   /**
