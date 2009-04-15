@@ -166,7 +166,8 @@ public class FileDataModel implements DataModel {
     AtomicInteger count = new AtomicInteger();
     for (String line : new FileLineIterable(dataOrUpdateFile, false)) {
       if (line.length() > 0) {
-        log.debug("Read line: {}", line);
+        if (log.isDebugEnabled())
+          log.debug("Read line: {}", line);
         if (delimiter == UNKNOWN_DELIMITER) {
           delimiter = determineDelimiter(line);
         }
@@ -247,7 +248,8 @@ public class FileDataModel implements DataModel {
         item = buildItem(itemID);
         itemCache.put(itemID, item);
       }
-      log.debug("Read item '{}' for user ID '{}'", item, userID);
+      if (log.isDebugEnabled())
+        log.debug("Read item '{}' for user ID '{}'", item, userID);
       if (preferenceValueString == null) {
         prefs.add(new BooleanPreference(null, item));
       } else {

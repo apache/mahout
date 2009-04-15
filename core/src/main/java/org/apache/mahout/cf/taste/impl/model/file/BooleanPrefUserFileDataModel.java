@@ -95,7 +95,8 @@ public class BooleanPrefUserFileDataModel implements DataModel {
     log.info("Reading file info...");
     for (String line : new FileLineIterable(dataFile, false)) {
       if (line.length() > 0) {
-        log.debug("Read line: {}", line);
+        if (log.isDebugEnabled())
+          log.debug("Read line: {}", line);
         processLine(line, data);
       }
     }
@@ -133,7 +134,8 @@ public class BooleanPrefUserFileDataModel implements DataModel {
       data.put(userID, prefs);
     }
     prefs.add(itemID);
-    log.debug("Read item '{}' for user ID '{}'", itemID, userID);
+    if (log.isDebugEnabled())
+      log.debug("Read item '{}' for user ID '{}'", itemID, userID);
   }
 
   private void checkLoaded() {
