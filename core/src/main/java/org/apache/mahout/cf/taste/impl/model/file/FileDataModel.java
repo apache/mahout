@@ -177,6 +177,7 @@ public class FileDataModel implements DataModel {
         }
       }
     }
+    log.info("Read lines: " + count.get());
   }
 
   private static char determineDelimiter(String line) {
