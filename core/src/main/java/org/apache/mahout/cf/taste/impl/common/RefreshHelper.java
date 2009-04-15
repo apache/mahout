@@ -78,15 +78,28 @@ public final class RefreshHelper implements Refreshable {
     }
   }
 
+  /**
+   * Creates a new and empty {@link FastSet} of size 3 if the method parameter is <code>null</code>.
+   * @param currentAlreadyRefreshed {@link Refreshable}s to refresh later on
+   * @return an empty {@link FastSet} if the method param was <code>null</code> or the unmodified method param. 
+   */
   public static Collection<Refreshable> buildRefreshed(Collection<Refreshable> currentAlreadyRefreshed) {
     return currentAlreadyRefreshed == null ? new FastSet<Refreshable>(3) : currentAlreadyRefreshed;
   }
 
+  /**
+   * Adds the specified {@link Refreshable} to the given collection of {@link Refreshable}s if it is not
+   * already there and immediately refreshes it.
+   * @param alreadyRefreshed the collection of {@link Refreshable}s
+   * @param refreshable the {@link Refreshable} to potentially add and refresh
+   */
   public static void maybeRefresh(Collection<Refreshable> alreadyRefreshed, Refreshable refreshable) {
+    log.debug("In Maybe refresh: " + refreshable);
     if (!alreadyRefreshed.contains(refreshable)) {
       alreadyRefreshed.add(refreshable);
+      log.info("Added refreshable: " + refreshable);
       refreshable.refresh(alreadyRefreshed);
+      log.info("Refreshed: " + alreadyRefreshed);
     }
   }
-
 }
