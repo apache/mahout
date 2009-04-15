@@ -120,7 +120,7 @@ public final class TopItems {
     double lowestTopValue = Double.NEGATIVE_INFINITY;
     for (GenericItemSimilarity.ItemItemSimilarity similarity : allSimilarities) {
       double value = similarity.getValue();
-      if (!full || value > lowestTopValue) {
+      if (!Double.isNaN(value) && (!full || value > lowestTopValue)) {
         topSimilarities.add(similarity);
         if (full) {
           topSimilarities.poll();
@@ -146,7 +146,7 @@ public final class TopItems {
     double lowestTopValue = Double.NEGATIVE_INFINITY;
     for (GenericUserSimilarity.UserUserSimilarity similarity : allSimilarities) {
       double value = similarity.getValue();
-      if (!full || value > lowestTopValue) {
+      if (!Double.isNaN(value) && (!full || value > lowestTopValue)) {
         topSimilarities.add(similarity);
         if (full) {
           topSimilarities.poll();
@@ -165,7 +165,6 @@ public final class TopItems {
   }
 
   public interface Estimator<T> {
-
     double estimate(T thing) throws TasteException;
   }
 
