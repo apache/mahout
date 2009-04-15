@@ -22,11 +22,11 @@ import org.apache.mahout.matrix.Vector;
 public class DisplayDirichlet extends Frame {
   private static final long serialVersionUID = 1L;
 
-  int res; //screen resolution
+  protected int res; //screen resolution
 
-  int ds = 72; //default scale = 72 pixels per inch
+  protected int ds = 72; //default scale = 72 pixels per inch
 
-  int size = 8; // screen size in inches
+  protected int size = 8; // screen size in inches
 
   public static List<Vector> sampleData = new ArrayList<Vector>();
 

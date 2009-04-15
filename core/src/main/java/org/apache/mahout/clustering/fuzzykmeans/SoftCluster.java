@@ -26,6 +26,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.SparseVector;
+import org.apache.mahout.matrix.SquareRootFunction;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
 
@@ -42,7 +43,8 @@ public class SoftCluster {
   private static double m = 2.0; // default value
 
   public static final double MINIMAL_VALUE = 0.0000000001; // using it for
-                                                            // adding
+
+  // adding
 
   // exception
   // this value to any
@@ -69,6 +71,13 @@ public class SoftCluster {
 
   // has the centroid converged with the center?
   private boolean converged = false;
+
+  // track membership parameters
+  double s0 = 0;
+
+  Vector s1;
+
+  Vector s2;
 
   private static DistanceMeasure measure;
 
@@ -163,9 +172,9 @@ public class SoftCluster {
       double probWeight = computeProbWeight(clusterDistanceList.get(i),
           clusterDistanceList);
       Text key = new Text(clusters.get(i).getIdentifier()); // just output the
-                                                            // identifier,avoids
-                                                            // too much data
-                                                            // traffic
+      // identifier,avoids
+      // too much data
+      // traffic
       Text value = new Text(Double.toString(probWeight)
           + FuzzyKMeansDriver.MAPPER_VALUE_SEPARATOR + values.toString());
       output.collect(key, value);
@@ -203,8 +212,7 @@ public class SoftCluster {
           probWeight).append(' ');
     }
     output.collect(new Text(outputKey.trim()), new Text(outputValue.toString()
-        .trim()
-        + ']'));
+        .trim() + ']'));
   }
 
   /**
@@ -295,12 +303,47 @@ public class SoftCluster {
   }
 
   /**
+   * Observe the point, accumulating weighted variables for std() calculation
+   * @param point
+   * @param ptProb
+   */
+  private void observePoint(Vector point, double ptProb) {
+    s0 += ptProb;
+    Vector wtPt = point.times(ptProb);
+    if (s1 == null)
+      s1 = point.copy();
+    else
+      s1 = s1.plus(wtPt);
+    if (s2 == null)
+      s2 = wtPt.times(wtPt);
+    else
+      s2 = s2.plus(wtPt.times(wtPt));
+  }
+
+  /**
+   * Compute a "standard deviation" value to use as the "radius" of the cluster for display purposes
+   * @return
+   */
+  public double std() {
+    if (s0 > 0) {
+      Vector radical = s2.times(s0).minus(s1.times(s1));
+      radical = radical.times(radical).assign(new SquareRootFunction());
+      Vector stds = radical.assign(new SquareRootFunction()).divide(s0);
+      double res = stds.zSum() / stds.cardinality();
+      System.out.println(res);
+      return res;
+    } else
+      return 0.33;
+  }
+
+  /**
    * Add the point to the SoftCluster
    * 
    * @param point a point to add
    * @param ptProb
    */
   public void addPoint(Vector point, double ptProb) {
+    observePoint(point, ptProb);
     centroid = null;
     pointProbSum += ptProb;
     if (weightedPointTotal == null)

@@ -57,10 +57,10 @@ public class MeanShiftCanopy {
   private static int nextCanopyId = 0;
 
   // the T1 distance threshold
-  private static double t1;
+  static double t1;
 
   // the T2 distance threshold
-  private static double t2;
+  static double t2;
 
   // the distance measure
   private static DistanceMeasure measure;
