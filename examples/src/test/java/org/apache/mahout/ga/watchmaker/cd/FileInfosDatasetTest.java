@@ -53,6 +53,7 @@ public class FileInfosDatasetTest extends TestCase {
         }
       }
     }
+    in.close();
   }
 
   private void assertInRange(double value, double min, double max) {

@@ -76,6 +76,10 @@ public final class CachingRecommender implements Recommender {
     this.refreshHelper.addDependency(recommender);
   }
 
+  private synchronized Rescorer<Item> getCurrentRescorer() {
+    return currentRescorer;
+  }
+
   private synchronized void setCurrentRescorer(Rescorer<Item> rescorer) {
     if (rescorer == null) {
       if (currentRescorer != null) {
@@ -190,9 +194,10 @@ public final class CachingRecommender implements Recommender {
     public Recommendations get(Object key) throws TasteException {
       log.debug("Retrieving new recommendations for user ID '{}'", key);
       int howMany = maxHowMany.get();
-      List<RecommendedItem> recommendations = currentRescorer == null ?
+      Rescorer<Item> rescorer = getCurrentRescorer();
+      List<RecommendedItem> recommendations = rescorer == null ?
           recommender.recommend(key, howMany) :
-          recommender.recommend(key, howMany, currentRescorer);
+          recommender.recommend(key, howMany, rescorer);
       return new Recommendations(Collections.unmodifiableList(recommendations));
     }
   }

@@ -50,6 +50,7 @@ public class InputMapper extends MapReduceBase implements
       point.set(index++, d);
     MeanShiftCanopy canopy = new MeanShiftCanopy(point);
     output.collect(null, new Text(canopy.toString()));
+    // TODO srowen: FindBugs says line above will definitely cause an NPE due to null param?
   }
 
 }

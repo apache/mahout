@@ -50,6 +50,7 @@ public class JsonModelDistributionAdapter implements
       cl = ccl.loadClass(json.getAsString());
     } catch (ClassNotFoundException e) {
       log.warn("Error while loading class", e);
+      return null;
     }
     try {
       return (ModelDistribution<?>) cl.newInstance();

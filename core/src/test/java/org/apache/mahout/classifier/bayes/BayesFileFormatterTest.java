@@ -75,7 +75,10 @@ public class BayesFileFormatterTest extends TestCase {
     for (File file : files) {
       //should only be one line in the file, and it should be label label
       BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), charset));
-      String line = reader.readLine().trim();
+      String line = reader.readLine();
+      if (line != null) {
+        line = line.trim();
+      }
       String label = "animal" + '\t' + file.getName();
       assertEquals(line + ":::: is not equal to " + label + "::::", line, label);
       reader.close();

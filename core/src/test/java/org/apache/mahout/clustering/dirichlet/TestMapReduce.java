@@ -357,7 +357,7 @@ public class TestMapReduce extends TestCase {
     printResults(clusters, 0);
   }
 
-  private void printResults(List<List<DirichletCluster<Vector>>> clusters,
+  private static void printResults(List<List<DirichletCluster<Vector>>> clusters,
       int significant) {
     int row = 0;
     for (List<DirichletCluster<Vector>> r : clusters) {
@@ -365,8 +365,8 @@ public class TestMapReduce extends TestCase {
       for (int k = 0; k < r.size(); k++) {
         Model<Vector> model = r.get(k).model;
         if (model.count() > significant) {
-          int total = new Double(r.get(k).totalCount).intValue();
-          System.out.print("m" + k + "(" + total + ")" + model.toString()
+          int total = (int) r.get(k).totalCount;
+          System.out.print("m" + k + '(' + total + ')' + model.toString()
               + ", ");
         }
       }
