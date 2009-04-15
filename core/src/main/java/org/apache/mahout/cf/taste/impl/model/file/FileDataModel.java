@@ -21,11 +21,13 @@ import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
 import org.apache.mahout.cf.taste.impl.model.BooleanPreference;
+import org.apache.mahout.cf.taste.impl.model.BooleanPrefUser;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -351,9 +353,18 @@ public class FileDataModel implements DataModel {
    *
    * @param id user ID
    * @param prefs user preferences
-   * @return {@link GenericUser} by default
+   * @return {@link GenericUser} by default, or, a {@link BooleanPrefUser} if the prefs supplied
+   *  are in fact {@link BooleanPreference}s
    */
   protected User buildUser(String id, List<Preference> prefs) {
+    if (!prefs.isEmpty() || prefs.get(0) instanceof BooleanPreference) {
+      // If first is a BooleanPreference, assuming all are, so, want to use BooleanPrefUser
+      FastSet<Object> itemIDs = new FastSet<Object>(prefs.size());
+      for (Preference pref : prefs) {
+        itemIDs.add(pref.getItem().getID());
+      }
+      return new BooleanPrefUser<String>(id, itemIDs);
+    }
     return new GenericUser<String>(id, prefs);
   }
 
