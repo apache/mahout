@@ -39,8 +39,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -50,11 +48,7 @@ public class BooleanPrefUserFileDataModel implements DataModel {
 
   private static final Logger log = LoggerFactory.getLogger(BooleanPrefUserFileDataModel.class);
 
-  private static final Timer timer = new Timer(true);
-  private static final long RELOAD_CHECK_INTERVAL_MS = 60L * 1000L;
-
   private final File dataFile;
-  private long lastModified;
   private boolean loaded;
   private DataModel delegate;
   private final ReentrantLock reloadLock;
@@ -74,11 +68,7 @@ public class BooleanPrefUserFileDataModel implements DataModel {
     log.info("Creating FileDataModel for file " + dataFile);
 
     this.dataFile = dataFile;
-    this.lastModified = dataFile.lastModified();
     this.reloadLock = new ReentrantLock();
-
-//    // Schedule next refresh
-//    timer.schedule(new RefreshTimerTask(), RELOAD_CHECK_INTERVAL_MS, RELOAD_CHECK_INTERVAL_MS);
   }
 
   protected void reload() {
@@ -237,20 +227,4 @@ public class BooleanPrefUserFileDataModel implements DataModel {
   public String toString() {
     return "BooleanPrefUserFileDataModel[dataFile:" + dataFile + ']';
   }
-
-//  private final class RefreshTimerTask extends TimerTask {
-//
-//    @Override
-//    public void run() {
-//      if (loaded) {
-//        long newModified = dataFile.lastModified();
-//        if (newModified > lastModified) {
-//          log.debug("File has changed; reloading...");
-//          lastModified = newModified;
-//          reload();
-//        }
-//      }
-//    }
-//  }
-
 }
