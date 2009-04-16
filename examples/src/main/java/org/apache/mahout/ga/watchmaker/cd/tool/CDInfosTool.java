@@ -68,7 +68,7 @@ public class CDInfosTool {
   public static void gatherInfos(Descriptors descriptors, Path inpath,
       List<String> descriptions) throws IOException {
     JobConf conf = new JobConf(CDInfosTool.class);
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(inpath.toUri(), conf);
 
     // check the input
     if (!fs.exists(inpath) || !fs.getFileStatus(inpath).isDir())
@@ -211,8 +211,8 @@ public class CDInfosTool {
       throw new IllegalArgumentException();
     }
 
-    FileSystem fs = FileSystem.get(new Configuration());
     Path inpath = new Path(args[0]);
+    FileSystem fs = FileSystem.get(inpath.toUri(), new Configuration());
 
     log.info("Loading Descriptors...");
     Descriptors descriptors = loadDescriptors(fs, inpath);

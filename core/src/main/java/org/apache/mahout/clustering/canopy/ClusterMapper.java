@@ -33,6 +33,7 @@ import org.apache.mahout.matrix.Vector;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.LoggerFactory;
 
 public class ClusterMapper extends MapReduceBase implements
         Mapper<WritableComparable<?>, Text, Text, Text> {
@@ -64,8 +65,8 @@ public class ClusterMapper extends MapReduceBase implements
     canopies = new ArrayList<Canopy>();
 
     try {
-      FileSystem fs = FileSystem.get(job);
       Path path = new Path(canopyPath + "/part-00000");
+      FileSystem fs = FileSystem.get(path.toUri(), job);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
       try {
         Text key = new Text();

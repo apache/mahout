@@ -120,7 +120,7 @@ public class KMeansDriver {
     client.setConf(conf);
     try {
       JobClient.runJob(conf);
-      FileSystem fs = FileSystem.get(conf);
+      FileSystem fs = FileSystem.get(outPath.toUri(), conf);
       return isConverged(clustersOut + "/part-00000", conf, fs);
     } catch (IOException e) {
       log.warn(e.toString(), e);

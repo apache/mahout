@@ -77,7 +77,7 @@ public class BayesWeightSummerDriver {
     conf.setCombinerClass(BayesWeightSummerReducer.class);
     conf.setReducerClass(BayesWeightSummerReducer.class);    
     conf.setOutputFormat(BayesWeightSummerOutputFormat.class);
-    FileSystem dfs = FileSystem.get(conf);
+    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
     if (dfs.exists(outPath))
       dfs.delete(outPath, true);
     client.setConf(conf);

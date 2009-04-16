@@ -336,8 +336,8 @@ public class TestMeanShift extends TestCase {
     MeanShiftCanopyJob.runJob("testdata", "output",
         EuclideanDistanceMeasure.class.getName(), 4, 1, 0.5, 10);
     JobConf conf = new JobConf(MeanShiftCanopyDriver.class);
-    FileSystem fs = FileSystem.get(conf);
     Path outPart = new Path("output/canopies-2/part-00000");
+    FileSystem fs = FileSystem.get(outPart.toUri(), conf);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, outPart, conf);
     Text key = new Text();
     Text value = new Text();

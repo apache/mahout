@@ -65,8 +65,8 @@ public class CBayesDriver {
    */
   public static void runJob(String input, String output, int gramSize) throws IOException {
     JobConf conf = new JobConf(CBayesDriver.class);
-    FileSystem dfs = FileSystem.get(conf);
     Path outPath = new Path(output);
+    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
     if (dfs.exists(outPath))
       dfs.delete(outPath, true);
 

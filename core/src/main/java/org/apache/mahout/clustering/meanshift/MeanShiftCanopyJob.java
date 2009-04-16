@@ -63,7 +63,7 @@ public class MeanShiftCanopyJob {
     // delete the output directory
     JobConf conf = new JobConf(MeanShiftCanopyDriver.class);
     Path outPath = new Path(output);
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(outPath.toUri(), conf);
     if (fs.exists(outPath)) {
       fs.delete(outPath, true);
     }

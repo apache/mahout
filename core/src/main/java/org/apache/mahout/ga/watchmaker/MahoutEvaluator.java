@@ -61,9 +61,9 @@ public class MahoutEvaluator {
       List<Double> evaluations) throws IOException {
     JobConf conf = new JobConf(MahoutEvaluator.class);
     FileSystem fs = FileSystem.get(conf);
-
     Path inpath = prepareInput(fs, population);
     Path outpath = OutputUtils.prepareOutput(fs);
+
 
     configureJob(conf, evaluator, inpath, outpath);
     JobClient.runJob(conf);

@@ -52,7 +52,7 @@ public final class SlopeOnePrefsToDiffsJob {
 
     JobConf jobConf = new JobConf(SlopeOnePrefsToDiffsJob.class);
 
-    FileSystem fs = FileSystem.get(jobConf);
+    FileSystem fs = FileSystem.get(outputPathPath.toUri(), jobConf);
     if (fs.exists(outputPathPath)) {
       fs.delete(outputPathPath, true);
     }

@@ -104,8 +104,9 @@ public class DirichletDriver {
       IllegalAccessException, FileNotFoundException, IOException {
     DirichletState<Vector> state = createState(modelFactory, numModels, alpha_0);
     JobConf job = new JobConf(KMeansDriver.class);
-    FileSystem fs = FileSystem.get(job);
-    fs.delete(new Path(output), true);
+    Path outPath = new Path(output);
+    FileSystem fs = FileSystem.get(outPath.toUri(), job);
+    fs.delete(outPath, true);
     for (int i = 0; i < numModels; i++) {
       Path path = new Path(stateIn + "/part-" + i);
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, job, path,

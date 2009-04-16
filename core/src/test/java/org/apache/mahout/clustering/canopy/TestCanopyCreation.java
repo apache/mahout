@@ -478,8 +478,8 @@ public class TestCanopyCreation extends TestCase {
     // verify output from sequence file
     JobConf job = new JobConf(
         org.apache.mahout.clustering.canopy.CanopyDriver.class);
-    FileSystem fs = FileSystem.get(job);
     Path path = new Path("output/canopies/part-00000");
+    FileSystem fs = FileSystem.get(path.toUri(), job);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
     Text key = new Text();
     Text value = new Text();
@@ -514,8 +514,8 @@ public class TestCanopyCreation extends TestCase {
     // verify output from sequence file
     JobConf job = new JobConf(
         org.apache.mahout.clustering.canopy.CanopyDriver.class);
-    FileSystem fs = FileSystem.get(job);
     Path path = new Path("output/canopies/part-00000");
+    FileSystem fs = FileSystem.get(path.toUri(), job);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
     Text key = new Text();
     Text value = new Text();
@@ -805,8 +805,8 @@ public class TestCanopyCreation extends TestCase {
     // verify output from sequence file
     JobConf job = new JobConf(
         org.apache.mahout.clustering.canopy.CanopyDriver.class);
-    FileSystem fs = FileSystem.get(job);
     Path path = new Path("output/canopies/part-00000");
+    FileSystem fs = FileSystem.get(path.toUri(), job);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
     Text key = new Text();
     Text value = new Text();

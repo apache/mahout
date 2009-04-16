@@ -31,8 +31,8 @@ import java.nio.charset.Charset;
 public class FileInfosDatasetTest extends TestCase {
 
   public void testRanges() throws IOException {
-    FileSystem fs = FileSystem.get(new Configuration());
     Path inpath = new Path("target/test-classes/wdbc");
+    FileSystem fs = FileSystem.get(inpath.toUri(), new Configuration());
     
     DataSet dataset = FileInfoParser.parseFile(fs, inpath);
     DataSet.initialize(dataset);

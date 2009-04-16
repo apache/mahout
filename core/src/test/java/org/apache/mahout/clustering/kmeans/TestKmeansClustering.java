@@ -389,8 +389,8 @@ public class TestKmeansClustering extends TestCase {
       System.out.println("testKMeansMRJob k= " + k);
       // pick k initial cluster centers at random
       JobConf job = new JobConf(KMeansDriver.class);
-      FileSystem fs = FileSystem.get(job);
       Path path = new Path("testdata/clusters/part-00000");
+      FileSystem fs = FileSystem.get(path.toUri(), job);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, job, path,
           Text.class, Text.class);
 

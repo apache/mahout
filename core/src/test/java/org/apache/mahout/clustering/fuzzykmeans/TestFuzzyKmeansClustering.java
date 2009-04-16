@@ -210,8 +210,8 @@ public class TestFuzzyKmeansClustering extends TestCase {
       System.out.println("testKFuzzyKMeansMRJob k= " + k);
       // pick k initial cluster centers at random
       JobConf job = new JobConf(FuzzyKMeansDriver.class);
-      FileSystem fs = FileSystem.get(job);
       Path path = new Path("testdata/clusters");
+      FileSystem fs = FileSystem.get(path.toUri(), job);
       if (fs.exists(path)) {
         fs.delete(path, true);
       }
@@ -239,7 +239,7 @@ public class TestFuzzyKmeansClustering extends TestCase {
 
       JobConf conf = new JobConf(FuzzyKMeansDriver.class);
       Path outPath = new Path("output");
-      fs = FileSystem.get(conf);
+      fs = FileSystem.get(outPath.toUri(), conf);
       if (fs.exists(outPath)) {
         fs.delete(outPath, true);
       }

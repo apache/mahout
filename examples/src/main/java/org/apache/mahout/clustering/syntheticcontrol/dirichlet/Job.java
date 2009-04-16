@@ -79,7 +79,7 @@ public class Job {
     // delete the output directory
     JobConf conf = new JobConf(DirichletJob.class);
     Path outPath = new Path(output);
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(outPath.toUri(), conf);
     if (fs.exists(outPath)) {
       fs.delete(outPath, true);
     }

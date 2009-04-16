@@ -26,6 +26,8 @@ import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
 
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Job {
   private Job() {
@@ -73,7 +75,7 @@ public class Job {
 
     Path outPath = new Path(output);
     client.setConf(conf);
-    FileSystem dfs = FileSystem.get(conf);
+    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
     if (dfs.exists(outPath))
       dfs.delete(outPath, true);
     InputDriver.runJob(input, output + "/data");

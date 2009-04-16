@@ -80,7 +80,7 @@ public final class RecommenderJob {
 
     JobConf jobConf = new JobConf(RecommenderJob.class);
 
-    FileSystem fs = FileSystem.get(jobConf);
+    FileSystem fs = FileSystem.get(outputPathPath.toUri(), jobConf);
     if (fs.exists(outputPathPath)) {
       fs.delete(outputPathPath, true);
     }

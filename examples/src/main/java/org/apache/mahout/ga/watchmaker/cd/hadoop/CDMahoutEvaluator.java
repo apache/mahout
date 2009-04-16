@@ -66,7 +66,7 @@ public class CDMahoutEvaluator {
       Path inpath, List<CDFitness> evaluations, DatasetSplit split)
       throws IOException {
     JobConf conf = new JobConf(CDMahoutEvaluator.class);
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(inpath.toUri(), conf);
 
     // check the input
     if (!fs.exists(inpath) || !fs.getFileStatus(inpath).isDir())
@@ -88,7 +88,7 @@ public class CDMahoutEvaluator {
    */
   public static void initializeDataSet(Path inpath) throws IOException {
     JobConf conf = new JobConf(CDMahoutEvaluator.class);
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(inpath.toUri(), conf);
 
     // Initialize the dataset
     DataSet.initialize(FileInfoParser.parseFile(fs, inpath));

@@ -164,8 +164,8 @@ public class CDInfosToolTest extends TestCase {
     Object[][] descriptions = randomDescriptions(descriptors);
 
     // random dataset
-    FileSystem fs = FileSystem.get(new Configuration());
     Path inpath = new Path("input");
+    FileSystem fs = FileSystem.get(inpath.toUri(), new Configuration());
     if (fs.exists(inpath)) {
       fs.delete(inpath, true);
     }

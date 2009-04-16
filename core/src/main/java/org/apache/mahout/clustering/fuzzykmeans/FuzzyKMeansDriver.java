@@ -165,7 +165,7 @@ public class FuzzyKMeansDriver {
 
     try {
       JobClient.runJob(conf);
-      FileSystem fs = FileSystem.get(conf);
+      FileSystem fs = FileSystem.get(outPath.toUri(), conf);
       return isConverged(clustersOut, conf, fs);
     } catch (IOException e) {
       log.warn(e.toString(), e);

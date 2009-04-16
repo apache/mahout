@@ -66,7 +66,7 @@ public class Job {
 
     Path outPath = new Path(output);
     client.setConf(conf);
-    FileSystem dfs = FileSystem.get(conf);
+    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
     if (dfs.exists(outPath))
       dfs.delete(outPath, true);
     InputDriver.runJob(input, output + "/data");

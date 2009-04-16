@@ -82,10 +82,11 @@ public final class RecommenderMapper
     String recommenderClassName = jobConf.get(RECOMMENDER_CLASS_NAME);
     FileDataModel fileDataModel;
     try {
-      FileSystem fs = FileSystem.get(jobConf);
+      Path dataModelPath = new Path(dataModelFile);
+      FileSystem fs = FileSystem.get(dataModelPath.toUri(), jobConf);
       File tempDataFile = File.createTempFile("mahout-taste-hadoop", "txt");
       tempDataFile.deleteOnExit();
-      fs.copyToLocalFile(new Path(dataModelFile), new Path(tempDataFile.getAbsolutePath()));
+      fs.copyToLocalFile(dataModelPath, new Path(tempDataFile.getAbsolutePath()));
       fileDataModel = new FileDataModel(tempDataFile);
     } catch (IOException ioe) {
       throw new RuntimeException(ioe);

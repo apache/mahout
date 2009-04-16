@@ -89,7 +89,7 @@ public class CBayesNormalizedWeightDriver {
     conf.set("io.serializations",
              "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
     // Dont ever forget this. People should keep track of how hadoop conf parameters and make or break a piece of code
-    FileSystem dfs = FileSystem.get(conf);
+    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
     if (dfs.exists(outPath))
       dfs.delete(outPath, true);
 

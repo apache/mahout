@@ -68,8 +68,8 @@ public class MahoutEvaluatorTest extends TestCase {
 
   private static void storeLoadPopulation(List<DummyCandidate> population)
       throws IOException {
-    FileSystem fs = FileSystem.get(new Configuration());
     Path f = new Path("build/test.txt");
+    FileSystem fs = FileSystem.get(f.toUri(), new Configuration());
 
     // store the population
     MahoutEvaluator.storePopulation(fs, f, population);

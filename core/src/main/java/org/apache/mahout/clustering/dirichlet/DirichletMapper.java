@@ -70,8 +70,8 @@ public class DirichletMapper extends MapReduceBase implements
     try {
       DirichletState<Vector> state = DirichletDriver.createState(modelFactory,
           new Integer(numClusters), new Double(alpha_0));
-      FileSystem fs = FileSystem.get(job);
       Path path = new Path(statePath);
+      FileSystem fs = FileSystem.get(path.toUri(), job);
       FileStatus[] status = fs.listStatus(path);
       for (FileStatus s : status) {
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(),
