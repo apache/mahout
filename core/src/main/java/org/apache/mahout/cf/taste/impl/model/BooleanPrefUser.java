@@ -20,6 +20,7 @@ package org.apache.mahout.cf.taste.impl.model;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.impl.common.FastSet;
+import org.apache.mahout.cf.taste.impl.common.ArrayIterator;
 
 import java.io.Serializable;
 
@@ -47,24 +48,27 @@ public class BooleanPrefUser<K extends Comparable<K>> implements User, Serializa
 
   @Override
   public Preference getPreferenceFor(Object itemID) {
-    return itemIDs.contains(itemID) ?
-        new GenericPreference(this, new GenericItem<String>(itemID.toString()), 1.0) : null;
+    return itemIDs.contains(itemID) ? buildPreference(itemID) : null;
   }
 
-  /**
-   * @throws UnsupportedOperationException
-   */
   @Override
   public Iterable<Preference> getPreferences() {
-    throw new UnsupportedOperationException();
+    return new ArrayIterator<Preference>(getPreferencesAsArray());
   }
 
-  /**
-   * @throws UnsupportedOperationException
-   */
   @Override
   public Preference[] getPreferencesAsArray() {
-    throw new UnsupportedOperationException();
+    Preference[] result = new Preference[itemIDs.size()];
+    int i = 0;
+    for (Object itemID : itemIDs) {
+      result[i] = buildPreference(itemID);
+      i++;
+    }
+    return result;
+  }
+
+  private Preference buildPreference(Object itemID) {
+    return new BooleanPreference(this, new GenericItem<String>(itemID.toString()));
   }
 
   /**
