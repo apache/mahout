@@ -28,7 +28,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * A helper class for implementing {@link Refreshable}.
+ * A helper class for implementing {@link Refreshable}. This object is typically included in an implementation
+ * {@link Refreshable} to implement {@link Refreshable#refresh(Collection)}. It execute the class's own supplied
+ * update logic, after updating all the object's dependencies. This also ensures that dependencies are not
+ * updated multiple times.
  */
 public final class RefreshHelper implements Refreshable {
 
@@ -38,12 +41,18 @@ public final class RefreshHelper implements Refreshable {
   private final ReentrantLock refreshLock;
   private final Callable<?> refreshRunnable;
 
+  /**
+   * @param refreshRunnable encapsulates the containing object's own refresh logic
+   */
   public RefreshHelper(Callable<?> refreshRunnable) {
     this.dependencies = new ArrayList<Refreshable>(3);
     this.refreshLock = new ReentrantLock();
     this.refreshRunnable = refreshRunnable;
   }
 
+  /**
+   * Add a dependency to be refreshed first when the encapsulating object does.
+   */
   public void addDependency(Refreshable refreshable) {
     if (refreshable != null) {
       dependencies.add(refreshable);
@@ -56,6 +65,10 @@ public final class RefreshHelper implements Refreshable {
     }
   }
 
+  /**
+   * Typically this is called in {@link Refreshable#refresh(java.util.Collection)} and is the entire body
+   * of that method.
+   */
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     if (!refreshLock.isLocked()) {
@@ -94,12 +107,12 @@ public final class RefreshHelper implements Refreshable {
    * @param refreshable the {@link Refreshable} to potentially add and refresh
    */
   public static void maybeRefresh(Collection<Refreshable> alreadyRefreshed, Refreshable refreshable) {
-    log.debug("In Maybe refresh: " + refreshable);
+    log.debug("In maybeRefresh({})", refreshable);
     if (!alreadyRefreshed.contains(refreshable)) {
       alreadyRefreshed.add(refreshable);
-      log.info("Added refreshable: " + refreshable);
+      log.info("Added refreshable: {}", refreshable);
       refreshable.refresh(alreadyRefreshed);
-      log.info("Refreshed: " + alreadyRefreshed);
+      log.info("Refreshed: {}", alreadyRefreshed);
     }
   }
 }
