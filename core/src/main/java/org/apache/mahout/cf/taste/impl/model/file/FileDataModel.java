@@ -360,7 +360,7 @@ public class FileDataModel implements DataModel {
    *  are in fact {@link BooleanPreference}s
    */
   protected User buildUser(String id, List<Preference> prefs) {
-    if (!prefs.isEmpty() || prefs.get(0) instanceof BooleanPreference) {
+    if (!prefs.isEmpty() && prefs.get(0) instanceof BooleanPreference) {
       // If first is a BooleanPreference, assuming all are, so, want to use BooleanPrefUser
       FastSet<Object> itemIDs = new FastSet<Object>(prefs.size());
       for (Preference pref : prefs) {

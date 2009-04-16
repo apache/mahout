@@ -23,6 +23,7 @@ import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.common.ArrayIterator;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * A variant of {@link GenericUser} which is appropriate when users express only a "yes" preference for
@@ -64,6 +65,7 @@ public class BooleanPrefUser<K extends Comparable<K>> implements User, Serializa
       result[i] = buildPreference(itemID);
       i++;
     }
+    Arrays.sort(result, ByItemPreferenceComparator.getInstance());
     return result;
   }
 
