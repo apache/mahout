@@ -34,7 +34,7 @@ import org.apache.mahout.utils.DistanceMeasure;
 import org.apache.mahout.utils.ManhattanDistanceMeasure;
 
 class DisplayFuzzyKMeans extends DisplayDirichlet {
-  public DisplayFuzzyKMeans() {
+  DisplayFuzzyKMeans() {
     initialize();
     this.setTitle("Fuzzy K-Means Clusters (> 5% of population)");
   }
@@ -49,8 +49,9 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
 
   static double t2 = 1.5;
 
+  @Override
   public void paint(Graphics g) {
-    super.plotSampleData(g);
+    plotSampleData(g);
     Graphics2D g2 = (Graphics2D) g;
     Vector dv = new DenseVector(2);
     int i = clusters.size() - 1;
@@ -85,7 +86,7 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
    * to clusters and returning if the iterations are completed.
    * 
    * @param points the List<Vector> having the input points
-   * @param clusters the List<Cluster> clusters
+   * @param clusterList the List<Cluster> clusters
    * @param measure a DistanceMeasure to use
    * @return
    */

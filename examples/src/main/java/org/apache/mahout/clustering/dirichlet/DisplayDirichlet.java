@@ -24,19 +24,19 @@ public class DisplayDirichlet extends Frame {
 
   protected int res; //screen resolution
 
-  protected int ds = 72; //default scale = 72 pixels per inch
+  protected final int ds = 72; //default scale = 72 pixels per inch
 
-  protected int size = 8; // screen size in inches
+  protected final int size = 8; // screen size in inches
 
-  public static List<Vector> sampleData = new ArrayList<Vector>();
+  public static final List<Vector> sampleData = new ArrayList<Vector>();
 
   protected static List<Model<Vector>[]> result;
 
-  protected static double significance = 0.05;
+  protected static final double significance = 0.05;
 
-  static List<Vector> sampleParams = new ArrayList<Vector>();
+  private static final List<Vector> sampleParams = new ArrayList<Vector>();
 
-  protected static Color[] colors = { Color.red, Color.orange, Color.yellow, Color.green,
+  protected static final Color[] colors = { Color.red, Color.orange, Color.yellow, Color.green,
       Color.blue, Color.magenta, Color.lightGray };
 
   /**
@@ -71,6 +71,7 @@ public class DisplayDirichlet extends Frame {
 
     //Window listener to terminate program.
     this.addWindowListener(new WindowAdapter() {
+      @Override
       public void windowClosing(WindowEvent e) {
         System.exit(0);
       }
@@ -84,6 +85,7 @@ public class DisplayDirichlet extends Frame {
   }
 
   // Override the paint() method
+  @Override
   public void paint(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
     plotSampleData(g);
@@ -186,7 +188,7 @@ public class DisplayDirichlet extends Frame {
    * @param my double y-value of the sample mean
    * @param sd double standard deviation of the samples
    */
-  public static void generateSamples(int num, double mx, double my, double sd) {
+  private static void generateSamples(int num, double mx, double my, double sd) {
     double[] params = { mx, my, sd, sd };
     sampleParams.add(new DenseVector(params));
     System.out.println("Generating " + num + " samples m=[" + mx + ", " + my
@@ -205,12 +207,12 @@ public class DisplayDirichlet extends Frame {
    * @param sdx double x-value standard deviation of the samples
    * @param sdy double y-value standard deviation of the samples
    */
-  public static void generate2dSamples(int num, double mx, double my,
+  private static void generate2dSamples(int num, double mx, double my,
       double sdx, double sdy) {
     double[] params = { mx, my, sdx, sdy };
     sampleParams.add(new DenseVector(params));
     System.out.println("Generating " + num + " samples m=[" + mx + ", " + my
-        + "] sd=[" + sdx + ", " + sdy + "]");
+        + "] sd=[" + sdx + ", " + sdy + ']');
     for (int i = 0; i < num; i++)
       sampleData.add(new DenseVector(new double[] {
           UncommonDistributions.rNorm(mx, sdx),
@@ -224,7 +226,7 @@ public class DisplayDirichlet extends Frame {
     printModels(result, 5);
   }
 
- public static boolean isSignificant(Model<Vector> model) {
+  public static boolean isSignificant(Model<Vector> model) {
     return (((double) model.count() / sampleData.size()) > significance);
   }
 

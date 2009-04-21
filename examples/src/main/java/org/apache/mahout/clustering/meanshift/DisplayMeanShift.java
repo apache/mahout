@@ -32,7 +32,7 @@ import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.EuclideanDistanceMeasure;
 
 class DisplayMeanShift extends DisplayDirichlet {
-  public DisplayMeanShift() {
+  private DisplayMeanShift() {
     initialize();
     this.setTitle("Canopy Clusters (> 1.5% of population)");
   }
@@ -41,8 +41,9 @@ class DisplayMeanShift extends DisplayDirichlet {
 
   private static List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
 
-  private static List<List<Vector>> iterationCenters = new ArrayList<List<Vector>>();
+  private static final List<List<Vector>> iterationCenters = new ArrayList<List<Vector>>();
 
+  @Override
   public void paint(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
     double sx = (double) res / ds;
@@ -72,7 +73,7 @@ class DisplayMeanShift extends DisplayDirichlet {
       }
   }
 
-  public static void testReferenceImplementation() {
+  private static void testReferenceImplementation() {
     MeanShiftCanopy.config(new EuclideanDistanceMeasure(), 1.0, 0.05, 0.5);
     // add all points to the canopies
     for (Vector aRaw : sampleData) {
