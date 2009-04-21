@@ -166,8 +166,9 @@ public class FileDataModel implements DataModel {
     AtomicInteger count = new AtomicInteger();
     for (String line : new FileLineIterable(dataOrUpdateFile, false)) {
       if (line.length() > 0) {
-        if (log.isDebugEnabled())
+        if (log.isDebugEnabled()) {
           log.debug("Read line: {}", line);
+        }
         if (delimiter == UNKNOWN_DELIMITER) {
           delimiter = determineDelimiter(line);
         }
@@ -248,8 +249,9 @@ public class FileDataModel implements DataModel {
         item = buildItem(itemID);
         itemCache.put(itemID, item);
       }
-      if (log.isDebugEnabled())
+      if (log.isDebugEnabled()) {
         log.debug("Read item '{}' for user ID '{}'", item, userID);
+      }
       if (preferenceValueString == null) {
         prefs.add(new BooleanPreference(null, item));
       } else {
@@ -320,19 +322,24 @@ public class FileDataModel implements DataModel {
   }
 
   /**
-   * @throws UnsupportedOperationException
+   * Note that this method only updates the in-memory preference data that this {@link FileDataModel}
+   * maintains; it does not modify any data on disk. Therefore any updates from this method are only
+   * temporary, and lost when data is reloaded from a file. This method should also be considered
+   * relatively slow.
    */
   @Override
-  public void setPreference(Object userID, Object itemID, double value) {
-    throw new UnsupportedOperationException();
+  public void setPreference(Object userID, Object itemID, double value) throws TasteException {
+    checkLoaded();
+    delegate.setPreference(userID, itemID, value);
   }
 
   /**
-   * @throws UnsupportedOperationException
+   * See the warning at {@link #setPreference(Object, Object, double)}.
    */
   @Override
-  public void removePreference(Object userID, Object itemID) {
-    throw new UnsupportedOperationException();
+  public void removePreference(Object userID, Object itemID) throws TasteException {
+    checkLoaded();
+    delegate.removePreference(userID, itemID);
   }
 
   @Override

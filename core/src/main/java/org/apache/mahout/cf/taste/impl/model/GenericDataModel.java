@@ -205,20 +205,15 @@ public final class GenericDataModel implements DataModel, Serializable {
     }
   }
 
-  /**
-   * @throws UnsupportedOperationException
-   */
   @Override
-  public void setPreference(Object userID, Object itemID, double value) {
-    throw new UnsupportedOperationException();
+  public void setPreference(Object userID, Object itemID, double value)
+      throws NoSuchUserException, NoSuchItemException {
+    getUser(userID).setPreference(getItem(itemID), value);
   }
 
-  /**
-   * @throws UnsupportedOperationException
-   */
   @Override
-  public void removePreference(Object userID, Object itemID) {
-    throw new UnsupportedOperationException();
+  public void removePreference(Object userID, Object itemID) throws NoSuchUserException {
+    getUser(userID).removePreference(itemID);
   }
 
   @Override

@@ -28,6 +28,7 @@ import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.Item;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -94,8 +95,27 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
       return delegate.getID();
     }
 
+    /**
+     * @throws UnsupportedOperationException
+     */
     @Override
     public Preference getPreferenceFor(Object itemID) {
+      throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @throws UnsupportedOperationException
+     */
+    @Override
+    public void setPreference(Item item, double value) {
+      throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @throws UnsupportedOperationException
+     */
+    @Override
+    public void removePreference(Object itemID) {
       throw new UnsupportedOperationException();
     }
 

@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -62,7 +63,9 @@ public final class FileDataModelTest extends TasteTestCase {
     super.setUp();
     File tmpDir = new File(System.getProperty("java.io.tmpdir"));
     File tmpLoc = new File(tmpDir, "fileDataModel");
-    tmpLoc.mkdirs();
+    if (!tmpLoc.mkdirs()) {
+      throw new IOException();
+    }
     File testFile = File.createTempFile("test", ".txt", tmpLoc);
     testFile.deleteOnExit();
     PrintWriter writer =
@@ -151,12 +154,13 @@ public final class FileDataModelTest extends TasteTestCase {
   }
 
   public void testSetPreference() throws Exception {
-    try {
-      model.setPreference(null, null, 0.0);
-      fail("Should have thrown UnsupportedOperationException");
-    } catch (UnsupportedOperationException uoe) {
-      // good
-    }
+    model.setPreference("A123", "456", 0.2);
+    assertEquals(0.2, model.getUser("A123").getPreferenceFor("456").getValue());
+  }
+
+  public void testRemovePreference() throws Exception {
+    model.removePreference("A123", "456");
+    assertNull(model.getUser("A123").getPreferenceFor("456"));
   }
 
   public void testRefresh() throws Exception {

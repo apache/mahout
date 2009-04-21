@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.impl.model;
 
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.common.ArrayIterator;
 
@@ -50,6 +51,19 @@ public class BooleanPrefUser<K extends Comparable<K>> implements User, Serializa
   @Override
   public Preference getPreferenceFor(Object itemID) {
     return itemIDs.contains(itemID) ? buildPreference(itemID) : null;
+  }
+
+  /**
+   * Note that the value parameter is ignored; it is as if it were always 1.0.
+   */
+  @Override
+  public void setPreference(Item item, double value) {
+    itemIDs.add(item.getID());
+  }
+
+  @Override
+  public void removePreference(Object itemID) {
+    itemIDs.remove(itemID);
   }
 
   @Override

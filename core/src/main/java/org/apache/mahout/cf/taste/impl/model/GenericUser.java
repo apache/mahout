@@ -21,6 +21,7 @@ import org.apache.mahout.cf.taste.impl.common.ArrayIterator;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.Item;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -40,7 +41,7 @@ public class GenericUser<K extends Comparable<K>> implements User, Serializable 
   private final K id;
   private final Map<Object, Preference> data;
   // Use an array for maximum performance
-  private final Preference[] values;
+  private Preference[] values;
 
   public GenericUser(K id, List<Preference> preferences) {
     if (id == null) {
@@ -75,6 +76,45 @@ public class GenericUser<K extends Comparable<K>> implements User, Serializable 
   @Override
   public Preference getPreferenceFor(Object itemID) {
     return data.get(itemID);
+  }
+
+  @Override
+  public void setPreference(Item item, double value) {
+    Object itemID = item.getID();
+    Preference oldPref = data.get(itemID);
+    int numValues = values.length;
+    if (oldPref == null) {
+      // No previous pref existed; make room for another
+      // TODO I am concerned we don't have a good theory about where the factory method
+      // belongs for Preference objects in the scheme of things. Should probably live in DataModel.
+      // For now we are hard-coding GenericPreference which is usually fine but not really right.
+      Preference preference = new GenericPreference(this, item, value);
+      Preference[] newValues = new Preference[numValues + 1];
+      System.arraycopy(values, 0, newValues, 1, numValues);
+      newValues[0] = preference;
+      Arrays.sort(newValues, ByItemPreferenceComparator.getInstance());
+      values = newValues;
+      data.put(itemID, preference);
+    } else {
+      oldPref.setValue(value);
+      // We assume the same Preference object is in the array -- this updated 'both'
+    }
+  }
+
+  @Override
+  public void removePreference(Object itemID) {
+    int numValues = values.length;
+    Preference[] newValues = new Preference[numValues - 1];
+    for (int i = 0, j = 0; i < numValues; i++, j++) {
+      Preference value = values[i];
+      if (value.getItem().getID().equals(itemID)) {
+        i++; // skip
+      } else {
+        newValues[j] = value;
+      }
+    }
+    values = newValues;
+    data.remove(itemID);
   }
 
   @Override

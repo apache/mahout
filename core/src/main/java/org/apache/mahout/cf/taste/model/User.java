@@ -35,6 +35,17 @@ public interface User extends Comparable<User> {
   Preference getPreferenceFor(Object itemID);
 
   /**
+   * Sets a preference that this {@link User} has. Note that in general callers should expect this to
+   * be a slow operation, compared to {@link #getPreferenceFor(Object)}.
+   */
+  void setPreference(Item item, double value);
+
+  /**
+   * Removes a preference. This method should also be considered potentially slow.
+   */
+  void removePreference(Object itemID);
+
+  /**
    * <p>Returns a sequence of {@link Preference}s for this {@link User} which can be iterated over.
    * Note that the sequence <em>must</em> be "in order": ordered by {@link Item}.</p>
    *
