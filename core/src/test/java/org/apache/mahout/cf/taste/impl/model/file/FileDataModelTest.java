@@ -63,8 +63,14 @@ public final class FileDataModelTest extends TasteTestCase {
     super.setUp();
     File tmpDir = new File(System.getProperty("java.io.tmpdir"));
     File tmpLoc = new File(tmpDir, "fileDataModel");
-    if (!tmpLoc.mkdirs()) {
-      throw new IOException();
+    if (tmpLoc.exists()) {
+      if (tmpLoc.isFile()) {
+        throw new IOException("Temp directory is a file");
+      }
+    } else {
+      if (!tmpLoc.mkdirs()) {
+        throw new IOException("Could not create temp directory");
+      }
     }
     File testFile = File.createTempFile("test", ".txt", tmpLoc);
     testFile.deleteOnExit();
