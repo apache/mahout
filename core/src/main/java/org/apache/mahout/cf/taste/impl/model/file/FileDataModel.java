@@ -228,7 +228,7 @@ public class FileDataModel implements DataModel {
     }
     List<Preference> prefs = data.get(userID);
     if (prefs == null) {
-      prefs = new ArrayList<Preference>();
+      prefs = new ArrayList<Preference>(2);
       data.put(userID, prefs);
     }
 
@@ -433,7 +433,10 @@ public class FileDataModel implements DataModel {
     @Override
     public User next() {
       Map.Entry<String, List<Preference>> datum = dataIterator.next();
-      return buildUser(datum.getKey(), datum.getValue());
+      String key = datum.getKey();
+      List<Preference> value = datum.getValue();
+      dataIterator.remove();
+      return buildUser(key, value);
     }
     @Override
     public void remove() {

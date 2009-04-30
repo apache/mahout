@@ -29,6 +29,8 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -45,6 +47,8 @@ import java.util.Set;
  * recommended for contexts where performance is important.</p>
  */
 public final class GenericDataModel implements DataModel, Serializable {
+
+  private static final Logger log = LoggerFactory.getLogger(GenericDataModel.class);
 
   private static final Preference[] NO_PREFS_ARRAY = new Preference[0];
   private static final Iterable<Preference> NO_PREFS_ITERABLE = new EmptyIterable<Preference>();
@@ -72,6 +76,7 @@ public final class GenericDataModel implements DataModel, Serializable {
     // I'm abusing generics a little here since I want to use this (huge) map to hold Lists,
     // then arrays, and don't want to allocate two Maps at once here.
     Map<Object, Object> prefsForItems = new FastMap<Object, Object>();
+    int currentCount = 0;
     for (User user : users) {
       userMap.put(user.getID(), user);
       Preference[] prefsArray = user.getPreferencesAsArray();
@@ -85,6 +90,10 @@ public final class GenericDataModel implements DataModel, Serializable {
           prefsForItems.put(itemID, prefsForItem);
         }
         prefsForItem.add(preference);
+      }
+      currentCount++;
+      if (currentCount % 10000 == 0) {
+        log.info("Processed {} users", currentCount);
       }
     }
 
