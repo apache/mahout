@@ -22,6 +22,7 @@ import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
+import org.apache.mahout.cf.taste.impl.common.SamplingIterable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +32,7 @@ import java.util.List;
 
 /**
  * <p>Computes a neighborhood consisting of the nearest n {@link User}s to a given {@link User}.
- * "Nearest" is defined by the given {@link org.apache.mahout.cf.taste.similarity.UserSimilarity}.</p>
+ * "Nearest" is defined by the given {@link UserSimilarity}.</p>
  */
 public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
 
@@ -97,7 +98,8 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
 
     TopItems.Estimator<User> estimator = new Estimator(userSimilarityImpl, theUser, minSimilarity);
 
-    List<User> neighborhood = TopItems.getTopUsers(n, dataModel.getUsers(), null, estimator);
+    Iterable<? extends User> users = SamplingIterable.maybeWrapIterable(dataModel.getUsers(), getSamplingRate());
+    List<User> neighborhood = TopItems.getTopUsers(n, users, null, estimator);
 
     log.trace("UserNeighborhood around user ID '{}' is: {}", userID, neighborhood);
 

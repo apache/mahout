@@ -21,6 +21,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.impl.common.SamplingIterable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,7 @@ import java.util.List;
 /**
  * <p>Computes a neigbhorhood consisting of all {@link User}s whose similarity to the
  * given {@link User} meets or exceeds a certain threshold. Similarity is defined by the given
- * {@link org.apache.mahout.cf.taste.similarity.UserSimilarity}.</p>
+ * {@link UserSimilarity}.</p>
  */
 public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
 
@@ -83,12 +84,14 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
     DataModel dataModel = getDataModel();
     User theUser = dataModel.getUser(userID);
     List<User> neighborhood = new ArrayList<User>();
-    Iterator<? extends User> users = dataModel.getUsers().iterator();
+    Iterable<? extends User> usersIterable =
+      SamplingIterable.maybeWrapIterable(dataModel.getUsers(), getSamplingRate());
+    Iterator<? extends User> users = usersIterable.iterator();
     UserSimilarity userSimilarityImpl = getUserSimilarity();
 
     while (users.hasNext()) {
       User user = users.next();
-      if (sampleForUser() && !userID.equals(user.getID())) {
+      if (!userID.equals(user.getID())) {
         double theSimilarity = userSimilarityImpl.userSimilarity(theUser, user);
         if (!Double.isNaN(theSimilarity) && theSimilarity >= threshold) {
           neighborhood.add(user);
