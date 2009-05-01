@@ -21,26 +21,23 @@ import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
-import org.apache.mahout.cf.taste.impl.common.RandomUtils;
+import org.apache.mahout.cf.taste.impl.common.SamplingIterable;
 import org.apache.mahout.cf.taste.model.User;
 
 import java.util.Collection;
-import java.util.Random;
 
 /**
  * <p>Defines cluster similarity as the <em>largest</em> similarity between any two
- * {@link org.apache.mahout.cf.taste.model.User}s in the clusters -- that is, it says that clusters are close
+ * {@link User}s in the clusters -- that is, it says that clusters are close
  * when <em>some pair</em> of their members has high similarity.</p>
  */
 public final class NearestNeighborClusterSimilarity implements ClusterSimilarity {
 
-  private static final Random random = RandomUtils.getRandom();
-
   private final UserSimilarity similarity;
-  private final double samplingPercentage;
+  private final double samplingRate;
 
   /**
-   * <p>Constructs a {@link NearestNeighborClusterSimilarity} based on the given {@link org.apache.mahout.cf.taste.similarity.UserSimilarity}.
+   * <p>Constructs a {@link NearestNeighborClusterSimilarity} based on the given {@link UserSimilarity}.
    * All user-user similarities are examined.</p>
    */
   public NearestNeighborClusterSimilarity(UserSimilarity similarity) {
@@ -48,20 +45,20 @@ public final class NearestNeighborClusterSimilarity implements ClusterSimilarity
   }
 
   /**
-   * <p>Constructs a {@link NearestNeighborClusterSimilarity} based on the given {@link org.apache.mahout.cf.taste.similarity.UserSimilarity}.
-   * By setting <code>samplingPercentage</code> to a value less than 1.0, this implementation will only examine
+   * <p>Constructs a {@link NearestNeighborClusterSimilarity} based on the given {@link UserSimilarity}.
+   * By setting <code>samplingRate</code> to a value less than 1.0, this implementation will only examine
    * that fraction of all user-user similarities between two clusters, increasing performance at the expense
    * of accuracy.</p>
    */
-  public NearestNeighborClusterSimilarity(UserSimilarity similarity, double samplingPercentage) {
+  public NearestNeighborClusterSimilarity(UserSimilarity similarity, double samplingRate) {
     if (similarity == null) {
       throw new IllegalArgumentException("similarity is null");
     }
-    if (Double.isNaN(samplingPercentage) || samplingPercentage <= 0.0 || samplingPercentage > 1.0) {
-      throw new IllegalArgumentException("samplingPercentage is invalid: " + samplingPercentage);
+    if (Double.isNaN(samplingRate) || samplingRate <= 0.0 || samplingRate > 1.0) {
+      throw new IllegalArgumentException("samplingRate is invalid: " + samplingRate);
     }
     this.similarity = similarity;
-    this.samplingPercentage = samplingPercentage;
+    this.samplingRate = samplingRate;
   }
 
   @Override
@@ -70,14 +67,13 @@ public final class NearestNeighborClusterSimilarity implements ClusterSimilarity
     if (cluster1.isEmpty() || cluster2.isEmpty()) {
       return Double.NaN;
     }
+    Iterable<User> someUsers = SamplingIterable.maybeWrapIterable(cluster1, samplingRate);
     double greatestSimilarity = Double.NEGATIVE_INFINITY;
-    for (User user1 : cluster1) {
-      if (samplingPercentage >= 1.0 || random.nextDouble() < samplingPercentage) {
-        for (User user2 : cluster2) {
-          double theSimilarity = similarity.userSimilarity(user1, user2);
-          if (theSimilarity > greatestSimilarity) {
-            greatestSimilarity = theSimilarity;
-          }
+    for (User user1 : someUsers) {
+      for (User user2 : cluster2) {
+        double theSimilarity = similarity.userSimilarity(user1, user2);
+        if (theSimilarity > greatestSimilarity) {
+          greatestSimilarity = theSimilarity;
         }
       }
     }

@@ -60,13 +60,15 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public final class TreeClusteringRecommender extends AbstractRecommender implements ClusteringRecommender {
 
+  private static final Random r = RandomUtils.getRandom();
+
   private static final Logger log = LoggerFactory.getLogger(TreeClusteringRecommender.class);
 
   private final ClusterSimilarity clusterSimilarity;
   private final int numClusters;
   private final double clusteringThreshold;
   private final boolean clusteringByThreshold;
-  private final double samplingPercentage;
+  private final double samplingRate;
   private Map<Object, List<RecommendedItem>> topRecsByUserID;
   private Collection<Collection<User>> allClusters;
   private Map<Object, Collection<User>> clustersByUserID;
@@ -91,16 +93,16 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
    * @param dataModel {@link DataModel} which provdes {@link User}s
    * @param clusterSimilarity {@link ClusterSimilarity} used to compute cluster similarity
    * @param numClusters desired number of clusters to create
-   * @param samplingPercentage percentage of all cluster-cluster pairs to consider when finding
+   * @param samplingRate percentage of all cluster-cluster pairs to consider when finding
    * next-most-similar clusters. Decreasing this value from 1.0 can increase performance at the
    * cost of accuracy
    * @throws IllegalArgumentException if arguments are <code>null</code>, or <code>numClusters</code> is
-   * less than 2, or samplingPercentage is {@link Double#NaN} or nonpositive or greater than 1.0
+   * less than 2, or samplingRate is {@link Double#NaN} or nonpositive or greater than 1.0
    */
   public TreeClusteringRecommender(DataModel dataModel,
                                    ClusterSimilarity clusterSimilarity,
                                    int numClusters,
-                                   double samplingPercentage) {
+                                   double samplingRate) {
     super(dataModel);
     if (clusterSimilarity == null) {
       throw new IllegalArgumentException("clusterSimilarity is null");
@@ -108,14 +110,14 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     if (numClusters < 2) {
       throw new IllegalArgumentException("numClusters must be at least 2");
     }
-    if (Double.isNaN(samplingPercentage) || samplingPercentage <= 0.0 || samplingPercentage > 1.0) {
-      throw new IllegalArgumentException("samplingPercentage is invalid: " + samplingPercentage);
+    if (Double.isNaN(samplingRate) || samplingRate <= 0.0 || samplingRate > 1.0) {
+      throw new IllegalArgumentException("samplingRate is invalid: " + samplingRate);
     }
     this.clusterSimilarity = clusterSimilarity;
     this.numClusters = numClusters;
     this.clusteringThreshold = Double.NaN;
     this.clusteringByThreshold = false;
-    this.samplingPercentage = samplingPercentage;
+    this.samplingRate = samplingRate;
     this.buildClustersLock = new ReentrantLock();
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
       @Override
@@ -147,16 +149,16 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
    * @param clusterSimilarity {@link ClusterSimilarity} used to compute cluster similarity
    * @param clusteringThreshold clustering similarity threshold; clusters will be aggregated into larger
    * clusters until the next two nearest clusters' similarity drops below this threshold
-   * @param samplingPercentage percentage of all cluster-cluster pairs to consider when finding
+   * @param samplingRate percentage of all cluster-cluster pairs to consider when finding
    * next-most-similar clusters. Decreasing this value from 1.0 can increase performance at the
    * cost of accuracy
    * @throws IllegalArgumentException if arguments are <code>null</code>, or <code>clusteringThreshold</code> is
-   * {@link Double#NaN}, or samplingPercentage is {@link Double#NaN} or nonpositive or greater than 1.0
+   * {@link Double#NaN}, or samplingRate is {@link Double#NaN} or nonpositive or greater than 1.0
    */
   public TreeClusteringRecommender(DataModel dataModel,
                                    ClusterSimilarity clusterSimilarity,
                                    double clusteringThreshold,
-                                   double samplingPercentage) {
+                                   double samplingRate) {
     super(dataModel);
     if (clusterSimilarity == null) {
       throw new IllegalArgumentException("clusterSimilarity is null");
@@ -164,14 +166,14 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     if (Double.isNaN(clusteringThreshold)) {
       throw new IllegalArgumentException("clusteringThreshold must not be NaN");
     }
-    if (Double.isNaN(samplingPercentage) || samplingPercentage <= 0.0 || samplingPercentage > 1.0) {
-      throw new IllegalArgumentException("samplingPercentage is invalid: " + samplingPercentage);
+    if (Double.isNaN(samplingRate) || samplingRate <= 0.0 || samplingRate > 1.0) {
+      throw new IllegalArgumentException("samplingRate is invalid: " + samplingRate);
     }
     this.clusterSimilarity = clusterSimilarity;
     this.numClusters = Integer.MIN_VALUE;
     this.clusteringThreshold = clusteringThreshold;
     this.clusteringByThreshold = true;
-    this.samplingPercentage = samplingPercentage;
+    this.samplingRate = samplingRate;
     this.buildClustersLock = new ReentrantLock();
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
       @Override
@@ -345,11 +347,10 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     int size = clusters.size();
     Pair<Collection<User>, Collection<User>> nearestPair = null;
     double bestSimilarity = Double.NEGATIVE_INFINITY;
-    Random r = RandomUtils.getRandom();
     for (int i = 0; i < size; i++) {
       Collection<User> cluster1 = clusters.get(i);
       for (int j = i + 1; j < size; j++) {
-        if (samplingPercentage >= 1.0 || r.nextDouble() < samplingPercentage) {
+        if (samplingRate >= 1.0 || r.nextDouble() < samplingRate) {
           Collection<User> cluster2 = clusters.get(j);
           double similarity = clusterSimilarity.getSimilarity(cluster1, cluster2);
           if (!Double.isNaN(similarity) && similarity > bestSimilarity) {
