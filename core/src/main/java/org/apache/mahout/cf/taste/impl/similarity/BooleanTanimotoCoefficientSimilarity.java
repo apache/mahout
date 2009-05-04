@@ -54,10 +54,6 @@ public final class BooleanTanimotoCoefficientSimilarity implements UserSimilarit
 
   @Override
   public double userSimilarity(User user1, User user2) {
-
-    if (user1 == null || user2 == null) {
-      throw new IllegalArgumentException("user1 or user2 is null");
-    }
     if (!(user1 instanceof BooleanPrefUser && user2 instanceof BooleanPrefUser)) {
       throw new IllegalArgumentException();
     }
