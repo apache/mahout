@@ -45,14 +45,17 @@ import java.util.List;
  *
  * <p>Note that there is no corresponding {@link org.apache.hadoop.mapred.Reducer}; this
  * implementation can only partially take advantage of the mapreduce paradigm and only
- * really leverages it for easy parallelization.</p>
+ * really leverages it for easy parallelization. Therefore, use the
+ * {@link org.apache.hadoop.mapred.lib.IdentityReducer} when running this on Hadoop.</p>
+ *
+ * @see RecommenderJob
  */
 public final class RecommenderMapper
     extends MapReduceBase
     implements Mapper<LongWritable, Text, Text, RecommendedItemsWritable> {
 
   static final String RECOMMENDER_CLASS_NAME = "recommenderClassName";
-  static final String RECOMMENDATIONS_PER_USER = "recommendadtionsPerUser";
+  static final String RECOMMENDATIONS_PER_USER = "recommendationsPerUser";
   static final String DATA_MODEL_FILE = "dataModelFile";
 
   private Recommender recommender;
@@ -92,8 +95,10 @@ public final class RecommenderMapper
       throw new RuntimeException(ioe);
     }
     try {
-      Class<? extends Recommender> recommenderClass = Class.forName(recommenderClassName).asSubclass(Recommender.class);
-      Constructor<? extends Recommender> constructor = recommenderClass.getConstructor(DataModel.class);
+      Class<? extends Recommender> recommenderClass =
+          Class.forName(recommenderClassName).asSubclass(Recommender.class);
+      Constructor<? extends Recommender> constructor =
+          recommenderClass.getConstructor(DataModel.class);
       recommender = constructor.newInstance(fileDataModel);
     } catch (NoSuchMethodException nsme) {
       throw new RuntimeException(nsme);

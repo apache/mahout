@@ -37,14 +37,14 @@ import java.io.IOException;
  * <p>Command line arguments are:</p>
  * <ol>
  *  <li>Fully-qualified class name of {@link Recommender} to use to make recommendations.
- *   Note that it must have a no-arg constructor.</li>
+ *   Note that it must have a constructor which takes a {@link org.apache.mahout.cf.taste.model.DataModel}
+ *   argument.</li>
  *  <li>Number of recommendations to compute per user</li>
  *  <li>Location of a text file containing user IDs for which recommendations should be computed,
  *   one per line</li>
  *  <li>Location of a data model file containing preference data, suitable for use with
  *   {@link org.apache.mahout.cf.taste.impl.model.file.FileDataModel}</li>
  *  <li>Output path where reducer output should go</li>
- *  <li>Number of mapper tasks to use</li>
  * </ol>
  *
  * <p>Example:</p>
