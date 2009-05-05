@@ -176,7 +176,6 @@ public final class BooleanUserGenericUserBasedRecommender extends AbstractRecomm
     if (theNeighborhood.isEmpty()) {
       return Double.NaN;
     }
-    double preference = 0.0;
     double totalSimilarity = 0.0;
     for (User user : theNeighborhood) {
       if (!user.equals(theUser)) {
@@ -185,13 +184,12 @@ public final class BooleanUserGenericUserBasedRecommender extends AbstractRecomm
         if (pref != null) {
           double theSimilarity = similarity.userSimilarity(theUser, user) + 1.0;
           if (!Double.isNaN(theSimilarity)) {
-            preference += theSimilarity * pref.getValue();
             totalSimilarity += theSimilarity;
           }
         }
       }
     }
-    return totalSimilarity == 0.0 ? Double.NaN : preference / totalSimilarity;
+    return totalSimilarity == 0.0 ? Double.NaN : totalSimilarity;
   }
 
   private static Set<Object> getAllOtherItems(Iterable<User> theNeighborhood, User theUser) {
