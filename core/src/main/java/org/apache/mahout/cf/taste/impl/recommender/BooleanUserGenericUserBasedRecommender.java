@@ -171,25 +171,30 @@ public final class BooleanUserGenericUserBasedRecommender extends AbstractRecomm
     return TopItems.getTopUsers(howMany, allUsers, null, estimator);
   }
 
+  /**
+   * This computation is in a technical sense, wrong, since in the domain of "boolean preference users"
+   * where all preference values are 1, this method should only ever return 1.0 or NaN. This isn't
+   * terribly useful however since it means results can't be ranked by preference value (all are 1).
+   * So instead this returns a sum of similarties to any other user in the neighborhood who has also
+   * rated the item.
+   */
   private double doEstimatePreference(User theUser, Collection<User> theNeighborhood, Object itemID)
           throws TasteException {
     if (theNeighborhood.isEmpty()) {
       return Double.NaN;
     }
     double totalSimilarity = 0.0;
+    boolean foundAPref = false;
     for (User user : theNeighborhood) {
       if (!user.equals(theUser)) {
         // See GenericItemBasedRecommender.doEstimatePreference() too
-        Preference pref = user.getPreferenceFor(itemID);
-        if (pref != null) {
-          double theSimilarity = similarity.userSimilarity(theUser, user) + 1.0;
-          if (!Double.isNaN(theSimilarity)) {
-            totalSimilarity += theSimilarity;
-          }
+        if (user.getPreferenceFor(itemID) != null) {
+          foundAPref = true;
+          totalSimilarity += similarity.userSimilarity(theUser, user);
         }
       }
     }
-    return totalSimilarity == 0.0 ? Double.NaN : totalSimilarity;
+    return foundAPref ? totalSimilarity : 0.0;
   }
 
   private static Set<Object> getAllOtherItems(Iterable<User> theNeighborhood, User theUser) {

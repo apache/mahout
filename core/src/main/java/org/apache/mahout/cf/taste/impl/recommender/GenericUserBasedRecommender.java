@@ -144,10 +144,11 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
         Preference pref = user.getPreferenceFor(item.getID());
         if (pref != null) {
           double theSimilarity = similarity.userSimilarity(theUser, user) + 1.0;
-          if (!Double.isNaN(theSimilarity)) {
-            preference += theSimilarity * pref.getValue();
-            totalSimilarity += theSimilarity;
-          }
+          // Similarity should not be NaN or else the user should never have showed up
+          // in the neighborhood. Adding 1.0 puts this in the range [0,2] which is
+          // more appropriate for weights
+          preference += theSimilarity * pref.getValue();
+          totalSimilarity += theSimilarity;
         }
       }
     }
