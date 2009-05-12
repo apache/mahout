@@ -211,10 +211,10 @@ public class FileDataModel implements DataModel {
    */
   protected void processLine(String line, Map<String, List<Preference>> data, Map<String, Item> itemCache) {
     int delimiterOne = line.indexOf((int) delimiter);
-    int delimiterTwo = line.indexOf((int) delimiter, delimiterOne + 1);
     if (delimiterOne < 0) {
       throw new IllegalArgumentException("Bad line: " + line);
     }
+    int delimiterTwo = line.indexOf((int) delimiter, delimiterOne + 1);
 
     String userID = line.substring(0, delimiterOne);
     String itemID;
@@ -248,9 +248,6 @@ public class FileDataModel implements DataModel {
       if (item == null) {
         item = buildItem(itemID);
         itemCache.put(itemID, item);
-      }
-      if (log.isDebugEnabled()) {
-        log.debug("Read item '{}' for user ID '{}'", item, userID);
       }
       if (preferenceValueString == null) {
         prefs.add(new BooleanPreference(null, item));
@@ -373,6 +370,7 @@ public class FileDataModel implements DataModel {
       for (Preference pref : prefs) {
         itemIDs.add(pref.getItem().getID());
       }
+      itemIDs.rehash();
       return new BooleanPrefUser<String>(id, itemIDs);
     }
     return new GenericUser<String>(id, prefs);

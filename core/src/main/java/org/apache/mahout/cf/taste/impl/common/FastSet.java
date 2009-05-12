@@ -272,8 +272,7 @@ public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
   @SuppressWarnings("unchecked")  
   public int intersectionSize(FastSet<?> other) {
     int count = 0;
-    K[] otherKeys = (K[]) other.keys;
-    for (K key : otherKeys) {
+    for (K key : (K[]) other.keys) {
       if (key != null && key != REMOVED && keys[find(key)] != null) {
         count++;
       }

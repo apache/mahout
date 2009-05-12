@@ -54,22 +54,16 @@ public final class BooleanTanimotoCoefficientSimilarity implements UserSimilarit
 
   @Override
   public double userSimilarity(User user1, User user2) {
-    if (!(user1 instanceof BooleanPrefUser && user2 instanceof BooleanPrefUser)) {
-      throw new IllegalArgumentException();
-    }
-    BooleanPrefUser<?> bpUser1 = (BooleanPrefUser<?>) user1;
-    BooleanPrefUser<?> bpUser2 = (BooleanPrefUser<?>) user2;
-
-    FastSet<Object> prefs1 = bpUser1.getItemIDs();
-    FastSet<Object> prefs2 = bpUser2.getItemIDs();
-    int intersectionSize =
-        prefs1.size() < prefs2.size() ? prefs2.intersectionSize(prefs1) : prefs1.intersectionSize(prefs2);
-
-    int unionSize = prefs1.size() + prefs2.size() - intersectionSize;
-
+    FastSet<Object> prefs1 = ((BooleanPrefUser<?>) user1).getItemIDs();
+    FastSet<Object> prefs2 = ((BooleanPrefUser<?>) user2).getItemIDs();
+    int prefs1Size = prefs1.size();
+    int prefs2Size = prefs2.size();
+    int intersectionSize = prefs1Size < prefs2Size ?
+                           prefs2.intersectionSize(prefs1) :
+                           prefs1.intersectionSize(prefs2);
+    int unionSize = prefs1Size + prefs2Size - intersectionSize;
     return (double) intersectionSize / (double) unionSize;
   }
-
 
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
