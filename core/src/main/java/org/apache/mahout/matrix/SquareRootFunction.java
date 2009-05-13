@@ -4,7 +4,7 @@ public class SquareRootFunction implements UnaryFunction {
 
   @Override
   public double apply(double arg1) {
-    return Math.sqrt(arg1);
+    return Math.abs(arg1);
   }
 
 }

@@ -39,8 +39,9 @@ public class SparseVector extends AbstractVector {
 
   private Map<Integer, Double> values;
 
-
   private int cardinality;
+
+  public static boolean optimizeTimes = true;
 
   /**
    * Decode a new instance from the argument
@@ -96,19 +97,22 @@ public class SparseVector extends AbstractVector {
   }
 
   @Override
-  @SuppressWarnings("unchecked")  
+  @SuppressWarnings("unchecked")
   public String asFormatString() {
     StringBuilder out = new StringBuilder();
     out.append("[s").append(cardinality).append(", ");
-    Map.Entry<Integer, Double>[] entries = (Map.Entry<Integer, Double>[]) values.entrySet().toArray(new Map.Entry[values.size()]);
-    Arrays.sort(entries, new Comparator<Map.Entry<Integer, Double>>(){
+    Map.Entry<Integer, Double>[] entries = (Map.Entry<Integer, Double>[]) values
+        .entrySet().toArray(new Map.Entry[values.size()]);
+    Arrays.sort(entries, new Comparator<Map.Entry<Integer, Double>>() {
       @Override
-      public int compare(Map.Entry<Integer, Double> e1, Map.Entry<Integer, Double> e2) {
+      public int compare(Map.Entry<Integer, Double> e1,
+          Map.Entry<Integer, Double> e2) {
         return e1.getKey().compareTo(e2.getKey());
       }
     });
     for (Map.Entry<Integer, Double> entry : entries) {
-      out.append(entry.getKey()).append(':').append(entry.getValue()).append(", ");
+      out.append(entry.getKey()).append(':').append(entry.getValue()).append(
+          ", ");
     }
     out.append("] ");
     return out.toString();
@@ -188,15 +192,17 @@ public class SparseVector extends AbstractVector {
     return new Iterator();
   }
 
-
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
 
     SparseVector that = (SparseVector) o;
 
-    return cardinality == that.cardinality && (values == null ? that.values == null : values.equals(that.values));
+    return cardinality == that.cardinality
+        && (values == null ? that.values == null : values.equals(that.values));
   }
 
   @Override
@@ -271,6 +277,44 @@ public class SparseVector extends AbstractVector {
     }
     this.cardinality = cardinality;
     this.values = values;
+  }
+
+  @Override
+  public Vector times(double x) {
+    Vector result;
+    if (optimizeTimes) {
+      result = like();
+      for (Vector.Element element : this) {
+        double value = element.get();
+        int index = element.index();
+        result.setQuick(index, value * x);
+      }
+    } else {
+      result = copy();
+      for (int i = 0; i < result.cardinality(); i++)
+        result.setQuick(i, getQuick(i) * x);
+    }
+    return result;
+  }
+
+  @Override
+  public Vector times(Vector x) {
+    if (cardinality() != x.cardinality())
+      throw new CardinalityException();
+    Vector result;
+    if (optimizeTimes) {
+      result = like();
+      for (Vector.Element element : this) {
+        double value = element.get();
+        int index = element.index();
+        result.setQuick(index, value * x.getQuick(index));
+      }
+    } else {
+      result = copy();
+      for (int i = 0; i < result.cardinality(); i++)
+        result.setQuick(i, getQuick(i) * x.getQuick(i));
+    }
+    return result;
   }
 
 }

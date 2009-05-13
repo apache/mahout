@@ -17,6 +17,9 @@
 
 package org.apache.mahout.matrix;
 
+import java.util.Date;
+import java.util.Random;
+
 import junit.framework.TestCase;
 
 public class VectorTest extends TestCase {
@@ -42,7 +45,6 @@ public class VectorTest extends TestCase {
     assertEquals(result + " does not equal: " + 32, 32.0, result);
   }
 
-
   public void testDenseVector() throws Exception {
     DenseVector vec1 = new DenseVector(3);
     DenseVector vec2 = new DenseVector(3);
@@ -67,17 +69,18 @@ public class VectorTest extends TestCase {
       test[e.index()] = e.get();
     }
 
-    for (int i = 0; i<test.length; i++) {
+    for (int i = 0; i < test.length; i++) {
       assertEquals(apriori[i], test[i]);
     }
   }
 
   public void testEnumeration() throws Exception {
-    double[] apriori = {0, 1, 2, 3, 4};
+    double[] apriori = { 0, 1, 2, 3, 4 };
 
-    doTestEnumeration(apriori, new VectorView(new DenseVector(new double[]{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9}), 2, 5));
-    
-    doTestEnumeration(apriori, new DenseVector(new double[]{0, 1, 2, 3, 4}));
+    doTestEnumeration(apriori, new VectorView(new DenseVector(new double[] {
+        -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }), 2, 5));
+
+    doTestEnumeration(apriori, new DenseVector(new double[] { 0, 1, 2, 3, 4 }));
 
     SparseVector sparse = new SparseVector(5);
     sparse.set(0, 0);
@@ -86,6 +89,61 @@ public class VectorTest extends TestCase {
     sparse.set(3, 3);
     sparse.set(4, 4);
     doTestEnumeration(apriori, sparse);
+  }
+
+  public void testSparseVectorTimesX() {
+    Random rnd = new Random();
+    Vector v1 = randomSparseVector(rnd);
+    double x = rnd.nextDouble();
+    long t0 = new Date().getTime();
+    SparseVector.optimizeTimes = false;
+    Vector rRef = null;
+    for (int i = 0; i < 10; i++)
+      rRef = v1.times(x);
+    long t1 = new Date().getTime();
+    SparseVector.optimizeTimes = true;
+    Vector rOpt = null;
+    for (int i = 0; i < 10; i++)
+      rOpt = v1.times(x);
+    long t2 = new Date().getTime();
+    long tOpt = t2 - t1;
+    long tRef = t1 - t0;
+    assertTrue(tOpt < tRef);
+    System.out.println("testSparseVectorTimesX tRef=tOpt=" + (tRef - tOpt)
+        + " ms for 10 iterations");
+    for (int i = 0; i < 50000; i++)
+      assertEquals("i=" + i, rRef.getQuick(i), rOpt.getQuick(i));
+  }
+
+  public void testSparseVectorTimesV() {
+    Random rnd = new Random();
+    Vector v1 = randomSparseVector(rnd);
+    Vector v2 = randomSparseVector(rnd);
+    long t0 = new Date().getTime();
+    SparseVector.optimizeTimes = false;
+    Vector rRef = null;
+    for (int i = 0; i < 10; i++)
+      rRef = v1.times(v2);
+    long t1 = new Date().getTime();
+    SparseVector.optimizeTimes = true;
+    Vector rOpt = null;
+    for (int i = 0; i < 10; i++)
+      rOpt = v1.times(v2);
+    long t2 = new Date().getTime();
+    long tOpt = t2 - t1;
+    long tRef = t1 - t0;
+    assertTrue(tOpt < tRef);
+    System.out.println("testSparseVectorTimesV tRef=tOpt=" + (tRef - tOpt)
+        + " ms for 10 iterations");
+    for (int i = 0; i < 50000; i++)
+      assertEquals("i=" + i, rRef.getQuick(i), rOpt.getQuick(i));
+  }
+
+  private Vector randomSparseVector(Random rnd) {
+    SparseVector v1 = new SparseVector(50000);
+    for (int i = 0; i < 1000; i++)
+      v1.setQuick((int) (rnd.nextDouble() * 50000), rnd.nextDouble());
+    return v1;
   }
 
 }
