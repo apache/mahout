@@ -64,6 +64,9 @@ public final class RandomUtils {
     if (n > MAX_INT_SMALLER_TWIN_PRIME) {
       throw new IllegalArgumentException();
     }
+    if (n <= 2) {
+      return 3;
+    }
     int next = nextPrime(n);
     while (isNotPrime(next + 2)) {
       next = nextPrime(next + 4);
@@ -75,6 +78,9 @@ public final class RandomUtils {
    * <p>Finds smallest prime p such that p is greater than or equal to n.</p>
    */
   public static int nextPrime(int n) {
+    if (n < 2) {
+      return 2;
+    }
     // Make sure the number is odd. Is this too clever?
     n |= 0x1;
     // There is no problem with overflow since Integer.MAX_INT is prime, as it happens
@@ -89,10 +95,7 @@ public final class RandomUtils {
    * @return <code>true</code> iff n is not a prime
    */
   public static boolean isNotPrime(int n) {
-    if (n < 2) {
-      throw new IllegalArgumentException();
-    }
-    if ((n & 0x1) == 0) { // even
+    if (n < 2 || (n & 0x1) == 0) { // < 2 or even
       return true;
     }
     int max = 1 + (int) Math.sqrt((double) n);
