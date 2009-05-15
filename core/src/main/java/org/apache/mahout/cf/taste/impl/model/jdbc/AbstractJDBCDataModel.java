@@ -557,7 +557,10 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     private ResultSetUserIterator(DataSource dataSource, String getUsersSQL) throws TasteException {
       try {
         connection = dataSource.getConnection();
-        statement = connection.prepareStatement(getUsersSQL);
+        // These settings should enable the ResultSet to be iterated in both directions
+        statement = connection.prepareStatement(getUsersSQL,
+                                                ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                                ResultSet.CONCUR_READ_ONLY);
         statement.setFetchDirection(ResultSet.FETCH_UNKNOWN);
         log.debug("Executing SQL query: {}", getUsersSQL);
         resultSet = statement.executeQuery();
