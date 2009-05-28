@@ -129,7 +129,7 @@ public class FileDataModel implements DataModel {
           processFile(updateFile, data);
         }
 
-        delegate = new GenericDataModel(new UserIteratableOverData(data));
+        delegate = new GenericDataModel(new UserIterableOverData(data));
         loaded = true;
 
       } finally {
@@ -408,11 +408,12 @@ public class FileDataModel implements DataModel {
   }
 
 
-  private final class UserIteratableOverData implements Iterable<User> {
+  private final class UserIterableOverData implements Iterable<User> {
     private final Map<String, List<Preference>> data;
-    private UserIteratableOverData(Map<String, List<Preference>> data) {
+    private UserIterableOverData(Map<String, List<Preference>> data) {
       this.data = data;
     }
+
     @Override
     public Iterator<User> iterator() {
       return new UserIteratorOverData(data.entrySet().iterator());
