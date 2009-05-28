@@ -97,6 +97,9 @@ public final class MemoryDiffStorage implements DiffStorage {
     if (dataModel == null) {
       throw new IllegalArgumentException("dataModel is null");
     }
+    if (dataModel.getNumItems() < 1) {
+      throw new IllegalArgumentException("dataModel has no items");
+    }
     if (maxEntries <= 0L) {
       throw new IllegalArgumentException("maxEntries must be positive");
     }
