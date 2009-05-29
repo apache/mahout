@@ -17,6 +17,8 @@
 
 package org.apache.mahout.clustering.syntheticcontrol.kmeans;
 
+import java.io.IOException;
+
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobClient;
@@ -24,10 +26,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.canopy.CanopyClusteringJob;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
-
-import java.io.IOException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Job {
   private Job() {
@@ -69,7 +67,8 @@ public class Job {
    * @param maxIterations the int maximum number of iterations
    */
   private static void runJob(String input, String output, String measureClass,
-      double t1, double t2, double convergenceDelta, int maxIterations) throws IOException {
+      double t1, double t2, double convergenceDelta, int maxIterations)
+      throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(Job.class);
 
@@ -79,10 +78,9 @@ public class Job {
     if (dfs.exists(outPath))
       dfs.delete(outPath, true);
     InputDriver.runJob(input, output + "/data");
-    CanopyClusteringJob
-        .runJob(output + "/data", output, measureClass, t1, t2);
+    CanopyClusteringJob.runJob(output + "/data", output, measureClass, t1, t2);
     KMeansDriver.runJob(output + "/data", output + "/canopies", output,
-        measureClass, convergenceDelta, maxIterations,1);
-//    OutputDriver.runJob(output + "/points", output + "/clustered-points");
+        measureClass, convergenceDelta, maxIterations, 1);
+    //    OutputDriver.runJob(output + "/points", output + "/clustered-points");
   }
 }

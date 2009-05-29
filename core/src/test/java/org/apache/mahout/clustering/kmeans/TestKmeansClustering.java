@@ -410,7 +410,6 @@ public class TestKmeansClustering extends TestCase {
       // now compare the expected clusters with actual
       File outDir = new File("output/points");
       assertTrue("output dir exists?", outDir.exists());
-      String[] outFiles = outDir.list();
       // assertEquals("output dir files?", 4, outFiles.length);
       BufferedReader reader = new BufferedReader(new InputStreamReader(
           new FileInputStream("output/points/part-00000"), Charset

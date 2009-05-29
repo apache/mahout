@@ -57,10 +57,11 @@ public class KMeansDriver {
    * @param measureClass the classname of the DistanceMeasure
    * @param convergenceDelta the convergence delta value
    * @param maxIterations the maximum number of iterations
+   * @param numReduceTasks the number of reducers
    */
   public static void runJob(String input, String clustersIn, String output,
       String measureClass, double convergenceDelta, int maxIterations,
-      int numCentroids) {
+      int numReduceTasks) {
     // iterate until the clusters converge
     boolean converged = false;
     int iteration = 0;
@@ -71,7 +72,7 @@ public class KMeansDriver {
       // point the output to a new directory per iteration
       String clustersOut = output + "/clusters-" + iteration;
       converged = runIteration(input, clustersIn, clustersOut, measureClass,
-          delta, numCentroids);
+          delta, numReduceTasks);
       // now point the input to the old output directory
       clustersIn = output + "/clusters-" + iteration;
       iteration++;
@@ -89,6 +90,7 @@ public class KMeansDriver {
    * @param clustersOut the directory pathname for output clusters
    * @param measureClass the classname of the DistanceMeasure
    * @param convergenceDelta the convergence delta value
+   * @param numReduceTasks the number of reducer tasks
    * @return true if the iteration successfully runs
    */
   private static boolean runIteration(String input, String clustersIn,
@@ -107,16 +109,10 @@ public class KMeansDriver {
     conf.setMapperClass(KMeansMapper.class);
     conf.setCombinerClass(KMeansCombiner.class);
     conf.setReducerClass(KMeansReducer.class);
-    // conf.setNumMapTasks(numMapTasks);
     conf.setNumReduceTasks(numReduceTasks);
     conf.set(Cluster.CLUSTER_PATH_KEY, clustersIn);
     conf.set(Cluster.DISTANCE_MEASURE_KEY, measureClass);
     conf.set(Cluster.CLUSTER_CONVERGENCE_KEY, convergenceDelta);
-
-//    conf.set("mapred.child.java.opts", "-Xmx1536m");
-    // uncomment it to run locally
-//    conf.set("mapred.job.tracker", "local");
-
     client.setConf(conf);
     try {
       JobClient.runJob(conf);
@@ -156,9 +152,6 @@ public class KMeansDriver {
     conf.set(Cluster.CLUSTER_CONVERGENCE_KEY, convergenceDelta);
 
     client.setConf(conf);
-    // uncomment it to run locally
-    // conf.set("mapred.job.tracker", "local");
-//    conf.set("mapred.child.java.opts", "-Xmx1536m");
     try {
       JobClient.runJob(conf);
     } catch (IOException e) {

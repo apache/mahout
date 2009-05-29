@@ -70,12 +70,10 @@ public final class KMeansUtil {
       // iterate thru the result path list
       for (Path path : result) {
         SequenceFile.Reader reader = null;
-//        RecordReader<Text, Text> recordReader = null;
         try {
           reader =new SequenceFile.Reader(fs, path, job); 
           Text key = new Text();
           Text value = new Text();
-          int counter = 1;
           while (reader.next(key, value)) {
             // get the cluster info
             Cluster cluster = Cluster.decodeCluster(value.toString());
