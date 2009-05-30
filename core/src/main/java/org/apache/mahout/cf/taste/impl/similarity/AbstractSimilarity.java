@@ -30,9 +30,6 @@ import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.transforms.SimilarityTransform;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collection;
 import java.util.concurrent.Callable;
 
@@ -41,8 +38,6 @@ import java.util.concurrent.Callable;
  * implementations in this package.
  */
 abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
-
-  private static final Logger log = LoggerFactory.getLogger(AbstractSimilarity.class);
 
   private final DataModel dataModel;
   private PreferenceInferrer inferrer;

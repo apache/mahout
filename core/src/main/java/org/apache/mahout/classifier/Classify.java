@@ -56,7 +56,6 @@ public class Classify {
   private Classify() {
   }
 
-  @SuppressWarnings({ "static-access" })
   public static void main(String[] args)
           throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException, OptionException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();

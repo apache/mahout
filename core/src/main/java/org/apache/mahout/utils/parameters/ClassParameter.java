@@ -19,6 +19,7 @@ package org.apache.mahout.utils.parameters;
 
 import org.apache.hadoop.mapred.JobConf;
 
+@SuppressWarnings("unchecked")
 public class ClassParameter extends AbstractParameter<Class> {
 
   public ClassParameter(String prefix, String name, JobConf jobConf, Class<?> defaultValue, String description) {

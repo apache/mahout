@@ -60,7 +60,7 @@ public class CDMutationTest extends TestCase {
       int nbcats;
 
       for (int condInd = 0; condInd < mutated.getNbConditions(); condInd++) {
-        int attrInd = rule.attributeIndex(condInd);
+        int attrInd = CDRule.attributeIndex(condInd);
         value = rule.getV(condInd);
         newval = mutated.getV(condInd);
         modified = modified || (value != newval);

@@ -39,8 +39,8 @@ import javax.swing.JPanel;
  * The original code is from <b>the Watchmaker project</b>
  * (https://watchmaker.dev.java.net/).
  */
-final class ItineraryPanel extends JPanel
-{
+final class ItineraryPanel extends JPanel {
+
     private final Collection<JCheckBox> checkBoxes;
     private final JButton selectAllButton;
     private final JButton clearButton;

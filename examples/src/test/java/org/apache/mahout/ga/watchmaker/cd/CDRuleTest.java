@@ -45,7 +45,7 @@ public class CDRuleTest extends TestCase {
 
       CDRule rule = new CDRule(threshold, rng);
       for (int condInd = 0; condInd < rule.getNbConditions(); condInd++) {
-        int attrInd = rule.attributeIndex(condInd);
+        int attrInd = CDRule.attributeIndex(condInd);
         
         assertInRange(rule.getW(condInd), 0, 1);
         

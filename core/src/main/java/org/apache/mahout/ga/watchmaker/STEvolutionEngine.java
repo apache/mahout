@@ -45,7 +45,6 @@ public class STEvolutionEngine<T> extends AbstractEvolutionEngine<T> {
    * @see org.uncommons.watchmaker.framework.AbstractEvolutionEngine#evaluatePopulation(java.util.List)
    */
   @Override
-  @SuppressWarnings("unchecked")
   protected List<EvaluatedCandidate<T>> evaluatePopulation(List<T> population) {
     List<Double> evaluations = new ArrayList<Double>();
     STFitnessEvaluator<? super T> evaluator = (STFitnessEvaluator<? super T>) getFitnessEvaluator();

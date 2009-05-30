@@ -37,13 +37,12 @@ import javax.swing.SwingUtilities;
  * The original code is from <b>the Watchmaker project</b>
  * (https://watchmaker.dev.java.net/).
  */
-final class ExecutionPanel extends JPanel implements ProgressListener
-{
+final class ExecutionPanel extends JPanel implements ProgressListener {
+
     private final JButton startButton;
     private final JTextArea output;
     private final JScrollPane scroller;
     private final JProgressBar progressBar;
-
 
     ExecutionPanel()
     {

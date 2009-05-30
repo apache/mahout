@@ -41,7 +41,6 @@ public class WikipediaXmlSplitter {
   private WikipediaXmlSplitter() {
   }
 
-  @SuppressWarnings("static-access")
   public static void main(String[] args) throws IOException, OptionException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();

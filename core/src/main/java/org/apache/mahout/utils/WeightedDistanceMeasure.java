@@ -40,6 +40,7 @@ public abstract class WeightedDistanceMeasure implements DistanceMeasure {
 
   private List<Parameter<?>> parameters;
   private Parameter<Path> weightsFile;
+  @SuppressWarnings("unchecked")
   private Parameter<Class> vectorClass;
   protected Vector weights;
 

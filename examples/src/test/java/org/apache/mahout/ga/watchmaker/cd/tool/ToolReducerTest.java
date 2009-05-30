@@ -35,7 +35,7 @@ public class ToolReducerTest extends TestCase {
 
     List<Text> values = asList("0,5", "-2,12", "-32,3",
         "0.5,25", "-30,20");
-    String descriptor = reducer.numericDescription(values.iterator());
+    String descriptor = ToolReducer.numericDescription(values.iterator());
 
     assertEquals("-32.0,25.0", descriptor);
   }

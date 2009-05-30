@@ -32,7 +32,6 @@ public class WikipediaDatasetCreator {
   private WikipediaDatasetCreator() {
   }
 
-  @SuppressWarnings("static-access")
   public static void main(String[] args) throws IOException,
       OptionException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();

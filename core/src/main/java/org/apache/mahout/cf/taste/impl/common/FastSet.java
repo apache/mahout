@@ -280,6 +280,7 @@ public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
     return count;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public FastSet<K> clone() {
     FastSet<K> clone;

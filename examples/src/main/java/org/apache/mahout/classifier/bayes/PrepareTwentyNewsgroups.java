@@ -45,7 +45,6 @@ public class PrepareTwentyNewsgroups {
   private PrepareTwentyNewsgroups() {
   }
 
-  @SuppressWarnings("static-access")
   public static void main(String[] args) throws IOException,
           ClassNotFoundException, InstantiationException, IllegalAccessException, OptionException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();

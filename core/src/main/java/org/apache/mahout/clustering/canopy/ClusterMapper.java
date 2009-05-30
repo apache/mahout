@@ -33,7 +33,6 @@ import org.apache.mahout.matrix.Vector;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.slf4j.LoggerFactory;
 
 public class ClusterMapper extends MapReduceBase implements
         Mapper<WritableComparable<?>, Text, Text, Text> {

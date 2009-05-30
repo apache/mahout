@@ -324,6 +324,7 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
     numEntries--;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public FastMap<K,V> clone() {
     FastMap<K,V> clone;
