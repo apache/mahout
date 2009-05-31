@@ -28,7 +28,7 @@ import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
 
 class DisplaySNDirichlet extends DisplayDirichlet {
-  public DisplaySNDirichlet() {
+  DisplaySNDirichlet() {
     initialize();
     this.setTitle("Dirichlet Process Clusters - Sampled Normal Distribution (>"
         + (int) (significance * 100) + "% of population)");

@@ -41,13 +41,13 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
 
   private static final long serialVersionUID = 1L;
 
-  static List<Canopy> canopies;
+  private static List<Canopy> canopies;
 
-  static List<List<SoftCluster>> clusters;
+  private static List<List<SoftCluster>> clusters;
 
-  static double t1 = 3.0;
+  private static final double t1 = 3.0;
 
-  static double t2 = 1.5;
+  private static final double t2 = 1.5;
 
   @Override
   public void paint(Graphics g) {
@@ -67,7 +67,7 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
   }
 
   public static void referenceFuzzyKMeans(List<Vector> points,
-      DistanceMeasure measure, double threshold, int numIter) throws Exception {
+      DistanceMeasure measure, double threshold, int numIter) {
     SoftCluster.config(measure, threshold);
     boolean converged = false;
     int iteration = 0;

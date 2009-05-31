@@ -46,7 +46,7 @@ public class DirichletCluster<Observation> {
     this.totalCount += model.count();
   }
 
-  static final Type typeOfModel = new TypeToken<DirichletCluster<Vector>>() {
+  private static final Type typeOfModel = new TypeToken<DirichletCluster<Vector>>() {
   }.getType();
 
   public String asFormatString() {

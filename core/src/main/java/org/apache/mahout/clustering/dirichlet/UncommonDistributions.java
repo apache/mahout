@@ -28,7 +28,7 @@ public final class UncommonDistributions {
 
   private static final double sqrt2pi = Math.sqrt(2.0 * Math.PI);
 
-  static Random random = new MersenneTwisterRNG();
+  private static Random random = new MersenneTwisterRNG();
 
   private UncommonDistributions() {
   }

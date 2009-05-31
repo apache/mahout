@@ -106,7 +106,7 @@ public class TestClassifier {
     modelPaths.put("thetaNormalizer", new Path(modelBasePath + "/trainer-thetaNormalizer/part-*"));
     modelPaths.put("weight", new Path(modelBasePath + "/trainer-tfIdf/trainer-tfIdf/part-*"));
 
-    FileSystem fs = FileSystem.get((new Path(modelBasePath)).toUri(), conf);
+    FileSystem fs = FileSystem.get(new Path(modelBasePath).toUri(), conf);
 
     log.info("Loading model from: {}", modelPaths);
 

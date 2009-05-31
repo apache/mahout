@@ -28,7 +28,7 @@ import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
 
 class Display2dASNDirichlet extends DisplayDirichlet {
-  public Display2dASNDirichlet() {
+  Display2dASNDirichlet() {
     initialize();
     this
         .setTitle("Dirichlet Process Clusters - 2-d Asymmetric Sampled Normal Distribution (>"
@@ -62,7 +62,7 @@ class Display2dASNDirichlet extends DisplayDirichlet {
     new Display2dASNDirichlet();
   }
 
-  static void generateResults() {
+  private static void generateResults() {
     DisplayDirichlet.generateResults(new AsymmetricSampledNormalDistribution());
   }
 }

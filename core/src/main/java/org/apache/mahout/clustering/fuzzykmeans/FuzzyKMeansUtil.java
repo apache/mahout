@@ -34,7 +34,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FuzzyKMeansUtil {
+class FuzzyKMeansUtil {
   private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansUtil.class);
 
   private FuzzyKMeansUtil() {

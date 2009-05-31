@@ -93,7 +93,7 @@ public class DirichletClusterer<Observation> {
 
   private final int numClusters;
 
-  public final List<Model<Observation>[]> clusterSamples = new ArrayList<Model<Observation>[]>();
+  private final List<Model<Observation>[]> clusterSamples = new ArrayList<Model<Observation>[]>();
 
   /**
    * Create a new instance on the sample data with the given additional parameters

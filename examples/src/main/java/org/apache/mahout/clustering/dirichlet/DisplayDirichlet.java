@@ -24,11 +24,11 @@ public class DisplayDirichlet extends Frame {
 
   protected int res; //screen resolution
 
-  protected final int ds = 72; //default scale = 72 pixels per inch
+  protected static final int ds = 72; //default scale = 72 pixels per inch
 
-  protected final int size = 8; // screen size in inches
+  protected static final int size = 8; // screen size in inches
 
-  public static final List<Vector> sampleData = new ArrayList<Vector>();
+  protected static final List<Vector> sampleData = new ArrayList<Vector>();
 
   protected static List<Model<Vector>[]> result;
 

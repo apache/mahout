@@ -47,16 +47,16 @@ public class XmlInputFormat extends TextInputFormat {
   }
 
   public static class XmlRecordReader implements RecordReader<LongWritable, Text> {
-    private byte[] startTag;
-    private byte[] endTag;
-    private long start;
-    private long end;
-    private FSDataInputStream fsin;
+    private final byte[] startTag;
+    private final byte[] endTag;
+    private final long start;
+    private final long end;
+    private final FSDataInputStream fsin;
     private final DataOutputBuffer buffer = new DataOutputBuffer();
 
     public XmlRecordReader(FileSplit split, JobConf jobConf) throws IOException {
-      startTag = jobConf.get("xmlinput.start").getBytes("utf-8");
-      endTag = jobConf.get("xmlinput.end").getBytes("utf-8");
+      startTag = jobConf.get(START_TAG_KEY).getBytes("utf-8");
+      endTag = jobConf.get(END_TAG_KEY).getBytes("utf-8");
 
       // open the file and seek to the start of the split
       start = split.getStart();

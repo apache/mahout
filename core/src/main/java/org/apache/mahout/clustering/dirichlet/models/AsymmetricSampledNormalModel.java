@@ -29,11 +29,11 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
   public Vector sd;
 
   // the observation statistics, initialized by the first observation
-  int s0 = 0;
+  private int s0 = 0;
 
-  Vector s1;
+  private Vector s1;
 
-  Vector s2;
+  private Vector s2;
 
   public AsymmetricSampledNormalModel() {
     super();

@@ -32,18 +32,18 @@ import org.apache.mahout.utils.DistanceMeasure;
 import org.apache.mahout.utils.ManhattanDistanceMeasure;
 
 class DisplayCanopy extends DisplayDirichlet {
-  public DisplayCanopy() {
+  DisplayCanopy() {
     initialize();
     this.setTitle("Canopy Clusters (> 5% of population)");
   }
 
   private static final long serialVersionUID = 1L;
 
-  static List<Canopy> canopies;
+  private static List<Canopy> canopies;
 
-  static double t1 = 3.0;
+  private static final double t1 = 3.0;
 
-  static double t2 = 1.5;
+  private static final double t2 = 1.5;
 
   public void paint(Graphics g) {
     super.plotSampleData(g);

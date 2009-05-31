@@ -42,7 +42,7 @@ public class SoftCluster {
 
   private static double m = 2.0; // default value
 
-  public static final double MINIMAL_VALUE = 0.0000000001; // using it for
+  private static final double MINIMAL_VALUE = 0.0000000001; // using it for
 
   // adding
 
@@ -73,11 +73,11 @@ public class SoftCluster {
   private boolean converged = false;
 
   // track membership parameters
-  double s0 = 0;
+  private double s0 = 0;
 
-  Vector s1;
+  private Vector s1;
 
-  Vector s2;
+  private Vector s2;
 
   private static DistanceMeasure measure;
 
@@ -105,7 +105,7 @@ public class SoftCluster {
     char firstChar = id.charAt(0);
     boolean startsWithV = firstChar == 'V';
     if (firstChar == 'C' || startsWithV) {
-      int clusterId = new Integer(formattedString.substring(1, beginIndex - 2));
+      int clusterId = Integer.parseInt(formattedString.substring(1, beginIndex - 2));
       Vector clusterCenter = AbstractVector.decodeVector(center);
 
       SoftCluster cluster = new SoftCluster(clusterCenter, clusterId);

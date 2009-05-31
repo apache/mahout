@@ -39,10 +39,10 @@ import com.google.gson.reflect.TypeToken;
 public class JsonDirichletStateAdapter implements
     JsonSerializer<DirichletState<?>>, JsonDeserializer<DirichletState<?>> {
 
-  final Type typeOfModel = new TypeToken<List<DirichletCluster<Vector>>>() {
+  private final Type typeOfModel = new TypeToken<List<DirichletCluster<Vector>>>() {
   }.getType();
 
-  final Type typeOfModelDistribution = new TypeToken<ModelDistribution<Vector>>() {
+  private final Type typeOfModelDistribution = new TypeToken<ModelDistribution<Vector>>() {
   }.getType();
 
   @Override

@@ -31,7 +31,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class KMeansUtil {
+final class KMeansUtil {
 
   private static final Logger log = LoggerFactory.getLogger(KMeansUtil.class);
 

@@ -40,13 +40,13 @@ class DisplayKMeans extends DisplayDirichlet {
 
   private static final long serialVersionUID = 1L;
 
-  static List<Canopy> canopies;
+  private static List<Canopy> canopies;
 
-  static List<List<Cluster>> clusters;
+  private static List<List<Cluster>> clusters;
 
-  static double t1 = 3.0;
+  private static final double t1 = 3.0;
 
-  static double t2 = 1.5;
+  private static final double t2 = 1.5;
 
   public void paint(Graphics g) {
     super.plotSampleData(g);

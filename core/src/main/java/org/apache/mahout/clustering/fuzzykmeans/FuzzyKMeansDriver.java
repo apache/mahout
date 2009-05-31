@@ -66,7 +66,7 @@ public class FuzzyKMeansDriver {
     String output = args[index++];
     String measureClass = args[index++];
     double convergenceDelta = Double.parseDouble(args[index++]);
-    int maxIterations = new Integer(args[index++]);
+    int maxIterations = Integer.parseInt(args[index++]);
     float m = Float.parseFloat(args[index++]);
     boolean doClustering = false;
     if (args.length > 7)

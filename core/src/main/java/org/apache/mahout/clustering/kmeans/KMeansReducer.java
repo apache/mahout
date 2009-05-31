@@ -34,7 +34,7 @@ import org.apache.mahout.matrix.AbstractVector;
 public class KMeansReducer extends MapReduceBase implements
     Reducer<Text, Text, Text, Text> {
 
-  protected Map<String, Cluster> clusterMap;
+  private Map<String, Cluster> clusterMap;
 
   @Override
   public void reduce(Text key, Iterator<Text> values,

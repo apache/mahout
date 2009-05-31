@@ -36,7 +36,7 @@ import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
 
 class DisplayOutputState extends DisplayDirichlet {
-  public DisplayOutputState() {
+  DisplayOutputState() {
     initialize();
     this.setTitle("Dirichlet Process Clusters - Map/Reduce Results (>"
         + (int) (significance * 100) + "% of population)");

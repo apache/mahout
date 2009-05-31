@@ -37,7 +37,7 @@ import org.apache.mahout.matrix.Vector;
 public class DirichletMapper extends MapReduceBase implements
     Mapper<WritableComparable<?>, Text, Text, Text> {
 
-  DirichletState<Vector> state;
+  private DirichletState<Vector> state;
 
   @Override
   public void map(WritableComparable<?> key, Text values,
@@ -69,7 +69,7 @@ public class DirichletMapper extends MapReduceBase implements
 
     try {
       DirichletState<Vector> state = DirichletDriver.createState(modelFactory,
-          new Integer(numClusters), new Double(alpha_0));
+          Integer.parseInt(numClusters), Double.parseDouble(alpha_0));
       Path path = new Path(statePath);
       FileSystem fs = FileSystem.get(path.toUri(), job);
       FileStatus[] status = fs.listStatus(path);
@@ -80,7 +80,7 @@ public class DirichletMapper extends MapReduceBase implements
           Text key = new Text();
           Text value = new Text();
           while (reader.next(key, value)) {
-            int index = new Integer(key.toString());
+            int index = Integer.parseInt(key.toString());
             String formatString = value.toString();
             DirichletCluster<Vector> cluster = DirichletCluster
                 .fromFormatString(formatString);

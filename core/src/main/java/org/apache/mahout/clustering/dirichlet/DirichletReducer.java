@@ -40,7 +40,7 @@ public class DirichletReducer extends MapReduceBase implements
   @Override
   public void reduce(Text key, Iterator<Text> values,
       OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
-    Integer k = new Integer(key.toString());
+    int k = Integer.parseInt(key.toString());
     Model<Vector> model = newModels[k];
     while (values.hasNext()) {
       Vector v = DenseVector.decodeFormat(values.next().toString());

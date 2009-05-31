@@ -25,16 +25,16 @@ public class NormalScModel implements Model<Vector> {
   private static final double sqrt2pi = Math.sqrt(2.0 * Math.PI);
 
   // the parameters
-  public Vector mean;
+  private Vector mean;
 
-  public double sd;
+  private double sd;
 
   // the observation statistics, initialized by the first observation
-  int s0 = 0;
+  private int s0 = 0;
 
-  Vector s1;
+  private Vector s1;
 
-  Vector s2;
+  private Vector s2;
 
   public NormalScModel() {
   }
