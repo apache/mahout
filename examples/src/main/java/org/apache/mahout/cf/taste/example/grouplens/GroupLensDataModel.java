@@ -85,27 +85,28 @@ public final class GroupLensDataModel extends FileDataModel {
     // Now translate the file; remove commas, then convert "::" delimiter to comma
     File resultFile = new File(new File(System.getProperty("java.io.tmpdir")),
                                         (ratings ? "ratings" : "movies") + ".txt");
-    if (!resultFile.exists()) {
-      PrintWriter writer = null;
-      try {
-        writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charset.forName("UTF-8")));
-        for (String line : new FileLineIterable(originalFile, false)) {
-          String convertedLine;
-          if (ratings) {
-            // toss the last column of data, which is a timestamp we don't want
-            convertedLine = line.substring(0, line.lastIndexOf("::")).replace("::", ",");
-          } else {
-            convertedLine = line.replace(",", "").replace("::", ",");
-          }
-          writer.println(convertedLine);
+    if (resultFile.exists()) {
+      resultFile.delete();
+    }
+    PrintWriter writer = null;
+    try {
+      writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charset.forName("UTF-8")));
+      for (String line : new FileLineIterable(originalFile, false)) {
+        String convertedLine;
+        if (ratings) {
+          // toss the last column of data, which is a timestamp we don't want
+          convertedLine = line.substring(0, line.lastIndexOf("::")).replace("::", ",");
+        } else {
+          convertedLine = line.replace(",", "").replace("::", ",");
         }
-        writer.flush();
-      } catch (IOException ioe) {
-        resultFile.delete();
-        throw ioe;
-      } finally {
-        IOUtils.quietClose(writer);
+        writer.println(convertedLine);
       }
+      writer.flush();
+    } catch (IOException ioe) {
+      resultFile.delete();
+      throw ioe;
+    } finally {
+      IOUtils.quietClose(writer);
     }
     return resultFile;
   }
