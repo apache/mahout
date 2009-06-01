@@ -30,6 +30,7 @@
       <param-name>recommender-class</param-name>
       <param-value>${recommender.class}</param-value>
     </init-param>
+    <load-on-startup>1</load-on-startup>
   </servlet>
 
   <servlet>
