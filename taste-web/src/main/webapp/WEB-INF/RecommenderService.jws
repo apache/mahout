@@ -68,7 +68,7 @@ public final class RecommenderService {
 	}
 
 	public void refresh() throws Exception {
-	    recommender.refresh();
+	    recommender.refresh(null);
 	}
 
 }
