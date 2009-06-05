@@ -175,7 +175,7 @@ public final class BooleanUserGenericUserBasedRecommender extends AbstractRecomm
    * This computation is in a technical sense, wrong, since in the domain of "boolean preference users"
    * where all preference values are 1, this method should only ever return 1.0 or NaN. This isn't
    * terribly useful however since it means results can't be ranked by preference value (all are 1).
-   * So instead this returns a sum of similarties to any other user in the neighborhood who has also
+   * So instead this returns a sum of similarities to any other user in the neighborhood who has also
    * rated the item.
    */
   private double doEstimatePreference(User theUser, Collection<User> theNeighborhood, Object itemID)

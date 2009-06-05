@@ -145,7 +145,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   }
 
   /**
-   * @param dataModel {@link DataModel} which provdes {@link User}s
+   * @param dataModel {@link DataModel} which provides {@link User}s
    * @param clusterSimilarity {@link ClusterSimilarity} used to compute cluster similarity
    * @param clusteringThreshold clustering similarity threshold; clusters will be aggregated into larger
    * clusters until the next two nearest clusters' similarity drops below this threshold

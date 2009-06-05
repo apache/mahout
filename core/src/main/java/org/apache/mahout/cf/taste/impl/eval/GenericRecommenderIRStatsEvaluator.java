@@ -150,10 +150,10 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
     return new IRStatisticsImpl(precision.getAverage(), recall.getAverage(), fallOut.getAverage());
   }
 
-  private void processOtherUser(Object id,
-                                Collection<Item> relevantItems,
-                                Collection<User> trainingUsers,
-                                User user2) {
+  private static void processOtherUser(Object id,
+                                       Collection<Item> relevantItems,
+                                       Collection<User> trainingUsers,
+                                       User user2) {
     if (id.equals(user2.getID())) {
       List<Preference> trainingPrefs = new ArrayList<Preference>();
       Preference[] prefs2 = user2.getPreferencesAsArray();
