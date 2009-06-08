@@ -17,12 +17,22 @@
 
 package org.apache.mahout.cf.taste.impl.recommender.svd;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
+import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.recommender.AbstractRecommender;
@@ -38,12 +48,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uncommons.maths.statistics.DataSet;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
 /**
  * <p>A {@link Recommender} which uses Single Value Decomposition to
  * find the main features of the {@link DataSet}.
@@ -52,6 +56,7 @@ import java.util.concurrent.Callable;
 public final class SVDRecommender extends AbstractRecommender {
 
   private static final Logger log = LoggerFactory.getLogger(SVDRecommender.class);
+  private static final Random random = RandomUtils.getRandom();
 
   private final RefreshHelper refreshHelper;
 
@@ -61,6 +66,7 @@ public final class SVDRecommender extends AbstractRecommender {
   private final Map<Object, Integer> userMap;
   private Map<Object, Integer> itemMap;
   private ExpectationMaximizationSVD emSvd;
+  private final List<Preference> cachedPreferences;
 
   /**
    * @param dataModel
@@ -98,19 +104,31 @@ public final class SVDRecommender extends AbstractRecommender {
     }
 
     double average = getAveragePreference();
-    double defaultValue = Math.sqrt((average - 1.0) / numFeatures);
+    double defaultValue = Math.sqrt((average - 1.0) / (double) numFeatures);
 
     emSvd = new ExpectationMaximizationSVD(numUsers, numItems, numFeatures, defaultValue);
-
+    cachedPreferences = new ArrayList<Preference>(numUsers);
+    recachePreferences();
 
     refreshHelper = new RefreshHelper(new Callable<Object>() {
       @Override
-      public Object call() {
+      public Object call() throws TasteException {
+        recachePreferences();
         //TODO: train again
         return null;
       }
     });
     refreshHelper.addDependency(dataModel);
+    
+  }
+
+  private void recachePreferences() throws TasteException {
+    cachedPreferences.clear();
+    for (User user : getDataModel().getUsers()) {
+      for (Preference pref : user.getPreferences()) {
+        cachedPreferences.add(pref);
+      }
+    }
   }
 
   private double getAveragePreference() throws TasteException {
@@ -123,20 +141,19 @@ public final class SVDRecommender extends AbstractRecommender {
     return average.getAverage();
   }
 
-  public void train(int steps) throws TasteException {
+  public void train(int steps) {
     for (int i = 0; i < steps; i++) {
       nextTrainStep();
     }
   }
 
-  private void nextTrainStep() throws TasteException {
+  private void nextTrainStep() {
+    Collections.shuffle(cachedPreferences, random);
     for (int i = 0; i < numFeatures; i++) {
-      for (User user : getDataModel().getUsers()) {
-        int useridx = userMap.get(user.getID());
-        for (Preference pref : user.getPreferencesAsArray()) {
-          int itemidx = itemMap.get(pref.getItem().getID());
-          emSvd.train(useridx, itemidx, i, pref.getValue());
-        }
+      for (Preference pref : cachedPreferences) {
+        int useridx = userMap.get(pref.getUser().getID());
+        int itemidx = itemMap.get(pref.getItem().getID());
+        emSvd.train(useridx, itemidx, i, pref.getValue());
       }
     }
   }
@@ -203,7 +220,7 @@ public final class SVDRecommender extends AbstractRecommender {
 
     @Override
     public double estimate(Item item) throws TasteException {
-      return estimatePreference(theUser, item.getID());
+      return estimatePreference(theUser.getID(), item.getID());
     }
   }
 
