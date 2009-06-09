@@ -223,11 +223,38 @@ public interface Vector extends Iterable<Vector.Element>, Writable {
   Vector minus(Vector x);
 
   /**
-   * Return a new matrix containing the normalized values of the recipient
+   * Return a new matrix containing the normalized (L_2 norm) values of the recipient
    *
    * @return a new Vector
    */
   Vector normalize();
+
+  /**
+   * Return a new Vector containing the normalized (L_power norm) values of the recipient.
+   * <p/>
+   * See http://en.wikipedia.org/wiki/Lp_space
+   * <p/>
+   * Technically, when 0 < power < 1, we don't have a norm, just a metric, but we'll overload this here.
+   * <p/>
+   * Also supports power == 0 (number of non-zero elements) and power = {@link Double#POSITIVE_INFINITY} (max element).  Again, see the Wikipedia page for more info
+   * 
+   *
+   * @param power The power to use.  Must be >= 0.  May also be {@link Double#POSITIVE_INFINITY}.  See the Wikipedia link for more on this.
+   * @return a new Vector
+   */
+  Vector normalize(double power);
+
+  /**
+   *
+   * @return The maximum value in the Vector
+   */
+  double maxValue();
+
+  /**
+   *
+   * @return The index of the maximum value
+   */
+  int maxValueIndex();
 
   /**
    * Return a new matrix containing the sum of each value of the recipient and

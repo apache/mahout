@@ -17,10 +17,10 @@
 
 package org.apache.mahout.matrix;
 
+import junit.framework.TestCase;
+
 import java.util.Date;
 import java.util.Random;
-
-import junit.framework.TestCase;
 
 public class VectorTest extends TestCase {
 
@@ -43,6 +43,78 @@ public class VectorTest extends TestCase {
     right.setQuick(2, 6);
     double result = left.dot(right);
     assertEquals(result + " does not equal: " + 32, 32.0, result);
+  }
+
+  public void testNormalize() throws Exception {
+    SparseVector vec1 = new SparseVector(3);
+
+    vec1.setQuick(0, 1);
+    vec1.setQuick(1, 2);
+    vec1.setQuick(2, 3);
+    Vector norm = vec1.normalize();
+    assertTrue("norm1 is null and it shouldn't be", norm != null);
+    Vector expected = new SparseVector(3);
+
+    expected.setQuick(0, 0.2672612419124244);
+    expected.setQuick(1, 0.5345224838248488);
+    expected.setQuick(2, 0.8017837257372732);
+    assertTrue("norm is not equal to expected", norm.equals(expected));
+
+    norm = vec1.normalize(2);
+    assertTrue("norm is not equal to expected", norm.equals(expected));
+
+    norm = vec1.normalize(1);
+    expected.setQuick(0, 1.0/6);
+    expected.setQuick(1, 2.0/6);
+    expected.setQuick(2, 3.0/6);
+    assertTrue("norm is not equal to expected", norm.equals(expected));
+    norm = vec1.normalize(3);
+    //TODO this is not used
+    expected = vec1.times(vec1).times(vec1);
+
+    //double sum = expected.zSum();
+    //cube = Math.pow(sum, 1.0/3);
+    double cube = Math.pow(36, 1.0/3);
+    expected = vec1.divide(cube);
+    
+    assertTrue("norm: " + norm.asFormatString() + " is not equal to expected: " + expected.asFormatString(), norm.equals(expected));
+
+    norm = vec1.normalize(Double.POSITIVE_INFINITY);
+    //The max is 3, so we divide by that.
+    expected.setQuick(0, 1.0/3);
+    expected.setQuick(1, 2.0/3);
+    expected.setQuick(2, 3.0/3);
+    assertTrue("norm: " + norm.asFormatString() + " is not equal to expected: " + expected.asFormatString(), norm.equals(expected));
+
+    norm = vec1.normalize(0);
+    //The max is 3, so we divide by that.
+    expected.setQuick(0, 1.0/3);
+    expected.setQuick(1, 2.0/3);
+    expected.setQuick(2, 3.0/3);
+    assertTrue("norm: " + norm.asFormatString() + " is not equal to expected: " + expected.asFormatString(), norm.equals(expected));
+
+    try {
+      vec1.normalize(-1);
+      assertTrue(false);
+    } catch (IllegalArgumentException e) {
+      //expected
+    }
+
+  }
+
+  public void testMax() throws Exception {
+    SparseVector vec1 = new SparseVector(3);
+
+    vec1.setQuick(0, 1);
+    vec1.setQuick(1, 3);
+    vec1.setQuick(2, 2);
+
+    double max = vec1.maxValue();
+    assertTrue(max + " does not equal: " + 3, max == 3);
+
+    int idx = vec1.maxValueIndex();
+    assertTrue(idx + " does not equal: " + 1, idx == 1);
+
   }
 
   public void testDenseVector() throws Exception {
@@ -75,12 +147,12 @@ public class VectorTest extends TestCase {
   }
 
   public void testEnumeration() throws Exception {
-    double[] apriori = { 0, 1, 2, 3, 4 };
+    double[] apriori = {0, 1, 2, 3, 4};
 
-    doTestEnumeration(apriori, new VectorView(new DenseVector(new double[] {
-        -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }), 2, 5));
+    doTestEnumeration(apriori, new VectorView(new DenseVector(new double[]{
+            -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9}), 2, 5));
 
-    doTestEnumeration(apriori, new DenseVector(new double[] { 0, 1, 2, 3, 4 }));
+    doTestEnumeration(apriori, new DenseVector(new double[]{0, 1, 2, 3, 4}));
 
     SparseVector sparse = new SparseVector(5);
     sparse.set(0, 0);
@@ -110,7 +182,7 @@ public class VectorTest extends TestCase {
     long tRef = t1 - t0;
     assertTrue(tOpt < tRef);
     System.out.println("testSparseVectorTimesX tRef=tOpt=" + (tRef - tOpt)
-        + " ms for 10 iterations");
+            + " ms for 10 iterations");
     for (int i = 0; i < 50000; i++)
       assertEquals("i=" + i, rRef.getQuick(i), rOpt.getQuick(i));
   }
@@ -134,7 +206,7 @@ public class VectorTest extends TestCase {
     long tRef = t1 - t0;
     assertTrue(tOpt < tRef);
     System.out.println("testSparseVectorTimesV tRef=tOpt=" + (tRef - tOpt)
-        + " ms for 10 iterations");
+            + " ms for 10 iterations");
     for (int i = 0; i < 50000; i++)
       assertEquals("i=" + i, rRef.getQuick(i), rOpt.getQuick(i));
   }

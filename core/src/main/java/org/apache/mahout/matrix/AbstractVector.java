@@ -116,6 +116,61 @@ public abstract class AbstractVector implements Vector {
     return divide(divSq);
   }
 
+  public Vector normalize(double power){
+    if (power < 0){
+      throw new IllegalArgumentException("Power must be >= 0");
+    }
+    double val = 0;
+    //we can special case certain powers
+    if (Double.isInfinite(power)) {
+      val = maxValue();
+      return divide(val);
+    } else if (power == 2) {
+      return normalize();
+    } else if (power == 1) {
+      val = zSum();
+      return divide(val);
+    } else if (power == 0) {
+      // this is the number of non-zero elements
+      for (int i = 0; i < cardinality(); i++) {
+        val += getQuick(i) != 0 ? 1 : 0;
+      }
+      return divide(val);
+    } else if (power > 0) {
+      for (int i = 0; i < cardinality(); i++) {
+        val += Math.pow(getQuick(i), power);
+      }
+      double divFactor = Math.pow(val, 1.0 / power);
+      return divide(divFactor);
+    } else {
+      throw new IllegalArgumentException("Unreachable");
+    }
+  }
+
+
+  @Override
+  public double maxValue() {
+    double result = Double.MIN_VALUE;
+    for (int i = 0; i < cardinality(); i++) {
+      result = Math.max(result, getQuick(i));
+    }
+    return result;
+  }
+
+  @Override
+  public int maxValueIndex() {
+    int result = -1;
+    double max = Double.MIN_VALUE;
+    for (int i = 0; i < cardinality(); i++) {
+      double tmp = getQuick(i);
+      if (tmp > max){
+        max = tmp;
+        result = i;
+      }
+    }
+    return result;
+  }
+
   @Override
   public Vector plus(double x) {
     Vector result = copy();
