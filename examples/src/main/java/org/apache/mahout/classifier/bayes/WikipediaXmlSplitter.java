@@ -57,7 +57,11 @@ public class WikipediaXmlSplitter {
     Option chunkSizeOpt = obuilder.withLongName("chunkSize").withRequired(true).withArgument(
             abuilder.withName("chunkSize").withMinimum(1).withMaximum(1).create()).
             withDescription("The Size of the chunk, in megabytes").withShortName("c").create();
-    Group group = gbuilder.withName("Options").withOption(dumpFileOpt).withOption(outputDirOpt).withOption(chunkSizeOpt).create();
+    Option numChunksOpt = obuilder.withLongName("numChunks").withRequired(false).withArgument(
+            abuilder.withName("numChunks").withMinimum(1).withMaximum(1).create()).
+            withDescription("The maximum number of chunks to create.  If specified, program will only create a subset of the chunks").withShortName("n").create();
+    Group group = gbuilder.withName("Options").withOption(dumpFileOpt).withOption(outputDirOpt).withOption(chunkSizeOpt).withOption(numChunksOpt).create();
+
     Parser parser = new Parser();
     parser.setGroup(group);
     CommandLine cmdLine = parser.parse(args);
@@ -65,6 +69,11 @@ public class WikipediaXmlSplitter {
     String dumpFilePath = (String) cmdLine.getValue(dumpFileOpt);
     String outputDirPath = (String) cmdLine.getValue(outputDirOpt);
     int chunkSize = 1024 * 1024 * Integer.parseInt((String) cmdLine.getValue(chunkSizeOpt));
+
+    int numChunks = Integer.MAX_VALUE;
+    if (cmdLine.hasOption(numChunksOpt)){
+      numChunks = Integer.parseInt((String) cmdLine.getValue(numChunksOpt));
+    }
 
     BufferedReader dumpReader = new BufferedReader(new InputStreamReader(
         new FileInputStream(dumpFilePath), "UTF-8"));
@@ -128,7 +137,9 @@ public class WikipediaXmlSplitter {
 
           chunkWriter.write(content.toString(), 0, content.length());
           chunkWriter.close();
-
+          if (filenumber >= numChunks){
+            break;
+          }
           content = new StringBuilder();
           content.append(header);
         }
