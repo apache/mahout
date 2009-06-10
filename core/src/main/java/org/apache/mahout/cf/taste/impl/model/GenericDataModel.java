@@ -232,7 +232,7 @@ public final class GenericDataModel implements DataModel, Serializable {
 
   @Override
   public String toString() {
-    return "GenericDataModel[users:" + users + ']';
+    return "GenericDataModel[users:" + (users.size() > 3 ? users.subList(0,3) + "..." : users) + ']';
   }
 
 }
