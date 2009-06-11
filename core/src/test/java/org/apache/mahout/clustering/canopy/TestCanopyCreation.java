@@ -347,21 +347,14 @@ public class TestCanopyCreation extends TestCase {
    */
   public void testCanopyMapperManhattan() throws Exception {
     CanopyMapper mapper = new CanopyMapper();
-    CanopyCombiner combiner = new CanopyCombiner();
     DummyOutputCollector<Text,Text> collector = new DummyOutputCollector<Text,Text>();
     Canopy.config(manhattanDistanceMeasure, (3.1), (2.1));
     List<Vector> points = getPoints(raw);
     // map the data
     for (Vector point : points)
       mapper.map(new Text(), new Text(point.asFormatString()), collector, null);
-    assertEquals("Number of map results", 3, collector.getData().size());
-    // now combine the mapper output
-    Canopy.config(manhattanDistanceMeasure, (3.1), (2.1));
-    Map<String, List<Text>> mapData = collector.getData();
-    collector = new DummyOutputCollector<Text,Text>();
-    for (Map.Entry<String, List<Text>> stringListEntry : mapData.entrySet())
-      combiner.reduce(new Text(stringListEntry.getKey()), stringListEntry.getValue().iterator(), collector,
-          null);
+    mapper.close();
+    assertEquals("Number of map results", 1, collector.getData().size());
     // now verify the output
     List<Text> data = collector.getValue("centroid");
     assertEquals("Number of centroids", 3, data.size());
@@ -380,21 +373,14 @@ public class TestCanopyCreation extends TestCase {
    */
   public void testCanopyMapperEuclidean() throws Exception {
     CanopyMapper mapper = new CanopyMapper();
-    CanopyCombiner combiner = new CanopyCombiner();
     DummyOutputCollector<Text,Text> collector = new DummyOutputCollector<Text,Text>();
     Canopy.config(euclideanDistanceMeasure, (3.1), (2.1));
     List<Vector> points = getPoints(raw);
     // map the data
     for (Vector point : points)
       mapper.map(new Text(), new Text(point.asFormatString()), collector, null);
-    assertEquals("Number of map results", 3, collector.getData().size());
-    // now combine the mapper output
-    Canopy.config(euclideanDistanceMeasure, (3.1), (2.1));
-    Map<String, List<Text>> mapData = collector.getData();
-    collector = new DummyOutputCollector<Text,Text>();
-    for (Map.Entry<String, List<Text>> stringListEntry : mapData.entrySet())
-      combiner.reduce(new Text(stringListEntry.getKey()), stringListEntry.getValue().iterator(), collector,
-          null);
+    mapper.close();
+    assertEquals("Number of map results", 1, collector.getData().size());
     // now verify the output
     List<Text> data = collector.getValue("centroid");
     assertEquals("Number of centroids", 3, data.size());

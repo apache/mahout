@@ -32,21 +32,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CanopyMapper extends MapReduceBase implements
-        Mapper<WritableComparable<?>, Text, Text, Text> {
+    Mapper<WritableComparable<?>, Text, Text, Text> {
 
   private final List<Canopy> canopies = new ArrayList<Canopy>();
 
+  private OutputCollector<Text, Text> outputCollector;
+
   @Override
   public void map(WritableComparable<?> key, Text values,
-                  OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+    outputCollector = output;
     Vector point = AbstractVector.decodeVector(values.toString());
-    Canopy.emitPointToNewCanopies(point, canopies, output);
+    Canopy.addPointToCanopies(point, canopies);
   }
 
   @Override
   public void configure(JobConf job) {
     super.configure(job);
     Canopy.configure(job);
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapred.MapReduceBase#close()
+   */
+  @Override
+  public void close() throws IOException {
+    for (Canopy canopy : canopies)
+      outputCollector.collect(new Text("centroid"), new Text(canopy
+          .computeCentroid().asFormatString()));
+    super.close();
   }
 
 }

@@ -68,7 +68,6 @@ public class CanopyDriver {
     FileOutputFormat.setOutputPath(conf, outPath);
 
     conf.setMapperClass(CanopyMapper.class);
-    conf.setCombinerClass(CanopyCombiner.class);
     conf.setReducerClass(CanopyReducer.class);
     conf.setNumReduceTasks(1);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
