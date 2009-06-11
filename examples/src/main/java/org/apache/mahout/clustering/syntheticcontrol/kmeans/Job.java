@@ -40,7 +40,7 @@ public class Job {
       double t2 = Double.parseDouble(args[4]);
       double convergenceDelta = Double.parseDouble(args[5]);
       int maxIterations = Integer.parseInt(args[6]);
-      runJob(input, output, measureClass, convergenceDelta, t1, t2,
+      runJob(input, output, measureClass, t1, t2, convergenceDelta,
           maxIterations);
     } else
       runJob("testdata", "output",
