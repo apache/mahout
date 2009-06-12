@@ -17,7 +17,6 @@
 
 package org.apache.mahout.clustering.dirichlet;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.apache.hadoop.fs.FileSystem;
@@ -101,7 +100,7 @@ public class DirichletDriver {
   private static void writeInitialState(String output, String stateIn,
       String modelFactory, int numModels, double alpha_0)
       throws ClassNotFoundException, InstantiationException,
-      IllegalAccessException, FileNotFoundException, IOException {
+      IllegalAccessException, IOException {
     DirichletState<Vector> state = createState(modelFactory, numModels, alpha_0);
     JobConf job = new JobConf(KMeansDriver.class);
     Path outPath = new Path(output);
@@ -125,9 +124,8 @@ public class DirichletDriver {
     Class<?> cl = ccl.loadClass(modelFactory);
     ModelDistribution<Vector> factory = (ModelDistribution<Vector>) cl
         .newInstance();
-    DirichletState<Vector> state = new DirichletState<Vector>(factory,
+    return new DirichletState<Vector>(factory,
         numModels, alpha_0, 1, 1);
-    return state;
   }
 
   /**

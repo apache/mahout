@@ -227,8 +227,8 @@ public class SoftCluster {
       clusterDistance = MINIMAL_VALUE;
     }
     double denom = 0.0;
-    for (Double eachCDist : clusterDistanceList) {
-      if (eachCDist == 0)
+    for (double eachCDist : clusterDistanceList) {
+      if (eachCDist == 0.0)
         eachCDist = MINIMAL_VALUE;
 
       denom += Math.pow(clusterDistance / eachCDist, 2.0 / (m - 1));

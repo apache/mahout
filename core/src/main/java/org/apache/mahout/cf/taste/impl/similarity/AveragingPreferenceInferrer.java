@@ -39,7 +39,6 @@ import java.util.Collection;
 public final class AveragingPreferenceInferrer implements PreferenceInferrer {
 
   private static final Retriever<User, Double> RETRIEVER = new PrefRetriever();
-  private static final Double ZERO = 0.0;
 
   private final Cache<User, Double> averagePreferenceValue;
 
@@ -62,7 +61,7 @@ public final class AveragingPreferenceInferrer implements PreferenceInferrer {
   }
 
   private static final class PrefRetriever implements Retriever<User, Double> {
-
+    private static final Double ZERO = Double.valueOf(0.0);
     @Override
     public Double get(User key) {
       RunningAverage average = new FullRunningAverage();

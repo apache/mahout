@@ -58,7 +58,7 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
       // to
       // split
       // prob and vector
-      double partialSumPtProb = new Double(value.substring(0, index));
+      double partialSumPtProb = Double.parseDouble(value.substring(0, index));
       Vector total = AbstractVector.decodeVector(value.substring(index + 1));
       if (mapperSepIndex != -1) // escaped from combiner
       {

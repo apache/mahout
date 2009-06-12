@@ -86,10 +86,7 @@ public class DirichletState<Observation> {
   public double adjustedProbability(Observation x, int k) {
     double pdf = clusters.get(k).model.pdf(x);
     double mix = mixture.get(k);
-    double result = mix * pdf;
-    //if (result < 0 || result > 1)
-    //  System.out.print("");
-    return result;
+    return mix * pdf;
   }
 
   @SuppressWarnings("unchecked")

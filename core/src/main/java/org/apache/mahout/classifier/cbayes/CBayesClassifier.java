@@ -103,18 +103,17 @@ public class CBayesClassifier implements Classifier{
    */
   @Override
   public double documentWeight(Model model, String label, String[] document) {
-    Map<String, Integer[]> wordList = new HashMap<String, Integer[]>(1000);
+    Map<String, int[]> wordList = new HashMap<String, int[]>(1000);
     for (String word : document) {
-      Integer [] count = wordList.get(word);
+      int[] count = wordList.get(word);
       if (count == null) {
-        count = new Integer[1];
-        count[0] = 0;
+        count = new int[] { 0 };
         wordList.put(word, count);
       }
       count[0]++;
     }
     double result = 0.0;
-    for (Map.Entry<String, Integer[]> entry : wordList.entrySet()) {
+    for (Map.Entry<String, int[]> entry : wordList.entrySet()) {
       String word = entry.getKey();
       int count = entry.getValue()[0];
       result += count * model.featureWeight(label, word);

@@ -116,34 +116,32 @@ public abstract class AbstractVector implements Vector {
     return divide(divSq);
   }
 
+  @Override
   public Vector normalize(double power){
-    if (power < 0){
+    if (power < 0.0){
       throw new IllegalArgumentException("Power must be >= 0");
     }
-    double val = 0;
     //we can special case certain powers
     if (Double.isInfinite(power)) {
-      val = maxValue();
-      return divide(val);
-    } else if (power == 2) {
+      return divide(maxValue());
+    } else if (power == 2.0) {
       return normalize();
-    } else if (power == 1) {
-      val = zSum();
-      return divide(val);
-    } else if (power == 0) {
+    } else if (power == 1.0) {
+      return divide(zSum());
+    } else if (power == 0.0) {
       // this is the number of non-zero elements
+      double val = 0.0;
       for (int i = 0; i < cardinality(); i++) {
-        val += getQuick(i) != 0 ? 1 : 0;
+        val += getQuick(i) == 0 ? 0 : 1;
       }
       return divide(val);
-    } else if (power > 0) {
+    } else {
+      double val = 0.0;
       for (int i = 0; i < cardinality(); i++) {
         val += Math.pow(getQuick(i), power);
       }
       double divFactor = Math.pow(val, 1.0 / power);
       return divide(divFactor);
-    } else {
-      throw new IllegalArgumentException("Unreachable");
     }
   }
 
