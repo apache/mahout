@@ -194,16 +194,21 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
+    if (this == o) return true;
+    if (!(o instanceof Vector)) return false;
 
-    SparseVector that = (SparseVector) o;
+    Vector that = (Vector) o;
+    if (this.cardinality() != that.cardinality()) return false;
 
-    return cardinality == that.cardinality
-        && (values == null ? that.values == null : values.equals(that.values));
+    if (that instanceof SparseVector) {
+      return (values == null ? ((SparseVector) that).values == null : values.equals(((SparseVector) that).values));
+    } else {
+      return equivalent(this, that);
+    }
+
   }
+
+
 
   @Override
   public int hashCode() {

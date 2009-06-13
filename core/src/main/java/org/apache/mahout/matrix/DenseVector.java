@@ -24,6 +24,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.NoSuchElementException;
+import java.util.Arrays;
 
 /**
  * Implements vector as an array of doubles
@@ -211,5 +212,29 @@ public class DenseVector extends AbstractVector {
       values[i] = dataInput.readDouble();
     }
     this.values = values;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Vector)) return false;
+
+    Vector that = (Vector) o;
+    if (this.cardinality() != that.cardinality()) return false;
+
+    if (that instanceof DenseVector) {
+      if (!Arrays.equals(values, ((DenseVector) that).values)) return false;
+    } else {
+      return equivalent(this, that);
+    }
+
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = (values != null ? values.hashCode() : 0);
+    result = 31 * result + values.length;
+    return result;
   }
 }

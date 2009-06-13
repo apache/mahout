@@ -35,7 +35,7 @@ public class TestVectorView extends TestCase {
 
   public void testAsFormatString() {
     String formatString = test.asWritableComparable().toString();
-    assertEquals("format", "[2.2, 3.3, 4.4, ] ", formatString);
+    assertEquals("format", "[, 2.2, 3.3, 4.4, ] ", formatString);
   }
 
   public void testCardinality() {

@@ -307,4 +307,29 @@ public abstract class AbstractVector implements Vector {
     return result;
   }
 
+  /**
+   * Compare whether two Vector implementations are the same, regardless of the implementation.
+   * Two Vectors are the same if they have the same cardinality and all of their values are the same.
+   *
+   *
+   * @param left The left hand Vector to compare
+   * @param right The right hand Vector
+   * @return true if the two Vectors have the same cardinality and the same values
+   */
+  public static boolean equivalent(Vector left, Vector right){
+    boolean result = true;
+    int leftCardinality = left.cardinality();
+    if (leftCardinality == right.cardinality()){
+      for (int i = 0; i < leftCardinality; i++){
+        if (left.getQuick(i) != right.getQuick(i)){
+          return false;
+        }
+
+      }
+    } else {
+      return false;
+    }
+    return result;
+  }
+
 }

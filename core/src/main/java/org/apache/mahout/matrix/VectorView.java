@@ -64,7 +64,7 @@ public class VectorView extends AbstractVector {
   @Override
   public String asFormatString() {
     StringBuilder out = new StringBuilder();
-    out.append('[');
+    out.append("[, ");
     for (int i = offset; i < offset + cardinality; i++)
       out.append(getQuick(i)).append(", ");
     out.append("] ");
@@ -237,5 +237,20 @@ public class VectorView extends AbstractVector {
     this.offset = offset;
     this.cardinality = cardinality;
     this.vector = vector;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    return o instanceof Vector && equivalent(this, (Vector) o);
+
+  }
+
+  @Override
+  public int hashCode() {
+    int result = vector.hashCode();
+    result = 31 * result + offset;
+    result = 31 * result + cardinality;
+    return result;
   }
 }

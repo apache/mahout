@@ -34,6 +34,69 @@ public class VectorTest extends TestCase {
     doTestVectors(vec1, vec2);
   }
 
+  public void testEquivalent() throws Exception {
+    SparseVector left = new SparseVector(3);
+    DenseVector right = new DenseVector(3);
+    left.setQuick(0, 1);
+    left.setQuick(1, 2);
+    left.setQuick(2, 3);
+    right.setQuick(0, 1);
+    right.setQuick(1, 2);
+    right.setQuick(2, 3);
+    assertTrue("equivalent didn't work", AbstractVector.equivalent(left, right));
+    assertTrue("equals didn't work", left.equals(right));
+    right.setQuick(2, 4);
+    assertTrue("equivalent didn't work", AbstractVector.equivalent(left, right)  == false);
+    assertTrue("equals didn't work", left.equals(right)  == false);
+    right = new DenseVector(4);
+    right.setQuick(0, 1);
+    right.setQuick(1, 2);
+    right.setQuick(2, 3);
+    right.setQuick(3, 3);
+    assertTrue("equivalent didn't work", AbstractVector.equivalent(left, right)  == false);
+    assertTrue("equals didn't work", left.equals(right) == false);
+    left = new SparseVector(2);
+    left.setQuick(0, 1);
+    left.setQuick(1, 2);
+    assertTrue("equivalent didn't work", AbstractVector.equivalent(left, right)  == false);
+    assertTrue("equals didn't work", left.equals(right) == false);
+
+    DenseVector dense = new DenseVector(3);
+    right = new DenseVector(3);
+    right.setQuick(0, 1);
+    right.setQuick(1, 2);
+    right.setQuick(2, 3);
+    dense.setQuick(0, 1);
+    dense.setQuick(1, 2);
+    dense.setQuick(2, 3);
+    assertTrue("equivalent didn't work", AbstractVector.equivalent(dense, right)  == true);
+    assertTrue("equals didn't work", dense.equals(right) == true);
+
+    SparseVector sparse = new SparseVector(3);
+    left = new SparseVector(3);
+    sparse.setQuick(0, 1);
+    sparse.setQuick(1, 2);
+    sparse.setQuick(2, 3);
+    left.setQuick(0, 1);
+    left.setQuick(1, 2);
+    left.setQuick(2, 3);
+    assertTrue("equivalent didn't work", AbstractVector.equivalent(sparse, left)  == true);
+    assertTrue("equals didn't work", left.equals(sparse) == true);
+
+    VectorView v1 = new VectorView(left, 0, 2);
+    VectorView v2 = new VectorView(right, 0, 2);
+    assertTrue("equivalent didn't work", AbstractVector.equivalent(v1, v2)  == true);
+    assertTrue("equals didn't work", v1.equals(v2) == true);
+    sparse = new SparseVector(2);
+    sparse.setQuick(0, 1);
+    sparse.setQuick(1, 2);
+    assertTrue("equivalent didn't work", AbstractVector.equivalent(v1, sparse)  == true);
+    assertTrue("equals didn't work", v1.equals(sparse) == true);
+
+
+  }
+
+
   private static void doTestVectors(Vector left, Vector right) {
     left.setQuick(0, 1);
     left.setQuick(1, 2);
@@ -43,6 +106,11 @@ public class VectorTest extends TestCase {
     right.setQuick(2, 6);
     double result = left.dot(right);
     assertEquals(result + " does not equal: " + 32, 32.0, result);
+    String formattedString = left.asFormatString();
+    System.out.println("Vec: " + formattedString);
+    Vector vec = AbstractVector.decodeVector(formattedString);
+    assertTrue("vec is null and it shouldn't be", vec != null);
+    assertTrue("Vector could not be decoded from the formatString", AbstractVector.equivalent(vec, left));
   }
 
   public void testNormalize() throws Exception {
