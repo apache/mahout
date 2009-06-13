@@ -30,6 +30,7 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.TimesFunction;
 import org.apache.mahout.matrix.Vector;
@@ -42,7 +43,7 @@ public class DirichletMapper extends MapReduceBase implements
   @Override
   public void map(WritableComparable<?> key, Text values,
       OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
-    Vector v = DenseVector.decodeFormat(values.toString());
+    Vector v = AbstractVector.decodeVector(values.toString());
     // compute a normalized vector of probabilities that v is described by each model
     Vector pi = normalizedProbabilities(state, v);
     // then pick one model by sampling a Multinomial distribution based upon them
