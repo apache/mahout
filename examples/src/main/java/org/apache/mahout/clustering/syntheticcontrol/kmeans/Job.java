@@ -26,9 +26,13 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.canopy.CanopyClusteringJob;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
+import static org.apache.mahout.clustering.syntheticcontrol.Constants.CLUSTERED_POINTS_OUTPUT_DIRECTORY;
+import static org.apache.mahout.clustering.syntheticcontrol.Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
 
 public class Job {
-  private Job() {
+  
+
+private Job() {
   }
 
   public static void main(String[] args) throws IOException {
@@ -77,10 +81,12 @@ public class Job {
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
     if (dfs.exists(outPath))
       dfs.delete(outPath, true);
-    InputDriver.runJob(input, output + "/data");
-    CanopyClusteringJob.runJob(output + "/data", output, measureClass, t1, t2);
-    KMeansDriver.runJob(output + "/data", output + "/canopies", output,
+    final String directoryContainingConvertedInput = output + DIRECTORY_CONTAINING_CONVERTED_INPUT;
+    InputDriver.runJob(input, directoryContainingConvertedInput);
+    CanopyClusteringJob.runJob(directoryContainingConvertedInput, output, measureClass, t1, t2);
+    KMeansDriver.runJob(directoryContainingConvertedInput, 
+            output + CanopyClusteringJob.DEFAULT_CANOPIES_OUTPUT_DIRECTORY, output,
         measureClass, convergenceDelta, maxIterations, 1);
-    //    OutputDriver.runJob(output + "/points", output + "/clustered-points");
+    //    OutputDriver.runJob(output + KMeansDriver.DEFAULT_OUTPUT_DIRECTORY, output + CLUSTERED_POINTS_OUTPUT_DIRECTORY);
   }
 }

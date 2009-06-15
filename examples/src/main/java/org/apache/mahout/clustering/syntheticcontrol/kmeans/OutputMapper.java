@@ -35,12 +35,11 @@ public class OutputMapper extends MapReduceBase implements
   @Override
   public void map(LongWritable key, Text values,
       OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
-    String foo = values.toString();
+    final String foo = values.toString();
     int ix = foo.indexOf(']');
     Cluster canopy = Cluster.decodeCluster(foo.substring(0, ix + 1));
     Vector point = AbstractVector.decodeVector(foo.substring(ix + 3));
-    output.collect(new Text(canopy.getIdentifier()), new Text(point
-        .asFormatString()));
+    output.collect(new Text(canopy.getIdentifier()), new Text(point.asFormatString()));
   }
 
 }

@@ -25,6 +25,9 @@ import org.apache.mahout.clustering.canopy.CanopyClusteringJob;
 
 import java.io.IOException;
 
+import static org.apache.mahout.clustering.syntheticcontrol.Constants.CLUSTERED_POINTS_OUTPUT_DIRECTORY;
+import static org.apache.mahout.clustering.syntheticcontrol.Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
+
 public class Job {
   private Job() {
   }
@@ -69,10 +72,11 @@ public class Job {
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
     if (dfs.exists(outPath))
       dfs.delete(outPath, true);
-    InputDriver.runJob(input, output + "/data");
-    CanopyClusteringJob.runJob(output + "/data", output, measureClassName,
+    final String directoryContainingConvertedInput = output + DIRECTORY_CONTAINING_CONVERTED_INPUT;
+    InputDriver.runJob(input, directoryContainingConvertedInput);
+    CanopyClusteringJob.runJob(directoryContainingConvertedInput, output, measureClassName,
         t1, t2);
-    OutputDriver.runJob(output + "/clusters", output + "/clustered-points");
+    OutputDriver.runJob(output + CanopyClusteringJob.DEFAULT_CLUSTER_OUTPUT_DIRECTORY, output + CLUSTERED_POINTS_OUTPUT_DIRECTORY);
 
   }
 

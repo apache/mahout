@@ -32,6 +32,11 @@ import org.slf4j.LoggerFactory;
 
 public class KMeansDriver {
 
+  /**
+   * The name of the directory used to output final results. 
+   */
+  public static final String DEFAULT_OUTPUT_DIRECTORY = "/points";
+  
   private static final Logger log = LoggerFactory.getLogger(KMeansDriver.class);
 
   private KMeansDriver() {
@@ -79,7 +84,7 @@ public class KMeansDriver {
     }
     // now actually cluster the points
     log.info("Clustering ");
-    runClustering(input, clustersIn, output + "/points", measureClass, delta);
+    runClustering(input, clustersIn, output + DEFAULT_OUTPUT_DIRECTORY, measureClass, delta);
   }
 
   /**

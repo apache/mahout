@@ -33,7 +33,11 @@ import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
 import org.apache.mahout.matrix.Vector;
 
+import static org.apache.mahout.clustering.syntheticcontrol.Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
+
 public class Job {
+       
+    
   private Job() {
   }
 
@@ -84,8 +88,9 @@ public class Job {
       fs.delete(outPath, true);
     }
     fs.mkdirs(outPath);
-    InputDriver.runJob(input, output + "/data");
-    DirichletDriver.runJob(output + "/data", output + "/state", modelFactory,
+    final String directoryContainingConvertedInput = output + DIRECTORY_CONTAINING_CONVERTED_INPUT;
+    InputDriver.runJob(input, directoryContainingConvertedInput);
+    DirichletDriver.runJob(directoryContainingConvertedInput, output + "/state", modelFactory,
         numModels, maxIterations, alpha_0, numReducers);
     printResults(output + "/state", modelFactory, maxIterations, numModels,
         alpha_0);

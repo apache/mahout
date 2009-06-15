@@ -1,4 +1,3 @@
-package org.apache.mahout.clustering.kmeans;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -15,23 +14,20 @@ package org.apache.mahout.clustering.kmeans;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.mahout.clustering.syntheticcontrol;
 
-import java.io.IOException;
+/**
+ * Constants shared between examples.
+ */
+public final class Constants {
 
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.matrix.AbstractVector;
-import org.apache.mahout.matrix.Vector;
-
-public class KMeansClusterMapper extends KMeansMapper {
-  @Override
-  public void map(WritableComparable<?> key, Text values,
-      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
-    final String valuesAsString = values.toString();
-    final Vector point = AbstractVector.decodeVector(valuesAsString);
-    Cluster.outputPointWithClusterInfo(valuesAsString, point, clusters, values, output);
-  }
-
+    /**
+     * Directory containing output for examples.
+     */
+    public static final String CLUSTERED_POINTS_OUTPUT_DIRECTORY = "/clustered-points";
+    /**
+     * Directory used to store the input after it has been processed from it's 
+     * original form into one suitable for processing by the clustering examples.
+     */
+    public static final String DIRECTORY_CONTAINING_CONVERTED_INPUT = "/data";
 }

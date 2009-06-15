@@ -30,6 +30,8 @@ import java.io.IOException;
 
 public class ClusterDriver {
 
+  public static final String DEFAULT_CLUSTER_OUTPUT_DIRECTORY = "/clusters";
+
   private ClusterDriver() {
   }
 
@@ -68,7 +70,7 @@ public class ClusterDriver {
     conf.setOutputValueClass(Text.class);
 
     FileInputFormat.setInputPaths(conf, new Path(points));
-    Path outPath = new Path(output + "/clusters");
+    Path outPath = new Path(output + DEFAULT_CLUSTER_OUTPUT_DIRECTORY);
     FileOutputFormat.setOutputPath(conf, outPath);
 
     conf.setMapperClass(ClusterMapper.class);

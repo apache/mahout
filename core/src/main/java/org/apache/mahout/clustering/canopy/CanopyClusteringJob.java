@@ -21,6 +21,15 @@ import java.io.IOException;
 
 public class CanopyClusteringJob {
 
+  /**
+   * The default name of the canopies output sub-directory.
+   */     
+  public static final String DEFAULT_CANOPIES_OUTPUT_DIRECTORY = "/canopies";
+  /**
+   * The default name of the directory used to output clusters.
+   */
+  public static final String DEFAULT_CLUSTER_OUTPUT_DIRECTORY = ClusterDriver.DEFAULT_CLUSTER_OUTPUT_DIRECTORY;
+
   private CanopyClusteringJob() {
   }
 
@@ -47,8 +56,8 @@ public class CanopyClusteringJob {
    */
   public static void runJob(String input, String output,
                             String measureClassName, double t1, double t2) throws IOException {
-    CanopyDriver.runJob(input, output + "/canopies", measureClassName, t1, t2);
-    ClusterDriver.runJob(input, output + "/canopies", output, measureClassName, t1, t2);
+    CanopyDriver.runJob(input, output + DEFAULT_CANOPIES_OUTPUT_DIRECTORY, measureClassName, t1, t2);
+    ClusterDriver.runJob(input, output + DEFAULT_CANOPIES_OUTPUT_DIRECTORY, output, measureClassName, t1, t2);
   }
 
 }

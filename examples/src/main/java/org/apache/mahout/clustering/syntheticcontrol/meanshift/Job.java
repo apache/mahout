@@ -24,6 +24,9 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyJob;
 
+import static org.apache.mahout.clustering.syntheticcontrol.Constants.CLUSTERED_POINTS_OUTPUT_DIRECTORY;
+import static org.apache.mahout.clustering.syntheticcontrol.Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
+
 import java.io.IOException;
 
 public class Job {
@@ -74,14 +77,16 @@ public class Job {
     Path outPath = new Path(output);
     client.setConf(conf);
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath))
+    if (dfs.exists(outPath)) {
       dfs.delete(outPath, true);
-    InputDriver.runJob(input, output + "/data");
-    MeanShiftCanopyJob.runJob(output + "/data", output + "/meanshift",
+    }
+    final String directoryContainingConvertedInput = output + DIRECTORY_CONTAINING_CONVERTED_INPUT;
+    InputDriver.runJob(input, directoryContainingConvertedInput);
+    MeanShiftCanopyJob.runJob(directoryContainingConvertedInput, output + "/meanshift",
         measureClassName, t1, t2, convergenceDelta, maxIterations);
     FileStatus[] status = dfs.listStatus(new Path(output + "/meanshift"));
     OutputDriver.runJob(status[status.length - 1].getPath().toString(),
-        output + "/clustered-points");
+        output + CLUSTERED_POINTS_OUTPUT_DIRECTORY);
   }
 
 }
