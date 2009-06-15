@@ -253,7 +253,7 @@ public final class UncommonDistributions {
     Vector r = alpha.like();
     double total = alpha.zSum();
     double remainder = 1;
-    for (int i = 0; i < r.size(); i++) {
+    for (int i = 0; i < r.cardinality(); i++) {
       double a = alpha.get(i);
       total -= a;
       double beta = rBeta(a, Math.max(0, total));
