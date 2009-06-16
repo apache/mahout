@@ -290,6 +290,16 @@ public interface Vector extends Iterable<Vector.Element>, Writable {
    */
   void set(String label, double value) throws IndexException,
       UnboundLabelException;
+  
+  /**
+   * Set the value at the index and add the label to the bindings
+   * 
+   * @param label a String label that maps to an index
+   * @param index an int index
+   * @param value a double value
+   * @throws IndexException
+   */
+  void set(String label, int index, double value) throws IndexException;
 
   /**
    * Sets a map of label bindings in the receiver

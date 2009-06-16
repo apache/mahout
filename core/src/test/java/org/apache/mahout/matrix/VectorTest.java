@@ -359,4 +359,14 @@ public class VectorTest extends TestCase {
     }
   }
 
+  public void testLabelSet() {
+    Vector test = new DenseVector(3);
+    test.set("Fee", 0, 1.1);
+    test.set("Fie", 1, 2.2);
+    test.set("Foe", 2, 3.3);
+    assertEquals("Fee", 1.1, test.get("Fee"));
+    assertEquals("Fie", 2.2, test.get("Fie"));
+    assertEquals("Foe", 3.3, test.get("Foe"));
+  }
+
 }

@@ -18,6 +18,7 @@
 package org.apache.mahout.matrix;
 
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hadoop.io.WritableComparable;
@@ -355,6 +356,9 @@ public abstract class AbstractVector implements Vector {
     return result;
   }
 
+  /* (non-Javadoc)
+   * @see org.apache.mahout.matrix.Vector#get(java.lang.String)
+   */
   @Override
   public double get(String label) throws IndexException, UnboundLabelException {
     if (bindings == null)
@@ -365,11 +369,17 @@ public abstract class AbstractVector implements Vector {
     return get(index);
   }
 
+  /* (non-Javadoc)
+   * @see org.apache.mahout.matrix.Vector#getLabelBindings()
+   */
   @Override
   public Map<String, Integer> getLabelBindings() {
     return bindings;
   }
 
+  /* (non-Javadoc)
+   * @see org.apache.mahout.matrix.Vector#set(java.lang.String, double)
+   */
   @Override
   public void set(String label, double value) throws IndexException,
       UnboundLabelException {
@@ -381,9 +391,23 @@ public abstract class AbstractVector implements Vector {
     set(index, value);
   }
 
+  /* (non-Javadoc)
+   * @see org.apache.mahout.matrix.Vector#setLabelBindings(java.util.Map)
+   */
   @Override
   public void setLabelBindings(Map<String, Integer> bindings) {
     this.bindings = bindings;
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.mahout.matrix.Vector#set(java.lang.String, int, double)
+   */
+  @Override
+  public void set(String label, int index, double value) throws IndexException {
+    if (bindings == null)
+      bindings = new HashMap<String, Integer>();
+    bindings.put(label, index);
+    set(index, value);
   }
 
 }
