@@ -30,6 +30,8 @@ import org.apache.mahout.utils.DistanceMeasure;
 
 public class Cluster {
 
+  private static final String ERROR_UNKNOWN_CLUSTER_FORMAT="Unknown cluster format:\n";
+    
   public static final String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.kmeans.measure";
 
   public static final String CLUSTER_PATH_KEY = "org.apache.mahout.clustering.kmeans.path";
@@ -81,23 +83,30 @@ public class Cluster {
    * Decodes and returns a Cluster from the formattedString
    * 
    * @param formattedString a String produced by formatCluster
-   * @return a new Canopy
+   * @return a decoded Cluster, not null
+   * @throws IllegalArgumentException when the string is wrongly formatted
    */
   public static Cluster decodeCluster(String formattedString) {
-    int beginIndex = formattedString.indexOf('[');
-    String id = formattedString.substring(0, beginIndex);
-    String center = formattedString.substring(beginIndex);
-    char firstChar = id.charAt(0);
-    boolean startsWithV = firstChar == 'V';
-    if (firstChar == 'C' || startsWithV) {
-      int clusterId = Integer.parseInt(formattedString.substring(1,
-          beginIndex - 2));
-      Vector clusterCenter = AbstractVector.decodeVector(center);
-      Cluster cluster = new Cluster(clusterCenter, clusterId);
-      cluster.converged = startsWithV;
-      return cluster;
+    final int beginIndex = formattedString.indexOf('[');
+    final Cluster cluster;
+    if (beginIndex <= 0) {
+        throw new IllegalArgumentException(ERROR_UNKNOWN_CLUSTER_FORMAT + formattedString);
+    } else {
+        final String id = formattedString.substring(0, beginIndex);
+        final String center = formattedString.substring(beginIndex);
+        final char firstChar = id.charAt(0);
+        final boolean startsWithV = firstChar == 'V';
+        if (firstChar == 'C' || startsWithV) {
+          final int clusterId = Integer.parseInt(formattedString.substring(1,
+              beginIndex - 2));
+          final Vector clusterCenter = AbstractVector.decodeVector(center);
+          cluster = new Cluster(clusterCenter, clusterId);
+          cluster.converged = startsWithV;
+        } else {
+            throw new IllegalArgumentException(ERROR_UNKNOWN_CLUSTER_FORMAT + formattedString);
+        }
     }
-    return null;
+    return cluster;
   }
 
   /**
