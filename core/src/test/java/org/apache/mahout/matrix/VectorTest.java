@@ -319,9 +319,14 @@ public class VectorTest extends TestCase {
     Gson gson = builder.create();
     String json = gson.toJson(test, vectorType);
     Vector test1 = gson.fromJson(json, vectorType);
-    assertEquals("Fee", test.get(0), test1.get("Fee"));
-    assertEquals("Fie", test.get(1), test1.get("Fie"));
-    assertEquals("Foe", test.get(2), test1.get("Foe"));
+    try {
+      test1.get("Fee");
+      fail();
+    } catch (IndexException e) {
+      fail();
+    } catch (UnboundLabelException e) {
+      assertTrue(true);
+    }
 
   }
 
@@ -344,9 +349,14 @@ public class VectorTest extends TestCase {
     Gson gson = builder.create();
     String json = gson.toJson(test, vectorType);
     Vector test1 = gson.fromJson(json, vectorType);
-    assertEquals("Fee", test.get(0), test1.get("Fee"));
-    assertEquals("Fie", test.get(1), test1.get("Fie"));
-    assertEquals("Foe", test.get(2), test1.get("Foe"));
+    try {
+      test1.get("Fee");
+      fail();
+    } catch (IndexException e) {
+      fail();
+    } catch (UnboundLabelException e) {
+      assertTrue(true);
+    }
   }
 
 }

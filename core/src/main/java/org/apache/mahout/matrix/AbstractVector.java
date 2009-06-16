@@ -32,9 +32,10 @@ import com.google.gson.reflect.TypeToken;
 public abstract class AbstractVector implements Vector {
 
   /**
-   * User-settable mapping between String labels and Integer indices
+   * User-settable mapping between String labels and Integer indices. Marked
+   * transient so that it will not be serialized with each vector instance.
    */
-  private Map<String, Integer> bindings;
+  private transient Map<String, Integer> bindings;
 
   /**
    * Subclasses must override to return an appropriately sparse or dense result
