@@ -42,6 +42,10 @@ public class KMeansDriver {
   private KMeansDriver() {
   }
 
+  /**
+   * 
+   * @param args Expects 6 args and they all correspond to the order of the params in {@link #runJob}
+   */
   public static void main(String[] args) {
     String input = args[0];
     String clusters = args[1];
