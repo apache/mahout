@@ -35,6 +35,10 @@ public class SparseVector extends AbstractVector {
   public SparseVector() {
   }
 
+  public SparseVector(String name) {
+    super(name);
+  }
+
   private Map<Integer, Double> values;
 
   private int cardinality;
@@ -42,6 +46,11 @@ public class SparseVector extends AbstractVector {
   public static boolean optimizeTimes = true;
 
   public SparseVector(int cardinality) {
+    this(null, cardinality);
+  }
+
+  public SparseVector(String name, int cardinality) {
+    super(name);
     values = new HashMap<Integer, Double>();
     this.cardinality = cardinality;
   }
@@ -136,13 +145,28 @@ public class SparseVector extends AbstractVector {
     return new Iterator();
   }
 
-  @Override
+  /**
+   * Indicate whether the two objects are the same or not.  Two {@link org.apache.mahout.matrix.Vector}s can be equal
+   * even if the underlying implementation is not equal.
+   *  
+   * @param o The object to compare
+   * @return true if the objects have the same cell values and same name, false otherwise.
+   *
+   * * @see AbstractVector#strictEquivalence(Vector, Vector)
+   * @see AbstractVector#equivalent(Vector, Vector) 
+   */
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof Vector)) return false;
 
     Vector that = (Vector) o;
     if (this.cardinality() != that.cardinality()) return false;
+    String thatName = that.getName();
+    if (name != null && thatName != null && !name.equals(thatName)){
+      return false;
+    } else if ((name != null && thatName == null) || (thatName != null && name == null)){
+      return false;
+    }
 
     if (that instanceof SparseVector) {
       return (values == null ? ((SparseVector) that).values == null : values.equals(((SparseVector) that).values));
@@ -158,6 +182,7 @@ public class SparseVector extends AbstractVector {
   public int hashCode() {
     int result = (values != null ? values.hashCode() : 0);
     result = 31 * result + cardinality;
+    result = 31 * result + name.hashCode();
     return result;
   }
 

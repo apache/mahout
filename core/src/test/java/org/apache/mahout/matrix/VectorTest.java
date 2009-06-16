@@ -42,8 +42,9 @@ public class VectorTest extends TestCase {
   }
 
   public void testEquivalent() throws Exception {
-    SparseVector left = new SparseVector(3);
-    DenseVector right = new DenseVector(3);
+    //names are not used for equivalent
+    SparseVector left = new SparseVector("foo", 3);
+    DenseVector right = new DenseVector("foo", 3);
     left.setQuick(0, 1);
     left.setQuick(1, 2);
     left.setQuick(2, 3);
@@ -52,6 +53,8 @@ public class VectorTest extends TestCase {
     right.setQuick(2, 3);
     assertTrue("equivalent didn't work", AbstractVector.equivalent(left, right));
     assertTrue("equals didn't work", left.equals(right));
+    assertTrue("equivalent didn't work", AbstractVector.strictEquivalence(left, right) == false);
+
     right.setQuick(2, 4);
     assertTrue("equivalent didn't work",
         AbstractVector.equivalent(left, right) == false);
@@ -328,6 +331,22 @@ public class VectorTest extends TestCase {
       assertTrue(true);
     }
 
+  }
+
+
+  public void testNameSerialization() throws Exception {
+    double[] values = { 1.1, 2.2, 3.3 };
+    Vector test = new DenseVector("foo", values);
+    String formatString = test.asFormatString();
+
+    Vector decode = AbstractVector.decodeVector(formatString);
+    assertTrue("test and decode are not equal", test.equals(decode));
+
+    Vector noName = new DenseVector(values);
+    formatString = noName.asFormatString();
+
+    decode = AbstractVector.decodeVector(formatString);
+    assertTrue("noName and decode are not equal", noName.equals(decode));
   }
 
   public void testLabelSerializationSparse() {

@@ -28,6 +28,19 @@ import org.apache.hadoop.io.WritableComparable;
 public interface Vector extends Iterable<Vector.Element>, Writable {
 
   /**
+   * Vectors may have a name associated with them, which makes them easy to identify
+   * @return The name, or null if one has not been set
+   */
+  String getName();
+
+  /**
+   * Set a name for this vector.  Need not be unique in a set of Vectors, but probably is more useful if it is.
+   * In other words, Mahout does not check for uniqueness.
+   * @param name The name
+   */
+  void setName(String name);
+
+  /**
    * Return a formatted WritableComparable<?> suitable for output
    * 
    * @return formatted WritableComparable

@@ -35,6 +35,10 @@ public class DenseVector extends AbstractVector {
   public DenseVector() {
   }
 
+  public DenseVector(String name){
+    super(name);
+  }
+
   private double[] values;
 
   /**
@@ -46,12 +50,22 @@ public class DenseVector extends AbstractVector {
     this.values = values.clone();
   }
 
+  public DenseVector(String name, double[] values) {
+    super(name);
+    this.values = values.clone();
+  }
+
   /**
    * Construct a new instance of the given cardinality
    * 
    * @param cardinality
    */
   public DenseVector(int cardinality) {
+    this(null, cardinality);
+  }
+
+  public DenseVector(String name, int cardinality) {
+    super(name);
     this.values = new double[cardinality];
   }
 
@@ -183,13 +197,27 @@ public class DenseVector extends AbstractVector {
     this.values = values;
   }
 
-  @Override
+  /**
+   * Indicate whether the two objects are the same or not.  Two {@link org.apache.mahout.matrix.Vector}s can be equal
+   * even if the underlying implementation is not equal.
+   * @param o The object to compare
+   * @return true if the objects have the same cell values and same name, false otherwise.
+   *
+   * @see AbstractVector#strictEquivalence(Vector, Vector)
+   * @see AbstractVector#equivalent(Vector, Vector)
+   */
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof Vector)) return false;
 
     Vector that = (Vector) o;
+    String thatName = that.getName();
     if (this.cardinality() != that.cardinality()) return false;
+    if (name != null && thatName != null && !name.equals(thatName)){
+      return false;
+    } else if ((name != null && thatName == null) || (thatName != null && name == null)){
+      return false;
+    }
 
     if (that instanceof DenseVector) {
       if (!Arrays.equals(values, ((DenseVector) that).values)) return false;
@@ -203,7 +231,8 @@ public class DenseVector extends AbstractVector {
   @Override
   public int hashCode() {
     int result = (values != null ? values.hashCode() : 0);
-    result = 31 * result + values.length;
+    result = 31 * result + name.hashCode();
+
     return result;
   }
 }

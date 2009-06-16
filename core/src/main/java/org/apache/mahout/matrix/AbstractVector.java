@@ -37,6 +37,15 @@ public abstract class AbstractVector implements Vector {
    * transient so that it will not be serialized with each vector instance.
    */
   private transient Map<String, Integer> bindings;
+  protected String name;
+
+
+  protected AbstractVector() {
+  }
+
+  protected AbstractVector(String name) {
+    this.name = name;
+  }
 
   /**
    * Subclasses must override to return an appropriately sparse or dense result
@@ -316,8 +325,16 @@ public abstract class AbstractVector implements Vector {
     Gson gson = builder.create();
     return gson.fromJson(formattedString, vectorType);
   }
-  
-  /* (non-Javadoc)
+
+  public String getName() {
+    return name;
+
+  }
+
+  public void setName(String name) {
+    this.name = name;
+
+  }/* (non-Javadoc)
    * @see org.apache.mahout.matrix.Vector#asFormatString()
    */
   public String asFormatString(){
@@ -330,17 +347,23 @@ public abstract class AbstractVector implements Vector {
   }
 
   /**
-   * Compare whether two Vector implementations are the same, regardless of the
-   * implementation. Two Vectors are the same if they have the same cardinality
+   * Compare whether two Vector implementations have the same elements, regardless of the
+   * implementation and name. Two Vectors are equivalent if they have the same cardinality
    * and all of their values are the same.
+   * <p/>
+   * Does not compare {@link Vector#getName()}.
    * 
    * 
    * @param left The left hand Vector to compare
    * @param right The right hand Vector
    * @return true if the two Vectors have the same cardinality and the same
    *         values
+   *
+   * @see #strictEquivalence(Vector, Vector)
+   * @see Vector#equals(Object) 
    */
   public static boolean equivalent(Vector left, Vector right) {
+    if (left == right) return true;
     boolean result = true;
     int leftCardinality = left.cardinality();
     if (leftCardinality == right.cardinality()) {
@@ -355,6 +378,44 @@ public abstract class AbstractVector implements Vector {
     }
     return result;
   }
+
+  /**
+   * Compare whether two Vector implementations are the same, including the
+   * underlying implementation. Two Vectors are the same if they have the same cardinality, same name
+   * and all of their values are the same.
+   *
+   *
+   * @param left The left hand Vector to compare
+   * @param right The right hand Vector
+   * @return true if the two Vectors have the same cardinality and the same
+   *         values
+   */
+  public static boolean strictEquivalence(Vector left, Vector right) {
+    if (left == right) return true;
+    if (!(left.getClass().equals(right.getClass()))) return false;
+    String leftName = left.getName();
+    String rightName = right.getName();
+    if (leftName != null && rightName != null && !leftName.equals(rightName)){
+      return false;
+    } else if ((leftName != null && rightName == null) || (rightName != null && leftName == null)){
+      return false;
+    }
+    
+    boolean result = true;
+    int leftCardinality = left.cardinality();
+    if (leftCardinality == right.cardinality()) {
+      for (int i = 0; i < leftCardinality; i++) {
+        if (left.getQuick(i) != right.getQuick(i)) {
+          return false;
+        }
+
+      }
+    } else {
+      return false;
+    }
+    return result;
+  }
+
 
   /* (non-Javadoc)
    * @see org.apache.mahout.matrix.Vector#get(java.lang.String)
