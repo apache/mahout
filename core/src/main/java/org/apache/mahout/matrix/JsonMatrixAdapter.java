@@ -36,6 +36,8 @@ public class JsonMatrixAdapter implements JsonSerializer<Matrix>,
     JsonDeserializer<Matrix> {
 
   private static final Logger log = Logger.getLogger(JsonMatrixAdapter.class);
+  public static final String CLASS = "class";
+  public static final String MATRIX = "matrix";
 
   @Override
   public JsonElement serialize(Matrix src, Type typeOfSrc,
@@ -49,8 +51,8 @@ public class JsonMatrixAdapter implements JsonSerializer<Matrix>,
     builder.registerTypeAdapter(matrixType, new JsonMatrixAdapter());
     Gson gson = builder.create();
     JsonObject obj = new JsonObject();
-    obj.add("class", new JsonPrimitive(src.getClass().getName()));
-    obj.add("matrix", new JsonPrimitive(gson.toJson(src)));
+    obj.add(CLASS, new JsonPrimitive(src.getClass().getName()));
+    obj.add(MATRIX, new JsonPrimitive(gson.toJson(src)));
     return obj;
   }
 
@@ -66,8 +68,8 @@ public class JsonMatrixAdapter implements JsonSerializer<Matrix>,
     builder.registerTypeAdapter(matrixType, new JsonMatrixAdapter());
     Gson gson = builder.create();
     JsonObject obj = json.getAsJsonObject();
-    String klass = obj.get("class").getAsString();
-    String matrix = obj.get("matrix").getAsString();
+    String klass = obj.get(CLASS).getAsString();
+    String matrix = obj.get(MATRIX).getAsString();
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     Class<?> cl = null;
     try {

@@ -35,6 +35,7 @@ public class JsonVectorAdapter implements JsonSerializer<Vector>,
     JsonDeserializer<Vector> {
 
   private static final Logger log = Logger.getLogger(JsonVectorAdapter.class);
+  public static final String VECTOR = "vector";
 
   @Override
   public JsonElement serialize(Vector src, Type typeOfSrc,
@@ -43,8 +44,8 @@ public class JsonVectorAdapter implements JsonSerializer<Vector>,
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();
     JsonObject obj = new JsonObject();
-    obj.add("class", new JsonPrimitive(src.getClass().getName()));
-    obj.add("vector", new JsonPrimitive(gson.toJson(src)));
+    obj.add(JsonMatrixAdapter.CLASS, new JsonPrimitive(src.getClass().getName()));
+    obj.add(VECTOR, new JsonPrimitive(gson.toJson(src)));
     return obj;
   }
 
@@ -55,8 +56,8 @@ public class JsonVectorAdapter implements JsonSerializer<Vector>,
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();
     JsonObject obj = json.getAsJsonObject();
-    String klass = obj.get("class").getAsString();
-    String vector = obj.get("vector").getAsString();
+    String klass = obj.get(JsonMatrixAdapter.CLASS).getAsString();
+    String vector = obj.get(VECTOR).getAsString();
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     Class<?> cl = null;
     try {
