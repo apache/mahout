@@ -39,6 +39,7 @@ import org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution;
 import org.apache.mahout.clustering.dirichlet.models.SampledNormalModel;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.matrix.DenseVector;
+import org.apache.mahout.matrix.JsonVectorAdapter;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DummyOutputCollector;
 

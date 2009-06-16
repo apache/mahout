@@ -113,7 +113,8 @@ public class TestCanopyCreation extends TestCase {
    * 
    * @param canopies
    */
-  private static void verifyCanopies(List<Canopy> canopies, List<Canopy> reference) {
+  private static void verifyCanopies(List<Canopy> canopies,
+      List<Canopy> reference) {
     assertEquals("number of canopies", reference.size(), canopies.size());
     for (int canopyIx = 0; canopyIx < canopies.size(); canopyIx++) {
       Canopy refCanopy = reference.get(canopyIx);
@@ -132,8 +133,7 @@ public class TestCanopyCreation extends TestCase {
   /**
    * Print the canopies to the transcript
    * 
-   * @param canopies
-   *            a List<Canopy>
+   * @param canopies a List<Canopy>
    */
   private static void printCanopies(List<Canopy> canopies) {
     for (Canopy canopy : canopies) {
@@ -148,7 +148,8 @@ public class TestCanopyCreation extends TestCase {
 
   private static void writePointsToFileWithPayload(List<Vector> points,
       String fileName, String payload) throws IOException {
-    BufferedWriter output = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), Charset.forName("UTF-8")));
+    BufferedWriter output = new BufferedWriter(new OutputStreamWriter(
+        new FileOutputStream(fileName), Charset.forName("UTF-8")));
     for (Vector point : points) {
       output.write(point.asFormatString());
       output.write(payload);
@@ -187,8 +188,7 @@ public class TestCanopyCreation extends TestCase {
   /**
    * Iterate through the canopies, adding their centroids to a list
    * 
-   * @param canopies
-   *            a List<Canopy>
+   * @param canopies a List<Canopy>
    * @return the List<Vector>
    */
   static List<Vector> populateCentroids(List<Canopy> canopies) {
@@ -201,18 +201,14 @@ public class TestCanopyCreation extends TestCase {
   /**
    * Iterate through the points, adding new canopies. Return the canopies.
    * 
-   * @param measure
-   *            a DistanceMeasure to use
-   * @param points
-   *            a list<Vector> defining the points to be clustered
-   * @param t1
-   *            the T1 distance threshold
-   * @param t2
-   *            the T2 distance threshold
+   * @param measure a DistanceMeasure to use
+   * @param points a list<Vector> defining the points to be clustered
+   * @param t1 the T1 distance threshold
+   * @param t2 the T2 distance threshold
    * @return the List<Canopy> created
    */
-  static List<Canopy> populateCanopies(DistanceMeasure measure, List<Vector> points,
-      double t1, double t2) {
+  static List<Canopy> populateCanopies(DistanceMeasure measure,
+      List<Vector> points, double t1, double t2) {
     List<Canopy> canopies = new ArrayList<Canopy>();
     Canopy.config(measure, t1, t2);
     /**
@@ -244,7 +240,6 @@ public class TestCanopyCreation extends TestCase {
     }
     return canopies;
   }
-
 
   /**
    * Story: User can cluster points using a ManhattanDistanceMeasure and a
@@ -347,7 +342,7 @@ public class TestCanopyCreation extends TestCase {
    */
   public void testCanopyMapperManhattan() throws Exception {
     CanopyMapper mapper = new CanopyMapper();
-    DummyOutputCollector<Text,Text> collector = new DummyOutputCollector<Text,Text>();
+    DummyOutputCollector<Text, Text> collector = new DummyOutputCollector<Text, Text>();
     Canopy.config(manhattanDistanceMeasure, (3.1), (2.1));
     List<Vector> points = getPoints(raw);
     // map the data
@@ -360,8 +355,8 @@ public class TestCanopyCreation extends TestCase {
     assertEquals("Number of centroids", 3, data.size());
     for (int i = 0; i < data.size(); i++)
       assertEquals("Centroid error",
-          manhattanCentroids.get(i).asFormatString(), AbstractVector.decodeVector(
-              data.get(i).toString()).asFormatString());
+          manhattanCentroids.get(i).asFormatString(), AbstractVector
+              .decodeVector(data.get(i).toString()).asFormatString());
   }
 
   /**
@@ -373,7 +368,7 @@ public class TestCanopyCreation extends TestCase {
    */
   public void testCanopyMapperEuclidean() throws Exception {
     CanopyMapper mapper = new CanopyMapper();
-    DummyOutputCollector<Text,Text> collector = new DummyOutputCollector<Text,Text>();
+    DummyOutputCollector<Text, Text> collector = new DummyOutputCollector<Text, Text>();
     Canopy.config(euclideanDistanceMeasure, (3.1), (2.1));
     List<Vector> points = getPoints(raw);
     // map the data
@@ -386,8 +381,8 @@ public class TestCanopyCreation extends TestCase {
     assertEquals("Number of centroids", 3, data.size());
     for (int i = 0; i < data.size(); i++)
       assertEquals("Centroid error",
-          euclideanCentroids.get(i).asFormatString(), AbstractVector.decodeVector(
-              data.get(i).toString()).asFormatString());
+          euclideanCentroids.get(i).asFormatString(), AbstractVector
+              .decodeVector(data.get(i).toString()).asFormatString());
   }
 
   /**
@@ -399,7 +394,7 @@ public class TestCanopyCreation extends TestCase {
    */
   public void testCanopyReducerManhattan() throws Exception {
     CanopyReducer reducer = new CanopyReducer();
-    DummyOutputCollector<Text,Text> collector = new DummyOutputCollector<Text,Text>();
+    DummyOutputCollector<Text, Text> collector = new DummyOutputCollector<Text, Text>();
     Canopy.config(manhattanDistanceMeasure, (3.1), (2.1));
     List<Vector> points = getPoints(raw);
     List<Text> texts = getFormattedPoints(points);
@@ -426,7 +421,7 @@ public class TestCanopyCreation extends TestCase {
    */
   public void testCanopyReducerEuclidean() throws Exception {
     CanopyReducer reducer = new CanopyReducer();
-    DummyOutputCollector<Text,Text> collector = new DummyOutputCollector<Text,Text>();
+    DummyOutputCollector<Text, Text> collector = new DummyOutputCollector<Text, Text>();
     Canopy.config(euclideanDistanceMeasure, (3.1), (2.1));
     List<Vector> points = getPoints(raw);
     List<Text> texts = getFormattedPoints(points);
@@ -471,11 +466,14 @@ public class TestCanopyCreation extends TestCase {
     Text value = new Text();
     assertTrue("more to come", reader.next(key, value));
     assertEquals("1st key", "C0", key.toString());
-    assertEquals("1st value", "C0: [s2, 0:1.5, 1:1.5, ] ", value.toString());
+    Canopy canopy = Canopy.decodeCanopy(value.toString());
+    assertEquals("1st x value", 1.5, canopy.getCenter().get(0));
+    assertEquals("1st y value", 1.5, canopy.getCenter().get(1));
     assertTrue("more to come", reader.next(key, value));
     assertEquals("2nd key", "C1", key.toString());
-    assertEquals("2nd value", "C1: [s2, 0:4.333333333333334, 1:4.333333333333334, ] ",
-        value.toString());
+    canopy = Canopy.decodeCanopy(value.toString());
+    assertEquals("1st x value", 4.333333333333334, canopy.getCenter().get(0));
+    assertEquals("1st y value", 4.333333333333334, canopy.getCenter().get(1));
     assertFalse("more to come", reader.next(key, value));
     reader.close();
   }
@@ -507,11 +505,14 @@ public class TestCanopyCreation extends TestCase {
     Text value = new Text();
     assertTrue("more to come", reader.next(key, value));
     assertEquals("1st key", "C0", key.toString());
-    assertEquals("1st value", "C0: [s2, 0:1.8, 1:1.8, ] ", value.toString());
+    Canopy canopy = Canopy.decodeCanopy(value.toString());
+    assertEquals("1st x value", 1.8, canopy.getCenter().get(0));
+    assertEquals("1st y value", 1.8, canopy.getCenter().get(1));
     assertTrue("more to come", reader.next(key, value));
     assertEquals("2nd key", "C1", key.toString());
-    assertEquals("2nd value", "C1: [s2, 0:4.433333333333334, 1:4.433333333333334, ] ",
-        value.toString());
+    canopy = Canopy.decodeCanopy(value.toString());
+    assertEquals("1st x value", 4.433333333333334, canopy.getCenter().get(0));
+    assertEquals("1st y value", 4.433333333333334, canopy.getCenter().get(1));
     assertFalse("more to come", reader.next(key, value));
     reader.close();
   }
@@ -526,7 +527,7 @@ public class TestCanopyCreation extends TestCase {
     Canopy.config(manhattanDistanceMeasure, (3.1), (2.1));
     ClusterMapper mapper = new ClusterMapper();
     List<Canopy> canopies = new ArrayList<Canopy>();
-    DummyOutputCollector<Text,Text> collector = new DummyOutputCollector<Text,Text>();
+    DummyOutputCollector<Text, Text> collector = new DummyOutputCollector<Text, Text>();
     for (Vector centroid : manhattanCentroids)
       canopies.add(new Canopy(centroid));
     mapper.config(canopies);
@@ -540,8 +541,8 @@ public class TestCanopyCreation extends TestCase {
       Canopy canopy = Canopy.decodeCanopy(stringListEntry.getKey());
       List<Text> pts = stringListEntry.getValue();
       for (Writable ptDef : pts)
-        assertTrue("Point not in canopy", canopy.covers(AbstractVector.decodeVector(ptDef
-            .toString())));
+        assertTrue("Point not in canopy", canopy.covers(AbstractVector
+            .decodeVector(ptDef.toString())));
     }
   }
 
@@ -555,7 +556,7 @@ public class TestCanopyCreation extends TestCase {
     Canopy.config(euclideanDistanceMeasure, (3.1), (2.1));
     ClusterMapper mapper = new ClusterMapper();
     List<Canopy> canopies = new ArrayList<Canopy>();
-    DummyOutputCollector<Text,Text> collector = new DummyOutputCollector<Text,Text>();
+    DummyOutputCollector<Text, Text> collector = new DummyOutputCollector<Text, Text>();
     for (Vector centroid : euclideanCentroids)
       canopies.add(new Canopy(centroid));
     mapper.config(canopies);
@@ -569,8 +570,8 @@ public class TestCanopyCreation extends TestCase {
       Canopy canopy = Canopy.decodeCanopy(stringListEntry.getKey());
       List<Text> pts = stringListEntry.getValue();
       for (Writable ptDef : pts)
-        assertTrue("Point not in canopy", canopy.covers(AbstractVector.decodeVector(ptDef
-            .toString())));
+        assertTrue("Point not in canopy", canopy.covers(AbstractVector
+            .decodeVector(ptDef.toString())));
     }
   }
 
@@ -584,7 +585,7 @@ public class TestCanopyCreation extends TestCase {
     Canopy.config(manhattanDistanceMeasure, (3.1), (2.1));
     ClusterMapper mapper = new ClusterMapper();
     List<Canopy> canopies = new ArrayList<Canopy>();
-    DummyOutputCollector<Text,Text> collector = new DummyOutputCollector<Text,Text>();
+    DummyOutputCollector<Text, Text> collector = new DummyOutputCollector<Text, Text>();
     for (Vector centroid : manhattanCentroids)
       canopies.add(new Canopy(centroid));
     mapper.config(canopies);
@@ -597,9 +598,10 @@ public class TestCanopyCreation extends TestCase {
 
     // reduce the data
     Reducer<Text, Text, Text, Text> reducer = new IdentityReducer<Text, Text>();
-    collector = new DummyOutputCollector<Text,Text>();
+    collector = new DummyOutputCollector<Text, Text>();
     for (Map.Entry<String, List<Text>> stringListEntry : data.entrySet())
-      reducer.reduce(new Text(stringListEntry.getKey()), stringListEntry.getValue().iterator(), collector, null);
+      reducer.reduce(new Text(stringListEntry.getKey()), stringListEntry
+          .getValue().iterator(), collector, null);
 
     // check the output
     data = collector.getData();
@@ -607,8 +609,8 @@ public class TestCanopyCreation extends TestCase {
       Canopy canopy = Canopy.decodeCanopy(stringListEntry.getKey());
       List<Text> pts = stringListEntry.getValue();
       for (Writable ptDef : pts)
-        assertTrue("Point not in canopy", canopy.covers(AbstractVector.decodeVector(ptDef
-            .toString())));
+        assertTrue("Point not in canopy", canopy.covers(AbstractVector
+            .decodeVector(ptDef.toString())));
     }
   }
 
@@ -622,7 +624,7 @@ public class TestCanopyCreation extends TestCase {
     Canopy.config(euclideanDistanceMeasure, (3.1), (2.1));
     ClusterMapper mapper = new ClusterMapper();
     List<Canopy> canopies = new ArrayList<Canopy>();
-    DummyOutputCollector<Text,Text> collector = new DummyOutputCollector<Text,Text>();
+    DummyOutputCollector<Text, Text> collector = new DummyOutputCollector<Text, Text>();
     for (Vector centroid : euclideanCentroids)
       canopies.add(new Canopy(centroid));
     mapper.config(canopies);
@@ -634,9 +636,10 @@ public class TestCanopyCreation extends TestCase {
 
     // reduce the data
     Reducer<Text, Text, Text, Text> reducer = new IdentityReducer<Text, Text>();
-    collector = new DummyOutputCollector<Text,Text>();
+    collector = new DummyOutputCollector<Text, Text>();
     for (Map.Entry<String, List<Text>> stringListEntry : data.entrySet())
-      reducer.reduce(new Text(stringListEntry.getKey()), stringListEntry.getValue().iterator(), collector, null);
+      reducer.reduce(new Text(stringListEntry.getKey()), stringListEntry
+          .getValue().iterator(), collector, null);
 
     // check the output
     data = collector.getData();
@@ -645,8 +648,8 @@ public class TestCanopyCreation extends TestCase {
       Canopy canopy = Canopy.decodeCanopy(stringListEntry.getKey());
       List<Text> pts = stringListEntry.getValue();
       for (Writable ptDef : pts)
-        assertTrue("Point not in canopy", canopy.covers(AbstractVector.decodeVector(ptDef
-            .toString())));
+        assertTrue("Point not in canopy", canopy.covers(AbstractVector
+            .decodeVector(ptDef.toString())));
     }
   }
 
@@ -666,8 +669,9 @@ public class TestCanopyCreation extends TestCase {
     // now run the Job
     CanopyClusteringJob.runJob("testdata", "output",
         ManhattanDistanceMeasure.class.getName(), 3.1, 2.1);
-    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(
-        "output/clusters/part-00000"), Charset.forName("UTF-8")));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(
+        new FileInputStream("output/clusters/part-00000"), Charset
+            .forName("UTF-8")));
     int count = 0;
     while (reader.ready()) {
       System.out.println(reader.readLine());
@@ -694,8 +698,9 @@ public class TestCanopyCreation extends TestCase {
     // now run the Job
     CanopyClusteringJob.runJob("testdata", "output",
         EuclideanDistanceMeasure.class.getName(), 3.1, 2.1);
-    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(
-        "output/clusters/part-00000"), Charset.forName("UTF-8")));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(
+        new FileInputStream("output/clusters/part-00000"), Charset
+            .forName("UTF-8")));
     int count = 0;
     while (reader.ready()) {
       System.out.println(reader.readLine());
@@ -724,8 +729,9 @@ public class TestCanopyCreation extends TestCase {
     // now run the Job
     CanopyClusteringJob.runJob("testdata", "output",
         ManhattanDistanceMeasure.class.getName(), 3.1, 2.1);
-    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(
-        "output/clusters/part-00000"), Charset.forName("UTF-8")));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(
+        new FileInputStream("output/clusters/part-00000"), Charset
+            .forName("UTF-8")));
     int count = 0;
     while (reader.ready()) {
       String line = reader.readLine();
@@ -756,8 +762,9 @@ public class TestCanopyCreation extends TestCase {
     // now run the Job
     CanopyClusteringJob.runJob("testdata", "output",
         EuclideanDistanceMeasure.class.getName(), 3.1, 2.1);
-    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(
-        "output/clusters/part-00000"), Charset.forName("UTF-8")));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(
+        new FileInputStream("output/clusters/part-00000"), Charset
+            .forName("UTF-8")));
     int count = 0;
     while (reader.ready()) {
       String line = reader.readLine();
@@ -798,11 +805,14 @@ public class TestCanopyCreation extends TestCase {
     Text value = new Text();
     assertTrue("more to come", reader.next(key, value));
     assertEquals("1st key", "C0", key.toString());
-    assertEquals("1st value", "C0: [s2, 0:1.5, 1:1.5, ] ", value.toString());
+    Canopy canopy = Canopy.decodeCanopy(value.toString());
+    assertEquals("1st x value", 1.5, canopy.getCenter().get(0));
+    assertEquals("1st y value", 1.5, canopy.getCenter().get(1));
     assertTrue("more to come", reader.next(key, value));
     assertEquals("2nd key", "C1", key.toString());
-    assertEquals("2nd value", "C1: [s2, 0:4.333333333333334, 1:4.333333333333334, ] ",
-        value.toString());
+    canopy = Canopy.decodeCanopy(value.toString());
+    assertEquals("1st x value", 4.333333333333334, canopy.getCenter().get(0));
+    assertEquals("1st y value", 4.333333333333334, canopy.getCenter().get(1));
     assertFalse("more to come", reader.next(key, value));
     reader.close();
   }

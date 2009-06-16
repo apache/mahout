@@ -17,10 +17,17 @@
 
 package org.apache.mahout.matrix;
 
+import java.lang.reflect.Type;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+
 import junit.framework.TestCase;
 
-import java.util.Date;
-import java.util.Random;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 public class VectorTest extends TestCase {
 
@@ -46,19 +53,22 @@ public class VectorTest extends TestCase {
     assertTrue("equivalent didn't work", AbstractVector.equivalent(left, right));
     assertTrue("equals didn't work", left.equals(right));
     right.setQuick(2, 4);
-    assertTrue("equivalent didn't work", AbstractVector.equivalent(left, right)  == false);
-    assertTrue("equals didn't work", left.equals(right)  == false);
+    assertTrue("equivalent didn't work",
+        AbstractVector.equivalent(left, right) == false);
+    assertTrue("equals didn't work", left.equals(right) == false);
     right = new DenseVector(4);
     right.setQuick(0, 1);
     right.setQuick(1, 2);
     right.setQuick(2, 3);
     right.setQuick(3, 3);
-    assertTrue("equivalent didn't work", AbstractVector.equivalent(left, right)  == false);
+    assertTrue("equivalent didn't work",
+        AbstractVector.equivalent(left, right) == false);
     assertTrue("equals didn't work", left.equals(right) == false);
     left = new SparseVector(2);
     left.setQuick(0, 1);
     left.setQuick(1, 2);
-    assertTrue("equivalent didn't work", AbstractVector.equivalent(left, right)  == false);
+    assertTrue("equivalent didn't work",
+        AbstractVector.equivalent(left, right) == false);
     assertTrue("equals didn't work", left.equals(right) == false);
 
     DenseVector dense = new DenseVector(3);
@@ -69,7 +79,8 @@ public class VectorTest extends TestCase {
     dense.setQuick(0, 1);
     dense.setQuick(1, 2);
     dense.setQuick(2, 3);
-    assertTrue("equivalent didn't work", AbstractVector.equivalent(dense, right)  == true);
+    assertTrue("equivalent didn't work", AbstractVector
+        .equivalent(dense, right) == true);
     assertTrue("equals didn't work", dense.equals(right) == true);
 
     SparseVector sparse = new SparseVector(3);
@@ -80,22 +91,23 @@ public class VectorTest extends TestCase {
     left.setQuick(0, 1);
     left.setQuick(1, 2);
     left.setQuick(2, 3);
-    assertTrue("equivalent didn't work", AbstractVector.equivalent(sparse, left)  == true);
+    assertTrue("equivalent didn't work", AbstractVector
+        .equivalent(sparse, left) == true);
     assertTrue("equals didn't work", left.equals(sparse) == true);
 
     VectorView v1 = new VectorView(left, 0, 2);
     VectorView v2 = new VectorView(right, 0, 2);
-    assertTrue("equivalent didn't work", AbstractVector.equivalent(v1, v2)  == true);
+    assertTrue("equivalent didn't work",
+        AbstractVector.equivalent(v1, v2) == true);
     assertTrue("equals didn't work", v1.equals(v2) == true);
     sparse = new SparseVector(2);
     sparse.setQuick(0, 1);
     sparse.setQuick(1, 2);
-    assertTrue("equivalent didn't work", AbstractVector.equivalent(v1, sparse)  == true);
+    assertTrue("equivalent didn't work",
+        AbstractVector.equivalent(v1, sparse) == true);
     assertTrue("equals didn't work", v1.equals(sparse) == true);
 
-
   }
-
 
   private static void doTestVectors(Vector left, Vector right) {
     left.setQuick(0, 1);
@@ -110,7 +122,8 @@ public class VectorTest extends TestCase {
     System.out.println("Vec: " + formattedString);
     Vector vec = AbstractVector.decodeVector(formattedString);
     assertTrue("vec is null and it shouldn't be", vec != null);
-    assertTrue("Vector could not be decoded from the formatString", AbstractVector.equivalent(vec, left));
+    assertTrue("Vector could not be decoded from the formatString",
+        AbstractVector.equivalent(vec, left));
   }
 
   public void testNormalize() throws Exception {
@@ -132,40 +145,43 @@ public class VectorTest extends TestCase {
     assertTrue("norm is not equal to expected", norm.equals(expected));
 
     norm = vec1.normalize(1);
-    expected.setQuick(0, 1.0/6);
-    expected.setQuick(1, 2.0/6);
-    expected.setQuick(2, 3.0/6);
+    expected.setQuick(0, 1.0 / 6);
+    expected.setQuick(1, 2.0 / 6);
+    expected.setQuick(2, 3.0 / 6);
     assertTrue("norm is not equal to expected", norm.equals(expected));
     norm = vec1.normalize(3);
-    //TODO this is not used
+    // TODO this is not used
     expected = vec1.times(vec1).times(vec1);
 
-    //double sum = expected.zSum();
-    //cube = Math.pow(sum, 1.0/3);
-    double cube = Math.pow(36, 1.0/3);
+    // double sum = expected.zSum();
+    // cube = Math.pow(sum, 1.0/3);
+    double cube = Math.pow(36, 1.0 / 3);
     expected = vec1.divide(cube);
-    
-    assertTrue("norm: " + norm.asFormatString() + " is not equal to expected: " + expected.asFormatString(), norm.equals(expected));
+
+    assertTrue("norm: " + norm.asFormatString() + " is not equal to expected: "
+        + expected.asFormatString(), norm.equals(expected));
 
     norm = vec1.normalize(Double.POSITIVE_INFINITY);
-    //The max is 3, so we divide by that.
-    expected.setQuick(0, 1.0/3);
-    expected.setQuick(1, 2.0/3);
-    expected.setQuick(2, 3.0/3);
-    assertTrue("norm: " + norm.asFormatString() + " is not equal to expected: " + expected.asFormatString(), norm.equals(expected));
+    // The max is 3, so we divide by that.
+    expected.setQuick(0, 1.0 / 3);
+    expected.setQuick(1, 2.0 / 3);
+    expected.setQuick(2, 3.0 / 3);
+    assertTrue("norm: " + norm.asFormatString() + " is not equal to expected: "
+        + expected.asFormatString(), norm.equals(expected));
 
     norm = vec1.normalize(0);
-    //The max is 3, so we divide by that.
-    expected.setQuick(0, 1.0/3);
-    expected.setQuick(1, 2.0/3);
-    expected.setQuick(2, 3.0/3);
-    assertTrue("norm: " + norm.asFormatString() + " is not equal to expected: " + expected.asFormatString(), norm.equals(expected));
+    // The max is 3, so we divide by that.
+    expected.setQuick(0, 1.0 / 3);
+    expected.setQuick(1, 2.0 / 3);
+    expected.setQuick(2, 3.0 / 3);
+    assertTrue("norm: " + norm.asFormatString() + " is not equal to expected: "
+        + expected.asFormatString(), norm.equals(expected));
 
     try {
       vec1.normalize(-1);
       assertTrue(false);
     } catch (IllegalArgumentException e) {
-      //expected
+      // expected
     }
 
   }
@@ -215,12 +231,12 @@ public class VectorTest extends TestCase {
   }
 
   public void testEnumeration() throws Exception {
-    double[] apriori = {0, 1, 2, 3, 4};
+    double[] apriori = { 0, 1, 2, 3, 4 };
 
-    doTestEnumeration(apriori, new VectorView(new DenseVector(new double[]{
-            -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9}), 2, 5));
+    doTestEnumeration(apriori, new VectorView(new DenseVector(new double[] {
+        -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }), 2, 5));
 
-    doTestEnumeration(apriori, new DenseVector(new double[]{0, 1, 2, 3, 4}));
+    doTestEnumeration(apriori, new DenseVector(new double[] { 0, 1, 2, 3, 4 }));
 
     SparseVector sparse = new SparseVector(5);
     sparse.set(0, 0);
@@ -250,7 +266,7 @@ public class VectorTest extends TestCase {
     long tRef = t1 - t0;
     assertTrue(tOpt < tRef);
     System.out.println("testSparseVectorTimesX tRef=tOpt=" + (tRef - tOpt)
-            + " ms for 10 iterations");
+        + " ms for 10 iterations");
     for (int i = 0; i < 50000; i++)
       assertEquals("i=" + i, rRef.getQuick(i), rOpt.getQuick(i));
   }
@@ -274,7 +290,7 @@ public class VectorTest extends TestCase {
     long tRef = t1 - t0;
     assertTrue(tOpt < tRef);
     System.out.println("testSparseVectorTimesV tRef=tOpt=" + (tRef - tOpt)
-            + " ms for 10 iterations");
+        + " ms for 10 iterations");
     for (int i = 0; i < 50000; i++)
       assertEquals("i=" + i, rRef.getQuick(i), rOpt.getQuick(i));
   }
@@ -284,6 +300,53 @@ public class VectorTest extends TestCase {
     for (int i = 0; i < 1000; i++)
       v1.setQuick((int) (rnd.nextDouble() * 50000), rnd.nextDouble());
     return v1;
+  }
+
+  public void testLabelSerializationDense() {
+    double[] values = { 1.1, 2.2, 3.3 };
+    Vector test = new DenseVector(values);
+    Map<String, Integer> bindings = new HashMap<String, Integer>();
+    bindings.put("Fee", 0);
+    bindings.put("Fie", 1);
+    bindings.put("Foe", 2);
+    test.setLabelBindings(bindings);
+
+    Type vectorType = new TypeToken<Vector>() {
+    }.getType();
+
+    GsonBuilder builder = new GsonBuilder();
+    builder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
+    Gson gson = builder.create();
+    String json = gson.toJson(test, vectorType);
+    Vector test1 = gson.fromJson(json, vectorType);
+    assertEquals("Fee", test.get(0), test1.get("Fee"));
+    assertEquals("Fie", test.get(1), test1.get("Fie"));
+    assertEquals("Foe", test.get(2), test1.get("Foe"));
+
+  }
+
+  public void testLabelSerializationSparse() {
+    double[] values = { 1.1, 2.2, 3.3 };
+    Vector test = new SparseVector(3);
+    for (int i = 0; i < values.length; i++)
+      test.set(i, values[i]);
+    Map<String, Integer> bindings = new HashMap<String, Integer>();
+    bindings.put("Fee", 0);
+    bindings.put("Fie", 1);
+    bindings.put("Foe", 2);
+    test.setLabelBindings(bindings);
+
+    Type vectorType = new TypeToken<Vector>() {
+    }.getType();
+
+    GsonBuilder builder = new GsonBuilder();
+    builder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
+    Gson gson = builder.create();
+    String json = gson.toJson(test, vectorType);
+    Vector test1 = gson.fromJson(json, vectorType);
+    assertEquals("Fee", test.get(0), test1.get("Fee"));
+    assertEquals("Fie", test.get(1), test1.get("Fie"));
+    assertEquals("Foe", test.get(2), test1.get("Foe"));
   }
 
 }

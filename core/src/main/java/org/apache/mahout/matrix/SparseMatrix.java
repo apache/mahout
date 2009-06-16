@@ -22,24 +22,25 @@ import org.apache.hadoop.io.WritableComparable;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Arrays;
 
 /**
  * Doubly sparse matrix. Implemented as a Map of SparseVector rows
  */
 public class SparseMatrix extends AbstractMatrix {
 
-  private final int[] cardinality;
+  public SparseMatrix() {
+    super();
+  }
 
-  private final Map<Integer, Vector> rows;
+  private int[] cardinality;
+
+  private Map<Integer, Vector> rows;
 
   /**
    * Construct a matrix of the given cardinality with the given row map
    * 
-   * @param cardinality
-   *            the int[2] cardinality desired
-   * @param rows
-   *            a Map<Integer, SparseVector> of rows
+   * @param cardinality the int[2] cardinality desired
+   * @param rows a Map<Integer, SparseVector> of rows
    */
   public SparseMatrix(int[] cardinality, Map<Integer, SparseVector> rows) {
     this.cardinality = cardinality.clone();
@@ -51,8 +52,7 @@ public class SparseMatrix extends AbstractMatrix {
   /**
    * Construct a matrix of the given cardinality
    * 
-   * @param cardinality
-   *            the int[2] cardinality desired
+   * @param cardinality the int[2] cardinality desired
    */
   public SparseMatrix(int[] cardinality) {
     this.cardinality = cardinality.clone();
@@ -63,18 +63,6 @@ public class SparseMatrix extends AbstractMatrix {
   public WritableComparable<?> asWritableComparable() {
     String out = asFormatString();
     return new Text(out);
-  }
-
-  @Override
-  public String asFormatString() {
-    StringBuilder out = new StringBuilder();
-    out.append("[s").append(cardinality[ROW]).append(", ");
-    Integer[] rows = this.rows.keySet().toArray(new Integer[this.rows.size()]);
-    Arrays.sort(rows);
-    for (Integer row : rows)
-      out.append(this.rows.get(row).asWritableComparable());
-    out.append("] ");
-    return out.toString();
   }
 
   @Override

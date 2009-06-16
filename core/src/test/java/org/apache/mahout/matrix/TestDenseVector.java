@@ -17,6 +17,9 @@
 
 package org.apache.mahout.matrix;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import junit.framework.TestCase;
 
 public class TestDenseVector extends TestCase {
@@ -31,7 +34,10 @@ public class TestDenseVector extends TestCase {
 
   public void testAsFormatString() {
     String formatString = test.asWritableComparable().toString();
-    assertEquals("format", "[, 1.1, 2.2, 3.3, ] ", formatString);
+    assertEquals(
+        "format",
+        "{\"class\":\"org.apache.mahout.matrix.DenseVector\",\"vector\":\"{\\\"values\\\":[1.1,2.2,3.3]}\"}",
+        formatString);
   }
 
   public void testCardinality() {
@@ -126,8 +132,8 @@ public class TestDenseVector extends TestCase {
     }
   }
 
-  public void testDecodeFormat() throws Exception {
-    Vector val = DenseVector.decodeFormat(test.asWritableComparable());
+  public void testDecodeVector() throws Exception {
+    Vector val = AbstractVector.decodeVector(test.asWritableComparable());
     for (int i = 0; i < test.cardinality(); i++)
       assertEquals("get [" + i + ']', test.get(i), val.get(i));
   }
@@ -349,5 +355,18 @@ public class TestDenseVector extends TestCase {
             * test.getQuick(col), result.getQuick(row, col));
       }
     }
+  }
+
+  public void testLabelIndexing() {
+    Map<String, Integer> bindings = new HashMap<String, Integer>();
+    bindings.put("Fee", 0);
+    bindings.put("Fie", 1);
+    bindings.put("Foe", 2);
+    test.setLabelBindings(bindings);
+    assertEquals("Fee", test.get(0), test.get("Fee"));
+    assertEquals("Fie", test.get(1), test.get("Fie"));
+    assertEquals("Foe", test.get(2), test.get("Foe"));
+    test.set("Fie", 15.3);
+    assertEquals("Fie", test.get(1), test.get("Fie"));
   }
 }

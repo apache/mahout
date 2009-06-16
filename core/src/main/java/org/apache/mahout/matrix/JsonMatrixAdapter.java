@@ -14,15 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.mahout.clustering.dirichlet;
+package org.apache.mahout.matrix;
 
 import java.lang.reflect.Type;
 
-import org.apache.mahout.clustering.dirichlet.models.Model;
-import org.apache.mahout.matrix.JsonVectorAdapter;
-import org.apache.mahout.matrix.Vector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -34,33 +30,44 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.google.gson.reflect.TypeToken;
 
-public class JsonModelAdapter implements JsonSerializer<Model<?>>,
-    JsonDeserializer<Model<?>> {
+public class JsonMatrixAdapter implements JsonSerializer<Matrix>,
+    JsonDeserializer<Matrix> {
 
-  private static final Logger log = LoggerFactory.getLogger(JsonModelAdapter.class);
+  private static final Logger log = Logger.getLogger(JsonMatrixAdapter.class);
 
   @Override
-  public JsonElement serialize(Model<?> src, Type typeOfSrc,
+  public JsonElement serialize(Matrix src, Type typeOfSrc,
       JsonSerializationContext context) {
+    Type vectorType = new TypeToken<Vector>() {
+    }.getType();
+    Type matrixType = new TypeToken<Matrix>() {
+    }.getType();
     GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
+    builder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
+    builder.registerTypeAdapter(matrixType, new JsonMatrixAdapter());
     Gson gson = builder.create();
     JsonObject obj = new JsonObject();
     obj.add("class", new JsonPrimitive(src.getClass().getName()));
-    obj.add("model", new JsonPrimitive(gson.toJson(src)));
+    obj.add("matrix", new JsonPrimitive(gson.toJson(src)));
     return obj;
   }
 
   @Override
-  public Model<?> deserialize(JsonElement json, Type typeOfT,
+  public Matrix deserialize(JsonElement json, Type typeOfT,
       JsonDeserializationContext context) throws JsonParseException {
+    Type vectorType = new TypeToken<Vector>() {
+    }.getType();
+    Type matrixType = new TypeToken<Matrix>() {
+    }.getType();
     GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
+    builder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
+    builder.registerTypeAdapter(matrixType, new JsonMatrixAdapter());
     Gson gson = builder.create();
     JsonObject obj = json.getAsJsonObject();
     String klass = obj.get("class").getAsString();
-    String model = obj.get("model").getAsString();
+    String matrix = obj.get("matrix").getAsString();
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     Class<?> cl = null;
     try {
@@ -68,6 +75,7 @@ public class JsonModelAdapter implements JsonSerializer<Model<?>>,
     } catch (ClassNotFoundException e) {
       log.warn("Error while loading class", e);
     }
-    return (Model<?>) gson.fromJson(model, cl);
+    return (Matrix) gson.fromJson(matrix, cl);
   }
+
 }

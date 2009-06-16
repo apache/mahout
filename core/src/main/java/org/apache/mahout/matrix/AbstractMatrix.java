@@ -17,6 +17,12 @@
 
 package org.apache.mahout.matrix;
 
+import java.lang.reflect.Type;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
 /**
  * A few universal implementations of convenience functions
  * 
@@ -28,6 +34,30 @@ public abstract class AbstractMatrix implements Matrix {
 
   // index into int[2] for row value
   public static final int ROW = 0;
+
+  public static Matrix decodeMatrix(String formatString) {
+    Type vectorType = new TypeToken<Vector>() {
+    }.getType();
+    Type matrixType = new TypeToken<Matrix>() {
+    }.getType();
+    GsonBuilder builder = new GsonBuilder();
+    builder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
+    builder.registerTypeAdapter(matrixType, new JsonMatrixAdapter());
+    Gson gson = builder.create();
+    return gson.fromJson(formatString, matrixType);
+  }
+
+  public String asFormatString() {
+    Type vectorType = new TypeToken<Vector>() {
+    }.getType();
+    Type matrixType = new TypeToken<Matrix>() {
+    }.getType();
+    GsonBuilder builder = new GsonBuilder();
+    builder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
+    builder.registerTypeAdapter(matrixType, new JsonMatrixAdapter());
+    Gson gson = builder.create();
+    return gson.toJson(this, matrixType);
+  }
 
   @Override
   public Matrix assign(double value) {

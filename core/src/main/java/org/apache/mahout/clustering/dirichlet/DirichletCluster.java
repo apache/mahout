@@ -19,6 +19,7 @@ package org.apache.mahout.clustering.dirichlet;
 import java.lang.reflect.Type;
 
 import org.apache.mahout.clustering.dirichlet.models.Model;
+import org.apache.mahout.matrix.JsonVectorAdapter;
 import org.apache.mahout.matrix.Vector;
 
 import com.google.gson.Gson;

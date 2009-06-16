@@ -25,9 +25,10 @@ public class TestVectorView extends TestCase {
 
   private static final int offset = 1;
 
-  final double[] values = {0.0, 1.1, 2.2, 3.3, 4.4, 5.5};
+  final double[] values = { 0.0, 1.1, 2.2, 3.3, 4.4, 5.5 };
 
-  final Vector test = new VectorView(new DenseVector(values), offset, cardinality);
+  final Vector test = new VectorView(new DenseVector(values), offset,
+      cardinality);
 
   public TestVectorView(String name) {
     super(name);
@@ -35,7 +36,8 @@ public class TestVectorView extends TestCase {
 
   public void testAsFormatString() {
     String formatString = test.asWritableComparable().toString();
-    assertEquals("format", "[, 2.2, 3.3, 4.4, ] ", formatString);
+    Vector v = AbstractVector.decodeVector(formatString);
+    assertEquals("cardinality", test.cardinality(), v.cardinality());
   }
 
   public void testCardinality() {
@@ -200,7 +202,7 @@ public class TestVectorView extends TestCase {
     assertEquals("cardinality", 3, val.cardinality());
     for (int i = 0; i < test.cardinality(); i++)
       assertEquals("get [" + i + ']', values[offset + i] * values[offset + i],
-              val.get(i));
+          val.get(i));
   }
 
   public void testTimesVectorCardinality() {
@@ -326,6 +328,6 @@ public class TestVectorView extends TestCase {
     for (int row = 0; row < result.cardinality()[0]; row++)
       for (int col = 0; col < result.cardinality()[1]; col++)
         assertEquals("cross[" + row + "][" + col + ']', test.getQuick(row)
-                * test.getQuick(col), result.getQuick(row, col));
+            * test.getQuick(col), result.getQuick(row, col));
   }
 }

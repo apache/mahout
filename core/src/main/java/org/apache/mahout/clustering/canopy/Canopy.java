@@ -244,7 +244,7 @@ public class Canopy {
    * @return a new Canopy
    */
   public static Canopy decodeCanopy(String formattedString) {
-    int beginIndex = formattedString.indexOf('[');
+    int beginIndex = formattedString.indexOf('{');
     String id = formattedString.substring(0, beginIndex);
     String centroid = formattedString.substring(beginIndex);
     if (id.charAt(0) == 'C') {

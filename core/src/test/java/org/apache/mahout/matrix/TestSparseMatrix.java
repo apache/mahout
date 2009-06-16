@@ -25,19 +25,12 @@ public class TestSparseMatrix extends MatrixTest {
 
   @Override
   public Matrix matrixFactory(double[][] values) {
-    int[] cardinality = {values.length, values[0].length};
+    int[] cardinality = { values.length, values[0].length };
     Matrix matrix = new SparseMatrix(cardinality);
     for (int row = 0; row < cardinality[ROW]; row++)
       for (int col = 0; col < cardinality[COL]; col++)
         matrix.setQuick(row, col, values[row][col]);
     return matrix;
-  }
-
-  public void testAsFormatString() {
-    assertEquals(
-            "format",
-            "[s3, [s2, 0:1.1, 1:2.2, ] [s2, 0:3.3, 1:4.4, ] [s2, 0:5.5, 1:6.6, ] ] ",
-            test.asWritableComparable().toString());
   }
 
 }

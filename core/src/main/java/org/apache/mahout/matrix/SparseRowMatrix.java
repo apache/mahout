@@ -26,9 +26,13 @@ import org.apache.hadoop.io.WritableComparable;
  */
 public class SparseRowMatrix extends AbstractMatrix {
 
-  private final int[] cardinality;
+  private int[] cardinality;
 
-  private final Vector[] rows;
+  private Vector[] rows;
+
+  public SparseRowMatrix() {
+    super();
+  }
 
   /**
    * Construct a matrix of the given cardinality with the given rows
@@ -62,19 +66,6 @@ public class SparseRowMatrix extends AbstractMatrix {
   public WritableComparable<?> asWritableComparable() {
     String out = asFormatString();
     return new Text(out);
-  }
-
-  @Override
-  public String asFormatString() {
-    StringBuilder out = new StringBuilder();
-    out.append("[[, ");
-    for (int row = 0; row < rows.length; row++) {
-      for (int col = 0; col < rows[ROW].size(); col++)
-        out.append(getQuick(row, col)).append(", ");
-      out.append("], ");
-    }
-    out.append("] ");
-    return out.toString();
   }
 
   @Override

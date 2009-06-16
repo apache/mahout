@@ -480,4 +480,14 @@ public abstract class MatrixTest extends TestCase {
     assertEquals("determinant", 43.0, m.determinant());
   }
 
+  public void testAsFormatString() {
+    String string = test.asFormatString();
+    int[] cardinality = { values.length, values[0].length };
+    Matrix m = AbstractMatrix.decodeMatrix(string);
+    for (int row = 0; row < cardinality[ROW]; row++)
+      for (int col = 0; col < cardinality[COL]; col++)
+        assertEquals("m[" + row + "," + col + "]", test.get(row, col), m.get(
+            row, col));
+  }
+
 }

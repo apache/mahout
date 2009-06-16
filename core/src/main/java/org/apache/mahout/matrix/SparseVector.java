@@ -17,16 +17,14 @@
 
 package org.apache.mahout.matrix;
 
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.WritableComparable;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Arrays;
-import java.util.Comparator;
+
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.WritableComparable;
 
 /**
  * Implements vector that only stores non-zero doubles
@@ -42,42 +40,6 @@ public class SparseVector extends AbstractVector {
   private int cardinality;
 
   public static boolean optimizeTimes = true;
-
-  /**
-   * Decode a new instance from the argument
-   *
-   * @param writableComparable
-   *            a writableComparable produced by the asWritableComparable<?> method
-   * @return a DenseVector
-   */
-  public static Vector decodeFormat(WritableComparable<?> writableComparable) {
-    return decodeFormat(writableComparable.toString());
-  }
-
-  /**
-   * Decode a new instance from the formatted string
-   *
-   * @param formattedString
-   *            a string produced by the asFormatString method
-   * @return a DenseVector
-   */
-  public static Vector decodeFormat(String formattedString) {
-    String[] pts = formattedString.split(",");
-    SparseVector result = null;
-    for (String pt1 : pts) {
-      String pt = pt1.trim();
-      if (pt.startsWith("[s")) {
-        int c = Integer.parseInt(pt1.substring(2));
-        result = new SparseVector(c);
-      } else if (pt.charAt(0) != ']') {
-        int ix = pt.indexOf(':');
-        int index = Integer.parseInt(pt.substring(0, ix).trim());
-        double value = Double.parseDouble(pt.substring(ix + 1));
-        result.setQuick(index, value);
-      }
-    }
-    return result;
-  }
 
   public SparseVector(int cardinality) {
     values = new HashMap<Integer, Double>();
@@ -97,28 +59,6 @@ public class SparseVector extends AbstractVector {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public String asFormatString() {
-    StringBuilder out = new StringBuilder();
-    out.append("[s").append(cardinality).append(", ");
-    Map.Entry<Integer, Double>[] entries = (Map.Entry<Integer, Double>[]) values
-        .entrySet().toArray(new Map.Entry[values.size()]);
-    Arrays.sort(entries, new Comparator<Map.Entry<Integer, Double>>() {
-      @Override
-      public int compare(Map.Entry<Integer, Double> e1,
-          Map.Entry<Integer, Double> e2) {
-        return e1.getKey().compareTo(e2.getKey());
-      }
-    });
-    for (Map.Entry<Integer, Double> entry : entries) {
-      out.append(entry.getKey()).append(':').append(entry.getValue()).append(
-          ", ");
-    }
-    out.append("] ");
-    return out.toString();
-  }
-
-  @Override
   public int cardinality() {
     return cardinality;
   }
@@ -126,7 +66,7 @@ public class SparseVector extends AbstractVector {
   @Override
   public SparseVector copy() {
     SparseVector result = like();
-    for (Map.Entry<Integer, Double> entry : values.entrySet()) {
+     for (Map.Entry<Integer, Double> entry : values.entrySet()) {
       result.setQuick(entry.getKey(), entry.getValue());
     }
     return result;
@@ -179,12 +119,16 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public SparseVector like() {
-    return new SparseVector(cardinality);
+    SparseVector sparseVector = new SparseVector(cardinality);
+    sparseVector.setLabelBindings(getLabelBindings());
+    return sparseVector;
   }
 
   @Override
   public Vector like(int newCardinality) {
-    return new SparseVector(newCardinality);
+    SparseVector sparseVector = new SparseVector(newCardinality);
+    sparseVector.setLabelBindings(getLabelBindings());
+    return sparseVector;
   }
 
   @Override

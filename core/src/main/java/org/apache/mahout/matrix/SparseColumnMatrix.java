@@ -26,17 +26,19 @@ import org.apache.hadoop.io.WritableComparable;
  */
 public class SparseColumnMatrix extends AbstractMatrix {
 
-  private final int[] cardinality;
+  private int[] cardinality;
 
-  private final Vector[] columns;
+  private Vector[] columns;
+
+  public SparseColumnMatrix() {
+    super();
+  }
 
   /**
    * Construct a matrix of the given cardinality with the given data columns
    * 
-   * @param cardinality
-   *            the int[2] cardinality
-   * @param columns
-   *            a SparseVector[] array of columns
+   * @param cardinality the int[2] cardinality
+   * @param columns a SparseVector[] array of columns
    */
   public SparseColumnMatrix(int[] cardinality, SparseVector[] columns) {
     this.cardinality = cardinality.clone();
@@ -48,8 +50,7 @@ public class SparseColumnMatrix extends AbstractMatrix {
   /**
    * Construct a matrix of the given cardinality
    * 
-   * @param cardinality
-   *            the int[2] cardinality
+   * @param cardinality the int[2] cardinality
    */
   public SparseColumnMatrix(int[] cardinality) {
     this.cardinality = cardinality.clone();
@@ -62,19 +63,6 @@ public class SparseColumnMatrix extends AbstractMatrix {
   public WritableComparable<?> asWritableComparable() {
     String out = asFormatString();
     return new Text(out);
-  }
-
-  @Override
-  public String asFormatString() {
-    StringBuilder out = new StringBuilder();
-    out.append("[[, ");
-    for (int row = 0; row < columns[ROW].size(); row++) {
-      for (int col = 0; col < columns.length; col++)
-        out.append(getQuick(row, col)).append(", ");
-      out.append("], ");
-    }
-    out.append("] ");
-    return out.toString();
   }
 
   @Override
@@ -109,7 +97,6 @@ public class SparseColumnMatrix extends AbstractMatrix {
   public Matrix like() {
     return new SparseColumnMatrix(cardinality);
   }
-
 
   @Override
   public Matrix like(int rows, int columns) {

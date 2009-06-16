@@ -17,20 +17,26 @@
 
 package org.apache.mahout.clustering.meanshift;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.matrix.CardinalityException;
 import org.apache.mahout.matrix.DenseVector;
+import org.apache.mahout.matrix.JsonVectorAdapter;
 import org.apache.mahout.matrix.PlusFunction;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
 import org.apache.mahout.utils.EuclideanDistanceMeasure;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * This class models a canopy as a center point, the number of points that are
@@ -88,7 +94,8 @@ public class MeanShiftCanopy {
    */
   public static void configure(JobConf job) {
     try {
-      measure = Class.forName(job.get(DISTANCE_MEASURE_KEY)).asSubclass(DistanceMeasure.class).newInstance();
+      measure = Class.forName(job.get(DISTANCE_MEASURE_KEY)).asSubclass(
+          DistanceMeasure.class).newInstance();
       measure.configure(job);
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(e);
@@ -122,15 +129,16 @@ public class MeanShiftCanopy {
 
   /**
    * Merge the given canopy into the canopies list. If it touches any existing
-   * canopy (norm<T1) then add the center of each to the other. If it covers
-   * any other canopies (norm<T2), then merge the given canopy with the closest
+   * canopy (norm<T1) then add the center of each to the other. If it covers any
+   * other canopies (norm<T2), then merge the given canopy with the closest
    * covering canopy. If the given canopy does not cover any other canopies, add
    * it to the canopies list.
    * 
    * @param aCanopy a MeanShiftCanopy to be merged
    * @param canopies the List<Canopy> to be appended
    */
-  public static void mergeCanopy(MeanShiftCanopy aCanopy, List<MeanShiftCanopy> canopies) {
+  public static void mergeCanopy(MeanShiftCanopy aCanopy,
+      List<MeanShiftCanopy> canopies) {
     MeanShiftCanopy closestCoveringCanopy = null;
     double closestNorm = Double.MAX_VALUE;
     for (MeanShiftCanopy canopy : canopies) {
@@ -160,7 +168,8 @@ public class MeanShiftCanopy {
    */
   public static void mergeCanopy(MeanShiftCanopy aCanopy,
       List<MeanShiftCanopy> canopies,
-      OutputCollector<Text, WritableComparable<?>> collector) throws IOException {
+      OutputCollector<Text, WritableComparable<?>> collector)
+      throws IOException {
     MeanShiftCanopy closestCoveringCanopy = null;
     double closestNorm = 0;
     for (MeanShiftCanopy canopy : canopies) {
@@ -186,12 +195,12 @@ public class MeanShiftCanopy {
    * @param canopy
    */
   public static String formatCanopy(MeanShiftCanopy canopy) {
-    StringBuilder builder = new StringBuilder();
-    builder.append(canopy.getIdentifier()).append(" - ").append(
-        canopy.getCenter().asWritableComparable().toString()).append(": ");
-    for (Vector bound : canopy.boundPoints)
-      builder.append(bound.asWritableComparable().toString());
-    return builder.toString();
+    Type vectorType = new TypeToken<Vector>() {
+    }.getType();
+    GsonBuilder gBuilder = new GsonBuilder();
+    gBuilder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
+    Gson gson = gBuilder.create();
+    return gson.toJson(canopy, MeanShiftCanopy.class);
   }
 
   /**
@@ -201,28 +210,16 @@ public class MeanShiftCanopy {
    * @return a new Canopy
    */
   public static MeanShiftCanopy decodeCanopy(String formattedString) {
-    int beginIndex = formattedString.indexOf('[');
-    int endIndex = formattedString.indexOf(':', beginIndex);
-    String id = formattedString.substring(0, beginIndex);
-    String centroid = formattedString.substring(beginIndex, endIndex);
-    String boundPoints = formattedString.substring(endIndex + 1).trim();
-    char firstChar = id.charAt(0);
-    boolean startsWithV = firstChar == 'V';
-    if (firstChar == 'C' || startsWithV) {
-      int canopyId = Integer.parseInt(formattedString.substring(1, beginIndex - 3));
-      Vector canopyCentroid = DenseVector.decodeFormat(new Text(centroid));
-      List<Vector> canopyBoundPoints = new ArrayList<Vector>();
-      while (boundPoints.length() > 0) {
-        int ix = boundPoints.indexOf(']');
-        Vector v = DenseVector.decodeFormat(new Text(boundPoints.substring(0,
-            ix + 1)));
-        canopyBoundPoints.add(v);
-        boundPoints = boundPoints.substring(ix + 1);
-      }
-      return new MeanShiftCanopy(canopyCentroid, canopyId, canopyBoundPoints,
-          startsWithV);
-    }
-    return null;
+    Type vectorType = new TypeToken<Vector>() {
+    }.getType();
+    GsonBuilder gBuilder = new GsonBuilder();
+    gBuilder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
+    Gson gson = gBuilder.create();
+    return gson.fromJson(formattedString, MeanShiftCanopy.class);
+  }
+
+  public MeanShiftCanopy() {
+    super();
   }
 
   /**
@@ -329,7 +326,8 @@ public class MeanShiftCanopy {
    * Emit the new canopy to the collector, keyed by the canopy's Id
    */
   void emitCanopy(MeanShiftCanopy canopy,
-      OutputCollector<Text, WritableComparable<?>> collector) throws IOException {
+      OutputCollector<Text, WritableComparable<?>> collector)
+      throws IOException {
     String identifier = this.getIdentifier();
     collector.collect(new Text(identifier),
         new Text("new " + canopy.toString()));
@@ -344,10 +342,11 @@ public class MeanShiftCanopy {
    * @throws IOException if there is an IO problem with the collector
    */
   void emitCanopyCentroid(MeanShiftCanopy canopy,
-      OutputCollector<Text, WritableComparable<?>> collector) throws IOException {
+      OutputCollector<Text, WritableComparable<?>> collector)
+      throws IOException {
     collector.collect(new Text(this.getIdentifier()), new Text(canopy
         .computeCentroid().asWritableComparable().toString()
-        + boundPoints.size()));
+        + ":=:" + boundPoints.size()));
   }
 
   public List<Vector> getBoundPoints() {
@@ -406,7 +405,8 @@ public class MeanShiftCanopy {
    * @param canopy an existing MeanShiftCanopy
    */
   void merge(MeanShiftCanopy canopy,
-      OutputCollector<Text, WritableComparable<?>> collector) throws IOException {
+      OutputCollector<Text, WritableComparable<?>> collector)
+      throws IOException {
     collector.collect(new Text(getIdentifier()), new Text("merge "
         + canopy.toString()));
   }

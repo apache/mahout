@@ -17,6 +17,9 @@
 
 package org.apache.mahout.clustering.meanshift;
 
+import java.io.IOException;
+import java.util.Iterator;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
@@ -25,11 +28,8 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.matrix.DenseVector;
+import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.Vector;
-
-import java.io.IOException;
-import java.util.Iterator;
 
 public class MeanShiftCanopyCombiner extends MapReduceBase implements
     Reducer<Text, WritableComparable<?>, Text, WritableComparable<?>> {
@@ -48,8 +48,8 @@ public class MeanShiftCanopyCombiner extends MapReduceBase implements
       else if (valueStr.startsWith("merge"))
         canopy.merge(MeanShiftCanopy.decodeCanopy(valueStr.substring(6)));
       else {
-        Vector formatString = DenseVector.decodeFormat(new Text(valueStr));
-        int number = Integer.parseInt(valueStr.substring(valueStr.indexOf(']') + 2));
+        Vector formatString = AbstractVector.decodeVector(new Text(valueStr));
+        int number = Integer.parseInt(valueStr.substring(valueStr.indexOf(":=:") + 3));
         canopy.addPoints(formatString, number);
       }
     }

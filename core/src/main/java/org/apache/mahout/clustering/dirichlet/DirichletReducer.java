@@ -27,7 +27,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.clustering.dirichlet.models.Model;
-import org.apache.mahout.matrix.DenseVector;
+import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.Vector;
 
 public class DirichletReducer extends MapReduceBase implements
@@ -43,7 +43,7 @@ public class DirichletReducer extends MapReduceBase implements
     int k = Integer.parseInt(key.toString());
     Model<Vector> model = newModels[k];
     while (values.hasNext()) {
-      Vector v = DenseVector.decodeFormat(values.next().toString());
+      Vector v = AbstractVector.decodeVector(values.next().toString());
       model.observe(v);
     }
     model.computeParameters();

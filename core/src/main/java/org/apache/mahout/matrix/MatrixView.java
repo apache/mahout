@@ -25,13 +25,17 @@ import org.apache.hadoop.io.WritableComparable;
  */
 public class MatrixView extends AbstractMatrix {
 
-  private final Matrix matrix;
+  private Matrix matrix;
 
   // the offset into the Matrix
-  private final int[] offset;
+  private int[] offset;
 
   // the cardinality of the view
-  private final int[] cardinality;
+  private int[] cardinality;
+
+  public MatrixView() {
+    super();
+  }
 
   /**
    * Construct a view of the matrix with given offset and cardinality
@@ -53,20 +57,6 @@ public class MatrixView extends AbstractMatrix {
   public WritableComparable<?> asWritableComparable() {
     String out = asFormatString();
     return new Text(out);
-  }
-
-  @Override
-  public String asFormatString() {
-    StringBuilder out = new StringBuilder();
-    out.append("[, ");
-    for (int row = 0; row < cardinality[ROW]; row++) {
-      out.append("[, ");
-      for (int col = 0; col < cardinality[COL]; col++)
-        out.append(getQuick(row, col)).append(", ");
-      out.append("], ");
-    }
-    out.append("] ");
-    return out.toString();
   }
 
   @Override

@@ -62,16 +62,6 @@ public class VectorView extends AbstractVector {
   }
 
   @Override
-  public String asFormatString() {
-    StringBuilder out = new StringBuilder();
-    out.append("[, ");
-    for (int i = offset; i < offset + cardinality; i++)
-      out.append(getQuick(i)).append(", ");
-    out.append("] ");
-    return out.toString();
-  }
-
-  @Override
   public int cardinality() {
     return cardinality;
   }

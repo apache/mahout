@@ -38,32 +38,6 @@ public class DenseVector extends AbstractVector {
   private double[] values;
 
   /**
-   * Decode a new instance from the argument
-   * 
-   * @param writableComparable
-   *            a WritableComparable<?> produced by the asWritableComparable<?> method
-   * @return a DenseVector
-   */
-  public static Vector decodeFormat(WritableComparable<?> writableComparable) {
-    return decodeFormat(writableComparable.toString());
-  }
-
-  /**
-   * Decode a new instance from the formatted string
-   * 
-   * @param formattedString
-   *            a String produced by asFormatString()
-   * @return a DenseVector
-   */
-  public static Vector decodeFormat(String formattedString) {
-    String[] pts = formattedString.split(",");
-    double[] point = new double[pts.length - 2];
-    for (int i = 1; i < pts.length - 1; i++)
-      point[i - 1] = Double.parseDouble(pts[i]);
-    return new DenseVector(point);
-  }
-
-  /**
    * Construct a new instance using provided values
    * 
    * @param values
@@ -92,24 +66,15 @@ public class DenseVector extends AbstractVector {
   }
 
   @Override
-  public String asFormatString() {
-    StringBuilder out = new StringBuilder();
-    out.append("[, ");
-    for (double value : values) {
-      out.append(value).append(", ");
-    }
-    out.append("] ");
-    return out.toString();
-  }
-
-  @Override
   public int cardinality() {
     return values.length;
   }
 
   @Override
   public DenseVector copy() {
-    return new DenseVector(values);
+    DenseVector denseVector = new DenseVector(values);
+    denseVector.setLabelBindings(getLabelBindings());
+    return denseVector;
   }
 
   @Override
@@ -119,12 +84,16 @@ public class DenseVector extends AbstractVector {
 
   @Override
   public DenseVector like() {
-    return new DenseVector(cardinality());
+    DenseVector denseVector = new DenseVector(cardinality());
+    denseVector.setLabelBindings(getLabelBindings());
+    return denseVector;
   }
 
   @Override
   public Vector like(int cardinality) {
-    return new DenseVector(cardinality);
+    DenseVector denseVector = new DenseVector(cardinality);
+    denseVector.setLabelBindings(getLabelBindings());
+    return denseVector;
   }
 
   @Override

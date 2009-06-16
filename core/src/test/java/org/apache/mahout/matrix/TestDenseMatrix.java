@@ -28,9 +28,4 @@ public class TestDenseMatrix extends MatrixTest {
     return new DenseMatrix(values);
   }
 
-  public void testAsFormatString() {
-    assertEquals("format", "[[, 1.1, 2.2, ], 3.3, 4.4, ], 5.5, 6.6, ], ] ",
-            test.asWritableComparable().toString());
-  }
-
 }

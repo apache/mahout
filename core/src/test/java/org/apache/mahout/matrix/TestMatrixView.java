@@ -43,9 +43,12 @@ public class TestMatrixView extends TestCase {
   }
 
   public void testAsFormatString() {
-    assertEquals("format",
-        "[, [, 2.2, 3.3, ], [, 4.4, 5.5, ], [, 6.6, 7.7, ], ] ", test
-            .asWritableComparable().toString());
+    String string = test
+        .asWritableComparable().toString();
+    Matrix m = AbstractMatrix.decodeMatrix(string);
+    int[] c = m.cardinality();
+    assertEquals("row cardinality", values.length - 2, c[ROW]);
+    assertEquals("col cardinality", values[0].length - 1, c[COL]);
   }
 
   public void testCardinality() {

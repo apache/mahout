@@ -99,7 +99,7 @@ public class SoftCluster {
    * @param formattedString a String produced by formatCluster
    */
   public static SoftCluster decodeCluster(String formattedString) {
-    int beginIndex = formattedString.indexOf('[');
+    int beginIndex = formattedString.indexOf('{');
     String id = formattedString.substring(0, beginIndex);
     String center = formattedString.substring(beginIndex);
     char firstChar = id.charAt(0);

@@ -26,7 +26,11 @@ import org.apache.hadoop.io.WritableComparable;
  */
 public class DenseMatrix extends AbstractMatrix {
 
-  private final double[][] values;
+  private double[][] values;
+
+  public DenseMatrix() {
+    super();
+  }
 
   private int columnSize() {
     return values[0].length;
@@ -39,8 +43,7 @@ public class DenseMatrix extends AbstractMatrix {
   /**
    * Construct a matrix from the given values
    * 
-   * @param values
-   *            a double[][]
+   * @param values a double[][]
    */
   public DenseMatrix(double[][] values) {
     // clone the rows
@@ -63,19 +66,6 @@ public class DenseMatrix extends AbstractMatrix {
   @Override
   public WritableComparable<?> asWritableComparable() {
     return new Text(asFormatString());
-  }
-
-  @Override
-  public String asFormatString() {
-    StringBuilder out = new StringBuilder();
-    out.append("[[, ");
-    for (int row = 0; row < rowSize(); row++) {
-      for (int col = 0; col < values[row].length; col++)
-        out.append(getQuick(row, col)).append(", ");
-      out.append("], ");
-    }
-    out.append("] ");
-    return out.toString();
   }
 
   @Override

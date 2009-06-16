@@ -32,6 +32,7 @@ import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.NormalModel;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
+import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
 
@@ -77,7 +78,7 @@ class DisplayOutputState extends DisplayDirichlet {
       List<Vector> results = new ArrayList<Vector>();
       String line;
       while ((line = r.readLine()) != null)
-        results.add(DenseVector.decodeFormat(line));
+        results.add(AbstractVector.decodeVector(line));
       return results;
     } finally {
       r.close();

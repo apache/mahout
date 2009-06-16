@@ -17,7 +17,14 @@
 
 package org.apache.mahout.matrix;
 
+import java.lang.reflect.Type;
+import java.util.Map;
+
 import org.apache.hadoop.io.WritableComparable;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * Implementations of generic capabilities like sum of elements and dot products
@@ -25,12 +32,15 @@ import org.apache.hadoop.io.WritableComparable;
 public abstract class AbstractVector implements Vector {
 
   /**
+   * User-settable mapping between String labels and Integer indices
+   */
+  private Map<String, Integer> bindings;
+
+  /**
    * Subclasses must override to return an appropriately sparse or dense result
    * 
-   * @param rows
-   *            the row cardinality
-   * @param columns
-   *            the column cardinality
+   * @param rows the row cardinality
+   * @param columns the column cardinality
    * @return a Matrix
    */
   protected abstract Matrix matrixLike(int rows, int columns);
@@ -117,11 +127,11 @@ public abstract class AbstractVector implements Vector {
   }
 
   @Override
-  public Vector normalize(double power){
-    if (power < 0.0){
+  public Vector normalize(double power) {
+    if (power < 0.0) {
       throw new IllegalArgumentException("Power must be >= 0");
     }
-    //we can special case certain powers
+    // we can special case certain powers
     if (Double.isInfinite(power)) {
       return divide(maxValue());
     } else if (power == 2.0) {
@@ -145,7 +155,6 @@ public abstract class AbstractVector implements Vector {
     }
   }
 
-
   @Override
   public double maxValue() {
     double result = Double.MIN_VALUE;
@@ -161,7 +170,7 @@ public abstract class AbstractVector implements Vector {
     double max = Double.MIN_VALUE;
     for (int i = 0; i < cardinality(); i++) {
       double tmp = getQuick(i);
-      if (tmp > max){
+      if (tmp > max) {
         max = tmp;
         result = i;
       }
@@ -281,9 +290,9 @@ public abstract class AbstractVector implements Vector {
   /**
    * Decodes a point from its WritableComparable<?> representation.
    * 
-   * @param writableComparable
-   *            a WritableComparable<?> produced by asWritableComparable. Note the
-   *            payload remainder: it is optional, but can be present.
+   * @param writableComparable a WritableComparable<?> produced by
+   *        asWritableComparable. Note the payload remainder: it is optional,
+   *        but can be present.
    * @return the n-dimensional point
    */
   public static Vector decodeVector(WritableComparable<?> writableComparable) {
@@ -293,35 +302,48 @@ public abstract class AbstractVector implements Vector {
   /**
    * Decodes a point from its string representation.
    * 
-   * @param formattedString
-   *            a formatted String produced by asFormatString. Note the payload
-   *            remainder: it is optional, but can be present.
+   * @param formattedString a formatted String produced by asFormatString. Note
+   *        the payload remainder: it is optional, but can be present.
    * @return the n-dimensional point
    */
   public static Vector decodeVector(String formattedString) {
-    Vector result;
-    if (formattedString.trim().startsWith("[s"))
-      result = SparseVector.decodeFormat(formattedString);
-    else
-      result = DenseVector.decodeFormat(formattedString);
-    return result;
+    Type vectorType = new TypeToken<Vector>() {
+    }.getType();
+    GsonBuilder builder = new GsonBuilder();
+    builder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
+    Gson gson = builder.create();
+    return gson.fromJson(formattedString, vectorType);
+  }
+  
+  /* (non-Javadoc)
+   * @see org.apache.mahout.matrix.Vector#asFormatString()
+   */
+  public String asFormatString(){
+    Type vectorType = new TypeToken<Vector>() {
+    }.getType();
+    GsonBuilder builder = new GsonBuilder();
+    builder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
+    Gson gson = builder.create();
+    return gson.toJson(this, vectorType);
   }
 
   /**
-   * Compare whether two Vector implementations are the same, regardless of the implementation.
-   * Two Vectors are the same if they have the same cardinality and all of their values are the same.
-   *
-   *
+   * Compare whether two Vector implementations are the same, regardless of the
+   * implementation. Two Vectors are the same if they have the same cardinality
+   * and all of their values are the same.
+   * 
+   * 
    * @param left The left hand Vector to compare
    * @param right The right hand Vector
-   * @return true if the two Vectors have the same cardinality and the same values
+   * @return true if the two Vectors have the same cardinality and the same
+   *         values
    */
-  public static boolean equivalent(Vector left, Vector right){
+  public static boolean equivalent(Vector left, Vector right) {
     boolean result = true;
     int leftCardinality = left.cardinality();
-    if (leftCardinality == right.cardinality()){
-      for (int i = 0; i < leftCardinality; i++){
-        if (left.getQuick(i) != right.getQuick(i)){
+    if (leftCardinality == right.cardinality()) {
+      for (int i = 0; i < leftCardinality; i++) {
+        if (left.getQuick(i) != right.getQuick(i)) {
           return false;
         }
 
@@ -330,6 +352,37 @@ public abstract class AbstractVector implements Vector {
       return false;
     }
     return result;
+  }
+
+  @Override
+  public double get(String label) throws IndexException, UnboundLabelException {
+    if (bindings == null)
+      throw new UnboundLabelException();
+    Integer index = bindings.get(label);
+    if (index == null)
+      throw new UnboundLabelException();
+    return get(index);
+  }
+
+  @Override
+  public Map<String, Integer> getLabelBindings() {
+    return bindings;
+  }
+
+  @Override
+  public void set(String label, double value) throws IndexException,
+      UnboundLabelException {
+    if (bindings == null)
+      throw new UnboundLabelException();
+    Integer index = bindings.get(label);
+    if (index == null)
+      throw new UnboundLabelException();
+    set(index, value);
+  }
+
+  @Override
+  public void setLabelBindings(Map<String, Integer> bindings) {
+    this.bindings = bindings;
   }
 
 }
