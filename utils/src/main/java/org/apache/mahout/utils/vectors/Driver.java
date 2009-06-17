@@ -80,6 +80,10 @@ public class Driver {
             abuilder.withName("dictOut").withMinimum(1).withMaximum(1).create()).
             withDescription("The output of the dictionary").withShortName("t").create();
 
+    Option weightOpt = obuilder.withLongName("weight").withRequired(true).withArgument(
+            abuilder.withName("weight").withMinimum(1).withMaximum(1).create()).
+            withDescription("The kind of weight to use. Currently TF or TFIDF").withShortName("w").create();
+
     Option delimiterOpt = obuilder.withLongName("delimiter").withRequired(false).withArgument(
             abuilder.withName("delimiter").withMinimum(1).withMaximum(1).create()).
             withDescription("The delimiter for outputing the dictionary").withShortName("l").create();
@@ -93,7 +97,8 @@ public class Driver {
     Option helpOpt = obuilder.withLongName("help").
             withDescription("Print out help").withShortName("h").create();
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(idFieldOpt).withOption(outputOpt).withOption(delimiterOpt)
-            .withOption(helpOpt).withOption(fieldOpt).withOption(maxOpt).withOption(dictOutOpt).withOption(powerOpt).create();
+            .withOption(helpOpt).withOption(fieldOpt).withOption(maxOpt).withOption(dictOutOpt).withOption(powerOpt)
+            .withOption(weightOpt).create();
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
@@ -117,7 +122,17 @@ public class Driver {
           }
           Directory dir = FSDirectory.open(file);
           IndexReader reader = IndexReader.open(dir, true);
-          Weight weight = new TFIDF();
+          Weight weight = null;
+          if(cmdLine.hasOption(weightOpt)) {
+            String wString = cmdLine.getValue(weightOpt).toString();
+            if(wString.equalsIgnoreCase("tf")) {
+              weight = new TF();
+            } else if (wString.equalsIgnoreCase("tfidf")) {
+              weight = new TFIDF();
+            } else {
+              throw new OptionException(weightOpt);
+            }
+          }
           String field = cmdLine.getValue(fieldOpt).toString();
           TermInfo termInfo = new CachedTermInfo(reader, field, 1, 99);
           VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
