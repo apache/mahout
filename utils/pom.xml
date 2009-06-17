@@ -10,10 +10,10 @@
   </parent>
 
   <groupId>org.apache.mahout</groupId>
-  <artifactId>mahout-examples</artifactId>
+  <artifactId>mahout-utils</artifactId>
   <version>0.2-SNAPSHOT</version>
-  <name>Mahout examples</name>
-  <description>Scalable machine learning library examples</description>
+  <name>Mahout utilities</name>
+  <description>Utilities for preparing content into formats for Mahout.</description>
 
   <packaging>jar</packaging>
 
@@ -75,99 +75,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>examples</id>
-            <phase>package</phase>
-            <configuration>
-              <tasks>
-                <ant antfile="../maven/build.xml" target="example-job">
-                  <property name="dest" value="${project.build.directory}" />
-                  <property name="fullnamever" value="${project.artifactId}-${project.version}" />
-                  <property name="core-lib" value="../core/lib" />
-                  <property name="shared-lib" value="../lib" />
-                  <property name="version" value="${project.version}" />
-                </ant>
-              <ant antfile="../maven/build.xml" target="build-grouplens-jar">
-                <property name="dest" value="${project.build.directory}" />
-                <property name="examples-base" value="src/main/java" />
-              </ant>
-              </tasks>
-
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>get-20news</id>
-            <phase>process-classes</phase>
-            <configuration>
-              <tasks if="get.20news">
-                <ant antfile="../maven/build.xml" target="get-files">
-                  <property name="dest" value="${project.build.directory}" />
-                  <property name="fullnamever" value="${project.artifactId}-${project.version}" />
-                  <property name="core-lib" value="../core/lib" />
-                  <property name="shared-lib" value="../lib" />
-                  <property name="version" value="${project.version}" />
-                </ant>
-              </tasks>
-
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>get-enwiki</id>
-            <phase>process-classes</phase>
-            <configuration>
-              <tasks if="get.enwiki">
-                <ant antfile="../maven/build.xml" target="enwiki-files">
-                  <property name="dest" value="${project.build.directory}" />
-                  <property name="fullnamever" value="${project.artifactId}-${project.version}" />
-                  <property name="core-lib" value="../core/lib" />
-                  <property name="shared-lib" value="../lib" />
-                  <property name="version" value="${project.version}" />
-                </ant>
-              </tasks>
-
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- Attach the Job Jar -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.1</version>
-        <executions>
-          <execution>
-            <id>attach-artifacts</id>
-            <phase>package</phase>
-            <goals>
-              <goal>attach-artifact</goal>
-            </goals>
-            <configuration>
-              <artifacts>
-                <artifact>
-                  <file>${project.build.directory}/${artifactId}-${version}.job</file>
-                  <type>job</type>
-                  <!--<classifier>job</classifier>-->
-                </artifact>
-
-              </artifacts>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
 
   </build>
@@ -180,21 +87,19 @@
       <version>${project.version}</version>
     </dependency>
 
-    <!-- core test -->
     <dependency>
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-solrj</artifactId>
+      <version>1.4-SNAPSHOT</version>
+    </dependency>
+    <!-- core test -->
+    <!--<dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core</artifactId>
       <version>${project.version}</version>
       <type>test-jar</type>
       <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.openejb</groupId>
-      <artifactId>javaee-api</artifactId>
-      <version>5.0-1</version>
-    </dependency>
-
+    </dependency>-->
 
     <dependency>
       <groupId>org.easymock</groupId>

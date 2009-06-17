@@ -23,6 +23,7 @@
     <module>core</module>
     <module>taste-web</module>
     <module>examples</module>
+    <module>utils</module>
   </modules>
 
   <build>
