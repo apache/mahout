@@ -18,7 +18,8 @@ package org.apache.mahout.matrix;
 
 import java.lang.reflect.Type;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -35,7 +36,7 @@ import com.google.gson.reflect.TypeToken;
 public class JsonMatrixAdapter implements JsonSerializer<Matrix>,
     JsonDeserializer<Matrix> {
 
-  private static final Logger log = Logger.getLogger(JsonMatrixAdapter.class);
+  private static final Logger log = LoggerFactory.getLogger(JsonVectorAdapter.class);
   public static final String CLASS = "class";
   public static final String MATRIX = "matrix";
 

@@ -18,7 +18,6 @@ package org.apache.mahout.matrix;
 
 import java.lang.reflect.Type;
 
-import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -30,11 +29,13 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JsonVectorAdapter implements JsonSerializer<Vector>,
     JsonDeserializer<Vector> {
 
-  private static final Logger log = Logger.getLogger(JsonVectorAdapter.class);
+  private static final Logger log = LoggerFactory.getLogger(JsonVectorAdapter.class);
   public static final String VECTOR = "vector";
 
   @Override
