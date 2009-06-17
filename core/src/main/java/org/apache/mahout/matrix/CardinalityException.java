@@ -22,9 +22,4 @@ package org.apache.mahout.matrix;
  */
 public class CardinalityException extends RuntimeException {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
 }
