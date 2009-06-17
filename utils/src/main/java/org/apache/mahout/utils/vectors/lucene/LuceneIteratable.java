@@ -41,27 +41,32 @@ public class LuceneIteratable implements VectorIterable {
   private FieldSelector idFieldSelector;
 
   private VectorMapper mapper;
-  private double normPower = -1;
+  private double normPower = NO_NORMALIZING;
+
+  public static final double NO_NORMALIZING = -1.0;
 
   public LuceneIteratable(IndexReader reader, String idField, String field, VectorMapper mapper) {
-    this(reader, idField, field, mapper, 2.0);
+    this(reader, idField, field, mapper, NO_NORMALIZING);
   }
 
   /**
    * Produce a LuceneIterable that can create the Vector plus normalize it.
-   * @param reader
+   * @param reader The {@link org.apache.lucene.index.IndexReader} to read the documents from.
    * @param idField - The Field containing the id.  May be null
    * @param field The field to use for the Vector
-   * @param mapper
-   * @param normPower
+   * @param mapper The {@link org.apache.mahout.utils.vectors.lucene.VectorMapper} for creating {@link org.apache.mahout.matrix.Vector}s from Lucene's TermVectors.
+   * @param normPower The normalization value.  Must be greater than or equal to 0 or equal to {@link #NO_NORMALIZING}
    */
   public LuceneIteratable(IndexReader reader, String idField, String field, VectorMapper mapper, double normPower) {
+    if (normPower != NO_NORMALIZING && normPower < 0){
+      throw new IllegalArgumentException("normPower must either be -1 or >= 0");
+    }
+      idFieldSelector = new SetBasedFieldSelector(Collections.singleton(idField), Collections.emptySet());
     this.indexReader = reader;
     this.idField = idField;
     this.field = field;
     this.mapper = mapper;
     this.normPower = normPower;
-    idFieldSelector = new SetBasedFieldSelector(Collections.singleton(idField), Collections.emptySet());
   }
 
 
@@ -105,7 +110,7 @@ public class LuceneIteratable implements VectorIterable {
         } else {
           result.setName(String.valueOf(doc));
         }
-        if (normPower >= 0){
+        if (normPower != NO_NORMALIZING){
           result = result.normalize(normPower);
         }
       } catch (IOException e) {

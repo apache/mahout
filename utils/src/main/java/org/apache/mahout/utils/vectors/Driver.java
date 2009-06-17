@@ -136,8 +136,8 @@ public class Driver {
           if (cmdLine.hasOption(idFieldOpt)){
             idField = cmdLine.getValue(idFieldOpt).toString();
           }
-          if (norm == -1) {
-            iteratable = new LuceneIteratable(reader, idField, field, mapper);
+          if (norm == LuceneIteratable.NO_NORMALIZING) {
+            iteratable = new LuceneIteratable(reader, idField, field, mapper, LuceneIteratable.NO_NORMALIZING);
           } else {
             iteratable = new LuceneIteratable(reader, idField, field, mapper, norm);
           }
