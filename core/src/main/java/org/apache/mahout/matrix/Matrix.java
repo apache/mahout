@@ -17,6 +17,8 @@
 
 package org.apache.mahout.matrix;
 
+import java.util.Map;
+
 import org.apache.hadoop.io.WritableComparable;
 
 /**
@@ -302,6 +304,87 @@ public interface Matrix {
    * @return a double
    */
   double zSum();
+
+  /**
+   * Return a map of the current column label bindings of the receiver
+   * 
+   * @return a Map<String, Integer>
+   */
+  Map<String, Integer> getColumnLabelBindings();
+
+  /**
+   * Return a map of the current row label bindings of the receiver
+   * 
+   * @return a Map<String, Integer>
+   */
+  Map<String, Integer> getRowLabelBindings();
+
+  /**
+   * Sets a map of column label bindings in the receiver
+   * 
+   * @param bindings a Map<String, Integer> of label bindings
+   */
+  void setColumnLabelBindings(Map<String, Integer> bindings);
+
+  /**
+   * Sets a map of row label bindings in the receiver
+   * 
+   * @param bindings a Map<String, Integer> of label bindings
+   */
+  void setRowLabelBindings(Map<String, Integer> bindings);
+
+  /**
+   * Return the value at the given labels
+   * 
+   * @param rowLabel a String row label
+   * @param columnLabel a String column label
+   * @return the double at the index
+   * @throws IndexException if the index is out of bounds
+   */
+  double get(String rowLabel, String columnLabel) throws IndexException,
+    UnboundLabelException;
+
+  /**
+   * Set the value at the given index
+   * 
+   * @param rowLabel a String row label
+   * @param columnLabel a String column label
+   * @param value a double value to set
+   * @throws IndexException if the index is out of bounds
+   */
+  void set(String rowLabel, String columnLabel, double value) throws IndexException,
+    UnboundLabelException;
+
+  /**
+   * Set the value at the given index, updating the row and column label bindings
+   * 
+   * @param rowLabel a String row label
+   * @param columnLabel a String column label
+   * @param row an int row index
+   * @param column an int column index
+   * @param value a double value
+   * @throws IndexException
+   * @throws UnboundLabelException
+   */
+  void set(String rowLabel, String columnLabel, int row, int column, double value) throws IndexException,
+    UnboundLabelException;
+
+  /**
+   * Sets the row values at the given row label
+   * 
+   * @param rowLabel a String row label
+   * @param rowData a double[] array of row data
+   */
+  void set(String rowLabel, double[] rowData);
+
+  /**
+   * Sets the row values at the given row index and updates the row labels
+   * 
+   * @param rowLabel the String row label
+   * @param row an int the row index
+   * @param rowData a double[] array of row data
+   */
+  void set(String rowLabel, int row, double[] rowData);
 
   /*
    * Need stories for these but keeping them here for now.

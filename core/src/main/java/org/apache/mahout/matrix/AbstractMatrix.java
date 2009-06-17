@@ -18,6 +18,8 @@
 package org.apache.mahout.matrix;
 
 import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -28,6 +30,86 @@ import com.google.gson.reflect.TypeToken;
  * 
  */
 public abstract class AbstractMatrix implements Matrix {
+
+  private Map<String, Integer> columnLabelBindings;
+  
+  private Map<String, Integer> rowLabelBindings;
+  
+  @Override
+  public double get(String rowLabel, String columnLabel) throws IndexException,
+      UnboundLabelException {
+    if (columnLabelBindings == null || rowLabelBindings == null)
+      throw new UnboundLabelException();
+    Integer row = rowLabelBindings.get(rowLabel);
+    Integer col = columnLabelBindings.get(columnLabel);
+    if (row == null || col == null)
+      throw new UnboundLabelException();
+
+    return get(row, col);
+  }
+
+  @Override
+  public Map<String, Integer> getColumnLabelBindings() {
+    return columnLabelBindings;
+  }
+
+  @Override
+  public Map<String, Integer> getRowLabelBindings() {
+    return rowLabelBindings;
+  }
+
+  @Override
+  public void set(String rowLabel, double[] rowData) {
+    if (columnLabelBindings == null)
+      throw new UnboundLabelException();
+    Integer row = rowLabelBindings.get(rowLabel);
+    if (row == null)
+      throw new UnboundLabelException();
+    set(row, rowData);
+  }
+
+  @Override
+  public void set(String rowLabel, int row, double[] rowData) {
+    if (rowLabelBindings == null)
+      rowLabelBindings = new HashMap<String, Integer>();
+    rowLabelBindings.put(rowLabel, row);
+    set(row, rowData);
+  }
+
+  @Override
+  public void set(String rowLabel, String columnLabel, double value)
+      throws IndexException, UnboundLabelException {
+    if (columnLabelBindings == null || rowLabelBindings == null)
+      throw new UnboundLabelException();
+    Integer row = rowLabelBindings.get(rowLabel);
+    Integer col = columnLabelBindings.get(columnLabel);
+    if (row == null || col == null)
+      throw new UnboundLabelException();
+    set(row, col, value);
+  }
+
+  @Override
+  public void set(String rowLabel, String columnLabel, int row, int column,
+      double value) throws IndexException, UnboundLabelException {
+    if (rowLabelBindings == null)
+      rowLabelBindings = new HashMap<String, Integer>();
+    rowLabelBindings.put(rowLabel, row);
+    if (columnLabelBindings == null)
+      columnLabelBindings = new HashMap<String, Integer>();
+    columnLabelBindings.put(columnLabel, column);
+    
+    set(row, column, value);
+  }
+
+  @Override
+  public void setColumnLabelBindings(Map<String, Integer> bindings) {
+    columnLabelBindings = bindings;
+  }
+
+  @Override
+  public void setRowLabelBindings(Map<String, Integer> bindings) {
+    rowLabelBindings = bindings;
+  }
 
   // index into int[2] for column value
   public static final int COL = 1;

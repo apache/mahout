@@ -17,6 +17,9 @@
 
 package org.apache.mahout.matrix;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import junit.framework.TestCase;
 
 public abstract class MatrixTest extends TestCase {
@@ -25,7 +28,8 @@ public abstract class MatrixTest extends TestCase {
 
   protected static final int COL = AbstractMatrix.COL;
 
-  protected final double[][] values = {{1.1, 2.2}, {3.3, 4.4}, {5.5, 6.6}};
+  protected final double[][] values = { { 1.1, 2.2 }, { 3.3, 4.4 },
+      { 5.5, 6.6 } };
 
   protected Matrix test;
 
@@ -54,7 +58,7 @@ public abstract class MatrixTest extends TestCase {
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         assertEquals("value[" + row + "][" + col + ']',
-                test.getQuick(row, col), copy.getQuick(row, col));
+            test.getQuick(row, col), copy.getQuick(row, col));
   }
 
   public void testGetQuick() {
@@ -62,7 +66,7 @@ public abstract class MatrixTest extends TestCase {
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         assertEquals("value[" + row + "][" + col + ']', values[row][col], test
-                .getQuick(row, col));
+            .getQuick(row, col));
   }
 
   public void testHaveSharedCells() {
@@ -90,7 +94,7 @@ public abstract class MatrixTest extends TestCase {
       for (int col = 0; col < c[COL]; col++) {
         test.setQuick(row, col, 1.23);
         assertEquals("value[" + row + "][" + col + ']', 1.23, test.getQuick(
-                row, col));
+            row, col));
       }
   }
 
@@ -106,23 +110,23 @@ public abstract class MatrixTest extends TestCase {
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         assertEquals("value[" + row + "][" + col + ']', values[row][col],
-                array[row][col]);
+            array[row][col]);
   }
 
   public void testViewPart() {
-    int[] offset = {1, 1};
-    int[] size = {2, 1};
+    int[] offset = { 1, 1 };
+    int[] size = { 2, 1 };
     Matrix view = test.viewPart(offset, size);
     int[] c = view.cardinality();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         assertEquals("value[" + row + "][" + col + ']',
-                values[row + 1][col + 1], view.getQuick(row, col));
+            values[row + 1][col + 1], view.getQuick(row, col));
   }
 
   public void testViewPartCardinality() {
-    int[] offset = {1, 1};
-    int[] size = {3, 3};
+    int[] offset = { 1, 1 };
+    int[] size = { 3, 3 };
     try {
       test.viewPart(offset, size);
       fail("exception expected");
@@ -134,8 +138,8 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testViewPartIndexOver() {
-    int[] offset = {1, 1};
-    int[] size = {2, 2};
+    int[] offset = { 1, 1 };
+    int[] size = { 2, 2 };
     try {
       test.viewPart(offset, size);
       fail("exception expected");
@@ -147,8 +151,8 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testViewPartIndexUnder() {
-    int[] offset = {-1, -1};
-    int[] size = {2, 2};
+    int[] offset = { -1, -1 };
+    int[] size = { 2, 2 };
     try {
       test.viewPart(offset, size);
       fail("exception expected");
@@ -165,7 +169,7 @@ public abstract class MatrixTest extends TestCase {
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         assertEquals("value[" + row + "][" + col + ']', 4.53, test.getQuick(
-                row, col));
+            row, col));
   }
 
   public void testAssignDoubleArrayArray() {
@@ -174,7 +178,7 @@ public abstract class MatrixTest extends TestCase {
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         assertEquals("value[" + row + "][" + col + ']', 0.0, test.getQuick(row,
-                col));
+            col));
   }
 
   public void testAssignDoubleArrayArrayCardinality() {
@@ -193,7 +197,7 @@ public abstract class MatrixTest extends TestCase {
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         assertEquals("value[" + row + "][" + col + ']', 2 * values[row][col],
-                test.getQuick(row, col));
+            test.getQuick(row, col));
   }
 
   public void testAssignMatrixBinaryFunctionCardinality() {
@@ -212,7 +216,7 @@ public abstract class MatrixTest extends TestCase {
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         assertEquals("value[" + row + "][" + col + ']',
-                test.getQuick(row, col), value.getQuick(row, col));
+            test.getQuick(row, col), value.getQuick(row, col));
   }
 
   public void testAssignMatrixCardinality() {
@@ -230,7 +234,7 @@ public abstract class MatrixTest extends TestCase {
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         assertEquals("value[" + row + "][" + col + ']', -values[row][col], test
-                .getQuick(row, col));
+            .getQuick(row, col));
   }
 
   public void testDivide() {
@@ -239,7 +243,7 @@ public abstract class MatrixTest extends TestCase {
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         assertEquals("value[" + row + "][" + col + ']',
-                values[row][col] / 4.53, value.getQuick(row, col));
+            values[row][col] / 4.53, value.getQuick(row, col));
   }
 
   public void testGet() {
@@ -247,7 +251,7 @@ public abstract class MatrixTest extends TestCase {
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         assertEquals("value[" + row + "][" + col + ']', values[row][col], test
-                .get(row, col));
+            .get(row, col));
   }
 
   public void testGetIndexUnder() {
@@ -280,7 +284,7 @@ public abstract class MatrixTest extends TestCase {
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         assertEquals("value[" + row + "][" + col + ']', 0.0, value.getQuick(
-                row, col));
+            row, col));
   }
 
   public void testMinusCardinality() {
@@ -298,7 +302,7 @@ public abstract class MatrixTest extends TestCase {
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         assertEquals("value[" + row + "][" + col + ']',
-                values[row][col] + 4.53, value.getQuick(row, col));
+            values[row][col] + 4.53, value.getQuick(row, col));
   }
 
   public void testPlusMatrix() {
@@ -307,7 +311,7 @@ public abstract class MatrixTest extends TestCase {
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         assertEquals("value[" + row + "][" + col + ']', values[row][col] * 2,
-                value.getQuick(row, col));
+            value.getQuick(row, col));
   }
 
   public void testPlusMatrixCardinality() {
@@ -351,7 +355,7 @@ public abstract class MatrixTest extends TestCase {
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         assertEquals("value[" + row + "][" + col + ']',
-                values[row][col] * 4.53, value.getQuick(row, col));
+            values[row][col] * 4.53, value.getQuick(row, col));
   }
 
   public void testTimesMatrix() {
@@ -362,7 +366,7 @@ public abstract class MatrixTest extends TestCase {
     assertEquals("rows", c[ROW], v[ROW]);
     assertEquals("cols", c[ROW], v[COL]);
     // TODO: check the math too, lazy
-    Matrix timestest = new DenseMatrix(10,1);
+    Matrix timestest = new DenseMatrix(10, 1);
     /* will throw ArrayIndexOutOfBoundsException exception without MAHOUT-26 */
     timestest.transpose().times(timestest);
   }
@@ -386,7 +390,7 @@ public abstract class MatrixTest extends TestCase {
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         assertEquals("value[" + row + "][" + col + ']',
-                test.getQuick(row, col), transpose.getQuick(col, row));
+            test.getQuick(row, col), transpose.getQuick(col, row));
   }
 
   public void testZSum() {
@@ -395,14 +399,14 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testAssignRow() {
-    double[] data = {2.1, 3.2};
+    double[] data = { 2.1, 3.2 };
     test.assignRow(1, new DenseVector(data));
     assertEquals("test[1][0]", 2.1, test.getQuick(1, 0));
     assertEquals("test[1][1]", 3.2, test.getQuick(1, 1));
   }
 
   public void testAssignRowCardinality() {
-    double[] data = {2.1, 3.2, 4.3};
+    double[] data = { 2.1, 3.2, 4.3 };
     try {
       test.assignRow(1, new DenseVector(data));
       fail("expecting cardinality exception");
@@ -412,7 +416,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testAssignColumn() {
-    double[] data = {2.1, 3.2, 4.3};
+    double[] data = { 2.1, 3.2, 4.3 };
     test.assignColumn(1, new DenseVector(data));
     assertEquals("test[0][1]", 2.1, test.getQuick(0, 1));
     assertEquals("test[1][1]", 3.2, test.getQuick(1, 1));
@@ -420,7 +424,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testAssignColumnCardinality() {
-    double[] data = {2.1, 3.2};
+    double[] data = { 2.1, 3.2 };
     try {
       test.assignColumn(1, new DenseVector(data));
       fail("expecting cardinality exception");
@@ -476,7 +480,8 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testDetermitant() {
-    Matrix m = matrixFactory(new double[][] { {1,3,4},{5,2,3},{1,4,2} });
+    Matrix m = matrixFactory(new double[][] { { 1, 3, 4 }, { 5, 2, 3 },
+        { 1, 4, 2 } });
     assertEquals("determinant", 43.0, m.determinant());
   }
 
@@ -490,4 +495,69 @@ public abstract class MatrixTest extends TestCase {
             row, col));
   }
 
+  public void testLabelBindings() {
+    Matrix m = matrixFactory(new double[][] { { 1, 3, 4 }, { 5, 2, 3 },
+        { 1, 4, 2 } });
+    assertNull("row bindings", m.getRowLabelBindings());
+    assertNull("col bindings", m.getColumnLabelBindings());
+    Map<String, Integer> rowBindings = new HashMap<String, Integer>();
+    rowBindings.put("Fee", 0);
+    rowBindings.put("Fie", 1);
+    rowBindings.put("Foe", 2);
+    m.setRowLabelBindings(rowBindings);
+    assertEquals("row", rowBindings, m.getRowLabelBindings());
+    Map<String, Integer> colBindings = new HashMap<String, Integer>();
+    colBindings.put("Foo", 0);
+    colBindings.put("Bar", 1);
+    colBindings.put("Baz", 2);
+    m.setColumnLabelBindings(colBindings);
+    assertEquals("row", rowBindings, m.getRowLabelBindings());
+    assertEquals("Fee", m.get(0, 1), m.get("Fee", "Bar"));
+
+    double[] newrow = { 9, 8, 7 };
+    m.set("Foe", newrow);
+    assertEquals("FeeBaz", m.get(0, 2), m.get("Fee", "Baz"));
+  }
+
+  public void testSettingLabelBindings() {
+    Matrix m = matrixFactory(new double[][] { { 1, 3, 4 }, { 5, 2, 3 },
+        { 1, 4, 2 } });
+    assertNull("row bindings", m.getRowLabelBindings());
+    assertNull("col bindings", m.getColumnLabelBindings());
+    m.set("Fee", "Foo", 1, 2, 9);
+    assertNotNull("row", m.getRowLabelBindings());
+    assertNotNull("row", m.getRowLabelBindings());
+    assertEquals("Fee", 1, m.getRowLabelBindings().get("Fee").intValue());
+    assertEquals("Fee", 2, m.getColumnLabelBindings().get("Foo").intValue());
+    assertEquals("FeeFoo", m.get(1, 2), m.get("Fee", "Foo"));
+    try {
+      m.get("Fie", "Foe");
+      fail("Expected UnboundLabelException");
+    } catch (IndexException e) {
+      fail("Expected UnboundLabelException");
+    } catch (UnboundLabelException e) {
+      assertTrue(true);
+    }
+  }
+  
+  public void testLabelBindingSerialization(){
+    Matrix m = matrixFactory(new double[][] { { 1, 3, 4 }, { 5, 2, 3 },
+        { 1, 4, 2 } });
+    assertNull("row bindings", m.getRowLabelBindings());
+    assertNull("col bindings", m.getColumnLabelBindings());
+    Map<String, Integer> rowBindings = new HashMap<String, Integer>();
+    rowBindings.put("Fee", 0);
+    rowBindings.put("Fie", 1);
+    rowBindings.put("Foe", 2);
+    m.setRowLabelBindings(rowBindings);
+    assertEquals("row", rowBindings, m.getRowLabelBindings());
+    Map<String, Integer> colBindings = new HashMap<String, Integer>();
+    colBindings.put("Foo", 0);
+    colBindings.put("Bar", 1);
+    colBindings.put("Baz", 2);
+    m.setColumnLabelBindings(colBindings);
+    String json = m.asFormatString();
+    Matrix mm = AbstractMatrix.decodeMatrix(json);
+    assertEquals("Fee", m.get(0, 1), mm.get("Fee", "Bar"));
+  }
 }

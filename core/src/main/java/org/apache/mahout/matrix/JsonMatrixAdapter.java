@@ -36,7 +36,7 @@ import com.google.gson.reflect.TypeToken;
 public class JsonMatrixAdapter implements JsonSerializer<Matrix>,
     JsonDeserializer<Matrix> {
 
-  private static final Logger log = LoggerFactory.getLogger(JsonVectorAdapter.class);
+  private static final Logger log = LoggerFactory.getLogger(JsonMatrixAdapter.class);
   public static final String CLASS = "class";
   public static final String MATRIX = "matrix";
 
