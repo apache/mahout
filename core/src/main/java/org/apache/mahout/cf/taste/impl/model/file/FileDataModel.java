@@ -64,7 +64,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * updates to {@link FileDataModel} without re-copying the entire data file.</p>
  *
  * <p>The line may contain a blank preference value (e.g. "123,ABC,"). This is interpreted to mean "delete
- * preference", and is only useful in the context of an update delta file (see above).</p>
+ * preference", and is only useful in the context of an update delta file (see above).
+ * Note that if the line is empty or begins with '#' it will be ignored as a comment.</p>
  *
  * <p>Finally, for application that have no notion of a preference value (that is, the user simply expresses
  * a preference for an item, but no degree of preference), the caller can simply omit the third token in
@@ -204,12 +205,19 @@ public class FileDataModel implements DataModel {
    * the item in question if needed, and use {@link #buildPreference(User, Item, double)} to
    * build {@link Preference} objects as needed.</p>
    *
+   * <p>Note that if the line is empty or begins with '#' it will be ignored as a comment.</p>
+   *
    * @param line line from input data file
    * @param data all data read so far, as a mapping from user IDs to preferences
    * @see #buildPreference(User, Item, double)
    * @see #buildItem(String)
    */
   protected void processLine(String line, Map<String, List<Preference>> data, Map<String, Item> itemCache) {
+
+    if (line.length() == 0 || line.charAt(0) == '#') {
+      return;
+    }
+
     int delimiterOne = line.indexOf((int) delimiter);
     if (delimiterOne < 0) {
       throw new IllegalArgumentException("Bad line: " + line);
