@@ -62,7 +62,8 @@ public class TFDFMapper extends VectorMapper {
   @Override
   public void map(String term, int frequency, TermVectorOffsetInfo[] offsets, int[] positions) {
     TermEntry entry = termInfo.getTermEntry(field, term);
-    vector.setQuick(entry.termIdx, weight.calculate(frequency, entry.docFreq, numTerms, numDocs));
+    if(entry != null)
+      vector.setQuick(entry.termIdx, weight.calculate(frequency, entry.docFreq, numTerms, numDocs));
   }
 
   @Override
