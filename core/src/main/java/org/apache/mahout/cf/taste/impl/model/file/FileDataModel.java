@@ -209,6 +209,7 @@ public class FileDataModel implements DataModel {
    *
    * @param line line from input data file
    * @param data all data read so far, as a mapping from user IDs to preferences
+   * @param itemCache A cache of existing items
    * @see #buildPreference(User, Item, double)
    * @see #buildItem(String)
    */
