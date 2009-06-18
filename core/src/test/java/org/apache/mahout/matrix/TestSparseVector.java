@@ -40,7 +40,7 @@ public class TestSparseVector extends TestCase {
   }
 
   public void testAsFormatString() {
-    String formatString = test.asWritableComparable().toString();
+    String formatString = test.asFormatString();
     assertEquals(
         "format",
         "{\"class\":\"org.apache.mahout.matrix.SparseVector\",\"vector\":\"{\\\"values\\\":{\\\"1\\\":1.1,\\\"2\\\":2.2,\\\"3\\\":3.3},\\\"cardinality\\\":5}\"}",
@@ -145,7 +145,7 @@ public class TestSparseVector extends TestCase {
   }
 
   public void testDecodeVectort() throws Exception {
-    Vector val = AbstractVector.decodeVector(test.asWritableComparable());
+    Vector val = AbstractVector.decodeVector(test.asFormatString());
     for (int i = 0; i < test.cardinality(); i++)
       assertEquals("get [" + i + ']', test.get(i), val.get(i));
   }

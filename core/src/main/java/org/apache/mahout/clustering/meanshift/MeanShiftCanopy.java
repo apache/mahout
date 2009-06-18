@@ -345,7 +345,7 @@ public class MeanShiftCanopy {
       OutputCollector<Text, WritableComparable<?>> collector)
       throws IOException {
     collector.collect(new Text(this.getIdentifier()), new Text(canopy
-        .computeCentroid().asWritableComparable().toString()
+        .computeCentroid().asFormatString()
         + ":=:" + boundPoints.size()));
   }
 

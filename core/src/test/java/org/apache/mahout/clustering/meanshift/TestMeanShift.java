@@ -238,8 +238,8 @@ public class TestMeanShift extends TestCase {
           + (ref.getCanopyId() - raw.length));
       assertEquals("ids", ref.getCanopyId(), canopy.getCanopyId() + 100);
       assertEquals("centers(" + ref.getIdentifier() + ')', ref.getCenter()
-          .asWritableComparable().toString(), canopy.getCenter()
-          .asWritableComparable().toString());
+          .asFormatString(), canopy.getCenter()
+          .asFormatString());
       assertEquals("bound points", ref.getBoundPoints().size(), canopy
           .getBoundPoints().size());
     }
@@ -313,8 +313,8 @@ public class TestMeanShift extends TestCase {
           .toString());
       assertEquals("ids", ref.getCanopyId(), canopy.getCanopyId() + 100);
       assertEquals("centers(" + stringMeanShiftCanopyEntry.getKey() + ')', ref.getCenter()
-          .asWritableComparable().toString(), canopy.getCenter()
-          .asWritableComparable().toString());
+          .asFormatString(), canopy.getCenter()
+          .asFormatString().toString());
       assertEquals("bound points", ref.getBoundPoints().size(), canopy
           .getBoundPoints().size());
     }

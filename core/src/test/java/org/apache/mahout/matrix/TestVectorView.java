@@ -35,7 +35,7 @@ public class TestVectorView extends TestCase {
   }
 
   public void testAsFormatString() {
-    String formatString = test.asWritableComparable().toString();
+    String formatString = test.asFormatString();
     Vector v = AbstractVector.decodeVector(formatString);
     assertEquals("cardinality", test.cardinality(), v.cardinality());
   }

@@ -33,7 +33,7 @@ public class TestDenseVector extends TestCase {
   }
 
   public void testAsFormatString() {
-    String formatString = test.asWritableComparable().toString();
+    String formatString = test.asFormatString();
     assertEquals(
         "format",
         "{\"class\":\"org.apache.mahout.matrix.DenseVector\",\"vector\":\"{\\\"values\\\":[1.1,2.2,3.3]}\"}",
@@ -133,7 +133,7 @@ public class TestDenseVector extends TestCase {
   }
 
   public void testDecodeVector() throws Exception {
-    Vector val = AbstractVector.decodeVector(test.asWritableComparable());
+    Vector val = AbstractVector.decodeVector(test.asFormatString());
     for (int i = 0; i < test.cardinality(); i++)
       assertEquals("get [" + i + ']', test.get(i), val.get(i));
   }
