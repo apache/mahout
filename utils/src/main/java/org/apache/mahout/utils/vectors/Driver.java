@@ -80,7 +80,7 @@ public class Driver {
             abuilder.withName("dictOut").withMinimum(1).withMaximum(1).create()).
             withDescription("The output of the dictionary").withShortName("t").create();
 
-    Option weightOpt = obuilder.withLongName("weight").withRequired(true).withArgument(
+    Option weightOpt = obuilder.withLongName("weight").withRequired(false).withArgument(
             abuilder.withName("weight").withMinimum(1).withMaximum(1).create()).
             withDescription("The kind of weight to use. Currently TF or TFIDF").withShortName("w").create();
 
@@ -132,6 +132,8 @@ public class Driver {
             } else {
               throw new OptionException(weightOpt);
             }
+          } else {
+            weight = new TFIDF();
           }
           String field = cmdLine.getValue(fieldOpt).toString();
           TermInfo termInfo = new CachedTermInfo(reader, field, 1, 99);
