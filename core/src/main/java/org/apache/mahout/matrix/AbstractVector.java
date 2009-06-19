@@ -17,6 +17,9 @@
 
 package org.apache.mahout.matrix;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,8 +40,8 @@ public abstract class AbstractVector implements Vector {
    * transient so that it will not be serialized with each vector instance.
    */
   private transient Map<String, Integer> bindings;
-  protected String name;
 
+  protected String name;
 
   protected AbstractVector() {
   }
@@ -336,10 +339,13 @@ public abstract class AbstractVector implements Vector {
   public void setName(String name) {
     this.name = name;
 
-  }/* (non-Javadoc)
-   * @see org.apache.mahout.matrix.Vector#asFormatString()
-   */
-  public String asFormatString(){
+  }/*
+    * (non-Javadoc)
+    * 
+    * @see org.apache.mahout.matrix.Vector#asFormatString()
+    */
+
+  public String asFormatString() {
     Type vectorType = new TypeToken<Vector>() {
     }.getType();
     GsonBuilder builder = new GsonBuilder();
@@ -349,9 +355,9 @@ public abstract class AbstractVector implements Vector {
   }
 
   /**
-   * Compare whether two Vector implementations have the same elements, regardless of the
-   * implementation and name. Two Vectors are equivalent if they have the same cardinality
-   * and all of their values are the same.
+   * Compare whether two Vector implementations have the same elements,
+   * regardless of the implementation and name. Two Vectors are equivalent if
+   * they have the same cardinality and all of their values are the same.
    * <p/>
    * Does not compare {@link Vector#getName()}.
    * 
@@ -360,12 +366,13 @@ public abstract class AbstractVector implements Vector {
    * @param right The right hand Vector
    * @return true if the two Vectors have the same cardinality and the same
    *         values
-   *
+   * 
    * @see #strictEquivalence(Vector, Vector)
-   * @see Vector#equals(Object) 
+   * @see Vector#equals(Object)
    */
   public static boolean equivalent(Vector left, Vector right) {
-    if (left == right) return true;
+    if (left == right)
+      return true;
     boolean result = true;
     int leftCardinality = left.size();
     if (leftCardinality == right.size()) {
@@ -383,26 +390,29 @@ public abstract class AbstractVector implements Vector {
 
   /**
    * Compare whether two Vector implementations are the same, including the
-   * underlying implementation. Two Vectors are the same if they have the same cardinality, same name
-   * and all of their values are the same.
-   *
-   *
+   * underlying implementation. Two Vectors are the same if they have the same
+   * cardinality, same name and all of their values are the same.
+   * 
+   * 
    * @param left The left hand Vector to compare
    * @param right The right hand Vector
    * @return true if the two Vectors have the same cardinality and the same
    *         values
    */
   public static boolean strictEquivalence(Vector left, Vector right) {
-    if (left == right) return true;
-    if (!(left.getClass().equals(right.getClass()))) return false;
+    if (left == right)
+      return true;
+    if (!(left.getClass().equals(right.getClass())))
+      return false;
     String leftName = left.getName();
     String rightName = right.getName();
-    if (leftName != null && rightName != null && !leftName.equals(rightName)){
+    if (leftName != null && rightName != null && !leftName.equals(rightName)) {
       return false;
-    } else if ((leftName != null && rightName == null) || (rightName != null && leftName == null)){
+    } else if ((leftName != null && rightName == null)
+        || (rightName != null && leftName == null)) {
       return false;
     }
-    
+
     boolean result = true;
     int leftCardinality = left.size();
     if (leftCardinality == right.size()) {
@@ -418,8 +428,9 @@ public abstract class AbstractVector implements Vector {
     return result;
   }
 
-
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.mahout.matrix.Vector#get(java.lang.String)
    */
   @Override
@@ -432,7 +443,9 @@ public abstract class AbstractVector implements Vector {
     return get(index);
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.mahout.matrix.Vector#getLabelBindings()
    */
   @Override
@@ -440,7 +453,9 @@ public abstract class AbstractVector implements Vector {
     return bindings;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.mahout.matrix.Vector#set(java.lang.String, double)
    */
   @Override
@@ -454,7 +469,9 @@ public abstract class AbstractVector implements Vector {
     set(index, value);
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.mahout.matrix.Vector#setLabelBindings(java.util.Map)
    */
   @Override
@@ -462,7 +479,9 @@ public abstract class AbstractVector implements Vector {
     this.bindings = bindings;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.mahout.matrix.Vector#set(java.lang.String, int, double)
    */
   @Override
@@ -471,6 +490,45 @@ public abstract class AbstractVector implements Vector {
       bindings = new HashMap<String, Integer>();
     bindings.put(label, index);
     set(index, value);
+  }
+
+  /**
+   * Read and return a vector from the input
+   * 
+   * @param in
+   * @return
+   * @throws IOException
+   */
+  protected static Vector readVector(DataInput in) throws IOException {
+    String vectorClassName = in.readUTF();
+    Vector vector;
+    try {
+      vector = Class.forName(vectorClassName).asSubclass(Vector.class)
+          .newInstance();
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    } catch (InstantiationException e) {
+      throw new RuntimeException(e);
+    }
+    vector.readFields(in);
+    return vector;
+  }
+
+  /**
+   * Write the vector to the output
+   * 
+   * @param out
+   * @param vector
+   * @throws IOException
+   */
+  protected static void writeVector(DataOutput out, Vector vector)
+      throws IOException {
+    String vectorClassName = vector.getClass().getName();
+    out.writeUTF(vectorClassName);
+    vector.write(out);
+
   }
 
 }

@@ -17,6 +17,14 @@
 
 package org.apache.mahout.matrix;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.hadoop.io.DataOutputBuffer;
+
 import junit.framework.TestCase;
 
 public class TestMatrixView extends TestCase {
@@ -107,15 +115,6 @@ public class TestMatrixView extends TestCase {
     int[] c = test.getNumNondefaultElements();
     assertEquals("row size", values.length - 2, c[ROW]);
     assertEquals("col size", values[0].length - 1, c[COL]);
-  }
-
-  public void testToArray() {
-    double[][] array = test.toArray();
-    int[] c = test.size();
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + ']',
-            values[row + 1][col + 1], array[row][col]);
   }
 
   public void testViewPart() throws Exception {
@@ -479,6 +478,78 @@ public class TestMatrixView extends TestCase {
     } catch (IndexException e) {
       assertTrue(true);
     }
+  }
+
+  public void testMatrixWritable() throws IOException {
+    DataOutputBuffer out = new DataOutputBuffer();
+    test.write(out);
+    out.close();
+
+    DataInputStream in = new DataInputStream(new ByteArrayInputStream(out
+        .getData()));
+    Matrix m2 = test.clone();
+    m2.readFields(in);
+    in.close();
+    assertEquals("row size", test.size()[ROW], m2.size()[ROW]);
+    assertEquals("col size", test.size()[COL], m2.size()[COL]);
+  }
+
+  public void testLabelBindings() {
+    assertNull("row bindings", test.getRowLabelBindings());
+    assertNull("col bindings", test.getColumnLabelBindings());
+    Map<String, Integer> rowBindings = new HashMap<String, Integer>();
+    rowBindings.put("Fee", 0);
+    rowBindings.put("Fie", 1);
+    test.setRowLabelBindings(rowBindings);
+    assertEquals("row", rowBindings, test.getRowLabelBindings());
+    Map<String, Integer> colBindings = new HashMap<String, Integer>();
+    colBindings.put("Foo", 0);
+    colBindings.put("Bar", 1);
+    test.setColumnLabelBindings(colBindings);
+    assertEquals("row", rowBindings, test.getRowLabelBindings());
+    assertEquals("Fee", test.get(0, 1), test.get("Fee", "Bar"));
+
+    double[] newrow = { 9, 8 };
+    test.set("Fie", newrow);
+    assertEquals("FeeBar", test.get(0, 1), test.get("Fee", "Bar"));
+  }
+
+  public void testSettingLabelBindings() {
+    assertNull("row bindings", test.getRowLabelBindings());
+    assertNull("col bindings", test.getColumnLabelBindings());
+    test.set("Fee", "Foo", 1, 1, 9);
+    assertNotNull("row", test.getRowLabelBindings());
+    assertNotNull("row", test.getRowLabelBindings());
+    assertEquals("Fee", 1, test.getRowLabelBindings().get("Fee").intValue());
+    assertEquals("Foo", 1, test.getColumnLabelBindings().get("Foo").intValue());
+    assertEquals("FeeFoo", test.get(1, 1), test.get("Fee", "Foo"));
+    try {
+      test.get("Fie", "Foe");
+      fail("Expected UnboundLabelException");
+    } catch (IndexException e) {
+      fail("Expected UnboundLabelException");
+    } catch (UnboundLabelException e) {
+      assertTrue(true);
+    }
+  }
+
+  public void testLabelBindingSerialization() {
+    assertNull("row bindings", test.getRowLabelBindings());
+    assertNull("col bindings", test.getColumnLabelBindings());
+    Map<String, Integer> rowBindings = new HashMap<String, Integer>();
+    rowBindings.put("Fee", 0);
+    rowBindings.put("Fie", 1);
+    rowBindings.put("Foe", 2);
+    test.setRowLabelBindings(rowBindings);
+    assertEquals("row", rowBindings, test.getRowLabelBindings());
+    Map<String, Integer> colBindings = new HashMap<String, Integer>();
+    colBindings.put("Foo", 0);
+    colBindings.put("Bar", 1);
+    colBindings.put("Baz", 2);
+    test.setColumnLabelBindings(colBindings);
+    String json = test.asFormatString();
+    Matrix mm = AbstractMatrix.decodeMatrix(json);
+    assertEquals("Fee", test.get(0, 1), mm.get("Fee", "Bar"));
   }
 
 }

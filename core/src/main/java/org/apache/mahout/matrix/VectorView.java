@@ -20,7 +20,6 @@ package org.apache.mahout.matrix;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -118,6 +117,7 @@ public class VectorView extends AbstractVector {
 
   public class ViewIterator implements Iterator<Vector.Element> {
     private final Iterator<Vector.Element> it;
+
     private Vector.Element el;
 
     public ViewIterator() {
@@ -168,8 +168,8 @@ public class VectorView extends AbstractVector {
     }
 
     /**
-     * @throws UnsupportedOperationException
-     *             all the time. method not implemented.
+     * @throws UnsupportedOperationException all the time. method not
+     *         implemented.
      */
     @Override
     public void remove() {
@@ -177,46 +177,26 @@ public class VectorView extends AbstractVector {
     }
   }
 
-
   @Override
   public void write(DataOutput dataOutput) throws IOException {
-    dataOutput.writeUTF(this.name==null? "": this.name);
+    dataOutput.writeUTF(this.name == null ? "" : this.name);
     dataOutput.writeInt(offset);
     dataOutput.writeInt(cardinality);
-    String vectorClassName = vector.getClass().getName();
-    dataOutput.writeInt(vectorClassName.length() * 2);
-    dataOutput.write(vectorClassName.getBytes());
-    vector.write(dataOutput);
+    writeVector(dataOutput, vector);
   }
 
   @Override
   public void readFields(DataInput dataInput) throws IOException {
     this.name = dataInput.readUTF();
-    int offset = dataInput.readInt();
-    int cardinality = dataInput.readInt();
-    byte[] buf = new byte[dataInput.readInt()];
-    dataInput.readFully(buf);
-    String vectorClassName = new String(buf, Charset.forName("UTF-8"));
-    Vector vector;
-    try {
-      vector = Class.forName(vectorClassName).asSubclass(Vector.class).newInstance();
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
-    } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
-    } catch (InstantiationException e) {
-      throw new RuntimeException(e);
-    }
-    vector.readFields(dataInput);
-
-    this.offset = offset;
-    this.cardinality = cardinality;
-    this.vector = vector;
+    this.offset = dataInput.readInt();
+    this.cardinality = dataInput.readInt();
+    this.vector = readVector(dataInput);
   }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
+    if (this == o)
+      return true;
     return o instanceof Vector && equivalent(this, (Vector) o);
 
   }

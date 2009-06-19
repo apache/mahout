@@ -17,10 +17,15 @@
 
 package org.apache.mahout.matrix;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import junit.framework.TestCase;
+
+import org.apache.hadoop.io.DataOutputBuffer;
 
 public abstract class MatrixTest extends TestCase {
 
@@ -102,15 +107,6 @@ public abstract class MatrixTest extends TestCase {
     int[] c = test.getNumNondefaultElements();
     assertEquals("row size", values.length, c[ROW]);
     assertEquals("col size", values[0].length, c[COL]);
-  }
-
-  public void testToArray() {
-    double[][] array = test.toArray();
-    int[] c = test.size();
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
-        assertEquals("value[" + row + "][" + col + ']', values[row][col],
-            array[row][col]);
   }
 
   public void testViewPart() {
@@ -539,8 +535,8 @@ public abstract class MatrixTest extends TestCase {
       assertTrue(true);
     }
   }
-  
-  public void testLabelBindingSerialization(){
+
+  public void testLabelBindingSerialization() {
     Matrix m = matrixFactory(new double[][] { { 1, 3, 4 }, { 5, 2, 3 },
         { 1, 4, 2 } });
     assertNull("row bindings", m.getRowLabelBindings());
@@ -559,5 +555,21 @@ public abstract class MatrixTest extends TestCase {
     String json = m.asFormatString();
     Matrix mm = AbstractMatrix.decodeMatrix(json);
     assertEquals("Fee", m.get(0, 1), mm.get("Fee", "Bar"));
+  }
+
+  public void testMatrixWritable() throws IOException {
+    Matrix m = matrixFactory(new double[][] { { 1, 3, 4 }, { 5, 2, 3 },
+        { 1, 4, 2 } });
+    DataOutputBuffer out = new DataOutputBuffer();
+    m.write(out);
+    out.close();
+
+    DataInputStream in = new DataInputStream(new ByteArrayInputStream(out
+        .getData()));
+    Matrix m2 = m.like();
+    m2.readFields(in);
+    in.close();
+    assertEquals("row size", m.size()[ROW], m2.size()[ROW]);
+    assertEquals("col size", m.size()[COL], m2.size()[COL]);
   }
 }

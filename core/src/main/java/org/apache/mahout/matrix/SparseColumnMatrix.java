@@ -17,6 +17,9 @@
 
 package org.apache.mahout.matrix;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 /**
  * sparse matrix with general element values whose columns are accessible
@@ -110,16 +113,8 @@ public class SparseColumnMatrix extends AbstractMatrix {
     int[] result = new int[2];
     result[COL] = columns.length;
     for (int col = 0; col < cardinality[COL]; col++)
-      result[ROW] = Math.max(result[ROW], columns[col].getNumNondefaultElements());
-    return result;
-  }
-
-  @Override
-  public double[][] toArray() {
-    double[][] result = new double[cardinality[ROW]][cardinality[COL]];
-    for (int row = 0; row < cardinality[ROW]; row++)
-      for (int col = 0; col < cardinality[COL]; col++)
-        result[row][col] = getQuick(row, col);
+      result[ROW] = Math.max(result[ROW], columns[col]
+          .getNumNondefaultElements());
     return result;
   }
 
@@ -128,8 +123,7 @@ public class SparseColumnMatrix extends AbstractMatrix {
     if (size[COL] > columns.length || size[ROW] > columns[COL].size())
       throw new CardinalityException();
     if (offset[COL] < 0 || offset[COL] + size[COL] > columns.length
-        || offset[ROW] < 0
-        || offset[ROW] + size[ROW] > columns[COL].size())
+        || offset[ROW] < 0 || offset[ROW] + size[ROW] > columns[COL].size())
       throw new IndexException();
     return new MatrixView(this, offset, size);
   }
@@ -166,6 +160,29 @@ public class SparseColumnMatrix extends AbstractMatrix {
     for (int col = 0; col < cardinality[COL]; col++)
       d[col] = getQuick(row, col);
     return new DenseVector(d);
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    super.readFields(in);
+    int[] card = { in.readInt(), in.readInt() };
+    this.cardinality = card;
+    int colSize = in.readInt();
+    this.columns = new Vector[colSize];
+    for (int col = 0; col < colSize; col++) {
+      columns[col] = AbstractVector.readVector(in);
+    }
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    super.write(out);
+    out.writeInt(cardinality[ROW]);
+    out.writeInt(cardinality[COL]);
+    out.writeInt(columns.length);
+    for (Vector col : columns) {
+      AbstractVector.writeVector(out, col);
+    }
   }
 
 }

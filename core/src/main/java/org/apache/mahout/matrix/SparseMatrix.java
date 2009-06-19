@@ -17,6 +17,9 @@
 
 package org.apache.mahout.matrix;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -112,16 +115,8 @@ public class SparseMatrix extends AbstractMatrix {
     int[] result = new int[2];
     result[ROW] = rows.size();
     for (Map.Entry<Integer, Vector> integerVectorEntry : rows.entrySet())
-      result[COL] = Math.max(result[COL], integerVectorEntry.getValue().getNumNondefaultElements());
-    return result;
-  }
-
-  @Override
-  public double[][] toArray() {
-    double[][] result = new double[cardinality[ROW]][cardinality[COL]];
-    for (int row = 0; row < cardinality[ROW]; row++)
-      for (int col = 0; col < cardinality[COL]; col++)
-        result[row][col] = getQuick(row, col);
+      result[COL] = Math.max(result[COL], integerVectorEntry.getValue()
+          .getNumNondefaultElements());
     return result;
   }
 
@@ -180,6 +175,31 @@ public class SparseMatrix extends AbstractMatrix {
     if (res == null)
       res = new SparseVector(cardinality[ROW]);
     return res;
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    super.readFields(in);
+    int[] card = { in.readInt(), in.readInt() };
+    this.cardinality = card;
+    int rowsize = in.readInt();
+    this.rows = new HashMap<Integer, Vector>();
+    for (int row = 0; row < rowsize; row++) {
+      int key = in.readInt();
+      rows.put(key, AbstractVector.readVector(in));
+    }
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    super.write(out);
+    out.writeInt(cardinality[ROW]);
+    out.writeInt(cardinality[COL]);
+    out.writeInt(rows.size());
+    for (Integer row : rows.keySet()) {
+      out.writeInt(row);
+      AbstractVector.writeVector(out, rows.get(row));
+    }
   }
 
 }

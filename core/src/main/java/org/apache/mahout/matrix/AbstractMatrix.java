@@ -17,6 +17,9 @@
 
 package org.apache.mahout.matrix;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,9 +35,9 @@ import com.google.gson.reflect.TypeToken;
 public abstract class AbstractMatrix implements Matrix {
 
   private Map<String, Integer> columnLabelBindings;
-  
+
   private Map<String, Integer> rowLabelBindings;
-  
+
   @Override
   public double get(String rowLabel, String columnLabel) throws IndexException,
       UnboundLabelException {
@@ -97,7 +100,7 @@ public abstract class AbstractMatrix implements Matrix {
     if (columnLabelBindings == null)
       columnLabelBindings = new HashMap<String, Integer>();
     columnLabelBindings.put(columnLabel, column);
-    
+
     set(row, column, value);
   }
 
@@ -357,6 +360,69 @@ public abstract class AbstractMatrix implements Matrix {
       for (int col = 0; col < c[COL]; col++)
         result += getQuick(row, col);
     return result;
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    // read the label bindings
+    int colSize = in.readInt();
+    if (colSize > 0) {
+      columnLabelBindings = new HashMap<String, Integer>();
+      for (int i = 0; i < colSize; i++)
+        columnLabelBindings.put(in.readUTF(), in.readInt());
+    }
+    int rowSize = in.readInt();
+    if (rowSize > 0) {
+      rowLabelBindings = new HashMap<String, Integer>();
+      for (int i = 0; i < rowSize; i++)
+        rowLabelBindings.put(in.readUTF(), in.readInt());
+    }
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    // write the label bindings
+    if (columnLabelBindings == null)
+      out.writeInt(0);
+    else {
+      out.writeInt(columnLabelBindings.size());
+      for (String key : columnLabelBindings.keySet()) {
+        out.writeUTF(key);
+        out.writeInt(columnLabelBindings.get(key));
+      }
+    }
+    if (rowLabelBindings == null)
+      out.writeInt(0);
+    else {
+      out.writeInt(rowLabelBindings.size());
+      for (String key : rowLabelBindings.keySet()) {
+        out.writeUTF(key);
+        out.writeInt(rowLabelBindings.get(key));
+      }
+    }
+  }
+
+  protected static Matrix readMatrix(DataInput in) throws IOException {
+    String matrixClassName = in.readUTF();
+    Matrix matrix;
+    try {
+      matrix = Class.forName(matrixClassName).asSubclass(Matrix.class)
+          .newInstance();
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    } catch (InstantiationException e) {
+      throw new RuntimeException(e);
+    }
+    matrix.readFields(in);
+    return matrix;
+  }
+
+  protected static void writeMatrix(DataOutput out, Matrix matrix)
+      throws IOException {
+    out.writeUTF(matrix.getClass().getName());
+    matrix.write(out);
   }
 
 }

@@ -17,6 +17,9 @@
 
 package org.apache.mahout.matrix;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 /**
  * Implements subset view of a Matrix
@@ -38,12 +41,9 @@ public class MatrixView extends AbstractMatrix {
   /**
    * Construct a view of the matrix with given offset and cardinality
    * 
-   * @param matrix
-   *            an underlying Matrix
-   * @param offset
-   *            the int[2] offset into the underlying matrix
-   * @param cardinality
-   *            the int[2] cardinality of the view
+   * @param matrix an underlying Matrix
+   * @param offset the int[2] offset into the underlying matrix
+   * @param cardinality the int[2] cardinality of the view
    */
   public MatrixView(Matrix matrix, int[] offset, int[] cardinality) {
     this.matrix = matrix;
@@ -85,16 +85,6 @@ public class MatrixView extends AbstractMatrix {
   @Override
   public int[] getNumNondefaultElements() {
     return cardinality;
-  }
-
-  @Override
-  public double[][] toArray() {
-    double[][] result = new double[cardinality[ROW]][cardinality[COL]];
-    for (int row = ROW; row < cardinality[ROW]; row++)
-      for (int col = ROW; col < cardinality[COL]; col++)
-        result[row][col] = matrix
-            .getQuick(offset[ROW] + row, offset[COL] + col);
-    return result;
   }
 
   @Override
@@ -152,5 +142,25 @@ public class MatrixView extends AbstractMatrix {
       throw new IndexException();
     return new VectorView(matrix.getRow(row + offset[ROW]), offset[COL],
         cardinality[COL]);
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    super.readFields(in);
+    int[] o = { in.readInt(), in.readInt() };
+    this.offset = o;
+    int[] c = { in.readInt(), in.readInt() };
+    this.cardinality = c;
+    this.matrix = readMatrix(in);
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    super.write(out);
+    out.writeInt(offset[ROW]);
+    out.writeInt(offset[COL]);
+    out.writeInt(cardinality[ROW]);
+    out.writeInt(cardinality[COL]);
+    writeMatrix(out, this.matrix);
   }
 }

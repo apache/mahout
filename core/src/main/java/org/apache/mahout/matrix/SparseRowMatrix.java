@@ -17,6 +17,9 @@
 
 package org.apache.mahout.matrix;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 /**
  * sparse matrix with general element values whose rows are accessible quickly.
@@ -35,10 +38,8 @@ public class SparseRowMatrix extends AbstractMatrix {
   /**
    * Construct a matrix of the given cardinality with the given rows
    * 
-   * @param cardinality
-   *            the int[2] cardinality desired
-   * @param rows
-   *            a SparseVector[] array of rows
+   * @param cardinality the int[2] cardinality desired
+   * @param rows a SparseVector[] array of rows
    */
   public SparseRowMatrix(int[] cardinality, SparseVector[] rows) {
     this.cardinality = cardinality.clone();
@@ -50,8 +51,7 @@ public class SparseRowMatrix extends AbstractMatrix {
   /**
    * Construct a matrix of the given cardinality
    * 
-   * @param cardinality
-   *            the int[2] cardinality desired
+   * @param cardinality the int[2] cardinality desired
    */
   public SparseRowMatrix(int[] cardinality) {
     this.cardinality = cardinality.clone();
@@ -116,15 +116,6 @@ public class SparseRowMatrix extends AbstractMatrix {
   }
 
   @Override
-  public double[][] toArray() {
-    double[][] result = new double[cardinality[ROW]][cardinality[COL]];
-    for (int row = 0; row < cardinality[ROW]; row++)
-      for (int col = 0; col < cardinality[COL]; col++)
-        result[row][col] = getQuick(row, col);
-    return result;
-  }
-
-  @Override
   public Matrix viewPart(int[] offset, int[] size) {
     if (size[ROW] > rows.length || size[COL] > rows[ROW].size())
       throw new CardinalityException();
@@ -166,6 +157,29 @@ public class SparseRowMatrix extends AbstractMatrix {
     if (row < 0 || row >= cardinality[ROW])
       throw new IndexException();
     return rows[row];
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    super.readFields(in);
+    int[] card = { in.readInt(), in.readInt() };
+    this.cardinality = card;
+    int rowsize = in.readInt();
+    this.rows = new Vector[rowsize];
+    for (int row = 0; row < rowsize; row++) {
+      rows[row] = AbstractVector.readVector(in);
+    }
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    super.write(out);
+    out.writeInt(cardinality[ROW]);
+    out.writeInt(cardinality[COL]);
+    out.writeInt(rows.length);
+    for (Vector row : rows) {
+      AbstractVector.writeVector(out, row);
+    }
   }
 
 }

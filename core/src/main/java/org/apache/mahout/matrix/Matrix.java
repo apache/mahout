@@ -19,10 +19,12 @@ package org.apache.mahout.matrix;
 
 import java.util.Map;
 
+import org.apache.hadoop.io.Writable;
+
 /**
  * The basic interface including numerous convenience functions
  */
-public interface Matrix extends Cloneable {
+public interface Matrix extends Cloneable, Writable {
 
   /**
    * @return a formatted String suitable for output
@@ -268,13 +270,6 @@ public interface Matrix extends Cloneable {
    * @return the transpose
    */
   Matrix transpose();
-
-  /**
-   * Return the element of the recipient as a double[]
-   * 
-   * @return a double[][]
-   */
-  double[][] toArray();
 
   /**
    * Return a new matrix containing the subset of the recipient

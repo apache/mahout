@@ -17,6 +17,9 @@
 
 package org.apache.mahout.matrix;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 /**
  * Matrix of doubles implemented using a 2-d array
@@ -108,12 +111,6 @@ public class DenseMatrix extends AbstractMatrix {
   }
 
   @Override
-  public double[][] toArray() {
-    DenseMatrix result = new DenseMatrix(values);
-    return result.values;
-  }
-
-  @Override
   public Matrix viewPart(int[] offset, int[] size) {
     if (size[ROW] > rowSize() || size[COL] > columnSize())
       throw new CardinalityException();
@@ -156,6 +153,27 @@ public class DenseMatrix extends AbstractMatrix {
     if (row < 0 || row >= rowSize())
       throw new IndexException();
     return new DenseVector(values[row]);
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    super.readFields(in);
+    int rows = in.readInt();
+    int columns = in.readInt();
+    this.values = new double[rows][columns];
+    for (int row = 0; row < rows; row++)
+      for (int column = 0; column < columns; column++)
+        this.values[row][column] = in.readDouble();
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    super.write(out);
+    out.writeInt(rowSize());
+    out.writeInt(columnSize());
+    for (double[] row : values)
+      for (double value : row)
+        out.writeDouble(value);
   }
 
 }

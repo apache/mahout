@@ -35,13 +35,14 @@ public class TestVectorWritable extends TestCase {
     writable.write(out);
     out.close();
 
-    DataInputStream in = new DataInputStream(new ByteArrayInputStream(out.getData()));
+    DataInputStream in = new DataInputStream(new ByteArrayInputStream(out
+        .getData()));
     writable.readFields(in);
     in.close();
 
     assertEquals(cardinality, writable.size());
     for (int i = 0; i < cardinality; i++) {
-      assertEquals((double)i, writable.get(i));
+      assertEquals((double) i, writable.get(i));
     }
 
     in = new DataInputStream(new ByteArrayInputStream(out.getData()));
@@ -50,12 +51,14 @@ public class TestVectorWritable extends TestCase {
 
     assertEquals(cardinality, writable.size());
     for (int i = 0; i < cardinality; i++) {
-      assertEquals((double)i, writable.get(i));
+      assertEquals((double) i, writable.get(i));
     }
   }
 
   public void testVectors() throws Exception {
     doTest(new SparseVector(cardinality));
     doTest(new DenseVector(cardinality));
+    doTest(new VectorView(new SparseVector(cardinality + 1), 1, cardinality));
+    doTest(new VectorView(new DenseVector(cardinality + 1), 1, cardinality));
   }
 }
