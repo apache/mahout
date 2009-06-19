@@ -26,6 +26,7 @@ import org.apache.mahout.cf.taste.impl.recommender.GenericUserBasedRecommender;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
+import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 
@@ -57,6 +58,7 @@ public final class FileDataModelTest extends TasteTestCase {
           "D456,456,0.1"};
 
   private DataModel model;
+  private File testFile;
 
   @Override
   public void setUp() throws Exception {
@@ -72,7 +74,7 @@ public final class FileDataModelTest extends TasteTestCase {
         throw new IOException("Could not create temp directory");
       }
     }
-    File testFile = File.createTempFile("test", ".txt", tmpLoc);
+    testFile = File.createTempFile("test", ".txt", tmpLoc);
     testFile.deleteOnExit();
     PrintWriter writer =
         new PrintWriter(new OutputStreamWriter(new FileOutputStream(testFile), Charset.forName("UTF-8")));
@@ -96,6 +98,18 @@ public final class FileDataModelTest extends TasteTestCase {
 
     // Make sure this doesn't throw an exception
     model.refresh(null);
+  }
+
+
+  public void testTranspose() throws Exception {
+    FileDataModel tModel = new FileDataModel(testFile, true);
+    Item item = tModel.getItem("A123");
+    assertNotNull("item is null and it shouldn't be", item);
+    User user = tModel.getUser("456");
+    assertNotNull("user is null and it shouldn't be", user);
+    Preference [] pref = tModel.getPreferencesForItemAsArray("A123");
+    assertNotNull("pref is null and it shouldn't be", pref);
+    assertEquals("pref Size: " + pref.length + " is not: " + 3, 3, pref.length);
   }
 
   public void testItem() throws Exception {

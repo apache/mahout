@@ -92,6 +92,7 @@ public class FileDataModel implements DataModel {
   private boolean loaded;
   private DataModel delegate;
   private final ReentrantLock reloadLock;
+  private final boolean transpose;
 
   /**
    * @param dataFile file containing preferences data. If file is compressed (and name ends in .gz
@@ -99,6 +100,10 @@ public class FileDataModel implements DataModel {
    * @throws FileNotFoundException if dataFile does not exist
    */
   public FileDataModel(File dataFile) throws FileNotFoundException {
+    this(dataFile, false);
+  }
+
+  public FileDataModel(File dataFile, boolean transpose) throws FileNotFoundException {
     if (dataFile == null) {
       throw new IllegalArgumentException("dataFile is null");
     }
@@ -113,6 +118,7 @@ public class FileDataModel implements DataModel {
     this.dataFile = dataFile.getAbsoluteFile();
     this.lastModified = dataFile.lastModified();
     this.reloadLock = new ReentrantLock();
+    this.transpose = transpose;
   }
 
   public File getDataFile() {
@@ -234,6 +240,11 @@ public class FileDataModel implements DataModel {
     } else {
       itemID = line.substring(delimiterOne + 1);
       preferenceValueString = null;
+    }
+    if (transpose){
+      String tmp = userID;
+      userID = itemID;
+      itemID = tmp;
     }
     List<Preference> prefs = data.get(userID);
     if (prefs == null) {
