@@ -17,8 +17,6 @@
 
 package org.apache.mahout.matrix;
 
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.WritableComparable;
 
 /**
  * Matrix of doubles implemented using a 2-d array
@@ -61,11 +59,6 @@ public class DenseMatrix extends AbstractMatrix {
    */
   public DenseMatrix(int rows, int columns) {
     this.values = new double[rows][columns];
-  }
-
-  @Override
-  public WritableComparable<?> asWritableComparable() {
-    return new Text(asFormatString());
   }
 
   @Override

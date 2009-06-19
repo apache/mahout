@@ -17,8 +17,6 @@
 
 package org.apache.mahout.matrix;
 
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.WritableComparable;
 
 /**
  * sparse matrix with general element values whose columns are accessible
@@ -57,12 +55,6 @@ public class SparseColumnMatrix extends AbstractMatrix {
     this.columns = new SparseVector[cardinality[COL]];
     for (int col = 0; col < cardinality[COL]; col++)
       this.columns[col] = new SparseVector(cardinality[ROW]);
-  }
-
-  @Override
-  public WritableComparable<?> asWritableComparable() {
-    String out = asFormatString();
-    return new Text(out);
   }
 
   @Override

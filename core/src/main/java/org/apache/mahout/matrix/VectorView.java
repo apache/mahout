@@ -17,15 +17,12 @@
 
 package org.apache.mahout.matrix;
 
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.WritableComparable;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.nio.charset.Charset;
 
 /**
  * Implements subset view of a Vector
@@ -53,12 +50,6 @@ public class VectorView extends AbstractVector {
   @Override
   protected Matrix matrixLike(int rows, int columns) {
     return ((AbstractVector) vector).matrixLike(rows, columns);
-  }
-
-  @Override
-  public WritableComparable<?> asWritableComparable() {
-    String out = asFormatString();
-    return new Text(out);
   }
 
   @Override
@@ -189,6 +180,7 @@ public class VectorView extends AbstractVector {
 
   @Override
   public void write(DataOutput dataOutput) throws IOException {
+    dataOutput.writeUTF(this.name==null? "": this.name);
     dataOutput.writeInt(offset);
     dataOutput.writeInt(cardinality);
     String vectorClassName = vector.getClass().getName();
@@ -199,6 +191,7 @@ public class VectorView extends AbstractVector {
 
   @Override
   public void readFields(DataInput dataInput) throws IOException {
+    this.name = dataInput.readUTF();
     int offset = dataInput.readInt();
     int cardinality = dataInput.readInt();
     byte[] buf = new byte[dataInput.readInt()];

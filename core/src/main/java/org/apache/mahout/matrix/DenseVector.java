@@ -17,14 +17,11 @@
 
 package org.apache.mahout.matrix;
 
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.WritableComparable;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.NoSuchElementException;
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 
 /**
  * Implements vector as an array of doubles
@@ -35,7 +32,7 @@ public class DenseVector extends AbstractVector {
   public DenseVector() {
   }
 
-  public DenseVector(String name){
+  public DenseVector(String name) {
     super(name);
   }
 
@@ -72,11 +69,6 @@ public class DenseVector extends AbstractVector {
   @Override
   protected Matrix matrixLike(int rows, int columns) {
     return new DenseMatrix(rows, columns);
-  }
-
-  @Override
-  public WritableComparable<?> asWritableComparable() {
-    return new Text(asFormatString());
   }
 
   @Override
@@ -174,9 +166,9 @@ public class DenseVector extends AbstractVector {
     }
   }
 
-
   @Override
   public void write(DataOutput dataOutput) throws IOException {
+    dataOutput.writeUTF(this.name==null? "": this.name);
     dataOutput.writeInt(size());
     for (Vector.Element element : this) {
       dataOutput.writeDouble(element.get());
@@ -185,6 +177,7 @@ public class DenseVector extends AbstractVector {
 
   @Override
   public void readFields(DataInput dataInput) throws IOException {
+    this.name = dataInput.readUTF();
     double[] values = new double[dataInput.readInt()];
     for (int i = 0; i < values.length; i++) {
       values[i] = dataInput.readDouble();
@@ -193,30 +186,38 @@ public class DenseVector extends AbstractVector {
   }
 
   /**
-   * Indicate whether the two objects are the same or not.  Two {@link org.apache.mahout.matrix.Vector}s can be equal
-   * even if the underlying implementation is not equal.
+   * Indicate whether the two objects are the same or not. Two
+   * {@link org.apache.mahout.matrix.Vector}s can be equal even if the
+   * underlying implementation is not equal.
+   * 
    * @param o The object to compare
-   * @return true if the objects have the same cell values and same name, false otherwise.
-   *
+   * @return true if the objects have the same cell values and same name, false
+   *         otherwise.
+   * 
    * @see AbstractVector#strictEquivalence(Vector, Vector)
    * @see AbstractVector#equivalent(Vector, Vector)
    */
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Vector)) return false;
+    if (this == o)
+      return true;
+    if (!(o instanceof Vector))
+      return false;
 
     Vector that = (Vector) o;
     String thatName = that.getName();
-    if (this.size() != that.size()) return false;
-    if (name != null && thatName != null && !name.equals(thatName)){
+    if (this.size() != that.size())
       return false;
-    } else if ((name != null && thatName == null) || (thatName != null && name == null)){
+    if (name != null && thatName != null && !name.equals(thatName)) {
+      return false;
+    } else if ((name != null && thatName == null)
+        || (thatName != null && name == null)) {
       return false;
     }
 
     if (that instanceof DenseVector) {
-      if (!Arrays.equals(values, ((DenseVector) that).values)) return false;
+      if (!Arrays.equals(values, ((DenseVector) that).values))
+        return false;
     } else {
       return equivalent(this, that);
     }

@@ -19,19 +19,10 @@ package org.apache.mahout.matrix;
 
 import java.util.Map;
 
-import org.apache.hadoop.io.WritableComparable;
-
 /**
  * The basic interface including numerous convenience functions
  */
 public interface Matrix extends Cloneable {
-
-  /**
-   * Return a formatted WritableComparable<?> suitable for output
-   * 
-   * @return formatted WritableComparable
-   */
-  WritableComparable<?> asWritableComparable();
 
   /**
    * @return a formatted String suitable for output

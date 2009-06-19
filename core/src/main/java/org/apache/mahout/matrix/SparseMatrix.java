@@ -17,9 +17,6 @@
 
 package org.apache.mahout.matrix;
 
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.WritableComparable;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,12 +54,6 @@ public class SparseMatrix extends AbstractMatrix {
   public SparseMatrix(int[] cardinality) {
     this.cardinality = cardinality.clone();
     this.rows = new HashMap<Integer, Vector>();
-  }
-
-  @Override
-  public WritableComparable<?> asWritableComparable() {
-    String out = asFormatString();
-    return new Text(out);
   }
 
   @Override

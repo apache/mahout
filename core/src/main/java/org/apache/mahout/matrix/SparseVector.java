@@ -22,9 +22,6 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.WritableComparable;
-
 /**
  * Implements vector that only stores non-zero doubles
  */
@@ -58,12 +55,6 @@ public class SparseVector extends AbstractVector {
   protected Matrix matrixLike(int rows, int columns) {
     int[] cardinality = { rows, columns };
     return new SparseRowMatrix(cardinality);
-  }
-
-  @Override
-  public WritableComparable<?> asWritableComparable() {
-    String out = asFormatString();
-    return new Text(out);
   }
 
   @Override
@@ -204,6 +195,7 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public void write(DataOutput dataOutput) throws IOException {
+    dataOutput.writeUTF(this.name==null? "": this.name);
     dataOutput.writeInt(size());
     dataOutput.writeInt(getNumNondefaultElements());
     for (Vector.Element element : this) {
@@ -216,6 +208,7 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public void readFields(DataInput dataInput) throws IOException {
+    this.name = dataInput.readUTF();
     int cardinality = dataInput.readInt();
     int size = dataInput.readInt();
     OrderedIntDoubleMapping values = new OrderedIntDoubleMapping(size);

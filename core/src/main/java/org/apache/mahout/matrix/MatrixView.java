@@ -17,8 +17,6 @@
 
 package org.apache.mahout.matrix;
 
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.WritableComparable;
 
 /**
  * Implements subset view of a Matrix
@@ -51,12 +49,6 @@ public class MatrixView extends AbstractMatrix {
     this.matrix = matrix;
     this.offset = offset;
     this.cardinality = cardinality;
-  }
-
-  @Override
-  public WritableComparable<?> asWritableComparable() {
-    String out = asFormatString();
-    return new Text(out);
   }
 
   @Override

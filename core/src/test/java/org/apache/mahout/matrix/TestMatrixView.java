@@ -43,8 +43,7 @@ public class TestMatrixView extends TestCase {
   }
 
   public void testAsFormatString() {
-    String string = test
-        .asWritableComparable().toString();
+    String string = test.asFormatString();
     Matrix m = AbstractMatrix.decodeMatrix(string);
     int[] c = m.size();
     assertEquals("row cardinality", values.length - 2, c[ROW]);
