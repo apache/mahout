@@ -60,13 +60,13 @@ public class MatrixView extends AbstractMatrix {
   }
 
   @Override
-  public int[] cardinality() {
+  public int[] size() {
     return cardinality;
   }
 
   @Override
-  public Matrix copy() {
-    return new MatrixView(matrix.copy(), offset, cardinality);
+  public Matrix clone() {
+    return new MatrixView(matrix.clone(), offset, cardinality);
   }
 
   @Override
@@ -91,7 +91,7 @@ public class MatrixView extends AbstractMatrix {
   }
 
   @Override
-  public int[] size() {
+  public int[] getNumNondefaultElements() {
     return cardinality;
   }
 
@@ -128,7 +128,7 @@ public class MatrixView extends AbstractMatrix {
 
   @Override
   public Matrix assignColumn(int column, Vector other) {
-    if (cardinality[ROW] != other.cardinality())
+    if (cardinality[ROW] != other.size())
       throw new CardinalityException();
     for (int row = 0; row < cardinality[ROW]; row++)
       matrix.setQuick(row + offset[ROW], column + offset[COL], other
@@ -138,7 +138,7 @@ public class MatrixView extends AbstractMatrix {
 
   @Override
   public Matrix assignRow(int row, Vector other) {
-    if (cardinality[COL] != other.cardinality())
+    if (cardinality[COL] != other.size())
       throw new CardinalityException();
     for (int col = 0; col < cardinality[COL]; col++)
       matrix

@@ -57,10 +57,10 @@ public class EuclideanDistanceMeasure implements DistanceMeasure {
 
   @Override
   public double distance(Vector v1, Vector v2) {
-    if (v1.cardinality() != v2.cardinality())
+    if (v1.size() != v2.size())
       throw new CardinalityException();
     double result = 0;
-    for (int i = 0; i < v1.cardinality(); i++) {
+    for (int i = 0; i < v1.size(); i++) {
       double delta = v2.getQuick(i) - v1.getQuick(i);
       result += delta * delta;
     }

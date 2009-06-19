@@ -18,7 +18,7 @@
 package org.apache.mahout.matrix;
 
 import java.lang.reflect.Type;
-import java.util.Date;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -251,57 +251,57 @@ public class VectorTest extends TestCase {
   }
 
   public void testSparseVectorTimesX() {
-    Random rnd = new Random();
+    Random rnd = new Random(0xDEADBEEFL);
     Vector v1 = randomSparseVector(rnd);
     double x = rnd.nextDouble();
-    long t0 = new Date().getTime();
+    long t0 = System.currentTimeMillis();
     SparseVector.optimizeTimes = false;
     Vector rRef = null;
     for (int i = 0; i < 10; i++)
       rRef = v1.times(x);
-    long t1 = new Date().getTime();
+    long t1 = System.currentTimeMillis();
     SparseVector.optimizeTimes = true;
     Vector rOpt = null;
     for (int i = 0; i < 10; i++)
       rOpt = v1.times(x);
-    long t2 = new Date().getTime();
+    long t2 = System.currentTimeMillis();
     long tOpt = t2 - t1;
     long tRef = t1 - t0;
     assertTrue(tOpt < tRef);
-    System.out.println("testSparseVectorTimesX tRef=tOpt=" + (tRef - tOpt)
+    System.out.println("testSparseVectorTimesX tRef-tOpt=" + (tRef - tOpt)
         + " ms for 10 iterations");
     for (int i = 0; i < 50000; i++)
       assertEquals("i=" + i, rRef.getQuick(i), rOpt.getQuick(i));
   }
 
   public void testSparseVectorTimesV() {
-    Random rnd = new Random();
+    Random rnd = new Random(0xDEADBEEFL);
     Vector v1 = randomSparseVector(rnd);
     Vector v2 = randomSparseVector(rnd);
-    long t0 = new Date().getTime();
+    long t0 = System.currentTimeMillis();
     SparseVector.optimizeTimes = false;
     Vector rRef = null;
     for (int i = 0; i < 10; i++)
       rRef = v1.times(v2);
-    long t1 = new Date().getTime();
+    long t1 = System.currentTimeMillis();
     SparseVector.optimizeTimes = true;
     Vector rOpt = null;
     for (int i = 0; i < 10; i++)
       rOpt = v1.times(v2);
-    long t2 = new Date().getTime();
+    long t2 = System.currentTimeMillis();
     long tOpt = t2 - t1;
     long tRef = t1 - t0;
     assertTrue(tOpt < tRef);
-    System.out.println("testSparseVectorTimesV tRef=tOpt=" + (tRef - tOpt)
+    System.out.println("testSparseVectorTimesV tRef-tOpt=" + (tRef - tOpt)
         + " ms for 10 iterations");
     for (int i = 0; i < 50000; i++)
       assertEquals("i=" + i, rRef.getQuick(i), rOpt.getQuick(i));
   }
 
-  private Vector randomSparseVector(Random rnd) {
+  private static Vector randomSparseVector(Random rnd) {
     SparseVector v1 = new SparseVector(50000);
     for (int i = 0; i < 1000; i++)
-      v1.setQuick((int) (rnd.nextDouble() * 50000), rnd.nextDouble());
+      v1.setQuick(rnd.nextInt(50000), rnd.nextDouble());
     return v1;
   }
 

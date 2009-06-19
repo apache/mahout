@@ -123,7 +123,7 @@ public class TestCanopyCreation extends TestCase {
           testCanopy.getNumPoints());
       Vector refCentroid = refCanopy.computeCentroid();
       Vector testCentroid = testCanopy.computeCentroid();
-      for (int pointIx = 0; pointIx < refCentroid.cardinality(); pointIx++) {
+      for (int pointIx = 0; pointIx < refCentroid.size(); pointIx++) {
         assertEquals("canopy centroid " + canopyIx + '[' + pointIx + ']',
             refCentroid.get(pointIx), testCentroid.get(pointIx));
       }

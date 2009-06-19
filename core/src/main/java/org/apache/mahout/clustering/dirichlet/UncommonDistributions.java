@@ -175,7 +175,7 @@ public final class UncommonDistributions {
     double total = probabilities.zSum();
     double nextDouble = random.nextDouble();
     double p = nextDouble * total;
-    for (int i = 0; i < probabilities.cardinality(); i++) {
+    for (int i = 0; i < probabilities.size(); i++) {
       double p_i = probabilities.get(i);
       if (p < p_i) {
         return i;
@@ -207,7 +207,7 @@ public final class UncommonDistributions {
   public static Vector rMultinom(int size, Vector probabilities) {
     // our probability argument may not be normalized.
     double total = probabilities.zSum();
-    int cardinality = probabilities.cardinality();
+    int cardinality = probabilities.size();
     Vector result = new DenseVector(cardinality);
     for (int i = 0; total > 0 && i < cardinality; i++) {
       double p = probabilities.get(i);
@@ -253,7 +253,7 @@ public final class UncommonDistributions {
     Vector r = alpha.like();
     double total = alpha.zSum();
     double remainder = 1;
-    for (int i = 0; i < r.cardinality(); i++) {
+    for (int i = 0; i < r.size(); i++) {
       double a = alpha.get(i);
       total -= a;
       double beta = rBeta(a, Math.max(0, total));

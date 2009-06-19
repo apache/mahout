@@ -95,27 +95,29 @@ public abstract class AbstractVector implements Vector {
     }
   }
 
+  public abstract Vector clone();
+
   @Override
   public Vector divide(double x) {
-    Vector result = copy();
-    for (int i = 0; i < result.cardinality(); i++)
+    Vector result = clone();
+    for (int i = 0; i < result.size(); i++)
       result.setQuick(i, getQuick(i) / x);
     return result;
   }
 
   @Override
   public double dot(Vector x) {
-    if (cardinality() != x.cardinality())
+    if (size() != x.size())
       throw new CardinalityException();
     double result = 0;
-    for (int i = 0; i < cardinality(); i++)
+    for (int i = 0; i < size(); i++)
       result += getQuick(i) * x.getQuick(i);
     return result;
   }
 
   @Override
   public double get(int index) {
-    if (index >= 0 && index < cardinality())
+    if (index >= 0 && index < size())
       return getQuick(index);
     else
       throw new IndexException();
@@ -123,10 +125,10 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public Vector minus(Vector x) {
-    if (cardinality() != x.cardinality())
+    if (size() != x.size())
       throw new CardinalityException();
-    Vector result = copy();
-    for (int i = 0; i < result.cardinality(); i++)
+    Vector result = clone();
+    for (int i = 0; i < result.size(); i++)
       result.setQuick(i, getQuick(i) - x.getQuick(i));
     return result;
   }
@@ -152,13 +154,13 @@ public abstract class AbstractVector implements Vector {
     } else if (power == 0.0) {
       // this is the number of non-zero elements
       double val = 0.0;
-      for (int i = 0; i < cardinality(); i++) {
+      for (int i = 0; i < size(); i++) {
         val += getQuick(i) == 0 ? 0 : 1;
       }
       return divide(val);
     } else {
       double val = 0.0;
-      for (int i = 0; i < cardinality(); i++) {
+      for (int i = 0; i < size(); i++) {
         val += Math.pow(getQuick(i), power);
       }
       double divFactor = Math.pow(val, 1.0 / power);
@@ -169,7 +171,7 @@ public abstract class AbstractVector implements Vector {
   @Override
   public double maxValue() {
     double result = Double.MIN_VALUE;
-    for (int i = 0; i < cardinality(); i++) {
+    for (int i = 0; i < size(); i++) {
       result = Math.max(result, getQuick(i));
     }
     return result;
@@ -179,7 +181,7 @@ public abstract class AbstractVector implements Vector {
   public int maxValueIndex() {
     int result = -1;
     double max = Double.MIN_VALUE;
-    for (int i = 0; i < cardinality(); i++) {
+    for (int i = 0; i < size(); i++) {
       double tmp = getQuick(i);
       if (tmp > max) {
         max = tmp;
@@ -191,25 +193,25 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public Vector plus(double x) {
-    Vector result = copy();
-    for (int i = 0; i < result.cardinality(); i++)
+    Vector result = clone();
+    for (int i = 0; i < result.size(); i++)
       result.setQuick(i, getQuick(i) + x);
     return result;
   }
 
   @Override
   public Vector plus(Vector x) {
-    if (cardinality() != x.cardinality())
+    if (size() != x.size())
       throw new CardinalityException();
-    Vector result = copy();
-    for (int i = 0; i < result.cardinality(); i++)
+    Vector result = clone();
+    for (int i = 0; i < result.size(); i++)
       result.setQuick(i, getQuick(i) + x.getQuick(i));
     return result;
   }
 
   @Override
   public void set(int index, double value) {
-    if (index >= 0 && index < cardinality())
+    if (index >= 0 && index < size())
       setQuick(index, value);
     else
       throw new IndexException();
@@ -217,18 +219,18 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public Vector times(double x) {
-    Vector result = copy();
-    for (int i = 0; i < result.cardinality(); i++)
+    Vector result = clone();
+    for (int i = 0; i < result.size(); i++)
       result.setQuick(i, getQuick(i) * x);
     return result;
   }
 
   @Override
   public Vector times(Vector x) {
-    if (cardinality() != x.cardinality())
+    if (size() != x.size())
       throw new CardinalityException();
-    Vector result = copy();
-    for (int i = 0; i < result.cardinality(); i++)
+    Vector result = clone();
+    for (int i = 0; i < result.size(); i++)
       result.setQuick(i, getQuick(i) * x.getQuick(i));
     return result;
   }
@@ -236,39 +238,39 @@ public abstract class AbstractVector implements Vector {
   @Override
   public double zSum() {
     double result = 0;
-    for (int i = 0; i < cardinality(); i++)
+    for (int i = 0; i < size(); i++)
       result += getQuick(i);
     return result;
   }
 
   @Override
   public Vector assign(double value) {
-    for (int i = 0; i < cardinality(); i++)
+    for (int i = 0; i < size(); i++)
       setQuick(i, value);
     return this;
   }
 
   @Override
   public Vector assign(double[] values) {
-    if (values.length != cardinality())
+    if (values.length != size())
       throw new CardinalityException();
-    for (int i = 0; i < cardinality(); i++)
+    for (int i = 0; i < size(); i++)
       setQuick(i, values[i]);
     return this;
   }
 
   @Override
   public Vector assign(Vector other) {
-    if (other.cardinality() != cardinality())
+    if (other.size() != size())
       throw new CardinalityException();
-    for (int i = 0; i < cardinality(); i++)
+    for (int i = 0; i < size(); i++)
       setQuick(i, other.getQuick(i));
     return this;
   }
 
   @Override
   public Vector assign(BinaryFunction f, double y) {
-    for (int i = 0; i < cardinality(); i++) {
+    for (int i = 0; i < size(); i++) {
       setQuick(i, f.apply(getQuick(i), y));
     }
     return this;
@@ -276,24 +278,24 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public Vector assign(UnaryFunction function) {
-    for (int i = 0; i < cardinality(); i++)
+    for (int i = 0; i < size(); i++)
       setQuick(i, function.apply(getQuick(i)));
     return this;
   }
 
   @Override
   public Vector assign(Vector other, BinaryFunction function) {
-    if (other.cardinality() != cardinality())
+    if (other.size() != size())
       throw new CardinalityException();
-    for (int i = 0; i < cardinality(); i++)
+    for (int i = 0; i < size(); i++)
       setQuick(i, function.apply(getQuick(i), other.getQuick(i)));
     return this;
   }
 
   @Override
   public Matrix cross(Vector other) {
-    Matrix result = matrixLike(cardinality(), other.cardinality());
-    for (int row = 0; row < cardinality(); row++)
+    Matrix result = matrixLike(size(), other.size());
+    for (int row = 0; row < size(); row++)
       result.assignRow(row, other.times(getQuick(row)));
     return result;
   }
@@ -365,8 +367,8 @@ public abstract class AbstractVector implements Vector {
   public static boolean equivalent(Vector left, Vector right) {
     if (left == right) return true;
     boolean result = true;
-    int leftCardinality = left.cardinality();
-    if (leftCardinality == right.cardinality()) {
+    int leftCardinality = left.size();
+    if (leftCardinality == right.size()) {
       for (int i = 0; i < leftCardinality; i++) {
         if (left.getQuick(i) != right.getQuick(i)) {
           return false;
@@ -402,8 +404,8 @@ public abstract class AbstractVector implements Vector {
     }
     
     boolean result = true;
-    int leftCardinality = left.cardinality();
-    if (leftCardinality == right.cardinality()) {
+    int leftCardinality = left.size();
+    if (leftCardinality == right.size()) {
       for (int i = 0; i < leftCardinality; i++) {
         if (left.getQuick(i) != right.getQuick(i)) {
           return false;

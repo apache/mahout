@@ -78,7 +78,7 @@ public class Canopy {
   public Canopy(Vector point) {
     this.canopyId = nextCanopyId++;
     this.center = point;
-    this.pointTotal = point.copy();
+    this.pointTotal = point.clone();
     this.numPoints = 1;
   }
 
@@ -93,7 +93,7 @@ public class Canopy {
   public Canopy(Vector point, int canopyId) {
     this.canopyId = canopyId;
     this.center = point;
-    this.pointTotal = point.copy();
+    this.pointTotal = point.clone();
     this.numPoints = 1;
   }
 
@@ -263,7 +263,7 @@ public class Canopy {
    */
   public void addPoint(Vector point) {
     numPoints++;
-    for (int i = 0; i < point.cardinality(); i++)
+    for (int i = 0; i < point.size(); i++)
       pointTotal.set(i, point.get(i) + pointTotal.get(i));
   }
 
@@ -317,8 +317,8 @@ public class Canopy {
    * @return a point which is the new centroid
    */
   public Vector computeCentroid() {
-    Vector result = new SparseVector(pointTotal.cardinality());
-    for (int i = 0; i < pointTotal.cardinality(); i++)
+    Vector result = new SparseVector(pointTotal.size());
+    for (int i = 0; i < pointTotal.size(); i++)
       result.set(i, pointTotal.get(i) / numPoints);
     return result;
   }

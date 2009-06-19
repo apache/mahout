@@ -311,7 +311,7 @@ public class SoftCluster {
     s0 += ptProb;
     Vector wtPt = point.times(ptProb);
     if (s1 == null)
-      s1 = point.copy();
+      s1 = point.clone();
     else
       s1 = s1.plus(wtPt);
     if (s2 == null)
@@ -329,7 +329,7 @@ public class SoftCluster {
       Vector radical = s2.times(s0).minus(s1.times(s1));
       radical = radical.times(radical).assign(new SquareRootFunction());
       Vector stds = radical.assign(new SquareRootFunction()).divide(s0);
-      return stds.zSum() / stds.cardinality();
+      return stds.zSum() / stds.size();
     } else
       return 0;
   }
@@ -345,7 +345,7 @@ public class SoftCluster {
     centroid = null;
     pointProbSum += ptProb;
     if (weightedPointTotal == null)
-      weightedPointTotal = point.copy().times(ptProb);
+      weightedPointTotal = point.clone().times(ptProb);
     else
       weightedPointTotal = weightedPointTotal.plus(point.times(ptProb));
   }
@@ -359,7 +359,7 @@ public class SoftCluster {
     centroid = null;
     pointProbSum += partialSumPtProb;
     if (weightedPointTotal == null)
-      weightedPointTotal = delta.copy();
+      weightedPointTotal = delta.clone();
     else
       weightedPointTotal = weightedPointTotal.plus(delta);
   }

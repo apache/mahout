@@ -143,7 +143,7 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Matrix assign(double value) {
-    int[] c = cardinality();
+    int[] c = size();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         setQuick(row, col, value);
@@ -152,7 +152,7 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Matrix assign(double[][] values) {
-    int[] c = cardinality();
+    int[] c = size();
     if (c[ROW] != values.length)
       throw new CardinalityException();
     for (int row = 0; row < c[ROW]; row++)
@@ -166,8 +166,8 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Matrix assign(Matrix other, BinaryFunction function) {
-    int[] c = cardinality();
-    int[] o = other.cardinality();
+    int[] c = size();
+    int[] o = other.size();
     if (c[ROW] != o[ROW] || c[COL] != o[COL])
       throw new CardinalityException();
     for (int row = 0; row < c[ROW]; row++)
@@ -179,8 +179,8 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Matrix assign(Matrix other) {
-    int[] c = cardinality();
-    int[] o = other.cardinality();
+    int[] c = size();
+    int[] o = other.size();
     if (c[ROW] != o[ROW] || c[COL] != o[COL])
       throw new CardinalityException();
     for (int row = 0; row < c[ROW]; row++)
@@ -191,7 +191,7 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Matrix assign(UnaryFunction function) {
-    int[] c = cardinality();
+    int[] c = size();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         setQuick(row, col, function.apply(getQuick(row, col)));
@@ -200,7 +200,7 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public double determinant() {
-    int[] card = cardinality();
+    int[] card = size();
     int rowSize = card[ROW];
     int columnSize = card[COL];
     if (rowSize != columnSize)
@@ -234,10 +234,12 @@ public abstract class AbstractMatrix implements Matrix {
 
   }
 
+  public abstract Matrix clone();
+
   @Override
   public Matrix divide(double x) {
-    Matrix result = copy();
-    int[] c = cardinality();
+    Matrix result = clone();
+    int[] c = size();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         result.setQuick(row, col, result.getQuick(row, col) / x);
@@ -246,7 +248,7 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public double get(int row, int column) {
-    int[] c = cardinality();
+    int[] c = size();
     if (row < 0 || column < 0 || row >= c[ROW] || column >= c[COL])
       throw new IndexException();
     return getQuick(row, column);
@@ -254,11 +256,11 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Matrix minus(Matrix other) {
-    int[] c = cardinality();
-    int[] o = other.cardinality();
+    int[] c = size();
+    int[] o = other.size();
     if (c[ROW] != o[ROW] || c[COL] != o[COL])
       throw new CardinalityException();
-    Matrix result = copy();
+    Matrix result = clone();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         result.setQuick(row, col, result.getQuick(row, col)
@@ -268,8 +270,8 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Matrix plus(double x) {
-    Matrix result = copy();
-    int[] c = cardinality();
+    Matrix result = clone();
+    int[] c = size();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         result.setQuick(row, col, result.getQuick(row, col) + x);
@@ -278,11 +280,11 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Matrix plus(Matrix other) {
-    int[] c = cardinality();
-    int[] o = other.cardinality();
+    int[] c = size();
+    int[] o = other.size();
     if (c[ROW] != o[ROW] || c[COL] != o[COL])
       throw new CardinalityException();
-    Matrix result = copy();
+    Matrix result = clone();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         result.setQuick(row, col, result.getQuick(row, col)
@@ -292,7 +294,7 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public void set(int row, int column, double value) {
-    int[] c = cardinality();
+    int[] c = size();
     if (row < 0 || column < 0 || row >= c[ROW] || column >= c[COL])
       throw new IndexException();
     setQuick(row, column, value);
@@ -300,7 +302,7 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public void set(int row, double[] data) {
-    int[] c = cardinality();
+    int[] c = size();
     if (c[COL] < data.length)
       throw new CardinalityException();
     if ((c[ROW] < row) || (row < 0))
@@ -312,8 +314,8 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Matrix times(double x) {
-    Matrix result = copy();
-    int[] c = cardinality();
+    Matrix result = clone();
+    int[] c = size();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         result.setQuick(row, col, result.getQuick(row, col) * x);
@@ -322,8 +324,8 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Matrix times(Matrix other) {
-    int[] c = cardinality();
-    int[] o = other.cardinality();
+    int[] c = size();
+    int[] o = other.size();
     if (c[COL] != o[ROW])
       throw new CardinalityException();
     Matrix result = like(c[ROW], o[COL]);
@@ -339,7 +341,7 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Matrix transpose() {
-    int[] card = cardinality();
+    int[] card = size();
     Matrix result = like(card[COL], card[ROW]);
     for (int row = 0; row < card[ROW]; row++)
       for (int col = 0; col < card[COL]; col++)
@@ -350,7 +352,7 @@ public abstract class AbstractMatrix implements Matrix {
   @Override
   public double zSum() {
     double result = 0;
-    int[] c = cardinality();
+    int[] c = size();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         result += getQuick(row, col);

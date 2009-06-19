@@ -128,7 +128,7 @@ public class DisplayDirichlet extends Frame {
   public void plotRectangle(Graphics2D g2, Vector v, Vector dv) {
     int h = size / 2;
     double[] flip = { 1, -1 };
-    Vector v2 = v.copy().assign(new DenseVector(flip), new TimesFunction());
+    Vector v2 = v.clone().assign(new DenseVector(flip), new TimesFunction());
     v2 = v2.minus(dv.divide(2));
     double x = v2.get(0) + h;
     double y = v2.get(1) + h;
@@ -145,7 +145,7 @@ public class DisplayDirichlet extends Frame {
   public void plotEllipse(Graphics2D g2, Vector v, Vector dv) {
     int h = size / 2;
     double[] flip = { 1, -1 };
-    Vector v2 = v.copy().assign(new DenseVector(flip), new TimesFunction());
+    Vector v2 = v.clone().assign(new DenseVector(flip), new TimesFunction());
     v2 = v2.minus(dv.divide(2));
     double x = v2.get(0) + h;
     double y = v2.get(1) + h;

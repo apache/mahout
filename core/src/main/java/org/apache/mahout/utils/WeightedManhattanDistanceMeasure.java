@@ -31,12 +31,12 @@ public class WeightedManhattanDistanceMeasure extends WeightedDistanceMeasure {
 
     Vector res = p2.minus(p1);
     if (weights == null) {
-      for (int i = 0; i < res.cardinality(); i++) {
+      for (int i = 0; i < res.size(); i++) {
         result += Math.abs(res.get(i));
       }
     }
     else {
-      for (int i = 0; i < res.cardinality(); i++) {
+      for (int i = 0; i < res.size(); i++) {
         result += Math.abs(res.get(i) * weights.get(i)); // todo this is where the weights goes, right?
       }
     }

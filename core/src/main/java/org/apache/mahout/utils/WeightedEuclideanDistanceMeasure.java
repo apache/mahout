@@ -30,11 +30,11 @@ public class WeightedEuclideanDistanceMeasure extends WeightedDistanceMeasure {
     double result = 0;
     Vector res = p2.minus(p1);
     if (weights == null) {
-      for (int i = 0; i < p1.cardinality(); i++) {
+      for (int i = 0; i < p1.size(); i++) {
         result += res.get(i) * res.get(i);
       }
     } else {
-      for (int i = 0; i < p1.cardinality(); i++) {
+      for (int i = 0; i < p1.size(); i++) {
         result += res.get(i) * res.get(i) * weights.get(i);  // todo this is where the weights goes, right?
       }
     }

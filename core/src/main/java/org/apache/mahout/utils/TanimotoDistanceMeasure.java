@@ -46,7 +46,7 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
     // this whole distance measurent thing
     // should be evaluated using an intermediate vector and BinaryFunction or something?
     
-    Set<Integer> featuresSeen = new HashSet<Integer>((int)((vector0.size() + vector1.size()) * 0.75));
+    Set<Integer> featuresSeen = new HashSet<Integer>((int)((vector0.getNumNondefaultElements() + vector1.getNumNondefaultElements()) * 0.75));
 
     double ab = 0.0;
     double a2 = 0.0;

@@ -322,8 +322,8 @@ public class TestMapReduce extends TestCase {
     assertEquals("modelFactory", state.modelFactory.getClass().getName(),
         state2.modelFactory.getClass().getName());
     assertEquals("clusters", state.clusters.size(), state2.clusters.size());
-    assertEquals("mixture", state.mixture.cardinality(), state2.mixture
-        .cardinality());
+    assertEquals("mixture", state.mixture.size(), state2.mixture
+        .size());
     assertEquals("dirichlet", state.offset, state2.offset);
   }
 

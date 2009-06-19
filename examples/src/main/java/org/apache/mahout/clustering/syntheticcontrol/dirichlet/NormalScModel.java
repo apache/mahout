@@ -77,7 +77,7 @@ public class NormalScModel implements Model<Vector> {
     if (s0 > 1) {
       Vector std = s2.times(s0).minus(s1.times(s1)).assign(
           new SquareRootFunction()).divide(s0);
-      sd = std.zSum() / s1.cardinality();
+      sd = std.zSum() / s1.size();
     } else
       sd = Double.MIN_VALUE;
   }
@@ -101,7 +101,7 @@ public class NormalScModel implements Model<Vector> {
     StringBuilder buf = new StringBuilder();
     buf.append("nm{n=").append(s0).append(" m=[");
     if (mean != null)
-      for (int i = 0; i < mean.cardinality(); i++)
+      for (int i = 0; i < mean.size(); i++)
         buf.append(String.format("%.2f", mean.get(i))).append(", ");
     buf.append("] sd=").append(String.format("%.2f", sd)).append('}');
     return buf.toString();

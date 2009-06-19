@@ -20,8 +20,7 @@ package org.apache.mahout.matrix;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
@@ -35,24 +34,24 @@ public class SparseVector extends AbstractVector {
   public SparseVector() {
   }
 
-  public SparseVector(String name) {
-    super(name);
-  }
-
-  private Map<Integer, Double> values;
+  private OrderedIntDoubleMapping values;
 
   private int cardinality;
 
   public static boolean optimizeTimes = true;
 
-  public SparseVector(int cardinality) {
-    this(null, cardinality);
+  public SparseVector(String name, int cardinality, int size) {
+    super(name);
+    values = new OrderedIntDoubleMapping(size);
+    this.cardinality = cardinality;
   }
 
   public SparseVector(String name, int cardinality) {
-    super(name);
-    values = new HashMap<Integer, Double>();
-    this.cardinality = cardinality;
+    this(name, cardinality, cardinality / 8); // arbitrary estimate of 'sparseness'
+  }
+
+  public SparseVector(int cardinality) {
+    this(null, cardinality, cardinality / 8); // arbitrary estimate of 'sparseness'
   }
 
   @Override
@@ -68,45 +67,30 @@ public class SparseVector extends AbstractVector {
   }
 
   @Override
-  public int cardinality() {
+  public int size() {
     return cardinality;
   }
 
   @Override
-  public SparseVector copy() {
+  public SparseVector clone() {
     SparseVector result = like();
-     for (Map.Entry<Integer, Double> entry : values.entrySet()) {
-      result.setQuick(entry.getKey(), entry.getValue());
-    }
+    result.values = (OrderedIntDoubleMapping) values.clone();
     return result;
   }
 
   @Override
   public double getQuick(int index) {
-    Double value = values.get(index);
-    return value == null ? 0.0 : value;
+    return values.get(index);
   }
 
   @Override
   public void setQuick(int index, double value) {
-    if (value == 0.0)
-      values.remove(index);
-    else
-      values.put(index, value);
+    values.set(index, value);
   }
 
   @Override
-  public int size() {
-    return values.size();
-  }
-
-  @Override
-  public double[] toArray() {
-    double[] result = new double[cardinality];
-    for (Map.Entry<Integer, Double> entry : values.entrySet()) {
-      result[entry.getKey()] = entry.getValue();
-    }
-    return result;
+  public int getNumNondefaultElements() {
+    return values.getNumMappings();
   }
 
   @Override
@@ -128,16 +112,12 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public SparseVector like() {
-    SparseVector sparseVector = new SparseVector(cardinality);
-    sparseVector.setLabelBindings(getLabelBindings());
-    return sparseVector;
+    return new SparseVector(cardinality);
   }
 
   @Override
   public Vector like(int newCardinality) {
-    SparseVector sparseVector = new SparseVector(newCardinality);
-    sparseVector.setLabelBindings(getLabelBindings());
-    return sparseVector;
+    return new SparseVector(newCardinality);
   }
 
   @Override
@@ -155,18 +135,13 @@ public class SparseVector extends AbstractVector {
    * * @see AbstractVector#strictEquivalence(Vector, Vector)
    * @see AbstractVector#equivalent(Vector, Vector) 
    */
+  @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof Vector)) return false;
 
     Vector that = (Vector) o;
-    if (this.cardinality() != that.cardinality()) return false;
-    String thatName = that.getName();
-    if (name != null && thatName != null && !name.equals(thatName)){
-      return false;
-    } else if ((name != null && thatName == null) || (thatName != null && name == null)){
-      return false;
-    }
+    if (this.size() != that.size()) return false;
 
     if (that instanceof SparseVector) {
       return (values == null ? ((SparseVector) that).values == null : values.equals(((SparseVector) that).values));
@@ -175,7 +150,6 @@ public class SparseVector extends AbstractVector {
     }
 
   }
-
 
 
   @Override
@@ -187,20 +161,19 @@ public class SparseVector extends AbstractVector {
   }
 
   private class Iterator implements java.util.Iterator<Vector.Element> {
-    private final java.util.Iterator<Map.Entry<Integer, Double>> it;
-
-    Iterator() {
-      it = values.entrySet().iterator();
-    }
+    private int offset = 0;
 
     @Override
     public boolean hasNext() {
-      return it.hasNext();
+      return offset < values.getNumMappings();
     }
 
     @Override
     public Element next() {
-      return new Element(it.next().getKey());
+      if (offset < values.getNumMappings()) {
+        return new Element(values.getIndices()[offset++]);
+      }
+      throw new NoSuchElementException();
     }
 
     @Override
@@ -212,7 +185,7 @@ public class SparseVector extends AbstractVector {
   @Override
   public double zSum() {
     double result = 0.0;
-    for (Double value : values.values()) {
+    for (double value : values.getValues()) {
       result += value;
     }
     return result;
@@ -220,19 +193,19 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public double dot(Vector x) {
-    if (cardinality() != x.cardinality())
+    if (size() != x.size())
       throw new CardinalityException();
     double result = 0.0;
-    for (Map.Entry<Integer, Double> entry : values.entrySet()) {
-      result += entry.getValue() * x.getQuick(entry.getKey());
+    for (int index : values.getIndices()) {
+      result += values.get(index) * x.getQuick(index);
     }
     return result;
   }
 
   @Override
   public void write(DataOutput dataOutput) throws IOException {
-    dataOutput.writeInt(cardinality());
     dataOutput.writeInt(size());
+    dataOutput.writeInt(getNumNondefaultElements());
     for (Vector.Element element : this) {
       if (element.get() != 0.0d) {
         dataOutput.writeInt(element.index());
@@ -245,9 +218,9 @@ public class SparseVector extends AbstractVector {
   public void readFields(DataInput dataInput) throws IOException {
     int cardinality = dataInput.readInt();
     int size = dataInput.readInt();
-    Map<Integer, Double> values = new HashMap<Integer, Double>(size);
+    OrderedIntDoubleMapping values = new OrderedIntDoubleMapping(size);
     for (int i = 0; i < size; i++) {
-      values.put(dataInput.readInt(), dataInput.readDouble());
+      values.set(dataInput.readInt(), dataInput.readDouble());
     }
     this.cardinality = cardinality;
     this.values = values;
@@ -264,8 +237,8 @@ public class SparseVector extends AbstractVector {
         result.setQuick(index, value * x);
       }
     } else {
-      result = copy();
-      for (int i = 0; i < result.cardinality(); i++)
+      result = clone();
+      for (int i = 0; i < result.size(); i++)
         result.setQuick(i, getQuick(i) * x);
     }
     return result;
@@ -273,7 +246,7 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public Vector times(Vector x) {
-    if (cardinality() != x.cardinality())
+    if (size() != x.size())
       throw new CardinalityException();
     Vector result;
     if (optimizeTimes) {
@@ -284,8 +257,8 @@ public class SparseVector extends AbstractVector {
         result.setQuick(index, value * x.getQuick(index));
       }
     } else {
-      result = copy();
-      for (int i = 0; i < result.cardinality(); i++)
+      result = clone();
+      for (int i = 0; i < result.size(); i++)
         result.setQuick(i, getQuick(i) * x.getQuick(i));
     }
     return result;

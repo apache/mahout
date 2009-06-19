@@ -46,7 +46,7 @@ public class SparseRowMatrix extends AbstractMatrix {
     this.cardinality = cardinality.clone();
     this.rows = rows.clone();
     for (int row = 0; row < cardinality[ROW]; row++)
-      this.rows[row] = rows[row].copy();
+      this.rows[row] = rows[row].clone();
   }
 
   /**
@@ -69,15 +69,15 @@ public class SparseRowMatrix extends AbstractMatrix {
   }
 
   @Override
-  public int[] cardinality() {
+  public int[] size() {
     return cardinality;
   }
 
   @Override
-  public Matrix copy() {
+  public Matrix clone() {
     SparseRowMatrix copy = new SparseRowMatrix(cardinality);
     for (int row = 0; row < cardinality[ROW]; row++)
-      copy.rows[row] = rows[row].copy();
+      copy.rows[row] = rows[row].clone();
     return copy;
   }
 
@@ -115,11 +115,11 @@ public class SparseRowMatrix extends AbstractMatrix {
   }
 
   @Override
-  public int[] size() {
+  public int[] getNumNondefaultElements() {
     int[] result = new int[2];
     result[ROW] = rows.length;
     for (int row = 0; row < cardinality[ROW]; row++)
-      result[COL] = Math.max(result[COL], rows[row].size());
+      result[COL] = Math.max(result[COL], rows[row].getNumNondefaultElements());
     return result;
   }
 
@@ -134,17 +134,17 @@ public class SparseRowMatrix extends AbstractMatrix {
 
   @Override
   public Matrix viewPart(int[] offset, int[] size) {
-    if (size[ROW] > rows.length || size[COL] > rows[ROW].cardinality())
+    if (size[ROW] > rows.length || size[COL] > rows[ROW].size())
       throw new CardinalityException();
     if (offset[ROW] < 0 || offset[ROW] + size[ROW] > rows.length
-        || offset[COL] < 0 || offset[COL] + size[COL] > rows[ROW].cardinality())
+        || offset[COL] < 0 || offset[COL] + size[COL] > rows[ROW].size())
       throw new IndexException();
     return new MatrixView(this, offset, size);
   }
 
   @Override
   public Matrix assignColumn(int column, Vector other) {
-    if (other.cardinality() != cardinality[ROW] || column >= cardinality[COL])
+    if (other.size() != cardinality[ROW] || column >= cardinality[COL])
       throw new CardinalityException();
     for (int row = 0; row < cardinality[ROW]; row++)
       rows[row].setQuick(column, other.getQuick(row));
@@ -153,7 +153,7 @@ public class SparseRowMatrix extends AbstractMatrix {
 
   @Override
   public Matrix assignRow(int row, Vector other) {
-    if (row >= cardinality[ROW] || other.cardinality() != cardinality[COL])
+    if (row >= cardinality[ROW] || other.size() != cardinality[COL])
       throw new CardinalityException();
     rows[row].assign(other);
     return this;

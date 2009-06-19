@@ -80,12 +80,12 @@ public class DenseVector extends AbstractVector {
   }
 
   @Override
-  public int cardinality() {
+  public int size() {
     return values.length;
   }
 
   @Override
-  public DenseVector copy() {
+  public DenseVector clone() {
     DenseVector denseVector = new DenseVector(values);
     denseVector.setLabelBindings(getLabelBindings());
     return denseVector;
@@ -98,7 +98,7 @@ public class DenseVector extends AbstractVector {
 
   @Override
   public DenseVector like() {
-    DenseVector denseVector = new DenseVector(cardinality());
+    DenseVector denseVector = new DenseVector(size());
     denseVector.setLabelBindings(getLabelBindings());
     return denseVector;
   }
@@ -116,13 +116,8 @@ public class DenseVector extends AbstractVector {
   }
 
   @Override
-  public int size() {
+  public int getNumNondefaultElements() {
     return values.length;
-  }
-
-  @Override
-  public double[] toArray() {
-    return values.clone();
   }
 
   @Override
@@ -182,7 +177,7 @@ public class DenseVector extends AbstractVector {
 
   @Override
   public void write(DataOutput dataOutput) throws IOException {
-    dataOutput.writeInt(cardinality());
+    dataOutput.writeInt(size());
     for (Vector.Element element : this) {
       dataOutput.writeDouble(element.get());
     }
@@ -206,13 +201,14 @@ public class DenseVector extends AbstractVector {
    * @see AbstractVector#strictEquivalence(Vector, Vector)
    * @see AbstractVector#equivalent(Vector, Vector)
    */
+  @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof Vector)) return false;
 
     Vector that = (Vector) o;
     String thatName = that.getName();
-    if (this.cardinality() != that.cardinality()) return false;
+    if (this.size() != that.size()) return false;
     if (name != null && thatName != null && !name.equals(thatName)){
       return false;
     } else if ((name != null && thatName == null) || (thatName != null && name == null)){

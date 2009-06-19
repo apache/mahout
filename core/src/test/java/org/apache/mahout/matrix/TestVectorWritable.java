@@ -39,7 +39,7 @@ public class TestVectorWritable extends TestCase {
     writable.readFields(in);
     in.close();
 
-    assertEquals(cardinality, writable.cardinality());
+    assertEquals(cardinality, writable.size());
     for (int i = 0; i < cardinality; i++) {
       assertEquals((double)i, writable.get(i));
     }
@@ -48,7 +48,7 @@ public class TestVectorWritable extends TestCase {
     writable.readFields(in);
     in.close();
 
-    assertEquals(cardinality, writable.cardinality());
+    assertEquals(cardinality, writable.size());
     for (int i = 0; i < cardinality; i++) {
       assertEquals((double)i, writable.get(i));
     }

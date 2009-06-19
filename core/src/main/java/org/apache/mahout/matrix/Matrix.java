@@ -24,7 +24,7 @@ import org.apache.hadoop.io.WritableComparable;
 /**
  * The basic interface including numerous convenience functions
  */
-public interface Matrix {
+public interface Matrix extends Cloneable {
 
   /**
    * Return a formatted WritableComparable<?> suitable for output
@@ -109,14 +109,14 @@ public interface Matrix {
    * 
    * @return an int[2]
    */
-  int[] cardinality();
+  int[] size();
 
   /**
    * Return a copy of the recipient
    * 
    * @return a new Matrix
    */
-  Matrix copy();
+  Matrix clone();
 
     /**
      * Returns matrix determinator using Laplace theorem
@@ -250,7 +250,7 @@ public interface Matrix {
    * 
    * @return an int[2] containing [row, column] count
    */
-  int[] size();
+  int[] getNumNondefaultElements();
 
   /**
    * Return a new matrix containing the product of each value of the recipient

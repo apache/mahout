@@ -242,7 +242,7 @@ public class MeanShiftCanopy {
   public MeanShiftCanopy(Vector point) {
     this.canopyId = nextCanopyId++;
     this.center = point;
-    this.pointTotal = point.copy();
+    this.pointTotal = point.clone();
     this.numPoints = 1;
     this.boundPoints.add(point);
   }
@@ -259,7 +259,7 @@ public class MeanShiftCanopy {
       boolean converged) {
     this.canopyId = canopyId;
     this.center = point;
-    this.pointTotal = point.copy();
+    this.pointTotal = point.clone();
     this.numPoints = 1;
     this.boundPoints = boundPoints;
     this.converged = converged;
@@ -274,7 +274,7 @@ public class MeanShiftCanopy {
    */
   void addPoints(Vector point, int nPoints) {
     numPoints += nPoints;
-    Vector subTotal = (nPoints == 1) ? point.copy() : point.times(nPoints);
+    Vector subTotal = (nPoints == 1) ? point.clone() : point.times(nPoints);
     pointTotal = (pointTotal == null) ? subTotal : pointTotal.plus(subTotal);
   }
 
@@ -294,7 +294,7 @@ public class MeanShiftCanopy {
    * @return a Vector which is the new bound centroid
    */
   public Vector computeBoundCentroid() {
-    Vector result = new DenseVector(center.cardinality());
+    Vector result = new DenseVector(center.size());
     for (Vector v : boundPoints)
       result.assign(v, new PlusFunction());
     return result.divide(boundPoints.size());
@@ -416,7 +416,7 @@ public class MeanShiftCanopy {
     converged = new EuclideanDistanceMeasure().distance(centroid, center) < convergenceDelta;
     center = centroid;
     numPoints = 1;
-    pointTotal = centroid.copy();
+    pointTotal = centroid.clone();
     return converged;
   }
 

@@ -270,7 +270,7 @@ public class Cluster {
     centroid = null;
     numPoints += count;
     if (pointTotal == null) {
-      pointTotal = delta.copy();
+      pointTotal = delta.clone();
       pointSquaredTotal = delta.times(delta);
     } else {
       pointTotal = pointTotal.plus(delta);

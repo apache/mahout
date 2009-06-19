@@ -46,7 +46,7 @@ public class SparseMatrix extends AbstractMatrix {
     this.cardinality = cardinality.clone();
     this.rows = new HashMap<Integer, Vector>();
     for (Map.Entry<Integer, SparseVector> entry : rows.entrySet())
-      this.rows.put(entry.getKey(), entry.getValue().copy());
+      this.rows.put(entry.getKey(), entry.getValue().clone());
   }
 
   /**
@@ -66,15 +66,15 @@ public class SparseMatrix extends AbstractMatrix {
   }
 
   @Override
-  public int[] cardinality() {
+  public int[] size() {
     return cardinality;
   }
 
   @Override
-  public Matrix copy() {
+  public Matrix clone() {
     SparseMatrix copy = new SparseMatrix(cardinality);
     for (Map.Entry<Integer, Vector> entry : rows.entrySet())
-      copy.rows.put(entry.getKey(), entry.getValue().copy());
+      copy.rows.put(entry.getKey(), entry.getValue().clone());
     return copy;
   }
 
@@ -117,11 +117,11 @@ public class SparseMatrix extends AbstractMatrix {
   }
 
   @Override
-  public int[] size() {
+  public int[] getNumNondefaultElements() {
     int[] result = new int[2];
     result[ROW] = rows.size();
     for (Map.Entry<Integer, Vector> integerVectorEntry : rows.entrySet())
-      result[COL] = Math.max(result[COL], integerVectorEntry.getValue().size());
+      result[COL] = Math.max(result[COL], integerVectorEntry.getValue().getNumNondefaultElements());
     return result;
   }
 
@@ -146,7 +146,7 @@ public class SparseMatrix extends AbstractMatrix {
 
   @Override
   public Matrix assignColumn(int column, Vector other) {
-    if (other.cardinality() != cardinality[ROW] || column >= cardinality[COL])
+    if (other.size() != cardinality[ROW] || column >= cardinality[COL])
       throw new CardinalityException();
     for (int row = 0; row < cardinality[ROW]; row++) {
       double val = other.getQuick(row);
@@ -165,7 +165,7 @@ public class SparseMatrix extends AbstractMatrix {
 
   @Override
   public Matrix assignRow(int row, Vector other) {
-    if (row >= cardinality[ROW] || other.cardinality() != cardinality[COL])
+    if (row >= cardinality[ROW] || other.size() != cardinality[COL])
       throw new CardinalityException();
     rows.put(row, other);
     return this;

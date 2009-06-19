@@ -30,9 +30,6 @@ import org.apache.mahout.utils.vectors.TermInfo;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.matrix.SparseVector;
 
-import java.util.Collections;
-
-
 /**
  *
  *
@@ -40,7 +37,7 @@ import java.util.Collections;
 public class LuceneIterableTest extends TestCase {
   protected RAMDirectory directory;
 
-  public static String [] DOCS = {
+  private static final String [] DOCS = {
         "The quick red fox jumped over the lazy brown dogs.",
         "Mary had a little lamb whose fleece was white as snow.",
         "Moby Dick is a story of a whale and a man obsessed.",
@@ -75,7 +72,7 @@ public class LuceneIterableTest extends TestCase {
     //TODO: do something more meaningful here
     for (Vector vector : iterable) {
       assertTrue("vector is not an instanceof " + SparseVector.class, vector instanceof SparseVector);
-      assertTrue("vector Size: " + vector.cardinality() + " is not greater than: " + 0, vector.cardinality() > 0);
+      assertTrue("vector Size: " + vector.size() + " is not greater than: " + 0, vector.size() > 0);
     }
   }
 

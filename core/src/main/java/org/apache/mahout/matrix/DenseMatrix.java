@@ -69,7 +69,7 @@ public class DenseMatrix extends AbstractMatrix {
   }
 
   @Override
-  public int[] cardinality() {
+  public int[] size() {
     int[] result = new int[2];
     result[ROW] = rowSize();
     result[COL] = columnSize();
@@ -77,7 +77,7 @@ public class DenseMatrix extends AbstractMatrix {
   }
 
   @Override
-  public Matrix copy() {
+  public Matrix clone() {
     return new DenseMatrix(values);
   }
 
@@ -110,8 +110,8 @@ public class DenseMatrix extends AbstractMatrix {
   }
 
   @Override
-  public int[] size() {
-    return cardinality();
+  public int[] getNumNondefaultElements() {
+    return size();
   }
 
   @Override
@@ -132,7 +132,7 @@ public class DenseMatrix extends AbstractMatrix {
 
   @Override
   public Matrix assignColumn(int column, Vector other) {
-    if (other.cardinality() != rowSize() || column >= columnSize())
+    if (other.size() != rowSize() || column >= columnSize())
       throw new CardinalityException();
     for (int row = 0; row < rowSize(); row++)
       values[row][column] = other.getQuick(row);
@@ -141,9 +141,10 @@ public class DenseMatrix extends AbstractMatrix {
 
   @Override
   public Matrix assignRow(int row, Vector other) {
-    if (row >= rowSize() || other.cardinality() != columnSize())
+    if (row >= rowSize() || other.size() != columnSize())
       throw new CardinalityException();
-    values[row] = other.toArray();
+    for (int col = 0; col < columnSize(); col++)
+      values[row][col] = other.getQuick(col);
     return this;
   }
 

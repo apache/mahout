@@ -46,14 +46,14 @@ public abstract class MatrixTest extends TestCase {
   public abstract Matrix matrixFactory(double[][] values);
 
   public void testCardinality() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     assertEquals("row cardinality", values.length, c[ROW]);
     assertEquals("col cardinality", values[0].length, c[COL]);
   }
 
   public void testCopy() {
-    int[] c = test.cardinality();
-    Matrix copy = test.copy();
+    int[] c = test.size();
+    Matrix copy = test.clone();
     assertEquals("wrong class", copy.getClass(), test.getClass());
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
@@ -62,7 +62,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testGetQuick() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         assertEquals("value[" + row + "][" + col + ']', values[row][col], test
@@ -71,25 +71,25 @@ public abstract class MatrixTest extends TestCase {
 
   public void testHaveSharedCells() {
     assertTrue("same", test.haveSharedCells(test));
-    assertFalse("different", test.haveSharedCells(test.copy()));
+    assertFalse("different", test.haveSharedCells(test.clone()));
   }
 
   public void testLike() {
     Matrix like = test.like();
     assertEquals("type", like.getClass(), test.getClass());
-    assertEquals("rows", test.cardinality()[ROW], like.cardinality()[ROW]);
-    assertEquals("columns", test.cardinality()[COL], like.cardinality()[COL]);
+    assertEquals("rows", test.size()[ROW], like.size()[ROW]);
+    assertEquals("columns", test.size()[COL], like.size()[COL]);
   }
 
   public void testLikeIntInt() {
     Matrix like = test.like(4, 4);
     assertEquals("type", like.getClass(), test.getClass());
-    assertEquals("rows", 4, like.cardinality()[ROW]);
-    assertEquals("columns", 4, like.cardinality()[COL]);
+    assertEquals("rows", 4, like.size()[ROW]);
+    assertEquals("columns", 4, like.size()[COL]);
   }
 
   public void testSetQuick() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++) {
         test.setQuick(row, col, 1.23);
@@ -99,14 +99,14 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testSize() {
-    int[] c = test.size();
+    int[] c = test.getNumNondefaultElements();
     assertEquals("row size", values.length, c[ROW]);
     assertEquals("col size", values[0].length, c[COL]);
   }
 
   public void testToArray() {
     double[][] array = test.toArray();
-    int[] c = test.cardinality();
+    int[] c = test.size();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         assertEquals("value[" + row + "][" + col + ']', values[row][col],
@@ -117,7 +117,7 @@ public abstract class MatrixTest extends TestCase {
     int[] offset = { 1, 1 };
     int[] size = { 2, 1 };
     Matrix view = test.viewPart(offset, size);
-    int[] c = view.cardinality();
+    int[] c = view.size();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         assertEquals("value[" + row + "][" + col + ']',
@@ -164,7 +164,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testAssignDouble() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     test.assign(4.53);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
@@ -173,7 +173,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testAssignDoubleArrayArray() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     test.assign(new double[3][2]);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
@@ -182,7 +182,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testAssignDoubleArrayArrayCardinality() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     try {
       test.assign(new double[c[ROW] + 1][c[COL]]);
       fail("exception expected");
@@ -192,7 +192,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testAssignMatrixBinaryFunction() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     test.assign(test, new PlusFunction());
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
@@ -210,7 +210,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testAssignMatrix() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     Matrix value = test.like();
     value.assign(test);
     for (int row = 0; row < c[ROW]; row++)
@@ -229,7 +229,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testAssignUnaryFunction() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     test.assign(new NegateFunction());
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
@@ -238,7 +238,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testDivide() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     Matrix value = test.divide(4.53);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
@@ -247,7 +247,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testGet() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
         assertEquals("value[" + row + "][" + col + ']', values[row][col], test
@@ -255,7 +255,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testGetIndexUnder() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     try {
       for (int row = -1; row < c[ROW]; row++)
         for (int col = 0; col < c[COL]; col++)
@@ -267,7 +267,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testGetIndexOver() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     try {
       for (int row = 0; row < c[ROW] + 1; row++)
         for (int col = 0; col < c[COL]; col++)
@@ -279,7 +279,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testMinus() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     Matrix value = test.minus(test);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
@@ -297,7 +297,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testPlusDouble() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     Matrix value = test.plus(4.53);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
@@ -306,7 +306,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testPlusMatrix() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     Matrix value = test.plus(test);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
@@ -324,7 +324,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testSetUnder() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     try {
       for (int row = -1; row < c[ROW]; row++)
         for (int col = 0; col < c[COL]; col++) {
@@ -337,7 +337,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testSetOver() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     try {
       for (int row = 0; row < c[ROW] + 1; row++)
         for (int col = 0; col < c[COL]; col++) {
@@ -350,7 +350,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testTimesDouble() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     Matrix value = test.times(4.53);
     for (int row = 0; row < c[ROW]; row++)
       for (int col = 0; col < c[COL]; col++)
@@ -359,10 +359,10 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testTimesMatrix() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     Matrix transpose = test.transpose();
     Matrix value = test.times(transpose);
-    int[] v = value.cardinality();
+    int[] v = value.size();
     assertEquals("rows", c[ROW], v[ROW]);
     assertEquals("cols", c[ROW], v[COL]);
     // TODO: check the math too, lazy
@@ -382,9 +382,9 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testTranspose() {
-    int[] c = test.cardinality();
+    int[] c = test.size();
     Matrix transpose = test.transpose();
-    int[] t = transpose.cardinality();
+    int[] t = transpose.size();
     assertEquals("rows", c[COL], t[ROW]);
     assertEquals("cols", c[ROW], t[COL]);
     for (int row = 0; row < c[ROW]; row++)
@@ -435,7 +435,7 @@ public abstract class MatrixTest extends TestCase {
 
   public void testGetRow() {
     Vector row = test.getRow(1);
-    assertEquals("row size", 2, row.size());
+    assertEquals("row size", 2, row.getNumNondefaultElements());
   }
 
   public void testGetRowIndexUnder() {
@@ -458,7 +458,7 @@ public abstract class MatrixTest extends TestCase {
 
   public void testGetColumn() {
     Vector column = test.getColumn(1);
-    assertEquals("row size", 3, column.size());
+    assertEquals("row size", 3, column.getNumNondefaultElements());
   }
 
   public void testGetColumnIndexUnder() {

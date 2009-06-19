@@ -112,14 +112,14 @@ public interface Vector extends Iterable<Vector.Element>, Writable {
    * 
    * @return an int
    */
-  int cardinality();
+  int size();
 
   /**
    * Return a copy of the recipient
    * 
    * @return a new Vector
    */
-  Vector copy();
+  Vector clone();
 
   /**
    * Return the value at the index defined by the label
@@ -317,7 +317,7 @@ public interface Vector extends Iterable<Vector.Element>, Writable {
   /**
    * Sets a map of label bindings in the receiver
    * 
-   * @param bindings a Map<String, Integer> of label bindings
+   * @param bindings a {@link Map<String, Integer>} of label bindings
    */
   void setLabelBindings(Map<String, Integer> bindings);
 
@@ -343,7 +343,7 @@ public interface Vector extends Iterable<Vector.Element>, Writable {
    * 
    * @return an int
    */
-  int size();
+  int getNumNondefaultElements();
 
   /**
    * Return a new matrix containing the product of each value of the recipient
@@ -363,13 +363,6 @@ public interface Vector extends Iterable<Vector.Element>, Writable {
    * @throws CardinalityException if the cardinalities differ
    */
   Vector times(Vector x);
-
-  /**
-   * Return the element of the recipient as a double[]
-   * 
-   * @return a double[]
-   */
-  double[] toArray();
 
   /**
    * Return a new matrix containing the subset of the recipient

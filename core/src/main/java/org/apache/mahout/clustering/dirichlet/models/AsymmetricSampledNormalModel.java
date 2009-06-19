@@ -91,7 +91,7 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
   * @return
   */
   private double pdf(Vector x, double sd) {
-    assert x.size() == 2;
+    assert x.getNumNondefaultElements() == 2;
     double sd2 = sd * sd;
     double exp = -(x.dot(x) - 2 * x.dot(mean) + mean.dot(mean)) / (2 * sd2);
     double ex = Math.exp(exp);
@@ -101,7 +101,7 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
   @Override
   public double pdf(Vector x) {
     // return the product of the two component pdfs
-    assert x.size() == 2;
+    assert x.getNumNondefaultElements() == 2;
     double pdf0 = pdf(x, sd.get(0));
     double pdf1 = pdf(x, sd.get(1));
     //if (pdf0 < 0 || pdf0 > 1 || pdf1 < 0 || pdf1 > 1)
@@ -119,11 +119,11 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
     StringBuilder buf = new StringBuilder();
     buf.append("asnm{n=").append(s0).append(" m=[");
     if (mean != null)
-      for (int i = 0; i < mean.cardinality(); i++)
+      for (int i = 0; i < mean.size(); i++)
         buf.append(String.format("%.2f", mean.get(i))).append(", ");
     buf.append("] sd=[");
     if (sd != null)
-      for (int i = 0; i < sd.cardinality(); i++)
+      for (int i = 0; i < sd.size(); i++)
         buf.append(String.format("%.2f", sd.get(i))).append(", ");
     buf.append("]}");
     return buf.toString();

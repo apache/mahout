@@ -62,13 +62,13 @@ public class VectorView extends AbstractVector {
   }
 
   @Override
-  public int cardinality() {
+  public int size() {
     return cardinality;
   }
 
   @Override
-  public Vector copy() {
-    return new VectorView(vector.copy(), offset, cardinality);
+  public Vector clone() {
+    return new VectorView(vector.clone(), offset, cardinality);
   }
 
   @Override
@@ -92,16 +92,8 @@ public class VectorView extends AbstractVector {
   }
 
   @Override
-  public int size() {
+  public int getNumNondefaultElements() {
     return cardinality;
-  }
-
-  @Override
-  public double[] toArray() {
-    double[] result = new double[cardinality];
-    for (int i = 0; i < cardinality; i++)
-      result[i] = vector.getQuick(offset + i);
-    return result;
   }
 
   @Override
