@@ -44,11 +44,13 @@ public class SparseVector extends AbstractVector {
   }
 
   public SparseVector(String name, int cardinality) {
-    this(name, cardinality, cardinality / 8); // arbitrary estimate of 'sparseness'
+    this(name, cardinality, cardinality / 8); // arbitrary estimate of
+                                              // 'sparseness'
   }
 
   public SparseVector(int cardinality) {
-    this(null, cardinality, cardinality / 8); // arbitrary estimate of 'sparseness'
+    this(null, cardinality, cardinality / 8); // arbitrary estimate of
+                                              // 'sparseness'
   }
 
   @Override
@@ -117,37 +119,42 @@ public class SparseVector extends AbstractVector {
   }
 
   /**
-   * Indicate whether the two objects are the same or not.  Two {@link org.apache.mahout.matrix.Vector}s can be equal
-   * even if the underlying implementation is not equal.
-   *  
+   * Indicate whether the two objects are the same or not. Two
+   * {@link org.apache.mahout.matrix.Vector}s can be equal even if the
+   * underlying implementation is not equal.
+   * 
    * @param o The object to compare
-   * @return true if the objects have the same cell values and same name, false otherwise.
-   *
-   * * @see AbstractVector#strictEquivalence(Vector, Vector)
-   * @see AbstractVector#equivalent(Vector, Vector) 
+   * @return true if the objects have the same cell values and same name, false
+   *         otherwise.
+   * 
+   *         * @see AbstractVector#strictEquivalence(Vector, Vector)
+   * @see AbstractVector#equivalent(Vector, Vector)
    */
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Vector)) return false;
+    if (this == o)
+      return true;
+    if (!(o instanceof Vector))
+      return false;
 
     Vector that = (Vector) o;
-    if (this.size() != that.size()) return false;
+    if (this.size() != that.size())
+      return false;
 
     if (that instanceof SparseVector) {
-      return (values == null ? ((SparseVector) that).values == null : values.equals(((SparseVector) that).values));
+      return (values == null ? ((SparseVector) that).values == null : values
+          .equals(((SparseVector) that).values));
     } else {
       return equivalent(this, that);
     }
 
   }
 
-
   @Override
   public int hashCode() {
     int result = (values != null ? values.hashCode() : 0);
     result = 31 * result + cardinality;
-    result = 31 * result + name.hashCode();
+    result = 31 * result + (name == null ? 0 : name.hashCode());
     return result;
   }
 
@@ -195,7 +202,7 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public void write(DataOutput dataOutput) throws IOException {
-    dataOutput.writeUTF(this.name==null? "": this.name);
+    dataOutput.writeUTF(this.name == null ? "" : this.name);
     dataOutput.writeInt(size());
     dataOutput.writeInt(getNumNondefaultElements());
     for (Vector.Element element : this) {

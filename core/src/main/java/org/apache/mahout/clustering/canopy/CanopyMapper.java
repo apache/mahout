@@ -25,6 +25,7 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.matrix.AbstractVector;
+import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
 
 import java.io.IOException;
@@ -32,15 +33,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CanopyMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, Text, Text, Text> {
+    Mapper<WritableComparable<?>, Text, Text, Vector> {
 
   private final List<Canopy> canopies = new ArrayList<Canopy>();
 
-  private OutputCollector<Text, Text> outputCollector;
+  private OutputCollector<Text, Vector> outputCollector;
 
   @Override
   public void map(WritableComparable<?> key, Text values,
-      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+      OutputCollector<Text, Vector> output, Reporter reporter) throws IOException {
     outputCollector = output;
     Vector point = AbstractVector.decodeVector(values.toString());
     Canopy.addPointToCanopies(point, canopies);
@@ -52,14 +53,17 @@ public class CanopyMapper extends MapReduceBase implements
     Canopy.configure(job);
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.hadoop.mapred.MapReduceBase#close()
    */
   @Override
   public void close() throws IOException {
-    for (Canopy canopy : canopies)
-      outputCollector.collect(new Text("centroid"), new Text(canopy
-          .computeCentroid().asFormatString()));
+    for (Canopy canopy : canopies) {
+      SparseVector centroid = canopy.computeCentroid();
+      outputCollector.collect(new Text("centroid"), centroid);
+    }
     super.close();
   }
 

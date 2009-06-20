@@ -17,6 +17,8 @@
 
 package org.apache.mahout.clustering.canopy;
 
+import java.io.IOException;
+
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -25,8 +27,7 @@ import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
-
-import java.io.IOException;
+import org.apache.mahout.matrix.SparseVector;
 
 public class CanopyDriver {
 
@@ -60,6 +61,8 @@ public class CanopyDriver {
     conf.set(Canopy.T1_KEY, String.valueOf(t1));
     conf.set(Canopy.T2_KEY, String.valueOf(t2));
 
+    conf.setMapOutputKeyClass(Text.class);
+    conf.setMapOutputValueClass(SparseVector.class);
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(Text.class);
 

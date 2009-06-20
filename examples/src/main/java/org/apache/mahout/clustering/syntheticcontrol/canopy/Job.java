@@ -17,16 +17,15 @@
 
 package org.apache.mahout.clustering.syntheticcontrol.canopy;
 
+import static org.apache.mahout.clustering.syntheticcontrol.Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
+
+import java.io.IOException;
+
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.canopy.CanopyClusteringJob;
-
-import java.io.IOException;
-
-import static org.apache.mahout.clustering.syntheticcontrol.Constants.CLUSTERED_POINTS_OUTPUT_DIRECTORY;
-import static org.apache.mahout.clustering.syntheticcontrol.Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
 
 public class Job {
   private Job() {
@@ -76,8 +75,6 @@ public class Job {
     InputDriver.runJob(input, directoryContainingConvertedInput);
     CanopyClusteringJob.runJob(directoryContainingConvertedInput, output, measureClassName,
         t1, t2);
-    OutputDriver.runJob(output + CanopyClusteringJob.DEFAULT_CLUSTER_OUTPUT_DIRECTORY, output + CLUSTERED_POINTS_OUTPUT_DIRECTORY);
-
   }
 
 }

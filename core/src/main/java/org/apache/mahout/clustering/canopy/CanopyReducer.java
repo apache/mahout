@@ -17,31 +17,29 @@
 
 package org.apache.mahout.clustering.canopy;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.Vector;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 public class CanopyReducer extends MapReduceBase implements
-        Reducer<Text, Text, Text, Text> {
+        Reducer<Text, Vector, Text, Text> {
 
   private final List<Canopy> canopies = new ArrayList<Canopy>();
 
   @Override
-  public void reduce(Text key, Iterator<Text> values,
+  public void reduce(Text key, Iterator<Vector> values,
                      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
     while (values.hasNext()) {
-      Text value = values.next();
-      Vector point = AbstractVector.decodeVector(value.toString());
+      Vector point = values.next();
       Canopy.addPointToCanopies(point, canopies);
     }
     for (Canopy canopy : canopies)
