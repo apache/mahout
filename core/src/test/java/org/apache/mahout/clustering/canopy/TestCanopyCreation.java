@@ -73,8 +73,9 @@ public class TestCanopyCreation extends TestCase {
 
   private static List<Vector> getPoints(double[][] raw) {
     List<Vector> points = new ArrayList<Vector>();
+    int i = 0;
     for (double[] fr : raw) {
-      Vector vec = new SparseVector(fr.length);
+      Vector vec = new SparseVector(String.valueOf(i++), fr.length);
       vec.assign(fr);
       points.add(vec);
     }
