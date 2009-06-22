@@ -24,7 +24,7 @@ import org.apache.hadoop.io.Writable;
 /**
  * The basic interface including numerous convenience functions
  */
-public interface Vector extends Iterable<Vector.Element>, Writable {
+public interface Vector extends Iterable<Vector.Element>, Cloneable, Writable {
 
   /**
    * Vectors may have a name associated with them, which makes them easy to identify
