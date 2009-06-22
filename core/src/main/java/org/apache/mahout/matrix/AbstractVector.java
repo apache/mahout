@@ -492,6 +492,12 @@ public abstract class AbstractVector implements Vector {
     set(index, value);
   }
 
+  // cache most recent vector instance class name
+  private static String instanceClassName;
+
+  // cache most recent vector instance class
+  private static Class<? extends Vector> instanceClass;
+
   /**
    * Read and return a vector from the input
    * 
@@ -503,8 +509,11 @@ public abstract class AbstractVector implements Vector {
     String vectorClassName = in.readUTF();
     Vector vector;
     try {
-      vector = Class.forName(vectorClassName).asSubclass(Vector.class)
-          .newInstance();
+      if (!vectorClassName.equals(instanceClassName)) {
+        instanceClassName = vectorClassName;
+        instanceClass = Class.forName(vectorClassName).asSubclass(Vector.class);
+      }
+      vector = instanceClass.newInstance();
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(e);
     } catch (IllegalAccessException e) {
