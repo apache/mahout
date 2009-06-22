@@ -499,7 +499,7 @@ public abstract class AbstractVector implements Vector {
    * @return
    * @throws IOException
    */
-  protected static Vector readVector(DataInput in) throws IOException {
+  public static Vector readVector(DataInput in) throws IOException {
     String vectorClassName = in.readUTF();
     Vector vector;
     try {
@@ -523,7 +523,7 @@ public abstract class AbstractVector implements Vector {
    * @param vector
    * @throws IOException
    */
-  protected static void writeVector(DataOutput out, Vector vector)
+  public static void writeVector(DataOutput out, Vector vector)
       throws IOException {
     String vectorClassName = vector.getClass().getName();
     out.writeUTF(vectorClassName);

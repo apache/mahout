@@ -402,7 +402,13 @@ public abstract class AbstractMatrix implements Matrix {
     }
   }
 
-  protected static Matrix readMatrix(DataInput in) throws IOException {
+  /**
+   * Reads a typed Matrix instance from the input stream
+   * @param in
+   * @return
+   * @throws IOException
+   */
+  public static Matrix readMatrix(DataInput in) throws IOException {
     String matrixClassName = in.readUTF();
     Matrix matrix;
     try {
@@ -419,7 +425,13 @@ public abstract class AbstractMatrix implements Matrix {
     return matrix;
   }
 
-  protected static void writeMatrix(DataOutput out, Matrix matrix)
+  /**
+   * Writes a typed Matrix instance to the output stream
+   * @param out
+   * @param matrix
+   * @throws IOException
+   */
+  public static void writeMatrix(DataOutput out, Matrix matrix)
       throws IOException {
     out.writeUTF(matrix.getClass().getName());
     matrix.write(out);
