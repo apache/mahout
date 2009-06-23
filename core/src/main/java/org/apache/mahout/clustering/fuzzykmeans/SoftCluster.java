@@ -17,9 +17,9 @@
 
 package org.apache.mahout.clustering.fuzzykmeans;
 
-import java.io.IOException;
-import java.io.DataOutput;
 import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +32,6 @@ import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.SquareRootFunction;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
-import org.apache.mahout.clustering.kmeans.Cluster;
 
 public class SoftCluster implements Writable {
 
@@ -124,17 +123,14 @@ public class SoftCluster implements Writable {
     out.writeInt(clusterId);
     out.writeBoolean(converged);
     Vector vector = computeCentroid();
-    out.writeUTF(vector.getClass().getSimpleName().toString());
-    vector.write(out);
+    AbstractVector.writeVector(out, vector);
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
     clusterId = in.readInt();
     converged = in.readBoolean();
-    String className = in.readUTF();
-    this.center = Cluster.vectorNameToVector(className);
-    center.readFields(in);
+    center = AbstractVector.readVector(in);
     this.pointProbSum = 0;
     this.weightedPointTotal = center.like();
   }

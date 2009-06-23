@@ -1,12 +1,12 @@
 package org.apache.mahout.clustering.fuzzykmeans;
 
-import org.apache.hadoop.io.Writable;
-import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.clustering.kmeans.Cluster;
-
+import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.io.DataInput;
+
+import org.apache.hadoop.io.Writable;
+import org.apache.mahout.matrix.AbstractVector;
+import org.apache.mahout.matrix.Vector;
 
 
 /**
@@ -45,15 +45,12 @@ public class FuzzyKMeansInfo implements Writable {
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeDouble(probability);
-    out.writeUTF(pointTotal.getClass().getSimpleName().toString());
-    pointTotal.write(out);
+    AbstractVector.writeVector(out, pointTotal);
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
     this.probability = in.readDouble();
-    String className = in.readUTF();
-    pointTotal = Cluster.vectorNameToVector(className);
-    pointTotal.readFields(in);
+    this.pointTotal = AbstractVector.readVector(in);
   }
 }

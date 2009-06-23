@@ -225,14 +225,13 @@ public class Canopy implements Writable {
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(canopyId);
-    computeCentroid().write(out);
+    AbstractVector.writeVector(out, computeCentroid());
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
     canopyId = in.readInt();
-    this.center = new SparseVector();
-    center.readFields(in);
+    this.center = AbstractVector.readVector(in);
     this.pointTotal = center.clone();
     this.numPoints = 1;
   }

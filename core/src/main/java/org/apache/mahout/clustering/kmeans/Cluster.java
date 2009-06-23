@@ -16,9 +16,9 @@
  */
 package org.apache.mahout.clustering.kmeans;
 
-import java.io.IOException;
-import java.io.DataOutput;
 import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.List;
 
 import org.apache.hadoop.io.Text;
@@ -29,7 +29,6 @@ import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.SquareRootFunction;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.utils.DistanceMeasure;
 
 public class Cluster implements Writable {
@@ -120,36 +119,17 @@ public class Cluster implements Writable {
   public void write(DataOutput out) throws IOException {
     out.writeInt(clusterId);
     out.writeBoolean(converged);
-    Vector vector = computeCentroid();
-    out.writeUTF(vector.getClass().getSimpleName().toString());
-    vector.write(out);
+    AbstractVector.writeVector(out, computeCentroid());
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    clusterId = in.readInt();
-    converged = in.readBoolean();
-    String className = in.readUTF();
-    this.center = vectorNameToVector(className);
-    center.readFields(in);
+    this.clusterId = in.readInt();
+    this.converged = in.readBoolean();
+    this.center = AbstractVector.readVector(in);
     this.numPoints = 0;
     this.pointTotal = center.like();
     this.pointSquaredTotal = center.like();
-  }
-
-  /**
-   * Simplified version that only handles SparseVector and DenseVector
-   * @param className
-   * @return
-   */
-  public static Vector vectorNameToVector(String className) {
-    Vector vector;
-    if (className.endsWith("SparseVector")){
-      vector = new SparseVector();
-    } else {
-      vector = new DenseVector();
-    }
-    return vector;
   }
 
   /**
