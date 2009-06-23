@@ -16,22 +16,50 @@ package org.apache.mahout.clustering.kmeans;
  * limitations under the License.
  */
 
-import java.io.IOException;
-
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.matrix.AbstractVector;
+import org.apache.hadoop.mapred.Mapper;
+import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.mahout.matrix.Vector;
 
-public class KMeansClusterMapper extends KMeansMapper {
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class KMeansClusterMapper extends MapReduceBase  implements
+        Mapper<WritableComparable<?>, Vector, Text, Text> {
+  protected List<Cluster> clusters;
+
+
   @Override
-  public void map(WritableComparable<?> key, Text values,
-      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
-    final String valuesAsString = values.toString();
-    final Vector point = AbstractVector.decodeVector(valuesAsString);
-    Cluster.outputPointWithClusterInfo(valuesAsString, point, clusters, values, output);
+  public void map(WritableComparable<?> key, Vector point, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+    Cluster.outputPointWithClusterInfo(point, clusters, output);
+  }
+
+  /**
+   * Configure the mapper by providing its clusters. Used by unit tests.
+   *
+   * @param clusters a List<Cluster>
+   */
+  void config(List<Cluster> clusters) {
+    this.clusters = clusters;
+  }
+
+  @Override
+  public void configure(JobConf job) {
+    super.configure(job);
+    Cluster.configure(job);
+
+    clusters = new ArrayList<Cluster>();
+
+    KMeansUtil.configureWithClusterInfo(job.get(Cluster.CLUSTER_PATH_KEY),
+            clusters);
+
+    if (clusters.isEmpty())
+      throw new NullPointerException("Cluster is empty!!!");
   }
 
 }

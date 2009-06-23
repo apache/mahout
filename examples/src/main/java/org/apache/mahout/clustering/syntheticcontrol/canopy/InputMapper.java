@@ -23,19 +23,24 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 public class InputMapper extends MapReduceBase implements
-    Mapper<LongWritable, Text, Text, Text> {
+    Mapper<LongWritable, Text, Text, Vector> {
+  protected Class<? extends Vector> outputClass;
+  protected Constructor constructor;
 
   @Override
   public void map(LongWritable key, Text values,
-      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+      OutputCollector<Text, Vector> output, Reporter reporter) throws IOException {
     String[] numbers = values.toString().split(" ");
     // sometimes there are multiple separator spaces
     List<Double> doubles = new ArrayList<Double>();
@@ -43,11 +48,32 @@ public class InputMapper extends MapReduceBase implements
       if (value.length() > 0)
         doubles.add(Double.valueOf(value));
     }
-    Vector result = new DenseVector(doubles.size());
-    int index = 0;
-    for (Double d : doubles)
-      result.set(index++, d);
-    output.collect(null, new Text(result.asFormatString()));
+    Vector result = null;//new DenseVector(doubles.size());
+    try {
+      result = (Vector) constructor.newInstance(doubles.size());
+      int index = 0;
+      for (Double d : doubles)
+        result.set(index++, d);
+      output.collect(new Text(String.valueOf(index)), result);
+
+    } catch (InstantiationException e) {
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    } catch (InvocationTargetException e) {
+      throw new RuntimeException(e);
+    }
   }
 
+
+  @Override
+  public void configure(JobConf job) {
+    outputClass = (Class<? extends Vector>) job.getOutputValueClass();
+    try {
+      constructor = outputClass.getConstructor(int.class);
+    } catch (NoSuchMethodException e) {
+      throw new RuntimeException(e);
+    }
+
+  }
 }

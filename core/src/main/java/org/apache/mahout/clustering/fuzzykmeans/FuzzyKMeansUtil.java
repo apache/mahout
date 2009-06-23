@@ -23,6 +23,7 @@ import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.KeyValueLineRecordReader;
@@ -72,24 +73,23 @@ class FuzzyKMeansUtil {
 
       //iterate thru the result path list
       for (Path path : result) {
-        RecordReader<Text, Text> recordReader = null;
-//        SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
+        //RecordReader<Text, Text> recordReader = null;
+        SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
         try {
-          recordReader = new KeyValueLineRecordReader(job, new FileSplit(path, 0, fs.getFileStatus(path).getLen(), (String[]) null));
+          //recordReader = new KeyValueLineRecordReader(job, new FileSplit(path, 0, fs.getFileStatus(path).getLen(), (String[]) null));
           Text key = new Text();
-          Text value = new Text();
+          SoftCluster value = new SoftCluster();
           //int counter = 1;
-          while (recordReader.next(key, value)) {
+          while (reader.next(key, value)) {
             //get the cluster info
-            SoftCluster cluster = SoftCluster.decodeCluster(value.toString());
             // add the center so the centroid will be correct on output
             // formatting
 //            cluster.addPoint(cluster.getCenter(), 1);
-            clusters.add(cluster);
+            clusters.add(value);
           }
         } finally {
-          if (recordReader != null) {
-            recordReader.close();
+          if (reader != null) {
+            reader.close();
           }
 
         }

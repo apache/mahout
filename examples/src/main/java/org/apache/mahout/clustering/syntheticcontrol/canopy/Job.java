@@ -26,22 +26,26 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.canopy.CanopyClusteringJob;
+import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.matrix.SparseVector;
 
 public class Job {
   private Job() {
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, ClassNotFoundException {
     if (args.length == 5) {
       String input = args[0];
       String output = args[1];
       String measureClassName = args[2];
       double t1 = Double.parseDouble(args[3]);
       double t2 = Double.parseDouble(args[4]);
-      runJob(input, output, measureClassName, t1, t2);
+      String vectorClassName = args[5];
+      Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
+      runJob(input, output, measureClassName, t1, t2, vectorClass);
     } else
       runJob("testdata", "output",
-          "org.apache.mahout.utils.EuclideanDistanceMeasure", 80, 55);
+          "org.apache.mahout.utils.EuclideanDistanceMeasure", 80, 55, SparseVector.class);
   }
 
   /**
@@ -62,7 +66,7 @@ public class Job {
    * @param t2 the canopy T2 threshold
    */
   private static void runJob(String input, String output,
-      String measureClassName, double t1, double t2) throws IOException {
+      String measureClassName, double t1, double t2, Class<? extends Vector> vectorClass) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(Job.class);
 
@@ -72,9 +76,9 @@ public class Job {
     if (dfs.exists(outPath))
       dfs.delete(outPath, true);
     final String directoryContainingConvertedInput = output + DIRECTORY_CONTAINING_CONVERTED_INPUT;
-    InputDriver.runJob(input, directoryContainingConvertedInput);
+    InputDriver.runJob(input, directoryContainingConvertedInput, vectorClass);
     CanopyClusteringJob.runJob(directoryContainingConvertedInput, output, measureClassName,
-        t1, t2);
+        t1, t2, vectorClass);
   }
 
 }

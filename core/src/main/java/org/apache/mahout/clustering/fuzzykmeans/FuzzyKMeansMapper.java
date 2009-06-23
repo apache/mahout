@@ -34,17 +34,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FuzzyKMeansMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, Text, Text, Text> {
+    Mapper<WritableComparable<?>, Vector, Text, FuzzyKMeansInfo> {
 
   private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansMapper.class);
 
   protected List<SoftCluster> clusters;
 
   @Override
-  public void map(WritableComparable<?> key, Text values,
-      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
-    Vector point = AbstractVector.decodeVector(values.toString());
-    SoftCluster.emitPointProbToCluster(point, clusters, values, output);
+  public void map(WritableComparable<?> key, Vector point,
+      OutputCollector<Text, FuzzyKMeansInfo> output, Reporter reporter) throws IOException {
+    SoftCluster.emitPointProbToCluster(point, clusters, output);
   }
 
   /**

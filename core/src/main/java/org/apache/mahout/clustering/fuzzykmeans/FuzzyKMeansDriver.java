@@ -28,12 +28,17 @@ import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.KeyValueLineRecordReader;
+import org.apache.hadoop.mapred.SequenceFileInputFormat;
+import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.mahout.clustering.kmeans.Cluster;
+import org.apache.mahout.matrix.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,9 +47,6 @@ public class FuzzyKMeansDriver {
   private static final Logger log = LoggerFactory
       .getLogger(FuzzyKMeansDriver.class);
 
-  public static final String MAPPER_VALUE_SEPARATOR = "~";
-
-  public static final String COMBINER_VALUE_SEPARATOR = "\t";
 
   private FuzzyKMeansDriver() {
   }
@@ -54,8 +56,8 @@ public class FuzzyKMeansDriver {
         .println("Usage: input clusterIn output measureClass convergenceDelta maxIterations m [doClusteringOnly]");
   }
 
-  public static void main(String[] args) {
-    if (args.length < 7) {
+  public static void main(String[] args) throws ClassNotFoundException {
+    if (args.length < 8) {
       System.out.println("Expected number of arguments: 7 or 8 : received:"
           + args.length);
       printMessage();
@@ -68,16 +70,18 @@ public class FuzzyKMeansDriver {
     double convergenceDelta = Double.parseDouble(args[index++]);
     int maxIterations = Integer.parseInt(args[index++]);
     float m = Float.parseFloat(args[index++]);
+    String vectorClassName = args[index++];
+    Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
     boolean doClustering = false;
-    if (args.length > 7)
+    if (args.length > 8){
       doClustering = Boolean.parseBoolean(args[index++]);
+    }
     if (doClustering) {
       runClustering(input, clusters, output, measureClass, Double
-          .toString(convergenceDelta), 500, m);
+          .toString(convergenceDelta), 500, m, vectorClass);
     } else {
       runJob(input, clusters, output, measureClass, convergenceDelta,
-          maxIterations, 10, 10, m);
-
+          maxIterations, 10, 10, m, vectorClass);
     }
 
   }
@@ -92,10 +96,11 @@ public class FuzzyKMeansDriver {
    * @param convergenceDelta the convergence delta value
    * @param maxIterations the maximum number of iterations
    * @param numMapTasks the number of mapper tasks
+   * @param vectorClass
    */
   public static void runJob(String input, String clustersIn, String output,
-      String measureClass, double convergenceDelta, int maxIterations,
-      int numMapTasks, int numReduceTasks, float m) {
+                            String measureClass, double convergenceDelta, int maxIterations,
+                            int numMapTasks, int numReduceTasks, float m, Class<? extends Vector> vectorClass) {
 
     boolean converged = false;
     int iteration = 0;
@@ -119,7 +124,7 @@ public class FuzzyKMeansDriver {
     log.info("Clustering ");
 
     runClustering(input, clustersIn, output + File.separator + "points",
-        measureClass, delta, numMapTasks, m);
+        measureClass, delta, numMapTasks, m, vectorClass);
   }
 
   /**
@@ -142,12 +147,17 @@ public class FuzzyKMeansDriver {
     JobConf conf = new JobConf(FuzzyKMeansJob.class);
     conf.setJobName("Fuzzy K Means{" + iterationNumber + '}');
 
+    conf.setMapOutputKeyClass(Text.class);
+    conf.setMapOutputValueClass(FuzzyKMeansInfo.class);
     conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(Text.class);
+    conf.setOutputValueClass(SoftCluster.class);
 
     FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(clustersOut);
     FileOutputFormat.setOutputPath(conf, outPath);
+
+    conf.setInputFormat(SequenceFileInputFormat.class);
+    conf.setOutputFormat(SequenceFileOutputFormat.class);
 
     conf.setMapperClass(FuzzyKMeansMapper.class);
     conf.setCombinerClass(FuzzyKMeansCombiner.class);
@@ -185,19 +195,24 @@ public class FuzzyKMeansDriver {
    */
   private static void runClustering(String input, String clustersIn,
       String output, String measureClass, String convergenceDelta,
-      int numMapTasks, float m) {
+      int numMapTasks, float m, Class<? extends Vector> vectorClass) {
 
     JobConf conf = new JobConf(FuzzyKMeansDriver.class);
     conf.setJobName("Fuzzy K Means Clustering");
 
+    conf.setMapOutputKeyClass(Text.class);
+    conf.setMapOutputValueClass(vectorClass);
     conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(Text.class);
+    conf.setOutputValueClass(FuzzyKMeansOutput.class);
 
     FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(output);
     FileOutputFormat.setOutputPath(conf, outPath);
 
     conf.setMapperClass(FuzzyKMeansClusterMapper.class);
+
+    conf.setInputFormat(SequenceFileInputFormat.class);
+    conf.setOutputFormat(SequenceFileOutputFormat.class);
 
     // uncomment it to run locally
     // conf.set("mapred.job.tracker", "local");
@@ -246,15 +261,16 @@ public class FuzzyKMeansDriver {
 
     for (Path p : result) {
 
-      KeyValueLineRecordReader reader = null;
+      SequenceFile.Reader reader = null;
 
       try {
-        reader = new KeyValueLineRecordReader(conf, new FileSplit(p, 0, fs
-            .getFileStatus(p).getLen(), (String[]) null));
+        reader = new SequenceFile.Reader(fs, p, conf);
+                /*new KeyValueLineRecordReader(conf, new FileSplit(p, 0, fs
+            .getFileStatus(p).getLen(), (String[]) null));*/
         Text key = new Text();
-        Text value = new Text();
+        SoftCluster value = new SoftCluster();
         while (converged && reader.next(key, value)) {
-          converged = value.toString().charAt(0) == 'V';
+          converged = value.isConverged();
         }
       } finally {
         if (reader != null) {

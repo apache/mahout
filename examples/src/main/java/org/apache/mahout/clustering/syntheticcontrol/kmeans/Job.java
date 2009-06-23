@@ -26,8 +26,9 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.canopy.CanopyClusteringJob;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
-import static org.apache.mahout.clustering.syntheticcontrol.Constants.CLUSTERED_POINTS_OUTPUT_DIRECTORY;
 import static org.apache.mahout.clustering.syntheticcontrol.Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
+import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.matrix.SparseVector;
 
 public class Job {
   
@@ -35,7 +36,7 @@ public class Job {
 private Job() {
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, ClassNotFoundException {
     if (args.length == 7) {
       String input = args[0];
       String output = args[1];
@@ -44,11 +45,13 @@ private Job() {
       double t2 = Double.parseDouble(args[4]);
       double convergenceDelta = Double.parseDouble(args[5]);
       int maxIterations = Integer.parseInt(args[6]);
+      String vectorClassName = args[7];
+      Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
       runJob(input, output, measureClass, t1, t2, convergenceDelta,
-          maxIterations);
+          maxIterations, vectorClass);
     } else
       runJob("testdata", "output",
-          "org.apache.mahout.utils.EuclideanDistanceMeasure", 80, 55, 0.5, 10);
+          "org.apache.mahout.utils.EuclideanDistanceMeasure", 80, 55, 0.5, 10, SparseVector.class);
   }
 
   /**
@@ -71,7 +74,7 @@ private Job() {
    * @param maxIterations the int maximum number of iterations
    */
   private static void runJob(String input, String output, String measureClass,
-      double t1, double t2, double convergenceDelta, int maxIterations)
+      double t1, double t2, double convergenceDelta, int maxIterations, Class<? extends Vector> vectorClass)
       throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(Job.class);
@@ -82,11 +85,14 @@ private Job() {
     if (dfs.exists(outPath))
       dfs.delete(outPath, true);
     final String directoryContainingConvertedInput = output + DIRECTORY_CONTAINING_CONVERTED_INPUT;
-    InputDriver.runJob(input, directoryContainingConvertedInput);
-    CanopyClusteringJob.runJob(directoryContainingConvertedInput, output, measureClass, t1, t2);
+    System.out.println("Preparing Input");
+    InputDriver.runJob(input, directoryContainingConvertedInput, vectorClass);
+    System.out.println("Running Canopy to get initial clusters");
+    CanopyClusteringJob.runJob(directoryContainingConvertedInput, output, measureClass, t1, t2, vectorClass);
+    System.out.println("Running KMeans");
     KMeansDriver.runJob(directoryContainingConvertedInput, 
             output + CanopyClusteringJob.DEFAULT_CANOPIES_OUTPUT_DIRECTORY, output,
-        measureClass, convergenceDelta, maxIterations, 1);
+        measureClass, convergenceDelta, maxIterations, 1, vectorClass);
     //    OutputDriver.runJob(output + KMeansDriver.DEFAULT_OUTPUT_DIRECTORY, output + CLUSTERED_POINTS_OUTPUT_DIRECTORY);
   }
 }

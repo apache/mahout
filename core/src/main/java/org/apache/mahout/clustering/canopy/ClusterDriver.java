@@ -24,7 +24,10 @@ import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.SequenceFileInputFormat;
+import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
+import org.apache.mahout.matrix.Vector;
 
 import java.io.IOException;
 
@@ -35,14 +38,16 @@ public class ClusterDriver {
   private ClusterDriver() {
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, ClassNotFoundException {
     String points = args[0];
     String canopies = args[1];
     String output = args[2];
     String measureClassName = args[3];
     double t1 = Double.parseDouble(args[4]);
     double t2 = Double.parseDouble(args[5]);
-    runJob(points, canopies, output, measureClassName, t1, t2);
+    String vectorClassName = args[6];
+    Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
+    runJob(points, canopies, output, measureClassName, t1, t2, vectorClass);
   }
 
   /**
@@ -54,9 +59,10 @@ public class ClusterDriver {
    * @param measureClassName the DistanceMeasure class name
    * @param t1               the T1 distance threshold
    * @param t2               the T2 distance threshold
+   * @param vectorClass      The {@link Class} of Vector to use for the Output Value Class.  Must be concrete.
    */
   public static void runJob(String points, String canopies, String output,
-                            String measureClassName, double t1, double t2) throws IOException {
+                            String measureClassName, double t1, double t2, Class<? extends Vector> vectorClass) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(
             org.apache.mahout.clustering.canopy.ClusterDriver.class);
@@ -66,8 +72,13 @@ public class ClusterDriver {
     conf.set(Canopy.T2_KEY, String.valueOf(t2));
     conf.set(Canopy.CANOPY_PATH_KEY, canopies);
 
+    conf.setInputFormat(SequenceFileInputFormat.class);
+    
+    /*conf.setMapOutputKeyClass(Text.class);
+    conf.setMapOutputValueClass(SparseVector.class);*/
     conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(Text.class);
+    conf.setOutputValueClass(vectorClass);
+    conf.setOutputFormat(SequenceFileOutputFormat.class);
 
     FileInputFormat.setInputPaths(conf, new Path(points));
     Path outPath = new Path(output + DEFAULT_CLUSTER_OUTPUT_DIRECTORY);

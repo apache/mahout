@@ -17,6 +17,8 @@
 
 package org.apache.mahout.clustering.canopy;
 
+import org.apache.mahout.matrix.Vector;
+
 import java.io.IOException;
 
 public class CanopyClusteringJob {
@@ -36,13 +38,15 @@ public class CanopyClusteringJob {
   /**
    * @param args
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, ClassNotFoundException {
     String input = args[0];
     String output = args[1];
     String measureClassName = args[2];
     double t1 = Double.parseDouble(args[3]);
     double t2 = Double.parseDouble(args[4]);
-    runJob(input, output, measureClassName, t1, t2);
+    String vectorClassName = args[5];
+    Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
+    runJob(input, output, measureClassName, t1, t2, vectorClass);
   }
 
   /**
@@ -55,9 +59,9 @@ public class CanopyClusteringJob {
    * @param t2               the T2 distance threshold
    */
   public static void runJob(String input, String output,
-                            String measureClassName, double t1, double t2) throws IOException {
-    CanopyDriver.runJob(input, output + DEFAULT_CANOPIES_OUTPUT_DIRECTORY, measureClassName, t1, t2);
-    ClusterDriver.runJob(input, output + DEFAULT_CANOPIES_OUTPUT_DIRECTORY, output, measureClassName, t1, t2);
+                            String measureClassName, double t1, double t2, Class<? extends Vector> vectorClass) throws IOException {
+    CanopyDriver.runJob(input, output + DEFAULT_CANOPIES_OUTPUT_DIRECTORY, measureClassName, t1, t2, vectorClass);
+    ClusterDriver.runJob(input, output + DEFAULT_CANOPIES_OUTPUT_DIRECTORY, output, measureClassName, t1, t2, vectorClass);
   }
 
 }

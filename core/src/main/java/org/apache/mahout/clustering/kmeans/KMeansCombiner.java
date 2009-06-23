@@ -28,19 +28,18 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.matrix.AbstractVector;
 
 public class KMeansCombiner extends MapReduceBase implements
-    Reducer<Text, Text, Text, Text> {
+    Reducer<Text, KMeansInfo, Text, KMeansInfo> {
 
   @Override
-  public void reduce(Text key, Iterator<Text> values,
-      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+  public void reduce(Text key, Iterator<KMeansInfo> values,
+      OutputCollector<Text, KMeansInfo> output, Reporter reporter) throws IOException {
     Cluster cluster = new Cluster(key.toString());
     while (values.hasNext()) {
-      String[] numPointnValue = values.next().toString().split("\t");
-      cluster.addPoints(Integer.parseInt(numPointnValue[0].trim()),
-          AbstractVector.decodeVector(numPointnValue[1].trim()));
+      KMeansInfo next = values.next();
+      cluster.addPoints(next.getPoints(),
+          next.getPointTotal());
     }
-    output.collect(key, new Text(cluster.getNumPoints() + "\t"
-        + cluster.getPointTotal().asFormatString()));
+    output.collect(key, new KMeansInfo(cluster.getNumPoints(), cluster.getPointTotal())); 
   }
 
   @Override

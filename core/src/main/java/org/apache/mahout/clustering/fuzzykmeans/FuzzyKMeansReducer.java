@@ -34,44 +34,30 @@ import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.Vector;
 
 public class FuzzyKMeansReducer extends MapReduceBase implements
-    Reducer<Text, Text, Text, Text> {
+    Reducer<Text, FuzzyKMeansInfo, Text, SoftCluster> {
 
   protected Map<String, SoftCluster> clusterMap;
 
   @Override
-  public void reduce(Text key, Iterator<Text> values,
-      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+  public void reduce(Text key, Iterator<FuzzyKMeansInfo> values,
+      OutputCollector<Text, SoftCluster> output, Reporter reporter) throws IOException {
 
     SoftCluster cluster = clusterMap.get(key.toString());
 
     while (values.hasNext()) {
-      String value = values.next().toString();
-      int mapperSepIndex = value
-          .indexOf(FuzzyKMeansDriver.MAPPER_VALUE_SEPARATOR); // tild separator
-      // is used in
-      // mapper
-      int combinerSepIndex = value
-          .indexOf(FuzzyKMeansDriver.COMBINER_VALUE_SEPARATOR); // tab separator
-      // is used in
-      // combiner
-      int index = mapperSepIndex == -1 ? combinerSepIndex : mapperSepIndex;// needed
-      // to
-      // split
-      // prob and vector
-      double partialSumPtProb = Double.parseDouble(value.substring(0, index));
-      Vector total = AbstractVector.decodeVector(value.substring(index + 1));
-      if (mapperSepIndex != -1) // escaped from combiner
+      FuzzyKMeansInfo value = values.next();
+
+      if (value.combinerPass == 0) // escaped from combiner
       {
-        cluster.addPoint(total, Math.pow(partialSumPtProb, SoftCluster.getM()));
+        cluster.addPoint(value.getVector(), Math.pow(value.getProbability(), SoftCluster.getM()));
       } else {
-        cluster.addPoints(total, partialSumPtProb);
+        cluster.addPoints(value.getVector(), value.getProbability());
       }
 
     }
     // force convergence calculation
     cluster.computeConvergence();
-    output.collect(new Text(cluster.getIdentifier()), new Text(SoftCluster
-        .formatCluster(cluster)));
+    output.collect(new Text(cluster.getIdentifier()), cluster); 
   }
 
   @Override

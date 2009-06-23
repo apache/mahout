@@ -23,6 +23,9 @@ import org.apache.hadoop.io.Writable;
 
 /**
  * The basic interface including numerous convenience functions
+ * <p/>
+ * NOTE: All implementing classes must have a constructor that takes an int for cardinality
+ * and a no-arg constructor that can be used for marshalling the Writable instance
  */
 public interface Vector extends Iterable<Vector.Element>, Cloneable, Writable {
 

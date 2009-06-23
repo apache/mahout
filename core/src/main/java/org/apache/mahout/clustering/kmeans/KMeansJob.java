@@ -23,13 +23,14 @@ import java.io.IOException;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.mahout.matrix.Vector;
 
 public class KMeansJob {
 
   private KMeansJob() {
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, ClassNotFoundException {
 
     if (args.length != 7) {
       System.err.println("Expected number of arguments 10 and received:"
@@ -46,9 +47,10 @@ public class KMeansJob {
     double convergenceDelta = Double.parseDouble(args[index++]);
     int maxIterations = Integer.parseInt(args[index++]);
     int numCentroids = Integer.parseInt(args[index++]);
-
+    String vectorClassName = args[6];
+    Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
     runJob(input, clusters, output, measureClass, convergenceDelta,
-        maxIterations, numCentroids);
+        maxIterations, numCentroids, vectorClass);
   }
 
   /**
@@ -61,10 +63,11 @@ public class KMeansJob {
    * @param measureClass the classname of the DistanceMeasure
    * @param convergenceDelta the convergence delta value
    * @param maxIterations the maximum number of iterations
+   * @param vectorClass
    */
   public static void runJob(String input, String clustersIn, String output,
-      String measureClass, double convergenceDelta, int maxIterations,
-      int numCentroids) throws IOException {
+                            String measureClass, double convergenceDelta, int maxIterations,
+                            int numCentroids, Class<? extends Vector> vectorClass) throws IOException {
     // delete the output directory
     JobConf conf = new JobConf(KMeansJob.class);
     Path outPath = new Path(output);
@@ -75,6 +78,6 @@ public class KMeansJob {
     fs.mkdirs(outPath);
 
     KMeansDriver.runJob(input, clustersIn, output, measureClass,
-        convergenceDelta, maxIterations, numCentroids);
+        convergenceDelta, maxIterations, numCentroids, vectorClass);
   }
 }

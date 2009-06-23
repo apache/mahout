@@ -17,18 +17,22 @@
 package org.apache.mahout.clustering.kmeans;
 
 import java.io.IOException;
+import java.io.DataOutput;
+import java.io.DataInput;
 import java.util.List;
 
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.SquareRootFunction;
 import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.utils.DistanceMeasure;
 
-public class Cluster {
+public class Cluster implements Writable {
 
   private static final String ERROR_UNKNOWN_CLUSTER_FORMAT = "Unknown cluster format:\n";
 
@@ -38,10 +42,19 @@ public class Cluster {
 
   public static final String CLUSTER_CONVERGENCE_KEY = "org.apache.mahout.clustering.kmeans.convergence";
 
+  /**
+   * The number of iterations that have taken place
+   */
+  public static final String ITERATION_NUMBER = "org.apache.mahout.clustering.kmeans.iteration";
+  /**
+   * Boolean value indicating whether the initial input is from Canopy clustering
+   */
+  public static final String CANOPY_INPUT = "org.apache.mahout.clustering.kmeans.canopyInput";
+
   private static int nextClusterId = 0;
 
   // this cluster's clusterId
-  private final int clusterId;
+  private int clusterId;
 
   // the current center
   private Vector center = new SparseVector(0);
@@ -63,9 +76,7 @@ public class Cluster {
 
   // has the centroid converged with the center?
   private boolean converged = false;
-
   private static DistanceMeasure measure;
-
   private static double convergenceDelta = 0;
 
   /**
@@ -102,6 +113,43 @@ public class Cluster {
     } else
       throw new IllegalArgumentException(ERROR_UNKNOWN_CLUSTER_FORMAT
           + formattedString);
+  }
+
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeInt(clusterId);
+    out.writeBoolean(converged);
+    Vector vector = computeCentroid();
+    out.writeUTF(vector.getClass().getSimpleName().toString());
+    vector.write(out);
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    clusterId = in.readInt();
+    converged = in.readBoolean();
+    String className = in.readUTF();
+    this.center = vectorNameToVector(className);
+    center.readFields(in);
+    this.numPoints = 0;
+    this.pointTotal = center.like();
+    this.pointSquaredTotal = center.like();
+  }
+
+  /**
+   * Simplified version that only handles SparseVector and DenseVector
+   * @param className
+   * @return
+   */
+  public static Vector vectorNameToVector(String className) {
+    Vector vector;
+    if (className.endsWith("SparseVector")){
+      vector = new SparseVector();
+    } else {
+      vector = new DenseVector();
+    }
+    return vector;
   }
 
   /**
@@ -143,13 +191,11 @@ public class Cluster {
    * 
    * @param point a point
    * @param clusters a List<Cluster> to test
-   * @param values a Writable containing the input point and possible other
-   *        values of interest (payload)
    * @param output the OutputCollector to emit into
    * @throws IOException
    */
   public static void emitPointToNearestCluster(Vector point,
-      List<Cluster> clusters, Text values, OutputCollector<Text, Text> output)
+      List<Cluster> clusters, OutputCollector<Text, KMeansInfo> output)
       throws IOException {
     Cluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
@@ -161,13 +207,11 @@ public class Cluster {
       }
     }
     // emit only clusterID
-    String outKey = nearestCluster.getIdentifier();
-    String value = "1\t" + values.toString();
-    output.collect(new Text(outKey), new Text(value));
+    output.collect(new Text(nearestCluster.getIdentifier()), new KMeansInfo(1, point));
   }
 
-  public static void outputPointWithClusterInfo(String key, Vector point,
-      List<Cluster> clusters, Text values, OutputCollector<Text, Text> output)
+  public static void outputPointWithClusterInfo(Vector point,
+      List<Cluster> clusters, OutputCollector<Text, Text> output)
       throws IOException {
     Cluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
@@ -178,8 +222,9 @@ public class Cluster {
         nearestDistance = distance;
       }
     }
-    output.collect(new Text(key), new Text(Integer
-        .toString(nearestCluster.clusterId)));
+    //TODO: this is ugly
+    String name = point.getName();
+    output.collect(new Text(name != null && name.equals("") == false ? name : point.asFormatString()), new Text(String.valueOf(nearestCluster.clusterId)));
   }
 
   /**
@@ -213,6 +258,12 @@ public class Cluster {
     this.numPoints = 0;
     this.pointTotal = center.like();
     this.pointSquaredTotal = center.like();
+  }
+
+  /**
+   * For (de)serialization as a Writable
+   */
+  public Cluster() {
   }
 
   /**

@@ -18,20 +18,51 @@
 package org.apache.mahout.clustering.fuzzykmeans;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.Mapper;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.clustering.kmeans.Cluster;
 
-public class FuzzyKMeansClusterMapper extends FuzzyKMeansMapper {
+public class FuzzyKMeansClusterMapper extends MapReduceBase implements
+        Mapper<WritableComparable<?>, Vector, Text, FuzzyKMeansOutput> {
+  protected List<SoftCluster> clusters;
   @Override
-  public void map(WritableComparable<?> key, Text values,
-      OutputCollector<Text, Text> output, Reporter reporter) throws IOException
+  public void map(WritableComparable<?> key, Vector point,
+      OutputCollector<Text, FuzzyKMeansOutput> output, Reporter reporter) throws IOException
   {
-    Vector point = AbstractVector.decodeVector(values.toString());
-    SoftCluster.outputPointWithClusterProbabilities(key.toString(), point, clusters, values, output);
-  }  
+    SoftCluster.outputPointWithClusterProbabilities(key.toString(), point, clusters, output);
+  }
+
+  /**
+   * Configure the mapper by providing its clusters. Used by unit tests.
+   *
+   * @param clusters a List<Cluster>
+   */
+  void config(List<SoftCluster> clusters) {
+    this.clusters = clusters;
+  }
+
+  @Override
+  public void configure(JobConf job) {
+
+    super.configure(job);
+    SoftCluster.configure(job);
+    clusters = new ArrayList<SoftCluster>();
+
+    FuzzyKMeansUtil.configureWithClusterInfo(job
+        .get(SoftCluster.CLUSTER_PATH_KEY), clusters);
+
+    if (clusters.isEmpty())
+      throw new NullPointerException("Cluster is empty!!!");
+  }
+
 }

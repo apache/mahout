@@ -18,6 +18,7 @@
 package org.apache.mahout.clustering.canopy;
 
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.matrix.AbstractVector;
@@ -26,6 +27,8 @@ import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
 
 import java.io.IOException;
+import java.io.DataOutput;
+import java.io.DataInput;
 import java.util.List;
 
 /**
@@ -34,7 +37,7 @@ import java.util.List;
  * a point total which is the sum of all the points and is used to compute the
  * centroid when needed.
  */
-public class Canopy {
+public class Canopy implements Writable {
 
   // keys used by Driver, Mapper, Combiner & Reducer
   public static final String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.canopy.measure";
@@ -58,7 +61,7 @@ public class Canopy {
   private static DistanceMeasure measure;
 
   // this canopy's canopyId
-  private final int canopyId;
+  private int canopyId;
 
   // the current center
   private Vector center = new SparseVector(0);
@@ -68,6 +71,12 @@ public class Canopy {
 
   // the total of all points added to the canopy
   private Vector pointTotal = null;
+
+  /**
+   * Used w
+   */
+  public Canopy() {
+  }
 
   /**
    * Create a new Canopy containing the given point
@@ -164,7 +173,7 @@ public class Canopy {
    * @param collector an OutputCollector in which to emit the point
    */
   public static void emitPointToNewCanopies(Vector point,
-      List<Canopy> canopies, OutputCollector<Text, Text> collector)
+      List<Canopy> canopies, OutputCollector<Text, Vector> collector)
       throws IOException {
     boolean pointStronglyBound = false;
     for (Canopy canopy : canopies) {
@@ -188,13 +197,11 @@ public class Canopy {
    * 
    * @param point the point to be added
    * @param canopies the List<Canopy> to be appended
-   * @param writable the original Writable from the input, may include arbitrary
-   *        payload information after the point [...]<payload>
    * @param collector an OutputCollector in which to emit the point
    */
   public static void emitPointToExistingCanopies(Vector point,
-      List<Canopy> canopies, Text writable,
-      OutputCollector<Text, Text> collector) throws IOException {
+      List<Canopy> canopies,
+      OutputCollector<Text, Vector> collector) throws IOException {
     double minDist = Double.MAX_VALUE;
     Canopy closest = null;
     boolean isCovered = false;
@@ -202,7 +209,7 @@ public class Canopy {
       double dist = measure.distance(canopy.getCenter(), point);
       if (dist < t1) {
         isCovered = true;
-        collector.collect(new Text(canopy.getIdentifier()), writable);
+        collector.collect(new Text(canopy.getIdentifier()), point);
       } else if (dist < minDist) {
         minDist = dist;
         closest = canopy;
@@ -211,7 +218,23 @@ public class Canopy {
     // if the point is not contained in any canopies (due to canopy centroid
     // clustering), emit the point to the closest covering canopy.
     if (!isCovered)
-      collector.collect(new Text(closest.getIdentifier()), writable);
+      collector.collect(new Text(closest.getIdentifier()), point);
+  }
+
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeInt(canopyId);
+    computeCentroid().write(out);
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    canopyId = in.readInt();
+    this.center = new SparseVector();
+    center.readFields(in);
+    this.pointTotal = center.clone();
+    this.numPoints = 1;
   }
 
   /**
@@ -260,10 +283,9 @@ public class Canopy {
    * 
    * @param point a point to emit.
    */
-  public void emitPoint(Vector point, OutputCollector<Text, Text> collector)
+  public void emitPoint(Vector point, OutputCollector<Text, Vector> collector)
       throws IOException {
-    collector.collect(new Text(this.getIdentifier()), new Text(point
-        .asFormatString()));
+    collector.collect(new Text(this.getIdentifier()), point);
   }
 
   @Override
@@ -302,8 +324,8 @@ public class Canopy {
    * 
    * @return a SparseVector (required by Mapper) which is the new centroid
    */
-  public SparseVector computeCentroid() {
-    SparseVector result = new SparseVector(pointTotal.size());
+  public Vector computeCentroid() {
+    Vector result = new SparseVector(pointTotal.size());
     for (int i = 0; i < pointTotal.size(); i++)
       result.set(i, pointTotal.get(i) / numPoints);
     return result;

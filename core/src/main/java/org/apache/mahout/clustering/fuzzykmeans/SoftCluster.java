@@ -18,10 +18,13 @@
 package org.apache.mahout.clustering.fuzzykmeans;
 
 import java.io.IOException;
+import java.io.DataOutput;
+import java.io.DataInput;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.matrix.AbstractVector;
@@ -29,8 +32,9 @@ import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.SquareRootFunction;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
+import org.apache.mahout.clustering.kmeans.Cluster;
 
-public class SoftCluster {
+public class SoftCluster implements Writable {
 
   public static final String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.kmeans.measure";
 
@@ -55,7 +59,7 @@ public class SoftCluster {
   private static int nextClusterId = 0;
 
   // this cluster's clusterId
-  private final int clusterId;
+  private int clusterId;
 
   // the current center
   private Vector center = new SparseVector(0);
@@ -115,6 +119,27 @@ public class SoftCluster {
     return null;
   }
 
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeInt(clusterId);
+    out.writeBoolean(converged);
+    Vector vector = computeCentroid();
+    out.writeUTF(vector.getClass().getSimpleName().toString());
+    vector.write(out);
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    clusterId = in.readInt();
+    converged = in.readBoolean();
+    String className = in.readUTF();
+    this.center = Cluster.vectorNameToVector(className);
+    center.readFields(in);
+    this.pointProbSum = 0;
+    this.weightedPointTotal = center.like();
+  }
+
+
   /**
    * Configure the distance measure from the job
    * 
@@ -155,14 +180,12 @@ public class SoftCluster {
    * 
    * @param point a point
    * @param clusters a List<SoftCluster>
-   * @param values a Writable containing the input point and possible other
-   *        values of interest (payload)
    * @param output the OutputCollector to emit into
    * @throws IOException
    */
   public static void emitPointProbToCluster(Vector point,
-      List<SoftCluster> clusters, Text values,
-      OutputCollector<Text, Text> output) throws IOException {
+      List<SoftCluster> clusters,
+      OutputCollector<Text, FuzzyKMeansInfo> output) throws IOException {
     List<Double> clusterDistanceList = new ArrayList<Double>();
     for (SoftCluster cluster : clusters) {
       clusterDistanceList.add(measure.distance(cluster.getCenter(), point));
@@ -175,8 +198,9 @@ public class SoftCluster {
       // identifier,avoids
       // too much data
       // traffic
-      Text value = new Text(Double.toString(probWeight)
-          + FuzzyKMeansDriver.MAPPER_VALUE_SEPARATOR + values.toString());
+      /*Text value = new Text(Double.toString(probWeight)
+          + FuzzyKMeansDriver.MAPPER_VALUE_SEPARATOR + values.toString());*/
+      FuzzyKMeansInfo value = new FuzzyKMeansInfo(probWeight, point);
       output.collect(key, value);
     }
   }
@@ -186,33 +210,31 @@ public class SoftCluster {
    * 
    * @param point a point
    * @param clusters a List<SoftCluster> to test
-   * @param values a Writable containing the input point and possible other
-   *        values of interest (payload)
    * @param output the OutputCollector to emit into
    * @throws IOException
    */
   public static void outputPointWithClusterProbabilities(String key,
-      Vector point, List<SoftCluster> clusters, Text values,
-      OutputCollector<Text, Text> output) throws IOException {
-
-    String outputKey = values.toString();
-    StringBuilder outputValue = new StringBuilder("[");
+      Vector point, List<SoftCluster> clusters,
+      OutputCollector<Text, FuzzyKMeansOutput> output) throws IOException {
     List<Double> clusterDistanceList = new ArrayList<Double>();
 
     for (SoftCluster cluster : clusters) {
       clusterDistanceList.add(measure.distance(point, cluster.getCenter()));
     }
-
+    FuzzyKMeansOutput fOutput = new FuzzyKMeansOutput(clusters.size());
     for (int i = 0; i < clusters.size(); i++) {
       // System.out.print("cluster:" + i + "\t" + clusterDistanceList.get(i));
 
       double probWeight = computeProbWeight(clusterDistanceList.get(i),
           clusterDistanceList);
-      outputValue.append(clusters.get(i).clusterId).append(':').append(
-          probWeight).append(' ');
+      /*outputValue.append(clusters.get(i).clusterId).append(':').append(
+          probWeight).append(' ');*/
+      fOutput.add(i, clusters.get(i), probWeight);
     }
-    output.collect(new Text(outputKey.trim()), new Text(outputValue.toString()
-        .trim() + ']'));
+    String name = point.getName();
+    output.collect(new Text(name != null && name.equals("") == false ? name
+            : point.asFormatString()),
+            fOutput);
   }
 
   /**
@@ -250,6 +272,10 @@ public class SoftCluster {
       centroid = weightedPointTotal.divide(pointProbSum);
     }
     return centroid;
+  }
+
+  //For Writable
+  public SoftCluster() {
   }
 
   /**

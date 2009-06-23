@@ -28,6 +28,7 @@ import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.mahout.clustering.canopy.Canopy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,13 +72,24 @@ final class KMeansUtil {
       for (Path path : result) {
         SequenceFile.Reader reader = null;
         try {
-          reader =new SequenceFile.Reader(fs, path, job); 
+          reader =new SequenceFile.Reader(fs, path, job);
+          Class valueClass = reader.getValueClass();
           Text key = new Text();
-          Text value = new Text();
-          while (reader.next(key, value)) {
-            // get the cluster info
-            Cluster cluster = Cluster.decodeCluster(value.toString());
-            clusters.add(cluster);
+          if (valueClass.equals(Cluster.class)){
+            Cluster value = new Cluster();
+            while (reader.next(key, value)) {
+              // get the cluster info
+              clusters.add(value);
+              value = new Cluster();
+            }
+          } else if (valueClass.equals(Canopy.class)){
+            Canopy value = new Canopy();
+            while (reader.next(key, value)) {
+              // get the cluster info
+              Cluster cluster = new Cluster(value.getCenter(), value.getCanopyId());
+              clusters.add(cluster);
+              value = new Canopy();
+            }
           }
         } finally {
           if (reader != null) {

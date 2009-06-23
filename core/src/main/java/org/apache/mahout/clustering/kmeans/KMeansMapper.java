@@ -31,15 +31,14 @@ import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.Vector;
 
 public class KMeansMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, Text, Text, Text> {
+    Mapper<WritableComparable<?>, Vector, Text, KMeansInfo> {
 
   protected List<Cluster> clusters;
 
   @Override
-  public void map(WritableComparable<?> key, Text values,
-      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
-    Vector point = AbstractVector.decodeVector(values.toString());
-    Cluster.emitPointToNearestCluster(point, clusters, values, output);
+  public void map(WritableComparable<?> key, Vector point,
+      OutputCollector<Text, KMeansInfo> output, Reporter reporter) throws IOException {
+    Cluster.emitPointToNearestCluster(point, clusters,  output);
   }
 
   /**
@@ -57,7 +56,7 @@ public class KMeansMapper extends MapReduceBase implements
     Cluster.configure(job);
 
     clusters = new ArrayList<Cluster>();
-
+    int iteration = job.getInt(Cluster.ITERATION_NUMBER, -1);
     KMeansUtil.configureWithClusterInfo(job.get(Cluster.CLUSTER_PATH_KEY),
         clusters);
 

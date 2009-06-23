@@ -29,21 +29,21 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.matrix.SparseVector;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ClusterMapper extends MapReduceBase implements
-        Mapper<WritableComparable<?>, Text, Text, Text> {
+        Mapper<WritableComparable<?>, Vector, Text, Vector> {
 
   private List<Canopy> canopies;
 
   @Override
-  public void map(WritableComparable<?> key, Text values,
-                  OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
-    Vector point = AbstractVector.decodeVector(values.toString());
-    Canopy.emitPointToExistingCanopies(point, canopies, values, output);
+  public void map(WritableComparable<?> key, Vector point,
+                  OutputCollector<Text, Vector> output, Reporter reporter) throws IOException {
+    Canopy.emitPointToExistingCanopies(point, canopies, output);
   }
 
   /**
@@ -69,10 +69,10 @@ public class ClusterMapper extends MapReduceBase implements
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
       try {
         Text key = new Text();
-        Text value = new Text();
+        Canopy value = new Canopy();
         while (reader.next(key, value)) {
-          Canopy canopy = Canopy.decodeCanopy(value.toString());
-          canopies.add(canopy);
+          canopies.add(value);
+          value = new Canopy();
         }
       } finally {
         reader.close();

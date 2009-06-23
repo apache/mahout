@@ -30,27 +30,25 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.matrix.AbstractVector;
+import org.apache.mahout.matrix.Vector;
 
 public class KMeansReducer extends MapReduceBase implements
-    Reducer<Text, Text, Text, Text> {
+    Reducer<Text, KMeansInfo, Text, Cluster> {
 
   private Map<String, Cluster> clusterMap;
 
   @Override
-  public void reduce(Text key, Iterator<Text> values,
-      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+  public void reduce(Text key, Iterator<KMeansInfo> values,
+      OutputCollector<Text, Cluster> output, Reporter reporter) throws IOException {
     Cluster cluster = clusterMap.get(key.toString());
 
     while (values.hasNext()) {
-      String value = values.next().toString();
-      String[] numNValue = value.split("\t");
-      cluster.addPoints(Integer.parseInt(numNValue[0].trim()), AbstractVector
-          .decodeVector(numNValue[1].trim()));
+      KMeansInfo delta = values.next();
+      cluster.addPoints(delta.getPoints(), delta.getPointTotal());
     }
     // force convergence calculation
     cluster.computeConvergence();
-    output.collect(new Text(cluster.getIdentifier()), new Text(Cluster
-        .formatCluster(cluster)));
+    output.collect(new Text(cluster.getIdentifier()), cluster);
   }
 
   @Override

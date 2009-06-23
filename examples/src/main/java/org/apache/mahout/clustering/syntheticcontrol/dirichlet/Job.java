@@ -32,6 +32,7 @@ import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
 import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.matrix.SparseVector;
 
 import static org.apache.mahout.clustering.syntheticcontrol.Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
 
@@ -51,14 +52,16 @@ public class Job {
       int maxIterations = Integer.parseInt(args[4]);
       double alpha_0 = Double.parseDouble(args[5]);
       int numReducers = Integer.parseInt(args[6]);
+      String vectorClassName = args[7];
+      Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
       runJob(input, output, modelFactory, numClusters, maxIterations, alpha_0,
-          numReducers);
+          numReducers, vectorClass);
     } else
       runJob(
           "testdata",
           "output",
           "org.apache.mahout.clustering.syntheticcontrol.dirichlet.NormalScModelDistribution",
-          10, 5, 1.0, 1);
+          10, 5, 1.0, 1, SparseVector.class);
   }
 
   /**
@@ -77,7 +80,7 @@ public class Job {
    * @throws ClassNotFoundException 
    */
   public static void runJob(String input, String output, String modelFactory,
-      int numModels, int maxIterations, double alpha_0, int numReducers)
+      int numModels, int maxIterations, double alpha_0, int numReducers, Class<? extends Vector> vectorClass)
       throws IOException, ClassNotFoundException, InstantiationException,
       IllegalAccessException {
     // delete the output directory
@@ -89,7 +92,7 @@ public class Job {
     }
     fs.mkdirs(outPath);
     final String directoryContainingConvertedInput = output + DIRECTORY_CONTAINING_CONVERTED_INPUT;
-    InputDriver.runJob(input, directoryContainingConvertedInput);
+    InputDriver.runJob(input, directoryContainingConvertedInput, vectorClass);
     DirichletDriver.runJob(directoryContainingConvertedInput, output + "/state", modelFactory,
         numModels, maxIterations, alpha_0, numReducers);
     printResults(output + "/state", modelFactory, maxIterations, numModels,

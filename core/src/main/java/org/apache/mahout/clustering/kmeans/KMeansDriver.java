@@ -27,6 +27,8 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapred.SequenceFileInputFormat;
+import org.apache.mahout.matrix.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,15 +48,17 @@ public class KMeansDriver {
    * 
    * @param args Expects 6 args and they all correspond to the order of the params in {@link #runJob}
    */
-  public static void main(String[] args) {
+  public static void main(String[] args) throws ClassNotFoundException {
     String input = args[0];
     String clusters = args[1];
     String output = args[2];
     String measureClass = args[3];
     double convergenceDelta = Double.parseDouble(args[4]);
     int maxIterations = Integer.parseInt(args[5]);
+    String vectorClassName = args[6];
+    Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
     runJob(input, clusters, output, measureClass, convergenceDelta,
-        maxIterations, 2);
+        maxIterations, 2, vectorClass);
   }
 
   /**
@@ -67,10 +71,11 @@ public class KMeansDriver {
    * @param convergenceDelta the convergence delta value
    * @param maxIterations the maximum number of iterations
    * @param numReduceTasks the number of reducers
+   * @param vectorClass
    */
   public static void runJob(String input, String clustersIn, String output,
-      String measureClass, double convergenceDelta, int maxIterations,
-      int numReduceTasks) {
+                            String measureClass, double convergenceDelta, int maxIterations,
+                            int numReduceTasks, Class<? extends Vector> vectorClass) {
     // iterate until the clusters converge
     boolean converged = false;
     int iteration = 0;
@@ -81,14 +86,14 @@ public class KMeansDriver {
       // point the output to a new directory per iteration
       String clustersOut = output + "/clusters-" + iteration;
       converged = runIteration(input, clustersIn, clustersOut, measureClass,
-          delta, numReduceTasks);
+          delta, numReduceTasks, iteration);
       // now point the input to the old output directory
       clustersIn = output + "/clusters-" + iteration;
       iteration++;
     }
     // now actually cluster the points
     log.info("Clustering ");
-    runClustering(input, clustersIn, output + DEFAULT_OUTPUT_DIRECTORY, measureClass, delta);
+    runClustering(input, clustersIn, output + DEFAULT_OUTPUT_DIRECTORY, measureClass, delta, vectorClass);
   }
 
   /**
@@ -100,20 +105,23 @@ public class KMeansDriver {
    * @param measureClass the classname of the DistanceMeasure
    * @param convergenceDelta the convergence delta value
    * @param numReduceTasks the number of reducer tasks
+   * @param iteration The iteration number
    * @return true if the iteration successfully runs
    */
   private static boolean runIteration(String input, String clustersIn,
-      String clustersOut, String measureClass, String convergenceDelta,
-      int numReduceTasks) {
+                                      String clustersOut, String measureClass, String convergenceDelta,
+                                      int numReduceTasks, int iteration) {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(KMeansDriver.class);
+    conf.setMapOutputKeyClass(Text.class);
+    conf.setMapOutputValueClass(KMeansInfo.class);
     conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(Text.class);
+    conf.setOutputValueClass(Cluster.class);
 
     FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(clustersOut);
     FileOutputFormat.setOutputPath(conf, outPath);
-
+    conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     conf.setMapperClass(KMeansMapper.class);
     conf.setCombinerClass(KMeansCombiner.class);
@@ -122,6 +130,8 @@ public class KMeansDriver {
     conf.set(Cluster.CLUSTER_PATH_KEY, clustersIn);
     conf.set(Cluster.DISTANCE_MEASURE_KEY, measureClass);
     conf.set(Cluster.CLUSTER_CONVERGENCE_KEY, convergenceDelta);
+    conf.setInt(Cluster.ITERATION_NUMBER, iteration);
+    
     client.setConf(conf);
     try {
       JobClient.runJob(conf);
@@ -143,11 +153,16 @@ public class KMeansDriver {
    * @param convergenceDelta the convergence delta value
    */
   private static void runClustering(String input, String clustersIn,
-      String output, String measureClass, String convergenceDelta) {
+      String output, String measureClass, String convergenceDelta, Class<? extends Vector> vectorClass) {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(KMeansDriver.class);
+    conf.setInputFormat(SequenceFileInputFormat.class);
+    conf.setOutputFormat(SequenceFileOutputFormat.class);
 
+    conf.setMapOutputKeyClass(Text.class);
+    conf.setMapOutputValueClass(vectorClass);
     conf.setOutputKeyClass(Text.class);
+    //the output is the cluster id
     conf.setOutputValueClass(Text.class);
 
     FileInputFormat.setInputPaths(conf, new Path(input));
@@ -182,10 +197,10 @@ public class KMeansDriver {
     Path outPart = new Path(filePath);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, outPart, conf);
     Text key = new Text();
-    Text value = new Text();
+    Cluster value = new Cluster();
     boolean converged = true;
     while (converged && reader.next(key, value)) {
-      converged = value.toString().charAt(0) == 'V';
+      converged = value.isConverged();
     }
     return converged;
   }

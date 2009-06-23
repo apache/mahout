@@ -25,10 +25,19 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.cli2.util.HelpFormatter;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.matrix.SparseVector;
+import org.apache.mahout.utils.vectors.io.JWriterTermInfoWriter;
+import org.apache.mahout.utils.vectors.io.SequenceFileVectorWriter;
+import org.apache.mahout.utils.vectors.io.VectorWriter;
+import org.apache.mahout.utils.vectors.io.JWriterVectorWriter;
 import org.apache.mahout.utils.vectors.lucene.CachedTermInfo;
 import org.apache.mahout.utils.vectors.lucene.LuceneIteratable;
 import org.apache.mahout.utils.vectors.lucene.TFDFMapper;
@@ -39,11 +48,10 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.FileWriter;
 import java.nio.charset.Charset;
-import java.util.Iterator;
 
 
 /**
@@ -53,7 +61,7 @@ import java.util.Iterator;
 public class Driver {
   private transient static Logger log = LoggerFactory.getLogger(Driver.class);
   //TODO: This assumes LuceneIterable, make it generic.
-  
+
   public static void main(String[] args) throws IOException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
@@ -75,7 +83,7 @@ public class Driver {
             abuilder.withName("idField").withMinimum(1).withMaximum(1).create()).
             withDescription("The field in the index containing the index.  If null, then the Lucene internal doc " +
                     "id is used which is prone to error if the underlying index changes").withShortName("i").create();
-    
+
     Option dictOutOpt = obuilder.withLongName("dictOut").withRequired(true).withArgument(
             abuilder.withName("dictOut").withMinimum(1).withMaximum(1).create()).
             withDescription("The output of the dictionary").withShortName("t").create();
@@ -94,10 +102,15 @@ public class Driver {
     Option maxOpt = obuilder.withLongName("max").withRequired(false).withArgument(
             abuilder.withName("max").withMinimum(1).withMaximum(1).create()).
             withDescription("The maximum number of vectors to output.  If not specified, then it will loop over all docs").withShortName("m").create();
+
+    Option outWriterOpt = obuilder.withLongName("outputWriter").withRequired(false).withArgument(
+            abuilder.withName("outputWriter").withMinimum(1).withMaximum(1).create()).
+            withDescription("The VectorWriter to use, either seq (SequenceFileVectorWriter - default) or file (Writes to a File using JSON format)").withShortName("e").create();
+
     Option helpOpt = obuilder.withLongName("help").
             withDescription("Print out help").withShortName("h").create();
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(idFieldOpt).withOption(outputOpt).withOption(delimiterOpt)
-            .withOption(helpOpt).withOption(fieldOpt).withOption(maxOpt).withOption(dictOutOpt).withOption(powerOpt)
+            .withOption(helpOpt).withOption(fieldOpt).withOption(maxOpt).withOption(dictOutOpt).withOption(powerOpt).withOption(outWriterOpt)
             .withOption(weightOpt).create();
     try {
       Parser parser = new Parser();
@@ -123,9 +136,9 @@ public class Driver {
           Directory dir = FSDirectory.open(file);
           IndexReader reader = IndexReader.open(dir, true);
           Weight weight = null;
-          if(cmdLine.hasOption(weightOpt)) {
+          if (cmdLine.hasOption(weightOpt)) {
             String wString = cmdLine.getValue(weightOpt).toString();
-            if(wString.equalsIgnoreCase("tf")) {
+            if (wString.equalsIgnoreCase("tf")) {
               weight = new TF();
             } else if (wString.equalsIgnoreCase("tfidf")) {
               weight = new TFIDF();
@@ -150,7 +163,7 @@ public class Driver {
             }
           }
           String idField = null;
-          if (cmdLine.hasOption(idFieldOpt)){
+          if (cmdLine.hasOption(idFieldOpt)) {
             idField = cmdLine.getValue(idFieldOpt).toString();
           }
           if (norm == LuceneIteratable.NO_NORMALIZING) {
@@ -158,54 +171,32 @@ public class Driver {
           } else {
             iteratable = new LuceneIteratable(reader, idField, field, mapper, norm);
           }
-          File outFile = new File(cmdLine.getValue(outputOpt).toString());
+          String outFile = cmdLine.getValue(outputOpt).toString();
           log.info("Output File: " + outFile);
-          BufferedWriter writer = new BufferedWriter(new FileWriter(outFile));
-          int i = 0;
-          for (Vector vector : iteratable) {
-            if (i >= maxDocs){
-              break;
+
+          VectorWriter vectorWriter;
+          if (cmdLine.hasOption(outWriterOpt)) {
+            String outWriter = cmdLine.getValue(outWriterOpt).toString();
+            if (outWriter.equals("file")) {
+              BufferedWriter writer = new BufferedWriter(new FileWriter(outFile));
+              vectorWriter = new JWriterVectorWriter(writer);
+            } else {
+              vectorWriter = getSeqFileWriter(outFile);
             }
-            writer.write(vector.asFormatString());
-            writer.write("\n");
-            if (i % 500 == 0) {
-              log.info("i = " + i);
-            }
-            i++;
+          } else {
+            vectorWriter = getSeqFileWriter(outFile);
           }
-          log.info("Wrote " + i + " vectors");
-          writer.flush();
-          writer.close();
-          // TODO: replace with aa codec
+
+          vectorWriter.write(iteratable);
+          vectorWriter.close();
+
+          String delimiter = cmdLine.hasOption(delimiterOpt) ? cmdLine.getValue(delimiterOpt).toString() : "\t";
           File dictOutFile = new File(cmdLine.getValue(dictOutOpt).toString());
           log.info("Dictionary Output file: " + dictOutFile);
-          writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dictOutFile), Charset.forName("UTF8")));
-          Iterator<TermEntry> entIter = termInfo.getAllEntries();
-          String delimiter = cmdLine.hasOption(delimiterOpt) ? cmdLine.getValue(delimiterOpt).toString() : "\t";
-          writer.write("input");
-          writer.write(delimiter);
-          writer.write(file.getAbsolutePath());
-          writer.write("\n");
-          writer.write("field");
-          writer.write(delimiter);
-          writer.write(field);
-          writer.write("\n");
-          writer.write("num.terms");
-          writer.write(delimiter);
-          writer.write(String.valueOf(termInfo.totalTerms(field)));
-          writer.write("\n");
-          writer.write("#term" + delimiter + "doc freq" + delimiter + "idx");
-          writer.write("\n");
-          while (entIter.hasNext()) {
-            TermEntry entry = entIter.next();
-            writer.write(entry.term);
-            writer.write(delimiter);
-            writer.write(String.valueOf(entry.docFreq));
-            writer.write(delimiter);
-            writer.write(String.valueOf(entry.termIdx));
-            writer.write("\n");
-          }
-          writer.flush();
+          BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dictOutFile), Charset.forName("UTF8")));
+          JWriterTermInfoWriter tiWriter = new JWriterTermInfoWriter(writer, delimiter, field);
+          tiWriter.write(termInfo);
+          tiWriter.close();
           writer.close();
         }
       }
@@ -214,6 +205,18 @@ public class Driver {
       log.error("Exception", e);
       printHelp(group);
     }
+  }
+
+  private static VectorWriter getSeqFileWriter(String outFile) throws IOException {
+    VectorWriter sfWriter;
+    Path path = new Path(outFile);
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(conf);
+    //TODO: Make this parameter driven
+    SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, LongWritable.class, SparseVector.class);
+
+    sfWriter = new SequenceFileVectorWriter(seqWriter);
+    return sfWriter;
   }
 
   private static void printHelp(Group group) {

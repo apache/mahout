@@ -31,20 +31,19 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.matrix.Vector;
 
 public class CanopyReducer extends MapReduceBase implements
-        Reducer<Text, Vector, Text, Text> {
+        Reducer<Text, Vector, Text, Canopy> {
 
   private final List<Canopy> canopies = new ArrayList<Canopy>();
 
   @Override
   public void reduce(Text key, Iterator<Vector> values,
-                     OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+                     OutputCollector<Text, Canopy> output, Reporter reporter) throws IOException {
     while (values.hasNext()) {
       Vector point = values.next();
       Canopy.addPointToCanopies(point, canopies);
     }
     for (Canopy canopy : canopies)
-      output.collect(new Text(canopy.getIdentifier()), new Text(Canopy
-              .formatCanopy(canopy)));
+      output.collect(new Text(canopy.getIdentifier()), canopy);
   }
 
   @Override

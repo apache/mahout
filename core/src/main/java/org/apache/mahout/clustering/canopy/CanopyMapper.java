@@ -33,17 +33,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CanopyMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, Text, Text, Vector> {
+    Mapper<WritableComparable<?>, Vector, Text, Vector> {
 
   private final List<Canopy> canopies = new ArrayList<Canopy>();
 
   private OutputCollector<Text, Vector> outputCollector;
 
   @Override
-  public void map(WritableComparable<?> key, Text values,
+  public void map(WritableComparable<?> key, Vector point,
       OutputCollector<Text, Vector> output, Reporter reporter) throws IOException {
     outputCollector = output;
-    Vector point = AbstractVector.decodeVector(values.toString());
     Canopy.addPointToCanopies(point, canopies);
   }
 
@@ -61,7 +60,7 @@ public class CanopyMapper extends MapReduceBase implements
   @Override
   public void close() throws IOException {
     for (Canopy canopy : canopies) {
-      SparseVector centroid = canopy.computeCentroid();
+      Vector centroid = canopy.computeCentroid();
       outputCollector.collect(new Text("centroid"), centroid);
     }
     super.close();

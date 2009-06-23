@@ -24,6 +24,7 @@ import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Reducer;
+import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.matrix.Vector;
 
 import java.io.IOException;
@@ -32,17 +33,21 @@ public class InputDriver {
   private InputDriver() {
   }
 
-  public static void main(String[] args) throws IOException {
-    runJob(args[0], args[1]);
+  public static void main(String[] args) throws IOException, ClassNotFoundException {
+    String input = args[0];
+    String output = args[1];
+    String vectorClassName = args[2];
+    Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
+    runJob(input, output, vectorClass);
   }
 
-  public static void runJob(String input, String output) throws IOException {
+  public static void runJob(String input, String output, Class<? extends Vector> vectorClass) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(InputDriver.class);
 
     conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(Vector.class);
-
+    conf.setOutputValueClass(vectorClass);
+    conf.setOutputFormat(SequenceFileOutputFormat.class);
     FileInputFormat.setInputPaths(conf, new Path(input));
     FileOutputFormat.setOutputPath(conf, new Path(output));
 
