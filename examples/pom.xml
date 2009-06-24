@@ -102,7 +102,7 @@
               <goal>run</goal>
             </goals>
           </execution>
-          <execution>
+          <!--<execution>
             <id>get-20news</id>
             <phase>process-classes</phase>
             <configuration>
@@ -120,8 +120,8 @@
             <goals>
               <goal>run</goal>
             </goals>
-          </execution>
-          <execution>
+          </execution>-->
+          <!--<execution>
             <id>get-enwiki</id>
             <phase>process-classes</phase>
             <configuration>
@@ -139,7 +139,7 @@
             <goals>
               <goal>run</goal>
             </goals>
-          </execution>
+          </execution>-->
         </executions>
       </plugin>
 
