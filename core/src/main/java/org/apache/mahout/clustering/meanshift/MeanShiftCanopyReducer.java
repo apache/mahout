@@ -17,39 +17,42 @@
 
 package org.apache.mahout.clustering.meanshift;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 public class MeanShiftCanopyReducer extends MapReduceBase implements
-    Reducer<Text, WritableComparable<?>, Text, WritableComparable<?>> {
+    Reducer<Text, MeanShiftCanopy, Text, MeanShiftCanopy> {
 
   private final List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
 
+  private boolean allConverged = true;
+
+  private JobConf conf;
+
   @Override
-  public void reduce(Text key, Iterator<WritableComparable<?>> values,
-      OutputCollector<Text, WritableComparable<?>> output, Reporter reporter)
+  public void reduce(Text key, Iterator<MeanShiftCanopy> values,
+      OutputCollector<Text, MeanShiftCanopy> output, Reporter reporter)
       throws IOException {
 
     while (values.hasNext()) {
-      Text value = (Text) values.next();
-      MeanShiftCanopy canopy = MeanShiftCanopy.decodeCanopy(value.toString());
-      MeanShiftCanopy.mergeCanopy(canopy, canopies);
+      MeanShiftCanopy canopy = values.next();
+      MeanShiftCanopy.mergeCanopy(canopy.shallowCopy(), canopies);
     }
 
     for (MeanShiftCanopy canopy : canopies) {
-      canopy.shiftToMean();
-      output.collect(new Text(canopy.getIdentifier()), new Text(
-          MeanShiftCanopy.formatCanopy(canopy)));
+      allConverged = canopy.shiftToMean() && allConverged;
+      output.collect(new Text(canopy.getIdentifier()), canopy);
     }
 
   }
@@ -57,7 +60,17 @@ public class MeanShiftCanopyReducer extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     super.configure(job);
+    this.conf = job;
     MeanShiftCanopy.configure(job);
+  }
+
+  @Override
+  public void close() throws IOException {
+    if (allConverged) {
+      Path path = new Path(conf.get(MeanShiftCanopy.CONTROL_PATH_KEY));
+      FileSystem.get(conf).createNewFile(path);
+    }
+    super.close();
   }
 
 }

@@ -30,18 +30,16 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 public class OutputMapper extends MapReduceBase implements
-    Mapper<Text, Text, Text, Text> {
+    Mapper<Text, MeanShiftCanopy, Text, Text> {
 
   private static final Logger log = LoggerFactory.getLogger(OutputMapper.class);
 
   private int clusters = 0;
 
   @Override
-  public void map(Text key, Text values, OutputCollector<Text, Text> output,
+  public void map(Text key, MeanShiftCanopy canopy, OutputCollector<Text, Text> output,
       Reporter reporter) throws IOException {
     clusters++;
-    String foo = values.toString();
-    MeanShiftCanopy canopy = MeanShiftCanopy.decodeCanopy(foo);
     for (Vector point : canopy.getBoundPoints())
       output.collect(key, new Text(point.asFormatString()));
   }

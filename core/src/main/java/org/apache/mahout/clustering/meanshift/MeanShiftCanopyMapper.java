@@ -30,16 +30,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MeanShiftCanopyMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, Text, Text, WritableComparable<?>> {
+    Mapper<WritableComparable<?>, MeanShiftCanopy, Text, MeanShiftCanopy> {
 
   private final List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
 
+  private OutputCollector<Text, MeanShiftCanopy> output;
+
   @Override
-  public void map(WritableComparable<?> key, Text values,
-      OutputCollector<Text, WritableComparable<?>> output, Reporter reporter)
+  public void map(WritableComparable<?> key, MeanShiftCanopy canopy,
+      OutputCollector<Text, MeanShiftCanopy> output, Reporter reporter)
       throws IOException {
-    MeanShiftCanopy canopy = MeanShiftCanopy.decodeCanopy(values.toString());
-    MeanShiftCanopy.mergeCanopy(canopy, canopies, output);
+    this.output = output;
+    MeanShiftCanopy.mergeCanopy(canopy.shallowCopy(), canopies);
+  }
+
+  @Override
+  public void close() throws IOException {
+    for (MeanShiftCanopy canopy : canopies) {
+      canopy.shiftToMean();
+      output.collect(new Text("canopy"), canopy);
+    }
+    super.close();
   }
 
   @Override

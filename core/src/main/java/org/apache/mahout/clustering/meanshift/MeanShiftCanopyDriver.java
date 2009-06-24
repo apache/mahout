@@ -17,6 +17,8 @@
 
 package org.apache.mahout.clustering.meanshift;
 
+import java.io.IOException;
+
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileInputFormat;
@@ -28,11 +30,10 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
 public class MeanShiftCanopyDriver {
 
-  private static final Logger log = LoggerFactory.getLogger(MeanShiftCanopyDriver.class);
+  private static final Logger log = LoggerFactory
+      .getLogger(MeanShiftCanopyDriver.class);
 
   private MeanShiftCanopyDriver() {
   }
@@ -44,7 +45,8 @@ public class MeanShiftCanopyDriver {
     double t1 = Double.parseDouble(args[3]);
     double t2 = Double.parseDouble(args[4]);
     double convergenceDelta = Double.parseDouble(args[5]);
-    runJob(input, output, measureClassName, t1, t2, convergenceDelta, false);
+    runJob(input, output, output + MeanShiftCanopy.CONTROL_PATH_KEY,
+        measureClassName, t1, t2, convergenceDelta);
   }
 
   /**
@@ -52,37 +54,36 @@ public class MeanShiftCanopyDriver {
    * 
    * @param input the input pathname String
    * @param output the output pathname String
+   * @param control TODO
    * @param measureClassName the DistanceMeasure class name
    * @param t1 the T1 distance threshold
    * @param t2 the T2 distance threshold
    * @param convergenceDelta the double convergence criteria
-   * @param inputIsSequenceFile true if input is sequence file encoded
    */
-  public static void runJob(String input, String output,
-      String measureClassName, double t1, double t2, double convergenceDelta,
-      boolean inputIsSequenceFile) {
+  public static void runJob(String input, String output, String control,
+      String measureClassName, double t1, double t2, double convergenceDelta) {
 
     JobClient client = new JobClient();
     JobConf conf = new JobConf(MeanShiftCanopyDriver.class);
 
     conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(Text.class);
+    conf.setOutputValueClass(MeanShiftCanopy.class);
 
     FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(output);
     FileOutputFormat.setOutputPath(conf, outPath);
 
     conf.setMapperClass(MeanShiftCanopyMapper.class);
-    conf.setCombinerClass(MeanShiftCanopyCombiner.class);
     conf.setReducerClass(MeanShiftCanopyReducer.class);
     conf.setNumReduceTasks(1);
-    if (inputIsSequenceFile)
-      conf.setInputFormat(SequenceFileInputFormat.class);
+    conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     conf.set(MeanShiftCanopy.DISTANCE_MEASURE_KEY, measureClassName);
-    conf.set(MeanShiftCanopy.CLUSTER_CONVERGENCE_KEY, String.valueOf(convergenceDelta));
+    conf.set(MeanShiftCanopy.CLUSTER_CONVERGENCE_KEY, String
+        .valueOf(convergenceDelta));
     conf.set(MeanShiftCanopy.T1_KEY, String.valueOf(t1));
     conf.set(MeanShiftCanopy.T2_KEY, String.valueOf(t2));
+    conf.set(MeanShiftCanopy.CONTROL_PATH_KEY, control);
 
     client.setConf(conf);
     try {

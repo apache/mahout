@@ -17,6 +17,8 @@
 
 package org.apache.mahout.clustering.syntheticcontrol.meanshift;
 
+import java.io.IOException;
+
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileInputFormat;
@@ -24,9 +26,8 @@ import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Reducer;
-import org.apache.mahout.matrix.Vector;
-
-import java.io.IOException;
+import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
 
 public class InputDriver {
   private InputDriver() {
@@ -42,14 +43,13 @@ public class InputDriver {
         org.apache.mahout.clustering.syntheticcontrol.meanshift.InputDriver.class);
 
     conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(Vector.class);
+    conf.setOutputValueClass(MeanShiftCanopy.class);
 
     FileInputFormat.setInputPaths(conf, new Path(input));
     FileOutputFormat.setOutputPath(conf, new Path(output));
-
+    conf.setOutputFormat(SequenceFileOutputFormat.class);
     conf
         .setMapperClass(org.apache.mahout.clustering.syntheticcontrol.meanshift.InputMapper.class);
-
     conf.setReducerClass(Reducer.class);
     conf.setNumReduceTasks(0);
 

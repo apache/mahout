@@ -32,11 +32,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InputMapper extends MapReduceBase implements
-    Mapper<LongWritable, Text, Text, Text> {
+    Mapper<LongWritable, Text, Text, MeanShiftCanopy> {
 
   @Override
   public void map(LongWritable key, Text values,
-      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+      OutputCollector<Text, MeanShiftCanopy> output, Reporter reporter) throws IOException {
     String[] numbers = values.toString().split(" ");
     // sometimes there are multiple separator spaces
     List<Double> doubles = new ArrayList<Double>();
@@ -49,8 +49,7 @@ public class InputMapper extends MapReduceBase implements
     for (Double d : doubles)
       point.set(index++, d);
     MeanShiftCanopy canopy = new MeanShiftCanopy(point);
-    output.collect(null, new Text(canopy.toString()));
-    // TODO srowen: FindBugs says line above will definitely cause an NPE due to null param?
+    output.collect(new Text(), canopy);
   }
 
 }

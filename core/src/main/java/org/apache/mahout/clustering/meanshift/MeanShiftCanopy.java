@@ -17,15 +17,19 @@
 
 package org.apache.mahout.clustering.meanshift;
 
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.CardinalityException;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.JsonVectorAdapter;
@@ -44,7 +48,7 @@ import com.google.gson.reflect.TypeToken;
  * a point total which is the sum of all the points and is used to compute the
  * centroid when needed.
  */
-public class MeanShiftCanopy {
+public class MeanShiftCanopy implements Writable {
 
   // keys used by Driver, Mapper, Combiner & Reducer
   public static final String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.canopy.measure";
@@ -53,7 +57,7 @@ public class MeanShiftCanopy {
 
   public static final String T2_KEY = "org.apache.mahout.clustering.canopy.t2";
 
-  public static final String CANOPY_PATH_KEY = "org.apache.mahout.clustering.canopy.path";
+  public static final String CONTROL_PATH_KEY = "org.apache.mahout.clustering.control.path";
 
   public static final String CLUSTER_CONVERGENCE_KEY = "org.apache.mahout.clustering.canopy.convergence";
 
@@ -155,38 +159,6 @@ public class MeanShiftCanopy {
       canopies.add(aCanopy);
     else
       closestCoveringCanopy.merge(aCanopy);
-  }
-
-  /**
-   * This method is used by the CanopyMapper to perform canopy inclusion tests
-   * and to emit the point and its covering canopies to the output. The
-   * CanopyCombiner will then sum the canopy points and produce the centroids.
-   * 
-   * @param aCanopy a MeanShiftCanopy to be merged
-   * @param canopies the List<Canopy> to be appended
-   * @param collector an OutputCollector in which to emit the point
-   */
-  public static void mergeCanopy(MeanShiftCanopy aCanopy,
-      List<MeanShiftCanopy> canopies,
-      OutputCollector<Text, WritableComparable<?>> collector)
-      throws IOException {
-    MeanShiftCanopy closestCoveringCanopy = null;
-    double closestNorm = 0;
-    for (MeanShiftCanopy canopy : canopies) {
-      double dist = measure.distance(canopy.getCenter(), aCanopy.getCenter());
-      if (dist < t1)
-        aCanopy.touch(collector, canopy);
-      if (dist < t2)
-        if (closestCoveringCanopy == null || dist < closestNorm) {
-          closestCoveringCanopy = canopy;
-          closestNorm = dist;
-        }
-    }
-    if (closestCoveringCanopy == null) {
-      canopies.add(aCanopy);
-      aCanopy.emitCanopy(aCanopy, collector);
-    } else
-      closestCoveringCanopy.merge(aCanopy, collector);
   }
 
   /**
@@ -333,22 +305,6 @@ public class MeanShiftCanopy {
         new Text("new " + canopy.toString()));
   }
 
-  /**
-   * Emit the canopy centroid to the collector, keyed by the canopy's Id, once
-   * per bound point.
-   * 
-   * @param canopy a MeanShiftCanopy
-   * @param collector the OutputCollector
-   * @throws IOException if there is an IO problem with the collector
-   */
-  void emitCanopyCentroid(MeanShiftCanopy canopy,
-      OutputCollector<Text, WritableComparable<?>> collector)
-      throws IOException {
-    collector.collect(new Text(this.getIdentifier()), new Text(canopy
-        .computeCentroid().asFormatString()
-        + ":=:" + boundPoints.size()));
-  }
-
   public List<Vector> getBoundPoints() {
     return boundPoints;
   }
@@ -399,18 +355,9 @@ public class MeanShiftCanopy {
   }
 
   /**
-   * The receiver overlaps the given canopy. Touch it and add my bound points to
-   * it.
-   * 
-   * @param canopy an existing MeanShiftCanopy
+   * Shift the center to the new centroid of the cluster
+   * @return if the cluster is converged
    */
-  void merge(MeanShiftCanopy canopy,
-      OutputCollector<Text, WritableComparable<?>> collector)
-      throws IOException {
-    collector.collect(new Text(getIdentifier()), new Text("merge "
-        + canopy.toString()));
-  }
-
   public boolean shiftToMean() {
     Vector centroid = computeCentroid();
     converged = new EuclideanDistanceMeasure().distance(centroid, center) < convergenceDelta;
@@ -435,16 +382,32 @@ public class MeanShiftCanopy {
     addPoints(canopy.center, canopy.boundPoints.size());
   }
 
-  /**
-   * The receiver touches the given canopy. Emit the respective centers.
-   * 
-   * @param collector
-   * @param canopy
-   * @throws IOException
-   */
-  void touch(OutputCollector<Text, WritableComparable<?>> collector,
-      MeanShiftCanopy canopy) throws IOException {
-    canopy.emitCanopyCentroid(this, collector);
-    emitCanopyCentroid(canopy, collector);
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    this.canopyId = in.readInt();
+    this.center = AbstractVector.readVector(in);
+    int numpoints = in.readInt();
+    this.boundPoints = new ArrayList<Vector>();
+    for (int i = 0; i < numpoints; i++)
+      this.boundPoints.add(AbstractVector.readVector(in));
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeInt(canopyId);
+    AbstractVector.writeVector(out, computeCentroid());
+    out.writeInt(boundPoints.size());
+    for (Vector v : boundPoints)
+      AbstractVector.writeVector(out, v);
+  }
+  
+  public MeanShiftCanopy shallowCopy(){
+    MeanShiftCanopy result = new MeanShiftCanopy();
+    result.canopyId = this.canopyId;
+    result.center = this.center;
+    result.pointTotal = this.pointTotal;
+    result.numPoints = this.numPoints;
+    result.boundPoints = this.boundPoints;
+    return result;
   }
 }
