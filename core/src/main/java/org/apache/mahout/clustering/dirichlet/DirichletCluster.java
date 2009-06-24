@@ -16,8 +16,12 @@
  */
 package org.apache.mahout.clustering.dirichlet;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.lang.reflect.Type;
 
+import org.apache.hadoop.io.Writable;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.matrix.JsonVectorAdapter;
 import org.apache.mahout.matrix.Vector;
@@ -26,7 +30,20 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-public class DirichletCluster<Observation> {
+public class DirichletCluster<Observation> implements Writable {
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    this.totalCount = in.readDouble();
+    this.model = readModel(in);
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeDouble(totalCount);
+    writeModel(out, model);
+  }
 
   public Model<Observation> model; // the model for this iteration
 
@@ -56,6 +73,44 @@ public class DirichletCluster<Observation> {
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
     Gson gson = builder.create();
     return gson.toJson(this, typeOfModel);
+  }
+
+  /**
+   * Reads a typed Model instance from the input stream
+   * 
+   * @param in
+   * @return
+   * @throws IOException
+   */
+  @SuppressWarnings("unchecked")
+  public static Model readModel(DataInput in) throws IOException {
+    String modelClassName = in.readUTF();
+    Model model;
+    try {
+      model = Class.forName(modelClassName).asSubclass(Model.class)
+          .newInstance();
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    } catch (InstantiationException e) {
+      throw new RuntimeException(e);
+    }
+    model.readFields(in);
+    return model;
+  }
+
+  /**
+   * Writes a typed Model instance to the output stream
+   * 
+   * @param out
+   * @param matrix
+   * @throws IOException
+   */
+  @SuppressWarnings("unchecked")
+  public static void writeModel(DataOutput out, Model model) throws IOException {
+    out.writeUTF(model.getClass().getName());
+    model.write(out);
   }
 
   public static DirichletCluster<Vector> fromFormatString(String formatString) {

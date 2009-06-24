@@ -44,7 +44,7 @@ public class SampledNormalModel extends NormalModel {
    * @return an SampledNormalModel
    */
   @Override
-  NormalModel sample() {
+  public NormalModel sample() {
     return new SampledNormalModel(mean, sd);
   }
 }

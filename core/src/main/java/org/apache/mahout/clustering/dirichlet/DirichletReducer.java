@@ -27,29 +27,29 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.clustering.dirichlet.models.Model;
-import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.Vector;
 
 public class DirichletReducer extends MapReduceBase implements
-    Reducer<Text, Text, Text, Text> {
+    Reducer<Text, Vector, Text, DirichletCluster<Vector>> {
 
   DirichletState<Vector> state;
 
   public Model<Vector>[] newModels;
 
   @Override
-  public void reduce(Text key, Iterator<Text> values,
-      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+  public void reduce(Text key, Iterator<Vector> values,
+      OutputCollector<Text, DirichletCluster<Vector>> output, Reporter reporter)
+      throws IOException {
     int k = Integer.parseInt(key.toString());
     Model<Vector> model = newModels[k];
     while (values.hasNext()) {
-      Vector v = AbstractVector.decodeVector(values.next().toString());
+      Vector v = values.next();
       model.observe(v);
     }
     model.computeParameters();
     DirichletCluster<Vector> cluster = state.clusters.get(k);
     cluster.setModel(model);
-    output.collect(key, new Text(cluster.asFormatString()));
+    output.collect(key, cluster);
   }
 
   public void configure(DirichletState<Vector> state) {

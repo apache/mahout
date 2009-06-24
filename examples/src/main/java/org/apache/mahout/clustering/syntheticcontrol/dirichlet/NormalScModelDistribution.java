@@ -20,6 +20,7 @@ package org.apache.mahout.clustering.syntheticcontrol.dirichlet;
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
+import org.apache.mahout.clustering.dirichlet.models.NormalModel;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
 
@@ -31,21 +32,21 @@ public class NormalScModelDistribution implements ModelDistribution<Vector> {
 
   @Override
   public Model<Vector>[] sampleFromPrior(int howMany) {
-    Model<Vector>[] result = new NormalScModel[howMany];
+    Model<Vector>[] result = new NormalModel[howMany];
     for (int i = 0; i < howMany; i++) {
       DenseVector mean = new DenseVector(60);
       for (int j = 0; j < 60; j++)
         mean.set(j, UncommonDistributions.rNorm(30, 0.5));
-      result[i] = new NormalScModel(mean, 1);
+      result[i] = new NormalModel(mean, 1);
     }
     return result;
   }
 
   @Override
   public Model<Vector>[] sampleFromPosterior(Model<Vector>[] posterior) {
-    Model<Vector>[] result = new NormalScModel[posterior.length];
+    Model<Vector>[] result = new NormalModel[posterior.length];
     for (int i = 0; i < posterior.length; i++) {
-      NormalScModel m = (NormalScModel) posterior[i];
+      NormalModel m = (NormalModel) posterior[i];
       result[i] = m.sample();
     }
     return result;

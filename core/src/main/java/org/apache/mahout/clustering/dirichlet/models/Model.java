@@ -1,5 +1,7 @@
 package org.apache.mahout.clustering.dirichlet.models;
 
+import org.apache.hadoop.io.Writable;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -21,7 +23,7 @@ package org.apache.mahout.clustering.dirichlet.models;
  * A model is a probability distribution over observed data points and allows 
  * the probability of any data point to be computed.
  */
-public interface Model<Observation> {
+public interface Model<Observation> extends Writable {
 
   /**
    * Observe the given observation, retaining information about it

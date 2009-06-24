@@ -16,20 +16,19 @@
  */
 package org.apache.mahout.clustering.dirichlet;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDistribution;
 import org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalModel;
 import org.apache.mahout.clustering.dirichlet.models.Model;
@@ -40,6 +39,7 @@ import org.apache.mahout.clustering.dirichlet.models.SampledNormalModel;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.JsonVectorAdapter;
+import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DummyOutputCollector;
 
@@ -50,8 +50,40 @@ public class TestMapReduce extends TestCase {
 
   private List<Vector> sampleData = new ArrayList<Vector>();
 
+  FileSystem fs;
+
+  Configuration conf;
+
   /**
    * Generate random samples and add them to the sampleData
+   * 
+   * @param num int number of samples to generate
+   * @param mx double x-value of the sample mean
+   * @param my double y-value of the sample mean
+   * @param sdx double x-standard deviation of the samples
+   * @param sdy double y-standard deviation of the samples
+   */
+  private void generateSamples(int num, double mx, double my, double sdx,
+      double sdy) {
+    System.out.println("Generating " + num + " samples m=[" + mx + ", " + my
+        + "] sd=[" + sdx + ", " + sdy + "]");
+    for (int i = 0; i < num; i++) {
+      addSample(new double[] {
+          UncommonDistributions.rNorm(mx, sdx),
+          UncommonDistributions.rNorm(my, sdy) });
+    }
+  }
+
+  private void addSample(double[] values) {
+    Vector v = new SparseVector(2);
+    for (int j = 0; j < values.length; j++)
+      v.setQuick(j, values[j]);
+    sampleData.add(v);
+  }
+
+  /**
+   * Generate random samples and add them to the sampleData
+   * 
    * @param num int number of samples to generate
    * @param mx double x-value of the sample mean
    * @param my double y-value of the sample mean
@@ -60,36 +92,27 @@ public class TestMapReduce extends TestCase {
   private void generateSamples(int num, double mx, double my, double sd) {
     System.out.println("Generating " + num + " samples m=[" + mx + ", " + my
         + "] sd=" + sd);
-    for (int i = 0; i < num; i++)
-      sampleData.add(new DenseVector(new double[] {
-          UncommonDistributions.rNorm(mx, sd),
-          UncommonDistributions.rNorm(my, sd) }));
-  }
-
-  public static void writePointsToFileWithPayload(List<Vector> points,
-      String fileName, String payload) throws IOException {
-    BufferedWriter output = new BufferedWriter(new OutputStreamWriter(
-        new FileOutputStream(fileName), Charset.forName("UTF-8")));
-    for (Vector point : points) {
-      output.write(point.asFormatString());
-      output.write(payload);
-      output.write('\n');
+    for (int i = 0; i < num; i++) {
+      addSample(new double[] { UncommonDistributions.rNorm(mx, sd),
+          UncommonDistributions.rNorm(my, sd) });
     }
-    output.flush();
-    output.close();
   }
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
     UncommonDistributions.init("Mahout=Hadoop+ML".getBytes());
+    ClusteringTestUtils.rmr("output");
+    ClusteringTestUtils.rmr("input");
+    conf = new Configuration();
+    fs = FileSystem.get(conf);
     File f = new File("input");
-    if (!f.exists())
-      f.mkdir();
+    f.mkdir();
   }
 
   /**
-   * Test the basic Mapper 
+   * Test the basic Mapper
+   * 
    * @throws Exception
    */
   public void testMapper() throws Exception {
@@ -99,16 +122,17 @@ public class TestMapReduce extends TestCase {
     DirichletMapper mapper = new DirichletMapper();
     mapper.configure(state);
 
-    DummyOutputCollector<Text, Text> collector = new DummyOutputCollector<Text, Text>();
+    DummyOutputCollector<Text, Vector> collector = new DummyOutputCollector<Text, Vector>();
     for (Vector v : sampleData)
-      mapper.map(null, new Text(v.asFormatString()), collector, null);
-    Map<String, List<Text>> data = collector.getData();
+      mapper.map(null, v, collector, null);
+    Map<String, List<Vector>> data = collector.getData();
     // this seed happens to produce two partitions, but they work
     assertEquals("output size", 3, data.size());
   }
 
   /**
-   * Test the basic Reducer 
+   * Test the basic Reducer
+   * 
    * @throws Exception
    */
   public void testReducer() throws Exception {
@@ -121,16 +145,16 @@ public class TestMapReduce extends TestCase {
     DirichletMapper mapper = new DirichletMapper();
     mapper.configure(state);
 
-    DummyOutputCollector<Text, Text> mapCollector = new DummyOutputCollector<Text, Text>();
+    DummyOutputCollector<Text, Vector> mapCollector = new DummyOutputCollector<Text, Vector>();
     for (Vector v : sampleData)
-      mapper.map(null, new Text(v.asFormatString()), mapCollector, null);
-    Map<String, List<Text>> data = mapCollector.getData();
+      mapper.map(null, v, mapCollector, null);
+    Map<String, List<Vector>> data = mapCollector.getData();
     // this seed happens to produce three partitions, but they work
     assertEquals("output size", 7, data.size());
 
     DirichletReducer reducer = new DirichletReducer();
     reducer.configure(state);
-    DummyOutputCollector<Text, Text> reduceCollector = new DummyOutputCollector<Text, Text>();
+    DummyOutputCollector<Text, DirichletCluster<Vector>> reduceCollector = new DummyOutputCollector<Text, DirichletCluster<Vector>>();
     for (String key : mapCollector.getKeys())
       reducer.reduce(new Text(key), mapCollector.getValue(key).iterator(),
           reduceCollector, null);
@@ -155,7 +179,8 @@ public class TestMapReduce extends TestCase {
   }
 
   /**
-   * Test the Mapper and Reducer in an iteration loop 
+   * Test the Mapper and Reducer in an iteration loop
+   * 
    * @throws Exception
    */
   public void testMRIterations() throws Exception {
@@ -171,13 +196,13 @@ public class TestMapReduce extends TestCase {
     for (int iteration = 0; iteration < 10; iteration++) {
       DirichletMapper mapper = new DirichletMapper();
       mapper.configure(state);
-      DummyOutputCollector<Text, Text> mapCollector = new DummyOutputCollector<Text, Text>();
+      DummyOutputCollector<Text, Vector> mapCollector = new DummyOutputCollector<Text, Vector>();
       for (Vector v : sampleData)
-        mapper.map(null, new Text(v.asFormatString()), mapCollector, null);
+        mapper.map(null, v, mapCollector, null);
 
       DirichletReducer reducer = new DirichletReducer();
       reducer.configure(state);
-      DummyOutputCollector<Text, Text> reduceCollector = new DummyOutputCollector<Text, Text>();
+      DummyOutputCollector<Text, DirichletCluster<Vector>> reduceCollector = new DummyOutputCollector<Text, DirichletCluster<Vector>>();
       for (String key : mapCollector.getKeys())
         reducer.reduce(new Text(key), mapCollector.getValue(key).iterator(),
             reduceCollector, null);
@@ -322,13 +347,13 @@ public class TestMapReduce extends TestCase {
     assertEquals("modelFactory", state.modelFactory.getClass().getName(),
         state2.modelFactory.getClass().getName());
     assertEquals("clusters", state.clusters.size(), state2.clusters.size());
-    assertEquals("mixture", state.mixture.size(), state2.mixture
-        .size());
+    assertEquals("mixture", state.mixture.size(), state2.mixture.size());
     assertEquals("dirichlet", state.offset, state2.offset);
   }
 
   /**
-   * Test the Mapper and Reducer using the Driver 
+   * Test the Mapper and Reducer using the Driver
+   * 
    * @throws Exception
    */
   public void testDriverMRIterations() throws Exception {
@@ -339,16 +364,21 @@ public class TestMapReduce extends TestCase {
     generateSamples(100, 2, 0, 0.2);
     generateSamples(100, 0, 2, 0.3);
     generateSamples(100, 2, 2, 1);
-    writePointsToFileWithPayload(sampleData, "input/data.txt", "");
+    ClusteringTestUtils.writePointsToFile(sampleData, "input/data.txt", fs,
+        conf);
     // Now run the driver
-    DirichletDriver.runJob("input", "output",
-        "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", 20,
-        10, 1.0, 1);
+    DirichletDriver
+        .runJob(
+            "input",
+            "output",
+            "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution",
+            20, 10, 1.0, 1);
     // and inspect results
     List<List<DirichletCluster<Vector>>> clusters = new ArrayList<List<DirichletCluster<Vector>>>();
     JobConf conf = new JobConf(KMeansDriver.class);
-    conf.set(DirichletDriver.MODEL_FACTORY_KEY,
-        "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution");
+    conf
+        .set(DirichletDriver.MODEL_FACTORY_KEY,
+            "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution");
     conf.set(DirichletDriver.NUM_CLUSTERS_KEY, Integer.toString(20));
     conf.set(DirichletDriver.ALPHA_0_KEY, Double.toString(1.0));
     for (int i = 0; i < 11; i++) {
@@ -358,8 +388,8 @@ public class TestMapReduce extends TestCase {
     printResults(clusters, 0);
   }
 
-  private static void printResults(List<List<DirichletCluster<Vector>>> clusters,
-      int significant) {
+  private static void printResults(
+      List<List<DirichletCluster<Vector>>> clusters, int significant) {
     int row = 0;
     for (List<DirichletCluster<Vector>> r : clusters) {
       System.out.print("sample[" + row++ + "]= ");
@@ -377,33 +407,28 @@ public class TestMapReduce extends TestCase {
   }
 
   /**
-   * Test the Mapper and Reducer using the Driver 
+   * Test the Mapper and Reducer using the Driver
+   * 
    * @throws Exception
    */
   public void testDriverMnRIterations() throws Exception {
     File f = new File("input");
     for (File g : f.listFiles())
       g.delete();
-    generateSamples(500, 0, 0, 0.5);
-    writePointsToFileWithPayload(sampleData, "input/data1.txt", "");
-    sampleData = new ArrayList<Vector>();
-    generateSamples(500, 2, 0, 0.2);
-    writePointsToFileWithPayload(sampleData, "input/data2.txt", "");
-    sampleData = new ArrayList<Vector>();
-    generateSamples(500, 0, 2, 0.3);
-    writePointsToFileWithPayload(sampleData, "input/data3.txt", "");
-    sampleData = new ArrayList<Vector>();
-    generateSamples(500, 2, 2, 1);
-    writePointsToFileWithPayload(sampleData, "input/data4.txt", "");
+    generate4Datasets();
     // Now run the driver
-    DirichletDriver.runJob("input", "output",
-        "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", 20,
-        15, 1.0, 1);
+    DirichletDriver
+        .runJob(
+            "input",
+            "output",
+            "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution",
+            20, 15, 1.0, 1);
     // and inspect results
     List<List<DirichletCluster<Vector>>> clusters = new ArrayList<List<DirichletCluster<Vector>>>();
     JobConf conf = new JobConf(KMeansDriver.class);
-    conf.set(DirichletDriver.MODEL_FACTORY_KEY,
-        "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution");
+    conf
+        .set(DirichletDriver.MODEL_FACTORY_KEY,
+            "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution");
     conf.set(DirichletDriver.NUM_CLUSTERS_KEY, Integer.toString(20));
     conf.set(DirichletDriver.ALPHA_0_KEY, Double.toString(1.0));
     for (int i = 0; i < 11; i++) {
@@ -413,34 +438,47 @@ public class TestMapReduce extends TestCase {
     printResults(clusters, 0);
   }
 
+  private void generate4Datasets() throws IOException {
+    generateSamples(500, 0, 0, 0.5);
+    ClusteringTestUtils.writePointsToFile(sampleData, "input/data1.txt", fs,
+        conf);
+    sampleData = new ArrayList<Vector>();
+    generateSamples(500, 2, 0, 0.2);
+    ClusteringTestUtils.writePointsToFile(sampleData, "input/data2.txt", fs,
+        conf);
+    sampleData = new ArrayList<Vector>();
+    generateSamples(500, 0, 2, 0.3);
+    ClusteringTestUtils.writePointsToFile(sampleData, "input/data3.txt", fs,
+        conf);
+    sampleData = new ArrayList<Vector>();
+    generateSamples(500, 2, 2, 1);
+    ClusteringTestUtils.writePointsToFile(sampleData, "input/data4.txt", fs,
+        conf);
+  }
+
   /**
-   * Test the Mapper and Reducer using the Driver 
+   * Test the Mapper and Reducer using the Driver
+   * 
    * @throws Exception
    */
   public void testDriverMnRnIterations() throws Exception {
     File f = new File("input");
     for (File g : f.listFiles())
       g.delete();
-    generateSamples(500, 0, 0, 0.5);
-    writePointsToFileWithPayload(sampleData, "input/data1.txt", "");
-    sampleData = new ArrayList<Vector>();
-    generateSamples(500, 2, 0, 0.2);
-    writePointsToFileWithPayload(sampleData, "input/data2.txt", "");
-    sampleData = new ArrayList<Vector>();
-    generateSamples(500, 0, 2, 0.3);
-    writePointsToFileWithPayload(sampleData, "input/data3.txt", "");
-    sampleData = new ArrayList<Vector>();
-    generateSamples(500, 2, 2, 1);
-    writePointsToFileWithPayload(sampleData, "input/data4.txt", "");
+    generate4Datasets();
     // Now run the driver
-    DirichletDriver.runJob("input", "output",
-        "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", 20,
-        15, 1.0, 2);
+    DirichletDriver
+        .runJob(
+            "input",
+            "output",
+            "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution",
+            20, 15, 1.0, 2);
     // and inspect results
     List<List<DirichletCluster<Vector>>> clusters = new ArrayList<List<DirichletCluster<Vector>>>();
     JobConf conf = new JobConf(KMeansDriver.class);
-    conf.set(DirichletDriver.MODEL_FACTORY_KEY,
-        "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution");
+    conf
+        .set(DirichletDriver.MODEL_FACTORY_KEY,
+            "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution");
     conf.set(DirichletDriver.NUM_CLUSTERS_KEY, Integer.toString(20));
     conf.set(DirichletDriver.ALPHA_0_KEY, Double.toString(1.0));
     for (int i = 0; i < 11; i++) {
@@ -451,25 +489,8 @@ public class TestMapReduce extends TestCase {
   }
 
   /**
-   * Generate random samples and add them to the sampleData
-   * @param num int number of samples to generate
-   * @param mx double x-value of the sample mean
-   * @param my double y-value of the sample mean
-   * @param sdx double x-standard deviation of the samples
-   * @param sdy double y-standard deviation of the samples
-   */
-  private void generateSamples(int num, double mx, double my, double sdx,
-      double sdy) {
-    System.out.println("Generating " + num + " samples m=[" + mx + ", " + my
-        + "] sd=[" + sdx + ", " + sdy + "]");
-    for (int i = 0; i < num; i++)
-      sampleData.add(new DenseVector(new double[] {
-          UncommonDistributions.rNorm(mx, sdx),
-          UncommonDistributions.rNorm(my, sdy) }));
-  }
-
-  /**
-   * Test the Mapper and Reducer using the Driver 
+   * Test the Mapper and Reducer using the Driver
+   * 
    * @throws Exception
    */
   public void testDriverMnRnIterationsAsymmetric() throws Exception {
@@ -477,16 +498,20 @@ public class TestMapReduce extends TestCase {
     for (File g : f.listFiles())
       g.delete();
     generateSamples(500, 0, 0, 0.5, 1.0);
-    writePointsToFileWithPayload(sampleData, "input/data1.txt", "");
+    ClusteringTestUtils.writePointsToFile(sampleData, "input/data1.txt", fs,
+        conf);
     sampleData = new ArrayList<Vector>();
-    generateSamples(500, 2, 0, 0.2, 0.1);
-    writePointsToFileWithPayload(sampleData, "input/data2.txt", "");
+    generateSamples(500, 2, 0, 0.2);
+    ClusteringTestUtils.writePointsToFile(sampleData, "input/data2.txt", fs,
+        conf);
     sampleData = new ArrayList<Vector>();
-    generateSamples(500, 0, 2, 0.3, 0.5);
-    writePointsToFileWithPayload(sampleData, "input/data3.txt", "");
+    generateSamples(500, 0, 2, 0.3);
+    ClusteringTestUtils.writePointsToFile(sampleData, "input/data3.txt", fs,
+        conf);
     sampleData = new ArrayList<Vector>();
-    generateSamples(500, 2, 2, 1, 0.5);
-    writePointsToFileWithPayload(sampleData, "input/data4.txt", "");
+    generateSamples(500, 2, 2, 1);
+    ClusteringTestUtils.writePointsToFile(sampleData, "input/data4.txt", fs,
+        conf);
     // Now run the driver
     DirichletDriver
         .runJob(
@@ -498,7 +523,8 @@ public class TestMapReduce extends TestCase {
     List<List<DirichletCluster<Vector>>> clusters = new ArrayList<List<DirichletCluster<Vector>>>();
     JobConf conf = new JobConf(KMeansDriver.class);
     conf
-        .set(DirichletDriver.MODEL_FACTORY_KEY,
+        .set(
+            DirichletDriver.MODEL_FACTORY_KEY,
             "org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDistribution");
     conf.set(DirichletDriver.NUM_CLUSTERS_KEY, Integer.toString(20));
     conf.set(DirichletDriver.ALPHA_0_KEY, Double.toString(1.0));

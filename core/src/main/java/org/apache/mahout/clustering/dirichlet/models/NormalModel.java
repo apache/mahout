@@ -16,6 +16,11 @@
  */
 package org.apache.mahout.clustering.dirichlet.models;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
+import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.SquareRootFunction;
 import org.apache.mahout.matrix.Vector;
 
@@ -47,10 +52,12 @@ public class NormalModel implements Model<Vector> {
   }
 
   /**
-   * Return an instance with the same parameters
+   * TODO: Return a proper sample from the posterior. For now, return an 
+   * instance with the same parameters
+   * 
    * @return an NormalModel
    */
-  NormalModel sample() {
+  public NormalModel sample() {
     return new NormalModel(mean, sd);
   }
 
@@ -58,7 +65,7 @@ public class NormalModel implements Model<Vector> {
   public void observe(Vector x) {
     s0++;
     if (s1 == null)
-      s1 = x;
+      s1 = x.clone();
     else
       s1 = s1.plus(x);
     if (s2 == null)
@@ -83,7 +90,6 @@ public class NormalModel implements Model<Vector> {
 
   @Override
   public double pdf(Vector x) {
-    assert x.getNumNondefaultElements() == 2;
     double sd2 = sd * sd;
     double exp = -(x.dot(x) - 2 * x.dot(mean) + mean.dot(mean)) / (2 * sd2);
     double ex = Math.exp(exp);
@@ -104,5 +110,23 @@ public class NormalModel implements Model<Vector> {
         buf.append(String.format("%.2f", mean.get(i))).append(", ");
     buf.append("] sd=").append(String.format("%.2f", sd)).append('}');
     return buf.toString();
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    this.mean = AbstractVector.readVector(in);
+    this.sd = in.readDouble();
+    this.s0 = in.readInt();
+    this.s1 = AbstractVector.readVector(in);
+    this.s2 = AbstractVector.readVector(in);
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    AbstractVector.writeVector(out, mean);
+    out.writeDouble(sd);
+    out.writeInt(s0);
+    AbstractVector.writeVector(out, s1);
+    AbstractVector.writeVector(out, s2);    
   }
 }

@@ -9,6 +9,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.LongWritable;
 
 import java.util.List;
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -27,5 +28,17 @@ public class ClusteringTestUtils {
       writer.append(new LongWritable(recNum++), point);
     }
     writer.close();
+  }
+
+  public static void rmr(String path) throws Exception {
+    File f = new File(path);
+    if (f.exists()) {
+      if (f.isDirectory()) {
+        String[] contents = f.list();
+        for (int i = 0; i < contents.length; i++)
+          rmr(f.toString() + File.separator + contents[i]);
+      }
+      f.delete();
+    }
   }
 }

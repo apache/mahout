@@ -27,9 +27,11 @@ import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
+import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,9 +111,8 @@ public class DirichletDriver {
     for (int i = 0; i < numModels; i++) {
       Path path = new Path(stateIn + "/part-" + i);
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, job, path,
-          Text.class, Text.class);
-      String stateString = state.clusters.get(i).asFormatString();
-      writer.append(new Text(Integer.toString(i)), new Text(stateString));
+          Text.class, DirichletCluster.class);
+      writer.append(new Text(Integer.toString(i)), state.clusters.get(i));
       writer.close();
     }
   }
@@ -146,7 +147,9 @@ public class DirichletDriver {
     JobConf conf = new JobConf(DirichletDriver.class);
 
     conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(Text.class);
+    conf.setOutputValueClass(DirichletCluster.class);
+    conf.setMapOutputKeyClass(Text.class);
+    conf.setMapOutputValueClass(SparseVector.class);
 
     FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(stateOut);
@@ -155,6 +158,7 @@ public class DirichletDriver {
     conf.setMapperClass(DirichletMapper.class);
     conf.setReducerClass(DirichletReducer.class);
     conf.setNumReduceTasks(numReducers);
+    conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     conf.set(STATE_IN_KEY, stateIn);
     conf.set(MODEL_FACTORY_KEY, modelFactory);

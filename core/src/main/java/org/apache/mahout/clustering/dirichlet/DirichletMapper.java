@@ -30,26 +30,24 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.TimesFunction;
 import org.apache.mahout.matrix.Vector;
 
 public class DirichletMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, Text, Text, Text> {
+    Mapper<WritableComparable<?>, Vector, Text, Vector> {
 
   private DirichletState<Vector> state;
 
   @Override
-  public void map(WritableComparable<?> key, Text values,
-      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
-    Vector v = AbstractVector.decodeVector(values.toString());
+  public void map(WritableComparable<?> key, Vector v,
+      OutputCollector<Text, Vector> output, Reporter reporter) throws IOException {
     // compute a normalized vector of probabilities that v is described by each model
     Vector pi = normalizedProbabilities(state, v);
     // then pick one model by sampling a Multinomial distribution based upon them
     // see: http://en.wikipedia.org/wiki/Multinomial_distribution
     int k = UncommonDistributions.rMultinom(pi);
-    output.collect(new Text(String.valueOf(k)), values);
+    output.collect(new Text(String.valueOf(k)), v);
   }
 
   public void configure(DirichletState<Vector> state) {
@@ -62,6 +60,7 @@ public class DirichletMapper extends MapReduceBase implements
     state = getDirichletState(job);
   }
 
+  @SuppressWarnings("unchecked")
   public static DirichletState<Vector> getDirichletState(JobConf job) {
     String statePath = job.get(DirichletDriver.STATE_IN_KEY);
     String modelFactory = job.get(DirichletDriver.MODEL_FACTORY_KEY);
@@ -79,13 +78,11 @@ public class DirichletMapper extends MapReduceBase implements
             job);
         try {
           Text key = new Text();
-          Text value = new Text();
-          while (reader.next(key, value)) {
+          DirichletCluster cluster = new DirichletCluster();
+          while (reader.next(key, cluster)) {
             int index = Integer.parseInt(key.toString());
-            String formatString = value.toString();
-            DirichletCluster<Vector> cluster = DirichletCluster
-                .fromFormatString(formatString);
             state.clusters.set(index, cluster);
+            cluster = new DirichletCluster();
           }
         } finally {
           reader.close();

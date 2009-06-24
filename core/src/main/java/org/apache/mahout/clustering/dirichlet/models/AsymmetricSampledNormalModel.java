@@ -16,6 +16,11 @@
  */
 package org.apache.mahout.clustering.dirichlet.models;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
+import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.SquareRootFunction;
 import org.apache.mahout.matrix.Vector;
 
@@ -50,6 +55,7 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
 
   /**
    * Return an instance with the same parameters
+   * 
    * @return an AsymmetricSampledNormalModel
    */
   AsymmetricSampledNormalModel sample() {
@@ -60,7 +66,7 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
   public void observe(Vector x) {
     s0++;
     if (s1 == null)
-      s1 = x.like();
+      s1 = x.clone();
     else
       s1 = s1.plus(x);
     if (s2 == null)
@@ -86,10 +92,10 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
   /**
    * Calculate a pdf using the supplied sample and sd
    * 
-  * @param x a Vector sample
-  * @param sd a double std deviation
-  * @return
-  */
+   * @param x a Vector sample
+   * @param sd a double std deviation
+   * @return
+   */
   private double pdf(Vector x, double sd) {
     assert x.getNumNondefaultElements() == 2;
     double sd2 = sd * sd;
@@ -104,8 +110,8 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
     assert x.getNumNondefaultElements() == 2;
     double pdf0 = pdf(x, sd.get(0));
     double pdf1 = pdf(x, sd.get(1));
-    //if (pdf0 < 0 || pdf0 > 1 || pdf1 < 0 || pdf1 > 1)
-    //  System.out.print("");
+    // if (pdf0 < 0 || pdf0 > 1 || pdf1 < 0 || pdf1 > 1)
+    // System.out.print("");
     return pdf0 * pdf1;
   }
 
@@ -127,5 +133,23 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
         buf.append(String.format("%.2f", sd.get(i))).append(", ");
     buf.append("]}");
     return buf.toString();
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    this.mean = AbstractVector.readVector(in);
+    this.sd = AbstractVector.readVector(in);
+    this.s0 = in.readInt();
+    this.s1 = AbstractVector.readVector(in);
+    this.s2 = AbstractVector.readVector(in);
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    AbstractVector.writeVector(out, mean);
+    AbstractVector.writeVector(out, sd);
+    out.writeInt(s0);
+    AbstractVector.writeVector(out, s1);
+    AbstractVector.writeVector(out, s2);
   }
 }
