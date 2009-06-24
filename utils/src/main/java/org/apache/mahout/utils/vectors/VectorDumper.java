@@ -63,6 +63,7 @@ public class VectorDumper {
 
       if (cmdLine.hasOption(seqOpt)) {
         Path path = new Path(cmdLine.getValue(seqOpt).toString());
+        System.out.println("Input Path: " + path);
         JobClient client = new JobClient();
         JobConf conf = new JobConf(Job.class);
         client.setConf(conf);

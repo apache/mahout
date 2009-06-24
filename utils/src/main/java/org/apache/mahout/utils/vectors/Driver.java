@@ -214,7 +214,7 @@ public class Driver {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
     //TODO: Make this parameter driven
-    SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, LongWritable.class, SparseVector.class);
+    SequenceFile.Writer seqWriter = SequenceFile.createWriter(fs, conf, path, LongWritable.class, SparseVector.class);
 
     sfWriter = new SequenceFileVectorWriter(seqWriter);
     return sfWriter;
