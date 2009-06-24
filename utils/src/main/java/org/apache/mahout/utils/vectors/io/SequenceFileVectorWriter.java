@@ -9,7 +9,7 @@ import java.io.IOException;
 
 
 /**
- *
+ * Closes the writer when done
  *
  **/
 public class SequenceFileVectorWriter implements VectorWriter {
@@ -21,18 +21,16 @@ public class SequenceFileVectorWriter implements VectorWriter {
 
   @Override
   public long write(VectorIterable iterable, long maxDocs) throws IOException {
-    long i = 0;
     long recNum = 0;
     for (Vector point : iterable) {
-      if (i >= maxDocs) {
+      if (recNum >= maxDocs) {
         break;
       }
       //point.write(dataOut);
       writer.append(new LongWritable(recNum++), point);
 
-      i++;
     }
-    return i;
+    return recNum;
   }
 
   @Override
@@ -42,6 +40,12 @@ public class SequenceFileVectorWriter implements VectorWriter {
 
   @Override
   public void close() throws IOException {
+    if (writer != null) {
+      writer.close();
+    }
+  }
 
+  public SequenceFile.Writer getWriter() {
+    return writer;
   }
 }
