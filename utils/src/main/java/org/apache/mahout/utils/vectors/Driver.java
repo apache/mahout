@@ -126,9 +126,9 @@ public class Driver {
       if (cmdLine.hasOption(inputOpt)) {//Lucene case
         File file = new File(cmdLine.getValue(inputOpt).toString());
         if (file.exists() && file.isDirectory()) {
-          int maxDocs = Integer.MAX_VALUE;
+          long maxDocs = Long.MAX_VALUE;
           if (cmdLine.hasOption(maxOpt)) {
-            maxDocs = Integer.parseInt(cmdLine.getValue(maxOpt).toString());
+            maxDocs = Long.parseLong(cmdLine.getValue(maxOpt).toString());
           }
           if (maxDocs < 0) {
             throw new IllegalArgumentException("maxDocs must be >= 0");
@@ -187,7 +187,7 @@ public class Driver {
             vectorWriter = getSeqFileWriter(outFile);
           }
 
-          vectorWriter.write(iteratable);
+          vectorWriter.write(iteratable, maxDocs);
           vectorWriter.close();
 
           String delimiter = cmdLine.hasOption(delimiterOpt) ? cmdLine.getValue(delimiterOpt).toString() : "\t";
