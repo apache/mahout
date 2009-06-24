@@ -187,8 +187,9 @@ public class Driver {
             vectorWriter = getSeqFileWriter(outFile);
           }
 
-          vectorWriter.write(iteratable, maxDocs);
+          long numDocs = vectorWriter.write(iteratable, maxDocs);
           vectorWriter.close();
+          log.info("Wrote: " + numDocs + " vectors");
 
           String delimiter = cmdLine.hasOption(delimiterOpt) ? cmdLine.getValue(delimiterOpt).toString() : "\t";
           File dictOutFile = new File(cmdLine.getValue(dictOutOpt).toString());
