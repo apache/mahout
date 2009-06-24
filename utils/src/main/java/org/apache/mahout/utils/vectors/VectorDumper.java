@@ -11,23 +11,24 @@ import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.cli2.util.HelpFormatter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.jobcontrol.Job;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.matrix.Vector;
 
-import java.io.IOException;
-import java.io.BufferedWriter;
-import java.io.Writer;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 
 /**
- *
+ * Can read in a {@link org.apache.hadoop.io.SequenceFile} of {@link org.apache.mahout.matrix.Vector}s
+ * and dump out the results using {@link org.apache.mahout.matrix.Vector#asFormatString()} to either the console
+ * or to a file.
  *
  **/
 public class VectorDumper {
@@ -71,7 +72,7 @@ public class VectorDumper {
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
         VectorIterable iter = new SequenceFileVectorIterable(reader);
         Writer writer = null;
-        if (cmdLine.hasOption(outputOpt)){
+        if (cmdLine.hasOption(outputOpt)) {
           writer = new FileWriter(cmdLine.getValue(outputOpt).toString());
         } else {
           writer = new OutputStreamWriter(System.out);
@@ -80,7 +81,7 @@ public class VectorDumper {
           writer.write(vector.asFormatString());
           writer.write(LINE_SEP);
         }
-        if (cmdLine.hasOption(outputOpt)){
+        if (cmdLine.hasOption(outputOpt)) {
           writer.close();
         }
       }
