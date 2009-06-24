@@ -22,6 +22,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.Iterator;
 
 import junit.framework.TestCase;
 
@@ -224,7 +225,9 @@ public class VectorTest extends TestCase {
    */
   private static void doTestEnumeration(double[] apriori, Vector vector) {
     double[] test = new double[apriori.length];
-    for (Vector.Element e : vector) {
+    Iterator<Vector.Element> iter = vector.iterateNonZero();
+    while (iter.hasNext()) {
+      Vector.Element e = iter.next();
       test[e.index()] = e.get();
     }
 
@@ -250,7 +253,7 @@ public class VectorTest extends TestCase {
     doTestEnumeration(apriori, sparse);
   }
 
-  public void testSparseVectorTimesX() {
+  /*public void testSparseVectorTimesX() {
     Random rnd = new Random(0xDEADBEEFL);
     Vector v1 = randomSparseVector(rnd);
     double x = rnd.nextDouble();
@@ -272,9 +275,9 @@ public class VectorTest extends TestCase {
         + " ms for 10 iterations");
     for (int i = 0; i < 50000; i++)
       assertEquals("i=" + i, rRef.getQuick(i), rOpt.getQuick(i));
-  }
+  }*/
 
-  public void testSparseVectorTimesV() {
+  /*public void testSparseVectorTimesV() {
     Random rnd = new Random(0xDEADBEEFL);
     Vector v1 = randomSparseVector(rnd);
     Vector v2 = randomSparseVector(rnd);
@@ -296,7 +299,7 @@ public class VectorTest extends TestCase {
         + " ms for 10 iterations");
     for (int i = 0; i < 50000; i++)
       assertEquals("i=" + i, rRef.getQuick(i), rOpt.getQuick(i));
-  }
+  }*/
 
   private static Vector randomSparseVector(Random rnd) {
     SparseVector v1 = new SparseVector(50000);

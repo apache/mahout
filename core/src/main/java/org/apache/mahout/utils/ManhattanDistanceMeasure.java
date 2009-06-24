@@ -24,6 +24,7 @@ import org.apache.mahout.utils.parameters.Parameter;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 
 /**
  * This class implements a "manhattan distance" metric by summing the absolute
@@ -58,8 +59,12 @@ public class ManhattanDistanceMeasure implements DistanceMeasure {
     if (v1.size() != v2.size())
       throw new CardinalityException();
     double result = 0;
-    for (int i = 0; i < v1.size(); i++)
-      result += Math.abs(v2.getQuick(i) - v1.getQuick(i));
+   Vector vector = v1.plus(v2);
+   Iterator<Vector.Element> iter = vector.iterateNonZero();//this contains all non zero elements between the two
+   while (iter.hasNext()){
+      Vector.Element e = iter.next();
+      result += Math.abs(v2.getQuick(e.index()) - v1.getQuick(e.index()));
+    }
     return result;
   }
 

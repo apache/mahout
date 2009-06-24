@@ -20,7 +20,6 @@ package org.apache.mahout.matrix;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
@@ -111,25 +110,30 @@ public class VectorView extends AbstractVector {
   }
 
   @Override
-  public Iterator<Vector.Element> iterator() {
-    return new ViewIterator();
+  public java.util.Iterator<Vector.Element> iterateNonZero() {
+    return new NonZeroIterator();
   }
 
-  public class ViewIterator implements Iterator<Vector.Element> {
-    private final Iterator<Vector.Element> it;
+  @Override
+  public java.util.Iterator<Vector.Element> iterateAll() {
+    return new AllIterator();
+  }
+
+  public class NonZeroIterator implements java.util.Iterator<Vector.Element> {
+    private final java.util.Iterator<Vector.Element> it;
 
     private Vector.Element el;
 
-    public ViewIterator() {
-      it = vector.iterator();
+    public NonZeroIterator() {
+      it = vector.iterateAll();
       buffer();
     }
 
     private void buffer() {
       while (it.hasNext()) {
         el = it.next();
-        if (isInView(el.index())) {
-          final Vector.Element decorated = el;
+        if (isInView(el.index()) && el.get() != 0) {
+          final Vector.Element decorated = vector.getElement(el.index());
           el = new Vector.Element() {
             @Override
             public double get() {
@@ -174,6 +178,107 @@ public class VectorView extends AbstractVector {
     @Override
     public void remove() {
       throw new UnsupportedOperationException();
+    }
+  }
+
+  public class AllIterator implements java.util.Iterator<Vector.Element> {
+    private final java.util.Iterator<Vector.Element> it;
+
+    private Vector.Element el;
+
+    public AllIterator() {
+      it = vector.iterateAll();
+      buffer();
+    }
+
+    private void buffer() {
+      while (it.hasNext()) {
+        el = it.next();
+        if (isInView(el.index())) {
+          final Vector.Element decorated = vector.getElement(el.index());
+          el = new Vector.Element() {
+            @Override
+            public double get() {
+              return decorated.get();
+            }
+
+            @Override
+            public int index() {
+              return decorated.index() - offset;
+            }
+
+            @Override
+            public void set(double value) {
+              el.set(value);
+            }
+          };
+          return;
+        }
+      }
+      el = null; // No element was found
+    }
+
+    @Override
+    public Vector.Element next() {
+      if (!hasNext()) {
+        throw new NoSuchElementException();
+      }
+      Vector.Element buffer = el;
+      buffer();
+      return buffer;
+    }
+
+    @Override
+    public boolean hasNext() {
+      return el != null;
+    }
+
+    /**
+     * @throws UnsupportedOperationException all the time. method not
+     *         implemented.
+     */
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+
+  @Override
+  public double dot(Vector x) {
+    if (size() != x.size())
+      throw new CardinalityException();
+    double result = 0;
+    for (int i = 0; i < size(); i++)
+      result += getQuick(i) * x.getQuick(i);
+    return result;
+  }
+
+  @Override
+  public Vector.Element getElement(int index) {
+    return new Element(index);
+  }
+
+  public class Element implements Vector.Element {
+    private final int ind;
+
+    public Element(int ind) {
+      this.ind = ind;
+    }
+
+    @Override
+    public double get() {
+      return getQuick(ind);
+    }
+
+    @Override
+    public int index() {
+      return ind;
+    }
+
+    @Override
+    public void set(double value) {
+      setQuick(ind, value);
     }
   }
 

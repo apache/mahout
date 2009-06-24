@@ -18,6 +18,7 @@
 package org.apache.mahout.matrix;
 
 import java.util.Map;
+import java.util.Iterator;
 
 import org.apache.hadoop.io.Writable;
 
@@ -26,8 +27,10 @@ import org.apache.hadoop.io.Writable;
  * <p/>
  * NOTE: All implementing classes must have a constructor that takes an int for cardinality
  * and a no-arg constructor that can be used for marshalling the Writable instance
+ * <p/>
+ * NOTE: Implementations may choose to reuse the Vector.Element in the Iterable methods
  */
-public interface Vector extends Iterable<Vector.Element>, Cloneable, Writable {
+public interface Vector extends Cloneable, Writable {
 
   /**
    * Vectors may have a name associated with them, which makes them easy to identify
@@ -117,6 +120,25 @@ public interface Vector extends Iterable<Vector.Element>, Cloneable, Writable {
   Vector clone();
 
   /**
+   * Iterates over all elements
+   *<p/>
+   * * NOTE: Implementations may choose to reuse the Element returned for performance reasons,
+   * so if you need a copy of it, you should call {@link #getElement} for the given index
+   *
+   * @return An {@link java.util.Iterator} over all elements
+   */
+  Iterator<Element> iterateAll();
+
+  /**
+   * Iterates over all non-zero elements.
+   *<p/> 
+   * NOTE: Implementations may choose to reuse the Element returned for performance reasons,
+   * so if you need a copy of it, you should call {@link #getElement} for the given index
+   * @return An {@link java.util.Iterator} over all non-zero elements
+   */
+  Iterator<Element> iterateNonZero();
+
+  /**
    * Return the value at the index defined by the label
    * 
    * @param label a String label that maps to an index
@@ -142,6 +164,12 @@ public interface Vector extends Iterable<Vector.Element>, Cloneable, Writable {
    */
   Element getElement(int index);
 
+  /**
+   * A holder for information about a specific item in the Vector.
+   * <p/>
+   * When using with an Iterator, the implementation may choose to reuse this element, so you may need to make a copy if
+   * you want to keep it
+   */
   interface Element {
     /**
      * @return the value of this vector element.

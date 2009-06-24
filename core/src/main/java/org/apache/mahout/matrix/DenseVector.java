@@ -21,7 +21,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.NoSuchElementException;
+import java.util.Iterator;
 
 /**
  * Implements vector as an array of doubles
@@ -136,28 +136,45 @@ public class DenseVector extends AbstractVector {
    * @see java.lang.Iterable#iterator
    */
   @Override
-  public java.util.Iterator<Vector.Element> iterator() {
-    return new Iterator();
+  public java.util.Iterator<Vector.Element> iterateNonZero() {
+    return new NonZeroIterator();
   }
 
-  private class Iterator implements java.util.Iterator<Vector.Element> {
-    private int ind;
+  @Override
+  public java.util.Iterator<Vector.Element> iterateAll() {
+    return new AllIterator();
+  }
 
-    private Iterator() {
-      ind = 0;
+  private class NonZeroIterator implements java.util.Iterator<Vector.Element> {
+
+    private Element element = new Element(0);
+    private int offset;
+
+    private NonZeroIterator() {
     }
 
     @Override
     public boolean hasNext() {
-      return ind < values.length;
+      int last = offset;
+      while (offset < values.length && values[offset] == 0){
+        offset++;
+      }
+      boolean next = true;
+      if (offset >= values.length){
+        next = false;
+      } else {
+        element.ind = offset;
+        offset++;
+      }
+      return next;
     }
 
     @Override
     public Vector.Element next() {
-      if (!hasNext()) {
+      /*if (!hasNext()) {
         throw new NoSuchElementException();
-      }
-      return new Element(ind++);
+      }*/
+      return element;
     }
 
     @Override
@@ -166,11 +183,68 @@ public class DenseVector extends AbstractVector {
     }
   }
 
+  private class AllIterator implements java.util.Iterator<Vector.Element> {
+
+    private Element element = new Element(-1);
+
+    private AllIterator() {
+    }
+
+    @Override
+    public boolean hasNext() {
+      return element.ind + 1 < values.length;
+    }
+
+    @Override
+    public Vector.Element next() {
+      /*if (!hasNext()) {
+        throw new NoSuchElementException();
+      }*/
+      element.ind++;
+      return element;
+    }
+
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  public class Element implements Vector.Element {
+    int ind;
+
+    public Element(int ind) {
+      this.ind = ind;
+    }
+
+    @Override
+    public double get() {
+      return values[ind];
+    }
+
+    @Override
+    public int index() {
+      return ind;
+    }
+
+    @Override
+    public void set(double value) {
+      values[ind] = value;
+    }
+  }
+
+  @Override
+  public Vector.Element getElement(int index) {
+    return new Element(index);
+  }
+
   @Override
   public void write(DataOutput dataOutput) throws IOException {
     dataOutput.writeUTF(this.name==null? "": this.name);
     dataOutput.writeInt(size());
-    for (Vector.Element element : this) {
+    Iterator<Vector.Element> iter = iterateAll();
+    while (iter.hasNext()) {
+      Vector.Element element = iter.next();
       dataOutput.writeDouble(element.get());
     }
   }

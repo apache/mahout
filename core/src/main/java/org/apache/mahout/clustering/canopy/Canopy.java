@@ -25,6 +25,7 @@ import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
+import org.apache.mahout.clustering.ClusterBase;
 
 import java.io.IOException;
 import java.io.DataOutput;
@@ -37,7 +38,7 @@ import java.util.List;
  * a point total which is the sum of all the points and is used to compute the
  * centroid when needed.
  */
-public class Canopy implements Writable {
+public class Canopy extends ClusterBase implements Writable {
 
   // keys used by Driver, Mapper, Combiner & Reducer
   public static final String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.canopy.measure";
@@ -60,17 +61,6 @@ public class Canopy implements Writable {
   // the distance measure
   private static DistanceMeasure measure;
 
-  // this canopy's canopyId
-  private int canopyId;
-
-  // the current center
-  private Vector center = new SparseVector(0);
-
-  // the number of points in the canopy
-  private int numPoints = 0;
-
-  // the total of all points added to the canopy
-  private Vector pointTotal = null;
 
   /**
    * Used w
@@ -84,7 +74,7 @@ public class Canopy implements Writable {
    * @param point a point in vector space
    */
   public Canopy(Vector point) {
-    this.canopyId = nextCanopyId++;
+    this.id = nextCanopyId++;
     this.center = point.clone();
     this.pointTotal = point.clone();
     this.numPoints = 1;
@@ -97,7 +87,7 @@ public class Canopy implements Writable {
    * @param canopyId an int identifying the canopy local to this process only
    */
   public Canopy(Vector point, int canopyId) {
-    this.canopyId = canopyId;
+    this.id = canopyId;
     this.center = point.clone();
     this.pointTotal = point.clone();
     this.numPoints = 1;
@@ -224,13 +214,13 @@ public class Canopy implements Writable {
 
   @Override
   public void write(DataOutput out) throws IOException {
-    out.writeInt(canopyId);
+    super.write(out);
     AbstractVector.writeVector(out, computeCentroid());
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    canopyId = in.readInt();
+    super.readFields(in);
     this.center = AbstractVector.readVector(in);
     this.pointTotal = center.clone();
     this.numPoints = 1;
@@ -242,8 +232,13 @@ public class Canopy implements Writable {
    * @param canopy
    */
   public static String formatCanopy(Canopy canopy) {
-    return "C" + canopy.canopyId + ": "
+    return "C" + canopy.id + ": "
         + canopy.computeCentroid().asFormatString();
+  }
+
+  @Override
+  public String asFormatString() {
+    return formatCanopy(this);
   }
 
   /**
@@ -272,8 +267,8 @@ public class Canopy implements Writable {
    */
   public void addPoint(Vector point) {
     numPoints++;
-    for (int i = 0; i < point.size(); i++)
-      pointTotal.set(i, point.get(i) + pointTotal.get(i));
+    pointTotal = pointTotal.plus(point);
+
   }
 
   /**
@@ -293,30 +288,10 @@ public class Canopy implements Writable {
   }
 
   public String getIdentifier() {
-    return "C" + canopyId;
+    return "C" + id;
   }
 
-  public int getCanopyId() {
-    return canopyId;
-  }
 
-  /**
-   * Return the center point
-   * 
-   * @return the center of the Canopy
-   */
-  public Vector getCenter() {
-    return center;
-  }
-
-  /**
-   * Return the number of points in the Canopy
-   * 
-   * @return the number of points in the canopy.
-   */
-  public int getNumPoints() {
-    return numPoints;
-  }
 
   /**
    * Compute the centroid by averaging the pointTotals
@@ -324,10 +299,7 @@ public class Canopy implements Writable {
    * @return a SparseVector (required by Mapper) which is the new centroid
    */
   public Vector computeCentroid() {
-    Vector result = new SparseVector(pointTotal.size());
-    for (int i = 0; i < pointTotal.size(); i++)
-      result.set(i, pointTotal.get(i) / numPoints);
-    return result;
+    return  pointTotal.divide(numPoints);
   }
 
   /**

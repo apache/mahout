@@ -21,6 +21,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.NoSuchElementException;
+import java.util.Iterator;
 
 /**
  * Implements vector that only stores non-zero doubles
@@ -35,7 +36,6 @@ public class SparseVector extends AbstractVector {
 
   private int cardinality;
 
-  public static boolean optimizeTimes = true;
 
   public SparseVector(String name, int cardinality, int size) {
     super(name);
@@ -113,9 +113,20 @@ public class SparseVector extends AbstractVector {
     return new SparseVector(newCardinality);
   }
 
+  /**
+   * NOTE: this implementation reuses the Vector.Element instance for each call of next(). If you
+   * need to preserve the instance, you need to make a copy of it
+   * @return an {@link org.apache.mahout.matrix.SparseVector.NonZeroIterator} over the Elements.
+   *
+   * @see #getElement(int)
+   */
+  public java.util.Iterator<Vector.Element> iterateNonZero() {
+    return new NonZeroIterator();
+  }
+
   @Override
-  public java.util.Iterator<Vector.Element> iterator() {
-    return new Iterator();
+  public Iterator<Vector.Element> iterateAll() {
+    return new AllIterator();
   }
 
   /**
@@ -158,9 +169,31 @@ public class SparseVector extends AbstractVector {
     return result;
   }
 
-  private class Iterator implements java.util.Iterator<Vector.Element> {
+  private class AllIterator implements java.util.Iterator<Vector.Element>{
     private int offset = 0;
+    private Element element = new Element(0);
 
+    @Override
+    public boolean hasNext() {
+      return offset < cardinality;
+    }
+
+    @Override
+    public Vector.Element next() {
+      element.ind = offset++;
+      return element;
+    }
+
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+
+  private class NonZeroIterator implements java.util.Iterator<Vector.Element> {
+    private int offset = 0;
+    private Element element = new Element(0);
     @Override
     public boolean hasNext() {
       return offset < values.getNumMappings();
@@ -169,7 +202,8 @@ public class SparseVector extends AbstractVector {
     @Override
     public Element next() {
       if (offset < values.getNumMappings()) {
-        return new Element(values.getIndices()[offset++]);
+        element.ind = values.getIndices()[offset++];
+        return element;
       }
       throw new NoSuchElementException();
     }
@@ -181,36 +215,50 @@ public class SparseVector extends AbstractVector {
   }
 
   @Override
-  public double zSum() {
-    double result = 0.0;
-    for (double value : values.getValues()) {
-      result += value;
-    }
-    return result;
+  public Vector.Element getElement(int index) {
+    return new Element(index);
   }
 
-  @Override
-  public double dot(Vector x) {
-    if (size() != x.size())
-      throw new CardinalityException();
-    double result = 0.0;
-    for (int index : values.getIndices()) {
-      result += values.get(index) * x.getQuick(index);
+  public class Element implements Vector.Element {
+    int ind;
+
+    public Element(int ind) {
+      this.ind = ind;
     }
-    return result;
+
+    @Override
+    public double get() {
+      return values.get(ind);
+    }
+
+    @Override
+    public int index() {
+      return ind;
+    }
+
+    @Override
+    public void set(double value) {
+      values.set(ind, value);
+    }
   }
 
+
+ 
   @Override
   public void write(DataOutput dataOutput) throws IOException {
     dataOutput.writeUTF(this.name == null ? "" : this.name);
     dataOutput.writeInt(size());
-    dataOutput.writeInt(getNumNondefaultElements());
-    for (Vector.Element element : this) {
-      if (element.get() != 0.0d) {
-        dataOutput.writeInt(element.index());
-        dataOutput.writeDouble(element.get());
-      }
+    int nde = getNumNondefaultElements();
+    dataOutput.writeInt(nde);
+    Iterator<Vector.Element> iter = iterateNonZero();
+    int count = 0;
+    while (iter.hasNext()) {
+      Vector.Element element = iter.next();
+      dataOutput.writeInt(element.index());
+      dataOutput.writeDouble(element.get());
+      count++;
     }
+    assert(nde == count);
   }
 
   @Override
@@ -219,49 +267,14 @@ public class SparseVector extends AbstractVector {
     int cardinality = dataInput.readInt();
     int size = dataInput.readInt();
     OrderedIntDoubleMapping values = new OrderedIntDoubleMapping(size);
-    for (int i = 0; i < size; i++) {
+    int i = 0;
+    for (; i < size; i++) {
       values.set(dataInput.readInt(), dataInput.readDouble());
     }
+    assert(i == size);
     this.cardinality = cardinality;
     this.values = values;
   }
 
-  @Override
-  public Vector times(double x) {
-    Vector result;
-    if (optimizeTimes) {
-      result = like();
-      for (Vector.Element element : this) {
-        double value = element.get();
-        int index = element.index();
-        result.setQuick(index, value * x);
-      }
-    } else {
-      result = clone();
-      for (int i = 0; i < result.size(); i++)
-        result.setQuick(i, getQuick(i) * x);
-    }
-    return result;
-  }
-
-  @Override
-  public Vector times(Vector x) {
-    if (size() != x.size())
-      throw new CardinalityException();
-    Vector result;
-    if (optimizeTimes) {
-      result = like();
-      for (Vector.Element element : this) {
-        double value = element.get();
-        int index = element.index();
-        result.setQuick(index, value * x.getQuick(index));
-      }
-    } else {
-      result = clone();
-      for (int i = 0; i < result.size(); i++)
-        result.setQuick(i, getQuick(i) * x.getQuick(i));
-    }
-    return result;
-  }
 
 }

@@ -20,6 +20,7 @@ package org.apache.mahout.utils;
 import junit.framework.TestCase;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.matrix.SparseVector;
 
 
 public abstract class DefaultDistanceMeasureTest extends TestCase {
@@ -30,12 +31,35 @@ public abstract class DefaultDistanceMeasureTest extends TestCase {
 
     DistanceMeasure distanceMeasure = distanceMeasureFactory();
 
-    Vector[] vectors = {
-        new DenseVector(new double[]{1, 1, 1, 1, 1, 1}),
-        new DenseVector(new double[]{2, 2, 2, 2, 2, 2}),
-        new DenseVector(new double[]{6, 6, 6, 6, 6, 6})
+    Vector[] vectors;
+    vectors = new Vector[]{
+            new DenseVector(new double[]{1, 1, 1, 1, 1, 1}),
+            new DenseVector(new double[]{2, 2, 2, 2, 2, 2}),
+            new DenseVector(new double[]{6, 6, 6, 6, 6, 6})
     };
 
+    compare(distanceMeasure, vectors);
+
+    vectors = new Vector[3];
+    vectors[0] = new SparseVector(5);
+    vectors[0].setQuick(0, 1);
+    vectors[0].setQuick(3, 1);
+    vectors[0].setQuick(4, 1);
+
+    vectors[1] = new SparseVector(5);
+    vectors[1].setQuick(0, 2);
+    vectors[1].setQuick(3, 2);
+    vectors[1].setQuick(4, 2);
+
+    vectors[2] = new SparseVector(5);
+    vectors[2].setQuick(0, 6);
+    vectors[2].setQuick(3, 6);
+    vectors[2].setQuick(4, 6);
+
+    compare(distanceMeasure, vectors);
+  }
+
+  private void compare(DistanceMeasure distanceMeasure, Vector[] vectors) {
     double[][] distanceMatrix = new double[3][3];
 
     for (int a = 0; a < 3; a++) {
@@ -55,8 +79,6 @@ public abstract class DefaultDistanceMeasureTest extends TestCase {
     assertEquals(0.0, distanceMatrix[2][2]);
     assertTrue(distanceMatrix[2][0] > distanceMatrix[2][1]);
     assertTrue(distanceMatrix[2][1] > distanceMatrix[2][2]);
-
-
   }
 
 }

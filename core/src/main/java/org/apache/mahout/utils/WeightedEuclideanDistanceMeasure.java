@@ -19,6 +19,8 @@ package org.apache.mahout.utils;
 
 import org.apache.mahout.matrix.Vector;
 
+import java.util.Iterator;
+
 /**
  * This class implements a Euclidian distance metric by summing the square root
  * of the squared differences between each coordinate,  optionally adding weights.
@@ -30,12 +32,16 @@ public class WeightedEuclideanDistanceMeasure extends WeightedDistanceMeasure {
     double result = 0;
     Vector res = p2.minus(p1);
     if (weights == null) {
-      for (int i = 0; i < p1.size(); i++) {
-        result += res.get(i) * res.get(i);
+      Iterator<Vector.Element> iter = res.iterateNonZero();
+      while (iter.hasNext()) {
+        Vector.Element elt = iter.next();
+        result += elt.get() * elt.get();
       }
     } else {
-      for (int i = 0; i < p1.size(); i++) {
-        result += res.get(i) * res.get(i) * weights.get(i);  // todo this is where the weights goes, right?
+      Iterator<Vector.Element> iter = res.iterateNonZero();
+      while (iter.hasNext()) {
+        Vector.Element elt = iter.next();
+        result += elt.get() * elt.get() * weights.get(elt.index());
       }
     }
     return Math.sqrt(result);

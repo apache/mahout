@@ -86,7 +86,7 @@ final class KMeansUtil {
             Canopy value = new Canopy();
             while (reader.next(key, value)) {
               // get the cluster info
-              Cluster cluster = new Cluster(value.getCenter(), value.getCanopyId());
+              Cluster cluster = new Cluster(value.getCenter(), value.getId());
               clusters.add(cluster);
               value = new Canopy();
             }

@@ -1,4 +1,4 @@
-package org.apache.mahout.utils.vectors;
+package org.apache.mahout.utils.clustering;
 
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -11,50 +11,49 @@ import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.cli2.util.HelpFormatter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.jobcontrol.Job;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Writable;
 import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.utils.vectors.VectorIterable;
+import org.apache.mahout.utils.vectors.SequenceFileVectorIterable;
+import org.apache.mahout.utils.vectors.VectorDumper;
+import org.apache.mahout.clustering.ClusterBase;
 
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.BufferedWriter;
 import java.io.Writer;
+import java.io.FileWriter;
+import java.io.OutputStreamWriter;
 
 
 /**
- * Can read in a {@link org.apache.hadoop.io.SequenceFile} of {@link org.apache.mahout.matrix.Vector}s
- * and dump out the results using {@link org.apache.mahout.matrix.Vector#asFormatString()} to either the console
- * or to a file.
+ *
  *
  **/
-public class VectorDumper {
-  private transient static Log log = LogFactory.getLog(VectorDumper.class);
+public class ClusterDumper {
+  private transient static Log log = LogFactory.getLog(ClusterDumper.class);
   private static final String LINE_SEP = System.getProperty("line.separator");
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, IllegalAccessException, InstantiationException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
     Option seqOpt = obuilder.withLongName("seqFile").withRequired(false).withArgument(
             abuilder.withName("seqFile").withMinimum(1).withMaximum(1).create()).
-            withDescription("The Sequence File containing the Vectors").withShortName("s").create();
-    Option vectorAsKeyOpt = obuilder.withLongName("useKey").withRequired(false).
-            withDescription("If the Key is a vector, then dump that instead").withShortName("u").create();
-    Option printKeyOpt = obuilder.withLongName("printKey").withRequired(false).
-            withDescription("Print out the key as well, delimited by a tab (or the value if useKey is true)").withShortName("p").create();
+            withDescription("The Sequence File containing the Clusters").withShortName("s").create();
     Option outputOpt = obuilder.withLongName("output").withRequired(false).withArgument(
             abuilder.withName("output").withMinimum(1).withMaximum(1).create()).
             withDescription("The output file.  If not specified, dumps to the console").withShortName("o").create();
     Option helpOpt = obuilder.withLongName("help").
             withDescription("Print out help").withShortName("h").create();
 
-    Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt)
-            .withOption(vectorAsKeyOpt).withOption(printKeyOpt).create();
+    Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -75,29 +74,20 @@ public class VectorDumper {
         client.setConf(conf);
         FileSystem fs = FileSystem.get(path.toUri(), conf);
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-        SequenceFileVectorIterable vectorIterable = new SequenceFileVectorIterable(reader, cmdLine.hasOption(vectorAsKeyOpt));
+
         Writer writer = null;
-        if (cmdLine.hasOption(outputOpt)) {
+        if (cmdLine.hasOption(outputOpt)){
           writer = new FileWriter(cmdLine.getValue(outputOpt).toString());
         } else {
           writer = new OutputStreamWriter(System.out);
         }
-        boolean printKey = cmdLine.hasOption(printKeyOpt);
-        SequenceFileVectorIterable.SeqFileIterator iterator =
-                (SequenceFileVectorIterable.SeqFileIterator) vectorIterable.iterator();
-        int i = 0;
-        while (iterator.hasNext()) {
-          Vector vector = iterator.next();
-          if (printKey){
-            writer.write(iterator.key().toString());
-            writer.write("\t");
-          }
-          writer.write(vector.asFormatString());
+        Writable key = (Writable) reader.getKeyClass().newInstance();
+        ClusterBase value = (ClusterBase) reader.getValueClass().newInstance();
+        while (reader.next(key, value)){
+          writer.write(value.asFormatString());
           writer.write(LINE_SEP);
-          i++;
         }
-        System.err.println("Dumped " + i + " Vectors");
-        if (cmdLine.hasOption(outputOpt)) {
+        if (cmdLine.hasOption(outputOpt)){
           writer.close();
         }
       }

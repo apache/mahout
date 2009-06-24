@@ -21,6 +21,7 @@ import org.apache.mahout.matrix.Vector;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Iterator;
 
 
 /**
@@ -52,7 +53,9 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
     double a2 = 0.0;
     double b2 = 0.0;
 
-    for (Vector.Element feature : vector0) {
+    Iterator<Vector.Element> iter = vector0.iterateNonZero();
+    while (iter.hasNext()) {
+      Vector.Element feature = iter.next();
       if (!featuresSeen.add(feature.index())) {
 
         double a = feature.get();
@@ -69,7 +72,9 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
     }
 
 
-    for (Vector.Element feature : vector1) {
+    iter = vector1.iterateNonZero();
+    while (iter.hasNext()) {
+      Vector.Element feature = iter.next();
       if (!featuresSeen.add(feature.index())) {
 
         double a = vector0.get(feature.index());

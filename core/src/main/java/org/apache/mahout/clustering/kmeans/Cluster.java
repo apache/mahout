@@ -30,8 +30,9 @@ import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.SquareRootFunction;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
+import org.apache.mahout.clustering.ClusterBase;
 
-public class Cluster implements Writable {
+public class Cluster extends ClusterBase implements Writable {
 
   private static final String ERROR_UNKNOWN_CLUSTER_FORMAT = "Unknown cluster format:\n";
 
@@ -52,11 +53,6 @@ public class Cluster implements Writable {
 
   private static int nextClusterId = 0;
 
-  // this cluster's clusterId
-  private int clusterId;
-
-  // the current center
-  private Vector center = new SparseVector(0);
 
   // the current centroid is lazy evaluated and may be null
   private Vector centroid = null;
@@ -64,11 +60,7 @@ public class Cluster implements Writable {
   // the standard deviation of the covered points
   private double std;
 
-  // the number of points in the cluster
-  private int numPoints = 0;
 
-  // the total of all points added to the cluster
-  private Vector pointTotal = null;
 
   // the total of all the points squared, used for std computation
   private Vector pointSquaredTotal = null;
@@ -87,6 +79,11 @@ public class Cluster implements Writable {
   public static String formatCluster(Cluster cluster) {
     return cluster.getIdentifier() + ": "
         + cluster.computeCentroid().asFormatString();
+  }
+
+  @Override
+  public String asFormatString() {
+    return formatCluster(this);
   }
 
   /**
@@ -117,14 +114,14 @@ public class Cluster implements Writable {
 
   @Override
   public void write(DataOutput out) throws IOException {
-    out.writeInt(clusterId);
+    super.write(out);
     out.writeBoolean(converged);
     AbstractVector.writeVector(out, computeCentroid());
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    this.clusterId = in.readInt();
+    super.readFields(in);
     this.converged = in.readBoolean();
     this.center = AbstractVector.readVector(in);
     this.numPoints = 0;
@@ -204,7 +201,7 @@ public class Cluster implements Writable {
     }
     //TODO: this is ugly
     String name = point.getName();
-    output.collect(new Text(name != null && name.equals("") == false ? name : point.asFormatString()), new Text(String.valueOf(nearestCluster.clusterId)));
+    output.collect(new Text(name != null && name.equals("") == false ? name : point.asFormatString()), new Text(String.valueOf(nearestCluster.id)));
   }
 
   /**
@@ -233,7 +230,7 @@ public class Cluster implements Writable {
    */
   public Cluster(Vector center) {
     super();
-    this.clusterId = nextClusterId++;
+    this.id = nextClusterId++;
     this.center = center;
     this.numPoints = 0;
     this.pointTotal = center.like();
@@ -253,7 +250,7 @@ public class Cluster implements Writable {
    */
   public Cluster(Vector center, int clusterId) {
     super();
-    this.clusterId = clusterId;
+    this.id = clusterId;
     this.center = center;
     this.numPoints = 0;
     this.pointTotal = center.like();
@@ -265,7 +262,7 @@ public class Cluster implements Writable {
    */
   public Cluster(String clusterId) {
 
-    this.clusterId = Integer.parseInt((clusterId.substring(1)));
+    this.id = Integer.parseInt((clusterId.substring(1)));
     this.numPoints = 0;
     this.converged = clusterId.startsWith("V");
   }
@@ -277,9 +274,9 @@ public class Cluster implements Writable {
 
   public String getIdentifier() {
     if (converged)
-      return "V" + clusterId;
+      return "V" + id;
     else
-      return "C" + clusterId;
+      return "C" + id;
   }
 
   /**
@@ -309,13 +306,8 @@ public class Cluster implements Writable {
     }
   }
 
-  public Vector getCenter() {
-    return center;
-  }
+  
 
-  public int getNumPoints() {
-    return numPoints;
-  }
 
   /**
    * Compute the centroid and set the center to it.
@@ -337,9 +329,7 @@ public class Cluster implements Writable {
     return converged;
   }
 
-  public Vector getPointTotal() {
-    return pointTotal;
-  }
+
 
   public boolean isConverged() {
     return converged;

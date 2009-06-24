@@ -19,13 +19,14 @@ package org.apache.mahout.matrix;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Iterator;
 
 import junit.framework.TestCase;
 
 public class TestSparseVector extends TestCase {
 
   final double[] values = { 1.1, 2.2, 3.3 };
-
+  final double[] gold = {0, 1.1, 2.2, 3.3, 0};
   final Vector test = new SparseVector(values.length + 2);
 
   public TestSparseVector(String name) {
@@ -49,6 +50,45 @@ public class TestSparseVector extends TestCase {
 
   public void testCardinality() {
     assertEquals("size", 5, test.size());
+  }
+
+  public void testIterator() throws Exception {
+    Iterator<Vector.Element> iterator = test.iterateNonZero();
+    checkIterator(iterator, gold);
+
+    iterator = test.iterateAll();
+    checkIterator(iterator, gold);
+
+    SparseVector zeros;
+    double[] doubles;
+    doubles = new double[]{0.0, 5.0, 0, 3.0};
+    zeros = new SparseVector(doubles.length);
+    for (int i = 0; i < doubles.length; i++) {
+      zeros.setQuick(i, doubles[i]);
+    }
+    iterator = zeros.iterateNonZero();
+    checkIterator(iterator, doubles);
+    iterator = zeros.iterateAll();
+    checkIterator(iterator, doubles);
+
+    doubles = new double[]{0.0, 0.0, 0, 0.0};
+    zeros = new SparseVector(doubles.length);
+    for (int i = 0; i < doubles.length; i++) {
+      zeros.setQuick(i, doubles[i]);
+    }
+    iterator = zeros.iterateNonZero();
+    checkIterator(iterator, doubles);
+    iterator = zeros.iterateAll();
+    checkIterator(iterator, doubles);
+
+  }
+
+  private void checkIterator(Iterator<Vector.Element> nzIter, double[] values) {
+    while (nzIter.hasNext()) {
+      Vector.Element elt = nzIter.next();
+      assertTrue((elt.index()) + " Value: " + values[elt.index()]
+              + " does not equal: " + elt.get(), values[elt.index()] == elt.get());
+    }
   }
 
   public void testCopy() throws Exception {

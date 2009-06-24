@@ -19,6 +19,8 @@ package org.apache.mahout.matrix;
 
 import junit.framework.TestCase;
 
+import java.util.Iterator;
+
 public class TestVectorView extends TestCase {
 
   private static final int cardinality = 3;
@@ -61,6 +63,38 @@ public class TestVectorView extends TestCase {
       fail("expected exception");
     } catch (IndexException e) {
       assertTrue(true);
+    }
+  }
+
+  public void testIterator() throws Exception {
+
+    Iterator<Vector.Element> iter;
+    VectorView view;
+    double[] gold;
+    view = new VectorView(new DenseVector(values), offset, cardinality);
+    gold = new double[]{1.1, 2.2, 3.3};
+    iter = view.iterateAll();
+    checkIterator(iter, gold);
+    iter = view.iterateNonZero();
+    checkIterator(iter, gold);
+
+    view = new VectorView(new DenseVector(values), 0, cardinality);
+    gold = new double[]{0.0, 1.1, 2.2};
+    iter = view.iterateAll();
+    checkIterator(iter, gold);
+    gold = new double[]{1.1, 2.2};
+    iter = view.iterateNonZero();
+    checkIterator(iter, gold);
+    
+  }
+
+  private void checkIterator(Iterator<Vector.Element> iter, double[] gold) {
+    int i = 0;
+    while (iter.hasNext()) {
+      Vector.Element elt = iter.next();
+      assertTrue((elt.index()) + " Value: " + gold[i]
+              + " does not equal: " + elt.get(), gold[i] == elt.get());
+      i++;
     }
   }
 

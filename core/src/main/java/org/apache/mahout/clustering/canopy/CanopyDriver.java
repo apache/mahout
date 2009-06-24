@@ -27,11 +27,13 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.matrix.Vector;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 import java.io.IOException;
 
 public class CanopyDriver {
-
+  private transient static Log log = LogFactory.getLog(CanopyDriver.class);
   private CanopyDriver() {
   }
 
@@ -61,6 +63,8 @@ public class CanopyDriver {
    */
   public static void runJob(String input, String output,
                             String measureClassName, double t1, double t2, Class<? extends Vector> vectorClass) throws IOException {
+    log.info("Input: " + input + " Out: " + output + " Measure: " + measureClassName + " t1: " + t1
+    + " t2: " + t2 + " Vector Class: " + vectorClass.getSimpleName());
     JobClient client = new JobClient();
     JobConf conf = new JobConf(
             org.apache.mahout.clustering.canopy.CanopyDriver.class);

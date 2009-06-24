@@ -24,6 +24,7 @@ import org.apache.mahout.utils.parameters.Parameter;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 
 /**
  * This class implements a cosine distance metric by dividing the dot product
@@ -50,17 +51,17 @@ public class CosineDistanceMeasure implements DistanceMeasure {
     double dotProduct = 0.0;
     double lengthSquaredp1 = 0.0;
     double lengthSquaredp2 = 0.0;
-    for (int i = 0; i < p1.length; i++) { 
+    for (int i = 0; i < p1.length; i++) {
       lengthSquaredp1 += p1[i] * p1[i];
       lengthSquaredp2 += p2[i] * p2[i];
       dotProduct += p1[i] * p2[i];
     }
     double denominator = Math.sqrt(lengthSquaredp1) * Math.sqrt(lengthSquaredp2);
-    
+
     // correct for floating-point rounding errors
-    if(denominator < dotProduct)
+    if (denominator < dotProduct)
       denominator = dotProduct;
-    
+
     return 1.0 - (dotProduct / denominator);
   }
 
@@ -68,20 +69,27 @@ public class CosineDistanceMeasure implements DistanceMeasure {
   public double distance(Vector v1, Vector v2) {
     if (v1.size() != v2.size())
       throw new CardinalityException();
-	  double lengthSquaredv1 = 0.0;
-	  double lengthSquaredv2 = 0.0;
-	  for (int i = 0; i < v1.size(); i++) {
-	    lengthSquaredv1 += v1.getQuick(i) * v1.getQuick(i);
-	    lengthSquaredv2 += v2.getQuick(i) * v2.getQuick(i);
-	  }
-	  double dotProduct = v1.dot(v2);
-	  double denominator = Math.sqrt(lengthSquaredv1) * Math.sqrt(lengthSquaredv2);
-	  
-	  // correct for floating-point rounding errors
-    if(denominator < dotProduct)
+    double lengthSquaredv1 = 0.0;
+    double lengthSquaredv2 = 0.0;
+    Iterator<Vector.Element> iter = v1.iterateNonZero();
+    while (iter.hasNext()) {
+      Vector.Element elt = iter.next();
+      lengthSquaredv1 += elt.get() * elt.get();
+    }
+    iter = v2.iterateNonZero();
+    while (iter.hasNext()) {
+      Vector.Element elt = iter.next();
+      lengthSquaredv2 += elt.get() * elt.get();
+    }
+
+    double dotProduct = v1.dot(v2);
+    double denominator = Math.sqrt(lengthSquaredv1) * Math.sqrt(lengthSquaredv2);
+
+    // correct for floating-point rounding errors
+    if (denominator < dotProduct)
       denominator = dotProduct;
 
-	  return 1.0 - (dotProduct / denominator);
+    return 1.0 - (dotProduct / denominator);
   }
-  
+
 }

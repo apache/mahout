@@ -19,6 +19,7 @@ package org.apache.mahout.matrix;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Iterator;
 
 import junit.framework.TestCase;
 
@@ -80,6 +81,42 @@ public class TestDenseVector extends TestCase {
         assertEquals("set [" + i + ']', 4.5, test.get(i));
       else
         assertEquals("set [" + i + ']', values[i], test.get(i));
+  }
+
+
+  public void testIterator() throws Exception {
+    Iterator<Vector.Element> iterator = test.iterateNonZero();
+    checkIterator(iterator, values, 3);
+
+    iterator = test.iterateAll();
+    checkIterator(iterator, values, 3);
+
+    DenseVector zeros;
+    double[] doubles;
+    doubles = new double[]{0.0, 5.0, 0, 3.0};
+    zeros = new DenseVector(doubles);
+    iterator = zeros.iterateNonZero();
+    checkIterator(iterator, doubles, 2);
+    iterator = zeros.iterateAll();
+    checkIterator(iterator, doubles, doubles.length);
+
+    doubles = new double[]{0.0, 0.0, 0, 0.0};
+    zeros = new DenseVector(doubles);
+    iterator = zeros.iterateNonZero();
+    checkIterator(iterator, doubles, 0);
+    iterator = zeros.iterateAll();
+    checkIterator(iterator, doubles, doubles.length);
+
+  }
+
+  private void checkIterator(Iterator<Vector.Element> nzIter, double[] values, int expectedNum) {
+    int i = 0;
+    while (nzIter.hasNext()) {
+      Vector.Element elt = nzIter.next();
+      assertTrue((elt.index()) + " Value: " + values[elt.index() ] + " does not equal: " + elt.get(), values[elt.index()] == elt.get());
+      i++;
+    }
+    assertTrue(i + " does not equal: " + expectedNum, i == expectedNum);
   }
 
   public void testSize() throws Exception {

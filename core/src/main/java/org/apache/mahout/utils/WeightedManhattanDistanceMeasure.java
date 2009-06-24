@@ -19,6 +19,8 @@ package org.apache.mahout.utils;
 
 import org.apache.mahout.matrix.Vector;
 
+import java.util.Iterator;
+
 /**
  * This class implements a "manhattan distance" metric by summing the absolute
  * values of the difference between each coordinate, optionally with weights.
@@ -31,13 +33,18 @@ public class WeightedManhattanDistanceMeasure extends WeightedDistanceMeasure {
 
     Vector res = p2.minus(p1);
     if (weights == null) {
-      for (int i = 0; i < res.size(); i++) {
-        result += Math.abs(res.get(i));
+      Iterator<Vector.Element> iter = res.iterateNonZero();
+      while (iter.hasNext()) {
+        Vector.Element elt = iter.next();
+        result += Math.abs(elt.get());
       }
+
     }
     else {
-      for (int i = 0; i < res.size(); i++) {
-        result += Math.abs(res.get(i) * weights.get(i)); // todo this is where the weights goes, right?
+      Iterator<Vector.Element> iter = res.iterateNonZero();
+      while (iter.hasNext()) {
+        Vector.Element elt = iter.next();
+        result += Math.abs(elt.get() * weights.get(elt.index()));
       }
     }
 
