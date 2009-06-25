@@ -25,10 +25,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.CardinalityException;
 import org.apache.mahout.matrix.DenseVector;
@@ -48,7 +48,7 @@ import com.google.gson.reflect.TypeToken;
  * a point total which is the sum of all the points and is used to compute the
  * centroid when needed.
  */
-public class MeanShiftCanopy implements Writable {
+public class MeanShiftCanopy extends ClusterBase {
 
   // keys used by Driver, Mapper, Combiner & Reducer
   public static final String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.canopy.measure";
@@ -75,18 +75,7 @@ public class MeanShiftCanopy implements Writable {
   // the distance measure
   private static DistanceMeasure measure;
 
-  // this canopy's canopyId
-  private int canopyId;
-
-  // the current center
-  private Vector center = null;
-
-  // the number of points in the canopy
-  private int numPoints = 0;
-
-  // the total of all points added to the canopy
-  private Vector pointTotal = null;
-
+  // TODO: this is problematic, but how else to encode membership?
   private List<Vector> boundPoints = new ArrayList<Vector>();
 
   private boolean converged = false;
@@ -200,7 +189,7 @@ public class MeanShiftCanopy implements Writable {
    * @param id
    */
   public MeanShiftCanopy(String id) {
-    this.canopyId = Integer.parseInt(id.substring(1));
+    this.id = Integer.parseInt(id.substring(1));
     this.center = null;
     this.pointTotal = null;
     this.numPoints = 0;
@@ -212,7 +201,7 @@ public class MeanShiftCanopy implements Writable {
    * @param point a Vector
    */
   public MeanShiftCanopy(Vector point) {
-    this.canopyId = nextCanopyId++;
+    this.id = nextCanopyId++;
     this.center = point;
     this.pointTotal = point.clone();
     this.numPoints = 1;
@@ -220,16 +209,16 @@ public class MeanShiftCanopy implements Writable {
   }
 
   /**
-   * Create a new Canopy containing the given point, canopyId and bound points
+   * Create a new Canopy containing the given point, id and bound points
    * 
    * @param point a Vector
-   * @param canopyId an int identifying the canopy local to this process only
+   * @param id an int identifying the canopy local to this process only
    * @param boundPoints a List<Vector> containing points bound to the canopy
    * @param converged true if the canopy has converged
    */
-  MeanShiftCanopy(Vector point, int canopyId, List<Vector> boundPoints,
+  MeanShiftCanopy(Vector point, int id, List<Vector> boundPoints,
       boolean converged) {
-    this.canopyId = canopyId;
+    this.id = id;
     this.center = point;
     this.pointTotal = point.clone();
     this.numPoints = 1;
@@ -310,7 +299,7 @@ public class MeanShiftCanopy implements Writable {
   }
 
   public int getCanopyId() {
-    return canopyId;
+    return id;
   }
 
   /**
@@ -323,7 +312,7 @@ public class MeanShiftCanopy implements Writable {
   }
 
   public String getIdentifier() {
-    return converged ? "V" + canopyId : "C" + canopyId;
+    return converged ? "V" + id : "C" + id;
   }
 
   /**
@@ -334,7 +323,7 @@ public class MeanShiftCanopy implements Writable {
   }
 
   void init(MeanShiftCanopy canopy) {
-    canopyId = canopy.canopyId;
+    id = canopy.id;
     center = canopy.center;
     addPoints(center, 1);
     boundPoints.addAll(canopy.getBoundPoints());
@@ -356,6 +345,7 @@ public class MeanShiftCanopy implements Writable {
 
   /**
    * Shift the center to the new centroid of the cluster
+   * 
    * @return if the cluster is converged
    */
   public boolean shiftToMean() {
@@ -384,7 +374,7 @@ public class MeanShiftCanopy implements Writable {
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    this.canopyId = in.readInt();
+    super.readFields(in);
     this.center = AbstractVector.readVector(in);
     int numpoints = in.readInt();
     this.boundPoints = new ArrayList<Vector>();
@@ -394,20 +384,25 @@ public class MeanShiftCanopy implements Writable {
 
   @Override
   public void write(DataOutput out) throws IOException {
-    out.writeInt(canopyId);
+    super.write(out);
     AbstractVector.writeVector(out, computeCentroid());
     out.writeInt(boundPoints.size());
     for (Vector v : boundPoints)
       AbstractVector.writeVector(out, v);
   }
-  
-  public MeanShiftCanopy shallowCopy(){
+
+  public MeanShiftCanopy shallowCopy() {
     MeanShiftCanopy result = new MeanShiftCanopy();
-    result.canopyId = this.canopyId;
+    result.id = this.id;
     result.center = this.center;
     result.pointTotal = this.pointTotal;
     result.numPoints = this.numPoints;
     result.boundPoints = this.boundPoints;
     return result;
+  }
+
+  @Override
+  public String asFormatString() {
+    return formatCanopy(this);
   }
 }

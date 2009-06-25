@@ -25,7 +25,6 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.matrix.AbstractVector;
 
 public class KMeansCombiner extends MapReduceBase implements
     Reducer<Text, KMeansInfo, Text, KMeansInfo> {

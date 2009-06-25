@@ -17,20 +17,19 @@
 
 package org.apache.mahout.clustering.canopy;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.List;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.matrix.AbstractVector;
-import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
-import org.apache.mahout.clustering.ClusterBase;
-
-import java.io.IOException;
-import java.io.DataOutput;
-import java.io.DataInput;
-import java.util.List;
 
 /**
  * This class models a canopy as a center point, the number of points that are

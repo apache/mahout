@@ -25,12 +25,11 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.matrix.AbstractVector;
-import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.SquareRootFunction;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
-import org.apache.mahout.clustering.ClusterBase;
 
 public class Cluster extends ClusterBase implements Writable {
 
