@@ -8,21 +8,21 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.DataInput;
 
-
 /**
  *
  *
  **/
 public abstract class ClusterBase implements Writable {
-  // this canopy's canopyId
+  // this cluster's clusterId
   protected int id;
-  // the current center
+
+  // the current cluster center
   protected Vector center = new SparseVector(0);
 
-  // the number of points in the canopy
+  // the number of points in the cluster
   protected int numPoints = 0;
 
-    // the total of all points added to the cluster
+  // the Vector total of all points added to the cluster
   protected Vector pointTotal = null;
 
   public Vector getPointTotal() {
@@ -35,8 +35,8 @@ public abstract class ClusterBase implements Writable {
 
   /**
    * Return the center point
-   *
-   * @return the center of the Canopy
+   * 
+   * @return the center of the Cluster
    */
   public Vector getCenter() {
     return center;
@@ -47,8 +47,10 @@ public abstract class ClusterBase implements Writable {
   }
 
   public abstract String asFormatString();
+
   /**
    * Simply writes out the id, and that's it!
+   * 
    * @param out The {@link java.io.DataOutput}
    * @throws IOException
    */
@@ -58,6 +60,7 @@ public abstract class ClusterBase implements Writable {
 
   /**
    * Reads in the id, nothing else
+   * 
    * @param in
    * @throws IOException
    */
