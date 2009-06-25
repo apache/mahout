@@ -46,7 +46,7 @@ public class KMeansDriver {
 
   /**
    * 
-   * @param args Expects 6 args and they all correspond to the order of the params in {@link #runJob}
+   * @param args Expects 7 args and they all correspond to the order of the params in {@link #runJob}
    */
   public static void main(String[] args) throws ClassNotFoundException {
     String input = args[0];
