@@ -17,60 +17,24 @@
 
 package org.apache.mahout.utils;
 
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.mahout.matrix.CardinalityException;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.parameters.Parameter;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
 
 /**
  * This class implements a Euclidian distance metric by summing the square root
- * of the squared differences between each coordinate
+ * of the squared differences between each coordinate.
+ * <p/>
+ * If you don't care about the true distance and only need the values for comparison, then
+ * the base class, {@link SquaredEuclideanDistanceMeasure}, will be faster since it doesn't do
+ * the actual square root of the squared differences.
  */
-public class EuclideanDistanceMeasure implements DistanceMeasure {
-
-  @Override
-  public void configure(JobConf job) {
-    // nothing to do
-  }
-
-  @Override
-  public Collection<Parameter<?>> getParameters() {
-    return Collections.emptyList();
-  }
-
-  @Override
-  public void createParameters(String prefix, JobConf jobConf) {
-    // nothing to do
-  }
-
-  public static double distance(double[] p1, double[] p2) {
-    double result = 0.0;
-    for (int i = 0; i < p1.length; i++) {
-      double delta = p2[i] - p1[i];
-      result += delta * delta;
-    }
-    //TODO: Do we really need to return the square root?
-    return Math.sqrt(result);
-  }
-
+public class EuclideanDistanceMeasure extends SquaredEuclideanDistanceMeasure {
   @Override
   public double distance(Vector v1, Vector v2) {
-    if (v1.size() != v2.size())
-      throw new CardinalityException();
-    double result = 0;
-    Vector vector = v1.plus(v2);
-    Iterator<Vector.Element> iter = vector.iterateNonZero();//this contains all non zero elements between the two
-    while (iter.hasNext()) {
-      Vector.Element e = iter.next();
-      double delta = v2.getQuick(e.index()) - v1.getQuick(e.index());
-      result += delta * delta;
-    }
-    //TODO: Do we really need to return the square root?
-    return Math.sqrt(result);
+    return Math.sqrt(super.distance(v1, v2));
   }
 
+  @Override
+  public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
+    return Math.sqrt(super.distance(centroidLengthSquare, centroid, v));
+  }
 }

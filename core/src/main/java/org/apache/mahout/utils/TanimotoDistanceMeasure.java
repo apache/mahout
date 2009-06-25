@@ -93,5 +93,10 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
     return ((a2 + b2 - ab) / ab) - 1.0;
   }
 
+  @Override
+  public double distance(double centroidLengthSquare, Vector centroid, Vector v) {	 
+   return distance(centroid, v); // TODO
+  }
+
 }
 

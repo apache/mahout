@@ -143,7 +143,7 @@ public class Canopy extends ClusterBase implements Writable {
   public static void addPointToCanopies(Vector point, List<Canopy> canopies) {
     boolean pointStronglyBound = false;
     for (Canopy canopy : canopies) {
-      double dist = measure.distance(canopy.getCenter(), point);
+      double dist = measure.distance(canopy.getCenter().getLengthSquared(), canopy.getCenter(), point);
       if (dist < t1)
         canopy.addPoint(point);
       pointStronglyBound = pointStronglyBound || (dist < t2);
@@ -166,7 +166,7 @@ public class Canopy extends ClusterBase implements Writable {
       throws IOException {
     boolean pointStronglyBound = false;
     for (Canopy canopy : canopies) {
-      double dist = measure.distance(canopy.getCenter(), point);
+      double dist = measure.distance(canopy.getCenter().getLengthSquared(), canopy.getCenter(), point);
       if (dist < t1)
         canopy.emitPoint(point, collector);
       pointStronglyBound = pointStronglyBound || (dist < t2);
@@ -195,7 +195,7 @@ public class Canopy extends ClusterBase implements Writable {
     Canopy closest = null;
     boolean isCovered = false;
     for (Canopy canopy : canopies) {
-      double dist = measure.distance(canopy.getCenter(), point);
+      double dist = measure.distance(canopy.getCenter().getLengthSquared(), canopy.getCenter(), point);
       if (dist < t1) {
         isCovered = true;
         collector.collect(new Text(canopy.getIdentifier()), point);
@@ -308,6 +308,6 @@ public class Canopy extends ClusterBase implements Writable {
    * @return if the point is covered
    */
   public boolean covers(Vector point) {
-    return measure.distance(center, point) < t1;
+    return measure.distance(center.getLengthSquared(), center, point) < t1;
   }
 }

@@ -425,4 +425,23 @@ public interface Vector extends Cloneable, Writable {
   // DoubleDoubleFunction map);
   // NewVector assign(Vector y, DoubleDoubleFunction function, IntArrayList
   // nonZeroIndexes);
+  
+
+  /**
+   * Return the sum of squares of all elements in the vector. Square root of this value is the length of the vector.
+   */
+  public abstract double getLengthSquared();
+    
+  /**
+   * Get the square of the distance between this vector and the other vector. 
+   * @param v
+   * @return
+   */
+  public abstract double getDistanceSquared(Vector v);
+  
+  /**
+   * Add the elements to the other vector and results are stored in that vector.
+   */
+  public abstract void addTo(Vector v);
+  
 }

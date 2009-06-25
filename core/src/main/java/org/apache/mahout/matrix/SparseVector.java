@@ -20,15 +20,17 @@ package org.apache.mahout.matrix;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.NoSuchElementException;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * Implements vector that only stores non-zero doubles
  */
 public class SparseVector extends AbstractVector {
 
-  /** For serialization purposes only. */
+  /**
+   * For serialization purposes only.
+   */
   public SparseVector() {
   }
 
@@ -36,6 +38,9 @@ public class SparseVector extends AbstractVector {
 
   private int cardinality;
 
+  public SparseVector(int cardinality, int size) {
+    this(null, cardinality, size);
+  }
 
   public SparseVector(String name, int cardinality, int size) {
     super(name);
@@ -45,17 +50,17 @@ public class SparseVector extends AbstractVector {
 
   public SparseVector(String name, int cardinality) {
     this(name, cardinality, cardinality / 8); // arbitrary estimate of
-                                              // 'sparseness'
+    // 'sparseness'
   }
 
   public SparseVector(int cardinality) {
     this(null, cardinality, cardinality / 8); // arbitrary estimate of
-                                              // 'sparseness'
+    // 'sparseness'
   }
 
   @Override
   protected Matrix matrixLike(int rows, int columns) {
-    int[] cardinality = { rows, columns };
+    int[] cardinality = {rows, columns};
     return new SparseRowMatrix(cardinality);
   }
 
@@ -105,19 +110,27 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public SparseVector like() {
-    return new SparseVector(cardinality);
+    int numValues = 256;
+    if (values != null) {
+      numValues = values.getNumMappings();
+    }
+    return new SparseVector(cardinality, numValues);
   }
 
   @Override
   public Vector like(int newCardinality) {
-    return new SparseVector(newCardinality);
+    int numValues = 256;
+    if (values != null) {
+      numValues = values.getNumMappings();
+    }
+    return new SparseVector(newCardinality, numValues);
   }
 
   /**
    * NOTE: this implementation reuses the Vector.Element instance for each call of next(). If you
    * need to preserve the instance, you need to make a copy of it
-   * @return an {@link org.apache.mahout.matrix.SparseVector.NonZeroIterator} over the Elements.
    *
+   * @return an {@link org.apache.mahout.matrix.SparseVector.NonZeroIterator} over the Elements.
    * @see #getElement(int)
    */
   public java.util.Iterator<Vector.Element> iterateNonZero() {
@@ -133,11 +146,11 @@ public class SparseVector extends AbstractVector {
    * Indicate whether the two objects are the same or not. Two
    * {@link org.apache.mahout.matrix.Vector}s can be equal even if the
    * underlying implementation is not equal.
-   * 
+   *
    * @param o The object to compare
    * @return true if the objects have the same cell values and same name, false
    *         otherwise.
-   * 
+   *         <p/>
    *         * @see AbstractVector#strictEquivalence(Vector, Vector)
    * @see AbstractVector#equivalent(Vector, Vector)
    */
@@ -154,7 +167,7 @@ public class SparseVector extends AbstractVector {
 
     if (that instanceof SparseVector) {
       return (values == null ? ((SparseVector) that).values == null : values
-          .equals(((SparseVector) that).values));
+              .equals(((SparseVector) that).values));
     } else {
       return equivalent(this, that);
     }
@@ -169,7 +182,7 @@ public class SparseVector extends AbstractVector {
     return result;
   }
 
-  private class AllIterator implements java.util.Iterator<Vector.Element>{
+  private class AllIterator implements java.util.Iterator<Vector.Element> {
     private int offset = 0;
     private Element element = new Element(0);
 
@@ -194,6 +207,7 @@ public class SparseVector extends AbstractVector {
   private class NonZeroIterator implements java.util.Iterator<Vector.Element> {
     private int offset = 0;
     private Element element = new Element(0);
+
     @Override
     public boolean hasNext() {
       return offset < values.getNumMappings();
@@ -243,7 +257,6 @@ public class SparseVector extends AbstractVector {
   }
 
 
- 
   @Override
   public void write(DataOutput dataOutput) throws IOException {
     dataOutput.writeUTF(this.name == null ? "" : this.name);
@@ -258,7 +271,7 @@ public class SparseVector extends AbstractVector {
       dataOutput.writeDouble(element.get());
       count++;
     }
-    assert(nde == count);
+    assert (nde == count);
   }
 
   @Override
@@ -271,10 +284,50 @@ public class SparseVector extends AbstractVector {
     for (; i < size; i++) {
       values.set(dataInput.readInt(), dataInput.readDouble());
     }
-    assert(i == size);
+    assert (i == size);
     this.cardinality = cardinality;
     this.values = values;
   }
 
+  private Double lengthSquared = null;
+
+  @Override
+  public double getLengthSquared() {
+    if (lengthSquared != null) {
+      return lengthSquared;
+    }
+    double result = 0.0f;
+    for (double val : values.getValues()) {
+      result += val * val;
+    }
+    lengthSquared = new Double(result);
+    return result;
+  }
+
+  @Override
+  public double getDistanceSquared(Vector v) {
+    //TODO: Check sizes?
+
+    double result = 0.0f;
+    double delta = 0.0f;
+    double centroidValue = 0.0f;
+    Iterator<Vector.Element> iter = iterateNonZero();
+    while (iter.hasNext()) {
+      Vector.Element elt = iter.next();
+      centroidValue = v.getQuick(elt.index());
+      delta = elt.get() - centroidValue;
+      result += (delta * delta) - (centroidValue * centroidValue);
+    }
+    return result;
+  }
+
+  @Override
+  public void addTo(Vector v) {
+    Iterator<Vector.Element> iter = iterateNonZero();
+    while (iter.hasNext()) {
+      Vector.Element elt = iter.next();
+      v.setQuick(elt.index(), elt.get() + v.get(elt.index()));
+    }
+  }
 
 }

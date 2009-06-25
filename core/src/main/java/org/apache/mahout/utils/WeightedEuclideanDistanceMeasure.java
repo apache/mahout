@@ -47,4 +47,9 @@ public class WeightedEuclideanDistanceMeasure extends WeightedDistanceMeasure {
     return Math.sqrt(result);
   }
 
+  @Override
+  public double distance(double centroidLengthSquare, Vector centroid, Vector v) {	 
+   return distance(centroid, v); // TODO
+  }
+
 }

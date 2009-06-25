@@ -21,6 +21,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.NoSuchElementException;
+import java.util.Iterator;
 
 /**
  * Implements subset view of a Vector
@@ -313,4 +314,35 @@ public class VectorView extends AbstractVector {
     result = 31 * result + cardinality;
     return result;
   }
+
+  @Override
+  public double getLengthSquared() {
+  	double result = 0.0;
+  	for (int i = 0; i < cardinality; i++) {
+  		double value = getQuick(i); 
+  		result +=  value * value;
+  	}
+  	return result;
+  }
+
+  @Override
+  public double getDistanceSquared(Vector v) {  	
+  	double result = 0.0;
+  	double delta = 0.0;
+  	for (int i = 0; i < cardinality; i++) {
+  		delta = getQuick(i) - v.getQuick(i);
+  		result += delta * delta;
+  	}
+  	return result;
+  }
+
+  @Override
+  public void addTo(Vector v) {
+    Iterator<Vector.Element> iter = iterateNonZero();
+    while (iter.hasNext()) {
+      Vector.Element elt = iter.next();
+  	  v.set(elt.index(), elt.get() + v.get(elt.index()));
+    }
+  }
+
 }

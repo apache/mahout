@@ -225,7 +225,8 @@ public class Cluster extends ClusterBase implements Writable {
   /**
    * Construct a new cluster with the given point as its center
    * 
-   * @param center the center point
+   * @param center
+   *            the center point
    */
   public Cluster(Vector center) {
     super();
@@ -300,8 +301,8 @@ public class Cluster extends ClusterBase implements Writable {
       pointTotal = delta.clone();
       pointSquaredTotal = delta.times(delta);
     } else {
-      pointTotal = pointTotal.plus(delta);
-      pointSquaredTotal = pointSquaredTotal.plus(delta.times(delta));
+      delta.addTo(pointTotal);
+      delta.times(delta).addTo(pointSquaredTotal);
     }
   }
 
@@ -324,7 +325,7 @@ public class Cluster extends ClusterBase implements Writable {
    */
   public boolean computeConvergence() {
     Vector centroid = computeCentroid();
-    converged = measure.distance(centroid, center) <= convergenceDelta;
+    converged = measure.distance(centroid.getLengthSquared(), centroid, center) <= convergenceDelta;
     return converged;
   }
 

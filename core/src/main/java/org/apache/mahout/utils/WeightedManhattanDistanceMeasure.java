@@ -51,4 +51,9 @@ public class WeightedManhattanDistanceMeasure extends WeightedDistanceMeasure {
     return result;
   }
 
+  @Override
+  public double distance(double centroidLengthSquare, Vector centroid, Vector v) {	 
+   return distance(centroid, v); // TODO
+  }
+
 }

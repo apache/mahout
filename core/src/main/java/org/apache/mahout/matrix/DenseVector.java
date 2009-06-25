@@ -306,4 +306,38 @@ public class DenseVector extends AbstractVector {
 
     return result;
   }
+
+  private Double lengthSquared = null; 
+
+  @Override
+  public double getLengthSquared() {
+  	if (lengthSquared != null) {
+  		return lengthSquared;
+  	}	
+
+  	double result = 0.0;
+  	for (int i = 0; i < values.length; i++) {
+  		result += values[i] * values[i];
+  	
+  	}
+  	lengthSquared = new Double(result);
+  	return result;
+  }
+
+  @Override
+  public double getDistanceSquared(Vector v) {
+  	double result = 0.0;
+  	double delta = 0.0;
+  	for (int i = 0; i < values.length; i++) {
+  		delta = values[i] - v.getQuick(i);  
+  		result += delta * delta;	
+  	}	
+  	return result;
+  }
+
+  @Override
+  public void addTo(Vector v) {
+    for (int i = 0; i < size(); i++)
+      v.setQuick(i, get(i) + v.get(i));  	
+  }
 }

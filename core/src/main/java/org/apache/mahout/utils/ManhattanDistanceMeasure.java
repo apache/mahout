@@ -68,4 +68,9 @@ public class ManhattanDistanceMeasure implements DistanceMeasure {
     return result;
   }
 
+ @Override
+ public double distance(double centroidLengthSquare, Vector centroid, Vector v) {	 
+  return distance(centroid, v); // TODO
+ }
+ 
 }

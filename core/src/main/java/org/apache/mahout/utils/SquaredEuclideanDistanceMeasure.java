@@ -1,3 +1,4 @@
+package org.apache.mahout.utils;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -15,22 +16,24 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.utils;
-
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.mahout.matrix.CardinalityException;
-import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.parameters.Parameter;
+import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.matrix.CardinalityException;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
+
 /**
- * This class implements a cosine distance metric by dividing the dot product
- * of two vectors by the product of their lengths
- */
-public class CosineDistanceMeasure implements DistanceMeasure {
+ * Like {@link org.apache.mahout.utils.EuclideanDistanceMeasure} but it does not take the square root.
+ * <p/>
+ * Thus, it is not actually the Euclidean Distance, but it is saves on computation when you only need the distance for
+ * comparison and don't care about the actual value as a distance.
+ *
+ **/
+public class SquaredEuclideanDistanceMeasure implements DistanceMeasure {
 
   @Override
   public void configure(JobConf job) {
@@ -48,53 +51,38 @@ public class CosineDistanceMeasure implements DistanceMeasure {
   }
 
   public static double distance(double[] p1, double[] p2) {
-    double dotProduct = 0.0;
-    double lengthSquaredp1 = 0.0;
-    double lengthSquaredp2 = 0.0;
+    double result = 0.0;
     for (int i = 0; i < p1.length; i++) {
-      lengthSquaredp1 += p1[i] * p1[i];
-      lengthSquaredp2 += p2[i] * p2[i];
-      dotProduct += p1[i] * p2[i];
+      double delta = p2[i] - p1[i];
+      result += delta * delta;
     }
-    double denominator = Math.sqrt(lengthSquaredp1) * Math.sqrt(lengthSquaredp2);
 
-    // correct for floating-point rounding errors
-    if (denominator < dotProduct)
-      denominator = dotProduct;
-
-    return 1.0 - (dotProduct / denominator);
+    return result;
   }
 
   @Override
   public double distance(Vector v1, Vector v2) {
     if (v1.size() != v2.size())
       throw new CardinalityException();
-    double lengthSquaredv1 = 0.0;
-    double lengthSquaredv2 = 0.0;
-    Iterator<Vector.Element> iter = v1.iterateNonZero();
+    double result = 0;
+    Vector vector = v1.plus(v2);
+    Iterator<Vector.Element> iter = vector.iterateNonZero();//this contains all non zero elements between the two
     while (iter.hasNext()) {
-      Vector.Element elt = iter.next();
-      lengthSquaredv1 += elt.get() * elt.get();
-    }
-    iter = v2.iterateNonZero();
-    while (iter.hasNext()) {
-      Vector.Element elt = iter.next();
-      lengthSquaredv2 += elt.get() * elt.get();
+      Vector.Element e = iter.next();
+      double delta = v2.getQuick(e.index()) - v1.getQuick(e.index());
+      result += delta * delta;
     }
 
-    double dotProduct = v1.dot(v2);
-    double denominator = Math.sqrt(lengthSquaredv1) * Math.sqrt(lengthSquaredv2);
-
-    // correct for floating-point rounding errors
-    if (denominator < dotProduct)
-      denominator = dotProduct;
-
-    return 1.0 - (dotProduct / denominator);
+    return result;
   }
 
   @Override
-   public double distance(double centroidLengthSquare, Vector centroid, Vector v) {	 
-     return distance(centroid, v); // TODO
-   }
+  public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
+	    if (centroid.size() != centroid.size())
+	        throw new CardinalityException();
 
+	    double result = centroidLengthSquare;
+	    result += v.getDistanceSquared(centroid);
+	    return result;
+  }
 }
