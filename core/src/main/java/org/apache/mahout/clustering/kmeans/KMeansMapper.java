@@ -55,7 +55,6 @@ public class KMeansMapper extends MapReduceBase implements
     Cluster.configure(job);
 
     clusters = new ArrayList<Cluster>();
-    int iteration = job.getInt(Cluster.ITERATION_NUMBER, -1);
     KMeansUtil.configureWithClusterInfo(job.get(Cluster.CLUSTER_PATH_KEY),
         clusters);
 
