@@ -32,7 +32,7 @@ public class KMeansJob {
 
   public static void main(String[] args) throws IOException, ClassNotFoundException {
 
-    if (args.length != 7) {
+    if (args.length != 8) {
       System.err.println("Expected number of arguments 10 and received:"
           + args.length);
       System.err
@@ -47,7 +47,7 @@ public class KMeansJob {
     double convergenceDelta = Double.parseDouble(args[index++]);
     int maxIterations = Integer.parseInt(args[index++]);
     int numCentroids = Integer.parseInt(args[index++]);
-    String vectorClassName = args[6];
+    String vectorClassName = args[index++];
     Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
     runJob(input, clusters, output, measureClass, convergenceDelta,
         maxIterations, numCentroids, vectorClass);
