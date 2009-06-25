@@ -106,12 +106,17 @@ public class Driver {
     Option outWriterOpt = obuilder.withLongName("outputWriter").withRequired(false).withArgument(
             abuilder.withName("outputWriter").withMinimum(1).withMaximum(1).create()).
             withDescription("The VectorWriter to use, either seq (SequenceFileVectorWriter - default) or file (Writes to a File using JSON format)").withShortName("e").create();
-
+    Option minDFOpt = obuilder.withLongName("minDf").withRequired(false).withArgument(
+            abuilder.withName("minDf").withMinimum(1).withMaximum(1).create()).
+            withDescription("The minimum document frequency.  Default is 1").withShortName("md").create();
+    Option maxDFPercentOpt = obuilder.withLongName("maxDFPercent").withRequired(false).withArgument(
+            abuilder.withName("maxDFPercent").withMinimum(1).withMaximum(1).create()).
+            withDescription("The max percentage of docs for the DF.  Can be used to remove really high frequency terms.  Expressed as an integer between 0 and 100. Default is 99.").withShortName("x").create();
     Option helpOpt = obuilder.withLongName("help").
             withDescription("Print out help").withShortName("h").create();
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(idFieldOpt).withOption(outputOpt).withOption(delimiterOpt)
-            .withOption(helpOpt).withOption(fieldOpt).withOption(maxOpt).withOption(dictOutOpt).withOption(powerOpt).withOption(outWriterOpt)
-            .withOption(weightOpt).create();
+            .withOption(helpOpt).withOption(fieldOpt).withOption(maxOpt).withOption(dictOutOpt).withOption(powerOpt).withOption(outWriterOpt).withOption(maxDFPercentOpt)
+            .withOption(weightOpt).withOption(minDFOpt).create();
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
@@ -149,7 +154,15 @@ public class Driver {
             weight = new TFIDF();
           }
           String field = cmdLine.getValue(fieldOpt).toString();
-          TermInfo termInfo = new CachedTermInfo(reader, field, 1, 99);
+          int minDf = 1;
+          if (cmdLine.hasOption(minDFOpt)) {
+            minDf = Integer.parseInt(cmdLine.getValue(minDFOpt).toString());
+          }
+          int maxDFPercent = 99;
+          if (cmdLine.hasOption(maxDFPercentOpt)) {
+            maxDFPercent = Integer.parseInt(cmdLine.getValue(maxDFPercentOpt).toString());
+          }
+          TermInfo termInfo = new CachedTermInfo(reader, field, minDf, maxDFPercent);
           VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
           LuceneIteratable iteratable = null;
           String power = null;
