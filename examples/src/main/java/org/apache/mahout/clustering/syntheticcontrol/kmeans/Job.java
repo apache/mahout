@@ -37,7 +37,7 @@ private Job() {
   }
 
   public static void main(String[] args) throws IOException, ClassNotFoundException {
-    if (args.length == 7) {
+    if (args.length == 8) {
       String input = args[0];
       String output = args[1];
       String measureClass = args[2];
