@@ -402,8 +402,8 @@ public class TestKmeansClustering extends TestCase {
       }
       writer.close();
       // now run the Job
-      KMeansJob.runJob("testdata/points", "testdata/clusters", "output",
-          EuclideanDistanceMeasure.class.getName(), 0.001, 10, k + 1, SparseVector.class);
+      KMeansDriver.runJob("testdata/points", "testdata/clusters", "output",
+          EuclideanDistanceMeasure.class.getName(), 0.001, 10, k + 1, SparseVector.class, true);
       // now compare the expected clusters with actual
       File outDir = new File("output/points");
       assertTrue("output dir exists?", outDir.exists());
@@ -460,8 +460,8 @@ public class TestKmeansClustering extends TestCase {
         ManhattanDistanceMeasure.class.getName(), 3.1, 2.1, SparseVector.class);
 
     // now run the KMeans job
-    KMeansJob.runJob("testdata/points", "testdata/canopies", "output",
-        EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, SparseVector.class);
+    KMeansDriver.runJob("testdata/points", "testdata/canopies", "output",
+        EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, SparseVector.class, true);
 
     // now compare the expected clusters with actual
     File outDir = new File("output/points");
