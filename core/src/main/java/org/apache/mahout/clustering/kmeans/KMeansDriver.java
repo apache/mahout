@@ -100,7 +100,7 @@ public class KMeansDriver {
    * Run the job using supplied arguments
    *
    * @param input the directory pathname for input points
-   * @param clustersIn the directory pathname for iniput clusters
+   * @param clustersIn the directory pathname for input clusters
    * @param clustersOut the directory pathname for output clusters
    * @param measureClass the classname of the DistanceMeasure
    * @param convergenceDelta the convergence delta value
