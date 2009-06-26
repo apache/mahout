@@ -51,6 +51,9 @@ public class RandomSeedGenerator {
 
     while (reader.next(key, value) && count < k){
       if (random.nextBoolean() == true){
+        if (log.isInfoEnabled()) {
+          log.info("Selected: " + value.asFormatString());
+        }
         writer.append(new Text(key.toString()), new Cluster(value));
         count++;
       }
