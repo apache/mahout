@@ -42,6 +42,7 @@ import org.apache.mahout.utils.vectors.lucene.CachedTermInfo;
 import org.apache.mahout.utils.vectors.lucene.LuceneIteratable;
 import org.apache.mahout.utils.vectors.lucene.TFDFMapper;
 import org.apache.mahout.utils.vectors.lucene.VectorMapper;
+import org.apache.mahout.utils.CommandLineUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,7 +125,7 @@ public class Driver {
 
       if (cmdLine.hasOption(helpOpt)) {
 
-        printHelp(group);
+        CommandLineUtil.printHelp(group);
         return;
       }
       //Springify all this
@@ -217,7 +218,7 @@ public class Driver {
 
     } catch (OptionException e) {
       log.error("Exception", e);
-      printHelp(group);
+      CommandLineUtil.printHelp(group);
     }
   }
 
@@ -233,9 +234,5 @@ public class Driver {
     return sfWriter;
   }
 
-  private static void printHelp(Group group) {
-    HelpFormatter formatter = new HelpFormatter();
-    formatter.setGroup(group);
-    formatter.print();
-  }
+
 }
