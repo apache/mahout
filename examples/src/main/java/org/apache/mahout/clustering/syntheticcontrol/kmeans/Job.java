@@ -99,6 +99,6 @@ public class Job {
     System.out.println("Running KMeans");
     KMeansDriver.runJob(directoryContainingConvertedInput, output
         + CanopyClusteringJob.DEFAULT_CANOPIES_OUTPUT_DIRECTORY, output,
-        measureClass, convergenceDelta, maxIterations, 1, vectorClass, true);
+        measureClass, convergenceDelta, maxIterations, 1, vectorClass, false);
   }
 }
