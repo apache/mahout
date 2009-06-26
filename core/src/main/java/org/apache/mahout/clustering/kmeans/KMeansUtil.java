@@ -27,6 +27,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.canopy.Canopy;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ final class KMeansUtil {
    * Configure the mapper with the cluster info
    */
   public static void configureWithClusterInfo(String clusterPathStr,
-      List<Cluster> clusters) {    
+      List<Cluster> clusters) {
     
     // Get the path location where the cluster Info is stored
     JobConf job = new JobConf(KMeansUtil.class);
@@ -74,7 +75,16 @@ final class KMeansUtil {
         try {
           reader =new SequenceFile.Reader(fs, path, job);
           Class valueClass = reader.getValueClass();
-          Text key = new Text();
+          Writable key = null;
+          try {
+            key = (Writable) reader.getKeyClass().newInstance();
+          } catch (InstantiationException e) {//Should not be possible
+            log.error("Exception", e);
+            throw new RuntimeException(e);
+          } catch (IllegalAccessException e) {
+            log.error("Exception", e);
+            throw new RuntimeException(e);
+          }
           if (valueClass.equals(Cluster.class)){
             Cluster value = new Cluster();
             while (reader.next(key, value)) {
