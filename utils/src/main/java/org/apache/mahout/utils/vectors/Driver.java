@@ -107,8 +107,8 @@ public class Driver {
     Option outWriterOpt = obuilder.withLongName("outputWriter").withRequired(false).withArgument(
             abuilder.withName("outputWriter").withMinimum(1).withMaximum(1).create()).
             withDescription("The VectorWriter to use, either seq (SequenceFileVectorWriter - default) or file (Writes to a File using JSON format)").withShortName("e").create();
-    Option minDFOpt = obuilder.withLongName("minDf").withRequired(false).withArgument(
-            abuilder.withName("minDf").withMinimum(1).withMaximum(1).create()).
+    Option minDFOpt = obuilder.withLongName("minDF").withRequired(false).withArgument(
+            abuilder.withName("minDF").withMinimum(1).withMaximum(1).create()).
             withDescription("The minimum document frequency.  Default is 1").withShortName("md").create();
     Option maxDFPercentOpt = obuilder.withLongName("maxDFPercent").withRequired(false).withArgument(
             abuilder.withName("maxDFPercent").withMinimum(1).withMaximum(1).create()).
