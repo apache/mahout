@@ -18,14 +18,9 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.jobcontrol.Job;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.vectors.VectorIterable;
-import org.apache.mahout.utils.vectors.SequenceFileVectorIterable;
-import org.apache.mahout.utils.vectors.VectorDumper;
 import org.apache.mahout.clustering.ClusterBase;
 
 import java.io.IOException;
-import java.io.BufferedWriter;
 import java.io.Writer;
 import java.io.FileWriter;
 import java.io.OutputStreamWriter;
@@ -50,10 +45,13 @@ public class ClusterDumper {
     Option outputOpt = obuilder.withLongName("output").withRequired(false).withArgument(
             abuilder.withName("output").withMinimum(1).withMaximum(1).create()).
             withDescription("The output file.  If not specified, dumps to the console").withShortName("o").create();
+    Option substringOpt = obuilder.withLongName("substring").withRequired(false).withArgument(
+            abuilder.withName("substring").withMinimum(1).withMaximum(1).create()).
+            withDescription("The number of chars of the asFormatString() to print").withShortName("b").create();
     Option helpOpt = obuilder.withLongName("help").
             withDescription("Print out help").withShortName("h").create();
 
-    Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt).create();
+    Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt).withOption(substringOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -81,15 +79,24 @@ public class ClusterDumper {
         } else {
           writer = new OutputStreamWriter(System.out);
         }
+        int sub = Integer.MAX_VALUE;
+        if (cmdLine.hasOption(substringOpt)) {
+          sub = Integer.parseInt(cmdLine.getValue(substringOpt).toString());
+        }
         Writable key = (Writable) reader.getKeyClass().newInstance();
         ClusterBase value = (ClusterBase) reader.getValueClass().newInstance();
         while (reader.next(key, value)){
           writer.write(value.getId());
           writer.write(":");
-          writer.write(value.getCenter().asFormatString());
+          writer.write("name:" + value.getCenter().getName());
+          writer.write(":");
+          String fmtStr = value.getCenter().asFormatString();
+          writer.write(fmtStr.substring(0, Math.min(sub, fmtStr.length())));
           writer.write(LINE_SEP);
+          writer.flush();
         }
         if (cmdLine.hasOption(outputOpt)){
+          writer.flush();
           writer.close();
         }
       }
