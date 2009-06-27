@@ -84,7 +84,9 @@ public class ClusterDumper {
         Writable key = (Writable) reader.getKeyClass().newInstance();
         ClusterBase value = (ClusterBase) reader.getValueClass().newInstance();
         while (reader.next(key, value)){
-          writer.write(value.asFormatString());
+          writer.write(value.getId());
+          writer.write(":");
+          writer.write(value.getCenter().asFormatString());
           writer.write(LINE_SEP);
         }
         if (cmdLine.hasOption(outputOpt)){
