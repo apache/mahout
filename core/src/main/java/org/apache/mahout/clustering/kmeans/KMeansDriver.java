@@ -105,11 +105,12 @@ public class KMeansDriver {
             abuilder.withName("numReduce").withMinimum(1).withMaximum(1).create()).
             withDescription("The number of reduce tasks").withShortName("r").create();
 
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(clustersOpt).withOption(outputOpt).withOption(measureClassOpt)
-            .withOption(convergenceDeltaOpt).withOption(maxIterationsOpt).withOption(numReduceTasksOpt).withOption(kOpt)
-            .withOption(vectorClassOpt).withOption(overwriteOutput).create();
     Option helpOpt = obuilder.withLongName("help").
             withDescription("Print out help").withShortName("h").create();
+
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(clustersOpt).withOption(outputOpt).withOption(measureClassOpt)
+            .withOption(convergenceDeltaOpt).withOption(maxIterationsOpt).withOption(numReduceTasksOpt).withOption(kOpt)
+            .withOption(vectorClassOpt).withOption(overwriteOutput).withOption(helpOpt).create();
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
