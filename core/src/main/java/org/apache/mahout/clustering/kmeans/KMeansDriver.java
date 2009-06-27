@@ -271,6 +271,11 @@ public class KMeansDriver {
    */
   private static void runClustering(String input, String clustersIn,
                                     String output, String measureClass, String convergenceDelta, Class<? extends Vector> vectorClass) {
+    if (log.isInfoEnabled()) {
+      log.info("Running Clustering");
+      log.info("Input: " + input + " Clusters In: " + clustersIn + " Out: " + output + " Distance: " + measureClass);
+      log.info("convergence: " + convergenceDelta + " Input Vectors: " + vectorClass.getName());
+    }
     JobConf conf = new JobConf(KMeansDriver.class);
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
