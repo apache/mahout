@@ -54,7 +54,9 @@ public class RandomSeedGenerator {
         if (log.isInfoEnabled()) {
           log.info("Selected: " + value.asFormatString());
         }
-        writer.append(new Text(key.toString()), new Cluster(value));
+        Cluster val = new Cluster(value);
+        val.addPoint(value);
+        writer.append(new Text(key.toString()), val);
         count++;
       }
     }
