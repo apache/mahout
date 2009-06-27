@@ -58,7 +58,7 @@ public class RandomSeedGenerator {
         count++;
       }
     }
-    log.info("Wrote " + count + " vectors");
+    log.info("Wrote " + count + " vectors to " + outFile);
     reader.close();
     writer.close();
     }
