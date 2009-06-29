@@ -210,7 +210,7 @@ public class Cluster extends ClusterBase implements Writable {
    */
   private Vector computeCentroid() {
     if (numPoints == 0)
-      return pointTotal;
+      return center;
     else if (centroid == null) {
       // lazy compute new centroid
       centroid = pointTotal.divide(numPoints);
