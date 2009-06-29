@@ -168,9 +168,9 @@ public class TestKmeansClustering extends TestCase {
       referenceKmeans(points, clusters, measure, maxIter);
       for (int c = 0; c < clusters.size(); c++) {
         Cluster cluster = clusters.get(c);
-        assertEquals("Cluster " + c + " test " + k, expectedNumPoints[k][c],
-            cluster.getNumPoints());
         System.out.println(cluster.toString());
+        assertEquals("Cluster " + c + " test " + (k + 1), expectedNumPoints[k][c],
+            cluster.getNumPoints());
       }
     }
   }
