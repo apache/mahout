@@ -19,31 +19,32 @@ package org.apache.mahout.clustering.kmeans;
 
 
 import junit.framework.TestCase;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.ClusteringTestUtils;
+import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
 import org.apache.mahout.utils.DummyOutputCollector;
 import org.apache.mahout.utils.EuclideanDistanceMeasure;
+import org.apache.mahout.utils.HadoopUtil;
 import org.apache.mahout.utils.ManhattanDistanceMeasure;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.nio.charset.Charset;
 
 public class TestKmeansClustering extends TestCase {
 
@@ -402,7 +403,7 @@ public class TestKmeansClustering extends TestCase {
       }
       writer.close();
       // now run the Job
-      KMeansDriver.overwriteOutput("output");
+      HadoopUtil.overwriteOutput("output");
       KMeansDriver.runJob("testdata/points", "testdata/clusters", "output",
           EuclideanDistanceMeasure.class.getName(), 0.001, 10, k + 1, SparseVector.class);
       // now compare the expected clusters with actual

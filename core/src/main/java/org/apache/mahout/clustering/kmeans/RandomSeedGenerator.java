@@ -25,7 +25,7 @@ public class RandomSeedGenerator {
   private transient static Log log = LogFactory.getLog(RandomSeedGenerator.class);
   public static final String K = "k";
 
-  public static Path runJob(String input, String output,
+  public static Path buildRandom(String input, String output,
                             int k ) throws IOException, IllegalAccessException, InstantiationException {
     // delete the output directory
     JobConf conf = new JobConf(RandomSeedGenerator.class);

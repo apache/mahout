@@ -22,12 +22,10 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.mapred.FileSplit;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.KeyValueLineRecordReader;
-import org.apache.hadoop.mapred.RecordReader;
+import org.apache.mahout.clustering.kmeans.Cluster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,15 +75,32 @@ class FuzzyKMeansUtil {
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
         try {
           //recordReader = new KeyValueLineRecordReader(job, new FileSplit(path, 0, fs.getFileStatus(path).getLen(), (String[]) null));
-          Text key = new Text();
-          SoftCluster value = new SoftCluster();
-          //int counter = 1;
-          while (reader.next(key, value)) {
-            //get the cluster info
-            // add the center so the centroid will be correct on output
-            // formatting
-//            cluster.addPoint(cluster.getCenter(), 1);
-            clusters.add(value);
+          Class valueClass = reader.getValueClass();
+          Writable key = null;
+          try {
+            key = (Writable) reader.getKeyClass().newInstance();
+          } catch (InstantiationException e) {//Should not be possible
+            log.error("Exception", e);
+            throw new RuntimeException(e);
+          } catch (IllegalAccessException e) {
+            log.error("Exception", e);
+            throw new RuntimeException(e);
+          }
+          if (valueClass.equals(Cluster.class)){
+            Cluster value = new Cluster();
+            while (reader.next(key, value)) {
+              // get the cluster info
+              SoftCluster theCluster = new SoftCluster(value.getCenter(), value.getId());
+              clusters.add(theCluster);
+              value = new Cluster();
+            }
+          } else if (valueClass.equals(SoftCluster.class)){
+            SoftCluster value = new SoftCluster();
+            while (reader.next(key, value)) {
+              // get the cluster info
+              clusters.add(value);
+              value = new SoftCluster();
+            }
           }
         } finally {
           if (reader != null) {

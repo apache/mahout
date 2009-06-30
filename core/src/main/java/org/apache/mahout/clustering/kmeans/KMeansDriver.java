@@ -38,6 +38,7 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.CommandLineUtil;
+import org.apache.mahout.utils.HadoopUtil;
 import org.apache.mahout.utils.SquaredEuclideanDistanceMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,10 +147,10 @@ public class KMeansDriver {
         numReduceTasks = Integer.parseInt(cmdLine.getValue(numReduceTasksOpt).toString());
       }
       if (cmdLine.hasOption(overwriteOutput) == true) {
-        overwriteOutput(output);
+        HadoopUtil.overwriteOutput(output);
       }
       if (cmdLine.hasOption(kOpt)) {
-        clusters = buildRandom(input, clusters, Integer.parseInt(cmdLine.getValue(kOpt).toString())).toString();
+        clusters = RandomSeedGenerator.buildRandom(input, clusters, Integer.parseInt(cmdLine.getValue(kOpt).toString())).toString();
       }
       runJob(input, clusters, output, measureClass, convergenceDelta,
               maxIterations, numReduceTasks, vectorClass);
@@ -159,22 +160,7 @@ public class KMeansDriver {
     }
   }
 
-  public static void overwriteOutput(String output) throws IOException {
-    JobConf conf = new JobConf(KMeansDriver.class);
-    Path outPath = new Path(output);
-    FileSystem fs = FileSystem.get(outPath.toUri(), conf);
-    boolean exists = fs.exists(outPath);
-    if (exists == true) {
-      log.warn("Deleting " + outPath);
-      fs.delete(outPath, true);
-    }
-    fs.mkdirs(outPath);
 
-  }
-
-  public static Path buildRandom(String input, String clusters, int k) throws IOException, IllegalAccessException, InstantiationException {
-    return RandomSeedGenerator.runJob(input, clusters, k);
-  }
 
   /**
    * Run the job using supplied arguments
