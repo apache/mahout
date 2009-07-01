@@ -300,7 +300,7 @@ public class KMeansDriver {
    */
   private static boolean isConverged(String filePath, JobConf conf, FileSystem fs)
           throws IOException {
-    Path outPart = new Path(filePath);
+    Path outPart = new Path(filePath + "/*");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, outPart, conf);
     Writable key = null;
     try {

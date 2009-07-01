@@ -25,6 +25,7 @@ import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.clustering.kmeans.Cluster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,8 +48,8 @@ class FuzzyKMeansUtil {
    */
   public static void configureWithClusterInfo(String clusterPathStr, List<SoftCluster> clusters) {
     //Get the path location where the cluster Info is stored
-    JobConf job = new JobConf(FuzzyKMeansUtil.class);
-    Path clusterPath = new Path(clusterPathStr);
+    Configuration job = new Configuration();
+    Path clusterPath = new Path(clusterPathStr + "/*");
     List<Path> result = new ArrayList<Path>();
 //    log.info("I am here");
     //filter out the files

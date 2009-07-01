@@ -203,7 +203,7 @@ public class TestFuzzyKmeansClustering extends TestCase {
     testData = new File("testdata/points");
     if (!testData.exists())
       testData.mkdir();
-    JobConf conf = new JobConf(FuzzyKMeansDriver.class);
+    Configuration conf = new Configuration();
     ClusteringTestUtils.writePointsToFile(points, "testdata/points/file1", fs, conf);
     ClusteringTestUtils.writePointsToFile(points, "testdata/points/file2", fs, conf);
 

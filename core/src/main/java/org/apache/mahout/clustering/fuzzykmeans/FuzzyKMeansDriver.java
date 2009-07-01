@@ -38,6 +38,7 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
@@ -346,10 +347,10 @@ public class FuzzyKMeansDriver {
    * @return true if all Clusters are converged
    * @throws IOException if there was an IO error
    */
-  private static boolean isConverged(String filePath, JobConf conf,
+  private static boolean isConverged(String filePath, Configuration conf,
                                      FileSystem fs) throws IOException {
 
-    Path clusterPath = new Path(filePath);
+    Path clusterPath = new Path(filePath + "/*");
     List<Path> result = new ArrayList<Path>();
 
     PathFilter clusterFileFilter = new PathFilter() {

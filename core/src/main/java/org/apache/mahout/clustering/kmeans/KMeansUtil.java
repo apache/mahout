@@ -48,7 +48,7 @@ final class KMeansUtil {
     
     // Get the path location where the cluster Info is stored
     JobConf job = new JobConf(KMeansUtil.class);
-    Path clusterPath = new Path(clusterPathStr);
+    Path clusterPath = new Path(clusterPathStr + "/*");
     List<Path> result = new ArrayList<Path>();
 
     // filter out the files
