@@ -70,13 +70,13 @@ public class CosineDistanceMeasure implements DistanceMeasure {
     if (v1.size() != v2.size())
       throw new CardinalityException();
     double lengthSquaredv1 = 0.0;
-    double lengthSquaredv2 = 0.0;
     Iterator<Vector.Element> iter = v1.iterateNonZero();
     while (iter.hasNext()) {
       Vector.Element elt = iter.next();
       lengthSquaredv1 += elt.get() * elt.get();
     }
     iter = v2.iterateNonZero();
+    double lengthSquaredv2 = 0.0;
     while (iter.hasNext()) {
       Vector.Element elt = iter.next();
       lengthSquaredv2 += elt.get() * elt.get();

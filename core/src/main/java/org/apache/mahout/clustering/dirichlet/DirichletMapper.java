@@ -78,7 +78,7 @@ public class DirichletMapper extends MapReduceBase implements
             job);
         try {
           Text key = new Text();
-          DirichletCluster cluster = new DirichletCluster();
+          DirichletCluster<Vector> cluster = new DirichletCluster();
           while (reader.next(key, cluster)) {
             int index = Integer.parseInt(key.toString());
             state.clusters.set(index, cluster);

@@ -133,6 +133,7 @@ public class SparseVector extends AbstractVector {
    * @return an {@link org.apache.mahout.matrix.SparseVector.NonZeroIterator} over the Elements.
    * @see #getElement(int)
    */
+  @Override
   public java.util.Iterator<Vector.Element> iterateNonZero() {
     return new NonZeroIterator();
   }
@@ -184,7 +185,7 @@ public class SparseVector extends AbstractVector {
 
   private class AllIterator implements java.util.Iterator<Vector.Element> {
     private int offset = 0;
-    private Element element = new Element(0);
+    private final Element element = new Element(0);
 
     @Override
     public boolean hasNext() {
@@ -206,7 +207,7 @@ public class SparseVector extends AbstractVector {
 
   private class NonZeroIterator implements java.util.Iterator<Vector.Element> {
     private int offset = 0;
-    private Element element = new Element(0);
+    private final Element element = new Element(0);
 
     @Override
     public boolean hasNext() {
@@ -296,11 +297,11 @@ public class SparseVector extends AbstractVector {
     if (lengthSquared != null) {
       return lengthSquared;
     }
-    double result = 0.0f;
+    double result = 0.0;
     for (double val : values.getValues()) {
       result += val * val;
     }
-    lengthSquared = new Double(result);
+    lengthSquared = result;
     return result;
   }
 
@@ -308,14 +309,12 @@ public class SparseVector extends AbstractVector {
   public double getDistanceSquared(Vector v) {
     //TODO: Check sizes?
 
-    double result = 0.0f;
-    double delta = 0.0f;
-    double centroidValue = 0.0f;
+    double result = 0.0;
     Iterator<Vector.Element> iter = iterateNonZero();
     while (iter.hasNext()) {
       Vector.Element elt = iter.next();
-      centroidValue = v.getQuick(elt.index());
-      delta = elt.get() - centroidValue;
+      double centroidValue = v.getQuick(elt.index());
+      double delta = elt.get() - centroidValue;
       result += (delta * delta) - (centroidValue * centroidValue);
     }
     return result;

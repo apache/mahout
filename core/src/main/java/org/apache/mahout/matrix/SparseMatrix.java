@@ -196,9 +196,9 @@ public class SparseMatrix extends AbstractMatrix {
     out.writeInt(cardinality[ROW]);
     out.writeInt(cardinality[COL]);
     out.writeInt(rows.size());
-    for (Integer row : rows.keySet()) {
-      out.writeInt(row);
-      AbstractVector.writeVector(out, rows.get(row));
+    for (Map.Entry<Integer, Vector> integerVectorEntry : rows.entrySet()) {
+      out.writeInt(integerVectorEntry.getKey());
+      AbstractVector.writeVector(out, integerVectorEntry.getValue());
     }
   }
 

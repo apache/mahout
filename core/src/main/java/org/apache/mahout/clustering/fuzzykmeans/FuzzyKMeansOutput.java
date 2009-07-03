@@ -40,12 +40,12 @@ public class FuzzyKMeansOutput implements Writable {
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(clusters.length);
-    for (int i = 0; i < clusters.length; i++) {
-      clusters[i].write(out);
+    for (SoftCluster cluster : clusters) {
+      cluster.write(out);
     }
     out.writeInt(probabilities.length);
-    for (int i = 0; i < probabilities.length; i++) {
-      out.writeDouble(probabilities[i]);
+    for (double probability : probabilities) {
+      out.writeDouble(probability);
     }
   }
 

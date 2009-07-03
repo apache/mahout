@@ -65,6 +65,7 @@ public abstract class AbstractVector implements Vector {
 
 
 
+  @Override
   public abstract Vector clone();
 
   @Override
@@ -333,11 +334,13 @@ public abstract class AbstractVector implements Vector {
     return gson.fromJson(formattedString, vectorType);
   }
 
+  @Override
   public String getName() {
     return name;
 
   }
 
+  @Override
   public void setName(String name) {
     this.name = name;
 
@@ -347,6 +350,7 @@ public abstract class AbstractVector implements Vector {
     * @see org.apache.mahout.matrix.Vector#asFormatString()
     */
 
+  @Override
   public String asFormatString() {
     Type vectorType = new TypeToken<Vector>() {
     }.getType();
@@ -373,7 +377,6 @@ public abstract class AbstractVector implements Vector {
   public static boolean equivalent(Vector left, Vector right) {
     if (left == right)
       return true;
-    boolean result = true;
     int leftCardinality = left.size();
     if (leftCardinality == right.size()) {
       for (int i = 0; i < leftCardinality; i++) {
@@ -385,7 +388,7 @@ public abstract class AbstractVector implements Vector {
     } else {
       return false;
     }
-    return result;
+    return true;
   }
 
   /**
@@ -412,7 +415,6 @@ public abstract class AbstractVector implements Vector {
       return false;
     }
 
-    boolean result = true;
     int leftCardinality = left.size();
     if (leftCardinality == right.size()) {
       for (int i = 0; i < leftCardinality; i++) {
@@ -424,7 +426,7 @@ public abstract class AbstractVector implements Vector {
     } else {
       return false;
     }
-    return result;
+    return true;
   }
 
   /*

@@ -200,7 +200,7 @@ public class Cluster extends ClusterBase implements Writable {
     }
     //TODO: this is ugly
     String name = point.getName();
-    output.collect(new Text(name != null && name.equals("") == false ? name : point.asFormatString()), new Text(String.valueOf(nearestCluster.id)));
+    output.collect(new Text(name != null && name.length() != 0 ? name : point.asFormatString()), new Text(String.valueOf(nearestCluster.id)));
   }
 
   /**

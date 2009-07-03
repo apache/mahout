@@ -228,7 +228,7 @@ public class SoftCluster implements Writable {
       fOutput.add(i, clusters.get(i), probWeight);
     }
     String name = point.getName();
-    output.collect(new Text(name != null && name.equals("") == false ? name
+    output.collect(new Text(name != null && name.length() != 0 ? name
             : point.asFormatString()),
             fOutput);
   }

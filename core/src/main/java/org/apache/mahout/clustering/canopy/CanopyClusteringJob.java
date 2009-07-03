@@ -29,8 +29,8 @@ import org.apache.commons.cli2.OptionException;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
 import org.apache.commons.cli2.commandline.Parser;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -38,8 +38,10 @@ import java.io.IOException;
  * Runs the {@link org.apache.mahout.clustering.canopy.CanopyDriver#runJob(String, String, String, double, double, Class)}
  * and then {@link org.apache.mahout.clustering.canopy.ClusterDriver#runJob(String, String, String, String, double, double, Class)}.
  */
-public class CanopyClusteringJob {
-  private transient static Log log = LogFactory.getLog(CanopyClusteringJob.class);
+public final class CanopyClusteringJob {
+
+  private static final Logger log = LoggerFactory.getLogger(CanopyClusteringJob.class);
+
   /**
    * The default name of the canopies output sub-directory.
    */     

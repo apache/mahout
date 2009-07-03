@@ -162,15 +162,4 @@ final class OrderedIntDoubleMapping implements Serializable, Cloneable {
     return clone;
   }
 
-  public static void main(String[] args) {
-    OrderedIntDoubleMapping test = new OrderedIntDoubleMapping(3);
-    test.set(7, 10.0);
-    test.set(10, 13.0);
-    test.set(3, 4.0);
-    test.set(1, 3.0);
-    test.set(7, 0.0);
-    test.set(1, 0.0);
-    System.out.println(test);
-  }
-
 }

@@ -132,6 +132,7 @@ public abstract class AbstractMatrix implements Matrix {
     return gson.fromJson(formatString, matrixType);
   }
 
+  @Override
   public String asFormatString() {
     Type vectorType = new TypeToken<Vector>() {
     }.getType();
@@ -237,6 +238,7 @@ public abstract class AbstractMatrix implements Matrix {
 
   }
 
+  @Override
   public abstract Matrix clone();
 
   @Override
@@ -386,18 +388,18 @@ public abstract class AbstractMatrix implements Matrix {
       out.writeInt(0);
     else {
       out.writeInt(columnLabelBindings.size());
-      for (String key : columnLabelBindings.keySet()) {
-        out.writeUTF(key);
-        out.writeInt(columnLabelBindings.get(key));
+      for (Map.Entry<String, Integer> stringIntegerEntry : columnLabelBindings.entrySet()) {
+        out.writeUTF(stringIntegerEntry.getKey());
+        out.writeInt(stringIntegerEntry.getValue());
       }
     }
     if (rowLabelBindings == null)
       out.writeInt(0);
     else {
       out.writeInt(rowLabelBindings.size());
-      for (String key : rowLabelBindings.keySet()) {
-        out.writeUTF(key);
-        out.writeInt(rowLabelBindings.get(key));
+      for (Map.Entry<String, Integer> stringIntegerEntry : rowLabelBindings.entrySet()) {
+        out.writeUTF(stringIntegerEntry.getKey());
+        out.writeInt(stringIntegerEntry.getValue());
       }
     }
   }

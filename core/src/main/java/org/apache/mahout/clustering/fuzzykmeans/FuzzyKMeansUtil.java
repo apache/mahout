@@ -24,7 +24,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.clustering.kmeans.Cluster;
 import org.slf4j.Logger;
@@ -76,8 +75,8 @@ class FuzzyKMeansUtil {
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
         try {
           //recordReader = new KeyValueLineRecordReader(job, new FileSplit(path, 0, fs.getFileStatus(path).getLen(), (String[]) null));
-          Class valueClass = reader.getValueClass();
-          Writable key = null;
+          Class<?> valueClass = reader.getValueClass();
+          Writable key;
           try {
             key = (Writable) reader.getKeyClass().newInstance();
           } catch (InstantiationException e) {//Should not be possible

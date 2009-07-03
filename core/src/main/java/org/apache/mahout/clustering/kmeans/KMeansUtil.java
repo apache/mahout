@@ -26,7 +26,6 @@ import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.canopy.Canopy;
@@ -74,8 +73,8 @@ final class KMeansUtil {
         SequenceFile.Reader reader = null;
         try {
           reader =new SequenceFile.Reader(fs, path, job);
-          Class valueClass = reader.getValueClass();
-          Writable key = null;
+          Class<?> valueClass = reader.getValueClass();
+          Writable key;
           try {
             key = (Writable) reader.getKeyClass().newInstance();
           } catch (InstantiationException e) {//Should not be possible

@@ -45,7 +45,7 @@ public class JsonModelDistributionAdapter implements
   public ModelDistribution<?> deserialize(JsonElement json, Type typeOfT,
       JsonDeserializationContext context) throws JsonParseException {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    Class<?> cl = null;
+    Class<?> cl;
     try {
       cl = ccl.loadClass(json.getAsString());
     } catch (ClassNotFoundException e) {

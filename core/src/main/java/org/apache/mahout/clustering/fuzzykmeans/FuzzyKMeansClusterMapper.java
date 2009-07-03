@@ -28,9 +28,7 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.clustering.kmeans.Cluster;
 
 public class FuzzyKMeansClusterMapper extends MapReduceBase implements
         Mapper<WritableComparable<?>, Vector, Text, FuzzyKMeansOutput> {

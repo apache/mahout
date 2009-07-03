@@ -28,7 +28,6 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

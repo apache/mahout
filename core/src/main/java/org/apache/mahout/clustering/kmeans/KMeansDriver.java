@@ -176,15 +176,15 @@ public class KMeansDriver {
    */
   public static void runJob(String input, String clustersIn, String output,
                             String measureClass, double convergenceDelta, int maxIterations,
-                            int numReduceTasks, Class<? extends Vector> vectorClass) throws IOException {
+                            int numReduceTasks, Class<? extends Vector> vectorClass) {
     // iterate until the clusters converge
-    boolean converged = false;
-    int iteration = 0;
     String delta = Double.toString(convergenceDelta);
     if (log.isInfoEnabled()) {
       log.info("Input: " + input + " Clusters In: " + clustersIn + " Out: " + output + " Distance: " + measureClass);
       log.info("convergence: " + convergenceDelta + " max Iterations: " + maxIterations + " num Reduce Tasks: " + numReduceTasks + " Input Vectors: " + vectorClass.getName());
     }
+    boolean converged = false;
+    int iteration = 0;
     while (!converged && iteration < maxIterations) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
@@ -302,7 +302,7 @@ public class KMeansDriver {
           throws IOException {
     Path outPart = new Path(filePath + "/*");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, outPart, conf);
-    Writable key = null;
+    Writable key;
     try {
       key = (Writable) reader.getKeyClass().newInstance();
     } catch (InstantiationException e) {//shouldn't happen

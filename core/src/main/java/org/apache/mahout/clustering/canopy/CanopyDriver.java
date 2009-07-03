@@ -30,8 +30,6 @@ import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.utils.CommandLineUtil;
 import org.apache.mahout.utils.SquaredEuclideanDistanceMeasure;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
@@ -40,11 +38,15 @@ import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.OptionException;
 import org.apache.commons.cli2.commandline.Parser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class CanopyDriver {
-  private transient static Log log = LogFactory.getLog(CanopyDriver.class);
+public final class CanopyDriver {
+
+  private static final Logger log = LoggerFactory.getLogger(CanopyDriver.class);
+
   private CanopyDriver() {
   }
 

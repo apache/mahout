@@ -147,15 +147,11 @@ public class DenseVector extends AbstractVector {
 
   private class NonZeroIterator implements java.util.Iterator<Vector.Element> {
 
-    private Element element = new Element(0);
+    private final Element element = new Element(0);
     private int offset;
-
-    private NonZeroIterator() {
-    }
 
     @Override
     public boolean hasNext() {
-      int last = offset;
       while (offset < values.length && values[offset] == 0){
         offset++;
       }
@@ -185,10 +181,7 @@ public class DenseVector extends AbstractVector {
 
   private class AllIterator implements java.util.Iterator<Vector.Element> {
 
-    private Element element = new Element(-1);
-
-    private AllIterator() {
-    }
+    private final Element element = new Element(-1);
 
     @Override
     public boolean hasNext() {
@@ -316,20 +309,19 @@ public class DenseVector extends AbstractVector {
   	}	
 
   	double result = 0.0;
-  	for (int i = 0; i < values.length; i++) {
-  		result += values[i] * values[i];
-  	
-  	}
-  	lengthSquared = new Double(result);
+    for (double value : values) {
+      result += value * value;
+
+    }
+  	lengthSquared = result;
   	return result;
   }
 
   @Override
   public double getDistanceSquared(Vector v) {
   	double result = 0.0;
-  	double delta = 0.0;
   	for (int i = 0; i < values.length; i++) {
-  		delta = values[i] - v.getQuick(i);  
+  		double delta = values[i] - v.getQuick(i);
   		result += delta * delta;	
   	}	
   	return result;

@@ -301,9 +301,7 @@ public class VectorView extends AbstractVector {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    return o instanceof Vector && equivalent(this, (Vector) o);
+    return this == o || (o instanceof Vector && equivalent(this, (Vector) o));
 
   }
 
@@ -328,9 +326,8 @@ public class VectorView extends AbstractVector {
   @Override
   public double getDistanceSquared(Vector v) {  	
   	double result = 0.0;
-  	double delta = 0.0;
   	for (int i = 0; i < cardinality; i++) {
-  		delta = getQuick(i) - v.getQuick(i);
+  		double delta = getQuick(i) - v.getQuick(i);
   		result += delta * delta;
   	}
   	return result;

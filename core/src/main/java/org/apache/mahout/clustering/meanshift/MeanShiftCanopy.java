@@ -302,24 +302,8 @@ public class MeanShiftCanopy extends ClusterBase {
     return id;
   }
 
-  /**
-   * Return the center point
-   * 
-   * @return a Vector
-   */
-  public Vector getCenter() {
-    return center;
-  }
-
   public String getIdentifier() {
     return converged ? "V" + id : "C" + id;
-  }
-
-  /**
-   * @return the number of points under the Canopy
-   */
-  public int getNumPoints() {
-    return numPoints;
   }
 
   void init(MeanShiftCanopy canopy) {

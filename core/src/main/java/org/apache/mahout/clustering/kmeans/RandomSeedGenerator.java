@@ -1,7 +1,5 @@
 package org.apache.mahout.clustering.kmeans;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
@@ -9,6 +7,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.matrix.Vector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Random;
@@ -21,12 +21,16 @@ import java.util.Random;
  * <p/>
  *
  */
-public class RandomSeedGenerator {
-  private transient static Log log = LogFactory.getLog(RandomSeedGenerator.class);
+public final class RandomSeedGenerator {
+
+  private static final Logger log = LoggerFactory.getLogger(RandomSeedGenerator.class);
+
   public static final String K = "k";
 
+  private RandomSeedGenerator() {}
+
   public static Path buildRandom(String input, String output,
-                            int k ) throws IOException, IllegalAccessException, InstantiationException {
+                                 int k) throws IOException, IllegalAccessException, InstantiationException {
     // delete the output directory
     JobConf conf = new JobConf(RandomSeedGenerator.class);
     Path outPath = new Path(output);
@@ -47,22 +51,20 @@ public class RandomSeedGenerator {
       Vector value = (Vector) reader.getValueClass().newInstance();
       SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, outFile, Text.class, Cluster.class);
       Random random = new Random();
-    int count = 0;
+      int count = 0;
 
-    while (reader.next(key, value) && count < k){
-      if (random.nextBoolean() == true){
-        if (log.isInfoEnabled()) {
-          log.info("Selected: " + value.asFormatString());
+      while (reader.next(key, value) && count < k){
+        if (random.nextBoolean() == true){
+          log.info("Selected: {}", value.asFormatString());
+          Cluster val = new Cluster(value);
+          val.addPoint(value);
+          writer.append(new Text(key.toString()), val);
+          count++;
         }
-        Cluster val = new Cluster(value);
-        val.addPoint(value);
-        writer.append(new Text(key.toString()), val);
-        count++;
       }
-    }
-    log.info("Wrote " + count + " vectors to " + outFile);
-    reader.close();
-    writer.close();
+      log.info("Wrote " + count + " vectors to " + outFile);
+      reader.close();
+      writer.close();
     }
 
     return outFile;

@@ -30,8 +30,6 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.matrix.AbstractVector;
-import org.apache.mahout.matrix.Vector;
 
 public class FuzzyKMeansReducer extends MapReduceBase implements
     Reducer<Text, FuzzyKMeansInfo, Text, SoftCluster> {

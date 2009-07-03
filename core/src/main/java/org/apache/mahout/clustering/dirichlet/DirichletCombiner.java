@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
@@ -33,11 +32,6 @@ public class DirichletCombiner extends MapReduceBase implements
   @Override
   public void reduce(Text key, Iterator<Text> values,
       OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
-  }
-
-  @Override
-  public void configure(JobConf job) {
-    super.configure(job);
   }
 
 }

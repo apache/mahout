@@ -54,6 +54,7 @@ public abstract class ClusterBase implements Writable {
    * @param out The {@link java.io.DataOutput}
    * @throws IOException
    */
+  @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(id);
   }
@@ -64,6 +65,7 @@ public abstract class ClusterBase implements Writable {
    * @param in
    * @throws IOException
    */
+  @Override
   public void readFields(DataInput in) throws IOException {
     id = in.readInt();
   }

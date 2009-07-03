@@ -30,13 +30,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-public class DirichletCluster<Observation> implements Writable {
+public class DirichletCluster<O> implements Writable {
 
   @SuppressWarnings("unchecked")
   @Override
   public void readFields(DataInput in) throws IOException {
     this.totalCount = in.readDouble();
-    this.model = readModel(in);
+    this.model = (Model<O>) readModel(in);
   }
 
   @Override
@@ -45,11 +45,11 @@ public class DirichletCluster<Observation> implements Writable {
     writeModel(out, model);
   }
 
-  public Model<Observation> model; // the model for this iteration
+  public Model<O> model; // the model for this iteration
 
   public double totalCount; // total count of observations for the model
 
-  public DirichletCluster(Model<Observation> model, double totalCount) {
+  public DirichletCluster(Model<O> model, double totalCount) {
     super();
     this.model = model;
     this.totalCount = totalCount;
@@ -59,7 +59,7 @@ public class DirichletCluster<Observation> implements Writable {
     super();
   }
 
-  public void setModel(Model<Observation> model) {
+  public void setModel(Model<O> model) {
     this.model = model;
     this.totalCount += model.count();
   }
@@ -83,9 +83,9 @@ public class DirichletCluster<Observation> implements Writable {
    * @throws IOException
    */
   @SuppressWarnings("unchecked")
-  public static Model readModel(DataInput in) throws IOException {
+  public static Model<?> readModel(DataInput in) throws IOException {
     String modelClassName = in.readUTF();
-    Model model;
+    Model<?> model;
     try {
       model = Class.forName(modelClassName).asSubclass(Model.class)
           .newInstance();
@@ -104,11 +104,11 @@ public class DirichletCluster<Observation> implements Writable {
    * Writes a typed Model instance to the output stream
    * 
    * @param out
-   * @param matrix
+   * @param model
    * @throws IOException
    */
   @SuppressWarnings("unchecked")
-  public static void writeModel(DataOutput out, Model model) throws IOException {
+  public static void writeModel(DataOutput out, Model<?> model) throws IOException {
     out.writeUTF(model.getClass().getName());
     model.write(out);
   }
