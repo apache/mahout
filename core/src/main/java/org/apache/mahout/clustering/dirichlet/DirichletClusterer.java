@@ -76,16 +76,16 @@ import org.apache.mahout.matrix.Vector;
  *    x_j ~ model(\theta_i)
  * </pre>
  */
-public class DirichletClusterer<Observation> {
+public class DirichletClusterer<O> {
 
   // observed data
-  private final List<Observation> sampleData;
+  private final List<O> sampleData;
 
   // the ModelDistribution for the computation
-  private final ModelDistribution<Observation> modelFactory;
+  private final ModelDistribution<O> modelFactory;
 
   // the state of the clustering process
-  private final DirichletState<Observation> state;
+  private final DirichletState<O> state;
 
   private final int thin;
 
@@ -93,7 +93,7 @@ public class DirichletClusterer<Observation> {
 
   private final int numClusters;
 
-  private final List<Model<Observation>[]> clusterSamples = new ArrayList<Model<Observation>[]>();
+  private final List<Model<O>[]> clusterSamples = new ArrayList<Model<O>[]>();
 
   /**
    * Create a new instance on the sample data with the given additional parameters
@@ -105,15 +105,15 @@ public class DirichletClusterer<Observation> {
    * @param thin          the int thinning interval, used to report every n iterations
    * @param burnin        the int burnin interval, used to suppress early iterations
    */
-  public DirichletClusterer(List<Observation> sampleData,
-      ModelDistribution<Observation> modelFactory, double alpha_0,
+  public DirichletClusterer(List<O> sampleData,
+      ModelDistribution<O> modelFactory, double alpha_0,
       int numClusters, int thin, int burnin) {
     this.sampleData = sampleData;
     this.modelFactory = modelFactory;
     this.thin = thin;
     this.burnin = burnin;
     this.numClusters = numClusters;
-    state = new DirichletState<Observation>(modelFactory, numClusters, alpha_0,
+    state = new DirichletState<O>(modelFactory, numClusters, alpha_0,
         thin, burnin);
   }
 
@@ -124,7 +124,7 @@ public class DirichletClusterer<Observation> {
    * @param numIterations the int number of iterations to perform
    * @return a List<List<Model<Observation>>> of the observed models
    */
-  public List<Model<Observation>[]> cluster(int numIterations) {
+  public List<Model<O>[]> cluster(int numIterations) {
     for (int iteration = 0; iteration < numIterations; iteration++)
       iterate(iteration, state);
     return clusterSamples;
@@ -136,14 +136,14 @@ public class DirichletClusterer<Observation> {
    * 
    * @param state the DirichletState<Observation> of this iteration
    */
-  private void iterate(int iteration, DirichletState<Observation> state) {
+  private void iterate(int iteration, DirichletState<O> state) {
 
     // create new posterior models
-    Model<Observation>[] newModels = modelFactory.sampleFromPosterior(state
+    Model<O>[] newModels = modelFactory.sampleFromPosterior(state
         .getModels());
 
     // iterate over the samples, assigning each to a model
-    for (Observation x : sampleData) {
+    for (O x : sampleData) {
       // compute normalized vector of probabilities that x is described by each model
       Vector pi = normalizedProbabilities(state, x);
       // then pick one cluster by sampling a Multinomial distribution based upon them
@@ -168,8 +168,8 @@ public class DirichletClusterer<Observation> {
    * @param x an Observation
    * @return the Vector of probabilities
    */
-  private Vector normalizedProbabilities(DirichletState<Observation> state,
-      Observation x) {
+  private Vector normalizedProbabilities(DirichletState<O> state,
+      O x) {
     Vector pi = new DenseVector(numClusters);
     double max = 0;
     for (int k = 0; k < numClusters; k++) {

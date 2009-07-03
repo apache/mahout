@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.clustering.kmeans;
 
 import org.apache.hadoop.fs.FileSystem;
@@ -12,6 +29,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Random;
+import java.util.List;
+import java.util.ArrayList;
 
 
 /**
@@ -51,18 +70,29 @@ public final class RandomSeedGenerator {
       Vector value = (Vector) reader.getValueClass().newInstance();
       SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, outFile, Text.class, Cluster.class);
       Random random = new Random();
-      int count = 0;
 
-      while (reader.next(key, value) && count < k){
-        if (random.nextBoolean() == true){
-          log.info("Selected: {}", value.asFormatString());
-          Cluster val = new Cluster(value);
-          val.addPoint(value);
-          writer.append(new Text(key.toString()), val);
-          count++;
+      List<Text> chosenTexts = new ArrayList<Text>(k);
+      List<Cluster> chosenClusters = new ArrayList<Cluster>(k);
+      while (reader.next(key, value)){
+        Cluster newCluster = new Cluster(value);
+        newCluster.addPoint(value);
+        Text newText = new Text(key.toString());
+        int currentSize = chosenTexts.size();
+        if (currentSize < k) {
+          chosenTexts.add(newText);
+          chosenClusters.add(newCluster);
+        } else if (random.nextInt(currentSize + 1) == 0) { // with chance 1/(currentSize+1) pick new element
+          int indexToRemove = random.nextInt(currentSize); // evict one chosen randomly
+          chosenTexts.remove(indexToRemove);
+          chosenClusters.remove(indexToRemove);
+          chosenTexts.add(newText);
+          chosenClusters.add(newCluster);
         }
       }
-      log.info("Wrote " + count + " vectors to " + outFile);
+      for (int i = 0; i < k; i++) {
+        writer.append(chosenTexts.get(i), chosenClusters.get(i));
+      }
+      log.info("Wrote " + k + " vectors to " + outFile);
       reader.close();
       writer.close();
     }
