@@ -28,15 +28,15 @@ import java.util.NoSuchElementException;
  */
 public class SparseVector extends AbstractVector {
 
+  private OrderedIntDoubleMapping values;
+
+  private int cardinality;
+
   /**
    * For serialization purposes only.
    */
   public SparseVector() {
   }
-
-  private OrderedIntDoubleMapping values;
-
-  private int cardinality;
 
   public SparseVector(int cardinality, int size) {
     this(null, cardinality, size);
@@ -71,9 +71,9 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public SparseVector clone() {
-    SparseVector result = like();
-    result.values = (OrderedIntDoubleMapping) values.clone();
-    return result;
+    SparseVector clone = (SparseVector) super.clone();
+    clone.values = values.clone();
+    return clone;
   }
 
   @Override

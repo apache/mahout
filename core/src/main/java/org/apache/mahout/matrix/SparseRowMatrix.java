@@ -67,10 +67,13 @@ public class SparseRowMatrix extends AbstractMatrix {
 
   @Override
   public Matrix clone() {
-    SparseRowMatrix copy = new SparseRowMatrix(cardinality);
-    for (int row = 0; row < cardinality[ROW]; row++)
-      copy.rows[row] = rows[row].clone();
-    return copy;
+    SparseRowMatrix clone = (SparseRowMatrix) super.clone();
+    clone.cardinality = cardinality.clone();
+    clone.rows = new Vector[rows.length];
+    for (int i = 0; i < rows.length; i++) {
+      clone.rows[i] = rows[i].clone();
+    }
+    return clone;
   }
 
   @Override

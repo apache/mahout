@@ -28,13 +28,13 @@ import java.util.Map;
  */
 public class SparseMatrix extends AbstractMatrix {
 
-  public SparseMatrix() {
-    super();
-  }
-
   private int[] cardinality;
 
   private Map<Integer, Vector> rows;
+
+  public SparseMatrix() {
+    super();
+  }
 
   /**
    * Construct a matrix of the given cardinality with the given row map
@@ -66,10 +66,10 @@ public class SparseMatrix extends AbstractMatrix {
 
   @Override
   public Matrix clone() {
-    SparseMatrix copy = new SparseMatrix(cardinality);
-    for (Map.Entry<Integer, Vector> entry : rows.entrySet())
-      copy.rows.put(entry.getKey(), entry.getValue().clone());
-    return copy;
+    SparseMatrix clone = (SparseMatrix) super.clone();
+    clone.cardinality = cardinality.clone();
+    clone.rows = (Map<Integer,Vector>) ((HashMap<Integer,Vector>) rows).clone();
+    return clone;
   }
 
   @Override

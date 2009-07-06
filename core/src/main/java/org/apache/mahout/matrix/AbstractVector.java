@@ -64,9 +64,20 @@ public abstract class AbstractVector implements Vector {
   public abstract Vector.Element getElement(int index); 
 
 
-
   @Override
-  public abstract Vector clone();
+  public Vector clone() {
+    AbstractVector clone;
+    try {
+      clone = (AbstractVector) super.clone();
+    } catch (CloneNotSupportedException cnse) {
+      throw new IllegalStateException(cnse); // Can't happen
+    }
+    if (bindings != null) {
+      clone.bindings = (Map<String,Integer>) ((HashMap<String,Integer>) bindings).clone();
+    }
+    // name is OK
+    return clone;
+  }
 
   @Override
   public Vector divide(double x) {
@@ -343,12 +354,7 @@ public abstract class AbstractVector implements Vector {
   @Override
   public void setName(String name) {
     this.name = name;
-
-  }/*
-    * (non-Javadoc)
-    * 
-    * @see org.apache.mahout.matrix.Vector#asFormatString()
-    */
+  }
 
   @Override
   public String asFormatString() {
@@ -429,11 +435,6 @@ public abstract class AbstractVector implements Vector {
     return true;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#get(java.lang.String)
-   */
   @Override
   public double get(String label) throws IndexException, UnboundLabelException {
     if (bindings == null)
@@ -444,21 +445,11 @@ public abstract class AbstractVector implements Vector {
     return get(index);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#getLabelBindings()
-   */
   @Override
   public Map<String, Integer> getLabelBindings() {
     return bindings;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#set(java.lang.String, double)
-   */
   @Override
   public void set(String label, double value) throws IndexException,
           UnboundLabelException {
@@ -470,21 +461,11 @@ public abstract class AbstractVector implements Vector {
     set(index, value);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#setLabelBindings(java.util.Map)
-   */
   @Override
   public void setLabelBindings(Map<String, Integer> bindings) {
     this.bindings = bindings;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.matrix.Vector#set(java.lang.String, int, double)
-   */
   @Override
   public void set(String label, int index, double value) throws IndexException {
     if (bindings == null)

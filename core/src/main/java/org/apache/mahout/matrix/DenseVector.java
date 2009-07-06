@@ -28,6 +28,8 @@ import java.util.Iterator;
  */
 public class DenseVector extends AbstractVector {
 
+  private double[] values;
+
   /** For serialization purposes only */
   public DenseVector() {
   }
@@ -35,8 +37,6 @@ public class DenseVector extends AbstractVector {
   public DenseVector(String name) {
     super(name);
   }
-
-  private double[] values;
 
   /**
    * Construct a new instance using provided values
@@ -78,9 +78,9 @@ public class DenseVector extends AbstractVector {
 
   @Override
   public DenseVector clone() {
-    DenseVector denseVector = new DenseVector(values);
-    denseVector.setLabelBindings(getLabelBindings());
-    return denseVector;
+    DenseVector clone = (DenseVector) super.clone();
+    clone.values = values.clone();
+    return clone;
   }
 
   @Override

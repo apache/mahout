@@ -48,10 +48,10 @@ public class DenseMatrix extends AbstractMatrix {
    */
   public DenseMatrix(double[][] values) {
     // clone the rows
-    this.values = values.clone();
+    this.values = new double[values.length][];
     // be careful, need to clone the columns too
     for (int i = 0; i < values.length; i++)
-      this.values[i] = this.values[i].clone();
+      this.values[i] = values[i].clone();
   }
 
   /**
@@ -74,7 +74,12 @@ public class DenseMatrix extends AbstractMatrix {
 
   @Override
   public Matrix clone() {
-    return new DenseMatrix(values);
+    DenseMatrix clone = (DenseMatrix) super.clone();
+    clone.values = new double[values.length][];
+    for (int i = 0; i < values.length; i++) {
+      clone.values[i] = values[i].clone();
+    }
+    return clone;
   }
 
   @Override

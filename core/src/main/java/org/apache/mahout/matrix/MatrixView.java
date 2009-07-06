@@ -58,7 +58,11 @@ public class MatrixView extends AbstractMatrix {
 
   @Override
   public Matrix clone() {
-    return new MatrixView(matrix.clone(), offset, cardinality);
+    MatrixView clone = (MatrixView) super.clone();
+    clone.matrix = matrix.clone();
+    clone.offset = offset.clone();
+    clone.cardinality = cardinality.clone();
+    return clone;
   }
 
   @Override

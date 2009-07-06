@@ -239,7 +239,21 @@ public abstract class AbstractMatrix implements Matrix {
   }
 
   @Override
-  public abstract Matrix clone();
+  public Matrix clone() {
+    AbstractMatrix clone;
+    try {
+      clone = (AbstractMatrix) super.clone();
+    } catch (CloneNotSupportedException cnse) {
+      throw new IllegalStateException(cnse); // can't happen
+    }
+    if (rowLabelBindings != null) {
+      clone.rowLabelBindings = (Map<String,Integer>) ((HashMap<String,Integer>) rowLabelBindings).clone();
+    }
+    if (columnLabelBindings != null) {
+      clone.columnLabelBindings = (Map<String,Integer>) ((HashMap<String,Integer>) columnLabelBindings).clone();
+    }
+    return clone;
+  }
 
   @Override
   public Matrix divide(double x) {

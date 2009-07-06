@@ -28,10 +28,6 @@ import java.util.Iterator;
  */
 public class VectorView extends AbstractVector {
 
-  /** For serialization purposes only */
-  public VectorView() {
-  }
-
   private Vector vector;
 
   // the offset into the Vector
@@ -39,6 +35,10 @@ public class VectorView extends AbstractVector {
 
   // the cardinality of the view
   private int cardinality;
+
+  /** For serialization purposes only */
+  public VectorView() {
+  }
 
   public VectorView(Vector vector, int offset, int cardinality) {
     this.vector = vector;
@@ -58,7 +58,9 @@ public class VectorView extends AbstractVector {
 
   @Override
   public Vector clone() {
-    return new VectorView(vector.clone(), offset, cardinality);
+    VectorView clone = (VectorView) super.clone();
+    clone.vector = vector.clone();
+    return clone;
   }
 
   @Override
