@@ -60,8 +60,7 @@ public class TestDirichletClustering extends TestCase {
     int row = 0;
     for (Model<Vector>[] r : result) {
       System.out.print("sample[" + row++ + "]= ");
-      for (int k = 0; k < r.length; k++) {
-        Model<Vector> model = r[k];
+      for (Model<Vector> model : r) {
         if (model.count() > significant)
           System.out.print(model.toString() + ", ");
       }

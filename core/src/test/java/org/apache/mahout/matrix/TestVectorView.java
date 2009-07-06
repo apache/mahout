@@ -68,12 +68,9 @@ public class TestVectorView extends TestCase {
 
   public void testIterator() throws Exception {
 
-    Iterator<Vector.Element> iter;
-    VectorView view;
-    double[] gold;
-    view = new VectorView(new DenseVector(values), offset, cardinality);
-    gold = new double[]{1.1, 2.2, 3.3};
-    iter = view.iterateAll();
+    VectorView view = new VectorView(new DenseVector(values), offset, cardinality);
+    double[] gold = new double[]{1.1, 2.2, 3.3};
+    Iterator<Vector.Element> iter = view.iterateAll();
     checkIterator(iter, gold);
     iter = view.iterateNonZero();
     checkIterator(iter, gold);

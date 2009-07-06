@@ -30,6 +30,8 @@ import java.io.File;
 import java.io.IOException;
 
 public class ClusteringTestUtils {
+  private ClusteringTestUtils() {
+  }
 
   public static void writePointsToFile(List<Vector> points, String fileName, FileSystem fs, Configuration conf)
           throws IOException {
@@ -48,8 +50,9 @@ public class ClusteringTestUtils {
     if (f.exists()) {
       if (f.isDirectory()) {
         String[] contents = f.list();
-        for (int i = 0; i < contents.length; i++)
-          rmr(f.toString() + File.separator + contents[i]);
+        for (String content : contents) {
+          rmr(f.toString() + File.separator + content);
+        }
       }
       f.delete();
     }

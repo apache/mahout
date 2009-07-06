@@ -37,9 +37,10 @@ import com.google.gson.reflect.TypeToken;
 public class JsonModelHolderAdapter implements JsonSerializer<ModelHolder>,
     JsonDeserializer<ModelHolder> {
 
-  Type typeOfModel = new TypeToken<Model<Vector>>() {
+  final Type typeOfModel = new TypeToken<Model<Vector>>() {
   }.getType();
 
+  @Override
   public JsonElement serialize(ModelHolder src, Type typeOfSrc,
       JsonSerializationContext context) {
     GsonBuilder builder = new GsonBuilder();
@@ -50,6 +51,7 @@ public class JsonModelHolderAdapter implements JsonSerializer<ModelHolder>,
     return obj;
   }
 
+  @Override
   public ModelHolder deserialize(JsonElement json, Type typeOfT,
       JsonDeserializationContext context) throws JsonParseException {
     GsonBuilder builder = new GsonBuilder();

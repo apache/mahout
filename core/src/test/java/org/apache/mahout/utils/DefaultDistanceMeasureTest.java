@@ -31,11 +31,10 @@ public abstract class DefaultDistanceMeasureTest extends TestCase {
 
     DistanceMeasure distanceMeasure = distanceMeasureFactory();
 
-    Vector[] vectors;
-    vectors = new Vector[]{
-            new DenseVector(new double[]{1, 1, 1, 1, 1, 1}),
-            new DenseVector(new double[]{2, 2, 2, 2, 2, 2}),
-            new DenseVector(new double[]{6, 6, 6, 6, 6, 6})
+    Vector[] vectors = new Vector[]{
+        new DenseVector(new double[]{1, 1, 1, 1, 1, 1}),
+        new DenseVector(new double[]{2, 2, 2, 2, 2, 2}),
+        new DenseVector(new double[]{6, 6, 6, 6, 6, 6})
     };
 
     compare(distanceMeasure, vectors);

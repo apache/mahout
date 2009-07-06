@@ -91,10 +91,8 @@ public class TestDenseVector extends TestCase {
     iterator = test.iterateAll();
     checkIterator(iterator, values, 3);
 
-    DenseVector zeros;
-    double[] doubles;
-    doubles = new double[]{0.0, 5.0, 0, 3.0};
-    zeros = new DenseVector(doubles);
+    double[] doubles = new double[]{0.0, 5.0, 0, 3.0};
+    DenseVector zeros = new DenseVector(doubles);
     iterator = zeros.iterateNonZero();
     checkIterator(iterator, doubles, 2);
     iterator = zeros.iterateAll();

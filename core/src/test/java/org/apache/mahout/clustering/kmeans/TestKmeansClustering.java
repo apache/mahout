@@ -63,13 +63,15 @@ public class TestKmeansClustering extends TestCase {
     if (f.exists()) {
       if (f.isDirectory()) {
         String[] contents = f.list();
-        for (int i = 0; i < contents.length; i++)
-          rmr(f.toString() + File.separator + contents[i]);
+        for (String content : contents) {
+          rmr(f.toString() + File.separator + content);
+        }
       }
       f.delete();
     }
   }
 
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
     rmr("output");
@@ -108,8 +110,6 @@ public class TestKmeansClustering extends TestCase {
    */
   private boolean iterateReference(List<Vector> points, List<Cluster> clusters,
       DistanceMeasure measure) {
-    boolean converged;
-    converged = true;
     // iterate through all points, assigning each to the nearest cluster
     for (Vector point : points) {
       Cluster closestCluster = null;
@@ -124,6 +124,7 @@ public class TestKmeansClustering extends TestCase {
       closestCluster.addPoint(point);
     }
     // test for convergence
+    boolean converged = true;
     for (Cluster cluster : clusters) {
       if (!cluster.computeConvergence())
         converged = false;
@@ -354,8 +355,8 @@ public class TestKmeansClustering extends TestCase {
         converged = converged && cluster.isConverged();
         //Since we aren't roundtripping through Writable, we need to compare the reference center with the cluster centroid
         cluster.recomputeCenter();
-        assertTrue(i + " reference center: " + ref.getCenter().asFormatString() + " and cluster center:  "
-                + cluster.getCenter().asFormatString() + " are not equal", ref.getCenter().equals(cluster.getCenter()));
+        assertEquals(i + " reference center: " + ref.getCenter().asFormatString() + " and cluster center:  "
+            + cluster.getCenter().asFormatString() + " are not equal", ref.getCenter(), cluster.getCenter());
 
         /*assertEquals(k + " center[" + key + "][1]", ref.getCenter().get(1),
             cluster.getCenter().get(1));*/

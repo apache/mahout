@@ -59,10 +59,8 @@ public class TestSparseVector extends TestCase {
     iterator = test.iterateAll();
     checkIterator(iterator, gold);
 
-    SparseVector zeros;
-    double[] doubles;
-    doubles = new double[]{0.0, 5.0, 0, 3.0};
-    zeros = new SparseVector(doubles.length);
+    double[] doubles = new double[]{0.0, 5.0, 0, 3.0};
+    SparseVector zeros = new SparseVector(doubles.length);
     for (int i = 0; i < doubles.length; i++) {
       zeros.setQuick(i, doubles[i]);
     }

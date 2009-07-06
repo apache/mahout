@@ -147,7 +147,7 @@ public class TestFuzzyKmeansClustering extends TestCase {
             .append(probWeight).append(' ');
       }
       String name = point.getName();
-      pointClusterInfo.put(name != null && name.equals("") == false ? name : point.asFormatString().trim(), outputValue
+      pointClusterInfo.put(name != null && name.length() != 0 ? name : point.asFormatString().trim(), outputValue
           .toString().trim()
           + ']');
     }
@@ -274,9 +274,9 @@ public class TestFuzzyKmeansClustering extends TestCase {
         */
         double prob = 0.0;
         double [] probabilities = out.getProbabilities();
-        for (int i = 0; i < probabilities.length; i++) {
+        for (double probability : probabilities) {
           //SoftCluster cluster = clusters[i];
-          prob += probabilities[i];
+          prob += probability;
         }
         prob = round(prob, 1);
         assertEquals(
