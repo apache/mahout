@@ -65,4 +65,16 @@ final class BitSet implements Serializable, Cloneable {
     }
   }
 
+  @Override
+  public String toString() {
+    StringBuilder result = new StringBuilder(64 * bits.length);
+    for (long l : bits) {
+      for (int j = 0; j < 64; j++) {
+        result.append((l & (1L << j)) == 0 ? '0' : '1');
+      }
+      result.append(' ');
+    }
+    return result.toString();
+  }
+
 }

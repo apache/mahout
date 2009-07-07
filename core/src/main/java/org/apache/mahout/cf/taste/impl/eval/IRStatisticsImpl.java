@@ -68,4 +68,9 @@ public final class IRStatisticsImpl implements IRStatistics, Serializable {
     return sum == 0.0 ? Double.NaN : (1.0 + n) * precision * recall / sum;
   }
 
+  @Override
+  public String toString() {
+    return "IRStatisticsImpl[precision:" + precision + ",recall:" + recall + ",fallOut:" + fallOut + ']';
+  }
+
 }
