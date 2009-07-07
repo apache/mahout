@@ -346,7 +346,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     return list.toArray(new Preference[list.size()]);
   }
 
-  private List<? extends Preference> doGetPreferencesForItem(Object itemID) throws TasteException {
+  protected List<? extends Preference> doGetPreferencesForItem(Object itemID) throws TasteException {
     log.debug("Retrieving preferences for item ID '{}'", itemID);
     Item item = getItem(itemID, true);
     Connection conn = null;

@@ -30,6 +30,8 @@ import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
+import org.apache.mahout.cf.taste.impl.model.ByValuePreferenceComparator;
+import org.apache.mahout.cf.taste.impl.model.BooleanPrefUser;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -44,6 +46,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.Collections;
+import java.util.Arrays;
 
 /**
  * <p>For each {@link User}, these implementation determine the top <code>n</code> preferences,
@@ -102,8 +106,16 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
         Object id = user.getID();
         Collection<Item> relevantItems = new FastSet<Item>(at);
         Preference[] prefs = user.getPreferencesAsArray();
+        if (prefs.length < 2 * at) {
+          // Really not enough prefs to meaningfully evaluate this user
+          continue;
+        }
+
+        // List some most-preferred items that would count as (most) "relevant" results
         double theRelevanceThreshold = Double.isNaN(relevanceThreshold) ? computeThreshold(prefs) : relevanceThreshold;
-        for (Preference pref : prefs) {
+        Arrays.sort(prefs, Collections.reverseOrder(ByValuePreferenceComparator.getInstance()));
+        for (int i = 0; i < prefs.length && relevantItems.size() < at; i++) {
+          Preference pref = prefs[i];
           if (pref.getValue() >= theRelevanceThreshold) {
             relevantItems.add(pref.getItem());
           }
@@ -163,7 +175,17 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
         }
       }
       if (!trainingPrefs.isEmpty()) {
-        User trainingUser = new GenericUser<String>(id.toString(), trainingPrefs);
+        // TODO hack
+        User trainingUser;
+        if (user2 instanceof BooleanPrefUser) {
+          FastSet<Object> itemIDs = new FastSet<Object>();
+          for (Preference pref : trainingPrefs) {
+            itemIDs.add(pref.getItem().getID());
+          }
+          trainingUser = new BooleanPrefUser<String>(id.toString(), itemIDs);
+        } else {
+          trainingUser = new GenericUser<String>(id.toString(), trainingPrefs);
+        }
         trainingUsers.add(trainingUser);
       }
     } else {
