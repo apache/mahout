@@ -75,34 +75,7 @@ public final class TanimotoCoefficientSimilarity implements UserSimilarity, Item
       return 0.0;
     }
 
-    Preference xPref = xPrefs[0];
-    Preference yPref = yPrefs[0];
-    Item xIndex = xPref.getItem();
-    Item yIndex = yPref.getItem();
-    int xPrefIndex = 1;
-    int yPrefIndex = 1;
-
-    int intersectionSize = 0;
-    while (true) {
-      int compare = xIndex.compareTo(yIndex);
-      if (compare == 0) {
-        intersectionSize++;
-      }
-      if (compare <= 0) {
-        if (xPrefIndex == xPrefs.length) {
-          break;
-        }
-        xPref = xPrefs[xPrefIndex++];
-        xIndex = xPref.getItem();
-      }
-      if (compare >= 0) {
-        if (yPrefIndex == yPrefs.length) {
-          break;
-        }
-        yPref = yPrefs[yPrefIndex++];
-        yIndex = yPref.getItem();
-      }
-    }
+    int intersectionSize = LogLikelihoodSimilarity.findIntersectionSize(xPrefs, yPrefs);
 
     int unionSize = xPrefs.length + yPrefs.length - intersectionSize;
 

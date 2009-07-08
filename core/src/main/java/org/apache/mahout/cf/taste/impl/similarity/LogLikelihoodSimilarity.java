@@ -20,16 +20,20 @@ package org.apache.mahout.cf.taste.impl.similarity;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
+import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
+import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.Preference;
 
 import java.util.Collection;
 
 /**
  * See <a href="http://citeseer.ist.psu.edu/29096.html">http://citeseer.ist.psu.edu/29096.html</a>.
  */
-public final class LogLikelihoodSimilarity implements ItemSimilarity {
+public final class LogLikelihoodSimilarity implements UserSimilarity, ItemSimilarity {
 
   private final DataModel dataModel;
 
@@ -37,8 +41,69 @@ public final class LogLikelihoodSimilarity implements ItemSimilarity {
     this.dataModel = dataModel;
   }
 
-  // TODO also implement UserSimilarity if someone wants it
-  // This would involve refactoring out the bits that are similar to TanimotoCoefficientSimilarity
+  /**
+   * @throws UnsupportedOperationException
+   */
+  @Override
+  public void setPreferenceInferrer(PreferenceInferrer inferrer) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public double userSimilarity(User user1, User user2) throws TasteException {
+    if (user1 == null || user2 == null) {
+      throw new IllegalArgumentException("user1 or user2 is null");
+    }
+
+    Preference[] xPrefs = user1.getPreferencesAsArray();
+    Preference[] yPrefs = user2.getPreferencesAsArray();
+
+    if (xPrefs.length == 0 && yPrefs.length == 0) {
+      return Double.NaN;
+    }
+    if (xPrefs.length == 0 || yPrefs.length == 0) {
+      return 0.0;
+    }
+
+    int intersectionSize = findIntersectionSize(xPrefs, yPrefs);
+
+    int numItems = dataModel.getNumItems();
+    double logLikelihood =
+      twoLogLambda(intersectionSize, xPrefs.length - intersectionSize, yPrefs.length, numItems - yPrefs.length);
+    return 1.0 - 1.0 / (1.0 + logLikelihood);
+  }
+
+  static int findIntersectionSize(Preference[] xPrefs, Preference[] yPrefs) {
+    Preference xPref = xPrefs[0];
+    Preference yPref = yPrefs[0];
+    Item xIndex = xPref.getItem();
+    Item yIndex = yPref.getItem();
+    int xPrefIndex = 1;
+    int yPrefIndex = 1;
+
+    int intersectionSize = 0;
+    while (true) {
+      int compare = xIndex.compareTo(yIndex);
+      if (compare == 0) {
+        intersectionSize++;
+      }
+      if (compare <= 0) {
+        if (xPrefIndex == xPrefs.length) {
+          break;
+        }
+        xPref = xPrefs[xPrefIndex++];
+        xIndex = xPref.getItem();
+      }
+      if (compare >= 0) {
+        if (yPrefIndex == yPrefs.length) {
+          break;
+        }
+        yPref = yPrefs[yPrefIndex++];
+        yIndex = yPref.getItem();
+      }
+    }
+    return intersectionSize;
+  }
 
   @Override
   public double itemSimilarity(Item item1, Item item2) throws TasteException {
@@ -54,7 +119,7 @@ public final class LogLikelihoodSimilarity implements ItemSimilarity {
     return 1.0 - 1.0 / (1.0 + logLikelihood);
   }
 
-  private static double twoLogLambda(double k1, double k2, double n1, double n2) {
+  static double twoLogLambda(double k1, double k2, double n1, double n2) {
     double p = (k1 + k2) / (n1 + n2);
     return 2.0 * (logL(k1 / n1, k1, n1) + logL(k2 / n2, k2, n2) - logL(p, k1, n1) - logL(p, k2, n2));
   }
