@@ -78,6 +78,8 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
   public static final String DEFAULT_ITEM_ID_COLUMN = "item_id";
   public static final String DEFAULT_PREFERENCE_COLUMN = "preference";
 
+  static final int DEFAULT_FETCH_SIZE = 1000; // A max, "big" number of rows to buffer at once
+
   private final DataSource dataSource;
   private final String preferenceTable;
   private final String userIDColumn;
@@ -243,6 +245,10 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     return preferenceColumn;
   }
 
+  protected int getFetchSize() {
+    return DEFAULT_FETCH_SIZE;
+  }
+
   @Override
   public Iterable<? extends User> getUsers() throws TasteException {
     log.debug("Retrieving all users...");
@@ -265,7 +271,9 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
     try {
       conn = dataSource.getConnection();
-      stmt = conn.prepareStatement(getUserSQL);
+      stmt = conn.prepareStatement(getUserSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
+      stmt.setFetchSize(getFetchSize());
       stmt.setObject(1, id);
 
       log.debug("Executing SQL query: {}", getUserSQL);
@@ -354,7 +362,9 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     ResultSet rs = null;
     try {
       conn = dataSource.getConnection();
-      stmt = conn.prepareStatement(getPrefsForItemSQL);
+      stmt = conn.prepareStatement(getPrefsForItemSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
+      stmt.setFetchSize(getFetchSize());
       stmt.setObject(1, itemID);
 
       log.debug("Executing SQL query: {}", getPrefsForItemSQL);
@@ -559,11 +569,16 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
         connection = dataSource.getConnection();
         // These settings should enable the ResultSet to be iterated in both directions
         statement = connection.prepareStatement(getUsersSQL,
-                                                ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                                ResultSet.TYPE_FORWARD_ONLY,
                                                 ResultSet.CONCUR_READ_ONLY);
-        statement.setFetchDirection(ResultSet.FETCH_UNKNOWN);
+        statement.setFetchDirection(ResultSet.FETCH_FORWARD);
+        statement.setFetchSize(getFetchSize());
         log.debug("Executing SQL query: {}", getUsersSQL);
         resultSet = statement.executeQuery();
+        boolean anyResults = resultSet.next();
+        if (!anyResults) {
+          close();
+        }
       } catch (SQLException sqle) {
         close();
         throw new TasteException(sqle);
@@ -575,9 +590,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       boolean nextExists = false;
       if (!closed) {
         try {
-          // No more results if cursor is pointing at last row, or after
-          // Thanks to Rolf W. for pointing out an earlier bug in this condition
-          if (resultSet.isLast() || resultSet.isAfterLast()) {
+          if (resultSet.isAfterLast()) {
             close();
           } else {
             nextExists = true;
@@ -593,7 +606,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     @Override
     public User next() {
 
-      if (closed) {
+      if (!hasNext()) {
         throw new NoSuchElementException();
       }
 
@@ -601,31 +614,23 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       List<Preference> prefs = new ArrayList<Preference>();
 
       try {
-        while (resultSet.next()) {
+        do {
           String userID = resultSet.getString(3);
           if (currentUserID == null) {
             currentUserID = userID;
           }
           // Did we move on to a new user?
           if (!userID.equals(currentUserID)) {
-            // back up one row
-            resultSet.previous();
-            // we're done for now
             break;
           }
           // else add a new preference for the current user
           addPreference(resultSet, prefs);
-        }
+        } while (resultSet.next());
       } catch (SQLException sqle) {
         // No good way to handle this since we can't throw an exception
         log.warn("Exception while iterating over users", sqle);
         close();
         throw new NoSuchElementException("Can't retrieve more due to exception: " + sqle);
-      }
-
-      if (currentUserID == null) {
-        // nothing left?
-        throw new NoSuchElementException();
       }
 
       return buildUser(currentUserID, prefs);
@@ -664,10 +669,15 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     private ResultSetItemIterator(DataSource dataSource, String getItemsSQL) throws TasteException {
       try {
         connection = dataSource.getConnection();
-        statement = connection.prepareStatement(getItemsSQL);
+        statement = connection.prepareStatement(getItemsSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         statement.setFetchDirection(ResultSet.FETCH_FORWARD);
+        statement.setFetchSize(getFetchSize());
         log.debug("Executing SQL query: {}", getItemsSQL);
         resultSet = statement.executeQuery();
+        boolean anyResults = resultSet.next();
+        if (!anyResults) {
+          close();
+        }
       } catch (SQLException sqle) {
         close();
         throw new TasteException(sqle);
@@ -679,9 +689,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       boolean nextExists = false;
       if (!closed) {
         try {
-          // No more results if cursor is pointing at last row, or after
-          // Thanks to Rolf W. for pointing out an earlier bug in this condition
-          if (resultSet.isLast() || resultSet.isAfterLast()) {
+          if (resultSet.isAfterLast()) {
             close();
           } else {
             nextExists = true;
@@ -702,11 +710,9 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       }
 
       try {
-        if (resultSet.next()) {
-          return buildItem(resultSet.getString(1));
-        } else {
-          throw new NoSuchElementException();
-        }
+        Item item = buildItem(resultSet.getString(1));
+        resultSet.next();
+        return item;
       } catch (SQLException sqle) {
         // No good way to handle this since we can't throw an exception
         log.warn("Exception while iterating over items", sqle);

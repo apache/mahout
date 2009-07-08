@@ -122,4 +122,10 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
           "WHERE tp1." + itemIDColumn + "=? and tp2." + itemIDColumn + "=?");
   }
 
+  @Override
+  protected int getFetchSize() {
+    // Need to return this for MySQL Connector/J to make it use streaming mode
+    return Integer.MIN_VALUE;
+  }
+
 }

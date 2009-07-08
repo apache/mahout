@@ -103,6 +103,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
     RunningAverage fallOut = new FullRunningAverage();
     for (User user : dataModel.getUsers()) {
       if (random.nextDouble() < evaluationPercentage) {
+        long start = System.currentTimeMillis();
         Object id = user.getID();
         Collection<Item> relevantItems = new FastSet<Item>(at);
         Preference[] prefs = user.getPreferencesAsArray();
@@ -152,6 +153,8 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
                              (double) (numItems - numRelevantItems));
           }
 
+          long end = System.currentTimeMillis();
+          log.info("Evaluated with user " + user + " in " + (end - start) + "ms");
           log.info("Precision/recall/fall-out: {} / {} / {}", new Object[] {
               precision.getAverage(), recall.getAverage(), fallOut.getAverage()
           });

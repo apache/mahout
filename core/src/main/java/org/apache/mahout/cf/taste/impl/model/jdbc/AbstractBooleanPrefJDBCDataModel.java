@@ -100,7 +100,9 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
 
     try {
       conn = getDataSource().getConnection();
-      stmt = conn.prepareStatement(getUserSQL);
+      stmt = conn.prepareStatement(getUserSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
+      stmt.setFetchSize(getFetchSize());
       stmt.setObject(1, id);
 
       log.debug("Executing SQL query: {}", getUserSQL);
@@ -176,7 +178,9 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
     ResultSet rs = null;
     try {
       conn = getDataSource().getConnection();
-      stmt = conn.prepareStatement(getPrefsForItemSQL);
+      stmt = conn.prepareStatement(getPrefsForItemSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
+      stmt.setFetchSize(getFetchSize());
       stmt.setObject(1, itemID);
 
       log.debug("Executing SQL query: {}", getPrefsForItemSQL);
@@ -216,11 +220,16 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
         connection = getDataSource().getConnection();
         // These settings should enable the ResultSet to be iterated in both directions
         statement = connection.prepareStatement(getUsersSQL,
-                                                ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                                ResultSet.TYPE_FORWARD_ONLY,
                                                 ResultSet.CONCUR_READ_ONLY);
-        statement.setFetchDirection(ResultSet.FETCH_UNKNOWN);
+        statement.setFetchDirection(ResultSet.FETCH_FORWARD);
+        statement.setFetchSize(getFetchSize()); // TODO only for MySQL
         log.debug("Executing SQL query: {}", getUsersSQL);
         resultSet = statement.executeQuery();
+        boolean anyResults = resultSet.next();
+        if (!anyResults) {
+          close();
+        }
       } catch (SQLException sqle) {
         close();
         throw new TasteException(sqle);
@@ -234,7 +243,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
         try {
           // No more results if cursor is pointing at last row, or after
           // Thanks to Rolf W. for pointing out an earlier bug in this condition
-          if (resultSet.isLast() || resultSet.isAfterLast()) {
+          if (resultSet.isAfterLast()) {
             close();
           } else {
             nextExists = true;
@@ -250,7 +259,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
     @Override
     public User next() {
 
-      if (closed) {
+      if (!hasNext()) {
         throw new NoSuchElementException();
       }
 
@@ -258,31 +267,23 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
       FastSet<Object> itemIDs = new FastSet<Object>();
 
       try {
-        while (resultSet.next()) {
+        do {
           String userID = resultSet.getString(2);
           if (currentUserID == null) {
             currentUserID = userID;
           }
           // Did we move on to a new user?
           if (!userID.equals(currentUserID)) {
-            // back up one row
-            resultSet.previous();
-            // we're done for now
             break;
           }
           // else add a new preference for the current user
           itemIDs.add(resultSet.getString(1));
-        }
+        } while (resultSet.next());
       } catch (SQLException sqle) {
         // No good way to handle this since we can't throw an exception
         log.warn("Exception while iterating over users", sqle);
         close();
         throw new NoSuchElementException("Can't retrieve more due to exception: " + sqle);
-      }
-
-      if (currentUserID == null) {
-        // nothing left?
-        throw new NoSuchElementException();
       }
 
       return buildUser(currentUserID, itemIDs);
