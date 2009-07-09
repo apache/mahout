@@ -96,6 +96,8 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
   private final String getPrefsForItemSQL;
   private final String getNumPreferenceForItemSQL;
   private final String getNumPreferenceForItemsSQL;
+  private int cachedNumUsers;
+  private int cachedNumItems;
 
   protected AbstractJDBCDataModel(DataSource dataSource,
                                   String getUserSQL,
@@ -186,6 +188,9 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     this.getPrefsForItemSQL = getPrefsForItemSQL;
     this.getNumPreferenceForItemSQL = getNumPreferenceForItemSQL;
     this.getNumPreferenceForItemsSQL = getNumPreferenceForItemsSQL;
+
+    this.cachedNumUsers = -1;
+    this.cachedNumItems = -1;
   }
 
   private static void checkNotNullAndLog(String argName, Object value) {
@@ -387,12 +392,18 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
   @Override
   public int getNumItems() throws TasteException {
-    return getNumThings("items", getNumItemsSQL);
+    if (cachedNumItems < 0) {
+      cachedNumItems = getNumThings("items", getNumItemsSQL);
+    }
+    return cachedNumItems;
   }
 
   @Override
   public int getNumUsers() throws TasteException {
-    return getNumThings("users", getNumUsersSQL);
+    if (cachedNumUsers < 0) {
+      cachedNumUsers = getNumThings("users", getNumUsersSQL);
+    }
+    return cachedNumUsers;
   }
 
   @Override
@@ -504,7 +515,8 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    // do nothing
+    cachedNumUsers = -1;
+    cachedNumItems = -1;
   }
 
 

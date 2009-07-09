@@ -162,7 +162,7 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
           // getNumPreferenceForItemSQL
           "SELECT COUNT(1) FROM " + preferenceTable + " WHERE " + itemIDColumn + "=?",
           // getNumPreferenceForItemsSQL
-          "SELECT COUNT(1) FROM " + preferenceTable + " tp1 INNER JOIN " + preferenceColumn + " tp2 " +
+          "SELECT COUNT(1) FROM " + preferenceTable + " tp1 INNER JOIN " + preferenceTable + " tp2 " +
           "ON (tp1." + userIDColumn + "=tp2." + userIDColumn + ") " +
           "WHERE tp1." + itemIDColumn + "=? and tp2." + itemIDColumn + "=?");
   }

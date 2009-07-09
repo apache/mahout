@@ -36,6 +36,8 @@ import javax.sql.DataSource;
  */
 public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataModel {
 
+  private static final String NO_SUCH_COLUMN = "NO_SUCH_COLUMN";
+
   /**
    * <p>Creates a {@link MySQLBooleanPrefJDBCDataModel} using the default {@link javax.sql.DataSource}
    * (named {@link #DEFAULT_DATASOURCE_NAME} and default table/column names.</p>
@@ -57,8 +59,7 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
     this(lookupDataSource(dataSourceName),
          DEFAULT_PREFERENCE_TABLE,
          DEFAULT_USER_ID_COLUMN,
-         DEFAULT_ITEM_ID_COLUMN,
-         DEFAULT_PREFERENCE_COLUMN);
+         DEFAULT_ITEM_ID_COLUMN);
   }
 
   /**
@@ -71,8 +72,7 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
     this(dataSource,
          DEFAULT_PREFERENCE_TABLE,
          DEFAULT_USER_ID_COLUMN,
-         DEFAULT_ITEM_ID_COLUMN,
-         DEFAULT_PREFERENCE_COLUMN);
+         DEFAULT_ITEM_ID_COLUMN);
   }
 
   /**
@@ -83,18 +83,16 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
    * @param preferenceTable name of table containing preference data
    * @param userIDColumn user ID column name
    * @param itemIDColumn item ID column name
-   * @param preferenceColumn preference column name
    */
   public MySQLBooleanPrefJDBCDataModel(DataSource dataSource,
                                        String preferenceTable,
                                        String userIDColumn,
-                                       String itemIDColumn,
-                                       String preferenceColumn) {
+                                       String itemIDColumn) {
     super(dataSource,
           preferenceTable,
           userIDColumn,
           itemIDColumn,
-          preferenceColumn,
+          NO_SUCH_COLUMN,
           // getUserSQL
           "SELECT " + itemIDColumn + " FROM " + preferenceTable + " WHERE " + userIDColumn + "=?",
           // getNumItemsSQL
@@ -117,7 +115,7 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
           // getNumPreferenceForItemSQL
           "SELECT COUNT(1) FROM " + preferenceTable + " WHERE " + itemIDColumn + "=?",
           // getNumPreferenceForItemsSQL
-          "SELECT COUNT(1) FROM " + preferenceTable + " tp1 INNER JOIN " + preferenceColumn + " tp2 " +
+          "SELECT COUNT(1) FROM " + preferenceTable + " tp1 INNER JOIN " + preferenceTable + " tp2 " +
           "ON (tp1." + userIDColumn + "=tp2." + userIDColumn + ") " +
           "WHERE tp1." + itemIDColumn + "=? and tp2." + itemIDColumn + "=?");
   }
