@@ -22,6 +22,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.common.IteratorIterable;
+import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
@@ -43,7 +44,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -569,7 +569,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
    * only release database resources after {@link #hasNext()} has been called and has returned false;
    * callers should make sure to "drain" the entire set of data to avoid tying up database resources.</p>
    */
-  private final class ResultSetUserIterator implements Iterator<User> {
+  private final class ResultSetUserIterator implements SkippingIterator<User> {
 
     private final Connection connection;
     private final PreparedStatement statement;
@@ -661,6 +661,26 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       IOUtils.quietClose(resultSet, statement, connection);
     }
 
+    @Override
+    public void skip(int n) {
+      if (n >= 1 && hasNext()) {
+        try {
+          int distinctUserNamesSeen = 0;
+          String currentUserID = null;
+          do {
+            String userID = resultSet.getString(3);
+            if (!userID.equals(currentUserID)) {
+              distinctUserNamesSeen++;
+            }
+            currentUserID = userID;
+          } while (distinctUserNamesSeen <= n && resultSet.next());
+        } catch (SQLException sqle) {
+          log.warn("Exception while iterating over users", sqle);
+          close();
+        }
+      }
+    }
+
   }
 
   /**
@@ -671,7 +691,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
    * <code>false</code>; callers should make sure to "drain" the entire set of data to avoid tying up database
    * resources.</p>
    */
-  private final class ResultSetItemIterator implements Iterator<Item> {
+  private final class ResultSetItemIterator implements SkippingIterator<Item> {
 
     private final Connection connection;
     private final PreparedStatement statement;
@@ -745,6 +765,16 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     private void close() {
       closed = true;
       IOUtils.quietClose(resultSet, statement, connection);
+    }
+
+    @Override
+    public void skip(int n) {
+      try {
+        resultSet.relative(n);
+      } catch (SQLException sqle) {
+        log.warn("Exception while iterating over items", sqle);
+        close();
+      }
     }
 
   }

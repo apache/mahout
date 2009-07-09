@@ -25,7 +25,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipInputStream;
@@ -38,7 +37,7 @@ import java.nio.charset.Charset;
  *
  * This class will uncompress files that end in .zip or .gz accordingly, too.
  */
-public final class FileLineIterator implements Iterator<String>, Closeable {
+public final class FileLineIterator implements SkippingIterator<String>, Closeable {
 
   private final BufferedReader reader;
   private String nextLine;
@@ -110,6 +109,17 @@ public final class FileLineIterator implements Iterator<String>, Closeable {
   @Override
   public void remove() {
     throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void skip(int n) {
+    try {
+      for (int i = 0; i < n && nextLine != null; i++) {
+        nextLine = reader.readLine();
+      }
+    } catch (IOException ioe) {
+      close();
+    }
   }
 
   @Override

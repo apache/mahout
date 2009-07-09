@@ -25,6 +25,7 @@ import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.common.IteratorIterable;
+import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
 import org.apache.mahout.cf.taste.impl.model.BooleanPrefUser;
 import org.apache.mahout.cf.taste.impl.model.BooleanPreference;
 
@@ -35,7 +36,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 
@@ -208,7 +208,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
     return new BooleanPreference(user, item);
   }
 
-  private final class ResultSetUserIterator implements Iterator<User> {
+  private final class ResultSetUserIterator implements SkippingIterator<User> {
 
     private final Connection connection;
     private final PreparedStatement statement;
@@ -223,7 +223,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
                                                 ResultSet.TYPE_FORWARD_ONLY,
                                                 ResultSet.CONCUR_READ_ONLY);
         statement.setFetchDirection(ResultSet.FETCH_FORWARD);
-        statement.setFetchSize(getFetchSize()); // TODO only for MySQL
+        statement.setFetchSize(getFetchSize());
         log.debug("Executing SQL query: {}", getUsersSQL);
         resultSet = statement.executeQuery();
         boolean anyResults = resultSet.next();
@@ -241,8 +241,6 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
       boolean nextExists = false;
       if (!closed) {
         try {
-          // No more results if cursor is pointing at last row, or after
-          // Thanks to Rolf W. for pointing out an earlier bug in this condition
           if (resultSet.isAfterLast()) {
             close();
           } else {
@@ -302,6 +300,25 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
       IOUtils.quietClose(resultSet, statement, connection);
     }
 
+    @Override
+    public void skip(int n) {
+      if (n >= 1 && hasNext()) {
+        try {
+          int distinctUserNamesSeen = 0;
+          String currentUserID = null;
+          do {
+            String userID = resultSet.getString(2);
+            if (!userID.equals(currentUserID)) {
+              distinctUserNamesSeen++;
+            }
+            currentUserID = userID;
+          } while (distinctUserNamesSeen <= n && resultSet.next());
+        } catch (SQLException sqle) {
+          log.warn("Exception while iterating over users", sqle);
+          close();
+        }
+      }
+    }
   }
 
 }

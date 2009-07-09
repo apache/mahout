@@ -58,12 +58,28 @@ public final class SamplingIterator<T> implements Iterator<T> {
 
   private void doNext() {
     boolean found = false;
-    while (delegate.hasNext()) {
-      T delegateNext = delegate.next();
-      if (r.nextDouble() < samplingRate) {
-        next = delegateNext;
+    if (delegate instanceof SkippingIterator) {
+      SkippingIterator<? extends T> skippingDelegate = (SkippingIterator<? extends T>) delegate;
+      int toSkip = 0;
+      while (r.nextDouble() >= samplingRate) {
+        toSkip++;
+      }
+      // Really, would be nicer to select value from geometric distribution, for small values of samplingRate
+      if (toSkip > 0) {
+        skippingDelegate.skip(toSkip);
+      }
+      if (skippingDelegate.hasNext()) {
+        next = skippingDelegate.next();
         found = true;
-        break;
+      }
+    } else {
+      while (delegate.hasNext()) {
+        T delegateNext = delegate.next();
+        if (r.nextDouble() < samplingRate) {
+          next = delegateNext;
+          found = true;
+          break;
+        }
       }
     }
     if (!found) {

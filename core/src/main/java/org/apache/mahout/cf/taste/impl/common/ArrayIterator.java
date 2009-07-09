@@ -24,7 +24,7 @@ import java.util.NoSuchElementException;
 /**
  * <p>Simple, fast {@link Iterator} for an array.</p>
  */
-public final class ArrayIterator<T> implements Iterator<T>, Iterable<T> {
+public final class ArrayIterator<T> implements SkippingIterator<T>, Iterable<T> {
 
   private final T[] array;
   private int position;
@@ -63,6 +63,13 @@ public final class ArrayIterator<T> implements Iterator<T>, Iterable<T> {
   @Override
   public void remove() {
     throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void skip(int n) {
+    if (n > 0) {
+      position += n;
+    }
   }
 
   @Override
