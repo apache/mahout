@@ -23,6 +23,8 @@ import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.common.IteratorIterable;
 import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
+import org.apache.mahout.cf.taste.impl.common.Cache;
+import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
@@ -98,6 +100,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
   private final String getNumPreferenceForItemsSQL;
   private int cachedNumUsers;
   private int cachedNumItems;
+  private final Cache<Object,Integer> itemPrefCounts;
 
   protected AbstractJDBCDataModel(DataSource dataSource,
                                   String getUserSQL,
@@ -191,6 +194,8 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
     this.cachedNumUsers = -1;
     this.cachedNumItems = -1;
+    this.itemPrefCounts = new Cache<Object,Integer>(new ItemPrefCountRetriever(getNumPreferenceForItemSQL));
+
   }
 
   private static void checkNotNullAndLog(String argName, Object value) {
@@ -426,7 +431,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       throw new IllegalArgumentException("Illegal number of item IDs: " + length);
     }
     return length == 1 ?
-        getNumThings("user preferring item", getNumPreferenceForItemSQL, itemIDs) :
+        itemPrefCounts.get(itemIDs[0]) :
         getNumThings("user preferring items", getNumPreferenceForItemsSQL, itemIDs);
   }
 
@@ -529,6 +534,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     cachedNumUsers = -1;
     cachedNumItems = -1;
+    itemPrefCounts.clear();
   }
 
 
@@ -796,4 +802,16 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
   }
 
+  private class ItemPrefCountRetriever implements Retriever<Object,Integer> {
+    private final String getNumPreferenceForItemSQL;
+
+    private ItemPrefCountRetriever(String getNumPreferenceForItemSQL) {
+      this.getNumPreferenceForItemSQL = getNumPreferenceForItemSQL;
+    }
+
+    @Override
+    public Integer get(Object key) throws TasteException {
+      return getNumThings("user preferring item", getNumPreferenceForItemSQL, key);
+    }
+  }
 }
