@@ -21,6 +21,8 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.model.DataModel;
 
 import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * <p>A {@link DataModel} backed by a MySQL database and accessed via JDBC. It may work with other
@@ -165,6 +167,21 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
           "SELECT COUNT(1) FROM " + preferenceTable + " tp1 INNER JOIN " + preferenceTable + " tp2 " +
           "ON (tp1." + userIDColumn + "=tp2." + userIDColumn + ") " +
           "WHERE tp1." + itemIDColumn + "=? and tp2." + itemIDColumn + "=?");
+  }
+
+  @Override
+  protected int getFetchSize() {
+    // Need to return this for MySQL Connector/J to make it use streaming mode
+    return Integer.MIN_VALUE;
+  }
+
+  @Override
+  protected void advanceResultSet(ResultSet resultSet, int n) throws SQLException {
+    // Can't use relative on MySQL Connector/J
+    int i = 0;
+    while (i < n && resultSet.next()) {
+      i++;
+    }
   }
 
 }

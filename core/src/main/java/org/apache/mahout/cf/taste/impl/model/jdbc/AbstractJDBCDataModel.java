@@ -254,6 +254,10 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     return DEFAULT_FETCH_SIZE;
   }
 
+  protected void advanceResultSet(ResultSet resultSet, int n) throws SQLException {
+    resultSet.relative(n);
+  }
+
   @Override
   public Iterable<? extends User> getUsers() throws TasteException {
     log.debug("Retrieving all users...");
@@ -276,6 +280,8 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
     try {
       conn = dataSource.getConnection();
+      conn.setReadOnly(true);
+      conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
       stmt = conn.prepareStatement(getUserSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
@@ -330,6 +336,8 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
     try {
       conn = dataSource.getConnection();
+      conn.setReadOnly(true);
+      conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
       stmt = conn.prepareStatement(getItemSQL);
       stmt.setObject(1, id);
 
@@ -367,6 +375,8 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     ResultSet rs = null;
     try {
       conn = dataSource.getConnection();
+      conn.setReadOnly(true);
+      conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
       stmt = conn.prepareStatement(getPrefsForItemSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
@@ -428,6 +438,8 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     ResultSet rs = null;
     try {
       conn = dataSource.getConnection();
+      conn.setReadOnly(true);
+      conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
       stmt = conn.prepareStatement(sql);
       if (args != null) {
         for (int i = 1; i <= args.length; i++) {
@@ -465,7 +477,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
     try {
       conn = dataSource.getConnection();
-
+      conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
       stmt = conn.prepareStatement(setPreferenceSQL);
       stmt.setObject(1, userID);
       stmt.setObject(2, itemID);
@@ -497,7 +509,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
     try {
       conn = dataSource.getConnection();
-
+      conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
       stmt = conn.prepareStatement(removePreferenceSQL);
       stmt.setObject(1, userID);
       stmt.setObject(2, itemID);
@@ -579,7 +591,8 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     private ResultSetUserIterator(DataSource dataSource, String getUsersSQL) throws TasteException {
       try {
         connection = dataSource.getConnection();
-        // These settings should enable the ResultSet to be iterated in both directions
+        connection.setReadOnly(true);
+        connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         statement = connection.prepareStatement(getUsersSQL,
                                                 ResultSet.TYPE_FORWARD_ONLY,
                                                 ResultSet.CONCUR_READ_ONLY);
@@ -701,6 +714,8 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     private ResultSetItemIterator(DataSource dataSource, String getItemsSQL) throws TasteException {
       try {
         connection = dataSource.getConnection();
+        connection.setReadOnly(true);
+        connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         statement = connection.prepareStatement(getItemsSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         statement.setFetchDirection(ResultSet.FETCH_FORWARD);
         statement.setFetchSize(getFetchSize());
@@ -737,7 +752,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     @Override
     public Item next() {
 
-      if (closed) {
+      if (!hasNext()) {
         throw new NoSuchElementException();
       }
 
@@ -769,11 +784,13 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
     @Override
     public void skip(int n) {
-      try {
-        resultSet.relative(n);
-      } catch (SQLException sqle) {
-        log.warn("Exception while iterating over items", sqle);
-        close();
+      if (n >= 1) {
+        try {
+          advanceResultSet(resultSet, n);
+        } catch (SQLException sqle) {
+          log.warn("Exception while iterating over items", sqle);
+          close();
+        }
       }
     }
 
