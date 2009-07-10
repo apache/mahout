@@ -121,4 +121,12 @@ public final class MySQLJDBCDiffStorage extends AbstractJDBCDiffStorage {
         minDiffCount);
   }
 
+  /**
+   * @see MySQLJDBCDataModel#getFetchSize() 
+   */
+  @Override
+  protected int getFetchSize() {
+    return Integer.MIN_VALUE;
+  }
+
 }

@@ -44,6 +44,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -432,7 +433,9 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     ResultSet rs = null;
     try {
       conn = dataSource.getConnection();
-      stmt = conn.prepareStatement(sql);
+      stmt = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
+      stmt.setFetchSize(getFetchSize());
       if (args != null) {
         for (int i = 1; i <= args.length; i++) {
           stmt.setObject(i, args[i - 1]);
@@ -574,20 +577,18 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
   private final class ResultSetUserIterator implements SkippingIterator<User> {
 
     private final Connection connection;
-    private final PreparedStatement statement;
+    private final Statement statement;
     private final ResultSet resultSet;
     private boolean closed;
 
     private ResultSetUserIterator(DataSource dataSource, String getUsersSQL) throws TasteException {
       try {
         connection = dataSource.getConnection();
-        statement = connection.prepareStatement(getUsersSQL,
-            ResultSet.TYPE_FORWARD_ONLY,
-            ResultSet.CONCUR_READ_ONLY);
+        statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         statement.setFetchDirection(ResultSet.FETCH_FORWARD);
         statement.setFetchSize(getFetchSize());
         log.debug("Executing SQL query: {}", getUsersSQL);
-        resultSet = statement.executeQuery();
+        resultSet = statement.executeQuery(getUsersSQL);
         boolean anyResults = resultSet.next();
         if (!anyResults) {
           close();
@@ -694,18 +695,18 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
   private final class ResultSetItemIterator implements SkippingIterator<Item> {
 
     private final Connection connection;
-    private final PreparedStatement statement;
+    private final Statement statement;
     private final ResultSet resultSet;
     private boolean closed;
 
     private ResultSetItemIterator(DataSource dataSource, String getItemsSQL) throws TasteException {
       try {
         connection = dataSource.getConnection();
-        statement = connection.prepareStatement(getItemsSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         statement.setFetchDirection(ResultSet.FETCH_FORWARD);
         statement.setFetchSize(getFetchSize());
         log.debug("Executing SQL query: {}", getItemsSQL);
-        resultSet = statement.executeQuery();
+        resultSet = statement.executeQuery(getItemsSQL);
         boolean anyResults = resultSet.next();
         if (!anyResults) {
           close();

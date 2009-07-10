@@ -35,6 +35,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -49,6 +50,8 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
 
   private static final Logger log = LoggerFactory.getLogger(AbstractJDBCDiffStorage.class);
 
+  static final int DEFAULT_FETCH_SIZE = 1000; // A max, "big" number of rows to buffer at once
+  
   public static final String DEFAULT_DIFF_TABLE = "taste_slopeone_diffs";
   public static final String DEFAULT_ITEM_A_COLUMN = "item_id_a";
   public static final String DEFAULT_ITEM_B_COLUMN = "item_id_b";
@@ -114,6 +117,10 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
     }
   }
 
+  protected int getFetchSize() {
+    return DEFAULT_FETCH_SIZE;
+  }
+
   @Override
   public RunningAverage getDiff(Object itemID1, Object itemID2) throws TasteException {
     Connection conn = null;
@@ -121,7 +128,9 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
     ResultSet rs = null;
     try {
       conn = dataSource.getConnection();
-      stmt = conn.prepareStatement(getDiffSQL);
+      stmt = conn.prepareStatement(getDiffSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
+      stmt.setFetchSize(getFetchSize());
       stmt.setObject(1, itemID1);
       stmt.setObject(2, itemID2);
       stmt.setObject(3, itemID2);
@@ -147,7 +156,9 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
     ResultSet rs = null;
     try {
       conn = dataSource.getConnection();
-      stmt = conn.prepareStatement(getDiffsSQL);
+      stmt = conn.prepareStatement(getDiffsSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
+      stmt.setFetchSize(getFetchSize());
       stmt.setObject(1, itemID);
       stmt.setObject(2, userID);
       log.debug("Executing SQL query: {}", getDiffsSQL);
@@ -181,7 +192,9 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
     ResultSet rs = null;
     try {
       conn = dataSource.getConnection();
-      stmt = conn.prepareStatement(getAverageItemPrefSQL);
+      stmt = conn.prepareStatement(getAverageItemPrefSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
+      stmt.setFetchSize(getFetchSize());
       stmt.setObject(1, itemID);
       log.debug("Executing SQL query: {}", getAverageItemPrefSQL);
       rs = stmt.executeQuery();
@@ -241,7 +254,9 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
     ResultSet rs = null;
     try {
       conn = dataSource.getConnection();
-      stmt = conn.prepareStatement(getRecommendableItemsSQL);
+      stmt = conn.prepareStatement(getRecommendableItemsSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
+      stmt.setFetchSize(getFetchSize());
       stmt.setObject(1, userID);
       stmt.setObject(2, userID);
       stmt.setObject(3, userID);
@@ -290,13 +305,15 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
 
   private boolean isDiffsExist() throws TasteException {
     Connection conn = null;
-    PreparedStatement stmt = null;
+    Statement stmt = null;
     ResultSet rs = null;
     try {
       conn = dataSource.getConnection();
-      stmt = conn.prepareStatement(diffsExistSQL);
+      stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
+      stmt.setFetchSize(getFetchSize());
       log.debug("Executing SQL query: {}", diffsExistSQL);
-      rs = stmt.executeQuery();
+      rs = stmt.executeQuery(diffsExistSQL);
       rs.next();
       return rs.getInt(1) > 0;
     } catch (SQLException sqle) {

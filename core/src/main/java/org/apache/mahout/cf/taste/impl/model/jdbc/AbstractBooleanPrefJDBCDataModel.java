@@ -34,6 +34,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -213,20 +214,18 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
   private final class ResultSetUserIterator implements SkippingIterator<User> {
 
     private final Connection connection;
-    private final PreparedStatement statement;
+    private final Statement statement;
     private final ResultSet resultSet;
     private boolean closed;
 
     private ResultSetUserIterator(DataSource dataSource, String getUsersSQL) throws TasteException {
       try {
         connection = dataSource.getConnection();
-        statement = connection.prepareStatement(getUsersSQL,
-            ResultSet.TYPE_FORWARD_ONLY,
-            ResultSet.CONCUR_READ_ONLY);
+        statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         statement.setFetchDirection(ResultSet.FETCH_FORWARD);
         statement.setFetchSize(getFetchSize());
         log.debug("Executing SQL query: {}", getUsersSQL);
-        resultSet = statement.executeQuery();
+        resultSet = statement.executeQuery(getUsersSQL);
         boolean anyResults = resultSet.next();
         if (!anyResults) {
           close();
