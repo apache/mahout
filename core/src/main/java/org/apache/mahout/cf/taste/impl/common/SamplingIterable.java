@@ -20,8 +20,8 @@ package org.apache.mahout.cf.taste.impl.common;
 import java.util.Iterator;
 
 /**
- * Wraps an {@link Iterable} whose {@link Iterable#iterator()} returns only some subset of the elements
- * that it would, as determined by a sampling rate parameter.
+ * Wraps an {@link Iterable} whose {@link Iterable#iterator()} returns only some subset of the elements that it would,
+ * as determined by a sampling rate parameter.
  */
 public final class SamplingIterable<T> implements Iterable<T> {
 

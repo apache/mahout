@@ -21,16 +21,17 @@ import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
 
 /**
- * An implementation of the ModelDistribution interface suitable for testing the
- * DirichletCluster algorithm. Uses a Normal Distribution
+ * An implementation of the ModelDistribution interface suitable for testing the DirichletCluster algorithm. Uses a
+ * Normal Distribution
  */
 public class NormalModelDistribution implements ModelDistribution<Vector> {
 
   @Override
   public Model<Vector>[] sampleFromPrior(int howMany) {
     Model<Vector>[] result = new NormalModel[howMany];
-    for (int i = 0; i < howMany; i++)
+    for (int i = 0; i < howMany; i++) {
       result[i] = new NormalModel(new DenseVector(2), 1);
+    }
     return result;
   }
 

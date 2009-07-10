@@ -16,18 +16,16 @@
  */
 package org.apache.mahout.cf.taste.impl.similarity;
 
-import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * <p>Tests {@link GenericItemSimilarity}.</p>
- */
+/** <p>Tests {@link GenericItemSimilarity}.</p> */
 public final class GenericItemSimilarityTest extends SimilarityTestCase {
 
   public void testSimple() {
@@ -36,7 +34,7 @@ public final class GenericItemSimilarityTest extends SimilarityTestCase {
     Item item3 = new GenericItem<String>("3");
     Item item4 = new GenericItem<String>("4");
     List<GenericItemSimilarity.ItemItemSimilarity> similarities =
-            new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(4);
+        new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(4);
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item1, item2, 0.5));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item2, item1, 0.6));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item1, item1, 0.5));
@@ -57,9 +55,9 @@ public final class GenericItemSimilarityTest extends SimilarityTestCase {
     ItemSimilarity otherSimilarity = new PearsonCorrelationSimilarity(dataModel);
     ItemSimilarity itemSimilarity = new GenericItemSimilarity(otherSimilarity, dataModel);
     assertCorrelationEquals(1.0,
-                            itemSimilarity.itemSimilarity(dataModel.getItem("0"), dataModel.getItem("0")));
+        itemSimilarity.itemSimilarity(dataModel.getItem("0"), dataModel.getItem("0")));
     assertCorrelationEquals(0.960768922830523,
-                            itemSimilarity.itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1")));
+        itemSimilarity.itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1")));
   }
 
 }

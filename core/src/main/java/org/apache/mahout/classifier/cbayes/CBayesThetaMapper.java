@@ -36,25 +36,20 @@ import java.util.Map;
 public class CBayesThetaMapper extends MapReduceBase implements
     Mapper<Text, DoubleWritable, Text, DoubleWritable> {
 
-  private static final Logger log = LoggerFactory.getLogger(CBayesThetaMapper.class);   
+  private static final Logger log = LoggerFactory.getLogger(CBayesThetaMapper.class);
 
-  private Map<String,Double> labelWeightSum = null;
+  private Map<String, Double> labelWeightSum = null;
   private double sigma_jSigma_k = 0.0;
   private double vocabCount = 0.0;
 
   /**
    * We need to calculate the idf of each feature in each label
-   * 
-   * @param key The label,feature pair (can either be the freq Count or the term
-   *        Document count
-   * @param value
-   * @param output
-   * @param reporter
-   * @throws IOException
+   *
+   * @param key The label,feature pair (can either be the freq Count or the term Document count
    */
   @Override
   public void map(Text key, DoubleWritable value,
-      OutputCollector<Text, DoubleWritable> output, Reporter reporter)
+                  OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {
 
     String labelFeaturePair = key.toString();
@@ -64,12 +59,12 @@ public class CBayesThetaMapper extends MapReduceBase implements
       double alpha_i = 1.0;
       for (Map.Entry<String, Double> stringDoubleEntry : labelWeightSum.entrySet()) {
         double inverseDenominator = 1.0 / (sigma_jSigma_k - stringDoubleEntry.getValue() + vocabCount);
-        DoubleWritable weight = new DoubleWritable((value.get() + alpha_i)*inverseDenominator);
+        DoubleWritable weight = new DoubleWritable((value.get() + alpha_i) * inverseDenominator);
         output.collect(new Text((stringDoubleEntry.getKey() + ',' + feature).trim()), weight); //output Sigma_j
       }
     } else {
       String label = labelFeaturePair.split(",")[0];
-      double inverseDenominator = 1.0 /(sigma_jSigma_k - labelWeightSum.get(label) + vocabCount);
+      double inverseDenominator = 1.0 / (sigma_jSigma_k - labelWeightSum.get(label) + vocabCount);
       DoubleWritable weight = new DoubleWritable(-value.get() * inverseDenominator);
       output.collect(key, weight);//output -D_ij       
     }
@@ -79,9 +74,9 @@ public class CBayesThetaMapper extends MapReduceBase implements
   public void configure(JobConf job) {
     try {
       if (labelWeightSum == null) {
-        labelWeightSum = new HashMap<String,Double>();
+        labelWeightSum = new HashMap<String, Double>();
 
-        DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(
+        DefaultStringifier<Map<String, Double>> mapStringifier = new DefaultStringifier<Map<String, Double>>(
             job, GenericsUtil.getClass(labelWeightSum));
 
         String labelWeightSumString = mapStringifier.toString(labelWeightSum);
@@ -100,7 +95,7 @@ public class CBayesThetaMapper extends MapReduceBase implements
         vocabCountString = job.get("cnaivebayes.vocabCount",
             vocabCountString);
         vocabCount = stringifier.fromString(vocabCountString);
-       
+
       }
     } catch (IOException ex) {
       log.info(ex.toString(), ex);

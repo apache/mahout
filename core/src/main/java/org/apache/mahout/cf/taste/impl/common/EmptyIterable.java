@@ -19,10 +19,7 @@ package org.apache.mahout.cf.taste.impl.common;
 
 import java.util.Iterator;
 
-/**
- * <p>An {@link Iterable} over no elements: always produces an {@link Iterator} which iterates
- * over nothing.</p>
- */
+/** <p>An {@link Iterable} over no elements: always produces an {@link Iterator} which iterates over nothing.</p> */
 public final class EmptyIterable<T> implements Iterable<T> {
 
   private final Iterator<T> iterator;

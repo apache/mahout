@@ -23,18 +23,14 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/**
- * Implements vector that only stores non-zero doubles
- */
+/** Implements vector that only stores non-zero doubles */
 public class SparseVector extends AbstractVector {
 
   private OrderedIntDoubleMapping values;
 
   private int cardinality;
 
-  /**
-   * For serialization purposes only.
-   */
+  /** For serialization purposes only. */
   public SparseVector() {
   }
 
@@ -93,19 +89,22 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public Vector viewPart(int offset, int length) {
-    if (length > cardinality)
+    if (length > cardinality) {
       throw new CardinalityException();
-    if (offset < 0 || offset + length > cardinality)
+    }
+    if (offset < 0 || offset + length > cardinality) {
       throw new IndexException();
+    }
     return new VectorView(this, offset, length);
   }
 
   @Override
   public boolean haveSharedCells(Vector other) {
-    if (other instanceof SparseVector)
+    if (other instanceof SparseVector) {
       return other == this;
-    else
+    } else {
       return other.haveSharedCells(this);
+    }
   }
 
   @Override
@@ -127,8 +126,8 @@ public class SparseVector extends AbstractVector {
   }
 
   /**
-   * NOTE: this implementation reuses the Vector.Element instance for each call of next(). If you
-   * need to preserve the instance, you need to make a copy of it
+   * NOTE: this implementation reuses the Vector.Element instance for each call of next(). If you need to preserve the
+   * instance, you need to make a copy of it
    *
    * @return an {@link org.apache.mahout.matrix.SparseVector.NonZeroIterator} over the Elements.
    * @see #getElement(int)
@@ -144,31 +143,31 @@ public class SparseVector extends AbstractVector {
   }
 
   /**
-   * Indicate whether the two objects are the same or not. Two
-   * {@link org.apache.mahout.matrix.Vector}s can be equal even if the
-   * underlying implementation is not equal.
+   * Indicate whether the two objects are the same or not. Two {@link org.apache.mahout.matrix.Vector}s can be equal
+   * even if the underlying implementation is not equal.
    *
    * @param o The object to compare
-   * @return true if the objects have the same cell values and same name, false
-   *         otherwise.
-   *         <p/>
-   *         * @see AbstractVector#strictEquivalence(Vector, Vector)
+   * @return true if the objects have the same cell values and same name, false otherwise. <p/> * @see
+   *         AbstractVector#strictEquivalence(Vector, Vector)
    * @see AbstractVector#equivalent(Vector, Vector)
    */
   @Override
   public boolean equals(Object o) {
-    if (this == o)
+    if (this == o) {
       return true;
-    if (!(o instanceof Vector))
+    }
+    if (!(o instanceof Vector)) {
       return false;
+    }
 
     Vector that = (Vector) o;
-    if (this.size() != that.size())
+    if (this.size() != that.size()) {
       return false;
+    }
 
     if (that instanceof SparseVector) {
       return (values == null ? ((SparseVector) that).values == null : values
-              .equals(((SparseVector) that).values));
+          .equals(((SparseVector) that).values));
     } else {
       return equivalent(this, that);
     }

@@ -18,23 +18,22 @@
 package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
-import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
-import org.apache.mahout.cf.taste.similarity.UserSimilarity;
-import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.FastSet;
+import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.model.BooleanPrefUser;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 import java.util.Collection;
 
 /**
- * <p>Variant of {@link TanimotoCoefficientSimilarity} which is appropriate
- * for use with the "boolean" classes like {@link BooleanPrefUser}.</p>
+ * <p>Variant of {@link TanimotoCoefficientSimilarity} which is appropriate for use with the "boolean" classes like
+ * {@link BooleanPrefUser}.</p>
  *
- * <p>If you need an {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity},
- * just use {@link org.apache.mahout.cf.taste.impl.similarity.TanimotoCoefficientSimilarity},
- * even with "boolean" classes.</p>
+ * <p>If you need an {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity}, just use {@link
+ * org.apache.mahout.cf.taste.impl.similarity.TanimotoCoefficientSimilarity}, even with "boolean" classes.</p>
  */
 public final class BooleanTanimotoCoefficientSimilarity implements UserSimilarity {
 
@@ -59,8 +58,8 @@ public final class BooleanTanimotoCoefficientSimilarity implements UserSimilarit
     int prefs1Size = prefs1.size();
     int prefs2Size = prefs2.size();
     int intersectionSize = prefs1Size < prefs2Size ?
-                           prefs2.intersectionSize(prefs1) :
-                           prefs1.intersectionSize(prefs2);
+        prefs2.intersectionSize(prefs1) :
+        prefs1.intersectionSize(prefs2);
     int unionSize = prefs1Size + prefs2Size - intersectionSize;
     return (double) intersectionSize / (double) unionSize;
   }

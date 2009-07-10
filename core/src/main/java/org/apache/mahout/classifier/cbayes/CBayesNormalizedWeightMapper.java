@@ -36,23 +36,18 @@ import java.util.Map;
 public class CBayesNormalizedWeightMapper extends MapReduceBase implements
     Mapper<Text, DoubleWritable, Text, DoubleWritable> {
 
-  private static final Logger log = LoggerFactory.getLogger(CBayesNormalizedWeightMapper.class);    
+  private static final Logger log = LoggerFactory.getLogger(CBayesNormalizedWeightMapper.class);
 
-  private Map<String,Double> thetaNormalizer = null;
+  private Map<String, Double> thetaNormalizer = null;
 
   /**
    * We need to calculate the idf of each feature in each label
-   * 
-   * @param key The label,feature pair (can either be the freq Count or the term
-   *        Document count
-   * @param value
-   * @param output
-   * @param reporter
-   * @throws IOException
+   *
+   * @param key The label,feature pair (can either be the freq Count or the term Document count
    */
   @Override
   public void map(Text key, DoubleWritable value,
-      OutputCollector<Text, DoubleWritable> output, Reporter reporter)
+                  OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {
 
     String labelFeaturePair = key.toString();
@@ -66,9 +61,9 @@ public class CBayesNormalizedWeightMapper extends MapReduceBase implements
   public void configure(JobConf job) {
     try {
       if (thetaNormalizer == null) {
-        thetaNormalizer = new HashMap<String,Double>();
+        thetaNormalizer = new HashMap<String, Double>();
 
-        DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(
+        DefaultStringifier<Map<String, Double>> mapStringifier = new DefaultStringifier<Map<String, Double>>(
             job, GenericsUtil.getClass(thetaNormalizer));
 
         String thetaNormalizationsString = mapStringifier.toString(thetaNormalizer);

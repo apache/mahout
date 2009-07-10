@@ -18,7 +18,6 @@ package org.apache.mahout.clustering.dirichlet;
  */
 
 import junit.framework.TestCase;
-
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
 
@@ -31,21 +30,24 @@ public class TestDistributions extends TestCase {
   }
 
   public void testRbeta() {
-    for (double i = 0.01; i < 20; i += 0.25)
+    for (double i = 0.01; i < 20; i += 0.25) {
       System.out.println("rBeta(6,1," + i + ")="
           + UncommonDistributions.rBeta(6, 1, i).asFormatString());
+    }
   }
 
   public void testRchisq() {
-    for (int i = 0; i < 50; i++)
+    for (int i = 0; i < 50; i++) {
       System.out
           .println("rChisq(" + i + ")=" + UncommonDistributions.rChisq(i));
+    }
   }
 
   public void testRnorm() {
-    for (int i = 1; i < 50; i++)
+    for (int i = 1; i < 50; i++) {
       System.out.println("rNorm(6,1," + i + ")="
           + UncommonDistributions.rNorm(1, i));
+    }
   }
 
   public void testDnorm() {
@@ -53,8 +55,9 @@ public class TestDistributions extends TestCase {
       double d = (i * 0.1);
       double dnorm = UncommonDistributions.dNorm(d, 0, 1);
       byte[] bar = new byte[(int) (dnorm * 100)];
-      for (int j = 0; j < bar.length; j++)
+      for (int j = 0; j < bar.length; j++) {
         bar[j] = '*';
+      }
       String baz = new String(bar);
       System.out.println(baz);
     }
@@ -65,8 +68,9 @@ public class TestDistributions extends TestCase {
       double d = (i * 0.1);
       double dnorm = UncommonDistributions.dNorm(d, 0, 2);
       byte[] bar = new byte[(int) (dnorm * 100)];
-      for (int j = 0; j < bar.length; j++)
+      for (int j = 0; j < bar.length; j++) {
         bar[j] = '*';
+      }
       String baz = new String(bar);
       System.out.println(baz);
     }
@@ -77,15 +81,16 @@ public class TestDistributions extends TestCase {
       double d = (i * 0.1);
       double dnorm = UncommonDistributions.dNorm(d, 0, 0.2);
       byte[] bar = new byte[(int) (dnorm * 100)];
-      for (int j = 0; j < bar.length; j++)
+      for (int j = 0; j < bar.length; j++) {
         bar[j] = '*';
+      }
       String baz = new String(bar);
       System.out.println(baz);
     }
   }
 
   public void testRmultinom1() {
-    double[] b = { 0.4, 0.6 };
+    double[] b = {0.4, 0.6};
     Vector v = new DenseVector(b);
     Vector t = v.like();
     for (int i = 1; i <= 100; i++) {
@@ -98,7 +103,7 @@ public class TestDistributions extends TestCase {
   }
 
   public void testRmultinom2() {
-    double[] b = { 0.1, 0.2, 0.7 };
+    double[] b = {0.1, 0.2, 0.7};
     Vector v = new DenseVector(b);
     Vector t = v.like();
     for (int i = 1; i <= 100; i++) {
@@ -111,10 +116,11 @@ public class TestDistributions extends TestCase {
   }
 
   public void testRmultinom() {
-    double[] b = { 0.1, 0.2, 0.8 };
+    double[] b = {0.1, 0.2, 0.8};
     Vector v = new DenseVector(b);
-    for (int i = 1; i <= 100; i++)
+    for (int i = 1; i <= 100; i++) {
       System.out.println("rMultinom(" + 100 + ", [0.1, 0.2, 0.8])="
           + UncommonDistributions.rMultinom(100, v).asFormatString());
+    }
   }
 }

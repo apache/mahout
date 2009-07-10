@@ -22,9 +22,8 @@ import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
 
 /**
- * An implementation of the ModelDistribution interface suitable for testing the
- * DirichletCluster algorithm. Uses a Normal Distribution to sample the prior
- * model values.
+ * An implementation of the ModelDistribution interface suitable for testing the DirichletCluster algorithm. Uses a
+ * Normal Distribution to sample the prior model values.
  */
 public class SampledNormalDistribution extends NormalModelDistribution {
 
@@ -32,8 +31,8 @@ public class SampledNormalDistribution extends NormalModelDistribution {
   public Model<Vector>[] sampleFromPrior(int howMany) {
     Model<Vector>[] result = new SampledNormalModel[howMany];
     for (int i = 0; i < howMany; i++) {
-      double[] m = { UncommonDistributions.rNorm(0, 1),
-          UncommonDistributions.rNorm(0, 1) };
+      double[] m = {UncommonDistributions.rNorm(0, 1),
+          UncommonDistributions.rNorm(0, 1)};
       DenseVector mean = new DenseVector(m);
       result[i] = new SampledNormalModel(mean, 1);
     }

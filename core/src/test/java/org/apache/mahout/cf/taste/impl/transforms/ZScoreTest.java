@@ -20,9 +20,7 @@ package org.apache.mahout.cf.taste.impl.transforms;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
 
-/**
- * <p>Tests {@link ZScore}.</p>
- */
+/** <p>Tests {@link ZScore}.</p> */
 public final class ZScoreTest extends TransformTestCase {
 
   public void testOnePref() throws Exception {

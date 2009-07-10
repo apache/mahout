@@ -142,7 +142,7 @@ final class OrderedIntDoubleMapping implements Serializable, Cloneable {
 
   @Override
   public String toString() {
-    StringBuilder result = new StringBuilder(10* numMappings);
+    StringBuilder result = new StringBuilder(10 * numMappings);
     for (int i = 0; i < numMappings; i++) {
       result.append('(');
       result.append(indices[i]);

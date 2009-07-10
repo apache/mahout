@@ -24,9 +24,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
-/**
- * <p>Tests common classes.</p>
- */
+/** <p>Tests common classes.</p> */
 public final class CommonTest extends TasteTestCase {
 
   public void testException() {

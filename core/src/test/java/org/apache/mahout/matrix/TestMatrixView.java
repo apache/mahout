@@ -17,15 +17,14 @@
 
 package org.apache.mahout.matrix;
 
+import junit.framework.TestCase;
+import org.apache.hadoop.io.DataOutputBuffer;
+
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.hadoop.io.DataOutputBuffer;
-
-import junit.framework.TestCase;
 
 public class TestMatrixView extends TestCase {
 
@@ -33,8 +32,8 @@ public class TestMatrixView extends TestCase {
 
   private static final int COL = AbstractMatrix.COL;
 
-  private final double[][] values = { { 0.0, 1.1, 2.2 }, { 1.1, 2.2, 3.3 },
-      { 3.3, 4.4, 5.5 }, { 5.5, 6.6, 7.7 }, { 7.7, 8.8, 9.9 } };
+  private final double[][] values = {{0.0, 1.1, 2.2}, {1.1, 2.2, 3.3},
+      {3.3, 4.4, 5.5}, {5.5, 6.6, 7.7}, {7.7, 8.8, 9.9}};
 
   private Matrix test;
 
@@ -45,8 +44,8 @@ public class TestMatrixView extends TestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    int[] offset = { 1, 1 };
-    int[] card = { 3, 2 };
+    int[] offset = {1, 1};
+    int[] card = {3, 2};
     test = new MatrixView(new DenseMatrix(values), offset, card);
   }
 
@@ -68,18 +67,22 @@ public class TestMatrixView extends TestCase {
     int[] c = test.size();
     Matrix copy = test.clone();
     assertTrue("wrong class", copy instanceof MatrixView);
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
             test.getQuick(row, col), copy.getQuick(row, col));
+      }
+    }
   }
 
   public void testGetQuick() {
     int[] c = test.size();
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
             values[row + 1][col + 1], test.getQuick(row, col));
+      }
+    }
   }
 
   public void testHaveSharedCells() {
@@ -103,12 +106,13 @@ public class TestMatrixView extends TestCase {
 
   public void testSetQuick() {
     int[] c = test.size();
-    for (int row = 0; row < c[ROW]; row++)
+    for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         test.setQuick(row, col, 1.23);
         assertEquals("value[" + row + "][" + col + ']', 1.23, test.getQuick(
             row, col));
       }
+    }
   }
 
   public void testSize() {
@@ -118,19 +122,21 @@ public class TestMatrixView extends TestCase {
   }
 
   public void testViewPart() throws Exception {
-    int[] offset = { 1, 1 };
-    int[] size = { 2, 1 };
+    int[] offset = {1, 1};
+    int[] size = {2, 1};
     Matrix view = test.viewPart(offset, size);
     int[] c = view.size();
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
             values[row + 2][col + 2], view.getQuick(row, col));
+      }
+    }
   }
 
   public void testViewPartCardinality() {
-    int[] offset = { 1, 1 };
-    int[] size = { 3, 3 };
+    int[] offset = {1, 1};
+    int[] size = {3, 3};
     try {
       test.viewPart(offset, size);
       fail("exception expected");
@@ -142,8 +148,8 @@ public class TestMatrixView extends TestCase {
   }
 
   public void testViewPartIndexOver() {
-    int[] offset = { 1, 1 };
-    int[] size = { 2, 2 };
+    int[] offset = {1, 1};
+    int[] size = {2, 2};
     try {
       test.viewPart(offset, size);
       fail("exception expected");
@@ -155,8 +161,8 @@ public class TestMatrixView extends TestCase {
   }
 
   public void testViewPartIndexUnder() {
-    int[] offset = { -1, -1 };
-    int[] size = { 2, 2 };
+    int[] offset = {-1, -1};
+    int[] size = {2, 2};
     try {
       test.viewPart(offset, size);
       fail("exception expected");
@@ -170,19 +176,23 @@ public class TestMatrixView extends TestCase {
   public void testAssignDouble() {
     int[] c = test.size();
     test.assign(4.53);
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']', 4.53, test.getQuick(
             row, col));
+      }
+    }
   }
 
   public void testAssignDoubleArrayArray() throws Exception {
     int[] c = test.size();
     test.assign(new double[3][2]);
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']', 0.0, test.getQuick(row,
             col));
+      }
+    }
   }
 
   public void testAssignDoubleArrayArrayCardinality() {
@@ -198,10 +208,12 @@ public class TestMatrixView extends TestCase {
   public void testAssignMatrixBinaryFunction() throws Exception {
     int[] c = test.size();
     test.assign(test, new PlusFunction());
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
             2 * values[row + 1][col + 1], test.getQuick(row, col));
+      }
+    }
   }
 
   public void testAssignMatrixBinaryFunctionCardinality() {
@@ -217,10 +229,12 @@ public class TestMatrixView extends TestCase {
     int[] c = test.size();
     Matrix value = test.like();
     value.assign(test);
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
             test.getQuick(row, col), value.getQuick(row, col));
+      }
+    }
   }
 
   public void testAssignMatrixCardinality() {
@@ -235,35 +249,43 @@ public class TestMatrixView extends TestCase {
   public void testAssignUnaryFunction() {
     int[] c = test.size();
     test.assign(new NegateFunction());
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
             -values[row + 1][col + 1], test.getQuick(row, col));
+      }
+    }
   }
 
   public void testDivide() {
     int[] c = test.size();
     Matrix value = test.divide(4.53);
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
             values[row + 1][col + 1] / 4.53, value.getQuick(row, col));
+      }
+    }
   }
 
   public void testGet() throws Exception {
     int[] c = test.size();
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
             values[row + 1][col + 1], test.get(row, col));
+      }
+    }
   }
 
   public void testGetIndexUnder() {
     int[] c = test.size();
     try {
-      for (int row = -1; row < c[ROW]; row++)
-        for (int col = 0; col < c[COL]; col++)
+      for (int row = -1; row < c[ROW]; row++) {
+        for (int col = 0; col < c[COL]; col++) {
           test.get(row, col);
+        }
+      }
       fail("index exception expected");
     } catch (IndexException e) {
       assertTrue(true);
@@ -273,9 +295,11 @@ public class TestMatrixView extends TestCase {
   public void testGetIndexOver() {
     int[] c = test.size();
     try {
-      for (int row = 0; row < c[ROW] + 1; row++)
-        for (int col = 0; col < c[COL]; col++)
+      for (int row = 0; row < c[ROW] + 1; row++) {
+        for (int col = 0; col < c[COL]; col++) {
           test.get(row, col);
+        }
+      }
       fail("index exception expected");
     } catch (IndexException e) {
       assertTrue(true);
@@ -285,10 +309,12 @@ public class TestMatrixView extends TestCase {
   public void testMinus() throws Exception {
     int[] c = test.size();
     Matrix value = test.minus(test);
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']', 0.0, value.getQuick(
             row, col));
+      }
+    }
   }
 
   public void testMinusCardinality() {
@@ -303,19 +329,23 @@ public class TestMatrixView extends TestCase {
   public void testPlusDouble() {
     int[] c = test.size();
     Matrix value = test.plus(4.53);
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
             values[row + 1][col + 1] + 4.53, value.getQuick(row, col));
+      }
+    }
   }
 
   public void testPlusMatrix() throws Exception {
     int[] c = test.size();
     Matrix value = test.plus(test);
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
             values[row + 1][col + 1] * 2, value.getQuick(row, col));
+      }
+    }
   }
 
   public void testPlusMatrixCardinality() {
@@ -330,10 +360,11 @@ public class TestMatrixView extends TestCase {
   public void testSetUnder() {
     int[] c = test.size();
     try {
-      for (int row = -1; row < c[ROW]; row++)
+      for (int row = -1; row < c[ROW]; row++) {
         for (int col = 0; col < c[COL]; col++) {
           test.set(row, col, 1.23);
         }
+      }
       fail("index exception expected");
     } catch (IndexException e) {
       assertTrue(true);
@@ -343,10 +374,11 @@ public class TestMatrixView extends TestCase {
   public void testSetOver() {
     int[] c = test.size();
     try {
-      for (int row = 0; row < c[ROW] + 1; row++)
+      for (int row = 0; row < c[ROW] + 1; row++) {
         for (int col = 0; col < c[COL]; col++) {
           test.set(row, col, 1.23);
         }
+      }
       fail("index exception expected");
     } catch (IndexException e) {
       assertTrue(true);
@@ -356,10 +388,12 @@ public class TestMatrixView extends TestCase {
   public void testTimesDouble() {
     int[] c = test.size();
     Matrix value = test.times(4.53);
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
             values[row + 1][col + 1] * 4.53, value.getQuick(row, col));
+      }
+    }
   }
 
   public void testTimesMatrix() throws Exception {
@@ -388,10 +422,12 @@ public class TestMatrixView extends TestCase {
     int[] t = transpose.size();
     assertEquals("rows", c[COL], t[ROW]);
     assertEquals("cols", c[ROW], t[COL]);
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
             test.getQuick(row, col), transpose.getQuick(col, row));
+      }
+    }
   }
 
   public void testZSum() {
@@ -400,14 +436,14 @@ public class TestMatrixView extends TestCase {
   }
 
   public void testAssignRow() throws Exception {
-    double[] data = { 2.1, 3.2 };
+    double[] data = {2.1, 3.2};
     test.assignRow(1, new DenseVector(data));
     assertEquals("test[1][0]", 2.1, test.getQuick(1, 0));
     assertEquals("test[1][1]", 3.2, test.getQuick(1, 1));
   }
 
   public void testAssignRowCardinality() {
-    double[] data = { 2.1, 3.2, 4.3 };
+    double[] data = {2.1, 3.2, 4.3};
     try {
       test.assignRow(1, new DenseVector(data));
       fail("expecting cardinality exception");
@@ -417,7 +453,7 @@ public class TestMatrixView extends TestCase {
   }
 
   public void testAssignColumn() throws Exception {
-    double[] data = { 2.1, 3.2, 4.3 };
+    double[] data = {2.1, 3.2, 4.3};
     test.assignColumn(1, new DenseVector(data));
     assertEquals("test[0][1]", 2.1, test.getQuick(0, 1));
     assertEquals("test[1][1]", 3.2, test.getQuick(1, 1));
@@ -425,7 +461,7 @@ public class TestMatrixView extends TestCase {
   }
 
   public void testAssignColumnCardinality() {
-    double[] data = { 2.1, 3.2 };
+    double[] data = {2.1, 3.2};
     try {
       test.assignColumn(1, new DenseVector(data));
       fail("expecting cardinality exception");
@@ -509,7 +545,7 @@ public class TestMatrixView extends TestCase {
     assertEquals("row", rowBindings, test.getRowLabelBindings());
     assertEquals("Fee", test.get(0, 1), test.get("Fee", "Bar"));
 
-    double[] newrow = { 9, 8 };
+    double[] newrow = {9, 8};
     test.set("Fie", newrow);
     assertEquals("FeeBar", test.get(0, 1), test.get("Fee", "Bar"));
   }

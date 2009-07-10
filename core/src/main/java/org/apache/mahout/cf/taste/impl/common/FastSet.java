@@ -17,21 +17,21 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
+import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.lang.reflect.Array;
-import java.io.Serializable;
 
 /**
- * <p>This is an optimized {@link Set} implementation, based on algorithms described in Knuth's
- * "Art of Computer Programming", Vol. 3, p. 529.</p>
+ * <p>This is an optimized {@link Set} implementation, based on algorithms described in Knuth's "Art of Computer
+ * Programming", Vol. 3, p. 529.</p>
  *
- * <p>It should be faster than {@link java.util.HashSet} in some cases, but not all. It should definitely
- * be more memory efficient since that implementation is actually just a {@link java.util.HashMap} underneath
- * mapping values to a dummy object.</p>
+ * <p>It should be faster than {@link java.util.HashSet} in some cases, but not all. It should definitely be more memory
+ * efficient since that implementation is actually just a {@link java.util.HashMap} underneath mapping values to a dummy
+ * object.</p>
  *
  * <p>This class is not a bit thread-safe.</p>
  *
@@ -41,18 +41,14 @@ import java.io.Serializable;
  */
 public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
 
-  /**
-   * Dummy object used to represent a key that has been removed.
-   */
+  /** Dummy object used to represent a key that has been removed. */
   private static final Object REMOVED = new Object();
 
   private K[] keys;
   private int numEntries;
   private int numSlotsUsed;
 
-  /**
-   * Creates a new {@link FastSet} with default capacity.
-   */
+  /** Creates a new {@link FastSet} with default capacity. */
   public FastSet() {
     this(5);
   }
@@ -62,7 +58,7 @@ public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
     addAll(c);
   }
 
-  @SuppressWarnings("unchecked")  
+  @SuppressWarnings("unchecked")
   public FastSet(int size) {
     if (size < 1) {
       throw new IllegalArgumentException("size must be at least 1");
@@ -75,8 +71,8 @@ public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
   }
 
   /**
-   * This is for the benefit of inner classes. Without it the compiler would just generate a similar synthetic
-   * accessor. Might as well make it explicit.
+   * This is for the benefit of inner classes. Without it the compiler would just generate a similar synthetic accessor.
+   * Might as well make it explicit.
    */
   K[] getKeys() {
     return keys;
@@ -115,9 +111,7 @@ public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
     return key != null && keys[find(key)] != null;
   }
 
-  /**
-   * @throws NullPointerException if key is null
-   */
+  /** @throws NullPointerException if key is null */
   @Override
   public boolean add(K key) {
     if (key == null) {
@@ -266,10 +260,8 @@ public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
     }
   }
 
-  /**
-   * Convenience method to quickly compute just the size of the intersection with another {@link FastSet}.
-   */
-  @SuppressWarnings("unchecked")  
+  /** Convenience method to quickly compute just the size of the intersection with another {@link FastSet}. */
+  @SuppressWarnings("unchecked")
   public int intersectionSize(FastSet<?> other) {
     int count = 0;
     for (K key : (K[]) other.keys) {

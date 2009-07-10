@@ -25,15 +25,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.NoSuchElementException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipInputStream;
-import java.nio.charset.Charset;
 
 /**
- * Iterates over the lines of a text file. This assumes the text file's lines
- * are delimited in a manner consistent with how {@link BufferedReader}
- * defines lines.
+ * Iterates over the lines of a text file. This assumes the text file's lines are delimited in a manner consistent with
+ * how {@link BufferedReader} defines lines.
  *
  * This class will uncompress files that end in .zip or .gz accordingly, too.
  */
@@ -46,7 +45,7 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
    * Creates a {@link FileLineIterator} over a given file, assuming a UTF-8 encoding.
    *
    * @throws FileNotFoundException if the file does not exist
-   * @throws IOException if the file cannot be read
+   * @throws IOException           if the file cannot be read
    */
   public FileLineIterator(File file, boolean skipFirstLine) throws IOException {
     this(file, Charset.forName("UTF-8"), skipFirstLine);
@@ -56,7 +55,7 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
    * Creates a {@link FileLineIterator} over a given file, using the given encoding.
    *
    * @throws FileNotFoundException if the file does not exist
-   * @throws IOException if the file cannot be read
+   * @throws IOException           if the file cannot be read
    */
   public FileLineIterator(File file, Charset encoding, boolean skipFirstLine) throws IOException {
     InputStream is = getFileInputStream(file);

@@ -18,9 +18,8 @@
 package org.apache.mahout.matrix;
 
 /**
- * This interface allows the formulation of binary functions to be applied to
- * matrices inside the inner loops of their implementations.
- * 
+ * This interface allows the formulation of binary functions to be applied to matrices inside the inner loops of their
+ * implementations.
  */
 public interface BinaryFunction {
   BinaryFunction plus = new PlusFunction();
@@ -28,7 +27,7 @@ public interface BinaryFunction {
 
   /**
    * Apply the function to the arguments and return the result
-   * 
+   *
    * @param arg1 a double for the first argument
    * @param arg2 a double for the second argument
    * @return the result of applying the function

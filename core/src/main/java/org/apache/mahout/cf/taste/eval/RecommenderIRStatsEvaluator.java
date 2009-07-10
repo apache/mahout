@@ -23,23 +23,22 @@ import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 /**
- * <p>Implementations collect information retrieval-related statistics on a
- * {@link org.apache.mahout.cf.taste.recommender.Recommender}'s performance, including precision,
- * recall and f-measure.</p>
+ * <p>Implementations collect information retrieval-related statistics on a {@link
+ * org.apache.mahout.cf.taste.recommender.Recommender}'s performance, including precision, recall and f-measure.</p>
  *
  * <p>See <a href="http://en.wikipedia.org/wiki/Information_retrieval">Information retrieval</a>.
  */
 public interface RecommenderIRStatsEvaluator {
 
   /**
-   * @param recommenderBuilder object that can build a
-   * {@link org.apache.mahout.cf.taste.recommender.Recommender} to test
-   * @param dataModel dataset to test on
-   * @param rescorer if any, to use when computing recommendations
-   * @param at as in, "precision at 5". The number of recommendations to consider when evaluating
-   * precision, etc.
-   * @param relevanceThreshold {@link Item}s whose preference value is at least
-   * this value are considered "relevant" for the purposes of computations
+   * @param recommenderBuilder object that can build a {@link org.apache.mahout.cf.taste.recommender.Recommender} to
+   *                           test
+   * @param dataModel          dataset to test on
+   * @param rescorer           if any, to use when computing recommendations
+   * @param at                 as in, "precision at 5". The number of recommendations to consider when evaluating
+   *                           precision, etc.
+   * @param relevanceThreshold {@link Item}s whose preference value is at least this value are considered "relevant" for
+   *                           the purposes of computations
    * @return {@link IRStatistics} with resulting precision, recall, etc.
    * @throws TasteException if an error occurs while accessing the {@link DataModel}
    */

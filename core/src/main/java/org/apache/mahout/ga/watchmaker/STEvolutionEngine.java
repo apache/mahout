@@ -28,22 +28,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Single Threaded Evolution Engine.
- */
+/** Single Threaded Evolution Engine. */
 public class STEvolutionEngine<T> extends AbstractEvolutionEngine<T> {
 
   public STEvolutionEngine(CandidateFactory<T> candidateFactory,
-      EvolutionaryOperator<? super T> evolutionScheme,
-      STFitnessEvaluator<? super T> fitnessEvaluator,
-      SelectionStrategy<? super T> selectionStrategy, Random rng) {
+                           EvolutionaryOperator<? super T> evolutionScheme,
+                           STFitnessEvaluator<? super T> fitnessEvaluator,
+                           SelectionStrategy<? super T> selectionStrategy, Random rng) {
     super(candidateFactory, evolutionScheme, fitnessEvaluator,
         selectionStrategy, rng);
   }
 
-  /**
-   * @see org.uncommons.watchmaker.framework.AbstractEvolutionEngine#evaluatePopulation(java.util.List)
-   */
+  /** @see org.uncommons.watchmaker.framework.AbstractEvolutionEngine#evaluatePopulation(java.util.List) */
   @Override
   protected List<EvaluatedCandidate<T>> evaluatePopulation(List<T> population) {
     List<Double> evaluations = new ArrayList<Double>();
@@ -60,13 +56,12 @@ public class STEvolutionEngine<T> extends AbstractEvolutionEngine<T> {
     // Sort candidates in descending order according to fitness.
     if (getFitnessEvaluator().isNatural()) // Descending values for natural fitness.
     {
-        Collections.sort(evaluatedPopulation, Collections.reverseOrder());
-    }
-    else // Ascending values for non-natural fitness.
+      Collections.sort(evaluatedPopulation, Collections.reverseOrder());
+    } else // Ascending values for non-natural fitness.
     {
-        Collections.sort(evaluatedPopulation);
+      Collections.sort(evaluatedPopulation);
     }
-    
+
     return evaluatedPopulation;
   }
 

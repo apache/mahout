@@ -23,9 +23,9 @@ import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 
 /**
- * <p>Implementations of this interface compute an inferred preference for a {@link User} and an {@link Item}
- * that the user has not expressed any preference for. This might be an average of other preferences scores
- * from that user, for example. This technique is sometimes called "default voting".</p>
+ * <p>Implementations of this interface compute an inferred preference for a {@link User} and an {@link Item} that the
+ * user has not expressed any preference for. This might be an average of other preferences scores from that user, for
+ * example. This technique is sometimes called "default voting".</p>
  */
 public interface PreferenceInferrer extends Refreshable {
 

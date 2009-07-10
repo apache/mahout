@@ -21,9 +21,7 @@ import org.apache.hadoop.mapred.JobConf;
 
 import java.util.Collection;
 
-/**
- * A placeholder for some sort of class with more parameters.
- */
+/** A placeholder for some sort of class with more parameters. */
 public class CompositeParameter<T extends Parametered> extends AbstractParameter<T> {
 
   public CompositeParameter(Class<T> type, String prefix, String name, JobConf jobConf, T defaultValue, String description) {

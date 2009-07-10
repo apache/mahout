@@ -17,23 +17,21 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
-import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
-import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
+import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * <p>Tests {@link TreeClusteringRecommender}.</p>
- */
+/** <p>Tests {@link TreeClusteringRecommender}.</p> */
 public final class TreeClusteringRecommenderTest extends TasteTestCase {
 
   public void testNoRecommendations() throws Exception {
@@ -86,7 +84,7 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
     Recommender recommender = new TreeClusteringRecommender(dataModel, clusterSimilarity, 2);
     List<RecommendedItem> originalRecommended = recommender.recommend("test1", 2);
     List<RecommendedItem> rescoredRecommended =
-            recommender.recommend("test1", 2, new ReversingRescorer<Item>());
+        recommender.recommend("test1", 2, new ReversingRescorer<Item>());
     assertNotNull(originalRecommended);
     assertNotNull(rescoredRecommended);
     assertEquals(2, originalRecommended.size());

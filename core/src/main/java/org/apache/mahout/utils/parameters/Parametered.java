@@ -24,9 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
-/**
- * Meta information and accessors for configuring a job.
- */
+/** Meta information and accessors for configuring a job. */
 public interface Parametered extends JobConfigurable {
 
   Logger log = LoggerFactory.getLogger(Parametered.class);
@@ -34,31 +32,31 @@ public interface Parametered extends JobConfigurable {
   Collection<Parameter<?>> getParameters();
 
   /**
-   * EXPERT: consumers should never have to call this method. It would be friendly visible to
-   * {@link ParameteredGeneralizations} if java supported it.
-   * Calling this method should create a new list of parameters and is called
-   * @see ParameteredGeneralizations#configureParameters(String,Parametered,org.apache.hadoop.mapred.JobConf) invoking method
-   * @see ParameteredGeneralizations#configureParametersRecusivly(Parametered,String,org.apache.hadoop.mapred.JobConf) invoking method
-   * @param prefix ends with a dot if not empty.
+   * EXPERT: consumers should never have to call this method. It would be friendly visible to {@link
+   * ParameteredGeneralizations} if java supported it. Calling this method should create a new list of parameters and is
+   * called
+   *
+   * @param prefix  ends with a dot if not empty.
    * @param jobConf configuration used for retreiving values
+   * @see ParameteredGeneralizations#configureParameters(String,Parametered,org.apache.hadoop.mapred.JobConf) invoking
+   *      method
+   * @see ParameteredGeneralizations#configureParametersRecusivly(Parametered,String,org.apache.hadoop.mapred.JobConf)
+   *      invoking method
    */
   void createParameters(String prefix, JobConf jobConf);
 
 
-  /**
-   * "multiple inheritance"
-   */
+  /** "multiple inheritance" */
   class ParameteredGeneralizations {
     private ParameteredGeneralizations() {
     }
 
 
     /**
-     * @see #configureParameters(Parametered,org.apache.hadoop.mapred.JobConf)
-     * Uses parametered simple class name as prefix.
-     *
      * @param parametered instance to be configured
-     * @param jobConf configuration used for retreiving values
+     * @param jobConf     configuration used for retreiving values
+     * @see #configureParameters(Parametered,org.apache.hadoop.mapred.JobConf) Uses parametered simple class name as
+     *      prefix.
      */
     public static void configureParameters(Parametered parametered, JobConf jobConf) {
       configureParameters(parametered.getClass().getSimpleName() + '.', parametered, jobConf);
@@ -67,15 +65,14 @@ public interface Parametered extends JobConfigurable {
 
     /**
      * Calls {@link org.apache.mahout.utils.parameters.Parametered#createParameters(String,org.apache.hadoop.mapred.JobConf)}
-     * on parameter parmetered,
-     * and then recurse down its composite tree
-     * to invoke {@link org.apache.mahout.utils.parameters.Parametered#createParameters(String,org.apache.hadoop.mapred.JobConf)}
-     * and {@link org.apache.hadoop.mapred.JobConfigurable#configure(org.apache.hadoop.mapred.JobConf)}
-     * on each composite part.
+     * on parameter parmetered, and then recurse down its composite tree to invoke {@link
+     * org.apache.mahout.utils.parameters.Parametered#createParameters(String,org.apache.hadoop.mapred.JobConf)} and
+     * {@link org.apache.hadoop.mapred.JobConfigurable#configure(org.apache.hadoop.mapred.JobConf)} on each composite
+     * part.
      *
-     * @param prefix ends with a dot if not empty.
+     * @param prefix      ends with a dot if not empty.
      * @param parametered instance to be configured
-     * @param jobConf configuration used for retreiving values
+     * @param jobConf     configuration used for retreiving values
      */
     public static void configureParameters(String prefix, Parametered parametered, JobConf jobConf) {
       parametered.createParameters(prefix, jobConf);

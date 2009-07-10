@@ -20,9 +20,8 @@ package org.apache.mahout.cf.taste.impl.recommender.knn;
 import java.util.Arrays;
 
 /**
- * Non-negative Quadratic Optimization.
- * Based on the paper of Robert M. Bell and Yehuda Koren in ICDM '07.
- * Thanks to Dan Tillberg for the hints in the implementation.
+ * Non-negative Quadratic Optimization. Based on the paper of Robert M. Bell and Yehuda Koren in ICDM '07. Thanks to Dan
+ * Tillberg for the hints in the implementation.
  */
 public final class NonNegativeQuadraticOptimizer implements Optimizer {
 
@@ -104,6 +103,6 @@ public final class NonNegativeQuadraticOptimizer implements Optimizer {
     } while (rdot > 0.1);
 
     return x;
-	}
+  }
 
 }

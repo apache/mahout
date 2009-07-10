@@ -16,14 +16,6 @@
  */
 package org.apache.mahout.clustering.dirichlet;
 
-import java.lang.reflect.Type;
-
-import org.apache.mahout.clustering.dirichlet.models.Model;
-import org.apache.mahout.matrix.JsonVectorAdapter;
-import org.apache.mahout.matrix.Vector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -34,6 +26,13 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import org.apache.mahout.clustering.dirichlet.models.Model;
+import org.apache.mahout.matrix.JsonVectorAdapter;
+import org.apache.mahout.matrix.Vector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Type;
 
 public class JsonModelAdapter implements JsonSerializer<Model<?>>,
     JsonDeserializer<Model<?>> {
@@ -42,7 +41,7 @@ public class JsonModelAdapter implements JsonSerializer<Model<?>>,
 
   @Override
   public JsonElement serialize(Model<?> src, Type typeOfSrc,
-      JsonSerializationContext context) {
+                               JsonSerializationContext context) {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();
@@ -54,7 +53,7 @@ public class JsonModelAdapter implements JsonSerializer<Model<?>>,
 
   @Override
   public Model<?> deserialize(JsonElement json, Type typeOfT,
-      JsonDeserializationContext context) throws JsonParseException {
+                              JsonDeserializationContext context) throws JsonParseException {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();

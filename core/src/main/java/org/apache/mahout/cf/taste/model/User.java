@@ -17,45 +17,39 @@
 
 package org.apache.mahout.cf.taste.model;
 
-/**
- * <p>Implementations represent a user, who has preferences for {@link Item}s.</p>
- */
+/** <p>Implementations represent a user, who has preferences for {@link Item}s.</p> */
 public interface User extends Comparable<User> {
 
-  /**
-   * @return unique user ID
-   */
+  /** @return unique user ID */
   Object getID();
 
   /**
    * @param itemID ID of item to get the user's preference for
-   * @return user's {@link Preference} for that {@link Item}, or <code>null</code> if the user expresses
-   *         no such preference
+   * @return user's {@link Preference} for that {@link Item}, or <code>null</code> if the user expresses no such
+   *         preference
    */
   Preference getPreferenceFor(Object itemID);
 
   /**
-   * Sets a preference that this {@link User} has. Note that in general callers should expect this to
-   * be a slow operation, compared to {@link #getPreferenceFor(Object)}.
+   * Sets a preference that this {@link User} has. Note that in general callers should expect this to be a slow
+   * operation, compared to {@link #getPreferenceFor(Object)}.
    */
   void setPreference(Item item, double value);
 
-  /**
-   * Removes a preference. This method should also be considered potentially slow.
-   */
+  /** Removes a preference. This method should also be considered potentially slow. */
   void removePreference(Object itemID);
 
   /**
-   * <p>Returns a sequence of {@link Preference}s for this {@link User} which can be iterated over.
-   * Note that the sequence <em>must</em> be "in order": ordered by {@link Item}.</p>
+   * <p>Returns a sequence of {@link Preference}s for this {@link User} which can be iterated over. Note that the
+   * sequence <em>must</em> be "in order": ordered by {@link Item}.</p>
    *
    * @return a sequence of {@link Preference}s
    */
   Iterable<Preference> getPreferences();
 
   /**
-   * <p>Returns an array view of {@link Preference}s for this {@link User}.
-   * Note that the sequence <em>must</em> be "in order": ordered by {@link Item}.</p>
+   * <p>Returns an array view of {@link Preference}s for this {@link User}. Note that the sequence <em>must</em> be "in
+   * order": ordered by {@link Item}.</p>
    *
    * @return an array of {@link Preference}s
    */

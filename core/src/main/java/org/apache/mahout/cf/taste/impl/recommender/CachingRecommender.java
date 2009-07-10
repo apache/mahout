@@ -39,9 +39,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * <p>A {@link Recommender} which caches the results from another {@link Recommender} in memory.
- * Results are held by {@link SoftReference}s so that the JVM may reclaim memory from the recommendationCache
- * in low-memory situations.</p>
+ * <p>A {@link Recommender} which caches the results from another {@link Recommender} in memory. Results are held by
+ * {@link SoftReference}s so that the JVM may reclaim memory from the recommendationCache in low-memory situations.</p>
  */
 public final class CachingRecommender implements Recommender {
 
@@ -65,7 +64,7 @@ public final class CachingRecommender implements Recommender {
     this.recommendationCache =
         new Cache<Object, Recommendations>(new RecommendationRetriever(this.recommender), numUsers);
     this.estimatedPrefCache =
-            new Cache<Pair<?, ?>, Double>(new EstimatedPrefRetriever(this.recommender), numUsers);
+        new Cache<Pair<?, ?>, Double>(new EstimatedPrefRetriever(this.recommender), numUsers);
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
       @Override
       public Object call() {
@@ -101,7 +100,7 @@ public final class CachingRecommender implements Recommender {
 
   @Override
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
-          throws TasteException {
+      throws TasteException {
     if (userID == null) {
       throw new IllegalArgumentException("userID is null");
     }
@@ -128,8 +127,8 @@ public final class CachingRecommender implements Recommender {
 
     List<RecommendedItem> recommendedItems = recommendations.getItems();
     return recommendedItems.size() > howMany ?
-           recommendedItems.subList(0, howMany) :
-           recommendedItems;
+        recommendedItems.subList(0, howMany) :
+        recommendedItems;
   }
 
   @Override
@@ -169,9 +168,7 @@ public final class CachingRecommender implements Recommender {
     recommendationCache.remove(userID);
   }
 
-  /**
-   * <p>Clears all cached recommendations.</p>
-   */
+  /** <p>Clears all cached recommendations.</p> */
   public void clear() {
     log.debug("Clearing all recommendations...");
     recommendationCache.clear();

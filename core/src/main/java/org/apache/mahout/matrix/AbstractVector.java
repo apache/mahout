@@ -27,17 +27,15 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Iterator;
+import java.util.Map;
 
-/**
- * Implementations of generic capabilities like sum of elements and dot products
- */
+/** Implementations of generic capabilities like sum of elements and dot products */
 public abstract class AbstractVector implements Vector {
 
   /**
-   * User-settable mapping between String labels and Integer indices. Marked
-   * transient so that it will not be serialized with each vector instance.
+   * User-settable mapping between String labels and Integer indices. Marked transient so that it will not be serialized
+   * with each vector instance.
    */
   private transient Map<String, Integer> bindings;
 
@@ -61,7 +59,7 @@ public abstract class AbstractVector implements Vector {
 
 
   @Override
-  public abstract Vector.Element getElement(int index); 
+  public abstract Vector.Element getElement(int index);
 
 
   @Override
@@ -73,7 +71,7 @@ public abstract class AbstractVector implements Vector {
       throw new IllegalStateException(cnse); // Can't happen
     }
     if (bindings != null) {
-      clone.bindings = (Map<String,Integer>) ((HashMap<String,Integer>) bindings).clone();
+      clone.bindings = (Map<String, Integer>) ((HashMap<String, Integer>) bindings).clone();
     }
     // name is OK
     return clone;
@@ -94,8 +92,9 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public double dot(Vector x) {
-    if (size() != x.size())
+    if (size() != x.size()) {
       throw new CardinalityException();
+    }
     double result = 0;
     Iterator<Element> iter = iterateNonZero();
     while (iter.hasNext()) {
@@ -108,19 +107,21 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public double get(int index) {
-    if (index >= 0 && index < size())
+    if (index >= 0 && index < size()) {
       return getQuick(index);
-    else
+    } else {
       throw new IndexException();
+    }
   }
 
   @Override
   public Vector minus(Vector x) {
-    if (size() != x.size())
+    if (size() != x.size()) {
       throw new CardinalityException();
+    }
     Vector result = clone();
     Iterator<Vector.Element> iter = x.iterateNonZero();
-    while (iter.hasNext()){
+    while (iter.hasNext()) {
       Vector.Element e = iter.next();
       result.setQuick(e.index(), getQuick(e.index()) - e.get());
     }
@@ -156,7 +157,7 @@ public abstract class AbstractVector implements Vector {
       double val = 0.0;
       Iterator<Element> iter = this.iterateNonZero();
       while (iter.hasNext()) {
-      Element element = iter.next();
+        Element element = iter.next();
         val += Math.pow(element.get(), power);
       }
       double divFactor = Math.pow(val, 1.0 / power);
@@ -190,19 +191,21 @@ public abstract class AbstractVector implements Vector {
   @Override
   public Vector plus(double x) {
     Vector result = clone();
-    for (int i = 0; i < result.size(); i++)
+    for (int i = 0; i < result.size(); i++) {
       result.setQuick(i, getQuick(i) + x);
+    }
     return result;
   }
 
   @Override
   public Vector plus(Vector x) {
-    if (size() != x.size())
+    if (size() != x.size()) {
       throw new CardinalityException();
+    }
     //TODO: get smarter about this, if we are adding a dense to a sparse, then we should return a dense
     Vector result = clone();
     Iterator<Vector.Element> iter = x.iterateNonZero();
-    while (iter.hasNext()){
+    while (iter.hasNext()) {
       Vector.Element e = iter.next();
       result.setQuick(e.index(), getQuick(e.index()) + e.get());
     }
@@ -214,10 +217,11 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public void set(int index, double value) {
-    if (index >= 0 && index < size())
+    if (index >= 0 && index < size()) {
       setQuick(index, value);
-    else
+    } else {
       throw new IndexException();
+    }
   }
 
   @Override
@@ -235,14 +239,15 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public Vector times(Vector x) {
-    if (size() != x.size())
+    if (size() != x.size()) {
       throw new CardinalityException();
+    }
     Vector result = clone();
     Iterator<Element> iter = result.iterateNonZero();
     while (iter.hasNext()) {
       Element element = iter.next();
       int index = element.index();
-      result.setQuick(index, element.get() * x.getQuick(index));  
+      result.setQuick(index, element.get() * x.getQuick(index));
     }
 
     return result;
@@ -262,26 +267,31 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public Vector assign(double value) {
-    for (int i = 0; i < size(); i++)
+    for (int i = 0; i < size(); i++) {
       setQuick(i, value);
+    }
     return this;
   }
 
   @Override
   public Vector assign(double[] values) {
-    if (values.length != size())
+    if (values.length != size()) {
       throw new CardinalityException();
-    for (int i = 0; i < size(); i++)
+    }
+    for (int i = 0; i < size(); i++) {
       setQuick(i, values[i]);
+    }
     return this;
   }
 
   @Override
   public Vector assign(Vector other) {
-    if (other.size() != size())
+    if (other.size() != size()) {
       throw new CardinalityException();
-    for (int i = 0; i < size(); i++)
+    }
+    for (int i = 0; i < size(); i++) {
       setQuick(i, other.getQuick(i));
+    }
     return this;
   }
 
@@ -295,34 +305,37 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public Vector assign(UnaryFunction function) {
-    for (int i = 0; i < size(); i++)
+    for (int i = 0; i < size(); i++) {
       setQuick(i, function.apply(getQuick(i)));
+    }
     return this;
   }
 
   @Override
   public Vector assign(Vector other, BinaryFunction function) {
-    if (other.size() != size())
+    if (other.size() != size()) {
       throw new CardinalityException();
-    for (int i = 0; i < size(); i++)
+    }
+    for (int i = 0; i < size(); i++) {
       setQuick(i, function.apply(getQuick(i), other.getQuick(i)));
+    }
     return this;
   }
 
   @Override
   public Matrix cross(Vector other) {
     Matrix result = matrixLike(size(), other.size());
-    for (int row = 0; row < size(); row++)
+    for (int row = 0; row < size(); row++) {
       result.assignRow(row, other.times(getQuick(row)));
+    }
     return result;
   }
 
   /**
    * Decodes a point from its WritableComparable<?> representation.
    *
-   * @param writableComparable a WritableComparable<?> produced by
-   *                           asWritableComparable. Note the payload remainder: it is optional,
-   *                           but can be present.
+   * @param writableComparable a WritableComparable<?> produced by asWritableComparable. Note the payload remainder: it
+   *                           is optional, but can be present.
    * @return the n-dimensional point
    */
   public static Vector decodeVector(WritableComparable<?> writableComparable) {
@@ -332,8 +345,8 @@ public abstract class AbstractVector implements Vector {
   /**
    * Decodes a point from its string representation.
    *
-   * @param formattedString a formatted String produced by asFormatString. Note
-   *                        the payload remainder: it is optional, but can be present.
+   * @param formattedString a formatted String produced by asFormatString. Note the payload remainder: it is optional,
+   *                        but can be present.
    * @return the n-dimensional point
    */
   public static Vector decodeVector(String formattedString) {
@@ -367,22 +380,20 @@ public abstract class AbstractVector implements Vector {
   }
 
   /**
-   * Compare whether two Vector implementations have the same elements,
-   * regardless of the implementation and name. Two Vectors are equivalent if
-   * they have the same cardinality and all of their values are the same.
-   * <p/>
-   * Does not compare {@link Vector#getName()}.
+   * Compare whether two Vector implementations have the same elements, regardless of the implementation and name. Two
+   * Vectors are equivalent if they have the same cardinality and all of their values are the same. <p/> Does not
+   * compare {@link Vector#getName()}.
    *
    * @param left  The left hand Vector to compare
    * @param right The right hand Vector
-   * @return true if the two Vectors have the same cardinality and the same
-   *         values
+   * @return true if the two Vectors have the same cardinality and the same values
    * @see #strictEquivalence(Vector, Vector)
    * @see Vector#equals(Object)
    */
   public static boolean equivalent(Vector left, Vector right) {
-    if (left == right)
+    if (left == right) {
       return true;
+    }
     int leftCardinality = left.size();
     if (leftCardinality == right.size()) {
       for (int i = 0; i < leftCardinality; i++) {
@@ -398,26 +409,26 @@ public abstract class AbstractVector implements Vector {
   }
 
   /**
-   * Compare whether two Vector implementations are the same, including the
-   * underlying implementation. Two Vectors are the same if they have the same
-   * cardinality, same name and all of their values are the same.
+   * Compare whether two Vector implementations are the same, including the underlying implementation. Two Vectors are
+   * the same if they have the same cardinality, same name and all of their values are the same.
    *
    * @param left  The left hand Vector to compare
    * @param right The right hand Vector
-   * @return true if the two Vectors have the same cardinality and the same
-   *         values
+   * @return true if the two Vectors have the same cardinality and the same values
    */
   public static boolean strictEquivalence(Vector left, Vector right) {
-    if (left == right)
+    if (left == right) {
       return true;
-    if (!(left.getClass().equals(right.getClass())))
+    }
+    if (!(left.getClass().equals(right.getClass()))) {
       return false;
+    }
     String leftName = left.getName();
     String rightName = right.getName();
     if (leftName != null && rightName != null && !leftName.equals(rightName)) {
       return false;
     } else if ((leftName != null && rightName == null)
-            || (rightName != null && leftName == null)) {
+        || (rightName != null && leftName == null)) {
       return false;
     }
 
@@ -437,11 +448,13 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public double get(String label) throws IndexException, UnboundLabelException {
-    if (bindings == null)
+    if (bindings == null) {
       throw new UnboundLabelException();
+    }
     Integer index = bindings.get(label);
-    if (index == null)
+    if (index == null) {
       throw new UnboundLabelException();
+    }
     return get(index);
   }
 
@@ -452,12 +465,14 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public void set(String label, double value) throws IndexException,
-          UnboundLabelException {
-    if (bindings == null)
+      UnboundLabelException {
+    if (bindings == null) {
       throw new UnboundLabelException();
+    }
     Integer index = bindings.get(label);
-    if (index == null)
+    if (index == null) {
       throw new UnboundLabelException();
+    }
     set(index, value);
   }
 
@@ -468,8 +483,9 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public void set(String label, int index, double value) throws IndexException {
-    if (bindings == null)
+    if (bindings == null) {
       bindings = new HashMap<String, Integer>();
+    }
     bindings.put(label, index);
     set(index, value);
   }
@@ -480,13 +496,7 @@ public abstract class AbstractVector implements Vector {
   // cache most recent vector instance class
   private static Class<? extends Vector> instanceClass;
 
-  /**
-   * Read and return a vector from the input
-   *
-   * @param in
-   * @return
-   * @throws IOException
-   */
+  /** Read and return a vector from the input */
   public static Vector readVector(DataInput in) throws IOException {
     String vectorClassName = in.readUTF();
     Vector vector;
@@ -507,15 +517,9 @@ public abstract class AbstractVector implements Vector {
     return vector;
   }
 
-  /**
-   * Write the vector to the output
-   *
-   * @param out
-   * @param vector
-   * @throws IOException
-   */
+  /** Write the vector to the output */
   public static void writeVector(DataOutput out, Vector vector)
-          throws IOException {
+      throws IOException {
     String vectorClassName = vector.getClass().getName();
     out.writeUTF(vectorClassName);
     vector.write(out);

@@ -76,9 +76,7 @@ public final class WeightedRunningAverage implements RunningAverage, Serializabl
     return totalWeight;
   }
 
-  /**
-   * @return {@link #getTotalWeight()}
-   */
+  /** @return {@link #getTotalWeight()} */
   @Override
   public int getCount() {
     return (int) totalWeight;

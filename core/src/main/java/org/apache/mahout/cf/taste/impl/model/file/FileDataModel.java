@@ -20,14 +20,14 @@ package org.apache.mahout.cf.taste.impl.model.file;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
-import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
 import org.apache.mahout.cf.taste.impl.common.FastSet;
+import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
+import org.apache.mahout.cf.taste.impl.model.BooleanPrefUser;
+import org.apache.mahout.cf.taste.impl.model.BooleanPreference;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
-import org.apache.mahout.cf.taste.impl.model.BooleanPreference;
-import org.apache.mahout.cf.taste.impl.model.BooleanPrefUser;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -39,45 +39,43 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Iterator;
-import java.util.Collections;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * <p>A {@link DataModel} backed by a comma-delimited file. This class typically expects a file where each
- * line contains a user ID, followed by item ID, followed by preferences value, separated by commas. You may
- * also use tabs.</p>
+ * <p>A {@link DataModel} backed by a comma-delimited file. This class typically expects a file where each line contains
+ * a user ID, followed by item ID, followed by preferences value, separated by commas. You may also use tabs.</p>
  *
- * <p>The preference value is assumed to be parseable as a <code>double</code>. The user and item IDs
- * are ready literally as Strings and treated as such in the API. Note that this means that whitespace
- * matters in the data file; they will be treated as part of the ID values.</p>
+ * <p>The preference value is assumed to be parseable as a <code>double</code>. The user and item IDs are ready
+ * literally as Strings and treated as such in the API. Note that this means that whitespace matters in the data file;
+ * they will be treated as part of the ID values.</p>
  *
- * <p>This class will reload data from the data file when {@link #refresh(Collection)} is called, unless
- * the file has been reloaded very recently already.</p>
+ * <p>This class will reload data from the data file when {@link #refresh(Collection)} is called, unless the file has
+ * been reloaded very recently already.</p>
  *
- * <p>This class will also look for update "delta" files in the same directory, with file names that start
- * the same way (up to the first period). These files should have the same format, and provide updated data
- * that supersedes what is in the main data file. This is a mechanism that allows an application to push
- * updates to {@link FileDataModel} without re-copying the entire data file.</p>
+ * <p>This class will also look for update "delta" files in the same directory, with file names that start the same way
+ * (up to the first period). These files should have the same format, and provide updated data that supersedes what is
+ * in the main data file. This is a mechanism that allows an application to push updates to {@link FileDataModel}
+ * without re-copying the entire data file.</p>
  *
- * <p>The line may contain a blank preference value (e.g. "123,ABC,"). This is interpreted to mean "delete
- * preference", and is only useful in the context of an update delta file (see above).
- * Note that if the line is empty or begins with '#' it will be ignored as a comment.</p>
+ * <p>The line may contain a blank preference value (e.g. "123,ABC,"). This is interpreted to mean "delete preference",
+ * and is only useful in the context of an update delta file (see above). Note that if the line is empty or begins with
+ * '#' it will be ignored as a comment.</p>
  *
- * <p>Finally, for application that have no notion of a preference value (that is, the user simply expresses
- * a preference for an item, but no degree of preference), the caller can simply omit the third token in
- * each line altogether -- for example, "123,ABC".</p>
+ * <p>Finally, for application that have no notion of a preference value (that is, the user simply expresses a
+ * preference for an item, but no degree of preference), the caller can simply omit the third token in each line
+ * altogether -- for example, "123,ABC".</p>
  *
- * <p>This class is not intended for use with very large amounts of data (over, say, tens of millions of rows).
- * For that, a JDBC-backed {@link DataModel} and a database are more appropriate.</p>
+ * <p>This class is not intended for use with very large amounts of data (over, say, tens of millions of rows). For
+ * that, a JDBC-backed {@link DataModel} and a database are more appropriate.</p>
  *
  * <p>It is possible and likely useful to subclass this class and customize its behavior to accommodate
- * application-specific needs and input formats. See {@link #processLine(String, Map, Map)},
- * {@link #buildItem(String)}, {@link #buildUser(String, List)}
- * and {@link #buildPreference(User, Item, double)}.</p>
+ * application-specific needs and input formats. See {@link #processLine(String, Map, Map)}, {@link #buildItem(String)},
+ * {@link #buildUser(String, List)} and {@link #buildPreference(User, Item, double)}.</p>
  */
 public class FileDataModel implements DataModel {
 
@@ -95,8 +93,8 @@ public class FileDataModel implements DataModel {
   private final boolean transpose;
 
   /**
-   * @param dataFile file containing preferences data. If file is compressed (and name ends in .gz
-   *  or .zip accordingly) it will be decompressed as it is read)
+   * @param dataFile file containing preferences data. If file is compressed (and name ends in .gz or .zip accordingly)
+   *                 it will be decompressed as it is read)
    * @throws FileNotFoundException if dataFile does not exist
    */
   public FileDataModel(File dataFile) throws FileNotFoundException {
@@ -146,10 +144,9 @@ public class FileDataModel implements DataModel {
   }
 
   /**
-   * Finds update delta files in the same directory as the data file. This finds any file whose
-   * name starts the same way as the data file (up to first period) but isn't the data file itself.
-   * For example, if the data file is /foo/data.txt.gz, you might place update files at
-   * /foo/data.1.txt.gz, /foo/data.2.txt.gz, etc.
+   * Finds update delta files in the same directory as the data file. This finds any file whose name starts the same way
+   * as the data file (up to first period) but isn't the data file itself. For example, if the data file is
+   * /foo/data.txt.gz, you might place update files at /foo/data.1.txt.gz, /foo/data.2.txt.gz, etc.
    */
   private Iterable<File> findUpdateFiles() {
     String dataFileName = dataFile.getName();
@@ -200,21 +197,18 @@ public class FileDataModel implements DataModel {
   }
 
   /**
-   * <p>Reads one line from the input file and adds the data to a {@link Map} data structure
-   * which maps user IDs to preferences. This assumes that each line of the input file
-   * corresponds to one preference. After reading a line and determining which user and item
-   * the preference pertains to, the method should look to see if the data contains a mapping
-   * for the user ID already, and if not, add an empty {@link List} of {@link Preference}s to
-   * the data.</p>
+   * <p>Reads one line from the input file and adds the data to a {@link Map} data structure which maps user IDs to
+   * preferences. This assumes that each line of the input file corresponds to one preference. After reading a line and
+   * determining which user and item the preference pertains to, the method should look to see if the data contains a
+   * mapping for the user ID already, and if not, add an empty {@link List} of {@link Preference}s to the data.</p>
    *
-   * <p>The method should use {@link #buildItem(String)} to create an {@link Item} representing
-   * the item in question if needed, and use {@link #buildPreference(User, Item, double)} to
-   * build {@link Preference} objects as needed.</p>
+   * <p>The method should use {@link #buildItem(String)} to create an {@link Item} representing the item in question if
+   * needed, and use {@link #buildPreference(User, Item, double)} to build {@link Preference} objects as needed.</p>
    *
    * <p>Note that if the line is empty or begins with '#' it will be ignored as a comment.</p>
    *
-   * @param line line from input data file
-   * @param data all data read so far, as a mapping from user IDs to preferences
+   * @param line      line from input data file
+   * @param data      all data read so far, as a mapping from user IDs to preferences
    * @param itemCache A cache of existing items
    * @see #buildPreference(User, Item, double)
    * @see #buildItem(String)
@@ -241,7 +235,7 @@ public class FileDataModel implements DataModel {
       itemID = line.substring(delimiterOne + 1);
       preferenceValueString = null;
     }
-    if (transpose){
+    if (transpose) {
       String tmp = userID;
       userID = itemID;
       itemID = tmp;
@@ -339,10 +333,9 @@ public class FileDataModel implements DataModel {
   }
 
   /**
-   * Note that this method only updates the in-memory preference data that this {@link FileDataModel}
-   * maintains; it does not modify any data on disk. Therefore any updates from this method are only
-   * temporary, and lost when data is reloaded from a file. This method should also be considered
-   * relatively slow.
+   * Note that this method only updates the in-memory preference data that this {@link FileDataModel} maintains; it does
+   * not modify any data on disk. Therefore any updates from this method are only temporary, and lost when data is
+   * reloaded from a file. This method should also be considered relatively slow.
    */
   @Override
   public void setPreference(Object userID, Object itemID, double value) throws TasteException {
@@ -350,9 +343,7 @@ public class FileDataModel implements DataModel {
     delegate.setPreference(userID, itemID, value);
   }
 
-  /**
-   * See the warning at {@link #setPreference(Object, Object, double)}.
-   */
+  /** See the warning at {@link #setPreference(Object, Object, double)}. */
   @Override
   public void removePreference(Object userID, Object itemID) throws TasteException {
     checkLoaded();
@@ -373,15 +364,14 @@ public class FileDataModel implements DataModel {
   }
 
   /**
-   * Subclasses may override to return a different {@link User} implementation.
-   * The default implemenation always builds a new {@link GenericUser}. This may not
-   * be desirable; it may be better to return an existing {@link User} object
-   * in some applications rather than create a new object.
+   * Subclasses may override to return a different {@link User} implementation. The default implemenation always builds
+   * a new {@link GenericUser}. This may not be desirable; it may be better to return an existing {@link User} object in
+   * some applications rather than create a new object.
    *
-   * @param id user ID
+   * @param id    user ID
    * @param prefs user preferences
-   * @return {@link GenericUser} by default, or, a {@link BooleanPrefUser} if the prefs supplied
-   *  are in fact {@link BooleanPreference}s
+   * @return {@link GenericUser} by default, or, a {@link BooleanPrefUser} if the prefs supplied are in fact {@link
+   *         BooleanPreference}s
    */
   protected User buildUser(String id, List<Preference> prefs) {
     if (!prefs.isEmpty() && prefs.get(0) instanceof BooleanPreference) {
@@ -397,9 +387,8 @@ public class FileDataModel implements DataModel {
   }
 
   /**
-   * Subclasses may override to return a different {@link Item} implementation.
-   * The default implementation always builds a new {@link GenericItem}; likewise
-   * it may be better here to return an existing object encapsulating the item
+   * Subclasses may override to return a different {@link Item} implementation. The default implementation always builds
+   * a new {@link GenericItem}; likewise it may be better here to return an existing object encapsulating the item
    * instead.
    *
    * @param id item ID
@@ -410,11 +399,11 @@ public class FileDataModel implements DataModel {
   }
 
   /**
-   * Subclasses may override to return a different {@link Preference} implementation.
-   * The default implementation builds a new {@link GenericPreference}.
+   * Subclasses may override to return a different {@link Preference} implementation. The default implementation builds
+   * a new {@link GenericPreference}.
    *
-   * @param user {@link User} who expresses the preference
-   * @param item preferred {@link Item}
+   * @param user  {@link User} who expresses the preference
+   * @param item  preferred {@link Item}
    * @param value preference value
    * @return {@link GenericPreference} by default
    */
@@ -430,6 +419,7 @@ public class FileDataModel implements DataModel {
 
   private final class UserIterableOverData implements Iterable<User> {
     private final Map<String, List<Preference>> data;
+
     private UserIterableOverData(Map<String, List<Preference>> data) {
       this.data = data;
     }
@@ -442,13 +432,16 @@ public class FileDataModel implements DataModel {
 
   private final class UserIteratorOverData implements Iterator<User> {
     private final Iterator<Map.Entry<String, List<Preference>>> dataIterator;
+
     private UserIteratorOverData(Iterator<Map.Entry<String, List<Preference>>> dataIterator) {
       this.dataIterator = dataIterator;
     }
+
     @Override
     public boolean hasNext() {
       return dataIterator.hasNext();
     }
+
     @Override
     public User next() {
       Map.Entry<String, List<Preference>> datum = dataIterator.next();
@@ -457,6 +450,7 @@ public class FileDataModel implements DataModel {
       dataIterator.remove();
       return buildUser(key, value);
     }
+
     @Override
     public void remove() {
       throw new UnsupportedOperationException();

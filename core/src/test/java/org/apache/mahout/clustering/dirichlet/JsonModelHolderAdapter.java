@@ -16,11 +16,6 @@
  */
 package org.apache.mahout.clustering.dirichlet;
 
-import java.lang.reflect.Type;
-
-import org.apache.mahout.clustering.dirichlet.models.Model;
-import org.apache.mahout.matrix.Vector;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -32,17 +27,21 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
+import org.apache.mahout.clustering.dirichlet.models.Model;
+import org.apache.mahout.matrix.Vector;
+
+import java.lang.reflect.Type;
 
 @SuppressWarnings("unchecked")
-public class JsonModelHolderAdapter implements JsonSerializer<ModelHolder>,
-    JsonDeserializer<ModelHolder> {
+public class JsonModelHolderAdapter implements JsonSerializer<ModelHolder<?>>,
+    JsonDeserializer<ModelHolder<?>> {
 
   final Type typeOfModel = new TypeToken<Model<Vector>>() {
   }.getType();
 
   @Override
-  public JsonElement serialize(ModelHolder src, Type typeOfSrc,
-      JsonSerializationContext context) {
+  public JsonElement serialize(ModelHolder<?> src, Type typeOfSrc,
+                               JsonSerializationContext context) {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
     Gson gson = builder.create();
@@ -52,14 +51,14 @@ public class JsonModelHolderAdapter implements JsonSerializer<ModelHolder>,
   }
 
   @Override
-  public ModelHolder deserialize(JsonElement json, Type typeOfT,
-      JsonDeserializationContext context) throws JsonParseException {
+  public ModelHolder<?> deserialize(JsonElement json, Type typeOfT,
+                                    JsonDeserializationContext context) throws JsonParseException {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
     Gson gson = builder.create();
     JsonObject obj = json.getAsJsonObject();
     String value = obj.get("model").getAsString();
-    Model m = (Model) gson.fromJson(value, typeOfModel);
+    Model<?> m = (Model<?>) gson.fromJson(value, typeOfModel);
     return new ModelHolder(m);
   }
 

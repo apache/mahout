@@ -19,19 +19,17 @@ package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.impl.common.Cache;
 import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 
 import java.util.Collection;
 
-/**
- * Caches the results from an underlying {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity} implementation.
- */
+/** Caches the results from an underlying {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity} implementation. */
 public final class CachingItemSimilarity implements ItemSimilarity {
 
   private final ItemSimilarity similarity;

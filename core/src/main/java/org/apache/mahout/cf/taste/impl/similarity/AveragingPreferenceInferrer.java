@@ -19,7 +19,6 @@ package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.impl.common.Cache;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
@@ -28,13 +27,14 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 
 import java.util.Collection;
 
 /**
- * <p>Implementations of this interface compute an inferred preference for a {@link User} and an {@link Item}
- * that the user has not expressed any preference for. This might be an average of other preferences scores
- * from that user, for example. This technique is sometimes called "default voting".</p>
+ * <p>Implementations of this interface compute an inferred preference for a {@link User} and an {@link Item} that the
+ * user has not expressed any preference for. This might be an average of other preferences scores from that user, for
+ * example. This technique is sometimes called "default voting".</p>
  */
 public final class AveragingPreferenceInferrer implements PreferenceInferrer {
 
@@ -62,6 +62,7 @@ public final class AveragingPreferenceInferrer implements PreferenceInferrer {
 
   private static final class PrefRetriever implements Retriever<User, Double> {
     private static final Double ZERO = 0.0;
+
     @Override
     public Double get(User key) {
       RunningAverage average = new FullRunningAverage();

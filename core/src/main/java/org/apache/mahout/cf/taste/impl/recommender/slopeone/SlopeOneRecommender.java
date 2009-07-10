@@ -17,10 +17,10 @@
 
 package org.apache.mahout.cf.taste.impl.recommender.slopeone;
 
+import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Weighting;
-import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
@@ -42,8 +42,8 @@ import java.util.Set;
 
 /**
  * <p>A basic "slope one" recommender. (See an <a href="http://www.daniel-lemire.com/fr/abstracts/SDM2005.html">
- * excellent summary here</a> for example.) This {@link org.apache.mahout.cf.taste.recommender.Recommender} is especially
- * suitable when user preferences are updating frequently as it can incorporate this information without
+ * excellent summary here</a> for example.) This {@link org.apache.mahout.cf.taste.recommender.Recommender} is
+ * especially suitable when user preferences are updating frequently as it can incorporate this information without
  * expensive recomputation.</p>
  *
  * <p>This implementation can also be used as a "weighted slope one" recommender.</p>
@@ -63,23 +63,22 @@ public final class SlopeOneRecommender extends AbstractRecommender {
    */
   public SlopeOneRecommender(DataModel dataModel) throws TasteException {
     this(dataModel,
-         Weighting.WEIGHTED,
-         Weighting.WEIGHTED,
-         new MemoryDiffStorage(dataModel, Weighting.WEIGHTED, false, Long.MAX_VALUE));
+        Weighting.WEIGHTED,
+        Weighting.WEIGHTED,
+        new MemoryDiffStorage(dataModel, Weighting.WEIGHTED, false, Long.MAX_VALUE));
   }
 
   /**
    * <p>Creates a {@link SlopeOneRecommender} based on the given {@link DataModel}.</p>
    *
-   * <p>If <code>weighted</code> is set, acts as a weighted slope one recommender.
-   * This implementation also includes an experimental "standard deviation" weighting which weights
-   * item-item ratings diffs with lower standard deviation more highly, on the theory that they are more
-   * reliable.</p>
+   * <p>If <code>weighted</code> is set, acts as a weighted slope one recommender. This implementation also includes an
+   * experimental "standard deviation" weighting which weights item-item ratings diffs with lower standard deviation
+   * more highly, on the theory that they are more reliable.</p>
    *
-   * @param weighting if {@link Weighting#WEIGHTED}, acts as a weighted slope one recommender
+   * @param weighting       if {@link Weighting#WEIGHTED}, acts as a weighted slope one recommender
    * @param stdDevWeighting use optional standard deviation weighting of diffs
-   * @throws IllegalArgumentException if <code>diffStorage</code> is null, or stdDevWeighted is set
-   * when weighted is not set
+   * @throws IllegalArgumentException if <code>diffStorage</code> is null, or stdDevWeighted is set when weighted is not
+   *                                  set
    */
   public SlopeOneRecommender(DataModel dataModel,
                              Weighting weighting,
@@ -99,7 +98,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
 
   @Override
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
-          throws TasteException {
+      throws TasteException {
     if (userID == null) {
       throw new IllegalArgumentException("userID is null");
     }
@@ -205,7 +204,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
   @Override
   public String toString() {
     return "SlopeOneRecommender[weighted:" + weighted + ", stdDevWeighted:" + stdDevWeighted +
-           ", diffStorage:" + diffStorage + ']';
+        ", diffStorage:" + diffStorage + ']';
   }
 
   private final class Estimator implements TopItems.Estimator<Item> {

@@ -17,9 +17,9 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
@@ -42,10 +42,10 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * <p>A simple recommender that always estimates preference for an {@link Item} to be the average of
- * all known preference values for that {@link Item}. No information about {@link User}s is taken into
- * account. This implementation is provided for experimentation; while simple and fast, it may not
- * produce very good recommendations.</p>
+ * <p>A simple recommender that always estimates preference for an {@link Item} to be the average of all known
+ * preference values for that {@link Item}. No information about {@link User}s is taken into account. This
+ * implementation is provided for experimentation; while simple and fast, it may not produce very good
+ * recommendations.</p>
  */
 public final class ItemAverageRecommender extends AbstractRecommender {
 
@@ -72,7 +72,7 @@ public final class ItemAverageRecommender extends AbstractRecommender {
 
   @Override
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
-          throws TasteException {
+      throws TasteException {
     if (userID == null) {
       throw new IllegalArgumentException("userID is null");
     }

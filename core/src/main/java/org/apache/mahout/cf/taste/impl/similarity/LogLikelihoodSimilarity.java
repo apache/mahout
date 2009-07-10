@@ -19,20 +19,18 @@ package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
-import org.apache.mahout.cf.taste.similarity.UserSimilarity;
-import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
-import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.model.Preference;
+import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
+import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 import java.util.Collection;
 
-/**
- * See <a href="http://citeseer.ist.psu.edu/29096.html">http://citeseer.ist.psu.edu/29096.html</a>.
- */
+/** See <a href="http://citeseer.ist.psu.edu/29096.html">http://citeseer.ist.psu.edu/29096.html</a>. */
 public final class LogLikelihoodSimilarity implements UserSimilarity, ItemSimilarity {
 
   private final DataModel dataModel;
@@ -69,7 +67,7 @@ public final class LogLikelihoodSimilarity implements UserSimilarity, ItemSimila
 
     int numItems = dataModel.getNumItems();
     double logLikelihood =
-      twoLogLambda(intersectionSize, xPrefs.length - intersectionSize, yPrefs.length, numItems - yPrefs.length);
+        twoLogLambda(intersectionSize, xPrefs.length - intersectionSize, yPrefs.length, numItems - yPrefs.length);
     return 1.0 - 1.0 / (1.0 + logLikelihood);
   }
 
@@ -115,7 +113,7 @@ public final class LogLikelihoodSimilarity implements UserSimilarity, ItemSimila
     int preferring2 = dataModel.getNumUsersWithPreferenceFor(item2.getID());
     int numUsers = dataModel.getNumUsers();
     double logLikelihood =
-      twoLogLambda(preferring1and2, preferring1 - preferring1and2, preferring2, numUsers - preferring2);
+        twoLogLambda(preferring1and2, preferring1 - preferring1and2, preferring2, numUsers - preferring2);
     return 1.0 - 1.0 / (1.0 + logLikelihood);
   }
 

@@ -21,15 +21,14 @@ import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 
 /**
- * Simple interface that simply exposes a {@link #setUser(User)} method.
- * This helps unify implementations of {@link Preference} which expose this method.
+ * Simple interface that simply exposes a {@link #setUser(User)} method. This helps unify implementations of {@link
+ * Preference} which expose this method.
  */
 public interface SettableUserPreference extends Preference {
 
   /**
-   * <p>Let this be set by {@link GenericUser} to avoid a circularity problem -- 
-   * implementations want a reference to a {@link User} in the constructor, but so does
-   * {@link GenericUser}.</p>
+   * <p>Let this be set by {@link GenericUser} to avoid a circularity problem -- implementations want a reference to a
+   * {@link User} in the constructor, but so does {@link GenericUser}.</p>
    *
    * @param user user whose preference this is
    */

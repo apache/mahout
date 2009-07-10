@@ -18,20 +18,20 @@
 package org.apache.mahout.cf.taste.recommender;
 
 /**
- * <p>A {@link Rescorer} simply assigns a new "score" to a thing like an
- * {@link org.apache.mahout.cf.taste.model.Item} or {@link org.apache.mahout.cf.taste.model.User} which a {@link Recommender}
- * is considering returning as a top recommendation. It may be used to arbitrarily re-rank the results
- * according to application-specific logic before returning recommendations. For example, an application
- * may want to boost the score of items in a certain category just for one request.</p>
+ * <p>A {@link Rescorer} simply assigns a new "score" to a thing like an {@link org.apache.mahout.cf.taste.model.Item}
+ * or {@link org.apache.mahout.cf.taste.model.User} which a {@link Recommender} is considering returning as a top
+ * recommendation. It may be used to arbitrarily re-rank the results according to application-specific logic before
+ * returning recommendations. For example, an application may want to boost the score of items in a certain category
+ * just for one request.</p>
  *
- * <p>A {@link Rescorer} can also exclude a thing from consideration entirely by returning <code>true</code>
- * from {@link #isFiltered(Object)}.</p>
+ * <p>A {@link Rescorer} can also exclude a thing from consideration entirely by returning <code>true</code> from {@link
+ * #isFiltered(Object)}.</p>
  */
 public interface Rescorer<T> {
 
   /**
-   * @param thing thing ({@link org.apache.mahout.cf.taste.model.Item} or
-   * {@link org.apache.mahout.cf.taste.model.User} really) to rescore
+   * @param thing         thing ({@link org.apache.mahout.cf.taste.model.Item} or {@link org.apache.mahout.cf.taste.model.User}
+   *                      really) to rescore
    * @param originalScore original score
    * @return modified score, or {@link Double#NaN} to indicate that this should be excluded entirely
    */
@@ -39,6 +39,7 @@ public interface Rescorer<T> {
 
   /**
    * Returns <code>true</code> to exclude the given thing.
+   *
    * @param thing the thing to filter
    * @return <code>true</code> to exclude, <code>false</code> otherwise
    */

@@ -17,9 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
-/**
- * <p>Extends {@link FullRunningAverage} to add a running standard deviation computation.</p>
- */
+/** <p>Extends {@link FullRunningAverage} to add a running standard deviation computation.</p> */
 public final class FullRunningAverageAndStdDev extends FullRunningAverage implements RunningAverageAndStdDev {
 
   private double stdDev;

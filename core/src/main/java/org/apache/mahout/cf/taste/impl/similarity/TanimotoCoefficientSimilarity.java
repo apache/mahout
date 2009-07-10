@@ -19,26 +19,24 @@ package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
-import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
-import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
+import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 import java.util.Collection;
 
 /**
- * <p>An implementation of a "similarity" based on the
- * <a href="http://en.wikipedia.org/wiki/Jaccard_index#Tanimoto_coefficient_.28extended_Jaccard_coefficient.29">
- * Tanimoto coefficient</a>,
- * or extended <a href="http://en.wikipedia.org/wiki/Jaccard_index">Jaccard coefficient</a>.</p>
+ * <p>An implementation of a "similarity" based on the <a href="http://en.wikipedia.org/wiki/Jaccard_index#Tanimoto_coefficient_.28extended_Jaccard_coefficient.29">
+ * Tanimoto coefficient</a>, or extended <a href="http://en.wikipedia.org/wiki/Jaccard_index">Jaccard
+ * coefficient</a>.</p>
  *
- * <p>This is intended for "binary" data sets where a user either expresses a generic "yes" preference
- * for an item or has no preference. The actual preference values do not matter here, only their presence
- * or absence.</p>
+ * <p>This is intended for "binary" data sets where a user either expresses a generic "yes" preference for an item or
+ * has no preference. The actual preference values do not matter here, only their presence or absence.</p>
  *
  * <p>The value returned is in [0,1].</p>
  */

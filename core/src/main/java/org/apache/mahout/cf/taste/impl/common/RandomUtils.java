@@ -20,20 +20,17 @@ package org.apache.mahout.cf.taste.impl.common;
 import java.util.Random;
 
 /**
- * <p>The source of random stuff for the whole project. This lets us make all randomness in
- * the project predictable, if desired, for when we run unit tests, which should be repeatable.</p>
+ * <p>The source of random stuff for the whole project. This lets us make all randomness in the project predictable, if
+ * desired, for when we run unit tests, which should be repeatable.</p>
  *
- * <p>This class is increasingly incorrectly named as it also includes other mathematical
- * utility methods.</p>
+ * <p>This class is increasingly incorrectly named as it also includes other mathematical utility methods.</p>
  */
 public final class RandomUtils {
 
   private static final long STANDARD_SEED = 0xCAFEBABECAFEBABEL;
   private static boolean testSeed;
 
-  /**
-   * The largest prime less than 2<sup>31</sup>-1 that is the smaller of a twin prime pair.
-   */
+  /** The largest prime less than 2<sup>31</sup>-1 that is the smaller of a twin prime pair. */
   public static final int MAX_INT_SMALLER_TWIN_PRIME = 2147482949;
 
   private RandomUtils() {
@@ -47,9 +44,7 @@ public final class RandomUtils {
     return testSeed ? new Random(STANDARD_SEED) : new Random();
   }
 
-  /**
-   * @return what {@link Double#hashCode()} would return for the same value
-   */
+  /** @return what {@link Double#hashCode()} would return for the same value */
   public static int hashDouble(double value) {
     // Just copied from Double.hashCode
     long bits = Double.doubleToLongBits(value);
@@ -74,9 +69,7 @@ public final class RandomUtils {
     return next + 2;
   }
 
-  /**
-   * <p>Finds smallest prime p such that p is greater than or equal to n.</p>
-   */
+  /** <p>Finds smallest prime p such that p is greater than or equal to n.</p> */
   public static int nextPrime(int n) {
     if (n < 2) {
       return 2;
@@ -90,10 +83,7 @@ public final class RandomUtils {
     return n;
   }
 
-  /**
-   * @param n
-   * @return <code>true</code> iff n is not a prime
-   */
+  /** @return <code>true</code> iff n is not a prime */
   public static boolean isNotPrime(int n) {
     if (n < 2 || (n & 0x1) == 0) { // < 2 or even
       return true;

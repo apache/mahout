@@ -17,12 +17,10 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
-import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
+import org.apache.mahout.cf.taste.model.User;
 
-/**
- * Simply encapsulates a {@link User} and a similarity value.
- */
+/** Simply encapsulates a {@link User} and a similarity value. */
 public final class SimilarUser implements Comparable<SimilarUser> {
 
   private final User user;
@@ -60,9 +58,7 @@ public final class SimilarUser implements Comparable<SimilarUser> {
     return "SimilarUser[user:" + user + ", similarity:" + similarity + ']';
   }
 
-  /**
-   * Defines an ordering from most similar to least similar.
-   */
+  /** Defines an ordering from most similar to least similar. */
   @Override
   public int compareTo(SimilarUser other) {
     double otherSimilarity = other.similarity;

@@ -17,15 +17,6 @@
 
 package org.apache.mahout.cf.taste.impl.recommender.svd;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.Refreshable;
@@ -48,9 +39,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uncommons.maths.statistics.DataSet;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
 /**
- * <p>A {@link Recommender} which uses Single Value Decomposition to
- * find the main features of the {@link DataSet}.
+ * <p>A {@link Recommender} which uses Single Value Decomposition to find the main features of the {@link DataSet}.
  * Thanks to Simon Funk for the hints in the implementation.
  */
 public final class SVDRecommender extends AbstractRecommender {
@@ -69,19 +68,15 @@ public final class SVDRecommender extends AbstractRecommender {
   private final List<Preference> cachedPreferences;
 
   /**
-   * @param dataModel
    * @param numFeatures  the number of features
    * @param initialSteps number of initial training steps
    */
-  public SVDRecommender(DataModel dataModel, int numFeatures, int initialSteps) throws TasteException{
+  public SVDRecommender(DataModel dataModel, int numFeatures, int initialSteps) throws TasteException {
     this(dataModel, numFeatures);
     train(initialSteps);
   }
 
-  /**
-   * @param dataModel
-   * @param numFeatures the number of features
-   */
+  /** @param numFeatures the number of features */
   public SVDRecommender(DataModel dataModel, int numFeatures) throws TasteException {
     super(dataModel);
 
@@ -119,7 +114,7 @@ public final class SVDRecommender extends AbstractRecommender {
       }
     });
     refreshHelper.addDependency(dataModel);
-    
+
   }
 
   private void recachePreferences() throws TasteException {

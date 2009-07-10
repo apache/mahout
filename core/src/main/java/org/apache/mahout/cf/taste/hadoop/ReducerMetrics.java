@@ -17,9 +17,7 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
-/**
- * Custom metrics collected by {@link RecommenderMapper}.
- */
+/** Custom metrics collected by {@link RecommenderMapper}. */
 public enum ReducerMetrics {
 
   /** Number of unique users for which recommendations were produced */

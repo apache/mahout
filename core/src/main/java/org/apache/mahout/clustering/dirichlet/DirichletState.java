@@ -17,13 +17,13 @@ package org.apache.mahout.clustering.dirichlet;
  * limitations under the License.
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DirichletState<O> {
 
@@ -39,15 +39,16 @@ public class DirichletState<O> {
 
   @SuppressWarnings("unchecked")
   public DirichletState(ModelDistribution<O> modelFactory,
-      int numClusters, double alpha_0, int thin, int burnin) {
+                        int numClusters, double alpha_0, int thin, int burnin) {
     this.numClusters = numClusters;
     this.modelFactory = modelFactory;
     // initialize totalCounts
     offset = alpha_0 / numClusters;
     // sample initial prior models
     clusters = new ArrayList<DirichletCluster<O>>();
-    for (Model<?> m : modelFactory.sampleFromPrior(numClusters))
+    for (Model<?> m : modelFactory.sampleFromPrior(numClusters)) {
       clusters.add(new DirichletCluster(m, offset));
+    }
     // sample the mixture parameters from a Dirichlet distribution on the totalCounts 
     mixture = UncommonDistributions.rDirichlet(totalCounts());
   }
@@ -57,14 +58,15 @@ public class DirichletState<O> {
 
   public Vector totalCounts() {
     Vector result = new DenseVector(numClusters);
-    for (int i = 0; i < numClusters; i++)
+    for (int i = 0; i < numClusters; i++) {
       result.set(i, clusters.get(i).totalCount);
+    }
     return result;
   }
 
   /**
    * Update the receiver with the new models
-   * 
+   *
    * @param newModels a Model<Observation>[] of new models
    */
   public void update(Model<O>[] newModels) {
@@ -79,6 +81,7 @@ public class DirichletState<O> {
 
   /**
    * return the adjusted probability that x is described by the kth model
+   *
    * @param x an Observation
    * @param k an int index of a model
    * @return the double probability
@@ -92,8 +95,9 @@ public class DirichletState<O> {
   @SuppressWarnings("unchecked")
   public Model<O>[] getModels() {
     Model<O>[] result = new Model[numClusters];
-    for (int i = 0; i < numClusters; i++)
+    for (int i = 0; i < numClusters; i++) {
       result[i] = clusters.get(i).model;
+    }
     return result;
   }
 

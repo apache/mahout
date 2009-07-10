@@ -17,12 +17,6 @@
 
 package org.apache.mahout.clustering.fuzzykmeans;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
@@ -32,6 +26,12 @@ import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.SquareRootFunction;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SoftCluster implements Writable {
 
@@ -88,7 +88,7 @@ public class SoftCluster implements Writable {
 
   /**
    * Format the SoftCluster for output
-   * 
+   *
    * @param cluster the Cluster
    */
   public static String formatCluster(SoftCluster cluster) {
@@ -98,7 +98,7 @@ public class SoftCluster implements Writable {
 
   /**
    * Decodes and returns a SoftCluster from the formattedString
-   * 
+   *
    * @param formattedString a String produced by formatCluster
    */
   public static SoftCluster decodeCluster(String formattedString) {
@@ -138,7 +138,7 @@ public class SoftCluster implements Writable {
 
   /**
    * Configure the distance measure from the job
-   * 
+   *
    * @param job the JobConf for the job
    */
   public static void configure(JobConf job) {
@@ -161,8 +161,8 @@ public class SoftCluster implements Writable {
 
   /**
    * Configure the distance measure directly. Used by unit tests.
-   * 
-   * @param aMeasure the DistanceMeasure
+   *
+   * @param aMeasure          the DistanceMeasure
    * @param aConvergenceDelta the delta value used to define convergence
    */
   public static void config(DistanceMeasure aMeasure, double aConvergenceDelta) {
@@ -173,15 +173,14 @@ public class SoftCluster implements Writable {
 
   /**
    * Emit the point and its probability of belongingness to each cluster
-   * 
-   * @param point a point
+   *
+   * @param point    a point
    * @param clusters a List<SoftCluster>
-   * @param output the OutputCollector to emit into
-   * @throws IOException
+   * @param output   the OutputCollector to emit into
    */
   public static void emitPointProbToCluster(Vector point,
-      List<SoftCluster> clusters,
-      OutputCollector<Text, FuzzyKMeansInfo> output) throws IOException {
+                                            List<SoftCluster> clusters,
+                                            OutputCollector<Text, FuzzyKMeansInfo> output) throws IOException {
     List<Double> clusterDistanceList = new ArrayList<Double>();
     for (SoftCluster cluster : clusters) {
       clusterDistanceList.add(measure.distance(cluster.getCenter(), point));
@@ -203,15 +202,14 @@ public class SoftCluster implements Writable {
 
   /**
    * Output point with cluster info (Cluster and probability)
-   * 
-   * @param point a point
+   *
+   * @param point    a point
    * @param clusters a List<SoftCluster> to test
-   * @param output the OutputCollector to emit into
-   * @throws IOException
+   * @param output   the OutputCollector to emit into
    */
   public static void outputPointWithClusterProbabilities(String key,
-      Vector point, List<SoftCluster> clusters,
-      OutputCollector<Text, FuzzyKMeansOutput> output) throws IOException {
+                                                         Vector point, List<SoftCluster> clusters,
+                                                         OutputCollector<Text, FuzzyKMeansOutput> output) throws IOException {
     List<Double> clusterDistanceList = new ArrayList<Double>();
 
     for (SoftCluster cluster : clusters) {
@@ -229,25 +227,21 @@ public class SoftCluster implements Writable {
     }
     String name = point.getName();
     output.collect(new Text(name != null && name.length() != 0 ? name
-            : point.asFormatString()),
-            fOutput);
+        : point.asFormatString()),
+        fOutput);
   }
 
-  /**
-   * Computes the probability of a point belonging to a cluster
-   * 
-   * @param clusterDistance
-   * @param clusterDistanceList
-   */
+  /** Computes the probability of a point belonging to a cluster */
   public static double computeProbWeight(double clusterDistance,
-      List<Double> clusterDistanceList) {
+                                         List<Double> clusterDistanceList) {
     if (clusterDistance == 0) {
       clusterDistance = MINIMAL_VALUE;
     }
     double denom = 0.0;
     for (double eachCDist : clusterDistanceList) {
-      if (eachCDist == 0.0)
+      if (eachCDist == 0.0) {
         eachCDist = MINIMAL_VALUE;
+      }
 
       denom += Math.pow(clusterDistance / eachCDist, 2.0 / (m - 1));
 
@@ -257,13 +251,13 @@ public class SoftCluster implements Writable {
 
   /**
    * Compute the centroid
-   * 
+   *
    * @return the new centroid
    */
   private Vector computeCentroid() {
-    if (pointProbSum == 0)
+    if (pointProbSum == 0) {
       return weightedPointTotal;
-    else if (centroid == null) {
+    } else if (centroid == null) {
       // lazy compute new centroid
       centroid = weightedPointTotal.divide(pointProbSum);
     }
@@ -276,7 +270,7 @@ public class SoftCluster implements Writable {
 
   /**
    * Construct a new SoftCluster with the given point as its center
-   * 
+   *
    * @param center the center point
    */
   public SoftCluster(Vector center) {
@@ -289,7 +283,7 @@ public class SoftCluster implements Writable {
 
   /**
    * Construct a new SoftCluster with the given point as its center
-   * 
+   *
    * @param center the center point
    */
   public SoftCluster(Vector center, int clusterId) {
@@ -299,11 +293,7 @@ public class SoftCluster implements Writable {
     this.weightedPointTotal = center.like();
   }
 
-  /**
-   * Construct a new softcluster with the given clusterID
-   * 
-   * @param clusterId
-   */
+  /** Construct a new softcluster with the given clusterID */
   public SoftCluster(String clusterId) {
 
     this.clusterId = Integer.parseInt((clusterId.substring(1)));
@@ -318,72 +308,70 @@ public class SoftCluster implements Writable {
   }
 
   public String getIdentifier() {
-    if (converged)
+    if (converged) {
       return "V" + clusterId;
-    else
+    } else {
       return "C" + clusterId;
+    }
   }
 
-  /**
-   * Observe the point, accumulating weighted variables for std() calculation
-   * @param point
-   * @param ptProb
-   */
+  /** Observe the point, accumulating weighted variables for std() calculation */
   private void observePoint(Vector point, double ptProb) {
     s0 += ptProb;
     Vector wtPt = point.times(ptProb);
-    if (s1 == null)
+    if (s1 == null) {
       s1 = point.clone();
-    else
+    } else {
       s1 = s1.plus(wtPt);
-    if (s2 == null)
+    }
+    if (s2 == null) {
       s2 = wtPt.times(wtPt);
-    else
+    } else {
       s2 = s2.plus(wtPt.times(wtPt));
+    }
   }
 
-  /**
-   * Compute a "standard deviation" value to use as the "radius" of the cluster for display purposes
-   * @return
-   */
+  /** Compute a "standard deviation" value to use as the "radius" of the cluster for display purposes */
   public double std() {
     if (s0 > 0) {
       Vector radical = s2.times(s0).minus(s1.times(s1));
       radical = radical.times(radical).assign(new SquareRootFunction());
       Vector stds = radical.assign(new SquareRootFunction()).divide(s0);
       return stds.zSum() / stds.size();
-    } else
+    } else {
       return 0;
+    }
   }
 
   /**
    * Add the point to the SoftCluster
-   * 
+   *
    * @param point a point to add
-   * @param ptProb
    */
   public void addPoint(Vector point, double ptProb) {
     observePoint(point, ptProb);
     centroid = null;
     pointProbSum += ptProb;
-    if (weightedPointTotal == null)
+    if (weightedPointTotal == null) {
       weightedPointTotal = point.clone().times(ptProb);
-    else
+    } else {
       weightedPointTotal = weightedPointTotal.plus(point.times(ptProb));
+    }
   }
 
   /**
    * Add the point to the cluster
-   * 
+   *
    * @param delta a point to add
    */
   public void addPoints(Vector delta, double partialSumPtProb) {
     centroid = null;
     pointProbSum += partialSumPtProb;
-    if (weightedPointTotal == null)
+    if (weightedPointTotal == null) {
       weightedPointTotal = delta.clone();
-    else
+    } else {
       weightedPointTotal = weightedPointTotal.plus(delta);
+    }
   }
 
   public Vector getCenter() {
@@ -394,9 +382,7 @@ public class SoftCluster implements Writable {
     return pointProbSum;
   }
 
-  /**
-   * Compute the centroid and set the center to it.
-   */
+  /** Compute the centroid and set the center to it. */
   public void recomputeCenter() {
     center = computeCentroid();
     pointProbSum = 0;
@@ -405,7 +391,7 @@ public class SoftCluster implements Writable {
 
   /**
    * Return if the cluster is converged by comparing its center and centroid.
-   * 
+   *
    * @return if the cluster is converged
    */
   public boolean computeConvergence() {

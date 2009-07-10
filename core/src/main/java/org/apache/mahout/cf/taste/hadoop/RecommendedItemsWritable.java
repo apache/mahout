@@ -31,9 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A {@link Writable} which encapsulates a list of {@link RecommendedItem}s. This is
- * the mapper (and reducer) output, and represents items recommended to a user.
- * The first item is the one whose estimated preference is highest.
+ * A {@link Writable} which encapsulates a list of {@link RecommendedItem}s. This is the mapper (and reducer) output,
+ * and represents items recommended to a user. The first item is the one whose estimated preference is highest.
  */
 public final class RecommendedItemsWritable implements Writable {
 

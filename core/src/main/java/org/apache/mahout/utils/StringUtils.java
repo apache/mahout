@@ -20,9 +20,8 @@ package org.apache.mahout.utils;
 import com.thoughtworks.xstream.XStream;
 
 /**
- * Offers two methods to convert an object to a string representation and
- * restore the object given its string representation. Should use Hadoop
- * Stringifier whenever available.
+ * Offers two methods to convert an object to a string representation and restore the object given its string
+ * representation. Should use Hadoop Stringifier whenever available.
  */
 public final class StringUtils {
 
@@ -31,10 +30,10 @@ public final class StringUtils {
   private StringUtils() {
     // do nothing
   }
-  
+
   /**
    * Converts the object to a one-line string representation
-   * 
+   *
    * @param obj the object to convert
    * @return the string representation of the object
    */
@@ -44,7 +43,7 @@ public final class StringUtils {
 
   /**
    * Restores the object from its string representation.
-   * 
+   *
    * @param str the string representation of the object
    * @return restored object
    */

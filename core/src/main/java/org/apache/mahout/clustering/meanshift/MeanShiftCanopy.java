@@ -17,13 +17,9 @@
 
 package org.apache.mahout.clustering.meanshift;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -38,14 +34,16 @@ import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
 import org.apache.mahout.utils.EuclideanDistanceMeasure;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * This class models a canopy as a center point, the number of points that are
- * contained within it according to the application of some distance metric, and
- * a point total which is the sum of all the points and is used to compute the
+ * This class models a canopy as a center point, the number of points that are contained within it according to the
+ * application of some distance metric, and a point total which is the sum of all the points and is used to compute the
  * centroid when needed.
  */
 public class MeanShiftCanopy extends ClusterBase {
@@ -82,7 +80,7 @@ public class MeanShiftCanopy extends ClusterBase {
 
   /**
    * Configure the Canopy and its distance measure
-   * 
+   *
    * @param job the JobConf for this job
    */
   public static void configure(JobConf job) {
@@ -105,14 +103,11 @@ public class MeanShiftCanopy extends ClusterBase {
 
   /**
    * Configure the Canopy for unit tests
-   * 
-   * @param aMeasure
-   * @param aT1
-   * @param aT2
+   *
    * @param aDelta the convergence criteria
    */
   public static void config(DistanceMeasure aMeasure, double aT1, double aT2,
-      double aDelta) {
+                            double aDelta) {
     nextCanopyId = 100; // so canopyIds will sort properly
     measure = aMeasure;
     t1 = aT1;
@@ -121,40 +116,37 @@ public class MeanShiftCanopy extends ClusterBase {
   }
 
   /**
-   * Merge the given canopy into the canopies list. If it touches any existing
-   * canopy (norm<T1) then add the center of each to the other. If it covers any
-   * other canopies (norm<T2), then merge the given canopy with the closest
-   * covering canopy. If the given canopy does not cover any other canopies, add
-   * it to the canopies list.
-   * 
-   * @param aCanopy a MeanShiftCanopy to be merged
+   * Merge the given canopy into the canopies list. If it touches any existing canopy (norm<T1) then add the center of
+   * each to the other. If it covers any other canopies (norm<T2), then merge the given canopy with the closest covering
+   * canopy. If the given canopy does not cover any other canopies, add it to the canopies list.
+   *
+   * @param aCanopy  a MeanShiftCanopy to be merged
    * @param canopies the List<Canopy> to be appended
    */
   public static void mergeCanopy(MeanShiftCanopy aCanopy,
-      List<MeanShiftCanopy> canopies) {
+                                 List<MeanShiftCanopy> canopies) {
     MeanShiftCanopy closestCoveringCanopy = null;
     double closestNorm = Double.MAX_VALUE;
     for (MeanShiftCanopy canopy : canopies) {
       double norm = measure.distance(canopy.getCenter(), aCanopy.getCenter());
-      if (norm < t1)
+      if (norm < t1) {
         aCanopy.touch(canopy);
-      if (norm < t2)
+      }
+      if (norm < t2) {
         if (closestCoveringCanopy == null || norm < closestNorm) {
           closestNorm = norm;
           closestCoveringCanopy = canopy;
         }
+      }
     }
-    if (closestCoveringCanopy == null)
+    if (closestCoveringCanopy == null) {
       canopies.add(aCanopy);
-    else
+    } else {
       closestCoveringCanopy.merge(aCanopy);
+    }
   }
 
-  /**
-   * Format the canopy for output
-   * 
-   * @param canopy
-   */
+  /** Format the canopy for output */
   public static String formatCanopy(MeanShiftCanopy canopy) {
     Type vectorType = new TypeToken<Vector>() {
     }.getType();
@@ -166,7 +158,7 @@ public class MeanShiftCanopy extends ClusterBase {
 
   /**
    * Decodes and returns a Canopy from the formattedString
-   * 
+   *
    * @param formattedString a String produced by formatCanopy
    * @return a new Canopy
    */
@@ -183,11 +175,7 @@ public class MeanShiftCanopy extends ClusterBase {
     super();
   }
 
-  /**
-   * Create a new Canopy with the given canopyId
-   * 
-   * @param id
-   */
+  /** Create a new Canopy with the given canopyId */
   public MeanShiftCanopy(String id) {
     this.id = Integer.parseInt(id.substring(1));
     this.center = null;
@@ -197,7 +185,7 @@ public class MeanShiftCanopy extends ClusterBase {
 
   /**
    * Create a new Canopy containing the given point
-   * 
+   *
    * @param point a Vector
    */
   public MeanShiftCanopy(Vector point) {
@@ -210,14 +198,14 @@ public class MeanShiftCanopy extends ClusterBase {
 
   /**
    * Create a new Canopy containing the given point, id and bound points
-   * 
-   * @param point a Vector
-   * @param id an int identifying the canopy local to this process only
+   *
+   * @param point       a Vector
+   * @param id          an int identifying the canopy local to this process only
    * @param boundPoints a List<Vector> containing points bound to the canopy
-   * @param converged true if the canopy has converged
+   * @param converged   true if the canopy has converged
    */
   MeanShiftCanopy(Vector point, int id, List<Vector> boundPoints,
-      boolean converged) {
+                  boolean converged) {
     this.id = id;
     this.center = point;
     this.pointTotal = point.clone();
@@ -228,8 +216,8 @@ public class MeanShiftCanopy extends ClusterBase {
 
   /**
    * Add a point to the canopy some number of times
-   * 
-   * @param point a Vector to add
+   *
+   * @param point   a Vector to add
    * @param nPoints the number of times to add the point
    * @throws CardinalityException if the cardinalities disagree
    */
@@ -241,7 +229,7 @@ public class MeanShiftCanopy extends ClusterBase {
 
   /**
    * Return if the point is closely covered by this canopy
-   * 
+   *
    * @param point a Vector point
    * @return if the point is covered
    */
@@ -251,31 +239,33 @@ public class MeanShiftCanopy extends ClusterBase {
 
   /**
    * Compute the bound centroid by averaging the bound points
-   * 
+   *
    * @return a Vector which is the new bound centroid
    */
   public Vector computeBoundCentroid() {
     Vector result = new DenseVector(center.size());
-    for (Vector v : boundPoints)
+    for (Vector v : boundPoints) {
       result.assign(v, new PlusFunction());
+    }
     return result.divide(boundPoints.size());
   }
 
   /**
    * Compute the centroid by normalizing the pointTotal
-   * 
+   *
    * @return a Vector which is the new centroid
    */
   public Vector computeCentroid() {
-    if (numPoints == 0)
+    if (numPoints == 0) {
       return center;
-    else
+    } else {
       return pointTotal.divide(numPoints);
+    }
   }
 
   /**
    * Return if the point is covered by this canopy
-   * 
+   *
    * @param point a Vector point
    * @return if the point is covered
    */
@@ -283,11 +273,9 @@ public class MeanShiftCanopy extends ClusterBase {
     return measure.distance(center, point) < t1;
   }
 
-  /**
-   * Emit the new canopy to the collector, keyed by the canopy's Id
-   */
+  /** Emit the new canopy to the collector, keyed by the canopy's Id */
   void emitCanopy(MeanShiftCanopy canopy,
-      OutputCollector<Text, WritableComparable<?>> collector)
+                  OutputCollector<Text, WritableComparable<?>> collector)
       throws IOException {
     String identifier = this.getIdentifier();
     collector.collect(new Text(identifier),
@@ -318,9 +306,8 @@ public class MeanShiftCanopy extends ClusterBase {
   }
 
   /**
-   * The receiver overlaps the given canopy. Touch it and add my bound points to
-   * it.
-   * 
+   * The receiver overlaps the given canopy. Touch it and add my bound points to it.
+   *
    * @param canopy an existing MeanShiftCanopy
    */
   void merge(MeanShiftCanopy canopy) {
@@ -329,7 +316,7 @@ public class MeanShiftCanopy extends ClusterBase {
 
   /**
    * Shift the center to the new centroid of the cluster
-   * 
+   *
    * @return if the cluster is converged
    */
   public boolean shiftToMean() {
@@ -348,7 +335,7 @@ public class MeanShiftCanopy extends ClusterBase {
 
   /**
    * The receiver touches the given canopy. Add respective centers.
-   * 
+   *
    * @param canopy an existing MeanShiftCanopy
    */
   void touch(MeanShiftCanopy canopy) {
@@ -362,8 +349,9 @@ public class MeanShiftCanopy extends ClusterBase {
     this.center = AbstractVector.readVector(in);
     int numpoints = in.readInt();
     this.boundPoints = new ArrayList<Vector>();
-    for (int i = 0; i < numpoints; i++)
+    for (int i = 0; i < numpoints; i++) {
       this.boundPoints.add(AbstractVector.readVector(in));
+    }
   }
 
   @Override
@@ -371,8 +359,9 @@ public class MeanShiftCanopy extends ClusterBase {
     super.write(out);
     AbstractVector.writeVector(out, computeCentroid());
     out.writeInt(boundPoints.size());
-    for (Vector v : boundPoints)
+    for (Vector v : boundPoints) {
       AbstractVector.writeVector(out, v);
+    }
   }
 
   public MeanShiftCanopy shallowCopy() {

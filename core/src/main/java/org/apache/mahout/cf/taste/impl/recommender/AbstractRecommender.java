@@ -18,12 +18,12 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,9 +44,9 @@ public abstract class AbstractRecommender implements Recommender {
   }
 
   /**
-   * <p>Default implementation which just calls
-   * {@link Recommender#recommend(Object, int, org.apache.mahout.cf.taste.recommender.Rescorer)},
-   * with a {@link org.apache.mahout.cf.taste.recommender.Rescorer} that does nothing.</p>
+   * <p>Default implementation which just calls {@link Recommender#recommend(Object, int,
+   * org.apache.mahout.cf.taste.recommender.Rescorer)}, with a {@link org.apache.mahout.cf.taste.recommender.Rescorer}
+   * that does nothing.</p>
    */
   @Override
   public List<RecommendedItem> recommend(Object userID, int howMany) throws TasteException {
@@ -56,8 +56,7 @@ public abstract class AbstractRecommender implements Recommender {
   /**
    * <p>Default implementation which just calls {@link DataModel#setPreference(Object, Object, double)}.</p>
    *
-   * @throws IllegalArgumentException if userID or itemID is <code>null</code>, or if value is
-   * {@link Double#NaN}
+   * @throws IllegalArgumentException if userID or itemID is <code>null</code>, or if value is {@link Double#NaN}
    */
   @Override
   public void setPreference(Object userID, Object itemID, double value) throws TasteException {
@@ -74,8 +73,8 @@ public abstract class AbstractRecommender implements Recommender {
   }
 
   /**
-   * <p>Default implementation which just calls
-   * {@link DataModel#removePreference(Object, Object)} (Object, Object)}.</p>
+   * <p>Default implementation which just calls {@link DataModel#removePreference(Object, Object)} (Object,
+   * Object)}.</p>
    *
    * @throws IllegalArgumentException if userID or itemID is <code>null</code>
    */

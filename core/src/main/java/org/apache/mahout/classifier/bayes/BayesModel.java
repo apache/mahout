@@ -30,21 +30,20 @@ public class BayesModel extends Model {
   @Override
   protected double getWeight(Integer label, Integer feature) {
     double result = 0.0;
-    Map<Integer,Double> featureWeights = featureLabelWeights.get(feature);
+    Map<Integer, Double> featureWeights = featureLabelWeights.get(feature);
 
-    
+
     if (featureWeights.containsKey(label)) {
       result = featureWeights.get(label).floatValue();
     }
-    
+
     double vocabCount = featureList.size();
     double sumLabelWeight = getSumLabelWeight(label);
 
+    double numerator = result + alpha_i;
+    double denominator = (sumLabelWeight + vocabCount);
 
-    double numerator =  result + alpha_i;
-    double denominator =(sumLabelWeight + vocabCount);
-    
-    double weight = Math.log(numerator /denominator);
+    double weight = Math.log(numerator / denominator);
     result = -weight;
 
     return result;
@@ -53,7 +52,7 @@ public class BayesModel extends Model {
   @Override
   protected double getWeightUnprocessed(Integer label, Integer feature) {
     double result;
-    Map<Integer,Double> featureWeights = featureLabelWeights.get(feature);
+    Map<Integer, Double> featureWeights = featureLabelWeights.get(feature);
 
     if (featureWeights.containsKey(label)) {
       result = featureWeights.get(label);
@@ -85,65 +84,67 @@ public class BayesModel extends Model {
 
   @Override
   public void generateModel() {
-      double vocabCount = featureList.size();
+    double vocabCount = featureList.size();
 
-      double[] perLabelThetaNormalizer = new double[labelList.size()];
+    double[] perLabelThetaNormalizer = new double[labelList.size()];
 
     for (int feature = 0, maxFeatures = featureList.size(); feature < maxFeatures; feature++) {
-        Integer featureInt = feature;
-        for (int label = 0, maxLabels = labelList.size(); label < maxLabels; label++) {
+      Integer featureInt = feature;
+      for (int label = 0, maxLabels = labelList.size(); label < maxLabels; label++) {
 
-          Integer labelInt = label;
-          double D_ij = getWeightUnprocessed(labelInt, featureInt);
-          double sumLabelWeight = getSumLabelWeight(labelInt);
-          //double sigma_j = getSumFeatureWeight(featureInt);
+        Integer labelInt = label;
+        double D_ij = getWeightUnprocessed(labelInt, featureInt);
+        double sumLabelWeight = getSumLabelWeight(labelInt);
+        //double sigma_j = getSumFeatureWeight(featureInt);
 
-          double numerator = D_ij + alpha_i;
-          double denominator = sumLabelWeight + vocabCount;
+        double numerator = D_ij + alpha_i;
+        double denominator = sumLabelWeight + vocabCount;
 
-          double weight = Math.log(numerator / denominator);
+        double weight = Math.log(numerator / denominator);
 
-          if (D_ij != 0)
-            setWeight(labelInt, featureInt, weight);
-
-          perLabelThetaNormalizer[label] += weight;
-
+        if (D_ij != 0) {
+          setWeight(labelInt, featureInt, weight);
         }
+
+        perLabelThetaNormalizer[label] += weight;
+
       }
-      log.info("Normalizing Weights");
+    }
+    log.info("Normalizing Weights");
     double perLabelWeightSumNormalisationFactor = Double.MAX_VALUE;
     for (int label = 0, maxLabels = labelList.size(); label < maxLabels; label++) {
-        double Sigma_W_ij = perLabelThetaNormalizer[label];
-        if (perLabelWeightSumNormalisationFactor > Math.abs(Sigma_W_ij)) {
-          perLabelWeightSumNormalisationFactor = Math.abs(Sigma_W_ij);
-        }
+      double Sigma_W_ij = perLabelThetaNormalizer[label];
+      if (perLabelWeightSumNormalisationFactor > Math.abs(Sigma_W_ij)) {
+        perLabelWeightSumNormalisationFactor = Math.abs(Sigma_W_ij);
       }
+    }
 
+    for (int label = 0, maxLabels = labelList.size(); label < maxLabels; label++) {
+      double Sigma_W_ij = perLabelThetaNormalizer[label];
+      perLabelThetaNormalizer[label] = Sigma_W_ij
+          / perLabelWeightSumNormalisationFactor;
+    }
+
+    for (int feature = 0, maxFeatures = featureList.size(); feature < maxFeatures; feature++) {
+      Integer featureInt = feature;
       for (int label = 0, maxLabels = labelList.size(); label < maxLabels; label++) {
-        double Sigma_W_ij = perLabelThetaNormalizer[label];
-        perLabelThetaNormalizer[label] = Sigma_W_ij
-            / perLabelWeightSumNormalisationFactor;
-      }
-
-      for (int feature = 0, maxFeatures = featureList.size(); feature < maxFeatures; feature++) {
-        Integer featureInt = feature;
-        for (int label = 0, maxLabels = labelList.size(); label < maxLabels; label++) {
-          Integer labelInt = label;
-          double W_ij = getWeightUnprocessed(labelInt, featureInt);
-          if (W_ij == 0)
-            continue;
-          double Sigma_W_ij = perLabelThetaNormalizer[label];
-          double normalizedWeight = -W_ij / Sigma_W_ij;
-          setWeight(labelInt, featureInt, normalizedWeight);
+        Integer labelInt = label;
+        double W_ij = getWeightUnprocessed(labelInt, featureInt);
+        if (W_ij == 0) {
+          continue;
         }
+        double Sigma_W_ij = perLabelThetaNormalizer[label];
+        double normalizedWeight = -W_ij / Sigma_W_ij;
+        setWeight(labelInt, featureInt, normalizedWeight);
       }
+    }
 
   }
 
   /**
    * Get the weighted probability of the feature.
-   * 
-   * @param label The label of the feature
+   *
+   * @param label   The label of the feature
    * @param feature The feature to calc. the prob. for
    * @return The weighted probability
    */

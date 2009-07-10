@@ -20,35 +20,32 @@ import org.apache.hadoop.io.Writable;
  */
 
 /**
- * A model is a probability distribution over observed data points and allows 
- * the probability of any data point to be computed.
+ * A model is a probability distribution over observed data points and allows the probability of any data point to be
+ * computed.
  */
 public interface Model<O> extends Writable {
 
   /**
    * Observe the given observation, retaining information about it
-   * 
+   *
    * @param x an Observation from the posterior
    */
   void observe(O x);
 
-  /**
-   * Compute a new set of posterior parameters based upon the Observations 
-   * that have been observed since my creation
-   */
+  /** Compute a new set of posterior parameters based upon the Observations that have been observed since my creation */
   void computeParameters();
 
   /**
-  * Return the probability that the observation is described by this model
-  * 
-  * @param x an Observation from the posterior
-  * @return the probability that x is in the receiver
-  */
+   * Return the probability that the observation is described by this model
+   *
+   * @param x an Observation from the posterior
+   * @return the probability that x is in the receiver
+   */
   double pdf(O x);
 
   /**
    * Return the number of observations that have been observed by this model
-   * 
+   *
    * @return an int
    */
   int count();

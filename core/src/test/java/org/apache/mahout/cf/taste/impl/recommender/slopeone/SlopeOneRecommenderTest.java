@@ -31,9 +31,7 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * <p>Tests {@link SlopeOneRecommender}.</p>
- */
+/** <p>Tests {@link SlopeOneRecommender}.</p> */
 public final class SlopeOneRecommenderTest extends TasteTestCase {
 
   public void testRecommender() throws Exception {
@@ -78,7 +76,7 @@ public final class SlopeOneRecommenderTest extends TasteTestCase {
     Recommender recommender = new SlopeOneRecommender(dataModel);
     List<RecommendedItem> originalRecommended = recommender.recommend("test1", 2);
     List<RecommendedItem> rescoredRecommended =
-            recommender.recommend("test1", 2, new ReversingRescorer<Item>());
+        recommender.recommend("test1", 2, new ReversingRescorer<Item>());
     assertNotNull(originalRecommended);
     assertNotNull(rescoredRecommended);
     assertEquals(2, originalRecommended.size());

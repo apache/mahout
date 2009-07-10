@@ -23,9 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This Canopy subclass maintains a list of points in the canopy so it can
- * include them in its toString method. Useful for debugging but not practical
- * for production use since it holds onto all its points.
+ * This Canopy subclass maintains a list of points in the canopy so it can include them in its toString method. Useful
+ * for debugging but not practical for production use since it holds onto all its points.
  */
 public class VisibleCanopy extends Canopy {
 
@@ -47,17 +46,15 @@ public class VisibleCanopy extends Canopy {
     points.add(point);
   }
 
-  /**
-   * Return a printable representation of this object, using the user supplied
-   * identifier
-   *
-   * @return
-   */
+  /** Return a printable representation of this object, using the user supplied identifier */
   @Override
   public String toString() {
     String out = super.toString() + ": ";
-    for (Vector pt : points)
-      out = pt.asFormatString();
+    for (Vector pt : points) {
+      {
+        out = pt.asFormatString();
+      }
+    }
     return out;
   }
 

@@ -20,23 +20,16 @@ package org.apache.mahout.cf.taste.impl.common;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/**
- * <p>An empty {@link Iterator}, which iterates over nothing.</p>
- */
+/** <p>An empty {@link Iterator}, which iterates over nothing.</p> */
 final class EmptyIterator<T> implements Iterator<T> {
 
-  /**
-   * @return false
-   */
+  /** @return false */
   @Override
   public boolean hasNext() {
     return false;
   }
 
-  /**
-   * @return never returns anything
-   * @throws NoSuchElementException
-   */
+  /** @return never returns anything */
   @Override
   public T next() {
     throw new NoSuchElementException();

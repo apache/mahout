@@ -17,18 +17,18 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
+import org.apache.mahout.cf.taste.impl.common.ArrayIterator;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
+import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.model.Item;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
-import org.apache.mahout.cf.taste.impl.common.ArrayIterator;
 
 import java.io.Serializable;
 import java.util.Arrays;
 
 /**
- * A variant of {@link GenericUser} which is appropriate when users express only a "yes" preference for
- * an item, or none at all. The preference value for all items is considered to be 1.0.
+ * A variant of {@link GenericUser} which is appropriate when users express only a "yes" preference for an item, or none
+ * at all. The preference value for all items is considered to be 1.0.
  */
 public class BooleanPrefUser<K extends Comparable<K>> implements User, Serializable {
 
@@ -53,9 +53,7 @@ public class BooleanPrefUser<K extends Comparable<K>> implements User, Serializa
     return itemIDs.contains(itemID) ? buildPreference(itemID) : null;
   }
 
-  /**
-   * Note that the value parameter is ignored; it is as if it were always 1.0.
-   */
+  /** Note that the value parameter is ignored; it is as if it were always 1.0. */
   @Override
   public void setPreference(Item item, double value) {
     itemIDs.add(item.getID());
@@ -87,16 +85,12 @@ public class BooleanPrefUser<K extends Comparable<K>> implements User, Serializa
     return new BooleanPreference(this, new GenericItem<String>(itemID.toString()));
   }
 
-  /**
-   * @return true iff this user expresses a preference for the given item
-   */
+  /** @return true iff this user expresses a preference for the given item */
   public boolean hasPreferenceFor(Object itemID) {
     return itemIDs.contains(itemID);
   }
 
-  /**
-   * @return all item IDs the user expresses a preference for
-   */
+  /** @return all item IDs the user expresses a preference for */
   public FastSet<Object> getItemIDs() {
     return itemIDs;
   }

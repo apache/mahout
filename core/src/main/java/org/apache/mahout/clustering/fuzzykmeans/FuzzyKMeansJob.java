@@ -17,13 +17,13 @@
 
 package org.apache.mahout.clustering.fuzzykmeans;
 
-import java.io.IOException;
-
 import org.apache.mahout.clustering.canopy.CanopyDriver;
-import org.apache.mahout.utils.ManhattanDistanceMeasure;
 import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.utils.ManhattanDistanceMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 public class FuzzyKMeansJob {
 
@@ -57,9 +57,7 @@ public class FuzzyKMeansJob {
         maxIterations, numMapTasks, numReduceTasks, doCanopy, m, vectorClass);
   }
 
-  /**
-   * Prints Error Message
-   */
+  /** Prints Error Message */
   private static void printMessage() {
     log
         .warn("Usage: inputDir clusterDir OutputDir measureClass ConvergenceDelata  maxIterations numMapTasks numReduceTasks doCanopy m");
@@ -67,20 +65,20 @@ public class FuzzyKMeansJob {
 
   /**
    * Run the job using supplied arguments
-   * 
-   * @param input the directory pathname for input points
-   * @param clustersIn the directory pathname for initial clusters
-   * @param output the directory pathname for output points
-   * @param measureClass the classname of the DistanceMeasure
+   *
+   * @param input            the directory pathname for input points
+   * @param clustersIn       the directory pathname for initial clusters
+   * @param output           the directory pathname for output points
+   * @param measureClass     the classname of the DistanceMeasure
    * @param convergenceDelta the convergence delta value
-   * @param maxIterations the maximum number of iterations
-   * @param numMapTasks the number of maptasks
-   * @param doCanopy does canopy needed for initial clusters
-   * @param m param needed to fuzzify the cluster membership values
+   * @param maxIterations    the maximum number of iterations
+   * @param numMapTasks      the number of maptasks
+   * @param doCanopy         does canopy needed for initial clusters
+   * @param m                param needed to fuzzify the cluster membership values
    */
   public static void runJob(String input, String clustersIn, String output,
-      String measureClass, double convergenceDelta, int maxIterations,
-      int numMapTasks, int numReduceTasks, boolean doCanopy, float m, Class<? extends Vector> vectorClass)
+                            String measureClass, double convergenceDelta, int maxIterations,
+                            int numMapTasks, int numReduceTasks, boolean doCanopy, float m, Class<? extends Vector> vectorClass)
       throws IOException {
 
     // run canopy to find initial clusters

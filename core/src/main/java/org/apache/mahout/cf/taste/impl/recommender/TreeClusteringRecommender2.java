@@ -20,11 +20,11 @@ package org.apache.mahout.cf.taste.impl.recommender;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
+import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
-import org.apache.mahout.cf.taste.impl.common.RandomUtils;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -47,24 +47,21 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * <p>A {@link org.apache.mahout.cf.taste.recommender.Recommender} that clusters
- * {@link org.apache.mahout.cf.taste.model.User}s, then determines
- * the clusters' top recommendations. This implementation builds clusters by repeatedly merging clusters
- * until only a certain number remain, meaning that each cluster is sort of a tree of other clusters.</p>
+ * <p>A {@link org.apache.mahout.cf.taste.recommender.Recommender} that clusters {@link
+ * org.apache.mahout.cf.taste.model.User}s, then determines the clusters' top recommendations. This implementation
+ * builds clusters by repeatedly merging clusters until only a certain number remain, meaning that each cluster is sort
+ * of a tree of other clusters.</p>
  *
- * <p>This {@link org.apache.mahout.cf.taste.recommender.Recommender} therefore has a few properties to note:</p>
- * <ul>
+ * <p>This {@link org.apache.mahout.cf.taste.recommender.Recommender} therefore has a few properties to note:</p> <ul>
  * <li>For all {@link org.apache.mahout.cf.taste.model.User}s in a cluster, recommendations will be the same</li>
- * <li>{@link #estimatePreference(Object, Object)} may well return {@link Double#NaN}; it does so when asked
- * to estimate preference for an {@link org.apache.mahout.cf.taste.model.Item} for which no preference is expressed in the
- * {@link org.apache.mahout.cf.taste.model.User}s in the cluster.</li>
- * </ul>
+ * <li>{@link #estimatePreference(Object, Object)} may well return {@link Double#NaN}; it does so when asked to estimate
+ * preference for an {@link org.apache.mahout.cf.taste.model.Item} for which no preference is expressed in the {@link
+ * org.apache.mahout.cf.taste.model.User}s in the cluster.</li> </ul>
  *
- * <p>This is an <em>experimental</em> implementation which tries to gain a lot of speed at the cost of
- * accuracy in building clusters, compared to {@link org.apache.mahout.cf.taste.impl.recommender.TreeClusteringRecommender}.
- * It will sometimes cluster two other clusters together that may not be the exact closest two clusters
- * in existence. This may not affect the recommendation quality much, but it potentially speeds up the
- * clustering process dramatically.</p>
+ * <p>This is an <em>experimental</em> implementation which tries to gain a lot of speed at the cost of accuracy in
+ * building clusters, compared to {@link org.apache.mahout.cf.taste.impl.recommender.TreeClusteringRecommender}. It will
+ * sometimes cluster two other clusters together that may not be the exact closest two clusters in existence. This may
+ * not affect the recommendation quality much, but it potentially speeds up the clustering process dramatically.</p>
  */
 public final class TreeClusteringRecommender2 extends AbstractRecommender implements ClusteringRecommender {
 
@@ -82,12 +79,12 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
   private final RefreshHelper refreshHelper;
 
   /**
-   * @param dataModel {@link org.apache.mahout.cf.taste.model.DataModel} which provdes {@link org.apache.mahout.cf.taste.model.User}s
+   * @param dataModel         {@link org.apache.mahout.cf.taste.model.DataModel} which provdes {@link
+   *                          org.apache.mahout.cf.taste.model.User}s
    * @param clusterSimilarity {@link org.apache.mahout.cf.taste.impl.recommender.ClusterSimilarity} used to compute
-   * cluster similarity
-   * @param numClusters desired number of clusters to create
-   * @throws IllegalArgumentException if arguments are <code>null</code>, or <code>numClusters</code> is
-   * less than 2
+   *                          cluster similarity
+   * @param numClusters       desired number of clusters to create
+   * @throws IllegalArgumentException if arguments are <code>null</code>, or <code>numClusters</code> is less than 2
    */
   public TreeClusteringRecommender2(DataModel dataModel,
                                     ClusterSimilarity clusterSimilarity,
@@ -116,13 +113,14 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
   }
 
   /**
-   * @param dataModel {@link org.apache.mahout.cf.taste.model.DataModel} which provdes {@link org.apache.mahout.cf.taste.model.User}s
-   * @param clusterSimilarity {@link org.apache.mahout.cf.taste.impl.recommender.ClusterSimilarity} used to compute
-   * cluster similarity
-   * @param clusteringThreshold clustering similarity threshold; clusters will be aggregated into larger
-   * clusters until the next two nearest clusters' similarity drops below this threshold
-   * @throws IllegalArgumentException if arguments are <code>null</code>, or <code>clusteringThreshold</code> is
-   * {@link Double#NaN}
+   * @param dataModel           {@link org.apache.mahout.cf.taste.model.DataModel} which provdes {@link
+   *                            org.apache.mahout.cf.taste.model.User}s
+   * @param clusterSimilarity   {@link org.apache.mahout.cf.taste.impl.recommender.ClusterSimilarity} used to compute
+   *                            cluster similarity
+   * @param clusteringThreshold clustering similarity threshold; clusters will be aggregated into larger clusters until
+   *                            the next two nearest clusters' similarity drops below this threshold
+   * @throws IllegalArgumentException if arguments are <code>null</code>, or <code>clusteringThreshold</code> is {@link
+   *                                  Double#NaN}
    */
   public TreeClusteringRecommender2(DataModel dataModel,
                                     ClusterSimilarity clusterSimilarity,
@@ -152,7 +150,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
 
   @Override
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
-          throws TasteException {
+      throws TasteException {
     if (userID == null) {
       throw new IllegalArgumentException("userID is null");
     }
@@ -271,8 +269,8 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
       }
       ClusterClusterPair other = (ClusterClusterPair) o;
       return cluster1.equals(other.cluster1) &&
-             cluster2.equals(other.cluster2) &&
-             similarity == other.similarity;
+          cluster2.equals(other.cluster2) &&
+          similarity == other.similarity;
     }
 
     @Override
@@ -327,7 +325,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
     }
   }
 
-  private boolean mergeClosestClusters(int numUsers, List<Collection<User>> clusters, boolean done) 
+  private boolean mergeClosestClusters(int numUsers, List<Collection<User>> clusters, boolean done)
       throws TasteException {
     // We find a certain number of closest clusters...
     LinkedList<ClusterClusterPair> queue = findClosestClusters(numUsers, clusters);
@@ -425,7 +423,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
         if (!Double.isNaN(similarity) &&
             (!full || similarity > queue.getLast().getSimilarity())) {
           ListIterator<ClusterClusterPair> queueIterator =
-                  queue.listIterator(queue.size());
+              queue.listIterator(queue.size());
           while (queueIterator.hasPrevious()) {
             if (similarity <= queueIterator.previous().getSimilarity()) {
               queueIterator.next();
@@ -446,7 +444,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
   }
 
   private static Map<Object, List<RecommendedItem>> computeTopRecsPerUserID(Iterable<Collection<User>> clusters)
-          throws TasteException {
+      throws TasteException {
     Map<Object, List<RecommendedItem>> recsPerUser = new FastMap<Object, List<RecommendedItem>>();
     for (Collection<User> cluster : clusters) {
       List<RecommendedItem> recs = computeTopRecsForCluster(cluster);
@@ -458,7 +456,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
   }
 
   private static List<RecommendedItem> computeTopRecsForCluster(Collection<User> cluster)
-          throws TasteException {
+      throws TasteException {
 
     Collection<Item> allItems = new FastSet<Item>();
     for (User user : cluster) {
@@ -471,7 +469,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
     TopItems.Estimator<Item> estimator = new Estimator(cluster);
 
     List<RecommendedItem> topItems =
-            TopItems.getTopItems(Integer.MAX_VALUE, allItems, null, estimator);
+        TopItems.getTopItems(Integer.MAX_VALUE, allItems, null, estimator);
 
     log.debug("Recommendations are: {}", topItems);
     return Collections.unmodifiableList(topItems);

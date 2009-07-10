@@ -23,15 +23,13 @@ import org.apache.mahout.common.Classifier;
 import org.apache.mahout.common.Model;
 
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Deque;
 
-/**
- * Classifies documents based on a {@link CBayesModel}.  
- */
-public class CBayesClassifier implements Classifier{
+/** Classifies documents based on a {@link CBayesModel}. */
+public class CBayesClassifier implements Classifier {
 
   /**
    * Classify the document and return the top <code>numResults</code>
@@ -39,8 +37,8 @@ public class CBayesClassifier implements Classifier{
    * @param model           The model
    * @param document        The document to classify
    * @param defaultCategory The default category to assign
-   * @param numResults      The maximum number of results to return, ranked by score.
-   *  Ties are broken by comparing the category
+   * @param numResults      The maximum number of results to return, ranked by score. Ties are broken by comparing the
+   *                        category
    * @return A Collection of {@link org.apache.mahout.classifier.ClassifierResult}s.
    */
   @Override
@@ -48,7 +46,7 @@ public class CBayesClassifier implements Classifier{
     Collection<String> categories = model.getLabels();
     PriorityQueue<ClassifierResult> pq = new ClassifierResultPriorityQueue(numResults);
     ClassifierResult tmp;
-    for (String category : categories){
+    for (String category : categories) {
       double prob = documentWeight(model, category, document);
       if (prob < 0.0) {
         tmp = new ClassifierResult(category, prob);
@@ -60,7 +58,7 @@ public class CBayesClassifier implements Classifier{
     while ((tmp = pq.pop()) != null) {
       result.addLast(tmp);
     }
-    if (result.isEmpty()){
+    if (result.isEmpty()) {
       result.add(new ClassifierResult(defaultCategory, 0));
     }
     return result;
@@ -92,12 +90,12 @@ public class CBayesClassifier implements Classifier{
   }
 
   /**
-   * Calculate the document weight as the multiplication of the
-   * {@link Model#featureWeight(String, String)} for each word given the label
+   * Calculate the document weight as the multiplication of the {@link Model#featureWeight(String, String)} for each
+   * word given the label
    *
-   * @param model       The {@link org.apache.mahout.common.Model}
-   * @param label       The label to calculate the probability of
-   * @param document    The document
+   * @param model    The {@link org.apache.mahout.common.Model}
+   * @param label    The label to calculate the probability of
+   * @param document The document
    * @return The probability
    * @see Model#featureWeight(String, String)
    */
@@ -107,7 +105,7 @@ public class CBayesClassifier implements Classifier{
     for (String word : document) {
       int[] count = wordList.get(word);
       if (count == null) {
-        count = new int[] { 0 };
+        count = new int[]{0};
         wordList.put(word, count);
       }
       count[0]++;
@@ -121,7 +119,7 @@ public class CBayesClassifier implements Classifier{
     return result;
   }
 
-  
+
   private static class ClassifierResultPriorityQueue extends PriorityQueue<ClassifierResult> {
 
     private ClassifierResultPriorityQueue(int numResults) {

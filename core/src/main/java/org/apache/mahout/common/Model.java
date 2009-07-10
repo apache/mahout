@@ -28,9 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-/**
- * The Base Model Class. Currently there are some Bayes Model elements which have to be refactored out later.
- */
+/** The Base Model Class. Currently there are some Bayes Model elements which have to be refactored out later. */
 public abstract class Model {
 
   private static final Logger log = LoggerFactory.getLogger(Model.class);
@@ -52,17 +50,17 @@ public abstract class Model {
   protected double sigma_jSigma_k = 0.0;
 
   protected static final double alpha_i = 1.0; // alpha_i can be improved upon for increased smoothing
-  
+
   protected abstract double featureWeight(Integer label, Integer feature);
-  
+
   protected abstract double getWeight(Integer label, Integer feature);
 
   protected abstract double getWeightUnprocessed(Integer label, Integer feature);
-  
+
   public abstract void initializeNormalizer();
 
   public abstract void generateModel();
-  
+
   protected double getSumLabelWeight(Integer label) {
     return nullToZero(sumLabelWeight.get(label));
   }
@@ -111,14 +109,16 @@ public abstract class Model {
   }
 
   protected void setSumFeatureWeight(Integer feature, double sum) {
-    if (sumFeatureWeight.size() != feature)
+    if (sumFeatureWeight.size() != feature) {
       throw new IllegalStateException("This should not happen");
+    }
     sumFeatureWeight.add(feature, sum);
   }
 
   protected void setSumLabelWeight(Integer label, double sum) {
-    if (sumLabelWeight.size() != label)
+    if (sumLabelWeight.size() != label) {
       throw new IllegalStateException("This should not happen");
+    }
     sumLabelWeight.put(label, sum);
   }
 
@@ -129,8 +129,9 @@ public abstract class Model {
   public void initializeWeightMatrix() {
     log.info("{}", featureList.size());
 
-    for (int i = 0; i < featureList.size(); i++)
-      featureLabelWeights.add(new HashMap<Integer,Double>(1));
+    for (int i = 0; i < featureList.size(); i++) {
+      featureLabelWeights.add(new HashMap<Integer, Double>(1));
+    }
   }
 
   public void setSigma_jSigma_k(double sigma_jSigma_k) {
@@ -155,14 +156,15 @@ public abstract class Model {
 
   /**
    * Get the weighted probability of the feature.
-   * 
-   * @param labelString The label of the feature
+   *
+   * @param labelString   The label of the feature
    * @param featureString The feature to calc. the prob. for
    * @return The weighted probability
    */
   public double featureWeight(String labelString, String featureString) {
-    if (featureList.containsKey(featureString) == false)
+    if (featureList.containsKey(featureString) == false) {
       return 0.0;
+    }
     Integer feature = getFeature(featureString);
     Integer label = getLabel(labelString);
     return featureWeight(label, feature);
@@ -171,28 +173,28 @@ public abstract class Model {
   public Collection<String> getLabels() {
     return labelList.keySet();
   }
-  
-  public static Map<String, List<String>> generateNGrams(String line, int gramSize)
-  {
+
+  public static Map<String, List<String>> generateNGrams(String line, int gramSize) {
     Map<String, List<String>> returnDocument = new HashMap<String, List<String>>();
-    
+
     StringTokenizer tokenizer = new StringTokenizer(line);
     List<String> tokens = new ArrayList<String>();
     String labelName = tokenizer.nextToken();
-    List<String> previousN_1Grams  = new ArrayList<String>();
+    List<String> previousN_1Grams = new ArrayList<String>();
     while (tokenizer.hasMoreTokens()) {
-      
+
       String next_token = tokenizer.nextToken();
-      if(previousN_1Grams.size() == gramSize)
+      if (previousN_1Grams.size() == gramSize) {
         previousN_1Grams.remove(0);
-   
+      }
+
       previousN_1Grams.add(next_token);
-      
+
       StringBuilder gramBuilder = new StringBuilder();
-     
+
       for (String gram : previousN_1Grams) {
         gramBuilder.append(gram);
-        String token = gramBuilder.toString();        
+        String token = gramBuilder.toString();
         tokens.add(token);
         gramBuilder.append(' ');
       }
@@ -200,32 +202,32 @@ public abstract class Model {
     returnDocument.put(labelName, tokens);
     return returnDocument;
   }
-  
-  public static List<String> generateNGramsWithoutLabel(String line, int gramSize)
-  {
-  
+
+  public static List<String> generateNGramsWithoutLabel(String line, int gramSize) {
+
     StringTokenizer tokenizer = new StringTokenizer(line);
     List<String> tokens = new ArrayList<String>();
-   
-    List<String> previousN_1Grams  = new ArrayList<String>();
+
+    List<String> previousN_1Grams = new ArrayList<String>();
     while (tokenizer.hasMoreTokens()) {
-      
+
       String next_token = tokenizer.nextToken();
-      if(previousN_1Grams.size() == gramSize)
+      if (previousN_1Grams.size() == gramSize) {
         previousN_1Grams.remove(0);
-   
+      }
+
       previousN_1Grams.add(next_token);
-      
+
       StringBuilder gramBuilder = new StringBuilder();
-     
+
       for (String gram : previousN_1Grams) {
         gramBuilder.append(gram);
-        String token = gramBuilder.toString();        
+        String token = gramBuilder.toString();
         tokens.add(token);
         gramBuilder.append(' ');
       }
     }
-    
+
     return tokens;
   }
 

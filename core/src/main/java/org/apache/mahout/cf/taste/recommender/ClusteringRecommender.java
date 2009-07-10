@@ -22,14 +22,11 @@ import org.apache.mahout.cf.taste.model.User;
 
 import java.util.Collection;
 
-/**
- * <p>Interface implemented by "clustering" recommenders.</p>
- */
+/** <p>Interface implemented by "clustering" recommenders.</p> */
 public interface ClusteringRecommender extends Recommender {
 
   /**
-   * <p>Returns the cluster of users to which the given {@link User}, denoted by user ID,
-   * belongs.</p>
+   * <p>Returns the cluster of users to which the given {@link User}, denoted by user ID, belongs.</p>
    *
    * @param userID user ID for which to find a cluster
    * @return {@link Collection} of {@link User}s in the requested user's cluster

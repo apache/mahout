@@ -23,9 +23,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 
-/**
- * Implements vector as an array of doubles
- */
+/** Implements vector as an array of doubles */
 public class DenseVector extends AbstractVector {
 
   private double[] values;
@@ -38,11 +36,7 @@ public class DenseVector extends AbstractVector {
     super(name);
   }
 
-  /**
-   * Construct a new instance using provided values
-   * 
-   * @param values
-   */
+  /** Construct a new instance using provided values */
   public DenseVector(double[] values) {
     this.values = values.clone();
   }
@@ -52,11 +46,7 @@ public class DenseVector extends AbstractVector {
     this.values = values.clone();
   }
 
-  /**
-   * Construct a new instance of the given cardinality
-   * 
-   * @param cardinality
-   */
+  /** Construct a new instance of the given cardinality */
   public DenseVector(int cardinality) {
     this(null, cardinality);
   }
@@ -114,25 +104,27 @@ public class DenseVector extends AbstractVector {
 
   @Override
   public Vector viewPart(int offset, int length) {
-    if (length > values.length)
+    if (length > values.length) {
       throw new CardinalityException();
-    if (offset < 0 || offset + length > values.length)
+    }
+    if (offset < 0 || offset + length > values.length) {
       throw new IndexException();
+    }
     return new VectorView(this, offset, length);
   }
 
   @Override
   public boolean haveSharedCells(Vector other) {
-    if (other instanceof DenseVector)
+    if (other instanceof DenseVector) {
       return other == this;
-    else
+    } else {
       return other.haveSharedCells(this);
+    }
   }
 
   /**
-   * Returns an iterator that traverses this Vector from 0 to cardinality-1, in
-   * that order.
-   * 
+   * Returns an iterator that traverses this Vector from 0 to cardinality-1, in that order.
+   *
    * @see java.lang.Iterable#iterator
    */
   @Override
@@ -152,11 +144,11 @@ public class DenseVector extends AbstractVector {
 
     @Override
     public boolean hasNext() {
-      while (offset < values.length && values[offset] == 0){
+      while (offset < values.length && values[offset] == 0) {
         offset++;
       }
       boolean next = true;
-      if (offset >= values.length){
+      if (offset >= values.length) {
         next = false;
       } else {
         element.ind = offset;
@@ -233,7 +225,7 @@ public class DenseVector extends AbstractVector {
 
   @Override
   public void write(DataOutput dataOutput) throws IOException {
-    dataOutput.writeUTF(this.name==null? "": this.name);
+    dataOutput.writeUTF(this.name == null ? "" : this.name);
     dataOutput.writeInt(size());
     Iterator<Vector.Element> iter = iterateAll();
     while (iter.hasNext()) {
@@ -253,28 +245,28 @@ public class DenseVector extends AbstractVector {
   }
 
   /**
-   * Indicate whether the two objects are the same or not. Two
-   * {@link org.apache.mahout.matrix.Vector}s can be equal even if the
-   * underlying implementation is not equal.
-   * 
+   * Indicate whether the two objects are the same or not. Two {@link org.apache.mahout.matrix.Vector}s can be equal
+   * even if the underlying implementation is not equal.
+   *
    * @param o The object to compare
-   * @return true if the objects have the same cell values and same name, false
-   *         otherwise.
-   * 
+   * @return true if the objects have the same cell values and same name, false otherwise.
    * @see AbstractVector#strictEquivalence(Vector, Vector)
    * @see AbstractVector#equivalent(Vector, Vector)
    */
   @Override
   public boolean equals(Object o) {
-    if (this == o)
+    if (this == o) {
       return true;
-    if (!(o instanceof Vector))
+    }
+    if (!(o instanceof Vector)) {
       return false;
+    }
 
     Vector that = (Vector) o;
     String thatName = that.getName();
-    if (this.size() != that.size())
+    if (this.size() != that.size()) {
       return false;
+    }
     if (name != null && thatName != null && !name.equals(thatName)) {
       return false;
     } else if ((name != null && thatName == null)
@@ -283,8 +275,9 @@ public class DenseVector extends AbstractVector {
     }
 
     if (that instanceof DenseVector) {
-      if (!Arrays.equals(values, ((DenseVector) that).values))
+      if (!Arrays.equals(values, ((DenseVector) that).values)) {
         return false;
+      }
     } else {
       return equivalent(this, that);
     }
@@ -300,36 +293,37 @@ public class DenseVector extends AbstractVector {
     return result;
   }
 
-  private Double lengthSquared = null; 
+  private Double lengthSquared = null;
 
   @Override
   public double getLengthSquared() {
-  	if (lengthSquared != null) {
-  		return lengthSquared;
-  	}	
+    if (lengthSquared != null) {
+      return lengthSquared;
+    }
 
-  	double result = 0.0;
+    double result = 0.0;
     for (double value : values) {
       result += value * value;
 
     }
-  	lengthSquared = result;
-  	return result;
+    lengthSquared = result;
+    return result;
   }
 
   @Override
   public double getDistanceSquared(Vector v) {
-  	double result = 0.0;
-  	for (int i = 0; i < values.length; i++) {
-  		double delta = values[i] - v.getQuick(i);
-  		result += delta * delta;	
-  	}	
-  	return result;
+    double result = 0.0;
+    for (int i = 0; i < values.length; i++) {
+      double delta = values[i] - v.getQuick(i);
+      result += delta * delta;
+    }
+    return result;
   }
 
   @Override
   public void addTo(Vector v) {
-    for (int i = 0; i < size(); i++)
-      v.setQuick(i, get(i) + v.get(i));  	
+    for (int i = 0; i < size(); i++) {
+      v.setQuick(i, get(i) + v.get(i));
+    }
   }
 }

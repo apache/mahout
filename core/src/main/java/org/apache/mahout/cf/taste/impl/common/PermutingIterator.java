@@ -21,10 +21,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
-/**
- * An {@link Iterator} that iterates in a random order over a given sequence
- * of elements. It is non-destructive.
- */
+/** An {@link Iterator} that iterates in a random order over a given sequence of elements. It is non-destructive. */
 public final class PermutingIterator<T> implements Iterator<T> {
 
   private final T[] elements;
@@ -67,9 +64,7 @@ public final class PermutingIterator<T> implements Iterator<T> {
     return elements[permutation[offset++]];
   }
 
-  /**
-   * @throws UnsupportedOperationException always
-   */
+  /** @throws UnsupportedOperationException always */
   @Override
   public void remove() {
     throw new UnsupportedOperationException();

@@ -19,25 +19,25 @@ package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
-import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.model.ByItemPreferenceComparator;
 import org.apache.mahout.cf.taste.impl.model.ByValuePreferenceComparator;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.model.DataModel;
+import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.model.Item;
+import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 import java.util.Arrays;
 import java.util.Collection;
 
 /**
- * <p>Like {@link PearsonCorrelationSimilarity}, but compares relative ranking of preference values instead of preference
- * values themselves. That is, each {@link User}'s preferences are sorted and then assign a rank as their preference
- * value, with 1 being assigned to the least preferred item. Then the Pearson correlation of these rank values is
- * computed.</p>
+ * <p>Like {@link PearsonCorrelationSimilarity}, but compares relative ranking of preference values instead of
+ * preference values themselves. That is, each {@link User}'s preferences are sorted and then assign a rank as their
+ * preference value, with 1 being assigned to the least preferred item. Then the Pearson correlation of these rank
+ * values is computed.</p>
  */
 public final class SpearmanCorrelationSimilarity implements UserSimilarity {
 
@@ -63,7 +63,7 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
       throw new IllegalArgumentException("user1 or user2 is null");
     }
     return rankingUserSimilarity.userSimilarity(new RankedPreferenceUser(user1),
-                                                  new RankedPreferenceUser(user2));
+        new RankedPreferenceUser(user2));
   }
 
   @Override
@@ -79,8 +79,8 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
 
 
   /**
-   * <p>A simple {@link User} decorator which will always return the underlying {@link User}'s
-   * preferences in order by value.</p>
+   * <p>A simple {@link User} decorator which will always return the underlying {@link User}'s preferences in order by
+   * value.</p>
    */
   private static final class RankedPreferenceUser implements User {
 

@@ -22,12 +22,12 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.mapred.FileInputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.TextInputFormat;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.mahout.utils.StringUtils;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
@@ -37,28 +37,24 @@ import java.io.OutputStreamWriter;
 import java.util.List;
 
 /**
- * Generic Mahout distributed evaluator. takes an evaluator and a population and
- * launches a Hadoop job. The job evaluates the fitness of each individual of the
- * population using the given evaluator. Takes care of storing the population
- * into an input file, and loading the fitness from job outputs.
+ * Generic Mahout distributed evaluator. takes an evaluator and a population and launches a Hadoop job. The job
+ * evaluates the fitness of each individual of the population using the given evaluator. Takes care of storing the
+ * population into an input file, and loading the fitness from job outputs.
  */
 public class MahoutEvaluator {
   private MahoutEvaluator() {
   }
 
   /**
-   * Uses Mahout to evaluate every candidate from the input population using the
-   * given evaluator.
-   * 
-   * @param evaluator FitnessEvaluator to use
-   * @param population input population
-   * @param evaluations <code>List&lt;Double&gt;</code> that contains the
-   *        evaluated fitness for each candidate from the input population,
-   *        sorted in the same order as the candidates.
-   * @throws IOException
+   * Uses Mahout to evaluate every candidate from the input population using the given evaluator.
+   *
+   * @param evaluator   FitnessEvaluator to use
+   * @param population  input population
+   * @param evaluations <code>List&lt;Double&gt;</code> that contains the evaluated fitness for each candidate from the
+   *                    input population, sorted in the same order as the candidates.
    */
   public static void evaluate(FitnessEvaluator<?> evaluator, List<?> population,
-      List<Double> evaluations) throws IOException {
+                              List<Double> evaluations) throws IOException {
     JobConf conf = new JobConf(MahoutEvaluator.class);
     FileSystem fs = FileSystem.get(conf);
     Path inpath = prepareInput(fs, population);
@@ -73,12 +69,10 @@ public class MahoutEvaluator {
 
   /**
    * Create the input directory and stores the population in it.
-   * 
-   * @param fs <code>FileSystem</code> to use
+   *
+   * @param fs         <code>FileSystem</code> to use
    * @param population population to store
    * @return input <code>Path</code>
-   *
-   * @throws IOException
    */
   private static Path prepareInput(FileSystem fs, List<?> population)
       throws IOException {
@@ -98,14 +92,13 @@ public class MahoutEvaluator {
 
   /**
    * Configure the job
-   * 
-   * @param conf
+   *
    * @param evaluator FitnessEvaluator passed to the mapper
-   * @param inpath input <code>Path</code>
-   * @param outpath output <code>Path</code>
+   * @param inpath    input <code>Path</code>
+   * @param outpath   output <code>Path</code>
    */
   private static void configureJob(JobConf conf, FitnessEvaluator<?> evaluator,
-      Path inpath, Path outpath) {
+                                   Path inpath, Path outpath) {
     FileInputFormat.setInputPaths(conf, inpath);
     FileOutputFormat.setOutputPath(conf, outpath);
 
@@ -126,11 +119,10 @@ public class MahoutEvaluator {
 
   /**
    * Stores a population of candidates in the output file path.
-   * 
-   * @param fs FileSystem used to create the output file
-   * @param f output file path
+   *
+   * @param fs         FileSystem used to create the output file
+   * @param f          output file path
    * @param population population to store
-   * @throws IOException
    */
   static void storePopulation(FileSystem fs, Path f, List<?> population)
       throws IOException {

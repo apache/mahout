@@ -17,8 +17,6 @@
 
 package org.apache.mahout.clustering.dirichlet;
 
-import java.io.IOException;
-
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
@@ -35,6 +33,8 @@ import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 public class DirichletDriver {
 
@@ -68,20 +68,16 @@ public class DirichletDriver {
   /**
    * Run the job using supplied arguments
    *
-   * @param input           the directory pathname for input points
-   * @param output          the directory pathname for output points
-   * @param modelFactory    the String ModelDistribution class name to use
-   * @param numClusters       the number of models
-   * @param maxIterations   the maximum number of iterations
-   * @param alpha_0         the alpha_0 value for the DirichletDistribution
-   * @param numReducers     the number of Reducers desired
-   * @throws ClassNotFoundException 
-   * @throws IllegalAccessException 
-   * @throws InstantiationException 
-   * @throws IOException 
+   * @param input         the directory pathname for input points
+   * @param output        the directory pathname for output points
+   * @param modelFactory  the String ModelDistribution class name to use
+   * @param numClusters   the number of models
+   * @param maxIterations the maximum number of iterations
+   * @param alpha_0       the alpha_0 value for the DirichletDistribution
+   * @param numReducers   the number of Reducers desired
    */
   public static void runJob(String input, String output, String modelFactory,
-      int numClusters, int maxIterations, double alpha_0, int numReducers)
+                            int numClusters, int maxIterations, double alpha_0, int numReducers)
       throws ClassNotFoundException, InstantiationException,
       IllegalAccessException, IOException {
 
@@ -100,7 +96,7 @@ public class DirichletDriver {
   }
 
   private static void writeInitialState(String output, String stateIn,
-      String modelFactory, int numModels, double alpha_0)
+                                        String modelFactory, int numModels, double alpha_0)
       throws ClassNotFoundException, InstantiationException,
       IllegalAccessException, IOException {
     DirichletState<Vector> state = createState(modelFactory, numModels, alpha_0);
@@ -119,7 +115,7 @@ public class DirichletDriver {
 
   @SuppressWarnings("unchecked")
   public static DirichletState<Vector> createState(String modelFactory,
-      int numModels, double alpha_0) throws ClassNotFoundException,
+                                                   int numModels, double alpha_0) throws ClassNotFoundException,
       InstantiationException, IllegalAccessException {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     Class<?> cl = ccl.loadClass(modelFactory);
@@ -132,17 +128,17 @@ public class DirichletDriver {
   /**
    * Run the job using supplied arguments
    *
-   * @param input         the directory pathname for input points
-   * @param stateIn       the directory pathname for input state
-   * @param stateOut      the directory pathname for output state
-   * @param modelFactory  the class name of the model factory class
-   * @param numClusters   the number of clusters
-   * @param alpha_0       alpha_0
-   * @param numReducers   the number of Reducers desired
+   * @param input        the directory pathname for input points
+   * @param stateIn      the directory pathname for input state
+   * @param stateOut     the directory pathname for output state
+   * @param modelFactory the class name of the model factory class
+   * @param numClusters  the number of clusters
+   * @param alpha_0      alpha_0
+   * @param numReducers  the number of Reducers desired
    */
   public static void runIteration(String input, String stateIn,
-      String stateOut, String modelFactory, int numClusters, double alpha_0,
-      int numReducers) {
+                                  String stateOut, String modelFactory, int numClusters, double alpha_0,
+                                  int numReducers) {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(DirichletDriver.class);
 
@@ -176,9 +172,9 @@ public class DirichletDriver {
   /**
    * Run the job using supplied arguments
    *
-   * @param input            the directory pathname for input points
-   * @param stateIn          the directory pathname for input state
-   * @param output           the directory pathname for output points
+   * @param input   the directory pathname for input points
+   * @param stateIn the directory pathname for input state
+   * @param output  the directory pathname for output points
    */
   public static void runClustering(String input, String stateIn, String output) {
     JobClient client = new JobClient();

@@ -19,7 +19,6 @@ package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.IteratorIterable;
 import org.apache.mahout.cf.taste.impl.common.IteratorUtils;
@@ -27,6 +26,7 @@ import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -35,48 +35,42 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
- * <p>A "generic" {@link ItemSimilarity} which takes a static list of precomputed {@link Item}
- * similarities and bases its responses on that alone. The values may have been precomputed
- * offline by another process, stored in a file, and then read and fed into an instance of this class.</p>
+ * <p>A "generic" {@link ItemSimilarity} which takes a static list of precomputed {@link Item} similarities and bases
+ * its responses on that alone. The values may have been precomputed offline by another process, stored in a file, and
+ * then read and fed into an instance of this class.</p>
  *
- * <p>This is perhaps the best {@link ItemSimilarity} to use with
- * {@link org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender}, for now, since the point of item-based
- * recommenders is that they can take advantage of the fact that item similarity is relatively static,
- * can be precomputed, and then used in computation to gain a significant performance advantage.</p>
+ * <p>This is perhaps the best {@link ItemSimilarity} to use with {@link org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender},
+ * for now, since the point of item-based recommenders is that they can take advantage of the fact that item similarity
+ * is relatively static, can be precomputed, and then used in computation to gain a significant performance
+ * advantage.</p>
  */
 public final class GenericItemSimilarity implements ItemSimilarity {
 
   private final Map<Item, Map<Item, Double>> similarityMaps = new FastMap<Item, Map<Item, Double>>();
 
   /**
-   * <p>Creates a {@link GenericItemSimilarity} from a precomputed list of
-   * {@link ItemItemSimilarity}s. Each
-   * represents the similarity between two distinct items. Since similarity is assumed to be symmetric,
-   * it is not necessary to specify similarity between item1 and item2, and item2 and item1. Both are the same.
-   * It is also not necessary to specify a similarity between any item and itself; these are assumed to be 1.0.</p>
+   * <p>Creates a {@link GenericItemSimilarity} from a precomputed list of {@link ItemItemSimilarity}s. Each represents
+   * the similarity between two distinct items. Since similarity is assumed to be symmetric, it is not necessary to
+   * specify similarity between item1 and item2, and item2 and item1. Both are the same. It is also not necessary to
+   * specify a similarity between any item and itself; these are assumed to be 1.0.</p>
    *
-   * <p>Note that specifying a similarity between two items twice is not an error, but, the later value will
-   * win.</p>
+   * <p>Note that specifying a similarity between two items twice is not an error, but, the later value will win.</p>
    *
-   * @param similarities set of
-   *  {@link ItemItemSimilarity}s
-   *  on which to base this instance
+   * @param similarities set of {@link ItemItemSimilarity}s on which to base this instance
    */
   public GenericItemSimilarity(Iterable<ItemItemSimilarity> similarities) {
     initSimilarityMaps(similarities);
   }
 
   /**
-   * <p>Like {@link #GenericItemSimilarity(Iterable)}, but will only keep the specified number of similarities
-   * from the given {@link Iterable} of similarities. It will keep those with the highest similarity --
-   * those that are therefore most important.</p>
+   * <p>Like {@link #GenericItemSimilarity(Iterable)}, but will only keep the specified number of similarities from the
+   * given {@link Iterable} of similarities. It will keep those with the highest similarity -- those that are therefore
+   * most important.</p>
    *
    * <p>Thanks to tsmorton for suggesting this and providing part of the implementation.</p>
    *
-   * @param similarities set of
-   *  {@link ItemItemSimilarity}s
-   *  on which to base this instance
-   * @param maxToKeep maximum number of similarities to keep
+   * @param similarities set of {@link ItemItemSimilarity}s on which to base this instance
+   * @param maxToKeep    maximum number of similarities to keep
    */
   public GenericItemSimilarity(Iterable<ItemItemSimilarity> similarities, int maxToKeep) {
     Iterable<ItemItemSimilarity> keptSimilarities = TopItems.getTopItemItemSimilarities(maxToKeep, similarities);
@@ -84,17 +78,16 @@ public final class GenericItemSimilarity implements ItemSimilarity {
   }
 
   /**
-   * <p>Builds a list of item-item similarities given an {@link ItemSimilarity} implementation and a
-   * {@link DataModel}, rather than a list of
-   * {@link ItemItemSimilarity}s.</p>
+   * <p>Builds a list of item-item similarities given an {@link ItemSimilarity} implementation and a {@link DataModel},
+   * rather than a list of {@link ItemItemSimilarity}s.</p>
    *
-   * <p>It's valid to build a {@link GenericItemSimilarity} this way, but perhaps missing some of the point
-   * of an item-based recommender. Item-based recommenders use the assumption that item-item similarities
-   * are relatively fixed, and might be known already independent of user preferences. Hence it is useful
-   * to inject that information, using {@link #GenericItemSimilarity(Iterable)}.</p>
+   * <p>It's valid to build a {@link GenericItemSimilarity} this way, but perhaps missing some of the point of an
+   * item-based recommender. Item-based recommenders use the assumption that item-item similarities are relatively
+   * fixed, and might be known already independent of user preferences. Hence it is useful to inject that information,
+   * using {@link #GenericItemSimilarity(Iterable)}.</p>
    *
    * @param otherSimilarity other {@link ItemSimilarity} to get similarities from
-   * @param dataModel data model to get {@link Item}s from
+   * @param dataModel       data model to get {@link Item}s from
    * @throws TasteException if an error occurs while accessing the {@link DataModel} items
    */
   public GenericItemSimilarity(ItemSimilarity otherSimilarity, DataModel dataModel) throws TasteException {
@@ -104,23 +97,23 @@ public final class GenericItemSimilarity implements ItemSimilarity {
   }
 
   /**
-   * <p>Like {@link #GenericItemSimilarity(ItemSimilarity, DataModel)} )}, but will only
-   * keep the specified number of similarities from the given {@link DataModel}.
-   * It will keep those with the highest similarity -- those that are therefore most important.</p>
+   * <p>Like {@link #GenericItemSimilarity(ItemSimilarity, DataModel)} )}, but will only keep the specified number of
+   * similarities from the given {@link DataModel}. It will keep those with the highest similarity -- those that are
+   * therefore most important.</p>
    *
    * <p>Thanks to tsmorton for suggesting this and providing part of the implementation.</p>
    *
    * @param otherSimilarity other {@link ItemSimilarity} to get similarities from
-   * @param dataModel data model to get {@link Item}s from
-   * @param maxToKeep maximum number of similarities to keep
+   * @param dataModel       data model to get {@link Item}s from
+   * @param maxToKeep       maximum number of similarities to keep
    * @throws TasteException if an error occurs while accessing the {@link DataModel} items
    */
   public GenericItemSimilarity(ItemSimilarity otherSimilarity, DataModel dataModel, int maxToKeep)
-          throws TasteException {
+      throws TasteException {
     List<? extends Item> items = IteratorUtils.iterableToList(dataModel.getItems());
     Iterator<ItemItemSimilarity> it = new DataModelSimilaritiesIterator(otherSimilarity, items);
     Iterable<ItemItemSimilarity> keptSimilarities =
-            TopItems.getTopItemItemSimilarities(maxToKeep, new IteratorIterable<ItemItemSimilarity>(it));
+        TopItems.getTopItemItemSimilarities(maxToKeep, new IteratorIterable<ItemItemSimilarity>(it));
     initSimilarityMaps(keptSimilarities);
   }
 
@@ -153,8 +146,8 @@ public final class GenericItemSimilarity implements ItemSimilarity {
 
   /**
    * <p>Returns the similarity between two items. Note that similarity is assumed to be symmetric, that
-   * <code>itemSimilarity(item1, item2) == itemSimilarity(item2, item1)</code>, and that
-   * <code>itemSimilarity(item1, item1) == 1.0</code> for all items.</p>
+   * <code>itemSimilarity(item1, item2) == itemSimilarity(item2, item1)</code>, and that <code>itemSimilarity(item1,
+   * item1) == 1.0</code> for all items.</p>
    *
    * @param item1 first item
    * @param item2 second item
@@ -188,9 +181,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
     // Do nothing
   }
 
-  /**
-   * Encapsulates a similarity between two items. Similarity must be in the range [-1.0,1.0].
-   */
+  /** Encapsulates a similarity between two items. Similarity must be in the range [-1.0,1.0]. */
   public static final class ItemItemSimilarity implements Comparable<ItemItemSimilarity> {
 
     private final Item item1;
@@ -232,9 +223,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
       return "ItemItemSimilarity[" + item1 + ',' + item2 + ':' + value + ']';
     }
 
-    /**
-     * Defines an ordering from highest similarity to lowest.
-     */
+    /** Defines an ordering from highest similarity to lowest. */
     @Override
     public int compareTo(ItemItemSimilarity other) {
       double otherValue = other.value;

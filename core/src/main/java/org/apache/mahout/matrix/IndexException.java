@@ -17,9 +17,7 @@
 
 package org.apache.mahout.matrix;
 
-/**
- * Exception thrown when there is an index outside of [0, cardinality)
- */
+/** Exception thrown when there is an index outside of [0, cardinality) */
 public class IndexException extends RuntimeException {
 
 }

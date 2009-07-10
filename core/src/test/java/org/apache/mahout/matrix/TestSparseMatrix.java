@@ -25,11 +25,13 @@ public class TestSparseMatrix extends MatrixTest {
 
   @Override
   public Matrix matrixFactory(double[][] values) {
-    int[] cardinality = { values.length, values[0].length };
+    int[] cardinality = {values.length, values[0].length};
     Matrix matrix = new SparseMatrix(cardinality);
-    for (int row = 0; row < cardinality[ROW]; row++)
-      for (int col = 0; col < cardinality[COL]; col++)
+    for (int row = 0; row < cardinality[ROW]; row++) {
+      for (int col = 0; col < cardinality[COL]; col++) {
         matrix.setQuick(row, col, values[row][col]);
+      }
+    }
     return matrix;
   }
 

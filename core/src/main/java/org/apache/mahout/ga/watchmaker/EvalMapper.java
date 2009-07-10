@@ -17,9 +17,9 @@
 
 package org.apache.mahout.ga.watchmaker;
 
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
@@ -31,13 +31,9 @@ import org.uncommons.watchmaker.framework.FitnessEvaluator;
 import java.io.IOException;
 
 /**
- * <p>
- * Generic Mapper class for fitness evaluation. Works with the following :
- * <code>&lt;key, candidate, key, fitness&gt;</code>, where :
- * </p>
- * key: position of the current candidate in the input file. <br>
- * candidate: candidate solution to evaluate. <br>
- * fitness: evaluated fitness for the given candidate.
+ * <p> Generic Mapper class for fitness evaluation. Works with the following : <code>&lt;key, candidate, key,
+ * fitness&gt;</code>, where : </p> key: position of the current candidate in the input file. <br> candidate: candidate
+ * solution to evaluate. <br> fitness: evaluated fitness for the given candidate.
  */
 public class EvalMapper extends MapReduceBase implements
     Mapper<LongWritable, Text, LongWritable, DoubleWritable> {
@@ -48,7 +44,7 @@ public class EvalMapper extends MapReduceBase implements
   private FitnessEvaluator<Object> evaluator = null;
 
   @Override
-  @SuppressWarnings("unchecked")  
+  @SuppressWarnings("unchecked")
   public void configure(JobConf job) {
     String evlstr = job.get(MAHOUT_GA_EVALUATOR);
     if (evlstr == null) {
@@ -63,7 +59,7 @@ public class EvalMapper extends MapReduceBase implements
 
   @Override
   public void map(LongWritable key, Text value,
-      OutputCollector<LongWritable,DoubleWritable> output, Reporter reporter)
+                  OutputCollector<LongWritable, DoubleWritable> output, Reporter reporter)
       throws IOException {
     Object candidate = StringUtils.fromString(value.toString());
 

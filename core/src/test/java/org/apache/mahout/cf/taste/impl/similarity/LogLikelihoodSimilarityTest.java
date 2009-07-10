@@ -20,17 +20,15 @@ package org.apache.mahout.cf.taste.impl.similarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
 
-/**
- * <p>Tests {@link LogLikelihoodSimilarity}.</p>
- */
+/** <p>Tests {@link LogLikelihoodSimilarity}.</p> */
 public final class LogLikelihoodSimilarityTest extends SimilarityTestCase {
 
   public void testCorrelation() throws Exception {
-    User user1 = getUser("test1", 1.0,  1.0);
-    User user2 = getUser("test2", 1.0,  null, 1.0);
-    User user3 = getUser("test3", null, null, 1.0,  1.0,  1.0);
-    User user4 = getUser("test4", 1.0,  1.0,  1.0,  1.0,  1.0);
-    User user5 = getUser("test5", null, 1.0,  1.0,  1.0,  1.0);
+    User user1 = getUser("test1", 1.0, 1.0);
+    User user2 = getUser("test2", 1.0, null, 1.0);
+    User user3 = getUser("test3", null, null, 1.0, 1.0, 1.0);
+    User user4 = getUser("test4", 1.0, 1.0, 1.0, 1.0, 1.0);
+    User user5 = getUser("test5", null, 1.0, 1.0, 1.0, 1.0);
     DataModel dataModel = getDataModel(user1, user2, user3, user4, user5);
 
     double correlation = new LogLikelihoodSimilarity(dataModel).

@@ -30,15 +30,12 @@ import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
 import java.util.Collection;
 
 /**
- * <p>Normalizes preference values for a {@link User} by converting them to
- * <a href="http://mathworld.wolfram.com/z-Score.html">"z-scores"</a>. This process
- * normalizes preference values to adjust for variation in mean and variance of a
- * user's preferences.</p>
+ * <p>Normalizes preference values for a {@link User} by converting them to <a href="http://mathworld.wolfram.com/z-Score.html">"z-scores"</a>.
+ * This process normalizes preference values to adjust for variation in mean and variance of a user's preferences.</p>
  *
- * <p>Imagine two users, one who tends to rate every movie he/she sees four or five stars,
- * and another who uses the full one to five star range when assigning ratings. This
- * transform normalizes away the difference in scale used by the two users so that both
- * have a mean preference of 0.0 and a standard deviation of 1.0.</p>
+ * <p>Imagine two users, one who tends to rate every movie he/she sees four or five stars, and another who uses the full
+ * one to five star range when assigning ratings. This transform normalizes away the difference in scale used by the two
+ * users so that both have a mean preference of 0.0 and a standard deviation of 1.0.</p>
  */
 public final class ZScore implements PreferenceTransform {
 

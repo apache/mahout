@@ -17,15 +17,15 @@
 
 package org.apache.mahout.matrix;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Iterator;
-
 import junit.framework.TestCase;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class TestSparseVector extends TestCase {
 
-  final double[] values = { 1.1, 2.2, 3.3 };
+  final double[] values = {1.1, 2.2, 3.3};
   final double[] gold = {0, 1.1, 2.2, 3.3, 0};
   final Vector test = new SparseVector(values.length + 2);
 
@@ -36,8 +36,9 @@ public class TestSparseVector extends TestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    for (int i = 0; i < values.length; i++)
+    for (int i = 0; i < values.length; i++) {
       test.set(i + 1, values[i]);
+    }
   }
 
   public void testAsFormatString() {
@@ -59,7 +60,7 @@ public class TestSparseVector extends TestCase {
     iterator = test.iterateAll();
     checkIterator(iterator, gold);
 
-    double[] doubles = new double[]{0.0, 5.0, 0, 3.0};
+    double[] doubles = {0.0, 5.0, 0, 3.0};
     SparseVector zeros = new SparseVector(doubles.length);
     for (int i = 0; i < doubles.length; i++) {
       zeros.setQuick(i, doubles[i]);
@@ -81,26 +82,29 @@ public class TestSparseVector extends TestCase {
 
   }
 
-  private void checkIterator(Iterator<Vector.Element> nzIter, double[] values) {
+  private static void checkIterator(Iterator<Vector.Element> nzIter, double[] values) {
     while (nzIter.hasNext()) {
       Vector.Element elt = nzIter.next();
       assertTrue((elt.index()) + " Value: " + values[elt.index()]
-              + " does not equal: " + elt.get(), values[elt.index()] == elt.get());
+          + " does not equal: " + elt.get(), values[elt.index()] == elt.get());
     }
   }
 
   public void testCopy() throws Exception {
     Vector copy = test.clone();
-    for (int i = 0; i < test.size(); i++)
+    for (int i = 0; i < test.size(); i++) {
       assertEquals("copy [" + i + ']', test.get(i), copy.get(i));
+    }
   }
 
   public void testGet() throws Exception {
-    for (int i = 0; i < test.size(); i++)
-      if (i > 0 && i < 4)
+    for (int i = 0; i < test.size(); i++) {
+      if (i > 0 && i < 4) {
         assertEquals("get [" + i + ']', values[i - 1], test.get(i));
-      else
+      } else {
         assertEquals("get [" + i + ']', 0.0, test.get(i));
+      }
+    }
   }
 
   public void testGetOver() {
@@ -123,13 +127,15 @@ public class TestSparseVector extends TestCase {
 
   public void testSet() throws Exception {
     test.set(2, 4.5);
-    for (int i = 0; i < test.size(); i++)
-      if (i == 0 || i == 4)
+    for (int i = 0; i < test.size(); i++) {
+      if (i == 0 || i == 4) {
         assertEquals("get [" + i + ']', 0.0, test.get(i));
-      else if (i == 2)
+      } else if (i == 2) {
         assertEquals("set [" + i + ']', 4.5, test.get(i));
-      else
+      } else {
         assertEquals("set [" + i + ']', values[i - 1], test.get(i));
+      }
+    }
   }
 
   public void testSize() throws Exception {
@@ -139,8 +145,9 @@ public class TestSparseVector extends TestCase {
   public void testViewPart() throws Exception {
     Vector part = test.viewPart(1, 2);
     assertEquals("part size", 2, part.getNumNondefaultElements());
-    for (int i = 0; i < part.size(); i++)
+    for (int i = 0; i < part.size(); i++) {
       assertEquals("part[" + i + ']', values[i], part.get(i));
+    }
   }
 
   public void testViewPartUnder() {
@@ -178,15 +185,17 @@ public class TestSparseVector extends TestCase {
 
   public void testDecodeVector() throws Exception {
     Vector val = AbstractVector.decodeVector(test.asFormatString());
-    for (int i = 0; i < test.size(); i++)
+    for (int i = 0; i < test.size(); i++) {
       assertEquals("get [" + i + ']', test.get(i), val.get(i));
+    }
   }
 
   public void testSparseDoubleVectorInt() throws Exception {
     Vector val = new SparseVector(4);
     assertEquals("size", 4, val.size());
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 4; i++) {
       assertEquals("get [" + i + ']', 0.0, val.get(i));
+    }
   }
 
   public void testDot() throws Exception {
@@ -206,38 +215,45 @@ public class TestSparseVector extends TestCase {
   public void testNormalize() throws Exception {
     Vector val = test.normalize();
     double mag = Math.sqrt(1.1 * 1.1 + 2.2 * 2.2 + 3.3 * 3.3);
-    for (int i = 0; i < test.size(); i++)
-      if (i == 0 || i == 4)
+    for (int i = 0; i < test.size(); i++) {
+      if (i == 0 || i == 4) {
         assertEquals("get [" + i + ']', 0.0, val.get(i));
-      else
+      } else {
         assertEquals("dot", values[i - 1] / mag, val.get(i));
+      }
+    }
   }
 
   public void testMinus() throws Exception {
     Vector val = test.minus(test);
     assertEquals("size", test.size(), val.size());
-    for (int i = 0; i < test.size(); i++)
+    for (int i = 0; i < test.size(); i++) {
       assertEquals("get [" + i + ']', 0.0, val.get(i));
+    }
   }
 
   public void testPlusDouble() throws Exception {
     Vector val = test.plus(1);
     assertEquals("size", test.size(), val.size());
-    for (int i = 0; i < test.size(); i++)
-      if (i == 0 || i == 4)
+    for (int i = 0; i < test.size(); i++) {
+      if (i == 0 || i == 4) {
         assertEquals("get [" + i + ']', 1.0, val.get(i));
-      else
+      } else {
         assertEquals("get [" + i + ']', values[i - 1] + 1, val.get(i));
+      }
+    }
   }
 
   public void testPlusVector() throws Exception {
     Vector val = test.plus(test);
     assertEquals("size", test.size(), val.size());
-    for (int i = 0; i < test.size(); i++)
-      if (i == 0 || i == 4)
+    for (int i = 0; i < test.size(); i++) {
+      if (i == 0 || i == 4) {
         assertEquals("get [" + i + ']', 0.0, val.get(i));
-      else
+      } else {
         assertEquals("get [" + i + ']', values[i - 1] * 2, val.get(i));
+      }
+    }
   }
 
   public void testPlusVectorCardinality() {
@@ -252,32 +268,38 @@ public class TestSparseVector extends TestCase {
   public void testTimesDouble() throws Exception {
     Vector val = test.times(3);
     assertEquals("size", test.size(), val.size());
-    for (int i = 0; i < test.size(); i++)
-      if (i == 0 || i == 4)
+    for (int i = 0; i < test.size(); i++) {
+      if (i == 0 || i == 4) {
         assertEquals("get [" + i + ']', 0.0, val.get(i));
-      else
+      } else {
         assertEquals("get [" + i + ']', values[i - 1] * 3, val.get(i));
+      }
+    }
   }
 
   public void testDivideDouble() throws Exception {
     Vector val = test.divide(3);
     assertEquals("size", test.size(), val.size());
-    for (int i = 0; i < test.size(); i++)
-      if (i == 0 || i == 4)
+    for (int i = 0; i < test.size(); i++) {
+      if (i == 0 || i == 4) {
         assertEquals("get [" + i + ']', 0.0, val.get(i));
-      else
+      } else {
         assertEquals("get [" + i + ']', values[i - 1] / 3, val.get(i));
+      }
+    }
   }
 
   public void testTimesVector() throws Exception {
     Vector val = test.times(test);
     assertEquals("size", test.size(), val.size());
-    for (int i = 0; i < test.size(); i++)
-      if (i == 0 || i == 4)
+    for (int i = 0; i < test.size(); i++) {
+      if (i == 0 || i == 4) {
         assertEquals("get [" + i + ']', 0.0, val.get(i));
-      else
+      } else {
         assertEquals("get [" + i + ']', values[i - 1] * values[i - 1], val
             .get(i));
+      }
+    }
   }
 
   public void testTimesVectorCardinality() {
@@ -299,15 +321,17 @@ public class TestSparseVector extends TestCase {
 
   public void testAssignDouble() {
     test.assign(0);
-    for (int i = 0; i < values.length; i++)
+    for (int i = 0; i < values.length; i++) {
       assertEquals("value[" + i + ']', 0.0, test.getQuick(i));
+    }
   }
 
   public void testAssignDoubleArray() throws Exception {
     double[] array = new double[test.size()];
     test.assign(array);
-    for (int i = 0; i < values.length; i++)
+    for (int i = 0; i < values.length; i++) {
       assertEquals("value[" + i + ']', 0.0, test.getQuick(i));
+    }
   }
 
   public void testAssignDoubleArrayCardinality() {
@@ -323,8 +347,9 @@ public class TestSparseVector extends TestCase {
   public void testAssignVector() throws Exception {
     Vector other = new DenseVector(test.size());
     test.assign(other);
-    for (int i = 0; i < values.length; i++)
+    for (int i = 0; i < values.length; i++) {
       assertEquals("value[" + i + ']', 0.0, test.getQuick(i));
+    }
   }
 
   public void testAssignVectorCardinality() {
@@ -339,38 +364,46 @@ public class TestSparseVector extends TestCase {
 
   public void testAssignUnaryFunction() {
     test.assign(new NegateFunction());
-    for (int i = 0; i < values.length; i++)
-      if (i == 0 || i == 4)
+    for (int i = 0; i < values.length; i++) {
+      if (i == 0 || i == 4) {
         assertEquals("get [" + i + ']', 0.0, test.getQuick(i));
-      else
+      } else {
         assertEquals("value[" + i + ']', -values[i - 1], test.getQuick(i));
+      }
+    }
   }
 
   public void testAssignBinaryFunction() throws Exception {
     test.assign(test, new PlusFunction());
-    for (int i = 0; i < values.length; i++)
-      if (i == 0 || i == 4)
+    for (int i = 0; i < values.length; i++) {
+      if (i == 0 || i == 4) {
         assertEquals("get [" + i + ']', 0.0, test.get(i));
-      else
+      } else {
         assertEquals("value[" + i + ']', 2 * values[i - 1], test.getQuick(i));
+      }
+    }
   }
 
   public void testAssignBinaryFunction2() throws Exception {
     test.assign(new PlusFunction(), 4);
-    for (int i = 0; i < values.length; i++)
-      if (i == 0 || i == 4)
+    for (int i = 0; i < values.length; i++) {
+      if (i == 0 || i == 4) {
         assertEquals("get [" + i + ']', 4.0, test.get(i));
-      else
+      } else {
         assertEquals("value[" + i + ']', values[i - 1] + 4, test.getQuick(i));
+      }
+    }
   }
 
   public void testAssignBinaryFunction3() throws Exception {
     test.assign(new TimesFunction(), 4);
-    for (int i = 0; i < values.length; i++)
-      if (i == 0 || i == 4)
+    for (int i = 0; i < values.length; i++) {
+      if (i == 0 || i == 4) {
         assertEquals("get [" + i + ']', 0.0, test.get(i));
-      else
+      } else {
         assertEquals("value[" + i + ']', values[i - 1] * 4, test.getQuick(i));
+      }
+    }
   }
 
   public void testAssignBinaryFunctionCardinality() {
@@ -415,10 +448,12 @@ public class TestSparseVector extends TestCase {
     Matrix result = test.cross(test);
     assertEquals("row size", test.size(), result.size()[0]);
     assertEquals("col size", test.size(), result.size()[1]);
-    for (int row = 0; row < result.size()[0]; row++)
-      for (int col = 0; col < result.size()[1]; col++)
+    for (int row = 0; row < result.size()[0]; row++) {
+      for (int col = 0; col < result.size()[1]; col++) {
         assertEquals("cross[" + row + "][" + col + ']', test.getQuick(row)
             * test.getQuick(col), result.getQuick(row, col));
+      }
+    }
   }
 
   public void testLabelIndexing() {

@@ -19,10 +19,7 @@ package org.apache.mahout.cf.taste.impl;
 
 import junit.textui.TestRunner;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
-import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
-import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
@@ -32,12 +29,15 @@ import org.apache.mahout.cf.taste.impl.recommender.CachingRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.GenericUserBasedRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender;
+import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,9 +51,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-/**
- * <p>Generates load on the whole implementation, for profiling purposes mostly.</p>
- */
+/** <p>Generates load on the whole implementation, for profiling purposes mostly.</p> */
 public final class LoadTest extends TasteTestCase {
 
   private static final Logger log = LoggerFactory.getLogger(LoadTest.class);
@@ -89,7 +87,7 @@ public final class LoadTest extends TasteTestCase {
     UserSimilarity userSimilarity = new PearsonCorrelationSimilarity(model);
     UserNeighborhood neighborhood = new NearestNUserNeighborhood(10, userSimilarity, model);
     Recommender recommender =
-            new CachingRecommender(new GenericUserBasedRecommender(model, neighborhood, userSimilarity));
+        new CachingRecommender(new GenericUserBasedRecommender(model, neighborhood, userSimilarity));
     doTestLoad(recommender, 40);
   }
 
@@ -115,7 +113,7 @@ public final class LoadTest extends TasteTestCase {
   }
 
   private void doTestLoad(Recommender recommender, int allowedTimeSec)
-          throws InterruptedException, ExecutionException {
+      throws InterruptedException, ExecutionException {
 
     ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
     Collection<Future<?>> futures = new ArrayList<Future<?>>(NUM_THREADS);

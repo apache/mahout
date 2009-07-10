@@ -18,25 +18,20 @@
 package org.apache.mahout.cf.taste.model;
 
 /**
- * <p>A {@link Preference} encapsulates an {@link Item} and a preference value, which
- * indicates the strength of the preference for it. {@link Preference}s are associated
- * to {@link User}s.</p>
+ * <p>A {@link Preference} encapsulates an {@link Item} and a preference value, which indicates the strength of the
+ * preference for it. {@link Preference}s are associated to {@link User}s.</p>
  */
 public interface Preference {
 
-  /**
-   * @return {@link User} who prefers the {@link Item}
-   */
+  /** @return {@link User} who prefers the {@link Item} */
   User getUser();
 
-  /**
-   * @return {@link Item} that is preferred
-   */
+  /** @return {@link Item} that is preferred */
   Item getItem();
 
   /**
-   * @return strength of the preference for that item. Zero should indicate "no preference either way";
-   *         positive values indicate preference and negative values indicate dislike
+   * @return strength of the preference for that item. Zero should indicate "no preference either way"; positive values
+   *         indicate preference and negative values indicate dislike
    */
   double getValue();
 

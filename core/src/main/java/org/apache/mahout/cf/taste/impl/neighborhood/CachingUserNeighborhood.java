@@ -28,9 +28,7 @@ import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 
 import java.util.Collection;
 
-/**
- * A caching wrapper around an underlying {@link UserNeighborhood} implementation.
- */
+/** A caching wrapper around an underlying {@link UserNeighborhood} implementation. */
 public final class CachingUserNeighborhood implements UserNeighborhood {
 
   private final UserNeighborhood neighborhood;
@@ -59,9 +57,11 @@ public final class CachingUserNeighborhood implements UserNeighborhood {
 
   private static final class NeighborhoodRetriever implements Retriever<Object, Collection<User>> {
     private final UserNeighborhood neighborhood;
+
     private NeighborhoodRetriever(UserNeighborhood neighborhood) {
       this.neighborhood = neighborhood;
     }
+
     @Override
     public Collection<User> get(Object key) throws TasteException {
       return neighborhood.getUserNeighborhood(key);

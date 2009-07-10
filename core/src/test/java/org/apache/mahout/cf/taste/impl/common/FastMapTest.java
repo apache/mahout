@@ -26,9 +26,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-/**
- * <p>Tests {@link FastMap}.</p>
- */
+/** <p>Tests {@link FastMap}.</p> */
 public final class FastMapTest extends TasteTestCase {
 
   public void testPutAndGet() {

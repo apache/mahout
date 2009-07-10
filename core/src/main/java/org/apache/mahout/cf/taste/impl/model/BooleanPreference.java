@@ -23,9 +23,9 @@ import org.apache.mahout.cf.taste.model.User;
 import java.io.Serializable;
 
 /**
- * Encapsulates a simple boolean "preference" for an {@link Item} whose value does not matter (is fixed
- * at 1.0). This is appropriate in situations where users conceptually have only a general "yes" preference
- * for items, rather than a spectrum of preference values.
+ * Encapsulates a simple boolean "preference" for an {@link Item} whose value does not matter (is fixed at 1.0). This is
+ * appropriate in situations where users conceptually have only a general "yes" preference for items, rather than a
+ * spectrum of preference values.
  */
 public final class BooleanPreference implements SettableUserPreference, Serializable {
 

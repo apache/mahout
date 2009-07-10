@@ -27,16 +27,13 @@ import org.apache.hadoop.mapred.Reporter;
 import java.io.IOException;
 import java.util.Iterator;
 
-/**
- * Can also be used as a local Combiner beacuse only two values should be there
- * inside the values
- */
+/** Can also be used as a local Combiner beacuse only two values should be there inside the values */
 public class CBayesThetaNormalizerReducer extends MapReduceBase implements
     Reducer<Text, DoubleWritable, Text, DoubleWritable> {
 
   @Override
   public void reduce(Text key, Iterator<DoubleWritable> values,
-      OutputCollector<Text, DoubleWritable> output, Reporter reporter)
+                     OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {
     // Key is label,word, value is the number of times we've seen this label
     // word per local node. Output is the same

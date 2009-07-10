@@ -18,14 +18,13 @@
 package org.apache.mahout.classifier;
 
 import org.apache.commons.cli2.CommandLine;
-import org.apache.commons.cli2.Option;
 import org.apache.commons.cli2.Group;
+import org.apache.commons.cli2.Option;
 import org.apache.commons.cli2.OptionException;
-import org.apache.commons.cli2.commandline.Parser;
-import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.ArgumentBuilder;
+import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
-
+import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
@@ -42,12 +41,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.nio.charset.Charset;
 
 public class Classify {
 
@@ -57,37 +56,37 @@ public class Classify {
   }
 
   public static void main(String[] args)
-          throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException, OptionException {
+      throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException, OptionException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
     Option pathOpt = obuilder.withLongName("path").withRequired(true).withArgument(
-            abuilder.withName("path").withMinimum(1).withMaximum(1).create()).withDescription("The local file system path").withShortName("p").create();
+        abuilder.withName("path").withMinimum(1).withMaximum(1).create()).withDescription("The local file system path").withShortName("p").create();
 
     Option classifyOpt = obuilder.withLongName("classify").withRequired(true).withArgument(
-            abuilder.withName("classify").withMinimum(1).withMaximum(1).create()).
-            withDescription("The doc to classify").withShortName("").create();
+        abuilder.withName("classify").withMinimum(1).withMaximum(1).create()).
+        withDescription("The doc to classify").withShortName("").create();
 
     Option encodingOpt = obuilder.withLongName("encoding").withRequired(true).withArgument(
-            abuilder.withName("encoding").withMinimum(1).withMaximum(1).create()).
-            withDescription("The file encoding.  Default: UTF-8").withShortName("e").create();
+        abuilder.withName("encoding").withMinimum(1).withMaximum(1).create()).
+        withDescription("The file encoding.  Default: UTF-8").withShortName("e").create();
 
     Option analyzerOpt = obuilder.withLongName("analyzer").withRequired(true).withArgument(
-            abuilder.withName("analyzer").withMinimum(1).withMaximum(1).create()).
-            withDescription("The Analyzer to use").withShortName("a").create();
+        abuilder.withName("analyzer").withMinimum(1).withMaximum(1).create()).
+        withDescription("The Analyzer to use").withShortName("a").create();
 
     Option defaultCatOpt = obuilder.withLongName("defaultCat").withRequired(true).withArgument(
-            abuilder.withName("defaultCat").withMinimum(1).withMaximum(1).create()).
-            withDescription("The default category").withShortName("d").create();
+        abuilder.withName("defaultCat").withMinimum(1).withMaximum(1).create()).
+        withDescription("The default category").withShortName("d").create();
 
     Option gramSizeOpt = obuilder.withLongName("gramSize").withRequired(true).withArgument(
-            abuilder.withName("gramSize").withMinimum(1).withMaximum(1).create()).
-            withDescription("Size of the n-gram").withShortName("ng").create();
+        abuilder.withName("gramSize").withMinimum(1).withMaximum(1).create()).
+        withDescription("Size of the n-gram").withShortName("ng").create();
 
     Option typeOpt = obuilder.withLongName("classifierType").withRequired(true).withArgument(
-            abuilder.withName("classifierType").withMinimum(1).withMaximum(1).create()).
-            withDescription("Type of classifier").withShortName("type").create();
+        abuilder.withName("classifierType").withMinimum(1).withMaximum(1).create()).
+        withDescription("Type of classifier").withShortName("type").create();
 
     Group options = gbuilder.withName("Options").withOption(pathOpt).withOption(classifyOpt).withOption(encodingOpt).withOption(analyzerOpt).withOption(defaultCatOpt).withOption(gramSizeOpt).withOption(typeOpt).create();
 
@@ -159,11 +158,10 @@ public class Classify {
     log.info("Converting input document to proper format");
     String[] document = BayesFileFormatter.readerToDocument(analyzer, new InputStreamReader(new FileInputStream(docPath), Charset.forName(encoding)));
     StringBuilder line = new StringBuilder();
-    for(String token : document)
-    {
+    for (String token : document) {
       line.append(token).append(' ');
     }
-    List<String> doc = Model.generateNGramsWithoutLabel(line.toString(), gramSize) ;
+    List<String> doc = Model.generateNGramsWithoutLabel(line.toString(), gramSize);
     log.info("Done converting");
     log.info("Classifying document: {}", docPath);
     ClassifierResult category = classifier.classify(model, doc.toArray(new String[doc.size()]), defaultCat);

@@ -17,9 +17,9 @@ package org.apache.mahout.utils;
  */
 
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.mahout.utils.parameters.Parameter;
-import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.matrix.CardinalityException;
+import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.utils.parameters.Parameter;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -27,12 +27,10 @@ import java.util.Iterator;
 
 
 /**
- * Like {@link org.apache.mahout.utils.EuclideanDistanceMeasure} but it does not take the square root.
- * <p/>
- * Thus, it is not actually the Euclidean Distance, but it is saves on computation when you only need the distance for
- * comparison and don't care about the actual value as a distance.
- *
- **/
+ * Like {@link org.apache.mahout.utils.EuclideanDistanceMeasure} but it does not take the square root. <p/> Thus, it is
+ * not actually the Euclidean Distance, but it is saves on computation when you only need the distance for comparison
+ * and don't care about the actual value as a distance.
+ */
 public class SquaredEuclideanDistanceMeasure implements DistanceMeasure {
 
   @Override
@@ -62,8 +60,9 @@ public class SquaredEuclideanDistanceMeasure implements DistanceMeasure {
 
   @Override
   public double distance(Vector v1, Vector v2) {
-    if (v1.size() != v2.size())
+    if (v1.size() != v2.size()) {
       throw new CardinalityException();
+    }
     double result = 0;
     Vector vector = v1.plus(v2);
     Iterator<Vector.Element> iter = vector.iterateNonZero();//this contains all non zero elements between the two
@@ -78,11 +77,12 @@ public class SquaredEuclideanDistanceMeasure implements DistanceMeasure {
 
   @Override
   public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
-	    if (centroid.size() != centroid.size())
-	        throw new CardinalityException();
+    if (centroid.size() != centroid.size()) {
+      throw new CardinalityException();
+    }
 
-	    double result = centroidLengthSquare;
-	    result += v.getDistanceSquared(centroid);
-	    return result;
+    double result = centroidLengthSquare;
+    result += v.getDistanceSquared(centroid);
+    return result;
   }
 }

@@ -19,9 +19,7 @@ package org.apache.mahout.cf.taste.impl.common;
 
 import java.io.Serializable;
 
-/**
- * A simplified and streamlined version of {@link java.util.BitSet}.
- */
+/** A simplified and streamlined version of {@link java.util.BitSet}. */
 final class BitSet implements Serializable, Cloneable {
 
   private final long[] bits;

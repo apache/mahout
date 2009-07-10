@@ -20,12 +20,12 @@ package org.apache.mahout.cf.taste.impl.recommender;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -46,17 +46,14 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * <p>A {@link org.apache.mahout.cf.taste.recommender.Recommender} that clusters {@link User}s, then determines
- * the clusters' top recommendations. This implementation builds clusters by repeatedly merging clusters
- * until only a certain number remain, meaning that each cluster is sort of a tree of other clusters.</p>
+ * <p>A {@link org.apache.mahout.cf.taste.recommender.Recommender} that clusters {@link User}s, then determines the
+ * clusters' top recommendations. This implementation builds clusters by repeatedly merging clusters until only a
+ * certain number remain, meaning that each cluster is sort of a tree of other clusters.</p>
  *
- * <p>This {@link org.apache.mahout.cf.taste.recommender.Recommender} therefore has a few properties to note:</p>
- * <ul>
- * <li>For all {@link User}s in a cluster, recommendations will be the same</li>
- * <li>{@link #estimatePreference(Object, Object)} may well return {@link Double#NaN}; it does so when asked
- * to estimate preference for an {@link Item} for which no preference is expressed in the {@link User}s in
- * the cluster.</li>
- * </ul>
+ * <p>This {@link org.apache.mahout.cf.taste.recommender.Recommender} therefore has a few properties to note:</p> <ul>
+ * <li>For all {@link User}s in a cluster, recommendations will be the same</li> <li>{@link #estimatePreference(Object,
+ * Object)} may well return {@link Double#NaN}; it does so when asked to estimate preference for an {@link Item} for
+ * which no preference is expressed in the {@link User}s in the cluster.</li> </ul>
  */
 public final class TreeClusteringRecommender extends AbstractRecommender implements ClusteringRecommender {
 
@@ -77,11 +74,10 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   private final RefreshHelper refreshHelper;
 
   /**
-   * @param dataModel {@link DataModel} which provdes {@link User}s
+   * @param dataModel         {@link DataModel} which provdes {@link User}s
    * @param clusterSimilarity {@link ClusterSimilarity} used to compute cluster similarity
-   * @param numClusters desired number of clusters to create
-   * @throws IllegalArgumentException if arguments are <code>null</code>, or <code>numClusters</code> is
-   * less than 2
+   * @param numClusters       desired number of clusters to create
+   * @throws IllegalArgumentException if arguments are <code>null</code>, or <code>numClusters</code> is less than 2
    */
   public TreeClusteringRecommender(DataModel dataModel,
                                    ClusterSimilarity clusterSimilarity,
@@ -90,14 +86,13 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   }
 
   /**
-   * @param dataModel {@link DataModel} which provdes {@link User}s
+   * @param dataModel         {@link DataModel} which provdes {@link User}s
    * @param clusterSimilarity {@link ClusterSimilarity} used to compute cluster similarity
-   * @param numClusters desired number of clusters to create
-   * @param samplingRate percentage of all cluster-cluster pairs to consider when finding
-   * next-most-similar clusters. Decreasing this value from 1.0 can increase performance at the
-   * cost of accuracy
-   * @throws IllegalArgumentException if arguments are <code>null</code>, or <code>numClusters</code> is
-   * less than 2, or samplingRate is {@link Double#NaN} or nonpositive or greater than 1.0
+   * @param numClusters       desired number of clusters to create
+   * @param samplingRate      percentage of all cluster-cluster pairs to consider when finding next-most-similar
+   *                          clusters. Decreasing this value from 1.0 can increase performance at the cost of accuracy
+   * @throws IllegalArgumentException if arguments are <code>null</code>, or <code>numClusters</code> is less than 2, or
+   *                                  samplingRate is {@link Double#NaN} or nonpositive or greater than 1.0
    */
   public TreeClusteringRecommender(DataModel dataModel,
                                    ClusterSimilarity clusterSimilarity,
@@ -131,12 +126,12 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   }
 
   /**
-   * @param dataModel {@link DataModel} which provdes {@link User}s
-   * @param clusterSimilarity {@link ClusterSimilarity} used to compute cluster similarity
-   * @param clusteringThreshold clustering similarity threshold; clusters will be aggregated into larger
-   * clusters until the next two nearest clusters' similarity drops below this threshold
-   * @throws IllegalArgumentException if arguments are <code>null</code>, or <code>clusteringThreshold</code> is
-   * {@link Double#NaN}
+   * @param dataModel           {@link DataModel} which provdes {@link User}s
+   * @param clusterSimilarity   {@link ClusterSimilarity} used to compute cluster similarity
+   * @param clusteringThreshold clustering similarity threshold; clusters will be aggregated into larger clusters until
+   *                            the next two nearest clusters' similarity drops below this threshold
+   * @throws IllegalArgumentException if arguments are <code>null</code>, or <code>clusteringThreshold</code> is {@link
+   *                                  Double#NaN}
    */
   public TreeClusteringRecommender(DataModel dataModel,
                                    ClusterSimilarity clusterSimilarity,
@@ -145,15 +140,16 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   }
 
   /**
-   * @param dataModel {@link DataModel} which provides {@link User}s
-   * @param clusterSimilarity {@link ClusterSimilarity} used to compute cluster similarity
-   * @param clusteringThreshold clustering similarity threshold; clusters will be aggregated into larger
-   * clusters until the next two nearest clusters' similarity drops below this threshold
-   * @param samplingRate percentage of all cluster-cluster pairs to consider when finding
-   * next-most-similar clusters. Decreasing this value from 1.0 can increase performance at the
-   * cost of accuracy
-   * @throws IllegalArgumentException if arguments are <code>null</code>, or <code>clusteringThreshold</code> is
-   * {@link Double#NaN}, or samplingRate is {@link Double#NaN} or nonpositive or greater than 1.0
+   * @param dataModel           {@link DataModel} which provides {@link User}s
+   * @param clusterSimilarity   {@link ClusterSimilarity} used to compute cluster similarity
+   * @param clusteringThreshold clustering similarity threshold; clusters will be aggregated into larger clusters until
+   *                            the next two nearest clusters' similarity drops below this threshold
+   * @param samplingRate        percentage of all cluster-cluster pairs to consider when finding next-most-similar
+   *                            clusters. Decreasing this value from 1.0 can increase performance at the cost of
+   *                            accuracy
+   * @throws IllegalArgumentException if arguments are <code>null</code>, or <code>clusteringThreshold</code> is {@link
+   *                                  Double#NaN}, or samplingRate is {@link Double#NaN} or nonpositive or greater than
+   *                                  1.0
    */
   public TreeClusteringRecommender(DataModel dataModel,
                                    ClusterSimilarity clusterSimilarity,
@@ -188,7 +184,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
 
   @Override
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
-          throws TasteException {
+      throws TasteException {
     if (userID == null) {
       throw new IllegalArgumentException("userID is null");
     }
@@ -270,7 +266,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   }
 
   private void buildClusters() throws TasteException {
-    buildClustersLock.lock();    
+    buildClustersLock.lock();
     try {
       DataModel model = getDataModel();
       int numUsers = model.getNumUsers();
@@ -326,7 +322,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     } else {
       while (newClusters.size() > numClusters) {
         Pair<Collection<User>, Collection<User>> nearestPair =
-                findNearestClusters(newClusters);
+            findNearestClusters(newClusters);
         if (nearestPair == null) {
           break;
         }
@@ -343,7 +339,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   }
 
   private Pair<Collection<User>, Collection<User>> findNearestClusters(List<Collection<User>> clusters)
-          throws TasteException {
+      throws TasteException {
     int size = clusters.size();
     Pair<Collection<User>, Collection<User>> nearestPair = null;
     double bestSimilarity = Double.NEGATIVE_INFINITY;
@@ -364,7 +360,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   }
 
   private static Map<Object, List<RecommendedItem>> computeTopRecsPerUserID(
-          Iterable<Collection<User>> clusters) throws TasteException {
+      Iterable<Collection<User>> clusters) throws TasteException {
     Map<Object, List<RecommendedItem>> recsPerUser = new FastMap<Object, List<RecommendedItem>>();
     for (Collection<User> cluster : clusters) {
       List<RecommendedItem> recs = computeTopRecsForCluster(cluster);
@@ -376,7 +372,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   }
 
   private static List<RecommendedItem> computeTopRecsForCluster(Collection<User> cluster)
-          throws TasteException {
+      throws TasteException {
 
     Collection<Item> allItems = new FastSet<Item>();
     for (User user : cluster) {

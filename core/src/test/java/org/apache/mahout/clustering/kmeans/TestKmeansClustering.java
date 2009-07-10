@@ -48,17 +48,17 @@ import java.util.Map;
 
 public class TestKmeansClustering extends TestCase {
 
-  public static final double[][] reference = { { 1, 1 }, { 2, 1 }, { 1, 2 },
-      { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 4 }, { 4, 5 }, { 5, 5 } };
+  public static final double[][] reference = {{1, 1}, {2, 1}, {1, 2},
+      {2, 2}, {3, 3}, {4, 4}, {5, 4}, {4, 5}, {5, 5}};
 
-  public static final int[][] expectedNumPoints = { { 9 }, { 4, 5 },
-      { 4, 4, 1 }, { 1, 2, 1, 5 }, { 1, 1, 1, 2, 4 }, { 1, 1, 1, 1, 1, 4 },
-      { 1, 1, 1, 1, 1, 2, 2 }, { 1, 1, 1, 1, 1, 1, 2, 1 },
-      { 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
+  public static final int[][] expectedNumPoints = {{9}, {4, 5},
+      {4, 4, 1}, {1, 2, 1, 5}, {1, 1, 1, 2, 4}, {1, 1, 1, 1, 1, 4},
+      {1, 1, 1, 1, 1, 2, 2}, {1, 1, 1, 1, 1, 1, 2, 1},
+      {1, 1, 1, 1, 1, 1, 1, 1, 1}};
 
   FileSystem fs;
 
-  private void rmr(String path) throws Exception {
+  private static void rmr(String path) throws Exception {
     File f = new File(path);
     if (f.exists()) {
       if (f.isDirectory()) {
@@ -81,17 +81,16 @@ public class TestKmeansClustering extends TestCase {
   }
 
   /**
-   * This is the reference k-means implementation. Given its inputs it iterates
-   * over the points and clusters until their centers converge or until the
-   * maximum number of iterations is exceeded.
-   * 
-   * @param points the input List<Vector> of points
+   * This is the reference k-means implementation. Given its inputs it iterates over the points and clusters until their
+   * centers converge or until the maximum number of iterations is exceeded.
+   *
+   * @param points   the input List<Vector> of points
    * @param clusters the initial List<Cluster> of clusters
-   * @param measure the DistanceMeasure to use
-   * @param maxIter the maximum number of iterations
+   * @param measure  the DistanceMeasure to use
+   * @param maxIter  the maximum number of iterations
    */
   private void referenceKmeans(List<Vector> points, List<Cluster> clusters,
-      DistanceMeasure measure, int maxIter) {
+                               DistanceMeasure measure, int maxIter) {
     boolean converged = false;
     int iteration = 0;
     while (!converged && iteration++ < maxIter) {
@@ -100,16 +99,15 @@ public class TestKmeansClustering extends TestCase {
   }
 
   /**
-   * Perform a single iteration over the points and clusters, assigning points
-   * to clusters and returning if the iterations are completed.
-   * 
-   * @param points the List<Vector> having the input points
+   * Perform a single iteration over the points and clusters, assigning points to clusters and returning if the
+   * iterations are completed.
+   *
+   * @param points   the List<Vector> having the input points
    * @param clusters the List<Cluster> clusters
-   * @param measure a DistanceMeasure to use
-   * @return
+   * @param measure  a DistanceMeasure to use
    */
-  private boolean iterateReference(List<Vector> points, List<Cluster> clusters,
-      DistanceMeasure measure) {
+  private static boolean iterateReference(List<Vector> points, List<Cluster> clusters,
+                                   DistanceMeasure measure) {
     // iterate through all points, assigning each to the nearest cluster
     for (Vector point : points) {
       Cluster closestCluster = null;
@@ -126,13 +124,16 @@ public class TestKmeansClustering extends TestCase {
     // test for convergence
     boolean converged = true;
     for (Cluster cluster : clusters) {
-      if (!cluster.computeConvergence())
+      if (!cluster.computeConvergence()) {
         converged = false;
+      }
     }
     // update the cluster centers
-    if (!converged)
-      for (Cluster cluster : clusters)
+    if (!converged) {
+      for (Cluster cluster : clusters) {
         cluster.recomputeCenter();
+      }
+    }
     return converged;
   }
 
@@ -147,11 +148,7 @@ public class TestKmeansClustering extends TestCase {
     return points;
   }
 
-  /**
-   * Story: Test the reference implementation
-   * 
-   * @throws Exception
-   */
+  /** Story: Test the reference implementation */
   public void testReferenceImplementation() throws Exception {
     List<Vector> points = getPoints(reference);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
@@ -177,7 +174,7 @@ public class TestKmeansClustering extends TestCase {
     }
   }
 
-  private Map<String, Cluster> loadClusterMap(List<Cluster> clusters) {
+  private static Map<String, Cluster> loadClusterMap(List<Cluster> clusters) {
     Map<String, Cluster> clusterMap = new HashMap<String, Cluster>();
 
     for (Cluster cluster : clusters) {
@@ -186,11 +183,7 @@ public class TestKmeansClustering extends TestCase {
     return clusterMap;
   }
 
-  /**
-   * Story: test that the mapper will map input points to the nearest cluster
-   * 
-   * @throws Exception
-   */
+  /** Story: test that the mapper will map input points to the nearest cluster */
   public void testKMeansMapper() throws Exception {
     KMeansMapper mapper = new KMeansMapper();
     EuclideanDistanceMeasure euclideanDistanceMeasure = new EuclideanDistanceMeasure();
@@ -223,20 +216,16 @@ public class TestKmeansClustering extends TestCase {
         for (KMeansInfo value : values) {
           double distance = euclideanDistanceMeasure.distance(cluster
               .getCenter(), value.getPointTotal());
-          for (Cluster c : clusters)
+          for (Cluster c : clusters) {
             assertTrue("distance error", distance <= euclideanDistanceMeasure
                 .distance(value.getPointTotal(), c.getCenter()));
+          }
         }
       }
     }
   }
 
-  /**
-   * Story: test that the combiner will produce partial cluster totals for all
-   * of the clusters and points that it sees
-   * 
-   * @throws Exception
-   */
+  /** Story: test that the combiner will produce partial cluster totals for all of the clusters and points that it sees */
   public void testKMeansCombiner() throws Exception {
     KMeansMapper mapper = new KMeansMapper();
     EuclideanDistanceMeasure euclideanDistanceMeasure = new EuclideanDistanceMeasure();
@@ -263,9 +252,10 @@ public class TestKmeansClustering extends TestCase {
       // now combine the data
       KMeansCombiner combiner = new KMeansCombiner();
       DummyOutputCollector<Text, KMeansInfo> collector2 = new DummyOutputCollector<Text, KMeansInfo>();
-      for (String key : collector.getKeys())
+      for (String key : collector.getKeys()) {
         combiner.reduce(new Text(key), collector.getValue(key).iterator(),
             collector2, null);
+      }
 
       assertEquals("Number of map results", k + 1, collector2.getData().size());
       // now verify that all points are accounted for
@@ -286,12 +276,7 @@ public class TestKmeansClustering extends TestCase {
     }
   }
 
-  /**
-   * Story: test that the reducer will sum the partial cluster totals for all of
-   * the clusters and points that it sees
-   * 
-   * @throws Exception
-   */
+  /** Story: test that the reducer will sum the partial cluster totals for all of the clusters and points that it sees */
   public void testKMeansReducer() throws Exception {
     KMeansMapper mapper = new KMeansMapper();
     EuclideanDistanceMeasure euclideanDistanceMeasure = new EuclideanDistanceMeasure();
@@ -318,17 +303,19 @@ public class TestKmeansClustering extends TestCase {
       // now combine the data
       KMeansCombiner combiner = new KMeansCombiner();
       DummyOutputCollector<Text, KMeansInfo> collector2 = new DummyOutputCollector<Text, KMeansInfo>();
-      for (String key : collector.getKeys())
+      for (String key : collector.getKeys()) {
         combiner.reduce(new Text(key), collector.getValue(key).iterator(),
             collector2, null);
+      }
 
       // now reduce the data
       KMeansReducer reducer = new KMeansReducer();
       reducer.config(clusters);
       DummyOutputCollector<Text, Cluster> collector3 = new DummyOutputCollector<Text, Cluster>();
-      for (String key : collector2.getKeys())
+      for (String key : collector2.getKeys()) {
         reducer.reduce(new Text(key), collector2.getValue(key).iterator(),
             collector3, null);
+      }
 
       assertEquals("Number of map results", k + 1, collector3.getData().size());
 
@@ -340,10 +327,11 @@ public class TestKmeansClustering extends TestCase {
       }
       boolean converged = iterateReference(points, reference,
           euclideanDistanceMeasure);
-      if (k == 8)
+      if (k == 8) {
         assertTrue("not converged? " + k, converged);
-      else
+      } else {
         assertFalse("converged? " + k, converged);
+      }
 
       // now verify that all clusters have correct centers
       converged = true;
@@ -361,26 +349,25 @@ public class TestKmeansClustering extends TestCase {
         /*assertEquals(k + " center[" + key + "][1]", ref.getCenter().get(1),
             cluster.getCenter().get(1));*/
       }
-      if (k == 8)
+      if (k == 8) {
         assertTrue("not converged? " + k, converged);
-      else
+      } else {
         assertFalse("converged? " + k, converged);
+      }
     }
   }
 
-  /**
-   * Story: User wishes to run kmeans job on reference data
-   * 
-   * @throws Exception
-   */
+  /** Story: User wishes to run kmeans job on reference data */
   public void testKMeansMRJob() throws Exception {
     List<Vector> points = getPoints(reference);
     File testData = new File("testdata");
-    if (!testData.exists())
+    if (!testData.exists()) {
       testData.mkdir();
+    }
     testData = new File("testdata/points");
-    if (!testData.exists())
+    if (!testData.exists()) {
       testData.mkdir();
+    }
 
     Configuration conf = new Configuration();
     ClusteringTestUtils.writePointsToFile(points, "testdata/points/file1", fs, conf);
@@ -431,29 +418,28 @@ public class TestKmeansClustering extends TestCase {
       }
       reader.close();
       if (k == 2)
-        // cluster 3 is empty so won't appear in output
-        assertEquals("clusters[" + k + "]", expect.length - 1, collector
+      // cluster 3 is empty so won't appear in output
+      {
+        assertEquals("clusters[" + k + ']', expect.length - 1, collector
             .getKeys().size());
-      else
-        assertEquals("clusters[" + k + "]", expect.length, collector.getKeys()
+      } else {
+        assertEquals("clusters[" + k + ']', expect.length, collector.getKeys()
             .size());
+      }
     }
   }
 
-  /**
-   * Story: User wants to use canopy clustering to input the initial clusters
-   * for kmeans job.
-   * 
-   * @throws Exception
-   */
+  /** Story: User wants to use canopy clustering to input the initial clusters for kmeans job. */
   public void textKMeansWithCanopyClusterInput() throws Exception {
     List<Vector> points = getPoints(reference);
     File testData = new File("testdata");
-    if (!testData.exists())
+    if (!testData.exists()) {
       testData.mkdir();
+    }
     testData = new File("testdata/points");
-    if (!testData.exists())
+    if (!testData.exists()) {
       testData.mkdir();
+    }
     Configuration conf = new Configuration();
     ClusteringTestUtils.writePointsToFile(points, "testdata/points/file1", fs, conf);
     ClusteringTestUtils.writePointsToFile(points, "testdata/points/file2", fs, conf);

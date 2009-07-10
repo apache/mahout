@@ -21,9 +21,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
 
-/**
- * <p>Tests {@link SpearmanCorrelationSimilarity}.</p>
- */
+/** <p>Tests {@link SpearmanCorrelationSimilarity}.</p> */
 public final class SpearmanCorrelationSimilarityTest extends SimilarityTestCase {
 
   public void testFullCorrelation1() throws Exception {

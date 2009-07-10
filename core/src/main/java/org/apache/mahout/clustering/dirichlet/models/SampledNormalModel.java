@@ -32,15 +32,18 @@ public class SampledNormalModel extends NormalModel {
   public String toString() {
     StringBuilder buf = new StringBuilder();
     buf.append("snm{n=").append(s0).append(" m=[");
-    if (mean != null)
-      for (int i = 0; i < mean.size(); i++)
+    if (mean != null) {
+      for (int i = 0; i < mean.size(); i++) {
         buf.append(String.format("%.2f", mean.get(i))).append(", ");
+      }
+    }
     buf.append("] sd=").append(String.format("%.2f", sd)).append('}');
     return buf.toString();
   }
 
   /**
    * Return an instance with the same parameters
+   *
    * @return an SampledNormalModel
    */
   @Override

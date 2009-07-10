@@ -27,8 +27,8 @@ import java.util.Collections;
 import java.util.Iterator;
 
 /**
- * This class implements a cosine distance metric by dividing the dot product
- * of two vectors by the product of their lengths
+ * This class implements a cosine distance metric by dividing the dot product of two vectors by the product of their
+ * lengths
  */
 public class CosineDistanceMeasure implements DistanceMeasure {
 
@@ -59,16 +59,18 @@ public class CosineDistanceMeasure implements DistanceMeasure {
     double denominator = Math.sqrt(lengthSquaredp1) * Math.sqrt(lengthSquaredp2);
 
     // correct for floating-point rounding errors
-    if (denominator < dotProduct)
+    if (denominator < dotProduct) {
       denominator = dotProduct;
+    }
 
     return 1.0 - (dotProduct / denominator);
   }
 
   @Override
   public double distance(Vector v1, Vector v2) {
-    if (v1.size() != v2.size())
+    if (v1.size() != v2.size()) {
       throw new CardinalityException();
+    }
     double lengthSquaredv1 = 0.0;
     Iterator<Vector.Element> iter = v1.iterateNonZero();
     while (iter.hasNext()) {
@@ -86,15 +88,16 @@ public class CosineDistanceMeasure implements DistanceMeasure {
     double denominator = Math.sqrt(lengthSquaredv1) * Math.sqrt(lengthSquaredv2);
 
     // correct for floating-point rounding errors
-    if (denominator < dotProduct)
+    if (denominator < dotProduct) {
       denominator = dotProduct;
+    }
 
     return 1.0 - (dotProduct / denominator);
   }
 
   @Override
-   public double distance(double centroidLengthSquare, Vector centroid, Vector v) {	 
-     return distance(centroid, v); // TODO
-   }
+  public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
+    return distance(centroid, v); // TODO
+  }
 
 }

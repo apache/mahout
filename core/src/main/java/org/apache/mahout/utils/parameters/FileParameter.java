@@ -21,7 +21,7 @@ import org.apache.hadoop.mapred.JobConf;
 
 import java.io.File;
 
-public class FileParameter extends AbstractParameter<File>{
+public class FileParameter extends AbstractParameter<File> {
 
   public FileParameter(String prefix, String name, JobConf jobConf, File defaultValue, String description) {
     super(File.class, prefix, name, jobConf, defaultValue, description);

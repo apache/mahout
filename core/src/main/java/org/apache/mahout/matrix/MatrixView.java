@@ -21,9 +21,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-/**
- * Implements subset view of a Matrix
- */
+/** Implements subset view of a Matrix */
 public class MatrixView extends AbstractMatrix {
 
   private Matrix matrix;
@@ -40,9 +38,9 @@ public class MatrixView extends AbstractMatrix {
 
   /**
    * Construct a view of the matrix with given offset and cardinality
-   * 
-   * @param matrix an underlying Matrix
-   * @param offset the int[2] offset into the underlying matrix
+   *
+   * @param matrix      an underlying Matrix
+   * @param offset      the int[2] offset into the underlying matrix
    * @param cardinality the int[2] cardinality of the view
    */
   public MatrixView(Matrix matrix, int[] offset, int[] cardinality) {
@@ -93,11 +91,13 @@ public class MatrixView extends AbstractMatrix {
 
   @Override
   public Matrix viewPart(int[] offset, int[] size) {
-    if (size[ROW] > cardinality[ROW] || size[COL] > cardinality[COL])
+    if (size[ROW] > cardinality[ROW] || size[COL] > cardinality[COL]) {
       throw new CardinalityException();
+    }
     if ((offset[ROW] < ROW || offset[ROW] + size[ROW] > cardinality[ROW])
-        || (offset[COL] < ROW || offset[COL] + size[COL] > cardinality[COL]))
+        || (offset[COL] < ROW || offset[COL] + size[COL] > cardinality[COL])) {
       throw new IndexException();
+    }
     int[] origin = offset.clone();
     origin[ROW] += offset[ROW];
     origin[COL] += offset[COL];
@@ -106,44 +106,51 @@ public class MatrixView extends AbstractMatrix {
 
   @Override
   public boolean haveSharedCells(Matrix other) {
-    if (other instanceof MatrixView)
+    if (other instanceof MatrixView) {
       return other == this || matrix.haveSharedCells(other);
-    else
+    } else {
       return other.haveSharedCells(matrix);
+    }
   }
 
   @Override
   public Matrix assignColumn(int column, Vector other) {
-    if (cardinality[ROW] != other.size())
+    if (cardinality[ROW] != other.size()) {
       throw new CardinalityException();
-    for (int row = 0; row < cardinality[ROW]; row++)
+    }
+    for (int row = 0; row < cardinality[ROW]; row++) {
       matrix.setQuick(row + offset[ROW], column + offset[COL], other
           .getQuick(row));
+    }
     return this;
   }
 
   @Override
   public Matrix assignRow(int row, Vector other) {
-    if (cardinality[COL] != other.size())
+    if (cardinality[COL] != other.size()) {
       throw new CardinalityException();
-    for (int col = 0; col < cardinality[COL]; col++)
+    }
+    for (int col = 0; col < cardinality[COL]; col++) {
       matrix
           .setQuick(row + offset[ROW], col + offset[COL], other.getQuick(col));
+    }
     return this;
   }
 
   @Override
   public Vector getColumn(int column) {
-    if (column < 0 || column >= cardinality[COL])
+    if (column < 0 || column >= cardinality[COL]) {
       throw new IndexException();
+    }
     return new VectorView(matrix.getColumn(column + offset[COL]), offset[ROW],
         cardinality[ROW]);
   }
 
   @Override
   public Vector getRow(int row) {
-    if (row < 0 || row >= cardinality[ROW])
+    if (row < 0 || row >= cardinality[ROW]) {
       throw new IndexException();
+    }
     return new VectorView(matrix.getRow(row + offset[ROW]), offset[COL],
         cardinality[COL]);
   }
@@ -151,9 +158,9 @@ public class MatrixView extends AbstractMatrix {
   @Override
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
-    int[] o = { in.readInt(), in.readInt() };
+    int[] o = {in.readInt(), in.readInt()};
     this.offset = o;
-    int[] c = { in.readInt(), in.readInt() };
+    int[] c = {in.readInt(), in.readInt()};
     this.cardinality = c;
     this.matrix = readMatrix(in);
   }

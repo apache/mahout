@@ -19,10 +19,7 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 
-/**
- * <p>Simple {@link Rescorer} which negates the given score, thus reversing
- * order of rankings.</p>
- */
+/** <p>Simple {@link Rescorer} which negates the given score, thus reversing order of rankings.</p> */
 public final class ReversingRescorer<T> implements Rescorer<T> {
 
   @Override

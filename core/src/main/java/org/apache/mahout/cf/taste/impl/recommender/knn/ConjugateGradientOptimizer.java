@@ -126,6 +126,6 @@ public final class ConjugateGradientOptimizer implements Optimizer {
     }
 
     return x;
-	}
+  }
 
 }

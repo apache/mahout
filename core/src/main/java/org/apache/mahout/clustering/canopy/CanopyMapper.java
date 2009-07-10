@@ -17,10 +17,6 @@
 
 package org.apache.mahout.clustering.canopy;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -29,6 +25,10 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.matrix.Vector;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CanopyMapper extends MapReduceBase implements
     Mapper<WritableComparable<?>, Vector, Text, Vector> {
@@ -39,7 +39,7 @@ public class CanopyMapper extends MapReduceBase implements
 
   @Override
   public void map(WritableComparable<?> key, Vector point,
-      OutputCollector<Text, Vector> output, Reporter reporter) throws IOException {
+                  OutputCollector<Text, Vector> output, Reporter reporter) throws IOException {
     outputCollector = output;
     Canopy.addPointToCanopies(point, canopies);
   }

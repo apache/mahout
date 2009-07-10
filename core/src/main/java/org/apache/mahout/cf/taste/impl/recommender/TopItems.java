@@ -31,9 +31,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-/**
- * <p>A simple class that refactors the "find top N things" logic that is used in several places.</p>
- */
+/** <p>A simple class that refactors the "find top N things" logic that is used in several places.</p> */
 public final class TopItems {
 
   private TopItems() {
@@ -110,12 +108,12 @@ public final class TopItems {
    *
    * @see GenericItemSimilarity#GenericItemSimilarity(Iterable, int)
    * @see GenericItemSimilarity#GenericItemSimilarity(org.apache.mahout.cf.taste.similarity.ItemSimilarity,
-   *  org.apache.mahout.cf.taste.model.DataModel, int)
+   *      org.apache.mahout.cf.taste.model.DataModel, int)
    */
   public static List<GenericItemSimilarity.ItemItemSimilarity> getTopItemItemSimilarities(
-          int howMany, Iterable<GenericItemSimilarity.ItemItemSimilarity> allSimilarities) {
+      int howMany, Iterable<GenericItemSimilarity.ItemItemSimilarity> allSimilarities) {
     Queue<GenericItemSimilarity.ItemItemSimilarity> topSimilarities =
-            new PriorityQueue<GenericItemSimilarity.ItemItemSimilarity>(howMany + 1, Collections.reverseOrder());
+        new PriorityQueue<GenericItemSimilarity.ItemItemSimilarity>(howMany + 1, Collections.reverseOrder());
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
     for (GenericItemSimilarity.ItemItemSimilarity similarity : allSimilarities) {
@@ -132,16 +130,16 @@ public final class TopItems {
       }
     }
     List<GenericItemSimilarity.ItemItemSimilarity> result =
-      new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(topSimilarities.size());
+        new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(topSimilarities.size());
     result.addAll(topSimilarities);
     Collections.sort(result);
     return result;
   }
 
   public static List<GenericUserSimilarity.UserUserSimilarity> getTopUserUserSimilarities(
-          int howMany, Iterable<GenericUserSimilarity.UserUserSimilarity> allSimilarities) {
+      int howMany, Iterable<GenericUserSimilarity.UserUserSimilarity> allSimilarities) {
     Queue<GenericUserSimilarity.UserUserSimilarity> topSimilarities =
-            new PriorityQueue<GenericUserSimilarity.UserUserSimilarity>(howMany + 1, Collections.reverseOrder());
+        new PriorityQueue<GenericUserSimilarity.UserUserSimilarity>(howMany + 1, Collections.reverseOrder());
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
     for (GenericUserSimilarity.UserUserSimilarity similarity : allSimilarities) {
@@ -158,7 +156,7 @@ public final class TopItems {
       }
     }
     List<GenericUserSimilarity.UserUserSimilarity> result =
-      new ArrayList<GenericUserSimilarity.UserUserSimilarity>(topSimilarities.size());
+        new ArrayList<GenericUserSimilarity.UserUserSimilarity>(topSimilarities.size());
     result.addAll(topSimilarities);
     Collections.sort(result);
     return result;

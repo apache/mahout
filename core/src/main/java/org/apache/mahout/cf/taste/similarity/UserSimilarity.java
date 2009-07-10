@@ -22,17 +22,15 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.model.User;
 
 /**
- * <p>Implementations of this interface define a notion of similarity between two
- * {@link User}s. Implementations should return values in the range -1.0 to 1.0, with
- * 1.0 representing perfect similarity.</p>
+ * <p>Implementations of this interface define a notion of similarity between two {@link User}s. Implementations should
+ * return values in the range -1.0 to 1.0, with 1.0 representing perfect similarity.</p>
  *
  * @see ItemSimilarity
  */
 public interface UserSimilarity extends Refreshable {
 
   /**
-   * <p>Returns the degree of similarity, of two {@link User}s, based
-   * on the their preferences.</p>
+   * <p>Returns the degree of similarity, of two {@link User}s, based on the their preferences.</p>
    *
    * @param user1 first user
    * @param user2 second user

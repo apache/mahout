@@ -21,9 +21,7 @@ import org.apache.mahout.cf.taste.impl.common.FastMap;
 
 import java.util.Map;
 
-/**
- * <p>A simple, fast utility class that maps keys to counts.</p>
- */
+/** <p>A simple, fast utility class that maps keys to counts.</p> */
 final class Counters<T> {
 
   private final Map<T, int[]> counts = new FastMap<T, int[]>();

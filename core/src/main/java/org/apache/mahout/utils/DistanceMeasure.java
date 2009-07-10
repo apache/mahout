@@ -17,34 +17,27 @@
 
 package org.apache.mahout.utils;
 
-import org.apache.mahout.matrix.CardinalityException;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.parameters.Parametered;
 
-/**
- * This interface is used for objects which can determine a distance metric
- * between two points
- */
+/** This interface is used for objects which can determine a distance metric between two points */
 public interface DistanceMeasure extends Parametered {
 
   /**
    * Returns the distance metric applied to the arguments
-   * 
+   *
    * @param v1 a Vector defining a multidimensional point in some feature space
    * @param v2 a Vector defining a multidimensional point in some feature space
    * @return a scalar doubles of the distance
-   * @throws CardinalityException
    */
   double distance(Vector v1, Vector v2);
-  
+
   /**
-   * Optimized version of distance metric for sparse vectors. This distance computation requires  
-   * operations proportional to the number of non-zero elements in the vector instead of the cardinality 
-   * of the vector.
+   * Optimized version of distance metric for sparse vectors. This distance computation requires operations proportional
+   * to the number of non-zero elements in the vector instead of the cardinality of the vector.
+   *
    * @param centroidLengthSquare Square of the length of centroid
-   * @param centroid Centroid vector
-   * @param v 
-   * @return
+   * @param centroid             Centroid vector
    */
   double distance(double centroidLengthSquare, Vector centroid, Vector v);
 

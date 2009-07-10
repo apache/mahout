@@ -17,9 +17,9 @@
 
 package org.apache.mahout.cf.taste.impl.eval;
 
-import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
+import org.apache.mahout.cf.taste.common.NoSuchUserException;
+import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -44,14 +44,14 @@ public final class AverageAbsoluteDifferenceRecommenderEvaluator extends Abstrac
   @Override
   double getEvaluation(Map<User, Collection<Preference>> testUserPrefs,
                        Recommender recommender)
-          throws TasteException {
+      throws TasteException {
     RunningAverage average = new FullRunningAverage();
     for (Map.Entry<User, Collection<Preference>> entry : testUserPrefs.entrySet()) {
       for (Preference realPref : entry.getValue()) {
         User testUser = entry.getKey();
         try {
           double estimatedPreference =
-                  recommender.estimatePreference(testUser.getID(), realPref.getItem().getID());
+              recommender.estimatePreference(testUser.getID(), realPref.getItem().getID());
           if (!Double.isNaN(estimatedPreference)) {
             average.addDatum(Math.abs(realPref.getValue() - estimatedPreference));
           }

@@ -20,14 +20,14 @@ package org.apache.mahout.cf.taste.impl.common;
 import org.apache.mahout.cf.taste.common.TasteException;
 
 /**
- * <p>An efficient Map-like class which caches values for keys. Values are not "put" into a {@link Cache};
- * instead the caller supplies the instance with an implementation of {@link Retriever} which can load the
- * value for a given key.</p>
+ * <p>An efficient Map-like class which caches values for keys. Values are not "put" into a {@link Cache}; instead the
+ * caller supplies the instance with an implementation of {@link Retriever} which can load the value for a given
+ * key.</p>
  *
  * <p>The cache does not support <code>null</code> values or keys.</p>
  *
- * <p>Thanks to Amila Jayasooriya for helping evaluate performance of the rewrite of this class, as part of a
- * Google Summer of Code 2007 project.</p>
+ * <p>Thanks to Amila Jayasooriya for helping evaluate performance of the rewrite of this class, as part of a Google
+ * Summer of Code 2007 project.</p>
  */
 public final class Cache<K, V> implements Retriever<K, V> {
 
@@ -46,7 +46,7 @@ public final class Cache<K, V> implements Retriever<K, V> {
   /**
    * <p>Creates a new cache based on the given {@link Retriever} and with given maximum size.</p>
    *
-   * @param retriever object which can retrieve values for keys
+   * @param retriever  object which can retrieve values for keys
    * @param maxEntries maximum number of entries the cache will store before evicting some
    */
   public Cache(Retriever<? super K, ? extends V> retriever, int maxEntries) {
@@ -90,9 +90,7 @@ public final class Cache<K, V> implements Retriever<K, V> {
     }
   }
 
-  /**
-   * <p>Clears the cache.</p>
-   */
+  /** <p>Clears the cache.</p> */
   public void clear() {
     synchronized (cache) {
       cache.clear();

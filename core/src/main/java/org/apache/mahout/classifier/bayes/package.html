@@ -47,9 +47,9 @@
       <li>{@link org.apache.mahout.classifier.bayes.BayesDriver} -- Creates the Hadoop Naive Bayes job and outputs
         the model. This Driver encapsulates a lot of intermediate Map-Reduce Classes
       </li>
-      <li>{@link org.apache.mahout.classifier.bayes.common.BayesFeatureDriver} 
+      <li>{@link org.apache.mahout.classifier.bayes.common.BayesFeatureDriver}
       </li>
-      <li>{@link org.apache.mahout.classifier.bayes.common.BayesTfIdfDriver} 
+      <li>{@link org.apache.mahout.classifier.bayes.common.BayesTfIdfDriver}
       </li>
       <li>{@link org.apache.mahout.classifier.bayes.common.BayesWeightSummerDriver}
       </li>
@@ -58,7 +58,8 @@
     </ol>
     The trainer assumes that the input files are in the {@link org.apache.hadoop.mapred.KeyValueTextInputFormat}, i.e.
     the first token of the line
-    is the label and separated from the remaining tokens on the line by a tab-delimiter. The remaining tokens are the unique features (words). Thus, input documents might look
+    is the label and separated from the remaining tokens on the line by a tab-delimiter. The remaining tokens are the
+    unique features (words). Thus, input documents might look
     like:
     <pre>
       hockey puck stick goalie forward defenseman referee ice checking slapshot helmet
@@ -69,10 +70,13 @@
     <p>The output from the trainer is a {@link org.apache.hadoop.io.SequenceFile}.</p>
   </div>
   <div><h3>The Model</h3>
-    <p>The {@link org.apache.mahout.classifier.bayes.BayesModel} is the data structure used to represent the results of the training
-    for use by the {@link org.apache.mahout.classifier.bayes.BayesClassifier}.  A Model can be created by hand, or, if using
-    the {@link org.apache.mahout.classifier.bayes.BayesDriver}, it can be created from the {@link
-      org.apache.hadoop.io.SequenceFile} that is output.  To create it from the SequenceFile, use the
+
+    <p>The {@link org.apache.mahout.classifier.bayes.BayesModel} is the data structure used to represent the results of
+      the training
+      for use by the {@link org.apache.mahout.classifier.bayes.BayesClassifier}. A Model can be created by hand, or, if
+      using
+      the {@link org.apache.mahout.classifier.bayes.BayesDriver}, it can be created from the {@link
+      org.apache.hadoop.io.SequenceFile} that is output. To create it from the SequenceFile, use the
       {@link org.apache.mahout.classifier.bayes.io.SequenceFileModelReader} located in the io subpackage.</p>
   </div>
   <div><h3>The Classifier</h3>

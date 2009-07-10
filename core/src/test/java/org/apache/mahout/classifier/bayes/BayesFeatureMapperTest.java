@@ -34,7 +34,7 @@ public class BayesFeatureMapperTest extends TestCase {
     BayesFeatureMapper mapper = new BayesFeatureMapper();
     JobConf conf = new JobConf();
     conf.set("io.serializations",
-            "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
+        "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
     DefaultStringifier<Integer> intStringifier = new DefaultStringifier<Integer>(conf, Integer.class);
     conf.set("bayes.gramSize", intStringifier.toString(3));
     mapper.configure(conf);

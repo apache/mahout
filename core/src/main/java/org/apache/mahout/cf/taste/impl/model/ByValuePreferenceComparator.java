@@ -23,8 +23,8 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 /**
- * <p>{@link Comparator} that orders {@link org.apache.mahout.cf.taste.model.Preference}s from least preferred
- * to most preferred -- that is, in order of ascending value.</p>
+ * <p>{@link Comparator} that orders {@link org.apache.mahout.cf.taste.model.Preference}s from least preferred to most
+ * preferred -- that is, in order of ascending value.</p>
  */
 public final class ByValuePreferenceComparator implements Comparator<Preference>, Serializable {
 

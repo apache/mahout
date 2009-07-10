@@ -18,15 +18,14 @@
 package org.apache.mahout.matrix;
 
 /**
- * This interface allows the formulation of unary functions to be applied to
- * matrices inside the inner loops of their implementations.
- * 
+ * This interface allows the formulation of unary functions to be applied to matrices inside the inner loops of their
+ * implementations.
  */
 public interface UnaryFunction {
 
   /**
    * Apply the function to the argument and return the result
-   * 
+   *
    * @param arg1 double for the argument
    * @return the result of applying the function
    */

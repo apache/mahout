@@ -21,9 +21,7 @@ import org.apache.mahout.cf.taste.model.Item;
 
 import java.io.Serializable;
 
-/**
- * <p>An {@link Item} which has no data other than an ID. This may be most useful for writing tests.</p>
- */
+/** <p>An {@link Item} which has no data other than an ID. This may be most useful for writing tests.</p> */
 public class GenericItem<K extends Comparable<K>> implements Item, Serializable {
 
   private final K id;

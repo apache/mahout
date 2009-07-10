@@ -20,10 +20,9 @@ package org.apache.mahout.cf.taste.impl.common;
 import java.io.Serializable;
 
 /**
- * <p>A simple class that can keep track of a running avearage of a series of numbers.
- * One can add to or remove from the series, as well as update a datum in the series.
- * The class does not actually keep track of the series of values, just its running average,
- * so it doesn't even matter if you remove/change a value that wasn't added.</p>
+ * <p>A simple class that can keep track of a running avearage of a series of numbers. One can add to or remove from the
+ * series, as well as update a datum in the series. The class does not actually keep track of the series of values, just
+ * its running average, so it doesn't even matter if you remove/change a value that wasn't added.</p>
  */
 public class FullRunningAverage implements RunningAverage, Serializable {
 
@@ -35,9 +34,7 @@ public class FullRunningAverage implements RunningAverage, Serializable {
     average = Double.NaN;
   }
 
-  /**
-   * @param datum new item to add to the running average
-   */
+  /** @param datum new item to add to the running average */
   @Override
   public void addDatum(double datum) {
     if (++count == 1) {

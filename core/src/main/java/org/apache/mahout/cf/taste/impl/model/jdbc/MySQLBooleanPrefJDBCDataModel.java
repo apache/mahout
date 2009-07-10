@@ -20,8 +20,8 @@ package org.apache.mahout.cf.taste.impl.model.jdbc;
 import org.apache.mahout.cf.taste.common.TasteException;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * <p>See also {@link MySQLJDBCDataModel} -- same except deals with a table without preference info:</p>
@@ -41,85 +41,87 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
   private static final String NO_SUCH_COLUMN = "NO_SUCH_COLUMN";
 
   /**
-   * <p>Creates a {@link MySQLBooleanPrefJDBCDataModel} using the default {@link javax.sql.DataSource}
-   * (named {@link #DEFAULT_DATASOURCE_NAME} and default table/column names.</p>
+   * <p>Creates a {@link MySQLBooleanPrefJDBCDataModel} using the default {@link javax.sql.DataSource} (named {@link
+   * #DEFAULT_DATASOURCE_NAME} and default table/column names.</p>
    *
-   * @throws org.apache.mahout.cf.taste.common.TasteException if {@link javax.sql.DataSource} can't be found
+   * @throws org.apache.mahout.cf.taste.common.TasteException
+   *          if {@link javax.sql.DataSource} can't be found
    */
   public MySQLBooleanPrefJDBCDataModel() throws TasteException {
     this(DEFAULT_DATASOURCE_NAME);
   }
 
   /**
-   * <p>Creates a {@link MySQLBooleanPrefJDBCDataModel} using the default {@link javax.sql.DataSource}
-   * found under the given name, and using default table/column names.</p>
+   * <p>Creates a {@link MySQLBooleanPrefJDBCDataModel} using the default {@link javax.sql.DataSource} found under the
+   * given name, and using default table/column names.</p>
    *
    * @param dataSourceName name of {@link javax.sql.DataSource} to look up
-   * @throws org.apache.mahout.cf.taste.common.TasteException if {@link javax.sql.DataSource} can't be found
+   * @throws org.apache.mahout.cf.taste.common.TasteException
+   *          if {@link javax.sql.DataSource} can't be found
    */
   public MySQLBooleanPrefJDBCDataModel(String dataSourceName) throws TasteException {
     this(lookupDataSource(dataSourceName),
-         DEFAULT_PREFERENCE_TABLE,
-         DEFAULT_USER_ID_COLUMN,
-         DEFAULT_ITEM_ID_COLUMN);
+        DEFAULT_PREFERENCE_TABLE,
+        DEFAULT_USER_ID_COLUMN,
+        DEFAULT_ITEM_ID_COLUMN);
   }
 
   /**
-   * <p>Creates a {@link MySQLBooleanPrefJDBCDataModel} using the given {@link javax.sql.DataSource}
-   * and default table/column names.</p>
+   * <p>Creates a {@link MySQLBooleanPrefJDBCDataModel} using the given {@link javax.sql.DataSource} and default
+   * table/column names.</p>
    *
    * @param dataSource {@link javax.sql.DataSource} to use
    */
   public MySQLBooleanPrefJDBCDataModel(DataSource dataSource) {
     this(dataSource,
-         DEFAULT_PREFERENCE_TABLE,
-         DEFAULT_USER_ID_COLUMN,
-         DEFAULT_ITEM_ID_COLUMN);
+        DEFAULT_PREFERENCE_TABLE,
+        DEFAULT_USER_ID_COLUMN,
+        DEFAULT_ITEM_ID_COLUMN);
   }
 
   /**
-   * <p>Creates a {@link MySQLBooleanPrefJDBCDataModel} using the given {@link javax.sql.DataSource}
-   * and default table/column names.</p>
+   * <p>Creates a {@link MySQLBooleanPrefJDBCDataModel} using the given {@link javax.sql.DataSource} and default
+   * table/column names.</p>
    *
-   * @param dataSource {@link javax.sql.DataSource} to use
+   * @param dataSource      {@link javax.sql.DataSource} to use
    * @param preferenceTable name of table containing preference data
-   * @param userIDColumn user ID column name
-   * @param itemIDColumn item ID column name
+   * @param userIDColumn    user ID column name
+   * @param itemIDColumn    item ID column name
    */
   public MySQLBooleanPrefJDBCDataModel(DataSource dataSource,
                                        String preferenceTable,
                                        String userIDColumn,
                                        String itemIDColumn) {
     super(dataSource,
-          preferenceTable,
-          userIDColumn,
-          itemIDColumn,
-          NO_SUCH_COLUMN,
-          // getUserSQL
-          "SELECT " + itemIDColumn + " FROM " + preferenceTable + " WHERE " + userIDColumn + "=?",
-          // getNumItemsSQL
-          "SELECT COUNT(DISTINCT " + itemIDColumn + ") FROM " + preferenceTable,
-          // getNumUsersSQL
-          "SELECT COUNT(DISTINCT " + userIDColumn + ") FROM " + preferenceTable,
-          // setPreferenceSQL
-          "INSERT IGNORE INTO " + preferenceTable + '(' + userIDColumn + ',' + itemIDColumn + ") VALUES (?,?)",
-          // removePreference SQL
-          "DELETE FROM " + preferenceTable + " WHERE " + userIDColumn + "=? AND " + itemIDColumn + "=?",
-          // getUsersSQL
-          "SELECT " + itemIDColumn + ", " + userIDColumn + " FROM " + preferenceTable + " ORDER BY " + userIDColumn,
-          // getItemsSQL
-          "SELECT DISTINCT " + itemIDColumn + " FROM " + preferenceTable + " ORDER BY " + itemIDColumn,
-          // getItemSQL
-          "SELECT 1 FROM " + preferenceTable + " WHERE " + itemIDColumn + "=?",
-          // getPrefsForItemSQL
-          "SELECT " + userIDColumn + " FROM " +
-          preferenceTable + " WHERE " + itemIDColumn + "=? ORDER BY " + userIDColumn,
-          // getNumPreferenceForItemSQL
-          "SELECT COUNT(1) FROM " + preferenceTable + " WHERE " + itemIDColumn + "=?",
-          // getNumPreferenceForItemsSQL
-          "SELECT COUNT(1) FROM " + preferenceTable + " tp1 INNER JOIN " + preferenceTable + " tp2 " +
-          "ON (tp1." + userIDColumn + "=tp2." + userIDColumn + ") " +
-          "WHERE tp1." + itemIDColumn + "=? and tp2." + itemIDColumn + "=?");
+        preferenceTable,
+        userIDColumn,
+        itemIDColumn,
+        NO_SUCH_COLUMN,
+        // getUserSQL
+        "SELECT " + itemIDColumn + " FROM " + preferenceTable + " WHERE " + userIDColumn + "=?",
+        // getNumItemsSQL
+        "SELECT COUNT(DISTINCT " + itemIDColumn + ") FROM " + preferenceTable,
+        // getNumUsersSQL
+        "SELECT COUNT(DISTINCT " + userIDColumn + ") FROM " + preferenceTable,
+        // setPreferenceSQL
+        "INSERT IGNORE INTO " + preferenceTable + '(' + userIDColumn + ',' + itemIDColumn + ") VALUES (?,?)",
+        // removePreference SQL
+        "DELETE FROM " + preferenceTable + " WHERE " + userIDColumn + "=? AND " + itemIDColumn + "=?",
+        // getUsersSQL
+        "SELECT " + itemIDColumn + ", " + userIDColumn + " FROM " + preferenceTable + " ORDER BY " + userIDColumn,
+        // getItemsSQL
+        "SELECT DISTINCT " + itemIDColumn + " FROM " + preferenceTable + " ORDER BY " + itemIDColumn,
+        // getItemSQL
+        "SELECT 1 FROM " + preferenceTable + " WHERE " + itemIDColumn + "=?",
+        // getPrefsForItemSQL
+        "SELECT " + userIDColumn + " FROM " +
+            preferenceTable + " WHERE " + itemIDColumn + "=? ORDER BY " + userIDColumn,
+        // getNumPreferenceForItemSQL
+        "SELECT COUNT(1) FROM " + preferenceTable + " WHERE " + itemIDColumn + "=?",
+        // getNumPreferenceForItemsSQL
+        "SELECT COUNT(1) FROM " + preferenceTable + " tp1 INNER JOIN " + preferenceTable + " tp2 " +
+            "ON (tp1." + userIDColumn + "=tp2." + userIDColumn + ") " +
+            "WHERE tp1." + itemIDColumn + "=? and tp2." + itemIDColumn + "=?");
   }
 
   @Override

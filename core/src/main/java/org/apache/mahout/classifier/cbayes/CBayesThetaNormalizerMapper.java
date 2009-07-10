@@ -38,23 +38,18 @@ public class CBayesThetaNormalizerMapper extends MapReduceBase implements
 
   private static final Logger log = LoggerFactory.getLogger(CBayesThetaNormalizerMapper.class);
 
-  private Map<String,Double> labelWeightSum = null;
+  private Map<String, Double> labelWeightSum = null;
   private double sigma_jSigma_k = 0.0;
   private double vocabCount = 0.0;
 
   /**
    * We need to calculate the idf of each feature in each label
-   * 
-   * @param key The label,feature pair (can either be the freq Count or the term
-   *        Document count
-   * @param value
-   * @param output
-   * @param reporter
-   * @throws IOException
+   *
+   * @param key The label,feature pair (can either be the freq Count or the term Document count
    */
   @Override
   public void map(Text key, DoubleWritable value,
-      OutputCollector<Text, DoubleWritable> output, Reporter reporter)
+                  OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {
 
     String labelFeaturePair = key.toString();
@@ -62,31 +57,30 @@ public class CBayesThetaNormalizerMapper extends MapReduceBase implements
 
       double alpha_i = 1.0;
       for (Map.Entry<String, Double> stringDoubleEntry : labelWeightSum.entrySet()) {
-        double weight = Math.log((value.get() + alpha_i)/(sigma_jSigma_k - stringDoubleEntry.getValue() + vocabCount));
+        double weight = Math.log((value.get() + alpha_i) / (sigma_jSigma_k - stringDoubleEntry.getValue() + vocabCount));
         output.collect(new Text(('_' + stringDoubleEntry.getKey()).trim()), new DoubleWritable(weight)); //output Sigma_j
 
       }
-      
-    }
-    else {
+
+    } else {
       String label = labelFeaturePair.split(",")[0];
-      
+
       double D_ij = value.get();
-      double denominator = 0.5 *((sigma_jSigma_k / vocabCount) + (D_ij * this.labelWeightSum.size()));
+      double denominator = 0.5 * ((sigma_jSigma_k / vocabCount) + (D_ij * this.labelWeightSum.size()));
       double weight = Math.log(1.0 - D_ij / denominator);
-      output.collect(new Text(('_' +label).trim()), new DoubleWritable(weight));//output -D_ij
-     
+      output.collect(new Text(('_' + label).trim()), new DoubleWritable(weight));//output -D_ij
+
     }
-    
+
   }
 
   @Override
   public void configure(JobConf job) {
     try {
       if (labelWeightSum == null) {
-        labelWeightSum = new HashMap<String,Double>();
+        labelWeightSum = new HashMap<String, Double>();
 
-        DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(
+        DefaultStringifier<Map<String, Double>> mapStringifier = new DefaultStringifier<Map<String, Double>>(
             job, GenericsUtil.getClass(labelWeightSum));
 
         String labelWeightSumString = mapStringifier.toString(labelWeightSum);

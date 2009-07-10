@@ -29,10 +29,12 @@ public class StringUtilsTest extends TestCase {
 
     @Override
     public boolean equals(Object obj) {
-      if (this == obj)
+      if (this == obj) {
         return true;
-      if (obj == null || !(obj instanceof DummyTest))
+      }
+      if (obj == null || !(obj instanceof DummyTest)) {
         return false;
+      }
 
       DummyTest dt = (DummyTest) obj;
       return field == dt.field;

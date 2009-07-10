@@ -24,9 +24,7 @@ import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * <p>Tests {@link CachingRecommender}.</p>
- */
+/** <p>Tests {@link CachingRecommender}.</p> */
 public final class CachingRecommenderTest extends TasteTestCase {
 
   public void testRecommender() throws Exception {

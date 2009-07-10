@@ -17,9 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
-/**
- * A simple (ordered) pair of two objects. Elements may be null.
- */
+/** A simple (ordered) pair of two objects. Elements may be null. */
 public final class Pair<A, B> {
 
   private final A first;
@@ -45,7 +43,7 @@ public final class Pair<A, B> {
     }
     Pair<?, ?> otherPair = (Pair<?, ?>) obj;
     return isEqualOrNulls(first, otherPair.first) &&
-           isEqualOrNulls(second, otherPair.second);
+        isEqualOrNulls(second, otherPair.second);
   }
 
   private static boolean isEqualOrNulls(Object obj1, Object obj2) {

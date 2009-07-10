@@ -16,11 +16,6 @@
  */
 package org.apache.mahout.clustering.kmeans;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-import java.util.List;
-
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
@@ -30,6 +25,11 @@ import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.SquareRootFunction;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.List;
 
 public class Cluster extends ClusterBase implements Writable {
 
@@ -41,13 +41,9 @@ public class Cluster extends ClusterBase implements Writable {
 
   public static final String CLUSTER_CONVERGENCE_KEY = "org.apache.mahout.clustering.kmeans.convergence";
 
-  /**
-   * The number of iterations that have taken place
-   */
+  /** The number of iterations that have taken place */
   public static final String ITERATION_NUMBER = "org.apache.mahout.clustering.kmeans.iteration";
-  /**
-   * Boolean value indicating whether the initial input is from Canopy clustering
-   */
+  /** Boolean value indicating whether the initial input is from Canopy clustering */
   public static final String CANOPY_INPUT = "org.apache.mahout.clustering.kmeans.canopyInput";
 
   private static int nextClusterId = 0;
@@ -60,7 +56,6 @@ public class Cluster extends ClusterBase implements Writable {
   private double std;
 
 
-
   // the total of all the points squared, used for std computation
   private Vector pointSquaredTotal = null;
 
@@ -71,7 +66,7 @@ public class Cluster extends ClusterBase implements Writable {
 
   /**
    * Format the cluster for output
-   * 
+   *
    * @param cluster the Cluster
    * @return the String representation of the Cluster
    */
@@ -87,7 +82,7 @@ public class Cluster extends ClusterBase implements Writable {
 
   /**
    * Decodes and returns a Cluster from the formattedString
-   * 
+   *
    * @param formattedString a String produced by formatCluster
    * @return a decoded Cluster, not null
    * @throws IllegalArgumentException when the string is wrongly formatted
@@ -105,9 +100,10 @@ public class Cluster extends ClusterBase implements Writable {
       Cluster cluster = new Cluster(clusterCenter, clusterId);
       cluster.converged = startsWithV;
       return cluster;
-    } else
+    } else {
       throw new IllegalArgumentException(ERROR_UNKNOWN_CLUSTER_FORMAT
           + formattedString);
+    }
   }
 
 
@@ -130,7 +126,7 @@ public class Cluster extends ClusterBase implements Writable {
 
   /**
    * Configure the distance measure from the job
-   * 
+   *
    * @param job the JobConf for the job
    */
   public static void configure(JobConf job) {
@@ -152,8 +148,8 @@ public class Cluster extends ClusterBase implements Writable {
 
   /**
    * Configure the distance measure directly. Used by unit tests.
-   * 
-   * @param aMeasure the DistanceMeasure
+   *
+   * @param aMeasure          the DistanceMeasure
    * @param aConvergenceDelta the delta value used to define convergence
    */
   public static void config(DistanceMeasure aMeasure, double aConvergenceDelta) {
@@ -164,14 +160,13 @@ public class Cluster extends ClusterBase implements Writable {
 
   /**
    * Emit the point to the nearest cluster center
-   * 
-   * @param point a point
+   *
+   * @param point    a point
    * @param clusters a List<Cluster> to test
-   * @param output the OutputCollector to emit into
-   * @throws IOException
+   * @param output   the OutputCollector to emit into
    */
   public static void emitPointToNearestCluster(Vector point,
-      List<Cluster> clusters, OutputCollector<Text, KMeansInfo> output)
+                                               List<Cluster> clusters, OutputCollector<Text, KMeansInfo> output)
       throws IOException {
     Cluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
@@ -187,7 +182,7 @@ public class Cluster extends ClusterBase implements Writable {
   }
 
   public static void outputPointWithClusterInfo(Vector point,
-      List<Cluster> clusters, OutputCollector<Text, Text> output)
+                                                List<Cluster> clusters, OutputCollector<Text, Text> output)
       throws IOException {
     Cluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
@@ -205,13 +200,13 @@ public class Cluster extends ClusterBase implements Writable {
 
   /**
    * Compute the centroid by averaging the pointTotals
-   * 
+   *
    * @return the new centroid
    */
   private Vector computeCentroid() {
-    if (numPoints == 0)
+    if (numPoints == 0) {
       return center;
-    else if (centroid == null) {
+    } else if (centroid == null) {
       // lazy compute new centroid
       centroid = pointTotal.divide(numPoints);
       Vector stds = pointSquaredTotal.times(numPoints).minus(
@@ -224,9 +219,8 @@ public class Cluster extends ClusterBase implements Writable {
 
   /**
    * Construct a new cluster with the given point as its center
-   * 
-   * @param center
-   *            the center point
+   *
+   * @param center the center point
    */
   public Cluster(Vector center) {
     super();
@@ -237,15 +231,13 @@ public class Cluster extends ClusterBase implements Writable {
     this.pointSquaredTotal = center.like();
   }
 
-  /**
-   * For (de)serialization as a Writable
-   */
+  /** For (de)serialization as a Writable */
   public Cluster() {
   }
 
   /**
    * Construct a new cluster with the given point as its center
-   * 
+   *
    * @param center the center point
    */
   public Cluster(Vector center, int clusterId) {
@@ -257,9 +249,7 @@ public class Cluster extends ClusterBase implements Writable {
     this.pointSquaredTotal = center.like();
   }
 
-  /**
-   * Construct a new clsuter with the given id as identifier
-   */
+  /** Construct a new clsuter with the given id as identifier */
   public Cluster(String clusterId) {
 
     this.id = Integer.parseInt((clusterId.substring(1)));
@@ -273,15 +263,16 @@ public class Cluster extends ClusterBase implements Writable {
   }
 
   public String getIdentifier() {
-    if (converged)
+    if (converged) {
       return "V" + id;
-    else
+    } else {
       return "C" + id;
+    }
   }
 
   /**
    * Add the point to the cluster
-   * 
+   *
    * @param point a point to add
    */
   public void addPoint(Vector point) {
@@ -290,7 +281,7 @@ public class Cluster extends ClusterBase implements Writable {
 
   /**
    * Add the point to the cluster
-   * 
+   *
    * @param count the number of points in the delta
    * @param delta a point to add
    */
@@ -306,12 +297,8 @@ public class Cluster extends ClusterBase implements Writable {
     }
   }
 
-  
 
-
-  /**
-   * Compute the centroid and set the center to it.
-   */
+  /** Compute the centroid and set the center to it. */
   public void recomputeCenter() {
     center = computeCentroid();
     numPoints = 0;
@@ -320,7 +307,7 @@ public class Cluster extends ClusterBase implements Writable {
 
   /**
    * Return if the cluster is converged by comparing its center and centroid.
-   * 
+   *
    * @return if the cluster is converged
    */
   public boolean computeConvergence() {
@@ -330,14 +317,11 @@ public class Cluster extends ClusterBase implements Writable {
   }
 
 
-
   public boolean isConverged() {
     return converged;
   }
 
-  /**
-   * @return the std
-   */
+  /** @return the std */
   public double getStd() {
     return std;
   }

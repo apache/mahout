@@ -25,11 +25,11 @@ import org.apache.mahout.classifier.BayesFileFormatter;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Writer;
-import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.Charset;
 
 public class BayesFileFormatterTest extends TestCase {
@@ -96,7 +96,7 @@ public class BayesFileFormatterTest extends TestCase {
     BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(files[0]), charset));
     String line;
     int count = 0;
-    while ((line = reader.readLine()) != null){
+    while ((line = reader.readLine()) != null) {
       assertTrue("line does not start with label", line.startsWith("animal"));
       System.out.println("Line: " + line);
       count++;

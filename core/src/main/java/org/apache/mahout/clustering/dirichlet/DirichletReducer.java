@@ -17,9 +17,6 @@
 
 package org.apache.mahout.clustering.dirichlet;
 
-import java.io.IOException;
-import java.util.Iterator;
-
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -28,6 +25,9 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.matrix.Vector;
+
+import java.io.IOException;
+import java.util.Iterator;
 
 public class DirichletReducer extends MapReduceBase implements
     Reducer<Text, Vector, Text, DirichletCluster<Vector>> {
@@ -38,7 +38,7 @@ public class DirichletReducer extends MapReduceBase implements
 
   @Override
   public void reduce(Text key, Iterator<Vector> values,
-      OutputCollector<Text, DirichletCluster<Vector>> output, Reporter reporter)
+                     OutputCollector<Text, DirichletCluster<Vector>> output, Reporter reporter)
       throws IOException {
     int k = Integer.parseInt(key.toString());
     Model<Vector> model = newModels[k];

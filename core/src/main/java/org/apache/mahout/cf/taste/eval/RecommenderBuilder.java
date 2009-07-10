@@ -22,8 +22,8 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 
 /**
- * <p>Implementations of this inner interface are simple helper classes which create a
- * {@link Recommender} to be evaluated based on the given {@link DataModel}.</p>
+ * <p>Implementations of this inner interface are simple helper classes which create a {@link Recommender} to be
+ * evaluated based on the given {@link DataModel}.</p>
  */
 public interface RecommenderBuilder {
 

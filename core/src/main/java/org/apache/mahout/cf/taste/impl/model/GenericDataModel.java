@@ -17,10 +17,10 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
+import org.apache.mahout.cf.taste.common.NoSuchItemException;
+import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.common.NoSuchUserException;
-import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.impl.common.ArrayIterator;
 import org.apache.mahout.cf.taste.impl.common.EmptyIterable;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
@@ -42,9 +42,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * <p>A simple {@link DataModel} which uses a given {@link List} of {@link User}s as
- * its data source. This implementation is mostly useful for small experiments and is not
- * recommended for contexts where performance is important.</p>
+ * <p>A simple {@link DataModel} which uses a given {@link List} of {@link User}s as its data source. This
+ * implementation is mostly useful for small experiments and is not recommended for contexts where performance is
+ * important.</p>
  */
 public final class GenericDataModel implements DataModel, Serializable {
 
@@ -60,8 +60,8 @@ public final class GenericDataModel implements DataModel, Serializable {
   private final Map<Object, Preference[]> preferenceForItems;
 
   /**
-   * <p>Creates a new {@link GenericDataModel} from the given {@link User}s (and their preferences).
-   * This {@link DataModel} retains all this information in memory and is effectively immutable.</p>
+   * <p>Creates a new {@link GenericDataModel} from the given {@link User}s (and their preferences). This {@link
+   * DataModel} retains all this information in memory and is effectively immutable.</p>
    *
    * @param users {@link User}s to include in this {@link GenericDataModel}
    */
@@ -117,8 +117,8 @@ public final class GenericDataModel implements DataModel, Serializable {
   }
 
   /**
-   * <p>Creates a new {@link GenericDataModel} containing an immutable copy of the data from another
-   * given {@link DataModel}.</p>
+   * <p>Creates a new {@link GenericDataModel} containing an immutable copy of the data from another given {@link
+   * DataModel}.</p>
    *
    * @param dataModel {@link DataModel} to copy
    * @throws TasteException if an error occurs while retrieving the other {@link DataModel}'s users
@@ -132,9 +132,7 @@ public final class GenericDataModel implements DataModel, Serializable {
     return users;
   }
 
-  /**
-   * @throws NoSuchUserException if there is no such {@link User}
-   */
+  /** @throws NoSuchUserException if there is no such {@link User} */
   @Override
   public User getUser(Object id) throws NoSuchUserException {
     User user = userMap.get(id);
@@ -149,9 +147,7 @@ public final class GenericDataModel implements DataModel, Serializable {
     return items;
   }
 
-  /**
-   * @throws NoSuchItemException if there is no such {@link Item}
-   */
+  /** @throws NoSuchItemException if there is no such {@link Item} */
   @Override
   public Item getItem(Object id) throws NoSuchItemException {
     Item item = itemMap.get(id);
@@ -232,7 +228,7 @@ public final class GenericDataModel implements DataModel, Serializable {
 
   @Override
   public String toString() {
-    return "GenericDataModel[users:" + (users.size() > 3 ? users.subList(0,3) + "..." : users) + ']';
+    return "GenericDataModel[users:" + (users.size() > 3 ? users.subList(0, 3) + "..." : users) + ']';
   }
 
 }

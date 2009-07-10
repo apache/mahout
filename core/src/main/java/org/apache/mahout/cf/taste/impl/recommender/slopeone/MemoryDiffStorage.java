@@ -23,12 +23,12 @@ import org.apache.mahout.cf.taste.common.Weighting;
 import org.apache.mahout.cf.taste.impl.common.CompactRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.CompactRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -46,8 +46,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * <p>An implementation of {@link DiffStorage} that merely stores item-item diffs in memory.
- * It is fast, but can consume a great deal of memory.</p>
+ * <p>An implementation of {@link DiffStorage} that merely stores item-item diffs in memory. It is fast, but can consume
+ * a great deal of memory.</p>
  */
 public final class MemoryDiffStorage implements DiffStorage {
 
@@ -66,29 +66,24 @@ public final class MemoryDiffStorage implements DiffStorage {
   /**
    * <p>Creates a new {@link MemoryDiffStorage}.</p>
    *
-   * <p>See {@link org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender} for the
-   * meaning of <code>stdDevWeighted</code>. If <code>compactAverages</code>
-   * is set, this uses alternate data structures ({@link CompactRunningAverage} versus
-   * {@link FullRunningAverage}) that use almost 50% less memory but store item-item
-   * averages less accurately. <code>maxEntries</code> controls the maximum number of item-item average
-   * preference differences that will be tracked internally. After the limit is reached,
-   * if a new item-item pair is observed in the data it will be ignored. This is recommended for large datasets.
-   * The first <code>maxEntries</code>
-   * item-item pairs observed in the data are tracked. Assuming that item ratings are reasonably distributed
-   * among users, this should only ignore item-item pairs that are very infrequently co-rated by a user.
-   * The intuition is that data on these infrequently co-rated item-item pairs is less reliable and should
-   * be the first that is ignored. This parameter can be used to limit the memory requirements of
-   * {@link SlopeOneRecommender}, which otherwise grow as the square
-   * of the number of items that exist in the {@link DataModel}. Memory requirements can reach gigabytes
-   * with only about 10000 items, so this may be necessary on larger datasets.
+   * <p>See {@link org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender} for the meaning of
+   * <code>stdDevWeighted</code>. If <code>compactAverages</code> is set, this uses alternate data structures ({@link
+   * CompactRunningAverage} versus {@link FullRunningAverage}) that use almost 50% less memory but store item-item
+   * averages less accurately. <code>maxEntries</code> controls the maximum number of item-item average preference
+   * differences that will be tracked internally. After the limit is reached, if a new item-item pair is observed in the
+   * data it will be ignored. This is recommended for large datasets. The first <code>maxEntries</code> item-item pairs
+   * observed in the data are tracked. Assuming that item ratings are reasonably distributed among users, this should
+   * only ignore item-item pairs that are very infrequently co-rated by a user. The intuition is that data on these
+   * infrequently co-rated item-item pairs is less reliable and should be the first that is ignored. This parameter can
+   * be used to limit the memory requirements of {@link SlopeOneRecommender}, which otherwise grow as the square of the
+   * number of items that exist in the {@link DataModel}. Memory requirements can reach gigabytes with only about 10000
+   * items, so this may be necessary on larger datasets.
    *
-   * @param dataModel
-   * @param stdDevWeighted see {@link org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender}
-   * @param compactAverages if <code>true</code>,
-   * use {@link CompactRunningAverage} instead of {@link FullRunningAverage} internally
-   * @param maxEntries maximum number of item-item average preference differences to track internally
-   * @throws IllegalArgumentException if <code>maxEntries</code> is not positive or <code>dataModel</code>
-   * is null
+   * @param stdDevWeighted  see {@link org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender}
+   * @param compactAverages if <code>true</code>, use {@link CompactRunningAverage} instead of {@link
+   *                        FullRunningAverage} internally
+   * @param maxEntries      maximum number of item-item average preference differences to track internally
+   * @throws IllegalArgumentException if <code>maxEntries</code> is not positive or <code>dataModel</code> is null
    */
   public MemoryDiffStorage(DataModel dataModel,
                            Weighting stdDevWeighted,
@@ -142,8 +137,8 @@ public final class MemoryDiffStorage implements DiffStorage {
         return null;
       }
       return stdDevWeighted ?
-             new InvertedRunningAverageAndStdDev((RunningAverageAndStdDev) average) :
-             new InvertedRunningAverage(average);
+          new InvertedRunningAverageAndStdDev((RunningAverageAndStdDev) average) :
+          new InvertedRunningAverage(average);
     } else {
       return average;
     }

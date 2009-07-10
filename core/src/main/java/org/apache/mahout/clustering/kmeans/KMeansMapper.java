@@ -16,10 +16,6 @@
  */
 package org.apache.mahout.clustering.kmeans;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -29,6 +25,10 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.matrix.Vector;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 public class KMeansMapper extends MapReduceBase implements
     Mapper<WritableComparable<?>, Vector, Text, KMeansInfo> {
 
@@ -36,13 +36,13 @@ public class KMeansMapper extends MapReduceBase implements
 
   @Override
   public void map(WritableComparable<?> key, Vector point,
-      OutputCollector<Text, KMeansInfo> output, Reporter reporter) throws IOException {
-    Cluster.emitPointToNearestCluster(point, clusters,  output);
+                  OutputCollector<Text, KMeansInfo> output, Reporter reporter) throws IOException {
+    Cluster.emitPointToNearestCluster(point, clusters, output);
   }
 
   /**
    * Configure the mapper by providing its clusters. Used by unit tests.
-   * 
+   *
    * @param clusters a List<Cluster>
    */
   void config(List<Cluster> clusters) {
@@ -58,7 +58,8 @@ public class KMeansMapper extends MapReduceBase implements
     KMeansUtil.configureWithClusterInfo(job.get(Cluster.CLUSTER_PATH_KEY),
         clusters);
 
-    if (clusters.isEmpty())
+    if (clusters.isEmpty()) {
       throw new NullPointerException("Cluster is empty!!!");
+    }
   }
 }

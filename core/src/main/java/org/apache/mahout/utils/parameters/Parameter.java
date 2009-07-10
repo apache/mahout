@@ -20,28 +20,35 @@ package org.apache.mahout.utils.parameters;
 /**
  * An accessor to a parameters in the job.
  *
- * This is a composite entity that can it self contain more parameters.
- * Say the parameters describes what DistanceMeasure class to use,
- * once set this parameters would also produce the parameters available
- * in that DistanceMeasure implementation.
+ * This is a composite entity that can it self contain more parameters. Say the parameters describes what
+ * DistanceMeasure class to use, once set this parameters would also produce the parameters available in that
+ * DistanceMeasure implementation.
  */
 public interface Parameter<T> extends Parametered {
   /** @return job configuration setting key prefix, e.g. 'org.apache.mahout.util.WeightedDistanceMeasure.' */
   String prefix();
+
   /** @return configuration parameters name, e.g. 'weightsFile' */
   String name();
+
   /** @return human readable description of parameters */
   String description();
+
   /** @return value class type */
   Class<T> type();
+
   /** @param stringValue value string representation */
   void setStringValue(String stringValue);
+
   /** @return value string reprentation of current value */
   String getStringValue();
+
   /** @param value new parameters value */
   void set(T value);
+
   /** @return current parameters value */
   T get();
+
   /** @return value used if not set by consumer */
   String defaultValue();
 }

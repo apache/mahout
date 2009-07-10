@@ -16,14 +16,9 @@
  */
 package org.apache.mahout.clustering.dirichlet;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import junit.framework.TestCase;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.Text;
@@ -43,8 +38,11 @@ import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DummyOutputCollector;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class TestMapReduce extends TestCase {
 
@@ -56,45 +54,46 @@ public class TestMapReduce extends TestCase {
 
   /**
    * Generate random samples and add them to the sampleData
-   * 
+   *
    * @param num int number of samples to generate
-   * @param mx double x-value of the sample mean
-   * @param my double y-value of the sample mean
+   * @param mx  double x-value of the sample mean
+   * @param my  double y-value of the sample mean
    * @param sdx double x-standard deviation of the samples
    * @param sdy double y-standard deviation of the samples
    */
   private void generateSamples(int num, double mx, double my, double sdx,
-      double sdy) {
+                               double sdy) {
     System.out.println("Generating " + num + " samples m=[" + mx + ", " + my
-        + "] sd=[" + sdx + ", " + sdy + "]");
+        + "] sd=[" + sdx + ", " + sdy + ']');
     for (int i = 0; i < num; i++) {
-      addSample(new double[] {
+      addSample(new double[]{
           UncommonDistributions.rNorm(mx, sdx),
-          UncommonDistributions.rNorm(my, sdy) });
+          UncommonDistributions.rNorm(my, sdy)});
     }
   }
 
   private void addSample(double[] values) {
     Vector v = new SparseVector(2);
-    for (int j = 0; j < values.length; j++)
+    for (int j = 0; j < values.length; j++) {
       v.setQuick(j, values[j]);
+    }
     sampleData.add(v);
   }
 
   /**
    * Generate random samples and add them to the sampleData
-   * 
+   *
    * @param num int number of samples to generate
-   * @param mx double x-value of the sample mean
-   * @param my double y-value of the sample mean
-   * @param sd double standard deviation of the samples
+   * @param mx  double x-value of the sample mean
+   * @param my  double y-value of the sample mean
+   * @param sd  double standard deviation of the samples
    */
   private void generateSamples(int num, double mx, double my, double sd) {
     System.out.println("Generating " + num + " samples m=[" + mx + ", " + my
         + "] sd=" + sd);
     for (int i = 0; i < num; i++) {
-      addSample(new double[] { UncommonDistributions.rNorm(mx, sd),
-          UncommonDistributions.rNorm(my, sd) });
+      addSample(new double[]{UncommonDistributions.rNorm(mx, sd),
+          UncommonDistributions.rNorm(my, sd)});
     }
   }
 
@@ -110,11 +109,7 @@ public class TestMapReduce extends TestCase {
     f.mkdir();
   }
 
-  /**
-   * Test the basic Mapper
-   * 
-   * @throws Exception
-   */
+  /** Test the basic Mapper */
   public void testMapper() throws Exception {
     generateSamples(10, 0, 0, 1);
     DirichletState<Vector> state = new DirichletState<Vector>(
@@ -123,18 +118,15 @@ public class TestMapReduce extends TestCase {
     mapper.configure(state);
 
     DummyOutputCollector<Text, Vector> collector = new DummyOutputCollector<Text, Vector>();
-    for (Vector v : sampleData)
+    for (Vector v : sampleData) {
       mapper.map(null, v, collector, null);
+    }
     Map<String, List<Vector>> data = collector.getData();
     // this seed happens to produce two partitions, but they work
     assertEquals("output size", 3, data.size());
   }
 
-  /**
-   * Test the basic Reducer
-   * 
-   * @throws Exception
-   */
+  /** Test the basic Reducer */
   public void testReducer() throws Exception {
     generateSamples(100, 0, 0, 1);
     generateSamples(100, 2, 0, 1);
@@ -146,8 +138,9 @@ public class TestMapReduce extends TestCase {
     mapper.configure(state);
 
     DummyOutputCollector<Text, Vector> mapCollector = new DummyOutputCollector<Text, Vector>();
-    for (Vector v : sampleData)
+    for (Vector v : sampleData) {
       mapper.map(null, v, mapCollector, null);
+    }
     Map<String, List<Vector>> data = mapCollector.getData();
     // this seed happens to produce three partitions, but they work
     assertEquals("output size", 7, data.size());
@@ -155,15 +148,16 @@ public class TestMapReduce extends TestCase {
     DirichletReducer reducer = new DirichletReducer();
     reducer.configure(state);
     DummyOutputCollector<Text, DirichletCluster<Vector>> reduceCollector = new DummyOutputCollector<Text, DirichletCluster<Vector>>();
-    for (String key : mapCollector.getKeys())
+    for (String key : mapCollector.getKeys()) {
       reducer.reduce(new Text(key), mapCollector.getValue(key).iterator(),
           reduceCollector, null);
+    }
 
     Model<Vector>[] newModels = reducer.newModels;
     state.update(newModels);
   }
 
-  private void printModels(List<Model<Vector>[]> results, int significant) {
+  private static void printModels(List<Model<Vector>[]> results, int significant) {
     int row = 0;
     for (Model<Vector>[] r : results) {
       System.out.print("sample[" + row++ + "]= ");
@@ -178,11 +172,7 @@ public class TestMapReduce extends TestCase {
     System.out.println();
   }
 
-  /**
-   * Test the Mapper and Reducer in an iteration loop
-   * 
-   * @throws Exception
-   */
+  /** Test the Mapper and Reducer in an iteration loop */
   public void testMRIterations() throws Exception {
     generateSamples(100, 0, 0, 1);
     generateSamples(100, 2, 0, 1);
@@ -197,15 +187,17 @@ public class TestMapReduce extends TestCase {
       DirichletMapper mapper = new DirichletMapper();
       mapper.configure(state);
       DummyOutputCollector<Text, Vector> mapCollector = new DummyOutputCollector<Text, Vector>();
-      for (Vector v : sampleData)
+      for (Vector v : sampleData) {
         mapper.map(null, v, mapCollector, null);
+      }
 
       DirichletReducer reducer = new DirichletReducer();
       reducer.configure(state);
       DummyOutputCollector<Text, DirichletCluster<Vector>> reduceCollector = new DummyOutputCollector<Text, DirichletCluster<Vector>>();
-      for (String key : mapCollector.getKeys())
+      for (String key : mapCollector.getKeys()) {
         reducer.reduce(new Text(key), mapCollector.getValue(key).iterator(),
             reduceCollector, null);
+      }
 
       Model<Vector>[] newModels = reducer.newModels;
       state.update(newModels);
@@ -216,40 +208,41 @@ public class TestMapReduce extends TestCase {
 
   @SuppressWarnings("unchecked")
   public void testNormalModelSerialization() {
-    double[] m = { 1.1, 2.2 };
-    Model model = new NormalModel(new DenseVector(m), 3.3);
+    double[] m = {1.1, 2.2};
+    Model<?> model = new NormalModel(new DenseVector(m), 3.3);
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();
     String jsonString = gson.toJson(model);
-    Model model2 = gson.fromJson(jsonString, NormalModel.class);
+    Model<?> model2 = gson.fromJson(jsonString, NormalModel.class);
     assertEquals("models", model.toString(), model2.toString());
   }
 
   @SuppressWarnings("unchecked")
   public void testNormalModelDistributionSerialization() {
     NormalModelDistribution dist = new NormalModelDistribution();
-    Model[] models = dist.sampleFromPrior(20);
+    Model<?>[] models = dist.sampleFromPrior(20);
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();
     String jsonString = gson.toJson(models);
-    Model[] models2 = gson.fromJson(jsonString, NormalModel[].class);
+    Model<?>[] models2 = gson.fromJson(jsonString, NormalModel[].class);
     assertEquals("models", models.length, models2.length);
-    for (int i = 0; i < models.length; i++)
-      assertEquals("model[" + i + "]", models[i].toString(), models2[i]
+    for (int i = 0; i < models.length; i++) {
+      assertEquals("model[" + i + ']', models[i].toString(), models2[i]
           .toString());
+    }
   }
 
   @SuppressWarnings("unchecked")
   public void testSampledNormalModelSerialization() {
-    double[] m = { 1.1, 2.2 };
-    Model model = new SampledNormalModel(new DenseVector(m), 3.3);
+    double[] m = {1.1, 2.2};
+    Model<?> model = new SampledNormalModel(new DenseVector(m), 3.3);
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();
     String jsonString = gson.toJson(model);
-    Model model2 = gson.fromJson(jsonString, SampledNormalModel.class);
+    Model<?> model2 = gson.fromJson(jsonString, SampledNormalModel.class);
     assertEquals("models", model.toString(), model2.toString());
   }
 
@@ -263,22 +256,23 @@ public class TestMapReduce extends TestCase {
     String jsonString = gson.toJson(models);
     Model[] models2 = gson.fromJson(jsonString, SampledNormalModel[].class);
     assertEquals("models", models.length, models2.length);
-    for (int i = 0; i < models.length; i++)
-      assertEquals("model[" + i + "]", models[i].toString(), models2[i]
+    for (int i = 0; i < models.length; i++) {
+      assertEquals("model[" + i + ']', models[i].toString(), models2[i]
           .toString());
+    }
   }
 
   @SuppressWarnings("unchecked")
   public void testAsymmetricSampledNormalModelSerialization() {
-    double[] m = { 1.1, 2.2 };
-    double[] s = { 3.3, 4.4 };
-    Model model = new AsymmetricSampledNormalModel(new DenseVector(m),
+    double[] m = {1.1, 2.2};
+    double[] s = {3.3, 4.4};
+    Model<?> model = new AsymmetricSampledNormalModel(new DenseVector(m),
         new DenseVector(s));
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();
     String jsonString = gson.toJson(model);
-    Model model2 = gson
+    Model<?> model2 = gson
         .fromJson(jsonString, AsymmetricSampledNormalModel.class);
     assertEquals("models", model.toString(), model2.toString());
   }
@@ -294,9 +288,10 @@ public class TestMapReduce extends TestCase {
     Model[] models2 = gson.fromJson(jsonString,
         AsymmetricSampledNormalModel[].class);
     assertEquals("models", models.length, models2.length);
-    for (int i = 0; i < models.length; i++)
-      assertEquals("model[" + i + "]", models[i].toString(), models2[i]
+    for (int i = 0; i < models.length; i++) {
+      assertEquals("model[" + i + ']', models[i].toString(), models2[i]
           .toString());
+    }
   }
 
   @SuppressWarnings("unchecked")
@@ -306,7 +301,7 @@ public class TestMapReduce extends TestCase {
     builder
         .registerTypeAdapter(ModelHolder.class, new JsonModelHolderAdapter());
     Gson gson = builder.create();
-    double[] d = { 1.1, 2.2 };
+    double[] d = {1.1, 2.2};
     ModelHolder mh = new ModelHolder(new NormalModel(new DenseVector(d), 3.3));
     String format = gson.toJson(mh);
     System.out.println(format);
@@ -321,8 +316,8 @@ public class TestMapReduce extends TestCase {
     builder
         .registerTypeAdapter(ModelHolder.class, new JsonModelHolderAdapter());
     Gson gson = builder.create();
-    double[] d = { 1.1, 2.2 };
-    double[] s = { 3.3, 4.4 };
+    double[] d = {1.1, 2.2};
+    double[] s = {3.3, 4.4};
     ModelHolder mh = new ModelHolder(new AsymmetricSampledNormalModel(
         new DenseVector(d), new DenseVector(s)));
     String format = gson.toJson(mh);
@@ -351,15 +346,12 @@ public class TestMapReduce extends TestCase {
     assertEquals("dirichlet", state.offset, state2.offset);
   }
 
-  /**
-   * Test the Mapper and Reducer using the Driver
-   * 
-   * @throws Exception
-   */
+  /** Test the Mapper and Reducer using the Driver */
   public void testDriverMRIterations() throws Exception {
     File f = new File("input");
-    for (File g : f.listFiles())
+    for (File g : f.listFiles()) {
       g.delete();
+    }
     generateSamples(100, 0, 0, 0.5);
     generateSamples(100, 2, 0, 0.2);
     generateSamples(100, 0, 2, 0.3);
@@ -406,15 +398,12 @@ public class TestMapReduce extends TestCase {
     System.out.println();
   }
 
-  /**
-   * Test the Mapper and Reducer using the Driver
-   * 
-   * @throws Exception
-   */
+  /** Test the Mapper and Reducer using the Driver */
   public void testDriverMnRIterations() throws Exception {
     File f = new File("input");
-    for (File g : f.listFiles())
+    for (File g : f.listFiles()) {
       g.delete();
+    }
     generate4Datasets();
     // Now run the driver
     DirichletDriver
@@ -456,15 +445,12 @@ public class TestMapReduce extends TestCase {
         conf);
   }
 
-  /**
-   * Test the Mapper and Reducer using the Driver
-   * 
-   * @throws Exception
-   */
+  /** Test the Mapper and Reducer using the Driver */
   public void testDriverMnRnIterations() throws Exception {
     File f = new File("input");
-    for (File g : f.listFiles())
+    for (File g : f.listFiles()) {
       g.delete();
+    }
     generate4Datasets();
     // Now run the driver
     DirichletDriver
@@ -488,15 +474,12 @@ public class TestMapReduce extends TestCase {
     printResults(clusters, 0);
   }
 
-  /**
-   * Test the Mapper and Reducer using the Driver
-   * 
-   * @throws Exception
-   */
+  /** Test the Mapper and Reducer using the Driver */
   public void testDriverMnRnIterationsAsymmetric() throws Exception {
     File f = new File("input");
-    for (File g : f.listFiles())
+    for (File g : f.listFiles()) {
       g.delete();
+    }
     generateSamples(500, 0, 0, 0.5, 1.0);
     ClusteringTestUtils.writePointsToFile(sampleData, "input/data1.txt", fs,
         conf);

@@ -43,14 +43,16 @@ public class ResultAnalyzer implements Summarizable {
     confusionMatrix = new ConfusionMatrix(labelSet, defaultLabel);
   }
 
-  public ConfusionMatrix getConfusionMatrix(){
+  public ConfusionMatrix getConfusionMatrix() {
     return this.confusionMatrix;
   }
+
   public void addInstance(String correctLabel, ClassifierResult classifiedResult) {
-    if (correctLabel.equals(classifiedResult.getLabel()))
+    if (correctLabel.equals(classifiedResult.getLabel())) {
       correctlyClassified++;
-    else
+    } else {
       incorrectlyClassified++;
+    }
     confusionMatrix.addInstance(correctLabel, classifiedResult);
   }
 

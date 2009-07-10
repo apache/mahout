@@ -20,8 +20,8 @@ package org.apache.mahout.cf.taste.impl.common;
 import java.util.Iterator;
 
 /**
- * <p>Simple utility class that makes an {@link Iterator} {@link Iterable}
- * by returning the {@link Iterator} itself.</p>
+ * <p>Simple utility class that makes an {@link Iterator} {@link Iterable} by returning the {@link Iterator}
+ * itself.</p>
  */
 public final class IteratorIterable<T> implements Iterable<T> {
 

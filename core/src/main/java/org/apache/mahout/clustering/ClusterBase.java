@@ -1,12 +1,12 @@
 package org.apache.mahout.clustering;
 
-import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.matrix.SparseVector;
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.matrix.SparseVector;
+import org.apache.mahout.matrix.Vector;
 
+import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.io.DataInput;
 
 /**
  *
@@ -35,7 +35,7 @@ public abstract class ClusterBase implements Writable {
 
   /**
    * Return the center point
-   * 
+   *
    * @return the center of the Cluster
    */
   public Vector getCenter() {
@@ -50,21 +50,15 @@ public abstract class ClusterBase implements Writable {
 
   /**
    * Simply writes out the id, and that's it!
-   * 
+   *
    * @param out The {@link java.io.DataOutput}
-   * @throws IOException
    */
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(id);
   }
 
-  /**
-   * Reads in the id, nothing else
-   * 
-   * @param in
-   * @throws IOException
-   */
+  /** Reads in the id, nothing else */
   @Override
   public void readFields(DataInput in) throws IOException {
     id = in.readInt();

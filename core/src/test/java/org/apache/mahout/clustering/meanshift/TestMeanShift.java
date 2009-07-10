@@ -17,15 +17,7 @@
 
 package org.apache.mahout.clustering.meanshift;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import junit.framework.TestCase;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -33,12 +25,18 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.mahout.matrix.CardinalityException;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
 import org.apache.mahout.utils.DummyOutputCollector;
 import org.apache.mahout.utils.EuclideanDistanceMeasure;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TestMeanShift extends TestCase {
 
@@ -58,7 +56,7 @@ public class TestMeanShift extends TestCase {
 
   /**
    * Print the canopies to the transcript
-   * 
+   *
    * @param canopies a List<Canopy>
    */
   private static void printCanopies(List<MeanShiftCanopy> canopies) {
@@ -67,21 +65,19 @@ public class TestMeanShift extends TestCase {
     }
   }
 
-  /**
-   * Print a graphical representation of the clustered image points as a 10x10
-   * character mask
-   * 
-   * @param canopies
-   */
+  /** Print a graphical representation of the clustered image points as a 10x10 character mask */
   private static void printImage(List<MeanShiftCanopy> canopies) {
     char[][] out = new char[10][10];
-    for (int i = 0; i < out.length; i++)
-      for (int j = 0; j < out[0].length; j++)
+    for (int i = 0; i < out.length; i++) {
+      for (int j = 0; j < out[0].length; j++) {
         out[i][j] = ' ';
+      }
+    }
     for (MeanShiftCanopy canopy : canopies) {
       int ch = 'A' + canopy.getCanopyId() - 100;
-      for (Vector pt : canopy.getBoundPoints())
+      for (Vector pt : canopy.getBoundPoints()) {
         out[(int) pt.getQuick(0)][(int) pt.getQuick(1)] = (char) ch;
+      }
     }
     for (char[] anOut : out) {
       System.out.println(anOut);
@@ -130,25 +126,25 @@ public class TestMeanShift extends TestCase {
     rmr("output");
     rmr("testdata");
     raw = new Vector[100];
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 10; i++) {
       for (int j = 0; j < 10; j++) {
         int ix = i * 10 + j;
         Vector v = new DenseVector(3);
         v.setQuick(0, i);
         v.setQuick(1, j);
-        if (i == j)
+        if (i == j) {
           v.setQuick(2, 9);
-        else if (i + j == 9)
+        } else if (i + j == 9) {
           v.setQuick(2, 4.5);
+        }
         raw[ix] = v;
       }
+    }
   }
 
   /**
-   * Story: User can exercise the reference implementation to verify that the
-   * test datapoints are clustered in a reasonable manner.
-   * 
-   * @throws CardinalityException
+   * Story: User can exercise the reference implementation to verify that the test datapoints are clustered in a
+   * reasonable manner.
    */
   public void testReferenceImplementation() {
     MeanShiftCanopy.config(new EuclideanDistanceMeasure(), 4.0, 1.0, 0.5);
@@ -174,11 +170,8 @@ public class TestMeanShift extends TestCase {
   }
 
   /**
-   * Story: User can produce initial canopy centers using a
-   * EuclideanDistanceMeasure and a CanopyMapper/Combiner which clusters input
-   * points to produce an output set of canopies.
-   * 
-   * @throws Exception
+   * Story: User can produce initial canopy centers using a EuclideanDistanceMeasure and a CanopyMapper/Combiner which
+   * clusters input points to produce an output set of canopies.
    */
   public void testCanopyMapperEuclidean() throws Exception {
     MeanShiftCanopyMapper mapper = new MeanShiftCanopyMapper();
@@ -193,8 +186,9 @@ public class TestMeanShift extends TestCase {
     }
 
     // map the data
-    for (MeanShiftCanopy canopy : canopies)
+    for (MeanShiftCanopy canopy : canopies) {
       mapper.map(new Text(), canopy, collector, null);
+    }
     mapper.close();
 
     // now verify the output
@@ -229,11 +223,8 @@ public class TestMeanShift extends TestCase {
   }
 
   /**
-   * Story: User can produce final canopy centers using a
-   * EuclideanDistanceMeasure and a CanopyReducer which clusters input centroid
-   * points to produce an output set of final canopy centroid points.
-   * 
-   * @throws Exception
+   * Story: User can produce final canopy centers using a EuclideanDistanceMeasure and a CanopyReducer which clusters
+   * input centroid points to produce an output set of final canopy centroid points.
    */
   public void testCanopyReducerEuclidean() throws Exception {
     MeanShiftCanopyMapper mapper = new MeanShiftCanopyMapper();
@@ -260,8 +251,9 @@ public class TestMeanShift extends TestCase {
     }
 
     // map the data
-    for (MeanShiftCanopy canopy : canopies)
+    for (MeanShiftCanopy canopy : canopies) {
       mapper.map(new Text(), canopy, mapCollector, null);
+    }
     mapper.close();
 
     assertEquals("Number of map results", 1, mapCollector.getData().size());
@@ -304,16 +296,12 @@ public class TestMeanShift extends TestCase {
     }
   }
 
-  /**
-   * Story: User can produce final point clustering using a Hadoop map/reduce
-   * job and a EuclideanDistanceMeasure.
-   * 
-   * @throws Exception
-   */
+  /** Story: User can produce final point clustering using a Hadoop map/reduce job and a EuclideanDistanceMeasure. */
   public void testCanopyEuclideanMRJob() throws Exception {
     File testData = new File("testdata");
-    if (!testData.exists())
+    if (!testData.exists()) {
       testData.mkdir();
+    }
     writePointsToFile(raw, "testdata/file1");
     writePointsToFile(raw, "testdata/file2");
     // now run the Job

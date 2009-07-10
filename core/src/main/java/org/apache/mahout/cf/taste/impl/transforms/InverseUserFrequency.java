@@ -35,17 +35,17 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * <p>Implements an "inverse user frequency" transformation, which boosts preference values for items for which few
- * users have expressed a preference, and reduces preference values for items for which many users have expressed
- * a preference. The idea is that these "rare" {@link Item}s are more useful in deciding how similar two users'
- * tastes are, and so should be emphasized in other calculatioons. This idea is mentioned in
- * <a href="ftp://ftp.research.microsoft.com/pub/tr/tr-98-12.pdf">Empirical Analysis of Predictive Algorithms for
+ * users have expressed a preference, and reduces preference values for items for which many users have expressed a
+ * preference. The idea is that these "rare" {@link Item}s are more useful in deciding how similar two users' tastes
+ * are, and so should be emphasized in other calculatioons. This idea is mentioned in <a
+ * href="ftp://ftp.research.microsoft.com/pub/tr/tr-98-12.pdf">Empirical Analysis of Predictive Algorithms for
  * Collaborative Filtering</a>.</p>
  *
- * <p>A scaling factor is computed for each {@link Item} by dividing the total number of users by the number of
- * users expressing a preference for that item, and taking the log of that value. The log base of this calculation
- * can be controlled in the constructor. Intuitively, the right value for the base is equal to the average
- * number of users who express a preference for each item in your model. If each item has about 100 preferences
- * on average, 100.0 is a good log base.</p>
+ * <p>A scaling factor is computed for each {@link Item} by dividing the total number of users by the number of users
+ * expressing a preference for that item, and taking the log of that value. The log base of this calculation can be
+ * controlled in the constructor. Intuitively, the right value for the base is equal to the average number of users who
+ * express a preference for each item in your model. If each item has about 100 preferences on average, 100.0 is a good
+ * log base.</p>
  */
 public final class InverseUserFrequency implements PreferenceTransform {
 
@@ -59,7 +59,7 @@ public final class InverseUserFrequency implements PreferenceTransform {
    * <p>Creates a {@link InverseUserFrequency} transformation. Computations use the given log base.</p>
    *
    * @param dataModel {@link DataModel} from which to calculate user frequencies
-   * @param logBase calculation logarithm base
+   * @param logBase   calculation logarithm base
    * @throws IllegalArgumentException if dataModel is <code>null</code> or logBase is {@link Double#NaN} or &lt;= 1.0
    */
   public InverseUserFrequency(DataModel dataModel, double logBase) throws TasteException {
@@ -75,9 +75,7 @@ public final class InverseUserFrequency implements PreferenceTransform {
     recompute();
   }
 
-  /**
-   * @return log base used in this object's calculations
-   */
+  /** @return log base used in this object's calculations */
   public double getLogBase() {
     return logBase;
   }
@@ -114,7 +112,7 @@ public final class InverseUserFrequency implements PreferenceTransform {
     double logFactor = Math.log(logBase);
     for (Map.Entry<Item, int[]> entry : itemPreferenceCounts.getEntrySet()) {
       newIufFactors.put(entry.getKey(),
-                        Math.log((double) numUsers / (double) entry.getValue()[0]) / logFactor);
+          Math.log((double) numUsers / (double) entry.getValue()[0]) / logFactor);
     }
     iufFactors.set(Collections.unmodifiableMap(newIufFactors));
   }

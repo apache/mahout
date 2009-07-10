@@ -35,26 +35,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This Class reads the different interim  files created during the Training stage
- * as well as the Model File during testing.
+ * This Class reads the different interim  files created during the Training stage as well as the Model File during
+ * testing.
  */
 public class SequenceFileModelReader {
 
   private static final Logger log = LoggerFactory.getLogger(SequenceFileModelReader.class);
 
-  private SequenceFileModelReader() {}
+  private SequenceFileModelReader() {
+  }
 
   public static void loadModel(Model model, FileSystem fs, Map<String, Path> pathPatterns,
-      Configuration conf) throws IOException {
+                               Configuration conf) throws IOException {
 
     loadFeatureWeights(model, fs, pathPatterns.get("sigma_j"), conf);
-    loadLabelWeights(model, fs, pathPatterns.get("sigma_k"), conf); 
-    loadSumWeight(model, fs, pathPatterns.get("sigma_kSigma_j"), conf); 
-    loadThetaNormalizer(model, fs, pathPatterns.get("thetaNormalizer"), conf); 
-    
-   
+    loadLabelWeights(model, fs, pathPatterns.get("sigma_k"), conf);
+    loadSumWeight(model, fs, pathPatterns.get("sigma_kSigma_j"), conf);
+    loadThetaNormalizer(model, fs, pathPatterns.get("thetaNormalizer"), conf);
+
+
     model.initializeWeightMatrix();
-    
+
     loadWeightMatrix(model, fs, pathPatterns.get("weight"), conf);
     model.initializeNormalizer();
     //model.GenerateComplementaryModel();
@@ -85,11 +86,11 @@ public class SequenceFileModelReader {
   }
 
   public static void loadFeatureWeights(Model model, FileSystem fs, Path pathPattern,
-      Configuration conf) throws IOException {
+                                        Configuration conf) throws IOException {
 
     Writable key = new Text();
     DoubleWritable value = new DoubleWritable();
-    
+
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
@@ -108,8 +109,8 @@ public class SequenceFileModelReader {
     }
   }
 
-  public static void loadLabelWeights(Model model,FileSystem fs, Path pathPattern,
-      Configuration conf) throws IOException {
+  public static void loadLabelWeights(Model model, FileSystem fs, Path pathPattern,
+                                      Configuration conf) throws IOException {
     Writable key = new Text();
     DoubleWritable value = new DoubleWritable();
 
@@ -130,9 +131,9 @@ public class SequenceFileModelReader {
       }
     }
   }
-  
-  public static void loadThetaNormalizer(Model model,FileSystem fs, Path pathPattern,
-      Configuration conf) throws IOException {
+
+  public static void loadThetaNormalizer(Model model, FileSystem fs, Path pathPattern,
+                                         Configuration conf) throws IOException {
     Writable key = new Text();
     DoubleWritable value = new DoubleWritable();
 
@@ -144,7 +145,7 @@ public class SequenceFileModelReader {
 
       // the key is either _label_ or label,feature
       while (reader.next(key, value)) {
-        String keyStr = key.toString();        
+        String keyStr = key.toString();
         if (keyStr.charAt(0) == '_') { // Sum of weights in a Label
           model.setThetaNormalizer(keyStr.substring(1), value
               .get());
@@ -154,7 +155,7 @@ public class SequenceFileModelReader {
   }
 
   public static void loadSumWeight(Model model, FileSystem fs, Path pathPattern,
-      Configuration conf) throws IOException {
+                                   Configuration conf) throws IOException {
 
     Writable key = new Text();
     DoubleWritable value = new DoubleWritable();
@@ -212,13 +213,13 @@ public class SequenceFileModelReader {
     }
   }
 
-  public static Map<String,Double> readLabelSums(FileSystem fs, Path pathPattern, Configuration conf) throws IOException {
-    Map<String,Double> labelSum = new HashMap<String,Double>();
+  public static Map<String, Double> readLabelSums(FileSystem fs, Path pathPattern, Configuration conf) throws IOException {
+    Map<String, Double> labelSum = new HashMap<String, Double>();
     Writable key = new Text();
     DoubleWritable value = new DoubleWritable();
 
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
-   
+
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
@@ -235,9 +236,9 @@ public class SequenceFileModelReader {
     return labelSum;
   }
 
-  public static Map<String,Double> readLabelDocumentCounts(FileSystem fs, Path pathPattern, Configuration conf)
+  public static Map<String, Double> readLabelDocumentCounts(FileSystem fs, Path pathPattern, Configuration conf)
       throws IOException {
-    Map<String,Double> labelDocumentCounts = new HashMap<String,Double>();
+    Map<String, Double> labelDocumentCounts = new HashMap<String, Double>();
     Writable key = new Text();
     DoubleWritable value = new DoubleWritable();
 
@@ -259,8 +260,8 @@ public class SequenceFileModelReader {
   }
 
   public static double readSigma_jSigma_k(FileSystem fs, Path pathPattern,
-      Configuration conf) throws IOException {
-    Map<String,Double> weightSum = new HashMap<String,Double>();
+                                          Configuration conf) throws IOException {
+    Map<String, Double> weightSum = new HashMap<String, Double>();
     Writable key = new Text();
     DoubleWritable value = new DoubleWritable();
 
@@ -284,8 +285,8 @@ public class SequenceFileModelReader {
   }
 
   public static double readVocabCount(FileSystem fs, Path pathPattern,
-      Configuration conf) throws IOException {
-    Map<String,Double> weightSum = new HashMap<String,Double>();
+                                      Configuration conf) throws IOException {
+    Map<String, Double> weightSum = new HashMap<String, Double>();
     Writable key = new Text();
     DoubleWritable value = new DoubleWritable();
 

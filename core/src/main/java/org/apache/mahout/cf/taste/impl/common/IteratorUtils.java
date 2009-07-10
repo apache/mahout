@@ -23,9 +23,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * <p>{@link java.util.Iterator}-related methods without a better home.</p>
- */
+/** <p>{@link java.util.Iterator}-related methods without a better home.</p> */
 public final class IteratorUtils {
 
   private IteratorUtils() {
@@ -40,10 +38,10 @@ public final class IteratorUtils {
   }
 
   /**
-   * @param iterable {@link Iterable} whose contents are to be put into a {@link List}
+   * @param iterable   {@link Iterable} whose contents are to be put into a {@link List}
    * @param comparator {@link Comparator} defining the sort order of the returned {@link List}
-   * @return a {@link List} with the objects one gets by iterating over the given {@link Iterable},
-   *         sorted according to the given {@link Comparator}
+   * @return a {@link List} with the objects one gets by iterating over the given {@link Iterable}, sorted according to
+   *         the given {@link Comparator}
    */
   public static <K> List<K> iterableToList(Iterable<K> iterable, Comparator<K> comparator) {
     if (iterable == null) {

@@ -17,11 +17,11 @@
 
 package org.apache.mahout.clustering.dirichlet;
 
-import java.io.IOException;
-
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
+
+import java.io.IOException;
 
 public class DirichletJob {
 
@@ -40,21 +40,17 @@ public class DirichletJob {
   }
 
   /**
-   * Run the job using supplied arguments, deleting the output directory if it
-   * exists beforehand
-   * 
-   * @param input the directory pathname for input points
-   * @param output the directory pathname for output points
-   * @param modelFactory the ModelDistribution class name
-   * @param numModels the number of Models
+   * Run the job using supplied arguments, deleting the output directory if it exists beforehand
+   *
+   * @param input         the directory pathname for input points
+   * @param output        the directory pathname for output points
+   * @param modelFactory  the ModelDistribution class name
+   * @param numModels     the number of Models
    * @param maxIterations the maximum number of iterations
-   * @param alpha_0 the alpha0 value for the DirichletDistribution
-   * @throws IllegalAccessException 
-   * @throws InstantiationException 
-   * @throws ClassNotFoundException 
+   * @param alpha_0       the alpha0 value for the DirichletDistribution
    */
   public static void runJob(String input, String output, String modelFactory,
-      int numModels, int maxIterations, double alpha_0)
+                            int numModels, int maxIterations, double alpha_0)
       throws IOException, ClassNotFoundException, InstantiationException,
       IllegalAccessException {
     // delete the output directory

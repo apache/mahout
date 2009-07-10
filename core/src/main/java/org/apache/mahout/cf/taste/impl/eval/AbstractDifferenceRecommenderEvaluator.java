@@ -38,9 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-/**
- * <p>Abstract superclass of a couple implementations, providing shared functionality.</p>
- */
+/** <p>Abstract superclass of a couple implementations, providing shared functionality.</p> */
 abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEvaluator {
 
   private static final Logger log = LoggerFactory.getLogger(AbstractDifferenceRecommenderEvaluator.class);
@@ -75,7 +73,7 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     int numUsers = dataModel.getNumUsers();
     Collection<User> trainingUsers = new ArrayList<User>(1 + (int) (trainingPercentage * (double) numUsers));
     Map<User, Collection<Preference>> testUserPrefs =
-            new FastMap<User, Collection<Preference>>(1 + (int) ((1.0 - trainingPercentage) * (double) numUsers));
+        new FastMap<User, Collection<Preference>>(1 + (int) ((1.0 - trainingPercentage) * (double) numUsers));
 
     for (User user : dataModel.getUsers()) {
       if (random.nextDouble() < evaluationPercentage) {

@@ -19,9 +19,7 @@ package org.apache.mahout.cf.taste.impl.common;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 
-/**
- * <p>Tests {@link FullRunningAverage}.</p>
- */
+/** <p>Tests {@link FullRunningAverage}.</p> */
 public final class RunningAverageTest extends TasteTestCase {
 
   public void testFull() {

@@ -19,18 +19,18 @@ package org.apache.mahout.clustering.kmeans;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.mahout.matrix.Vector;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KMeansClusterMapper extends MapReduceBase  implements
-        Mapper<WritableComparable<?>, Vector, Text, Text> {
+public class KMeansClusterMapper extends MapReduceBase implements
+    Mapper<WritableComparable<?>, Vector, Text, Text> {
   protected List<Cluster> clusters;
 
 
@@ -56,10 +56,11 @@ public class KMeansClusterMapper extends MapReduceBase  implements
     clusters = new ArrayList<Cluster>();
 
     KMeansUtil.configureWithClusterInfo(job.get(Cluster.CLUSTER_PATH_KEY),
-            clusters);
+        clusters);
 
-    if (clusters.isEmpty())
+    if (clusters.isEmpty()) {
       throw new NullPointerException("Cluster is empty!!!");
+    }
   }
 
 }

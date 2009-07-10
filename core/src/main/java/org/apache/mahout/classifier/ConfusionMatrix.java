@@ -56,11 +56,11 @@ public class ConfusionMatrix implements Summarizable {
     return labels;
   }
 
-  public double getAccuracy(String label){
+  public double getAccuracy(String label) {
     int labelId = labelMap.get(label);
     int labelTotal = 0;
     int correct = 0;
-    for(int i = 0 ;i < labels.size() ;i++){
+    for (int i = 0; i < labels.size(); i++) {
       labelTotal += confusionMatrix[labelId][i];
       if (i == labelId) {
         correct = confusionMatrix[labelId][i];
@@ -69,33 +69,33 @@ public class ConfusionMatrix implements Summarizable {
     return 100.0 * correct / labelTotal;
   }
 
-  public int getCorrect(String label){
+  public int getCorrect(String label) {
     int labelId = labelMap.get(label);
     return confusionMatrix[labelId][labelId];
   }
 
 
-  public double getTotal(String label){
+  public double getTotal(String label) {
     int labelId = labelMap.get(label);
     int labelTotal = 0;
-    for (int i = 0 ;i < labels.size() ;i++){
-      labelTotal+= confusionMatrix[labelId][i];
+    for (int i = 0; i < labels.size(); i++) {
+      labelTotal += confusionMatrix[labelId][i];
     }
     return labelTotal;
   }
 
   public void addInstance(String correctLabel, ClassifierResult classifiedResult) {
     incrementCount(correctLabel, classifiedResult.getLabel());
-  }  
-  
+  }
+
   public void addInstance(String correctLabel, String classifiedLabel) {
     incrementCount(correctLabel, classifiedLabel);
   }
-  
+
   public int getCount(String correctLabel, String classifiedLabel) {
     if (labels.contains(correctLabel)
         && labels.contains(classifiedLabel) == false && defaultLabel.equals(classifiedLabel) == false) {
-      throw new IllegalArgumentException("Label not found " +correctLabel + ' ' +classifiedLabel );
+      throw new IllegalArgumentException("Label not found " + correctLabel + ' ' + classifiedLabel);
     }
     int correctId = labelMap.get(correctLabel);
     int classifiedId = labelMap.get(classifiedLabel);
@@ -113,7 +113,7 @@ public class ConfusionMatrix implements Summarizable {
   }
 
   public void incrementCount(String correctLabel, String classifiedLabel,
-      int count) {
+                             int count) {
     putCount(correctLabel, classifiedLabel, count
         + getCount(correctLabel, classifiedLabel));
   }
@@ -123,8 +123,9 @@ public class ConfusionMatrix implements Summarizable {
   }
 
   public ConfusionMatrix merge(ConfusionMatrix b) {
-    if (labels.size() != b.getLabels().size())
+    if (labels.size() != b.getLabels().size()) {
       throw new IllegalArgumentException("The Labels do not Match");
+    }
 
     //if (labels.containsAll(b.getLabels()))
     //  ;
@@ -172,12 +173,12 @@ public class ConfusionMatrix implements Summarizable {
   static String getSmallLabel(int i) {
     int val = i;
     StringBuilder returnString = new StringBuilder();
-    do{
+    do {
       int n = val % 26;
       int c = 'a';
-      returnString.insert(0, (char)(c + n));
+      returnString.insert(0, (char) (c + n));
       val /= 26;
-    }while(val>0);
+    } while (val > 0);
     return returnString.toString();
   }
 

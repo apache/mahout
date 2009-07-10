@@ -28,9 +28,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 
-/**
- * Can also be used as a local Combiner
- */
+/** Can also be used as a local Combiner */
 public class BayesWeightSummerReducer extends MapReduceBase
     implements Reducer<Text, DoubleWritable, Text, DoubleWritable> {
 

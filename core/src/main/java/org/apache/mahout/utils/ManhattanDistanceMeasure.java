@@ -27,15 +27,16 @@ import java.util.Collections;
 import java.util.Iterator;
 
 /**
- * This class implements a "manhattan distance" metric by summing the absolute
- * values of the difference between each coordinate
+ * This class implements a "manhattan distance" metric by summing the absolute values of the difference between each
+ * coordinate
  */
 public class ManhattanDistanceMeasure implements DistanceMeasure {
 
   public static double distance(double[] p1, double[] p2) {
     double result = 0.0;
-    for (int i = 0; i < p1.length; i++)
+    for (int i = 0; i < p1.length; i++) {
       result += Math.abs(p2[i] - p1[i]);
+    }
     return result;
   }
 
@@ -54,23 +55,24 @@ public class ManhattanDistanceMeasure implements DistanceMeasure {
     // nothing to do
   }
 
- @Override
- public double distance(Vector v1, Vector v2) {
-    if (v1.size() != v2.size())
+  @Override
+  public double distance(Vector v1, Vector v2) {
+    if (v1.size() != v2.size()) {
       throw new CardinalityException();
+    }
     double result = 0;
-   Vector vector = v1.plus(v2);
-   Iterator<Vector.Element> iter = vector.iterateNonZero();//this contains all non zero elements between the two
-   while (iter.hasNext()){
+    Vector vector = v1.plus(v2);
+    Iterator<Vector.Element> iter = vector.iterateNonZero();//this contains all non zero elements between the two
+    while (iter.hasNext()) {
       Vector.Element e = iter.next();
       result += Math.abs(v2.getQuick(e.index()) - v1.getQuick(e.index()));
     }
     return result;
   }
 
- @Override
- public double distance(double centroidLengthSquare, Vector centroid, Vector v) {	 
-  return distance(centroid, v); // TODO
- }
- 
+  @Override
+  public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
+    return distance(centroid, v); // TODO
+  }
+
 }

@@ -23,9 +23,7 @@ import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import java.util.Collection;
 import java.util.HashSet;
 
-/**
- * Tests {@link RefreshHelper}
- */
+/** Tests {@link RefreshHelper} */
 public final class RefreshHelperTest extends TasteTestCase {
 
   public void testCallable() {
@@ -48,7 +46,7 @@ public final class RefreshHelperTest extends TasteTestCase {
     helper.addDependency(mock2);
     helper.refresh(null);
     assertEquals(1, mock1.getCallCount());
-    assertEquals(1, mock2.getCallCount()) ;
+    assertEquals(1, mock2.getCallCount());
   }
 
   public void testAlreadyRefreshed() {
@@ -61,7 +59,7 @@ public final class RefreshHelperTest extends TasteTestCase {
     alreadyRefreshed.add(mock1);
     helper.refresh(alreadyRefreshed);
     assertEquals(0, mock1.getCallCount());
-    assertEquals(1, mock2.getCallCount()) ;
+    assertEquals(1, mock2.getCallCount());
   }
 
 }

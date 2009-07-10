@@ -24,8 +24,8 @@ import org.apache.mahout.cf.taste.model.User;
 import java.util.Collection;
 
 /**
- * <p>Returns the "similarity" between two clusters of users, according to some
- * definition of similarity. Subclassses define different notions of similarity.</p>
+ * <p>Returns the "similarity" between two clusters of users, according to some definition of similarity. Subclassses
+ * define different notions of similarity.</p>
  *
  * @see TreeClusteringRecommender
  */
@@ -35,8 +35,8 @@ public interface ClusterSimilarity extends Refreshable {
    * @param cluster1 first cluster of {@link User}s
    * @param cluster2 second cluste rof {@link User}s
    * @return "distance" between clusters; a positiv
-   * @throws TasteException if an error occurs while computing similarity, such as
-   * errors accessing an underlying {@link org.apache.mahout.cf.taste.model.DataModel}
+   * @throws TasteException           if an error occurs while computing similarity, such as errors accessing an
+   *                                  underlying {@link org.apache.mahout.cf.taste.model.DataModel}
    * @throws IllegalArgumentException if either argument is null or empty
    */
   double getSimilarity(Collection<User> cluster1, Collection<User> cluster2) throws TasteException;

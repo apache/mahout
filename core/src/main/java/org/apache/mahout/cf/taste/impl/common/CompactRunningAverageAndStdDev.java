@@ -17,9 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
-/**
- * <p>Extends {@link CompactRunningAverage} to add a running standard deviation computation.</p>
- */
+/** <p>Extends {@link CompactRunningAverage} to add a running standard deviation computation.</p> */
 public final class CompactRunningAverageAndStdDev extends CompactRunningAverage implements RunningAverageAndStdDev {
 
   private float stdDev;

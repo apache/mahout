@@ -32,12 +32,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
-/**
- * Reads the input train set(preprocessed using the {@link BayesFileFormatter}).
- */
+/** Reads the input train set(preprocessed using the {@link BayesFileFormatter}). */
 public class BayesFeatureMapper extends MapReduceBase implements
     Mapper<Text, Text, Text, DoubleWritable> {
 
@@ -50,22 +48,19 @@ public class BayesFeatureMapper extends MapReduceBase implements
   private int gramSize = 1;
 
   /**
-   * We need to count the number of times we've seen a term with a given label
-   * and we need to output that. But this Mapper does more than just outputing the count. It first does weight
-   * normalisation.
-   * Secondly, it outputs for each unique word in a document value 1 for summing up as the Term Document Frequency.
-   * Which later is used to calculate the Idf
-   * Thirdly, it outputs for each label the number of times a document was seen(Also used in Idf Calculation)
-   * 
-   * @param key The label
-   * @param value the features (all unique) associated w/ this label
-   * @param output The OutputCollector to write the results to
+   * We need to count the number of times we've seen a term with a given label and we need to output that. But this
+   * Mapper does more than just outputing the count. It first does weight normalisation. Secondly, it outputs for each
+   * unique word in a document value 1 for summing up as the Term Document Frequency. Which later is used to calculate
+   * the Idf Thirdly, it outputs for each label the number of times a document was seen(Also used in Idf Calculation)
+   *
+   * @param key      The label
+   * @param value    the features (all unique) associated w/ this label
+   * @param output   The OutputCollector to write the results to
    * @param reporter Not used
-   * @throws IOException
    */
   @Override
   public void map(Text key, Text value,
-      OutputCollector<Text, DoubleWritable> output, Reporter reporter)
+                  OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {
     //String line = value.toString();
     String label = key.toString();
@@ -75,8 +70,8 @@ public class BayesFeatureMapper extends MapReduceBase implements
 
     StringBuilder builder = new StringBuilder(label);
     builder.ensureCapacity(32);// make sure we have a reasonably size buffer to
-                               // begin with
-    List<String> ngrams  = Model.generateNGramsWithoutLabel(value.toString(), gramSize);
+    // begin with
+    List<String> ngrams = Model.generateNGramsWithoutLabel(value.toString(), gramSize);
     for (String ngram : ngrams) {
       int[] count = wordList.get(ngram);
       if (count == null) {

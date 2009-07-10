@@ -23,9 +23,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Doubly sparse matrix. Implemented as a Map of SparseVector rows
- */
+/** Doubly sparse matrix. Implemented as a Map of SparseVector rows */
 public class SparseMatrix extends AbstractMatrix {
 
   private int[] cardinality;
@@ -38,20 +36,21 @@ public class SparseMatrix extends AbstractMatrix {
 
   /**
    * Construct a matrix of the given cardinality with the given row map
-   * 
+   *
    * @param cardinality the int[2] cardinality desired
-   * @param rows a Map<Integer, SparseVector> of rows
+   * @param rows        a Map<Integer, SparseVector> of rows
    */
   public SparseMatrix(int[] cardinality, Map<Integer, SparseVector> rows) {
     this.cardinality = cardinality.clone();
     this.rows = new HashMap<Integer, Vector>();
-    for (Map.Entry<Integer, SparseVector> entry : rows.entrySet())
+    for (Map.Entry<Integer, SparseVector> entry : rows.entrySet()) {
       this.rows.put(entry.getKey(), entry.getValue().clone());
+    }
   }
 
   /**
    * Construct a matrix of the given cardinality
-   * 
+   *
    * @param cardinality the int[2] cardinality desired
    */
   public SparseMatrix(int[] cardinality) {
@@ -68,25 +67,27 @@ public class SparseMatrix extends AbstractMatrix {
   public Matrix clone() {
     SparseMatrix clone = (SparseMatrix) super.clone();
     clone.cardinality = cardinality.clone();
-    clone.rows = (Map<Integer,Vector>) ((HashMap<Integer,Vector>) rows).clone();
+    clone.rows = (Map<Integer, Vector>) ((HashMap<Integer, Vector>) rows).clone();
     return clone;
   }
 
   @Override
   public double getQuick(int row, int column) {
     Vector r = rows.get(row);
-    if (r == null)
+    if (r == null) {
       return 0.0;
-    else
+    } else {
       return r.getQuick(column);
+    }
   }
 
   @Override
   public boolean haveSharedCells(Matrix other) {
-    if (other instanceof SparseMatrix)
+    if (other instanceof SparseMatrix) {
       return other == this;
-    else
+    } else {
       return other.haveSharedCells(this);
+    }
   }
 
   @Override
@@ -96,7 +97,7 @@ public class SparseMatrix extends AbstractMatrix {
 
   @Override
   public Matrix like(int rows, int columns) {
-    return new SparseMatrix(new int[] { rows, columns });
+    return new SparseMatrix(new int[]{rows, columns});
   }
 
   @Override
@@ -114,26 +115,30 @@ public class SparseMatrix extends AbstractMatrix {
   public int[] getNumNondefaultElements() {
     int[] result = new int[2];
     result[ROW] = rows.size();
-    for (Map.Entry<Integer, Vector> integerVectorEntry : rows.entrySet())
+    for (Map.Entry<Integer, Vector> integerVectorEntry : rows.entrySet()) {
       result[COL] = Math.max(result[COL], integerVectorEntry.getValue()
           .getNumNondefaultElements());
+    }
     return result;
   }
 
   @Override
   public Matrix viewPart(int[] offset, int[] size) {
-    if (size[ROW] > cardinality[ROW] || size[COL] > cardinality[COL])
+    if (size[ROW] > cardinality[ROW] || size[COL] > cardinality[COL]) {
       throw new CardinalityException();
+    }
     if (offset[ROW] < 0 || offset[ROW] + size[ROW] > cardinality[ROW]
-        || offset[COL] < 0 || offset[COL] + size[COL] > cardinality[COL])
+        || offset[COL] < 0 || offset[COL] + size[COL] > cardinality[COL]) {
       throw new IndexException();
+    }
     return new MatrixView(this, offset, size);
   }
 
   @Override
   public Matrix assignColumn(int column, Vector other) {
-    if (other.size() != cardinality[ROW] || column >= cardinality[COL])
+    if (other.size() != cardinality[ROW] || column >= cardinality[COL]) {
       throw new CardinalityException();
+    }
     for (int row = 0; row < cardinality[ROW]; row++) {
       double val = other.getQuick(row);
       if (val != 0.0) {
@@ -151,36 +156,41 @@ public class SparseMatrix extends AbstractMatrix {
 
   @Override
   public Matrix assignRow(int row, Vector other) {
-    if (row >= cardinality[ROW] || other.size() != cardinality[COL])
+    if (row >= cardinality[ROW] || other.size() != cardinality[COL]) {
       throw new CardinalityException();
+    }
     rows.put(row, other);
     return this;
   }
 
   @Override
   public Vector getColumn(int column) {
-    if (column < 0 || column >= cardinality[COL])
+    if (column < 0 || column >= cardinality[COL]) {
       throw new IndexException();
+    }
     double[] d = new double[cardinality[ROW]];
-    for (int row = 0; row < cardinality[ROW]; row++)
+    for (int row = 0; row < cardinality[ROW]; row++) {
       d[row] = getQuick(row, column);
+    }
     return new DenseVector(d);
   }
 
   @Override
   public Vector getRow(int row) {
-    if (row < 0 || row >= cardinality[ROW])
+    if (row < 0 || row >= cardinality[ROW]) {
       throw new IndexException();
+    }
     Vector res = rows.get(row);
-    if (res == null)
+    if (res == null) {
       res = new SparseVector(cardinality[ROW]);
+    }
     return res;
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
-    int[] card = { in.readInt(), in.readInt() };
+    int[] card = {in.readInt(), in.readInt()};
     this.cardinality = card;
     int rowsize = in.readInt();
     this.rows = new HashMap<Integer, Vector>();

@@ -22,8 +22,8 @@ import org.apache.mahout.matrix.Vector;
 import java.util.Iterator;
 
 /**
- * This class implements a Euclidian distance metric by summing the square root
- * of the squared differences between each coordinate,  optionally adding weights.
+ * This class implements a Euclidian distance metric by summing the square root of the squared differences between each
+ * coordinate,  optionally adding weights.
  */
 public class WeightedEuclideanDistanceMeasure extends WeightedDistanceMeasure {
 
@@ -48,8 +48,8 @@ public class WeightedEuclideanDistanceMeasure extends WeightedDistanceMeasure {
   }
 
   @Override
-  public double distance(double centroidLengthSquare, Vector centroid, Vector v) {	 
-   return distance(centroid, v); // TODO
+  public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
+    return distance(centroid, v); // TODO
   }
 
 }

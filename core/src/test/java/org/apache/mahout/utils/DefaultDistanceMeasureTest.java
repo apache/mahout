@@ -19,8 +19,8 @@ package org.apache.mahout.utils;
 
 import junit.framework.TestCase;
 import org.apache.mahout.matrix.DenseVector;
-import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.matrix.SparseVector;
+import org.apache.mahout.matrix.Vector;
 
 
 public abstract class DefaultDistanceMeasureTest extends TestCase {
@@ -31,7 +31,7 @@ public abstract class DefaultDistanceMeasureTest extends TestCase {
 
     DistanceMeasure distanceMeasure = distanceMeasureFactory();
 
-    Vector[] vectors = new Vector[]{
+    Vector[] vectors = {
         new DenseVector(new double[]{1, 1, 1, 1, 1, 1}),
         new DenseVector(new double[]{2, 2, 2, 2, 2, 2}),
         new DenseVector(new double[]{6, 6, 6, 6, 6, 6})

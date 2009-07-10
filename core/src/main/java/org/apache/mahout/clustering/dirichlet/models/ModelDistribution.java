@@ -17,14 +17,12 @@ package org.apache.mahout.clustering.dirichlet.models;
  * limitations under the License.
  */
 
-/**
- * A model distribution allows us to sample a model from its prior distribution.
- */
+/** A model distribution allows us to sample a model from its prior distribution. */
 public interface ModelDistribution<O> {
 
   /**
    * Return a list of models sampled from the prior
-   * 
+   *
    * @param howMany the int number of models to return
    * @return a Model<Observation>[] representing what is known apriori
    */
@@ -32,7 +30,7 @@ public interface ModelDistribution<O> {
 
   /**
    * Return a list of models sampled from the posterior
-   * 
+   *
    * @param posterior the Model<Observation>[] after observations
    * @return a Model<Observation>[] representing what is known apriori
    */

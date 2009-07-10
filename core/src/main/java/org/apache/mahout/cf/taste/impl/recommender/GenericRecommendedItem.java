@@ -17,25 +17,19 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
-import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 
 import java.io.Serializable;
 
-/**
- * <p>A simple implementation of {@link RecommendedItem}.</p>
- */
+/** <p>A simple implementation of {@link RecommendedItem}.</p> */
 public final class GenericRecommendedItem implements RecommendedItem, Serializable {
 
   private final Item item;
   private final double value;
 
-  /**
-   * @param item
-   * @param value
-   * @throws IllegalArgumentException if item is null or value is NaN
-   */
+  /** @throws IllegalArgumentException if item is null or value is NaN */
   public GenericRecommendedItem(Item item, double value) {
     if (item == null) {
       throw new IllegalArgumentException("item is null");
@@ -79,7 +73,6 @@ public final class GenericRecommendedItem implements RecommendedItem, Serializab
   /**
    * Defines a natural ordering from most-preferred item (highest value) to least-preferred.
    *
-   * @param other
    * @return 1, -1, 0 as this value is less than, greater than or equal to the other's value
    */
   @Override

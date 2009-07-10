@@ -19,8 +19,6 @@ package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.similarity.UserSimilarity;
-import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.IteratorIterable;
 import org.apache.mahout.cf.taste.impl.common.IteratorUtils;
@@ -28,6 +26,8 @@ import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -55,11 +55,11 @@ public final class GenericUserSimilarity implements UserSimilarity {
   }
 
   public GenericUserSimilarity(UserSimilarity otherSimilarity, DataModel dataModel, int maxToKeep)
-          throws TasteException {
+      throws TasteException {
     List<? extends User> users = IteratorUtils.iterableToList(dataModel.getUsers());
     Iterator<UserUserSimilarity> it = new DataModelSimilaritiesIterator(otherSimilarity, users);
     Iterable<UserUserSimilarity> keptSimilarities =
-            TopItems.getTopUserUserSimilarities(maxToKeep, new IteratorIterable<UserUserSimilarity>(it));
+        TopItems.getTopUserUserSimilarities(maxToKeep, new IteratorIterable<UserUserSimilarity>(it));
     initSimilarityMaps(keptSimilarities);
   }
 
@@ -158,9 +158,7 @@ public final class GenericUserSimilarity implements UserSimilarity {
       return "UserUserSimilarity[" + user1 + ',' + user2 + ':' + value + ']';
     }
 
-    /**
-     * Defines an ordering from highest similarity to lowest.
-     */
+    /** Defines an ordering from highest similarity to lowest. */
     @Override
     public int compareTo(UserUserSimilarity other) {
       double otherValue = other.value;

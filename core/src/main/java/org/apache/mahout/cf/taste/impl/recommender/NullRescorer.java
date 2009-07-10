@@ -22,9 +22,7 @@ import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 
-/**
- * <p>A simple {@link Rescorer} which always returns the original score.</p>
- */
+/** <p>A simple {@link Rescorer} which always returns the original score.</p> */
 public final class NullRescorer<T> implements Rescorer<T> {
 
   private static final Rescorer<Item> itemInstance = new NullRescorer<Item>();
@@ -53,7 +51,7 @@ public final class NullRescorer<T> implements Rescorer<T> {
   }
 
   /**
-   * @param thing to rescore
+   * @param thing         to rescore
    * @param originalScore current score for {@link Item}
    * @return same originalScore as new score, always
    */

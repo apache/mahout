@@ -24,11 +24,11 @@ import java.text.DateFormat;
 import java.util.Date;
 
 /**
- * <p>An expanded version of {@link GenericPreference} which adds more fields;  for now, this only includes
- * an additional timestamp field. This is provided as a convenience to implementations and
- * {@link org.apache.mahout.cf.taste.model.DataModel}s which wish to record and use this information in computations.
- * This information is not added to {@link org.apache.mahout.cf.taste.impl.model.GenericPreference} to avoid expanding
- * memory requirements of the algorithms supplied with Taste, since memory is a limiting factor.</p>
+ * <p>An expanded version of {@link GenericPreference} which adds more fields;  for now, this only includes an
+ * additional timestamp field. This is provided as a convenience to implementations and {@link
+ * org.apache.mahout.cf.taste.model.DataModel}s which wish to record and use this information in computations. This
+ * information is not added to {@link org.apache.mahout.cf.taste.impl.model.GenericPreference} to avoid expanding memory
+ * requirements of the algorithms supplied with Taste, since memory is a limiting factor.</p>
  */
 public class DetailedPreference extends GenericPreference {
 
@@ -49,7 +49,7 @@ public class DetailedPreference extends GenericPreference {
   @Override
   public String toString() {
     return "GenericPreference[user: " + getUser() + ", item:" + getItem() + ", value:" + getValue() +
-           ", timestamp: " + DateFormat.getDateTimeInstance().format(new Date(timestamp)) + ']';
+        ", timestamp: " + DateFormat.getDateTimeInstance().format(new Date(timestamp)) + ']';
   }
 
 }

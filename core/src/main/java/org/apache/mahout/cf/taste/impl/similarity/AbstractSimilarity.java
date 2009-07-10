@@ -20,23 +20,21 @@ package org.apache.mahout.cf.taste.impl.similarity;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Weighting;
-import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
-import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
-import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.transforms.SimilarityTransform;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
+import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
+import org.apache.mahout.cf.taste.transforms.SimilarityTransform;
+
 import java.util.Collection;
 import java.util.concurrent.Callable;
 
-/**
- * Abstract superclass encapsulating functionality that is common to most
- * implementations in this package.
- */
+/** Abstract superclass encapsulating functionality that is common to most implementations in this package. */
 abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
 
   private final DataModel dataModel;
@@ -48,16 +46,12 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
   private int cachedNumUsers;
   private final RefreshHelper refreshHelper;
 
-  /**
-   * <p>Creates a normal (unweighted) {@link AbstractSimilarity}.</p>
-   */
+  /** <p>Creates a normal (unweighted) {@link AbstractSimilarity}.</p> */
   AbstractSimilarity(DataModel dataModel) throws TasteException {
     this(dataModel, Weighting.UNWEIGHTED);
   }
 
-  /**
-   * <p>Creates a possibly weighted {@link AbstractSimilarity}.</p>
-   */
+  /** <p>Creates a possibly weighted {@link AbstractSimilarity}.</p> */
   AbstractSimilarity(final DataModel dataModel, Weighting weighting) throws TasteException {
     if (dataModel == null) {
       throw new IllegalArgumentException("dataModel is null");
@@ -120,21 +114,21 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
   }
 
   /**
-   * <p>Several subclasses in this package implement this method to actually compute the similarity
-   * from figures computed over users or items. Note that the computations in this class "center" the
-   * data, such that X and Y's mean are 0.</p>
+   * <p>Several subclasses in this package implement this method to actually compute the similarity from figures
+   * computed over users or items. Note that the computations in this class "center" the data, such that X and Y's mean
+   * are 0.</p>
    *
-   * <p>Note that the sum of all X and Y values must then be 0. This value isn't passed down into
-   * the standard similarity computations as a result.</p>
+   * <p>Note that the sum of all X and Y values must then be 0. This value isn't passed down into the standard
+   * similarity computations as a result.</p>
    *
-   * @param n total number of users or items
-   * @param sumXY sum of product of user/item preference values, over all items/users prefererred by
-   * both users/items
-   * @param sumX2 sum of the square of user/item preference values, over the first item/user
-   * @param sumY2 sum of the square of the user/item preference values, over the second item/user
+   * @param n          total number of users or items
+   * @param sumXY      sum of product of user/item preference values, over all items/users prefererred by both
+   *                   users/items
+   * @param sumX2      sum of the square of user/item preference values, over the first item/user
+   * @param sumY2      sum of the square of the user/item preference values, over the second item/user
    * @param sumXYdiff2 sum of squares of differences in X and Y values
-   * @return similarity value between -1.0 and 1.0, inclusive, or {@link Double#NaN} if no similarity
-   *         can be computed (e.g. when no {@link Item}s have been rated by both {@link User}s
+   * @return similarity value between -1.0 and 1.0, inclusive, or {@link Double#NaN} if no similarity can be computed
+   *         (e.g. when no {@link Item}s have been rated by both {@link User}s
    */
   abstract double computeResult(int n, double sumXY, double sumX2, double sumY2, double sumXYdiff2);
 

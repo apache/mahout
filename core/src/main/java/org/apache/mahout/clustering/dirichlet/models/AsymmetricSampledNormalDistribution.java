@@ -22,10 +22,9 @@ import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
 
 /**
- * An implementation of the ModelDistribution interface suitable for testing the
- * DirichletCluster algorithm. Uses a Normal Distribution to sample the prior
- * model values. Model values have a vector standard deviation, allowing assymetrical
- * regions to be covered by a model.
+ * An implementation of the ModelDistribution interface suitable for testing the DirichletCluster algorithm. Uses a
+ * Normal Distribution to sample the prior model values. Model values have a vector standard deviation, allowing
+ * assymetrical regions to be covered by a model.
  */
 public class AsymmetricSampledNormalDistribution implements
     ModelDistribution<Vector> {
@@ -34,11 +33,11 @@ public class AsymmetricSampledNormalDistribution implements
   public Model<Vector>[] sampleFromPrior(int howMany) {
     Model<Vector>[] result = new AsymmetricSampledNormalModel[howMany];
     for (int i = 0; i < howMany; i++) {
-      double[] m = { UncommonDistributions.rNorm(0, 1),
-          UncommonDistributions.rNorm(0, 1) };
+      double[] m = {UncommonDistributions.rNorm(0, 1),
+          UncommonDistributions.rNorm(0, 1)};
       DenseVector mean = new DenseVector(m);
-      double[] s = { UncommonDistributions.rNorm(1, 1),
-          UncommonDistributions.rNorm(1, 1) };
+      double[] s = {UncommonDistributions.rNorm(1, 1),
+          UncommonDistributions.rNorm(1, 1)};
       DenseVector sd = new DenseVector(s);
       result[i] = new AsymmetricSampledNormalModel(mean, sd);
     }

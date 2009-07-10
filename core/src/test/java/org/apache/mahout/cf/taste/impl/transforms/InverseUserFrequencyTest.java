@@ -24,9 +24,7 @@ import org.apache.mahout.cf.taste.model.User;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * <p>Tests {@link InverseUserFrequency}.</p>
- */
+/** <p>Tests {@link InverseUserFrequency}.</p> */
 public final class InverseUserFrequencyTest extends TransformTestCase {
 
   public void testIUF() throws Exception {
@@ -44,8 +42,8 @@ public final class InverseUserFrequencyTest extends TransformTestCase {
       Preference pref = user.getPreferenceFor(String.valueOf(i));
       assertNotNull(pref);
       assertEquals(Math.log(5.0 / (double) (5 - i)) / Math.log(iuf.getLogBase()),
-                   iuf.getTransformedValue(pref),
-                   EPSILON);
+          iuf.getTransformedValue(pref),
+          EPSILON);
     }
 
     // Make sure this doesn't throw an exception

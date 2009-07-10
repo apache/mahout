@@ -26,9 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * <p>Tests {@link NearestNUserNeighborhood}.</p>
- */
+/** <p>Tests {@link NearestNUserNeighborhood}.</p> */
 public final class NearestNNeighborhoodTest extends TasteTestCase {
 
   public void testNeighborhood() throws Exception {
@@ -37,20 +35,20 @@ public final class NearestNNeighborhoodTest extends TasteTestCase {
     DataModel dataModel = new GenericDataModel(users);
 
     Collection<User> neighborhood =
-            new NearestNUserNeighborhood(1, new DummySimilarity(), dataModel).getUserNeighborhood("test1");
+        new NearestNUserNeighborhood(1, new DummySimilarity(), dataModel).getUserNeighborhood("test1");
     assertNotNull(neighborhood);
     assertEquals(1, neighborhood.size());
     assertTrue(neighborhood.contains(users.get(1)));
 
     Collection<User> neighborhood2 =
-            new NearestNUserNeighborhood(2, new DummySimilarity(), dataModel).getUserNeighborhood("test2");
+        new NearestNUserNeighborhood(2, new DummySimilarity(), dataModel).getUserNeighborhood("test2");
     assertNotNull(neighborhood2);
     assertEquals(2, neighborhood2.size());
     assertTrue(neighborhood2.contains(users.get(0)));
     assertTrue(neighborhood2.contains(users.get(2)));
 
     Collection<User> neighborhood3 =
-            new NearestNUserNeighborhood(4, new DummySimilarity(), dataModel).getUserNeighborhood("test4");
+        new NearestNUserNeighborhood(4, new DummySimilarity(), dataModel).getUserNeighborhood("test4");
     assertNotNull(neighborhood3);
     assertEquals(3, neighborhood3.size());
     assertTrue(neighborhood3.contains(users.get(0)));

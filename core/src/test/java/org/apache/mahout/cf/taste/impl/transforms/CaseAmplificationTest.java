@@ -17,9 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.transforms;
 
-/**
- * <p>Tests {@link CaseAmplification}.</p>
- */
+/** <p>Tests {@link CaseAmplification}.</p> */
 public final class CaseAmplificationTest extends TransformTestCase {
 
   public void testOneValue() {

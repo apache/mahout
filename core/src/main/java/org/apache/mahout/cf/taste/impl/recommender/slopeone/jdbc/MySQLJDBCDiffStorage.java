@@ -18,25 +18,21 @@
 package org.apache.mahout.cf.taste.impl.recommender.slopeone.jdbc;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.model.jdbc.MySQLJDBCDataModel;
 import org.apache.mahout.cf.taste.impl.model.jdbc.AbstractJDBCDataModel;
+import org.apache.mahout.cf.taste.impl.model.jdbc.MySQLJDBCDataModel;
 
 /**
- * <p>MySQL-specific implementation. Should be used in conjunction with a
- * {@link MySQLJDBCDataModel}. This implementation stores item-item diffs in a MySQL
- * database and encapsulates some other slope-one-specific operations that are needed
- * on the preference data in the database. It assumes the database has a schema like:</p>
+ * <p>MySQL-specific implementation. Should be used in conjunction with a {@link MySQLJDBCDataModel}. This
+ * implementation stores item-item diffs in a MySQL database and encapsulates some other slope-one-specific operations
+ * that are needed on the preference data in the database. It assumes the database has a schema like:</p>
  *
- * <table>
- * <tr><th>item_id_a</th><th>item_id_b</th><th>average_diff</th><th>count</th></tr>
- * <tr><td>123</td><td>234</td><td>0.5</td><td>5</td></tr>
- * <tr><td>123</td><td>789</td><td>-1.33</td><td>3</td></tr>
- * <tr><td>234</td><td>789</td><td>2.1</td><td>1</td></tr>
- * </table>
+ * <table> <tr><th>item_id_a</th><th>item_id_b</th><th>average_diff</th><th>count</th></tr>
+ * <tr><td>123</td><td>234</td><td>0.5</td><td>5</td></tr> <tr><td>123</td><td>789</td><td>-1.33</td><td>3</td></tr>
+ * <tr><td>234</td><td>789</td><td>2.1</td><td>1</td></tr> </table>
  *
- * <p><code>item_id_a</code> and <code>item_id_b</code> must have type compatible with
- * the Java <code>String</code> type. <code>average_diff</code> must be compatible with
- * <code>double</code> and <code>count</code> must be compatible with <code>int</code>.</p>
+ * <p><code>item_id_a</code> and <code>item_id_b</code> must have type compatible with the Java <code>String</code>
+ * type. <code>average_diff</code> must be compatible with <code>double</code> and <code>count</code> must be compatible
+ * with <code>int</code>.</p>
  *
  * <p>The following command sets up a suitable table in MySQL:</p>
  *
@@ -58,12 +54,12 @@ public final class MySQLJDBCDiffStorage extends AbstractJDBCDiffStorage {
 
   public MySQLJDBCDiffStorage(AbstractJDBCDataModel dataModel) throws TasteException {
     this(dataModel,
-         DEFAULT_DIFF_TABLE,
-         DEFAULT_ITEM_A_COLUMN,
-         DEFAULT_ITEM_B_COLUMN,
-         DEFAULT_COUNT_COLUMN,
-         DEFAULT_AVERAGE_DIFF_COLUMN,
-         DEFAULT_MIN_DIFF_COUNT);
+        DEFAULT_DIFF_TABLE,
+        DEFAULT_ITEM_A_COLUMN,
+        DEFAULT_ITEM_B_COLUMN,
+        DEFAULT_COUNT_COLUMN,
+        DEFAULT_AVERAGE_DIFF_COLUMN,
+        DEFAULT_MIN_DIFF_COUNT);
   }
 
   public MySQLJDBCDiffStorage(AbstractJDBCDataModel dataModel,
@@ -74,55 +70,55 @@ public final class MySQLJDBCDiffStorage extends AbstractJDBCDiffStorage {
                               String avgColumn,
                               int minDiffCount) throws TasteException {
     super(dataModel,
-          // getDiffSQL
-          "SELECT " + countColumn + ", " + avgColumn + " FROM " + diffsTable +
-          " WHERE " + itemIDAColumn + "=? AND " + itemIDBColumn + "=? UNION " +
-          "SELECT " + countColumn + ", " + avgColumn + " FROM " + diffsTable +
-          " WHERE " + itemIDAColumn + "=? AND " + itemIDBColumn + "=?",
-          // getDiffsSQL
-          "SELECT " + countColumn + ", " + avgColumn + ", " + itemIDAColumn + " FROM " + diffsTable + ", " +
-          dataModel.getPreferenceTable() + " WHERE " + itemIDBColumn + "=? AND " + itemIDAColumn + " = " + dataModel.getItemIDColumn() +
-          " AND " + dataModel.getUserIDColumn() + "=? ORDER BY " + itemIDAColumn,
-          // getAverageItemPrefSQL
-          "SELECT COUNT(1), AVG(" + dataModel.getPreferenceColumn() + ") FROM " + dataModel.getPreferenceTable() +
-          " WHERE " + dataModel.getItemIDColumn() + "=?",
-          // updateDiffSQLs
-          new String[]{
-                  "UPDATE " + diffsTable + " SET " + avgColumn + " = " + avgColumn + " - (? / " + countColumn +
-                  ") WHERE " + itemIDAColumn + "=?",
-                  "UPDATE " + diffsTable + " SET " + avgColumn + " = " + avgColumn + " + (? / " + countColumn +
-                  ") WHERE " + itemIDBColumn + "=?"
-          },
-          // removeDiffSQL
-          new String[]{
-                  "UPDATE " + diffsTable + " SET " + countColumn + " = " + countColumn + "-1, " +
-                  avgColumn + " = " + avgColumn + " * ((" + countColumn + " + 1) / CAST(" + countColumn +
-                  " AS DECIMAL)) + ? / CAST(" + countColumn + " AS DECIMAL) WHERE " + itemIDAColumn + "=?",
-                  "UPDATE " + diffsTable + " SET " + countColumn + " = " + countColumn + "-1, " +
-                  avgColumn + " = " + avgColumn + " * ((" + countColumn + " + 1) / CAST(" + countColumn +
-                  " AS DECIMAL)) - ? / CAST(" + countColumn + " AS DECIMAL) WHERE " + itemIDBColumn + "=?"
-          },
-          // getRecommendableItemsSQL
-          "SELECT id FROM " +
-          "(SELECT " + itemIDAColumn + " AS id FROM " + diffsTable + ", " + dataModel.getPreferenceTable() +
-          " WHERE " + itemIDBColumn + " = " + dataModel.getItemIDColumn() + " AND " + dataModel.getUserIDColumn() + "=? UNION DISTINCT" +
-          " SELECT " + itemIDBColumn + " AS id FROM " + diffsTable + ", " + dataModel.getPreferenceTable() +
-          " WHERE " + itemIDAColumn + " = " + dataModel.getItemIDColumn() + " AND " + dataModel.getUserIDColumn() +
-          "=?) possible_item_ids WHERE id NOT IN (SELECT " + dataModel.getItemIDColumn() + " FROM " + dataModel.getPreferenceTable() +
-          " WHERE " + dataModel.getUserIDColumn() + "=?)",
-          // deleteDiffsSQL
-          "DELETE FROM " + diffsTable,
-          // createDiffsSQL
-          "INSERT INTO " + diffsTable + " (" + itemIDAColumn + ", " + itemIDBColumn + ", " + avgColumn +
-          ", " + countColumn + ") SELECT prefsA." + dataModel.getItemIDColumn() + ", prefsB." + dataModel.getItemIDColumn() + ',' +
-          " AVG(prefsB." + dataModel.getPreferenceColumn() + " - prefsA." + dataModel.getPreferenceColumn() + ")," +
-          " COUNT(1) AS count FROM " + dataModel.getPreferenceTable() + " prefsA, " + dataModel.getPreferenceTable() + " prefsB WHERE prefsA." +
-          dataModel.getUserIDColumn() + " = prefsB." + dataModel.getUserIDColumn() + " AND prefsA." + dataModel.getItemIDColumn() + " < prefsB." +
-          dataModel.getItemIDColumn() + ' ' + " GROUP BY prefsA." + dataModel.getItemIDColumn() +
-          ", prefsB." + dataModel.getItemIDColumn() + " HAVING count >=?",
-          // diffsExistSQL
-          "SELECT COUNT(1) FROM " + diffsTable,
-          minDiffCount);
+        // getDiffSQL
+        "SELECT " + countColumn + ", " + avgColumn + " FROM " + diffsTable +
+            " WHERE " + itemIDAColumn + "=? AND " + itemIDBColumn + "=? UNION " +
+            "SELECT " + countColumn + ", " + avgColumn + " FROM " + diffsTable +
+            " WHERE " + itemIDAColumn + "=? AND " + itemIDBColumn + "=?",
+        // getDiffsSQL
+        "SELECT " + countColumn + ", " + avgColumn + ", " + itemIDAColumn + " FROM " + diffsTable + ", " +
+            dataModel.getPreferenceTable() + " WHERE " + itemIDBColumn + "=? AND " + itemIDAColumn + " = " + dataModel.getItemIDColumn() +
+            " AND " + dataModel.getUserIDColumn() + "=? ORDER BY " + itemIDAColumn,
+        // getAverageItemPrefSQL
+        "SELECT COUNT(1), AVG(" + dataModel.getPreferenceColumn() + ") FROM " + dataModel.getPreferenceTable() +
+            " WHERE " + dataModel.getItemIDColumn() + "=?",
+        // updateDiffSQLs
+        new String[]{
+            "UPDATE " + diffsTable + " SET " + avgColumn + " = " + avgColumn + " - (? / " + countColumn +
+                ") WHERE " + itemIDAColumn + "=?",
+            "UPDATE " + diffsTable + " SET " + avgColumn + " = " + avgColumn + " + (? / " + countColumn +
+                ") WHERE " + itemIDBColumn + "=?"
+        },
+        // removeDiffSQL
+        new String[]{
+            "UPDATE " + diffsTable + " SET " + countColumn + " = " + countColumn + "-1, " +
+                avgColumn + " = " + avgColumn + " * ((" + countColumn + " + 1) / CAST(" + countColumn +
+                " AS DECIMAL)) + ? / CAST(" + countColumn + " AS DECIMAL) WHERE " + itemIDAColumn + "=?",
+            "UPDATE " + diffsTable + " SET " + countColumn + " = " + countColumn + "-1, " +
+                avgColumn + " = " + avgColumn + " * ((" + countColumn + " + 1) / CAST(" + countColumn +
+                " AS DECIMAL)) - ? / CAST(" + countColumn + " AS DECIMAL) WHERE " + itemIDBColumn + "=?"
+        },
+        // getRecommendableItemsSQL
+        "SELECT id FROM " +
+            "(SELECT " + itemIDAColumn + " AS id FROM " + diffsTable + ", " + dataModel.getPreferenceTable() +
+            " WHERE " + itemIDBColumn + " = " + dataModel.getItemIDColumn() + " AND " + dataModel.getUserIDColumn() + "=? UNION DISTINCT" +
+            " SELECT " + itemIDBColumn + " AS id FROM " + diffsTable + ", " + dataModel.getPreferenceTable() +
+            " WHERE " + itemIDAColumn + " = " + dataModel.getItemIDColumn() + " AND " + dataModel.getUserIDColumn() +
+            "=?) possible_item_ids WHERE id NOT IN (SELECT " + dataModel.getItemIDColumn() + " FROM " + dataModel.getPreferenceTable() +
+            " WHERE " + dataModel.getUserIDColumn() + "=?)",
+        // deleteDiffsSQL
+        "DELETE FROM " + diffsTable,
+        // createDiffsSQL
+        "INSERT INTO " + diffsTable + " (" + itemIDAColumn + ", " + itemIDBColumn + ", " + avgColumn +
+            ", " + countColumn + ") SELECT prefsA." + dataModel.getItemIDColumn() + ", prefsB." + dataModel.getItemIDColumn() + ',' +
+            " AVG(prefsB." + dataModel.getPreferenceColumn() + " - prefsA." + dataModel.getPreferenceColumn() + ")," +
+            " COUNT(1) AS count FROM " + dataModel.getPreferenceTable() + " prefsA, " + dataModel.getPreferenceTable() + " prefsB WHERE prefsA." +
+            dataModel.getUserIDColumn() + " = prefsB." + dataModel.getUserIDColumn() + " AND prefsA." + dataModel.getItemIDColumn() + " < prefsB." +
+            dataModel.getItemIDColumn() + ' ' + " GROUP BY prefsA." + dataModel.getItemIDColumn() +
+            ", prefsB." + dataModel.getItemIDColumn() + " HAVING count >=?",
+        // diffsExistSQL
+        "SELECT COUNT(1) FROM " + diffsTable,
+        minDiffCount);
   }
 
 }

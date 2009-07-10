@@ -22,19 +22,17 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.FileInputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.KeyValueTextInputFormat;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-/**
- * Create and run the Bayes Feature Reader Step.
- */
+/** Create and run the Bayes Feature Reader Step. */
 public class BayesFeatureDriver {
 
   private static final Logger log = LoggerFactory.getLogger(BayesFeatureDriver.class);
@@ -43,11 +41,10 @@ public class BayesFeatureDriver {
   }
 
   /**
-   * Takes in two arguments:
-   * <ol>
-   * <li>The input {@link org.apache.hadoop.fs.Path} where the input documents live</li>
-   * <li>The output {@link org.apache.hadoop.fs.Path} where to write the interim files as a {@link org.apache.hadoop.io.SequenceFile}</li>
-   * </ol>
+   * Takes in two arguments: <ol> <li>The input {@link org.apache.hadoop.fs.Path} where the input documents live</li>
+   * <li>The output {@link org.apache.hadoop.fs.Path} where to write the interim files as a {@link
+   * org.apache.hadoop.io.SequenceFile}</li> </ol>
+   *
    * @param args The args
    */
   public static void main(String[] args) throws IOException {
@@ -60,8 +57,8 @@ public class BayesFeatureDriver {
   /**
    * Run the job
    *
-   * @param input            the input pathname String
-   * @param output           the output pathname String
+   * @param input  the input pathname String
+   * @param output the output pathname String
    */
   public static void runJob(String input, String output, int gramSize) throws IOException {
     JobClient client = new JobClient();
@@ -79,16 +76,17 @@ public class BayesFeatureDriver {
 
     conf.setInputFormat(KeyValueTextInputFormat.class);
     conf.setCombinerClass(BayesFeatureReducer.class);
-    conf.setReducerClass(BayesFeatureReducer.class);    
+    conf.setReducerClass(BayesFeatureReducer.class);
     conf.setOutputFormat(BayesFeatureOutputFormat.class);
 
     conf.set("io.serializations",
-             "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization"); 
+        "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
     // Dont ever forget this. People should keep track of how hadoop conf parameters and make or break a piece of code
 
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath))
+    if (dfs.exists(outPath)) {
       dfs.delete(outPath, true);
+    }
 
     DefaultStringifier<Integer> intStringifier = new DefaultStringifier<Integer>(conf, Integer.class);
     String gramSizeString = intStringifier.toString(gramSize);
@@ -98,6 +96,6 @@ public class BayesFeatureDriver {
 
     client.setConf(conf);
     JobClient.runJob(conf);
-    
+
   }
 }

@@ -20,8 +20,8 @@ package org.apache.mahout.utils;
 import org.apache.mahout.matrix.Vector;
 
 import java.util.HashSet;
-import java.util.Set;
 import java.util.Iterator;
+import java.util.Set;
 
 
 /**
@@ -37,8 +37,6 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
    *
    * ((a^2 + b^2 - ab) / ab) - 1;
    *
-   * @param vector0
-   * @param vector1
    * @return 0 for perfect match, > 0 for greater distance
    */
   @Override
@@ -46,8 +44,8 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
 
     // this whole distance measurent thing
     // should be evaluated using an intermediate vector and BinaryFunction or something?
-    
-    Set<Integer> featuresSeen = new HashSet<Integer>((int)((vector0.getNumNondefaultElements() + vector1.getNumNondefaultElements()) * 0.75));
+
+    Set<Integer> featuresSeen = new HashSet<Integer>((int) ((vector0.getNumNondefaultElements() + vector1.getNumNondefaultElements()) * 0.75));
 
     double ab = 0.0;
     double a2 = 0.0;
@@ -94,8 +92,8 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
   }
 
   @Override
-  public double distance(double centroidLengthSquare, Vector centroid, Vector v) {	 
-   return distance(centroid, v); // TODO
+  public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
+    return distance(centroid, v); // TODO
   }
 
 }

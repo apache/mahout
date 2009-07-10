@@ -17,14 +17,10 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
-/**
- * <p>Extends {@link RunningAverage} by adding standard deviation too.</p>
- */
+/** <p>Extends {@link RunningAverage} by adding standard deviation too.</p> */
 public interface RunningAverageAndStdDev extends RunningAverage {
 
-  /**
-   * @return standard deviation of data
-   */
+  /** @return standard deviation of data */
   double getStandardDeviation();
 
 }

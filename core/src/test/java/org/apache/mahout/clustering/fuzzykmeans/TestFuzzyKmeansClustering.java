@@ -17,14 +17,7 @@
 
 package org.apache.mahout.clustering.fuzzykmeans;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import junit.framework.TestCase;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -38,6 +31,12 @@ import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
 import org.apache.mahout.utils.DummyOutputCollector;
 import org.apache.mahout.utils.EuclideanDistanceMeasure;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TestFuzzyKmeansClustering extends TestCase {
 
@@ -86,8 +85,8 @@ public class TestFuzzyKmeansClustering extends TestCase {
   }
 
   public static void referenceFuzzyKMeans(List<Vector> points,
-      List<SoftCluster> clusterList, Map<String, String> pointClusterInfo,
-      String distanceMeasureClass, double threshold, int numIter)
+                                          List<SoftCluster> clusterList, Map<String, String> pointClusterInfo,
+                                          String distanceMeasureClass, double threshold, int numIter)
       throws Exception {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     Class<?> cl = ccl.loadClass(distanceMeasureClass);
@@ -102,7 +101,7 @@ public class TestFuzzyKmeansClustering extends TestCase {
   }
 
   public static boolean iterateReference(List<Vector> points,
-      List<SoftCluster> clusterList, DistanceMeasure measure) {
+                                         List<SoftCluster> clusterList, DistanceMeasure measure) {
     // for each
     for (Vector point : points) {
       List<Double> clusterDistanceList = new ArrayList<Double>();
@@ -119,20 +118,23 @@ public class TestFuzzyKmeansClustering extends TestCase {
     }
     boolean converged = true;
     for (SoftCluster cluster : clusterList) {
-      if (!cluster.computeConvergence())
+      if (!cluster.computeConvergence()) {
         converged = false;
+      }
     }
     // update the cluster centers
-    if (!converged)
-      for (SoftCluster cluster : clusterList)
+    if (!converged) {
+      for (SoftCluster cluster : clusterList) {
         cluster.recomputeCenter();
+      }
+    }
     return converged;
 
   }
 
   public static void computeCluster(List<Vector> points,
-      List<SoftCluster> clusterList, DistanceMeasure measure,
-      Map<String, String> pointClusterInfo) {
+                                    List<SoftCluster> clusterList, DistanceMeasure measure,
+                                    Map<String, String> pointClusterInfo) {
 
     for (Vector point : points) {
       StringBuilder outputValue = new StringBuilder("[");
@@ -198,11 +200,13 @@ public class TestFuzzyKmeansClustering extends TestCase {
     List<Vector> points = TestKmeansClustering
         .getPoints(TestKmeansClustering.reference);
     File testData = new File("testdata");
-    if (!testData.exists())
+    if (!testData.exists()) {
       testData.mkdir();
+    }
     testData = new File("testdata/points");
-    if (!testData.exists())
+    if (!testData.exists()) {
       testData.mkdir();
+    }
     Configuration conf = new Configuration();
     ClusteringTestUtils.writePointsToFile(points, "testdata/points/file1", fs, conf);
     ClusteringTestUtils.writePointsToFile(points, "testdata/points/file2", fs, conf);
@@ -227,7 +231,7 @@ public class TestFuzzyKmeansClustering extends TestCase {
               .forName("UTF-8")));
 */
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, new Path("testdata/clusters/part-00000"),
-              Text.class, SoftCluster.class);
+          Text.class, SoftCluster.class);
       for (int i = 0; i < k + 1; i++) {
         Vector vec = tweakValue(points.get(i));
 
@@ -273,7 +277,7 @@ public class TestFuzzyKmeansClustering extends TestCase {
         assertEquals("Number of clusters", k + 1, clusterInfoList.length);
         */
         double prob = 0.0;
-        double [] probabilities = out.getProbabilities();
+        double[] probabilities = out.getProbabilities();
         for (double probability : probabilities) {
           //SoftCluster cluster = clusters[i];
           prob += probability;
@@ -471,7 +475,7 @@ public class TestFuzzyKmeansClustering extends TestCase {
             + cluster.toString());
         cluster.recomputeCenter();
         assertTrue("key center: " + key.getCenter().asFormatString() + " does not equal cluster: " +
-                cluster.getCenter().asFormatString(), key.getCenter().equals(cluster.getCenter()));
+            cluster.getCenter().asFormatString(), key.getCenter().equals(cluster.getCenter()));
       }
     }
   }
@@ -578,7 +582,7 @@ public class TestFuzzyKmeansClustering extends TestCase {
 
         FuzzyKMeansOutput kMeansOutput = value.get(0);
         SoftCluster[] softClusters = kMeansOutput.getClusters();
-        double [] probabilities = kMeansOutput.getProbabilities();
+        double[] probabilities = kMeansOutput.getProbabilities();
         assertEquals("Number of clusters", k + 1, softClusters.length);
         for (String clusterInfo : refClusterInfoList) {
           String[] clusterProb = clusterInfo.split(":");

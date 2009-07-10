@@ -16,12 +16,6 @@
  */
 package org.apache.mahout.clustering.dirichlet;
 
-import java.lang.reflect.Type;
-
-import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -29,6 +23,11 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Type;
 
 public class JsonModelDistributionAdapter implements
     JsonSerializer<ModelDistribution<?>>, JsonDeserializer<ModelDistribution<?>> {
@@ -37,13 +36,13 @@ public class JsonModelDistributionAdapter implements
 
   @Override
   public JsonElement serialize(ModelDistribution<?> src, Type typeOfSrc,
-      JsonSerializationContext context) {
+                               JsonSerializationContext context) {
     return new JsonPrimitive(src.getClass().getName());
   }
 
   @Override
   public ModelDistribution<?> deserialize(JsonElement json, Type typeOfT,
-      JsonDeserializationContext context) throws JsonParseException {
+                                          JsonDeserializationContext context) throws JsonParseException {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     Class<?> cl;
     try {

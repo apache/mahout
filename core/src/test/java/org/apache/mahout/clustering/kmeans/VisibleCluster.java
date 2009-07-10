@@ -23,9 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This Cluster subclass maintains a list of points in the cluster so it can
- * include them in its toString method. Useful for debugging but not practical
- * for production use since it holds onto all its points.
+ * This Cluster subclass maintains a list of points in the cluster so it can include them in its toString method. Useful
+ * for debugging but not practical for production use since it holds onto all its points.
  */
 public class VisibleCluster extends Cluster {
 
@@ -44,9 +43,8 @@ public class VisibleCluster extends Cluster {
 
   /**
    * Add a point to the canopy
-   * 
-   * @param point
-   *            a Double[]
+   *
+   * @param point a Double[]
    */
   @Override
   public void addPoint(Vector point) {
@@ -54,12 +52,7 @@ public class VisibleCluster extends Cluster {
     points.add(point);
   }
 
-  /**
-   * Return a printable representation of this object, using the user supplied
-   * identifier
-   * 
-   * @return
-   */
+  /** Return a printable representation of this object, using the user supplied identifier */
   @Override
   public String toString() {
     StringBuilder result = new StringBuilder();

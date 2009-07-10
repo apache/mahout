@@ -17,6 +17,7 @@ package org.apache.mahout.clustering.fuzzykmeans;
  */
 
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
@@ -24,7 +25,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.clustering.kmeans.Cluster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,12 +39,7 @@ class FuzzyKMeansUtil {
   private FuzzyKMeansUtil() {
   }
 
-  /**
-   * Configure the mapper with the cluster info
-   *
-   * @param clusterPathStr
-   * @param clusters
-   */
+  /** Configure the mapper with the cluster info */
   public static void configureWithClusterInfo(String clusterPathStr, List<SoftCluster> clusters) {
     //Get the path location where the cluster Info is stored
     Configuration job = new Configuration();
@@ -63,7 +58,7 @@ class FuzzyKMeansUtil {
       //get all filtered file names in result list
       FileSystem fs = clusterPath.getFileSystem(job);
       FileStatus[] matches = fs.listStatus(FileUtil.stat2Paths(fs.globStatus(
-              clusterPath, clusterFileFilter)), clusterFileFilter);
+          clusterPath, clusterFileFilter)), clusterFileFilter);
 
       for (FileStatus match : matches) {
         result.add(fs.makeQualified(match.getPath()));
@@ -86,7 +81,7 @@ class FuzzyKMeansUtil {
             log.error("Exception", e);
             throw new RuntimeException(e);
           }
-          if (valueClass.equals(Cluster.class)){
+          if (valueClass.equals(Cluster.class)) {
             Cluster value = new Cluster();
             while (reader.next(key, value)) {
               // get the cluster info
@@ -94,7 +89,7 @@ class FuzzyKMeansUtil {
               clusters.add(theCluster);
               value = new Cluster();
             }
-          } else if (valueClass.equals(SoftCluster.class)){
+          } else if (valueClass.equals(SoftCluster.class)) {
             SoftCluster value = new SoftCluster();
             while (reader.next(key, value)) {
               // get the cluster info

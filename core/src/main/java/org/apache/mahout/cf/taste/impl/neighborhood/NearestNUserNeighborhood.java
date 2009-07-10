@@ -18,11 +18,11 @@
 package org.apache.mahout.cf.taste.impl.neighborhood;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.similarity.UserSimilarity;
+import org.apache.mahout.cf.taste.impl.common.SamplingIterable;
+import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.impl.recommender.TopItems;
-import org.apache.mahout.cf.taste.impl.common.SamplingIterable;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +31,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * <p>Computes a neighborhood consisting of the nearest n {@link User}s to a given {@link User}.
- * "Nearest" is defined by the given {@link UserSimilarity}.</p>
+ * <p>Computes a neighborhood consisting of the nearest n {@link User}s to a given {@link User}. "Nearest" is defined by
+ * the given {@link UserSimilarity}.</p>
  */
 public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
 
@@ -42,9 +42,9 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
   private final double minSimilarity;
 
   /**
-   * @param n neighborhood size
+   * @param n              neighborhood size
    * @param userSimilarity nearness metric
-   * @param dataModel data model
+   * @param dataModel      data model
    * @throws IllegalArgumentException if n &lt; 1, or userSimilarity or dataModel are <code>null</code>
    */
   public NearestNUserNeighborhood(int n,
@@ -54,10 +54,10 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
   }
 
   /**
-   * @param n neighborhood size
-   * @param minSimilarity minimal similarity required for neighbors
+   * @param n              neighborhood size
+   * @param minSimilarity  minimal similarity required for neighbors
    * @param userSimilarity nearness metric
-   * @param dataModel data model
+   * @param dataModel      data model
    * @throws IllegalArgumentException if n &lt; 1, or userSimilarity or dataModel are <code>null</code>
    */
   public NearestNUserNeighborhood(int n, double minSimilarity,
@@ -67,14 +67,14 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
   }
 
   /**
-   * @param n neighborhood size
-   * @param minSimilarity minimal similarity required for neighbors
+   * @param n              neighborhood size
+   * @param minSimilarity  minimal similarity required for neighbors
    * @param userSimilarity nearness metric
-   * @param dataModel data model
-   * @param samplingRate percentage of users to consider when building neighborhood -- decrease to
-   * trade quality for performance
-   * @throws IllegalArgumentException if n &lt; 1 or samplingRate is NaN or not in (0,1],
-   * or userSimilarity or dataModel are <code>null</code>
+   * @param dataModel      data model
+   * @param samplingRate   percentage of users to consider when building neighborhood -- decrease to trade quality for
+   *                       performance
+   * @throws IllegalArgumentException if n &lt; 1 or samplingRate is NaN or not in (0,1], or userSimilarity or dataModel
+   *                                  are <code>null</code>
    */
   public NearestNUserNeighborhood(int n, double minSimilarity,
                                   UserSimilarity userSimilarity,
@@ -128,7 +128,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
         return Double.NaN;
       }
       double sim = userSimilarityImpl.userSimilarity(theUser, user);
-      return (sim >= minSim) ? sim : Double.NaN; 
+      return (sim >= minSim) ? sim : Double.NaN;
     }
   }
 }

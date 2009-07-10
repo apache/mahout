@@ -22,10 +22,7 @@ import org.uncommons.watchmaker.framework.FitnessEvaluator;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Watchmaker compatible Fitness Evaluator that delegates the evaluation of the
- * whole population to Mahout.
- */
+/** Watchmaker compatible Fitness Evaluator that delegates the evaluation of the whole population to Mahout. */
 public class MahoutFitnessEvaluator<T> extends STFitnessEvaluator<T> {
 
   private final FitnessEvaluator<? super T> evaluator;

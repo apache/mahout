@@ -38,22 +38,19 @@ public class BayesThetaNormalizerMapper extends MapReduceBase implements
 
   private static final Logger log = LoggerFactory.getLogger(BayesThetaNormalizerMapper.class);
 
-  private Map<String,Double> labelWeightSum = null;
+  private Map<String, Double> labelWeightSum = null;
   private double sigma_jSigma_k = 0.0;
   private double vocabCount = 0.0;
 
   /**
    * We need to calculate the thetaNormalization factor of each label
-   * 
-   * @param key The label,feature pair 
-   * @param value  The tfIdf of the pair
-   * @param output
-   * @param reporter
-   * @throws IOException
+   *
+   * @param key   The label,feature pair
+   * @param value The tfIdf of the pair
    */
   @Override
   public void map(Text key, DoubleWritable value,
-      OutputCollector<Text, DoubleWritable> output, Reporter reporter)
+                  OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {
 
     String labelFeaturePair = key.toString();
@@ -68,9 +65,9 @@ public class BayesThetaNormalizerMapper extends MapReduceBase implements
   public void configure(JobConf job) {
     try {
       if (labelWeightSum == null) {
-        labelWeightSum = new HashMap<String,Double>();
+        labelWeightSum = new HashMap<String, Double>();
 
-        DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(
+        DefaultStringifier<Map<String, Double>> mapStringifier = new DefaultStringifier<Map<String, Double>>(
             job, GenericsUtil.getClass(labelWeightSum));
 
         String labelWeightSumString = mapStringifier.toString(labelWeightSum);

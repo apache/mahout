@@ -22,13 +22,11 @@ import org.apache.mahout.cf.taste.model.User;
 
 import java.util.List;
 
-/**
- * <p>Interface implemented by "user-based" recommenders.</p>
- */
+/** <p>Interface implemented by "user-based" recommenders.</p> */
 public interface UserBasedRecommender extends Recommender {
 
   /**
-   * @param userID ID of {@link User} for which to find most similar other {@link User}s
+   * @param userID  ID of {@link User} for which to find most similar other {@link User}s
    * @param howMany desired number of most similar {@link User}s to find
    * @return {@link User}s most similar to the given user
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
@@ -36,10 +34,10 @@ public interface UserBasedRecommender extends Recommender {
   List<User> mostSimilarUsers(Object userID, int howMany) throws TasteException;
 
   /**
-   * @param userID ID of {@link User} for which to find most similar other {@link User}s
-   * @param howMany desired number of most similar {@link User}s to find
-   * @param rescorer {@link Rescorer} which can adjust user-user similarity
-   * estimates used to determine most similar users
+   * @param userID   ID of {@link User} for which to find most similar other {@link User}s
+   * @param howMany  desired number of most similar {@link User}s to find
+   * @param rescorer {@link Rescorer} which can adjust user-user similarity estimates used to determine most similar
+   *                 users
    * @return {@link User}s most similar to the given user
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */

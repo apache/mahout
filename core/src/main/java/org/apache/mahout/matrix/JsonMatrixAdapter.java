@@ -16,11 +16,6 @@
  */
 package org.apache.mahout.matrix;
 
-import java.lang.reflect.Type;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -32,6 +27,10 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Type;
 
 public class JsonMatrixAdapter implements JsonSerializer<Matrix>,
     JsonDeserializer<Matrix> {
@@ -42,7 +41,7 @@ public class JsonMatrixAdapter implements JsonSerializer<Matrix>,
 
   @Override
   public JsonElement serialize(Matrix src, Type typeOfSrc,
-      JsonSerializationContext context) {
+                               JsonSerializationContext context) {
     Type vectorType = new TypeToken<Vector>() {
     }.getType();
     Type matrixType = new TypeToken<Matrix>() {
@@ -59,7 +58,7 @@ public class JsonMatrixAdapter implements JsonSerializer<Matrix>,
 
   @Override
   public Matrix deserialize(JsonElement json, Type typeOfT,
-      JsonDeserializationContext context) throws JsonParseException {
+                            JsonDeserializationContext context) throws JsonParseException {
     Type vectorType = new TypeToken<Vector>() {
     }.getType();
     Type matrixType = new TypeToken<Matrix>() {

@@ -19,16 +19,15 @@ package org.apache.mahout.cf.taste.impl.model;
 
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
+import org.apache.mahout.cf.taste.model.User;
 
 import java.io.Serializable;
 
 /**
- * This implementation maintains three parallel arrays, of {@link User}s, {@link Item}s, and values.
- * The idea is to save allocating {@link Preference} objects themselves.
- * On a 64-bit virtual machine, this should save 12 bytes per element (the overhead of an
- * enclosing {@link Preference} object reference and object header).
+ * This implementation maintains three parallel arrays, of {@link User}s, {@link Item}s, and values. The idea is to save
+ * allocating {@link Preference} objects themselves. On a 64-bit virtual machine, this should save 12 bytes per element
+ * (the overhead of an enclosing {@link Preference} object reference and object header).
  *
  * This is not used yet.
  */

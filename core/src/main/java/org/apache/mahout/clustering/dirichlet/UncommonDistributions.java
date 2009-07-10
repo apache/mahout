@@ -17,12 +17,12 @@ package org.apache.mahout.clustering.dirichlet;
  * limitations under the License.
  */
 
-import java.util.Random;
-
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
 import org.uncommons.maths.random.GaussianGenerator;
 import org.uncommons.maths.random.MersenneTwisterRNG;
+
+import java.util.Random;
 
 public final class UncommonDistributions {
 
@@ -38,12 +38,10 @@ public final class UncommonDistributions {
   }
 
   //=============== start of BSD licensed code. See LICENSE.txt
-  /** 
-   * Returns a double sampled according to this distribution.  Uniformly
-   * fast for all k > 0.  (Reference: Non-Uniform Random Variate Generation,
-   * Devroye http://cgm.cs.mcgill.ca/~luc/rnbookindex.html)  Uses Cheng's
-   * rejection algorithm (GB) for k>=1, rejection from Weibull distribution
-   * for 0 < k < 1.
+  /**
+   * Returns a double sampled according to this distribution.  Uniformly fast for all k > 0.  (Reference: Non-Uniform
+   * Random Variate Generation, Devroye http://cgm.cs.mcgill.ca/~luc/rnbookindex.html)  Uses Cheng's rejection algorithm
+   * (GB) for k>=1, rejection from Weibull distribution for 0 < k < 1.
    */
   public static double rGamma(double k, double lambda) {
     boolean accept = false;
@@ -88,9 +86,8 @@ public final class UncommonDistributions {
   //============= end of BSD licensed code
 
   /**
-   * Returns a random sample from a beta distribution with
-   * the given shapes
-   * 
+   * Returns a random sample from a beta distribution with the given shapes
+   *
    * @param shape1 a double representing shape1
    * @param shape2 a double representing shape2
    * @return a Vector of samples
@@ -103,10 +100,9 @@ public final class UncommonDistributions {
   }
 
   /**
-   * Returns a vector of random samples from a beta distribution with
-   * the given shapes
-   * 
-   * @param K the number of samples to return
+   * Returns a vector of random samples from a beta distribution with the given shapes
+   *
+   * @param K      the number of samples to return
    * @param shape1 a double representing shape1
    * @param shape2 a double representing shape2
    * @return a Vector of samples
@@ -116,15 +112,15 @@ public final class UncommonDistributions {
     //params.add(shape1);
     //params.add(Math.max(0, shape2));
     Vector result = new DenseVector(K);
-    for (int i = 0; i < K; i++)
+    for (int i = 0; i < K; i++) {
       result.set(i, rBeta(shape1, shape2));
+    }
     return result;
   }
 
   /**
-   * Return a random sample from the chi-squared (chi^2) distribution with df 
-   * degrees of freedom.
-   * @param df
+   * Return a random sample from the chi-squared (chi^2) distribution with df degrees of freedom.
+   *
    * @return a double sample
    */
   public static double rChisq(double df) {
@@ -137,11 +133,10 @@ public final class UncommonDistributions {
   }
 
   /**
-   * Return a random value from a normal distribution with the given mean and
-   * standard deviation
-   * 
+   * Return a random value from a normal distribution with the given mean and standard deviation
+   *
    * @param mean a double mean value
-   * @param sd a double standard deviation
+   * @param sd   a double standard deviation
    * @return a double sample
    */
   public static double rNorm(double mean, double sd) {
@@ -151,10 +146,9 @@ public final class UncommonDistributions {
 
   /**
    * Return the normal density function value for the sample x
-   * 
+   *
    * pdf = 1/[sqrt(2*p)*s] * e^{-1/2*[(x-m)/s]^2}
-   *  
-   * 
+   *
    * @param x a double sample value
    * @param m a double mean value
    * @param s a double standard deviation
@@ -167,9 +161,7 @@ public final class UncommonDistributions {
     return exp / (sqrt2pi * s);
   }
 
-  /**
-  * Returns one sample from a multinomial.
-  */
+  /** Returns one sample from a multinomial. */
   public static int rMultinom(Vector probabilities) {
     // our probability argument are not normalized.
     double total = probabilities.zSum();
@@ -189,19 +181,15 @@ public final class UncommonDistributions {
 
   /**
    * Returns a multinomial vector sampled from the given probabilities
-   * 
+   *
    * rmultinom should be implemented as successive binomial sampling.
    *
-   *Keep a normalizing amount that starts with 1 (I call it total).
+   * Keep a normalizing amount that starts with 1 (I call it total).
    *
-   * For each i
-   *  k[i] = rbinom(p[i] / total, size);
-   *  total -= p[i];
-   *  size -= k[i];
-   * 
-   * @param size the size parameter of the binomial distribution
+   * For each i k[i] = rbinom(p[i] / total, size); total -= p[i]; size -= k[i];
+   *
+   * @param size          the size parameter of the binomial distribution
    * @param probabilities a Vector of probabilities
-   * 
    * @return a multinomial distribution Vector
    */
   public static Vector rMultinom(int size, Vector probabilities) {
@@ -220,14 +208,14 @@ public final class UncommonDistributions {
   }
 
   /**
-   * Returns an integer sampled according to this distribution.  Takes time
-   * proprotional to np + 1.  (Reference: Non-Uniform Random Variate 
-   * Generation, Devroye http://cgm.cs.mcgill.ca/~luc/rnbookindex.html) 
-   * Second time-waiting algorithm.
+   * Returns an integer sampled according to this distribution.  Takes time proprotional to np + 1.  (Reference:
+   * Non-Uniform Random Variate Generation, Devroye http://cgm.cs.mcgill.ca/~luc/rnbookindex.html) Second time-waiting
+   * algorithm.
    */
   public static int rBinomial(int n, double p) {
-    if (p >= 1)
+    if (p >= 1) {
       return n; // needed to avoid infinite loops and negative results
+    }
     double q = -Math.log(1 - p);
     double sum = 0;
     int x = 0;
@@ -237,15 +225,18 @@ public final class UncommonDistributions {
       sum += (e / (n - x));
       x += 1;
     }
-    if (x == 0)
-      return 0;
+    if (x == 0) {
+      {
+        return 0;
+      }
+    }
     return x - 1;
   }
 
   /**
-   * Sample from a Dirichlet distribution over the given alpha, 
-   * returning a vector of probabilities using a stick-breaking algorithm
-   * 
+   * Sample from a Dirichlet distribution over the given alpha, returning a vector of probabilities using a
+   * stick-breaking algorithm
+   *
    * @param alpha an unnormalized count Vector
    * @return a Vector of probabilities
    */

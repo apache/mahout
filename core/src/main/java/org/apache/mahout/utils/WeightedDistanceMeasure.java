@@ -33,9 +33,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * Abstract implementation of DistanceMeasure with support for weights.
- */
+/** Abstract implementation of DistanceMeasure with support for weights. */
 public abstract class WeightedDistanceMeasure implements DistanceMeasure {
 
   private List<Parameter<?>> parameters;

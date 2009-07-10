@@ -87,7 +87,7 @@ public class MahoutEvaluatorTest extends TestCase {
   }
 
   private static void loadPopulation(FileSystem fs, Path f,
-      List<DummyCandidate> population) throws IOException {
+                                     List<DummyCandidate> population) throws IOException {
     FSDataInputStream in = fs.open(f);
     BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 

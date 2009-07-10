@@ -17,19 +17,19 @@
 
 package org.apache.mahout.clustering.fuzzykmeans;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public class FuzzyKMeansReducer extends MapReduceBase implements
     Reducer<Text, FuzzyKMeansInfo, Text, SoftCluster> {
@@ -38,7 +38,7 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
 
   @Override
   public void reduce(Text key, Iterator<FuzzyKMeansInfo> values,
-      OutputCollector<Text, SoftCluster> output, Reporter reporter) throws IOException {
+                     OutputCollector<Text, SoftCluster> output, Reporter reporter) throws IOException {
 
     SoftCluster cluster = clusterMap.get(key.toString());
 
@@ -55,7 +55,7 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
     }
     // force convergence calculation
     cluster.computeConvergence();
-    output.collect(new Text(cluster.getIdentifier()), cluster); 
+    output.collect(new Text(cluster.getIdentifier()), cluster);
   }
 
   @Override
@@ -70,8 +70,9 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
         .get(SoftCluster.CLUSTER_PATH_KEY), clusters);
     setClusterMap(clusters);
 
-    if (clusterMap.isEmpty())
+    if (clusterMap.isEmpty()) {
       throw new NullPointerException("Cluster is empty!!!");
+    }
   }
 
   private void setClusterMap(List<SoftCluster> clusters) {

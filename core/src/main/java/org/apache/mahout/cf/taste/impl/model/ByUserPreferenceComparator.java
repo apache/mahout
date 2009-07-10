@@ -23,8 +23,8 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 /**
- * <p>{@link java.util.Comparator} that orders {@link org.apache.mahout.cf.taste.model.Preference}s by
- * {@link org.apache.mahout.cf.taste.model.User}.</p>
+ * <p>{@link java.util.Comparator} that orders {@link org.apache.mahout.cf.taste.model.Preference}s by {@link
+ * org.apache.mahout.cf.taste.model.User}.</p>
  */
 public final class ByUserPreferenceComparator implements Comparator<Preference>, Serializable {
 

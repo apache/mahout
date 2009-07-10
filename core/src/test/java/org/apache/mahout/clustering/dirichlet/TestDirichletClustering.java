@@ -17,17 +17,16 @@ package org.apache.mahout.clustering.dirichlet;
  * limitations under the License.
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import junit.framework.TestCase;
-
 import org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDistribution;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestDirichletClustering extends TestCase {
 
@@ -42,27 +41,30 @@ public class TestDirichletClustering extends TestCase {
 
   /**
    * Generate random samples and add them to the sampleData
+   *
    * @param num int number of samples to generate
-   * @param mx double x-value of the sample mean
-   * @param my double y-value of the sample mean
-   * @param sd double standard deviation of the samples
+   * @param mx  double x-value of the sample mean
+   * @param my  double y-value of the sample mean
+   * @param sd  double standard deviation of the samples
    */
   private void generateSamples(int num, double mx, double my, double sd) {
     System.out.println("Generating " + num + " samples m=[" + mx + ", " + my
         + "] sd=" + sd);
-    for (int i = 0; i < num; i++)
-      sampleData.add(new DenseVector(new double[] {
+    for (int i = 0; i < num; i++) {
+      sampleData.add(new DenseVector(new double[]{
           UncommonDistributions.rNorm(mx, sd),
-          UncommonDistributions.rNorm(my, sd) }));
+          UncommonDistributions.rNorm(my, sd)}));
+    }
   }
 
-  private void printResults(List<Model<Vector>[]> result, int significant) {
+  private static void printResults(List<Model<Vector>[]> result, int significant) {
     int row = 0;
     for (Model<Vector>[] r : result) {
       System.out.print("sample[" + row++ + "]= ");
       for (Model<Vector> model : r) {
-        if (model.count() > significant)
+        if (model.count() > significant) {
           System.out.print(model.toString() + ", ");
+        }
       }
       System.out.println();
     }

@@ -17,15 +17,14 @@
 
 package org.apache.mahout.matrix;
 
+import junit.framework.TestCase;
+import org.apache.hadoop.io.DataOutputBuffer;
+
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import junit.framework.TestCase;
-
-import org.apache.hadoop.io.DataOutputBuffer;
 
 public abstract class MatrixTest extends TestCase {
 
@@ -33,8 +32,8 @@ public abstract class MatrixTest extends TestCase {
 
   protected static final int COL = AbstractMatrix.COL;
 
-  protected final double[][] values = { { 1.1, 2.2 }, { 3.3, 4.4 },
-      { 5.5, 6.6 } };
+  protected final double[][] values = {{1.1, 2.2}, {3.3, 4.4},
+      {5.5, 6.6}};
 
   protected Matrix test;
 
@@ -60,18 +59,22 @@ public abstract class MatrixTest extends TestCase {
     int[] c = test.size();
     Matrix copy = test.clone();
     assertEquals("wrong class", copy.getClass(), test.getClass());
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
             test.getQuick(row, col), copy.getQuick(row, col));
+      }
+    }
   }
 
   public void testGetQuick() {
     int[] c = test.size();
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']', values[row][col], test
             .getQuick(row, col));
+      }
+    }
   }
 
   public void testHaveSharedCells() {
@@ -95,12 +98,13 @@ public abstract class MatrixTest extends TestCase {
 
   public void testSetQuick() {
     int[] c = test.size();
-    for (int row = 0; row < c[ROW]; row++)
+    for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         test.setQuick(row, col, 1.23);
         assertEquals("value[" + row + "][" + col + ']', 1.23, test.getQuick(
             row, col));
       }
+    }
   }
 
   public void testSize() {
@@ -110,19 +114,21 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testViewPart() {
-    int[] offset = { 1, 1 };
-    int[] size = { 2, 1 };
+    int[] offset = {1, 1};
+    int[] size = {2, 1};
     Matrix view = test.viewPart(offset, size);
     int[] c = view.size();
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
             values[row + 1][col + 1], view.getQuick(row, col));
+      }
+    }
   }
 
   public void testViewPartCardinality() {
-    int[] offset = { 1, 1 };
-    int[] size = { 3, 3 };
+    int[] offset = {1, 1};
+    int[] size = {3, 3};
     try {
       test.viewPart(offset, size);
       fail("exception expected");
@@ -134,8 +140,8 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testViewPartIndexOver() {
-    int[] offset = { 1, 1 };
-    int[] size = { 2, 2 };
+    int[] offset = {1, 1};
+    int[] size = {2, 2};
     try {
       test.viewPart(offset, size);
       fail("exception expected");
@@ -147,8 +153,8 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testViewPartIndexUnder() {
-    int[] offset = { -1, -1 };
-    int[] size = { 2, 2 };
+    int[] offset = {-1, -1};
+    int[] size = {2, 2};
     try {
       test.viewPart(offset, size);
       fail("exception expected");
@@ -162,19 +168,23 @@ public abstract class MatrixTest extends TestCase {
   public void testAssignDouble() {
     int[] c = test.size();
     test.assign(4.53);
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']', 4.53, test.getQuick(
             row, col));
+      }
+    }
   }
 
   public void testAssignDoubleArrayArray() {
     int[] c = test.size();
     test.assign(new double[3][2]);
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']', 0.0, test.getQuick(row,
             col));
+      }
+    }
   }
 
   public void testAssignDoubleArrayArrayCardinality() {
@@ -190,10 +200,12 @@ public abstract class MatrixTest extends TestCase {
   public void testAssignMatrixBinaryFunction() {
     int[] c = test.size();
     test.assign(test, new PlusFunction());
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']', 2 * values[row][col],
             test.getQuick(row, col));
+      }
+    }
   }
 
   public void testAssignMatrixBinaryFunctionCardinality() {
@@ -209,10 +221,12 @@ public abstract class MatrixTest extends TestCase {
     int[] c = test.size();
     Matrix value = test.like();
     value.assign(test);
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
             test.getQuick(row, col), value.getQuick(row, col));
+      }
+    }
   }
 
   public void testAssignMatrixCardinality() {
@@ -227,35 +241,43 @@ public abstract class MatrixTest extends TestCase {
   public void testAssignUnaryFunction() {
     int[] c = test.size();
     test.assign(new NegateFunction());
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']', -values[row][col], test
             .getQuick(row, col));
+      }
+    }
   }
 
   public void testDivide() {
     int[] c = test.size();
     Matrix value = test.divide(4.53);
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
             values[row][col] / 4.53, value.getQuick(row, col));
+      }
+    }
   }
 
   public void testGet() {
     int[] c = test.size();
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']', values[row][col], test
             .get(row, col));
+      }
+    }
   }
 
   public void testGetIndexUnder() {
     int[] c = test.size();
     try {
-      for (int row = -1; row < c[ROW]; row++)
-        for (int col = 0; col < c[COL]; col++)
+      for (int row = -1; row < c[ROW]; row++) {
+        for (int col = 0; col < c[COL]; col++) {
           test.get(row, col);
+        }
+      }
       fail("index exception expected");
     } catch (IndexException e) {
       assertTrue(true);
@@ -265,9 +287,11 @@ public abstract class MatrixTest extends TestCase {
   public void testGetIndexOver() {
     int[] c = test.size();
     try {
-      for (int row = 0; row < c[ROW] + 1; row++)
-        for (int col = 0; col < c[COL]; col++)
+      for (int row = 0; row < c[ROW] + 1; row++) {
+        for (int col = 0; col < c[COL]; col++) {
           test.get(row, col);
+        }
+      }
       fail("index exception expected");
     } catch (IndexException e) {
       assertTrue(true);
@@ -277,10 +301,12 @@ public abstract class MatrixTest extends TestCase {
   public void testMinus() {
     int[] c = test.size();
     Matrix value = test.minus(test);
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']', 0.0, value.getQuick(
             row, col));
+      }
+    }
   }
 
   public void testMinusCardinality() {
@@ -295,19 +321,23 @@ public abstract class MatrixTest extends TestCase {
   public void testPlusDouble() {
     int[] c = test.size();
     Matrix value = test.plus(4.53);
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
             values[row][col] + 4.53, value.getQuick(row, col));
+      }
+    }
   }
 
   public void testPlusMatrix() {
     int[] c = test.size();
     Matrix value = test.plus(test);
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']', values[row][col] * 2,
             value.getQuick(row, col));
+      }
+    }
   }
 
   public void testPlusMatrixCardinality() {
@@ -322,10 +352,11 @@ public abstract class MatrixTest extends TestCase {
   public void testSetUnder() {
     int[] c = test.size();
     try {
-      for (int row = -1; row < c[ROW]; row++)
+      for (int row = -1; row < c[ROW]; row++) {
         for (int col = 0; col < c[COL]; col++) {
           test.set(row, col, 1.23);
         }
+      }
       fail("index exception expected");
     } catch (IndexException e) {
       assertTrue(true);
@@ -335,10 +366,11 @@ public abstract class MatrixTest extends TestCase {
   public void testSetOver() {
     int[] c = test.size();
     try {
-      for (int row = 0; row < c[ROW] + 1; row++)
+      for (int row = 0; row < c[ROW] + 1; row++) {
         for (int col = 0; col < c[COL]; col++) {
           test.set(row, col, 1.23);
         }
+      }
       fail("index exception expected");
     } catch (IndexException e) {
       assertTrue(true);
@@ -348,10 +380,12 @@ public abstract class MatrixTest extends TestCase {
   public void testTimesDouble() {
     int[] c = test.size();
     Matrix value = test.times(4.53);
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
             values[row][col] * 4.53, value.getQuick(row, col));
+      }
+    }
   }
 
   public void testTimesMatrix() {
@@ -383,10 +417,12 @@ public abstract class MatrixTest extends TestCase {
     int[] t = transpose.size();
     assertEquals("rows", c[COL], t[ROW]);
     assertEquals("cols", c[ROW], t[COL]);
-    for (int row = 0; row < c[ROW]; row++)
-      for (int col = 0; col < c[COL]; col++)
+    for (int row = 0; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
             test.getQuick(row, col), transpose.getQuick(col, row));
+      }
+    }
   }
 
   public void testZSum() {
@@ -395,14 +431,14 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testAssignRow() {
-    double[] data = { 2.1, 3.2 };
+    double[] data = {2.1, 3.2};
     test.assignRow(1, new DenseVector(data));
     assertEquals("test[1][0]", 2.1, test.getQuick(1, 0));
     assertEquals("test[1][1]", 3.2, test.getQuick(1, 1));
   }
 
   public void testAssignRowCardinality() {
-    double[] data = { 2.1, 3.2, 4.3 };
+    double[] data = {2.1, 3.2, 4.3};
     try {
       test.assignRow(1, new DenseVector(data));
       fail("expecting cardinality exception");
@@ -412,7 +448,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testAssignColumn() {
-    double[] data = { 2.1, 3.2, 4.3 };
+    double[] data = {2.1, 3.2, 4.3};
     test.assignColumn(1, new DenseVector(data));
     assertEquals("test[0][1]", 2.1, test.getQuick(0, 1));
     assertEquals("test[1][1]", 3.2, test.getQuick(1, 1));
@@ -420,7 +456,7 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testAssignColumnCardinality() {
-    double[] data = { 2.1, 3.2 };
+    double[] data = {2.1, 3.2};
     try {
       test.assignColumn(1, new DenseVector(data));
       fail("expecting cardinality exception");
@@ -476,24 +512,26 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testDetermitant() {
-    Matrix m = matrixFactory(new double[][] { { 1, 3, 4 }, { 5, 2, 3 },
-        { 1, 4, 2 } });
+    Matrix m = matrixFactory(new double[][]{{1, 3, 4}, {5, 2, 3},
+        {1, 4, 2}});
     assertEquals("determinant", 43.0, m.determinant());
   }
 
   public void testAsFormatString() {
     String string = test.asFormatString();
-    int[] cardinality = { values.length, values[0].length };
+    int[] cardinality = {values.length, values[0].length};
     Matrix m = AbstractMatrix.decodeMatrix(string);
-    for (int row = 0; row < cardinality[ROW]; row++)
-      for (int col = 0; col < cardinality[COL]; col++)
-        assertEquals("m[" + row + "," + col + "]", test.get(row, col), m.get(
+    for (int row = 0; row < cardinality[ROW]; row++) {
+      for (int col = 0; col < cardinality[COL]; col++) {
+        assertEquals("m[" + row + ',' + col + ']', test.get(row, col), m.get(
             row, col));
+      }
+    }
   }
 
   public void testLabelBindings() {
-    Matrix m = matrixFactory(new double[][] { { 1, 3, 4 }, { 5, 2, 3 },
-        { 1, 4, 2 } });
+    Matrix m = matrixFactory(new double[][]{{1, 3, 4}, {5, 2, 3},
+        {1, 4, 2}});
     assertNull("row bindings", m.getRowLabelBindings());
     assertNull("col bindings", m.getColumnLabelBindings());
     Map<String, Integer> rowBindings = new HashMap<String, Integer>();
@@ -510,14 +548,14 @@ public abstract class MatrixTest extends TestCase {
     assertEquals("row", rowBindings, m.getRowLabelBindings());
     assertEquals("Fee", m.get(0, 1), m.get("Fee", "Bar"));
 
-    double[] newrow = { 9, 8, 7 };
+    double[] newrow = {9, 8, 7};
     m.set("Foe", newrow);
     assertEquals("FeeBaz", m.get(0, 2), m.get("Fee", "Baz"));
   }
 
   public void testSettingLabelBindings() {
-    Matrix m = matrixFactory(new double[][] { { 1, 3, 4 }, { 5, 2, 3 },
-        { 1, 4, 2 } });
+    Matrix m = matrixFactory(new double[][]{{1, 3, 4}, {5, 2, 3},
+        {1, 4, 2}});
     assertNull("row bindings", m.getRowLabelBindings());
     assertNull("col bindings", m.getColumnLabelBindings());
     m.set("Fee", "Foo", 1, 2, 9);
@@ -537,8 +575,8 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testLabelBindingSerialization() {
-    Matrix m = matrixFactory(new double[][] { { 1, 3, 4 }, { 5, 2, 3 },
-        { 1, 4, 2 } });
+    Matrix m = matrixFactory(new double[][]{{1, 3, 4}, {5, 2, 3},
+        {1, 4, 2}});
     assertNull("row bindings", m.getRowLabelBindings());
     assertNull("col bindings", m.getColumnLabelBindings());
     Map<String, Integer> rowBindings = new HashMap<String, Integer>();
@@ -558,8 +596,8 @@ public abstract class MatrixTest extends TestCase {
   }
 
   public void testMatrixWritable() throws IOException {
-    Matrix m = matrixFactory(new double[][] { { 1, 3, 4 }, { 5, 2, 3 },
-        { 1, 4, 2 } });
+    Matrix m = matrixFactory(new double[][]{{1, 3, 4}, {5, 2, 3},
+        {1, 4, 2}});
     DataOutputBuffer out = new DataOutputBuffer();
     m.write(out);
     out.close();

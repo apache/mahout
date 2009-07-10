@@ -20,24 +20,25 @@ package org.apache.mahout.cf.taste.common;
 import java.util.Collection;
 
 /**
- * <p>Implementations of this interface have state that can be periodically refreshed. For example, an
- * implementation instance might contain some pre-computed information that should be periodically
- * refreshed. The {@link #refresh(Collection)} method triggers such a refresh.</p>
+ * <p>Implementations of this interface have state that can be periodically refreshed. For example, an implementation
+ * instance might contain some pre-computed information that should be periodically refreshed. The {@link
+ * #refresh(Collection)} method triggers such a refresh.</p>
  *
- * <p>All Taste components implement this. In particular, {@link org.apache.mahout.cf.taste.recommender.Recommender}s do.
- * Callers may want to call {@link #refresh(Collection)} periodically to re-compute information throughout the system
- * and bring it up to date, though this operation may be expensive.</p>
+ * <p>All Taste components implement this. In particular, {@link org.apache.mahout.cf.taste.recommender.Recommender}s
+ * do. Callers may want to call {@link #refresh(Collection)} periodically to re-compute information throughout the
+ * system and bring it up to date, though this operation may be expensive.</p>
  */
 public interface Refreshable {
 
   /**
-   * <p>Triggers "refresh" -- whatever that means -- of the implementation. The general contract is that
-   * any {@link Refreshable} should always leave itself in a consistent, operational state, and that
-   * the refresh atomically updates internal state from old to new.</p>
+   * <p>Triggers "refresh" -- whatever that means -- of the implementation. The general contract is that any {@link
+   * Refreshable} should always leave itself in a consistent, operational state, and that the refresh atomically updates
+   * internal state from old to new.</p>
    *
-   * @param alreadyRefreshed {@link org.apache.mahout.cf.taste.common.Refreshable}s that are known to have already
-   *  been refreshed as a result of an initial call to a {@link #refresh(Collection)} method on some
-   *  object. This ensure that objects in a refresh dependency graph aren't refreshed twice needlessly.
+   * @param alreadyRefreshed {@link org.apache.mahout.cf.taste.common.Refreshable}s that are known to have already been
+   *                         refreshed as a result of an initial call to a {@link #refresh(Collection)} method on some
+   *                         object. This ensure that objects in a refresh dependency graph aren't refreshed twice
+   *                         needlessly.
    */
   void refresh(Collection<Refreshable> alreadyRefreshed);
 

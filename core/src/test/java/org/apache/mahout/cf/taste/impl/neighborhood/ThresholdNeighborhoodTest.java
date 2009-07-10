@@ -26,9 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * <p>Tests {@link ThresholdUserNeighborhood}.</p>
- */
+/** <p>Tests {@link ThresholdUserNeighborhood}.</p> */
 public final class ThresholdNeighborhoodTest extends TasteTestCase {
 
   public void testNeighborhood() throws Exception {
@@ -37,18 +35,18 @@ public final class ThresholdNeighborhoodTest extends TasteTestCase {
     DataModel dataModel = new GenericDataModel(users);
 
     Collection<User> neighborhood =
-            new ThresholdUserNeighborhood(20.0, new DummySimilarity(), dataModel).getUserNeighborhood("test1");
+        new ThresholdUserNeighborhood(20.0, new DummySimilarity(), dataModel).getUserNeighborhood("test1");
     assertNotNull(neighborhood);
     assertTrue(neighborhood.isEmpty());
 
     Collection<User> neighborhood2 =
-            new ThresholdUserNeighborhood(10.0, new DummySimilarity(), dataModel).getUserNeighborhood("test1");
+        new ThresholdUserNeighborhood(10.0, new DummySimilarity(), dataModel).getUserNeighborhood("test1");
     assertNotNull(neighborhood2);
     assertEquals(1, neighborhood2.size());
     assertTrue(neighborhood2.contains(users.get(1)));
 
     Collection<User> neighborhood3 =
-            new ThresholdUserNeighborhood(1.0, new DummySimilarity(), dataModel).getUserNeighborhood("test2");
+        new ThresholdUserNeighborhood(1.0, new DummySimilarity(), dataModel).getUserNeighborhood("test2");
     assertNotNull(neighborhood3);
     assertEquals(3, neighborhood3.size());
     assertTrue(neighborhood3.contains(users.get(0)));

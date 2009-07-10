@@ -28,9 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-/**
- * Create and run the Bayes Trainer.
- */
+/** Create and run the Bayes Trainer. */
 public class BayesDriver {
 
   private static final Logger log = LoggerFactory.getLogger(BayesDriver.class);
@@ -39,15 +37,10 @@ public class BayesDriver {
   }
 
   /**
-   * Takes in two arguments:
-   * <ol>
-   * <li>The input {@link org.apache.hadoop.fs.Path} where the input documents
-   * live</li>
-   * <li>The output {@link org.apache.hadoop.fs.Path} where to write the
-   * {@link org.apache.mahout.common.Model} as a
-   * {@link org.apache.hadoop.io.SequenceFile}</li>
-   * </ol>
-   * 
+   * Takes in two arguments: <ol> <li>The input {@link org.apache.hadoop.fs.Path} where the input documents live</li>
+   * <li>The output {@link org.apache.hadoop.fs.Path} where to write the {@link org.apache.mahout.common.Model} as a
+   * {@link org.apache.hadoop.io.SequenceFile}</li> </ol>
+   *
    * @param args The args
    */
   public static void main(String[] args) throws IOException {
@@ -59,16 +52,17 @@ public class BayesDriver {
 
   /**
    * Run the job
-   * 
-   * @param input the input pathname String
+   *
+   * @param input  the input pathname String
    * @param output the output pathname String
    */
   public static void runJob(String input, String output, int gramSize) throws IOException {
     JobConf conf = new JobConf(BayesDriver.class);
     Path outPath = new Path(output);
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath))
+    if (dfs.exists(outPath)) {
       dfs.delete(outPath, true);
+    }
 
     log.info("Reading features...");
     //Read the features in each document normalized by length of each document
@@ -92,30 +86,36 @@ public class BayesDriver {
     //Calculate the normalization factor Sigma_W_ij for each complement class.
     //CBayesNormalizedWeightDriver.runJob(input, output);
 
-    Path docCountOutPath = new Path(output+ "/trainer-docCount");
-    if (dfs.exists(docCountOutPath))
+    Path docCountOutPath = new Path(output + "/trainer-docCount");
+    if (dfs.exists(docCountOutPath)) {
       dfs.delete(docCountOutPath, true);
-    Path termDocCountOutPath = new Path(output+ "/trainer-termDocCount");
-    if (dfs.exists(termDocCountOutPath))
+    }
+    Path termDocCountOutPath = new Path(output + "/trainer-termDocCount");
+    if (dfs.exists(termDocCountOutPath)) {
       dfs.delete(termDocCountOutPath, true);
-    Path featureCountOutPath = new Path(output+ "/trainer-featureCount");
-    if (dfs.exists(featureCountOutPath))
+    }
+    Path featureCountOutPath = new Path(output + "/trainer-featureCount");
+    if (dfs.exists(featureCountOutPath)) {
       dfs.delete(featureCountOutPath, true);
-    Path wordFreqOutPath = new Path(output+ "/trainer-wordFreq");
-    if (dfs.exists(wordFreqOutPath))
+    }
+    Path wordFreqOutPath = new Path(output + "/trainer-wordFreq");
+    if (dfs.exists(wordFreqOutPath)) {
       dfs.delete(wordFreqOutPath, true);
-    Path vocabCountPath = new Path(output+ "/trainer-tfIdf/trainer-vocabCount");
-    if (dfs.exists(vocabCountPath))
+    }
+    Path vocabCountPath = new Path(output + "/trainer-tfIdf/trainer-vocabCount");
+    if (dfs.exists(vocabCountPath)) {
       dfs.delete(vocabCountPath, true);
+    }
     /*Path tfIdfOutPath = new Path(output+ "/trainer-tfIdf");
     if (dfs.exists(tfIdfOutPath))
       dfs.delete(tfIdfOutPath, true);*/
-    Path vocabCountOutPath = new Path(output+ "/trainer-vocabCount");
-    if (dfs.exists(vocabCountOutPath))
+    Path vocabCountOutPath = new Path(output + "/trainer-vocabCount");
+    if (dfs.exists(vocabCountOutPath)) {
       dfs.delete(vocabCountOutPath, true);
-   /* Path weightsOutPath = new Path(output+ "/trainer-weights");
-    if (dfs.exists(weightsOutPath))
-      dfs.delete(weightsOutPath, true);*/
+    }
+    /* Path weightsOutPath = new Path(output+ "/trainer-weights");
+ if (dfs.exists(weightsOutPath))
+   dfs.delete(weightsOutPath, true);*/
     /*Path thetaOutPath = new Path(output+ "/trainer-theta");
     if (dfs.exists(thetaOutPath))
       dfs.delete(thetaOutPath, true);*/

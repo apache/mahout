@@ -21,9 +21,7 @@ import org.apache.mahout.classifier.ClassifierResult;
 
 import java.util.Collection;
 
-/**
- * Classifies documents based on a {@link org.apache.mahout.common.Model}.  
- */
+/** Classifies documents based on a {@link org.apache.mahout.common.Model}. */
 public interface Classifier {
 
   /**
@@ -32,12 +30,12 @@ public interface Classifier {
    * @param model           The model
    * @param document        The document to classify
    * @param defaultCategory The default category to assign
-   * @param numResults      The maximum number of results to return, ranked by score.
-   * Ties are broken by comparing the category
+   * @param numResults      The maximum number of results to return, ranked by score. Ties are broken by comparing the
+   *                        category
    * @return A Collection of {@link org.apache.mahout.classifier.ClassifierResult}s.
    */
   Collection<ClassifierResult> classify(Model model, String[] document, String defaultCategory, int numResults);
-   
+
 
   /**
    * Classify the document according to the {@link org.apache.mahout.common.Model}
@@ -50,16 +48,16 @@ public interface Classifier {
   ClassifierResult classify(Model model, String[] document, String defaultCategory);
 
   /**
-   * Calculate the document probability as the multiplication of the
-   * {@link org.apache.mahout.common.Model#featureWeight(String, String)} for each word given the label
+   * Calculate the document probability as the multiplication of the {@link org.apache.mahout.common.Model#featureWeight(String,
+   * String)} for each word given the label
    *
-   * @param model       The {@link org.apache.mahout.common.Model}
-   * @param label       The label to calculate the probability of
-   * @param document    The document
+   * @param model    The {@link org.apache.mahout.common.Model}
+   * @param label    The label to calculate the probability of
+   * @param document The document
    * @return The probability
    * @see Model#featureWeight (String, String)
    */
   double documentWeight(Model model, String label, String[] document);
 
-  
+
 }

@@ -18,44 +18,42 @@
 package org.apache.mahout.cf.taste.impl.model.file;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
-import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
 import org.apache.mahout.cf.taste.impl.recommender.GenericUserBasedRecommender;
+import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 import java.io.File;
-import java.io.PrintWriter;
 import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.nio.charset.Charset;
 
-/**
- * <p>Tests {@link FileDataModel}.</p>
- */
+/** <p>Tests {@link FileDataModel}.</p> */
 public final class FileDataModelTest extends TasteTestCase {
 
-  private static final String [] DATA = {
-          "A123,456,0.1",
-          "A123,789,0.6",
-          "A123,654,0.7",
-          "B234,123,0.5",
-          "B234,234,1.0",
-          "C345,789,0.6",
-          "C345,654,0.7",
-          "C345,123,1.0",
-          "C345,234,0.5",
-          "D456,456,0.1"};
+  private static final String[] DATA = {
+      "A123,456,0.1",
+      "A123,789,0.6",
+      "A123,654,0.7",
+      "B234,123,0.5",
+      "B234,234,1.0",
+      "C345,789,0.6",
+      "C345,654,0.7",
+      "C345,123,1.0",
+      "C345,234,0.5",
+      "D456,456,0.1"};
 
   private DataModel model;
   private File testFile;
@@ -107,7 +105,7 @@ public final class FileDataModelTest extends TasteTestCase {
     assertNotNull("item is null and it shouldn't be", item);
     User user = tModel.getUser("456");
     assertNotNull("user is null and it shouldn't be", user);
-    Preference [] pref = tModel.getPreferencesForItemAsArray("A123");
+    Preference[] pref = tModel.getPreferencesForItemAsArray("A123");
     assertNotNull("pref is null and it shouldn't be", pref);
     assertEquals("pref Size: " + pref.length + " is not: " + 3, 3, pref.length);
   }

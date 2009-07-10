@@ -16,14 +16,6 @@
  */
 package org.apache.mahout.clustering.dirichlet;
 
-import java.lang.reflect.Type;
-import java.util.List;
-
-import org.apache.mahout.clustering.dirichlet.models.Model;
-import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
-import org.apache.mahout.matrix.JsonVectorAdapter;
-import org.apache.mahout.matrix.Vector;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -35,6 +27,13 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
+import org.apache.mahout.clustering.dirichlet.models.Model;
+import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
+import org.apache.mahout.matrix.JsonVectorAdapter;
+import org.apache.mahout.matrix.Vector;
+
+import java.lang.reflect.Type;
+import java.util.List;
 
 @SuppressWarnings("unchecked")
 public class JsonDirichletStateAdapter implements
@@ -48,7 +47,7 @@ public class JsonDirichletStateAdapter implements
 
   @Override
   public JsonElement serialize(DirichletState<?> src, Type typeOfSrc,
-      JsonSerializationContext context) {
+                               JsonSerializationContext context) {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
@@ -69,7 +68,7 @@ public class JsonDirichletStateAdapter implements
 
   @Override
   public DirichletState<?> deserialize(JsonElement json, Type typeOfT,
-      JsonDeserializationContext context) throws JsonParseException {
+                                       JsonDeserializationContext context) throws JsonParseException {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());

@@ -16,19 +16,19 @@
  */
 package org.apache.mahout.clustering.kmeans;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public class KMeansReducer extends MapReduceBase implements
     Reducer<Text, KMeansInfo, Text, Cluster> {
@@ -37,7 +37,7 @@ public class KMeansReducer extends MapReduceBase implements
 
   @Override
   public void reduce(Text key, Iterator<KMeansInfo> values,
-      OutputCollector<Text, Cluster> output, Reporter reporter) throws IOException {
+                     OutputCollector<Text, Cluster> output, Reporter reporter) throws IOException {
     Cluster cluster = clusterMap.get(key.toString());
 
     while (values.hasNext()) {
@@ -61,8 +61,9 @@ public class KMeansReducer extends MapReduceBase implements
         clusters);
     setClusterMap(clusters);
 
-    if (clusterMap.isEmpty())
+    if (clusterMap.isEmpty()) {
       throw new NullPointerException("Cluster is empty!!!");
+    }
   }
 
   private void setClusterMap(List<Cluster> clusters) {

@@ -27,9 +27,7 @@ import org.apache.hadoop.mapred.Reporter;
 import java.io.IOException;
 import java.util.Iterator;
 
-/**
- * Can also be used as a local Combiner. A simple summing reducer
- */
+/** Can also be used as a local Combiner. A simple summing reducer */
 public class BayesFeatureReducer extends MapReduceBase
     implements Reducer<Text, DoubleWritable, Text, DoubleWritable> {
 
@@ -39,7 +37,7 @@ public class BayesFeatureReducer extends MapReduceBase
                      OutputCollector<Text, DoubleWritable> output,
                      Reporter reporter) throws IOException {
     //Key is label,word, value is the number of times we've seen this label word per local node.  Output is the same
-   
+
     double sum = 0.0;
     while (values.hasNext()) {
       sum += values.next().get();

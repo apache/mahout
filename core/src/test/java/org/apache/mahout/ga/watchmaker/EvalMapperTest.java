@@ -18,9 +18,9 @@
 package org.apache.mahout.ga.watchmaker;
 
 import junit.framework.TestCase;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.ga.watchmaker.utils.DummyCandidate;
 import org.apache.mahout.ga.watchmaker.utils.DummyEvaluator;
@@ -45,7 +45,7 @@ public class EvalMapperTest extends TestCase {
 
     // Mapper
     EvalMapper mapper = new EvalMapper();
-    DummyOutputCollector<LongWritable,DoubleWritable> collector = new DummyOutputCollector<LongWritable,DoubleWritable>();
+    DummyOutputCollector<LongWritable, DoubleWritable> collector = new DummyOutputCollector<LongWritable, DoubleWritable>();
 
     // prepare configuration
     JobConf conf = new JobConf();

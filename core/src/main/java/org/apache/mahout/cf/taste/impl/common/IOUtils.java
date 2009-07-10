@@ -20,23 +20,21 @@ package org.apache.mahout.cf.taste.impl.common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.InputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.net.URL;
-import java.nio.charset.Charset;
 
-/**
- * <p>I/O-related utility methods that don't have a better home.</p>
- */
+/** <p>I/O-related utility methods that don't have a better home.</p> */
 public final class IOUtils {
 
   private static final Logger log = LoggerFactory.getLogger(IOUtils.class);
@@ -87,12 +85,11 @@ public final class IOUtils {
   }
 
   /**
-   * Closes a {@link ResultSet}, {@link Statement} and {@link Connection} (if not null) and
-   * logs (but does not rethrow) any resulting {@link SQLException}. This is useful for cleaning
-   * up after a database query.
+   * Closes a {@link ResultSet}, {@link Statement} and {@link Connection} (if not null) and logs (but does not rethrow)
+   * any resulting {@link SQLException}. This is useful for cleaning up after a database query.
    *
-   * @param resultSet {@link ResultSet} to close
-   * @param statement {@link Statement} to close
+   * @param resultSet  {@link ResultSet} to close
+   * @param statement  {@link Statement} to close
    * @param connection {@link Connection} to close
    */
   public static void quietClose(ResultSet resultSet, Statement statement, Connection connection) {

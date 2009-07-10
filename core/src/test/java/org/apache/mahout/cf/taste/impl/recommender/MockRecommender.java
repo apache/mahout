@@ -48,7 +48,7 @@ final class MockRecommender implements Recommender {
   public List<RecommendedItem> recommend(Object userID, int howMany) {
     recommendCount.incrementAndGet();
     return Collections.<RecommendedItem>singletonList(
-            new GenericRecommendedItem(new GenericItem<String>("1"), 1.0));
+        new GenericRecommendedItem(new GenericItem<String>("1"), 1.0));
   }
 
   @Override

@@ -21,9 +21,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/**
- * <p>Simple, fast {@link Iterator} for an array.</p>
- */
+/** <p>Simple, fast {@link Iterator} for an array.</p> */
 public final class ArrayIterator<T> implements SkippingIterator<T>, Iterable<T> {
 
   private final T[] array;

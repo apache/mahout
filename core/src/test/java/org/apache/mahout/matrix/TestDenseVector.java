@@ -17,15 +17,15 @@
 
 package org.apache.mahout.matrix;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Iterator;
-
 import junit.framework.TestCase;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class TestDenseVector extends TestCase {
 
-  final double[] values = { 1.1, 2.2, 3.3 };
+  final double[] values = {1.1, 2.2, 3.3};
 
   final Vector test = new DenseVector(values);
 
@@ -47,13 +47,15 @@ public class TestDenseVector extends TestCase {
 
   public void testCopy() throws Exception {
     Vector copy = test.clone();
-    for (int i = 0; i < test.size(); i++)
+    for (int i = 0; i < test.size(); i++) {
       assertEquals("copy [" + i + ']', test.get(i), copy.get(i));
+    }
   }
 
   public void testGet() throws Exception {
-    for (int i = 0; i < test.size(); i++)
+    for (int i = 0; i < test.size(); i++) {
       assertEquals("get [" + i + ']', values[i], test.get(i));
+    }
   }
 
   public void testGetOver() {
@@ -76,11 +78,13 @@ public class TestDenseVector extends TestCase {
 
   public void testSet() throws Exception {
     test.set(2, 4.5);
-    for (int i = 0; i < test.size(); i++)
-      if (i == 2)
+    for (int i = 0; i < test.size(); i++) {
+      if (i == 2) {
         assertEquals("set [" + i + ']', 4.5, test.get(i));
-      else
+      } else {
         assertEquals("set [" + i + ']', values[i], test.get(i));
+      }
+    }
   }
 
 
@@ -91,7 +95,7 @@ public class TestDenseVector extends TestCase {
     iterator = test.iterateAll();
     checkIterator(iterator, values, 3);
 
-    double[] doubles = new double[]{0.0, 5.0, 0, 3.0};
+    double[] doubles = {0.0, 5.0, 0, 3.0};
     DenseVector zeros = new DenseVector(doubles);
     iterator = zeros.iterateNonZero();
     checkIterator(iterator, doubles, 2);
@@ -107,11 +111,11 @@ public class TestDenseVector extends TestCase {
 
   }
 
-  private void checkIterator(Iterator<Vector.Element> nzIter, double[] values, int expectedNum) {
+  private static void checkIterator(Iterator<Vector.Element> nzIter, double[] values, int expectedNum) {
     int i = 0;
     while (nzIter.hasNext()) {
       Vector.Element elt = nzIter.next();
-      assertTrue((elt.index()) + " Value: " + values[elt.index() ] + " does not equal: " + elt.get(), values[elt.index()] == elt.get());
+      assertTrue((elt.index()) + " Value: " + values[elt.index()] + " does not equal: " + elt.get(), values[elt.index()] == elt.get());
       i++;
     }
     assertTrue(i + " does not equal: " + expectedNum, i == expectedNum);
@@ -124,8 +128,9 @@ public class TestDenseVector extends TestCase {
   public void testViewPart() throws Exception {
     Vector part = test.viewPart(1, 2);
     assertEquals("part size", 2, part.getNumNondefaultElements());
-    for (int i = 0; i < part.size(); i++)
+    for (int i = 0; i < part.size(); i++) {
       assertEquals("part[" + i + ']', values[i + 1], part.get(i));
+    }
   }
 
   public void testViewPartUnder() {
@@ -163,20 +168,23 @@ public class TestDenseVector extends TestCase {
 
   public void testDecodeVector() throws Exception {
     Vector val = AbstractVector.decodeVector(test.asFormatString());
-    for (int i = 0; i < test.size(); i++)
+    for (int i = 0; i < test.size(); i++) {
       assertEquals("get [" + i + ']', test.get(i), val.get(i));
+    }
   }
 
   public void testDenseVectorDoubleArray() throws Exception {
-    for (int i = 0; i < test.size(); i++)
+    for (int i = 0; i < test.size(); i++) {
       assertEquals("test[" + i + ']', values[i], test.get(i));
+    }
   }
 
   public void testDenseVectorInt() throws Exception {
     Vector val = new DenseVector(4);
     assertEquals("cardinality", 4, val.size());
-    for (int i = 0; i < test.size(); i++)
+    for (int i = 0; i < test.size(); i++) {
       assertEquals("get [" + i + ']', 0.0, val.get(i));
+    }
   }
 
   public void testDot() throws Exception {
@@ -196,29 +204,33 @@ public class TestDenseVector extends TestCase {
   public void testNormalize() throws Exception {
     Vector res = test.normalize();
     double mag = Math.sqrt(1.1 * 1.1 + 2.2 * 2.2 + 3.3 * 3.3);
-    for (int i = 0; i < test.size(); i++)
+    for (int i = 0; i < test.size(); i++) {
       assertEquals("dot", values[i] / mag, res.get(i));
+    }
   }
 
   public void testMinus() throws Exception {
     Vector val = test.minus(test);
     assertEquals("cardinality", 3, val.size());
-    for (int i = 0; i < test.size(); i++)
+    for (int i = 0; i < test.size(); i++) {
       assertEquals("get [" + i + ']', 0.0, val.get(i));
+    }
   }
 
   public void testPlusDouble() throws Exception {
     Vector val = test.plus(1);
     assertEquals("cardinality", 3, val.size());
-    for (int i = 0; i < test.size(); i++)
+    for (int i = 0; i < test.size(); i++) {
       assertEquals("get [" + i + ']', values[i] + 1, val.get(i));
+    }
   }
 
   public void testPlusVector() throws Exception {
     Vector val = test.plus(test);
     assertEquals("cardinality", 3, val.size());
-    for (int i = 0; i < test.size(); i++)
+    for (int i = 0; i < test.size(); i++) {
       assertEquals("get [" + i + ']', values[i] * 2, val.get(i));
+    }
   }
 
   public void testPlusVectorCardinality() {
@@ -233,22 +245,25 @@ public class TestDenseVector extends TestCase {
   public void testTimesDouble() throws Exception {
     Vector val = test.times(3);
     assertEquals("cardinality", 3, val.size());
-    for (int i = 0; i < test.size(); i++)
+    for (int i = 0; i < test.size(); i++) {
       assertEquals("get [" + i + ']', values[i] * 3, val.get(i));
+    }
   }
 
   public void testDivideDouble() throws Exception {
     Vector val = test.divide(3);
     assertEquals("cardinality", 3, val.size());
-    for (int i = 0; i < test.size(); i++)
+    for (int i = 0; i < test.size(); i++) {
       assertEquals("get [" + i + ']', values[i] / 3, val.get(i));
+    }
   }
 
   public void testTimesVector() throws Exception {
     Vector val = test.times(test);
     assertEquals("cardinality", 3, val.size());
-    for (int i = 0; i < test.size(); i++)
+    for (int i = 0; i < test.size(); i++) {
       assertEquals("get [" + i + ']', values[i] * values[i], val.get(i));
+    }
   }
 
   public void testTimesVectorCardinality() {
@@ -334,8 +349,9 @@ public class TestDenseVector extends TestCase {
 
   public void testAssignBinaryFunction3() throws Exception {
     test.assign(new TimesFunction(), 4);
-    for (int i = 0; i < values.length; i++)
+    for (int i = 0; i < values.length; i++) {
       assertEquals("value[" + i + ']', values[i] * 4, test.getQuick(i));
+    }
   }
 
   public void testAssignBinaryFunctionCardinality() {

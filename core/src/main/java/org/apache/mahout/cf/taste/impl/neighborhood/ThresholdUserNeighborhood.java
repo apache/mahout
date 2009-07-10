@@ -18,10 +18,10 @@
 package org.apache.mahout.cf.taste.impl.neighborhood;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.similarity.UserSimilarity;
+import org.apache.mahout.cf.taste.impl.common.SamplingIterable;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.impl.common.SamplingIterable;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +32,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>Computes a neigbhorhood consisting of all {@link User}s whose similarity to the
- * given {@link User} meets or exceeds a certain threshold. Similarity is defined by the given
- * {@link UserSimilarity}.</p>
+ * <p>Computes a neigbhorhood consisting of all {@link User}s whose similarity to the given {@link User} meets or
+ * exceeds a certain threshold. Similarity is defined by the given {@link UserSimilarity}.</p>
  */
 public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
 
@@ -43,12 +42,11 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
   private final double threshold;
 
   /**
-   * @param threshold similarity threshold
+   * @param threshold      similarity threshold
    * @param userSimilarity similarity metric
-   * @param dataModel data model
-   * @throws IllegalArgumentException if threshold is {@link Double#NaN},
-   * or if samplingRate is not positive and less than or equal to 1.0, or if userSimilarity
-   * or dataModel are <code>null</code>
+   * @param dataModel      data model
+   * @throws IllegalArgumentException if threshold is {@link Double#NaN}, or if samplingRate is not positive and less
+   *                                  than or equal to 1.0, or if userSimilarity or dataModel are <code>null</code>
    */
   public ThresholdUserNeighborhood(double threshold,
                                    UserSimilarity userSimilarity,
@@ -57,14 +55,14 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
   }
 
   /**
-   * @param threshold similarity threshold
+   * @param threshold      similarity threshold
    * @param userSimilarity similarity metric
-   * @param dataModel data model
-   * @param samplingRate percentage of users to consider when building neighborhood -- decrease to
-   * trade quality for performance
-   * @throws IllegalArgumentException if threshold or samplingRate is {@link Double#NaN},
-   * or if samplingRate is not positive and less than or equal to 1.0, or if userSimilarity
-   * or dataModel are <code>null</code>
+   * @param dataModel      data model
+   * @param samplingRate   percentage of users to consider when building neighborhood -- decrease to trade quality for
+   *                       performance
+   * @throws IllegalArgumentException if threshold or samplingRate is {@link Double#NaN}, or if samplingRate is not
+   *                                  positive and less than or equal to 1.0, or if userSimilarity or dataModel are
+   *                                  <code>null</code>
    */
   public ThresholdUserNeighborhood(double threshold,
                                    UserSimilarity userSimilarity,
@@ -85,7 +83,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
     User theUser = dataModel.getUser(userID);
     List<User> neighborhood = new ArrayList<User>();
     Iterable<? extends User> usersIterable =
-      SamplingIterable.maybeWrapIterable(dataModel.getUsers(), getSamplingRate());
+        SamplingIterable.maybeWrapIterable(dataModel.getUsers(), getSamplingRate());
     Iterator<? extends User> users = usersIterable.iterator();
     UserSimilarity userSimilarityImpl = getUserSimilarity();
 

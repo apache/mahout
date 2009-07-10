@@ -19,17 +19,17 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.SamplingIterable;
 import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 import java.util.Collection;
 
 /**
- * <p>Defines cluster similarity as the <em>smallest</em> similarity between any two
- * {@link User}s in the clusters -- that is, it says that clusters are close
- * when <em>all pairs</em> of their members have relatively high similarity.</p>
+ * <p>Defines cluster similarity as the <em>smallest</em> similarity between any two {@link User}s in the clusters --
+ * that is, it says that clusters are close when <em>all pairs</em> of their members have relatively high
+ * similarity.</p>
  */
 public final class FarthestNeighborClusterSimilarity implements ClusterSimilarity {
 
@@ -37,18 +37,17 @@ public final class FarthestNeighborClusterSimilarity implements ClusterSimilarit
   private final double samplingRate;
 
   /**
-   * <p>Constructs a {@link FarthestNeighborClusterSimilarity} based on the given {@link UserSimilarity}.
-   * All user-user similarities are examined.</p>
+   * <p>Constructs a {@link FarthestNeighborClusterSimilarity} based on the given {@link UserSimilarity}. All user-user
+   * similarities are examined.</p>
    */
   public FarthestNeighborClusterSimilarity(UserSimilarity similarity) {
     this(similarity, 1.0);
   }
 
   /**
-   * <p>Constructs a {@link FarthestNeighborClusterSimilarity} based on the given {@link UserSimilarity}.
-   * By setting <code>samplingRate</code> to a value less than 1.0, this implementation will only examine
-   * that fraction of all user-user similarities between two clusters, increasing performance at the expense
-   * of accuracy.</p>
+   * <p>Constructs a {@link FarthestNeighborClusterSimilarity} based on the given {@link UserSimilarity}. By setting
+   * <code>samplingRate</code> to a value less than 1.0, this implementation will only examine that fraction of all
+   * user-user similarities between two clusters, increasing performance at the expense of accuracy.</p>
    */
   public FarthestNeighborClusterSimilarity(UserSimilarity similarity, double samplingRate) {
     if (similarity == null) {

@@ -29,9 +29,7 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-/**
- * <p>A wrapper {@link DataSource} which pools connections. Why can't Jakarta Commons DBCP provide this directly?</p>
- */
+/** <p>A wrapper {@link DataSource} which pools connections. Why can't Jakarta Commons DBCP provide this directly?</p> */
 public final class ConnectionPoolDataSource implements DataSource {
 
   private static final Logger log = LoggerFactory.getLogger(ConnectionPoolDataSource.class);
@@ -81,17 +79,13 @@ public final class ConnectionPoolDataSource implements DataSource {
   // should also delegate to the 'delegate' object. But that would then *only* compile in JDK 6. So for
   // now they are dummy implementations which do little.
 
-  /**
-   * @throws SQLException always
-   */
+  /** @throws SQLException always */
   @Override
   public <T> T unwrap(Class<T> iface) throws SQLException {
     throw new SQLException("Unsupported operation");
   }
 
-  /**
-   * @return false always
-   */
+  /** @return false always */
   @Override
   public boolean isWrapperFor(Class<?> iface) {
     return false;

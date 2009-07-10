@@ -18,19 +18,17 @@
 package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Weighting;
-import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 
 import java.util.Collections;
 
-/**
- * <p>Tests {@link PearsonCorrelationSimilarity}.</p>
- */
+/** <p>Tests {@link PearsonCorrelationSimilarity}.</p> */
 public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
 
   public void testFullCorrelation1() throws Exception {
@@ -113,7 +111,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     User user2 = getUser("test2", -2.0, -2.0);
     DataModel dataModel = getDataModel(user1, user2);
     double correlation =
-            new PearsonCorrelationSimilarity(dataModel).itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
+        new PearsonCorrelationSimilarity(dataModel).itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
     assertCorrelationEquals(1.0, correlation);
   }
 
@@ -122,7 +120,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     User user2 = getUser("test2", 3.0, 3.0);
     DataModel dataModel = getDataModel(user1, user2);
     double correlation =
-            new PearsonCorrelationSimilarity(dataModel).itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
+        new PearsonCorrelationSimilarity(dataModel).itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
     // Yeah, undefined in this case
     assertTrue(Double.isNaN(correlation));
   }
@@ -132,7 +130,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     User user2 = getUser("test2", -2.0, 2.0);
     DataModel dataModel = getDataModel(user1, user2);
     double correlation =
-            new PearsonCorrelationSimilarity(dataModel).itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
+        new PearsonCorrelationSimilarity(dataModel).itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
     assertCorrelationEquals(-1.0, correlation);
   }
 
@@ -143,7 +141,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     GenericUser<String> user2 = new GenericUser<String>("test2", Collections.singletonList(pref2));
     DataModel dataModel = getDataModel(user1, user2);
     double correlation =
-            new PearsonCorrelationSimilarity(dataModel).itemSimilarity(dataModel.getItem("1"), dataModel.getItem("2"));
+        new PearsonCorrelationSimilarity(dataModel).itemSimilarity(dataModel.getItem("1"), dataModel.getItem("2"));
     assertTrue(Double.isNaN(correlation));
   }
 
@@ -153,7 +151,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     User user3 = getUser("test3", 70.0, 90.0);
     DataModel dataModel = getDataModel(user1, user2, user3);
     double correlation =
-            new PearsonCorrelationSimilarity(dataModel).itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
+        new PearsonCorrelationSimilarity(dataModel).itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
     assertCorrelationEquals(-1.0, correlation);
   }
 
@@ -163,7 +161,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     User user3 = getUser("test3", 3.0, 6.0);
     DataModel dataModel = getDataModel(user1, user2, user3);
     double correlation =
-            new PearsonCorrelationSimilarity(dataModel).itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
+        new PearsonCorrelationSimilarity(dataModel).itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
     assertCorrelationEquals(0.9607689228305227, correlation);
   }
 

@@ -17,10 +17,6 @@
 
 package org.apache.mahout.clustering.canopy;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
@@ -33,8 +29,12 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.matrix.Vector;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 public class ClusterMapper extends MapReduceBase implements
-        Mapper<WritableComparable<?>, Vector, Text, Vector> {
+    Mapper<WritableComparable<?>, Vector, Text, Vector> {
 
   private List<Canopy> canopies;
 

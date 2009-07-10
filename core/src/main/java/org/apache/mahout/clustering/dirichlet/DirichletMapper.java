@@ -17,8 +17,6 @@
 
 package org.apache.mahout.clustering.dirichlet;
 
-import java.io.IOException;
-
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -34,6 +32,8 @@ import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.TimesFunction;
 import org.apache.mahout.matrix.Vector;
 
+import java.io.IOException;
+
 public class DirichletMapper extends MapReduceBase implements
     Mapper<WritableComparable<?>, Vector, Text, Vector> {
 
@@ -41,7 +41,7 @@ public class DirichletMapper extends MapReduceBase implements
 
   @Override
   public void map(WritableComparable<?> key, Vector v,
-      OutputCollector<Text, Vector> output, Reporter reporter) throws IOException {
+                  OutputCollector<Text, Vector> output, Reporter reporter) throws IOException {
     // compute a normalized vector of probabilities that v is described by each model
     Vector pi = normalizedProbabilities(state, v);
     // then pick one model by sampling a Multinomial distribution based upon them
@@ -97,11 +97,11 @@ public class DirichletMapper extends MapReduceBase implements
   }
 
   /**
-   * Compute a normalized vector of probabilities that v is described
-   * by each model using the mixture and the model pdfs
-   * 
+   * Compute a normalized vector of probabilities that v is described by each model using the mixture and the model
+   * pdfs
+   *
    * @param state the DirichletState<Vector> of this iteration
-   * @param v an Vector
+   * @param v     an Vector
    * @return the Vector of probabilities
    */
   private static Vector normalizedProbabilities(DirichletState<Vector> state, Vector v) {
@@ -110,8 +110,9 @@ public class DirichletMapper extends MapReduceBase implements
     for (int k = 0; k < state.numClusters; k++) {
       double p = state.adjustedProbability(v, k);
       pi.set(k, p);
-      if (max < p)
+      if (max < p) {
         max = p;
+      }
     }
     // normalize the probabilities by largest observed value
     pi.assign(new TimesFunction(), 1.0 / max);

@@ -23,13 +23,11 @@ import org.apache.mahout.cf.taste.model.Item;
 
 import java.util.List;
 
-/**
- * <p>Interface implemented by "item-based" recommenders.</p>
- */
+/** <p>Interface implemented by "item-based" recommenders.</p> */
 public interface ItemBasedRecommender extends Recommender {
 
   /**
-   * @param itemID ID of {@link Item} for which to find most similar other {@link Item}s
+   * @param itemID  ID of {@link Item} for which to find most similar other {@link Item}s
    * @param howMany desired number of most similar {@link Item}s to find
    * @return {@link Item}s most similar to the given item, ordered from most similar to least
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
@@ -37,10 +35,10 @@ public interface ItemBasedRecommender extends Recommender {
   List<RecommendedItem> mostSimilarItems(Object itemID, int howMany) throws TasteException;
 
   /**
-   * @param itemID ID of {@link Item} for which to find most similar other {@link Item}s
-   * @param howMany desired number of most similar {@link Item}s to find
-   * @param rescorer {@link Rescorer} which can adjust item-item similarity
-   * estimates used to determine most similar items
+   * @param itemID   ID of {@link Item} for which to find most similar other {@link Item}s
+   * @param howMany  desired number of most similar {@link Item}s to find
+   * @param rescorer {@link Rescorer} which can adjust item-item similarity estimates used to determine most similar
+   *                 items
    * @return {@link Item}s most similar to the given item, ordered from most similar to least
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
@@ -50,18 +48,17 @@ public interface ItemBasedRecommender extends Recommender {
 
   /**
    * @param itemIDs IDs of {@link Item} for which to find most similar other {@link Item}s
-   * @param howMany desired number of most similar {@link Item}s to find
-   * estimates used to determine most similar items
+   * @param howMany desired number of most similar {@link Item}s to find estimates used to determine most similar items
    * @return {@link Item}s most similar to the given items, ordered from most similar to least
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
   List<RecommendedItem> mostSimilarItems(List<Object> itemIDs, int howMany) throws TasteException;
 
   /**
-   * @param itemIDs IDs of {@link Item} for which to find most similar other {@link Item}s
-   * @param howMany desired number of most similar {@link Item}s to find
-   * @param rescorer {@link Rescorer} which can adjust item-item similarity
-   * estimates used to determine most similar items
+   * @param itemIDs  IDs of {@link Item} for which to find most similar other {@link Item}s
+   * @param howMany  desired number of most similar {@link Item}s to find
+   * @param rescorer {@link Rescorer} which can adjust item-item similarity estimates used to determine most similar
+   *                 items
    * @return {@link Item}s most similar to the given items, ordered from most similar to least
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
@@ -70,21 +67,20 @@ public interface ItemBasedRecommender extends Recommender {
                                          Rescorer<Pair<Item, Item>> rescorer) throws TasteException;
 
   /**
-   * <p>Lists the {@link Item}s that were most influential in recommending a given item to a given user.
-   * Exactly how this is determined is left to the implementation, but, generally this will return items
-   * that the user prefers and that are similar to the given item.</p>
+   * <p>Lists the {@link Item}s that were most influential in recommending a given item to a given user. Exactly how
+   * this is determined is left to the implementation, but, generally this will return items that the user prefers and
+   * that are similar to the given item.</p>
    *
-   * <p>This returns a {@link List} of {@link RecommendedItem} which is a little misleading since it's
-   * returning recommend<strong>ing</strong> items, but, I thought it more natural to just reuse this
-   * class since it encapsulates an {@link Item} and value. The value here does not necessarily have
-   * a consistent interpretation or expected range; it will be higher the more influential the {@link Item}
-   * was in the recommendation.</p>
+   * <p>This returns a {@link List} of {@link RecommendedItem} which is a little misleading since it's returning
+   * recommend<strong>ing</strong> items, but, I thought it more natural to just reuse this class since it encapsulates
+   * an {@link Item} and value. The value here does not necessarily have a consistent interpretation or expected range;
+   * it will be higher the more influential the {@link Item} was in the recommendation.</p>
    *
-   * @param userID ID of {@link org.apache.mahout.cf.taste.model.User} who was recommended the {@link Item}
-   * @param itemID ID of {@link Item} that was recommended
+   * @param userID  ID of {@link org.apache.mahout.cf.taste.model.User} who was recommended the {@link Item}
+   * @param itemID  ID of {@link Item} that was recommended
    * @param howMany maximum number of {@link Item}s to return
-   * @return {@link List} of {@link RecommendedItem}, ordered from most influential in recommended the given
-   *         {@link Item} to least
+   * @return {@link List} of {@link RecommendedItem}, ordered from most influential in recommended the given {@link
+   *         Item} to least
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
   List<RecommendedItem> recommendedBecause(Object userID, Object itemID, int howMany) throws TasteException;

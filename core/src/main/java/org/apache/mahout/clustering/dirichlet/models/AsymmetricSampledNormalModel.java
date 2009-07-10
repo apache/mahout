@@ -16,13 +16,13 @@
  */
 package org.apache.mahout.clustering.dirichlet.models;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-
 import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.SquareRootFunction;
 import org.apache.mahout.matrix.Vector;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 public class AsymmetricSampledNormalModel implements Model<Vector> {
 
@@ -55,7 +55,7 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
 
   /**
    * Return an instance with the same parameters
-   * 
+   *
    * @return an AsymmetricSampledNormalModel
    */
   AsymmetricSampledNormalModel sample() {
@@ -65,20 +65,23 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
   @Override
   public void observe(Vector x) {
     s0++;
-    if (s1 == null)
+    if (s1 == null) {
       s1 = x.clone();
-    else
+    } else {
       s1 = s1.plus(x);
-    if (s2 == null)
+    }
+    if (s2 == null) {
       s2 = x.times(x);
-    else
+    } else {
       s2 = s2.plus(x.times(x));
+    }
   }
 
   @Override
   public void computeParameters() {
-    if (s0 == 0)
+    if (s0 == 0) {
       return;
+    }
     mean = s1.divide(s0);
     // compute the two component stds
     if (s0 > 1) {
@@ -91,10 +94,9 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
 
   /**
    * Calculate a pdf using the supplied sample and sd
-   * 
-   * @param x a Vector sample
+   *
+   * @param x  a Vector sample
    * @param sd a double std deviation
-   * @return
    */
   private double pdf(Vector x, double sd) {
     assert x.getNumNondefaultElements() == 2;
@@ -124,13 +126,17 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
   public String toString() {
     StringBuilder buf = new StringBuilder();
     buf.append("asnm{n=").append(s0).append(" m=[");
-    if (mean != null)
-      for (int i = 0; i < mean.size(); i++)
+    if (mean != null) {
+      for (int i = 0; i < mean.size(); i++) {
         buf.append(String.format("%.2f", mean.get(i))).append(", ");
+      }
+    }
     buf.append("] sd=[");
-    if (sd != null)
-      for (int i = 0; i < sd.size(); i++)
+    if (sd != null) {
+      for (int i = 0; i < sd.size(); i++) {
         buf.append(String.format("%.2f", sd.get(i))).append(", ");
+      }
+    }
     buf.append("]}");
     return buf.toString();
   }

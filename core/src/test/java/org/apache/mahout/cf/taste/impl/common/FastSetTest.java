@@ -24,9 +24,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-/**
- * <p>Tests {@link org.apache.mahout.cf.taste.impl.common.FastSet}.</p>
- */
+/** <p>Tests {@link org.apache.mahout.cf.taste.impl.common.FastSet}.</p> */
 public final class FastSetTest extends TasteTestCase {
 
   public void testContainsAndAdd() {
@@ -70,7 +68,7 @@ public final class FastSetTest extends TasteTestCase {
 
   public void testContains() {
     FastSet<String> set = buildTestFastSet();
-    assertTrue(set.contains("foo") );
+    assertTrue(set.contains("foo"));
     assertTrue(set.contains("baz"));
     assertTrue(set.contains("alpha"));
     assertFalse(set.contains("something"));

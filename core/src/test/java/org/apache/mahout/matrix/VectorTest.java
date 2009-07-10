@@ -17,18 +17,16 @@
 
 package org.apache.mahout.matrix;
 
-import java.lang.reflect.Type;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.Iterator;
-
-import junit.framework.TestCase;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import junit.framework.TestCase;
+
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Random;
 
 public class VectorTest extends TestCase {
 
@@ -220,9 +218,7 @@ public class VectorTest extends TestCase {
     doTestVectors(vecV1, vecV2);
   }
 
-  /**
-   * Asserts a vector using enumeration equals a given dense vector
-   */
+  /** Asserts a vector using enumeration equals a given dense vector */
   private static void doTestEnumeration(double[] apriori, Vector vector) {
     double[] test = new double[apriori.length];
     Iterator<Vector.Element> iter = vector.iterateNonZero();
@@ -237,12 +233,12 @@ public class VectorTest extends TestCase {
   }
 
   public void testEnumeration() throws Exception {
-    double[] apriori = { 0, 1, 2, 3, 4 };
+    double[] apriori = {0, 1, 2, 3, 4};
 
-    doTestEnumeration(apriori, new VectorView(new DenseVector(new double[] {
-        -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }), 2, 5));
+    doTestEnumeration(apriori, new VectorView(new DenseVector(new double[]{
+        -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9}), 2, 5));
 
-    doTestEnumeration(apriori, new DenseVector(new double[] { 0, 1, 2, 3, 4 }));
+    doTestEnumeration(apriori, new DenseVector(new double[]{0, 1, 2, 3, 4}));
 
     SparseVector sparse = new SparseVector(5);
     sparse.set(0, 0);
@@ -303,13 +299,16 @@ public class VectorTest extends TestCase {
 
   private static Vector randomSparseVector(Random rnd) {
     SparseVector v1 = new SparseVector(50000);
-    for (int i = 0; i < 1000; i++)
-      v1.setQuick(rnd.nextInt(50000), rnd.nextDouble());
+    for (int i = 0; i < 1000; i++) {
+      {
+        v1.setQuick(rnd.nextInt(50000), rnd.nextDouble());
+      }
+    }
     return v1;
   }
 
   public void testLabelSerializationDense() {
-    double[] values = { 1.1, 2.2, 3.3 };
+    double[] values = {1.1, 2.2, 3.3};
     Vector test = new DenseVector(values);
     Map<String, Integer> bindings = new HashMap<String, Integer>();
     bindings.put("Fee", 0);
@@ -338,7 +337,7 @@ public class VectorTest extends TestCase {
 
 
   public void testNameSerialization() throws Exception {
-    double[] values = { 1.1, 2.2, 3.3 };
+    double[] values = {1.1, 2.2, 3.3};
     Vector test = new DenseVector("foo", values);
     String formatString = test.asFormatString();
 
@@ -353,10 +352,13 @@ public class VectorTest extends TestCase {
   }
 
   public void testLabelSerializationSparse() {
-    double[] values = { 1.1, 2.2, 3.3 };
+    double[] values = {1.1, 2.2, 3.3};
     Vector test = new SparseVector(3);
-    for (int i = 0; i < values.length; i++)
-      test.set(i, values[i]);
+    for (int i = 0; i < values.length; i++) {
+      {
+        test.set(i, values[i]);
+      }
+    }
     Map<String, Integer> bindings = new HashMap<String, Integer>();
     bindings.put("Fee", 0);
     bindings.put("Fie", 1);

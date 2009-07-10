@@ -34,7 +34,7 @@ public class DummyOutputCollector<K extends WritableComparable, V extends Writab
 
   @Override
   public void collect(K key, V values)
-          throws IOException {
+      throws IOException {
     List<V> points = data.get(key.toString());
     if (points == null) {
       points = new ArrayList<V>();

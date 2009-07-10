@@ -17,13 +17,13 @@
 
 package org.apache.mahout.clustering.fuzzykmeans;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.Vector;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 public class FuzzyKMeansInfo implements Writable {
 

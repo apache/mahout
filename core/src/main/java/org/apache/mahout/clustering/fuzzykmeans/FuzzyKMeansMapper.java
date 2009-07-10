@@ -17,10 +17,6 @@
 
 package org.apache.mahout.clustering.fuzzykmeans;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -32,6 +28,10 @@ import org.apache.mahout.matrix.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 public class FuzzyKMeansMapper extends MapReduceBase implements
     Mapper<WritableComparable<?>, Vector, Text, FuzzyKMeansInfo> {
 
@@ -41,13 +41,13 @@ public class FuzzyKMeansMapper extends MapReduceBase implements
 
   @Override
   public void map(WritableComparable<?> key, Vector point,
-      OutputCollector<Text, FuzzyKMeansInfo> output, Reporter reporter) throws IOException {
+                  OutputCollector<Text, FuzzyKMeansInfo> output, Reporter reporter) throws IOException {
     SoftCluster.emitPointProbToCluster(point, clusters, output);
   }
 
   /**
    * Configure the mapper by providing its clusters. Used by unit tests.
-   * 
+   *
    * @param clusters a List<Cluster>
    */
   void config(List<SoftCluster> clusters) {
@@ -66,8 +66,9 @@ public class FuzzyKMeansMapper extends MapReduceBase implements
     FuzzyKMeansUtil.configureWithClusterInfo(job
         .get(SoftCluster.CLUSTER_PATH_KEY), clusters);
 
-    if (clusters.isEmpty())
+    if (clusters.isEmpty()) {
       throw new NullPointerException("Cluster is empty!!!");
+    }
   }
 
 }

@@ -16,10 +16,6 @@ package org.apache.mahout.clustering.kmeans;
  * limitations under the License.
  */
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
@@ -32,6 +28,10 @@ import org.apache.mahout.clustering.canopy.Canopy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 final class KMeansUtil {
 
   private static final Logger log = LoggerFactory.getLogger(KMeansUtil.class);
@@ -39,12 +39,10 @@ final class KMeansUtil {
   private KMeansUtil() {
   }
 
-  /**
-   * Configure the mapper with the cluster info
-   */
+  /** Configure the mapper with the cluster info */
   public static void configureWithClusterInfo(String clusterPathStr,
-      List<Cluster> clusters) {
-    
+                                              List<Cluster> clusters) {
+
     // Get the path location where the cluster Info is stored
     JobConf job = new JobConf(KMeansUtil.class);
     Path clusterPath = new Path(clusterPathStr + "/*");
@@ -72,7 +70,7 @@ final class KMeansUtil {
       for (Path path : result) {
         SequenceFile.Reader reader = null;
         try {
-          reader =new SequenceFile.Reader(fs, path, job);
+          reader = new SequenceFile.Reader(fs, path, job);
           Class<?> valueClass = reader.getValueClass();
           Writable key;
           try {
@@ -84,14 +82,14 @@ final class KMeansUtil {
             log.error("Exception", e);
             throw new RuntimeException(e);
           }
-          if (valueClass.equals(Cluster.class)){
+          if (valueClass.equals(Cluster.class)) {
             Cluster value = new Cluster();
             while (reader.next(key, value)) {
               // get the cluster info
               clusters.add(value);
               value = new Cluster();
             }
-          } else if (valueClass.equals(Canopy.class)){
+          } else if (valueClass.equals(Canopy.class)) {
             Canopy value = new Canopy();
             while (reader.next(key, value)) {
               // get the cluster info

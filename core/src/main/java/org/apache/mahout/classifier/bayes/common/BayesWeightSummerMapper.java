@@ -26,36 +26,28 @@ import org.apache.hadoop.mapred.Reporter;
 
 import java.io.IOException;
 
-
 public class BayesWeightSummerMapper extends MapReduceBase implements
     Mapper<Text, DoubleWritable, Text, DoubleWritable> {
 
-
   /**
    * We need to calculate the idf of each feature in each label
-   * 
-   * @param key The label,feature pair (can either be the freq Count or the term
-   *        Document count
-   * @param value
-   * @param output
-   * @param reporter
-   * @throws IOException
+   *
+   * @param key The label,feature pair (can either be the freq Count or the term Document count
    */
   @Override
   public void map(Text key, DoubleWritable value,
-      OutputCollector<Text, DoubleWritable> output, Reporter reporter)
+                  OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {
 
     String labelFeaturePair = key.toString();
     int i = labelFeaturePair.indexOf(',');
-    
-    String label = labelFeaturePair.substring(0,i);
-    String feature = labelFeaturePair.substring(i+1);
-    
+
+    String label = labelFeaturePair.substring(0, i);
+    String feature = labelFeaturePair.substring(i + 1);
+
     output.collect(new Text(',' + feature), value);//sum of weight for all labels for a feature Sigma_j
     output.collect(new Text('_' + label), value);//sum of weight for all features for a label Sigma_k
     output.collect(new Text("*"), value);//sum of weight of all features for all label Sigma_kSigma_j
-    
 
   }
 }

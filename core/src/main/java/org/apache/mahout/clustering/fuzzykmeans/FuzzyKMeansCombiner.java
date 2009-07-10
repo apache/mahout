@@ -17,9 +17,6 @@
 
 package org.apache.mahout.clustering.fuzzykmeans;
 
-import java.io.IOException;
-import java.util.Iterator;
-
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -27,12 +24,15 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 
+import java.io.IOException;
+import java.util.Iterator;
+
 public class FuzzyKMeansCombiner extends MapReduceBase implements
     Reducer<Text, FuzzyKMeansInfo, Text, FuzzyKMeansInfo> {
 
   @Override
   public void reduce(Text key, Iterator<FuzzyKMeansInfo> values,
-      OutputCollector<Text, FuzzyKMeansInfo> output, Reporter reporter) throws IOException {
+                     OutputCollector<Text, FuzzyKMeansInfo> output, Reporter reporter) throws IOException {
     SoftCluster cluster = new SoftCluster(key.toString().trim());
     while (values.hasNext()) {
       //String pointInfo = values.next().toString();

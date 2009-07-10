@@ -22,9 +22,7 @@ import org.uncommons.watchmaker.framework.FitnessEvaluator;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Special Fitness Evaluator that evaluates all the population ones.
- */
+/** Special Fitness Evaluator that evaluates all the population ones. */
 public abstract class STFitnessEvaluator<T> implements FitnessEvaluator<T> {
 
   private final List<Double> evaluations = new ArrayList<Double>();
@@ -41,8 +39,9 @@ public abstract class STFitnessEvaluator<T> implements FitnessEvaluator<T> {
     }
 
     int index = population.indexOf(candidate);
-    if (index == -1)
+    if (index == -1) {
       throw new RuntimeException("Candidate is not part of the population");
+    }
 
     return evaluations.get(index);
   }

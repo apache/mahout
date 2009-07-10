@@ -19,13 +19,13 @@ package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
-import org.apache.mahout.cf.taste.similarity.UserSimilarity;
-import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.FastSet;
+import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.model.BooleanPrefUser;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 import java.util.Collection;
 
@@ -52,11 +52,11 @@ public final class BooleanLogLikelihoodSimilarity implements UserSimilarity {
     int prefs1Size = prefs1.size();
     int prefs2Size = prefs2.size();
     int intersectionSize = prefs1Size < prefs2Size ?
-                           prefs2.intersectionSize(prefs1) :
-                           prefs1.intersectionSize(prefs2);
+        prefs2.intersectionSize(prefs1) :
+        prefs1.intersectionSize(prefs2);
     int numItems = dataModel.getNumItems();
     double logLikelihood =
-      LogLikelihoodSimilarity.twoLogLambda(intersectionSize, prefs1.size() - intersectionSize, prefs2.size(), numItems - prefs2.size());
+        LogLikelihoodSimilarity.twoLogLambda(intersectionSize, prefs1.size() - intersectionSize, prefs2.size(), numItems - prefs2.size());
     return 1.0 - 1.0 / (1.0 + logLikelihood);
   }
 

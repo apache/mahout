@@ -22,9 +22,7 @@ import org.apache.mahout.cf.taste.common.Refreshable;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 
-/**
- * A mock {@link Refreshable} which counts the number of times it has been refreshed, for use in tests.
- */
+/** A mock {@link Refreshable} which counts the number of times it has been refreshed, for use in tests. */
 final class MockRefreshable implements Refreshable, Callable<Object> {
 
   private int callCount;

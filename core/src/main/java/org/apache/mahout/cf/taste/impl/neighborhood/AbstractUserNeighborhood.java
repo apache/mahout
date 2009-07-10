@@ -18,16 +18,14 @@
 package org.apache.mahout.cf.taste.impl.neighborhood;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
-import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 import java.util.Collection;
 
-/**
- * <p>Contains methods and resources useful to all classes in this package.</p>
- */
+/** <p>Contains methods and resources useful to all classes in this package.</p> */
 abstract class AbstractUserNeighborhood implements UserNeighborhood {
 
   private final UserSimilarity userSimilarity;

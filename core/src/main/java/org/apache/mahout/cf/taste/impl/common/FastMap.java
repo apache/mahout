@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
+import java.io.Serializable;
 import java.util.AbstractCollection;
 import java.util.AbstractSet;
 import java.util.Arrays;
@@ -25,15 +26,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.io.Serializable;
 
 /**
- * <p>This is an optimized {@link Map} implementation, based on algorithms described in Knuth's
- * "Art of Computer Programming", Vol. 3, p. 529.</p>
+ * <p>This is an optimized {@link Map} implementation, based on algorithms described in Knuth's "Art of Computer
+ * Programming", Vol. 3, p. 529.</p>
  *
- * <p>It should be faster than {@link java.util.HashMap} in some cases, but not all. Its main feature is
- * a "max size" and the ability to transparently, efficiently and semi-intelligently evict old entries
- * when max size is exceeded.</p>
+ * <p>It should be faster than {@link java.util.HashMap} in some cases, but not all. Its main feature is a "max size"
+ * and the ability to transparently, efficiently and semi-intelligently evict old entries when max size is
+ * exceeded.</p>
  *
  * <p>This class is not a bit thread-safe.</p>
  *
@@ -43,9 +43,7 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
 
   public static final int NO_MAX_SIZE = Integer.MAX_VALUE;
 
-  /**
-   * Dummy object used to represent a key that has been removed.
-   */
+  /** Dummy object used to represent a key that has been removed. */
   private static final Object REMOVED = new Object();
 
   private K[] keys;
@@ -56,9 +54,7 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
   private BitSet recentlyAccessed;
   private final boolean countingAccesses;
 
-  /**
-   * Creates a new {@link FastMap} with default capacity.
-   */
+  /** Creates a new {@link FastMap} with default capacity. */
   public FastMap() {
     this(5, NO_MAX_SIZE);
   }
@@ -70,10 +66,9 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
   /**
    * Creates a new {@link FastMap} whose capacity can accommodate the given number of entries without rehash.</p>
    *
-   * @param size desired capacity
+   * @param size    desired capacity
    * @param maxSize max capacity
-   * @throws IllegalArgumentException if size is less than 1 or at least half of
-   *  {@link RandomUtils#MAX_INT_SMALLER_TWIN_PRIME}
+   * @throws IllegalArgumentException if size is less than 1 or at least half of {@link RandomUtils#MAX_INT_SMALLER_TWIN_PRIME}
    */
   @SuppressWarnings("unchecked")
   public FastMap(int size, int maxSize) {
@@ -95,16 +90,16 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
   }
 
   /**
-   * This is for the benefit of inner classes. Without it the compiler would just generate a similar synthetic
-   * accessor. Might as well make it explicit.
+   * This is for the benefit of inner classes. Without it the compiler would just generate a similar synthetic accessor.
+   * Might as well make it explicit.
    */
   K[] getKeys() {
     return keys;
   }
 
   /**
-   * This is for the benefit of inner classes. Without it the compiler would just generate a similar synthetic
-   * accessor. Might as well make it explicit.
+   * This is for the benefit of inner classes. Without it the compiler would just generate a similar synthetic accessor.
+   * Might as well make it explicit.
    */
   V[] getValues() {
     return values;
@@ -168,9 +163,7 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
     return false;
   }
 
-  /**
-   * @throws NullPointerException if key or value is null
-   */
+  /** @throws NullPointerException if key or value is null */
   @Override
   public V put(K key, V value) {
     if (key == null || value == null) {
@@ -326,10 +319,10 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
 
   @SuppressWarnings("unchecked")
   @Override
-  public FastMap<K,V> clone() {
-    FastMap<K,V> clone;
+  public FastMap<K, V> clone() {
+    FastMap<K, V> clone;
     try {
-      clone = (FastMap<K,V>) super.clone();
+      clone = (FastMap<K, V>) super.clone();
     } catch (CloneNotSupportedException cnse) {
       throw new AssertionError();
     }
@@ -337,7 +330,7 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
     clone.keys = (K[]) new Object[length];
     clone.values = (V[]) new Object[length];
     System.arraycopy(keys, 0, clone.keys, 0, length);
-    System.arraycopy(values, 0, clone.values,  0, length);
+    System.arraycopy(values, 0, clone.values, 0, length);
     clone.recentlyAccessed = countingAccesses ? new BitSet(length) : null;
     return clone;
   }

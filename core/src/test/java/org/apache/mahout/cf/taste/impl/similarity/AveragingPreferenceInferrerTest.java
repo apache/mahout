@@ -18,19 +18,17 @@
 package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 
 import java.util.Collections;
 
-/**
- * <p>Tests {@link AveragingPreferenceInferrer}.</p>
- */
+/** <p>Tests {@link AveragingPreferenceInferrer}.</p> */
 public final class AveragingPreferenceInferrerTest extends TasteTestCase {
 
   public void testInferrer() throws TasteException {

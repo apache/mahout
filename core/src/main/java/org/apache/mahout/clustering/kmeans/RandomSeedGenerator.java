@@ -28,17 +28,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Random;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 
 /**
- * Given an Input Path containing a {@link org.apache.hadoop.io.SequenceFile}, randomly select k vectors
- * and write them to the output file as a {@link org.apache.mahout.clustering.kmeans.Cluster} representing
- * the initial centroid to use.
+ * Given an Input Path containing a {@link org.apache.hadoop.io.SequenceFile}, randomly select k vectors and write them
+ * to the output file as a {@link org.apache.mahout.clustering.kmeans.Cluster} representing the initial centroid to use.
  * <p/>
- *
  */
 public final class RandomSeedGenerator {
 
@@ -46,7 +44,8 @@ public final class RandomSeedGenerator {
 
   public static final String K = "k";
 
-  private RandomSeedGenerator() {}
+  private RandomSeedGenerator() {
+  }
 
   public static Path buildRandom(String input, String output,
                                  int k) throws IOException, IllegalAccessException, InstantiationException {
@@ -59,12 +58,12 @@ public final class RandomSeedGenerator {
     }
     fs.mkdirs(outPath);
     Path outFile = new Path(outPath, "part-randomSeed");
-    if (fs.exists(outFile) == true){
+    if (fs.exists(outFile) == true) {
       log.warn("Deleting " + outFile);
       fs.delete(outFile, false);
     }
     boolean newFile = fs.createNewFile(outFile);
-    if (newFile == true){
+    if (newFile == true) {
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(input), conf);
       Writable key = (Writable) reader.getKeyClass().newInstance();
       Vector value = (Vector) reader.getValueClass().newInstance();
@@ -73,7 +72,7 @@ public final class RandomSeedGenerator {
 
       List<Text> chosenTexts = new ArrayList<Text>(k);
       List<Cluster> chosenClusters = new ArrayList<Cluster>(k);
-      while (reader.next(key, value)){
+      while (reader.next(key, value)) {
         Cluster newCluster = new Cluster(value);
         newCluster.addPoint(value);
         Text newText = new Text(key.toString());

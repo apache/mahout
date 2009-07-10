@@ -20,9 +20,7 @@ package org.apache.mahout.cf.taste.impl.similarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
 
-/**
- * <p>Tests {@link TanimotoCoefficientSimilarity}.</p>
- */
+/** <p>Tests {@link TanimotoCoefficientSimilarity}.</p> */
 public final class TanimotoCoefficientSimilarityTest extends SimilarityTestCase {
 
   public void testNoCorrelation1() throws Exception {

@@ -33,9 +33,7 @@ import java.util.List;
 
 public abstract class TasteTestCase extends TestCase {
 
-  /**
-   * "Close enough" value for floating-point comparisons.
-   */
+  /** "Close enough" value for floating-point comparisons. */
   public static final double EPSILON = 0.00001;
 
   @Override

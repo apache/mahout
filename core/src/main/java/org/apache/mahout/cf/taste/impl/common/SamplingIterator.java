@@ -18,12 +18,12 @@
 package org.apache.mahout.cf.taste.impl.common;
 
 import java.util.Iterator;
-import java.util.Random;
 import java.util.NoSuchElementException;
+import java.util.Random;
 
 /**
- * Wraps an {@link Iterator} and returns only some subset of the elements
- * that it would, as determined by a sampling rate parameter.
+ * Wraps an {@link Iterator} and returns only some subset of the elements that it would, as determined by a sampling
+ * rate parameter.
  */
 public final class SamplingIterator<T> implements Iterator<T> {
 

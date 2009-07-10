@@ -34,10 +34,12 @@ public class DummyCandidate {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null || !(obj instanceof DummyCandidate))
+    }
+    if (obj == null || !(obj instanceof DummyCandidate)) {
       return false;
+    }
 
     DummyCandidate dc = (DummyCandidate) obj;
     return index == dc.index;

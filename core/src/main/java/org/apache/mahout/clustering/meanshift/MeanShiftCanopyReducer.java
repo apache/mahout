@@ -17,11 +17,6 @@
 
 package org.apache.mahout.clustering.meanshift;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -30,6 +25,11 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class MeanShiftCanopyReducer extends MapReduceBase implements
     Reducer<Text, MeanShiftCanopy, Text, MeanShiftCanopy> {
@@ -42,7 +42,7 @@ public class MeanShiftCanopyReducer extends MapReduceBase implements
 
   @Override
   public void reduce(Text key, Iterator<MeanShiftCanopy> values,
-      OutputCollector<Text, MeanShiftCanopy> output, Reporter reporter)
+                     OutputCollector<Text, MeanShiftCanopy> output, Reporter reporter)
       throws IOException {
 
     while (values.hasNext()) {

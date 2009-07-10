@@ -17,14 +17,14 @@
 
 package org.apache.mahout.cf.taste.impl.model.jdbc;
 
+import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.common.NoSuchUserException;
+import org.apache.mahout.cf.taste.impl.common.Cache;
 import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.common.IteratorIterable;
-import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
-import org.apache.mahout.cf.taste.impl.common.Cache;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
+import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
@@ -53,22 +53,21 @@ import java.util.NoSuchElementException;
  * <p>An abstract superclass for JDBC-related {@link DataModel} implementations, providing most of the common
  * functionality that any such implementation would need.</p>
  *
- * <p>Performance will be a concern with any JDBC-based {@link DataModel}. There are going to be lots of
- * simultaneous reads and some writes to one table. Make sure the table is set up optimally -- for example,
- * you'll want to establish indexes.</p>
+ * <p>Performance will be a concern with any JDBC-based {@link DataModel}. There are going to be lots of simultaneous
+ * reads and some writes to one table. Make sure the table is set up optimally -- for example, you'll want to establish
+ * indexes.</p>
  *
- * <p>You'll also want to use connection pooling of some kind. Most J2EE containers like Tomcat
- * provide connection pooling, so make sure the {@link DataSource} it exposes is using pooling. Outside a
- * J2EE container, you can use packages like Jakarta's
- * <a href="http://jakarta.apache.org/commons/dbcp/">DBCP</a> to create a {@link DataSource} on top of your
- * database whose {@link Connection}s are pooled.</p>
+ * <p>You'll also want to use connection pooling of some kind. Most J2EE containers like Tomcat provide connection
+ * pooling, so make sure the {@link DataSource} it exposes is using pooling. Outside a J2EE container, you can use
+ * packages like Jakarta's <a href="http://jakarta.apache.org/commons/dbcp/">DBCP</a> to create a {@link DataSource} on
+ * top of your database whose {@link Connection}s are pooled.</p>
  *
- * <p>Also note: this default implementation assumes that the user and item ID keys are {@link String}s, for
- * maximum flexibility. You can override this behavior by subclassing an implementation and overriding
- * {@link #buildItem(String)} and {@link #buildUser(String, List)}. If you don't, just make sure you use
- * {@link String}s as IDs throughout your code. If your IDs are really numeric, and you use, say, {@link Long}
- * for IDs in the rest of your code, you will run into subtle problems because the {@link Long} values won't
- * be equal to or compare correctly to the underlying {@link String} key values.</p>
+ * <p>Also note: this default implementation assumes that the user and item ID keys are {@link String}s, for maximum
+ * flexibility. You can override this behavior by subclassing an implementation and overriding {@link
+ * #buildItem(String)} and {@link #buildUser(String, List)}. If you don't, just make sure you use {@link String}s as IDs
+ * throughout your code. If your IDs are really numeric, and you use, say, {@link Long} for IDs in the rest of your
+ * code, you will run into subtle problems because the {@link Long} values won't be equal to or compare correctly to the
+ * underlying {@link String} key values.</p>
  */
 public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
@@ -100,7 +99,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
   private final String getNumPreferenceForItemsSQL;
   private int cachedNumUsers;
   private int cachedNumItems;
-  private final Cache<Object,Integer> itemPrefCounts;
+  private final Cache<Object, Integer> itemPrefCounts;
 
   protected AbstractJDBCDataModel(DataSource dataSource,
                                   String getUserSQL,
@@ -115,21 +114,21 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
                                   String getNumPreferenceForItemSQL,
                                   String getNumPreferenceForItemsSQL) {
     this(dataSource,
-         DEFAULT_PREFERENCE_TABLE,
-         DEFAULT_USER_ID_COLUMN,
-         DEFAULT_ITEM_ID_COLUMN,
-         DEFAULT_PREFERENCE_COLUMN,
-         getUserSQL,
-         getNumItemsSQL,
-         getNumUsersSQL,
-         setPreferenceSQL,
-         removePreferenceSQL,
-         getUsersSQL,
-         getItemsSQL,
-         getItemSQL,
-         getPrefsForItemSQL,
-         getNumPreferenceForItemSQL,
-         getNumPreferenceForItemsSQL);
+        DEFAULT_PREFERENCE_TABLE,
+        DEFAULT_USER_ID_COLUMN,
+        DEFAULT_ITEM_ID_COLUMN,
+        DEFAULT_PREFERENCE_COLUMN,
+        getUserSQL,
+        getNumItemsSQL,
+        getNumUsersSQL,
+        setPreferenceSQL,
+        removePreferenceSQL,
+        getUsersSQL,
+        getItemsSQL,
+        getItemSQL,
+        getPrefsForItemSQL,
+        getNumPreferenceForItemSQL,
+        getNumPreferenceForItemsSQL);
   }
 
   protected AbstractJDBCDataModel(DataSource dataSource,
@@ -171,7 +170,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
     if (!(dataSource instanceof ConnectionPoolDataSource)) {
       log.warn("You are not using ConnectionPoolDataSource. Make sure your DataSource pools connections " +
-               "to the database itself, or database performance will be severely reduced.");
+          "to the database itself, or database performance will be severely reduced.");
     }
 
     this.preferenceTable = preferenceTable;
@@ -194,7 +193,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
     this.cachedNumUsers = -1;
     this.cachedNumItems = -1;
-    this.itemPrefCounts = new Cache<Object,Integer>(new ItemPrefCountRetriever(getNumPreferenceForItemSQL));
+    this.itemPrefCounts = new Cache<Object, Integer>(new ItemPrefCountRetriever(getNumPreferenceForItemSQL));
 
   }
 
@@ -206,8 +205,8 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
   }
 
   /**
-   * <p>Looks up a {@link DataSource} by name from JNDI. "java:comp/env/" is prepended to the argument
-   * before looking up the name in JNDI.</p>
+   * <p>Looks up a {@link DataSource} by name from JNDI. "java:comp/env/" is prepended to the argument before looking up
+   * the name in JNDI.</p>
    *
    * @param dataSourceName JNDI name where a {@link DataSource} is bound (e.g. "jdbc/taste")
    * @return {@link DataSource} under that JNDI name
@@ -231,9 +230,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     }
   }
 
-  /**
-   * @return the {@link DataSource} that this instance is using
-   */
+  /** @return the {@link DataSource} that this instance is using */
   @Override
   public DataSource getDataSource() {
     return dataSource;
@@ -269,9 +266,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     return new IteratorIterable<User>(new ResultSetUserIterator(dataSource, getUsersSQL));
   }
 
-  /**
-   * @throws NoSuchUserException if there is no such user
-   */
+  /** @throws NoSuchUserException if there is no such user */
   @Override
   public User getUser(Object id) throws TasteException {
 
@@ -465,7 +460,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
   @Override
   public void setPreference(Object userID, Object itemID, double value)
-          throws TasteException {
+      throws TasteException {
     if (userID == null || itemID == null) {
       throw new IllegalArgumentException("userID or itemID is null");
     }
@@ -502,7 +497,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
   @Override
   public void removePreference(Object userID, Object itemID)
-          throws TasteException {
+      throws TasteException {
     if (userID == null || itemID == null) {
       throw new IllegalArgumentException("userID or itemID is null");
     }
@@ -539,17 +534,17 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
 
   private void addPreference(ResultSet rs, Collection<Preference> prefs)
-          throws SQLException {
+      throws SQLException {
     Item item = buildItem(rs.getString(1));
     double preferenceValue = rs.getDouble(2);
     prefs.add(buildPreference(null, item, preferenceValue));
   }
 
   /**
-   * <p>Default implementation which returns a new {@link GenericUser} with {@link String} IDs.
-   * Subclasses may override to return a different {@link User} implementation.</p>
+   * <p>Default implementation which returns a new {@link GenericUser} with {@link String} IDs. Subclasses may override
+   * to return a different {@link User} implementation.</p>
    *
-   * @param id user ID
+   * @param id    user ID
    * @param prefs user preferences
    * @return {@link GenericUser} by default
    */
@@ -558,8 +553,8 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
   }
 
   /**
-   * <p>Default implementation which returns a new {@link GenericItem} with {@link String} IDs.
-   * Subclasses may override to return a different {@link Item} implementation.</p>
+   * <p>Default implementation which returns a new {@link GenericItem} with {@link String} IDs. Subclasses may override
+   * to return a different {@link Item} implementation.</p>
    *
    * @param id item ID
    * @return {@link GenericItem} by default
@@ -580,12 +575,11 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
   }
 
   /**
-   * <p>An {@link java.util.Iterator} which returns {@link org.apache.mahout.cf.taste.model.User}s from a
-   * {@link java.sql.ResultSet}. This is a useful
-   * way to iterate over all user data since it does not require all data to be read into memory
-   * at once. It does however require that the DB connection be held open. Note that this class will
-   * only release database resources after {@link #hasNext()} has been called and has returned false;
-   * callers should make sure to "drain" the entire set of data to avoid tying up database resources.</p>
+   * <p>An {@link java.util.Iterator} which returns {@link org.apache.mahout.cf.taste.model.User}s from a {@link
+   * java.sql.ResultSet}. This is a useful way to iterate over all user data since it does not require all data to be
+   * read into memory at once. It does however require that the DB connection be held open. Note that this class will
+   * only release database resources after {@link #hasNext()} has been called and has returned false; callers should
+   * make sure to "drain" the entire set of data to avoid tying up database resources.</p>
    */
   private final class ResultSetUserIterator implements SkippingIterator<User> {
 
@@ -600,8 +594,8 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
         connection.setReadOnly(true);
         connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         statement = connection.prepareStatement(getUsersSQL,
-                                                ResultSet.TYPE_FORWARD_ONLY,
-                                                ResultSet.CONCUR_READ_ONLY);
+            ResultSet.TYPE_FORWARD_ONLY,
+            ResultSet.CONCUR_READ_ONLY);
         statement.setFetchDirection(ResultSet.FETCH_FORWARD);
         statement.setFetchSize(getFetchSize());
         log.debug("Executing SQL query: {}", getUsersSQL);
@@ -703,12 +697,11 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
   }
 
   /**
-   * <p>An {@link java.util.Iterator} which returns {@link org.apache.mahout.cf.taste.model.Item}s from a
-   * {@link java.sql.ResultSet}. This is a useful way to iterate over all user data since it does not require
-   * all data to be read into memory at once. It does however require that the DB connection be held open. Note
-   * that this class will only release database resources after {@link #hasNext()} has been called and has returned
-   * <code>false</code>; callers should make sure to "drain" the entire set of data to avoid tying up database
-   * resources.</p>
+   * <p>An {@link java.util.Iterator} which returns {@link org.apache.mahout.cf.taste.model.Item}s from a {@link
+   * java.sql.ResultSet}. This is a useful way to iterate over all user data since it does not require all data to be
+   * read into memory at once. It does however require that the DB connection be held open. Note that this class will
+   * only release database resources after {@link #hasNext()} has been called and has returned <code>false</code>;
+   * callers should make sure to "drain" the entire set of data to avoid tying up database resources.</p>
    */
   private final class ResultSetItemIterator implements SkippingIterator<Item> {
 
@@ -802,7 +795,7 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
   }
 
-  private class ItemPrefCountRetriever implements Retriever<Object,Integer> {
+  private class ItemPrefCountRetriever implements Retriever<Object, Integer> {
     private final String getNumPreferenceForItemSQL;
 
     private ItemPrefCountRetriever(String getNumPreferenceForItemSQL) {

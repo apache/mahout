@@ -16,19 +16,18 @@
  */
 package org.apache.mahout.clustering.dirichlet;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-import java.lang.reflect.Type;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.matrix.JsonVectorAdapter;
 import org.apache.mahout.matrix.Vector;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.lang.reflect.Type;
 
 public class DirichletCluster<O> implements Writable {
 
@@ -75,13 +74,7 @@ public class DirichletCluster<O> implements Writable {
     return gson.toJson(this, typeOfModel);
   }
 
-  /**
-   * Reads a typed Model instance from the input stream
-   * 
-   * @param in
-   * @return
-   * @throws IOException
-   */
+  /** Reads a typed Model instance from the input stream */
   @SuppressWarnings("unchecked")
   public static Model<?> readModel(DataInput in) throws IOException {
     String modelClassName = in.readUTF();
@@ -100,13 +93,7 @@ public class DirichletCluster<O> implements Writable {
     return model;
   }
 
-  /**
-   * Writes a typed Model instance to the output stream
-   * 
-   * @param out
-   * @param model
-   * @throws IOException
-   */
+  /** Writes a typed Model instance to the output stream */
   @SuppressWarnings("unchecked")
   public static void writeModel(DataOutput out, Model<?> model) throws IOException {
     out.writeUTF(model.getClass().getName());

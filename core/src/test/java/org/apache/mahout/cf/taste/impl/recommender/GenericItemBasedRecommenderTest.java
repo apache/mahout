@@ -17,25 +17,23 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
-import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
-import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
+import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.ItemBasedRecommender;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * <p>Tests {@link GenericItemBasedRecommender}.</p>
- */
+/** <p>Tests {@link GenericItemBasedRecommender}.</p> */
 public final class GenericItemBasedRecommenderTest extends TasteTestCase {
 
   public void testRecommender() throws Exception {
@@ -60,13 +58,13 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     users.add(getUser("test5", 0.2, 0.3, 0.6, 0.7, 0.1, 0.2));
     DataModel dataModel = new GenericDataModel(users);
     Collection<GenericItemSimilarity.ItemItemSimilarity> similarities =
-            new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(6);
+        new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(6);
     for (int i = 0; i < 6; i++) {
       for (int j = i + 1; j < 6; j++) {
         similarities.add(
-                new GenericItemSimilarity.ItemItemSimilarity(new GenericItem<String>(String.valueOf(i)),
-                                                               new GenericItem<String>(String.valueOf(j)),
-                                                               1.0 / (1.0 + (double) i + (double) j)));
+            new GenericItemSimilarity.ItemItemSimilarity(new GenericItem<String>(String.valueOf(i)),
+                new GenericItem<String>(String.valueOf(j)),
+                1.0 / (1.0 + (double) i + (double) j)));
       }
     }
     ItemSimilarity similarity = new GenericItemSimilarity(similarities);
@@ -93,7 +91,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     Item item3 = new GenericItem<String>("2");
     Item item4 = new GenericItem<String>("3");
     Collection<GenericItemSimilarity.ItemItemSimilarity> similarities =
-            new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(6);
+        new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(6);
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item1, item2, 1.0));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item1, item3, 0.5));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item1, item4, 0.2));
@@ -104,7 +102,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     Recommender recommender = new GenericItemBasedRecommender(dataModel, similarity);
     List<RecommendedItem> originalRecommended = recommender.recommend("test1", 2);
     List<RecommendedItem> rescoredRecommended =
-            recommender.recommend("test1", 2, new ReversingRescorer<Item>());
+        recommender.recommend("test1", 2, new ReversingRescorer<Item>());
     assertNotNull(originalRecommended);
     assertNotNull(rescoredRecommended);
     assertEquals(2, originalRecommended.size());
@@ -119,8 +117,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
   }
 
   /**
-   * Contributed test case that verifies fix for bug
-   * <a href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=1396128&amp;group_id=138771&amp;atid=741665">
+   * Contributed test case that verifies fix for bug <a href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=1396128&amp;group_id=138771&amp;atid=741665">
    * 1396128</a>.
    */
   public void testBestRating() throws Exception {
@@ -182,7 +179,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
   private static ItemBasedRecommender buildRecommender() {
     DataModel dataModel = new GenericDataModel(getMockUsers());
     Collection<GenericItemSimilarity.ItemItemSimilarity> similarities =
-            new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(2);
+        new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(2);
     Item item1 = new GenericItem<String>("0");
     Item item2 = new GenericItem<String>("1");
     Item item3 = new GenericItem<String>("2");
@@ -200,7 +197,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     users.add(getUser("test4", 0.7, 0.3, 0.8, 0.5, 0.6));
     DataModel dataModel = new GenericDataModel(users);
     Collection<GenericItemSimilarity.ItemItemSimilarity> similarities =
-            new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(10);
+        new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(10);
     Item item1 = new GenericItem<String>("0");
     Item item2 = new GenericItem<String>("1");
     Item item3 = new GenericItem<String>("2");

@@ -19,10 +19,10 @@ package org.apache.mahout.cf.taste.impl.recommender.slopeone.jdbc;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.JDBCDataModel;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -40,10 +40,10 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 /**
- * <p>A  {@link DiffStorage} which stores diffs in a database. Database-specific implementations subclass
- * this abstract class. Note that this implementation has a fairly particular dependence on the
- * {@link org.apache.mahout.cf.taste.model.DataModel} used; it needs a {@link JDBCDataModel} attached to the same
- * database since its efficent operation depends on accessing preference data in the database directly.</p>
+ * <p>A  {@link DiffStorage} which stores diffs in a database. Database-specific implementations subclass this abstract
+ * class. Note that this implementation has a fairly particular dependence on the {@link
+ * org.apache.mahout.cf.taste.model.DataModel} used; it needs a {@link JDBCDataModel} attached to the same database
+ * since its efficent operation depends on accessing preference data in the database directly.</p>
  */
 public abstract class AbstractJDBCDiffStorage implements DiffStorage {
 
@@ -139,7 +139,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
 
   @Override
   public RunningAverage[] getDiffs(Object userID, Object itemID, Preference[] prefs)
-          throws TasteException {
+      throws TasteException {
     int size = prefs.length;
     RunningAverage[] result = new RunningAverage[size];
     Connection conn = null;
@@ -202,7 +202,7 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
 
   @Override
   public void updateItemPref(Object itemID, double prefDelta, boolean remove)
-          throws TasteException {
+      throws TasteException {
     Connection conn = null;
     try {
       conn = dataSource.getConnection();

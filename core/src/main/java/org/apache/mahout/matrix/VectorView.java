@@ -20,12 +20,10 @@ package org.apache.mahout.matrix;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.NoSuchElementException;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
-/**
- * Implements subset view of a Vector
- */
+/** Implements subset view of a Vector */
 public class VectorView extends AbstractVector {
 
   private Vector vector;
@@ -90,24 +88,33 @@ public class VectorView extends AbstractVector {
 
   @Override
   public Vector viewPart(int offset, int length) {
-    if (length > cardinality)
-      throw new CardinalityException();
-    if (offset < 0 || offset + length > cardinality)
-      throw new IndexException();
+    if (length > cardinality) {
+      {
+        throw new CardinalityException();
+      }
+    }
+    if (offset < 0 || offset + length > cardinality) {
+      {
+        throw new IndexException();
+      }
+    }
     return new VectorView(vector, offset + this.offset, length);
   }
 
   @Override
   public boolean haveSharedCells(Vector other) {
-    if (other instanceof VectorView)
-      return other == this || vector.haveSharedCells(other);
-    else
-      return other.haveSharedCells(vector);
+    if (other instanceof VectorView) {
+      {
+        return other == this || vector.haveSharedCells(other);
+      }
+    } else {
+      {
+        return other.haveSharedCells(vector);
+      }
+    }
   }
 
-  /**
-   * @return true if index is a valid index in the underlying Vector
-   */
+  /** @return true if index is a valid index in the underlying Vector */
   private boolean isInView(int index) {
     return index >= offset && index < offset + cardinality;
   }
@@ -174,10 +181,7 @@ public class VectorView extends AbstractVector {
       return el != null;
     }
 
-    /**
-     * @throws UnsupportedOperationException all the time. method not
-     *         implemented.
-     */
+    /** @throws UnsupportedOperationException all the time. method not implemented. */
     @Override
     public void remove() {
       throw new UnsupportedOperationException();
@@ -236,10 +240,7 @@ public class VectorView extends AbstractVector {
       return el != null;
     }
 
-    /**
-     * @throws UnsupportedOperationException all the time. method not
-     *         implemented.
-     */
+    /** @throws UnsupportedOperationException all the time. method not implemented. */
     @Override
     public void remove() {
       throw new UnsupportedOperationException();
@@ -249,11 +250,17 @@ public class VectorView extends AbstractVector {
 
   @Override
   public double dot(Vector x) {
-    if (size() != x.size())
-      throw new CardinalityException();
+    if (size() != x.size()) {
+      {
+        throw new CardinalityException();
+      }
+    }
     double result = 0;
-    for (int i = 0; i < size(); i++)
-      result += getQuick(i) * x.getQuick(i);
+    for (int i = 0; i < size(); i++) {
+      {
+        result += getQuick(i) * x.getQuick(i);
+      }
+    }
     return result;
   }
 
@@ -317,22 +324,22 @@ public class VectorView extends AbstractVector {
 
   @Override
   public double getLengthSquared() {
-  	double result = 0.0;
-  	for (int i = 0; i < cardinality; i++) {
-  		double value = getQuick(i); 
-  		result +=  value * value;
-  	}
-  	return result;
+    double result = 0.0;
+    for (int i = 0; i < cardinality; i++) {
+      double value = getQuick(i);
+      result += value * value;
+    }
+    return result;
   }
 
   @Override
-  public double getDistanceSquared(Vector v) {  	
-  	double result = 0.0;
-  	for (int i = 0; i < cardinality; i++) {
-  		double delta = getQuick(i) - v.getQuick(i);
-  		result += delta * delta;
-  	}
-  	return result;
+  public double getDistanceSquared(Vector v) {
+    double result = 0.0;
+    for (int i = 0; i < cardinality; i++) {
+      double delta = getQuick(i) - v.getQuick(i);
+      result += delta * delta;
+    }
+    return result;
   }
 
   @Override
@@ -340,7 +347,7 @@ public class VectorView extends AbstractVector {
     Iterator<Vector.Element> iter = iterateNonZero();
     while (iter.hasNext()) {
       Vector.Element elt = iter.next();
-  	  v.set(elt.index(), elt.get() + v.get(elt.index()));
+      v.set(elt.index(), elt.get() + v.get(elt.index()));
     }
   }
 

@@ -17,25 +17,25 @@
 
 package org.apache.mahout.cf.taste.impl.model.jdbc;
 
-import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.Item;
-import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
-import org.apache.mahout.cf.taste.impl.common.IOUtils;
+import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastSet;
+import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.common.IteratorIterable;
 import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
 import org.apache.mahout.cf.taste.impl.model.BooleanPrefUser;
 import org.apache.mahout.cf.taste.impl.model.BooleanPreference;
+import org.apache.mahout.cf.taste.model.Item;
+import org.apache.mahout.cf.taste.model.Preference;
+import org.apache.mahout.cf.taste.model.User;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 
@@ -63,21 +63,21 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
                                              String getNumPreferenceForItemSQL,
                                              String getNumPreferenceForItemsSQL) {
     super(dataSource,
-          preferenceTable,
-          userIDColumn,
-          itemIDColumn,
-          preferenceColumn,
-          getUserSQL,
-          getNumItemsSQL,
-          getNumUsersSQL,
-          setPreferenceSQL,
-          removePreferenceSQL,
-          getUsersSQL,
-          getItemsSQL,
-          getItemSQL,
-          getPrefsForItemSQL,
-          getNumPreferenceForItemSQL,
-          getNumPreferenceForItemsSQL);
+        preferenceTable,
+        userIDColumn,
+        itemIDColumn,
+        preferenceColumn,
+        getUserSQL,
+        getNumItemsSQL,
+        getNumUsersSQL,
+        setPreferenceSQL,
+        removePreferenceSQL,
+        getUsersSQL,
+        getItemsSQL,
+        getItemSQL,
+        getPrefsForItemSQL,
+        getNumPreferenceForItemSQL,
+        getNumPreferenceForItemsSQL);
     this.getUserSQL = getUserSQL;
     this.setPreferenceSQL = setPreferenceSQL;
     this.getUsersSQL = getUsersSQL;
@@ -85,7 +85,8 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
   }
 
   /**
-   * @throws org.apache.mahout.cf.taste.common.NoSuchUserException if there is no such user
+   * @throws org.apache.mahout.cf.taste.common.NoSuchUserException
+   *          if there is no such user
    */
   @Override
   public User getUser(Object id) throws TasteException {
@@ -138,7 +139,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
 
   @Override
   public void setPreference(Object userID, Object itemID, double value)
-          throws TasteException {
+      throws TasteException {
     if (userID == null || itemID == null) {
       throw new IllegalArgumentException("userID or itemID is null");
     }
@@ -225,8 +226,8 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
         connection.setReadOnly(true);
         connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         statement = connection.prepareStatement(getUsersSQL,
-                                                ResultSet.TYPE_FORWARD_ONLY,
-                                                ResultSet.CONCUR_READ_ONLY);
+            ResultSet.TYPE_FORWARD_ONLY,
+            ResultSet.CONCUR_READ_ONLY);
         statement.setFetchDirection(ResultSet.FETCH_FORWARD);
         statement.setFetchSize(getFetchSize());
         log.debug("Executing SQL query: {}", getUsersSQL);

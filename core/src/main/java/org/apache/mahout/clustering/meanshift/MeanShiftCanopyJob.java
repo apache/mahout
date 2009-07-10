@@ -17,13 +17,13 @@
 
 package org.apache.mahout.clustering.meanshift;
 
-import java.io.IOException;
-
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 public class MeanShiftCanopyJob {
 
@@ -49,18 +49,18 @@ public class MeanShiftCanopyJob {
 
   /**
    * Run the job
-   * 
-   * @param input the input pathname String
-   * @param output the output pathname String
+   *
+   * @param input            the input pathname String
+   * @param output           the output pathname String
    * @param measureClassName the DistanceMeasure class name
-   * @param t1 the T1 distance threshold
-   * @param t2 the T2 distance threshold
+   * @param t1               the T1 distance threshold
+   * @param t2               the T2 distance threshold
    * @param convergenceDelta the double convergence criteria
-   * @param maxIterations an int number of iterations
+   * @param maxIterations    an int number of iterations
    */
   public static void runJob(String input, String output,
-      String measureClassName, double t1, double t2, double convergenceDelta,
-      int maxIterations) throws IOException {
+                            String measureClassName, double t1, double t2, double convergenceDelta,
+                            int maxIterations) throws IOException {
     // delete the output directory
     JobConf conf = new JobConf(MeanShiftCanopyDriver.class);
     Path outPath = new Path(output);

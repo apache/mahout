@@ -41,7 +41,7 @@ public class STFitnessEvaluatorTest extends TestCase {
 
     @Override
     protected void evaluate(List<? extends T> population,
-        List<Double> evaluations) {
+                            List<Double> evaluations) {
       nbcalls++;
       evaluations.addAll(this.evaluations);
     }
@@ -55,10 +55,8 @@ public class STFitnessEvaluatorTest extends TestCase {
   }
 
   /**
-   * Test method for
-   * {@link org.apache.mahout.ga.watchmaker.STFitnessEvaluator#evaluate(java.util.List, java.util.List)}.<br>
-   * <br>
-   * Make sure that evaluate() is not called twice for the same population.
+   * Test method for {@link org.apache.mahout.ga.watchmaker.STFitnessEvaluator#evaluate(java.util.List,
+   * java.util.List)}.<br> <br> Make sure that evaluate() is not called twice for the same population.
    */
   public void testEvaluateSamePopulation() {
     STFitnessEvaluatorMock<Integer> mock = new STFitnessEvaluatorMock<Integer>();
@@ -80,11 +78,9 @@ public class STFitnessEvaluatorTest extends TestCase {
   }
 
   /**
-   * Test method for
-   * {@link org.apache.mahout.ga.watchmaker.STFitnessEvaluator#evaluate(java.util.List, java.util.List)}.<br>
-   * <br>
-   * Make sure that evaluate() is called as many different populations are
-   * passed to getFitness().
+   * Test method for {@link org.apache.mahout.ga.watchmaker.STFitnessEvaluator#evaluate(java.util.List,
+   * java.util.List)}.<br> <br> Make sure that evaluate() is called as many different populations are passed to
+   * getFitness().
    */
   public void testEvaluateDifferentPopulations() {
     STFitnessEvaluatorMock<Integer> mock = new STFitnessEvaluatorMock<Integer>();
@@ -112,16 +108,18 @@ public class STFitnessEvaluatorTest extends TestCase {
 
   private static List<Integer> randomInts(int size, Random rng) {
     List<Integer> population = new ArrayList<Integer>();
-    for (int index = 0; index < size; index++)
+    for (int index = 0; index < size; index++) {
       population.add(rng.nextInt());
+    }
 
     return population;
   }
 
   private static List<Double> randomFloats(int size, Random rng) {
     List<Double> population = new ArrayList<Double>();
-    for (int index = 0; index < size; index++)
+    for (int index = 0; index < size; index++) {
       population.add(rng.nextDouble());
+    }
 
     return population;
   }

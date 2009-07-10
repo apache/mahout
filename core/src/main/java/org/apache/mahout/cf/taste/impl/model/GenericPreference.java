@@ -23,9 +23,7 @@ import org.apache.mahout.cf.taste.model.User;
 
 import java.io.Serializable;
 
-/**
- * <p>A simple {@link Preference} encapsulating an {@link Item} and preference value.</p>
- */
+/** <p>A simple {@link Preference} encapsulating an {@link Item} and preference value.</p> */
 public class GenericPreference implements SettableUserPreference, Serializable {
 
   private User user;

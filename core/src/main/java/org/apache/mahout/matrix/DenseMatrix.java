@@ -21,10 +21,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-/**
- * Matrix of doubles implemented using a 2-d array
- * 
- */
+/** Matrix of doubles implemented using a 2-d array */
 public class DenseMatrix extends AbstractMatrix {
 
   private double[][] values;
@@ -43,23 +40,19 @@ public class DenseMatrix extends AbstractMatrix {
 
   /**
    * Construct a matrix from the given values
-   * 
+   *
    * @param values a double[][]
    */
   public DenseMatrix(double[][] values) {
     // clone the rows
     this.values = new double[values.length][];
     // be careful, need to clone the columns too
-    for (int i = 0; i < values.length; i++)
+    for (int i = 0; i < values.length; i++) {
       this.values[i] = values[i].clone();
+    }
   }
 
-  /**
-   * Construct an empty matrix of the given size
-   * 
-   * @param rows
-   * @param columns
-   */
+  /** Construct an empty matrix of the given size */
   public DenseMatrix(int rows, int columns) {
     this.values = new double[rows][columns];
   }
@@ -89,10 +82,11 @@ public class DenseMatrix extends AbstractMatrix {
 
   @Override
   public boolean haveSharedCells(Matrix other) {
-    if (other instanceof DenseMatrix)
+    if (other instanceof DenseMatrix) {
       return other == this;
-    else
+    } else {
       return other.haveSharedCells(this);
+    }
   }
 
   @Override
@@ -117,46 +111,55 @@ public class DenseMatrix extends AbstractMatrix {
 
   @Override
   public Matrix viewPart(int[] offset, int[] size) {
-    if (size[ROW] > rowSize() || size[COL] > columnSize())
+    if (size[ROW] > rowSize() || size[COL] > columnSize()) {
       throw new CardinalityException();
+    }
     if (offset[ROW] < 0 || offset[ROW] + size[ROW] > rowSize()
-        || offset[COL] < 0 || offset[COL] + size[COL] > columnSize())
+        || offset[COL] < 0 || offset[COL] + size[COL] > columnSize()) {
       throw new IndexException();
+    }
     return new MatrixView(this, offset, size);
   }
 
   @Override
   public Matrix assignColumn(int column, Vector other) {
-    if (other.size() != rowSize() || column >= columnSize())
+    if (other.size() != rowSize() || column >= columnSize()) {
       throw new CardinalityException();
-    for (int row = 0; row < rowSize(); row++)
+    }
+    for (int row = 0; row < rowSize(); row++) {
       values[row][column] = other.getQuick(row);
+    }
     return this;
   }
 
   @Override
   public Matrix assignRow(int row, Vector other) {
-    if (row >= rowSize() || other.size() != columnSize())
+    if (row >= rowSize() || other.size() != columnSize()) {
       throw new CardinalityException();
-    for (int col = 0; col < columnSize(); col++)
+    }
+    for (int col = 0; col < columnSize(); col++) {
       values[row][col] = other.getQuick(col);
+    }
     return this;
   }
 
   @Override
   public Vector getColumn(int column) {
-    if (column < 0 || column >= columnSize())
+    if (column < 0 || column >= columnSize()) {
       throw new IndexException();
+    }
     double[] col = new double[rowSize()];
-    for (int row = 0; row < rowSize(); row++)
+    for (int row = 0; row < rowSize(); row++) {
       col[row] = values[row][column];
+    }
     return new DenseVector(col);
   }
 
   @Override
   public Vector getRow(int row) {
-    if (row < 0 || row >= rowSize())
+    if (row < 0 || row >= rowSize()) {
       throw new IndexException();
+    }
     return new DenseVector(values[row]);
   }
 
@@ -166,9 +169,11 @@ public class DenseMatrix extends AbstractMatrix {
     int rows = in.readInt();
     int columns = in.readInt();
     this.values = new double[rows][columns];
-    for (int row = 0; row < rows; row++)
-      for (int column = 0; column < columns; column++)
+    for (int row = 0; row < rows; row++) {
+      for (int column = 0; column < columns; column++) {
         this.values[row][column] = in.readDouble();
+      }
+    }
   }
 
   @Override
@@ -176,9 +181,11 @@ public class DenseMatrix extends AbstractMatrix {
     super.write(out);
     out.writeInt(rowSize());
     out.writeInt(columnSize());
-    for (double[] row : values)
-      for (double value : row)
+    for (double[] row : values) {
+      for (double value : row) {
         out.writeDouble(value);
+      }
+    }
   }
 
 }

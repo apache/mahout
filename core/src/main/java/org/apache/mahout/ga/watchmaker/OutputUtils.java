@@ -30,9 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Utility Class that deals with the output.
- */
+/** Utility Class that deals with the output. */
 public final class OutputUtils {
 
   private OutputUtils() {
@@ -41,11 +39,9 @@ public final class OutputUtils {
 
   /**
    * Removes the output directory if it already exists.
-   * 
+   *
    * @param fs <code>FileSystem</code> to use
    * @return output <code>Path</code>
-   * 
-   * @throws IOException
    */
   public static Path prepareOutput(FileSystem fs) throws IOException {
     Path outpath = new Path(fs.getWorkingDirectory(), "output");
@@ -59,11 +55,10 @@ public final class OutputUtils {
 
   /**
    * Lists all files in the output <code>Path</code>
-   * 
-   * @param fs <code>FileSystem</code> to use
+   *
+   * @param fs      <code>FileSystem</code> to use
    * @param outpath output <code>Path</code>
    * @return <code>Path</code> array
-   * @throws IOException
    */
   public static Path[] listOutputFiles(FileSystem fs, Path outpath)
       throws IOException {
@@ -83,15 +78,12 @@ public final class OutputUtils {
 
   /**
    * Reads back the evaluations.
-   * 
-   * @param fs
-   * @param conf
-   * @param outpath output <code>Path</code>
+   *
+   * @param outpath     output <code>Path</code>
    * @param evaluations List of evaluations
-   * @throws IOException
    */
   public static void importEvaluations(FileSystem fs, JobConf conf,
-      Path outpath, List<Double> evaluations) throws IOException {
+                                       Path outpath, List<Double> evaluations) throws IOException {
     Sorter sorter = new Sorter(fs, LongWritable.class, DoubleWritable.class, conf);
 
     // merge and sort the outputs

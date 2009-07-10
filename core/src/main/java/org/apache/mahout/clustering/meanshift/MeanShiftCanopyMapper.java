@@ -38,7 +38,7 @@ public class MeanShiftCanopyMapper extends MapReduceBase implements
 
   @Override
   public void map(WritableComparable<?> key, MeanShiftCanopy canopy,
-      OutputCollector<Text, MeanShiftCanopy> output, Reporter reporter)
+                  OutputCollector<Text, MeanShiftCanopy> output, Reporter reporter)
       throws IOException {
     this.output = output;
     MeanShiftCanopy.mergeCanopy(canopy.shallowCopy(), canopies);

@@ -18,8 +18,8 @@
 package org.apache.mahout.cf.taste.model;
 
 /**
- * An alternate representation of an array of {@link Preference}. Implementations, in theory,
- * can produce a more memory-efficient representation. This is not used yet.
+ * An alternate representation of an array of {@link Preference}. Implementations, in theory, can produce a more
+ * memory-efficient representation. This is not used yet.
  */
 public interface PreferenceArray {
 

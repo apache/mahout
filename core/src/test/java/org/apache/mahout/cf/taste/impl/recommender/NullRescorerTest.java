@@ -17,9 +17,9 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
-import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
@@ -27,9 +27,7 @@ import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 import java.util.Collections;
 
-/**
- * <p>Tests {@link NullRescorer}.</p>
- */
+/** <p>Tests {@link NullRescorer}.</p> */
 public final class NullRescorerTest extends TasteTestCase {
 
   public void testItemRescorer() throws Exception {

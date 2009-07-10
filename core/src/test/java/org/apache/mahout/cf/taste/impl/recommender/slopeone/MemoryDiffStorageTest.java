@@ -23,9 +23,7 @@ import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.model.DataModel;
 
-/**
- * Tests {@link MemoryDiffStorage}.
- */
+/** Tests {@link MemoryDiffStorage}. */
 public class MemoryDiffStorageTest extends TasteTestCase {
 
   public void testGetDiff() throws Exception {

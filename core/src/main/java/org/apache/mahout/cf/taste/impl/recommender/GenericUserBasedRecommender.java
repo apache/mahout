@@ -19,10 +19,9 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.similarity.UserSimilarity;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -32,6 +31,7 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 import org.apache.mahout.cf.taste.recommender.UserBasedRecommender;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +41,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * <p>A simple {@link Recommender} which uses a given {@link DataModel} and {@link UserNeighborhood}
- * to produce recommendations.</p>
+ * <p>A simple {@link Recommender} which uses a given {@link DataModel} and {@link UserNeighborhood} to produce
+ * recommendations.</p>
  */
 public final class GenericUserBasedRecommender extends AbstractRecommender implements UserBasedRecommender {
 
@@ -69,7 +69,7 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
 
   @Override
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
-          throws TasteException {
+      throws TasteException {
     if (userID == null) {
       throw new IllegalArgumentException("userID is null");
     }
@@ -132,7 +132,7 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
   }
 
   private double doEstimatePreference(User theUser, Collection<User> theNeighborhood, Item item)
-          throws TasteException {
+      throws TasteException {
     if (theNeighborhood.isEmpty()) {
       return Double.NaN;
     }

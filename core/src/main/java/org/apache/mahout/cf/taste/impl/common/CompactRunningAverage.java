@@ -20,8 +20,8 @@ package org.apache.mahout.cf.taste.impl.common;
 import java.io.Serializable;
 
 /**
- * <p>Like {@link org.apache.mahout.cf.taste.impl.common.FullRunningAverage} but uses smaller values (short, float)
- * to conserve memory. This is used in {@link org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender}
+ * <p>Like {@link org.apache.mahout.cf.taste.impl.common.FullRunningAverage} but uses smaller values (short, float) to
+ * conserve memory. This is used in {@link org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender}
  * since it may allocate tens of millions of such objects.</p>
  */
 public class CompactRunningAverage implements RunningAverage, Serializable {
@@ -41,7 +41,7 @@ public class CompactRunningAverage implements RunningAverage, Serializable {
         average = (float) datum;
       } else {
         average = (float)
-                ((double) average * ((double) ((int) count - 1) / (double) count) + datum / (double) count);
+            ((double) average * ((double) ((int) count - 1) / (double) count) + datum / (double) count);
       }
     }
   }
@@ -55,7 +55,7 @@ public class CompactRunningAverage implements RunningAverage, Serializable {
       average = Float.NaN;
     } else {
       average = (float)
-              ((double) average * ((double) ((int) count + 1) / (double) count) - datum / (double) count);
+          ((double) average * ((double) ((int) count + 1) / (double) count) - datum / (double) count);
     }
   }
 

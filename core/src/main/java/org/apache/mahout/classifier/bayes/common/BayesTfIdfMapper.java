@@ -36,40 +36,35 @@ import java.util.Map;
 public class BayesTfIdfMapper extends MapReduceBase implements
     Mapper<Text, DoubleWritable, Text, DoubleWritable> {
 
-  private static final Logger log = LoggerFactory.getLogger(BayesTfIdfMapper.class);  
+  private static final Logger log = LoggerFactory.getLogger(BayesTfIdfMapper.class);
 
-  private Map<String,Double> labelDocumentCounts = null;
+  private Map<String, Double> labelDocumentCounts = null;
 
   /**
    * We need to calculate the Tf-Idf of each feature in each label
-   * 
-   * @param key The label,feature pair (can either be the freq Count or the term
-   *        Document count
-   * @param value
-   * @param output
-   * @param reporter
-   * @throws IOException
+   *
+   * @param key The label,feature pair (can either be the freq Count or the term Document count
    */
   @Override
   public void map(Text key, DoubleWritable value,
-      OutputCollector<Text, DoubleWritable> output, Reporter reporter)
+                  OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {
- 
+
     String labelFeaturePair = key.toString();
 
     char firstChar = labelFeaturePair.charAt(0);
     if (firstChar == '-') { // if it is the termDocumentCount
       labelFeaturePair = labelFeaturePair.substring(1);
       String label = labelFeaturePair.split(",")[0];
-      
-      if(labelDocumentCounts.containsKey(label) == false){
-        
+
+      if (labelDocumentCounts.containsKey(label) == false) {
+
         throw new IOException(label);
       }
-      
+
       double labelDocumentCount = labelDocumentCounts.get(label);
       double logIdf = Math.log(labelDocumentCount / value.get());
-      
+
       output.collect(new Text(labelFeaturePair), new DoubleWritable(logIdf));
     } else if (firstChar == ',') {
       output.collect(new Text("*vocabCount"), new DoubleWritable(1.0));
@@ -77,22 +72,22 @@ public class BayesTfIdfMapper extends MapReduceBase implements
       output.collect(key, value);
     }
   }
-  
+
   @Override
   public void configure(JobConf job) {
     try {
-      if (labelDocumentCounts == null){
-        labelDocumentCounts = new HashMap<String,Double>();
+      if (labelDocumentCounts == null) {
+        labelDocumentCounts = new HashMap<String, Double>();
 
-        DefaultStringifier<Map<String,Double>> mapStringifier =
-            new DefaultStringifier<Map<String,Double>>(job,GenericsUtil.getClass(labelDocumentCounts));
+        DefaultStringifier<Map<String, Double>> mapStringifier =
+            new DefaultStringifier<Map<String, Double>>(job, GenericsUtil.getClass(labelDocumentCounts));
 
         String labelDocumentCountString = mapStringifier.toString(labelDocumentCounts);
         labelDocumentCountString = job.get("cnaivebayes.labelDocumentCounts", labelDocumentCountString);
-        
+
         labelDocumentCounts = mapStringifier.fromString(labelDocumentCountString);
       }
-    } catch(IOException ex){
+    } catch (IOException ex) {
       log.warn(ex.toString(), ex);
     }
   }

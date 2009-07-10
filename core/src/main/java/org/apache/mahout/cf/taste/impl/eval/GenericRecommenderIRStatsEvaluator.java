@@ -17,21 +17,21 @@
 
 package org.apache.mahout.cf.taste.impl.eval;
 
-import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
+import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.eval.IRStatistics;
 import org.apache.mahout.cf.taste.eval.RecommenderBuilder;
 import org.apache.mahout.cf.taste.eval.RecommenderIRStatsEvaluator;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
+import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
-import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
+import org.apache.mahout.cf.taste.impl.model.BooleanPrefUser;
+import org.apache.mahout.cf.taste.impl.model.ByValuePreferenceComparator;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
-import org.apache.mahout.cf.taste.impl.model.ByValuePreferenceComparator;
-import org.apache.mahout.cf.taste.impl.model.BooleanPrefUser;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -43,27 +43,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.Collections;
-import java.util.Arrays;
 
 /**
- * <p>For each {@link User}, these implementation determine the top <code>n</code> preferences,
- * then evaluate the IR statistics based on a {@link DataModel} that does not have these values.
- * This number <code>n</code> is the "at" value, as in "precision at 5". For example, this would mean precision
- * evaluated by removing the top 5 preferences for a {@link User} and then finding the percentage of those 5
- * {@link Item}s included in the top 5 recommendations for that user.</p>
+ * <p>For each {@link User}, these implementation determine the top <code>n</code> preferences, then evaluate the IR
+ * statistics based on a {@link DataModel} that does not have these values. This number <code>n</code> is the "at"
+ * value, as in "precision at 5". For example, this would mean precision evaluated by removing the top 5 preferences for
+ * a {@link User} and then finding the percentage of those 5 {@link Item}s included in the top 5 recommendations for
+ * that user.</p>
  */
 public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRStatsEvaluator {
 
   private static final Logger log = LoggerFactory.getLogger(GenericRecommenderIRStatsEvaluator.class);
 
   /**
-   * Pass as "relevanceThreshold" argument to
-   * {@link #evaluate(RecommenderBuilder, DataModel, Rescorer, int, double, double)} to have it attempt
-   * to compute a reasonable threshold. Note that this will impact performance.
+   * Pass as "relevanceThreshold" argument to {@link #evaluate(RecommenderBuilder, DataModel, Rescorer, int, double,
+   * double)} to have it attempt to compute a reasonable threshold. Note that this will impact performance.
    */
   public static final double CHOOSE_THRESHOLD = Double.NaN;
 
@@ -150,12 +149,12 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
           recall.addDatum((double) intersectionSize / (double) numRelevantItems);
           if (numRelevantItems < prefs.length) {
             fallOut.addDatum((double) (numRecommendedItems - intersectionSize) /
-                             (double) (numItems - numRelevantItems));
+                (double) (numItems - numRelevantItems));
           }
 
           long end = System.currentTimeMillis();
           log.info("Evaluated with user " + user + " in " + (end - start) + "ms");
-          log.info("Precision/recall/fall-out: {} / {} / {}", new Object[] {
+          log.info("Precision/recall/fall-out: {} / {} / {}", new Object[]{
               precision.getAverage(), recall.getAverage(), fallOut.getAverage()
           });
         }

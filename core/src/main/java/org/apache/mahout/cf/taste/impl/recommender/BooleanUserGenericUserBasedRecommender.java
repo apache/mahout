@@ -19,10 +19,9 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.similarity.UserSimilarity;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.model.BooleanPrefUser;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -33,20 +32,21 @@ import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 import org.apache.mahout.cf.taste.recommender.UserBasedRecommender;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.Queue;
 import java.util.PriorityQueue;
-import java.util.ArrayList;
+import java.util.Queue;
+import java.util.Set;
 
 /**
- * A variant on {@link GenericUserBasedRecommender} which is appropriate
- * for use with "boolean" classes like {@link org.apache.mahout.cf.taste.impl.model.BooleanPrefUser}.
+ * A variant on {@link GenericUserBasedRecommender} which is appropriate for use with "boolean" classes like {@link
+ * org.apache.mahout.cf.taste.impl.model.BooleanPrefUser}.
  */
 public final class BooleanUserGenericUserBasedRecommender extends AbstractRecommender implements UserBasedRecommender {
 
@@ -57,8 +57,8 @@ public final class BooleanUserGenericUserBasedRecommender extends AbstractRecomm
   private final RefreshHelper refreshHelper;
 
   public BooleanUserGenericUserBasedRecommender(DataModel dataModel,
-                                     UserNeighborhood neighborhood,
-                                     UserSimilarity similarity) {
+                                                UserNeighborhood neighborhood,
+                                                UserSimilarity similarity) {
     super(dataModel);
     if (neighborhood == null) {
       throw new IllegalArgumentException("neighborhood is null");
@@ -73,7 +73,7 @@ public final class BooleanUserGenericUserBasedRecommender extends AbstractRecomm
 
   @Override
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
-          throws TasteException {
+      throws TasteException {
     if (userID == null) {
       throw new IllegalArgumentException("userID is null");
     }
@@ -113,18 +113,18 @@ public final class BooleanUserGenericUserBasedRecommender extends AbstractRecomm
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
     for (Object itemID : allItems) {
-        double preference = estimator.estimate(itemID);
-        double rescoredPref = rescorer == null ? preference : rescorer.rescore(new GenericItem<String>(itemID.toString()), preference);
-        if (!Double.isNaN(rescoredPref) && (!full || rescoredPref > lowestTopValue)) {
-          topItems.add(new GenericRecommendedItem(new GenericItem<String>(itemID.toString()), rescoredPref));
-          if (full) {
-            topItems.poll();
-          } else if (topItems.size() > howMany) {
-            full = true;
-            topItems.poll();
-          }
-          lowestTopValue = topItems.peek().getValue();
+      double preference = estimator.estimate(itemID);
+      double rescoredPref = rescorer == null ? preference : rescorer.rescore(new GenericItem<String>(itemID.toString()), preference);
+      if (!Double.isNaN(rescoredPref) && (!full || rescoredPref > lowestTopValue)) {
+        topItems.add(new GenericRecommendedItem(new GenericItem<String>(itemID.toString()), rescoredPref));
+        if (full) {
+          topItems.poll();
+        } else if (topItems.size() > howMany) {
+          full = true;
+          topItems.poll();
         }
+        lowestTopValue = topItems.peek().getValue();
+      }
     }
     List<RecommendedItem> result = new ArrayList<RecommendedItem>(topItems.size());
     result.addAll(topItems);
@@ -172,14 +172,13 @@ public final class BooleanUserGenericUserBasedRecommender extends AbstractRecomm
   }
 
   /**
-   * This computation is in a technical sense, wrong, since in the domain of "boolean preference users"
-   * where all preference values are 1, this method should only ever return 1.0 or NaN. This isn't
-   * terribly useful however since it means results can't be ranked by preference value (all are 1).
-   * So instead this returns a sum of similarities to any other user in the neighborhood who has also
-   * rated the item.
+   * This computation is in a technical sense, wrong, since in the domain of "boolean preference users" where all
+   * preference values are 1, this method should only ever return 1.0 or NaN. This isn't terribly useful however since
+   * it means results can't be ranked by preference value (all are 1). So instead this returns a sum of similarities to
+   * any other user in the neighborhood who has also rated the item.
    */
   private double doEstimatePreference(User theUser, Collection<User> theNeighborhood, Object itemID)
-          throws TasteException {
+      throws TasteException {
     if (theNeighborhood.isEmpty()) {
       return Double.NaN;
     }

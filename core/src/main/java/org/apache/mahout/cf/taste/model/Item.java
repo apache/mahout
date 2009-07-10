@@ -18,21 +18,17 @@
 package org.apache.mahout.cf.taste.model;
 
 /**
- * <p>Implementations of this interface represent items that {@link User}s have
- * preferences for, and which can be recommended to them. {@link Item}s must have
- * a unique ID of some kind, and must be {@link Comparable}.</p>
+ * <p>Implementations of this interface represent items that {@link User}s have preferences for, and which can be
+ * recommended to them. {@link Item}s must have a unique ID of some kind, and must be {@link Comparable}.</p>
  */
 public interface Item extends Comparable<Item> {
 
-  /**
-   * @return unique ID for this item
-   */
+  /** @return unique ID for this item */
   Object getID();
 
   /**
-   * @return true if and only if this {@link Item} can be recommended to a user;
-   *         for example, this could be false for an {@link Item} that is no longer
-   *         available but which remains valuable for recommendation
+   * @return true if and only if this {@link Item} can be recommended to a user; for example, this could be false for an
+   *         {@link Item} that is no longer available but which remains valuable for recommendation
    */
   boolean isRecommendable();
 

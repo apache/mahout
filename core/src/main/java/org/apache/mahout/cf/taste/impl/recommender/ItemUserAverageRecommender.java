@@ -17,9 +17,9 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
@@ -42,11 +42,10 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * <p>Like {@link ItemAverageRecommender}, except that estimated preferences are adjusted for the
- * {@link User}s' average preference value. For example, say user X has not rated item Y. Item Y's
- * average preference value is 3.5. User X's average preference value is 4.2, and the average over all
- * preference values is 4.0. User X prefers items 0.2 higher on average, so, the estimated preference
- * for user X, item Y is 3.5 + 0.2 = 3.7.</p>
+ * <p>Like {@link ItemAverageRecommender}, except that estimated preferences are adjusted for the {@link User}s' average
+ * preference value. For example, say user X has not rated item Y. Item Y's average preference value is 3.5. User X's
+ * average preference value is 4.2, and the average over all preference values is 4.0. User X prefers items 0.2 higher
+ * on average, so, the estimated preference for user X, item Y is 3.5 + 0.2 = 3.7.</p>
  */
 public final class ItemUserAverageRecommender extends AbstractRecommender {
 
@@ -77,7 +76,7 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
 
   @Override
   public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
-          throws TasteException {
+      throws TasteException {
     if (userID == null) {
       throw new IllegalArgumentException("userID is null");
     }

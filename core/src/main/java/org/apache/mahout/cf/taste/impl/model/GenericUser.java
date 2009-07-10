@@ -19,9 +19,9 @@ package org.apache.mahout.cf.taste.impl.model;
 
 import org.apache.mahout.cf.taste.impl.common.ArrayIterator;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
+import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.model.Item;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -30,10 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-/**
- * <p>A simple {@link User} which has simply an ID and some {@link Collection} of
- * {@link Preference}s.</p>
- */
+/** <p>A simple {@link User} which has simply an ID and some {@link Collection} of {@link Preference}s.</p> */
 public class GenericUser<K extends Comparable<K>> implements User, Serializable {
 
   private static final Preference[] NO_PREFS = new Preference[0];

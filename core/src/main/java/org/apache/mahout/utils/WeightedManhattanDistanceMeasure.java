@@ -22,8 +22,8 @@ import org.apache.mahout.matrix.Vector;
 import java.util.Iterator;
 
 /**
- * This class implements a "manhattan distance" metric by summing the absolute
- * values of the difference between each coordinate, optionally with weights.
+ * This class implements a "manhattan distance" metric by summing the absolute values of the difference between each
+ * coordinate, optionally with weights.
  */
 public class WeightedManhattanDistanceMeasure extends WeightedDistanceMeasure {
 
@@ -39,8 +39,7 @@ public class WeightedManhattanDistanceMeasure extends WeightedDistanceMeasure {
         result += Math.abs(elt.get());
       }
 
-    }
-    else {
+    } else {
       Iterator<Vector.Element> iter = res.iterateNonZero();
       while (iter.hasNext()) {
         Vector.Element elt = iter.next();
@@ -52,8 +51,8 @@ public class WeightedManhattanDistanceMeasure extends WeightedDistanceMeasure {
   }
 
   @Override
-  public double distance(double centroidLengthSquare, Vector centroid, Vector v) {	 
-   return distance(centroid, v); // TODO
+  public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
+    return distance(centroid, v); // TODO
   }
 
 }

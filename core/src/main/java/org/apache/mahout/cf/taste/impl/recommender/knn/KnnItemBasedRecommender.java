@@ -18,26 +18,25 @@
 package org.apache.mahout.cf.taste.impl.recommender.knn;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
+import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
-import org.apache.mahout.cf.taste.impl.common.Pair;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
-import org.apache.mahout.cf.taste.recommender.Rescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
+import org.apache.mahout.cf.taste.recommender.Rescorer;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collection;
+import java.util.List;
 
 /**
- * <p>The weights to compute the final predicted preferences are calculated
- * using linear interpolation, through an {@link Optimizer}. This algorithm is based in
- * the paper of Robert M. Bell and Yehuda Koren in ICDM '07.</p>
+ * <p>The weights to compute the final predicted preferences are calculated using linear interpolation, through an
+ * {@link Optimizer}. This algorithm is based in the paper of Robert M. Bell and Yehuda Koren in ICDM '07.</p>
  */
 public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
 
@@ -117,14 +116,14 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
   protected double doEstimatePreference(User theUser, Item item) throws TasteException {
 
     Collection<Item> allItems = new FastSet<Item>();
-    for(Preference pref: theUser.getPreferencesAsArray()){
+    for (Preference pref : theUser.getPreferencesAsArray()) {
       allItems.add(pref.getItem());
     }
     allItems.remove(item);
 
     List<RecommendedItem> mostSimilar = mostSimilarItems(item.getID(), allItems, neighborhoodSize, null);
     List<Item> theNeighborhood = new ArrayList<Item>(mostSimilar.size());
-    for (RecommendedItem rec: mostSimilar) {
+    for (RecommendedItem rec : mostSimilar) {
       theNeighborhood.add(rec.getItem());
     }
 

@@ -21,9 +21,7 @@ import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 
 import java.util.Random;
 
-/**
- * Calculates the SVD using an Expectation Maximization algorithm.
- */
+/** Calculates the SVD using an Expectation Maximization algorithm. */
 public final class ExpectationMaximizationSVD {
 
   private static final Random random = RandomUtils.getRandom();
@@ -98,6 +96,6 @@ public final class ExpectationMaximizationSVD {
 
   int getK() {
     return k;
-	}
+  }
 
 }
