@@ -280,8 +280,6 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
     try {
       conn = dataSource.getConnection();
-      conn.setReadOnly(true);
-      conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
       stmt = conn.prepareStatement(getUserSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
@@ -336,8 +334,6 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
     try {
       conn = dataSource.getConnection();
-      conn.setReadOnly(true);
-      conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
       stmt = conn.prepareStatement(getItemSQL);
       stmt.setObject(1, id);
 
@@ -375,8 +371,6 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     ResultSet rs = null;
     try {
       conn = dataSource.getConnection();
-      conn.setReadOnly(true);
-      conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
       stmt = conn.prepareStatement(getPrefsForItemSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
@@ -438,8 +432,6 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     ResultSet rs = null;
     try {
       conn = dataSource.getConnection();
-      conn.setReadOnly(true);
-      conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
       stmt = conn.prepareStatement(sql);
       if (args != null) {
         for (int i = 1; i <= args.length; i++) {
@@ -477,7 +469,6 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
     try {
       conn = dataSource.getConnection();
-      conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
       stmt = conn.prepareStatement(setPreferenceSQL);
       stmt.setObject(1, userID);
       stmt.setObject(2, itemID);
@@ -509,7 +500,6 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
     try {
       conn = dataSource.getConnection();
-      conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
       stmt = conn.prepareStatement(removePreferenceSQL);
       stmt.setObject(1, userID);
       stmt.setObject(2, itemID);
@@ -591,8 +581,6 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     private ResultSetUserIterator(DataSource dataSource, String getUsersSQL) throws TasteException {
       try {
         connection = dataSource.getConnection();
-        connection.setReadOnly(true);
-        connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         statement = connection.prepareStatement(getUsersSQL,
             ResultSet.TYPE_FORWARD_ONLY,
             ResultSet.CONCUR_READ_ONLY);
@@ -713,8 +701,6 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
     private ResultSetItemIterator(DataSource dataSource, String getItemsSQL) throws TasteException {
       try {
         connection = dataSource.getConnection();
-        connection.setReadOnly(true);
-        connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         statement = connection.prepareStatement(getItemsSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         statement.setFetchDirection(ResultSet.FETCH_FORWARD);
         statement.setFetchSize(getFetchSize());

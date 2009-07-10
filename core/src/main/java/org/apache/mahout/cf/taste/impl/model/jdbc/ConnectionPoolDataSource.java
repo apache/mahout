@@ -27,6 +27,7 @@ import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.ResultSet;
 
 /** <p>A wrapper {@link DataSource} which pools connections.</p> */
 public final class ConnectionPoolDataSource implements DataSource {
@@ -40,7 +41,10 @@ public final class ConnectionPoolDataSource implements DataSource {
     ConnectionFactory connectionFactory = new ConnectionFactory() {
       @Override
       public Connection createConnection() throws SQLException {
-        return underlyingDataSource.getConnection();
+        Connection connection = underlyingDataSource.getConnection();
+        connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        connection.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
+        return connection;
       }
     };
     ObjectPool objectPool = new StackObjectPool();

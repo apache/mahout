@@ -156,7 +156,6 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
 
     try {
       conn = getDataSource().getConnection();
-      conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
       stmt = conn.prepareStatement(setPreferenceSQL);
       stmt.setObject(1, userID);
       stmt.setObject(2, itemID);
@@ -181,8 +180,6 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
     ResultSet rs = null;
     try {
       conn = getDataSource().getConnection();
-      conn.setReadOnly(true);
-      conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
       stmt = conn.prepareStatement(getPrefsForItemSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
@@ -223,8 +220,6 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
     private ResultSetUserIterator(DataSource dataSource, String getUsersSQL) throws TasteException {
       try {
         connection = dataSource.getConnection();
-        connection.setReadOnly(true);
-        connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         statement = connection.prepareStatement(getUsersSQL,
             ResultSet.TYPE_FORWARD_ONLY,
             ResultSet.CONCUR_READ_ONLY);
