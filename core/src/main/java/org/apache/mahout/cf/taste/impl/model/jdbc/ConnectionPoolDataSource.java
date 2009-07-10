@@ -17,32 +17,35 @@
 
 package org.apache.mahout.cf.taste.impl.model.jdbc;
 
+import org.apache.commons.dbcp.ConnectionFactory;
+import org.apache.commons.dbcp.PoolableConnectionFactory;
 import org.apache.commons.dbcp.PoolingDataSource;
 import org.apache.commons.pool.ObjectPool;
-import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.StackObjectPool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-/** <p>A wrapper {@link DataSource} which pools connections. Why can't Jakarta Commons DBCP provide this directly?</p> */
+/** <p>A wrapper {@link DataSource} which pools connections.</p> */
 public final class ConnectionPoolDataSource implements DataSource {
-
-  private static final Logger log = LoggerFactory.getLogger(ConnectionPoolDataSource.class);
 
   private final DataSource delegate;
 
-  public ConnectionPoolDataSource(DataSource underlyingDataSource) {
+  public ConnectionPoolDataSource(final DataSource underlyingDataSource) {
     if (underlyingDataSource == null) {
       throw new IllegalArgumentException("underlyingDataSource is null");
     }
-    PoolableObjectFactory poolFactory = new DataSourceConnectionFactory(underlyingDataSource);
-    ObjectPool connectionPool = new StackObjectPool(poolFactory);
-    this.delegate = new PoolingDataSource(connectionPool);
+    ConnectionFactory connectionFactory = new ConnectionFactory() {
+      @Override
+      public Connection createConnection() throws SQLException {
+        return underlyingDataSource.getConnection();
+      }
+    };
+    ObjectPool objectPool = new StackObjectPool();
+    objectPool.setFactory(new PoolableConnectionFactory(connectionFactory, objectPool, null, null, false, false));
+    delegate = new PoolingDataSource(objectPool);
   }
 
   @Override
@@ -75,56 +78,14 @@ public final class ConnectionPoolDataSource implements DataSource {
     return delegate.getLoginTimeout();
   }
 
-  // These two methods are new in JDK 6, so they are added to allow it to compile in JDK 6. Really, they
-  // should also delegate to the 'delegate' object. But that would then *only* compile in JDK 6. So for
-  // now they are dummy implementations which do little.
-
-  /** @throws SQLException always */
   @Override
   public <T> T unwrap(Class<T> iface) throws SQLException {
-    throw new SQLException("Unsupported operation");
+    return delegate.unwrap(iface);
   }
 
-  /** @return false always */
   @Override
-  public boolean isWrapperFor(Class<?> iface) {
-    return false;
-  }
-
-  private static class DataSourceConnectionFactory implements PoolableObjectFactory {
-
-    private final DataSource dataSource;
-
-    private DataSourceConnectionFactory(DataSource dataSource) {
-      this.dataSource = dataSource;
-    }
-
-    @Override
-    public Object makeObject() throws SQLException {
-      log.debug("Obtaining pooled connection");
-      return dataSource.getConnection();
-    }
-
-    @Override
-    public void destroyObject(Object o) throws SQLException {
-      log.debug("Closing pooled connection");
-      ((Connection) o).close();
-    }
-
-    @Override
-    public boolean validateObject(Object o) {
-      return true;
-    }
-
-    @Override
-    public void activateObject(Object o) {
-      // do nothing
-    }
-
-    @Override
-    public void passivateObject(Object o) {
-      // do nothing
-    }
+  public boolean isWrapperFor(Class<?> iface) throws SQLException {
+    return delegate.isWrapperFor(iface);
   }
 
 }
