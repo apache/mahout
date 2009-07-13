@@ -112,6 +112,18 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
 
   @Override
   public double itemSimilarity(Item item1, Item item2) throws TasteException {
+
+    int compare = item1.compareTo(item2);
+    if (compare == 0) {
+      return 1.0;
+    }
+    // Order as smaller - larger
+    if (compare > 0) {
+      Item temp = item1;
+      item1 = item2;
+      item2 = temp;
+    }
+
     Connection conn = null;
     PreparedStatement stmt = null;
     ResultSet rs = null;

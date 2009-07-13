@@ -21,8 +21,6 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * <p>An {@link ItemSimilarity} backed by a MySQL database and accessed via JDBC.
@@ -48,6 +46,8 @@ import java.sql.SQLException;
  * )
  * </pre>
  *
+ * <p>Note that for each row, item_id_a should be "less than" item_id_b. It is redundant to store it
+ * both ways, so the pair is always stored as a pair with the lesser one first.
  *
  * @see org.apache.mahout.cf.taste.impl.recommender.slopeone.jdbc.MySQLJDBCDiffStorage
  * @see org.apache.mahout.cf.taste.impl.model.jdbc.MySQLJDBCDataModel
