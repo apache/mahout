@@ -668,9 +668,9 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
       if (n >= 1 && hasNext()) {
         try {
           int distinctUserNamesSeen = 0;
-          String currentUserID = null;
+          Object currentUserID = null;
           do {
-            String userID = resultSet.getString(3);
+            Object userID = resultSet.getObject(3);
             if (!userID.equals(currentUserID)) {
               distinctUserNamesSeen++;
             }

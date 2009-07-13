@@ -305,9 +305,9 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
       if (n >= 1 && hasNext()) {
         try {
           int distinctUserNamesSeen = 0;
-          String currentUserID = null;
+          Object currentUserID = null;
           do {
-            String userID = resultSet.getString(2);
+            Object userID = resultSet.getObject(2);
             if (!userID.equals(currentUserID)) {
               distinctUserNamesSeen++;
             }
