@@ -64,8 +64,24 @@ import java.sql.SQLException;
  * <p>Here are some key settings that can be tuned for MySQL, and suggested size for a data set of around 1 million
  * elements:</p>
  *
- * <ul> <li>innodb_buffer_pool_size=64M</li> <li>myisam_sort_buffer_size=64M</li> <li>query_cache_limit=64M</li>
- * <li>query_cache_min_res_unit=512K</li> <li>query_cache_type=1</li> <li>query_cache_size=64M</li> </ul>
+ * <ul>
+ * <li>innodb_buffer_pool_size=64M</li>
+ * <li>myisam_sort_buffer_size=64M</li>
+ * <li>query_cache_limit=64M</li>
+ * <li>query_cache_min_res_unit=512K</li>
+ * <li>query_cache_type=1</li>
+ * <li>query_cache_size=64M</li>
+ * </ul>
+ *
+ * <p>Also consider setting some parameters on the MySQL Connector/J driver:</p>
+ *
+ * <pre>
+ * cachePreparedStatements = true
+ * cachePrepStmts = true
+ * cacheResultSetMetadata = true
+ * alwaysSendSetIsolation = false
+ * elideSetAutoCommits = true
+ * </pre>
  *
  * <p>Thanks to Amila Jayasooriya for contributing MySQL notes above as part of Google Summer of Code 2007.</p>
  */

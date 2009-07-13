@@ -102,8 +102,6 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
 
     try {
       conn = getDataSource().getConnection();
-      conn.setReadOnly(true);
-      conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
       stmt = conn.prepareStatement(getUserSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
