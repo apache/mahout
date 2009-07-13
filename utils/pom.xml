@@ -87,11 +87,11 @@
       <version>${project.version}</version>
     </dependency>
 
-    <dependency>
+    <!--<dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-solrj</artifactId>
       <version>1.4-SNAPSHOT</version>
-    </dependency>
+    </dependency>-->
     <!-- core test -->
     <!--<dependency>
       <groupId>org.apache.mahout</groupId>
