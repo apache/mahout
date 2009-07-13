@@ -23,6 +23,7 @@ import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
+import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.JDBCDataModel;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -46,12 +47,10 @@ import java.util.concurrent.Callable;
  * org.apache.mahout.cf.taste.model.DataModel} used; it needs a {@link JDBCDataModel} attached to the same database
  * since its efficent operation depends on accessing preference data in the database directly.</p>
  */
-public abstract class AbstractJDBCDiffStorage implements DiffStorage {
+public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent implements DiffStorage {
 
   private static final Logger log = LoggerFactory.getLogger(AbstractJDBCDiffStorage.class);
 
-  static final int DEFAULT_FETCH_SIZE = 1000; // A max, "big" number of rows to buffer at once
-  
   public static final String DEFAULT_DIFF_TABLE = "taste_slopeone_diffs";
   public static final String DEFAULT_ITEM_A_COLUMN = "item_id_a";
   public static final String DEFAULT_ITEM_B_COLUMN = "item_id_b";
@@ -83,9 +82,18 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
                                     String createDiffsSQL,
                                     String diffsExistSQL,
                                     int minDiffCount) throws TasteException {
-    if (dataModel == null) {
-      throw new IllegalArgumentException("dataModel is null");
-    }
+
+    checkNotNullAndLog("dataModel", dataModel);
+    checkNotNullAndLog("getDiffSQL", getDiffSQL);
+    checkNotNullAndLog("getDiffsSQL", getDiffsSQL);
+    checkNotNullAndLog("getAverageItemPrefSQL", getAverageItemPrefSQL);
+    checkNotNullAndLog("updateDiffSQLs", updateDiffSQLs);
+    checkNotNullAndLog("removeDiffSQLs", removeDiffSQLs);
+    checkNotNullAndLog("getRecommendableItemsSQL", getRecommendableItemsSQL);
+    checkNotNullAndLog("deleteDiffsSQL", deleteDiffsSQL);
+    checkNotNullAndLog("createDiffsSQL", createDiffsSQL);
+    checkNotNullAndLog("diffsExistSQL", diffsExistSQL);
+
     if (minDiffCount < 0) {
       throw new IllegalArgumentException("minDiffCount is not positive");
     }
@@ -115,10 +123,6 @@ public abstract class AbstractJDBCDiffStorage implements DiffStorage {
       log.info("No diffs exist in database; recomputing...");
       buildAverageDiffs();
     }
-  }
-
-  protected int getFetchSize() {
-    return DEFAULT_FETCH_SIZE;
   }
 
   @Override

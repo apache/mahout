@@ -25,6 +25,7 @@ import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.common.IteratorIterable;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
+import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
 import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
@@ -70,17 +71,14 @@ import java.util.NoSuchElementException;
  * code, you will run into subtle problems because the {@link Long} values won't be equal to or compare correctly to the
  * underlying {@link String} key values.</p>
  */
-public abstract class AbstractJDBCDataModel implements JDBCDataModel {
+public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implements JDBCDataModel {
 
   static final Logger log = LoggerFactory.getLogger(AbstractJDBCDataModel.class);
 
-  public static final String DEFAULT_DATASOURCE_NAME = "jdbc/taste";
   public static final String DEFAULT_PREFERENCE_TABLE = "taste_preferences";
   public static final String DEFAULT_USER_ID_COLUMN = "user_id";
   public static final String DEFAULT_ITEM_ID_COLUMN = "item_id";
   public static final String DEFAULT_PREFERENCE_COLUMN = "preference";
-
-  static final int DEFAULT_FETCH_SIZE = 1000; // A max, "big" number of rows to buffer at once
 
   private final DataSource dataSource;
   private final String preferenceTable;
@@ -198,39 +196,6 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
   }
 
-  private static void checkNotNullAndLog(String argName, Object value) {
-    if (value == null || value.toString().length() == 0) {
-      throw new IllegalArgumentException(argName + " is null or empty");
-    }
-    log.debug("{}: {}", argName, value);
-  }
-
-  /**
-   * <p>Looks up a {@link DataSource} by name from JNDI. "java:comp/env/" is prepended to the argument before looking up
-   * the name in JNDI.</p>
-   *
-   * @param dataSourceName JNDI name where a {@link DataSource} is bound (e.g. "jdbc/taste")
-   * @return {@link DataSource} under that JNDI name
-   * @throws TasteException if a JNDI error occurs
-   */
-  public static DataSource lookupDataSource(String dataSourceName) throws TasteException {
-    Context context = null;
-    try {
-      context = new InitialContext();
-      return (DataSource) context.lookup("java:comp/env/" + dataSourceName);
-    } catch (NamingException ne) {
-      throw new TasteException(ne);
-    } finally {
-      if (context != null) {
-        try {
-          context.close();
-        } catch (NamingException ne) {
-          log.warn("Error while closing Context; continuing...", ne);
-        }
-      }
-    }
-  }
-
   /** @return the {@link DataSource} that this instance is using */
   @Override
   public DataSource getDataSource() {
@@ -251,14 +216,6 @@ public abstract class AbstractJDBCDataModel implements JDBCDataModel {
 
   public String getPreferenceColumn() {
     return preferenceColumn;
-  }
-
-  protected int getFetchSize() {
-    return DEFAULT_FETCH_SIZE;
-  }
-
-  protected void advanceResultSet(ResultSet resultSet, int n) throws SQLException {
-    resultSet.relative(n);
   }
 
   @Override

@@ -29,12 +29,15 @@ import java.sql.SQLException;
  * default, this class assumes that there is a {@link DataSource} available under the JNDI name "jdbc/taste", which
  * gives access to a database with a "taste_preferences" table with the following schema:</p>
  *
- * <table> <tr><th>user_id</th><th>item_id</th><th>preference</th></tr> <tr><td>ABC</td><td>123</td><td>0.9</td></tr>
- * <tr><td>ABC</td><td>456</td><td>0.1</td></tr> <tr><td>DEF</td><td>123</td><td>0.2</td></tr>
- * <tr><td>DEF</td><td>789</td><td>0.3</td></tr> </table>
+ * <table>
+ * <tr><th>user_id</th><th>item_id</th><th>preference</th></tr>
+ * <tr><td>ABC</td><td>123</td><td>0.9</td></tr>
+ * <tr><td>ABC</td><td>456</td><td>0.1</td></tr>
+ * <tr><td>DEF</td><td>123</td><td>0.2</td></tr>
+ * <tr><td>DEF</td><td>789</td><td>0.3</td></tr>
+ * </table>
  *
- * <p><code>user_id</code> must have a type compatible with the Java <code>String</code> type. <code>item_id</code> must
- * have a type compatible with the Java <code>String</code> type. <code>preference</code> must have a type compatible
+ * <p><code>preference</code> must have a type compatible
  * with the Java <code>double</code> type. For example, the following command sets up a suitable table in MySQL,
  * complete with primary key and indexes:</p>
  *
