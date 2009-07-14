@@ -299,8 +299,9 @@ public class KMeansDriver {
    */
   private static boolean isConverged(String filePath, JobConf conf, FileSystem fs) throws IOException {
     FileStatus[] parts = fs.listStatus(new Path(filePath));
-    for (FileStatus part : parts)
-      if (!part.getPath().getName().endsWith(".crc")) {
+    for (FileStatus part : parts) {
+      String name = part.getPath().getName();
+      if (name.startsWith("part") && !name.endsWith(".crc")) {
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, part.getPath(), conf);
         Writable key;
         try {
@@ -319,6 +320,7 @@ public class KMeansDriver {
           }
         }
       }
+    }
     return true;
   }
 }
