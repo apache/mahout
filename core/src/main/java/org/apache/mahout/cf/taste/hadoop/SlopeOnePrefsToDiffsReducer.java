@@ -19,29 +19,22 @@ package org.apache.mahout.cf.taste.hadoop;
 
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 public final class SlopeOnePrefsToDiffsReducer
-    extends MapReduceBase
-    implements Reducer<Text, ItemPrefWritable, ItemItemWritable, DoubleWritable> {
+    extends Reducer<Text, ItemPrefWritable, ItemItemWritable, DoubleWritable> {
 
   @Override
-  public void reduce(Text key,
-                     Iterator<ItemPrefWritable> values,
-                     OutputCollector<ItemItemWritable, DoubleWritable> output,
-                     Reporter reporter) throws IOException {
+  protected void reduce(Text key, Iterable<ItemPrefWritable> values, Context context)
+      throws IOException, InterruptedException {
     List<ItemPrefWritable> prefs = new ArrayList<ItemPrefWritable>();
-    while (values.hasNext()) {
-      prefs.add(new ItemPrefWritable(values.next()));
+    for (ItemPrefWritable value : values) {
+      prefs.add(new ItemPrefWritable(value));
     }
     Collections.sort(prefs, ByItemIDComparator.getInstance());
     int size = prefs.size();
@@ -53,7 +46,7 @@ public final class SlopeOnePrefsToDiffsReducer
         ItemPrefWritable second = prefs.get(j);
         String itemBID = second.getItemID();
         double itemBValue = second.getPrefValue();
-        output.collect(new ItemItemWritable(itemAID, itemBID), new DoubleWritable(itemBValue - itemAValue));
+        context.write(new ItemItemWritable(itemAID, itemBID), new DoubleWritable(itemBValue - itemAValue));
       }
     }
   }

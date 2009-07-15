@@ -17,60 +17,62 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
-import org.apache.hadoop.mapred.TextInputFormat;
+import org.apache.hadoop.mapreduce.InputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.util.StringUtils;
 
 import java.io.IOException;
 
-/**
- */
-public final class SlopeOnePrefsToDiffsJob {
-  private SlopeOnePrefsToDiffsJob() {
+public final class SlopeOnePrefsToDiffsJob extends Job {
+
+  private SlopeOnePrefsToDiffsJob(Configuration jobConf) throws IOException {
+    super(jobConf);
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     String prefsFile = args[0];
     String outputPath = args[1];
-    JobConf jobConf = buildJobConf(prefsFile, outputPath);
-    JobClient.runJob(jobConf);
+    Configuration jobConf = buildJobConf(prefsFile, outputPath);
+    Job job = new SlopeOnePrefsToDiffsJob(jobConf);
+    job.waitForCompletion(true);
   }
 
-  public static JobConf buildJobConf(String prefsFile,
-                                     String outputPath) throws IOException {
+  public static Configuration buildJobConf(String prefsFile,
+                                           String outputPath) throws IOException {
 
-    Path prefsFilePath = new Path(prefsFile);
-    Path outputPathPath = new Path(outputPath);
+    Configuration jobConf = new Configuration();
+    FileSystem fs = FileSystem.get(jobConf);
 
-    JobConf jobConf = new JobConf(SlopeOnePrefsToDiffsJob.class);
+    Path prefsFilePath = new Path(prefsFile).makeQualified(fs);
+    Path outputPathPath = new Path(outputPath).makeQualified(fs);
 
-    FileSystem fs = FileSystem.get(outputPathPath.toUri(), jobConf);
     if (fs.exists(outputPathPath)) {
       fs.delete(outputPathPath, true);
     }
 
-    jobConf.setInputFormat(TextInputFormat.class);
-    FileInputFormat.setInputPaths(jobConf, prefsFilePath);
+    jobConf.setClass("mapred.input.format.class", TextInputFormat.class, InputFormat.class);
+    jobConf.set("mapred.input.dir", StringUtils.escapeString(prefsFilePath.toString()));
 
-    jobConf.setMapperClass(SlopeOnePrefsToDiffsMapper.class);
-    jobConf.setMapOutputKeyClass(Text.class);
-    jobConf.setMapOutputValueClass(ItemPrefWritable.class);
+    jobConf.setClass("mapred.mapper.class", SlopeOnePrefsToDiffsMapper.class, Mapper.class);
+    jobConf.setClass("mapred.mapoutput.key.class", Text.class, Object.class);
+    jobConf.setClass("mapred.mapoutput.value.class", ItemPrefWritable.class, Object.class);
 
-    jobConf.setReducerClass(SlopeOnePrefsToDiffsReducer.class);
-    jobConf.setOutputKeyClass(ItemItemWritable.class);
-    jobConf.setOutputValueClass(DoubleWritable.class);
+    jobConf.setClass("mapred.reducer.class", SlopeOnePrefsToDiffsReducer.class, Reducer.class);
+    jobConf.setClass("mapred.output.key.class", ItemItemWritable.class, Object.class);
+    jobConf.setClass("mapred.output.value.class", DoubleWritable.class, Object.class);
 
-    jobConf.setOutputFormat(SequenceFileOutputFormat.class);
-    SequenceFileOutputFormat.setOutputCompressionType(jobConf, SequenceFile.CompressionType.RECORD);
-    FileOutputFormat.setOutputPath(jobConf, outputPathPath);
+    jobConf.setClass("mapred.output.format.class", SequenceFileOutputFormat.class, OutputFormat.class);
+    jobConf.set("mapred.output.dir", StringUtils.escapeString(outputPathPath.toString()));
 
     return jobConf;
   }

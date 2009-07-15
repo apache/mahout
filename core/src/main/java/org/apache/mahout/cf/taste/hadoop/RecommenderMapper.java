@@ -17,15 +17,12 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -39,20 +36,18 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 /**
- * <p>The {@link Mapper} which takes as input a file of user IDs (treated as Strings, note), and
- * for each unique user ID, computes recommendations with the configured {@link Recommender}.
- * The results are output as {@link RecommendedItemsWritable}.</p>
+ * <p>The {@link Mapper} which takes as input a file of user IDs (treated as Strings, note), and for each unique user
+ * ID, computes recommendations with the configured {@link Recommender}. The results are output as {@link
+ * RecommendedItemsWritable}.</p>
  *
- * <p>Note that there is no corresponding {@link org.apache.hadoop.mapred.Reducer}; this
- * implementation can only partially take advantage of the mapreduce paradigm and only
- * really leverages it for easy parallelization. Therefore, use the
- * {@link org.apache.hadoop.mapred.lib.IdentityReducer} when running this on Hadoop.</p>
+ * <p>Note that there is no corresponding {@link org.apache.hadoop.mapred.Reducer}; this implementation can only
+ * partially take advantage of the mapreduce paradigm and only really leverages it for easy parallelization. Therefore,
+ * use the {@link org.apache.hadoop.mapred.lib.IdentityReducer} when running this on Hadoop.</p>
  *
  * @see RecommenderJob
  */
 public final class RecommenderMapper
-    extends MapReduceBase
-    implements Mapper<LongWritable, Text, Text, RecommendedItemsWritable> {
+    extends Mapper<LongWritable, Text, Text, RecommendedItemsWritable> {
 
   static final String RECOMMENDER_CLASS_NAME = "recommenderClassName";
   static final String RECOMMENDATIONS_PER_USER = "recommendationsPerUser";
@@ -62,10 +57,8 @@ public final class RecommenderMapper
   private int recommendationsPerUser;
 
   @Override
-  public void map(LongWritable key,
-                  Text value,
-                  OutputCollector<Text, RecommendedItemsWritable> output,
-                  Reporter reporter) throws IOException {
+  protected void map(LongWritable key, Text value,
+                     Context context) throws IOException, InterruptedException {
     String userID = value.toString();
     List<RecommendedItem> recommendedItems;
     try {
@@ -74,13 +67,14 @@ public final class RecommenderMapper
       throw new RuntimeException(te);
     }
     RecommendedItemsWritable writable = new RecommendedItemsWritable(recommendedItems);
-    output.collect(new Text(userID), writable);
-    reporter.incrCounter(ReducerMetrics.USERS_PROCESSED, 1L);
-    reporter.incrCounter(ReducerMetrics.RECOMMENDATIONS_MADE, recommendedItems.size());
+    context.write(new Text(userID), writable);
+    context.getCounter(ReducerMetrics.USERS_PROCESSED).increment(1L);
+    context.getCounter(ReducerMetrics.RECOMMENDATIONS_MADE).increment(recommendedItems.size());
   }
 
   @Override
-  public void configure(JobConf jobConf) {
+  protected void setup(Context context) {
+    Configuration jobConf = context.getConfiguration();
     String dataModelFile = jobConf.get(DATA_MODEL_FILE);
     String recommenderClassName = jobConf.get(RECOMMENDER_CLASS_NAME);
     FileDataModel fileDataModel;

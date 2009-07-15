@@ -17,16 +17,18 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.TextInputFormat;
-import org.apache.hadoop.mapred.TextOutputFormat;
-import org.apache.hadoop.mapred.lib.IdentityReducer;
+import org.apache.hadoop.mapreduce.InputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.util.StringUtils;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 
 import java.io.IOException;
@@ -34,53 +36,48 @@ import java.io.IOException;
 /**
  * <p>This class configures and runs a {@link RecommenderMapper} using Hadoop.</p>
  *
- * <p>Command line arguments are:</p>
- * <ol>
- *  <li>Fully-qualified class name of {@link Recommender} to use to make recommendations.
- *   Note that it must have a constructor which takes a {@link org.apache.mahout.cf.taste.model.DataModel}
- *   argument.</li>
- *  <li>Number of recommendations to compute per user</li>
- *  <li>Location of a text file containing user IDs for which recommendations should be computed,
- *   one per line</li>
- *  <li>Location of a data model file containing preference data, suitable for use with
- *   {@link org.apache.mahout.cf.taste.impl.model.file.FileDataModel}</li>
- *  <li>Output path where reducer output should go</li>
- * </ol>
+ * <p>Command line arguments are:</p> <ol> <li>Fully-qualified class name of {@link Recommender} to use to make
+ * recommendations. Note that it must have a constructor which takes a {@link org.apache.mahout.cf.taste.model.DataModel}
+ * argument.</li> <li>Number of recommendations to compute per user</li> <li>Location of a text file containing user IDs
+ * for which recommendations should be computed, one per line</li> <li>Location of a data model file containing
+ * preference data, suitable for use with {@link org.apache.mahout.cf.taste.impl.model.file.FileDataModel}</li>
+ * <li>Output path where reducer output should go</li> </ol>
  *
  * <p>Example:</p>
  *
  * <p><code>org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender 10 path/to/users.txt
- *  path/to/data.csv path/to/reducerOutputDir 5</code></p>
- *
- * <p>TODO I am not a bit sure this works yet in a real distributed environment.</p>
+ * path/to/data.csv path/to/reducerOutputDir 5</code></p>
  */
-public final class RecommenderJob {
-  private RecommenderJob() {
+public final class RecommenderJob extends Job {
+
+  public RecommenderJob(Configuration jobConf) throws IOException {
+    super(jobConf);
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     String recommendClassName = args[0];
     int recommendationsPerUser = Integer.parseInt(args[1]);
     String userIDFile = args[2];
     String dataModelFile = args[3];
     String outputPath = args[4];
-    JobConf jobConf =
+    Configuration jobConf =
         buildJobConf(recommendClassName, recommendationsPerUser, userIDFile, dataModelFile, outputPath);
-    JobClient.runJob(jobConf);
+    Job job = new RecommenderJob(jobConf);
+    job.waitForCompletion(true);
   }
 
-  public static JobConf buildJobConf(String recommendClassName,
-                                     int recommendationsPerUser,
-                                     String userIDFile,
-                                     String dataModelFile,
-                                     String outputPath) throws IOException {
+  public static Configuration buildJobConf(String recommendClassName,
+                                           int recommendationsPerUser,
+                                           String userIDFile,
+                                           String dataModelFile,
+                                           String outputPath) throws IOException {
 
-    Path userIDFilePath = new Path(userIDFile);
-    Path outputPathPath = new Path(outputPath);
+    Configuration jobConf = new Configuration();
+    FileSystem fs = FileSystem.get(jobConf);
 
-    JobConf jobConf = new JobConf(RecommenderJob.class);
+    Path userIDFilePath = new Path(userIDFile).makeQualified(fs);
+    Path outputPathPath = new Path(outputPath).makeQualified(fs);
 
-    FileSystem fs = FileSystem.get(outputPathPath.toUri(), jobConf);
     if (fs.exists(outputPathPath)) {
       fs.delete(outputPathPath, true);
     }
@@ -89,19 +86,19 @@ public final class RecommenderJob {
     jobConf.set(RecommenderMapper.RECOMMENDATIONS_PER_USER, String.valueOf(recommendationsPerUser));
     jobConf.set(RecommenderMapper.DATA_MODEL_FILE, dataModelFile);
 
-    jobConf.setInputFormat(TextInputFormat.class);
-    FileInputFormat.setInputPaths(jobConf, userIDFilePath);
+    jobConf.setClass("mapred.input.format.class", TextInputFormat.class, InputFormat.class);
+    jobConf.set("mapred.input.dir", StringUtils.escapeString(userIDFilePath.toString()));
 
-    jobConf.setMapperClass(RecommenderMapper.class);
-    jobConf.setMapOutputKeyClass(Text.class);
-    jobConf.setMapOutputValueClass(RecommendedItemsWritable.class);
+    jobConf.setClass("mapred.mapper.class", RecommenderMapper.class, Mapper.class);
+    jobConf.setClass("mapred.mapoutput.key.class", Text.class, Object.class);
+    jobConf.setClass("mapred.mapoutput.value.class", RecommendedItemsWritable.class, Object.class);
 
-    jobConf.setReducerClass(IdentityReducer.class);
-    jobConf.setOutputKeyClass(Text.class);
-    jobConf.setOutputValueClass(RecommendedItemsWritable.class);
+    jobConf.setClass("mapred.reducer.class", IdentityReducer.class, Reducer.class);
+    jobConf.setClass("mapred.output.key.class", Text.class, Object.class);
+    jobConf.setClass("mapred.output.value.class", RecommendedItemsWritable.class, Object.class);
 
-    jobConf.setOutputFormat(TextOutputFormat.class);
-    FileOutputFormat.setOutputPath(jobConf, outputPathPath);
+    jobConf.setClass("mapred.output.format.class", TextOutputFormat.class, OutputFormat.class);
+    jobConf.set("mapred.output.dir", StringUtils.escapeString(outputPathPath.toString()));
 
     return jobConf;
   }

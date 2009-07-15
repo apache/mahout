@@ -18,30 +18,23 @@
 package org.apache.mahout.cf.taste.hadoop;
 
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 public final class SlopeOneDiffsToAveragesReducer
-    extends MapReduceBase
-    implements Reducer<ItemItemWritable, DoubleWritable, ItemItemWritable, DoubleWritable> {
+    extends Reducer<ItemItemWritable, DoubleWritable, ItemItemWritable, DoubleWritable> {
 
   @Override
-  public void reduce(ItemItemWritable key,
-                     Iterator<DoubleWritable> values,
-                     OutputCollector<ItemItemWritable, DoubleWritable> output,
-                     Reporter reporter) throws IOException {
+  protected void reduce(ItemItemWritable key, Iterable<DoubleWritable> values, Context context)
+      throws IOException, InterruptedException {
     int count = 0;
     double total = 0.0;
-    while (values.hasNext()) {
-      total += values.next().get();
+    for (DoubleWritable value : values) {
+      total += value.get();
       count++;
     }
-    output.collect(key, new DoubleWritable((total / count)));
+    context.write(key, new DoubleWritable((total / count)));
   }
 
 }
