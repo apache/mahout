@@ -59,9 +59,8 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
     if(!country.equals("Unknown")){
       document = StringEscapeUtils.unescapeHtml(document.replaceFirst("<text xml:space=\"preserve\">", "").replaceAll("</text>", ""));
       TokenStream stream = analyzer.tokenStream(country, new StringReader(document));
-      while(true){
-        Token token = stream.next();
-        if(token==null) break;
+      Token token = new Token();
+      while((token = stream.next(token)) != null){
         contents.append(token.termBuffer(), 0, token.termLength()).append(' ');
       }
       output.collect(new Text(country.replace(" ","_")), new Text(contents.toString()));
