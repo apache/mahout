@@ -2,13 +2,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout-parent</artifactId>
-    <version>1.0</version>
-    <relativePath>./maven</relativePath>
-  </parent>
-
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
@@ -19,6 +12,7 @@
   <description>Scalable machine learning libraries</description>
 
   <modules>
+    <module>buildtools</module>
     <module>maven</module>
     <module>core</module>
     <module>taste-web</module>
@@ -28,6 +22,12 @@
 
   <build>
     <defaultGoal>install</defaultGoal>
+  </build>
+
+    <profiles>
+      <profile>
+        <id>release</id>
+        <build>
     <plugins>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -79,8 +79,8 @@
 
     </plugins>
   </build>
-
-
+  </profile>
+</profiles>
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.1</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.1</developerConnection>

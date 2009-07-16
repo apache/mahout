@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<supplementalDataModels>
+  <supplement>
+  <supplement>
+    <project>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <licenses>
+        <license>
+          <name>MIT License</name>
+          <url>http://www.slf4j.org/license.html</url>
+        </license>
+      </licenses>
+    </project>
+  </supplement>
+  <supplement>
+    <project>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-jdk14</artifactId>
+      <licenses>
+        <license>
+          <name>MIT License</name>
+          <url>http://www.slf4j.org/license.html</url>
+        </license>
+      </licenses>
+    </project>
+  </supplement>
+</supplementalDataModels>
