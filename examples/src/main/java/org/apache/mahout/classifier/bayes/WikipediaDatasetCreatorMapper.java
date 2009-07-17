@@ -31,6 +31,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.util.Version;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -42,41 +43,54 @@ import java.util.Set;
 public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
     Mapper<LongWritable, Text, Text, Text> {
 
-  private static Set<String> countries = null;
-  
+  private static Set<String> inputCategories = null;
+  private static boolean exactMatchOnly = false;
+
   @Override
   public void map(LongWritable key, Text value,
       OutputCollector<Text, Text> output, Reporter reporter)
       throws IOException {
     String document = value.toString();
-    Analyzer analyzer = new StandardAnalyzer();
+    Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
     StringBuilder contents = new StringBuilder();
 
     Set<String> categories = new HashSet<String>(findAllCategories(document));
     
-    String country = getCountry(categories);
+    String catMatch = matchCategories(categories);
     
-    if(!country.equals("Unknown")){
+    if(!catMatch.equals("Unknown")){
       document = StringEscapeUtils.unescapeHtml(document.replaceFirst("<text xml:space=\"preserve\">", "").replaceAll("</text>", ""));
-      TokenStream stream = analyzer.tokenStream(country, new StringReader(document));
+      TokenStream stream = analyzer.tokenStream(catMatch, new StringReader(document));
       Token token = new Token();
       while((token = stream.next(token)) != null){
         contents.append(token.termBuffer(), 0, token.termLength()).append(' ');
       }
-      output.collect(new Text(country.replace(" ","_")), new Text(contents.toString()));
+      output.collect(new Text(catMatch.replace(" ","_")), new Text(contents.toString()));
     }
   }
   
-  public static String getCountry(Set<String> categories)
+  public static String matchCategories(Set<String> categories)
   {
-    for(String category : categories)
-    {
-      for(String country: countries){        
-        if(category.contains(country)){
-          return country;
-          
+    if (exactMatchOnly == false) {
+      for(String category : categories)
+      {
+        for(String input: inputCategories){
+          if(category.contains(input)){
+            return input;
+
+          }
         }
-      }      
+      }
+    } else {
+      for(String category : categories)
+      {
+        for(String input: inputCategories){
+          if(category.equals(input)){
+            return input;
+
+          }
+        }
+      }
     }
     return "Unknown";
   }
@@ -92,7 +106,7 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
       int endIndex = document.indexOf("]]", categoryIndex);
       if(endIndex>=document.length() || endIndex < 0) break;
       String category = document.substring(categoryIndex, endIndex);
-      categories.add(category);
+      categories.add(category.toLowerCase());
       startIndex = endIndex;
     }
     
@@ -102,18 +116,20 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     try {
-      if (countries == null){
-        Set<String> newCountries = new HashSet<String>();
+      if (inputCategories == null){
+        Set<String> newCategories = new HashSet<String>();
 
         DefaultStringifier<Set<String>> setStringifier =
-            new DefaultStringifier<Set<String>>(job,GenericsUtil.getClass(newCountries));
+            new DefaultStringifier<Set<String>>(job,GenericsUtil.getClass(newCategories));
 
-        String countriesString = setStringifier.toString(newCountries);
-        countriesString = job.get("wikipedia.countries", countriesString);
+        String categoriesStr = setStringifier.toString(newCategories);
+        categoriesStr = job.get("wikipedia.categories", categoriesStr);
         
-        countries = setStringifier.fromString(countriesString);
-        
+        inputCategories = setStringifier.fromString(categoriesStr);
+
+
       }
+      exactMatchOnly = job.getBoolean("exact.match.only", false);
     } catch(IOException ex){
       throw new RuntimeException(ex);
     }

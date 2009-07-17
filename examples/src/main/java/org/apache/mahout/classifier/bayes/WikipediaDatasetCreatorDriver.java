@@ -17,27 +17,40 @@
 
 package org.apache.mahout.classifier.bayes;
 
-import org.apache.hadoop.util.GenericsUtil;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.DefaultStringifier;
-import org.apache.hadoop.fs.Path;
+import org.apache.commons.cli2.CommandLine;
+import org.apache.commons.cli2.Group;
+import org.apache.commons.cli2.Option;
+import org.apache.commons.cli2.OptionException;
+import org.apache.commons.cli2.builder.ArgumentBuilder;
+import org.apache.commons.cli2.builder.DefaultOptionBuilder;
+import org.apache.commons.cli2.builder.GroupBuilder;
+import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.DefaultStringifier;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.util.GenericsUtil;
+import org.apache.mahout.utils.CommandLineUtil;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
-import java.util.Set;
+import java.io.InputStreamReader;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Create and run the Wikipedia Dataset Creator.
  */
 public class WikipediaDatasetCreatorDriver {
+  private transient static Logger log = LoggerFactory.getLogger(WikipediaDatasetCreatorDriver.class);
+
   private WikipediaDatasetCreatorDriver() {
   }
 
@@ -48,26 +61,70 @@ public class WikipediaDatasetCreatorDriver {
    * <li>The output {@link org.apache.hadoop.fs.Path} where to write the
    * {@link org.apache.mahout.classifier.bayes.BayesModel} as a {@link org.apache.hadoop.io.SequenceFile}</li>
    * </ol>
+   *
    * @param args The args
    */
   public static void main(String[] args) throws IOException {
-    String input = args[0];
-    String output = args[1];
-    String countriesFile = args[2];
+    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    ArgumentBuilder abuilder = new ArgumentBuilder();
+    GroupBuilder gbuilder = new GroupBuilder();
 
-    runJob(input, output,countriesFile);
+    Option dirInputPathOpt = obuilder.withLongName("input").withRequired(true).withArgument(
+            abuilder.withName("input").withMinimum(1).withMaximum(1).create()).
+            withDescription("The input directory path").withShortName("i").create();
+
+    Option dirOutputPathOpt = obuilder.withLongName("output").withRequired(true).withArgument(
+            abuilder.withName("output").withMinimum(1).withMaximum(1).create()).
+            withDescription("The output directory Path").withShortName("o").create();
+
+    Option categoriesOpt = obuilder.withLongName("categories").withRequired(true).withArgument(
+            abuilder.withName("categories").withMinimum(1).withMaximum(1).create()).
+            withDescription("Location of the categories file.  One entry per line.  Will be used to make a string match in Wikipedia Category field").withShortName("c").create();
+
+    Option exactMatchOpt = obuilder.withLongName("exactMatch").
+            withDescription("If set, then the category name must exactly match the entry in the categories file. Default is false").withShortName("e").create();
+
+    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h").create();
+
+    Group group = gbuilder.withName("Options").withOption(categoriesOpt).withOption(dirInputPathOpt).withOption(dirOutputPathOpt)
+            .withOption(exactMatchOpt)
+            .withOption(helpOpt).create();
+
+    Parser parser = new Parser();
+    parser.setGroup(group);
+    CommandLine cmdLine = null;
+    try {
+      cmdLine = parser.parse(args);
+      if (cmdLine.hasOption(helpOpt)) {
+        CommandLineUtil.printHelp(group);
+        return;
+      }
+
+      String inputPath = (String) cmdLine.getValue(dirInputPathOpt);
+      String outputPath = (String) cmdLine.getValue(dirOutputPathOpt);
+      String catFile = (String) cmdLine.getValue(categoriesOpt);
+
+      runJob(inputPath, outputPath, catFile, cmdLine.hasOption(exactMatchOpt));
+    } catch (OptionException e) {
+      log.error("Exception", e);
+      CommandLineUtil.printHelp(group);
+    }
   }
 
   /**
    * Run the job
    *
-   * @param input            the input pathname String
-   * @param output           the output pathname String
+   * @param input  the input pathname String
+   * @param output the output pathname String
+   * @param catFile the file containing the Wikipedia categories
+   * @param exactMatchOnly if true, then the Wikipedia category must match exactly instead of simply containing the category string
    */
-  public static void runJob(String input, String output, String countriesFile) throws IOException {
+  public static void runJob(String input, String output, String catFile, boolean exactMatchOnly) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(WikipediaDatasetCreatorDriver.class);
-
+    if (log.isInfoEnabled()) {
+      log.info("Input: " + input + " Out: " + output + " Categories: " + catFile);
+    }
     conf.set("key.value.separator.in.input.line", " ");
     conf.set("xmlinput.start", "<text xml:space=\"preserve\">");
     conf.set("xmlinput.end", "</text>");
@@ -85,33 +142,30 @@ public class WikipediaDatasetCreatorDriver {
     conf.setReducerClass(WikipediaDatasetCreatorReducer.class);
     conf.setOutputFormat(WikipediaDatasetCreatorOutputFormat.class);
     conf.set("io.serializations",
-             "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
+            "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
     // Dont ever forget this. People should keep track of how hadoop conf parameters and make or break a piece of code
 
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath))
+    if (dfs.exists(outPath)){
       dfs.delete(outPath, true);
+    }
 
-    Set<String> countries= new HashSet<String>();
-
-
+    Set<String> categories = new HashSet<String>();
     BufferedReader reader = new BufferedReader(new InputStreamReader(
-        new FileInputStream(countriesFile), "UTF-8"));
+            new FileInputStream(catFile), "UTF-8"));
     String line;
-    while((line = reader.readLine())!=null){
-      countries.add(line);
+    while ((line = reader.readLine()) != null) {
+      categories.add(line.trim().toLowerCase());
     }
     reader.close();
 
-    DefaultStringifier<Set<String>> setStringifier = new DefaultStringifier<Set<String>>(conf,GenericsUtil.getClass(countries));
+    DefaultStringifier<Set<String>> setStringifier = new DefaultStringifier<Set<String>>(conf, GenericsUtil.getClass(categories));
 
-    String countriesString = setStringifier.toString(countries);
+    String categoriesStr = setStringifier.toString(categories);
 
-    conf.set("wikipedia.countries", countriesString);
+    conf.set("wikipedia.categories", categoriesStr);
 
     client.setConf(conf);
     JobClient.runJob(conf);
-
-    
   }
 }

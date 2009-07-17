@@ -71,8 +71,8 @@ public class TrainClassifier {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option inputDirOpt = obuilder.withLongName("inputDir").withRequired(true).withArgument(
-            abuilder.withName("inputDir").withMinimum(1).withMaximum(1).create()).
+    Option inputDirOpt = obuilder.withLongName("input").withRequired(true).withArgument(
+            abuilder.withName("input").withMinimum(1).withMaximum(1).create()).
             withDescription("The Directory on HDFS containing the collapsed, properly formatted files").withShortName("i").create();
 
     Option outputOpt = obuilder.withLongName("output").withRequired(true).withArgument(

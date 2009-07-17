@@ -43,6 +43,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.FilenameFilter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,9 +62,9 @@ public class TestClassifier {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option pathOpt = obuilder.withLongName("path").withRequired(true).withArgument(
-            abuilder.withName("path").withMinimum(1).withMaximum(1).create()).
-            withDescription("The local file system path").withShortName("p").create();
+    Option pathOpt = obuilder.withLongName("model").withRequired(true).withArgument(
+            abuilder.withName("model").withMinimum(1).withMaximum(1).create()).
+            withDescription("The file system path containing the model (the output path from training)").withShortName("p").create();
 
     Option dirOpt = obuilder.withLongName("testDir").withRequired(true).withArgument(
             abuilder.withName("testDir").withMinimum(1).withMaximum(1).create()).
@@ -160,7 +161,12 @@ public class TestClassifier {
 
     String testDirPath = (String) cmdLine.getValue(dirOpt);
     File dir = new File(testDirPath);
-    File[] subdirs = dir.listFiles();
+    File[] subdirs = dir.listFiles(new FilenameFilter() {
+      @Override
+      public boolean accept(File file, String s) {
+        return s.startsWith(".") == false;
+      }
+    });
 
     ResultAnalyzer resultAnalyzer = new ResultAnalyzer(model.getLabels(), defaultCat);
 
