@@ -108,7 +108,15 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     log.debug("Training against {} preferences", trainingPrefs.size());
     log.debug("Evaluating accuracy of {} preferences", testPrefs.size());
     if (!trainingPrefs.isEmpty()) {
-      User trainingUser = new GenericUser<String>(user.getID().toString(), trainingPrefs);
+      Object id = user.getID();
+      User trainingUser;
+      if (id instanceof Long) {
+        trainingUser = new GenericUser<Long>((Long) id, trainingPrefs);
+      } else if (id instanceof Integer) {
+        trainingUser = new GenericUser<Integer>((Integer) id, trainingPrefs);
+      } else {
+        trainingUser = new GenericUser<String>(id.toString(), trainingPrefs);
+      }
       trainingUsers.add(trainingUser);
       if (!testPrefs.isEmpty()) {
         testUserPrefs.put(trainingUser, testPrefs);

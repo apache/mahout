@@ -38,13 +38,14 @@ import java.sql.SQLException;
  * </table>
  *
  * <p><code>preference</code> must have a type compatible
- * with the Java <code>double</code> type. For example, the following command sets up a suitable table in MySQL,
+ * with the Java <code>double</code> type. <code>user_id</code> and <code>item_id</code> should be an integer or
+ * string type (INT, LONGINT, VARCHAR). For example, the following command sets up a suitable table in MySQL,
  * complete with primary key and indexes:</p>
  *
  * <pre>
  * CREATE TABLE taste_preferences (
- *   user_id VARCHAR(10) NOT NULL,
- *   item_id VARCHAR(10) NOT NULL,
+ *   user_id INT NOT NULL,
+ *   item_id INT NOT NULL,
  *   preference FLOAT NOT NULL,
  *   PRIMARY KEY (user_id, item_id),
  *   INDEX (user_id),

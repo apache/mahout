@@ -98,8 +98,6 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
     PreparedStatement stmt = null;
     ResultSet rs = null;
 
-    String idString = id.toString();
-
     try {
       conn = getDataSource().getConnection();
       stmt = conn.prepareStatement(getUserSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -119,7 +117,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
         throw new NoSuchUserException();
       }
 
-      return buildUser(idString, itemIDs);
+      return buildUser(id, itemIDs);
 
     } catch (SQLException sqle) {
       log.warn("Exception while retrieving user", sqle);
@@ -188,7 +186,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
       rs = stmt.executeQuery();
       List<Preference> prefs = new ArrayList<Preference>();
       while (rs.next()) {
-        String userID = rs.getString(2);
+        Object userID = rs.getObject(2);
         Preference pref = buildPreference(buildUser(userID, (FastSet<Object>) null), item);
         prefs.add(pref);
       }
@@ -201,8 +199,13 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
     }
   }
 
-  protected User buildUser(String id, FastSet<Object> itemIDs) {
-    return new BooleanPrefUser<String>(id, itemIDs);
+  protected User buildUser(Object id, FastSet<Object> itemIDs) {
+    if (id instanceof Long) {
+      return new BooleanPrefUser<Long>((Long) id, itemIDs);
+    } else if (id instanceof Integer) {
+      return new BooleanPrefUser<Integer>((Integer) id, itemIDs);
+    }
+    return new BooleanPrefUser<String>(id.toString(), itemIDs);
   }
 
   protected Preference buildPreference(User user, Item item) {
@@ -259,12 +262,12 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
         throw new NoSuchElementException();
       }
 
-      String currentUserID = null;
+      Object currentUserID = null;
       FastSet<Object> itemIDs = new FastSet<Object>();
 
       try {
         do {
-          String userID = resultSet.getString(2);
+          Object userID = resultSet.getObject(2);
           if (currentUserID == null) {
             currentUserID = userID;
           }
@@ -273,7 +276,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
             break;
           }
           // else add a new preference for the current user
-          itemIDs.add(resultSet.getString(1));
+          itemIDs.add(resultSet.getObject(1));
         } while (resultSet.next());
       } catch (SQLException sqle) {
         // No good way to handle this since we can't throw an exception

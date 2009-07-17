@@ -107,7 +107,7 @@ public final class MySQLJDBCDiffStorage extends AbstractJDBCDiffStorage {
             "=?) possible_item_ids WHERE id NOT IN (SELECT " + dataModel.getItemIDColumn() + " FROM " + dataModel.getPreferenceTable() +
             " WHERE " + dataModel.getUserIDColumn() + "=?)",
         // deleteDiffsSQL
-        "DELETE FROM " + diffsTable,
+        "TRUNCATE " + diffsTable,
         // createDiffsSQL
         "INSERT INTO " + diffsTable + " (" + itemIDAColumn + ", " + itemIDBColumn + ", " + avgColumn +
             ", " + countColumn + ") SELECT prefsA." + dataModel.getItemIDColumn() + ", prefsB." + dataModel.getItemIDColumn() + ',' +

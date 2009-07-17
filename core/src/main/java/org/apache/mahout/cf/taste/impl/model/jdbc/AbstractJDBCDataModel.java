@@ -37,9 +37,6 @@ import org.apache.mahout.cf.taste.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -66,7 +63,7 @@ import java.util.NoSuchElementException;
  *
  * <p>Also note: this default implementation assumes that the user and item ID keys are {@link String}s, for maximum
  * flexibility. You can override this behavior by subclassing an implementation and overriding {@link
- * #buildItem(String)} and {@link #buildUser(String, List)}. If you don't, just make sure you use {@link String}s as IDs
+ * #buildItem(Object)} and {@link #buildUser(Object, List)}. If you don't, just make sure you use {@link String}s as IDs
  * throughout your code. If your IDs are really numeric, and you use, say, {@link Long} for IDs in the rest of your
  * code, you will run into subtle problems because the {@link Long} values won't be equal to or compare correctly to the
  * underlying {@link String} key values.</p>
@@ -339,7 +336,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       List<Preference> prefs = new ArrayList<Preference>();
       while (rs.next()) {
         double preference = rs.getDouble(1);
-        String userID = rs.getString(2);
+        Object userID = rs.getObject(2);
         Preference pref = buildPreference(buildUser(userID, null), item, preference);
         prefs.add(pref);
       }
@@ -485,7 +482,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
   private void addPreference(ResultSet rs, Collection<Preference> prefs)
       throws SQLException {
-    Item item = buildItem(rs.getString(1));
+    Item item = buildItem(rs.getObject(1));
     double preferenceValue = rs.getDouble(2);
     prefs.add(buildPreference(null, item, preferenceValue));
   }
@@ -498,8 +495,14 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
    * @param prefs user preferences
    * @return {@link GenericUser} by default
    */
-  protected User buildUser(String id, List<Preference> prefs) {
-    return new GenericUser<String>(id, prefs);
+  protected User buildUser(Object id, List<Preference> prefs) {
+    // ugly
+    if (id instanceof Long) {
+      return new GenericUser<Long>((Long) id, prefs);
+    } else if (id instanceof Integer) {
+      return new GenericUser<Integer>((Integer) id, prefs);
+    }
+    return new GenericUser<String>(id.toString(), prefs);
   }
 
   /**
@@ -509,8 +512,13 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
    * @param id item ID
    * @return {@link GenericItem} by default
    */
-  protected Item buildItem(String id) {
-    return new GenericItem<String>(id);
+  protected Item buildItem(Object id) {
+    if (id instanceof Long) {
+      return new GenericItem<Long>((Long) id);
+    } else if (id instanceof Integer) {
+      return new GenericItem<Integer>((Integer) id);
+    }
+    return new GenericItem<String>(id.toString());
   }
 
   /**
@@ -581,12 +589,12 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
         throw new NoSuchElementException();
       }
 
-      String currentUserID = null;
+      Object currentUserID = null;
       List<Preference> prefs = new ArrayList<Preference>();
 
       try {
         do {
-          String userID = resultSet.getString(3);
+          Object userID = resultSet.getObject(3);
           if (currentUserID == null) {
             currentUserID = userID;
           }
@@ -700,7 +708,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       }
 
       try {
-        Item item = buildItem(resultSet.getString(1));
+        Item item = buildItem(resultSet.getObject(1));
         resultSet.next();
         return item;
       } catch (SQLException sqle) {

@@ -82,6 +82,11 @@ public class BooleanPrefUser<K extends Comparable<K>> implements User, Serializa
   }
 
   private Preference buildPreference(Object itemID) {
+    if (itemID instanceof Long) {
+      return new BooleanPreference(this, new GenericItem<Long>((Long) itemID));
+    } else if (itemID instanceof Integer) {
+      return new BooleanPreference(this, new GenericItem<Integer>((Integer) itemID));
+    }
     return new BooleanPreference(this, new GenericItem<String>(itemID.toString()));
   }
 

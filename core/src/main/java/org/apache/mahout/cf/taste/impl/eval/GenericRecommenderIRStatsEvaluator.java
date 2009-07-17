@@ -184,9 +184,21 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
           for (Preference pref : trainingPrefs) {
             itemIDs.add(pref.getItem().getID());
           }
-          trainingUser = new BooleanPrefUser<String>(id.toString(), itemIDs);
+          if (id instanceof Long) {
+            trainingUser = new BooleanPrefUser<Long>((Long) id, itemIDs);
+          } else if (id instanceof Integer) {
+            trainingUser = new BooleanPrefUser<Integer>((Integer) id, itemIDs);
+          } else {
+            trainingUser = new BooleanPrefUser<String>(id.toString(), itemIDs);
+          }
         } else {
-          trainingUser = new GenericUser<String>(id.toString(), trainingPrefs);
+          if (id instanceof Long) {
+            trainingUser = new GenericUser<Long>((Long) id, trainingPrefs);
+          } else if (id instanceof Integer) {
+            trainingUser = new GenericUser<Integer>((Integer) id, trainingPrefs);
+          } else {
+            trainingUser = new GenericUser<String>(id.toString(), trainingPrefs);
+          }
         }
         trainingUsers.add(trainingUser);
       }

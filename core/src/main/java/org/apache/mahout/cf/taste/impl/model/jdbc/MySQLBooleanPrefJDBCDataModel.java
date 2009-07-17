@@ -28,8 +28,8 @@ import java.sql.SQLException;
  *
  * <pre>
  * CREATE TABLE taste_preferences (
- *   user_id VARCHAR(10) NOT NULL,
- *   item_id VARCHAR(10) NOT NULL,
+ *   user_id INT NOT NULL,
+ *   item_id INT NOT NULL,
  *   PRIMARY KEY (user_id, item_id),
  *   INDEX (user_id),
  *   INDEX (item_id)

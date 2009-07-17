@@ -114,9 +114,9 @@ public final class BooleanUserGenericUserBasedRecommender extends AbstractRecomm
     double lowestTopValue = Double.NEGATIVE_INFINITY;
     for (Object itemID : allItems) {
       double preference = estimator.estimate(itemID);
-      double rescoredPref = rescorer == null ? preference : rescorer.rescore(new GenericItem<String>(itemID.toString()), preference);
+      double rescoredPref = rescorer == null ? preference : rescorer.rescore(buildDummyItem(itemID), preference);
       if (!Double.isNaN(rescoredPref) && (!full || rescoredPref > lowestTopValue)) {
-        topItems.add(new GenericRecommendedItem(new GenericItem<String>(itemID.toString()), rescoredPref));
+        topItems.add(new GenericRecommendedItem(buildDummyItem(itemID), rescoredPref));
         if (full) {
           topItems.poll();
         } else if (topItems.size() > howMany) {
@@ -130,6 +130,15 @@ public final class BooleanUserGenericUserBasedRecommender extends AbstractRecomm
     result.addAll(topItems);
     Collections.sort(result);
     return result;
+  }
+
+  private static Item buildDummyItem(Object itemID) {
+    if (itemID instanceof Long) {
+      return new GenericItem<Long>((Long) itemID);
+    } else if (itemID instanceof Integer) {
+      return new GenericItem<Integer>((Integer) itemID);
+    }
+    return new GenericItem<String>(itemID.toString());
   }
 
   @Override
@@ -193,7 +202,7 @@ public final class BooleanUserGenericUserBasedRecommender extends AbstractRecomm
         }
       }
     }
-    return foundAPref ? totalSimilarity : 0.0;
+    return foundAPref ? totalSimilarity : Double.NaN;
   }
 
   private static Set<Object> getAllOtherItems(Iterable<User> theNeighborhood, User theUser) {
