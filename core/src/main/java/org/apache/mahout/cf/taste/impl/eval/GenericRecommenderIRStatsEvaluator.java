@@ -32,6 +32,7 @@ import org.apache.mahout.cf.taste.impl.model.BooleanPrefUser;
 import org.apache.mahout.cf.taste.impl.model.ByValuePreferenceComparator;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
+import org.apache.mahout.cf.taste.impl.model.GenericBooleanUserDataModel;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -126,7 +127,13 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
           for (User user2 : dataModel.getUsers()) {
             processOtherUser(id, relevantItems, trainingUsers, user2);
           }
-          DataModel trainingModel = new GenericDataModel(trainingUsers);
+
+          DataModel trainingModel;
+          if (trainingUsers.get(0) instanceof BooleanPrefUser) {
+            trainingModel = new GenericBooleanUserDataModel(trainingUsers);
+          } else {
+            trainingModel = new GenericDataModel(trainingUsers);
+          }
           Recommender recommender = recommenderBuilder.buildRecommender(trainingModel);
 
           try {
