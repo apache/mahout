@@ -48,7 +48,7 @@ public final class ConnectionPoolDataSource implements DataSource {
       }
     };
     ObjectPool objectPool = new StackObjectPool();
-    objectPool.setFactory(new PoolableConnectionFactory(connectionFactory, objectPool, null, null, false, false));
+    objectPool.setFactory(new PoolableConnectionFactory(connectionFactory, objectPool, null, "SELECT 1", false, false));
     delegate = new PoolingDataSource(objectPool);
   }
 
