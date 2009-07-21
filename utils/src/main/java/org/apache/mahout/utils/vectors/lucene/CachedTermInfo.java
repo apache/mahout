@@ -43,7 +43,7 @@ public class CachedTermInfo implements TermInfo {
     int count = 0;
     int numDocs = reader.numDocs();
     double percent = numDocs * maxDfPercent / 100.0;
-    //Should we use a linked hash map so that we no terms are in order?
+    //Should we use a linked hash map so that we know terms are in order?
     termEntries = new LinkedHashMap<String, TermEntry>();
     do {
       Term term = te.term();
