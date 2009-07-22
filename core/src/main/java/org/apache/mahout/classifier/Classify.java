@@ -30,6 +30,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.util.Version;
 import org.apache.mahout.classifier.bayes.BayesClassifier;
 import org.apache.mahout.classifier.bayes.BayesModel;
 import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
@@ -145,7 +146,7 @@ public class Classify {
       analyzer = Class.forName(className).asSubclass(Analyzer.class).newInstance();
     }
     if (analyzer == null) {
-      analyzer = new StandardAnalyzer();
+      analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
     }
 
     int gramSize = 1;

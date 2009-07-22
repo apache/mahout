@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -85,16 +86,16 @@
             <configuration>
               <tasks>
                 <ant antfile="../maven/build.xml" target="example-job">
-                  <property name="dest" value="${project.build.directory}" />
-                  <property name="fullnamever" value="${project.artifactId}-${project.version}" />
-                  <property name="core-lib" value="../core/lib" />
-                  <property name="shared-lib" value="../lib" />
-                  <property name="version" value="${project.version}" />
+                  <property name="dest" value="${project.build.directory}"/>
+                  <property name="fullnamever" value="${project.artifactId}-${project.version}"/>
+                  <property name="core-lib" value="../core/lib"/>
+                  <property name="shared-lib" value="../lib"/>
+                  <property name="version" value="${project.version}"/>
                 </ant>
-              <ant antfile="../maven/build.xml" target="build-grouplens-jar">
-                <property name="dest" value="${project.build.directory}" />
-                <property name="examples-base" value="src/main/java" />
-              </ant>
+                <ant antfile="../maven/build.xml" target="build-grouplens-jar">
+                  <property name="dest" value="${project.build.directory}"/>
+                  <property name="examples-base" value="src/main/java"/>
+                </ant>
               </tasks>
 
             </configuration>
@@ -180,6 +181,14 @@
       <version>${project.version}</version>
     </dependency>
 
+
+    <!-- A Lucene wikipedia tokenizer/analyzer -->
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-wikipedia</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
+
     <!-- core test -->
     <dependency>
       <groupId>org.apache.mahout</groupId>
@@ -241,10 +250,10 @@
   </dependencies>
 
 
-
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.1-examples</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.1-examples</developerConnection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.1-examples
+    </developerConnection>
     <url>https://svn.apache.org/repos/asf/lucene/mahout/mahout-examples</url>
   </scm>
 </project>

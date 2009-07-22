@@ -34,9 +34,11 @@ import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.GenericsUtil;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.mahout.analysis.WikipediaAnalyzer;
 import org.apache.mahout.utils.CommandLineUtil;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -83,11 +85,13 @@ public class WikipediaDatasetCreatorDriver {
 
     Option exactMatchOpt = obuilder.withLongName("exactMatch").
             withDescription("If set, then the category name must exactly match the entry in the categories file. Default is false").withShortName("e").create();
-
+    Option analyzerOpt = obuilder.withLongName("analyzer").withRequired(false).withArgument(
+            abuilder.withName("analyzer").withMinimum(1).withMaximum(1).create()).
+            withDescription("The analyzer to use, must have a no argument constructor").withShortName("a").create();
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h").create();
 
     Group group = gbuilder.withName("Options").withOption(categoriesOpt).withOption(dirInputPathOpt).withOption(dirOutputPathOpt)
-            .withOption(exactMatchOpt)
+            .withOption(exactMatchOpt).withOption(analyzerOpt)
             .withOption(helpOpt).create();
 
     Parser parser = new Parser();
@@ -103,23 +107,37 @@ public class WikipediaDatasetCreatorDriver {
       String inputPath = (String) cmdLine.getValue(dirInputPathOpt);
       String outputPath = (String) cmdLine.getValue(dirOutputPathOpt);
       String catFile = (String) cmdLine.getValue(categoriesOpt);
-
-      runJob(inputPath, outputPath, catFile, cmdLine.hasOption(exactMatchOpt));
+      Class<? extends Analyzer> analyzerClass = WikipediaAnalyzer.class;
+      if (cmdLine.hasOption(analyzerOpt)) {
+        String className = cmdLine.getValue(analyzerOpt).toString();
+        analyzerClass = (Class<? extends Analyzer>) Class.forName(className);
+        //try instantiating it, b/c there isn't any point in setting it if
+        //you can't instantiate it
+        analyzerClass.newInstance();
+      }
+      runJob(inputPath, outputPath, catFile, cmdLine.hasOption(exactMatchOpt), analyzerClass);
     } catch (OptionException e) {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);
+    } catch (ClassNotFoundException e) {
+      log.error("Exception: Analyzer class not found", e);
+    } catch (IllegalAccessException e) {
+      log.error("Exception: Couldn't instantiate the class", e);
+    } catch (InstantiationException e) {
+      log.error("Exception: Couldn't instantiate the class", e);
     }
   }
 
   /**
    * Run the job
    *
-   * @param input  the input pathname String
-   * @param output the output pathname String
-   * @param catFile the file containing the Wikipedia categories
+   * @param input          the input pathname String
+   * @param output         the output pathname String
+   * @param catFile        the file containing the Wikipedia categories
    * @param exactMatchOnly if true, then the Wikipedia category must match exactly instead of simply containing the category string
    */
-  public static void runJob(String input, String output, String catFile, boolean exactMatchOnly) throws IOException {
+  public static void runJob(String input, String output, String catFile,
+                            boolean exactMatchOnly, Class<? extends Analyzer> analyzerClass) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(WikipediaDatasetCreatorDriver.class);
     if (log.isInfoEnabled()) {
@@ -130,11 +148,11 @@ public class WikipediaDatasetCreatorDriver {
     conf.set("xmlinput.end", "</text>");
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(Text.class);
-
+    conf.setBoolean("exact.match.only", exactMatchOnly);
+    conf.set("analyzer.class", analyzerClass.getName());
     FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(output);
     FileOutputFormat.setOutputPath(conf, outPath);
-
     conf.setMapperClass(WikipediaDatasetCreatorMapper.class);
     conf.setNumMapTasks(100);
     conf.setInputFormat(XmlInputFormat.class);
@@ -146,7 +164,7 @@ public class WikipediaDatasetCreatorDriver {
     // Dont ever forget this. People should keep track of how hadoop conf parameters and make or break a piece of code
 
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath)){
+    if (dfs.exists(outPath)) {
       dfs.delete(outPath, true);
     }
 

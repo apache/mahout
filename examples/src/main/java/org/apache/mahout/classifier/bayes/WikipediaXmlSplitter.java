@@ -68,6 +68,7 @@ public class WikipediaXmlSplitter {
 
     String dumpFilePath = (String) cmdLine.getValue(dumpFileOpt);
     String outputDirPath = (String) cmdLine.getValue(outputDirOpt);
+
     int chunkSize = 1024 * 1024 * Integer.parseInt((String) cmdLine.getValue(chunkSizeOpt));
 
     int numChunks = Integer.MAX_VALUE;
@@ -79,7 +80,7 @@ public class WikipediaXmlSplitter {
         new FileInputStream(dumpFilePath), "UTF-8"));
 
     File dir = new File(outputDirPath);
-
+    dir.mkdirs();
     String header =
           "<mediawiki xmlns=\"http://www.mediawiki.org/xml/export-0.3/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.mediawiki.org/xml/export-0.3/ http://www.mediawiki.org/xml/export-0.3.xsd\" version=\"0.3\" xml:lang=\"en\">\n"
         + "  <siteinfo>\n" + "<sitename>Wikipedia</sitename>\n"

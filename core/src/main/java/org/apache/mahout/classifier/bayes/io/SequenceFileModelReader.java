@@ -98,12 +98,17 @@ public class SequenceFileModelReader {
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
 
       // the key is either _label_ or label,feature
+      long count = 0;
       while (reader.next(key, value)) {
         String keyStr = key.toString();
 
         if (keyStr.charAt(0) == ',') { // Sum of weights for a Feature
           model.setSumFeatureWeight(keyStr.substring(1),
               value.get());
+          count++;
+          if (count % 50000 == 0){
+            log.info("Read {} feature weights", count);
+          }
         }
       }
     }
@@ -121,12 +126,17 @@ public class SequenceFileModelReader {
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
 
       // the key is either _label_ or label,feature
+      long count = 0;
       while (reader.next(key, value)) {
         String keyStr = key.toString();
 
         if (keyStr.charAt(0) == '_') { // Sum of weights in a Label
           model.setSumLabelWeight(keyStr.substring(1), value
               .get());
+          count++;
+          if (count % 10000 == 0){
+            log.info("Read {} label weights", count);
+          }
         }
       }
     }
@@ -144,11 +154,16 @@ public class SequenceFileModelReader {
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
 
       // the key is either _label_ or label,feature
+      long count = 0;
       while (reader.next(key, value)) {
         String keyStr = key.toString();
         if (keyStr.charAt(0) == '_') { // Sum of weights in a Label
           model.setThetaNormalizer(keyStr.substring(1), value
               .get());
+          count++;
+          if (count % 50000 == 0){
+            log.info("Read {} theta norms", count);
+          }
         }
       }
     }

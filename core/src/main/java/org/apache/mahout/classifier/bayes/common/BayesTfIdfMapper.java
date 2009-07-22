@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BayesTfIdfMapper extends MapReduceBase implements
-    Mapper<Text, DoubleWritable, Text, DoubleWritable> {
+        Mapper<Text, DoubleWritable, Text, DoubleWritable> {
 
   private static final Logger log = LoggerFactory.getLogger(BayesTfIdfMapper.class);
 
@@ -48,28 +48,38 @@ public class BayesTfIdfMapper extends MapReduceBase implements
   @Override
   public void map(Text key, DoubleWritable value,
                   OutputCollector<Text, DoubleWritable> output, Reporter reporter)
-      throws IOException {
+          throws IOException {
 
     String labelFeaturePair = key.toString();
 
     char firstChar = labelFeaturePair.charAt(0);
-    if (firstChar == '-') { // if it is the termDocumentCount
-      labelFeaturePair = labelFeaturePair.substring(1);
-      String label = labelFeaturePair.split(",")[0];
+    switch (firstChar) {
+      case '-': {// if it is the termDocumentCount
+        labelFeaturePair = labelFeaturePair.substring(1);
+        //-17th_century_mathematicians_anderson__alexander,1582
+        int idx = labelFeaturePair.indexOf(",");
+        if (idx != -1) {
+          String label = labelFeaturePair.substring(0, idx);
 
-      if (labelDocumentCounts.containsKey(label) == false) {
-
-        throw new IOException(label);
+          Double labelDocumentCount = labelDocumentCounts.get(label);
+          if (labelDocumentCount == null) {
+            throw new IOException("Invalid label: " + label);
+          }
+          double logIdf = Math.log(labelDocumentCount / value.get());
+          output.collect(new Text(labelFeaturePair), new DoubleWritable(logIdf));
+        } else {
+          throw new IOException("Invalid ");
+        }
+        break;
       }
-
-      double labelDocumentCount = labelDocumentCounts.get(label);
-      double logIdf = Math.log(labelDocumentCount / value.get());
-
-      output.collect(new Text(labelFeaturePair), new DoubleWritable(logIdf));
-    } else if (firstChar == ',') {
-      output.collect(new Text("*vocabCount"), new DoubleWritable(1.0));
-    } else {
-      output.collect(key, value);
+      case ',': {
+        output.collect(new Text("*vocabCount"), new DoubleWritable(1.0));
+        break;
+      }
+      default: {
+        output.collect(key, value);
+        break;
+      }
     }
   }
 
@@ -80,7 +90,7 @@ public class BayesTfIdfMapper extends MapReduceBase implements
         labelDocumentCounts = new HashMap<String, Double>();
 
         DefaultStringifier<Map<String, Double>> mapStringifier =
-            new DefaultStringifier<Map<String, Double>>(job, GenericsUtil.getClass(labelDocumentCounts));
+                new DefaultStringifier<Map<String, Double>>(job, GenericsUtil.getClass(labelDocumentCounts));
 
         String labelDocumentCountString = mapStringifier.toString(labelDocumentCounts);
         labelDocumentCountString = job.get("cnaivebayes.labelDocumentCounts", labelDocumentCountString);
