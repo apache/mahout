@@ -85,13 +85,14 @@ public class TestClassifier {
     Option gramSizeOpt = obuilder.withLongName("gramSize").withRequired(true).withArgument(
             abuilder.withName("gramSize").withMinimum(1).withMaximum(1).create()).
             withDescription("Size of the n-gram").withShortName("ng").create();
-
+    Option verboseOutputOpt = obuilder.withLongName("verbose").withRequired(false).
+            withDescription("Output which values were correctly and incorrectly classified").withShortName("v").create();
     Option typeOpt = obuilder.withLongName("classifierType").withRequired(true).withArgument(
             abuilder.withName("classifierType").withMinimum(1).withMaximum(1).create()).
             withDescription("Type of classifier: bayes|cbayes").withShortName("type").create();
 
     Group group = gbuilder.withName("Options").withOption(analyzerOpt).withOption(defaultCatOpt).withOption(dirOpt).withOption(encodingOpt).withOption(gramSizeOpt).withOption(pathOpt)
-            .withOption(typeOpt).create();
+            .withOption(typeOpt).withOption(verboseOutputOpt).create();
 
     Parser parser = new Parser();
     parser.setGroup(group);
@@ -143,6 +144,7 @@ public class TestClassifier {
     if (cmdLine.hasOption(encodingOpt)) {
       encoding = (String) cmdLine.getValue(encodingOpt);
     }
+    boolean verbose = cmdLine.hasOption(verboseOutputOpt);
     //Analyzer analyzer = null;
     //if (cmdLine.hasOption(analyzerOpt)) {
       //String className = (String) cmdLine.getValue(analyzerOpt);
@@ -171,13 +173,15 @@ public class TestClassifier {
     ResultAnalyzer resultAnalyzer = new ResultAnalyzer(model.getLabels(), defaultCat);
 
     if (subdirs != null) {
-      for (File subdir : subdirs) {
-
-        String correctLabel = subdir.getName().split(".txt")[0];
+      for (File file : subdirs) {
+        log.info("--------------");
+        log.info("Testing: " + file);
+        String correctLabel = file.getName().split(".txt")[0];
         BufferedReader fileReader = new BufferedReader(new InputStreamReader(
-            new FileInputStream(subdir.getPath()), encoding));
+            new FileInputStream(file.getPath()), encoding));
         try {
           String line;
+          long lineNum = 0;
           while ((line = fileReader.readLine()) != null) {
   
             Map<String, List<String>> document = Model.generateNGrams(line, gramSize);
@@ -186,8 +190,14 @@ public class TestClassifier {
               ClassifierResult classifiedLabel = classifier.classify(model,
                   strings.toArray(new String[strings.size()]),
                   defaultCat);
-              resultAnalyzer.addInstance(correctLabel, classifiedLabel);
+              boolean correct = resultAnalyzer.addInstance(correctLabel, classifiedLabel);
+              if (verbose == true){
+                //We have one document per line
+                log.info("Line Number: " + lineNum + " Line(30): " + (line.length() > 30 ? line.substring(0, 30) : line) +
+                        " Expected Label: " + correctLabel + " Classified Label: " + classifiedLabel.getLabel() + " Correct: " + correct);
+              }
             }
+            lineNum++;
           }
           log.info("{}\t{}\t{}/{}", new Object[]{
               correctLabel,

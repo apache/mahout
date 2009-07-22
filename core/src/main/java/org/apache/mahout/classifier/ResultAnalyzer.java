@@ -47,13 +47,21 @@ public class ResultAnalyzer implements Summarizable {
     return this.confusionMatrix;
   }
 
-  public void addInstance(String correctLabel, ClassifierResult classifiedResult) {
-    if (correctLabel.equals(classifiedResult.getLabel())) {
+  /**
+   *
+   * @param correctLabel The correct label
+   * @param classifiedResult The classified result
+   * @return whether the instance was correct or not
+   */
+  public boolean addInstance(String correctLabel, ClassifierResult classifiedResult) {
+    boolean result = correctLabel.equals(classifiedResult.getLabel());
+    if (result == true) {
       correctlyClassified++;
     } else {
       incorrectlyClassified++;
     }
     confusionMatrix.addInstance(correctLabel, classifiedResult);
+    return result;
   }
 
   @Override
