@@ -26,20 +26,20 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.cli2.util.HelpFormatter;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.jobcontrol.Job;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Writable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 public class SequenceFileDumper {
 
@@ -63,10 +63,12 @@ public class SequenceFileDumper {
     Option substringOpt = obuilder.withLongName("substring").withRequired(false).withArgument(
             abuilder.withName("substring").withMinimum(1).withMaximum(1).create()).
             withDescription("The number of chars of the asFormatString() to print").withShortName("b").create();
+    Option countOpt = obuilder.withLongName("count").withRequired(false).
+            withDescription("Report the count only").withShortName("c").create();
     Option helpOpt = obuilder.withLongName("help").
             withDescription("Print out help").withShortName("h").create();
 
-    Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt).withOption(substringOpt).create();
+    Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt).withOption(substringOpt).withOption(countOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -89,25 +91,38 @@ public class SequenceFileDumper {
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
 
         Writer writer = null;
-        if (cmdLine.hasOption(outputOpt)){
+        if (cmdLine.hasOption(outputOpt)) {
           writer = new FileWriter(cmdLine.getValue(outputOpt).toString());
         } else {
           writer = new OutputStreamWriter(System.out);
         }
+
         int sub = Integer.MAX_VALUE;
         if (cmdLine.hasOption(substringOpt)) {
           sub = Integer.parseInt(cmdLine.getValue(substringOpt).toString());
         }
+        boolean countOnly = cmdLine.hasOption(countOpt);
+        long count = 0;
         Writable key = (Writable) reader.getKeyClass().newInstance();
         Writable value = (Writable) reader.getValueClass().newInstance();
-        while (reader.next(key, value)){
-          writer.write("Key: " + key);
-          writer.write(": Value: " + value);
-          writer.write(LINE_SEP);
-          writer.flush();
+        if (countOnly == false) {
+          while (reader.next(key, value)) {
+            writer.append("Key: ").append(String.valueOf(key));
+            String str = value.toString();
+            writer.append(": Value: ").append(str.length() > sub ? str.substring(0, sub) : str);
+            writer.write(LINE_SEP);
+            writer.flush();
+            count++;
+          }
+          System.out.println("Count: " + String.valueOf(count) + LINE_SEP);
+        } else {
+          while (reader.next(key, value)) {
+            count++;
+          }
+          System.out.println("Count: " + String.valueOf(count) + LINE_SEP);
         }
-        if (cmdLine.hasOption(outputOpt)){
-          writer.flush();
+        writer.flush();
+        if (cmdLine.hasOption(outputOpt)) {
           writer.close();
         }
       }
