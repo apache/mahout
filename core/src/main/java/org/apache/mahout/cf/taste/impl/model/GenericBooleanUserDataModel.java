@@ -22,6 +22,7 @@ import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -33,7 +34,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 /**
  * TODO many methods here have not been implemented properly yet
@@ -41,7 +42,7 @@ import java.util.Map;
 public final class GenericBooleanUserDataModel implements DataModel, Serializable {
 
   private final List<User> users;
-  private final Map<Object, User> userMap;
+  private final FastMap<Object, User> userMap;
   private final Object[] itemIDs;
   //private final Set<Object> itemIDSet;
 
@@ -49,9 +50,9 @@ public final class GenericBooleanUserDataModel implements DataModel, Serializabl
     if (users == null) {
       throw new IllegalArgumentException("users is null");
     }
-    this.users = new ArrayList<User>();
-    this.userMap = new FastMap<Object, User>();
-    List<Object> itemIDs = new ArrayList<Object>();
+    this.users = new ArrayList<User>(1003);
+    this.userMap = new FastMap<Object, User>(1003);
+    Set<Object> itemIDs = new FastSet<Object>(1003);
     for (User user : users) {
       if (!(user instanceof BooleanPrefUser)) {
         throw new IllegalArgumentException("Must use a source of BooleanPrefUsers");
@@ -60,6 +61,7 @@ public final class GenericBooleanUserDataModel implements DataModel, Serializabl
       userMap.put(user.getID(), user);
       itemIDs.addAll(((BooleanPrefUser) user).getItemIDs());
     }
+    userMap.rehash();
     Collections.sort(this.users);
 
     this.itemIDs = itemIDs.toArray();

@@ -54,10 +54,10 @@ public final class GenericDataModel implements DataModel, Serializable {
   private static final Iterable<Preference> NO_PREFS_ITERABLE = new EmptyIterable<Preference>();
 
   private final List<User> users;
-  private final Map<Object, User> userMap;
+  private final FastMap<Object, User> userMap;
   private final List<Item> items;
-  private final Map<Object, Item> itemMap;
-  private final Map<Object, Preference[]> preferenceForItems;
+  private final FastMap<Object, Item> itemMap;
+  private final FastMap<Object, Preference[]> preferenceForItems;
 
   /**
    * <p>Creates a new {@link GenericDataModel} from the given {@link User}s (and their preferences). This {@link
@@ -75,7 +75,7 @@ public final class GenericDataModel implements DataModel, Serializable {
     this.itemMap = new FastMap<Object, Item>();
     // I'm abusing generics a little here since I want to use this (huge) map to hold Lists,
     // then arrays, and don't want to allocate two Maps at once here.
-    Map<Object, Object> prefsForItems = new FastMap<Object, Object>();
+    FastMap<Object, Object> prefsForItems = new FastMap<Object, Object>();
     int currentCount = 0;
     for (User user : users) {
       userMap.put(user.getID(), user);
@@ -96,6 +96,8 @@ public final class GenericDataModel implements DataModel, Serializable {
         log.info("Processed {} users", currentCount);
       }
     }
+    userMap.rehash();
+    itemMap.rehash();
 
     List<User> usersCopy = new ArrayList<User>(userMap.values());
     Collections.sort(usersCopy);
@@ -105,6 +107,7 @@ public final class GenericDataModel implements DataModel, Serializable {
     Collections.sort(itemsCopy);
     this.items = Collections.unmodifiableList(itemsCopy);
 
+    prefsForItems.rehash();    
     // Swap out lists for arrays here -- using the same Map. This is why the generics mess is worth it.
     for (Map.Entry<Object, Object> entry : prefsForItems.entrySet()) {
       List<Preference> list = (List<Preference>) entry.getValue();
@@ -112,8 +115,9 @@ public final class GenericDataModel implements DataModel, Serializable {
       Arrays.sort(prefsAsArray, ByUserPreferenceComparator.getInstance());
       entry.setValue(prefsAsArray);
     }
+
     // Yeah more generics ugliness
-    this.preferenceForItems = (Map<Object, Preference[]>) (Map<Object, ?>) prefsForItems;
+    this.preferenceForItems = (FastMap<Object, Preference[]>) (FastMap<Object, ?>) prefsForItems;
   }
 
   /**
