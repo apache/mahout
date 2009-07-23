@@ -1,16 +1,15 @@
 package org.apache.mahout.analysis;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.LowerCaseFilter;
+import org.apache.lucene.analysis.StopAnalyzer;
 import org.apache.lucene.analysis.StopFilter;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.StopAnalyzer;
-import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.wikipedia.analysis.WikipediaTokenizer;
 
 import java.io.Reader;
-import java.util.Set;
 
 
 /**
