@@ -20,7 +20,6 @@ package org.apache.mahout.cf.taste.impl;
 import junit.framework.TestCase;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
-import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -47,11 +46,11 @@ public abstract class TasteTestCase extends TestCase {
     int i = 0;
     for (Double value : values) {
       if (value != null) {
-        prefs.add(new GenericPreference(null, new GenericItem<String>(String.valueOf(i)), value));
+        prefs.add(new GenericPreference(null, String.valueOf(i), value));
       }
       i++;
     }
-    return new GenericUser<String>(userID, prefs);
+    return new GenericUser(userID, prefs);
   }
 
   public static DataModel getDataModel(User... users) {

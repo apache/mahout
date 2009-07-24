@@ -20,7 +20,6 @@ package org.apache.mahout.cf.taste.recommender.slopeone;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 
 import java.util.List;
@@ -40,7 +39,7 @@ public interface DiffStorage extends Refreshable {
    *         <code>itemID1</code> and <code>itemID2</code>, in that direction; that is, it's the average of item 2's
    *         preferences minus item 1's preferences
    */
-  RunningAverage getDiff(Object itemID1, Object itemID2) throws TasteException;
+  RunningAverage getDiff(Comparable<?> itemID1, Comparable<?> itemID2) throws TasteException;
 
   /**
    * @param userID user ID to get diffs for
@@ -48,10 +47,10 @@ public interface DiffStorage extends Refreshable {
    * @param prefs  user's preferendces
    * @return {@link List} of {@link RunningAverage} for that user's item-item diffs
    */
-  RunningAverage[] getDiffs(Object userID, Object itemID, Preference[] prefs) throws TasteException;
+  RunningAverage[] getDiffs(Comparable<?> userID, Comparable<?> itemID, Preference[] prefs) throws TasteException;
 
   /** @return {@link RunningAverage} encapsulating the average preference for the given item */
-  RunningAverage getAverageItemPref(Object itemID) throws TasteException;
+  RunningAverage getAverageItemPref(Comparable<?> itemID) throws TasteException;
 
   /**
    * <p>Updates internal data structures to reflect an update in a preference value for an item.</p>
@@ -60,12 +59,12 @@ public interface DiffStorage extends Refreshable {
    * @param prefDelta amount by which preference value changed (or its old value, if being removed
    * @param remove    if <code>true</code>, operation reflects a removal rather than change of preference
    */
-  void updateItemPref(Object itemID, double prefDelta, boolean remove) throws TasteException;
+  void updateItemPref(Comparable<?> itemID, double prefDelta, boolean remove) throws TasteException;
 
   /**
-   * @return {@link Item}s that may possibly be recommended to the given user, which may not be all {@link Item}s since
-   *         the item-item diff matrix may be sparses
+   * @return item IDs that may possibly be recommended to the given user, which may not be all items since
+   *         the item-item diff matrix may be sparse
    */
-  Set<Item> getRecommendableItems(Object userID) throws TasteException;
+  Set<Comparable<?>> getRecommendableItemIDs(Comparable<?> userID) throws TasteException;
 
 }

@@ -24,7 +24,6 @@ import org.apache.mahout.cf.taste.impl.model.ByItemPreferenceComparator;
 import org.apache.mahout.cf.taste.impl.model.ByValuePreferenceComparator;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
@@ -91,7 +90,7 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
     }
 
     @Override
-    public Object getID() {
+    public Comparable<?> getID() {
       return delegate.getID();
     }
 
@@ -99,7 +98,7 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
      * @throws UnsupportedOperationException
      */
     @Override
-    public Preference getPreferenceFor(Object itemID) {
+    public Preference getPreferenceFor(Comparable<?> itemID) {
       throw new UnsupportedOperationException();
     }
 
@@ -107,7 +106,7 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
      * @throws UnsupportedOperationException
      */
     @Override
-    public void setPreference(Item item, double value) {
+    public void setPreference(Comparable<?> itemID, double value) {
       throw new UnsupportedOperationException();
     }
 
@@ -115,7 +114,7 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
      * @throws UnsupportedOperationException
      */
     @Override
-    public void removePreference(Object itemID) {
+    public void removePreference(Comparable<?> itemID) {
       throw new UnsupportedOperationException();
     }
 
@@ -132,7 +131,7 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
       System.arraycopy(source, 0, sortedPrefs, 0, length);
       Arrays.sort(sortedPrefs, ByValuePreferenceComparator.getInstance());
       for (int i = 0; i < length; i++) {
-        sortedPrefs[i] = new GenericPreference(this, sortedPrefs[i].getItem(), (double) (i + 1));
+        sortedPrefs[i] = new GenericPreference(this, sortedPrefs[i].getItemID(), (double) (i + 1));
       }
       Arrays.sort(sortedPrefs, ByItemPreferenceComparator.getInstance());
       return sortedPrefs;

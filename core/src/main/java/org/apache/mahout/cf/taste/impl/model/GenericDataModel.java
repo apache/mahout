@@ -26,7 +26,6 @@ import org.apache.mahout.cf.taste.impl.common.EmptyIterable;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.slf4j.Logger;
@@ -54,10 +53,9 @@ public final class GenericDataModel implements DataModel, Serializable {
   private static final Iterable<Preference> NO_PREFS_ITERABLE = new EmptyIterable<Preference>();
 
   private final List<User> users;
-  private final FastMap<Object, User> userMap;
-  private final List<Item> items;
-  private final FastMap<Object, Item> itemMap;
-  private final FastMap<Object, Preference[]> preferenceForItems;
+  private final FastMap<Comparable<?>, User> userMap;
+  private final List<Comparable<?>> itemIDs;
+  private final FastMap<Comparable<?>, Preference[]> preferenceForItems;
 
   /**
    * <p>Creates a new {@link GenericDataModel} from the given {@link User}s (and their preferences). This {@link
@@ -71,19 +69,18 @@ public final class GenericDataModel implements DataModel, Serializable {
       throw new IllegalArgumentException("users is null");
     }
 
-    this.userMap = new FastMap<Object, User>();
-    this.itemMap = new FastMap<Object, Item>();
+    this.userMap = new FastMap<Comparable<?>, User>();
     // I'm abusing generics a little here since I want to use this (huge) map to hold Lists,
     // then arrays, and don't want to allocate two Maps at once here.
-    FastMap<Object, Object> prefsForItems = new FastMap<Object, Object>();
+    FastMap<Comparable<?>, Object> prefsForItems = new FastMap<Comparable<?>, Object>();
+    FastSet<Comparable<?>> itemIDSet = new FastSet<Comparable<?>>();
     int currentCount = 0;
     for (User user : users) {
       userMap.put(user.getID(), user);
       Preference[] prefsArray = user.getPreferencesAsArray();
       for (Preference preference : prefsArray) {
-        Item item = preference.getItem();
-        Object itemID = item.getID();
-        itemMap.put(itemID, item);
+        Comparable<?> itemID = preference.getItemID();
+        itemIDSet.add(itemID);
         List<Preference> prefsForItem = (List<Preference>) prefsForItems.get(itemID);
         if (prefsForItem == null) {
           prefsForItem = new ArrayList<Preference>();
@@ -97,19 +94,16 @@ public final class GenericDataModel implements DataModel, Serializable {
       }
     }
     userMap.rehash();
-    itemMap.rehash();
 
-    List<User> usersCopy = new ArrayList<User>(userMap.values());
-    Collections.sort(usersCopy);
-    this.users = Collections.unmodifiableList(usersCopy);
+    this.users = new ArrayList<User>(userMap.values());
+    Collections.sort(this.users);
 
-    List<Item> itemsCopy = new ArrayList<Item>(itemMap.values());
-    Collections.sort(itemsCopy);
-    this.items = Collections.unmodifiableList(itemsCopy);
+    this.itemIDs = new ArrayList<Comparable<?>>(itemIDSet);
+    Collections.sort((List<? extends Comparable>) this.itemIDs);
 
     prefsForItems.rehash();    
     // Swap out lists for arrays here -- using the same Map. This is why the generics mess is worth it.
-    for (Map.Entry<Object, Object> entry : prefsForItems.entrySet()) {
+    for (Map.Entry<Comparable<?>, Object> entry : prefsForItems.entrySet()) {
       List<Preference> list = (List<Preference>) entry.getValue();
       Preference[] prefsAsArray = list.toArray(new Preference[list.size()]);
       Arrays.sort(prefsAsArray, ByUserPreferenceComparator.getInstance());
@@ -117,7 +111,7 @@ public final class GenericDataModel implements DataModel, Serializable {
     }
 
     // Yeah more generics ugliness
-    this.preferenceForItems = (FastMap<Object, Preference[]>) (FastMap<Object, ?>) prefsForItems;
+    this.preferenceForItems = (FastMap<Comparable<?>, Preference[]>) (FastMap<Comparable<?>, ?>) prefsForItems;
   }
 
   /**
@@ -138,7 +132,7 @@ public final class GenericDataModel implements DataModel, Serializable {
 
   /** @throws NoSuchUserException if there is no such {@link User} */
   @Override
-  public User getUser(Object id) throws NoSuchUserException {
+  public User getUser(Comparable<?> id) throws NoSuchUserException {
     User user = userMap.get(id);
     if (user == null) {
       throw new NoSuchUserException();
@@ -147,35 +141,25 @@ public final class GenericDataModel implements DataModel, Serializable {
   }
 
   @Override
-  public Iterable<? extends Item> getItems() {
-    return items;
-  }
-
-  /** @throws NoSuchItemException if there is no such {@link Item} */
-  @Override
-  public Item getItem(Object id) throws NoSuchItemException {
-    Item item = itemMap.get(id);
-    if (item == null) {
-      throw new NoSuchItemException();
-    }
-    return item;
+  public Iterable<Comparable<?>> getItemIDs() {
+    return itemIDs;
   }
 
   @Override
-  public Iterable<? extends Preference> getPreferencesForItem(Object itemID) {
+  public Iterable<? extends Preference> getPreferencesForItem(Comparable<?> itemID) {
     Preference[] prefs = preferenceForItems.get(itemID);
     return prefs == null ? NO_PREFS_ITERABLE : new ArrayIterator<Preference>(prefs);
   }
 
   @Override
-  public Preference[] getPreferencesForItemAsArray(Object itemID) {
+  public Preference[] getPreferencesForItemAsArray(Comparable<?> itemID) {
     Preference[] prefs = preferenceForItems.get(itemID);
     return prefs == null ? NO_PREFS_ARRAY : prefs;
   }
 
   @Override
   public int getNumItems() {
-    return items.size();
+    return itemIDs.size();
   }
 
   @Override
@@ -184,7 +168,7 @@ public final class GenericDataModel implements DataModel, Serializable {
   }
 
   @Override
-  public int getNumUsersWithPreferenceFor(Object... itemIDs) {
+  public int getNumUsersWithPreferenceFor(Comparable<?>... itemIDs) {
     if (itemIDs == null) {
       throw new IllegalArgumentException("itemIDs is null");
     }
@@ -201,11 +185,11 @@ public final class GenericDataModel implements DataModel, Serializable {
       if (prefs1 == null || prefs2 == null) {
         return 0;
       }
-      Set<Object> users1 = new FastSet<Object>(prefs1.length);
+      Set<Comparable<?>> users1 = new FastSet<Comparable<?>>(prefs1.length);
       for (Preference aPrefs1 : prefs1) {
         users1.add(aPrefs1.getUser().getID());
       }
-      Set<Object> users2 = new FastSet<Object>(prefs2.length);
+      Set<Comparable<?>> users2 = new FastSet<Comparable<?>>(prefs2.length);
       for (Preference aPrefs2 : prefs2) {
         users2.add(aPrefs2.getUser().getID());
       }
@@ -215,13 +199,13 @@ public final class GenericDataModel implements DataModel, Serializable {
   }
 
   @Override
-  public void setPreference(Object userID, Object itemID, double value)
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value)
       throws NoSuchUserException, NoSuchItemException {
-    getUser(userID).setPreference(getItem(itemID), value);
+    getUser(userID).setPreference(itemID, value);
   }
 
   @Override
-  public void removePreference(Object userID, Object itemID) throws NoSuchUserException {
+  public void removePreference(Comparable<?> userID, Comparable<?> itemID) throws NoSuchUserException {
     getUser(userID).removePreference(itemID);
   }
 

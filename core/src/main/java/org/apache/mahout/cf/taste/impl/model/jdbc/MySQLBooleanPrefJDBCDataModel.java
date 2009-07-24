@@ -111,8 +111,6 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
         "SELECT " + itemIDColumn + ", " + userIDColumn + " FROM " + preferenceTable + " ORDER BY " + userIDColumn,
         // getItemsSQL
         "SELECT DISTINCT " + itemIDColumn + " FROM " + preferenceTable + " ORDER BY " + itemIDColumn,
-        // getItemSQL
-        "SELECT 1 FROM " + preferenceTable + " WHERE " + itemIDColumn + "=?",
         // getPrefsForItemSQL
         "SELECT " + userIDColumn + " FROM " +
             preferenceTable + " WHERE " + itemIDColumn + "=? ORDER BY " + userIDColumn,

@@ -60,7 +60,8 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
    * @param dataModel      data model
    * @throws IllegalArgumentException if n &lt; 1, or userSimilarity or dataModel are <code>null</code>
    */
-  public NearestNUserNeighborhood(int n, double minSimilarity,
+  public NearestNUserNeighborhood(int n,
+                                  double minSimilarity,
                                   UserSimilarity userSimilarity,
                                   DataModel dataModel) {
     this(n, minSimilarity, userSimilarity, dataModel, 1.0);
@@ -89,7 +90,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
   }
 
   @Override
-  public Collection<User> getUserNeighborhood(Object userID) throws TasteException {
+  public Collection<User> getUserNeighborhood(Comparable<?> userID) throws TasteException {
     log.trace("Computing neighborhood around user ID '{}'", userID);
 
     DataModel dataModel = getDataModel();

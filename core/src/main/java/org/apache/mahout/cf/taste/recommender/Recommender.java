@@ -20,12 +20,11 @@ package org.apache.mahout.cf.taste.recommender;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 
 import java.util.List;
 
 /**
- * <p>Implementations of this interface can recommend {@link Item}s for a {@link org.apache.mahout.cf.taste.model.User}.
+ * <p>Implementations of this interface can recommend items for a {@link org.apache.mahout.cf.taste.model.User}.
  * Implementations will likely take advantage of several classes in other packages here to compute this.</p>
  */
 public interface Recommender extends Refreshable {
@@ -36,7 +35,7 @@ public interface Recommender extends Refreshable {
    * @return {@link List} of recommended {@link RecommendedItem}s, ordered from most strongly recommend to least
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
-  List<RecommendedItem> recommend(Object userID, int howMany) throws TasteException;
+  List<RecommendedItem> recommend(Comparable<?> userID, int howMany) throws TasteException;
 
   /**
    * @param userID   user for which recommendations are to be computed
@@ -45,7 +44,8 @@ public interface Recommender extends Refreshable {
    * @return {@link List} of recommended {@link RecommendedItem}s, ordered from most strongly recommend to least
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
-  List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer) throws TasteException;
+  List<RecommendedItem> recommend(Comparable<?> userID, int howMany, Rescorer<Comparable<?>> rescorer)
+          throws TasteException;
 
   /**
    * @param userID user ID whose preference is to be estimated
@@ -54,7 +54,7 @@ public interface Recommender extends Refreshable {
    *         preference for the item. If a preference cannot be estimated, returns {@link Double#NaN}
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
-  double estimatePreference(Object userID, Object itemID) throws TasteException;
+  double estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException;
 
   /**
    * @param userID user to set preference for
@@ -62,14 +62,14 @@ public interface Recommender extends Refreshable {
    * @param value  preference value
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
-  void setPreference(Object userID, Object itemID, double value) throws TasteException;
+  void setPreference(Comparable<?> userID, Comparable<?> itemID, double value) throws TasteException;
 
   /**
    * @param userID user from which to remove preference
    * @param itemID item for which to remove preference
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
-  void removePreference(Object userID, Object itemID) throws TasteException;
+  void removePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException;
 
   /** @return {@link DataModel} used by this {@link Recommender} */
   DataModel getDataModel();

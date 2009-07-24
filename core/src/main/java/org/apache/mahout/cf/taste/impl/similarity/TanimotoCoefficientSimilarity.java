@@ -21,7 +21,6 @@ import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
@@ -31,7 +30,8 @@ import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import java.util.Collection;
 
 /**
- * <p>An implementation of a "similarity" based on the <a href="http://en.wikipedia.org/wiki/Jaccard_index#Tanimoto_coefficient_.28extended_Jaccard_coefficient.29">
+ * <p>An implementation of a "similarity" based on the
+ * <a href="http://en.wikipedia.org/wiki/Jaccard_index#Tanimoto_coefficient_.28extended_Jaccard_coefficient.29">
  * Tanimoto coefficient</a>, or extended <a href="http://en.wikipedia.org/wiki/Jaccard_index">Jaccard
  * coefficient</a>.</p>
  *
@@ -81,13 +81,13 @@ public final class TanimotoCoefficientSimilarity implements UserSimilarity, Item
   }
 
   @Override
-  public double itemSimilarity(Item item1, Item item2) throws TasteException {
-    if (item1 == null || item2 == null) {
-      throw new IllegalArgumentException("item1 or item2 is null");
+  public double itemSimilarity(Comparable<?> itemID1, Comparable<?> itemID2) throws TasteException {
+    if (itemID1 == null || itemID2 == null) {
+      throw new IllegalArgumentException("itemID1 or itemID2 is null");
     }
-    int preferring1and2 = dataModel.getNumUsersWithPreferenceFor(item1.getID(), item2.getID());
-    int preferring1 = dataModel.getNumUsersWithPreferenceFor(item1.getID());
-    int preferring2 = dataModel.getNumUsersWithPreferenceFor(item2.getID());
+    int preferring1and2 = dataModel.getNumUsersWithPreferenceFor(itemID1, itemID2);
+    int preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
+    int preferring2 = dataModel.getNumUsersWithPreferenceFor(itemID2);
     return (double) preferring1and2 / (double) (preferring1 + preferring2 - preferring1and2);
   }
 

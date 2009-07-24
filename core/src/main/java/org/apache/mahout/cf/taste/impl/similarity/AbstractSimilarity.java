@@ -22,7 +22,6 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Weighting;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
@@ -40,7 +39,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
   private final DataModel dataModel;
   private PreferenceInferrer inferrer;
   private PreferenceTransform prefTransform;
-  private SimilarityTransform<Object> similarityTransform;
+  private SimilarityTransform<Comparable<?>> similarityTransform;
   private boolean weighted;
   private int cachedNumItems;
   private int cachedNumUsers;
@@ -99,11 +98,11 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     this.prefTransform = prefTransform;
   }
 
-  public final SimilarityTransform<Object> getSimilarityTransform() {
+  public final SimilarityTransform<Comparable<?>> getSimilarityTransform() {
     return similarityTransform;
   }
 
-  public final void setSimilarityTransform(SimilarityTransform<Object> similarityTransform) {
+  public final void setSimilarityTransform(SimilarityTransform<Comparable<?>> similarityTransform) {
     refreshHelper.addDependency(similarityTransform);
     refreshHelper.removeDependency(this.similarityTransform);
     this.similarityTransform = similarityTransform;
@@ -128,7 +127,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
    * @param sumY2      sum of the square of the user/item preference values, over the second item/user
    * @param sumXYdiff2 sum of squares of differences in X and Y values
    * @return similarity value between -1.0 and 1.0, inclusive, or {@link Double#NaN} if no similarity can be computed
-   *         (e.g. when no {@link Item}s have been rated by both {@link User}s
+   *         (e.g. when no items have been rated by both {@link User}s
    */
   abstract double computeResult(int n, double sumXY, double sumX2, double sumY2, double sumXYdiff2);
 
@@ -148,8 +147,8 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
 
     Preference xPref = xPrefs[0];
     Preference yPref = yPrefs[0];
-    Item xIndex = xPref.getItem();
-    Item yIndex = yPref.getItem();
+    Comparable<?> xIndex = xPref.getItemID();
+    Comparable<?> yIndex = yPref.getItemID();
     int xPrefIndex = 1;
     int yPrefIndex = 1;
 
@@ -165,7 +164,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     boolean hasPrefTransform = prefTransform != null;
 
     while (true) {
-      int compare = xIndex.compareTo(yIndex);
+      int compare = ((Comparable<Object>) xIndex).compareTo(yIndex);
       if (hasInferrer || compare == 0) {
         double x;
         double y;
@@ -206,14 +205,14 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
           break;
         }
         xPref = xPrefs[xPrefIndex++];
-        xIndex = xPref.getItem();
+        xIndex = xPref.getItemID();
       }
       if (compare >= 0) {
         if (yPrefIndex == yPrefs.length) {
           break;
         }
         yPref = yPrefs[yPrefIndex++];
-        yIndex = yPref.getItem();
+        yIndex = yPref.getItemID();
       }
     }
 
@@ -241,14 +240,14 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
   }
 
   @Override
-  public final double itemSimilarity(Item item1, Item item2) throws TasteException {
+  public final double itemSimilarity(Comparable<?> itemID1, Comparable<?> itemID2) throws TasteException {
 
-    if (item1 == null || item2 == null) {
+    if (itemID1 == null || itemID2 == null) {
       throw new IllegalArgumentException("item1 or item2 is null");
     }
 
-    Preference[] xPrefs = dataModel.getPreferencesForItemAsArray(item1.getID());
-    Preference[] yPrefs = dataModel.getPreferencesForItemAsArray(item2.getID());
+    Preference[] xPrefs = dataModel.getPreferencesForItemAsArray(itemID1);
+    Preference[] yPrefs = dataModel.getPreferencesForItemAsArray(itemID2);
 
     if (xPrefs.length == 0 || yPrefs.length == 0) {
       return Double.NaN;
@@ -316,7 +315,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     double result = computeResult(count, centeredSumXY, centeredSumX2, centeredSumY2, sumXYdiff2);
 
     if (similarityTransform != null) {
-      result = similarityTransform.transformSimilarity(item1, item2, result);
+      result = similarityTransform.transformSimilarity(itemID1, itemID2, result);
     }
 
     if (!Double.isNaN(result)) {

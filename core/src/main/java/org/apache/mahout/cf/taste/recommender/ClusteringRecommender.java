@@ -32,7 +32,7 @@ public interface ClusteringRecommender extends Recommender {
    * @return {@link Collection} of {@link User}s in the requested user's cluster
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
-  Collection<User> getCluster(Object userID) throws TasteException;
+  Collection<User> getCluster(Comparable<?> userID) throws TasteException;
 
   /**
    * <p>Returns all clusters of users.</p>

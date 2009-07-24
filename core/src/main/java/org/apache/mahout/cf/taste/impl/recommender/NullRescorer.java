@@ -18,19 +18,19 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.impl.common.Pair;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 /** <p>A simple {@link Rescorer} which always returns the original score.</p> */
 public final class NullRescorer<T> implements Rescorer<T> {
 
-  private static final Rescorer<Item> itemInstance = new NullRescorer<Item>();
+  private static final Rescorer<Comparable<?>> itemInstance = new NullRescorer<Comparable<?>>();
   private static final Rescorer<User> userInstance = new NullRescorer<User>();
-  private static final Rescorer<Pair<Item, Item>> itemItemPairInstance = new NullRescorer<Pair<Item, Item>>();
+  private static final Rescorer<Pair<Comparable<?>, Comparable<?>>> itemItemPairInstance =
+          new NullRescorer<Pair<Comparable<?>, Comparable<?>>>();
   private static final Rescorer<Pair<User, User>> userUserPairInstance = new NullRescorer<Pair<User, User>>();
 
-  public static Rescorer<Item> getItemInstance() {
+  public static Rescorer<Comparable<?>> getItemInstance() {
     return itemInstance;
   }
 
@@ -38,7 +38,7 @@ public final class NullRescorer<T> implements Rescorer<T> {
     return userInstance;
   }
 
-  public static Rescorer<Pair<Item, Item>> getItemItemPairInstance() {
+  public static Rescorer<Pair<Comparable<?>, Comparable<?>>> getItemItemPairInstance() {
     return itemItemPairInstance;
   }
 
@@ -52,7 +52,7 @@ public final class NullRescorer<T> implements Rescorer<T> {
 
   /**
    * @param thing         to rescore
-   * @param originalScore current score for {@link Item}
+   * @param originalScore current score for item
    * @return same originalScore as new score, always
    */
   @Override

@@ -20,7 +20,6 @@ package org.apache.mahout.cf.taste.impl.recommender;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
@@ -44,22 +43,22 @@ public abstract class AbstractRecommender implements Recommender {
   }
 
   /**
-   * <p>Default implementation which just calls {@link Recommender#recommend(Object, int,
+   * <p>Default implementation which just calls {@link Recommender#recommend(Comparable, int,
    * org.apache.mahout.cf.taste.recommender.Rescorer)}, with a {@link org.apache.mahout.cf.taste.recommender.Rescorer}
    * that does nothing.</p>
    */
   @Override
-  public List<RecommendedItem> recommend(Object userID, int howMany) throws TasteException {
+  public List<RecommendedItem> recommend(Comparable<?> userID, int howMany) throws TasteException {
     return recommend(userID, howMany, null);
   }
 
   /**
-   * <p>Default implementation which just calls {@link DataModel#setPreference(Object, Object, double)}.</p>
+   * <p>Default implementation which just calls {@link DataModel#setPreference(Comparable, Comparable, double)}.</p>
    *
    * @throws IllegalArgumentException if userID or itemID is <code>null</code>, or if value is {@link Double#NaN}
    */
   @Override
-  public void setPreference(Object userID, Object itemID, double value) throws TasteException {
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value) throws TasteException {
     if (userID == null || itemID == null) {
       throw new IllegalArgumentException("userID or itemID is null");
     }
@@ -73,13 +72,13 @@ public abstract class AbstractRecommender implements Recommender {
   }
 
   /**
-   * <p>Default implementation which just calls {@link DataModel#removePreference(Object, Object)} (Object,
+   * <p>Default implementation which just calls {@link DataModel#removePreference(Comparable, Comparable)} (Object,
    * Object)}.</p>
    *
    * @throws IllegalArgumentException if userID or itemID is <code>null</code>
    */
   @Override
-  public void removePreference(Object userID, Object itemID) throws TasteException {
+  public void removePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
     if (userID == null || itemID == null) {
       throw new IllegalArgumentException("userID or itemID is null");
     }
@@ -94,21 +93,21 @@ public abstract class AbstractRecommender implements Recommender {
 
   /**
    * @param theUser {@link User} being evaluated
-   * @return all {@link Item}s in the {@link DataModel} for which the {@link User} has not expressed a preference
-   * @throws TasteException if an error occurs while listing {@link Item}s
+   * @return all items in the {@link DataModel} for which the {@link User} has not expressed a preference
+   * @throws TasteException if an error occurs while listing items
    */
-  protected Set<Item> getAllOtherItems(User theUser) throws TasteException {
+  protected Set<Comparable<?>> getAllOtherItems(User theUser) throws TasteException {
     if (theUser == null) {
       throw new IllegalArgumentException("theUser is null");
     }
-    Set<Item> allItems = new FastSet<Item>(dataModel.getNumItems());
-    for (Item item : dataModel.getItems()) {
+    Set<Comparable<?>> allItemIDs = new FastSet<Comparable<?>>(dataModel.getNumItems());
+    for (Comparable<?> itemID : dataModel.getItemIDs()) {
       // If not already preferred by the user, add it
-      if (theUser.getPreferenceFor(item.getID()) == null) {
-        allItems.add(item);
+      if (theUser.getPreferenceFor(itemID) == null) {
+        allItemIDs.add(itemID);
       }
     }
-    return allItems;
+    return allItemIDs;
   }
 
 }

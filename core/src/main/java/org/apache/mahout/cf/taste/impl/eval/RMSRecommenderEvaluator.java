@@ -49,7 +49,7 @@ public final class RMSRecommenderEvaluator extends AbstractDifferenceRecommender
         User testUser = entry.getKey();
         try {
           double estimatedPreference =
-              recommender.estimatePreference(testUser.getID(), realPref.getItem().getID());
+              recommender.estimatePreference(testUser.getID(), realPref.getItemID());
           if (!Double.isNaN(estimatedPreference)) {
             double diff = realPref.getValue() - estimatedPreference;
             average.addDatum(diff * diff);

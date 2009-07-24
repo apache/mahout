@@ -76,7 +76,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
   }
 
   @Override
-  public Collection<User> getUserNeighborhood(Object userID) throws TasteException {
+  public Collection<User> getUserNeighborhood(Comparable<?> userID) throws TasteException {
     log.trace("Computing neighborhood around user ID '{}'", userID);
 
     DataModel dataModel = getDataModel();

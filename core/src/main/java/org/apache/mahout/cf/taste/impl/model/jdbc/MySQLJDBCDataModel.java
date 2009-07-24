@@ -162,8 +162,6 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
             preferenceTable + " ORDER BY " + userIDColumn + ", " + itemIDColumn,
         // getItemsSQL
         "SELECT DISTINCT " + itemIDColumn + " FROM " + preferenceTable + " ORDER BY " + itemIDColumn,
-        // getItemSQL
-        "SELECT 1 FROM " + preferenceTable + " WHERE " + itemIDColumn + "=?",
         // getPrefsForItemSQL
         "SELECT " + preferenceColumn + ", " + userIDColumn + " FROM " +
             preferenceTable + " WHERE " + itemIDColumn + "=? ORDER BY " + userIDColumn,

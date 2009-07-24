@@ -29,7 +29,6 @@ import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.recommender.AbstractRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
@@ -37,7 +36,6 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.uncommons.maths.statistics.DataSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,7 +47,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 /**
- * <p>A {@link Recommender} which uses Single Value Decomposition to find the main features of the {@link DataSet}.
+ * <p>A {@link Recommender} which uses Single Value Decomposition to find the main features of the data set.
  * Thanks to Simon Funk for the hints in the implementation.
  */
 public final class SVDRecommender extends AbstractRecommender {
@@ -62,8 +60,8 @@ public final class SVDRecommender extends AbstractRecommender {
   /** Number of features */
   private final int numFeatures;
 
-  private final Map<Object, Integer> userMap;
-  private Map<Object, Integer> itemMap;
+  private final Map<Comparable<?>, Integer> userMap;
+  private Map<Comparable<?>, Integer> itemMap;
   private ExpectationMaximizationSVD emSvd;
   private final List<Preference> cachedPreferences;
 
@@ -83,7 +81,7 @@ public final class SVDRecommender extends AbstractRecommender {
     this.numFeatures = numFeatures;
 
     int numUsers = dataModel.getNumUsers();
-    userMap = new FastMap<Object, Integer>(numUsers);
+    userMap = new FastMap<Comparable<?>, Integer>(numUsers);
 
     int idx = 0;
     for (User user : dataModel.getUsers()) {
@@ -91,11 +89,11 @@ public final class SVDRecommender extends AbstractRecommender {
     }
 
     int numItems = dataModel.getNumItems();
-    itemMap = new FastMap<Object, Integer>(numItems);
+    itemMap = new FastMap<Comparable<?>, Integer>(numItems);
 
     idx = 0;
-    for (Item item : dataModel.getItems()) {
-      itemMap.put(item.getID(), idx++);
+    for (Comparable<?> itemID : dataModel.getItemIDs()) {
+      itemMap.put(itemID, idx++);
     }
 
     double average = getAveragePreference();
@@ -147,7 +145,7 @@ public final class SVDRecommender extends AbstractRecommender {
     for (int i = 0; i < numFeatures; i++) {
       for (Preference pref : cachedPreferences) {
         int useridx = userMap.get(pref.getUser().getID());
-        int itemidx = itemMap.get(pref.getItem().getID());
+        int itemidx = itemMap.get(pref.getItemID());
         emSvd.train(useridx, itemidx, i, pref.getValue());
       }
     }
@@ -159,7 +157,7 @@ public final class SVDRecommender extends AbstractRecommender {
 
 
   @Override
-  public double estimatePreference(Object userID, Object itemID) throws TasteException {
+  public double estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
     Integer useridx = userMap.get(userID);
     if (useridx == null) {
       throw new NoSuchUserException();
@@ -172,8 +170,9 @@ public final class SVDRecommender extends AbstractRecommender {
   }
 
   @Override
-  public List<RecommendedItem> recommend(Object userID, int howMany,
-                                         Rescorer<Item> rescorer) throws TasteException {
+  public List<RecommendedItem> recommend(Comparable<?> userID, 
+                                         int howMany,
+                                         Rescorer<Comparable<?>> rescorer) throws TasteException {
     if (userID == null) {
       throw new IllegalArgumentException("userID is null");
     }
@@ -185,11 +184,11 @@ public final class SVDRecommender extends AbstractRecommender {
 
     User theUser = getDataModel().getUser(userID);
 
-    Set<Item> allItems = getAllOtherItems(theUser);
+    Set<Comparable<?>> allItemIDs = getAllOtherItems(theUser);
 
-    TopItems.Estimator<Item> estimator = new Estimator(theUser);
+    TopItems.Estimator<Comparable<?>> estimator = new Estimator(theUser);
 
-    List<RecommendedItem> topItems = TopItems.getTopItems(howMany, allItems, rescorer, estimator);
+    List<RecommendedItem> topItems = TopItems.getTopItems(howMany, allItemIDs, rescorer, estimator);
 
     log.debug("Recommendations are: {}", topItems);
     return topItems;
@@ -205,7 +204,7 @@ public final class SVDRecommender extends AbstractRecommender {
     return "SVDRecommender[numFeatures:" + numFeatures + ']';
   }
 
-  private final class Estimator implements TopItems.Estimator<Item> {
+  private final class Estimator implements TopItems.Estimator<Comparable<?>> {
 
     private final User theUser;
 
@@ -214,8 +213,8 @@ public final class SVDRecommender extends AbstractRecommender {
     }
 
     @Override
-    public double estimate(Item item) throws TasteException {
-      return estimatePreference(theUser.getID(), item.getID());
+    public double estimate(Comparable<?> itemID) throws TasteException {
+      return estimatePreference(theUser.getID(), itemID);
     }
   }
 

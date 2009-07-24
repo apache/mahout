@@ -19,10 +19,8 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
-import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
@@ -45,40 +43,40 @@ final class MockRecommender implements Recommender {
   }
 
   @Override
-  public List<RecommendedItem> recommend(Object userID, int howMany) {
+  public List<RecommendedItem> recommend(Comparable<?> userID, int howMany) {
     recommendCount.incrementAndGet();
     return Collections.<RecommendedItem>singletonList(
-        new GenericRecommendedItem(new GenericItem<String>("1"), 1.0));
+        new GenericRecommendedItem("1", 1.0));
   }
 
   @Override
-  public List<RecommendedItem> recommend(Object userID,
+  public List<RecommendedItem> recommend(Comparable<?> userID,
                                          int howMany,
-                                         Rescorer<Item> rescorer) {
+                                         Rescorer<Comparable<?>> rescorer) {
     return recommend(userID, howMany);
   }
 
   @Override
-  public double estimatePreference(Object userID, Object itemID) {
+  public double estimatePreference(Comparable<?> userID, Comparable<?> itemID) {
     recommendCount.incrementAndGet();
     return 0.0;
   }
 
   @Override
-  public void setPreference(Object userID, Object itemID, double value) {
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value) {
     // do nothing
   }
 
   @Override
-  public void removePreference(Object userID, Object itemID) {
+  public void removePreference(Comparable<?> userID, Comparable<?> itemID) {
     // do nothing
   }
 
   @Override
   public DataModel getDataModel() {
-    User user1 = new GenericUser<String>("1", Collections.<Preference>emptyList());
-    User user2 = new GenericUser<String>("2", Collections.<Preference>emptyList());
-    User user3 = new GenericUser<String>("3", Collections.<Preference>emptyList());
+    User user1 = new GenericUser("1", Collections.<Preference>emptyList());
+    User user2 = new GenericUser("2", Collections.<Preference>emptyList());
+    User user3 = new GenericUser("3", Collections.<Preference>emptyList());
     List<User> users = new ArrayList<User>(3);
     users.add(user1);
     users.add(user2);

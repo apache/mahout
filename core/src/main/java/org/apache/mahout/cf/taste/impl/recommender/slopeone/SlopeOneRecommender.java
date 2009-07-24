@@ -27,7 +27,6 @@ import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.recommender.AbstractRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
@@ -97,7 +96,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
   }
 
   @Override
-  public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
+  public List<RecommendedItem> recommend(Comparable<?> userID, int howMany, Rescorer<Comparable<?>> rescorer)
       throws TasteException {
     if (userID == null) {
       throw new IllegalArgumentException("userID is null");
@@ -109,18 +108,18 @@ public final class SlopeOneRecommender extends AbstractRecommender {
     log.debug("Recommending items for user ID '{}'", userID);
 
     User theUser = getDataModel().getUser(userID);
-    Set<Item> allItems = diffStorage.getRecommendableItems(userID);
+    Set<Comparable<?>> allItemIDs = diffStorage.getRecommendableItemIDs(userID);
 
-    TopItems.Estimator<Item> estimator = new Estimator(theUser);
+    TopItems.Estimator<Comparable<?>> estimator = new Estimator(theUser);
 
-    List<RecommendedItem> topItems = TopItems.getTopItems(howMany, allItems, rescorer, estimator);
+    List<RecommendedItem> topItems = TopItems.getTopItems(howMany, allItemIDs, rescorer, estimator);
 
     log.debug("Recommendations are: {}", topItems);
     return topItems;
   }
 
   @Override
-  public double estimatePreference(Object userID, Object itemID) throws TasteException {
+  public double estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
     DataModel model = getDataModel();
     User theUser = model.getUser(userID);
     Preference actualPref = theUser.getPreferenceFor(itemID);
@@ -130,7 +129,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
     return doEstimatePreference(theUser, itemID);
   }
 
-  private double doEstimatePreference(User theUser, Object itemID) throws TasteException {
+  private double doEstimatePreference(User theUser, Comparable<?> itemID) throws TasteException {
     double count = 0.0;
     double totalPreference = 0.0;
     Preference[] prefs = theUser.getPreferencesAsArray();
@@ -170,7 +169,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
   }
 
   @Override
-  public void setPreference(Object userID, Object itemID, double value) throws TasteException {
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value) throws TasteException {
     DataModel dataModel = getDataModel();
     double prefDelta;
     try {
@@ -185,7 +184,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
   }
 
   @Override
-  public void removePreference(Object userID, Object itemID) throws TasteException {
+  public void removePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
     DataModel dataModel = getDataModel();
     User theUser = dataModel.getUser(userID);
     Preference oldPref = theUser.getPreferenceFor(itemID);
@@ -207,7 +206,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
         ", diffStorage:" + diffStorage + ']';
   }
 
-  private final class Estimator implements TopItems.Estimator<Item> {
+  private final class Estimator implements TopItems.Estimator<Comparable<?>> {
 
     private final User theUser;
 
@@ -216,8 +215,8 @@ public final class SlopeOneRecommender extends AbstractRecommender {
     }
 
     @Override
-    public double estimate(Item item) throws TasteException {
-      return doEstimatePreference(theUser, item.getID());
+    public double estimate(Comparable<?> itemID) throws TasteException {
+      return doEstimatePreference(theUser, itemID);
     }
   }
 

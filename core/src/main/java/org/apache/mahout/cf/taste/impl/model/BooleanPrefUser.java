@@ -19,7 +19,6 @@ package org.apache.mahout.cf.taste.impl.model;
 
 import org.apache.mahout.cf.taste.impl.common.ArrayIterator;
 import org.apache.mahout.cf.taste.impl.common.FastSet;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 
@@ -30,12 +29,12 @@ import java.util.Arrays;
  * A variant of {@link GenericUser} which is appropriate when users express only a "yes" preference for an item, or none
  * at all. The preference value for all items is considered to be 1.0.
  */
-public class BooleanPrefUser<K extends Comparable<K>> implements User, Serializable {
+public class BooleanPrefUser implements User, Serializable {
 
-  private final K id;
-  private final FastSet<Object> itemIDs;
+  private final Comparable id;
+  private final FastSet<Comparable<?>> itemIDs;
 
-  public BooleanPrefUser(K id, FastSet<Object> itemIDs) {
+  public BooleanPrefUser(Comparable<?> id, FastSet<Comparable<?>> itemIDs) {
     if (id == null || itemIDs == null || itemIDs.isEmpty()) {
       throw new IllegalArgumentException("id or itemIDs is null or empty");
     }
@@ -44,23 +43,23 @@ public class BooleanPrefUser<K extends Comparable<K>> implements User, Serializa
   }
 
   @Override
-  public K getID() {
+  public Comparable<?> getID() {
     return id;
   }
 
   @Override
-  public Preference getPreferenceFor(Object itemID) {
+  public Preference getPreferenceFor(Comparable<?> itemID) {
     return itemIDs.contains(itemID) ? buildPreference(itemID) : null;
   }
 
   /** Note that the value parameter is ignored; it is as if it were always 1.0. */
   @Override
-  public void setPreference(Item item, double value) {
-    itemIDs.add(item.getID());
+  public void setPreference(Comparable<?> itemID, double value) {
+    itemIDs.add(itemID);
   }
 
   @Override
-  public void removePreference(Object itemID) {
+  public void removePreference(Comparable<?> itemID) {
     itemIDs.remove(itemID);
   }
 
@@ -73,7 +72,7 @@ public class BooleanPrefUser<K extends Comparable<K>> implements User, Serializa
   public Preference[] getPreferencesAsArray() {
     Preference[] result = new Preference[itemIDs.size()];
     int i = 0;
-    for (Object itemID : itemIDs) {
+    for (Comparable<?> itemID : itemIDs) {
       result[i] = buildPreference(itemID);
       i++;
     }
@@ -81,22 +80,17 @@ public class BooleanPrefUser<K extends Comparable<K>> implements User, Serializa
     return result;
   }
 
-  private Preference buildPreference(Object itemID) {
-    if (itemID instanceof Long) {
-      return new BooleanPreference(this, new GenericItem<Long>((Long) itemID));
-    } else if (itemID instanceof Integer) {
-      return new BooleanPreference(this, new GenericItem<Integer>((Integer) itemID));
-    }
-    return new BooleanPreference(this, new GenericItem<String>(itemID.toString()));
+  private Preference buildPreference(Comparable<?> itemID) {
+    return new BooleanPreference(this, itemID);
   }
 
   /** @return true iff this user expresses a preference for the given item */
-  public boolean hasPreferenceFor(Object itemID) {
+  public boolean hasPreferenceFor(Comparable<?> itemID) {
     return itemIDs.contains(itemID);
   }
 
   /** @return all item IDs the user expresses a preference for */
-  public FastSet<Object> getItemIDs() {
+  public FastSet<Comparable<?>> getItemIDs() {
     return itemIDs;
   }
 
@@ -118,7 +112,7 @@ public class BooleanPrefUser<K extends Comparable<K>> implements User, Serializa
   @Override
   @SuppressWarnings("unchecked")
   public int compareTo(User o) {
-    return id.compareTo((K) o.getID());
+    return id.compareTo(o.getID());
   }
 
 }

@@ -26,11 +26,9 @@ import org.apache.mahout.cf.taste.impl.common.IteratorIterable;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
 import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
-import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.JDBCDataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
@@ -63,7 +61,7 @@ import java.util.NoSuchElementException;
  *
  * <p>Also note: this default implementation assumes that the user and item ID keys are {@link String}s, for maximum
  * flexibility. You can override this behavior by subclassing an implementation and overriding {@link
- * #buildItem(Object)} and {@link #buildUser(Object, List)}. If you don't, just make sure you use {@link String}s as IDs
+ * {@link #buildUser(Comparable, List)}. If you don't, just make sure you use {@link String}s as IDs
  * throughout your code. If your IDs are really numeric, and you use, say, {@link Long} for IDs in the rest of your
  * code, you will run into subtle problems because the {@link Long} values won't be equal to or compare correctly to the
  * underlying {@link String} key values.</p>
@@ -89,13 +87,12 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   private final String removePreferenceSQL;
   private final String getUsersSQL;
   private final String getItemsSQL;
-  private final String getItemSQL;
   private final String getPrefsForItemSQL;
   private final String getNumPreferenceForItemSQL;
   private final String getNumPreferenceForItemsSQL;
   private int cachedNumUsers;
   private int cachedNumItems;
-  private final Cache<Object, Integer> itemPrefCounts;
+  private final Cache<Comparable<?>, Integer> itemPrefCounts;
 
   protected AbstractJDBCDataModel(DataSource dataSource,
                                   String getUserSQL,
@@ -105,7 +102,6 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
                                   String removePreferenceSQL,
                                   String getUsersSQL,
                                   String getItemsSQL,
-                                  String getItemSQL,
                                   String getPrefsForItemSQL,
                                   String getNumPreferenceForItemSQL,
                                   String getNumPreferenceForItemsSQL) {
@@ -121,7 +117,6 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
         removePreferenceSQL,
         getUsersSQL,
         getItemsSQL,
-        getItemSQL,
         getPrefsForItemSQL,
         getNumPreferenceForItemSQL,
         getNumPreferenceForItemsSQL);
@@ -139,7 +134,6 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
                                   String removePreferenceSQL,
                                   String getUsersSQL,
                                   String getItemsSQL,
-                                  String getItemSQL,
                                   String getPrefsForItemSQL,
                                   String getNumPreferenceForItemSQL,
                                   String getNumPreferenceForItemsSQL) {
@@ -159,7 +153,6 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     checkNotNullAndLog("removePreferenceSQL", removePreferenceSQL);
     checkNotNullAndLog("getUsersSQL", getUsersSQL);
     checkNotNullAndLog("getItemsSQL", getItemsSQL);
-    checkNotNullAndLog("getItemSQL", getItemSQL);
     checkNotNullAndLog("getPrefsForItemSQL", getPrefsForItemSQL);
     checkNotNullAndLog("getNumPreferenceForItemSQL", getNumPreferenceForItemSQL);
     checkNotNullAndLog("getNumPreferenceForItemsSQL", getNumPreferenceForItemsSQL);
@@ -182,14 +175,13 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     this.removePreferenceSQL = removePreferenceSQL;
     this.getUsersSQL = getUsersSQL;
     this.getItemsSQL = getItemsSQL;
-    this.getItemSQL = getItemSQL;
     this.getPrefsForItemSQL = getPrefsForItemSQL;
     this.getNumPreferenceForItemSQL = getNumPreferenceForItemSQL;
     this.getNumPreferenceForItemsSQL = getNumPreferenceForItemsSQL;
 
     this.cachedNumUsers = -1;
     this.cachedNumItems = -1;
-    this.itemPrefCounts = new Cache<Object, Integer>(new ItemPrefCountRetriever(getNumPreferenceForItemSQL));
+    this.itemPrefCounts = new Cache<Comparable<?>, Integer>(new ItemPrefCountRetriever(getNumPreferenceForItemSQL));
 
   }
 
@@ -223,7 +215,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
   /** @throws NoSuchUserException if there is no such user */
   @Override
-  public User getUser(Object id) throws TasteException {
+  public User getUser(Comparable<?> id) throws TasteException {
 
     log.debug("Retrieving user ID '{}'", id);
 
@@ -264,63 +256,24 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   }
 
   @Override
-  public Iterable<? extends Item> getItems() throws TasteException {
+  public Iterable<Comparable<?>> getItemIDs() throws TasteException {
     log.debug("Retrieving all items...");
-    return new IteratorIterable<Item>(new ResultSetItemIterator(dataSource, getItemsSQL));
+    return new IteratorIterable<Comparable<?>>(new ResultSetItemIterator(dataSource, getItemsSQL));
   }
 
   @Override
-  public Item getItem(Object id) throws TasteException {
-    return getItem(id, false);
-  }
-
-  @Override
-  public Item getItem(Object id, boolean assumeExists) throws TasteException {
-
-    if (assumeExists) {
-      return buildItem((String) id);
-    }
-
-    log.debug("Retrieving item ID '{}'", id);
-
-    Connection conn = null;
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-
-    try {
-      conn = dataSource.getConnection();
-      stmt = conn.prepareStatement(getItemSQL);
-      stmt.setObject(1, id);
-
-      log.debug("Executing SQL query: {}", getItemSQL);
-      rs = stmt.executeQuery();
-      if (rs.next()) {
-        return buildItem((String) id);
-      } else {
-        throw new NoSuchElementException();
-      }
-    } catch (SQLException sqle) {
-      log.warn("Exception while retrieving item", sqle);
-      throw new TasteException(sqle);
-    } finally {
-      IOUtils.quietClose(rs, stmt, conn);
-    }
-  }
-
-  @Override
-  public Iterable<? extends Preference> getPreferencesForItem(Object itemID) throws TasteException {
+  public Iterable<? extends Preference> getPreferencesForItem(Comparable<?> itemID) throws TasteException {
     return doGetPreferencesForItem(itemID);
   }
 
   @Override
-  public Preference[] getPreferencesForItemAsArray(Object itemID) throws TasteException {
+  public Preference[] getPreferencesForItemAsArray(Comparable<?> itemID) throws TasteException {
     List<? extends Preference> list = doGetPreferencesForItem(itemID);
     return list.toArray(new Preference[list.size()]);
   }
 
-  protected List<? extends Preference> doGetPreferencesForItem(Object itemID) throws TasteException {
+  protected List<? extends Preference> doGetPreferencesForItem(Comparable<?> itemID) throws TasteException {
     log.debug("Retrieving preferences for item ID '{}'", itemID);
-    Item item = getItem(itemID, true);
     Connection conn = null;
     PreparedStatement stmt = null;
     ResultSet rs = null;
@@ -336,8 +289,8 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       List<Preference> prefs = new ArrayList<Preference>();
       while (rs.next()) {
         double preference = rs.getDouble(1);
-        Object userID = rs.getObject(2);
-        Preference pref = buildPreference(buildUser(userID, null), item, preference);
+        Comparable<?> userID = (Comparable<?>) rs.getObject(2);
+        Preference pref = buildPreference(buildUser(userID, null), itemID, preference);
         prefs.add(pref);
       }
       return prefs;
@@ -366,7 +319,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   }
 
   @Override
-  public int getNumUsersWithPreferenceFor(Object... itemIDs) throws TasteException {
+  public int getNumUsersWithPreferenceFor(Comparable<?>... itemIDs) throws TasteException {
     if (itemIDs == null) {
       throw new IllegalArgumentException("itemIDs is null");
     }
@@ -408,7 +361,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   }
 
   @Override
-  public void setPreference(Object userID, Object itemID, double value)
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value)
       throws TasteException {
     if (userID == null || itemID == null) {
       throw new IllegalArgumentException("userID or itemID is null");
@@ -444,7 +397,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   }
 
   @Override
-  public void removePreference(Object userID, Object itemID)
+  public void removePreference(Comparable<?> userID, Comparable<?> itemID)
       throws TasteException {
     if (userID == null || itemID == null) {
       throw new IllegalArgumentException("userID or itemID is null");
@@ -482,9 +435,9 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
   private void addPreference(ResultSet rs, Collection<Preference> prefs)
       throws SQLException {
-    Item item = buildItem(rs.getObject(1));
+    Comparable<?> itemID = (Comparable<?>) rs.getObject(1);
     double preferenceValue = rs.getDouble(2);
-    prefs.add(buildPreference(null, item, preferenceValue));
+    prefs.add(buildPreference(null, itemID, preferenceValue));
   }
 
   /**
@@ -495,41 +448,19 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
    * @param prefs user preferences
    * @return {@link GenericUser} by default
    */
-  protected User buildUser(Object id, List<Preference> prefs) {
-    // ugly
-    if (id instanceof Long) {
-      return new GenericUser<Long>((Long) id, prefs);
-    } else if (id instanceof Integer) {
-      return new GenericUser<Integer>((Integer) id, prefs);
-    }
-    return new GenericUser<String>(id.toString(), prefs);
-  }
-
-  /**
-   * <p>Default implementation which returns a new {@link GenericItem} with {@link String} IDs. Subclasses may override
-   * to return a different {@link Item} implementation.</p>
-   *
-   * @param id item ID
-   * @return {@link GenericItem} by default
-   */
-  protected Item buildItem(Object id) {
-    if (id instanceof Long) {
-      return new GenericItem<Long>((Long) id);
-    } else if (id instanceof Integer) {
-      return new GenericItem<Integer>((Integer) id);
-    }
-    return new GenericItem<String>(id.toString());
+  protected User buildUser(Comparable<?> id, List<Preference> prefs) {
+    return new GenericUser(id, prefs);
   }
 
   /**
    * Subclasses may override to return a different {@link Preference} implementation.
    *
    * @param user {@link User}
-   * @param item {@link Item}
+   * @param itemID item ID
    * @return {@link GenericPreference} by default
    */
-  protected Preference buildPreference(User user, Item item, double value) {
-    return new GenericPreference(user, item, value);
+  protected Preference buildPreference(User user, Comparable<?> itemID, double value) {
+    return new GenericPreference(user, itemID, value);
   }
 
   /**
@@ -589,12 +520,12 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
         throw new NoSuchElementException();
       }
 
-      Object currentUserID = null;
+      Comparable<?> currentUserID = null;
       List<Preference> prefs = new ArrayList<Preference>();
 
       try {
         do {
-          Object userID = resultSet.getObject(3);
+          Comparable<?> userID = (Comparable<?>) resultSet.getObject(3);
           if (currentUserID == null) {
             currentUserID = userID;
           }
@@ -635,7 +566,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
           int distinctUserNamesSeen = 0;
           Object currentUserID = null;
           do {
-            Object userID = resultSet.getObject(3);
+            Comparable<?> userID = (Comparable<?>) resultSet.getObject(3);
             if (!userID.equals(currentUserID)) {
               distinctUserNamesSeen++;
             }
@@ -651,13 +582,13 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   }
 
   /**
-   * <p>An {@link java.util.Iterator} which returns {@link org.apache.mahout.cf.taste.model.Item}s from a {@link
+   * <p>An {@link java.util.Iterator} which returns items from a {@link
    * java.sql.ResultSet}. This is a useful way to iterate over all user data since it does not require all data to be
    * read into memory at once. It does however require that the DB connection be held open. Note that this class will
    * only release database resources after {@link #hasNext()} has been called and has returned <code>false</code>;
    * callers should make sure to "drain" the entire set of data to avoid tying up database resources.</p>
    */
-  private final class ResultSetItemIterator implements SkippingIterator<Item> {
+  private final class ResultSetItemIterator implements SkippingIterator<Comparable<?>> {
 
     private final Connection connection;
     private final Statement statement;
@@ -701,16 +632,16 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     }
 
     @Override
-    public Item next() {
+    public Comparable<?> next() {
 
       if (!hasNext()) {
         throw new NoSuchElementException();
       }
 
       try {
-        Item item = buildItem(resultSet.getObject(1));
+        Comparable<?> itemID = (Comparable<?>) resultSet.getObject(1);
         resultSet.next();
-        return item;
+        return itemID;
       } catch (SQLException sqle) {
         // No good way to handle this since we can't throw an exception
         log.warn("Exception while iterating over items", sqle);
@@ -747,7 +678,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
   }
 
-  private class ItemPrefCountRetriever implements Retriever<Object, Integer> {
+  private class ItemPrefCountRetriever implements Retriever<Comparable<?>, Integer> {
     private final String getNumPreferenceForItemSQL;
 
     private ItemPrefCountRetriever(String getNumPreferenceForItemSQL) {
@@ -755,7 +686,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     }
 
     @Override
-    public Integer get(Object key) throws TasteException {
+    public Integer get(Comparable<?> key) throws TasteException {
       return getNumThings("user preferring item", getNumPreferenceForItemSQL, key);
     }
   }

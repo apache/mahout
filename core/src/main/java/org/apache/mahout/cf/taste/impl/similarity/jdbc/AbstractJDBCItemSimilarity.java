@@ -18,7 +18,6 @@
 package org.apache.mahout.cf.taste.impl.similarity.jdbc;
 
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
@@ -111,17 +110,17 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
   }
 
   @Override
-  public double itemSimilarity(Item item1, Item item2) throws TasteException {
+  public double itemSimilarity(Comparable<?> itemID1, Comparable<?> itemID2) throws TasteException {
 
-    int compare = item1.compareTo(item2);
+    int compare = ((Comparable<Object>) itemID1).compareTo(itemID2);
     if (compare == 0) {
       return 1.0;
     }
     // Order as smaller - larger
     if (compare > 0) {
-      Item temp = item1;
-      item1 = item2;
-      item2 = temp;
+      Comparable<?> temp = itemID1;
+      itemID1 = itemID2;
+      itemID2 = temp;
     }
 
     Connection conn = null;
@@ -133,8 +132,8 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
       stmt = conn.prepareStatement(getItemItemSimilaritySQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
-      stmt.setObject(1, item1.getID());
-      stmt.setObject(2, item2.getID());
+      stmt.setObject(1, itemID1);
+      stmt.setObject(2, itemID2);
 
       log.debug("Executing SQL query: {}", getItemItemSimilaritySQL);
       rs = stmt.executeQuery();

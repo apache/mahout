@@ -18,7 +18,6 @@
 package org.apache.mahout.cf.taste.impl.neighborhood;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
@@ -35,9 +34,9 @@ final class DummySimilarity implements UserSimilarity, ItemSimilarity {
   }
 
   @Override
-  public double itemSimilarity(Item item1, Item item2) {
+  public double itemSimilarity(Comparable<?> itemID1, Comparable<?> itemID2) {
     // Make up something wacky
-    return (double) (item1.hashCode() - item2.hashCode());
+    return (double) (itemID1.hashCode() - itemID2.hashCode());
   }
 
   @Override

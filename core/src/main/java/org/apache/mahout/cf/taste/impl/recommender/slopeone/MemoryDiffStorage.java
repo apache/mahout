@@ -30,7 +30,6 @@ import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.slopeone.DiffStorage;
@@ -57,9 +56,9 @@ public final class MemoryDiffStorage implements DiffStorage {
   private final boolean stdDevWeighted;
   private final boolean compactAverages;
   private final long maxEntries;
-  private final FastMap<Object, FastMap<Object, RunningAverage>> averageDiffs;
-  private final Map<Object, RunningAverage> averageItemPref;
-  private final FastSet<Item> allRecommendableItemIDs;
+  private final FastMap<Comparable<?>, FastMap<Comparable<?>, RunningAverage>> averageDiffs;
+  private final Map<Comparable<?>, RunningAverage> averageItemPref;
+  private final FastSet<Comparable<?>> allRecommendableItemIDs;
   private final ReadWriteLock buildAverageDiffsLock;
   private final RefreshHelper refreshHelper;
 
@@ -102,10 +101,10 @@ public final class MemoryDiffStorage implements DiffStorage {
     this.stdDevWeighted = stdDevWeighted == Weighting.WEIGHTED;
     this.compactAverages = compactAverages;
     this.maxEntries = maxEntries;
-    this.averageDiffs = new FastMap<Object, FastMap<Object, RunningAverage>>();
-    this.averageItemPref = new FastMap<Object, RunningAverage>();
+    this.averageDiffs = new FastMap<Comparable<?>, FastMap<Comparable<?>, RunningAverage>>();
+    this.averageItemPref = new FastMap<Comparable<?>, RunningAverage>();
     this.buildAverageDiffsLock = new ReentrantReadWriteLock();
-    this.allRecommendableItemIDs = new FastSet<Item>(dataModel.getNumItems());
+    this.allRecommendableItemIDs = new FastSet<Comparable<?>>(dataModel.getNumItems());
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
       @Override
       public Object call() throws TasteException {
@@ -118,8 +117,8 @@ public final class MemoryDiffStorage implements DiffStorage {
   }
 
   @Override
-  public RunningAverage getDiff(Object itemID1, Object itemID2) {
-    Map<Object, RunningAverage> level2Map = averageDiffs.get(itemID1);
+  public RunningAverage getDiff(Comparable<?> itemID1, Comparable<?> itemID2) {
+    Map<Comparable<?>, RunningAverage> level2Map = averageDiffs.get(itemID1);
     RunningAverage average = null;
     if (level2Map != null) {
       average = level2Map.get(itemID2);
@@ -145,13 +144,14 @@ public final class MemoryDiffStorage implements DiffStorage {
   }
 
   @Override
-  public RunningAverage[] getDiffs(Object userID, Object itemID, Preference[] prefs) {
+  public RunningAverage[] getDiffs(Comparable<?> userID, Comparable<?> itemID, Preference[] prefs)
+          throws TasteException {
     try {
       buildAverageDiffsLock.readLock().lock();
       int size = prefs.length;
       RunningAverage[] result = new RunningAverage[size];
       for (int i = 0; i < size; i++) {
-        result[i] = getDiff(prefs[i].getItem().getID(), itemID);
+        result[i] = getDiff(prefs[i].getItemID(), itemID);
       }
       return result;
     } finally {
@@ -160,20 +160,20 @@ public final class MemoryDiffStorage implements DiffStorage {
   }
 
   @Override
-  public RunningAverage getAverageItemPref(Object itemID) {
+  public RunningAverage getAverageItemPref(Comparable<?> itemID) {
     return averageItemPref.get(itemID);
   }
 
   @Override
-  public void updateItemPref(Object itemID, double prefDelta, boolean remove) {
+  public void updateItemPref(Comparable<?> itemID, double prefDelta, boolean remove) {
     if (!remove && stdDevWeighted) {
       throw new UnsupportedOperationException("Can't update only when stdDevWeighted is set");
     }
     try {
       buildAverageDiffsLock.readLock().lock();
-      for (Map.Entry<Object, FastMap<Object, RunningAverage>> entry : averageDiffs.entrySet()) {
+      for (Map.Entry<Comparable<?>, FastMap<Comparable<?>, RunningAverage>> entry : averageDiffs.entrySet()) {
         boolean matchesItemID1 = itemID.equals(entry.getKey());
-        for (Map.Entry<Object, RunningAverage> entry2 : entry.getValue().entrySet()) {
+        for (Map.Entry<Comparable<?>, RunningAverage> entry2 : entry.getValue().entrySet()) {
           RunningAverage average = entry2.getValue();
           if (matchesItemID1) {
             if (remove) {
@@ -200,12 +200,12 @@ public final class MemoryDiffStorage implements DiffStorage {
   }
 
   @Override
-  public Set<Item> getRecommendableItems(Object userID) throws TasteException {
+  public Set<Comparable<?>> getRecommendableItemIDs(Comparable<?> userID) throws TasteException {
     User user = dataModel.getUser(userID);
-    Set<Item> result = allRecommendableItemIDs.clone();
-    Iterator<Item> it = result.iterator();
+    Set<Comparable<?>> result = allRecommendableItemIDs.clone();
+    Iterator<Comparable<?>> it = result.iterator();
     while (it.hasNext()) {
-      if (user.getPreferenceFor(it.next().getID()) != null) {
+      if (user.getPreferenceFor(it.next()) != null) {
         it.remove();
       }
     }
@@ -233,9 +233,9 @@ public final class MemoryDiffStorage implements DiffStorage {
   private void pruneInconsequentialDiffs() {
     // Go back and prune inconsequential diffs. "Inconsequential" means, here, only represented by one
     // data point, so possibly unreliable
-    Iterator<FastMap<Object, RunningAverage>> it1 = averageDiffs.values().iterator();
+    Iterator<FastMap<Comparable<?>, RunningAverage>> it1 = averageDiffs.values().iterator();
     while (it1.hasNext()) {
-      FastMap<Object, RunningAverage> map = it1.next();
+      FastMap<Comparable<?>, RunningAverage> map = it1.next();
       Iterator<RunningAverage> it2 = map.values().iterator();
       while (it2.hasNext()) {
         RunningAverage average = it2.next();
@@ -253,17 +253,13 @@ public final class MemoryDiffStorage implements DiffStorage {
   }
 
   private void updateAllRecommendableItems() throws TasteException {
-    FastSet<Object> ids = new FastSet<Object>(dataModel.getNumItems());
-    for (Map.Entry<Object, FastMap<Object, RunningAverage>> entry : averageDiffs.entrySet()) {
+    FastSet<Comparable<?>> ids = new FastSet<Comparable<?>>(dataModel.getNumItems());
+    for (Map.Entry<Comparable<?>, FastMap<Comparable<?>, RunningAverage>> entry : averageDiffs.entrySet()) {
       ids.add(entry.getKey());
-      for (Object id : entry.getValue().keySet()) {
-        ids.add(id);
-      }
+      ids.addAll(entry.getValue().keySet());
     }
     allRecommendableItemIDs.clear();
-    for (Object id : ids) {
-      allRecommendableItemIDs.add(dataModel.getItem(id));
-    }
+    allRecommendableItemIDs.addAll(ids);
     allRecommendableItemIDs.rehash();
   }
 
@@ -275,16 +271,16 @@ public final class MemoryDiffStorage implements DiffStorage {
     for (int i = 0; i < length; i++) {
       Preference prefA = userPreferences[i];
       double prefAValue = prefA.getValue();
-      Object itemIDA = prefA.getItem().getID();
-      FastMap<Object, RunningAverage> aMap = averageDiffs.get(itemIDA);
+      Comparable<?> itemIDA = prefA.getItemID();
+      FastMap<Comparable<?>, RunningAverage> aMap = averageDiffs.get(itemIDA);
       if (aMap == null) {
-        aMap = new FastMap<Object, RunningAverage>();
+        aMap = new FastMap<Comparable<?>, RunningAverage>();
         averageDiffs.put(itemIDA, aMap);
       }
       for (int j = i + 1; j < length; j++) {
         // This is a performance-critical block
         Preference prefB = userPreferences[j];
-        Object itemIDB = prefB.getItem().getID();
+        Comparable<?> itemIDB = prefB.getItemID();
         RunningAverage average = aMap.get(itemIDB);
         if (average == null && averageCount < maxEntries) {
           average = buildRunningAverage();

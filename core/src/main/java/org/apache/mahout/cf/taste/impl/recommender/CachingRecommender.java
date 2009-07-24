@@ -24,7 +24,6 @@ import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
@@ -48,10 +47,10 @@ public final class CachingRecommender implements Recommender {
 
   private final Recommender recommender;
   private final AtomicInteger maxHowMany;
-  private final Cache<Object, Recommendations> recommendationCache;
-  private final Cache<Pair<?, ?>, Double> estimatedPrefCache;
+  private final Cache<Comparable<?>, Recommendations> recommendationCache;
+  private final Cache<Pair<Comparable<?>, Comparable<?>>, Double> estimatedPrefCache;
   private final RefreshHelper refreshHelper;
-  private Rescorer<Item> currentRescorer;
+  private Rescorer<Comparable<?>> currentRescorer;
 
   public CachingRecommender(Recommender recommender) throws TasteException {
     if (recommender == null) {
@@ -62,9 +61,9 @@ public final class CachingRecommender implements Recommender {
     // Use "num users" as an upper limit on cache size. Rough guess.
     int numUsers = recommender.getDataModel().getNumUsers();
     this.recommendationCache =
-        new Cache<Object, Recommendations>(new RecommendationRetriever(this.recommender), numUsers);
+        new Cache<Comparable<?>, Recommendations>(new RecommendationRetriever(this.recommender), numUsers);
     this.estimatedPrefCache =
-        new Cache<Pair<?, ?>, Double>(new EstimatedPrefRetriever(this.recommender), numUsers);
+        new Cache<Pair<Comparable<?>, Comparable<?>>, Double>(new EstimatedPrefRetriever(this.recommender), numUsers);
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
       @Override
       public Object call() {
@@ -75,11 +74,11 @@ public final class CachingRecommender implements Recommender {
     this.refreshHelper.addDependency(recommender);
   }
 
-  private synchronized Rescorer<Item> getCurrentRescorer() {
+  private synchronized Rescorer<Comparable<?>> getCurrentRescorer() {
     return currentRescorer;
   }
 
-  private synchronized void setCurrentRescorer(Rescorer<Item> rescorer) {
+  private synchronized void setCurrentRescorer(Rescorer<Comparable<?>> rescorer) {
     if (rescorer == null) {
       if (currentRescorer != null) {
         currentRescorer = null;
@@ -94,12 +93,12 @@ public final class CachingRecommender implements Recommender {
   }
 
   @Override
-  public List<RecommendedItem> recommend(Object userID, int howMany) throws TasteException {
+  public List<RecommendedItem> recommend(Comparable<?> userID, int howMany) throws TasteException {
     return recommend(userID, howMany, null);
   }
 
   @Override
-  public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
+  public List<RecommendedItem> recommend(Comparable<?> userID, int howMany, Rescorer<Comparable<?>> rescorer)
       throws TasteException {
     if (userID == null) {
       throw new IllegalArgumentException("userID is null");
@@ -132,18 +131,18 @@ public final class CachingRecommender implements Recommender {
   }
 
   @Override
-  public double estimatePreference(Object userID, Object itemID) throws TasteException {
-    return estimatedPrefCache.get(new Pair<Object, Object>(userID, itemID));
+  public double estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
+    return estimatedPrefCache.get(new Pair<Comparable<?>, Comparable<?>>(userID, itemID));
   }
 
   @Override
-  public void setPreference(Object userID, Object itemID, double value) throws TasteException {
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value) throws TasteException {
     recommender.setPreference(userID, itemID, value);
     clear(userID);
   }
 
   @Override
-  public void removePreference(Object userID, Object itemID) throws TasteException {
+  public void removePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
     recommender.removePreference(userID, itemID);
     clear(userID);
   }
@@ -163,7 +162,7 @@ public final class CachingRecommender implements Recommender {
    *
    * @param userID clear cached data associated with this user ID
    */
-  public void clear(Object userID) {
+  public void clear(Comparable<?> userID) {
     log.debug("Clearing recommendations for user ID '{}'", userID);
     recommendationCache.remove(userID);
   }
@@ -179,7 +178,7 @@ public final class CachingRecommender implements Recommender {
     return "CachingRecommender[recommender:" + recommender + ']';
   }
 
-  private final class RecommendationRetriever implements Retriever<Object, Recommendations> {
+  private final class RecommendationRetriever implements Retriever<Comparable<?>, Recommendations> {
 
     private final Recommender recommender;
 
@@ -188,10 +187,10 @@ public final class CachingRecommender implements Recommender {
     }
 
     @Override
-    public Recommendations get(Object key) throws TasteException {
+    public Recommendations get(Comparable<?> key) throws TasteException {
       log.debug("Retrieving new recommendations for user ID '{}'", key);
       int howMany = maxHowMany.get();
-      Rescorer<Item> rescorer = getCurrentRescorer();
+      Rescorer<Comparable<?>> rescorer = getCurrentRescorer();
       List<RecommendedItem> recommendations = rescorer == null ?
           recommender.recommend(key, howMany) :
           recommender.recommend(key, howMany, rescorer);
@@ -199,7 +198,7 @@ public final class CachingRecommender implements Recommender {
     }
   }
 
-  private static final class EstimatedPrefRetriever implements Retriever<Pair<?, ?>, Double> {
+  private static final class EstimatedPrefRetriever implements Retriever<Pair<Comparable<?>, Comparable<?>>, Double> {
 
     private final Recommender recommender;
 
@@ -208,9 +207,9 @@ public final class CachingRecommender implements Recommender {
     }
 
     @Override
-    public Double get(Pair<?, ?> key) throws TasteException {
-      Object userID = key.getFirst();
-      Object itemID = key.getSecond();
+    public Double get(Pair<Comparable<?>, Comparable<?>> key) throws TasteException {
+      Comparable<?> userID = key.getFirst();
+      Comparable<?> itemID = key.getSecond();
       log.debug("Retrieving estimated preference for user ID '{}' and item ID '{}'", userID, itemID);
       return recommender.estimatePreference(userID, itemID);
     }

@@ -21,7 +21,6 @@ import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
@@ -74,14 +73,12 @@ public final class LogLikelihoodSimilarity implements UserSimilarity, ItemSimila
   static int findIntersectionSize(Preference[] xPrefs, Preference[] yPrefs) {
     Preference xPref = xPrefs[0];
     Preference yPref = yPrefs[0];
-    Item xIndex = xPref.getItem();
-    Item yIndex = yPref.getItem();
     int xPrefIndex = 1;
     int yPrefIndex = 1;
 
     int intersectionSize = 0;
     while (true) {
-      int compare = xIndex.compareTo(yIndex);
+      int compare = ((Comparable<Object>) xPref.getItemID()).compareTo(yPref.getItemID());
       if (compare == 0) {
         intersectionSize++;
       }
@@ -90,27 +87,25 @@ public final class LogLikelihoodSimilarity implements UserSimilarity, ItemSimila
           break;
         }
         xPref = xPrefs[xPrefIndex++];
-        xIndex = xPref.getItem();
       }
       if (compare >= 0) {
         if (yPrefIndex == yPrefs.length) {
           break;
         }
         yPref = yPrefs[yPrefIndex++];
-        yIndex = yPref.getItem();
       }
     }
     return intersectionSize;
   }
 
   @Override
-  public double itemSimilarity(Item item1, Item item2) throws TasteException {
-    if (item1 == null || item2 == null) {
+  public double itemSimilarity(Comparable<?> itemID1, Comparable<?> itemID2) throws TasteException {
+    if (itemID1 == null || itemID2 == null) {
       throw new IllegalArgumentException("item1 or item2 is null");
     }
-    int preferring1and2 = dataModel.getNumUsersWithPreferenceFor(item1.getID(), item2.getID());
-    int preferring1 = dataModel.getNumUsersWithPreferenceFor(item1.getID());
-    int preferring2 = dataModel.getNumUsersWithPreferenceFor(item2.getID());
+    int preferring1and2 = dataModel.getNumUsersWithPreferenceFor(itemID1, itemID2);
+    int preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
+    int preferring2 = dataModel.getNumUsersWithPreferenceFor(itemID2);
     int numUsers = dataModel.getNumUsers();
     double logLikelihood =
         twoLogLambda(preferring1and2, preferring1 - preferring1and2, preferring2, numUsers - preferring2);

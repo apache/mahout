@@ -24,7 +24,6 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 
@@ -42,17 +41,16 @@ import java.util.Set;
 public final class GenericBooleanUserDataModel implements DataModel, Serializable {
 
   private final List<User> users;
-  private final FastMap<Object, User> userMap;
+  private final FastMap<Comparable<?>, User> userMap;
   private final Object[] itemIDs;
-  //private final Set<Object> itemIDSet;
 
   public GenericBooleanUserDataModel(Iterable<? extends User> users) {
     if (users == null) {
       throw new IllegalArgumentException("users is null");
     }
     this.users = new ArrayList<User>(1003);
-    this.userMap = new FastMap<Object, User>(1003);
-    Set<Object> itemIDs = new FastSet<Object>(1003);
+    this.userMap = new FastMap<Comparable<?>, User>(1003);
+    Set<Comparable<?>> itemIDs = new FastSet<Comparable<?>>(1003);
     for (User user : users) {
       if (!(user instanceof BooleanPrefUser)) {
         throw new IllegalArgumentException("Must use a source of BooleanPrefUsers");
@@ -67,8 +65,6 @@ public final class GenericBooleanUserDataModel implements DataModel, Serializabl
     this.itemIDs = itemIDs.toArray();
     itemIDs = null;
     Arrays.sort(this.itemIDs);
-    //this.itemIDSet = new FastSet<Object>(this.itemIDs.length);
-    //itemIDSet.addAll(Arrays.asList(this.itemIDs));
   }
 
   public GenericBooleanUserDataModel(DataModel dataModel) throws TasteException {
@@ -81,7 +77,7 @@ public final class GenericBooleanUserDataModel implements DataModel, Serializabl
   }
 
   @Override
-  public User getUser(Object id) throws NoSuchUserException {
+  public User getUser(Comparable<?> id) throws NoSuchUserException {
     User user = userMap.get(id);
     if (user == null) {
       throw new NoSuchUserException();
@@ -90,22 +86,17 @@ public final class GenericBooleanUserDataModel implements DataModel, Serializabl
   }
 
   @Override
-  public Iterable<? extends Item> getItems() {
+  public Iterable<Comparable<?>> getItemIDs() {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public Item getItem(Object id) throws NoSuchItemException {
+  public Iterable<? extends Preference> getPreferencesForItem(Comparable<?> itemID) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public Iterable<? extends Preference> getPreferencesForItem(Object itemID) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public Preference[] getPreferencesForItemAsArray(Object itemID) {
+  public Preference[] getPreferencesForItemAsArray(Comparable<?> itemID) {
     throw new UnsupportedOperationException();
   }
 
@@ -120,7 +111,7 @@ public final class GenericBooleanUserDataModel implements DataModel, Serializabl
   }
 
   @Override
-  public int getNumUsersWithPreferenceFor(Object... itemIDs) {
+  public int getNumUsersWithPreferenceFor(Comparable<?>... itemIDs) {
     if (itemIDs == null) {
       throw new IllegalArgumentException("itemIDs is null");
     }
@@ -132,13 +123,13 @@ public final class GenericBooleanUserDataModel implements DataModel, Serializabl
   }
 
   @Override
-  public void setPreference(Object userID, Object itemID, double value)
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value)
       throws NoSuchUserException, NoSuchItemException {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public void removePreference(Object userID, Object itemID) throws NoSuchUserException {
+  public void removePreference(Comparable<?> userID, Comparable<?> itemID) throws NoSuchUserException {
     throw new UnsupportedOperationException();
   }
 

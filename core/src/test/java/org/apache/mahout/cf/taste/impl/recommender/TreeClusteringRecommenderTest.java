@@ -19,10 +19,8 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
-import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
@@ -65,11 +63,11 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
     List<RecommendedItem> fewRecommended = recommender.recommend("test1", 2);
     List<RecommendedItem> moreRecommended = recommender.recommend("test1", 4);
     for (int i = 0; i < fewRecommended.size(); i++) {
-      assertEquals(fewRecommended.get(i).getItem(), moreRecommended.get(i).getItem());
+      assertEquals(fewRecommended.get(i).getItemID(), moreRecommended.get(i).getItemID());
     }
     recommender.refresh(null);
     for (int i = 0; i < fewRecommended.size(); i++) {
-      assertEquals(fewRecommended.get(i).getItem(), moreRecommended.get(i).getItem());
+      assertEquals(fewRecommended.get(i).getItemID(), moreRecommended.get(i).getItemID());
     }
   }
 
@@ -84,13 +82,13 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
     Recommender recommender = new TreeClusteringRecommender(dataModel, clusterSimilarity, 2);
     List<RecommendedItem> originalRecommended = recommender.recommend("test1", 2);
     List<RecommendedItem> rescoredRecommended =
-        recommender.recommend("test1", 2, new ReversingRescorer<Item>());
+        recommender.recommend("test1", 2, new ReversingRescorer<Comparable<?>>());
     assertNotNull(originalRecommended);
     assertNotNull(rescoredRecommended);
     assertEquals(2, originalRecommended.size());
     assertEquals(2, rescoredRecommended.size());
-    assertEquals(originalRecommended.get(0).getItem(), rescoredRecommended.get(1).getItem());
-    assertEquals(originalRecommended.get(1).getItem(), rescoredRecommended.get(0).getItem());
+    assertEquals(originalRecommended.get(0).getItemID(), rescoredRecommended.get(1).getItemID());
+    assertEquals(originalRecommended.get(1).getItemID(), rescoredRecommended.get(0).getItemID());
   }
 
   public void testEstimatePref() throws Exception {
@@ -121,7 +119,7 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
     assertEquals(1, recommended.size());
     RecommendedItem firstRecommended = recommended.get(0);
     // item one should be recommended because it has a greater rating/score
-    assertEquals(new GenericItem<String>("2"), firstRecommended.getItem());
+    assertEquals("2", firstRecommended.getItemID());
     assertEquals(0.3, firstRecommended.getValue(), EPSILON);
   }
 

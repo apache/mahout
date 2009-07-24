@@ -31,7 +31,7 @@ public interface UserBasedRecommender extends Recommender {
    * @return {@link User}s most similar to the given user
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
-  List<User> mostSimilarUsers(Object userID, int howMany) throws TasteException;
+  List<User> mostSimilarUsers(Comparable<?> userID, int howMany) throws TasteException;
 
   /**
    * @param userID   ID of {@link User} for which to find most similar other {@link User}s
@@ -41,6 +41,7 @@ public interface UserBasedRecommender extends Recommender {
    * @return {@link User}s most similar to the given user
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
-  List<User> mostSimilarUsers(Object userID, int howMany, Rescorer<Pair<User, User>> rescorer) throws TasteException;
+  List<User> mostSimilarUsers(Comparable<?> userID, int howMany, Rescorer<Pair<User, User>> rescorer)
+          throws TasteException;
 
 }

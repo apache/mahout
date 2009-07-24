@@ -35,6 +35,6 @@ public interface UserNeighborhood extends Refreshable {
    * @throws org.apache.mahout.cf.taste.common.TasteException
    *          if an error occurs while accessing data
    */
-  Collection<User> getUserNeighborhood(Object userID) throws TasteException;
+  Collection<User> getUserNeighborhood(Comparable<?> userID) throws TasteException;
 
 }

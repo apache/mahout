@@ -23,7 +23,6 @@ import org.apache.mahout.cf.taste.impl.recommender.CachingRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.GenericUserBasedRecommender;
 import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
@@ -48,28 +47,28 @@ public final class BookCrossingRecommender implements Recommender {
   }
 
   @Override
-  public List<RecommendedItem> recommend(Object userID, int howMany) throws TasteException {
+  public List<RecommendedItem> recommend(Comparable<?> userID, int howMany) throws TasteException {
     return recommender.recommend(userID, howMany);
   }
 
   @Override
-  public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
+  public List<RecommendedItem> recommend(Comparable<?> userID, int howMany, Rescorer<Comparable<?>> rescorer)
           throws TasteException {
     return recommender.recommend(userID, howMany, rescorer);
   }
 
   @Override
-  public double estimatePreference(Object userID, Object itemID) throws TasteException {
+  public double estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
     return recommender.estimatePreference(userID, itemID);
   }
 
   @Override
-  public void setPreference(Object userID, Object itemID, double value) throws TasteException {
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value) throws TasteException {
     recommender.setPreference(userID, itemID, value);
   }
 
   @Override
-  public void removePreference(Object userID, Object itemID) throws TasteException {
+  public void removePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
     recommender.removePreference(userID, itemID);
   }
 

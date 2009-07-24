@@ -17,7 +17,6 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.model.User;
@@ -25,7 +24,7 @@ import org.apache.mahout.cf.taste.model.User;
 import java.io.Serializable;
 
 /**
- * This implementation maintains three parallel arrays, of {@link User}s, {@link Item}s, and values. The idea is to save
+ * This implementation maintains three parallel arrays, of {@link User}s, items, and values. The idea is to save
  * allocating {@link Preference} objects themselves. On a 64-bit virtual machine, this should save 12 bytes per element
  * (the overhead of an enclosing {@link Preference} object reference and object header).
  *
@@ -34,24 +33,24 @@ import java.io.Serializable;
 public final class GenericPreferenceArray implements PreferenceArray, Serializable {
 
   private final User[] users;
-  private final Item[] items;
+  private final Comparable<?>[] itemIDs;
   private final double[] values;
 
   public GenericPreferenceArray(int size) {
     users = new User[size];
-    items = new Item[size];
+    itemIDs = new Comparable<?>[size];
     values = new double[size];
   }
 
   @Override
   public Preference get(int i) {
-    return new GenericPreference(users[i], items[i], values[i]);
+    return new GenericPreference(users[i], itemIDs[i], values[i]);
   }
 
   @Override
   public void set(int i, Preference pref) {
     users[i] = pref.getUser();
-    items[i] = pref.getItem();
+    itemIDs[i] = pref.getItemID();
     values[i] = pref.getValue();
   }
 
@@ -66,13 +65,13 @@ public final class GenericPreferenceArray implements PreferenceArray, Serializab
   }
 
   @Override
-  public Item getItem(int i) {
-    return items[i];
+  public Comparable<?> getItemID(int i) {
+    return itemIDs[i];
   }
 
   @Override
-  public void setItem(int i, Item item) {
-    items[i] = item;
+  public void setItemID(int i, Comparable<?> itemID) {
+    itemIDs[i] = itemID;
   }
 
 

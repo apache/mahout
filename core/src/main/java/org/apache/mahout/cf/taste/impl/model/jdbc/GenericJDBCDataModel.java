@@ -45,7 +45,6 @@ public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
   public static final String REMOVE_PREFERENCE_SQL_KEY = "removePreferenceSQL";
   public static final String GET_USERS_SQL_KEY = "getUsersSQL";
   public static final String GET_ITEMS_SQL_KEY = "getItemsSQL";
-  public static final String GET_ITEM_SQL_KEY = "getItemSQL";
   public static final String GET_PREFS_FOR_ITEM_SQL_KEY = "getPrefsForItemSQL";
   public static final String GET_NUM_PREFERENCE_FOR_ITEM_KEY = "getNumPreferenceForItemSQL";
   public static final String GET_NUM_PREFERENCE_FOR_ITEMS_KEY = "getNumPreferenceForItemsSQL";
@@ -66,7 +65,6 @@ public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
         props.getProperty(REMOVE_PREFERENCE_SQL_KEY),
         props.getProperty(GET_USERS_SQL_KEY),
         props.getProperty(GET_ITEMS_SQL_KEY),
-        props.getProperty(GET_ITEM_SQL_KEY),
         props.getProperty(GET_PREFS_FOR_ITEM_SQL_KEY),
         props.getProperty(GET_NUM_PREFERENCE_FOR_ITEM_KEY),
         props.getProperty(GET_NUM_PREFERENCE_FOR_ITEMS_KEY));

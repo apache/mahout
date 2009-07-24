@@ -16,9 +16,7 @@
  */
 package org.apache.mahout.cf.taste.impl.similarity;
 
-import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 
@@ -29,10 +27,10 @@ import java.util.List;
 public final class GenericItemSimilarityTest extends SimilarityTestCase {
 
   public void testSimple() {
-    Item item1 = new GenericItem<String>("1");
-    Item item2 = new GenericItem<String>("2");
-    Item item3 = new GenericItem<String>("3");
-    Item item4 = new GenericItem<String>("4");
+    Comparable<?> item1 = "1";
+    Comparable<?> item2 = "2";
+    Comparable<?> item3 = "3";
+    Comparable<?> item4 = "4";
     List<GenericItemSimilarity.ItemItemSimilarity> similarities =
         new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(4);
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item1, item2, 0.5));
@@ -54,10 +52,8 @@ public final class GenericItemSimilarityTest extends SimilarityTestCase {
     DataModel dataModel = getDataModel(user1, user2, user3);
     ItemSimilarity otherSimilarity = new PearsonCorrelationSimilarity(dataModel);
     ItemSimilarity itemSimilarity = new GenericItemSimilarity(otherSimilarity, dataModel);
-    assertCorrelationEquals(1.0,
-        itemSimilarity.itemSimilarity(dataModel.getItem("0"), dataModel.getItem("0")));
-    assertCorrelationEquals(0.960768922830523,
-        itemSimilarity.itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1")));
+    assertCorrelationEquals(1.0, itemSimilarity.itemSimilarity("0", "0"));
+    assertCorrelationEquals(0.960768922830523, itemSimilarity.itemSimilarity("0", "1"));
   }
 
 }

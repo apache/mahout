@@ -17,7 +17,6 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 
@@ -30,9 +29,9 @@ import java.util.Comparator;
  */
 final class ByRescoreComparator implements Comparator<RecommendedItem>, Serializable {
 
-  private final Rescorer<Item> rescorer;
+  private final Rescorer<Comparable<?>> rescorer;
 
-  ByRescoreComparator(Rescorer<Item> rescorer) {
+  ByRescoreComparator(Rescorer<Comparable<?>> rescorer) {
     this.rescorer = rescorer;
   }
 
@@ -44,8 +43,8 @@ final class ByRescoreComparator implements Comparator<RecommendedItem>, Serializ
       rescored1 = o1.getValue();
       rescored2 = o2.getValue();
     } else {
-      rescored1 = rescorer.rescore(o1.getItem(), o1.getValue());
-      rescored2 = rescorer.rescore(o2.getItem(), o2.getValue());
+      rescored1 = rescorer.rescore(o1.getItemID(), o1.getValue());
+      rescored2 = rescorer.rescore(o2.getItemID(), o2.getValue());
     }
     if (rescored1 < rescored2) {
       return 1;

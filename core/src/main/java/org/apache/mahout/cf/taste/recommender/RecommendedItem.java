@@ -17,19 +17,17 @@
 
 package org.apache.mahout.cf.taste.recommender;
 
-import org.apache.mahout.cf.taste.model.Item;
-
 /**
- * <p>Implementations encapsulate items that are recommended, and include the {@link
- * org.apache.mahout.cf.taste.model.Item} recommended and a value expressing the strength of the preference.</p>
+ * <p>Implementations encapsulate items that are recommended, and include the item
+ * recommended and a value expressing the strength of the preference.</p>
  */
 public interface RecommendedItem extends Comparable<RecommendedItem> {
 
-  /** @return the recommended {@link Item} */
-  Item getItem();
+  /** @return the recommended item ID */
+  Comparable<?> getItemID();
 
   /**
-   * <p>A value expressing the strength of the preference for the recommended {@link Item}. The range of the values
+   * <p>A value expressing the strength of the preference for the recommended item. The range of the values
    * depends on the implementation. Implementations must use larger values to express stronger preference.</p>
    *
    * @return strength of the preference

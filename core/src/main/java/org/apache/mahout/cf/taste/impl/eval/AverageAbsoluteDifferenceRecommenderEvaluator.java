@@ -51,7 +51,7 @@ public final class AverageAbsoluteDifferenceRecommenderEvaluator extends Abstrac
         User testUser = entry.getKey();
         try {
           double estimatedPreference =
-              recommender.estimatePreference(testUser.getID(), realPref.getItem().getID());
+              recommender.estimatePreference(testUser.getID(), realPref.getItemID());
           if (!Double.isNaN(estimatedPreference)) {
             average.addDatum(Math.abs(realPref.getValue() - estimatedPreference));
           }
@@ -60,7 +60,7 @@ public final class AverageAbsoluteDifferenceRecommenderEvaluator extends Abstrac
           // NSEE will be thrown. Just ignore it and move on.
           log.debug("User exists in test data but not training data: {}", testUser.getID(), nsue);
         } catch (NoSuchItemException nsie) {
-          log.debug("Item exists in test data but not training data: {}", realPref.getItem().getID(), nsie);
+          log.debug("Item exists in test data but not training data: {}", realPref.getItemID(), nsie);
         }
       }
     }

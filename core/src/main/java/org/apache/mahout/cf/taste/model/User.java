@@ -17,31 +17,31 @@
 
 package org.apache.mahout.cf.taste.model;
 
-/** <p>Implementations represent a user, who has preferences for {@link Item}s.</p> */
+/** <p>Implementations represent a user, who has preferences for items.</p> */
 public interface User extends Comparable<User> {
 
   /** @return unique user ID */
-  Object getID();
+  Comparable<?> getID();
 
   /**
    * @param itemID ID of item to get the user's preference for
-   * @return user's {@link Preference} for that {@link Item}, or <code>null</code> if the user expresses no such
+   * @return user's {@link Preference} for that item, or <code>null</code> if the user expresses no such
    *         preference
    */
-  Preference getPreferenceFor(Object itemID);
+  Preference getPreferenceFor(Comparable<?> itemID);
 
   /**
    * Sets a preference that this {@link User} has. Note that in general callers should expect this to be a slow
-   * operation, compared to {@link #getPreferenceFor(Object)}.
+   * operation, compared to {@link #getPreferenceFor(Comparable<?>)}.
    */
-  void setPreference(Item item, double value);
+  void setPreference(Comparable<?> itemID, double value);
 
   /** Removes a preference. This method should also be considered potentially slow. */
-  void removePreference(Object itemID);
+  void removePreference(Comparable<?> itemID);
 
   /**
    * <p>Returns a sequence of {@link Preference}s for this {@link User} which can be iterated over. Note that the
-   * sequence <em>must</em> be "in order": ordered by {@link Item}.</p>
+   * sequence <em>must</em> be "in order": ordered by item ID.</p>
    *
    * @return a sequence of {@link Preference}s
    */
@@ -49,7 +49,7 @@ public interface User extends Comparable<User> {
 
   /**
    * <p>Returns an array view of {@link Preference}s for this {@link User}. Note that the sequence <em>must</em> be "in
-   * order": ordered by {@link Item}.</p>
+   * order": ordered by item ID.</p>
    *
    * @return an array of {@link Preference}s
    */

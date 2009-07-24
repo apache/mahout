@@ -19,10 +19,8 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
-import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.ItemBasedRecommender;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
@@ -42,10 +40,10 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     assertNotNull(recommended);
     assertEquals(1, recommended.size());
     RecommendedItem firstRecommended = recommended.get(0);
-    assertEquals(new GenericItem<String>("2"), firstRecommended.getItem());
+    assertEquals("2", firstRecommended.getItemID());
     assertEquals(0.1, firstRecommended.getValue(), EPSILON);
     recommender.refresh(null);
-    assertEquals(new GenericItem<String>("2"), firstRecommended.getItem());
+    assertEquals("2", firstRecommended.getItemID());
     assertEquals(0.1, firstRecommended.getValue(), EPSILON);
   }
 
@@ -62,8 +60,8 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     for (int i = 0; i < 6; i++) {
       for (int j = i + 1; j < 6; j++) {
         similarities.add(
-            new GenericItemSimilarity.ItemItemSimilarity(new GenericItem<String>(String.valueOf(i)),
-                new GenericItem<String>(String.valueOf(j)),
+            new GenericItemSimilarity.ItemItemSimilarity(String.valueOf(i),
+                String.valueOf(j),
                 1.0 / (1.0 + (double) i + (double) j)));
       }
     }
@@ -72,11 +70,11 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     List<RecommendedItem> fewRecommended = recommender.recommend("test1", 2);
     List<RecommendedItem> moreRecommended = recommender.recommend("test1", 4);
     for (int i = 0; i < fewRecommended.size(); i++) {
-      assertEquals(fewRecommended.get(i).getItem(), moreRecommended.get(i).getItem());
+      assertEquals(fewRecommended.get(i).getItemID(), moreRecommended.get(i).getItemID());
     }
     recommender.refresh(null);
     for (int i = 0; i < fewRecommended.size(); i++) {
-      assertEquals(fewRecommended.get(i).getItem(), moreRecommended.get(i).getItem());
+      assertEquals(fewRecommended.get(i).getItemID(), moreRecommended.get(i).getItemID());
     }
   }
 
@@ -86,10 +84,10 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     users.add(getUser("test2", 0.2, 0.3, 0.3, 0.6));
     users.add(getUser("test3", 0.4, 0.4, 0.5, 0.9));
     DataModel dataModel = new GenericDataModel(users);
-    Item item1 = new GenericItem<String>("0");
-    Item item2 = new GenericItem<String>("1");
-    Item item3 = new GenericItem<String>("2");
-    Item item4 = new GenericItem<String>("3");
+    Comparable<?> item1 = "0";
+    Comparable<?> item2 = "1";
+    Comparable<?> item3 = "2";
+    Comparable<?> item4 = "3";
     Collection<GenericItemSimilarity.ItemItemSimilarity> similarities =
         new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(6);
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item1, item2, 1.0));
@@ -102,13 +100,13 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     Recommender recommender = new GenericItemBasedRecommender(dataModel, similarity);
     List<RecommendedItem> originalRecommended = recommender.recommend("test1", 2);
     List<RecommendedItem> rescoredRecommended =
-        recommender.recommend("test1", 2, new ReversingRescorer<Item>());
+        recommender.recommend("test1", 2, new ReversingRescorer<Comparable<?>>());
     assertNotNull(originalRecommended);
     assertNotNull(rescoredRecommended);
     assertEquals(2, originalRecommended.size());
     assertEquals(2, rescoredRecommended.size());
-    assertEquals(originalRecommended.get(0).getItem(), rescoredRecommended.get(1).getItem());
-    assertEquals(originalRecommended.get(1).getItem(), rescoredRecommended.get(0).getItem());
+    assertEquals(originalRecommended.get(0).getItemID(), rescoredRecommended.get(1).getItemID());
+    assertEquals(originalRecommended.get(1).getItemID(), rescoredRecommended.get(0).getItemID());
   }
 
   public void testEstimatePref() throws Exception {
@@ -127,7 +125,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     assertEquals(1, recommended.size());
     RecommendedItem firstRecommended = recommended.get(0);
     // item one should be recommended because it has a greater rating/score
-    assertEquals(new GenericItem<String>("2"), firstRecommended.getItem());
+    assertEquals("2", firstRecommended.getItemID());
     assertEquals(0.1, firstRecommended.getValue(), EPSILON);
   }
 
@@ -138,15 +136,15 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     assertEquals(2, similar.size());
     RecommendedItem first = similar.get(0);
     RecommendedItem second = similar.get(1);
-    assertEquals("1", first.getItem().getID());
+    assertEquals("1", first.getItemID());
     assertEquals(1.0, first.getValue(), EPSILON);
-    assertEquals("2", second.getItem().getID());
+    assertEquals("2", second.getItemID());
     assertEquals(0.5, second.getValue(), EPSILON);
   }
 
   public void testMostSimilarToMultiple() throws Exception {
     ItemBasedRecommender recommender = buildRecommender2();
-    List<Object> itemIDs = new ArrayList<Object>(2);
+    List<Comparable<?>> itemIDs = new ArrayList<Comparable<?>>(2);
     itemIDs.add("0");
     itemIDs.add("1");
     List<RecommendedItem> similar = recommender.mostSimilarItems(itemIDs, 2);
@@ -154,9 +152,9 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     assertEquals(2, similar.size());
     RecommendedItem first = similar.get(0);
     RecommendedItem second = similar.get(1);
-    assertEquals("2", first.getItem().getID());
+    assertEquals("2", first.getItemID());
     assertEquals(0.85, first.getValue(), EPSILON);
-    assertEquals("3", second.getItem().getID());
+    assertEquals("3", second.getItemID());
     assertEquals(-0.3, second.getValue(), EPSILON);
   }
 
@@ -168,11 +166,11 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     RecommendedItem first = recommendedBecause.get(0);
     RecommendedItem second = recommendedBecause.get(1);
     RecommendedItem third = recommendedBecause.get(2);
-    assertEquals("2", first.getItem().getID());
+    assertEquals("2", first.getItemID());
     assertEquals(0.99, first.getValue(), EPSILON);
-    assertEquals("3", second.getItem().getID());
+    assertEquals("3", second.getItemID());
     assertEquals(0.4, second.getValue(), EPSILON);
-    assertEquals("0", third.getItem().getID());
+    assertEquals("0", third.getItemID());
     assertEquals(0.2, third.getValue(), EPSILON);
   }
 
@@ -180,9 +178,9 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     DataModel dataModel = new GenericDataModel(getMockUsers());
     Collection<GenericItemSimilarity.ItemItemSimilarity> similarities =
         new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(2);
-    Item item1 = new GenericItem<String>("0");
-    Item item2 = new GenericItem<String>("1");
-    Item item3 = new GenericItem<String>("2");
+    Comparable<?> item1 = "0";
+    Comparable<?> item2 = "1";
+    Comparable<?> item3 = "2";
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item1, item2, 1.0));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item1, item3, 0.5));
     ItemSimilarity similarity = new GenericItemSimilarity(similarities);
@@ -198,11 +196,11 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     DataModel dataModel = new GenericDataModel(users);
     Collection<GenericItemSimilarity.ItemItemSimilarity> similarities =
         new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(10);
-    Item item1 = new GenericItem<String>("0");
-    Item item2 = new GenericItem<String>("1");
-    Item item3 = new GenericItem<String>("2");
-    Item item4 = new GenericItem<String>("3");
-    Item item5 = new GenericItem<String>("4");
+    Comparable<?> item1 = "0";
+    Comparable<?> item2 = "1";
+    Comparable<?> item3 = "2";
+    Comparable<?> item4 = "3";
+    Comparable<?> item5 = "4";
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item1, item2, 1.0));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item1, item3, 0.8));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item1, item4, -0.6));

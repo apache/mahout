@@ -21,7 +21,6 @@ import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
 import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.example.grouplens.GroupLensDataModel;
@@ -38,41 +37,28 @@ import java.nio.charset.Charset;
 
 public final class BookCrossingDataModel extends FileDataModel {
 
-  private Map<String, Book> bookMap;
   private Map<String, String[]> userDataMap;
-  private final File booksFile;
   private final File usersFile;
 
   public BookCrossingDataModel() throws IOException {
     this(GroupLensDataModel.readResourceToTempFile("/org/apache/mahout/cf/taste/example/bookcrossing/BX-Book-Ratings.csv"),
-         GroupLensDataModel.readResourceToTempFile("/org/apache/mahout/cf/taste/example/bookcrossing/BX-Books.csv"),
          GroupLensDataModel.readResourceToTempFile("/org/apache/mahout/cf/taste/example/bookcrossing/BX-Users.csv"));
   }
 
   /**
    * @param ratingsFile BookCrossing ratings file in its native format
-   * @param booksFile BookCrossing books file in its native format
    * @param usersFile BookCrossing books file in its native format
    * @throws IOException if an error occurs while reading or writing files
    */
-  public BookCrossingDataModel(File ratingsFile, File booksFile, File usersFile) throws IOException {
+  public BookCrossingDataModel(File ratingsFile, File usersFile) throws IOException {
     super(convertBCFile(ratingsFile));
-    this.booksFile = booksFile;
     this.usersFile = usersFile;
   }
 
   @Override
   protected void reload() {
-    bookMap = new FastMap<String, Book>(5001);
     userDataMap = new FastMap<String, String[]>(5001);
 
-    for (String line : new FileLineIterable(booksFile, true)) {
-      String[] tokens = tokenizeLine(line, 5);
-      if (tokens != null) {
-        String id = tokens[0];
-        bookMap.put(id, new Book(id, tokens[1], tokens[2], Integer.parseInt(tokens[3]), tokens[4]));
-      }
-    }
     for (String line : new FileLineIterable(usersFile, true)) {
       String[] tokens = tokenizeLine(line, 3);
       if (tokens != null) {
@@ -80,9 +66,7 @@ public final class BookCrossingDataModel extends FileDataModel {
         userDataMap.put(id, new String[] { tokens[1], tokens[2] });
       }
     }
-
     super.reload();
-    bookMap = null;
     userDataMap = null;
   }
 
@@ -159,16 +143,6 @@ public final class BookCrossingDataModel extends FileDataModel {
     String country = locationTokens.length > 2 ? locationTokens[2] : null;
     Integer age = userData[1] == null ? null : Integer.valueOf(userData[1]);
     return new BookCrossingUser(id, prefs, city, state, country, age);
-  }
-
-  @Override
-  protected Item buildItem(String id) {
-    Item item = bookMap.get(id);
-    if (item == null) {
-      // some books aren't in books file?
-      return new Book(id, null, null, 0, null);
-    }
-    return item;
   }
 
   private static File convertBCFile(File originalFile) throws IOException {

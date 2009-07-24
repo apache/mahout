@@ -19,10 +19,9 @@ package org.apache.mahout.cf.taste.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.model.Item;
 
 /**
- * <p>Implementations of this interface define a notion of similarity between two {@link Item}s. Implementations should
+ * <p>Implementations of this interface define a notion of similarity between two items. Implementations should
  * return values in the range -1.0 to 1.0, with 1.0 representing perfect similarity.</p>
  *
  * @see UserSimilarity
@@ -30,14 +29,14 @@ import org.apache.mahout.cf.taste.model.Item;
 public interface ItemSimilarity extends Refreshable {
 
   /**
-   * <p>Returns the degree of similarity, of two {@link Item}s, based on the preferences that {@link
+   * <p>Returns the degree of similarity, of two items, based on the preferences that {@link
    * org.apache.mahout.cf.taste.model.User}s have expressed for the items.</p>
    *
-   * @param item1 first item
-   * @param item2 second item
-   * @return similarity between the {@link Item}s, in [-1,1]
+   * @param itemID1 first item ID
+   * @param itemID2 second item ID
+   * @return similarity between the items, in [-1,1]
    * @throws TasteException if an error occurs while accessing the data
    */
-  double itemSimilarity(Item item1, Item item2) throws TasteException;
+  double itemSimilarity(Comparable<?> itemID1, Comparable<?> itemID2) throws TasteException;
 
 }

@@ -24,7 +24,7 @@ import java.util.List;
 
 /**
  * <p>Implementations represent a repository of information about {@link User}s and their associated {@link Preference}s
- * for {@link Item}s.</p>
+ * for items.</p>
  */
 public interface DataModel extends Refreshable {
 
@@ -41,39 +41,30 @@ public interface DataModel extends Refreshable {
    * @throws org.apache.mahout.cf.taste.common.NoSuchUserException
    *                        if there is no such {@link User}
    */
-  User getUser(Object id) throws TasteException;
+  User getUser(Comparable<?> id) throws TasteException;
 
   /**
-   * @return a {@link List} of all {@link Item}s in the model, order by {@link Item}
+   * @return a {@link List} of all item IDs in the model, in order
    * @throws TasteException if an error occurs while accessing the data
    */
-  Iterable<? extends Item> getItems() throws TasteException;
-
-  /**
-   * @param id item ID
-   * @return {@link Item} that has that ID
-   * @throws TasteException if an error occurs while accessing the data
-   * @throws org.apache.mahout.cf.taste.common.NoSuchItemException
-   *                        if there is no such {@link Item}
-   */
-  Item getItem(Object id) throws TasteException;
+  Iterable<Comparable<?>> getItemIDs() throws TasteException;
 
   /**
    * @param itemID item ID
    * @return all existing {@link Preference}s expressed for that item, ordered by {@link User}
    * @throws TasteException if an error occurs while accessing the data
    */
-  Iterable<? extends Preference> getPreferencesForItem(Object itemID) throws TasteException;
+  Iterable<? extends Preference> getPreferencesForItem(Comparable<?> itemID) throws TasteException;
 
   /**
    * @param itemID item ID
    * @return all existing {@link Preference}s expressed for that item, ordered by {@link User}, as an array
    * @throws TasteException if an error occurs while accessing the data
    */
-  Preference[] getPreferencesForItemAsArray(Object itemID) throws TasteException;
+  Preference[] getPreferencesForItemAsArray(Comparable<?> itemID) throws TasteException;
 
   /**
-   * @return total number of {@link Item}s known to the model. This is generally the union of all {@link Item}s
+   * @return total number of items known to the model. This is generally the union of all items
    *         preferred by at least one {@link User} but could include more.
    * @throws TasteException if an error occurs while accessing the data
    */
@@ -92,7 +83,7 @@ public interface DataModel extends Refreshable {
    * @throws IllegalArgumentException if itemIDs is null, empty, or larger than 2 elements since currently only queries
    *                                  of up to 2 items are needed and supported
    */
-  int getNumUsersWithPreferenceFor(Object... itemIDs) throws TasteException;
+  int getNumUsersWithPreferenceFor(Comparable<?>... itemIDs) throws TasteException;
 
   /**
    * <p>Sets a particular preference (item plus rating) for a user.</p>
@@ -102,7 +93,7 @@ public interface DataModel extends Refreshable {
    * @param value  preference value
    * @throws TasteException if an error occurs while accessing the data
    */
-  void setPreference(Object userID, Object itemID, double value) throws TasteException;
+  void setPreference(Comparable<?> userID, Comparable<?> itemID, double value) throws TasteException;
 
   /**
    * <p>Removes a particular preference for a user.</p>
@@ -111,6 +102,6 @@ public interface DataModel extends Refreshable {
    * @param itemID item to remove preference for
    * @throws TasteException if an error occurs while accessing the data
    */
-  void removePreference(Object userID, Object itemID) throws TasteException;
+  void removePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException;
 
 }

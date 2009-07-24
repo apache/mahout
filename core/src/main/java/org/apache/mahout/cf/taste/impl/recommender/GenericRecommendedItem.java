@@ -18,7 +18,6 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 
 import java.io.Serializable;
@@ -26,24 +25,24 @@ import java.io.Serializable;
 /** <p>A simple implementation of {@link RecommendedItem}.</p> */
 public final class GenericRecommendedItem implements RecommendedItem, Serializable {
 
-  private final Item item;
+  private final Comparable<?> itemID;
   private final double value;
 
   /** @throws IllegalArgumentException if item is null or value is NaN */
-  public GenericRecommendedItem(Item item, double value) {
-    if (item == null) {
+  public GenericRecommendedItem(Comparable<?> itemID, double value) {
+    if (itemID == null) {
       throw new IllegalArgumentException("item is null");
     }
     if (Double.isNaN(value)) {
       throw new IllegalArgumentException("value is NaN");
     }
-    this.item = item;
+    this.itemID = itemID;
     this.value = value;
   }
 
   @Override
-  public Item getItem() {
-    return item;
+  public Comparable<?> getItemID() {
+    return itemID;
   }
 
   @Override
@@ -53,12 +52,12 @@ public final class GenericRecommendedItem implements RecommendedItem, Serializab
 
   @Override
   public String toString() {
-    return "RecommendedItem[item:" + item + ", value:" + value + ']';
+    return "RecommendedItem[item:" + itemID + ", value:" + value + ']';
   }
 
   @Override
   public int hashCode() {
-    return item.hashCode() ^ RandomUtils.hashDouble(value);
+    return itemID.hashCode() ^ RandomUtils.hashDouble(value);
   }
 
   @Override
@@ -67,7 +66,7 @@ public final class GenericRecommendedItem implements RecommendedItem, Serializab
       return false;
     }
     GenericRecommendedItem other = (GenericRecommendedItem) o;
-    return item.equals(other.item) && value == other.value;
+    return itemID.equals(other.itemID) && value == other.value;
   }
 
   /**

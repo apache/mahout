@@ -17,11 +17,9 @@
 
 package org.apache.mahout.cf.taste.example.grouplens;
 
-import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
 import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
-import org.apache.mahout.cf.taste.model.Item;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -30,61 +28,25 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.OutputStreamWriter;
-import java.util.Map;
-import java.util.NoSuchElementException;
 import java.nio.charset.Charset;
 
 public final class GroupLensDataModel extends FileDataModel {
 
-  private Map<String, Movie> movieMap;
-  private final File moviesFile;
-
   public GroupLensDataModel() throws IOException {
-    this(readResourceToTempFile("/org/apache/mahout/cf/taste/example/grouplens/ratings.dat"),
-         readResourceToTempFile("/org/apache/mahout/cf/taste/example/grouplens/movies.dat"));
+    this(readResourceToTempFile("/org/apache/mahout/cf/taste/example/grouplens/ratings.dat"));
   }
 
   /**
    * @param ratingsFile GroupLens ratings.dat file in its native format
-   * @param moviesFile GroupLens movies.dat file in its native format
    * @throws IOException if an error occurs while reading or writing files
    */
-  public GroupLensDataModel(File ratingsFile, File moviesFile) throws IOException {
-    super(convertGLFile(ratingsFile, true));
-    this.moviesFile = moviesFile;
+  public GroupLensDataModel(File ratingsFile) throws IOException {
+    super(convertGLFile(ratingsFile));
   }
 
-  @Override
-  protected Item buildItem(String id) {
-    Item item = movieMap.get(id);
-    if (item == null) {
-      throw new NoSuchElementException();
-    }
-    return item;
-  }
-
-  @Override
-  protected void reload() {
-    File convertedMoviesFile;
-    try {
-      convertedMoviesFile = convertGLFile(moviesFile, false);
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe); // better way?
-    }
-    movieMap = new FastMap<String, Movie>(5001);
-    for (String line : new FileLineIterable(convertedMoviesFile, false)) {
-      String[] tokens = line.split(",");
-      String id = tokens[0];
-      movieMap.put(id, new Movie(id, tokens[1], tokens[2]));
-    }
-    super.reload();
-    movieMap = null;
-  }
-
-  private static File convertGLFile(File originalFile, boolean ratings) throws IOException {
+  private static File convertGLFile(File originalFile) throws IOException {
     // Now translate the file; remove commas, then convert "::" delimiter to comma
-    File resultFile = new File(new File(System.getProperty("java.io.tmpdir")),
-                                        (ratings ? "ratings" : "movies") + ".txt");
+    File resultFile = new File(new File(System.getProperty("java.io.tmpdir")), "ratings.txt");
     if (resultFile.exists()) {
       resultFile.delete();
     }
@@ -92,13 +54,7 @@ public final class GroupLensDataModel extends FileDataModel {
     try {
       writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charset.forName("UTF-8")));
       for (String line : new FileLineIterable(originalFile, false)) {
-        String convertedLine;
-        if (ratings) {
-          // toss the last column of data, which is a timestamp we don't want
-          convertedLine = line.substring(0, line.lastIndexOf("::")).replace("::", ",");
-        } else {
-          convertedLine = line.replace(",", "").replace("::", ",");
-        }
+        String convertedLine = line.substring(0, line.lastIndexOf("::")).replace("::", ",");
         writer.println(convertedLine);
       }
       writer.flush();

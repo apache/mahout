@@ -18,9 +18,7 @@
 package org.apache.mahout.cf.taste.hadoop;
 
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 
 import java.io.DataInput;
@@ -53,7 +51,7 @@ public final class RecommendedItemsWritable implements Writable {
   @Override
   public void write(DataOutput out) throws IOException {
     for (RecommendedItem item : recommended) {
-      out.writeUTF(item.getItem().getID().toString());
+      out.writeUTF(item.getItemID().toString());
       out.writeDouble(item.getValue());
     }
 
@@ -66,8 +64,7 @@ public final class RecommendedItemsWritable implements Writable {
       do {
         String itemID = in.readUTF();
         double value = in.readDouble();
-        Item item = new GenericItem<String>(itemID);
-        RecommendedItem recommendedItem = new GenericRecommendedItem(item, value);
+        RecommendedItem recommendedItem = new GenericRecommendedItem(itemID, value);
         recommended.add(recommendedItem);
       } while (true);
     } catch (EOFException eofe) {
@@ -92,7 +89,7 @@ public final class RecommendedItemsWritable implements Writable {
       } else {
         result.append(',');
       }
-      result.append(item.getItem().getID().toString());
+      result.append(item.getItemID().toString());
       result.append(':');
       result.append(item.getValue());
     }

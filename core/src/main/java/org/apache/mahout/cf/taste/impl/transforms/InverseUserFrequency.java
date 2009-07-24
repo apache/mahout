@@ -21,7 +21,6 @@ import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
@@ -36,12 +35,12 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * <p>Implements an "inverse user frequency" transformation, which boosts preference values for items for which few
  * users have expressed a preference, and reduces preference values for items for which many users have expressed a
- * preference. The idea is that these "rare" {@link Item}s are more useful in deciding how similar two users' tastes
+ * preference. The idea is that these "rare" items are more useful in deciding how similar two users' tastes
  * are, and so should be emphasized in other calculatioons. This idea is mentioned in <a
  * href="ftp://ftp.research.microsoft.com/pub/tr/tr-98-12.pdf">Empirical Analysis of Predictive Algorithms for
  * Collaborative Filtering</a>.</p>
  *
- * <p>A scaling factor is computed for each {@link Item} by dividing the total number of users by the number of users
+ * <p>A scaling factor is computed for each item by dividing the total number of users by the number of users
  * expressing a preference for that item, and taking the log of that value. The log base of this calculation can be
  * controlled in the constructor. Intuitively, the right value for the base is equal to the average number of users who
  * express a preference for each item in your model. If each item has about 100 preferences on average, 100.0 is a good
@@ -53,7 +52,7 @@ public final class InverseUserFrequency implements PreferenceTransform {
 
   private final DataModel dataModel;
   private final double logBase;
-  private final AtomicReference<Map<Item, Double>> iufFactors;
+  private final AtomicReference<Map<Comparable<?>, Double>> iufFactors;
 
   /**
    * <p>Creates a {@link InverseUserFrequency} transformation. Computations use the given log base.</p>
@@ -71,7 +70,7 @@ public final class InverseUserFrequency implements PreferenceTransform {
     }
     this.dataModel = dataModel;
     this.logBase = logBase;
-    this.iufFactors = new AtomicReference<Map<Item, Double>>(new FastMap<Item, Double>());
+    this.iufFactors = new AtomicReference<Map<Comparable<?>, Double>>(new FastMap<Comparable<?>, Double>());
     recompute();
   }
 
@@ -82,7 +81,7 @@ public final class InverseUserFrequency implements PreferenceTransform {
 
   @Override
   public double getTransformedValue(Preference pref) {
-    Double factor = iufFactors.get().get(pref.getItem());
+    Double factor = iufFactors.get().get(pref.getItemID());
     if (factor != null) {
       return pref.getValue() * factor;
     }
@@ -99,18 +98,18 @@ public final class InverseUserFrequency implements PreferenceTransform {
   }
 
   private synchronized void recompute() throws TasteException {
-    Counters<Item> itemPreferenceCounts = new Counters<Item>();
+    Counters<Comparable<?>> itemPreferenceCounts = new Counters<Comparable<?>>();
     int numUsers = 0;
     for (User user : dataModel.getUsers()) {
       Preference[] prefs = user.getPreferencesAsArray();
       for (Preference pref : prefs) {
-        itemPreferenceCounts.increment(pref.getItem());
+        itemPreferenceCounts.increment(pref.getItemID());
       }
       numUsers++;
     }
-    Map<Item, Double> newIufFactors = new FastMap<Item, Double>(itemPreferenceCounts.size());
+    Map<Comparable<?>, Double> newIufFactors = new FastMap<Comparable<?>, Double>(itemPreferenceCounts.size());
     double logFactor = Math.log(logBase);
-    for (Map.Entry<Item, int[]> entry : itemPreferenceCounts.getEntrySet()) {
+    for (Map.Entry<Comparable<?>, int[]> entry : itemPreferenceCounts.getEntrySet()) {
       newIufFactors.put(entry.getKey(),
           Math.log((double) numUsers / (double) entry.getValue()[0]) / logFactor);
     }

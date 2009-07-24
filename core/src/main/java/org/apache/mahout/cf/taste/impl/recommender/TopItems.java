@@ -20,7 +20,6 @@ package org.apache.mahout.cf.taste.impl.recommender;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
 import org.apache.mahout.cf.taste.impl.similarity.GenericUserSimilarity;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
@@ -38,21 +37,21 @@ public final class TopItems {
   }
 
   public static List<RecommendedItem> getTopItems(int howMany,
-                                                  Iterable<Item> allItems,
-                                                  Rescorer<Item> rescorer,
-                                                  Estimator<Item> estimator) throws TasteException {
-    if (allItems == null || estimator == null) {
+                                                  Iterable<Comparable<?>> allItemIDs,
+                                                  Rescorer<Comparable<?>> rescorer,
+                                                  Estimator<Comparable<?>> estimator) throws TasteException {
+    if (allItemIDs == null || estimator == null) {
       throw new IllegalArgumentException("argument is null");
     }
     Queue<RecommendedItem> topItems = new PriorityQueue<RecommendedItem>(howMany + 1, Collections.reverseOrder());
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
-    for (Item item : allItems) {
-      if (item.isRecommendable() && (rescorer == null || !rescorer.isFiltered(item))) {
-        double preference = estimator.estimate(item);
-        double rescoredPref = rescorer == null ? preference : rescorer.rescore(item, preference);
+    for (Comparable<?> itemID : allItemIDs) {
+      if (rescorer == null || !rescorer.isFiltered(itemID)) {
+        double preference = estimator.estimate(itemID);
+        double rescoredPref = rescorer == null ? preference : rescorer.rescore(itemID, preference);
         if (!Double.isNaN(rescoredPref) && (!full || rescoredPref > lowestTopValue)) {
-          topItems.add(new GenericRecommendedItem(item, rescoredPref));
+          topItems.add(new GenericRecommendedItem(itemID, rescoredPref));
           if (full) {
             topItems.poll();
           } else if (topItems.size() > howMany) {

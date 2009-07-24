@@ -21,7 +21,6 @@ import org.apache.mahout.cf.taste.example.grouplens.GroupLensDataModel;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.Item;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,7 +51,7 @@ public final class JesterDataModel extends FileDataModel {
   }
 
   @Override
-  protected void processLine(String line, Map<String, List<Preference>> data, Map<String, Item> itemCache) {
+  protected void processLine(String line, Map<String, List<Preference>> data) {
     String userID = String.valueOf(userBeingRead);
     String[] jokePrefs = line.split(",");
     List<Preference> prefs = new ArrayList<Preference>(101);
@@ -61,12 +60,7 @@ public final class JesterDataModel extends FileDataModel {
       if (!"99".equals(jokePref)) {
         double jokePrefValue = Double.parseDouble(jokePref);        
         String itemID = String.valueOf(itemIDNum);
-        Item item = itemCache.get(itemID);
-        if (item == null) {
-          item = buildItem(itemID);
-          itemCache.put(itemID, item);
-        }
-        prefs.add(new GenericPreference(null, item, jokePrefValue));
+        prefs.add(new GenericPreference(null, itemID, jokePrefValue));
       }
     }
     data.put(userID, prefs);

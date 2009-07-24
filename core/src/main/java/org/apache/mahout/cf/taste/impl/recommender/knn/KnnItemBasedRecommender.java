@@ -23,7 +23,6 @@ import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
@@ -52,17 +51,17 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
     this.neighborhoodSize = neighborhoodSize;
   }
 
-  private List<RecommendedItem> mostSimilarItems(Object itemID,
-                                                 Iterable<Item> allItems,
+  private List<RecommendedItem> mostSimilarItems(Comparable<?> itemID,
+                                                 Iterable<Comparable<?>> allItemIDs,
                                                  int howMany,
-                                                 Rescorer<Pair<Item, Item>> rescorer) throws TasteException {
-    Item toItem = getDataModel().getItem(itemID);
-    TopItems.Estimator<Item> estimator = new MostSimilarEstimator(toItem, getSimilarity(), rescorer);
-    return TopItems.getTopItems(howMany, allItems, null, estimator);
+                                                 Rescorer<Pair<Comparable<?>, Comparable<?>>> rescorer)
+          throws TasteException {
+    TopItems.Estimator<Comparable<?>> estimator = new MostSimilarEstimator(itemID, getSimilarity(), rescorer);
+    return TopItems.getTopItems(howMany, allItemIDs, null, estimator);
   }
 
 
-  private double[] getInterpolations(Item item, User theUser, List<Item> itemNeighborhood) throws TasteException {
+  private double[] getInterpolations(Comparable<?> itemID, User theUser, List<Comparable<?>> itemNeighborhood) throws TasteException {
 
     int k = itemNeighborhood.size();
     double[][] A = new double[k][k];
@@ -70,17 +69,17 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
     int i = 0;
 
     int numUsers = getDataModel().getNumUsers();
-    for (Item iitem : itemNeighborhood) {
-      Preference[] iPrefs = getDataModel().getPreferencesForItemAsArray(iitem.getID());
+    for (Comparable<?> iitem : itemNeighborhood) {
+      Preference[] iPrefs = getDataModel().getPreferencesForItemAsArray(iitem);
       int j = 0;
-      for (Item jitem : itemNeighborhood) {
+      for (Comparable<?> jitem : itemNeighborhood) {
         double value = 0.0;
         for (Preference pi : iPrefs) {
           User v = pi.getUser();
           if (v.equals(theUser)) {
             continue;
           }
-          Preference pj = v.getPreferenceFor(jitem.getID());
+          Preference pj = v.getPreferenceFor(jitem);
           if (pj != null) {
             value += pi.getValue() * pj.getValue();
           }
@@ -91,16 +90,16 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
       i++;
     }
 
-    Preference[] iPrefs = getDataModel().getPreferencesForItemAsArray(item.getID());
+    Preference[] iPrefs = getDataModel().getPreferencesForItemAsArray(itemID);
     i = 0;
-    for (Item jitem : itemNeighborhood) {
+    for (Comparable<?> jitem : itemNeighborhood) {
       double value = 0.0;
       for (Preference pi : iPrefs) {
         User v = pi.getUser();
         if (v.equals(theUser)) {
           continue;
         }
-        Preference pj = v.getPreferenceFor(jitem.getID());
+        Preference pj = v.getPreferenceFor(jitem);
         if (pj != null) {
           value += pi.getValue() * pj.getValue();
         }
@@ -113,29 +112,29 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
   }
 
   @Override
-  protected double doEstimatePreference(User theUser, Item item) throws TasteException {
+  protected double doEstimatePreference(User theUser, Comparable<?> itemID) throws TasteException {
 
-    Collection<Item> allItems = new FastSet<Item>();
+    Collection<Comparable<?>> allItemIDs = new FastSet<Comparable<?>>();
     for (Preference pref : theUser.getPreferencesAsArray()) {
-      allItems.add(pref.getItem());
+      allItemIDs.add(pref.getItemID());
     }
-    allItems.remove(item);
+    allItemIDs.remove(itemID);
 
-    List<RecommendedItem> mostSimilar = mostSimilarItems(item.getID(), allItems, neighborhoodSize, null);
-    List<Item> theNeighborhood = new ArrayList<Item>(mostSimilar.size());
+    List<RecommendedItem> mostSimilar = mostSimilarItems(itemID, allItemIDs, neighborhoodSize, null);
+    List<Comparable<?>> theNeighborhood = new ArrayList<Comparable<?>>(mostSimilar.size());
     for (RecommendedItem rec : mostSimilar) {
-      theNeighborhood.add(rec.getItem());
+      theNeighborhood.add(rec.getItemID());
     }
 
 
-    double[] weights = getInterpolations(item, theUser, theNeighborhood);
+    double[] weights = getInterpolations(itemID, theUser, theNeighborhood);
 
     int i = 0;
     double preference = 0.0;
     double totalSimilarity = 0.0;
-    for (Item jitem : theNeighborhood) {
+    for (Comparable<?> jitem : theNeighborhood) {
 
-      Preference pref = theUser.getPreferenceFor(jitem.getID());
+      Preference pref = theUser.getPreferenceFor(jitem);
 
       if (pref != null) {
         preference += pref.getValue() * weights[i];

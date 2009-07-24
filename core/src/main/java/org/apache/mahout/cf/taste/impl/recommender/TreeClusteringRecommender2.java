@@ -26,7 +26,6 @@ import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.ClusteringRecommender;
@@ -54,8 +53,8 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * <p>This {@link org.apache.mahout.cf.taste.recommender.Recommender} therefore has a few properties to note:</p> <ul>
  * <li>For all {@link org.apache.mahout.cf.taste.model.User}s in a cluster, recommendations will be the same</li>
- * <li>{@link #estimatePreference(Object, Object)} may well return {@link Double#NaN}; it does so when asked to estimate
- * preference for an {@link org.apache.mahout.cf.taste.model.Item} for which no preference is expressed in the {@link
+ * <li>{@link #estimatePreference(Comparable, Comparable)} may well return {@link Double#NaN}; it does so
+ * when asked to estimate preference for an item for which no preference is expressed in the {@link
  * org.apache.mahout.cf.taste.model.User}s in the cluster.</li> </ul>
  *
  * <p>This is an <em>experimental</em> implementation which tries to gain a lot of speed at the cost of accuracy in
@@ -71,9 +70,9 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
   private final int numClusters;
   private final double clusteringThreshold;
   private final boolean clusteringByThreshold;
-  private Map<Object, List<RecommendedItem>> topRecsByUserID;
+  private Map<Comparable<?>, List<RecommendedItem>> topRecsByUserID;
   private Collection<Collection<User>> allClusters;
-  private Map<Object, Collection<User>> clustersByUserID;
+  private Map<Comparable<?>, Collection<User>> clustersByUserID;
   private boolean clustersBuilt;
   private final ReentrantLock buildClustersLock;
   private final RefreshHelper refreshHelper;
@@ -149,7 +148,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
   }
 
   @Override
-  public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
+  public List<RecommendedItem> recommend(Comparable<?> userID, int howMany, Rescorer<Comparable<?>> rescorer)
       throws TasteException {
     if (userID == null) {
       throw new IllegalArgumentException("userID is null");
@@ -171,12 +170,12 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
     // Only add items the user doesn't already have a preference for.
     // And that the rescorer doesn't "reject".
     for (RecommendedItem recommendedItem : recommended) {
-      Item item = recommendedItem.getItem();
-      if (rescorer != null && rescorer.isFiltered(item)) {
+      Comparable<?> itemID = recommendedItem.getItemID();
+      if (rescorer != null && rescorer.isFiltered(itemID)) {
         continue;
       }
-      if (theUser.getPreferenceFor(item.getID()) == null &&
-          (rescorer == null || !Double.isNaN(rescorer.rescore(item, recommendedItem.getValue())))) {
+      if (theUser.getPreferenceFor(itemID) == null &&
+          (rescorer == null || !Double.isNaN(rescorer.rescore(itemID, recommendedItem.getValue())))) {
         rescored.add(recommendedItem);
       }
     }
@@ -186,7 +185,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
   }
 
   @Override
-  public double estimatePreference(Object userID, Object itemID) throws TasteException {
+  public double estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
     if (userID == null || itemID == null) {
       throw new IllegalArgumentException("userID or itemID is null");
     }
@@ -200,7 +199,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
     List<RecommendedItem> topRecsForUser = topRecsByUserID.get(userID);
     if (topRecsForUser != null) {
       for (RecommendedItem item : topRecsForUser) {
-        if (itemID.equals(item.getItem().getID())) {
+        if (itemID.equals(item.getItemID())) {
           return item.getValue();
         }
       }
@@ -210,7 +209,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
   }
 
   @Override
-  public Collection<User> getCluster(Object userID) throws TasteException {
+  public Collection<User> getCluster(Comparable<?> userID) throws TasteException {
     if (userID == null) {
       throw new IllegalArgumentException("userID is null");
     }
@@ -443,9 +442,9 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
     return queue;
   }
 
-  private static Map<Object, List<RecommendedItem>> computeTopRecsPerUserID(Iterable<Collection<User>> clusters)
+  private static Map<Comparable<?>, List<RecommendedItem>> computeTopRecsPerUserID(Iterable<Collection<User>> clusters)
       throws TasteException {
-    Map<Object, List<RecommendedItem>> recsPerUser = new FastMap<Object, List<RecommendedItem>>();
+    Map<Comparable<?>, List<RecommendedItem>> recsPerUser = new FastMap<Comparable<?>, List<RecommendedItem>>();
     for (Collection<User> cluster : clusters) {
       List<RecommendedItem> recs = computeTopRecsForCluster(cluster);
       for (User user : cluster) {
@@ -458,25 +457,25 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
   private static List<RecommendedItem> computeTopRecsForCluster(Collection<User> cluster)
       throws TasteException {
 
-    Collection<Item> allItems = new FastSet<Item>();
+    Collection<Comparable<?>> allItemIDs = new FastSet<Comparable<?>>();
     for (User user : cluster) {
       Preference[] prefs = user.getPreferencesAsArray();
       for (Preference pref : prefs) {
-        allItems.add(pref.getItem());
+        allItemIDs.add(pref.getItemID());
       }
     }
 
-    TopItems.Estimator<Item> estimator = new Estimator(cluster);
+    TopItems.Estimator<Comparable<?>> estimator = new Estimator(cluster);
 
     List<RecommendedItem> topItems =
-        TopItems.getTopItems(Integer.MAX_VALUE, allItems, null, estimator);
+        TopItems.getTopItems(Integer.MAX_VALUE, allItemIDs, null, estimator);
 
     log.debug("Recommendations are: {}", topItems);
     return Collections.unmodifiableList(topItems);
   }
 
-  private static Map<Object, Collection<User>> computeClustersPerUserID(Collection<Collection<User>> clusters) {
-    Map<Object, Collection<User>> clustersPerUser = new FastMap<Object, Collection<User>>(clusters.size());
+  private static Map<Comparable<?>, Collection<User>> computeClustersPerUserID(Collection<Collection<User>> clusters) {
+    Map<Comparable<?>, Collection<User>> clustersPerUser = new FastMap<Comparable<?>, Collection<User>>(clusters.size());
     for (Collection<User> cluster : clusters) {
       for (User user : cluster) {
         clustersPerUser.put(user.getID(), cluster);
@@ -495,7 +494,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
     return "TreeClusteringRecommender2[clusterSimilarity:" + clusterSimilarity + ']';
   }
 
-  private static class Estimator implements TopItems.Estimator<Item> {
+  private static class Estimator implements TopItems.Estimator<Comparable<?>> {
 
     private final Collection<User> cluster;
 
@@ -504,10 +503,10 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
     }
 
     @Override
-    public double estimate(Item item) {
+    public double estimate(Comparable<?> itemID) {
       RunningAverage average = new FullRunningAverage();
       for (User user : cluster) {
-        Preference pref = user.getPreferenceFor(item.getID());
+        Preference pref = user.getPreferenceFor(itemID);
         if (pref != null) {
           average.addDatum(pref.getValue());
         }

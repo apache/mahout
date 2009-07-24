@@ -25,7 +25,6 @@ import org.apache.mahout.cf.taste.impl.common.IteratorIterable;
 import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
 import org.apache.mahout.cf.taste.impl.model.BooleanPrefUser;
 import org.apache.mahout.cf.taste.impl.model.BooleanPreference;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 
@@ -59,7 +58,6 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
                                              String removePreferenceSQL,
                                              String getUsersSQL,
                                              String getItemsSQL,
-                                             String getItemSQL,
                                              String getPrefsForItemSQL,
                                              String getNumPreferenceForItemSQL,
                                              String getNumPreferenceForItemsSQL) {
@@ -75,7 +73,6 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
         removePreferenceSQL,
         getUsersSQL,
         getItemsSQL,
-        getItemSQL,
         getPrefsForItemSQL,
         getNumPreferenceForItemSQL,
         getNumPreferenceForItemsSQL);
@@ -90,7 +87,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
    *          if there is no such user
    */
   @Override
-  public User getUser(Object id) throws TasteException {
+  public User getUser(Comparable<?> id) throws TasteException {
 
     log.debug("Retrieving user ID '{}'", id);
 
@@ -108,9 +105,9 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
       log.debug("Executing SQL query: {}", getUserSQL);
       rs = stmt.executeQuery();
 
-      FastSet<Object> itemIDs = new FastSet<Object>();
+      FastSet<Comparable<?>> itemIDs = new FastSet<Comparable<?>>();
       while (rs.next()) {
-        itemIDs.add(rs.getObject(1));
+        itemIDs.add((Comparable<?>) rs.getObject(1));
       }
 
       if (itemIDs.isEmpty()) {
@@ -135,7 +132,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
   }
 
   @Override
-  public void setPreference(Object userID, Object itemID, double value)
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value)
       throws TasteException {
     if (userID == null || itemID == null) {
       throw new IllegalArgumentException("userID or itemID is null");
@@ -169,9 +166,8 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
   }
 
   @Override
-  protected List<? extends Preference> doGetPreferencesForItem(Object itemID) throws TasteException {
+  protected List<? extends Preference> doGetPreferencesForItem(Comparable<?> itemID) throws TasteException {
     log.debug("Retrieving preferences for item ID '{}'", itemID);
-    Item item = getItem(itemID, true);
     Connection conn = null;
     PreparedStatement stmt = null;
     ResultSet rs = null;
@@ -186,8 +182,8 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
       rs = stmt.executeQuery();
       List<Preference> prefs = new ArrayList<Preference>();
       while (rs.next()) {
-        Object userID = rs.getObject(2);
-        Preference pref = buildPreference(buildUser(userID, (FastSet<Object>) null), item);
+        Comparable<?> userID = (Comparable<?>) rs.getObject(2);
+        Preference pref = buildPreference(buildUser(userID, (FastSet<Comparable<?>>) null), itemID);
         prefs.add(pref);
       }
       return prefs;
@@ -199,17 +195,12 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
     }
   }
 
-  protected User buildUser(Object id, FastSet<Object> itemIDs) {
-    if (id instanceof Long) {
-      return new BooleanPrefUser<Long>((Long) id, itemIDs);
-    } else if (id instanceof Integer) {
-      return new BooleanPrefUser<Integer>((Integer) id, itemIDs);
-    }
-    return new BooleanPrefUser<String>(id.toString(), itemIDs);
+  protected User buildUser(Comparable<?> id, FastSet<Comparable<?>> itemIDs) {
+    return new BooleanPrefUser(id, itemIDs);
   }
 
-  protected Preference buildPreference(User user, Item item) {
-    return new BooleanPreference(user, item);
+  protected Preference buildPreference(User user, Comparable<?> itemID) {
+    return new BooleanPreference(user, itemID);
   }
 
   private final class ResultSetUserIterator implements SkippingIterator<User> {
@@ -262,12 +253,12 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
         throw new NoSuchElementException();
       }
 
-      Object currentUserID = null;
-      FastSet<Object> itemIDs = new FastSet<Object>();
+      Comparable<?> currentUserID = null;
+      FastSet<Comparable<?>> itemIDs = new FastSet<Comparable<?>>();
 
       try {
         do {
-          Object userID = resultSet.getObject(2);
+          Comparable<?> userID = (Comparable<?>) resultSet.getObject(2);
           if (currentUserID == null) {
             currentUserID = userID;
           }
@@ -276,7 +267,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
             break;
           }
           // else add a new preference for the current user
-          itemIDs.add(resultSet.getObject(1));
+          itemIDs.add((Comparable<?>) resultSet.getObject(1));
         } while (resultSet.next());
       } catch (SQLException sqle) {
         // No good way to handle this since we can't throw an exception
@@ -308,7 +299,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
           int distinctUserNamesSeen = 0;
           Object currentUserID = null;
           do {
-            Object userID = resultSet.getObject(2);
+            Comparable<?> userID = (Comparable<?>) resultSet.getObject(2);
             if (!userID.equals(currentUserID)) {
               distinctUserNamesSeen++;
             }

@@ -47,8 +47,8 @@ public final class BooleanLogLikelihoodSimilarity implements UserSimilarity {
 
   @Override
   public double userSimilarity(User user1, User user2) throws TasteException {
-    FastSet<Object> prefs1 = ((BooleanPrefUser<?>) user1).getItemIDs();
-    FastSet<Object> prefs2 = ((BooleanPrefUser<?>) user2).getItemIDs();
+    FastSet<Comparable<?>> prefs1 = ((BooleanPrefUser) user1).getItemIDs();
+    FastSet<Comparable<?>> prefs2 = ((BooleanPrefUser) user2).getItemIDs();
     int prefs1Size = prefs1.size();
     int prefs2Size = prefs2.size();
     int intersectionSize = prefs1Size < prefs2Size ?

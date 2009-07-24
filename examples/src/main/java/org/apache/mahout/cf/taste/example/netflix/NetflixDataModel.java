@@ -25,7 +25,6 @@ import org.apache.mahout.cf.taste.impl.model.GenericUser;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.slf4j.LoggerFactory;
@@ -57,6 +56,7 @@ public final class NetflixDataModel implements DataModel {
    * @param dataDirectory root directory of Netflix data set, unpacked
    * @param useSubset if true, will use only a small fraction of the data -- may be useful
    *  for quick experiments
+   * @throws IOException
    */
 	public NetflixDataModel(File dataDirectory, boolean useSubset) throws IOException {
 		if (dataDirectory == null) {
@@ -70,17 +70,27 @@ public final class NetflixDataModel implements DataModel {
 
 		log.info("Creating NetflixDataModel for directory: {}", dataDirectory);
 
-		log.info("Reading movie data...");
-		List<NetflixMovie> movies = NetflixMovie.readMovies(dataDirectory);
-
 		log.info("Reading preference data...");
-		List<User> users = readUsers(dataDirectory, movies);
+		List<User> users = readUsers(dataDirectory);
 
 		log.info("Creating delegate DataModel...");
 		delegate = new GenericDataModel(users);
 	}
 
-	private List<User> readUsers(File dataDirectory, List<NetflixMovie> movies) throws IOException {
+  static List<Comparable<?>> readMovies(File dataDirectory) {
+		List<Comparable<?>> movies = new ArrayList<Comparable<?>>(17770);
+    for (String line : new FileLineIterable(new File(dataDirectory, "movie_titles.txt"), false)) {
+			int firstComma = line.indexOf((int) ',');
+			Integer id = Integer.valueOf(line.substring(0, firstComma));
+			movies.add(id);
+      if (id != movies.size()) {
+        throw new IllegalStateException("A movie is missing from movie_titles.txt");
+      }
+		}
+		return movies;
+	}
+
+	private List<User> readUsers(File dataDirectory) throws IOException {
 		Map<Integer, List<Preference>> userIDPrefMap = new FastMap<Integer, List<Preference>>();
 
 		int counter = 0;
@@ -88,11 +98,7 @@ public final class NetflixDataModel implements DataModel {
 		for (File movieFile : new File(dataDirectory, "training_set").listFiles(filenameFilter)) {
       Iterator<String> lineIterator = new FileLineIterable(movieFile, false).iterator();
 			String line = lineIterator.next();
-			int movieID = Integer.parseInt(line.substring(0, line.length() - 1)); // strip colon
-			NetflixMovie movie = movies.get(movieID - 1);
-			if (movie == null) {
-				throw new IllegalArgumentException("No such movie: " + movieID);
-			}
+			Integer movieID = Integer.valueOf(line.substring(0, line.length() - 1)); // strip colon
 			while (lineIterator.hasNext()) {
         line = lineIterator.next();
 				counter++;
@@ -108,13 +114,13 @@ public final class NetflixDataModel implements DataModel {
 					userPrefs = new ArrayList<Preference>();
 					userIDPrefMap.put(userID, userPrefs);
 				}
-				userPrefs.add(new GenericPreference(null, movie, rating));
+				userPrefs.add(new GenericPreference(null, movieID, rating));
 			}
 		}
 
 		List<User> users = new ArrayList<User>(userIDPrefMap.size());
 		for (Map.Entry<Integer, List<Preference>> entry : userIDPrefMap.entrySet()) {
-			users.add(new GenericUser<Integer>(entry.getKey(), entry.getValue()));
+			users.add(new GenericUser(entry.getKey(), entry.getValue()));
 		}
 		return users;
 	}
@@ -125,27 +131,22 @@ public final class NetflixDataModel implements DataModel {
 	}
 
 	@Override
-  public User getUser(Object id) throws TasteException {
+  public User getUser(Comparable<?> id) throws TasteException {
 		return delegate.getUser(id);
 	}
 
 	@Override
-  public Iterable<? extends Item> getItems() throws TasteException {
-		return delegate.getItems();
+  public Iterable<Comparable<?>> getItemIDs() throws TasteException {
+		return delegate.getItemIDs();
 	}
 
 	@Override
-  public Item getItem(Object id) throws TasteException {
-		return delegate.getItem(id);
-	}
-
-	@Override
-  public Iterable<? extends Preference> getPreferencesForItem(Object itemID) throws TasteException {
+  public Iterable<? extends Preference> getPreferencesForItem(Comparable<?> itemID) throws TasteException {
 		return delegate.getPreferencesForItem(itemID);
 	}
 
 	@Override
-  public Preference[] getPreferencesForItemAsArray(Object itemID) throws TasteException {
+  public Preference[] getPreferencesForItemAsArray(Comparable<?> itemID) throws TasteException {
 		return delegate.getPreferencesForItemAsArray(itemID);
 	}
 
@@ -160,17 +161,17 @@ public final class NetflixDataModel implements DataModel {
 	}
 
   @Override
-  public int getNumUsersWithPreferenceFor(Object... itemIDs) throws TasteException {
+  public int getNumUsersWithPreferenceFor(Comparable<?>... itemIDs) throws TasteException {
     return delegate.getNumUsersWithPreferenceFor(itemIDs);
   }
 
   @Override
-  public void setPreference(Object userID, Object itemID, double value) {
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-  public void removePreference(Object userID, Object itemID) {
+  public void removePreference(Comparable<?> userID, Comparable<?> itemID) {
 		throw new UnsupportedOperationException();
 	}
 

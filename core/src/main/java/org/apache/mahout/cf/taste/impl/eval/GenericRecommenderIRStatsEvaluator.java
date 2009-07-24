@@ -34,7 +34,6 @@ import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
 import org.apache.mahout.cf.taste.impl.model.GenericBooleanUserDataModel;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
@@ -54,7 +53,7 @@ import java.util.Random;
  * <p>For each {@link User}, these implementation determine the top <code>n</code> preferences, then evaluate the IR
  * statistics based on a {@link DataModel} that does not have these values. This number <code>n</code> is the "at"
  * value, as in "precision at 5". For example, this would mean precision evaluated by removing the top 5 preferences for
- * a {@link User} and then finding the percentage of those 5 {@link Item}s included in the top 5 recommendations for
+ * a {@link User} and then finding the percentage of those 5 items included in the top 5 recommendations for
  * that user.</p>
  */
 public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRStatsEvaluator {
@@ -76,7 +75,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
   @Override
   public IRStatistics evaluate(RecommenderBuilder recommenderBuilder,
                                DataModel dataModel,
-                               Rescorer<Item> rescorer,
+                               Rescorer<Comparable<?>> rescorer,
                                int at,
                                double relevanceThreshold,
                                double evaluationPercentage) throws TasteException {
@@ -104,8 +103,8 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
     for (User user : dataModel.getUsers()) {
       if (random.nextDouble() < evaluationPercentage) {
         long start = System.currentTimeMillis();
-        Object id = user.getID();
-        Collection<Item> relevantItems = new FastSet<Item>(at);
+        Comparable<?> id = user.getID();
+        Collection<Comparable<?>> relevantItemIDs = new FastSet<Comparable<?>>(at);
         Preference[] prefs = user.getPreferencesAsArray();
         if (prefs.length < 2 * at) {
           // Really not enough prefs to meaningfully evaluate this user
@@ -115,17 +114,17 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
         // List some most-preferred items that would count as (most) "relevant" results
         double theRelevanceThreshold = Double.isNaN(relevanceThreshold) ? computeThreshold(prefs) : relevanceThreshold;
         Arrays.sort(prefs, Collections.reverseOrder(ByValuePreferenceComparator.getInstance()));
-        for (int i = 0; i < prefs.length && relevantItems.size() < at; i++) {
+        for (int i = 0; i < prefs.length && relevantItemIDs.size() < at; i++) {
           Preference pref = prefs[i];
           if (pref.getValue() >= theRelevanceThreshold) {
-            relevantItems.add(pref.getItem());
+            relevantItemIDs.add(pref.getItemID());
           }
         }
-        int numRelevantItems = relevantItems.size();
+        int numRelevantItems = relevantItemIDs.size();
         if (numRelevantItems > 0) {
           List<User> trainingUsers = new ArrayList<User>(dataModel.getNumUsers());
           for (User user2 : dataModel.getUsers()) {
-            processOtherUser(id, relevantItems, trainingUsers, user2);
+            processOtherUser(id, relevantItemIDs, trainingUsers, user2);
           }
 
           DataModel trainingModel;
@@ -145,7 +144,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
           int intersectionSize = 0;
           List<RecommendedItem> recommendedItems = recommender.recommend(id, at, rescorer);
           for (RecommendedItem recommendedItem : recommendedItems) {
-            if (relevantItems.contains(recommendedItem.getItem())) {
+            if (relevantItemIDs.contains(recommendedItem.getItemID())) {
               intersectionSize++;
             }
           }
@@ -171,15 +170,15 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
     return new IRStatisticsImpl(precision.getAverage(), recall.getAverage(), fallOut.getAverage());
   }
 
-  private static void processOtherUser(Object id,
-                                       Collection<Item> relevantItems,
+  private static void processOtherUser(Comparable<?> id,
+                                       Collection<Comparable<?>> relevantItemIDs,
                                        Collection<User> trainingUsers,
                                        User user2) {
     if (id.equals(user2.getID())) {
       List<Preference> trainingPrefs = new ArrayList<Preference>();
       Preference[] prefs2 = user2.getPreferencesAsArray();
       for (Preference pref : prefs2) {
-        if (!relevantItems.contains(pref.getItem())) {
+        if (!relevantItemIDs.contains(pref.getItemID())) {
           trainingPrefs.add(pref);
         }
       }
@@ -187,25 +186,13 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
         // TODO hack
         User trainingUser;
         if (user2 instanceof BooleanPrefUser) {
-          FastSet<Object> itemIDs = new FastSet<Object>();
+          FastSet<Comparable<?>> itemIDs = new FastSet<Comparable<?>>();
           for (Preference pref : trainingPrefs) {
-            itemIDs.add(pref.getItem().getID());
+            itemIDs.add(pref.getItemID());
           }
-          if (id instanceof Long) {
-            trainingUser = new BooleanPrefUser<Long>((Long) id, itemIDs);
-          } else if (id instanceof Integer) {
-            trainingUser = new BooleanPrefUser<Integer>((Integer) id, itemIDs);
-          } else {
-            trainingUser = new BooleanPrefUser<String>(id.toString(), itemIDs);
-          }
+          trainingUser = new BooleanPrefUser(id, itemIDs);
         } else {
-          if (id instanceof Long) {
-            trainingUser = new GenericUser<Long>((Long) id, trainingPrefs);
-          } else if (id instanceof Integer) {
-            trainingUser = new GenericUser<Integer>((Integer) id, trainingPrefs);
-          } else {
-            trainingUser = new GenericUser<String>(id.toString(), trainingPrefs);
-          }
+          trainingUser = new GenericUser(id, trainingPrefs);
         }
         trainingUsers.add(trainingUser);
       }

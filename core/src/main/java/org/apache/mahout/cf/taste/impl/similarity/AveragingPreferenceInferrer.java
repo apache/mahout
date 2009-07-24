@@ -24,7 +24,6 @@ import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
@@ -32,7 +31,7 @@ import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import java.util.Collection;
 
 /**
- * <p>Implementations of this interface compute an inferred preference for a {@link User} and an {@link Item} that the
+ * <p>Implementations of this interface compute an inferred preference for a {@link User} and an item that the
  * user has not expressed any preference for. This might be an average of other preferences scores from that user, for
  * example. This technique is sometimes called "default voting".</p>
  */
@@ -48,8 +47,8 @@ public final class AveragingPreferenceInferrer implements PreferenceInferrer {
   }
 
   @Override
-  public double inferPreference(User user, Item item) throws TasteException {
-    if (user == null || item == null) {
+  public double inferPreference(User user, Comparable<?> itemID) throws TasteException {
+    if (user == null || itemID == null) {
       throw new IllegalArgumentException("user or item is null");
     }
     return averagePreferenceValue.get(user);

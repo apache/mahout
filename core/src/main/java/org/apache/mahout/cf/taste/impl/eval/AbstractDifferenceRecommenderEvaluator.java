@@ -98,7 +98,7 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     List<Preference> testPrefs = new ArrayList<Preference>();
     Preference[] prefs = user.getPreferencesAsArray();
     for (Preference pref : prefs) {
-      Preference newPref = new GenericPreference(null, pref.getItem(), pref.getValue());
+      Preference newPref = new GenericPreference(null, pref.getItemID(), pref.getValue());
       if (random.nextDouble() < trainingPercentage) {
         trainingPrefs.add(newPref);
       } else {
@@ -108,15 +108,8 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     log.debug("Training against {} preferences", trainingPrefs.size());
     log.debug("Evaluating accuracy of {} preferences", testPrefs.size());
     if (!trainingPrefs.isEmpty()) {
-      Object id = user.getID();
-      User trainingUser;
-      if (id instanceof Long) {
-        trainingUser = new GenericUser<Long>((Long) id, trainingPrefs);
-      } else if (id instanceof Integer) {
-        trainingUser = new GenericUser<Integer>((Integer) id, trainingPrefs);
-      } else {
-        trainingUser = new GenericUser<String>(id.toString(), trainingPrefs);
-      }
+      Comparable<?> id = user.getID();
+      User trainingUser = new GenericUser(id, trainingPrefs);
       trainingUsers.add(trainingUser);
       if (!testPrefs.isEmpty()) {
         testUserPrefs.put(trainingUser, testPrefs);

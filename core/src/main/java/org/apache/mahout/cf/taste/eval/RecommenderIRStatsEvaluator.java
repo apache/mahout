@@ -19,7 +19,6 @@ package org.apache.mahout.cf.taste.eval;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 /**
@@ -37,14 +36,14 @@ public interface RecommenderIRStatsEvaluator {
    * @param rescorer           if any, to use when computing recommendations
    * @param at                 as in, "precision at 5". The number of recommendations to consider when evaluating
    *                           precision, etc.
-   * @param relevanceThreshold {@link Item}s whose preference value is at least this value are considered "relevant" for
+   * @param relevanceThreshold items whose preference value is at least this value are considered "relevant" for
    *                           the purposes of computations
    * @return {@link IRStatistics} with resulting precision, recall, etc.
    * @throws TasteException if an error occurs while accessing the {@link DataModel}
    */
   IRStatistics evaluate(RecommenderBuilder recommenderBuilder,
                         DataModel dataModel,
-                        Rescorer<Item> rescorer,
+                        Rescorer<Comparable<?>> rescorer,
                         int at,
                         double relevanceThreshold,
                         double evaluationPercentage) throws TasteException;

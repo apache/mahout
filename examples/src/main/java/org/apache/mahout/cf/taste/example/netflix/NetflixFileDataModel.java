@@ -19,7 +19,6 @@ package org.apache.mahout.cf.taste.example.netflix;
 
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
@@ -36,7 +35,7 @@ import java.io.IOException;
 public final class NetflixFileDataModel implements DataModel {
 
   private final File dataDirectory;
-  private final List<NetflixMovie> movies;
+  private final List<Comparable<?>> movies;
 
   public NetflixFileDataModel(File dataDirectory) throws IOException {
 		if (dataDirectory == null) {
@@ -47,7 +46,7 @@ public final class NetflixFileDataModel implements DataModel {
 		}
 
     this.dataDirectory = dataDirectory;
-    movies = NetflixMovie.readMovies(dataDirectory);
+    movies = NetflixDataModel.readMovies(dataDirectory);
   }
 
   @Override
@@ -56,41 +55,35 @@ public final class NetflixFileDataModel implements DataModel {
   }
 
   @Override
-  public User getUser(Object id) {
+  public User getUser(Comparable<?> id) {
     throw new UnsupportedOperationException(); // TODO
   }
 
   @Override
-  public Iterable<? extends Item> getItems() {
+  public Iterable<Comparable<?>> getItemIDs() {
     return movies;
   }
 
   @Override
-  public Item getItem(Object id) {
-    return movies.get((Integer) id - 1);
-  }
-
-  @Override
-  public Iterable<? extends Preference> getPreferencesForItem(Object itemID) {
+  public Iterable<? extends Preference> getPreferencesForItem(Comparable<?> itemID) {
     return new ArrayIterator<Preference>(getPreferencesForItemAsArray(itemID));
   }
 
   @Override
-  public Preference[] getPreferencesForItemAsArray(Object itemID) {
+  public Preference[] getPreferencesForItemAsArray(Comparable<?> itemID) {
     StringBuilder itemIDPadded = new StringBuilder(5);
     itemIDPadded.append(itemID);
     while (itemIDPadded.length() < 5) {
       itemIDPadded.insert(0, '0');
     }
     List<Preference> prefs = new ArrayList<Preference>();
-    Item movie = getItem(itemID);
     File movieFile = new File(new File(dataDirectory, "training_set"), "mv_00" + itemIDPadded + ".txt");
     for (String line : new FileLineIterable(movieFile, true)) {
       int firstComma = line.indexOf((int) ',');
       Integer userID = Integer.valueOf(line.substring(0, firstComma));
       int secondComma = line.indexOf((int) ',', firstComma + 1);
       double rating = Double.parseDouble(line.substring(firstComma + 1, secondComma));
-      prefs.add(new GenericPreference(getUser(userID), movie, rating));
+      prefs.add(new GenericPreference(getUser(userID), itemID, rating));
     }
     return prefs.toArray(new Preference[prefs.size()]);
   }
@@ -106,7 +99,7 @@ public final class NetflixFileDataModel implements DataModel {
   }
 
   @Override
-  public int getNumUsersWithPreferenceFor(Object... itemIDs) {
+  public int getNumUsersWithPreferenceFor(Comparable<?>... itemIDs) {
     throw new UnsupportedOperationException(); // TODO
   }
 
@@ -114,7 +107,7 @@ public final class NetflixFileDataModel implements DataModel {
    * @throws UnsupportedOperationException
    */
   @Override
-  public void setPreference(Object userID, Object itemID, double value) {
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value) {
     throw new UnsupportedOperationException();
   }
 
@@ -122,7 +115,7 @@ public final class NetflixFileDataModel implements DataModel {
    * @throws UnsupportedOperationException
    */
   @Override
-  public void removePreference(Object userID, Object itemID) {
+  public void removePreference(Comparable<?> userID, Comparable<?> itemID) {
     throw new UnsupportedOperationException();
   }
 

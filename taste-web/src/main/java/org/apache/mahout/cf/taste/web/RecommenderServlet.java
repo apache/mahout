@@ -125,7 +125,7 @@ public final class RecommenderServlet extends HttpServlet {
       writer.print("<item><value>");
       writer.print(recommendedItem.getValue());
       writer.print("</value><id>");
-      writer.print(recommendedItem.getItem().getID());
+      writer.print(recommendedItem.getItemID());
       writer.print("</id></item>");
     }
     writer.println("</recommendedItems>");
@@ -141,7 +141,7 @@ public final class RecommenderServlet extends HttpServlet {
       writer.print("{\"value\":\"");
       writer.print(recommendedItem.getValue());
       writer.print("\",\"id\":\"");
-      writer.print(recommendedItem.getItem().getID());
+      writer.print(recommendedItem.getItemID());
       writer.print("\"},");
     }
     writer.println("]}}");
@@ -166,7 +166,7 @@ public final class RecommenderServlet extends HttpServlet {
     for (RecommendedItem recommendedItem : items) {
       writer.print(recommendedItem.getValue());
       writer.print('\t');
-      writer.println(recommendedItem.getItem().getID());
+      writer.println(recommendedItem.getItemID());
     }
   }
 
@@ -192,14 +192,14 @@ public final class RecommenderServlet extends HttpServlet {
       Preference pref = sortedPrefs[i];
       writer.print(pref.getValue());
       writer.print('\t');
-      writer.println(pref.getItem());
+      writer.println(pref.getItemID());
     }
     writer.println();
     writer.println("Recommendations:");
     for (RecommendedItem recommendedItem : items) {
       writer.print(recommendedItem.getValue());
       writer.print('\t');
-      writer.println(recommendedItem.getItem());
+      writer.println(recommendedItem.getItemID());
     }
   }
 

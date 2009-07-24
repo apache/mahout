@@ -23,7 +23,6 @@ import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
 import org.apache.mahout.cf.taste.impl.recommender.GenericUserBasedRecommender;
 import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
@@ -101,8 +100,6 @@ public final class FileDataModelTest extends TasteTestCase {
 
   public void testTranspose() throws Exception {
     FileDataModel tModel = new FileDataModel(testFile, true);
-    Item item = tModel.getItem("A123");
-    assertNotNull("item is null and it shouldn't be", item);
     User user = tModel.getUser("456");
     assertNotNull("user is null and it shouldn't be", user);
     Preference[] pref = tModel.getPreferencesForItemAsArray("A123");
@@ -110,25 +107,21 @@ public final class FileDataModelTest extends TasteTestCase {
     assertEquals("pref Size: " + pref.length + " is not: " + 3, 3, pref.length);
   }
 
-  public void testItem() throws Exception {
-    assertEquals("456", model.getItem("456").getID());
-  }
-
   public void testGetItems() throws Exception {
-    Iterable<? extends Item> items = model.getItems();
+    Iterable<Comparable<?>> items = model.getItemIDs();
     assertNotNull(items);
-    Iterator<? extends Item> it = items.iterator();
+    Iterator<Comparable<?>> it = items.iterator();
     assertNotNull(it);
     assertTrue(it.hasNext());
-    assertEquals("123", it.next().getID());
+    assertEquals("123", it.next());
     assertTrue(it.hasNext());
-    assertEquals("234", it.next().getID());
+    assertEquals("234", it.next());
     assertTrue(it.hasNext());
-    assertEquals("456", it.next().getID());
+    assertEquals("456", it.next());
     assertTrue(it.hasNext());
-    assertEquals("654", it.next().getID());
+    assertEquals("654", it.next());
     assertTrue(it.hasNext());
-    assertEquals("789", it.next().getID());
+    assertEquals("789", it.next());
     assertFalse(it.hasNext());
     try {
       it.next();
@@ -146,11 +139,11 @@ public final class FileDataModelTest extends TasteTestCase {
     assertTrue(it.hasNext());
     Preference pref1 = it.next();
     assertEquals("A123", pref1.getUser().getID());
-    assertEquals("456", pref1.getItem().getID());
+    assertEquals("456", pref1.getItemID());
     assertTrue(it.hasNext());
     Preference pref2 = it.next();
     assertEquals("D456", pref2.getUser().getID());
-    assertEquals("456", pref2.getItem().getID());
+    assertEquals("456", pref2.getItemID());
     assertFalse(it.hasNext());
     try {
       it.next();

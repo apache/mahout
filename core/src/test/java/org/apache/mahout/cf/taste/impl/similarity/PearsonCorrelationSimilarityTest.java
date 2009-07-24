@@ -18,7 +18,6 @@
 package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Weighting;
-import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -73,10 +72,10 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
   }
 
   public void testNoCorrelation2() throws Exception {
-    Preference pref1 = new GenericPreference(null, new GenericItem<String>("1"), 1.0);
-    GenericUser<String> user1 = new GenericUser<String>("test1", Collections.singletonList(pref1));
-    Preference pref2 = new GenericPreference(null, new GenericItem<String>("2"), 1.0);
-    GenericUser<String> user2 = new GenericUser<String>("test2", Collections.singletonList(pref2));
+    Preference pref1 = new GenericPreference(null, "1", 1.0);
+    GenericUser user1 = new GenericUser("test1", Collections.singletonList(pref1));
+    Preference pref2 = new GenericPreference(null, "2", 1.0);
+    GenericUser user2 = new GenericUser("test2", Collections.singletonList(pref2));
     DataModel dataModel = getDataModel(user1, user2);
     double correlation = new PearsonCorrelationSimilarity(dataModel).userSimilarity(user1, user2);
     assertTrue(Double.isNaN(correlation));
@@ -111,7 +110,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     User user2 = getUser("test2", -2.0, -2.0);
     DataModel dataModel = getDataModel(user1, user2);
     double correlation =
-        new PearsonCorrelationSimilarity(dataModel).itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
+        new PearsonCorrelationSimilarity(dataModel).itemSimilarity("0", "1");
     assertCorrelationEquals(1.0, correlation);
   }
 
@@ -120,7 +119,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     User user2 = getUser("test2", 3.0, 3.0);
     DataModel dataModel = getDataModel(user1, user2);
     double correlation =
-        new PearsonCorrelationSimilarity(dataModel).itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
+        new PearsonCorrelationSimilarity(dataModel).itemSimilarity("0", "1");
     // Yeah, undefined in this case
     assertTrue(Double.isNaN(correlation));
   }
@@ -130,18 +129,18 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     User user2 = getUser("test2", -2.0, 2.0);
     DataModel dataModel = getDataModel(user1, user2);
     double correlation =
-        new PearsonCorrelationSimilarity(dataModel).itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
+        new PearsonCorrelationSimilarity(dataModel).itemSimilarity("0", "1");
     assertCorrelationEquals(-1.0, correlation);
   }
 
   public void testNoItemCorrelation2() throws Exception {
-    Preference pref1 = new GenericPreference(null, new GenericItem<String>("1"), 1.0);
-    GenericUser<String> user1 = new GenericUser<String>("test1", Collections.singletonList(pref1));
-    Preference pref2 = new GenericPreference(null, new GenericItem<String>("2"), 1.0);
-    GenericUser<String> user2 = new GenericUser<String>("test2", Collections.singletonList(pref2));
+    Preference pref1 = new GenericPreference(null, "1", 1.0);
+    GenericUser user1 = new GenericUser("test1", Collections.singletonList(pref1));
+    Preference pref2 = new GenericPreference(null, "2", 1.0);
+    GenericUser user2 = new GenericUser("test2", Collections.singletonList(pref2));
     DataModel dataModel = getDataModel(user1, user2);
     double correlation =
-        new PearsonCorrelationSimilarity(dataModel).itemSimilarity(dataModel.getItem("1"), dataModel.getItem("2"));
+        new PearsonCorrelationSimilarity(dataModel).itemSimilarity("1", "2");
     assertTrue(Double.isNaN(correlation));
   }
 
@@ -151,7 +150,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     User user3 = getUser("test3", 70.0, 90.0);
     DataModel dataModel = getDataModel(user1, user2, user3);
     double correlation =
-        new PearsonCorrelationSimilarity(dataModel).itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
+        new PearsonCorrelationSimilarity(dataModel).itemSimilarity("0", "1");
     assertCorrelationEquals(-1.0, correlation);
   }
 
@@ -161,7 +160,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     User user3 = getUser("test3", 3.0, 6.0);
     DataModel dataModel = getDataModel(user1, user2, user3);
     double correlation =
-        new PearsonCorrelationSimilarity(dataModel).itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
+        new PearsonCorrelationSimilarity(dataModel).itemSimilarity("0", "1");
     assertCorrelationEquals(0.9607689228305227, correlation);
   }
 
@@ -171,7 +170,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     User user3 = getUser("test3", 3.0, 6.0);
     DataModel dataModel = getDataModel(user1, user2, user3);
     ItemSimilarity itemSimilarity = new PearsonCorrelationSimilarity(dataModel, Weighting.WEIGHTED);
-    double correlation = itemSimilarity.itemSimilarity(dataModel.getItem("0"), dataModel.getItem("1"));
+    double correlation = itemSimilarity.itemSimilarity("0", "1");
     assertCorrelationEquals(0.9901922307076306, correlation);
   }
 

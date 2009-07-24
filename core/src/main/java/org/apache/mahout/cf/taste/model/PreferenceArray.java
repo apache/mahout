@@ -31,9 +31,9 @@ public interface PreferenceArray {
 
   void setUser(int i, User user);
 
-  Item getItem(int i);
+  Comparable<?> getItemID(int i);
 
-  void setItem(int i, Item item);
+  void setItemID(int i, Comparable<?> itemID);
 
   double getValue(int i);
 

@@ -17,19 +17,10 @@
 
 package org.apache.mahout.cf.taste.model;
 
-import org.apache.mahout.cf.taste.common.TasteException;
-
 import javax.sql.DataSource;
 
 public interface JDBCDataModel extends DataModel {
 
   DataSource getDataSource();
-
-  /**
-   * @param assumeExists assume the item exists; don't consult the underlying database. This is a necessary performance
-   *                     enhancement shortcut needed by slope one recommenders
-   * @see #getItem(Object)
-   */
-  Item getItem(Object id, boolean assumeExists) throws TasteException;
 
 }

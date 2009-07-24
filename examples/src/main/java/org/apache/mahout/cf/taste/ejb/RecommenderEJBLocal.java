@@ -19,7 +19,6 @@ package org.apache.mahout.cf.taste.ejb;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 import javax.ejb.EJBLocalObject;
@@ -35,27 +34,27 @@ import java.util.List;
 public interface RecommenderEJBLocal extends EJBLocalObject {
 
   /**
-   * @see org.apache.mahout.cf.taste.recommender.Recommender#recommend(Object, int)
+   * @see org.apache.mahout.cf.taste.recommender.Recommender#recommend(Comparable, int)
    */
-  List<Item> recommend(Object userID, int howMany) throws TasteException;
+  List<Comparable<?>> recommend(Object userID, int howMany) throws TasteException;
 
   /**
-   * @see org.apache.mahout.cf.taste.recommender.Recommender#recommend(Object, int, Rescorer)
+   * @see org.apache.mahout.cf.taste.recommender.Recommender#recommend(Comparable, int, Rescorer)
    */
-  List<Item> recommend(Object userID, int howMany, Rescorer<Item> rescorer) throws TasteException;
+  List<Comparable<?>> recommend(Object userID, int howMany, Rescorer<Comparable<?>> rescorer) throws TasteException;
 
   /**
-   * @see org.apache.mahout.cf.taste.recommender.Recommender#estimatePreference(Object, Object)
+   * @see org.apache.mahout.cf.taste.recommender.Recommender#estimatePreference(Comparable, Comparable)
    */
   double estimatePreference(Object userID, Object itemID) throws TasteException;
 
   /**
-   * @see org.apache.mahout.cf.taste.recommender.Recommender#setPreference(Object, Object, double)
+   * @see org.apache.mahout.cf.taste.recommender.Recommender#setPreference(Comparable, Comparable, double)
    */
   void setPreference(Object userID, Object itemID, double value) throws TasteException;
 
   /**
-   * @see org.apache.mahout.cf.taste.recommender.Recommender#removePreference(Object, Object)
+   * @see org.apache.mahout.cf.taste.recommender.Recommender#removePreference(Comparable, Comparable)
    */
   void removePreference(Object userID, Object itemID) throws TasteException;
 

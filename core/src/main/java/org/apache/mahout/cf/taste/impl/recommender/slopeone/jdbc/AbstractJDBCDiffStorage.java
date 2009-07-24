@@ -24,7 +24,6 @@ import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.JDBCDataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.recommender.slopeone.DiffStorage;
@@ -126,7 +125,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
   }
 
   @Override
-  public RunningAverage getDiff(Object itemID1, Object itemID2) throws TasteException {
+  public RunningAverage getDiff(Comparable<?> itemID1, Comparable<?> itemID2) throws TasteException {
     Connection conn = null;
     PreparedStatement stmt = null;
     ResultSet rs = null;
@@ -151,7 +150,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
   }
 
   @Override
-  public RunningAverage[] getDiffs(Object userID, Object itemID, Preference[] prefs)
+  public RunningAverage[] getDiffs(Comparable<?> userID, Comparable<?> itemID, Preference[] prefs)
       throws TasteException {
     int size = prefs.length;
     RunningAverage[] result = new RunningAverage[size];
@@ -173,7 +172,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       int i = 0;
       while (rs.next()) {
         String nextResultItemID = rs.getString(3);
-        while (!prefs[i].getItem().getID().equals(nextResultItemID)) {
+        while (!prefs[i].getItemID().equals(nextResultItemID)) {
           i++;
           // result[i] is null for these values of i
         }
@@ -190,7 +189,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
   }
 
   @Override
-  public RunningAverage getAverageItemPref(Object itemID) throws TasteException {
+  public RunningAverage getAverageItemPref(Comparable<?> itemID) throws TasteException {
     Connection conn = null;
     PreparedStatement stmt = null;
     ResultSet rs = null;
@@ -218,7 +217,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
   }
 
   @Override
-  public void updateItemPref(Object itemID, double prefDelta, boolean remove)
+  public void updateItemPref(Comparable<?> itemID, double prefDelta, boolean remove)
       throws TasteException {
     Connection conn = null;
     try {
@@ -238,7 +237,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
     }
   }
 
-  private static void doPartialUpdate(String sql, Object itemID, double prefDelta, Connection conn)
+  private static void doPartialUpdate(String sql, Comparable<?> itemID, double prefDelta, Connection conn)
       throws SQLException {
     PreparedStatement stmt = conn.prepareStatement(sql);
     try {
@@ -252,7 +251,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
   }
 
   @Override
-  public Set<Item> getRecommendableItems(Object userID) throws TasteException {
+  public Set<Comparable<?>> getRecommendableItemIDs(Comparable<?> userID) throws TasteException {
     Connection conn = null;
     PreparedStatement stmt = null;
     ResultSet rs = null;
@@ -266,11 +265,11 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       stmt.setObject(3, userID);
       log.debug("Executing SQL query: {}", getRecommendableItemsSQL);
       rs = stmt.executeQuery();
-      Set<Item> items = new FastSet<Item>();
+      Set<Comparable<?>> itemIDs = new FastSet<Comparable<?>>();
       while (rs.next()) {
-        items.add(dataModel.getItem(rs.getObject(1), true));
+        itemIDs.add((Comparable<?>) rs.getObject(1));
       }
-      return items;
+      return itemIDs;
     } catch (SQLException sqle) {
       log.warn("Exception while retrieving recommendable items", sqle);
       throw new TasteException(sqle);

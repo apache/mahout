@@ -17,27 +17,26 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 
 import java.io.Serializable;
 
 /**
- * Encapsulates a simple boolean "preference" for an {@link Item} whose value does not matter (is fixed at 1.0). This is
+ * Encapsulates a simple boolean "preference" for an item whose value does not matter (is fixed at 1.0). This is
  * appropriate in situations where users conceptually have only a general "yes" preference for items, rather than a
  * spectrum of preference values.
  */
 public final class BooleanPreference implements SettableUserPreference, Serializable {
 
   private User user;
-  private final Item item;
+  private final Comparable<?> itemID;
 
-  public BooleanPreference(User user, Item item) {
-    if (item == null) {
-      throw new IllegalArgumentException("item is null");
+  public BooleanPreference(User user, Comparable<?> itemID) {
+    if (itemID == null) {
+      throw new IllegalArgumentException("itemID is null");
     }
     this.user = user;
-    this.item = item;
+    this.itemID = itemID;
   }
 
   @Override
@@ -57,8 +56,8 @@ public final class BooleanPreference implements SettableUserPreference, Serializ
   }
 
   @Override
-  public Item getItem() {
-    return item;
+  public Comparable<?> getItemID() {
+    return itemID;
   }
 
   @Override
@@ -73,7 +72,7 @@ public final class BooleanPreference implements SettableUserPreference, Serializ
 
   @Override
   public String toString() {
-    return "BooleanPreference[user: " + user + ", item:" + item + ']';
+    return "BooleanPreference[user: " + user + ", itemID:" + itemID + ']';
   }
 
 }

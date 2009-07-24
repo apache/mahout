@@ -22,7 +22,7 @@ import org.apache.mahout.cf.taste.model.Preference;
 
 import java.util.List;
 
-final class BookCrossingUser extends GenericUser<String> {
+final class BookCrossingUser extends GenericUser {
 
   private final String city;
   private final String state;

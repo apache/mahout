@@ -19,7 +19,6 @@ package org.apache.mahout.cf.taste.impl.model;
 
 import org.apache.mahout.cf.taste.impl.common.ArrayIterator;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 
@@ -31,16 +30,16 @@ import java.util.List;
 import java.util.Map;
 
 /** <p>A simple {@link User} which has simply an ID and some {@link Collection} of {@link Preference}s.</p> */
-public class GenericUser<K extends Comparable<K>> implements User, Serializable {
+public class GenericUser implements User, Serializable {
 
   private static final Preference[] NO_PREFS = new Preference[0];
 
-  private final K id;
-  private final Map<Object, Preference> data;
+  private final Comparable id;
+  private final Map<Comparable<?>, Preference> data;
   // Use an array for maximum performance
   private Preference[] values;
 
-  public GenericUser(K id, List<Preference> preferences) {
+  public GenericUser(Comparable<?> id, List<Preference> preferences) {
     if (id == null) {
       throw new IllegalArgumentException("id is null");
     }
@@ -49,7 +48,7 @@ public class GenericUser<K extends Comparable<K>> implements User, Serializable 
       data = Collections.emptyMap();
       values = NO_PREFS;
     } else {
-      data = new FastMap<Object, Preference>();
+      data = new FastMap<Comparable<?>, Preference>();
       int size = preferences.size();
       values = new Preference[size];
       for (int i = 0; i < size; i++) {
@@ -59,25 +58,24 @@ public class GenericUser<K extends Comparable<K>> implements User, Serializable 
         if (preference instanceof SettableUserPreference) {
           ((SettableUserPreference) preference).setUser(this);
         }
-        data.put(preference.getItem().getID(), preference);
+        data.put(preference.getItemID(), preference);
       }
       Arrays.sort(values, ByItemPreferenceComparator.getInstance());
     }
   }
 
   @Override
-  public K getID() {
+  public Comparable<?> getID() {
     return id;
   }
 
   @Override
-  public Preference getPreferenceFor(Object itemID) {
+  public Preference getPreferenceFor(Comparable<?> itemID) {
     return data.get(itemID);
   }
 
   @Override
-  public void setPreference(Item item, double value) {
-    Object itemID = item.getID();
+  public void setPreference(Comparable<?> itemID, double value) {
     Preference oldPref = data.get(itemID);
     int numValues = values.length;
     if (oldPref == null) {
@@ -85,7 +83,7 @@ public class GenericUser<K extends Comparable<K>> implements User, Serializable 
       // TODO I am concerned we don't have a good theory about where the factory method
       // belongs for Preference objects in the scheme of things. Should probably live in DataModel.
       // For now we are hard-coding GenericPreference which is usually fine but not really right.
-      Preference preference = new GenericPreference(this, item, value);
+      Preference preference = new GenericPreference(this, itemID, value);
       Preference[] newValues = new Preference[numValues + 1];
       System.arraycopy(values, 0, newValues, 1, numValues);
       newValues[0] = preference;
@@ -99,12 +97,12 @@ public class GenericUser<K extends Comparable<K>> implements User, Serializable 
   }
 
   @Override
-  public void removePreference(Object itemID) {
+  public void removePreference(Comparable<?> itemID) {
     int numValues = values.length;
     Preference[] newValues = new Preference[numValues - 1];
     for (int i = 0, j = 0; i < numValues; i++, j++) {
       Preference value = values[i];
-      if (value.getItem().getID().equals(itemID)) {
+      if (value.getItemID().equals(itemID)) {
         i++; // skip
       } else {
         newValues[j] = value;
@@ -142,7 +140,7 @@ public class GenericUser<K extends Comparable<K>> implements User, Serializable 
   @Override
   @SuppressWarnings("unchecked")
   public int compareTo(User o) {
-    return id.compareTo((K) o.getID());
+    return id.compareTo(o.getID());
   }
 
 }

@@ -20,10 +20,8 @@ package org.apache.mahout.cf.taste.impl.recommender.slopeone;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
-import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.recommender.ReversingRescorer;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
@@ -40,10 +38,10 @@ public final class SlopeOneRecommenderTest extends TasteTestCase {
     assertNotNull(recommended);
     assertEquals(1, recommended.size());
     RecommendedItem firstRecommended = recommended.get(0);
-    assertEquals(new GenericItem<String>("2"), firstRecommended.getItem());
+    assertEquals("2", firstRecommended.getItemID());
     assertEquals(0.34803885284992736, firstRecommended.getValue(), EPSILON);
     recommender.refresh(null);
-    assertEquals(new GenericItem<String>("2"), firstRecommended.getItem());
+    assertEquals("2", firstRecommended.getItemID());
     assertEquals(0.34803885284992736, firstRecommended.getValue(), EPSILON);
   }
 
@@ -59,11 +57,11 @@ public final class SlopeOneRecommenderTest extends TasteTestCase {
     List<RecommendedItem> fewRecommended = recommender.recommend("test1", 2);
     List<RecommendedItem> moreRecommended = recommender.recommend("test1", 4);
     for (int i = 0; i < fewRecommended.size(); i++) {
-      assertEquals(fewRecommended.get(i).getItem(), moreRecommended.get(i).getItem());
+      assertEquals(fewRecommended.get(i).getItemID(), moreRecommended.get(i).getItemID());
     }
     recommender.refresh(null);
     for (int i = 0; i < fewRecommended.size(); i++) {
-      assertEquals(fewRecommended.get(i).getItem(), moreRecommended.get(i).getItem());
+      assertEquals(fewRecommended.get(i).getItemID(), moreRecommended.get(i).getItemID());
     }
   }
 
@@ -76,13 +74,13 @@ public final class SlopeOneRecommenderTest extends TasteTestCase {
     Recommender recommender = new SlopeOneRecommender(dataModel);
     List<RecommendedItem> originalRecommended = recommender.recommend("test1", 2);
     List<RecommendedItem> rescoredRecommended =
-        recommender.recommend("test1", 2, new ReversingRescorer<Item>());
+        recommender.recommend("test1", 2, new ReversingRescorer<Comparable<?>>());
     assertNotNull(originalRecommended);
     assertNotNull(rescoredRecommended);
     assertEquals(2, originalRecommended.size());
     assertEquals(2, rescoredRecommended.size());
-    assertEquals(originalRecommended.get(0).getItem(), rescoredRecommended.get(1).getItem());
-    assertEquals(originalRecommended.get(1).getItem(), rescoredRecommended.get(0).getItem());
+    assertEquals(originalRecommended.get(0).getItemID(), rescoredRecommended.get(1).getItemID());
+    assertEquals(originalRecommended.get(1).getItemID(), rescoredRecommended.get(0).getItemID());
   }
 
   public void testEstimatePref() throws Exception {
@@ -102,7 +100,7 @@ public final class SlopeOneRecommenderTest extends TasteTestCase {
     assertEquals(1, recommended.size());
     RecommendedItem firstRecommended = recommended.get(0);
     // item one should be recommended because it has a greater rating/score
-    assertEquals(new GenericItem<String>("2"), firstRecommended.getItem());
+    assertEquals("2", firstRecommended.getItemID());
     assertEquals(0.2400938676203033, firstRecommended.getValue(), EPSILON);
   }
 

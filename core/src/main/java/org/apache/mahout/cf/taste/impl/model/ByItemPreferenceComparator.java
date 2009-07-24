@@ -23,8 +23,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 /**
- * <p>{@link java.util.Comparator} that orders {@link org.apache.mahout.cf.taste.model.Preference}s by {@link
- * org.apache.mahout.cf.taste.model.Item}.</p>
+ * <p>{@link java.util.Comparator} that orders {@link org.apache.mahout.cf.taste.model.Preference}s by item.</p>
  */
 public final class ByItemPreferenceComparator implements Comparator<Preference>, Serializable {
 
@@ -40,7 +39,7 @@ public final class ByItemPreferenceComparator implements Comparator<Preference>,
 
   @Override
   public int compare(Preference o1, Preference o2) {
-    return o1.getItem().compareTo(o2.getItem());
+    return ((Comparable<Object>) o1.getItemID()).compareTo(o2.getItemID());
   }
 
   @Override

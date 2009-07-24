@@ -19,7 +19,6 @@ package org.apache.mahout.cf.taste.ejb;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
@@ -44,25 +43,25 @@ public class RecommenderEJBBean implements SessionBean {
 
   private Recommender recommender;
 
-  public List<RecommendedItem> recommend(Object userID, int howMany) throws TasteException {
+  public List<RecommendedItem> recommend(Comparable<?> userID, int howMany) throws TasteException {
     return recommender.recommend(userID, howMany);
   }
 
-  public List<RecommendedItem> recommend(Object userID, int howMany, Rescorer<Item> rescorer)
+  public List<RecommendedItem> recommend(Comparable<?> userID, int howMany, Rescorer<Comparable<?>> rescorer)
           throws TasteException {
     return recommender.recommend(userID, howMany, rescorer);
   }
 
 
-  public double estimatePreference(Object userID, Object itemID) throws TasteException {
+  public double estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
     return recommender.estimatePreference(userID, itemID);
   }
 
-  public void setPreference(Object userID, Object itemID, double value) throws TasteException {
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value) throws TasteException {
     recommender.setPreference(userID, itemID, value);
   }
 
-  public void removePreference(Object userID, Object itemID) throws TasteException {
+  public void removePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
     recommender.removePreference(userID, itemID);
   }
 

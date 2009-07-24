@@ -25,11 +25,9 @@ import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
 import org.apache.mahout.cf.taste.impl.model.BooleanPrefUser;
 import org.apache.mahout.cf.taste.impl.model.BooleanPreference;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
-import org.apache.mahout.cf.taste.impl.model.GenericItem;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.impl.model.GenericUser;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 import org.slf4j.Logger;
@@ -74,8 +72,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * that, a JDBC-backed {@link DataModel} and a database are more appropriate.</p>
  *
  * <p>It is possible and likely useful to subclass this class and customize its behavior to accommodate
- * application-specific needs and input formats. See {@link #processLine(String, Map, Map)}, {@link #buildItem(String)},
- * {@link #buildUser(String, List)} and {@link #buildPreference(User, Item, double)}.</p>
+ * application-specific needs and input formats. See {@link #processLine(String, Map)},
+ * {@link #buildUser(String, List)} and {@link #buildPreference(User, Comparable, double)}.</p>
  */
 public class FileDataModel implements DataModel {
 
@@ -166,7 +164,6 @@ public class FileDataModel implements DataModel {
 
   protected void processFile(File dataOrUpdateFile, Map<String, List<Preference>> data) {
     log.info("Reading file info...");
-    Map<String, Item> itemCache = new FastMap<String, Item>(1001);
     AtomicInteger count = new AtomicInteger();
     for (String line : new FileLineIterable(dataOrUpdateFile, false)) {
       if (line.length() > 0) {
@@ -176,7 +173,7 @@ public class FileDataModel implements DataModel {
         if (delimiter == UNKNOWN_DELIMITER) {
           delimiter = determineDelimiter(line);
         }
-        processLine(line, data, itemCache);
+        processLine(line, data);
         int currentCount = count.incrementAndGet();
         if (currentCount % 100000 == 0) {
           log.info("Processed {} lines", currentCount);
@@ -202,18 +199,16 @@ public class FileDataModel implements DataModel {
    * determining which user and item the preference pertains to, the method should look to see if the data contains a
    * mapping for the user ID already, and if not, add an empty {@link List} of {@link Preference}s to the data.</p>
    *
-   * <p>The method should use {@link #buildItem(String)} to create an {@link Item} representing the item in question if
-   * needed, and use {@link #buildPreference(User, Item, double)} to build {@link Preference} objects as needed.</p>
+   * <p>The method should use {@link #buildPreference(User, Comparable, double)} to
+   * build {@link Preference} objects as needed.</p>
    *
    * <p>Note that if the line is empty or begins with '#' it will be ignored as a comment.</p>
    *
    * @param line      line from input data file
    * @param data      all data read so far, as a mapping from user IDs to preferences
-   * @param itemCache A cache of existing items
-   * @see #buildPreference(User, Item, double)
-   * @see #buildItem(String)
+   * @see #buildPreference(User, Comparable, double)
    */
-  protected void processLine(String line, Map<String, List<Preference>> data, Map<String, Item> itemCache) {
+  protected void processLine(String line, Map<String, List<Preference>> data) {
 
     if (line.length() == 0 || line.charAt(0) == '#') {
       return;
@@ -251,23 +246,18 @@ public class FileDataModel implements DataModel {
       Iterator<Preference> prefsIterator = prefs.iterator();
       while (prefsIterator.hasNext()) {
         Preference pref = prefsIterator.next();
-        if (pref.getItem().getID().equals(itemID)) {
+        if (pref.getItemID().equals(itemID)) {
           prefsIterator.remove();
           break;
         }
       }
     } else {
       // add pref -- assume it does not already exist
-      Item item = itemCache.get(itemID);
-      if (item == null) {
-        item = buildItem(itemID);
-        itemCache.put(itemID, item);
-      }
       if (preferenceValueString == null) {
-        prefs.add(new BooleanPreference(null, item));
+        prefs.add(new BooleanPreference(null, itemID));
       } else {
         double preferenceValue = Double.parseDouble(preferenceValueString);
-        prefs.add(buildPreference(null, item, preferenceValue));
+        prefs.add(buildPreference(null, itemID, preferenceValue));
       }
     }
   }
@@ -285,31 +275,25 @@ public class FileDataModel implements DataModel {
   }
 
   @Override
-  public User getUser(Object id) throws TasteException {
+  public User getUser(Comparable<?> id) throws TasteException {
     checkLoaded();
     return delegate.getUser(id);
   }
 
   @Override
-  public Iterable<? extends Item> getItems() throws TasteException {
+  public Iterable<Comparable<?>> getItemIDs() throws TasteException {
     checkLoaded();
-    return delegate.getItems();
+    return delegate.getItemIDs();
   }
 
   @Override
-  public Item getItem(Object id) throws TasteException {
-    checkLoaded();
-    return delegate.getItem(id);
-  }
-
-  @Override
-  public Iterable<? extends Preference> getPreferencesForItem(Object itemID) throws TasteException {
+  public Iterable<? extends Preference> getPreferencesForItem(Comparable<?> itemID) throws TasteException {
     checkLoaded();
     return delegate.getPreferencesForItem(itemID);
   }
 
   @Override
-  public Preference[] getPreferencesForItemAsArray(Object itemID) throws TasteException {
+  public Preference[] getPreferencesForItemAsArray(Comparable<?> itemID) throws TasteException {
     checkLoaded();
     return delegate.getPreferencesForItemAsArray(itemID);
   }
@@ -327,7 +311,7 @@ public class FileDataModel implements DataModel {
   }
 
   @Override
-  public int getNumUsersWithPreferenceFor(Object... itemIDs) throws TasteException {
+  public int getNumUsersWithPreferenceFor(Comparable<?>... itemIDs) throws TasteException {
     checkLoaded();
     return delegate.getNumUsersWithPreferenceFor(itemIDs);
   }
@@ -338,14 +322,14 @@ public class FileDataModel implements DataModel {
    * reloaded from a file. This method should also be considered relatively slow.
    */
   @Override
-  public void setPreference(Object userID, Object itemID, double value) throws TasteException {
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value) throws TasteException {
     checkLoaded();
     delegate.setPreference(userID, itemID, value);
   }
 
-  /** See the warning at {@link #setPreference(Object, Object, double)}. */
+  /** See the warning at {@link #setPreference(Comparable, Comparable, double)}. */
   @Override
-  public void removePreference(Object userID, Object itemID) throws TasteException {
+  public void removePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
     checkLoaded();
     delegate.removePreference(userID, itemID);
   }
@@ -376,26 +360,14 @@ public class FileDataModel implements DataModel {
   protected User buildUser(String id, List<Preference> prefs) {
     if (!prefs.isEmpty() && prefs.get(0) instanceof BooleanPreference) {
       // If first is a BooleanPreference, assuming all are, so, want to use BooleanPrefUser
-      FastSet<Object> itemIDs = new FastSet<Object>(prefs.size());
+      FastSet<Comparable<?>> itemIDs = new FastSet<Comparable<?>>(prefs.size());
       for (Preference pref : prefs) {
-        itemIDs.add(pref.getItem().getID());
+        itemIDs.add(pref.getItemID());
       }
       itemIDs.rehash();
-      return new BooleanPrefUser<String>(id, itemIDs);
+      return new BooleanPrefUser(id, itemIDs);
     }
-    return new GenericUser<String>(id, prefs);
-  }
-
-  /**
-   * Subclasses may override to return a different {@link Item} implementation. The default implementation always builds
-   * a new {@link GenericItem}; likewise it may be better here to return an existing object encapsulating the item
-   * instead.
-   *
-   * @param id item ID
-   * @return {@link GenericItem} by default
-   */
-  protected Item buildItem(String id) {
-    return new GenericItem<String>(id);
+    return new GenericUser(id, prefs);
   }
 
   /**
@@ -403,12 +375,12 @@ public class FileDataModel implements DataModel {
    * a new {@link GenericPreference}.
    *
    * @param user  {@link User} who expresses the preference
-   * @param item  preferred {@link Item}
+   * @param itemID  preferred item
    * @param value preference value
    * @return {@link GenericPreference} by default
    */
-  protected Preference buildPreference(User user, Item item, double value) {
-    return new GenericPreference(user, item, value);
+  protected Preference buildPreference(User user, Comparable<?> itemID, double value) {
+    return new GenericPreference(user, itemID, value);
   }
 
   @Override

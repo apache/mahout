@@ -17,28 +17,27 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
-import org.apache.mahout.cf.taste.model.Item;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.User;
 
 import java.io.Serializable;
 
-/** <p>A simple {@link Preference} encapsulating an {@link Item} and preference value.</p> */
+/** <p>A simple {@link Preference} encapsulating an item and preference value.</p> */
 public class GenericPreference implements SettableUserPreference, Serializable {
 
   private User user;
-  private final Item item;
+  private final Comparable<?> itemID;
   private double value;
 
-  public GenericPreference(User user, Item item, double value) {
-    if (item == null) {
-      throw new IllegalArgumentException("item is null");
+  public GenericPreference(User user, Comparable<?> itemID, double value) {
+    if (itemID == null) {
+      throw new IllegalArgumentException("itemID is null");
     }
     if (Double.isNaN(value)) {
       throw new IllegalArgumentException("Invalid value: " + value);
     }
     this.user = user;
-    this.item = item;
+    this.itemID = itemID;
     this.value = value;
   }
 
@@ -59,8 +58,8 @@ public class GenericPreference implements SettableUserPreference, Serializable {
   }
 
   @Override
-  public Item getItem() {
-    return item;
+  public Comparable<?> getItemID() {
+    return itemID;
   }
 
   @Override
@@ -78,7 +77,7 @@ public class GenericPreference implements SettableUserPreference, Serializable {
 
   @Override
   public String toString() {
-    return "GenericPreference[user: " + user + ", item:" + item + ", value:" + value + ']';
+    return "GenericPreference[user: " + user + ", itemID:" + itemID + ", value:" + value + ']';
   }
 
 }
