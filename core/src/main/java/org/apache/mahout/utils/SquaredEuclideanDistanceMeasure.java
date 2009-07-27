@@ -77,7 +77,7 @@ public class SquaredEuclideanDistanceMeasure implements DistanceMeasure {
 
   @Override
   public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
-    if (centroid.size() != centroid.size()) {
+    if (centroid.size() != v.size()) {
       throw new CardinalityException();
     }
 
