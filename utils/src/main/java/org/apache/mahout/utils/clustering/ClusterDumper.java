@@ -25,22 +25,30 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
-import org.apache.commons.cli2.util.HelpFormatter;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.jobcontrol.Job;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Writable;
 import org.apache.mahout.clustering.ClusterBase;
+import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.utils.CommandLineUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public final class ClusterDumper {
 
@@ -64,10 +72,13 @@ public final class ClusterDumper {
     Option substringOpt = obuilder.withLongName("substring").withRequired(false).withArgument(
             abuilder.withName("substring").withMinimum(1).withMaximum(1).create()).
             withDescription("The number of chars of the asFormatString() to print").withShortName("b").create();
+    Option pointsOpt = obuilder.withLongName("points").withRequired(false).withArgument(
+            abuilder.withName("points").withMinimum(1).withMaximum(1).create()).
+            withDescription("The points sequence file mapping input vectors to their cluster.  If specified, then the program will output the points associated with a cluster").withShortName("p").create();
     Option helpOpt = obuilder.withLongName("help").
             withDescription("Print out help").withShortName("h").create();
 
-    Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt).withOption(substringOpt).create();
+    Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt).withOption(substringOpt).withOption(pointsOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -76,7 +87,7 @@ public final class ClusterDumper {
 
       if (cmdLine.hasOption(helpOpt)) {
 
-        printHelp(group);
+        CommandLineUtil.printHelp(group);
         return;
       }
 
@@ -88,7 +99,13 @@ public final class ClusterDumper {
         client.setConf(conf);
         FileSystem fs = FileSystem.get(path.toUri(), conf);
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-
+        Map<String, List<String>> clusterIdToPoints = null;
+        if (cmdLine.hasOption(pointsOpt)) {
+          //read in the points
+          clusterIdToPoints = readPoints(cmdLine.getValue(pointsOpt).toString(), conf);
+        } else {
+          clusterIdToPoints = Collections.emptyMap();
+        }
         Writer writer = null;
         if (cmdLine.hasOption(outputOpt)){
           writer = new FileWriter(cmdLine.getValue(outputOpt).toString());
@@ -102,13 +119,22 @@ public final class ClusterDumper {
         Writable key = (Writable) reader.getKeyClass().newInstance();
         ClusterBase value = (ClusterBase) reader.getValueClass().newInstance();
         while (reader.next(key, value)){
-          writer.write(value.getId());
-          writer.write(":");
-          writer.write("name:" + value.getCenter().getName());
-          writer.write(":");
-          String fmtStr = value.getCenter().asFormatString();
-          writer.write(fmtStr.substring(0, Math.min(sub, fmtStr.length())));
-          writer.write(LINE_SEP);
+          Vector center = value.getCenter();
+          String fmtStr = center.asFormatString();
+          writer.append(String.valueOf(value.getId())).append(":").append("name:")
+                  .append(center.getName()).append(":").append(fmtStr.substring(0, Math.min(sub, fmtStr.length()))).append(LINE_SEP);
+          List<String> points = clusterIdToPoints.get(String.valueOf(value.getId()));
+          if (points != null){
+            writer.write("\tPoints: ");
+            for (Iterator<String> iterator = points.iterator(); iterator.hasNext();) {
+              String point = iterator.next();
+              writer.append(point);
+              if (iterator.hasNext()){
+                writer.append(", ");
+              }
+            }
+            writer.write(LINE_SEP);
+          }
           writer.flush();
         }
         if (cmdLine.hasOption(outputOpt)){
@@ -119,14 +145,37 @@ public final class ClusterDumper {
 
     } catch (OptionException e) {
       log.error("Exception", e);
-      printHelp(group);
+      CommandLineUtil.printHelp(group);
     }
 
   }
 
-  private static void printHelp(Group group) {
-    HelpFormatter formatter = new HelpFormatter();
-    formatter.setGroup(group);
-    formatter.print();
+  private static Map<String, List<String>> readPoints(String pointsPath, JobConf conf) throws IOException {
+    Map<String, List<String>> result = new HashMap<String, List<String>>();
+    Path path = new Path(pointsPath);
+    FileSystem fs = FileSystem.get(path.toUri(), conf);
+    SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
+    try {
+      Text key = (Text) reader.getKeyClass().newInstance();
+      Text value = (Text) reader.getValueClass().newInstance();
+      while (reader.next(key, value)) {
+        //value is the cluster id as an int, key is the name/id of the vector, but that doesn't matter because we only care about printing it
+        String clusterId = value.toString();
+        List<String> pointList = result.get(clusterId);
+        if (pointList == null) {
+          pointList = new ArrayList<String>();
+          result.put(clusterId, pointList);
+        }
+        pointList.add(key.toString());
+
+      }
+    } catch (InstantiationException e) {
+      log.error("Exception", e);
+    } catch (IllegalAccessException e) {
+      log.error("Exception", e);
+    }
+    return result;
   }
+
+
 }
