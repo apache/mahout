@@ -56,7 +56,6 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
   public static final String DEFAULT_COUNT_COLUMN = "count";
   public static final String DEFAULT_AVERAGE_DIFF_COLUMN = "average_diff";
 
-  private final JDBCDataModel dataModel;
   private final DataSource dataSource;
   private final String getDiffSQL;
   private final String getDiffsSQL;
@@ -96,7 +95,6 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
     if (minDiffCount < 0) {
       throw new IllegalArgumentException("minDiffCount is not positive");
     }
-    this.dataModel = dataModel;
     this.dataSource = dataModel.getDataSource();
     this.getDiffSQL = getDiffSQL;
     this.getDiffsSQL = getDiffsSQL;
@@ -171,7 +169,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       // with nulls for Preferences that have no corresponding result row
       int i = 0;
       while (rs.next()) {
-        String nextResultItemID = rs.getString(3);
+        Comparable<?> nextResultItemID = (Comparable<?>) rs.getObject(3);
         while (!prefs[i].getItemID().equals(nextResultItemID)) {
           i++;
           // result[i] is null for these values of i
