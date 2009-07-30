@@ -30,16 +30,16 @@ import org.apache.mahout.cf.taste.impl.model.jdbc.MySQLJDBCDataModel;
  * <tr><td>123</td><td>234</td><td>0.5</td><td>5</td></tr> <tr><td>123</td><td>789</td><td>-1.33</td><td>3</td></tr>
  * <tr><td>234</td><td>789</td><td>2.1</td><td>1</td></tr> </table>
  *
- * <p><code>item_id_a</code> and <code>item_id_b</code> must have type compatible with the Java <code>String</code>
- * type. <code>average_diff</code> must be compatible with <code>double</code> and <code>count</code> must be compatible
- * with <code>int</code>.</p>
+ * <p><code>item_id_a</code> and <code>item_id_b</code> may have types compatible with Java String, or integer
+ * primitive types. <code>average_diff</code> must be compatible with <code>double</code> and
+ * <code>count</code> must be compatible with <code>int</code>.</p>
  *
  * <p>The following command sets up a suitable table in MySQL:</p>
  *
  * <pre>
  * CREATE TABLE taste_slopeone_diffs (
- *   item_id_a VARCHAR(10) NOT NULL,
- *   item_id_b VARCHAR(10) NOT NULL,
+ *   item_id_a INT NOT NULL,
+ *   item_id_b INT NOT NULL,
  *   average_diff FLOAT NOT NULL,
  *   count INT NOT NULL,
  *   PRIMARY KEY (item_id_a, item_id_b),
@@ -77,8 +77,8 @@ public final class MySQLJDBCDiffStorage extends AbstractJDBCDiffStorage {
             " WHERE " + itemIDAColumn + "=? AND " + itemIDBColumn + "=?",
         // getDiffsSQL
         "SELECT " + countColumn + ", " + avgColumn + ", " + itemIDAColumn + " FROM " + diffsTable + ", " +
-            dataModel.getPreferenceTable() + " WHERE " + itemIDBColumn + "=? AND " + itemIDAColumn + " = " + dataModel.getItemIDColumn() +
-            " AND " + dataModel.getUserIDColumn() + "=? ORDER BY " + itemIDAColumn,
+            dataModel.getPreferenceTable() + " WHERE " + itemIDBColumn + "=? AND " + itemIDAColumn + " = " +
+            dataModel.getItemIDColumn() + " AND " + dataModel.getUserIDColumn() + "=? ORDER BY " + itemIDAColumn,
         // getAverageItemPrefSQL
         "SELECT COUNT(1), AVG(" + dataModel.getPreferenceColumn() + ") FROM " + dataModel.getPreferenceTable() +
             " WHERE " + dataModel.getItemIDColumn() + "=?",
@@ -101,19 +101,23 @@ public final class MySQLJDBCDiffStorage extends AbstractJDBCDiffStorage {
         // getRecommendableItemsSQL
         "SELECT id FROM " +
             "(SELECT " + itemIDAColumn + " AS id FROM " + diffsTable + ", " + dataModel.getPreferenceTable() +
-            " WHERE " + itemIDBColumn + " = " + dataModel.getItemIDColumn() + " AND " + dataModel.getUserIDColumn() + "=? UNION DISTINCT" +
+            " WHERE " + itemIDBColumn + " = " + dataModel.getItemIDColumn() +
+            " AND " + dataModel.getUserIDColumn() + "=? UNION DISTINCT" +
             " SELECT " + itemIDBColumn + " AS id FROM " + diffsTable + ", " + dataModel.getPreferenceTable() +
-            " WHERE " + itemIDAColumn + " = " + dataModel.getItemIDColumn() + " AND " + dataModel.getUserIDColumn() +
-            "=?) possible_item_ids WHERE id NOT IN (SELECT " + dataModel.getItemIDColumn() + " FROM " + dataModel.getPreferenceTable() +
-            " WHERE " + dataModel.getUserIDColumn() + "=?)",
+            " WHERE " + itemIDAColumn + " = " + dataModel.getItemIDColumn() +
+            " AND " + dataModel.getUserIDColumn() +"=?) " +
+            "possible_item_ids WHERE id NOT IN (SELECT " + dataModel.getItemIDColumn() + " FROM " +
+            dataModel.getPreferenceTable() + " WHERE " + dataModel.getUserIDColumn() + "=?)",
         // deleteDiffsSQL
         "TRUNCATE " + diffsTable,
         // createDiffsSQL
         "INSERT INTO " + diffsTable + " (" + itemIDAColumn + ", " + itemIDBColumn + ", " + avgColumn +
-            ", " + countColumn + ") SELECT prefsA." + dataModel.getItemIDColumn() + ", prefsB." + dataModel.getItemIDColumn() + ',' +
-            " AVG(prefsB." + dataModel.getPreferenceColumn() + " - prefsA." + dataModel.getPreferenceColumn() + ")," +
-            " COUNT(1) AS count FROM " + dataModel.getPreferenceTable() + " prefsA, " + dataModel.getPreferenceTable() + " prefsB WHERE prefsA." +
-            dataModel.getUserIDColumn() + " = prefsB." + dataModel.getUserIDColumn() + " AND prefsA." + dataModel.getItemIDColumn() + " < prefsB." +
+            ", " + countColumn + ") SELECT prefsA." + dataModel.getItemIDColumn() + ", prefsB." +
+            dataModel.getItemIDColumn() + ',' +" AVG(prefsB." + dataModel.getPreferenceColumn() +
+            " - prefsA." + dataModel.getPreferenceColumn() + ")," + " COUNT(1) AS count FROM " +
+            dataModel.getPreferenceTable() + " prefsA, " + dataModel.getPreferenceTable() + " prefsB WHERE prefsA." +
+            dataModel.getUserIDColumn() + " = prefsB." + dataModel.getUserIDColumn() +
+            " AND prefsA." + dataModel.getItemIDColumn() + " < prefsB." +
             dataModel.getItemIDColumn() + ' ' + " GROUP BY prefsA." + dataModel.getItemIDColumn() +
             ", prefsB." + dataModel.getItemIDColumn() + " HAVING count >=?",
         // diffsExistSQL
