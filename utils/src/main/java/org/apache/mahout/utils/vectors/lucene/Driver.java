@@ -1,4 +1,4 @@
-package org.apache.mahout.utils.vectors;
+package org.apache.mahout.utils.vectors.lucene;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,7 +24,6 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
-import org.apache.commons.cli2.util.HelpFormatter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -34,24 +33,24 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.mahout.matrix.SparseVector;
+import org.apache.mahout.utils.CommandLineUtil;
+import org.apache.mahout.utils.vectors.TF;
+import org.apache.mahout.utils.vectors.TFIDF;
+import org.apache.mahout.utils.vectors.TermInfo;
+import org.apache.mahout.utils.vectors.Weight;
 import org.apache.mahout.utils.vectors.io.JWriterTermInfoWriter;
+import org.apache.mahout.utils.vectors.io.JWriterVectorWriter;
 import org.apache.mahout.utils.vectors.io.SequenceFileVectorWriter;
 import org.apache.mahout.utils.vectors.io.VectorWriter;
-import org.apache.mahout.utils.vectors.io.JWriterVectorWriter;
-import org.apache.mahout.utils.vectors.lucene.CachedTermInfo;
-import org.apache.mahout.utils.vectors.lucene.LuceneIteratable;
-import org.apache.mahout.utils.vectors.lucene.TFDFMapper;
-import org.apache.mahout.utils.vectors.lucene.VectorMapper;
-import org.apache.mahout.utils.CommandLineUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.FileWriter;
 import java.nio.charset.Charset;
 
 
