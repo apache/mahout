@@ -32,7 +32,7 @@ import java.util.Collections;
  *
  *
  **/
-public class LuceneIteratable implements VectorIterable {
+public class LuceneIterable implements VectorIterable {
 
 
   private IndexReader indexReader;
@@ -45,7 +45,7 @@ public class LuceneIteratable implements VectorIterable {
 
   public static final double NO_NORMALIZING = -1.0;
 
-  public LuceneIteratable(IndexReader reader, String idField, String field, VectorMapper mapper) {
+  public LuceneIterable(IndexReader reader, String idField, String field, VectorMapper mapper) {
     this(reader, idField, field, mapper, NO_NORMALIZING);
   }
 
@@ -57,7 +57,7 @@ public class LuceneIteratable implements VectorIterable {
    * @param mapper The {@link org.apache.mahout.utils.vectors.lucene.VectorMapper} for creating {@link org.apache.mahout.matrix.Vector}s from Lucene's TermVectors.
    * @param normPower The normalization value.  Must be greater than or equal to 0 or equal to {@link #NO_NORMALIZING}
    */
-  public LuceneIteratable(IndexReader reader, String idField, String field, VectorMapper mapper, double normPower) {
+  public LuceneIterable(IndexReader reader, String idField, String field, VectorMapper mapper, double normPower) {
     if (normPower != NO_NORMALIZING && normPower < 0){
       throw new IllegalArgumentException("normPower must either be -1 or >= 0");
     }

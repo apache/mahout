@@ -60,7 +60,6 @@ import java.nio.charset.Charset;
  **/
 public class Driver {
   private transient static Logger log = LoggerFactory.getLogger(Driver.class);
-  //TODO: This assumes LuceneIterable, make it generic.
 
   public static void main(String[] args) throws IOException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
@@ -164,7 +163,7 @@ public class Driver {
           }
           TermInfo termInfo = new CachedTermInfo(reader, field, minDf, maxDFPercent);
           VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
-          LuceneIteratable iteratable = null;
+          LuceneIterable iterable = null;
           String power = null;
           double norm = -1;
           if (cmdLine.hasOption(powerOpt)) {
@@ -179,10 +178,10 @@ public class Driver {
           if (cmdLine.hasOption(idFieldOpt)) {
             idField = cmdLine.getValue(idFieldOpt).toString();
           }
-          if (norm == LuceneIteratable.NO_NORMALIZING) {
-            iteratable = new LuceneIteratable(reader, idField, field, mapper, LuceneIteratable.NO_NORMALIZING);
+          if (norm == LuceneIterable.NO_NORMALIZING) {
+            iterable = new LuceneIterable(reader, idField, field, mapper, LuceneIterable.NO_NORMALIZING);
           } else {
-            iteratable = new LuceneIteratable(reader, idField, field, mapper, norm);
+            iterable = new LuceneIterable(reader, idField, field, mapper, norm);
           }
           String outFile = cmdLine.getValue(outputOpt).toString();
           log.info("Output File: " + outFile);
@@ -200,7 +199,7 @@ public class Driver {
             vectorWriter = getSeqFileWriter(outFile);
           }
 
-          long numDocs = vectorWriter.write(iteratable, maxDocs);
+          long numDocs = vectorWriter.write(iterable, maxDocs);
           vectorWriter.close();
           log.info("Wrote: " + numDocs + " vectors");
 

@@ -67,7 +67,7 @@ public class LuceneIterableTest extends TestCase {
     Weight weight = new TFIDF();
     TermInfo termInfo = new CachedTermInfo(reader, "content", 1, 100);
     VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
-    LuceneIteratable iterable = new LuceneIteratable(reader, "id", "content", mapper);
+    LuceneIterable iterable = new LuceneIterable(reader, "id", "content", mapper);
 
     //TODO: do something more meaningful here
     for (Vector vector : iterable) {
