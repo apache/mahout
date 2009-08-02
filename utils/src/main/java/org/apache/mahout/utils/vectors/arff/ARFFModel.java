@@ -67,4 +67,12 @@ public interface ARFFModel {
    * @return the count
    */
   long getWordCount();
+
+  double getValue(String data, int idx);
+
+  Map<String, Integer> getNominalMap();
+
+  int getLabelSize();
+
+  Map<String, Long> getWords();
 }

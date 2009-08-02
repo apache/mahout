@@ -45,7 +45,8 @@ public class ARFFVectorIterableTest extends TestCase {
             .append("1,2, \"2009-01-01 5:55:55\", foo, c").append(StringUtil.LINE_SEP)
             .append("2,3").append(StringUtil.LINE_SEP)
             .append("{0 5,1 23}").append(StringUtil.LINE_SEP);
-    ARFFVectorIterable iterable = new ARFFVectorIterable(builder.toString());
+    ARFFModel model = new MapBackedARFFModel();
+    ARFFVectorIterable iterable = new ARFFVectorIterable(builder.toString(), model);
     assertTrue(iterable.getModel().getRelation() + " is not equal to " + "Mahout", iterable.getModel().getRelation().equals("Mahout") == true);
     Map<String, Integer> bindings = iterable.getModel().getLabelBindings();
     assertNotNull(bindings);
@@ -74,7 +75,8 @@ public class ARFFVectorIterableTest extends TestCase {
   }
 
   public void testDense() throws Exception {
-    ARFFVectorIterable iterable = new ARFFVectorIterable(SAMPLE_DENSE_ARFF);
+    ARFFModel model = new MapBackedARFFModel();
+    ARFFVectorIterable iterable = new ARFFVectorIterable(SAMPLE_DENSE_ARFF, model);
     int count = 0;
     for (Vector vector : iterable) {
       assertTrue("Vector is not dense", vector instanceof DenseVector);
@@ -84,7 +86,8 @@ public class ARFFVectorIterableTest extends TestCase {
   }
 
   public void testSparse() throws Exception {
-    ARFFVectorIterable iterable = new ARFFVectorIterable(SAMPLE_SPARSE_ARFF);
+    ARFFModel model = new MapBackedARFFModel();
+    ARFFVectorIterable iterable = new ARFFVectorIterable(SAMPLE_SPARSE_ARFF, model);
     int count = 0;
     for (Vector vector : iterable) {
       assertTrue("Vector is not dense", vector instanceof SparseVector);
@@ -95,7 +98,8 @@ public class ARFFVectorIterableTest extends TestCase {
 
   public void testNonNumeric() throws Exception {
     try {
-      ARFFVectorIterable iterable = new ARFFVectorIterable(NON_NUMERIC_ARFF);
+      MapBackedARFFModel model = new MapBackedARFFModel();
+      ARFFVectorIterable iterable = new ARFFVectorIterable(NON_NUMERIC_ARFF, model);
       int count = 0;
       for (Vector vector : iterable) {
         assertTrue("Vector is not dense", vector instanceof SparseVector);
@@ -105,14 +109,14 @@ public class ARFFVectorIterableTest extends TestCase {
       Map<String, Integer> nominalMap = iterable.getModel().getNominalMap();
       assertNotNull(nominalMap);
       assertTrue("nominalMap Size: " + nominalMap.size() + " is not: " + 2, nominalMap.size() == 2);
-      Map<Integer, ARFFType> integerARFFTypeMap = iterable.getModel().getTypeMap();
+      Map<Integer, ARFFType> integerARFFTypeMap = model.getTypeMap();
       assertNotNull("Type map null", integerARFFTypeMap);
       assertTrue("integerARFFTypeMap Size: " + integerARFFTypeMap.size() + " is not: " + 5, integerARFFTypeMap.size() == 5);
-      Map<String, Long> words = iterable.getModel().getWords();
+      Map<String, Long> words = model.getWords();
       assertNotNull("words null", words);
       assertTrue("words Size: " + words.size() + " is not: " + 10, words.size() == 10);
       System.out.println("Words: " + words);
-      Map<Integer, DateFormat> integerDateFormatMap = iterable.getModel().getDateMap();
+      Map<Integer, DateFormat> integerDateFormatMap = model.getDateMap();
       assertNotNull("date format null", integerDateFormatMap);
       assertTrue("integerDateFormatMap Size: " + integerDateFormatMap.size() + " is not: " + 1, integerDateFormatMap.size() == 1);
     } catch (UnsupportedOperationException e) {

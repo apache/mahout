@@ -40,16 +40,16 @@ public class MapBackedARFFModel implements ARFFModel {
   private Map<String, Long> words;
 
   public MapBackedARFFModel() {
-    labelBindings = new HashMap<String, Integer>();
-    words = new HashMap<String, Long>();
-    typeMap = new HashMap<Integer, ARFFType>();
-    dateMap = new HashMap<Integer, DateFormat>();
-    nominalMap = new HashMap<String, Integer>();
+    this(new HashMap<String, Long>(), 1);    
   }
 
   public MapBackedARFFModel(Map<String, Long> words, long wordCount) {
     this.words = words;
     this.wordCount = wordCount;
+    labelBindings = new HashMap<String, Integer>();
+    typeMap = new HashMap<Integer, ARFFType>();
+    dateMap = new HashMap<Integer, DateFormat>();
+    nominalMap = new HashMap<String, Integer>();
   }
 
   public String getRelation() {
@@ -67,7 +67,7 @@ public class MapBackedARFFModel implements ARFFModel {
    * @param idx  The position in the ARFF data
    * @return A double representing the data
    */
-  protected double getValue(String data, int idx) {
+  public double getValue(String data, int idx) {
     double result = 0;
     ARFFType type = typeMap.get(idx);
     data = data.replaceAll("\"", "");
@@ -183,7 +183,7 @@ public class MapBackedARFFModel implements ARFFModel {
    * @return The map
    */
   public Map<String, Long> getWords() {
-    return Collections.unmodifiableMap(words);
+    return words;
   }
 
   public Integer getNominalValue(String nominal){

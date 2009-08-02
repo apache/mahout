@@ -56,22 +56,22 @@ public class ARFFVectorIterable implements VectorIterable {
 
   protected BufferedReader buff;
   protected boolean inData;
-  protected MapBackedARFFModel model;
+  protected ARFFModel model;
 
 
-  public ARFFVectorIterable(File file) throws IOException {
-    this(new FileReader(file));
+  public ARFFVectorIterable(File file, ARFFModel model) throws IOException {
+    this(new FileReader(file), model);
   }
 
-  public ARFFVectorIterable(File file, Charset encoding) throws IOException {
-    this(new InputStreamReader(new FileInputStream(file), encoding));
+  public ARFFVectorIterable(File file, Charset encoding, ARFFModel model) throws IOException {
+    this(new InputStreamReader(new FileInputStream(file), encoding), model);
   }
 
-  public ARFFVectorIterable(String arff) throws IOException {
-    this(new StringReader(arff));
+  public ARFFVectorIterable(String arff, ARFFModel model) throws IOException {
+    this(new StringReader(arff), model);
   }
 
-  public ARFFVectorIterable(Reader reader) throws IOException {
+  public ARFFVectorIterable(Reader reader, ARFFModel model) throws IOException {
     if (reader instanceof BufferedReader) {
       buff = (BufferedReader) reader;
     } else {
@@ -81,7 +81,7 @@ public class ARFFVectorIterable implements VectorIterable {
     String line = null;
     int labelNumber = 0;
     inData = false;
-    model = new MapBackedARFFModel();
+    this.model = model;
 
     while ((line = buff.readLine()) != null) {
       line = line.trim();
@@ -210,7 +210,7 @@ public class ARFFVectorIterable implements VectorIterable {
    * Returns info about the ARFF content that was parsed.
    * @return the model
    */
-  public MapBackedARFFModel getModel() {
+  public ARFFModel getModel() {
     return model;
   }
 }
