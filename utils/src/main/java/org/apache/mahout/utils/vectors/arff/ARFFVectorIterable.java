@@ -95,25 +95,25 @@ public class ARFFVectorIterable implements VectorIterable {
       } else if (lower.startsWith(ARFFModel.ATTRIBUTE)) {
         String label;
         if (lower.indexOf(ARFFType.NUMERIC.getIndicator()) != -1) {
-          label = ARFFType.NUMERIC.getLabel(line);
+          label = ARFFType.NUMERIC.getLabel(lower);
           type = ARFFType.NUMERIC;
         } else if (lower.indexOf(ARFFType.STRING.getIndicator()) != -1) {
-          label = ARFFType.STRING.getLabel(line);
+          label = ARFFType.STRING.getLabel(lower);
           type = ARFFType.STRING;
           //TODO: create a map so we know which
 
         } else if (lower.indexOf(ARFFType.NOMINAL.getIndicator()) != -1) {
-          label = ARFFType.NOMINAL.getLabel(line);
+          label = ARFFType.NOMINAL.getLabel(lower);
           type = ARFFType.NOMINAL;
           //@ATTRIBUTE class        {Iris-setosa,Iris-versicolor,Iris-virginica}
           int classIdx = lower.indexOf(ARFFType.NOMINAL.getIndicator());
           String [] classes = line.substring(classIdx + 1, line.length() - 1).split(",");
           for (int i = 0; i < classes.length; i++) {
-            model.addNominal(classes[i].trim(), i);
+            model.addNominal(label, classes[i].trim(), i);
           }
 
         } else if (lower.indexOf(ARFFType.DATE.getIndicator()) != -1) {
-          label = ARFFType.DATE.getLabel(line);
+          label = ARFFType.DATE.getLabel(lower);
           type = ARFFType.DATE;
           //TODO: DateFormatter map
           DateFormat format = ARFFModel.DEFAULT_DATE_FORMAT;
@@ -184,7 +184,6 @@ public class ARFFVectorIterable implements VectorIterable {
         for (int i = 0; i < splits.length; i++) {
           String[] data = splits[i].split(" ");//first is index, second is
           int idx = Integer.parseInt(data[0]);
-
           result.setQuick(idx, model.getValue(data[1], idx));
         }
       } else {

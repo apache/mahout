@@ -34,22 +34,25 @@ public class MapBackedARFFModel implements ARFFModel {
   protected String relation;
 
   private Map<String, Integer> labelBindings;
+  private Map<Integer, String> idxLabel;
   private Map<Integer, ARFFType> typeMap; //key is the vector index, value is the type
   private Map<Integer, DateFormat> dateMap;
-  private Map<String, Integer> nominalMap;
+  private Map<String, Map<String, Integer>> nominalMap;
   private Map<String, Long> words;
 
   public MapBackedARFFModel() {
-    this(new HashMap<String, Long>(), 1);    
+    this(new HashMap<String, Long>(), 1, new HashMap<String, Map<String, Integer>>());
   }
 
-  public MapBackedARFFModel(Map<String, Long> words, long wordCount) {
+  public MapBackedARFFModel(Map<String, Long> words, long wordCount, Map<String, Map<String, Integer>> nominalMap) {
     this.words = words;
     this.wordCount = wordCount;
     labelBindings = new HashMap<String, Integer>();
+    idxLabel = new HashMap<Integer, String>();
     typeMap = new HashMap<Integer, ARFFType>();
     dateMap = new HashMap<Integer, DateFormat>();
-    nominalMap = new HashMap<String, Integer>();
+    this.nominalMap = nominalMap;
+
   }
 
   public String getRelation() {
@@ -87,7 +90,8 @@ public class MapBackedARFFModel implements ARFFModel {
         break;
       }
       case NOMINAL: {
-        result = processNominal(data);
+        String label = idxLabel.get(idx);
+        result = processNominal(label, data);
         break;
       }
 
@@ -96,13 +100,20 @@ public class MapBackedARFFModel implements ARFFModel {
     return result;
   }
 
-  protected double processNominal(String data) {
+  protected double processNominal(String label, String data) {
     double result;
-    Integer ord = nominalMap.get(data);
-    if (ord == null) {
-      throw new RuntimeException("Invalid nominal: " + data);
+    Map<String, Integer> classes = nominalMap.get(label);
+    if (classes != null) {
+      Integer ord = classes.get(data);
+      if (ord != null) {
+        result = ord;
+      } else {
+        throw new RuntimeException("Invalid nominal: " + data + " for label: " + label);
+      }
+    } else {
+      throw new RuntimeException("Invalid nominal label: " + label + " Data: " + data);
     }
-    result = ord;
+
     return result;
   }
 
@@ -147,11 +158,11 @@ public class MapBackedARFFModel implements ARFFModel {
   }
 
   /**
-   * The vector attributes (labels in Mahout speak)
+   * The vector attributes (labels in Mahout speak), unmodifiable
    * @return the map
    */
   public Map<String, Integer> getLabelBindings() {
-    return labelBindings;
+    return Collections.unmodifiableMap(labelBindings);
   }
 
   /**
@@ -171,11 +182,11 @@ public class MapBackedARFFModel implements ARFFModel {
   }
 
   /**
-   * Map nominals to ids
+   * Map nominals to ids.  Should only be modified by calling {@link ARFFModel#addNominal(String, String, int)}
    * @return the map
    */
-  public Map<String, Integer> getNominalMap() {
-    return Collections.unmodifiableMap(nominalMap);
+  public Map<String, Map<String, Integer>> getNominalMap() {
+    return nominalMap;
   }
 
   /**
@@ -186,12 +197,17 @@ public class MapBackedARFFModel implements ARFFModel {
     return words;
   }
 
-  public Integer getNominalValue(String nominal){
-    return nominalMap.get(nominal);
+  public Integer getNominalValue(String label, String nominal){
+    return nominalMap.get(label).get(nominal);
   }
 
-  public void addNominal(String nominal, int idx) {
-    nominalMap.put(nominal, idx);
+  public void addNominal(String label, String nominal, int idx) {
+    Map<String, Integer> noms = nominalMap.get(label);
+    if (noms == null) {
+      noms = new HashMap<String, Integer>();
+      nominalMap.put(label, noms);
+    }
+    noms.put(nominal, idx);
   }
 
   public DateFormat getDateFormat(Integer idx){
@@ -208,6 +224,7 @@ public class MapBackedARFFModel implements ARFFModel {
 
   public void addLabel(String label, Integer idx) {
     labelBindings.put(label, idx);
+    idxLabel.put(idx, label);
   }
 
   public ARFFType getARFFType(Integer idx){

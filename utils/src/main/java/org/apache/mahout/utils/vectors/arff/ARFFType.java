@@ -15,6 +15,8 @@ public enum ARFFType {
   
 
   public String getLabel(String line) {
-    return line.substring(ARFFModel.ATTRIBUTE.length(), line.length() - indicator.length()).trim();
+    int idx = line.indexOf(indicator);
+    return line.substring(ARFFModel.ATTRIBUTE.length(),
+            idx).trim();
   }
 }

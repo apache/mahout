@@ -151,7 +151,8 @@ public class Driver {
   private static void writeFile(String outWriter, String outDir, File file,
                                 long maxDocs, ARFFModel arffModel) throws IOException {
     log.info("Converting File: " + file);
-    ARFFModel model = new MapBackedARFFModel(arffModel.getWords(), arffModel.getWordCount() + 1);
+    ARFFModel model = new MapBackedARFFModel(arffModel.getWords(), arffModel.getWordCount() + 1,
+            arffModel.getNominalMap());
     ARFFVectorIterable iteratable = new ARFFVectorIterable(file, model);
     String outFile = outDir + "/" + file.getName() + ".mvc";
 

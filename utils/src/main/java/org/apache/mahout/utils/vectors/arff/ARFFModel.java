@@ -46,9 +46,9 @@ public interface ARFFModel {
    */
   Map<String, Integer> getLabelBindings();
 
-  Integer getNominalValue(String nominal);
+  Integer getNominalValue(String label, String nominal);
 
-  void addNominal(String nominal, int idx);
+  void addNominal(String label, String nominal, int idx);
 
   DateFormat getDateFormat(Integer idx);
 
@@ -70,7 +70,7 @@ public interface ARFFModel {
 
   double getValue(String data, int idx);
 
-  Map<String, Integer> getNominalMap();
+  Map<String, Map<String, Integer>> getNominalMap();
 
   int getLabelSize();
 
