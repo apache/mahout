@@ -21,8 +21,7 @@ import org.apache.mahout.cf.taste.common.Refreshable;
 
 /**
  * <p>Implementations encapsulate some transformation on similarity values between two things, where things might be
- * {@link org.apache.mahout.cf.taste.model.User}s or {@link org.apache.mahout.cf.taste.model.Item}s or something
- * else.</p>
+ * IDs of users or items or something else.</p>
  */
 public interface SimilarityTransform<T> extends Refreshable {
 

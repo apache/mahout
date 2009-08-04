@@ -49,9 +49,9 @@ public interface RecommenderEJBLocal extends EJBLocalObject {
   double estimatePreference(Object userID, Object itemID) throws TasteException;
 
   /**
-   * @see org.apache.mahout.cf.taste.recommender.Recommender#setPreference(Comparable, Comparable, double)
+   * @see org.apache.mahout.cf.taste.recommender.Recommender#setPreference(Comparable, Comparable, float)
    */
-  void setPreference(Object userID, Object itemID, double value) throws TasteException;
+  void setPreference(Object userID, Object itemID, float value) throws TasteException;
 
   /**
    * @see org.apache.mahout.cf.taste.recommender.Recommender#removePreference(Comparable, Comparable)

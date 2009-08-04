@@ -17,26 +17,40 @@
 
 package org.apache.mahout.cf.taste.model;
 
+import java.io.Serializable;
+
 /**
  * An alternate representation of an array of {@link Preference}. Implementations, in theory, can produce a more
  * memory-efficient representation. This is not used yet.
  */
-public interface PreferenceArray {
+public interface PreferenceArray extends Cloneable, Serializable, Iterable<Preference> {
 
+  int length();
+  
   Preference get(int i);
 
   void set(int i, Preference pref);
 
-  User getUser(int i);
+  Comparable<?> getUserID(int i);
 
-  void setUser(int i, User user);
+  void setUserID(int i, Comparable<?> userID);
 
   Comparable<?> getItemID(int i);
 
   void setItemID(int i, Comparable<?> itemID);
 
-  double getValue(int i);
+  float getValue(int i);
 
-  void setValue(int i, double value);
+  void setValue(int i, float value);
+
+  PreferenceArray clone();
+
+  void sortByUser();
+
+  void sortByItem();
+
+  void sortByValue();
+
+  void sortByValueReversed();
 
 }

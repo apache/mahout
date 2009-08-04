@@ -18,49 +18,38 @@
 package org.apache.mahout.cf.taste.impl.neighborhood;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
-import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.User;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 /** <p>Tests {@link NearestNUserNeighborhood}.</p> */
 public final class NearestNNeighborhoodTest extends TasteTestCase {
 
   public void testNeighborhood() throws Exception {
 
-    List<User> users = getMockUsers();
-    DataModel dataModel = new GenericDataModel(users);
+    DataModel dataModel = getDataModel();
 
-    Collection<User> neighborhood =
-        new NearestNUserNeighborhood(1, new DummySimilarity(), dataModel).getUserNeighborhood("test1");
+    Collection<Comparable<?>> neighborhood =
+        new NearestNUserNeighborhood(1, new DummySimilarity(dataModel), dataModel).getUserNeighborhood("test1");
     assertNotNull(neighborhood);
     assertEquals(1, neighborhood.size());
-    assertTrue(neighborhood.contains(users.get(1)));
+    assertTrue(neighborhood.contains("test2"));
 
-    Collection<User> neighborhood2 =
-        new NearestNUserNeighborhood(2, new DummySimilarity(), dataModel).getUserNeighborhood("test2");
+    Collection<Comparable<?>> neighborhood2 =
+        new NearestNUserNeighborhood(2, new DummySimilarity(dataModel), dataModel).getUserNeighborhood("test2");
     assertNotNull(neighborhood2);
     assertEquals(2, neighborhood2.size());
-    assertTrue(neighborhood2.contains(users.get(0)));
-    assertTrue(neighborhood2.contains(users.get(2)));
+    assertTrue(neighborhood2.contains("test1"));
+    assertTrue(neighborhood2.contains("test3"));
 
-    Collection<User> neighborhood3 =
-        new NearestNUserNeighborhood(4, new DummySimilarity(), dataModel).getUserNeighborhood("test4");
+    Collection<Comparable<?>> neighborhood3 =
+        new NearestNUserNeighborhood(4, new DummySimilarity(dataModel), dataModel).getUserNeighborhood("test4");
     assertNotNull(neighborhood3);
     assertEquals(3, neighborhood3.size());
-    assertTrue(neighborhood3.contains(users.get(0)));
-    assertTrue(neighborhood3.contains(users.get(1)));
-    assertTrue(neighborhood3.contains(users.get(2)));
+    assertTrue(neighborhood3.contains("test1"));
+    assertTrue(neighborhood3.contains("test2"));
+    assertTrue(neighborhood3.contains("test3"));
 
-  }
-
-  public void testRefresh() throws Exception {
-    // Make sure this doesn't throw an exception
-    DataModel dataModel = new GenericDataModel(Collections.singletonList(getUser("test1", 0.1)));
-    new NearestNUserNeighborhood(1, new DummySimilarity(), dataModel).refresh(null);
   }
 
 }

@@ -21,20 +21,19 @@ import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.FastSet;
-import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
-import org.apache.mahout.cf.taste.impl.model.BooleanPrefUser;
-import org.apache.mahout.cf.taste.impl.model.BooleanPreference;
+import org.apache.mahout.cf.taste.impl.common.FileLineIterator;
+import org.apache.mahout.cf.taste.impl.model.GenericBooleanPrefDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
-import org.apache.mahout.cf.taste.impl.model.GenericUser;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -68,23 +67,25 @@ import java.util.concurrent.locks.ReentrantLock;
  * preference for an item, but no degree of preference), the caller can simply omit the third token in each line
  * altogether -- for example, "123,ABC".</p>
  *
+ * <p>Note that it's all-or-nothing -- all of the items in the file must express no preference, or the all must.
+ * These cannot be mixed. Put another way there will always be the same number of delimiters on every line of the
+ * file!</p>
+ *
  * <p>This class is not intended for use with very large amounts of data (over, say, tens of millions of rows). For
  * that, a JDBC-backed {@link DataModel} and a database are more appropriate.</p>
  *
  * <p>It is possible and likely useful to subclass this class and customize its behavior to accommodate
- * application-specific needs and input formats. See {@link #processLine(String, Map)},
- * {@link #buildUser(String, List)} and {@link #buildPreference(User, Comparable, double)}.</p>
+ * application-specific needs and input formats. See {@link #processLine(String, Map, char)} and
+ * {@link #processLineWithoutID(String, Map, char)}
  */
 public class FileDataModel implements DataModel {
 
   private static final Logger log = LoggerFactory.getLogger(FileDataModel.class);
 
   private static final long MIN_RELOAD_INTERVAL_MS = 60 * 1000L; // 1 minute?
-  private static final char UNKNOWN_DELIMITER = '\0';
 
   private final File dataFile;
   private long lastModified;
-  private char delimiter;
   private boolean loaded;
   private DataModel delegate;
   private final ReentrantLock reloadLock;
@@ -107,8 +108,6 @@ public class FileDataModel implements DataModel {
       throw new FileNotFoundException(dataFile.toString());
     }
 
-    this.delimiter = UNKNOWN_DELIMITER;
-
     log.info("Creating FileDataModel for file " + dataFile);
 
     this.dataFile = dataFile.getAbsoluteFile();
@@ -125,19 +124,36 @@ public class FileDataModel implements DataModel {
     if (!reloadLock.isLocked()) {
       reloadLock.lock();
       try {
-        Map<String, List<Preference>> data = new FastMap<String, List<Preference>>();
-
-        processFile(dataFile, data);
-        for (File updateFile : findUpdateFiles()) {
-          processFile(updateFile, data);
-        }
-
-        delegate = new GenericDataModel(new UserIterableOverData(data));
+        delegate = buildModel();
         loaded = true;
-
+      } catch (IOException ioe) {
+        log.warn("Exception while reloading", ioe);
       } finally {
         reloadLock.unlock();
       }
+    }
+  }
+
+  private DataModel buildModel() throws IOException {
+    FileLineIterator iterator = new FileLineIterator(dataFile, false);
+    String firstLine = iterator.peek();
+    char delimiter = determineDelimiter(firstLine);
+    boolean hasPrefValues = firstLine.indexOf(',', firstLine.indexOf(',') + 1) >= 0;
+
+    if (hasPrefValues) {
+      Map<Comparable<?>, Collection<Preference>> data = new FastMap<Comparable<?>, Collection<Preference>>();
+      processFile(iterator, data, delimiter);
+      for (File updateFile : findUpdateFiles()) {
+        processFile(new FileLineIterator(updateFile, false), data, delimiter);
+      }
+      return new GenericDataModel(GenericDataModel.toPrefArrayValues(data, true));
+    } else {
+      Map<Comparable<?>, FastSet<Comparable<?>>> data = new FastMap<Comparable<?>, FastSet<Comparable<?>>>();
+      processFileWithoutID(iterator, data, delimiter);
+      for (File updateFile : findUpdateFiles()) {
+        processFileWithoutID(new FileLineIterator(updateFile, false), data, delimiter);
+      }
+      return new GenericBooleanPrefDataModel(data);
     }
   }
 
@@ -162,27 +178,6 @@ public class FileDataModel implements DataModel {
     return updateFiles;
   }
 
-  protected void processFile(File dataOrUpdateFile, Map<String, List<Preference>> data) {
-    log.info("Reading file info...");
-    AtomicInteger count = new AtomicInteger();
-    for (String line : new FileLineIterable(dataOrUpdateFile, false)) {
-      if (line.length() > 0) {
-        if (log.isDebugEnabled()) {
-          log.debug("Read line: {}", line);
-        }
-        if (delimiter == UNKNOWN_DELIMITER) {
-          delimiter = determineDelimiter(line);
-        }
-        processLine(line, data);
-        int currentCount = count.incrementAndGet();
-        if (currentCount % 100000 == 0) {
-          log.info("Processed {} lines", currentCount);
-        }
-      }
-    }
-    log.info("Read lines: " + count.get());
-  }
-
   private static char determineDelimiter(String line) {
     if (line.indexOf(',') >= 0) {
       return ',';
@@ -193,55 +188,63 @@ public class FileDataModel implements DataModel {
     throw new IllegalArgumentException("Did not find a delimiter in first line");
   }
 
+  protected void processFile(FileLineIterator dataOrUpdateFileIterator,
+                             Map<Comparable<?>, Collection<Preference>> data,
+                             char delimiter) {
+    log.info("Reading file info...");
+    AtomicInteger count = new AtomicInteger();
+    while (dataOrUpdateFileIterator.hasNext()) {
+      String line = dataOrUpdateFileIterator.next();
+      if (line.length() > 0) {
+        processLine(line, data, delimiter);
+        int currentCount = count.incrementAndGet();
+        if (currentCount % 100000 == 0) {
+          log.info("Processed {} lines", currentCount);
+        }
+      }
+    }
+    log.info("Read lines: {}", count.get());
+  }
+
   /**
    * <p>Reads one line from the input file and adds the data to a {@link Map} data structure which maps user IDs to
    * preferences. This assumes that each line of the input file corresponds to one preference. After reading a line and
    * determining which user and item the preference pertains to, the method should look to see if the data contains a
    * mapping for the user ID already, and if not, add an empty {@link List} of {@link Preference}s to the data.</p>
    *
-   * <p>The method should use {@link #buildPreference(User, Comparable, double)} to
-   * build {@link Preference} objects as needed.</p>
-   *
    * <p>Note that if the line is empty or begins with '#' it will be ignored as a comment.</p>
    *
    * @param line      line from input data file
    * @param data      all data read so far, as a mapping from user IDs to preferences
-   * @see #buildPreference(User, Comparable, double)
    */
-  protected void processLine(String line, Map<String, List<Preference>> data) {
+  protected void processLine(String line, Map<Comparable<?>, Collection<Preference>> data, char delimiter) {
 
     if (line.length() == 0 || line.charAt(0) == '#') {
       return;
     }
 
     int delimiterOne = line.indexOf((int) delimiter);
-    if (delimiterOne < 0) {
+    int delimiterTwo = line.indexOf((int) delimiter, delimiterOne + 1);
+    if (delimiterOne < 0 || delimiterTwo < 0) {
       throw new IllegalArgumentException("Bad line: " + line);
     }
-    int delimiterTwo = line.indexOf((int) delimiter, delimiterOne + 1);
 
     String userID = line.substring(0, delimiterOne);
-    String itemID;
-    String preferenceValueString;
-    if (delimiterTwo >= 0) {
-      itemID = line.substring(delimiterOne + 1, delimiterTwo);
-      preferenceValueString = line.substring(delimiterTwo + 1);
-    } else {
-      itemID = line.substring(delimiterOne + 1);
-      preferenceValueString = null;
-    }
+    String itemID = line.substring(delimiterOne + 1, delimiterTwo);
+    String preferenceValueString = line.substring(delimiterTwo + 1);
+
     if (transpose) {
       String tmp = userID;
       userID = itemID;
       itemID = tmp;
     }
-    List<Preference> prefs = data.get(userID);
+    Collection<Preference> prefs = data.get(userID);
     if (prefs == null) {
       prefs = new ArrayList<Preference>(2);
       data.put(userID, prefs);
     }
 
-    if (preferenceValueString != null && preferenceValueString.length() == 0) {
+    if (preferenceValueString.length() == 0) {
       // remove pref
       Iterator<Preference> prefsIterator = prefs.iterator();
       while (prefsIterator.hasNext()) {
@@ -252,14 +255,54 @@ public class FileDataModel implements DataModel {
         }
       }
     } else {
-      // add pref -- assume it does not already exist
-      if (preferenceValueString == null) {
-        prefs.add(new BooleanPreference(null, itemID));
-      } else {
-        double preferenceValue = Double.parseDouble(preferenceValueString);
-        prefs.add(buildPreference(null, itemID, preferenceValue));
+      float preferenceValue = Float.parseFloat(preferenceValueString);
+      prefs.add(new GenericPreference(userID, itemID, preferenceValue));
+    }
+  }
+
+  protected void processFileWithoutID(FileLineIterator dataOrUpdateFileIterator,
+                                      Map<Comparable<?>, FastSet<Comparable<?>>> data,
+                                      char delimiter) {
+    log.info("Reading file info...");
+    AtomicInteger count = new AtomicInteger();
+    while (dataOrUpdateFileIterator.hasNext()) {
+      String line = dataOrUpdateFileIterator.next();
+      if (line.length() > 0) {
+        processLineWithoutID(line, data, delimiter);
+        int currentCount = count.incrementAndGet();
+        if (currentCount % 100000 == 0) {
+          log.info("Processed {} lines", currentCount);
+        }
       }
     }
+    log.info("Read lines: {}", count.get());
+  }
+
+  protected void processLineWithoutID(String line, Map<Comparable<?>, FastSet<Comparable<?>>> data, char delimiter) {
+
+    if (line.length() == 0 || line.charAt(0) == '#') {
+      return;
+    }
+
+    int delimiterOne = line.indexOf((int) delimiter);
+    if (delimiterOne < 0) {
+      throw new IllegalArgumentException("Bad line: " + line);
+    }
+
+    String userID = line.substring(0, delimiterOne);
+    String itemID = line.substring(delimiterOne + 1);
+
+    if (transpose) {
+      String tmp = userID;
+      userID = itemID;
+      itemID = tmp;
+    }
+    FastSet<Comparable<?>> itemIDs = data.get(userID);
+    if (itemIDs == null) {
+      itemIDs = new FastSet<Comparable<?>>(2);
+      data.put(userID, itemIDs);
+    }
+    itemIDs.add(itemID);
   }
 
   private void checkLoaded() {
@@ -269,15 +312,20 @@ public class FileDataModel implements DataModel {
   }
 
   @Override
-  public Iterable<? extends User> getUsers() throws TasteException {
+  public Iterable<Comparable<?>> getUserIDs() throws TasteException {
     checkLoaded();
-    return delegate.getUsers();
+    return delegate.getUserIDs();
   }
 
   @Override
-  public User getUser(Comparable<?> id) throws TasteException {
+  public PreferenceArray getPreferencesFromUser(Comparable<?> userID) throws TasteException {
     checkLoaded();
-    return delegate.getUser(id);
+    return delegate.getPreferencesFromUser(userID);
+  }
+
+  @Override
+  public FastSet<Comparable<?>> getItemIDsFromUser(Comparable<?> userID) throws TasteException {
+    return delegate.getItemIDsFromUser(userID);
   }
 
   @Override
@@ -287,15 +335,14 @@ public class FileDataModel implements DataModel {
   }
 
   @Override
-  public Iterable<? extends Preference> getPreferencesForItem(Comparable<?> itemID) throws TasteException {
+  public PreferenceArray getPreferencesForItem(Comparable<?> itemID) throws TasteException {
     checkLoaded();
     return delegate.getPreferencesForItem(itemID);
   }
 
   @Override
-  public Preference[] getPreferencesForItemAsArray(Comparable<?> itemID) throws TasteException {
-    checkLoaded();
-    return delegate.getPreferencesForItemAsArray(itemID);
+  public Float getPreferenceValue(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
+    return delegate.getPreferenceValue(userID, itemID);
   }
 
   @Override
@@ -322,12 +369,12 @@ public class FileDataModel implements DataModel {
    * reloaded from a file. This method should also be considered relatively slow.
    */
   @Override
-  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value) throws TasteException {
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, float value) throws TasteException {
     checkLoaded();
     delegate.setPreference(userID, itemID, value);
   }
 
-  /** See the warning at {@link #setPreference(Comparable, Comparable, double)}. */
+  /** See the warning at {@link #setPreference(Comparable, Comparable, float)}. */
   @Override
   public void removePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
     checkLoaded();
@@ -347,86 +394,11 @@ public class FileDataModel implements DataModel {
     }
   }
 
-  /**
-   * Subclasses may override to return a different {@link User} implementation. The default implemenation always builds
-   * a new {@link GenericUser}. This may not be desirable; it may be better to return an existing {@link User} object in
-   * some applications rather than create a new object.
-   *
-   * @param id    user ID
-   * @param prefs user preferences
-   * @return {@link GenericUser} by default, or, a {@link BooleanPrefUser} if the prefs supplied are in fact {@link
-   *         BooleanPreference}s
-   */
-  protected User buildUser(String id, List<Preference> prefs) {
-    if (!prefs.isEmpty() && prefs.get(0) instanceof BooleanPreference) {
-      // If first is a BooleanPreference, assuming all are, so, want to use BooleanPrefUser
-      FastSet<Comparable<?>> itemIDs = new FastSet<Comparable<?>>(prefs.size());
-      for (Preference pref : prefs) {
-        itemIDs.add(pref.getItemID());
-      }
-      itemIDs.rehash();
-      return new BooleanPrefUser(id, itemIDs);
-    }
-    return new GenericUser(id, prefs);
-  }
-
-  /**
-   * Subclasses may override to return a different {@link Preference} implementation. The default implementation builds
-   * a new {@link GenericPreference}.
-   *
-   * @param user  {@link User} who expresses the preference
-   * @param itemID  preferred item
-   * @param value preference value
-   * @return {@link GenericPreference} by default
-   */
-  protected Preference buildPreference(User user, Comparable<?> itemID, double value) {
-    return new GenericPreference(user, itemID, value);
-  }
-
   @Override
   public String toString() {
     return "FileDataModel[dataFile:" + dataFile + ']';
   }
 
 
-  private final class UserIterableOverData implements Iterable<User> {
-    private final Map<String, List<Preference>> data;
-
-    private UserIterableOverData(Map<String, List<Preference>> data) {
-      this.data = data;
-    }
-
-    @Override
-    public Iterator<User> iterator() {
-      return new UserIteratorOverData(data.entrySet().iterator());
-    }
-  }
-
-  private final class UserIteratorOverData implements Iterator<User> {
-    private final Iterator<Map.Entry<String, List<Preference>>> dataIterator;
-
-    private UserIteratorOverData(Iterator<Map.Entry<String, List<Preference>>> dataIterator) {
-      this.dataIterator = dataIterator;
-    }
-
-    @Override
-    public boolean hasNext() {
-      return dataIterator.hasNext();
-    }
-
-    @Override
-    public User next() {
-      Map.Entry<String, List<Preference>> datum = dataIterator.next();
-      String key = datum.getKey();
-      List<Preference> value = datum.getValue();
-      dataIterator.remove();
-      return buildUser(key, value);
-    }
-
-    @Override
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
-  }
 
 }

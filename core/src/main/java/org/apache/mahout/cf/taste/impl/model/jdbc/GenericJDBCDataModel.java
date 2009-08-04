@@ -38,7 +38,9 @@ import java.util.Properties;
 public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
 
   public static final String DATA_SOURCE_KEY = "dataSource";
+  public static final String GET_PREFERENCE_SQL_KEY = "getPreferenceSQL";
   public static final String GET_USER_SQL_KEY = "getUserSQL";
+  public static final String GET_ALL_USERS_SQL_KEY = "getAllUsersSQL";
   public static final String GET_NUM_USERS_SQL_KEY = "getNumUsersSQL";
   public static final String GET_NUM_ITEMS_SQL_KEY = "getNumItemsSQL";
   public static final String SET_PREFERENCE_SQL_KEY = "setPreferenceSQL";
@@ -58,7 +60,9 @@ public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
    */
   public GenericJDBCDataModel(Properties props) throws TasteException {
     super(lookupDataSource(props.getProperty(DATA_SOURCE_KEY)),
+        props.getProperty(GET_PREFERENCE_SQL_KEY),
         props.getProperty(GET_USER_SQL_KEY),
+        props.getProperty(GET_ALL_USERS_SQL_KEY),        
         props.getProperty(GET_NUM_USERS_SQL_KEY),
         props.getProperty(GET_NUM_ITEMS_SQL_KEY),
         props.getProperty(SET_PREFERENCE_SQL_KEY),

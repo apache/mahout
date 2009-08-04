@@ -17,44 +17,40 @@
 
 package org.apache.mahout.cf.taste.impl.transforms;
 
-import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.impl.model.GenericPreference;
+import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
 
 /** <p>Tests {@link ZScore}.</p> */
 public final class ZScoreTest extends TransformTestCase {
 
   public void testOnePref() throws Exception {
-    User user = getUser("test", 1.0);
-    PreferenceTransform zScore = new ZScore();
-    assertEquals(0.0, zScore.getTransformedValue(user.getPreferenceFor("0")), EPSILON);
+    DataModel dataModel = getDataModel(new Comparable<?>[] {"test1"}, new Double[][] {{1.0}});
+    PreferenceTransform zScore = new ZScore(dataModel);
+    assertEquals(0.0, zScore.getTransformedValue(new GenericPreference("test1", "0", 1.0f)), EPSILON);
   }
 
   public void testAllSame() throws Exception {
-    User user = getUser("test", 1.0, 1.0, 1.0);
-    PreferenceTransform zScore = new ZScore();
-    assertEquals(0.0, zScore.getTransformedValue(user.getPreferenceFor("0")), EPSILON);
-    assertEquals(0.0, zScore.getTransformedValue(user.getPreferenceFor("1")), EPSILON);
-    assertEquals(0.0, zScore.getTransformedValue(user.getPreferenceFor("2")), EPSILON);
+    DataModel dataModel = getDataModel(new Comparable<?>[] {"test1"}, new Double[][] {{1.0,1.0,1.0}});
+    PreferenceTransform zScore = new ZScore(dataModel);
+    assertEquals(0.0, zScore.getTransformedValue(new GenericPreference("test1", "0", 1.0f)), EPSILON);
+    assertEquals(0.0, zScore.getTransformedValue(new GenericPreference("test1", "1", 1.0f)), EPSILON);
+    assertEquals(0.0, zScore.getTransformedValue(new GenericPreference("test1", "2", 1.0f)), EPSILON);
   }
 
   public void testStdev() throws Exception {
-    User user = getUser("test", -1.0, -2.0);
-    PreferenceTransform zScore = new ZScore();
-    assertEquals(0.707107, zScore.getTransformedValue(user.getPreferenceFor("0")), EPSILON);
-    assertEquals(-0.707107, zScore.getTransformedValue(user.getPreferenceFor("1")), EPSILON);
+    DataModel dataModel = getDataModel(new Comparable<?>[] {"test1"}, new Double[][] {{-1.0,-2.0}});
+    PreferenceTransform zScore = new ZScore(dataModel);
+    assertEquals(0.707107, zScore.getTransformedValue(new GenericPreference("test1", "0", -1.0f)), EPSILON);
+    assertEquals(-0.707107, zScore.getTransformedValue(new GenericPreference("test1", "1", -2.0f)), EPSILON);
   }
 
   public void testExample() throws Exception {
-    User user = getUser("test", 5.0, 7.0, 9.0);
-    PreferenceTransform zScore = new ZScore();
-    assertEquals(-1.0, zScore.getTransformedValue(user.getPreferenceFor("0")), EPSILON);
-    assertEquals(0.0, zScore.getTransformedValue(user.getPreferenceFor("1")), EPSILON);
-    assertEquals(1.0, zScore.getTransformedValue(user.getPreferenceFor("2")), EPSILON);
-  }
-
-  public void testRefresh() {
-    // Make sure this doesn't throw an exception
-    new ZScore().refresh(null);
+    DataModel dataModel = getDataModel(new Comparable<?>[] {"test1"}, new Double[][] {{5.0, 7.0, 9.0}});
+    PreferenceTransform zScore = new ZScore(dataModel);
+    assertEquals(-1.0, zScore.getTransformedValue(new GenericPreference("test1", "0", 5.0f)), EPSILON);
+    assertEquals(0.0, zScore.getTransformedValue(new GenericPreference("test1", "1", 7.0f)), EPSILON);
+    assertEquals(1.0, zScore.getTransformedValue(new GenericPreference("test1", "2", 9.0f)), EPSILON);
   }
 
 }

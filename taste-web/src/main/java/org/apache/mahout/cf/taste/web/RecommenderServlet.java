@@ -18,9 +18,9 @@
 package org.apache.mahout.cf.taste.web;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.model.ByValuePreferenceComparator;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 
@@ -31,8 +31,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -174,22 +172,21 @@ public final class RecommenderServlet extends HttpServlet {
       throws TasteException {
     DataModel dataModel = recommender.getDataModel();
     writer.print("User:");
-    writer.println(dataModel.getUser(userID));
+    writer.println(userID);
     writer.print("Recommender: ");
     writer.println(recommender);
     writer.println();
     writer.print("Top ");
     writer.print(NUM_TOP_PREFERENCES);
     writer.println(" Preferences:");
-    Preference[] rawPrefs = dataModel.getUser(userID).getPreferencesAsArray();
-    int length = rawPrefs.length;
-    Preference[] sortedPrefs = new Preference[length];
-    System.arraycopy(rawPrefs, 0, sortedPrefs, 0, length);
-    Arrays.sort(sortedPrefs, Collections.reverseOrder(ByValuePreferenceComparator.getInstance()));
+    PreferenceArray rawPrefs = dataModel.getPreferencesFromUser(userID);
+    int length = rawPrefs.length();
+    PreferenceArray sortedPrefs = rawPrefs.clone();
+    sortedPrefs.sortByValueReversed();
     // Cap this at NUM_TOP_PREFERENCES just to be brief
     int max = Math.min(NUM_TOP_PREFERENCES, length);
     for (int i = 0; i < max; i++) {
-      Preference pref = sortedPrefs[i];
+      Preference pref = sortedPrefs.get(i);
       writer.print(pref.getValue());
       writer.print('\t');
       writer.println(pref.getItemID());

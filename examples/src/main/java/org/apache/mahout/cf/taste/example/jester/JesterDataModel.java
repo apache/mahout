@@ -18,15 +18,16 @@
 package org.apache.mahout.cf.taste.example.jester;
 
 import org.apache.mahout.cf.taste.example.grouplens.GroupLensDataModel;
-import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
+import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
 
 public final class JesterDataModel extends FileDataModel {
 
@@ -51,14 +52,14 @@ public final class JesterDataModel extends FileDataModel {
   }
 
   @Override
-  protected void processLine(String line, Map<String, List<Preference>> data) {
+  protected void processLine(String line, Map<Comparable<?>, Collection<Preference>> data, char delimiter) {
     String userID = String.valueOf(userBeingRead);
     String[] jokePrefs = line.split(",");
     List<Preference> prefs = new ArrayList<Preference>(101);
     for (int itemIDNum = 1; itemIDNum < jokePrefs.length; itemIDNum++) { // yes skip first one, just a count
       String jokePref = jokePrefs[itemIDNum];
       if (!"99".equals(jokePref)) {
-        double jokePrefValue = Double.parseDouble(jokePref);        
+        float jokePrefValue = Float.parseFloat(jokePref);
         String itemID = String.valueOf(itemIDNum);
         prefs.add(new GenericPreference(null, itemID, jokePrefValue));
       }

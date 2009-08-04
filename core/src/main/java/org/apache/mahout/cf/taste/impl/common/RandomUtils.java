@@ -51,6 +51,10 @@ public final class RandomUtils {
     return (int) (bits ^ (bits >>> 32));
   }
 
+  public static int hashFloat(float value) {
+    return Float.floatToIntBits(value);
+  }
+
   /**
    * <p>Finds next-largest "twin primes": numbers p and p+2 such that both are prime. Finds the smallest such p such
    * that the smaller twin, p, is greater than or equal to n. Returns p+2, the larger of the two twins.</p>
@@ -59,7 +63,7 @@ public final class RandomUtils {
     if (n > MAX_INT_SMALLER_TWIN_PRIME) {
       throw new IllegalArgumentException();
     }
-    if (n <= 2) {
+    if (n <= 3) {
       return 3;
     }
     int next = nextPrime(n);

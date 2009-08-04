@@ -93,7 +93,7 @@ public final class RefreshHelper implements Refreshable {
    * @return an empty {@link FastSet} if the method param was <code>null</code> or the unmodified method param.
    */
   public static Collection<Refreshable> buildRefreshed(Collection<Refreshable> currentAlreadyRefreshed) {
-    return currentAlreadyRefreshed == null ? new FastSet<Refreshable>(3) : currentAlreadyRefreshed;
+    return currentAlreadyRefreshed == null ? new FastSet<Refreshable>(2) : currentAlreadyRefreshed;
   }
 
   /**

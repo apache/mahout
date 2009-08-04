@@ -75,7 +75,7 @@ public interface ItemBasedRecommender extends Recommender {
    * an item and value. The value here does not necessarily have a consistent interpretation or expected range;
    * it will be higher the more influential the item was in the recommendation.</p>
    *
-   * @param userID  ID of {@link org.apache.mahout.cf.taste.model.User} who was recommended the item
+   * @param userID  ID of user who was recommended the item
    * @param itemID  ID of item that was recommended
    * @param howMany maximum number of items to return
    * @return {@link List} of {@link RecommendedItem}, ordered from most influential in recommended the

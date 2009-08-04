@@ -41,6 +41,8 @@ import java.util.Set;
  */
 public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
 
+  private static final double ALLOWED_LOAD_FACTOR = 1.5;
+
   /** Dummy object used to represent a key that has been removed. */
   private static final Object REMOVED = new Object();
 
@@ -60,13 +62,14 @@ public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
 
   @SuppressWarnings("unchecked")
   public FastSet(int size) {
-    if (size < 1) {
-      throw new IllegalArgumentException("size must be at least 1");
+    if (size < 0) {
+      throw new IllegalArgumentException("size must be at least 0");
     }
-    if (size >= RandomUtils.MAX_INT_SMALLER_TWIN_PRIME >> 1) {
-      throw new IllegalArgumentException("size must be less than " + (RandomUtils.MAX_INT_SMALLER_TWIN_PRIME >> 1));
+    int max = (int) (RandomUtils.MAX_INT_SMALLER_TWIN_PRIME / ALLOWED_LOAD_FACTOR);
+    if (size >= max) {
+      throw new IllegalArgumentException("size must be less than " + max);
     }
-    int hashSize = RandomUtils.nextTwinPrime(2 * size);
+    int hashSize = RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * size));
     keys = (K[]) new Object[hashSize];
   }
 
@@ -118,9 +121,9 @@ public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
       throw new NullPointerException();
     }
     // If less than half the slots are open, let's clear it up
-    if (numSlotsUsed >= keys.length >> 1) {
+    if (numSlotsUsed * ALLOWED_LOAD_FACTOR >= keys.length) {
       // If over half the slots used are actual entries, let's grow
-      if (numEntries >= numSlotsUsed >> 1) {
+      if (numEntries * ALLOWED_LOAD_FACTOR >= numSlotsUsed) {
         growAndRehash();
       } else {
         // Otherwise just rehash to clear REMOVED entries and don't grow
@@ -235,14 +238,14 @@ public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
   }
 
   private void growAndRehash() {
-    if (keys.length >= RandomUtils.MAX_INT_SMALLER_TWIN_PRIME >> 1) {
+    if (keys.length * ALLOWED_LOAD_FACTOR >= RandomUtils.MAX_INT_SMALLER_TWIN_PRIME) {
       throw new IllegalStateException("Can't grow any more");
     }
-    rehash(RandomUtils.nextTwinPrime(keys.length << 1));
+    rehash(RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * keys.length)));
   }
 
   public void rehash() {
-    rehash(RandomUtils.nextTwinPrime(numEntries << 1));
+    rehash(RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * numEntries)));
   }
 
   @SuppressWarnings("unchecked")

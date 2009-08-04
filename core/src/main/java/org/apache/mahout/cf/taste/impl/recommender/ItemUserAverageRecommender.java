@@ -25,8 +25,7 @@ import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 import org.slf4j.Logger;
@@ -41,7 +40,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * <p>Like {@link ItemAverageRecommender}, except that estimated preferences are adjusted for the {@link User}s' average
+ * <p>Like {@link ItemAverageRecommender}, except that estimated preferences are adjusted for the users' average
  * preference value. For example, say user X has not rated item Y. Item Y's average preference value is 3.5. User X's
  * average preference value is 4.2, and the average over all preference values is 4.0. User X prefers items 0.2 higher
  * on average, so, the estimated preference for user X, item Y is 3.5 + 0.2 = 3.7.</p>
@@ -85,8 +84,7 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
     log.debug("Recommending items for user ID '{}'", userID);
     checkAverageDiffsBuilt();
 
-    User theUser = getDataModel().getUser(userID);
-    Set<Comparable<?>> allItemIDs = getAllOtherItems(theUser);
+    Set<Comparable<?>> allItemIDs = getAllOtherItems(userID);
 
     TopItems.Estimator<Comparable<?>> estimator = new Estimator(userID);
 
@@ -97,30 +95,29 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
   }
 
   @Override
-  public double estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
-    DataModel model = getDataModel();
-    User theUser = model.getUser(userID);
-    Preference actualPref = theUser.getPreferenceFor(itemID);
+  public float estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
+    DataModel dataModel = getDataModel();
+    Float actualPref = dataModel.getPreferenceValue(userID, itemID);
     if (actualPref != null) {
-      return actualPref.getValue();
+      return actualPref;
     }
     checkAverageDiffsBuilt();
     return doEstimatePreference(userID, itemID);
   }
 
-  private double doEstimatePreference(Comparable<?> userID, Comparable<?> itemID) {
+  private float doEstimatePreference(Comparable<?> userID, Comparable<?> itemID) {
     buildAveragesLock.readLock().lock();
     try {
       RunningAverage itemAverage = itemAverages.get(itemID);
       if (itemAverage == null) {
-        return Double.NaN;
+        return Float.NaN;
       }
       RunningAverage userAverage = userAverages.get(userID);
       if (userAverage == null) {
-        return Double.NaN;
+        return Float.NaN;
       }
       double userDiff = userAverage.getAverage() - overallAveragePrefValue.getAverage();
-      return itemAverage.getAverage() + userDiff;
+      return (float) (itemAverage.getAverage() + userDiff);
     } finally {
       buildAveragesLock.readLock().unlock();
     }
@@ -136,14 +133,14 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
     try {
       buildAveragesLock.writeLock().lock();
       DataModel dataModel = getDataModel();
-      for (User user : dataModel.getUsers()) {
-        Comparable<?> userID = user.getID();
-        Preference[] prefs = user.getPreferencesAsArray();
-        for (Preference pref : prefs) {
-          Comparable<?> itemID = pref.getItemID();
-          double value = pref.getValue();
-          addDatumAndCrateIfNeeded(itemID, value, itemAverages);
-          addDatumAndCrateIfNeeded(userID, value, userAverages);
+      for (Comparable<?> userID : dataModel.getUserIDs()) {
+        PreferenceArray prefs = dataModel.getPreferencesFromUser(userID);
+        int size = prefs.length();
+        for (int i = 0; i < size; i++) {
+          Comparable<?> itemID = prefs.getItemID(i);
+          float value = prefs.getValue(i);
+          addDatumAndCreateIfNeeded(itemID, value, itemAverages);
+          addDatumAndCreateIfNeeded(userID, value, userAverages);
           overallAveragePrefValue.addDatum(value);
         }
       }
@@ -153,9 +150,9 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
     }
   }
 
-  private static void addDatumAndCrateIfNeeded(Comparable<?> itemID,
-                                               double value,
-                                               Map<Comparable<?>, RunningAverage> averages) {
+  private static void addDatumAndCreateIfNeeded(Comparable<?> itemID,
+                                                float value,
+                                                Map<Comparable<?>, RunningAverage> averages) {
     RunningAverage itemAverage = averages.get(itemID);
     if (itemAverage == null) {
       itemAverage = new FullRunningAverage();
@@ -165,13 +162,12 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
   }
 
   @Override
-  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value) throws TasteException {
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, float value) throws TasteException {
     DataModel dataModel = getDataModel();
     double prefDelta;
     try {
-      User theUser = dataModel.getUser(userID);
-      Preference oldPref = theUser.getPreferenceFor(itemID);
-      prefDelta = oldPref == null ? value : value - oldPref.getValue();
+      Float oldPref = dataModel.getPreferenceValue(userID, itemID);
+      prefDelta = oldPref == null ? value : value - oldPref;
     } catch (NoSuchUserException nsee) {
       prefDelta = value;
     }
@@ -203,11 +199,10 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
   @Override
   public void removePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
     DataModel dataModel = getDataModel();
-    User theUser = dataModel.getUser(userID);
-    Preference oldPref = theUser.getPreferenceFor(itemID);
+    Float oldPref = dataModel.getPreferenceValue(userID, itemID);
     super.removePreference(userID, itemID);
     if (oldPref != null) {
-      double value = oldPref.getValue();
+      double value = oldPref;
       try {
         buildAveragesLock.writeLock().lock();
         RunningAverage itemAverage = itemAverages.get(itemID);

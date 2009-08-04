@@ -68,12 +68,12 @@ public final class GroupLensRecommender implements Recommender {
   }
 
   @Override
-  public double estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
+  public float estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
     return recommender.estimatePreference(userID, itemID);
   }
 
   @Override
-  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value) throws TasteException {
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, float value) throws TasteException {
     recommender.setPreference(userID, itemID, value);
   }
 

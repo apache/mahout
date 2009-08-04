@@ -19,10 +19,9 @@ package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
@@ -47,55 +46,22 @@ public final class LogLikelihoodSimilarity implements UserSimilarity, ItemSimila
   }
 
   @Override
-  public double userSimilarity(User user1, User user2) throws TasteException {
-    if (user1 == null || user2 == null) {
-      throw new IllegalArgumentException("user1 or user2 is null");
-    }
+  public double userSimilarity(Comparable<?> userID1, Comparable<?> userID2) throws TasteException {
 
-    Preference[] xPrefs = user1.getPreferencesAsArray();
-    Preference[] yPrefs = user2.getPreferencesAsArray();
+    FastSet<Comparable<?>> prefs1 = dataModel.getItemIDsFromUser(userID1);
+    FastSet<Comparable<?>> prefs2 = dataModel.getItemIDsFromUser(userID2);
 
-    if (xPrefs.length == 0 && yPrefs.length == 0) {
-      return Double.NaN;
-    }
-    if (xPrefs.length == 0 || yPrefs.length == 0) {
-      return 0.0;
-    }
-
-    int intersectionSize = findIntersectionSize(xPrefs, yPrefs);
-
+    int prefs1Size = prefs1.size();
+    int prefs2Size = prefs2.size();
+    int intersectionSize = prefs1Size < prefs2Size ?
+        prefs2.intersectionSize(prefs1) :
+        prefs1.intersectionSize(prefs2);
     int numItems = dataModel.getNumItems();
-    double logLikelihood =
-        twoLogLambda(intersectionSize, xPrefs.length - intersectionSize, yPrefs.length, numItems - yPrefs.length);
+    double logLikelihood = LogLikelihoodSimilarity.twoLogLambda(intersectionSize,
+                                                                prefs1Size - intersectionSize,
+                                                                prefs2Size,
+                                                                numItems - prefs2Size);
     return 1.0 - 1.0 / (1.0 + logLikelihood);
-  }
-
-  static int findIntersectionSize(Preference[] xPrefs, Preference[] yPrefs) {
-    Preference xPref = xPrefs[0];
-    Preference yPref = yPrefs[0];
-    int xPrefIndex = 1;
-    int yPrefIndex = 1;
-
-    int intersectionSize = 0;
-    while (true) {
-      int compare = ((Comparable<Object>) xPref.getItemID()).compareTo(yPref.getItemID());
-      if (compare == 0) {
-        intersectionSize++;
-      }
-      if (compare <= 0) {
-        if (xPrefIndex == xPrefs.length) {
-          break;
-        }
-        xPref = xPrefs[xPrefIndex++];
-      }
-      if (compare >= 0) {
-        if (yPrefIndex == yPrefs.length) {
-          break;
-        }
-        yPref = yPrefs[yPrefIndex++];
-      }
-    }
-    return intersectionSize;
   }
 
   @Override
@@ -122,7 +88,7 @@ public final class LogLikelihoodSimilarity implements UserSimilarity, ItemSimila
   }
 
   private static double safeLog(double d) {
-    return d <= 0.0 ? 0 : Math.log(d);
+    return d <= 0.0 ? 0.0 : Math.log(d);
   }
 
   @Override

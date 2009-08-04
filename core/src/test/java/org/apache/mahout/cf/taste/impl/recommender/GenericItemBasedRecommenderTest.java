@@ -18,10 +18,8 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
-import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.ItemBasedRecommender;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
@@ -48,13 +46,17 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
   }
 
   public void testHowMany() throws Exception {
-    List<User> users = new ArrayList<User>(3);
-    users.add(getUser("test1", 0.1, 0.2));
-    users.add(getUser("test2", 0.2, 0.3, 0.3, 0.6));
-    users.add(getUser("test3", 0.4, 0.4, 0.5, 0.9));
-    users.add(getUser("test4", 0.1, 0.4, 0.5, 0.8, 0.9, 1.0));
-    users.add(getUser("test5", 0.2, 0.3, 0.6, 0.7, 0.1, 0.2));
-    DataModel dataModel = new GenericDataModel(users);
+
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2", "test3", "test4", "test5"},
+            new Double[][] {
+                    {0.1, 0.2},
+                    {0.2, 0.3, 0.3, 0.6},
+                    {0.4, 0.4, 0.5, 0.9},
+                    {0.1, 0.4, 0.5, 0.8, 0.9, 1.0},
+                    {0.2, 0.3, 0.6, 0.7, 0.1, 0.2},
+            });
+
     Collection<GenericItemSimilarity.ItemItemSimilarity> similarities =
         new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(6);
     for (int i = 0; i < 6; i++) {
@@ -79,11 +81,15 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
   }
 
   public void testRescorer() throws Exception {
-    List<User> users = new ArrayList<User>(3);
-    users.add(getUser("test1", 0.1, 0.2));
-    users.add(getUser("test2", 0.2, 0.3, 0.3, 0.6));
-    users.add(getUser("test3", 0.4, 0.4, 0.5, 0.9));
-    DataModel dataModel = new GenericDataModel(users);
+
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2", "test3"},
+            new Double[][] {
+                    {0.1, 0.2},
+                    {0.2, 0.3, 0.3, 0.6},
+                    {0.4, 0.4, 0.5, 0.9},
+            });
+
     Comparable<?> item1 = "0";
     Comparable<?> item2 = "1";
     Comparable<?> item3 = "2";
@@ -175,7 +181,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
   }
 
   private static ItemBasedRecommender buildRecommender() {
-    DataModel dataModel = new GenericDataModel(getMockUsers());
+    DataModel dataModel = getDataModel();
     Collection<GenericItemSimilarity.ItemItemSimilarity> similarities =
         new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(2);
     Comparable<?> item1 = "0";
@@ -188,12 +194,16 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
   }
 
   private static ItemBasedRecommender buildRecommender2() {
-    List<User> users = new ArrayList<User>(4);
-    users.add(getUser("test1", 0.1, 0.3, 0.9, 0.8));
-    users.add(getUser("test2", 0.2, 0.3, 0.3, 0.4));
-    users.add(getUser("test3", 0.4, 0.3, 0.5, 0.1, 0.1));
-    users.add(getUser("test4", 0.7, 0.3, 0.8, 0.5, 0.6));
-    DataModel dataModel = new GenericDataModel(users);
+
+    DataModel dataModel = getDataModel(
+        new Comparable<?>[] {"test1", "test2", "test3", "test4"},
+        new Double[][] {
+                {0.1, 0.3, 0.9, 0.8},
+                {0.2, 0.3, 0.3, 0.4},
+                {0.4, 0.3, 0.5, 0.1, 0.1},
+                {0.7, 0.3, 0.8, 0.5, 0.6},
+        });
+
     Collection<GenericItemSimilarity.ItemItemSimilarity> similarities =
         new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(10);
     Comparable<?> item1 = "0";

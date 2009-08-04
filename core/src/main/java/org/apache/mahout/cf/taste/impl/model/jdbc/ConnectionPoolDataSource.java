@@ -26,8 +26,8 @@ import org.apache.commons.pool.impl.StackObjectPool;
 import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /** <p>A wrapper {@link DataSource} which pools connections.</p> */
 public final class ConnectionPoolDataSource implements DataSource {

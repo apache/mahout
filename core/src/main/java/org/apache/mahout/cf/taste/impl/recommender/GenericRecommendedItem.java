@@ -26,14 +26,14 @@ import java.io.Serializable;
 public final class GenericRecommendedItem implements RecommendedItem, Serializable {
 
   private final Comparable<?> itemID;
-  private final double value;
+  private final float value;
 
   /** @throws IllegalArgumentException if item is null or value is NaN */
-  public GenericRecommendedItem(Comparable<?> itemID, double value) {
+  public GenericRecommendedItem(Comparable<?> itemID, float value) {
     if (itemID == null) {
       throw new IllegalArgumentException("item is null");
     }
-    if (Double.isNaN(value)) {
+    if (Float.isNaN(value)) {
       throw new IllegalArgumentException("value is NaN");
     }
     this.itemID = itemID;
@@ -46,7 +46,7 @@ public final class GenericRecommendedItem implements RecommendedItem, Serializab
   }
 
   @Override
-  public double getValue() {
+  public float getValue() {
     return value;
   }
 
@@ -57,7 +57,7 @@ public final class GenericRecommendedItem implements RecommendedItem, Serializab
 
   @Override
   public int hashCode() {
-    return itemID.hashCode() ^ RandomUtils.hashDouble(value);
+    return itemID.hashCode() ^ RandomUtils.hashFloat(value);
   }
 
   @Override
@@ -76,7 +76,7 @@ public final class GenericRecommendedItem implements RecommendedItem, Serializab
    */
   @Override
   public int compareTo(RecommendedItem other) {
-    double otherValue = other.getValue();
+    float otherValue = other.getValue();
     return value > otherValue ? -1 : value < otherValue ? 1 : 0;
   }
 

@@ -19,14 +19,11 @@ package org.apache.mahout.cf.taste.impl.recommender.slopeone;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
-import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.recommender.ReversingRescorer;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /** <p>Tests {@link SlopeOneRecommender}.</p> */
@@ -46,13 +43,16 @@ public final class SlopeOneRecommenderTest extends TasteTestCase {
   }
 
   public void testHowMany() throws Exception {
-    List<User> users = new ArrayList<User>(3);
-    users.add(getUser("test1", 0.1, 0.2));
-    users.add(getUser("test2", 0.2, 0.3, 0.3, 0.6));
-    users.add(getUser("test3", 0.4, 0.4, 0.5, 0.9));
-    users.add(getUser("test4", 0.1, 0.4, 0.5, 0.8, 0.9, 1.0));
-    users.add(getUser("test5", 0.2, 0.3, 0.6, 0.7, 0.1, 0.2));
-    DataModel dataModel = new GenericDataModel(users);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2", "test3", "test4", "test5"},
+            new Double[][] {
+                    {0.1, 0.2},
+                    {0.2, 0.3, 0.3, 0.6},
+                    {0.4, 0.4, 0.5, 0.9},
+                    {0.1, 0.4, 0.5, 0.8, 0.9, 1.0},
+                    {0.2, 0.3, 0.6, 0.7, 0.1, 0.2},
+            });
+
     Recommender recommender = new SlopeOneRecommender(dataModel);
     List<RecommendedItem> fewRecommended = recommender.recommend("test1", 2);
     List<RecommendedItem> moreRecommended = recommender.recommend("test1", 4);
@@ -66,11 +66,14 @@ public final class SlopeOneRecommenderTest extends TasteTestCase {
   }
 
   public void testRescorer() throws Exception {
-    List<User> users = new ArrayList<User>(3);
-    users.add(getUser("test1", 0.1, 0.2));
-    users.add(getUser("test2", 0.2, 0.3, 0.3, 0.6));
-    users.add(getUser("test3", 0.4, 0.4, 0.5, 0.9));
-    DataModel dataModel = new GenericDataModel(users);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2", "test3"},
+            new Double[][] {
+                    {0.1, 0.2},
+                    {0.2, 0.3, 0.3, 0.6},
+                    {0.4, 0.4, 0.5, 0.9},
+            });
+
     Recommender recommender = new SlopeOneRecommender(dataModel);
     List<RecommendedItem> originalRecommended = recommender.recommend("test1", 2);
     List<RecommendedItem> rescoredRecommended =
@@ -89,11 +92,14 @@ public final class SlopeOneRecommenderTest extends TasteTestCase {
   }
 
   public void testBestRating() throws Exception {
-    List<User> users = new ArrayList<User>(3);
-    users.add(getUser("test1", 0.0, 0.3));
-    users.add(getUser("test2", 0.2, 0.3, 0.3));
-    users.add(getUser("test3", 0.4, 0.3, 0.5));
-    DataModel dataModel = new GenericDataModel(users);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2", "test3"},
+            new Double[][] {
+                    {0.0, 0.3},
+                    {0.2, 0.3, 0.3},
+                    {0.4, 0.3, 0.5},
+            });
+
     Recommender recommender = new SlopeOneRecommender(dataModel);
     List<RecommendedItem> recommended = recommender.recommend("test1", 1);
     assertNotNull(recommended);
@@ -105,16 +111,19 @@ public final class SlopeOneRecommenderTest extends TasteTestCase {
   }
 
   public void testDiffStdevBehavior() throws Exception {
-    List<User> users = new ArrayList<User>(3);
-    users.add(getUser("test1", 0.1, 0.2));
-    users.add(getUser("test2", 0.2, 0.3, 0.6));
-    DataModel dataModel = new GenericDataModel(users);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2"},
+            new Double[][] {
+                    {0.1, 0.2},
+                    {0.2, 0.3, 0.6},
+            });
+
     Recommender recommender = new SlopeOneRecommender(dataModel);
     assertEquals(0.6, recommender.estimatePreference("test1", "2"), EPSILON);
   }
 
   private static Recommender buildRecommender() throws TasteException {
-    DataModel dataModel = new GenericDataModel(getMockUsers());
+    DataModel dataModel = getDataModel();
     return new SlopeOneRecommender(dataModel);
   }
 

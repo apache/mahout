@@ -21,7 +21,6 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.SamplingIterable;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +30,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * <p>Computes a neighborhood consisting of the nearest n {@link User}s to a given {@link User}. "Nearest" is defined by
+ * <p>Computes a neighborhood consisting of the nearest n users to a given user. "Nearest" is defined by
  * the given {@link UserSimilarity}.</p>
  */
 public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
@@ -90,17 +89,16 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
   }
 
   @Override
-  public Collection<User> getUserNeighborhood(Comparable<?> userID) throws TasteException {
+  public Collection<Comparable<?>> getUserNeighborhood(Comparable<?> userID) throws TasteException {
     log.trace("Computing neighborhood around user ID '{}'", userID);
 
     DataModel dataModel = getDataModel();
-    User theUser = dataModel.getUser(userID);
     UserSimilarity userSimilarityImpl = getUserSimilarity();
 
-    TopItems.Estimator<User> estimator = new Estimator(userSimilarityImpl, theUser, minSimilarity);
+    TopItems.Estimator<Comparable<?>> estimator = new Estimator(userSimilarityImpl, userID, minSimilarity);
 
-    Iterable<? extends User> users = SamplingIterable.maybeWrapIterable(dataModel.getUsers(), getSamplingRate());
-    List<User> neighborhood = TopItems.getTopUsers(n, users, null, estimator);
+    Iterable<Comparable<?>> users = SamplingIterable.maybeWrapIterable(dataModel.getUserIDs(), getSamplingRate());
+    List<Comparable<?>> neighborhood = TopItems.getTopUsers(n, users, null, estimator);
 
     log.trace("UserNeighborhood around user ID '{}' is: {}", userID, neighborhood);
 
@@ -112,23 +110,23 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
     return "NearestNUserNeighborhood";
   }
 
-  private static class Estimator implements TopItems.Estimator<User> {
+  private static class Estimator implements TopItems.Estimator<Comparable<?>> {
     private final UserSimilarity userSimilarityImpl;
-    private final User theUser;
+    private final Comparable<?> theUserID;
     private final double minSim;
 
-    private Estimator(UserSimilarity userSimilarityImpl, User theUser, double minSim) {
+    private Estimator(UserSimilarity userSimilarityImpl, Comparable<?> theUserID, double minSim) {
       this.userSimilarityImpl = userSimilarityImpl;
-      this.theUser = theUser;
+      this.theUserID = theUserID;
       this.minSim = minSim;
     }
 
     @Override
-    public double estimate(User user) throws TasteException {
-      if (user.equals(theUser)) {
+    public double estimate(Comparable<?> user) throws TasteException {
+      if (user.equals(theUserID)) {
         return Double.NaN;
       }
-      double sim = userSimilarityImpl.userSimilarity(theUser, user);
+      double sim = userSimilarityImpl.userSimilarity(theUserID, user);
       return (sim >= minSim) ? sim : Double.NaN;
     }
   }

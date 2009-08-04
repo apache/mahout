@@ -18,26 +18,25 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
-import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /** <p>Tests {@link TreeClusteringRecommender}.</p> */
 public final class TreeClusteringRecommenderTest extends TasteTestCase {
 
   public void testNoRecommendations() throws Exception {
-    List<User> users = new ArrayList<User>(3);
-    users.add(getUser("test1", 0.1));
-    users.add(getUser("test2", 0.2, 0.6));
-    users.add(getUser("test3", 0.4, 0.9));
-    DataModel dataModel = new GenericDataModel(users);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2", "test3"},
+            new Double[][] {
+                    {0.1},
+                    {0.2, 0.6},
+                    {0.4, 0.9},
+            });
     UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
     ClusterSimilarity clusterSimilarity = new FarthestNeighborClusterSimilarity(similarity);
     Recommender recommender = new TreeClusteringRecommender(dataModel, clusterSimilarity, 2);
@@ -50,13 +49,16 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
   }
 
   public void testHowMany() throws Exception {
-    List<User> users = new ArrayList<User>(3);
-    users.add(getUser("test1", 0.1, 0.2));
-    users.add(getUser("test2", 0.2, 0.3, 0.3, 0.6));
-    users.add(getUser("test3", 0.4, 0.4, 0.5, 0.9));
-    users.add(getUser("test4", 0.1, 0.4, 0.5, 0.8, 0.9, 1.0));
-    users.add(getUser("test5", 0.2, 0.3, 0.6, 0.7, 0.1, 0.2));
-    DataModel dataModel = new GenericDataModel(users);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2", "test3", "test4", "test5"},
+            new Double[][] {
+                    {0.1, 0.2},
+                    {0.2, 0.3, 0.3, 0.6},
+                    {0.4, 0.4, 0.5, 0.9},
+                    {0.1, 0.4, 0.5, 0.8, 0.9, 1.0},
+                    {0.2, 0.3, 0.6, 0.7, 0.1, 0.2},
+            });
+
     UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
     ClusterSimilarity clusterSimilarity = new FarthestNeighborClusterSimilarity(similarity);
     Recommender recommender = new TreeClusteringRecommender(dataModel, clusterSimilarity, 2);
@@ -72,11 +74,14 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
   }
 
   public void testRescorer() throws Exception {
-    List<User> users = new ArrayList<User>(3);
-    users.add(getUser("test1", 0.1, 0.2));
-    users.add(getUser("test2", 0.2, 0.3, 0.3, 0.6));
-    users.add(getUser("test3", 0.4, 0.4, 0.5, 0.9));
-    DataModel dataModel = new GenericDataModel(users);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2", "test3"},
+            new Double[][] {
+                    {0.1, 0.2},
+                    {0.2, 0.3, 0.3, 0.6},
+                    {0.4, 0.4, 0.5, 0.9},
+            });
+
     UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
     ClusterSimilarity clusterSimilarity = new FarthestNeighborClusterSimilarity(similarity);
     Recommender recommender = new TreeClusteringRecommender(dataModel, clusterSimilarity, 2);
@@ -92,25 +97,32 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
   }
 
   public void testEstimatePref() throws Exception {
-    List<User> users = new ArrayList<User>(4);
-    users.add(getUser("test1", 0.1, 0.3));
-    users.add(getUser("test2", 0.2, 0.3, 0.3));
-    users.add(getUser("test3", 0.4, 0.3, 0.5));
-    users.add(getUser("test4", 0.7, 0.3, 0.8, 0.9));
-    DataModel dataModel = new GenericDataModel(users);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2", "test3", "test4"},
+            new Double[][] {
+                    {0.1, 0.3},
+                    {0.2, 0.3, 0.3},
+                    {0.4, 0.3, 0.5},
+                    {0.7, 0.3, 0.8, 0.9},
+            });
+
     UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
     ClusterSimilarity clusterSimilarity = new FarthestNeighborClusterSimilarity(similarity);
     Recommender recommender = new TreeClusteringRecommender(dataModel, clusterSimilarity, 2);
-    assertEquals(0.9, recommender.estimatePreference("test3", "3"));
+    assertEquals(0.9f, recommender.estimatePreference("test3", "3"));
   }
 
   public void testBestRating() throws Exception {
-    List<User> users = new ArrayList<User>(4);
-    users.add(getUser("test1", 0.1, 0.3));
-    users.add(getUser("test2", 0.2, 0.3, 0.3));
-    users.add(getUser("test3", 0.4, 0.3, 0.5));
-    users.add(getUser("test4", 0.7, 0.3, 0.8));
-    DataModel dataModel = new GenericDataModel(users);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2", "test3", "test4"},
+            new Double[][] {
+                    {0.1, 0.3},
+                    {0.2, 0.3, 0.3},
+                    {0.4, 0.3, 0.5},
+                    {0.7, 0.3, 0.8},
+            });
+
+
     UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
     ClusterSimilarity clusterSimilarity = new FarthestNeighborClusterSimilarity(similarity);
     Recommender recommender = new TreeClusteringRecommender(dataModel, clusterSimilarity, 2);

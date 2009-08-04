@@ -18,64 +18,62 @@
 package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.User;
 
 /** <p>Tests {@link TanimotoCoefficientSimilarity}.</p> */
 public final class TanimotoCoefficientSimilarityTest extends SimilarityTestCase {
 
-  public void testNoCorrelation1() throws Exception {
-    User user1 = getUser("test1");
-    User user2 = getUser("test2");
-    DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity(user1, user2);
-    assertTrue(Double.isNaN(correlation));
-  }
-
-  public void testNoCorrelation2() throws Exception {
-    User user1 = getUser("test1");
-    User user2 = getUser("test2", 1.0);
-    DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity(user1, user2);
-    assertCorrelationEquals(0.0, correlation);
-  }
-
   public void testNoCorrelation() throws Exception {
-    User user1 = getUser("test1", null, 2.0, 3.0);
-    User user2 = getUser("test2", 1.0);
-    DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity(user1, user2);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2"},
+            new Double[][] {
+                    {null, 2.0, 3.0},
+                    {1.0},
+            });
+    double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity("test1", "test2");
     assertCorrelationEquals(0.0, correlation);
   }
 
   public void testFullCorrelation1() throws Exception {
-    User user1 = getUser("test1", 1.0);
-    User user2 = getUser("test2", 1.0);
-    DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity(user1, user2);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2"},
+            new Double[][] {
+                    {1.0},
+                    {1.0},
+            });
+    double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity("test1", "test2");
     assertCorrelationEquals(1.0, correlation);
   }
 
   public void testFullCorrelation2() throws Exception {
-    User user1 = getUser("test1", 1.0, 2.0, 3.0);
-    User user2 = getUser("test2", 1.0);
-    DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity(user1, user2);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2"},
+            new Double[][] {
+                    {1.0, 2.0, 3.0},
+                    {1.0},
+            });
+    double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity("test1", "test2");
     assertCorrelationEquals(0.3333333333333333, correlation);
   }
 
   public void testCorrelation1() throws Exception {
-    User user1 = getUser("test1", null, 2.0, 3.0);
-    User user2 = getUser("test2", 1.0, 1.0);
-    DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity(user1, user2);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2"},
+            new Double[][] {
+                    {null, 2.0, 3.0},
+                    {1.0, 1.0},
+            });
+    double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity("test1", "test2");
     assertEquals(0.3333333333333333, correlation);
   }
 
   public void testCorrelation2() throws Exception {
-    User user1 = getUser("test1", null, 2.0, 3.0, 1.0);
-    User user2 = getUser("test2", 1.0, 1.0, null, 0.0);
-    DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity(user1, user2);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2"},
+            new Double[][] {
+                    {null, 2.0, 3.0, 1.0},
+                    {1.0, 1.0, null, 0.0},
+            });
+    double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity("test1", "test2");
     assertEquals(0.5, correlation);
   }
 

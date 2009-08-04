@@ -21,13 +21,12 @@ import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.SamplingIterable;
-import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 import java.util.Collection;
 
 /**
- * <p>Defines cluster similarity as the <em>smallest</em> similarity between any two {@link User}s in the clusters --
+ * <p>Defines cluster similarity as the <em>smallest</em> similarity between any two users in the clusters --
  * that is, it says that clusters are close when <em>all pairs</em> of their members have relatively high
  * similarity.</p>
  */
@@ -61,16 +60,16 @@ public final class FarthestNeighborClusterSimilarity implements ClusterSimilarit
   }
 
   @Override
-  public double getSimilarity(Collection<User> cluster1,
-                              Collection<User> cluster2) throws TasteException {
+  public double getSimilarity(Collection<Comparable<?>> cluster1,
+                              Collection<Comparable<?>> cluster2) throws TasteException {
     if (cluster1.isEmpty() || cluster2.isEmpty()) {
       return Double.NaN;
     }
     double leastSimilarity = Double.POSITIVE_INFINITY;
-    Iterable<User> someUsers = SamplingIterable.maybeWrapIterable(cluster1, samplingRate);
-    for (User user1 : someUsers) {
-      for (User user2 : cluster2) {
-        double theSimilarity = similarity.userSimilarity(user1, user2);
+    Iterable<Comparable<?>> someUsers = SamplingIterable.maybeWrapIterable(cluster1, samplingRate);
+    for (Comparable<?> userID1 : someUsers) {
+      for (Comparable<?> userID2 : cluster2) {
+        double theSimilarity = similarity.userSimilarity(userID1, userID2);
         if (theSimilarity < leastSimilarity) {
           leastSimilarity = theSimilarity;
         }

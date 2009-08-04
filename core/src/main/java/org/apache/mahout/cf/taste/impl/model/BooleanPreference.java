@@ -17,7 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
-import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.Preference;
 
 import java.io.Serializable;
 
@@ -26,33 +26,22 @@ import java.io.Serializable;
  * appropriate in situations where users conceptually have only a general "yes" preference for items, rather than a
  * spectrum of preference values.
  */
-public final class BooleanPreference implements SettableUserPreference, Serializable {
+public final class BooleanPreference implements Preference, Serializable {
 
-  private User user;
+  private final Comparable<?> userID;
   private final Comparable<?> itemID;
 
-  public BooleanPreference(User user, Comparable<?> itemID) {
-    if (itemID == null) {
+  public BooleanPreference(Comparable<?> userID, Comparable<?> itemID) {
+    if (userID == null || itemID == null) {
       throw new IllegalArgumentException("itemID is null");
     }
-    this.user = user;
+    this.userID = userID;
     this.itemID = itemID;
   }
 
   @Override
-  public User getUser() {
-    if (user == null) {
-      throw new IllegalStateException("User was never set");
-    }
-    return user;
-  }
-
-  @Override
-  public void setUser(User user) {
-    if (user == null) {
-      throw new IllegalArgumentException("user is null");
-    }
-    this.user = user;
+  public Comparable<?> getUserID() {
+    return userID;
   }
 
   @Override
@@ -61,18 +50,18 @@ public final class BooleanPreference implements SettableUserPreference, Serializ
   }
 
   @Override
-  public double getValue() {
-    return 1.0;
+  public float getValue() {
+    return 1.0f;
   }
 
   @Override
-  public void setValue(double value) {
+  public void setValue(float value) {
     throw new UnsupportedOperationException();
   }
 
   @Override
   public String toString() {
-    return "BooleanPreference[user: " + user + ", itemID:" + itemID + ']';
+    return "BooleanPreference[userID: " + userID + ", itemID:" + itemID + ']';
   }
 
 }

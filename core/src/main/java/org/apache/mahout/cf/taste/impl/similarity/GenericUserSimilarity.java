@@ -25,7 +25,6 @@ import org.apache.mahout.cf.taste.impl.common.IteratorUtils;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
@@ -37,7 +36,8 @@ import java.util.NoSuchElementException;
 
 public final class GenericUserSimilarity implements UserSimilarity {
 
-  private final Map<User, Map<User, Double>> similarityMaps = new FastMap<User, Map<User, Double>>();
+  private final Map<Comparable<?>, Map<Comparable<?>, Double>> similarityMaps =
+          new FastMap<Comparable<?>, Map<Comparable<?>, Double>>();
 
   public GenericUserSimilarity(Iterable<UserUserSimilarity> similarities) {
     initSimilarityMaps(similarities);
@@ -49,15 +49,15 @@ public final class GenericUserSimilarity implements UserSimilarity {
   }
 
   public GenericUserSimilarity(UserSimilarity otherSimilarity, DataModel dataModel) throws TasteException {
-    List<? extends User> users = IteratorUtils.iterableToList(dataModel.getUsers());
-    Iterator<UserUserSimilarity> it = new DataModelSimilaritiesIterator(otherSimilarity, users);
+    List<? extends Comparable<?>> userIDs = IteratorUtils.iterableToList(dataModel.getUserIDs());
+    Iterator<UserUserSimilarity> it = new DataModelSimilaritiesIterator(otherSimilarity, userIDs);
     initSimilarityMaps(new IteratorIterable<UserUserSimilarity>(it));
   }
 
   public GenericUserSimilarity(UserSimilarity otherSimilarity, DataModel dataModel, int maxToKeep)
       throws TasteException {
-    List<? extends User> users = IteratorUtils.iterableToList(dataModel.getUsers());
-    Iterator<UserUserSimilarity> it = new DataModelSimilaritiesIterator(otherSimilarity, users);
+    List<? extends Comparable<?>> userIDs = IteratorUtils.iterableToList(dataModel.getUserIDs());
+    Iterator<UserUserSimilarity> it = new DataModelSimilaritiesIterator(otherSimilarity, userIDs);
     Iterable<UserUserSimilarity> keptSimilarities =
         TopItems.getTopUserUserSimilarities(maxToKeep, new IteratorIterable<UserUserSimilarity>(it));
     initSimilarityMaps(keptSimilarities);
@@ -65,13 +65,13 @@ public final class GenericUserSimilarity implements UserSimilarity {
 
   private void initSimilarityMaps(Iterable<UserUserSimilarity> similarities) {
     for (UserUserSimilarity uuc : similarities) {
-      User similarityUser1 = uuc.getUser1();
-      User similarityUser2 = uuc.getUser2();
-      int compare = similarityUser1.compareTo(similarityUser2);
+      Comparable<?> similarityUser1 = uuc.getUserID1();
+      Comparable<?> similarityUser2 = uuc.getUserID2();
+      int compare = ((Comparable<Object>) similarityUser1).compareTo(similarityUser2);
       if (compare != 0) {
         // Order them -- first key should be the "smaller" one
-        User user1;
-        User user2;
+        Comparable<?> user1;
+        Comparable<?> user2;
         if (compare < 0) {
           user1 = similarityUser1;
           user2 = similarityUser2;
@@ -79,9 +79,9 @@ public final class GenericUserSimilarity implements UserSimilarity {
           user1 = similarityUser2;
           user2 = similarityUser1;
         }
-        Map<User, Double> map = similarityMaps.get(user1);
+        Map<Comparable<?>, Double> map = similarityMaps.get(user1);
         if (map == null) {
-          map = new FastMap<User, Double>();
+          map = new FastMap<Comparable<?>, Double>();
           similarityMaps.put(user1, map);
         }
         map.put(user2, uuc.getValue());
@@ -91,21 +91,21 @@ public final class GenericUserSimilarity implements UserSimilarity {
   }
 
   @Override
-  public double userSimilarity(User user1, User user2) {
-    int compare = user1.compareTo(user2);
+  public double userSimilarity(Comparable<?> userID1, Comparable<?> userID2) {
+    int compare = ((Comparable<Object>) userID1).compareTo(userID2);
     if (compare == 0) {
       return 1.0;
     }
-    User first;
-    User second;
+    Comparable<?> first;
+    Comparable<?> second;
     if (compare < 0) {
-      first = user1;
-      second = user2;
+      first = userID1;
+      second = userID2;
     } else {
-      first = user2;
-      second = user1;
+      first = userID2;
+      second = userID1;
     }
-    Map<User, Double> nextMap = similarityMaps.get(first);
+    Map<Comparable<?>, Double> nextMap = similarityMaps.get(first);
     if (nextMap == null) {
       return Double.NaN;
     }
@@ -125,28 +125,28 @@ public final class GenericUserSimilarity implements UserSimilarity {
 
   public static final class UserUserSimilarity implements Comparable<UserUserSimilarity> {
 
-    private final User user1;
-    private final User user2;
+    private final Comparable<?> userID1;
+    private final Comparable<?> userID2;
     private final double value;
 
-    public UserUserSimilarity(User user1, User user2, double value) {
-      if (user1 == null || user2 == null) {
+    public UserUserSimilarity(Comparable<?> userID1, Comparable<?> userID2, double value) {
+      if (userID1 == null || userID2 == null) {
         throw new IllegalArgumentException("A user is null");
       }
       if (Double.isNaN(value) || value < -1.0 || value > 1.0) {
         throw new IllegalArgumentException("Illegal value: " + value);
       }
-      this.user1 = user1;
-      this.user2 = user2;
+      this.userID1 = userID1;
+      this.userID2 = userID2;
       this.value = value;
     }
 
-    public User getUser1() {
-      return user1;
+    public Comparable<?> getUserID1() {
+      return userID1;
     }
 
-    public User getUser2() {
-      return user2;
+    public Comparable<?> getUserID2() {
+      return userID2;
     }
 
     public double getValue() {
@@ -155,7 +155,7 @@ public final class GenericUserSimilarity implements UserSimilarity {
 
     @Override
     public String toString() {
-      return "UserUserSimilarity[" + user1 + ',' + user2 + ':' + value + ']';
+      return "UserUserSimilarity[" + userID1 + ',' + userID2 + ':' + value + ']';
     }
 
     /** Defines an ordering from highest similarity to lowest. */
@@ -171,12 +171,12 @@ public final class GenericUserSimilarity implements UserSimilarity {
         return false;
       }
       UserUserSimilarity otherSimilarity = (UserUserSimilarity) other;
-      return otherSimilarity.user1.equals(user1) && otherSimilarity.user2.equals(user2) && otherSimilarity.value == value;
+      return otherSimilarity.userID1.equals(userID1) && otherSimilarity.userID2.equals(userID2) && otherSimilarity.value == value;
     }
 
     @Override
     public int hashCode() {
-      return user1.hashCode() ^ user2.hashCode() ^ RandomUtils.hashDouble(value);
+      return userID1.hashCode() ^ userID2.hashCode() ^ RandomUtils.hashDouble(value);
     }
 
   }
@@ -184,18 +184,18 @@ public final class GenericUserSimilarity implements UserSimilarity {
   private static final class DataModelSimilaritiesIterator implements Iterator<UserUserSimilarity> {
 
     private final UserSimilarity otherSimilarity;
-    private final List<? extends User> users;
+    private final List<? extends Comparable<?>> userIDs;
     private final int size;
     private int i;
-    private User user1;
+    private Comparable<?> userID1;
     private int j;
 
-    private DataModelSimilaritiesIterator(UserSimilarity otherSimilarity, List<? extends User> users) {
+    private DataModelSimilaritiesIterator(UserSimilarity otherSimilarity, List<? extends Comparable<?>> userIDs) {
       this.otherSimilarity = otherSimilarity;
-      this.users = users;
-      this.size = users.size();
+      this.userIDs = userIDs;
+      this.size = userIDs.size();
       i = 0;
-      user1 = users.get(0);
+      userID1 = userIDs.get(0);
       j = 1;
     }
 
@@ -209,19 +209,19 @@ public final class GenericUserSimilarity implements UserSimilarity {
       if (!hasNext()) {
         throw new NoSuchElementException();
       }
-      User user2 = users.get(j);
+      Comparable<?> userID2 = userIDs.get(j);
       double similarity;
       try {
-        similarity = otherSimilarity.userSimilarity(user1, user2);
+        similarity = otherSimilarity.userSimilarity(userID1, userID2);
       } catch (TasteException te) {
         // ugly:
         throw new RuntimeException(te);
       }
-      UserUserSimilarity result = new UserUserSimilarity(user1, user2, similarity);
+      UserUserSimilarity result = new UserUserSimilarity(userID1, userID2, similarity);
       j++;
       if (j == size) {
         i++;
-        user1 = users.get(i);
+        userID1 = userIDs.get(i);
         j = i + 1;
       }
       return result;

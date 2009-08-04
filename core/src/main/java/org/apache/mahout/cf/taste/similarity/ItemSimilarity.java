@@ -29,8 +29,8 @@ import org.apache.mahout.cf.taste.common.TasteException;
 public interface ItemSimilarity extends Refreshable {
 
   /**
-   * <p>Returns the degree of similarity, of two items, based on the preferences that {@link
-   * org.apache.mahout.cf.taste.model.User}s have expressed for the items.</p>
+   * <p>Returns the degree of similarity, of two items, based on the preferences that
+   * users have expressed for the items.</p>
    *
    * @param itemID1 first item ID
    * @param itemID2 second item ID

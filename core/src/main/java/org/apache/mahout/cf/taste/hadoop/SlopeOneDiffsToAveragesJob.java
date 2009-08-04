@@ -20,7 +20,7 @@ package org.apache.mahout.cf.taste.hadoop;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -64,11 +64,11 @@ public final class SlopeOneDiffsToAveragesJob extends Job {
 
     jobConf.setClass("mapred.mapper.class", Mapper.class, Mapper.class);
     jobConf.setClass("mapred.mapoutput.key.class", ItemItemWritable.class, Object.class);
-    jobConf.setClass("mapred.mapoutput.value.class", DoubleWritable.class, Object.class);
+    jobConf.setClass("mapred.mapoutput.value.class", FloatWritable.class, Object.class);
 
     jobConf.setClass("mapred.reducer.class", SlopeOneDiffsToAveragesReducer.class, Reducer.class);
     jobConf.setClass("mapred.output.key.class", ItemItemWritable.class, Object.class);
-    jobConf.setClass("mapred.output.value.class", DoubleWritable.class, Object.class);
+    jobConf.setClass("mapred.output.value.class", FloatWritable.class, Object.class);
 
     jobConf.setClass("mapred.output.format.class", TextOutputFormat.class, OutputFormat.class);
     jobConf.set("mapred.output.dir", StringUtils.escapeString(outputPathPath.toString()));

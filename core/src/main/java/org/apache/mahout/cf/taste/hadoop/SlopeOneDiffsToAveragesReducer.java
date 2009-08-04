@@ -17,24 +17,24 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
-import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
 
 public final class SlopeOneDiffsToAveragesReducer
-    extends Reducer<ItemItemWritable, DoubleWritable, ItemItemWritable, DoubleWritable> {
+    extends Reducer<ItemItemWritable, FloatWritable, ItemItemWritable, FloatWritable> {
 
   @Override
-  protected void reduce(ItemItemWritable key, Iterable<DoubleWritable> values, Context context)
+  protected void reduce(ItemItemWritable key, Iterable<FloatWritable> values, Context context)
       throws IOException, InterruptedException {
     int count = 0;
     double total = 0.0;
-    for (DoubleWritable value : values) {
+    for (FloatWritable value : values) {
       total += value.get();
       count++;
     }
-    context.write(key, new DoubleWritable((total / count)));
+    context.write(key, new FloatWritable((float) (total / count)));
   }
 
 }

@@ -19,10 +19,11 @@ package org.apache.mahout.cf.taste.impl;
 
 import junit.textui.TestRunner;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
-import org.apache.mahout.cf.taste.impl.model.GenericUser;
+import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
 import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
 import org.apache.mahout.cf.taste.impl.recommender.CachingRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender;
@@ -30,8 +31,7 @@ import org.apache.mahout.cf.taste.impl.recommender.GenericUserBasedRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender;
 import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -90,24 +91,22 @@ public final class LoadTest extends TasteTestCase {
   }
 
   private DataModel createModel() {
-
     List<Comparable<?>> itemIDs = new ArrayList<Comparable<?>>(NUM_ITEMS);
     for (int i = 0; i < NUM_ITEMS; i++) {
       itemIDs.add(String.valueOf(i));
     }
-
-    List<User> users = new ArrayList<User>(NUM_USERS);
+    Map<Comparable<?>, PreferenceArray> data = new FastMap<Comparable<?>, PreferenceArray>(NUM_USERS);
     for (int i = 0; i < NUM_USERS; i++) {
-      int numPrefs = random.nextInt(NUM_PREFS) + 1;
-      List<Preference> prefs = new ArrayList<Preference>(numPrefs);
-      for (int j = 0; j < numPrefs; j++) {
-        prefs.add(new GenericPreference(null, itemIDs.get(random.nextInt(NUM_ITEMS)), random.nextDouble()));
-      }
-      GenericUser user = new GenericUser(String.valueOf(i), prefs);
-      users.add(user);
-    }
+      String userID = String.valueOf(i);
 
-    return new GenericDataModel(users);
+      int numPrefs = random.nextInt(NUM_PREFS) + 1;
+      PreferenceArray prefs = new GenericUserPreferenceArray(numPrefs);
+      for (int j = 0; j < numPrefs; j++) {
+        prefs.set(j, new GenericPreference(userID, itemIDs.get(random.nextInt(NUM_ITEMS)), random.nextFloat()));
+      }
+      data.put(userID, prefs);
+    }
+    return new GenericDataModel(data);
   }
 
   private void doTestLoad(Recommender recommender, int allowedTimeSec)

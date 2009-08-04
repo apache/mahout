@@ -17,7 +17,7 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
-import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
@@ -27,7 +27,7 @@ import java.util.Collections;
 import java.util.List;
 
 public final class SlopeOnePrefsToDiffsReducer
-    extends Reducer<Text, ItemPrefWritable, ItemItemWritable, DoubleWritable> {
+    extends Reducer<Text, ItemPrefWritable, ItemItemWritable, FloatWritable> {
 
   @Override
   protected void reduce(Text key, Iterable<ItemPrefWritable> values, Context context)
@@ -41,12 +41,12 @@ public final class SlopeOnePrefsToDiffsReducer
     for (int i = 0; i < size; i++) {
       ItemPrefWritable first = prefs.get(i);
       String itemAID = first.getItemID();
-      double itemAValue = first.getPrefValue();
+      float itemAValue = first.getPrefValue();
       for (int j = i + 1; j < size; j++) {
         ItemPrefWritable second = prefs.get(j);
         String itemBID = second.getItemID();
-        double itemBValue = second.getPrefValue();
-        context.write(new ItemItemWritable(itemAID, itemBID), new DoubleWritable(itemBValue - itemAValue));
+        float itemBValue = second.getPrefValue();
+        context.write(new ItemItemWritable(itemAID, itemBID), new FloatWritable(itemBValue - itemAValue));
       }
     }
   }

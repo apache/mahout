@@ -19,40 +19,51 @@ package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.User;
 
 /** <p>Tests {@link SpearmanCorrelationSimilarity}.</p> */
 public final class SpearmanCorrelationSimilarityTest extends SimilarityTestCase {
 
   public void testFullCorrelation1() throws Exception {
-    User user1 = getUser("test1", 1.0, 2.0, 3.0);
-    User user2 = getUser("test2", 1.0, 2.0, 3.0);
-    DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new SpearmanCorrelationSimilarity(dataModel).userSimilarity(user1, user2);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2"},
+            new Double[][] {
+                    {1.0, 2.0, 3.0},
+                    {1.0, 2.0, 3.0},
+            });
+    double correlation = new SpearmanCorrelationSimilarity(dataModel).userSimilarity("test1", "test2");
     assertCorrelationEquals(1.0, correlation);
   }
 
   public void testFullCorrelation2() throws Exception {
-    User user1 = getUser("test1", 1.0, 2.0, 3.0);
-    User user2 = getUser("test2", 4.0, 5.0, 6.0);
-    DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new SpearmanCorrelationSimilarity(dataModel).userSimilarity(user1, user2);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2"},
+            new Double[][] {
+                    {1.0, 2.0, 3.0},
+                    {4.0, 5.0, 6.0},
+            });
+    double correlation = new SpearmanCorrelationSimilarity(dataModel).userSimilarity("test1", "test2");
     assertCorrelationEquals(1.0, correlation);
   }
 
   public void testAnticorrelation() throws Exception {
-    User user1 = getUser("test1", 1.0, 2.0, 3.0);
-    User user2 = getUser("test2", 3.0, 2.0, 1.0);
-    DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new SpearmanCorrelationSimilarity(dataModel).userSimilarity(user1, user2);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2"},
+            new Double[][] {
+                    {1.0, 2.0, 3.0},
+                    {3.0, 2.0, 1.0},
+            });
+    double correlation = new SpearmanCorrelationSimilarity(dataModel).userSimilarity("test1", "test2");
     assertCorrelationEquals(-1.0, correlation);
   }
 
   public void testSimple() throws Exception {
-    User user1 = getUser("test1", 1.0, 2.0, 3.0);
-    User user2 = getUser("test2", 2.0, 3.0, 1.0);
-    DataModel dataModel = getDataModel(user1, user2);
-    double correlation = new SpearmanCorrelationSimilarity(dataModel).userSimilarity(user1, user2);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2"},
+            new Double[][] {
+                    {1.0, 2.0, 3.0},
+                    {2.0, 3.0, 1.0},
+            });
+    double correlation = new SpearmanCorrelationSimilarity(dataModel).userSimilarity("test1", "test2");
     assertCorrelationEquals(-0.5, correlation);
   }
 

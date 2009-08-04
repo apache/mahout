@@ -24,7 +24,7 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import java.util.List;
 
 /**
- * <p>Implementations of this interface can recommend items for a {@link org.apache.mahout.cf.taste.model.User}.
+ * <p>Implementations of this interface can recommend items for a user.
  * Implementations will likely take advantage of several classes in other packages here to compute this.</p>
  */
 public interface Recommender extends Refreshable {
@@ -33,7 +33,7 @@ public interface Recommender extends Refreshable {
    * @param userID  user for which recommendations are to be computed
    * @param howMany desired number of recommendations
    * @return {@link List} of recommended {@link RecommendedItem}s, ordered from most strongly recommend to least
-   * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
+   * @throws TasteException if an error occurs while accessing the {@link DataModel}
    */
   List<RecommendedItem> recommend(Comparable<?> userID, int howMany) throws TasteException;
 
@@ -42,7 +42,7 @@ public interface Recommender extends Refreshable {
    * @param howMany  desired number of recommendations
    * @param rescorer rescoring function to apply before final list of recommendations is determined
    * @return {@link List} of recommended {@link RecommendedItem}s, ordered from most strongly recommend to least
-   * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
+   * @throws TasteException if an error occurs while accessing the {@link DataModel}
    */
   List<RecommendedItem> recommend(Comparable<?> userID, int howMany, Rescorer<Comparable<?>> rescorer)
           throws TasteException;
@@ -52,22 +52,22 @@ public interface Recommender extends Refreshable {
    * @param itemID item ID to estimate preference for
    * @return an estimated preference if the user has not expressed a preference for the item, or else the user's actual
    *         preference for the item. If a preference cannot be estimated, returns {@link Double#NaN}
-   * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
+   * @throws TasteException if an error occurs while accessing the {@link DataModel}
    */
-  double estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException;
+  float estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException;
 
   /**
    * @param userID user to set preference for
    * @param itemID item to set preference for
    * @param value  preference value
-   * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
+   * @throws TasteException if an error occurs while accessing the {@link DataModel}
    */
-  void setPreference(Comparable<?> userID, Comparable<?> itemID, double value) throws TasteException;
+  void setPreference(Comparable<?> userID, Comparable<?> itemID, float value) throws TasteException;
 
   /**
    * @param userID user from which to remove preference
    * @param itemID item for which to remove preference
-   * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
+   * @throws TasteException if an error occurs while accessing the {@link DataModel}
    */
   void removePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException;
 

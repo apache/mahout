@@ -18,47 +18,36 @@
 package org.apache.mahout.cf.taste.impl.neighborhood;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
-import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.User;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 /** <p>Tests {@link ThresholdUserNeighborhood}.</p> */
 public final class ThresholdNeighborhoodTest extends TasteTestCase {
 
   public void testNeighborhood() throws Exception {
 
-    List<User> users = getMockUsers();
-    DataModel dataModel = new GenericDataModel(users);
+    DataModel dataModel = getDataModel();
 
-    Collection<User> neighborhood =
-        new ThresholdUserNeighborhood(20.0, new DummySimilarity(), dataModel).getUserNeighborhood("test1");
+    Collection<Comparable<?>> neighborhood =
+        new ThresholdUserNeighborhood(19.0, new DummySimilarity(dataModel), dataModel).getUserNeighborhood("test1");
     assertNotNull(neighborhood);
     assertTrue(neighborhood.isEmpty());
 
-    Collection<User> neighborhood2 =
-        new ThresholdUserNeighborhood(10.0, new DummySimilarity(), dataModel).getUserNeighborhood("test1");
+    Collection<Comparable<?>> neighborhood2 =
+        new ThresholdUserNeighborhood(9.0, new DummySimilarity(dataModel), dataModel).getUserNeighborhood("test1");
     assertNotNull(neighborhood2);
     assertEquals(1, neighborhood2.size());
-    assertTrue(neighborhood2.contains(users.get(1)));
+    assertTrue(neighborhood2.contains("test2"));
 
-    Collection<User> neighborhood3 =
-        new ThresholdUserNeighborhood(1.0, new DummySimilarity(), dataModel).getUserNeighborhood("test2");
+    Collection<Comparable<?>> neighborhood3 =
+        new ThresholdUserNeighborhood(0.9, new DummySimilarity(dataModel), dataModel).getUserNeighborhood("test2");
     assertNotNull(neighborhood3);
     assertEquals(3, neighborhood3.size());
-    assertTrue(neighborhood3.contains(users.get(0)));
-    assertTrue(neighborhood3.contains(users.get(2)));
-    assertTrue(neighborhood3.contains(users.get(3)));
+    assertTrue(neighborhood3.contains("test1"));
+    assertTrue(neighborhood3.contains("test3"));
+    assertTrue(neighborhood3.contains("test4"));
 
-  }
-
-  public void testRefresh() throws Exception {
-    // Make sure this doesn't throw an exception
-    DataModel dataModel = new GenericDataModel(Collections.singletonList(getUser("test1", 0.1)));
-    new ThresholdUserNeighborhood(20.0, new DummySimilarity(), dataModel).refresh(null);
   }
 
 }

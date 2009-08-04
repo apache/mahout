@@ -17,29 +17,30 @@
 
 package org.apache.mahout.cf.taste.impl.transforms;
 
-import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
+import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 
 /** <p>Tests {@link InverseUserFrequency}.</p> */
 public final class InverseUserFrequencyTest extends TransformTestCase {
 
   public void testIUF() throws Exception {
-    List<User> users = new ArrayList<User>(5);
-    users.add(getUser("test1", 0.1));
-    users.add(getUser("test2", 0.2, 0.3));
-    users.add(getUser("test3", 0.4, 0.5, 0.6));
-    users.add(getUser("test4", 0.7, 0.8, 0.9, 1.0));
-    users.add(getUser("test5", 1.0, 1.0, 1.0, 1.0, 1.0));
-    GenericDataModel dummy = new GenericDataModel(users);
-    InverseUserFrequency iuf = new InverseUserFrequency(dummy, 10.0);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2", "test3", "test4", "test5"},
+            new Double[][] {
+                    {0.1},
+                    {0.2, 0.3},
+                    {0.4, 0.5, 0.6},
+                    {0.7, 0.8, 0.9, 1.0},
+                    {1.0, 1.0, 1.0, 1.0, 1.0},
+            });
 
-    User user = dummy.getUser("test5");
+    InverseUserFrequency iuf = new InverseUserFrequency(dataModel, 10.0);
+
+    PreferenceArray user5Prefs = dataModel.getPreferencesFromUser("test5");
+
     for (int i = 0; i < 5; i++) {
-      Preference pref = user.getPreferenceFor(String.valueOf(i));
+      Preference pref = user5Prefs.get(i);
       assertNotNull(pref);
       assertEquals(Math.log(5.0 / (double) (5 - i)) / Math.log(iuf.getLogBase()),
           iuf.getTransformedValue(pref),

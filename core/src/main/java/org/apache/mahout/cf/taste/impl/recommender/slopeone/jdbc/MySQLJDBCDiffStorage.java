@@ -31,7 +31,7 @@ import org.apache.mahout.cf.taste.impl.model.jdbc.MySQLJDBCDataModel;
  * <tr><td>234</td><td>789</td><td>2.1</td><td>1</td></tr> </table>
  *
  * <p><code>item_id_a</code> and <code>item_id_b</code> may have types compatible with Java String, or integer
- * primitive types. <code>average_diff</code> must be compatible with <code>double</code> and
+ * primitive types. <code>average_diff</code> must be compatible with <code>float</code> and
  * <code>count</code> must be compatible with <code>int</code>.</p>
  *
  * <p>The following command sets up a suitable table in MySQL:</p>

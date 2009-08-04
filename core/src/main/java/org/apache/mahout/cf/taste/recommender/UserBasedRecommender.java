@@ -18,7 +18,6 @@ package org.apache.mahout.cf.taste.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.Pair;
-import org.apache.mahout.cf.taste.model.User;
 
 import java.util.List;
 
@@ -26,22 +25,24 @@ import java.util.List;
 public interface UserBasedRecommender extends Recommender {
 
   /**
-   * @param userID  ID of {@link User} for which to find most similar other {@link User}s
-   * @param howMany desired number of most similar {@link User}s to find
-   * @return {@link User}s most similar to the given user
+   * @param userID  ID of user for which to find most similar other users
+   * @param howMany desired number of most similar users to find
+   * @return users most similar to the given user
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
-  List<User> mostSimilarUsers(Comparable<?> userID, int howMany) throws TasteException;
+  List<Comparable<?>> mostSimilarUserIDs(Comparable<?> userID, int howMany) throws TasteException;
 
   /**
-   * @param userID   ID of {@link User} for which to find most similar other {@link User}s
-   * @param howMany  desired number of most similar {@link User}s to find
+   * @param userID   ID of user for which to find most similar other users
+   * @param howMany  desired number of most similar users to find
    * @param rescorer {@link Rescorer} which can adjust user-user similarity estimates used to determine most similar
    *                 users
-   * @return {@link User}s most similar to the given user
+   * @return IDs of users most similar to the given user
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
-  List<User> mostSimilarUsers(Comparable<?> userID, int howMany, Rescorer<Pair<User, User>> rescorer)
-          throws TasteException;
+  List<Comparable<?>> mostSimilarUserIDs(Comparable<?> userID,
+                                         int howMany,
+                                         Rescorer<Pair<Comparable<?>,
+                                         Comparable<?>>> rescorer) throws TasteException;
 
 }

@@ -18,21 +18,20 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
-import org.apache.mahout.cf.taste.model.User;
 
-/** Simply encapsulates a {@link User} and a similarity value. */
+/** Simply encapsulates a user and a similarity value. */
 public final class SimilarUser implements Comparable<SimilarUser> {
 
-  private final User user;
+  private final Comparable<?> userID;
   private final double similarity;
 
-  public SimilarUser(User user, double similarity) {
-    this.user = user;
+  public SimilarUser(Comparable<?> userID, double similarity) {
+    this.userID = userID;
     this.similarity = similarity;
   }
 
-  User getUser() {
-    return user;
+  Comparable<?> getUserID() {
+    return userID;
   }
 
   double getSimilarity() {
@@ -41,7 +40,7 @@ public final class SimilarUser implements Comparable<SimilarUser> {
 
   @Override
   public int hashCode() {
-    return user.hashCode() ^ RandomUtils.hashDouble(similarity);
+    return userID.hashCode() ^ RandomUtils.hashDouble(similarity);
   }
 
   @Override
@@ -50,12 +49,12 @@ public final class SimilarUser implements Comparable<SimilarUser> {
       return false;
     }
     SimilarUser other = (SimilarUser) o;
-    return user.equals(other.user) && similarity == other.similarity;
+    return userID.equals(other.userID) && similarity == other.similarity;
   }
 
   @Override
   public String toString() {
-    return "SimilarUser[user:" + user + ", similarity:" + similarity + ']';
+    return "SimilarUser[user:" + userID + ", similarity:" + similarity + ']';
   }
 
   /** Defines an ordering from most similar to least similar. */

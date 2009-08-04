@@ -24,10 +24,9 @@ import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
-import org.apache.mahout.cf.taste.impl.model.GenericUser;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,17 +70,18 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     log.info("Beginning evaluation using " + trainingPercentage + " of " + dataModel);
 
     int numUsers = dataModel.getNumUsers();
-    Collection<User> trainingUsers = new ArrayList<User>(1 + (int) (trainingPercentage * (double) numUsers));
-    Map<User, Collection<Preference>> testUserPrefs =
-        new FastMap<User, Collection<Preference>>(1 + (int) ((1.0 - trainingPercentage) * (double) numUsers));
+    Map<Comparable<?>, Collection<Preference>> trainingUsers =
+            new FastMap<Comparable<?>, Collection<Preference>>(1 + (int) (trainingPercentage * (double) numUsers));
+    Map<Comparable<?>, Collection<Preference>> testUserPrefs =
+            new FastMap<Comparable<?>, Collection<Preference>>(1 + (int) ((1.0 - trainingPercentage) * (double) numUsers));
 
-    for (User user : dataModel.getUsers()) {
+    for (Comparable<?> userID : dataModel.getUserIDs()) {
       if (random.nextDouble() < evaluationPercentage) {
-        processOneUser(trainingPercentage, trainingUsers, testUserPrefs, user);
+        processOneUser(trainingPercentage, trainingUsers, testUserPrefs, userID, dataModel);
       }
     }
 
-    DataModel trainingModel = new GenericDataModel(trainingUsers);
+    DataModel trainingModel = new GenericDataModel(GenericDataModel.toPrefArrayValues(trainingUsers, true));
 
     Recommender recommender = recommenderBuilder.buildRecommender(trainingModel);
 
@@ -91,14 +91,16 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
   }
 
   private void processOneUser(double trainingPercentage,
-                              Collection<User> trainingUsers,
-                              Map<User, Collection<Preference>> testUserPrefs,
-                              User user) {
+                              Map<Comparable<?>, Collection<Preference>> trainingUsers,
+                              Map<Comparable<?>, Collection<Preference>> testUserPrefs,
+                              Comparable<?> userID,
+                              DataModel dataModel) throws TasteException {
     List<Preference> trainingPrefs = new ArrayList<Preference>();
     List<Preference> testPrefs = new ArrayList<Preference>();
-    Preference[] prefs = user.getPreferencesAsArray();
-    for (Preference pref : prefs) {
-      Preference newPref = new GenericPreference(null, pref.getItemID(), pref.getValue());
+    PreferenceArray prefs = dataModel.getPreferencesFromUser(userID);
+    int size = prefs.length();
+    for (int i = 0; i < size; i++) {
+      Preference newPref = new GenericPreference(userID, prefs.getItemID(i), prefs.getValue(i));
       if (random.nextDouble() < trainingPercentage) {
         trainingPrefs.add(newPref);
       } else {
@@ -108,16 +110,14 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     log.debug("Training against {} preferences", trainingPrefs.size());
     log.debug("Evaluating accuracy of {} preferences", testPrefs.size());
     if (!trainingPrefs.isEmpty()) {
-      Comparable<?> id = user.getID();
-      User trainingUser = new GenericUser(id, trainingPrefs);
-      trainingUsers.add(trainingUser);
+      trainingUsers.put(userID, trainingPrefs);
       if (!testPrefs.isEmpty()) {
-        testUserPrefs.put(trainingUser, testPrefs);
+        testUserPrefs.put(userID, testPrefs);
       }
     }
   }
 
-  abstract double getEvaluation(Map<User, Collection<Preference>> testUserPrefs, Recommender recommender)
+  abstract double getEvaluation(Map<Comparable<?>, Collection<Preference>> testUserPrefs, Recommender recommender)
       throws TasteException;
 
 }

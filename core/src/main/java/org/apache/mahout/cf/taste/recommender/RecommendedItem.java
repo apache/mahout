@@ -32,6 +32,6 @@ public interface RecommendedItem extends Comparable<RecommendedItem> {
    *
    * @return strength of the preference
    */
-  double getValue();
+  float getValue();
 
 }

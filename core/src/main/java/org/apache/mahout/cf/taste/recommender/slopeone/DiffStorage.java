@@ -20,7 +20,7 @@ package org.apache.mahout.cf.taste.recommender.slopeone;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
-import org.apache.mahout.cf.taste.model.Preference;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 
 import java.util.List;
 import java.util.Set;
@@ -47,7 +47,7 @@ public interface DiffStorage extends Refreshable {
    * @param prefs  user's preferendces
    * @return {@link List} of {@link RunningAverage} for that user's item-item diffs
    */
-  RunningAverage[] getDiffs(Comparable<?> userID, Comparable<?> itemID, Preference[] prefs) throws TasteException;
+  RunningAverage[] getDiffs(Comparable<?> userID, Comparable<?> itemID, PreferenceArray prefs) throws TasteException;
 
   /** @return {@link RunningAverage} encapsulating the average preference for the given item */
   RunningAverage getAverageItemPref(Comparable<?> itemID) throws TasteException;
@@ -59,7 +59,7 @@ public interface DiffStorage extends Refreshable {
    * @param prefDelta amount by which preference value changed (or its old value, if being removed
    * @param remove    if <code>true</code>, operation reflects a removal rather than change of preference
    */
-  void updateItemPref(Comparable<?> itemID, double prefDelta, boolean remove) throws TasteException;
+  void updateItemPref(Comparable<?> itemID, float prefDelta, boolean remove) throws TasteException;
 
   /**
    * @return item IDs that may possibly be recommended to the given user, which may not be all items since

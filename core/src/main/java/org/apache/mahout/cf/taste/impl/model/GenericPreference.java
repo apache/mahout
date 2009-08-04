@@ -18,43 +18,31 @@
 package org.apache.mahout.cf.taste.impl.model;
 
 import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
 
 import java.io.Serializable;
 
 /** <p>A simple {@link Preference} encapsulating an item and preference value.</p> */
-public class GenericPreference implements SettableUserPreference, Serializable {
+public class GenericPreference implements Preference, Serializable {
 
-  private User user;
+  private final Comparable<?> userID;
   private final Comparable<?> itemID;
-  private double value;
+  private float value;
 
-  public GenericPreference(User user, Comparable<?> itemID, double value) {
-    if (itemID == null) {
-      throw new IllegalArgumentException("itemID is null");
+  public GenericPreference(Comparable<?> userID, Comparable<?> itemID, float value) {
+    if (userID == null || itemID == null) {
+      throw new IllegalArgumentException("userID or itemID is null");
     }
-    if (Double.isNaN(value)) {
+    if (Float.isNaN(value)) {
       throw new IllegalArgumentException("Invalid value: " + value);
     }
-    this.user = user;
+    this.userID = userID;
     this.itemID = itemID;
     this.value = value;
   }
 
   @Override
-  public User getUser() {
-    if (user == null) {
-      throw new IllegalStateException("User was never set");
-    }
-    return user;
-  }
-
-  @Override
-  public void setUser(User user) {
-    if (user == null) {
-      throw new IllegalArgumentException("user is null");
-    }
-    this.user = user;
+  public Comparable<?> getUserID() {
+    return userID;
   }
 
   @Override
@@ -63,13 +51,13 @@ public class GenericPreference implements SettableUserPreference, Serializable {
   }
 
   @Override
-  public double getValue() {
+  public float getValue() {
     return value;
   }
 
   @Override
-  public void setValue(double value) {
-    if (Double.isNaN(value)) {
+  public void setValue(float value) {
+    if (Float.isNaN(value)) {
       throw new IllegalArgumentException("Invalid value: " + value);
     }
     this.value = value;
@@ -77,7 +65,7 @@ public class GenericPreference implements SettableUserPreference, Serializable {
 
   @Override
   public String toString() {
-    return "GenericPreference[user: " + user + ", itemID:" + itemID + ", value:" + value + ']';
+    return "GenericPreference[userID: " + userID + ", itemID:" + itemID + ", value:" + value + ']';
   }
 
 }

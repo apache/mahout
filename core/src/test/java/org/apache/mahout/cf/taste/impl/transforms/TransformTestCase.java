@@ -17,15 +17,16 @@
 
 package org.apache.mahout.cf.taste.impl.transforms;
 
+import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
+import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
 
 abstract class TransformTestCase extends TasteTestCase {
 
-  static void assertPrefsEquals(User user, double... expected) {
+  static void assertPrefsEquals(DataModel dataModel, Comparable<?> userID, double... expected) throws TasteException {
     int i = 0;
-    for (Preference pref : user.getPreferences()) {
+    for (Preference pref : dataModel.getPreferencesFromUser(userID)) {
       assertEquals(expected[i], pref.getValue());
       i++;
     }

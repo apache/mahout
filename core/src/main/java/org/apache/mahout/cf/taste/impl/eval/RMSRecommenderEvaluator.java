@@ -22,7 +22,6 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,24 +39,24 @@ public final class RMSRecommenderEvaluator extends AbstractDifferenceRecommender
   private static final Logger log = LoggerFactory.getLogger(RMSRecommenderEvaluator.class);
 
   @Override
-  double getEvaluation(Map<User, Collection<Preference>> testUserPrefs,
+  double getEvaluation(Map<Comparable<?>, Collection<Preference>> testUserPrefs,
                        Recommender recommender)
       throws TasteException {
     RunningAverage average = new FullRunningAverage();
-    for (Map.Entry<User, Collection<Preference>> entry : testUserPrefs.entrySet()) {
+    for (Map.Entry<Comparable<?>, Collection<Preference>> entry : testUserPrefs.entrySet()) {
       for (Preference realPref : entry.getValue()) {
-        User testUser = entry.getKey();
+        Comparable<?> testUserID = entry.getKey();
         try {
-          double estimatedPreference =
-              recommender.estimatePreference(testUser.getID(), realPref.getItemID());
-          if (!Double.isNaN(estimatedPreference)) {
+          float estimatedPreference =
+              recommender.estimatePreference(testUserID, realPref.getItemID());
+          if (!Float.isNaN(estimatedPreference)) {
             double diff = realPref.getValue() - estimatedPreference;
             average.addDatum(diff * diff);
           }
         } catch (NoSuchUserException nsee) {
           // It's possible that an item exists in the test data but not training data in which case
           // NSEE will be thrown. Just ignore it and move on.
-          log.info("Element exists in test data but not training data: {}", testUser.getID(), nsee);
+          log.info("Element exists in test data but not training data: {}", testUserID, nsee);
         }
       }
     }

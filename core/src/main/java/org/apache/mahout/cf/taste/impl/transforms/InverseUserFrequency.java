@@ -20,16 +20,16 @@ package org.apache.mahout.cf.taste.impl.transforms;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
+import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -48,9 +48,8 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public final class InverseUserFrequency implements PreferenceTransform {
 
-  private static final Logger log = LoggerFactory.getLogger(InverseUserFrequency.class);
-
   private final DataModel dataModel;
+  private final RefreshHelper refreshHelper;
   private final double logBase;
   private final AtomicReference<Map<Comparable<?>, Double>> iufFactors;
 
@@ -71,6 +70,14 @@ public final class InverseUserFrequency implements PreferenceTransform {
     this.dataModel = dataModel;
     this.logBase = logBase;
     this.iufFactors = new AtomicReference<Map<Comparable<?>, Double>>(new FastMap<Comparable<?>, Double>());
+    this.refreshHelper = new RefreshHelper(new Callable<Object>() {
+      @Override
+      public Object call() throws TasteException {
+        recompute();
+        return null;
+      }
+    });
+    this.refreshHelper.addDependency(this.dataModel);
     recompute();
   }
 
@@ -80,30 +87,27 @@ public final class InverseUserFrequency implements PreferenceTransform {
   }
 
   @Override
-  public double getTransformedValue(Preference pref) {
+  public float getTransformedValue(Preference pref) {
     Double factor = iufFactors.get().get(pref.getItemID());
     if (factor != null) {
-      return pref.getValue() * factor;
+      return (float) (pref.getValue() * factor);
     }
     return pref.getValue();
   }
 
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    try {
-      recompute();
-    } catch (TasteException te) {
-      log.warn("Unable to refresh", te);
-    }
+    refreshHelper.refresh(alreadyRefreshed);
   }
 
   private synchronized void recompute() throws TasteException {
     Counters<Comparable<?>> itemPreferenceCounts = new Counters<Comparable<?>>();
     int numUsers = 0;
-    for (User user : dataModel.getUsers()) {
-      Preference[] prefs = user.getPreferencesAsArray();
-      for (Preference pref : prefs) {
-        itemPreferenceCounts.increment(pref.getItemID());
+    for (Comparable<?> userID : dataModel.getUserIDs()) {
+      PreferenceArray prefs = dataModel.getPreferencesFromUser(userID);
+      int size = prefs.length();
+      for (int i = 0; i < size; i++) {
+        itemPreferenceCounts.increment(prefs.getItemID(i));
       }
       numUsers++;
     }

@@ -19,23 +19,22 @@ package org.apache.mahout.cf.taste.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.model.User;
 
 /**
- * <p>Implementations of this interface compute an inferred preference for a {@link User} and an item that the
+ * <p>Implementations of this interface compute an inferred preference for a user and an item that the
  * user has not expressed any preference for. This might be an average of other preferences scores from that user, for
  * example. This technique is sometimes called "default voting".</p>
  */
 public interface PreferenceInferrer extends Refreshable {
 
   /**
-   * <p>Infers the given {@link User}'s preference value for an item.</p>
+   * <p>Infers the given user's preference value for an item.</p>
    *
-   * @param user {@link User} to infer preference for
+   * @param userID ID of user to infer preference for
    * @param itemID item ID to infer preference for
    * @return inferred preference
    * @throws TasteException if an error occurs while inferring
    */
-  double inferPreference(User user, Comparable<?> itemID) throws TasteException;
+  float inferPreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException;
 
 }

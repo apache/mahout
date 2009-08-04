@@ -23,8 +23,7 @@ import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
@@ -43,7 +42,7 @@ import java.util.Set;
  * <p>A simple {@link Recommender} which uses a given {@link DataModel} and {@link UserNeighborhood} to produce
  * recommendations.</p>
  */
-public final class GenericUserBasedRecommender extends AbstractRecommender implements UserBasedRecommender {
+public class GenericUserBasedRecommender extends AbstractRecommender implements UserBasedRecommender {
 
   private static final Logger log = LoggerFactory.getLogger(GenericUserBasedRecommender.class);
 
@@ -66,6 +65,10 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
     refreshHelper.addDependency(neighborhood);
   }
 
+  public UserSimilarity getSimilarity() {
+    return similarity;
+  }
+
   @Override
   public List<RecommendedItem> recommend(Comparable<?> userID, int howMany, Rescorer<Comparable<?>> rescorer)
       throws TasteException {
@@ -78,18 +81,17 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
 
     log.debug("Recommending items for user ID '{}'", userID);
 
-    User theUser = getDataModel().getUser(userID);
-    Collection<User> theNeighborhood = neighborhood.getUserNeighborhood(userID);
+    Collection<Comparable<?>> theNeighborhood = neighborhood.getUserNeighborhood(userID);
     log.trace("UserNeighborhood is: {}", neighborhood);
 
     if (theNeighborhood.isEmpty()) {
       return Collections.emptyList();
     }
 
-    Set<Comparable<?>> allItemIDs = getAllOtherItems(theNeighborhood, theUser);
+    Set<Comparable<?>> allItemIDs = getAllOtherItems(theNeighborhood, userID);
     log.trace("Items in neighborhood which user doesn't prefer already are: {}", allItemIDs);
 
-    TopItems.Estimator<Comparable<?>> estimator = new Estimator(theUser, theNeighborhood);
+    TopItems.Estimator<Comparable<?>> estimator = new Estimator(userID, theNeighborhood);
 
     List<RecommendedItem> topItems = TopItems.getTopItems(howMany, allItemIDs, rescorer, estimator);
 
@@ -98,69 +100,74 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
   }
 
   @Override
-  public double estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
+  public float estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
     DataModel model = getDataModel();
-    User theUser = model.getUser(userID);
-    Preference actualPref = theUser.getPreferenceFor(itemID);
+    Float actualPref = model.getPreferenceValue(userID, itemID);
     if (actualPref != null) {
-      return actualPref.getValue();
+      return actualPref;
     }
-    Collection<User> theNeighborhood = neighborhood.getUserNeighborhood(userID);
-    return doEstimatePreference(theUser, theNeighborhood, itemID);
+    Collection<Comparable<?>> theNeighborhood = neighborhood.getUserNeighborhood(userID);
+    return doEstimatePreference(userID, theNeighborhood, itemID);
   }
 
   @Override
-  public List<User> mostSimilarUsers(Comparable<?> userID, int howMany) throws TasteException {
-    return mostSimilarUsers(userID, howMany, null);
+  public List<Comparable<?>> mostSimilarUserIDs(Comparable<?> userID, int howMany) throws TasteException {
+    return mostSimilarUserIDs(userID, howMany, null);
   }
 
   @Override
-  public List<User> mostSimilarUsers(Comparable<?> userID,
-                                     int howMany,
-                                     Rescorer<Pair<User, User>> rescorer) throws TasteException {
-    User toUser = getDataModel().getUser(userID);
-    TopItems.Estimator<User> estimator = new MostSimilarEstimator(toUser, similarity, rescorer);
+  public List<Comparable<?>> mostSimilarUserIDs(Comparable<?> userID,
+                                                int howMany,
+                                                Rescorer<Pair<Comparable<?>, Comparable<?>>> rescorer)
+          throws TasteException {
+    TopItems.Estimator<Comparable<?>> estimator = new MostSimilarEstimator(userID, similarity, rescorer);
     return doMostSimilarUsers(howMany, estimator);
   }
 
-  private List<User> doMostSimilarUsers(int howMany,
-                                        TopItems.Estimator<User> estimator) throws TasteException {
+  private List<Comparable<?>> doMostSimilarUsers(int howMany,
+                                                 TopItems.Estimator<Comparable<?>> estimator) throws TasteException {
     DataModel model = getDataModel();
-    return TopItems.getTopUsers(howMany, model.getUsers(), null, estimator);
+    return TopItems.getTopUsers(howMany, model.getUserIDs(), null, estimator);
   }
 
-  private double doEstimatePreference(User theUser, Collection<User> theNeighborhood, Comparable<?> itemID)
+  protected float doEstimatePreference(Comparable<?> theUserID,
+                                       Collection<Comparable<?>> theNeighborhood,
+                                       Comparable<?> itemID)
       throws TasteException {
     if (theNeighborhood.isEmpty()) {
-      return Double.NaN;
+      return Float.NaN;
     }
+    DataModel dataModel = getDataModel();
     double preference = 0.0;
     double totalSimilarity = 0.0;
-    for (User user : theNeighborhood) {
-      if (!user.equals(theUser)) {
+    for (Comparable<?> userID : theNeighborhood) {
+      if (!userID.equals(theUserID)) {
         // See GenericItemBasedRecommender.doEstimatePreference() too
-        Preference pref = user.getPreferenceFor(itemID);
+        Float pref = dataModel.getPreferenceValue(userID, itemID);
         if (pref != null) {
-          double theSimilarity = similarity.userSimilarity(theUser, user) + 1.0;
+          double theSimilarity = similarity.userSimilarity(theUserID, userID) + 1.0;
           // Similarity should not be NaN or else the user should never have showed up
           // in the neighborhood. Adding 1.0 puts this in the range [0,2] which is
           // more appropriate for weights
-          preference += theSimilarity * pref.getValue();
+          preference += theSimilarity * pref;
           totalSimilarity += theSimilarity;
         }
       }
     }
-    return totalSimilarity == 0.0 ? Double.NaN : preference / totalSimilarity;
+    return totalSimilarity == 0.0 ? Float.NaN : (float) (preference / totalSimilarity);
   }
 
-  private static Set<Comparable<?>> getAllOtherItems(Iterable<User> theNeighborhood, User theUser) {
+  protected Set<Comparable<?>> getAllOtherItems(Iterable<Comparable<?>> theNeighborhood, Comparable<?> theUserID)
+          throws TasteException {
+    DataModel dataModel = getDataModel();
     Set<Comparable<?>> allItemIDs = new FastSet<Comparable<?>>();
-    for (User user : theNeighborhood) {
-      Preference[] prefs = user.getPreferencesAsArray();
-      for (Preference pref : prefs) {
-        Comparable<?> itemID = pref.getItemID();
+    for (Comparable<?> userID : theNeighborhood) {
+      PreferenceArray prefs = dataModel.getPreferencesFromUser(userID);
+      int size = prefs.length();
+      for (int i = 0; i < size; i++) {
+        Comparable<?> itemID = prefs.getItemID(i);
         // If not already preferred by the user, add it
-        if (theUser.getPreferenceFor(itemID) == null) {
+        if (dataModel.getPreferenceValue(theUserID, itemID) == null) {
           allItemIDs.add(itemID);
         }
       }
@@ -178,48 +185,52 @@ public final class GenericUserBasedRecommender extends AbstractRecommender imple
     return "GenericUserBasedRecommender[neighborhood:" + neighborhood + ']';
   }
 
-  private static class MostSimilarEstimator implements TopItems.Estimator<User> {
+  private static class MostSimilarEstimator implements TopItems.Estimator<Comparable<?>> {
 
-    private final User toUser;
+    private final Comparable<?> toUserID;
     private final UserSimilarity similarity;
-    private final Rescorer<Pair<User, User>> rescorer;
+    private final Rescorer<Pair<Comparable<?>, Comparable<?>>> rescorer;
 
-    private MostSimilarEstimator(User toUser,
+    private MostSimilarEstimator(Comparable<?> toUserID,
                                  UserSimilarity similarity,
-                                 Rescorer<Pair<User, User>> rescorer) {
-      this.toUser = toUser;
+                                 Rescorer<Pair<Comparable<?>, Comparable<?>>> rescorer) {
+      this.toUserID = toUserID;
       this.similarity = similarity;
       this.rescorer = rescorer;
     }
 
     @Override
-    public double estimate(User user) throws TasteException {
+    public double estimate(Comparable<?> userID) throws TasteException {
       // Don't consider the user itself as a possible most similar user
-      if (user.equals(toUser)) {
+      if (userID.equals(toUserID)) {
         return Double.NaN;
       }
-      Pair<User, User> pair = new Pair<User, User>(toUser, user);
-      if (rescorer != null && rescorer.isFiltered(pair)) {
-        return Double.NaN;
+      if (rescorer == null) {
+        return similarity.userSimilarity(toUserID, userID);
+      } else {
+        Pair<Comparable<?>, Comparable<?>> pair = new Pair<Comparable<?>, Comparable<?>>(toUserID, userID);
+        if (rescorer.isFiltered(pair)) {
+          return Double.NaN;
+        }
+        double originalEstimate = similarity.userSimilarity(toUserID, userID);
+        return rescorer.rescore(pair, originalEstimate);
       }
-      double originalEstimate = similarity.userSimilarity(toUser, user);
-      return rescorer == null ? originalEstimate : rescorer.rescore(pair, originalEstimate);
     }
   }
 
   private final class Estimator implements TopItems.Estimator<Comparable<?>> {
 
-    private final User theUser;
-    private final Collection<User> theNeighborhood;
+    private final Comparable<?> theUserUD;
+    private final Collection<Comparable<?>> theNeighborhood;
 
-    Estimator(User theUser, Collection<User> theNeighborhood) {
-      this.theUser = theUser;
+    Estimator(Comparable<?> theUserUD, Collection<Comparable<?>> theNeighborhood) {
+      this.theUserUD = theUserUD;
       this.theNeighborhood = theNeighborhood;
     }
 
     @Override
     public double estimate(Comparable<?> itemID) throws TasteException {
-      return doEstimatePreference(theUser, theNeighborhood, itemID);
+      return doEstimatePreference(theUserUD, theNeighborhood, itemID);
     }
   }
 }

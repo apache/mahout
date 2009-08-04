@@ -57,7 +57,7 @@ public class RecommenderEJBBean implements SessionBean {
     return recommender.estimatePreference(userID, itemID);
   }
 
-  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value) throws TasteException {
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, float value) throws TasteException {
     recommender.setPreference(userID, itemID, value);
   }
 

@@ -25,8 +25,7 @@ import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.ItemBasedRecommender;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
@@ -34,7 +33,6 @@ import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -90,14 +88,13 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
 
     log.debug("Recommending items for user ID '{}'", userID);
 
-    User theUser = getDataModel().getUser(userID);
-    if (getNumPreferences(theUser) == 0) {
+    if (getNumPreferences(userID) == 0) {
       return Collections.emptyList();
     }
 
-    Set<Comparable<?>> allItemIDs = getAllOtherItems(theUser);
+    Set<Comparable<?>> allItemIDs = getAllOtherItems(userID);
 
-    TopItems.Estimator<Comparable<?>> estimator = new Estimator(theUser);
+    TopItems.Estimator<Comparable<?>> estimator = new Estimator(userID);
 
     List<RecommendedItem> topItems = TopItems.getTopItems(howMany, allItemIDs, rescorer, estimator);
 
@@ -106,14 +103,13 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   }
 
   @Override
-  public double estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
+  public float estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
     DataModel model = getDataModel();
-    User theUser = model.getUser(userID);
-    Preference actualPref = theUser.getPreferenceFor(itemID);
+    Float actualPref = model.getPreferenceValue(userID, itemID);
     if (actualPref != null) {
-      return actualPref.getValue();
+      return actualPref;
     }
-    return doEstimatePreference(theUser, itemID);
+    return doEstimatePreference(userID, itemID);
   }
 
   @Override
@@ -163,13 +159,13 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     }
 
     DataModel model = getDataModel();
-    User user = model.getUser(userID);
-    TopItems.Estimator<Comparable<?>> estimator = new RecommendedBecauseEstimator(user, itemID, similarity);
+    TopItems.Estimator<Comparable<?>> estimator = new RecommendedBecauseEstimator(userID, itemID, similarity);
 
     Collection<Comparable<?>> allUserItems = new FastSet<Comparable<?>>();
-    Preference[] prefs = user.getPreferencesAsArray();
-    for (Preference pref : prefs) {
-      allUserItems.add(pref.getItemID());
+    PreferenceArray prefs = model.getPreferencesFromUser(userID);
+    int size = prefs.length();
+    for (int i = 0; i < size; i++) {
+      allUserItems.add(prefs.getItemID(i));
     }
     allUserItems.remove(itemID);
 
@@ -188,26 +184,27 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     return TopItems.getTopItems(howMany, allItemIDs, null, estimator);
   }
 
-  protected double doEstimatePreference(User theUser, Comparable<?> itemID) throws TasteException {
+  protected float doEstimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
     double preference = 0.0;
     double totalSimilarity = 0.0;
-    Preference[] prefs = theUser.getPreferencesAsArray();
-    for (Preference pref : prefs) {
-      double theSimilarity = similarity.itemSimilarity(itemID, pref.getItemID());
+    PreferenceArray prefs = getDataModel().getPreferencesFromUser(userID);
+    int size = prefs.length();
+    for (int i = 0; i < size; i++) {
+      double theSimilarity = similarity.itemSimilarity(itemID, prefs.getItemID(i));
       if (!Double.isNaN(theSimilarity)) {
         // Why + 1.0? similarity ranges from -1.0 to 1.0, and we want to use it as a simple
         // weight. To avoid negative values, we add 1.0 to put it in
         // the [0.0,2.0] range which is reasonable for weights
         theSimilarity += 1.0;
-        preference += theSimilarity * pref.getValue();
+        preference += theSimilarity * prefs.getValue(i);
         totalSimilarity += theSimilarity;
       }
     }
-    return totalSimilarity == 0.0 ? Double.NaN : preference / totalSimilarity;
+    return totalSimilarity == 0.0 ? Float.NaN : (float) (preference / totalSimilarity);
   }
 
-  private static int getNumPreferences(User theUser) {
-    return theUser.getPreferencesAsArray().length;
+  private int getNumPreferences(Comparable<?> userID) throws TasteException {
+    return getDataModel().getPreferencesFromUser(userID).length();
   }
 
   @Override
@@ -247,15 +244,15 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
 
   private final class Estimator implements TopItems.Estimator<Comparable<?>> {
 
-    private final User theUser;
+    private final Comparable<?> userID;
 
-    private Estimator(User theUser) {
-      this.theUser = theUser;
+    private Estimator(Comparable<?> userID) {
+      this.userID = userID;
     }
 
     @Override
     public double estimate(Comparable<?> itemID) throws TasteException {
-      return doEstimatePreference(theUser, itemID);
+      return doEstimatePreference(userID, itemID);
     }
   }
 
@@ -291,28 +288,28 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     }
   }
 
-  private static class RecommendedBecauseEstimator implements TopItems.Estimator<Comparable<?>> {
+  private class RecommendedBecauseEstimator implements TopItems.Estimator<Comparable<?>> {
 
-    private final User user;
+    private final Comparable<?> userID;
     private final Comparable<?> recommendedItemID;
     private final ItemSimilarity similarity;
 
-    private RecommendedBecauseEstimator(User user,
+    private RecommendedBecauseEstimator(Comparable<?> userID,
                                         Comparable<?> recommendedItemID,
                                         ItemSimilarity similarity) {
-      this.user = user;
+      this.userID = userID;
       this.recommendedItemID = recommendedItemID;
       this.similarity = similarity;
     }
 
     @Override
     public double estimate(Comparable<?> itemID) throws TasteException {
-      Preference pref = user.getPreferenceFor(itemID);
+      Float pref = getDataModel().getPreferenceValue(userID, itemID);
       if (pref == null) {
-        return Double.NaN;
+        return Float.NaN;
       }
       double similarityValue = similarity.itemSimilarity(recommendedItemID, itemID);
-      return (1.0 + similarityValue) * pref.getValue();
+      return (1.0 + similarityValue) * pref;
     }
   }
 

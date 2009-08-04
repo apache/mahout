@@ -51,9 +51,9 @@ public interface RecommenderEJB extends EJBObject {
   double estimatePreference(Object userID, Object itemID) throws TasteException, RemoteException;
 
   /**
-   * @see org.apache.mahout.cf.taste.recommender.Recommender#setPreference(Comparable, Comparable, double)
+   * @see org.apache.mahout.cf.taste.recommender.Recommender#setPreference(Comparable, Comparable, float)
    */
-  void setPreference(Object userID, Object itemID, double value)
+  void setPreference(Object userID, Object itemID, float value)
           throws TasteException, RemoteException;
 
   /**

@@ -17,7 +17,6 @@
 package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 
 import java.util.ArrayList;
@@ -46,10 +45,13 @@ public final class GenericItemSimilarityTest extends SimilarityTestCase {
   }
 
   public void testFromCorrelation() throws Exception {
-    User user1 = getUser("test1", 1.0, 2.0);
-    User user2 = getUser("test2", 2.0, 5.0);
-    User user3 = getUser("test3", 3.0, 6.0);
-    DataModel dataModel = getDataModel(user1, user2, user3);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2", "test3"},
+            new Double[][] {
+                    {1.0, 2.0},
+                    {2.0, 5.0},
+                    {3.0, 6.0},
+            });
     ItemSimilarity otherSimilarity = new PearsonCorrelationSimilarity(dataModel);
     ItemSimilarity itemSimilarity = new GenericItemSimilarity(otherSimilarity, dataModel);
     assertCorrelationEquals(1.0, itemSimilarity.itemSimilarity("0", "0"));

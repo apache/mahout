@@ -21,16 +21,18 @@ import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.Cache;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
+import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
+import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
 
 import java.util.Collection;
 
 /**
- * <p>Normalizes preference values for a {@link User} by converting them to <a href="http://mathworld.wolfram.com/z-Score.html">"z-scores"</a>.
+ * <p>Normalizes preference values for a user by converting them to <a href="http://mathworld.wolfram.com/z-Score.html">"z-scores"</a>.
  * This process normalizes preference values to adjust for variation in mean and variance of a user's preferences.</p>
  *
  * <p>Imagine two users, one who tends to rate every movie he/she sees four or five stars, and another who uses the full
@@ -39,28 +41,32 @@ import java.util.Collection;
  */
 public final class ZScore implements PreferenceTransform {
 
-  private final Cache<User, RunningAverageAndStdDev> meanAndStdevs;
+  private final DataModel dataModel;
+  private final Cache<Comparable<?>, RunningAverageAndStdDev> meanAndStdevs;
 
-  public ZScore() {
-    this.meanAndStdevs = new Cache<User, RunningAverageAndStdDev>(new MeanStdevRetriever());
+  public ZScore(DataModel dataModel) {
+    this.dataModel = dataModel;
+    this.meanAndStdevs = new Cache<Comparable<?>, RunningAverageAndStdDev>(new MeanStdevRetriever());
     refresh(null);
   }
 
   @Override
-  public double getTransformedValue(Preference pref) throws TasteException {
-    RunningAverageAndStdDev meanAndStdev = meanAndStdevs.get(pref.getUser());
+  public float getTransformedValue(Preference pref) throws TasteException {
+    RunningAverageAndStdDev meanAndStdev = meanAndStdevs.get(pref.getUserID());
     if (meanAndStdev.getCount() > 1) {
       double stdev = meanAndStdev.getStandardDeviation();
       if (stdev > 0.0) {
-        return (pref.getValue() - meanAndStdev.getAverage()) / stdev;
+        return (float) ((pref.getValue() - meanAndStdev.getAverage()) / stdev);
       }
     }
-    return 0.0;
+    return 0.0f;
   }
 
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    // do nothing
+    meanAndStdevs.clear();
+    alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
+    RefreshHelper.maybeRefresh(alreadyRefreshed, dataModel);
   }
 
   @Override
@@ -68,14 +74,15 @@ public final class ZScore implements PreferenceTransform {
     return "ZScore";
   }
 
-  private static class MeanStdevRetriever implements Retriever<User, RunningAverageAndStdDev> {
+  private class MeanStdevRetriever implements Retriever<Comparable<?>, RunningAverageAndStdDev> {
 
     @Override
-    public RunningAverageAndStdDev get(User user) throws TasteException {
+    public RunningAverageAndStdDev get(Comparable<?> userID) throws TasteException {
       RunningAverageAndStdDev running = new FullRunningAverageAndStdDev();
-      Preference[] prefs = user.getPreferencesAsArray();
-      for (Preference pref : prefs) {
-        running.addDatum(pref.getValue());
+      PreferenceArray prefs = dataModel.getPreferencesFromUser(userID);
+      int size = prefs.length();
+      for (int i = 0; i < size; i++) {
+        running.addDatum(prefs.getValue(i));
       }
       return running;
     }

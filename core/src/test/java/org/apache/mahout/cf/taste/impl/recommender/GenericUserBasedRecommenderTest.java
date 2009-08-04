@@ -18,18 +18,15 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
-import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
 import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.recommender.UserBasedRecommender;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -43,20 +40,22 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
     assertEquals(1, recommended.size());
     RecommendedItem firstRecommended = recommended.get(0);
     assertEquals("2", firstRecommended.getItemID());
-    assertEquals(0.3, firstRecommended.getValue());
+    assertEquals(0.3f, firstRecommended.getValue());
     recommender.refresh(null);
     assertEquals("2", firstRecommended.getItemID());
-    assertEquals(0.3, firstRecommended.getValue());
+    assertEquals(0.3f, firstRecommended.getValue());
   }
 
   public void testHowMany() throws Exception {
-    List<User> users = new ArrayList<User>(3);
-    users.add(getUser("test1", 0.1, 0.2));
-    users.add(getUser("test2", 0.2, 0.3, 0.3, 0.6));
-    users.add(getUser("test3", 0.4, 0.4, 0.5, 0.9));
-    users.add(getUser("test4", 0.1, 0.4, 0.5, 0.8, 0.9, 1.0));
-    users.add(getUser("test5", 0.2, 0.3, 0.6, 0.7, 0.1, 0.2));
-    DataModel dataModel = new GenericDataModel(users);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2", "test3", "test4", "test5"},
+            new Double[][] {
+                    {0.1, 0.2},
+                    {0.2, 0.3, 0.3, 0.6},
+                    {0.4, 0.4, 0.5, 0.9},
+                    {0.1, 0.4, 0.5, 0.8, 0.9, 1.0},
+                    {0.2, 0.3, 0.6, 0.7, 0.1, 0.2},
+            });
     UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
     UserNeighborhood neighborhood = new NearestNUserNeighborhood(2, similarity, dataModel);
     Recommender recommender = new GenericUserBasedRecommender(dataModel, neighborhood, similarity);
@@ -72,11 +71,13 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
   }
 
   public void testRescorer() throws Exception {
-    List<User> users = new ArrayList<User>(3);
-    users.add(getUser("test1", 0.1, 0.2));
-    users.add(getUser("test2", 0.2, 0.3, 0.3, 0.6));
-    users.add(getUser("test3", 0.4, 0.4, 0.5, 0.9));
-    DataModel dataModel = new GenericDataModel(users);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2", "test3"},
+            new Double[][] {
+                    {0.1, 0.2},
+                    {0.2, 0.3, 0.3, 0.6},
+                    {0.4, 0.4, 0.5, 0.9},
+            });
     UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
     UserNeighborhood neighborhood = new NearestNUserNeighborhood(1, similarity, dataModel);
     Recommender recommender = new GenericUserBasedRecommender(dataModel, neighborhood, similarity);
@@ -93,7 +94,7 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
 
   public void testEstimatePref() throws Exception {
     Recommender recommender = buildRecommender();
-    assertEquals(0.3, recommender.estimatePreference("test1", "2"));
+    assertEquals(0.3f, recommender.estimatePreference("test1", "2"));
   }
 
   public void testBestRating() throws Exception {
@@ -104,37 +105,37 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
     RecommendedItem firstRecommended = recommended.get(0);
     // item one should be recommended because it has a greater rating/score
     assertEquals("2", firstRecommended.getItemID());
-    assertEquals(0.3, firstRecommended.getValue(), EPSILON);
+    assertEquals(0.3f, firstRecommended.getValue(), EPSILON);
   }
 
   public void testMostSimilar() throws Exception {
     UserBasedRecommender recommender = buildRecommender();
-    List<User> similar = recommender.mostSimilarUsers("test1", 2);
+    List<Comparable<?>> similar = recommender.mostSimilarUserIDs("test1", 2);
     assertNotNull(similar);
     assertEquals(2, similar.size());
-    User first = similar.get(0);
-    User second = similar.get(1);
-    assertEquals("test2", first.getID());
-    assertEquals("test3", second.getID());
+    assertEquals("test2", similar.get(0));
+    assertEquals("test4", similar.get(1));
   }
 
   public void testIsolatedUser() throws Exception {
-    List<User> users = new ArrayList<User>(3);
-    users.add(getUser("test1", 0.1, 0.2));
-    users.add(getUser("test2", 0.2, 0.3, 0.3, 0.6));
-    users.add(getUser("test3", 0.4, 0.4, 0.5, 0.9));
-    users.add(getUser("test4"));
-    DataModel dataModel = new GenericDataModel(users);
+    DataModel dataModel = getDataModel(
+            new Comparable<?>[] {"test1", "test2", "test3", "test4"},
+            new Double[][] {
+                    {0.1, 0.2},
+                    {0.2, 0.3, 0.3, 0.6},
+                    {0.4, 0.4, 0.5, 0.9},
+                    {null, null, null, null, 1.0},
+            });
     UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
     UserNeighborhood neighborhood = new NearestNUserNeighborhood(3, similarity, dataModel);
     UserBasedRecommender recommender = new GenericUserBasedRecommender(dataModel, neighborhood, similarity);
-    Collection<User> mostSimilar = recommender.mostSimilarUsers("test4", 3);
+    Collection<Comparable<?>> mostSimilar = recommender.mostSimilarUserIDs("test4", 3);
     assertNotNull(mostSimilar);
     assertEquals(0, mostSimilar.size());
   }
 
   private static UserBasedRecommender buildRecommender() throws Exception {
-    DataModel dataModel = new GenericDataModel(getMockUsers());
+    DataModel dataModel = getDataModel();
     UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
     UserNeighborhood neighborhood = new NearestNUserNeighborhood(1, similarity, dataModel);
     return new GenericUserBasedRecommender(dataModel, neighborhood, similarity);

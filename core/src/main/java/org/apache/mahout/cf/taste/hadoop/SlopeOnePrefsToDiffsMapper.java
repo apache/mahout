@@ -33,7 +33,7 @@ public final class SlopeOnePrefsToDiffsMapper
     String[] tokens = line.split(",");
     String userID = tokens[0];
     String itemID = tokens[1];
-    double prefValue = Double.parseDouble(tokens[2]);
+    float prefValue = Float.parseFloat(tokens[2]);
     context.write(new Text(userID), new ItemPrefWritable(itemID, prefValue));
   }
 

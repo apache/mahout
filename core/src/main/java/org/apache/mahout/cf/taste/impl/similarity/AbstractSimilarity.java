@@ -23,7 +23,7 @@ import org.apache.mahout.cf.taste.common.Weighting;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
@@ -127,30 +127,32 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
    * @param sumY2      sum of the square of the user/item preference values, over the second item/user
    * @param sumXYdiff2 sum of squares of differences in X and Y values
    * @return similarity value between -1.0 and 1.0, inclusive, or {@link Double#NaN} if no similarity can be computed
-   *         (e.g. when no items have been rated by both {@link User}s
+   *         (e.g. when no items have been rated by both uesrs
    */
   abstract double computeResult(int n, double sumXY, double sumX2, double sumY2, double sumXYdiff2);
 
   @Override
-  public double userSimilarity(User user1, User user2) throws TasteException {
+  public double userSimilarity(Comparable<?> userID1, Comparable<?> userID2) throws TasteException {
 
-    if (user1 == null || user2 == null) {
-      throw new IllegalArgumentException("user1 or user2 is null");
+    if (userID1 == null || userID2 == null) {
+      throw new IllegalArgumentException("userID1 or userID2 is null");
     }
 
-    Preference[] xPrefs = user1.getPreferencesAsArray();
-    Preference[] yPrefs = user2.getPreferencesAsArray();
+    PreferenceArray xPrefs = dataModel.getPreferencesFromUser(userID1);
+    PreferenceArray yPrefs = dataModel.getPreferencesFromUser(userID2);
+    int xLength = xPrefs.length();
+    int yLength = yPrefs.length();
 
-    if (xPrefs.length == 0 || yPrefs.length == 0) {
+    if (xLength == 0 || yLength == 0) {
       return Double.NaN;
     }
 
-    Preference xPref = xPrefs[0];
-    Preference yPref = yPrefs[0];
+    Preference xPref = xPrefs.get(0);
+    Preference yPref = yPrefs.get(0);
     Comparable<?> xIndex = xPref.getItemID();
     Comparable<?> yIndex = yPref.getItemID();
-    int xPrefIndex = 1;
-    int yPrefIndex = 1;
+    int xPrefIndex = 0;
+    int yPrefIndex = 0;
 
     double sumX = 0.0;
     double sumX2 = 0.0;
@@ -183,11 +185,11 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
           if (compare < 0) {
             // X has a value; infer Y's
             x = hasPrefTransform ? prefTransform.getTransformedValue(xPref) : xPref.getValue();
-            y = inferrer.inferPreference(user2, xIndex);
+            y = inferrer.inferPreference(userID2, xIndex);
           } else {
             // compare > 0
             // Y has a value; infer X's
-            x = inferrer.inferPreference(user1, yIndex);
+            x = inferrer.inferPreference(userID1, yIndex);
             y = hasPrefTransform ? prefTransform.getTransformedValue(yPref) : yPref.getValue();
           }
         }
@@ -201,17 +203,17 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
         count++;
       }
       if (compare <= 0) {
-        if (xPrefIndex == xPrefs.length) {
+        if (++xPrefIndex >= xLength) {
           break;
         }
-        xPref = xPrefs[xPrefIndex++];
+        xPref = xPrefs.get(xPrefIndex);
         xIndex = xPref.getItemID();
       }
       if (compare >= 0) {
-        if (yPrefIndex == yPrefs.length) {
+        if (++yPrefIndex >= yLength) {
           break;
         }
-        yPref = yPrefs[yPrefIndex++];
+        yPref = yPrefs.get(yPrefIndex);
         yIndex = yPref.getItemID();
       }
     }
@@ -230,7 +232,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     double result = computeResult(count, centeredSumXY, centeredSumX2, centeredSumY2, sumXYdiff2);
 
     if (similarityTransform != null) {
-      result = similarityTransform.transformSimilarity(user1, user2, result);
+      result = similarityTransform.transformSimilarity(userID1, userID2, result);
     }
 
     if (!Double.isNaN(result)) {
@@ -246,17 +248,19 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
       throw new IllegalArgumentException("item1 or item2 is null");
     }
 
-    Preference[] xPrefs = dataModel.getPreferencesForItemAsArray(itemID1);
-    Preference[] yPrefs = dataModel.getPreferencesForItemAsArray(itemID2);
+    PreferenceArray xPrefs = dataModel.getPreferencesForItem(itemID1);
+    PreferenceArray yPrefs = dataModel.getPreferencesForItem(itemID2);
+    int xLength = xPrefs.length();
+    int yLength = yPrefs.length();
 
-    if (xPrefs.length == 0 || yPrefs.length == 0) {
+    if (xLength == 0 || yLength == 0) {
       return Double.NaN;
     }
 
-    Preference xPref = xPrefs[0];
-    Preference yPref = yPrefs[0];
-    User xIndex = xPref.getUser();
-    User yIndex = yPref.getUser();
+    Preference xPref = xPrefs.get(0);
+    Preference yPref = yPrefs.get(0);
+    Comparable<?> xIndex = xPref.getUserID();
+    Comparable<?> yIndex = yPref.getUserID();
     int xPrefIndex = 1;
     int yPrefIndex = 1;
 
@@ -271,7 +275,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     // No, pref inferrers and transforms don't appy here. I think.
 
     while (true) {
-      int compare = xIndex.compareTo(yIndex);
+      int compare = ((Comparable<Object>) xIndex).compareTo(yIndex);
       if (compare == 0) {
         // Both users expressed a preference for the item
         double x = xPref.getValue();
@@ -286,18 +290,18 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
         count++;
       }
       if (compare <= 0) {
-        if (xPrefIndex == xPrefs.length) {
+        if (xPrefIndex == xLength) {
           break;
         }
-        xPref = xPrefs[xPrefIndex++];
-        xIndex = xPref.getUser();
+        xPref = xPrefs.get(xPrefIndex++);
+        xIndex = xPref.getUserID();
       }
       if (compare >= 0) {
-        if (yPrefIndex == yPrefs.length) {
+        if (yPrefIndex == yLength) {
           break;
         }
-        yPref = yPrefs[yPrefIndex++];
-        yIndex = yPref.getUser();
+        yPref = yPrefs.get(yPrefIndex++);
+        yIndex = yPref.getUserID();
       }
     }
 

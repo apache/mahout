@@ -19,22 +19,21 @@ package org.apache.mahout.cf.taste.neighborhood;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.model.User;
 
 import java.util.Collection;
 
 /**
- * <p>Implementations of this interface compute a "neighborhood" of {@link User}s like a given {@link User}. This
+ * <p>Implementations of this interface compute a "neighborhood" of users like a given user. This
  * neighborhood can be used to compute recommendations then.</p>
  */
 public interface UserNeighborhood extends Refreshable {
 
   /**
    * @param userID ID of user for which a neighborhood will be computed
-   * @return {@link Collection} of {@link User}s in the neighborhood
+   * @return {@link Collection} of IDs of users in the neighborhood
    * @throws org.apache.mahout.cf.taste.common.TasteException
    *          if an error occurs while accessing data
    */
-  Collection<User> getUserNeighborhood(Comparable<?> userID) throws TasteException;
+  Collection<Comparable<?>> getUserNeighborhood(Comparable<?> userID) throws TasteException;
 
 }

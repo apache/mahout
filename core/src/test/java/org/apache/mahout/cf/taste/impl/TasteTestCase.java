@@ -18,17 +18,18 @@
 package org.apache.mahout.cf.taste.impl;
 
 import junit.framework.TestCase;
+import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
-import org.apache.mahout.cf.taste.impl.model.GenericUser;
+import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public abstract class TasteTestCase extends TestCase {
 
@@ -41,33 +42,31 @@ public abstract class TasteTestCase extends TestCase {
     RandomUtils.useTestSeed();
   }
 
-  public static User getUser(String userID, Double... values) {
-    List<Preference> prefs = new ArrayList<Preference>(values.length);
-    int i = 0;
-    for (Double value : values) {
-      if (value != null) {
-        prefs.add(new GenericPreference(null, String.valueOf(i), value));
+  public static DataModel getDataModel(Comparable<?>[] userIDs, Double[][] prefValues) {
+    Map<Comparable<?>, PreferenceArray> result = new FastMap<Comparable<?>, PreferenceArray>();
+    for (int i = 0; i < userIDs.length; i++) {
+      List<Preference> prefsList = new ArrayList<Preference>();
+      for (int j = 0; j < prefValues[i].length; j++) {
+        if (prefValues[i][j] != null) {
+          prefsList.add(new GenericPreference(userIDs[i], String.valueOf(j), prefValues[i][j].floatValue()));
+        }
       }
-      i++;
+      if (!prefsList.isEmpty()) {
+        result.put(userIDs[i], new GenericUserPreferenceArray(prefsList));
+      }
     }
-    return new GenericUser(userID, prefs);
-  }
-
-  public static DataModel getDataModel(User... users) {
-    return new GenericDataModel(Arrays.asList(users));
+    return new GenericDataModel(result);
   }
 
   public static DataModel getDataModel() {
-    return new GenericDataModel(getMockUsers());
-  }
-
-  public static List<User> getMockUsers() {
-    List<User> users = new ArrayList<User>(4);
-    users.add(getUser("test1", 0.1, 0.3));
-    users.add(getUser("test2", 0.2, 0.3, 0.3));
-    users.add(getUser("test3", 0.4, 0.3, 0.5));
-    users.add(getUser("test4", 0.7, 0.3, 0.8));
-    return users;
+    return getDataModel(
+            new Comparable<?>[] {"test1", "test2", "test3", "test4"},
+            new Double[][] {
+                    {0.1, 0.3},
+                    {0.2, 0.3, 0.3},
+                    {0.4, 0.3, 0.5},
+                    {0.7, 0.3, 0.8},
+            });
   }
 
 }

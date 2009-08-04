@@ -30,7 +30,6 @@ import org.apache.mahout.cf.taste.impl.recommender.AbstractRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
@@ -84,8 +83,8 @@ public final class SVDRecommender extends AbstractRecommender {
     userMap = new FastMap<Comparable<?>, Integer>(numUsers);
 
     int idx = 0;
-    for (User user : dataModel.getUsers()) {
-      userMap.put(user.getID(), idx++);
+    for (Comparable<?> userID : dataModel.getUserIDs()) {
+      userMap.put(userID, idx++);
     }
 
     int numItems = dataModel.getNumItems();
@@ -117,8 +116,9 @@ public final class SVDRecommender extends AbstractRecommender {
 
   private void recachePreferences() throws TasteException {
     cachedPreferences.clear();
-    for (User user : getDataModel().getUsers()) {
-      for (Preference pref : user.getPreferences()) {
+    DataModel dataModel = getDataModel();
+    for (Comparable<?> userID : dataModel.getUserIDs()) {
+      for  (Preference pref : dataModel.getPreferencesFromUser(userID)) {
         cachedPreferences.add(pref);
       }
     }
@@ -126,8 +126,9 @@ public final class SVDRecommender extends AbstractRecommender {
 
   private double getAveragePreference() throws TasteException {
     RunningAverage average = new FullRunningAverage();
-    for (User user : getDataModel().getUsers()) {
-      for (Preference pref : user.getPreferences()) {
+    DataModel dataModel = getDataModel();
+    for (Comparable<?> userID : dataModel.getUserIDs()) {
+      for (Preference pref : dataModel.getPreferencesFromUser(userID)) {
         average.addDatum(pref.getValue());
       }
     }
@@ -144,20 +145,20 @@ public final class SVDRecommender extends AbstractRecommender {
     Collections.shuffle(cachedPreferences, random);
     for (int i = 0; i < numFeatures; i++) {
       for (Preference pref : cachedPreferences) {
-        int useridx = userMap.get(pref.getUser().getID());
+        int useridx = userMap.get(pref.getUserID());
         int itemidx = itemMap.get(pref.getItemID());
         emSvd.train(useridx, itemidx, i, pref.getValue());
       }
     }
   }
 
-  private double predictRating(int user, int item) {
-    return emSvd.getDotProduct(user, item);
+  private float predictRating(int user, int item) {
+    return (float) emSvd.getDotProduct(user, item);
   }
 
 
   @Override
-  public double estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
+  public float estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
     Integer useridx = userMap.get(userID);
     if (useridx == null) {
       throw new NoSuchUserException();
@@ -182,11 +183,9 @@ public final class SVDRecommender extends AbstractRecommender {
 
     log.debug("Recommending items for user ID '{}'", userID);
 
-    User theUser = getDataModel().getUser(userID);
+    Set<Comparable<?>> allItemIDs = getAllOtherItems(userID);
 
-    Set<Comparable<?>> allItemIDs = getAllOtherItems(theUser);
-
-    TopItems.Estimator<Comparable<?>> estimator = new Estimator(theUser);
+    TopItems.Estimator<Comparable<?>> estimator = new Estimator(userID);
 
     List<RecommendedItem> topItems = TopItems.getTopItems(howMany, allItemIDs, rescorer, estimator);
 
@@ -206,15 +205,15 @@ public final class SVDRecommender extends AbstractRecommender {
 
   private final class Estimator implements TopItems.Estimator<Comparable<?>> {
 
-    private final User theUser;
+    private final Comparable<?> theUserID;
 
-    private Estimator(User theUser) {
-      this.theUser = theUser;
+    private Estimator(Comparable<?> theUserID) {
+      this.theUserID = theUserID;
     }
 
     @Override
     public double estimate(Comparable<?> itemID) throws TasteException {
-      return estimatePreference(theUser.getID(), itemID);
+      return estimatePreference(theUserID, itemID);
     }
   }
 

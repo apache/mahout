@@ -17,23 +17,19 @@
 
 package org.apache.mahout.cf.taste.example.bookcrossing;
 
+import org.apache.mahout.cf.taste.example.grouplens.GroupLensDataModel;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
 import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
-import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.example.grouplens.GroupLensDataModel;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.OutputStreamWriter;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.List;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.util.Map;
 
 public final class BookCrossingDataModel extends FileDataModel {
 
@@ -120,29 +116,6 @@ public final class BookCrossingDataModel extends FileDataModel {
       }
     }
     return result;
-  }
-  
-  @Override
-  protected User buildUser(String id, List<Preference> prefs) {
-    String[] userData = userDataMap.get(id);
-    if (userData == null) {
-      throw new NoSuchElementException();
-    }
-    String location = userData[0];
-    String[] locationTokens = location.split(",");
-    for (int i = 0; i < locationTokens.length; i++) {
-      if (locationTokens[i] != null) {
-        locationTokens[i] = locationTokens[i].trim();
-        if (locationTokens[i].length() == 0) {
-          locationTokens[i] = null;
-        }
-      }
-    }
-    String city = locationTokens[0];
-    String state = locationTokens.length > 1 ? locationTokens[1] : null;
-    String country = locationTokens.length > 2 ? locationTokens[2] : null;
-    Integer age = userData[1] == null ? null : Integer.valueOf(userData[1]);
-    return new BookCrossingUser(id, prefs, city, state, country, age);
   }
 
   private static File convertBCFile(File originalFile) throws IOException {

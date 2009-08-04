@@ -23,17 +23,17 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-/** A {@link Writable} encapsulating a {@link org.apache.mahout.cf.taste.model.Item} and a preference value. */
+/** A {@link Writable} encapsulating an item and a preference value. */
 public final class ItemPrefWritable implements Writable {
 
   private String itemID;
-  private double prefValue;
+  private float prefValue;
 
   public ItemPrefWritable() {
     // do nothing
   }
 
-  public ItemPrefWritable(String itemID, double prefValue) {
+  public ItemPrefWritable(String itemID, float prefValue) {
     this.itemID = itemID;
     this.prefValue = prefValue;
   }
@@ -46,20 +46,20 @@ public final class ItemPrefWritable implements Writable {
     return itemID;
   }
 
-  public double getPrefValue() {
+  public float getPrefValue() {
     return prefValue;
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeUTF(itemID);
-    out.writeDouble(prefValue);
+    out.writeFloat(prefValue);
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
     itemID = in.readUTF();
-    prefValue = in.readDouble();
+    prefValue = in.readFloat();
   }
 
   public static ItemPrefWritable read(DataInput in) throws IOException {

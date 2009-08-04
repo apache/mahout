@@ -24,8 +24,8 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 
 public final class NetflixRecommenderEvaluatorRunner {
 

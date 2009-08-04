@@ -21,17 +21,20 @@ import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.Cache;
+import org.apache.mahout.cf.taste.impl.common.FastMap;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.common.IteratorIterable;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
 import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
+import org.apache.mahout.cf.taste.impl.model.GenericItemPreferenceArray;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
-import org.apache.mahout.cf.taste.impl.model.GenericUser;
+import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.JDBCDataModel;
 import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +47,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
@@ -58,13 +62,6 @@ import java.util.NoSuchElementException;
  * pooling, so make sure the {@link DataSource} it exposes is using pooling. Outside a J2EE container, you can use
  * packages like Jakarta's <a href="http://jakarta.apache.org/commons/dbcp/">DBCP</a> to create a {@link DataSource} on
  * top of your database whose {@link Connection}s are pooled.</p>
- *
- * <p>Also note: this default implementation assumes that the user and item ID keys are {@link String}s, for maximum
- * flexibility. You can override this behavior by subclassing an implementation and overriding {@link
- * {@link #buildUser(Comparable, List)}. If you don't, just make sure you use {@link String}s as IDs
- * throughout your code. If your IDs are really numeric, and you use, say, {@link Long} for IDs in the rest of your
- * code, you will run into subtle problems because the {@link Long} values won't be equal to or compare correctly to the
- * underlying {@link String} key values.</p>
  */
 public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implements JDBCDataModel {
 
@@ -80,7 +77,9 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   private final String userIDColumn;
   private final String itemIDColumn;
   private final String preferenceColumn;
+  private final String getPreferenceSQL;
   private final String getUserSQL;
+  private final String getAllUsersSQL;
   private final String getNumItemsSQL;
   private final String getNumUsersSQL;
   private final String setPreferenceSQL;
@@ -95,7 +94,9 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   private final Cache<Comparable<?>, Integer> itemPrefCounts;
 
   protected AbstractJDBCDataModel(DataSource dataSource,
+                                  String getPreferenceSQL,
                                   String getUserSQL,
+                                  String getAllUsersSQL,
                                   String getNumItemsSQL,
                                   String getNumUsersSQL,
                                   String setPreferenceSQL,
@@ -110,7 +111,9 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
         DEFAULT_USER_ID_COLUMN,
         DEFAULT_ITEM_ID_COLUMN,
         DEFAULT_PREFERENCE_COLUMN,
+        getPreferenceSQL,
         getUserSQL,
+        getAllUsersSQL,
         getNumItemsSQL,
         getNumUsersSQL,
         setPreferenceSQL,
@@ -127,7 +130,9 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
                                   String userIDColumn,
                                   String itemIDColumn,
                                   String preferenceColumn,
+                                  String getPreferenceSQL,
                                   String getUserSQL,
+                                  String getAllUsersSQL,
                                   String getNumItemsSQL,
                                   String getNumUsersSQL,
                                   String setPreferenceSQL,
@@ -147,6 +152,8 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
     checkNotNullAndLog("dataSource", dataSource);
     checkNotNullAndLog("getUserSQL", getUserSQL);
+    checkNotNullAndLog("getAllUsersSQL", getAllUsersSQL);
+    checkNotNullAndLog("getPreferenceSQL", getPreferenceSQL);
     checkNotNullAndLog("getNumItemsSQL", getNumItemsSQL);
     checkNotNullAndLog("getNumUsersSQL", getNumUsersSQL);
     checkNotNullAndLog("setPreferenceSQL", setPreferenceSQL);
@@ -168,7 +175,9 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     this.preferenceColumn = preferenceColumn;
 
     this.dataSource = dataSource;
+    this.getPreferenceSQL = getPreferenceSQL;
     this.getUserSQL = getUserSQL;
+    this.getAllUsersSQL = getAllUsersSQL;
     this.getNumItemsSQL = getNumItemsSQL;
     this.getNumUsersSQL = getNumUsersSQL;
     this.setPreferenceSQL = setPreferenceSQL;
@@ -208,22 +217,20 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   }
 
   @Override
-  public Iterable<? extends User> getUsers() throws TasteException {
+  public Iterable<Comparable<?>> getUserIDs() throws TasteException {
     log.debug("Retrieving all users...");
-    return new IteratorIterable<User>(new ResultSetUserIterator(dataSource, getUsersSQL));
+    return new IteratorIterable<Comparable<?>>(new ResultSetIDIterator(getUsersSQL));
   }
 
   /** @throws NoSuchUserException if there is no such user */
   @Override
-  public User getUser(Comparable<?> id) throws TasteException {
+  public PreferenceArray getPreferencesFromUser(Comparable<?> id) throws TasteException {
 
     log.debug("Retrieving user ID '{}'", id);
 
     Connection conn = null;
     PreparedStatement stmt = null;
     ResultSet rs = null;
-
-    String idString = id.toString();
 
     try {
       conn = dataSource.getConnection();
@@ -237,14 +244,14 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
       List<Preference> prefs = new ArrayList<Preference>();
       while (rs.next()) {
-        addPreference(rs, prefs);
+        prefs.add(buildPreference(rs));
       }
 
       if (prefs.isEmpty()) {
         throw new NoSuchUserException();
       }
 
-      return buildUser(idString, prefs);
+      return new GenericUserPreferenceArray(prefs);
 
     } catch (SQLException sqle) {
       log.warn("Exception while retrieving user", sqle);
@@ -256,23 +263,183 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   }
 
   @Override
+  public Map<Comparable<?>, PreferenceArray> exportWithPrefs() throws TasteException {
+    log.debug("Exporting all data");
+
+    Connection conn = null;
+    Statement stmt = null;
+    ResultSet rs = null;
+
+    Map<Comparable<?>, PreferenceArray> result = new FastMap<Comparable<?>, PreferenceArray>();
+
+    try {
+      conn = dataSource.getConnection();
+      stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
+      stmt.setFetchSize(getFetchSize());
+
+      log.debug("Executing SQL query: {}", getAllUsersSQL);
+      rs = stmt.executeQuery(getAllUsersSQL);
+
+      Comparable<?> currentUserID = null;
+      List<Preference> currentPrefs = new ArrayList<Preference>();
+      while (rs.next()) {
+        Comparable<?> nextUserID = (Comparable<?>) rs.getObject(1);
+        if (currentUserID != null && !currentUserID.equals(nextUserID)) {
+          if (!currentPrefs.isEmpty()) {
+            result.put(currentUserID, new GenericUserPreferenceArray(currentPrefs));
+            currentPrefs.clear();
+          }
+        } else {
+          currentPrefs.add(buildPreference(rs));
+        }
+        currentUserID = nextUserID;
+      }
+      if (!currentPrefs.isEmpty()) {
+        result.put(currentUserID, new GenericUserPreferenceArray(currentPrefs));
+      }
+
+      return result;
+
+    } catch (SQLException sqle) {
+      log.warn("Exception while exporting all data", sqle);
+      throw new TasteException(sqle);
+    } finally {
+      IOUtils.quietClose(rs, stmt, conn);
+
+    }
+  }
+
+  @Override
+  public Map<Comparable<?>, FastSet<Comparable<?>>> exportWithIDsOnly() throws TasteException {
+    log.debug("Exporting all data");
+
+    Connection conn = null;
+    Statement stmt = null;
+    ResultSet rs = null;
+
+    Map<Comparable<?>, FastSet<Comparable<?>>> result = new FastMap<Comparable<?>, FastSet<Comparable<?>>>();
+
+    try {
+      conn = dataSource.getConnection();
+      stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
+      stmt.setFetchSize(getFetchSize());
+
+      log.debug("Executing SQL query: {}", getAllUsersSQL);
+      rs = stmt.executeQuery(getAllUsersSQL);
+
+      Comparable<?> currentUserID = null;
+      FastSet<Comparable<?>> currentItemIDs = new FastSet<Comparable<?>>(2);
+      while (rs.next()) {
+        Comparable<?> nextUserID = (Comparable<?>) rs.getObject(1);
+        if (currentUserID != null && !currentUserID.equals(nextUserID)) {
+          if (!currentItemIDs.isEmpty()) {
+            result.put(currentUserID, currentItemIDs);
+            currentItemIDs = new FastSet<Comparable<?>>(2);
+          }
+        } else {
+          currentItemIDs.add((Comparable<?>) rs.getObject(2));
+        }
+        currentUserID = nextUserID;
+      }
+      if (!currentItemIDs.isEmpty()) {
+        result.put(currentUserID, currentItemIDs);
+      }
+
+      return result;
+
+    } catch (SQLException sqle) {
+      log.warn("Exception while exporting all data", sqle);
+      throw new TasteException(sqle);
+    } finally {
+      IOUtils.quietClose(rs, stmt, conn);
+
+    }
+  }
+
+  /** @throws NoSuchUserException if there is no such user */
+  @Override
+  public FastSet<Comparable<?>> getItemIDsFromUser(Comparable<?> id) throws TasteException {
+
+    log.debug("Retrieving items for user ID '{}'", id);
+
+    Connection conn = null;
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+
+    try {
+      conn = getDataSource().getConnection();
+      stmt = conn.prepareStatement(getUserSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
+      stmt.setFetchSize(getFetchSize());
+      stmt.setObject(1, id);
+
+      log.debug("Executing SQL query: {}", getUserSQL);
+      rs = stmt.executeQuery();
+
+      FastSet<Comparable<?>> result = new FastSet<Comparable<?>>();
+      while (rs.next()) {
+        result.add((Comparable<?>) rs.getObject(1));
+      }
+
+      if (result.isEmpty()) {
+        throw new NoSuchUserException();
+      }
+
+      return result;
+
+    } catch (SQLException sqle) {
+      log.warn("Exception while retrieving item s", sqle);
+      throw new TasteException(sqle);
+    } finally {
+      IOUtils.quietClose(rs, stmt, conn);
+    }
+
+  }
+
+  @Override
+  public Float getPreferenceValue(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
+    log.debug("Retrieving preferences for item ID '{}'", itemID);
+    Connection conn = null;
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    try {
+      conn = dataSource.getConnection();
+      stmt = conn.prepareStatement(getPreferenceSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
+      stmt.setFetchSize(1);
+      stmt.setObject(1, userID);
+      stmt.setObject(2, itemID);
+
+      log.debug("Executing SQL query: {}", getPreferenceSQL);
+      rs = stmt.executeQuery();
+      if (rs.next()) {
+        return rs.getFloat(1);
+      } else {
+        return null;
+      }
+    } catch (SQLException sqle) {
+      log.warn("Exception while retrieving prefs for item", sqle);
+      throw new TasteException(sqle);
+    } finally {
+      IOUtils.quietClose(rs, stmt, conn);
+    }
+  }
+
+  @Override
   public Iterable<Comparable<?>> getItemIDs() throws TasteException {
     log.debug("Retrieving all items...");
-    return new IteratorIterable<Comparable<?>>(new ResultSetItemIterator(dataSource, getItemsSQL));
+    return new IteratorIterable<Comparable<?>>(new ResultSetIDIterator(getItemsSQL));
   }
 
   @Override
-  public Iterable<? extends Preference> getPreferencesForItem(Comparable<?> itemID) throws TasteException {
-    return doGetPreferencesForItem(itemID);
+  public PreferenceArray getPreferencesForItem(Comparable<?> itemID) throws TasteException {
+    List<Preference> list = doGetPreferencesForItem(itemID);
+    return new GenericItemPreferenceArray(list);
   }
 
-  @Override
-  public Preference[] getPreferencesForItemAsArray(Comparable<?> itemID) throws TasteException {
-    List<? extends Preference> list = doGetPreferencesForItem(itemID);
-    return list.toArray(new Preference[list.size()]);
-  }
-
-  protected List<? extends Preference> doGetPreferencesForItem(Comparable<?> itemID) throws TasteException {
+  protected List<Preference> doGetPreferencesForItem(Comparable<?> itemID) throws TasteException {
     log.debug("Retrieving preferences for item ID '{}'", itemID);
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -288,10 +455,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       rs = stmt.executeQuery();
       List<Preference> prefs = new ArrayList<Preference>();
       while (rs.next()) {
-        double preference = rs.getDouble(1);
-        Comparable<?> userID = (Comparable<?>) rs.getObject(2);
-        Preference pref = buildPreference(buildUser(userID, null), itemID, preference);
-        prefs.add(pref);
+        prefs.add(buildPreference(rs));
       }
       return prefs;
     } catch (SQLException sqle) {
@@ -329,7 +493,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     }
     return length == 1 ?
         itemPrefCounts.get(itemIDs[0]) :
-        getNumThings("user preferring items", getNumPreferenceForItemsSQL, itemIDs);
+        getNumThings("user preferring items", getNumPreferenceForItemsSQL, (Object[]) itemIDs);
   }
 
 
@@ -361,18 +525,16 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   }
 
   @Override
-  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value)
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, float value)
       throws TasteException {
     if (userID == null || itemID == null) {
       throw new IllegalArgumentException("userID or itemID is null");
     }
-    if (Double.isNaN(value)) {
+    if (Float.isNaN(value)) {
       throw new IllegalArgumentException("Invalid value: " + value);
     }
 
-    if (log.isDebugEnabled()) {
-      log.debug("Setting preference for user '" + userID + "', item '" + itemID + "', value " + value);
-    }
+    log.debug("Setting preference for user {}, item {}", userID, itemID);    
 
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -432,177 +594,32 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     itemPrefCounts.clear();
   }
 
-
-  private void addPreference(ResultSet rs, Collection<Preference> prefs)
-      throws SQLException {
-    Comparable<?> itemID = (Comparable<?>) rs.getObject(1);
-    double preferenceValue = rs.getDouble(2);
-    prefs.add(buildPreference(null, itemID, preferenceValue));
+  protected Preference buildPreference(ResultSet rs) throws SQLException {
+    return new GenericPreference((Comparable<?>) rs.getObject(1), (Comparable<?>) rs.getObject(2), rs.getFloat(3));
   }
 
   /**
-   * <p>Default implementation which returns a new {@link GenericUser} with {@link String} IDs. Subclasses may override
-   * to return a different {@link User} implementation.</p>
-   *
-   * @param id    user ID
-   * @param prefs user preferences
-   * @return {@link GenericUser} by default
-   */
-  protected User buildUser(Comparable<?> id, List<Preference> prefs) {
-    return new GenericUser(id, prefs);
-  }
-
-  /**
-   * Subclasses may override to return a different {@link Preference} implementation.
-   *
-   * @param user {@link User}
-   * @param itemID item ID
-   * @return {@link GenericPreference} by default
-   */
-  protected Preference buildPreference(User user, Comparable<?> itemID, double value) {
-    return new GenericPreference(user, itemID, value);
-  }
-
-  /**
-   * <p>An {@link java.util.Iterator} which returns {@link org.apache.mahout.cf.taste.model.User}s from a {@link
-   * java.sql.ResultSet}. This is a useful way to iterate over all user data since it does not require all data to be
-   * read into memory at once. It does however require that the DB connection be held open. Note that this class will
-   * only release database resources after {@link #hasNext()} has been called and has returned false; callers should
-   * make sure to "drain" the entire set of data to avoid tying up database resources.</p>
-   */
-  private final class ResultSetUserIterator implements SkippingIterator<User> {
-
-    private final Connection connection;
-    private final Statement statement;
-    private final ResultSet resultSet;
-    private boolean closed;
-
-    private ResultSetUserIterator(DataSource dataSource, String getUsersSQL) throws TasteException {
-      try {
-        connection = dataSource.getConnection();
-        statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        statement.setFetchDirection(ResultSet.FETCH_FORWARD);
-        statement.setFetchSize(getFetchSize());
-        log.debug("Executing SQL query: {}", getUsersSQL);
-        resultSet = statement.executeQuery(getUsersSQL);
-        boolean anyResults = resultSet.next();
-        if (!anyResults) {
-          close();
-        }
-      } catch (SQLException sqle) {
-        close();
-        throw new TasteException(sqle);
-      }
-    }
-
-    @Override
-    public boolean hasNext() {
-      boolean nextExists = false;
-      if (!closed) {
-        try {
-          if (resultSet.isAfterLast()) {
-            close();
-          } else {
-            nextExists = true;
-          }
-        } catch (SQLException sqle) {
-          log.warn("Unexpected exception while accessing ResultSet; continuing...", sqle);
-          close();
-        }
-      }
-      return nextExists;
-    }
-
-    @Override
-    public User next() {
-
-      if (!hasNext()) {
-        throw new NoSuchElementException();
-      }
-
-      Comparable<?> currentUserID = null;
-      List<Preference> prefs = new ArrayList<Preference>();
-
-      try {
-        do {
-          Comparable<?> userID = (Comparable<?>) resultSet.getObject(3);
-          if (currentUserID == null) {
-            currentUserID = userID;
-          }
-          // Did we move on to a new user?
-          if (!userID.equals(currentUserID)) {
-            break;
-          }
-          // else add a new preference for the current user
-          addPreference(resultSet, prefs);
-        } while (resultSet.next());
-      } catch (SQLException sqle) {
-        // No good way to handle this since we can't throw an exception
-        log.warn("Exception while iterating over users", sqle);
-        close();
-        throw new NoSuchElementException("Can't retrieve more due to exception: " + sqle);
-      }
-
-      return buildUser(currentUserID, prefs);
-    }
-
-    /**
-     * @throws UnsupportedOperationException
-     */
-    @Override
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
-
-    private void close() {
-      closed = true;
-      IOUtils.quietClose(resultSet, statement, connection);
-    }
-
-    @Override
-    public void skip(int n) {
-      if (n >= 1 && hasNext()) {
-        try {
-          int distinctUserNamesSeen = 0;
-          Object currentUserID = null;
-          do {
-            Comparable<?> userID = (Comparable<?>) resultSet.getObject(3);
-            if (!userID.equals(currentUserID)) {
-              distinctUserNamesSeen++;
-            }
-            currentUserID = userID;
-          } while (distinctUserNamesSeen <= n && resultSet.next());
-        } catch (SQLException sqle) {
-          log.warn("Exception while iterating over users", sqle);
-          close();
-        }
-      }
-    }
-
-  }
-
-  /**
-   * <p>An {@link java.util.Iterator} which returns items from a {@link
-   * java.sql.ResultSet}. This is a useful way to iterate over all user data since it does not require all data to be
+   * <p>An {@link java.util.Iterator} which returns items from a {@link ResultSet}.
+   * This is a useful way to iterate over all user data since it does not require all data to be
    * read into memory at once. It does however require that the DB connection be held open. Note that this class will
    * only release database resources after {@link #hasNext()} has been called and has returned <code>false</code>;
    * callers should make sure to "drain" the entire set of data to avoid tying up database resources.</p>
    */
-  private final class ResultSetItemIterator implements SkippingIterator<Comparable<?>> {
+  private final class ResultSetIDIterator implements SkippingIterator<Comparable<?>> {
 
     private final Connection connection;
     private final Statement statement;
     private final ResultSet resultSet;
     private boolean closed;
 
-    private ResultSetItemIterator(DataSource dataSource, String getItemsSQL) throws TasteException {
+    private ResultSetIDIterator(String sql) throws TasteException {
       try {
         connection = dataSource.getConnection();
         statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         statement.setFetchDirection(ResultSet.FETCH_FORWARD);
         statement.setFetchSize(getFetchSize());
-        log.debug("Executing SQL query: {}", getItemsSQL);
-        resultSet = statement.executeQuery(getItemsSQL);
+        log.debug("Executing SQL query: {}", sql);
+        resultSet = statement.executeQuery(sql);
         boolean anyResults = resultSet.next();
         if (!anyResults) {
           close();
@@ -639,12 +656,12 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       }
 
       try {
-        Comparable<?> itemID = (Comparable<?>) resultSet.getObject(1);
+        Comparable<?> ID = (Comparable<?>) resultSet.getObject(1);
         resultSet.next();
-        return itemID;
+        return ID;
       } catch (SQLException sqle) {
         // No good way to handle this since we can't throw an exception
-        log.warn("Exception while iterating over items", sqle);
+        log.warn("Exception while iterating", sqle);
         close();
         throw new NoSuchElementException("Can't retrieve more due to exception: " + sqle);
       }

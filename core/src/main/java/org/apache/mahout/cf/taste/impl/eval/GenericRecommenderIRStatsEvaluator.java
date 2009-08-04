@@ -22,20 +22,17 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.eval.IRStatistics;
 import org.apache.mahout.cf.taste.eval.RecommenderBuilder;
 import org.apache.mahout.cf.taste.eval.RecommenderIRStatsEvaluator;
+import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
-import org.apache.mahout.cf.taste.impl.model.BooleanPrefUser;
-import org.apache.mahout.cf.taste.impl.model.ByValuePreferenceComparator;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
-import org.apache.mahout.cf.taste.impl.model.GenericUser;
-import org.apache.mahout.cf.taste.impl.model.GenericBooleanUserDataModel;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
@@ -43,17 +40,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 /**
- * <p>For each {@link User}, these implementation determine the top <code>n</code> preferences, then evaluate the IR
+ * <p>For each user, these implementation determine the top <code>n</code> preferences, then evaluate the IR
  * statistics based on a {@link DataModel} that does not have these values. This number <code>n</code> is the "at"
  * value, as in "precision at 5". For example, this would mean precision evaluated by removing the top 5 preferences for
- * a {@link User} and then finding the percentage of those 5 items included in the top 5 recommendations for
+ * a user and then finding the percentage of those 5 items included in the top 5 recommendations for
  * that user.</p>
  */
 public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRStatsEvaluator {
@@ -100,49 +97,44 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
     RunningAverage precision = new FullRunningAverage();
     RunningAverage recall = new FullRunningAverage();
     RunningAverage fallOut = new FullRunningAverage();
-    for (User user : dataModel.getUsers()) {
+    for (Comparable<?> userID : dataModel.getUserIDs()) {
       if (random.nextDouble() < evaluationPercentage) {
         long start = System.currentTimeMillis();
-        Comparable<?> id = user.getID();
         Collection<Comparable<?>> relevantItemIDs = new FastSet<Comparable<?>>(at);
-        Preference[] prefs = user.getPreferencesAsArray();
-        if (prefs.length < 2 * at) {
+        PreferenceArray prefs = dataModel.getPreferencesFromUser(userID);
+        int size = prefs.length();
+        if (size < 2 * at) {
           // Really not enough prefs to meaningfully evaluate this user
           continue;
         }
 
         // List some most-preferred items that would count as (most) "relevant" results
         double theRelevanceThreshold = Double.isNaN(relevanceThreshold) ? computeThreshold(prefs) : relevanceThreshold;
-        Arrays.sort(prefs, Collections.reverseOrder(ByValuePreferenceComparator.getInstance()));
-        for (int i = 0; i < prefs.length && relevantItemIDs.size() < at; i++) {
-          Preference pref = prefs[i];
-          if (pref.getValue() >= theRelevanceThreshold) {
-            relevantItemIDs.add(pref.getItemID());
+        prefs.sortByValueReversed();
+        for (int i = 0; i < size && relevantItemIDs.size() < at; i++) {
+          if (prefs.getValue(i) >= theRelevanceThreshold) {
+            relevantItemIDs.add(prefs.getItemID(i));
           }
         }
         int numRelevantItems = relevantItemIDs.size();
         if (numRelevantItems > 0) {
-          List<User> trainingUsers = new ArrayList<User>(dataModel.getNumUsers());
-          for (User user2 : dataModel.getUsers()) {
-            processOtherUser(id, relevantItemIDs, trainingUsers, user2);
+          Map<Comparable<?>, Collection<Preference>> trainingUsers =
+            new FastMap<Comparable<?>, Collection<Preference>>(dataModel.getNumUsers());
+          for (Comparable userID2 : dataModel.getUserIDs()) {
+            processOtherUser(userID, relevantItemIDs, trainingUsers, userID2, dataModel);
           }
 
-          DataModel trainingModel;
-          if (trainingUsers.get(0) instanceof BooleanPrefUser) {
-            trainingModel = new GenericBooleanUserDataModel(trainingUsers);
-          } else {
-            trainingModel = new GenericDataModel(trainingUsers);
-          }
+          DataModel trainingModel = new GenericDataModel(GenericDataModel.toPrefArrayValues(trainingUsers, true));
           Recommender recommender = recommenderBuilder.buildRecommender(trainingModel);
 
           try {
-            trainingModel.getUser(id);
+            trainingModel.getPreferencesFromUser(userID);
           } catch (NoSuchUserException nsee) {
             continue; // Oops we excluded all prefs for the user -- just move on
           }
 
           int intersectionSize = 0;
-          List<RecommendedItem> recommendedItems = recommender.recommend(id, at, rescorer);
+          List<RecommendedItem> recommendedItems = recommender.recommend(userID, at, rescorer);
           for (RecommendedItem recommendedItem : recommendedItems) {
             if (relevantItemIDs.contains(recommendedItem.getItemID())) {
               intersectionSize++;
@@ -153,13 +145,13 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
             precision.addDatum((double) intersectionSize / (double) numRecommendedItems);
           }
           recall.addDatum((double) intersectionSize / (double) numRelevantItems);
-          if (numRelevantItems < prefs.length) {
+          if (numRelevantItems < size) {
             fallOut.addDatum((double) (numRecommendedItems - intersectionSize) /
                 (double) (numItems - numRelevantItems));
           }
 
           long end = System.currentTimeMillis();
-          log.info("Evaluated with user " + user + " in " + (end - start) + "ms");
+          log.info("Evaluated with user " + userID + " in " + (end - start) + "ms");
           log.info("Precision/recall/fall-out: {} / {} / {}", new Object[]{
               precision.getAverage(), recall.getAverage(), fallOut.getAverage()
           });
@@ -172,43 +164,34 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
 
   private static void processOtherUser(Comparable<?> id,
                                        Collection<Comparable<?>> relevantItemIDs,
-                                       Collection<User> trainingUsers,
-                                       User user2) {
-    if (id.equals(user2.getID())) {
-      List<Preference> trainingPrefs = new ArrayList<Preference>();
-      Preference[] prefs2 = user2.getPreferencesAsArray();
-      for (Preference pref : prefs2) {
-        if (!relevantItemIDs.contains(pref.getItemID())) {
-          trainingPrefs.add(pref);
-        }
-      }
-      if (!trainingPrefs.isEmpty()) {
-        // TODO hack
-        User trainingUser;
-        if (user2 instanceof BooleanPrefUser) {
-          FastSet<Comparable<?>> itemIDs = new FastSet<Comparable<?>>();
-          for (Preference pref : trainingPrefs) {
-            itemIDs.add(pref.getItemID());
-          }
-          trainingUser = new BooleanPrefUser(id, itemIDs);
-        } else {
-          trainingUser = new GenericUser(id, trainingPrefs);
-        }
-        trainingUsers.add(trainingUser);
-      }
-    } else {
-      trainingUsers.add(user2);
+                                       Map<Comparable<?>, Collection<Preference>> trainingUsers,
+                                       Comparable<?> userID2,
+                                       DataModel dataModel) throws TasteException {
+    PreferenceArray prefs2Array = dataModel.getPreferencesFromUser(userID2);
+    List<Preference> prefs2 = new ArrayList<Preference>(prefs2Array.length());
+    for (Preference pref : prefs2Array) {
+      prefs2.add(pref);
     }
+    if (id.equals(userID2)) {
+      for (Iterator<Preference> iterator = prefs2.iterator(); iterator.hasNext();) {
+        Preference pref = iterator.next();
+        if (relevantItemIDs.contains(pref.getItemID())) {
+          iterator.remove();
+        }
+      }
+    }
+    trainingUsers.put(userID2, prefs2);
   }
 
-  private static double computeThreshold(Preference[] prefs) {
-    if (prefs.length < 2) {
+  private static double computeThreshold(PreferenceArray prefs) {
+    if (prefs.length() < 2) {
       // Not enough data points -- return a threshold that allows everything
       return Double.NEGATIVE_INFINITY;
     }
     RunningAverageAndStdDev stdDev = new FullRunningAverageAndStdDev();
-    for (Preference pref : prefs) {
-      stdDev.addDatum(pref.getValue());
+    int size = prefs.length();
+    for (int i = 0; i < size; i++) {
+      stdDev.addDatum(prefs.getValue(i));
     }
     return stdDev.getAverage() + stdDev.getStandardDeviation();
   }

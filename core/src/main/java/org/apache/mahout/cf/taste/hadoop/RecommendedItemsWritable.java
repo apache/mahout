@@ -52,7 +52,7 @@ public final class RecommendedItemsWritable implements Writable {
   public void write(DataOutput out) throws IOException {
     for (RecommendedItem item : recommended) {
       out.writeUTF(item.getItemID().toString());
-      out.writeDouble(item.getValue());
+      out.writeFloat(item.getValue());
     }
 
   }
@@ -63,7 +63,7 @@ public final class RecommendedItemsWritable implements Writable {
     try {
       do {
         String itemID = in.readUTF();
-        double value = in.readDouble();
+        float value = in.readFloat();
         RecommendedItem recommendedItem = new GenericRecommendedItem(itemID, value);
         recommended.add(recommendedItem);
       } while (true);

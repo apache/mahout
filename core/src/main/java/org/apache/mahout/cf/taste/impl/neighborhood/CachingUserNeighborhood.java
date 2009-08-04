@@ -23,7 +23,6 @@ import org.apache.mahout.cf.taste.impl.common.Cache;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 
 import java.util.Collection;
@@ -32,7 +31,7 @@ import java.util.Collection;
 public final class CachingUserNeighborhood implements UserNeighborhood {
 
   private final UserNeighborhood neighborhood;
-  private final Cache<Comparable<?>, Collection<User>> neighborhoodCache;
+  private final Cache<Comparable<?>, Collection<Comparable<?>>> neighborhoodCache;
 
   public CachingUserNeighborhood(UserNeighborhood neighborhood, DataModel dataModel) throws TasteException {
     if (neighborhood == null) {
@@ -40,12 +39,12 @@ public final class CachingUserNeighborhood implements UserNeighborhood {
     }
     this.neighborhood = neighborhood;
     int maxCacheSize = dataModel.getNumUsers(); // just a dumb heuristic for sizing
-    this.neighborhoodCache = new Cache<Comparable<?>, Collection<User>>(
+    this.neighborhoodCache = new Cache<Comparable<?>, Collection<Comparable<?>>>(
             new NeighborhoodRetriever(neighborhood), maxCacheSize);
   }
 
   @Override
-  public Collection<User> getUserNeighborhood(Comparable<?> userID) throws TasteException {
+  public Collection<Comparable<?>> getUserNeighborhood(Comparable<?> userID) throws TasteException {
     return neighborhoodCache.get(userID);
   }
 
@@ -56,7 +55,7 @@ public final class CachingUserNeighborhood implements UserNeighborhood {
     RefreshHelper.maybeRefresh(alreadyRefreshed, neighborhood);
   }
 
-  private static final class NeighborhoodRetriever implements Retriever<Comparable<?>, Collection<User>> {
+  private static final class NeighborhoodRetriever implements Retriever<Comparable<?>, Collection<Comparable<?>>> {
     private final UserNeighborhood neighborhood;
 
     private NeighborhoodRetriever(UserNeighborhood neighborhood) {
@@ -64,7 +63,7 @@ public final class CachingUserNeighborhood implements UserNeighborhood {
     }
 
     @Override
-    public Collection<User> get(Comparable<?> key) throws TasteException {
+    public Collection<Comparable<?>> get(Comparable<?> key) throws TasteException {
       return neighborhood.getUserNeighborhood(key);
     }
   }

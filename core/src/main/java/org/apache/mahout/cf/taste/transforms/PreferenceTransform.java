@@ -29,6 +29,6 @@ import org.apache.mahout.cf.taste.model.Preference;
  */
 public interface PreferenceTransform extends Refreshable {
 
-  double getTransformedValue(Preference pref) throws TasteException;
+  float getTransformedValue(Preference pref) throws TasteException;
 
 }

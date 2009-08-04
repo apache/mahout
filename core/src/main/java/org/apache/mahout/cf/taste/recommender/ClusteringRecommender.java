@@ -18,7 +18,6 @@
 package org.apache.mahout.cf.taste.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.model.User;
 
 import java.util.Collection;
 
@@ -26,20 +25,20 @@ import java.util.Collection;
 public interface ClusteringRecommender extends Recommender {
 
   /**
-   * <p>Returns the cluster of users to which the given {@link User}, denoted by user ID, belongs.</p>
+   * <p>Returns the cluster of users to which the given user, denoted by user ID, belongs.</p>
    *
    * @param userID user ID for which to find a cluster
-   * @return {@link Collection} of {@link User}s in the requested user's cluster
+   * @return {@link Collection} of IDs of users in the requested user's cluster
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
-  Collection<User> getCluster(Comparable<?> userID) throws TasteException;
+  Collection<Comparable<?>> getCluster(Comparable<?> userID) throws TasteException;
 
   /**
    * <p>Returns all clusters of users.</p>
    *
-   * @return {@link Collection} of {@link Collection}s of {@link User}s
+   * @return {@link Collection} of {@link Collection}s of user IDs
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
-  Collection<Collection<User>> getClusters() throws TasteException;
+  Collection<Collection<Comparable<?>>> getClusters() throws TasteException;
 
 }

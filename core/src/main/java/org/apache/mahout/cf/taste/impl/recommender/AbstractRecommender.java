@@ -20,7 +20,7 @@ package org.apache.mahout.cf.taste.impl.recommender;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.slf4j.Logger;
@@ -53,21 +53,19 @@ public abstract class AbstractRecommender implements Recommender {
   }
 
   /**
-   * <p>Default implementation which just calls {@link DataModel#setPreference(Comparable, Comparable, double)}.</p>
+   * <p>Default implementation which just calls {@link DataModel#setPreference(Comparable, Comparable, float)}.</p>
    *
    * @throws IllegalArgumentException if userID or itemID is <code>null</code>, or if value is {@link Double#NaN}
    */
   @Override
-  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value) throws TasteException {
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, float value) throws TasteException {
     if (userID == null || itemID == null) {
       throw new IllegalArgumentException("userID or itemID is null");
     }
     if (Double.isNaN(value)) {
       throw new IllegalArgumentException("Invalid value: " + value);
     }
-    if (log.isDebugEnabled()) {
-      log.debug("Setting preference for user '" + userID + "', item '" + itemID + "', value " + value);
-    }
+    log.debug("Setting preference for user {}, item {}", userID, itemID);    
     dataModel.setPreference(userID, itemID, value);
   }
 
@@ -92,20 +90,19 @@ public abstract class AbstractRecommender implements Recommender {
   }
 
   /**
-   * @param theUser {@link User} being evaluated
-   * @return all items in the {@link DataModel} for which the {@link User} has not expressed a preference
+   * @param theUserID ID of user being evaluated
+   * @return all items in the {@link DataModel} for which the user has not expressed a preference
    * @throws TasteException if an error occurs while listing items
    */
-  protected Set<Comparable<?>> getAllOtherItems(User theUser) throws TasteException {
-    if (theUser == null) {
-      throw new IllegalArgumentException("theUser is null");
-    }
+  protected Set<Comparable<?>> getAllOtherItems(Comparable<?> theUserID) throws TasteException {
     Set<Comparable<?>> allItemIDs = new FastSet<Comparable<?>>(dataModel.getNumItems());
     for (Comparable<?> itemID : dataModel.getItemIDs()) {
-      // If not already preferred by the user, add it
-      if (theUser.getPreferenceFor(itemID) == null) {
-        allItemIDs.add(itemID);
-      }
+      allItemIDs.add(itemID);
+    }
+    PreferenceArray prefs = dataModel.getPreferencesFromUser(theUserID);
+    int size = prefs.length();
+    for (int i = 0; i < size; i++) {
+      allItemIDs.remove(prefs.getItemID(i));
     }
     return allItemIDs;
   }

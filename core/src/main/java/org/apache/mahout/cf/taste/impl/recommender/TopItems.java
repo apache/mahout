@@ -20,7 +20,6 @@ package org.apache.mahout.cf.taste.impl.recommender;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
 import org.apache.mahout.cf.taste.impl.similarity.GenericUserSimilarity;
-import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 
@@ -51,7 +50,7 @@ public final class TopItems {
         double preference = estimator.estimate(itemID);
         double rescoredPref = rescorer == null ? preference : rescorer.rescore(itemID, preference);
         if (!Double.isNaN(rescoredPref) && (!full || rescoredPref > lowestTopValue)) {
-          topItems.add(new GenericRecommendedItem(itemID, rescoredPref));
+          topItems.add(new GenericRecommendedItem(itemID, (float) rescoredPref));
           if (full) {
             topItems.poll();
           } else if (topItems.size() > howMany) {
@@ -68,21 +67,21 @@ public final class TopItems {
     return result;
   }
 
-  public static List<User> getTopUsers(int howMany,
-                                       Iterable<? extends User> allUsers,
-                                       Rescorer<User> rescorer,
-                                       Estimator<User> estimator) throws TasteException {
+  public static List<Comparable<?>> getTopUsers(int howMany,
+                                                Iterable<? extends Comparable<?>> allUserIDs,
+                                                Rescorer<Comparable<?>> rescorer,
+                                                Estimator<Comparable<?>> estimator) throws TasteException {
     Queue<SimilarUser> topUsers = new PriorityQueue<SimilarUser>(howMany + 1, Collections.reverseOrder());
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
-    for (User user : allUsers) {
-      if (rescorer != null && rescorer.isFiltered(user)) {
+    for (Comparable<?> userID : allUserIDs) {
+      if (rescorer != null && rescorer.isFiltered(userID)) {
         continue;
       }
-      double similarity = estimator.estimate(user);
-      double rescoredSimilarity = rescorer == null ? similarity : rescorer.rescore(user, similarity);
+      double similarity = estimator.estimate(userID);
+      double rescoredSimilarity = rescorer == null ? similarity : rescorer.rescore(userID, similarity);
       if (!Double.isNaN(rescoredSimilarity) && (!full || rescoredSimilarity > lowestTopValue)) {
-        topUsers.add(new SimilarUser(user, similarity));
+        topUsers.add(new SimilarUser(userID, similarity));
         if (full) {
           topUsers.poll();
         } else if (topUsers.size() > howMany) {
@@ -95,9 +94,9 @@ public final class TopItems {
     List<SimilarUser> sorted = new ArrayList<SimilarUser>(topUsers.size());
     sorted.addAll(topUsers);
     Collections.sort(sorted);
-    List<User> result = new ArrayList<User>(sorted.size());
+    List<Comparable<?>> result = new ArrayList<Comparable<?>>(sorted.size());
     for (SimilarUser similarUser : sorted) {
-      result.add(similarUser.getUser());
+      result.add(similarUser.getUserID());
     }
     return result;
   }

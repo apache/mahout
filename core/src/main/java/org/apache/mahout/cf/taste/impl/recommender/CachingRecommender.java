@@ -48,7 +48,7 @@ public final class CachingRecommender implements Recommender {
   private final Recommender recommender;
   private final AtomicInteger maxHowMany;
   private final Cache<Comparable<?>, Recommendations> recommendationCache;
-  private final Cache<Pair<Comparable<?>, Comparable<?>>, Double> estimatedPrefCache;
+  private final Cache<Pair<Comparable<?>, Comparable<?>>, Float> estimatedPrefCache;
   private final RefreshHelper refreshHelper;
   private Rescorer<Comparable<?>> currentRescorer;
 
@@ -63,7 +63,7 @@ public final class CachingRecommender implements Recommender {
     this.recommendationCache =
         new Cache<Comparable<?>, Recommendations>(new RecommendationRetriever(this.recommender), numUsers);
     this.estimatedPrefCache =
-        new Cache<Pair<Comparable<?>, Comparable<?>>, Double>(new EstimatedPrefRetriever(this.recommender), numUsers);
+        new Cache<Pair<Comparable<?>, Comparable<?>>, Float>(new EstimatedPrefRetriever(this.recommender), numUsers);
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
       @Override
       public Object call() {
@@ -131,12 +131,12 @@ public final class CachingRecommender implements Recommender {
   }
 
   @Override
-  public double estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
+  public float estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
     return estimatedPrefCache.get(new Pair<Comparable<?>, Comparable<?>>(userID, itemID));
   }
 
   @Override
-  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value) throws TasteException {
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, float value) throws TasteException {
     recommender.setPreference(userID, itemID, value);
     clear(userID);
   }
@@ -198,7 +198,7 @@ public final class CachingRecommender implements Recommender {
     }
   }
 
-  private static final class EstimatedPrefRetriever implements Retriever<Pair<Comparable<?>, Comparable<?>>, Double> {
+  private static final class EstimatedPrefRetriever implements Retriever<Pair<Comparable<?>, Comparable<?>>, Float> {
 
     private final Recommender recommender;
 
@@ -207,7 +207,7 @@ public final class CachingRecommender implements Recommender {
     }
 
     @Override
-    public Double get(Pair<Comparable<?>, Comparable<?>> key) throws TasteException {
+    public Float get(Pair<Comparable<?>, Comparable<?>> key) throws TasteException {
       Comparable<?> userID = key.getFirst();
       Comparable<?> itemID = key.getSecond();
       log.debug("Retrieving estimated preference for user ID '{}' and item ID '{}'", userID, itemID);

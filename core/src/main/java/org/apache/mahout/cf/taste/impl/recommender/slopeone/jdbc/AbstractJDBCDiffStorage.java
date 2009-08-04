@@ -25,7 +25,7 @@ import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
 import org.apache.mahout.cf.taste.model.JDBCDataModel;
-import org.apache.mahout.cf.taste.model.Preference;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.slopeone.DiffStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,9 +148,9 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
   }
 
   @Override
-  public RunningAverage[] getDiffs(Comparable<?> userID, Comparable<?> itemID, Preference[] prefs)
+  public RunningAverage[] getDiffs(Comparable<?> userID, Comparable<?> itemID, PreferenceArray prefs)
       throws TasteException {
-    int size = prefs.length;
+    int size = prefs.length();
     RunningAverage[] result = new RunningAverage[size];
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -170,7 +170,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       int i = 0;
       while (rs.next()) {
         Comparable<?> nextResultItemID = (Comparable<?>) rs.getObject(3);
-        while (!prefs[i].getItemID().equals(nextResultItemID)) {
+        while (!prefs.getItemID(i).equals(nextResultItemID)) {
           i++;
           // result[i] is null for these values of i
         }
@@ -215,7 +215,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
   }
 
   @Override
-  public void updateItemPref(Comparable<?> itemID, double prefDelta, boolean remove)
+  public void updateItemPref(Comparable<?> itemID, float prefDelta, boolean remove)
       throws TasteException {
     Connection conn = null;
     try {

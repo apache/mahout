@@ -22,7 +22,6 @@ import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.SamplingIterable;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,12 +35,13 @@ public final class LoadEvaluator {
     DataModel dataModel = recommender.getDataModel();
     int numUsers = dataModel.getNumUsers();
     double sampleRate = 1000.0 / numUsers;
-    SamplingIterable<User> userSampler = new SamplingIterable<User>(dataModel.getUsers(), sampleRate);
+    SamplingIterable<Comparable<?>> userSampler =
+            new SamplingIterable<Comparable<?>>(dataModel.getUserIDs(), sampleRate);
     RunningAverageAndStdDev recommendationTime = new FullRunningAverageAndStdDev();
     int count = 0;
-    for (User user : userSampler) {
+    for (Comparable<?> userID : userSampler) {
       long start = System.currentTimeMillis();
-      recommender.recommend(user.getID(), 10);
+      recommender.recommend(userID, 10);
       long end = System.currentTimeMillis();
       if (count > 0) { // Ignore first as a warmup
         recommendationTime.addDatum(end - start);

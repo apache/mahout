@@ -97,8 +97,12 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
         userIDColumn,
         itemIDColumn,
         NO_SUCH_COLUMN,
+        // getPreferenceSQL
+        "SELECT 1 FROM " + preferenceTable + " WHERE " + userIDColumn + "=? AND " + itemIDColumn + "=?",
         // getUserSQL
-        "SELECT " + itemIDColumn + " FROM " + preferenceTable + " WHERE " + userIDColumn + "=?",
+        "SELECT " + userIDColumn + ", " + itemIDColumn + " FROM " + preferenceTable + " WHERE " + userIDColumn + "=?",
+        // getAllUsersSQL
+        "SELECT " + userIDColumn + ", " + itemIDColumn + " FROM " + preferenceTable + " ORDER BY " + userIDColumn,
         // getNumItemsSQL
         "SELECT COUNT(DISTINCT " + itemIDColumn + ") FROM " + preferenceTable,
         // getNumUsersSQL
@@ -108,11 +112,11 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
         // removePreference SQL
         "DELETE FROM " + preferenceTable + " WHERE " + userIDColumn + "=? AND " + itemIDColumn + "=?",
         // getUsersSQL
-        "SELECT " + itemIDColumn + ", " + userIDColumn + " FROM " + preferenceTable + " ORDER BY " + userIDColumn,
+        "SELECT DISTINCT " + userIDColumn + " FROM " + preferenceTable + " ORDER BY " + userIDColumn,
         // getItemsSQL
         "SELECT DISTINCT " + itemIDColumn + " FROM " + preferenceTable + " ORDER BY " + itemIDColumn,
         // getPrefsForItemSQL
-        "SELECT " + userIDColumn + " FROM " +
+        "SELECT " + userIDColumn + ", " + itemIDColumn + " FROM " +
             preferenceTable + " WHERE " + itemIDColumn + "=? ORDER BY " + userIDColumn,
         // getNumPreferenceForItemSQL
         "SELECT COUNT(1) FROM " + preferenceTable + " WHERE " + itemIDColumn + "=?",

@@ -16,8 +16,6 @@
  */
 package org.apache.mahout.clustering.kmeans;
 
-import java.io.IOException;
-
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -45,6 +43,8 @@ import org.apache.mahout.utils.HadoopUtil;
 import org.apache.mahout.utils.SquaredEuclideanDistanceMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 public class KMeansDriver {
 

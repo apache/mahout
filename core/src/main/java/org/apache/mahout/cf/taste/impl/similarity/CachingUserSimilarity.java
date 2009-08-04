@@ -24,7 +24,6 @@ import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
@@ -34,7 +33,7 @@ import java.util.Collection;
 public final class CachingUserSimilarity implements UserSimilarity {
 
   private final UserSimilarity similarity;
-  private final Cache<Pair<User, User>, Double> similarityCache;
+  private final Cache<Pair<Comparable<?>, Comparable<?>>, Double> similarityCache;
 
   public CachingUserSimilarity(UserSimilarity similarity, DataModel dataModel) throws TasteException {
     if (similarity == null) {
@@ -42,14 +41,14 @@ public final class CachingUserSimilarity implements UserSimilarity {
     }
     this.similarity = similarity;
     int maxCacheSize = dataModel.getNumUsers(); // just a dumb heuristic for sizing    
-    this.similarityCache = new Cache<Pair<User, User>, Double>(new SimilarityRetriever(similarity), maxCacheSize);
+    this.similarityCache = new Cache<Pair<Comparable<?>, Comparable<?>>, Double>(new SimilarityRetriever(similarity), maxCacheSize);
   }
 
   @Override
-  public double userSimilarity(User user1, User user2) throws TasteException {
-    Pair<User, User> key = user1.compareTo(user2) < 0 ?
-        new Pair<User, User>(user1, user2) :
-        new Pair<User, User>(user2, user1);
+  public double userSimilarity(Comparable<?> userID1, Comparable<?> userID2) throws TasteException {
+    Pair<Comparable<?>, Comparable<?>> key = ((Comparable<Object>) userID1).compareTo(userID2) < 0 ?
+        new Pair<Comparable<?>, Comparable<?>>(userID1, userID2) :
+        new Pair<Comparable<?>, Comparable<?>>(userID2, userID1);
     return similarityCache.get(key);
   }
 
@@ -66,7 +65,7 @@ public final class CachingUserSimilarity implements UserSimilarity {
     RefreshHelper.maybeRefresh(alreadyRefreshed, similarity);
   }
 
-  private static final class SimilarityRetriever implements Retriever<Pair<User, User>, Double> {
+  private static final class SimilarityRetriever implements Retriever<Pair<Comparable<?>, Comparable<?>>, Double> {
     private final UserSimilarity similarity;
 
     private SimilarityRetriever(UserSimilarity similarity) {
@@ -74,7 +73,7 @@ public final class CachingUserSimilarity implements UserSimilarity {
     }
 
     @Override
-    public Double get(Pair<User, User> key) throws TasteException {
+    public Double get(Pair<Comparable<?>, Comparable<?>> key) throws TasteException {
       return similarity.userSimilarity(key.getFirst(), key.getSecond());
     }
   }

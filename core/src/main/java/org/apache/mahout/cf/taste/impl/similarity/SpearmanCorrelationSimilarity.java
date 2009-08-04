@@ -20,143 +20,102 @@ package org.apache.mahout.cf.taste.impl.similarity;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
-import org.apache.mahout.cf.taste.impl.model.ByItemPreferenceComparator;
-import org.apache.mahout.cf.taste.impl.model.ByValuePreferenceComparator;
-import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 /**
  * <p>Like {@link PearsonCorrelationSimilarity}, but compares relative ranking of preference values instead of
- * preference values themselves. That is, each {@link User}'s preferences are sorted and then assign a rank as their
- * preference value, with 1 being assigned to the least preferred item. Then the Pearson correlation of these rank
- * values is computed.</p>
+ * preference values themselves. That is, each user's preferences are sorted and then assign a rank as their
+ * preference value, with 1 being assigned to the least preferred item.</p>
  */
 public final class SpearmanCorrelationSimilarity implements UserSimilarity {
 
-  private final UserSimilarity rankingUserSimilarity;
+  private final DataModel dataModel;
 
   public SpearmanCorrelationSimilarity(DataModel dataModel) throws TasteException {
     if (dataModel == null) {
       throw new IllegalArgumentException("dataModel is null");
     }
-    this.rankingUserSimilarity = new PearsonCorrelationSimilarity(dataModel);
-  }
-
-  public SpearmanCorrelationSimilarity(UserSimilarity rankingUserSimilarity) {
-    if (rankingUserSimilarity == null) {
-      throw new IllegalArgumentException("rankingUserSimilarity is null");
-    }
-    this.rankingUserSimilarity = rankingUserSimilarity;
+    this.dataModel = dataModel;
   }
 
   @Override
-  public double userSimilarity(User user1, User user2) throws TasteException {
-    if (user1 == null || user2 == null) {
-      throw new IllegalArgumentException("user1 or user2 is null");
+  public double userSimilarity(Comparable<?> userID1, Comparable<?> userID2) throws TasteException {
+
+    if (userID1 == null || userID2 == null) {
+      throw new IllegalArgumentException("userID1 or userID2 is null");
     }
-    return rankingUserSimilarity.userSimilarity(new RankedPreferenceUser(user1),
-        new RankedPreferenceUser(user2));
+
+    PreferenceArray xPrefs = dataModel.getPreferencesFromUser(userID1);
+    PreferenceArray yPrefs = dataModel.getPreferencesFromUser(userID2);
+    int xLength = xPrefs.length();
+    int yLength = yPrefs.length();
+
+    if (xLength <= 1 || yLength <= 1) {
+      return Double.NaN;
+    }
+
+    xPrefs = xPrefs.clone();
+    yPrefs = yPrefs.clone();
+    
+    xPrefs.sortByValue();
+    yPrefs.sortByValue();
+
+    for (int i = 0; i < xLength; i++) {
+      xPrefs.setValue(i, i);
+    }
+    for (int i = 0; i < yLength; i++) {
+      yPrefs.setValue(i, i);
+    }
+
+    xPrefs.sortByItem();
+    yPrefs.sortByItem();
+
+    Comparable<?> xIndex = xPrefs.getItemID(0);
+    Comparable<?> yIndex = yPrefs.getItemID(0);
+    int xPrefIndex = 0;
+    int yPrefIndex = 0;
+
+    double sumXYRankDiff2 = 0.0;
+    int count = 0;
+
+    while (true) {
+      int compare = ((Comparable<Object>) xIndex).compareTo(yIndex);
+      if (compare == 0) {
+        double diff = xPrefs.getValue(xPrefIndex) - yPrefs.getValue(yPrefIndex);
+        sumXYRankDiff2 += diff * diff;
+        count++;
+      }
+      if (compare <= 0) {
+        if (++xPrefIndex >= xLength) {
+          break;
+        }
+        xIndex = xPrefs.getItemID(xPrefIndex);
+      }
+      if (compare >= 0) {
+        if (++yPrefIndex >= yLength) {
+          break;
+        }
+        yIndex = yPrefs.getItemID(yPrefIndex);
+      }
+    }
+
+    return 1.0 - (6.0 * sumXYRankDiff2 / count / (count*count - 1));
   }
 
   @Override
   public void setPreferenceInferrer(PreferenceInferrer inferrer) {
-    rankingUserSimilarity.setPreferenceInferrer(inferrer);
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
-    RefreshHelper.maybeRefresh(alreadyRefreshed, rankingUserSimilarity);
-  }
-
-
-  /**
-   * <p>A simple {@link User} decorator which will always return the underlying {@link User}'s preferences in order by
-   * value.</p>
-   */
-  private static final class RankedPreferenceUser implements User {
-
-    private final User delegate;
-
-    private RankedPreferenceUser(User delegate) {
-      this.delegate = delegate;
-    }
-
-    @Override
-    public Comparable<?> getID() {
-      return delegate.getID();
-    }
-
-    /**
-     * @throws UnsupportedOperationException
-     */
-    @Override
-    public Preference getPreferenceFor(Comparable<?> itemID) {
-      throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @throws UnsupportedOperationException
-     */
-    @Override
-    public void setPreference(Comparable<?> itemID, double value) {
-      throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @throws UnsupportedOperationException
-     */
-    @Override
-    public void removePreference(Comparable<?> itemID) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Iterable<Preference> getPreferences() {
-      return Arrays.asList(getPreferencesAsArray());
-    }
-
-    @Override
-    public Preference[] getPreferencesAsArray() {
-      Preference[] source = delegate.getPreferencesAsArray();
-      int length = source.length;
-      Preference[] sortedPrefs = new Preference[length];
-      System.arraycopy(source, 0, sortedPrefs, 0, length);
-      Arrays.sort(sortedPrefs, ByValuePreferenceComparator.getInstance());
-      for (int i = 0; i < length; i++) {
-        sortedPrefs[i] = new GenericPreference(this, sortedPrefs[i].getItemID(), (double) (i + 1));
-      }
-      Arrays.sort(sortedPrefs, ByItemPreferenceComparator.getInstance());
-      return sortedPrefs;
-    }
-
-    @Override
-    public int hashCode() {
-      return delegate.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      return o instanceof RankedPreferenceUser && delegate.equals(((RankedPreferenceUser) o).delegate);
-    }
-
-    @Override
-    public int compareTo(User user) {
-      return delegate.compareTo(user);
-    }
-
-    @Override
-    public String toString() {
-      return "RankedPreferenceUser[user:" + delegate + ']';
-    }
-
+    RefreshHelper.maybeRefresh(alreadyRefreshed, dataModel);
   }
 
 }

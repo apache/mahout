@@ -24,34 +24,36 @@ import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 
 import java.util.Collection;
 
 /**
- * <p>Implementations of this interface compute an inferred preference for a {@link User} and an item that the
+ * <p>Implementations of this interface compute an inferred preference for a user and an item that the
  * user has not expressed any preference for. This might be an average of other preferences scores from that user, for
  * example. This technique is sometimes called "default voting".</p>
  */
 public final class AveragingPreferenceInferrer implements PreferenceInferrer {
 
-  private static final Retriever<User, Double> RETRIEVER = new PrefRetriever();
+  private static final Float ZERO = 0.0f;
 
-  private final Cache<User, Double> averagePreferenceValue;
+  private final DataModel dataModel;
+  private final Cache<Comparable<?>, Float> averagePreferenceValue;
 
   public AveragingPreferenceInferrer(DataModel dataModel) throws TasteException {
-    averagePreferenceValue = new Cache<User, Double>(RETRIEVER, dataModel.getNumUsers());
+    this.dataModel = dataModel;
+    Retriever<Comparable<?>, Float> retriever = new PrefRetriever();
+    averagePreferenceValue = new Cache<Comparable<?>, Float>(retriever, dataModel.getNumUsers());
     refresh(null);
   }
 
   @Override
-  public double inferPreference(User user, Comparable<?> itemID) throws TasteException {
-    if (user == null || itemID == null) {
-      throw new IllegalArgumentException("user or item is null");
+  public float inferPreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
+    if (userID == null || itemID == null) {
+      throw new IllegalArgumentException("userID or item is null");
     }
-    return averagePreferenceValue.get(user);
+    return averagePreferenceValue.get(userID);
   }
 
   @Override
@@ -59,20 +61,20 @@ public final class AveragingPreferenceInferrer implements PreferenceInferrer {
     averagePreferenceValue.clear();
   }
 
-  private static final class PrefRetriever implements Retriever<User, Double> {
-    private static final Double ZERO = 0.0;
+  private final class PrefRetriever implements Retriever<Comparable<?>, Float> {
 
     @Override
-    public Double get(User key) {
+    public Float get(Comparable<?> key) throws TasteException {
       RunningAverage average = new FullRunningAverage();
-      Preference[] prefs = key.getPreferencesAsArray();
-      if (prefs.length == 0) {
+      PreferenceArray prefs = dataModel.getPreferencesFromUser(key);
+      int size = prefs.length();
+      if (size == 0) {
         return ZERO;
       }
-      for (Preference pref : prefs) {
-        average.addDatum(pref.getValue());
+      for (int i = 0; i < size; i++) {
+        average.addDatum(prefs.getValue(i));
       }
-      return average.getAverage();
+      return (float) average.getAverage();
     }
   }
 

@@ -38,7 +38,7 @@ import java.sql.SQLException;
  * </table>
  *
  * <p><code>preference</code> must have a type compatible
- * with the Java <code>double</code> type. <code>user_id</code> and <code>item_id</code> should be an integer or
+ * with the Java <code>float</code> type. <code>user_id</code> and <code>item_id</code> should be an integer or
  * string type (INT, LONGINT, VARCHAR). For example, the following command sets up a suitable table in MySQL,
  * complete with primary key and indexes:</p>
  *
@@ -145,9 +145,15 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
         userIDColumn,
         itemIDColumn,
         preferenceColumn,
+        // getPreferenceSQL
+        "SELECT " + preferenceColumn + " FROM " + preferenceTable + " WHERE " + userIDColumn + "=? AND " +
+            itemIDColumn + "=?",
         // getUserSQL
-        "SELECT " + itemIDColumn + ", " + preferenceColumn + " FROM " + preferenceTable +
+        "SELECT " + userIDColumn + ", " + itemIDColumn + ", " + preferenceColumn + " FROM " + preferenceTable +
             " WHERE " + userIDColumn + "=? ORDER BY " + itemIDColumn,
+        // getAllUsersSQL
+        "SELECT " + userIDColumn + ", " + itemIDColumn + ", " + preferenceColumn + " FROM " + preferenceTable +
+            " ORDER BY " + userIDColumn + ", " + itemIDColumn,
         // getNumItemsSQL
         "SELECT COUNT(DISTINCT " + itemIDColumn + ") FROM " + preferenceTable,
         // getNumUsersSQL
@@ -158,12 +164,11 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
         // removePreference SQL
         "DELETE FROM " + preferenceTable + " WHERE " + userIDColumn + "=? AND " + itemIDColumn + "=?",
         // getUsersSQL
-        "SELECT " + itemIDColumn + ", " + preferenceColumn + ", " + userIDColumn + " FROM " +
-            preferenceTable + " ORDER BY " + userIDColumn + ", " + itemIDColumn,
+        "SELECT DISTINCT " + userIDColumn + " FROM " + preferenceTable + " ORDER BY " + userIDColumn,
         // getItemsSQL
         "SELECT DISTINCT " + itemIDColumn + " FROM " + preferenceTable + " ORDER BY " + itemIDColumn,
         // getPrefsForItemSQL
-        "SELECT " + preferenceColumn + ", " + userIDColumn + " FROM " +
+        "SELECT " + userIDColumn + ", " + itemIDColumn + ", " + preferenceColumn + " FROM " +
             preferenceTable + " WHERE " + itemIDColumn + "=? ORDER BY " + userIDColumn,
         // getNumPreferenceForItemSQL
         "SELECT COUNT(1) FROM " + preferenceTable + " WHERE " + itemIDColumn + "=?",

@@ -18,8 +18,8 @@
 package org.apache.mahout.cf.taste.recommender;
 
 /**
- * <p>A {@link Rescorer} simply assigns a new "score" to a thing like an {@link org.apache.mahout.cf.taste.model.Item}
- * or {@link org.apache.mahout.cf.taste.model.User} which a {@link Recommender} is considering returning as a top
+ * <p>A {@link Rescorer} simply assigns a new "score" to a thing like an ID of an item
+ * or user which a {@link Recommender} is considering returning as a top
  * recommendation. It may be used to arbitrarily re-rank the results according to application-specific logic before
  * returning recommendations. For example, an application may want to boost the score of items in a certain category
  * just for one request.</p>
@@ -30,8 +30,7 @@ package org.apache.mahout.cf.taste.recommender;
 public interface Rescorer<T> {
 
   /**
-   * @param thing         thing ({@link org.apache.mahout.cf.taste.model.Item} or {@link org.apache.mahout.cf.taste.model.User}
-   *                      really) to rescore
+   * @param thing         thing to rescore
    * @param originalScore original score
    * @return modified score, or {@link Double#NaN} to indicate that this should be excluded entirely
    */

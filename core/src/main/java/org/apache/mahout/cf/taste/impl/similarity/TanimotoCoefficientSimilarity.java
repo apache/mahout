@@ -19,10 +19,9 @@ package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
@@ -57,25 +56,25 @@ public final class TanimotoCoefficientSimilarity implements UserSimilarity, Item
   }
 
   @Override
-  public double userSimilarity(User user1, User user2) {
+  public double userSimilarity(Comparable<?> userID1, Comparable<?> userID2) throws TasteException {
 
-    if (user1 == null || user2 == null) {
-      throw new IllegalArgumentException("user1 or user2 is null");
+    if (userID1 == null || userID2 == null) {
+      throw new IllegalArgumentException("userID1 or userID2 is null");
     }
 
-    Preference[] xPrefs = user1.getPreferencesAsArray();
-    Preference[] yPrefs = user2.getPreferencesAsArray();
+    FastSet<Comparable<?>> xPrefs = dataModel.getItemIDsFromUser(userID1);
+    FastSet<Comparable<?>> yPrefs = dataModel.getItemIDsFromUser(userID2);
 
-    if (xPrefs.length == 0 && yPrefs.length == 0) {
+    if (xPrefs.isEmpty() && yPrefs.isEmpty()) {
       return Double.NaN;
     }
-    if (xPrefs.length == 0 || yPrefs.length == 0) {
+    if (xPrefs.isEmpty() || yPrefs.isEmpty()) {
       return 0.0;
     }
 
-    int intersectionSize = LogLikelihoodSimilarity.findIntersectionSize(xPrefs, yPrefs);
+    int intersectionSize = xPrefs.intersectionSize(yPrefs);
 
-    int unionSize = xPrefs.length + yPrefs.length - intersectionSize;
+    int unionSize = xPrefs.size() + yPrefs.size() - intersectionSize;
 
     return (double) intersectionSize / (double) unionSize;
   }

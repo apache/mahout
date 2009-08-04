@@ -78,6 +78,10 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
     }
   }
 
+  public String peek() {
+    return nextLine;
+  }
+
   @Override
   public boolean hasNext() {
     return nextLine != null;

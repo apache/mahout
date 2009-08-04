@@ -42,6 +42,7 @@ import java.util.Set;
 public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
 
   public static final int NO_MAX_SIZE = Integer.MAX_VALUE;
+  private static final double ALLOWED_LOAD_FACTOR = 1.5;
 
   /** Dummy object used to represent a key that has been removed. */
   private static final Object REMOVED = new Object();
@@ -63,25 +64,32 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
     this(size, NO_MAX_SIZE);
   }
 
+  public FastMap(Map<K,V> other) {
+    this(other.size());
+    putAll(other);
+  }
+
   /**
    * Creates a new {@link FastMap} whose capacity can accommodate the given number of entries without rehash.</p>
    *
    * @param size    desired capacity
    * @param maxSize max capacity
-   * @throws IllegalArgumentException if size is less than 1 or at least half of {@link RandomUtils#MAX_INT_SMALLER_TWIN_PRIME}
+   * @throws IllegalArgumentException if size is less than 0, maxSize is less than 1,
+   *  or at least half of {@link RandomUtils#MAX_INT_SMALLER_TWIN_PRIME}
    */
   @SuppressWarnings("unchecked")
   public FastMap(int size, int maxSize) {
-    if (size < 1) {
-      throw new IllegalArgumentException("size must be at least 1");
+    if (size < 0) {
+      throw new IllegalArgumentException("size must be at least 0");
     }
-    if (size >= RandomUtils.MAX_INT_SMALLER_TWIN_PRIME >> 1) {
-      throw new IllegalArgumentException("size must be less than " + (RandomUtils.MAX_INT_SMALLER_TWIN_PRIME >> 1));
+    int max = (int) (RandomUtils.MAX_INT_SMALLER_TWIN_PRIME / ALLOWED_LOAD_FACTOR);
+    if (size >= max) {
+      throw new IllegalArgumentException("size must be less than " + max);
     }
     if (maxSize < 1) {
       throw new IllegalArgumentException("maxSize must be at least 1");
     }
-    int hashSize = RandomUtils.nextTwinPrime(2 * size);
+    int hashSize = RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * size));
     keys = (K[]) new Object[hashSize];
     values = (V[]) new Object[hashSize];
     this.maxSize = maxSize;
@@ -170,9 +178,9 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
       throw new NullPointerException();
     }
     // If less than half the slots are open, let's clear it up
-    if (numSlotsUsed >= keys.length >> 1) {
+    if (numSlotsUsed * ALLOWED_LOAD_FACTOR >= keys.length) {
       // If over half the slots used are actual entries, let's grow
-      if (numEntries >= numSlotsUsed >> 1) {
+      if (numEntries * ALLOWED_LOAD_FACTOR >= numSlotsUsed) {
         growAndRehash();
       } else {
         // Otherwise just rehash to clear REMOVED entries and don't grow
@@ -275,14 +283,14 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
   }
 
   public void rehash() {
-    rehash(RandomUtils.nextTwinPrime(numEntries << 1));
+    rehash(RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * numEntries)));
   }
 
   private void growAndRehash() {
-    if (keys.length >= RandomUtils.MAX_INT_SMALLER_TWIN_PRIME >> 1) {
+    if (keys.length * ALLOWED_LOAD_FACTOR >= RandomUtils.MAX_INT_SMALLER_TWIN_PRIME) {
       throw new IllegalStateException("Can't grow any more");
     }
-    rehash(RandomUtils.nextTwinPrime(keys.length << 1));
+    rehash(RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * keys.length)));
   }
 
   @SuppressWarnings("unchecked")

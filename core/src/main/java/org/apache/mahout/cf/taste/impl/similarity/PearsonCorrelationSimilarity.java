@@ -20,10 +20,9 @@ package org.apache.mahout.cf.taste.impl.similarity;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Weighting;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.User;
 
 /**
- * <p>An implementation of the Pearson correlation. For {@link User}s X and Y, the following values are calculated:</p>
+ * <p>An implementation of the Pearson correlation. For users X and Y, the following values are calculated:</p>
  *
  * <ul> <li>sumX2: sum of the square of all X's preference values</li> <li>sumY2: sum of the square of all Y's
  * preference values</li> <li>sumXY: sum of the product of X and Y's preference value for all items for which both X and

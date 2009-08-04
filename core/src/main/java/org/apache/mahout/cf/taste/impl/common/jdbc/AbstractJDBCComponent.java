@@ -17,14 +17,14 @@
 
 package org.apache.mahout.cf.taste.impl.common.jdbc;
 
+import org.apache.mahout.cf.taste.common.TasteException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.mahout.cf.taste.common.TasteException;
 
-import javax.sql.DataSource;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 

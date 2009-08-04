@@ -30,8 +30,7 @@ import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.slopeone.DiffStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -144,14 +143,14 @@ public final class MemoryDiffStorage implements DiffStorage {
   }
 
   @Override
-  public RunningAverage[] getDiffs(Comparable<?> userID, Comparable<?> itemID, Preference[] prefs)
+  public RunningAverage[] getDiffs(Comparable<?> userID, Comparable<?> itemID, PreferenceArray prefs)
           throws TasteException {
     try {
       buildAverageDiffsLock.readLock().lock();
-      int size = prefs.length;
+      int size = prefs.length();
       RunningAverage[] result = new RunningAverage[size];
       for (int i = 0; i < size; i++) {
-        result[i] = getDiff(prefs[i].getItemID(), itemID);
+        result[i] = getDiff(prefs.getItemID(i), itemID);
       }
       return result;
     } finally {
@@ -165,7 +164,7 @@ public final class MemoryDiffStorage implements DiffStorage {
   }
 
   @Override
-  public void updateItemPref(Comparable<?> itemID, double prefDelta, boolean remove) {
+  public void updateItemPref(Comparable<?> itemID, float prefDelta, boolean remove) {
     if (!remove && stdDevWeighted) {
       throw new UnsupportedOperationException("Can't update only when stdDevWeighted is set");
     }
@@ -201,11 +200,10 @@ public final class MemoryDiffStorage implements DiffStorage {
 
   @Override
   public Set<Comparable<?>> getRecommendableItemIDs(Comparable<?> userID) throws TasteException {
-    User user = dataModel.getUser(userID);
     Set<Comparable<?>> result = allRecommendableItemIDs.clone();
     Iterator<Comparable<?>> it = result.iterator();
     while (it.hasNext()) {
-      if (user.getPreferenceFor(it.next()) != null) {
+      if (dataModel.getPreferenceValue(userID, it.next()) != null) {
         it.remove();
       }
     }
@@ -218,8 +216,8 @@ public final class MemoryDiffStorage implements DiffStorage {
       buildAverageDiffsLock.writeLock().lock();
       averageDiffs.clear();
       long averageCount = 0L;
-      for (User user : dataModel.getUsers()) {
-        averageCount = processOneUser(averageCount, user);
+      for (Comparable<?> userID : dataModel.getUserIDs()) {
+        averageCount = processOneUser(averageCount, userID);
       }
 
       pruneInconsequentialDiffs();
@@ -263,15 +261,14 @@ public final class MemoryDiffStorage implements DiffStorage {
     allRecommendableItemIDs.rehash();
   }
 
-  private long processOneUser(long averageCount, User user) {
-    log.debug("Processing prefs for user {}", user);
+  private long processOneUser(long averageCount, Comparable<?> userID) throws TasteException {
+    log.debug("Processing prefs for user {}", userID);
     // Save off prefs for the life of this loop iteration
-    Preference[] userPreferences = user.getPreferencesAsArray();
-    int length = userPreferences.length;
+    PreferenceArray userPreferences = dataModel.getPreferencesFromUser(userID);
+    int length = userPreferences.length();
     for (int i = 0; i < length; i++) {
-      Preference prefA = userPreferences[i];
-      double prefAValue = prefA.getValue();
-      Comparable<?> itemIDA = prefA.getItemID();
+      double prefAValue = userPreferences.getValue(i);
+      Comparable<?> itemIDA = userPreferences.getItemID(i);
       FastMap<Comparable<?>, RunningAverage> aMap = averageDiffs.get(itemIDA);
       if (aMap == null) {
         aMap = new FastMap<Comparable<?>, RunningAverage>();
@@ -279,8 +276,7 @@ public final class MemoryDiffStorage implements DiffStorage {
       }
       for (int j = i + 1; j < length; j++) {
         // This is a performance-critical block
-        Preference prefB = userPreferences[j];
-        Comparable<?> itemIDB = prefB.getItemID();
+        Comparable<?> itemIDB = userPreferences.getItemID(j);
         RunningAverage average = aMap.get(itemIDB);
         if (average == null && averageCount < maxEntries) {
           average = buildRunningAverage();
@@ -288,7 +284,7 @@ public final class MemoryDiffStorage implements DiffStorage {
           averageCount++;
         }
         if (average != null) {
-          average.addDatum(prefB.getValue() - prefAValue);
+          average.addDatum(userPreferences.getValue(j) - prefAValue);
         }
 
       }

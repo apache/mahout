@@ -18,16 +18,12 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
-import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
-import org.apache.mahout.cf.taste.impl.model.GenericUser;
+import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.User;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -46,7 +42,7 @@ final class MockRecommender implements Recommender {
   public List<RecommendedItem> recommend(Comparable<?> userID, int howMany) {
     recommendCount.incrementAndGet();
     return Collections.<RecommendedItem>singletonList(
-        new GenericRecommendedItem("1", 1.0));
+        new GenericRecommendedItem("1", 1.0f));
   }
 
   @Override
@@ -57,13 +53,13 @@ final class MockRecommender implements Recommender {
   }
 
   @Override
-  public double estimatePreference(Comparable<?> userID, Comparable<?> itemID) {
+  public float estimatePreference(Comparable<?> userID, Comparable<?> itemID) {
     recommendCount.incrementAndGet();
-    return 0.0;
+    return 0.0f;
   }
 
   @Override
-  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value) {
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, float value) {
     // do nothing
   }
 
@@ -74,14 +70,9 @@ final class MockRecommender implements Recommender {
 
   @Override
   public DataModel getDataModel() {
-    User user1 = new GenericUser("1", Collections.<Preference>emptyList());
-    User user2 = new GenericUser("2", Collections.<Preference>emptyList());
-    User user3 = new GenericUser("3", Collections.<Preference>emptyList());
-    List<User> users = new ArrayList<User>(3);
-    users.add(user1);
-    users.add(user2);
-    users.add(user3);
-    return new GenericDataModel(users);
+    return TasteTestCase.getDataModel(
+            new Comparable<?>[] {"1","2","3"},
+            new Double[][]{{1.0},{2.0},{3.0}});
   }
 
   @Override

@@ -17,20 +17,21 @@
 
 package org.apache.mahout.cf.taste.example.netflix;
 
-import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.User;
-import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.common.Refreshable;
+import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
-import org.apache.mahout.cf.taste.impl.common.ArrayIterator;
+import org.apache.mahout.cf.taste.impl.model.GenericItemPreferenceArray;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
+import org.apache.mahout.cf.taste.model.DataModel;
+import org.apache.mahout.cf.taste.model.Preference;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.ArrayList;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public final class NetflixFileDataModel implements DataModel {
 
@@ -50,12 +51,12 @@ public final class NetflixFileDataModel implements DataModel {
   }
 
   @Override
-  public Iterable<? extends User> getUsers() {
+  public Iterable<Comparable<?>> getUserIDs() {
     throw new UnsupportedOperationException(); // TODO
   }
 
   @Override
-  public User getUser(Comparable<?> id) {
+  public PreferenceArray getPreferencesFromUser(Comparable<?> id) {
     throw new UnsupportedOperationException(); // TODO
   }
 
@@ -65,12 +66,17 @@ public final class NetflixFileDataModel implements DataModel {
   }
 
   @Override
-  public Iterable<? extends Preference> getPreferencesForItem(Comparable<?> itemID) {
-    return new ArrayIterator<Preference>(getPreferencesForItemAsArray(itemID));
+  public FastSet<Comparable<?>> getItemIDsFromUser(Comparable<?> userID) {
+    throw new UnsupportedOperationException(); // TODO
   }
 
   @Override
-  public Preference[] getPreferencesForItemAsArray(Comparable<?> itemID) {
+  public Float getPreferenceValue(Comparable<?> userID, Comparable<?> itemID) {
+    throw new UnsupportedOperationException(); // TODO
+  }
+
+  @Override
+  public PreferenceArray getPreferencesForItem(Comparable<?> itemID) {
     StringBuilder itemIDPadded = new StringBuilder(5);
     itemIDPadded.append(itemID);
     while (itemIDPadded.length() < 5) {
@@ -82,10 +88,10 @@ public final class NetflixFileDataModel implements DataModel {
       int firstComma = line.indexOf((int) ',');
       Integer userID = Integer.valueOf(line.substring(0, firstComma));
       int secondComma = line.indexOf((int) ',', firstComma + 1);
-      double rating = Double.parseDouble(line.substring(firstComma + 1, secondComma));
-      prefs.add(new GenericPreference(getUser(userID), itemID, rating));
+      float rating = Float.parseFloat(line.substring(firstComma + 1, secondComma));
+      prefs.add(new GenericPreference(userID, itemID, rating));
     }
-    return prefs.toArray(new Preference[prefs.size()]);
+    return new GenericItemPreferenceArray(prefs);
   }
 
   @Override
@@ -107,7 +113,7 @@ public final class NetflixFileDataModel implements DataModel {
    * @throws UnsupportedOperationException
    */
   @Override
-  public void setPreference(Comparable<?> userID, Comparable<?> itemID, double value) {
+  public void setPreference(Comparable<?> userID, Comparable<?> itemID, float value) {
     throw new UnsupportedOperationException();
   }
 

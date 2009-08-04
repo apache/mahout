@@ -18,7 +18,8 @@
 package org.apache.mahout.cf.taste.impl.neighborhood;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
-import org.apache.mahout.cf.taste.model.User;
+import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
@@ -27,10 +28,16 @@ import java.util.Collection;
 
 final class DummySimilarity implements UserSimilarity, ItemSimilarity {
 
+  private final DataModel dataModel;
+
+  DummySimilarity(DataModel dataModel) {
+    this.dataModel = dataModel;
+  }
+
   @Override
-  public double userSimilarity(User user1, User user2) {
-    return 1.0 / Math.abs(user1.getPreferencesAsArray()[0].getValue() -
-        user2.getPreferencesAsArray()[0].getValue());
+  public double userSimilarity(Comparable<?> userID1, Comparable<?> userID2) throws TasteException {
+    return 1.0 / Math.abs(dataModel.getPreferencesFromUser(userID1).get(0).getValue() -
+        dataModel.getPreferencesFromUser(userID2).get(0).getValue());
   }
 
   @Override

@@ -22,8 +22,8 @@ import org.apache.mahout.cf.taste.common.Weighting;
 import org.apache.mahout.cf.taste.model.DataModel;
 
 /**
- * <p>An implementation of a "similarity" based on the Euclidean "distance" between two {@link
- * org.apache.mahout.cf.taste.model.User}s X and Y. Thinking of items as dimensions and preferences as points along
+ * <p>An implementation of a "similarity" based on the Euclidean "distance" between two 
+ * users X and Y. Thinking of items as dimensions and preferences as points along
  * those dimensions, a distance is computed using all items (dimensions) where both users have expressed a preference
  * for that item. This is simply the square root of the sum of the squares of differences in position (preference) along
  * each dimension. The similarity is then computed as 1 / (1 + distance), so the resulting values are in the range
