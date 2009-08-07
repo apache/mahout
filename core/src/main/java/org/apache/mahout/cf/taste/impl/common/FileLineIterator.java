@@ -47,6 +47,16 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
    * @throws FileNotFoundException if the file does not exist
    * @throws IOException           if the file cannot be read
    */
+  public FileLineIterator(File file) throws IOException {
+    this(file, Charset.forName("UTF-8"), false);
+  }
+
+  /**
+   * Creates a {@link FileLineIterator} over a given file, assuming a UTF-8 encoding.
+   *
+   * @throws FileNotFoundException if the file does not exist
+   * @throws IOException           if the file cannot be read
+   */
   public FileLineIterator(File file, boolean skipFirstLine) throws IOException {
     this(file, Charset.forName("UTF-8"), skipFirstLine);
   }

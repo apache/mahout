@@ -35,6 +35,11 @@ public final class FileLineIterable implements Iterable<String> {
   private final boolean skipFirstLine;
 
   /** Creates a {@link FileLineIterable} over a given file, assuming a UTF-8 encoding. */
+  public FileLineIterable(File file) {
+    this(file, Charset.forName("UTF-8"), false);
+  }
+
+  /** Creates a {@link FileLineIterable} over a given file, assuming a UTF-8 encoding. */
   public FileLineIterable(File file, boolean skipFirstLine) {
     this(file, Charset.forName("UTF-8"), skipFirstLine);
   }
