@@ -27,6 +27,7 @@ import java.util.Iterator;
 public class DenseVector extends AbstractVector {
 
   private double[] values;
+  private double lengthSquared = -1.0;
 
   /** For serialization purposes only */
   public DenseVector() {
@@ -293,11 +294,11 @@ public class DenseVector extends AbstractVector {
     return result;
   }
 
-  private Double lengthSquared = null;
+
 
   @Override
   public double getLengthSquared() {
-    if (lengthSquared != null) {
+    if (lengthSquared < 0.0) {
       return lengthSquared;
     }
 

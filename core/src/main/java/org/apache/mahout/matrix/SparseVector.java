@@ -29,6 +29,7 @@ public class SparseVector extends AbstractVector {
   private OrderedIntDoubleMapping values;
 
   private int cardinality;
+  private double lengthSquared = -1.0;
 
   /** For serialization purposes only. */
   public SparseVector() {
@@ -289,7 +290,7 @@ public class SparseVector extends AbstractVector {
     this.values = values;
   }
 
-  private double lengthSquared;
+
 
   @Override
   public double getLengthSquared() {
