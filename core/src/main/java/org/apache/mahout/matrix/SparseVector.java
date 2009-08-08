@@ -289,11 +289,11 @@ public class SparseVector extends AbstractVector {
     this.values = values;
   }
 
-  private Double lengthSquared = null;
+  private double lengthSquared;
 
   @Override
   public double getLengthSquared() {
-    if (lengthSquared != null) {
+    if (lengthSquared < 0.0) {
       return lengthSquared;
     }
     double result = 0.0;

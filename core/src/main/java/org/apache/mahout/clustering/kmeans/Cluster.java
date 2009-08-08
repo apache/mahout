@@ -52,9 +52,6 @@ public class Cluster extends ClusterBase implements Writable {
   // the current centroid is lazy evaluated and may be null
   private Vector centroid = null;
 
-  // the standard deviation of the covered points
-  private double std;
-
 
   // the total of all the points squared, used for std computation
   private Vector pointSquaredTotal = null;
@@ -171,8 +168,9 @@ public class Cluster extends ClusterBase implements Writable {
     Cluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
     for (Cluster cluster : clusters) {
-      double distance = measure.distance(point, cluster.getCenter());
-      if (nearestCluster == null || distance < nearestDistance) {
+      Vector clusterCenter = cluster.getCenter();
+      double distance = measure.distance(clusterCenter.getLengthSquared(), clusterCenter, point);
+      if (distance < nearestDistance || nearestCluster == null ) {
         nearestCluster = cluster;
         nearestDistance = distance;
       }
@@ -187,8 +185,9 @@ public class Cluster extends ClusterBase implements Writable {
     Cluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
     for (Cluster cluster : clusters) {
-      double distance = measure.distance(point, cluster.getCenter());
-      if (nearestCluster == null || distance < nearestDistance) {
+      Vector clusterCenter = cluster.getCenter();
+      double distance = measure.distance(clusterCenter.getLengthSquared(), clusterCenter, point);
+      if (distance < nearestDistance || nearestCluster == null) {
         nearestCluster = cluster;
         nearestDistance = distance;
       }
@@ -209,10 +208,6 @@ public class Cluster extends ClusterBase implements Writable {
     } else if (centroid == null) {
       // lazy compute new centroid
       centroid = pointTotal.divide(numPoints);
-      Vector stds = pointSquaredTotal.times(numPoints).minus(
-          pointTotal.times(pointTotal)).assign(new SquareRootFunction())
-          .divide(numPoints);
-      std = stds.zSum() / 2;
     }
     return centroid;
   }
@@ -323,7 +318,10 @@ public class Cluster extends ClusterBase implements Writable {
 
   /** @return the std */
   public double getStd() {
-    return std;
+    Vector stds = pointSquaredTotal.times(numPoints).minus(
+          pointTotal.times(pointTotal)).assign(new SquareRootFunction())
+          .divide(numPoints);
+    return stds.zSum() / 2;
   }
 
 }

@@ -43,10 +43,8 @@ public class TestSparseVector extends TestCase {
 
   public void testAsFormatString() {
     String formatString = test.asFormatString();
-    assertEquals(
-        "format",
-        "{\"class\":\"org.apache.mahout.matrix.SparseVector\",\"vector\":\"{\\\"values\\\":{\\\"indices\\\":[1,2,3],\\\"values\\\":[1.1,2.2,3.3],\\\"numMappings\\\":3},\\\"cardinality\\\":5}\"}",
-        formatString);
+    Vector vec = AbstractVector.decodeVector(formatString);
+    assertEquals(vec, test);
   }
 
   public void testCardinality() {
