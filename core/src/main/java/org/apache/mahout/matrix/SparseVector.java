@@ -294,7 +294,7 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public double getLengthSquared() {
-    if (lengthSquared < 0.0) {
+    if (lengthSquared >= 0.0) {
       return lengthSquared;
     }
     double result = 0.0;

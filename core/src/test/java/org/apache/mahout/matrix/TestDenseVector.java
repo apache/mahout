@@ -35,10 +35,8 @@ public class TestDenseVector extends TestCase {
 
   public void testAsFormatString() {
     String formatString = test.asFormatString();
-    assertEquals(
-        "format",
-        "{\"class\":\"org.apache.mahout.matrix.DenseVector\",\"vector\":\"{\\\"values\\\":[1.1,2.2,3.3]}\"}",
-        formatString);
+    Vector vec = AbstractVector.decodeVector(formatString);
+    assertEquals(vec, test);
   }
 
   public void testCardinality() {
