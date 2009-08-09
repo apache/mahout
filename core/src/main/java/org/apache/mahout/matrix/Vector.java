@@ -256,6 +256,21 @@ public interface Vector extends Cloneable, Writable {
    */
   Vector normalize(double power);
 
+  /**
+   * Return the k-norm of the vector. <p/> See 
+   * http://en.wikipedia.org/wiki/Lp_space <p/> Technically, when 
+   * 0 &gt; power &lt; 1, we don't have a norm, just a metric, but 
+   * we'll overload this here. Also supports power == 0 (number of non-zero elements) and
+   * power = {@link Double#POSITIVE_INFINITY} (max element). Again, see the Wikipedia page
+   * for more info.
+   *
+   * @param power The power to use.
+   *
+   * @see #normalize(double) 
+   *
+   */
+  double norm(double power);
+
   /** @return The maximum value in the Vector */
   double maxValue();
 

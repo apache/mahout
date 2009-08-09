@@ -130,29 +130,33 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public Vector normalize() {
-    double divSq = Math.sqrt(dot(this));
-    return divide(divSq);
+    return divide(Math.sqrt(dot(this)));
   }
 
   @Override
   public Vector normalize(double power) {
+    return divide(norm(power));
+  }
+
+  @Override
+  public double norm(double power) {
     if (power < 0.0) {
       throw new IllegalArgumentException("Power must be >= 0");
     }
     // we can special case certain powers
     if (Double.isInfinite(power)) {
-      return divide(maxValue());
+      return maxValue();
     } else if (power == 2.0) {
-      return normalize();
+      return Math.sqrt(dot(this));
     } else if (power == 1.0) {
-      return divide(zSum());
+      return zSum();
     } else if (power == 0.0) {
       // this is the number of non-zero elements
       double val = 0.0;
       for (int i = 0; i < size(); i++) {
         val += getQuick(i) == 0 ? 0 : 1;
       }
-      return divide(val);
+      return val;
     } else {
       double val = 0.0;
       Iterator<Element> iter = this.iterateNonZero();
@@ -160,8 +164,7 @@ public abstract class AbstractVector implements Vector {
         Element element = iter.next();
         val += Math.pow(element.get(), power);
       }
-      double divFactor = Math.pow(val, 1.0 / power);
-      return divide(divFactor);
+      return Math.pow(val, 1.0 / power);
     }
   }
 
