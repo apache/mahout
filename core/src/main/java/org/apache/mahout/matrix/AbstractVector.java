@@ -153,8 +153,9 @@ public abstract class AbstractVector implements Vector {
     } else if (power == 0.0) {
       // this is the number of non-zero elements
       double val = 0.0;
-      for (int i = 0; i < size(); i++) {
-        val += getQuick(i) == 0 ? 0 : 1;
+      Iterator<Element> iter = this.iterateNonZero();
+      while (iter.hasNext()) {
+        val += iter.next().get() == 0 ? 0 : 1;
       }
       return val;
     } else {
