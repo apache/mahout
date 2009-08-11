@@ -17,9 +17,7 @@
 package org.apache.mahout.cf.taste.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.Pair;
-
-import java.util.List;
+import org.apache.mahout.cf.taste.impl.common.LongPair;
 
 /** <p>Interface implemented by "user-based" recommenders.</p> */
 public interface UserBasedRecommender extends Recommender {
@@ -30,7 +28,7 @@ public interface UserBasedRecommender extends Recommender {
    * @return users most similar to the given user
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
-  List<Comparable<?>> mostSimilarUserIDs(Comparable<?> userID, int howMany) throws TasteException;
+  long[] mostSimilarUserIDs(long userID, int howMany) throws TasteException;
 
   /**
    * @param userID   ID of user for which to find most similar other users
@@ -40,9 +38,6 @@ public interface UserBasedRecommender extends Recommender {
    * @return IDs of users most similar to the given user
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
-  List<Comparable<?>> mostSimilarUserIDs(Comparable<?> userID,
-                                         int howMany,
-                                         Rescorer<Pair<Comparable<?>,
-                                         Comparable<?>>> rescorer) throws TasteException;
+  long[] mostSimilarUserIDs(long userID, int howMany, Rescorer<LongPair> rescorer) throws TasteException;
 
 }

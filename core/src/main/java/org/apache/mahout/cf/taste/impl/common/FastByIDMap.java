@@ -18,7 +18,6 @@
 package org.apache.mahout.cf.taste.impl.common;
 
 import java.io.Serializable;
-import java.util.AbstractCollection;
 import java.util.AbstractSet;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,26 +27,19 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
- * <p>This is an optimized {@link Map} implementation, based on algorithms described in Knuth's "Art of Computer
- * Programming", Vol. 3, p. 529.</p>
- *
- * <p>It should be faster than {@link java.util.HashMap} in some cases, but not all. Its main feature is a "max size"
- * and the ability to transparently, efficiently and semi-intelligently evict old entries when max size is
- * exceeded.</p>
- *
- * <p>This class is not a bit thread-safe.</p>
- *
- * <p>This implementation does not allow <code>null</code> as a key or value.</p>
+ * @see FastMap
+ * @see FastIDSet
  */
-public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
+public final class FastByIDMap<V> implements Serializable, Cloneable {
 
   public static final int NO_MAX_SIZE = Integer.MAX_VALUE;
   private static final double ALLOWED_LOAD_FACTOR = 1.5;
 
   /** Dummy object used to represent a key that has been removed. */
-  private static final Object REMOVED = new Object();
+  private static final long REMOVED = Long.MAX_VALUE;
+  private static final long NULL = Long.MIN_VALUE;
 
-  private K[] keys;
+  private long[] keys;
   private V[] values;
   private int numEntries;
   private int numSlotsUsed;
@@ -55,22 +47,17 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
   private BitSet recentlyAccessed;
   private final boolean countingAccesses;
 
-  /** Creates a new {@link FastMap} with default capacity. */
-  public FastMap() {
+  /** Creates a new {@link FastByIDMap} with default capacity. */
+  public FastByIDMap() {
     this(2, NO_MAX_SIZE);
   }
 
-  public FastMap(int size) {
+  public FastByIDMap(int size) {
     this(size, NO_MAX_SIZE);
   }
 
-  public FastMap(Map<K,V> other) {
-    this(other.size());
-    putAll(other);
-  }
-
   /**
-   * Creates a new {@link FastMap} whose capacity can accommodate the given number of entries without rehash.</p>
+   * Creates a new {@link FastByIDMap} whose capacity can accommodate the given number of entries without rehash.</p>
    *
    * @param size    desired capacity
    * @param maxSize max capacity
@@ -78,7 +65,7 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
    *  or at least half of {@link RandomUtils#MAX_INT_SMALLER_TWIN_PRIME}
    */
   @SuppressWarnings("unchecked")
-  public FastMap(int size, int maxSize) {
+  public FastByIDMap(int size, int maxSize) {
     if (size < 0) {
       throw new IllegalArgumentException("size must be at least 0");
     }
@@ -90,21 +77,22 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
       throw new IllegalArgumentException("maxSize must be at least 1");
     }
     int hashSize = RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * size));
-    keys = (K[]) new Object[hashSize];
+    keys = new long[hashSize];
+    Arrays.fill(keys, NULL);
     values = (V[]) new Object[hashSize];
     this.maxSize = maxSize;
     this.countingAccesses = maxSize != Integer.MAX_VALUE;
     this.recentlyAccessed = countingAccesses ? new BitSet(hashSize) : null;
   }
 
-  private int find(Object key) {
-    int theHashCode = key.hashCode() & 0x7FFFFFFF; // make sure it's positive
-    K[] keys = this.keys;
+  private int find(long key) {
+    int theHashCode = (int) key & 0x7FFFFFFF; // make sure it's positive
+    long[] keys = this.keys;
     int hashSize = keys.length;
     int jump = 1 + theHashCode % (hashSize - 2);
     int index = theHashCode % hashSize;
-    K currentKey = keys[index];
-    while (currentKey != null && (currentKey == REMOVED || !key.equals(currentKey))) {
+    long currentKey = keys[index];
+    while (currentKey != NULL && (currentKey == REMOVED || key != currentKey)) {
       if (index < jump) {
         index += hashSize - jump;
       } else {
@@ -115,9 +103,8 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
     return index;
   }
 
-  @Override
-  public V get(Object key) {
-    if (key == null) {
+  public V get(long key) {
+    if (key == NULL) {
       return null;
     }
     int index = find(key);
@@ -127,22 +114,18 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
     return values[index];
   }
 
-  @Override
   public int size() {
     return numEntries;
   }
 
-  @Override
   public boolean isEmpty() {
     return numEntries == 0;
   }
 
-  @Override
-  public boolean containsKey(Object key) {
-    return key != null && keys[find(key)] != null;
+  public boolean containsKey(long key) {
+    return key != NULL && key != REMOVED && keys[find(key)] != NULL;
   }
 
-  @Override
   public boolean containsValue(Object value) {
     if (value == null) {
       return false;
@@ -155,10 +138,11 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
     return false;
   }
 
-  /** @throws NullPointerException if key or value is null */
-  @Override
-  public V put(K key, V value) {
-    if (key == null || value == null) {
+  public V put(long key, V value) {
+    if (key == NULL || key == REMOVED) {
+      throw new IllegalArgumentException();
+    }
+    if (value == null) {
       throw new NullPointerException();
     }
     // If less than half the slots are open, let's clear it up
@@ -173,7 +157,7 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
     }
     // Here we may later consider implementing Brent's variation described on page 532
     int index = find(key);
-    if (keys[index] == null) {
+    if (keys[index] == NULL) {
       // If size is limited,
       if (countingAccesses && numEntries >= maxSize) {
         // and we're too large, clear some old-ish entry
@@ -193,7 +177,7 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
 
   private void clearStaleEntry(int index) {
     while (true) {
-      K currentKey;
+      long currentKey;
       do {
         if (index == 0) {
           index = keys.length - 1;
@@ -201,7 +185,7 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
           index--;
         }
         currentKey = keys[index];
-      } while (currentKey == null || currentKey == REMOVED);
+      } while (currentKey == NULL || currentKey == REMOVED);
       if (recentlyAccessed.get(index)) {
         recentlyAccessed.clear(index);
       } else {
@@ -209,28 +193,20 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
       }
     }
     // Delete the entry
-    ((Object[]) keys)[index] = REMOVED;
+    keys[index] = REMOVED;
     numEntries--;
     values[index] = null;
   }
 
-  @Override
-  public void putAll(Map<? extends K, ? extends V> map) {
-    for (Entry<? extends K, ? extends V> entry : map.entrySet()) {
-      put(entry.getKey(), entry.getValue());
-    }
-  }
-
-  @Override
-  public V remove(Object key) {
-    if (key == null) {
+  public V remove(long key) {
+    if (key == NULL || key == REMOVED) {
       return null;
     }
     int index = find(key);
-    if (keys[index] == null) {
+    if (keys[index] == NULL) {
       return null;
     } else {
-      ((Object[]) keys)[index] = REMOVED;
+      keys[index] = REMOVED;
       numEntries--;
       V oldValue = values[index];
       values[index] = null;
@@ -240,29 +216,21 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
     // Could un-set recentlyAccessed's bit but doesn't matter
   }
 
-  @Override
   public void clear() {
     numEntries = 0;
     numSlotsUsed = 0;
-    Arrays.fill(keys, null);
+    Arrays.fill(keys, NULL);
     Arrays.fill(values, null);
     if (countingAccesses) {
       recentlyAccessed.clear();
     }
   }
 
-  @Override
-  public Set<K> keySet() {
-    return new KeySet();
+  public LongPrimitiveIterator keySetIterator() {
+    return new KeyIterator();
   }
 
-  @Override
-  public Collection<V> values() {
-    return new ValueCollection();
-  }
-
-  @Override
-  public Set<Entry<K, V>> entrySet() {
+  public Set<Map.Entry<Long, V>> entrySet() {
     return new EntrySet();
   }
 
@@ -277,21 +245,21 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
     rehash(RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * keys.length)));
   }
 
-  @SuppressWarnings("unchecked")
   private void rehash(int newHashSize) {
-    K[] oldKeys = keys;
+    long[] oldKeys = keys;
     V[] oldValues = values;
     numEntries = 0;
     numSlotsUsed = 0;
     if (countingAccesses) {
       recentlyAccessed = new BitSet(newHashSize);
     }
-    keys = (K[]) new Object[newHashSize];
+    keys = new long[newHashSize];
+    Arrays.fill(keys, NULL);
     values = (V[]) new Object[newHashSize];
     int length = oldKeys.length;
     for (int i = 0; i < length; i++) {
-      K key = oldKeys[i];
-      if (key != null && key != REMOVED) {
+      long key = oldKeys[i];
+      if (key != NULL && key != REMOVED) {
         put(key, oldValues[i]);
       }
     }
@@ -305,52 +273,96 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
       throw new IllegalStateException();
     }
     values[lastNext] = null;
-    ((Object[]) keys)[lastNext] = REMOVED;
+    keys[lastNext] = REMOVED;
     numEntries--;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
-  public FastMap<K, V> clone() {
-    FastMap<K, V> clone;
+  public FastByIDMap<V> clone() {
+    FastByIDMap<V> clone;
     try {
-      clone = (FastMap<K, V>) super.clone();
+      clone = (FastByIDMap<V>) super.clone();
     } catch (CloneNotSupportedException cnse) {
       throw new AssertionError();
     }
-    int length = keys.length;
-    clone.keys = (K[]) new Object[length];
-    clone.values = (V[]) new Object[length];
-    System.arraycopy(keys, 0, clone.keys, 0, length);
-    System.arraycopy(values, 0, clone.values, 0, length);
-    clone.recentlyAccessed = countingAccesses ? new BitSet(length) : null;
+    clone.keys = keys.clone();
+    clone.values = values.clone();
+    clone.recentlyAccessed = countingAccesses ? new BitSet(keys.length) : null;
     return clone;
   }
 
-  private final class EntrySet extends AbstractSet<Entry<K, V>> {
+  private final class KeyIterator implements LongPrimitiveIterator {
+
+    private int position;
+    private int lastNext = -1;
+
+    @Override
+    public boolean hasNext() {
+      goToNext();
+      return position < keys.length;
+    }
+
+    @Override
+    public Long next() {
+      return nextLong();
+    }
+
+    @Override
+    public long nextLong() {
+      goToNext();
+      lastNext = position;
+      if (position >= keys.length) {
+        throw new NoSuchElementException();
+      }
+      return keys[position++];
+    }
+
+    @Override
+    public long peek() {
+      goToNext();
+      if (position >= keys.length) {
+        throw new NoSuchElementException();
+      }
+      return keys[position];
+    }
+
+    private void goToNext() {
+      int length = values.length;
+      while (position < length && values[position] == null) {
+        position++;
+      }
+    }
+
+    @Override
+    public void remove() {
+      iteratorRemove(lastNext);
+    }
+  }
+
+  private final class EntrySet extends AbstractSet<Map.Entry<Long, V>> {
 
     @Override
     public int size() {
-      return FastMap.this.size();
+      return FastByIDMap.this.size();
     }
 
     @Override
     public boolean isEmpty() {
-      return FastMap.this.isEmpty();
+      return FastByIDMap.this.isEmpty();
     }
 
     @Override
     public boolean contains(Object o) {
-      return containsKey(o);
+      return containsKey((Long) o);
     }
 
     @Override
-    public Iterator<Entry<K, V>> iterator() {
+    public Iterator<Map.Entry<Long, V>> iterator() {
       return new EntryIterator();
     }
 
     @Override
-    public boolean add(Entry<K, V> t) {
+    public boolean add(Map.Entry<Long, V> t) {
       throw new UnsupportedOperationException();
     }
 
@@ -360,7 +372,7 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
     }
 
     @Override
-    public boolean addAll(Collection<? extends Entry<K, V>> ts) {
+    public boolean addAll(Collection<? extends Map.Entry<Long, V>> ts) {
       throw new UnsupportedOperationException();
     }
 
@@ -376,10 +388,10 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
 
     @Override
     public void clear() {
-      FastMap.this.clear();
+      FastByIDMap.this.clear();
     }
 
-    private final class MapEntry implements Entry<K, V> {
+    private final class MapEntry implements Map.Entry<Long, V> {
 
       private final int index;
 
@@ -388,7 +400,7 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
       }
 
       @Override
-      public K getKey() {
+      public Long getKey() {
         return keys[index];
       }
 
@@ -408,7 +420,7 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
       }
     }
 
-    private final class EntryIterator implements Iterator<Entry<K, V>> {
+    private final class EntryIterator implements Iterator<Map.Entry<Long, V>> {
 
       private int position;
       private int lastNext = -1;
@@ -420,7 +432,7 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
       }
 
       @Override
-      public Entry<K, V> next() {
+      public Map.Entry<Long, V> next() {
         goToNext();
         lastNext = position;
         if (position >= keys.length) {
@@ -444,180 +456,4 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
 
   }
 
-  private final class KeySet extends AbstractSet<K> {
-
-    @Override
-    public int size() {
-      return FastMap.this.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-      return FastMap.this.isEmpty();
-    }
-
-    @Override
-    public boolean contains(Object o) {
-      return containsKey(o);
-    }
-
-    @Override
-    public Iterator<K> iterator() {
-      return new KeyIterator();
-    }
-
-    @Override
-    public boolean add(K t) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean remove(Object o) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends K> ts) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> objects) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean removeAll(Collection<?> objects) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void clear() {
-      FastMap.this.clear();
-    }
-
-    private final class KeyIterator implements Iterator<K> {
-
-      private int position;
-      private int lastNext = -1;
-
-      @Override
-      public boolean hasNext() {
-        goToNext();
-        return position < keys.length;
-      }
-
-      @Override
-      public K next() {
-        goToNext();
-        lastNext = position;
-        if (position >= keys.length) {
-          throw new NoSuchElementException();
-        }
-        return keys[position++];
-      }
-
-      private void goToNext() {
-        int length = values.length;
-        while (position < length && values[position] == null) {
-          position++;
-        }
-      }
-
-      @Override
-      public void remove() {
-        iteratorRemove(lastNext);
-      }
-    }
-
-  }
-
-  private final class ValueCollection extends AbstractCollection<V> {
-
-    @Override
-    public int size() {
-      return FastMap.this.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-      return FastMap.this.isEmpty();
-    }
-
-    @Override
-    public boolean contains(Object o) {
-      return containsValue(o);
-    }
-
-    @Override
-    public Iterator<V> iterator() {
-      return new ValueIterator();
-    }
-
-    @Override
-    public boolean add(V v) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean remove(Object o) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends V> vs) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean removeAll(Collection<?> objects) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> objects) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void clear() {
-      FastMap.this.clear();
-    }
-
-    private final class ValueIterator implements Iterator<V> {
-
-      private int position;
-      private int lastNext = -1;
-
-      @Override
-      public boolean hasNext() {
-        goToNext();
-        return position < values.length;
-      }
-
-      @Override
-      public V next() {
-        goToNext();
-        lastNext = position;
-        if (position >= values.length) {
-          throw new NoSuchElementException();
-        }
-        return values[position++];
-      }
-
-      private void goToNext() {
-        int length = values.length;
-        while (position < length && values[position] == null) {
-          position++;
-        }
-      }
-
-      @Override
-      public void remove() {
-        iteratorRemove(lastNext);
-      }
-
-    }
-
-  }
 }

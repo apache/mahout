@@ -21,8 +21,8 @@ package org.apache.mahout.cf.taste.impl.transforms;
 public final class CaseAmplificationTest extends TransformTestCase {
 
   public void testOneValue() {
-    assertEquals(2.0, new CaseAmplification(0.5).transformSimilarity(null, null, 4.0), EPSILON);
-    assertEquals(-2.0, new CaseAmplification(0.5).transformSimilarity(null, null, -4.0), EPSILON);
+    assertEquals(2.0, new CaseAmplification(0.5).transformSimilarity(0, 0, 4.0), EPSILON);
+    assertEquals(-2.0, new CaseAmplification(0.5).transformSimilarity(0, 0, -4.0), EPSILON);
   }
 
   public void testRefresh() {

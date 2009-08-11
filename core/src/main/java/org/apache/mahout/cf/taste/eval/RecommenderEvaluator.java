@@ -21,8 +21,8 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.model.DataModel;
 
 /**
- * <p>Implementations of this interface evaluate the quality of a {@link org.apache.mahout.cf.taste.recommender.Recommender}'s
- * recommendations.</p>
+ * <p>Implementations of this interface evaluate the quality of a
+ * {@link org.apache.mahout.cf.taste.recommender.Recommender}'s recommendations.</p>
  */
 public interface RecommenderEvaluator {
 
@@ -49,9 +49,12 @@ public interface RecommenderEvaluator {
    *
    * @param recommenderBuilder   object that can build a {@link org.apache.mahout.cf.taste.recommender.Recommender} to
    *                             test
+   * @param dataModelBuilder     @param dataModelBuilder   {@link DataModelBuilder} to use, or if null, a default {@link DataModel} implementation
+   *                             will be used
    * @param dataModel            dataset to test on
    * @param trainingPercentage   percentage of each user's preferences to use to produce recommendations; the rest are
-   *                             compared to estimated preference values to evaluate {@link org.apache.mahout.cf.taste.recommender.Recommender}
+   *                             compared to estimated preference values to evaluate
+   *                             {@link org.apache.mahout.cf.taste.recommender.Recommender}
    *                             performance
    * @param evaluationPercentage percentage of users to use in evaluation
    * @return a "score" representing how well the {@link org.apache.mahout.cf.taste.recommender.Recommender}'s estimated
@@ -59,6 +62,7 @@ public interface RecommenderEvaluator {
    * @throws TasteException if an error occurs while accessing the {@link DataModel}
    */
   double evaluate(RecommenderBuilder recommenderBuilder,
+                  DataModelBuilder dataModelBuilder,
                   DataModel dataModel,
                   double trainingPercentage,
                   double evaluationPercentage) throws TasteException;

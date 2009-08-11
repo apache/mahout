@@ -37,6 +37,25 @@ public final class IteratorUtils {
     return iterableToList(iterable, null);
   }
 
+  public static long[] longIteratorToList(LongPrimitiveIterator iterator) {
+    long[] result = new long[5];
+    int size = 0;
+    while (iterator.hasNext()) {
+      if (size == result.length) {
+        long[] newResult = new long[result.length * 2];
+        System.arraycopy(result, 0, newResult, 0, result.length);
+        result = newResult;
+      }
+      result[size++] = iterator.next();
+    }
+    if (size != result.length) {
+      long[] newResult = new long[size];
+      System.arraycopy(result, 0, newResult, 0, size);
+      result = newResult;
+    }
+    return result;
+  }
+
   /**
    * @param iterable   {@link Iterable} whose contents are to be put into a {@link List}
    * @param comparator {@link Comparator} defining the sort order of the returned {@link List}

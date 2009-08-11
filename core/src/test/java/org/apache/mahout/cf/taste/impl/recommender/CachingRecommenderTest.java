@@ -31,46 +31,46 @@ public final class CachingRecommenderTest extends TasteTestCase {
     Recommender mockRecommender = new MockRecommender(recommendCount);
 
     Recommender cachingRecommender = new CachingRecommender(mockRecommender);
-    cachingRecommender.recommend("1", 1);
+    cachingRecommender.recommend(1, 1);
     assertEquals(1, recommendCount.get());
-    cachingRecommender.recommend("2", 1);
+    cachingRecommender.recommend(2, 1);
     assertEquals(2, recommendCount.get());
-    cachingRecommender.recommend("1", 1);
+    cachingRecommender.recommend(1, 1);
     assertEquals(2, recommendCount.get());
-    cachingRecommender.recommend("2", 1);
+    cachingRecommender.recommend(2, 1);
     assertEquals(2, recommendCount.get());
     cachingRecommender.refresh(null);
-    cachingRecommender.recommend("1", 1);
+    cachingRecommender.recommend(1, 1);
     assertEquals(3, recommendCount.get());
-    cachingRecommender.recommend("2", 1);
+    cachingRecommender.recommend(2, 1);
     assertEquals(4, recommendCount.get());
-    cachingRecommender.recommend("3", 1);
+    cachingRecommender.recommend(3, 1);
     assertEquals(5, recommendCount.get());
 
     // Results from this recommend() method can be cached...
-    Rescorer<Comparable<?>> rescorer = NullRescorer.getItemInstance();
+    Rescorer<Long> rescorer = NullRescorer.getItemInstance();
     cachingRecommender.refresh(null);
-    cachingRecommender.recommend("1", 1, rescorer);
+    cachingRecommender.recommend(1, 1, rescorer);
     assertEquals(6, recommendCount.get());
-    cachingRecommender.recommend("2", 1, rescorer);
+    cachingRecommender.recommend(2, 1, rescorer);
     assertEquals(7, recommendCount.get());
-    cachingRecommender.recommend("1", 1, rescorer);
+    cachingRecommender.recommend(1, 1, rescorer);
     assertEquals(7, recommendCount.get());
-    cachingRecommender.recommend("2", 1, rescorer);
+    cachingRecommender.recommend(2, 1, rescorer);
     assertEquals(7, recommendCount.get());
 
     // until you switch Rescorers
-    cachingRecommender.recommend("1", 1, null);
+    cachingRecommender.recommend(1, 1, null);
     assertEquals(8, recommendCount.get());
-    cachingRecommender.recommend("2", 1, null);
+    cachingRecommender.recommend(2, 1, null);
     assertEquals(9, recommendCount.get());
 
     cachingRecommender.refresh(null);
-    cachingRecommender.estimatePreference("test1", "1");
+    cachingRecommender.estimatePreference(1, 1);
     assertEquals(10, recommendCount.get());
-    cachingRecommender.estimatePreference("test1", "2");
+    cachingRecommender.estimatePreference(1, 2);
     assertEquals(11, recommendCount.get());
-    cachingRecommender.estimatePreference("test1", "2");
+    cachingRecommender.estimatePreference(1, 2);
     assertEquals(11, recommendCount.get());
   }
 

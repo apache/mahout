@@ -24,7 +24,7 @@ import org.apache.mahout.cf.taste.model.Preference;
 
 abstract class TransformTestCase extends TasteTestCase {
 
-  static void assertPrefsEquals(DataModel dataModel, Comparable<?> userID, double... expected) throws TasteException {
+  static void assertPrefsEquals(DataModel dataModel, long userID, double... expected) throws TasteException {
     int i = 0;
     for (Preference pref : dataModel.getPreferencesFromUser(userID)) {
       assertEquals(expected[i], pref.getValue());

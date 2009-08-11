@@ -19,7 +19,7 @@ package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
@@ -46,16 +46,19 @@ public final class LogLikelihoodSimilarity implements UserSimilarity, ItemSimila
   }
 
   @Override
-  public double userSimilarity(Comparable<?> userID1, Comparable<?> userID2) throws TasteException {
+  public double userSimilarity(long userID1, long userID2) throws TasteException {
 
-    FastSet<Comparable<?>> prefs1 = dataModel.getItemIDsFromUser(userID1);
-    FastSet<Comparable<?>> prefs2 = dataModel.getItemIDsFromUser(userID2);
+    FastIDSet prefs1 = dataModel.getItemIDsFromUser(userID1);
+    FastIDSet prefs2 = dataModel.getItemIDsFromUser(userID2);
 
     int prefs1Size = prefs1.size();
     int prefs2Size = prefs2.size();
     int intersectionSize = prefs1Size < prefs2Size ?
         prefs2.intersectionSize(prefs1) :
         prefs1.intersectionSize(prefs2);
+    if (intersectionSize == 0) {
+      return Double.NaN;
+    }
     int numItems = dataModel.getNumItems();
     double logLikelihood = LogLikelihoodSimilarity.twoLogLambda(intersectionSize,
                                                                 prefs1Size - intersectionSize,
@@ -65,11 +68,11 @@ public final class LogLikelihoodSimilarity implements UserSimilarity, ItemSimila
   }
 
   @Override
-  public double itemSimilarity(Comparable<?> itemID1, Comparable<?> itemID2) throws TasteException {
-    if (itemID1 == null || itemID2 == null) {
-      throw new IllegalArgumentException("item1 or item2 is null");
-    }
+  public double itemSimilarity(long itemID1, long itemID2) throws TasteException {
     int preferring1and2 = dataModel.getNumUsersWithPreferenceFor(itemID1, itemID2);
+    if (preferring1and2 == 0) {
+      return Double.NaN;
+    }
     int preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
     int preferring2 = dataModel.getNumUsersWithPreferenceFor(itemID2);
     int numUsers = dataModel.getNumUsers();

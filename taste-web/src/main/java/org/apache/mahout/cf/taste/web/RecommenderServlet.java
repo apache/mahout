@@ -82,10 +82,11 @@ public final class RecommenderServlet extends HttpServlet {
   public void doGet(HttpServletRequest request,
                     HttpServletResponse response) throws ServletException {
 
-    String userID = request.getParameter("userID");
-    if (userID == null) {
+    String userIDString = request.getParameter("userID");
+    if (userIDString == null) {
       throw new ServletException("userID was not specified");
     }
+    long userID = Long.parseLong(userIDString);
     String howManyString = request.getParameter("howMany");
     int howMany = howManyString == null ? DEFAULT_HOW_MANY : Integer.parseInt(howManyString);
     boolean debug = Boolean.parseBoolean(request.getParameter("debug"));
@@ -146,7 +147,7 @@ public final class RecommenderServlet extends HttpServlet {
   }
 
   private void writePlainText(HttpServletResponse response,
-                              String userID,
+                              long userID,
                               boolean debug,
                               Iterable<RecommendedItem> items) throws IOException, TasteException {
     response.setContentType("text/plain");
@@ -168,7 +169,7 @@ public final class RecommenderServlet extends HttpServlet {
     }
   }
 
-  private void writeDebugRecommendations(String userID, Iterable<RecommendedItem> items, PrintWriter writer)
+  private void writeDebugRecommendations(long userID, Iterable<RecommendedItem> items, PrintWriter writer)
       throws TasteException {
     DataModel dataModel = recommender.getDataModel();
     writer.print("User:");

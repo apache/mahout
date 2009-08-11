@@ -19,54 +19,56 @@ package org.apache.mahout.cf.taste.impl.common;
 
 import java.io.Serializable;
 
-/** A simple (ordered) pair of two objects. Elements may be null. */
-public final class Pair<A, B> implements Serializable {
+/** A simple (ordered) pair of longs. */
+public final class LongPair implements Comparable<LongPair>, Serializable {
 
-  private final A first;
-  private final B second;
+  private final long first;
+  private final long second;
 
-  public Pair(A first, B second) {
+  public LongPair(long first, long second) {
     this.first = first;
     this.second = second;
   }
 
-  public A getFirst() {
+  public long getFirst() {
     return first;
   }
 
-  public B getSecond() {
+  public long getSecond() {
     return second;
   }
 
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof Pair)) {
+    if (!(obj instanceof LongPair)) {
       return false;
     }
-    Pair<?, ?> otherPair = (Pair<?, ?>) obj;
-    return isEqualOrNulls(first, otherPair.first) &&
-        isEqualOrNulls(second, otherPair.second);
-  }
-
-  private static boolean isEqualOrNulls(Object obj1, Object obj2) {
-    return obj1 == null ? obj2 == null : obj1.equals(obj2);
+    LongPair otherPair = (LongPair) obj;
+    return first == otherPair.first && second == otherPair.second;
   }
 
   @Override
   public int hashCode() {
-    int firstHash = hashCodeNull(first);
+    int firstHash = RandomUtils.hashLong(first);
     // Flip top and bottom 16 bits; this makes the hash function probably different
     // for (a,b) versus (b,a)
-    return (firstHash >>> 16 | firstHash << 16) ^ hashCodeNull(second);
-  }
-
-  private static int hashCodeNull(Object obj) {
-    return obj == null ? 0 : obj.hashCode();
+    return (firstHash >>> 16 | firstHash << 16) ^ RandomUtils.hashLong(second);
   }
 
   @Override
   public String toString() {
     return '(' + String.valueOf(first) + ',' + second + ')';
+  }
+
+  @Override
+  public int compareTo(LongPair o) {
+    if (first < o.first) {
+      return -1;
+    } else if (first > o.first) {
+      return 1;
+    } else {
+      return second < o.second ? -1 : second > o.second ? 1 : 0;
+    }
   }
 
 }

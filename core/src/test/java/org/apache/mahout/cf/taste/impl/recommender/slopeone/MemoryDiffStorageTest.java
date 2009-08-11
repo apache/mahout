@@ -28,7 +28,7 @@ public class MemoryDiffStorageTest extends TasteTestCase {
   public void testGetDiff() throws Exception {
     DataModel model = getDataModel();
     MemoryDiffStorage storage = new MemoryDiffStorage(model, Weighting.UNWEIGHTED, false, Long.MAX_VALUE);
-    RunningAverage average = storage.getDiff("1", "2");
+    RunningAverage average = storage.getDiff(1, 2);
     assertEquals(0.23333333333333334, average.getAverage(), EPSILON);
     assertEquals(3, average.getCount());
   }
@@ -36,8 +36,8 @@ public class MemoryDiffStorageTest extends TasteTestCase {
   public void testUpdate() throws Exception {
     DataModel model = getDataModel();
     MemoryDiffStorage storage = new MemoryDiffStorage(model, Weighting.UNWEIGHTED, false, Long.MAX_VALUE);
-    storage.updateItemPref("1", 0.5f, false);
-    RunningAverage average = storage.getDiff("1", "2");
+    storage.updateItemPref(1, 0.5f, false);
+    RunningAverage average = storage.getDiff(1, 2);
     assertEquals(0.06666666666666668, average.getAverage(), EPSILON);
     assertEquals(3, average.getCount());
   }
@@ -45,8 +45,8 @@ public class MemoryDiffStorageTest extends TasteTestCase {
   public void testRemove() throws Exception {
     DataModel model = getDataModel();
     MemoryDiffStorage storage = new MemoryDiffStorage(model, Weighting.UNWEIGHTED, false, Long.MAX_VALUE);
-    storage.updateItemPref("1", 0.5f, true);
-    RunningAverage average = storage.getDiff("1", "2");
+    storage.updateItemPref(1, 0.5f, true);
+    RunningAverage average = storage.getDiff(1, 2);
     assertEquals(0.1, average.getAverage(), EPSILON);
     assertEquals(2, average.getCount());
   }

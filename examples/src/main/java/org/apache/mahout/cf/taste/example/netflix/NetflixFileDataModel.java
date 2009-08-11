@@ -18,8 +18,9 @@
 package org.apache.mahout.cf.taste.example.netflix;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.model.GenericItemPreferenceArray;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -32,11 +33,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public final class NetflixFileDataModel implements DataModel {
 
   private final File dataDirectory;
-  private final List<Comparable<?>> movies;
 
   public NetflixFileDataModel(File dataDirectory) throws IOException {
 		if (dataDirectory == null) {
@@ -45,38 +46,36 @@ public final class NetflixFileDataModel implements DataModel {
 		if (!dataDirectory.exists() || !dataDirectory.isDirectory()) {
 			throw new FileNotFoundException(dataDirectory.toString());
 		}
-
     this.dataDirectory = dataDirectory;
-    movies = NetflixDataModel.readMovies(dataDirectory);
   }
 
   @Override
-  public Iterable<Comparable<?>> getUserIDs() {
+  public LongPrimitiveIterator getUserIDs() {
     throw new UnsupportedOperationException(); // TODO
   }
 
   @Override
-  public PreferenceArray getPreferencesFromUser(Comparable<?> id) {
+  public PreferenceArray getPreferencesFromUser(long id) {
     throw new UnsupportedOperationException(); // TODO
   }
 
   @Override
-  public Iterable<Comparable<?>> getItemIDs() {
-    return movies;
+  public LongPrimitiveIterator getItemIDs() {
+    return new MovieIDIterator();
   }
 
   @Override
-  public FastSet<Comparable<?>> getItemIDsFromUser(Comparable<?> userID) {
+  public FastIDSet getItemIDsFromUser(long userID) {
     throw new UnsupportedOperationException(); // TODO
   }
 
   @Override
-  public Float getPreferenceValue(Comparable<?> userID, Comparable<?> itemID) {
+  public Float getPreferenceValue(long userID, long itemID) {
     throw new UnsupportedOperationException(); // TODO
   }
 
   @Override
-  public PreferenceArray getPreferencesForItem(Comparable<?> itemID) {
+  public PreferenceArray getPreferencesForItem(long itemID) {
     StringBuilder itemIDPadded = new StringBuilder(5);
     itemIDPadded.append(itemID);
     while (itemIDPadded.length() < 5) {
@@ -96,7 +95,7 @@ public final class NetflixFileDataModel implements DataModel {
 
   @Override
   public int getNumItems() {
-    return movies.size();
+    return MovieIDIterator.COUNT;
   }
 
   @Override
@@ -105,7 +104,7 @@ public final class NetflixFileDataModel implements DataModel {
   }
 
   @Override
-  public int getNumUsersWithPreferenceFor(Comparable<?>... itemIDs) {
+  public int getNumUsersWithPreferenceFor(long... itemIDs) {
     throw new UnsupportedOperationException(); // TODO
   }
 
@@ -113,7 +112,7 @@ public final class NetflixFileDataModel implements DataModel {
    * @throws UnsupportedOperationException
    */
   @Override
-  public void setPreference(Comparable<?> userID, Comparable<?> itemID, float value) {
+  public void setPreference(long userID, long itemID, float value) {
     throw new UnsupportedOperationException();
   }
 
@@ -121,7 +120,7 @@ public final class NetflixFileDataModel implements DataModel {
    * @throws UnsupportedOperationException
    */
   @Override
-  public void removePreference(Comparable<?> userID, Comparable<?> itemID) {
+  public void removePreference(long userID, long itemID) {
     throw new UnsupportedOperationException();
   }
 
@@ -133,6 +132,44 @@ public final class NetflixFileDataModel implements DataModel {
   @Override
   public String toString() {
     return "NetflixFileDataModel";
+  }
+
+  private static final class MovieIDIterator implements LongPrimitiveIterator {
+
+    private int next = 1;
+    static final int COUNT = 17770;
+
+    @Override
+    public long nextLong() {
+      if (next <= COUNT) {
+        return next++;
+      }
+      throw new NoSuchElementException();
+    }
+
+    @Override
+    public long peek() {
+      if (next <= COUNT) {
+        return next;
+      }
+      throw new NoSuchElementException();
+    }
+
+    @Override
+    public boolean hasNext() {
+      return next <= COUNT;
+    }
+
+    @Override
+    public Long next() {
+      return nextLong();
+    }
+
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
+
   }
 
 }

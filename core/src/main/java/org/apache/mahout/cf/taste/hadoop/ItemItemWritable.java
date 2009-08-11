@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.hadoop;
 
 import org.apache.hadoop.io.WritableComparable;
+import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -26,36 +27,36 @@ import java.io.IOException;
 /** A {@link WritableComparable} encapsulating two items. */
 public final class ItemItemWritable implements WritableComparable<ItemItemWritable> {
 
-  private String itemAID;
-  private String itemBID;
+  private long itemAID;
+  private long itemBID;
 
   public ItemItemWritable() {
     // do nothing
   }
 
-  public ItemItemWritable(String itemAID, String itemBID) {
+  public ItemItemWritable(long itemAID, long itemBID) {
     this.itemAID = itemAID;
     this.itemBID = itemBID;
   }
 
-  public String getItemAID() {
+  public long getItemAID() {
     return itemAID;
   }
 
-  public String getItemBID() {
+  public long getItemBID() {
     return itemBID;
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
-    out.writeUTF(itemAID);
-    out.writeUTF(itemBID);
+    out.writeLong(itemAID);
+    out.writeLong(itemBID);
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    itemAID = in.readUTF();
-    itemBID = in.readUTF();
+    itemAID = in.readLong();
+    itemBID = in.readLong();
   }
 
   public static ItemItemWritable read(DataInput in) throws IOException {
@@ -69,27 +70,32 @@ public final class ItemItemWritable implements WritableComparable<ItemItemWritab
     if (this == that) {
       return 0;
     }
-    int compare = itemAID.compareTo(that.itemAID);
-    return compare == 0 ? itemBID.compareTo(that.itemBID) : compare;
+    if (itemAID < that.itemAID) {
+      return -1;
+    } else if (itemAID > that.itemAID) {
+      return 1;
+    } else {
+      return itemBID < that.itemBID ? -1 : itemBID > that.itemBID ? 1 : 0;
+    }
   }
 
   @Override
   public int hashCode() {
-    return itemAID.hashCode() + 31 * itemBID.hashCode();
+    return RandomUtils.hashLong(itemAID) + 31 * RandomUtils.hashLong(itemBID);
   }
 
   @Override
   public boolean equals(Object o) {
     if (o instanceof ItemItemWritable) {
       ItemItemWritable that = (ItemItemWritable) o;
-      return this == that || (itemAID.equals(that.itemAID) && itemBID.equals(that.itemBID));
+      return itemAID == that.itemAID && itemBID == that.itemBID;
     }
     return false;
   }
 
   @Override
   public String toString() {
-    return itemAID + '\t' + itemBID;
+    return itemAID + "\t" + itemBID;
   }
 
 }

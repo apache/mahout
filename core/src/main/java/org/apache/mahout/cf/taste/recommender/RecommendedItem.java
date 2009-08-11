@@ -24,7 +24,7 @@ package org.apache.mahout.cf.taste.recommender;
 public interface RecommendedItem extends Comparable<RecommendedItem> {
 
   /** @return the recommended item ID */
-  Comparable<?> getItemID();
+  long getItemID();
 
   /**
    * <p>A value expressing the strength of the preference for the recommended item. The range of the values

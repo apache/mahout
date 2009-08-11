@@ -19,8 +19,7 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-
-import java.util.Collection;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 
 /**
  * <p>Returns the "similarity" between two clusters of users, according to some definition of similarity. Subclassses
@@ -38,6 +37,6 @@ public interface ClusterSimilarity extends Refreshable {
    *                                  underlying {@link org.apache.mahout.cf.taste.model.DataModel}
    * @throws IllegalArgumentException if either argument is null or empty
    */
-  double getSimilarity(Collection<Comparable<?>> cluster1, Collection<Comparable<?>> cluster2) throws TasteException;
+  double getSimilarity(FastIDSet cluster1, FastIDSet cluster2) throws TasteException;
 
 }

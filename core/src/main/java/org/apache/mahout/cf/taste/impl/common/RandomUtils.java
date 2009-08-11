@@ -55,6 +55,24 @@ public final class RandomUtils {
     return Float.floatToIntBits(value);
   }
 
+  public static int hashLong(long value) {
+    return (int) (value ^ (value >>> 32));
+  }
+
+  /**
+   * See String.hashCode() from Apache Harmony
+   */
+  public static long hashStringToLong(String value) {
+    long hash = 0L;
+    int multiplier = 1;
+    for (int i = value.length() - 1; i >= 0; i--) {
+      hash += value.charAt(i) * multiplier;
+      int shifted = multiplier << 5;
+      multiplier = shifted - multiplier;
+    }
+    return hash;
+  }
+
   /**
    * <p>Finds next-largest "twin primes": numbers p and p+2 such that both are prime. Finds the smallest such p such
    * that the smaller twin, p, is greater than or equal to n. Returns p+2, the larger of the two twins.</p>

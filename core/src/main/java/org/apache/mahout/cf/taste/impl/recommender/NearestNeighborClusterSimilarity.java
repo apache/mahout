@@ -19,8 +19,10 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
-import org.apache.mahout.cf.taste.impl.common.SamplingIterable;
+import org.apache.mahout.cf.taste.impl.common.SamplingLongPrimitiveIterator;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 import java.util.Collection;
@@ -59,16 +61,18 @@ public final class NearestNeighborClusterSimilarity implements ClusterSimilarity
   }
 
   @Override
-  public double getSimilarity(Collection<Comparable<?>> cluster1,
-                              Collection<Comparable<?>> cluster2) throws TasteException {
+  public double getSimilarity(FastIDSet cluster1, FastIDSet cluster2) throws TasteException {
     if (cluster1.isEmpty() || cluster2.isEmpty()) {
       return Double.NaN;
     }
-    Iterable<Comparable<?>> someUsers = SamplingIterable.maybeWrapIterable(cluster1, samplingRate);
+    LongPrimitiveIterator someUsers =
+            SamplingLongPrimitiveIterator.maybeWrapIterator(cluster1.iterator(), samplingRate);
     double greatestSimilarity = Double.NEGATIVE_INFINITY;
-    for (Comparable<?> userID1 : someUsers) {
-      for (Comparable<?> userID2 : cluster2) {
-        double theSimilarity = similarity.userSimilarity(userID1, userID2);
+    while (someUsers.hasNext()) {
+      long userID1 = someUsers.next();
+      LongPrimitiveIterator it2 = cluster2.iterator();
+      while (it2.hasNext()) {
+        double theSimilarity = similarity.userSimilarity(userID1, it2.next());
         if (theSimilarity > greatestSimilarity) {
           greatestSimilarity = theSimilarity;
         }

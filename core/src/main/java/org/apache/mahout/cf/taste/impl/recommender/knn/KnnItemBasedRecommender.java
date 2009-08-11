@@ -18,8 +18,9 @@
 package org.apache.mahout.cf.taste.impl.recommender.knn;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
-import org.apache.mahout.cf.taste.impl.common.Pair;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
+import org.apache.mahout.cf.taste.impl.common.LongPair;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -28,8 +29,6 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -50,20 +49,20 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
     this.neighborhoodSize = neighborhoodSize;
   }
 
-  private List<RecommendedItem> mostSimilarItems(Comparable<?> itemID,
-                                                 Iterable<Comparable<?>> allItemIDs,
+  private List<RecommendedItem> mostSimilarItems(long itemID,
+                                                 LongPrimitiveIterator allItemIDs,
                                                  int howMany,
-                                                 Rescorer<Pair<Comparable<?>, Comparable<?>>> rescorer)
+                                                 Rescorer<LongPair> rescorer)
           throws TasteException {
-    TopItems.Estimator<Comparable<?>> estimator = new MostSimilarEstimator(itemID, getSimilarity(), rescorer);
+    TopItems.Estimator<Long> estimator = new MostSimilarEstimator(itemID, getSimilarity(), rescorer);
     return TopItems.getTopItems(howMany, allItemIDs, null, estimator);
   }
 
 
-  private double[] getInterpolations(Comparable<?> itemID, Comparable<?> userID, List<Comparable<?>> itemNeighborhood)
+  private double[] getInterpolations(long itemID, long userID, long[] itemNeighborhood)
           throws TasteException {
 
-    int k = itemNeighborhood.size();
+    int k = itemNeighborhood.length;
     double[][] A = new double[k][k];
     double[] b = new double[k];
     int i = 0;
@@ -71,15 +70,15 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
     DataModel dataModel = getDataModel();
 
     int numUsers = getDataModel().getNumUsers();
-    for (Comparable<?> iitem : itemNeighborhood) {
+    for (long iitem : itemNeighborhood) {
       PreferenceArray iPrefs = getDataModel().getPreferencesForItem(iitem);
       int iSize = iPrefs.length();
       int j = 0;
-      for (Comparable<?> jitem : itemNeighborhood) {
+      for (long jitem : itemNeighborhood) {
         double value = 0.0;
         for (int pi = 0; pi < iSize; pi++) {
-          Comparable<?> v = iPrefs.getUserID(pi);
-          if (v.equals(userID)) {
+          long v = iPrefs.getUserID(pi);
+          if (v == userID) {
             continue;
           }
           Float pj = dataModel.getPreferenceValue(userID, jitem);
@@ -96,11 +95,11 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
     PreferenceArray iPrefs = getDataModel().getPreferencesForItem(itemID);
     int iSize = iPrefs.length();
     i = 0;
-    for (Comparable<?> jitem : itemNeighborhood) {
+    for (long jitem : itemNeighborhood) {
       double value = 0.0;
       for (int pi = 0; pi < iSize; pi++) {
-        Comparable<?> v = iPrefs.getUserID(pi);
-        if (v.equals(userID)) {
+        long v = iPrefs.getUserID(pi);
+        if (v == userID) {
           continue;
         }
         Float pj = dataModel.getPreferenceValue(userID, jitem);
@@ -116,10 +115,10 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
   }
 
   @Override
-  protected float doEstimatePreference(Comparable<?> theUserID, Comparable<?> itemID) throws TasteException {
+  protected float doEstimatePreference(long theUserID, long itemID) throws TasteException {
 
     DataModel dataModel = getDataModel();
-    Collection<Comparable<?>> allItemIDs = new FastSet<Comparable<?>>();
+    FastIDSet allItemIDs = new FastIDSet();
     PreferenceArray prefs = dataModel.getPreferencesFromUser(theUserID);
     int size = prefs.length();
     for (int i = 0; i < size; i++) {
@@ -127,19 +126,19 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
     }
     allItemIDs.remove(itemID);
 
-    List<RecommendedItem> mostSimilar = mostSimilarItems(itemID, allItemIDs, neighborhoodSize, null);
-    List<Comparable<?>> theNeighborhood = new ArrayList<Comparable<?>>(mostSimilar.size());
+    List<RecommendedItem> mostSimilar = mostSimilarItems(itemID, allItemIDs.iterator(), neighborhoodSize, null);
+    long[] theNeighborhood = new long[mostSimilar.size()];
+    int nOffset = 0;
     for (RecommendedItem rec : mostSimilar) {
-      theNeighborhood.add(rec.getItemID());
+      theNeighborhood[nOffset++] = rec.getItemID();
     }
-
 
     double[] weights = getInterpolations(itemID, theUserID, theNeighborhood);
 
     int i = 0;
     double preference = 0.0;
     double totalSimilarity = 0.0;
-    for (Comparable<?> jitem : theNeighborhood) {
+    for (long jitem : theNeighborhood) {
 
       Float pref = dataModel.getPreferenceValue(theUserID, jitem);
 

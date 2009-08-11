@@ -21,6 +21,7 @@ import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -34,14 +35,14 @@ import java.util.List;
  */
 public final class BooleanUserPreferenceArray implements PreferenceArray, Serializable {
 
-  private final Comparable<?>[] IDs;
-  private Comparable<?> id;
+  private final long[] IDs;
+  private long id;
 
   public BooleanUserPreferenceArray(int size) {
     if (size < 1) {
       throw new IllegalArgumentException("size is less than 1");
     }
-    this.IDs = new Comparable<?>[size];
+    this.IDs = new long[size];
   }
 
   public int length() {
@@ -69,22 +70,22 @@ public final class BooleanUserPreferenceArray implements PreferenceArray, Serial
   }
 
   @Override
-  public Comparable<?> getUserID(int i) {
+  public long getUserID(int i) {
     return id;
   }
 
   @Override
-  public void setUserID(int i, Comparable<?> userID) {
+  public void setUserID(int i, long userID) {
     id = userID;
   }
 
   @Override
-  public Comparable<?> getItemID(int i) {
+  public long getItemID(int i) {
     return IDs[i];
   }
 
   @Override
-  public void setItemID(int i, Comparable<?> itemID) {
+  public void setItemID(int i, long itemID) {
     IDs[i] = itemID;
   }
 
@@ -104,7 +105,7 @@ public final class BooleanUserPreferenceArray implements PreferenceArray, Serial
 
   @Override
   public void sortByItem() {
-    selectionSort();
+    Arrays.sort(IDs);
   }
 
   @Override
@@ -113,24 +114,6 @@ public final class BooleanUserPreferenceArray implements PreferenceArray, Serial
 
   @Override
   public void sortByValueReversed() {
-  }
-
-  private void selectionSort() {
-    // I think this sort will prove to be too dumb, but, it's in place and OK for tiny, mostly sorted data
-    int max = length();
-    for (int i = 0; i < max; i++) {
-      int min = i;
-      for (int j = i + 1; j < max; j++) {
-        if (((Comparable<Object>) IDs[i]).compareTo(IDs[j]) < 0) {
-          min = j;
-        }
-      }
-      if (i != min) {
-        Comparable<?> temp1 = IDs[i];
-        IDs[i] = IDs[min];
-        IDs[min] = temp1;
-      }
-    }
   }
 
   public GenericItemPreferenceArray clone() {
@@ -171,12 +154,12 @@ public final class BooleanUserPreferenceArray implements PreferenceArray, Serial
     }
 
     @Override
-    public Comparable<?> getUserID() {
+    public long getUserID() {
       return BooleanUserPreferenceArray.this.getUserID(i);
     }
 
     @Override
-    public Comparable<?> getItemID() {
+    public long getItemID() {
       return BooleanUserPreferenceArray.this.getItemID(i);
     }
 

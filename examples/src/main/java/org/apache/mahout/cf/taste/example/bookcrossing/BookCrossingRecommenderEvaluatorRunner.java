@@ -37,9 +37,10 @@ public final class BookCrossingRecommenderEvaluatorRunner {
     RecommenderEvaluator evaluator = new AverageAbsoluteDifferenceRecommenderEvaluator();
     BookCrossingDataModel model = new BookCrossingDataModel();
     double evaluation = evaluator.evaluate(new BookCrossingRecommenderBuilder(model),
-                                                 model,
-                                                 0.9,
-                                                 0.1);
+                                           null,
+                                           model,
+                                           0.9,
+                                           0.1);
     log.info(String.valueOf(evaluation));
   }
 

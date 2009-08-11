@@ -22,15 +22,15 @@ import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 /** Simply encapsulates a user and a similarity value. */
 public final class SimilarUser implements Comparable<SimilarUser> {
 
-  private final Comparable<?> userID;
+  private final long userID;
   private final double similarity;
 
-  public SimilarUser(Comparable<?> userID, double similarity) {
+  public SimilarUser(long userID, double similarity) {
     this.userID = userID;
     this.similarity = similarity;
   }
 
-  Comparable<?> getUserID() {
+  long getUserID() {
     return userID;
   }
 
@@ -40,7 +40,7 @@ public final class SimilarUser implements Comparable<SimilarUser> {
 
   @Override
   public int hashCode() {
-    return userID.hashCode() ^ RandomUtils.hashDouble(similarity);
+    return (int) userID ^ RandomUtils.hashDouble(similarity);
   }
 
   @Override
@@ -49,7 +49,7 @@ public final class SimilarUser implements Comparable<SimilarUser> {
       return false;
     }
     SimilarUser other = (SimilarUser) o;
-    return userID.equals(other.userID) && similarity == other.similarity;
+    return userID == other.userID && similarity == other.similarity;
   }
 
   @Override

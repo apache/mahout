@@ -19,14 +19,15 @@ package org.apache.mahout.cf.taste.impl.eval;
 
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.model.Preference;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -39,13 +40,11 @@ public final class RMSRecommenderEvaluator extends AbstractDifferenceRecommender
   private static final Logger log = LoggerFactory.getLogger(RMSRecommenderEvaluator.class);
 
   @Override
-  double getEvaluation(Map<Comparable<?>, Collection<Preference>> testUserPrefs,
-                       Recommender recommender)
-      throws TasteException {
+  double getEvaluation(FastByIDMap<PreferenceArray> testUserPrefs, Recommender recommender) throws TasteException {
     RunningAverage average = new FullRunningAverage();
-    for (Map.Entry<Comparable<?>, Collection<Preference>> entry : testUserPrefs.entrySet()) {
+    for (Map.Entry<Long, PreferenceArray> entry : testUserPrefs.entrySet()) {
       for (Preference realPref : entry.getValue()) {
-        Comparable<?> testUserID = entry.getKey();
+        long testUserID = entry.getKey();
         try {
           float estimatedPreference =
               recommender.estimatePreference(testUserID, realPref.getItemID());
@@ -56,7 +55,7 @@ public final class RMSRecommenderEvaluator extends AbstractDifferenceRecommender
         } catch (NoSuchUserException nsee) {
           // It's possible that an item exists in the test data but not training data in which case
           // NSEE will be thrown. Just ignore it and move on.
-          log.info("Element exists in test data but not training data: {}", testUserID, nsee);
+          log.info("User exists in test data but not training data: {}", testUserID);
         }
       }
     }

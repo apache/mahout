@@ -26,7 +26,7 @@ public final class InverseUserFrequencyTest extends TransformTestCase {
 
   public void testIUF() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2", "test3", "test4", "test5"},
+            new long[] {1, 2, 3, 4, 5},
             new Double[][] {
                     {0.1},
                     {0.2, 0.3},
@@ -37,7 +37,7 @@ public final class InverseUserFrequencyTest extends TransformTestCase {
 
     InverseUserFrequency iuf = new InverseUserFrequency(dataModel, 10.0);
 
-    PreferenceArray user5Prefs = dataModel.getPreferencesFromUser("test5");
+    PreferenceArray user5Prefs = dataModel.getPreferencesFromUser(5);
 
     for (int i = 0; i < 5; i++) {
       Preference pref = user5Prefs.get(i);

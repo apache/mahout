@@ -18,7 +18,7 @@
 package org.apache.mahout.cf.taste.impl;
 
 import junit.framework.TestCase;
-import org.apache.mahout.cf.taste.impl.common.FastMap;
+import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
@@ -29,7 +29,6 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public abstract class TasteTestCase extends TestCase {
 
@@ -42,13 +41,13 @@ public abstract class TasteTestCase extends TestCase {
     RandomUtils.useTestSeed();
   }
 
-  public static DataModel getDataModel(Comparable<?>[] userIDs, Double[][] prefValues) {
-    Map<Comparable<?>, PreferenceArray> result = new FastMap<Comparable<?>, PreferenceArray>();
+  public static DataModel getDataModel(long[] userIDs, Double[][] prefValues) {
+    FastByIDMap<PreferenceArray> result = new FastByIDMap<PreferenceArray>();
     for (int i = 0; i < userIDs.length; i++) {
       List<Preference> prefsList = new ArrayList<Preference>();
       for (int j = 0; j < prefValues[i].length; j++) {
         if (prefValues[i][j] != null) {
-          prefsList.add(new GenericPreference(userIDs[i], String.valueOf(j), prefValues[i][j].floatValue()));
+          prefsList.add(new GenericPreference(userIDs[i], j, prefValues[i][j].floatValue()));
         }
       }
       if (!prefsList.isEmpty()) {
@@ -60,13 +59,22 @@ public abstract class TasteTestCase extends TestCase {
 
   public static DataModel getDataModel() {
     return getDataModel(
-            new Comparable<?>[] {"test1", "test2", "test3", "test4"},
+            new long[] {1, 2, 3, 4},
             new Double[][] {
                     {0.1, 0.3},
                     {0.2, 0.3, 0.3},
                     {0.4, 0.3, 0.5},
                     {0.7, 0.3, 0.8},
             });
+  }
+
+  protected static boolean arrayContains(long[] array, long value) {
+    for (long l : array) {
+      if (l == value) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }

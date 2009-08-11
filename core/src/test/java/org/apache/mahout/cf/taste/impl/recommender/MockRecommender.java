@@ -39,39 +39,37 @@ final class MockRecommender implements Recommender {
   }
 
   @Override
-  public List<RecommendedItem> recommend(Comparable<?> userID, int howMany) {
+  public List<RecommendedItem> recommend(long userID, int howMany) {
     recommendCount.incrementAndGet();
     return Collections.<RecommendedItem>singletonList(
-        new GenericRecommendedItem("1", 1.0f));
+        new GenericRecommendedItem(1, 1.0f));
   }
 
   @Override
-  public List<RecommendedItem> recommend(Comparable<?> userID,
-                                         int howMany,
-                                         Rescorer<Comparable<?>> rescorer) {
+  public List<RecommendedItem> recommend(long userID, int howMany, Rescorer<Long> rescorer) {
     return recommend(userID, howMany);
   }
 
   @Override
-  public float estimatePreference(Comparable<?> userID, Comparable<?> itemID) {
+  public float estimatePreference(long userID, long itemID) {
     recommendCount.incrementAndGet();
     return 0.0f;
   }
 
   @Override
-  public void setPreference(Comparable<?> userID, Comparable<?> itemID, float value) {
+  public void setPreference(long userID, long itemID, float value) {
     // do nothing
   }
 
   @Override
-  public void removePreference(Comparable<?> userID, Comparable<?> itemID) {
+  public void removePreference(long userID, long itemID) {
     // do nothing
   }
 
   @Override
   public DataModel getDataModel() {
     return TasteTestCase.getDataModel(
-            new Comparable<?>[] {"1","2","3"},
+            new long[] {1, 2, 3},
             new Double[][]{{1.0},{2.0},{3.0}});
   }
 

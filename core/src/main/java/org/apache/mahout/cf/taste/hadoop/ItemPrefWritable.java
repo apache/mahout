@@ -26,14 +26,14 @@ import java.io.IOException;
 /** A {@link Writable} encapsulating an item and a preference value. */
 public final class ItemPrefWritable implements Writable {
 
-  private String itemID;
+  private long itemID;
   private float prefValue;
 
   public ItemPrefWritable() {
     // do nothing
   }
 
-  public ItemPrefWritable(String itemID, float prefValue) {
+  public ItemPrefWritable(long itemID, float prefValue) {
     this.itemID = itemID;
     this.prefValue = prefValue;
   }
@@ -42,7 +42,7 @@ public final class ItemPrefWritable implements Writable {
     this(other.getItemID(), other.getPrefValue());
   }
 
-  public String getItemID() {
+  public long getItemID() {
     return itemID;
   }
 
@@ -52,13 +52,13 @@ public final class ItemPrefWritable implements Writable {
 
   @Override
   public void write(DataOutput out) throws IOException {
-    out.writeUTF(itemID);
+    out.writeLong(itemID);
     out.writeFloat(prefValue);
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    itemID = in.readUTF();
+    itemID = in.readLong();
     prefValue = in.readFloat();
   }
 

@@ -39,7 +39,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
   private final DataModel dataModel;
   private PreferenceInferrer inferrer;
   private PreferenceTransform prefTransform;
-  private SimilarityTransform<Comparable<?>> similarityTransform;
+  private SimilarityTransform similarityTransform;
   private boolean weighted;
   private int cachedNumItems;
   private int cachedNumUsers;
@@ -98,11 +98,11 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     this.prefTransform = prefTransform;
   }
 
-  public final SimilarityTransform<Comparable<?>> getSimilarityTransform() {
+  public final SimilarityTransform getSimilarityTransform() {
     return similarityTransform;
   }
 
-  public final void setSimilarityTransform(SimilarityTransform<Comparable<?>> similarityTransform) {
+  public final void setSimilarityTransform(SimilarityTransform similarityTransform) {
     refreshHelper.addDependency(similarityTransform);
     refreshHelper.removeDependency(this.similarityTransform);
     this.similarityTransform = similarityTransform;
@@ -132,12 +132,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
   abstract double computeResult(int n, double sumXY, double sumX2, double sumY2, double sumXYdiff2);
 
   @Override
-  public double userSimilarity(Comparable<?> userID1, Comparable<?> userID2) throws TasteException {
-
-    if (userID1 == null || userID2 == null) {
-      throw new IllegalArgumentException("userID1 or userID2 is null");
-    }
-
+  public double userSimilarity(long userID1, long userID2) throws TasteException {
     PreferenceArray xPrefs = dataModel.getPreferencesFromUser(userID1);
     PreferenceArray yPrefs = dataModel.getPreferencesFromUser(userID2);
     int xLength = xPrefs.length();
@@ -149,8 +144,8 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
 
     Preference xPref = xPrefs.get(0);
     Preference yPref = yPrefs.get(0);
-    Comparable<?> xIndex = xPref.getItemID();
-    Comparable<?> yIndex = yPref.getItemID();
+    long xIndex = xPref.getItemID();
+    long yIndex = yPref.getItemID();
     int xPrefIndex = 0;
     int yPrefIndex = 0;
 
@@ -166,11 +161,11 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     boolean hasPrefTransform = prefTransform != null;
 
     while (true) {
-      int compare = ((Comparable<Object>) xIndex).compareTo(yIndex);
+      int compare = xIndex < yIndex ? -1 : xIndex > yIndex ? 1 : 0;
       if (hasInferrer || compare == 0) {
         double x;
         double y;
-        if (compare == 0) {
+        if (xIndex == yIndex) {
           // Both users expressed a preference for the item
           if (hasPrefTransform) {
             x = prefTransform.getTransformedValue(xPref);
@@ -242,12 +237,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
   }
 
   @Override
-  public final double itemSimilarity(Comparable<?> itemID1, Comparable<?> itemID2) throws TasteException {
-
-    if (itemID1 == null || itemID2 == null) {
-      throw new IllegalArgumentException("item1 or item2 is null");
-    }
-
+  public final double itemSimilarity(long itemID1, long itemID2) throws TasteException {
     PreferenceArray xPrefs = dataModel.getPreferencesForItem(itemID1);
     PreferenceArray yPrefs = dataModel.getPreferencesForItem(itemID2);
     int xLength = xPrefs.length();
@@ -259,8 +249,8 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
 
     Preference xPref = xPrefs.get(0);
     Preference yPref = yPrefs.get(0);
-    Comparable<?> xIndex = xPref.getUserID();
-    Comparable<?> yIndex = yPref.getUserID();
+    long xIndex = xPref.getUserID();
+    long yIndex = yPref.getUserID();
     int xPrefIndex = 1;
     int yPrefIndex = 1;
 
@@ -275,7 +265,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     // No, pref inferrers and transforms don't appy here. I think.
 
     while (true) {
-      int compare = ((Comparable<Object>) xIndex).compareTo(yIndex);
+      int compare = xIndex < yIndex ? -1 : xIndex > yIndex ? 1 : 0;
       if (compare == 0) {
         // Both users expressed a preference for the item
         double x = xPref.getValue();

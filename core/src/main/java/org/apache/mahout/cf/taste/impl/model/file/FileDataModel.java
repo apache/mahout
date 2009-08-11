@@ -19,9 +19,10 @@ package org.apache.mahout.cf.taste.impl.model.file;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.FastMap;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
+import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.FileLineIterator;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.model.GenericBooleanPrefDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
@@ -75,8 +76,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * that, a JDBC-backed {@link DataModel} and a database are more appropriate.</p>
  *
  * <p>It is possible and likely useful to subclass this class and customize its behavior to accommodate
- * application-specific needs and input formats. See {@link #processLine(String, Map, char)} and
- * {@link #processLineWithoutID(String, Map, char)}
+ * application-specific needs and input formats. See {@link #processLine(String, FastByIDMap, char)} and
+ * {@link #processLineWithoutID(String, FastByIDMap, char)}
  */
 public class FileDataModel implements DataModel {
 
@@ -138,17 +139,17 @@ public class FileDataModel implements DataModel {
     FileLineIterator iterator = new FileLineIterator(dataFile, false);
     String firstLine = iterator.peek();
     char delimiter = determineDelimiter(firstLine);
-    boolean hasPrefValues = firstLine.indexOf(',', firstLine.indexOf(',') + 1) >= 0;
+    boolean hasPrefValues = firstLine.indexOf(delimiter, firstLine.indexOf(delimiter) + 1) >= 0;
 
     if (hasPrefValues) {
-      Map<Comparable<?>, Collection<Preference>> data = new FastMap<Comparable<?>, Collection<Preference>>();
+      FastByIDMap<Collection<Preference>> data = new FastByIDMap<Collection<Preference>>();
       processFile(iterator, data, delimiter);
       for (File updateFile : findUpdateFiles()) {
         processFile(new FileLineIterator(updateFile, false), data, delimiter);
       }
-      return new GenericDataModel(GenericDataModel.toPrefArrayValues(data, true));
+      return new GenericDataModel(GenericDataModel.toDataMap(data, true));
     } else {
-      Map<Comparable<?>, FastSet<Comparable<?>>> data = new FastMap<Comparable<?>, FastSet<Comparable<?>>>();
+      FastByIDMap<FastIDSet> data = new FastByIDMap<FastIDSet>();
       processFileWithoutID(iterator, data, delimiter);
       for (File updateFile : findUpdateFiles()) {
         processFileWithoutID(new FileLineIterator(updateFile, false), data, delimiter);
@@ -189,7 +190,7 @@ public class FileDataModel implements DataModel {
   }
 
   protected void processFile(FileLineIterator dataOrUpdateFileIterator,
-                             Map<Comparable<?>, Collection<Preference>> data,
+                             FastByIDMap<Collection<Preference>> data,
                              char delimiter) {
     log.info("Reading file info...");
     AtomicInteger count = new AtomicInteger();
@@ -217,7 +218,7 @@ public class FileDataModel implements DataModel {
    * @param line      line from input data file
    * @param data      all data read so far, as a mapping from user IDs to preferences
    */
-  protected void processLine(String line, Map<Comparable<?>, Collection<Preference>> data, char delimiter) {
+  protected void processLine(String line, FastByIDMap<Collection<Preference>> data, char delimiter) {
 
     if (line.length() == 0 || line.charAt(0) == '#') {
       return;
@@ -229,12 +230,12 @@ public class FileDataModel implements DataModel {
       throw new IllegalArgumentException("Bad line: " + line);
     }
 
-    String userID = line.substring(0, delimiterOne);
-    String itemID = line.substring(delimiterOne + 1, delimiterTwo);
+    long userID = Long.parseLong(line.substring(0, delimiterOne));
+    long itemID = Long.parseLong(line.substring(delimiterOne + 1, delimiterTwo));
     String preferenceValueString = line.substring(delimiterTwo + 1);
 
     if (transpose) {
-      String tmp = userID;
+      long tmp = userID;
       userID = itemID;
       itemID = tmp;
     }
@@ -249,7 +250,7 @@ public class FileDataModel implements DataModel {
       Iterator<Preference> prefsIterator = prefs.iterator();
       while (prefsIterator.hasNext()) {
         Preference pref = prefsIterator.next();
-        if (pref.getItemID().equals(itemID)) {
+        if (pref.getItemID() == itemID) {
           prefsIterator.remove();
           break;
         }
@@ -261,7 +262,7 @@ public class FileDataModel implements DataModel {
   }
 
   protected void processFileWithoutID(FileLineIterator dataOrUpdateFileIterator,
-                                      Map<Comparable<?>, FastSet<Comparable<?>>> data,
+                                      FastByIDMap<FastIDSet> data,
                                       char delimiter) {
     log.info("Reading file info...");
     AtomicInteger count = new AtomicInteger();
@@ -278,7 +279,7 @@ public class FileDataModel implements DataModel {
     log.info("Read lines: {}", count.get());
   }
 
-  protected void processLineWithoutID(String line, Map<Comparable<?>, FastSet<Comparable<?>>> data, char delimiter) {
+  protected void processLineWithoutID(String line, FastByIDMap<FastIDSet> data, char delimiter) {
 
     if (line.length() == 0 || line.charAt(0) == '#') {
       return;
@@ -289,17 +290,17 @@ public class FileDataModel implements DataModel {
       throw new IllegalArgumentException("Bad line: " + line);
     }
 
-    String userID = line.substring(0, delimiterOne);
-    String itemID = line.substring(delimiterOne + 1);
+    long userID = Long.parseLong(line.substring(0, delimiterOne));
+    long itemID = Long.parseLong(line.substring(delimiterOne + 1));
 
     if (transpose) {
-      String tmp = userID;
+      long tmp = userID;
       userID = itemID;
       itemID = tmp;
     }
-    FastSet<Comparable<?>> itemIDs = data.get(userID);
+    FastIDSet itemIDs = data.get(userID);
     if (itemIDs == null) {
-      itemIDs = new FastSet<Comparable<?>>(2);
+      itemIDs = new FastIDSet(2);
       data.put(userID, itemIDs);
     }
     itemIDs.add(itemID);
@@ -312,36 +313,36 @@ public class FileDataModel implements DataModel {
   }
 
   @Override
-  public Iterable<Comparable<?>> getUserIDs() throws TasteException {
+  public LongPrimitiveIterator getUserIDs() throws TasteException {
     checkLoaded();
     return delegate.getUserIDs();
   }
 
   @Override
-  public PreferenceArray getPreferencesFromUser(Comparable<?> userID) throws TasteException {
+  public PreferenceArray getPreferencesFromUser(long userID) throws TasteException {
     checkLoaded();
     return delegate.getPreferencesFromUser(userID);
   }
 
   @Override
-  public FastSet<Comparable<?>> getItemIDsFromUser(Comparable<?> userID) throws TasteException {
+  public FastIDSet getItemIDsFromUser(long userID) throws TasteException {
     return delegate.getItemIDsFromUser(userID);
   }
 
   @Override
-  public Iterable<Comparable<?>> getItemIDs() throws TasteException {
+  public LongPrimitiveIterator getItemIDs() throws TasteException {
     checkLoaded();
     return delegate.getItemIDs();
   }
 
   @Override
-  public PreferenceArray getPreferencesForItem(Comparable<?> itemID) throws TasteException {
+  public PreferenceArray getPreferencesForItem(long itemID) throws TasteException {
     checkLoaded();
     return delegate.getPreferencesForItem(itemID);
   }
 
   @Override
-  public Float getPreferenceValue(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
+  public Float getPreferenceValue(long userID, long itemID) throws TasteException {
     return delegate.getPreferenceValue(userID, itemID);
   }
 
@@ -358,7 +359,7 @@ public class FileDataModel implements DataModel {
   }
 
   @Override
-  public int getNumUsersWithPreferenceFor(Comparable<?>... itemIDs) throws TasteException {
+  public int getNumUsersWithPreferenceFor(long... itemIDs) throws TasteException {
     checkLoaded();
     return delegate.getNumUsersWithPreferenceFor(itemIDs);
   }
@@ -369,14 +370,14 @@ public class FileDataModel implements DataModel {
    * reloaded from a file. This method should also be considered relatively slow.
    */
   @Override
-  public void setPreference(Comparable<?> userID, Comparable<?> itemID, float value) throws TasteException {
+  public void setPreference(long userID, long itemID, float value) throws TasteException {
     checkLoaded();
     delegate.setPreference(userID, itemID, value);
   }
 
-  /** See the warning at {@link #setPreference(Comparable, Comparable, float)}. */
+  /** See the warning at {@link #setPreference(long, long, float)}. */
   @Override
-  public void removePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
+  public void removePreference(long userID, long itemID) throws TasteException {
     checkLoaded();
     delegate.removePreference(userID, itemID);
   }

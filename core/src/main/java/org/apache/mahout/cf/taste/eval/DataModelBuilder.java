@@ -15,29 +15,30 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.eval;
+package org.apache.mahout.cf.taste.eval;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.eval.RecommenderBuilder;
-import org.apache.mahout.cf.taste.eval.RecommenderEvaluator;
-import org.apache.mahout.cf.taste.impl.TasteTestCase;
-import org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender;
+import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.model.DataModel;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 
-public final class RMSRecommenderEvaluatorTest extends TasteTestCase {
+/**
+ * <p>Implementations of this inner interface are simple helper classes which create a {@link DataModel} to be
+ * used while evaluating a {@link Recommender}.
+ *
+ * @see RecommenderBuilder
+ * @see RecommenderEvaluator
+ */
+public interface DataModelBuilder {
 
-  public void testEvaluate() throws Exception {
-    DataModel model = getDataModel();
-    RecommenderBuilder builder = new RecommenderBuilder() {
-      @Override
-      public Recommender buildRecommender(DataModel dataModel) throws TasteException {
-        return new SlopeOneRecommender(dataModel);
-      }
-    };
-    RecommenderEvaluator evaluator = new RMSRecommenderEvaluator();
-    double eval = evaluator.evaluate(builder, null, model, 0.85, 1.0);
-    assertEquals(0.3004147161079469, eval, EPSILON);
-  }
+  /**
+   * <p>Builds a {@link DataModel} implementation to be used in an evaluation, given training data.</p>
+   *
+   * @param trainingData data to be used in the {@link DataModel}
+   * @return {@link DataModel} based upon the given data
+   * @throws TasteException if an error occurs while accessing the {@link DataModel}
+   */
+  DataModel buildDataModel(FastByIDMap<PreferenceArray> trainingData) throws TasteException;
 
 }

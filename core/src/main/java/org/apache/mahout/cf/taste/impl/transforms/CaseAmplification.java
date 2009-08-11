@@ -26,7 +26,7 @@ import java.util.Collection;
  * <p>Applies "case amplification" to similarities. This essentially makes big values bigger and small values smaller by
  * raising each score to a power. It could however be used to achieve the opposite effect.</p>
  */
-public final class CaseAmplification implements SimilarityTransform<Object> {
+public final class CaseAmplification implements SimilarityTransform {
 
   private final double factor;
 
@@ -47,14 +47,14 @@ public final class CaseAmplification implements SimilarityTransform<Object> {
    * <p>Transforms one similarity value. This implementation is such that it's possible to define this transformation on
    * one value in isolation. The "thing" parameters are therefore unused.</p>
    *
-   * @param thing1 unused
-   * @param thing2 unused
+   * @param id1 unused
+   * @param id2 unused
    * @param value  similarity to transform
    * @return <code>value<sup>factor</sup></code> if value is nonnegative; <code>-value<sup>-factor</sup></code>
    *         otherwise
    */
   @Override
-  public double transformSimilarity(Object thing1, Object thing2, double value) {
+  public double transformSimilarity(long id1, long id2, double value) {
     return value < 0.0 ? -Math.pow(-value, factor) : Math.pow(value, factor);
   }
 

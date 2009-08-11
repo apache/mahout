@@ -20,6 +20,7 @@ package org.apache.mahout.cf.taste.ejb;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
+import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 
 import javax.ejb.EJBObject;
 import java.rmi.RemoteException;
@@ -35,31 +36,31 @@ import java.util.List;
 public interface RecommenderEJB extends EJBObject {
 
   /**
-   * @see org.apache.mahout.cf.taste.recommender.Recommender#recommend(Comparable, int)
+   * @see org.apache.mahout.cf.taste.recommender.Recommender#recommend(long, int)
    */
-  List<Comparable<?>> recommend(Object userID, int howMany) throws TasteException, RemoteException;
+  List<RecommendedItem> recommend(long userID, int howMany) throws TasteException, RemoteException;
 
   /**
-   * @see org.apache.mahout.cf.taste.recommender.Recommender#recommend(Comparable, int, Rescorer)
+   * @see org.apache.mahout.cf.taste.recommender.Recommender#recommend(long, int, Rescorer)
    */
-  List<Comparable<?>> recommend(Object userID, int howMany, Rescorer<Comparable<?>> rescorer)
+  List<RecommendedItem> recommend(long userID, int howMany, Rescorer<Long> rescorer)
           throws TasteException, RemoteException;
 
   /**
-   * @see org.apache.mahout.cf.taste.recommender.Recommender#estimatePreference(Comparable, Comparable)
+   * @see org.apache.mahout.cf.taste.recommender.Recommender#estimatePreference(long, long)
    */
-  double estimatePreference(Object userID, Object itemID) throws TasteException, RemoteException;
+  double estimatePreference(long userID, long itemID) throws TasteException, RemoteException;
 
   /**
-   * @see org.apache.mahout.cf.taste.recommender.Recommender#setPreference(Comparable, Comparable, float)
+   * @see org.apache.mahout.cf.taste.recommender.Recommender#setPreference(long, long, float)
    */
-  void setPreference(Object userID, Object itemID, float value)
+  void setPreference(long userID, long itemID, float value)
           throws TasteException, RemoteException;
 
   /**
-   * @see org.apache.mahout.cf.taste.recommender.Recommender#removePreference(Comparable, Comparable)
+   * @see org.apache.mahout.cf.taste.recommender.Recommender#removePreference(long, long)
    */
-  void removePreference(Object userID, Object itemID) throws TasteException, RemoteException;
+  void removePreference(long userID, long itemID) throws TasteException, RemoteException;
 
   /**
    * @see org.apache.mahout.cf.taste.recommender.Recommender#refresh(java.util.Collection)

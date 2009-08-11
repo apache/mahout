@@ -19,7 +19,8 @@ package org.apache.mahout.cf.taste.impl.transforms;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.FastMap;
+import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -27,7 +28,6 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
@@ -51,7 +51,7 @@ public final class InverseUserFrequency implements PreferenceTransform {
   private final DataModel dataModel;
   private final RefreshHelper refreshHelper;
   private final double logBase;
-  private final AtomicReference<Map<Comparable<?>, Double>> iufFactors;
+  private final AtomicReference<FastByIDMap<Double>> iufFactors;
 
   /**
    * <p>Creates a {@link InverseUserFrequency} transformation. Computations use the given log base.</p>
@@ -69,7 +69,7 @@ public final class InverseUserFrequency implements PreferenceTransform {
     }
     this.dataModel = dataModel;
     this.logBase = logBase;
-    this.iufFactors = new AtomicReference<Map<Comparable<?>, Double>>(new FastMap<Comparable<?>, Double>());
+    this.iufFactors = new AtomicReference<FastByIDMap<Double>>(new FastByIDMap<Double>());
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
       @Override
       public Object call() throws TasteException {
@@ -101,23 +101,24 @@ public final class InverseUserFrequency implements PreferenceTransform {
   }
 
   private synchronized void recompute() throws TasteException {
-    Counters<Comparable<?>> itemPreferenceCounts = new Counters<Comparable<?>>();
+    Counters itemPreferenceCounts = new Counters();
     int numUsers = 0;
-    for (Comparable<?> userID : dataModel.getUserIDs()) {
-      PreferenceArray prefs = dataModel.getPreferencesFromUser(userID);
+    LongPrimitiveIterator it = dataModel.getUserIDs();
+    while (it.hasNext()) {
+      PreferenceArray prefs = dataModel.getPreferencesFromUser(it.nextLong());
       int size = prefs.length();
       for (int i = 0; i < size; i++) {
         itemPreferenceCounts.increment(prefs.getItemID(i));
       }
       numUsers++;
     }
-    Map<Comparable<?>, Double> newIufFactors = new FastMap<Comparable<?>, Double>(itemPreferenceCounts.size());
+    FastByIDMap<Double> newIufFactors = new FastByIDMap<Double>(itemPreferenceCounts.size());
     double logFactor = Math.log(logBase);
-    for (Map.Entry<Comparable<?>, int[]> entry : itemPreferenceCounts.getEntrySet()) {
+    for (Map.Entry<Long, int[]> entry : itemPreferenceCounts.getEntrySet()) {
       newIufFactors.put(entry.getKey(),
           Math.log((double) numUsers / (double) entry.getValue()[0]) / logFactor);
     }
-    iufFactors.set(Collections.unmodifiableMap(newIufFactors));
+    iufFactors.set(newIufFactors);
   }
 
   @Override

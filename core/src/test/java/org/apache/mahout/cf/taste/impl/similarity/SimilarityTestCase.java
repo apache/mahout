@@ -22,10 +22,14 @@ import org.apache.mahout.cf.taste.impl.TasteTestCase;
 abstract class SimilarityTestCase extends TasteTestCase {
 
   static void assertCorrelationEquals(double expected, double actual) {
-    assertTrue("Correlation is NaN", !Double.isNaN(actual));
-    assertTrue("Correlation > 1.0", actual <= 1.0);
-    assertTrue("Correlation < -1.0", actual >= -1.0);
-    assertEquals(expected, actual, EPSILON);
+    if (Double.isNaN(expected)) {
+      assertTrue("Correlation is not NaN", Double.isNaN(actual));
+    } else {
+      assertTrue("Correlation is NaN", !Double.isNaN(actual));
+      assertTrue("Correlation > 1.0", actual <= 1.0);
+      assertTrue("Correlation < -1.0", actual >= -1.0);
+      assertEquals(expected, actual, EPSILON);
+    }
   }
 
 }

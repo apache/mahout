@@ -21,7 +21,8 @@ import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 
 import java.util.List;
 
@@ -32,10 +33,10 @@ import java.util.List;
 public interface DataModel extends Refreshable {
 
   /**
-   * @return a {@link List} of all user IDs in the model, in order
+   * @return all user IDs in the model, in order
    * @throws TasteException if an error occurs while accessing the data
    */
-  Iterable<Comparable<?>> getUserIDs() throws TasteException;
+  LongPrimitiveIterator getUserIDs() throws TasteException;
 
   /**
    * @param userID ID of user to get prefs for
@@ -43,7 +44,7 @@ public interface DataModel extends Refreshable {
    * @throws NoSuchUserException if the user does not exist
    * @throws TasteException if an error occurs while accessing the data
    */
-  PreferenceArray getPreferencesFromUser(Comparable<?> userID) throws TasteException;
+  PreferenceArray getPreferencesFromUser(long userID) throws TasteException;
 
   /**
    * @param userID ID of user to get prefs for
@@ -51,13 +52,13 @@ public interface DataModel extends Refreshable {
    * @throws NoSuchUserException if the user does not exist
    * @throws TasteException if an error occurs while accessing the data
    */
-  FastSet<Comparable<?>> getItemIDsFromUser(Comparable<?> userID) throws TasteException;
+  FastIDSet getItemIDsFromUser(long userID) throws TasteException;
 
   /**
    * @return a {@link List} of all item IDs in the model, in order
    * @throws TasteException if an error occurs while accessing the data
    */
-  Iterable<Comparable<?>> getItemIDs() throws TasteException;
+  LongPrimitiveIterator getItemIDs() throws TasteException;
 
   /**
    * @param itemID item ID
@@ -65,7 +66,7 @@ public interface DataModel extends Refreshable {
    * @throws NoSuchItemException if the item does not exist
    * @throws TasteException if an error occurs while accessing the data
    */
-  PreferenceArray getPreferencesForItem(Comparable<?> itemID) throws TasteException;
+  PreferenceArray getPreferencesForItem(long itemID) throws TasteException;
 
   /**
    * Retrieves the preference value for a single user and item.
@@ -76,7 +77,7 @@ public interface DataModel extends Refreshable {
    * @throws NoSuchUserException if the user does not exist
    * @throws TasteException if an error occurs while accessing the data
    */
-  Float getPreferenceValue(Comparable<?> userID, Comparable<?> itemID) throws TasteException;
+  Float getPreferenceValue(long userID, long itemID) throws TasteException;
 
   /**
    * @return total number of items known to the model. This is generally the union of all items
@@ -99,7 +100,7 @@ public interface DataModel extends Refreshable {
    *                                  of up to 2 items are needed and supported
    * @throws NoSuchItemException if an item does not exist
    */
-  int getNumUsersWithPreferenceFor(Comparable<?>... itemIDs) throws TasteException;
+  int getNumUsersWithPreferenceFor(long... itemIDs) throws TasteException;
 
   /**
    * <p>Sets a particular preference (item plus rating) for a user.</p>
@@ -111,7 +112,7 @@ public interface DataModel extends Refreshable {
    * @throws NoSuchUserException if the user does not exist
    * @throws TasteException if an error occurs while accessing the data
    */
-  void setPreference(Comparable<?> userID, Comparable<?> itemID, float value) throws TasteException;
+  void setPreference(long userID, long itemID, float value) throws TasteException;
 
   /**
    * <p>Removes a particular preference for a user.</p>
@@ -122,6 +123,6 @@ public interface DataModel extends Refreshable {
    * @throws NoSuchUserException if the user does not exist
    * @throws TasteException if an error occurs while accessing the data
    */
-  void removePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException;
+  void removePreference(long userID, long itemID) throws TasteException;
 
 }

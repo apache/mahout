@@ -40,9 +40,10 @@ public final class GroupLensRecommenderEvaluatorRunner {
   public static void main(String... args) throws IOException, TasteException {
     RecommenderEvaluator evaluator = new AverageAbsoluteDifferenceRecommenderEvaluator();
     double evaluation = evaluator.evaluate(new GroupLensRecommenderBuilder(),
-                                                 new GroupLensDataModel(),
-                                                 0.9,
-                                                 0.1);
+                                           null,
+                                           new GroupLensDataModel(),
+                                           0.9,
+                                           0.1);
     log.info(String.valueOf(evaluation));
   }
 

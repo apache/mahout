@@ -38,7 +38,7 @@ public final class NetflixRecommenderEvaluatorRunner {
   public static void main(String... args) throws IOException, TasteException {
     RecommenderEvaluator evaluator = new AverageAbsoluteDifferenceRecommenderEvaluator();
     DataModel model = new NetflixDataModel(new File(args[0]), true);
-    double evaluation = evaluator.evaluate(new NetflixRecommenderBuilder(), model, 0.9, 0.1);
+    double evaluation = evaluator.evaluate(new NetflixRecommenderBuilder(), null, model, 0.9, 0.1);
     log.info(String.valueOf(evaluation));
   }
 

@@ -51,7 +51,7 @@ public final class RecommendedItemsWritable implements Writable {
   @Override
   public void write(DataOutput out) throws IOException {
     for (RecommendedItem item : recommended) {
-      out.writeUTF(item.getItemID().toString());
+      out.writeLong(item.getItemID());
       out.writeFloat(item.getValue());
     }
 
@@ -62,7 +62,7 @@ public final class RecommendedItemsWritable implements Writable {
     recommended = new ArrayList<RecommendedItem>();
     try {
       do {
-        String itemID = in.readUTF();
+        long itemID = in.readLong();
         float value = in.readFloat();
         RecommendedItem recommendedItem = new GenericRecommendedItem(itemID, value);
         recommended.add(recommendedItem);
@@ -89,7 +89,7 @@ public final class RecommendedItemsWritable implements Writable {
       } else {
         result.append(',');
       }
-      result.append(item.getItemID().toString());
+      result.append(item.getItemID());
       result.append(':');
       result.append(item.getValue());
     }

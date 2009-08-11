@@ -28,24 +28,21 @@ import java.io.Serializable;
  */
 public final class BooleanPreference implements Preference, Serializable {
 
-  private final Comparable<?> userID;
-  private final Comparable<?> itemID;
+  private final long userID;
+  private final long itemID;
 
-  public BooleanPreference(Comparable<?> userID, Comparable<?> itemID) {
-    if (userID == null || itemID == null) {
-      throw new IllegalArgumentException("itemID is null");
-    }
+  public BooleanPreference(long userID, long itemID) {
     this.userID = userID;
     this.itemID = itemID;
   }
 
   @Override
-  public Comparable<?> getUserID() {
+  public long getUserID() {
     return userID;
   }
 
   @Override
-  public Comparable<?> getItemID() {
+  public long getItemID() {
     return itemID;
   }
 

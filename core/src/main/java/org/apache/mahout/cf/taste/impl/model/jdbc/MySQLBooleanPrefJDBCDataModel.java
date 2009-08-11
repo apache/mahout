@@ -28,8 +28,8 @@ import java.sql.SQLException;
  *
  * <pre>
  * CREATE TABLE taste_preferences (
- *   user_id INT NOT NULL,
- *   item_id INT NOT NULL,
+ *   user_id BIGINT NOT NULL,
+ *   item_id BIGINT NOT NULL,
  *   PRIMARY KEY (user_id, item_id),
  *   INDEX (user_id),
  *   INDEX (item_id)
@@ -122,7 +122,7 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
         "SELECT COUNT(1) FROM " + preferenceTable + " WHERE " + itemIDColumn + "=?",
         // getNumPreferenceForItemsSQL
         "SELECT COUNT(1) FROM " + preferenceTable + " tp1 JOIN " + preferenceTable + " tp2 " +
-            "USING " + userIDColumn + " WHERE tp1." + itemIDColumn + "=? and tp2." + itemIDColumn + "=?");
+            "USING (" + userIDColumn + ") WHERE tp1." + itemIDColumn + "=? and tp2." + itemIDColumn + "=?");
   }
 
   @Override

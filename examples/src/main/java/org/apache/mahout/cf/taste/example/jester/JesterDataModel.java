@@ -20,6 +20,9 @@ package org.apache.mahout.cf.taste.example.jester;
 import org.apache.mahout.cf.taste.example.grouplens.GroupLensDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
+import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
+import org.apache.mahout.cf.taste.impl.common.FileLineIterator;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.model.Preference;
 
 import java.io.File;
@@ -31,7 +34,7 @@ import java.util.Map;
 
 public final class JesterDataModel extends FileDataModel {
 
-  private int userBeingRead;
+  private long userBeingRead;
 
   public JesterDataModel() throws IOException {
     this(GroupLensDataModel.readResourceToTempFile("/org/apache/mahout/cf/taste/example/jester/jester-data-1.csv"));
@@ -52,25 +55,19 @@ public final class JesterDataModel extends FileDataModel {
   }
 
   @Override
-  protected void processLine(String line, Map<Comparable<?>, Collection<Preference>> data, char delimiter) {
-    String userID = String.valueOf(userBeingRead);
+  protected void processLine(String line, FastByIDMap<Collection<Preference>> data, char delimiter) {
     String[] jokePrefs = line.split(",");
-    List<Preference> prefs = new ArrayList<Preference>(101);
-    for (int itemIDNum = 1; itemIDNum < jokePrefs.length; itemIDNum++) { // yes skip first one, just a count
-      String jokePref = jokePrefs[itemIDNum];
+    int count = Integer.parseInt(jokePrefs[0]);
+    List<Preference> prefs = new ArrayList<Preference>(count);
+    for (int itemID = 1; itemID < jokePrefs.length; itemID++) { // yes skip first one, just a count
+      String jokePref = jokePrefs[itemID];
       if (!"99".equals(jokePref)) {
         float jokePrefValue = Float.parseFloat(jokePref);
-        String itemID = String.valueOf(itemIDNum);
-        prefs.add(new GenericPreference(null, itemID, jokePrefValue));
+        prefs.add(new GenericPreference(userBeingRead, itemID, jokePrefValue));
       }
     }
-    data.put(userID, prefs);
+    data.put(userBeingRead, prefs);
     userBeingRead++;
-  }
-
-  @Override
-  public String toString() {
-    return "JesterDataModel";
   }
 
 }

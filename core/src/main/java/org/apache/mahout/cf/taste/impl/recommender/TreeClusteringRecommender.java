@@ -19,9 +19,10 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.FastMap;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
+import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.common.Pair;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
@@ -38,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.locks.ReentrantLock;
@@ -52,7 +52,7 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * <ul>
  * <li>For all users in a cluster, recommendations will be the same</li>
- * <li>{@link #estimatePreference(Comparable, Comparable)} may well return {@link Double#NaN};
+ * <li>{@link #estimatePreference(long, long)} may well return {@link Double#NaN};
  *  it does so when asked to estimate preference for an item for
  *  which no preference is expressed in the users in the cluster.</li>
  * </ul>
@@ -68,9 +68,9 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   private final double clusteringThreshold;
   private final boolean clusteringByThreshold;
   private final double samplingRate;
-  private Map<Comparable<?>, List<RecommendedItem>> topRecsByUserID;
-  private Collection<Collection<Comparable<?>>> allClusters;
-  private Map<Comparable<?>, Collection<Comparable<?>>> clustersByUserID;
+  private FastByIDMap<List<RecommendedItem>> topRecsByUserID;
+  private FastIDSet[] allClusters;
+  private FastByIDMap<FastIDSet> clustersByUserID;
   private boolean clustersBuilt;
   private final ReentrantLock buildClustersLock;
   private final RefreshHelper refreshHelper;
@@ -185,11 +185,8 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   }
 
   @Override
-  public List<RecommendedItem> recommend(Comparable<?> userID, int howMany, Rescorer<Comparable<?>> rescorer)
+  public List<RecommendedItem> recommend(long userID, int howMany, Rescorer<Long> rescorer)
       throws TasteException {
-    if (userID == null) {
-      throw new IllegalArgumentException("userID is null");
-    }
     if (howMany < 1) {
       throw new IllegalArgumentException("howMany must be at least 1");
     }
@@ -207,7 +204,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     // Only add items the user doesn't already have a preference for.
     // And that the rescorer doesn't "reject".
     for (RecommendedItem recommendedItem : recommended) {
-      Comparable<?> itemID = recommendedItem.getItemID();
+      long itemID = recommendedItem.getItemID();
       if (rescorer != null && rescorer.isFiltered(itemID)) {
         continue;
       }
@@ -222,10 +219,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   }
 
   @Override
-  public float estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
-    if (userID == null || itemID == null) {
-      throw new IllegalArgumentException("userID or itemID is null");
-    }
+  public float estimatePreference(long userID, long itemID) throws TasteException {
     DataModel model = getDataModel();
     Float actualPref = model.getPreferenceValue(userID, itemID);
     if (actualPref != null) {
@@ -235,7 +229,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     List<RecommendedItem> topRecsForUser = topRecsByUserID.get(userID);
     if (topRecsForUser != null) {
       for (RecommendedItem item : topRecsForUser) {
-        if (itemID.equals(item.getItemID())) {
+        if (itemID == item.getItemID()) {
           return item.getValue();
         }
       }
@@ -245,17 +239,14 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   }
 
   @Override
-  public Collection<Comparable<?>> getCluster(Comparable<?> userID) throws TasteException {
-    if (userID == null) {
-      throw new IllegalArgumentException("userID is null");
-    }
+  public FastIDSet getCluster(long userID) throws TasteException {
     checkClustersBuilt();
-    Collection<Comparable<?>> cluster = clustersByUserID.get(userID);
-    return cluster == null ? Collections.<Comparable<?>>emptyList() : cluster;
+    FastIDSet cluster = clustersByUserID.get(userID);
+    return cluster == null ? new FastIDSet() : cluster;
   }
 
   @Override
-  public Collection<Collection<Comparable<?>>> getClusters() throws TasteException {
+  public FastIDSet[] getClusters() throws TasteException {
     checkClustersBuilt();
     return allClusters;
   }
@@ -272,11 +263,12 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
       DataModel model = getDataModel();
       int numUsers = model.getNumUsers();
       if (numUsers > 0) {
-        List<Collection<Comparable<?>>> newClusters = new ArrayList<Collection<Comparable<?>>>(numUsers);
+        List<FastIDSet> newClusters = new ArrayList<FastIDSet>(numUsers);
         // Begin with a cluster for each user:
-        for (Comparable<?> userID : model.getUserIDs()) {
-          Collection<Comparable<?>> newCluster = new FastSet<Comparable<?>>();
-          newCluster.add(userID);
+        LongPrimitiveIterator it = model.getUserIDs();
+        while (it.hasNext()) {
+          FastIDSet newCluster = new FastIDSet();
+          newCluster.add(it.nextLong());
           newClusters.add(newCluster);
         }
         if (numUsers > 1) {
@@ -284,11 +276,11 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
         }
         topRecsByUserID = computeTopRecsPerUserID(newClusters);
         clustersByUserID = computeClustersPerUserID(newClusters);
-        allClusters = newClusters;
+        allClusters = newClusters.toArray(new FastIDSet[newClusters.size()]);
       } else {
-        topRecsByUserID = Collections.emptyMap();
-        clustersByUserID = Collections.emptyMap();
-        allClusters = Collections.emptySet();
+        topRecsByUserID = new FastByIDMap<List<RecommendedItem>>();
+        clustersByUserID = new FastByIDMap<FastIDSet>();
+        allClusters = new FastIDSet[0];
       }
       clustersBuilt = true;
     } finally {
@@ -296,16 +288,16 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     }
   }
 
-  private void findClusters(List<Collection<Comparable<?>>> newClusters) throws TasteException {
+  private void findClusters(List<FastIDSet> newClusters) throws TasteException {
     if (clusteringByThreshold) {
-      Pair<Collection<Comparable<?>>, Collection<Comparable<?>>> nearestPair = findNearestClusters(newClusters);
+      Pair<FastIDSet, FastIDSet> nearestPair = findNearestClusters(newClusters);
       if (nearestPair != null) {
-        Collection<Comparable<?>> cluster1 = nearestPair.getFirst();
-        Collection<Comparable<?>> cluster2 = nearestPair.getSecond();
+        FastIDSet cluster1 = nearestPair.getFirst();
+        FastIDSet cluster2 = nearestPair.getSecond();
         while (clusterSimilarity.getSimilarity(cluster1, cluster2) >= clusteringThreshold) {
           newClusters.remove(cluster1);
           newClusters.remove(cluster2);
-          Collection<Comparable<?>> merged = new FastSet<Comparable<?>>(cluster1.size() + cluster2.size());
+          FastIDSet merged = new FastIDSet(cluster1.size() + cluster2.size());
           merged.addAll(cluster1);
           merged.addAll(cluster2);
           newClusters.add(merged);
@@ -319,16 +311,15 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
       }
     } else {
       while (newClusters.size() > numClusters) {
-        Pair<Collection<Comparable<?>>, Collection<Comparable<?>>> nearestPair =
-            findNearestClusters(newClusters);
+        Pair<FastIDSet, FastIDSet> nearestPair = findNearestClusters(newClusters);
         if (nearestPair == null) {
           break;
         }
-        Collection<Comparable<?>> cluster1 = nearestPair.getFirst();
-        Collection<Comparable<?>> cluster2 = nearestPair.getSecond();
+        FastIDSet cluster1 = nearestPair.getFirst();
+        FastIDSet cluster2 = nearestPair.getSecond();
         newClusters.remove(cluster1);
         newClusters.remove(cluster2);
-        Collection<Comparable<?>> merged = new FastSet<Comparable<?>>(cluster1.size() + cluster2.size());
+        FastIDSet merged = new FastIDSet(cluster1.size() + cluster2.size());
         merged.addAll(cluster1);
         merged.addAll(cluster2);
         newClusters.add(merged);
@@ -336,20 +327,19 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     }
   }
 
-  private Pair<Collection<Comparable<?>>, Collection<Comparable<?>>>
-      findNearestClusters(List<Collection<Comparable<?>>> clusters) throws TasteException {
+  private Pair<FastIDSet, FastIDSet> findNearestClusters(List<FastIDSet> clusters) throws TasteException {
     int size = clusters.size();
-    Pair<Collection<Comparable<?>>, Collection<Comparable<?>>> nearestPair = null;
+    Pair<FastIDSet, FastIDSet> nearestPair = null;
     double bestSimilarity = Double.NEGATIVE_INFINITY;
     for (int i = 0; i < size; i++) {
-      Collection<Comparable<?>> cluster1 = clusters.get(i);
+      FastIDSet cluster1 = clusters.get(i);
       for (int j = i + 1; j < size; j++) {
         if (samplingRate >= 1.0 || r.nextDouble() < samplingRate) {
-          Collection<Comparable<?>> cluster2 = clusters.get(j);
+          FastIDSet cluster2 = clusters.get(j);
           double similarity = clusterSimilarity.getSimilarity(cluster1, cluster2);
           if (!Double.isNaN(similarity) && similarity > bestSimilarity) {
             bestSimilarity = similarity;
-            nearestPair = new Pair<Collection<Comparable<?>>, Collection<Comparable<?>>>(cluster1, cluster2);
+            nearestPair = new Pair<FastIDSet, FastIDSet>(cluster1, cluster2);
           }
         }
       }
@@ -357,46 +347,46 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     return nearestPair;
   }
 
-  private Map<Comparable<?>, List<RecommendedItem>> computeTopRecsPerUserID(
-      Iterable<Collection<Comparable<?>>> clusters) throws TasteException {
-    Map<Comparable<?>, List<RecommendedItem>> recsPerUser = new FastMap<Comparable<?>, List<RecommendedItem>>();
-    for (Collection<Comparable<?>> cluster : clusters) {
+  private FastByIDMap<List<RecommendedItem>> computeTopRecsPerUserID(List<FastIDSet> clusters) throws TasteException {
+    FastByIDMap<List<RecommendedItem>> recsPerUser = new FastByIDMap<List<RecommendedItem>>();
+    for (FastIDSet cluster : clusters) {
       List<RecommendedItem> recs = computeTopRecsForCluster(cluster);
-      for (Comparable<?> userID : cluster) {
-        recsPerUser.put(userID, recs);
+      LongPrimitiveIterator it = cluster.iterator();
+      while (it.hasNext()) {
+        recsPerUser.put(it.next(), recs);
       }
     }
-    return Collections.unmodifiableMap(recsPerUser);
+    return recsPerUser;
   }
 
-  private List<RecommendedItem> computeTopRecsForCluster(Collection<Comparable<?>> cluster)
+  private List<RecommendedItem> computeTopRecsForCluster(FastIDSet cluster)
       throws TasteException {
     DataModel dataModel = getDataModel();
-    Collection<Comparable<?>> allItemIDs = new FastSet<Comparable<?>>();
-    for (Comparable<?> userID : cluster) {
-      PreferenceArray prefs = dataModel.getPreferencesFromUser(userID);
+    FastIDSet allItemIDs = new FastIDSet();
+    LongPrimitiveIterator it = cluster.iterator();
+    while (it.hasNext()) {
+      PreferenceArray prefs = dataModel.getPreferencesFromUser(it.next());
       int size = prefs.length();
       for (int i = 0; i < size; i++) {
         allItemIDs.add(prefs.getItemID(i));
       }
     }
 
-    TopItems.Estimator<Comparable<?>> estimator = new Estimator(cluster);
+    TopItems.Estimator<Long> estimator = new Estimator(cluster);
 
     // TODO don't hardcode 100, figure out some reasonable value
-    List<RecommendedItem> topItems = TopItems.getTopItems(100, allItemIDs, null, estimator);
+    List<RecommendedItem> topItems = TopItems.getTopItems(100, allItemIDs.iterator(), null, estimator);
 
     log.debug("Recommendations are: {}", topItems);
     return Collections.unmodifiableList(topItems);
   }
 
-  private static Map<Comparable<?>, Collection<Comparable<?>>>
-      computeClustersPerUserID(Collection<Collection<Comparable<?>>> clusters) {
-    Map<Comparable<?>, Collection<Comparable<?>>> clustersPerUser =
-            new FastMap<Comparable<?>, Collection<Comparable<?>>>(clusters.size());
-    for (Collection<Comparable<?>> cluster : clusters) {
-      for (Comparable<?> userID : cluster) {
-        clustersPerUser.put(userID, cluster);
+  private static FastByIDMap<FastIDSet> computeClustersPerUserID(List<FastIDSet> clusters) {
+    FastByIDMap<FastIDSet> clustersPerUser = new FastByIDMap<FastIDSet>(clusters.size());
+    for (FastIDSet cluster : clusters) {
+      LongPrimitiveIterator it = cluster.iterator();
+      while (it.hasNext()) {
+        clustersPerUser.put(it.next(), cluster);
       }
     }
     return clustersPerUser;
@@ -412,20 +402,21 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     return "TreeClusteringRecommender[clusterSimilarity:" + clusterSimilarity + ']';
   }
 
-  private class Estimator implements TopItems.Estimator<Comparable<?>> {
+  private class Estimator implements TopItems.Estimator<Long> {
 
-    private final Collection<Comparable<?>> cluster;
+    private final FastIDSet cluster;
 
-    private Estimator(Collection<Comparable<?>> cluster) {
+    private Estimator(FastIDSet cluster) {
       this.cluster = cluster;
     }
 
     @Override
-    public double estimate(Comparable<?> itemID) throws TasteException {
+    public double estimate(Long itemID) throws TasteException {
       DataModel dataModel = getDataModel();
       RunningAverage average = new FullRunningAverage();
-      for (Comparable<?> userID : cluster) {
-        Float pref = dataModel.getPreferenceValue(userID, itemID);
+      LongPrimitiveIterator it = cluster.iterator();
+      while (it.hasNext()) {
+        Float pref = dataModel.getPreferenceValue(it.next(), itemID);
         if (pref != null) {
           average.addDatum(pref);
         }

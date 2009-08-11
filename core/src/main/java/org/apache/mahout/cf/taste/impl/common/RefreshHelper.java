@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.locks.ReentrantLock;
@@ -87,13 +88,13 @@ public final class RefreshHelper implements Refreshable {
   }
 
   /**
-   * Creates a new and empty {@link FastSet} of size 3 if the method parameter is <code>null</code>.
+   * Creates a new and empty {@link Collection} if the method parameter is <code>null</code>.
    *
    * @param currentAlreadyRefreshed {@link Refreshable}s to refresh later on
-   * @return an empty {@link FastSet} if the method param was <code>null</code> or the unmodified method param.
+   * @return an empty {@link Collection} if the method param was <code>null</code> or the unmodified method param.
    */
   public static Collection<Refreshable> buildRefreshed(Collection<Refreshable> currentAlreadyRefreshed) {
-    return currentAlreadyRefreshed == null ? new FastSet<Refreshable>(2) : currentAlreadyRefreshed;
+    return currentAlreadyRefreshed == null ? new HashSet<Refreshable>(3) : currentAlreadyRefreshed;
   }
 
   /**
@@ -104,7 +105,6 @@ public final class RefreshHelper implements Refreshable {
    * @param refreshable      the {@link Refreshable} to potentially add and refresh
    */
   public static void maybeRefresh(Collection<Refreshable> alreadyRefreshed, Refreshable refreshable) {
-    log.debug("In maybeRefresh({})", refreshable);
     if (!alreadyRefreshed.contains(refreshable)) {
       alreadyRefreshed.add(refreshable);
       log.info("Added refreshable: {}", refreshable);

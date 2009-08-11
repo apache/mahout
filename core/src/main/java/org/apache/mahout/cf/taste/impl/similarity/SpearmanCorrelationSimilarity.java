@@ -44,12 +44,7 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
   }
 
   @Override
-  public double userSimilarity(Comparable<?> userID1, Comparable<?> userID2) throws TasteException {
-
-    if (userID1 == null || userID2 == null) {
-      throw new IllegalArgumentException("userID1 or userID2 is null");
-    }
-
+  public double userSimilarity(long userID1, long userID2) throws TasteException {
     PreferenceArray xPrefs = dataModel.getPreferencesFromUser(userID1);
     PreferenceArray yPrefs = dataModel.getPreferencesFromUser(userID2);
     int xLength = xPrefs.length();
@@ -75,8 +70,8 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
     xPrefs.sortByItem();
     yPrefs.sortByItem();
 
-    Comparable<?> xIndex = xPrefs.getItemID(0);
-    Comparable<?> yIndex = yPrefs.getItemID(0);
+    long xIndex = xPrefs.getItemID(0);
+    long yIndex = yPrefs.getItemID(0);
     int xPrefIndex = 0;
     int yPrefIndex = 0;
 
@@ -84,7 +79,7 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
     int count = 0;
 
     while (true) {
-      int compare = ((Comparable<Object>) xIndex).compareTo(yIndex);
+      int compare = xIndex < yIndex ? -1 : xIndex > yIndex ? 1 : 0;
       if (compare == 0) {
         double diff = xPrefs.getValue(xPrefIndex) - yPrefs.getValue(yPrefIndex);
         sumXYRankDiff2 += diff * diff;

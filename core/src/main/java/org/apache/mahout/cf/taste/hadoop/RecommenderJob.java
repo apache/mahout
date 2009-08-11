@@ -20,7 +20,7 @@ package org.apache.mahout.cf.taste.hadoop;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -90,11 +90,11 @@ public final class RecommenderJob extends Job {
     jobConf.set("mapred.input.dir", StringUtils.escapeString(userIDFilePath.toString()));
 
     jobConf.setClass("mapred.mapper.class", RecommenderMapper.class, Mapper.class);
-    jobConf.setClass("mapred.mapoutput.key.class", Text.class, Object.class);
+    jobConf.setClass("mapred.mapoutput.key.class", LongWritable.class, Object.class);
     jobConf.setClass("mapred.mapoutput.value.class", RecommendedItemsWritable.class, Object.class);
 
     jobConf.setClass("mapred.reducer.class", IdentityReducer.class, Reducer.class);
-    jobConf.setClass("mapred.output.key.class", Text.class, Object.class);
+    jobConf.setClass("mapred.output.key.class", LongWritable.class, Object.class);
     jobConf.setClass("mapred.output.value.class", RecommendedItemsWritable.class, Object.class);
 
     jobConf.setClass("mapred.output.format.class", TextOutputFormat.class, OutputFormat.class);

@@ -30,7 +30,9 @@ final class ByItemIDComparator implements Comparator<ItemPrefWritable>, Serializ
 
   @Override
   public int compare(ItemPrefWritable a, ItemPrefWritable b) {
-    return a.getItemID().compareTo(b.getItemID());
+    long idA = a.getItemID();
+    long idB = b.getItemID();
+    return idA < idB ? -1 : idA > idB ? 1 : 0;
   }
 
 }

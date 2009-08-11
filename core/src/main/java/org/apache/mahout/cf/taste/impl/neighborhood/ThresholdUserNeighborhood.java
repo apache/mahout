@@ -18,25 +18,17 @@
 package org.apache.mahout.cf.taste.impl.neighborhood;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.SamplingIterable;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
+import org.apache.mahout.cf.taste.impl.common.SamplingLongPrimitiveIterator;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * <p>Computes a neigbhorhood consisting of all users whose similarity to the given user meets or
  * exceeds a certain threshold. Similarity is defined by the given {@link UserSimilarity}.</p>
  */
 public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
-
-  private static final Logger log = LoggerFactory.getLogger(ThresholdUserNeighborhood.class);
 
   private final double threshold;
 
@@ -75,19 +67,17 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
   }
 
   @Override
-  public Collection<Comparable<?>> getUserNeighborhood(Comparable<?> userID) throws TasteException {
-    log.trace("Computing neighborhood around user ID '{}'", userID);
+  public long[] getUserNeighborhood(long userID) throws TasteException {
 
     DataModel dataModel = getDataModel();
-    List<Comparable<?>> neighborhood = new ArrayList<Comparable<?>>();
-    Iterable<Comparable<?>> usersIterable =
-        SamplingIterable.maybeWrapIterable(dataModel.getUserIDs(), getSamplingRate());
-    Iterator<Comparable<?>> users = usersIterable.iterator();
+    FastIDSet neighborhood = new FastIDSet();
+    LongPrimitiveIterator usersIterable =
+        SamplingLongPrimitiveIterator.maybeWrapIterator(dataModel.getUserIDs(), getSamplingRate());
     UserSimilarity userSimilarityImpl = getUserSimilarity();
 
-    while (users.hasNext()) {
-      Comparable<?> otherUserID = users.next();
-      if (!userID.equals(otherUserID)) {
+    while (usersIterable.hasNext()) {
+      long otherUserID = usersIterable.next();
+      if (userID != otherUserID) {
         double theSimilarity = userSimilarityImpl.userSimilarity(userID, otherUserID);
         if (!Double.isNaN(theSimilarity) && theSimilarity >= threshold) {
           neighborhood.add(otherUserID);
@@ -95,9 +85,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
       }
     }
 
-    log.trace("UserNeighborhood around user ID '{}' is: {}", userID, neighborhood);
-
-    return Collections.unmodifiableList(neighborhood);
+    return neighborhood.toArray();
   }
 
   @Override

@@ -24,14 +24,11 @@ import java.io.Serializable;
 /** <p>A simple {@link Preference} encapsulating an item and preference value.</p> */
 public class GenericPreference implements Preference, Serializable {
 
-  private final Comparable<?> userID;
-  private final Comparable<?> itemID;
+  private final long userID;
+  private final long itemID;
   private float value;
 
-  public GenericPreference(Comparable<?> userID, Comparable<?> itemID, float value) {
-    if (userID == null || itemID == null) {
-      throw new IllegalArgumentException("userID or itemID is null");
-    }
+  public GenericPreference(long userID, long itemID, float value) {
     if (Float.isNaN(value)) {
       throw new IllegalArgumentException("Invalid value: " + value);
     }
@@ -41,12 +38,12 @@ public class GenericPreference implements Preference, Serializable {
   }
 
   @Override
-  public Comparable<?> getUserID() {
+  public long getUserID() {
     return userID;
   }
 
   @Override
-  public Comparable<?> getItemID() {
+  public long getItemID() {
     return itemID;
   }
 

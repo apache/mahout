@@ -35,11 +35,10 @@ public final class LoadEvaluator {
     DataModel dataModel = recommender.getDataModel();
     int numUsers = dataModel.getNumUsers();
     double sampleRate = 1000.0 / numUsers;
-    SamplingIterable<Comparable<?>> userSampler =
-            new SamplingIterable<Comparable<?>>(dataModel.getUserIDs(), sampleRate);
+    SamplingIterable<Long> userSampler = new SamplingIterable<Long>(dataModel.getUserIDs(), sampleRate);
     RunningAverageAndStdDev recommendationTime = new FullRunningAverageAndStdDev();
     int count = 0;
-    for (Comparable<?> userID : userSampler) {
+    for (long userID : userSampler) {
       long start = System.currentTimeMillis();
       recommender.recommend(userID, 10);
       long end = System.currentTimeMillis();

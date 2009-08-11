@@ -39,8 +39,8 @@ import javax.sql.DataSource;
  *
  * <pre>
  * CREATE TABLE taste_item_similarity (
- *   item_id_a INT NOT NULL,
- *   item_id_b INT NOT NULL,
+ *   item_id_a BIGINT NOT NULL,
+ *   item_id_b BIGINT NOT NULL,
  *   similarity FLOAT NOT NULL,
  *   PRIMARY KEY (item_id_a, item_id_b),
  * )

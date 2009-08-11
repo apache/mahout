@@ -25,45 +25,45 @@ public final class SpearmanCorrelationSimilarityTest extends SimilarityTestCase 
 
   public void testFullCorrelation1() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2"},
+            new long[] {1, 2},
             new Double[][] {
                     {1.0, 2.0, 3.0},
                     {1.0, 2.0, 3.0},
             });
-    double correlation = new SpearmanCorrelationSimilarity(dataModel).userSimilarity("test1", "test2");
+    double correlation = new SpearmanCorrelationSimilarity(dataModel).userSimilarity(1, 2);
     assertCorrelationEquals(1.0, correlation);
   }
 
   public void testFullCorrelation2() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2"},
+            new long[] {1, 2},
             new Double[][] {
                     {1.0, 2.0, 3.0},
                     {4.0, 5.0, 6.0},
             });
-    double correlation = new SpearmanCorrelationSimilarity(dataModel).userSimilarity("test1", "test2");
+    double correlation = new SpearmanCorrelationSimilarity(dataModel).userSimilarity(1, 2);
     assertCorrelationEquals(1.0, correlation);
   }
 
   public void testAnticorrelation() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2"},
+            new long[] {1, 2},
             new Double[][] {
                     {1.0, 2.0, 3.0},
                     {3.0, 2.0, 1.0},
             });
-    double correlation = new SpearmanCorrelationSimilarity(dataModel).userSimilarity("test1", "test2");
+    double correlation = new SpearmanCorrelationSimilarity(dataModel).userSimilarity(1, 2);
     assertCorrelationEquals(-1.0, correlation);
   }
 
   public void testSimple() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2"},
+            new long[] {1, 2},
             new Double[][] {
                     {1.0, 2.0, 3.0},
                     {2.0, 3.0, 1.0},
             });
-    double correlation = new SpearmanCorrelationSimilarity(dataModel).userSimilarity("test1", "test2");
+    double correlation = new SpearmanCorrelationSimilarity(dataModel).userSimilarity(1, 2);
     assertCorrelationEquals(-0.5, correlation);
   }
 

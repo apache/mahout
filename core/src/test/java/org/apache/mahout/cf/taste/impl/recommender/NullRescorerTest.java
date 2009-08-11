@@ -24,21 +24,21 @@ import org.apache.mahout.cf.taste.recommender.Rescorer;
 public final class NullRescorerTest extends TasteTestCase {
 
   public void testItemRescorer() throws Exception {
-    Rescorer<Comparable<?>> rescorer = NullRescorer.getItemInstance();
+    Rescorer<Long> rescorer = NullRescorer.getItemInstance();
     assertNotNull(rescorer);
-    assertEquals(1.0, rescorer.rescore("test", 1.0));
+    assertEquals(1.0, rescorer.rescore(1L, 1.0));
     assertEquals(1.0, rescorer.rescore(null, 1.0));
-    assertEquals(0.0, rescorer.rescore("test", 0.0));
-    assertTrue(Double.isNaN(rescorer.rescore("test", Double.NaN)));
+    assertEquals(0.0, rescorer.rescore(1L, 0.0));
+    assertTrue(Double.isNaN(rescorer.rescore(1L, Double.NaN)));
   }
 
   public void testUserRescorer() throws Exception {
-    Rescorer<Comparable<?>> rescorer = NullRescorer.getUserInstance();
+    Rescorer<Long> rescorer = NullRescorer.getUserInstance();
     assertNotNull(rescorer);
-    assertEquals(1.0, rescorer.rescore("test", 1.0));
+    assertEquals(1.0, rescorer.rescore(1L, 1.0));
     assertEquals(1.0, rescorer.rescore(null, 1.0));
-    assertEquals(0.0, rescorer.rescore("test", 0.0));
-    assertTrue(Double.isNaN(rescorer.rescore("test", Double.NaN)));
+    assertEquals(0.0, rescorer.rescore(1L, 0.0));
+    assertTrue(Double.isNaN(rescorer.rescore(1L, Double.NaN)));
   }
 
 }

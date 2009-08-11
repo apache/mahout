@@ -75,15 +75,11 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
 
   @Override
   protected Preference buildPreference(ResultSet rs) throws SQLException {
-    return new BooleanPreference((Comparable<?>) rs.getObject(1), (Comparable<?>) rs.getObject(2));
+    return new BooleanPreference(rs.getLong(1), rs.getLong(2));
   }
 
   @Override
-  public void setPreference(Comparable<?> userID, Comparable<?> itemID, float value)
-      throws TasteException {
-    if (userID == null || itemID == null) {
-      throw new IllegalArgumentException("userID or itemID is null");
-    }
+  public void setPreference(long userID, long itemID, float value) throws TasteException {
     if (!Float.isNaN(value)) {
       throw new IllegalArgumentException("Invalid value: " + value);
     }

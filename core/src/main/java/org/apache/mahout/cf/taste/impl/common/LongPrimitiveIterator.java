@@ -15,42 +15,27 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.model;
+package org.apache.mahout.cf.taste.impl.common;
 
-import java.io.Serializable;
+import java.util.Iterator;
 
 /**
- * An alternate representation of an array of {@link Preference}. Implementations, in theory, can produce a more
- * memory-efficient representation. This is not used yet.
+ * Adds notion of iterating over <code>long</code> primitives in the style of an
+ * {@link Iterator} -- as opposed to iterating over {@link Long}. Implementations of
+ * this interface however also implement {@link Iterator} and {@link Iterable} over
+ * {@link Long} for convenience.
  */
-public interface PreferenceArray extends Cloneable, Serializable, Iterable<Preference> {
+public interface LongPrimitiveIterator extends Iterator<Long> {
 
-  int length();
-  
-  Preference get(int i);
+  /**
+   * @return next <code>long</code> in iteration
+   * @throws java.util.NoSuchElementException if no more elements exist in the iteration
+   */
+  long nextLong();
 
-  void set(int i, Preference pref);
-
-  long getUserID(int i);
-
-  void setUserID(int i, long userID);
-
-  long getItemID(int i);
-
-  void setItemID(int i, long itemID);
-
-  float getValue(int i);
-
-  void setValue(int i, float value);
-
-  PreferenceArray clone();
-
-  void sortByUser();
-
-  void sortByItem();
-
-  void sortByValue();
-
-  void sortByValueReversed();
+  /**
+   * @return next <code>long</code> in iteration without advancing iteration
+   */
+  long peek();
 
 }

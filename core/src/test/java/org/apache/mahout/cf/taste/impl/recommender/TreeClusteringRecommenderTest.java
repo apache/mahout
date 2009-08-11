@@ -31,7 +31,7 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
 
   public void testNoRecommendations() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2", "test3"},
+            new long[] {1, 2, 3},
             new Double[][] {
                     {0.1},
                     {0.2, 0.6},
@@ -40,7 +40,7 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
     UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
     ClusterSimilarity clusterSimilarity = new FarthestNeighborClusterSimilarity(similarity);
     Recommender recommender = new TreeClusteringRecommender(dataModel, clusterSimilarity, 2);
-    List<RecommendedItem> recommended = recommender.recommend("test1", 1);
+    List<RecommendedItem> recommended = recommender.recommend(1, 1);
     assertNotNull(recommended);
     assertEquals(0, recommended.size());
     recommender.refresh(null);
@@ -50,7 +50,7 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
 
   public void testHowMany() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2", "test3", "test4", "test5"},
+            new long[] {1, 2, 3, 4, 5},
             new Double[][] {
                     {0.1, 0.2},
                     {0.2, 0.3, 0.3, 0.6},
@@ -62,8 +62,8 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
     UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
     ClusterSimilarity clusterSimilarity = new FarthestNeighborClusterSimilarity(similarity);
     Recommender recommender = new TreeClusteringRecommender(dataModel, clusterSimilarity, 2);
-    List<RecommendedItem> fewRecommended = recommender.recommend("test1", 2);
-    List<RecommendedItem> moreRecommended = recommender.recommend("test1", 4);
+    List<RecommendedItem> fewRecommended = recommender.recommend(1, 2);
+    List<RecommendedItem> moreRecommended = recommender.recommend(1, 4);
     for (int i = 0; i < fewRecommended.size(); i++) {
       assertEquals(fewRecommended.get(i).getItemID(), moreRecommended.get(i).getItemID());
     }
@@ -75,7 +75,7 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
 
   public void testRescorer() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2", "test3"},
+            new long[] {1, 2, 3},
             new Double[][] {
                     {0.1, 0.2},
                     {0.2, 0.3, 0.3, 0.6},
@@ -85,9 +85,9 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
     UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
     ClusterSimilarity clusterSimilarity = new FarthestNeighborClusterSimilarity(similarity);
     Recommender recommender = new TreeClusteringRecommender(dataModel, clusterSimilarity, 2);
-    List<RecommendedItem> originalRecommended = recommender.recommend("test1", 2);
+    List<RecommendedItem> originalRecommended = recommender.recommend(1, 2);
     List<RecommendedItem> rescoredRecommended =
-        recommender.recommend("test1", 2, new ReversingRescorer<Comparable<?>>());
+        recommender.recommend(1, 2, new ReversingRescorer<Long>());
     assertNotNull(originalRecommended);
     assertNotNull(rescoredRecommended);
     assertEquals(2, originalRecommended.size());
@@ -98,7 +98,7 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
 
   public void testEstimatePref() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2", "test3", "test4"},
+            new long[] {1, 2, 3, 4},
             new Double[][] {
                     {0.1, 0.3},
                     {0.2, 0.3, 0.3},
@@ -109,12 +109,12 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
     UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
     ClusterSimilarity clusterSimilarity = new FarthestNeighborClusterSimilarity(similarity);
     Recommender recommender = new TreeClusteringRecommender(dataModel, clusterSimilarity, 2);
-    assertEquals(0.9f, recommender.estimatePreference("test3", "3"));
+    assertEquals(0.9f, recommender.estimatePreference(3, 3));
   }
 
   public void testBestRating() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2", "test3", "test4"},
+            new long[] {1, 2, 3, 4},
             new Double[][] {
                     {0.1, 0.3},
                     {0.2, 0.3, 0.3},
@@ -126,12 +126,12 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
     UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
     ClusterSimilarity clusterSimilarity = new FarthestNeighborClusterSimilarity(similarity);
     Recommender recommender = new TreeClusteringRecommender(dataModel, clusterSimilarity, 2);
-    List<RecommendedItem> recommended = recommender.recommend("test1", 1);
+    List<RecommendedItem> recommended = recommender.recommend(1, 1);
     assertNotNull(recommended);
     assertEquals(1, recommended.size());
     RecommendedItem firstRecommended = recommended.get(0);
     // item one should be recommended because it has a greater rating/score
-    assertEquals("2", firstRecommended.getItemID());
+    assertEquals(2, firstRecommended.getItemID());
     assertEquals(0.3, firstRecommended.getValue(), EPSILON);
   }
 

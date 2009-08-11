@@ -29,9 +29,9 @@ import java.util.Comparator;
  */
 final class ByRescoreComparator implements Comparator<RecommendedItem>, Serializable {
 
-  private final Rescorer<Comparable<?>> rescorer;
+  private final Rescorer<Long> rescorer;
 
-  ByRescoreComparator(Rescorer<Comparable<?>> rescorer) {
+  ByRescoreComparator(Rescorer<Long> rescorer) {
     this.rescorer = rescorer;
   }
 

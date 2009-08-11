@@ -35,7 +35,7 @@ public interface Recommender extends Refreshable {
    * @return {@link List} of recommended {@link RecommendedItem}s, ordered from most strongly recommend to least
    * @throws TasteException if an error occurs while accessing the {@link DataModel}
    */
-  List<RecommendedItem> recommend(Comparable<?> userID, int howMany) throws TasteException;
+  List<RecommendedItem> recommend(long userID, int howMany) throws TasteException;
 
   /**
    * @param userID   user for which recommendations are to be computed
@@ -44,7 +44,7 @@ public interface Recommender extends Refreshable {
    * @return {@link List} of recommended {@link RecommendedItem}s, ordered from most strongly recommend to least
    * @throws TasteException if an error occurs while accessing the {@link DataModel}
    */
-  List<RecommendedItem> recommend(Comparable<?> userID, int howMany, Rescorer<Comparable<?>> rescorer)
+  List<RecommendedItem> recommend(long userID, int howMany, Rescorer<Long> rescorer)
           throws TasteException;
 
   /**
@@ -54,7 +54,7 @@ public interface Recommender extends Refreshable {
    *         preference for the item. If a preference cannot be estimated, returns {@link Double#NaN}
    * @throws TasteException if an error occurs while accessing the {@link DataModel}
    */
-  float estimatePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException;
+  float estimatePreference(long userID, long itemID) throws TasteException;
 
   /**
    * @param userID user to set preference for
@@ -62,14 +62,14 @@ public interface Recommender extends Refreshable {
    * @param value  preference value
    * @throws TasteException if an error occurs while accessing the {@link DataModel}
    */
-  void setPreference(Comparable<?> userID, Comparable<?> itemID, float value) throws TasteException;
+  void setPreference(long userID, long itemID, float value) throws TasteException;
 
   /**
    * @param userID user from which to remove preference
    * @param itemID item for which to remove preference
    * @throws TasteException if an error occurs while accessing the {@link DataModel}
    */
-  void removePreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException;
+  void removePreference(long userID, long itemID) throws TasteException;
 
   /** @return {@link DataModel} used by this {@link Recommender} */
   DataModel getDataModel();

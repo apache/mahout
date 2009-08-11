@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.impl.model.file;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
 import org.apache.mahout.cf.taste.impl.recommender.GenericUserBasedRecommender;
 import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
@@ -35,7 +36,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -43,16 +43,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public final class FileDataModelTest extends TasteTestCase {
 
   private static final String[] DATA = {
-      "A123,456,0.1",
-      "A123,789,0.6",
-      "A123,654,0.7",
-      "B234,123,0.5",
-      "B234,234,1.0",
-      "C345,789,0.6",
-      "C345,654,0.7",
-      "C345,123,1.0",
-      "C345,234,0.5",
-      "D456,456,0.1"};
+      "123,456,0.1",
+      "123,789,0.6",
+      "123,654,0.7",
+      "234,123,0.5",
+      "234,234,1.0",
+      "345,789,0.6",
+      "345,654,0.7",
+      "345,123,1.0",
+      "345,234,0.5",
+      "456,456,0.1"};
 
   private DataModel model;
   private File testFile;
@@ -89,9 +89,9 @@ public final class FileDataModelTest extends TasteTestCase {
     UserSimilarity userSimilarity = new PearsonCorrelationSimilarity(model);
     UserNeighborhood neighborhood = new NearestNUserNeighborhood(2, userSimilarity, model);
     Recommender recommender = new GenericUserBasedRecommender(model, neighborhood, userSimilarity);
-    assertEquals(2, recommender.recommend("A123", 3).size());
-    assertEquals(2, recommender.recommend("B234", 3).size());
-    assertEquals(1, recommender.recommend("C345", 3).size());
+    assertEquals(2, recommender.recommend(123, 3).size());
+    assertEquals(2, recommender.recommend(234, 3).size());
+    assertEquals(1, recommender.recommend(345, 3).size());
 
     // Make sure this doesn't throw an exception
     model.refresh(null);
@@ -100,28 +100,26 @@ public final class FileDataModelTest extends TasteTestCase {
 
   public void testTranspose() throws Exception {
     FileDataModel tModel = new FileDataModel(testFile, true);
-    PreferenceArray userPrefs = tModel.getPreferencesFromUser("456");
+    PreferenceArray userPrefs = tModel.getPreferencesFromUser(456);
     assertNotNull("user prefs are null and it shouldn't be", userPrefs);
-    PreferenceArray pref = tModel.getPreferencesForItem("A123");
+    PreferenceArray pref = tModel.getPreferencesForItem(123);
     assertNotNull("pref is null and it shouldn't be", pref);
     assertEquals("pref Size: " + pref.length() + " is not: " + 3, 3, pref.length());
   }
 
   public void testGetItems() throws Exception {
-    Iterable<Comparable<?>> items = model.getItemIDs();
-    assertNotNull(items);
-    Iterator<Comparable<?>> it = items.iterator();
+    LongPrimitiveIterator it = model.getItemIDs();
     assertNotNull(it);
     assertTrue(it.hasNext());
-    assertEquals("123", it.next());
+    assertEquals(123, it.nextLong());
     assertTrue(it.hasNext());
-    assertEquals("234", it.next());
+    assertEquals(234, it.nextLong());
     assertTrue(it.hasNext());
-    assertEquals("456", it.next());
+    assertEquals(456, it.nextLong());
     assertTrue(it.hasNext());
-    assertEquals("654", it.next());
+    assertEquals(654, it.nextLong());
     assertTrue(it.hasNext());
-    assertEquals("789", it.next());
+    assertEquals(789, it.nextLong());
     assertFalse(it.hasNext());
     try {
       it.next();
@@ -132,14 +130,14 @@ public final class FileDataModelTest extends TasteTestCase {
   }
 
   public void testPreferencesForItem() throws Exception {
-    PreferenceArray prefs = model.getPreferencesForItem("456");
+    PreferenceArray prefs = model.getPreferencesForItem(456);
     assertNotNull(prefs);
     Preference pref1 = prefs.get(0);
-    assertEquals("A123", pref1.getUserID());
-    assertEquals("456", pref1.getItemID());
+    assertEquals(123, pref1.getUserID());
+    assertEquals(456, pref1.getItemID());
     Preference pref2 = prefs.get(1);
-    assertEquals("D456", pref2.getUserID());
-    assertEquals("456", pref2.getItemID());
+    assertEquals(456, pref2.getUserID());
+    assertEquals(456, pref2.getItemID());
     assertEquals(2, prefs.length());
   }
 
@@ -148,10 +146,10 @@ public final class FileDataModelTest extends TasteTestCase {
   }
 
   public void testNumUsersPreferring() throws Exception {
-    assertEquals(2, model.getNumUsersWithPreferenceFor("456"));
-    assertEquals(0, model.getNumUsersWithPreferenceFor("111"));
-    assertEquals(0, model.getNumUsersWithPreferenceFor("111", "456"));
-    assertEquals(2, model.getNumUsersWithPreferenceFor("123", "234"));
+    assertEquals(2, model.getNumUsersWithPreferenceFor(456));
+    assertEquals(0, model.getNumUsersWithPreferenceFor(111));
+    assertEquals(0, model.getNumUsersWithPreferenceFor(111, 456));
+    assertEquals(2, model.getNumUsersWithPreferenceFor(123, 234));
   }
 
   public void testRefresh() throws Exception {

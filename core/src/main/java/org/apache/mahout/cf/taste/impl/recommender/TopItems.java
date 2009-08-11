@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
 import org.apache.mahout.cf.taste.impl.similarity.GenericUserSimilarity;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
@@ -32,20 +33,23 @@ import java.util.Queue;
 /** <p>A simple class that refactors the "find top N things" logic that is used in several places.</p> */
 public final class TopItems {
 
+  private static final long[] NO_IDS = new long[0];
+
   private TopItems() {
   }
 
   public static List<RecommendedItem> getTopItems(int howMany,
-                                                  Iterable<Comparable<?>> allItemIDs,
-                                                  Rescorer<Comparable<?>> rescorer,
-                                                  Estimator<Comparable<?>> estimator) throws TasteException {
+                                                  LongPrimitiveIterator allItemIDs,
+                                                  Rescorer<Long> rescorer,
+                                                  Estimator<Long> estimator) throws TasteException {
     if (allItemIDs == null || estimator == null) {
       throw new IllegalArgumentException("argument is null");
     }
     Queue<RecommendedItem> topItems = new PriorityQueue<RecommendedItem>(howMany + 1, Collections.reverseOrder());
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
-    for (Comparable<?> itemID : allItemIDs) {
+    while (allItemIDs.hasNext()) {
+      long itemID = allItemIDs.next();
       if (rescorer == null || !rescorer.isFiltered(itemID)) {
         double preference = estimator.estimate(itemID);
         double rescoredPref = rescorer == null ? preference : rescorer.rescore(itemID, preference);
@@ -67,14 +71,15 @@ public final class TopItems {
     return result;
   }
 
-  public static List<Comparable<?>> getTopUsers(int howMany,
-                                                Iterable<? extends Comparable<?>> allUserIDs,
-                                                Rescorer<Comparable<?>> rescorer,
-                                                Estimator<Comparable<?>> estimator) throws TasteException {
+  public static long[] getTopUsers(int howMany,
+                                   LongPrimitiveIterator allUserIDs,
+                                   Rescorer<Long> rescorer,
+                                   Estimator<Long> estimator) throws TasteException {
     Queue<SimilarUser> topUsers = new PriorityQueue<SimilarUser>(howMany + 1, Collections.reverseOrder());
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
-    for (Comparable<?> userID : allUserIDs) {
+    while (allUserIDs.hasNext()) {
+      long userID = allUserIDs.next();
       if (rescorer != null && rescorer.isFiltered(userID)) {
         continue;
       }
@@ -91,12 +96,16 @@ public final class TopItems {
         lowestTopValue = topUsers.peek().getSimilarity();
       }
     }
+    if (topUsers.isEmpty()) {
+      return NO_IDS;
+    }
     List<SimilarUser> sorted = new ArrayList<SimilarUser>(topUsers.size());
     sorted.addAll(topUsers);
     Collections.sort(sorted);
-    List<Comparable<?>> result = new ArrayList<Comparable<?>>(sorted.size());
+    long[] result = new long[sorted.size()];
+    int i = 0;
     for (SimilarUser similarUser : sorted) {
-      result.add(similarUser.getUserID());
+      result[i++] = similarUser.getUserID();
     }
     return result;
   }

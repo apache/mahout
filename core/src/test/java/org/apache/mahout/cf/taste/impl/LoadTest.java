@@ -19,7 +19,7 @@ package org.apache.mahout.cf.taste.impl;
 
 import junit.textui.TestRunner;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.FastMap;
+import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
@@ -41,8 +41,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -91,20 +89,14 @@ public final class LoadTest extends TasteTestCase {
   }
 
   private DataModel createModel() {
-    List<Comparable<?>> itemIDs = new ArrayList<Comparable<?>>(NUM_ITEMS);
-    for (int i = 0; i < NUM_ITEMS; i++) {
-      itemIDs.add(String.valueOf(i));
-    }
-    Map<Comparable<?>, PreferenceArray> data = new FastMap<Comparable<?>, PreferenceArray>(NUM_USERS);
+    FastByIDMap<PreferenceArray> data = new FastByIDMap<PreferenceArray>(NUM_USERS);
     for (int i = 0; i < NUM_USERS; i++) {
-      String userID = String.valueOf(i);
-
       int numPrefs = random.nextInt(NUM_PREFS) + 1;
       PreferenceArray prefs = new GenericUserPreferenceArray(numPrefs);
       for (int j = 0; j < numPrefs; j++) {
-        prefs.set(j, new GenericPreference(userID, itemIDs.get(random.nextInt(NUM_ITEMS)), random.nextFloat()));
+        prefs.set(j, new GenericPreference(i, random.nextInt(NUM_ITEMS), random.nextFloat()));
       }
-      data.put(userID, prefs);
+      data.put(i, prefs);
     }
     return new GenericDataModel(data);
   }
@@ -140,11 +132,11 @@ public final class LoadTest extends TasteTestCase {
     @Override
     public Object call() throws TasteException {
       for (int i = 0; i < NUM_USERS / 2; i++) {
-        recommender.recommend(String.valueOf(random.nextInt(NUM_USERS)), 10);
+        recommender.recommend(random.nextInt(NUM_USERS), 10);
       }
       recommender.refresh(null);
       for (int i = NUM_USERS / 2; i < NUM_USERS; i++) {
-        recommender.recommend(String.valueOf(random.nextInt(NUM_USERS)), 10);
+        recommender.recommend(random.nextInt(NUM_USERS), 10);
       }
       return null;
     }

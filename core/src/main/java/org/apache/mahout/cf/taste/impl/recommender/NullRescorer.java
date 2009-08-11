@@ -17,31 +17,29 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
-import org.apache.mahout.cf.taste.impl.common.Pair;
+import org.apache.mahout.cf.taste.impl.common.LongPair;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 /** <p>A simple {@link Rescorer} which always returns the original score.</p> */
 public final class NullRescorer<T> implements Rescorer<T> {
 
-  private static final Rescorer<Comparable<?>> userOrItemInstance = new NullRescorer<Comparable<?>>();
-  private static final Rescorer<Pair<Comparable<?>, Comparable<?>>> itemItemPairInstance =
-          new NullRescorer<Pair<Comparable<?>, Comparable<?>>>();
-  private static final Rescorer<Pair<Comparable<?>, Comparable<?>>> userUserPairInstance =
-          new NullRescorer<Pair<Comparable<?>, Comparable<?>>>();
+  private static final Rescorer<Long> userOrItemInstance = new NullRescorer<Long>();
+  private static final Rescorer<LongPair> itemItemPairInstance = new NullRescorer<LongPair>();
+  private static final Rescorer<LongPair> userUserPairInstance = new NullRescorer<LongPair>();
 
-  public static Rescorer<Comparable<?>> getItemInstance() {
+  public static Rescorer<Long> getItemInstance() {
     return userOrItemInstance;
   }
 
-  public static Rescorer<Comparable<?>> getUserInstance() {
+  public static Rescorer<Long> getUserInstance() {
     return userOrItemInstance;
   }
 
-  public static Rescorer<Pair<Comparable<?>, Comparable<?>>> getItemItemPairInstance() {
+  public static Rescorer<LongPair> getItemItemPairInstance() {
     return itemItemPairInstance;
   }
 
-  public static Rescorer<Pair<Comparable<?>, Comparable<?>>> getUserUserPairInstance() {
+  public static Rescorer<LongPair> getUserUserPairInstance() {
     return userUserPairInstance;
   }
 

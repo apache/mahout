@@ -31,7 +31,7 @@ import java.util.Collection;
 public final class CachingUserNeighborhood implements UserNeighborhood {
 
   private final UserNeighborhood neighborhood;
-  private final Cache<Comparable<?>, Collection<Comparable<?>>> neighborhoodCache;
+  private final Cache<Long, long[]> neighborhoodCache;
 
   public CachingUserNeighborhood(UserNeighborhood neighborhood, DataModel dataModel) throws TasteException {
     if (neighborhood == null) {
@@ -39,12 +39,12 @@ public final class CachingUserNeighborhood implements UserNeighborhood {
     }
     this.neighborhood = neighborhood;
     int maxCacheSize = dataModel.getNumUsers(); // just a dumb heuristic for sizing
-    this.neighborhoodCache = new Cache<Comparable<?>, Collection<Comparable<?>>>(
+    this.neighborhoodCache = new Cache<Long, long[]>(
             new NeighborhoodRetriever(neighborhood), maxCacheSize);
   }
 
   @Override
-  public Collection<Comparable<?>> getUserNeighborhood(Comparable<?> userID) throws TasteException {
+  public long[] getUserNeighborhood(long userID) throws TasteException {
     return neighborhoodCache.get(userID);
   }
 
@@ -55,7 +55,7 @@ public final class CachingUserNeighborhood implements UserNeighborhood {
     RefreshHelper.maybeRefresh(alreadyRefreshed, neighborhood);
   }
 
-  private static final class NeighborhoodRetriever implements Retriever<Comparable<?>, Collection<Comparable<?>>> {
+  private static final class NeighborhoodRetriever implements Retriever<Long, long[]> {
     private final UserNeighborhood neighborhood;
 
     private NeighborhoodRetriever(UserNeighborhood neighborhood) {
@@ -63,7 +63,7 @@ public final class CachingUserNeighborhood implements UserNeighborhood {
     }
 
     @Override
-    public Collection<Comparable<?>> get(Comparable<?> key) throws TasteException {
+    public long[] get(Long key) throws TasteException {
       return neighborhood.getUserNeighborhood(key);
     }
   }

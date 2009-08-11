@@ -19,9 +19,10 @@ package org.apache.mahout.cf.taste.example.netflix;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.FastMap;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
 import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
+import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -37,8 +38,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * <p>This is a {@link DataModel} that reads the Netflix data set, as represented in its
@@ -71,83 +70,69 @@ public final class NetflixDataModel implements DataModel {
 		log.info("Creating NetflixDataModel for directory: {}", dataDirectory);
 
 		log.info("Reading preference data...");
-		Map<Comparable<?>, PreferenceArray> users = readUsers(dataDirectory);
+		FastByIDMap<PreferenceArray> users = readUsers(dataDirectory);
 
 		log.info("Creating delegate DataModel...");
 		delegate = new GenericDataModel(users);
 	}
 
-  static List<Comparable<?>> readMovies(File dataDirectory) {
-		List<Comparable<?>> movies = new ArrayList<Comparable<?>>(17770);
-    for (String line : new FileLineIterable(new File(dataDirectory, "movie_titles.txt"), false)) {
-			int firstComma = line.indexOf((int) ',');
-			Integer id = Integer.valueOf(line.substring(0, firstComma));
-			movies.add(id);
-      if (id != movies.size()) {
-        throw new IllegalStateException("A movie is missing from movie_titles.txt");
-      }
-		}
-		return movies;
-	}
-
-	private Map<Comparable<?>, PreferenceArray> readUsers(File dataDirectory) throws IOException {
-		Map<Comparable<?>, Collection<Preference>> userIDPrefMap = new FastMap<Comparable<?>, Collection<Preference>>();
+	private FastByIDMap<PreferenceArray> readUsers(File dataDirectory) throws IOException {
+		FastByIDMap<Collection<Preference>> userIDPrefMap = new FastByIDMap<Collection<Preference>>();
 
 		int counter = 0;
 		FilenameFilter filenameFilter = new MovieFilenameFilter();
 		for (File movieFile : new File(dataDirectory, "training_set").listFiles(filenameFilter)) {
       Iterator<String> lineIterator = new FileLineIterable(movieFile, false).iterator();
 			String line = lineIterator.next();
-			Integer movieID = Integer.valueOf(line.substring(0, line.length() - 1)); // strip colon
+			long movieID = Long.parseLong(line.substring(0, line.length() - 1)); // strip colon
 			while (lineIterator.hasNext()) {
         line = lineIterator.next();
-				counter++;
-				if (counter % 100000 == 0) {
+				if (++counter % 100000 == 0) {
 					log.info("Processed {} prefs", counter);
 				}
 				int firstComma = line.indexOf((int) ',');
-				Integer userID = Integer.valueOf(line.substring(0, firstComma));
+				long userID = Long.parseLong(line.substring(0, firstComma));
 				int secondComma = line.indexOf((int) ',', firstComma + 1);
 				float rating = Float.parseFloat(line.substring(firstComma + 1, secondComma));
 				Collection<Preference> userPrefs = userIDPrefMap.get(userID);
 				if (userPrefs == null) {
-					userPrefs = new ArrayList<Preference>();
+					userPrefs = new ArrayList<Preference>(2);
 					userIDPrefMap.put(userID, userPrefs);
 				}
-				userPrefs.add(new GenericPreference(null, movieID, rating));
+				userPrefs.add(new GenericPreference(userID, movieID, rating));
 			}
 		}
 
-		return GenericDataModel.toPrefArrayValues(userIDPrefMap, true);
+		return GenericDataModel.toDataMap(userIDPrefMap, true);
 	}
 
 	@Override
-  public Iterable<Comparable<?>> getUserIDs() throws TasteException {
+  public LongPrimitiveIterator getUserIDs() throws TasteException {
 		return delegate.getUserIDs();
 	}
 
 	@Override
-  public PreferenceArray getPreferencesFromUser(Comparable<?> id) throws TasteException {
+  public PreferenceArray getPreferencesFromUser(long id) throws TasteException {
 		return delegate.getPreferencesFromUser(id);
 	}
 
   @Override
-  public FastSet<Comparable<?>> getItemIDsFromUser(Comparable<?> userID) throws TasteException {
+  public FastIDSet getItemIDsFromUser(long userID) throws TasteException {
     return delegate.getItemIDsFromUser(userID);
   }
 
   @Override
-  public Iterable<Comparable<?>> getItemIDs() throws TasteException {
+  public LongPrimitiveIterator getItemIDs() throws TasteException {
 		return delegate.getItemIDs();
 	}
 
 	@Override
-  public PreferenceArray getPreferencesForItem(Comparable<?> itemID) throws TasteException {
+  public PreferenceArray getPreferencesForItem(long itemID) throws TasteException {
 		return delegate.getPreferencesForItem(itemID);
 	}
 
   @Override
-  public Float getPreferenceValue(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
+  public Float getPreferenceValue(long userID, long itemID) throws TasteException {
     return delegate.getPreferenceValue(userID, itemID);
   }
 
@@ -162,17 +147,17 @@ public final class NetflixDataModel implements DataModel {
 	}
 
   @Override
-  public int getNumUsersWithPreferenceFor(Comparable<?>... itemIDs) throws TasteException {
+  public int getNumUsersWithPreferenceFor(long... itemIDs) throws TasteException {
     return delegate.getNumUsersWithPreferenceFor(itemIDs);
   }
 
   @Override
-  public void setPreference(Comparable<?> userID, Comparable<?> itemID, float value) {
+  public void setPreference(long userID, long itemID, float value) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-  public void removePreference(Comparable<?> userID, Comparable<?> itemID) {
+  public void removePreference(long userID, long itemID) {
 		throw new UnsupportedOperationException();
 	}
 

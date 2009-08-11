@@ -18,13 +18,10 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
-
-import java.util.Collection;
-import java.util.Set;
 
 /**
  * A variant on {@link GenericUserBasedRecommender} which is appropriate for use when no notion of
@@ -45,19 +42,17 @@ public final class GenericBooleanPrefUserBasedRecommender extends GenericUserBas
    * any other user in the neighborhood who has also rated the item.
    */
   @Override
-  protected float doEstimatePreference(Comparable<?> theUserID,
-                                       Collection<Comparable<?>> theNeighborhood,
-                                       Comparable<?> itemID)
+  protected float doEstimatePreference(long theUserID, long[] theNeighborhood, long itemID)
       throws TasteException {
-    if (theNeighborhood.isEmpty()) {
+    if (theNeighborhood.length == 0) {
       return Float.NaN;
     }
     DataModel dataModel = getDataModel();
     UserSimilarity similarity = getSimilarity();
     float totalSimilarity = 0.0f;
     boolean foundAPref = false;
-    for (Comparable<?> userID : theNeighborhood) {
-      if (!userID.equals(theUserID)) {
+    for (long userID : theNeighborhood) {
+      if (userID != theUserID) {
         // See GenericItemBasedRecommender.doEstimatePreference() too
         if (dataModel.getPreferenceValue(userID, itemID) != null) {
           foundAPref = true;
@@ -69,11 +64,11 @@ public final class GenericBooleanPrefUserBasedRecommender extends GenericUserBas
   }
 
   @Override
-  protected Set<Comparable<?>> getAllOtherItems(Iterable<Comparable<?>> theNeighborhood, Comparable<?> theUserID)
+  protected FastIDSet getAllOtherItems(long[] theNeighborhood, long theUserID)
       throws TasteException {
     DataModel dataModel = getDataModel();
-    Set<Comparable<?>> allItemIDs = new FastSet<Comparable<?>>();
-    for (Comparable<?> userID : theNeighborhood) {
+    FastIDSet allItemIDs = new FastIDSet();
+    for (long userID : theNeighborhood) {
       allItemIDs.addAll(dataModel.getItemIDsFromUser(userID));
     }
     allItemIDs.removeAll(dataModel.getItemIDsFromUser(theUserID));

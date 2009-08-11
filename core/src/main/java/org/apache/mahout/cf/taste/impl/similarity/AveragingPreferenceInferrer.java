@@ -39,20 +39,17 @@ public final class AveragingPreferenceInferrer implements PreferenceInferrer {
   private static final Float ZERO = 0.0f;
 
   private final DataModel dataModel;
-  private final Cache<Comparable<?>, Float> averagePreferenceValue;
+  private final Cache<Long, Float> averagePreferenceValue;
 
   public AveragingPreferenceInferrer(DataModel dataModel) throws TasteException {
     this.dataModel = dataModel;
-    Retriever<Comparable<?>, Float> retriever = new PrefRetriever();
-    averagePreferenceValue = new Cache<Comparable<?>, Float>(retriever, dataModel.getNumUsers());
+    Retriever<Long, Float> retriever = new PrefRetriever();
+    averagePreferenceValue = new Cache<Long, Float>(retriever, dataModel.getNumUsers());
     refresh(null);
   }
 
   @Override
-  public float inferPreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException {
-    if (userID == null || itemID == null) {
-      throw new IllegalArgumentException("userID or item is null");
-    }
+  public float inferPreference(long userID, long itemID) throws TasteException {
     return averagePreferenceValue.get(userID);
   }
 
@@ -61,10 +58,10 @@ public final class AveragingPreferenceInferrer implements PreferenceInferrer {
     averagePreferenceValue.clear();
   }
 
-  private final class PrefRetriever implements Retriever<Comparable<?>, Float> {
+  private final class PrefRetriever implements Retriever<Long, Float> {
 
     @Override
-    public Float get(Comparable<?> key) throws TasteException {
+    public Float get(Long key) throws TasteException {
       RunningAverage average = new FullRunningAverage();
       PreferenceArray prefs = dataModel.getPreferencesFromUser(key);
       int size = prefs.length();

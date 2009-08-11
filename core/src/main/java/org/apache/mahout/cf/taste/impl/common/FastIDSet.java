@@ -18,50 +18,31 @@
 package org.apache.mahout.cf.taste.impl.common;
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 /**
- * <p>This is an optimized {@link Set} implementation, based on algorithms described in Knuth's "Art of Computer
- * Programming", Vol. 3, p. 529.</p>
- *
- * <p>It should be faster than {@link java.util.HashSet} in some cases, but not all. It should definitely be more memory
- * efficient since that implementation is actually just a {@link java.util.HashMap} underneath mapping values to a dummy
- * object.</p>
- *
- * <p>This class is not a bit thread-safe.</p>
- *
- * <p>This implementation does not allow <code>null</code> as a key.</p>
- *
- * @see FastMap
+ * @see FastByIDMap
  */
-public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
+public final class FastIDSet implements Serializable, Cloneable {
 
   private static final double ALLOWED_LOAD_FACTOR = 1.5;
 
   /** Dummy object used to represent a key that has been removed. */
-  private static final Object REMOVED = new Object();
+  private static final long REMOVED = Long.MAX_VALUE;
+  private static final long NULL = Long.MIN_VALUE;
 
-  private K[] keys;
+  private long[] keys;
   private int numEntries;
   private int numSlotsUsed;
 
-  /** Creates a new {@link FastSet} with default capacity. */
-  public FastSet() {
-    this(5);
+  /** Creates a new {@link FastIDSet} with default capacity. */
+  public FastIDSet() {
+    this(2);
   }
 
-  public FastSet(Collection<? extends K> c) {
-    this(c.size());
-    addAll(c);
-  }
-
-  @SuppressWarnings("unchecked")
-  public FastSet(int size) {
+  public FastIDSet(int size) {
     if (size < 0) {
       throw new IllegalArgumentException("size must be at least 0");
     }
@@ -70,25 +51,18 @@ public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
       throw new IllegalArgumentException("size must be less than " + max);
     }
     int hashSize = RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * size));
-    keys = (K[]) new Object[hashSize];
+    keys = new long[hashSize];
+    Arrays.fill(keys, NULL);
   }
 
-  /**
-   * This is for the benefit of inner classes. Without it the compiler would just generate a similar synthetic accessor.
-   * Might as well make it explicit.
-   */
-  K[] getKeys() {
-    return keys;
-  }
-
-  private int find(Object key) {
-    int theHashCode = key.hashCode() & 0x7FFFFFFF; // make sure it's positive
-    K[] keys = this.keys;
+  private int find(long key) {
+    int theHashCode = (int) key & 0x7FFFFFFF; // make sure it's positive
+    long[] keys = this.keys;
     int hashSize = keys.length;
     int jump = 1 + theHashCode % (hashSize - 2);
     int index = theHashCode % hashSize;
-    K currentKey = keys[index];
-    while (currentKey != null && (currentKey == REMOVED || !key.equals(currentKey))) {
+    long currentKey = keys[index];
+    while (currentKey != NULL && (currentKey == REMOVED || key != currentKey)) {
       if (index < jump) {
         index += hashSize - jump;
       } else {
@@ -99,26 +73,21 @@ public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
     return index;
   }
 
-  @Override
   public int size() {
     return numEntries;
   }
 
-  @Override
   public boolean isEmpty() {
     return numEntries == 0;
   }
 
-  @Override
-  public boolean contains(Object key) {
-    return key != null && keys[find(key)] != null;
+  public boolean contains(long key) {
+    return key != NULL && key != REMOVED && keys[find(key)] != NULL;
   }
 
-  /** @throws NullPointerException if key is null */
-  @Override
-  public boolean add(K key) {
-    if (key == null) {
-      throw new NullPointerException();
+  public boolean add(long key) {
+    if (key == NULL || key == REMOVED) {
+      throw new IllegalArgumentException();
     }
     // If less than half the slots are open, let's clear it up
     if (numSlotsUsed * ALLOWED_LOAD_FACTOR >= keys.length) {
@@ -132,7 +101,7 @@ public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
     }
     // Here we may later consider implementing Brent's variation described on page 532
     int index = find(key);
-    if (keys[index] == null) {
+    if (keys[index] == NULL) {
       keys[index] = key;
       numEntries++;
       numSlotsUsed++;
@@ -141,41 +110,38 @@ public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
     return false;
   }
 
-  @Override
-  public Iterator<K> iterator() {
+  public LongPrimitiveIterator iterator() {
     return new KeyIterator();
   }
 
-  @Override
-  public boolean remove(Object key) {
-    if (key == null) {
+  public long[] toArray() {
+    long[] result = new long[numEntries];
+    for (int i = 0, position = 0; i < result.length; i++) {
+      while (keys[position] == NULL || keys[position] == REMOVED) {
+        position++;
+      }
+      result[i] = keys[position++];
+    }
+    return result;
+  }
+
+  public boolean remove(long key) {
+    if (key == NULL || key == REMOVED) {
       return false;
     }
     int index = find(key);
-    if (keys[index] == null) {
+    if (keys[index] == NULL) {
       return false;
     } else {
-      ((Object[]) keys)[index] = REMOVED;
+      keys[index] = REMOVED;
       numEntries--;
       return true;
     }
-    // Could un-set recentlyAccessed's bit but doesn't matter
   }
 
-  @Override
-  public boolean containsAll(Collection<?> c) {
-    for (Object o : c) {
-      if (o == null || keys[find(o)] == null) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  @Override
-  public boolean addAll(Collection<? extends K> c) {
+  public boolean addAll(long[] c) {
     boolean changed = false;
-    for (K k : c) {
+    for (long k : c) {
       if (add(k)) {
         changed = true;
       }
@@ -183,24 +149,21 @@ public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
     return changed;
   }
 
-  @Override
-  public boolean retainAll(Collection<?> c) {
+  public boolean addAll(FastIDSet c) {
     boolean changed = false;
-    Iterator<K> iterator = iterator();
-    while (iterator.hasNext()) {
-      K k = iterator.next();
-      if (!c.contains(k)) {
-        iterator.remove();
-        changed = true;
+    for (long k : c.keys) {
+      if (k != NULL && k != REMOVED) {
+        if (add(k)) {
+          changed = true;
+        }
       }
     }
     return changed;
   }
 
-  @Override
-  public boolean removeAll(Collection<?> c) {
+  public boolean removeAll(long[] c) {
     boolean changed = false;
-    for (Object o : c) {
+    for (long o : c) {
       if (remove(o)) {
         changed = true;
       }
@@ -208,33 +171,35 @@ public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
     return changed;
   }
 
-  @Override
+  public boolean removeAll(FastIDSet c) {
+    boolean changed = false;
+    for (long k : c.keys) {
+      if (k != NULL && k != REMOVED) {
+        if (remove(k)) {
+          changed = true;
+        }
+      }
+    }
+    return changed;
+  }
+
+  public boolean retainAll(FastIDSet c) {
+    boolean changed = false;
+    for (int i = 0; i < keys.length; i++) {
+      long k = keys[i];
+      if (k != NULL && k != REMOVED && !c.contains(k)) {
+        keys[i] = REMOVED;
+        numEntries--;
+        changed = true;
+      }
+    }
+    return changed;
+  }
+
   public void clear() {
     numEntries = 0;
     numSlotsUsed = 0;
-    Arrays.fill(keys, null);
-  }
-
-  @Override
-  public Object[] toArray() {
-    return toArray(new Object[numEntries]);
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public <T> T[] toArray(T[] a) {
-    if (a.length < numEntries) {
-      a = (T[]) Array.newInstance(a.getClass().getComponentType(), numEntries);
-    }
-    int keyOffset = 0;
-    int resultOffset = 0;
-    while (resultOffset < a.length) {
-      K key = keys[keyOffset++];
-      if (key != null && key != REMOVED) {
-        a[resultOffset++] = (T) key;
-      }
-    }
-    return a;
+    Arrays.fill(keys, NULL);
   }
 
   private void growAndRehash() {
@@ -248,48 +213,50 @@ public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
     rehash(RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * numEntries)));
   }
 
-  @SuppressWarnings("unchecked")
   private void rehash(int newHashSize) {
-    K[] oldKeys = keys;
+    long[] oldKeys = keys;
     numEntries = 0;
     numSlotsUsed = 0;
-    keys = (K[]) new Object[newHashSize];
+    keys = new long[newHashSize];
+    Arrays.fill(keys, NULL);
     int length = oldKeys.length;
     for (int i = 0; i < length; i++) {
-      K key = oldKeys[i];
-      if (key != null && key != REMOVED) {
+      long key = oldKeys[i];
+      if (key != NULL && key != REMOVED) {
         add(key);
       }
     }
   }
 
-  /** Convenience method to quickly compute just the size of the intersection with another {@link FastSet}. */
-  @SuppressWarnings("unchecked")
-  public int intersectionSize(FastSet<?> other) {
+  /**
+   * Convenience method to quickly compute just the size of the intersection with another {@link FastIDSet}.
+   *
+   * @param other {@link FastIDSet} to intersect with
+   * @return number of elements in intersection
+   */
+  public int intersectionSize(FastIDSet other) {
     int count = 0;
-    for (K key : (K[]) other.keys) {
-      if (key != null && key != REMOVED && keys[find(key)] != null) {
+    for (long key : other.keys) {
+      if (key != NULL && key != REMOVED && keys[find(key)] != NULL) {
         count++;
       }
     }
     return count;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
-  public FastSet<K> clone() {
-    FastSet<K> clone;
+  public FastIDSet clone() {
+    FastIDSet clone;
     try {
-      clone = (FastSet<K>) super.clone();
+      clone = (FastIDSet) super.clone();
     } catch (CloneNotSupportedException cnse) {
       throw new AssertionError();
     }
-    clone.keys = (K[]) new Object[keys.length];
-    System.arraycopy(keys, 0, clone.keys, 0, keys.length);
+    clone.keys = keys.clone();
     return clone;
   }
 
-  private final class KeyIterator implements Iterator<K> {
+  private final class KeyIterator implements LongPrimitiveIterator {
 
     private int position;
     private int lastNext = -1;
@@ -297,24 +264,36 @@ public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
     @Override
     public boolean hasNext() {
       goToNext();
-      return position < getKeys().length;
+      return position < keys.length;
     }
 
     @Override
-    public K next() {
+    public Long next() {
+      return nextLong();
+    }
+
+    @Override
+    public long nextLong() {
       goToNext();
       lastNext = position;
-      K[] keys = getKeys();
       if (position >= keys.length) {
         throw new NoSuchElementException();
       }
       return keys[position++];
     }
 
+    @Override
+    public long peek() {
+      goToNext();
+      if (position >= keys.length) {
+        throw new NoSuchElementException();
+      }
+      return keys[position];
+    }
+
     private void goToNext() {
-      K[] keys = getKeys();
       int length = keys.length;
-      while (position < length && (keys[position] == null || keys[position] == REMOVED)) {
+      while (position < length && (keys[position] == NULL || keys[position] == REMOVED)) {
         position++;
       }
     }
@@ -327,11 +306,14 @@ public final class FastSet<K> implements Set<K>, Serializable, Cloneable {
       if (lastNext < 0) {
         throw new IllegalStateException();
       }
-      ((Object[]) keys)[lastNext] = REMOVED;
+      keys[lastNext] = REMOVED;
       numEntries--;
     }
 
-  }
+    public Iterator<Long> iterator() {
+      return new KeyIterator();
+    }
 
+  }
 
 }

@@ -18,10 +18,10 @@
 package org.apache.mahout.cf.taste.model;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
+import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 
 import javax.sql.DataSource;
-import java.util.Map;
 
 public interface JDBCDataModel extends DataModel {
 
@@ -36,8 +36,8 @@ public interface JDBCDataModel extends DataModel {
    *
    * @return all user preference data
    */
-  Map<Comparable<?>, PreferenceArray> exportWithPrefs() throws TasteException;
+  FastByIDMap<PreferenceArray> exportWithPrefs() throws TasteException;
 
-  Map<Comparable<?>, FastSet<Comparable<?>>> exportWithIDsOnly() throws TasteException;
+  FastByIDMap<FastIDSet> exportWithIDsOnly() throws TasteException;
 
 }

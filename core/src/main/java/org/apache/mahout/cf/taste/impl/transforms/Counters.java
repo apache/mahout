@@ -17,16 +17,16 @@
 
 package org.apache.mahout.cf.taste.impl.transforms;
 
-import org.apache.mahout.cf.taste.impl.common.FastMap;
+import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 
 import java.util.Map;
 
 /** <p>A simple, fast utility class that maps keys to counts.</p> */
-final class Counters<T> {
+final class Counters {
 
-  private final Map<T, int[]> counts = new FastMap<T, int[]>();
+  private final FastByIDMap<int[]> counts = new FastByIDMap<int[]>();
 
-  void increment(T key) {
+  void increment(long key) {
     int[] count = counts.get(key);
     if (count == null) {
       int[] newCount = new int[1];
@@ -37,7 +37,7 @@ final class Counters<T> {
     }
   }
 
-  int getCount(T key) {
+  int getCount(long key) {
     int[] count = counts.get(key);
     return count == null ? 0 : count[0];
   }
@@ -46,7 +46,7 @@ final class Counters<T> {
     return counts.size();
   }
 
-  Iterable<Map.Entry<T, int[]>> getEntrySet() {
+  Iterable<Map.Entry<Long, int[]>> getEntrySet() {
     return counts.entrySet();
   }
 

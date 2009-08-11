@@ -21,15 +21,16 @@ import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.FastMap;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
+import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveArrayIterator;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -40,10 +41,10 @@ import java.util.Map;
  */
 public final class GenericBooleanPrefDataModel implements DataModel, Serializable {
 
-  private final List<Comparable<?>> userIDs;
-  private final Map<Comparable<?>, FastSet<Comparable<?>>> preferenceFromUsers;
-  private final List<Comparable<?>> itemIDs;
-  private final Map<Comparable<?>, FastSet<Comparable<?>>> preferenceForItems;
+  private final long[] userIDs;
+  private final FastByIDMap<FastIDSet> preferenceFromUsers;
+  private final long[] itemIDs;
+  private final FastByIDMap<FastIDSet> preferenceForItems;
 
   /**
    * <p>Creates a new {@link GenericDataModel} from the given users (and their preferences). This {@link
@@ -52,34 +53,41 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
    * @param userData users to include
    */
   @SuppressWarnings("unchecked")
-  public GenericBooleanPrefDataModel(Map<Comparable<?>, FastSet<Comparable<?>>> userData) {
+  public GenericBooleanPrefDataModel(FastByIDMap<FastIDSet> userData) {
     if (userData == null) {
       throw new IllegalArgumentException("userData is null");
     }
 
     this.preferenceFromUsers = userData;
-    this.preferenceForItems = new FastMap<Comparable<?>, FastSet<Comparable<?>>>();
-    FastSet<Comparable<?>> itemIDSet = new FastSet<Comparable<?>>();
-    for (Map.Entry<Comparable<?>, FastSet<Comparable<?>>> entry : preferenceFromUsers.entrySet()) {
-      Comparable<?> userID = entry.getKey();
-      FastSet<Comparable<?>> itemIDs = entry.getValue();
+    this.preferenceForItems = new FastByIDMap<FastIDSet>();
+    FastIDSet itemIDSet = new FastIDSet();
+    for (Map.Entry<Long, FastIDSet> entry : preferenceFromUsers.entrySet()) {
+      long userID = entry.getKey();
+      FastIDSet itemIDs = entry.getValue();
       itemIDSet.addAll(itemIDs);
-      for (Comparable<?> itemID : itemIDs) {
-        FastSet<Comparable<?>> userIDs = preferenceForItems.get(itemID);
+      LongPrimitiveIterator it = itemIDs.iterator();
+      while (it.hasNext()) {
+        long itemID = it.next();
+        FastIDSet userIDs = preferenceForItems.get(itemID);
         if (userIDs == null) {
-          userIDs = new FastSet<Comparable<?>>(2);
+          userIDs = new FastIDSet(2);
           preferenceForItems.put(itemID, userIDs);
         }
         userIDs.add(userID);
       }
     }
 
-    this.itemIDs = new ArrayList<Comparable<?>>(itemIDSet);
-    itemIDSet = null;
-    Collections.sort((List<? extends Comparable>) this.itemIDs);
+    this.itemIDs = itemIDSet.toArray();
+    itemIDSet = null; // Might help GC -- this is big
+    Arrays.sort(itemIDs);
 
-    this.userIDs = new ArrayList(userData.keySet());
-    Collections.sort((List<? extends Comparable>) userIDs);
+    this.userIDs = new long[userData.size()];
+    int i = 0;
+    LongPrimitiveIterator it = userData.keySetIterator();
+    while (it.hasNext()) {
+      userIDs[i++] = it.next();
+    }
+    Arrays.sort(userIDs);
 
   }
 
@@ -94,40 +102,55 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
     this(toDataMap(dataModel));
   }
 
-  private static Map<Comparable<?>, FastSet<Comparable<?>>> toDataMap(DataModel dataModel) throws TasteException {
-    Map<Comparable<?>, FastSet<Comparable<?>>> data = 
-            new FastMap<Comparable<?>, FastSet<Comparable<?>>>(dataModel.getNumUsers());
-    for (Comparable<?> userID : dataModel.getUserIDs()) {
+  private static FastByIDMap<FastIDSet> toDataMap(DataModel dataModel) throws TasteException {
+    FastByIDMap<FastIDSet> data = new FastByIDMap<FastIDSet>(dataModel.getNumUsers());
+    LongPrimitiveIterator it = dataModel.getUserIDs();
+    while (it.hasNext()) {
+      long userID = it.nextLong();
       data.put(userID, dataModel.getItemIDsFromUser(userID));
     }
     return data;
   }
 
+  public static FastByIDMap<FastIDSet> toDataMap(FastByIDMap<PreferenceArray> data) throws TasteException {
+    for (Map.Entry<Long, Object> entry : ((FastByIDMap<Object>) (FastByIDMap<?>) data).entrySet()) {
+      PreferenceArray prefArray = (PreferenceArray) entry.getValue();
+      int size = prefArray.length();
+      FastIDSet itemIDs = new FastIDSet(size);
+      for (int i = 0; i < size; i++) {
+        itemIDs.add(prefArray.getItemID(i));
+      }
+      entry.setValue(itemIDs);
+    }
+    return (FastByIDMap<FastIDSet>) (FastByIDMap<?>) data;
+  }
+
   @Override
-  public Iterable<Comparable<?>> getUserIDs() {
-    return userIDs;
+  public LongPrimitiveArrayIterator getUserIDs() {
+    return new LongPrimitiveArrayIterator(userIDs);
   }
 
   /** @throws NoSuchUserException if there is no such user */
   @Override
-  public PreferenceArray getPreferencesFromUser(Comparable<?> userID) throws NoSuchUserException {
-    FastSet<Comparable<?>> itemIDs = preferenceFromUsers.get(userID);
+  public PreferenceArray getPreferencesFromUser(long userID) throws NoSuchUserException {
+    FastIDSet itemIDs = preferenceFromUsers.get(userID);
     if (itemIDs == null) {
       throw new NoSuchUserException();
     }
     PreferenceArray prefArray = new BooleanUserPreferenceArray(itemIDs.size());
     int i = 0;
-    for (Comparable<?> itemID : itemIDs) {
+    LongPrimitiveIterator it = itemIDs.iterator();
+    while (it.hasNext()) {
       prefArray.setUserID(i, userID);
-      prefArray.setItemID(i, itemID);
+      prefArray.setItemID(i, it.next());
       i++;
     }
     return prefArray;
   }
 
   @Override
-  public FastSet<Comparable<?>> getItemIDsFromUser(Comparable<?> userID) throws TasteException {
-    FastSet<Comparable<?>> itemIDs = preferenceFromUsers.get(userID);
+  public FastIDSet getItemIDsFromUser(long userID) throws TasteException {
+    FastIDSet itemIDs = preferenceFromUsers.get(userID);
     if (itemIDs == null) {
       throw new NoSuchUserException();
     }
@@ -135,20 +158,21 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
   }
 
   @Override
-  public Iterable<Comparable<?>> getItemIDs() {
-    return itemIDs;
+  public LongPrimitiveArrayIterator getItemIDs() {
+    return new LongPrimitiveArrayIterator(itemIDs);
   }
 
   @Override
-  public PreferenceArray getPreferencesForItem(Comparable<?> itemID) throws NoSuchItemException {
-    FastSet<Comparable<?>> userIDs = preferenceForItems.get(itemID);
+  public PreferenceArray getPreferencesForItem(long itemID) throws NoSuchItemException {
+    FastIDSet userIDs = preferenceForItems.get(itemID);
     if (userIDs == null) {
       throw new NoSuchItemException();
     }
     PreferenceArray prefArray = new BooleanItemPreferenceArray(userIDs.size());
     int i = 0;
-    for (Comparable<?> userID : userIDs) {
-      prefArray.setUserID(i, userID);
+    LongPrimitiveIterator it = userIDs.iterator();
+    while (it.hasNext()) {
+      prefArray.setUserID(i, it.next());
       prefArray.setItemID(i, itemID);
       i++;
     }
@@ -156,8 +180,8 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
   }
 
   @Override
-  public Float getPreferenceValue(Comparable<?> userID, Comparable<?> itemID) throws NoSuchUserException, NoSuchItemException {
-    FastSet<Comparable<?>> itemIDs = preferenceFromUsers.get(userID);
+  public Float getPreferenceValue(long userID, long itemID) throws NoSuchUserException, NoSuchItemException {
+    FastIDSet itemIDs = preferenceFromUsers.get(userID);
     if (itemIDs == null) {
       throw new NoSuchUserException();
     }
@@ -169,24 +193,24 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
 
   @Override
   public int getNumItems() {
-    return itemIDs.size();
+    return itemIDs.length;
   }
 
   @Override
   public int getNumUsers() {
-    return userIDs.size();
+    return userIDs.length;
   }
 
   @Override
-  public int getNumUsersWithPreferenceFor(Comparable<?>... itemIDs) throws NoSuchItemException {
+  public int getNumUsersWithPreferenceFor(long... itemIDs) throws NoSuchItemException {
     if (itemIDs.length == 0) {
       return 0;
     }
-    FastSet<Comparable<?>> intersection = new FastSet<Comparable<?>>();
-    FastSet<Comparable<?>> userIDs = preferenceForItems.get(itemIDs[0]);
+    FastIDSet userIDs = preferenceForItems.get(itemIDs[0]);
     if (userIDs == null) {
       throw new NoSuchItemException();
     }
+    FastIDSet intersection = new FastIDSet(userIDs.size());
     intersection.addAll(userIDs);
     int i = 1;
     while (!intersection.isEmpty() && i < itemIDs.length) {
@@ -200,12 +224,12 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
   }
 
   @Override
-  public void removePreference(Comparable<?> userID, Comparable<?> itemID) throws NoSuchUserException {
+  public void removePreference(long userID, long itemID) throws NoSuchUserException {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public void setPreference(Comparable<?> userID, Comparable<?> itemID, float value) throws NoSuchUserException {
+  public void setPreference(long userID, long itemID, float value) throws NoSuchUserException {
     throw new UnsupportedOperationException();
   }
 
@@ -216,7 +240,19 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
 
   @Override
   public String toString() {
-    return "GenericBooleanPrefDataModel[users:" + (userIDs.size() > 3 ? userIDs.subList(0, 3) + "..." : userIDs) + ']';
+    StringBuilder result = new StringBuilder(200);
+    result.append("GenericDataModel[users:");
+    for (int i = 0; i < Math.min(3, userIDs.length); i++) {
+      if (i > 0) {
+        result.append(',');
+      }
+      result.append(userIDs[i]);
+    }
+    if (result.length() > 3) {
+      result.append("...");
+    }
+    result.append(']');
+    return result.toString();
   }
 
 }

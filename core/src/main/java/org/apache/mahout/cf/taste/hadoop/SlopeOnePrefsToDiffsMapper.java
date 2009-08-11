@@ -24,17 +24,17 @@ import org.apache.hadoop.mapreduce.Mapper;
 import java.io.IOException;
 
 public final class SlopeOnePrefsToDiffsMapper
-    extends Mapper<LongWritable, Text, Text, ItemPrefWritable> {
+    extends Mapper<LongWritable, Text, LongWritable, ItemPrefWritable> {
 
   @Override
   protected void map(LongWritable key, Text value,
                      Context context) throws IOException, InterruptedException {
     String line = value.toString();
     String[] tokens = line.split(",");
-    String userID = tokens[0];
-    String itemID = tokens[1];
+    long userID = Long.parseLong(tokens[0]);
+    long itemID = Long.parseLong(tokens[1]);
     float prefValue = Float.parseFloat(tokens[2]);
-    context.write(new Text(userID), new ItemPrefWritable(itemID, prefValue));
+    context.write(new LongWritable(userID), new ItemPrefWritable(itemID, prefValue));
   }
 
 }

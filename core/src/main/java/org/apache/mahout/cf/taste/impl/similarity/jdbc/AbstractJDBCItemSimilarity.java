@@ -70,9 +70,6 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
                                        String itemBIDColumn,
                                        String similarityColumn,
                                        String getItemItemSimilaritySQL) {
-
-    log.debug("Creating AbstractJDBCItemSimilarity...");
-
     checkNotNullAndLog("similarityTable", similarityTable);
     checkNotNullAndLog("itemAIDColumn", itemAIDColumn);
     checkNotNullAndLog("itemBIDColumn", itemBIDColumn);
@@ -110,15 +107,14 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
   }
 
   @Override
-  public double itemSimilarity(Comparable<?> itemID1, Comparable<?> itemID2) throws TasteException {
+  public double itemSimilarity(long itemID1, long itemID2) throws TasteException {
 
-    int compare = ((Comparable<Object>) itemID1).compareTo(itemID2);
-    if (compare == 0) {
+    if (itemID1 == itemID2) {
       return 1.0;
     }
     // Order as smaller - larger
-    if (compare > 0) {
-      Comparable<?> temp = itemID1;
+    if (itemID1 > itemID2) {
+      long temp = itemID1;
       itemID1 = itemID2;
       itemID2 = temp;
     }
@@ -132,8 +128,8 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
       stmt = conn.prepareStatement(getItemItemSimilaritySQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
-      stmt.setObject(1, itemID1);
-      stmt.setObject(2, itemID2);
+      stmt.setLong(1, itemID1);
+      stmt.setLong(2, itemID2);
 
       log.debug("Executing SQL query: {}", getItemItemSimilaritySQL);
       rs = stmt.executeQuery();

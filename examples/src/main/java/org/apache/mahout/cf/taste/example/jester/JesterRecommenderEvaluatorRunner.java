@@ -38,9 +38,10 @@ public final class JesterRecommenderEvaluatorRunner {
     RecommenderEvaluator evaluator = new AverageAbsoluteDifferenceRecommenderEvaluator();
     DataModel model = new JesterDataModel();
     double evaluation = evaluator.evaluate(new JesterRecommenderBuilder(),
-                                                 model,
-                                                 0.9,
-                                                 1.0);
+                                           null,
+                                           model,
+                                           0.9,
+                                           1.0);
     log.info(String.valueOf(evaluation));
   }
 

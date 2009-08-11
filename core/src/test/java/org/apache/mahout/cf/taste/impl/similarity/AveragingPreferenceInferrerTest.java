@@ -26,9 +26,9 @@ import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 public final class AveragingPreferenceInferrerTest extends TasteTestCase {
 
   public void testInferrer() throws TasteException {
-    DataModel model = getDataModel(new Comparable<?>[] {"test1"}, new Double[][] {{3.0,-2.0,5.0}});
+    DataModel model = getDataModel(new long[] {1}, new Double[][] {{3.0,-2.0,5.0}});
     PreferenceInferrer inferrer = new AveragingPreferenceInferrer(model);
-    double inferred = inferrer.inferPreference("test1", "3");
+    double inferred = inferrer.inferPreference(1, 3);
     assertEquals(2.0, inferred);
   }
 

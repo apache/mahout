@@ -36,7 +36,7 @@ public interface UserSimilarity extends Refreshable {
    * @return similarity between the two users, in [-1,1]
    * @throws TasteException if an error occurs while accessing the data
    */
-  double userSimilarity(Comparable<?> userID1, Comparable<?> userID2) throws TasteException;
+  double userSimilarity(long userID1, long userID2) throws TasteException;
 
   /**
    * <p>Attaches a {@link PreferenceInferrer} to the {@link UserSimilarity} implementation.</p>

@@ -20,7 +20,7 @@ package org.apache.mahout.cf.taste.impl.similarity;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.Cache;
-import org.apache.mahout.cf.taste.impl.common.Pair;
+import org.apache.mahout.cf.taste.impl.common.LongPair;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -32,7 +32,7 @@ import java.util.Collection;
 public final class CachingItemSimilarity implements ItemSimilarity {
 
   private final ItemSimilarity similarity;
-  private final Cache<Pair<Comparable<?>, Comparable<?>>, Double> similarityCache;
+  private final Cache<LongPair, Double> similarityCache;
 
   public CachingItemSimilarity(ItemSimilarity similarity, DataModel dataModel) throws TasteException {
     if (similarity == null) {
@@ -40,15 +40,12 @@ public final class CachingItemSimilarity implements ItemSimilarity {
     }
     this.similarity = similarity;
     int maxCacheSize = dataModel.getNumItems(); // just a dumb heuristic for sizing
-    this.similarityCache =
-            new Cache<Pair<Comparable<?>, Comparable<?>>, Double>(new SimilarityRetriever(similarity), maxCacheSize);
+    this.similarityCache = new Cache<LongPair, Double>(new SimilarityRetriever(similarity), maxCacheSize);
   }
 
   @Override
-  public double itemSimilarity(Comparable<?> itemID1, Comparable<?> itemID2) throws TasteException {
-    Pair<Comparable<?>, Comparable<?>> key = ((Comparable<Object>) itemID1).compareTo(itemID2) < 0 ?
-        new Pair<Comparable<?>, Comparable<?>>(itemID1, itemID2) :
-        new Pair<Comparable<?>, Comparable<?>>(itemID2, itemID1);
+  public double itemSimilarity(long itemID1, long itemID2) throws TasteException {
+    LongPair key = itemID1 < itemID2 ? new LongPair(itemID1, itemID2) : new LongPair(itemID2, itemID1);
     return similarityCache.get(key);
   }
 
@@ -59,7 +56,7 @@ public final class CachingItemSimilarity implements ItemSimilarity {
     RefreshHelper.maybeRefresh(alreadyRefreshed, similarity);
   }
 
-  private static final class SimilarityRetriever implements Retriever<Pair<Comparable<?>, Comparable<?>>, Double> {
+  private static final class SimilarityRetriever implements Retriever<LongPair, Double> {
     private final ItemSimilarity similarity;
 
     private SimilarityRetriever(ItemSimilarity similarity) {
@@ -67,7 +64,7 @@ public final class CachingItemSimilarity implements ItemSimilarity {
     }
 
     @Override
-    public Double get(Pair<Comparable<?>, Comparable<?>> key) throws TasteException {
+    public Double get(LongPair key) throws TasteException {
       return similarity.itemSimilarity(key.getFirst(), key.getSecond());
     }
   }

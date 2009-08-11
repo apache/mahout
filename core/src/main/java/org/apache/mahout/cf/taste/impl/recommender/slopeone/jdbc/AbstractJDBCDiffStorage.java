@@ -19,7 +19,7 @@ package org.apache.mahout.cf.taste.impl.recommender.slopeone.jdbc;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
@@ -37,7 +37,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
-import java.util.Set;
 import java.util.concurrent.Callable;
 
 /**
@@ -123,7 +122,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
   }
 
   @Override
-  public RunningAverage getDiff(Comparable<?> itemID1, Comparable<?> itemID2) throws TasteException {
+  public RunningAverage getDiff(long itemID1, long itemID2) throws TasteException {
     Connection conn = null;
     PreparedStatement stmt = null;
     ResultSet rs = null;
@@ -132,10 +131,10 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       stmt = conn.prepareStatement(getDiffSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
-      stmt.setObject(1, itemID1);
-      stmt.setObject(2, itemID2);
-      stmt.setObject(3, itemID2);
-      stmt.setObject(4, itemID1);
+      stmt.setLong(1, itemID1);
+      stmt.setLong(2, itemID2);
+      stmt.setLong(3, itemID2);
+      stmt.setLong(4, itemID1);
       log.debug("Executing SQL query: {}", getDiffSQL);
       rs = stmt.executeQuery();
       return rs.next() ? new FixedRunningAverage(rs.getInt(1), rs.getDouble(2)) : null;
@@ -148,7 +147,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
   }
 
   @Override
-  public RunningAverage[] getDiffs(Comparable<?> userID, Comparable<?> itemID, PreferenceArray prefs)
+  public RunningAverage[] getDiffs(long userID, long itemID, PreferenceArray prefs)
       throws TasteException {
     int size = prefs.length();
     RunningAverage[] result = new RunningAverage[size];
@@ -160,8 +159,8 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       stmt = conn.prepareStatement(getDiffsSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
-      stmt.setObject(1, itemID);
-      stmt.setObject(2, userID);
+      stmt.setLong(1, itemID);
+      stmt.setLong(2, userID);
       log.debug("Executing SQL query: {}", getDiffsSQL);
       rs = stmt.executeQuery();
       // We should have up to one result for each Preference in prefs
@@ -169,8 +168,8 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       // with nulls for Preferences that have no corresponding result row
       int i = 0;
       while (rs.next()) {
-        Comparable<?> nextResultItemID = (Comparable<?>) rs.getObject(3);
-        while (!prefs.getItemID(i).equals(nextResultItemID)) {
+        long nextResultItemID = rs.getLong(3);
+        while (prefs.getItemID(i) != nextResultItemID) {
           i++;
           // result[i] is null for these values of i
         }
@@ -187,7 +186,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
   }
 
   @Override
-  public RunningAverage getAverageItemPref(Comparable<?> itemID) throws TasteException {
+  public RunningAverage getAverageItemPref(long itemID) throws TasteException {
     Connection conn = null;
     PreparedStatement stmt = null;
     ResultSet rs = null;
@@ -196,7 +195,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       stmt = conn.prepareStatement(getAverageItemPrefSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
-      stmt.setObject(1, itemID);
+      stmt.setLong(1, itemID);
       log.debug("Executing SQL query: {}", getAverageItemPrefSQL);
       rs = stmt.executeQuery();
       if (rs.next()) {
@@ -215,7 +214,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
   }
 
   @Override
-  public void updateItemPref(Comparable<?> itemID, float prefDelta, boolean remove)
+  public void updateItemPref(long itemID, float prefDelta, boolean remove)
       throws TasteException {
     Connection conn = null;
     try {
@@ -235,12 +234,12 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
     }
   }
 
-  private static void doPartialUpdate(String sql, Comparable<?> itemID, double prefDelta, Connection conn)
+  private static void doPartialUpdate(String sql, long itemID, double prefDelta, Connection conn)
       throws SQLException {
     PreparedStatement stmt = conn.prepareStatement(sql);
     try {
       stmt.setDouble(1, prefDelta);
-      stmt.setObject(2, itemID);
+      stmt.setLong(2, itemID);
       log.debug("Executing SQL update: {}", sql);
       stmt.executeUpdate();
     } finally {
@@ -249,7 +248,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
   }
 
   @Override
-  public Set<Comparable<?>> getRecommendableItemIDs(Comparable<?> userID) throws TasteException {
+  public FastIDSet getRecommendableItemIDs(long userID) throws TasteException {
     Connection conn = null;
     PreparedStatement stmt = null;
     ResultSet rs = null;
@@ -258,14 +257,14 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       stmt = conn.prepareStatement(getRecommendableItemsSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
-      stmt.setObject(1, userID);
-      stmt.setObject(2, userID);
-      stmt.setObject(3, userID);
+      stmt.setLong(1, userID);
+      stmt.setLong(2, userID);
+      stmt.setLong(3, userID);
       log.debug("Executing SQL query: {}", getRecommendableItemsSQL);
       rs = stmt.executeQuery();
-      Set<Comparable<?>> itemIDs = new FastSet<Comparable<?>>();
+      FastIDSet itemIDs = new FastIDSet();
       while (rs.next()) {
-        itemIDs.add((Comparable<?>) rs.getObject(1));
+        itemIDs.add(rs.getLong(1));
       }
       return itemIDs;
     } catch (SQLException sqle) {

@@ -37,6 +37,6 @@ public interface ItemSimilarity extends Refreshable {
    * @return similarity between the items, in [-1,1]
    * @throws TasteException if an error occurs while accessing the data
    */
-  double itemSimilarity(Comparable<?> itemID1, Comparable<?> itemID2) throws TasteException;
+  double itemSimilarity(long itemID1, long itemID2) throws TasteException;
 
 }

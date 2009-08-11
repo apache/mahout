@@ -26,189 +26,189 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
 
   public void testFullCorrelation1() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2"},
+            new long[] {1, 2},
             new Double[][] {
                     {3.0, -2.0},
                     {3.0, -2.0},
             });
-    double correlation = new PearsonCorrelationSimilarity(dataModel).userSimilarity("test1", "test2");
+    double correlation = new PearsonCorrelationSimilarity(dataModel).userSimilarity(1, 2);
     assertCorrelationEquals(1.0, correlation);
   }
 
   public void testFullCorrelation1Weighted() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2"},
+            new long[] {1, 2},
             new Double[][] {
                     {3.0, -2.0},
                     {3.0, -2.0},
             });
-    double correlation = new PearsonCorrelationSimilarity(dataModel, Weighting.WEIGHTED).userSimilarity("test1", "test2");
+    double correlation = new PearsonCorrelationSimilarity(dataModel, Weighting.WEIGHTED).userSimilarity(1, 2);
     assertCorrelationEquals(1.0, correlation);
   }
 
   public void testFullCorrelation2() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2"},
+            new long[] {1, 2},
             new Double[][] {
                     {3.0, 3.0},
                     {3.0, 3.0},
             });
-    double correlation = new PearsonCorrelationSimilarity(dataModel).userSimilarity("test1", "test2");
+    double correlation = new PearsonCorrelationSimilarity(dataModel).userSimilarity(1, 2);
     // Yeah, undefined in this case
     assertTrue(Double.isNaN(correlation));
   }
 
   public void testNoCorrelation1() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2"},
+            new long[] {1, 2},
             new Double[][] {
                     {3.0, -2.0},
                     {-3.0, 2.0},
             });
-    double correlation = new PearsonCorrelationSimilarity(dataModel).userSimilarity("test1", "test2");
+    double correlation = new PearsonCorrelationSimilarity(dataModel).userSimilarity(1, 2);
     assertCorrelationEquals(-1.0, correlation);
   }
 
   public void testNoCorrelation1Weighted() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2"},
+            new long[] {1, 2},
             new Double[][] {
                     {3.0, -2.0},
                     {-3.0, 2.0},
             });
-    double correlation = new PearsonCorrelationSimilarity(dataModel, Weighting.WEIGHTED).userSimilarity("test1", "test2");
+    double correlation = new PearsonCorrelationSimilarity(dataModel, Weighting.WEIGHTED).userSimilarity(1, 2);
     assertCorrelationEquals(-1.0, correlation);
   }
 
   public void testNoCorrelation2() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2"},
+            new long[] {1, 2},
             new Double[][] {
                     {null, 1.0, null},
                     {null, null, 1.0},
             });
-    double correlation = new PearsonCorrelationSimilarity(dataModel).userSimilarity("test1", "test2");
+    double correlation = new PearsonCorrelationSimilarity(dataModel).userSimilarity(1, 2);
     assertTrue(Double.isNaN(correlation));
   }
 
   public void testNoCorrelation3() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2"},
+            new long[] {1, 2},
             new Double[][] {
                     {90.0, 80.0, 70.0},
                     {70.0, 80.0, 90.0},
             });
-    double correlation = new PearsonCorrelationSimilarity(dataModel).userSimilarity("test1", "test2");
+    double correlation = new PearsonCorrelationSimilarity(dataModel).userSimilarity(1, 2);
     assertCorrelationEquals(-1.0, correlation);
   }
 
   public void testSimple() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2"},
+            new long[] {1, 2},
             new Double[][] {
                     {1.0, 2.0, 3.0},
                     {2.0, 5.0, 6.0},
             });
-    double correlation = new PearsonCorrelationSimilarity(dataModel).userSimilarity("test1", "test2");
+    double correlation = new PearsonCorrelationSimilarity(dataModel).userSimilarity(1, 2);
     assertCorrelationEquals(0.9607689228305227, correlation);
   }
 
   public void testSimpleWeighted() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2"},
+            new long[] {1, 2},
             new Double[][] {
                     {1.0, 2.0, 3.0},
                     {2.0, 5.0, 6.0},
             });
-    double correlation = new PearsonCorrelationSimilarity(dataModel, Weighting.WEIGHTED).userSimilarity("test1", "test2");
+    double correlation = new PearsonCorrelationSimilarity(dataModel, Weighting.WEIGHTED).userSimilarity(1, 2);
     assertCorrelationEquals(0.9901922307076306, correlation);
   }
 
   public void testFullItemCorrelation1() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2"},
+            new long[] {1, 2},
             new Double[][] {
                     {3.0, 3.0},
                     {-2.0, -2.0},
             });
     double correlation =
-        new PearsonCorrelationSimilarity(dataModel).itemSimilarity("0", "1");
+        new PearsonCorrelationSimilarity(dataModel).itemSimilarity(0, 1);
     assertCorrelationEquals(1.0, correlation);
   }
 
   public void testFullItemCorrelation2() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2"},
+            new long[] {1, 2},
             new Double[][] {
                     {3.0, 3.0},
                     {3.0, 3.0},
             });
     double correlation =
-        new PearsonCorrelationSimilarity(dataModel).itemSimilarity("0", "1");
+        new PearsonCorrelationSimilarity(dataModel).itemSimilarity(0, 1);
     // Yeah, undefined in this case
     assertTrue(Double.isNaN(correlation));
   }
 
   public void testNoItemCorrelation1() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2"},
+            new long[] {1, 2},
             new Double[][] {
                     {3.0, -3.0},
                     {2.0, -2.0},
             });
     double correlation =
-        new PearsonCorrelationSimilarity(dataModel).itemSimilarity("0", "1");
+        new PearsonCorrelationSimilarity(dataModel).itemSimilarity(0, 1);
     assertCorrelationEquals(-1.0, correlation);
   }
 
   public void testNoItemCorrelation2() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2"},
+            new long[] {1, 2},
             new Double[][] {
                     {null, 1.0, null},
                     {null, null, 1.0},
             });
     double correlation =
-        new PearsonCorrelationSimilarity(dataModel).itemSimilarity("1", "2");
+        new PearsonCorrelationSimilarity(dataModel).itemSimilarity(1, 2);
     assertTrue(Double.isNaN(correlation));
   }
 
   public void testNoItemCorrelation3() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2", "test3"},
+            new long[] {1, 2, 3},
             new Double[][] {
                     {90.0, 70.0},
                     {80.0, 80.0},
                     {70.0, 90.0},
             });
     double correlation =
-        new PearsonCorrelationSimilarity(dataModel).itemSimilarity("0", "1");
+        new PearsonCorrelationSimilarity(dataModel).itemSimilarity(0, 1);
     assertCorrelationEquals(-1.0, correlation);
   }
 
   public void testSimpleItem() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2", "test3"},
+            new long[] {1, 2, 3},
             new Double[][] {
                     {1.0, 2.0},
                     {2.0, 5.0},
                     {3.0, 6.0},
             });
     double correlation =
-        new PearsonCorrelationSimilarity(dataModel).itemSimilarity("0", "1");
+        new PearsonCorrelationSimilarity(dataModel).itemSimilarity(0, 1);
     assertCorrelationEquals(0.9607689228305227, correlation);
   }
 
   public void testSimpleItemWeighted() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2", "test3"},
+            new long[] {1, 2, 3},
             new Double[][] {
                     {1.0, 2.0},
                     {2.0, 5.0},
                     {3.0, 6.0},
             });
     ItemSimilarity itemSimilarity = new PearsonCorrelationSimilarity(dataModel, Weighting.WEIGHTED);
-    double correlation = itemSimilarity.itemSimilarity("0", "1");
+    double correlation = itemSimilarity.itemSimilarity(0, 1);
     assertCorrelationEquals(0.9901922307076306, correlation);
   }
 

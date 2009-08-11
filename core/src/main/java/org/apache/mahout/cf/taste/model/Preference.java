@@ -24,10 +24,10 @@ package org.apache.mahout.cf.taste.model;
 public interface Preference {
 
   /** @return ID of user who prefers the item */
-  Comparable<?> getUserID();
+  long getUserID();
 
   /** @return item ID that is preferred */
-  Comparable<?> getItemID();
+  long getItemID();
 
   /**
    * @return strength of the preference for that item. Zero should indicate "no preference either way"; positive values

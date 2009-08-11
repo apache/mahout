@@ -26,27 +26,23 @@ import java.util.List;
 public final class GenericItemSimilarityTest extends SimilarityTestCase {
 
   public void testSimple() {
-    Comparable<?> item1 = "1";
-    Comparable<?> item2 = "2";
-    Comparable<?> item3 = "3";
-    Comparable<?> item4 = "4";
     List<GenericItemSimilarity.ItemItemSimilarity> similarities =
         new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(4);
-    similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item1, item2, 0.5));
-    similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item2, item1, 0.6));
-    similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item1, item1, 0.5));
-    similarities.add(new GenericItemSimilarity.ItemItemSimilarity(item1, item3, 0.3));
+    similarities.add(new GenericItemSimilarity.ItemItemSimilarity(1, 2, 0.5));
+    similarities.add(new GenericItemSimilarity.ItemItemSimilarity(2, 1, 0.6));
+    similarities.add(new GenericItemSimilarity.ItemItemSimilarity(1, 1, 0.5));
+    similarities.add(new GenericItemSimilarity.ItemItemSimilarity(1, 3, 0.3));
     GenericItemSimilarity itemCorrelation = new GenericItemSimilarity(similarities);
-    assertEquals(1.0, itemCorrelation.itemSimilarity(item1, item1));
-    assertEquals(0.6, itemCorrelation.itemSimilarity(item1, item2));
-    assertEquals(0.6, itemCorrelation.itemSimilarity(item2, item1));
-    assertEquals(0.3, itemCorrelation.itemSimilarity(item1, item3));
-    assertTrue(Double.isNaN(itemCorrelation.itemSimilarity(item3, item4)));
+    assertEquals(1.0, itemCorrelation.itemSimilarity(1, 1));
+    assertEquals(0.6, itemCorrelation.itemSimilarity(1, 2));
+    assertEquals(0.6, itemCorrelation.itemSimilarity(2, 1));
+    assertEquals(0.3, itemCorrelation.itemSimilarity(1, 3));
+    assertTrue(Double.isNaN(itemCorrelation.itemSimilarity(3, 4)));
   }
 
   public void testFromCorrelation() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2", "test3"},
+            new long[] {1, 2, 3},
             new Double[][] {
                     {1.0, 2.0},
                     {2.0, 5.0},
@@ -54,8 +50,8 @@ public final class GenericItemSimilarityTest extends SimilarityTestCase {
             });
     ItemSimilarity otherSimilarity = new PearsonCorrelationSimilarity(dataModel);
     ItemSimilarity itemSimilarity = new GenericItemSimilarity(otherSimilarity, dataModel);
-    assertCorrelationEquals(1.0, itemSimilarity.itemSimilarity("0", "0"));
-    assertCorrelationEquals(0.960768922830523, itemSimilarity.itemSimilarity("0", "1"));
+    assertCorrelationEquals(1.0, itemSimilarity.itemSimilarity(0, 0));
+    assertCorrelationEquals(0.960768922830523, itemSimilarity.itemSimilarity(0, 1));
   }
 
 }

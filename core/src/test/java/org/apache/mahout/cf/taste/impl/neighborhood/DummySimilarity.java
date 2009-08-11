@@ -35,15 +35,15 @@ final class DummySimilarity implements UserSimilarity, ItemSimilarity {
   }
 
   @Override
-  public double userSimilarity(Comparable<?> userID1, Comparable<?> userID2) throws TasteException {
-    return 1.0 / Math.abs(dataModel.getPreferencesFromUser(userID1).get(0).getValue() -
-        dataModel.getPreferencesFromUser(userID2).get(0).getValue());
+  public double userSimilarity(long userID1, long userID2) throws TasteException {
+    return 1.0 / (1.0 + Math.abs(dataModel.getPreferencesFromUser(userID1).get(0).getValue() -
+        dataModel.getPreferencesFromUser(userID2).get(0).getValue()));
   }
 
   @Override
-  public double itemSimilarity(Comparable<?> itemID1, Comparable<?> itemID2) {
+  public double itemSimilarity(long itemID1, long itemID2) {
     // Make up something wacky
-    return (double) (itemID1.hashCode() - itemID2.hashCode());
+    return 1.0 / (1.0 + Math.abs(itemID1 - itemID2));
   }
 
   @Override

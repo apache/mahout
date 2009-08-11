@@ -19,16 +19,16 @@ package org.apache.mahout.cf.taste.recommender.slopeone;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 
-import java.util.List;
-import java.util.Set;
-
 /**
- * <p>Implementations store item-item preference diffs for a {@link org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender}.
- * It actually does a bit more for this implementation, like listing all items that may be considered for recommedation,
- * in order to maximize what implementations can do to optimize the slope-one algorithm.</p>
+ * <p>Implementations store item-item preference diffs for a
+ * {@link org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender}.
+ * It actually does a bit more for this implementation, like listing all items that may be
+ * considered for recommendation, in order to maximize what implementations can do to optimize
+ * the slope-one algorithm.</p>
  *
  * @see org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender
  */
@@ -39,18 +39,18 @@ public interface DiffStorage extends Refreshable {
    *         <code>itemID1</code> and <code>itemID2</code>, in that direction; that is, it's the average of item 2's
    *         preferences minus item 1's preferences
    */
-  RunningAverage getDiff(Comparable<?> itemID1, Comparable<?> itemID2) throws TasteException;
+  RunningAverage getDiff(long itemID1, long itemID2) throws TasteException;
 
   /**
    * @param userID user ID to get diffs for
    * @param itemID itemID to assess
    * @param prefs  user's preferendces
-   * @return {@link List} of {@link RunningAverage} for that user's item-item diffs
+   * @return {@link RunningAverage}s for that user's item-item diffs
    */
-  RunningAverage[] getDiffs(Comparable<?> userID, Comparable<?> itemID, PreferenceArray prefs) throws TasteException;
+  RunningAverage[] getDiffs(long userID, long itemID, PreferenceArray prefs) throws TasteException;
 
   /** @return {@link RunningAverage} encapsulating the average preference for the given item */
-  RunningAverage getAverageItemPref(Comparable<?> itemID) throws TasteException;
+  RunningAverage getAverageItemPref(long itemID) throws TasteException;
 
   /**
    * <p>Updates internal data structures to reflect an update in a preference value for an item.</p>
@@ -59,12 +59,12 @@ public interface DiffStorage extends Refreshable {
    * @param prefDelta amount by which preference value changed (or its old value, if being removed
    * @param remove    if <code>true</code>, operation reflects a removal rather than change of preference
    */
-  void updateItemPref(Comparable<?> itemID, float prefDelta, boolean remove) throws TasteException;
+  void updateItemPref(long itemID, float prefDelta, boolean remove) throws TasteException;
 
   /**
    * @return item IDs that may possibly be recommended to the given user, which may not be all items since
    *         the item-item diff matrix may be sparse
    */
-  Set<Comparable<?>> getRecommendableItemIDs(Comparable<?> userID) throws TasteException;
+  FastIDSet getRecommendableItemIDs(long userID) throws TasteException;
 
 }

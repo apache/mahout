@@ -31,21 +31,21 @@ import java.sql.SQLException;
  *
  * <table>
  * <tr><th>user_id</th><th>item_id</th><th>preference</th></tr>
- * <tr><td>ABC</td><td>123</td><td>0.9</td></tr>
- * <tr><td>ABC</td><td>456</td><td>0.1</td></tr>
- * <tr><td>DEF</td><td>123</td><td>0.2</td></tr>
- * <tr><td>DEF</td><td>789</td><td>0.3</td></tr>
+ * <tr><td>987</td><td>123</td><td>0.9</td></tr>
+ * <tr><td>987</td><td>456</td><td>0.1</td></tr>
+ * <tr><td>654</td><td>123</td><td>0.2</td></tr>
+ * <tr><td>654</td><td>789</td><td>0.3</td></tr>
  * </table>
  *
  * <p><code>preference</code> must have a type compatible
- * with the Java <code>float</code> type. <code>user_id</code> and <code>item_id</code> should be an integer or
- * string type (INT, LONGINT, VARCHAR). For example, the following command sets up a suitable table in MySQL,
+ * with the Java <code>float</code> type. <code>user_id</code> and <code>item_id</code> should be compatible
+ * with long type (BIGINT). For example, the following command sets up a suitable table in MySQL,
  * complete with primary key and indexes:</p>
  *
  * <pre>
  * CREATE TABLE taste_preferences (
- *   user_id INT NOT NULL,
- *   item_id INT NOT NULL,
+ *   user_id BIGINT NOT NULL,
+ *   item_id BIGINT NOT NULL,
  *   preference FLOAT NOT NULL,
  *   PRIMARY KEY (user_id, item_id),
  *   INDEX (user_id),
@@ -174,7 +174,7 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
         "SELECT COUNT(1) FROM " + preferenceTable + " WHERE " + itemIDColumn + "=?",
         // getNumPreferenceForItemsSQL
         "SELECT COUNT(1) FROM " + preferenceTable + " tp1 JOIN " + preferenceTable + " tp2 " +
-            "USING " + userIDColumn + " WHERE tp1." + itemIDColumn + "=? and tp2." + itemIDColumn + "=?");
+            "USING (" + userIDColumn + ") WHERE tp1." + itemIDColumn + "=? and tp2." + itemIDColumn + "=?");
   }
 
   @Override

@@ -38,15 +38,15 @@ public final class GenericItemPreferenceArray implements PreferenceArray, Serial
   private static final int VALUE = 2;
   private static final int VALUE_REVERSED = 3;
 
-  private final Comparable<?>[] IDs;
-  private Comparable<?> id;
+  private final long[] IDs;
+  private long id;
   private final float[] values;
 
   public GenericItemPreferenceArray(int size) {
     if (size < 1) {
       throw new IllegalArgumentException("size is less than 1");
     }
-    this.IDs = new Comparable<?>[size];
+    this.IDs = new long[size];
     values = new float[size];
   }
 
@@ -77,22 +77,22 @@ public final class GenericItemPreferenceArray implements PreferenceArray, Serial
   }
 
   @Override
-  public Comparable<?> getUserID(int i) {
+  public long getUserID(int i) {
     return IDs[i];
   }
 
   @Override
-  public void setUserID(int i, Comparable<?> userID) {
+  public void setUserID(int i, long userID) {
     IDs[i] = userID;
   }
 
   @Override
-  public Comparable<?> getItemID(int i) {
+  public long getItemID(int i) {
     return id;
   }
 
   @Override
-  public void setItemID(int i, Comparable<?> itemID) {
+  public void setItemID(int i, long itemID) {
     id = itemID;
   }
 
@@ -144,7 +144,7 @@ public final class GenericItemPreferenceArray implements PreferenceArray, Serial
   private boolean isLess(int i, int j, int type) {
     switch (type) {
       case USER:
-        return ((Comparable<Object>) IDs[i]).compareTo(IDs[j]) < 0;
+        return IDs[i] < IDs[j];
       case VALUE:
         return values[i] < values[j];
       case VALUE_REVERSED:
@@ -155,7 +155,7 @@ public final class GenericItemPreferenceArray implements PreferenceArray, Serial
   }
 
   private void swap(int i, int j) {
-    Comparable<?> temp1 = IDs[i];
+    long temp1 = IDs[i];
     float temp2 = values[i];
     IDs[i] = IDs[j];
     values[i] = values[j];
@@ -201,12 +201,12 @@ public final class GenericItemPreferenceArray implements PreferenceArray, Serial
     }
 
     @Override
-    public Comparable<?> getUserID() {
+    public long getUserID() {
       return GenericItemPreferenceArray.this.getUserID(i);
     }
 
     @Override
-    public Comparable<?> getItemID() {
+    public long getItemID() {
       return GenericItemPreferenceArray.this.getItemID(i);
     }
 

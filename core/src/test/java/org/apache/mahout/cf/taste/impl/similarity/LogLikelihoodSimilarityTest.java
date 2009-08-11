@@ -24,7 +24,7 @@ public final class LogLikelihoodSimilarityTest extends SimilarityTestCase {
 
   public void testCorrelation() throws Exception {
     DataModel dataModel = getDataModel(
-            new Comparable<?>[] {"test1", "test2", "test3", "test4", "test5"},
+            new long[] {1, 2, 3, 4, 5},
             new Double[][] {
                     {1.0, 1.0},
                     {1.0, null, 1.0},
@@ -33,22 +33,22 @@ public final class LogLikelihoodSimilarityTest extends SimilarityTestCase {
                     {null, 1.0, 1.0, 1.0, 1.0},
             });
 
-    double correlation = new LogLikelihoodSimilarity(dataModel).itemSimilarity("1", "0");
+    double correlation = new LogLikelihoodSimilarity(dataModel).itemSimilarity(1, 0);
     assertCorrelationEquals(0.12160727029227925, correlation);
 
-    correlation = new LogLikelihoodSimilarity(dataModel).itemSimilarity("0", "1");
+    correlation = new LogLikelihoodSimilarity(dataModel).itemSimilarity(0, 1);
     assertCorrelationEquals(0.12160727029227925, correlation);
 
-    correlation = new LogLikelihoodSimilarity(dataModel).itemSimilarity("2", "1");
+    correlation = new LogLikelihoodSimilarity(dataModel).itemSimilarity(2, 1);
     assertCorrelationEquals(0.5423213660693733, correlation);
 
-    correlation = new LogLikelihoodSimilarity(dataModel).itemSimilarity("2", "3");
+    correlation = new LogLikelihoodSimilarity(dataModel).itemSimilarity(2, 3);
     assertCorrelationEquals(0.6905400104897509, correlation);
 
-    correlation = new LogLikelihoodSimilarity(dataModel).itemSimilarity("3", "4");
+    correlation = new LogLikelihoodSimilarity(dataModel).itemSimilarity(3, 4);
     assertCorrelationEquals(0.8706358464330881, correlation);
 
-    correlation = new LogLikelihoodSimilarity(dataModel).itemSimilarity("4", "3");
+    correlation = new LogLikelihoodSimilarity(dataModel).itemSimilarity(4, 3);
     assertCorrelationEquals(0.8706358464330881, correlation);
   }
 

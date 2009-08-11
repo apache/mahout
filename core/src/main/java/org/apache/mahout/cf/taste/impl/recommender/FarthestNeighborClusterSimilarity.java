@@ -19,8 +19,10 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
-import org.apache.mahout.cf.taste.impl.common.SamplingIterable;
+import org.apache.mahout.cf.taste.impl.common.SamplingLongPrimitiveIterator;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 import java.util.Collection;
@@ -60,16 +62,18 @@ public final class FarthestNeighborClusterSimilarity implements ClusterSimilarit
   }
 
   @Override
-  public double getSimilarity(Collection<Comparable<?>> cluster1,
-                              Collection<Comparable<?>> cluster2) throws TasteException {
+  public double getSimilarity(FastIDSet cluster1, FastIDSet cluster2) throws TasteException {
     if (cluster1.isEmpty() || cluster2.isEmpty()) {
       return Double.NaN;
     }
     double leastSimilarity = Double.POSITIVE_INFINITY;
-    Iterable<Comparable<?>> someUsers = SamplingIterable.maybeWrapIterable(cluster1, samplingRate);
-    for (Comparable<?> userID1 : someUsers) {
-      for (Comparable<?> userID2 : cluster2) {
-        double theSimilarity = similarity.userSimilarity(userID1, userID2);
+    LongPrimitiveIterator someUsers =
+            SamplingLongPrimitiveIterator.maybeWrapIterator(cluster1.iterator(), samplingRate);
+    while (someUsers.hasNext()) {
+      long userID1 = someUsers.next();
+      LongPrimitiveIterator it2 = cluster2.iterator();
+      while (it2.hasNext()) {
+        double theSimilarity = similarity.userSimilarity(userID1, it2.next());
         if (theSimilarity < leastSimilarity) {
           leastSimilarity = theSimilarity;
         }
@@ -77,7 +81,7 @@ public final class FarthestNeighborClusterSimilarity implements ClusterSimilarit
     }
     // We skipped everything? well, at least try comparing the first Users to get some value
     if (leastSimilarity == Double.POSITIVE_INFINITY) {
-      return similarity.userSimilarity(cluster1.iterator().next(), cluster2.iterator().next());
+      return similarity.userSimilarity((Long) cluster1.iterator().next(), (Long) cluster2.iterator().next());
     }
     return leastSimilarity;
   }

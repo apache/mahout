@@ -18,7 +18,7 @@
 package org.apache.mahout.cf.taste.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.Pair;
+import org.apache.mahout.cf.taste.impl.common.LongPair;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ public interface ItemBasedRecommender extends Recommender {
    * @return items most similar to the given item, ordered from most similar to least
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
-  List<RecommendedItem> mostSimilarItems(Comparable<?> itemID, int howMany) throws TasteException;
+  List<RecommendedItem> mostSimilarItems(long itemID, int howMany) throws TasteException;
 
   /**
    * @param itemID   ID of item for which to find most similar other items
@@ -41,9 +41,9 @@ public interface ItemBasedRecommender extends Recommender {
    * @return itemss most similar to the given item, ordered from most similar to least
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
-  List<RecommendedItem> mostSimilarItems(Comparable<?> itemID,
+  List<RecommendedItem> mostSimilarItems(long itemID,
                                          int howMany,
-                                         Rescorer<Pair<Comparable<?>, Comparable<?>>> rescorer) throws TasteException;
+                                         Rescorer<LongPair> rescorer) throws TasteException;
 
   /**
    * @param itemIDs IDs of item for which to find most similar other items
@@ -51,7 +51,7 @@ public interface ItemBasedRecommender extends Recommender {
    * @return items most similar to the given items, ordered from most similar to least
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
-  List<RecommendedItem> mostSimilarItems(List<Comparable<?>> itemIDs, int howMany) throws TasteException;
+  List<RecommendedItem> mostSimilarItems(long[] itemIDs, int howMany) throws TasteException;
 
   /**
    * @param itemIDs  IDs of item for which to find most similar other items
@@ -61,9 +61,9 @@ public interface ItemBasedRecommender extends Recommender {
    * @return items most similar to the given items, ordered from most similar to least
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
-  List<RecommendedItem> mostSimilarItems(List<Comparable<?>> itemIDs,
+  List<RecommendedItem> mostSimilarItems(long[] itemIDs,
                                          int howMany,
-                                         Rescorer<Pair<Comparable<?>, Comparable<?>>> rescorer) throws TasteException;
+                                         Rescorer<LongPair> rescorer) throws TasteException;
 
   /**
    * <p>Lists the items that were most influential in recommending a given item to a given user. Exactly how
@@ -82,7 +82,6 @@ public interface ItemBasedRecommender extends Recommender {
    * given item to least
    * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
-  List<RecommendedItem> recommendedBecause(Comparable<?> userID, Comparable<?> itemID, int howMany)
-          throws TasteException;
+  List<RecommendedItem> recommendedBecause(long userID, long itemID, int howMany) throws TasteException;
 
 }

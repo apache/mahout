@@ -35,6 +35,6 @@ public interface PreferenceInferrer extends Refreshable {
    * @return inferred preference
    * @throws TasteException if an error occurs while inferring
    */
-  float inferPreference(Comparable<?> userID, Comparable<?> itemID) throws TasteException;
+  float inferPreference(long userID, long itemID) throws TasteException;
 
 }

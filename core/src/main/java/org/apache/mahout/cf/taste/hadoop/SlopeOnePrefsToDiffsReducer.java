@@ -40,11 +40,11 @@ public final class SlopeOnePrefsToDiffsReducer
     int size = prefs.size();
     for (int i = 0; i < size; i++) {
       ItemPrefWritable first = prefs.get(i);
-      String itemAID = first.getItemID();
+      long itemAID = first.getItemID();
       float itemAValue = first.getPrefValue();
       for (int j = i + 1; j < size; j++) {
         ItemPrefWritable second = prefs.get(j);
-        String itemBID = second.getItemID();
+        long itemBID = second.getItemID();
         float itemBValue = second.getPrefValue();
         context.write(new ItemItemWritable(itemAID, itemBID), new FloatWritable(itemBValue - itemAValue));
       }

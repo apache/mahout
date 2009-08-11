@@ -24,97 +24,103 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-/** <p>Tests {@link org.apache.mahout.cf.taste.impl.common.FastSet}.</p> */
-public final class FastSetTest extends TasteTestCase {
+/** <p>Tests {@link FastIDSet}.</p> */
+public final class FastIDSetTest extends TasteTestCase {
 
   public void testContainsAndAdd() {
-    FastSet<String> set = new FastSet<String>();
-    assertFalse(set.contains("foo"));
-    set.add("foo");
-    assertTrue(set.contains("foo"));
+    FastIDSet set = new FastIDSet();
+    assertFalse(set.contains(1));
+    set.add(1);
+    assertTrue(set.contains(1));
   }
 
-
   public void testRemove() {
-    FastSet<String> set = new FastSet<String>();
-    set.add("foo");
-    set.remove("foo");
+    FastIDSet set = new FastIDSet();
+    set.add(1);
+    set.remove(1);
     assertEquals(0, set.size());
     assertTrue(set.isEmpty());
-    assertFalse(set.contains("foo"));
+    assertFalse(set.contains(1));
   }
 
 
   public void testClear() {
-    FastSet<String> set = new FastSet<String>();
-    set.add("foo");
+    FastIDSet set = new FastIDSet();
+    set.add(1);
     set.clear();
     assertEquals(0, set.size());
     assertTrue(set.isEmpty());
-    assertFalse(set.contains("foo"));
+    assertFalse(set.contains(1));
   }
 
   public void testSizeEmpty() {
-    FastSet<String> set = new FastSet<String>();
+    FastIDSet set = new FastIDSet();
     assertEquals(0, set.size());
     assertTrue(set.isEmpty());
-    set.add("foo");
+    set.add(1);
     assertEquals(1, set.size());
     assertFalse(set.isEmpty());
-    set.remove("foo");
+    set.remove(1);
     assertEquals(0, set.size());
     assertTrue(set.isEmpty());
   }
 
   public void testContains() {
-    FastSet<String> set = buildTestFastSet();
-    assertTrue(set.contains("foo"));
-    assertTrue(set.contains("baz"));
-    assertTrue(set.contains("alpha"));
-    assertFalse(set.contains("something"));
+    FastIDSet set = buildTestFastSet();
+    assertTrue(set.contains(1));
+    assertTrue(set.contains(2));
+    assertTrue(set.contains(3));
+    assertFalse(set.contains(4));
   }
 
-  public void testNull() {
-    FastSet<String> set = new FastSet<String>();
+  public void testReservedValues() {
+    FastIDSet set = new FastIDSet();
     try {
-      set.add(null);
-      fail("Should have thrown NullPointerException");
-    } catch (NullPointerException npe) {
+      set.add(Long.MIN_VALUE);
+      fail("Should have thrown IllegalArgumentException");
+    } catch (IllegalArgumentException iae) {
       // good
     }
-    assertFalse(set.contains(null));
+    assertFalse(set.contains(Long.MIN_VALUE));
+    try {
+      set.add(Long.MAX_VALUE);
+      fail("Should have thrown IllegalArgumentException");
+    } catch (IllegalArgumentException iae) {
+      // good
+    }
+    assertFalse(set.contains(Long.MAX_VALUE));
   }
 
   public void testRehash() {
-    FastSet<String> set = buildTestFastSet();
-    set.remove("foo");
+    FastIDSet set = buildTestFastSet();
+    set.remove(1);
     set.rehash();
-    assertFalse(set.contains("foo"));
+    assertFalse(set.contains(1));
   }
 
   public void testGrow() {
-    FastMap<String, String> map = new FastMap<String, String>(1, FastMap.NO_MAX_SIZE);
-    map.put("foo", "bar");
-    map.put("baz", "bang");
-    assertEquals("bar", map.get("foo"));
-    assertEquals("bang", map.get("baz"));
+    FastIDSet set = new FastIDSet(1);
+    set.add(1);
+    set.add(2);
+    assertTrue(set.contains(1));
+    assertTrue(set.contains(2));
   }
 
   public void testIterator() {
-    FastSet<String> set = buildTestFastSet();
-    Collection<String> expected = new HashSet<String>(3);
-    expected.add("foo");
-    expected.add("baz");
-    expected.add("alpha");
-    for (String s : set) {
-      expected.remove(s);
+    FastIDSet set = buildTestFastSet();
+    Collection<Long> expected = new HashSet<Long>(3);
+    expected.add(1L);
+    expected.add(2L);
+    expected.add(3L);
+    LongPrimitiveIterator it = set.iterator();
+    while (it.hasNext()) {
+      expected.remove(it.next());
     }
     assertTrue(expected.isEmpty());
   }
 
-
   public void testVersusHashSet() {
-    Set<Integer> actual = new FastSet<Integer>(1);
+    FastIDSet actual = new FastIDSet(1);
     Set<Integer> expected = new HashSet<Integer>(1000000);
     Random r = RandomUtils.getRandom();
     for (int i = 0; i < 1000000; i++) {
@@ -134,11 +140,11 @@ public final class FastSetTest extends TasteTestCase {
     }
   }
 
-  private static FastSet<String> buildTestFastSet() {
-    FastSet<String> set = new FastSet<String>();
-    set.add("foo");
-    set.add("baz");
-    set.add("alpha");
+  private static FastIDSet buildTestFastSet() {
+    FastIDSet set = new FastIDSet();
+    set.add(1);
+    set.add(2);
+    set.add(3);
     return set;
   }
 

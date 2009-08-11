@@ -19,7 +19,7 @@ package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.FastSet;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
@@ -56,14 +56,10 @@ public final class TanimotoCoefficientSimilarity implements UserSimilarity, Item
   }
 
   @Override
-  public double userSimilarity(Comparable<?> userID1, Comparable<?> userID2) throws TasteException {
+  public double userSimilarity(long userID1, long userID2) throws TasteException {
 
-    if (userID1 == null || userID2 == null) {
-      throw new IllegalArgumentException("userID1 or userID2 is null");
-    }
-
-    FastSet<Comparable<?>> xPrefs = dataModel.getItemIDsFromUser(userID1);
-    FastSet<Comparable<?>> yPrefs = dataModel.getItemIDsFromUser(userID2);
+    FastIDSet xPrefs = dataModel.getItemIDsFromUser(userID1);
+    FastIDSet yPrefs = dataModel.getItemIDsFromUser(userID2);
 
     if (xPrefs.isEmpty() && yPrefs.isEmpty()) {
       return Double.NaN;
@@ -73,6 +69,9 @@ public final class TanimotoCoefficientSimilarity implements UserSimilarity, Item
     }
 
     int intersectionSize = xPrefs.intersectionSize(yPrefs);
+    if (intersectionSize == 0) {
+      return Double.NaN;
+    }
 
     int unionSize = xPrefs.size() + yPrefs.size() - intersectionSize;
 
@@ -80,10 +79,7 @@ public final class TanimotoCoefficientSimilarity implements UserSimilarity, Item
   }
 
   @Override
-  public double itemSimilarity(Comparable<?> itemID1, Comparable<?> itemID2) throws TasteException {
-    if (itemID1 == null || itemID2 == null) {
-      throw new IllegalArgumentException("itemID1 or itemID2 is null");
-    }
+  public double itemSimilarity(long itemID1, long itemID2) throws TasteException {
     int preferring1and2 = dataModel.getNumUsersWithPreferenceFor(itemID1, itemID2);
     int preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
     int preferring2 = dataModel.getNumUsersWithPreferenceFor(itemID2);
