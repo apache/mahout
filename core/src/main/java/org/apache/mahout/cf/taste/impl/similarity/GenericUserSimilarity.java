@@ -47,14 +47,14 @@ public final class GenericUserSimilarity implements UserSimilarity {
   }
 
   public GenericUserSimilarity(UserSimilarity otherSimilarity, DataModel dataModel) throws TasteException {
-    List<Long> userIDs = IteratorUtils.iterableToList(dataModel.getUserIDs());
+    long[] userIDs = IteratorUtils.longIteratorToList(dataModel.getUserIDs());
     Iterator<UserUserSimilarity> it = new DataModelSimilaritiesIterator(otherSimilarity, userIDs);
     initSimilarityMaps(new IteratorIterable<UserUserSimilarity>(it));
   }
 
   public GenericUserSimilarity(UserSimilarity otherSimilarity, DataModel dataModel, int maxToKeep)
       throws TasteException {
-    List<Long> userIDs = IteratorUtils.iterableToList(dataModel.getUserIDs());
+    long[] userIDs = IteratorUtils.longIteratorToList(dataModel.getUserIDs());
     Iterator<UserUserSimilarity> it = new DataModelSimilaritiesIterator(otherSimilarity, userIDs);
     Iterable<UserUserSimilarity> keptSimilarities =
         TopItems.getTopUserUserSimilarities(maxToKeep, new IteratorIterable<UserUserSimilarity>(it));
@@ -177,18 +177,18 @@ public final class GenericUserSimilarity implements UserSimilarity {
   private static final class DataModelSimilaritiesIterator implements Iterator<UserUserSimilarity> {
 
     private final UserSimilarity otherSimilarity;
-    private final List<Long> userIDs;
+    private final long[] userIDs;
     private final int size;
     private int i;
     private long userID1;
     private int j;
 
-    private DataModelSimilaritiesIterator(UserSimilarity otherSimilarity, List<Long> userIDs) {
+    private DataModelSimilaritiesIterator(UserSimilarity otherSimilarity, long[] userIDs) {
       this.otherSimilarity = otherSimilarity;
       this.userIDs = userIDs;
-      this.size = userIDs.size();
+      this.size = userIDs.length;
       i = 0;
-      userID1 = userIDs.get(0);
+      userID1 = userIDs[0];
       j = 1;
     }
 
@@ -202,7 +202,7 @@ public final class GenericUserSimilarity implements UserSimilarity {
       if (!hasNext()) {
         throw new NoSuchElementException();
       }
-      long userID2 = userIDs.get(j);
+      long userID2 = userIDs[j];
       double similarity;
       try {
         similarity = otherSimilarity.userSimilarity(userID1, userID2);
@@ -214,7 +214,7 @@ public final class GenericUserSimilarity implements UserSimilarity {
       j++;
       if (j == size) {
         i++;
-        userID1 = userIDs.get(i);
+        userID1 = userIDs[i];
         j = i + 1;
       }
       return result;
