@@ -84,6 +84,7 @@ public class FileDataModel implements DataModel {
   private static final Logger log = LoggerFactory.getLogger(FileDataModel.class);
 
   private static final long MIN_RELOAD_INTERVAL_MS = 60 * 1000L; // 1 minute?
+  private static final char COMMENT_CHAR = '#';
 
   private final File dataFile;
   private long lastModified;
@@ -138,6 +139,10 @@ public class FileDataModel implements DataModel {
   private DataModel buildModel() throws IOException {
     FileLineIterator iterator = new FileLineIterator(dataFile, false);
     String firstLine = iterator.peek();
+    while (firstLine.length() == 0 || firstLine.charAt(0) == COMMENT_CHAR) {
+      iterator.next();
+      firstLine = iterator.peek();
+    }
     char delimiter = determineDelimiter(firstLine);
     boolean hasPrefValues = firstLine.indexOf(delimiter, firstLine.indexOf(delimiter) + 1) >= 0;
 
@@ -220,7 +225,7 @@ public class FileDataModel implements DataModel {
    */
   protected void processLine(String line, FastByIDMap<Collection<Preference>> data, char delimiter) {
 
-    if (line.length() == 0 || line.charAt(0) == '#') {
+    if (line.length() == 0 || line.charAt(0) == COMMENT_CHAR) {
       return;
     }
 
@@ -281,7 +286,7 @@ public class FileDataModel implements DataModel {
 
   protected void processLineWithoutID(String line, FastByIDMap<FastIDSet> data, char delimiter) {
 
-    if (line.length() == 0 || line.charAt(0) == '#') {
+    if (line.length() == 0 || line.charAt(0) == COMMENT_CHAR) {
       return;
     }
 
