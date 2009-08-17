@@ -370,7 +370,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     ResultSet rs = null;
 
     try {
-      conn = getDataSource().getConnection();
+      conn = dataSource.getConnection();
       stmt = conn.prepareStatement(getUserSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
@@ -641,6 +641,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       return nextExists;
     }
 
+    @Override
     public Long next() {
       return nextLong();
     }

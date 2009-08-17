@@ -30,7 +30,6 @@ import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 public final class GenericUserSimilarity implements UserSimilarity {

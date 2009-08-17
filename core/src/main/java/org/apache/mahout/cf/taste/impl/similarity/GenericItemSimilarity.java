@@ -29,7 +29,6 @@ import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 /**

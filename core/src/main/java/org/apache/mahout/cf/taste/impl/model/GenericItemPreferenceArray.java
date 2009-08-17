@@ -23,6 +23,7 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * <p>Like {@link GenericUserPreferenceArray} but stores preferences for one item (all item IDs the same)
@@ -50,6 +51,7 @@ public final class GenericItemPreferenceArray implements PreferenceArray, Serial
     values = new float[size];
   }
 
+  @Override
   public int length() {
     return IDs.length;
   }
@@ -163,6 +165,7 @@ public final class GenericItemPreferenceArray implements PreferenceArray, Serial
     values[j] = temp2;
   }
 
+  @Override
   public GenericItemPreferenceArray clone() {
     try {
       return (GenericItemPreferenceArray) super.clone();
@@ -184,6 +187,9 @@ public final class GenericItemPreferenceArray implements PreferenceArray, Serial
     }
     @Override
     public Preference next() {
+      if (i >= length()) {
+        throw new NoSuchElementException();
+      }
       return new PreferenceView(i++);
     }
     @Override

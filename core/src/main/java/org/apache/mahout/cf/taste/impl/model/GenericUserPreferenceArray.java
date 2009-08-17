@@ -23,6 +23,7 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * <p>This implementation maintains two parallel arrays, of user IDs and values. The idea is to save
@@ -51,6 +52,7 @@ public final class GenericUserPreferenceArray implements PreferenceArray, Serial
     values = new float[size];
   }
 
+  @Override
   public int length() {
     return IDs.length;
   }
@@ -164,6 +166,7 @@ public final class GenericUserPreferenceArray implements PreferenceArray, Serial
     values[j] = temp2;
   }
 
+  @Override
   public GenericUserPreferenceArray clone() {
     try {
       return (GenericUserPreferenceArray) super.clone();
@@ -185,6 +188,9 @@ public final class GenericUserPreferenceArray implements PreferenceArray, Serial
     }
     @Override
     public Preference next() {
+      if (i >= length()) {
+        throw new NoSuchElementException();
+      }
       return new PreferenceView(i++);
     }
     @Override

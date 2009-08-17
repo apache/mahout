@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * <p>Like {@link GenericUserPreferenceArray} but stores, conceptually, {@link BooleanPreference} objects
@@ -45,6 +46,7 @@ public final class BooleanUserPreferenceArray implements PreferenceArray, Serial
     this.IDs = new long[size];
   }
 
+  @Override
   public int length() {
     return IDs.length;
   }
@@ -116,6 +118,7 @@ public final class BooleanUserPreferenceArray implements PreferenceArray, Serial
   public void sortByValueReversed() {
   }
 
+  @Override
   public GenericItemPreferenceArray clone() {
     try {
       return (GenericItemPreferenceArray) super.clone();
@@ -137,6 +140,9 @@ public final class BooleanUserPreferenceArray implements PreferenceArray, Serial
     }
     @Override
     public Preference next() {
+      if (i >= length()) {
+        throw new NoSuchElementException();
+      }
       return new PreferenceView(i++);
     }
     @Override
