@@ -1,0 +1,30 @@
+merge.policy=org.apache.lucene.index.LogDocMergePolicy
+merge.factor=mrg:10:20
+max.buffered=buf:100:1000
+compound=true
+
+analyzer=org.apache.lucene.analysis.standard.StandardAnalyzer
+directory=FSDirectory
+
+doc.stored=true
+doc.term.vector=true
+doc.tokenized=true
+log.step=600
+
+content.source=org.apache.lucene.benchmark.byTask.feeds.ReutersContentSource
+content.source.forever=false
+doc.maker.forever=false
+query.maker=org.apache.lucene.benchmark.byTask.feeds.SimpleQueryMaker
+
+# task at this depth or less would print when they start
+task.max.depth.log=2
+
+log.queries=false
+# --------- alg
+{ "BuildReuters"
+  CreateIndex 
+  { "AddDocs" AddDoc > : *
+#  Optimize
+  CloseIndex
+}
+
