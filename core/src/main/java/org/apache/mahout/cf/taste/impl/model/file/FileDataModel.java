@@ -185,13 +185,28 @@ public class FileDataModel implements DataModel {
   }
 
   private static char determineDelimiter(String line) {
+    char delimiter;
     if (line.indexOf(',') >= 0) {
-      return ',';
+      delimiter = ',';
+    } else if (line.indexOf('\t') >= 0) {
+      delimiter = '\t';
+    } else {
+      throw new IllegalArgumentException("Did not find a delimiter in first line");
     }
-    if (line.indexOf('\t') >= 0) {
-      return '\t';
+    int delimiterCount = 1;
+    int lastDelimiter = line.indexOf(delimiter);
+    int nextDelimiter;
+    while ((nextDelimiter = line.indexOf(delimiter, lastDelimiter + 1)) >= 0) {
+      delimiterCount++;
+      if (delimiterCount == 3) {
+        throw new IllegalArgumentException("More than two delimiters per line");
+      }
+      if (nextDelimiter == lastDelimiter + 1) {
+        // empty field
+        throw new IllegalArgumentException("Empty field");
+      }
     }
-    throw new IllegalArgumentException("Did not find a delimiter in first line");
+    return delimiter;
   }
 
   protected void processFile(FileLineIterator dataOrUpdateFileIterator,
