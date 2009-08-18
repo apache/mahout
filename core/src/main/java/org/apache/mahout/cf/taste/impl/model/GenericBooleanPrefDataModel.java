@@ -112,7 +112,7 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
     return data;
   }
 
-  public static FastByIDMap<FastIDSet> toDataMap(FastByIDMap<PreferenceArray> data) throws TasteException {
+  public static FastByIDMap<FastIDSet> toDataMap(FastByIDMap<PreferenceArray> data) {
     for (Map.Entry<Long, Object> entry : ((FastByIDMap<Object>) (FastByIDMap<?>) data).entrySet()) {
       PreferenceArray prefArray = (PreferenceArray) entry.getValue();
       int size = prefArray.length();
@@ -180,7 +180,7 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
   }
 
   @Override
-  public Float getPreferenceValue(long userID, long itemID) throws NoSuchUserException, NoSuchItemException {
+  public Float getPreferenceValue(long userID, long itemID) throws NoSuchUserException {
     FastIDSet itemIDs = preferenceFromUsers.get(userID);
     if (itemIDs == null) {
       throw new NoSuchUserException();
@@ -219,17 +219,18 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
         throw new NoSuchItemException();
       }
       intersection.retainAll(userIDs);
+      i++;
     }
     return intersection.size();
   }
 
   @Override
-  public void removePreference(long userID, long itemID) throws NoSuchUserException {
+  public void removePreference(long userID, long itemID) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public void setPreference(long userID, long itemID, float value) throws NoSuchUserException {
+  public void setPreference(long userID, long itemID, float value) {
     throw new UnsupportedOperationException();
   }
 
