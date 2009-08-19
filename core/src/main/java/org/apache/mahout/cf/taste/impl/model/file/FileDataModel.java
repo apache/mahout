@@ -193,7 +193,7 @@ public class FileDataModel implements DataModel {
     } else {
       throw new IllegalArgumentException("Did not find a delimiter in first line");
     }
-    int delimiterCount = 1;
+    int delimiterCount = 0;
     int lastDelimiter = line.indexOf(delimiter);
     int nextDelimiter;
     while ((nextDelimiter = line.indexOf(delimiter, lastDelimiter + 1)) >= 0) {
@@ -205,6 +205,7 @@ public class FileDataModel implements DataModel {
         // empty field
         throw new IllegalArgumentException("Empty field");
       }
+      lastDelimiter = nextDelimiter;
     }
     return delimiter;
   }
