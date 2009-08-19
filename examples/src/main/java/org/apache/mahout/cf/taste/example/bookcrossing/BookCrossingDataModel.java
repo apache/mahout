@@ -18,7 +18,6 @@
 package org.apache.mahout.cf.taste.example.bookcrossing;
 
 import org.apache.mahout.cf.taste.example.grouplens.GroupLensDataModel;
-import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
 import org.apache.mahout.cf.taste.impl.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
@@ -29,93 +28,25 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
-import java.util.Map;
 
+
+/**
+ * See <a href="http://www.informatik.uni-freiburg.de/~cziegler/BX/BX-CSV-Dump.zip">download</a> for
+ * data needed by this class. The BX-Book-Ratings.csv file is needed.
+ */
 public final class BookCrossingDataModel extends FileDataModel {
 
-  private Map<String, String[]> userDataMap;
-  private final File usersFile;
-
   public BookCrossingDataModel() throws IOException {
-    this(GroupLensDataModel.readResourceToTempFile("/org/apache/mahout/cf/taste/example/bookcrossing/BX-Book-Ratings.csv"),
-         GroupLensDataModel.readResourceToTempFile("/org/apache/mahout/cf/taste/example/bookcrossing/BX-Users.csv"));
+    this(GroupLensDataModel.readResourceToTempFile(
+            "/org/apache/mahout/cf/taste/example/bookcrossing/BX-Book-Ratings.csv"));
   }
 
   /**
    * @param ratingsFile BookCrossing ratings file in its native format
-   * @param usersFile BookCrossing books file in its native format
    * @throws IOException if an error occurs while reading or writing files
    */
-  public BookCrossingDataModel(File ratingsFile, File usersFile) throws IOException {
+  public BookCrossingDataModel(File ratingsFile) throws IOException {
     super(convertBCFile(ratingsFile));
-    this.usersFile = usersFile;
-  }
-
-  @Override
-  protected void reload() {
-    userDataMap = new FastMap<String, String[]>(5001);
-
-    for (String line : new FileLineIterable(usersFile, true)) {
-      String[] tokens = tokenizeLine(line, 3);
-      if (tokens != null) {
-        String id = tokens[0];
-        userDataMap.put(id, new String[] { tokens[1], tokens[2] });
-      }
-    }
-    super.reload();
-    userDataMap = null;
-  }
-
-  private static String[] tokenizeLine(String line, int numTokens) {
-    String[] result = new String[numTokens];
-    int pos = 0;
-    int token = 0;
-    int start = 0;
-    int end = 0;
-    boolean inQuote = false;
-    int length = line.length();
-    while (pos < length && token < numTokens) {
-      char c = line.charAt(pos);
-      if (c == '"') {
-        if (inQuote) {
-          if (line.charAt(pos - 1) != '\\') {
-            end = pos;
-            inQuote = false;
-          }
-        } else {
-          start = pos + 1;
-          inQuote = true;
-        }
-      } else if (c == ';' && !inQuote) {
-        if (start == end) {
-          // last token was unquoted
-          end = pos + 1;
-        }
-        result[token] = line.substring(start, end);
-        start = pos + 1;
-        end = pos + 1;
-        token++;
-      }
-      pos++;
-    }
-    if (token == numTokens - 1) {
-      // one more at end
-      if (start == end) {
-        // last token was unquoted
-        end = pos;
-      }
-      result[token] = line.substring(start, end);
-      token++;
-    }
-    if (token != numTokens) {
-      return null;
-    }
-    for (int i = 0; i < result.length; i++) {
-      if ("NULL".equalsIgnoreCase(result[i])) {
-        result[i] = null;
-      }
-    }
-    return result;
   }
 
   private static File convertBCFile(File originalFile) throws IOException {
@@ -125,11 +56,8 @@ public final class BookCrossingDataModel extends FileDataModel {
       try {
         writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charset.forName("UTF-8")));
         for (String line : new FileLineIterable(originalFile, true)) {
-          if (line.indexOf(',') >= 0) {
-            // crude hack to work around corruptions in data file -- some bad lines with commas in them
-            continue;
-          }
-          String convertedLine = line.replace(';', ',').replace("\"", "");
+          // Delete commas, make semicolon delimiter into comma delimter, then remove quotes
+          String convertedLine = line.replace(",", "").replace(';', ',').replace("\"", "");
           writer.println(convertedLine);
         }
         writer.flush();

@@ -21,16 +21,12 @@ import org.apache.mahout.cf.taste.example.grouplens.GroupLensDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
-import org.apache.mahout.cf.taste.impl.common.FileLineIterator;
-import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.model.Preference;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 public final class JesterDataModel extends FileDataModel {
 
@@ -58,7 +54,7 @@ public final class JesterDataModel extends FileDataModel {
   protected void processLine(String line, FastByIDMap<Collection<Preference>> data, char delimiter) {
     String[] jokePrefs = line.split(",");
     int count = Integer.parseInt(jokePrefs[0]);
-    List<Preference> prefs = new ArrayList<Preference>(count);
+    Collection<Preference> prefs = new ArrayList<Preference>(count);
     for (int itemID = 1; itemID < jokePrefs.length; itemID++) { // yes skip first one, just a count
       String jokePref = jokePrefs[itemID];
       if (!"99".equals(jokePref)) {

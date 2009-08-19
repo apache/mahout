@@ -76,7 +76,7 @@ public final class NetflixDataModel implements DataModel {
 		delegate = new GenericDataModel(users);
 	}
 
-	private FastByIDMap<PreferenceArray> readUsers(File dataDirectory) throws IOException {
+	private FastByIDMap<PreferenceArray> readUsers(File dataDirectory) {
 		FastByIDMap<Collection<Preference>> userIDPrefMap = new FastByIDMap<Collection<Preference>>();
 
 		int counter = 0;

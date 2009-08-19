@@ -40,7 +40,7 @@ public final class TransposeToByUser {
 
   private TransposeToByUser() {}
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws IOException {
 
     File dataDirectory = new File(args[0]);
     File byItemDirectory = new File(dataDirectory, "training_set");
@@ -100,7 +100,7 @@ public final class TransposeToByUser {
     }
   }
 
-  private static void appendStringsToFile(List<String> strings, File file) throws IOException {
+  private static void appendStringsToFile(Iterable<String> strings, File file) throws IOException {
     PrintWriter outputStreamWriter =
         new PrintWriter(new OutputStreamWriter(new FileOutputStream(file, true), Charset.forName("UTF-8")));
     try {
