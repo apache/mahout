@@ -327,6 +327,23 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
     return clone;
   }
 
+  @Override
+  public String toString() {
+    if (isEmpty()) {
+      return "{}";
+    }
+    StringBuilder result = new StringBuilder();
+    result.append('{');
+    for (int i = 0; i < keys.length; i++) {
+      K key = keys[i];
+      if (key != null && key != REMOVED) {
+        result.append(key).append('=').append(values[i]).append(',');
+      }
+    }
+    result.setCharAt(result.length() - 1, '}');
+    return result.toString();
+  }
+
   private final class EntrySet extends AbstractSet<Entry<K, V>> {
 
     @Override

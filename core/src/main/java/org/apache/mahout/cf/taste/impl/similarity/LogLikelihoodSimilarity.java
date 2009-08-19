@@ -60,10 +60,10 @@ public final class LogLikelihoodSimilarity implements UserSimilarity, ItemSimila
       return Double.NaN;
     }
     int numItems = dataModel.getNumItems();
-    double logLikelihood = LogLikelihoodSimilarity.twoLogLambda(intersectionSize,
-                                                                prefs1Size - intersectionSize,
-                                                                prefs2Size,
-                                                                numItems - prefs2Size);
+    double logLikelihood = twoLogLambda(intersectionSize,
+                                        prefs1Size - intersectionSize,
+                                        prefs2Size,
+                                        numItems - prefs2Size);
     return 1.0 - 1.0 / (1.0 + logLikelihood);
   }
 

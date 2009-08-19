@@ -36,7 +36,7 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
 
   private final DataModel dataModel;
 
-  public SpearmanCorrelationSimilarity(DataModel dataModel) throws TasteException {
+  public SpearmanCorrelationSimilarity(DataModel dataModel) {
     if (dataModel == null) {
       throw new IllegalArgumentException("dataModel is null");
     }

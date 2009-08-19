@@ -81,7 +81,7 @@ public final class FarthestNeighborClusterSimilarity implements ClusterSimilarit
     }
     // We skipped everything? well, at least try comparing the first Users to get some value
     if (leastSimilarity == Double.POSITIVE_INFINITY) {
-      return similarity.userSimilarity((Long) cluster1.iterator().next(), (Long) cluster2.iterator().next());
+      return similarity.userSimilarity(cluster1.iterator().next(), cluster2.iterator().next());
     }
     return leastSimilarity;
   }

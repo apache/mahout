@@ -59,9 +59,10 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public final class TreeClusteringRecommender extends AbstractRecommender implements ClusteringRecommender {
 
-  private static final Random r = RandomUtils.getRandom();
-
   private static final Logger log = LoggerFactory.getLogger(TreeClusteringRecommender.class);
+
+  private static final FastIDSet[] NO_CLUSTERS = new FastIDSet[0];
+  private static final Random r = RandomUtils.getRandom();
 
   private final ClusterSimilarity clusterSimilarity;
   private final int numClusters;
@@ -280,7 +281,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
       } else {
         topRecsByUserID = new FastByIDMap<List<RecommendedItem>>();
         clustersByUserID = new FastByIDMap<FastIDSet>();
-        allClusters = new FastIDSet[0];
+        allClusters = NO_CLUSTERS;
       }
       clustersBuilt = true;
     } finally {

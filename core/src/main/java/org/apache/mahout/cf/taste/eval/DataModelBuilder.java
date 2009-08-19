@@ -39,6 +39,6 @@ public interface DataModelBuilder {
    * @return {@link DataModel} based upon the given data
    * @throws TasteException if an error occurs while accessing the {@link DataModel}
    */
-  DataModel buildDataModel(FastByIDMap<PreferenceArray> trainingData) throws TasteException;
+  DataModel buildDataModel(FastByIDMap<PreferenceArray> trainingData);
 
 }

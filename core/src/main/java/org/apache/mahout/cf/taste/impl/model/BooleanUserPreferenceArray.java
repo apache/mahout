@@ -20,7 +20,6 @@ package org.apache.mahout.cf.taste.impl.model;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -34,7 +33,7 @@ import java.util.NoSuchElementException;
  * @see BooleanItemPreferenceArray
  * @see GenericUserPreferenceArray
  */
-public final class BooleanUserPreferenceArray implements PreferenceArray, Serializable {
+public final class BooleanUserPreferenceArray implements PreferenceArray {
 
   private final long[] IDs;
   private long id;

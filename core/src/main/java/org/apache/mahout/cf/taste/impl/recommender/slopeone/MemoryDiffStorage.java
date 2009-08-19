@@ -143,8 +143,7 @@ public final class MemoryDiffStorage implements DiffStorage {
   }
 
   @Override
-  public RunningAverage[] getDiffs(long userID, long itemID, PreferenceArray prefs)
-          throws TasteException {
+  public RunningAverage[] getDiffs(long userID, long itemID, PreferenceArray prefs) {
     try {
       buildAverageDiffsLock.readLock().lock();
       int size = prefs.length();

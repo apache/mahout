@@ -35,7 +35,7 @@ public abstract class AbstractJDBCComponent {
 
   private static final Logger log = LoggerFactory.getLogger(AbstractJDBCComponent.class);
 
-  public static final String DEFAULT_DATASOURCE_NAME = "jdbc/taste";
+  protected static final String DEFAULT_DATASOURCE_NAME = "jdbc/taste";
   private static final int DEFAULT_FETCH_SIZE = 1000; // A max, "big" number of rows to buffer at once
 
   protected static void checkNotNullAndLog(String argName, Object value) {
@@ -63,7 +63,7 @@ public abstract class AbstractJDBCComponent {
    * @return {@link DataSource} under that JNDI name
    * @throws TasteException if a JNDI error occurs
    */
-  public static DataSource lookupDataSource(String dataSourceName) throws TasteException {
+  protected static DataSource lookupDataSource(String dataSourceName) throws TasteException {
     Context context = null;
     try {
       context = new InitialContext();

@@ -31,7 +31,10 @@ public final class LoadEvaluator {
 
   private static final Logger log = LoggerFactory.getLogger(LoadEvaluator.class);
 
-  public void runLoad(Recommender recommender) throws TasteException {
+  private LoadEvaluator() {
+  }
+
+  public static void runLoad(Recommender recommender) throws TasteException {
 
     DataModel dataModel = recommender.getDataModel();
     int numUsers = dataModel.getNumUsers();

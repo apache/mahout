@@ -291,6 +291,23 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     return clone;
   }
 
+  @Override
+  public String toString() {
+    if (isEmpty()) {
+      return "{}";
+    }
+    StringBuilder result = new StringBuilder();
+    result.append('{');
+    for (int i = 0; i < keys.length; i++) {
+      long key = keys[i];
+      if (key != NULL && key != REMOVED) {
+        result.append(key).append('=').append(values[i]).append(',');
+      }
+    }
+    result.setCharAt(result.length() - 1, '}');
+    return result.toString();
+  }
+
   private final class KeyIterator implements LongPrimitiveIterator {
 
     private int position;

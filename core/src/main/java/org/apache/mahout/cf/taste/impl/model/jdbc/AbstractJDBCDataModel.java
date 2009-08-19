@@ -64,7 +64,7 @@ import java.util.NoSuchElementException;
  */
 public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implements JDBCDataModel {
 
-  static final Logger log = LoggerFactory.getLogger(AbstractJDBCDataModel.class);
+  private static final Logger log = LoggerFactory.getLogger(AbstractJDBCDataModel.class);
 
   public static final String DEFAULT_PREFERENCE_TABLE = "taste_preferences";
   public static final String DEFAULT_USER_ID_COLUMN = "user_id";

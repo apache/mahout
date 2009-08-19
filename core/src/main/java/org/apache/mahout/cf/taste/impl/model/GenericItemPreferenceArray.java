@@ -20,7 +20,6 @@ package org.apache.mahout.cf.taste.impl.model;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 
-import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -33,7 +32,7 @@ import java.util.NoSuchElementException;
  * @see GenericUserPreferenceArray
  * @see GenericPreference
  */
-public final class GenericItemPreferenceArray implements PreferenceArray, Serializable {
+public final class GenericItemPreferenceArray implements PreferenceArray {
 
   private static final int USER = 0;
   private static final int VALUE = 2;

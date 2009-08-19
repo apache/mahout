@@ -236,12 +236,12 @@ public final class GenericDataModel implements DataModel, Serializable {
   }
 
   @Override
-  public void removePreference(long userID, long itemID) throws NoSuchUserException {
+  public void removePreference(long userID, long itemID) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public void setPreference(long userID, long itemID, float value) throws NoSuchUserException {
+  public void setPreference(long userID, long itemID, float value) {
     throw new UnsupportedOperationException();
   }
 

@@ -256,6 +256,22 @@ public final class FastIDSet implements Serializable, Cloneable {
     return clone;
   }
 
+  @Override
+  public String toString() {
+    if (isEmpty()) {
+      return "[]";
+    }
+    StringBuilder result = new StringBuilder();
+    result.append('[');
+    for (long key : keys) {
+      if (key != NULL && key != REMOVED) {
+        result.append(key).append(',');
+      }
+    }
+    result.setCharAt(result.length() - 1, ']');
+    return result.toString();
+  }
+
   private final class KeyIterator implements LongPrimitiveIterator {
 
     private int position;

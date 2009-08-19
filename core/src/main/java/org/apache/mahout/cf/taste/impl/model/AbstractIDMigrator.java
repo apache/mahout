@@ -68,7 +68,4 @@ public abstract class AbstractIDMigrator implements IDMigrator {
 
   protected abstract void storeMapping(long longID, String stringID) throws TasteException;
 
-  @Override
-  public abstract String toStringID(long longID) throws TasteException;
-
 }

@@ -36,9 +36,9 @@ public abstract class AbstractJDBCIDMigrator extends AbstractIDMigrator {
   private final String getStringIDSQL;
   private final String storeMappingSQL;
 
-  public AbstractJDBCIDMigrator(DataSource dataSource,
-                                String getStringIDSQL,
-                                String storeMappingSQL) {
+  protected AbstractJDBCIDMigrator(DataSource dataSource,
+                                   String getStringIDSQL,
+                                   String storeMappingSQL) {
     this.dataSource = dataSource;
     this.getStringIDSQL = getStringIDSQL;
     this.storeMappingSQL = storeMappingSQL;
