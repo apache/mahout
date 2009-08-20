@@ -27,8 +27,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.FileNotFoundException;
 import java.nio.charset.Charset;
-
 
 /**
  * See <a href="http://www.informatik.uni-freiburg.de/~cziegler/BX/BX-CSV-Dump.zip">download</a> for
@@ -50,23 +50,29 @@ public final class BookCrossingDataModel extends FileDataModel {
   }
 
   private static File convertBCFile(File originalFile) throws IOException {
+    if (!originalFile.exists()) {
+      throw new FileNotFoundException(originalFile.toString());
+    }
     File resultFile = new File(new File(System.getProperty("java.io.tmpdir")), "taste.bookcrossing.txt");
-    if (!resultFile.exists()) {
-      PrintWriter writer = null;
-      try {
-        writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charset.forName("UTF-8")));
-        for (String line : new FileLineIterable(originalFile, true)) {
-          // Delete commas, make semicolon delimiter into comma delimter, then remove quotes
-          String convertedLine = line.replace(",", "").replace(';', ',').replace("\"", "");
-          writer.println(convertedLine);
+    resultFile.delete();
+    PrintWriter writer = null;
+    try {
+      writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charset.forName("UTF-8")));
+      for (String line : new FileLineIterable(originalFile, true)) {
+        // Delete replace anything that isn't numeric, or a semicolon delimiter. Make comma the delimiter.
+        String convertedLine = line.replaceAll("[^0-9;]", "").replace(';', ',');
+        // If this means we deleted an entire ID -- few cases like that -- skip the line
+        if (convertedLine.contains(",,")) {
+          continue;
         }
-        writer.flush();
-      } catch (IOException ioe) {
-        resultFile.delete();
-        throw ioe;
-      } finally {
-        IOUtils.quietClose(writer);
+        writer.println(convertedLine);
       }
+      writer.flush();
+    } catch (IOException ioe) {
+      resultFile.delete();
+      throw ioe;
+    } finally {
+      IOUtils.quietClose(writer);
     }
     return resultFile;
   }

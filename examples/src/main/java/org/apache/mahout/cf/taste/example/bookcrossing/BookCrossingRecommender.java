@@ -41,10 +41,10 @@ public final class BookCrossingRecommender implements Recommender {
 
   private final Recommender recommender;
 
-  public BookCrossingRecommender(DataModel dataModel, BookCrossingDataModel bcModel) throws TasteException {
+  public BookCrossingRecommender(DataModel bcModel) throws TasteException {
     UserSimilarity similarity = new PearsonCorrelationSimilarity(bcModel);
-    UserNeighborhood neighborhood = new NearestNUserNeighborhood(5, similarity, dataModel);
-    recommender = new CachingRecommender(new GenericUserBasedRecommender(dataModel, neighborhood, similarity));
+    UserNeighborhood neighborhood = new NearestNUserNeighborhood(10, 0.0, similarity, bcModel, 0.1);
+    recommender = new CachingRecommender(new GenericUserBasedRecommender(bcModel, neighborhood, similarity));
   }
 
   @Override

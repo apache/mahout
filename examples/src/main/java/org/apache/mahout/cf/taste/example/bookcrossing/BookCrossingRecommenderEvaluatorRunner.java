@@ -20,10 +20,12 @@ package org.apache.mahout.cf.taste.example.bookcrossing;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.eval.RecommenderEvaluator;
 import org.apache.mahout.cf.taste.impl.eval.AverageAbsoluteDifferenceRecommenderEvaluator;
+import org.apache.mahout.cf.taste.model.DataModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.File;
 
 public final class BookCrossingRecommenderEvaluatorRunner {
 
@@ -35,12 +37,18 @@ public final class BookCrossingRecommenderEvaluatorRunner {
 
   public static void main(String... args) throws IOException, TasteException {
     RecommenderEvaluator evaluator = new AverageAbsoluteDifferenceRecommenderEvaluator();
-    BookCrossingDataModel model = new BookCrossingDataModel();
-    double evaluation = evaluator.evaluate(new BookCrossingRecommenderBuilder(model),
+    DataModel model;
+    if (args.length >= 1) {
+      model = new BookCrossingDataModel(new File(args[0]));
+    } else {
+      model = new BookCrossingDataModel();
+    }
+
+    double evaluation = evaluator.evaluate(new BookCrossingRecommenderBuilder(),
                                            null,
                                            model,
-                                           0.9,
-                                           0.1);
+                                           0.95,
+                                           0.05);
     log.info(String.valueOf(evaluation));
   }
 
