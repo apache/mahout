@@ -73,14 +73,15 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
 
     int numUsers = dataModel.getNumUsers();
     FastByIDMap<PreferenceArray> trainingUsers =
-            new FastByIDMap<PreferenceArray>(1 + (int) (trainingPercentage * (double) numUsers));
+            new FastByIDMap<PreferenceArray>(1 + (int) (evaluationPercentage * (double) numUsers));
     FastByIDMap<PreferenceArray> testUserPrefs =
-            new FastByIDMap<PreferenceArray>(1 + (int) ((1.0 - trainingPercentage) * (double) numUsers));
+            new FastByIDMap<PreferenceArray>(1 + (int) (evaluationPercentage * (double) numUsers));
 
     LongPrimitiveIterator it = dataModel.getUserIDs();
     while (it.hasNext()) {
+      long userID = it.nextLong();
       if (random.nextDouble() < evaluationPercentage) {
-        processOneUser(trainingPercentage, trainingUsers, testUserPrefs, it.nextLong(), dataModel);
+        processOneUser(trainingPercentage, trainingUsers, testUserPrefs, userID, dataModel);
       }
     }
 
@@ -90,6 +91,7 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
 
     Recommender recommender = recommenderBuilder.buildRecommender(trainingModel);
 
+    log.info("Beginning evaluation for {} prefs", testUserPrefs.size());
     double result = getEvaluation(testUserPrefs, recommender);
     log.info("Evaluation result: " + result);
     return result;

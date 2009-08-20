@@ -42,6 +42,7 @@ public final class RMSRecommenderEvaluator extends AbstractDifferenceRecommender
   @Override
   double getEvaluation(FastByIDMap<PreferenceArray> testUserPrefs, Recommender recommender) throws TasteException {
     RunningAverage average = new FullRunningAverage();
+    int count = 0;
     for (Map.Entry<Long, PreferenceArray> entry : testUserPrefs.entrySet()) {
       for (Preference realPref : entry.getValue()) {
         long testUserID = entry.getKey();
@@ -57,6 +58,9 @@ public final class RMSRecommenderEvaluator extends AbstractDifferenceRecommender
           // NSEE will be thrown. Just ignore it and move on.
           log.info("User exists in test data but not training data: {}", testUserID);
         }
+      }
+      if (++count % 100 == 0) {
+        log.info("Finished evaluation for {} prefs", count);
       }
     }
     return Math.sqrt(average.getAverage());

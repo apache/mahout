@@ -44,6 +44,7 @@ public final class AverageAbsoluteDifferenceRecommenderEvaluator extends Abstrac
   @Override
   double getEvaluation(FastByIDMap<PreferenceArray> testUserPrefs, Recommender recommender) throws TasteException {
     RunningAverage average = new FullRunningAverage();
+    int count = 0;
     for (Map.Entry<Long, PreferenceArray> entry : testUserPrefs.entrySet()) {
       for (Preference realPref : entry.getValue()) {
         long testUserID = entry.getKey();
@@ -60,6 +61,9 @@ public final class AverageAbsoluteDifferenceRecommenderEvaluator extends Abstrac
         } catch (NoSuchItemException nsie) {
           log.info("Item exists in test data but not training data: {}", realPref.getItemID());
         }
+      }
+      if (++count % 100 == 0) {
+        log.info("Finished evaluation for {} prefs", count);
       }
     }
     return average.getAverage();
