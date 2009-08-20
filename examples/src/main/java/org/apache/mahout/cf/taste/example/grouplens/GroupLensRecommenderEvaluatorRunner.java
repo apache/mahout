@@ -20,10 +20,12 @@ package org.apache.mahout.cf.taste.example.grouplens;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.eval.RecommenderEvaluator;
 import org.apache.mahout.cf.taste.impl.eval.AverageAbsoluteDifferenceRecommenderEvaluator;
+import org.apache.mahout.cf.taste.model.DataModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.File;
 
 /**
  * <p>A simple example "runner" class which will evaluate the performance of the current
@@ -39,11 +41,17 @@ public final class GroupLensRecommenderEvaluatorRunner {
 
   public static void main(String... args) throws IOException, TasteException {
     RecommenderEvaluator evaluator = new AverageAbsoluteDifferenceRecommenderEvaluator();
+    DataModel model;
+    if (args.length >= 1) {
+      model = new GroupLensDataModel(new File(args[0]));
+    } else {
+      model = new GroupLensDataModel();
+    }
     double evaluation = evaluator.evaluate(new GroupLensRecommenderBuilder(),
                                            null,
-                                           new GroupLensDataModel(),
+                                           model,
                                            0.9,
-                                           0.1);
+                                           0.3);
     log.info(String.valueOf(evaluation));
   }
 
