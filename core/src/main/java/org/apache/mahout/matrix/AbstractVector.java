@@ -59,10 +59,6 @@ public abstract class AbstractVector implements Vector {
 
 
   @Override
-  public abstract Vector.Element getElement(int index);
-
-
-  @Override
   public Vector clone() {
     AbstractVector clone;
     try {
@@ -120,9 +116,9 @@ public abstract class AbstractVector implements Vector {
       throw new CardinalityException();
     }
     Vector result = clone();
-    Iterator<Vector.Element> iter = x.iterateNonZero();
+    Iterator<Element> iter = x.iterateNonZero();
     while (iter.hasNext()) {
-      Vector.Element e = iter.next();
+      Element e = iter.next();
       result.setQuick(e.index(), getQuick(e.index()) - e.get());
     }
     return result;
@@ -208,9 +204,9 @@ public abstract class AbstractVector implements Vector {
     }
     //TODO: get smarter about this, if we are adding a dense to a sparse, then we should return a dense
     Vector result = clone();
-    Iterator<Vector.Element> iter = x.iterateNonZero();
+    Iterator<Element> iter = x.iterateNonZero();
     while (iter.hasNext()) {
-      Vector.Element e = iter.next();
+      Element e = iter.next();
       result.setQuick(e.index(), getQuick(e.index()) + e.get());
     }
 

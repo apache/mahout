@@ -22,6 +22,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /** Implements vector as an array of doubles */
 public class DenseVector extends AbstractVector {
@@ -143,26 +144,29 @@ public class DenseVector extends AbstractVector {
     private final Element element = new Element(0);
     private int offset;
 
-    @Override
-    public boolean hasNext() {
+    private NonZeroIterator() {
+      goToNext();
+    }
+
+    private void goToNext() {
       while (offset < values.length && values[offset] == 0) {
         offset++;
       }
-      boolean next = true;
-      if (offset >= values.length) {
-        next = false;
-      } else {
-        element.ind = offset;
-        offset++;
-      }
-      return next;
+    }
+
+    @Override
+    public boolean hasNext() {
+      return offset < values.length;
     }
 
     @Override
     public Vector.Element next() {
-      /*if (!hasNext()) {
+      if (offset >= values.length) {
         throw new NoSuchElementException();
-      }*/
+      }
+      element.ind = offset;
+      offset++;
+      goToNext();
       return element;
     }
 
@@ -183,9 +187,9 @@ public class DenseVector extends AbstractVector {
 
     @Override
     public Vector.Element next() {
-      /*if (!hasNext()) {
+      if (!hasNext()) {
         throw new NoSuchElementException();
-      }*/
+      }
       element.ind++;
       return element;
     }

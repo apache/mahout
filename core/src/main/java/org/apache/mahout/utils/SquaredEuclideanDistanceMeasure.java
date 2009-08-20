@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
-
 /**
  * Like {@link org.apache.mahout.utils.EuclideanDistanceMeasure} but it does not take the square root. <p/> Thus, it is
  * not actually the Euclidean Distance, but it is saves on computation when you only need the distance for comparison
@@ -46,16 +45,6 @@ public class SquaredEuclideanDistanceMeasure implements DistanceMeasure {
   @Override
   public void createParameters(String prefix, JobConf jobConf) {
     // nothing to do
-  }
-
-  public static double distance(double[] p1, double[] p2) {
-    double result = 0.0;
-    for (int i = 0; i < p1.length; i++) {
-      double delta = p2[i] - p1[i];
-      result += delta * delta;
-    }
-
-    return result;
   }
 
   @Override

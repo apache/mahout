@@ -69,9 +69,15 @@ public class IntPairWritable implements WritableComparable<IntPairWritable> {
     y = dataInput.readInt();
   }
 
+  @Override
   public int compareTo(IntPairWritable that) {
-    int xdiff = this.x - that.x;
-    return (xdiff != 0) ? xdiff : this.y - that.y;
+    if (this.x < that.x) {
+      return -1;
+    } else if (this.x > that.x) {
+      return 1;
+    } else {
+      return this.y < that.y ? -1 : this.y > that.y ? 1 : 0;
+    }
   }
 
   public boolean equals(Object o) {
@@ -93,7 +99,7 @@ public class IntPairWritable implements WritableComparable<IntPairWritable> {
 
   @Override
   public String toString() {
-    return "(" + x + ", " + y + ")";
+    return "(" + x + ", " + y + ')';
   }
 
   static {
@@ -105,6 +111,7 @@ public class IntPairWritable implements WritableComparable<IntPairWritable> {
       super(IntPairWritable.class);
     }
 
+    @Override
     public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2) {
       assert l1 == 8;
       int int11 = readInt(b1, s1);

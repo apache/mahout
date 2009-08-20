@@ -130,7 +130,7 @@ public class SparseVector extends AbstractVector {
    * NOTE: this implementation reuses the Vector.Element instance for each call of next(). If you need to preserve the
    * instance, you need to make a copy of it
    *
-   * @return an {@link org.apache.mahout.matrix.SparseVector.NonZeroIterator} over the Elements.
+   * @return an {@link NonZeroIterator} over the Elements.
    * @see #getElement(int)
    */
   @Override
@@ -194,6 +194,9 @@ public class SparseVector extends AbstractVector {
 
     @Override
     public Vector.Element next() {
+      if (offset >= cardinality) {
+        throw new NoSuchElementException();
+      }
       element.ind = offset++;
       return element;
     }

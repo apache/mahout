@@ -45,7 +45,7 @@ public class LDAInference {
   * the document, phi(k,w) is the probability of
   * topic k generating w in this document.
   */
-  public class InferredDocument {
+  public static class InferredDocument {
 
     public final Vector wordCounts;
     public final Vector gamma; // p(topic)
@@ -83,8 +83,6 @@ public class LDAInference {
 
     DenseMatrix phi = new DenseMatrix(state.numTopics, docLength);
 
-    boolean converged = false;
-    double oldLL = 1;
     // digamma is expensive, precompute
     Vector digammaGamma = digamma(gamma);
     // and log normalize:
@@ -96,6 +94,8 @@ public class LDAInference {
     int iteration = 0;
     final int MAX_ITER = 20;
 
+    boolean converged = false;
+    double oldLL = 1;
     while (!converged && iteration < MAX_ITER) {
       nextGamma.assign(state.topicSmoothing); // nG := alpha, for all topics
 
@@ -139,7 +139,7 @@ public class LDAInference {
     return new InferredDocument(wordCounts, gamma, columnMap, phi, oldLL);
   }
 
-  private LDAState state;
+  private final LDAState state;
 
   private double computeLikelihood(Vector wordCounts, Map<Integer, Integer> columnMap,
       Matrix phi, Vector gamma, Vector digammaGamma) {
@@ -206,6 +206,7 @@ public class LDAInference {
   private static Vector digamma(Vector v) {
     Vector digammaGamma = new DenseVector(v.size());
     digammaGamma.assign(v, new BinaryFunction() {
+      @Override
       public double apply(double unused, double g) {
         return digamma(g);
       }
@@ -241,7 +242,7 @@ public class LDAInference {
       x += 1;
     }
 
-    double f = 1. / (x * x);
+    double f = 1.0 / (x * x);
     double t = f * (-1 / 12.0
         + f * (1 / 120.0
         + f * (-1 / 252.0
@@ -253,5 +254,5 @@ public class LDAInference {
     return r + Math.log(x) - 0.5 / x + t;
   }
 
-    private static final double E_STEP_CONVERGENCE = 1E-6;
+    private static final double E_STEP_CONVERGENCE = 1.0E-6;
 }

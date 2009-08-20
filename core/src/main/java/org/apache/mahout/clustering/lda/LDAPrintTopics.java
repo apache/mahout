@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Queue;
 
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -52,17 +53,33 @@ public class LDAPrintTopics {
   }
 
   private static class StringDoublePair implements Comparable<StringDoublePair> {
+    private final double score;
+    private final String word;
+
     StringDoublePair(double score, String word) {
       this.score = score;
       this.word = word;
     }
     
+    @Override
     public int compareTo(StringDoublePair other) {
       return Double.compare(score,other.score);
     }
 
-    double score;
-    String word;
+    @Override
+    public boolean equals(Object o) {
+      if (!(o instanceof String)) {
+        return false;
+      }
+      StringDoublePair other = (StringDoublePair) o;
+      return score == other.score && word.equals(other.word);
+    }
+
+    @Override
+    public int hashCode() {
+      return (int) Double.doubleToLongBits(score) ^ word.hashCode();
+    }
+
   }
 
   public static List<List<String>> topWordsForTopics(String dir, Configuration job,
@@ -109,7 +126,7 @@ public class LDAPrintTopics {
   }
 
   // Adds the word if the queue is below capacity, or the score is high enough
-  private static void maybeEnqueue(PriorityQueue<StringDoublePair> q, String word, 
+  private static void maybeEnqueue(Queue<StringDoublePair> q, String word,
       double score, int numWordsToPrint) {
     if (q.size() >= numWordsToPrint && score > q.peek().score) {
       q.poll();
@@ -141,7 +158,7 @@ public class LDAPrintTopics {
     return result;
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -208,11 +225,9 @@ public class LDAPrintTopics {
       }
 
     } catch (OptionException e) {
-      System.err.println("Exception: " + e);
       CommandLineUtil.printHelp(group);
     } catch (IOException e) {
-      System.err.println("Exception:" + e);
-      e.printStackTrace();
+      throw e;
     }
   }
 

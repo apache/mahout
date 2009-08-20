@@ -89,14 +89,10 @@ public class VectorView extends AbstractVector {
   @Override
   public Vector viewPart(int offset, int length) {
     if (length > cardinality) {
-      {
-        throw new CardinalityException();
-      }
+      throw new CardinalityException();
     }
     if (offset < 0 || offset + length > cardinality) {
-      {
-        throw new IndexException();
-      }
+      throw new IndexException();
     }
     return new VectorView(vector, offset + this.offset, length);
   }
@@ -104,13 +100,9 @@ public class VectorView extends AbstractVector {
   @Override
   public boolean haveSharedCells(Vector other) {
     if (other instanceof VectorView) {
-      {
-        return other == this || vector.haveSharedCells(other);
-      }
+      return other == this || vector.haveSharedCells(other);
     } else {
-      {
-        return other.haveSharedCells(vector);
-      }
+      return other.haveSharedCells(vector);
     }
   }
 
@@ -251,15 +243,11 @@ public class VectorView extends AbstractVector {
   @Override
   public double dot(Vector x) {
     if (size() != x.size()) {
-      {
-        throw new CardinalityException();
-      }
+      throw new CardinalityException();
     }
     double result = 0;
     for (int i = 0; i < size(); i++) {
-      {
-        result += getQuick(i) * x.getQuick(i);
-      }
+      result += getQuick(i) * x.getQuick(i);
     }
     return result;
   }

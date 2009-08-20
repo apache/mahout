@@ -63,15 +63,14 @@ public final class LDADriver {
   static final int LOG_LIKELIHOOD_KEY = -2;
   static final int TOPIC_SUM_KEY = -1;
 
-  static final double OVERALL_CONVERGENCE = 1E-5;
+  static final double OVERALL_CONVERGENCE = 1.0E-5;
 
   private static final Logger log = LoggerFactory.getLogger(LDADriver.class);
 
   private LDADriver() {
   }
 
-  public static void main(String[] args) throws InstantiationException,
-      IllegalAccessException, ClassNotFoundException,
+  public static void main(String[] args) throws ClassNotFoundException,
       IOException, InterruptedException {
 
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
@@ -155,7 +154,7 @@ public final class LDADriver {
         topicSmoothing = Double.parseDouble(cmdLine.getValue(maxIterOpt).toString());
       }
       if(topicSmoothing < 1) {
-        topicSmoothing = 50. / numTopics;
+        topicSmoothing = 50.0 / numTopics;
       }
 
       runJob(input, output, numTopics, numWords, topicSmoothing, maxIterations,
@@ -223,13 +222,12 @@ public final class LDADriver {
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, job, path,
           IntPairWritable.class, DoubleWritable.class);
 
-      double total = 0.0; // total number of pseudo counts we made
-
       kw.setX(k);
+      double total = 0.0; // total number of pseudo counts we made
       for (int w = 0; w < numWords; ++w) {
         kw.setY(w);
         // A small amount of random noise, minimized by having a floor.
-        double pseudocount = random.nextDouble() + 1E-8;
+        double pseudocount = random.nextDouble() + 1.0E-8;
         total += pseudocount;
         v.set(Math.log(pseudocount));
         writer.append(kw, v);
@@ -272,9 +270,7 @@ public final class LDADriver {
    * @param input         the directory pathname for input points
    * @param stateIn       the directory pathname for input state
    * @param stateOut      the directory pathname for output state
-   * @param modelFactory  the class name of the model factory class
    * @param numTopics   the number of clusters
-   * @param alpha_0       alpha_0
    * @param numReducers   the number of Reducers desired
    */
   public static double runIteration(String input, String stateIn,
@@ -307,10 +303,10 @@ public final class LDADriver {
   }
 
   static LDAState createState(Configuration job) throws IOException {
-    String statePath = job.get(LDADriver.STATE_IN_KEY);
-    int numTopics = Integer.parseInt(job.get(LDADriver.NUM_TOPICS_KEY));
-    int numWords = Integer.parseInt(job.get(LDADriver.NUM_WORDS_KEY));
-    double topicSmoothing = Double.parseDouble(job.get(LDADriver.TOPIC_SMOOTHING_KEY));
+    String statePath = job.get(STATE_IN_KEY);
+    int numTopics = Integer.parseInt(job.get(NUM_TOPICS_KEY));
+    int numWords = Integer.parseInt(job.get(NUM_WORDS_KEY));
+    double topicSmoothing = Double.parseDouble(job.get(TOPIC_SMOOTHING_KEY));
 
     Path dir = new Path(statePath);
     FileSystem fs = dir.getFileSystem(job);
