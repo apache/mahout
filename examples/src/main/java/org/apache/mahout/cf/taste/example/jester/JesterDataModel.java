@@ -19,9 +19,12 @@ package org.apache.mahout.cf.taste.example.jester;
 
 import org.apache.mahout.cf.taste.example.grouplens.GroupLensDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
+import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
+import org.apache.mahout.cf.taste.impl.common.FileLineIterator;
 import org.apache.mahout.cf.taste.model.Preference;
+import org.apache.mahout.cf.taste.model.DataModel;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,8 +54,16 @@ public final class JesterDataModel extends FileDataModel {
   }
 
   @Override
+  protected DataModel buildModel() throws IOException {
+    FastByIDMap<Collection<Preference>> data = new FastByIDMap<Collection<Preference>>();
+    FileLineIterator iterator = new FileLineIterator(getDataFile(), false);
+    processFile(iterator, data, ',');
+    return new GenericDataModel(GenericDataModel.toDataMap(data, true));
+  }
+
+  @Override
   protected void processLine(String line, FastByIDMap<Collection<Preference>> data, char delimiter) {
-    String[] jokePrefs = line.split(",");
+    String[] jokePrefs = line.split(String.valueOf(delimiter));
     int count = Integer.parseInt(jokePrefs[0]);
     Collection<Preference> prefs = new ArrayList<Preference>(count);
     for (int itemID = 1; itemID < jokePrefs.length; itemID++) { // yes skip first one, just a count

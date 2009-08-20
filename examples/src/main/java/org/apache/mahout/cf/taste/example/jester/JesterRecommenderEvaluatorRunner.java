@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.File;
 
 public final class JesterRecommenderEvaluatorRunner {
 
@@ -36,12 +37,17 @@ public final class JesterRecommenderEvaluatorRunner {
 
   public static void main(String... args) throws IOException, TasteException {
     RecommenderEvaluator evaluator = new AverageAbsoluteDifferenceRecommenderEvaluator();
-    DataModel model = new JesterDataModel();
+    DataModel model;
+    if (args.length >= 1) {
+      model = new JesterDataModel(new File(args[0]));
+    } else {
+      model = new JesterDataModel();
+    }
     double evaluation = evaluator.evaluate(new JesterRecommenderBuilder(),
                                            null,
                                            model,
                                            0.9,
-                                           1.0);
+                                           0.1);
     log.info(String.valueOf(evaluation));
   }
 

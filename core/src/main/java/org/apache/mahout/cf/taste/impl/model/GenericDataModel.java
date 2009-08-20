@@ -86,6 +86,7 @@ public final class GenericDataModel implements DataModel, Serializable {
         log.info("Processed {} users", currentCount);
       }
     }
+    log.info("Processed {} users", currentCount);
 
     this.itemIDs = itemIDSet.toArray();
     itemIDSet = null; // Might help GC -- this is big

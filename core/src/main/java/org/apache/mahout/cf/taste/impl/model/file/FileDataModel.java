@@ -136,7 +136,7 @@ public class FileDataModel implements DataModel {
     }
   }
 
-  private DataModel buildModel() throws IOException {
+  protected DataModel buildModel() throws IOException {
     FileLineIterator iterator = new FileLineIterator(dataFile, false);
     String firstLine = iterator.peek();
     while (firstLine.length() == 0 || firstLine.charAt(0) == COMMENT_CHAR) {
