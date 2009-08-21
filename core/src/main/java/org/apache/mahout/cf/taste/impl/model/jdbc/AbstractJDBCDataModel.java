@@ -381,7 +381,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
       FastIDSet result = new FastIDSet();
       while (rs.next()) {
-        result.add(rs.getLong(1));
+        result.add(rs.getLong(2));
       }
 
       if (result.isEmpty()) {
