@@ -244,45 +244,54 @@ public final class GenericItemSimilarity implements ItemSimilarity {
 
     private final ItemSimilarity otherSimilarity;
     private final long[] itemIDs;
-    private final int size;
     private int i;
     private long itemID1;
     private int j;
+    private ItemItemSimilarity next;
 
     private DataModelSimilaritiesIterator(ItemSimilarity otherSimilarity, long[] itemIDs) {
       this.otherSimilarity = otherSimilarity;
       this.itemIDs = itemIDs;
-      this.size = itemIDs.length;
       i = 0;
       itemID1 = itemIDs[0];
       j = 1;
+      goToNext();
+    }
+
+    private void goToNext() {
+      next = null;
+      int size = itemIDs.length;
+      while (next == null && i < size - 1) {
+        long itemID2 = itemIDs[j];
+        double similarity;
+        try {
+          similarity = otherSimilarity.itemSimilarity(itemID1, itemID2);
+        } catch (TasteException te) {
+          // ugly:
+          throw new RuntimeException(te);
+        }
+        if (!Double.isNaN(similarity)) {
+          next = new ItemItemSimilarity(itemID1, itemID2, similarity);
+        }
+        if (++j == size) {
+          itemID1 = itemIDs[++i];
+          j = i + 1;
+        }
+      }
     }
 
     @Override
     public boolean hasNext() {
-      return i < size - 1;
+      return next != null;
     }
 
     @Override
     public ItemItemSimilarity next() {
-      if (!hasNext()) {
+      if (next == null) {
         throw new NoSuchElementException();
       }
-      long itemID2 = itemIDs[j];
-      double similarity;
-      try {
-        similarity = otherSimilarity.itemSimilarity(itemID1, itemID2);
-      } catch (TasteException te) {
-        // ugly:
-        throw new RuntimeException(te);
-      }
-      ItemItemSimilarity result = new ItemItemSimilarity(itemID1, itemID2, similarity);
-      j++;
-      if (j == size) {
-        i++;
-        itemID1 = itemIDs[i];
-        j = i + 1;
-      }
+      ItemItemSimilarity result = next;
+      goToNext();
       return result;
     }
 
