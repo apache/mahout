@@ -124,13 +124,13 @@ public class DatasetSplit {
   public static class RndLineRecordReader implements
       RecordReader<LongWritable, Text> {
 
-    private RecordReader<LongWritable, Text> reader;
+    private final RecordReader<LongWritable, Text> reader;
 
-    private Random rng;
+    private final Random rng;
 
-    private double threshold;
+    private final double threshold;
 
-    private boolean training;
+    private final boolean training;
 
     private final LongWritable k = new LongWritable();
 

@@ -1,5 +1,3 @@
-package org.apache.mahout.clustering.lda;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,15 +15,16 @@ package org.apache.mahout.clustering.lda;
  * limitations under the License.
  */
 
-import java.util.ArrayList;
+package org.apache.mahout.clustering.lda;
+
 import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
 
 import junit.framework.TestCase;
 
 import org.apache.commons.math.distribution.PoissonDistribution;
 import org.apache.commons.math.distribution.PoissonDistributionImpl;
+import org.apache.commons.math.MathException;
 
 import org.apache.mahout.matrix.DenseMatrix;
 import org.apache.mahout.matrix.DenseVector;
@@ -34,14 +33,14 @@ import org.apache.mahout.matrix.Vector;
 
 public class TestLDAInference extends TestCase {
 
-  private Random random;
+  private static final int NUM_TOPICS = 20;
 
-  private static int NUM_TOPICS = 20;
+  private Random random;
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    random = new Random();
+    random = new Random(0xCAFEBABECAFEBABEL);
   }
 
   /**
@@ -49,17 +48,12 @@ public class TestLDAInference extends TestCase {
    * @param numWords int number of words in the vocabulary
    * @param numWords E[count] for each word
    */
-  private Vector generateRandomDoc(int numWords, double sparsity) {
+  private Vector generateRandomDoc(int numWords, double sparsity) throws MathException {
     Vector v = new DenseVector(numWords);
-    try {
-      PoissonDistribution dist = new PoissonDistributionImpl(sparsity);
-      for (int i = 0; i < numWords; i++) {
-        // random integer
-        v.setQuick(i, dist.inverseCumulativeProbability(random.nextDouble()) + 1);
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-      fail("Caught " + e.toString());
+    PoissonDistribution dist = new PoissonDistributionImpl(sparsity);
+    for (int i = 0; i < numWords; i++) {
+      // random integer
+      v.setQuick(i, dist.inverseCumulativeProbability(random.nextDouble()) + 1);
     }
     return v;
   }
@@ -68,13 +62,13 @@ public class TestLDAInference extends TestCase {
     double topicSmoothing = 50.0 / numTopics; // whatever
     Matrix m = new DenseMatrix(numTopics, numWords);
     double[] logTotals = new double[numTopics];
-    double ll = Double.NEGATIVE_INFINITY;
+    double ll = Double.NEGATIVE_INFINITY; // TODO this is not updated in loop?
 
     for (int k = 0; k < numTopics; ++k) {
       double total = 0.0; // total number of pseudo counts we made
       for (int w = 0; w < numWords; ++w) {
         // A small amount of random noise, minimized by having a floor.
-        double pseudocount = random.nextDouble() + 1E-10;
+        double pseudocount = random.nextDouble() + 1.0E-10;
         total += pseudocount;
         m.setQuick(k, w, Math.log(pseudocount));
       }
@@ -86,7 +80,7 @@ public class TestLDAInference extends TestCase {
   }
 
 
-  private void runTest(int numWords, double sparsity, int numTests) {
+  private void runTest(int numWords, double sparsity, int numTests) throws MathException {
     LDAState state = generateRandomState(numWords, NUM_TOPICS);
     LDAInference lda = new LDAInference(state);
     for (int t = 0; t < numTests; ++t) {
@@ -103,20 +97,20 @@ public class TestLDAInference extends TestCase {
           assertTrue(k + " " + w + " logProb " + logProb, logProb <= 0.0); 
         }
       }
-      assertTrue("log likelihood", doc.logLikelihood <= 1E-10);
+      assertTrue("log likelihood", doc.logLikelihood <= 1.0E-10);
     }
   }
 
 
-  public void testLDAEasy() {
-    runTest(10, 1, 5); // 1 word per doc in expectation
+  public void testLDAEasy() throws MathException {
+    runTest(10, 1.0, 5); // 1 word per doc in expectation
   }
 
-  public void testLDASparse() {
+  public void testLDASparse() throws MathException {
     runTest(100, 0.4, 5); // 40 words per doc in expectation
   }
 
-  public void testLDADense() {
-    runTest(100, 3, 5); // 300 words per doc in expectation
+  public void testLDADense() throws MathException {
+    runTest(100, 3.0, 5); // 300 words per doc in expectation
   }
 }

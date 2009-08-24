@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.vectors.lucene;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,8 @@ package org.apache.mahout.utils.vectors.lucene;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.vectors.lucene;
+
 import junit.framework.TestCase;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.index.IndexWriter;
@@ -30,12 +31,8 @@ import org.apache.mahout.utils.vectors.TermInfo;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.matrix.SparseVector;
 
-/**
- *
- *
- **/
 public class LuceneIterableTest extends TestCase {
-  protected RAMDirectory directory;
+  private RAMDirectory directory;
 
   private static final String [] DOCS = {
         "The quick red fox jumped over the lazy brown dogs.",
@@ -48,6 +45,7 @@ public class LuceneIterableTest extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
+    super.setUp();
     directory = new RAMDirectory();
     IndexWriter writer = new IndexWriter(directory, new StandardAnalyzer(Version.LUCENE_CURRENT), true, IndexWriter.MaxFieldLength.UNLIMITED);
     for (int i = 0; i < DOCS.length; i++){

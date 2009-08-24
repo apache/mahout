@@ -1,4 +1,3 @@
-package org.apache.mahout.clustering.fuzzykmeans;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,7 @@ package org.apache.mahout.clustering.fuzzykmeans;
  * limitations under the License.
  */
 
+package org.apache.mahout.clustering.fuzzykmeans;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;

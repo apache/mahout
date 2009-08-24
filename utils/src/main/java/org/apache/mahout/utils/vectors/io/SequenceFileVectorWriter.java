@@ -27,10 +27,9 @@ import java.io.IOException;
 
 /**
  * Closes the writer when done
- *
- **/
+ */
 public class SequenceFileVectorWriter implements VectorWriter {
-  protected SequenceFile.Writer writer;
+  private final SequenceFile.Writer writer;
 
   public SequenceFileVectorWriter(SequenceFile.Writer writer) {
     this.writer = writer;

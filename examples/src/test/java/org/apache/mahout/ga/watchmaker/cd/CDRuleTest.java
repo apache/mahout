@@ -61,7 +61,7 @@ public class CDRuleTest extends TestCase {
     }
   }
 
-  private void assertInRange(double value, double min, double max) {
+  private static void assertInRange(double value, double min, double max) {
     Assert.assertTrue("value < min", value >= min);
     Assert.assertTrue("value > max", value <= max);
   }
@@ -77,14 +77,14 @@ public class CDRuleTest extends TestCase {
    * 
    */
   public void testWCondition() {
-    int n = 100; // repeat the test n times
 
     // the dataline has all its attributes set to 0d
     DataLine dl = EasyMock.createMock(DataLine.class);
-    EasyMock.expect(dl.getAttribut(EasyMock.anyInt())).andReturn(0d).atLeastOnce();
+    EasyMock.expect(dl.getAttribut(EasyMock.anyInt())).andReturn(0.0).atLeastOnce();
     EasyMock.replay(dl);
 
     // all the conditions are : attribut < 0
+    int n = 100; // repeat the test n times
     for (int nloop = 0; nloop < n; nloop++) {
       double thr = rng.nextDouble();
 
@@ -116,19 +116,19 @@ public class CDRuleTest extends TestCase {
    * 
    */
   public void testOConditionNumerical() {
-    int n = 100; // repeat the test n times
 
     // the dataline has all its attributes set to 1d
     DataLine dl = EasyMock.createMock(DataLine.class);
-    EasyMock.expect(dl.getAttribut(EasyMock.anyInt())).andReturn(1d).atLeastOnce();
+    EasyMock.expect(dl.getAttribut(EasyMock.anyInt())).andReturn(1.0d).atLeastOnce();
     EasyMock.replay(dl);
 
+    int n = 100; // repeat the test n times
     for (int nloop = 0; nloop < n; nloop++) {
       mock.numericalDataset();
 
-      CDRule rule = new CDRule(0.);
+      CDRule rule = new CDRule(0.0);
       for (int condInd = 0; condInd < rule.getNbConditions(); condInd++) {
-        rule.setW(condInd, 1.); // all weights are 1 (active)
+        rule.setW(condInd, 1.0); // all weights are 1 (active)
         rule.setO(condInd, rng.nextBoolean());
         rule.setV(condInd, 0);
       }
@@ -152,21 +152,21 @@ public class CDRuleTest extends TestCase {
    * 
    */
   public void testOConditionCategorical() {
-    int n = 100; // repeat the test n times
 
     // the dataline has all its attributes set to 1d
     DataLine dl = EasyMock.createMock(DataLine.class);
-    EasyMock.expect(dl.getAttribut(EasyMock.anyInt())).andReturn(1d).atLeastOnce();
+    EasyMock.expect(dl.getAttribut(EasyMock.anyInt())).andReturn(1.0d).atLeastOnce();
     EasyMock.replay(dl);
 
     Random rng = new MersenneTwisterRNG();
+    int n = 100; // repeat the test n times
     for (int nloop = 0; nloop < n; nloop++) {
       mock.categoricalDataset();
 
       // all weights are 1 (active)
-      CDRule rule = new CDRule(0.);
+      CDRule rule = new CDRule(0.0);
       for (int condInd = 0; condInd < rule.getNbConditions(); condInd++) {
-        rule.setW(condInd, 1.);
+        rule.setW(condInd, 1.0);
         rule.setO(condInd, rng.nextBoolean());
         rule.setV(condInd, rng.nextInt(2)); // two categories
       }

@@ -22,9 +22,12 @@ import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RandomRuleResults {
+public final class RandomRuleResults {
 
   private static final Map<Integer, CDFitness> results = new HashMap<Integer, CDFitness>();
+
+  private RandomRuleResults() {
+  }
 
   public static synchronized void addResult(int ruleid, CDFitness fit) {
     CDFitness f = results.get(ruleid);

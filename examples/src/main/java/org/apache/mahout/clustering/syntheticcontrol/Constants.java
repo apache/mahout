@@ -19,15 +19,15 @@ package org.apache.mahout.clustering.syntheticcontrol;
 /**
  * Constants shared between examples.
  */
-public final class Constants {
+public interface Constants {
 
     /**
      * Directory containing output for examples.
      */
-    public static final String CLUSTERED_POINTS_OUTPUT_DIRECTORY = "/clustered-points";
+    String CLUSTERED_POINTS_OUTPUT_DIRECTORY = "/clustered-points";
     /**
      * Directory used to store the input after it has been processed from it's 
      * original form into one suitable for processing by the clustering examples.
      */
-    public static final String DIRECTORY_CONTAINING_CONVERTED_INPUT = "/data";
+    String DIRECTORY_CONTAINING_CONVERTED_INPUT = "/data";
 }

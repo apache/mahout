@@ -24,33 +24,35 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 public class InputMapper extends MapReduceBase implements
     Mapper<LongWritable, Text, Text, Vector> {
+
+  private static final Pattern SPACE = java.util.regex.Pattern.compile(" ");
+
   protected Class<? extends Vector> outputClass;
-  protected Constructor constructor;
+  protected Constructor<?> constructor;
 
   @Override
   public void map(LongWritable key, Text values,
       OutputCollector<Text, Vector> output, Reporter reporter) throws IOException {
-    String[] numbers = values.toString().split(" ");
+    String[] numbers = SPACE.split(values.toString());
     // sometimes there are multiple separator spaces
     List<Double> doubles = new ArrayList<Double>();
     for (String value : numbers) {
       if (value.length() > 0)
         doubles.add(Double.valueOf(value));
     }
-    Vector result = null;//new DenseVector(doubles.size());
     try {
-      result = (Vector) constructor.newInstance(doubles.size());
+      Vector result = (Vector) constructor.newInstance(doubles.size());//new DenseVector(doubles.size());
       int index = 0;
       for (Double d : doubles)
         result.set(index++, d);

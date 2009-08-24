@@ -1,5 +1,3 @@
-package org.apache.mahout.clustering.meanshift;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +14,8 @@ package org.apache.mahout.clustering.meanshift;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.clustering.meanshift;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -36,8 +36,6 @@ class DisplayMeanShift extends DisplayDirichlet {
     initialize();
     this.setTitle("Canopy Clusters (> 1.5% of population)");
   }
-
-  private static final long serialVersionUID = 1L;
 
   private static List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
 

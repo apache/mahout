@@ -40,9 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -56,11 +54,13 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public final class ClusterDumper {
 
   private static final Logger log = LoggerFactory.getLogger(ClusterDumper.class);
   private static final String LINE_SEP = System.getProperty("line.separator");
+  private static final Pattern TAB_PATTERN = Pattern.compile("\t");
 
   private ClusterDumper() {
   }
@@ -110,14 +110,14 @@ public final class ClusterDumper {
         JobClient client = new JobClient();
         JobConf conf = new JobConf(Job.class);
         client.setConf(conf);
-        Map<String, List<String>> clusterIdToPoints = null;
+        Map<String, List<String>> clusterIdToPoints;
         if (cmdLine.hasOption(pointsOpt)) {
           //read in the points
           clusterIdToPoints = readPoints(cmdLine.getValue(pointsOpt).toString(), conf);
         } else {
           clusterIdToPoints = Collections.emptyMap();
         }
-        Writer writer = null;
+        Writer writer;
         if (cmdLine.hasOption(outputOpt)){
           writer = new FileWriter(cmdLine.getValue(outputOpt).toString());
         } else {
@@ -229,12 +229,12 @@ public final class ClusterDumper {
       result.add("dummyentry");
     }
     
-    String line = null;
+    String line;
     while ((line = reader.readLine()) != null) {
       if (line.startsWith("#")) {
         continue;
       }
-      String[] tokens = line.split("\t");
+      String[] tokens = TAB_PATTERN.split(line);
       if (tokens.length < 3) {
         continue;
       }
@@ -244,11 +244,11 @@ public final class ClusterDumper {
     return result;
   }
 
-  class TermIndexWeight {
+  static class TermIndexWeight {
     public int index = -1;
     public double weight = 0;
     
-    public TermIndexWeight(int index, double weight) {
+    TermIndexWeight(int index, double weight) {
       this.index = index;
       this.weight = weight;
     }    
@@ -261,7 +261,7 @@ public final class ClusterDumper {
     Iterator<Vector.Element> iter = vector.iterateNonZero();
       while (iter.hasNext()) {
         Vector.Element elt = iter.next();     
-        vectorTerms.add(new ClusterDumper().new TermIndexWeight(elt.index(), elt.get()));        
+        vectorTerms.add(new TermIndexWeight(elt.index(), elt.get()));
       }
       
       // Sort results in reverse order (ie weight in descending order)

@@ -89,7 +89,7 @@ public class SequenceFileDumper {
         FileSystem fs = FileSystem.get(path.toUri(), conf);
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
 
-        Writer writer = null;
+        Writer writer;
         if (cmdLine.hasOption(outputOpt)) {
           writer = new FileWriter(cmdLine.getValue(outputOpt).toString());
         } else {
@@ -102,11 +102,11 @@ public class SequenceFileDumper {
           sub = Integer.parseInt(cmdLine.getValue(substringOpt).toString());
         }
         boolean countOnly = cmdLine.hasOption(countOpt);
-        long count = 0;
         Writable key = (Writable) reader.getKeyClass().newInstance();
         Writable value = (Writable) reader.getValueClass().newInstance();
         writer.append("Key class: ").append(String.valueOf(reader.getKeyClass())).append(" Value Class: ").append(String.valueOf(value.getClass())).append(StringUtil.LINE_SEP);
         writer.flush();
+        long count = 0;
         if (countOnly == false) {
           while (reader.next(key, value)) {
             writer.append("Key: ").append(String.valueOf(key));

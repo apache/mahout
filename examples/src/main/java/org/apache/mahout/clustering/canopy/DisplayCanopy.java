@@ -1,5 +1,3 @@
-package org.apache.mahout.clustering.canopy;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +14,8 @@ package org.apache.mahout.clustering.canopy;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.clustering.canopy;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -37,19 +37,18 @@ class DisplayCanopy extends DisplayDirichlet {
     this.setTitle("Canopy Clusters (> 5% of population)");
   }
 
-  private static final long serialVersionUID = 1L;
-
   private static List<Canopy> canopies;
 
   private static final double t1 = 3.0;
 
   private static final double t2 = 1.5;
 
+  @Override
   public void paint(Graphics g) {
     super.plotSampleData(g);
     Graphics2D g2 = (Graphics2D) g;
     Vector dv = new DenseVector(2);
-    for (Canopy canopy : canopies)
+    for (Canopy canopy : canopies) {
       if (canopy.getNumPoints() > sampleData.size() * 0.05) {
         dv.assign(t1);
         g2.setColor(colors[0]);
@@ -57,6 +56,7 @@ class DisplayCanopy extends DisplayDirichlet {
         dv.assign(t2);
         plotEllipse(g2, canopy.getCenter(), dv);
       }
+    }
   }
 
   /**

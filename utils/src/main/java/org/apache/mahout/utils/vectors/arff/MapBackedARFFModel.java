@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.vectors.arff;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,29 +15,34 @@ package org.apache.mahout.utils.vectors.arff;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.vectors.arff;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Collections;
+import java.util.regex.Pattern;
 
 
 /**
- * Holds ARFF information in {@link java.util.Map}.
+ * Holds ARFF information in {@link Map}.
  */
 public class MapBackedARFFModel implements ARFFModel {
 
-  protected long wordCount = 1;
+  private static final Pattern QUOTE_PATTERN = Pattern.compile("\"");
 
-  protected String relation;
+  private long wordCount = 1;
 
-  private Map<String, Integer> labelBindings;
-  private Map<Integer, String> idxLabel;
-  private Map<Integer, ARFFType> typeMap; //key is the vector index, value is the type
-  private Map<Integer, DateFormat> dateMap;
-  private Map<String, Map<String, Integer>> nominalMap;
-  private Map<String, Long> words;
+  private String relation;
+
+  private final Map<String, Integer> labelBindings;
+  private final Map<Integer, String> idxLabel;
+  private final Map<Integer, ARFFType> typeMap; //key is the vector index, value is the type
+  private final Map<Integer, DateFormat> dateMap;
+  private final Map<String, Map<String, Integer>> nominalMap;
+  private final Map<String, Long> words;
 
   public MapBackedARFFModel() {
     this(new HashMap<String, Long>(), 1, new HashMap<String, Map<String, Integer>>());
@@ -55,10 +59,12 @@ public class MapBackedARFFModel implements ARFFModel {
 
   }
 
+  @Override
   public String getRelation() {
     return relation;
   }
 
+  @Override
   public void setRelation(String relation) {
     this.relation = relation;
   }
@@ -70,11 +76,12 @@ public class MapBackedARFFModel implements ARFFModel {
    * @param idx  The position in the ARFF data
    * @return A double representing the data
    */
+  @Override
   public double getValue(String data, int idx) {
-    double result = 0;
     ARFFType type = typeMap.get(idx);
-    data = data.replaceAll("\"", "");
+    data = QUOTE_PATTERN.matcher(data).replaceAll("");
     data = data.trim();
+    double result = 0.0;
     switch (type) {
       case NUMERIC: {
         result = processNumeric(data);
@@ -125,31 +132,31 @@ public class MapBackedARFFModel implements ARFFModel {
    */
   //Not sure how scalable this is going to be
   protected double processString(String data) {
-    double result;
-    data = data.replaceAll("\"", "");
+    data = QUOTE_PATTERN.matcher(data).replaceAll("");
     //map it to an long
     Long theLong = words.get(data);
     if (theLong == null) {
       theLong = wordCount++;
       words.put(data, theLong);
     }
-    result = theLong;
-    return result;
+    return theLong;
   }
 
-  protected double processNumeric(String data) {
+  protected static double processNumeric(String data) {
     return Double.parseDouble(data);
   }
 
   protected double processDate(String data, int idx) {
-    double result;
     DateFormat format = dateMap.get(idx);
     if (format == null) {
       format = DEFAULT_DATE_FORMAT;
     }
-    Date date = null;
+    double result;
     try {
-      date = format.parse(data);
+      Date date;
+      synchronized (format) {
+        date = format.parse(data);
+      }
       result = date.getTime();// hmmm, what kind of loss casting long to double?
     } catch (ParseException e) {
       throw new RuntimeException(e);
@@ -161,6 +168,7 @@ public class MapBackedARFFModel implements ARFFModel {
    * The vector attributes (labels in Mahout speak), unmodifiable
    * @return the map
    */
+  @Override
   public Map<String, Integer> getLabelBindings() {
     return Collections.unmodifiableMap(labelBindings);
   }
@@ -185,6 +193,7 @@ public class MapBackedARFFModel implements ARFFModel {
    * Map nominals to ids.  Should only be modified by calling {@link ARFFModel#addNominal(String, String, int)}
    * @return the map
    */
+  @Override
   public Map<String, Map<String, Integer>> getNominalMap() {
     return nominalMap;
   }
@@ -193,14 +202,17 @@ public class MapBackedARFFModel implements ARFFModel {
    * Immutable map of words to the long id used for those words
    * @return The map
    */
+  @Override
   public Map<String, Long> getWords() {
     return words;
   }
 
+  @Override
   public Integer getNominalValue(String label, String nominal){
     return nominalMap.get(label).get(nominal);
   }
 
+  @Override
   public void addNominal(String label, String nominal, int idx) {
     Map<String, Integer> noms = nominalMap.get(label);
     if (noms == null) {
@@ -210,27 +222,33 @@ public class MapBackedARFFModel implements ARFFModel {
     noms.put(nominal, idx);
   }
 
+  @Override
   public DateFormat getDateFormat(Integer idx){
     return dateMap.get(idx);
   }
 
+  @Override
   public void addDateFormat(Integer idx, DateFormat format) {
     dateMap.put(idx, format);
   }
 
+  @Override
   public Integer getLabelIndex(String label){
     return labelBindings.get(label);
   }
 
+  @Override
   public void addLabel(String label, Integer idx) {
     labelBindings.put(label, idx);
     idxLabel.put(idx, label);
   }
 
+  @Override
   public ARFFType getARFFType(Integer idx){
     return typeMap.get(idx);
   }
 
+  @Override
   public void addType(Integer idx, ARFFType type) {
     typeMap.put(idx, type);
   }
@@ -239,10 +257,12 @@ public class MapBackedARFFModel implements ARFFModel {
    * The count of the number of words seen
    * @return the count
    */
+  @Override
   public long getWordCount() {
     return wordCount;
   }
 
+  @Override
   public int getLabelSize() {
     return labelBindings.size();
   }

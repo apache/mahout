@@ -30,32 +30,31 @@ import org.apache.hadoop.util.GenericsUtil;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.util.Version;
 import org.apache.mahout.analysis.WikipediaAnalyzer;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
     Mapper<LongWritable, Text, Text, Text> {
-  private transient static Logger log = LoggerFactory.getLogger(WikipediaDatasetCreatorMapper.class);
+  private static final Logger log = LoggerFactory.getLogger(WikipediaDatasetCreatorMapper.class);
 
   private static Set<String> inputCategories = null;
   private static boolean exactMatchOnly = false;
   private static Analyzer analyzer;
+  private static final Pattern SPACE_NON_ALPHA_PATTERN = Pattern.compile("[\\s\\W]");
+
   @Override
   public void map(LongWritable key, Text value,
       OutputCollector<Text, Text> output, Reporter reporter)
       throws IOException {
 
-            StringBuilder contents = new StringBuilder();
+    StringBuilder contents = new StringBuilder();
     String document = value.toString();
     String catMatch = findMatchingCategory(document);
     
@@ -66,14 +65,14 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
       while((token = stream.next(token)) != null){
         contents.append(token.termBuffer(), 0, token.termLength()).append(' ');
       }
-      output.collect(new Text(catMatch.replaceAll("[\\s\\W]","_")), new Text(contents.toString()));
+      output.collect(new Text(SPACE_NON_ALPHA_PATTERN.matcher(catMatch).replaceAll("_")), new Text(contents.toString()));
     }
   }
 
   public static String findMatchingCategory(String document){
     int startIndex = 0;
     int categoryIndex;
-    String match = null;
+    String match = null; // TODO this is never updated?
     while((categoryIndex = document.indexOf("[[Category:", startIndex))!=-1)
     {
       categoryIndex+=11;
@@ -129,6 +128,7 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
     } catch (InstantiationException e) {
       throw new RuntimeException(e);
     }
-    log.info("Configure: Input Categories size: " + inputCategories.size() + " Exact Match: " + exactMatchOnly + " Analyzer: " + analyzer.getClass().getName());
+    log.info("Configure: Input Categories size: " + inputCategories.size() + " Exact Match: " + exactMatchOnly +
+             " Analyzer: " + analyzer.getClass().getName());
   }
 }

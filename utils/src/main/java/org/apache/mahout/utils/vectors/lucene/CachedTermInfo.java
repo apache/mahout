@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.vectors.lucene;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,8 @@ package org.apache.mahout.utils.vectors.lucene;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.vectors.lucene;
+
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.TermEnum;
 import org.apache.lucene.index.Term;
@@ -24,27 +25,26 @@ import org.apache.mahout.utils.vectors.TermEntry;
 
 import java.util.Map;
 import java.util.Iterator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.io.IOException;
 
 
 /**
  * Caches TermEntries from a single field.  Materializes all values in the TermEnum to memory (much like FieldCache)
- *
- **/
+ */
 public class CachedTermInfo implements TermInfo {
 
-  Map<String, TermEntry> termEntries;
-  String field;
+  private final Map<String, TermEntry> termEntries;
+  private final String field;
+
   public CachedTermInfo(IndexReader reader, String field, int minDf, int maxDfPercent) throws IOException {
     this.field = field;
     TermEnum te = reader.terms(new Term(field, ""));
-    int count = 0;
     int numDocs = reader.numDocs();
     double percent = numDocs * maxDfPercent / 100.0;
     //Should we use a linked hash map so that we know terms are in order?
     termEntries = new LinkedHashMap<String, TermEntry>();
+    int count = 0;
     do {
       Term term = te.term();
       if (term == null || term.field().equals(field) == false){

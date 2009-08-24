@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.vectors.lucene;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -15,6 +14,8 @@ package org.apache.mahout.utils.vectors.lucene;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.utils.vectors.lucene;
 
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -53,13 +54,11 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 
-
-/**
- *
- *
- **/
 public class Driver {
-  private transient static Logger log = LoggerFactory.getLogger(Driver.class);
+  private static final Logger log = LoggerFactory.getLogger(Driver.class);
+
+  private Driver() {
+  }
 
   public static void main(String[] args) throws IOException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
@@ -139,7 +138,7 @@ public class Driver {
           }
           Directory dir = FSDirectory.open(file);
           IndexReader reader = IndexReader.open(dir, true);
-          Weight weight = null;
+          Weight weight;
           if (cmdLine.hasOption(weightOpt)) {
             String wString = cmdLine.getValue(weightOpt).toString();
             if (wString.equalsIgnoreCase("tf")) {
@@ -163,11 +162,9 @@ public class Driver {
           }
           TermInfo termInfo = new CachedTermInfo(reader, field, minDf, maxDFPercent);
           VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
-          LuceneIterable iterable = null;
-          String power = null;
           double norm = -1;
           if (cmdLine.hasOption(powerOpt)) {
-            power = cmdLine.getValue(powerOpt).toString();
+            String power = cmdLine.getValue(powerOpt).toString();
             if (power.equals("INF")) {
               norm = Double.POSITIVE_INFINITY;
             } else {
@@ -178,6 +175,7 @@ public class Driver {
           if (cmdLine.hasOption(idFieldOpt)) {
             idField = cmdLine.getValue(idFieldOpt).toString();
           }
+          LuceneIterable iterable;
           if (norm == LuceneIterable.NO_NORMALIZING) {
             iterable = new LuceneIterable(reader, idField, field, mapper, LuceneIterable.NO_NORMALIZING);
           } else {
@@ -221,15 +219,13 @@ public class Driver {
   }
 
   private static VectorWriter getSeqFileWriter(String outFile) throws IOException {
-    VectorWriter sfWriter;
     Path path = new Path(outFile);
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
     //TODO: Make this parameter driven
     SequenceFile.Writer seqWriter = SequenceFile.createWriter(fs, conf, path, LongWritable.class, SparseVector.class);
 
-    sfWriter = new SequenceFileVectorWriter(seqWriter);
-    return sfWriter;
+    return new SequenceFileVectorWriter(seqWriter);
   }
 
 

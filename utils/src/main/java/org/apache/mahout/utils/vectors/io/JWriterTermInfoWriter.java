@@ -27,13 +27,12 @@ import java.util.Iterator;
 
 /**
  * Write ther TermInfo out to a {@link java.io.Writer}
- *
- **/
+ */
 public class JWriterTermInfoWriter implements TermInfoWriter {
 
-  protected Writer writer;
-  protected String delimiter;
-  protected String field;
+  private final Writer writer;
+  private final String delimiter;
+  private final String field;
 
   public JWriterTermInfoWriter(Writer writer, String delimiter, String field) {
     this.writer = writer;

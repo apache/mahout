@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.vectors.lucene;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,8 @@ package org.apache.mahout.utils.vectors.lucene;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.vectors.lucene;
+
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.TermDocs;
 import org.apache.lucene.document.FieldSelector;
@@ -27,13 +28,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Collections;
 
-
-/**
- *
- *
- **/
 public class LuceneIterable implements VectorIterable {
-
 
   private IndexReader indexReader;
   private String field;
@@ -80,7 +75,7 @@ public class LuceneIterable implements VectorIterable {
   }
 
   private class TDIterator implements Iterator<Vector> {
-    private TermDocs termDocs;
+    private final TermDocs termDocs;
 
     private TDIterator() throws IOException {
       //term docs(null) is a better way of iterating all the docs in Lucene
@@ -98,7 +93,7 @@ public class LuceneIterable implements VectorIterable {
 
     @Override
     public Vector next() {
-      Vector result = null;
+      Vector result;
       int doc = termDocs.doc();
       //
       try {

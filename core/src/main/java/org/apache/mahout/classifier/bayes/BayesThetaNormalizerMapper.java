@@ -56,7 +56,8 @@ public class BayesThetaNormalizerMapper extends MapReduceBase implements
     String labelFeaturePair = key.toString();
     double alpha_i = 1.0;
 
-    String label = labelFeaturePair.split(",")[0];
+    int comma = labelFeaturePair.indexOf(',');
+    String label = comma < 0 ? labelFeaturePair : labelFeaturePair.substring(0, comma);
     double weight = Math.log((value.get() + alpha_i) / (labelWeightSum.get(label) + vocabCount));
     output.collect(new Text(('_' + label).trim()), new DoubleWritable(weight));
   }

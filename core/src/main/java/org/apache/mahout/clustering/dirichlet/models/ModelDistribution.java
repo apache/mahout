@@ -1,5 +1,3 @@
-package org.apache.mahout.clustering.dirichlet.models;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +14,8 @@ package org.apache.mahout.clustering.dirichlet.models;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.clustering.dirichlet.models;
 
 /** A model distribution allows us to sample a model from its prior distribution. */
 public interface ModelDistribution<O> {

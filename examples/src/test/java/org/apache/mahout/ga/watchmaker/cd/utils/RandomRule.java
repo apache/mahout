@@ -38,6 +38,7 @@ public class RandomRule implements Rule {
     this.rng = rng;
   }
 
+  @Override
   public int classify(DataLine dl) {
     int label = dl.getLabel();
     int prediction = rng.nextInt(2);

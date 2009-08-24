@@ -63,7 +63,8 @@ public class CBayesThetaMapper extends MapReduceBase implements
         output.collect(new Text((stringDoubleEntry.getKey() + ',' + feature).trim()), weight); //output Sigma_j
       }
     } else {
-      String label = labelFeaturePair.split(",")[0];
+      int comma = labelFeaturePair.indexOf(',');
+      String label = comma < 0 ? labelFeaturePair : labelFeaturePair.substring(0, comma);
       double inverseDenominator = 1.0 / (sigma_jSigma_k - labelWeightSum.get(label) + vocabCount);
       DoubleWritable weight = new DoubleWritable(-value.get() * inverseDenominator);
       output.collect(key, weight);//output -D_ij       

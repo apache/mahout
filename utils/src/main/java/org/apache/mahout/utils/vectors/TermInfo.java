@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.vectors;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,12 +15,10 @@ package org.apache.mahout.utils.vectors;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.vectors;
+
 import java.util.Iterator;
 
-/**
- *
- *
- **/
 public interface TermInfo {
 
   int totalTerms(String field);

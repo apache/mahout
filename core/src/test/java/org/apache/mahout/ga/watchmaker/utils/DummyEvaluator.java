@@ -30,7 +30,7 @@ import java.util.Random;
  */
 public class DummyEvaluator implements FitnessEvaluator<DummyCandidate> {
 
-  private final Random rng = new Random();
+  private final Random rng = new Random(0xCAFEBABECAFEBABEL);
 
   private static final Map<Integer, Double> evaluations = new HashMap<Integer, Double>();
 

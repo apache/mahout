@@ -1,5 +1,3 @@
-package org.apache.mahout.clustering.kmeans;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,6 +15,8 @@ package org.apache.mahout.clustering.kmeans;
  * limitations under the License.
  */
 
+package org.apache.mahout.clustering.kmeans;
+
 import java.awt.BasicStroke;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -33,14 +33,10 @@ import org.apache.mahout.utils.DistanceMeasure;
 import org.apache.mahout.utils.ManhattanDistanceMeasure;
 
 class DisplayKMeans extends DisplayDirichlet {
-  public DisplayKMeans() {
+  DisplayKMeans() {
     initialize();
     this.setTitle("K-Means Clusters (> 5% of population)");
   }
-
-  private static final long serialVersionUID = 1L;
-
-  private static List<Canopy> canopies;
 
   private static List<List<Cluster>> clusters;
 
@@ -48,6 +44,7 @@ class DisplayKMeans extends DisplayDirichlet {
 
   private static final double t2 = 1.5;
 
+  @Override
   public void paint(Graphics g) {
     super.plotSampleData(g);
     Graphics2D g2 = (Graphics2D) g;
@@ -56,11 +53,12 @@ class DisplayKMeans extends DisplayDirichlet {
     for (List<Cluster> cls : clusters) {
       g2.setStroke(new BasicStroke(i == 0 ? 3 : 1));
       g2.setColor(colors[Math.min(colors.length - 1, i--)]);
-      for (Cluster cluster : cls)
-        if (true || cluster.getNumPoints() > sampleData.size() * 0.05) {
+      for (Cluster cluster : cls) {
+        //if (true || cluster.getNumPoints() > sampleData.size() * 0.05) {
           dv.assign(cluster.getStd() * 3);
           plotEllipse(g2, cluster.getCenter(), dv);
-        }
+        //}
+      }
     }
   }
 
@@ -99,8 +97,7 @@ class DisplayKMeans extends DisplayDirichlet {
    */
   private static boolean iterateReference(List<Vector> points,
       List<Cluster> clusters, DistanceMeasure measure) {
-    boolean converged;
-    converged = true;
+    boolean converged = true;
     // iterate through all points, assigning each to the nearest cluster
     for (Vector point : points) {
       Cluster closestCluster = null;
@@ -178,7 +175,7 @@ class DisplayKMeans extends DisplayDirichlet {
     generateSamples();
     List<Vector> points = new ArrayList<Vector>();
     points.addAll(sampleData);
-    canopies = populateCanopies(new ManhattanDistanceMeasure(), points, t1, t2);
+    List<Canopy> canopies = populateCanopies(new ManhattanDistanceMeasure(), points, t1, t2);
     DistanceMeasure measure = new ManhattanDistanceMeasure();
     Cluster.config(measure, 0.001);
     clusters = new ArrayList<List<Cluster>>();

@@ -1,5 +1,3 @@
-package org.apache.mahout.clustering.dirichlet;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,6 +15,8 @@ package org.apache.mahout.clustering.dirichlet;
  * limitations under the License.
  */
 
+package org.apache.mahout.clustering.dirichlet;
+
 import java.awt.BasicStroke;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -28,15 +28,14 @@ import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
 
 class DisplayASNDirichlet extends DisplayDirichlet {
-  public DisplayASNDirichlet() {
+  DisplayASNDirichlet() {
     initialize();
     this
         .setTitle("Dirichlet Process Clusters - Asymmetric Sampled Normal Distribution (>"
             + (int) (significance * 100) + "% of population)");
   }
 
-  private static final long serialVersionUID = 1L;
-
+  @Override
   public void paint(Graphics g) {
     super.plotSampleData(g);
     Graphics2D g2 = (Graphics2D) g;

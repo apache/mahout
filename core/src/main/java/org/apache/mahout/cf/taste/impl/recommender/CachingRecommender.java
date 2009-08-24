@@ -35,7 +35,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * <p>A {@link Recommender} which caches the results from another {@link Recommender} in memory. Results are held by
@@ -46,7 +45,7 @@ public final class CachingRecommender implements Recommender {
   private static final Logger log = LoggerFactory.getLogger(CachingRecommender.class);
 
   private final Recommender recommender;
-  private final AtomicInteger maxHowMany;
+  private final int[] maxHowMany;
   private final Cache<Long, Recommendations> recommendationCache;
   private final Cache<LongPair, Float> estimatedPrefCache;
   private final RefreshHelper refreshHelper;
@@ -57,7 +56,7 @@ public final class CachingRecommender implements Recommender {
       throw new IllegalArgumentException("recommender is null");
     }
     this.recommender = recommender;
-    this.maxHowMany = new AtomicInteger(1);
+    this.maxHowMany = new int[] {1};
     // Use "num users" as an upper limit on cache size. Rough guess.
     int numUsers = recommender.getDataModel().getNumUsers();
     this.recommendationCache =
@@ -105,8 +104,8 @@ public final class CachingRecommender implements Recommender {
     }
 
     synchronized (maxHowMany) {
-      if (howMany > maxHowMany.get()) {
-        maxHowMany.set(howMany);
+      if (howMany > maxHowMany[0]) {
+        maxHowMany[0] = howMany;
       }
     }
 
@@ -186,7 +185,7 @@ public final class CachingRecommender implements Recommender {
     @Override
     public Recommendations get(Long key) throws TasteException {
       log.debug("Retrieving new recommendations for user ID '{}'", key);
-      int howMany = maxHowMany.get();
+      int howMany = maxHowMany[0];
       Rescorer<Long> rescorer = getCurrentRescorer();
       List<RecommendedItem> recommendations = rescorer == null ?
           recommender.recommend(key, howMany) :

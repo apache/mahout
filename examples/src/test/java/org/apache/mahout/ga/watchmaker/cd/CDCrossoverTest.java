@@ -31,15 +31,15 @@ public class CDCrossoverTest extends TestCase {
    * offsprings will not any common gene.
    */
   public void testMate1() {
-    int maxattributes = 100;
-    int maxcrosspnts = 10;
-    int n = 100; // repeat this test n times
     Random rng = new MersenneTwisterRNG();
 
     // Initialize dataset
     DataSet dataset = EasyMock.createMock(DataSet.class);
     DataSet.initialize(dataset);
 
+    int n = 100; // repeat this test n times
+    int maxcrosspnts = 10;
+    int maxattributes = 100;
     for (int nloop = 0; nloop < n; nloop++) {
       // we need at least 2 attributes for the crossover
       // and a label that will be skipped by the rules
@@ -54,8 +54,8 @@ public class CDCrossoverTest extends TestCase {
       CDCrossover crossover = new CDCrossover(crosspnts);
 
       // the parents have no gene in common
-      CDRule parent0 = generate0Rule(nbattributes);
-      CDRule parent1 = generate1Rule(nbattributes);
+      CDRule parent0 = generate0Rule();
+      CDRule parent1 = generate1Rule();
 
       List<CDRule> offsprings = crossover
           .mate(parent0, parent1, crosspnts, rng);
@@ -78,15 +78,15 @@ public class CDCrossoverTest extends TestCase {
    * areas.
    */
   public void testMate2() {
-    int maxattributes = 100;
-    int maxcrosspnts = 10;
-    int n = 100; // repeat this test n times
     Random rng = new MersenneTwisterRNG();
 
     // Initialize dataset
     DataSet dataset = EasyMock.createMock(DataSet.class);
     DataSet.initialize(dataset);
 
+    int n = 100; // repeat this test n times
+    int maxcrosspnts = 10;
+    int maxattributes = 100;
     for (int nloop = 0; nloop < n; nloop++) {
       int nbattributes = rng.nextInt(maxattributes) + 3;
       int crosspnts = rng.nextInt(maxcrosspnts) + 1;
@@ -102,8 +102,8 @@ public class CDCrossoverTest extends TestCase {
       CDCrossover crossover = new CDCrossover(crosspnts);
 
       // the parents have no gene in common
-      CDRule parent0 = generate0Rule(nbattributes);
-      CDRule parent1 = generate1Rule(nbattributes);
+      CDRule parent0 = generate0Rule();
+      CDRule parent1 = generate1Rule();
 
       // due to the random nature of the crossover their must be at most
       // (crosspnts+1) areas in the offsprings.
@@ -127,7 +127,7 @@ public class CDCrossoverTest extends TestCase {
 
   }
 
-  String printRule(CDRule rule) {
+  static String printRule(CDRule rule) {
     StringBuffer buffer = new StringBuffer();
 
     for (int index = 0; index < rule.getNbConditions(); index++) {
@@ -137,7 +137,7 @@ public class CDCrossoverTest extends TestCase {
     return buffer.toString();
   }
 
-  int countAreas(CDRule rule) {
+  static int countAreas(CDRule rule) {
 
     int nbareas = 1; // we already start in an area
     int partind = 0; // index of the start of the current part
@@ -153,7 +153,7 @@ public class CDCrossoverTest extends TestCase {
     return nbareas;
   }
 
-  CDRule generate0Rule(int nbattributes) {
+  static CDRule generate0Rule() {
     CDRule rule = new CDRule(1);
 
     for (int index = 0; index < rule.getNbConditions(); index++) {
@@ -165,7 +165,7 @@ public class CDCrossoverTest extends TestCase {
     return rule;
   }
 
-  CDRule generate1Rule(int nbattributes) {
+  static CDRule generate1Rule() {
     CDRule rule = new CDRule(1);
 
     for (int index = 0; index < rule.getNbConditions(); index++) {

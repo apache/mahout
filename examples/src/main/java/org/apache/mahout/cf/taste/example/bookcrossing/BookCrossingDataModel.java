@@ -29,12 +29,14 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.FileNotFoundException;
 import java.nio.charset.Charset;
+import java.util.regex.Pattern;
 
 /**
  * See <a href="http://www.informatik.uni-freiburg.de/~cziegler/BX/BX-CSV-Dump.zip">download</a> for
  * data needed by this class. The BX-Book-Ratings.csv file is needed.
  */
 public final class BookCrossingDataModel extends FileDataModel {
+  private static final Pattern NON_DIGIT_SEMICOLON_PATTERN = Pattern.compile("[^0-9;]");
 
   public BookCrossingDataModel() throws IOException {
     this(GroupLensDataModel.readResourceToTempFile(
@@ -60,7 +62,7 @@ public final class BookCrossingDataModel extends FileDataModel {
       writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charset.forName("UTF-8")));
       for (String line : new FileLineIterable(originalFile, true)) {
         // Delete replace anything that isn't numeric, or a semicolon delimiter. Make comma the delimiter.
-        String convertedLine = line.replaceAll("[^0-9;]", "").replace(';', ',');
+        String convertedLine = NON_DIGIT_SEMICOLON_PATTERN.matcher(line).replaceAll("").replace(';', ',');
         // If this means we deleted an entire ID -- few cases like that -- skip the line
         if (convertedLine.contains(",,")) {
           continue;

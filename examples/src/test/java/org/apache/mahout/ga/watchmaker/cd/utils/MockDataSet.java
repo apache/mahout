@@ -29,11 +29,11 @@ import java.util.Random;
  */
 public class MockDataSet {
 
-  private Random rng;
+  private final Random rng;
 
-  private int maxnba;
+  private final int maxnba;
 
-  private DataSet dataset;
+  private final DataSet dataset;
 
   /**
    * 

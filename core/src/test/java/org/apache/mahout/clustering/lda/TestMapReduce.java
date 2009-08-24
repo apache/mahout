@@ -17,10 +17,7 @@
 package org.apache.mahout.clustering.lda;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import junit.framework.TestCase;
@@ -28,20 +25,20 @@ import junit.framework.TestCase;
 
 import org.apache.commons.math.distribution.PoissonDistribution;
 import org.apache.commons.math.distribution.PoissonDistributionImpl;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
+import org.apache.commons.math.MathException;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.matrix.DenseMatrix;
 import org.apache.mahout.matrix.Matrix;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.DummyOutputCollector;
 
 import static org.easymock.classextension.EasyMock.*;
 
 public class TestMapReduce extends TestCase {
 
+  private static final int NUM_TESTS = 10;
+  private static final int NUM_TOPICS = 10;
 
   private Random random;
 
@@ -50,17 +47,12 @@ public class TestMapReduce extends TestCase {
    * @param numWords int number of words in the vocabulary
    * @param numWords E[count] for each word
    */
-  private SparseVector generateRandomDoc(int numWords, double sparsity) {
+  private SparseVector generateRandomDoc(int numWords, double sparsity) throws MathException {
     SparseVector v = new SparseVector(numWords,(int)(numWords * sparsity));
-    try {
-      PoissonDistribution dist = new PoissonDistributionImpl(sparsity);
-      for (int i = 0; i < numWords; i++) {
-        // random integer
-        v.set(i,dist.inverseCumulativeProbability(random.nextDouble()) + 1);
-      }
-    } catch(Exception e) {
-      e.printStackTrace();
-      fail("Caught " + e.toString());
+    PoissonDistribution dist = new PoissonDistributionImpl(sparsity);
+    for (int i = 0; i < numWords; i++) {
+      // random integer
+      v.set(i,dist.inverseCumulativeProbability(random.nextDouble()) + 1);
     }
     return v;
   }
@@ -69,12 +61,12 @@ public class TestMapReduce extends TestCase {
     double topicSmoothing = 50.0 / numTopics; // whatever
     Matrix m = new DenseMatrix(numTopics,numWords);
     double[] logTotals = new double[numTopics];
-    double ll = Double.NEGATIVE_INFINITY;
+    double ll = Double.NEGATIVE_INFINITY; // TODO this is not updated in loop?
     for(int k = 0; k < numTopics; ++k) {
       double total = 0.0; // total number of pseudo counts we made
       for(int w = 0; w < numWords; ++w) {
         // A small amount of random noise, minimized by having a floor.
-        double pseudocount = random.nextDouble() + 1E-10;
+        double pseudocount = random.nextDouble() + 1.0E-10;
         total += pseudocount;
         m.setQuick(k,w,Math.log(pseudocount));
       }
@@ -88,13 +80,10 @@ public class TestMapReduce extends TestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
+    random = new Random(0xCAFEBABECAFEBABEL);
     File f = new File("input");
-    random = new Random();
     f.mkdir();
   }
-
-  private static int NUM_TESTS = 10;
-  private static int NUM_TOPICS = 10;
 
   /**
    * Test the basic Mapper
@@ -120,7 +109,7 @@ public class TestMapReduce extends TestCase {
     }
   }
 
-  private int numNonZero(Vector v) {
+  private static int numNonZero(Vector v) {
     int count = 0;
     for(Iterator<Vector.Element> iter = v.iterateNonZero();
         iter.hasNext();iter.next() ) {

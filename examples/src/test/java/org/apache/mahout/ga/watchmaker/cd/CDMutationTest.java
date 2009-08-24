@@ -55,25 +55,22 @@ public class CDMutationTest extends TestCase {
       CDRule mutated = mutation.mutate(new CDRule(rule), rng);
 
       // check the ranges
-      double min, max;
-      double value, newval;
-      int nbcats;
 
       for (int condInd = 0; condInd < mutated.getNbConditions(); condInd++) {
         int attrInd = CDRule.attributeIndex(condInd);
-        value = rule.getV(condInd);
-        newval = mutated.getV(condInd);
+        double value = rule.getV(condInd);
+        double newval = mutated.getV(condInd);
         modified = modified || (value != newval);
 
         if (dataset.isNumerical(attrInd)) {
-          min = dataset.getMin(attrInd);
-          max = dataset.getMax(attrInd);
+          double min = dataset.getMin(attrInd);
+          double max = dataset.getMax(attrInd);
 
           assertInRange(newval, min, max);
           assertTrue(Math.abs(newval - value) <= (max - min) * range);
 
         } else {
-          nbcats = dataset.getNbValues(attrInd);
+          int nbcats = dataset.getNbValues(attrInd);
 
           assertInRange(newval, 0, nbcats);
         }
@@ -84,7 +81,7 @@ public class CDMutationTest extends TestCase {
     assertTrue(modified);
   }
 
-  private void assertInRange(double value, double min, double max) {
+  private static void assertInRange(double value, double min, double max) {
     TestCase.assertTrue("value < min", value >= min);
     TestCase.assertTrue("value > max", value <= max);
   }

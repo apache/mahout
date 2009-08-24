@@ -292,9 +292,12 @@ public class DenseVector extends AbstractVector {
 
   @Override
   public int hashCode() {
-    int result = (values != null ? values.hashCode() : 0);
-    result = 31 * result + name.hashCode();
-
+    int result = name.hashCode();
+    if (values != null) {
+      for (double value : values) {
+        result = 31 * result + (int) Double.doubleToLongBits(value);
+      }
+    }
     return result;
   }
 

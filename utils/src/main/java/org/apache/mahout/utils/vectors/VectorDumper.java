@@ -46,8 +46,7 @@ import java.io.Writer;
  * Can read in a {@link org.apache.hadoop.io.SequenceFile} of {@link org.apache.mahout.matrix.Vector}s
  * and dump out the results using {@link org.apache.mahout.matrix.Vector#asFormatString()} to either the console
  * or to a file.
- *
- **/
+ */
 public final class VectorDumper {
 
   private static final Logger log = LoggerFactory.getLogger(VectorDumper.class);
@@ -97,7 +96,7 @@ public final class VectorDumper {
         FileSystem fs = FileSystem.get(path.toUri(), conf);
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
         SequenceFileVectorIterable vectorIterable = new SequenceFileVectorIterable(reader, cmdLine.hasOption(vectorAsKeyOpt));
-        Writer writer = null;
+        Writer writer;
         if (cmdLine.hasOption(outputOpt)) {
           writer = new FileWriter(cmdLine.getValue(outputOpt).toString());
         } else {

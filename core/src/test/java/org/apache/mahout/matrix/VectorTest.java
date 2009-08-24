@@ -250,7 +250,7 @@ public class VectorTest extends TestCase {
   }
 
   /*public void testSparseVectorTimesX() {
-    Random rnd = new Random(0xDEADBEEFL);
+    Random rnd = new Random(0xCAFEBABECAFEBABEL);
     Vector v1 = randomSparseVector(rnd);
     double x = rnd.nextDouble();
     long t0 = System.currentTimeMillis();
@@ -274,7 +274,7 @@ public class VectorTest extends TestCase {
   }*/
 
   /*public void testSparseVectorTimesV() {
-    Random rnd = new Random(0xDEADBEEFL);
+    Random rnd = new Random(0xCAFEBABECAFEBABEL);
     Vector v1 = randomSparseVector(rnd);
     Vector v2 = randomSparseVector(rnd);
     long t0 = System.currentTimeMillis();

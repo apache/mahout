@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.vectors;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,15 +15,11 @@ package org.apache.mahout.utils.vectors;
  * limitations under the License.
  */
 
-
-import org.apache.lucene.search.DefaultSimilarity;
-import org.apache.lucene.search.Similarity;
-
+package org.apache.mahout.utils.vectors;
 
 /**
  * {@link org.apache.mahout.utils.vectors.Weight} based on term frequency only 
- *
- **/
+ */
 public class TF implements Weight {
 
   @Override

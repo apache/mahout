@@ -19,6 +19,8 @@ package org.apache.mahout.utils;
 
 import com.thoughtworks.xstream.XStream;
 
+import java.util.regex.Pattern;
+
 /**
  * Offers two methods to convert an object to a string representation and restore the object given its string
  * representation. Should use Hadoop Stringifier whenever available.
@@ -26,6 +28,7 @@ import com.thoughtworks.xstream.XStream;
 public final class StringUtils {
 
   private static final XStream xstream = new XStream();
+  private static final Pattern NEWLINE_PATTERN = Pattern.compile("\n");
 
   private StringUtils() {
     // do nothing
@@ -38,7 +41,7 @@ public final class StringUtils {
    * @return the string representation of the object
    */
   public static String toString(Object obj) {
-    return xstream.toXML(obj).replaceAll("\n", "");
+    return NEWLINE_PATTERN.matcher(xstream.toXML(obj)).replaceAll("");
   }
 
   /**

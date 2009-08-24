@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.vectors.arff;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -15,6 +14,8 @@ package org.apache.mahout.utils.vectors.arff;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.utils.vectors.arff;
 
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -49,12 +50,11 @@ import java.nio.charset.Charset;
 import java.util.Map;
 
 
-/**
- *
- *
- **/
 public class Driver {
-  private transient static Logger log = LoggerFactory.getLogger(Driver.class);
+  private static final Logger log = LoggerFactory.getLogger(Driver.class);
+
+  private Driver() {
+  }
 
   public static void main(String[] args) throws IOException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
@@ -125,9 +125,7 @@ public class Driver {
             }
           });
 
-          for (int i = 0; i < files.length; i++) {
-            File file = files[i];
-
+          for (File file : files) {
             writeFile(outWriter, outDir, file, maxDocs, model);
           }
         } else {
@@ -154,7 +152,7 @@ public class Driver {
     ARFFModel model = new MapBackedARFFModel(arffModel.getWords(), arffModel.getWordCount() + 1,
             arffModel.getNominalMap());
     ARFFVectorIterable iteratable = new ARFFVectorIterable(file, model);
-    String outFile = outDir + "/" + file.getName() + ".mvc";
+    String outFile = outDir + '/' + file.getName() + ".mvc";
 
     VectorWriter vectorWriter;
     if (outWriter != null) {
@@ -174,12 +172,11 @@ public class Driver {
   }
 
   private static VectorWriter getSeqFileWriter(String outFile) throws IOException {
-    VectorWriter sfWriter;
     Path path = new Path(outFile);
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer seqWriter = SequenceFile.createWriter(fs, conf, path, LongWritable.class, SparseVector.class);
-    sfWriter = new SequenceFileVectorWriter(seqWriter);
+    VectorWriter sfWriter = new SequenceFileVectorWriter(seqWriter);
     return sfWriter;
   }
 

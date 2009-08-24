@@ -79,7 +79,8 @@ public final class GroupLensDataModel extends FileDataModel {
       OutputStream os = new FileOutputStream(tempFile);
       try {
         int bytesRead;
-        for (byte[] buffer = new byte[32768]; (bytesRead = is.read(buffer)) > 0;) {
+        byte[] buffer = new byte[32768];
+        while ((bytesRead = is.read(buffer)) > 0) {
           os.write(buffer, 0, bytesRead);
         }
         os.flush();

@@ -51,7 +51,7 @@ import java.util.Set;
  * Create and run the Wikipedia Dataset Creator.
  */
 public class WikipediaDatasetCreatorDriver {
-  private transient static Logger log = LoggerFactory.getLogger(WikipediaDatasetCreatorDriver.class);
+  private static final Logger log = LoggerFactory.getLogger(WikipediaDatasetCreatorDriver.class);
 
   private WikipediaDatasetCreatorDriver() {
   }
@@ -96,9 +96,8 @@ public class WikipediaDatasetCreatorDriver {
 
     Parser parser = new Parser();
     parser.setGroup(group);
-    CommandLine cmdLine = null;
     try {
-      cmdLine = parser.parse(args);
+      CommandLine cmdLine = parser.parse(args);
       if (cmdLine.hasOption(helpOpt)) {
         CommandLineUtil.printHelp(group);
         return;

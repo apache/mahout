@@ -30,14 +30,17 @@ import org.apache.mahout.matrix.Vector;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class InputMapper extends MapReduceBase implements
     Mapper<LongWritable, Text, Text, MeanShiftCanopy> {
 
+  private static final Pattern SPACE = Pattern.compile(" ");
+
   @Override
   public void map(LongWritable key, Text values,
       OutputCollector<Text, MeanShiftCanopy> output, Reporter reporter) throws IOException {
-    String[] numbers = values.toString().split(" ");
+    String[] numbers = SPACE.split(values.toString());
     // sometimes there are multiple separator spaces
     List<Double> doubles = new ArrayList<Double>();
     for (String value : numbers) {

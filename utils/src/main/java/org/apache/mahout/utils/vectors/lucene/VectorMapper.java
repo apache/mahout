@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.vectors.lucene;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,14 +15,14 @@ package org.apache.mahout.utils.vectors.lucene;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.vectors.lucene;
+
 import org.apache.lucene.index.TermVectorMapper;
 import org.apache.mahout.matrix.Vector;
 
-
 /**
  * Not thread-safe
- *
- **/
+ */
 public abstract class VectorMapper extends TermVectorMapper {
   /**
    * Can be called after the TermVector has been mapped

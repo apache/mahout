@@ -1,5 +1,3 @@
-package org.apache.mahout.clustering.dirichlet;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +14,8 @@ package org.apache.mahout.clustering.dirichlet;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.clustering.dirichlet;
 
 import java.awt.BasicStroke;
 import java.awt.Graphics;
@@ -34,8 +34,7 @@ class DisplaySNDirichlet extends DisplayDirichlet {
         + (int) (significance * 100) + "% of population)");
   }
 
-  private static final long serialVersionUID = 1L;
-
+  @Override
   public void paint(Graphics g) {
     super.plotSampleData(g);
     Graphics2D g2 = (Graphics2D) g;

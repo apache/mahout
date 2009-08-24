@@ -45,9 +45,8 @@ public class CDInfosToolTest extends TestCase {
 
   private Descriptors randomDescriptors(int nbattributes, double numRate, double catRate) {
     char[] descriptors = new char[nbattributes];
-    double rnd;
     for (int index = 0; index < nbattributes; index++) {
-      rnd = rng.nextDouble();
+      double rnd = rng.nextDouble();
       if (rnd < numRate) {
         // numerical attribute
         descriptors[index] = 'N';
@@ -93,12 +92,10 @@ public class CDInfosToolTest extends TestCase {
   private void randomDataset(FileSystem fs, Path input, Descriptors descriptors,
       Object[][] descriptions) throws IOException {
     int nbfiles = rng.nextInt(20) + 1;
-    FSDataOutputStream out;
-    BufferedWriter writer;
 
     for (int floop = 0; floop < nbfiles; floop++) {
-      out = fs.create(new Path(input, "file." + floop));
-      writer = new BufferedWriter(new OutputStreamWriter(out));
+      FSDataOutputStream out = fs.create(new Path(input, "file." + floop));
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
 
       int nblines = rng.nextInt(200) + 1;
       for (int line = 0; line < nblines; line++) {
@@ -173,13 +170,13 @@ public class CDInfosToolTest extends TestCase {
 
     // Start the tool
     List<String> result = new ArrayList<String>();
-    int rindex=0;
     CDInfosTool.gatherInfos(descriptors, inpath, result);
 
     // check the results
     Collection<String> target = new ArrayList<String>();
 
     assertEquals(nbNonIgnored(descriptors), result.size());
+    int rindex = 0;
     for (int index = 0; index < nbattrs; index++) {
       if (descriptors.isIgnored(index)) {
         continue;

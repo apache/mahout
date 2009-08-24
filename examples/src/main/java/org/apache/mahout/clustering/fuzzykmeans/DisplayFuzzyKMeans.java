@@ -1,5 +1,3 @@
-package org.apache.mahout.clustering.fuzzykmeans;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +14,8 @@ package org.apache.mahout.clustering.fuzzykmeans;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.clustering.fuzzykmeans;
 
 import java.awt.BasicStroke;
 import java.awt.Graphics;
@@ -39,10 +39,6 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
     this.setTitle("Fuzzy K-Means Clusters (> 5% of population)");
   }
 
-  private static final long serialVersionUID = 1L;
-
-  private static List<Canopy> canopies;
-
   private static List<List<SoftCluster>> clusters;
 
   private static final double t1 = 3.0;
@@ -58,11 +54,12 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
     for (List<SoftCluster> cls : clusters) {
       g2.setStroke(new BasicStroke(i == 0 ? 3 : 1));
       g2.setColor(colors[Math.min(colors.length - 1, i--)]);
-      for (SoftCluster cluster : cls)
-        if (true || cluster.getWeightedPointTotal().zSum() > sampleData.size() * 0.05) {
+      for (SoftCluster cluster : cls) {
+        //if (true || cluster.getWeightedPointTotal().zSum() > sampleData.size() * 0.05) {
           dv.assign(cluster.std() * 3);
           plotEllipse(g2, cluster.getCenter(), dv);
-        }
+        //}
+      }
     }
   }
 
@@ -171,7 +168,7 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
     generateSamples();
     List<Vector> points = new ArrayList<Vector>();
     points.addAll(sampleData);
-    canopies = populateCanopies(new ManhattanDistanceMeasure(), points, t1, t2);
+    List<Canopy> canopies = populateCanopies(new ManhattanDistanceMeasure(), points, t1, t2);
     DistanceMeasure measure = new ManhattanDistanceMeasure();
     Cluster.config(measure, 0.001);
     clusters = new ArrayList<List<SoftCluster>>();
@@ -179,11 +176,7 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
     for (Canopy canopy : canopies)
       if (canopy.getNumPoints() > 0.05 * sampleData.size())
         clusters.get(0).add(new SoftCluster(canopy.getCenter()));
-    try {
-      referenceFuzzyKMeans(sampleData, measure, 0.001, 10);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    referenceFuzzyKMeans(sampleData, measure, 0.001, 10);
     new DisplayFuzzyKMeans();
   }
 }

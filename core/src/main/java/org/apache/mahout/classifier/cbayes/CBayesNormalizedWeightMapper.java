@@ -52,7 +52,8 @@ public class CBayesNormalizedWeightMapper extends MapReduceBase implements
 
     String labelFeaturePair = key.toString();
 
-    String label = labelFeaturePair.split(",")[0];
+    int comma = labelFeaturePair.indexOf(',');
+    String label = comma < 0 ? labelFeaturePair : labelFeaturePair.substring(0, comma);
     output.collect(key, new DoubleWritable(-Math.log(value.get()) / thetaNormalizer.get(label)));// output -D_ij
 
   }

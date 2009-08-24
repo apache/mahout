@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.clustering.dirichlet;
 
 import java.awt.Color;
@@ -12,6 +29,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.IOException;
 
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
@@ -20,7 +38,6 @@ import org.apache.mahout.matrix.TimesFunction;
 import org.apache.mahout.matrix.Vector;
 
 public class DisplayDirichlet extends Frame {
-  private static final long serialVersionUID = 1L;
 
   protected int res; //screen resolution
 
@@ -78,7 +95,7 @@ public class DisplayDirichlet extends Frame {
     });
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     UncommonDistributions.init("Mahout=Hadoop+ML".getBytes());
     generateSamples();
     new DisplayDirichlet();
@@ -126,10 +143,10 @@ public class DisplayDirichlet extends Frame {
    * @param dv a Vector of rectangle sizes
    */
   public void plotRectangle(Graphics2D g2, Vector v, Vector dv) {
-    int h = size / 2;
     double[] flip = { 1, -1 };
     Vector v2 = v.clone().assign(new DenseVector(flip), new TimesFunction());
     v2 = v2.minus(dv.divide(2));
+    int h = size / 2;
     double x = v2.get(0) + h;
     double y = v2.get(1) + h;
     g2.draw(new Rectangle2D.Double(x * ds, y * ds, dv.get(0) * ds, dv.get(1)
@@ -143,10 +160,10 @@ public class DisplayDirichlet extends Frame {
    * @param dv a Vector of rectangle sizes
    */
   public void plotEllipse(Graphics2D g2, Vector v, Vector dv) {
-    int h = size / 2;
     double[] flip = { 1, -1 };
     Vector v2 = v.clone().assign(new DenseVector(flip), new TimesFunction());
     v2 = v2.minus(dv.divide(2));
+    int h = size / 2;
     double x = v2.get(0) + h;
     double y = v2.get(1) + h;
     g2

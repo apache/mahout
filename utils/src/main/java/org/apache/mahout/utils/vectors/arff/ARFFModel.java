@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.vectors.arff;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,8 @@ package org.apache.mahout.utils.vectors.arff;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.vectors.arff;
+
 import java.util.Map;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -25,15 +26,14 @@ import java.text.SimpleDateFormat;
  * An interface for representing an ARFFModel.  Implementations can decide on the best approach
  * for storing the model, as some approaches will be fine for smaller files, while larger
  * ones may require a better implementation.
- *
- **/
+ */
 public interface ARFFModel {
-  public static final DateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-  public static final String ARFF_SPARSE = "{";//indicates the vector is sparse
-  public static final String ARFF_COMMENT = "%";
-  public static final String ATTRIBUTE = "@attribute";
-  public static final String DATA = "@data";
-  public static final String RELATION = "@relation";
+  DateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+  String ARFF_SPARSE = "{";//indicates the vector is sparse
+  String ARFF_COMMENT = "%";
+  String ATTRIBUTE = "@attribute";
+  String DATA = "@data";
+  String RELATION = "@relation";
 
 
   String getRelation();

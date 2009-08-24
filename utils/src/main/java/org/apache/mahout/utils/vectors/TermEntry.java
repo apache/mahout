@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.vectors;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,15 +15,12 @@ package org.apache.mahout.utils.vectors;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.vectors;
 
-/**
- *
- *
- **/
 public class TermEntry {
-  public String term;
-  public int termIdx;
-  public int docFreq;
+  public final String term;
+  public final int termIdx;
+  public final int docFreq;
 
   public TermEntry(String term, int termIdx, int docFreq) {
     this.term = term;

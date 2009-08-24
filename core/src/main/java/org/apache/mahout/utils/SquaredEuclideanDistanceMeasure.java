@@ -1,4 +1,3 @@
-package org.apache.mahout.utils;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -15,6 +14,8 @@ package org.apache.mahout.utils;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.utils;
 
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.matrix.CardinalityException;

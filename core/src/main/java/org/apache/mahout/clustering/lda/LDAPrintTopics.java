@@ -68,7 +68,7 @@ public class LDAPrintTopics {
 
     @Override
     public boolean equals(Object o) {
-      if (!(o instanceof String)) {
+      if (!(o instanceof StringDoublePair)) {
         return false;
       }
       StringDoublePair other = (StringDoublePair) o;

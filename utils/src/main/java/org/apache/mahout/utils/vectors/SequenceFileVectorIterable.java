@@ -31,10 +31,9 @@ import java.io.IOException;
  * <p/>
  * The key is any {@link org.apache.hadoop.io.Writable} and the value is a {@link org.apache.mahout.matrix.Vector}.
  * It can handle any class that implements Vector as long as it has a no-arg constructor.
- *
- **/
+ */
 public class SequenceFileVectorIterable implements VectorIterable {
-  private SequenceFile.Reader reader;
+  private final SequenceFile.Reader reader;
   private boolean transpose = false;
 
   public SequenceFileVectorIterable(SequenceFile.Reader reader) {
@@ -58,8 +57,8 @@ public class SequenceFileVectorIterable implements VectorIterable {
   }
 
   public class SeqFileIterator implements Iterator<Vector> {
-    private Writable key;
-    private Writable value;
+    private final Writable key;
+    private final Writable value;
 
     private SeqFileIterator() throws IllegalAccessException, InstantiationException {
       if (transpose == false){

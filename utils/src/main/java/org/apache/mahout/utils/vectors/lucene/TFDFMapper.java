@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.vectors.lucene;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,8 @@ package org.apache.mahout.utils.vectors.lucene;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.vectors.lucene;
+
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.TermVectorOffsetInfo;
 import org.apache.mahout.matrix.SparseVector;
@@ -32,14 +33,14 @@ public class TFDFMapper extends VectorMapper {
 
   public static final int DEFAULT_CACHE_SIZE = 256;
 
-  protected IndexReader reader;
-  protected Vector vector;
+  private final IndexReader reader; // TODO never used?
+  private Vector vector;
 
-  protected Weight weight;
-  protected int numTerms;
-  protected TermInfo termInfo;
+  private final Weight weight;
+  private int numTerms;
+  private final TermInfo termInfo;
   private String field;
-  private int numDocs;
+  private final int numDocs;
 
   public TFDFMapper(IndexReader reader, Weight weight, TermInfo termInfo) {
     this.reader = reader;
@@ -48,6 +49,7 @@ public class TFDFMapper extends VectorMapper {
     this.numDocs = reader.numDocs();
   }
 
+  @Override
   public Vector getVector() {
     return vector;
   }
@@ -62,8 +64,9 @@ public class TFDFMapper extends VectorMapper {
   @Override
   public void map(String term, int frequency, TermVectorOffsetInfo[] offsets, int[] positions) {
     TermEntry entry = termInfo.getTermEntry(field, term);
-    if(entry != null)
+    if (entry != null) {
       vector.setQuick(entry.termIdx, weight.calculate(frequency, entry.docFreq, numTerms, numDocs));
+    }
   }
 
   @Override

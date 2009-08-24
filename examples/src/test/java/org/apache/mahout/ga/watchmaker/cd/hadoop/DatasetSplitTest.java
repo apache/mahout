@@ -42,39 +42,45 @@ public class DatasetSplitTest extends TestCase {
 
     private long current;
 
-    private long size;
+    private final long size;
 
-    public MockReader(long size) {
+    MockReader(long size) {
       assert size > 0 : "size == 0";
 
       this.size = size;
     }
 
+    @Override
     public void close() throws IOException {
       // TODO Auto-generated method stub
 
     }
 
+    @Override
     public LongWritable createKey() {
       // TODO Auto-generated method stub
       return null;
     }
 
+    @Override
     public Text createValue() {
       // TODO Auto-generated method stub
       return null;
     }
 
+    @Override
     public long getPos() throws IOException {
       // TODO Auto-generated method stub
       return 0;
     }
 
+    @Override
     public float getProgress() throws IOException {
       // TODO Auto-generated method stub
       return 0;
     }
 
+    @Override
     public boolean next(LongWritable key, Text value) throws IOException {
       if (current == size) {
         return false;
@@ -89,13 +95,11 @@ public class DatasetSplitTest extends TestCase {
     int n = 20;
 
     for (int nloop = 0; nloop < n; nloop++) {
-      long datasetSize = 100;
       MersenneTwisterRNG rng = new MersenneTwisterRNG();
       byte[] seed = rng.getSeed();
       double threshold = rng.nextDouble();
 
       JobConf conf = new JobConf();
-      RndLineRecordReader rndReader;
       Set<Long> dataset = new HashSet<Long>();
       LongWritable key = new LongWritable();
       Text value = new Text();
@@ -104,7 +108,8 @@ public class DatasetSplitTest extends TestCase {
 
       // read the training set
       split.storeJobParameters(conf);
-      rndReader = new RndLineRecordReader(new MockReader(datasetSize), conf);
+      long datasetSize = 100;
+      RndLineRecordReader rndReader = new RndLineRecordReader(new MockReader(datasetSize), conf);
       while (rndReader.next(key, value)) {
         assertTrue("duplicate line index", dataset.add(key.get()));
       }

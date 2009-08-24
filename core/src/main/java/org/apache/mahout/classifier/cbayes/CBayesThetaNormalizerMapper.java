@@ -63,7 +63,8 @@ public class CBayesThetaNormalizerMapper extends MapReduceBase implements
       }
 
     } else {
-      String label = labelFeaturePair.split(",")[0];
+      int comma = labelFeaturePair.indexOf(',');
+      String label = comma < 0 ? labelFeaturePair : labelFeaturePair.substring(0, comma);
 
       double D_ij = value.get();
       double denominator = 0.5 * ((sigma_jSigma_k / vocabCount) + (D_ij * this.labelWeightSum.size()));

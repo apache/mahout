@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.vectors.arff;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,8 @@ package org.apache.mahout.utils.vectors.arff;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.vectors.arff;
+
 import junit.framework.TestCase;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.SparseVector;
@@ -26,11 +27,6 @@ import java.text.DateFormat;
 import java.util.Iterator;
 import java.util.Map;
 
-
-/**
- *
- *
- **/
 public class ARFFVectorIterableTest extends TestCase {
 
   public void testValues() throws Exception {
@@ -47,30 +43,30 @@ public class ARFFVectorIterableTest extends TestCase {
             .append("{0 5,1 23}").append(StringUtil.LINE_SEP);
     ARFFModel model = new MapBackedARFFModel();
     ARFFVectorIterable iterable = new ARFFVectorIterable(builder.toString(), model);
-    assertTrue(iterable.getModel().getRelation() + " is not equal to " + "Mahout", iterable.getModel().getRelation().equals("Mahout") == true);
+    assertEquals("Mahout", iterable.getModel().getRelation());
     Map<String, Integer> bindings = iterable.getModel().getLabelBindings();
     assertNotNull(bindings);
-    assertTrue("bindings Size: " + bindings.size() + " is not: " + 5, bindings.size() == 5);
+    assertEquals(5, bindings.size());
     Iterator<Vector> iter = iterable.iterator();
     assertTrue(iter.hasNext());
     Vector next = iter.next();
     assertNotNull(next);
     assertTrue("Wrong instanceof", next instanceof DenseVector);
-    assertEquals("", next.get(0), 1.0);
-    assertEquals("", next.get(1), 2.0);
+    assertEquals(1.0, next.get(0));
+    assertEquals(2.0, next.get(1));
     assertTrue(iter.hasNext());
     next = iter.next();
     assertNotNull(next);
     assertTrue("Wrong instanceof", next instanceof DenseVector);
-    assertEquals("", next.get(0), 2.0);
-    assertEquals("", next.get(1), 3.0);
+    assertEquals(2.0, next.get(0));
+    assertEquals(3.0, next.get(1));
 
     assertTrue(iter.hasNext());
     next = iter.next();
     assertNotNull(next);
     assertTrue("Wrong instanceof", next instanceof SparseVector);
-    assertEquals("", next.get(0), 5.0);
-    assertEquals("", next.get(1), 23.0);
+    assertEquals(5.0, next.get(0));
+    assertEquals(23.0, next.get(1));
 
     assertFalse(iter.hasNext());
   }
@@ -83,7 +79,7 @@ public class ARFFVectorIterableTest extends TestCase {
       assertTrue("Vector is not dense", vector instanceof DenseVector);
       count++;
     }
-    assertTrue(count + " does not equal: " + 10, count == 10);
+    assertEquals(10, count);
   }
 
   public void testSparse() throws Exception {
@@ -94,7 +90,7 @@ public class ARFFVectorIterableTest extends TestCase {
       assertTrue("Vector is not dense", vector instanceof SparseVector);
       count++;
     }
-    assertTrue(count + " does not equal: " + 10, count == 10);
+    assertEquals(10, count);
   }
 
   public void testNonNumeric() throws Exception {
@@ -106,23 +102,23 @@ public class ARFFVectorIterableTest extends TestCase {
       assertTrue("Vector is not dense", vector instanceof SparseVector);
       count++;
     }
-    assertTrue(count + " does not equal: " + 10, count == 10);
+    assertEquals(10, count);
     Map<String, Map<String, Integer>> nominalMap = iterable.getModel().getNominalMap();
     assertNotNull(nominalMap);
-    assertTrue("nominalMap Size: " + nominalMap.size() + " is not: " + 1, nominalMap.size() == 1);
+    assertEquals(1, nominalMap.size());
     Map<String, Integer> noms = nominalMap.get("bar");
     assertNotNull("nominals for bar are null", noms);
-    assertTrue("noms Size: " + noms.size() + " is not: " + 2, noms.size() == 2);
+    assertEquals(2, noms.size());
     Map<Integer, ARFFType> integerARFFTypeMap = model.getTypeMap();
     assertNotNull("Type map null", integerARFFTypeMap);
-    assertTrue("integerARFFTypeMap Size: " + integerARFFTypeMap.size() + " is not: " + 5, integerARFFTypeMap.size() == 5);
+    assertEquals(5, integerARFFTypeMap.size());
     Map<String, Long> words = model.getWords();
     assertNotNull("words null", words);
-    assertTrue("words Size: " + words.size() + " is not: " + 10, words.size() == 10);
+    assertEquals(10, words.size());
     System.out.println("Words: " + words);
     Map<Integer, DateFormat> integerDateFormatMap = model.getDateMap();
     assertNotNull("date format null", integerDateFormatMap);
-    assertTrue("integerDateFormatMap Size: " + integerDateFormatMap.size() + " is not: " + 1, integerDateFormatMap.size() == 1);
+    assertEquals(1, integerDateFormatMap.size());
 
   }
 
@@ -134,23 +130,23 @@ public class ARFFVectorIterableTest extends TestCase {
       assertTrue("Vector is not dense", vector instanceof SparseVector);
       count++;
     }
-    assertTrue(count + " does not equal: " + 10, count == 10);
+    assertEquals(10, count);
     Map<String, Map<String, Integer>> nominalMap = iterable.getModel().getNominalMap();
     assertNotNull(nominalMap);
-    assertTrue("nominalMap Size: " + nominalMap.size() + " is not: " + 1, nominalMap.size() == 1);
+    assertEquals(1, nominalMap.size());
     Map<String, Integer> noms = nominalMap.get("bar");
     assertNotNull("nominals for bar are null", noms);
-    assertTrue("noms Size: " + noms.size() + " is not: " + 2, noms.size() == 2);
+    assertEquals(2, noms.size());
     Map<Integer, ARFFType> integerARFFTypeMap = model.getTypeMap();
     assertNotNull("Type map null", integerARFFTypeMap);
-    assertTrue("integerARFFTypeMap Size: " + integerARFFTypeMap.size() + " is not: " + 5, integerARFFTypeMap.size() == 5);
+    assertEquals(5, integerARFFTypeMap.size());
     Map<String, Long> words = model.getWords();
     assertNotNull("words null", words);
-    assertTrue("words Size: " + words.size() + " is not: " + 10, words.size() == 10);
+    assertEquals(10, words.size());
     System.out.println("Words: " + words);
     Map<Integer, DateFormat> integerDateFormatMap = model.getDateMap();
     assertNotNull("date format null", integerDateFormatMap);
-    assertTrue("integerDateFormatMap Size: " + integerDateFormatMap.size() + " is not: " + 1, integerDateFormatMap.size() == 1);
+    assertEquals(1, integerDateFormatMap.size());
     model = new MapBackedARFFModel(model.getWords(), model.getWordCount(),
             model.getNominalMap());
     iterable = new ARFFVectorIterable(NON_NUMERIC_ARFF2, model);
@@ -161,26 +157,26 @@ public class ARFFVectorIterableTest extends TestCase {
     }
     nominalMap = model.getNominalMap();
     assertNotNull(nominalMap);
-    assertTrue("nominalMap Size: " + nominalMap.size() + " is not: " + 2, nominalMap.size() == 2);
+    assertEquals(2, nominalMap.size());
     noms = nominalMap.get("test");
     assertNotNull("nominals for bar are null", noms);
-    assertTrue("noms Size: " + noms.size() + " is not: " + 2, noms.size() == 2);
+    assertEquals(2, noms.size());
   }
 
 
-  public static final String SAMPLE_DENSE_ARFF = "   % Comments\n" +
+  private static final String SAMPLE_DENSE_ARFF = "   % Comments\n" +
           "   % \n" +
           "   % Comments go here" +
           "   % \n" +
           "   @RELATION Mahout\n" +
-          "\n" +
+          '\n' +
           "   @ATTRIBUTE foo  NUMERIC\n" +
           "   @ATTRIBUTE bar   NUMERIC\n" +
           "   @ATTRIBUTE hockey  NUMERIC\n" +
           "   @ATTRIBUTE football   NUMERIC\n" +
           "  \n" +
-          "\n" +
-          "\n" +
+          '\n' +
+          '\n' +
           "   @DATA\n" +
           "   23.1,3.23,1.2,0.2\n" +
           "   2.9,3.0,1.2,0.2\n" +
@@ -194,20 +190,20 @@ public class ARFFVectorIterableTest extends TestCase {
           "   2.9,3.1,1.23,0.1\n";
 
 
-  public static final String SAMPLE_SPARSE_ARFF = "   % Comments\n" +
+  private static final String SAMPLE_SPARSE_ARFF = "   % Comments\n" +
           "   % \n" +
           "   % Comments go here" +
           "   % \n" +
           "   @RELATION Mahout\n" +
-          "\n" +
+          '\n' +
           "   @ATTRIBUTE foo  NUMERIC\n" +
           "   @ATTRIBUTE bar   NUMERIC\n" +
           "   @ATTRIBUTE hockey  NUMERIC\n" +
           "   @ATTRIBUTE football   NUMERIC\n" +
           "   @ATTRIBUTE tennis   NUMERIC\n" +
           "  \n" +
-          "\n" +
-          "\n" +
+          '\n' +
+          '\n' +
           "   @DATA\n" +
           "   {1 23.1,2 3.23,3 1.2,4 0.2}\n" +
           "   {0 2.9}\n" +
@@ -220,20 +216,20 @@ public class ARFFVectorIterableTest extends TestCase {
           "   {1 2.2,2 2.94 0.2}\n" +
           "   {1 2.9,2 3.1}\n";
 
-  public static final String NON_NUMERIC_ARFF = "   % Comments\n" +
+  private static final String NON_NUMERIC_ARFF = "   % Comments\n" +
           "   % \n" +
           "   % Comments go here" +
           "   % \n" +
           "   @RELATION Mahout\n" +
-          "\n" +
+          '\n' +
           "   @ATTRIBUTE junk  NUMERIC\n" +
           "   @ATTRIBUTE foo  NUMERIC\n" +
           "   @ATTRIBUTE bar   {c,d}\n" +
           "   @ATTRIBUTE hockey  string\n" +
           "   @ATTRIBUTE football   date \"yyyy-MM-dd\"\n" +
           "  \n" +
-          "\n" +
-          "\n" +
+          '\n' +
+          '\n' +
           "   @DATA\n" +
           "   {2 c,3 gretzky,4 1973-10-23}\n" +
           "   {1 2.9,2 d,3 orr,4 1973-11-23}\n" +
@@ -246,20 +242,20 @@ public class ARFFVectorIterableTest extends TestCase {
           "   {0 2.2,2 d,3 messier,4 2008-11-23}\n" +
           "   {2 c,3 roy,4 1973-10-13}\n";
 
-  public static final String NON_NUMERIC_ARFF2 = "   % Comments\n" +
+  private static final String NON_NUMERIC_ARFF2 = "   % Comments\n" +
           "   % \n" +
           "   % Comments go here" +
           "   % \n" +
           "   @RELATION Mahout\n" +
-          "\n" +
+          '\n' +
           "   @ATTRIBUTE junk  NUMERIC\n" +
           "   @ATTRIBUTE foo  NUMERIC\n" +
           "   @ATTRIBUTE test   {f,z}\n" +
           "   @ATTRIBUTE hockey  string\n" +
           "   @ATTRIBUTE football   date \"yyyy-MM-dd\"\n" +
           "  \n" +
-          "\n" +
-          "\n" +
+          '\n' +
+          '\n' +
           "   @DATA\n" +
           "   {2 f,3 gretzky,4 1973-10-23}\n" +
           "   {1 2.9,2 z,3 orr,4 1973-11-23}\n" +

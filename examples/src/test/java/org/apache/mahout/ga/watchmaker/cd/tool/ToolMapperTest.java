@@ -34,10 +34,10 @@ public class ToolMapperTest extends TestCase {
     ToolMapper mapper = new ToolMapper();
 
     // no attribute is ignored
-    String dataline = "A1, A2, A3, A4, A5, A6";
     char[] descriptors = { 'N', 'N', 'C', 'C', 'N', 'N' };
 
     mapper.configure(descriptors);
+    String dataline = "A1, A2, A3, A4, A5, A6";
     value.set(dataline);
     mapper.map(key, value, output, null);
 
@@ -57,10 +57,10 @@ public class ToolMapperTest extends TestCase {
     ToolMapper mapper = new ToolMapper();
 
     // no attribute is ignored
-    String dataline = "A1, I, A3, I, I, A6";
     char[] descriptors = { 'N', 'I', 'C', 'I', 'I', 'N' };
 
     mapper.configure(descriptors);
+    String dataline = "A1, I, A3, I, I, A6";
     value.set(dataline);
     mapper.map(key, value, output, null);
 

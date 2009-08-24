@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 public class JWriterVectorWriter implements VectorWriter {
-  protected Writer writer;
+  private final Writer writer;
 
   public JWriterVectorWriter(Writer writer) {
     this.writer = writer;

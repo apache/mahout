@@ -27,10 +27,10 @@ import java.util.Random;
 
 public class RandomVectorIterable implements VectorIterable{
 
-  int numItems = 100;
-  public static enum VectorType {DENSE, SPARSE};
+  private int numItems = 100;
+  public enum VectorType {DENSE, SPARSE}
 
-  VectorType type = VectorType.SPARSE;
+  private VectorType type = VectorType.SPARSE;
 
   public RandomVectorIterable() {
   }
@@ -51,7 +51,7 @@ public class RandomVectorIterable implements VectorIterable{
 
   private class VectIterator implements Iterator<Vector>{
     int count = 0;
-    Random random = new Random();
+    final Random random = new Random();
     @Override
     public boolean hasNext() {
       return count < numItems;
@@ -59,7 +59,7 @@ public class RandomVectorIterable implements VectorIterable{
 
     @Override
     public Vector next() {
-      Vector result = type.equals(VectorType.SPARSE) ? new SparseVector(numItems) : new DenseVector(numItems);
+      Vector result = type == VectorType.SPARSE ? new SparseVector(numItems) : new DenseVector(numItems);
       result.assign(new UnaryFunction(){
         @Override
         public double apply(double arg1) {
