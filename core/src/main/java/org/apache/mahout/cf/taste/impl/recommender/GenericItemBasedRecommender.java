@@ -179,6 +179,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   protected float doEstimatePreference(long userID, long itemID) throws TasteException {
     double preference = 0.0;
     double totalSimilarity = 0.0;
+    int count = 0;
     PreferenceArray prefs = getDataModel().getPreferencesFromUser(userID);
     int size = prefs.length();
     for (int i = 0; i < size; i++) {
@@ -190,9 +191,15 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
         theSimilarity += 1.0;
         preference += theSimilarity * prefs.getValue(i);
         totalSimilarity += theSimilarity;
+        count++;
       }
     }
-    return totalSimilarity == 0.0 ? Float.NaN : (float) (preference / totalSimilarity);
+    // Throw out the estimate if it was based on no data points, of course, but also if based on
+    // just one. This is a bit of a band-aid on the 'stock' item-based algorithm for the moment.
+    // The reason is that in this case the estimate is, simply, the user's rating for one item
+    // that happened to have a defined similarity. The similarity score doesn't matter, and that
+    // seems like a bad situation.
+    return count <= 1 ? Float.NaN : (float) (preference / totalSimilarity);
   }
 
   private int getNumPreferences(long userID) throws TasteException {
