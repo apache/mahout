@@ -39,11 +39,11 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     assertEquals(1, recommended.size());
     RecommendedItem firstRecommended = recommended.get(0);
     assertEquals(2, firstRecommended.getItemID());
-    assertEquals(0.1, firstRecommended.getValue(), EPSILON);
+    assertEquals(0.18, firstRecommended.getValue(), EPSILON);
     recommender.refresh(null);
     recommended = recommender.recommend(1, 1);
     assertEquals(2, firstRecommended.getItemID());
-    assertEquals(0.1, firstRecommended.getValue(), EPSILON);
+    assertEquals(0.18, firstRecommended.getValue(), EPSILON);
   }
 
   public void testHowMany() throws Exception {
@@ -112,7 +112,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
 
   public void testEstimatePref() throws Exception {
     Recommender recommender = buildRecommender();
-    assertEquals(0.1, recommender.estimatePreference(1, 2), EPSILON);
+    assertEquals(0.18, recommender.estimatePreference(1, 2), EPSILON);
   }
 
   /**
@@ -127,7 +127,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     RecommendedItem firstRecommended = recommended.get(0);
     // item one should be recommended because it has a greater rating/score
     assertEquals(2, firstRecommended.getItemID());
-    assertEquals(0.1, firstRecommended.getValue(), EPSILON);
+    assertEquals(0.18, firstRecommended.getValue(), EPSILON);
   }
 
   public void testMostSimilar() throws Exception {
@@ -175,9 +175,10 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
   private static ItemBasedRecommender buildRecommender() {
     DataModel dataModel = getDataModel();
     Collection<GenericItemSimilarity.ItemItemSimilarity> similarities =
-        new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(2);
+        new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(3);
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(0, 1, 1.0));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(0, 2, 0.5));
+    similarities.add(new GenericItemSimilarity.ItemItemSimilarity(1, 2, 0.0));
     ItemSimilarity similarity = new GenericItemSimilarity(similarities);
     return new GenericItemBasedRecommender(dataModel, similarity);
   }
