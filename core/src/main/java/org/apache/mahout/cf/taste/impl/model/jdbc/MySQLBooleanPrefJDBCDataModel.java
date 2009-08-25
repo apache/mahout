@@ -26,7 +26,7 @@ import java.sql.SQLException;
 /**
  * <p>See also {@link MySQLJDBCDataModel} -- same except deals with a table without preference info:</p>
  *
- * <pre>
+ * <p><pre>
  * CREATE TABLE taste_preferences (
  *   user_id BIGINT NOT NULL,
  *   item_id BIGINT NOT NULL,
@@ -34,7 +34,7 @@ import java.sql.SQLException;
  *   INDEX (user_id),
  *   INDEX (item_id)
  * )
- * </pre>
+ * </pre></p>
  */
 public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataModel {
 

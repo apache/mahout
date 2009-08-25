@@ -42,7 +42,7 @@ import java.sql.SQLException;
  * with long type (BIGINT). For example, the following command sets up a suitable table in MySQL,
  * complete with primary key and indexes:</p>
  *
- * <pre>
+ * <p><pre>
  * CREATE TABLE taste_preferences (
  *   user_id BIGINT NOT NULL,
  *   item_id BIGINT NOT NULL,
@@ -51,7 +51,7 @@ import java.sql.SQLException;
  *   INDEX (user_id),
  *   INDEX (item_id)
  * )
- * </pre>
+ * </pre></p>
  *
  * <h3>Performance Notes</h3>
  *

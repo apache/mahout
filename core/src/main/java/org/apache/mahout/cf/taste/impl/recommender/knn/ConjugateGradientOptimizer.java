@@ -22,9 +22,9 @@ import java.util.Arrays;
 public final class ConjugateGradientOptimizer implements Optimizer {
 
   /**
-   * Conjugate gradient optimization
+   * <p>Conjugate gradient optimization. Matlab code:</p>
    *
-   * <p>Matlab code: <pre>
+   * <p><pre>
    * function [x] = conjgrad(A,b,x0)
    *
    *   x = x0;
@@ -44,7 +44,7 @@ public final class ConjugateGradientOptimizer implements Optimizer {
    *   end
    *
    * end
-   * </pre>
+   * </pre></p>
    *
    * @param A matrix nxn positions
    * @param b vector b, n positions

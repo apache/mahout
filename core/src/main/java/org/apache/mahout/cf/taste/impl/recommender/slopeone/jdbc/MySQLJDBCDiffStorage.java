@@ -36,7 +36,7 @@ import org.apache.mahout.cf.taste.impl.model.jdbc.MySQLJDBCDataModel;
  *
  * <p>The following command sets up a suitable table in MySQL:</p>
  *
- * <pre>
+ * <p><pre>
  * CREATE TABLE taste_slopeone_diffs (
  *   item_id_a BIGINT NOT NULL,
  *   item_id_b BIGINT NOT NULL,
@@ -46,7 +46,7 @@ import org.apache.mahout.cf.taste.impl.model.jdbc.MySQLJDBCDataModel;
  *   INDEX (item_id_a),
  *   INDEX (item_id_b)
  * )
- * </pre>
+ * </pre></p>
  */
 public final class MySQLJDBCDiffStorage extends AbstractJDBCDiffStorage {
 

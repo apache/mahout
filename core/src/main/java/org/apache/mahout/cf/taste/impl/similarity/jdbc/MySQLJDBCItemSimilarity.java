@@ -37,14 +37,14 @@ import javax.sql.DataSource;
  * <p>For example, the following command sets up a suitable table in MySQL,
  * complete with primary key and indexes:</p>
  *
- * <pre>
+ * <p><pre>
  * CREATE TABLE taste_item_similarity (
  *   item_id_a BIGINT NOT NULL,
  *   item_id_b BIGINT NOT NULL,
  *   similarity FLOAT NOT NULL,
  *   PRIMARY KEY (item_id_a, item_id_b),
  * )
- * </pre>
+ * </pre></p>
  *
  * <p>Note that for each row, item_id_a should be "less than" item_id_b. It is redundant to store it
  * both ways, so the pair is always stored as a pair with the lesser one first.
