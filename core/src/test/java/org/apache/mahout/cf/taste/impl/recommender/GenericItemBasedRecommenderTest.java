@@ -42,6 +42,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     assertEquals(0.18, firstRecommended.getValue(), EPSILON);
     recommender.refresh(null);
     recommended = recommender.recommend(1, 1);
+    firstRecommended = recommended.get(0);    
     assertEquals(2, firstRecommended.getItemID());
     assertEquals(0.18, firstRecommended.getValue(), EPSILON);
   }
@@ -116,7 +117,8 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
   }
 
   /**
-   * Contributed test case that verifies fix for bug <a href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=1396128&amp;group_id=138771&amp;atid=741665">
+   * Contributed test case that verifies fix for bug
+   * <a href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=1396128&amp;group_id=138771&amp;atid=741665">
    * 1396128</a>.
    */
   public void testBestRating() throws Exception {
