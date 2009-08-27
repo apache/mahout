@@ -29,8 +29,12 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.util.regex.Pattern;
 
 public final class GroupLensDataModel extends FileDataModel {
+
+  private static final String COLON_DELIMTER = "::";
+  private static final Pattern COLON_DELIMITER_PATTERN = Pattern.compile(COLON_DELIMTER);
 
   public GroupLensDataModel() throws IOException {
     this(readResourceToTempFile("/org/apache/mahout/cf/taste/example/grouplens/ratings.dat"));
@@ -54,7 +58,7 @@ public final class GroupLensDataModel extends FileDataModel {
     try {
       writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charset.forName("UTF-8")));
       for (String line : new FileLineIterable(originalFile, false)) {
-        String convertedLine = line.substring(0, line.lastIndexOf("::")).replace("::", ",");
+        String convertedLine = COLON_DELIMITER_PATTERN.matcher(line.substring(0, line.lastIndexOf(COLON_DELIMTER))).replaceAll(",");
         writer.println(convertedLine);
       }
       writer.flush();
