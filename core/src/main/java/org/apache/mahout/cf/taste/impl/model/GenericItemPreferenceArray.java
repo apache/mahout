@@ -129,6 +129,16 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
   private void selectionSort(int type) {
     // I think this sort will prove to be too dumb, but, it's in place and OK for tiny, mostly sorted data
     int max = length();
+    boolean sorted = true;
+    for (int i = 1; i < max; i++) {
+      if (isLess(i, i-1, type)) {
+        sorted = false;
+        break;
+      }
+    }
+    if (sorted) {
+      return;
+    }
     for (int i = 0; i < max; i++) {
       int min = i;
       for (int j = i + 1; j < max; j++) {
