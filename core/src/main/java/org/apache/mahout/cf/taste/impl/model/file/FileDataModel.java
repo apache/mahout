@@ -251,8 +251,8 @@ public class FileDataModel implements DataModel {
       throw new IllegalArgumentException("Bad line: " + line);
     }
 
-    long userID = Long.parseLong(line.substring(0, delimiterOne));
-    long itemID = Long.parseLong(line.substring(delimiterOne + 1, delimiterTwo));
+    long userID = readUserIDFromString(line.substring(0, delimiterOne));
+    long itemID = readItemIDFromString(line.substring(delimiterOne + 1, delimiterTwo));
     String preferenceValueString = line.substring(delimiterTwo + 1);
 
     if (transpose) {
@@ -311,8 +311,8 @@ public class FileDataModel implements DataModel {
       throw new IllegalArgumentException("Bad line: " + line);
     }
 
-    long userID = Long.parseLong(line.substring(0, delimiterOne));
-    long itemID = Long.parseLong(line.substring(delimiterOne + 1));
+    long userID = readUserIDFromString(line.substring(0, delimiterOne));
+    long itemID = readItemIDFromString(line.substring(delimiterOne + 1));
 
     if (transpose) {
       long tmp = userID;
@@ -331,6 +331,24 @@ public class FileDataModel implements DataModel {
     if (!loaded) {
       reload();
     }
+  }
+
+  /**
+   * Subclasses may wish to override this if ID values in the file are not numeric. This
+   * provides a hook by which subclasses can inject an
+   * {@link org.apache.mahout.cf.taste.model.IDMigrator} to perform translation.
+   */
+  protected long readUserIDFromString(String value) {
+    return Long.parseLong(value);
+  }
+
+  /**
+   * Subclasses may wish to override this if ID values in the file are not numeric. This
+   * provides a hook by which subclasses can inject an
+   * {@link org.apache.mahout.cf.taste.model.IDMigrator} to perform translation.
+   */
+  protected long readItemIDFromString(String value) {
+    return Long.parseLong(value);
   }
 
   @Override

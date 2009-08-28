@@ -236,7 +236,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       stmt = conn.prepareStatement(getUserSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
-      stmt.setLong(1, id);
+      setLongParameter(stmt, 1, id);
 
       log.debug("Executing SQL query: {}", getUserSQL);
       rs = stmt.executeQuery();
@@ -283,7 +283,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       Long currentUserID = null;
       List<Preference> currentPrefs = new ArrayList<Preference>();
       while (rs.next()) {
-        long nextUserID = rs.getLong(1);
+        long nextUserID = getLongColumn(rs, 1);
         if (currentUserID != null && !currentUserID.equals(nextUserID)) {
           if (!currentPrefs.isEmpty()) {
             result.put(currentUserID, new GenericUserPreferenceArray(currentPrefs));
@@ -332,14 +332,14 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       long currentUserID = 0L; // value isn't used
       FastIDSet currentItemIDs = new FastIDSet(2);
       while (rs.next()) {
-        long nextUserID = rs.getLong(1);
+        long nextUserID = getLongColumn(rs, 1);
         if (currentUserIDSet && currentUserID != nextUserID) {
           if (!currentItemIDs.isEmpty()) {
             result.put(currentUserID, currentItemIDs);
             currentItemIDs = new FastIDSet(2);
           }
         } else {
-          currentItemIDs.add(rs.getLong(2));
+          currentItemIDs.add(getLongColumn(rs, 2));
         }
         currentUserID = nextUserID;
         currentUserIDSet = true;
@@ -374,14 +374,14 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       stmt = conn.prepareStatement(getUserSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
-      stmt.setLong(1, id);
+      setLongParameter(stmt, 1, id);
 
       log.debug("Executing SQL query: {}", getUserSQL);
       rs = stmt.executeQuery();
 
       FastIDSet result = new FastIDSet();
       while (rs.next()) {
-        result.add(rs.getLong(2));
+        result.add(getLongColumn(rs, 2));
       }
 
       if (result.isEmpty()) {
@@ -410,8 +410,8 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       stmt = conn.prepareStatement(getPreferenceSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(1);
-      stmt.setLong(1, userID);
-      stmt.setLong(2, itemID);
+      setLongParameter(stmt, 1, userID);
+      setLongParameter(stmt, 2, itemID);
 
       log.debug("Executing SQL query: {}", getPreferenceSQL);
       rs = stmt.executeQuery();
@@ -450,7 +450,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       stmt = conn.prepareStatement(getPrefsForItemSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
-      stmt.setLong(1, itemID);
+      setLongParameter(stmt, 1, itemID);
 
       log.debug("Executing SQL query: {}", getPrefsForItemSQL);
       rs = stmt.executeQuery();
@@ -510,7 +510,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       stmt.setFetchSize(getFetchSize());
       if (args != null) {
         for (int i = 1; i <= args.length; i++) {
-          stmt.setLong(i, args[i - 1]);
+          setLongParameter(stmt, i, args[i-1]);
         }
       }
       log.debug("Executing SQL query: {}", sql);
@@ -539,8 +539,8 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     try {
       conn = dataSource.getConnection();
       stmt = conn.prepareStatement(setPreferenceSQL);
-      stmt.setLong(1, userID);
-      stmt.setLong(2, itemID);
+      setLongParameter(stmt, 1, userID);
+      setLongParameter(stmt, 2, itemID);
       stmt.setDouble(3, value);
       stmt.setDouble(4, value);
 
@@ -566,8 +566,8 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     try {
       conn = dataSource.getConnection();
       stmt = conn.prepareStatement(removePreferenceSQL);
-      stmt.setLong(1, userID);
-      stmt.setLong(2, itemID);
+      setLongParameter(stmt, 1, userID);
+      setLongParameter(stmt, 2, itemID);
 
       log.debug("Executing SQL update: {}", removePreferenceSQL);
       stmt.executeUpdate();
@@ -587,8 +587,28 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     itemPrefCounts.clear();
   }
 
+  // Some overrideable methods to customize the class behavior:
+
   protected Preference buildPreference(ResultSet rs) throws SQLException {
-    return new GenericPreference(rs.getLong(1), rs.getLong(2), rs.getFloat(3));
+    return new GenericPreference(getLongColumn(rs, 1), getLongColumn(rs, 2), rs.getFloat(3));
+  }
+
+  /**
+   * Subclasses may wish to override this if ID values in the file are not numeric. This
+   * provides a hook by which subclasses can inject an
+   * {@link org.apache.mahout.cf.taste.model.IDMigrator} to perform translation.
+   */
+  protected long getLongColumn(ResultSet rs, int position) throws SQLException {
+    return rs.getLong(position);
+  }
+
+  /**
+   * Subclasses may wish to override this if ID values in the file are not numeric. This
+   * provides a hook by which subclasses can inject an
+   * {@link org.apache.mahout.cf.taste.model.IDMigrator} to perform translation.
+   */
+  protected void setLongParameter(PreparedStatement stmt, int position, long value) throws SQLException {
+    stmt.setLong(position, value);
   }
 
   /**
@@ -654,7 +674,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       }
 
       try {
-        long ID = resultSet.getLong(1);
+        long ID = getLongColumn(resultSet, 1);
         resultSet.next();
         return ID;
       } catch (SQLException sqle) {
@@ -672,7 +692,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
         throw new NoSuchElementException();
       }
       try {
-        return resultSet.getLong(1);
+        return getLongColumn(resultSet, 1);
       } catch (SQLException sqle) {
         // No good way to handle this since we can't throw an exception
         log.warn("Exception while iterating", sqle);

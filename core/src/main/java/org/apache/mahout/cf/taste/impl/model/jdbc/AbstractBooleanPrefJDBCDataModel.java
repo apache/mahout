@@ -75,7 +75,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
 
   @Override
   protected Preference buildPreference(ResultSet rs) throws SQLException {
-    return new BooleanPreference(rs.getLong(1), rs.getLong(2));
+    return new BooleanPreference(getLongColumn(rs, 1), getLongColumn(rs, 2));
   }
 
   @Override
@@ -92,8 +92,8 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
     try {
       conn = getDataSource().getConnection();
       stmt = conn.prepareStatement(setPreferenceSQL);
-      stmt.setObject(1, userID);
-      stmt.setObject(2, itemID);
+      setLongParameter(stmt, 1, userID);
+      setLongParameter(stmt, 2, itemID);
 
       log.debug("Executing SQL update: {}", setPreferenceSQL);
       stmt.executeUpdate();
