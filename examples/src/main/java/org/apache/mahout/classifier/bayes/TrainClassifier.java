@@ -25,7 +25,9 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
-import org.apache.mahout.classifier.cbayes.CBayesDriver;
+import org.apache.mahout.classifier.bayes.common.BayesParameters;
+import org.apache.mahout.classifier.bayes.mapreduce.bayes.BayesDriver;
+import org.apache.mahout.classifier.bayes.mapreduce.cbayes.CBayesDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,15 +60,15 @@ public class TrainClassifier {
   private TrainClassifier() {
   }
 
-  public static void trainNaiveBayes(String dir, String outputDir, int gramSize) throws IOException {
-    BayesDriver.runJob(dir, outputDir, gramSize);
+  public static void trainNaiveBayes(String dir, String outputDir, BayesParameters params) throws IOException, InterruptedException, ClassNotFoundException {
+    BayesDriver.runJob(dir, outputDir, params);
   }
   
-  public static void trainCNaiveBayes(String dir, String outputDir, int gramSize) throws IOException {
-    CBayesDriver.runJob(dir, outputDir, gramSize);
+  public static void trainCNaiveBayes(String dir, String outputDir, BayesParameters params) throws IOException, InterruptedException, ClassNotFoundException {
+    CBayesDriver.runJob(dir, outputDir, params);
   }
 
-  public static void main(String[] args) throws IOException, OptionException {
+  public static void main(String[] args) throws IOException, OptionException, NumberFormatException, IllegalStateException, InterruptedException, ClassNotFoundException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -86,19 +88,33 @@ public class TrainClassifier {
     Option typeOpt = obuilder.withLongName("classifierType").withRequired(true).withArgument(
             abuilder.withName("classifierType").withMinimum(1).withMaximum(1).create()).
             withDescription("Type of classifier: bayes or cbayes").withShortName("type").create();
-    Group group = gbuilder.withName("Options").withOption(gramSizeOpt).withOption(inputDirOpt).withOption(outputOpt).withOption(typeOpt).create();
+    Option dataSourceOpt = obuilder.withLongName("dataSource").withRequired(
+        true).withArgument(
+        abuilder.withName("dataSource").withMinimum(1).withMaximum(1).create())
+        .withDescription("Location of model: hdfs|hbase").withShortName(
+            "source").create();
+
+    Group group = gbuilder.withName("Options").withOption(gramSizeOpt).withOption(inputDirOpt).withOption(outputOpt).withOption(typeOpt).withOption(dataSourceOpt).create();
     Parser parser = new Parser();
     parser.setGroup(group);
     CommandLine cmdLine = parser.parse(args);
     String classifierType = (String) cmdLine.getValue(typeOpt);
+    String dataSourceType = (String) cmdLine.getValue(dataSourceOpt);
+    BayesParameters params = new BayesParameters(Integer.parseInt((String) cmdLine.getValue(gramSizeOpt)));
+    
+    if(dataSourceType.equals("hbase"))
+      params.set("dataSource", "hbase");
+    else
+      params.set("dataSource", "hdfs");
+    
     if (classifierType.equalsIgnoreCase("bayes")) {
       log.info("Training Bayes Classifier");
-      trainNaiveBayes((String)cmdLine.getValue(inputDirOpt), (String)cmdLine.getValue(outputOpt), Integer.parseInt((String) cmdLine.getValue(gramSizeOpt)));
+      trainNaiveBayes((String)cmdLine.getValue(inputDirOpt), (String)cmdLine.getValue(outputOpt), params);
 
     } else if (classifierType.equalsIgnoreCase("cbayes")) {
       log.info("Training Complementary Bayes Classifier");
       //setup the HDFS and copy the files there, then run the trainer
-      trainCNaiveBayes((String) cmdLine.getValue(inputDirOpt), (String) cmdLine.getValue(outputOpt), Integer.parseInt((String) cmdLine.getValue(gramSizeOpt)));
+      trainCNaiveBayes((String) cmdLine.getValue(inputDirOpt), (String) cmdLine.getValue(outputOpt), params);
     }
   }
 }

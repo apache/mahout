@@ -13,7 +13,8 @@
     </parent>
     <properties>
         <junit.version>3.8.2</junit.version>
-        <hadoop.version>0.20.0</hadoop.version>
+	 <hadoop.version>0.20.0</hadoop.version>
+	 <hbase.version>0.20.0</hbase.version>
         <kfs.version>0.2.2</kfs.version>
         <xmlenc.version>0.52</xmlenc.version>
         <jets3t.version>0.6.1</jets3t.version>

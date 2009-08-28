@@ -114,7 +114,22 @@
               <createChecksum>true</createChecksum>
             </configuration>
           </execution>
-
+ 	  <execution>
+            <id>create-hbase-artifact</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>install-file</goal>
+            </goals>
+            <configuration>
+              <file>lib/hbase-${hbase.version}.jar</file>
+              <groupId>org.apache.mahout.hbase</groupId>
+              <artifactId>hbase</artifactId>
+              <packaging>jar</packaging>
+              <version>${hbase.version}</version>
+              <generatePom>true</generatePom>
+              <createChecksum>true</createChecksum>
+            </configuration>
+          </execution>
           <execution>
             <id>create-kfs-artifact</id>
             <phase>validate</phase>
@@ -428,6 +443,11 @@
       <groupId>org.apache.mahout.hadoop</groupId>
       <artifactId>hadoop-core</artifactId>
       <version>${hadoop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.mahout.hbase</groupId>
+      <artifactId>hbase</artifactId>
+      <version>${hbase.version}</version>
     </dependency>
 
     <dependency>

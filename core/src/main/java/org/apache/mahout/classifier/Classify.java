@@ -25,18 +25,21 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
-import org.apache.mahout.classifier.bayes.BayesClassifier;
-import org.apache.mahout.classifier.bayes.BayesModel;
-import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
-import org.apache.mahout.classifier.cbayes.CBayesModel;
-import org.apache.mahout.common.Classifier;
-import org.apache.mahout.common.Model;
+
+import org.apache.mahout.classifier.bayes.algorithm.BayesAlgorithm;
+import org.apache.mahout.classifier.bayes.algorithm.CBayesAlgorithm;
+import org.apache.mahout.classifier.bayes.common.BayesParameters;
+import org.apache.mahout.classifier.bayes.datastore.HBaseBayesDatastore;
+import org.apache.mahout.classifier.bayes.datastore.InMemoryBayesDatastore;
+import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
+import org.apache.mahout.classifier.bayes.interfaces.Algorithm;
+import org.apache.mahout.classifier.bayes.interfaces.Datastore;
+import org.apache.mahout.classifier.bayes.model.ClassifierContext;
+import org.apache.mahout.utils.nlp.NGrams;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,9 +48,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Classify {
 
@@ -56,81 +57,130 @@ public class Classify {
   private Classify() {
   }
 
-  public static void main(String[] args)
-      throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException, OptionException {
+
+  public static void main(String[] args) throws IOException,
+      ClassNotFoundException, IllegalAccessException, InstantiationException,
+      OptionException, InvalidDatastoreException {
+
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option pathOpt = obuilder.withLongName("path").withRequired(true).withArgument(
-        abuilder.withName("path").withMinimum(1).withMaximum(1).create()).withDescription("The local file system path").withShortName("p").create();
 
-    Option classifyOpt = obuilder.withLongName("classify").withRequired(true).withArgument(
-        abuilder.withName("classify").withMinimum(1).withMaximum(1).create()).
-        withDescription("The doc to classify").withShortName("").create();
+    Option pathOpt = obuilder.withLongName("path").withRequired(true)
+        .withArgument(
+            abuilder.withName("path").withMinimum(1).withMaximum(1).create())
+        .withDescription("The local file system path").withShortName("m")
+        .create();
 
-    Option encodingOpt = obuilder.withLongName("encoding").withRequired(true).withArgument(
-        abuilder.withName("encoding").withMinimum(1).withMaximum(1).create()).
-        withDescription("The file encoding.  Default: UTF-8").withShortName("e").create();
+    Option classifyOpt = obuilder.withLongName("classify").withRequired(true)
+        .withArgument(
+            abuilder.withName("classify").withMinimum(1).withMaximum(1)
+                .create()).withDescription("The doc to classify")
+        .withShortName("").create();
 
-    Option analyzerOpt = obuilder.withLongName("analyzer").withRequired(true).withArgument(
-        abuilder.withName("analyzer").withMinimum(1).withMaximum(1).create()).
-        withDescription("The Analyzer to use").withShortName("a").create();
+    Option encodingOpt = obuilder.withLongName("encoding").withRequired(true)
+        .withArgument(
+            abuilder.withName("encoding").withMinimum(1).withMaximum(1)
+                .create())
+        .withDescription("The file encoding.  Default: UTF-8").withShortName(
+            "e").create();
 
-    Option defaultCatOpt = obuilder.withLongName("defaultCat").withRequired(true).withArgument(
-        abuilder.withName("defaultCat").withMinimum(1).withMaximum(1).create()).
-        withDescription("The default category").withShortName("d").create();
 
-    Option gramSizeOpt = obuilder.withLongName("gramSize").withRequired(true).withArgument(
-        abuilder.withName("gramSize").withMinimum(1).withMaximum(1).create()).
-        withDescription("Size of the n-gram").withShortName("ng").create();
+    Option analyzerOpt = obuilder.withLongName("analyzer").withRequired(true)
+        .withArgument(
+            abuilder.withName("analyzer").withMinimum(1).withMaximum(1)
+                .create()).withDescription("The Analyzer to use")
+        .withShortName("a").create();
 
-    Option typeOpt = obuilder.withLongName("classifierType").withRequired(true).withArgument(
-        abuilder.withName("classifierType").withMinimum(1).withMaximum(1).create()).
-        withDescription("Type of classifier").withShortName("type").create();
 
-    Group options = gbuilder.withName("Options").withOption(pathOpt).withOption(classifyOpt).withOption(encodingOpt).withOption(analyzerOpt).withOption(defaultCatOpt).withOption(gramSizeOpt).withOption(typeOpt).create();
+    Option defaultCatOpt = obuilder.withLongName("defaultCat").withRequired(
+        true).withArgument(
+        abuilder.withName("defaultCat").withMinimum(1).withMaximum(1).create())
+        .withDescription("The default category").withShortName("d").create();
+
+
+    Option gramSizeOpt = obuilder.withLongName("gramSize").withRequired(true)
+        .withArgument(
+            abuilder.withName("gramSize").withMinimum(1).withMaximum(1)
+                .create()).withDescription("Size of the n-gram").withShortName(
+            "ng").create();
+
+
+    Option typeOpt = obuilder.withLongName("classifierType").withRequired(true)
+        .withArgument(
+            abuilder.withName("classifierType").withMinimum(1).withMaximum(1)
+                .create()).withDescription("Type of classifier").withShortName(
+            "type").create();
+
+    Option dataSourceOpt = obuilder.withLongName("dataSource").withRequired(
+        true).withArgument(
+        abuilder.withName("dataSource").withMinimum(1).withMaximum(1).create())
+        .withDescription("Location of model: hdfs|hbase").withShortName(
+            "source").create();
+
+    Group options = gbuilder.withName("Options").withOption(pathOpt)
+        .withOption(classifyOpt).withOption(encodingOpt)
+        .withOption(analyzerOpt).withOption(defaultCatOpt).withOption(
+            gramSizeOpt).withOption(typeOpt).withOption(dataSourceOpt).create();
 
     Parser parser = new Parser();
     parser.setGroup(options);
     CommandLine cmdLine = parser.parse(args);
 
-    JobConf conf = new JobConf(Classify.class);
 
-    Map<String, Path> modelPaths = new HashMap<String, Path>();
+    int gramSize = 1;
+    if (cmdLine.hasOption(gramSizeOpt)) {
+      gramSize = Integer.parseInt((String) cmdLine.getValue(gramSizeOpt));
+
+    }
+
+    BayesParameters params = new BayesParameters(gramSize);
+
     String modelBasePath = (String) cmdLine.getValue(pathOpt);
-    modelPaths.put("sigma_j", new Path(modelBasePath + "/trainer-weights/Sigma_j/part-*"));
-    modelPaths.put("sigma_k", new Path(modelBasePath + "/trainer-weights/Sigma_k/part-*"));
-    modelPaths.put("sigma_kSigma_j", new Path(modelBasePath + "/trainer-weights/Sigma_kSigma_j/part-*"));
-    modelPaths.put("thetaNormalizer", new Path(modelBasePath + "/trainer-thetaNormalizer/part-*"));
-    modelPaths.put("weight", new Path(modelBasePath + "/trainer-tfIdf/trainer-tfIdf/part-*"));
 
-    FileSystem fs = FileSystem.get((new Path(modelBasePath)).toUri(), conf);
+    log.info("Loading model from: {}", params.print());
 
-    log.info("Loading model from: {}", modelPaths);
-
-    Model model;
+    Algorithm algorithm = null;
+    Datastore datastore = null;
 
     String classifierType = (String) cmdLine.getValue(typeOpt);
 
-    if (classifierType.equalsIgnoreCase("bayes")) {
-      log.info("Testing Bayes Classifier");
-      model = new BayesModel();
-    } else if (classifierType.equalsIgnoreCase("cbayes")) {
-      log.info("Testing Complementary Bayes Classifier");
-      model = new CBayesModel();
+    String dataSource = (String) cmdLine.getValue(dataSourceOpt);
+    if (dataSource.equals("hdfs")) {
+      if (classifierType.equalsIgnoreCase("bayes")) {
+        log.info("Testing Bayes Classifier");
+        algorithm = new BayesAlgorithm();
+        datastore = new InMemoryBayesDatastore(params);
+      } else if (classifierType.equalsIgnoreCase("cbayes")) {
+        log.info("Testing Complementary Bayes Classifier");
+        algorithm = new CBayesAlgorithm();
+        datastore = new InMemoryBayesDatastore(params);
+      } else {
+        throw new IllegalArgumentException("Unrecognized classifier type: "
+            + classifierType);
+      }
+
+    } else if (dataSource.equals("hbase")) {
+      if (classifierType.equalsIgnoreCase("bayes")) {
+        log.info("Testing Bayes Classifier");
+        algorithm = new BayesAlgorithm();
+        datastore = new HBaseBayesDatastore(modelBasePath, params);
+      } else if (classifierType.equalsIgnoreCase("cbayes")) {
+        log.info("Testing Complementary Bayes Classifier");
+        algorithm = new CBayesAlgorithm();
+        datastore = new HBaseBayesDatastore(modelBasePath, params);
+      } else {
+        throw new IllegalArgumentException("Unrecognized classifier type: "
+            + classifierType);
+      }
+
     } else {
-      throw new IllegalArgumentException("Unrecognized classifier type: " + classifierType);
+      throw new IllegalArgumentException("Unrecognized dataSource type: "
+          + dataSource);
     }
-    Classifier classifier = new BayesClassifier();
-
-    SequenceFileModelReader.loadModel(model, fs, modelPaths, conf);
-
-    log.info("Done loading model: # labels: {}", model.getLabels().size());
-
-    log.info("Done generating Model");
-
-
+    ClassifierContext classifier = new ClassifierContext(algorithm, datastore);
+    classifier.initialize();
     String defaultCat = "unknown";
     if (cmdLine.hasOption(defaultCatOpt)) {
       defaultCat = (String) cmdLine.getValue(defaultCatOpt);
@@ -143,29 +193,29 @@ public class Classify {
     Analyzer analyzer = null;
     if (cmdLine.hasOption(analyzerOpt)) {
       String className = (String) cmdLine.getValue(analyzerOpt);
-      analyzer = Class.forName(className).asSubclass(Analyzer.class).newInstance();
+      analyzer = Class.forName(className).asSubclass(Analyzer.class)
+          .newInstance();
     }
     if (analyzer == null) {
       analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
     }
 
-    int gramSize = 1;
-    if (cmdLine.hasOption(gramSizeOpt)) {
-      gramSize = Integer.parseInt((String) cmdLine
-          .getValue(gramSizeOpt));
-
-    }
-
     log.info("Converting input document to proper format");
-    String[] document = BayesFileFormatter.readerToDocument(analyzer, new InputStreamReader(new FileInputStream(docPath), Charset.forName(encoding)));
+    String[] document = BayesFileFormatter.readerToDocument(analyzer,
+        new InputStreamReader(new FileInputStream(docPath), Charset
+            .forName(encoding)));
     StringBuilder line = new StringBuilder();
     for (String token : document) {
       line.append(token).append(' ');
     }
-    List<String> doc = Model.generateNGramsWithoutLabel(line.toString(), gramSize);
+
+    List<String> doc = new NGrams(line.toString(), gramSize)
+        .generateNGramsWithoutLabel();
+
     log.info("Done converting");
     log.info("Classifying document: {}", docPath);
-    ClassifierResult category = classifier.classify(model, doc.toArray(new String[doc.size()]), defaultCat);
+    ClassifierResult category = classifier.classifyDocument(doc
+        .toArray(new String[doc.size()]), defaultCat);
     log.info("Category for {} is {}", docPath, category);
 
   }

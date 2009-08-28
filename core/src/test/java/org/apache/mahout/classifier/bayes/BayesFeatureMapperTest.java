@@ -22,7 +22,11 @@ import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.mahout.classifier.bayes.common.BayesFeatureMapper;
+import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapred.TaskReport;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.mahout.classifier.bayes.mapreduce.common.BayesFeatureMapper;
+import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.utils.DummyOutputCollector;
 
 import java.util.List;
@@ -35,12 +39,11 @@ public class BayesFeatureMapperTest extends TestCase {
     JobConf conf = new JobConf();
     conf.set("io.serializations",
         "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
-    DefaultStringifier<Integer> intStringifier = new DefaultStringifier<Integer>(conf, Integer.class);
-    conf.set("bayes.gramSize", intStringifier.toString(3));
+    conf.set("bayes.parameters", new BayesParameters(3).toString());
     mapper.configure(conf);
 
     DummyOutputCollector<Text, DoubleWritable> output = new DummyOutputCollector<Text, DoubleWritable>();
-    mapper.map(new Text("foo"), new Text("big brown shoe"), output, null);
+    mapper.map(new Text("foo"), new Text("big brown shoe"), output, Reporter.NULL);
     Map<String, List<DoubleWritable>> outMap = output.getData();
     System.out.println("Map: " + outMap);
     assertNotNull("outMap is null and it shouldn't be", outMap);
