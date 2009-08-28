@@ -142,10 +142,8 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
       return Double.NaN;
     }
 
-    Preference xPref = xPrefs.get(0);
-    Preference yPref = yPrefs.get(0);
-    long xIndex = xPref.getItemID();
-    long yIndex = yPref.getItemID();
+    long xIndex = xPrefs.getItemID(0);
+    long yIndex = yPrefs.getItemID(0);
     int xPrefIndex = 0;
     int yPrefIndex = 0;
 
@@ -168,24 +166,24 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
         if (xIndex == yIndex) {
           // Both users expressed a preference for the item
           if (hasPrefTransform) {
-            x = prefTransform.getTransformedValue(xPref);
-            y = prefTransform.getTransformedValue(yPref);
+            x = prefTransform.getTransformedValue(xPrefs.get(xPrefIndex));
+            y = prefTransform.getTransformedValue(yPrefs.get(yPrefIndex));
           } else {
-            x = xPref.getValue();
-            y = yPref.getValue();
+            x = xPrefs.getValue(xPrefIndex);
+            y = yPrefs.getValue(yPrefIndex);
           }
         } else {
           // Only one user expressed a preference, but infer the other one's preference and tally
           // as if the other user expressed that preference
           if (compare < 0) {
             // X has a value; infer Y's
-            x = hasPrefTransform ? prefTransform.getTransformedValue(xPref) : xPref.getValue();
+            x = hasPrefTransform ? prefTransform.getTransformedValue(xPrefs.get(xPrefIndex)) : xPrefs.getValue(xPrefIndex);
             y = inferrer.inferPreference(userID2, xIndex);
           } else {
             // compare > 0
             // Y has a value; infer X's
             x = inferrer.inferPreference(userID1, yIndex);
-            y = hasPrefTransform ? prefTransform.getTransformedValue(yPref) : yPref.getValue();
+            y = hasPrefTransform ? prefTransform.getTransformedValue(yPrefs.get(yPrefIndex)) : yPrefs.getValue(yPrefIndex);
           }
         }
         sumXY += x * y;
@@ -201,15 +199,13 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
         if (++xPrefIndex >= xLength) {
           break;
         }
-        xPref = xPrefs.get(xPrefIndex);
-        xIndex = xPref.getItemID();
+        xIndex = xPrefs.getItemID(xPrefIndex);
       }
       if (compare >= 0) {
         if (++yPrefIndex >= yLength) {
           break;
         }
-        yPref = yPrefs.get(yPrefIndex);
-        yIndex = yPref.getItemID();
+        yIndex = yPrefs.getItemID(yPrefIndex);
       }
     }
 
@@ -247,12 +243,10 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
       return Double.NaN;
     }
 
-    Preference xPref = xPrefs.get(0);
-    Preference yPref = yPrefs.get(0);
-    long xIndex = xPref.getUserID();
-    long yIndex = yPref.getUserID();
-    int xPrefIndex = 1;
-    int yPrefIndex = 1;
+    long xIndex = xPrefs.getUserID(0);
+    long yIndex = yPrefs.getUserID(0);
+    int xPrefIndex = 0;
+    int yPrefIndex = 0;
 
     double sumX = 0.0;
     double sumX2 = 0.0;
@@ -268,8 +262,8 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
       int compare = xIndex < yIndex ? -1 : xIndex > yIndex ? 1 : 0;
       if (compare == 0) {
         // Both users expressed a preference for the item
-        double x = xPref.getValue();
-        double y = yPref.getValue();
+        double x = xPrefs.getValue(xPrefIndex);
+        double y = yPrefs.getValue(yPrefIndex);
         sumXY += x * y;
         sumX += x;
         sumX2 += x * x;
@@ -280,18 +274,16 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
         count++;
       }
       if (compare <= 0) {
-        if (xPrefIndex == xLength) {
+        if (++xPrefIndex == xLength) {
           break;
         }
-        xPref = xPrefs.get(xPrefIndex++);
-        xIndex = xPref.getUserID();
+        xIndex = xPrefs.getUserID(xPrefIndex);
       }
       if (compare >= 0) {
-        if (yPrefIndex == yLength) {
+        if (++yPrefIndex == yLength) {
           break;
         }
-        yPref = yPrefs.get(yPrefIndex++);
-        yIndex = yPref.getUserID();
+        yIndex = yPrefs.getUserID(yPrefIndex);
       }
     }
 

@@ -118,9 +118,13 @@ public final class PlusAnonymousUserDataModel implements DataModel {
         int length = delegatePrefs.length();
         PreferenceArray newPreferenceArray = new GenericItemPreferenceArray(length + 1);
         for (int j = 0; j < length; j++) {
-          newPreferenceArray.set(j, delegatePrefs.get(j));
+          newPreferenceArray.setUserID(j, delegatePrefs.getUserID(j));
+          newPreferenceArray.setItemID(j, delegatePrefs.getItemID(j));
+          newPreferenceArray.setValue(j, delegatePrefs.getValue(j));
         }
-        newPreferenceArray.set(length, tempPrefs.get(i));
+        newPreferenceArray.setUserID(length, tempPrefs.getUserID(i));
+        newPreferenceArray.setItemID(length, tempPrefs.getItemID(i));
+        newPreferenceArray.setValue(length, tempPrefs.getValue(i));
         newPreferenceArray.sortByUser();
         return newPreferenceArray;
       }
