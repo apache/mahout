@@ -162,7 +162,14 @@ public class SparseVector extends AbstractVector {
     }
 
     Vector that = (Vector) o;
+    String thatName = that.getName();
     if (this.size() != that.size()) {
+      return false;
+    }
+    if (name != null && thatName != null && !name.equals(thatName)) {
+      return false;
+    } else if ((name != null && thatName == null)
+        || (thatName != null && name == null)) {
       return false;
     }
 
@@ -173,14 +180,6 @@ public class SparseVector extends AbstractVector {
       return equivalent(this, that);
     }
 
-  }
-
-  @Override
-  public int hashCode() {
-    int result = (values != null ? values.hashCode() : 0);
-    result = 31 * result + cardinality;
-    result = 31 * result + (name == null ? 0 : name.hashCode());
-    return result;
   }
 
   private class AllIterator implements java.util.Iterator<Vector.Element> {

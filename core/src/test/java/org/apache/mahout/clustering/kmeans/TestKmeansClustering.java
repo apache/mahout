@@ -27,6 +27,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
+import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
@@ -343,8 +344,8 @@ public class TestKmeansClustering extends TestCase {
         converged = converged && cluster.isConverged();
         //Since we aren't roundtripping through Writable, we need to compare the reference center with the cluster centroid
         cluster.recomputeCenter();
-        assertEquals(i + " reference center: " + ref.getCenter().asFormatString() + " and cluster center:  "
-            + cluster.getCenter().asFormatString() + " are not equal", ref.getCenter(), cluster.getCenter());
+        assertTrue(i + " reference center: " + ref.getCenter().asFormatString() + " and cluster center:  "
+                   + cluster.getCenter().asFormatString() + " are not equal", AbstractVector.equivalent(ref.getCenter(), cluster.getCenter()));
 
         /*assertEquals(k + " center[" + key + "][1]", ref.getCenter().get(1),
             cluster.getCenter().get(1));*/

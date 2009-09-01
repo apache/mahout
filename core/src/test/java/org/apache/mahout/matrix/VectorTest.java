@@ -54,6 +54,22 @@ public class VectorTest extends TestCase {
     assertTrue("equals didn't work", left.equals(right));
     assertTrue("equivalent didn't work", AbstractVector.strictEquivalence(left, right) == false);
 
+    DenseVector leftBar = new DenseVector("bar", 3);
+    leftBar.setQuick(0, 1);
+    leftBar.setQuick(1, 2);
+    leftBar.setQuick(2, 3);
+    assertTrue("equivalent didn't work", AbstractVector.equivalent(leftBar, right));
+    assertTrue("equals didn't work", leftBar.equals(right) == false);
+    assertTrue("equivalent didn't work", AbstractVector.strictEquivalence(left, right) == false);
+
+    SparseVector rightBar = new SparseVector("bar", 3);
+    rightBar.setQuick(0, 1);
+    rightBar.setQuick(1, 2);
+    rightBar.setQuick(2, 3);
+    assertTrue("equivalent didn't work", AbstractVector.equivalent(left, rightBar));
+    assertTrue("equals didn't work", left.equals(rightBar) == false);
+    assertTrue("equivalent didn't work", AbstractVector.strictEquivalence(left, rightBar) == false);
+
     right.setQuick(2, 4);
     assertTrue("equivalent didn't work",
         AbstractVector.equivalent(left, right) == false);
@@ -391,6 +407,58 @@ public class VectorTest extends TestCase {
     assertEquals("Fee", 1.1, test.get("Fee"));
     assertEquals("Fie", 2.2, test.get("Fie"));
     assertEquals("Foe", 3.3, test.get("Foe"));
+  }
+
+  public void testHashCodeEquivalence() {
+    // Hash codes must be equal if the vectors are considered equal
+    SparseVector sparseLeft = new SparseVector(3);
+    DenseVector denseRight = new DenseVector(3);
+    sparseLeft.setQuick(0, 1);
+    sparseLeft.setQuick(1, 2);
+    sparseLeft.setQuick(2, 3);
+    denseRight.setQuick(0, 1);
+    denseRight.setQuick(1, 2);
+    denseRight.setQuick(2, 3);
+    assertEquals(sparseLeft, denseRight);
+    assertEquals(sparseLeft.hashCode(), denseRight.hashCode());
+
+    DenseVector denseLeft = new DenseVector(3);
+    denseLeft.setQuick(0, 1);
+    denseLeft.setQuick(1, 2);
+    denseLeft.setQuick(2, 3);
+    assertEquals(denseLeft, denseRight);
+    assertEquals(denseLeft.hashCode(), denseRight.hashCode());
+
+    SparseVector sparseRight = new SparseVector(3);
+    sparseRight.setQuick(0, 1);
+    sparseRight.setQuick(1, 2);
+    sparseRight.setQuick(2, 3);
+    assertEquals(sparseLeft, sparseRight);
+    assertEquals(sparseLeft.hashCode(), sparseRight.hashCode());
+
+    DenseVector emptyLeft = new DenseVector("foo", 0);
+    SparseVector emptyRight = new SparseVector("foo", 0);
+    assertEquals(emptyLeft, emptyRight);
+    assertEquals(emptyLeft.hashCode(), emptyRight.hashCode());
+  }
+
+  public void testHashCode() {
+    // Make sure that hash([1,0,2]) != hash([1,2,0])
+    SparseVector left = new SparseVector(3);
+    SparseVector right = new SparseVector(3);
+    left.setQuick(0,1);
+    left.setQuick(2,2);
+    right.setQuick(0,1);
+    right.setQuick(1,2);
+    assertFalse(left.equals(right));
+    assertFalse(left.hashCode() == right.hashCode());
+
+    // Make sure that hash([1,0,2,0,0,0]) != hash([1,0,2])
+    right = new SparseVector(5);
+    right.setQuick(0,1);
+    right.setQuick(2,2);
+    assertFalse(left.equals(right));
+    assertFalse(left.hashCode() == right.hashCode());
   }
 
 }
