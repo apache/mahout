@@ -81,7 +81,8 @@ public class BayesTfIdfReducer extends MapReduceBase implements
       }
       if (numberofValues == 2) { // Found TFIdf
 
-        String label = token.split(",")[0];
+        int comma = token.indexOf(',');
+        String label = comma < 0 ? token : token.substring(0, comma);
         String feature = token.substring(label.length() + 1);
         if (useHbase) {
           Put bu = new Put(Bytes.toBytes(feature));
@@ -110,8 +111,7 @@ public class BayesTfIdfReducer extends MapReduceBase implements
       table = new HTable(HBconf, job.get("output.table"));
 
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      log.error("Unexpected error during configuration", e);
     }
 
   }

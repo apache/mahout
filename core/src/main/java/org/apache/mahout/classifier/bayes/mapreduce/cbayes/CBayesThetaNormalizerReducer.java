@@ -29,6 +29,8 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.common.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -36,6 +38,10 @@ import java.util.Iterator;
 /** Can also be used as a local Combiner beacuse only two values should be there inside the values */
 public class CBayesThetaNormalizerReducer extends MapReduceBase implements
     Reducer<Text, DoubleWritable, Text, DoubleWritable> {
+
+  private static final Logger log = LoggerFactory
+      .getLogger(CBayesThetaNormalizerReducer.class);
+
   private HTable table;
 
   private HBaseConfiguration HBconf;
@@ -81,8 +87,7 @@ public class CBayesThetaNormalizerReducer extends MapReduceBase implements
       HBconf = new HBaseConfiguration(job);
       table = new HTable(HBconf, job.get("output.table"));
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      log.error("Unexpected error during configuration", e);
     }
   }
 

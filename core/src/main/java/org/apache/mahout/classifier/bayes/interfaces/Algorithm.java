@@ -17,7 +17,8 @@
 
 package org.apache.mahout.classifier.bayes.interfaces;
 
-import java.util.*;
+import java.util.Collection;
+
 import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 

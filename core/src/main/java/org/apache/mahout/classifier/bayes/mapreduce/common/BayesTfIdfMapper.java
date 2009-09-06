@@ -58,7 +58,7 @@ Mapper<Text, DoubleWritable, Text, DoubleWritable> {
       case '-': {// if it is the termDocumentCount
         labelFeaturePair = labelFeaturePair.substring(1);
         // -17th_century_mathematicians_anderson__alexander,1582
-        int idx = labelFeaturePair.indexOf(",");
+        int idx = labelFeaturePair.indexOf(',');
         if (idx != -1) {
           String label = labelFeaturePair.substring(0, idx);
 

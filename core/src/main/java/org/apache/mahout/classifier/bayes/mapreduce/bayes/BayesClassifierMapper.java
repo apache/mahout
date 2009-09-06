@@ -17,7 +17,6 @@
 
 package org.apache.mahout.classifier.bayes.mapreduce.bayes;
 
-import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
@@ -42,9 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /** Reads the input train set(preprocessed using the {@link BayesFileFormatter}). */
 public class BayesClassifierMapper extends MapReduceBase implements
@@ -75,8 +72,8 @@ public class BayesClassifierMapper extends MapReduceBase implements
     String label = key.toString();
 
 
-    StringBuilder builder = new StringBuilder(label);
-    builder.ensureCapacity(32);// make sure we have a reasonably size buffer to
+    //StringBuilder builder = new StringBuilder(label);
+    //builder.ensureCapacity(32);// make sure we have a reasonably size buffer to
                                // begin with
     List<String> ngrams  = new NGrams(value.toString(), gramSize).generateNGramsWithoutLabel(); 
     

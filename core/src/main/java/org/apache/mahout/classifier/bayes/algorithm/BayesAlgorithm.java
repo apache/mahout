@@ -17,7 +17,11 @@
 
 package org.apache.mahout.classifier.bayes.algorithm;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 import org.apache.hadoop.util.PriorityQueue;
 import org.apache.mahout.classifier.ClassifierResult;
@@ -70,7 +74,7 @@ public class BayesAlgorithm implements Algorithm{
     if (result.isEmpty()){
       result.add(new ClassifierResult(defaultCategory, 0));
     }
-    return result.toArray(new ClassifierResult[] {});  
+    return result.toArray(new ClassifierResult[result.size()]);  
   }
   
   @Override

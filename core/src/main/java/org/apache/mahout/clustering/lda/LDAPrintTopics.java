@@ -28,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.regex.Pattern;
 
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -49,6 +50,8 @@ import org.apache.mahout.utils.CommandLineUtil;
  * Class to print out the top K words for each topic.
  */
 public class LDAPrintTopics {
+  private static final Pattern TAB_PATTERN = Pattern.compile("\t");
+
   private LDAPrintTopics() {
   }
 
@@ -145,9 +148,9 @@ public class LDAPrintTopics {
     // skip 2 lines
     rdr.readLine();
     rdr.readLine();
-    String line = null;
+    String line;
     while ( (line = rdr.readLine()) != null) {
-      String[] parts = line.split("\t");
+      String[] parts = TAB_PATTERN.split(line);
       String word = parts[0];
       int index = Integer.parseInt(parts[2]);
       assert index == result.size();
@@ -226,8 +229,6 @@ public class LDAPrintTopics {
 
     } catch (OptionException e) {
       CommandLineUtil.printHelp(group);
-    } catch (IOException e) {
-      throw e;
     }
   }
 

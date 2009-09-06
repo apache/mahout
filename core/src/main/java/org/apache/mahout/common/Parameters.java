@@ -7,7 +7,6 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.util.GenericsUtil;
-import org.apache.mahout.classifier.bayes.datastore.HBaseBayesDatastore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +16,7 @@ public class Parameters {
 
   private Map<String, String> params = new HashMap<String, String>();
 
-  private Configuration conf = new Configuration();
+  //private Configuration conf = new Configuration();
 
   public Parameters() {
 

@@ -21,7 +21,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
@@ -40,11 +39,13 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /** Create and run the Bayes Classifier */
 public class BayesClassifierDriver {
 
   private static final Logger log = LoggerFactory.getLogger(BayesClassifierDriver.class);
+  private static final Pattern CHUNK_DEIMITER_PATTERN = Pattern.compile("____");
 
   /**
    * Run the job
@@ -99,7 +100,7 @@ public class BayesClassifierDriver {
       // the key is correctLabel____classifiedLabel value is count
       while (reader.next(key, value)) {
         String keyStr = key.toString();
-        String []chunks = keyStr.split("____");
+        String[] chunks = CHUNK_DEIMITER_PATTERN.split(keyStr);
         String correctLabel = chunks[0];
         String classifiedLabel = chunks[1];
         Map<String, Integer> rowMatrix = confusionMatrix.get(correctLabel);

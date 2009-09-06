@@ -98,10 +98,7 @@ class FuzzyKMeansUtil {
             }
           }
         } finally {
-          if (reader != null) {
-            reader.close();
-          }
-
+          reader.close();
         }
       }
 

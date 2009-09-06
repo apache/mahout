@@ -66,11 +66,11 @@ public class TimingStatistics implements Serializable {
     public String toString() {
         return "\n" +
         		"nCalls = " + nCalls + ";\n" +
-                "sumTime = " + getSumTime()/1000000000f + "s;\n" +
-                "minTime = " + minTime/1000000f + "ms;\n" +
-                "maxTime = " + maxTime/1000000f + "ms;\n" +
-                "meanTime = " + getMeanTime()/1000000f + "ms;\n" +
-                "stdDevTime = " + getStdDevTime()/1000000f + "ms;";
+                "sumTime = " + getSumTime()/1000000000.0f + "s;\n" +
+                "minTime = " + minTime/1000000.0f + "ms;\n" +
+                "maxTime = " + maxTime/1000000.0f + "ms;\n" +
+                "meanTime = " + getMeanTime()/1000000.0f + "ms;\n" +
+                "stdDevTime = " + getStdDevTime()/1000000.0f + "ms;";
     }
     
     public Call newCall() {

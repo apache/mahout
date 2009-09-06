@@ -18,10 +18,6 @@
 package org.apache.mahout.classifier.bayes.exceptions;
 
 public final class InvalidDatastoreException extends Exception {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 5875392475968381082L;
 
   public InvalidDatastoreException() {
   }
