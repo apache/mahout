@@ -20,8 +20,8 @@ package org.apache.mahout.cf.taste.impl.model.jdbc;
 import org.apache.commons.dbcp.ConnectionFactory;
 import org.apache.commons.dbcp.PoolableConnectionFactory;
 import org.apache.commons.dbcp.PoolingDataSource;
-import org.apache.commons.pool.ObjectPool;
-import org.apache.commons.pool.impl.StackObjectPool;
+import org.apache.commons.pool.impl.GenericObjectPool;
+import org.apache.commons.pool.PoolableObjectFactory;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
@@ -47,8 +47,14 @@ public final class ConnectionPoolDataSource implements DataSource {
         return connection;
       }
     };
-    ObjectPool objectPool = new StackObjectPool();
-    objectPool.setFactory(new PoolableConnectionFactory(connectionFactory, objectPool, null, "SELECT 1", false, false));
+    GenericObjectPool objectPool = new GenericObjectPool();
+    objectPool.setTestOnBorrow(false);
+    objectPool.setTestOnReturn(false);
+    objectPool.setTestWhileIdle(true);
+    objectPool.setTimeBetweenEvictionRunsMillis(60 * 1000L);
+    PoolableObjectFactory factory =
+            new PoolableConnectionFactory(connectionFactory, objectPool, null, "SELECT 1", false, false);
+    objectPool.setFactory(factory);
     delegate = new PoolingDataSource(objectPool);
   }
 
