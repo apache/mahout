@@ -17,6 +17,8 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
+import org.apache.mahout.common.RandomUtils;
+
 import java.io.Serializable;
 import java.util.AbstractSet;
 import java.util.Arrays;

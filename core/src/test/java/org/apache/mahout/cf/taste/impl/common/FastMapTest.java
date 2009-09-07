@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl.common;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
+import org.apache.mahout.common.RandomUtils;
 
 import java.util.Collection;
 import java.util.HashMap;

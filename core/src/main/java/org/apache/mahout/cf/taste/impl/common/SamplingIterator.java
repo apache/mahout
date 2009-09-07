@@ -17,6 +17,8 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
+import org.apache.mahout.common.RandomUtils;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;

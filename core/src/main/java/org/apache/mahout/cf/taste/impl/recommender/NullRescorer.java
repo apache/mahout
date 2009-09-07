@@ -17,7 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
-import org.apache.mahout.cf.taste.impl.common.LongPair;
+import org.apache.mahout.common.LongPair;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 /** <p>A simple {@link Rescorer} which always returns the original score.</p> */

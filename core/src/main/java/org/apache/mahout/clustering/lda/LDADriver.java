@@ -42,6 +42,7 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.matrix.DenseMatrix;
 import org.apache.mahout.utils.CommandLineUtil;
 import org.apache.mahout.utils.HadoopUtil;
+import org.apache.mahout.common.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -215,7 +216,7 @@ public final class LDADriver {
     IntPairWritable kw = new IntPairWritable();
     DoubleWritable v = new DoubleWritable();
 
-    Random random = new Random();
+    Random random = RandomUtils.getRandom();
 
     for (int k = 0; k < numTopics; ++k) {
       Path path = new Path(dir, "part-" + k);

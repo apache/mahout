@@ -18,20 +18,25 @@
 package org.apache.mahout.ga.watchmaker.cd;
 
 import junit.framework.TestCase;
-import org.uncommons.maths.random.MersenneTwisterRNG;
 import org.easymock.classextension.EasyMock;
+import org.apache.mahout.common.RandomUtils;
 
 import java.util.List;
 import java.util.Random;
 
 public class CDCrossoverTest extends TestCase {
 
+  @Override
+  public void setUp() {
+    RandomUtils.useTestSeed();
+  }
+
   /**
    * if the parents have different values for all their genes, then the
    * offsprings will not any common gene.
    */
   public void testMate1() {
-    Random rng = new MersenneTwisterRNG();
+    Random rng = RandomUtils.getRandom();
 
     // Initialize dataset
     DataSet dataset = EasyMock.createMock(DataSet.class);
@@ -78,7 +83,7 @@ public class CDCrossoverTest extends TestCase {
    * areas.
    */
   public void testMate2() {
-    Random rng = new MersenneTwisterRNG();
+    Random rng = RandomUtils.getRandom();
 
     // Initialize dataset
     DataSet dataset = EasyMock.createMock(DataSet.class);

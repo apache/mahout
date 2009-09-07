@@ -20,7 +20,7 @@ package org.apache.mahout.ga.watchmaker.cd;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.ga.watchmaker.cd.hadoop.CDMahoutEvaluator;
 import org.apache.mahout.ga.watchmaker.cd.hadoop.DatasetSplit;
-import org.uncommons.maths.random.MersenneTwisterRNG;
+import org.apache.mahout.common.RandomUtils;
 import org.uncommons.watchmaker.framework.CandidateFactory;
 import org.uncommons.watchmaker.framework.EvolutionEngine;
 import org.uncommons.watchmaker.framework.EvolutionObserver;
@@ -130,7 +130,7 @@ public class CDGA {
     SelectionStrategy<? super CDRule> selection = new RouletteWheelSelection();
 
     EvolutionEngine<CDRule> engine = new SequentialEvolutionEngine<CDRule>(factory,
-        pipeline, evaluator, selection, new MersenneTwisterRNG());
+        pipeline, evaluator, selection, RandomUtils.getRandom());
 
     engine.addEvolutionObserver(new EvolutionObserver<CDRule>() {
       @Override

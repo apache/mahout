@@ -18,7 +18,7 @@
 package org.apache.mahout.cf.taste.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.LongPair;
+import org.apache.mahout.common.LongPair;
 
 import java.util.List;
 

@@ -32,6 +32,7 @@ import org.apache.mahout.matrix.DenseMatrix;
 import org.apache.mahout.matrix.Matrix;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.common.RandomUtils;
 
 import static org.easymock.classextension.EasyMock.*;
 
@@ -80,7 +81,8 @@ public class TestMapReduce extends TestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    random = new Random(0xCAFEBABECAFEBABEL);
+    RandomUtils.useTestSeed();
+    random = RandomUtils.getRandom();
     File f = new File("input");
     f.mkdir();
   }

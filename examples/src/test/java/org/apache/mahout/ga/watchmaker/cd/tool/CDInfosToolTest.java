@@ -23,7 +23,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.ga.watchmaker.cd.tool.DescriptionUtils.Range;
-import org.uncommons.maths.random.MersenneTwisterRNG;
+import org.apache.mahout.common.RandomUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -36,11 +36,12 @@ import java.util.Random;
 
 public class CDInfosToolTest extends TestCase {
 
-  Random rng;
+  private Random rng;
 
   @Override
   protected void setUp() {
-    rng = new MersenneTwisterRNG();
+    RandomUtils.useTestSeed();
+    rng = RandomUtils.getRandom();
   }
 
   private Descriptors randomDescriptors(int nbattributes, double numRate, double catRate) {

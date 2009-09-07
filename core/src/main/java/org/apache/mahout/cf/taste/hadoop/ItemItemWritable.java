@@ -18,7 +18,7 @@
 package org.apache.mahout.cf.taste.hadoop;
 
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.mahout.cf.taste.impl.common.RandomUtils;
+import org.apache.mahout.common.RandomUtils;
 
 import java.io.DataInput;
 import java.io.DataOutput;

@@ -35,6 +35,7 @@ import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.common.RandomUtils;
 
 class DisplayOutputState extends DisplayDirichlet {
   DisplayOutputState() {
@@ -107,7 +108,7 @@ class DisplayOutputState extends DisplayDirichlet {
   }
 
   public static void main(String[] args) throws IOException {
-    UncommonDistributions.init("Mahout=Hadoop+ML".getBytes());
+    RandomUtils.useTestSeed();
     getSamples();
     getResults();
     new DisplayOutputState();

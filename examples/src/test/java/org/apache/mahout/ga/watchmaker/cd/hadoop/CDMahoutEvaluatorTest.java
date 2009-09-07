@@ -23,7 +23,7 @@ import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 import org.apache.mahout.ga.watchmaker.cd.Rule;
 import org.apache.mahout.ga.watchmaker.cd.utils.RandomRule;
 import org.apache.mahout.ga.watchmaker.cd.utils.RandomRuleResults;
-import org.uncommons.maths.random.MersenneTwisterRNG;
+import org.apache.mahout.common.RandomUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,9 +31,14 @@ import java.util.Random;
 
 public class CDMahoutEvaluatorTest extends TestCase {
 
+  @Override
+  public void setUp() {
+    RandomUtils.useTestSeed();
+  }
+
   public void testEvaluate() throws Exception {
     int nbrules = 100;
-    Random rng = new MersenneTwisterRNG();
+    Random rng = RandomUtils.getRandom();
     int target = 1;
 
     // random rules

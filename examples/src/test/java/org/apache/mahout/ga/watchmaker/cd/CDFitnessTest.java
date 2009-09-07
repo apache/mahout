@@ -18,19 +18,23 @@
 package org.apache.mahout.ga.watchmaker.cd;
 
 import junit.framework.TestCase;
-import org.uncommons.maths.random.MersenneTwisterRNG;
+import org.apache.mahout.common.RandomUtils;
 
 import java.util.Random;
 
 public class CDFitnessTest extends TestCase {
+
+  @Override
+  public void setUp() {
+    RandomUtils.useTestSeed();
+  }
 
   /**
    * Test method for {@link org.apache.mahout.ga.watchmaker.cd.CDFitness#get()}.
    */
   public void testGet() {
     int n = 100;
-    Random rng = new MersenneTwisterRNG();
-
+    Random rng = RandomUtils.getRandom();
     for (int nloop = 0; nloop < n; nloop++) {
       int tp = rng.nextInt(1000);
       int tn = rng.nextInt(1000);

@@ -25,11 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.mahout.clustering.dirichlet.DisplayDirichlet;
-import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.EuclideanDistanceMeasure;
+import org.apache.mahout.common.RandomUtils;
 
 class DisplayMeanShift extends DisplayDirichlet {
   private DisplayMeanShift() {
@@ -93,7 +93,7 @@ class DisplayMeanShift extends DisplayDirichlet {
   }
 
   public static void main(String[] args) {
-    UncommonDistributions.init("Mahout=Hadoop+ML".getBytes());
+    RandomUtils.useTestSeed();
     generateSamples();
     testReferenceImplementation();
     for (MeanShiftCanopy canopy : canopies)

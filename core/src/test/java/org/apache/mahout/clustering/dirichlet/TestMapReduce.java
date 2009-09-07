@@ -37,6 +37,7 @@ import org.apache.mahout.matrix.JsonVectorAdapter;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DummyOutputCollector;
+import org.apache.mahout.common.RandomUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -100,7 +101,7 @@ public class TestMapReduce extends TestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    UncommonDistributions.init("Mahout=Hadoop+ML".getBytes());
+    RandomUtils.useTestSeed();    
     ClusteringTestUtils.rmr("output");
     ClusteringTestUtils.rmr("input");
     conf = new Configuration();

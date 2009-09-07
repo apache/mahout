@@ -19,8 +19,8 @@ package org.apache.mahout.clustering.dirichlet;
 
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.common.RandomUtils;
 import org.uncommons.maths.random.GaussianGenerator;
-import org.uncommons.maths.random.MersenneTwisterRNG;
 
 import java.util.Random;
 
@@ -28,13 +28,9 @@ public final class UncommonDistributions {
 
   private static final double sqrt2pi = Math.sqrt(2.0 * Math.PI);
 
-  private static Random random = new MersenneTwisterRNG();
+  private static final Random random = RandomUtils.getRandom();
 
   private UncommonDistributions() {
-  }
-
-  public static void init(byte[] seed) {
-    random = new MersenneTwisterRNG(seed);
   }
 
   //=============== start of BSD licensed code. See LICENSE.txt

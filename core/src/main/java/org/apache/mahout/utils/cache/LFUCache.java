@@ -25,16 +25,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.utils.Cache;
-
 
 public class LFUCache<K, V> implements Cache<K, V> {
 
   SortedMap<Long, Set<K>> evictionMap = null;
 
-  Map<K, Pair<V, Long>> dataMap = null;
+  Map<K, Pair<V, AtomicLong>> dataMap = null;
 
   int capacity = 0;
 
@@ -45,7 +45,7 @@ public class LFUCache<K, V> implements Cache<K, V> {
     this.capacity = capacity;
 
     evictionMap = new TreeMap<Long, Set<K>>();
-    dataMap = new HashMap<K, Pair<V, Long>>(capacity);
+    dataMap = new HashMap<K, Pair<V, AtomicLong>>(capacity);
 
   }
 
@@ -60,28 +60,28 @@ public class LFUCache<K, V> implements Cache<K, V> {
 
   @Override
   public V get(K key) {
-    Pair<V,Long> data = dataMap.get(key);
+    Pair<V, AtomicLong> data = dataMap.get(key);
     if (data == null)
       return null;
     else {
-      V value = data.left();
-      long count = data.right();
-      data.setValue(Long.valueOf(count + 1));
-      incrementHit(key, Long.valueOf(count));
+      V value = data.getFirst();
+      AtomicLong count = data.getSecond();
+      long oldCount = count.getAndIncrement();
+      incrementHit(key, oldCount);
       return value;
     }
 
   }
   
   public V quickGet(K key){
-    Pair<V,Long> data = dataMap.get(key);
+    Pair<V, AtomicLong> data = dataMap.get(key);
     if (data == null)
       return null;
     else
-      return data.left();
+      return data.getFirst();
   }
 
-  private void incrementHit(K key, Long count) {
+  private void incrementHit(K key, long count) {
     Set<K> keys = evictionMap.get(count);
     if (keys == null)
       throw new ConcurrentModificationException();
@@ -89,7 +89,7 @@ public class LFUCache<K, V> implements Cache<K, V> {
       throw new ConcurrentModificationException();
     if (keys.isEmpty())
       evictionMap.remove(count);
-    count = Long.valueOf(count.longValue() + 1);
+    count++;
     Set<K> keysNew = evictionMap.get(count);
     if (keysNew == null) {
       keysNew = new LinkedHashSet<K>();
@@ -106,14 +106,15 @@ public class LFUCache<K, V> implements Cache<K, V> {
     {
       removeLeastFrequent();
     }
-    Long count = Long.valueOf(1);
-    Pair<V, Long> data = new Pair<V, Long>(value, count);
+    AtomicLong count = new AtomicLong(1L);
+    Pair<V, AtomicLong> data = new Pair<V, AtomicLong>(value, count);
     dataMap.put(key, data);
 
-    Set<K> keys = evictionMap.get(count);
+    Long countKey = 1L;
+    Set<K> keys = evictionMap.get(countKey);
     if (keys == null) {
       keys = new LinkedHashSet<K>();
-      evictionMap.put(count, keys);
+      evictionMap.put(countKey, keys);
     }
     keys.add(key);
 

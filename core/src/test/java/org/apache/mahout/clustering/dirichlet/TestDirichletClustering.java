@@ -24,6 +24,7 @@ import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.common.RandomUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +36,7 @@ public class TestDirichletClustering extends TestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    UncommonDistributions.init("Mahout=Hadoop+ML".getBytes());
+    RandomUtils.useTestSeed();
     sampleData = new ArrayList<Vector>();
   }
 

@@ -36,6 +36,7 @@ import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.TimesFunction;
 import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.common.RandomUtils;
 
 public class DisplayDirichlet extends Frame {
 
@@ -96,7 +97,7 @@ public class DisplayDirichlet extends Frame {
   }
 
   public static void main(String[] args) throws IOException {
-    UncommonDistributions.init("Mahout=Hadoop+ML".getBytes());
+    RandomUtils.useTestSeed();
     generateSamples();
     new DisplayDirichlet();
   }

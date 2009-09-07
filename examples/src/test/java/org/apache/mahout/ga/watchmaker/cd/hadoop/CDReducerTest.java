@@ -21,6 +21,7 @@ import junit.framework.TestCase;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 import org.apache.mahout.utils.DummyOutputCollector;
+import org.apache.mahout.common.RandomUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,7 +41,8 @@ public class CDReducerTest extends TestCase {
   protected void setUp() {
     // generate random evaluatons and calculate expectations
     evaluations = new ArrayList<CDFitness>();
-    Random rng = new Random();
+    RandomUtils.useTestSeed();
+    Random rng = RandomUtils.getRandom();
     int tp = 0;
     int fp = 0;
     int tn = 0;

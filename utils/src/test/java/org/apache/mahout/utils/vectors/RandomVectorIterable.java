@@ -21,6 +21,7 @@ import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.UnaryFunction;
 import org.apache.mahout.matrix.SparseVector;
+import org.apache.mahout.common.RandomUtils;
 
 import java.util.Iterator;
 import java.util.Random;
@@ -51,7 +52,7 @@ public class RandomVectorIterable implements VectorIterable{
 
   private class VectIterator implements Iterator<Vector>{
     int count = 0;
-    final Random random = new Random();
+    final Random random = RandomUtils.getRandom();
     @Override
     public boolean hasNext() {
       return count < numItems;

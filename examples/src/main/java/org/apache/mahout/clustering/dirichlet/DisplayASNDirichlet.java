@@ -26,6 +26,7 @@ import org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalMode
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.common.RandomUtils;
 
 class DisplayASNDirichlet extends DisplayDirichlet {
   DisplayASNDirichlet() {
@@ -55,7 +56,7 @@ class DisplayASNDirichlet extends DisplayDirichlet {
   }
 
   public static void main(String[] args) {
-    UncommonDistributions.init("Mahout=Hadoop+ML".getBytes());
+    RandomUtils.useTestSeed();
     generateSamples();
     generateResults();
     new DisplayASNDirichlet();

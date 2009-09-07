@@ -20,7 +20,7 @@ package org.apache.mahout.ga.watchmaker.cd;
 import junit.framework.TestCase;
 import junit.framework.Assert;
 import org.apache.mahout.ga.watchmaker.cd.utils.MockDataSet;
-import org.uncommons.maths.random.MersenneTwisterRNG;
+import org.apache.mahout.common.RandomUtils;
 import org.easymock.classextension.EasyMock;
 
 import java.util.Random;
@@ -68,7 +68,8 @@ public class CDRuleTest extends TestCase {
 
   @Override
   protected void setUp() {
-    rng = new MersenneTwisterRNG();
+    RandomUtils.useTestSeed();
+    rng = RandomUtils.getRandom();
     mock = new MockDataSet(rng, 50);
   }
 
@@ -158,7 +159,6 @@ public class CDRuleTest extends TestCase {
     EasyMock.expect(dl.getAttribut(EasyMock.anyInt())).andReturn(1.0d).atLeastOnce();
     EasyMock.replay(dl);
 
-    Random rng = new MersenneTwisterRNG();
     int n = 100; // repeat the test n times
     for (int nloop = 0; nloop < n; nloop++) {
       mock.categoricalDataset();

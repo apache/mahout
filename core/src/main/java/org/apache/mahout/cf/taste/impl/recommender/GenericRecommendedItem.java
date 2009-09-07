@@ -17,7 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
-import org.apache.mahout.cf.taste.impl.common.RandomUtils;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 
 import java.io.Serializable;

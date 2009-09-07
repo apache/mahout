@@ -18,7 +18,7 @@
 package org.apache.mahout.ga.watchmaker;
 
 import junit.framework.TestCase;
-import org.uncommons.maths.random.MersenneTwisterRNG;
+import org.apache.mahout.common.RandomUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +60,8 @@ public class STFitnessEvaluatorTest extends TestCase {
    */
   public void testEvaluateSamePopulation() {
     STFitnessEvaluatorMock<Integer> mock = new STFitnessEvaluatorMock<Integer>();
-    Random rng = new MersenneTwisterRNG();
+    RandomUtils.useTestSeed();
+    Random rng = RandomUtils.getRandom();
 
     int size = 100;
     List<Integer> population = randomInts(size, rng);
@@ -84,7 +85,8 @@ public class STFitnessEvaluatorTest extends TestCase {
    */
   public void testEvaluateDifferentPopulations() {
     STFitnessEvaluatorMock<Integer> mock = new STFitnessEvaluatorMock<Integer>();
-    Random rng = new MersenneTwisterRNG();
+    RandomUtils.useTestSeed();
+    Random rng = RandomUtils.getRandom();
 
     // generate a population A
     int size = 100;

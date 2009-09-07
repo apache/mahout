@@ -24,12 +24,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.mahout.clustering.dirichlet.DisplayDirichlet;
-import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.DistanceMeasure;
 import org.apache.mahout.utils.ManhattanDistanceMeasure;
+import org.apache.mahout.common.RandomUtils;
 
 class DisplayCanopy extends DisplayDirichlet {
   DisplayCanopy() {
@@ -107,7 +107,7 @@ class DisplayCanopy extends DisplayDirichlet {
   }
 
   public static void main(String[] args) {
-    UncommonDistributions.init("Mahout=Hadoop+ML".getBytes());
+    RandomUtils.useTestSeed();
     generateSamples();
     List<Vector> points = new ArrayList<Vector>();
     points.addAll(sampleData);

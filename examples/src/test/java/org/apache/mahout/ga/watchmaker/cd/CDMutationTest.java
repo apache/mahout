@@ -19,7 +19,7 @@ package org.apache.mahout.ga.watchmaker.cd;
 
 import junit.framework.TestCase;
 import org.apache.mahout.ga.watchmaker.cd.utils.MockDataSet;
-import org.uncommons.maths.random.MersenneTwisterRNG;
+import org.apache.mahout.common.RandomUtils;
 
 import java.util.Random;
 
@@ -31,7 +31,8 @@ public class CDMutationTest extends TestCase {
 
   @Override
   protected void setUp() {
-    rng = new MersenneTwisterRNG();
+    RandomUtils.useTestSeed();
+    rng = RandomUtils.getRandom();
     mock = new MockDataSet(rng, 100);
   }
 

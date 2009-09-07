@@ -18,7 +18,7 @@
 package org.apache.mahout.ga.watchmaker.travellingsalesman;
 
 import org.apache.mahout.ga.watchmaker.MahoutFitnessEvaluator;
-import org.uncommons.maths.random.MersenneTwisterRNG;
+import org.apache.mahout.common.RandomUtils;
 import org.uncommons.maths.random.PoissonGenerator;
 import org.uncommons.watchmaker.framework.CandidateFactory;
 import org.uncommons.watchmaker.framework.ConcurrentEvolutionEngine;
@@ -129,7 +129,7 @@ public class EvolutionaryTravellingSalesman implements
   @Override
   public List<String> calculateShortestRoute(Collection<String> cities,
       final ProgressListener progressListener) {
-    Random rng = new MersenneTwisterRNG();
+    Random rng = RandomUtils.getRandom();
 
     // Set-up evolution pipeline (cross-over followed by mutation).
     List<EvolutionaryOperator<? super List<?>>> operators = new ArrayList<EvolutionaryOperator<? super List<?>>>(

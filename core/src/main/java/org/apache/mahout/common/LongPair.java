@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.common;
+package org.apache.mahout.common;
 
 import java.io.Serializable;
 
@@ -36,6 +36,10 @@ public final class LongPair implements Comparable<LongPair>, Serializable {
 
   public long getSecond() {
     return second;
+  }
+
+  public LongPair swap() {
+    return new LongPair(second, first);
   }
 
   @Override

@@ -20,13 +20,14 @@ package org.apache.mahout.clustering.dirichlet;
 import junit.framework.TestCase;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.common.RandomUtils;
 
 public class TestDistributions extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    UncommonDistributions.init("Mahout=Hadoop+ML".getBytes());
+    RandomUtils.useTestSeed();    
   }
 
   public void testRbeta() {

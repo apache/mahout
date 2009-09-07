@@ -23,6 +23,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.mahout.ga.watchmaker.cd.hadoop.DatasetSplit.RndLineRecordReader;
+import org.apache.mahout.common.RandomUtils;
 import org.uncommons.maths.random.MersenneTwisterRNG;
 
 import java.io.IOException;
@@ -30,10 +31,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * 
- */
 public class DatasetSplitTest extends TestCase {
+
+  @Override
+  public void setUp() {
+    RandomUtils.useTestSeed();
+  }
 
   /**
    * Mock RecordReader that returns a sequence of keys in the range [0, size[
@@ -45,38 +48,33 @@ public class DatasetSplitTest extends TestCase {
     private final long size;
 
     MockReader(long size) {
-      assert size > 0 : "size == 0";
-
+      if (size <= 0) {
+        throw new IllegalArgumentException("size must be positive");
+      }
       this.size = size;
     }
 
     @Override
     public void close() throws IOException {
-      // TODO Auto-generated method stub
-
     }
 
     @Override
     public LongWritable createKey() {
-      // TODO Auto-generated method stub
       return null;
     }
 
     @Override
     public Text createValue() {
-      // TODO Auto-generated method stub
       return null;
     }
 
     @Override
     public long getPos() throws IOException {
-      // TODO Auto-generated method stub
       return 0;
     }
 
     @Override
     public float getProgress() throws IOException {
-      // TODO Auto-generated method stub
       return 0;
     }
 
@@ -95,7 +93,7 @@ public class DatasetSplitTest extends TestCase {
     int n = 20;
 
     for (int nloop = 0; nloop < n; nloop++) {
-      MersenneTwisterRNG rng = new MersenneTwisterRNG();
+      MersenneTwisterRNG rng = (MersenneTwisterRNG) RandomUtils.getRandom();
       byte[] seed = rng.getSeed();
       double threshold = rng.nextDouble();
 
@@ -130,7 +128,7 @@ public class DatasetSplitTest extends TestCase {
     int n = 20;
 
     for (int nloop = 0; nloop < n; nloop++) {
-      MersenneTwisterRNG rng = new MersenneTwisterRNG();
+      MersenneTwisterRNG rng = (MersenneTwisterRNG) RandomUtils.getRandom();
 
       byte[] seed = rng.getSeed();
       double threshold = rng.nextDouble();

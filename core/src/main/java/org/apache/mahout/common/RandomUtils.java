@@ -15,9 +15,12 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.common;
+package org.apache.mahout.common;
+
+import org.uncommons.maths.random.MersenneTwisterRNG;
 
 import java.util.Random;
+import java.nio.charset.Charset;
 
 /**
  * <p>The source of random stuff for the whole project. This lets us make all randomness in the project predictable, if
@@ -27,7 +30,8 @@ import java.util.Random;
  */
 public final class RandomUtils {
 
-  private static final long STANDARD_SEED = 0xCAFEBABECAFEBABEL;
+  private static final byte[] STANDARD_SEED = "Mahout=Hadoop+ML".getBytes(Charset.forName("US-ASCII"));
+
   private static boolean testSeed;
 
   /** The largest prime less than 2<sup>31</sup>-1 that is the smaller of a twin prime pair. */
@@ -41,7 +45,7 @@ public final class RandomUtils {
   }
 
   public static Random getRandom() {
-    return testSeed ? new Random(STANDARD_SEED) : new Random();
+    return testSeed ? new MersenneTwisterRNG(STANDARD_SEED) : new MersenneTwisterRNG();
   }
 
   /** @return what {@link Double#hashCode()} would return for the same value */

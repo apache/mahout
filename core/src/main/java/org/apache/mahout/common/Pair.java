@@ -17,106 +17,60 @@
 
 package org.apache.mahout.common;
 
-public class Pair<Left, Right> implements java.util.Map.Entry<Left, Right> {
-  protected Left left;
+import java.io.Serializable;
 
-  protected Right right;
+/** A simple (ordered) pair of two objects. Elements may be null. */
+public final class Pair<A, B> implements Serializable {
 
-  /**
-   * construct a new Pair using left and right value
-   * 
-   * @param left
-   * @param right
-   */
-  public Pair(Left left, Right right) {
-    this.left = left;
-    this.right = right;
+  private final A first;
+  private final B second;
+
+  public Pair(A first, B second) {
+    this.first = first;
+    this.second = second;
   }
 
-  /**
-   * Get the left value
-   * 
-   * @return Left
-   */
-  public Left left() {
-    return this.left;
+  public A getFirst() {
+    return first;
   }
 
-  /**
-   * Get the right value
-   * 
-   * @return Right
-   */
-  public Right right() {
-    return this.right;
+  public B getSecond() {
+    return second;
   }
 
-  /**
-   * returns a swapped Pair with left and right interchanged
-   * 
-   * @return Pair<Right, Left>
-   */
-  public Pair<Right, Left> swap() {
-    return new Pair<Right, Left>(right, left);
+  public Pair<B, A> swap() {
+    return new Pair<B, A>(second, first);
   }
 
-  @Override
-  public Left getKey() {
-    return this.left;
-  }
-
-  @Override
-  public Right getValue() {
-    return this.right;
-  }
-
-  @Override
-  public Right setValue(Right value) {
-    this.right = value;
-    return this.right;
-  }
-
-  /**
-   * some hashcode for Pair made from left and right hash codes
-   */
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((left == null) ? 0 : left.hashCode());
-    result = prime * result + ((right == null) ? 0 : right.hashCode());
-    return result;
-  }
-
-  /**
-   * @return boolean true if obj is not null and equals(this)
-   */
-  @SuppressWarnings("unchecked")
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
+    if (!(obj instanceof Pair)) {
       return false;
-    if (getClass() != obj.getClass())
-      return false;
-    Pair<Left, Right> other = (Pair<Left, Right>) obj;
-    if (left == null) {
-      if (other.left != null)
-        return false;
-    } else if (!left.equals(other.left))
-      return false;
-    if (right == null) {
-      if (other.right != null)
-        return false;
-    } else if (!right.equals(other.right))
-      return false;
-    return true;
+    }
+    Pair<?, ?> otherPair = (Pair<?, ?>) obj;
+    return isEqualOrNulls(first, otherPair.first) &&
+           isEqualOrNulls(second, otherPair.second);
   }
-  
+
+  private static boolean isEqualOrNulls(Object obj1, Object obj2) {
+    return obj1 == null ? obj2 == null : obj1.equals(obj2);
+  }
+
   @Override
-  public String toString() {    
-    return  left.toString() + "-" + right.toString();
+  public int hashCode() {
+    int firstHash = hashCodeNull(first);
+    // Flip top and bottom 16 bits; this makes the hash function probably different
+    // for (a,b) versus (b,a)
+    return (firstHash >>> 16 | firstHash << 16) ^ hashCodeNull(second);
+  }
+
+  private static int hashCodeNull(Object obj) {
+    return obj == null ? 0 : obj.hashCode();
+  }
+
+  @Override
+  public String toString() {
+    return '(' + String.valueOf(first) + ',' + second + ')';
   }
 
 }

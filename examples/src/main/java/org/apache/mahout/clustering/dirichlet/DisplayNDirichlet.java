@@ -26,6 +26,7 @@ import org.apache.mahout.clustering.dirichlet.models.NormalModel;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.common.RandomUtils;
 
 class DisplayNDirichlet extends DisplayDirichlet {
   DisplayNDirichlet() {
@@ -54,7 +55,7 @@ class DisplayNDirichlet extends DisplayDirichlet {
   }
 
   public static void main(String[] args) {
-    UncommonDistributions.init("Mahout=Hadoop+ML".getBytes());
+    RandomUtils.useTestSeed();
     generateSamples();
     generateResults();
     new DisplayNDirichlet();

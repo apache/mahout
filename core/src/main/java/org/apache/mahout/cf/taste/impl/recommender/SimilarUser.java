@@ -17,7 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
-import org.apache.mahout.cf.taste.impl.common.RandomUtils;
+import org.apache.mahout.common.RandomUtils;
 
 /** Simply encapsulates a user and a similarity value. */
 public final class SimilarUser implements Comparable<SimilarUser> {
