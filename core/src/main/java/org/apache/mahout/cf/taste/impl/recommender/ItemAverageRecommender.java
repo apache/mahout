@@ -77,11 +77,11 @@ public final class ItemAverageRecommender extends AbstractRecommender {
     log.debug("Recommending items for user ID '{}'", userID);
     checkAverageDiffsBuilt();
 
-    FastIDSet allItemIDs = getAllOtherItems(userID);
+    FastIDSet possibleItemIDs = getAllOtherItems(userID);
 
     TopItems.Estimator<Long> estimator = new Estimator();
 
-    List<RecommendedItem> topItems = TopItems.getTopItems(howMany, allItemIDs.iterator(), rescorer, estimator);
+    List<RecommendedItem> topItems = TopItems.getTopItems(howMany, possibleItemIDs.iterator(), rescorer, estimator);
 
     log.debug("Recommendations are: {}", topItems);
     return topItems;

@@ -28,7 +28,6 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.ClusteringRecommender;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
@@ -61,6 +60,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
 
   private static final Logger log = LoggerFactory.getLogger(TreeClusteringRecommender.class);
 
+  private static final int NUM_CLUSTER_RECS = 100;
   private static final FastIDSet[] NO_CLUSTERS = new FastIDSet[0];
   private static final Random r = RandomUtils.getRandom();
 
@@ -363,26 +363,22 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   private List<RecommendedItem> computeTopRecsForCluster(FastIDSet cluster)
       throws TasteException {
     DataModel dataModel = getDataModel();
-    FastIDSet allItemIDs = new FastIDSet();
+    FastIDSet possibleItemIDs = new FastIDSet();
     LongPrimitiveIterator it = cluster.iterator();
     while (it.hasNext()) {
-      PreferenceArray prefs = dataModel.getPreferencesFromUser(it.next());
-      int size = prefs.length();
-      for (int i = 0; i < size; i++) {
-        allItemIDs.add(prefs.getItemID(i));
-      }
+      possibleItemIDs.addAll(dataModel.getItemIDsFromUser(it.next()));
     }
 
     TopItems.Estimator<Long> estimator = new Estimator(cluster);
 
-    // TODO don't hardcode 100, figure out some reasonable value
-    List<RecommendedItem> topItems = TopItems.getTopItems(100, allItemIDs.iterator(), null, estimator);
+    List<RecommendedItem> topItems =
+        TopItems.getTopItems(NUM_CLUSTER_RECS, possibleItemIDs.iterator(), null, estimator);
 
     log.debug("Recommendations are: {}", topItems);
     return Collections.unmodifiableList(topItems);
   }
 
-  private static FastByIDMap<FastIDSet> computeClustersPerUserID(List<FastIDSet> clusters) {
+  private static FastByIDMap<FastIDSet> computeClustersPerUserID(Collection<FastIDSet> clusters) {
     FastByIDMap<FastIDSet> clustersPerUser = new FastByIDMap<FastIDSet>(clusters.size());
     for (FastIDSet cluster : clusters) {
       LongPrimitiveIterator it = cluster.iterator();

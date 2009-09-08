@@ -149,19 +149,12 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
   protected FastIDSet getAllOtherItems(long[] theNeighborhood, long theUserID)
           throws TasteException {
     DataModel dataModel = getDataModel();
-    FastIDSet allItemIDs = new FastIDSet();
+    FastIDSet possibleItemIDs = new FastIDSet();
     for (long userID : theNeighborhood) {
-      PreferenceArray prefs = dataModel.getPreferencesFromUser(userID);
-      int size = prefs.length();
-      for (int i = 0; i < size; i++) {
-        long itemID = prefs.getItemID(i);
-        // If not already preferred by the user, add it
-        if (dataModel.getPreferenceValue(theUserID, itemID) == null) {
-          allItemIDs.add(itemID);
-        }
-      }
+      possibleItemIDs.addAll(dataModel.getItemIDsFromUser(userID));
     }
-    return allItemIDs;
+    possibleItemIDs.removeAll(dataModel.getItemIDsFromUser(theUserID));
+    return possibleItemIDs;
   }
 
   @Override

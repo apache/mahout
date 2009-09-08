@@ -27,7 +27,6 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.ClusteringRecommender;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
@@ -64,6 +63,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public final class TreeClusteringRecommender2 extends AbstractRecommender implements ClusteringRecommender {
 
   private static final Logger log = LoggerFactory.getLogger(TreeClusteringRecommender2.class);
+
+  private static final int NUM_CLUSTER_RECS = 100;
 
   private final ClusterSimilarity clusterSimilarity;
   private final int numClusters;
@@ -230,15 +231,15 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
       this.similarity = similarity;
     }
 
-    private FastIDSet getCluster1() {
+    FastIDSet getCluster1() {
       return cluster1;
     }
 
-    private FastIDSet getCluster2() {
+    FastIDSet getCluster2() {
       return cluster2;
     }
 
-    private double getSimilarity() {
+    double getSimilarity() {
       return similarity;
     }
 
@@ -429,7 +430,8 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
     return queue;
   }
 
-  private FastByIDMap<List<RecommendedItem>> computeTopRecsPerUserID(Iterable<FastIDSet> clusters) throws TasteException {
+  private FastByIDMap<List<RecommendedItem>> computeTopRecsPerUserID(Iterable<FastIDSet> clusters)
+          throws TasteException {
     FastByIDMap<List<RecommendedItem>> recsPerUser = new FastByIDMap<List<RecommendedItem>>();
     for (FastIDSet cluster : clusters) {
       List<RecommendedItem> recs = computeTopRecsForCluster(cluster);
@@ -445,20 +447,16 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
       throws TasteException {
 
     DataModel dataModel = getDataModel();
-    FastIDSet allItemIDs = new FastIDSet();
+    FastIDSet possibleItemIDs = new FastIDSet();
     LongPrimitiveIterator it = cluster.iterator();
     while (it.hasNext()) {
-      PreferenceArray prefs = dataModel.getPreferencesFromUser(it.next());
-      int size = prefs.length();
-      for (int i = 0; i < size; i++) {
-        allItemIDs.add(prefs.getItemID(i));
-      }
+      possibleItemIDs.addAll(dataModel.getItemIDsFromUser(it.next()));
     }
 
     TopItems.Estimator<Long> estimator = new Estimator(cluster);
 
     List<RecommendedItem> topItems =
-        TopItems.getTopItems(Integer.MAX_VALUE, allItemIDs.iterator(), null, estimator);
+        TopItems.getTopItems(NUM_CLUSTER_RECS, possibleItemIDs.iterator(), null, estimator);
 
     log.debug("Recommendations are: {}", topItems);
     return Collections.unmodifiableList(topItems);

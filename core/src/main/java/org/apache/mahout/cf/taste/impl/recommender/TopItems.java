@@ -39,17 +39,17 @@ public final class TopItems {
   }
 
   public static List<RecommendedItem> getTopItems(int howMany,
-                                                  LongPrimitiveIterator allItemIDs,
+                                                  LongPrimitiveIterator possibleItemIDs,
                                                   Rescorer<Long> rescorer,
                                                   Estimator<Long> estimator) throws TasteException {
-    if (allItemIDs == null || estimator == null) {
+    if (possibleItemIDs == null || estimator == null) {
       throw new IllegalArgumentException("argument is null");
     }
     Queue<RecommendedItem> topItems = new PriorityQueue<RecommendedItem>(howMany + 1, Collections.reverseOrder());
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
-    while (allItemIDs.hasNext()) {
-      long itemID = allItemIDs.next();
+    while (possibleItemIDs.hasNext()) {
+      long itemID = possibleItemIDs.next();
       if (rescorer == null || !rescorer.isFiltered(itemID)) {
         double preference = estimator.estimate(itemID);
         double rescoredPref = rescorer == null ? preference : rescorer.rescore(itemID, preference);

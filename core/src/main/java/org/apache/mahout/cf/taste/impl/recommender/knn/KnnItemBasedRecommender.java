@@ -50,12 +50,12 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
   }
 
   private List<RecommendedItem> mostSimilarItems(long itemID,
-                                                 LongPrimitiveIterator allItemIDs,
+                                                 LongPrimitiveIterator possibleItemIDs,
                                                  int howMany,
                                                  Rescorer<LongPair> rescorer)
           throws TasteException {
     TopItems.Estimator<Long> estimator = new MostSimilarEstimator(itemID, getSimilarity(), rescorer);
-    return TopItems.getTopItems(howMany, allItemIDs, null, estimator);
+    return TopItems.getTopItems(howMany, possibleItemIDs, null, estimator);
   }
 
 
@@ -118,15 +118,15 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
   protected float doEstimatePreference(long theUserID, long itemID) throws TasteException {
 
     DataModel dataModel = getDataModel();
-    FastIDSet allItemIDs = new FastIDSet();
     PreferenceArray prefs = dataModel.getPreferencesFromUser(theUserID);
     int size = prefs.length();
+    FastIDSet possibleItemIDs = new FastIDSet(size);    
     for (int i = 0; i < size; i++) {
-      allItemIDs.add(prefs.getItemID(i));
+      possibleItemIDs.add(prefs.getItemID(i));
     }
-    allItemIDs.remove(itemID);
+    possibleItemIDs.remove(itemID);
 
-    List<RecommendedItem> mostSimilar = mostSimilarItems(itemID, allItemIDs.iterator(), neighborhoodSize, null);
+    List<RecommendedItem> mostSimilar = mostSimilarItems(itemID, possibleItemIDs.iterator(), neighborhoodSize, null);
     long[] theNeighborhood = new long[mostSimilar.size()];
     int nOffset = 0;
     for (RecommendedItem rec : mostSimilar) {

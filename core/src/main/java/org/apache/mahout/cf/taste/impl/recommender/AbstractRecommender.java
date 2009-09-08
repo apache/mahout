@@ -86,20 +86,23 @@ public abstract class AbstractRecommender implements Recommender {
   /**
    * @param theUserID ID of user being evaluated
    * @return all items in the {@link DataModel} for which the user has not expressed a preference
+   *  and could possibly be recommended to the user
    * @throws TasteException if an error occurs while listing items
    */
   protected FastIDSet getAllOtherItems(long theUserID) throws TasteException {
-    FastIDSet allItemIDs = new FastIDSet(dataModel.getNumItems());
-    LongPrimitiveIterator it = dataModel.getItemIDs();
-    while (it.hasNext()) {
-      allItemIDs.add(it.nextLong());
+    FastIDSet possibleItemsIDs = new FastIDSet();
+    FastIDSet itemIDs = dataModel.getItemIDsFromUser(theUserID);
+    LongPrimitiveIterator itemIDIterator = itemIDs.iterator();
+    while (itemIDIterator.hasNext()) {
+      long itemID = itemIDIterator.next();
+      PreferenceArray prefs2 = dataModel.getPreferencesForItem(itemID);
+      int size2 = prefs2.length();
+      for (int j = 0; j < size2; j++) {
+        possibleItemsIDs.addAll(dataModel.getItemIDsFromUser(prefs2.getUserID(j)));
+      }
     }
-    PreferenceArray prefs = dataModel.getPreferencesFromUser(theUserID);
-    int size = prefs.length();
-    for (int i = 0; i < size; i++) {
-      allItemIDs.remove(prefs.getItemID(i));
-    }
-    return allItemIDs;
+    possibleItemsIDs.removeAll(itemIDs);
+    return possibleItemsIDs;
   }
 
 }

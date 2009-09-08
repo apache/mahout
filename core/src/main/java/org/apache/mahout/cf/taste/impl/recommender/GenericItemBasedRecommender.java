@@ -22,7 +22,6 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.common.LongPair;
-import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -88,11 +87,11 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
       return Collections.emptyList();
     }
 
-    FastIDSet allItemIDs = getAllOtherItems(userID);
+    FastIDSet possibleItemIDs = getAllOtherItems(userID);
 
     TopItems.Estimator<Long> estimator = new Estimator(userID);
 
-    List<RecommendedItem> topItems = TopItems.getTopItems(howMany, allItemIDs.iterator(), rescorer, estimator);
+    List<RecommendedItem> topItems = TopItems.getTopItems(howMany, possibleItemIDs.iterator(), rescorer, estimator);
 
     log.debug("Recommendations are: {}", topItems);
     return topItems;
@@ -118,7 +117,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
                                                 int howMany,
                                                 Rescorer<LongPair> rescorer) throws TasteException {
     TopItems.Estimator<Long> estimator = new MostSimilarEstimator(itemID, similarity, rescorer);
-    return doMostSimilarItems(itemID, howMany, estimator);
+    return doMostSimilarItems(new long[] {itemID}, howMany, estimator);
   }
 
   @Override
@@ -130,15 +129,8 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   public List<RecommendedItem> mostSimilarItems(long[] itemIDs,
                                                 int howMany,
                                                 Rescorer<LongPair> rescorer) throws TasteException {
-    DataModel model = getDataModel();
     TopItems.Estimator<Long> estimator = new MultiMostSimilarEstimator(itemIDs, similarity, rescorer);
-    FastIDSet allItemIDs = new FastIDSet(model.getNumItems());
-    LongPrimitiveIterator it = model.getItemIDs();
-    while (it.hasNext()) {
-      allItemIDs.add(it.nextLong());
-    }
-    allItemIDs.removeAll(itemIDs);
-    return TopItems.getTopItems(howMany, allItemIDs.iterator(), null, estimator);
+    return doMostSimilarItems(itemIDs, howMany, estimator);
   }
 
   @Override
@@ -163,17 +155,21 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     return TopItems.getTopItems(howMany, allUserItems.iterator(), null, estimator);
   }
 
-  private List<RecommendedItem> doMostSimilarItems(long itemID,
+  private List<RecommendedItem> doMostSimilarItems(long[] itemIDs,
                                                    int howMany,
                                                    TopItems.Estimator<Long> estimator) throws TasteException {
     DataModel model = getDataModel();
-    FastIDSet allItemIDs = new FastIDSet(model.getNumItems());
-    LongPrimitiveIterator it = model.getItemIDs();
-    while (it.hasNext()) {
-      allItemIDs.add(it.nextLong());
+    FastIDSet possibleItemsIDs = new FastIDSet();
+    for (long itemID : itemIDs) {
+      PreferenceArray prefs = model.getPreferencesForItem(itemID);
+      int size = prefs.length();
+      for (int i = 0; i < size; i++) {
+        long userID = prefs.get(i).getUserID();
+        possibleItemsIDs.addAll(model.getItemIDsFromUser(userID));
+      }
     }
-    allItemIDs.remove(itemID);
-    return TopItems.getTopItems(howMany, allItemIDs.iterator(), null, estimator);
+    possibleItemsIDs.removeAll(itemIDs);
+    return TopItems.getTopItems(howMany, possibleItemsIDs.iterator(), null, estimator);
   }
 
   protected float doEstimatePreference(long userID, long itemID) throws TasteException {
