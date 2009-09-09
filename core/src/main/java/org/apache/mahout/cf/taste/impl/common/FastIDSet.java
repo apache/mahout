@@ -274,7 +274,7 @@ public final class FastIDSet implements Serializable, Cloneable {
     return result.toString();
   }
 
-  private final class KeyIterator implements LongPrimitiveIterator {
+  private final class KeyIterator extends AbstractLongPrimitiveIterator {
 
     private int position;
     private int lastNext = -1;
@@ -283,11 +283,6 @@ public final class FastIDSet implements Serializable, Cloneable {
     public boolean hasNext() {
       goToNext();
       return position < keys.length;
-    }
-
-    @Override
-    public Long next() {
-      return nextLong();
     }
 
     @Override
@@ -330,6 +325,11 @@ public final class FastIDSet implements Serializable, Cloneable {
 
     public Iterator<Long> iterator() {
       return new KeyIterator();
+    }
+
+    @Override
+    public void skip(int n) {
+      position += n;
     }
 
   }

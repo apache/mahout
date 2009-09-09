@@ -27,7 +27,7 @@ import java.util.Random;
  * Wraps an {@link Iterator} and returns only some subset of the elements that it would, as determined by a sampling
  * rate parameter.
  */
-public final class SamplingLongPrimitiveIterator implements LongPrimitiveIterator {
+public final class SamplingLongPrimitiveIterator extends AbstractLongPrimitiveIterator {
 
   private static final Random r = RandomUtils.getRandom();
 
@@ -46,11 +46,6 @@ public final class SamplingLongPrimitiveIterator implements LongPrimitiveIterato
   @Override
   public boolean hasNext() {
     return hasNext;
-  }
-
-  @Override
-  public Long next() {
-    return nextLong();
   }
 
   @Override
@@ -109,6 +104,12 @@ public final class SamplingLongPrimitiveIterator implements LongPrimitiveIterato
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
+  @Override
+  public void skip(int n) {
+    delegate.skip((int) (n / samplingRate)); // Kind of an approximation, but this is expected skip
+  }
+
 
   public static LongPrimitiveIterator maybeWrapIterator(LongPrimitiveIterator delegate, double samplingRate) {
     return samplingRate >= 1.0 ? delegate : new SamplingLongPrimitiveIterator(delegate, samplingRate);

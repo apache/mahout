@@ -18,8 +18,9 @@
 package org.apache.mahout.cf.taste.impl.model;
 
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
+import org.apache.mahout.cf.taste.impl.common.AbstractLongPrimitiveIterator;
 
-final class PlusAnonymousUserLongPrimitiveIterator implements LongPrimitiveIterator {
+final class PlusAnonymousUserLongPrimitiveIterator extends AbstractLongPrimitiveIterator {
 
   private final LongPrimitiveIterator delegate;
   private final long extraDatum;
@@ -75,13 +76,15 @@ final class PlusAnonymousUserLongPrimitiveIterator implements LongPrimitiveItera
   }
 
   @Override
-  public Long next() {
-    return nextLong();
+  public void remove() {
+    throw new UnsupportedOperationException();
   }
 
   @Override
-  public void remove() {
-    throw new UnsupportedOperationException();
+  public void skip(int n) {
+    for (int i = 0; i < n; i++) {
+      nextLong();
+    }
   }
 
 }
