@@ -25,12 +25,12 @@ import org.apache.hadoop.fs.Path;
 import org.apache.mahout.ga.watchmaker.utils.DummyCandidate;
 import org.apache.mahout.ga.watchmaker.utils.DummyEvaluator;
 import org.apache.mahout.utils.StringUtils;
+import org.apache.mahout.common.FileLineIterable;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collection;
 
 public class MahoutEvaluatorTest extends TestCase {
 
@@ -87,17 +87,10 @@ public class MahoutEvaluatorTest extends TestCase {
   }
 
   private static void loadPopulation(FileSystem fs, Path f,
-                                     List<DummyCandidate> population) throws IOException {
+                                     Collection<DummyCandidate> population) throws IOException {
     FSDataInputStream in = fs.open(f);
-    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-
-    try {
-      String s;
-      while ((s = reader.readLine()) != null) {
-        population.add((DummyCandidate) StringUtils.fromString(s));
-      }
-    } finally {
-      reader.close();
+    for (String line : new FileLineIterable(in)) {
+      population.add((DummyCandidate) StringUtils.fromString(line));
     }
   }
 

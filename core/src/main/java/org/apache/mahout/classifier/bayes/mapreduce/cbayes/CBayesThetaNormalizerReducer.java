@@ -47,6 +47,7 @@ public class CBayesThetaNormalizerReducer extends MapReduceBase implements
   private HBaseConfiguration HBconf;
 
   boolean useHbase = false;
+
   @Override
   public void reduce(Text key, Iterator<DoubleWritable> values,
                      OutputCollector<Text, DoubleWritable> output, Reporter reporter)
@@ -94,8 +95,8 @@ public class CBayesThetaNormalizerReducer extends MapReduceBase implements
   @Override
   public void close() throws IOException {
     if (useHbase) {
-	  table.close();
-	}
+	    table.close();
+	  }
     super.close();
   }
 }

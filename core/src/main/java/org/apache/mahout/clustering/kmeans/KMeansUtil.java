@@ -26,6 +26,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.canopy.Canopy;
+import org.apache.mahout.common.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,9 +101,7 @@ final class KMeansUtil {
             }
           }
         } finally {
-          if (reader != null) {
-            reader.close();
-          }
+          IOUtils.quietClose(reader);
         }
       }
 

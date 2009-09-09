@@ -18,9 +18,11 @@
 package org.apache.mahout.cf.taste.example.netflix;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
-import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
+import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.common.FileLineIterable;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
+import org.apache.mahout.cf.taste.impl.common.AbstractLongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.model.GenericItemPreferenceArray;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -75,7 +77,7 @@ public final class NetflixFileDataModel implements DataModel {
   }
 
   @Override
-  public PreferenceArray getPreferencesForItem(long itemID) {
+  public PreferenceArray getPreferencesForItem(long itemID) throws TasteException {
     StringBuilder itemIDPadded = new StringBuilder(5);
     itemIDPadded.append(itemID);
     while (itemIDPadded.length() < 5) {
@@ -83,12 +85,16 @@ public final class NetflixFileDataModel implements DataModel {
     }
     List<Preference> prefs = new ArrayList<Preference>();
     File movieFile = new File(new File(dataDirectory, "training_set"), "mv_00" + itemIDPadded + ".txt");
-    for (String line : new FileLineIterable(movieFile, true)) {
-      int firstComma = line.indexOf((int) ',');
-      Integer userID = Integer.valueOf(line.substring(0, firstComma));
-      int secondComma = line.indexOf((int) ',', firstComma + 1);
-      float rating = Float.parseFloat(line.substring(firstComma + 1, secondComma));
-      prefs.add(new GenericPreference(userID, itemID, rating));
+    try {
+      for (String line : new FileLineIterable(movieFile, true)) {
+        int firstComma = line.indexOf((int) ',');
+        Integer userID = Integer.valueOf(line.substring(0, firstComma));
+        int secondComma = line.indexOf((int) ',', firstComma + 1);
+        float rating = Float.parseFloat(line.substring(firstComma + 1, secondComma));
+        prefs.add(new GenericPreference(userID, itemID, rating));
+      }
+    } catch (IOException ioe) {
+      throw new TasteException(ioe);
     }
     return new GenericItemPreferenceArray(prefs);
   }
@@ -134,7 +140,7 @@ public final class NetflixFileDataModel implements DataModel {
     return "NetflixFileDataModel";
   }
 
-  private static final class MovieIDIterator implements LongPrimitiveIterator {
+  private static final class MovieIDIterator extends AbstractLongPrimitiveIterator {
 
     private int next = 1;
     static final int COUNT = 17770;
@@ -161,13 +167,13 @@ public final class NetflixFileDataModel implements DataModel {
     }
 
     @Override
-    public Long next() {
-      return nextLong();
+    public void remove() {
+      throw new UnsupportedOperationException();
     }
 
     @Override
-    public void remove() {
-      throw new UnsupportedOperationException();
+    public void skip(int n) {
+      next += n;
     }
 
   }

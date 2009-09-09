@@ -20,7 +20,7 @@ package org.apache.mahout.cf.taste.impl.similarity.jdbc;
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.IOUtils;
+import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
 import org.apache.mahout.cf.taste.impl.model.jdbc.ConnectionPoolDataSource;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;

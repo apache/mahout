@@ -262,9 +262,6 @@ public class TestFuzzyKmeansClustering extends TestCase {
       outDir.list();
 //      assertEquals("output dir files?", 4, outFiles.length);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path("output/points/part-00000"), conf);
-      /*BufferedReader reader = new BufferedReader(new InputStreamReader(
-          new FileInputStream("output/points/part-00000"), Charset
-              .forName("UTF-8")));*/
       Text key = new Text();
       FuzzyKMeansOutput out = new FuzzyKMeansOutput();
       while (reader.next(key, out)) {

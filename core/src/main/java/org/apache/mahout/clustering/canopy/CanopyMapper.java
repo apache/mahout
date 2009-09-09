@@ -50,11 +50,6 @@ public class CanopyMapper extends MapReduceBase implements
     Canopy.configure(job);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.mapred.MapReduceBase#close()
-   */
   @Override
   public void close() throws IOException {
     for (Canopy canopy : canopies) {

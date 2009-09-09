@@ -29,10 +29,10 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.mahout.common.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -76,7 +76,7 @@ public class BayesFileFormatter {
       inputDir.listFiles(new FileProcessor(label, analyzer, charset, writer));
       // listFiles() is called here as a way to recursively visit files, actually
     } finally {
-      quietClose(writer);
+      IOUtils.quietClose(writer);
     }
   }
 
@@ -99,7 +99,7 @@ public class BayesFileFormatter {
       try {
         writeFile(label, analyzer, input, charset, writer);
       } finally {
-        quietClose(writer);
+        IOUtils.quietClose(writer);
       }
     }
   }
@@ -167,7 +167,7 @@ public class BayesFileFormatter {
           throw new RuntimeException(e);
         } finally {
           if (writer == null) {
-            quietClose(theWriter);
+            IOUtils.quietClose(theWriter);
           }
         }
       } else {
@@ -203,17 +203,7 @@ public class BayesFileFormatter {
         writer.write(' ');
       }
     } finally {
-      quietClose(reader);
-    }
-  }
-
-  private static void quietClose(Closeable closeable) {
-    if (closeable != null) {
-      try {
-        closeable.close();
-      } catch (IOException ioe) {
-        // continue
-      }
+      IOUtils.quietClose(reader);
     }
   }
 

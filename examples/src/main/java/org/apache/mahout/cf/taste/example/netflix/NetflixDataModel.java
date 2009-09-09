@@ -19,7 +19,7 @@ package org.apache.mahout.cf.taste.example.netflix;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
+import org.apache.mahout.common.FileLineIterable;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
@@ -76,7 +76,7 @@ public final class NetflixDataModel implements DataModel {
 		delegate = new GenericDataModel(users);
 	}
 
-	private FastByIDMap<PreferenceArray> readUsers(File dataDirectory) {
+	private FastByIDMap<PreferenceArray> readUsers(File dataDirectory) throws IOException {
 		FastByIDMap<Collection<Preference>> userIDPrefMap = new FastByIDMap<Collection<Preference>>();
 
 		int counter = 0;

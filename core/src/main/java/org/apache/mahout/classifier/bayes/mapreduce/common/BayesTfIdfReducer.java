@@ -52,6 +52,7 @@ public class BayesTfIdfReducer extends MapReduceBase implements
 
   boolean useHbase = false;
 
+  @Override
   public void reduce(Text key, Iterator<DoubleWritable> values,
       OutputCollector<Text, DoubleWritable> output, Reporter reporter)
       throws IOException {
@@ -119,8 +120,8 @@ public class BayesTfIdfReducer extends MapReduceBase implements
   @Override
   public void close() throws IOException {
     if (useHbase) {
-	  table.close();
-	}
+	    table.close();
+	  }
     super.close();
   }
 }

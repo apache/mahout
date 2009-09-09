@@ -15,20 +15,13 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.common;
+package org.apache.mahout.common;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -96,39 +89,6 @@ public final class IOUtils {
     quietClose(resultSet);
     quietClose(statement);
     quietClose(connection);
-  }
-
-  public static void copyStreamToFile(InputStream in, File file) throws IOException {
-    OutputStream out = new FileOutputStream(file, false);
-    copyInToOut(in, out);
-  }
-
-  public static String readURL(URL url) throws IOException {
-    InputStream in = url.openStream();
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    copyInToOut(in, out);
-    return new String(out.toByteArray(), Charset.forName("UTF-8"));
-  }
-
-  public static File createTempFile(String copySuffixFrom) throws IOException {
-    int period = copySuffixFrom.lastIndexOf('.');
-    String suffix = period < 0 ? "" : copySuffixFrom.substring(period);
-    File tempFile = File.createTempFile("mahout-taste-", suffix);
-    tempFile.deleteOnExit();
-    return tempFile;
-  }
-
-  public static void copyInToOut(InputStream in, OutputStream out) throws IOException {
-    try {
-      int bytesRead;
-      byte[] buffer = new byte[65536];
-      while ((bytesRead = in.read(buffer)) > 0) {
-        out.write(buffer, 0, bytesRead);
-      }
-    } finally {
-      quietClose(in);
-      quietClose(out);
-    }
   }
 
 }

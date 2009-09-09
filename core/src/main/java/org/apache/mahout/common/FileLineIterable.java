@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.common;
+package org.apache.mahout.common;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 
@@ -30,23 +31,37 @@ import java.util.Iterator;
  */
 public final class FileLineIterable implements Iterable<String> {
 
-  private final File file;
+  private static final Charset UTF8 = Charset.forName("UTF-8");
+
+  private final InputStream is;
   private final Charset encoding;
   private final boolean skipFirstLine;
 
   /** Creates a {@link FileLineIterable} over a given file, assuming a UTF-8 encoding. */
-  public FileLineIterable(File file) {
-    this(file, Charset.forName("UTF-8"), false);
+  public FileLineIterable(File file) throws IOException {
+    this(file, UTF8, false);
   }
 
   /** Creates a {@link FileLineIterable} over a given file, assuming a UTF-8 encoding. */
-  public FileLineIterable(File file, boolean skipFirstLine) {
-    this(file, Charset.forName("UTF-8"), skipFirstLine);
+  public FileLineIterable(File file, boolean skipFirstLine) throws IOException {
+    this(file, UTF8, skipFirstLine);
   }
 
   /** Creates a {@link FileLineIterable} over a given file, using the given encoding. */
-  public FileLineIterable(File file, Charset encoding, boolean skipFirstLine) {
-    this.file = file;
+  public FileLineIterable(File file, Charset encoding, boolean skipFirstLine) throws IOException {
+    this(FileLineIterator.getFileInputStream(file), encoding, skipFirstLine);
+  }
+
+  public FileLineIterable(InputStream is) {
+    this(is, UTF8, false);
+  }
+
+  public FileLineIterable(InputStream is, boolean skipFirstLine) {
+    this(is, UTF8, skipFirstLine);
+  }
+
+  public FileLineIterable(InputStream is, Charset encoding, boolean skipFirstLine) {
+    this.is = is;
     this.encoding = encoding;
     this.skipFirstLine = skipFirstLine;
   }
@@ -54,7 +69,7 @@ public final class FileLineIterable implements Iterable<String> {
   @Override
   public Iterator<String> iterator() {
     try {
-      return new FileLineIterator(file, encoding, skipFirstLine);
+      return new FileLineIterator(is, encoding, skipFirstLine);
     } catch (IOException ioe) {
       throw new IllegalStateException(ioe);
     }

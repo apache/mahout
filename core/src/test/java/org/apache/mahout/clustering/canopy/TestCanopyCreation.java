@@ -594,9 +594,6 @@ public class TestCanopyCreation extends TestCase {
     CanopyClusteringJob.runJob("testdata", "output",
         ManhattanDistanceMeasure.class.getName(), 3.1, 2.1, SparseVector.class);
     //TODO: change
-    /*BufferedReader reader = new BufferedReader(new InputStreamReader(
-        new FileInputStream("output/clusters/part-00000"), Charset
-            .forName("UTF-8")));*/
     Path path = new Path("output/clusters/part-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
     int count = 0;
@@ -628,9 +625,6 @@ public class TestCanopyCreation extends TestCase {
     // now run the Job
     CanopyClusteringJob.runJob("testdata", "output",
         EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, SparseVector.class);
-    /*BufferedReader reader = new BufferedReader(new InputStreamReader(
-        new FileInputStream("output/clusters/part-00000"), Charset
-            .forName("UTF-8")));*/
     Path path = new Path("output/clusters/part-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
     int count = 0;

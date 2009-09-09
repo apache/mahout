@@ -18,8 +18,8 @@
 package org.apache.mahout.cf.taste.example.netflix;
 
 import org.apache.mahout.cf.taste.impl.common.FastMap;
-import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
-import org.apache.mahout.cf.taste.impl.common.IOUtils;
+import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

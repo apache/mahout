@@ -21,13 +21,12 @@ import junit.framework.TestCase;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
 import org.apache.mahout.classifier.BayesFileFormatter;
+import org.apache.mahout.common.FileLineIterator;
+import org.apache.mahout.common.FileLineIterable;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -74,14 +73,11 @@ public class BayesFileFormatterTest extends TestCase {
     assertEquals("files Size: " + files.length + " is not: " + words.length, files.length, words.length);
     for (File file : files) {
       //should only be one line in the file, and it should be label label
-      BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), charset));
-      String line = reader.readLine();
-      if (line != null) {
-        line = line.trim();
-      }
+      FileLineIterator it = new FileLineIterator(file);
+      String line = it.next().trim();
+      assertFalse(it.hasNext());
       String label = "animal" + '\t' + file.getName();
       assertEquals(line + ":::: is not equal to " + label + "::::", line, label);
-      reader.close();
     }
   }
 
@@ -93,15 +89,12 @@ public class BayesFileFormatterTest extends TestCase {
     BayesFileFormatter.collapse("animal", analyzer, input, charset, new File(out, "animal"));
     files = out.listFiles();
     assertEquals("files Size: " + files.length + " is not: " + 1, 1, files.length);
-    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(files[0]), charset));
-    String line;
     int count = 0;
-    while ((line = reader.readLine()) != null) {
+    for (String line : new FileLineIterable(files[0])) {
       assertTrue("line does not start with label", line.startsWith("animal"));
       System.out.println("Line: " + line);
       count++;
     }
-    reader.close();
     assertEquals(count + " does not equal: " + words.length, count, words.length);
 
   }

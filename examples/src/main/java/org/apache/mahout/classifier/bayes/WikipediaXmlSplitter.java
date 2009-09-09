@@ -25,13 +25,11 @@ import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
+import org.apache.mahout.common.FileLineIterator;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -76,9 +74,6 @@ public class WikipediaXmlSplitter {
       numChunks = Integer.parseInt((String) cmdLine.getValue(numChunksOpt));
     }
 
-    BufferedReader dumpReader = new BufferedReader(new InputStreamReader(
-        new FileInputStream(dumpFilePath), "UTF-8"));
-
     File dir = new File(outputDirPath);
     dir.mkdirs();
     String header =
@@ -115,14 +110,15 @@ public class WikipediaXmlSplitter {
     content.append(header);
     int filenumber = 0;
     NumberFormat decimalFormatter = new DecimalFormat("0000");
-    String thisLine;
-    while ((thisLine = dumpReader.readLine()) != null)
-    {
+    FileLineIterator it = new FileLineIterator(new File(dumpFilePath));
+    while (it.hasNext()) {
+      String thisLine = it.next();
       if(thisLine.trim().startsWith("<page>")){
         boolean end = false;
         while(thisLine.trim().startsWith("</page>") == false){
           content.append(thisLine).append('\n');
-          if ((thisLine = dumpReader.readLine()) == null){
+          if (it.hasNext()){
+            thisLine = it.next();
             end=true;
             break;
           }

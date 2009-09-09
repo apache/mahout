@@ -17,9 +17,7 @@
 
 package org.apache.mahout.clustering.lda;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -45,6 +43,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.utils.CommandLineUtil;
+import org.apache.mahout.common.FileLineIterator;
 
 /**
  * Class to print out the top K words for each topic.
@@ -141,22 +140,21 @@ public class LDAPrintTopics {
 
   // Reads dictionary in created by the vector Driver in util
   private static List<String> readDictionary(File path) throws IOException {
-    BufferedReader rdr = new BufferedReader(new FileReader(path));
+    FileLineIterator it = new FileLineIterator(path);
 
     List<String> result = new ArrayList<String>();
 
     // skip 2 lines
-    rdr.readLine();
-    rdr.readLine();
-    String line;
-    while ( (line = rdr.readLine()) != null) {
+    it.next();
+    it.next();
+    while (it.hasNext()) {
+      String line = it.next();
       String[] parts = TAB_PATTERN.split(line);
       String word = parts[0];
       int index = Integer.parseInt(parts[2]);
       assert index == result.size();
       result.add(word);
     }
-    rdr.close();
 
     return result;
   }

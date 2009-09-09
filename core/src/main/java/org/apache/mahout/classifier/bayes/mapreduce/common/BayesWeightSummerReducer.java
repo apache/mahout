@@ -110,9 +110,9 @@ public class BayesWeightSummerReducer extends MapReduceBase implements
 
   @Override
   public void close() throws IOException {
-	if (useHbase) {
+	  if (useHbase) {
       table.close();
-	}
+	  }
     super.close();
   }
 }

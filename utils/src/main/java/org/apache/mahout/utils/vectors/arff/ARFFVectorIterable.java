@@ -20,7 +20,7 @@ package org.apache.mahout.utils.vectors.arff;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.vectors.VectorIterable;
+import org.apache.mahout.common.IOUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,8 +34,8 @@ import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.text.DateFormat;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
-
 
 /**
  * Read in ARFF (http://www.cs.waikato.ac.nz/~ml/weka/arff.html) and create {@link Vector}s
@@ -43,24 +43,21 @@ import java.util.regex.Pattern;
  * Attribute type handling:
  * <ul>
  * <li>Numeric -> As is</li>
- * <li>Nominal -> ordinal(value) i.e. @attribute lumber {'\'(-inf-0.5]\'','\'(0.5-inf)\''} will convert -inf-0.5 -> 0, and 0.5-inf -> 1</li>
+ * <li>Nominal -> ordinal(value) i.e. @attribute lumber {'\'(-inf-0.5]\'','\'(0.5-inf)\''}
+ *  will convert -inf-0.5 -> 0, and 0.5-inf -> 1</li>
  * <li>Dates -> Convert to time as a long</li>
  * <li>Strings -> Create a map of String -> long</li>
  * </ul>
- * <p/>
- * <p/>
- * <p/>
- * <p/>
  * NOTE: This class does not set the label bindings on every vector.  If you want the label
  * bindings, call {@link MapBackedARFFModel#getLabelBindings()}, as they are the same for every vector.
  */
 public class ARFFVectorIterable implements Iterable<Vector> {
 
-  private final BufferedReader buff;
-  private final ARFFModel model;
   private static final Pattern COMMA_PATTERN = Pattern.compile(",");
   private static final Pattern SPACE_PATTERN = Pattern.compile(" ");
 
+  private final BufferedReader buff;
+  private final ARFFModel model;
 
   public ARFFVectorIterable(File file, ARFFModel model) throws IOException {
     this(new FileReader(file), model);
@@ -85,7 +82,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
 
     int labelNumber = 0;
     String line;
-    boolean inData = false;
+    //boolean inData = false; // TODO not used?
     while ((line = buff.readLine()) != null) {
       line = line.trim();
       String lower = line.toLowerCase();
@@ -138,7 +135,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
         model.addType(labelNumInt, type);
         labelNumber++;
       } else if (lower.startsWith(ARFFModel.DATA)) {
-        inData = true;
+        //inData = true;
         break;//skip it
       }
     }
@@ -146,21 +143,21 @@ public class ARFFVectorIterable implements Iterable<Vector> {
   }
 
 
-  /*public ARFFVectorIterable(SequenceFile seqFile){
-
-  }*/
-
   @Override
   public Iterator<Vector> iterator() {
     return new ARFFIterator();
   }
 
-  class ARFFIterator implements Iterator<Vector> {
-    String line = null;
+  private class ARFFIterator implements Iterator<Vector> {
 
-    @Override
-    public boolean hasNext() {
-      boolean result = false;
+    private String line;
+
+    private ARFFIterator() {
+      goToNext();
+    }
+
+    private void goToNext() {
+      line = null;
       try {
         while ((line = buff.readLine()) != null) {
           line = line.trim();
@@ -168,17 +165,24 @@ public class ARFFVectorIterable implements Iterable<Vector> {
             break;
           }
         }
-        if (line != null) {
-          result = true;
-        }
       } catch (IOException e) {
-        result = false;
+        line = null;
       }
-      return result;
+      if (line == null) {
+        IOUtils.quietClose(buff);
+      }
+    }
+
+    @Override
+    public boolean hasNext() {
+      return line != null;
     }
 
     @Override
     public Vector next() {
+      if (line == null) {
+        throw new NoSuchElementException();
+      }
       Vector result;
       if (line.startsWith(ARFFModel.ARFF_SPARSE)) {
         line = line.substring(1, line.length() - 1);
@@ -197,10 +201,9 @@ public class ARFFVectorIterable implements Iterable<Vector> {
         }
       }
       //result.setLabelBindings(labelBindings);
+      goToNext();
       return result;
     }
-
-
 
     @Override
     public void remove() {

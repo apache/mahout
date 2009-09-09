@@ -15,7 +15,10 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.common;
+package org.apache.mahout.common;
+
+import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
+import org.apache.mahout.common.IOUtils;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -38,6 +41,8 @@ import java.util.zip.ZipInputStream;
  */
 public final class FileLineIterator implements SkippingIterator<String>, Closeable {
 
+  private static final Charset UTF8 = Charset.forName("UTF-8");
+
   private final BufferedReader reader;
   private String nextLine;
 
@@ -48,7 +53,7 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
    * @throws IOException           if the file cannot be read
    */
   public FileLineIterator(File file) throws IOException {
-    this(file, Charset.forName("UTF-8"), false);
+    this(file, UTF8, false);
   }
 
   /**
@@ -58,7 +63,7 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
    * @throws IOException           if the file cannot be read
    */
   public FileLineIterator(File file, boolean skipFirstLine) throws IOException {
-    this(file, Charset.forName("UTF-8"), skipFirstLine);
+    this(file, UTF8, skipFirstLine);
   }
 
   /**
@@ -68,7 +73,18 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
    * @throws IOException           if the file cannot be read
    */
   public FileLineIterator(File file, Charset encoding, boolean skipFirstLine) throws IOException {
-    InputStream is = getFileInputStream(file);
+    this(getFileInputStream(file), encoding, skipFirstLine);
+  }
+
+  public FileLineIterator(InputStream is) throws IOException {
+    this(is, UTF8, false);
+  }
+
+  public FileLineIterator(InputStream is, boolean skipFirstLine) throws IOException {
+    this(is, UTF8, skipFirstLine);
+  }
+
+  public FileLineIterator(InputStream is, Charset encoding, boolean skipFirstLine) throws IOException {
     reader = new BufferedReader(new InputStreamReader(is, encoding));
     if (skipFirstLine) {
       reader.readLine();
@@ -76,7 +92,7 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
     nextLine = reader.readLine();
   }
 
-  private static InputStream getFileInputStream(File file) throws IOException {
+  static InputStream getFileInputStream(File file) throws IOException {
     InputStream is = new FileInputStream(file);
     String name = file.getName();
     if (name.endsWith(".gz")) {

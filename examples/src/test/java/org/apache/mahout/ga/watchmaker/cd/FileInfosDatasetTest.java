@@ -18,15 +18,14 @@
 package org.apache.mahout.ga.watchmaker.cd;
 
 import junit.framework.TestCase;
+import junit.framework.Assert;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.mahout.common.FileLineIterable;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.FileInputStream;
-import java.nio.charset.Charset;
+import java.io.File;
 
 public class FileInfosDatasetTest extends TestCase {
 
@@ -37,12 +36,8 @@ public class FileInfosDatasetTest extends TestCase {
     DataSet dataset = FileInfoParser.parseFile(fs, inpath);
     DataSet.initialize(dataset);
 
-    String filename = "target/test-classes/wdbc/wdbc.data";
-    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(filename), Charset.forName("UTF-8")));
-
-    String line;
     DataLine dl = new DataLine();
-    while ((line = in.readLine()) != null) {
+    for (String line : new FileLineIterable(new File("target/test-classes/wdbc/wdbc.data"))) {
       dl.set(line);
       for (int index = 0; index < dataset.getNbAttributes(); index++) {
         if (dataset.isNumerical(index)) {
@@ -53,12 +48,11 @@ public class FileInfosDatasetTest extends TestCase {
         }
       }
     }
-    in.close();
   }
 
-  private void assertInRange(double value, double min, double max) {
-    TestCase.assertTrue("value"+value+") < min", value >= min);
-    TestCase.assertTrue("value("+value+") > max", value <= max);
+  private static void assertInRange(double value, double min, double max) {
+    Assert.assertTrue("value" + value + ") < min", value >= min);
+    Assert.assertTrue("value(" + value + ") > max", value <= max);
   }
 
 }

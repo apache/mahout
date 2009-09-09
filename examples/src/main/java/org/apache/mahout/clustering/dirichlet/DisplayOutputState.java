@@ -20,9 +20,7 @@ package org.apache.mahout.clustering.dirichlet;
 import java.awt.BasicStroke;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +34,7 @@ import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.common.FileLineIterable;
 
 class DisplayOutputState extends DisplayDirichlet {
   DisplayOutputState() {
@@ -73,16 +72,11 @@ class DisplayOutputState extends DisplayDirichlet {
    *             if there is an error
    */
   public static List<Vector> readFile(String fileName) throws IOException {
-    BufferedReader r = new BufferedReader(new FileReader(fileName));
-    try {
-      List<Vector> results = new ArrayList<Vector>();
-      String line;
-      while ((line = r.readLine()) != null)
-        results.add(AbstractVector.decodeVector(line));
-      return results;
-    } finally {
-      r.close();
+    List<Vector> results = new ArrayList<Vector>();
+    for (String line : new FileLineIterable(new File(fileName))) {
+      results.add(AbstractVector.decodeVector(line));
     }
+    return results;
   }
 
   private static void getSamples() throws IOException {

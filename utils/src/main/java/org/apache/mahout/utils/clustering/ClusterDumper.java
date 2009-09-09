@@ -36,12 +36,11 @@ import org.apache.hadoop.mapred.jobcontrol.Job;
 import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.CommandLineUtil;
+import org.apache.mahout.common.FileLineIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -219,9 +218,9 @@ public final class ClusterDumper {
   }
 
   private static ArrayList<String> getTermDict(String dictFile) throws IOException {
-    BufferedReader reader = new BufferedReader(new FileReader(dictFile));
-    
-    int numEntries = Integer.parseInt(reader.readLine());    
+    FileLineIterator it = new FileLineIterator(new File(dictFile));
+
+    int numEntries = Integer.parseInt(it.next());
     System.out.println(numEntries);
     ArrayList<String> result = new ArrayList<String>();
     
@@ -229,8 +228,8 @@ public final class ClusterDumper {
       result.add("dummyentry");
     }
     
-    String line;
-    while ((line = reader.readLine()) != null) {
+    while (it.hasNext()) {
+      String line = it.next();
       if (line.startsWith("#")) {
         continue;
       }

@@ -18,7 +18,7 @@
 package org.apache.mahout.cf.taste.impl.model.jdbc;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.IOUtils;
+import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.model.BooleanPreference;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.slf4j.Logger;

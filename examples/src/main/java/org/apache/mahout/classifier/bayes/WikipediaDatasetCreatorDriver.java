@@ -37,13 +37,12 @@ import org.apache.hadoop.util.GenericsUtil;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.analysis.WikipediaAnalyzer;
 import org.apache.mahout.utils.CommandLineUtil;
+import org.apache.mahout.common.FileLineIterable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -61,7 +60,7 @@ public class WikipediaDatasetCreatorDriver {
    * <ol>
    * <li>The input {@link org.apache.hadoop.fs.Path} where the input documents live</li>
    * <li>The output {@link org.apache.hadoop.fs.Path} where to write the
-   * {@link org.apache.mahout.classifier.bayes.BayesModel} as a {@link org.apache.hadoop.io.SequenceFile}</li>
+   * classifier as a {@link org.apache.hadoop.io.SequenceFile}</li>
    * </ol>
    *
    * @param args The args
@@ -168,13 +167,9 @@ public class WikipediaDatasetCreatorDriver {
     }
 
     Set<String> categories = new HashSet<String>();
-    BufferedReader reader = new BufferedReader(new InputStreamReader(
-            new FileInputStream(catFile), "UTF-8"));
-    String line;
-    while ((line = reader.readLine()) != null) {
+    for (String line : new FileLineIterable(new File(catFile))) {
       categories.add(line.trim().toLowerCase());
     }
-    reader.close();
 
     DefaultStringifier<Set<String>> setStringifier = new DefaultStringifier<Set<String>>(conf, GenericsUtil.getClass(categories));
 

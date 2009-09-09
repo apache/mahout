@@ -17,8 +17,6 @@
 
 package org.apache.mahout.classifier.bayes;
 
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.classifier.ResultAnalyzer;
 import org.apache.mahout.classifier.bayes.algorithm.BayesAlgorithm;
@@ -33,6 +31,7 @@ import org.apache.mahout.classifier.bayes.mapreduce.bayes.BayesClassifierDriver;
 import org.apache.mahout.classifier.bayes.model.ClassifierContext;
 import org.apache.mahout.utils.TimingStatistics;
 import org.apache.mahout.utils.nlp.NGrams;
+import org.apache.mahout.common.FileLineIterable;
 import org.apache.commons.cli2.Option;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -43,8 +42,13 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.*;
-import java.util.*;
+
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.nio.charset.Charset;
 
 public class TestClassifier {
 
@@ -139,8 +143,7 @@ public class TestClassifier {
 
     String testDirPath = (String) cmdLine.getValue(dirOpt);
 
-    String classificationMethod = "sequential";
-    classificationMethod = (String) cmdLine.getValue(methodOpt);
+    String classificationMethod = (String) cmdLine.getValue(methodOpt);
 
     params.set("verbose", Boolean.toString(verbose));
     params.set("basePath", modelBasePath);
@@ -209,45 +212,37 @@ public class TestClassifier {
         log.info("Testing: " + file);
         String correctLabel = file.getName().split(".txt")[0];
         final TimingStatistics operationStats = new TimingStatistics();
-        BufferedReader fileReader = new BufferedReader(new InputStreamReader(
 
-        new FileInputStream(file.getPath()), params.get("encoding")));
+        long lineNum = 0;
+        for (String line : new FileLineIterable(new File(file.getPath()), Charset.forName(params.get("encoding")), false)) {
 
-        try {
-          String line;
-          long lineNum = 0;
-          while ((line = fileReader.readLine()) != null) {
-
-            Map<String, List<String>> document = new NGrams(line, Integer.valueOf(params.get("gramSize")).intValue())
-                .generateNGrams();
-            for (Map.Entry<String, List<String>> stringListEntry : document.entrySet()) {
-              List<String> strings = stringListEntry.getValue();
-              TimingStatistics.Call call = operationStats.newCall();
-              TimingStatistics.Call outercall = totalStatistics.newCall();
-              ClassifierResult classifiedLabel = classifier.classifyDocument(strings
-                  .toArray(new String[strings.size()]), params.get("defaultCat"));
-              call.end();
-              outercall.end();
-              boolean correct = resultAnalyzer.addInstance(correctLabel, classifiedLabel);
-              if (verbose == true) {
-                // We have one document per line
-                log.info("Line Number: " + lineNum + " Line(30): "
-                    + (line.length() > 30 ? line.substring(0, 30) : line) + " Expected Label: " + correctLabel
-                    + " Classified Label: " + classifiedLabel.getLabel() + " Correct: " + correct);
-              }
-              // log.info("{} {}", correctLabel, classifiedLabel);
-
+          Map<String, List<String>> document = new NGrams(line, Integer.parseInt(params.get("gramSize")))
+              .generateNGrams();
+          for (Map.Entry<String, List<String>> stringListEntry : document.entrySet()) {
+            List<String> strings = stringListEntry.getValue();
+            TimingStatistics.Call call = operationStats.newCall();
+            TimingStatistics.Call outercall = totalStatistics.newCall();
+            ClassifierResult classifiedLabel = classifier.classifyDocument(strings
+                .toArray(new String[strings.size()]), params.get("defaultCat"));
+            call.end();
+            outercall.end();
+            boolean correct = resultAnalyzer.addInstance(correctLabel, classifiedLabel);
+            if (verbose) {
+              // We have one document per line
+              log.info("Line Number: " + lineNum + " Line(30): "
+                  + (line.length() > 30 ? line.substring(0, 30) : line) + " Expected Label: " + correctLabel
+                  + " Classified Label: " + classifiedLabel.getLabel() + " Correct: " + correct);
             }
-            lineNum++;
+            // log.info("{} {}", correctLabel, classifiedLabel);
+
           }
-          log.info("{}\t{}\t{}/{}", new Object[] { correctLabel,
-              resultAnalyzer.getConfusionMatrix().getAccuracy(correctLabel),
-              resultAnalyzer.getConfusionMatrix().getCorrect(correctLabel),
-              resultAnalyzer.getConfusionMatrix().getTotal(correctLabel) });
-          log.info("{}", operationStats.toString());
-        } finally {
-          fileReader.close();
+          lineNum++;
         }
+        log.info("{}\t{}\t{}/{}", new Object[] { correctLabel,
+            resultAnalyzer.getConfusionMatrix().getAccuracy(correctLabel),
+            resultAnalyzer.getConfusionMatrix().getCorrect(correctLabel),
+            resultAnalyzer.getConfusionMatrix().getTotal(correctLabel) });
+        log.info("{}", operationStats.toString());
       }
 
     }

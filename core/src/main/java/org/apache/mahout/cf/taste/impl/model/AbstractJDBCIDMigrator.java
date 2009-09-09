@@ -18,7 +18,7 @@
 package org.apache.mahout.cf.taste.impl.model;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.IOUtils;
+import org.apache.mahout.common.IOUtils;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

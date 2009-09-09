@@ -17,8 +17,8 @@
 
 package org.apache.mahout.cf.taste.example.grouplens;
 
-import org.apache.mahout.cf.taste.impl.common.FileLineIterable;
-import org.apache.mahout.cf.taste.impl.common.IOUtils;
+import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 
 import java.io.File;

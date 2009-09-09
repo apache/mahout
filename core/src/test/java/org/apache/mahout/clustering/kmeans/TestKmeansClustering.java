@@ -36,12 +36,9 @@ import org.apache.mahout.utils.DummyOutputCollector;
 import org.apache.mahout.utils.EuclideanDistanceMeasure;
 import org.apache.mahout.utils.HadoopUtil;
 import org.apache.mahout.utils.ManhattanDistanceMeasure;
+import org.apache.mahout.common.FileLineIterable;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -458,18 +455,13 @@ public class TestKmeansClustering extends TestCase {
     assertTrue("output dir exists?", outDir.exists());
     String[] outFiles = outDir.list();
     assertEquals("output dir files?", 4, outFiles.length);
-    BufferedReader reader = new BufferedReader(new InputStreamReader(
-        new FileInputStream("output/points/part-00000"), Charset
-            .forName("UTF-8")));
     DummyOutputCollector<Text, Text> collector = new DummyOutputCollector<Text, Text>();
-    while (reader.ready()) {
-      String line = reader.readLine();
+    for (String line : new FileLineIterable(new File("output/points/part-00000"))) {
       String[] lineParts = line.split("\t");
       assertEquals("line parts", 2, lineParts.length);
       String cl = line.substring(0, line.indexOf(':'));
       collector.collect(new Text(cl), new Text(lineParts[1]));
     }
-    reader.close();
     assertEquals("num points[V0]", 4, collector.getValue("V0").size());
     assertEquals("num points[V1]", 5, collector.getValue("V1").size());
   }
