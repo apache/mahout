@@ -18,17 +18,16 @@
 package org.apache.mahout.utils.vectors;
 
 import junit.framework.TestCase;
-
-import java.io.File;
-
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.utils.vectors.io.SequenceFileVectorWriter;
+
+import java.io.File;
 
 public class SequenceFileVectorIterableTest extends TestCase {
   public void testIterable() throws Exception {

@@ -54,7 +54,7 @@ import java.util.regex.Pattern;
  * NOTE: This class does not set the label bindings on every vector.  If you want the label
  * bindings, call {@link MapBackedARFFModel#getLabelBindings()}, as they are the same for every vector.
  */
-public class ARFFVectorIterable implements VectorIterable {
+public class ARFFVectorIterable implements Iterable<Vector> {
 
   private final BufferedReader buff;
   private final ARFFModel model;

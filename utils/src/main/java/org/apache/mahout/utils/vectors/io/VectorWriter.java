@@ -17,7 +17,7 @@
 
 package org.apache.mahout.utils.vectors.io;
 
-import org.apache.mahout.utils.vectors.VectorIterable;
+import org.apache.mahout.matrix.Vector;
 
 import java.io.IOException;
 
@@ -28,9 +28,9 @@ public interface VectorWriter {
    * @return the number of docs written
    * @throws IOException if there was a problem writing
    *
-   * @see #write(org.apache.mahout.utils.vectors.VectorIterable, long)
+   * @see #write(Iterable
    */
-  long write(VectorIterable iterable) throws IOException;
+  long write(Iterable<Vector> iterable) throws IOException;
 
   /**
    * Write the first <code>maxDocs</code> to the output.
@@ -39,7 +39,7 @@ public interface VectorWriter {
    * @return The number of docs written
    * @throws IOException if there was a problem writing
    */
-  long write(VectorIterable iterable, long maxDocs) throws IOException;
+  long write(Iterable<Vector> iterable, long maxDocs) throws IOException;
 
   /**
    * Close any internally held resources.  If external Writers are passed in, the implementation should indicate

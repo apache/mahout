@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Collections;
 
-public class LuceneIterable implements VectorIterable {
+public class LuceneIterable implements Iterable<Vector> {
 
   private IndexReader indexReader;
   private String field;

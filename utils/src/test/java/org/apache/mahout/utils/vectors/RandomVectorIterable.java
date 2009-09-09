@@ -26,7 +26,7 @@ import org.apache.mahout.common.RandomUtils;
 import java.util.Iterator;
 import java.util.Random;
 
-public class RandomVectorIterable implements VectorIterable{
+public class RandomVectorIterable implements Iterable<Vector>{
 
   private int numItems = 100;
   public enum VectorType {DENSE, SPARSE}

@@ -32,7 +32,7 @@ import java.io.IOException;
  * The key is any {@link org.apache.hadoop.io.Writable} and the value is a {@link org.apache.mahout.matrix.Vector}.
  * It can handle any class that implements Vector as long as it has a no-arg constructor.
  */
-public class SequenceFileVectorIterable implements VectorIterable {
+public class SequenceFileVectorIterable implements Iterable<Vector> {
   private final SequenceFile.Reader reader;
   private boolean transpose = false;
 

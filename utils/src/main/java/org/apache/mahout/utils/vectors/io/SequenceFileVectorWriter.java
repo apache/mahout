@@ -17,7 +17,6 @@
 
 package org.apache.mahout.utils.vectors.io;
 
-import org.apache.mahout.utils.vectors.VectorIterable;
 import org.apache.mahout.matrix.Vector;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.LongWritable;
@@ -36,7 +35,7 @@ public class SequenceFileVectorWriter implements VectorWriter {
   }
 
   @Override
-  public long write(VectorIterable iterable, long maxDocs) throws IOException {
+  public long write(Iterable<Vector> iterable, long maxDocs) throws IOException {
     long recNum = 0;
     for (Vector point : iterable) {
       if (recNum >= maxDocs) {
@@ -50,7 +49,7 @@ public class SequenceFileVectorWriter implements VectorWriter {
   }
 
   @Override
-  public long write(VectorIterable iterable) throws IOException {
+  public long write(Iterable<Vector> iterable) throws IOException {
     return write(iterable, Long.MAX_VALUE);
   }
 

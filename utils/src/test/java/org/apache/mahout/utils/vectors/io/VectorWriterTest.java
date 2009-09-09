@@ -24,11 +24,16 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.mahout.matrix.SparseVector;
+import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.utils.vectors.RandomVectorIterable;
 
 import java.io.File;
+import java.io.StringWriter;
+import java.util.List;
+import java.util.ArrayList;
 
-public class SequenceFileVectorWriterTest extends TestCase {
+public class VectorWriterTest extends TestCase {
 
   public void testSFVW() throws Exception {
     File tmpDir = new File(System.getProperty("java.io.tmpdir"));
@@ -53,5 +58,20 @@ public class SequenceFileVectorWriterTest extends TestCase {
       count++;
     }
     assertEquals(count + " does not equal: " + 50, 50, count);
+  }
+
+  public void test() throws Exception {
+    StringWriter strWriter = new StringWriter();
+    VectorWriter writer = new JWriterVectorWriter(strWriter);
+    List<Vector> vectors = new ArrayList<Vector>();
+    vectors.add(new DenseVector(new double[]{0.3, 1.5, 4.5}));
+    vectors.add(new DenseVector(new double[]{1.3, 1.5, 3.5}));
+    writer.write(vectors);
+    writer.close();
+    StringBuffer buffer = strWriter.getBuffer();
+    assertNotNull(buffer);
+    assertTrue(buffer.length() > 0);
+    System.out.println("Buffer: " + buffer);
+
   }
 }
