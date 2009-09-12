@@ -162,7 +162,7 @@ public class Driver {
           }
           TermInfo termInfo = new CachedTermInfo(reader, field, minDf, maxDFPercent);
           VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
-          double norm = -1;
+          double norm = LuceneIterable.NO_NORMALIZING;
           if (cmdLine.hasOption(powerOpt)) {
             String power = cmdLine.getValue(powerOpt).toString();
             if (power.equals("INF")) {
