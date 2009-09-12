@@ -17,17 +17,20 @@
 
 package org.apache.mahout.utils.vectors.lucene;
 
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.TermDocs;
 import org.apache.lucene.document.FieldSelector;
 import org.apache.lucene.document.SetBasedFieldSelector;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.TermDocs;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.vectors.VectorIterable;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Collections;
+import java.util.Iterator;
 
+/**
+ * A LuceneIterable is an Iterable&lt;Vector&gt; that uses a Lucene index as the source for creating the {@link org.apache.mahout.matrix.Vector}.
+ * The Field used to create the Vector currently must have Term Vectors stored for it.
+ */
 public class LuceneIterable implements Iterable<Vector> {
 
   private IndexReader indexReader;
@@ -46,17 +49,18 @@ public class LuceneIterable implements Iterable<Vector> {
 
   /**
    * Produce a LuceneIterable that can create the Vector plus normalize it.
-   * @param reader The {@link org.apache.lucene.index.IndexReader} to read the documents from.
-   * @param idField - The Field containing the id.  May be null
-   * @param field The field to use for the Vector
-   * @param mapper The {@link org.apache.mahout.utils.vectors.lucene.VectorMapper} for creating {@link org.apache.mahout.matrix.Vector}s from Lucene's TermVectors.
+   *
+   * @param reader    The {@link org.apache.lucene.index.IndexReader} to read the documents from.
+   * @param idField   - The Field containing the id.  May be null
+   * @param field     The field to use for the Vector
+   * @param mapper    The {@link org.apache.mahout.utils.vectors.lucene.VectorMapper} for creating {@link org.apache.mahout.matrix.Vector}s from Lucene's TermVectors.
    * @param normPower The normalization value.  Must be greater than or equal to 0 or equal to {@link #NO_NORMALIZING}
    */
   public LuceneIterable(IndexReader reader, String idField, String field, VectorMapper mapper, double normPower) {
-    if (normPower != NO_NORMALIZING && normPower < 0){
+    if (normPower != NO_NORMALIZING && normPower < 0) {
       throw new IllegalArgumentException("normPower must either be -1 or >= 0");
     }
-      idFieldSelector = new SetBasedFieldSelector(Collections.singleton(idField), Collections.emptySet());
+    idFieldSelector = new SetBasedFieldSelector(Collections.singleton(idField), Collections.emptySet());
     this.indexReader = reader;
     this.idField = idField;
     this.field = field;
@@ -105,7 +109,7 @@ public class LuceneIterable implements Iterable<Vector> {
         } else {
           result.setName(String.valueOf(doc));
         }
-        if (normPower != NO_NORMALIZING){
+        if (normPower != NO_NORMALIZING) {
           result = result.normalize(normPower);
         }
       } catch (IOException e) {
