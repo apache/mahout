@@ -250,7 +250,7 @@ public final class LDADriver {
 
     IntPairWritable key = new IntPairWritable();
     DoubleWritable value = new DoubleWritable();
-    for (FileStatus status : fs.globStatus(new Path(dir, "*"))) { 
+    for (FileStatus status : fs.globStatus(new Path(dir, "part-*"))) { 
       Path path = status.getPath();
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
       while (reader.next(key, value)) {
@@ -318,7 +318,7 @@ public final class LDADriver {
 
     IntPairWritable key = new IntPairWritable();
     DoubleWritable value = new DoubleWritable();
-    for (FileStatus status : fs.globStatus(new Path(dir, "*"))) { 
+    for (FileStatus status : fs.globStatus(new Path(dir, "part-*"))) { 
       Path path = status.getPath();
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
       while (reader.next(key, value)) {
