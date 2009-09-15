@@ -22,15 +22,18 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 public final class SlopeOnePrefsToDiffsMapper
     extends Mapper<LongWritable, Text, LongWritable, ItemPrefWritable> {
+
+  private static final Pattern COMMA = Pattern.compile(",");
 
   @Override
   protected void map(LongWritable key, Text value,
                      Context context) throws IOException, InterruptedException {
     String line = value.toString();
-    String[] tokens = line.split(",");
+    String[] tokens = COMMA.split(line);
     long userID = Long.parseLong(tokens[0]);
     long itemID = Long.parseLong(tokens[1]);
     float prefValue = Float.parseFloat(tokens[2]);
