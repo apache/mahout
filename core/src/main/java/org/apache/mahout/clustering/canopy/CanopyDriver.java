@@ -36,8 +36,8 @@ import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.CommandLineUtil;
-import org.apache.mahout.utils.SquaredEuclideanDistanceMeasure;
+import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

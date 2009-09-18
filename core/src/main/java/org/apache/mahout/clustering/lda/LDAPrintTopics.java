@@ -42,7 +42,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.mahout.utils.CommandLineUtil;
+import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.FileLineIterator;
 
 /**
@@ -170,7 +170,7 @@ public class LDAPrintTopics {
 
     Option dictOpt = obuilder.withLongName("dict").withRequired(true).withArgument(
         abuilder.withName("dict").withMinimum(1).withMaximum(1).create()).withDescription(
-        "Dictionary to read in, created by utils.vector.Driver").withShortName("d").create();
+        "Dictionary to read in, created by common.vector.Driver").withShortName("d").create();
 
     Option outOpt = obuilder.withLongName("output").withRequired(true).withArgument(
         abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(

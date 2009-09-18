@@ -25,7 +25,7 @@ import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.SquareRootFunction;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.DistanceMeasure;
+import org.apache.mahout.common.distance.DistanceMeasure;
 
 import java.io.DataInput;
 import java.io.DataOutput;

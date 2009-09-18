@@ -34,7 +34,7 @@ import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.mahout.ga.watchmaker.OutputUtils;
 import org.apache.mahout.ga.watchmaker.cd.FileInfoParser;
-import org.apache.mahout.utils.StringUtils;
+import org.apache.mahout.common.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

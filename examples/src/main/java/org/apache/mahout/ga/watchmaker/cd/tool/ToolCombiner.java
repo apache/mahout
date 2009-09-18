@@ -24,7 +24,7 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.utils.StringUtils;
+import org.apache.mahout.common.StringUtils;
 
 import java.io.IOException;
 import java.util.HashSet;

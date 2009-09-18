@@ -47,7 +47,7 @@ public class Job {
           maxIterations);
     } else
       runJob("testdata", "output",
-          "org.apache.mahout.utils.EuclideanDistanceMeasure", 47.6, 1, 0.5, 10);
+          "org.apache.mahout.common.distance.EuclideanDistanceMeasure", 47.6, 1, 0.5, 10);
   }
 
   /**

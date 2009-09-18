@@ -31,7 +31,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.matrix.SparseVector;
-import org.apache.mahout.utils.CommandLineUtil;
+import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.utils.strings.StringUtil;
 import org.apache.mahout.utils.vectors.io.JWriterVectorWriter;
 import org.apache.mahout.utils.vectors.io.SequenceFileVectorWriter;

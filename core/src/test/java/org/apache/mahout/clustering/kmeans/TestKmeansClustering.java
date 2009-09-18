@@ -31,11 +31,11 @@ import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.DistanceMeasure;
-import org.apache.mahout.utils.DummyOutputCollector;
-import org.apache.mahout.utils.EuclideanDistanceMeasure;
-import org.apache.mahout.utils.HadoopUtil;
-import org.apache.mahout.utils.ManhattanDistanceMeasure;
+import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.common.DummyOutputCollector;
+import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
+import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.FileLineIterable;
 
 import java.io.File;

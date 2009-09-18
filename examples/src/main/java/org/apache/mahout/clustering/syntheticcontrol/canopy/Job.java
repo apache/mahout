@@ -45,7 +45,7 @@ public class Job {
       runJob(input, output, measureClassName, t1, t2, vectorClass);
     } else
       runJob("testdata", "output",
-          "org.apache.mahout.utils.EuclideanDistanceMeasure", 80, 55, SparseVector.class);
+          "org.apache.mahout.common.distance.EuclideanDistanceMeasure", 80, 55, SparseVector.class);
   }
 
   /**

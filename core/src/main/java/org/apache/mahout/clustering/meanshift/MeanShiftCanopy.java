@@ -31,8 +31,8 @@ import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.JsonVectorAdapter;
 import org.apache.mahout.matrix.PlusFunction;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.DistanceMeasure;
-import org.apache.mahout.utils.EuclideanDistanceMeasure;
+import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 
 import java.io.DataInput;
 import java.io.DataOutput;

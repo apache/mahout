@@ -36,7 +36,7 @@ import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.JsonVectorAdapter;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.DummyOutputCollector;
+import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.RandomUtils;
 
 import java.io.File;

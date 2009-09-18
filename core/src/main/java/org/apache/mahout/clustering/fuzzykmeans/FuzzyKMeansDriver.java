@@ -42,9 +42,9 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.CommandLineUtil;
-import org.apache.mahout.utils.HadoopUtil;
-import org.apache.mahout.utils.SquaredEuclideanDistanceMeasure;
+import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

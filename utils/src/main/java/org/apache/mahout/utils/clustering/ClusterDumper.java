@@ -35,7 +35,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.jobcontrol.Job;
 import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.CommandLineUtil;
+import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.FileLineIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

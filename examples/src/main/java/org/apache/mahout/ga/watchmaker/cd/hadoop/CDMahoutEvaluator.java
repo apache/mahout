@@ -33,7 +33,7 @@ import org.apache.mahout.ga.watchmaker.cd.DataSet;
 import org.apache.mahout.ga.watchmaker.cd.FileInfoParser;
 import org.apache.mahout.ga.watchmaker.cd.Rule;
 import org.apache.mahout.ga.watchmaker.cd.hadoop.DatasetSplit.DatasetTextInputFormat;
-import org.apache.mahout.utils.StringUtils;
+import org.apache.mahout.common.StringUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;

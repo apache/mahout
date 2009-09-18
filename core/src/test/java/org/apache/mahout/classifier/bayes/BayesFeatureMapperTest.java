@@ -18,16 +18,13 @@
 package org.apache.mahout.classifier.bayes;
 
 import junit.framework.TestCase;
-import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.mapred.TaskReport;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesFeatureMapper;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
-import org.apache.mahout.utils.DummyOutputCollector;
+import org.apache.mahout.common.DummyOutputCollector;
 
 import java.util.List;
 import java.util.Map;

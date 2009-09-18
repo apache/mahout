@@ -24,8 +24,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.ga.watchmaker.utils.DummyCandidate;
 import org.apache.mahout.ga.watchmaker.utils.DummyEvaluator;
-import org.apache.mahout.utils.DummyOutputCollector;
-import org.apache.mahout.utils.StringUtils;
+import org.apache.mahout.common.DummyOutputCollector;
+import org.apache.mahout.common.StringUtils;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
 import java.util.List;

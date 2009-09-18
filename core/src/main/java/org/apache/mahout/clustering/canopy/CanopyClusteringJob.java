@@ -27,8 +27,8 @@ import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.CommandLineUtil;
-import org.apache.mahout.utils.SquaredEuclideanDistanceMeasure;
+import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

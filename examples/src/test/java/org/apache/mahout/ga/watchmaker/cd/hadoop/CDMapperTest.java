@@ -22,7 +22,7 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 import org.apache.mahout.ga.watchmaker.cd.DataLine;
 import org.apache.mahout.ga.watchmaker.cd.Rule;
-import org.apache.mahout.utils.DummyOutputCollector;
+import org.apache.mahout.common.DummyOutputCollector;
 import org.easymock.classextension.EasyMock;
 
 import java.util.Arrays;

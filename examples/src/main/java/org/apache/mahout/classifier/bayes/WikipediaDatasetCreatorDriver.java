@@ -36,7 +36,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.analysis.WikipediaAnalyzer;
-import org.apache.mahout.utils.CommandLineUtil;
+import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.FileLineIterable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

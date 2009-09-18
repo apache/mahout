@@ -47,7 +47,7 @@ if [ ! -e work/vectors ]; then
   mvn -q install -DskipTests=true
   cd ../utils/
   mvn -q compile
-  mvn -e exec:java -Dexec.mainClass="org.apache.mahout.utils.vectors.lucene.Driver" \
+  mvn -e exec:java -Dexec.mainClass="org.apache.mahout.common.vectors.lucene.Driver" \
     -Dexec.args="--dir ../examples/work/index/ --field body --dictOut ../examples/work/dict.txt \
     --output ../examples/work/vectors --minDF 100 --maxDFPercent 97" || exit
   cd ../core/

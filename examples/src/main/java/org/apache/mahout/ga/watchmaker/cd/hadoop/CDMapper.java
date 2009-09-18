@@ -28,7 +28,7 @@ import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 import org.apache.mahout.ga.watchmaker.cd.DataLine;
 import org.apache.mahout.ga.watchmaker.cd.DataSet;
 import org.apache.mahout.ga.watchmaker.cd.Rule;
-import org.apache.mahout.utils.StringUtils;
+import org.apache.mahout.common.StringUtils;
 
 import java.io.IOException;
 import java.util.List;

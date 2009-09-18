@@ -27,9 +27,9 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.DistanceMeasure;
-import org.apache.mahout.utils.DummyOutputCollector;
-import org.apache.mahout.utils.EuclideanDistanceMeasure;
+import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.common.DummyOutputCollector;
+import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 
 import java.io.File;
 import java.io.IOException;

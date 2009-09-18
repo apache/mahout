@@ -33,8 +33,8 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.mahout.common.Parameters;
 import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 import org.apache.mahout.classifier.bayes.interfaces.Datastore;
-import org.apache.mahout.utils.Cache;
-import org.apache.mahout.utils.cache.HybridCache;
+import org.apache.mahout.common.cache.Cache;
+import org.apache.mahout.common.cache.HybridCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

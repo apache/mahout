@@ -26,7 +26,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.classifier.BayesFileFormatter;
 import org.apache.mahout.common.Parameters;
-import org.apache.mahout.utils.nlp.NGrams;
+import org.apache.mahout.common.nlp.NGrams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

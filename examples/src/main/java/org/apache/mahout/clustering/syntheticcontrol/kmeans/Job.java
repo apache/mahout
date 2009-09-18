@@ -54,7 +54,7 @@ public class Job {
           maxIterations, vectorClass);
     } else
       runJob("testdata", "output",
-          "org.apache.mahout.utils.EuclideanDistanceMeasure", 80, 55, 0.5, 10,
+          "org.apache.mahout.common.distance.EuclideanDistanceMeasure", 80, 55, 0.5, 10,
           SparseVector.class);
   }
 

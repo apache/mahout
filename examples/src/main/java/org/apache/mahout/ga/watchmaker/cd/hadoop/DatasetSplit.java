@@ -26,7 +26,7 @@ import org.apache.hadoop.mapred.LineRecordReader;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.TextInputFormat;
-import org.apache.mahout.utils.StringUtils;
+import org.apache.mahout.common.StringUtils;
 import org.uncommons.maths.random.MersenneTwisterRNG;
 
 import java.io.IOException;

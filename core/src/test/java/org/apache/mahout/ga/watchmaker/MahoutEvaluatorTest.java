@@ -24,7 +24,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.ga.watchmaker.utils.DummyCandidate;
 import org.apache.mahout.ga.watchmaker.utils.DummyEvaluator;
-import org.apache.mahout.utils.StringUtils;
+import org.apache.mahout.common.StringUtils;
 import org.apache.mahout.common.FileLineIterable;
 
 import java.io.IOException;

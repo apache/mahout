@@ -20,7 +20,7 @@ package org.apache.mahout.ga.watchmaker.cd.tool;
 import junit.framework.TestCase;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.mahout.utils.DummyOutputCollector;
+import org.apache.mahout.common.DummyOutputCollector;
 
 import java.util.List;
 

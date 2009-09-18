@@ -28,9 +28,9 @@ import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.kmeans.TestKmeansClustering;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.DistanceMeasure;
-import org.apache.mahout.utils.DummyOutputCollector;
-import org.apache.mahout.utils.EuclideanDistanceMeasure;
+import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.common.DummyOutputCollector;
+import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 
 import java.io.File;
 import java.util.ArrayList;

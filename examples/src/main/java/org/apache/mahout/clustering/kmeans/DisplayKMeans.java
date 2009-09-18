@@ -28,8 +28,8 @@ import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.dirichlet.DisplayDirichlet;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.DistanceMeasure;
-import org.apache.mahout.utils.ManhattanDistanceMeasure;
+import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.RandomUtils;
 
 class DisplayKMeans extends DisplayDirichlet {

@@ -36,7 +36,7 @@ import org.apache.mahout.classifier.bayes.interfaces.Algorithm;
 import org.apache.mahout.classifier.bayes.interfaces.Datastore;
 import org.apache.mahout.classifier.bayes.model.ClassifierContext;
 import org.apache.mahout.common.Parameters;
-import org.apache.mahout.utils.nlp.NGrams;
+import org.apache.mahout.common.nlp.NGrams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
