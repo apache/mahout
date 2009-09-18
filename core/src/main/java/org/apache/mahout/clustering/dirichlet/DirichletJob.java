@@ -17,26 +17,86 @@
 
 package org.apache.mahout.clustering.dirichlet;
 
+import org.apache.commons.cli2.CommandLine;
+import org.apache.commons.cli2.Group;
+import org.apache.commons.cli2.Option;
+import org.apache.commons.cli2.OptionException;
+import org.apache.commons.cli2.builder.ArgumentBuilder;
+import org.apache.commons.cli2.builder.DefaultOptionBuilder;
+import org.apache.commons.cli2.builder.GroupBuilder;
+import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.log4j.Logger;
+import org.apache.mahout.utils.CommandLineUtil;
 
 import java.io.IOException;
 
 public class DirichletJob {
+
+  private static final Logger log = Logger.getLogger(DirichletJob.class);
 
   private DirichletJob() {
   }
 
   public static void main(String[] args) throws IOException,
       ClassNotFoundException, InstantiationException, IllegalAccessException {
-    String input = args[0];
-    String output = args[1];
-    String modelFactory = args[2];
-    int numModels = Integer.parseInt(args[3]);
-    int maxIterations = Integer.parseInt(args[4]);
-    double alpha_0 = Double.parseDouble(args[5]);
-    runJob(input, output, modelFactory, numModels, maxIterations, alpha_0);
+    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    ArgumentBuilder abuilder = new ArgumentBuilder();
+    GroupBuilder gbuilder = new GroupBuilder();
+
+    Option inputOpt = obuilder.withLongName("input").withRequired(true).withShortName("i").
+        withArgument(abuilder.withName("input").withMinimum(1).withMaximum(1).create()).
+        withDescription("The Path for input Vectors. Must be a SequenceFile of Writable, Vector").withShortName("i").create();
+    
+    Option outputOpt = obuilder.withLongName("output").withRequired(true).withShortName("o").
+        withArgument(abuilder.withName("output").withMinimum(1).withMaximum(1).create()).
+        withDescription("The directory pathname for output points.").create();
+    
+    Option maxIterOpt = obuilder.withLongName("maxIter").withRequired(true).withShortName("x").
+        withArgument(abuilder.withName("maxIter").withMinimum(1).withMaximum(1).create()).
+        withDescription("The maximum number of iterations.").create();
+    
+    Option topicsOpt = obuilder.withLongName("numModels").withRequired(true).withArgument(
+        abuilder.withName("numModels").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The number of models").withShortName("k").create();
+
+    Option mOpt = obuilder.withLongName("alpha").withRequired(true).withShortName("m").
+        withArgument(abuilder.withName("alpha").withMinimum(1).withMaximum(1).create()).
+        withDescription("The alpha0 value for the DirichletDistribution.").create();
+
+    Option modelOpt = obuilder.withLongName("modelClass").withRequired(true).withShortName("d").
+        withArgument(abuilder.withName("modelClass").withMinimum(1).withMaximum(1).create()).
+          withDescription("The ModelDistribution class name.").create();
+
+    Option helpOpt = obuilder.withLongName("help").
+        withDescription("Print out help").withShortName("h").create();
+
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(modelOpt).
+        withOption(maxIterOpt).withOption(mOpt).withOption(topicsOpt).withOption(helpOpt).create();
+
+    try {
+      Parser parser = new Parser();
+      parser.setGroup(group);
+      CommandLine cmdLine = parser.parse(args);
+      if (cmdLine.hasOption(helpOpt)) {
+        CommandLineUtil.printHelp(group);
+        return;
+      }
+
+      String input = cmdLine.getValue(inputOpt).toString();
+      String output = cmdLine.getValue(outputOpt).toString();
+      String modelFactory = cmdLine.getValue(modelOpt).toString();
+      int numModels = Integer.parseInt(cmdLine.getValue(topicsOpt).toString());
+      int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt).toString());
+      double alpha_0 = Double.parseDouble(cmdLine.getValue(mOpt).toString());
+      runJob(input, output, modelFactory, numModels, maxIterations, alpha_0);
+    } catch (OptionException e) {
+      log.error("Exception parsing command line: ", e);
+      CommandLineUtil.printHelp(group);
+    }
+
   }
 
   /**
