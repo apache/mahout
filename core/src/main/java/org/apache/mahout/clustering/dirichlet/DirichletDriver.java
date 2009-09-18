@@ -40,6 +40,7 @@ import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,21 +68,11 @@ public class DirichletDriver {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option inputOpt = obuilder.withLongName("input").withRequired(true).withShortName("i").
-        withArgument(abuilder.withName("input").withMinimum(1).withMaximum(1).create()).
-        withDescription("The Path for input Vectors. Must be a SequenceFile of Writable, Vector").withShortName("i").create();
-    
-    Option outputOpt = obuilder.withLongName("output").withRequired(true).withShortName("o").
-        withArgument(abuilder.withName("output").withMinimum(1).withMaximum(1).create()).
-        withDescription("The directory pathname for output points.").create();
-    
-    Option maxIterOpt = obuilder.withLongName("maxIter").withRequired(true).withShortName("x").
-        withArgument(abuilder.withName("maxIter").withMinimum(1).withMaximum(1).create()).
-        withDescription("The maximum number of iterations.").create();
-    
-    Option topicsOpt = obuilder.withLongName("numModels").withRequired(true).withArgument(
-        abuilder.withName("numModels").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The number of models").withShortName("k").create();
+    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder);
+    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder);
+    Option maxIterOpt = DefaultOptionCreator.maxIterOption(obuilder, abuilder);
+    Option topicsOpt = DefaultOptionCreator.kOption(obuilder, abuilder);
+    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
 
     Option mOpt = obuilder.withLongName("alpha").withRequired(true).withShortName("m").
         withArgument(abuilder.withName("alpha").withMinimum(1).withMaximum(1).create()).
@@ -94,9 +85,6 @@ public class DirichletDriver {
     Option numRedOpt = obuilder.withLongName("maxRed").withRequired(true).withShortName("r").
         withArgument(abuilder.withName("maxRed").withMinimum(1).withMaximum(1).create()).
         withDescription("The number of reduce tasks.").create();
-
-    Option helpOpt = obuilder.withLongName("help").
-        withDescription("Print out help").withShortName("h").create();
 
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(modelOpt).
         withOption(maxIterOpt).withOption(mOpt).withOption(topicsOpt).withOption(helpOpt).

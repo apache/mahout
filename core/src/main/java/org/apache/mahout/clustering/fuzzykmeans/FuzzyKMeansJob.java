@@ -27,6 +27,7 @@ import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.CommandLineUtil;
 import org.slf4j.Logger;
@@ -48,29 +49,16 @@ public class FuzzyKMeansJob {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option inputOpt = obuilder.withLongName("input").withRequired(true).withShortName("i").
-        withArgument(abuilder.withName("input").withMinimum(1).withMaximum(1).create()).
-        withDescription("The Path for input Vectors. Must be a SequenceFile of Writable, Vector").withShortName("i").create();
-    
+    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder);
+    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder);
+    Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption(obuilder, abuilder);
+    Option measureClassOpt = DefaultOptionCreator.distanceOption(obuilder, abuilder);
+    Option maxIterOpt = DefaultOptionCreator.maxIterOption(obuilder, abuilder);
+    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
+
     Option clustersOpt = obuilder.withLongName("clusters").withRequired(true).withShortName("c").
         withArgument(abuilder.withName("clusters").withMinimum(1).withMaximum(1).create()).
         withDescription("The directory pathname for initial clusters.").create();
-
-    Option outputOpt = obuilder.withLongName("output").withRequired(true).withShortName("o").
-        withArgument(abuilder.withName("output").withMinimum(1).withMaximum(1).create()).
-        withDescription("The directory pathname for output points.").create();
-    
-    Option measureClassOpt = obuilder.withLongName("measure").withRequired(true).withShortName("d").
-        withArgument(abuilder.withName("measure").withMinimum(1).withMaximum(1).create()).
-        withDescription("The classname of the DistanceMeasure.").create();
-    
-    Option convergenceDeltaOpt = obuilder.withLongName("convergencedelta").withRequired(true).withShortName("v").
-        withArgument(abuilder.withName("convergenceDelta").withMinimum(1).withMaximum(1).create()).
-        withDescription("The convergence delta value.").create();
-    
-    Option maxIterOpt = obuilder.withLongName("maxIter").withRequired(true).withShortName("x").
-        withArgument(abuilder.withName("maxIter").withMinimum(1).withMaximum(1).create()).
-        withDescription("The maximum number of iterations.").create();
     
     Option numMapOpt = obuilder.withLongName("maxMap").withRequired(true).withShortName("p").
         withArgument(abuilder.withName("maxMap").withMinimum(1).withMaximum(1).create()).
@@ -92,9 +80,6 @@ public class FuzzyKMeansJob {
         withArgument(abuilder.withName("vectorclass").withMinimum(1).withMaximum(1).create()).
         withDescription("Class name of vector implementation to use.").create();
     
-    Option helpOpt = obuilder.withLongName("help").
-        withDescription("Print out help").withShortName("h").create();
-
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(clustersOpt).
         withOption(outputOpt).withOption(measureClassOpt).withOption(convergenceDeltaOpt).
         withOption(maxIterOpt).withOption(numMapOpt).withOption(numRedOpt).withOption(doCanopyOpt).
