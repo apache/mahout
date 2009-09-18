@@ -27,6 +27,7 @@ import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.mahout.common.StringUtils;
+import org.apache.mahout.common.RandomUtils;
 import org.uncommons.maths.random.MersenneTwisterRNG;
 
 import java.io.IOException;
@@ -62,7 +63,7 @@ public class DatasetSplit {
   }
 
   public DatasetSplit(double threshold) {
-    this(new MersenneTwisterRNG().getSeed(), threshold);
+    this(((MersenneTwisterRNG) RandomUtils.getRandom()).getSeed(), threshold);
   }
 
   public DatasetSplit(JobConf conf) {
@@ -144,7 +145,7 @@ public class DatasetSplit {
 
       DatasetSplit split = new DatasetSplit(conf);
 
-      rng = new MersenneTwisterRNG(split.getSeed());
+      rng = RandomUtils.getRandom();
       threshold = split.getThreshold();
       training = split.isTraining();
     }

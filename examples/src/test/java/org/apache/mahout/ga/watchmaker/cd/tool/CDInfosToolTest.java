@@ -82,7 +82,7 @@ public class CDInfosToolTest extends TestCase {
         int nbvalues = rng.nextInt(50) + 1;
         descriptions[index] = new Object[nbvalues];
         for (int vindex = 0; vindex < nbvalues; vindex++) {
-          descriptions[index][vindex] = "val_" + index + "_" + vindex;
+          descriptions[index][vindex] = "val_" + index + '_' + vindex;
         }
       }
     }
@@ -109,7 +109,7 @@ public class CDInfosToolTest extends TestCase {
   }
 
   private String randomLine(Descriptors descriptors, Object[][] descriptions) {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     for (int index = 0; index < descriptors.size(); index++) {
       if (descriptors.isNumerical(index)) {
@@ -138,7 +138,7 @@ public class CDInfosToolTest extends TestCase {
     return buffer.toString();
   }
 
-  private int nbNonIgnored(Descriptors descriptors) {
+  private static int nbNonIgnored(Descriptors descriptors) {
     int nbattrs = 0;
     for (int index = 0; index < descriptors.size(); index++) {
       if (!descriptors.isIgnored(index))
@@ -191,9 +191,9 @@ public class CDInfosToolTest extends TestCase {
         double max = (Double) descriptions[index][1];
         Range range = DescriptionUtils.extractNumericalRange(description);
 
-        assertTrue("bad min value for attribute (" + index + ")",
+        assertTrue("bad min value for attribute (" + index + ')',
             min <= range.min);
-        assertTrue("bad max value for attribute (" + index + ")",
+        assertTrue("bad max value for attribute (" + index + ')',
             max >= range.max);
       } else if (descriptors.isNominal(index)) {
         // categorical attribute

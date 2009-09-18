@@ -39,7 +39,8 @@ class DisplayMeanShift extends DisplayDirichlet {
 
   private static List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
 
-  private static final List<List<Vector>> iterationCenters = new ArrayList<List<Vector>>();
+  // TODO this is never queried?
+  //private static final List<List<Vector>> iterationCenters = new ArrayList<List<Vector>>();
 
   @Override
   public void paint(Graphics g) {
@@ -87,7 +88,7 @@ class DisplayMeanShift extends DisplayDirichlet {
         done = canopy.shiftToMean() && done;
         MeanShiftCanopy.mergeCanopy(canopy, migratedCanopies);
       }
-      iterationCenters.add(centers);
+      //iterationCenters.add(centers);
       canopies = migratedCanopies;
     }
   }

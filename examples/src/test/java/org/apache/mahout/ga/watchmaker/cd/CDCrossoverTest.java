@@ -133,7 +133,7 @@ public class CDCrossoverTest extends TestCase {
   }
 
   static String printRule(CDRule rule) {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     for (int index = 0; index < rule.getNbConditions(); index++) {
       buffer.append(rule.getO(index) ? 1 : 0);

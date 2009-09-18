@@ -36,10 +36,9 @@ import java.lang.reflect.InvocationTargetException;
 public class InputMapper extends MapReduceBase implements
     Mapper<LongWritable, Text, Text, Vector> {
 
-  private static final Pattern SPACE = java.util.regex.Pattern.compile(" ");
+  private static final Pattern SPACE = Pattern.compile(" ");
 
-  protected Class<? extends Vector> outputClass;
-  protected Constructor<?> constructor;
+  private Constructor<?> constructor;
 
   @Override
   public void map(LongWritable key, Text values,
@@ -70,7 +69,7 @@ public class InputMapper extends MapReduceBase implements
 
   @Override
   public void configure(JobConf job) {
-    outputClass = (Class<? extends Vector>) job.getOutputValueClass();
+    Class<? extends Vector> outputClass = (Class<? extends Vector>) job.getOutputValueClass();
     try {
       constructor = outputClass.getConstructor(int.class);
     } catch (NoSuchMethodException e) {

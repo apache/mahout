@@ -31,17 +31,12 @@ import java.util.Set;
 
 public class CDMapperTest extends TestCase {
 
-  DataLine dl;
-
-  Rule rule;
-
-  final CDFitness TP = new CDFitness(1, 0, 0, 0);
-
-  final CDFitness FP = new CDFitness(0, 1, 0, 0);
-
-  final CDFitness TN = new CDFitness(0, 0, 1, 0);
-
-  final CDFitness FN = new CDFitness(0, 0, 0, 1);
+  private DataLine dl;
+  private Rule rule;
+  private final CDFitness TP = new CDFitness(1, 0, 0, 0);
+  private final CDFitness FP = new CDFitness(0, 1, 0, 0);
+  private final CDFitness TN = new CDFitness(0, 0, 1, 0);
+  private final CDFitness FN = new CDFitness(0, 0, 0, 1);
 
   @Override
   protected void setUp() throws Exception {

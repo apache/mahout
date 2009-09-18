@@ -42,12 +42,15 @@ import java.util.regex.Pattern;
 
 public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
     Mapper<LongWritable, Text, Text, Text> {
-  private static final Logger log = LoggerFactory.getLogger(WikipediaDatasetCreatorMapper.class);
 
-  private static Set<String> inputCategories = null;
-  private static boolean exactMatchOnly = false;
-  private static Analyzer analyzer;
+  private static final Logger log = LoggerFactory.getLogger(WikipediaDatasetCreatorMapper.class);
   private static final Pattern SPACE_NON_ALPHA_PATTERN = Pattern.compile("[\\s\\W]");
+  private static final Pattern OPEN_TEXT_TAG_PATTERN = Pattern.compile("<text xml:space=\"preserve\">");
+  private static final Pattern CLOSE_TEXT_TAG_PATTERN = Pattern.compile("</text>");
+
+  private Set<String> inputCategories = null;
+  private boolean exactMatchOnly = false;
+  private Analyzer analyzer;
 
   @Override
   public void map(LongWritable key, Text value,
@@ -59,7 +62,7 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
     String catMatch = findMatchingCategory(document);
     
     if(!catMatch.equals("Unknown")){
-      document = StringEscapeUtils.unescapeHtml(document.replaceFirst("<text xml:space=\"preserve\">", "").replaceAll("</text>", ""));
+      document = StringEscapeUtils.unescapeHtml(CLOSE_TEXT_TAG_PATTERN.matcher(OPEN_TEXT_TAG_PATTERN.matcher(document).replaceFirst("")).replaceAll(""));
       TokenStream stream = analyzer.tokenStream(catMatch, new StringReader(document));
       Token token = new Token();
       while((token = stream.next(token)) != null){
@@ -69,18 +72,19 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
     }
   }
 
-  public static String findMatchingCategory(String document){
+  private String findMatchingCategory(String document){
     int startIndex = 0;
     int categoryIndex;
-    String match = null; // TODO this is never updated?
     while((categoryIndex = document.indexOf("[[Category:", startIndex))!=-1)
     {
       categoryIndex+=11;
       int endIndex = document.indexOf("]]", categoryIndex);
-      if(endIndex>=document.length() || endIndex < 0) break;
+      if (endIndex >= document.length() || endIndex < 0) {
+        break;
+      }
       String category = document.substring(categoryIndex, endIndex).toLowerCase().trim();
       //categories.add(category.toLowerCase());
-      if (exactMatchOnly == true && inputCategories.contains(category)){
+      if (exactMatchOnly && inputCategories.contains(category)){
         return category;
       } else if (exactMatchOnly == false){
         for (String inputCategory : inputCategories) {
@@ -91,17 +95,12 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
       }
       startIndex = endIndex;
     }
-    if (match == null){
-      match = "Unknown";
-    }
-
-    return match;
+    return "Unknown";
   }
   
   @Override
   public void configure(JobConf job) {
     try {
-      //Is this thread-safe?
       if (inputCategories == null){
         Set<String> newCategories = new HashSet<String>();
 

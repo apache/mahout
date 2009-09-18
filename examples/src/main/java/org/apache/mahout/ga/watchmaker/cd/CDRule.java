@@ -82,7 +82,7 @@ public class CDRule implements Rule {
     
     DataSet dataset = DataSet.getDataSet();
 
-    for (int condInd = 0; condInd < getNbConditions(); condInd++) {
+    for (int condInd = 0; condInd < nbConditions; condInd++) {
       int attrInd = attributeIndex(condInd);
 
       setW(condInd, rng.nextDouble());
