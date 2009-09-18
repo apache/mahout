@@ -17,8 +17,17 @@
 
 package org.apache.mahout.clustering.fuzzykmeans;
 
+import org.apache.commons.cli2.CommandLine;
+import org.apache.commons.cli2.Group;
+import org.apache.commons.cli2.Option;
+import org.apache.commons.cli2.OptionException;
+import org.apache.commons.cli2.builder.ArgumentBuilder;
+import org.apache.commons.cli2.builder.DefaultOptionBuilder;
+import org.apache.commons.cli2.builder.GroupBuilder;
+import org.apache.commons.cli2.commandline.Parser;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.utils.CommandLineUtil;
 import org.apache.mahout.utils.ManhattanDistanceMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,32 +44,88 @@ public class FuzzyKMeansJob {
 
   public static void main(String[] args) throws IOException, ClassNotFoundException {
 
-    if (args.length != 11) {
-      log.warn("Expected num Arguments: 11  received: {}", args.length);
-      printMessage();
-      return;
-    }
-    int index = 0;
-    String input = args[index++];
-    String clusters = args[index++];
-    String output = args[index++];
-    String measureClass = args[index++];
-    double convergenceDelta = Double.parseDouble(args[index++]);
-    int maxIterations = Integer.parseInt(args[index++]);
-    int numMapTasks = Integer.parseInt(args[index++]);
-    int numReduceTasks = Integer.parseInt(args[index++]);
-    boolean doCanopy = Boolean.parseBoolean(args[index++]);
-    float m = Float.parseFloat(args[index++]);
-    String vectorClassName = args[index++];
-    Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
-    runJob(input, clusters, output, measureClass, convergenceDelta,
-        maxIterations, numMapTasks, numReduceTasks, doCanopy, m, vectorClass);
-  }
+    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    ArgumentBuilder abuilder = new ArgumentBuilder();
+    GroupBuilder gbuilder = new GroupBuilder();
 
-  /** Prints Error Message */
-  private static void printMessage() {
-    log
-        .warn("Usage: inputDir clusterDir OutputDir measureClass ConvergenceDelata  maxIterations numMapTasks numReduceTasks doCanopy m");
+    Option inputOpt = obuilder.withLongName("input").withRequired(true).withShortName("i").
+        withArgument(abuilder.withName("input").withMinimum(1).withMaximum(1).create()).
+        withDescription("The Path for input Vectors. Must be a SequenceFile of Writable, Vector").withShortName("i").create();
+    
+    Option clustersOpt = obuilder.withLongName("clusters").withRequired(true).withShortName("c").
+        withArgument(abuilder.withName("clusters").withMinimum(1).withMaximum(1).create()).
+        withDescription("The directory pathname for initial clusters.").create();
+
+    Option outputOpt = obuilder.withLongName("output").withRequired(true).withShortName("o").
+        withArgument(abuilder.withName("output").withMinimum(1).withMaximum(1).create()).
+        withDescription("The directory pathname for output points.").create();
+    
+    Option measureClassOpt = obuilder.withLongName("measure").withRequired(true).withShortName("d").
+        withArgument(abuilder.withName("measure").withMinimum(1).withMaximum(1).create()).
+        withDescription("The classname of the DistanceMeasure.").create();
+    
+    Option convergenceDeltaOpt = obuilder.withLongName("convergencedelta").withRequired(true).withShortName("v").
+        withArgument(abuilder.withName("convergenceDelta").withMinimum(1).withMaximum(1).create()).
+        withDescription("The convergence delta value.").create();
+    
+    Option maxIterOpt = obuilder.withLongName("maxIter").withRequired(true).withShortName("x").
+        withArgument(abuilder.withName("maxIter").withMinimum(1).withMaximum(1).create()).
+        withDescription("The maximum number of iterations.").create();
+    
+    Option numMapOpt = obuilder.withLongName("maxMap").withRequired(true).withShortName("p").
+        withArgument(abuilder.withName("maxMap").withMinimum(1).withMaximum(1).create()).
+        withDescription("The maximum number of maptasks.").create();
+    
+    Option numRedOpt = obuilder.withLongName("maxRed").withRequired(true).withShortName("r").
+        withArgument(abuilder.withName("maxRed").withMinimum(1).withMaximum(1).create()).
+        withDescription("The maximum number of reduce tasks.").create();
+    
+    Option doCanopyOpt = obuilder.withLongName("doCanopy").withRequired(true).withShortName("a").
+        withArgument(abuilder.withName("doCanopy").withMinimum(1).withMaximum(1).create()).
+        withDescription("Does canopy needed for initial clusters.").create();
+    
+    Option mOpt = obuilder.withLongName("fuzzify").withRequired(true).withShortName("m").
+        withArgument(abuilder.withName("fuzzify").withMinimum(1).withMaximum(1).create()).
+        withDescription("Param needed to fuzzify the cluster membership values.").create();
+
+    Option vectorClassOpt = obuilder.withLongName("vectorclass").withRequired(true).withShortName("e").
+        withArgument(abuilder.withName("vectorclass").withMinimum(1).withMaximum(1).create()).
+        withDescription("Class name of vector implementation to use.").create();
+    
+    Option helpOpt = obuilder.withLongName("help").
+        withDescription("Print out help").withShortName("h").create();
+
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(clustersOpt).
+        withOption(outputOpt).withOption(measureClassOpt).withOption(convergenceDeltaOpt).
+        withOption(maxIterOpt).withOption(numMapOpt).withOption(numRedOpt).withOption(doCanopyOpt).
+        withOption(mOpt).withOption(vectorClassOpt).withOption(helpOpt).create();
+
+    try {
+      Parser parser = new Parser();
+      parser.setGroup(group);
+      CommandLine cmdLine = parser.parse(args);
+      if (cmdLine.hasOption(helpOpt)) {
+        CommandLineUtil.printHelp(group);
+        return;
+      }
+      String input = cmdLine.getValue(inputOpt).toString();
+      String clusters = cmdLine.getValue(clustersOpt).toString();
+      String output = cmdLine.getValue(outputOpt).toString();
+      String measureClass = cmdLine.getValue(measureClassOpt).toString();
+      double convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt).toString());
+      int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt).toString());
+      int numMapTasks = Integer.parseInt(cmdLine.getValue(numMapOpt).toString());
+      int numReduceTasks = Integer.parseInt(cmdLine.getValue(numRedOpt).toString());
+      boolean doCanopy = Boolean.parseBoolean(cmdLine.getValue(doCanopyOpt).toString());
+      float m = Float.parseFloat(cmdLine.getValue(mOpt).toString());
+      String vectorClassName = cmdLine.getValue(vectorClassOpt).toString();;
+      Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
+      runJob(input, clusters, output, measureClass, convergenceDelta,
+          maxIterations, numMapTasks, numReduceTasks, doCanopy, m, vectorClass);
+    } catch (OptionException e) {
+      log.error("Exception parsing command line: ", e);
+      CommandLineUtil.printHelp(group);
+    }
   }
 
   /**
