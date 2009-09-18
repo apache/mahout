@@ -39,7 +39,7 @@ import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.utils.CommandLineUtil;
+import org.apache.mahout.common.CommandLineUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
