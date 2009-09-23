@@ -31,7 +31,7 @@ import java.util.List;
  *
  * <p>This class exposes a subset of the {@link Recommender} API. In particular it
  * does not support {@link Recommender#getDataModel()}
- * or {@link Recommender#recommend(Object, int, org.apache.mahout.cf.taste.recommender.Rescorer)}
+ * or {@link Recommender#recommend(long, int, org.apache.mahout.cf.taste.recommender.Rescorer)}
  * since these involve data types which can't be transmitted in a web service.</p>
  */
 public final class RecommenderService {
@@ -43,32 +43,32 @@ public final class RecommenderService {
 		recommender = RecommenderSingleton.getInstance().getRecommender();
 	}
 
-	public String[][] recommend(final String userID, final int howMany) throws Exception {
-		final List<RecommendedItem> recommendations = recommender.recommend(userID, howMany);
-		final String[][] itemIDsAndPrefs = new String[recommendations.size()][2];
+	public String[][] recommend(long userID, final int howMany) throws Exception {
+		List<RecommendedItem> recommendations = recommender.recommend(userID, howMany);
+		String[][] itemIDsAndPrefs = new String[recommendations.size()][2];
 		int i = 0;
-		for (final RecommendedItem item : recommendations) {
+		for (RecommendedItem item : recommendations) {
 			itemIDsAndPrefs[i][0] = String.valueOf(item.getValue());
-			itemIDsAndPrefs[i][1] = item.getItem().getID().toString();
+			itemIDsAndPrefs[i][1] = String.valueOf(item.getItemID());
 			i++;
 		}
 		return itemIDsAndPrefs;
 	}
 
-	public double estimatePreference(final String userID, final String itemID) throws Exception {
+	public double estimatePreference(long userID, long itemID) throws Exception {
 		return recommender.estimatePreference(userID, itemID);
 	}
 
-	public void setPreference(final String userID, final String itemID, final double value) throws Exception {
+	public void setPreference(long userID, long itemID, float value) throws Exception {
 		recommender.setPreference(userID, itemID, value);
 	}
 
-	public void removePreference(final String userID, final String itemID) throws Exception {
+	public void removePreference(long userID, long itemID) throws Exception {
 		recommender.removePreference(userID, itemID);
 	}
 
 	public void refresh() throws Exception {
-	    recommender.refresh(null);
+	  recommender.refresh(null);
 	}
 
 }
