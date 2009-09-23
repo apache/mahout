@@ -165,10 +165,6 @@
       <artifactId>watchmaker-swing</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>org.apache.mahout.uncommons.math</groupId>
-      <artifactId>uncommons-math</artifactId>
-        </exclusion>
-        <exclusion>
           <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
         </exclusion>
