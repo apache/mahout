@@ -206,11 +206,11 @@
               <goal>install-file</goal>
             </goals>
             <configuration>
-              <file>lib/uncommons-maths-1.0.2.jar</file>
+              <file>lib/uncommons-maths-${uncommons.maths.version}.jar</file>
               <groupId>org.apache.mahout.uncommons.math</groupId>
               <artifactId>uncommons-math</artifactId>
               <packaging>jar</packaging>
-              <version>1.0.2</version>
+              <version>${uncommons.maths.version}</version>
               <generatePom>true</generatePom>
               <createChecksum>true</createChecksum>
             </configuration>
@@ -518,13 +518,13 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.5.6</version>
+      <version>1.5.8</version>
     </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-jcl</artifactId>
-      <version>1.5.6</version>
+      <version>1.5.8</version>
     </dependency>
 
     <dependency>

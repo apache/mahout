@@ -21,6 +21,7 @@ import org.uncommons.watchmaker.framework.AbstractEvolutionEngine;
 import org.uncommons.watchmaker.framework.CandidateFactory;
 import org.uncommons.watchmaker.framework.EvaluatedCandidate;
 import org.uncommons.watchmaker.framework.EvolutionaryOperator;
+import org.uncommons.watchmaker.framework.FitnessEvaluator;
 import org.uncommons.watchmaker.framework.SelectionStrategy;
 
 import java.util.ArrayList;
@@ -32,11 +33,10 @@ import java.util.Random;
 public class STEvolutionEngine<T> extends AbstractEvolutionEngine<T> {
 
   public STEvolutionEngine(CandidateFactory<T> candidateFactory,
-                           EvolutionaryOperator<? super T> evolutionScheme,
-                           STFitnessEvaluator<? super T> fitnessEvaluator,
+                           EvolutionaryOperator<T> evolutionScheme,
+                           FitnessEvaluator<? super T> fitnessEvaluator,
                            SelectionStrategy<? super T> selectionStrategy, Random rng) {
-    super(candidateFactory, evolutionScheme, fitnessEvaluator,
-        selectionStrategy, rng);
+    super(candidateFactory, evolutionScheme, fitnessEvaluator, selectionStrategy, rng);
   }
 
   /** @see org.uncommons.watchmaker.framework.AbstractEvolutionEngine#evaluatePopulation(java.util.List) */
