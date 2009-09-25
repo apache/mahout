@@ -36,7 +36,7 @@ public class CDFactory extends AbstractCandidateFactory<CDRule> {
   }
 
   @Override
-  protected CDRule generateRandomCandidate(Random rng) {
+  public CDRule generateRandomCandidate(Random rng) {
     return new CDRule(threshold, rng);
   }
 }

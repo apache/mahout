@@ -17,7 +17,7 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import org.uncommons.watchmaker.framework.Probability;
+import org.uncommons.maths.random.Probability;
 import org.uncommons.watchmaker.framework.operators.AbstractCrossover;
 
 import java.util.ArrayList;

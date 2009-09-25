@@ -132,8 +132,7 @@ public class EvolutionaryTravellingSalesman implements
     Random rng = RandomUtils.getRandom();
 
     // Set-up evolution pipeline (cross-over followed by mutation).
-    List<EvolutionaryOperator<? super List<?>>> operators = new ArrayList<EvolutionaryOperator<? super List<?>>>(
-        2);
+    List<EvolutionaryOperator<List<String>>> operators = new ArrayList<EvolutionaryOperator<List<String>>>(2);
     if (crossover) {
       operators.add(new ListOrderCrossover());
     }
@@ -142,13 +141,11 @@ public class EvolutionaryTravellingSalesman implements
           new PoissonGenerator(1.5, rng)));
     }
 
-    EvolutionaryOperator<List<?>> pipeline = new EvolutionPipeline<List<?>>(
-        operators);
+    EvolutionaryOperator<List<String>> pipeline = new EvolutionPipeline<List<String>>(operators);
 
     CandidateFactory<List<String>> candidateFactory = new ListPermutationFactory<String>(
         new LinkedList<String>(cities));
-    EvolutionEngine<List<String>> engine = getEngine(candidateFactory,
-        pipeline, rng);
+    EvolutionEngine<List<String>> engine = getEngine(candidateFactory, pipeline, rng);
     engine.addEvolutionObserver(new EvolutionObserver<List<String>>() {
       @Override
       public void populationUpdate(PopulationData<? extends List<String>> data) {
@@ -165,11 +162,11 @@ public class EvolutionaryTravellingSalesman implements
 
   private EvolutionEngine<List<String>> getEngine(
       CandidateFactory<List<String>> candidateFactory,
-      EvolutionaryOperator<List<?>> pipeline, Random rng) {
+      EvolutionaryOperator<List<String>> pipeline, Random rng) {
     if (mahout) {
       // This is what we need to do to distribute the fitness evaluation.
       // First create a STFitnessEvaluator that wraps our FitnessEvaluator
-      FitnessEvaluator<List<String>> evaluator = new MahoutFitnessEvaluator<List<String>>(
+      FitnessEvaluator<? super List<String>> evaluator = new MahoutFitnessEvaluator<List<String>>(
           new RouteEvaluator(distances));
       // Then use a SequentialEvolutionEngine instead of a StandaloneEvolutionEngine.
       // Its parameters remain the same.

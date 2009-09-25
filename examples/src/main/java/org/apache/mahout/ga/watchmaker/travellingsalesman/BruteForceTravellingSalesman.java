@@ -17,7 +17,7 @@
 
 package org.apache.mahout.ga.watchmaker.travellingsalesman;
 
-import org.uncommons.maths.PermutationGenerator;
+import org.uncommons.maths.combinatorics.PermutationGenerator;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
 import java.util.ArrayList;

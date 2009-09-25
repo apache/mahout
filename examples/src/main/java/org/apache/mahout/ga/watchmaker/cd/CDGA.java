@@ -115,7 +115,7 @@ public class CDGA {
     CandidateFactory<CDRule> factory = new CDFactory(threshold);
 
     // Evolution Scheme
-    List<EvolutionaryOperator<? super CDRule>> operators = new ArrayList<EvolutionaryOperator<? super CDRule>>();
+    List<EvolutionaryOperator<CDRule>> operators = new ArrayList<EvolutionaryOperator<CDRule>>();
     operators.add(new CDCrossover(crosspnts));
     operators.add(new CDMutation(mutrate, mutrange, mutprec));
     EvolutionPipeline<CDRule> pipeline = new EvolutionPipeline<CDRule>(operators);

@@ -211,7 +211,6 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
       <version>1.0</version>
-
     </dependency>
 
     <dependency>
@@ -219,7 +218,6 @@
       <artifactId>javaee-api</artifactId>
       <version>5.0-1</version>
     </dependency>
-
 
     <dependency>
       <groupId>org.easymock</groupId>
@@ -242,7 +240,6 @@
       <artifactId>cglib</artifactId>
       <version>2.1_3</version>
     </dependency>
-
 
     <dependency>
       <groupId>junit</groupId>
