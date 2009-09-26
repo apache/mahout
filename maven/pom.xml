@@ -22,7 +22,7 @@
     <uncommons.maths.version>1.2</uncommons.maths.version>    
     <watchmaker.version>0.6.2</watchmaker.version>
     <tagBase>https://svn.apache.org/repos/asf/lucene/mahout</tagBase>
-    <lucene.version>2.9-SNAPSHOT</lucene.version>
+    <lucene.version>2.9.0</lucene.version>
   </properties>
   <licenses>
     <license>
