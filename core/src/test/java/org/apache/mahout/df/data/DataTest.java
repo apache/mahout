@@ -1,0 +1,325 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.mahout.df.data;
+
+import static org.apache.mahout.df.data.Utils.double2String;
+import static org.apache.mahout.df.data.Utils.randomData;
+import static org.apache.mahout.df.data.Utils.randomDescriptor;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
+
+import org.apache.mahout.df.data.Data;
+import org.apache.mahout.df.data.DataLoader;
+import org.apache.mahout.df.data.Dataset;
+import org.apache.mahout.df.data.Instance;
+import org.apache.mahout.df.data.conditions.Condition;
+
+import junit.framework.TestCase;
+
+public class DataTest extends TestCase {
+
+  protected final int nbAttributes = 10;
+
+  protected final int datasize = 100;
+
+  protected Random rng;
+
+  protected Data data;
+
+  @Override
+  protected void setUp() throws Exception {
+    rng = new Random();
+    data = Utils.randomData(rng, nbAttributes, datasize);
+  }
+
+  /**
+   * Test method for
+   * {@link org.apache.mahout.df.data.Data#subset(org.apache.mahout.df.data.conditions.Condition)}.
+   */
+  public void testSubset() {
+    int n = 10;
+
+    for (int nloop = 0; nloop < n; nloop++) {
+      int attr = rng.nextInt(data.dataset.nbAttributes());
+
+      double[] values = data.values(attr);
+      double value = values[rng.nextInt(values.length)];
+
+      Data eSubset = data.subset(Condition.equals(attr, value));
+      Data lSubset = data.subset(Condition.lesser(attr, value));
+      Data gSubset = data.subset(Condition.greaterOrEquals(attr, value));
+
+      for (int index = 0; index < datasize; index++) {
+        Instance instance = data.get(index);
+
+        if (instance.get(attr) < value) {
+          assertTrue(lSubset.contains(instance));
+          assertFalse(eSubset.contains(instance));
+          assertFalse(gSubset.contains(instance));
+        } else if (instance.get(attr) == value) {
+          assertFalse(lSubset.contains(instance));
+          assertTrue(eSubset.contains(instance));
+          assertTrue(gSubset.contains(instance));
+        } else {
+          assertFalse(lSubset.contains(instance));
+          assertFalse(eSubset.contains(instance));
+          assertTrue(gSubset.contains(instance));
+        }
+      }
+    }
+  }
+
+
+  public void testValues() throws Exception {
+    Data data = Utils.randomData(rng, nbAttributes, datasize);
+
+    for (int attr = 0; attr < data.dataset.nbAttributes(); attr++) {
+      double[] values = data.values(attr);
+
+      // each value of the attribute should appear exactly one time in values
+      for (int index = 0; index < datasize; index++) {
+        assertEquals(1, count(values, data.get(index).get(attr)));
+      }
+    }
+
+  }
+
+  public static int count(double[] values, double value) {
+    int count = 0;
+    for (double v : values) {
+      if (v == value)
+        count++;
+    }
+    return count;
+  }
+
+  public void testIdenticalTrue() throws Exception {
+    // generate a small data, only to get the dataset
+    Dataset dataset = randomData(rng, nbAttributes, 1).dataset;
+    
+    // test empty data
+    Data empty = new Data(dataset, new ArrayList<Instance>());
+    assertTrue(empty.isIdentical());
+
+    // test identical data, except for the labels
+    Data identical = randomData(rng, nbAttributes, datasize);
+    Instance model = identical.get(0);
+    for (int index = 1; index < datasize; index++) {
+      for (int attr = 0; attr < identical.dataset.nbAttributes(); attr++) {
+        identical.get(index).set(attr, model.get(attr));
+      }
+    }
+
+    assertTrue(identical.isIdentical());
+  }
+
+  public void testIdenticalFalse() throws Exception {
+    int n = 10;
+
+    for (int nloop = 0; nloop < n; nloop++) {
+      Data data = randomData(rng, nbAttributes, datasize);
+
+      // choose a random instance
+      int index = rng.nextInt(datasize);
+      Instance instance = data.get(index);
+
+      // change a random attribute
+      int attr = rng.nextInt(data.dataset.nbAttributes());
+      instance.set(attr, instance.get(attr) + 1);
+
+      assertFalse(data.isIdentical());
+    }
+  }
+
+  public void testIdenticalLabelTrue() throws Exception {
+    // generate a small data, only to get a dataset
+    Dataset dataset = randomData(rng, nbAttributes, 1).dataset;
+    
+    // test empty data
+    Data empty = new Data(dataset, new ArrayList<Instance>());
+    assertTrue(empty.identicalLabel());
+
+    // test identical labels
+    String descriptor = randomDescriptor(rng, nbAttributes);
+    double[][] source = Utils.randomDoublesWithSameLabel(rng, descriptor,
+        datasize, rng.nextInt());
+    String[] sData = double2String(source);
+    
+    dataset = DataLoader.generateDataset(descriptor, sData);
+    Data data = DataLoader.loadData(dataset, sData);
+    
+    assertTrue(data.identicalLabel());
+  }
+
+  public void testIdenticalLabelFalse() throws Exception {
+    int n = 10;
+
+    for (int nloop = 0; nloop < n; nloop++) {
+      String descriptor = randomDescriptor(rng, nbAttributes);
+      int label = Utils.findLabel(descriptor);
+      double[][] source = Utils.randomDoublesWithSameLabel(rng, descriptor,
+          datasize, rng.nextInt());
+      // choose a random vector and change its label
+      int index = rng.nextInt(datasize);
+      source[index][label]++;
+
+      String[] sData = Utils.double2String(source);
+      
+      Dataset dataset = DataLoader.generateDataset(descriptor, sData);
+      Data data = DataLoader.loadData(dataset, sData);
+
+      assertFalse(data.identicalLabel());
+    }
+  }
+
+  /**
+   * Test method for
+   * {@link org.apache.mahout.df.data.Data#bagging(java.util.Random)}.
+   */
+  public void testBagging() {
+    Data bag = data.bagging(rng);
+
+    // the bag should have the same size as the data
+    assertEquals(data.size(), bag.size());
+
+    // at least one element from the data should not be in the bag
+    boolean found = false;
+    for (int index = 0; index < data.size() && !found; index++) {
+      found = !bag.contains(data.get(index));
+    }
+    
+    assertTrue("some instances from data should not be in the bag", found);
+  }
+
+  /**
+   * Test method for
+   * {@link org.apache.mahout.df.data.Data#rsplit(java.util.Random, double)}.
+   */
+  public void testRsplit() {
+    Data source;
+    Data subset;
+
+    // rsplit should handle empty subsets
+    source = data.clone();
+    subset = source.rsplit(rng, 0);
+    assertTrue("subset should be empty", subset.isEmpty());
+    assertEquals("source.size is incorrect", datasize, source.size());
+
+    // rsplit should handle full size subsets
+    source = data.clone();
+    subset = source.rsplit(rng, datasize);
+    assertEquals("subset.size is incorrect", datasize, subset.size());
+    assertTrue("source should be empty", source.isEmpty());
+
+    // random case
+    int subsize = rng.nextInt(datasize);
+    source = data.clone();
+    subset = source.rsplit(rng, subsize);
+    assertEquals("subset.size is incorrect", subsize, subset.size());
+    assertEquals("source.size is incorrect", datasize - subsize, source.size());
+  }
+
+  public void testCountLabel() throws Exception {
+    Data data = Utils.randomData(rng, nbAttributes, datasize);
+    int[] counts = new int[data.dataset.nblabels()];
+
+    int n = 10;
+
+    for (int nloop = 0; nloop < n; nloop++) {
+      Arrays.fill(counts, 0);
+      data.countLabels(counts);
+      
+      for (int index=0;index<data.size();index++) {
+        counts[data.get(index).label]--;
+      }
+      
+      for (int label = 0; label < data.dataset.nblabels(); label++) {
+        assertEquals("Wrong label 'equals' count", 0, counts[0]);
+      }
+    }
+  }
+
+  public void testMajorityLabel() throws Exception {
+    int label1, label2;
+    int code1, code2;
+
+    // all instances have the same label
+    String descriptor = randomDescriptor(rng, nbAttributes);
+    int label = Utils.findLabel(descriptor);
+
+    label1 = rng.nextInt();
+    double[][] source = Utils.randomDoublesWithSameLabel(rng, descriptor, 100,
+        label1);
+    String[] sData = double2String(source);
+    
+    Dataset dataset = DataLoader.generateDataset(descriptor, sData);
+    Data data = DataLoader.loadData(dataset, sData);
+    
+    code1 = dataset.labelCode(Double.toString(label1));
+
+    assertEquals(code1, data.majorityLabel(rng));
+
+    // 51/100 vectors have label2
+    label2 = label1 + 1;
+    int nblabel2 = 51;
+    while (nblabel2 > 0) {
+      double[] vector = source[rng.nextInt(100)];
+      if (vector[label] != label2) {
+        vector[label] = label2;
+        nblabel2--;
+      }
+    }
+    sData = double2String(source);
+    dataset = DataLoader.generateDataset(descriptor, sData);
+    data = DataLoader.loadData(dataset, sData);
+    code1 = dataset.labelCode(Double.toString(label1));
+    code2 = dataset.labelCode(Double.toString(label2));
+
+    // label2 should be the majority label
+    assertEquals(code2, data.majorityLabel(rng));
+
+    // 50 vectors with label1 and 50 vectors with label2
+    do {
+      double[] vector = source[rng.nextInt(100)];
+      if (vector[label] == label2) {
+        vector[label] = label1;
+        break;
+      }
+    } while (true);
+    sData = double2String(source);
+    
+    data = DataLoader.loadData(dataset, sData);
+    code1 = dataset.labelCode(Double.toString(label1));
+    code2 = dataset.labelCode(Double.toString(label2));
+
+    // majorityLabel should return label1 and label2 at random
+    boolean found1 = false;
+    boolean found2 = false;
+    for (int index = 0; index < 10 && (!found1 || !found2); index++) {
+      int major = data.majorityLabel(rng);
+      if (major == code1)
+        found1 = true;
+      if (major == code2)
+        found2 = true;
+    }
+    assertTrue(found1 && found2);
+  }
+
+}

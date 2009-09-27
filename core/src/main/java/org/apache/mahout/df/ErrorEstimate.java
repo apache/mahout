@@ -1,0 +1,82 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.mahout.df;
+
+/**
+ * various methods to compute from the output of a random forest
+ */
+public class ErrorEstimate {
+
+  public static double errorRate(int[] labels, int[] predictions) {
+    assert labels.length == predictions.length : "labels.length != predictions.length";
+
+    double nberrors = 0; // number of instance that got bad predictions
+    double datasize = 0; // number of classified instances
+
+    for (int index = 0; index < labels.length; index++) {
+      if (predictions[index] == -1)
+        continue; // instance not classified
+
+      if (predictions[index] != labels[index])
+        nberrors++;
+
+      datasize++;
+    }
+
+    return nberrors / datasize;
+  }
+
+  /**
+   * Counts the number of classified instances (prediction != -1)
+   * @param predictions
+   * @return
+   */
+  public static int nbPredicted(int[] predictions) {
+    int nbpredicted = 0;
+
+    for (int index = 0; index < predictions.length; index++) {
+      if (predictions[index] != -1)
+      nbpredicted++;
+    }
+
+    return nbpredicted;
+  }
+
+  /**
+   * Counts the number of instance that got bad predictions
+   * 
+   * @param labels
+   * @param predictions
+   * @return
+   */
+  public static int nbErrors(int[] labels, int[] predictions) {
+    assert labels.length == predictions.length : "labels.length != predictions.length";
+
+    int nberrors = 0;
+
+    for (int index = 0; index < labels.length; index++) {
+      if (predictions[index] == -1)
+        continue; // instance not classified
+
+      if (predictions[index] != labels[index])
+        nberrors++;
+    }
+
+    return nberrors;
+  }
+}

@@ -1,0 +1,94 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.mahout.df.data;
+
+import static org.apache.mahout.df.data.DescriptorUtils.parseDescriptor;
+import static org.apache.mahout.df.data.Utils.generateDescriptor;
+import static org.apache.mahout.df.data.Utils.randomTokens;
+
+import java.util.Random;
+
+import junit.framework.TestCase;
+
+import org.apache.mahout.df.data.DescriptorUtils;
+import org.apache.mahout.df.data.Dataset.Attribute;
+import org.apache.mahout.df.data.DescriptorUtils.DescriptorException;
+
+public class DescriptorUtilsTest extends TestCase {
+
+  /**
+   * Test method for
+   * {@link org.apache.mahout.df.data.DescriptorUtils#parseDescriptor(java.lang.String)}.
+   */
+  public void testParseDescriptor() throws Exception {
+    int n = 10;
+    int maxnbAttributes = 100;
+
+    Random rng = new Random();
+    
+    for (int nloop = 0; nloop < n; nloop++) {
+      int nbAttributes = rng.nextInt(maxnbAttributes) + 1;
+
+      char[] tokens = randomTokens(rng, nbAttributes);
+      Attribute[] attrs = parseDescriptor(generateDescriptor(tokens));
+
+      // verify that the attributes matches the token list
+      assertEquals("attributes size", nbAttributes, attrs.length);
+
+      for (int attr = 0; attr < nbAttributes; attr++) {
+        switch (tokens[attr]) {
+          case 'I':
+            assertTrue(attrs[attr].isIgnored());
+            break;
+          case 'N':
+            assertTrue(attrs[attr].isNumerical());
+            break;
+          case 'C':
+            assertTrue(attrs[attr].isCategorical());
+            break;
+          case 'L':
+            assertTrue(attrs[attr].isLabel());
+            break;
+        }
+      }
+    }
+  }
+
+  public void testGenerateDescription() throws Exception {
+    validate("", "");
+    validate("I L C C N N N C", "I L C C N N N C");
+    validate("I L C C N N N C", "I L 2 C 3 N C");
+    validate("I L C C N N N C", " I L  2 C 3 N C ");
+    
+    try {
+      validate("", "I L 2 2 C 2 N C");
+      fail("2 consecutive multiplicators");
+    } catch (DescriptorException e) {
+    }
+    
+    try {
+      validate("", "I L 2 C -2 N C");
+      fail("negative multiplicator");
+    } catch (DescriptorException e) {
+    }
+  }
+  
+  protected void validate(String descriptor, String description) throws DescriptorException {
+    assertEquals(descriptor, DescriptorUtils.generateDescriptor(description));
+  }
+}
