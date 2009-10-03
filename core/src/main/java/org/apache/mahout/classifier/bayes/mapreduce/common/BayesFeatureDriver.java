@@ -33,25 +33,21 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 /** Create and run the Bayes Feature Reader Step. */
-public class BayesFeatureDriver {
+public class BayesFeatureDriver implements BayesJob {
 
   private static final Logger log = LoggerFactory.getLogger(BayesFeatureDriver.class);
-
-  private BayesFeatureDriver() {
-  }
 
   /**
    * Takes in two arguments: <ol> <li>The input {@link org.apache.hadoop.fs.Path} where the input documents live</li>
    * <li>The output {@link org.apache.hadoop.fs.Path} where to write the interim files as a {@link
    * org.apache.hadoop.io.SequenceFile}</li> </ol>
    *
-   * @param args The args
+   * @param args The args - input and output path.
+   * @throws Exception in case of problems during job execution.
    */
-  public static void main(String[] args) throws IOException {
-    String input = args[0];
-    String output = args[1];
-
-    runJob(input, output, new BayesParameters(1));
+  public static void main(String[] args) throws Exception {
+    JobExecutor executor = new JobExecutor();
+    executor.execute(args, new BayesFeatureDriver());
   }
 
   /**
@@ -60,7 +56,7 @@ public class BayesFeatureDriver {
    * @param input  the input pathname String
    * @param output the output pathname String
    */
-  public static void runJob(String input, String output, BayesParameters params) throws IOException {
+  public void runJob(String input, String output, BayesParameters params) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(BayesFeatureDriver.class);
     conf.setJobName("Bayes Feature Driver running over input: " +  input);

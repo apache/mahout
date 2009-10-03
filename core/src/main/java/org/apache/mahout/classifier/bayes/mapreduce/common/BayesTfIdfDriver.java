@@ -31,6 +31,7 @@ import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.JobConfigurable;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
@@ -42,12 +43,9 @@ import java.io.IOException;
 import java.util.Map;
 
 /** The Driver which drives the Tf-Idf Generation */
-public class BayesTfIdfDriver {
+public class BayesTfIdfDriver implements BayesJob {
 
   private static final Logger log = LoggerFactory.getLogger(BayesTfIdfDriver.class);
-
-  private BayesTfIdfDriver() {
-  }
 
   /**
    * Takes in two arguments:
@@ -58,14 +56,12 @@ public class BayesTfIdfDriver {
    * files as a {@link org.apache.hadoop.io.SequenceFile}</li>
    * </ol>
    * 
-   * @param args The args
-   * @throws ClassNotFoundException
+   * @param args The args - input and output path.
+   * @throws Exception in case of problems during job execution.
    */
-  public static void main(String[] args) throws IOException {
-    String input = args[0];
-    String output = args[1];
-
-    runJob(input, output, new BayesParameters(1));
+  public static void main(String[] args) throws Exception {
+    JobExecutor executor = new JobExecutor();
+    executor.execute(args, new BayesTfIdfDriver());
   }
 
   /**
@@ -75,7 +71,7 @@ public class BayesTfIdfDriver {
    * @param output the output pathname String
    * @throws ClassNotFoundException
    */
-  public static void runJob(String input, String output, BayesParameters params) throws IOException {
+  public void runJob(String input, String output, BayesParameters params) throws IOException {
 
     JobClient client = new JobClient();
     JobConf conf = new JobConf(BayesWeightSummerDriver.class);

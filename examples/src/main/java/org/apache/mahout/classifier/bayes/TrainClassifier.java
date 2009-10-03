@@ -61,11 +61,13 @@ public class TrainClassifier {
   }
 
   public static void trainNaiveBayes(String dir, String outputDir, BayesParameters params) throws IOException, InterruptedException, ClassNotFoundException {
-    BayesDriver.runJob(dir, outputDir, params);
+    BayesDriver driver = new BayesDriver();
+    driver.runJob(dir, outputDir, params);
   }
   
   public static void trainCNaiveBayes(String dir, String outputDir, BayesParameters params) throws IOException, InterruptedException, ClassNotFoundException {
-    CBayesDriver.runJob(dir, outputDir, params);
+    CBayesDriver driver = new CBayesDriver();
+    driver.runJob(dir, outputDir, params);
   }
 
   public static void main(String[] args) throws IOException, OptionException, NumberFormatException, IllegalStateException, InterruptedException, ClassNotFoundException {

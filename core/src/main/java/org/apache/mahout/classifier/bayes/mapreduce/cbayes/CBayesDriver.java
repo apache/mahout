@@ -22,35 +22,31 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesFeatureDriver;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
+import org.apache.mahout.classifier.bayes.mapreduce.common.BayesJob;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesTfIdfDriver;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesWeightSummerDriver;
+import org.apache.mahout.classifier.bayes.mapreduce.common.JobExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 /** Create and run the Bayes Trainer. */
-public class CBayesDriver {
+public class CBayesDriver implements BayesJob{
 
   private static final Logger log = LoggerFactory.getLogger(CBayesDriver.class);
-
-  private CBayesDriver() {
-  }
 
   /**
    * Takes in two arguments: <ol> <li>The input {@link Path} where the input documents live</li>
    * <li>The output {@link Path} where to write the Model as a
    * {@link org.apache.hadoop.io.SequenceFile}</li> </ol>
    *
-   * @param args The args
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
+   * @param args The args input and output path.
+   * @throws Exception in case of problems during job execution. 
    */
-  public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
-    String input = args[0];
-    String output = args[1];
-
-    runJob(input, output, new BayesParameters(1));
+  public static void main(String[] args) throws Exception {
+    JobExecutor executor = new JobExecutor();
+    executor.execute(args, new CBayesDriver());
   }
 
   /**
@@ -61,7 +57,7 @@ public class CBayesDriver {
    * @throws ClassNotFoundException 
    * @throws InterruptedException 
    */
-  public static void runJob(String input, String output, BayesParameters params) throws IOException, InterruptedException, ClassNotFoundException {
+  public void runJob(String input, String output, BayesParameters params) throws IOException, InterruptedException, ClassNotFoundException {
     JobConf conf = new JobConf(CBayesDriver.class);
     Path outPath = new Path(output);
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
@@ -71,22 +67,26 @@ public class CBayesDriver {
 
     log.info("Reading features...");
     //Read the features in each document normalized by length of each document
-    BayesFeatureDriver.runJob(input, output, params);
+    BayesFeatureDriver feature = new BayesFeatureDriver();
+    feature.runJob(input, output, params);
 
     log.info("Calculating Tf-Idf...");
     //Calculate the TfIdf for each word in each label
-    BayesTfIdfDriver.runJob(input, output,params);
+    BayesTfIdfDriver tfidf = new BayesTfIdfDriver();
+    tfidf.runJob(input, output,params);
 
     log.info("Calculating weight sums for labels and features...");
     //Calculate the Sums of weights for each label, for each feature and for each feature and for each label
-    BayesWeightSummerDriver.runJob(input, output, params);
+    BayesWeightSummerDriver summer = new BayesWeightSummerDriver();
+    summer.runJob(input, output, params);
 
     //Calculate the W_ij = log(Theta) for each label, feature. This step actually generates the complement class
     //CBayesThetaDriver.runJob(input, output);
 
     log.info("Calculating the weight Normalisation factor for each complement class...");
     //Calculate the normalization factor Sigma_W_ij for each complement class.
-    CBayesThetaNormalizerDriver.runJob(input, output, params);
+    CBayesThetaNormalizerDriver normalizer = new CBayesThetaNormalizerDriver();
+    normalizer.runJob(input, output, params);
 
     //Calculate the normalization factor Sigma_W_ij for each complement class.
     //CBayesNormalizedWeightDriver.runJob(input, output);

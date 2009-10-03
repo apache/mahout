@@ -31,6 +31,8 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
+import org.apache.mahout.classifier.bayes.mapreduce.common.BayesJob;
+import org.apache.mahout.classifier.bayes.mapreduce.common.JobExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,25 +40,20 @@ import java.io.IOException;
 import java.util.Map;
 
 /** Create and run the Bayes Trainer. */
-public class CBayesNormalizedWeightDriver {
+public class CBayesNormalizedWeightDriver implements BayesJob {
 
   private static final Logger log = LoggerFactory.getLogger(CBayesNormalizedWeightDriver.class);
-
-  private CBayesNormalizedWeightDriver() {
-  }
 
   /**
    * Takes in two arguments: <ol> <li>The input {@link org.apache.hadoop.fs.Path} where the input documents live</li>
    * <li>The output {@link org.apache.hadoop.fs.Path} where to write the Model as a
    * {@link org.apache.hadoop.io.SequenceFile}</li> </ol>
    *
-   * @param args The args
+   * @param args The args - contains input and output path.
    */
-  public static void main(String[] args) throws IOException {
-    String input = args[0];
-    String output = args[1];
-
-    runJob(input, output, new BayesParameters(1));
+  public static void main(String[] args) throws Exception {
+    JobExecutor executor = new JobExecutor();
+    executor.execute(args, new CBayesNormalizedWeightDriver());
   }
 
   /**
@@ -65,7 +62,7 @@ public class CBayesNormalizedWeightDriver {
    * @param input  the input pathname String
    * @param output the output pathname String
    */
-  public static void runJob(String input, String output, BayesParameters params) throws IOException {
+  public void runJob(String input, String output, BayesParameters params) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(CBayesNormalizedWeightDriver.class);
 

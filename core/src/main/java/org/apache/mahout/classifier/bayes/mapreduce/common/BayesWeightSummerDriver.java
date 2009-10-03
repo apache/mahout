@@ -31,22 +31,18 @@ import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import java.io.IOException;
 
 /** Create and run the Bayes Trainer. */
-public class BayesWeightSummerDriver {
-  private BayesWeightSummerDriver() {
-  }
+public class BayesWeightSummerDriver implements BayesJob {
 
   /**
    * Takes in two arguments: <ol> <li>The input {@link org.apache.hadoop.fs.Path} where the input documents live</li>
    * <li>The output {@link org.apache.hadoop.fs.Path} where to write the the interim files as a {@link
    * org.apache.hadoop.io.SequenceFile}</li> </ol>
    *
-   * @param args The args
+   * @param args The args - should contain input and output path.
    */
-  public static void main(String[] args) throws IOException {
-    String input = args[0];
-    String output = args[1];
-
-    runJob(input, output, new BayesParameters(1));
+  public static void main(String[] args) throws Exception {
+    JobExecutor executor = new JobExecutor();
+    executor.execute(args, new BayesWeightSummerDriver());
   }
 
   /**
@@ -55,7 +51,7 @@ public class BayesWeightSummerDriver {
    * @param input  the input pathname String
    * @param output the output pathname String
    */
-  public static void runJob(String input, String output, BayesParameters params) throws IOException {
+  public void runJob(String input, String output, BayesParameters params) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(BayesWeightSummerDriver.class);
     conf.setJobName("Bayes Weight Summer Driver running over input: " +  input);
