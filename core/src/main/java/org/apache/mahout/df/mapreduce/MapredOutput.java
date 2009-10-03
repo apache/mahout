@@ -32,9 +32,9 @@ import org.apache.mahout.df.node.Node;
  */
 public class MapredOutput implements Writable {
 
-  protected Node tree;
+  private Node tree;
 
-  protected int[] predictions;
+  private int[] predictions;
 
   public Node getTree() {
     return tree;
@@ -113,8 +113,17 @@ public class MapredOutput implements Writable {
   }
 
   @Override
+  public int hashCode() {
+    int hashCode = tree == null ? 1 : tree.hashCode();
+    for (int prediction : predictions) {
+      hashCode = 31 * hashCode + prediction;
+    }
+    return hashCode;
+  }
+
+  @Override
   public String toString() {
-    return "{" + tree + " | " + Arrays.toString(predictions) + "}";
+    return "{" + tree + " | " + Arrays.toString(predictions) + '}';
   }
 
 }

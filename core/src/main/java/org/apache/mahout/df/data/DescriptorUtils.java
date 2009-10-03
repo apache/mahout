@@ -13,18 +13,9 @@ import org.apache.mahout.df.data.Dataset.Attribute;
  * Contains various methods that deal with descriptor strings
  */
 public class DescriptorUtils {
-
-  /**
-   * Exception throwed when parsing a descriptor
-   *
-   */
-  @SuppressWarnings("serial")
-  public static class DescriptorException extends Exception {
-    public DescriptorException(String msg) {
-      super(msg);
-    }
+  private DescriptorUtils() {
   }
-  
+
   /**
    * Parses a descriptor string and generates the corresponding array of Attributes
    * 
@@ -79,16 +70,15 @@ public class DescriptorUtils {
    * @throws DescriptorException
    */
   public static String generateDescriptor(List<String> tokens) throws DescriptorException {
-    StringBuffer descriptor = new StringBuffer();
+    StringBuilder descriptor = new StringBuilder();
     
     int multiplicator = 0;
-    int number;
-    
+
     for (String token : tokens) {
       try {
         // try to parse an integer
-        number = Integer.parseInt(token);
-        
+        int number = Integer.parseInt(token);
+
         if (number <= 0) {
           throw new DescriptorException("Multiplicator ("+number+") must be > 0");
         }

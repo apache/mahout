@@ -27,7 +27,7 @@ import org.apache.mahout.matrix.DenseVector;
  */
 public class DataConverter {
 
-  protected final Dataset dataset;
+  private final Dataset dataset;
 
   public DataConverter(Dataset dataset) {
     this.dataset = dataset;

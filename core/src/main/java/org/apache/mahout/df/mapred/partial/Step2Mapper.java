@@ -52,26 +52,26 @@ public class Step2Mapper extends MapReduceBase implements
 
   private static final Logger log = LoggerFactory.getLogger(Step2Mapper.class);
 
-  protected TreeID[] keys;
+  private TreeID[] keys;
 
-  protected Node[] trees;
+  private Node[] trees;
 
-  protected SingleTreePredictions[] callbacks;
+  private SingleTreePredictions[] callbacks;
 
-  protected DataConverter converter;
+  private DataConverter converter;
 
-  protected int partition = -1;
+  private int partition = -1;
 
   /** used by close() */
-  protected OutputCollector<TreeID, MapredOutput> output;
+  private OutputCollector<TreeID, MapredOutput> output;
 
   /** num treated instances */
-  protected int instanceId;
+  private int instanceId;
 
   @Override
   public void configure(JobConf job) {
     // get the cached files' paths
-    URI[] files = new URI[0];
+    URI[] files;
     try {
       files = DistributedCache.getCacheFiles(job);
     } catch (IOException e) {
@@ -175,6 +175,7 @@ public class Step2Mapper extends MapReduceBase implements
 
   }
 
+  @Override
   public void map(LongWritable key, Text value,
       OutputCollector<TreeID, MapredOutput> output, Reporter reporter)
       throws IOException {

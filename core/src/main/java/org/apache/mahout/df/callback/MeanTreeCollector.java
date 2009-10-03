@@ -22,15 +22,15 @@ import org.apache.mahout.df.data.Data;
 /**
  * Computes the error rate for each tree, and returns the mean of all the trees
  */
-public class MeanTreeCollector extends PredictionCallback {
+public class MeanTreeCollector implements PredictionCallback {
 
   /** number of errors for each tree */
-  protected final int nbErrors[];
+  private final int[] nbErrors;
 
   /** number of predictions for each tree */
-  protected final int nbPredictions[];
+  private final int[] nbPredictions;
 
-  protected final Data data;
+  private final Data data;
   
   public MeanTreeCollector(Data data, int nbtrees) {
     nbErrors = new int[nbtrees];

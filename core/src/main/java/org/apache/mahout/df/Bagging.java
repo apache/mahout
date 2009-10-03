@@ -34,11 +34,11 @@ public class Bagging {
 
   private static final Logger log = LoggerFactory.getLogger(Bagging.class);
 
-  protected final TreeBuilder treeBuilder;
+  private final TreeBuilder treeBuilder;
 
-  protected final Data data;
+  private final Data data;
 
-  protected final boolean[] sampled;
+  private final boolean[] sampled;
 
   public Bagging(TreeBuilder treeBuilder, Data data) {
     this.treeBuilder = treeBuilder;

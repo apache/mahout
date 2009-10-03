@@ -37,9 +37,9 @@ public class SequentialBuilder {
 
   private static final Logger log = LoggerFactory.getLogger(SequentialBuilder.class);
 
-  protected final Random rng;
+  private final Random rng;
   
-  protected final Bagging bagging;
+  private final Bagging bagging;
 
   /**
    * Constructor
@@ -53,7 +53,7 @@ public class SequentialBuilder {
     bagging = new Bagging(treeBuilder, data);
   }
 
-  public DecisionForest build(int nbTrees, PredictionCallback callback) throws Exception {
+  public DecisionForest build(int nbTrees, PredictionCallback callback) {
     List<Node> trees = new ArrayList<Node>();
     
     for (int treeId = 0; treeId < nbTrees; treeId++) {
@@ -64,7 +64,7 @@ public class SequentialBuilder {
     return new DecisionForest(trees);
   }
   
-  protected void logProgress(float progress) {
+  private static void logProgress(float progress) {
     int percent = (int) (progress * 100);
     if (percent % 10 == 0)
       log.info(String.format("Building %2d%%", percent));

@@ -37,7 +37,7 @@ import org.apache.mahout.df.data.conditions.Condition;
  */
 public class Data {
 
-  protected final List<Instance> instances;
+  private final List<Instance> instances;
 
   public final Dataset dataset;
 
@@ -158,10 +158,9 @@ public class Data {
   public Data bagging(Random rng, boolean[] sampled) {
     int datasize = size();
     List<Instance> bag = new ArrayList<Instance>(datasize);
-    int index;
 
     for (int i = 0; i < datasize; i++) {
-      index = rng.nextInt(datasize);
+      int index = rng.nextInt(datasize);
       bag.add(instances.get(index));
       sampled[index] = true;
     }
@@ -174,7 +173,6 @@ public class Data {
    * data. <b>VERY SLOW!</b>
    * 
    * @param rng
-   * @param ratio ratio of data to return
    * @return
    */
   public Data rsplit(Random rng, int subsize) {
@@ -251,6 +249,7 @@ public class Data {
     return values;
   }
 
+  @Override
   public Data clone() {
     return new Data(dataset, new ArrayList<Instance>(instances));
   }
@@ -265,6 +264,11 @@ public class Data {
     Data data = (Data)obj;
     
     return instances.equals(data.instances) && dataset.equals(data.dataset);
+  }
+
+  @Override
+  public int hashCode() {
+    return instances.hashCode() + dataset.hashCode();
   }
 
   /**
@@ -311,7 +315,6 @@ public class Data {
   /**
    * finds the majority label, breaking ties randomly
    * 
-   * @param data
    * @return the majority label value
    */
   public int majorityLabel(Random rng) {

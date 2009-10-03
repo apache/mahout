@@ -25,8 +25,8 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.mapred.Builder;
-import org.apache.mahout.df.mapred.inmem.InMemInputFormat;
 import org.apache.mahout.df.mapred.inmem.InMemInputFormat.InMemInputSplit;
 import org.apache.mahout.df.mapred.inmem.InMemInputFormat.InMemRecordReader;
 
@@ -37,7 +37,7 @@ public class InMemInputFormatTest extends TestCase {
     int maxNumSplits = 100;
     int maxNbTrees = 1000;
 
-    Random rng = new Random();
+    Random rng = RandomUtils.getRandom();
 
     for (int nloop = 0; nloop < n; nloop++) {
       int numSplits = rng.nextInt(maxNumSplits) + 1;
@@ -79,7 +79,7 @@ public class InMemInputFormatTest extends TestCase {
     int maxNumSplits = 100;
     int maxNbTrees = 1000;
 
-    Random rng = new Random();
+    Random rng = RandomUtils.getRandom();
 
     for (int nloop = 0; nloop < n; nloop++) {
       int numSplits = rng.nextInt(maxNumSplits) + 1;

@@ -22,7 +22,7 @@ import java.util.Arrays;
 /**
  * Collects the predictions for a single tree
  */
-public class SingleTreePredictions extends PredictionCallback {
+public class SingleTreePredictions implements PredictionCallback {
 
   /** predictions[n] = 'label' predicted for instance 'n' */
   public final int[] predictions;

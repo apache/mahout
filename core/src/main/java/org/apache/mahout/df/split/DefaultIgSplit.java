@@ -28,7 +28,7 @@ import org.apache.mahout.df.data.conditions.Condition;
 public class DefaultIgSplit extends IgSplit {
 
   /** used by entropy() */
-  protected int[] counts;
+  private int[] counts;
 
   @Override
   public Split computeSplit(Data data, int attr) {
@@ -86,10 +86,9 @@ public class DefaultIgSplit extends IgSplit {
   protected double numericalIg(Data data, int attr, double split) {
     double hy = entropy(data);
     double invDataSize = 1.0 / data.size();
-    Data subset;
 
     // LO subset
-    subset = data.subset(Condition.lesser(attr, split));
+    Data subset = data.subset(Condition.lesser(attr, split));
     hy -= subset.size() * invDataSize * entropy(subset);
 
     // HI subset
@@ -106,7 +105,6 @@ public class DefaultIgSplit extends IgSplit {
    * @return
    */
   protected double entropy(Data data) {
-    double entropy = 0.0;
     double invDataSize = 1.0 / data.size();
 
     if (counts == null)
@@ -115,6 +113,7 @@ public class DefaultIgSplit extends IgSplit {
     Arrays.fill(counts, 0);
     data.countLabels(counts);
 
+    double entropy = 0.0;
     for (int label = 0; label < data.dataset.nblabels(); label++) {
       int count = counts[label];
       if (count == 0)

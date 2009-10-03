@@ -31,10 +31,6 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.df.callback.PredictionCallback;
-import org.apache.mahout.df.data.Data;
-import org.apache.mahout.df.data.DataLoader;
-import org.apache.mahout.df.data.Dataset;
-import org.apache.mahout.df.data.DescriptorUtils;
 import org.apache.mahout.df.data.Dataset.Attribute;
 import org.slf4j.Logger;
 
@@ -43,7 +39,10 @@ import org.slf4j.Logger;
  *
  */
 public class Utils {
-  public static class LogCallback extends PredictionCallback {
+  private Utils() {
+  }
+
+  public static class LogCallback implements PredictionCallback {
   
     protected final Logger log;
   
@@ -103,8 +102,8 @@ public class Utils {
   public static String generateDescriptor(char[] tokens) {
     StringBuilder builder = new StringBuilder();
 
-    for (int token = 0; token < tokens.length; token++) {
-      builder.append(tokens[token]).append(" ");
+    for (char token1 : tokens) {
+      builder.append(token1).append(' ');
     }
 
     return builder.toString();
@@ -154,11 +153,8 @@ public class Utils {
    * @param rng Random number generator
    * @param descriptor attributes description
    * @param number number of data lines to generate
-   * @return
-   * @throws Exception 
    */
-  public static double[][] randomDoubles(Random rng, String descriptor,
-      int number) throws Exception {
+  public static double[][] randomDoubles(Random rng, String descriptor, int number) throws DescriptorException {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
 
     double[][] data = new double[number][];
@@ -227,8 +223,8 @@ public class Utils {
   protected static String double2String(double[] v) {
     StringBuilder builder = new StringBuilder();
 
-    for (int attr = 0; attr < v.length; attr++) {
-      builder.append(v[attr]).append(",");
+    for (double aV : v) {
+      builder.append(aV).append(',');
     }
 
     return builder.toString();

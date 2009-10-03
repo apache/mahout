@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PartialBuilder extends Builder {
 
-  private final static Logger log = LoggerFactory.getLogger(PartialBuilder.class);
+  private static final Logger log = LoggerFactory.getLogger(PartialBuilder.class);
 
   /**
    * Indicates if we should run the second step of the builder.<br>
@@ -143,7 +143,6 @@ public class PartialBuilder extends Builder {
    * @param outputPath directory that contains the output of the job
    * @param firstIds partitions' first ids in hadoop's order
    * @param keys
-   * @param values
    * @param callback can be null
    * @throws IOException
    */
@@ -192,8 +191,6 @@ public class PartialBuilder extends Builder {
    * callback
    * 
    * @param firstIds partitions' first ids in hadoop's order
-   * @param keys
-   * @param values
    * @param callback
    * @return
    */

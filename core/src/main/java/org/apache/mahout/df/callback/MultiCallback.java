@@ -21,9 +21,9 @@ package org.apache.mahout.df.callback;
 /**
  * Combines many callbacks, that will be called when a prediction is done.
  */
-public class MultiCallback extends PredictionCallback {
+public class MultiCallback implements PredictionCallback {
 
-  protected final PredictionCallback[] callbacks;
+  private final PredictionCallback[] callbacks;
 
   public MultiCallback(PredictionCallback... callbacks) {
     this.callbacks = callbacks;

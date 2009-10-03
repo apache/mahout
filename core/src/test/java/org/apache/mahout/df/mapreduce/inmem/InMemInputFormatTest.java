@@ -24,6 +24,7 @@ import junit.framework.TestCase;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.mapreduce.Builder;
 import org.apache.mahout.df.mapreduce.inmem.InMemInputFormat.InMemInputSplit;
 import org.apache.mahout.df.mapreduce.inmem.InMemInputFormat.InMemRecordReader;
@@ -35,7 +36,7 @@ public class InMemInputFormatTest extends TestCase {
     int maxNumSplits = 100;
     int maxNbTrees = 1000;
 
-    Random rng = new Random();
+    Random rng = RandomUtils.getRandom();
 
     for (int nloop = 0; nloop < n; nloop++) {
       int numSplits = rng.nextInt(maxNumSplits) + 1;
@@ -76,7 +77,7 @@ public class InMemInputFormatTest extends TestCase {
     int maxNumSplits = 100;
     int maxNbTrees = 1000;
 
-    Random rng = new Random();
+    Random rng = RandomUtils.getRandom();
 
     for (int nloop = 0; nloop < n; nloop++) {
       int numSplits = rng.nextInt(maxNumSplits) + 1;

@@ -39,13 +39,13 @@ import org.apache.mahout.df.split.Split;
  * <br>
  * http://www.cs.cmu.edu/~awm/tutorials
  */
-public class DefaultTreeBuilder extends TreeBuilder {
+public class DefaultTreeBuilder implements TreeBuilder {
 
   /** number of attributes to select randomly at each node */
-  protected int m = 1;
+  private int m = 1;
 
   /** IgSplit implementation */
-  protected IgSplit igSplit;
+  private IgSplit igSplit;
 
   public DefaultTreeBuilder() {
     igSplit = new OptIgSplit();
@@ -114,11 +114,11 @@ public class DefaultTreeBuilder extends TreeBuilder {
     assert m <= dataset.nbAttributes() : "m > num attributes";
 
     int[] result = new int[m];
-    int rvalue;
 
     Arrays.fill(result, -1);
 
     for (int index = 0; index < m; index++) {
+      int rvalue;
       do {
         rvalue = rng.nextInt(dataset.nbAttributes());
       } while (ArrayUtils.contains(result, rvalue));

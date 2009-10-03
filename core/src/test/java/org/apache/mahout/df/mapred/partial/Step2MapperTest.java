@@ -17,10 +17,6 @@
 
 package org.apache.mahout.df.mapred.partial;
 
-import static org.apache.mahout.df.data.Utils.double2String;
-import static org.apache.mahout.df.data.Utils.randomDescriptor;
-import static org.apache.mahout.df.data.Utils.randomDoubles;
-
 import java.util.Random;
 
 import junit.framework.TestCase;
@@ -32,6 +28,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.DataLoader;
 import org.apache.mahout.df.data.Dataset;
 import org.apache.mahout.df.data.Utils;
@@ -47,7 +44,7 @@ public class Step2MapperTest extends TestCase {
    * 
    */
   private static class MockStep2Mapper extends Step2Mapper {
-    public MockStep2Mapper(int partition, Dataset dataset, TreeID[] keys,
+    private MockStep2Mapper(int partition, Dataset dataset, TreeID[] keys,
         Node[] trees, int numInstances) {
       configure(partition, dataset, keys, trees, numInstances);
     }
@@ -55,24 +52,24 @@ public class Step2MapperTest extends TestCase {
   }
 
   /** nb attributes per generated data instance */
-  protected final int nbAttributes = 4;
+  protected static final int nbAttributes = 4;
 
   /** nb generated data instances */
-  protected final int nbInstances = 100;
+  protected static final int nbInstances = 100;
 
   /** nb trees to build */
-  protected final int nbTrees = 11;
+  protected static final int nbTrees = 11;
 
   /** nb mappers to use */
-  protected final int nbMappers = 5;
+  protected static final int nbMappers = 5;
 
   public void testMapper() throws Exception {
-    Random rng = new Random();
+    Random rng = RandomUtils.getRandom();
 
     // prepare the data
-    String descriptor = randomDescriptor(rng, nbAttributes);
-    double[][] source = randomDoubles(rng, descriptor, nbInstances);
-    String[] sData = double2String(source);
+    String descriptor = Utils.randomDescriptor(rng, nbAttributes);
+    double[][] source = Utils.randomDoubles(rng, descriptor, nbInstances);
+    String[] sData = Utils.double2String(source);
     Dataset dataset = DataLoader.generateDataset(descriptor, sData);
     String[][] splits = Utils.splitData(sData, nbMappers);
 

@@ -64,7 +64,7 @@ public abstract class Builder {
 
   private final Configuration conf;
 
-  protected String outputDirName = "output";
+  private String outputDirName = "output";
 
   protected int numTrees;
 
@@ -103,7 +103,7 @@ public abstract class Builder {
     return conf.getBoolean("mahout.rf.oob", false);
   }
 
-  protected static void setOobEstimate(Configuration conf, boolean value) {
+  private static void setOobEstimate(Configuration conf, boolean value) {
     conf.setBoolean("mahout.rf.oob", value);
   }
 
@@ -127,7 +127,7 @@ public abstract class Builder {
    * @param conf configuration
    * @param seed random seed
    */
-  protected static void setRandomSeed(Configuration conf, long seed) {
+  private static void setRandomSeed(Configuration conf, long seed) {
     conf.setLong("mahout.rf.random.seed", seed);
   }
 
@@ -139,7 +139,7 @@ public abstract class Builder {
     return (TreeBuilder) StringUtils.fromString(string);
   }
 
-  protected static void setTreeBuilder(Configuration conf,
+  private static void setTreeBuilder(Configuration conf,
       TreeBuilder treeBuilder) {
     conf.set("mahout.rf.treebuilder", StringUtils.toString(treeBuilder));
   }
@@ -223,7 +223,7 @@ public abstract class Builder {
     return Dataset.load(conf, datasetPath);
   }
 
-  public Builder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath,
+  protected Builder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath,
       Long seed, Configuration conf) {
     this.treeBuilder = treeBuilder;
     this.dataPath = dataPath;
@@ -249,9 +249,8 @@ public abstract class Builder {
    * 
    * @param job Hadoop's job
    * @return true is the job succeeded
-   * @throws Exception if the job encounters an error
    */
-  protected boolean runJob(Job job) throws Exception {
+  protected boolean runJob(Job job) throws ClassNotFoundException, IOException, InterruptedException {
     return job.waitForCompletion(true);
   }
 
@@ -262,12 +261,12 @@ public abstract class Builder {
    * @param job Hadoop's job
    * @param callback can be null
    * @return Built DecisionForest
-   * @throws Exception if anything goes wrong while parsing the output
+   * @throws IOException if anything goes wrong while parsing the output
    */
-  protected abstract DecisionForest parseOutput(Job job, PredictionCallback callback) throws Exception;
+  protected abstract DecisionForest parseOutput(Job job, PredictionCallback callback) throws IOException, ClassNotFoundException, InterruptedException;
 
   public DecisionForest build(int nbTrees, PredictionCallback callback)
-      throws Exception {
+      throws IOException, ClassNotFoundException, InterruptedException {
     numTrees = getNbTrees(conf);
 
     Path outputPath = getOutputPath(conf);
@@ -318,6 +317,7 @@ public abstract class Builder {
    */
   public static void sortSplits(InputSplit[] splits) {
     Arrays.sort(splits, new Comparator<InputSplit>() {
+      @Override
       public int compare(InputSplit a, InputSplit b) {
         try {
           long left = a.getLength();

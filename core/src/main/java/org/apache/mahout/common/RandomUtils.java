@@ -48,6 +48,20 @@ public final class RandomUtils {
     return testSeed ? new MersenneTwisterRNG(STANDARD_SEED) : new MersenneTwisterRNG();
   }
 
+  public static Random getRandom(long seed) {
+    byte[] seedBytes = new byte[16];
+    seedBytes[0] = (byte) (seed >>> 56);
+    seedBytes[1] = (byte) (seed >>> 48);
+    seedBytes[2] = (byte) (seed >>> 40);
+    seedBytes[3] = (byte) (seed >>> 32);
+    seedBytes[4] = (byte) (seed >>> 24);
+    seedBytes[5] = (byte) (seed >>> 16);
+    seedBytes[6] = (byte) (seed >>>  8);
+    seedBytes[7] = (byte) seed;
+    System.arraycopy(seedBytes, 0, seedBytes, 8, 8);
+    return new MersenneTwisterRNG(seedBytes);
+  }
+
   /** @return what {@link Double#hashCode()} would return for the same value */
   public static int hashDouble(double value) {
     // Just copied from Double.hashCode

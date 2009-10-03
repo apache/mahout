@@ -28,18 +28,19 @@ import java.util.Random;
 
 import junit.framework.TestCase;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.mapred.inmem.InMemInputFormat.InMemInputSplit;
 
 public class InMemInputSplitTest extends TestCase {
 
-  protected Random rng;
+  private Random rng;
 
-  protected ByteArrayOutputStream byteOutStream;
-  protected DataOutput out;
+  private ByteArrayOutputStream byteOutStream;
+  private DataOutput out;
   
   @Override
   protected void setUp() throws Exception {
-    rng = new Random();
+    rng = RandomUtils.getRandom();
 
     byteOutStream = new ByteArrayOutputStream();
     out = new DataOutputStream(byteOutStream);

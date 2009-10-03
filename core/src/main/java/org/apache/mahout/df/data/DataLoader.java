@@ -46,7 +46,10 @@ import org.slf4j.LoggerFactory;
 public class DataLoader {
 
   private static final Logger log = LoggerFactory.getLogger(DataLoader.class);
-  
+
+  private DataLoader() {
+  }
+
   /**
    * Converts a comma-separated String to a Vector.
    * 
@@ -120,11 +123,10 @@ public class DataLoader {
    * @param fs file system
    * @param fpath data file path
    * @return
-   * @throws Exception if any problem is encountered
+   * @throws IOException if any problem is encountered
    */
   
-  @SuppressWarnings("unchecked")
-  public static Data loadData(Dataset dataset, FileSystem fs, Path fpath) throws Exception {
+  public static Data loadData(Dataset dataset, FileSystem fs, Path fpath) throws IOException {
     FSDataInputStream input = fs.open(fpath);
     Scanner scanner = new Scanner(input);
     
@@ -156,14 +158,8 @@ public class DataLoader {
 
   /**
    * Loads the data from a String array
-   * 
-   * @param dataset
-   * @param data
-   * @return
-   * @throws Exception if any problem is encountered
    */
-  @SuppressWarnings("unchecked")
-  public static Data loadData(Dataset dataset, String[] data) throws Exception {
+  public static Data loadData(Dataset dataset, String[] data) {
     List<Instance> instances = new ArrayList<Instance>();
 
     DataConverter converter = new DataConverter(dataset);
@@ -192,12 +188,9 @@ public class DataLoader {
    * @param descriptor attributes description
    * @param fs file system
    * @param path data path
-   * @return
-   * @throws IOException
    */
-  @SuppressWarnings("unchecked")
   public static Dataset generateDataset(String descriptor, FileSystem fs, Path path)
-  throws Exception {
+      throws DescriptorException, IOException {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
 
     FSDataInputStream input = fs.open(path);
@@ -227,23 +220,20 @@ public class DataLoader {
    * Generates the Dataset by parsing the entire data
    * @param descriptor attributes description
    * @param data
-   * @return
-   * @throws Exception
    */
-  @SuppressWarnings("unchecked")
-  public static Dataset generateDataset(String descriptor, String[] data) throws Exception {
+  public static Dataset generateDataset(String descriptor, String[] data) throws DescriptorException {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
 
     // used to convert CATEGORICAL and LABEL attributes to Integer
     List<String>[] values = new List[attrs.length];
 
     int id = 0;
-    for (int index = 0; index < data.length; index++) {
-      if (data[index].isEmpty()) {
+    for (String aData : data) {
+      if (aData.isEmpty()) {
         continue;
       }
-      
-      if (parseString(id, attrs, values, data[index]) != null) {
+
+      if (parseString(id, attrs, values, aData) != null) {
         id++;
       }
     }

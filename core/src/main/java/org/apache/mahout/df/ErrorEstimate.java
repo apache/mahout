@@ -21,6 +21,8 @@ package org.apache.mahout.df;
  * various methods to compute from the output of a random forest
  */
 public class ErrorEstimate {
+  private ErrorEstimate() {
+  }
 
   public static double errorRate(int[] labels, int[] predictions) {
     assert labels.length == predictions.length : "labels.length != predictions.length";
@@ -49,9 +51,9 @@ public class ErrorEstimate {
   public static int nbPredicted(int[] predictions) {
     int nbpredicted = 0;
 
-    for (int index = 0; index < predictions.length; index++) {
-      if (predictions[index] != -1)
-      nbpredicted++;
+    for (int prediction : predictions) {
+      if (prediction != -1)
+        nbpredicted++;
     }
 
     return nbpredicted;

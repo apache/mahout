@@ -17,13 +17,12 @@
 
 package org.apache.mahout.df.node;
 
-import static org.apache.commons.lang.ArrayUtils.indexOf;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.mahout.df.DFUtils;
 import org.apache.mahout.df.data.Instance;
 
@@ -45,7 +44,7 @@ public class CategoricalNode extends Node {
 
   @Override
   public int classify(Instance instance) {
-    int index = indexOf(values, instance.get(attr));
+    int index = ArrayUtils.indexOf(values, instance.get(attr));
     if (index == -1) {
       // value not available, we cannot predict
       return -1;
@@ -90,10 +89,21 @@ public class CategoricalNode extends Node {
         && Arrays.equals(childs, node.childs);
   }
 
+  @Override
+  public int hashCode() {
+    int hashCode = attr;
+    for (double value : values) {
+      hashCode = 31 * hashCode + (int) Double.doubleToLongBits(value);
+    }
+    for (Node node : childs) {
+      hashCode = 31 * hashCode + node.hashCode();
+    }
+    return hashCode;
+  }
   
   @Override
   protected String getString() {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     
     for (Node child:childs) {
       buffer.append(child).append(',');

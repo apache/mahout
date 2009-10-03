@@ -54,17 +54,17 @@ public class PartialSequentialBuilder extends PartialBuilder {
 
   private static final Logger log = LoggerFactory.getLogger(PartialSequentialBuilder.class);
 
-  protected MockContext firstOutput;
+  private MockContext firstOutput;
 
-  protected MockContext secondOutput;
+  private MockContext secondOutput;
 
-  protected final Dataset dataset;
+  private final Dataset dataset;
 
   /** first instance id in hadoop's order */
-  protected int[] firstIds;
+  private int[] firstIds;
   
   /** partitions' sizes in hadoop order */
-  protected int[] sizes;
+  private int[] sizes;
 
   public PartialSequentialBuilder(TreeBuilder treeBuilder, Path dataPath,
       Dataset dataset, long seed, Configuration conf) {
@@ -90,9 +90,8 @@ public class PartialSequentialBuilder extends PartialBuilder {
     conf.setInt("mapred.map.tasks", num);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
-  protected boolean runJob(Job job) throws Exception {
+  protected boolean runJob(Job job) throws IOException, InterruptedException {
     Configuration conf = job.getConfiguration();
     
     // retrieve the splits
@@ -111,13 +110,13 @@ public class PartialSequentialBuilder extends PartialBuilder {
     TaskAttemptContext task = new TaskAttemptContext(conf, new TaskAttemptID());
 
     firstOutput = new MockContext(new Step1Mapper(), conf, task.getTaskAttemptID(), numTrees);
-    long slowest = 0; // duration of slowest map
 
-    int firstId = 0;
     firstIds = new int[nbSplits];
     sizes = new int[nbSplits];
     
     // to compute firstIds, process the splits in file order
+    long slowest = 0; // duration of slowest map
+    int firstId = 0;
     for (int p = 0; p < nbSplits; p++) {
       InputSplit split = splits.get(p);
       int hp = ArrayUtils.indexOf(sorted, split); // hadoop's partition
@@ -153,8 +152,7 @@ public class PartialSequentialBuilder extends PartialBuilder {
   }
 
   @Override
-  protected DecisionForest parseOutput(Job job, PredictionCallback callback)
-      throws Exception {
+  protected DecisionForest parseOutput(Job job, PredictionCallback callback) throws IOException, InterruptedException {
     Configuration conf = job.getConfiguration();
     
     DecisionForest forest = processOutput(firstOutput.keys, firstOutput.values, callback);
@@ -212,8 +210,8 @@ public class PartialSequentialBuilder extends PartialBuilder {
    * @throws Exception
    * 
    */
-  @SuppressWarnings("unchecked")
-  protected void secondStep(Configuration conf, Path forestPath, PredictionCallback callback) throws Exception {
+  protected void secondStep(Configuration conf, Path forestPath, PredictionCallback callback)
+      throws IOException, InterruptedException {
     JobContext jobContext = new JobContext(conf, new JobID());
     
     // retrieve the splits
@@ -281,7 +279,7 @@ public class PartialSequentialBuilder extends PartialBuilder {
    * 
    */
   protected static class MockStep1Mapper extends Step1Mapper {
-    public MockStep1Mapper(TreeBuilder treeBuilder, Dataset dataset, Long seed,
+    protected MockStep1Mapper(TreeBuilder treeBuilder, Dataset dataset, Long seed,
         int partition, int numMapTasks, int numTrees) {
       configure(false, true, treeBuilder, dataset);
       configure(seed, partition, numMapTasks, numTrees);

@@ -37,6 +37,7 @@ public class PartialOutputCollector implements OutputCollector<TreeID, MapredOut
     values = new MapredOutput[nbTrees];
   }
 
+  @Override
   public void collect(TreeID key, MapredOutput value) throws IOException {
     if (index == keys.length) {
       throw new IOException("Received more output than expected : " + index);

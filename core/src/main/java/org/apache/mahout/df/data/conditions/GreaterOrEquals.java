@@ -24,9 +24,9 @@ import org.apache.mahout.df.data.Instance;
  */
 public class GreaterOrEquals extends Condition {
 
-  protected final int attr;
+  private final int attr;
 
-  protected final double value;
+  private final double value;
 
   public GreaterOrEquals(int attr, double value) {
     this.attr = attr;

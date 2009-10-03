@@ -17,41 +17,32 @@
 
 package org.apache.mahout.df.split;
 
-import static org.apache.mahout.df.data.Utils.double2String;
-import static org.apache.mahout.df.data.Utils.randomDescriptor;
-import static org.apache.mahout.df.data.Utils.randomDoublesWithSameLabel;
-
 import java.util.Random;
 
 import junit.framework.TestCase;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.Data;
 import org.apache.mahout.df.data.DataLoader;
 import org.apache.mahout.df.data.Dataset;
 import org.apache.mahout.df.data.Utils;
-import org.apache.mahout.df.split.DefaultIgSplit;
 
 public class DefaultIgSplitTest extends TestCase {
 
-  protected final int nbAttributes = 10;
+  protected static final int nbAttributes = 10;
 
   public void testEntropy() throws Exception {
-    Random rng = new Random();
-    String descriptor = randomDescriptor(rng, nbAttributes);
+    Random rng = RandomUtils.getRandom();
+    String descriptor = Utils.randomDescriptor(rng, nbAttributes);
     int label = Utils.findLabel(descriptor);
-    double[][] temp;
-    String[] sData;
-    Data data;
-    Dataset dataset;
-    DefaultIgSplit iG;
-    
+
     // all the vectors have the same label (0)
-    temp = randomDoublesWithSameLabel(rng, descriptor, 100, 0);
-    sData = double2String(temp);
-    dataset = DataLoader.generateDataset(descriptor, sData);
-    data = DataLoader.loadData(dataset, sData);
-    iG = new DefaultIgSplit();
-    
+    double[][] temp = Utils.randomDoublesWithSameLabel(rng, descriptor, 100, 0);
+    String[] sData = Utils.double2String(temp);
+    Dataset dataset = DataLoader.generateDataset(descriptor, sData);
+    Data data = DataLoader.loadData(dataset, sData);
+    DefaultIgSplit iG = new DefaultIgSplit();
+
     double expected = 0.0 - 1.0 * Math.log(1.0) / Math.log(2.0);
     assertEquals(expected, iG.entropy(data));
 
@@ -60,7 +51,7 @@ public class DefaultIgSplitTest extends TestCase {
     for (int index = 0; index < 50; index++) {
       temp[index][label] = 1.0;
     }
-    sData = double2String(temp);
+    sData = Utils.double2String(temp);
     dataset = DataLoader.generateDataset(descriptor, sData);
     data = DataLoader.loadData(dataset, sData);
     iG = new DefaultIgSplit();
@@ -74,7 +65,7 @@ public class DefaultIgSplitTest extends TestCase {
     for (int index = 0; index < 15; index++) {
       temp[index][label] = 2.0;
     }
-    sData = double2String(temp);
+    sData = Utils.double2String(temp);
     dataset = DataLoader.generateDataset(descriptor, sData);
     data = DataLoader.loadData(dataset, sData);
     iG = new DefaultIgSplit();

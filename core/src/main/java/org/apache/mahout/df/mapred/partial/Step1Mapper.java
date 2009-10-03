@@ -28,6 +28,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.Bagging;
 import org.apache.mahout.df.callback.SingleTreePredictions;
 import org.apache.mahout.df.data.Data;
@@ -52,24 +53,24 @@ public class Step1Mapper extends MapredMapper implements
   private static final Logger log = LoggerFactory.getLogger(Step1Mapper.class);
   
   /** used to convert input values to data instances */
-  protected DataConverter converter;
+  private DataConverter converter;
 
-  protected Random rng;
+  private Random rng;
 
   /** number of trees to be built by this mapper */
-  protected int nbTrees;
+  private int nbTrees;
 
   /** id of the first tree */
   protected int firstTreeId;
 
   /** mapper's partition */
-  protected int partition;
+  private int partition;
 
   /** used by close() */
-  protected OutputCollector<TreeID, MapredOutput> output;
+  private OutputCollector<TreeID, MapredOutput> output;
 
   /** will contain all instances if this mapper's split */
-  protected final List<Instance> instances = new ArrayList<Instance>();
+  private final List<Instance> instances = new ArrayList<Instance>();
 
   @Override
   public void configure(JobConf job) {
@@ -94,9 +95,9 @@ public class Step1Mapper extends MapredMapper implements
     // prepare random-numders generator
     log.debug("seed : " + seed);
     if (seed == null)
-      rng = new Random();
-    else
-      rng = new Random(seed);
+        rng = RandomUtils.getRandom();
+      else
+        rng = RandomUtils.getRandom(seed);
 
     // mapper's partition
     if (partition < 0) {
@@ -128,14 +129,15 @@ public class Step1Mapper extends MapredMapper implements
    * @return
    */
   public static int nbTrees(int numMaps, int numTrees, int partition) {
-    int nbTrees = (int) Math.floor(numTrees / numMaps);
+    int nbTrees = numTrees / numMaps;
     if (partition == 0) {
-      nbTrees += (int) numTrees - nbTrees * numMaps;
+      nbTrees += numTrees - nbTrees * numMaps;
     }
 
     return nbTrees;
   }
 
+  @Override
   public void map(LongWritable key, Text value,
       OutputCollector<TreeID, MapredOutput> output, Reporter reporter)
       throws IOException {
@@ -154,11 +156,11 @@ public class Step1Mapper extends MapredMapper implements
     Data data = new Data(getDataset(), instances);
     Bagging bagging = new Bagging(getTreeBuilder(), data);
 
-    SingleTreePredictions callback = null;
-    int[] predictions = null;
     TreeID key = new TreeID();
 
     log.debug("Building " + nbTrees + " trees");
+    SingleTreePredictions callback = null;
+    int[] predictions = null;
     for (int treeId = 0; treeId < nbTrees; treeId++) {
       log.debug("Building tree N° : " + treeId);
       if (isOobEstimate() && !isNoOutput()) {

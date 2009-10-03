@@ -25,7 +25,7 @@ import org.apache.mahout.df.node.Node;
 /**
  * Abstract base class for TreeBuilders
  */
-public abstract class TreeBuilder {
+public interface TreeBuilder {
   
   /**
    * Builds a Decision tree using the training data
@@ -34,6 +34,6 @@ public abstract class TreeBuilder {
    * @param data training data
    * @return root Node
    */
-  public abstract Node build(Random rng, Data data);
+  Node build(Random rng, Data data);
 
 }

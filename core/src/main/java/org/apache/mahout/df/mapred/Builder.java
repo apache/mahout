@@ -167,7 +167,7 @@ public abstract class Builder {
     return new Path(fs.getWorkingDirectory(), outputDirName);
   }
 
-  public Builder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath,
+  protected Builder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath,
       Long seed, Configuration conf) {
     this.treeBuilder = treeBuilder;
     this.dataPath = dataPath;
@@ -186,8 +186,7 @@ public abstract class Builder {
    */
   public static Path getDistributedCacheFile(JobConf job, int index)
       throws IOException {
-    URI[] files = new URI[0];
-    files = DistributedCache.getCacheFiles(job);
+    URI[] files = DistributedCache.getCacheFiles(job);
 
     if (files == null || files.length < index) {
       throw new IOException("path not found in the DistributedCache");
@@ -223,11 +222,8 @@ public abstract class Builder {
   /**
    * Sequential implementation should override this method to simulate the job
    * execution
-   * 
-   * @param job
-   * @throws Exception
    */
-  protected void runJob(JobConf job) throws Exception {
+  protected void runJob(JobConf job) throws IOException {
     JobClient.runJob(job);
   }
 
@@ -243,8 +239,7 @@ public abstract class Builder {
   protected abstract DecisionForest parseOutput(JobConf job,
       PredictionCallback callback) throws IOException;
 
-  public DecisionForest build(int nbTrees, PredictionCallback callback)
-      throws Exception {
+  public DecisionForest build(int nbTrees, PredictionCallback callback) throws IOException {
     JobConf job = new JobConf(conf, Builder.class);
 
     Path outputPath = getOutputPath(job);
@@ -290,6 +285,7 @@ public abstract class Builder {
    */
   public static void sortSplits(InputSplit[] splits) {
     Arrays.sort(splits, new Comparator<InputSplit>() {
+      @Override
       public int compare(InputSplit a, InputSplit b) {
         try {
           long left = a.getLength();

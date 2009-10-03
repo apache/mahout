@@ -80,10 +80,14 @@ public class NumericalNode extends Node {
         && loChild.equals(node.loChild) && hiChild.equals(node.hiChild);
   }
 
+  @Override
+  public int hashCode() {
+    return attr + (int) Double.doubleToLongBits(split) + loChild.hashCode() + hiChild.hashCode();
+  }
   
   @Override
   protected String getString() {
-    return loChild.toString() + "," + hiChild.toString();
+    return loChild.toString() + ',' + hiChild.toString();
   }
 
   @Override

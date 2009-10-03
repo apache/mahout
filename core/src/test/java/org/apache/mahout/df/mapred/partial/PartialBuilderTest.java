@@ -17,6 +17,7 @@
 
 package org.apache.mahout.df.mapred.partial;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,11 +31,10 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.SequenceFile.Writer;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.builder.DefaultTreeBuilder;
 import org.apache.mahout.df.builder.TreeBuilder;
 import org.apache.mahout.df.callback.PredictionCallback;
-import org.apache.mahout.df.mapred.partial.PartialBuilder;
-import org.apache.mahout.df.mapred.partial.Step1Mapper;
 import org.apache.mahout.df.mapreduce.MapredOutput;
 import org.apache.mahout.df.mapreduce.partial.TreeID;
 import org.apache.mahout.df.node.Leaf;
@@ -53,7 +53,7 @@ public class PartialBuilderTest extends TestCase {
     JobConf job = new JobConf();
     job.setNumMapTasks(numMaps);
 
-    Random rng = new Random();
+    Random rng = RandomUtils.getRandom();
 
     // prepare the output
     TreeID[] keys = new TreeID[numTrees];
@@ -115,15 +115,15 @@ public class PartialBuilderTest extends TestCase {
    * @param values
    * @param firstIds partitions's first ids in hadoop's order
    */
-  protected void randomKeyValues(Random rng, TreeID[] keys,
+  protected static void randomKeyValues(Random rng, TreeID[] keys,
       MapredOutput[] values, int[] firstIds) {
     int index = 0;
     int firstId = 0;
     List<Integer> partitions = new ArrayList<Integer>();
-    int partition;
 
     for (int p = 0; p < numMaps; p++) {
       // select a random partition, not yet selected
+      int partition;
       do {
         partition = rng.nextInt(numMaps);
       } while (partitions.contains(partition));
@@ -147,7 +147,7 @@ public class PartialBuilderTest extends TestCase {
 
   }
 
-  protected int[] nextIntArray(Random rng, int size) {
+  protected static int[] nextIntArray(Random rng, int size) {
     int[] array = new int[size];
     for (int index = 0; index < size; index++) {
       array[index] = rng.nextInt(101) - 1;
@@ -158,13 +158,13 @@ public class PartialBuilderTest extends TestCase {
 
   protected static class PartialBuilderChecker extends PartialBuilder {
 
-    protected Long _seed;
+    protected final Long _seed;
 
-    protected TreeBuilder _treeBuilder;
+    protected final TreeBuilder _treeBuilder;
 
-    protected Path _datasetPath;
+    protected final Path _datasetPath;
 
-    public PartialBuilderChecker(TreeBuilder treeBuilder, Path dataPath,
+    protected PartialBuilderChecker(TreeBuilder treeBuilder, Path dataPath,
         Path datasetPath, Long seed) {
       super(treeBuilder, dataPath, datasetPath, seed);
 
@@ -174,7 +174,7 @@ public class PartialBuilderTest extends TestCase {
     }
 
     @Override
-    protected void runJob(JobConf job) throws Exception {
+    protected void runJob(JobConf job) throws IOException {
       // no need to run the job, just check if the params are correct
 
       assertEquals(_seed, getRandomSeed(job));
@@ -199,13 +199,13 @@ public class PartialBuilderTest extends TestCase {
    * Mock Callback. Make sure that the callback receives the correct predictions
    * 
    */
-  protected static class TestCallback extends PredictionCallback {
+  protected static class TestCallback implements PredictionCallback {
 
     protected final TreeID[] keys;
 
     protected final MapredOutput[] values;
 
-    public TestCallback(TreeID[] keys, MapredOutput[] values) {
+    protected TestCallback(TreeID[] keys, MapredOutput[] values) {
       this.keys = keys;
       this.values = values;
     }

@@ -76,6 +76,11 @@ public class Leaf extends Node implements Writable {
 
     return label == leaf.label;
   }
+
+  @Override
+  public int hashCode() {
+    return label;
+  }
  
   @Override
   protected String getString() {

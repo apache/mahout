@@ -27,6 +27,7 @@ import junit.framework.TestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.builder.TreeBuilder;
 import org.apache.mahout.df.callback.PredictionCallback;
 import org.apache.mahout.df.data.Data;
@@ -37,13 +38,13 @@ import org.apache.mahout.df.data.Utils;
 import org.apache.mahout.df.node.Node;
 
 public class PartitionBugTest extends TestCase {
-  int numAttributes = 40;
+  static final int numAttributes = 40;
 
-  int numInstances = 200;
+  static final int numInstances = 200;
 
-  int numTrees = 10;
+  static final int numTrees = 10;
 
-  int numMaps = 5;
+  static final int numMaps = 5;
 
   /**
    * Make sure that the correct instance ids are being computed
@@ -52,9 +53,8 @@ public class PartitionBugTest extends TestCase {
    * 
    */
   public void testProcessOutput() throws Exception {
-    Random rng = new Random();
+    Random rng = RandomUtils.getRandom();
     //long seed = rng.nextLong();
-    long seed = 1L;
 
     // create a dataset large enough to be split up
     String descriptor = Utils.randomDescriptor(rng, numAttributes);
@@ -82,6 +82,7 @@ public class PartitionBugTest extends TestCase {
     // disable the second step because we can test without it
     // and we won't be able to serialize the MockNode
     PartialBuilder.setStep2(conf, false);
+    long seed = 1L;
     PartialSequentialBuilder builder = new PartialSequentialBuilder(
         treeBuilder, dataPath, dataset, seed, conf);
 
@@ -96,13 +97,13 @@ public class PartitionBugTest extends TestCase {
   }
 
   /**
-   * Assets that the instanceId are correct
+   * Asserts that the instanceId are correct
    *
    */
-  private static class MockCallback extends PredictionCallback {
+  private static class MockCallback implements PredictionCallback {
     private final Data data;
 
-    public MockCallback(Data data) {
+    private MockCallback(Data data) {
       this.data = data;
     }
 
@@ -151,13 +152,14 @@ public class PartitionBugTest extends TestCase {
     protected void writeNode(DataOutput out) throws IOException {
     }
 
+    @Override
     public void readFields(DataInput in) throws IOException {
     }
 
     
   }
 
-  private static class MockTreeBuilder extends TreeBuilder {
+  private static class MockTreeBuilder implements TreeBuilder {
 
     @Override
     public Node build(Random rng, Data data) {

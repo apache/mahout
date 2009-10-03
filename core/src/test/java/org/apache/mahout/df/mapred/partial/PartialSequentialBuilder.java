@@ -39,9 +39,6 @@ import org.apache.mahout.df.builder.TreeBuilder;
 import org.apache.mahout.df.callback.PredictionCallback;
 import org.apache.mahout.df.data.Dataset;
 import org.apache.mahout.df.mapred.Builder;
-import org.apache.mahout.df.mapred.partial.PartialBuilder;
-import org.apache.mahout.df.mapred.partial.Step1Mapper;
-import org.apache.mahout.df.mapred.partial.Step2Mapper;
 import org.apache.mahout.df.mapreduce.MapredOutput;
 import org.apache.mahout.df.mapreduce.partial.InterResults;
 import org.apache.mahout.df.mapreduce.partial.TreeID;
@@ -106,17 +103,16 @@ public class PartialSequentialBuilder extends PartialBuilder {
 
     firstOutput = new PartialOutputCollector(numTrees);
     Reporter reporter = Reporter.NULL;
-    long slowest = 0; // duration of slowest map
 
-    int firstId = 0;
     firstIds = new int[splits.length];
     sizes = new int[splits.length];
     
     // to compute firstIds, process the splits in file order
-    for (int p = 0; p < splits.length; p++) {
-      InputSplit split = splits[p];
+    int firstId = 0;
+    long slowest = 0; // duration of slowest map
+    for (InputSplit split : splits) {
       int hp = ArrayUtils.indexOf(sorted, split); // hadoop's partition
-      
+
       RecordReader<LongWritable, Text> reader = input.getRecordReader(split, job, reporter);
 
       LongWritable key = reader.createKey();
@@ -274,7 +270,7 @@ public class PartialSequentialBuilder extends PartialBuilder {
    * 
    */
   protected static class MockStep1Mapper extends Step1Mapper {
-    public MockStep1Mapper(TreeBuilder treeBuilder, Dataset dataset, Long seed,
+    protected MockStep1Mapper(TreeBuilder treeBuilder, Dataset dataset, Long seed,
         int partition, int numMapTasks, int numTrees) {
       configure(false, true, treeBuilder, dataset);
       configure(seed, partition, numMapTasks, numTrees);

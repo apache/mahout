@@ -16,9 +16,6 @@
  */
 package org.apache.mahout.df.mapreduce.partial;
 
-import static org.apache.mahout.df.data.Utils.double2String;
-import static org.apache.mahout.df.data.Utils.randomDoubles;
-
 import java.util.Random;
 
 import junit.framework.TestCase;
@@ -27,6 +24,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.Utils;
 import org.apache.mahout.df.node.Leaf;
 import org.apache.mahout.df.node.Node;
@@ -34,16 +32,16 @@ import org.apache.mahout.df.node.Node;
 public class InterResultsTest extends TestCase {
 
   /** nb attributes per generated data instance */
-  protected final int nbAttributes = 4;
+  protected static final int nbAttributes = 4;
 
   /** nb generated data instances */
-  protected final int nbInstances = 100;
+  protected static final int nbInstances = 100;
 
   /** nb trees to build */
-  protected final int nbTrees = 11;
+  protected static final int nbTrees = 11;
 
   /** nb mappers to use */
-  protected final int nbMappers = 5;
+  protected static final int nbMappers = 5;
 
   protected String[][] splits;
 
@@ -53,12 +51,13 @@ public class InterResultsTest extends TestCase {
   
   int[] sizes;
 
+  @Override
   protected void setUp() throws Exception {
-    Random rng = new Random();
+    Random rng = RandomUtils.getRandom();
 
     // prepare the data
-    double[][] source = randomDoubles(rng, nbAttributes, nbInstances);
-    String[] sData = double2String(source);
+    double[][] source = Utils.randomDoubles(rng, nbAttributes, nbInstances);
+    String[] sData = Utils.double2String(source);
 
     splits = Utils.splitData(sData, nbMappers);
 
@@ -143,10 +142,9 @@ public class InterResultsTest extends TestCase {
 
       // load (key, tree)
       TreeID key = new TreeID();
-      Node value;
       for (int index = 0; index < nbTrees; index++) {
         key.readFields(in);
-        value = Node.read(in);
+        Node value = Node.read(in);
 
         assertEquals("index: " + index, keys[index], key);
         assertEquals("index: " + index, trees[index], value);

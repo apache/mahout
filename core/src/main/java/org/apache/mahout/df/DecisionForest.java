@@ -32,7 +32,7 @@ import org.apache.mahout.df.node.Node;
  */
 public class DecisionForest {
 
-  protected final List<Node> trees;
+  private final List<Node> trees;
 
   protected DecisionForest() {
     trees = new ArrayList<Node>();
@@ -147,6 +147,11 @@ public class DecisionForest {
     DecisionForest rf = (DecisionForest)obj;
     
     return trees.size() == rf.trees.size() && trees.containsAll(rf.trees);
+  }
+
+  @Override
+  public int hashCode() {
+    return trees.hashCode();
   }
 
 }

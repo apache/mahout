@@ -125,7 +125,7 @@ public class Dataset implements Writable {
     return ignored;
   }
 
-  protected Dataset() {
+  private Dataset() {
   }
 
   /**
@@ -144,10 +144,10 @@ public class Dataset implements Writable {
     attributes = new Attribute[nbattrs];
     this.values = new String[nbattrs][];
     ignored = new int[attrs.length - (nbattrs + 1)]; // nbignored = total - (nbattrs + label)
-    
-    int ind = 0;
+
     labelId = -1;
     int ignoredId = 0;
+    int ind = 0;
     for (int attr = 0; attr < attrs.length; attr++) {
       if (attrs[attr].isIgnored()) {
         ignored[ignoredId++] = attr;
@@ -188,16 +188,16 @@ public class Dataset implements Writable {
    */
   protected static int countAttributes(Attribute[] attrs) {
     int nbattrs = 0;
-  
-    for (int attr = 0; attr < attrs.length; attr++) {
-      if (attrs[attr].isNumerical() || attrs[attr].isCategorical())
+
+    for (Attribute attr1 : attrs) {
+      if (attr1.isNumerical() || attr1.isCategorical())
         nbattrs++;
     }
   
     return nbattrs;
   }
 
-  protected static void validateValues(Attribute[] attrs, List<String>[] values) {
+  private static void validateValues(Attribute[] attrs, List<String>[] values) {
     assert attrs.length == values.length : "attrs.length != values.length";
 
     for (int attr = 0; attr < attrs.length; attr++) {
@@ -252,11 +252,24 @@ public class Dataset implements Writable {
     return labelId == dataset.labelId && nbInstances == dataset.nbInstances;
   }
 
+  public int hashCode() {
+    int hashCode = labelId + 31 * nbInstances;
+    for (Attribute attr : attributes) {
+      hashCode = 31 * hashCode + attr.hashCode();
+    }
+    for (String label : labels) {
+      hashCode = 31 * hashCode + label.hashCode();
+    }
+    for (String[] valueRow : values) {
+      for (String value : valueRow) {
+        hashCode = 31 * hashCode + value.hashCode();
+      }
+    }
+    return hashCode;
+  }
+
   /**
    * Loads the dataset from a file
-   * @param fs
-   * @param path
-   * @return
    * @throws IOException
    */
   public static Dataset load(Configuration conf, Path path) throws IOException {
@@ -264,7 +277,7 @@ public class Dataset implements Writable {
     
     FSDataInputStream input = fs.open(path);
 
-    Dataset dataset = Dataset.read(input);
+    Dataset dataset = read(input);
     input.close();
 
     return dataset;
@@ -277,6 +290,7 @@ public class Dataset implements Writable {
     return dataset;
   }
   
+  @Override
   public void readFields(DataInput in) throws IOException {
     int nbAttributes = in.readInt();
     attributes = new Attribute[nbAttributes];
@@ -301,6 +315,7 @@ public class Dataset implements Writable {
     nbInstances = in.readInt();
   }
 
+  @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(attributes.length); // nb attributes
     for (Attribute attr:attributes) {

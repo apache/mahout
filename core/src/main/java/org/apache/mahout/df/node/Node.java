@@ -29,11 +29,11 @@ import org.apache.mahout.df.data.Instance;
  */
 public abstract class Node implements Writable {
 
-  protected final static String DELIMITER = ",";
+  //protected static final String DELIMITER = ",";
 
-  protected static enum NODE_TYPE {
+  protected enum NODE_TYPE {
     MOCKLEAF, LEAF, NUMERICAL, CATEGORICAL
-  };
+  }
 
   /**
    * predicts the label for the instance
@@ -77,7 +77,7 @@ public abstract class Node implements Writable {
     }
   }
 
-  public static final Node read(DataInput in) throws IOException {
+  public static Node read(DataInput in) throws IOException {
     NODE_TYPE type = NODE_TYPE.values()[in.readInt()];
     Node node;
 
@@ -106,7 +106,7 @@ public abstract class Node implements Writable {
 
   @Override
   public final String toString() {
-    return node2Type() + ":" + getString() + ";";
+    return node2Type() + ":" + getString() + ';';
   }
 
   protected abstract String getString();

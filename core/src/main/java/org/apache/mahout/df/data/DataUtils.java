@@ -25,6 +25,8 @@ import java.util.Random;
  * Helper methods that deals with data lists and arrays of values
  */
 public class DataUtils {
+  private DataUtils() {
+  }
 
   /**
    * Computes the sum of the values

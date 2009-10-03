@@ -25,10 +25,10 @@ import org.apache.mahout.df.data.DataUtils;
 /**
  * Collects a forest's predictions
  */
-public class ForestPredictions extends PredictionCallback {
+public class ForestPredictions implements PredictionCallback {
 
   /** predictions[n][label] = number of times instance n was classified 'label' */
-  public final int[][] predictions;
+  private final int[][] predictions;
 
   public ForestPredictions(int nbInstances, int nblabels) {
     predictions = new int[nbInstances][];
@@ -63,6 +63,17 @@ public class ForestPredictions extends PredictionCallback {
     }
 
     return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hashCode = 1;
+    for (int[] row : predictions) {
+      for (int value : row) {
+        hashCode = 31 * hashCode + value;
+      }
+    }
+    return hashCode;
   }
 
   /**

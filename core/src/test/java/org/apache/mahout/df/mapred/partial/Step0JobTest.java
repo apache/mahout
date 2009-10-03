@@ -10,12 +10,14 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.TextInputFormat;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.DataConverter;
 import org.apache.mahout.df.data.DataLoader;
 import org.apache.mahout.df.data.Dataset;
@@ -28,16 +30,16 @@ public class Step0JobTest extends TestCase {
 
   // the generated data must be big enough to be splited by FileInputFormat
 
-  int numAttributes = 40;
+  private static final int numAttributes = 40;
 
-  int numInstances = 200;
+  private static final int numInstances = 200;
 
-  int numTrees = 10;
+  //int numTrees = 10;
 
-  int numMaps = 5;
+  private static final int numMaps = 5;
 
   public void testStep0Mapper() throws Exception {
-    Random rng = new Random();
+    Random rng = RandomUtils.getRandom();
 
     // create a dataset large enough to be split up
     String descriptor = Utils.randomDescriptor(rng, numAttributes);
@@ -50,7 +52,7 @@ public class Step0JobTest extends TestCase {
     JobConf job = new JobConf();
     job.setNumMapTasks(numMaps);
 
-    TextInputFormat.setInputPaths(job, dataPath);
+    FileInputFormat.setInputPaths(job, dataPath);
 
     // retrieve the splits
     TextInputFormat input = (TextInputFormat) job.getInputFormat();
@@ -96,7 +98,7 @@ public class Step0JobTest extends TestCase {
   }
 
   public void testProcessOutput() throws Exception {
-    Random rng = new Random();
+    Random rng = RandomUtils.getRandom();
 
     // create a dataset large enough to be split up
     String descriptor = Utils.randomDescriptor(rng, numAttributes);
@@ -119,7 +121,7 @@ public class Step0JobTest extends TestCase {
     
     JobConf job = new JobConf();
     job.setNumMapTasks(numMaps);
-    TextInputFormat.setInputPaths(job, dataPath);
+    FileInputFormat.setInputPaths(job, dataPath);
 
     // retrieve the splits
     TextInputFormat input = (TextInputFormat) job.getInputFormat();
@@ -175,11 +177,12 @@ public class Step0JobTest extends TestCase {
 
     private int index = 0;
 
-    public Step0OutputCollector(int numMaps) {
+    protected Step0OutputCollector(int numMaps) {
       keys = new int[numMaps];
       values = new Step0Output[numMaps];
     }
 
+    @Override
     public void collect(IntWritable key, Step0Output value) throws IOException {
       if (index == keys.length) {
         throw new IOException("Received more output than expected : " + index);

@@ -47,18 +47,18 @@ public class Step2Mapper extends Mapper<LongWritable, Text, TreeID, MapredOutput
 
   private static final Logger log = LoggerFactory.getLogger(Step2Mapper.class);
 
-  protected TreeID[] keys;
+  private TreeID[] keys;
 
-  protected Node[] trees;
+  private Node[] trees;
 
-  protected SingleTreePredictions[] callbacks;
+  private SingleTreePredictions[] callbacks;
 
-  protected DataConverter converter;
+  private DataConverter converter;
 
-  protected int partition = -1;
+  private int partition = -1;
 
   /** num treated instances */
-  protected int instanceId;
+  private int instanceId;
 
   
   @Override
@@ -66,7 +66,7 @@ public class Step2Mapper extends Mapper<LongWritable, Text, TreeID, MapredOutput
     Configuration conf = context.getConfiguration();
     
     // get the cached files' paths
-    URI[] files = new URI[0];
+    URI[] files;
     try {
       files = DistributedCache.getCacheFiles(conf);
     } catch (IOException e) {

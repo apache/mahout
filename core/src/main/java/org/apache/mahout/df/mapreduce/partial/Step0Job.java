@@ -17,8 +17,6 @@
 
 package org.apache.mahout.df.mapreduce.partial;
 
-import static org.apache.mahout.df.DFUtils.listOutputFiles;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -43,6 +41,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.mahout.df.DFUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +63,6 @@ public class Step0Job {
   protected final Path dataPath;
 
   /**
-   * @param conf
    * @param base base directory
    * @param dataPath data used in the first step
    * @param datasetPath
@@ -80,9 +78,8 @@ public class Step0Job {
    * 
    * @param conf configuration
    * @return partitions' info in Hadoop's order
-   * @throws Exception
    */
-  public Step0Output[] run(Configuration conf) throws Exception {
+  public Step0Output[] run(Configuration conf) throws IOException, ClassNotFoundException, InterruptedException {
     
     // check the output
     if (outputPath.getFileSystem(conf).exists(outputPath))
@@ -90,7 +87,7 @@ public class Step0Job {
 
     // put the dataset into the DistributedCache
     // use setCacheFiles() to overwrite the first-step cache files
-    URI[] files = new URI[] { datasetPath.toUri() };
+    URI[] files = { datasetPath.toUri() };
     DistributedCache.setCacheFiles(files, conf);
 
     Job job = new Job(conf);
@@ -116,9 +113,7 @@ public class Step0Job {
 
   /**
    * Extracts the output and processes it
-   * 
-   * @param conf
-   * 
+   *
    * @return info for each partition in Hadoop's order
    * @throws IOException
    */
@@ -129,7 +124,7 @@ public class Step0Job {
     
     FileSystem fs = outputPath.getFileSystem(conf);
 
-    Path[] outfiles = listOutputFiles(fs, outputPath);
+    Path[] outfiles = DFUtils.listOutputFiles(fs, outputPath);
 
     List<Integer> keys = new ArrayList<Integer>();
     List<Step0Output> values = new ArrayList<Step0Output>();
@@ -253,25 +248,42 @@ public class Step0Job {
     /** number of instances in the partition */
     protected int size;
 
-    public Step0Output(long firstId, int size) {
+    protected Step0Output(long firstId, int size) {
       this.firstId = firstId;
       this.size = size;
     }
 
+    @Override
     public void readFields(DataInput in) throws IOException {
       firstId = in.readLong();
       size = in.readInt();
     }
 
+    @Override
     public void write(DataOutput out) throws IOException {
       out.writeLong(firstId);
       out.writeInt(size);
     }
 
+    @Override
+    public boolean equals(Object other) {
+      if (!(other instanceof Step0Output)) {
+        return false;
+      }
+      return firstId == ((Step0Output) other).firstId;
+    }
+
+    @Override
+    public int hashCode() {
+      return (int) firstId;
+    }
+
+    @Override
     protected Step0Output clone() {
       return new Step0Output(firstId, size);
     }
 
+    @Override
     public int compareTo(Step0Output obj) {
       if (firstId < obj.firstId)
         return -1;
@@ -295,7 +307,7 @@ public class Step0Job {
       int[] sizes = new int[partitions.length];
       
       for (int p = 0; p < partitions.length; p++) {
-        sizes[p] = (int) partitions[p].size;
+        sizes[p] = partitions[p].size;
       }
 
       return sizes;

@@ -15,27 +15,13 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.df.data.conditions;
-
-import org.apache.mahout.df.data.Instance;
+package org.apache.mahout.df.data;
 
 /**
- * True if a given attribute has a value "lesser" than a given value
+ * Exception thrown when parsing a descriptor
  */
-public class Lesser extends Condition {
-
-  private final int attr;
-
-  private final double value;
-
-  public Lesser(int attr, double value) {
-    this.attr = attr;
-    this.value = value;
+public class DescriptorException extends Exception {
+  public DescriptorException(String msg) {
+    super(msg);
   }
-
-  @Override
-  public boolean isTrueFor(Instance instance) {
-    return instance.get(attr) < value;
-  }
-
 }

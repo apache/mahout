@@ -19,7 +19,7 @@ package org.apache.mahout.df.mapreduce.partial;
 
 import java.util.Random;
 
-import org.apache.mahout.df.mapreduce.partial.TreeID;
+import org.apache.mahout.common.RandomUtils;
 
 import junit.framework.TestCase;
 
@@ -27,7 +27,7 @@ public class TreeIDTest extends TestCase {
 
   public void testTreeID() {
     int n = 1000000;
-    Random rng = new Random();
+    Random rng = RandomUtils.getRandom();
     
     for (int nloop = 0; nloop < n; nloop++) {
       int partition = Math.abs(rng.nextInt());

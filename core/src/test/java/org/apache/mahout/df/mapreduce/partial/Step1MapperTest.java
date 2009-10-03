@@ -1,9 +1,5 @@
 package org.apache.mahout.df.mapreduce.partial;
 
-import static org.apache.mahout.df.data.Utils.double2String;
-import static org.apache.mahout.df.data.Utils.randomDescriptor;
-import static org.apache.mahout.df.data.Utils.randomDoubles;
-
 import java.util.Random;
 
 import junit.framework.TestCase;
@@ -12,12 +8,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.builder.TreeBuilder;
 import org.apache.mahout.df.data.Data;
 import org.apache.mahout.df.data.DataLoader;
 import org.apache.mahout.df.data.Dataset;
 import org.apache.mahout.df.data.Utils;
-import org.apache.mahout.df.mapreduce.partial.TreeID;
 import org.apache.mahout.df.node.Leaf;
 import org.apache.mahout.df.node.Node;
 
@@ -28,7 +24,7 @@ public class Step1MapperTest extends TestCase {
    * partition
    * 
    */
-  private static class MockTreeBuilder extends TreeBuilder {
+  private static class MockTreeBuilder implements TreeBuilder {
 
     protected Data expected;
 
@@ -51,7 +47,7 @@ public class Step1MapperTest extends TestCase {
    * 
    */
   protected static class MockStep1Mapper extends Step1Mapper {
-    public MockStep1Mapper(TreeBuilder treeBuilder, Dataset dataset, Long seed,
+    protected MockStep1Mapper(TreeBuilder treeBuilder, Dataset dataset, Long seed,
         int partition, int numMapTasks, int numTrees) {
       configure(false, true, treeBuilder, dataset);
       configure(seed, partition, numMapTasks, numTrees);
@@ -64,26 +60,25 @@ public class Step1MapperTest extends TestCase {
   }
 
   /** nb attributes per generated data instance */
-  protected final int nbAttributes = 4;
+  protected static final int nbAttributes = 4;
 
   /** nb generated data instances */
-  protected final int nbInstances = 100;
+  protected static final int nbInstances = 100;
 
   /** nb trees to build */
-  protected final int nbTrees = 10;
+  protected static final int nbTrees = 10;
 
   /** nb mappers to use */
-  protected final int nbMappers = 2;
+  protected static final int nbMappers = 2;
 
-  @SuppressWarnings("unchecked")
   public void testMapper() throws Exception {
     Long seed = null;
-    Random rng = new Random();
+    Random rng = RandomUtils.getRandom();
 
     // prepare the data
-    String descriptor = randomDescriptor(rng, nbAttributes);
-    double[][] source = randomDoubles(rng, descriptor, nbInstances);
-    String[] sData = double2String(source);
+    String descriptor = Utils.randomDescriptor(rng, nbAttributes);
+    double[][] source = Utils.randomDoubles(rng, descriptor, nbInstances);
+    String[] sData = Utils.double2String(source);
     Dataset dataset = DataLoader.generateDataset(descriptor, sData);
     String[][] splits = Utils.splitData(sData, nbMappers);
 

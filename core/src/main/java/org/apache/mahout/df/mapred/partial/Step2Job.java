@@ -44,22 +44,21 @@ import org.apache.mahout.df.node.Node;
 public class Step2Job {
 
   /** directory that will hold this job's output */
-  protected final Path outputPath;
+  private final Path outputPath;
 
   /** file that will contains the forest, passed to the maps */
-  protected final Path forestPath;
+  private final Path forestPath;
 
   /** file that contains the serialized dataset */
-  protected final Path datasetPath;
+  private final Path datasetPath;
 
   /** directory that contains the data used in the first step */
-  protected final Path dataPath;
+  private final Path dataPath;
 
   /** partitions info in Hadoop's order */
-  protected final Step0Output[] partitions;
+  private final Step0Output[] partitions;
   
   /**
-   * @param conf
    * @param base base directory
    * @param dataPath data used in the first step
    * @param datasetPath
@@ -106,7 +105,7 @@ public class Step2Job {
 
     // put the dataset and the forest into the DistributedCache
     // use setCacheFiles() to overwrite the first-step cache files
-    URI[] files = new URI[] { datasetPath.toUri(), forestPath.toUri() };
+    URI[] files = { datasetPath.toUri(), forestPath.toUri() };
     DistributedCache.setCacheFiles(files, job);
 
     FileInputFormat.setInputPaths(job, dataPath);

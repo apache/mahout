@@ -19,21 +19,18 @@ package org.apache.mahout.df.data;
 
 import java.util.Random;
 
-import org.apache.mahout.df.data.Data;
-import org.apache.mahout.df.data.DataConverter;
-import org.apache.mahout.df.data.DataLoader;
-import org.apache.mahout.df.data.Dataset;
+import org.apache.mahout.common.RandomUtils;
 
 import junit.framework.TestCase;
 
 public class DataConverterTest extends TestCase {
 
-  private final int nbAttributes = 10;
+  private static final int nbAttributes = 10;
   
-  private final int nbInstances = 100;
+  private static final int nbInstances = 100;
   
   public void testConvert() throws Exception {
-    Random rng = new Random();
+    Random rng = RandomUtils.getRandom();
     
     String descriptor = Utils.randomDescriptor(rng, nbAttributes);
     double[][] source = Utils.randomDoubles(rng, descriptor, nbInstances);

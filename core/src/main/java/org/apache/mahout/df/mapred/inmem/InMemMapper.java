@@ -29,6 +29,7 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.Bagging;
 import org.apache.mahout.df.callback.SingleTreePredictions;
 import org.apache.mahout.df.data.Data;
@@ -48,11 +49,11 @@ import org.apache.mahout.df.node.Node;
 public class InMemMapper extends MapredMapper implements
     Mapper<IntWritable, NullWritable, IntWritable, MapredOutput> {
 
-  protected Bagging bagging;
+  private Bagging bagging;
 
-  protected Random rng;
+  private Random rng;
 
-  protected Data data;
+  private Data data;
 
   /**
    * Load the training data
@@ -61,7 +62,7 @@ public class InMemMapper extends MapredMapper implements
    * @return
    * @throws RuntimeException if the data could not be loaded
    */
-  protected Data loadData(JobConf conf, Dataset dataset) {
+  private static Data loadData(JobConf conf, Dataset dataset) {
     try {
       Path dataPath = Builder.getDistributedCacheFile(conf, 1);
       FileSystem fs = FileSystem.get(dataPath.toUri(), conf);
@@ -122,9 +123,9 @@ public class InMemMapper extends MapredMapper implements
       log.debug("Initialising rng with seed : " + seed);
 
       if (seed == null)
-        rng = new Random();
+        rng = RandomUtils.getRandom();
       else
-        rng = new Random(seed);
+        rng = RandomUtils.getRandom(seed);
     }
   }
 

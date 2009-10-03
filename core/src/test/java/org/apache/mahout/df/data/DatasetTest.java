@@ -26,32 +26,30 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Random;
 
-import org.apache.mahout.df.data.Dataset;
+import org.apache.mahout.common.RandomUtils;
 
 import junit.framework.TestCase;
 
 public class DatasetTest extends TestCase {
 
-  private final int nbAttributes = 10;
-
-  protected Random rng;
+  private static final int nbAttributes = 10;
 
   protected ByteArrayOutputStream byteOutStream;
   protected DataOutput out;
 
-  protected Dataset readDataset(byte[] bytes) throws IOException {
+  protected static Dataset readDataset(byte[] bytes) throws IOException {
     ByteArrayInputStream byteInStream = new ByteArrayInputStream(bytes);
     DataInput in = new DataInputStream(byteInStream);
     return Dataset.read(in);
   }
 
   public void testWritable() throws Exception {
-    int n = 10;
 
-    Random rng = new Random();
+    Random rng = RandomUtils.getRandom();
     byteOutStream = new ByteArrayOutputStream();
     out = new DataOutputStream(byteOutStream);
-    
+
+    int n = 10;
     for (int nloop=0; nloop< n; nloop++) {
       byteOutStream.reset();
       

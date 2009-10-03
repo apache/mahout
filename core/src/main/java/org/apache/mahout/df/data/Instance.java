@@ -28,7 +28,7 @@ public class Instance {
   public final int id;
 
   /** attributes, except LABEL and IGNORED */
-  protected final Vector attrs;
+  private final Vector attrs;
 
   /**
    * instance label code.<br>
@@ -74,6 +74,11 @@ public class Instance {
     
     return id == instance.id && label == instance.label && attrs.equals(instance.attrs);
     
+  }
+
+  @Override
+  public int hashCode() {
+    return id + label + attrs.hashCode();
   }
   
   

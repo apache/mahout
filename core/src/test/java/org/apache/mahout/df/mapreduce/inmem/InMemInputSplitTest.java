@@ -26,6 +26,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Random;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.mapreduce.inmem.InMemInputFormat.InMemInputSplit;
 
 import junit.framework.TestCase;
@@ -39,7 +40,7 @@ public class InMemInputSplitTest extends TestCase {
   
   @Override
   protected void setUp() throws Exception {
-    rng = new Random();
+    rng = RandomUtils.getRandom();
 
     byteOutStream = new ByteArrayOutputStream();
     out = new DataOutputStream(byteOutStream);

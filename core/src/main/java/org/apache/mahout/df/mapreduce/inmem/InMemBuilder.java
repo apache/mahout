@@ -117,19 +117,19 @@ public class InMemBuilder extends Builder {
    * @param callback
    * @return
    */
-  protected DecisionForest processOutput(Map<Integer, MapredOutput> output,
+  private static DecisionForest processOutput(Map<Integer, MapredOutput> output,
       PredictionCallback callback) {
     List<Node> trees = new ArrayList<Node>();
 
-    for (Integer key : output.keySet()) {
-      MapredOutput value = output.get(key);
+    for (Map.Entry<Integer, MapredOutput> entry : output.entrySet()) {
+      MapredOutput value = entry.getValue();
 
       trees.add(value.getTree());
 
       if (callback != null) {
         int[] predictions = value.getPredictions();
         for (int index = 0; index < predictions.length; index++) {
-          callback.prediction(key, index, predictions[index]);
+          callback.prediction(entry.getKey(), index, predictions[index]);
         }
       }
     }

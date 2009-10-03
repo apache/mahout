@@ -20,7 +20,7 @@ package org.apache.mahout.df.builder;
 import java.util.Random;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.mahout.df.builder.DefaultTreeBuilder;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.Data;
 import org.apache.mahout.df.data.Utils;
 
@@ -29,7 +29,7 @@ import junit.framework.TestCase;
 public class DefaultTreeBuilderTest extends TestCase {
 
   public void testRandomAttributes() throws Exception {
-    Random rng = new Random();
+    Random rng = RandomUtils.getRandom();
     int maxNbAttributes = 100;
     int n = 100;
 

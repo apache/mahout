@@ -51,7 +51,7 @@ public class OptIgSplit extends IgSplit {
    * @param attr
    * @return
    */
-  protected Split categoricalSplit(Data data, int attr) {
+  protected static Split categoricalSplit(Data data, int attr) {
     double[] values = data.values(attr);
     int[][] counts = new int[values.length][data.dataset.nblabels()];
     int[] countAll = new int[data.dataset.nblabels()];
@@ -84,7 +84,7 @@ public class OptIgSplit extends IgSplit {
    * @param attr
    * @return
    */
-  protected double[] sortedValues(Data data, int attr) {
+  protected static double[] sortedValues(Data data, int attr) {
     double[] values = data.values(attr);
     Arrays.sort(values);
 
@@ -131,11 +131,10 @@ public class OptIgSplit extends IgSplit {
 
     int best = -1;
     double bestIg = -1.0;
-    double ig;
 
     // try each possible split value
     for (int index = 0; index < values.length; index++) {
-      ig = hy;
+      double ig = hy;
 
       // instance with attribute value < values[index]
       size = DataUtils.sum(countLess);
@@ -172,8 +171,7 @@ public class OptIgSplit extends IgSplit {
     double entropy = 0.0;
     double invDataSize = 1.0 / dataSize;
 
-    for (int label = 0; label < counts.length; label++) {
-      int count = counts[label];
+    for (int count : counts) {
       if (count == 0)
         continue; // otherwise we get a NaN
       double p = count * invDataSize;

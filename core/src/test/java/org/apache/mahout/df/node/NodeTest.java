@@ -26,23 +26,20 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Random;
 
-import org.apache.mahout.df.node.CategoricalNode;
-import org.apache.mahout.df.node.Leaf;
-import org.apache.mahout.df.node.Node;
-import org.apache.mahout.df.node.NumericalNode;
+import org.apache.mahout.common.RandomUtils;
 
 import junit.framework.TestCase;
 
 public class NodeTest extends TestCase {
 
-  protected Random rng;
+  private Random rng;
 
-  protected ByteArrayOutputStream byteOutStream;
-  protected DataOutput out;
+  private ByteArrayOutputStream byteOutStream;
+  private DataOutput out;
   
   @Override
   protected void setUp() throws Exception {
-    rng = new Random();
+    rng = RandomUtils.getRandom();
 
     byteOutStream = new ByteArrayOutputStream();
     out = new DataOutputStream(byteOutStream);
@@ -77,30 +74,27 @@ public class NodeTest extends TestCase {
   }
   
   public void testReadLeaf() throws Exception {
-    Leaf leaf;
 
-    leaf = new Leaf(rng.nextInt());
+    Leaf leaf = new Leaf(rng.nextInt());
     leaf.write(out);
     assertEquals(leaf, readNode());
   }
 
   public void testParseNumerical() throws Exception {
-    NumericalNode node;
 
-    node = new NumericalNode(rng.nextInt(), rng.nextDouble(), new Leaf(rng
+    NumericalNode node = new NumericalNode(rng.nextInt(), rng.nextDouble(), new Leaf(rng
         .nextInt()), new Leaf(rng.nextInt()));
     node.write(out);
     assertEquals(node, readNode());
   }
 
   public void testCategoricalNode() throws Exception {
-    CategoricalNode node;
 
-    node = new CategoricalNode(rng.nextInt(), new double[] { rng.nextDouble(),
-        rng.nextDouble(), rng.nextDouble() }, new Node[] {
+    CategoricalNode node = new CategoricalNode(rng.nextInt(), new double[]{rng.nextDouble(),
+        rng.nextDouble(), rng.nextDouble()}, new Node[]{
         new Leaf(rng.nextInt()), new Leaf(rng.nextInt()),
-        new Leaf(rng.nextInt()) });
-    
+        new Leaf(rng.nextInt())});
+
     node.write(out);
     assertEquals(node, readNode());
   }

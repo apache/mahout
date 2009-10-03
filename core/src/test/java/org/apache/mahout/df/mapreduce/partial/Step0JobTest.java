@@ -22,7 +22,9 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.hadoop.mapreduce.Mapper.Context;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.DataConverter;
 import org.apache.mahout.df.data.DataLoader;
 import org.apache.mahout.df.data.Dataset;
@@ -35,13 +37,13 @@ public class Step0JobTest extends TestCase {
 
   // the generated data must be big enough to be splited by FileInputFormat
 
-  int numAttributes = 40;
+  static final int numAttributes = 40;
 
-  int numInstances = 2000;
+  static final int numInstances = 2000;
 
   int numTrees = 10;
 
-  int numMaps = 5;
+  static final int numMaps = 5;
 
   Step0Context context;
 
@@ -62,9 +64,8 @@ public class Step0JobTest extends TestCase {
     conf.setLong("mapred.max.split.size", goalSize);
   }
 
-  @SuppressWarnings("unchecked")
   public void testStep0Mapper() throws Exception {
-    Random rng = new Random();
+    Random rng = RandomUtils.getRandom();
 
     // create a dataset large enough to be split up
     String descriptor = Utils.randomDescriptor(rng, numAttributes);
@@ -76,7 +77,7 @@ public class Step0JobTest extends TestCase {
 
     Job job = new Job();
     job.setInputFormatClass(TextInputFormat.class);
-    TextInputFormat.setInputPaths(job, dataPath);
+    FileInputFormat.setInputPaths(job, dataPath);
 
     setMaxSplitSize(job.getConfiguration(), dataPath, numMaps);
 
@@ -128,7 +129,7 @@ public class Step0JobTest extends TestCase {
   }
 
   public void testProcessOutput() throws Exception {
-    Random rng = new Random();
+    Random rng = RandomUtils.getRandom();
 
     // create a dataset large enough to be split up
     String descriptor = Utils.randomDescriptor(rng, numAttributes);
@@ -213,8 +214,7 @@ public class Step0JobTest extends TestCase {
 
     private int index = 0;
 
-    @SuppressWarnings("unchecked")
-    public Step0Context(Mapper mapper, Configuration conf,
+    public Step0Context(Mapper<?,?,?,?> mapper, Configuration conf,
         TaskAttemptID taskid, int numMaps) throws IOException,
         InterruptedException {
       mapper.super(conf, taskid, null, null, null, null, null);

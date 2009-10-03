@@ -30,6 +30,7 @@ import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.mapred.Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,13 +43,13 @@ import org.slf4j.LoggerFactory;
  */
 public class InMemInputFormat implements InputFormat<IntWritable, NullWritable> {
 
-  protected static final Logger log = LoggerFactory.getLogger(InMemInputSplit.class);
+  private static final Logger log = LoggerFactory.getLogger(InMemInputSplit.class);
 
-  protected Random rng;
+  private Random rng;
 
-  protected Long seed;
+  private Long seed;
 
-  protected boolean isSingleSeed;
+  private boolean isSingleSeed;
 
   /**
    * Used for DEBUG purposes only. if true and a seed is available, all the
@@ -58,7 +59,7 @@ public class InMemInputFormat implements InputFormat<IntWritable, NullWritable> 
    * @param conf
    * @return
    */
-  public static boolean isSingleSeed(Configuration conf) {
+  private static boolean isSingleSeed(Configuration conf) {
     return conf.getBoolean("debug.mahout.rf.single.seed", false);
   }
 
@@ -81,7 +82,7 @@ public class InMemInputFormat implements InputFormat<IntWritable, NullWritable> 
           + "this can lead to no-repeatable behavior");
     }
 
-    rng = (seed == null || isSingleSeed) ? null : new Random(seed);
+    rng = (seed == null || isSingleSeed) ? null : RandomUtils.getRandom();
 
     int id = 0;
 
@@ -145,7 +146,7 @@ public class InMemInputFormat implements InputFormat<IntWritable, NullWritable> 
     @Override
     public float getProgress() throws IOException {
       if (pos == 0)
-        return 0f;
+        return 0.0f;
       else
         return (float) (pos - 1) / split.nbTrees;
     }
@@ -167,6 +168,8 @@ public class InMemInputFormat implements InputFormat<IntWritable, NullWritable> 
    * Custom InputSplit that indicates how many trees are built by each mapper
    */
   public static class InMemInputSplit implements InputSplit {
+
+    private static final String[] NO_LOCATIONS = new String[0];
 
     /** Id of the first tree of this split */
     private int firstId;
@@ -218,7 +221,7 @@ public class InMemInputFormat implements InputFormat<IntWritable, NullWritable> 
 
     @Override
     public String[] getLocations() throws IOException {
-      return new String[0];
+      return NO_LOCATIONS;
     }
 
     @Override
@@ -235,6 +238,11 @@ public class InMemInputFormat implements InputFormat<IntWritable, NullWritable> 
 
       return firstId == split.firstId && nbTrees == split.nbTrees
           && (seed == null || seed.equals(split.seed));
+    }
+
+    @Override
+    public int hashCode() {
+      return firstId + nbTrees + (seed == null ? 0 : seed.intValue());
     }
 
     @Override

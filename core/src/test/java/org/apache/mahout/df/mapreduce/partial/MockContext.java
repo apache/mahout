@@ -35,8 +35,7 @@ public class MockContext extends Context {
 
   private int index = 0;
 
-  @SuppressWarnings("unchecked")
-  public MockContext(Mapper mapper, Configuration conf, TaskAttemptID taskid,
+  public MockContext(Mapper<?,?,?,?> mapper, Configuration conf, TaskAttemptID taskid,
       int nbTrees) throws IOException, InterruptedException {
     mapper.super(conf, taskid, null, null, null, null, null);
 

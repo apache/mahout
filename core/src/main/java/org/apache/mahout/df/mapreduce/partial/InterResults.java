@@ -30,6 +30,8 @@ import org.apache.mahout.df.node.Node;
  * methods are protected.<br>
  */
 public class InterResults {
+  private InterResults() {
+  }
 
   /**
    * Load the trees and the keys returned from the first step

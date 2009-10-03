@@ -19,20 +19,17 @@ package org.apache.mahout.df.split;
 
 import java.util.Random;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.Data;
 import org.apache.mahout.df.data.Utils;
-import org.apache.mahout.df.split.DefaultIgSplit;
-import org.apache.mahout.df.split.IgSplit;
-import org.apache.mahout.df.split.OptIgSplit;
-import org.apache.mahout.df.split.Split;
 
 import junit.framework.TestCase;
 
 public class OptIgSplitTest extends TestCase {
 
-  protected final int nbAttributes = 20;
+  protected static final int nbAttributes = 20;
 
-  protected final int numInstances = 100;
+  protected static final int numInstances = 100;
 
   public void testComputeSplit() throws Exception {
     int n = 100;
@@ -40,7 +37,7 @@ public class OptIgSplitTest extends TestCase {
     IgSplit ref = new DefaultIgSplit();
     IgSplit opt = new OptIgSplit();
 
-    Random rng = new Random(1L);
+    Random rng = RandomUtils.getRandom();
     Data data = Utils.randomData(rng, nbAttributes, numInstances);
 
     for (int nloop = 0; nloop < n; nloop++) {

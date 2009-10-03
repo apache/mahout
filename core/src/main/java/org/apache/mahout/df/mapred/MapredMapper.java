@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MapredMapper extends MapReduceBase {
 
-  protected final static Logger log = LoggerFactory.getLogger(MapredMapper.class);
+  protected static final Logger log = LoggerFactory.getLogger(MapredMapper.class);
 
   private boolean noOutput;
 

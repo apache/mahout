@@ -17,17 +17,12 @@
 
 package org.apache.mahout.df.data;
 
-import static org.apache.mahout.df.data.DescriptorUtils.parseDescriptor;
-import static org.apache.mahout.df.data.Utils.generateDescriptor;
-import static org.apache.mahout.df.data.Utils.randomTokens;
-
 import java.util.Random;
 
 import junit.framework.TestCase;
 
-import org.apache.mahout.df.data.DescriptorUtils;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.Dataset.Attribute;
-import org.apache.mahout.df.data.DescriptorUtils.DescriptorException;
 
 public class DescriptorUtilsTest extends TestCase {
 
@@ -39,13 +34,13 @@ public class DescriptorUtilsTest extends TestCase {
     int n = 10;
     int maxnbAttributes = 100;
 
-    Random rng = new Random();
+    Random rng = RandomUtils.getRandom();
     
     for (int nloop = 0; nloop < n; nloop++) {
       int nbAttributes = rng.nextInt(maxnbAttributes) + 1;
 
-      char[] tokens = randomTokens(rng, nbAttributes);
-      Attribute[] attrs = parseDescriptor(generateDescriptor(tokens));
+      char[] tokens = Utils.randomTokens(rng, nbAttributes);
+      Attribute[] attrs = DescriptorUtils.parseDescriptor(Utils.generateDescriptor(tokens));
 
       // verify that the attributes matches the token list
       assertEquals("attributes size", nbAttributes, attrs.length);
@@ -88,7 +83,7 @@ public class DescriptorUtilsTest extends TestCase {
     }
   }
   
-  protected void validate(String descriptor, String description) throws DescriptorException {
+  protected static void validate(String descriptor, String description) throws DescriptorException {
     assertEquals(descriptor, DescriptorUtils.generateDescriptor(description));
   }
 }

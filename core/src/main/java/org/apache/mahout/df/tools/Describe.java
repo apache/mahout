@@ -36,6 +36,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.df.data.DataLoader;
 import org.apache.mahout.df.data.Dataset;
+import org.apache.mahout.df.data.DescriptorException;
 import org.apache.mahout.df.data.DescriptorUtils;
 import org.apache.mahout.common.CommandLineUtil;
 import org.slf4j.Logger;
@@ -48,10 +49,10 @@ public class Describe {
 
   private static final Logger log = LoggerFactory.getLogger(Describe.class);
 
+  private Describe() {
+  }
+
   public static void main(String[] args) throws Exception {
-    String dataPath;
-    List<String> descriptor;
-    String descPath;
 
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
@@ -88,9 +89,9 @@ public class Describe {
         System.exit(-1);
       }
 
-      dataPath = cmdLine.getValue(pathOpt).toString();
-      descPath = cmdLine.getValue(descPathOpt).toString();
-      descriptor = convert(cmdLine.getValues(descriptorOpt));
+      String dataPath = cmdLine.getValue(pathOpt).toString();
+      String descPath = cmdLine.getValue(descPathOpt).toString();
+      List<String> descriptor = convert(cmdLine.getValues(descriptorOpt));
 
       log.debug("Data path : " + dataPath);
       log.debug("Descriptor path : " + descPath);
@@ -105,7 +106,7 @@ public class Describe {
   }
 
   private static void runTool(String dataPath, List<String> description,
-      String filePath) throws Exception {
+      String filePath) throws DescriptorException, IOException {
     log.info("Generating the descriptor...");
     String descriptor = DescriptorUtils.generateDescriptor(description);
 
@@ -115,34 +116,32 @@ public class Describe {
     Dataset dataset = generateDataset(descriptor, dataPath);
 
     log.info("storing the dataset description");
-    Describe.storeWritable(new Configuration(), fPath, dataset);
+    storeWritable(new Configuration(), fPath, dataset);
   }
 
   private static Dataset generateDataset(String descriptor, String dataPath)
-      throws Exception {
+      throws IOException, DescriptorException {
     Path path = new Path(dataPath);
     FileSystem fs = path.getFileSystem(new Configuration());
 
     return DataLoader.generateDataset(descriptor, fs, path);
   }
 
-  private static Path validateOutput(String filePath) throws Exception {
+  private static Path validateOutput(String filePath) throws IOException {
     Path path = new Path(filePath);
     FileSystem fs = path.getFileSystem(new Configuration());
     if (fs.exists(path)) {
-      throw new Exception("Descriptor's file already exists");
+      throw new IllegalStateException("Descriptor's file already exists");
     }
     
     return path;
   }
   
-  private static List<String> convert(List values) {
-    List<String> list = new ArrayList<String>();
-
+  private static List<String> convert(List<?> values) {
+    List<String> list = new ArrayList<String>(values.size());
     for (Object value : values) {
       list.add(value.toString());
     }
-
     return list;
   }
 

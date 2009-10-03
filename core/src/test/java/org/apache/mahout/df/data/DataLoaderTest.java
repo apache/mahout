@@ -17,10 +17,6 @@
 
 package org.apache.mahout.df.data;
 
-import static org.apache.mahout.df.data.DescriptorUtils.parseDescriptor;
-import static org.apache.mahout.df.data.Utils.randomDescriptor;
-import static org.apache.mahout.df.data.Utils.randomDoubles;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -30,11 +26,7 @@ import junit.framework.TestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.mahout.df.data.Data;
-import org.apache.mahout.df.data.DataLoader;
-import org.apache.mahout.df.data.Dataset;
-import org.apache.mahout.df.data.DescriptorUtils;
-import org.apache.mahout.df.data.Instance;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.Dataset.Attribute;
 
 public class DataLoaderTest extends TestCase {
@@ -43,7 +35,7 @@ public class DataLoaderTest extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
-    rng = new Random();
+    rng = RandomUtils.getRandom();
   }
 
   public void testLoadDataWithDescriptor() throws Exception {
@@ -51,11 +43,11 @@ public class DataLoaderTest extends TestCase {
     int datasize = 100;
 
     // prepare the descriptors
-    String descriptor = randomDescriptor(rng, nbAttributes);
-    Attribute[] attrs = parseDescriptor(descriptor);
+    String descriptor = Utils.randomDescriptor(rng, nbAttributes);
+    Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
 
     // prepare the data
-    double[][] data = randomDoubles(rng, descriptor, datasize);
+    double[][] data = Utils.randomDoubles(rng, descriptor, datasize);
     List<Integer> missings = new ArrayList<Integer>();
     String[] sData = prepareData(data, attrs, missings);
     Dataset dataset = DataLoader.generateDataset(descriptor, sData);
@@ -74,11 +66,11 @@ public class DataLoaderTest extends TestCase {
     int datasize = 100;
 
     // prepare the descriptors
-    String descriptor = randomDescriptor(rng, nbAttributes);
-    Attribute[] attrs = parseDescriptor(descriptor);
+    String descriptor = Utils.randomDescriptor(rng, nbAttributes);
+    Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
 
     // prepare the data
-    double[][] data = randomDoubles(rng, descriptor, datasize);
+    double[][] data = Utils.randomDoubles(rng, descriptor, datasize);
     List<Integer> missings = new ArrayList<Integer>();
     String[] sData = prepareData(data, attrs, missings);
     Dataset expected = DataLoader.generateDataset(descriptor, sData);
@@ -99,12 +91,11 @@ public class DataLoaderTest extends TestCase {
    */
   protected String[] prepareData(double[][] data, Attribute[] attrs, List<Integer> missings) {
     int nbAttributes = attrs.length;
-    int missingAttr;
-    StringBuilder builder;
 
     String[] sData = new String[data.length];
 
     for (int index = 0; index < data.length; index++) {
+      int missingAttr;
       if (rng.nextDouble() < 0.0) {
         // add a missing value
         missings.add(index);
@@ -117,7 +108,7 @@ public class DataLoaderTest extends TestCase {
         missingAttr = -1;
       }
 
-      builder = new StringBuilder();
+      StringBuilder builder = new StringBuilder();
 
       for (int attr = 0; attr < nbAttributes; attr++) {
         if (attr == missingAttr) {
@@ -142,7 +133,7 @@ public class DataLoaderTest extends TestCase {
    * @param missings indexes of instance with missing values
    * @param loaded
    */
-  protected void testLoadedData(double[][] data, Attribute[] attrs, List<Integer> missings, Data loaded) {
+  protected static void testLoadedData(double[][] data, Attribute[] attrs, List<Integer> missings, Data loaded) {
     int nbAttributes = attrs.length;
 
     // check the vectors
@@ -189,7 +180,7 @@ public class DataLoaderTest extends TestCase {
    * @param missings indexes of instance with missing values
    * @param loaded
    */
-  protected void testLoadedDataset(double[][] data, Attribute[] attrs, List<Integer> missings, Data loaded) {
+  protected static void testLoadedDataset(double[][] data, Attribute[] attrs, List<Integer> missings, Data loaded) {
     int nbAttributes = attrs.length;
 
     int iId = 0;
@@ -224,11 +215,11 @@ public class DataLoaderTest extends TestCase {
     int datasize = 100;
 
     // prepare the descriptors
-    String descriptor = randomDescriptor(rng, nbAttributes);
+    String descriptor = Utils.randomDescriptor(rng, nbAttributes);
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
 
     // prepare the data
-    double[][] source = randomDoubles(rng, descriptor, datasize);
+    double[][] source = Utils.randomDoubles(rng, descriptor, datasize);
     List<Integer> missings = new ArrayList<Integer>();
     String[] sData = prepareData(source, attrs, missings);
     Dataset dataset = DataLoader.generateDataset(descriptor, sData);
@@ -249,11 +240,11 @@ public class DataLoaderTest extends TestCase {
     int datasize = 100;
 
     // prepare the descriptors
-    String descriptor = randomDescriptor(rng, nbAttributes);
+    String descriptor = Utils.randomDescriptor(rng, nbAttributes);
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
 
     // prepare the data
-    double[][] source = randomDoubles(rng, descriptor, datasize);
+    double[][] source = Utils.randomDoubles(rng, descriptor, datasize);
     List<Integer> missings = new ArrayList<Integer>();
     String[] sData = prepareData(source, attrs, missings);
     Dataset expected = DataLoader.generateDataset(descriptor, sData);
@@ -277,7 +268,7 @@ public class DataLoaderTest extends TestCase {
    * @param oValue old value in source
    * @param nValue new value in loaded
    */
-  protected void checkCategorical(double[][] source, List<Integer> missings,
+  protected static void checkCategorical(double[][] source, List<Integer> missings,
       Data loaded, int attr, int aId, double oValue, double nValue) {
     int lind = 0;
 
@@ -286,7 +277,7 @@ public class DataLoaderTest extends TestCase {
         continue;
 
       if (source[index][attr] == oValue) {
-        assertTrue(nValue == loaded.get(lind).get(aId));
+        assertEquals(nValue, loaded.get(lind).get(aId));
       } else {
         assertFalse(nValue == loaded.get(lind).get(aId));
       }
@@ -304,7 +295,7 @@ public class DataLoaderTest extends TestCase {
    * @param labelInd label's index in source
    * @param value source label's value
    */
-  protected void checkLabel(double[][] source, List<Integer> missings,
+  protected static void checkLabel(double[][] source, List<Integer> missings,
       Data loaded, int labelInd, double value) {
     // label's code that corresponds to the value
     int code = loaded.dataset.labelCode(Double.toString(value));
@@ -316,7 +307,7 @@ public class DataLoaderTest extends TestCase {
         continue;
 
       if (source[index][labelInd] == value) {
-        assertTrue(code == loaded.get(lind).label);
+        assertEquals(code, loaded.get(lind).label);
       } else {
         assertFalse(code == loaded.get(lind).label);
       }
