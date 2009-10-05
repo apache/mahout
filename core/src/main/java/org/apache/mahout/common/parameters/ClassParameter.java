@@ -31,7 +31,7 @@ public class ClassParameter extends AbstractParameter<Class> {
     try {
       set(Class.forName(stringValue));
     } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
   }
 

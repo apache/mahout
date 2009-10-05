@@ -32,7 +32,7 @@ public class DefaultIgSplit extends IgSplit {
 
   @Override
   public Split computeSplit(Data data, int attr) {
-    if (data.dataset.isNumerical(attr)) {
+    if (data.getDataset().isNumerical(attr)) {
       double[] values = data.values(attr);
       double bestIg = -1;
       double bestSplit = 0.0;
@@ -108,13 +108,13 @@ public class DefaultIgSplit extends IgSplit {
     double invDataSize = 1.0 / data.size();
 
     if (counts == null)
-      counts = new int[data.dataset.nblabels()];
+      counts = new int[data.getDataset().nblabels()];
 
     Arrays.fill(counts, 0);
     data.countLabels(counts);
 
     double entropy = 0.0;
-    for (int label = 0; label < data.dataset.nblabels(); label++) {
+    for (int label = 0; label < data.getDataset().nblabels(); label++) {
       int count = counts[label];
       if (count == 0)
         continue; // otherwise we get a NaN

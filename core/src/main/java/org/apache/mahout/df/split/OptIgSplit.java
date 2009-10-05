@@ -29,15 +29,15 @@ import org.apache.mahout.df.data.Instance;
  */
 public class OptIgSplit extends IgSplit {
 
-  protected int[][] counts;
+  private int[][] counts;
 
-  protected int[] countAll;
+  private int[] countAll;
 
-  protected int[] countLess;
+  private int[] countLess;
 
   @Override
   public Split computeSplit(Data data, int attr) {
-    if (data.dataset.isNumerical(attr)) {
+    if (data.getDataset().isNumerical(attr)) {
       return numericalSplit(data, attr);
     } else {
       return categoricalSplit(data, attr);
@@ -51,10 +51,10 @@ public class OptIgSplit extends IgSplit {
    * @param attr
    * @return
    */
-  protected static Split categoricalSplit(Data data, int attr) {
+  private static Split categoricalSplit(Data data, int attr) {
     double[] values = data.values(attr);
-    int[][] counts = new int[values.length][data.dataset.nblabels()];
-    int[] countAll = new int[data.dataset.nblabels()];
+    int[][] counts = new int[values.length][data.getDataset().nblabels()];
+    int[] countAll = new int[data.getDataset().nblabels()];
 
     // compute frequencies
     for (int index = 0; index < data.size(); index++) {
@@ -84,7 +84,7 @@ public class OptIgSplit extends IgSplit {
    * @param attr
    * @return
    */
-  protected static double[] sortedValues(Data data, int attr) {
+  private static double[] sortedValues(Data data, int attr) {
     double[] values = data.values(attr);
     Arrays.sort(values);
 
@@ -98,9 +98,9 @@ public class OptIgSplit extends IgSplit {
    * @param values
    */
   protected void initCounts(Data data, double[] values) {
-    counts = new int[values.length][data.dataset.nblabels()];
-    countAll = new int[data.dataset.nblabels()];
-    countLess = new int[data.dataset.nblabels()];
+    counts = new int[values.length][data.getDataset().nblabels()];
+    countAll = new int[data.getDataset().nblabels()];
+    countLess = new int[data.getDataset().nblabels()];
   }
 
   protected void computeFrequencies(Data data, int attr, double[] values) {
@@ -164,7 +164,7 @@ public class OptIgSplit extends IgSplit {
    * @param dataSize numInstances
    * @return
    */
-  protected static double entropy(int[] counts, int dataSize) {
+  private static double entropy(int[] counts, int dataSize) {
     if (dataSize == 0)
       return 0.0;
 

@@ -66,28 +66,16 @@ public class Step2Mapper extends Mapper<LongWritable, Text, TreeID, MapredOutput
     Configuration conf = context.getConfiguration();
     
     // get the cached files' paths
-    URI[] files;
-    try {
-      files = DistributedCache.getCacheFiles(conf);
-    } catch (IOException e) {
-      throw new RuntimeException("Exception while getting the cache files : "
-          + e.getMessage());
-    }
+    URI[] files = DistributedCache.getCacheFiles(conf);
 
     log.info("DistributedCache.getCacheFiles(): " + ArrayUtils.toString(files));
     
     if (files == null || files.length < 2) {
-      throw new RuntimeException("missing paths from the DistributedCache");
+      throw new IllegalArgumentException("missing paths from the DistributedCache");
     }
 
-    Dataset dataset;
-    try {
-      Path datasetPath = new Path(files[0].getPath());
-      dataset = Dataset.load(conf, datasetPath);
-    } catch (IOException e) {
-      throw new RuntimeException("Exception while loading the dataset : "
-          + e.getMessage());
-    }
+    Path datasetPath = new Path(files[0].getPath());
+    Dataset dataset = Dataset.load(conf, datasetPath);
 
     int numMaps = Builder.getNumMaps(conf);
     int p = conf.getInt("mapred.task.partition", -1);
@@ -95,27 +83,19 @@ public class Step2Mapper extends Mapper<LongWritable, Text, TreeID, MapredOutput
     // total number of trees in the forest
     int numTrees = Builder.getNbTrees(conf);
     if (numTrees == -1) {
-      throw new RuntimeException("numTrees not found !");
+      throw new IllegalArgumentException("numTrees not found !");
     }
 
     int nbConcerned = nbConcerned(numMaps, numTrees, p);
     keys = new TreeID[nbConcerned];
     trees = new Node[nbConcerned];
 
-    int numInstances;
+    Path forestPath = new Path(files[1].getPath());
+    FileSystem fs = forestPath.getFileSystem(conf);
+    int numInstances = InterResults.load(fs, forestPath, numMaps, numTrees,
+        p, keys, trees);
 
-    try {
-      Path forestPath = new Path(files[1].getPath());
-      FileSystem fs = forestPath.getFileSystem(conf);
-      numInstances = InterResults.load(fs, forestPath, numMaps, numTrees,
-          p, keys, trees);
-
-      log.debug("partition: " + p + "numInstances: " + numInstances);
-    } catch (IOException e) {
-      throw new RuntimeException("Exception while loading the forest : "
-          + e.getMessage());
-    }
-
+    log.debug("partition: " + p + "numInstances: " + numInstances);
     configure(p, dataset, keys, trees, numInstances);
   }
 
@@ -148,7 +128,7 @@ public class Step2Mapper extends Mapper<LongWritable, Text, TreeID, MapredOutput
       Node[] trees, int numInstances) {
     this.partition = partition;
     if (partition < 0) {
-      throw new RuntimeException("Wrong partition id : " + partition);
+      throw new IllegalArgumentException("Wrong partition id : " + partition);
     }
 
     converter = new DataConverter(dataset);
@@ -191,7 +171,7 @@ public class Step2Mapper extends Mapper<LongWritable, Text, TreeID, MapredOutput
   protected void cleanup(Context context) throws IOException, InterruptedException {
     for (int index = 0; index < keys.length; index++) {
       TreeID key = new TreeID(partition, keys[index].treeId());
-      context.write(key, new MapredOutput(callbacks[index].predictions));
+      context.write(key, new MapredOutput(callbacks[index].getPredictions()));
     }
   }
 

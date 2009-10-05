@@ -196,12 +196,12 @@ public class DataLoaderTest extends TestCase {
         if (attrs[attr].isIgnored() || attrs[attr].isLabel())
           continue;
 
-        assertEquals(attrs[attr].isNumerical(), loaded.dataset.isNumerical(aId));
+        assertEquals(attrs[attr].isNumerical(), loaded.getDataset().isNumerical(aId));
         
         if (attrs[attr].isCategorical()) {
           double nValue = instance.get(aId);
           String oValue = Double.toString(data[index][attr]);
-          assertEquals((double)loaded.dataset.valueOf(aId, oValue), nValue);
+          assertEquals((double) loaded.getDataset().valueOf(aId, oValue), nValue);
         }
 
         aId++;
@@ -298,7 +298,7 @@ public class DataLoaderTest extends TestCase {
   protected static void checkLabel(double[][] source, List<Integer> missings,
       Data loaded, int labelInd, double value) {
     // label's code that corresponds to the value
-    int code = loaded.dataset.labelCode(Double.toString(value));
+    int code = loaded.getDataset().labelCode(Double.toString(value));
 
     int lind = 0;
 

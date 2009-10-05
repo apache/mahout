@@ -92,7 +92,7 @@ public class DirichletMapper extends MapReduceBase implements
       state.mixture = UncommonDistributions.rDirichlet(state.totalCounts());
       return state;
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
   }
 

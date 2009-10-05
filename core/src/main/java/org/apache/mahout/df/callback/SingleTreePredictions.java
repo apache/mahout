@@ -25,7 +25,7 @@ import java.util.Arrays;
 public class SingleTreePredictions implements PredictionCallback {
 
   /** predictions[n] = 'label' predicted for instance 'n' */
-  public final int[] predictions;
+  private final int[] predictions;
 
   /** used to assert that all the predictions belong to the same tree */
   private Integer treeId;
@@ -44,6 +44,10 @@ public class SingleTreePredictions implements PredictionCallback {
     }
     
     predictions[instanceId] = prediction;
+  }
+
+  public int[] getPredictions() {
+    return predictions;
   }
 
 }

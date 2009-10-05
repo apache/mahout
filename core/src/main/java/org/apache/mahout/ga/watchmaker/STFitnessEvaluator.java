@@ -40,7 +40,7 @@ public abstract class STFitnessEvaluator<T> implements FitnessEvaluator<T> {
 
     int index = population.indexOf(candidate);
     if (index == -1) {
-      throw new RuntimeException("Candidate is not part of the population");
+      throw new IllegalArgumentException("Candidate is not part of the population");
     }
 
     return evaluations.get(index);

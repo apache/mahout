@@ -81,7 +81,7 @@ public class BreimanExample extends Configured implements Tool {
       throws Exception {
 
     final int dataSize = data.size();
-    final int nblabels = data.dataset.nblabels();
+    final int nblabels = data.getDataset().nblabels();
 
     double oobM; // oob error estimate when m = log2(M)+1
     double oobOne; // oob error estimate when m = 1
@@ -216,7 +216,7 @@ public class BreimanExample extends Configured implements Tool {
 
     // take m to be the first integer less than log2(M) + 1, where M is the
     // number of inputs
-    int m = (int) Math.floor(Maths.log(2, data.dataset.nbAttributes()) + 1);
+    int m = (int) Math.floor(Maths.log(2, data.getDataset().nbAttributes()) + 1);
 
     for (int iteration = 0; iteration < nbIterations; iteration++) {
       log.info("Iteration " + iteration);

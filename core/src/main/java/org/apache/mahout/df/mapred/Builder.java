@@ -65,7 +65,7 @@ public abstract class Builder {
 
   protected final Configuration conf;
 
-  protected String outputDirName = "output";
+  private String outputDirName = "output";
 
   /**
    * Used only for DEBUG purposes. if false, the mappers doesn't output anything,
@@ -82,7 +82,7 @@ public abstract class Builder {
     return conf.getBoolean("mahout.rf.oob", false);
   }
 
-  protected static void setOobEstimate(Configuration conf, boolean value) {
+  private static void setOobEstimate(Configuration conf, boolean value) {
     conf.setBoolean("mahout.rf.oob", value);
   }
 
@@ -106,7 +106,7 @@ public abstract class Builder {
    * @param conf
    * @param seed
    */
-  protected static void setRandomSeed(Configuration conf, long seed) {
+  private static void setRandomSeed(Configuration conf, long seed) {
     conf.setLong("mahout.rf.random.seed", seed);
   }
 
@@ -118,7 +118,7 @@ public abstract class Builder {
     return (TreeBuilder) StringUtils.fromString(string);
   }
 
-  protected static void setTreeBuilder(Configuration conf, TreeBuilder treeBuilder) {
+  private static void setTreeBuilder(Configuration conf, TreeBuilder treeBuilder) {
     conf.set("mahout.rf.treebuilder", StringUtils.toString(treeBuilder));
   }
 
@@ -247,7 +247,7 @@ public abstract class Builder {
 
     // check the output
     if (fs.exists(outputPath))
-      throw new RuntimeException("Ouput path already exists : " + outputPath);
+      throw new IOException("Output path already exists : " + outputPath);
 
     if (seed != null)
       setRandomSeed(job, seed);
@@ -298,7 +298,7 @@ public abstract class Builder {
             return -1;
           }
         } catch (IOException ie) {
-          throw new RuntimeException("Problem getting input split size", ie);
+          throw new IllegalStateException("Problem getting input split size", ie);
         }
       }
     });

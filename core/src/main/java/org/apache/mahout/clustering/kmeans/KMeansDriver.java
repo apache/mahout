@@ -308,10 +308,10 @@ public class KMeansDriver {
           key = (Writable) reader.getKeyClass().newInstance();
         } catch (InstantiationException e) {// shouldn't happen
           log.error("Exception", e);
-          throw new RuntimeException(e);
+          throw new IllegalStateException(e);
         } catch (IllegalAccessException e) {
           log.error("Exception", e);
-          throw new RuntimeException(e);
+          throw new IllegalStateException(e);
         }
         Cluster value = new Cluster();
         while (reader.next(key, value)) {

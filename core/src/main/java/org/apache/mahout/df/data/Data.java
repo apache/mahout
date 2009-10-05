@@ -39,7 +39,7 @@ public class Data {
 
   private final List<Instance> instances;
 
-  public final Dataset dataset;
+  private final Dataset dataset;
 
   public Data(Dataset dataset, List<Instance> instances) {
     this.dataset = dataset;
@@ -339,6 +339,9 @@ public class Data {
       counts[get(index).label]++;
     }
   }
-  
-  
+
+
+  public Dataset getDataset() {
+    return dataset;
+  }
 }

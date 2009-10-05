@@ -52,7 +52,7 @@ public class Describe {
   private Describe() {
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws IOException, DescriptorException {
 
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();

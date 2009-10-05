@@ -38,12 +38,12 @@ public class DefaultTreeBuilderTest extends TestCase {
 
       // generate a small data, only to get the dataset
       Data data = Utils.randomData(rng, nbAttributes, 1);
-      if (data.dataset.nbAttributes() == 0)
+      if (data.getDataset().nbAttributes() == 0)
         continue;
 
-      int m = rng.nextInt(data.dataset.nbAttributes()) + 1;
+      int m = rng.nextInt(data.getDataset().nbAttributes()) + 1;
 
-      int[] attrs = DefaultTreeBuilder.randomAttributes(data.dataset, rng, m);
+      int[] attrs = DefaultTreeBuilder.randomAttributes(data.getDataset(), rng, m);
 
       assertEquals(m, attrs.length);
 

@@ -44,11 +44,10 @@ public class EvalMapper extends MapReduceBase implements
   private FitnessEvaluator<Object> evaluator = null;
 
   @Override
-  @SuppressWarnings("unchecked")
   public void configure(JobConf job) {
     String evlstr = job.get(MAHOUT_GA_EVALUATOR);
     if (evlstr == null) {
-      throw new RuntimeException(
+      throw new IllegalArgumentException(
           "'MAHOUT_GA_EVALUATOR' job parameter non found");
     }
 

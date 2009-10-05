@@ -89,11 +89,11 @@ public class MeanShiftCanopy extends ClusterBase {
           DistanceMeasure.class).newInstance();
       measure.configure(job);
     } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } catch (InstantiationException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
     nextCanopyId = 0;
     t1 = Double.parseDouble(job.get(T1_KEY));

@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 public class MapredMapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
     Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
-  protected static final Logger log = LoggerFactory.getLogger(MapredMapper.class);
+  private static final Logger log = LoggerFactory.getLogger(MapredMapper.class);
 
   private boolean noOutput;
 
@@ -73,13 +73,8 @@ public class MapredMapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
     
     Configuration conf = context.getConfiguration();
     
-    try {
-      configure(!Builder.isOutput(conf), Builder.isOobEstimate(conf), Builder
+    configure(!Builder.isOutput(conf), Builder.isOobEstimate(conf), Builder
           .getTreeBuilder(conf), Builder.loadDataset(conf));
-    } catch (IOException e) {
-      throw new RuntimeException(
-          "Exception caught while configuring the mapper: " + e.getMessage());
-    }
   }
 
   /**
@@ -96,7 +91,7 @@ public class MapredMapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
     this.oobEstimate = oobEstimate;
 
     if (treeBuilder == null) {
-      throw new RuntimeException("TreeBuilder not found in the Job parameters");
+      throw new IllegalArgumentException("TreeBuilder not found in the Job parameters");
     }
     this.treeBuilder = treeBuilder;
 

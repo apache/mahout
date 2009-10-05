@@ -76,7 +76,7 @@ public class ClusterMapper extends MapReduceBase implements
         reader.close();
       }
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
   }
 }

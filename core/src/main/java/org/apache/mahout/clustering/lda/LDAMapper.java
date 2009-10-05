@@ -93,7 +93,7 @@ public class LDAMapper extends
       LDAState myState = LDADriver.createState(job);
       configure(myState);
     } catch (IOException e) {
-      throw new RuntimeException("Error creating LDA State!", e);
+      throw new IllegalStateException("Error creating LDA State!", e);
     }
   }
 

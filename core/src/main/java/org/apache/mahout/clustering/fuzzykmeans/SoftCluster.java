@@ -151,11 +151,11 @@ public class SoftCluster implements Writable {
       nextClusterId = 0;
       m = Double.parseDouble(job.get(M_KEY));
     } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } catch (InstantiationException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
   }
 

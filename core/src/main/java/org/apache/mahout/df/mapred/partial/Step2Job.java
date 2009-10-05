@@ -94,7 +94,7 @@ public class Step2Job {
 
     // check the output
     if (outputPath.getFileSystem(job).exists(outputPath))
-      throw new RuntimeException("Ouput path already exists : " + outputPath);
+      throw new IOException("Output path already exists : " + outputPath);
 
     int[] sizes = Step0Output.extractSizes(partitions);
     

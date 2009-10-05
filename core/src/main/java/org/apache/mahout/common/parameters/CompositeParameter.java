@@ -45,16 +45,15 @@ public class CompositeParameter<T extends Parametered> extends AbstractParameter
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public void setStringValue(String className) {
     try {
       set((T) Class.forName(className).newInstance());
     } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } catch (InstantiationException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
   }
 

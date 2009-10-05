@@ -38,7 +38,6 @@ public abstract class WeightedDistanceMeasure implements DistanceMeasure {
 
   private List<Parameter<?>> parameters;
   private Parameter<Path> weightsFile;
-  @SuppressWarnings("unchecked")
   private ClassParameter vectorClass;
   protected Vector weights;
 
@@ -77,11 +76,11 @@ public abstract class WeightedDistanceMeasure implements DistanceMeasure {
         this.weights = weights;
       }
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } catch (InstantiationException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
   }
 

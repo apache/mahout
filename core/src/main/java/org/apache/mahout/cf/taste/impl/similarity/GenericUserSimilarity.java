@@ -207,7 +207,7 @@ public final class GenericUserSimilarity implements UserSimilarity {
         similarity = otherSimilarity.userSimilarity(userID1, userID2);
       } catch (TasteException te) {
         // ugly:
-        throw new RuntimeException(te);
+        throw new IllegalStateException(te);
       }
       UserUserSimilarity result = new UserUserSimilarity(userID1, userID2, similarity);
       j++;

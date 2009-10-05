@@ -40,6 +40,8 @@ import org.apache.mahout.df.mapred.MapredMapper;
 import org.apache.mahout.df.mapred.inmem.InMemInputFormat.InMemInputSplit;
 import org.apache.mahout.df.mapreduce.MapredOutput;
 import org.apache.mahout.df.node.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * In-memory mapper that grows the trees using a full copy of the data loaded
@@ -48,6 +50,8 @@ import org.apache.mahout.df.node.Node;
  */
 public class InMemMapper extends MapredMapper implements
     Mapper<IntWritable, NullWritable, IntWritable, MapredOutput> {
+
+  private static final Logger log = LoggerFactory.getLogger(InMemMapper.class);
 
   private Bagging bagging;
 
@@ -62,16 +66,10 @@ public class InMemMapper extends MapredMapper implements
    * @return
    * @throws RuntimeException if the data could not be loaded
    */
-  private static Data loadData(JobConf conf, Dataset dataset) {
-    try {
-      Path dataPath = Builder.getDistributedCacheFile(conf, 1);
-      FileSystem fs = FileSystem.get(dataPath.toUri(), conf);
-
-      return DataLoader.loadData(dataset, fs, dataPath);
-    } catch (Exception e) {
-      throw new RuntimeException("Exception caught while loading the data: "
-          + StringUtils.stringifyException(e));
-    }
+  private static Data loadData(JobConf conf, Dataset dataset) throws IOException {
+    Path dataPath = Builder.getDistributedCacheFile(conf, 1);
+    FileSystem fs = FileSystem.get(dataPath.toUri(), conf);
+    return DataLoader.loadData(dataset, fs, dataPath);
   }
 
   @Override
@@ -79,7 +77,12 @@ public class InMemMapper extends MapredMapper implements
     super.configure(conf);
 
     log.info("Loading the data...");
-    data = loadData(conf, getDataset());
+    try {
+      data = loadData(conf, getDataset());
+    } catch (IOException e) {
+    throw new IllegalStateException("Exception caught while loading the data: "
+        + StringUtils.stringifyException(e));
+    }
     log.info("Data loaded : " + data.size() + " instances");
 
     bagging = new Bagging(getTreeBuilder(), data);
@@ -101,7 +104,7 @@ public class InMemMapper extends MapredMapper implements
 
     if (isOobEstimate() && !isNoOutput()) {
       callback = new SingleTreePredictions(data.size());
-      predictions = callback.predictions;
+      predictions = callback.getPredictions();
     }
 
     initRandom(split);

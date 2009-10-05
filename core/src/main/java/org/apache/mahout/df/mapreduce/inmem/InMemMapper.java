@@ -25,7 +25,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.util.StringUtils;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.Bagging;
 import org.apache.mahout.df.callback.SingleTreePredictions;
@@ -37,6 +36,8 @@ import org.apache.mahout.df.mapreduce.MapredMapper;
 import org.apache.mahout.df.mapreduce.MapredOutput;
 import org.apache.mahout.df.mapreduce.inmem.InMemInputFormat.InMemInputSplit;
 import org.apache.mahout.df.node.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * In-memory mapper that grows the trees using a full copy of the data loaded
@@ -45,6 +46,8 @@ import org.apache.mahout.df.node.Node;
  */
 public class InMemMapper extends
     MapredMapper<IntWritable, NullWritable, IntWritable, MapredOutput> {
+
+  private static final Logger log = LoggerFactory.getLogger(InMemMapper.class);
 
   private Bagging bagging;
 
@@ -59,16 +62,10 @@ public class InMemMapper extends
    * @return
    * @throws RuntimeException if the data could not be loaded
    */
-  private static Data loadData(Configuration conf, Dataset dataset) {
-    try {
-      Path dataPath = Builder.getDistributedCacheFile(conf, 1);
-      FileSystem fs = FileSystem.get(dataPath.toUri(), conf);
-
-      return DataLoader.loadData(dataset, fs, dataPath);
-    } catch (Exception e) {
-      throw new RuntimeException("Exception caught while loading the data: "
-          + StringUtils.stringifyException(e));
-    }
+  private static Data loadData(Configuration conf, Dataset dataset) throws IOException {
+    Path dataPath = Builder.getDistributedCacheFile(conf, 1);
+    FileSystem fs = FileSystem.get(dataPath.toUri(), conf);
+    return DataLoader.loadData(dataset, fs, dataPath);
   }
 
   @Override
@@ -98,7 +95,7 @@ public class InMemMapper extends
 
     if (isOobEstimate() && !isNoOutput()) {
       callback = new SingleTreePredictions(data.size());
-      predictions = callback.predictions;
+      predictions = callback.getPredictions();
     }
 
     initRandom((InMemInputSplit)context.getInputSplit());

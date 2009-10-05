@@ -42,11 +42,11 @@ public class Utils {
   private Utils() {
   }
 
-  public static class LogCallback implements PredictionCallback {
+  private static class LogCallback implements PredictionCallback {
   
-    protected final Logger log;
+    private final Logger log;
   
-    public LogCallback(Logger log) {
+    private LogCallback(Logger log) {
       this.log = log;
     }
   
@@ -133,8 +133,7 @@ public class Utils {
    * @return
    * @throws Exception 
    */
-  public static double[][] randomDoubles(Random rng, int nbAttributes,
-      int number) throws Exception {
+  public static double[][] randomDoubles(Random rng, int nbAttributes,int number) throws DescriptorException {
     String descriptor = randomDescriptor(rng, nbAttributes);
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
 
@@ -175,7 +174,7 @@ public class Utils {
    * @return
    * @throws Exception 
    */
-  public static Data randomData(Random rng, int nbAttributes, int size) throws Exception {
+  public static Data randomData(Random rng, int nbAttributes, int size) throws DescriptorException {
     String descriptor = randomDescriptor(rng, nbAttributes);
     double[][] source = randomDoubles(rng, descriptor, size);
     String[] sData = double2String(source);
@@ -257,7 +256,7 @@ public class Utils {
    * @throws Exception 
    */
   public static double[][] randomDoublesWithSameLabel(Random rng,
-      String descriptor, int number, int value) throws Exception {
+      String descriptor, int number, int value) throws DescriptorException {
     int label = findLabel(descriptor);
     
     double[][] source = randomDoubles(rng, descriptor, number);
@@ -276,7 +275,7 @@ public class Utils {
    * @return
    * @throws Exception 
    */
-  public static int findLabel(String descriptor) throws Exception {
+  public static int findLabel(String descriptor) throws DescriptorException {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
     return ArrayUtils.indexOf(attrs, Attribute.LABEL);
   }
@@ -284,13 +283,15 @@ public class Utils {
   public static void writeDataToFile(String[] sData, Path path) throws IOException {
     BufferedWriter output = new BufferedWriter(new OutputStreamWriter(
         new FileOutputStream(path.toString()), Charset.forName("UTF-8")));
-    
-    for (String line : sData) {
-      output.write(line);
-      output.write('\n');
+    try {
+      for (String line : sData) {
+        output.write(line);
+        output.write('\n');
+      }
+      output.flush();
+    } finally {
+      output.close();
     }
-    output.flush();
-    output.close();
   
   }
 

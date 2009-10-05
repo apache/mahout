@@ -274,7 +274,7 @@ public abstract class Builder {
 
     // check the output
     if (fs.exists(outputPath))
-      throw new RuntimeException("Ouput path already exists : " + outputPath);
+      throw new IOException("Output path already exists : " + outputPath);
 
     if (seed != null)
       setRandomSeed(conf, seed);
@@ -329,8 +329,10 @@ public abstract class Builder {
           } else {
             return -1;
           }
-        } catch (Exception ie) {
-          throw new RuntimeException("Problem getting input split size", ie);
+        } catch (IOException ie) {
+          throw new IllegalStateException("Problem getting input split size", ie);
+        } catch (InterruptedException ie) {
+          throw new IllegalStateException("Problem getting input split size", ie);
         }
       }
     });

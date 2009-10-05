@@ -112,10 +112,10 @@ public class Dataset implements Writable {
    */
   public int valueOf(int attr, String token) {
     if (isNumerical(attr)) {
-      throw new RuntimeException("Only for CATEGORICAL attributes");
+      throw new IllegalArgumentException("Only for CATEGORICAL attributes");
     }
     if (values == null) {
-      throw new RuntimeException("Values not found");
+      throw new IllegalStateException("Values not found");
     }
 
     return ArrayUtils.indexOf(values[attr], token);
@@ -156,7 +156,7 @@ public class Dataset implements Writable {
       
       if (attrs[attr].isLabel()) {
         if (labelId != -1) {
-          throw new RuntimeException("Label found more than once");
+          throw new IllegalStateException("Label found more than once");
         }
         labelId = attr;
         continue;
@@ -171,7 +171,7 @@ public class Dataset implements Writable {
     }
     
     if (labelId == -1) {
-      throw new RuntimeException("Label not found");
+      throw new IllegalStateException("Label not found");
     }
 
     labels = new String[values[labelId].size()];

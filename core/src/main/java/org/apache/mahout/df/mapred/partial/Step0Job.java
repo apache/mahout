@@ -84,7 +84,7 @@ public class Step0Job {
 
     // check the output
     if (outputPath.getFileSystem(job).exists(outputPath))
-      throw new RuntimeException("Ouput path already exists : " + outputPath);
+      throw new IOException("Output path already exists : " + outputPath);
 
     // put the dataset into the DistributedCache
     // use setCacheFiles() to overwrite the first-step cache files
@@ -213,7 +213,7 @@ public class Step0Job {
     protected void configure(int p) {
       partition = p;
       if (partition < 0) {
-        throw new RuntimeException("Wrong partition id : " + partition);
+        throw new IllegalArgumentException("Wrong partition id : " + partition);
       }
     }
 

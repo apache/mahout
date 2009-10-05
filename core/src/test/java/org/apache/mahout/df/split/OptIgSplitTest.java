@@ -41,7 +41,7 @@ public class OptIgSplitTest extends TestCase {
     Data data = Utils.randomData(rng, nbAttributes, numInstances);
 
     for (int nloop = 0; nloop < n; nloop++) {
-      int attr = rng.nextInt(data.dataset.nbAttributes());
+      int attr = rng.nextInt(data.getDataset().nbAttributes());
       // System.out.println("IsNumerical: " + data.dataset.isNumerical(attr));
 
       Split expected = ref.computeSplit(data, attr);

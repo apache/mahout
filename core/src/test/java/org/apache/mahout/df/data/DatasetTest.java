@@ -53,7 +53,7 @@ public class DatasetTest extends TestCase {
     for (int nloop=0; nloop< n; nloop++) {
       byteOutStream.reset();
       
-      Dataset dataset = Utils.randomData(rng, nbAttributes, 1).dataset;
+      Dataset dataset = Utils.randomData(rng, nbAttributes, 1).getDataset();
       
       dataset.write(out);
       

@@ -473,11 +473,11 @@ public abstract class AbstractMatrix implements Matrix {
       matrix = Class.forName(matrixClassName).asSubclass(Matrix.class)
           .newInstance();
     } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } catch (InstantiationException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
     matrix.readFields(in);
     return matrix;

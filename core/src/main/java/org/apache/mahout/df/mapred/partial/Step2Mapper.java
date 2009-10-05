@@ -75,12 +75,11 @@ public class Step2Mapper extends MapReduceBase implements
     try {
       files = DistributedCache.getCacheFiles(job);
     } catch (IOException e) {
-      throw new RuntimeException("Exception while getting the cache files : "
-          + e.getMessage());
+      throw new IllegalStateException("Exception while getting the cache files : ", e);
     }
 
     if (files == null || files.length < 2) {
-      throw new RuntimeException("missing paths from the DistributedCache");
+      throw new IllegalArgumentException("missing paths from the DistributedCache");
     }
 
     Dataset dataset;
@@ -88,8 +87,7 @@ public class Step2Mapper extends MapReduceBase implements
       Path datasetPath = new Path(files[0].getPath());
       dataset = Dataset.load(job, datasetPath);
     } catch (IOException e) {
-      throw new RuntimeException("Exception while loading the dataset : "
-          + e.getMessage());
+      throw new IllegalStateException("Exception while loading the dataset : ", e);
     }
 
     int numMaps = job.getNumMapTasks();
@@ -98,7 +96,7 @@ public class Step2Mapper extends MapReduceBase implements
     // total number of trees in the forest
     int numTrees = Builder.getNbTrees(job);
     if (numTrees == -1) {
-      throw new RuntimeException("numTrees not found !");
+      throw new IllegalArgumentException("numTrees not found !");
     }
 
     int nbConcerned = nbConcerned(numMaps, numTrees, p);
@@ -115,8 +113,7 @@ public class Step2Mapper extends MapReduceBase implements
 
       log.debug("partition: " + p + "numInstances: " + numInstances);
     } catch (IOException e) {
-      throw new RuntimeException("Exception while loading the forest : "
-          + e.getMessage());
+      throw new IllegalStateException("Exception while loading the forest : ", e);
     }
 
     configure(p, dataset, keys, trees, numInstances);
@@ -151,7 +148,7 @@ public class Step2Mapper extends MapReduceBase implements
       Node[] trees, int numInstances) {
     this.partition = partition;
     if (partition < 0) {
-      throw new RuntimeException("Wrong partition id : " + partition);
+      throw new IllegalArgumentException("Wrong partition id : " + partition);
     }
 
     converter = new DataConverter(dataset);
@@ -197,7 +194,7 @@ public class Step2Mapper extends MapReduceBase implements
   public void close() throws IOException {
     for (int index = 0; index < keys.length; index++) {
       TreeID key = new TreeID(partition, keys[index].treeId());
-      output.collect(key, new MapredOutput(callbacks[index].predictions));
+      output.collect(key, new MapredOutput(callbacks[index].getPredictions()));
     }
   }
 

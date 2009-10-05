@@ -39,7 +39,7 @@ public class DataConverter {
 
     StringTokenizer tokenizer = new StringTokenizer(string, ", ");
     if (tokenizer.countTokens() != nball) {
-      throw new RuntimeException("Wrong number of attributes in the string");
+      throw new IllegalArgumentException("Wrong number of attributes in the string");
     }
 
     int nbattrs = dataset.nbAttributes();
@@ -65,7 +65,7 @@ public class DataConverter {
     }
 
     if (label == -1)
-      throw new RuntimeException("Label not found!");
+      throw new IllegalStateException("Label not found!");
 
     return new Instance(id, vector, label);
   }

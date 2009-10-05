@@ -63,7 +63,7 @@ public final class RecommenderMapper
     try {
       recommendedItems = recommender.recommend(userID, recommendationsPerUser);
     } catch (TasteException te) {
-      throw new RuntimeException(te);
+      throw new IllegalStateException(te);
     }
     RecommendedItemsWritable writable = new RecommendedItemsWritable(recommendedItems);
     context.write(value, writable);
@@ -85,7 +85,7 @@ public final class RecommenderMapper
       fs.copyToLocalFile(dataModelPath, new Path(tempDataFile.getAbsolutePath()));
       fileDataModel = new FileDataModel(tempDataFile);
     } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
+      throw new IllegalStateException(ioe);
     }
     try {
       Class<? extends Recommender> recommenderClass =
@@ -94,15 +94,15 @@ public final class RecommenderMapper
           recommenderClass.getConstructor(DataModel.class);
       recommender = constructor.newInstance(fileDataModel);
     } catch (NoSuchMethodException nsme) {
-      throw new RuntimeException(nsme);
+      throw new IllegalStateException(nsme);
     } catch (ClassNotFoundException cnfe) {
-      throw new RuntimeException(cnfe);
+      throw new IllegalStateException(cnfe);
     } catch (InstantiationException ie) {
-      throw new RuntimeException(ie);
+      throw new IllegalStateException(ie);
     } catch (IllegalAccessException iae) {
-      throw new RuntimeException(iae);
+      throw new IllegalStateException(iae);
     } catch (InvocationTargetException ite) {
-      throw new RuntimeException(ite.getCause());
+      throw new IllegalStateException(ite.getCause());
     }
     recommendationsPerUser = Integer.parseInt(jobConf.get(RECOMMENDATIONS_PER_USER));
   }

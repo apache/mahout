@@ -50,7 +50,7 @@ public class DataTest extends TestCase {
     int n = 10;
 
     for (int nloop = 0; nloop < n; nloop++) {
-      int attr = rng.nextInt(data.dataset.nbAttributes());
+      int attr = rng.nextInt(data.getDataset().nbAttributes());
 
       double[] values = data.values(attr);
       double value = values[rng.nextInt(values.length)];
@@ -83,7 +83,7 @@ public class DataTest extends TestCase {
   public void testValues() throws Exception {
     Data data = Utils.randomData(rng, nbAttributes, datasize);
 
-    for (int attr = 0; attr < data.dataset.nbAttributes(); attr++) {
+    for (int attr = 0; attr < data.getDataset().nbAttributes(); attr++) {
       double[] values = data.values(attr);
 
       // each value of the attribute should appear exactly one time in values
@@ -105,7 +105,7 @@ public class DataTest extends TestCase {
 
   public void testIdenticalTrue() throws Exception {
     // generate a small data, only to get the dataset
-    Dataset dataset = Utils.randomData(rng, nbAttributes, 1).dataset;
+    Dataset dataset = Utils.randomData(rng, nbAttributes, 1).getDataset();
     
     // test empty data
     Data empty = new Data(dataset, new ArrayList<Instance>());
@@ -115,7 +115,7 @@ public class DataTest extends TestCase {
     Data identical = Utils.randomData(rng, nbAttributes, datasize);
     Instance model = identical.get(0);
     for (int index = 1; index < datasize; index++) {
-      for (int attr = 0; attr < identical.dataset.nbAttributes(); attr++) {
+      for (int attr = 0; attr < identical.getDataset().nbAttributes(); attr++) {
         identical.get(index).set(attr, model.get(attr));
       }
     }
@@ -134,7 +134,7 @@ public class DataTest extends TestCase {
       Instance instance = data.get(index);
 
       // change a random attribute
-      int attr = rng.nextInt(data.dataset.nbAttributes());
+      int attr = rng.nextInt(data.getDataset().nbAttributes());
       instance.set(attr, instance.get(attr) + 1);
 
       assertFalse(data.isIdentical());
@@ -143,7 +143,7 @@ public class DataTest extends TestCase {
 
   public void testIdenticalLabelTrue() throws Exception {
     // generate a small data, only to get a dataset
-    Dataset dataset = Utils.randomData(rng, nbAttributes, 1).dataset;
+    Dataset dataset = Utils.randomData(rng, nbAttributes, 1).getDataset();
     
     // test empty data
     Data empty = new Data(dataset, new ArrayList<Instance>());
@@ -229,7 +229,7 @@ public class DataTest extends TestCase {
 
   public void testCountLabel() throws Exception {
     Data data = Utils.randomData(rng, nbAttributes, datasize);
-    int[] counts = new int[data.dataset.nblabels()];
+    int[] counts = new int[data.getDataset().nblabels()];
 
     int n = 10;
 
@@ -241,7 +241,7 @@ public class DataTest extends TestCase {
         counts[data.get(index).label]--;
       }
       
-      for (int label = 0; label < data.dataset.nblabels(); label++) {
+      for (int label = 0; label < data.getDataset().nblabels(); label++) {
         assertEquals("Wrong label 'equals' count", 0, counts[0]);
       }
     }

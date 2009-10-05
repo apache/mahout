@@ -69,7 +69,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
     if (data.identicalLabel())
       return new Leaf(data.get(0).label);
 
-    int[] attributes = randomAttributes(data.dataset, rng, m);
+    int[] attributes = randomAttributes(data.getDataset(), rng, m);
 
     // find the best split
     Split best = null;
@@ -79,7 +79,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
         best = split;
     }
 
-    if (data.dataset.isNumerical(best.attr)) {
+    if (data.getDataset().isNumerical(best.attr)) {
       Data loSubset = data.subset(Condition.lesser(best.attr, best.split));
       Node loChild = build(rng, loSubset);
 

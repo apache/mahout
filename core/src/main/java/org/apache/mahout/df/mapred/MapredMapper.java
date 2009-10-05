@@ -23,15 +23,11 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.mahout.df.builder.TreeBuilder;
 import org.apache.mahout.df.data.Dataset;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Base class for Mapred mappers. Loads common parameters from the job
  */
 public class MapredMapper extends MapReduceBase {
-
-  protected static final Logger log = LoggerFactory.getLogger(MapredMapper.class);
 
   private boolean noOutput;
 
@@ -73,8 +69,7 @@ public class MapredMapper extends MapReduceBase {
       configure(!Builder.isOutput(conf), Builder.isOobEstimate(conf), Builder
           .getTreeBuilder(conf), Builder.loadDataset(conf));
     } catch (IOException e) {
-      throw new RuntimeException(
-          "Exception caught while configuring the mapper: " + e.getMessage());
+      throw new IllegalStateException("Exception caught while configuring the mapper: ", e);
     }
   }
 
@@ -92,7 +87,7 @@ public class MapredMapper extends MapReduceBase {
     this.oobEstimate = oobEstimate;
 
     if (treeBuilder == null) {
-      throw new RuntimeException("TreeBuilder not found in the Job parameters");
+      throw new IllegalArgumentException("TreeBuilder not found in the Job parameters");
     }
     this.treeBuilder = treeBuilder;
 

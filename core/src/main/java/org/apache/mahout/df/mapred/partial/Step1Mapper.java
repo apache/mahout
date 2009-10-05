@@ -101,7 +101,7 @@ public class Step1Mapper extends MapredMapper implements
 
     // mapper's partition
     if (partition < 0) {
-      throw new RuntimeException("Wrong partition ID");
+      throw new IllegalArgumentException("Wrong partition ID");
     }
     this.partition = partition;
 
@@ -165,7 +165,7 @@ public class Step1Mapper extends MapredMapper implements
       log.debug("Building tree N° : " + treeId);
       if (isOobEstimate() && !isNoOutput()) {
         callback = new SingleTreePredictions(data.size());
-        predictions = callback.predictions;
+        predictions = callback.getPredictions();
       }
 
       Node tree = bagging.build(treeId, rng, callback);

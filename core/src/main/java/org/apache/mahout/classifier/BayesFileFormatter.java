@@ -164,7 +164,7 @@ public class BayesFileFormatter {
           }
         } catch (IOException e) {
           // TODO: report failed files instead of throwing exception
-          throw new RuntimeException(e);
+          throw new IllegalStateException(e);
         } finally {
           if (writer == null) {
             IOUtils.quietClose(theWriter);

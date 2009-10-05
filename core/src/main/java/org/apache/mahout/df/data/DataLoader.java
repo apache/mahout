@@ -59,12 +59,12 @@ public class DataLoader {
    * @param string
    * @return null if there are missing values '?'
    */
-  protected static Instance parseString(int id, Attribute[] attrs,
+  private static Instance parseString(int id, Attribute[] attrs,
       List<String>[] values, String string) {
     StringTokenizer tokenizer = new StringTokenizer(string, ", ");
     if (tokenizer.countTokens() != attrs.length) {
       log.error(id + ": " + string);
-      throw new RuntimeException("Wrong number of attributes in the string");
+      throw new IllegalArgumentException("Wrong number of attributes in the string");
     }
 
     // extract tokens and check is there is any missing value
@@ -111,7 +111,7 @@ public class DataLoader {
     }
 
     if (label == -1)
-      throw new RuntimeException("Label not found!");
+      throw new IllegalStateException("Label not found!");
 
     return new Instance(id, vector, label);
   }

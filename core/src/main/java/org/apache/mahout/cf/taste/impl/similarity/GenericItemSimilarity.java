@@ -268,7 +268,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
           similarity = otherSimilarity.itemSimilarity(itemID1, itemID2);
         } catch (TasteException te) {
           // ugly:
-          throw new RuntimeException(te);
+          throw new IllegalStateException(te);
         }
         if (!Double.isNaN(similarity)) {
           next = new ItemItemSimilarity(itemID1, itemID2, similarity);

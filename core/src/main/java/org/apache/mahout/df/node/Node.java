@@ -72,7 +72,7 @@ public abstract class Node implements Writable {
     } else if (this instanceof CategoricalNode) {
       return NODE_TYPE.CATEGORICAL.ordinal();
     } else {
-      throw new RuntimeException(
+      throw new IllegalStateException(
           "This implementation is not currently supported");
     }
   }
@@ -95,7 +95,7 @@ public abstract class Node implements Writable {
         node = new CategoricalNode();
         break;
       default:
-        throw new RuntimeException(
+        throw new IllegalStateException(
             "This implementation is not currently supported");
     }
 

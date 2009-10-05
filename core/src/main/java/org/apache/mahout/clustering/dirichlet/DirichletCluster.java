@@ -83,11 +83,11 @@ public class DirichletCluster<O> implements Writable {
       model = Class.forName(modelClassName).asSubclass(Model.class)
           .newInstance();
     } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } catch (InstantiationException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
     model.readFields(in);
     return model;

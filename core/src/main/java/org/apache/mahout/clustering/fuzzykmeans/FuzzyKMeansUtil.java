@@ -76,10 +76,10 @@ class FuzzyKMeansUtil {
             key = (Writable) reader.getKeyClass().newInstance();
           } catch (InstantiationException e) {//Should not be possible
             log.error("Exception", e);
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
           } catch (IllegalAccessException e) {
             log.error("Exception", e);
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
           }
           if (valueClass.equals(Cluster.class)) {
             Cluster value = new Cluster();
@@ -104,7 +104,7 @@ class FuzzyKMeansUtil {
 
     } catch (IOException e) {
       log.info("Exception occurred in loading clusters:", e);
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
   }
 

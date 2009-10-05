@@ -139,11 +139,11 @@ public class Cluster extends ClusterBase implements Writable {
       convergenceDelta = Double.parseDouble(job.get(CLUSTER_CONVERGENCE_KEY));
       nextClusterId = 0;
     } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } catch (InstantiationException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
   }
 
