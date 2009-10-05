@@ -117,9 +117,10 @@ public class WikipediaXmlSplitter {
         boolean end = false;
         while(thisLine.trim().startsWith("</page>") == false){
           content.append(thisLine).append('\n');
-          if (it.hasNext()){
+          if (it.hasNext()) {
             thisLine = it.next();
-            end=true;
+          } else {
+            end = true;
             break;
           }
         }
