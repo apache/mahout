@@ -45,9 +45,9 @@
                   includes="**/*.jar"/>
       <zipfileset dir="${core-lib}" prefix="lib"
                   includes="**/*.jar" excludes="hadoop-*.jar"/>
-      <zipfileset dir="../core/target/" prefix="lib" includes="apache-mahout-core-${version}.jar"/>
+      <zipfileset dir="../core/target/classes"/>
       <zipfileset dir="${dest}/dependency" prefix="lib"
-                  includes="**/*.jar"/>
+                  includes="**/*.jar" excludes="apache-mahout-core-*.jar"/>
 	  <!--<zipfileset dir="../core/target/dependency" prefix="lib"
 		  includes="**/*.jar"/>-->
     </jar>
