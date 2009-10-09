@@ -17,6 +17,14 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
+import org.apache.commons.cli2.CommandLine;
+import org.apache.commons.cli2.Group;
+import org.apache.commons.cli2.Option;
+import org.apache.commons.cli2.OptionException;
+import org.apache.commons.cli2.builder.ArgumentBuilder;
+import org.apache.commons.cli2.builder.DefaultOptionBuilder;
+import org.apache.commons.cli2.builder.GroupBuilder;
+import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -29,7 +37,10 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.log4j.Logger;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 
 import java.io.IOException;
 
@@ -49,21 +60,63 @@ import java.io.IOException;
  * path/to/data.csv path/to/reducerOutputDir 5</code></p>
  */
 public final class RecommenderJob extends Job {
+  /** Logger for this class. */
+  private static Logger LOG = Logger.getLogger(SlopeOneDiffsToAveragesJob.class);
 
   public RecommenderJob(Configuration jobConf) throws IOException {
     super(jobConf);
   }
 
   public static void main(String[] args) throws Exception {
-    String recommendClassName = args[0];
-    int recommendationsPerUser = Integer.parseInt(args[1]);
-    String userIDFile = args[2];
-    String dataModelFile = args[3];
-    String outputPath = args[4];
-    Configuration jobConf =
-        buildJobConf(recommendClassName, recommendationsPerUser, userIDFile, dataModelFile, outputPath);
-    Job job = new RecommenderJob(jobConf);
-    job.waitForCompletion(true);
+    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    ArgumentBuilder abuilder = new ArgumentBuilder();
+    GroupBuilder gbuilder = new GroupBuilder();
+
+    Option recommendClassOpt = obuilder.withLongName("recommenderClassName").withRequired(true)
+      .withShortName("r").withArgument(abuilder.withName("recommenderClassName").withMinimum(1)
+      .withMaximum(1).create()).withDescription("Name of recommender class to use.").create();
+
+    Option userRecommendOpt = obuilder.withLongName("userRec").withRequired(true)
+      .withShortName("n").withArgument(abuilder.withName("userRec").withMinimum(1)
+      .withMaximum(1).create()).withDescription("Desired number of recommendations per user.").create();
+
+    Option userIDFileOpt = obuilder.withLongName("userIdFile").withRequired(true)
+      .withShortName("f").withArgument(abuilder.withName("userIdFile").withMinimum(1)
+      .withMaximum(1).create()).withDescription("File containing user ids.").create();
+
+    Option dataModelFileOpt = obuilder.withLongName("dataModelFile").withRequired(true)
+      .withShortName("m").withArgument(abuilder.withName("dataModelFile").withMinimum(1)
+      .withMaximum(1).create()).withDescription("File containing data model.").create();
+    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder);
+    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
+
+    Group group = gbuilder.withName("Options").withOption(recommendClassOpt).withOption(userRecommendOpt)
+      .withOption(userIDFileOpt).withOption(dataModelFileOpt).withOption(outputOpt).withOption(helpOpt).create();
+
+
+    try {
+      Parser parser = new Parser();
+      parser.setGroup(group);
+      CommandLine cmdLine = parser.parse(args);
+
+      if (cmdLine.hasOption(helpOpt)) {
+        CommandLineUtil.printHelp(group);
+        return;
+      }
+
+      String recommendClassName = cmdLine.getValue(recommendClassOpt).toString();
+      int recommendationsPerUser = Integer.parseInt(cmdLine.getValue(userRecommendOpt).toString());
+      String userIDFile = cmdLine.getValue(userIDFileOpt).toString();
+      String dataModelFile = cmdLine.getValue(dataModelFileOpt).toString();
+      String outputPath = cmdLine.getValue(outputOpt).toString();
+      Configuration jobConf =
+          buildJobConf(recommendClassName, recommendationsPerUser, userIDFile, dataModelFile, outputPath);
+      Job job = new RecommenderJob(jobConf);
+      job.waitForCompletion(true); 
+    } catch (OptionException e) {
+      LOG.error(e.getMessage());
+      CommandLineUtil.printHelp(group);
+    }
   }
 
   public static Configuration buildJobConf(String recommendClassName,

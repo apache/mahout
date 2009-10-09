@@ -26,7 +26,7 @@ public class DefaultOptionCreator {
     Option outputOpt = obuilder.withLongName("output").withRequired(true)
         .withShortName("o").withArgument(
             abuilder.withName("output").withMinimum(1).withMaximum(1).create())
-        .withDescription("The directory pathname for output points.").create();
+        .withDescription("The directory pathname for output.").create();
     return outputOpt;
   }
 
@@ -42,7 +42,7 @@ public class DefaultOptionCreator {
         .withArgument(
             abuilder.withName("input").withMinimum(1).withMaximum(1).create())
         .withDescription(
-            "The Path for input Vectors. Must be a SequenceFile of Writable, Vector")
+            "The Path for input Vectors. Must be a SequenceFile of Writable, Vector.")
         .create();
     return inputOpt;
   }
