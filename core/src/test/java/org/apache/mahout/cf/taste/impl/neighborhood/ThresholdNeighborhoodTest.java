@@ -30,7 +30,7 @@ public final class ThresholdNeighborhoodTest extends TasteTestCase {
     long[] neighborhood =
         new ThresholdUserNeighborhood(1.0, new DummySimilarity(dataModel), dataModel).getUserNeighborhood(1);
     assertNotNull(neighborhood);
-    assertTrue(neighborhood.length == 0);
+    assertEquals(0, neighborhood.length);
 
     long[] neighborhood2 =
         new ThresholdUserNeighborhood(0.8, new DummySimilarity(dataModel), dataModel).getUserNeighborhood(1);

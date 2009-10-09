@@ -18,7 +18,6 @@
 package org.apache.mahout.common;
 
 import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
-import org.apache.mahout.common.IOUtils;
 
 import java.io.BufferedReader;
 import java.io.Closeable;

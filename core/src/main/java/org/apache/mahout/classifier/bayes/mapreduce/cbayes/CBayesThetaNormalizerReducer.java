@@ -44,7 +44,7 @@ public class CBayesThetaNormalizerReducer extends MapReduceBase implements
 
   private HTable table;
 
-  private HBaseConfiguration HBconf;
+  private ThreadLocal<HBaseConfiguration> HBconf;
 
   boolean useHbase = false;
 
@@ -85,8 +85,8 @@ public class CBayesThetaNormalizerReducer extends MapReduceBase implements
       else
         return;
 
-      HBconf = new HBaseConfiguration(job);
-      table = new HTable(HBconf, job.get("output.table"));
+      HBconf.set(new HBaseConfiguration(job));
+      table = new HTable(HBconf.get(), job.get("output.table"));
     } catch (IOException e) {
       log.error("Unexpected error during configuration", e);
     }

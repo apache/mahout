@@ -29,8 +29,7 @@ public class ClassifierContext {
   protected Algorithm algorithm = null;
   protected Datastore datastore = null;
   
-  public ClassifierContext(Algorithm algorithm, Datastore datastore) throws InvalidDatastoreException
-  {
+  public ClassifierContext(Algorithm algorithm, Datastore datastore) {
     this.algorithm = algorithm;
     this.datastore = datastore;
   }

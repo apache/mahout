@@ -25,5 +25,5 @@ public interface TermInfoWriter {
 
   void write(TermInfo ti) throws IOException;
 
-  void close() throws IOException;
+  void close();
 }

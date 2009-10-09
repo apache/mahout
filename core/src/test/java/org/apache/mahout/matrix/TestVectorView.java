@@ -91,8 +91,8 @@ public class TestVectorView extends TestCase {
     int i = 0;
     while (iter.hasNext()) {
       Vector.Element elt = iter.next();
-      assertTrue((elt.index()) + " Value: " + gold[i]
-          + " does not equal: " + elt.get(), gold[i] == elt.get());
+      assertEquals((elt.index()) + " Value: " + gold[i]
+          + " does not equal: " + elt.get(), gold[i], elt.get(), 0.0);
       i++;
     }
   }

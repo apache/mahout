@@ -83,8 +83,8 @@ public class TestSparseVector extends TestCase {
   private static void checkIterator(Iterator<Vector.Element> nzIter, double[] values) {
     while (nzIter.hasNext()) {
       Vector.Element elt = nzIter.next();
-      assertTrue((elt.index()) + " Value: " + values[elt.index()]
-          + " does not equal: " + elt.get(), values[elt.index()] == elt.get());
+      assertEquals((elt.index()) + " Value: " + values[elt.index()]
+          + " does not equal: " + elt.get(), values[elt.index()], elt.get(), 0.0);
     }
   }
 

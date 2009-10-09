@@ -42,7 +42,7 @@ public class JobExecutor {
    * @param job the job to execute. 
    * @throws Exception any exception thrown at job execution.
    * */
-  public void execute(final String args[], final BayesJob job) throws Exception {
+  public static void execute(final String[] args, final BayesJob job) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();

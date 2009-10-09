@@ -48,8 +48,6 @@ public class BayesTfIdfReducer extends MapReduceBase implements
 
   private HTable table;
 
-  private HBaseConfiguration HBconf;
-
   boolean useHbase = false;
 
   @Override
@@ -106,8 +104,8 @@ public class BayesTfIdfReducer extends MapReduceBase implements
           "bayes.parameters", ""));
       if(params.get("dataSource").equals("hbase"))useHbase = true;
       else return;
-      
-      HBconf = new HBaseConfiguration(job);
+
+      HBaseConfiguration HBconf = new HBaseConfiguration(job);
 
       table = new HTable(HBconf, job.get("output.table"));
 

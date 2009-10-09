@@ -33,8 +33,6 @@ import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesJob;
 import org.apache.mahout.classifier.bayes.mapreduce.common.JobExecutor;
-import org.apache.mahout.common.CommandLineUtil;
-import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +62,7 @@ public class BayesThetaNormalizerDriver implements BayesJob {
    * @param input  the input pathname String
    * @param output the output pathname String
    */
+  @Override
   public void runJob(String input, String output, BayesParameters params) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(BayesThetaNormalizerDriver.class);

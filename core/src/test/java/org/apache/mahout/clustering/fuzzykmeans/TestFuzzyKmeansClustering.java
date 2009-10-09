@@ -471,8 +471,8 @@ public class TestFuzzyKmeansClustering extends TestCase {
         System.out.println("ref= " + key.toString() + " cluster= "
             + cluster.toString());
         cluster.recomputeCenter();
-        assertTrue("key center: " + key.getCenter().asFormatString() + " does not equal cluster: " +
-            cluster.getCenter().asFormatString(), key.getCenter().equals(cluster.getCenter()));
+        assertEquals("key center: " + key.getCenter().asFormatString() + " does not equal cluster: " +
+            cluster.getCenter().asFormatString(), key.getCenter(), cluster.getCenter());
       }
     }
   }

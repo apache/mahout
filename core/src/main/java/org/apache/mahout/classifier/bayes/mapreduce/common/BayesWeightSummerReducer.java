@@ -44,8 +44,6 @@ public class BayesWeightSummerReducer extends MapReduceBase implements
 
   private HTable table;
 
-  private HBaseConfiguration HBconf;
-
   boolean useHbase = false;
 
   @Override
@@ -100,7 +98,7 @@ public class BayesWeightSummerReducer extends MapReduceBase implements
       else
         return;
 
-      HBconf = new HBaseConfiguration(job);
+      HBaseConfiguration HBconf = new HBaseConfiguration(job);
       table = new HTable(HBconf, job.get("output.table"));
     } catch (IOException e) {
       log.error("Unexpected error during configuration", e);

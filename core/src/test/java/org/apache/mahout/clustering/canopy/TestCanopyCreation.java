@@ -345,8 +345,7 @@ public class TestCanopyCreation extends TestCase {
     int i = 0;
     for (String key : keys) {
       List<Canopy> data = collector.getValue(key);
-      assertTrue(manhattanCentroids.get(i).asFormatString() + " is not equal to " + data.get(0).computeCentroid().asFormatString(),
-          manhattanCentroids.get(i).equals(data.get(0).computeCentroid()));
+      assertEquals(manhattanCentroids.get(i).asFormatString() + " is not equal to " + data.get(0).computeCentroid().asFormatString(), manhattanCentroids.get(i), data.get(0).computeCentroid());
       i++;
     }
   }
@@ -367,8 +366,7 @@ public class TestCanopyCreation extends TestCase {
     int i = 0;
     for (String key : keys) {
       List<Canopy> data = collector.getValue(key);
-      assertTrue(euclideanCentroids.get(i).asFormatString() + " is not equal to " + data.get(0).computeCentroid().asFormatString(),
-          euclideanCentroids.get(i).equals(data.get(0).computeCentroid()));
+      assertEquals(euclideanCentroids.get(i).asFormatString() + " is not equal to " + data.get(0).computeCentroid().asFormatString(), euclideanCentroids.get(i), data.get(0).computeCentroid());
       i++;
     }
   }

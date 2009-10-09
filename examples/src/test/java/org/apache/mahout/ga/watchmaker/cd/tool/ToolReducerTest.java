@@ -73,7 +73,7 @@ public class ToolReducerTest extends TestCase {
     assertTrue(expected.containsAll(actual));
   }
 
-  List<Text> asList(String... strings) {
+  static List<Text> asList(String... strings) {
     List<Text> values = new ArrayList<Text>();
 
     for (String value : strings) {

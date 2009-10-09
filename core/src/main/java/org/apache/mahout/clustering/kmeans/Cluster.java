@@ -89,20 +89,19 @@ public class Cluster extends ClusterBase implements Writable {
     final Cluster cluster;
     if (beginIndex <= 0) {
       throw new IllegalArgumentException(ERROR_UNKNOWN_CLUSTER_FORMAT + formattedString);
+    }
+    final String id = formattedString.substring(0, beginIndex);
+    final String center = formattedString.substring(beginIndex);
+    final char firstChar = id.charAt(0);
+    final boolean startsWithV = firstChar == 'V';
+    if (firstChar == 'C' || startsWithV) {
+      final int clusterId = Integer.parseInt(formattedString.substring(1,
+        beginIndex - 2));
+      final Vector clusterCenter = AbstractVector.decodeVector(center);
+      cluster = new Cluster(clusterCenter, clusterId);
+      cluster.converged = startsWithV;
     } else {
-      final String id = formattedString.substring(0, beginIndex);
-      final String center = formattedString.substring(beginIndex);
-      final char firstChar = id.charAt(0);
-      final boolean startsWithV = firstChar == 'V';
-      if (firstChar == 'C' || startsWithV) {
-        final int clusterId = Integer.parseInt(formattedString.substring(1,
-          beginIndex - 2));
-        final Vector clusterCenter = AbstractVector.decodeVector(center);
-        cluster = new Cluster(clusterCenter, clusterId);
-        cluster.converged = startsWithV;
-      } else {
-       throw new IllegalArgumentException(ERROR_UNKNOWN_CLUSTER_FORMAT + formattedString);
-      }
+     throw new IllegalArgumentException(ERROR_UNKNOWN_CLUSTER_FORMAT + formattedString);
     }
     return cluster;
   }

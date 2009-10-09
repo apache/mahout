@@ -74,7 +74,7 @@ public class ToolCombinerTest extends TestCase {
     assertEquals(3, nbvalues);
   }
 
-  List<Text> asList(String... strings) {
+  static List<Text> asList(String... strings) {
     List<Text> values = new ArrayList<Text>();
 
     for (String value : strings) {

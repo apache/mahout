@@ -57,7 +57,7 @@ public abstract class DefaultDistanceMeasureTest extends TestCase {
     compare(distanceMeasure, vectors);
   }
 
-  private void compare(DistanceMeasure distanceMeasure, Vector[] vectors) {
+  private static void compare(DistanceMeasure distanceMeasure, Vector[] vectors) {
     double[][] distanceMatrix = new double[3][3];
 
     for (int a = 0; a < 3; a++) {

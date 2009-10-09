@@ -113,10 +113,10 @@ public class TestDenseVector extends TestCase {
     int i = 0;
     while (nzIter.hasNext()) {
       Vector.Element elt = nzIter.next();
-      assertTrue((elt.index()) + " Value: " + values[elt.index()] + " does not equal: " + elt.get(), values[elt.index()] == elt.get());
+      assertEquals((elt.index()) + " Value: " + values[elt.index()] + " does not equal: " + elt.get(), values[elt.index()], elt.get(), 0.0);
       i++;
     }
-    assertTrue(i + " does not equal: " + expectedNum, i == expectedNum);
+    assertEquals(i + " does not equal: " + expectedNum, i, expectedNum);
   }
 
   public void testSize() throws Exception {

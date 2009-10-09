@@ -31,7 +31,7 @@ import org.apache.mahout.utils.vectors.TermInfo;
  */
 public class TFDFMapper extends VectorMapper {
 
-  public static final int DEFAULT_CACHE_SIZE = 256;
+  //public static final int DEFAULT_CACHE_SIZE = 256;
 
   private final IndexReader reader; // TODO never used?
   private Vector vector;

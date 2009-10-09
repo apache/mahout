@@ -29,7 +29,7 @@ public interface Algorithm {
    * @param datastore
    * @throws InvalidDatastoreException
    */
-  public void initialize(Datastore datastore) throws InvalidDatastoreException;
+  void initialize(Datastore datastore) throws InvalidDatastoreException;
 
   /**
    * Classify the document and return the Result
@@ -42,7 +42,7 @@ public interface Algorithm {
    *         {@link org.apache.mahout.classifier.ClassifierResult}s.
    * @throws InvalidDatastoreException
    */
-  public ClassifierResult classifyDocument(String[] document,
+  ClassifierResult classifyDocument(String[] document,
       Datastore datastore, String defaultCategory)
       throws InvalidDatastoreException;
 
@@ -60,7 +60,7 @@ public interface Algorithm {
    *         {@link org.apache.mahout.classifier.ClassifierResult}s.
    * @throws InvalidDatastoreException
    */
-  public ClassifierResult[] classifyDocument(String[] document,
+  ClassifierResult[] classifyDocument(String[] document,
       Datastore datastore, String defaultCategory, int numResults)
       throws InvalidDatastoreException;
 
@@ -75,7 +75,7 @@ public interface Algorithm {
    * @return The weighted probability
    * @throws InvalidDatastoreException
    */
-  public double featureWeight(Datastore datastore, String label, String feature)
+  double featureWeight(Datastore datastore, String label, String feature)
       throws InvalidDatastoreException;
 
   /**
@@ -91,7 +91,7 @@ public interface Algorithm {
    * @throws InvalidDatastoreException
    * @see Algorithm#featureWeight(Datastore, String, String)
    */
-  public double documentWeight(Datastore datastore, String label,
+  double documentWeight(Datastore datastore, String label,
       String[] document) throws InvalidDatastoreException;
 
   /**
@@ -103,5 +103,5 @@ public interface Algorithm {
    * @throws InvalidDatastoreException
    * @return {@link Collection} of labels
    */
-  public Collection<String> getLabels(Datastore datastore) throws InvalidDatastoreException;
+  Collection<String> getLabels(Datastore datastore) throws InvalidDatastoreException;
 }

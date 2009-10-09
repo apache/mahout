@@ -203,7 +203,7 @@ public class BuildForest extends Configured implements Tool {
     return forest;
   }
 
-  protected Data loadData(Configuration conf, Path dataPath, Dataset dataset)
+  protected static Data loadData(Configuration conf, Path dataPath, Dataset dataset)
       throws Exception {
     log.info("Loading the data...");
     FileSystem fs = dataPath.getFileSystem(conf);

@@ -54,11 +54,11 @@ public class BayesThetaNormalizerMapper extends MapReduceBase implements
       throws IOException {
 
     String labelFeaturePair = key.toString();
-    double alpha_i = 1.0;
-    
+
     int comma = labelFeaturePair.indexOf(',');
     String label = comma < 0 ? labelFeaturePair : labelFeaturePair.substring(0, comma);
-    reporter.setStatus("Bayes Theta Normalizer Mapper: " + label);	
+    reporter.setStatus("Bayes Theta Normalizer Mapper: " + label);
+    double alpha_i = 1.0;
     double weight = Math.log((value.get() + alpha_i) / (labelWeightSum.get(label) + vocabCount));
     output.collect(new Text(('_' + label).trim()), new DoubleWritable(weight));
   }

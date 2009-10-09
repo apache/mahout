@@ -47,6 +47,9 @@ public class BayesClassifierDriver {
   private static final Logger log = LoggerFactory.getLogger(BayesClassifierDriver.class);
   private static final Pattern CHUNK_DEIMITER_PATTERN = Pattern.compile("____");
 
+  private BayesClassifierDriver() {
+  }
+
   /**
    * Run the job
    * 

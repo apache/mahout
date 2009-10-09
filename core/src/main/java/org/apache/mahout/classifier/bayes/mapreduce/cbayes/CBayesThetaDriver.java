@@ -26,7 +26,6 @@ import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.JobConfigurable;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.util.GenericsUtil;
@@ -66,6 +65,7 @@ public class CBayesThetaDriver implements BayesJob {
    * @param input  the input pathname String
    * @param output the output pathname String
    */
+  @Override
   public void runJob(String input, String output, BayesParameters params) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(CBayesThetaDriver.class);

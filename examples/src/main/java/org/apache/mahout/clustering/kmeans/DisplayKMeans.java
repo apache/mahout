@@ -97,7 +97,6 @@ class DisplayKMeans extends DisplayDirichlet {
    */
   private static boolean iterateReference(List<Vector> points,
       List<Cluster> clusters, DistanceMeasure measure) {
-    boolean converged = true;
     // iterate through all points, assigning each to the nearest cluster
     for (Vector point : points) {
       Cluster closestCluster = null;
@@ -112,6 +111,7 @@ class DisplayKMeans extends DisplayDirichlet {
       closestCluster.addPoint(point);
     }
     // test for convergence
+    boolean converged = true;
     for (Cluster cluster : clusters) {
       if (!cluster.computeConvergence())
         converged = false;

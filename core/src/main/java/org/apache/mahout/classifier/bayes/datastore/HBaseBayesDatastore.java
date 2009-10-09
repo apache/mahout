@@ -48,12 +48,11 @@ public class HBaseBayesDatastore implements Datastore {
 
   protected Cache<String, Result> tableCache = null;
 
-  protected String hbaseTable;
+  protected final String hbaseTable;
 
   protected Parameters parameters = null;
 
-  public HBaseBayesDatastore(String hbaseTable, Parameters params)
-      throws IOException {
+  public HBaseBayesDatastore(String hbaseTable, Parameters params) {
     this.hbaseTable = hbaseTable;
     this.parameters = params;
     this.tableCache = new HybridCache<String, Result>(50000, 100000);
@@ -81,7 +80,7 @@ public class HBaseBayesDatastore implements Datastore {
     }
   }
 
-  Map<String, Set<String>> keys = new HashMap<String, Set<String>>();
+  final Map<String, Set<String>> keys = new HashMap<String, Set<String>>();
 
   @Override
   public Collection<String> getKeys(String name)
@@ -180,7 +179,7 @@ public class HBaseBayesDatastore implements Datastore {
       } else
         return r;
 
-    } catch (Exception e) {
+    } catch (IOException e) {
       return r;
     }
   }

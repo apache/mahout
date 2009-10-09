@@ -50,7 +50,7 @@ class DisplayMeanShift extends DisplayDirichlet {
 
     // plot the axes
     g2.setColor(Color.BLACK);
-    Vector dv = new DenseVector(2).assign(size / 2);
+    Vector dv = new DenseVector(2).assign(size / 2.0);
     Vector dv1 = new DenseVector(2).assign(MeanShiftCanopy.t1);
     Vector dv2 = new DenseVector(2).assign(MeanShiftCanopy.t2);
     plotRectangle(g2, new DenseVector(2).assign(2), dv);

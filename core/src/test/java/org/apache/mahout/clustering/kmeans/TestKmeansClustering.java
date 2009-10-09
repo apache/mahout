@@ -17,7 +17,6 @@
 
 package org.apache.mahout.clustering.kmeans;
 
-
 import junit.framework.TestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -87,7 +86,7 @@ public class TestKmeansClustering extends TestCase {
    * @param measure  the DistanceMeasure to use
    * @param maxIter  the maximum number of iterations
    */
-  private void referenceKmeans(List<Vector> points, List<Cluster> clusters,
+  private static void referenceKmeans(List<Vector> points, List<Cluster> clusters,
                                DistanceMeasure measure, int maxIter) {
     boolean converged = false;
     int iteration = 0;
@@ -342,7 +341,7 @@ public class TestKmeansClustering extends TestCase {
         //Since we aren't roundtripping through Writable, we need to compare the reference center with the cluster centroid
         cluster.recomputeCenter();
         assertTrue(i + " reference center: " + ref.getCenter().asFormatString() + " and cluster center:  "
-                   + cluster.getCenter().asFormatString() + " are not equal", AbstractVector.equivalent(ref.getCenter(), cluster.getCenter()));
+            + cluster.getCenter().asFormatString() + " are not equal", AbstractVector.equivalent(ref.getCenter(), cluster.getCenter()));
 
         /*assertEquals(k + " center[" + key + "][1]", ref.getCenter().get(1),
             cluster.getCenter().get(1));*/

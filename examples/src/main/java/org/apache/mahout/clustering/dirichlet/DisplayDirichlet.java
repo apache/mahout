@@ -96,7 +96,7 @@ public class DisplayDirichlet extends Frame {
     });
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) {
     RandomUtils.useTestSeed();
     generateSamples();
     new DisplayDirichlet();
@@ -126,7 +126,7 @@ public class DisplayDirichlet extends Frame {
 
     // plot the axes
     g2.setColor(Color.BLACK);
-    Vector dv = new DenseVector(2).assign(size / 2);
+    Vector dv = new DenseVector(2).assign(size / 2.0);
     plotRectangle(g2, new DenseVector(2).assign(2), dv);
     plotRectangle(g2, new DenseVector(2).assign(-2), dv);
 
@@ -143,7 +143,7 @@ public class DisplayDirichlet extends Frame {
    * @param v a Vector of rectangle centers
    * @param dv a Vector of rectangle sizes
    */
-  public void plotRectangle(Graphics2D g2, Vector v, Vector dv) {
+  public static void plotRectangle(Graphics2D g2, Vector v, Vector dv) {
     double[] flip = { 1, -1 };
     Vector v2 = v.clone().assign(new DenseVector(flip), new TimesFunction());
     v2 = v2.minus(dv.divide(2));
@@ -160,7 +160,7 @@ public class DisplayDirichlet extends Frame {
    * @param v a Vector of rectangle centers
    * @param dv a Vector of rectangle sizes
    */
-  public void plotEllipse(Graphics2D g2, Vector v, Vector dv) {
+  public static void plotEllipse(Graphics2D g2, Vector v, Vector dv) {
     double[] flip = { 1, -1 };
     Vector v2 = v.clone().assign(new DenseVector(flip), new TimesFunction());
     v2 = v2.minus(dv.divide(2));

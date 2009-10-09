@@ -62,6 +62,7 @@ public class CBayesNormalizedWeightDriver implements BayesJob {
    * @param input  the input pathname String
    * @param output the output pathname String
    */
+  @Override
   public void runJob(String input, String output, BayesParameters params) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(CBayesNormalizedWeightDriver.class);

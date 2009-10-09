@@ -32,6 +32,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.builder.DefaultTreeBuilder;
 import org.apache.mahout.df.callback.ForestPredictions;
 import org.apache.mahout.df.callback.MeanTreeCollector;
@@ -77,21 +78,12 @@ public class BreimanExample extends Configured implements Tool {
    * @param nbtrees number of trees to grow
    * @throws Exception if an error occured while growing the trees
    */
-  protected static void runIteration(Data data, int m, int nbtrees)
-      throws Exception {
+  protected static void runIteration(Data data, int m, int nbtrees) {
 
     final int dataSize = data.size();
     final int nblabels = data.getDataset().nblabels();
 
-    double oobM; // oob error estimate when m = log2(M)+1
-    double oobOne; // oob error estimate when m = 1
-
-    ForestPredictions errorM; // oob error when using m = log2(M)+1
-    ForestPredictions errorOne; // oob error when using m = 1
-    ForestPredictions testError; // test set error
-    MeanTreeCollector treeError; // mean tree error
-
-    Random rng = new Random(1L);
+    Random rng = RandomUtils.getRandom();
 
     Data train = data.clone();
     Data test = train.rsplit(rng, (int) (data.size() * 0.1));
@@ -103,21 +95,19 @@ public class BreimanExample extends Configured implements Tool {
     
     SequentialBuilder forestBuilder = new SequentialBuilder(rng, treeBuilder, train);
 
-    long time;
-
     // grow a forest with m = log2(M)+1
-    errorM = new ForestPredictions(dataSize, nblabels);
+    ForestPredictions errorM = new ForestPredictions(dataSize, nblabels); // oob error when using m = log2(M)+1
     treeBuilder.setM(m);
 
-    time = System.currentTimeMillis();
+    long time = System.currentTimeMillis();
     log.info("Growing a forest with m=" + m);
     DecisionForest forestM = forestBuilder.build(nbtrees, errorM);
     sumTimeM += System.currentTimeMillis() - time;
 
-    oobM = ErrorEstimate.errorRate(trainLabels, errorM.computePredictions(rng));
+    double oobM = ErrorEstimate.errorRate(trainLabels, errorM.computePredictions(rng)); // oob error estimate when m = log2(M)+1
 
     // grow a forest with m=1
-    errorOne = new ForestPredictions(dataSize, nblabels);
+    ForestPredictions errorOne = new ForestPredictions(dataSize, nblabels); // oob error when using m = 1
     treeBuilder.setM(1);
 
     time = System.currentTimeMillis();
@@ -125,12 +115,12 @@ public class BreimanExample extends Configured implements Tool {
     DecisionForest forestOne = forestBuilder.build(nbtrees, errorOne);
     sumTimeOne += System.currentTimeMillis() - time;
 
-    oobOne = ErrorEstimate.errorRate(trainLabels, errorOne.computePredictions(rng));
+    double oobOne = ErrorEstimate.errorRate(trainLabels, errorOne.computePredictions(rng)); // oob error estimate when m = 1
 
     // compute the test set error (Selection Error), and mean tree error (One Tree Error),
     // using the lowest oob error forest
-    testError = new ForestPredictions(dataSize, nblabels);
-    treeError = new MeanTreeCollector(train, nbtrees);
+    ForestPredictions testError = new ForestPredictions(dataSize, nblabels); // test set error
+    MeanTreeCollector treeError = new MeanTreeCollector(train, nbtrees); // mean tree error
 
     // compute the test set error using m=1 (Single Input Error)
     errorOne = new ForestPredictions(dataSize, nblabels);
@@ -153,6 +143,7 @@ public class BreimanExample extends Configured implements Tool {
     System.exit(res);
   }
 
+  @Override
   public int run(String[] args) throws Exception {
     
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();

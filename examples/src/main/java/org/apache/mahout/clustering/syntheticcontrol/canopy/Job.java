@@ -17,8 +17,6 @@
 
 package org.apache.mahout.clustering.syntheticcontrol.canopy;
 
-import static org.apache.mahout.clustering.syntheticcontrol.Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
-
 import java.io.IOException;
 
 import org.apache.hadoop.fs.FileSystem;
@@ -26,6 +24,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.canopy.CanopyClusteringJob;
+import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.matrix.SparseVector;
 
@@ -75,7 +74,7 @@ public class Job {
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
     if (dfs.exists(outPath))
       dfs.delete(outPath, true);
-    final String directoryContainingConvertedInput = output + DIRECTORY_CONTAINING_CONVERTED_INPUT;
+    final String directoryContainingConvertedInput = output + Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
     InputDriver.runJob(input, directoryContainingConvertedInput, vectorClass);
     CanopyClusteringJob.runJob(directoryContainingConvertedInput, output, measureClassName,
         t1, t2, vectorClass);

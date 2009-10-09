@@ -57,6 +57,7 @@ public class BayesDriver implements BayesJob {
    * @throws ClassNotFoundException 
    * @throws InterruptedException 
    */
+  @Override
   public void runJob(String input, String output, BayesParameters params) throws IOException, InterruptedException, ClassNotFoundException {
     JobConf conf = new JobConf(BayesDriver.class);
     Path outPath = new Path(output);

@@ -32,13 +32,12 @@ import org.apache.mahout.common.Parameters;
 
 public class InMemoryBayesDatastore implements Datastore {
 
-  Map<String, Map<String, Map<String, Double>>> matrices = new HashMap<String, Map<String, Map<String, Double>>>();
-
-  Map<String, Map<String, Double>> vectors = new HashMap<String, Map<String, Double>>();
-
+  final Map<String, Map<String, Map<String, Double>>> matrices = new HashMap<String, Map<String, Map<String, Double>>>();
+  final Map<String, Map<String, Double>> vectors = new HashMap<String, Map<String, Double>>();
   Parameters params = null;
+  protected double thetaNormalizer = 1.0d;
 
-  public InMemoryBayesDatastore(Parameters params) throws IOException {
+  public InMemoryBayesDatastore(Parameters params) {
     
     matrices.put("weight", new HashMap<String, Map<String, Double>>());
     vectors.put("sumWeight", new HashMap<String, Double>());
@@ -55,7 +54,7 @@ public class InMemoryBayesDatastore implements Datastore {
     params.set("weight", basePath + "/trainer-tfIdf/trainer-tfIdf/part-*");
 
   }
-  protected double thetaNormalizer = 1.0d;
+
   @Override
   public void initialize() throws InvalidDatastoreException {
     Configuration conf = new Configuration();

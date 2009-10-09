@@ -67,31 +67,20 @@ public final class SamplingLongPrimitiveIterator extends AbstractLongPrimitiveIt
   }
 
   private void doNext() {
-    boolean found = false;
-    if (delegate instanceof SkippingIterator) {
-      SkippingIterator<?> skippingDelegate = (SkippingIterator<?>) delegate;
-      int toSkip = 0;
-      while (r.nextDouble() >= samplingRate) {
-        toSkip++;
-      }
-      // Really, would be nicer to select value from geometric distribution, for small values of samplingRate
-      if (toSkip > 0) {
-        skippingDelegate.skip(toSkip);
-      }
-      if (skippingDelegate.hasNext()) {
-        next = delegate.next();
-        found = true;
-      }
-    } else {
-      while (delegate.hasNext()) {
-        long delegateNext = delegate.next();
-        if (r.nextDouble() < samplingRate) {
-          next = delegateNext;
-          found = true;
-          break;
-        }
-      }
+    int toSkip = 0;
+    while (r.nextDouble() >= samplingRate) {
+      toSkip++;
     }
+    // Really, would be nicer to select value from geometric distribution, for small values of samplingRate
+    if (toSkip > 0) {
+      delegate.skip(toSkip);
+    }
+    boolean found = false;
+    if (delegate.hasNext()) {
+      next = delegate.next();
+      found = true;
+    }
+
     if (!found) {
       hasNext = false;
     }

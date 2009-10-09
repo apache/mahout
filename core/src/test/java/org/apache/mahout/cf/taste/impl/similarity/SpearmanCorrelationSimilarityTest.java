@@ -67,7 +67,7 @@ public final class SpearmanCorrelationSimilarityTest extends SimilarityTestCase 
     assertCorrelationEquals(-0.5, correlation);
   }
 
-  public void testRefresh() throws TasteException {
+  public void testRefresh() {
     // Make sure this doesn't throw an exception
     new SpearmanCorrelationSimilarity(getDataModel()).refresh(null);
   }

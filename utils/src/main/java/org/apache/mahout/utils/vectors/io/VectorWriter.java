@@ -24,7 +24,6 @@ import java.io.IOException;
 public interface VectorWriter {
   /**
    * Write all values in the Iterable to the output
-   * @param iterable The {@link org.apache.mahout.utils.vectors.VectorIterable}
    * @return the number of docs written
    * @throws IOException if there was a problem writing
    *
@@ -34,7 +33,6 @@ public interface VectorWriter {
 
   /**
    * Write the first <code>maxDocs</code> to the output.
-   * @param iterable The {@link org.apache.mahout.utils.vectors.VectorIterable}
    * @param maxDocs the maximum number of docs to write
    * @return The number of docs written
    * @throws IOException if there was a problem writing

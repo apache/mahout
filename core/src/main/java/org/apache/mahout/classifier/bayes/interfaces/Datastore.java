@@ -32,7 +32,7 @@ public interface Datastore {
    * @return double value
    * @throws InvalidDatastoreException 
    */
-  public double getWeight(String matrixName, String row, String column) throws InvalidDatastoreException;
+  double getWeight(String matrixName, String row, String column) throws InvalidDatastoreException;
 
   /**
    * Gets a double value from the Vector pointed to by the
@@ -43,7 +43,7 @@ public interface Datastore {
    * @return double value
    * @throws InvalidDatastoreException 
    */
-  public double getWeight(String vectorName, String index) throws InvalidDatastoreException;
+  double getWeight(String vectorName, String index) throws InvalidDatastoreException;
   
   /**
    * get the keySet of a given Matrix/Vector as given by <code>name</code>
@@ -51,11 +51,11 @@ public interface Datastore {
    * @return Collection of keys of Matrix/Vector
    * @throws InvalidDatastoreException 
    */
-  public Collection<String> getKeys(String name) throws InvalidDatastoreException;
+  Collection<String> getKeys(String name) throws InvalidDatastoreException;
   
   /**
    * Initializes the {@link Datastore} and loads the model into memory/cache if necessary
    * @throws InvalidDatastoreException
    */
-  public void initialize() throws InvalidDatastoreException;
+  void initialize() throws InvalidDatastoreException;
 }

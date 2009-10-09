@@ -64,10 +64,9 @@ public class JWriterTermInfoWriter implements TermInfoWriter {
 
   /**
    * Does NOT close the underlying writer
-   * @throws IOException
    */
   @Override
-  public void close() throws IOException {
+  public void close() {
 
   }
 }

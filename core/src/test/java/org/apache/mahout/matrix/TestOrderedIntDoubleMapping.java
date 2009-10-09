@@ -58,7 +58,7 @@ public class TestOrderedIntDoubleMapping extends TestCase {
     OrderedIntDoubleMapping mapping = new OrderedIntDoubleMapping(1);
     mapping.set(0, 1.1);
     mapping.set(5, 6.6);
-    OrderedIntDoubleMapping clone = (OrderedIntDoubleMapping) mapping.clone();
+    OrderedIntDoubleMapping clone = mapping.clone();
     assertEquals(2, clone.getNumMappings());
     assertEquals(1.1, clone.get(0));
     assertEquals(0.0, clone.get(1));
