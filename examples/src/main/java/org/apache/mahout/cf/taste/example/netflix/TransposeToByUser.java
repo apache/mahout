@@ -17,6 +17,8 @@
 
 package org.apache.mahout.cf.taste.example.netflix;
 
+import org.apache.commons.cli2.OptionException;
+import org.apache.mahout.cf.taste.example.TasteOptionParser;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
 import org.apache.mahout.common.FileLineIterable;
 import org.apache.mahout.common.IOUtils;
@@ -40,9 +42,10 @@ public final class TransposeToByUser {
 
   private TransposeToByUser() {}
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, OptionException {
 
-    File dataDirectory = new File(args[0]);
+    TasteOptionParser parser = new TasteOptionParser();
+    File dataDirectory = parser.getRatings(args);
     File byItemDirectory = new File(dataDirectory, "training_set");
     File byUserDirectory = new File(dataDirectory, "training_set_by_user");
 

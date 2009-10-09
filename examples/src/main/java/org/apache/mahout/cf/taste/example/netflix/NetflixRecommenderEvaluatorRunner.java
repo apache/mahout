@@ -17,8 +17,10 @@
 
 package org.apache.mahout.cf.taste.example.netflix;
 
+import org.apache.commons.cli2.OptionException;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.eval.RecommenderEvaluator;
+import org.apache.mahout.cf.taste.example.TasteOptionParser;
 import org.apache.mahout.cf.taste.impl.eval.AverageAbsoluteDifferenceRecommenderEvaluator;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.slf4j.Logger;
@@ -35,11 +37,17 @@ public final class NetflixRecommenderEvaluatorRunner {
     // do nothing
   }
 
-  public static void main(String... args) throws IOException, TasteException {
+  public static void main(String... args) throws IOException, TasteException, OptionException {
     RecommenderEvaluator evaluator = new AverageAbsoluteDifferenceRecommenderEvaluator();
-    DataModel model = new NetflixDataModel(new File(args[0]), true);
-    double evaluation = evaluator.evaluate(new NetflixRecommenderBuilder(), null, model, 0.9, 0.1);
-    log.info(String.valueOf(evaluation));
+    TasteOptionParser parser = new TasteOptionParser();
+    File ratingsFile = parser.getRatings(args);
+    if (ratingsFile != null) {
+      DataModel model = new NetflixDataModel(ratingsFile, true);
+      double evaluation = evaluator.evaluate(new NetflixRecommenderBuilder(), null, model, 0.9, 0.1);
+      log.info(String.valueOf(evaluation));
+    } else {
+      log.error("Netflix Recommender needs a ratings file to work. Please provide it with the -i command line option.");
+    }
   }
 
 }
