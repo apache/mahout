@@ -46,7 +46,7 @@ import java.io.IOException;
 public final class SlopeOneDiffsToAveragesJob extends Job {
 
   /** Logger for this class. */
-  private static Logger LOG = Logger.getLogger(SlopeOneDiffsToAveragesJob.class);
+  private static Logger log = Logger.getLogger(SlopeOneDiffsToAveragesJob.class);
 
   private SlopeOneDiffsToAveragesJob(Configuration jobConf) throws IOException {
     super(jobConf);
@@ -83,7 +83,7 @@ public final class SlopeOneDiffsToAveragesJob extends Job {
       Job job = new SlopeOneDiffsToAveragesJob(jobConf);
       job.waitForCompletion(true);
     } catch (OptionException e) {
-      LOG.error(e.getMessage());
+      log.error(e.getMessage());
       CommandLineUtil.printHelp(group);
     }
   }

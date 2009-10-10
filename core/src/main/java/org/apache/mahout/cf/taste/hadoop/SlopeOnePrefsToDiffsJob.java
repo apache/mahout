@@ -47,7 +47,7 @@ import java.io.IOException;
 public final class SlopeOnePrefsToDiffsJob extends Job {
 
   /** Logger for this class.*/
-  private static Logger LOG = Logger.getLogger(SlopeOnePrefsToDiffsJob.class);
+  private static Logger log = Logger.getLogger(SlopeOnePrefsToDiffsJob.class);
 
   private SlopeOnePrefsToDiffsJob(Configuration jobConf) throws IOException {
     super(jobConf);
@@ -85,7 +85,7 @@ public final class SlopeOnePrefsToDiffsJob extends Job {
       Job job = new SlopeOnePrefsToDiffsJob(jobConf);
       job.waitForCompletion(true);
     } catch (OptionException e) {
-      LOG.error(e.getMessage());
+      log.error(e.getMessage());
       CommandLineUtil.printHelp(group);
     }
   }
