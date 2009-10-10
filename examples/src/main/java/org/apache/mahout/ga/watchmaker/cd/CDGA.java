@@ -21,6 +21,16 @@ import org.apache.hadoop.fs.Path;
 import org.apache.mahout.ga.watchmaker.cd.hadoop.CDMahoutEvaluator;
 import org.apache.mahout.ga.watchmaker.cd.hadoop.DatasetSplit;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.commons.cli2.builder.DefaultOptionBuilder;
+import org.apache.commons.cli2.builder.ArgumentBuilder;
+import org.apache.commons.cli2.builder.GroupBuilder;
+import org.apache.commons.cli2.Option;
+import org.apache.commons.cli2.Group;
+import org.apache.commons.cli2.CommandLine;
+import org.apache.commons.cli2.OptionException;
+import org.apache.commons.cli2.commandline.Parser;
 import org.uncommons.watchmaker.framework.CandidateFactory;
 import org.uncommons.watchmaker.framework.EvolutionEngine;
 import org.uncommons.watchmaker.framework.EvolutionObserver;
@@ -71,38 +81,95 @@ public class CDGA {
   }
 
   public static void main(String[] args) throws IOException {
-    String dataset = "target/classes/wdbc";
-    int target = 1;
-    double threshold = 0.5;
-    int crosspnts = 1;
-    double mutrate = 0.1;
-    double mutrange = 0.1; // 10%
-    int mutprec = 2;
-    int popSize = 10;
-    int genCount = 10;
+    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    ArgumentBuilder abuilder = new ArgumentBuilder();
+    GroupBuilder gbuilder = new GroupBuilder();
 
-    if (args.length == 9) {
-      dataset = args[0];
-      target = Integer.parseInt(args[1]);
-      threshold = Double.parseDouble(args[2]);
-      crosspnts = Integer.parseInt(args[3]);
-      mutrate = Double.parseDouble(args[4]);
-      mutrange = Double.parseDouble(args[5]);
-      mutprec = Integer.parseInt(args[6]);
-      popSize = Integer.parseInt(args[7]);
-      genCount = Integer.parseInt(args[8]);
-    } else {
-      log.warn("Invalid arguments, working with default parameters instead");
-	  }
+    Option inputOpt = obuilder.withLongName("input").withRequired(true)
+            .withShortName("i").withArgument(
+                    abuilder.withName("input").withMinimum(1).withMaximum(1).create())
+            .withDescription("The Path for input data directory.").create();
 
-    long start = System.currentTimeMillis();
+    Option labelOpt = obuilder.withLongName("label").withRequired(true)
+            .withShortName("l").withArgument(
+                    abuilder.withName("index").withMinimum(1).withMaximum(1).create())
+            .withDescription("label's index.").create();
 
-    runJob(dataset, target, threshold, crosspnts, mutrate, mutrange, mutprec,
-        popSize, genCount);
+    Option thresholdOpt = obuilder.withLongName("threshold").withRequired(false)
+            .withShortName("t").withArgument(
+                    abuilder.withName("threshold").withMinimum(1).withMaximum(1).create())
+            .withDescription("Condition activation threshold, default = 0.5.").create();
 
-    long end = System.currentTimeMillis();
+    Option crosspntsOpt = obuilder.withLongName("crosspnts").withRequired(false)
+            .withShortName("cp").withArgument(
+                    abuilder.withName("points").withMinimum(1).withMaximum(1).create())
+            .withDescription("Number of crossover points to use, default = 1.").create();
 
-    printElapsedTime(end - start);
+    Option mutrateOpt = obuilder.withLongName("mutrate").withRequired(true)
+            .withShortName("m").withArgument(
+                    abuilder.withName("true").withMinimum(1).withMaximum(1).create())
+            .withDescription("Mutation rate (float).").create();
+
+    Option mutrangeOpt = obuilder.withLongName("mutrange").withRequired(false)
+            .withShortName("mr").withArgument(
+                    abuilder.withName("range").withMinimum(1).withMaximum(1).create())
+            .withDescription("Mutation range, default = 0.1 (10%).").create();
+
+    Option mutprecOpt = obuilder.withLongName("mutprec").withRequired(false)
+            .withShortName("mp").withArgument(
+                    abuilder.withName("precision").withMinimum(1).withMaximum(1).create())
+            .withDescription("Mutation precision, default = 2.").create();
+
+    Option popsizeOpt = obuilder.withLongName("popsize").withRequired(true)
+            .withShortName("p").withArgument(
+                    abuilder.withName("size").withMinimum(1).withMaximum(1).create())
+            .withDescription("Population size.").create();
+
+    Option gencntOpt = obuilder.withLongName("gencnt").withRequired(true)
+            .withShortName("g").withArgument(
+                    abuilder.withName("count").withMinimum(1).withMaximum(1).create())
+            .withDescription("Generations count.").create();
+
+    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
+
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(
+            helpOpt).withOption(labelOpt).withOption(thresholdOpt).withOption(crosspntsOpt).
+            withOption(mutrateOpt).withOption(mutrangeOpt).withOption(mutprecOpt).
+            withOption(popsizeOpt).withOption(gencntOpt).create();
+
+    Parser parser = new Parser();
+    parser.setGroup(group);
+
+    try {
+      CommandLine cmdLine = parser.parse(args);
+
+      if (cmdLine.hasOption(helpOpt)) {
+        CommandLineUtil.printHelp(group);
+        return;
+      }
+
+      String dataset = cmdLine.getValue(inputOpt).toString();
+      int target = Integer.parseInt(cmdLine.getValue(labelOpt).toString());
+      double threshold = (!cmdLine.hasOption(thresholdOpt)) ? 0.5 : Double.parseDouble(cmdLine.getValue(thresholdOpt).toString());
+      int crosspnts = (!cmdLine.hasOption(crosspntsOpt)) ? 1 : Integer.parseInt(cmdLine.getValue(crosspntsOpt).toString());
+      double mutrate = Double.parseDouble(cmdLine.getValue(mutrateOpt).toString());
+      double mutrange = (!cmdLine.hasOption(mutrangeOpt)) ? 0.1 : Double.parseDouble(cmdLine.getValue(mutrangeOpt).toString());
+      int mutprec = (!cmdLine.hasOption(mutprecOpt)) ? 2 : Integer.parseInt(cmdLine.getValue(mutprecOpt).toString());
+      int popSize = Integer.parseInt(cmdLine.getValue(popsizeOpt).toString());
+      int genCount = Integer.parseInt(cmdLine.getValue(gencntOpt).toString());
+
+      long start = System.currentTimeMillis();
+
+      runJob(dataset, target, threshold, crosspnts, mutrate, mutrange, mutprec,
+              popSize, genCount);
+
+      long end = System.currentTimeMillis();
+
+      printElapsedTime(end - start);
+    } catch (OptionException e) {
+      System.err.println("Exception : " + e);
+      CommandLineUtil.printHelp(group);
+    }
   }
 
   private static void runJob(String dataset, int target, double threshold,

@@ -35,6 +35,16 @@ import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.mahout.ga.watchmaker.OutputUtils;
 import org.apache.mahout.ga.watchmaker.cd.FileInfoParser;
 import org.apache.mahout.common.StringUtils;
+import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.commons.cli2.builder.DefaultOptionBuilder;
+import org.apache.commons.cli2.builder.ArgumentBuilder;
+import org.apache.commons.cli2.builder.GroupBuilder;
+import org.apache.commons.cli2.Option;
+import org.apache.commons.cli2.Group;
+import org.apache.commons.cli2.CommandLine;
+import org.apache.commons.cli2.OptionException;
+import org.apache.commons.cli2.commandline.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -205,23 +215,48 @@ public class CDInfosTool {
   }
 
   public static void main(String[] args) throws IOException {
-    // command-line parameters
-    if (args.length == 0) {
-      log.warn("Usage: CDInfosTool dataset_path");
-      throw new IllegalArgumentException();
+    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    ArgumentBuilder abuilder = new ArgumentBuilder();
+    GroupBuilder gbuilder = new GroupBuilder();
+
+    Option inputOpt = obuilder.withLongName("input").withRequired(true)
+            .withShortName("i").withArgument(
+                    abuilder.withName("input").withMinimum(1).withMaximum(1).create())
+            .withDescription("The Path for input data directory.").create();
+
+    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
+
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(
+            helpOpt).create();
+
+    Parser parser = new Parser();
+    parser.setGroup(group);
+    CommandLine cmdLine = null;
+    try {
+      cmdLine = parser.parse(args);
+
+      if (cmdLine.hasOption(helpOpt)) {
+        CommandLineUtil.printHelp(group);
+        return;
+      }
+
+      String input = cmdLine.getValue(inputOpt).toString();
+
+      Path inpath = new Path(input);
+      FileSystem fs = FileSystem.get(inpath.toUri(), new Configuration());
+
+      log.info("Loading Descriptors...");
+      Descriptors descriptors = loadDescriptors(fs, inpath);
+
+      log.info("Gathering informations...");
+      List<String> descriptions = new ArrayList<String>();
+      gatherInfos(descriptors, inpath, descriptions);
+
+      log.info("Storing Descriptions...");
+      storeDescriptions(fs, inpath, descriptors, descriptions);
+    } catch (OptionException e) {
+      System.err.println("Exception : " + e);
+      CommandLineUtil.printHelp(group);
     }
-
-    Path inpath = new Path(args[0]);
-    FileSystem fs = FileSystem.get(inpath.toUri(), new Configuration());
-
-    log.info("Loading Descriptors...");
-    Descriptors descriptors = loadDescriptors(fs, inpath);
-
-    log.info("Gathering informations...");
-    List<String> descriptions = new ArrayList<String>();
-    gatherInfos(descriptors, inpath, descriptions);
-
-    log.info("Storing Descriptions...");
-    storeDescriptions(fs, inpath, descriptors, descriptions);
   }
 }
