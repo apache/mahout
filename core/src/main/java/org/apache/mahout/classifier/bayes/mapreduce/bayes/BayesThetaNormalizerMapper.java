@@ -19,13 +19,14 @@ package org.apache.mahout.classifier.bayes.mapreduce.bayes;
 
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.GenericsUtil;
+import org.apache.mahout.classifier.bayes.mapreduce.common.BayesConstants;
+import org.apache.mahout.common.StringTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,14 +35,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BayesThetaNormalizerMapper extends MapReduceBase implements
-    Mapper<Text, DoubleWritable, Text, DoubleWritable> {
+    Mapper<StringTuple, DoubleWritable, StringTuple, DoubleWritable> {
 
   private static final Logger log = LoggerFactory.getLogger(BayesThetaNormalizerMapper.class);
 
   private Map<String, Double> labelWeightSum = null;
   private double sigma_jSigma_k = 0.0;
   private double vocabCount = 0.0;
-
+  private double alpha_i = 1.0;    
   /**
    * We need to calculate the thetaNormalization factor of each label
    *
@@ -49,18 +50,18 @@ public class BayesThetaNormalizerMapper extends MapReduceBase implements
    * @param value The tfIdf of the pair
    */
   @Override
-  public void map(Text key, DoubleWritable value,
-                  OutputCollector<Text, DoubleWritable> output, Reporter reporter)
+  public void map(StringTuple key, DoubleWritable value,
+                  OutputCollector<StringTuple, DoubleWritable> output, Reporter reporter)
       throws IOException {
 
-    String labelFeaturePair = key.toString();
+    String label = key.stringAt(1);
 
-    int comma = labelFeaturePair.indexOf(',');
-    String label = comma < 0 ? labelFeaturePair : labelFeaturePair.substring(0, comma);
     reporter.setStatus("Bayes Theta Normalizer Mapper: " + label);
     double alpha_i = 1.0;
     double weight = Math.log((value.get() + alpha_i) / (labelWeightSum.get(label) + vocabCount));
-    output.collect(new Text(('_' + label).trim()), new DoubleWritable(weight));
+    StringTuple thetaNormalizerTuple = new StringTuple(BayesConstants.LABEL_THETA_NORMALIZER);
+    thetaNormalizerTuple.add(label);
+    output.collect(thetaNormalizerTuple, new DoubleWritable(weight));
   }
 
   @Override

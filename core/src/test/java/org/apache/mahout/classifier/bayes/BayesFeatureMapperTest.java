@@ -25,6 +25,7 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesFeatureMapper;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.common.DummyOutputCollector;
+import org.apache.mahout.common.StringTuple;
 
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,7 @@ public class BayesFeatureMapperTest extends TestCase {
     conf.set("bayes.parameters", new BayesParameters(3).toString());
     mapper.configure(conf);
 
-    DummyOutputCollector<Text, DoubleWritable> output = new DummyOutputCollector<Text, DoubleWritable>();
+    DummyOutputCollector<StringTuple, DoubleWritable> output = new DummyOutputCollector<StringTuple, DoubleWritable>();
     mapper.map(new Text("foo"), new Text("big brown shoe"), output, Reporter.NULL);
     Map<String, List<DoubleWritable>> outMap = output.getData();
     System.out.println("Map: " + outMap);

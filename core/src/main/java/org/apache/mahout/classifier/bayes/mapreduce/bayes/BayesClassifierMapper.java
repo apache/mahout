@@ -34,8 +34,10 @@ import org.apache.mahout.classifier.bayes.datastore.InMemoryBayesDatastore;
 import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 import org.apache.mahout.classifier.bayes.interfaces.Algorithm;
 import org.apache.mahout.classifier.bayes.interfaces.Datastore;
+import org.apache.mahout.classifier.bayes.mapreduce.common.BayesConstants;
 import org.apache.mahout.classifier.bayes.model.ClassifierContext;
 import org.apache.mahout.common.Parameters;
+import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.common.nlp.NGrams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,11 +47,9 @@ import java.util.List;
 
 /** Reads the input train set(preprocessed using the {@link BayesFileFormatter}). */
 public class BayesClassifierMapper extends MapReduceBase implements
-    Mapper<Text, Text, Text, DoubleWritable> {
+    Mapper<Text, Text, StringTuple, DoubleWritable> {
 
   private static final Logger log = LoggerFactory.getLogger(BayesClassifierMapper.class);
-
-  private static final DoubleWritable one = new DoubleWritable(1.0);
 
   private int gramSize = 1;
   
@@ -66,7 +66,7 @@ public class BayesClassifierMapper extends MapReduceBase implements
    */
   @Override
   public void map(Text key, Text value,
-                  OutputCollector<Text, DoubleWritable> output, Reporter reporter)
+                  OutputCollector<StringTuple, DoubleWritable> output, Reporter reporter)
       throws IOException {
     //String line = value.toString();
     String label = key.toString();
@@ -80,9 +80,15 @@ public class BayesClassifierMapper extends MapReduceBase implements
     try {
       ClassifierResult result = classifier.classifyDocument( ngrams
           .toArray(new String[ngrams.size()]), defaultCategory);
+     
       String correctLabel = label;
       String classifiedLabel = result.getLabel();
-      output.collect(new Text(correctLabel+"____"+classifiedLabel), new DoubleWritable(1.0d));
+      
+      StringTuple outputTuple = new StringTuple(BayesConstants.CLASSIFIER_TUPLE);
+      outputTuple.add(correctLabel);
+      outputTuple.add(classifiedLabel);
+      
+      output.collect(outputTuple, new DoubleWritable(1.0d));
     } catch (InvalidDatastoreException e) {
       throw new IOException(e.toString());
     }

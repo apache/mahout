@@ -18,7 +18,6 @@
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -26,6 +25,7 @@ import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.lib.MultipleOutputFormat;
 import org.apache.hadoop.util.Progressable;
+import org.apache.mahout.common.StringTuple;
 
 import java.io.IOException;
 
@@ -49,16 +49,25 @@ public class BayesFeatureOutputFormat extends MultipleOutputFormat<WritableCompa
 
   @Override
   protected String generateFileNameForKeyValue(WritableComparable<?> k, Writable v, String name) {
-    Text key = (Text) k;
-    char firstChar = key.toString().charAt(0);
-    if (firstChar == '_') {
-      return "trainer-docCount/" + name;
-    } else if (firstChar == '-') {
-      return "trainer-termDocCount/" + name;
-    } else if (firstChar == ',') {
-      return "trainer-featureCount/" + name;
+    StringTuple key = (StringTuple) k;
+    if(key.length() == 3)
+    {
+      if(key.stringAt(0).equals(BayesConstants.WEIGHT))
+        return "trainer-wordFreq/" + name;
+      else if(key.stringAt(0).equals(BayesConstants.DOCUMENT_FREQUENCY))
+        return "trainer-termDocCount/" + name;
+      else throw new RuntimeException("Unrecognized Tuple: " + key);
     }
-    return "trainer-wordFreq/" + name;
+    else if(key.length() == 2)
+    {
+      if(key.stringAt(0).equals(BayesConstants.FEATURE_COUNT))
+        return "trainer-featureCount/" + name;
+      else if(key.stringAt(0).equals(BayesConstants.LABEL_COUNT))
+        return "trainer-docCount/" + name;
+      else throw new RuntimeException("Unrecognized Tuple: " + key);
+    }
+    else
+      throw new RuntimeException("Unrecognized Tuple: " + key);    
   }
 
 }

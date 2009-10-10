@@ -17,9 +17,7 @@
 
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
-
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -27,14 +25,16 @@ import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.lib.MultipleOutputFormat;
 import org.apache.hadoop.util.Progressable;
+import org.apache.mahout.common.StringTuple;
 
 import java.io.IOException;
 
 /**
- * This class extends the MultipleOutputFormat, allowing to write the output data to different output files in sequence
- * file output format.
+ * This class extends the MultipleOutputFormat, allowing to write the output
+ * data to different output files in sequence file output format.
  */
-public class BayesTfIdfOutputFormat extends MultipleOutputFormat<WritableComparable<?>, Writable> {
+public class BayesTfIdfOutputFormat extends
+    MultipleOutputFormat<WritableComparable<?>, Writable> {
 
   private SequenceFileOutputFormat<WritableComparable<?>, Writable> theSequenceFileOutputFormat = null;
 
@@ -49,13 +49,15 @@ public class BayesTfIdfOutputFormat extends MultipleOutputFormat<WritableCompara
   }
 
   @Override
-  protected String generateFileNameForKeyValue(WritableComparable<?> k, Writable v, String name) {
-    Text key = (Text) k;
+  protected String generateFileNameForKeyValue(WritableComparable<?> k,
+      Writable v, String name) {
+    StringTuple key = (StringTuple) k;
 
-    if (key.toString().charAt(0) == '*') {
+    if (key.length() == 1
+        && key.stringAt(0).equals(BayesConstants.FEATURE_SET_SIZE))
       return "trainer-vocabCount/" + name;
-    }
-    return "trainer-tfIdf/" + name;
+    else
+      return "trainer-tfIdf/" + name;
   }
 
 }

@@ -21,7 +21,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
@@ -32,7 +31,7 @@ import org.apache.hadoop.util.GenericsUtil;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesJob;
-import org.apache.mahout.classifier.bayes.mapreduce.common.JobExecutor;
+import org.apache.mahout.common.StringTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,18 +42,6 @@ import java.util.Map;
 public class CBayesThetaNormalizerDriver implements BayesJob {
 
   private static final Logger log = LoggerFactory.getLogger(CBayesThetaNormalizerDriver.class);
-
-  /**
-   * Takes in two arguments: <ol> <li>The input {@link org.apache.hadoop.fs.Path} where the input documents live</li>
-   * <li>The output {@link org.apache.hadoop.fs.Path} where to write the Model as a
-   * {@link org.apache.hadoop.io.SequenceFile}</li> </ol>
-   *
-   * @param args The args input and output path.
-   */
-  public static void main(String[] args) throws Exception {
-    JobExecutor executor = new JobExecutor();
-    executor.execute(args, new CBayesThetaNormalizerDriver());
-  }
 
   /**
    * Run the job
@@ -69,7 +56,7 @@ public class CBayesThetaNormalizerDriver implements BayesJob {
     conf.setJobName("Complementary Bayes Theta Normalizer Driver running over input: " +  input);
 
 
-    conf.setOutputKeyClass(Text.class);
+    conf.setOutputKeyClass(StringTuple.class);
     conf.setOutputValueClass(DoubleWritable.class);
     FileInputFormat.addInputPath(conf, new Path(output + "/trainer-weights/Sigma_j"));
     FileInputFormat.addInputPath(conf, new Path(output + "/trainer-tfIdf/trainer-tfIdf"));

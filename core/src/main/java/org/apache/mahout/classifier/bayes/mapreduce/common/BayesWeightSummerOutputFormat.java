@@ -18,7 +18,6 @@
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -26,6 +25,7 @@ import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.lib.MultipleOutputFormat;
 import org.apache.hadoop.util.Progressable;
+import org.apache.mahout.common.StringTuple;
 
 import java.io.IOException;
 
@@ -50,17 +50,22 @@ public class BayesWeightSummerOutputFormat extends MultipleOutputFormat<Writable
   @Override
   protected String generateFileNameForKeyValue(WritableComparable<?> k, Writable v,
                                                String name) {
-    Text key = (Text) k;
+    StringTuple key = (StringTuple) k;
 
-    char firstChar = key.toString().charAt(0);
-    if (firstChar == '*') { //sum of weight of all features for all label Sigma_kSigma_j
+    if(key.length() == 1 && key.stringAt(0).equals(BayesConstants.TOTAL_SUM))
+    {
       return "Sigma_kSigma_j/" + name;
-    } else if (firstChar == ',') { //sum of weight for all labels for a feature Sigma_j
-      return "Sigma_j/" + name;
-    } else if (firstChar == '_') { //sum of weights for all features for a label Sigma_k
-      return "Sigma_k/" + name;
     }
-    return "JunkFileThisShouldNotHappen";
+    else{
+      if(key.stringAt(0).equals(BayesConstants.FEATURE_SUM))
+      {
+        return "Sigma_j/" + name;
+      }
+      else if(key.stringAt(0).equals(BayesConstants.LABEL_SUM))
+        return "Sigma_k/" + name;
+      else
+        throw new RuntimeException("Unexpected StringTuple: " + key);
+    }
   }
 
 }

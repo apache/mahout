@@ -22,56 +22,61 @@ import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.common.Parameters;
+import org.apache.mahout.common.StringTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
 
-
 /**
  * Can also be used as a local Combiner beacuse only two values should be there
  * inside the values
  */
 public class BayesTfIdfReducer extends MapReduceBase implements
-    Reducer<Text, DoubleWritable, Text, DoubleWritable> {
+    Reducer<StringTuple, DoubleWritable, StringTuple, DoubleWritable> {
 
   private static final Logger log = LoggerFactory
       .getLogger(BayesTfIdfReducer.class);
 
   private HTable table;
-
+  private HBaseConfiguration HBconf; //reloading configuration causes 
+                                     //a new htable session to get 
+                                     //created(from HBASE IRC)
+  
   boolean useHbase = false;
 
   @Override
-  public void reduce(Text key, Iterator<DoubleWritable> values,
-      OutputCollector<Text, DoubleWritable> output, Reporter reporter)
+  public void reduce(StringTuple key, Iterator<DoubleWritable> values,
+      OutputCollector<StringTuple, DoubleWritable> output, Reporter reporter)
       throws IOException {
     // Key is label,word, value is the number of times we've seen this label
     // word per local node. Output is the same
-    String token = key.toString();
-    if (token.startsWith("*vocabCount")) {
+
+    if (key.stringAt(0).equals(BayesConstants.FEATURE_SET_SIZE)) {
       double vocabCount = 0.0;
+
       while (values.hasNext()) {
         reporter.setStatus("Bayes TfIdf Reducer: vocabCount " + vocabCount);
         vocabCount += values.next().get();
       }
-      log.info("{}\t{}", token, vocabCount);
+
+      log.info("{}\t{}", key, vocabCount);
       if (useHbase) {
-        Put bu = new Put(Bytes.toBytes("*totalCounts"));
-        bu.add(Bytes.toBytes("label"), Bytes.toBytes("vocabCount"), Bytes
+        Put bu = new Put(Bytes.toBytes(BayesConstants.HBASE_COUNTS_ROW));
+        bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes
+            .toBytes(BayesConstants.FEATURE_SET_SIZE), Bytes
             .toBytes(vocabCount));
         table.put(bu);
       }
       output.collect(key, new DoubleWritable(vocabCount));
-    } else {
+    } else if (key.stringAt(0).equals(BayesConstants.WEIGHT)) {
       double idfTimes_D_ij = 1.0;
       int numberofValues = 0;
       while (values.hasNext()) {
@@ -79,14 +84,12 @@ public class BayesTfIdfReducer extends MapReduceBase implements
         numberofValues++;
       }
       if (numberofValues == 2) { // Found TFIdf
-
-        int comma = token.indexOf(',');
-        String label = comma < 0 ? token : token.substring(0, comma);
-        String feature = token.substring(label.length() + 1);
+        String label = key.stringAt(1);
+        String feature = key.stringAt(2);
         if (useHbase) {
           Put bu = new Put(Bytes.toBytes(feature));
-          bu.add(Bytes.toBytes("label"), Bytes.toBytes(label), Bytes
-              .toBytes(idfTimes_D_ij));
+          bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes
+              .toBytes(label), Bytes.toBytes(idfTimes_D_ij));
           table.put(bu);
         }
 
@@ -94,18 +97,22 @@ public class BayesTfIdfReducer extends MapReduceBase implements
       reporter
           .setStatus("Bayes TfIdf Reducer: " + key + " => " + idfTimes_D_ij);
       output.collect(key, new DoubleWritable(idfTimes_D_ij));
+    } else {
+      throw new RuntimeException("Unexpected StringTuple: " + key);
     }
   }
 
   @Override
   public void configure(JobConf job) {
     try {
-      Parameters params = Parameters.fromString(job.get(
-          "bayes.parameters", ""));
-      if(params.get("dataSource").equals("hbase"))useHbase = true;
-      else return;
+      Parameters params = Parameters
+          .fromString(job.get("bayes.parameters", ""));
+      if (params.get("dataSource").equals("hbase"))
+        useHbase = true;
+      else
+        return;
 
-      HBaseConfiguration HBconf = new HBaseConfiguration(job);
+      HBconf = new HBaseConfiguration(job);
 
       table = new HTable(HBconf, job.get("output.table"));
 
@@ -118,8 +125,8 @@ public class BayesTfIdfReducer extends MapReduceBase implements
   @Override
   public void close() throws IOException {
     if (useHbase) {
-	    table.close();
-	  }
+      table.close();
+    }
     super.close();
   }
 }

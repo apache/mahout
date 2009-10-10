@@ -18,23 +18,23 @@
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.common.StringTuple;
 
 import java.io.IOException;
 import java.util.Iterator;
 
 /** Can also be used as a local Combiner. A simple summing reducer */
 public class BayesFeatureReducer extends MapReduceBase
-    implements Reducer<Text, DoubleWritable, Text, DoubleWritable> {
+    implements Reducer<StringTuple, DoubleWritable, StringTuple, DoubleWritable> {
 
   @Override
-  public void reduce(Text key,
+  public void reduce(StringTuple key,
                      Iterator<DoubleWritable> values,
-                     OutputCollector<Text, DoubleWritable> output,
+                     OutputCollector<StringTuple, DoubleWritable> output,
                      Reporter reporter) throws IOException {
     //Key is label,word, value is the number of times we've seen this label word per local node.  Output is the same
 

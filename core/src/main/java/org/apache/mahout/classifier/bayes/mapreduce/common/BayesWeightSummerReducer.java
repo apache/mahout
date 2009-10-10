@@ -22,13 +22,13 @@ import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.common.Parameters;
+import org.apache.mahout.common.StringTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ import java.util.Iterator;
 
 /** Can also be used as a local Combiner */
 public class BayesWeightSummerReducer extends MapReduceBase implements
-    Reducer<Text, DoubleWritable, Text, DoubleWritable> {
+    Reducer<StringTuple, DoubleWritable, StringTuple, DoubleWritable> {
 
   private static final Logger log = LoggerFactory
       .getLogger(BayesWeightSummerReducer.class);
@@ -47,8 +47,8 @@ public class BayesWeightSummerReducer extends MapReduceBase implements
   boolean useHbase = false;
 
   @Override
-  public void reduce(Text key, Iterator<DoubleWritable> values,
-      OutputCollector<Text, DoubleWritable> output, Reporter reporter)
+  public void reduce(StringTuple key, Iterator<DoubleWritable> values,
+      OutputCollector<StringTuple, DoubleWritable> output, Reporter reporter)
       throws IOException {
     // Key is label,word, value is the tfidf of the feature of times we've seen
     // this label word per local node. Output is the same
@@ -61,26 +61,28 @@ public class BayesWeightSummerReducer extends MapReduceBase implements
     reporter.setStatus("Bayes Weight Summer Reducer: " + key + " => " + sum);
     char firstChar = key.toString().charAt(0);
     if (useHbase) {
-      if (firstChar == ',') { // sum of weight for all labels for a feature
+      if (key.stringAt(0).equals(BayesConstants.FEATURE_SUM)) { // sum of weight
+        // for all
+        // labels for a
+        // feature
         // Sigma_j
-        String feature = key.toString().substring(1);
+        String feature = key.stringAt(1);
 
         Put bu = new Put(Bytes.toBytes(feature));
-        bu.add(Bytes.toBytes("label"), Bytes.toBytes("Sigma_j"), Bytes
-            .toBytes(sum));
+        bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes
+            .toBytes(BayesConstants.FEATURE_SUM), Bytes.toBytes(sum));
         table.put(bu);
 
-      } else if (firstChar == '_') {
-        String label = key.toString().substring(1);
-        Put bu = new Put(Bytes.toBytes("*labelWeight"));
-        bu.add(Bytes.toBytes("label"), Bytes.toBytes(label), Bytes
-            .toBytes(sum));
+      } else if (key.stringAt(0).equals(BayesConstants.LABEL_SUM)) {
+        String label = key.stringAt(1);
+        Put bu = new Put(Bytes.toBytes(BayesConstants.LABEL_SUM));
+        bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes
+            .toBytes(label), Bytes.toBytes(sum));
         table.put(bu);
-      }
-      else if (firstChar == '*') {
-        Put bu = new Put(Bytes.toBytes("*totalCounts"));
-        bu.add(Bytes.toBytes("label"), Bytes.toBytes("sigma_jSigma_k"), Bytes
-            .toBytes(sum));
+      } else if (key.stringAt(0).equals(BayesConstants.TOTAL_SUM)) {
+        Put bu = new Put(Bytes.toBytes(BayesConstants.HBASE_COUNTS_ROW));
+        bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes
+            .toBytes(BayesConstants.TOTAL_SUM), Bytes.toBytes(sum));
         table.put(bu);
       }
     }
@@ -91,8 +93,8 @@ public class BayesWeightSummerReducer extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     try {
-      Parameters params = Parameters.fromString(job.get(
-          "bayes.parameters", ""));
+      Parameters params = Parameters
+          .fromString(job.get("bayes.parameters", ""));
       if (params.get("dataSource").equals("hbase"))
         useHbase = true;
       else
@@ -108,9 +110,9 @@ public class BayesWeightSummerReducer extends MapReduceBase implements
 
   @Override
   public void close() throws IOException {
-	  if (useHbase) {
+    if (useHbase) {
       table.close();
-	  }
+    }
     super.close();
   }
 }

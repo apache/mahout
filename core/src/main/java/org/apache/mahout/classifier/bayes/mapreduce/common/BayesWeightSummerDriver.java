@@ -20,30 +20,18 @@ package org.apache.mahout.classifier.bayes.mapreduce.common;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
+import org.apache.mahout.common.StringTuple;
 
 import java.io.IOException;
 
 /** Create and run the Bayes Trainer. */
 public class BayesWeightSummerDriver implements BayesJob {
-
-  /**
-   * Takes in two arguments: <ol> <li>The input {@link org.apache.hadoop.fs.Path} where the input documents live</li>
-   * <li>The output {@link org.apache.hadoop.fs.Path} where to write the the interim files as a {@link
-   * org.apache.hadoop.io.SequenceFile}</li> </ol>
-   *
-   * @param args The args - should contain input and output path.
-   */
-  public static void main(String[] args) throws Exception {
-    JobExecutor executor = new JobExecutor();
-    executor.execute(args, new BayesWeightSummerDriver());
-  }
 
   /**
    * Run the job
@@ -58,7 +46,7 @@ public class BayesWeightSummerDriver implements BayesJob {
     conf.setJobName("Bayes Weight Summer Driver running over input: " +  input);
 
 
-    conf.setOutputKeyClass(Text.class);
+    conf.setOutputKeyClass(StringTuple.class);
     conf.setOutputValueClass(DoubleWritable.class);
 
     FileInputFormat.addInputPath(conf, new Path(output + "/trainer-tfIdf/trainer-tfIdf"));

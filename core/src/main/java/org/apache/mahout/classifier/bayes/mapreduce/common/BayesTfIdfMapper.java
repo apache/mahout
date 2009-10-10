@@ -19,13 +19,13 @@ package org.apache.mahout.classifier.bayes.mapreduce.common;
 
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.GenericsUtil;
+import org.apache.mahout.common.StringTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,12 +34,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BayesTfIdfMapper extends MapReduceBase implements
+    Mapper<StringTuple, DoubleWritable, StringTuple, DoubleWritable> {
 
-Mapper<Text, DoubleWritable, Text, DoubleWritable> {
-
-  private static final Logger log = LoggerFactory.getLogger(BayesTfIdfMapper.class);
+  private static final Logger log = LoggerFactory
+      .getLogger(BayesTfIdfMapper.class);
 
   private Map<String, Double> labelDocumentCounts = null;
+
+  private static StringTuple vocabCount = new StringTuple(
+      BayesConstants.FEATURE_SET_SIZE);
+
+  private static DoubleWritable one = new DoubleWritable(1.0d);
 
   /**
    * We need to calculate the Tf-Idf of each feature in each label
@@ -48,44 +53,31 @@ Mapper<Text, DoubleWritable, Text, DoubleWritable> {
    *        Document count
    */
   @Override
-  public void map(Text key, DoubleWritable value, OutputCollector<Text, DoubleWritable> output, Reporter reporter)
+  public void map(StringTuple key, DoubleWritable value,
+      OutputCollector<StringTuple, DoubleWritable> output, Reporter reporter)
       throws IOException {
 
-    String labelFeaturePair = key.toString();
-
-    char firstChar = labelFeaturePair.charAt(0);
-    switch (firstChar) {
-      case '-': {// if it is the termDocumentCount
-        labelFeaturePair = labelFeaturePair.substring(1);
-        // -17th_century_mathematicians_anderson__alexander,1582
-        int idx = labelFeaturePair.indexOf(',');
-        if (idx != -1) {
-          String label = labelFeaturePair.substring(0, idx);
-
-          Double labelDocumentCount = labelDocumentCounts.get(label);
-          if (labelDocumentCount == null) {
-            throw new IOException("Invalid label: " + label);
-          }
-          double logIdf = Math.log(labelDocumentCount / value.get());
-          output.collect(new Text(labelFeaturePair), new DoubleWritable(logIdf));
-          reporter.setStatus("Bayes TfIdf Mapper: log(Idf): " + labelFeaturePair);
-        } else {
-          throw new IOException("Invalid ");
-        }
-        break;
-      }
-
-      case ',': {
-        output.collect(new Text("*vocabCount"), new DoubleWritable(1.0));
-        reporter.setStatus("Bayes TfIdf Mapper: vocabCount");
-        break;
-      }
-      default: {
+    if (key.length() == 3) {
+      if (key.stringAt(0).equals(BayesConstants.WEIGHT)) {
         reporter.setStatus("Bayes TfIdf Mapper: Tf: " + key);
         output.collect(key, value);
-        break;
-      }
+      } else if (key.stringAt(0).equals(BayesConstants.DOCUMENT_FREQUENCY)) {
+        String label = key.stringAt(1);
+        Double labelDocumentCount = labelDocumentCounts.get(label);
+        double logIdf = Math.log(labelDocumentCount / value.get());
+        key.replaceAt(0, BayesConstants.WEIGHT);
+        output.collect(key, new DoubleWritable(logIdf));
+        reporter.setStatus("Bayes TfIdf Mapper: log(Idf): " + key);
+      } else
+        throw new RuntimeException("Unrecognized Tuple: " + key);
+    } else if (key.length() == 2) {
+      if (key.stringAt(0).equals(BayesConstants.FEATURE_COUNT)) {
+        output.collect(vocabCount, one);
+        reporter.setStatus("Bayes TfIdf Mapper: vocabCount");
+      } else
+        throw new RuntimeException("Unexpected Tuple: " + key);
     }
+
   }
 
   @Override
@@ -94,13 +86,16 @@ Mapper<Text, DoubleWritable, Text, DoubleWritable> {
       if (labelDocumentCounts == null) {
         labelDocumentCounts = new HashMap<String, Double>();
 
-        DefaultStringifier<Map<String, Double>> mapStringifier = new DefaultStringifier<Map<String, Double>>(job,
-            GenericsUtil.getClass(labelDocumentCounts));
+        DefaultStringifier<Map<String, Double>> mapStringifier = new DefaultStringifier<Map<String, Double>>(
+            job, GenericsUtil.getClass(labelDocumentCounts));
 
-        String labelDocumentCountString = mapStringifier.toString(labelDocumentCounts);
-        labelDocumentCountString = job.get("cnaivebayes.labelDocumentCounts", labelDocumentCountString);
+        String labelDocumentCountString = mapStringifier
+            .toString(labelDocumentCounts);
+        labelDocumentCountString = job.get("cnaivebayes.labelDocumentCounts",
+            labelDocumentCountString);
 
-        labelDocumentCounts = mapStringifier.fromString(labelDocumentCountString);
+        labelDocumentCounts = mapStringifier
+            .fromString(labelDocumentCountString);
       }
     } catch (IOException ex) {
       log.warn(ex.toString(), ex);

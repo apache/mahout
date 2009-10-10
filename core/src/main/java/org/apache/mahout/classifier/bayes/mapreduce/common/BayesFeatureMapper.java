@@ -26,6 +26,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.classifier.BayesFileFormatter;
 import org.apache.mahout.common.Parameters;
+import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.common.nlp.NGrams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,13 +38,11 @@ import java.util.Map;
 
 /** Reads the input train set(preprocessed using the {@link BayesFileFormatter}). */
 public class BayesFeatureMapper extends MapReduceBase implements
-    Mapper<Text, Text, Text, DoubleWritable> {
+    Mapper<Text, Text, StringTuple, DoubleWritable> {
 
   private static final Logger log = LoggerFactory.getLogger(BayesFeatureMapper.class);
 
   private static final DoubleWritable one = new DoubleWritable(1.0);
-
-  private final Text labelWord = new Text();
 
   private int gramSize = 1;
 
@@ -60,17 +59,13 @@ public class BayesFeatureMapper extends MapReduceBase implements
    */
   @Override
   public void map(Text key, Text value,
-                  OutputCollector<Text, DoubleWritable> output, Reporter reporter)
+                  OutputCollector<StringTuple, DoubleWritable> output, Reporter reporter)
       throws IOException {
     //String line = value.toString();
     String label = key.toString();
-    int keyLen = label.length();
 
     Map<String, int[]> wordList = new HashMap<String, int[]>(1000);
 
-    StringBuilder builder = new StringBuilder(label);
-    builder.ensureCapacity(32);// make sure we have a reasonably size buffer to
-                               // begin with
     List<String> ngrams  = new NGrams(value.toString(), gramSize).generateNGramsWithoutLabel(); 
 
     for (String ngram : ngrams) {
@@ -95,31 +90,39 @@ public class BayesFeatureMapper extends MapReduceBase implements
     for (Map.Entry<String, int[]> entry : wordList.entrySet()) {
       // key is label,word
       String token = entry.getKey();
-      builder.append(',').append(token);
-      labelWord.set(builder.toString());
+      StringTuple tuple = new StringTuple();
+      tuple.add(BayesConstants.WEIGHT);
+      tuple.add(label);
+      tuple.add(token);
       DoubleWritable f = new DoubleWritable(Math.log(1.0 + entry.getValue()[0]) / lengthNormalisation);
-      output.collect(labelWord, f);
-      builder.setLength(keyLen);// truncate back
+      output.collect(tuple, f);
     }
     reporter.setStatus("Bayes Feature Mapper: Document Label: " + label);  
     
     // Output Document Frequency per Word per Class
-    String dflabel = '-' + label;
-    int dfKeyLen = dflabel.length();
-    builder = new StringBuilder(dflabel);
+    
     for (String token : wordList.keySet()) {
       // key is label,word
-      builder.append(',').append(token);
-      labelWord.set(builder.toString());
-      output.collect(labelWord, one);
-      output.collect(new Text(',' + token), one);
-      builder.setLength(dfKeyLen);// truncate back
+      
+      StringTuple dfTuple = new StringTuple();
+      dfTuple.add(BayesConstants.DOCUMENT_FREQUENCY);
+      dfTuple.add(label);
+      dfTuple.add(token);      
+      output.collect(dfTuple, one);
+      
+      StringTuple tokenCountTuple = new StringTuple();
+      tokenCountTuple.add(BayesConstants.FEATURE_COUNT);
+      tokenCountTuple.add(token);
+      output.collect(tokenCountTuple, one);
 
     }
 
     // output that we have seen the label to calculate the Count of Document per
     // class
-    output.collect(new Text('_' + label), one);
+    StringTuple labelCountTuple = new StringTuple();
+    labelCountTuple.add(BayesConstants.LABEL_COUNT);
+    labelCountTuple.add(label);
+    output.collect(labelCountTuple, one);
   }
 
   @Override

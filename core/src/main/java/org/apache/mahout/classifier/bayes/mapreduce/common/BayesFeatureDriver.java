@@ -27,6 +27,7 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.KeyValueTextInputFormat;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
+import org.apache.mahout.common.StringTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,19 +37,6 @@ import java.io.IOException;
 public class BayesFeatureDriver implements BayesJob {
 
   private static final Logger log = LoggerFactory.getLogger(BayesFeatureDriver.class);
-
-  /**
-   * Takes in two arguments: <ol> <li>The input {@link org.apache.hadoop.fs.Path} where the input documents live</li>
-   * <li>The output {@link org.apache.hadoop.fs.Path} where to write the interim files as a {@link
-   * org.apache.hadoop.io.SequenceFile}</li> </ol>
-   *
-   * @param args The args - input and output path.
-   * @throws Exception in case of problems during job execution.
-   */
-  public static void main(String[] args) throws Exception {
-    JobExecutor executor = new JobExecutor();
-    executor.execute(args, new BayesFeatureDriver());
-  }
 
   /**
    * Run the job
@@ -61,14 +49,13 @@ public class BayesFeatureDriver implements BayesJob {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(BayesFeatureDriver.class);
     conf.setJobName("Bayes Feature Driver running over input: " +  input);
-    conf.setOutputKeyClass(Text.class);
+    conf.setOutputKeyClass(StringTuple.class);
     conf.setOutputValueClass(DoubleWritable.class);
 
     FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(output);
     FileOutputFormat.setOutputPath(conf, outPath);
-    //conf.setNumMapTasks(100);
-    //conf.setNumReduceTasks(1);
+    
     conf.setMapperClass(BayesFeatureMapper.class);
 
     conf.setInputFormat(KeyValueTextInputFormat.class);
@@ -77,7 +64,7 @@ public class BayesFeatureDriver implements BayesJob {
     conf.setOutputFormat(BayesFeatureOutputFormat.class);
     conf.set("io.serializations",
         "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
-    // Dont ever forget this. People should keep track of how hadoop conf parameters and make or break a piece of code
+    // this conf parameter needs to be set enable serialisation of conf values
 
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
     if (dfs.exists(outPath)) {

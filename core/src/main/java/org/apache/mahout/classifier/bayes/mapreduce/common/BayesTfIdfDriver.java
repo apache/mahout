@@ -26,7 +26,6 @@ import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
@@ -35,6 +34,7 @@ import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
+import org.apache.mahout.common.StringTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,23 +45,6 @@ import java.util.Map;
 public class BayesTfIdfDriver implements BayesJob {
 
   private static final Logger log = LoggerFactory.getLogger(BayesTfIdfDriver.class);
-
-  /**
-   * Takes in two arguments:
-   * <ol>
-   * <li>The input {@link org.apache.hadoop.fs.Path} where the input documents
-   * live</li>
-   * <li>The output {@link org.apache.hadoop.fs.Path} where to write the interim
-   * files as a {@link org.apache.hadoop.io.SequenceFile}</li>
-   * </ol>
-   * 
-   * @param args The args - input and output path.
-   * @throws Exception in case of problems during job execution.
-   */
-  public static void main(String[] args) throws Exception {
-    JobExecutor executor = new JobExecutor();
-    executor.execute(args, new BayesTfIdfDriver());
-  }
 
   /**
    * Run the job
@@ -77,7 +60,7 @@ public class BayesTfIdfDriver implements BayesJob {
     JobConf conf = new JobConf(BayesWeightSummerDriver.class);
     conf.setJobName("TfIdf Driver running over input: " + input);
 
-    conf.setOutputKeyClass(Text.class);
+    conf.setOutputKeyClass(StringTuple.class);
     conf.setOutputValueClass(DoubleWritable.class);
 
     FileInputFormat.addInputPath(conf, new Path(output + "/trainer-termDocCount"));
@@ -125,7 +108,7 @@ public class BayesTfIdfDriver implements BayesJob {
     if (params.get("dataSource").equals("hbase")) {
       HBaseConfiguration hc = new HBaseConfiguration(new Configuration());
       HTableDescriptor ht = new HTableDescriptor(output);
-      HColumnDescriptor hcd = new HColumnDescriptor("label:");
+      HColumnDescriptor hcd = new HColumnDescriptor(BayesConstants.HBASE_COLUMN_FAMILY+":");
       hcd.setBloomfilter(true);
       hcd.setInMemory(true);
       hcd.setMaxVersions(1);

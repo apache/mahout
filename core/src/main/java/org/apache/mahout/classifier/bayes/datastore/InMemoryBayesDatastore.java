@@ -154,14 +154,6 @@ public class InMemoryBayesDatastore implements Datastore {
     return matrix.size();
   }
 
-  private long sizeOfVector(String vectorName) {
-    Map<String, Double> vector = vectors.get(vectorName);
-    if (vector == null) {
-      return 0;
-    }
-    return vector.size();
-  }
-
   public void loadFeatureWeight(String feature, String label, double weight) {
     matrixPutCell("weight", feature, label, weight);
   }

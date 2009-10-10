@@ -25,7 +25,6 @@ import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesJob;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesTfIdfDriver;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesWeightSummerDriver;
-import org.apache.mahout.classifier.bayes.mapreduce.common.JobExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,19 +34,6 @@ import java.io.IOException;
 public class BayesDriver implements BayesJob {
 
   private static final Logger log = LoggerFactory.getLogger(BayesDriver.class);
-
-  /**
-   * Takes in two arguments: <ol> <li>The input {@link org.apache.hadoop.fs.Path} where the input documents live</li>
-   * <li>The output {@link org.apache.hadoop.fs.Path} where to write the Model as a
-   * {@link org.apache.hadoop.io.SequenceFile}</li> </ol>
-   *
-   * @param args The args
-   * @throws Exception in case of job execution problems. 
-   */
-  public static void main(String[] args) throws Exception {
-    JobExecutor executor = new JobExecutor();
-    executor.execute(args, new BayesDriver());
-  }
 
   /**
    * Run the job
@@ -81,16 +67,10 @@ public class BayesDriver implements BayesJob {
     BayesWeightSummerDriver summer = new BayesWeightSummerDriver();
     summer.runJob(input, output, params);
 
-    //Calculate the W_ij = log(Theta) for each label, feature. This step actually generates the complement class
-    //CBayesThetaDriver.runJob(input, output);
-
     log.info("Calculating the weight Normalisation factor for each class...");
     //Calculate the normalization factor Sigma_W_ij for each complement class.
     BayesThetaNormalizerDriver normalizer = new BayesThetaNormalizerDriver();
     normalizer.runJob(input, output, params);
-
-    //Calculate the normalization factor Sigma_W_ij for each complement class.
-    //CBayesNormalizedWeightDriver.runJob(input, output);
 
     Path docCountOutPath = new Path(output + "/trainer-docCount");
     if (dfs.exists(docCountOutPath)) {
@@ -112,22 +92,10 @@ public class BayesDriver implements BayesJob {
     if (dfs.exists(vocabCountPath)) {
       dfs.delete(vocabCountPath, true);
     }
-    /*Path tfIdfOutPath = new Path(output+ "/trainer-tfIdf");
-    if (dfs.exists(tfIdfOutPath))
-      dfs.delete(tfIdfOutPath, true);*/
     Path vocabCountOutPath = new Path(output + "/trainer-vocabCount");
     if (dfs.exists(vocabCountOutPath)) {
       dfs.delete(vocabCountOutPath, true);
     }
-    /* Path weightsOutPath = new Path(output+ "/trainer-weights");
- if (dfs.exists(weightsOutPath))
-   dfs.delete(weightsOutPath, true);*/
-    /*Path thetaOutPath = new Path(output+ "/trainer-theta");
-    if (dfs.exists(thetaOutPath))
-      dfs.delete(thetaOutPath, true);*/
-    /*Path thetaNormalizerOutPath = new Path(output+ "/trainer-thetaNormalizer");
-    if (dfs.exists(thetaNormalizerOutPath))
-      dfs.delete(thetaNormalizerOutPath, true);*/
 
   }
 }

@@ -19,13 +19,14 @@ package org.apache.mahout.classifier.bayes.mapreduce.cbayes;
 
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.GenericsUtil;
+import org.apache.mahout.classifier.bayes.mapreduce.common.BayesConstants;
+import org.apache.mahout.common.StringTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CBayesThetaNormalizerMapper extends MapReduceBase implements
-    Mapper<Text, DoubleWritable, Text, DoubleWritable> {
+    Mapper<StringTuple, DoubleWritable, StringTuple, DoubleWritable> {
 
   private static final Logger log = LoggerFactory.getLogger(CBayesThetaNormalizerMapper.class);
 
@@ -48,34 +49,37 @@ public class CBayesThetaNormalizerMapper extends MapReduceBase implements
    * @param key The label,feature pair (can either be the freq Count or the term Document count
    */
   @Override
-  public void map(Text key, DoubleWritable value,
-                  OutputCollector<Text, DoubleWritable> output, Reporter reporter)
+  public void map(StringTuple key, DoubleWritable value,
+                  OutputCollector<StringTuple, DoubleWritable> output, Reporter reporter)
       throws IOException {
 
-    String labelFeaturePair = key.toString();
-    if (labelFeaturePair.charAt(0) == ',') { // if it is from the Sigma_j folder
+    if (key.stringAt(0).equals(BayesConstants.FEATURE_SUM)) { // if it is from the Sigma_j folder
 
       double alpha_i = 1.0;
       for (Map.Entry<String, Double> stringDoubleEntry : labelWeightSum.entrySet()) {
+        String label = stringDoubleEntry.getKey();
         double weight = Math.log((value.get() + alpha_i) / (sigma_jSigma_k - stringDoubleEntry.getValue() + vocabCount));
         
         reporter.setStatus("Complementary Bayes Theta Normalizer Mapper: " + stringDoubleEntry + " => " + weight);
-        
-        output.collect(new Text(('_' + stringDoubleEntry.getKey()).trim()), new DoubleWritable(weight)); //output Sigma_j
+        StringTuple normalizerTuple = new StringTuple(BayesConstants.LABEL_THETA_NORMALIZER);
+        normalizerTuple.add(label);        
+        output.collect(normalizerTuple, new DoubleWritable(weight)); //output Sigma_j
 
       }
 
     } else {
-      int comma = labelFeaturePair.indexOf(',');
-      String label = comma < 0 ? labelFeaturePair : labelFeaturePair.substring(0, comma);
-
+      String label = key.stringAt(1);
+         
       double D_ij = value.get();
       double denominator = 0.5 * ((sigma_jSigma_k / vocabCount) + (D_ij * this.labelWeightSum.size()));
       double weight = Math.log(1.0 - D_ij / denominator);
 
       reporter.setStatus("Complementary Bayes Theta Normalizer Mapper: " + label + " => " + weight);
+     
+      StringTuple normalizerTuple = new StringTuple(BayesConstants.LABEL_THETA_NORMALIZER);
+      normalizerTuple.add(label);    
       
-      output.collect(new Text(('_' +label).trim()), new DoubleWritable(weight));//output -D_ij
+      output.collect(normalizerTuple, new DoubleWritable(weight));//output -D_ij
      
 
     }

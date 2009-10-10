@@ -52,57 +52,85 @@ import java.nio.charset.Charset;
 
 public class TestClassifier {
 
-  private static final Logger log = LoggerFactory.getLogger(TestClassifier.class);
+  private static final Logger log = LoggerFactory
+      .getLogger(TestClassifier.class);
 
   private TestClassifier() {
     // do nothing
   }
 
-  public static void main(String[] args) throws IOException, OptionException, InvalidDatastoreException {
+  public static void main(String[] args) throws IOException, OptionException,
+      InvalidDatastoreException, ClassNotFoundException,
+      InstantiationException, IllegalAccessException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option pathOpt = obuilder.withLongName("model").withRequired(true).withArgument(
-        abuilder.withName("model").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The path on HDFS / Name of Hbase Table as defined by the -source parameter").withShortName("m").create();
+    Option pathOpt = obuilder
+        .withLongName("model")
+        .withRequired(true)
+        .withArgument(
+            abuilder.withName("model").withMinimum(1).withMaximum(1).create())
+        .withDescription(
+            "The path on HDFS / Name of Hbase Table as defined by the -source parameter")
+        .withShortName("m").create();
 
-    Option dirOpt = obuilder.withLongName("testDir").withRequired(true).withArgument(
-        abuilder.withName("testDir").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The directory where test documents resides in").withShortName("d").create();
+    Option dirOpt = obuilder
+        .withLongName("testDir")
+        .withRequired(true)
+        .withArgument(
+            abuilder.withName("testDir").withMinimum(1).withMaximum(1).create())
+        .withDescription("The directory where test documents resides in")
+        .withShortName("d").create();
 
     Option encodingOpt = obuilder.withLongName("encoding").withArgument(
-        abuilder.withName("encoding").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The file encoding.  Defaults to UTF-8").withShortName("e").create();
+        abuilder.withName("encoding").withMinimum(1).withMaximum(1).create())
+        .withDescription("The file encoding.  Defaults to UTF-8")
+        .withShortName("e").create();
 
     Option analyzerOpt = obuilder.withLongName("analyzer").withArgument(
-        abuilder.withName("analyzer").withMinimum(1).withMaximum(1).create()).withDescription("The Analyzer to use")
-        .withShortName("a").create();
+        abuilder.withName("analyzer").withDefault(
+            "org.apache.lucene.analysis.standard.StandardAnalyzer")
+            .withMinimum(1).withMaximum(1).create()).withDescription(
+        "The Analyzer to use").withShortName("a").create();
 
     Option defaultCatOpt = obuilder.withLongName("defaultCat").withArgument(
-        abuilder.withName("defaultCat").withMinimum(1).withMaximum(1).create()).withDescription("The default category")
-        .withShortName("default").create();
+        abuilder.withName("defaultCat").withMinimum(1).withMaximum(1).create())
+        .withDescription("The default category").withShortName("default")
+        .create();
 
-    Option gramSizeOpt = obuilder.withLongName("gramSize").withRequired(true).withArgument(
-        abuilder.withName("gramSize").withMinimum(1).withMaximum(1).create()).withDescription("Size of the n-gram")
-        .withShortName("ng").create();
-    Option verboseOutputOpt = obuilder.withLongName("verbose").withRequired(false).withDescription(
-        "Output which values were correctly and incorrectly classified").withShortName("v").create();
-    Option typeOpt = obuilder.withLongName("classifierType").withRequired(true).withArgument(
-        abuilder.withName("classifierType").withMinimum(1).withMaximum(1).create()).withDescription(
-        "Type of classifier: bayes|cbayes").withShortName("type").create();
+    Option gramSizeOpt = obuilder.withLongName("gramSize").withRequired(true)
+        .withArgument(
+            abuilder.withName("gramSize").withMinimum(1).withMaximum(1)
+                .create()).withDescription("Size of the n-gram").withShortName(
+            "ng").create();
+    Option verboseOutputOpt = obuilder.withLongName("verbose").withRequired(
+        false).withDescription(
+        "Output which values were correctly and incorrectly classified")
+        .withShortName("v").create();
+    Option typeOpt = obuilder.withLongName("classifierType").withRequired(true)
+        .withArgument(
+            abuilder.withName("classifierType").withMinimum(1).withMaximum(1)
+                .create()).withDescription("Type of classifier: bayes|cbayes")
+        .withShortName("type").create();
 
-    Option dataSourceOpt = obuilder.withLongName("dataSource").withRequired(true).withArgument(
-        abuilder.withName("dataSource").withMinimum(1).withMaximum(1).create()).withDescription(
-        "Location of model: hdfs|hbase").withShortName("source").create();
+    Option dataSourceOpt = obuilder.withLongName("dataSource").withRequired(
+        true).withArgument(
+        abuilder.withName("dataSource").withMinimum(1).withMaximum(1).create())
+        .withDescription("Location of model: hdfs|hbase").withShortName(
+            "source").create();
 
-    Option methodOpt = obuilder.withLongName("method").withRequired(true).withArgument(
-        abuilder.withName("method").withMinimum(1).withMaximum(1).create()).withDescription(
-        "Method of Classification: sequential|mapreduce").withShortName("method").create();
+    Option methodOpt = obuilder.withLongName("method").withRequired(true)
+        .withArgument(
+            abuilder.withName("method").withMinimum(1).withMaximum(1).create())
+        .withDescription("Method of Classification: sequential|mapreduce")
+        .withShortName("method").create();
 
-    Group group = gbuilder.withName("Options").withOption(analyzerOpt).withOption(defaultCatOpt).withOption(dirOpt)
-        .withOption(encodingOpt).withOption(gramSizeOpt).withOption(pathOpt).withOption(typeOpt).withOption(
-            dataSourceOpt).withOption(methodOpt).withOption(verboseOutputOpt).create();
+    Group group = gbuilder.withName("Options").withOption(analyzerOpt)
+        .withOption(defaultCatOpt).withOption(dirOpt).withOption(encodingOpt)
+        .withOption(gramSizeOpt).withOption(pathOpt).withOption(typeOpt)
+        .withOption(dataSourceOpt).withOption(methodOpt).withOption(
+            verboseOutputOpt).create();
 
     Parser parser = new Parser();
     parser.setGroup(group);
@@ -131,15 +159,8 @@ public class TestClassifier {
     }
 
     boolean verbose = cmdLine.hasOption(verboseOutputOpt);
-    // Analyzer analyzer = null;
-    // if (cmdLine.hasOption(analyzerOpt)) {
-    // String className = (String) cmdLine.getValue(analyzerOpt);
-    // Class clazz = Class.forName(className);
-    // analyzer = (Analyzer) clazz.newInstance();
-    // }
-    // if (analyzer == null) {
-    // analyzer = new StandardAnalyzer();
-    // }
+
+    String className = (String) cmdLine.getValue(analyzerOpt);
 
     String testDirPath = (String) cmdLine.getValue(dirOpt);
 
@@ -150,6 +171,7 @@ public class TestClassifier {
     params.set("classifierType", classifierType);
     params.set("dataSource", dataSource);
     params.set("defaultCat", defaultCat);
+    params.set("analyzer", className);
     params.set("encoding", encoding);
     params.set("testDirPath", testDirPath);
     if (classificationMethod.equalsIgnoreCase("sequential"))
@@ -158,7 +180,8 @@ public class TestClassifier {
       classifyParallel(params);
   }
 
-  public static void classifySequential(BayesParameters params) throws IOException, InvalidDatastoreException {
+  public static void classifySequential(BayesParameters params)
+      throws IOException, InvalidDatastoreException {
     log.info("Loading model from: {}", params.print());
     boolean verbose = Boolean.valueOf(params.get("verbose"));
     File dir = new File(params.get("testDirPath"));
@@ -182,7 +205,8 @@ public class TestClassifier {
         algorithm = new CBayesAlgorithm();
         datastore = new InMemoryBayesDatastore(params);
       } else {
-        throw new IllegalArgumentException("Unrecognized classifier type: " + params.get("classifierType"));
+        throw new IllegalArgumentException("Unrecognized classifier type: "
+            + params.get("classifierType"));
       }
 
     } else if (params.get("dataSource").equals("hbase")) {
@@ -195,15 +219,18 @@ public class TestClassifier {
         algorithm = new CBayesAlgorithm();
         datastore = new HBaseBayesDatastore(params.get("basePath"), params);
       } else {
-        throw new IllegalArgumentException("Unrecognized classifier type: " + params.get("classifierType"));
+        throw new IllegalArgumentException("Unrecognized classifier type: "
+            + params.get("classifierType"));
       }
 
     } else {
-      throw new IllegalArgumentException("Unrecognized dataSource type: " + params.get("dataSource"));
+      throw new IllegalArgumentException("Unrecognized dataSource type: "
+          + params.get("dataSource"));
     }
     ClassifierContext classifier = new ClassifierContext(algorithm, datastore);
     classifier.initialize();
-    ResultAnalyzer resultAnalyzer = new ResultAnalyzer(classifier.getLabels(), params.get("defaultCat"));
+    ResultAnalyzer resultAnalyzer = new ResultAnalyzer(classifier.getLabels(),
+        params.get("defaultCat"));
     final TimingStatistics totalStatistics = new TimingStatistics();
     if (subdirs != null) {
 
@@ -214,24 +241,29 @@ public class TestClassifier {
         final TimingStatistics operationStats = new TimingStatistics();
 
         long lineNum = 0;
-        for (String line : new FileLineIterable(new File(file.getPath()), Charset.forName(params.get("encoding")), false)) {
+        for (String line : new FileLineIterable(new File(file.getPath()),
+            Charset.forName(params.get("encoding")), false)) {
 
-          Map<String, List<String>> document = new NGrams(line, Integer.parseInt(params.get("gramSize")))
-              .generateNGrams();
-          for (Map.Entry<String, List<String>> stringListEntry : document.entrySet()) {
+          Map<String, List<String>> document = new NGrams(line, Integer
+              .parseInt(params.get("gramSize"))).generateNGrams();
+          for (Map.Entry<String, List<String>> stringListEntry : document
+              .entrySet()) {
             List<String> strings = stringListEntry.getValue();
             TimingStatistics.Call call = operationStats.newCall();
             TimingStatistics.Call outercall = totalStatistics.newCall();
-            ClassifierResult classifiedLabel = classifier.classifyDocument(strings
-                .toArray(new String[strings.size()]), params.get("defaultCat"));
+            ClassifierResult classifiedLabel = classifier.classifyDocument(
+                strings.toArray(new String[strings.size()]), params
+                    .get("defaultCat"));
             call.end();
             outercall.end();
-            boolean correct = resultAnalyzer.addInstance(correctLabel, classifiedLabel);
+            boolean correct = resultAnalyzer.addInstance(correctLabel,
+                classifiedLabel);
             if (verbose) {
               // We have one document per line
               log.info("Line Number: " + lineNum + " Line(30): "
-                  + (line.length() > 30 ? line.substring(0, 30) : line) + " Expected Label: " + correctLabel
-                  + " Classified Label: " + classifiedLabel.getLabel() + " Correct: " + correct);
+                  + (line.length() > 30 ? line.substring(0, 30) : line)
+                  + " Expected Label: " + correctLabel + " Classified Label: "
+                  + classifiedLabel.getLabel() + " Correct: " + correct);
             }
             // log.info("{} {}", correctLabel, classifiedLabel);
 
@@ -250,7 +282,8 @@ public class TestClassifier {
     log.info(resultAnalyzer.summarize());
   }
 
-  public static void classifyParallel(BayesParameters params) throws IOException {
+  public static void classifyParallel(BayesParameters params)
+      throws IOException {
     BayesClassifierDriver.runJob(params);
   }
 }

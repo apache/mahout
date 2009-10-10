@@ -23,8 +23,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
@@ -33,20 +31,18 @@ import org.apache.hadoop.mapred.KeyValueTextInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.classifier.ConfusionMatrix;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
+import org.apache.mahout.common.StringTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 /** Create and run the Bayes Classifier */
 public class BayesClassifierDriver {
 
   private static final Logger log = LoggerFactory.getLogger(BayesClassifierDriver.class);
-  private static final Pattern CHUNK_DEIMITER_PATTERN = Pattern.compile("____");
-
   private BayesClassifierDriver() {
   }
 
@@ -55,11 +51,11 @@ public class BayesClassifierDriver {
    * 
    * @param params The Job parameters containing the gramSize, input output folders, defaultCat, encoding
    */
-  public static void runJob(BayesParameters params) throws IOException {
+  public static final void runJob(BayesParameters params) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(BayesClassifierDriver.class);
     conf.setJobName("Bayes Classifier Driver running over input: " + params.get("testDirPath"));
-    conf.setOutputKeyClass(Text.class);
+    conf.setOutputKeyClass(StringTuple.class);
     conf.setOutputValueClass(DoubleWritable.class);
 
     FileInputFormat.setInputPaths(conf, new Path(params.get("testDirPath")));
@@ -89,9 +85,9 @@ public class BayesClassifierDriver {
     log.info("{}",matrix.summarize());
   }
 
-  private static ConfusionMatrix readResult(FileSystem fs, Path pathPattern, Configuration conf, BayesParameters params) throws IOException{
+  private static final ConfusionMatrix readResult(FileSystem fs, Path pathPattern, Configuration conf, BayesParameters params) throws IOException{
    
-    Writable key = new Text();
+    StringTuple key = new StringTuple();
     DoubleWritable value = new DoubleWritable();
     String defaultLabel = params.get("defaultCat");
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
@@ -100,12 +96,9 @@ public class BayesClassifierDriver {
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-      // the key is correctLabel____classifiedLabel value is count
-      while (reader.next(key, value)) {
-        String keyStr = key.toString();
-        String[] chunks = CHUNK_DEIMITER_PATTERN.split(keyStr);
-        String correctLabel = chunks[0];
-        String classifiedLabel = chunks[1];
+      while (reader.next(key, value)) {        
+        String correctLabel = key.stringAt(1);
+        String classifiedLabel = key.stringAt(2);
         Map<String, Integer> rowMatrix = confusionMatrix.get(correctLabel);
         if(rowMatrix == null)
           rowMatrix = new HashMap<String, Integer>();        
