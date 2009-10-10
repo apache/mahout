@@ -96,7 +96,7 @@ public class DisplayDirichlet extends Frame {
     });
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     RandomUtils.useTestSeed();
     generateSamples();
     new DisplayDirichlet();
