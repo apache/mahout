@@ -92,9 +92,6 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
     if (Double.isNaN(evaluationPercentage) || evaluationPercentage <= 0.0 || evaluationPercentage > 1.0) {
       throw new IllegalArgumentException("Invalid evaluationPercentage: " + evaluationPercentage);
     }
-    if (Double.isNaN(relevanceThreshold)) {
-      throw new IllegalArgumentException("Invalid relevanceThreshold: " + evaluationPercentage);
-    }
 
     int numItems = dataModel.getNumItems();
     RunningAverage precision = new FullRunningAverage();
