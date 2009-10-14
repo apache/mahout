@@ -33,12 +33,14 @@ public abstract class DefaultDistanceMeasureTest extends TestCase {
     Vector[] vectors = {
         new DenseVector(new double[]{1, 1, 1, 1, 1, 1}),
         new DenseVector(new double[]{2, 2, 2, 2, 2, 2}),
-        new DenseVector(new double[]{6, 6, 6, 6, 6, 6})
+        new DenseVector(new double[]{6, 6, 6, 6, 6, 6}),
+        new DenseVector(new double[]{-1,-1,-1,-1,-1,-1})
     };
 
     compare(distanceMeasure, vectors);
 
-    vectors = new Vector[3];
+    vectors = new Vector[4];
+    
     vectors[0] = new SparseVector(5);
     vectors[0].setQuick(0, 1);
     vectors[0].setQuick(3, 1);
@@ -53,30 +55,47 @@ public abstract class DefaultDistanceMeasureTest extends TestCase {
     vectors[2].setQuick(0, 6);
     vectors[2].setQuick(3, 6);
     vectors[2].setQuick(4, 6);
+    
+    vectors[3] = new SparseVector(5);
 
     compare(distanceMeasure, vectors);
   }
 
-  private static void compare(DistanceMeasure distanceMeasure, Vector[] vectors) {
-    double[][] distanceMatrix = new double[3][3];
+  private void compare(DistanceMeasure distanceMeasure, Vector[] vectors) {
+     double[][] distanceMatrix = new double[4][4];
 
-    for (int a = 0; a < 3; a++) {
-      for (int b = 0; b < 3; b++) {
+     for (int a = 0; a < 4; a++) {
+       for (int b = 0; b < 4; b++) {
         distanceMatrix[a][b] = distanceMeasure.distance(vectors[a], vectors[b]);
       }
     }
 
-    assertEquals(0.0, distanceMatrix[0][0]);
+    assertEquals("Distance from first vector to itself is not zero", 0.0, distanceMatrix[0][0]);
     assertTrue(distanceMatrix[0][0] < distanceMatrix[0][1]);
     assertTrue(distanceMatrix[0][1] < distanceMatrix[0][2]);
 
-    assertEquals(0.0, distanceMatrix[1][1]);
+    assertEquals("Distance from second vector to itself is not zero", 0.0, distanceMatrix[1][1]);
     assertTrue(distanceMatrix[1][0] > distanceMatrix[1][1]);
     assertTrue(distanceMatrix[1][2] > distanceMatrix[1][0]);
 
-    assertEquals(0.0, distanceMatrix[2][2]);
+    assertEquals("Distance from third vector to itself is not zero", 0.0, distanceMatrix[2][2]);
     assertTrue(distanceMatrix[2][0] > distanceMatrix[2][1]);
     assertTrue(distanceMatrix[2][1] > distanceMatrix[2][2]);
-  }
 
+    for (int a = 0; a < 4; a++) {
+      for (int b = 0; b < 4; b++) {
+        assertTrue("Distance between vectors less than zero: " 
+                   + distanceMatrix[a][b] + " = " + distanceMeasure.toString() + 
+                   ".distance("+ vectors[a].asFormatString() + ", " 
+                   + vectors[b].asFormatString() + ")", 
+                   distanceMatrix[a][b] >= 0);
+        if(vectors[a].plus(vectors[b]).norm(2) == 0 && vectors[a].norm(2) > 0) {
+          assertTrue("Distance from v to -v is equal to zero" 
+                     + vectors[a].asFormatString() + " = -" + vectors[b].asFormatString(), 
+                     distanceMatrix[a][b] > 0);
+        }
+      }
+    }
+          
+  }
 }

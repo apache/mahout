@@ -34,61 +34,43 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
 
   /**
    * Calculates the distance between two vectors.
+   * 
+   * The coefficient (a measure of similarity) is:
+   * T(a, b) = a.b / (|a|^2 + |b|^2 - a.b)
    *
-   * ((a^2 + b^2 - ab) / ab) - 1;
+   * The distance d(a,b) = 1 - T(a,b)
    *
    * @return 0 for perfect match, > 0 for greater distance
    */
   @Override
-  public double distance(Vector vector0, Vector vector1) {
-
-    // this whole distance measurent thing
-    // should be evaluated using an intermediate vector and BinaryFunction or something?
-
-    Set<Integer> featuresSeen = new HashSet<Integer>((int) ((vector0.getNumNondefaultElements() + vector1.getNumNondefaultElements()) * 0.75));
-
-    double ab = 0.0;
-    double a2 = 0.0;
-    double b2 = 0.0;
-
-    Iterator<Vector.Element> iter = vector0.iterateNonZero();
-    while (iter.hasNext()) {
-      Vector.Element feature = iter.next();
-      if (!featuresSeen.add(feature.index())) {
-
-        double a = feature.get();
-
-        double b = vector1.get(feature.index());
-
-        Vector weights = getWeights();
-        double weight = weights == null ? 1.0 : weights.get(feature.index());
-
-        ab += a * b * weight;
-        a2 += a * a * weight;
-        b2 += b * b * weight;
+  public double distance(Vector a, Vector b) {
+    double ab = dot(a, b);
+    double denominator = dot(a, a) + dot(b, b) - ab;
+    if(denominator < ab) {  // correct for fp round-off: distance >= 0
+      denominator = ab;
+    };
+    if(denominator > 0) {
+        // denom == 0 only when dot(a,a) == dot(b,b) == dot(a,b) == 0
+      return 1 - ab / denominator;
+    } else {
+      return 0;
+    }
+  }
+  
+  public double dot(Vector a, Vector b) {
+    Iterator<Vector.Element> it = a.iterateNonZero();
+    Vector.Element el = null;
+    Vector weights = getWeights();
+    double dot = 0;
+    while(it.hasNext() && (el = it.next()) != null) {
+      try {
+      dot += el.get() * (a == b ? el.get() : b.getQuick(el.index())) * (weights == null ? 1.0 : weights.getQuick(el.index()));
+      } catch (NullPointerException npe) {
+        System.out.println(a.asFormatString() + "\n" + b.asFormatString() + "\n" + weights.asFormatString());
+        throw npe;
       }
     }
-
-
-    iter = vector1.iterateNonZero();
-    while (iter.hasNext()) {
-      Vector.Element feature = iter.next();
-      if (!featuresSeen.add(feature.index())) {
-
-        double a = vector0.get(feature.index());
-
-        double b = feature.get();
-
-        Vector weights = getWeights();
-        double weight = weights == null ? 1.0 : weights.get(feature.index());
-
-        ab += a * b * weight;
-        a2 += a * a * weight;
-        b2 += b * b * weight;
-      }
-    }
-
-    return ((a2 + b2 - ab) / ab) - 1.0;
+    return dot;
   }
 
   @Override
