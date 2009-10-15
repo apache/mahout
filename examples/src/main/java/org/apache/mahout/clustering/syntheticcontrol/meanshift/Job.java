@@ -53,22 +53,22 @@ public class Job {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder).create();
-    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).create();
-    Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption(obuilder, abuilder).create();
-    Option maxIterOpt = DefaultOptionCreator.maxIterOption(obuilder, abuilder).create();
+    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder).withRequired(false).create();
+    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).withRequired(false).create();
+    Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption(obuilder, abuilder).withRequired(false).create();
+    Option maxIterOpt = DefaultOptionCreator.maxIterOption(obuilder, abuilder).withRequired(false).create();
     Option helpOpt = DefaultOptionCreator.helpOption(obuilder);    
 
-    Option modelOpt = obuilder.withLongName("distanceClass").withRequired(true).withShortName("d").
+    Option modelOpt = obuilder.withLongName("distanceClass").withRequired(false).withShortName("d").
         withArgument(abuilder.withName("distanceClass").withMinimum(1).withMaximum(1).create()).
         withDescription("The distance measure class name.").create();
 
 
-    Option threshold1Opt = obuilder.withLongName("threshold_1").withRequired(true).withShortName("t1").
+    Option threshold1Opt = obuilder.withLongName("threshold_1").withRequired(false).withShortName("t1").
         withArgument(abuilder.withName("threshold_1").withMinimum(1).withMaximum(1).create()).
         withDescription("The T1 distance threshold.").create();
 
-    Option threshold2Opt = obuilder.withLongName("threshold_2").withRequired(true).withShortName("t2").
+    Option threshold2Opt = obuilder.withLongName("threshold_2").withRequired(false).withShortName("t2").
         withArgument(abuilder.withName("threshold_2").withMinimum(1).withMaximum(1).create()).
         withDescription("The T1 distance threshold.").create();
 

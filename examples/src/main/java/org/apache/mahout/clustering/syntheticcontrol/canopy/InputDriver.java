@@ -73,7 +73,7 @@ public class InputDriver {
 
       String input = cmdLine.getValue(inputOpt, "testdata").toString();
       String output = cmdLine.getValue(outputOpt, "output").toString();
-      String vectorClassName = cmdLine.getValue(vectorOpt).toString();
+      String vectorClassName = cmdLine.getValue(vectorOpt, "org.apache.mahout.matrix.SparseVector").toString();
       Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
       runJob(input, output, vectorClass);
     } catch (OptionException e) {
