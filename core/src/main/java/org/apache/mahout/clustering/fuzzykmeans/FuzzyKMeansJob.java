@@ -49,11 +49,11 @@ public class FuzzyKMeansJob {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder);
-    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder);
-    Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption(obuilder, abuilder);
-    Option measureClassOpt = DefaultOptionCreator.distanceOption(obuilder, abuilder);
-    Option maxIterOpt = DefaultOptionCreator.maxIterOption(obuilder, abuilder);
+    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder).create();
+    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).create();
+    Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption(obuilder, abuilder).create();
+    Option measureClassOpt = DefaultOptionCreator.distanceOption(obuilder, abuilder).create();
+    Option maxIterOpt = DefaultOptionCreator.maxIterOption(obuilder, abuilder).create();
     Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
 
     Option clustersOpt = obuilder.withLongName("clusters").withRequired(true).withShortName("c").

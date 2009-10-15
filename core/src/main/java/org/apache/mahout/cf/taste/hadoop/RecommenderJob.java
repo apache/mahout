@@ -87,7 +87,7 @@ public final class RecommenderJob extends Job {
     Option dataModelFileOpt = obuilder.withLongName("dataModelFile").withRequired(true)
       .withShortName("m").withArgument(abuilder.withName("dataModelFile").withMinimum(1)
       .withMaximum(1).create()).withDescription("File containing data model.").create();
-    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder);
+    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).create();
     Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
 
     Group group = gbuilder.withName("Options").withOption(recommendClassOpt).withOption(userRecommendOpt)

@@ -19,32 +19,92 @@ package org.apache.mahout.clustering.syntheticcontrol.canopy;
 
 import java.io.IOException;
 
+import org.apache.commons.cli2.CommandLine;
+import org.apache.commons.cli2.Group;
+import org.apache.commons.cli2.Option;
+import org.apache.commons.cli2.OptionException;
+import org.apache.commons.cli2.builder.ArgumentBuilder;
+import org.apache.commons.cli2.builder.DefaultOptionBuilder;
+import org.apache.commons.cli2.builder.GroupBuilder;
+import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.log4j.Logger;
 import org.apache.mahout.clustering.canopy.CanopyClusteringJob;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
+import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.matrix.SparseVector;
 
 public class Job {
+  /** Logger for this class.*/
+  private static final Logger LOG = Logger.getLogger(Job.class);
+
   private Job() {
   }
 
   public static void main(String[] args) throws IOException, ClassNotFoundException {
-    if (args.length == 5) {
-      String input = args[0];
-      String output = args[1];
-      String measureClassName = args[2];
-      double t1 = Double.parseDouble(args[3]);
-      double t2 = Double.parseDouble(args[4]);
-      String vectorClassName = args[5];
-      Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
-      runJob(input, output, measureClassName, t1, t2, vectorClass);
-    } else
-      runJob("testdata", "output",
-          "org.apache.mahout.common.distance.EuclideanDistanceMeasure", 80, 55, SparseVector.class);
+      DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+      ArgumentBuilder abuilder = new ArgumentBuilder();
+      GroupBuilder gbuilder = new GroupBuilder();
+
+      Option inputOpt = obuilder.withLongName("input").withRequired(false).withArgument(
+          abuilder.withName("input").withMinimum(1).withMaximum(1).create()).
+          withDescription("The Path for input Vectors. Must be a SequenceFile of Writable, Vector").withShortName("i").create();
+      Option outputOpt = obuilder.withLongName("output").withRequired(false).withArgument(
+          abuilder.withName("output").withMinimum(1).withMaximum(1).create()).
+          withDescription("The Path to put the output in").withShortName("o").create();
+
+      Option measureClassOpt = obuilder.withLongName("distance").withRequired(false).withArgument(
+          abuilder.withName("distance").withMinimum(1).withMaximum(1).create()).
+          withDescription("The Distance Measure to use.  Default is SquaredEuclidean").withShortName("m").create();
+      Option vectorClassOpt = obuilder.withLongName("vectorClass").withRequired(false).withArgument(
+          abuilder.withName("vectorClass").withMinimum(1).withMaximum(1).create()).
+          withDescription("The Vector implementation class name.  Default is SparseVector.class").withShortName("v").create();
+
+      Option t1Opt = obuilder.withLongName("t1").withRequired(false).withArgument(
+          abuilder.withName("t1").withMinimum(1).withMaximum(1).create()).
+          withDescription("t1").withShortName("t1").create();
+      Option t2Opt = obuilder.withLongName("t2").withRequired(false).withArgument(
+          abuilder.withName("t2").withMinimum(1).withMaximum(1).create()).
+          withDescription("t2").withShortName("t2").create();
+
+
+      Option helpOpt = obuilder.withLongName("help").
+          withDescription("Print out help").withShortName("h").create();
+
+      Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt)
+          .withOption(measureClassOpt).withOption(vectorClassOpt)
+          .withOption(t1Opt).withOption(t2Opt)
+          .withOption(helpOpt).create();
+
+
+      try {
+        Parser parser = new Parser();
+        parser.setGroup(group);
+        CommandLine cmdLine = parser.parse(args);
+
+        if (cmdLine.hasOption(helpOpt)) {
+          CommandLineUtil.printHelp(group);
+          return;
+        }
+
+        String input = cmdLine.getValue(inputOpt, "testdata").toString();
+        String output = cmdLine.getValue(outputOpt, "output").toString();
+        String measureClass = cmdLine.getValue(
+            measureClassOpt, "org.apache.mahout.common.distance.EuclideanDistanceMeasure").toString();
+
+        Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(
+            cmdLine.getValue(vectorClassOpt, "org.apache.mahout.matrix.SparseVector").toString());
+        double t1 = Double.parseDouble(cmdLine.getValue(t1Opt, "80").toString());
+        double t2 = Double.parseDouble(cmdLine.getValue(t2Opt, "55").toString());
+
+        runJob(input, output, measureClass, t1, t2, vectorClass);
+      } catch (OptionException e) {
+        LOG.error("Exception", e);
+        CommandLineUtil.printHelp(group);
+      }
   }
 
   /**
@@ -58,14 +118,20 @@ public class Job {
    * resides in a directory named "testdata", and writes output to a directory
    * named "output".
    * 
-   * @param input the String denoting the input directory path
-   * @param output the String denoting the output directory path
-   * @param measureClassName the String class name of the DistanceMeasure to use
-   * @param t1 the canopy T1 threshold
-   * @param t2 the canopy T2 threshold
+   * @param input
+   *          the String denoting the input directory path
+   * @param output
+   *          the String denoting the output directory path
+   * @param measureClassName
+   *          the String class name of the DistanceMeasure to use
+   * @param t1
+   *          the canopy T1 threshold
+   * @param t2
+   *          the canopy T2 threshold
    */
   private static void runJob(String input, String output,
-      String measureClassName, double t1, double t2, Class<? extends Vector> vectorClass) throws IOException {
+      String measureClassName, double t1, double t2,
+      Class<? extends Vector> vectorClass) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(Job.class);
 
@@ -74,10 +140,11 @@ public class Job {
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
     if (dfs.exists(outPath))
       dfs.delete(outPath, true);
-    final String directoryContainingConvertedInput = output + Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
+    final String directoryContainingConvertedInput = output
+        + Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
     InputDriver.runJob(input, directoryContainingConvertedInput, vectorClass);
-    CanopyClusteringJob.runJob(directoryContainingConvertedInput, output, measureClassName,
-        t1, t2, vectorClass);
+    CanopyClusteringJob.runJob(directoryContainingConvertedInput, output,
+        measureClassName, t1, t2, vectorClass);
   }
 
 }

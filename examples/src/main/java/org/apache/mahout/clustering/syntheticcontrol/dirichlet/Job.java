@@ -21,9 +21,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.cli2.CommandLine;
+import org.apache.commons.cli2.Group;
+import org.apache.commons.cli2.Option;
+import org.apache.commons.cli2.OptionException;
+import org.apache.commons.cli2.builder.ArgumentBuilder;
+import org.apache.commons.cli2.builder.DefaultOptionBuilder;
+import org.apache.commons.cli2.builder.GroupBuilder;
+import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.log4j.Logger;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
 import org.apache.mahout.clustering.dirichlet.DirichletDriver;
 import org.apache.mahout.clustering.dirichlet.DirichletJob;
@@ -31,37 +40,75 @@ import org.apache.mahout.clustering.dirichlet.DirichletMapper;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
+import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.matrix.Vector;
 import org.apache.mahout.matrix.SparseVector;
 
 import static org.apache.mahout.clustering.syntheticcontrol.Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
 
 public class Job {
-       
-    
+
+  /**Logger for this class.*/
+  private static final Logger LOG = Logger.getLogger(Job.class);
+
   private Job() {
   }
 
   public static void main(String[] args) throws IOException,
       ClassNotFoundException, InstantiationException, IllegalAccessException {
-    if (args.length == 7) {
-      String input = args[0];
-      String output = args[1];
-      String modelFactory = args[2];
-      int numClusters = Integer.parseInt(args[3]);
-      int maxIterations = Integer.parseInt(args[4]);
-      double alpha_0 = Double.parseDouble(args[5]);
-      int numReducers = Integer.parseInt(args[6]);
-      String vectorClassName = args[7];
+    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    ArgumentBuilder abuilder = new ArgumentBuilder();
+    GroupBuilder gbuilder = new GroupBuilder();
+
+    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder).withRequired(false).create();
+    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).withRequired(false).create();
+    Option maxIterOpt = DefaultOptionCreator.maxIterOption(obuilder, abuilder).withRequired(false).create();
+    Option topicsOpt = DefaultOptionCreator.kOption(obuilder, abuilder).withRequired(false).create();
+
+    Option redOpt = obuilder.withLongName("reducerNum").withRequired(false).withArgument(
+        abuilder.withName("r").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The number of reducers to use.").withShortName("r").create();
+
+    Option vectorOpt = obuilder.withLongName("vector").withRequired(false).withArgument(
+        abuilder.withName("v").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The vector implementation to use.").withShortName("v").create();
+
+    Option mOpt = obuilder.withLongName("alpha").withRequired(false).withShortName("m").
+        withArgument(abuilder.withName("alpha").withMinimum(1).withMaximum(1).create()).
+        withDescription("The alpha0 value for the DirichletDistribution.").create();
+
+    Option modelOpt = obuilder.withLongName("modelClass").withRequired(false).withShortName("d").
+        withArgument(abuilder.withName("modelClass").withMinimum(1).withMaximum(1).create()).
+          withDescription("The ModelDistribution class name.").create();
+    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
+
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(modelOpt).
+        withOption(maxIterOpt).withOption(mOpt).withOption(topicsOpt).withOption(redOpt).withOption(helpOpt).create();
+
+    try {
+      Parser parser = new Parser();
+      parser.setGroup(group);
+      CommandLine cmdLine = parser.parse(args);
+      if (cmdLine.hasOption(helpOpt)) {
+        CommandLineUtil.printHelp(group);
+        return;
+      }
+
+      String input = cmdLine.getValue(inputOpt, "testdata").toString();
+      String output = cmdLine.getValue(outputOpt, "output").toString();
+      String modelFactory = cmdLine.getValue(modelOpt, "org.apache.mahout.clustering.syntheticcontrol.dirichlet.NormalScModelDistribution").toString();
+      int numModels = Integer.parseInt(cmdLine.getValue(topicsOpt, "10").toString());
+      int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt, "5").toString());
+      double alpha_0 = Double.parseDouble(cmdLine.getValue(mOpt, "1.0").toString());
+      int numReducers = Integer.parseInt(cmdLine.getValue(redOpt, "1").toString());
+      String vectorClassName = cmdLine.getValue(vectorOpt, "org.apache.mahout.matrix.SparseVector").toString();
       Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
-      runJob(input, output, modelFactory, numClusters, maxIterations, alpha_0,
-          numReducers, vectorClass);
-    } else
-      runJob(
-          "testdata",
-          "output",
-          "org.apache.mahout.clustering.syntheticcontrol.dirichlet.NormalScModelDistribution",
-          10, 5, 1.0, 1, SparseVector.class);
+      runJob(input, output, modelFactory, numModels, maxIterations, alpha_0, numReducers, vectorClass);
+    } catch (OptionException e) {
+      LOG.error("Exception parsing command line: ", e);
+      CommandLineUtil.printHelp(group);
+    }
   }
 
   /**

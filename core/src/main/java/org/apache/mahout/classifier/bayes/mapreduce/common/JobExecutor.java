@@ -47,8 +47,8 @@ public class JobExecutor {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder);
-    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder);
+    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder).create();
+    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).create();
     Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
 
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt)

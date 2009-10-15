@@ -62,7 +62,7 @@ public final class SlopeOnePrefsToDiffsJob extends Job {
     .withArgument(abuilder.withName("input").withMinimum(1).withMaximum(1).create())
     .withDescription("The Path for input preferences file.").create();
 
-    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder);
+    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).create();
     Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
 
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt)

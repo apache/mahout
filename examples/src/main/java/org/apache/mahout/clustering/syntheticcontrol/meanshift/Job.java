@@ -21,33 +21,83 @@ import static org.apache.mahout.clustering.syntheticcontrol.Constants.DIRECTORY_
 
 import java.io.IOException;
 
+import org.apache.commons.cli2.CommandLine;
+import org.apache.commons.cli2.Group;
+import org.apache.commons.cli2.Option;
+import org.apache.commons.cli2.OptionException;
+import org.apache.commons.cli2.builder.ArgumentBuilder;
+import org.apache.commons.cli2.builder.DefaultOptionBuilder;
+import org.apache.commons.cli2.builder.GroupBuilder;
+import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.log4j.Logger;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyJob;
+import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 
 public class Job {
-  static final String CLUSTERED_POINTS_OUTPUT_DIRECTORY = "/clusteredPoints";
+  /** Logger for this class. */
+  private static final Logger LOG = Logger.getLogger(Job.class);
+
+  private static final String CLUSTERED_POINTS_OUTPUT_DIRECTORY = "/clusteredPoints";
 
   private Job() {
   }
 
   public static void main(String[] args) throws IOException {
-    if (args.length == 7) {
-      String input = args[0];
-      String output = args[1];
-      String measureClassName = args[2];
-      double t1 = Double.parseDouble(args[3]);
-      double t2 = Double.parseDouble(args[4]);
-      double convergenceDelta = Double.parseDouble(args[5]);
-      int maxIterations = Integer.parseInt(args[6]);
+    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    ArgumentBuilder abuilder = new ArgumentBuilder();
+    GroupBuilder gbuilder = new GroupBuilder();
+
+    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder).create();
+    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).create();
+    Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption(obuilder, abuilder).create();
+    Option maxIterOpt = DefaultOptionCreator.maxIterOption(obuilder, abuilder).create();
+    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);    
+
+    Option modelOpt = obuilder.withLongName("distanceClass").withRequired(true).withShortName("d").
+        withArgument(abuilder.withName("distanceClass").withMinimum(1).withMaximum(1).create()).
+        withDescription("The distance measure class name.").create();
+
+
+    Option threshold1Opt = obuilder.withLongName("threshold_1").withRequired(true).withShortName("t1").
+        withArgument(abuilder.withName("threshold_1").withMinimum(1).withMaximum(1).create()).
+        withDescription("The T1 distance threshold.").create();
+
+    Option threshold2Opt = obuilder.withLongName("threshold_2").withRequired(true).withShortName("t2").
+        withArgument(abuilder.withName("threshold_2").withMinimum(1).withMaximum(1).create()).
+        withDescription("The T1 distance threshold.").create();
+
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(modelOpt).
+        withOption(helpOpt).withOption(convergenceDeltaOpt).withOption(threshold1Opt).withOption(maxIterOpt).
+        withOption(threshold2Opt).create();
+
+    try {
+      Parser parser = new Parser();
+      parser.setGroup(group);
+      CommandLine cmdLine = parser.parse(args);
+      if (cmdLine.hasOption(helpOpt)) {
+        CommandLineUtil.printHelp(group);
+        return;
+      }
+
+      String input = cmdLine.getValue(inputOpt, "testdata").toString();
+      String output = cmdLine.getValue(outputOpt, "output").toString();
+      String measureClassName = cmdLine.getValue(modelOpt, "org.apache.mahout.common.distance.EuclideanDistanceMeasure").toString();
+      double t1 = Double.parseDouble(cmdLine.getValue(threshold1Opt, "47.6").toString());
+      double t2 = Double.parseDouble(cmdLine.getValue(threshold2Opt, "1").toString());
+      double convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt, "0.5").toString());
+      int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt, "10").toString());
       runJob(input, output, measureClassName, t1, t2, convergenceDelta,
           maxIterations);
-    } else
-      runJob("testdata", "output",
-          "org.apache.mahout.common.distance.EuclideanDistanceMeasure", 47.6, 1, 0.5, 10);
+    } catch (OptionException e) {
+      LOG.error("Exception parsing command line: ", e);
+      CommandLineUtil.printHelp(group);
+    }
   }
 
   /**

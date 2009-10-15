@@ -68,10 +68,10 @@ public class DirichletDriver {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder);
-    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder);
-    Option maxIterOpt = DefaultOptionCreator.maxIterOption(obuilder, abuilder);
-    Option topicsOpt = DefaultOptionCreator.kOption(obuilder, abuilder);
+    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder).create();
+    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).create();
+    Option maxIterOpt = DefaultOptionCreator.maxIterOption(obuilder, abuilder).create();
+    Option topicsOpt = DefaultOptionCreator.kOption(obuilder, abuilder).create();
     Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
 
     Option mOpt = obuilder.withLongName("alpha").withRequired(true).withShortName("m").
