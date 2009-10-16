@@ -50,11 +50,19 @@ public final class LoadEvaluator {
       if (count > 0) { // Ignore first as a warmup
         recommendationTime.addDatum(end - start);
       }
-      if (++count % 10 == 0) {
-        log.info("Average time per recommendation: " + recommendationTime.getAverage());
+      if (++count % 100 == 0) {
+        logStats(recommendationTime);
       }
     }
-    log.info("Average time per recommendation: " + recommendationTime.getAverage());
+    logStats(recommendationTime);
+  }
+
+  private static void logStats(RunningAverage recommendationTime) {
+    Runtime runtime = Runtime.getRuntime();
+    System.gc();
+    log.info("Average time per recommendation: " + (int) recommendationTime.getAverage() +
+             "ms; approx. memory used: " + ((runtime.totalMemory() - runtime.freeMemory()) / 1000000) + "MB");
+
   }
 
 }
