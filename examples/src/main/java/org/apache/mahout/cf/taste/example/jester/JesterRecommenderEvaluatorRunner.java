@@ -40,8 +40,7 @@ public final class JesterRecommenderEvaluatorRunner {
   public static void main(String... args) throws IOException, TasteException, OptionException {
     RecommenderEvaluator evaluator = new AverageAbsoluteDifferenceRecommenderEvaluator();
     DataModel model;
-    TasteOptionParser parser = new TasteOptionParser();
-    File ratingsFile = parser.getRatings(args);
+    File ratingsFile = TasteOptionParser.getRatings(args);
     if (ratingsFile != null) {
       model = new JesterDataModel(ratingsFile);
     } else {

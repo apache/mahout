@@ -44,8 +44,7 @@ public final class TransposeToByUser {
 
   public static void main(String[] args) throws IOException, OptionException {
 
-    TasteOptionParser parser = new TasteOptionParser();
-    File dataDirectory = parser.getRatings(args);
+    File dataDirectory = TasteOptionParser.getRatings(args);
     File byItemDirectory = new File(dataDirectory, "training_set");
     File byUserDirectory = new File(dataDirectory, "training_set_by_user");
 

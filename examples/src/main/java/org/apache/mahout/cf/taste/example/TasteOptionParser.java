@@ -20,15 +20,17 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
  * 
  * The class is safe to be used in threaded contexts.
  */
-public class TasteOptionParser {
+public final class TasteOptionParser {
+
+  private TasteOptionParser() {
+  }
 
   /**
    * Parse the given command line arguments.
    * @param args the arguments as given to the application.
    * @return the input file if a file was given on the command line, null otherwise. 
-   * */
-  public File getRatings(final String[] args) throws OptionException {
-    File file = null;
+   */
+  public static File getRatings(String[] args) throws OptionException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -49,12 +51,11 @@ public class TasteOptionParser {
 
     if (cmdLine.hasOption(helpOpt)) {
       CommandLineUtil.printHelp(group);
-      System.exit(0);
+      return null;
     }
 
     String prefsFile = cmdLine.getValue(inputOpt).toString();
-    file = new File(prefsFile);
-    return file;
+    return new File(prefsFile);
   }
 
 }
