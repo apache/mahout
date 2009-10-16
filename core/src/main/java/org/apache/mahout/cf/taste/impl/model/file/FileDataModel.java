@@ -64,6 +64,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * and is only useful in the context of an update delta file (see above). Note that if the line is empty or begins with
  * '#' it will be ignored as a comment.</p>
  *
+ * <p>It is also acceptable for the lines to contain additional fields. Fields beyond the third will be ignored.</p>
+ *
  * <p>Finally, for application that have no notion of a preference value (that is, the user simply expresses a
  * preference for an item, but no degree of preference), the caller can simply omit the third token in each line
  * altogether -- for example, "123,ABC".</p>
@@ -246,14 +248,27 @@ public class FileDataModel implements DataModel {
     }
 
     int delimiterOne = line.indexOf((int) delimiter);
-    int delimiterTwo = line.indexOf((int) delimiter, delimiterOne + 1);
-    if (delimiterOne < 0 || delimiterTwo < 0) {
+    if (delimiterOne < 0) {
       throw new IllegalArgumentException("Bad line: " + line);
     }
+    int delimiterTwo = line.indexOf((int) delimiter, delimiterOne + 1);
+    if (delimiterTwo < 0) {
+      throw new IllegalArgumentException("Bad line: " + line);
+    }
+    // Look for beginning of additional, ignored fields:
+    int delimiterThree = line.indexOf((int) delimiter, delimiterTwo + 1);    
 
-    long userID = readUserIDFromString(line.substring(0, delimiterOne));
-    long itemID = readItemIDFromString(line.substring(delimiterOne + 1, delimiterTwo));
-    String preferenceValueString = line.substring(delimiterTwo + 1);
+    String userIDString = line.substring(0, delimiterOne);
+    String itemIDString = line.substring(delimiterOne + 1, delimiterTwo);
+    String preferenceValueString;
+    if (delimiterThree > delimiterTwo) {
+      preferenceValueString = line.substring(delimiterTwo + 1, delimiterThree);
+    } else {
+      preferenceValueString = line.substring(delimiterTwo + 1);
+    }
+
+    long userID = readUserIDFromString(userIDString);
+    long itemID = readItemIDFromString(itemIDString);
 
     if (transpose) {
       long tmp = userID;
@@ -438,7 +453,5 @@ public class FileDataModel implements DataModel {
   public String toString() {
     return "FileDataModel[dataFile:" + dataFile + ']';
   }
-
-
 
 }

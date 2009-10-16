@@ -19,7 +19,7 @@ package org.apache.mahout.cf.taste.impl.eval;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
-import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
+import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.common.SamplingLongPrimitiveIterator;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -39,8 +39,9 @@ public final class LoadEvaluator {
     DataModel dataModel = recommender.getDataModel();
     int numUsers = dataModel.getNumUsers();
     double sampleRate = 1000.0 / numUsers;
-    LongPrimitiveIterator userSampler = SamplingLongPrimitiveIterator.maybeWrapIterator(dataModel.getUserIDs(), sampleRate);
-    RunningAverageAndStdDev recommendationTime = new FullRunningAverageAndStdDev();
+    LongPrimitiveIterator userSampler =
+        SamplingLongPrimitiveIterator.maybeWrapIterator(dataModel.getUserIDs(), sampleRate);
+    RunningAverage recommendationTime = new FullRunningAverageAndStdDev();
     int count = 0;
     while (userSampler.hasNext()) {
       long start = System.currentTimeMillis();
@@ -50,11 +51,10 @@ public final class LoadEvaluator {
         recommendationTime.addDatum(end - start);
       }
       if (++count % 10 == 0) {
-        log.info(recommendationTime.toString());
+        log.info("Average time per recommendation: " + recommendationTime.getAverage());
       }
     }
-    log.info(recommendationTime.toString());
-
+    log.info("Average time per recommendation: " + recommendationTime.getAverage());
   }
 
 }
