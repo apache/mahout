@@ -18,7 +18,6 @@
 package org.apache.mahout.clustering.canopy;
 
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.clustering.ClusterBase;
@@ -36,7 +35,7 @@ import java.util.List;
  * application of some distance metric, and a point total which is the sum of all the points and is used to compute the
  * centroid when needed.
  */
-public class Canopy extends ClusterBase implements Writable {
+public class Canopy extends ClusterBase {
 
   // keys used by Driver, Mapper, Combiner & Reducer
   public static final String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.canopy.measure";

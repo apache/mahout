@@ -152,7 +152,7 @@ public class Step0JobTest extends TestCase {
 
     Job job = new Job();
     job.setInputFormatClass(TextInputFormat.class);
-    TextInputFormat.setInputPaths(job, dataPath);
+    FileInputFormat.setInputPaths(job, dataPath);
 
     setMaxSplitSize(job.getConfiguration(), dataPath, numMaps);
 

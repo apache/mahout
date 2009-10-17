@@ -28,7 +28,6 @@ import org.apache.mahout.classifier.BayesFileFormatter;
 import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.classifier.bayes.algorithm.BayesAlgorithm;
 import org.apache.mahout.classifier.bayes.algorithm.CBayesAlgorithm;
-import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.classifier.bayes.datastore.HBaseBayesDatastore;
 import org.apache.mahout.classifier.bayes.datastore.InMemoryBayesDatastore;
 import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
@@ -98,10 +97,10 @@ public class BayesClassifierMapper extends MapReduceBase implements
   public void configure(JobConf job) {
     try {
       log.info("Bayes Parameter" + job.get("bayes.parameters"));
-      Parameters params = BayesParameters.fromString(job.get("bayes.parameters",""));
+      Parameters params = Parameters.fromString(job.get("bayes.parameters", ""));
       log.info("{}", params.print());
-      Algorithm algorithm = null;
-      Datastore datastore = null;
+      Algorithm algorithm;
+      Datastore datastore;
 
       
       if (params.get("dataSource").equals("hdfs")) {

@@ -222,7 +222,7 @@ public class FileDataModel implements DataModel {
       if (line.length() > 0) {
         processLine(line, data, delimiter);
         int currentCount = count.incrementAndGet();
-        if (currentCount % 100000 == 0) {
+        if (currentCount % 1000000 == 0) {
           log.info("Processed {} lines", currentCount);
         }
       }

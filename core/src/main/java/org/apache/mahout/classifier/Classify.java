@@ -141,8 +141,8 @@ public class Classify {
 
     log.info("Loading model from: {}", params.print());
 
-    Algorithm algorithm = null;
-    Datastore datastore = null;
+    Algorithm algorithm;
+    Datastore datastore;
 
     String classifierType = (String) cmdLine.getValue(typeOpt);
 

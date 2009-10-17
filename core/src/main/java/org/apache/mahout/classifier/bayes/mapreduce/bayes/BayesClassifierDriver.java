@@ -85,7 +85,8 @@ public class BayesClassifierDriver {
     log.info("{}",matrix.summarize());
   }
 
-  private static final ConfusionMatrix readResult(FileSystem fs, Path pathPattern, Configuration conf, BayesParameters params) throws IOException{
+  private static ConfusionMatrix readResult(FileSystem fs, Path pathPattern, Configuration conf, BayesParameters params)
+      throws IOException {
    
     StringTuple key = new StringTuple();
     DoubleWritable value = new DoubleWritable();

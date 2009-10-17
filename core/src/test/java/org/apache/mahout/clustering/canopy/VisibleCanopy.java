@@ -51,9 +51,7 @@ public class VisibleCanopy extends Canopy {
   public String toString() {
     String out = super.toString() + ": ";
     for (Vector pt : points) {
-      {
-        out = pt.asFormatString();
-      }
+      out = pt.asFormatString();
     }
     return out;
   }

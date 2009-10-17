@@ -17,7 +17,6 @@
 package org.apache.mahout.clustering.kmeans;
 
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.clustering.ClusterBase;
@@ -31,7 +30,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.List;
 
-public class Cluster extends ClusterBase implements Writable {
+public class Cluster extends ClusterBase {
 
   private static final String ERROR_UNKNOWN_CLUSTER_FORMAT="Unknown cluster format:\n";
     
@@ -86,7 +85,6 @@ public class Cluster extends ClusterBase implements Writable {
    */
   public static Cluster decodeCluster(String formattedString) {
     final int beginIndex = formattedString.indexOf('{');
-    final Cluster cluster;
     if (beginIndex <= 0) {
       throw new IllegalArgumentException(ERROR_UNKNOWN_CLUSTER_FORMAT + formattedString);
     }
@@ -94,6 +92,7 @@ public class Cluster extends ClusterBase implements Writable {
     final String center = formattedString.substring(beginIndex);
     final char firstChar = id.charAt(0);
     final boolean startsWithV = firstChar == 'V';
+    final Cluster cluster;
     if (firstChar == 'C' || startsWithV) {
       final int clusterId = Integer.parseInt(formattedString.substring(1,
         beginIndex - 2));

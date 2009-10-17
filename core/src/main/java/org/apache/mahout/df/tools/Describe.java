@@ -86,7 +86,7 @@ public class Describe {
 
       if (cmdLine.hasOption(helpOpt)) {
         CommandLineUtil.printHelp(group);
-        System.exit(-1);
+        return;
       }
 
       String dataPath = cmdLine.getValue(pathOpt).toString();
@@ -101,7 +101,6 @@ public class Describe {
     } catch (OptionException e) {
       System.err.println("Exception : " + e);
       CommandLineUtil.printHelp(group);
-      System.exit(-1);
     }
   }
 

@@ -19,10 +19,7 @@ package org.apache.mahout.common.distance;
 
 import org.apache.mahout.matrix.Vector;
 
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
-
 
 /**
  * Tanimoto coefficient implementation.
@@ -48,7 +45,7 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
     double denominator = dot(a, a) + dot(b, b) - ab;
     if(denominator < ab) {  // correct for fp round-off: distance >= 0
       denominator = ab;
-    };
+    }
     if(denominator > 0) {
         // denom == 0 only when dot(a,a) == dot(b,b) == dot(a,b) == 0
       return 1 - ab / denominator;
@@ -59,16 +56,15 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
   
   public double dot(Vector a, Vector b) {
     Iterator<Vector.Element> it = a.iterateNonZero();
-    Vector.Element el = null;
+    Vector.Element el;
     Vector weights = getWeights();
     double dot = 0;
-    while(it.hasNext() && (el = it.next()) != null) {
-      try {
-      dot += el.get() * (a == b ? el.get() : b.getQuick(el.index())) * (weights == null ? 1.0 : weights.getQuick(el.index()));
-      } catch (NullPointerException npe) {
-        System.out.println(a.asFormatString() + "\n" + b.asFormatString() + "\n" + weights.asFormatString());
-        throw npe;
+    while (it.hasNext() && (el = it.next()) != null) {
+      double value = el.get() * (a == b ? el.get() : b.getQuick(el.index()));
+      if (weights != null) {
+        value *= weights.getQuick(el.index());
       }
+      dot += value;
     }
     return dot;
   }

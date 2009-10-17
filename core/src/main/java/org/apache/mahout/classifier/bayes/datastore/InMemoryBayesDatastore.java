@@ -72,8 +72,8 @@ public class InMemoryBayesDatastore implements Datastore {
           "thetaNormalizer", label)));
     }
     for (String label : labels) {
-      System.out.println( label + " " +vectorGetCell(
-          "thetaNormalizer", label) +" " +thetaNormalizer + " " + vectorGetCell(
+      System.out.println( label + ' ' +vectorGetCell(
+          "thetaNormalizer", label) + ' ' +thetaNormalizer + ' ' + vectorGetCell(
           "thetaNormalizer", label)/thetaNormalizer);
     }
   }

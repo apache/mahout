@@ -313,9 +313,7 @@ public class VectorTest extends TestCase {
   private static Vector randomSparseVector(Random rnd) {
     SparseVector v1 = new SparseVector(50000);
     for (int i = 0; i < 1000; i++) {
-      {
-        v1.setQuick(rnd.nextInt(50000), rnd.nextDouble());
-      }
+      v1.setQuick(rnd.nextInt(50000), rnd.nextDouble());
     }
     return v1;
   }
@@ -368,9 +366,7 @@ public class VectorTest extends TestCase {
     double[] values = {1.1, 2.2, 3.3};
     Vector test = new SparseVector(3);
     for (int i = 0; i < values.length; i++) {
-      {
-        test.set(i, values[i]);
-      }
+      test.set(i, values[i]);
     }
     Map<String, Integer> bindings = new HashMap<String, Integer>();
     bindings.put("Fee", 0);

@@ -17,7 +17,6 @@
 
 package org.apache.mahout.cf.taste.impl.similarity;
 
-import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.model.DataModel;
 
 /** <p>Tests {@link SpearmanCorrelationSimilarity}.</p> */

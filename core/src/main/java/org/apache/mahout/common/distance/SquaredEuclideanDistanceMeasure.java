@@ -24,7 +24,6 @@ import org.apache.mahout.common.parameters.Parameter;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 
 /**
  * Like {@link EuclideanDistanceMeasure} but it does not take the square root. <p/> Thus, it is

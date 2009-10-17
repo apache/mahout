@@ -61,7 +61,7 @@ public abstract class DefaultDistanceMeasureTest extends TestCase {
     compare(distanceMeasure, vectors);
   }
 
-  private void compare(DistanceMeasure distanceMeasure, Vector[] vectors) {
+  private static void compare(DistanceMeasure distanceMeasure, Vector[] vectors) {
      double[][] distanceMatrix = new double[4][4];
 
      for (int a = 0; a < 4; a++) {
@@ -87,7 +87,7 @@ public abstract class DefaultDistanceMeasureTest extends TestCase {
         assertTrue("Distance between vectors less than zero: " 
                    + distanceMatrix[a][b] + " = " + distanceMeasure.toString() + 
                    ".distance("+ vectors[a].asFormatString() + ", " 
-                   + vectors[b].asFormatString() + ")", 
+                   + vectors[b].asFormatString() + ')',
                    distanceMatrix[a][b] >= 0);
         if(vectors[a].plus(vectors[b]).norm(2) == 0 && vectors[a].norm(2) > 0) {
           assertTrue("Distance from v to -v is equal to zero" 

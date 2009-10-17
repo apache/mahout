@@ -62,7 +62,6 @@ public class TestMapReduce extends TestCase {
     double topicSmoothing = 50.0 / numTopics; // whatever
     Matrix m = new DenseMatrix(numTopics,numWords);
     double[] logTotals = new double[numTopics];
-    double ll = Double.NEGATIVE_INFINITY; // TODO this is not updated in loop?
     for(int k = 0; k < numTopics; ++k) {
       double total = 0.0; // total number of pseudo counts we made
       for(int w = 0; w < numWords; ++w) {
@@ -75,6 +74,7 @@ public class TestMapReduce extends TestCase {
       logTotals[k] = Math.log(total);
     }
 
+    double ll = Double.NEGATIVE_INFINITY;
     return new LDAState(numTopics,numWords,topicSmoothing,m,logTotals,ll);
   }
 

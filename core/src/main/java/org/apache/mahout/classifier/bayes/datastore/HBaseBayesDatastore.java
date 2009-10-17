@@ -76,9 +76,9 @@ public class HBaseBayesDatastore implements Datastore {
           BayesConstants.LABEL_THETA_NORMALIZER, label)));
     }
     for (String label : labels) {
-      System.out.println(label + " "
+      System.out.println(label + ' '
           + getWeightFromHbase(BayesConstants.LABEL_THETA_NORMALIZER, label)
-          + " " + thetaNormalizer + " "
+          + ' ' + thetaNormalizer + ' '
           + getWeightFromHbase(BayesConstants.LABEL_THETA_NORMALIZER, label)
           / thetaNormalizer);
     }
@@ -91,7 +91,7 @@ public class HBaseBayesDatastore implements Datastore {
       throws InvalidDatastoreException {
     if (keys.containsKey(name))
       return keys.get(name);
-    Result r = null;
+    Result r;
     if (name.equals("labelWeight")) {
       r = getRowFromHbase(BayesConstants.LABEL_SUM);
     } else if (name.equals("thetaNormalizer")) {

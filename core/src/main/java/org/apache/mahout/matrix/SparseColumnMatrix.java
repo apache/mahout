@@ -182,8 +182,7 @@ public class SparseColumnMatrix extends AbstractMatrix {
   @Override
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
-    int[] card = {in.readInt(), in.readInt()};
-    this.cardinality = card;
+    this.cardinality = new int[]{in.readInt(), in.readInt()};
     int colSize = in.readInt();
     this.columns = new Vector[colSize];
     for (int col = 0; col < colSize; col++) {

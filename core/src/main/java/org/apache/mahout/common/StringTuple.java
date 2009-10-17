@@ -21,20 +21,16 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 
 /**
  * An Ordered List of Strings which can be used in a Hadoop Map/Reduce Job
- * 
- * 
  */
-public class StringTuple implements Writable, WritableComparable<StringTuple> {
+public final class StringTuple implements WritableComparable<StringTuple> {
 
   private List<String> tuple = new ArrayList<String>();
 
@@ -45,14 +41,16 @@ public class StringTuple implements Writable, WritableComparable<StringTuple> {
     add(firstEntry);
   }
   
-  public StringTuple(Collection<String> entries) {
-    for(String entry: entries)
+  public StringTuple(Iterable<String> entries) {
+    for (String entry : entries) {
       add(entry);
+    }
   }
-  
+
   public StringTuple(String[] entries) {
-    for(String entry: entries)
+    for (String entry : entries) {
       add(entry);
+    }
   }
 
   /**
@@ -107,7 +105,7 @@ public class StringTuple implements Writable, WritableComparable<StringTuple> {
   @Override
   public String toString() {
     return tuple.toString();
-  };
+  }
 
   @Override
   public int hashCode() {
@@ -155,14 +153,22 @@ public class StringTuple implements Writable, WritableComparable<StringTuple> {
 
   @Override
   public int compareTo(StringTuple otherTuple) {
-    int min = Math.min(this.length(), otherTuple.length());
+    int thisLength = length();
+    int otherLength = otherTuple.length();
+    int min = Math.min(thisLength, otherLength);
     for (int i = 0; i < min; i++) {
       int ret = this.tuple.get(i).compareTo(otherTuple.stringAt(i));
-      if (ret == 0)
-        continue;
-      return ret;
+      if (ret != 0) {
+        return ret;
+      }
     }
-    return this.length() - otherTuple.length();
+    if (thisLength < otherLength) {
+      return -1;
+    } else if (thisLength > otherLength) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 
 }

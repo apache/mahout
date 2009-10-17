@@ -23,7 +23,7 @@ import java.util.NoSuchElementException;
  * While long[] is an Iterable, it is not an Iterable&lt;Long&gt;. This adapter class
  * addresses that.
  */
-public final class LongPrimitiveArrayIterator implements LongPrimitiveIterator, SkippingIterator<Long> {
+public final class LongPrimitiveArrayIterator implements LongPrimitiveIterator {
 
   private final long[] array;
   private int position;

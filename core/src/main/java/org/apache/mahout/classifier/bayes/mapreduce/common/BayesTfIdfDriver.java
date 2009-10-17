@@ -108,7 +108,7 @@ public class BayesTfIdfDriver implements BayesJob {
     if (params.get("dataSource").equals("hbase")) {
       HBaseConfiguration hc = new HBaseConfiguration(new Configuration());
       HTableDescriptor ht = new HTableDescriptor(output);
-      HColumnDescriptor hcd = new HColumnDescriptor(BayesConstants.HBASE_COLUMN_FAMILY+":");
+      HColumnDescriptor hcd = new HColumnDescriptor(BayesConstants.HBASE_COLUMN_FAMILY+ ':');
       hcd.setBloomfilter(true);
       hcd.setInMemory(true);
       hcd.setMaxVersions(1);

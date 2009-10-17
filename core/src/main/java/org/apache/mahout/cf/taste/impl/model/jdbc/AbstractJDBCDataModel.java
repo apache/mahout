@@ -618,7 +618,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
    * only release database resources after {@link #hasNext()} has been called and has returned <code>false</code>;
    * callers should make sure to "drain" the entire set of data to avoid tying up database resources.</p>
    */
-  private final class ResultSetIDIterator implements LongPrimitiveIterator, SkippingIterator<Long> {
+  private final class ResultSetIDIterator implements LongPrimitiveIterator {
 
     private final Connection connection;
     private final Statement statement;

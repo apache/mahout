@@ -22,13 +22,12 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.StringTokenizer;
 
-import org.apache.hadoop.io.Writable;
 import org.apache.mahout.df.data.Instance;
 
 /**
  * Represents a Leaf node
  */
-public class Leaf extends Node implements Writable {
+public class Leaf extends Node {
   private int label;
 
   protected Leaf() {

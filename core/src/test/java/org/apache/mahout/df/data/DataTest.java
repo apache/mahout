@@ -278,6 +278,7 @@ public class DataTest extends TestCase {
     sData = Utils.double2String(source);
     dataset = DataLoader.generateDataset(descriptor, sData);
     data = DataLoader.loadData(dataset, sData);
+    // TODO code1 is not used?
     code1 = dataset.labelCode(Double.toString(label1));
     int code2 = dataset.labelCode(Double.toString(label2));
 

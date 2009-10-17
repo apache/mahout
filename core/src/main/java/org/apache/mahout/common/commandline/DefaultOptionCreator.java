@@ -112,9 +112,7 @@ public class DefaultOptionCreator {
    * Returns a default command line option for help.
    * */
   public static Option helpOption(DefaultOptionBuilder obuilder) {
-    Option helpOpt = obuilder.withLongName("help").
-    withDescription("Print out help").withShortName("h").create();
-    return helpOpt;
+    return obuilder.withLongName("help").withDescription("Print out help").withShortName("h").create();
   }
 
 }

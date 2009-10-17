@@ -147,7 +147,7 @@ public class PartialSequentialBuilder extends PartialBuilder {
   @Override
   protected DecisionForest parseOutput(JobConf job, PredictionCallback callback)
       throws IOException {
-    int numMaps = job.getNumMapTasks();
+    //int numMaps = job.getNumMapTasks();
 
     DecisionForest forest = processOutput(firstOutput.keys, firstOutput.values, callback);
 

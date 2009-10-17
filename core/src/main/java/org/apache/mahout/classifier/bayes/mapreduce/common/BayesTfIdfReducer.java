@@ -46,9 +46,6 @@ public class BayesTfIdfReducer extends MapReduceBase implements
       .getLogger(BayesTfIdfReducer.class);
 
   private HTable table;
-  private HBaseConfiguration HBconf; //reloading configuration causes 
-                                     //a new htable session to get 
-                                     //created(from HBASE IRC)
   
   boolean useHbase = false;
 
@@ -112,7 +109,7 @@ public class BayesTfIdfReducer extends MapReduceBase implements
       else
         return;
 
-      HBconf = new HBaseConfiguration(job);
+      HBaseConfiguration HBconf = new HBaseConfiguration(job);
 
       table = new HTable(HBconf, job.get("output.table"));
 

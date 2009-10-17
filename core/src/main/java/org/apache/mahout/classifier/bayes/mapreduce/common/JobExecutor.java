@@ -35,6 +35,9 @@ public class JobExecutor {
   /** Logger for this class. */
   private static final Logger log = LoggerFactory.getLogger(BayesDriver.class);
 
+  private JobExecutor() {
+  }
+
   /**
    * Execute a bayes classification job. Input and output path are parsed from
    * the input parameters.

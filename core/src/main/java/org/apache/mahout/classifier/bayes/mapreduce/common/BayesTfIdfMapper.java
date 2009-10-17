@@ -41,10 +41,10 @@ public class BayesTfIdfMapper extends MapReduceBase implements
 
   private Map<String, Double> labelDocumentCounts = null;
 
-  private static StringTuple vocabCount = new StringTuple(
+  private static final StringTuple vocabCount = new StringTuple(
       BayesConstants.FEATURE_SET_SIZE);
 
-  private static DoubleWritable one = new DoubleWritable(1.0d);
+  private static final DoubleWritable one = new DoubleWritable(1.0);
 
   /**
    * We need to calculate the Tf-Idf of each feature in each label
