@@ -27,6 +27,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.OutputLogFilter;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.TimesFunction;
@@ -72,7 +73,7 @@ public class DirichletMapper extends MapReduceBase implements
           Integer.parseInt(numClusters), Double.parseDouble(alpha_0));
       Path path = new Path(statePath);
       FileSystem fs = FileSystem.get(path.toUri(), job);
-      FileStatus[] status = fs.listStatus(path);
+      FileStatus[] status = fs.listStatus(path, new OutputLogFilter());
       for (FileStatus s : status) {
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(),
             job);
