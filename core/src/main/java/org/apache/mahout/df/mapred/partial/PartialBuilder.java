@@ -149,9 +149,6 @@ public class PartialBuilder extends Builder {
   protected static void processOutput(JobConf job, Path outputPath,
       int[] firstIds, TreeID[] keys, Node[] trees, PredictionCallback callback)
       throws IOException {
-    // TODO doesn't this assert throw NPE? looks like args are nullable
-    assert keys.length == trees.length : "keys.length != trees.length";
-    
     FileSystem fs = outputPath.getFileSystem(job);
 
     Path[] outfiles = DFUtils.listOutputFiles(fs, outputPath);
