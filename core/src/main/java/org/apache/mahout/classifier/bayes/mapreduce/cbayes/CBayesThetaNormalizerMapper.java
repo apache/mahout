@@ -26,6 +26,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesConstants;
+import org.apache.mahout.common.Parameters;
 import org.apache.mahout.common.StringTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ public class CBayesThetaNormalizerMapper extends MapReduceBase implements
   private Map<String, Double> labelWeightSum = null;
   private double sigma_jSigma_k = 0.0;
   private double vocabCount = 0.0;
-
+  private double alpha_i = 1.0;
   /**
    * We need to calculate the idf of each feature in each label
    *
@@ -55,7 +56,7 @@ public class CBayesThetaNormalizerMapper extends MapReduceBase implements
 
     if (key.stringAt(0).equals(BayesConstants.FEATURE_SUM)) { // if it is from the Sigma_j folder
 
-      double alpha_i = 1.0;
+      
       for (Map.Entry<String, Double> stringDoubleEntry : labelWeightSum.entrySet()) {
         String label = stringDoubleEntry.getKey();
         double weight = Math.log((value.get() + alpha_i) / (sigma_jSigma_k - stringDoubleEntry.getValue() + vocabCount));
@@ -110,6 +111,9 @@ public class CBayesThetaNormalizerMapper extends MapReduceBase implements
         String vocabCountString = stringifier.toString(vocabCount);
         vocabCountString = job.get("cnaivebayes.vocabCount", vocabCountString);
         vocabCount = stringifier.fromString(vocabCountString);
+        
+        Parameters params = Parameters.fromString(job.get("bayes.parameters", ""));
+        alpha_i = Double.valueOf(params.get("alpha_i", "1.0"));
 
       }
     } catch (IOException ex) {

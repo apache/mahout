@@ -33,8 +33,6 @@ import org.apache.mahout.classifier.bayes.interfaces.Datastore;
 
 public class BayesAlgorithm implements Algorithm{
 
-  private static final double alpha_i = 1.0;
-
   @Override
   public ClassifierResult classifyDocument(String[] document,
       Datastore datastore, String defaultCategory)
@@ -90,7 +88,7 @@ public class BayesAlgorithm implements Algorithm{
     double result = datastore.getWeight("weight", feature, label);
     double vocabCount = datastore.getWeight("sumWeight", "vocabCount");
     double sumLabelWeight = datastore.getWeight("labelWeight", label);    
-    double numerator = result + alpha_i;
+    double numerator = result + datastore.getWeight("params", "alpha_i");
     double denominator = (sumLabelWeight + vocabCount);
     double weight = Math.log(numerator / denominator);
     result = -weight;

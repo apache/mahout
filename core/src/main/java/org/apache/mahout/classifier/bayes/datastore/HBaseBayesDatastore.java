@@ -58,10 +58,12 @@ public class HBaseBayesDatastore implements Datastore {
     this.hbaseTable = hbaseTable;
     this.parameters = params;
     this.tableCache = new HybridCache<String, Result>(50000, 100000);
+    alpha_i = Double.valueOf(parameters.get("alpha_i", "1.0"));
   }
 
   protected double thetaNormalizer = 1.0d;
 
+  protected double alpha_i = 1.0d;
   @Override
   public void initialize() throws InvalidDatastoreException {
     config = new HBaseConfiguration(new Configuration());
@@ -142,6 +144,9 @@ public class HBaseBayesDatastore implements Datastore {
     } else if (vectorName.equals("thetaNormalizer")) {
       return getWeightFromHbase(BayesConstants.LABEL_THETA_NORMALIZER, index)
           / thetaNormalizer;
+    } else if (vectorName.equals("params")) {
+      if(index.equals("alpha_i")) return alpha_i;
+      else throw new InvalidDatastoreException();
     } else {
 
       throw new InvalidDatastoreException();

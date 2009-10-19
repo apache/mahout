@@ -18,6 +18,7 @@
 package org.apache.mahout.classifier.bayes;
 
 import org.apache.mahout.classifier.ClassifierResult;
+
 import org.apache.mahout.classifier.ResultAnalyzer;
 import org.apache.mahout.classifier.bayes.algorithm.BayesAlgorithm;
 import org.apache.mahout.classifier.bayes.algorithm.CBayesAlgorithm;
@@ -29,7 +30,9 @@ import org.apache.mahout.classifier.bayes.interfaces.Algorithm;
 import org.apache.mahout.classifier.bayes.interfaces.Datastore;
 import org.apache.mahout.classifier.bayes.mapreduce.bayes.BayesClassifierDriver;
 import org.apache.mahout.classifier.bayes.model.ClassifierContext;
+import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.TimingStatistics;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.nlp.NGrams;
 import org.apache.mahout.common.FileLineIterable;
 import org.apache.commons.cli2.Option;
@@ -50,6 +53,12 @@ import java.util.List;
 import java.util.Map;
 import java.nio.charset.Charset;
 
+/**
+ * Test the Naive Bayes classifier with improved weighting
+ * <p/>
+ * To run the twenty newsgroups example: refer
+ * http://cwiki.apache.org/MAHOUT/twentynewsgroups.html
+ */
 public class TestClassifier {
 
   private static final Logger log = LoggerFactory
@@ -83,101 +92,124 @@ public class TestClassifier {
         .withDescription("The directory where test documents resides in")
         .withShortName("d").create();
 
+    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
+
     Option encodingOpt = obuilder.withLongName("encoding").withArgument(
         abuilder.withName("encoding").withMinimum(1).withMaximum(1).create())
         .withDescription("The file encoding.  Defaults to UTF-8")
         .withShortName("e").create();
 
-    Option analyzerOpt = obuilder.withLongName("analyzer").withArgument(
-        abuilder.withName("analyzer").withDefault(
-            "org.apache.lucene.analysis.standard.StandardAnalyzer")
-            .withMinimum(1).withMaximum(1).create()).withDescription(
-        "The Analyzer to use").withShortName("a").create();
-
     Option defaultCatOpt = obuilder.withLongName("defaultCat").withArgument(
         abuilder.withName("defaultCat").withMinimum(1).withMaximum(1).create())
-        .withDescription("The default category").withShortName("default")
-        .create();
+        .withDescription("The default category Default Value: unknown")
+        .withShortName("default").create();
 
     Option gramSizeOpt = obuilder.withLongName("gramSize").withRequired(true)
         .withArgument(
             abuilder.withName("gramSize").withMinimum(1).withMaximum(1)
-                .create()).withDescription("Size of the n-gram").withShortName(
-            "ng").create();
+                .create()).withDescription(
+            "Size of the n-gram. Default Value: 1").withShortName("ng")
+        .create();
+
+    Option alphaOpt = obuilder.withLongName("alpha").withRequired(false)
+        .withArgument(
+            abuilder.withName("a").withMinimum(1).withMaximum(1).create())
+        .withDescription("Smoothing parameter Default Value: 1.0")
+        .withShortName("a").create();
+
     Option verboseOutputOpt = obuilder.withLongName("verbose").withRequired(
         false).withDescription(
         "Output which values were correctly and incorrectly classified")
         .withShortName("v").create();
+
     Option typeOpt = obuilder.withLongName("classifierType").withRequired(true)
         .withArgument(
             abuilder.withName("classifierType").withMinimum(1).withMaximum(1)
-                .create()).withDescription("Type of classifier: bayes|cbayes")
+                .create()).withDescription(
+            "Type of classifier: bayes|cbayes. Default Value: bayes")
         .withShortName("type").create();
 
     Option dataSourceOpt = obuilder.withLongName("dataSource").withRequired(
         true).withArgument(
         abuilder.withName("dataSource").withMinimum(1).withMaximum(1).create())
-        .withDescription("Location of model: hdfs|hbase").withShortName(
-            "source").create();
+        .withDescription("Location of model: hdfs|hbase Default Value: hdfs")
+        .withShortName("source").create();
 
-    Option methodOpt = obuilder.withLongName("method").withRequired(true)
+    Option methodOpt = obuilder
+        .withLongName("method")
+        .withRequired(true)
         .withArgument(
             abuilder.withName("method").withMinimum(1).withMaximum(1).create())
-        .withDescription("Method of Classification: sequential|mapreduce")
+        .withDescription(
+            "Method of Classification: sequential|mapreduce. Default Value: sequential")
         .withShortName("method").create();
 
-    Group group = gbuilder.withName("Options").withOption(analyzerOpt)
-        .withOption(defaultCatOpt).withOption(dirOpt).withOption(encodingOpt)
-        .withOption(gramSizeOpt).withOption(pathOpt).withOption(typeOpt)
-        .withOption(dataSourceOpt).withOption(methodOpt).withOption(
-            verboseOutputOpt).create();
+    Group group = gbuilder.withName("Options").withOption(defaultCatOpt)
+        .withOption(dirOpt).withOption(encodingOpt).withOption(gramSizeOpt)
+        .withOption(pathOpt).withOption(typeOpt).withOption(dataSourceOpt)
+        .withOption(helpOpt).withOption(methodOpt).withOption(verboseOutputOpt)
+        .withOption(alphaOpt).create();
 
-    Parser parser = new Parser();
-    parser.setGroup(group);
-    CommandLine cmdLine = parser.parse(args);
+    try {
+      Parser parser = new Parser();
+      parser.setGroup(group);
+      CommandLine cmdLine = parser.parse(args);
 
-    int gramSize = 1;
-    if (cmdLine.hasOption(gramSizeOpt)) {
-      gramSize = Integer.parseInt((String) cmdLine.getValue(gramSizeOpt));
+      if (cmdLine.hasOption(helpOpt)) {
+        CommandLineUtil.printHelp(group);
+        System.exit(0);
+      }
 
+      int gramSize = 1;
+      if (cmdLine.hasOption(gramSizeOpt)) {
+        gramSize = Integer.parseInt((String) cmdLine.getValue(gramSizeOpt));
+
+      }
+      BayesParameters params = new BayesParameters(gramSize);
+
+      String modelBasePath = (String) cmdLine.getValue(pathOpt);
+
+      String classifierType = (String) cmdLine.getValue(typeOpt);
+      String dataSource = (String) cmdLine.getValue(dataSourceOpt);
+
+      String defaultCat = "unknown";
+      if (cmdLine.hasOption(defaultCatOpt)) {
+        defaultCat = (String) cmdLine.getValue(defaultCatOpt);
+      }
+
+      String encoding = "UTF-8";
+      if (cmdLine.hasOption(encodingOpt)) {
+        encoding = (String) cmdLine.getValue(encodingOpt);
+      }
+
+      String alpha_i = "1.0";
+      if (cmdLine.hasOption(alphaOpt)) {
+        alpha_i = (String) cmdLine.getValue(alphaOpt);
+      }
+
+      boolean verbose = cmdLine.hasOption(verboseOutputOpt);
+
+      String testDirPath = (String) cmdLine.getValue(dirOpt);
+
+      String classificationMethod = (String) cmdLine.getValue(methodOpt);
+
+      params.set("verbose", Boolean.toString(verbose));
+      params.set("basePath", modelBasePath);
+      params.set("classifierType", classifierType);
+      params.set("dataSource", dataSource);
+      params.set("defaultCat", defaultCat);
+      params.set("encoding", encoding);
+      params.set("alpha_i", alpha_i);
+      params.set("testDirPath", testDirPath);
+
+      if (classificationMethod.equalsIgnoreCase("sequential"))
+        classifySequential(params);
+      else if (classificationMethod.equalsIgnoreCase("mapreduce"))
+        classifyParallel(params);
+    } catch (OptionException e) {
+      CommandLineUtil.printHelp(group);
+      System.exit(0);
     }
-    BayesParameters params = new BayesParameters(gramSize);
-
-    String modelBasePath = (String) cmdLine.getValue(pathOpt);
-
-    String classifierType = (String) cmdLine.getValue(typeOpt);
-    String dataSource = (String) cmdLine.getValue(dataSourceOpt);
-
-    String defaultCat = "unknown";
-    if (cmdLine.hasOption(defaultCatOpt)) {
-      defaultCat = (String) cmdLine.getValue(defaultCatOpt);
-    }
-
-    String encoding = "UTF-8";
-    if (cmdLine.hasOption(encodingOpt)) {
-      encoding = (String) cmdLine.getValue(encodingOpt);
-    }
-
-    boolean verbose = cmdLine.hasOption(verboseOutputOpt);
-
-    String className = (String) cmdLine.getValue(analyzerOpt);
-
-    String testDirPath = (String) cmdLine.getValue(dirOpt);
-
-    String classificationMethod = (String) cmdLine.getValue(methodOpt);
-
-    params.set("verbose", Boolean.toString(verbose));
-    params.set("basePath", modelBasePath);
-    params.set("classifierType", classifierType);
-    params.set("dataSource", dataSource);
-    params.set("defaultCat", defaultCat);
-    params.set("analyzer", className);
-    params.set("encoding", encoding);
-    params.set("testDirPath", testDirPath);
-    if (classificationMethod.equalsIgnoreCase("sequential"))
-      classifySequential(params);
-    else if (classificationMethod.equalsIgnoreCase("mapreduce"))
-      classifyParallel(params);
   }
 
   public static void classifySequential(BayesParameters params)

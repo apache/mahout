@@ -26,6 +26,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesConstants;
+import org.apache.mahout.common.Parameters;
 import org.apache.mahout.common.StringTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ public class BayesThetaNormalizerMapper extends MapReduceBase implements
   private Map<String, Double> labelWeightSum = null;
   private double sigma_jSigma_k = 0.0;
   private double vocabCount = 0.0;
-  //private final double alpha_i = 1.0;
+  private double alpha_i = 1.0;
 
   /**
    * We need to calculate the thetaNormalization factor of each label
@@ -58,7 +59,7 @@ public class BayesThetaNormalizerMapper extends MapReduceBase implements
     String label = key.stringAt(1);
 
     reporter.setStatus("Bayes Theta Normalizer Mapper: " + label);
-    double alpha_i = 1.0;
+    
     double weight = Math.log((value.get() + alpha_i) / (labelWeightSum.get(label) + vocabCount));
     StringTuple thetaNormalizerTuple = new StringTuple(BayesConstants.LABEL_THETA_NORMALIZER);
     thetaNormalizerTuple.add(label);
@@ -89,6 +90,9 @@ public class BayesThetaNormalizerMapper extends MapReduceBase implements
         String vocabCountString = stringifier.toString(vocabCount);
         vocabCountString = job.get("cnaivebayes.vocabCount", vocabCountString);
         vocabCount = stringifier.fromString(vocabCountString);
+        
+        Parameters params = Parameters.fromString(job.get("bayes.parameters", ""));
+        alpha_i = Double.valueOf(params.get("alpha_i", "1.0"));
 
       }
     } catch (IOException ex) {

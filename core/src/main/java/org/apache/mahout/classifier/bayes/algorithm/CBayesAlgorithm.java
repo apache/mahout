@@ -33,8 +33,6 @@ import org.apache.mahout.classifier.bayes.interfaces.Datastore;
 
 public class CBayesAlgorithm implements Algorithm {
 
-  private static final double alpha_i = 1.0;
-
   @Override
   public ClassifierResult classifyDocument(String[] document,
       Datastore datastore, String defaultCategory)
@@ -96,7 +94,7 @@ public class CBayesAlgorithm implements Algorithm {
 
     double thetaNormalizer = datastore.getWeight("thetaNormalizer", label);
 
-    double numerator = sigma_j - result + alpha_i;
+    double numerator = sigma_j - result + datastore.getWeight("params", "alpha_i");
     double denominator = (sigma_jSigma_k - sigma_k + vocabCount);
     
     double weight = Math.log(numerator / denominator);

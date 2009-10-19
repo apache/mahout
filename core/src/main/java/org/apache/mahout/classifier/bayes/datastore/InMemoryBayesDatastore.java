@@ -33,12 +33,17 @@ import org.apache.mahout.common.Parameters;
 public class InMemoryBayesDatastore implements Datastore {
 
   final Map<String, Map<String, Map<String, Double>>> matrices = new HashMap<String, Map<String, Map<String, Double>>>();
+
   final Map<String, Map<String, Double>> vectors = new HashMap<String, Map<String, Double>>();
+
   Parameters params = null;
+
   protected double thetaNormalizer = 1.0d;
 
+  protected double alpha_i = 1.0d;
+
   public InMemoryBayesDatastore(Parameters params) {
-    
+
     matrices.put("weight", new HashMap<String, Map<String, Double>>());
     vectors.put("sumWeight", new HashMap<String, Double>());
     matrices.put("weight", new HashMap<String, Map<String, Double>>());
@@ -52,7 +57,7 @@ public class InMemoryBayesDatastore implements Datastore {
         + "/trainer-weights/Sigma_kSigma_j/part-*");
     params.set("thetaNormalizer", basePath + "/trainer-thetaNormalizer/part-*");
     params.set("weight", basePath + "/trainer-tfIdf/trainer-tfIdf/part-*");
-
+    alpha_i = Double.valueOf(params.get("alpha_i", "1.0"));
   }
 
   @Override
@@ -64,7 +69,7 @@ public class InMemoryBayesDatastore implements Datastore {
           .toUri(), conf), params, conf);
     } catch (IOException e) {
       throw new InvalidDatastoreException(e.getMessage());
-    }    
+    }
     updateVocabCount();
     Collection<String> labels = getKeys("thetaNormalizer");
     for (String label : labels) {
@@ -72,9 +77,9 @@ public class InMemoryBayesDatastore implements Datastore {
           "thetaNormalizer", label)));
     }
     for (String label : labels) {
-      System.out.println( label + ' ' +vectorGetCell(
-          "thetaNormalizer", label) + ' ' +thetaNormalizer + ' ' + vectorGetCell(
-          "thetaNormalizer", label)/thetaNormalizer);
+      System.out.println(label + ' ' + vectorGetCell("thetaNormalizer", label)
+          + ' ' + thetaNormalizer + ' '
+          + vectorGetCell("thetaNormalizer", label) / thetaNormalizer);
     }
   }
 
@@ -93,8 +98,12 @@ public class InMemoryBayesDatastore implements Datastore {
   @Override
   public double getWeight(String vectorName, String index)
       throws InvalidDatastoreException {
-    if(vectorName.equals("thetaNormalizer"))
-      return  vectorGetCell(vectorName, index)/thetaNormalizer;
+    if (vectorName.equals("thetaNormalizer"))
+      return vectorGetCell(vectorName, index) / thetaNormalizer;
+    else if (vectorName.equals("params")) {
+      if(index.equals("alpha_i")) return alpha_i;
+      else throw new InvalidDatastoreException();
+    } 
     return vectorGetCell(vectorName, index);
   }
 
@@ -173,7 +182,7 @@ public class InMemoryBayesDatastore implements Datastore {
   public void setSigma_jSigma_k(double weight) {
     vectorPutCell("sumWeight", "sigma_jSigma_k", weight);
   }
-  
+
   public void updateVocabCount() {
     vectorPutCell("sumWeight", "vocabCount", sizeOfMatrix("weight"));
   }
