@@ -111,8 +111,8 @@ public class ParallelFPGrowthReducer extends
     }
     maxHeapSize = Integer.valueOf(params.get("maxHeapSize", "50"));
     minSupport = Integer.valueOf(params.get("minSupport", "3"));
-    FPTreeDepthCache.FirstLevelCacheSize = Integer.valueOf(params
+    FPTreeDepthCache.firstLevelCacheSize = Integer.valueOf(params
         .get("treeCacheSize", Integer
-            .toString(FPTreeDepthCache.FirstLevelCacheSize)));
+            .toString(FPTreeDepthCache.firstLevelCacheSize)));
   }
 }

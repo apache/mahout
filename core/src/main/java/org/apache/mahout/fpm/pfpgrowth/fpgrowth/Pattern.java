@@ -20,7 +20,7 @@ package org.apache.mahout.fpm.pfpgrowth.fpgrowth;
 import java.io.Serializable;
 import java.util.Arrays;
 
-public class Pattern implements Serializable, Cloneable {
+public class Pattern implements Serializable {
 
   private static final long serialVersionUID = 8698199782842762173L;
 

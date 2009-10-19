@@ -23,12 +23,12 @@ import org.apache.mahout.common.cache.LeastKCache;
 
 public class FPTreeDepthCache {
 
-  public static int FirstLevelCacheSize = 5;
+  public static int firstLevelCacheSize = 5;
 
   final private ArrayList<FPTree> treeCache = new ArrayList<FPTree>();
 
   final private LeastKCache<Integer, FPTree> firstLevelCache = new LeastKCache<Integer, FPTree>(
-      FirstLevelCacheSize);
+      firstLevelCacheSize);
 
   final public FPTree getTree(int level) {
     while (treeCache.size() < level + 1) {
