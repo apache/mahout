@@ -17,22 +17,23 @@
 
 package org.apache.mahout.classifier.bayes.common;
 
-import org.apache.hadoop.util.PriorityQueue;
 import org.apache.mahout.classifier.ClassifierResult;
 
-public class ClassifierResultPriorityQueue extends PriorityQueue<ClassifierResult> {
+import java.util.Comparator;
 
-  public ClassifierResultPriorityQueue(int numResults) {
-    initialize(numResults);
-  }
+public final class ByScoreLabelResultComparator implements Comparator<ClassifierResult> {
 
   @Override
-  protected boolean lessThan(Object a, Object b) {
-    ClassifierResult cr1 = (ClassifierResult) a;
-    ClassifierResult cr2 = (ClassifierResult) b;
-
+  public int compare(ClassifierResult cr1, ClassifierResult cr2) {
     double score1 = cr1.getScore();
     double score2 = cr2.getScore();
-    return score1 == score2 ? cr1.getLabel().compareTo(cr2.getLabel()) < 0 : score2<score1;
+    if (score1 < score2) {
+      return 1;
+    } else if (score1 > score2) {
+      return -1;
+    } else {
+      return cr1.getLabel().compareTo(cr2.getLabel());
+    }
   }
+
 }

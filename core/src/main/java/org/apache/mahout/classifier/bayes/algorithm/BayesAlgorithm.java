@@ -17,22 +17,24 @@
 
 package org.apache.mahout.classifier.bayes.algorithm;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Deque;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 
-import org.apache.hadoop.util.PriorityQueue;
 import org.apache.mahout.classifier.ClassifierResult;
-import org.apache.mahout.classifier.bayes.common.ClassifierResultPriorityQueue;
+import org.apache.mahout.classifier.bayes.common.ByScoreLabelResultComparator;
 import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 import org.apache.mahout.classifier.bayes.interfaces.Algorithm;
 import org.apache.mahout.classifier.bayes.interfaces.Datastore;
 
 public class BayesAlgorithm implements Algorithm{
 
-  private double alpha_i = 1.0;
+  private static final double alpha_i = 1.0;
+
   @Override
   public ClassifierResult classifyDocument(String[] document,
       Datastore datastore, String defaultCategory)
@@ -57,24 +59,28 @@ public class BayesAlgorithm implements Algorithm{
       Datastore datastore, String defaultCategory, int numResults)
       throws InvalidDatastoreException {
     Collection<String> categories = datastore.getKeys("labelWeight");    
-    PriorityQueue<ClassifierResult> pq = new ClassifierResultPriorityQueue(numResults);
-    ClassifierResult tmp;
+    PriorityQueue<ClassifierResult> pq =
+        new PriorityQueue<ClassifierResult>(numResults, new ByScoreLabelResultComparator());
     for (String category : categories){
       double prob = documentWeight(datastore, category, document);
       if (prob > 0.0) {
-        tmp = new ClassifierResult(category, prob);
-        pq.insert(tmp);
+        pq.add(new ClassifierResult(category, prob));
+        if (pq.size() > numResults) {
+          pq.remove();
+        }
       }
     }
 
-    Deque<ClassifierResult> result = new LinkedList<ClassifierResult>();
-    while ((tmp = pq.pop()) != null) {
-      result.addLast(tmp);
+    if (pq.isEmpty()) {
+      return new ClassifierResult[] { new ClassifierResult(defaultCategory, 0.0) };
+    } else {
+      List<ClassifierResult> result = new ArrayList<ClassifierResult>(pq.size());
+      while (pq.isEmpty() == false) {
+        result.add(pq.remove());
+      }
+      Collections.reverse(result);
+      return result.toArray(new ClassifierResult[pq.size()]);
     }
-    if (result.isEmpty()){
-      result.add(new ClassifierResult(defaultCategory, 0));
-    }
-    return result.toArray(new ClassifierResult[result.size()]);  
   }
   
   @Override
