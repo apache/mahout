@@ -61,37 +61,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>2.4</version>
-        <configuration>
-          <encoding>UTF-8</encoding>
-        </configuration>
-        <executions>
-          <execution>
-            <id>copy-resources</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>
-                ${project.build.directory}/classes/META-INF
-              </outputDirectory>
-              <resources>
-                <resource>
-                  <directory>..</directory>
-                  <includes>
-                    <include>README.txt</include>
-                    <include>NOTICE.txt</include>
-                    <include>LICENSE.txt</include>
-                  </includes>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
 
       <!-- Copy dependencies with no official Maven artifacts from libs to local Maven repository -->
       <plugin>
@@ -447,6 +416,19 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>2.4</version>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-remote-resources-plugin</artifactId>
+         <configuration>
+         <appendedResourcesDirectory>../src/main/appended-resources</appendedResourcesDirectory>
+          <resourceBundles>
+            <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
+          </resourceBundles>
+         <supplementalModels>
+            <supplementalModel>supplemental-models.xml</supplementalModel>
+          </supplementalModels>
+        </configuration>
+        </plugin>
 
     </plugins>
   </build>

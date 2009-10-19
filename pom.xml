@@ -2,6 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.apache</groupId>
+    <artifactId>apache</artifactId>
+    <version>6</version>
+  </parent>
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
@@ -12,7 +17,6 @@
   <description>Scalable machine learning libraries</description>
 
   <modules>
-    <module>buildtools</module>
     <module>maven</module>
     <module>core</module>
     <module>taste-web</module>
@@ -22,6 +26,34 @@
 
   <build>
     <defaultGoal>install</defaultGoal>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-remote-resources-plugin</artifactId>
+         <configuration>
+          <resourceBundles>
+            <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
+          </resourceBundles>
+          <supplementalModels>
+            <supplementalModel>supplemental-models.xml</supplementalModel>
+          </supplementalModels>
+        </configuration>
+        </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-eclipse-plugin</artifactId>
+        <configuration>
+          <downloadJavadocs>true</downloadJavadocs>
+          <downloadSources>true</downloadSources>
+          <additionalConfig>
+          <file>
+             <name>.checkstyle</name>
+             <location>maven/src/main/resources/mahout-eclipse-checkstyle</location>
+          </file>
+          </additionalConfig>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
 
     <profiles>

@@ -20,9 +20,7 @@
   <packaging>war</packaging>
 
   <build>
-
-    <sourceDirectory>src/main/java</sourceDirectory>
-    <resources>
+   <resources>
       <resource>
         <directory>src/main/resources</directory>
       </resource>
@@ -31,9 +29,7 @@
         <targetPath>${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/lib</targetPath>
       </resource>
     </resources>
-    
     <plugins>
-
     <plugin>
       <artifactId>maven-resources-plugin</artifactId>
       <version>2.4</version>
@@ -80,7 +76,20 @@
 	<optimize>true</optimize>
       </configuration>
     </plugin>
-      
+    <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-remote-resources-plugin</artifactId>
+         <configuration>
+         <appendedResourcesDirectory>../src/main/appended-resources</appendedResourcesDirectory>
+         <resourceBundles>
+            <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
+          </resourceBundles>
+          <supplementalModels>
+            <supplementalModel>supplemental-models.xml</supplementalModel>
+          </supplementalModels>
+        </configuration>
+        </plugin>
+  
     </plugins>
 
   </build>
