@@ -17,6 +17,7 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.apache.mahout.ga.watchmaker.cd.utils.MockDataSet;
 import org.apache.mahout.common.RandomUtils;
@@ -83,7 +84,7 @@ public class CDMutationTest extends TestCase {
   }
 
   private static void assertInRange(double value, double min, double max) {
-    TestCase.assertTrue("value < min", value >= min);
-    TestCase.assertTrue("value > max", value <= max);
+    Assert.assertTrue("value < min", value >= min);
+    Assert.assertTrue("value > max", value <= max);
   }
 }

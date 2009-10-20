@@ -190,8 +190,7 @@ public class SparseMatrix extends AbstractMatrix {
   @Override
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
-    int[] card = {in.readInt(), in.readInt()};
-    this.cardinality = card;
+    this.cardinality = new int[]{in.readInt(), in.readInt()};
     int rowsize = in.readInt();
     this.rows = new HashMap<Integer, Vector>();
     for (int row = 0; row < rowsize; row++) {

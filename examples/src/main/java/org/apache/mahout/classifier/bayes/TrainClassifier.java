@@ -63,7 +63,7 @@ public class TrainClassifier {
     driver.runJob(dir, outputDir, params);
   }
 
-  public static void main(String[] args) throws IOException, OptionException,
+  public static void main(String[] args) throws IOException,
       NumberFormatException, IllegalStateException, InterruptedException,
       ClassNotFoundException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
@@ -123,7 +123,7 @@ public class TrainClassifier {
       CommandLine cmdLine = parser.parse(args);
       if (cmdLine.hasOption(helpOpt)) {
         CommandLineUtil.printHelp(group);
-        System.exit(0);
+        return;
       }
 
       String classifierType = (String) cmdLine.getValue(typeOpt);
@@ -158,7 +158,7 @@ public class TrainClassifier {
     } catch (OptionException e) {
       log.info("{}", e);
       CommandLineUtil.printHelp(group);
-      System.exit(0);
+      return;
     }
   }
 }

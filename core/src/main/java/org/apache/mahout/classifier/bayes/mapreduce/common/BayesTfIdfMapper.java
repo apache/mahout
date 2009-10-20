@@ -69,13 +69,13 @@ public class BayesTfIdfMapper extends MapReduceBase implements
         output.collect(key, new DoubleWritable(logIdf));
         reporter.setStatus("Bayes TfIdf Mapper: log(Idf): " + key);
       } else
-        throw new RuntimeException("Unrecognized Tuple: " + key);
+        throw new IllegalArgumentException("Unrecognized Tuple: " + key);
     } else if (key.length() == 2) {
       if (key.stringAt(0).equals(BayesConstants.FEATURE_COUNT)) {
         output.collect(vocabCount, one);
         reporter.setStatus("Bayes TfIdf Mapper: vocabCount");
       } else
-        throw new RuntimeException("Unexpected Tuple: " + key);
+        throw new IllegalArgumentException("Unexpected Tuple: " + key);
     }
 
   }

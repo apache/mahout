@@ -176,8 +176,7 @@ public class Driver {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer seqWriter = SequenceFile.createWriter(fs, conf, path, LongWritable.class, SparseVector.class);
-    VectorWriter sfWriter = new SequenceFileVectorWriter(seqWriter);
-    return sfWriter;
+    return new SequenceFileVectorWriter(seqWriter);
   }
 
 

@@ -61,7 +61,6 @@ public class DirichletMapper extends MapReduceBase implements
     state = getDirichletState(job);
   }
 
-  @SuppressWarnings("unchecked")
   public static DirichletState<Vector> getDirichletState(JobConf job) {
     String statePath = job.get(DirichletDriver.STATE_IN_KEY);
     String modelFactory = job.get(DirichletDriver.MODEL_FACTORY_KEY);
@@ -79,11 +78,11 @@ public class DirichletMapper extends MapReduceBase implements
             job);
         try {
           Text key = new Text();
-          DirichletCluster<Vector> cluster = new DirichletCluster();
+          DirichletCluster<Vector> cluster = new DirichletCluster<Vector>();
           while (reader.next(key, cluster)) {
             int index = Integer.parseInt(key.toString());
             state.clusters.set(index, cluster);
-            cluster = new DirichletCluster();
+            cluster = new DirichletCluster<Vector>();
           }
         } finally {
           reader.close();

@@ -115,10 +115,10 @@ public class MapBackedARFFModel implements ARFFModel {
       if (ord != null) {
         result = ord;
       } else {
-        throw new RuntimeException("Invalid nominal: " + data + " for label: " + label);
+        throw new IllegalStateException("Invalid nominal: " + data + " for label: " + label);
       }
     } else {
-      throw new RuntimeException("Invalid nominal label: " + label + " Data: " + data);
+      throw new IllegalArgumentException("Invalid nominal label: " + label + " Data: " + data);
     }
 
     return result;
@@ -159,7 +159,7 @@ public class MapBackedARFFModel implements ARFFModel {
       }
       result = date.getTime();// hmmm, what kind of loss casting long to double?
     } catch (ParseException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
     return result;
   }

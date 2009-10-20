@@ -48,9 +48,6 @@ public class PartitionBugTest extends TestCase {
 
   /**
    * Make sure that the correct instance ids are being computed
-   * 
-   * @throws Exception
-   * 
    */
   public void testProcessOutput() throws Exception {
     Random rng = RandomUtils.getRandom();

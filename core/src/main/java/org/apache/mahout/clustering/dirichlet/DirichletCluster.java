@@ -75,7 +75,6 @@ public class DirichletCluster<O> implements Writable {
   }
 
   /** Reads a typed Model instance from the input stream */
-  @SuppressWarnings("unchecked")
   public static Model<?> readModel(DataInput in) throws IOException {
     String modelClassName = in.readUTF();
     Model<?> model;
@@ -94,7 +93,6 @@ public class DirichletCluster<O> implements Writable {
   }
 
   /** Writes a typed Model instance to the output stream */
-  @SuppressWarnings("unchecked")
   public static void writeModel(DataOutput out, Model<?> model) throws IOException {
     out.writeUTF(model.getClass().getName());
     model.write(out);

@@ -201,20 +201,19 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
     Float oldPref = dataModel.getPreferenceValue(userID, itemID);
     super.removePreference(userID, itemID);
     if (oldPref != null) {
-      double value = oldPref;
       try {
         buildAveragesLock.writeLock().lock();
         RunningAverage itemAverage = itemAverages.get(itemID);
         if (itemAverage == null) {
           throw new IllegalStateException("No preferences exist for item ID: " + itemID);
         }
-        itemAverage.removeDatum(value);
+        itemAverage.removeDatum(oldPref);
         RunningAverage userAverage = userAverages.get(userID);
         if (userAverage == null) {
           throw new IllegalStateException("No preferences exist for user ID: " + userID);
         }
-        userAverage.removeDatum(value);
-        overallAveragePrefValue.removeDatum(value);
+        userAverage.removeDatum(oldPref);
+        overallAveragePrefValue.removeDatum(oldPref);
       } finally {
         buildAveragesLock.writeLock().unlock();
       }

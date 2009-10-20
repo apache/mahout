@@ -45,7 +45,7 @@ public class FPTreeDepthCache {
   private int misses = 0;
 
   public final FPTree getFirstLevelTree(int attr) {
-    Integer attribute = Integer.valueOf(attr);
+    Integer attribute = attr;
     if (firstLevelCache.contains(attribute)) {
       hits++;
       return firstLevelCache.get(attribute);

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -39,10 +40,13 @@
         </configuration>
         <executions>
           <execution>
-            <id>make-assembly</id> <!-- this is used for inheritance merges -->
-            <phase>package</phase> <!-- append to the packaging phase. -->
+            <id>make-assembly</id>
+            <!-- this is used for inheritance merges -->
+            <phase>package</phase>
+            <!-- append to the packaging phase. -->
             <goals>
-              <goal>single</goal> <!-- goals == mojos -->
+              <goal>single</goal>
+              <!-- goals == mojos -->
             </goals>
           </execution>
         </executions>
@@ -84,7 +88,7 @@
               <createChecksum>true</createChecksum>
             </configuration>
           </execution>
- 	  <execution>
+          <execution>
             <id>create-hbase-artifact</id>
             <phase>validate</phase>
             <goals>
@@ -372,10 +376,10 @@
             <configuration>
               <tasks>
                 <ant antfile="../maven/build.xml" target="core-job">
-                  <property name="dest" value="${project.build.directory}" />
-                  <property name="fullnamever" value="${project.artifactId}-${project.version}" />
-                  <property name="core-lib" value="lib" />
-                  <property name="shared-lib" value="../lib" />
+                  <property name="dest" value="${project.build.directory}"/>
+                  <property name="fullnamever" value="${project.artifactId}-${project.version}"/>
+                  <property name="core-lib" value="lib"/>
+                  <property name="shared-lib" value="../lib"/>
                 </ant>
               </tasks>
 
@@ -419,16 +423,16 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-remote-resources-plugin</artifactId>
-         <configuration>
-         <appendedResourcesDirectory>../src/main/appended-resources</appendedResourcesDirectory>
+        <configuration>
+          <appendedResourcesDirectory>../src/main/appended-resources</appendedResourcesDirectory>
           <resourceBundles>
             <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
           </resourceBundles>
-         <supplementalModels>
+          <supplementalModels>
             <supplementalModel>supplemental-models.xml</supplementalModel>
           </supplementalModels>
         </configuration>
-        </plugin>
+      </plugin>
 
     </plugins>
   </build>
@@ -470,8 +474,6 @@
       <artifactId>commons-logging</artifactId>
       <version>1.1.1</version>
     </dependency>
-
-    
 
 
     <dependency>
@@ -579,14 +581,14 @@
       <version>3.8.2</version>
       <scope>test</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymockclassextension</artifactId>
       <version>2.2</version>
       <scope>test</scope>
     </dependency>
-    
+
     <!--  Gson: Java to Json conversion -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
@@ -594,7 +596,7 @@
       <version>1.3</version>
       <scope>compile</scope>
     </dependency>
-    
+
   </dependencies>
   <repositories>
     <repository>
@@ -606,7 +608,7 @@
       <releases>
         <enabled>false</enabled>
       </releases>
-    </repository>    
+    </repository>
     <repository>
       <id>gson</id>
       <url>http://google-gson.googlecode.com/svn/mavenrepo</url>

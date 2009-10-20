@@ -32,7 +32,6 @@ import org.apache.mahout.matrix.Vector;
 
 import java.lang.reflect.Type;
 
-@SuppressWarnings("unchecked")
 public class JsonModelHolderAdapter implements JsonSerializer<ModelHolder<?>>,
     JsonDeserializer<ModelHolder<?>> {
 

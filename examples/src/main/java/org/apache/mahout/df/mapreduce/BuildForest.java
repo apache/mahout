@@ -17,6 +17,7 @@
 
 package org.apache.mahout.df.mapreduce;
 
+import java.io.IOException;
 import java.util.Random;
 
 import org.apache.commons.cli2.CommandLine;
@@ -70,7 +71,7 @@ public class BuildForest extends Configured implements Tool {
   boolean isOob; // estimate oob error;
 
   @Override
-  public int run(String[] args) throws Exception {
+  public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
 
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
@@ -172,7 +173,7 @@ public class BuildForest extends Configured implements Tool {
     return 0;
   }
 
-  private DecisionForest buildForest() throws Exception {
+  private DecisionForest buildForest() throws IOException, ClassNotFoundException, InterruptedException {
     DefaultTreeBuilder treeBuilder = new DefaultTreeBuilder();
     treeBuilder.setM(m);
 
@@ -216,8 +217,7 @@ public class BuildForest extends Configured implements Tool {
     return forest;
   }
 
-  protected Data loadData(Configuration conf, Path dataPath, Dataset dataset)
-      throws Exception {
+  protected Data loadData(Configuration conf, Path dataPath, Dataset dataset) throws IOException {
     log.info("Loading the data...");
     FileSystem fs = dataPath.getFileSystem(conf);
     Data data = DataLoader.loadData(dataset, fs, dataPath);
@@ -231,8 +231,7 @@ public class BuildForest extends Configured implements Tool {
    * @throws Exception
    */
   public static void main(String[] args) throws Exception {
-    int res = ToolRunner.run(new Configuration(), new BuildForest(), args);
-    System.exit(res);
+    ToolRunner.run(new Configuration(), new BuildForest(), args);
   }
 
 }

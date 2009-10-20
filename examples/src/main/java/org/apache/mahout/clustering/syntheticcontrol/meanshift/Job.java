@@ -17,8 +17,6 @@
 
 package org.apache.mahout.clustering.syntheticcontrol.meanshift;
 
-import static org.apache.mahout.clustering.syntheticcontrol.Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
-
 import java.io.IOException;
 
 import org.apache.commons.cli2.CommandLine;
@@ -36,6 +34,7 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyJob;
+import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 
@@ -131,7 +130,7 @@ public class Job {
     if (dfs.exists(outPath)) {
       dfs.delete(outPath, true);
     }
-    final String directoryContainingConvertedInput = output + DIRECTORY_CONTAINING_CONVERTED_INPUT;
+    final String directoryContainingConvertedInput = output + Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
     InputDriver.runJob(input, directoryContainingConvertedInput);
     MeanShiftCanopyJob.runJob(directoryContainingConvertedInput, output + "/meanshift",
         measureClassName, t1, t2, convergenceDelta, maxIterations);

@@ -62,7 +62,7 @@ public class ToolReducer extends MapReduceBase implements
 
   void configure(char[] descriptors) {
     if (descriptors == null || descriptors.length == 0)
-      throw new RuntimeException("Descriptors's array not found or is empty");
+      throw new IllegalArgumentException("Descriptors's array not found or is empty");
 
     this.descriptors = new Descriptors(descriptors);
   }
@@ -88,7 +88,7 @@ public class ToolReducer extends MapReduceBase implements
     else if (descriptors.isNominal(index))
       return nominalDescription(values);
     else
-      throw new RuntimeException("");
+      throw new IllegalArgumentException();
   }
 
   static String numericDescription(Iterator<Text> values) {

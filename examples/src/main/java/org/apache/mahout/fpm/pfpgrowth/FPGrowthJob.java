@@ -54,6 +54,9 @@ public class FPGrowthJob {
 
   private static final Logger log = LoggerFactory.getLogger(FPGrowthJob.class);
 
+  private FPGrowthJob() {
+  }
+
   /**
    * Run TopK FPGrowth given the input file,
    * 
@@ -104,7 +107,7 @@ public class FPGrowthJob {
             abuilder.withName("numGroups").withMinimum(1).withMaximum(1)
                 .create())
         .withDescription(
-            "(Optional) Number of groups the features should be divided in the map-reduce version. Doesnt work in sequential verion Default Value:1000")
+            "(Optional) Number of groups the features should be divided in the map-reduce version. Doesn't work in sequential version Default Value:1000")
         .withShortName("g").create();
 
     Option recordSplitterOpt = obuilder
@@ -149,7 +152,7 @@ public class FPGrowthJob {
 
     if (cmdLine.hasOption(helpOpt)) {
       CommandLineUtil.printHelp(group);
-      System.exit(0);
+      return;
     }
 
     Parameters params = new Parameters();
@@ -188,15 +191,14 @@ public class FPGrowthJob {
     params.set("input", inputDir);
     params.set("output", outputDir);
 
-    String classificationMethod = "sequential";
-    classificationMethod = (String) cmdLine.getValue(methodOpt);
+    String classificationMethod = (String) cmdLine.getValue(methodOpt);
     if (classificationMethod.equalsIgnoreCase("sequential"))
       runFPGrowth(params);
     else if (classificationMethod.equalsIgnoreCase("mapreduce"))
       PFPGrowth.runPFPGrowth(params);
   }
 
-  static void runFPGrowth(Parameters params) throws IOException {
+  private static void runFPGrowth(Parameters params) throws IOException {
     log.info("Starting Sequential FPGrowth");
     int maxHeapSize = Integer.valueOf(params.get("maxHeapSize", "50"));
     int minSupport = Integer.valueOf(params.get("minSupport", "3"));
@@ -229,7 +231,6 @@ public class FPGrowthJob {
     List<Pair<String, TopKStringPatterns>> frequentPatterns = FPGrowth
         .readFrequentPattern(fs, conf, path);
     for (Pair<String, TopKStringPatterns> entry : frequentPatterns)
-      log.info("Dumping Patterns for Feature: {} \n{}", entry.getFirst()
-          .toString(), entry.getSecond().toString());
+      log.info("Dumping Patterns for Feature: {} \n{}", entry.getFirst(), entry.getSecond().toString());
   }
 }

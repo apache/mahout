@@ -38,9 +38,9 @@ public class InMemoryBayesDatastore implements Datastore {
 
   Parameters params = null;
 
-  protected double thetaNormalizer = 1.0d;
+  protected double thetaNormalizer = 1.0;
 
-  protected double alpha_i = 1.0d;
+  protected double alpha_i = 1.0;
 
   public InMemoryBayesDatastore(Parameters params) {
 

@@ -35,7 +35,6 @@ import org.apache.mahout.matrix.Vector;
 import java.lang.reflect.Type;
 import java.util.List;
 
-@SuppressWarnings("unchecked")
 public class JsonDirichletStateAdapter implements
     JsonSerializer<DirichletState<?>>, JsonDeserializer<DirichletState<?>> {
 

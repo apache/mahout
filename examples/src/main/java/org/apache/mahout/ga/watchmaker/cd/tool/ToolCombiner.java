@@ -61,7 +61,7 @@ public class ToolCombiner extends MapReduceBase implements
 
   void configure(char[] descriptors) {
     if (descriptors == null || descriptors.length == 0)
-      throw new RuntimeException("Descriptors's array not found or is empty");
+      throw new IllegalArgumentException("Descriptors's array not found or is empty");
 
     this.descriptors = new Descriptors(descriptors);
   }
@@ -88,7 +88,7 @@ public class ToolCombiner extends MapReduceBase implements
     else if (descriptors.isNumerical(index))
       return numericalDescription(values);
     else
-      throw new RuntimeException(
+      throw new IllegalArgumentException(
           "An ignored attribute should never reach the Combiner");
   }
 

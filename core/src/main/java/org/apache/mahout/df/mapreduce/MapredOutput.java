@@ -30,7 +30,7 @@ import org.apache.mahout.df.node.Node;
  * Used by various implementation to return the results of a build.<br>
  * Contains a grown tree and and its oob predictions.
  */
-public class MapredOutput implements Writable {
+public class MapredOutput implements Writable, Cloneable {
 
   private Node tree;
 

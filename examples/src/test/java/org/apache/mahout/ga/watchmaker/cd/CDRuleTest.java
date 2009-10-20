@@ -120,7 +120,7 @@ public class CDRuleTest extends TestCase {
 
     // the dataline has all its attributes set to 1d
     DataLine dl = EasyMock.createMock(DataLine.class);
-    EasyMock.expect(dl.getAttribut(EasyMock.anyInt())).andReturn(1.0d).atLeastOnce();
+    EasyMock.expect(dl.getAttribut(EasyMock.anyInt())).andReturn(1.0).atLeastOnce();
     EasyMock.replay(dl);
 
     int n = 100; // repeat the test n times
@@ -156,7 +156,7 @@ public class CDRuleTest extends TestCase {
 
     // the dataline has all its attributes set to 1d
     DataLine dl = EasyMock.createMock(DataLine.class);
-    EasyMock.expect(dl.getAttribut(EasyMock.anyInt())).andReturn(1.0d).atLeastOnce();
+    EasyMock.expect(dl.getAttribut(EasyMock.anyInt())).andReturn(1.0).atLeastOnce();
     EasyMock.replay(dl);
 
     int n = 100; // repeat the test n times

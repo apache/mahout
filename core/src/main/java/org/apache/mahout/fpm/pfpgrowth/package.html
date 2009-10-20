@@ -36,8 +36,8 @@ We have a Top K Parallel FPGrowth Implementation. What it means is that given a 
  <br>
  e.g:
  <pre>
- FPGrowth<String> fp = new FPGrowth<String>();
- Set<String> features = new HashSet<String>();
+ FPGrowth&lt;String&gt; fp = new FPGrowth&lt;String&gt;();
+ Set&lt;String&gt; features = new HashSet&lt;String&gt;();
  fp.generateTopKStringFrequentPatterns(
  		new StringRecordIterator(new FileLineIterable(new File(input), encoding, false), pattern), 
         fp.generateFList(
@@ -45,7 +45,7 @@ We have a Top K Parallel FPGrowth Implementation. What it means is that given a 
        	minSupport,
         maxHeapSize, 
         features,
-        new StringOutputConvertor(new SequenceFileOutputCollector<Text, TopKStringPatterns>(writer))
+        new StringOutputConvertor(new SequenceFileOutputCollector&lt;Text, TopKStringPatterns&gt;(writer))
   );
  </pre>
  <ul>
@@ -59,7 +59,7 @@ We have a Top K Parallel FPGrowth Implementation. What it means is that given a 
 
 <p>The command line launcher for string transaction data <i>org.apache.mahout.fpm.pfpgrowth.FPGrowthJob</i> has other features including specifying the regex pattern for spitting a string line of a transaction into the constituent features</p>
 The <i>numGroups</i> parameter in FPGrowthJob specifies the number of groups into which transactions have to be decomposed. 
-The <i>numTreeCacheEntries</i> parameter specifies the number of generated conditional FP-Trees to be kept in memory so as not to regenerate them. Increasing this number increases the memory consumption but might improve speed until a certain point. This depends entirely on the dataset in question. A value of 5-10 is recommended for mining upto top 100 patterns for each feature 
+The <i>numTreeCacheEntries</i> parameter specifies the number of generated conditional FP-Trees to be kept in memory so as not to regenerate them. Increasing this number increases the memory consumption but might improve speed until a certain point. This depends entirely on the dataset in question. A value of 5-10 is recommended for mining up to top 100 patterns for each feature 
 </DIV>
 <DIV>&nbsp;</DIV>
 <DIV align="center">

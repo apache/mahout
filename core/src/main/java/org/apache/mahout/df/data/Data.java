@@ -35,7 +35,7 @@ import org.apache.mahout.df.data.conditions.Condition;
  * operations that deals with the vectors (subset, count,...)
  * 
  */
-public class Data {
+public class Data implements Cloneable {
 
   private final List<Instance> instances;
 

@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 
 /**
@@ -33,7 +32,7 @@ import org.apache.hadoop.io.WritableComparable;
  * 
  * 
  */
-public class IntegerTuple implements Writable, WritableComparable<IntegerTuple> {
+public class IntegerTuple implements WritableComparable<IntegerTuple> {
 
   private List<Integer> tuple = new ArrayList<Integer>();
 
@@ -78,7 +77,7 @@ public class IntegerTuple implements Writable, WritableComparable<IntegerTuple> 
    * Replaces the string at the given index with the given newString
    * 
    * @param index
-   * @param newString
+   * @param newInteger
    * @return The previous value at that location
    */
   public Integer replaceAt(int index, Integer newInteger) {
@@ -106,7 +105,7 @@ public class IntegerTuple implements Writable, WritableComparable<IntegerTuple> 
   @Override
   public String toString() {
     return tuple.toString();
-  };
+  }
 
   @Override
   public int hashCode() {
@@ -150,14 +149,22 @@ public class IntegerTuple implements Writable, WritableComparable<IntegerTuple> 
 
   @Override
   public int compareTo(IntegerTuple otherTuple) {
-    int min = Math.min(this.length(), otherTuple.length());
+    int thisLength = length();
+    int otherLength = otherTuple.length();
+    int min = Math.min(thisLength, otherLength);
     for (int i = 0; i < min; i++) {
       int ret = this.tuple.get(i).compareTo(otherTuple.integerAt(i));
       if (ret == 0)
         continue;
       return ret;
     }
-    return this.length() - otherTuple.length();
+    if (thisLength < otherLength) {
+      return -1;
+    } else if (thisLength > otherLength) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 
 }

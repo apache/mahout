@@ -82,7 +82,7 @@ public class CDInfosTool {
 
     // check the input
     if (!fs.exists(inpath) || !fs.getFileStatus(inpath).isDir())
-      throw new RuntimeException("Input path not found or is not a directory");
+      throw new IllegalArgumentException("Input path not found or is not a directory");
 
     Path outpath = OutputUtils.prepareOutput(fs);
 
@@ -173,7 +173,7 @@ public class CDInfosTool {
     }
 
     if (descriptors.isEmpty()) {
-      throw new RuntimeException("Infos file is empty");
+      throw new IllegalArgumentException("Infos file is empty");
     }
 
     char[] desc = new char[descriptors.size()];
@@ -231,7 +231,7 @@ public class CDInfosTool {
 
     Parser parser = new Parser();
     parser.setGroup(group);
-    CommandLine cmdLine = null;
+    CommandLine cmdLine;
     try {
       cmdLine = parser.parse(args);
 

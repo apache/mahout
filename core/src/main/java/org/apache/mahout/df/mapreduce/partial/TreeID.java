@@ -22,7 +22,7 @@ import org.apache.hadoop.io.LongWritable;
 /**
  * Indicates both the tree and the data partition used to grow the tree
  */
-public class TreeID extends LongWritable {
+public class TreeID extends LongWritable implements Cloneable {
 
   public static final int MAX_TREEID = 100000;
   public TreeID() {

@@ -74,7 +74,7 @@ public class LuceneIterable implements Iterable<Vector> {
     try {
       return new TDIterator();
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
   }
 
@@ -88,10 +88,11 @@ public class LuceneIterable implements Iterable<Vector> {
 
     @Override
     public boolean hasNext() {
+      // TODO this doesn't work with the Iterator contract -- hasNext() cannot have a side effect      
       try {
         return termDocs.next();
       } catch (IOException e) {
-        throw new RuntimeException(e);
+        throw new IllegalStateException(e);
       }
     }
 
@@ -114,7 +115,7 @@ public class LuceneIterable implements Iterable<Vector> {
         }
       } catch (IOException e) {
         //Log?
-        throw new RuntimeException(e);
+        throw new IllegalStateException(e);
       }
 
       return result;

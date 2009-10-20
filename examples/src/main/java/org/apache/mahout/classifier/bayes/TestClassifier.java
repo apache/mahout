@@ -68,9 +68,7 @@ public class TestClassifier {
     // do nothing
   }
 
-  public static void main(String[] args) throws IOException, OptionException,
-      InvalidDatastoreException, ClassNotFoundException,
-      InstantiationException, IllegalAccessException {
+  public static void main(String[] args) throws IOException, InvalidDatastoreException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -157,7 +155,7 @@ public class TestClassifier {
 
       if (cmdLine.hasOption(helpOpt)) {
         CommandLineUtil.printHelp(group);
-        System.exit(0);
+        return;
       }
 
       int gramSize = 1;
@@ -208,7 +206,7 @@ public class TestClassifier {
         classifyParallel(params);
     } catch (OptionException e) {
       CommandLineUtil.printHelp(group);
-      System.exit(0);
+      return;
     }
   }
 
@@ -224,8 +222,8 @@ public class TestClassifier {
       }
     });
 
-    Algorithm algorithm = null;
-    Datastore datastore = null;
+    Algorithm algorithm;
+    Datastore datastore;
 
     if (params.get("dataSource").equals("hdfs")) {
       if (params.get("classifierType").equalsIgnoreCase("bayes")) {

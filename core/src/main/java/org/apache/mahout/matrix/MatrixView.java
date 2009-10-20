@@ -158,10 +158,8 @@ public class MatrixView extends AbstractMatrix {
   @Override
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
-    int[] o = {in.readInt(), in.readInt()};
-    this.offset = o;
-    int[] c = {in.readInt(), in.readInt()};
-    this.cardinality = c;
+    this.offset = new int[]{in.readInt(), in.readInt()};
+    this.cardinality = new int[]{in.readInt(), in.readInt()};
     this.matrix = readMatrix(in);
   }
 

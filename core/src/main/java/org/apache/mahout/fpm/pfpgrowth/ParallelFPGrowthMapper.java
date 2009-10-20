@@ -43,9 +43,9 @@ import java.util.regex.Pattern;
 public class ParallelFPGrowthMapper extends
     Mapper<LongWritable, Text, LongWritable, IntegerTuple> {
 
-  private Map<String, Integer> fMap = new HashMap<String, Integer>();
+  private final Map<String, Integer> fMap = new HashMap<String, Integer>();
 
-  private Map<Integer, Long> gListInt = new HashMap<Integer, Long>();
+  private final Map<Integer, Long> gListInt = new HashMap<Integer, Long>();
 
   private Pattern splitter = null;
 

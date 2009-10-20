@@ -64,7 +64,7 @@ public class BayesWeightSummerOutputFormat extends MultipleOutputFormat<Writable
       else if(key.stringAt(0).equals(BayesConstants.LABEL_SUM))
         return "Sigma_k/" + name;
       else
-        throw new RuntimeException("Unexpected StringTuple: " + key);
+        throw new IllegalArgumentException("Unexpected StringTuple: " + key);
     }
   }
 

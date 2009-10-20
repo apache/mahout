@@ -87,7 +87,7 @@ public class BayesClassifierMapper extends MapReduceBase implements
       outputTuple.add(correctLabel);
       outputTuple.add(classifiedLabel);
       
-      output.collect(outputTuple, new DoubleWritable(1.0d));
+      output.collect(outputTuple, new DoubleWritable(1.0));
     } catch (InvalidDatastoreException e) {
       throw new IOException(e.toString());
     }

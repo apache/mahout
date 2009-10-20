@@ -54,17 +54,17 @@ public class CDMapper extends MapReduceBase implements
   public void configure(JobConf job) {
     String rstr = job.get(CLASSDISCOVERY_RULES);
     if (rstr == null)
-      throw new RuntimeException("Job Parameter (" + CLASSDISCOVERY_RULES
+      throw new IllegalArgumentException("Job Parameter (" + CLASSDISCOVERY_RULES
           + ") not found!");
 
     String datastr = job.get(CLASSDISCOVERY_DATASET);
     if (datastr == null)
-      throw new RuntimeException("Job Parameter (" + CLASSDISCOVERY_DATASET
+      throw new IllegalArgumentException("Job Parameter (" + CLASSDISCOVERY_DATASET
           + ") not found!");
 
     int target = job.getInt(CLASSDISCOVERY_TARGET_LABEL, -1);
     if (target == -1)
-      throw new RuntimeException("Job Parameter ("
+      throw new IllegalArgumentException("Job Parameter ("
           + CLASSDISCOVERY_TARGET_LABEL + ") not found!");
 
     initializeDataSet((DataSet) StringUtils.fromString(datastr));

@@ -37,7 +37,7 @@ public class DummyEvaluator implements FitnessEvaluator<DummyCandidate> {
 
   public static double getFitness(Integer key) {
     if (!evaluations.containsKey(key)) {
-      throw new RuntimeException("Fitness not found");
+      throw new IllegalArgumentException("Fitness not found");
     }
     return evaluations.get(key);
   }
@@ -50,7 +50,7 @@ public class DummyEvaluator implements FitnessEvaluator<DummyCandidate> {
   public double getFitness(DummyCandidate candidate,
                            List<? extends DummyCandidate> population) {
     if (evaluations.containsKey(candidate.getIndex())) {
-      throw new RuntimeException("Duplicate Fitness");
+      throw new IllegalArgumentException("Duplicate Fitness");
     }
 
     double fitness = rng.nextDouble();

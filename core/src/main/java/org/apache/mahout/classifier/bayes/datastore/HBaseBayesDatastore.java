@@ -61,9 +61,9 @@ public class HBaseBayesDatastore implements Datastore {
     alpha_i = Double.valueOf(parameters.get("alpha_i", "1.0"));
   }
 
-  protected double thetaNormalizer = 1.0d;
+  protected double thetaNormalizer = 1.0;
 
-  protected double alpha_i = 1.0d;
+  protected double alpha_i = 1.0;
   @Override
   public void initialize() throws InvalidDatastoreException {
     config = new HBaseConfiguration(new Configuration());
@@ -154,7 +154,7 @@ public class HBaseBayesDatastore implements Datastore {
   }
 
   protected double getCachedCell(String row, String family, String column) {
-    Result r = null;
+    Result r;
 
     if ((r = tableCache.get(row)) == null) {
       Get g = new Get(Bytes.toBytes(row));
@@ -162,7 +162,7 @@ public class HBaseBayesDatastore implements Datastore {
       try {
         r = table.get(g);
       } catch (IOException e) {
-        return 0.0d;
+        return 0.0;
       }
       tableCache.set(row, r);
     }
@@ -170,7 +170,7 @@ public class HBaseBayesDatastore implements Datastore {
         Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes
             .toBytes(column));
     if (value == null)
-      return 0.0d;
+      return 0.0;
     return Bytes.toDouble(value);
 
   }

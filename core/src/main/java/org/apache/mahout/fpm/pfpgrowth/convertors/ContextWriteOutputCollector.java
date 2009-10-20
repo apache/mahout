@@ -31,10 +31,9 @@ public class ContextWriteOutputCollector<IK extends Writable, IV extends Writabl
   private static final Logger log = LoggerFactory
       .getLogger(ContextWriteOutputCollector.class);
 
-  private Reducer<IK, IV, K, V>.Context context;
+  private final Reducer<IK, IV, K, V>.Context context;
 
-  public ContextWriteOutputCollector(Reducer<IK, IV, K, V>.Context context)
-      throws IOException {
+  public ContextWriteOutputCollector(Reducer<IK, IV, K, V>.Context context) {
     this.context = context;
   }
 

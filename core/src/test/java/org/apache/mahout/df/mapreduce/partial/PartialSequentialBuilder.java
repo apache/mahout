@@ -206,9 +206,6 @@ public class PartialSequentialBuilder extends PartialBuilder {
   /**
    * The second step uses the trees to predict the rest of the instances outside
    * their own partition
-   * 
-   * @throws Exception
-   * 
    */
   protected void secondStep(Configuration conf, Path forestPath, PredictionCallback callback)
       throws IOException, InterruptedException {

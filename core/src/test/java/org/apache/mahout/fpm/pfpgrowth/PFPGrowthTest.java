@@ -41,8 +41,9 @@ public class PFPGrowthTest extends TestCase {
   private static final Logger log = LoggerFactory
       .getLogger(PFPGrowthTest.class);
 
-  protected Parameters params = new Parameters();
+  private final Parameters params = new Parameters();
 
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
     params.set("minSupport", "3");
@@ -61,24 +62,27 @@ public class PFPGrowthTest extends TestCase {
     }
     BufferedWriter writer = new BufferedWriter(new FileWriter(
         "testdata/transactions/test.txt"));
-    Collection<List<String>> transactions = new ArrayList<List<String>>();
-    transactions.add(Arrays.asList("E", "A", "D", "B"));
-    transactions.add(Arrays.asList("D", "A", "C", "E", "B"));
-    transactions.add(Arrays.asList("C", "A", "B", "E"));
-    transactions.add(Arrays.asList("B", "A", "D"));
-    transactions.add(Arrays.asList("D"));
-    transactions.add(Arrays.asList("D", "B"));
-    transactions.add(Arrays.asList("A", "D", "E"));
-    transactions.add(Arrays.asList("B", "C"));
-    for (List<String> transaction : transactions) {
-      String sep = "";
-      for (String item : transaction) {
-        writer.write(sep + item);
-        sep = ",";
+    try {
+      Collection<List<String>> transactions = new ArrayList<List<String>>();
+      transactions.add(Arrays.asList("E", "A", "D", "B"));
+      transactions.add(Arrays.asList("D", "A", "C", "E", "B"));
+      transactions.add(Arrays.asList("C", "A", "B", "E"));
+      transactions.add(Arrays.asList("B", "A", "D"));
+      transactions.add(Arrays.asList("D"));
+      transactions.add(Arrays.asList("D", "B"));
+      transactions.add(Arrays.asList("A", "D", "E"));
+      transactions.add(Arrays.asList("B", "C"));
+      for (List<String> transaction : transactions) {
+        String sep = "";
+        for (String item : transaction) {
+          writer.write(sep + item);
+          sep = ",";
+        }
+        writer.write("\n");
       }
-      writer.write("\n");
+    } finally {
+      writer.close();
     }
-    writer.close();
 
   }
 

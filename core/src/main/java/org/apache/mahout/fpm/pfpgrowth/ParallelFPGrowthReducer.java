@@ -48,13 +48,13 @@ import java.util.Map.Entry;
 public class ParallelFPGrowthReducer extends
     Reducer<LongWritable, IntegerTuple, Text, TopKStringPatterns> {
 
-  private List<Pair<Integer, Long>> fList = new ArrayList<Pair<Integer, Long>>();
+  private final List<Pair<Integer, Long>> fList = new ArrayList<Pair<Integer, Long>>();
   
-  private List<String> featureReverseMap = new ArrayList<String>();
+  private final List<String> featureReverseMap = new ArrayList<String>();
   
-  private Map<String, Integer> fMap = new HashMap<String, Integer>();
+  private final Map<String, Integer> fMap = new HashMap<String, Integer>();
 
-  private Map<Long, List<Integer>> groupFeatures = new HashMap<Long, List<Integer>>();
+  private final Map<Long, List<Integer>> groupFeatures = new HashMap<Long, List<Integer>>();
 
   private int maxHeapSize = 50;
 

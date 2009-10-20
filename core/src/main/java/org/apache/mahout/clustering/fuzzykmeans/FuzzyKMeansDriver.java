@@ -169,7 +169,7 @@ public class FuzzyKMeansDriver {
         maxIterations = Integer.parseInt(cmdLine.getValue(maxIterationsOpt).toString());
       }
 
-      if (cmdLine.hasOption(overwriteOutput) == true) {
+      if (cmdLine.hasOption(overwriteOutput)) {
         HadoopUtil.overwriteOutput(output);
       }
 

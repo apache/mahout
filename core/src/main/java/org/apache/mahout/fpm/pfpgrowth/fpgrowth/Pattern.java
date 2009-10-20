@@ -21,9 +21,9 @@ import java.util.Arrays;
 
 public class Pattern {
 
-  public static int DEFAULT_INITIAL_SIZE = 2;
+  private static final int DEFAULT_INITIAL_SIZE = 2;
 
-  public static float GROWTH_RATE = 1.5f;
+  private static final float GROWTH_RATE = 1.5f;
 
   private boolean dirty = true;
 
@@ -41,7 +41,7 @@ public class Pattern {
     this(DEFAULT_INITIAL_SIZE);
   }
 
-  public Pattern(int size) {
+  private Pattern(int size) {
     if (size < DEFAULT_INITIAL_SIZE)
       size = DEFAULT_INITIAL_SIZE;
     this.pattern = new int[size];
@@ -86,10 +86,10 @@ public class Pattern {
 
   @Override
   public int hashCode() {
-    final int prime = 31;
     if (dirty == false)
       return hashCode;
     int result = 1;
+    int prime = 31;
     result = prime * result + Arrays.hashCode(pattern);
     result = prime * result + Long.valueOf(support).hashCode();
     hashCode = result;
@@ -99,24 +99,20 @@ public class Pattern {
   public final boolean isSubPatternOf(Pattern frequentPattern) {
     int[] otherPattern = frequentPattern.getPattern();
     int otherLength = frequentPattern.length();
-    int otherI = 0;
-    int i = 0;
     if (this.length() > frequentPattern.length())
       return false;
+    int i = 0;
+    int otherI = 0;
     while (i < length && otherI < otherLength) {
       if (otherPattern[otherI] == pattern[i]) {
         otherI++;
         i++;
-        continue;
       } else if (otherPattern[otherI] < pattern[i]) {
         otherI++;
       } else
         return false;
     }
-    if (otherI == otherLength && i != length)
-      return false;
-    return true;
-
+    return otherI != otherLength || i == length;
   }
 
   public final int length() {
@@ -131,10 +127,10 @@ public class Pattern {
   public final String toString() {
     int[] arr = new int[length];
     System.arraycopy(pattern, 0, arr, 0, length);
-    return Arrays.toString(arr) + "-" + support;
+    return Arrays.toString(arr) + '-' + support;
   }
 
-  private final void resize() {
+  private void resize() {
     int size = (int) (GROWTH_RATE * length);
     if (size < DEFAULT_INITIAL_SIZE)
       size = DEFAULT_INITIAL_SIZE;

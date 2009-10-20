@@ -59,12 +59,12 @@ public final class RandomSeedGenerator {
     }
     fs.mkdirs(outPath);
     Path outFile = new Path(outPath, "part-randomSeed");
-    if (fs.exists(outFile) == true) {
+    if (fs.exists(outFile)) {
       log.warn("Deleting " + outFile);
       fs.delete(outFile, false);
     }
     boolean newFile = fs.createNewFile(outFile);
-    if (newFile == true) {
+    if (newFile) {
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(input), conf);
       Writable key = (Writable) reader.getKeyClass().newInstance();
       Vector value = (Vector) reader.getValueClass().newInstance();

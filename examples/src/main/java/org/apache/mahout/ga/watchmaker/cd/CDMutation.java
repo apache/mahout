@@ -63,7 +63,6 @@ public class CDMutation implements EvolutionaryOperator<CDRule> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public List<CDRule> apply(List<CDRule> selectedCandidates, Random rng) {
     List<CDRule> mutatedPopulation = new ArrayList<CDRule>(selectedCandidates.size());
     for (CDRule ind : selectedCandidates) {

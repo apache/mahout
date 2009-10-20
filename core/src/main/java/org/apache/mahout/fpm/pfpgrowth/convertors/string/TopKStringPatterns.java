@@ -40,15 +40,15 @@ public final class TopKStringPatterns implements Writable {
     frequentPatterns.addAll(patterns);
   }
 
-  public final Iterator<Pair<List<String>, Long>> iterator() {
+  public Iterator<Pair<List<String>, Long>> iterator() {
     return frequentPatterns.iterator();
   }
 
-  public final List<Pair<List<String>, Long>> getPatterns() {
+  public List<Pair<List<String>, Long>> getPatterns() {
     return frequentPatterns;
   }
 
-  public final TopKStringPatterns merge(TopKStringPatterns pattern, int heapSize) {
+  public TopKStringPatterns merge(TopKStringPatterns pattern, int heapSize) {
     List<Pair<List<String>, Long>> patterns = new ArrayList<Pair<List<String>, Long>>();
     Iterator<Pair<List<String>, Long>> myIterator = frequentPatterns.iterator();
     Iterator<Pair<List<String>, Long>> otherIterator = pattern.iterator();
@@ -67,9 +67,9 @@ public final class TopKStringPatterns implements Writable {
             for (int j = 0; j < myItem.getFirst().size(); j++) {
               cmp = myItem.getFirst().get(j).compareTo(
                   otherItem.getFirst().get(j));
-              if (cmp == 0)
-                continue;
-              else break;
+              if (cmp != 0) {
+                break;
+              }
             }
           }
         }
@@ -96,7 +96,7 @@ public final class TopKStringPatterns implements Writable {
   }
 
   @Override
-  public final void readFields(DataInput in) throws IOException {
+  public void readFields(DataInput in) throws IOException {
     frequentPatterns.clear();
     int length = in.readInt();
     for (int i = 0; i < length; i++) {
@@ -114,7 +114,7 @@ public final class TopKStringPatterns implements Writable {
   }
 
   @Override
-  public final void write(DataOutput out) throws IOException {
+  public void write(DataOutput out) throws IOException {
     out.writeInt(frequentPatterns.size());
     for (Pair<List<String>, Long> pattern : frequentPatterns) {
       out.writeInt(pattern.getFirst().size());
@@ -128,7 +128,7 @@ public final class TopKStringPatterns implements Writable {
   }
 
   @Override
-  public final String toString() {
+  public String toString() {
     StringBuilder sb = new StringBuilder();
     String sep = "";
     for (Pair<List<String>, Long> pattern : frequentPatterns) {

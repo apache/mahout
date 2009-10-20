@@ -28,9 +28,9 @@ import java.util.TreeSet;
  * 
  */
 public class FrequentPatternMaxHeap {
-  private Comparator<Pattern> treeSetComparator = new Comparator<Pattern>() {
+  private final Comparator<Pattern> treeSetComparator = new Comparator<Pattern>() {
     @Override
-    public final int compare(Pattern cr1, Pattern cr2) {
+    public int compare(Pattern cr1, Pattern cr2) {
       long support2 = cr2.support();
       long support1 = cr1.support();
       int length2 = cr2.length();
@@ -68,9 +68,7 @@ public class FrequentPatternMaxHeap {
   public final boolean addable(long support) {
     if (count < maxSize)
       return true;
-    if (least.support() > support)
-      return false;
-    return true;
+    return least.support() <= support;
   }
 
   public final TreeSet<Pattern> getHeap() {
@@ -104,8 +102,6 @@ public class FrequentPatternMaxHeap {
           int cmp = treeSetComparator.compare(least, frequentPattern);
           if (cmp < 0)
             least = frequentPattern;
-          else if (cmp == 0)
-            return;
         } else if (least == null)
           least = frequentPattern;
       }
@@ -131,13 +127,13 @@ public class FrequentPatternMaxHeap {
     return super.toString();
   }
 
-  final private boolean addPattern(Pattern frequentPattern,
+  private boolean addPattern(Pattern frequentPattern,
       boolean subPatternCheck) {
     if (subPatternCheck == false) {
       set.add(frequentPattern);
       return true;
     } else {
-      Long index = Long.valueOf(frequentPattern.support());
+      Long index = frequentPattern.support();
       if (patternIndex.containsKey(index)) {
         Set<Pattern> indexSet = patternIndex.get(index);
         boolean replace = false;
@@ -168,7 +164,7 @@ public class FrequentPatternMaxHeap {
         return true;
       } else {
         set.add(frequentPattern);
-        Set<Pattern> patternList = null;
+        Set<Pattern> patternList;
         if (patternIndex.containsKey(index) == false) {
           patternList = new HashSet<Pattern>();
           patternIndex.put(index, patternList);

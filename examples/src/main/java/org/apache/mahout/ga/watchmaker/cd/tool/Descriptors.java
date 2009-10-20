@@ -41,7 +41,7 @@ public class Descriptors {
     // check that all the descriptors are correct ('I', 'N' 'L' or 'C')
     for (int index = 0; index < descriptors.length; index++) {
       if (!isIgnored(index) && !isNumerical(index) && !isNominal(index))
-        throw new RuntimeException("Bad descriptor value : "
+        throw new IllegalArgumentException("Bad descriptor value : "
             + descriptors[index]);
     }
   }

@@ -21,15 +21,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class TransactionIterator<AttributePrimitive> implements Iterator<int[]> {
-  private Map<AttributePrimitive, Integer> attributeIdMapping = null;
+public class TransactionIterator<AP> implements Iterator<int[]> {
+  private Map<AP, Integer> attributeIdMapping = null;
 
-  private Iterator<List<AttributePrimitive>> iterator = null;
+  private Iterator<List<AP>> iterator = null;
 
   private int[] transactionBuffer = null;
 
-  public TransactionIterator(Iterator<List<AttributePrimitive>> iterator,
-      Map<AttributePrimitive, Integer> attributeIdMapping) {
+  public TransactionIterator(Iterator<List<AP>> iterator,
+      Map<AP, Integer> attributeIdMapping) {
     this.attributeIdMapping = attributeIdMapping;
     this.iterator = iterator;
     transactionBuffer = new int[attributeIdMapping.size()];
@@ -42,9 +42,9 @@ public class TransactionIterator<AttributePrimitive> implements Iterator<int[]> 
 
   @Override
   public final int[] next() {
-    List<AttributePrimitive> transaction = iterator.next();
+    List<AP> transaction = iterator.next();
     int index = 0;
-    for (AttributePrimitive Attribute : transaction) {
+    for (AP Attribute : transaction) {
       if (attributeIdMapping.containsKey(Attribute)) {
         transactionBuffer[index++] = attributeIdMapping.get(Attribute);
       }

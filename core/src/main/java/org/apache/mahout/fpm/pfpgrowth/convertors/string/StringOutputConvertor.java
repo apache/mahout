@@ -34,7 +34,7 @@ public final class StringOutputConvertor implements
   }
 
   @Override
-  public final void collect(String key, List<Pair<List<String>, Long>> value)
+  public void collect(String key, List<Pair<List<String>, Long>> value)
       throws IOException {
     collector.collect(new Text(key), new TopKStringPatterns(value));
   }

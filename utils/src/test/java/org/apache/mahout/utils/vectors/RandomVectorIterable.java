@@ -24,6 +24,7 @@ import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.common.RandomUtils;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Random;
 
 public class RandomVectorIterable implements Iterable<Vector>{
@@ -51,8 +52,8 @@ public class RandomVectorIterable implements Iterable<Vector>{
   }
 
   private class VectIterator implements Iterator<Vector>{
-    int count = 0;
-    final Random random = RandomUtils.getRandom();
+    private int count = 0;
+    private final Random random = RandomUtils.getRandom();
     @Override
     public boolean hasNext() {
       return count < numItems;
@@ -60,6 +61,9 @@ public class RandomVectorIterable implements Iterable<Vector>{
 
     @Override
     public Vector next() {
+      if (!hasNext()) {
+        throw new NoSuchElementException();
+      }
       Vector result = type == VectorType.SPARSE ? new SparseVector(numItems) : new DenseVector(numItems);
       result.assign(new UnaryFunction(){
         @Override

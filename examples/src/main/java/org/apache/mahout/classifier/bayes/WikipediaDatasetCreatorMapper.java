@@ -119,13 +119,13 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
         analyzer = analyzerClass.newInstance();
       }
     } catch(IOException ex){
-      throw new RuntimeException(ex);
+      throw new IllegalStateException(ex);
     } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } catch (InstantiationException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
     log.info("Configure: Input Categories size: " + inputCategories.size() + " Exact Match: " + exactMatchOnly +
              " Analyzer: " + analyzer.getClass().getName());

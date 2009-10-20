@@ -37,7 +37,6 @@ public class DirichletState<O> {
 
   public double offset; // alpha_0 / numClusters
 
-  @SuppressWarnings("unchecked")
   public DirichletState(ModelDistribution<O> modelFactory,
                         int numClusters, double alpha_0, int thin, int burnin) {
     this.numClusters = numClusters;

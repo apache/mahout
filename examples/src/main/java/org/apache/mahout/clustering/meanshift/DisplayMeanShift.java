@@ -82,9 +82,9 @@ class DisplayMeanShift extends DisplayDirichlet {
     while (!done) {// shift canopies to their centroids
       done = true;
       List<MeanShiftCanopy> migratedCanopies = new ArrayList<MeanShiftCanopy>();
-      List<Vector> centers = new ArrayList<Vector>();
+      //List<Vector> centers = new ArrayList<Vector>();
       for (MeanShiftCanopy canopy : canopies) {
-        centers.add(canopy.getCenter());
+        //centers.add(canopy.getCenter());
         done = canopy.shiftToMean() && done;
         MeanShiftCanopy.mergeCanopy(canopy, migratedCanopies);
       }

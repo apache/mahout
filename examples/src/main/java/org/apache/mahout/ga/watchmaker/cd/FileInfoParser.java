@@ -92,7 +92,7 @@ public class FileInfoParser {
       } else if (NUMERICAL_TOKEN.equals(token)) {
         attributes.add(parseNumerical(tokenizer));
       } else {
-        throw new RuntimeException("Unknown token (" + token
+        throw new IllegalArgumentException("Unknown token (" + token
             + ") encountered while parsing the info file");
       }
     }
@@ -100,7 +100,7 @@ public class FileInfoParser {
     reader.close();
 
     if (labelIndex == -1)
-      throw new RuntimeException("Info file does not contain a LABEL");
+      throw new IllegalStateException("Info file does not contain a LABEL");
 
     return new DataSet(attributes, ignored, labelIndex);
 
@@ -117,14 +117,14 @@ public class FileInfoParser {
       throws IOException {
     assert inpath != null : "null inpath parameter";
     if (!fs.exists(inpath))
-      throw new RuntimeException("Input path does not exist");
+      throw new IllegalArgumentException("Input path does not exist");
     if (!fs.getFileStatus(inpath).isDir())
-      throw new RuntimeException("Input path should be a directory");
+      throw new IllegalArgumentException("Input path should be a directory");
 
     // info file name
     Path infoPath = new Path(inpath.getParent(), inpath.getName() + ".infos");
     if (!fs.exists(infoPath))
-      throw new RuntimeException("Info file does not exist");
+      throw new IllegalArgumentException("Info file does not exist");
 
     return infoPath;
   }
@@ -165,7 +165,7 @@ public class FileInfoParser {
     try {
       value = Double.parseDouble(token);
     } catch (NumberFormatException e) {
-      throw new RuntimeException("Exception while parsing info file", e);
+      throw new IllegalArgumentException("Exception while parsing info file", e);
     }
 
     return value;
@@ -176,7 +176,7 @@ public class FileInfoParser {
     try {
       token = tokenizer.nextToken();
     } catch (NoSuchElementException e) {
-      throw new RuntimeException("Exception while parsing info file", e);
+      throw new IllegalArgumentException("Exception while parsing info file", e);
     }
 
     return token;

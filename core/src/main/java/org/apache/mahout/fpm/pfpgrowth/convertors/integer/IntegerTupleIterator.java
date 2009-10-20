@@ -31,18 +31,18 @@ public final class IntegerTupleIterator implements Iterator<List<Integer>> {
   }
 
   @Override
-  public final boolean hasNext() {
+  public boolean hasNext() {
     return iterator.hasNext();
   }
 
   @Override
-  public final List<Integer> next() {
+  public List<Integer> next() {
     IntegerTuple transaction = iterator.next();
     return transaction.getEntries();
   }
 
   @Override
-  public final void remove() {
+  public void remove() {
     iterator.remove();
   }
 

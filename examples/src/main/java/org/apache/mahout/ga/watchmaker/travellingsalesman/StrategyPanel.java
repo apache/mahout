@@ -163,8 +163,8 @@ final class StrategyPanel extends JPanel {
 
       SelectionStrategy<?>[] selectionStrategies = {
           new RankSelection(), new RouletteWheelSelection(),
-          new StochasticUniversalSampling(), new TournamentSelection(new Probability(0.95d)),
-          new TruncationSelection(0.5d)};
+          new StochasticUniversalSampling(), new TournamentSelection(new Probability(0.95)),
+          new TruncationSelection(0.5)};
 
       selectionCombo = new JComboBox(selectionStrategies);
       selectionCombo.setRenderer(new DefaultListCellRenderer() {
@@ -209,7 +209,6 @@ final class StrategyPanel extends JPanel {
       super.setEnabled(b);
     }
 
-    @SuppressWarnings("unchecked")
     public TravellingSalesmanStrategy getStrategy() {
       return new EvolutionaryTravellingSalesman(distances,
           (SelectionStrategy<? super List<String>>) selectionCombo

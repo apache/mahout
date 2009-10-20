@@ -55,7 +55,7 @@ public class ResultAnalyzer implements Summarizable {
    */
   public boolean addInstance(String correctLabel, ClassifierResult classifiedResult) {
     boolean result = correctLabel.equals(classifiedResult.getLabel());
-    if (result == true) {
+    if (result) {
       correctlyClassified++;
     } else {
       incorrectlyClassified++;

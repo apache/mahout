@@ -138,13 +138,11 @@ public class PartitionBugTest extends TestCase {
 
     @Override
     public long maxDepth() {
-      // TODO Auto-generated method stub
       return 0;
     }
 
     @Override
     public long nbNodes() {
-      // TODO Auto-generated method stub
       return 0;
     }
 
@@ -163,7 +161,6 @@ public class PartitionBugTest extends TestCase {
 
     @Override
     public Node build(Random rng, Data data) {
-      // TODO Auto-generated method stub
       return new MockLeaf();
     }
 

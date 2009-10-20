@@ -26,30 +26,30 @@ import org.apache.mahout.common.Pair;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FrequentPatternMaxHeap;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.Pattern;
 
-public final class TopKPatternsOutputConvertor<AttributePrimitive> implements
+public final class TopKPatternsOutputConvertor<A> implements
     OutputCollector<Integer, FrequentPatternMaxHeap> {
 
-  private OutputCollector<AttributePrimitive, List<Pair<List<AttributePrimitive>, Long>>> collector = null;
+  private OutputCollector<A, List<Pair<List<A>, Long>>> collector = null;
 
-  private Map<Integer, AttributePrimitive> reverseMapping = null;
+  private Map<Integer, A> reverseMapping = null;
 
   public TopKPatternsOutputConvertor(
-      OutputCollector<AttributePrimitive, List<Pair<List<AttributePrimitive>, Long>>> collector,
-      Map<Integer, AttributePrimitive> reverseMapping) {
+      OutputCollector<A, List<Pair<List<A>, Long>>> collector,
+      Map<Integer, A> reverseMapping) {
     this.collector = collector;
     this.reverseMapping = reverseMapping;
   }
 
   @Override
-  public final void collect(Integer key, FrequentPatternMaxHeap value)
+  public void collect(Integer key, FrequentPatternMaxHeap value)
       throws IOException {
-    List<Pair<List<AttributePrimitive>, Long>> perAttributePatterns = new ArrayList<Pair<List<AttributePrimitive>, Long>>();
+    List<Pair<List<A>, Long>> perAttributePatterns = new ArrayList<Pair<List<A>, Long>>();
     for (Pattern itemSet : value.getHeap()) {
-      List<AttributePrimitive> frequentPattern = new ArrayList<AttributePrimitive>();
+      List<A> frequentPattern = new ArrayList<A>();
       for (int j = 0; j < itemSet.length(); j++) {
         frequentPattern.add(reverseMapping.get(itemSet.getPattern()[j]));
       }
-      Pair<List<AttributePrimitive>, Long> returnItemSet = new Pair<List<AttributePrimitive>, Long>(
+      Pair<List<A>, Long> returnItemSet = new Pair<List<A>, Long>(
           frequentPattern, itemSet.support());
       perAttributePatterns.add(returnItemSet);
     }

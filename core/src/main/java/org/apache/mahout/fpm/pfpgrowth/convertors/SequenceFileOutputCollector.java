@@ -25,10 +25,9 @@ import org.apache.hadoop.mapred.OutputCollector;
 
 public class SequenceFileOutputCollector<K extends Writable, V extends Writable>
     implements OutputCollector<K, V> {
-  private SequenceFile.Writer writer;
+  private final SequenceFile.Writer writer;
 
-  public SequenceFileOutputCollector(SequenceFile.Writer writer)
-      throws IOException {
+  public SequenceFileOutputCollector(SequenceFile.Writer writer) {
     this.writer = writer;
   }
 

@@ -39,10 +39,9 @@ public class AggregatorReducer extends
   protected void reduce(Text key, Iterable<TopKStringPatterns> values,
       Context context) throws IOException, InterruptedException {
     TopKStringPatterns patterns = new TopKStringPatterns();
-    Iterator<TopKStringPatterns> it = values.iterator();
-    while (it.hasNext()) {
+    for (TopKStringPatterns value : values) {
       context.setStatus("Aggregator Reducer: Selecting TopK patterns for: " + key);
-      patterns = patterns.merge(it.next(), maxHeapSize);
+      patterns = patterns.merge(value, maxHeapSize);
     }
     context.write(key, patterns);
 

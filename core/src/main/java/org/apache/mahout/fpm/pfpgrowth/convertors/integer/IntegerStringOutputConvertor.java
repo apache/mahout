@@ -40,7 +40,7 @@ public final class IntegerStringOutputConvertor implements
   }
 
   @Override
-  public final void collect(Integer key, List<Pair<List<Integer>, Long>> value)
+  public void collect(Integer key, List<Pair<List<Integer>, Long>> value)
       throws IOException {
     String StringKey = featureReverseMap.get(key);
     List<Pair<List<String>, Long>> stringValues = new ArrayList<Pair<List<String>, Long>>();

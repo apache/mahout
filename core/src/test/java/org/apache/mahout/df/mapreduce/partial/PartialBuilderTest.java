@@ -71,11 +71,8 @@ public class PartialBuilderTest extends TestCase {
     Writer writer = SequenceFile.createWriter(fs, conf, outputFile,
         TreeID.class, MapredOutput.class);
 
-    try {
-      for (int index = 0; index < numTrees; index++) {
-        writer.append(keys[index], values[index]);
-      }
-    } finally {
+    for (int index = 0; index < numTrees; index++) {
+      writer.append(keys[index], values[index]);
     }
     writer.close();
 

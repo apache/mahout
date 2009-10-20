@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <parent>
@@ -15,6 +16,14 @@
 
   <name>Apache Lucene Mahout</name>
   <description>Scalable machine learning libraries</description>
+  <url>http://lucene.apache.org/mahout</url>
+  <inceptionYear>2008</inceptionYear>
+  <licenses>
+    <license>
+      <name>Apache 2</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
 
   <modules>
     <module>maven</module>
@@ -30,7 +39,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-remote-resources-plugin</artifactId>
-         <configuration>
+        <configuration>
           <resourceBundles>
             <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
           </resourceBundles>
@@ -38,7 +47,7 @@
             <supplementalModel>supplemental-models.xml</supplementalModel>
           </supplementalModels>
         </configuration>
-        </plugin>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-eclipse-plugin</artifactId>
@@ -46,73 +55,77 @@
           <downloadJavadocs>true</downloadJavadocs>
           <downloadSources>true</downloadSources>
           <additionalConfig>
-          <file>
-             <name>.checkstyle</name>
-             <location>maven/src/main/resources/mahout-eclipse-checkstyle</location>
-          </file>
+            <file>
+              <name>.checkstyle</name>
+              <location>maven/src/main/resources/mahout-eclipse-checkstyle</location>
+            </file>
           </additionalConfig>
         </configuration>
       </plugin>
     </plugins>
   </build>
 
-    <profiles>
-      <profile>
-        <id>release</id>
-        <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <descriptorRefs>
-            <descriptorRef>project</descriptorRef>
-          </descriptorRefs>
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <configuration>
+              <descriptorRefs>
+                <descriptorRef>project</descriptorRef>
+              </descriptorRefs>
 
-        </configuration>
-        <executions>
-          <execution>
-            <id>make-assembly</id> <!-- this is used for inheritance merges -->
-            <phase>package</phase> <!-- append to the packaging phase. -->
-            <goals>
-              <goal>single</goal> <!-- goals == mojos -->
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <!--<plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-doap-plugin</artifactId>
-        <version>1.0</version>
-        <configuration>
-          <about>Apache Mahout is a machine learning library written in Java and designed to scale by using Apache Hadoop and other high performance techniques.</about>
-         <doapOptions>
-           <programmingLanguage>java</programmingLanguage>
-           <category>library</category>
+            </configuration>
+            <executions>
+              <execution>
+                <id>make-assembly</id>
+                <!-- this is used for inheritance merges -->
+                <phase>package</phase>
+                <!-- append to the packaging phase. -->
+                <goals>
+                  <goal>single</goal>
+                  <!-- goals == mojos -->
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <!--<plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-doap-plugin</artifactId>
+            <version>1.0</version>
+            <configuration>
+              <about>Apache Mahout is a machine learning library written in Java and designed to scale by using Apache Hadoop and other high performance techniques.</about>
+             <doapOptions>
+               <programmingLanguage>java</programmingLanguage>
+               <category>library</category>
 
-         </doapOptions>
+             </doapOptions>
 
-          <asfExtOptions>
-            <included>true</included>
-            <charter>Apache Mahout is a machine learning library written in Java and designed to scale by using Apache Hadoop and other high performance techniques.</charter>
-            <pmc>http://lucene.apache.org</pmc>
-          </asfExtOptions>
+              <asfExtOptions>
+                <included>true</included>
+                <charter>Apache Mahout is a machine learning library written in Java and designed to scale by using Apache Hadoop and other high performance techniques.</charter>
+                <pmc>http://lucene.apache.org</pmc>
+              </asfExtOptions>
 
-        </configuration>
-        <executions>
-          <execution>
-            <id>gen</id>
-            <phase>package</phase>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>-->
+            </configuration>
+            <executions>
+              <execution>
+                <id>gen</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>generate</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>-->
 
-    </plugins>
-  </build>
-  </profile>
-</profiles>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.1</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.1</developerConnection>

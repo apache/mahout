@@ -85,17 +85,16 @@ public class BayesTfIdfReducer extends MapReduceBase implements
         String feature = key.stringAt(2);
         if (useHbase) {
           Put bu = new Put(Bytes.toBytes(feature));
-          bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes
-              .toBytes(label), Bytes.toBytes(idfTimes_D_ij));
+          bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY),
+                 Bytes.toBytes(label), Bytes.toBytes(idfTimes_D_ij));
           table.put(bu);
         }
 
       }
-      reporter
-          .setStatus("Bayes TfIdf Reducer: " + key + " => " + idfTimes_D_ij);
+      reporter.setStatus("Bayes TfIdf Reducer: " + key + " => " + idfTimes_D_ij);
       output.collect(key, new DoubleWritable(idfTimes_D_ij));
     } else {
-      throw new RuntimeException("Unexpected StringTuple: " + key);
+      throw new IllegalArgumentException("Unexpected StringTuple: " + key);
     }
   }
 

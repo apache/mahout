@@ -58,11 +58,11 @@ public class InputMapper extends MapReduceBase implements
       output.collect(new Text(String.valueOf(index)), result);
 
     } catch (InstantiationException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } catch (InvocationTargetException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
   }
 
@@ -73,7 +73,7 @@ public class InputMapper extends MapReduceBase implements
     try {
       constructor = outputClass.getConstructor(int.class);
     } catch (NoSuchMethodException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
 
   }

@@ -57,9 +57,12 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class PFPGrowth {
-  public static Pattern SPLITTER = Pattern.compile("[ ,\t]*[,|\t][ ,\t]*");
+  public static final Pattern SPLITTER = Pattern.compile("[ ,\t]*[,|\t][ ,\t]*");
 
   private static final Logger log = LoggerFactory.getLogger(PFPGrowth.class);
+
+  private PFPGrowth() {
+  }
 
   /**
    * Generates the fList from the serialized string representation
@@ -73,8 +76,7 @@ public class PFPGrowth {
   public static List<Pair<String, Long>> deserializeList(Parameters params,
       String key, Configuration conf) throws IOException {
     List<Pair<String, Long>> list = new ArrayList<Pair<String, Long>>();
-    conf
-        .set(
+    conf.set(
             "io.serializations",
             "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
 
@@ -258,12 +260,12 @@ public class PFPGrowth {
     Integer numGroups = Integer.valueOf(params.get("numGroups", "50"));
 
     Map<String, Long> gList = new HashMap<String, Long>();
-    long groupID = 0;
-    long i = 0;
     long maxPerGroup = fList.size() / numGroups;
     if (fList.size() != maxPerGroup * numGroups)
-      maxPerGroup = maxPerGroup + 1;
+      maxPerGroup++;
 
+    long i = 0;
+    long groupID = 0;
     for (Pair<String, Long> featureFreq : fList) {
       String feature = featureFreq.getFirst();
       if (i / (maxPerGroup) == groupID) {
@@ -374,14 +376,12 @@ public class PFPGrowth {
    */
   private static String serializeList(List<Pair<String, Long>> list,
       Configuration conf) throws IOException {
-    conf
-        .set(
+    conf.set(
             "io.serializations",
             "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
     DefaultStringifier<List<Pair<String, Long>>> listStringifier = new DefaultStringifier<List<Pair<String, Long>>>(
         conf, GenericsUtil.getClass(list));
-    String serializedListString = listStringifier.toString(list);
-    return serializedListString;
+    return listStringifier.toString(list);
   }
 
   /**
@@ -394,8 +394,7 @@ public class PFPGrowth {
    */
   private static String serializeMap(Map<String, Long> map, Configuration conf)
       throws IOException {
-    conf
-        .set(
+    conf.set(
             "io.serializations",
             "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
     DefaultStringifier<Map<String, Long>> mapStringifier = new DefaultStringifier<Map<String, Long>>(

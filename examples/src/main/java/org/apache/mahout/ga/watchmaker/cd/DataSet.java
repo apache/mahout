@@ -61,7 +61,7 @@ public class DataSet {
           return index;
       }
 
-      throw new RuntimeException("Value (" + value + ") not found");
+      throw new IllegalArgumentException("Value (" + value + ") not found");
     }
   }
 
@@ -110,7 +110,7 @@ public class DataSet {
    */
   public static DataSet getDataSet() {
     if (dataset == null)
-      throw new RuntimeException("DataSet not initialized");
+      throw new IllegalStateException("DataSet not initialized");
     return dataset;
   }
 
@@ -152,7 +152,7 @@ public class DataSet {
    */
   public double getMax(int index) {
     if (!isNumerical(index))
-      throw new RuntimeException("Nominal Attribute");
+      throw new IllegalArgumentException("Nominal Attribute");
 
     return ((NumericalAttr) attributes.get(index)).getMax();
   }
@@ -165,7 +165,7 @@ public class DataSet {
    */
   public double getMin(int index) {
     if (!isNumerical(index))
-      throw new RuntimeException("Nominal Attribute");
+      throw new IllegalArgumentException("Nominal Attribute");
 
     return ((NumericalAttr) attributes.get(index)).getMin();
   }
@@ -178,7 +178,7 @@ public class DataSet {
    */
   public int getNbValues(int index) {
     if (isNumerical(index))
-      throw new RuntimeException("Numerical Attribute");
+      throw new IllegalArgumentException("Numerical Attribute");
 
     return ((NominalAttr) attributes.get(index)).getNbvalues();
   }
@@ -203,7 +203,7 @@ public class DataSet {
    */
   public int valueIndex(int index, String value) {
     if (isNumerical(index))
-      throw new RuntimeException("Numerical Attribute");
+      throw new IllegalArgumentException("Numerical Attribute");
 
     return ((NominalAttr) attributes.get(index)).valueIndex(value);
   }

@@ -70,7 +70,7 @@ public class CDMahoutEvaluator {
 
     // check the input
     if (!fs.exists(inpath) || !fs.getFileStatus(inpath).isDir())
-      throw new RuntimeException("Input path not found or is not a directory");
+      throw new IllegalArgumentException("Input path not found or is not a directory");
 
     Path outpath = OutputUtils.prepareOutput(fs);
 

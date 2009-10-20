@@ -96,7 +96,7 @@ public class DatasetSplit {
   static byte[] getSeed(JobConf conf) {
     String seedstr = conf.get(SEED);
     if (seedstr == null)
-      throw new RuntimeException("SEED job parameter not found");
+      throw new IllegalArgumentException("SEED job parameter not found");
 
     return (byte[]) StringUtils.fromString(seedstr);
   }
@@ -104,14 +104,14 @@ public class DatasetSplit {
   static double getThreshold(JobConf conf) {
     String thrstr = conf.get(THRESHOLD);
     if (thrstr == null)
-      throw new RuntimeException("THRESHOLD job parameter not found");
+      throw new IllegalArgumentException("THRESHOLD job parameter not found");
 
     return Double.parseDouble(thrstr);
   }
 
   static boolean isTraining(JobConf conf) {
     if (conf.get(TRAINING) == null)
-      throw new RuntimeException("TRAINING job parameter not found");
+      throw new IllegalArgumentException("TRAINING job parameter not found");
 
     return conf.getBoolean(TRAINING, true);
   }

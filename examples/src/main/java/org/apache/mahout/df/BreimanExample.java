@@ -45,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uncommons.maths.Maths;
 
+import java.io.IOException;
 import java.util.Random;
 
 /**
@@ -80,8 +81,8 @@ public class BreimanExample extends Configured implements Tool {
    */
   protected static void runIteration(Data data, int m, int nbtrees) {
 
-    final int dataSize = data.size();
-    final int nblabels = data.getDataset().nblabels();
+    int dataSize = data.size();
+    int nblabels = data.getDataset().nblabels();
 
     Random rng = RandomUtils.getRandom();
 
@@ -139,12 +140,11 @@ public class BreimanExample extends Configured implements Tool {
   }
 
   public static void main(String[] args) throws Exception {
-    int res = ToolRunner.run(new Configuration(), new BreimanExample(), args);
-    System.exit(res);
+    ToolRunner.run(new Configuration(), new BreimanExample(), args);
   }
 
   @Override
-  public int run(String[] args) throws Exception {
+  public int run(String[] args) throws IOException {
     
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();

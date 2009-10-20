@@ -49,9 +49,9 @@ public class SequenceFileVectorIterable implements Iterable<Vector> {
     try {
       return new SeqFileIterator();
     } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } catch (InstantiationException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
   }
 
@@ -60,26 +60,28 @@ public class SequenceFileVectorIterable implements Iterable<Vector> {
     private final Writable value;
 
     private SeqFileIterator() throws IllegalAccessException, InstantiationException {
-      if (transpose == false){
+      if (transpose) {
+        value = (Writable) reader.getValueClass().newInstance();
         key = (Writable) reader.getKeyClass().newInstance();
-        value = (Vector) reader.getValueClass().newInstance();
       } else {
-        value = (Vector) reader.getValueClass().newInstance();
         key = (Writable) reader.getKeyClass().newInstance();
+        value = (Writable) reader.getValueClass().newInstance();
       }
     }
 
     @Override
     public boolean hasNext() {
+      // TODO this doesn't work with the Iterator contract -- hasNext() cannot have a side effect
       try {
         return reader.next(key, value);
       } catch (IOException e) {
-        throw new RuntimeException(e);
+        throw new IllegalStateException(e);
       }
     }
 
     @Override
     public Vector next() {
+      
       return transpose ? (Vector)key : (Vector)value;
     }
 

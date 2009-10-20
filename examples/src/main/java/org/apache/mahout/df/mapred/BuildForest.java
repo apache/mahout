@@ -45,6 +45,7 @@ import org.apache.mahout.df.mapred.partial.PartialBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Random;
 
 /**
@@ -70,7 +71,7 @@ public class BuildForest extends Configured implements Tool {
   boolean isOob; // estimate oob error;
 
   @Override
-  public int run(String[] args) throws Exception {
+  public int run(String[] args) throws IOException {
 
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
@@ -157,7 +158,7 @@ public class BuildForest extends Configured implements Tool {
     return 0;
   }
 
-  private DecisionForest buildForest() throws Exception {
+  private DecisionForest buildForest() throws IOException {
     DefaultTreeBuilder treeBuilder = new DefaultTreeBuilder();
     treeBuilder.setM(m);
 
@@ -218,8 +219,7 @@ public class BuildForest extends Configured implements Tool {
    * @throws Exception
    */
   public static void main(String[] args) throws Exception {
-    int res = ToolRunner.run(new Configuration(), new BuildForest(), args);
-    System.exit(res);
+    ToolRunner.run(new Configuration(), new BuildForest(), args);
   }
 
 }

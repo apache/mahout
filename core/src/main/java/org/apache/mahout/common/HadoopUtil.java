@@ -38,8 +38,7 @@ public final class HadoopUtil {
     JobConf conf = new JobConf(KMeansDriver.class);
     Path outPath = new Path(output);
     FileSystem fs = FileSystem.get(outPath.toUri(), conf);
-    boolean exists = fs.exists(outPath);
-    if (exists == true) {
+    if (fs.exists(outPath)) {
       log.warn("Deleting " + outPath);
       fs.delete(outPath, true);
     }
