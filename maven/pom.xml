@@ -5,12 +5,12 @@
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.2</version>
+  <version>0.2-SNAPSHOT</version>
   <name>Mahout Common Maven Parent</name>
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>0.2</version>
+    <version>0.2-SNAPSHOT</version>
   </parent>
   <properties>
     <junit.version>3.8.2</junit.version>

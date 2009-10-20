@@ -7,13 +7,13 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-parent</artifactId>
-    <version>0.2</version>
+    <version>0.2-SNAPSHOT</version>
     <relativePath>../maven</relativePath>
   </parent>
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-taste-webapp</artifactId>
-  <version>0.2</version>
+  <version>0.2-SNAPSHOT</version>
   <name>Mahout Taste Webapp</name>
   <description>Mahout Taste Collaborative Filtering Web App</description>
 
