@@ -32,10 +32,8 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.mahout.cf.taste.recommender.Recommender;
@@ -47,21 +45,68 @@ import java.io.IOException;
 /**
  * <p>This class configures and runs a {@link RecommenderMapper} using Hadoop.</p>
  *
- * <p>Command line arguments are:</p> <ol> <li>Fully-qualified class name of {@link Recommender} to use to make
- * recommendations. Note that it must have a constructor which takes a {@link org.apache.mahout.cf.taste.model.DataModel}
- * argument.</li> <li>Number of recommendations to compute per user</li> <li>Location of a text file containing user IDs
- * for which recommendations should be computed, one per line</li> <li>Location of a data model file containing
- * preference data, suitable for use with {@link org.apache.mahout.cf.taste.impl.model.file.FileDataModel}</li>
- * <li>Output path where reducer output should go</li> </ol>
+ * <p>Command line arguments are:</p>
  *
- * <p>Example:</p>
+ * <ol>
+ *  <li>Fully-qualified class name of {@link Recommender} to use to make
+ *   recommendations. Note that it must have a constructor which takes a
+ *   {@link org.apache.mahout.cf.taste.model.DataModel} argument.</li>
+ *  <li>Number of recommendations to compute per user</li>
+ *  <li>Location of a text file containing user IDs
+ *   for which recommendations should be computed, one per line</li>
+ *  <li>Location of a data model file containing preference data,
+ *   suitable for use with {@link org.apache.mahout.cf.taste.impl.model.file.FileDataModel}</li>
+ *  <li>Output path where reducer output should go</li>
+ * </ol>
+ *
+ * <p>Example arguments:</p>
  *
  * <p><code>org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender 10 path/to/users.txt
- * path/to/data.csv path/to/reducerOutputDir 5</code></p>
+ * path/to/data.csv path/to/reducerOutputDir</code></p>
+ *
+ * <p>
+ * Set up Hadoop in a pseudo-distributed manner: http://hadoop.apache.org/common/docs/current/quickstart.html
+ * You can stop at the point where it instructs you to copy files into HDFS. Instead, proceed as follow.</p>
+ *
+ * {@code
+ * hadoop fs -mkdir input
+ * hadoop fs -mkdir output
+ * }
+ *
+ * <p>We need to massage the BX input a little bit and also create a file of user IDs:</p>
+ *
+ * {@code
+ * tail +2 BX-Book-Ratings.csv | tr -cd '[:digit:];\n' | tr ';' ',' | grep -v ',,' > input.csv
+ * # Mac users: put "export LC_ALL=C;" at the front of this command. You may want to "unset LC_ALL" after.
+ * cut -d, -f1 input.csv | uniq > users.txt
+ * }
+ *
+ * <p>Now we put the file in input/ and prepare output/:</p>
+ *
+ * {@code
+ * hadoop fs -put input.csv input/input.csv
+ * hadoop fs -put users.txt input/users.txt
+ * hadoop fs -mkdir output/
+ * }
+ *
+ * <p>Now build Mahout code using your IDE, or Maven. Note where the compiled classes go. If you built with
+ * Maven, it'll be like (Mahout directory)/core/target/classes/. Prepare a .jar file for Hadoop:</p>
+ *
+ * {@code
+ * jar cvf recommender.jar -C (classes directory) .
+ * }
+ *
+ * <p>And launch:</p>
+ *
+ * {@code
+ * hadoop jar recommender.jar org.apache.mahout.cf.taste.hadoop.RecommenderJob \
+ *   org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender \
+ *   10 input/users.txt input/input.csv recommender.jar output
+ * }
  */
 public final class RecommenderJob extends Job {
-  /** Logger for this class. */
-  private static Logger LOG = Logger.getLogger(SlopeOneDiffsToAveragesJob.class);
+
+  private static final Logger log = Logger.getLogger(RecommenderJob.class);
 
   public RecommenderJob(Configuration jobConf) throws IOException {
     super(jobConf);
@@ -87,6 +132,11 @@ public final class RecommenderJob extends Job {
     Option dataModelFileOpt = obuilder.withLongName("dataModelFile").withRequired(true)
       .withShortName("m").withArgument(abuilder.withName("dataModelFile").withMinimum(1)
       .withMaximum(1).create()).withDescription("File containing data model.").create();
+
+    Option jarFileOpt = obuilder.withLongName("jarFile").withRequired(true)
+      .withShortName("m").withArgument(abuilder.withName("jarFile").withMinimum(1)
+      .withMaximum(1).create()).withDescription("Implementation jar.").create();
+
     Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).create();
     Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
 
@@ -108,13 +158,14 @@ public final class RecommenderJob extends Job {
       int recommendationsPerUser = Integer.parseInt(cmdLine.getValue(userRecommendOpt).toString());
       String userIDFile = cmdLine.getValue(userIDFileOpt).toString();
       String dataModelFile = cmdLine.getValue(dataModelFileOpt).toString();
+      String jarFile = cmdLine.getValue(jarFileOpt).toString();
       String outputPath = cmdLine.getValue(outputOpt).toString();
       Configuration jobConf =
-          buildJobConf(recommendClassName, recommendationsPerUser, userIDFile, dataModelFile, outputPath);
+          buildJobConf(recommendClassName, recommendationsPerUser, userIDFile, dataModelFile, jarFile, outputPath);
       Job job = new RecommenderJob(jobConf);
       job.waitForCompletion(true); 
     } catch (OptionException e) {
-      LOG.error(e.getMessage());
+      log.error(e.getMessage());
       CommandLineUtil.printHelp(group);
     }
   }
@@ -123,6 +174,7 @@ public final class RecommenderJob extends Job {
                                            int recommendationsPerUser,
                                            String userIDFile,
                                            String dataModelFile,
+                                           String jarFile,
                                            String outputPath) throws IOException {
 
     Configuration jobConf = new Configuration();
@@ -134,6 +186,8 @@ public final class RecommenderJob extends Job {
     if (fs.exists(outputPathPath)) {
       fs.delete(outputPathPath, true);
     }
+
+    jobConf.set("mapred.jar", jarFile);
 
     jobConf.set(RecommenderMapper.RECOMMENDER_CLASS_NAME, recommendClassName);
     jobConf.set(RecommenderMapper.RECOMMENDATIONS_PER_USER, String.valueOf(recommendationsPerUser));
@@ -150,7 +204,7 @@ public final class RecommenderJob extends Job {
     jobConf.setClass("mapred.output.key.class", LongWritable.class, Object.class);
     jobConf.setClass("mapred.output.value.class", RecommendedItemsWritable.class, Object.class);
 
-    jobConf.setClass("mapred.output.format.class", TextOutputFormat.class, OutputFormat.class);
+    //jobConf.setClass("mapred.output.format.class", TextOutputFormat.class, OutputFormat.class);
     jobConf.set("mapred.output.dir", StringUtils.escapeString(outputPathPath.toString()));
 
     return jobConf;
