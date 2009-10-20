@@ -26,49 +26,62 @@ import java.util.TreeSet;
 /**
  * {@link FrequentPatternMaxHeap} keeps top K Attributes in a TreeSet
  * 
- * @param <T>
  */
 public class FrequentPatternMaxHeap {
-  TreeSet<Pattern> set = null;
-
-  HashMap<Long, Set<Pattern>> patternIndex = null;
-
-  Pattern least = null;
-
-  int maxSize = 0;
-
-  int count = 0;
-
   private Comparator<Pattern> treeSetComparator = new Comparator<Pattern>() {
     @Override
-    final public int compare(Pattern cr1, Pattern cr2) {
-      long support2 = cr2.getSupport();
-      long support1 = cr1.getSupport();
+    public final int compare(Pattern cr1, Pattern cr2) {
+      long support2 = cr2.support();
+      long support1 = cr1.support();
       int length2 = cr2.length();
       int length1 = cr1.length();
       if (support1 == support2) {
-        if (length1 == length2) {//if they are of same length and support order randomly
+        if (length1 == length2) {// if they are of same length and support order
+          // randomly
           return 1;
         } else
           return length2 - length1;
       } else {
-        if( support2 - support1 >0)
+        if (support2 - support1 > 0)
           return 1;
-        else return -1;
+        else
+          return -1;
       }
     }
   };
+
+  private int count = 0;
+
+  private Pattern least = null;
+
+  private int maxSize = 0;
+
+  private HashMap<Long, Set<Pattern>> patternIndex = null;
+
+  private TreeSet<Pattern> set = null;
 
   public FrequentPatternMaxHeap(int numResults) {
     maxSize = numResults;
     set = new TreeSet<Pattern>(treeSetComparator);
   }
 
-  final public void insert(Pattern frequentPattern) {
+  public final boolean addable(long support) {
+    if (count < maxSize)
+      return true;
+    if (least.support() > support)
+      return false;
+    return true;
+  }
+
+  public final TreeSet<Pattern> getHeap() {
+    return set;
+  }
+
+  public final void insert(Pattern frequentPattern) {
     insert(frequentPattern, true);
   }
 
-  final public void insert(Pattern frequentPattern, boolean subPatternCheck) {
+  public final void insert(Pattern frequentPattern, boolean subPatternCheck) {
     if (subPatternCheck)// lazy initialization
     {
       if (patternIndex == null)
@@ -81,23 +94,41 @@ public class FrequentPatternMaxHeap {
           Pattern evictedItem = set.pollLast();
           least = set.last();
           if (subPatternCheck)
-            patternIndex.get(evictedItem.support).remove(evictedItem);
+            patternIndex.get(evictedItem.support()).remove(evictedItem);
         }
       }
-    } else {           
-      if (addPattern(frequentPattern, subPatternCheck)){
-        count++;        
-        if(least != null) {
-          int cmp = treeSetComparator.compare(least, frequentPattern);   
+    } else {
+      if (addPattern(frequentPattern, subPatternCheck)) {
+        count++;
+        if (least != null) {
+          int cmp = treeSetComparator.compare(least, frequentPattern);
           if (cmp < 0)
             least = frequentPattern;
-          else if(cmp == 0)
+          else if (cmp == 0)
             return;
-        }
-        else if (least == null)
+        } else if (least == null)
           least = frequentPattern;
       }
     }
+  }
+  
+  public final int count(){
+    return count;
+  }
+
+  public final boolean isFull() {
+    return count == maxSize;
+  }
+
+  public final long leastSupport() {
+    if (least == null)
+      return 0;
+    return least.support();
+  }
+
+  @Override
+  public final String toString() {
+    return super.toString();
   }
 
   final private boolean addPattern(Pattern frequentPattern,
@@ -106,7 +137,7 @@ public class FrequentPatternMaxHeap {
       set.add(frequentPattern);
       return true;
     } else {
-      Long index = Long.valueOf(frequentPattern.support);
+      Long index = Long.valueOf(frequentPattern.support());
       if (patternIndex.containsKey(index)) {
         Set<Pattern> indexSet = patternIndex.get(index);
         boolean replace = false;
@@ -148,32 +179,5 @@ public class FrequentPatternMaxHeap {
         return true;
       }
     }
-  }
-
-  final public TreeSet<Pattern> getHeap() {
-    return set;
-  }
-
-  final public boolean addable(long support) {
-    if (count < maxSize)
-      return true;
-    if (least.support > support)
-      return false;
-    return true;
-  }
-
-  @Override
-  final public String toString() {
-    return super.toString();
-  }
-
-  final public boolean isFull() {
-    return count == maxSize;
-  }
-
-  final public long leastSupport() {
-    if (least == null)
-      return 0;
-    return least.support;
   }
 }

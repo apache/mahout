@@ -25,12 +25,12 @@ public class FPTreeDepthCache {
 
   public static int firstLevelCacheSize = 5;
 
-  final private ArrayList<FPTree> treeCache = new ArrayList<FPTree>();
+  private final ArrayList<FPTree> treeCache = new ArrayList<FPTree>();
 
-  final private LeastKCache<Integer, FPTree> firstLevelCache = new LeastKCache<Integer, FPTree>(
+  private final LeastKCache<Integer, FPTree> firstLevelCache = new LeastKCache<Integer, FPTree>(
       firstLevelCacheSize);
 
-  final public FPTree getTree(int level) {
+  public final FPTree getTree(int level) {
     while (treeCache.size() < level + 1) {
       FPTree cTree = new FPTree();
       treeCache.add(cTree);
@@ -44,7 +44,7 @@ public class FPTreeDepthCache {
 
   private int misses = 0;
 
-  final public FPTree getFirstLevelTree(int attr) {
+  public final FPTree getFirstLevelTree(int attr) {
     Integer attribute = Integer.valueOf(attr);
     if (firstLevelCache.contains(attribute)) {
       hits++;
@@ -57,11 +57,11 @@ public class FPTreeDepthCache {
     }
   }
 
-  final public int getHits() {
+  public final int getHits() {
     return hits;
   }
 
-  final public int getMisses() {
+  public final int getMisses() {
     return misses;
   }
 

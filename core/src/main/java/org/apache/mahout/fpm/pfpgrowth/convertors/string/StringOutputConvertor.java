@@ -26,7 +26,7 @@ import org.apache.mahout.common.Pair;
 public final class StringOutputConvertor implements
     OutputCollector<String, List<Pair<List<String>, Long>>> {
 
-  OutputCollector<Text, TopKStringPatterns> collector = null;
+  private OutputCollector<Text, TopKStringPatterns> collector = null;
 
   public StringOutputConvertor(
       OutputCollector<Text, TopKStringPatterns> collector) {
@@ -34,7 +34,7 @@ public final class StringOutputConvertor implements
   }
 
   @Override
-  final public void collect(String key, List<Pair<List<String>, Long>> value)
+  public final void collect(String key, List<Pair<List<String>, Long>> value)
       throws IOException {
     collector.collect(new Text(key), new TopKStringPatterns(value));
   }

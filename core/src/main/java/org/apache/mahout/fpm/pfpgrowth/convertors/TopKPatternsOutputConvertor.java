@@ -26,7 +26,7 @@ import org.apache.mahout.common.Pair;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FrequentPatternMaxHeap;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.Pattern;
 
-final public class TopKPatternsOutputConvertor<AttributePrimitive> implements
+public final class TopKPatternsOutputConvertor<AttributePrimitive> implements
     OutputCollector<Integer, FrequentPatternMaxHeap> {
 
   private OutputCollector<AttributePrimitive, List<Pair<List<AttributePrimitive>, Long>>> collector = null;
@@ -41,7 +41,7 @@ final public class TopKPatternsOutputConvertor<AttributePrimitive> implements
   }
 
   @Override
-  final public void collect(Integer key, FrequentPatternMaxHeap value)
+  public final void collect(Integer key, FrequentPatternMaxHeap value)
       throws IOException {
     List<Pair<List<AttributePrimitive>, Long>> perAttributePatterns = new ArrayList<Pair<List<AttributePrimitive>, Long>>();
     for (Pattern itemSet : value.getHeap()) {
@@ -50,7 +50,7 @@ final public class TopKPatternsOutputConvertor<AttributePrimitive> implements
         frequentPattern.add(reverseMapping.get(itemSet.getPattern()[j]));
       }
       Pair<List<AttributePrimitive>, Long> returnItemSet = new Pair<List<AttributePrimitive>, Long>(
-          frequentPattern, itemSet.getSupport());
+          frequentPattern, itemSet.support());
       perAttributePatterns.add(returnItemSet);
     }
     collector.collect(reverseMapping.get(key), perAttributePatterns);

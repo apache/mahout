@@ -57,92 +57,9 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class PFPGrowth {
-  private static final Logger log = LoggerFactory.getLogger(PFPGrowth.class);
-
   public static Pattern SPLITTER = Pattern.compile("[ ,\t]*[,|\t][ ,\t]*");
 
-  /**
-   * 
-   * @param params params should contain input and output locations as a string
-   *        value, the additional parameters include minSupport(3),
-   *        maxHeapSize(50), numGroups(1000)
-   * @throws IOException
-   * @throws ClassNotFoundException
-   * @throws InterruptedException
-   */
-  public static void runPFPGrowth(Parameters params) throws IOException,
-      InterruptedException, ClassNotFoundException {
-    startParallelCounting(params);
-    startGroupingItems(params);
-    startParallelFPGrowth(params);
-    startAggregating(params);
-  }
-
-  /**
-   * Converts a given Map in to a String using DefaultStringifier of Hadoop
-   * 
-   * @param map
-   * @param conf
-   * @return string representation of the map
-   * @throws IOException
-   */
-  private static String serializeMap(Map<String, Long> map, Configuration conf)
-      throws IOException {
-    conf
-        .set(
-            "io.serializations",
-            "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
-    DefaultStringifier<Map<String, Long>> mapStringifier = new DefaultStringifier<Map<String, Long>>(
-        conf, GenericsUtil.getClass(map));
-    String serializedMapString = mapStringifier.toString(map);
-    return serializedMapString;
-  }
-
-  /**
-   * Generates the gList(Group ID Mapping of Various frequent Features) Map from
-   * the corresponding serialized representation
-   * 
-   * @param params
-   * @param key
-   * @param conf
-   * @return
-   * @throws IOException
-   */
-  public static Map<String, Long> deserializeMap(Parameters params, String key,
-      Configuration conf) throws IOException {
-    Map<String, Long> map = new HashMap<String, Long>();
-    conf
-        .set(
-            "io.serializations",
-            "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
-
-    DefaultStringifier<Map<String, Long>> mapStringifier = new DefaultStringifier<Map<String, Long>>(
-        conf, GenericsUtil.getClass(map));
-    String gListString = mapStringifier.toString(map);
-    gListString = params.get(key, gListString);
-    map = mapStringifier.fromString(gListString);
-    return map;
-  }
-
-  /**
-   * Serializes the fList and returns the string representation of the List
-   * 
-   * @param list
-   * @param conf
-   * @return
-   * @throws IOException
-   */
-  private static String serializeList(List<Pair<String, Long>> list,
-      Configuration conf) throws IOException {
-    conf
-        .set(
-            "io.serializations",
-            "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
-    DefaultStringifier<List<Pair<String, Long>>> listStringifier = new DefaultStringifier<List<Pair<String, Long>>>(
-        conf, GenericsUtil.getClass(list));
-    String serializedListString = listStringifier.toString(list);
-    return serializedListString;
-  }
+  private static final Logger log = LoggerFactory.getLogger(PFPGrowth.class);
 
   /**
    * Generates the fList from the serialized string representation
@@ -150,7 +67,7 @@ public class PFPGrowth {
    * @param params
    * @param key
    * @param conf
-   * @return
+   * @return Deserialized Feature Frequency List
    * @throws IOException
    */
   public static List<Pair<String, Long>> deserializeList(Parameters params,
@@ -170,44 +87,29 @@ public class PFPGrowth {
   }
 
   /**
-   * Count the frequencies of various features in parallel using Map/Reduce
+   * Generates the gList(Group ID Mapping of Various frequent Features) Map from
+   * the corresponding serialized representation
    * 
    * @param params
+   * @param key
+   * @param conf
+   * @return Deserialized Group List
    * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
    */
-  public static void startParallelCounting(Parameters params)
-      throws IOException, InterruptedException, ClassNotFoundException {
+  public static Map<String, Long> deserializeMap(Parameters params, String key,
+      Configuration conf) throws IOException {
+    Map<String, Long> map = new HashMap<String, Long>();
+    conf
+        .set(
+            "io.serializations",
+            "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
 
-    Configuration conf = new Configuration();
-    conf.set("pfp.parameters", params.toString());
-
-    String input = params.get("input");
-    Job job = new Job(conf, "Parallel Counting Driver running over input: "
-        + input);
-    job.setJarByClass(PFPGrowth.class);
-
-    job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(LongWritable.class);
-
-    FileInputFormat.addInputPath(job, new Path(input));
-    Path outPath = new Path(params.get("output") + "/parallelcounting");
-    FileOutputFormat.setOutputPath(job, outPath);
-
-    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath)) {
-      dfs.delete(outPath, true);
-    }
-
-    job.setInputFormatClass(TextInputFormat.class);
-    job.setMapperClass(ParallelCountingMapper.class);
-    job.setCombinerClass(ParallelCountingReducer.class);
-    job.setReducerClass(ParallelCountingReducer.class);
-    job.setOutputFormatClass(SequenceFileOutputFormat.class);
-
-    job.waitForCompletion(true);
-
+    DefaultStringifier<Map<String, Long>> mapStringifier = new DefaultStringifier<Map<String, Long>>(
+        conf, GenericsUtil.getClass(map));
+    String gListString = mapStringifier.toString(map);
+    gListString = params.get(key, gListString);
+    map = mapStringifier.fromString(gListString);
+    return map;
   }
 
   /**
@@ -215,7 +117,7 @@ public class PFPGrowth {
    * counting job
    * 
    * @param params
-   * @return
+   * @return Feature Frequency List
    * @throws IOException
    */
   public static List<Pair<String, Long>> readFList(Parameters params)
@@ -284,81 +186,20 @@ public class PFPGrowth {
   }
 
   /**
-   * Group the given Features into g groups as defined by the numGroups
-   * parameter in params
    * 
-   * @param params
+   * @param params params should contain input and output locations as a string
+   *        value, the additional parameters include minSupport(3),
+   *        maxHeapSize(50), numGroups(1000)
    * @throws IOException
-   */
-  public static void startGroupingItems(Parameters params) throws IOException {
-    Configuration conf = new Configuration();
-    List<Pair<String, Long>> fList = readFList(params);
-    Integer numGroups = Integer.valueOf(params.get("numGroups", "50"));
-
-    Map<String, Long> gList = new HashMap<String, Long>();
-    long groupID = 0;
-    long i = 0;
-    long maxPerGroup = fList.size() / numGroups;
-    if (fList.size() != maxPerGroup * numGroups)
-      maxPerGroup = maxPerGroup + 1;
-
-    for (Pair<String, Long> featureFreq : fList) {
-      String feature = featureFreq.getFirst();
-      if (i / (maxPerGroup) == groupID) {
-        gList.put(feature, groupID);
-      } else {
-        groupID++;
-        gList.put(feature, groupID);
-      }
-      i++;
-    }
-
-    log.info("No of Features: {}", fList.size());
-
-    params.set("gList", serializeMap(gList, conf));
-    params.set("fList", serializeList(fList, conf));
-  }
-
-  /**
-   * Run the Parallel FPGrowth Map/Reduce Job to calculate the Top K features of
-   * group dependent shards
-   * 
-   * @param params
-   * @throws IOException
-   * @throws InterruptedException
    * @throws ClassNotFoundException
+   * @throws InterruptedException
    */
-  public static void startParallelFPGrowth(Parameters params)
-      throws IOException, InterruptedException, ClassNotFoundException {
-
-    Configuration conf = new Configuration();
-    conf.set("pfp.parameters", params.toString());
-
-    String input = params.get("input");
-    Job job = new Job(conf, "PFP Growth Driver running over input" + input);
-    job.setJarByClass(PFPGrowth.class);
-
-    job.setMapOutputKeyClass(LongWritable.class);
-    job.setMapOutputValueClass(IntegerTuple.class);
-    
-    job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(TopKStringPatterns.class);
-
-    FileInputFormat.addInputPath(job, new Path(input));
-    Path outPath = new Path(params.get("output") + "/fpgrowth");
-    FileOutputFormat.setOutputPath(job, outPath);
-
-    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath)) {
-      dfs.delete(outPath, true);
-    }
-
-    job.setInputFormatClass(TextInputFormat.class);
-    job.setMapperClass(ParallelFPGrowthMapper.class);
-    job.setReducerClass(ParallelFPGrowthReducer.class);
-    job.setOutputFormatClass(SequenceFileOutputFormat.class);
-
-    job.waitForCompletion(true);
+  public static void runPFPGrowth(Parameters params) throws IOException,
+      InterruptedException, ClassNotFoundException {
+    startParallelCounting(params);
+    startGroupingItems(params);
+    startParallelFPGrowth(params);
+    startAggregating(params);
   }
 
   /**
@@ -402,5 +243,164 @@ public class PFPGrowth {
       dfs.delete(outPath, true);
     }
     job.waitForCompletion(true);
+  }
+
+  /**
+   * Group the given Features into g groups as defined by the numGroups
+   * parameter in params
+   * 
+   * @param params
+   * @throws IOException
+   */
+  public static void startGroupingItems(Parameters params) throws IOException {
+    Configuration conf = new Configuration();
+    List<Pair<String, Long>> fList = readFList(params);
+    Integer numGroups = Integer.valueOf(params.get("numGroups", "50"));
+
+    Map<String, Long> gList = new HashMap<String, Long>();
+    long groupID = 0;
+    long i = 0;
+    long maxPerGroup = fList.size() / numGroups;
+    if (fList.size() != maxPerGroup * numGroups)
+      maxPerGroup = maxPerGroup + 1;
+
+    for (Pair<String, Long> featureFreq : fList) {
+      String feature = featureFreq.getFirst();
+      if (i / (maxPerGroup) == groupID) {
+        gList.put(feature, groupID);
+      } else {
+        groupID++;
+        gList.put(feature, groupID);
+      }
+      i++;
+    }
+
+    log.info("No of Features: {}", fList.size());
+
+    params.set("gList", serializeMap(gList, conf));
+    params.set("fList", serializeList(fList, conf));
+  }
+
+  /**
+   * Count the frequencies of various features in parallel using Map/Reduce
+   * 
+   * @param params
+   * @throws IOException
+   * @throws InterruptedException
+   * @throws ClassNotFoundException
+   */
+  public static void startParallelCounting(Parameters params)
+      throws IOException, InterruptedException, ClassNotFoundException {
+
+    Configuration conf = new Configuration();
+    conf.set("pfp.parameters", params.toString());
+
+    String input = params.get("input");
+    Job job = new Job(conf, "Parallel Counting Driver running over input: "
+        + input);
+    job.setJarByClass(PFPGrowth.class);
+
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(LongWritable.class);
+
+    FileInputFormat.addInputPath(job, new Path(input));
+    Path outPath = new Path(params.get("output") + "/parallelcounting");
+    FileOutputFormat.setOutputPath(job, outPath);
+
+    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
+    if (dfs.exists(outPath)) {
+      dfs.delete(outPath, true);
+    }
+
+    job.setInputFormatClass(TextInputFormat.class);
+    job.setMapperClass(ParallelCountingMapper.class);
+    job.setCombinerClass(ParallelCountingReducer.class);
+    job.setReducerClass(ParallelCountingReducer.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+
+    job.waitForCompletion(true);
+
+  }
+
+  /**
+   * Run the Parallel FPGrowth Map/Reduce Job to calculate the Top K features of
+   * group dependent shards
+   * 
+   * @param params
+   * @throws IOException
+   * @throws InterruptedException
+   * @throws ClassNotFoundException
+   */
+  public static void startParallelFPGrowth(Parameters params)
+      throws IOException, InterruptedException, ClassNotFoundException {
+
+    Configuration conf = new Configuration();
+    conf.set("pfp.parameters", params.toString());
+
+    String input = params.get("input");
+    Job job = new Job(conf, "PFP Growth Driver running over input" + input);
+    job.setJarByClass(PFPGrowth.class);
+
+    job.setMapOutputKeyClass(LongWritable.class);
+    job.setMapOutputValueClass(IntegerTuple.class);
+
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(TopKStringPatterns.class);
+
+    FileInputFormat.addInputPath(job, new Path(input));
+    Path outPath = new Path(params.get("output") + "/fpgrowth");
+    FileOutputFormat.setOutputPath(job, outPath);
+
+    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
+    if (dfs.exists(outPath)) {
+      dfs.delete(outPath, true);
+    }
+
+    job.setInputFormatClass(TextInputFormat.class);
+    job.setMapperClass(ParallelFPGrowthMapper.class);
+    job.setReducerClass(ParallelFPGrowthReducer.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+
+    job.waitForCompletion(true);
+  }
+
+  /**
+   * Serializes the fList and returns the string representation of the List
+   * 
+   * @param list
+   * @param conf
+   * @return Serialized String representation of List
+   * @throws IOException
+   */
+  private static String serializeList(List<Pair<String, Long>> list,
+      Configuration conf) throws IOException {
+    conf
+        .set(
+            "io.serializations",
+            "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
+    DefaultStringifier<List<Pair<String, Long>>> listStringifier = new DefaultStringifier<List<Pair<String, Long>>>(
+        conf, GenericsUtil.getClass(list));
+    String serializedListString = listStringifier.toString(list);
+    return serializedListString;
+  }
+
+  /**
+   * Converts a given Map in to a String using DefaultStringifier of Hadoop
+   * 
+   * @param map
+   * @param conf
+   * @return Serialized String representation of the GList Map
+   * @throws IOException
+   */
+  private static String serializeMap(Map<String, Long> map, Configuration conf)
+      throws IOException {
+    conf
+        .set(
+            "io.serializations",
+            "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
+    DefaultStringifier<Map<String, Long>> mapStringifier = new DefaultStringifier<Map<String, Long>>(
+        conf, GenericsUtil.getClass(map));
+    String serializedMapString = mapStringifier.toString(map);
+    return serializedMapString;
   }
 }

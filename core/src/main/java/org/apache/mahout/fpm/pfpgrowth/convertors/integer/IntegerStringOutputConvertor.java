@@ -28,9 +28,9 @@ import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 public final class IntegerStringOutputConvertor implements
     OutputCollector<Integer, List<Pair<List<Integer>, Long>>> {
 
-  OutputCollector<Text, TopKStringPatterns> collector = null;
+  private OutputCollector<Text, TopKStringPatterns> collector = null;
 
-  List<String> featureReverseMap = null;
+  private List<String> featureReverseMap = null;
 
   public IntegerStringOutputConvertor(
       OutputCollector<Text, TopKStringPatterns> collector,
@@ -40,7 +40,7 @@ public final class IntegerStringOutputConvertor implements
   }
 
   @Override
-  final public void collect(Integer key, List<Pair<List<Integer>, Long>> value)
+  public final void collect(Integer key, List<Pair<List<Integer>, Long>> value)
       throws IOException {
     String StringKey = featureReverseMap.get(key);
     List<Pair<List<String>, Long>> stringValues = new ArrayList<Pair<List<String>, Long>>();

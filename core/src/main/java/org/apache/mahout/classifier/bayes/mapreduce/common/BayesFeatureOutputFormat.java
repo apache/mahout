@@ -56,7 +56,6 @@ public class BayesFeatureOutputFormat extends MultipleOutputFormat<WritableCompa
         return "trainer-wordFreq/" + name;
       else if(key.stringAt(0).equals(BayesConstants.DOCUMENT_FREQUENCY))
         return "trainer-termDocCount/" + name;
-      else throw new RuntimeException("Unrecognized Tuple: " + key);
     }
     else if(key.length() == 2)
     {
@@ -64,10 +63,8 @@ public class BayesFeatureOutputFormat extends MultipleOutputFormat<WritableCompa
         return "trainer-featureCount/" + name;
       else if(key.stringAt(0).equals(BayesConstants.LABEL_COUNT))
         return "trainer-docCount/" + name;
-      else throw new RuntimeException("Unrecognized Tuple: " + key);
     }
-    else
-      throw new RuntimeException("Unrecognized Tuple: " + key);    
+    throw new RuntimeException("Unrecognized Tuple: " + key);    
   }
 
 }

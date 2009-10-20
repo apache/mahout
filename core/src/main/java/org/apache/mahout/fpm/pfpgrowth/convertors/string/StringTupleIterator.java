@@ -31,18 +31,18 @@ public final class StringTupleIterator implements Iterator<List<String>> {
   }
 
   @Override
-  final public boolean hasNext() {
+  public final boolean hasNext() {
     return iterator.hasNext();
   }
 
   @Override
-  final public List<String> next() {
+  public final List<String> next() {
     StringTuple transaction = iterator.next();
     return transaction.getEntries();
   }
 
   @Override
-  final public void remove() {
+  public final void remove() {
     iterator.remove();
   }
 

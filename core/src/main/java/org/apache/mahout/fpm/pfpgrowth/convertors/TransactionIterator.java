@@ -26,7 +26,7 @@ public class TransactionIterator<AttributePrimitive> implements Iterator<int[]> 
 
   private Iterator<List<AttributePrimitive>> iterator = null;
 
-  int[] transactionBuffer = null;
+  private int[] transactionBuffer = null;
 
   public TransactionIterator(Iterator<List<AttributePrimitive>> iterator,
       Map<AttributePrimitive, Integer> attributeIdMapping) {
@@ -36,12 +36,12 @@ public class TransactionIterator<AttributePrimitive> implements Iterator<int[]> 
   }
 
   @Override
-  public boolean hasNext() {
+  public final boolean hasNext() {
     return iterator.hasNext();
   }
 
   @Override
-  public int[] next() {
+  public final int[] next() {
     List<AttributePrimitive> transaction = iterator.next();
     int index = 0;
     for (AttributePrimitive Attribute : transaction) {
@@ -57,7 +57,7 @@ public class TransactionIterator<AttributePrimitive> implements Iterator<int[]> 
   }
 
   @Override
-  public void remove() {
+  public final void remove() {
     iterator.remove();
   }
 

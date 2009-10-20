@@ -61,7 +61,7 @@ public class ParallelFPGrowthReducer extends
   private int minSupport = 3;
 
   @Override
-  public void reduce(LongWritable key, Iterable<IntegerTuple> values,
+  protected void reduce(LongWritable key, Iterable<IntegerTuple> values,
       Context context) throws IOException {
     FPGrowth<Integer> fpGrowth = new FPGrowth<Integer>();
     fpGrowth
@@ -77,7 +77,7 @@ public class ParallelFPGrowthReducer extends
   }
 
   @Override
-  public void setup(Context context) throws IOException, InterruptedException {
+  protected void setup(Context context) throws IOException, InterruptedException {
 
     super.setup(context);
     Parameters params = Parameters.fromString(context.getConfiguration().get(
