@@ -218,8 +218,8 @@ public class FPGrowth<AttributePrimitive extends Comparable<? super AttributePri
       outputCollector.collect(attribute, frequentPatterns);
 
       minSupportValue = Math.max(minSupportValue, minSupport.intValue() / 2);
-      log.info("Found {} Patterns with Least Support {}", Patterns
-          .get(attribute).count(), Patterns.get(attribute).leastSupport());
+      log.info("Found {} Patterns with Least Support {}", Patterns.get(
+          attribute).count(), Patterns.get(attribute).leastSupport());
     }
     log.info("Tree Cache: First Level: Cache hits={} Cache Misses={}",
         treeCache.getHits(), treeCache.getMisses());
@@ -321,8 +321,8 @@ public class FPGrowth<AttributePrimitive extends Comparable<? super AttributePri
         currentAttribute);
     if (i < 0)
       return frequentPatterns;
-
-    for (int j = tree.getHeaderTableCount(); i < j; i++) {
+    int j = tree.getHeaderTableCount();
+    while (i < j) {
       int attribute = tree.getAttributeAtIndex(i);
       long count = tree.getHeaderSupportCount(attribute);
       if (count < minSupportMutable.intValue())
@@ -352,7 +352,7 @@ public class FPGrowth<AttributePrimitive extends Comparable<? super AttributePri
           minSupportMutable.setValue(frequentPatterns.leastSupport());
         }
       }
-
+      i++;
     }
 
     return frequentPatterns;
