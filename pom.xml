@@ -11,7 +11,7 @@
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.2</version>
   <packaging>pom</packaging>
 
   <name>Apache Lucene Mahout</name>
@@ -127,8 +127,8 @@
   </profiles>
 
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.1</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.1</developerConnection>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2</developerConnection>
     <url>https://svn.apache.org/repos/asf/lucene/mahout/mahout</url>
   </scm>
 </project>

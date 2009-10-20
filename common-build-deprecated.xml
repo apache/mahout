@@ -19,7 +19,7 @@
 
  -->
 <project name="common" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
-  <property name="version" value="0.1-dev" />
+  <property name="version" value="0.2" />
   <tstamp>
     <format property="year" pattern="yyyy"/>
     <format property="DSTAMP" pattern="yyyy-MM-dd"/>
@@ -41,7 +41,7 @@
        NOTE: WHEN DOING A RELEASE CHANGE THE SPECVERSION TOO!
 
     -->
-  <property name="version" value="0.1-dev" />
+  <property name="version" value="0.2" />
 <!-- Mahout Specification Version -->
   <!--
        This will be used in the Manifest file, and therefore must
@@ -50,7 +50,7 @@
        By default, this should be set to "X.Y.M.${dateversion}"
        where X.Y.M is the last version released (on this branch).
     -->
-  <property name="specversion" value="0.1.${dateversion}" />
+  <property name="specversion" value="0.2.${dateversion}" />
 
   <!-- Type of checksum to compute for distribution files -->
   <property name="checksum.algorithm" value="md5" />

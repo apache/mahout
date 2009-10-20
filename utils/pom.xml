@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-parent</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.2</version>
     <relativePath>../maven</relativePath>
   </parent>
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-utils</artifactId>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.2</version>
   <name>Mahout utilities</name>
   <description>Utilities for preparing content into formats for Mahout.</description>
 
@@ -76,20 +77,20 @@
           </execution>
         </executions>
       </plugin>
-       <plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-remote-resources-plugin</artifactId>
-         <configuration>
-         <appendedResourcesDirectory>../src/main/appended-resources</appendedResourcesDirectory>
-         <resourceBundles>
+        <configuration>
+          <appendedResourcesDirectory>../src/main/appended-resources</appendedResourcesDirectory>
+          <resourceBundles>
             <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
           </resourceBundles>
           <supplementalModels>
             <supplementalModel>supplemental-models.xml</supplementalModel>
           </supplementalModels>
         </configuration>
-        </plugin>
-   </plugins>
+      </plugin>
+    </plugins>
 
   </build>
 
@@ -100,20 +101,6 @@
       <artifactId>mahout-core</artifactId>
       <version>${project.version}</version>
     </dependency>
-
-    <!--<dependency>
-      <groupId>org.apache.solr</groupId>
-      <artifactId>solr-solrj</artifactId>
-      <version>1.4-SNAPSHOT</version>
-    </dependency>-->
-    <!-- core test -->
-    <!--<dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-core</artifactId>
-      <version>${project.version}</version>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>-->
 
     <dependency>
       <groupId>org.easymock</groupId>
@@ -160,10 +147,10 @@
   </dependencies>
 
 
-
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.1-examples</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.1-examples</developerConnection>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2-examples</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2-examples
+    </developerConnection>
     <url>https://svn.apache.org/repos/asf/lucene/mahout/mahout-examples</url>
   </scm>
 </project>

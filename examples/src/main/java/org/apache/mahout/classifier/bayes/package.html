@@ -41,7 +41,7 @@
 <ol>
   <li>Download the Wikipedia Dataset.  Use the Ant target: ant enwiki-files</li>
   <li>Chunk the data using the WikipediaXmlSplitter (from the Hadoop home):
-    <div>bin/hadoop jar &lt;PATH TO MAHOUT&gt;/examples/build/apache-mahout-0.1-dev-ex.jar org.apache.mahout.classifier.bayes.WikipediaXmlSplitter -d &lt;MAHOUT_HOME&gt;/examples/temp/enwiki-latest-pages-articles.xml -o  &lt;MAHOUT_HOME&gt;/examples/work/wikipedia/chunks/ -c 64</div>
+    <div>bin/hadoop jar &lt;PATH TO MAHOUT&gt;/target/mahout-examples-0.2 org.apache.mahout.classifier.bayes.WikipediaXmlSplitter -d &lt;MAHOUT_HOME&gt;/examples/temp/enwiki-latest-pages-articles.xml -o  &lt;MAHOUT_HOME&gt;/examples/work/wikipedia/chunks/ -c 64</div>
   </li>
 </ol>
 </div>
