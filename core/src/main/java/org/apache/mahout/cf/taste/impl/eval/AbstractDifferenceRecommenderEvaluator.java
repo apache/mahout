@@ -91,7 +91,6 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
 
     Recommender recommender = recommenderBuilder.buildRecommender(trainingModel);
 
-    log.info("Beginning evaluation for {} prefs", testUserPrefs.size());
     double result = getEvaluation(testUserPrefs, recommender);
     log.info("Evaluation result: " + result);
     return result;

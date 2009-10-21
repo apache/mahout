@@ -58,9 +58,9 @@ public final class RMSRecommenderEvaluator extends AbstractDifferenceRecommender
           // NSEE will be thrown. Just ignore it and move on.
           log.info("User exists in test data but not training data: {}", testUserID);
         }
-      }
-      if (++count % 100 == 0) {
-        log.info("Finished evaluation for {} prefs", count);
+        if (++count % 1000 == 0) {
+          log.info("Finished evaluation for {} prefs", count);
+        }
       }
     }
     return Math.sqrt(average.getAverage());

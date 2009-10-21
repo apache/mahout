@@ -61,9 +61,9 @@ public final class AverageAbsoluteDifferenceRecommenderEvaluator extends Abstrac
         } catch (NoSuchItemException nsie) {
           log.info("Item exists in test data but not training data: {}", realPref.getItemID());
         }
-      }
-      if (++count % 100 == 0) {
-        log.info("Finished evaluation for {} prefs", count);
+        if (++count % 1000 == 0) {
+          log.info("Finished evaluation for {} prefs", count);
+        }
       }
     }
     return average.getAverage();
