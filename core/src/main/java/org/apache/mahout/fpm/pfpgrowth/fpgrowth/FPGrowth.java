@@ -319,8 +319,10 @@ public class FPGrowth<A extends Comparable<? super A>> {
     while (i < headerTableCount) {
       int attribute = tree.getAttributeAtIndex(i);
       long count = tree.getHeaderSupportCount(attribute);
-      if (count < minSupportMutable.intValue())
-        continue;
+      if (count < minSupportMutable.intValue()){
+	i++;
+	continue;
+      }
 
       FPTree conditionalTree = treeCache.getFirstLevelTree(attribute);
       if (conditionalTree.isEmpty()) {
