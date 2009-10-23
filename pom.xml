@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <parent>
@@ -10,7 +11,7 @@
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
-  <version>0.2</version>
+  <version>0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Lucene Mahout</name>
@@ -75,6 +76,7 @@
               <descriptorRefs>
                 <descriptorRef>project</descriptorRef>
               </descriptorRefs>
+              <tarLongFileMode>gnu</tarLongFileMode>
             </configuration>
             <executions>
               <execution>
@@ -86,9 +88,6 @@
                   <goal>single</goal>
                   <!-- goals == mojos -->
                 </goals>
-                <configuration>
-                  <tarLongFileMode>gnu</tarLongFileMode>
-                </configuration>
               </execution>
             </executions>
           </plugin>
@@ -130,7 +129,7 @@
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2</developerConnection>
-    <url>https://svn.apache.org/repos/asf/lucene/mahout/mahout/tags/mahout-0.2</url>
+    <url>https://svn.apache.org/repos/asf/lucene/mahout/mahout</url>
   </scm>
 </project>
   
