@@ -88,7 +88,22 @@
                   <goal>single</goal>
                   <!-- goals == mojos -->
                 </goals>
-                <configuration><tarLongFileMode>gnu</tarLongFileMode></configuration>
+                <configuration>
+                  <tarLongFileMode>gnu</tarLongFileMode>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>deploy</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
               </execution>
             </executions>
           </plugin>
