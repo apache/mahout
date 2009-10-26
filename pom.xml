@@ -140,8 +140,8 @@
   </profiles>
 
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2</developerConnection>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/trunk</developerConnection>
     <url>https://svn.apache.org/repos/asf/lucene/mahout/mahout</url>
   </scm>
 </project>
