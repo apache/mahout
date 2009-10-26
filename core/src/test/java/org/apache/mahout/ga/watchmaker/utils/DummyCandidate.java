@@ -28,6 +28,12 @@ public class DummyCandidate {
     return index;
   }
 
+  // This constructor exists to satisfy xstream, but error only shows up on FreeBSD / Diablo JDK?
+  
+  public DummyCandidate() {
+    this(0);
+  }
+
   public DummyCandidate(int index) {
     this.index = index;
   }
