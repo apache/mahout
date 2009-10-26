@@ -19,75 +19,13 @@ package org.apache.mahout.ga.watchmaker.cd;
 
 import java.util.List;
 
-
 /**
- * Contains informations about the dataset and its attributes. The label is a
+ * Contains information about the dataset and its attributes. The label is a
  * nominal attribute with a known position. Ignored attributes are not taken
  * into account when calculating attribute's position.
  */
 public class DataSet {
 
-  public interface Attribute {
-    boolean isNumerical();
-  }
-
-  public static class NominalAttr implements Attribute {
-    private final String[] values;
-
-    public NominalAttr(String[] values) {
-      assert values.length > 0 : "values is empty";
-      this.values = values;
-    }
-
-    public int getNbvalues() {
-      return values.length;
-    }
-
-    @Override
-    public boolean isNumerical() {
-      return false;
-    }
-
-    /**
-     * Converts a string value of a nominal attribute to an <code>int</code>.
-     * 
-     * @param value
-     * @return an <code>int</code> representing the value
-     * @throws RuntimeException if the value is not found.
-     */
-    public int valueIndex(String value) {
-      for (int index = 0; index < values.length; index++) {
-        if (values[index].equals(value))
-          return index;
-      }
-
-      throw new IllegalArgumentException("Value (" + value + ") not found");
-    }
-  }
-
-  public static class NumericalAttr implements Attribute {
-    private final double min;
-    private final double max;
-
-    public NumericalAttr(double min, double max) {
-      this.min = min;
-      this.max = max;
-    }
-
-    public double getMin() {
-      return min;
-    }
-
-    public double getMax() {
-      return max;
-    }
-
-    @Override
-    public boolean isNumerical() {
-      return true;
-    }
-  }
-  
   /** Singleton */
   private static DataSet dataset;
 
@@ -96,6 +34,12 @@ public class DataSet {
   private final int labelIndex;
 
   private final List<Attribute> attributes;
+
+  // This constructor just exists to satisfy xstream
+
+  DataSet() {
+    this(null, null, 0);
+  }
 
   DataSet(List<Attribute> attributes, List<Integer> ignored, int labelIndex) {
     this.attributes = attributes;

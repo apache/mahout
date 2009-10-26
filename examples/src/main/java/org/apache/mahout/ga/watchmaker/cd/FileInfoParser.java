@@ -20,9 +20,6 @@ package org.apache.mahout.ga.watchmaker.cd;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.mahout.ga.watchmaker.cd.DataSet.Attribute;
-import org.apache.mahout.ga.watchmaker.cd.DataSet.NominalAttr;
-import org.apache.mahout.ga.watchmaker.cd.DataSet.NumericalAttr;
 
 import java.io.IOException;
 import java.util.ArrayList;
