@@ -213,7 +213,7 @@
         <configuration>
           <altDeploymentRepository>${deploy.altRepository}</altDeploymentRepository>
           <url>${deploy.url}</url>
-          <repositoryId>mahout.dist</repositoryId>
+          <repositoryId>${repo.id}</repositoryId>
           <updateReleaseInfo>true</updateReleaseInfo>
         </configuration>
         <executions>
