@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.eval;
 
+import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
@@ -57,6 +58,8 @@ public final class RMSRecommenderEvaluator extends AbstractDifferenceRecommender
           // It's possible that an item exists in the test data but not training data in which case
           // NSEE will be thrown. Just ignore it and move on.
           log.info("User exists in test data but not training data: {}", testUserID);
+        } catch (NoSuchItemException nsie) {
+          log.info("Item exists in test data but not training data: {}", realPref.getItemID());
         }
         if (++count % 1000 == 0) {
           log.info("Finished evaluation for {} prefs", count);
