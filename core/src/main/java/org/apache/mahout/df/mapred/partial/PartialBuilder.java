@@ -181,7 +181,9 @@ public class PartialBuilder extends Builder {
     }
 
     // make sure we got all the keys/values
-    assert index == keys.length;
+    if (index != keys.length) {
+      throw new IllegalStateException();
+    }
   }
 
   /**

@@ -34,7 +34,9 @@ public class Descriptors {
   private final char[] descriptors;
 
   public Descriptors(char[] descriptors) {
-    assert descriptors != null && descriptors.length > 0;
+    if (!(descriptors != null && descriptors.length > 0)) {
+      throw new IllegalArgumentException();
+    }
 
     this.descriptors = descriptors;
 

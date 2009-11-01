@@ -129,8 +129,8 @@ public class LDAInference {
       digammaGamma = digammaGamma.plus(-digammaSumGamma);
 
       double ll = computeLikelihood(wordCounts, columnMap, phi, gamma, digammaGamma);
-      converged = oldLL < 0 && ((oldLL - ll) / oldLL < E_STEP_CONVERGENCE);
       assert !Double.isNaN(ll);
+      converged = oldLL < 0 && ((oldLL - ll) / oldLL < E_STEP_CONVERGENCE);
 
       oldLL = ll;
       iteration++;

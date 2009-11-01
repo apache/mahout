@@ -149,7 +149,9 @@ public class PartialBuilder extends Builder {
   protected static void processOutput(Job job, Path outputPath,
       int[] firstIds, TreeID[] keys, Node[] trees, PredictionCallback callback)
       throws IOException {
-    assert keys.length == trees.length : "keys.length != trees.length";
+    if (keys.length != trees.length) {
+      throw new IllegalArgumentException("keys.length != trees.length");
+    }
     
     Configuration conf = job.getConfiguration();
     
@@ -185,7 +187,9 @@ public class PartialBuilder extends Builder {
     }
 
     // make sure we got all the keys/values
-    assert index == keys.length;
+    if (index != keys.length) {
+      throw new IllegalStateException();
+    }
   }
 
   /**

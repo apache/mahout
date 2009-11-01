@@ -284,8 +284,9 @@ public class SparseVector extends AbstractVector {
     int size = dataInput.readInt();
     OrderedIntDoubleMapping values = new OrderedIntDoubleMapping(size);
     int i = 0;
-    for (; i < size; i++) {
+    while (i < size) {
       values.set(dataInput.readInt(), dataInput.readDouble());
+      i++;
     }
     assert (i == size);
     this.cardinality = cardinality;

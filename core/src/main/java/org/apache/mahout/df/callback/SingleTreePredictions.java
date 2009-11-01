@@ -40,7 +40,9 @@ public class SingleTreePredictions implements PredictionCallback {
     if (this.treeId == null) {
       this.treeId = treeId;
     } else {
-      assert this.treeId == treeId : "the predictions does not belong to the same tree";
+      if (this.treeId != treeId) {
+        throw new IllegalArgumentException("the predictions does not belong to the same tree");
+      }
     }
     
     predictions[instanceId] = prediction;

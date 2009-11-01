@@ -38,7 +38,9 @@ public class LDAReducer extends
       double accum = 0.0;
       for (DoubleWritable vw : values) {
         double v = vw.get();
-        assert !Double.isNaN(v) : topicWord.getX() + " " + topicWord.getY();
+        if (Double.isNaN(v)) {
+          throw new IllegalArgumentException(topicWord.getX() + " " + topicWord.getY());
+        }
         accum += v;
       }
       context.write(topicWord, new DoubleWritable(accum));
@@ -46,9 +48,13 @@ public class LDAReducer extends
       double accum = Double.NEGATIVE_INFINITY;
       for (DoubleWritable vw : values) {
         double v = vw.get();
-        assert !Double.isNaN(v) : topicWord.getX() + " " + topicWord.getY();
+        if (Double.isNaN(v)) {
+          throw new IllegalArgumentException(topicWord.getX() + " " + topicWord.getY());
+        }
         accum = LDAUtil.logSum(accum, v);
-        assert !Double.isNaN(accum) : topicWord.getX() + " " + topicWord.getY();
+        if (Double.isNaN(accum)) {
+          throw new IllegalArgumentException(topicWord.getX() + " " + topicWord.getY());
+        }
       }
       context.write(topicWord, new DoubleWritable(accum));
     }

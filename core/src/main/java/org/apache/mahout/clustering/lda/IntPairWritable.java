@@ -113,7 +113,9 @@ public class IntPairWritable implements WritableComparable<IntPairWritable> {
 
     @Override
     public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2) {
-      assert l1 == 8;
+      if (l1 != 8) {
+        throw new IllegalArgumentException();
+      }
       int int11 = readInt(b1, s1);
       int int21 = readInt(b2, s2);
       if (int11 != int21) {

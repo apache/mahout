@@ -152,7 +152,9 @@ public class LDAPrintTopics {
       String[] parts = TAB_PATTERN.split(line);
       String word = parts[0];
       int index = Integer.parseInt(parts[2]);
-      assert index == result.size();
+      if (index != result.size()) {
+        throw new IllegalArgumentException();
+      }
       result.add(word);
     }
 

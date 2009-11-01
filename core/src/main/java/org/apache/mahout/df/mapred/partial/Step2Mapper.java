@@ -129,7 +129,9 @@ public class Step2Mapper extends MapReduceBase implements
    * @return
    */
   public static int nbConcerned(int numMaps, int numTrees, int partition) {
-    assert partition >= 0 : "partition < 0";
+    if (partition < 0) {
+      throw new IllegalArgumentException("partition < 0");
+    }
     // the trees of the mapper's partition are not concerned
     return numTrees - Step1Mapper.nbTrees(numMaps, numTrees, partition);
   }
@@ -153,7 +155,9 @@ public class Step2Mapper extends MapReduceBase implements
 
     converter = new DataConverter(dataset);
 
-    assert keys.length == trees.length : "keys.length != trees.length";
+    if (keys.length != trees.length) {
+      throw new IllegalArgumentException("keys.length != trees.length");
+    }
     int nbConcerned = keys.length;
 
     this.keys = keys;
@@ -161,7 +165,9 @@ public class Step2Mapper extends MapReduceBase implements
 
     // make sure the trees are not from this partition
     for (TreeID key : keys) {
-      assert key.partition() != partition : "a tree from this partition was found !";
+      if (key.partition() == partition) {
+        throw new IllegalArgumentException("a tree from this partition was found !");
+      }
     }
 
     // init the callbacks

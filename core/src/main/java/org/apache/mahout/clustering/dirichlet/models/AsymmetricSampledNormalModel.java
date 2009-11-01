@@ -99,7 +99,9 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
    * @param sd a double std deviation
    */
   private double pdf(Vector x, double sd) {
-    assert x.getNumNondefaultElements() == 2;
+    if (x.getNumNondefaultElements() != 2) {
+      throw new IllegalArgumentException();
+    }
     double sd2 = sd * sd;
     double exp = -(x.dot(x) - 2 * x.dot(mean) + mean.dot(mean)) / (2 * sd2);
     double ex = Math.exp(exp);
@@ -109,7 +111,9 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
   @Override
   public double pdf(Vector x) {
     // return the product of the two component pdfs
-    assert x.getNumNondefaultElements() == 2;
+    if (x.getNumNondefaultElements() != 2) {
+      throw new IllegalArgumentException();
+    }
     double pdf0 = pdf(x, sd.get(0));
     double pdf1 = pdf(x, sd.get(1));
     // if (pdf0 < 0 || pdf0 > 1 || pdf1 < 0 || pdf1 > 1)

@@ -40,7 +40,9 @@ public class MockDataSet {
    * @param maxnba max number of attributes
    */
   public MockDataSet(Random rng, int maxnba) {
-    assert maxnba > 0 : "maxnba must be greater than 0";
+    if (maxnba <= 0) {
+      throw new IllegalArgumentException("maxnba must be greater than 0");
+    }
 
     this.rng = rng;
     this.maxnba = maxnba;

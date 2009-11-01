@@ -59,7 +59,9 @@ public class CDRule implements Rule {
    */
   public CDRule(double threshold) {
     // crossover needs at least 2 attributes
-    assert threshold >= 0 && threshold <= 1 : "bad threshold";
+    if (!(threshold >= 0 && threshold <= 1)) {
+      throw new IllegalArgumentException("bad threshold");
+    }
 
     this.threshold = threshold;
 
