@@ -242,7 +242,7 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
   @Override
   public String toString() {
     StringBuilder result = new StringBuilder(200);
-    result.append("GenericDataModel[users:");
+    result.append("GenericBooleanPrefDataModel[users:");
     for (int i = 0; i < Math.min(3, userIDs.length); i++) {
       if (i > 0) {
         result.append(',');
