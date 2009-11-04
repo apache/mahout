@@ -136,7 +136,7 @@ public class Step2MapperTest extends TestCase {
           continue;
         }
 
-        TreeID k = context.keys[current];
+        TreeID k = context.getKeys()[current];
 
         // the tree should receive the partition's index
         assertEquals(partition, k.partition());
@@ -145,7 +145,7 @@ public class Step2MapperTest extends TestCase {
         // correct order
         assertEquals(index, k.treeId());
 
-        int[] predictions = context.values[current].getPredictions();
+        int[] predictions = context.getValues()[current].getPredictions();
 
         // all the instances of the partition should be classified
         assertEquals(split.length, predictions.length);

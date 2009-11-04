@@ -45,7 +45,7 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
     while (values.hasNext()) {
       FuzzyKMeansInfo value = values.next();
 
-      if (value.combinerPass == 0) // escaped from combiner
+      if (value.getCombinerPass() == 0) // escaped from combiner
       {
         cluster.addPoint(value.getVector(), Math.pow(value.getProbability(), SoftCluster.getM()));
       } else {

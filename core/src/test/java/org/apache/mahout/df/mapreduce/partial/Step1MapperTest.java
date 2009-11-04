@@ -117,7 +117,7 @@ public class Step1MapperTest extends TestCase {
       assertEquals(mapNbTrees, context.nbOutputs());
 
       // check the returned keys
-      for (TreeID k : context.keys) {
+      for (TreeID k : context.getKeys()) {
         assertEquals(partition, k.partition());
         assertEquals(treeIndex, k.treeId());
 

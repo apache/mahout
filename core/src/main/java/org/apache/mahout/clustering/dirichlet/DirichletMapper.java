@@ -81,7 +81,7 @@ public class DirichletMapper extends MapReduceBase implements
           DirichletCluster<Vector> cluster = new DirichletCluster<Vector>();
           while (reader.next(key, cluster)) {
             int index = Integer.parseInt(key.toString());
-            state.clusters.set(index, cluster);
+            state.getClusters().set(index, cluster);
             cluster = new DirichletCluster<Vector>();
           }
         } finally {
@@ -89,7 +89,7 @@ public class DirichletMapper extends MapReduceBase implements
         }
       }
       // TODO: with more than one mapper, they will all have different mixtures. Will this matter?
-      state.mixture = UncommonDistributions.rDirichlet(state.totalCounts());
+      state.setMixture(UncommonDistributions.rDirichlet(state.totalCounts()));
       return state;
     } catch (Exception e) {
       throw new IllegalStateException(e);
@@ -105,9 +105,9 @@ public class DirichletMapper extends MapReduceBase implements
    * @return the Vector of probabilities
    */
   private static Vector normalizedProbabilities(DirichletState<Vector> state, Vector v) {
-    Vector pi = new DenseVector(state.numClusters);
+    Vector pi = new DenseVector(state.getNumClusters());
     double max = 0;
-    for (int k = 0; k < state.numClusters; k++) {
+    for (int k = 0; k < state.getNumClusters(); k++) {
       double p = state.adjustedProbability(v, k);
       pi.set(k, p);
       if (max < p) {

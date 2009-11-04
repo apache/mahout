@@ -29,9 +29,9 @@ import org.apache.mahout.df.mapreduce.MapredOutput;
  */
 public class MockContext extends Context {
 
-  public final TreeID[] keys;
+  private final TreeID[] keys;
 
-  public final MapredOutput[] values;
+  private final MapredOutput[] values;
 
   private int index = 0;
 
@@ -65,4 +65,11 @@ public class MockContext extends Context {
     return index;
   }
 
+  public TreeID[] getKeys() {
+    return keys;
+  }
+
+  public MapredOutput[] getValues() {
+    return values;
+  }
 }

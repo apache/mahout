@@ -55,9 +55,9 @@ class DisplayOutputState extends DisplayDirichlet {
       g2.setColor(colors[Math.min(colors.length - 1, i--)]);
       for (Model<Vector> m : models) {
         NormalModel mm = (NormalModel) m;
-        dv.assign(mm.sd * 3);
+        dv.assign(mm.getStdDev() * 3);
         if (isSignificant(mm))
-          plotEllipse(g2, mm.mean, dv);
+          plotEllipse(g2, mm.getMean(), dv);
       }
     }
   }

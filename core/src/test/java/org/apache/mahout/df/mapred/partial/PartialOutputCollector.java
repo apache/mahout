@@ -23,18 +23,25 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.df.mapreduce.MapredOutput;
 import org.apache.mahout.df.mapreduce.partial.TreeID;
 
-
 public class PartialOutputCollector implements OutputCollector<TreeID, MapredOutput> {
 
-  public final TreeID[] keys;
+  private final TreeID[] keys;
 
-  public final MapredOutput[] values;
+  private final MapredOutput[] values;
 
   private int index = 0;
 
   public PartialOutputCollector(int nbTrees) {
     keys = new TreeID[nbTrees];
     values = new MapredOutput[nbTrees];
+  }
+
+  public TreeID[] getKeys() {
+    return keys;
+  }
+
+  public MapredOutput[] getValues() {
+    return values;
   }
 
   @Override

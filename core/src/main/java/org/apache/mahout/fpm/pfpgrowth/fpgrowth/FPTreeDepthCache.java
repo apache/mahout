@@ -23,7 +23,15 @@ import org.apache.mahout.common.cache.LeastKCache;
 
 public class FPTreeDepthCache {
 
-  public static int firstLevelCacheSize = 5;
+  private static int firstLevelCacheSize = 5;
+
+  public static int getFirstLevelCacheSize() {
+    return firstLevelCacheSize;
+  }
+
+  public static void setFirstLevelCacheSize(int firstLevelCacheSize) {
+    FPTreeDepthCache.firstLevelCacheSize = firstLevelCacheSize;
+  }
 
   private final ArrayList<FPTree> treeCache = new ArrayList<FPTree>();
 

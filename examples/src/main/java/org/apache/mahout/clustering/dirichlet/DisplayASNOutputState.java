@@ -55,10 +55,10 @@ class DisplayASNOutputState extends DisplayDirichlet {
       g2.setColor(colors[Math.min(colors.length - 1, i--)]);
       for (Model<Vector> m : models) {
         AsymmetricSampledNormalModel mm = (AsymmetricSampledNormalModel) m;
-        dv.set(0, mm.sd.get(0) * 3);
-        dv.set(1, mm.sd.get(1) * 3);
+        dv.set(0, mm.getStdDev().get(0) * 3);
+        dv.set(1, mm.getStdDev().get(1) * 3);
         if (isSignificant(mm))
-          plotEllipse(g2, mm.mean, dv);
+          plotEllipse(g2, mm.getMean(), dv);
       }
     }
   }

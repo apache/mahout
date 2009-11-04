@@ -44,9 +44,9 @@ public class DirichletCluster<O> implements Writable {
     writeModel(out, model);
   }
 
-  public Model<O> model; // the model for this iteration
+  private Model<O> model; // the model for this iteration
 
-  public double totalCount; // total count of observations for the model
+  private double totalCount; // total count of observations for the model
 
   public DirichletCluster(Model<O> model, double totalCount) {
     super();
@@ -58,9 +58,17 @@ public class DirichletCluster<O> implements Writable {
     super();
   }
 
+  public Model<O> getModel() {
+    return model;
+  }
+
   public void setModel(Model<O> model) {
     this.model = model;
     this.totalCount += model.count();
+  }
+
+  public double getTotalCount() {
+    return totalCount;
   }
 
   private static final Type typeOfModel = new TypeToken<DirichletCluster<Vector>>() {

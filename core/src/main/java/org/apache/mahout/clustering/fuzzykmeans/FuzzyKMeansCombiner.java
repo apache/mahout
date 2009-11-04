@@ -38,13 +38,13 @@ public class FuzzyKMeansCombiner extends MapReduceBase implements
       //String pointInfo = values.next().toString();
       FuzzyKMeansInfo info = values.next();
 
-      if (info.combinerPass == 0) // first time thru combiner
+      if (info.getCombinerPass() == 0) // first time thru combiner
       {
         cluster.addPoint(info.getVector(), Math.pow(info.getProbability(), SoftCluster.getM()));
       } else {
         cluster.addPoints(info.getVector(), info.getProbability());
       }
-      info.combinerPass++;
+      info.setCombinerPass(info.getCombinerPass() + 1);
     }
     //TODO: how do we pass along the combinerPass?  Or do we not need to?
     output.collect(key, new FuzzyKMeansInfo(cluster.getPointProbSum(), cluster.getWeightedPointTotal(), 1));

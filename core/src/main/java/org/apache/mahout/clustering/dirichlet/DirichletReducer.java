@@ -34,7 +34,11 @@ public class DirichletReducer extends MapReduceBase implements
 
   DirichletState<Vector> state;
 
-  public Model<Vector>[] newModels;
+  private Model<Vector>[] newModels;
+
+  public Model<Vector>[] getNewModels() {
+    return newModels;
+  }
 
   @Override
   public void reduce(Text key, Iterator<Vector> values,
@@ -47,21 +51,21 @@ public class DirichletReducer extends MapReduceBase implements
       model.observe(v);
     }
     model.computeParameters();
-    DirichletCluster<Vector> cluster = state.clusters.get(k);
+    DirichletCluster<Vector> cluster = state.getClusters().get(k);
     cluster.setModel(model);
     output.collect(key, cluster);
   }
 
   public void configure(DirichletState<Vector> state) {
     this.state = state;
-    this.newModels = state.modelFactory.sampleFromPosterior(state.getModels());
+    this.newModels = state.getModelFactory().sampleFromPosterior(state.getModels());
   }
 
   @Override
   public void configure(JobConf job) {
     super.configure(job);
     state = DirichletMapper.getDirichletState(job);
-    this.newModels = state.modelFactory.sampleFromPosterior(state.getModels());
+    this.newModels = state.getModelFactory().sampleFromPosterior(state.getModels());
   }
 
 }

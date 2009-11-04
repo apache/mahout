@@ -147,7 +147,7 @@ public class PartialSequentialBuilder extends PartialBuilder {
   @Override
   protected DecisionForest parseOutput(JobConf job, PredictionCallback callback)
       throws IOException {
-    DecisionForest forest = processOutput(firstOutput.keys, firstOutput.values, callback);
+    DecisionForest forest = processOutput(firstOutput.getKeys(), firstOutput.getValues(), callback);
 
     if (isStep2(job)) {
       Path forestPath = new Path(getOutputPath(job), "step1.inter");
@@ -155,14 +155,14 @@ public class PartialSequentialBuilder extends PartialBuilder {
       
       Node[] trees = new Node[forest.getTrees().size()];
       forest.getTrees().toArray(trees);
-      InterResults.store(fs, forestPath, firstOutput.keys, trees, sizes);
+      InterResults.store(fs, forestPath, firstOutput.getKeys(), trees, sizes);
 
       log.info("***********");
       log.info("Second Step");
       log.info("***********");
       secondStep(job, forestPath, callback);
 
-      processOutput(secondOutput.keys, secondOutput.values, callback);
+      processOutput(secondOutput.getKeys(), secondOutput.getValues(), callback);
     }
 
     return forest;

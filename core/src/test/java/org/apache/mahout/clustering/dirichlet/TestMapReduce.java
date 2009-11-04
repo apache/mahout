@@ -154,7 +154,7 @@ public class TestMapReduce extends TestCase {
           reduceCollector, null);
     }
 
-    Model<Vector>[] newModels = reducer.newModels;
+    Model<Vector>[] newModels = reducer.getNewModels();
     state.update(newModels);
   }
 
@@ -200,7 +200,7 @@ public class TestMapReduce extends TestCase {
             reduceCollector, null);
       }
 
-      Model<Vector>[] newModels = reducer.newModels;
+      Model<Vector>[] newModels = reducer.getNewModels();
       state.update(newModels);
       models.add(newModels);
     }
@@ -307,7 +307,7 @@ public class TestMapReduce extends TestCase {
     String format = gson.toJson(mh);
     System.out.println(format);
     ModelHolder mh2 = gson.fromJson(format, ModelHolder.class);
-    assertEquals("mh", mh.model.toString(), mh2.model.toString());
+    assertEquals("mh", mh.getModel().toString(), mh2.getModel().toString());
   }
 
   @SuppressWarnings("unchecked")
@@ -324,7 +324,7 @@ public class TestMapReduce extends TestCase {
     String format = gson.toJson(mh);
     System.out.println(format);
     ModelHolder mh2 = gson.fromJson(format, ModelHolder.class);
-    assertEquals("mh", mh.model.toString(), mh2.model.toString());
+    assertEquals("mh", mh.getModel().toString(), mh2.getModel().toString());
   }
 
   @SuppressWarnings("unchecked")
@@ -339,12 +339,12 @@ public class TestMapReduce extends TestCase {
     System.out.println(format);
     DirichletState state2 = gson.fromJson(format, DirichletState.class);
     assertNotNull("State2 null", state2);
-    assertEquals("numClusters", state.numClusters, state2.numClusters);
-    assertEquals("modelFactory", state.modelFactory.getClass().getName(),
-        state2.modelFactory.getClass().getName());
-    assertEquals("clusters", state.clusters.size(), state2.clusters.size());
-    assertEquals("mixture", state.mixture.size(), state2.mixture.size());
-    assertEquals("dirichlet", state.offset, state2.offset);
+    assertEquals("numClusters", state.getNumClusters(), state2.getNumClusters());
+    assertEquals("modelFactory", state.getModelFactory().getClass().getName(),
+        state2.getModelFactory().getClass().getName());
+    assertEquals("clusters", state.getClusters().size(), state2.getClusters().size());
+    assertEquals("mixture", state.getMixture().size(), state2.getMixture().size());
+    assertEquals("dirichlet", state.getOffset(), state2.getOffset());
   }
 
   /** Test the Mapper and Reducer using the Driver */
@@ -376,7 +376,7 @@ public class TestMapReduce extends TestCase {
     conf.set(DirichletDriver.ALPHA_0_KEY, Double.toString(1.0));
     for (int i = 0; i < 11; i++) {
       conf.set(DirichletDriver.STATE_IN_KEY, "output/state-" + i);
-      clusters.add(DirichletMapper.getDirichletState(conf).clusters);
+      clusters.add(DirichletMapper.getDirichletState(conf).getClusters());
     }
     printResults(clusters, 0);
   }
@@ -387,9 +387,9 @@ public class TestMapReduce extends TestCase {
     for (List<DirichletCluster<Vector>> r : clusters) {
       System.out.print("sample[" + row++ + "]= ");
       for (int k = 0; k < r.size(); k++) {
-        Model<Vector> model = r.get(k).model;
+        Model<Vector> model = r.get(k).getModel();
         if (model.count() > significant) {
-          int total = (int) r.get(k).totalCount;
+          int total = (int) r.get(k).getTotalCount();
           System.out.print("m" + k + '(' + total + ')' + model.toString()
               + ", ");
         }
@@ -423,7 +423,7 @@ public class TestMapReduce extends TestCase {
     conf.set(DirichletDriver.ALPHA_0_KEY, Double.toString(1.0));
     for (int i = 0; i < 11; i++) {
       conf.set(DirichletDriver.STATE_IN_KEY, "output/state-" + i);
-      clusters.add(DirichletMapper.getDirichletState(conf).clusters);
+      clusters.add(DirichletMapper.getDirichletState(conf).getClusters());
     }
     printResults(clusters, 0);
   }
@@ -470,7 +470,7 @@ public class TestMapReduce extends TestCase {
     conf.set(DirichletDriver.ALPHA_0_KEY, Double.toString(1.0));
     for (int i = 0; i < 11; i++) {
       conf.set(DirichletDriver.STATE_IN_KEY, "output/state-" + i);
-      clusters.add(DirichletMapper.getDirichletState(conf).clusters);
+      clusters.add(DirichletMapper.getDirichletState(conf).getClusters());
     }
     printResults(clusters, 0);
   }
@@ -514,7 +514,7 @@ public class TestMapReduce extends TestCase {
     conf.set(DirichletDriver.ALPHA_0_KEY, Double.toString(1.0));
     for (int i = 0; i < 11; i++) {
       conf.set(DirichletDriver.STATE_IN_KEY, "output/state-" + i);
-      clusters.add(DirichletMapper.getDirichletState(conf).clusters);
+      clusters.add(DirichletMapper.getDirichletState(conf).getClusters());
     }
     printResults(clusters, 0);
   }
