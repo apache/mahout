@@ -184,9 +184,12 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
           iterator.remove();
         }
       }
-      prefs2Array = new GenericUserPreferenceArray(prefs2);
+      if (!prefs2.isEmpty()) {
+       trainingUsers.put(userID2, new GenericUserPreferenceArray(prefs2));
+      }
+    } else {
+      trainingUsers.put(userID2, prefs2Array);
     }
-    trainingUsers.put(userID2, prefs2Array);
   }
 
   private static double computeThreshold(PreferenceArray prefs) {
