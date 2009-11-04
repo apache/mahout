@@ -50,11 +50,6 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
     values = new float[size];
   }
 
-  @Override
-  public int length() {
-    return IDs.length;
-  }
-
   public GenericItemPreferenceArray(List<Preference> prefs) {
     this(prefs.size());
     for (int i = 0; i < prefs.size(); i++) {
@@ -63,6 +58,20 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
       values[i] = pref.getValue();
     }
     id = prefs.get(0).getItemID();
+  }
+
+  /**
+   * This is a private copy constructor for clone().
+   */
+  private GenericItemPreferenceArray(long[] IDs, long id, float[] values) {
+    this.IDs = IDs;
+    this.id = id;
+    this.values = values;
+  }
+
+  @Override
+  public int length() {
+    return IDs.length;
   }
 
   @Override
@@ -92,6 +101,11 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
     return id;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * Note that this method will actually set the item ID for <em>all</em> preferences.
+   */
   @Override
   public void setItemID(int i, long itemID) {
     id = itemID;
@@ -124,6 +138,21 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
   @Override
   public void sortByValueReversed() {
     selectionSort(VALUE_REVERSED);
+  }
+
+  @Override
+  public boolean hasPrefWithUserID(long userID) {
+    for (long id : IDs) {
+      if (userID == id) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public boolean hasPrefWithItemID(long itemID) {
+    return id == itemID;
   }
 
   private void selectionSort(int type) {
@@ -176,11 +205,7 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
 
   @Override
   public GenericItemPreferenceArray clone() {
-    try {
-      return (GenericItemPreferenceArray) super.clone();
-    } catch (CloneNotSupportedException cnse) {
-      throw new AssertionError();
-    }
+    return new GenericItemPreferenceArray(IDs.clone(), id, values.clone());
   }
 
   @Override

@@ -32,6 +32,10 @@ final class BitSet implements Serializable, Cloneable {
     bits = new long[numLongs];
   }
 
+  private BitSet(long[] bits) {
+    this.bits = bits;
+  }
+
   boolean get(int index) {
     // skipping range check for speed
     return (bits[index >>> 6] & (1L << (index & 0x3F))) != 0L;
@@ -56,11 +60,7 @@ final class BitSet implements Serializable, Cloneable {
 
   @Override
   public BitSet clone() {
-    try {
-      return (BitSet) super.clone();
-    } catch (CloneNotSupportedException cnse) {
-      throw new AssertionError();
-    }
+    return new BitSet(bits);
   }
 
   @Override

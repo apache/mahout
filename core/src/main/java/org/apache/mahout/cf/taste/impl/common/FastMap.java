@@ -311,7 +311,6 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
     numEntries--;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public FastMap<K, V> clone() {
     FastMap<K, V> clone;
@@ -320,12 +319,9 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
     } catch (CloneNotSupportedException cnse) {
       throw new AssertionError();
     }
-    int length = keys.length;
-    clone.keys = (K[]) new Object[length];
-    clone.values = (V[]) new Object[length];
-    System.arraycopy(keys, 0, clone.keys, 0, length);
-    System.arraycopy(values, 0, clone.values, 0, length);
-    clone.recentlyAccessed = countingAccesses ? new BitSet(length) : null;
+    clone.keys = keys.clone();
+    clone.values = values.clone();
+    clone.recentlyAccessed = countingAccesses ? new BitSet(keys.length) : null;
     return clone;
   }
 

@@ -45,11 +45,6 @@ public final class BooleanUserPreferenceArray implements PreferenceArray {
     this.IDs = new long[size];
   }
 
-  @Override
-  public int length() {
-    return IDs.length;
-  }
-
   public BooleanUserPreferenceArray(List<Preference> prefs) {
     this(prefs.size());
     for (int i = 0; i < prefs.size(); i++) {
@@ -57,6 +52,19 @@ public final class BooleanUserPreferenceArray implements PreferenceArray {
       IDs[i] = pref.getItemID();
     }
     id = prefs.get(0).getUserID();
+  }
+
+  /**
+   * This is a private copy constructor for clone().
+   */
+  private BooleanUserPreferenceArray(long[] IDs, long id) {
+    this.IDs = IDs;
+    this.id = id;
+  }
+
+  @Override
+  public int length() {
+    return IDs.length;
   }
 
   @Override
@@ -75,6 +83,11 @@ public final class BooleanUserPreferenceArray implements PreferenceArray {
     return id;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * Note that this method will actually set the user ID for <em>all</em> preferences.
+   */
   @Override
   public void setUserID(int i, long userID) {
     id = userID;
@@ -118,12 +131,23 @@ public final class BooleanUserPreferenceArray implements PreferenceArray {
   }
 
   @Override
-  public GenericItemPreferenceArray clone() {
-    try {
-      return (GenericItemPreferenceArray) super.clone();
-    } catch (CloneNotSupportedException cnse) {
-      throw new AssertionError();
+  public boolean hasPrefWithUserID(long userID) {
+    return id == userID;
+  }
+
+  @Override
+  public boolean hasPrefWithItemID(long itemID) {
+    for (long id : IDs) {
+      if (itemID == id) {
+        return true;
+      }
     }
+    return false;
+  }
+
+  @Override
+  public BooleanUserPreferenceArray clone() {
+    return new BooleanUserPreferenceArray(IDs.clone(), id);
   }
 
   @Override
