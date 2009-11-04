@@ -54,17 +54,30 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
       return Double.NaN;
     }
 
+    // Copy prefs since we need to modify pref values to ranks
     xPrefs = xPrefs.clone();
     yPrefs = yPrefs.clone();
-    
+
+    // First sort by values from low to high
     xPrefs.sortByValue();
     yPrefs.sortByValue();
 
+    // Assign ranks from low to high
+    float nextRank = 1.0f;
     for (int i = 0; i < xLength; i++) {
-      xPrefs.setValue(i, i);
+      // ... but only for items that are common to both pref arrays
+      if (yPrefs.hasPrefWithItemID(xPrefs.getItemID(i))) {
+        xPrefs.setValue(i, nextRank);
+        nextRank += 1.0f;
+      }
+      // Other values are bogus but don't matter
     }
+    nextRank = 1.0f;
     for (int i = 0; i < yLength; i++) {
-      yPrefs.setValue(i, i);
+      if (xPrefs.hasPrefWithItemID(yPrefs.getItemID(i))) {
+        yPrefs.setValue(i, nextRank);
+        nextRank += 1.0f;
+      }
     }
 
     xPrefs.sortByItem();
@@ -99,7 +112,12 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
       }
     }
 
-    return 1.0 - (6.0 * sumXYRankDiff2 / count / (count*count - 1));
+    if (count <= 1) {
+      return Double.NaN;
+    }
+
+    // When ranks are unique, this formula actually gives the Pearson correlation
+    return 1.0 - (6.0 * sumXYRankDiff2 / (count * (count*count - 1)));
   }
 
   @Override
