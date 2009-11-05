@@ -161,7 +161,7 @@ final class OrderedIntDoubleMapping implements Serializable, Cloneable {
 
   @Override
   public OrderedIntDoubleMapping clone() {
-    return new OrderedIntDoubleMapping(indices, values, numMappings);
+    return new OrderedIntDoubleMapping(indices.clone(), values.clone(), numMappings);
   }
 
 }
