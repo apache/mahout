@@ -117,18 +117,19 @@ public final class MemoryDiffStorage implements DiffStorage {
 
   @Override
   public RunningAverage getDiff(long itemID1, long itemID2) {
+
+    boolean inverted = false;
+    if (itemID1 > itemID2) {
+      inverted = true;
+      long temp = itemID1;
+      itemID1 = itemID2;
+      itemID2 = temp;
+    }
+
     FastByIDMap<RunningAverage> level2Map = averageDiffs.get(itemID1);
     RunningAverage average = null;
     if (level2Map != null) {
       average = level2Map.get(itemID2);
-    }
-    boolean inverted = false;
-    if (average == null) {
-      level2Map = averageDiffs.get(itemID2);
-      if (level2Map != null) {
-        average = level2Map.get(itemID1);
-        inverted = true;
-      }
     }
     if (inverted) {
       if (average == null) {
