@@ -166,3 +166,39 @@ Nf06Y2W6ZN6hG77a8lhZW5edeJnXIFQs2pqWXpWu74WDnCQoM5+o83ykvD/eH0KP
 YVeLo5wUgH87Mz0o+sdm5OmUDCe5G8DW5R/J0c0fE+lasw0Y7N2f4Mbh
 =WKix
 -----END PGP PUBLIC KEY BLOCK-----
+pub   4096R/C09FB546 2009-11-05
+uid                  Isabel Drost (Apache release signing key) <isabel@apache.org>
+sig 3        C09FB546 2009-11-05  Isabel Drost (Apache release signing key) <isabel@apache.org>
+sig          0C0885B4 2009-11-05  "Isabel 'MaineC.' Drost" <mainec@isabel-drost.de>
+
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+mQINBErzQG4BEAC9R7MR5hCJYgrMEYg2/2aTOglfoRnhpqpqZ302Q0V+cjOnEll/
+dmVzceuz6/OBDsLW5rKhRZ/6JJuk8jMINBqOSu9X4Odm+cPhP9XPTEXVx4cUloRK
+s3tYaB1qyHClYKHr0QuvIbEqeFR5CVXtLdKlMzd8PxVIZv3eOq3bMmtaDH8Qy0Tr
+xKfih5Gr8g4mdc9NJpiTFw+XxBHfcl0CZDq/+hbpry+uYCAjkTNgwbfbj2uG7wHr
+QQK9Cqt5Mt/hcjEu6wU6ei06ghrfHI9vfYZ/9ZDRtyJSe8BNIwfzfywHk+HsFbyG
+XLcE8Sn7l4WhNDCWe7WWjuvmO2j7eeFTbg+v9HMEP0wj37w/8uxbUCLvDIqICs3h
+Y2krsH/BhLt2TZswkZZ30wd//PnRdvvqwsMdk9pZ1QP+JzMmUL+6B/OiudZvHpg0
+6RZDZc/IJzilZImniBvmdR14q1PzWtNd+bwk2U+oY+H+rGuLn99oOlqPHuiV6bI9
+eshT6O2ZyTQNtNXx8EDWRLDtV6b6RhNZoxXMtS8/p7B68ATJ7DJ5S/buvOIenA2V
+r3Bs/UoyL+4YWR2biBc3kxpbZ9jSy0xIw1FwKCDRUGFbgZVawvQmD0mhsmlnwXBO
+opCvhqutrvtkRW4TAU6vU8FYB7Nzu7USTlg0t/lgiTtvVDPWbFZX9YEZwwARAQAB
+tD1Jc2FiZWwgRHJvc3QgKEFwYWNoZSByZWxlYXNlIHNpZ25pbmcga2V5KSA8aXNh
+YmVsQGFwYWNoZS5vcmc+iQI2BBMBAgAgBQJK80BuAhsDBgsJCAcDAgQVAggDBBYC
+AwECHgECF4AACgkQmSr+7sCftUY+xg//UnYw3QIQvJnUP0DEZPGT1r4HDSGbzyGu
+xlL9g/TWrGQY6Lb6qB/L7BcuEryZ3HXbDgdFqOAIXuUQfiv1T9AYoPhJ6hwsdtR1
+cO91oSqFpbc3dLaUluYF9xyBXq5DjleSxes3m29ND3CxiYKFj8Nd96YaMWHbNrgj
+tq14d5Z9+qig8CQ8tXixZLV6APA3Ag2E5w9Br7OZZZuFZF3UAV8Ahb+CkEjPTdEw
+MgmyXmjsvsa1DNKgwq/eRHkET6Wl2WfOcT8AkT8NwJcGXzzl6gdbdysbjyCwQ/a3
+5fxUcWSpIpQLebJaUdbKbylUEvzniwRH/bGWYCz6YVAs8ocxPpcajr3d8bDGHp3S
+xFHZYNqLp9z6E5KsPnk39iOa3Ol27goUz9qw+5547XWzo1/nF893d0Xr+PU9pHtm
+Cu+A3Qi4peDswEriFRnMNMUi0WG6lRHfOhiZ0HTCaBxlq2tc8xv57YK/uHkkNiYX
+45hY76JyIkf9CX5CjS2EWz25G1LdlIPR3jtNgjKsM7zwac9nYaUbns0gNpGvVEME
+eQlqofnaoWBG2HGo0LQexPSTkJauXYamqQ1okyQ5rmSoQAGChk8esPU35+VyuEqJ
+autnAi43kVCzAvPnv8TvPNNUdMxpqinZ83LWf/fvBJ8HWvrEk+wDi4gcAHV4N3G9
+gK7hzpIlwwaIRgQQEQIABgUCSvNBngAKCRA8mkIEDAiFtO+cAJwO8UI6EKraUuHk
+yTLmYglrjFPDXwCgrOglDCgPwhVTDezcphgfTv+pd5I=
+=3Rfi
+-----END PGP PUBLIC KEY BLOCK-----
