@@ -208,19 +208,19 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-gpg-plugin</artifactId>
+        <artifactId>maven-deploy-plugin</artifactId>
         <configuration>
-          <!--<altDeploymentRepository>${deploy.altRepository}</altDeploymentRepository>-->
+          <altDeploymentRepository>${deploy.altRepository}</altDeploymentRepository>
           <url>${deploy.url}</url>
           <repositoryId>mahout.dist</repositoryId>
-          <!--<updateReleaseInfo>true</updateReleaseInfo>-->
+          <updateReleaseInfo>true</updateReleaseInfo>
         </configuration>
         <executions>
           <execution>
             <id>create-hadoop-core-artifact</id>
             <phase>deploy</phase>
             <goals>
-              <goal>sign-and-deploy-file</goal>
+              <goal>deploy-file</goal>
             </goals>
             <configuration>
               <file>lib/hadoop-${hadoop.version}-core.jar</file>
@@ -231,12 +231,11 @@
               <generatePom>true</generatePom>
             </configuration>
           </execution>
-
           <execution>
             <id>create-kfs-artifact</id>
             <phase>deploy</phase>
             <goals>
-              <goal>sign-and-deploy-file</goal>
+              <goal>deploy-file</goal>
             </goals>
             <configuration>
               <file>lib/kfs-${kfs.version}.jar</file>
@@ -247,12 +246,11 @@
               <generatePom>true</generatePom>
             </configuration>
           </execution>
-
           <execution>
             <id>create-jets3t-artifact</id>
             <phase>deploy</phase>
             <goals>
-              <goal>sign-and-deploy-file</goal>
+              <goal>deploy-file</goal>
             </goals>
             <configuration>
               <file>lib/jets3t-${jets3t.version}.jar</file>
@@ -263,14 +261,11 @@
               <generatePom>true</generatePom>
             </configuration>
           </execution>
-
-          <!-- watchmaker -->
-
           <execution>
             <id>create-watchmaker-framework-artifact</id>
             <phase>deploy</phase>
             <goals>
-              <goal>sign-and-deploy-file</goal>
+              <goal>deploy-file</goal>
             </goals>
             <configuration>
               <file>lib/watchmaker-framework-${watchmaker.version}.jar</file>
@@ -281,12 +276,11 @@
               <generatePom>true</generatePom>
             </configuration>
           </execution>
-
           <execution>
             <id>create-watchmaker-swing-artifact</id>
             <phase>deploy</phase>
             <goals>
-              <goal>sign-and-deploy-file</goal>
+              <goal>deploy-file</goal>
             </goals>
             <configuration>
               <file>lib/watchmaker-swing-${watchmaker.version}.jar</file>
@@ -297,12 +291,11 @@
               <generatePom>true</generatePom>
             </configuration>
           </execution>
-
           <execution>
             <id>create-uncommons-math-artifact</id>
             <phase>deploy</phase>
             <goals>
-              <goal>sign-and-deploy-file</goal>
+              <goal>deploy-file</goal>
             </goals>
             <configuration>
               <file>lib/uncommons-maths-${uncommons.maths.version}.jar</file>
@@ -317,7 +310,7 @@
             <id>create-commons-cli</id>
             <phase>deploy</phase>
             <goals>
-              <goal>sign-and-deploy-file</goal>
+              <goal>deploy-file</goal>
             </goals>
             <configuration>
               <file>lib/commons-cli-2.0-mahout.jar</file>
@@ -326,7 +319,6 @@
               <packaging>jar</packaging>
               <version>2.0-mahout</version>
               <generatePom>true</generatePom>
-
             </configuration>
           </execution>
         </executions>
