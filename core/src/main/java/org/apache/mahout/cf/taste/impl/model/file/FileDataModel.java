@@ -380,6 +380,7 @@ public class FileDataModel implements DataModel {
 
   @Override
   public FastIDSet getItemIDsFromUser(long userID) throws TasteException {
+    checkLoaded();    
     return delegate.getItemIDsFromUser(userID);
   }
 
