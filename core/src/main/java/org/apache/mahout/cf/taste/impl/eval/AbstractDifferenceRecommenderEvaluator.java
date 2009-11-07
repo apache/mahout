@@ -38,23 +38,45 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-/** <p>Abstract superclass of a couple implementations, providing shared functionality.</p> */
+/**
+ * Abstract superclass of a couple implementations, providing shared functionality.
+ */
 abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEvaluator {
 
   private static final Logger log = LoggerFactory.getLogger(AbstractDifferenceRecommenderEvaluator.class);
 
   private final Random random;
+  private float maxPreference;
+  private float minPreference;
 
   AbstractDifferenceRecommenderEvaluator() {
     random = RandomUtils.getRandom();
+    maxPreference = Float.NaN;
+    minPreference = Float.NaN;
+  }
+
+  public final float getMaxPreference() {
+    return maxPreference;
+  }
+
+  public final void setMaxPreference(float maxPreference) {
+    this.maxPreference = maxPreference;
+  }
+
+  public final float getMinPreference() {
+    return minPreference;
+  }
+
+  public final void setMinPreference(float minPreference) {
+    this.minPreference = minPreference;
   }
 
   @Override
-  public double evaluate(RecommenderBuilder recommenderBuilder,
-                         DataModelBuilder dataModelBuilder,
-                         DataModel dataModel,
-                         double trainingPercentage,
-                         double evaluationPercentage) throws TasteException {
+  public final double evaluate(RecommenderBuilder recommenderBuilder,
+                               DataModelBuilder dataModelBuilder,
+                               DataModel dataModel,
+                               double trainingPercentage,
+                               double evaluationPercentage) throws TasteException {
 
     if (recommenderBuilder == null) {
       throw new IllegalArgumentException("recommenderBuilder is null");
@@ -125,6 +147,16 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
         testUserPrefs.put(userID, new GenericUserPreferenceArray(testPrefs));
       }
     }
+  }
+
+  protected final float capEstimatedPreference(float estimate) {
+    if (estimate > maxPreference) {
+      return maxPreference;
+    }
+    if (estimate < minPreference) {
+      return minPreference;
+    }
+    return estimate;
   }
 
   abstract double getEvaluation(FastByIDMap<PreferenceArray> testUserPrefs, Recommender recommender)

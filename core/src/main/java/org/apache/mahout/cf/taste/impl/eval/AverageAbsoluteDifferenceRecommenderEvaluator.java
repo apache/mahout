@@ -52,6 +52,7 @@ public final class AverageAbsoluteDifferenceRecommenderEvaluator extends Abstrac
           float estimatedPreference =
               recommender.estimatePreference(testUserID, realPref.getItemID());
           if (!Float.isNaN(estimatedPreference)) {
+            estimatedPreference = capEstimatedPreference(estimatedPreference);
             average.addDatum(Math.abs(realPref.getValue() - estimatedPreference));
           }
         } catch (NoSuchUserException nsue) {

@@ -67,4 +67,32 @@ public interface RecommenderEvaluator {
                   double trainingPercentage,
                   double evaluationPercentage) throws TasteException;
 
+  float getMaxPreference();
+
+  /**
+   * Sets the maximum preference value that is possible in the current problem
+   * domain being evaluated. For example, if the domain is movie ratings on a
+   * scale of 1 to 5, this should be set to 5. While a
+   * {@link org.apache.mahout.cf.taste.recommender.Recommender}
+   * may estimate a preference value above 5.0, it isn't "fair" to consider
+   * that the system is actually suggesting an impossible rating of, say,
+   * 5.4 stars. In practice the application would cap this estimate to 5.0.
+   * Since {@link RecommenderEvaluator}s evaluate the difference between
+   * estimated and actual value, this at least prevents this effect from
+   * unfairly penalizing a {@link org.apache.mahout.cf.taste.recommender.Recommender}.
+   *
+   * @see #setMinPreference(float)
+   */
+  void setMaxPreference(float maxPreference);
+
+  float getMinPreference();
+
+  /**
+   * Sets the minimum preference value that is possible in the current problem
+   * domain being evaluated.
+   *
+   * @see #setMinPreference(float)
+   */
+  void setMinPreference(float minPreference);
+
 }

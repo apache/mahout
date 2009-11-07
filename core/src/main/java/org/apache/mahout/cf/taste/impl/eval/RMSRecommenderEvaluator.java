@@ -51,6 +51,7 @@ public final class RMSRecommenderEvaluator extends AbstractDifferenceRecommender
           float estimatedPreference =
               recommender.estimatePreference(testUserID, realPref.getItemID());
           if (!Float.isNaN(estimatedPreference)) {
+            estimatedPreference = capEstimatedPreference(estimatedPreference);            
             double diff = realPref.getValue() - estimatedPreference;
             average.addDatum(diff * diff);
           }
