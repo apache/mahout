@@ -30,11 +30,11 @@ public final class WeightedRunningAverage implements RunningAverage, Serializabl
   }
 
   @Override
-  public void addDatum(double datum) {
+  public synchronized void addDatum(double datum) {
     addDatum(datum, 1.0);
   }
 
-  public void addDatum(double datum, double weight) {
+  public synchronized void addDatum(double datum, double weight) {
     double oldTotalWeight = totalWeight;
     totalWeight += weight;
     if (oldTotalWeight <= 0.0) {
@@ -45,11 +45,11 @@ public final class WeightedRunningAverage implements RunningAverage, Serializabl
   }
 
   @Override
-  public void removeDatum(double datum) {
+  public synchronized void removeDatum(double datum) {
     removeDatum(datum, 1.0);
   }
 
-  public void removeDatum(double datum, double weight) {
+  public synchronized void removeDatum(double datum, double weight) {
     double oldTotalWeight = totalWeight;
     totalWeight -= weight;
     if (totalWeight <= 0.0) {
@@ -61,11 +61,11 @@ public final class WeightedRunningAverage implements RunningAverage, Serializabl
   }
 
   @Override
-  public void changeDatum(double delta) {
+  public synchronized void changeDatum(double delta) {
     changeDatum(delta, 1.0);
   }
 
-  public void changeDatum(double delta, double weight) {
+  public synchronized void changeDatum(double delta, double weight) {
     if (weight > totalWeight) {
       throw new IllegalArgumentException();
     }
