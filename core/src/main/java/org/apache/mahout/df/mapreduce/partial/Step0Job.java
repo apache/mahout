@@ -57,10 +57,10 @@ public class Step0Job {
   private final Path outputPath;
 
   /** file that contains the serialized dataset */
-  protected final Path datasetPath;
+  private final Path datasetPath;
 
   /** directory that contains the data used in the first step */
-  protected final Path dataPath;
+  private final Path dataPath;
 
   /**
    * @param base base directory
@@ -193,11 +193,11 @@ public class Step0Job {
   protected static class Step0Mapper extends 
       Mapper<LongWritable, Text, IntWritable, Step0Output> {
 
-    protected int partition;
+    private int partition;
 
-    protected int size;
+    private int size;
 
-    protected Long firstId;
+    private Long firstId;
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
@@ -243,14 +243,22 @@ public class Step0Job {
      * first key of the partition<br>
      * used to sort the partition
      */
-    protected long firstId;
+    private long firstId;
 
     /** number of instances in the partition */
-    protected int size;
+    private int size;
 
     protected Step0Output(long firstId, int size) {
       this.firstId = firstId;
       this.size = size;
+    }
+
+    protected long getFirstId() {
+      return firstId;
+    }
+
+    protected int getSize() {
+      return size;
     }
 
     @Override

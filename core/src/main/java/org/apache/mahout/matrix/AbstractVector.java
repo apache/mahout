@@ -39,7 +39,7 @@ public abstract class AbstractVector implements Vector {
    */
   private transient Map<String, Integer> bindings;
 
-  protected String name;
+  private String name;
 
   protected AbstractVector() {
   }
@@ -361,7 +361,6 @@ public abstract class AbstractVector implements Vector {
   @Override
   public String getName() {
     return name;
-
   }
 
   @Override

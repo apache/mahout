@@ -55,17 +55,39 @@ public abstract class Builder {
   private static final Logger log = LoggerFactory.getLogger(Builder.class);
 
   /** Tree Builder Component */
-  protected final TreeBuilder treeBuilder;
+  private final TreeBuilder treeBuilder;
 
-  protected final Path dataPath;
+  private final Path dataPath;
 
-  protected final Path datasetPath;
+  private final Path datasetPath;
 
-  protected final Long seed;
+  private final Long seed;
 
-  protected final Configuration conf;
+  private final Configuration conf;
 
   private String outputDirName = "output";
+
+
+  protected TreeBuilder getTreeBuilder() {
+    return treeBuilder;
+  }
+
+  protected Path getDataPath() {
+    return dataPath;
+  }
+
+  protected Path getDatasetPath() {
+    return datasetPath;
+  }
+
+  protected Long getSeed() {
+    return seed;
+  }
+
+  protected Configuration getConf() {
+    return conf;
+  }
+  
 
   /**
    * Used only for DEBUG purposes. if false, the mappers doesn't output anything,

@@ -32,7 +32,8 @@ import java.util.List;
 
 public class FuzzyKMeansClusterMapper extends MapReduceBase implements
     Mapper<WritableComparable<?>, Vector, Text, FuzzyKMeansOutput> {
-  protected List<SoftCluster> clusters;
+
+  private List<SoftCluster> clusters;
 
   @Override
   public void map(WritableComparable<?> key, Vector point,

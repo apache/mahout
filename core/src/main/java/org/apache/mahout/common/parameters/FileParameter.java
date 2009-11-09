@@ -34,7 +34,7 @@ public class FileParameter extends AbstractParameter<File> {
 
   @Override
   public String getStringValue() {
-    if (value == null) {
+    if (get() == null) {
       return null;
     }
     return get().getPath();

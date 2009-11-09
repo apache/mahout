@@ -21,7 +21,7 @@ public class HybridCache<K, V> implements Cache<K, V> {
 
   private int LFUCapacity = 0;
 
-  int LRUCapacity = 0;
+  private int LRUCapacity = 0;
 
   private LRUCache<K, V> lruCache = null;
 

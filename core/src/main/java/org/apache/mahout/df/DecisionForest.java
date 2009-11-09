@@ -150,7 +150,7 @@ public class DecisionForest {
     
     DecisionForest rf = (DecisionForest)obj;
     
-    return trees.size() == rf.trees.size() && trees.containsAll(rf.trees);
+    return trees.size() == rf.getTrees().size() && trees.containsAll(rf.getTrees());
   }
 
   @Override

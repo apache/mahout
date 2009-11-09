@@ -39,12 +39,11 @@ import java.util.Iterator;
 public class BayesWeightSummerReducer extends MapReduceBase implements
     Reducer<StringTuple, DoubleWritable, StringTuple, DoubleWritable> {
 
-  private static final Logger log = LoggerFactory
-      .getLogger(BayesWeightSummerReducer.class);
+  private static final Logger log = LoggerFactory.getLogger(BayesWeightSummerReducer.class);
 
   private HTable table;
 
-  boolean useHbase = false;
+  private boolean useHbase = false;
 
   @Override
   public void reduce(StringTuple key, Iterator<DoubleWritable> values,

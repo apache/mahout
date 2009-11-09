@@ -32,7 +32,7 @@ public class WeightedManhattanDistanceMeasure extends WeightedDistanceMeasure {
     double result = 0;
 
     Vector res = p2.minus(p1);
-    if (weights == null) {
+    if (getWeights() == null) {
       Iterator<Vector.Element> iter = res.iterateNonZero();
       while (iter.hasNext()) {
         Vector.Element elt = iter.next();
@@ -43,7 +43,7 @@ public class WeightedManhattanDistanceMeasure extends WeightedDistanceMeasure {
       Iterator<Vector.Element> iter = res.iterateNonZero();
       while (iter.hasNext()) {
         Vector.Element elt = iter.next();
-        result += Math.abs(elt.get() * weights.get(elt.index()));
+        result += Math.abs(elt.get() * getWeights().get(elt.index()));
       }
     }
 

@@ -34,7 +34,7 @@ import java.util.Map;
 public class FuzzyKMeansReducer extends MapReduceBase implements
     Reducer<Text, FuzzyKMeansInfo, Text, SoftCluster> {
 
-  protected Map<String, SoftCluster> clusterMap;
+  private Map<String, SoftCluster> clusterMap;
 
   @Override
   public void reduce(Text key, Iterator<FuzzyKMeansInfo> values,

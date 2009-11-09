@@ -124,7 +124,7 @@ public class PartialSequentialBuilder extends PartialBuilder {
       RecordReader<LongWritable, Text> reader = input.createRecordReader(split, task);
       reader.initialize(split, task);
       
-      Step1Mapper mapper = new MockStep1Mapper(treeBuilder, dataset, seed,
+      Step1Mapper mapper = new MockStep1Mapper(getTreeBuilder(), dataset, getSeed(),
           hp, nbSplits, numTrees);
 
       long time = System.currentTimeMillis();

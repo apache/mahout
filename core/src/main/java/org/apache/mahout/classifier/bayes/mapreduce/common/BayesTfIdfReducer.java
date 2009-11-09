@@ -42,12 +42,11 @@ import java.util.Iterator;
 public class BayesTfIdfReducer extends MapReduceBase implements
     Reducer<StringTuple, DoubleWritable, StringTuple, DoubleWritable> {
 
-  private static final Logger log = LoggerFactory
-      .getLogger(BayesTfIdfReducer.class);
+  private static final Logger log = LoggerFactory.getLogger(BayesTfIdfReducer.class);
 
   private HTable table;
   
-  boolean useHbase = false;
+  private boolean useHbase = false;
 
   @Override
   public void reduce(StringTuple key, Iterator<DoubleWritable> values,

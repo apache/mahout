@@ -26,8 +26,8 @@ import org.apache.mahout.classifier.bayes.interfaces.Datastore;
 
 public class ClassifierContext {
 
-  protected Algorithm algorithm = null;
-  protected Datastore datastore = null;
+  private final Algorithm algorithm;
+  private final Datastore datastore;
   
   public ClassifierContext(Algorithm algorithm, Datastore datastore) {
     this.algorithm = algorithm;
@@ -52,8 +52,8 @@ public class ClassifierContext {
    * @return A Collection of {@link org.apache.mahout.classifier.ClassifierResult}s.
    * @throws InvalidDatastoreException 
    */
-  public ClassifierResult classifyDocument(String[] document, String defaultCategory) throws InvalidDatastoreException
-  {
+  public ClassifierResult classifyDocument(String[] document, String defaultCategory)
+      throws InvalidDatastoreException {
     return algorithm.classifyDocument(document, datastore, defaultCategory);   
   }
 
@@ -67,7 +67,8 @@ public class ClassifierContext {
    * @return A Collection of {@link org.apache.mahout.classifier.ClassifierResult}s.
    * @throws InvalidDatastoreException 
    */ 
-  public ClassifierResult[] classifyDocument(String[] document, String defaultCategory, int numResults) throws InvalidDatastoreException{
+  public ClassifierResult[] classifyDocument(String[] document, String defaultCategory, int numResults)
+      throws InvalidDatastoreException{
     return algorithm.classifyDocument(document, datastore, defaultCategory, numResults);
   }
   /**
@@ -75,7 +76,7 @@ public class ClassifierContext {
    * @return Collection of Labels
    * @throws InvalidDatastoreException 
    */
-  public Collection<String> getLabels() throws InvalidDatastoreException{
+  public Collection<String> getLabels() throws InvalidDatastoreException {
    return algorithm.getLabels(datastore);
   }
 

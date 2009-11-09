@@ -129,12 +129,10 @@ public class InMemInputFormat extends InputFormat<IntWritable, NullWritable> {
   public static class InMemRecordReader extends
       RecordReader<IntWritable, NullWritable> {
 
-    protected final InMemInputSplit split;
-
-    protected int pos;
-
-    protected IntWritable key;
-    protected NullWritable value;
+    private final InMemInputSplit split;
+    private int pos;
+    private IntWritable key;
+    private NullWritable value;
     
     public InMemRecordReader(InMemInputSplit split) {
       this.split = split;

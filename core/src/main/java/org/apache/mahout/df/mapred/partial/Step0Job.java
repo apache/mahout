@@ -192,13 +192,13 @@ public class Step0Job implements Cloneable {
   protected static class Step0Mapper extends MapReduceBase implements
       Mapper<LongWritable, Text, IntWritable, Step0Output> {
 
-    protected int partition;
+    private int partition;
 
-    protected int size;
+    private int size;
 
-    protected Long firstId;
+    private Long firstId;
 
-    protected OutputCollector<IntWritable, Step0Output> collector;
+    private OutputCollector<IntWritable, Step0Output> collector;
 
     @Override
     public void configure(JobConf job) {
@@ -251,14 +251,22 @@ public class Step0Job implements Cloneable {
      * first key of the partition<br>
      * used to sort the partition
      */
-    protected long firstId;
+    private long firstId;
 
     /** number of instances in the partition */
-    protected int size;
+    private int size;
 
     protected Step0Output(long firstId, int size) {
       this.firstId = firstId;
       this.size = size;
+    }
+
+    protected long getFirstId() {
+      return firstId;
+    }
+
+    protected int getSize() {
+      return size;
     }
 
     @Override

@@ -98,7 +98,7 @@ public class Cluster extends ClusterBase {
         beginIndex - 2));
       final Vector clusterCenter = AbstractVector.decodeVector(center);
       cluster = new Cluster(clusterCenter, clusterId);
-      cluster.converged = startsWithV;
+      cluster.setConverged(startsWithV);
     } else {
      throw new IllegalArgumentException(ERROR_UNKNOWN_CLUSTER_FORMAT + formattedString);
     }
@@ -117,10 +117,10 @@ public class Cluster extends ClusterBase {
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
     this.converged = in.readBoolean();
-    this.center = AbstractVector.readVector(in);
-    this.numPoints = 0;
-    this.pointTotal = center.like();
-    this.pointSquaredTotal = center.like();
+    this.setCenter(AbstractVector.readVector(in));
+    this.setNumPoints(0);
+    this.setPointTotal(getCenter().like());
+    this.pointSquaredTotal = getCenter().like();
   }
 
   /**
@@ -196,7 +196,7 @@ public class Cluster extends ClusterBase {
     }
     //TODO: this is ugly
     String name = point.getName();
-    output.collect(new Text(name != null && name.length() != 0 ? name : point.asFormatString()), new Text(String.valueOf(nearestCluster.id)));
+    output.collect(new Text(name != null && name.length() != 0 ? name : point.asFormatString()), new Text(String.valueOf(nearestCluster.getId())));
   }
 
   /**
@@ -205,11 +205,11 @@ public class Cluster extends ClusterBase {
    * @return the new centroid
    */
   private Vector computeCentroid() {
-    if (numPoints == 0) {
-      return center;
+    if (getNumPoints() == 0) {
+      return getCenter();
     } else if (centroid == null) {
       // lazy compute new centroid
-      centroid = pointTotal.divide(numPoints);
+      centroid = getPointTotal().divide(getNumPoints());
     }
     return centroid;
   }
@@ -221,10 +221,10 @@ public class Cluster extends ClusterBase {
    */
   public Cluster(Vector center) {
     super();
-    this.id = nextClusterId++;
-    this.center = center;
-    this.numPoints = 0;
-    this.pointTotal = center.like();
+    this.setId(nextClusterId++);
+    this.setCenter(center);
+    this.setNumPoints(0);
+    this.setPointTotal(center.like());
     this.pointSquaredTotal = center.like();
   }
 
@@ -239,31 +239,31 @@ public class Cluster extends ClusterBase {
    */
   public Cluster(Vector center, int clusterId) {
     super();
-    this.id = clusterId;
-    this.center = center;
-    this.numPoints = 0;
-    this.pointTotal = center.like();
+    this.setId(clusterId);
+    this.setCenter(center);
+    this.setNumPoints(0);
+    this.setPointTotal(center.like());
     this.pointSquaredTotal = center.like();
   }
 
   /** Construct a new clsuter with the given id as identifier */
   public Cluster(String clusterId) {
 
-    this.id = Integer.parseInt((clusterId.substring(1)));
-    this.numPoints = 0;
+    this.setId(Integer.parseInt((clusterId.substring(1))));
+    this.setNumPoints(0);
     this.converged = clusterId.startsWith("V");
   }
 
   @Override
   public String toString() {
-    return getIdentifier() + " - " + center.asFormatString();
+    return getIdentifier() + " - " + getCenter().asFormatString();
   }
 
   public String getIdentifier() {
     if (converged) {
-      return "V" + id;
+      return "V" + getId();
     } else {
-      return "C" + id;
+      return "C" + getId();
     }
   }
 
@@ -284,12 +284,12 @@ public class Cluster extends ClusterBase {
    */
   public void addPoints(int count, Vector delta) {
     centroid = null;
-    numPoints += count;
-    if (pointTotal == null) {
-      pointTotal = delta.clone();
+    setNumPoints(getNumPoints() + count);
+    if (getPointTotal() == null) {
+      setPointTotal(delta.clone());
       pointSquaredTotal = delta.times(delta);
     } else {
-      delta.addTo(pointTotal);
+      delta.addTo(getPointTotal());
       delta.times(delta).addTo(pointSquaredTotal);
     }
   }
@@ -297,9 +297,9 @@ public class Cluster extends ClusterBase {
 
   /** Compute the centroid and set the center to it. */
   public void recomputeCenter() {
-    center = computeCentroid();
-    numPoints = 0;
-    pointTotal = center.like();
+    setCenter(computeCentroid());
+    setNumPoints(0);
+    setPointTotal(getCenter().like());
   }
 
   /**
@@ -309,7 +309,7 @@ public class Cluster extends ClusterBase {
    */
   public boolean computeConvergence() {
     Vector centroid = computeCentroid();
-    converged = measure.distance(centroid.getLengthSquared(), centroid, center) <= convergenceDelta;
+    converged = measure.distance(centroid.getLengthSquared(), centroid, getCenter()) <= convergenceDelta;
     return converged;
   }
 
@@ -318,11 +318,15 @@ public class Cluster extends ClusterBase {
     return converged;
   }
 
+  private void setConverged(boolean converged) {
+    this.converged = converged;
+  }
+
   /** @return the std */
   public double getStd() {
-    Vector stds = pointSquaredTotal.times(numPoints).minus(
-          pointTotal.times(pointTotal)).assign(new SquareRootFunction())
-          .divide(numPoints);
+    Vector stds = pointSquaredTotal.times(getNumPoints()).minus(
+          getPointTotal().times(getPointTotal())).assign(new SquareRootFunction())
+          .divide(getNumPoints());
     return stds.zSum() / 2;
   }
 

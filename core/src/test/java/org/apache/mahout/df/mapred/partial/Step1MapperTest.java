@@ -53,10 +53,6 @@ public class Step1MapperTest extends TestCase {
       configure(seed, partition, numMapTasks, numTrees);
     }
 
-    public int getFirstTreeId() {
-      return firstTreeId;
-    }
-
   }
 
   /** nb attributes per generated data instance */

@@ -32,7 +32,7 @@ import java.util.Iterator;
 public class DirichletReducer extends MapReduceBase implements
     Reducer<Text, Vector, Text, DirichletCluster<Vector>> {
 
-  DirichletState<Vector> state;
+  private DirichletState<Vector> state;
 
   private Model<Vector>[] newModels;
 

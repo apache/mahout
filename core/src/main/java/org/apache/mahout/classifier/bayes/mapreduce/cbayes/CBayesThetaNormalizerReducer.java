@@ -40,14 +40,13 @@ import java.util.Iterator;
 public class CBayesThetaNormalizerReducer extends MapReduceBase implements
     Reducer<StringTuple, DoubleWritable, StringTuple, DoubleWritable> {
 
-  private static final Logger log = LoggerFactory
-      .getLogger(CBayesThetaNormalizerReducer.class);
+  private static final Logger log = LoggerFactory.getLogger(CBayesThetaNormalizerReducer.class);
 
   private HTable table;
 
   private ThreadLocal<HBaseConfiguration> HBconf;
 
-  boolean useHbase = false;
+  private boolean useHbase = false;
 
   @Override
   public void reduce(StringTuple key, Iterator<DoubleWritable> values,

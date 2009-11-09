@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class LRUCache<K, V> implements Cache<K, V> {
 
-  int capacity = 0;
+  private int capacity = 0;
   
   private Map<K, V> lruCache = null;
   

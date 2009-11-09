@@ -54,19 +54,37 @@ public abstract class Builder {
   private static final Logger log = LoggerFactory.getLogger(Builder.class);
 
   /** Tree Builder Component */
-  protected final TreeBuilder treeBuilder;
+  private final TreeBuilder treeBuilder;
 
-  protected final Path dataPath;
+  private final Path dataPath;
 
-  protected final Path datasetPath;
+  private final Path datasetPath;
 
-  protected final Long seed;
+  private final Long seed;
 
   private final Configuration conf;
 
   private String outputDirName = "output";
 
-  protected int numTrees;
+  private int numTrees;
+
+
+  protected TreeBuilder getTreeBuilder() {
+    return treeBuilder;
+  }
+
+  protected Path getDataPath() {
+    return dataPath;
+  }
+
+  protected Path getDatasetPath() {
+    return datasetPath;
+  }
+
+  protected Long getSeed() {
+    return seed;
+  }
+
 
   /**
    * Return the value of "mapred.map.tasks". In case the 'local' runner is

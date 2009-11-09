@@ -134,9 +134,9 @@ final class OrderedIntDoubleMapping implements Serializable, Cloneable {
   public boolean equals(Object o) {
     if (o instanceof OrderedIntDoubleMapping) {
       OrderedIntDoubleMapping other = (OrderedIntDoubleMapping) o;
-      if (numMappings == other.numMappings) {
+      if (numMappings == other.getNumMappings()) {
         for (int i = 0; i < numMappings; i++) {
-          if (indices[i] != other.indices[i] || values[i] != other.values[i]) {
+          if (indices[i] != other.getIndices()[i] || values[i] != other.getValues()[i]) {
             return false;
           }
         }

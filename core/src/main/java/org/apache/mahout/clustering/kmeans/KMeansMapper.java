@@ -32,7 +32,7 @@ import java.util.List;
 public class KMeansMapper extends MapReduceBase implements
     Mapper<WritableComparable<?>, Vector, Text, KMeansInfo> {
 
-  protected List<Cluster> clusters;
+  private List<Cluster> clusters;
 
   @Override
   public void map(WritableComparable<?> key, Vector point,

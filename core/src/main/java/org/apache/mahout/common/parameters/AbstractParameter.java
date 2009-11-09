@@ -24,7 +24,7 @@ import java.util.Collections;
 
 public abstract class AbstractParameter<T> implements Parameter<T> {
 
-  protected T value;
+  private T value;
   private final String prefix;
   private final String name;
   private final String description;

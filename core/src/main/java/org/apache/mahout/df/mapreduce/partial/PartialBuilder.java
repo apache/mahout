@@ -88,7 +88,7 @@ public class PartialBuilder extends Builder {
     
     job.setJarByClass(PartialBuilder.class);
     
-    FileInputFormat.setInputPaths(job, dataPath);
+    FileInputFormat.setInputPaths(job, getDataPath());
     FileOutputFormat.setOutputPath(job, getOutputPath(conf));
 
     job.setOutputKeyClass(TreeID.class);
@@ -111,7 +111,7 @@ public class PartialBuilder extends Builder {
     Path outputPath = getOutputPath(conf);
 
     log.info("Computing partitions' first ids...");
-    Step0Job step0 = new Step0Job(getOutputPath(conf), dataPath, datasetPath);
+    Step0Job step0 = new Step0Job(getOutputPath(conf), getDataPath(), getDatasetPath());
     Step0Output[] partitions = step0.run(new Configuration(conf));
 
     log.info("Processing the output...");
@@ -128,7 +128,7 @@ public class PartialBuilder extends Builder {
       log.info("*****************************");
       log.info("Second Step");
       log.info("*****************************");
-      Step2Job step2 = new Step2Job(getOutputPath(conf), dataPath, datasetPath, partitions);
+      Step2Job step2 = new Step2Job(getOutputPath(conf), getDataPath(), getDatasetPath(), partitions);
 
       step2.run(new Configuration(conf), keys, trees, callback);
     }

@@ -139,8 +139,8 @@ public class Step0JobTest extends TestCase {
 
       // validate the mapper's output
       assertEquals(p, context.keys[p]);
-      assertEquals(firstKey.longValue(), context.values[p].firstId);
-      assertEquals(size, context.values[p].size);
+      assertEquals(firstKey.longValue(), context.values[p].getFirstId());
+      assertEquals(size, context.values[p].getSize());
     }
 
   }

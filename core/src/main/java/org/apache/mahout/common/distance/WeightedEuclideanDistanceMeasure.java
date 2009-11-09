@@ -31,7 +31,7 @@ public class WeightedEuclideanDistanceMeasure extends WeightedDistanceMeasure {
   public double distance(Vector p1, Vector p2) {
     double result = 0;
     Vector res = p2.minus(p1);
-    if (weights == null) {
+    if (getWeights() == null) {
       Iterator<Vector.Element> iter = res.iterateNonZero();
       while (iter.hasNext()) {
         Vector.Element elt = iter.next();
@@ -41,7 +41,7 @@ public class WeightedEuclideanDistanceMeasure extends WeightedDistanceMeasure {
       Iterator<Vector.Element> iter = res.iterateNonZero();
       while (iter.hasNext()) {
         Vector.Element elt = iter.next();
-        result += elt.get() * elt.get() * weights.get(elt.index());
+        result += elt.get() * elt.get() * getWeights().get(elt.index());
       }
     }
     return Math.sqrt(result);

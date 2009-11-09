@@ -35,7 +35,7 @@ public class NormalModel implements Model<Vector> {
   private double stdDev;
 
   // the observation statistics, initialized by the first observation
-  int s0 = 0;
+  private int s0 = 0;
 
   private Vector s1;
 
@@ -50,6 +50,10 @@ public class NormalModel implements Model<Vector> {
     this.s0 = 0;
     this.s1 = mean.like();
     this.s2 = mean.like();
+  }
+
+  int getS0() {
+    return s0;
   }
   
   public Vector getMean() {

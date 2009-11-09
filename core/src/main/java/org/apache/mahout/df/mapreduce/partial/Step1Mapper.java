@@ -57,13 +57,17 @@ public class Step1Mapper extends
   private int nbTrees;
 
   /** id of the first tree */
-  protected int firstTreeId;
+  private int firstTreeId;
 
   /** mapper's partition */
   private int partition;
 
   /** will contain all instances if this mapper's split */
   private final List<Instance> instances = new ArrayList<Instance>();
+  
+  public int getFirstTreeId() {
+    return firstTreeId;
+  }
 
   @Override
   protected void setup(Context context) throws IOException,
