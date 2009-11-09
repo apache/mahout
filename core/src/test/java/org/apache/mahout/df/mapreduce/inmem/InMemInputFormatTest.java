@@ -31,6 +31,12 @@ import org.apache.mahout.df.mapreduce.inmem.InMemInputFormat.InMemRecordReader;
 
 public class InMemInputFormatTest extends TestCase {
 
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    RandomUtils.useTestSeed();
+  }
+
   public void testSplits() throws Exception {
     int n = 1;
     int maxNumSplits = 100;

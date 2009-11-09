@@ -46,6 +46,12 @@ public class PartitionBugTest extends TestCase {
 
   static final int numMaps = 5;
 
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    RandomUtils.useTestSeed();
+  }
+    
   /**
    * Make sure that the correct instance ids are being computed
    */

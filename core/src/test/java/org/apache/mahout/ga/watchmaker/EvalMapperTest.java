@@ -26,6 +26,7 @@ import org.apache.mahout.ga.watchmaker.utils.DummyCandidate;
 import org.apache.mahout.ga.watchmaker.utils.DummyEvaluator;
 import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.StringUtils;
+import org.apache.mahout.common.RandomUtils;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
 import java.util.List;
@@ -33,6 +34,12 @@ import java.util.Set;
 
 public class EvalMapperTest extends TestCase {
 
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    RandomUtils.useTestSeed();
+  }
+                            
   public void testMap() throws Exception {
     // population to evaluate
     int populationSize = 100;

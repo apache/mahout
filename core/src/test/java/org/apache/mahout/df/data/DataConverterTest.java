@@ -28,6 +28,12 @@ public class DataConverterTest extends TestCase {
   private static final int nbAttributes = 10;
   
   private static final int nbInstances = 100;
+
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    RandomUtils.useTestSeed();
+  }
   
   public void testConvert() throws Exception {
     Random rng = RandomUtils.getRandom();

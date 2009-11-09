@@ -31,6 +31,12 @@ public class DefaultIgSplitTest extends TestCase {
 
   protected static final int nbAttributes = 10;
 
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    RandomUtils.useTestSeed();
+  }
+   
   public void testEntropy() throws Exception {
     Random rng = RandomUtils.getRandom();
     String descriptor = Utils.randomDescriptor(rng, nbAttributes);

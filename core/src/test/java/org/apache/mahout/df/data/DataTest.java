@@ -38,6 +38,7 @@ public class DataTest extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
+    RandomUtils.useTestSeed();
     rng = RandomUtils.getRandom();
     data = Utils.randomData(rng, nbAttributes, datasize);
   }

@@ -61,6 +61,12 @@ public class Step2MapperTest extends TestCase {
   /** nb mappers to use */
   protected static final int nbMappers = 5;
 
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    RandomUtils.useTestSeed();
+  }
+ 
   public void testMapper() throws Exception {
     Random rng = RandomUtils.getRandom();
 

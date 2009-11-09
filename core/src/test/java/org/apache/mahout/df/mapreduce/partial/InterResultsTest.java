@@ -53,6 +53,7 @@ public class InterResultsTest extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
+    RandomUtils.useTestSeed();
     Random rng = RandomUtils.getRandom();
 
     // prepare the data
