@@ -112,14 +112,15 @@ public final class SlopeOneRecommenderTest extends TasteTestCase {
 
   public void testDiffStdevBehavior() throws Exception {
     DataModel dataModel = getDataModel(
-            new long[] {1, 2},
+            new long[] {1, 2, 3},
             new Double[][] {
                     {0.1, 0.2},
                     {0.2, 0.3, 0.6},
+                    {0.3, 0.3, 0.3},
             });
 
     Recommender recommender = new SlopeOneRecommender(dataModel);
-    assertEquals(0.6, recommender.estimatePreference(1, 2), EPSILON);
+    assertEquals(0.3257f, recommender.estimatePreference(1, 2), EPSILON);
   }
 
   private static Recommender buildRecommender() throws TasteException {
