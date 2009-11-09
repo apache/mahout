@@ -72,8 +72,10 @@ public final class ExpectationMaximizationSVD {
 
   public double getDotProduct(int i, int j) {
     double result = 1.0;
+    double[] leftVectorI = leftVector[i];
+    double[] rightVectorJ = rightVector[j];
     for (int k = 0; k < this.k; k++) {
-      result += leftVector[i][k] * rightVector[j][k];
+      result += leftVectorI[k] * rightVectorJ[k];
     }
     return result;
   }

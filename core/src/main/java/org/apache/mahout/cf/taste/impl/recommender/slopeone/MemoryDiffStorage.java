@@ -270,7 +270,7 @@ public final class MemoryDiffStorage implements DiffStorage {
     // Save off prefs for the life of this loop iteration
     PreferenceArray userPreferences = dataModel.getPreferencesFromUser(userID);
     int length = userPreferences.length();
-    for (int i = 0; i < length; i++) {
+    for (int i = 0; i < length - 1; i++) {
       double prefAValue = userPreferences.getValue(i);
       long itemIDA = userPreferences.getItemID(i);
       FastByIDMap<RunningAverage> aMap = averageDiffs.get(itemIDA);

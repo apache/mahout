@@ -60,8 +60,8 @@ public final class SVDRecommender extends AbstractRecommender {
   private final int numFeatures;
 
   private final FastByIDMap<Integer> userMap;
-  private FastByIDMap<Integer> itemMap;
-  private ExpectationMaximizationSVD emSvd;
+  private final FastByIDMap<Integer> itemMap;
+  private final ExpectationMaximizationSVD emSvd;
   private final List<Preference> cachedPreferences;
 
   /**
