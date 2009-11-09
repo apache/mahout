@@ -88,7 +88,7 @@
             </configuration>
           </execution>
           <execution>
-            <id>create-hadoop-core-artifact</id>
+            <id>create-hadoop-core-asc-artifact</id>
             <phase>validate</phase>
             <goals>
               <goal>install-file</goal>
@@ -120,7 +120,7 @@
             </configuration>
           </execution>
           <execution>
-            <id>create-hbase-artifact</id>
+            <id>create-hbase-asc-artifact</id>
             <phase>validate</phase>
             <goals>
               <goal>install-file</goal>
@@ -152,7 +152,7 @@
             </configuration>
           </execution>
           <execution>
-            <id>create-kfs-artifact</id>
+            <id>create-kfs-asc-artifact</id>
             <phase>validate</phase>
             <goals>
               <goal>install-file</goal>
@@ -185,7 +185,7 @@
             </configuration>
           </execution>
           <execution>
-            <id>create-jets3t-artifact</id>
+            <id>create-jets3t-asc-artifact</id>
             <phase>validate</phase>
             <goals>
               <goal>install-file</goal>
@@ -219,7 +219,7 @@
             </configuration>
           </execution>
           <execution>
-            <id>create-watchmaker-framework-artifact</id>
+            <id>create-watchmaker-framework-asc-artifact</id>
             <phase>validate</phase>
             <goals>
               <goal>install-file</goal>
@@ -252,7 +252,7 @@
             </configuration>
           </execution>
           <execution>
-            <id>create-watchmaker-swing-artifact</id>
+            <id>create-watchmaker-swing-asc-artifact</id>
             <phase>validate</phase>
             <goals>
               <goal>install-file</goal>
@@ -285,7 +285,7 @@
             </configuration>
           </execution>
           <execution>
-            <id>create-uncommons-math-artifact</id>
+            <id>create-uncommons-math-asc-artifact</id>
             <phase>validate</phase>
             <goals>
               <goal>install-file</goal>
@@ -317,7 +317,7 @@
             </configuration>
           </execution>
           <execution>
-            <id>create-commons-cli</id>
+            <id>create-commons-cli-asc</id>
             <phase>validate</phase>
             <goals>
               <goal>install-file</goal>
