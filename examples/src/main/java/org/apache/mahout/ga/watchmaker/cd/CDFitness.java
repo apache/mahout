@@ -90,7 +90,7 @@ public class CDFitness implements Writable {
 
     CDFitness f = (CDFitness) obj;
 
-    return tp == f.getFp() && fp == f.getFp() && tn == f.getTn() && fn == f.getTn();
+    return tp == f.getTp() && fp == f.getFp() && tn == f.getTn() && fn == f.getFn();
   }
 
   @Override
