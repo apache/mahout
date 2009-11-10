@@ -114,7 +114,7 @@
                   <goal>sign-and-deploy-file</goal>
                 </goals>
                 <configuration>
-                  <file>core/lib/hadoop-${hadoop.version}-core.jar</file>
+                  <file>core/lib/hadoop-core-${hadoop.version}.jar</file>
                   <groupId>org.apache.mahout.hadoop</groupId>
                   <artifactId>hadoop-core</artifactId>
                   <packaging>jar</packaging>

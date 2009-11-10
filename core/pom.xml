@@ -78,7 +78,7 @@
               <goal>install-file</goal>
             </goals>
             <configuration>
-              <file>lib/hadoop-${hadoop.version}-core.jar</file>
+              <file>lib/hadoop-core-${hadoop.version}.jar</file>
               <groupId>org.apache.mahout.hadoop</groupId>
               <artifactId>hadoop-core</artifactId>
               <packaging>jar</packaging>
@@ -218,7 +218,7 @@
               <goal>deploy-file</goal>
             </goals>
             <configuration>
-              <file>lib/hadoop-${hadoop.version}-core.jar</file>
+              <file>lib/hadoop-core-${hadoop.version}.jar</file>
               <groupId>org.apache.mahout.hadoop</groupId>
               <artifactId>hadoop-core</artifactId>
               <packaging>jar</packaging>
