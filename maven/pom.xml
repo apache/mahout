@@ -4,12 +4,12 @@
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.2</version>
   <name>Mahout Common Maven Parent</name>
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.2</version>
   </parent>
   <properties>
     <junit.version>3.8.2</junit.version>
@@ -70,9 +70,9 @@
     </mailingList>
   </mailingLists>
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout</developerConnection>
-    <url>https://svn.apache.org/repos/asf/lucene/mahout</url>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2</developerConnection>
+    <url>https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2</url>
   </scm>
   <repositories>
     <repository>
