@@ -88,22 +88,6 @@
             </configuration>
           </execution>
           <execution>
-            <id>create-hadoop-core-asc-artifact</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/hadoop-${hadoop.version}-core.jar.asc</file>
-              <groupId>org.apache.mahout.hadoop</groupId>
-              <artifactId>hadoop-core</artifactId>
-              <packaging>jar</packaging>
-              <version>${hadoop.version}</version>
-              <generatePom>true</generatePom>
-              <createChecksum>true</createChecksum>
-            </configuration>
-          </execution>
-          <execution>
             <id>create-hbase-artifact</id>
             <phase>validate</phase>
             <goals>
@@ -111,22 +95,6 @@
             </goals>
             <configuration>
               <file>lib/hbase-${hbase.version}.jar</file>
-              <groupId>org.apache.mahout.hbase</groupId>
-              <artifactId>hbase</artifactId>
-              <packaging>jar</packaging>
-              <version>${hbase.version}</version>
-              <generatePom>true</generatePom>
-              <createChecksum>true</createChecksum>
-            </configuration>
-          </execution>
-          <execution>
-            <id>create-hbase-asc-artifact</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/hbase-${hbase.version}.jar.asc</file>
               <groupId>org.apache.mahout.hbase</groupId>
               <artifactId>hbase</artifactId>
               <packaging>jar</packaging>
@@ -152,23 +120,6 @@
             </configuration>
           </execution>
           <execution>
-            <id>create-kfs-asc-artifact</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/kfs-${kfs.version}.jar.asc</file>
-              <groupId>org.apache.mahout.kosmofs</groupId>
-              <artifactId>kfs</artifactId>
-              <packaging>jar</packaging>
-              <version>${kfs.version}</version>
-              <generatePom>true</generatePom>
-              <createChecksum>true</createChecksum>
-            </configuration>
-          </execution>
-
-          <execution>
             <id>create-jets3t-artifact</id>
             <phase>validate</phase>
             <goals>
@@ -184,24 +135,6 @@
               <createChecksum>true</createChecksum>
             </configuration>
           </execution>
-          <execution>
-            <id>create-jets3t-asc-artifact</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/jets3t-${jets3t.version}.jar.asc</file>
-              <groupId>org.apache.mahout.jets3t</groupId>
-              <artifactId>jets3t</artifactId>
-              <packaging>jar</packaging>
-              <version>${jets3t.version}</version>
-              <generatePom>true</generatePom>
-              <createChecksum>true</createChecksum>
-            </configuration>
-          </execution>
-          <!-- watchmaker -->
-
           <execution>
             <id>create-watchmaker-framework-artifact</id>
             <phase>validate</phase>
@@ -219,23 +152,6 @@
             </configuration>
           </execution>
           <execution>
-            <id>create-watchmaker-framework-asc-artifact</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/watchmaker-framework-${watchmaker.version}.jar.asc</file>
-              <groupId>org.apache.mahout.watchmaker</groupId>
-              <artifactId>watchmaker-framework</artifactId>
-              <packaging>jar</packaging>
-              <version>${watchmaker.version}</version>
-              <generatePom>true</generatePom>
-              <createChecksum>true</createChecksum>
-            </configuration>
-          </execution>
-
-          <execution>
             <id>create-watchmaker-swing-artifact</id>
             <phase>validate</phase>
             <goals>
@@ -251,23 +167,6 @@
               <createChecksum>true</createChecksum>
             </configuration>
           </execution>
-          <execution>
-            <id>create-watchmaker-swing-asc-artifact</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/watchmaker-swing-${watchmaker.version}.jar.asc</file>
-              <groupId>org.apache.mahout.watchmaker</groupId>
-              <artifactId>watchmaker-swing</artifactId>
-              <packaging>jar</packaging>
-              <version>${watchmaker.version}</version>
-              <generatePom>true</generatePom>
-              <createChecksum>true</createChecksum>
-            </configuration>
-          </execution>
-
           <execution>
             <id>create-uncommons-math-artifact</id>
             <phase>validate</phase>
@@ -285,22 +184,6 @@
             </configuration>
           </execution>
           <execution>
-            <id>create-uncommons-math-asc-artifact</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/uncommons-maths-${uncommons.maths.version}.jar.asc</file>
-              <groupId>org.apache.mahout.uncommons.math</groupId>
-              <artifactId>uncommons-math</artifactId>
-              <packaging>jar</packaging>
-              <version>${uncommons.maths.version}</version>
-              <generatePom>true</generatePom>
-              <createChecksum>true</createChecksum>
-            </configuration>
-          </execution>
-          <execution>
             <id>create-commons-cli</id>
             <phase>validate</phase>
             <goals>
@@ -308,22 +191,6 @@
             </goals>
             <configuration>
               <file>lib/commons-cli-2.0-mahout.jar</file>
-              <groupId>org.apache.mahout.commons</groupId>
-              <artifactId>commons-cli</artifactId>
-              <packaging>jar</packaging>
-              <version>2.0-mahout</version>
-              <generatePom>true</generatePom>
-              <createChecksum>true</createChecksum>
-            </configuration>
-          </execution>
-          <execution>
-            <id>create-commons-cli-asc</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/commons-cli-2.0-mahout.jar.asc</file>
               <groupId>org.apache.mahout.commons</groupId>
               <artifactId>commons-cli</artifactId>
               <packaging>jar</packaging>
