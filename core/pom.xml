@@ -435,7 +435,10 @@
               <url>${deploy.url}</url>
               <repositoryId>mahout.dist</repositoryId>
             </configuration>
+            <!--
+             Keep these versions in sync
 
+             -->
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -451,11 +454,11 @@
                   <goal>sign-and-deploy-file</goal>
                 </goals>
                 <configuration>
-                  <file>core/lib/hadoop-core-${hadoop.version}.jar</file>
+                  <file>core/lib/hadoop-core-0.20.1.jar</file>
                   <groupId>org.apache.mahout.hadoop</groupId>
                   <artifactId>hadoop-core</artifactId>
                   <packaging>jar</packaging>
-                  <version>${hadoop.version}</version>
+                  <version>0.20.1</version>
                   <generatePom>true</generatePom>
                 </configuration>
               </execution>
@@ -466,11 +469,11 @@
                   <goal>sign-and-deploy-file</goal>
                 </goals>
                 <configuration>
-                  <file>core/lib/kfs-${kfs.version}.jar</file>
+                  <file>core/lib/kfs-0.3.jar</file>
                   <groupId>org.apache.mahout.kosmofs</groupId>
                   <artifactId>kfs</artifactId>
                   <packaging>jar</packaging>
-                  <version>${kfs.version}</version>
+                  <version>0.3</version>
                   <generatePom>true</generatePom>
                 </configuration>
               </execution>
@@ -481,11 +484,11 @@
                   <goal>sign-and-deploy-file</goal>
                 </goals>
                 <configuration>
-                  <file>core/lib/jets3t-${jets3t.version}.jar</file>
+                  <file>core/lib/jets3t-0.7.1.jar</file>
                   <groupId>org.apache.mahout.jets3t</groupId>
                   <artifactId>jets3t</artifactId>
                   <packaging>jar</packaging>
-                  <version>${jets3t.version}</version>
+                  <version>0.7.1</version>
                   <generatePom>true</generatePom>
                 </configuration>
               </execution>
@@ -496,11 +499,11 @@
                   <goal>sign-and-deploy-file</goal>
                 </goals>
                 <configuration>
-                  <file>core/lib/watchmaker-framework-${watchmaker.version}.jar</file>
+                  <file>core/lib/watchmaker-framework-0.6.2.jar</file>
                   <groupId>org.apache.mahout.watchmaker</groupId>
                   <artifactId>watchmaker-framework</artifactId>
                   <packaging>jar</packaging>
-                  <version>${watchmaker.version}</version>
+                  <version>0.6.2</version>
                   <generatePom>true</generatePom>
                 </configuration>
               </execution>
@@ -511,11 +514,11 @@
                   <goal>sign-and-deploy-file</goal>
                 </goals>
                 <configuration>
-                  <file>core/lib/watchmaker-swing-${watchmaker.version}.jar</file>
+                  <file>core/lib/watchmaker-swing-0.6.2.jar</file>
                   <groupId>org.apache.mahout.watchmaker</groupId>
                   <artifactId>watchmaker-swing</artifactId>
                   <packaging>jar</packaging>
-                  <version>${watchmaker.version}</version>
+                  <version>0.6.2</version>
                   <generatePom>true</generatePom>
                 </configuration>
               </execution>
@@ -526,11 +529,11 @@
                   <goal>sign-and-deploy-file</goal>
                 </goals>
                 <configuration>
-                  <file>core/lib/uncommons-maths-${uncommons.maths.version}.jar</file>
+                  <file>core/lib/uncommons-maths-1.2.jar</file>
                   <groupId>org.apache.mahout.uncommons.math</groupId>
                   <artifactId>uncommons-math</artifactId>
                   <packaging>jar</packaging>
-                  <version>${uncommons.maths.version}</version>
+                  <version>1.2</version>
                   <generatePom>true</generatePom>
                 </configuration>
               </execution>
