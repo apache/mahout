@@ -13,16 +13,9 @@
   </parent>
   <!-- Keep this in sync with the values in mahout-core pom.xml -->
   <properties>
-    <junit.version>3.8.2</junit.version>
-    <hadoop.version>0.20.1</hadoop.version>
-    <hbase.version>0.20.0</hbase.version>
-    <kfs.version>0.3</kfs.version>
-    <xmlenc.version>0.52</xmlenc.version>
-    <jets3t.version>0.7.1</jets3t.version>
-    <uncommons.maths.version>1.2</uncommons.maths.version>
-    <watchmaker.version>0.6.2</watchmaker.version>
+    <junit.version>3.8.2</junit.version>   
     <tagBase>https://svn.apache.org/repos/asf/lucene/mahout</tagBase>
-    <lucene.version>2.9.0</lucene.version>
+    <lucene.version>2.9.1</lucene.version>
   </properties>
   <licenses>
     <license>

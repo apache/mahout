@@ -66,261 +66,7 @@
         </executions>
       </plugin>
 
-      <!-- Copy dependencies with no official Maven artifacts from libs to local Maven repository -->
-      <plugin>
-        <artifactId>maven-install-plugin</artifactId>
-        <!-- hadoop -->
-
-        <executions>
-          <execution>
-            <id>create-hadoop-core-artifact</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/hadoop-core-${hadoop.version}.jar</file>
-              <groupId>org.apache.mahout.hadoop</groupId>
-              <artifactId>hadoop-core</artifactId>
-              <packaging>jar</packaging>
-              <version>${hadoop.version}</version>
-              <generatePom>true</generatePom>
-              <createChecksum>true</createChecksum>
-            </configuration>
-          </execution>
-          <execution>
-            <id>create-hbase-artifact</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/hbase-${hbase.version}.jar</file>
-              <groupId>org.apache.mahout.hbase</groupId>
-              <artifactId>hbase</artifactId>
-              <packaging>jar</packaging>
-              <version>${hbase.version}</version>
-              <generatePom>true</generatePom>
-              <createChecksum>true</createChecksum>
-            </configuration>
-          </execution>
-          <execution>
-            <id>create-kfs-artifact</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/kfs-${kfs.version}.jar</file>
-              <groupId>org.apache.mahout.kosmofs</groupId>
-              <artifactId>kfs</artifactId>
-              <packaging>jar</packaging>
-              <version>${kfs.version}</version>
-              <generatePom>true</generatePom>
-              <createChecksum>true</createChecksum>
-            </configuration>
-          </execution>
-          <execution>
-            <id>create-jets3t-artifact</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/jets3t-${jets3t.version}.jar</file>
-              <groupId>org.apache.mahout.jets3t</groupId>
-              <artifactId>jets3t</artifactId>
-              <packaging>jar</packaging>
-              <version>${jets3t.version}</version>
-              <generatePom>true</generatePom>
-              <createChecksum>true</createChecksum>
-            </configuration>
-          </execution>
-          <execution>
-            <id>create-watchmaker-framework-artifact</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/watchmaker-framework-${watchmaker.version}.jar</file>
-              <groupId>org.apache.mahout.watchmaker</groupId>
-              <artifactId>watchmaker-framework</artifactId>
-              <packaging>jar</packaging>
-              <version>${watchmaker.version}</version>
-              <generatePom>true</generatePom>
-              <createChecksum>true</createChecksum>
-            </configuration>
-          </execution>
-          <execution>
-            <id>create-watchmaker-swing-artifact</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/watchmaker-swing-${watchmaker.version}.jar</file>
-              <groupId>org.apache.mahout.watchmaker</groupId>
-              <artifactId>watchmaker-swing</artifactId>
-              <packaging>jar</packaging>
-              <version>${watchmaker.version}</version>
-              <generatePom>true</generatePom>
-              <createChecksum>true</createChecksum>
-            </configuration>
-          </execution>
-          <execution>
-            <id>create-uncommons-math-artifact</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/uncommons-maths-${uncommons.maths.version}.jar</file>
-              <groupId>org.apache.mahout.uncommons.math</groupId>
-              <artifactId>uncommons-math</artifactId>
-              <packaging>jar</packaging>
-              <version>${uncommons.maths.version}</version>
-              <generatePom>true</generatePom>
-              <createChecksum>true</createChecksum>
-            </configuration>
-          </execution>
-          <execution>
-            <id>create-commons-cli</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/commons-cli-2.0-mahout.jar</file>
-              <groupId>org.apache.mahout.commons</groupId>
-              <artifactId>commons-cli</artifactId>
-              <packaging>jar</packaging>
-              <version>2.0-mahout</version>
-              <generatePom>true</generatePom>
-              <createChecksum>true</createChecksum>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <configuration>
-          <altDeploymentRepository>${deploy.altRepository}</altDeploymentRepository>
-          <url>${deploy.url}</url>
-          <repositoryId>mahout.dist</repositoryId>
-          <updateReleaseInfo>true</updateReleaseInfo>
-        </configuration>
-        <executions>
-          <execution>
-            <id>create-hadoop-core-artifact</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>deploy-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/hadoop-core-${hadoop.version}.jar</file>
-              <groupId>org.apache.mahout.hadoop</groupId>
-              <artifactId>hadoop-core</artifactId>
-              <packaging>jar</packaging>
-              <version>${hadoop.version}</version>
-              <generatePom>true</generatePom>
-            </configuration>
-          </execution>
-          <execution>
-            <id>create-kfs-artifact</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>deploy-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/kfs-${kfs.version}.jar</file>
-              <groupId>org.apache.mahout.kosmofs</groupId>
-              <artifactId>kfs</artifactId>
-              <packaging>jar</packaging>
-              <version>${kfs.version}</version>
-              <generatePom>true</generatePom>
-            </configuration>
-          </execution>
-          <execution>
-            <id>create-jets3t-artifact</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>deploy-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/jets3t-${jets3t.version}.jar</file>
-              <groupId>org.apache.mahout.jets3t</groupId>
-              <artifactId>jets3t</artifactId>
-              <packaging>jar</packaging>
-              <version>${jets3t.version}</version>
-              <generatePom>true</generatePom>
-            </configuration>
-          </execution>
-          <execution>
-            <id>create-watchmaker-framework-artifact</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>deploy-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/watchmaker-framework-${watchmaker.version}.jar</file>
-              <groupId>org.apache.mahout.watchmaker</groupId>
-              <artifactId>watchmaker-framework</artifactId>
-              <packaging>jar</packaging>
-              <version>${watchmaker.version}</version>
-              <generatePom>true</generatePom>
-            </configuration>
-          </execution>
-          <execution>
-            <id>create-watchmaker-swing-artifact</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>deploy-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/watchmaker-swing-${watchmaker.version}.jar</file>
-              <groupId>org.apache.mahout.watchmaker</groupId>
-              <artifactId>watchmaker-swing</artifactId>
-              <packaging>jar</packaging>
-              <version>${watchmaker.version}</version>
-              <generatePom>true</generatePom>
-            </configuration>
-          </execution>
-          <execution>
-            <id>create-uncommons-math-artifact</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>deploy-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/uncommons-maths-${uncommons.maths.version}.jar</file>
-              <groupId>org.apache.mahout.uncommons.math</groupId>
-              <artifactId>uncommons-math</artifactId>
-              <packaging>jar</packaging>
-              <version>${uncommons.maths.version}</version>
-              <generatePom>true</generatePom>
-            </configuration>
-          </execution>
-          <execution>
-            <id>create-commons-cli</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>deploy-file</goal>
-            </goals>
-            <configuration>
-              <file>lib/commons-cli-2.0-mahout.jar</file>
-              <groupId>org.apache.mahout.commons</groupId>
-              <artifactId>commons-cli</artifactId>
-              <packaging>jar</packaging>
-              <version>2.0-mahout</version>
-              <generatePom>true</generatePom>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-
+      
       <!-- Build the Job Jar -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -414,30 +160,30 @@
     <dependency>
       <groupId>org.apache.mahout.hadoop</groupId>
       <artifactId>hadoop-core</artifactId>
-      <version>${hadoop.version}</version>
+      <version>0.20.1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.mahout.hbase</groupId>
       <artifactId>hbase</artifactId>
-      <version>${hbase.version}</version>
+      <version>0.20.0</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.mahout.kosmofs</groupId>
       <artifactId>kfs</artifactId>
-      <version>${kfs.version}</version>
+      <version>0.3</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.mahout.jets3t</groupId>
       <artifactId>jets3t</artifactId>
-      <version>${jets3t.version}</version>
+      <version>0.7.1</version>
     </dependency>
 
     <dependency>
       <groupId>xmlenc</groupId>
       <artifactId>xmlenc</artifactId>
-      <version>${xmlenc.version}</version>
+      <version>0.52</version>
     </dependency>
 
     <dependency>
@@ -505,21 +251,21 @@
 
 
     <dependency>
-      <groupId>org.apache.mahout.watchmaker</groupId>
+      <groupId>org.uncommons.watchmaker</groupId>
       <artifactId>watchmaker-framework</artifactId>
-      <version>${watchmaker.version}</version>
+      <version>0.6.2</version>
     </dependency>
 
     <dependency>
-      <groupId>org.apache.mahout.watchmaker</groupId>
+      <groupId>org.uncommons.watchmaker</groupId>
       <artifactId>watchmaker-swing</artifactId>
-      <version>${watchmaker.version}</version>
+      <version>0.6.2</version>
     </dependency>
 
     <dependency>
-      <groupId>org.apache.mahout.uncommons.math</groupId>
-      <artifactId>uncommons-math</artifactId>
-      <version>${uncommons.maths.version}</version>
+      <groupId>org.uncommons</groupId>
+      <artifactId>uncommons-maths</artifactId>
+      <version>1.2</version>
     </dependency>
 
     <dependency>
@@ -549,7 +295,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.2</version>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
 

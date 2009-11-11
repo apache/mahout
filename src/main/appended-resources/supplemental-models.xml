@@ -333,8 +333,8 @@
   <supplement>
     <project>
     <name>Uncommons Math</name>
-    <groupId>org.apache.mahout.uncommons.math</groupId>
-    <artifactId>uncommons-math</artifactId>
+    <groupId>org.uncommons</groupId>
+    <artifactId>uncommons-maths</artifactId>
     <url>https://uncommons-maths.dev.java.net/</url>
     <licenses>
       <license>
@@ -348,7 +348,7 @@
   <supplement>
     <project>
     <name>Watchmaker Framework</name>
-    <groupId>org.apache.mahout.watchmaker</groupId>
+    <groupId>org.uncommons.watchmaker</groupId>
     <artifactId>watchmaker-framework</artifactId>
     <url>https://watchmaker.dev.java.net/</url>
     <licenses>
@@ -363,7 +363,7 @@
   <supplement>
     <project>
     <name>Watchmaker Swing</name>
-    <groupId>org.apache.mahout.watchmaker</groupId>
+    <groupId>org.uncommons.watchmaker</groupId>
     <artifactId>watchmaker-swing</artifactId>
     <url>https://watchmaker.dev.java.net/</url>
     <licenses>
