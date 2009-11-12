@@ -85,6 +85,13 @@
         <enabled>false</enabled>
       </releases>
     </repository>
+    <!-- Needed for mail -->
+    <repository>
+      <id>java.net.legacy</id>
+      <name>Java.net Repo for Maven 1</name>
+      <url>http://download.java.net/maven/1</url>
+      <layout>legacy</layout>
+    </repository>
   </repositories>
   <issueManagement>
     <system>Jira</system>
@@ -226,4 +233,14 @@
       </build>
     </profile>
   </profiles>
+  <!--
+   
+   -->
+  <dependencies>
+    <dependency>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
+      <version>1.4</version>
+    </dependency>
+  </dependencies>
 </project>
