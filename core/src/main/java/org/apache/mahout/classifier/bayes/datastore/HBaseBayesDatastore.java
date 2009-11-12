@@ -41,18 +41,28 @@ import org.slf4j.LoggerFactory;
 
 public class HBaseBayesDatastore implements Datastore {
 
-  private static final Logger log = LoggerFactory
-      .getLogger(HBaseBayesDatastore.class);
+  private static final Logger log = LoggerFactory.getLogger(HBaseBayesDatastore.class);
 
-  protected HBaseConfiguration config = null;
+  private HBaseConfiguration config = null;
 
-  protected HTable table = null;
+  private HTable table = null;
 
-  protected Cache<String, Result> tableCache = null;
+  private Cache<String, Result> tableCache = null;
 
-  protected final String hbaseTable;
+  private final String hbaseTable;
 
-  protected Parameters parameters = null;
+  private Parameters parameters = null;
+
+  private double thetaNormalizer = 1.0;
+
+  private double alpha_i = 1.0;
+
+  private final Map<String, Set<String>> keys = new HashMap<String, Set<String>>();
+
+  private double vocabCount = -1.0;
+
+  private double sigma_jSigma_k = -1.0;
+
 
   public HBaseBayesDatastore(String hbaseTable, Parameters params) {
     this.hbaseTable = hbaseTable;
@@ -61,9 +71,46 @@ public class HBaseBayesDatastore implements Datastore {
     alpha_i = Double.valueOf(parameters.get("alpha_i", "1.0"));
   }
 
-  protected double thetaNormalizer = 1.0;
+  protected HBaseConfiguration getConfig() {
+    return config;
+  }
 
-  protected double alpha_i = 1.0;
+  protected HTable getTable() {
+    return table;
+  }
+
+  protected Cache<String, Result> getTableCache() {
+    return tableCache;
+  }
+
+  protected String getHbaseTable() {
+    return hbaseTable;
+  }
+
+  protected Parameters getParameters() {
+    return parameters;
+  }
+
+  protected double getThetaNormalizer() {
+    return thetaNormalizer;
+  }
+
+  protected double getAlpha_i() {
+    return alpha_i;
+  }
+
+  Map<String, Set<String>> getKeys() {
+    return keys;
+  }
+
+  protected double getVocabCount() {
+    return vocabCount;
+  }
+
+  protected double getSigma_jSigma_k() {
+    return sigma_jSigma_k;
+  }
+
   @Override
   public void initialize() throws InvalidDatastoreException {
     config = new HBaseConfiguration(new Configuration());
@@ -85,8 +132,6 @@ public class HBaseBayesDatastore implements Datastore {
           / thetaNormalizer);
     }
   }
-  
-  final Map<String, Set<String>> keys = new HashMap<String, Set<String>>();
 
   @Override
   public Collection<String> getKeys(String name)
@@ -200,8 +245,6 @@ public class HBaseBayesDatastore implements Datastore {
     return getCachedCell(feature, BayesConstants.HBASE_COLUMN_FAMILY, BayesConstants.FEATURE_SUM);
   }
 
-  protected double vocabCount = -1.0;
-
   protected double getVocabCountFromHbase() {
     if (vocabCount == -1.0) {
       vocabCount = getCachedCell(BayesConstants.HBASE_COUNTS_ROW,
@@ -211,8 +254,6 @@ public class HBaseBayesDatastore implements Datastore {
       return vocabCount;
     }
   }
-
-  protected double sigma_jSigma_k = -1.0;
 
   protected double getSigma_jSigma_kFromHbase() {
     if (sigma_jSigma_k == -1.0) {

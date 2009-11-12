@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.mahout.clustering.dirichlet.models;
 
 import org.apache.mahout.matrix.Vector;
@@ -31,13 +32,13 @@ public class SampledNormalModel extends NormalModel {
   @Override
   public String toString() {
     StringBuilder buf = new StringBuilder();
-    buf.append("snm{n=").append(s0).append(" m=[");
-    if (mean != null) {
-      for (int i = 0; i < mean.size(); i++) {
-        buf.append(String.format("%.2f", mean.get(i))).append(", ");
+    buf.append("snm{n=").append(getS0()).append(" m=[");
+    if (getMean() != null) {
+      for (int i = 0; i < getMean().size(); i++) {
+        buf.append(String.format("%.2f", getMean().get(i))).append(", ");
       }
     }
-    buf.append("] sd=").append(String.format("%.2f", sd)).append('}');
+    buf.append("] sd=").append(String.format("%.2f", getStdDev())).append('}');
     return buf.toString();
   }
 
@@ -48,6 +49,6 @@ public class SampledNormalModel extends NormalModel {
    */
   @Override
   public NormalModel sample() {
-    return new SampledNormalModel(mean, sd);
+    return new SampledNormalModel(getMean(), getStdDev());
   }
 }

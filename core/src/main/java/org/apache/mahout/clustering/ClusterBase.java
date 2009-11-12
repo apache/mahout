@@ -26,37 +26,49 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 public abstract class ClusterBase implements Writable {
+
   // this cluster's clusterId
-  protected int id;
+  private int id;
 
   // the current cluster center
-  protected Vector center = new SparseVector(0);
+  private Vector center = new SparseVector(0);
 
   // the number of points in the cluster
-  protected int numPoints = 0;
+  private int numPoints = 0;
 
   // the Vector total of all points added to the cluster
-  protected Vector pointTotal = null;
-
-  public Vector getPointTotal() {
-    return pointTotal;
-  }
+  private Vector pointTotal = null;
 
   public int getId() {
     return id;
   }
 
-  /**
-   * Return the center point
-   *
-   * @return the center of the Cluster
-   */
+  protected void setId(int id) {
+    this.id = id;
+  }
+
   public Vector getCenter() {
     return center;
   }
 
+  protected void setCenter(Vector center) {
+    this.center = center;
+  }
+
   public int getNumPoints() {
     return numPoints;
+  }
+
+  protected void setNumPoints(int numPoints) {
+    this.numPoints = numPoints;
+  }
+
+  public Vector getPointTotal() {
+    return pointTotal;
+  }
+
+  protected void setPointTotal(Vector pointTotal) {
+    this.pointTotal = pointTotal;
   }
 
   public abstract String asFormatString();

@@ -65,10 +65,10 @@ public class MeanShiftCanopy extends ClusterBase {
   private static int nextCanopyId = 0;
 
   // the T1 distance threshold
-  static double t1;
+  private static double t1;
 
   // the T2 distance threshold
-  static double t2;
+  private static double t2;
 
   // the distance measure
   private static DistanceMeasure measure;
@@ -77,6 +77,14 @@ public class MeanShiftCanopy extends ClusterBase {
   private List<Vector> boundPoints = new ArrayList<Vector>();
 
   private boolean converged = false;
+
+  static double getT1() {
+    return t1;
+  }
+
+  static double getT2() {
+    return t2;
+  }
 
   /**
    * Configure the Canopy and its distance measure
@@ -177,10 +185,10 @@ public class MeanShiftCanopy extends ClusterBase {
 
   /** Create a new Canopy with the given canopyId */
   public MeanShiftCanopy(String id) {
-    this.id = Integer.parseInt(id.substring(1));
-    this.center = null;
-    this.pointTotal = null;
-    this.numPoints = 0;
+    this.setId(Integer.parseInt(id.substring(1)));
+    this.setCenter(null);
+    this.setPointTotal(null);
+    this.setNumPoints(0);
   }
 
   /**
@@ -189,10 +197,10 @@ public class MeanShiftCanopy extends ClusterBase {
    * @param point a Vector
    */
   public MeanShiftCanopy(Vector point) {
-    this.id = nextCanopyId++;
-    this.center = point;
-    this.pointTotal = point.clone();
-    this.numPoints = 1;
+    this.setId(nextCanopyId++);
+    this.setCenter(point);
+    this.setPointTotal(point.clone());
+    this.setNumPoints(1);
     this.boundPoints.add(point);
   }
 
@@ -206,10 +214,10 @@ public class MeanShiftCanopy extends ClusterBase {
    */
   MeanShiftCanopy(Vector point, int id, List<Vector> boundPoints,
                   boolean converged) {
-    this.id = id;
-    this.center = point;
-    this.pointTotal = point.clone();
-    this.numPoints = 1;
+    this.setId(id);
+    this.setCenter(point);
+    this.setPointTotal(point.clone());
+    this.setNumPoints(1);
     this.boundPoints = boundPoints;
     this.converged = converged;
   }
@@ -222,9 +230,9 @@ public class MeanShiftCanopy extends ClusterBase {
    * @throws CardinalityException if the cardinalities disagree
    */
   void addPoints(Vector point, int nPoints) {
-    numPoints += nPoints;
+    setNumPoints(getNumPoints() + nPoints);
     Vector subTotal = (nPoints == 1) ? point.clone() : point.times(nPoints);
-    pointTotal = (pointTotal == null) ? subTotal : pointTotal.plus(subTotal);
+    setPointTotal((getPointTotal() == null) ? subTotal : getPointTotal().plus(subTotal));
   }
 
   /**
@@ -234,7 +242,7 @@ public class MeanShiftCanopy extends ClusterBase {
    * @return if the point is covered
    */
   public boolean closelyBound(Vector point) {
-    return measure.distance(center, point) < t2;
+    return measure.distance(getCenter(), point) < t2;
   }
 
   /**
@@ -243,7 +251,7 @@ public class MeanShiftCanopy extends ClusterBase {
    * @return a Vector which is the new bound centroid
    */
   public Vector computeBoundCentroid() {
-    Vector result = new DenseVector(center.size());
+    Vector result = new DenseVector(getCenter().size());
     for (Vector v : boundPoints) {
       result.assign(v, new PlusFunction());
     }
@@ -256,10 +264,10 @@ public class MeanShiftCanopy extends ClusterBase {
    * @return a Vector which is the new centroid
    */
   public Vector computeCentroid() {
-    if (numPoints == 0) {
-      return center;
+    if (getNumPoints() == 0) {
+      return getCenter();
     } else {
-      return pointTotal.divide(numPoints);
+      return getPointTotal().divide(getNumPoints());
     }
   }
 
@@ -270,7 +278,7 @@ public class MeanShiftCanopy extends ClusterBase {
    * @return if the point is covered
    */
   boolean covers(Vector point) {
-    return measure.distance(center, point) < t1;
+    return measure.distance(getCenter(), point) < t1;
   }
 
   /** Emit the new canopy to the collector, keyed by the canopy's Id */
@@ -287,17 +295,17 @@ public class MeanShiftCanopy extends ClusterBase {
   }
 
   public int getCanopyId() {
-    return id;
+    return getId();
   }
 
   public String getIdentifier() {
-    return converged ? "V" + id : "C" + id;
+    return converged ? "V" + getId() : "C" + getId();
   }
 
   void init(MeanShiftCanopy canopy) {
-    id = canopy.id;
-    center = canopy.center;
-    addPoints(center, 1);
+    setId(canopy.getId());
+    setCenter(canopy.getCenter());
+    addPoints(getCenter(), 1);
     boundPoints.addAll(canopy.getBoundPoints());
   }
 
@@ -321,10 +329,10 @@ public class MeanShiftCanopy extends ClusterBase {
    */
   public boolean shiftToMean() {
     Vector centroid = computeCentroid();
-    converged = new EuclideanDistanceMeasure().distance(centroid, center) < convergenceDelta;
-    center = centroid;
-    numPoints = 1;
-    pointTotal = centroid.clone();
+    converged = new EuclideanDistanceMeasure().distance(centroid, getCenter()) < convergenceDelta;
+    setCenter(centroid);
+    setNumPoints(1);
+    setPointTotal(centroid.clone());
     return converged;
   }
 
@@ -339,14 +347,14 @@ public class MeanShiftCanopy extends ClusterBase {
    * @param canopy an existing MeanShiftCanopy
    */
   void touch(MeanShiftCanopy canopy) {
-    canopy.addPoints(center, boundPoints.size());
-    addPoints(canopy.center, canopy.boundPoints.size());
+    canopy.addPoints(getCenter(), boundPoints.size());
+    addPoints(canopy.getCenter(), canopy.boundPoints.size());
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
-    this.center = AbstractVector.readVector(in);
+    this.setCenter(AbstractVector.readVector(in));
     int numpoints = in.readInt();
     this.boundPoints = new ArrayList<Vector>();
     for (int i = 0; i < numpoints; i++) {
@@ -366,10 +374,10 @@ public class MeanShiftCanopy extends ClusterBase {
 
   public MeanShiftCanopy shallowCopy() {
     MeanShiftCanopy result = new MeanShiftCanopy();
-    result.id = this.id;
-    result.center = this.center;
-    result.pointTotal = this.pointTotal;
-    result.numPoints = this.numPoints;
+    result.setId(this.getId());
+    result.setCenter(this.getCenter());
+    result.setPointTotal(this.getPointTotal());
+    result.setNumPoints(this.getNumPoints());
     result.boundPoints = this.boundPoints;
     return result;
   }

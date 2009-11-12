@@ -57,7 +57,9 @@ public class DummyCandidate {
   }
 
   public static List<DummyCandidate> generatePopulation(int size) {
-    assert size > 0 : "bad size";
+    if (size <= 0) {
+      throw new IllegalArgumentException("bad size");
+    }
 
     List<DummyCandidate> population = new ArrayList<DummyCandidate>();
     for (int index = 0; index < size; index++) {

@@ -59,9 +59,9 @@ public class CompositeParameter<T extends Parametered> extends AbstractParameter
 
   @Override
   public String getStringValue() {
-    if (value == null) {
+    if (get() == null) {
       return null;
     }
-    return value.getClass().getName();
+    return get().getClass().getName();
   }
 }

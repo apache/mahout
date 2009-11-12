@@ -60,8 +60,8 @@ public final class SVDRecommender extends AbstractRecommender {
   private final int numFeatures;
 
   private final FastByIDMap<Integer> userMap;
-  private FastByIDMap<Integer> itemMap;
-  private ExpectationMaximizationSVD emSvd;
+  private final FastByIDMap<Integer> itemMap;
+  private final ExpectationMaximizationSVD emSvd;
   private final List<Preference> cachedPreferences;
 
   /**
@@ -69,12 +69,6 @@ public final class SVDRecommender extends AbstractRecommender {
    * @param initialSteps number of initial training steps
    */
   public SVDRecommender(DataModel dataModel, int numFeatures, int initialSteps) throws TasteException {
-    this(dataModel, numFeatures);
-    train(initialSteps);
-  }
-
-  /** @param numFeatures the number of features */
-  public SVDRecommender(DataModel dataModel, int numFeatures) throws TasteException {
     super(dataModel);
 
     this.numFeatures = numFeatures;
@@ -114,6 +108,7 @@ public final class SVDRecommender extends AbstractRecommender {
     });
     refreshHelper.addDependency(dataModel);
 
+    train(initialSteps);
   }
 
   private void recachePreferences() throws TasteException {

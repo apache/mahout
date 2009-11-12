@@ -198,12 +198,17 @@ public class Dataset implements Writable {
   }
 
   private static void validateValues(Attribute[] attrs, List<String>[] values) {
-    assert attrs.length == values.length : "attrs.length != values.length";
+    if (attrs.length != values.length) {
+      throw new IllegalArgumentException("attrs.length != values.length");
+    }
 
     for (int attr = 0; attr < attrs.length; attr++) {
-      if (attrs[attr].isCategorical())
-        assert values[attr] != null : "values not found for attribute N° "
-            + attr;
+      if (attrs[attr].isCategorical()) {
+        if (values[attr] == null) {
+          throw new IllegalArgumentException("values not found for attribute N° "
+              + attr);
+        }
+      }
     }
   }
 

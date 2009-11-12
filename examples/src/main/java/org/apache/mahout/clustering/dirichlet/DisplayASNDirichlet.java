@@ -48,9 +48,9 @@ class DisplayASNDirichlet extends DisplayDirichlet {
       g2.setColor(colors[Math.min(colors.length - 1, i--)]);
       for (Model<Vector> m : models) {
         AsymmetricSampledNormalModel mm = (AsymmetricSampledNormalModel) m;
-        dv.assign(mm.sd.times(3));
+        dv.assign(mm.getStdDev().times(3));
         if (isSignificant(mm))
-          plotEllipse(g2, mm.mean, dv);
+          plotEllipse(g2, mm.getMean(), dv);
       }
     }
   }

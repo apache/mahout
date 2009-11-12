@@ -11,17 +11,11 @@
     <artifactId>mahout</artifactId>
     <version>0.2</version>
   </parent>
+  <!-- Keep this in sync with the values in mahout-core pom.xml -->
   <properties>
-    <junit.version>3.8.2</junit.version>
-    <hadoop.version>0.20.1</hadoop.version>
-    <hbase.version>0.20.0</hbase.version>
-    <kfs.version>0.3</kfs.version>
-    <xmlenc.version>0.52</xmlenc.version>
-    <jets3t.version>0.7.1</jets3t.version>
-    <uncommons.maths.version>1.2</uncommons.maths.version>
-    <watchmaker.version>0.6.2</watchmaker.version>
+    <junit.version>3.8.2</junit.version>   
     <tagBase>https://svn.apache.org/repos/asf/lucene/mahout</tagBase>
-    <lucene.version>2.9.0</lucene.version>
+    <lucene.version>2.9.1</lucene.version>
   </properties>
   <licenses>
     <license>
@@ -90,6 +84,13 @@
       <releases>
         <enabled>false</enabled>
       </releases>
+    </repository>
+    <!-- Needed for mail -->
+    <repository>
+      <id>java.net.legacy</id>
+      <name>Java.net Repo for Maven 1</name>
+      <url>http://download.java.net/maven/1</url>
+      <layout>legacy</layout>
     </repository>
   </repositories>
   <issueManagement>
@@ -232,4 +233,14 @@
       </build>
     </profile>
   </profiles>
+  <!--
+   
+   -->
+  <dependencies>
+    <dependency>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
+      <version>1.4</version>
+    </dependency>
+  </dependencies>
 </project>

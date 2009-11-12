@@ -153,7 +153,9 @@ public class OptIgSplit extends IgSplit {
       DataUtils.dec(countAll, counts[index]);
     }
 
-    assert best != -1 : "no best split found !";
+    if (best == -1) {
+      throw new IllegalStateException("no best split found !");
+    }
     return new Split(attr, bestIg, values[best]);
   }
 

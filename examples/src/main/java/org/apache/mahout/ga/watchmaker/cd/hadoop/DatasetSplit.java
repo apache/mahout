@@ -138,7 +138,9 @@ public class DatasetSplit {
 
     public RndLineRecordReader(RecordReader<LongWritable, Text> reader,
         JobConf conf) {
-      assert reader != null : "null reader";
+      if (reader == null) {
+        throw new IllegalArgumentException("null reader");
+      }
 
       this.reader = reader;
 

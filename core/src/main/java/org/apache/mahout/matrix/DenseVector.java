@@ -201,7 +201,7 @@ public class DenseVector extends AbstractVector {
   }
 
   public class Element implements Vector.Element {
-    int ind;
+    private int ind;
 
     public Element(int ind) {
       this.ind = ind;
@@ -230,7 +230,7 @@ public class DenseVector extends AbstractVector {
 
   @Override
   public void write(DataOutput dataOutput) throws IOException {
-    dataOutput.writeUTF(this.name == null ? "" : this.name);
+    dataOutput.writeUTF(this.getName() == null ? "" : this.getName());
     dataOutput.writeInt(size());
     Iterator<Vector.Element> iter = iterateAll();
     while (iter.hasNext()) {
@@ -241,7 +241,7 @@ public class DenseVector extends AbstractVector {
 
   @Override
   public void readFields(DataInput dataInput) throws IOException {
-    this.name = dataInput.readUTF();
+    this.setName(dataInput.readUTF());
     double[] values = new double[dataInput.readInt()];
     for (int i = 0; i < values.length; i++) {
       values[i] = dataInput.readDouble();
@@ -268,14 +268,15 @@ public class DenseVector extends AbstractVector {
     }
 
     Vector that = (Vector) o;
+    String thisName = getName();
     String thatName = that.getName();
     if (this.size() != that.size()) {
       return false;
     }
-    if (name != null && thatName != null && !name.equals(thatName)) {
+    if (thisName != null && thatName != null && !thisName.equals(thatName)) {
       return false;
-    } else if ((name != null && thatName == null)
-        || (thatName != null && name == null)) {
+    } else if ((thisName != null && thatName == null)
+        || (thatName != null && thisName == null)) {
       return false;
     }
 

@@ -25,7 +25,9 @@ public class ErrorEstimate {
   }
 
   public static double errorRate(int[] labels, int[] predictions) {
-    assert labels.length == predictions.length : "labels.length != predictions.length";
+    if (labels.length != predictions.length) {
+      throw new IllegalArgumentException("labels.length != predictions.length");
+    }
 
     double nberrors = 0; // number of instance that got bad predictions
     double datasize = 0; // number of classified instances
@@ -67,7 +69,9 @@ public class ErrorEstimate {
    * @return
    */
   public static int nbErrors(int[] labels, int[] predictions) {
-    assert labels.length == predictions.length : "labels.length != predictions.length";
+    if (labels.length != predictions.length) {
+      throw new IllegalArgumentException("labels.length != predictions.length");
+    }
 
     int nberrors = 0;
 

@@ -40,7 +40,7 @@ public interface DataModel extends Refreshable {
 
   /**
    * @param userID ID of user to get prefs for
-   * @return user's preferences
+   * @return user's preferences, ordered by item ID
    * @throws NoSuchUserException if the user does not exist
    * @throws TasteException if an error occurs while accessing the data
    */

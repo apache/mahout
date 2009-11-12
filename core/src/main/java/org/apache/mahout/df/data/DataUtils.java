@@ -49,7 +49,9 @@ public class DataUtils {
    * @param array2
    */
   public static void add(int[] array1, int[] array2) {
-    assert array1.length == array2.length : "array1.length != array2.length";
+    if (array1.length != array2.length) {
+      throw new IllegalArgumentException("array1.length != array2.length");
+    }
     
     for (int index = 0; index < array1.length; index++) {
       array1[index] += array2[index];
@@ -62,7 +64,9 @@ public class DataUtils {
    * @param array2
    */
   public static void dec(int[] array1, int[] array2) {
-    assert array1.length == array2.length : "array1.length != array2.length";
+    if (array1.length != array2.length) {
+      throw new IllegalArgumentException("array1.length != array2.length");
+    }
     
     for (int index = 0; index < array1.length; index++) {
       array1[index] -= array2[index];

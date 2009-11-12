@@ -37,7 +37,7 @@ public class FuzzyKMeansMapper extends MapReduceBase implements
 
   private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansMapper.class);
 
-  protected List<SoftCluster> clusters;
+  private List<SoftCluster> clusters;
 
   @Override
   public void map(WritableComparable<?> key, Vector point,

@@ -254,14 +254,14 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
         return false;
       }
       ClusterClusterPair other = (ClusterClusterPair) o;
-      return cluster1.equals(other.cluster1) &&
-          cluster2.equals(other.cluster2) &&
-          similarity == other.similarity;
+      return cluster1.equals(other.getCluster1()) &&
+          cluster2.equals(other.getCluster2()) &&
+          similarity == other.getSimilarity();
     }
 
     @Override
     public int compareTo(ClusterClusterPair other) {
-      double otherSimilarity = other.similarity;
+      double otherSimilarity = other.getSimilarity();
       if (similarity > otherSimilarity) {
         return -1;
       } else if (similarity < otherSimilarity) {

@@ -25,6 +25,12 @@ import junit.framework.TestCase;
 
 public class TreeIDTest extends TestCase {
 
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    RandomUtils.useTestSeed();
+  }
+                
   public void testTreeID() {
     int n = 1000000;
     Random rng = RandomUtils.getRandom();

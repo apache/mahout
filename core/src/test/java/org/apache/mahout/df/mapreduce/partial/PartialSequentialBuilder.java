@@ -124,7 +124,7 @@ public class PartialSequentialBuilder extends PartialBuilder {
       RecordReader<LongWritable, Text> reader = input.createRecordReader(split, task);
       reader.initialize(split, task);
       
-      Step1Mapper mapper = new MockStep1Mapper(treeBuilder, dataset, seed,
+      Step1Mapper mapper = new MockStep1Mapper(getTreeBuilder(), dataset, getSeed(),
           hp, nbSplits, numTrees);
 
       long time = System.currentTimeMillis();
@@ -155,7 +155,7 @@ public class PartialSequentialBuilder extends PartialBuilder {
   protected DecisionForest parseOutput(Job job, PredictionCallback callback) throws IOException, InterruptedException {
     Configuration conf = job.getConfiguration();
     
-    DecisionForest forest = processOutput(firstOutput.keys, firstOutput.values, callback);
+    DecisionForest forest = processOutput(firstOutput.getKeys(), firstOutput.getValues(), callback);
 
     if (isStep2(conf)) {
       Path forestPath = new Path(getOutputPath(conf), "step1.inter");
@@ -163,14 +163,14 @@ public class PartialSequentialBuilder extends PartialBuilder {
       
       Node[] trees = new Node[forest.getTrees().size()];
       forest.getTrees().toArray(trees);
-      InterResults.store(fs, forestPath, firstOutput.keys, trees, sizes);
+      InterResults.store(fs, forestPath, firstOutput.getKeys(), trees, sizes);
 
       log.info("***********");
       log.info("Second Step");
       log.info("***********");
       secondStep(conf, forestPath, callback);
 
-      processOutput(secondOutput.keys, secondOutput.values, callback);
+      processOutput(secondOutput.getKeys(), secondOutput.getValues(), callback);
     }
 
     return forest;

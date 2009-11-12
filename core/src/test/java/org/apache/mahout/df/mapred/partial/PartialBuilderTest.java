@@ -49,6 +49,12 @@ public class PartialBuilderTest extends TestCase {
   /** instances per partition */
   protected static final int numInstances = 20;
 
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    RandomUtils.useTestSeed();
+  }
+                         
   public void testProcessOutput() throws Exception {
     JobConf job = new JobConf();
     job.setNumMapTasks(numMaps);

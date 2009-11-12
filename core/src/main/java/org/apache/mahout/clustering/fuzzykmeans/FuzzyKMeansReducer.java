@@ -34,7 +34,7 @@ import java.util.Map;
 public class FuzzyKMeansReducer extends MapReduceBase implements
     Reducer<Text, FuzzyKMeansInfo, Text, SoftCluster> {
 
-  protected Map<String, SoftCluster> clusterMap;
+  private Map<String, SoftCluster> clusterMap;
 
   @Override
   public void reduce(Text key, Iterator<FuzzyKMeansInfo> values,
@@ -45,7 +45,7 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
     while (values.hasNext()) {
       FuzzyKMeansInfo value = values.next();
 
-      if (value.combinerPass == 0) // escaped from combiner
+      if (value.getCombinerPass() == 0) // escaped from combiner
       {
         cluster.addPoint(value.getVector(), Math.pow(value.getProbability(), SoftCluster.getM()));
       } else {

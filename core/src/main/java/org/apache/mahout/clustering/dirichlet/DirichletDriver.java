@@ -156,7 +156,7 @@ public class DirichletDriver {
       Path path = new Path(stateIn + "/part-" + i);
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, job, path,
           Text.class, DirichletCluster.class);
-      writer.append(new Text(Integer.toString(i)), state.clusters.get(i));
+      writer.append(new Text(Integer.toString(i)), state.getClusters().get(i));
       writer.close();
     }
   }

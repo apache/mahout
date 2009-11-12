@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.eval;
 
+import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
@@ -25,8 +26,6 @@ import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.Recommender;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -37,32 +36,21 @@ import java.util.Map;
  */
 public final class RMSRecommenderEvaluator extends AbstractDifferenceRecommenderEvaluator {
 
-  private static final Logger log = LoggerFactory.getLogger(RMSRecommenderEvaluator.class);
+  private RunningAverage average;
 
   @Override
-  double getEvaluation(FastByIDMap<PreferenceArray> testUserPrefs, Recommender recommender) throws TasteException {
-    RunningAverage average = new FullRunningAverage();
-    int count = 0;
-    for (Map.Entry<Long, PreferenceArray> entry : testUserPrefs.entrySet()) {
-      for (Preference realPref : entry.getValue()) {
-        long testUserID = entry.getKey();
-        try {
-          float estimatedPreference =
-              recommender.estimatePreference(testUserID, realPref.getItemID());
-          if (!Float.isNaN(estimatedPreference)) {
-            double diff = realPref.getValue() - estimatedPreference;
-            average.addDatum(diff * diff);
-          }
-        } catch (NoSuchUserException nsee) {
-          // It's possible that an item exists in the test data but not training data in which case
-          // NSEE will be thrown. Just ignore it and move on.
-          log.info("User exists in test data but not training data: {}", testUserID);
-        }
-        if (++count % 1000 == 0) {
-          log.info("Finished evaluation for {} prefs", count);
-        }
-      }
-    }
+  void reset() {
+    average = new FullRunningAverage();
+  }
+
+  @Override
+  void processOneEstimate(float estimatedPreference, Preference realPref) {
+    double diff = realPref.getValue() - estimatedPreference;
+    average.addDatum(diff * diff);
+  }
+
+  @Override
+  double computeFinalEvaluation() {
     return Math.sqrt(average.getAverage());
   }
 

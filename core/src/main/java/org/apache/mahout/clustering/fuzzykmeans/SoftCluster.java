@@ -112,7 +112,7 @@ public class SoftCluster implements Writable {
       Vector clusterCenter = AbstractVector.decodeVector(center);
 
       SoftCluster cluster = new SoftCluster(clusterCenter, clusterId);
-      cluster.converged = startsWithV;
+      cluster.setConverged(startsWithV);
       return cluster;
     }
     return null;
@@ -410,6 +410,10 @@ public class SoftCluster implements Writable {
 
   public boolean isConverged() {
     return converged;
+  }
+
+  private void setConverged(boolean converged) {
+    this.converged = converged;
   }
 
   public int getClusterId() {

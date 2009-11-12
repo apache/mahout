@@ -282,7 +282,7 @@ public class VectorView extends AbstractVector {
 
   @Override
   public void write(DataOutput dataOutput) throws IOException {
-    dataOutput.writeUTF(this.name == null ? "" : this.name);
+    dataOutput.writeUTF(this.getName() == null ? "" : this.getName());
     dataOutput.writeInt(offset);
     dataOutput.writeInt(cardinality);
     writeVector(dataOutput, vector);
@@ -290,7 +290,7 @@ public class VectorView extends AbstractVector {
 
   @Override
   public void readFields(DataInput dataInput) throws IOException {
-    this.name = dataInput.readUTF();
+    this.setName(dataInput.readUTF());
     this.offset = dataInput.readInt();
     this.cardinality = dataInput.readInt();
     this.vector = readVector(dataInput);

@@ -27,6 +27,13 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.concurrent.Callable;
+
+/**
+ * Simple helper class for running load on a Recommender.
+ */
 public final class LoadEvaluator {
 
   private static final Logger log = LoggerFactory.getLogger(LoadEvaluator.class);
@@ -42,18 +49,12 @@ public final class LoadEvaluator {
     LongPrimitiveIterator userSampler =
         SamplingLongPrimitiveIterator.maybeWrapIterator(dataModel.getUserIDs(), sampleRate);
     RunningAverage recommendationTime = new FullRunningAverageAndStdDev();
-    int count = 0;
+    recommender.recommend(userSampler.next(), 10); // Warm up
+    Collection<Callable<Object>> callables = new ArrayList<Callable<Object>>();
     while (userSampler.hasNext()) {
-      long start = System.currentTimeMillis();
-      recommender.recommend(userSampler.next(), 10);
-      long end = System.currentTimeMillis();
-      if (count > 0) { // Ignore first as a warmup
-        recommendationTime.addDatum(end - start);
-      }
-      if (++count % 100 == 0) {
-        logStats(recommendationTime);
-      }
+      callables.add(new LoadCallable(recommender, userSampler.next(), recommendationTime));
     }
+    AbstractDifferenceRecommenderEvaluator.execute(callables);
     logStats(recommendationTime);
   }
 
@@ -63,6 +64,28 @@ public final class LoadEvaluator {
     log.info("Average time per recommendation: " + (int) recommendationTime.getAverage() +
              "ms; approx. memory used: " + ((runtime.totalMemory() - runtime.freeMemory()) / 1000000) + "MB");
 
+  }
+
+  private static class LoadCallable implements Callable<Object> {
+
+    private final Recommender recommender;
+    private final long userID;
+    private final RunningAverage recommendationTime;
+
+    private LoadCallable(Recommender recommender, long userID, RunningAverage recommendationTime) {
+      this.recommender = recommender;
+      this.userID = userID;
+      this.recommendationTime = recommendationTime;
+    }
+
+    @Override
+    public Object call() throws Exception {
+      long start = System.currentTimeMillis();
+      recommender.recommend(userID, 10);
+      long end = System.currentTimeMillis();
+      recommendationTime.addDatum(end - start);
+      return null;
+    }
   }
 
 }

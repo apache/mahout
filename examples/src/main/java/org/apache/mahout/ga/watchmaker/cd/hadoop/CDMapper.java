@@ -74,13 +74,19 @@ public class CDMapper extends MapReduceBase implements
   }
 
   static void initializeDataSet(DataSet dataset) {
-    assert dataset != null : "bad 'dataset' configuration parameter";
+    if (dataset == null) {
+      throw new IllegalArgumentException("bad 'dataset' configuration parameter");
+    }
     DataSet.initialize(dataset);
   }
 
   void configure(List<Rule> rules, int target) {
-    assert rules != null && !rules.isEmpty() : "bad 'rules' configuration parameter";
-    assert target >= 0 : "bad 'target' configuration parameter";
+    if (!(rules != null && !rules.isEmpty())) {
+      throw new IllegalArgumentException("bad 'rules' configuration parameter");
+    }
+    if (target < 0) {
+      throw new IllegalArgumentException("bad 'target' configuration parameter");
+    }
 
     this.rules = rules;
     this.target = target;

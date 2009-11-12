@@ -71,12 +71,12 @@ public class IntPairWritable implements WritableComparable<IntPairWritable> {
 
   @Override
   public int compareTo(IntPairWritable that) {
-    if (this.x < that.x) {
+    if (this.x < that.getX()) {
       return -1;
-    } else if (this.x > that.x) {
+    } else if (this.x > that.getX()) {
       return 1;
     } else {
-      return this.y < that.y ? -1 : this.y > that.y ? 1 : 0;
+      return this.y < that.getY() ? -1 : this.y > that.getY() ? 1 : 0;
     }
   }
 
@@ -89,7 +89,7 @@ public class IntPairWritable implements WritableComparable<IntPairWritable> {
 
     IntPairWritable that = (IntPairWritable) o;
 
-    return that.x == this.x && this.y == that.y;
+    return that.getX() == this.x && this.y == that.getY();
   }
 
   @Override
@@ -113,7 +113,9 @@ public class IntPairWritable implements WritableComparable<IntPairWritable> {
 
     @Override
     public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2) {
-      assert l1 == 8;
+      if (l1 != 8) {
+        throw new IllegalArgumentException();
+      }
       int int11 = readInt(b1, s1);
       int int21 = readInt(b2, s2);
       if (int11 != int21) {

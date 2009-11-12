@@ -65,7 +65,7 @@ public class InMemBuilder extends Builder {
     FileOutputFormat.setOutputPath(job, getOutputPath(conf));
 
     // put the data in the DistributedCache
-    DistributedCache.addCacheFile(dataPath.toUri(), conf);
+    DistributedCache.addCacheFile(getDataPath().toUri(), conf);
 
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(MapredOutput.class);

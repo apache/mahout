@@ -42,12 +42,12 @@ import java.util.Iterator;
  */
 public class BayesThetaNormalizerReducer extends MapReduceBase implements
     Reducer<StringTuple, DoubleWritable, StringTuple, DoubleWritable> {
-  private static final Logger log = LoggerFactory
-      .getLogger(BayesThetaNormalizerReducer.class);
+
+  private static final Logger log = LoggerFactory.getLogger(BayesThetaNormalizerReducer.class);
 
   private HTable table;
 
-  boolean useHbase = false;
+  private boolean useHbase = false;
 
   @Override
   public void reduce(StringTuple key, Iterator<DoubleWritable> values,

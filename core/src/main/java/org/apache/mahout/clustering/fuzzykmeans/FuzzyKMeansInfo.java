@@ -30,7 +30,7 @@ public class FuzzyKMeansInfo implements Writable {
   private double probability;
   private Vector pointTotal;
 
-  public int combinerPass = 0;
+  private int combinerPass = 0;
 
   public FuzzyKMeansInfo() {
   }
@@ -43,6 +43,14 @@ public class FuzzyKMeansInfo implements Writable {
   public FuzzyKMeansInfo(double probability, Vector pointTotal, int combinerPass) {
     this.probability = probability;
     this.pointTotal = pointTotal;
+    this.combinerPass = combinerPass;
+  }
+
+  public int getCombinerPass() {
+    return combinerPass;
+  }
+
+  public void setCombinerPass(int combinerPass) {
     this.combinerPass = combinerPass;
   }
 

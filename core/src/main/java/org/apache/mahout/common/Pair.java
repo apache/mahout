@@ -48,8 +48,8 @@ public final class Pair<A, B> implements Serializable {
       return false;
     }
     Pair<?, ?> otherPair = (Pair<?, ?>) obj;
-    return isEqualOrNulls(first, otherPair.first) &&
-           isEqualOrNulls(second, otherPair.second);
+    return isEqualOrNulls(first, otherPair.getFirst()) &&
+           isEqualOrNulls(second, otherPair.getSecond());
   }
 
   private static boolean isEqualOrNulls(Object obj1, Object obj2) {

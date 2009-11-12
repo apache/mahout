@@ -56,19 +56,19 @@ public class BuildForest extends Configured implements Tool {
 
   private static final Logger log = LoggerFactory.getLogger(BuildForest.class);
 
-  protected Path dataPath; // Data path
+  private Path dataPath; // Data path
 
-  protected Path datasetPath; // Dataset path
+  private Path datasetPath; // Dataset path
 
-  int m; // Number of variables to select at each tree-node
+  private int m; // Number of variables to select at each tree-node
 
-  int nbTrees; // Number of trees to grow
+  private int nbTrees; // Number of trees to grow
 
-  Long seed = null; // Random seed
+  private Long seed = null; // Random seed
 
-  boolean isPartial; // use partial data implementation
+  private boolean isPartial; // use partial data implementation
 
-  boolean isOob; // estimate oob error;
+  private boolean isOob; // estimate oob error;
 
   @Override
   public int run(String[] args) throws IOException {

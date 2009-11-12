@@ -49,7 +49,9 @@ public class InterResults {
   public static int load(FileSystem fs, Path forestPath, int numMaps,
       int numTrees, int partition, TreeID[] keys, Node[] trees)
       throws IOException {
-    assert keys.length == trees.length : "keys.length != trees.length";
+    if (keys.length != trees.length) {
+      throw new IllegalArgumentException("keys.length != trees.length");
+    }
 
     FSDataInputStream in = fs.open(forestPath);
 
@@ -82,7 +84,9 @@ public class InterResults {
         }
       }
 
-      assert current == keys.length : "loaded less keys/trees than expected";
+      if (current != keys.length) {
+        throw new IllegalStateException("loaded less keys/trees than expected");
+      }
     } finally {
       in.close();
     }
@@ -101,7 +105,9 @@ public class InterResults {
    */
   public static void store(FileSystem fs, Path forestPath,
       TreeID[] keys, Node[] trees, int[] sizes) throws IOException {
-    assert keys.length == trees.length : "keys.length != trees.length";
+    if (keys.length != trees.length) {
+      throw new IllegalArgumentException("keys.length != trees.length");
+    }
 
     int numTrees = keys.length;
     int numMaps = sizes.length;

@@ -29,8 +29,12 @@ public class TreeID extends LongWritable implements Cloneable {
   }
 
   public TreeID(int partition, int treeId) {
-    assert partition >= 0 : "partition < 0";
-    assert treeId >= 0 : "treeId < 0";
+    if (partition < 0) {
+      throw new IllegalArgumentException("partition < 0");
+    }
+    if (treeId < 0) {
+      throw new IllegalArgumentException("treeId < 0");
+    }
     set(partition, treeId);
   }
 

@@ -54,14 +54,14 @@ public class JsonDirichletStateAdapter implements
         new JsonModelDistributionAdapter());
     Gson gson = builder.create();
     JsonObject obj = new JsonObject();
-    obj.addProperty("numClusters", src.numClusters);
-    obj.addProperty("offset", src.offset);
-    obj.add("modelFactory", new JsonPrimitive(gson.toJson(src.modelFactory,
+    obj.addProperty("numClusters", src.getNumClusters());
+    obj.addProperty("offset", src.getOffset());
+    obj.add("modelFactory", new JsonPrimitive(gson.toJson(src.getModelFactory(),
         typeOfModelDistribution)));
     obj.add("clusters", new JsonPrimitive(gson
-        .toJson(src.clusters, typeOfModel)));
+        .toJson(src.getClusters(), typeOfModel)));
     obj.add("mixture",
-        new JsonPrimitive(gson.toJson(src.mixture, Vector.class)));
+        new JsonPrimitive(gson.toJson(src.getMixture(), Vector.class)));
     return obj;
   }
 
@@ -76,13 +76,12 @@ public class JsonDirichletStateAdapter implements
     Gson gson = builder.create();
     JsonObject obj = json.getAsJsonObject();
     DirichletState<?> state = new DirichletState();
-    state.numClusters = obj.get("numClusters").getAsInt();
-    state.offset = obj.get("offset").getAsDouble();
-    state.modelFactory = gson.fromJson(obj.get("modelFactory").getAsString(),
-        typeOfModelDistribution);
-    state.clusters = gson.fromJson(obj.get("clusters").getAsString(),
-        typeOfModel);
-    state.mixture = gson.fromJson(obj.get("mixture").getAsString(), Vector.class);
+    state.setNumClusters(obj.get("numClusters").getAsInt());
+    state.setOffset(obj.get("offset").getAsDouble());
+    state.setModelFactory(gson.<ModelDistribution>fromJson(obj.get("modelFactory").getAsString(),
+        typeOfModelDistribution));
+    state.setClusters(gson.<List>fromJson(obj.get("clusters").getAsString(), typeOfModel));
+    state.setMixture(gson.fromJson(obj.get("mixture").getAsString(), Vector.class));
     return state;
   }
 

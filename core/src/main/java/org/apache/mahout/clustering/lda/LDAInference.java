@@ -28,13 +28,15 @@ import org.apache.mahout.matrix.DenseVector;
 import org.apache.mahout.matrix.Matrix;
 import org.apache.mahout.matrix.Vector;
 
-
 /**
-* Class for performing infererence on a document, which involves
-* computing (an approximation to) p(word|topic) for each word and
-* topic, and a prior distribution p(topic) for each topic.
-*/
+ * Class for performing infererence on a document, which involves
+ * computing (an approximation to) p(word|topic) for each word and
+ * topic, and a prior distribution p(topic) for each topic.
+ */
 public class LDAInference {
+
+  private static final double E_STEP_CONVERGENCE = 1.0E-6;
+
   public LDAInference(LDAState state) {
     this.state = state;
   }
@@ -47,8 +49,8 @@ public class LDAInference {
   */
   public static class InferredDocument {
 
-    public final Vector wordCounts;
-    public final Vector gamma; // p(topic)
+    private final Vector wordCounts;
+    private final Vector gamma; // p(topic)
     private final Matrix mphi; // log p(columnMap(w)|t)
     private final Map<Integer, Integer> columnMap; // maps words into the matrix's column map
     public final double logLikelihood;
@@ -65,6 +67,14 @@ public class LDAInference {
       this.mphi = phi;
       this.columnMap = columnMap;
       this.logLikelihood = ll;
+    }
+
+    public Vector getWordCounts() {
+      return wordCounts;
+    }
+
+    public Vector getGamma() {
+      return gamma;
     }
   }
 
@@ -129,8 +139,8 @@ public class LDAInference {
       digammaGamma = digammaGamma.plus(-digammaSumGamma);
 
       double ll = computeLikelihood(wordCounts, columnMap, phi, gamma, digammaGamma);
-      converged = oldLL < 0 && ((oldLL - ll) / oldLL < E_STEP_CONVERGENCE);
       assert !Double.isNaN(ll);
+      converged = oldLL < 0 && ((oldLL - ll) / oldLL < E_STEP_CONVERGENCE);
 
       oldLL = ll;
       iteration++;
@@ -254,5 +264,4 @@ public class LDAInference {
     return r + Math.log(x) - 0.5 / x + t;
   }
 
-    private static final double E_STEP_CONVERGENCE = 1.0E-6;
 }

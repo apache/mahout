@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.df.mapreduce.partial;
 
 import java.io.IOException;
@@ -122,8 +139,8 @@ public class Step0JobTest extends TestCase {
 
       // validate the mapper's output
       assertEquals(p, context.keys[p]);
-      assertEquals(firstKey.longValue(), context.values[p].firstId);
-      assertEquals(size, context.values[p].size);
+      assertEquals(firstKey.longValue(), context.values[p].getFirstId());
+      assertEquals(size, context.values[p].getSize());
     }
 
   }
@@ -208,9 +225,9 @@ public class Step0JobTest extends TestCase {
 
   public class Step0Context extends Context {
 
-    public final int[] keys;
+    private final int[] keys;
 
-    public final Step0Output[] values;
+    private final Step0Output[] values;
 
     private int index = 0;
 
@@ -243,6 +260,14 @@ public class Step0JobTest extends TestCase {
      */
     public int nbOutputs() {
       return index;
+    }
+
+    public int[] getKeys() {
+      return keys;
+    }
+
+    public Step0Output[] getValues() {
+      return values;
     }
   }
 }

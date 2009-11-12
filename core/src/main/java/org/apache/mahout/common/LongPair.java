@@ -48,7 +48,7 @@ public final class LongPair implements Comparable<LongPair>, Serializable {
       return false;
     }
     LongPair otherPair = (LongPair) obj;
-    return first == otherPair.first && second == otherPair.second;
+    return first == otherPair.getFirst() && second == otherPair.getSecond();
   }
 
   @Override
@@ -66,12 +66,12 @@ public final class LongPair implements Comparable<LongPair>, Serializable {
 
   @Override
   public int compareTo(LongPair o) {
-    if (first < o.first) {
+    if (first < o.getFirst()) {
       return -1;
-    } else if (first > o.first) {
+    } else if (first > o.getFirst()) {
       return 1;
     } else {
-      return second < o.second ? -1 : second > o.second ? 1 : 0;
+      return second < o.getSecond() ? -1 : second > o.getSecond() ? 1 : 0;
     }
   }
 

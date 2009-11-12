@@ -32,15 +32,15 @@ import org.apache.mahout.common.Parameters;
 
 public class InMemoryBayesDatastore implements Datastore {
 
-  final Map<String, Map<String, Map<String, Double>>> matrices = new HashMap<String, Map<String, Map<String, Double>>>();
+  private final Map<String, Map<String, Map<String, Double>>> matrices = new HashMap<String, Map<String, Map<String, Double>>>();
 
-  final Map<String, Map<String, Double>> vectors = new HashMap<String, Map<String, Double>>();
+  private final Map<String, Map<String, Double>> vectors = new HashMap<String, Map<String, Double>>();
 
-  Parameters params = null;
+  private Parameters params = null;
 
-  protected double thetaNormalizer = 1.0;
+  private double thetaNormalizer = 1.0;
 
-  protected double alpha_i = 1.0;
+  private double alpha_i = 1.0;
 
   public InMemoryBayesDatastore(Parameters params) {
 

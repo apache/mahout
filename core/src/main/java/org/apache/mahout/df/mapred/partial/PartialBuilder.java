@@ -84,7 +84,7 @@ public class PartialBuilder extends Builder {
   @Override
   protected void configureJob(JobConf job, int nbTrees, boolean oobEstimate)
       throws IOException {
-    FileInputFormat.setInputPaths(job, dataPath);
+    FileInputFormat.setInputPaths(job, getDataPath());
     FileOutputFormat.setOutputPath(job, getOutputPath(job));
 
     job.setOutputKeyClass(TreeID.class);
@@ -114,8 +114,8 @@ public class PartialBuilder extends Builder {
     Path outputPath = getOutputPath(job);
 
     log.info("Computing partitions' first ids...");
-    Step0Job step0 = new Step0Job(getOutputPath(job), dataPath, datasetPath);
-    Step0Output[] partitions = step0.run(conf);
+    Step0Job step0 = new Step0Job(getOutputPath(job), getDataPath(), getDatasetPath());
+    Step0Output[] partitions = step0.run(getConf());
 
     log.info("Processing the output...");
     TreeID[] keys = new TreeID[numTrees];
@@ -124,11 +124,11 @@ public class PartialBuilder extends Builder {
     processOutput(job, outputPath, firstIds, keys, trees, callback);
 
     // call the second step in order to complete the oob predictions
-    if (callback != null && numMaps > 1 && isStep2(conf)) {
+    if (callback != null && numMaps > 1 && isStep2(getConf())) {
       log.info("*****************************");
       log.info("Second Step");
       log.info("*****************************");
-      Step2Job step2 = new Step2Job(getOutputPath(job), dataPath, datasetPath, partitions);
+      Step2Job step2 = new Step2Job(getOutputPath(job), getDataPath(), getDatasetPath(), partitions);
 
       step2.run(job, keys, trees, callback);
     }
@@ -181,7 +181,9 @@ public class PartialBuilder extends Builder {
     }
 
     // make sure we got all the keys/values
-    assert index == keys.length;
+    if (index != keys.length) {
+      throw new IllegalStateException();
+    }
   }
 
   /**

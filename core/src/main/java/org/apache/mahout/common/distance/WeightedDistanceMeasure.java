@@ -39,7 +39,7 @@ public abstract class WeightedDistanceMeasure implements DistanceMeasure {
   private List<Parameter<?>> parameters;
   private Parameter<Path> weightsFile;
   private ClassParameter vectorClass;
-  protected Vector weights;
+  private Vector weights;
 
   @Override
   public void createParameters(String prefix, JobConf jobConf) {

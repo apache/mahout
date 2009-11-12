@@ -162,14 +162,15 @@ public class SparseVector extends AbstractVector {
     }
 
     Vector that = (Vector) o;
+    String thisName = getName();
     String thatName = that.getName();
     if (this.size() != that.size()) {
       return false;
     }
-    if (name != null && thatName != null && !name.equals(thatName)) {
+    if (thisName != null && thatName != null && !thisName.equals(thatName)) {
       return false;
-    } else if ((name != null && thatName == null)
-        || (thatName != null && name == null)) {
+    } else if ((thisName != null && thatName == null)
+        || (thatName != null && thisName == null)) {
       return false;
     }
 
@@ -237,7 +238,7 @@ public class SparseVector extends AbstractVector {
   }
 
   public class Element implements Vector.Element {
-    int ind;
+    private int ind;
 
     public Element(int ind) {
       this.ind = ind;
@@ -262,7 +263,7 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public void write(DataOutput dataOutput) throws IOException {
-    dataOutput.writeUTF(this.name == null ? "" : this.name);
+    dataOutput.writeUTF(this.getName() == null ? "" : this.getName());
     dataOutput.writeInt(size());
     int nde = getNumNondefaultElements();
     dataOutput.writeInt(nde);
@@ -279,13 +280,14 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public void readFields(DataInput dataInput) throws IOException {
-    this.name = dataInput.readUTF();
+    this.setName(dataInput.readUTF());
     int cardinality = dataInput.readInt();
     int size = dataInput.readInt();
     OrderedIntDoubleMapping values = new OrderedIntDoubleMapping(size);
     int i = 0;
-    for (; i < size; i++) {
+    while (i < size) {
       values.set(dataInput.readInt(), dataInput.readDouble());
+      i++;
     }
     assert (i == size);
     this.cardinality = cardinality;

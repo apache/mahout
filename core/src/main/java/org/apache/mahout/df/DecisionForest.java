@@ -39,7 +39,9 @@ public class DecisionForest {
   }
 
   public DecisionForest(List<Node> trees) {
-    assert trees != null && !trees.isEmpty() : "trees argument must not be null or empty";
+    if (!(trees != null && !trees.isEmpty())) {
+      throw new IllegalArgumentException("trees argument must not be null or empty");
+    }
 
     this.trees = trees;
   }
@@ -55,7 +57,9 @@ public class DecisionForest {
    * @param callback
    */
   public void classify(Data data, PredictionCallback callback) {
-    assert callback != null : "callback must not be null";
+    if (callback == null) {
+      throw new IllegalArgumentException("callback must not be null");
+    }
 
     if (data.isEmpty())
       return; // nothing to classify
@@ -146,7 +150,7 @@ public class DecisionForest {
     
     DecisionForest rf = (DecisionForest)obj;
     
-    return trees.size() == rf.trees.size() && trees.containsAll(rf.trees);
+    return trees.size() == rf.getTrees().size() && trees.containsAll(rf.getTrees());
   }
 
   @Override

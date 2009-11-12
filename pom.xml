@@ -103,35 +103,6 @@
               </execution>
             </executions>
           </plugin>
-          <!--<plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-doap-plugin</artifactId>
-            <version>1.0</version>
-            <configuration>
-              <about>Apache Mahout is a machine learning library written in Java and designed to scale by using Apache Hadoop and other high performance techniques.</about>
-             <doapOptions>
-               <programmingLanguage>java</programmingLanguage>
-               <category>library</category>
-
-             </doapOptions>
-
-              <asfExtOptions>
-                <included>true</included>
-                <charter>Apache Mahout is a machine learning library written in Java and designed to scale by using Apache Hadoop and other high performance techniques.</charter>
-                <pmc>http://lucene.apache.org</pmc>
-              </asfExtOptions>
-
-            </configuration>
-            <executions>
-              <execution>
-                <id>gen</id>
-                <phase>package</phase>
-                <goals>
-                  <goal>generate</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>-->
 
         </plugins>
       </build>

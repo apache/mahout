@@ -63,6 +63,12 @@ public class Step2MapperTest extends TestCase {
   /** nb mappers to use */
   protected static final int nbMappers = 5;
 
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    RandomUtils.useTestSeed();
+  }
+               
   public void testMapper() throws Exception {
     Random rng = RandomUtils.getRandom();
 
@@ -135,7 +141,7 @@ public class Step2MapperTest extends TestCase {
           continue;
         }
 
-        TreeID k = output.keys[current];
+        TreeID k = output.getKeys()[current];
 
         // the tree should receive the partition's index
         assertEquals(partition, k.partition());
@@ -144,7 +150,7 @@ public class Step2MapperTest extends TestCase {
         // correct order
         assertEquals(index, k.treeId());
 
-        int[] predictions = output.values[current].getPredictions();
+        int[] predictions = output.getValues()[current].getPredictions();
 
         // all the instances of the partition should be classified
         assertEquals(split.length, predictions.length);

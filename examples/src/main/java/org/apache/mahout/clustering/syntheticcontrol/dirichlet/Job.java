@@ -43,7 +43,6 @@ import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.matrix.SparseVector;
 
 import static org.apache.mahout.clustering.syntheticcontrol.Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
 
@@ -163,7 +162,7 @@ public class Job {
     conf.set(DirichletDriver.ALPHA_0_KEY, Double.toString(alpha_0));
     for (int i = 0; i < numIterations; i++) {
       conf.set(DirichletDriver.STATE_IN_KEY, output + "/state-" + i);
-      clusters.add(DirichletMapper.getDirichletState(conf).clusters);
+      clusters.add(DirichletMapper.getDirichletState(conf).getClusters());
     }
     printResults(clusters, 0);
 
@@ -180,9 +179,9 @@ public class Job {
     for (List<DirichletCluster<Vector>> r : clusters) {
       System.out.print("sample[" + row++ + "]= ");
       for (int k = 0; k < r.size(); k++) {
-        Model<Vector> model = r.get(k).model;
+        Model<Vector> model = r.get(k).getModel();
         if (model.count() > significant) {
-          int total = (int) r.get(k).totalCount;
+          int total = (int) r.get(k).getTotalCount();
           System.out.print("m" + k + '(' + total + ')' + model.toString()
               + ", ");
         }

@@ -52,9 +52,10 @@ public class BayesClassifierMapper extends MapReduceBase implements
 
   private int gramSize = 1;
   
-  ClassifierContext classifier = null;
+  private ClassifierContext classifier = null;
   
-  String defaultCategory = null;
+  private String defaultCategory = null;
+
   /**
    * Parallel Classification
    *

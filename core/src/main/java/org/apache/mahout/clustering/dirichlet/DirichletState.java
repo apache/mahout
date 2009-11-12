@@ -27,15 +27,15 @@ import java.util.List;
 
 public class DirichletState<O> {
 
-  public int numClusters; // the number of clusters
+  private int numClusters; // the number of clusters
 
-  public ModelDistribution<O> modelFactory; // the factory for models
+  private ModelDistribution<O> modelFactory; // the factory for models
 
-  public List<DirichletCluster<O>> clusters; // the clusters for this iteration
+  private List<DirichletCluster<O>> clusters; // the clusters for this iteration
 
-  public Vector mixture; // the mixture vector
+  private Vector mixture; // the mixture vector
 
-  public double offset; // alpha_0 / numClusters
+  private double offset; // alpha_0 / numClusters
 
   public DirichletState(ModelDistribution<O> modelFactory,
                         int numClusters, double alpha_0, int thin, int burnin) {
@@ -55,10 +55,50 @@ public class DirichletState<O> {
   public DirichletState() {
   }
 
+  public int getNumClusters() {
+    return numClusters;
+  }
+
+  public void setNumClusters(int numClusters) {
+    this.numClusters = numClusters;
+  }
+
+  public ModelDistribution<O> getModelFactory() {
+    return modelFactory;
+  }
+
+  public void setModelFactory(ModelDistribution<O> modelFactory) {
+    this.modelFactory = modelFactory;
+  }
+
+  public List<DirichletCluster<O>> getClusters() {
+    return clusters;
+  }
+
+  public void setClusters(List<DirichletCluster<O>> clusters) {
+    this.clusters = clusters;
+  }
+
+  public Vector getMixture() {
+    return mixture;
+  }
+
+  public void setMixture(Vector mixture) {
+    this.mixture = mixture;
+  }
+
+  public double getOffset() {
+    return offset;
+  }
+
+  public void setOffset(double offset) {
+    this.offset = offset;
+  }
+
   public Vector totalCounts() {
     Vector result = new DenseVector(numClusters);
     for (int i = 0; i < numClusters; i++) {
-      result.set(i, clusters.get(i).totalCount);
+      result.set(i, clusters.get(i).getTotalCount());
     }
     return result;
   }
@@ -86,7 +126,7 @@ public class DirichletState<O> {
    * @return the double probability
    */
   public double adjustedProbability(O x, int k) {
-    double pdf = clusters.get(k).model.pdf(x);
+    double pdf = clusters.get(k).getModel().pdf(x);
     double mix = mixture.get(k);
     return mix * pdf;
   }
@@ -95,7 +135,7 @@ public class DirichletState<O> {
   public Model<O>[] getModels() {
     Model<O>[] result = new Model[numClusters];
     for (int i = 0; i < numClusters; i++) {
-      result[i] = clusters.get(i).model;
+      result[i] = clusters.get(i).getModel();
     }
     return result;
   }

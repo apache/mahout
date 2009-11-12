@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.mahout.clustering.dirichlet.models;
 
 import org.apache.mahout.matrix.AbstractVector;
@@ -29,12 +30,12 @@ public class NormalModel implements Model<Vector> {
   private static final double sqrt2pi = Math.sqrt(2.0 * Math.PI);
 
   // the parameters
-  public Vector mean;
+  private Vector mean;
 
-  public double sd;
+  private double stdDev;
 
   // the observation statistics, initialized by the first observation
-  int s0 = 0;
+  private int s0 = 0;
 
   private Vector s1;
 
@@ -43,13 +44,26 @@ public class NormalModel implements Model<Vector> {
   public NormalModel() {
   }
 
-  public NormalModel(Vector mean, double sd) {
+  public NormalModel(Vector mean, double stdDev) {
     this.mean = mean;
-    this.sd = sd;
+    this.stdDev = stdDev;
     this.s0 = 0;
     this.s1 = mean.like();
     this.s2 = mean.like();
   }
+
+  int getS0() {
+    return s0;
+  }
+  
+  public Vector getMean() {
+    return mean;
+  }
+
+  public double getStdDev() {
+    return stdDev;
+  }
+
 
   /**
    * TODO: Return a proper sample from the posterior. For now, return an instance with the same parameters
@@ -57,7 +71,7 @@ public class NormalModel implements Model<Vector> {
    * @return an NormalModel
    */
   public NormalModel sample() {
-    return new NormalModel(mean, sd);
+    return new NormalModel(mean, stdDev);
   }
 
   @Override
@@ -85,18 +99,18 @@ public class NormalModel implements Model<Vector> {
     if (s0 > 1) {
       Vector std = s2.times(s0).minus(s1.times(s1)).assign(
           new SquareRootFunction()).divide(s0);
-      sd = std.zSum() / s1.size();
+      stdDev = std.zSum() / s1.size();
     } else {
-      sd = Double.MIN_VALUE;
+      stdDev = Double.MIN_VALUE;
     }
   }
 
   @Override
   public double pdf(Vector x) {
-    double sd2 = sd * sd;
+    double sd2 = stdDev * stdDev;
     double exp = -(x.dot(x) - 2 * x.dot(mean) + mean.dot(mean)) / (2 * sd2);
     double ex = Math.exp(exp);
-    return ex / (sd * sqrt2pi);
+    return ex / (stdDev * sqrt2pi);
   }
 
   @Override
@@ -113,14 +127,14 @@ public class NormalModel implements Model<Vector> {
         buf.append(String.format("%.2f", mean.get(i))).append(", ");
       }
     }
-    buf.append("] sd=").append(String.format("%.2f", sd)).append('}');
+    buf.append("] sd=").append(String.format("%.2f", stdDev)).append('}');
     return buf.toString();
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
     this.mean = AbstractVector.readVector(in);
-    this.sd = in.readDouble();
+    this.stdDev = in.readDouble();
     this.s0 = in.readInt();
     this.s1 = AbstractVector.readVector(in);
     this.s2 = AbstractVector.readVector(in);
@@ -129,7 +143,7 @@ public class NormalModel implements Model<Vector> {
   @Override
   public void write(DataOutput out) throws IOException {
     AbstractVector.writeVector(out, mean);
-    out.writeDouble(sd);
+    out.writeDouble(stdDev);
     out.writeInt(s0);
     AbstractVector.writeVector(out, s1);
     AbstractVector.writeVector(out, s2);

@@ -57,19 +57,19 @@ public class BreimanExample extends Configured implements Tool {
   private static final Logger log = LoggerFactory.getLogger(BreimanExample.class);
 
   /** sum test error */
-  protected static double sumTestErr;
+  private static double sumTestErr;
 
   /** sum mean tree error */
-  protected static double sumTreeErr;
+  private static double sumTreeErr;
 
   /** sum test error with m=1 */
-  protected static double sumOneErr = 0.0;
+  private static double sumOneErr = 0.0;
 
   /** mean time to build a forest with m=log2(M)+1 */
-  protected static long sumTimeM;
+  private static long sumTimeM;
 
   /** mean time to build a forest with m=1 */
-  protected static long sumTimeOne;
+  private static long sumTimeOne;
 
   /**
    * runs one iteration of the procedure.

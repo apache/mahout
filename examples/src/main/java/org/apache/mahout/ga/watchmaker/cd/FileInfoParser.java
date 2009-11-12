@@ -112,7 +112,9 @@ public class FileInfoParser {
    */
   public static Path getInfoFile(FileSystem fs, Path inpath)
       throws IOException {
-    assert inpath != null : "null inpath parameter";
+    if (inpath == null) {
+      throw new IllegalArgumentException("null inpath parameter");
+    }
     if (!fs.exists(inpath))
       throw new IllegalArgumentException("Input path does not exist");
     if (!fs.getFileStatus(inpath).isDir())
@@ -150,7 +152,9 @@ public class FileInfoParser {
   private static NumericalAttr parseNumerical(StringTokenizer tokenizer) {
     double min = nextDouble(tokenizer);
     double max = nextDouble(tokenizer);
-    assert min <= max : "min > max";
+    if (min > max) {
+      throw new IllegalArgumentException("min > max");
+    }
 
     return new NumericalAttr(min, max);
   }

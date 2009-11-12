@@ -37,7 +37,7 @@ public class ClassParameter extends AbstractParameter<Class> {
 
   @Override
   public String getStringValue() {
-    if (value == null) {
+    if (get() == null) {
       return null;
     }
     return get().getName();

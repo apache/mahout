@@ -111,7 +111,9 @@ public class DefaultTreeBuilder implements TreeBuilder {
    * @return
    */
   protected static int[] randomAttributes(Dataset dataset, Random rng, int m) {
-    assert m <= dataset.nbAttributes() : "m > num attributes";
+    if (m > dataset.nbAttributes()) {
+      throw new IllegalArgumentException("m > num attributes");
+    }
 
     int[] result = new int[m];
 

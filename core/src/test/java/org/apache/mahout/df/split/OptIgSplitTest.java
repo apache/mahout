@@ -31,6 +31,12 @@ public class OptIgSplitTest extends TestCase {
 
   protected static final int numInstances = 100;
 
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    RandomUtils.useTestSeed();
+  }
+ 
   public void testComputeSplit() throws Exception {
     int n = 100;
 

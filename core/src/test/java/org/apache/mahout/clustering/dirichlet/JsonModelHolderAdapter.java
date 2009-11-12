@@ -45,7 +45,7 @@ public class JsonModelHolderAdapter implements JsonSerializer<ModelHolder<?>>,
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
     Gson gson = builder.create();
     JsonObject obj = new JsonObject();
-    obj.add("model", new JsonPrimitive(gson.toJson(src.model, typeOfModel)));
+    obj.add("model", new JsonPrimitive(gson.toJson(src.getModel(), typeOfModel)));
     return obj;
   }
 

@@ -326,15 +326,23 @@ public final class LDADriver {
         int word = key.getY();
         if (word == TOPIC_SUM_KEY) {
           logTotals[topic] = value.get();
-          assert !Double.isInfinite(value.get());
+          if (Double.isInfinite(value.get())) {
+            throw new IllegalArgumentException();
+          }
         } else if (topic == LOG_LIKELIHOOD_KEY) {
           ll = value.get();
         } else {
           //System.out.println(topic + " " + word);
-          assert topic >= 0 && word >= 0 : topic + " " + word;
-          assert pWgT.getQuick(topic, word) == 0.0;
+          if (!(topic >= 0 && word >= 0)) {
+            throw new IllegalArgumentException(topic + " " + word);
+          }
+          if (pWgT.getQuick(topic, word) != 0.0) {
+            throw new IllegalArgumentException();
+          }
           pWgT.setQuick(topic, word, value.get());
-          assert !Double.isInfinite(pWgT.getQuick(topic, word));
+          if (Double.isInfinite(pWgT.getQuick(topic, word))) {
+            throw new IllegalArgumentException();
+          }
         }
       }
       reader.close();

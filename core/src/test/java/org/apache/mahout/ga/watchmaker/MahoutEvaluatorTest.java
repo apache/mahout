@@ -26,6 +26,7 @@ import org.apache.mahout.ga.watchmaker.utils.DummyCandidate;
 import org.apache.mahout.ga.watchmaker.utils.DummyEvaluator;
 import org.apache.mahout.common.StringUtils;
 import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.RandomUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,6 +35,12 @@ import java.util.Collection;
 
 public class MahoutEvaluatorTest extends TestCase {
 
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    RandomUtils.useTestSeed();
+  }
+                                         
   public <T> void testEvaluate() throws Exception {
     // candidate population
     int populationSize = 100;

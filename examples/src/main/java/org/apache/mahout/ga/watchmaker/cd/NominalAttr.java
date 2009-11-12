@@ -22,7 +22,9 @@ class NominalAttr implements Attribute {
   private final String[] values;
 
   NominalAttr(String[] values) {
-    assert values.length > 0 : "values is empty";
+    if (values.length <= 0) {
+      throw new IllegalArgumentException("values is empty");
+    }
     this.values = values;
   }
 

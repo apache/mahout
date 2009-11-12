@@ -218,7 +218,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
     /** Defines an ordering from highest similarity to lowest. */
     @Override
     public int compareTo(ItemItemSimilarity other) {
-      double otherValue = other.value;
+      double otherValue = other.getValue();
       return value > otherValue ? -1 : value < otherValue ? 1 : 0;
     }
 
@@ -228,9 +228,9 @@ public final class GenericItemSimilarity implements ItemSimilarity {
         return false;
       }
       ItemItemSimilarity otherSimilarity = (ItemItemSimilarity) other;
-      return otherSimilarity.itemID1 == itemID1 &&
-             otherSimilarity.itemID2 == itemID2 &&
-             otherSimilarity.value == value;
+      return otherSimilarity.getItemID1() == itemID1 &&
+             otherSimilarity.getItemID2() == itemID2 &&
+             otherSimilarity.getValue() == value;
     }
 
     @Override

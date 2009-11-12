@@ -89,8 +89,8 @@ public class TestLDAInference extends TestCase {
       Vector v = generateRandomDoc(numWords, sparsity);
       LDAInference.InferredDocument doc = lda.infer(v);
 
-      assertEquals("wordCounts", doc.wordCounts, v);
-      assertNotNull("gamma", doc.gamma);
+      assertEquals("wordCounts", doc.getWordCounts(), v);
+      assertNotNull("gamma", doc.getGamma());
       for (Iterator<Vector.Element> iter = v.iterateNonZero();
           iter.hasNext(); ) {
         int w = iter.next().index();

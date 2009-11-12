@@ -153,7 +153,7 @@ public final class GenericUserSimilarity implements UserSimilarity {
     /** Defines an ordering from highest similarity to lowest. */
     @Override
     public int compareTo(UserUserSimilarity other) {
-      double otherValue = other.value;
+      double otherValue = other.getValue();
       return value > otherValue ? -1 : value < otherValue ? 1 : 0;
     }
 
@@ -163,7 +163,9 @@ public final class GenericUserSimilarity implements UserSimilarity {
         return false;
       }
       UserUserSimilarity otherSimilarity = (UserUserSimilarity) other;
-      return otherSimilarity.userID1 == userID1 && otherSimilarity.userID2 == userID2 && otherSimilarity.value == value;
+      return otherSimilarity.getUserID1() == userID1 &&
+          otherSimilarity.getUserID2() == userID2 &&
+          otherSimilarity.getValue() == value;
     }
 
     @Override

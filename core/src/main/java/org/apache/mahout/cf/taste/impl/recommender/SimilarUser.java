@@ -49,7 +49,7 @@ public final class SimilarUser implements Comparable<SimilarUser> {
       return false;
     }
     SimilarUser other = (SimilarUser) o;
-    return userID == other.userID && similarity == other.similarity;
+    return userID == other.getUserID() && similarity == other.getSimilarity();
   }
 
   @Override
@@ -60,7 +60,7 @@ public final class SimilarUser implements Comparable<SimilarUser> {
   /** Defines an ordering from most similar to least similar. */
   @Override
   public int compareTo(SimilarUser other) {
-    double otherSimilarity = other.similarity;
+    double otherSimilarity = other.getSimilarity();
     return similarity > otherSimilarity ? -1 : similarity < otherSimilarity ? 1 : 0;
   }
 

@@ -57,8 +57,7 @@
                 <ant antfile="../maven/build.xml" target="example-job">
                   <property name="dest" value="${project.build.directory}" />
                   <property name="fullnamever" value="${project.artifactId}-${project.version}" />
-                  <property name="core-lib" value="../core/lib" />
-                  <property name="shared-lib" value="../lib" />
+
                   <property name="version" value="${project.version}" />
                 </ant>
                 <ant antfile="../maven/build.xml" target="build-grouplens-jar">
@@ -72,44 +71,6 @@
               <goal>run</goal>
             </goals>
           </execution>
-          <!--<execution>
-            <id>get-20news</id>
-            <phase>process-classes</phase>
-            <configuration>
-              <tasks if="get.20news">
-                <ant antfile="../maven/build.xml" target="get-files">
-                  <property name="dest" value="${project.build.directory}" />
-                  <property name="fullnamever" value="${project.artifactId}-${project.version}" />
-                  <property name="core-lib" value="../core/lib" />
-                  <property name="shared-lib" value="../lib" />
-                  <property name="version" value="${project.version}" />
-                </ant>
-              </tasks>
-
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>-->
-          <!--<execution>
-            <id>get-enwiki</id>
-            <phase>process-classes</phase>
-            <configuration>
-              <tasks if="get.enwiki">
-                <ant antfile="../maven/build.xml" target="enwiki-files">
-                  <property name="dest" value="${project.build.directory}" />
-                  <property name="fullnamever" value="${project.artifactId}-${project.version}" />
-                  <property name="core-lib" value="../core/lib" />
-                  <property name="shared-lib" value="../lib" />
-                  <property name="version" value="${project.version}" />
-                </ant>
-              </tasks>
-
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>-->
         </executions>
       </plugin>
 
@@ -187,7 +148,7 @@
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-benchmark</artifactId>
-      <version>2.9.0</version>
+      <version>${lucene.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -226,7 +187,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.2</version>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
 

@@ -52,11 +52,6 @@ public class Step1MapperTest extends TestCase {
       configure(false, true, treeBuilder, dataset);
       configure(seed, partition, numMapTasks, numTrees);
     }
-
-    public int getFirstTreeId() {
-      return firstTreeId;
-    }
-
   }
 
   /** nb attributes per generated data instance */
@@ -71,6 +66,12 @@ public class Step1MapperTest extends TestCase {
   /** nb mappers to use */
   protected static final int nbMappers = 2;
 
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    RandomUtils.useTestSeed();
+  }
+           
   public void testMapper() throws Exception {
     Long seed = null;
     Random rng = RandomUtils.getRandom();
@@ -117,7 +118,7 @@ public class Step1MapperTest extends TestCase {
       assertEquals(mapNbTrees, context.nbOutputs());
 
       // check the returned keys
-      for (TreeID k : context.keys) {
+      for (TreeID k : context.getKeys()) {
         assertEquals(partition, k.partition());
         assertEquals(treeIndex, k.treeId());
 

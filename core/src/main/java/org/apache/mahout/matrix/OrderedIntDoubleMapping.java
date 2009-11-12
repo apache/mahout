@@ -38,6 +38,12 @@ final class OrderedIntDoubleMapping implements Serializable, Cloneable {
     numMappings = 0;
   }
 
+  private OrderedIntDoubleMapping(int[] indices, double[] values, int numMappings) {
+    this.indices = indices;
+    this.values = values;
+    this.numMappings = numMappings;
+  }
+
   int[] getIndices() {
     return indices;
   }
@@ -128,9 +134,9 @@ final class OrderedIntDoubleMapping implements Serializable, Cloneable {
   public boolean equals(Object o) {
     if (o instanceof OrderedIntDoubleMapping) {
       OrderedIntDoubleMapping other = (OrderedIntDoubleMapping) o;
-      if (numMappings == other.numMappings) {
+      if (numMappings == other.getNumMappings()) {
         for (int i = 0; i < numMappings; i++) {
-          if (indices[i] != other.indices[i] || values[i] != other.values[i]) {
+          if (indices[i] != other.getIndices()[i] || values[i] != other.getValues()[i]) {
             return false;
           }
         }
@@ -155,11 +161,7 @@ final class OrderedIntDoubleMapping implements Serializable, Cloneable {
 
   @Override
   public OrderedIntDoubleMapping clone() {
-    OrderedIntDoubleMapping clone = new OrderedIntDoubleMapping(numMappings);
-    System.arraycopy(indices, 0, clone.indices, 0, numMappings);
-    System.arraycopy(values, 0, clone.values, 0, numMappings);
-    clone.numMappings = numMappings;
-    return clone;
+    return new OrderedIntDoubleMapping(indices.clone(), values.clone(), numMappings);
   }
 
 }

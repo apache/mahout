@@ -25,7 +25,7 @@ import java.util.List;
 public class StringUtilsTest extends TestCase {
 
   private static class DummyTest {
-    public int field;
+    private int field;
 
     @Override
     public boolean equals(Object obj) {
@@ -45,6 +45,9 @@ public class StringUtilsTest extends TestCase {
       return field;
     }
 
+    public int getField() {
+      return field;
+    }
   }
 
   public void testStringConversion() throws Exception {

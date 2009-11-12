@@ -69,10 +69,10 @@ public class Canopy extends ClusterBase {
    * @param point a point in vector space
    */
   public Canopy(Vector point) {
-    this.id = nextCanopyId++;
-    this.center = point.clone();
-    this.pointTotal = point.clone();
-    this.numPoints = 1;
+    this.setId(nextCanopyId++);
+    this.setCenter(point.clone());
+    this.setPointTotal(point.clone());
+    this.setNumPoints(1);
   }
 
   /**
@@ -82,10 +82,10 @@ public class Canopy extends ClusterBase {
    * @param canopyId an int identifying the canopy local to this process only
    */
   public Canopy(Vector point, int canopyId) {
-    this.id = canopyId;
-    this.center = point.clone();
-    this.pointTotal = point.clone();
-    this.numPoints = 1;
+    this.setId(canopyId);
+    this.setCenter(point.clone());
+    this.setPointTotal(point.clone());
+    this.setNumPoints(1);
   }
 
   /**
@@ -209,14 +209,14 @@ public class Canopy extends ClusterBase {
   @Override
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
-    this.center = AbstractVector.readVector(in);
-    this.pointTotal = center.clone();
-    this.numPoints = 1;
+    this.setCenter(AbstractVector.readVector(in));
+    this.setPointTotal(getCenter().clone());
+    this.setNumPoints(1);
   }
 
   /** Format the canopy for output */
   public static String formatCanopy(Canopy canopy) {
-    return "C" + canopy.id + ": "
+    return "C" + canopy.getId() + ": "
         + canopy.computeCentroid().asFormatString();
   }
 
@@ -250,8 +250,8 @@ public class Canopy extends ClusterBase {
    * @param point some point to add
    */
   public void addPoint(Vector point) {
-    numPoints++;
-    pointTotal = pointTotal.plus(point);
+    setNumPoints(getNumPoints() + 1);
+    setPointTotal(getPointTotal().plus(point));
 
   }
 
@@ -267,11 +267,11 @@ public class Canopy extends ClusterBase {
 
   @Override
   public String toString() {
-    return getIdentifier() + " - " + center.asFormatString();
+    return getIdentifier() + " - " + getCenter().asFormatString();
   }
 
   public String getIdentifier() {
-    return "C" + id;
+    return "C" + getId();
   }
 
 
@@ -281,7 +281,7 @@ public class Canopy extends ClusterBase {
    * @return a SparseVector (required by Mapper) which is the new centroid
    */
   public Vector computeCentroid() {
-    return pointTotal.divide(numPoints);
+    return getPointTotal().divide(getNumPoints());
   }
 
   /**
@@ -291,6 +291,6 @@ public class Canopy extends ClusterBase {
    * @return if the point is covered
    */
   public boolean covers(Vector point) {
-    return measure.distance(center.getLengthSquared(), center, point) < t1;
+    return measure.distance(getCenter().getLengthSquared(), getCenter(), point) < t1;
   }
 }

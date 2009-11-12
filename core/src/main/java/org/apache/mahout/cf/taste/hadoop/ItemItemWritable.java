@@ -70,12 +70,12 @@ public final class ItemItemWritable implements WritableComparable<ItemItemWritab
     if (this == that) {
       return 0;
     }
-    if (itemAID < that.itemAID) {
+    if (itemAID < that.getItemAID()) {
       return -1;
-    } else if (itemAID > that.itemAID) {
+    } else if (itemAID > that.getItemAID()) {
       return 1;
     } else {
-      return itemBID < that.itemBID ? -1 : itemBID > that.itemBID ? 1 : 0;
+      return itemBID < that.getItemBID() ? -1 : itemBID > that.getItemBID() ? 1 : 0;
     }
   }
 
@@ -88,7 +88,7 @@ public final class ItemItemWritable implements WritableComparable<ItemItemWritab
   public boolean equals(Object o) {
     if (o instanceof ItemItemWritable) {
       ItemItemWritable that = (ItemItemWritable) o;
-      return itemAID == that.itemAID && itemBID == that.itemBID;
+      return itemAID == that.getItemAID() && itemBID == that.getItemBID();
     }
     return false;
   }

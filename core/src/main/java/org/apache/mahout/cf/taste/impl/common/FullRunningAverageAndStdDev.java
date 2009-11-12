@@ -33,14 +33,14 @@ public final class FullRunningAverageAndStdDev extends FullRunningAverage implem
   }
 
   @Override
-  public void addDatum(double datum) {
+  public synchronized void addDatum(double datum) {
     super.addDatum(datum);
     sumX2 += datum * datum;
     recomputeStdDev();
   }
 
   @Override
-  public void removeDatum(double datum) {
+  public synchronized void removeDatum(double datum) {
     super.removeDatum(datum);
     sumX2 -= datum * datum;
     recomputeStdDev();
@@ -54,7 +54,7 @@ public final class FullRunningAverageAndStdDev extends FullRunningAverage implem
     throw new UnsupportedOperationException();
   }
 
-  private void recomputeStdDev() {
+  private synchronized void recomputeStdDev() {
     int count = getCount();
     if (count > 1) {
       double average = getAverage();

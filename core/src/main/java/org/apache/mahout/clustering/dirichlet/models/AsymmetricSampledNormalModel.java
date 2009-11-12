@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.mahout.clustering.dirichlet.models;
 
 import org.apache.mahout.matrix.AbstractVector;
@@ -29,9 +30,9 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
   private static final double sqrt2pi = Math.sqrt(2.0 * Math.PI);
 
   // the parameters
-  public Vector mean;
+  private Vector mean;
 
-  public Vector sd;
+  private Vector stdDev;
 
   // the observation statistics, initialized by the first observation
   private int s0 = 0;
@@ -44,13 +45,21 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
     super();
   }
 
-  public AsymmetricSampledNormalModel(Vector mean, Vector sd) {
+  public AsymmetricSampledNormalModel(Vector mean, Vector stdDev) {
     super();
     this.mean = mean;
-    this.sd = sd;
+    this.stdDev = stdDev;
     this.s0 = 0;
     this.s1 = mean.like();
     this.s2 = mean.like();
+  }
+
+  public Vector getMean() {
+    return mean;
+  }
+
+  public Vector getStdDev() {
+    return stdDev;
   }
 
   /**
@@ -59,7 +68,7 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
    * @return an AsymmetricSampledNormalModel
    */
   AsymmetricSampledNormalModel sample() {
-    return new AsymmetricSampledNormalModel(mean, sd);
+    return new AsymmetricSampledNormalModel(mean, stdDev);
   }
 
   @Override
@@ -85,21 +94,23 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
     mean = s1.divide(s0);
     // compute the two component stds
     if (s0 > 1) {
-      sd = s2.times(s0).minus(s1.times(s1)).assign(new SquareRootFunction())
+      stdDev = s2.times(s0).minus(s1.times(s1)).assign(new SquareRootFunction())
           .divide(s0);
     } else {
-      sd.assign(Double.MIN_NORMAL);
+      stdDev.assign(Double.MIN_NORMAL);
     }
   }
 
   /**
-   * Calculate a pdf using the supplied sample and sd
+   * Calculate a pdf using the supplied sample and stdDev
    *
    * @param x  a Vector sample
    * @param sd a double std deviation
    */
   private double pdf(Vector x, double sd) {
-    assert x.getNumNondefaultElements() == 2;
+    if (x.getNumNondefaultElements() != 2) {
+      throw new IllegalArgumentException();
+    }
     double sd2 = sd * sd;
     double exp = -(x.dot(x) - 2 * x.dot(mean) + mean.dot(mean)) / (2 * sd2);
     double ex = Math.exp(exp);
@@ -109,9 +120,11 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
   @Override
   public double pdf(Vector x) {
     // return the product of the two component pdfs
-    assert x.getNumNondefaultElements() == 2;
-    double pdf0 = pdf(x, sd.get(0));
-    double pdf1 = pdf(x, sd.get(1));
+    if (x.getNumNondefaultElements() != 2) {
+      throw new IllegalArgumentException();
+    }
+    double pdf0 = pdf(x, stdDev.get(0));
+    double pdf1 = pdf(x, stdDev.get(1));
     // if (pdf0 < 0 || pdf0 > 1 || pdf1 < 0 || pdf1 > 1)
     // System.out.print("");
     return pdf0 * pdf1;
@@ -124,7 +137,7 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
 
   @Override
   public String toString() {
-    StringBuilder buf = new StringBuilder();
+    StringBuilder buf = new StringBuilder(50);
     buf.append("asnm{n=").append(s0).append(" m=[");
     if (mean != null) {
       for (int i = 0; i < mean.size(); i++) {
@@ -132,9 +145,9 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
       }
     }
     buf.append("] sd=[");
-    if (sd != null) {
-      for (int i = 0; i < sd.size(); i++) {
-        buf.append(String.format("%.2f", sd.get(i))).append(", ");
+    if (stdDev != null) {
+      for (int i = 0; i < stdDev.size(); i++) {
+        buf.append(String.format("%.2f", stdDev.get(i))).append(", ");
       }
     }
     buf.append("]}");
@@ -144,7 +157,7 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
   @Override
   public void readFields(DataInput in) throws IOException {
     this.mean = AbstractVector.readVector(in);
-    this.sd = AbstractVector.readVector(in);
+    this.stdDev = AbstractVector.readVector(in);
     this.s0 = in.readInt();
     this.s1 = AbstractVector.readVector(in);
     this.s2 = AbstractVector.readVector(in);
@@ -153,7 +166,7 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
   @Override
   public void write(DataOutput out) throws IOException {
     AbstractVector.writeVector(out, mean);
-    AbstractVector.writeVector(out, sd);
+    AbstractVector.writeVector(out, stdDev);
     out.writeInt(s0);
     AbstractVector.writeVector(out, s1);
     AbstractVector.writeVector(out, s2);
