@@ -28,10 +28,6 @@
   <target name="core-job" >
     <jar jarfile="${dest}/${fullnamever}.job">
       <zipfileset dir="${dest}/classes"/>
-      <zipfileset dir="${core-lib}" prefix="lib"
-                  includes="**/*.jar" excludes="hadoop-*.jar"/>
-      <zipfileset dir="${shared-lib}" prefix="lib"
-                  includes="**/*.jar"/>
       <zipfileset dir="${dest}/dependency" prefix="lib"
                   includes="**/*.jar"/>
     </jar>
@@ -41,10 +37,6 @@
   <target name="example-job" depends="">
     <jar jarfile="${dest}/${fullnamever}.job">
       <zipfileset dir="${dest}/classes"/>
-      <zipfileset dir="${shared-lib}" prefix="lib"
-                  includes="**/*.jar"/>
-      <zipfileset dir="${core-lib}" prefix="lib"
-                  includes="**/*.jar" excludes="hadoop-*.jar"/>
       <zipfileset dir="../core/target/classes"/>
       <zipfileset dir="${dest}/dependency" prefix="lib"
                   includes="**/*.jar" excludes="apache-mahout-core-*.jar"/>

@@ -57,8 +57,7 @@
                 <ant antfile="../maven/build.xml" target="example-job">
                   <property name="dest" value="${project.build.directory}" />
                   <property name="fullnamever" value="${project.artifactId}-${project.version}" />
-                  <property name="core-lib" value="../core/lib" />
-                  <property name="shared-lib" value="../lib" />
+
                   <property name="version" value="${project.version}" />
                 </ant>
                 <ant antfile="../maven/build.xml" target="build-grouplens-jar">
