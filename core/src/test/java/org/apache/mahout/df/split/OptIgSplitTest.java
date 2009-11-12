@@ -53,7 +53,7 @@ public class OptIgSplitTest extends TestCase {
       Split expected = ref.computeSplit(data, attr);
       Split actual = opt.computeSplit(data, attr);
 
-      assertEquals(expected.ig, actual.ig);
+      assertEquals(expected.ig, actual.ig, 0.0000001);
       assertEquals(expected.split, actual.split);
     }
   }
