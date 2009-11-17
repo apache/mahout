@@ -24,7 +24,9 @@ import org.apache.mahout.cf.taste.eval.DataModelBuilder;
 import org.apache.mahout.cf.taste.eval.RecommenderBuilder;
 import org.apache.mahout.cf.taste.eval.RecommenderEvaluator;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
+import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
+import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
@@ -64,18 +66,22 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     minPreference = Float.NaN;
   }
 
+  @Override
   public final float getMaxPreference() {
     return maxPreference;
   }
 
+  @Override
   public final void setMaxPreference(float maxPreference) {
     this.maxPreference = maxPreference;
   }
 
+  @Override
   public final float getMinPreference() {
     return minPreference;
   }
 
+  @Override
   public final void setMinPreference(float minPreference) {
     this.minPreference = minPreference;
   }
@@ -171,7 +177,7 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
   private double getEvaluation(FastByIDMap<PreferenceArray> testUserPrefs, Recommender recommender)
       throws TasteException {
     reset();
-    Collection<Callable<Object>> estimateCallables = new ArrayList<Callable<Object>>();
+    Collection<Callable<Void>> estimateCallables = new ArrayList<Callable<Void>>();
     for (Map.Entry<Long, PreferenceArray> entry : testUserPrefs.entrySet()) {
       estimateCallables.add(new PreferenceEstimateCallable(recommender, entry.getKey(), entry.getValue()));
     }
@@ -180,15 +186,17 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     return computeFinalEvaluation();
   }
 
-  static void execute(Collection<Callable<Object>> callables) throws TasteException {
-    ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+  static void execute(Collection<Callable<Void>> callables) throws TasteException {
+    callables = wrapWithStatsCallables(callables);
+    int numProcessors = Runtime.getRuntime().availableProcessors();
+    ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
+    log.info("Starting timing of {} tasks in {} threads", callables.size(), numProcessors);
     try {
-      List<Future<Object>> futures = executor.invokeAll(callables);
-      int count = 0;
-      for (Future<Object> future : futures) {
-        future.get();
-        if (count++ % 1000 == 0) {
-          log.info("Finished {}", count);
+      List<Future<Void>> futures = executor.invokeAll(callables);
+      // Go look for exceptions here, really
+      for (Future<Void> future : futures) {
+        if (!future.isDone()) {
+          future.get();
         }
       }
     } catch (InterruptedException ie) {
@@ -199,6 +207,18 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     executor.shutdown();
   }
 
+  private static Collection<Callable<Void>> wrapWithStatsCallables(Collection<Callable<Void>> callables) {
+    int size = callables.size();
+    Collection<Callable<Void>> wrapped = new ArrayList<Callable<Void>>(size);
+    int count = 0;
+    RunningAverageAndStdDev timing = new FullRunningAverageAndStdDev();
+    for (Callable<Void> callable : callables) {
+      boolean logStats = count++ % 1000 == 0; // log every 100 or so iterations
+      wrapped.add(new StatsCallable(callable, logStats, timing));
+    }
+    return wrapped;
+  }
+
   abstract void reset();
 
   abstract void processOneEstimate(float estimatedPreference, Preference realPref);
@@ -206,7 +226,7 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
   abstract double computeFinalEvaluation();
 
 
-  private class PreferenceEstimateCallable implements Callable<Object> {
+  private class PreferenceEstimateCallable implements Callable<Void> {
 
     private final Recommender recommender;
     private final long testUserID;
@@ -221,7 +241,7 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     }
 
     @Override
-    public Object call() throws TasteException {
+    public Void call() throws TasteException {
       for (Preference realPref : prefs) {
         float estimatedPreference = Float.NaN;
         try {
@@ -241,6 +261,36 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
       return null;
     }
 
+  }
+
+  private static class StatsCallable implements Callable<Void> {
+
+    private final Callable<Void> delegate;
+    private final boolean logStats;
+    private final RunningAverageAndStdDev timing;
+
+    private StatsCallable(Callable<Void> delegate, boolean logStats, RunningAverageAndStdDev timing) {
+      this.delegate = delegate;
+      this.logStats = logStats;
+      this.timing = timing;
+    }
+
+    @Override
+    public Void call() throws Exception {
+      long start = System.currentTimeMillis();
+      delegate.call();
+      long end = System.currentTimeMillis();
+      timing.addDatum(end - start);
+      if (logStats) {
+        Runtime runtime = Runtime.getRuntime();
+        int average = (int) timing.getAverage();
+        log.info("Average time per recommendation: {}ms", average);
+        long totalMemory = runtime.totalMemory();
+        long memory = totalMemory - runtime.freeMemory();
+        log.info("Approximate memory used: {}MB / {}MB", memory / 1000000L, totalMemory / 1000000L);
+      }
+      return null;
+    }
   }
 
 }
