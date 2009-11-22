@@ -102,11 +102,10 @@ public class SparseMatrix extends AbstractMatrix {
 
   @Override
   public void setQuick(int row, int column, double value) {
-    Integer rowKey = row;
-    Vector r = rows.get(rowKey);
+    Vector r = rows.get(row);
     if (r == null) {
       r = new SparseVector(cardinality[COL]);
-      rows.put(rowKey, r);
+      rows.put(row, r);
     }
     r.setQuick(column, value);
   }
@@ -142,11 +141,10 @@ public class SparseMatrix extends AbstractMatrix {
     for (int row = 0; row < cardinality[ROW]; row++) {
       double val = other.getQuick(row);
       if (val != 0.0) {
-        Integer rowKey = row;
-        Vector r = rows.get(rowKey);
+        Vector r = rows.get(row);
         if (r == null) {
           r = new SparseVector(cardinality[ROW]);
-          rows.put(rowKey, r);
+          rows.put(row, r);
         }
         r.setQuick(column, val);
       }

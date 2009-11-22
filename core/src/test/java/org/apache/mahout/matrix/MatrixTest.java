@@ -35,6 +35,10 @@ public abstract class MatrixTest extends TestCase {
   protected final double[][] values = {{1.1, 2.2}, {3.3, 4.4},
       {5.5, 6.6}};
 
+  protected final double[] vectorAValues = { 1.0/1.1, 2.0/1.1 };
+  
+  protected final double[] vectorBValues = { 5.0, 10.0, 100.0 };
+  
   protected Matrix test;
 
   protected MatrixTest(String name) {
@@ -395,10 +399,47 @@ public abstract class MatrixTest extends TestCase {
     int[] v = value.size();
     assertEquals("rows", c[ROW], v[ROW]);
     assertEquals("cols", c[ROW], v[COL]);
-    // TODO: check the math too, lazy
+    
+    Matrix expected = new DenseMatrix(new double[][] {{5.0, 11.0, 17.0}, 
+        {11.0, 25.0, 39.0}, {17.0, 39.0, 61.0}}).times(1.21);
+    
+    for(int i=0; i<expected.numCols(); i++) {
+      for(int j=0; j<expected.numRows(); j++) {
+        assertTrue("Matrix times transpose not correct: " + i + ", " + j 
+                   + "\nexpected:\n\t" + expected.asFormatString() + "\nactual:\n\t" 
+                   + value.asFormatString(), 
+                   Math.abs(expected.get(i, j) - value.get(i, j)) < 1e-12);
+      }
+    }
+    
     Matrix timestest = new DenseMatrix(10, 1);
     /* will throw ArrayIndexOutOfBoundsException exception without MAHOUT-26 */
     timestest.transpose().times(timestest);
+  }
+  
+  public void testTimesVector() {
+    Vector vectorA = new DenseVector(vectorAValues);
+    Vector testTimesVectorA = test.times(vectorA);
+    Vector expected = new DenseVector(new double[] { 5.0, 11.0, 17.0 });
+    assertTrue("Matrix times vector not equals: " + vectorA.asFormatString() 
+               + " != " + testTimesVectorA.asFormatString(), 
+               expected.minus(testTimesVectorA).norm(2) < 1e-12);
+    try {
+      test.times(testTimesVectorA);
+      fail("Cardinalities do not match, should throw exception");
+    } catch (CardinalityException ce) {
+      assertTrue(true);
+    }
+  }
+  
+  public void testTimesSquaredTimesVector() {
+    Vector vectorA = new DenseVector(vectorAValues);
+    Vector ttA = test.timesSquared(vectorA);
+    Vector ttASlow = test.transpose().times(test.times(vectorA));
+    assertTrue("M'Mv != M.timesSquared(v): " + ttA.asFormatString() 
+               + " != " + ttASlow.asFormatString(),
+               ttASlow.minus(ttA).norm(2) < 1e-12);
+    
   }
 
   public void testTimesMatrixCardinality() {
