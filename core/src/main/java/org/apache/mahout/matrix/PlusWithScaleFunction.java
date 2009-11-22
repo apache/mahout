@@ -1,5 +1,3 @@
-package org.apache.mahout.matrix;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,10 +15,12 @@ package org.apache.mahout.matrix;
  * limitations under the License.
  */
 
+package org.apache.mahout.matrix;
+
 public class PlusWithScaleFunction implements BinaryFunction {
   private final double scale;
 
-  public PlusWithScaleFunction(final double scale) {
+  public PlusWithScaleFunction(double scale) {
     this.scale = scale;
   }
 

@@ -63,7 +63,7 @@ public class ToolMapper extends MapReduceBase implements
     String descrs = job.get(ATTRIBUTES);
 
     if (descrs != null)
-      configure((char[]) StringUtils.fromString(descrs));
+      configure(StringUtils.<char[]>fromString(descrs));
   }
 
   void configure(char[] descriptors) {

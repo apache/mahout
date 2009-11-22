@@ -66,7 +66,6 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
    * @throws IllegalArgumentException if size is less than 0, maxSize is less than 1,
    *  or at least half of {@link RandomUtils#MAX_INT_SMALLER_TWIN_PRIME}
    */
-  @SuppressWarnings("unchecked")
   public FastByIDMap(int size, int maxSize) {
     if (size < 0) {
       throw new IllegalArgumentException("size must be at least 0");

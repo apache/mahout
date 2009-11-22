@@ -97,7 +97,7 @@ public class MahoutEvaluatorTest extends TestCase {
                                      Collection<DummyCandidate> population) throws IOException {
     FSDataInputStream in = fs.open(f);
     for (String line : new FileLineIterable(in)) {
-      population.add((DummyCandidate) StringUtils.fromString(line));
+      population.add(StringUtils.<DummyCandidate>fromString(line));
     }
   }
 

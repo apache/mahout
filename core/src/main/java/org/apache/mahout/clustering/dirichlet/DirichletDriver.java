@@ -161,12 +161,12 @@ public class DirichletDriver {
     }
   }
 
-  @SuppressWarnings("unchecked")
   public static DirichletState<Vector> createState(String modelFactory,
                                                    int numModels, double alpha_0) throws ClassNotFoundException,
       InstantiationException, IllegalAccessException {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    Class<?> cl = ccl.loadClass(modelFactory);
+    Class<? extends ModelDistribution> cl =
+        ccl.loadClass(modelFactory).asSubclass(ModelDistribution.class);
     ModelDistribution<Vector> factory = (ModelDistribution<Vector>) cl
         .newInstance();
     return new DirichletState<Vector>(factory,

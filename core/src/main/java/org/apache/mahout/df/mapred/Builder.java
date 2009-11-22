@@ -137,7 +137,7 @@ public abstract class Builder {
     if (string == null)
       return null;
 
-    return (TreeBuilder) StringUtils.fromString(string);
+    return StringUtils.fromString(string);
   }
 
   private static void setTreeBuilder(Configuration conf, TreeBuilder treeBuilder) {

@@ -51,7 +51,7 @@ public final class StringUtils {
    * @param str the string representation of the object
    * @return restored object
    */
-  public static Object fromString(String str) {
-    return xstream.fromXML(str);
+  public static <T> T fromString(String str) {
+    return (T) xstream.fromXML(str);
   }
 }

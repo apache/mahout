@@ -231,9 +231,8 @@ public class CDInfosTool {
 
     Parser parser = new Parser();
     parser.setGroup(group);
-    CommandLine cmdLine;
     try {
-      cmdLine = parser.parse(args);
+      CommandLine cmdLine = parser.parse(args);
 
       if (cmdLine.hasOption(helpOpt)) {
         CommandLineUtil.printHelp(group);

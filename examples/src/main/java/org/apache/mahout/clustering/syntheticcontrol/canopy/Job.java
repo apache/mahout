@@ -95,8 +95,8 @@ public class Job {
         String measureClass = cmdLine.getValue(
             measureClassOpt, "org.apache.mahout.common.distance.EuclideanDistanceMeasure").toString();
 
-        Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(
-            cmdLine.getValue(vectorClassOpt, "org.apache.mahout.matrix.SparseVector").toString());
+        String className =  cmdLine.getValue(vectorClassOpt, "org.apache.mahout.matrix.SparseVector").toString();
+        Class<? extends Vector> vectorClass = Class.forName(className).asSubclass(Vector.class);
         double t1 = Double.parseDouble(cmdLine.getValue(t1Opt, "80").toString());
         double t2 = Double.parseDouble(cmdLine.getValue(t2Opt, "55").toString());
 
@@ -140,7 +140,7 @@ public class Job {
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
     if (dfs.exists(outPath))
       dfs.delete(outPath, true);
-    final String directoryContainingConvertedInput = output
+    String directoryContainingConvertedInput = output
         + Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
     InputDriver.runJob(input, directoryContainingConvertedInput, vectorClass);
     CanopyClusteringJob.runJob(directoryContainingConvertedInput, output,

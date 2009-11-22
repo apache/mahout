@@ -51,7 +51,7 @@ public class EvalMapper extends MapReduceBase implements
           "'MAHOUT_GA_EVALUATOR' job parameter non found");
     }
 
-    evaluator = (FitnessEvaluator<Object>) StringUtils.fromString(evlstr);
+    evaluator = StringUtils.fromString(evlstr);
 
     super.configure(job);
   }

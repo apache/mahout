@@ -37,13 +37,9 @@ import org.apache.log4j.Logger;
 import org.apache.mahout.clustering.canopy.CanopyClusteringJob;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
-import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
 import org.apache.mahout.common.CommandLineUtil;
-import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
-import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
-import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
 
 public class Job {
@@ -100,8 +96,8 @@ public class Job {
       double t2 = Double.parseDouble(cmdLine.getValue(t2Opt, "55").toString());
       double convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt, "0.5").toString());
       int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterationsOpt, 10).toString());
-      Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(
-          cmdLine.getValue(vectorClassOpt, "org.apache.mahout.matrix.SparseVector").toString());
+      String className = cmdLine.getValue(vectorClassOpt, "org.apache.mahout.matrix.SparseVector").toString();
+      Class<? extends Vector> vectorClass = Class.forName(className).asSubclass(Vector.class);
 
       runJob(input, output, measureClass, t1, t2, convergenceDelta, maxIterations, vectorClass);
     } catch (OptionException e) {

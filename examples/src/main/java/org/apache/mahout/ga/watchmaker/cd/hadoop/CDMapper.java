@@ -50,7 +50,6 @@ public class CDMapper extends MapReduceBase implements
   private int target;
 
   @Override
-  @SuppressWarnings("unchecked")
   public void configure(JobConf job) {
     String rstr = job.get(CLASSDISCOVERY_RULES);
     if (rstr == null)
@@ -67,8 +66,8 @@ public class CDMapper extends MapReduceBase implements
       throw new IllegalArgumentException("Job Parameter ("
           + CLASSDISCOVERY_TARGET_LABEL + ") not found!");
 
-    initializeDataSet((DataSet) StringUtils.fromString(datastr));
-    configure((List<Rule>) StringUtils.fromString(rstr), target);
+    initializeDataSet(StringUtils.<DataSet>fromString(datastr));
+    configure(StringUtils.<List<Rule>>fromString(rstr), target);
 
     super.configure(job);
   }

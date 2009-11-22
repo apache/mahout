@@ -52,7 +52,6 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
    *
    * @param userData users to include
    */
-  @SuppressWarnings("unchecked")
   public GenericBooleanPrefDataModel(FastByIDMap<FastIDSet> userData) {
     if (userData == null) {
       throw new IllegalArgumentException("userData is null");

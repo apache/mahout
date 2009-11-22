@@ -261,14 +261,14 @@ public class TestClassifier {
     classifier.initialize();
     ResultAnalyzer resultAnalyzer = new ResultAnalyzer(classifier.getLabels(),
         params.get("defaultCat"));
-    final TimingStatistics totalStatistics = new TimingStatistics();
+    TimingStatistics totalStatistics = new TimingStatistics();
     if (subdirs != null) {
 
       for (File file : subdirs) {
         log.info("--------------");
         log.info("Testing: " + file);
         String correctLabel = file.getName().split(".txt")[0];
-        final TimingStatistics operationStats = new TimingStatistics();
+        TimingStatistics operationStats = new TimingStatistics();
 
         long lineNum = 0;
         for (String line : new FileLineIterable(new File(file.getPath()),

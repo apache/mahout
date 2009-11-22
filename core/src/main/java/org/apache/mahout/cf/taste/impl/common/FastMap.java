@@ -79,7 +79,6 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
    * @throws IllegalArgumentException if size is less than 0, maxSize is less than 1,
    *  or at least half of {@link RandomUtils#MAX_INT_SMALLER_TWIN_PRIME}
    */
-  @SuppressWarnings("unchecked")
   public FastMap(int size, int maxSize) {
     if (size < 0) {
       throw new IllegalArgumentException("size must be at least 0");
@@ -279,7 +278,6 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
     rehash(RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * keys.length)));
   }
 
-  @SuppressWarnings("unchecked")
   private void rehash(int newHashSize) {
     K[] oldKeys = keys;
     V[] oldValues = values;

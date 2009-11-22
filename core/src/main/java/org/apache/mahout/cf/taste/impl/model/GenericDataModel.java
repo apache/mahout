@@ -59,7 +59,6 @@ public final class GenericDataModel implements DataModel, Serializable {
    * @param userData users to include in this {@link GenericDataModel}
    *  (see also {@link #toDataMap(FastByIDMap, boolean)})
    */
-  @SuppressWarnings("unchecked")
   public GenericDataModel(FastByIDMap<PreferenceArray> userData) {
     if (userData == null) {
       throw new IllegalArgumentException("userData is null");

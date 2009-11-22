@@ -39,7 +39,6 @@ import org.apache.log4j.Logger;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
-import org.apache.mahout.matrix.Vector;
 
 public class InputDriver {
   /**Logger for this class.*/

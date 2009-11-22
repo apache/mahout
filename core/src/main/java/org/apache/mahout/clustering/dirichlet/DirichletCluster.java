@@ -31,11 +31,10 @@ import java.lang.reflect.Type;
 
 public class DirichletCluster<O> implements Writable {
 
-  @SuppressWarnings("unchecked")
   @Override
   public void readFields(DataInput in) throws IOException {
     this.totalCount = in.readDouble();
-    this.model = (Model<O>) readModel(in);
+    this.model = readModel(in);
   }
 
   @Override
@@ -83,11 +82,11 @@ public class DirichletCluster<O> implements Writable {
   }
 
   /** Reads a typed Model instance from the input stream */
-  public static Model<?> readModel(DataInput in) throws IOException {
+  public static <O> Model<O> readModel(DataInput in) throws IOException {
     String modelClassName = in.readUTF();
-    Model<?> model;
+    Model<O> model;
     try {
-      model = Class.forName(modelClassName).asSubclass(Model.class)
+      model = (Model<O>) Class.forName(modelClassName).asSubclass(Model.class)
           .newInstance();
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);

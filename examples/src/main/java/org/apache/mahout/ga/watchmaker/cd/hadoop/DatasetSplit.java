@@ -98,7 +98,7 @@ public class DatasetSplit {
     if (seedstr == null)
       throw new IllegalArgumentException("SEED job parameter not found");
 
-    return (byte[]) StringUtils.fromString(seedstr);
+    return StringUtils.fromString(seedstr);
   }
 
   static double getThreshold(JobConf conf) {

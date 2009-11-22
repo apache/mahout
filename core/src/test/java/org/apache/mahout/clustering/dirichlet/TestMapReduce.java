@@ -23,6 +23,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDistribution;
 import org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalModel;
@@ -49,9 +50,9 @@ public class TestMapReduce extends TestCase {
 
   private List<Vector> sampleData = new ArrayList<Vector>();
 
-  FileSystem fs;
+  private FileSystem fs;
 
-  Configuration conf;
+  private Configuration conf;
 
   /**
    * Generate random samples and add them to the sampleData
@@ -148,7 +149,7 @@ public class TestMapReduce extends TestCase {
 
     DirichletReducer reducer = new DirichletReducer();
     reducer.configure(state);
-    DummyOutputCollector<Text, DirichletCluster<Vector>> reduceCollector = new DummyOutputCollector<Text, DirichletCluster<Vector>>();
+    OutputCollector<Text, DirichletCluster<Vector>> reduceCollector = new DummyOutputCollector<Text, DirichletCluster<Vector>>();
     for (String key : mapCollector.getKeys()) {
       reducer.reduce(new Text(key), mapCollector.getValue(key).iterator(),
           reduceCollector, null);
@@ -158,7 +159,7 @@ public class TestMapReduce extends TestCase {
     state.update(newModels);
   }
 
-  private static void printModels(List<Model<Vector>[]> results, int significant) {
+  private static void printModels(Iterable<Model<Vector>[]> results, int significant) {
     int row = 0;
     for (Model<Vector>[] r : results) {
       System.out.print("sample[" + row++ + "]= ");
@@ -194,7 +195,7 @@ public class TestMapReduce extends TestCase {
 
       DirichletReducer reducer = new DirichletReducer();
       reducer.configure(state);
-      DummyOutputCollector<Text, DirichletCluster<Vector>> reduceCollector = new DummyOutputCollector<Text, DirichletCluster<Vector>>();
+      OutputCollector<Text,DirichletCluster<Vector>> reduceCollector = new DummyOutputCollector<Text, DirichletCluster<Vector>>();
       for (String key : mapCollector.getKeys()) {
         reducer.reduce(new Text(key), mapCollector.getValue(key).iterator(),
             reduceCollector, null);
@@ -207,7 +208,6 @@ public class TestMapReduce extends TestCase {
     printModels(models, 0);
   }
 
-  @SuppressWarnings("unchecked")
   public void testNormalModelSerialization() {
     double[] m = {1.1, 2.2};
     Model<?> model = new NormalModel(new DenseVector(m), 3.3);
@@ -219,7 +219,6 @@ public class TestMapReduce extends TestCase {
     assertEquals("models", model.toString(), model2.toString());
   }
 
-  @SuppressWarnings("unchecked")
   public void testNormalModelDistributionSerialization() {
     NormalModelDistribution dist = new NormalModelDistribution();
     Model<?>[] models = dist.sampleFromPrior(20);
@@ -235,7 +234,6 @@ public class TestMapReduce extends TestCase {
     }
   }
 
-  @SuppressWarnings("unchecked")
   public void testSampledNormalModelSerialization() {
     double[] m = {1.1, 2.2};
     Model<?> model = new SampledNormalModel(new DenseVector(m), 3.3);
@@ -247,15 +245,14 @@ public class TestMapReduce extends TestCase {
     assertEquals("models", model.toString(), model2.toString());
   }
 
-  @SuppressWarnings("unchecked")
   public void testSampledNormalDistributionSerialization() {
     SampledNormalDistribution dist = new SampledNormalDistribution();
-    Model[] models = dist.sampleFromPrior(20);
+    Model<Vector>[] models = dist.sampleFromPrior(20);
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();
     String jsonString = gson.toJson(models);
-    Model[] models2 = gson.fromJson(jsonString, SampledNormalModel[].class);
+    Model<Vector>[] models2 = gson.fromJson(jsonString, SampledNormalModel[].class);
     assertEquals("models", models.length, models2.length);
     for (int i = 0; i < models.length; i++) {
       assertEquals("model[" + i + ']', models[i].toString(), models2[i]
@@ -263,7 +260,6 @@ public class TestMapReduce extends TestCase {
     }
   }
 
-  @SuppressWarnings("unchecked")
   public void testAsymmetricSampledNormalModelSerialization() {
     double[] m = {1.1, 2.2};
     double[] s = {3.3, 4.4};
@@ -278,15 +274,14 @@ public class TestMapReduce extends TestCase {
     assertEquals("models", model.toString(), model2.toString());
   }
 
-  @SuppressWarnings("unchecked")
   public void testAsymmetricSampledNormalDistributionSerialization() {
     AsymmetricSampledNormalDistribution dist = new AsymmetricSampledNormalDistribution();
-    Model[] models = dist.sampleFromPrior(20);
+    Model<Vector>[] models = dist.sampleFromPrior(20);
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();
     String jsonString = gson.toJson(models);
-    Model[] models2 = gson.fromJson(jsonString,
+    Model<Vector>[] models2 = gson.fromJson(jsonString,
         AsymmetricSampledNormalModel[].class);
     assertEquals("models", models.length, models2.length);
     for (int i = 0; i < models.length; i++) {
@@ -295,7 +290,6 @@ public class TestMapReduce extends TestCase {
     }
   }
 
-  @SuppressWarnings("unchecked")
   public void testModelHolderSerialization() {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
@@ -303,14 +297,12 @@ public class TestMapReduce extends TestCase {
         .registerTypeAdapter(ModelHolder.class, new JsonModelHolderAdapter());
     Gson gson = builder.create();
     double[] d = {1.1, 2.2};
-    ModelHolder mh = new ModelHolder(new NormalModel(new DenseVector(d), 3.3));
+    ModelHolder<Vector> mh = new ModelHolder<Vector>(new NormalModel(new DenseVector(d), 3.3));
     String format = gson.toJson(mh);
-    System.out.println(format);
-    ModelHolder mh2 = gson.fromJson(format, ModelHolder.class);
+    ModelHolder<Vector> mh2 = gson.<ModelHolder<Vector>>fromJson(format, ModelHolder.class);
     assertEquals("mh", mh.getModel().toString(), mh2.getModel().toString());
   }
 
-  @SuppressWarnings("unchecked")
   public void testModelHolderSerialization2() {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
@@ -319,25 +311,22 @@ public class TestMapReduce extends TestCase {
     Gson gson = builder.create();
     double[] d = {1.1, 2.2};
     double[] s = {3.3, 4.4};
-    ModelHolder mh = new ModelHolder(new AsymmetricSampledNormalModel(
+    ModelHolder<Vector> mh = new ModelHolder<Vector>(new AsymmetricSampledNormalModel(
         new DenseVector(d), new DenseVector(s)));
     String format = gson.toJson(mh);
-    System.out.println(format);
-    ModelHolder mh2 = gson.fromJson(format, ModelHolder.class);
+    ModelHolder<Vector> mh2 = gson.<ModelHolder<Vector>>fromJson(format, ModelHolder.class);
     assertEquals("mh", mh.getModel().toString(), mh2.getModel().toString());
   }
 
-  @SuppressWarnings("unchecked")
   public void testStateSerialization() {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(DirichletState.class,
         new JsonDirichletStateAdapter());
     Gson gson = builder.create();
-    DirichletState state = new DirichletState(new SampledNormalDistribution(),
+    DirichletState<Vector> state = new DirichletState<Vector>(new SampledNormalDistribution(),
         20, 1, 1, 0);
     String format = gson.toJson(state);
-    System.out.println(format);
-    DirichletState state2 = gson.fromJson(format, DirichletState.class);
+    DirichletState<?> state2 = gson.fromJson(format, DirichletState.class);
     assertNotNull("State2 null", state2);
     assertEquals("numClusters", state.getNumClusters(), state2.getNumClusters());
     assertEquals("modelFactory", state.getModelFactory().getClass().getName(),

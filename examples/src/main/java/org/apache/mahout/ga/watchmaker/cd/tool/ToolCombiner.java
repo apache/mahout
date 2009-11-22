@@ -56,7 +56,7 @@ public class ToolCombiner extends MapReduceBase implements
     String descriptors = job.get(ToolMapper.ATTRIBUTES);
 
     if (descriptors != null)
-      configure((char[]) StringUtils.fromString(descriptors));
+      configure(StringUtils.<char[]>fromString(descriptors));
   }
 
   void configure(char[] descriptors) {
