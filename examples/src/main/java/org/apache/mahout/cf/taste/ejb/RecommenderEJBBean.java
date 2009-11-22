@@ -19,9 +19,9 @@ package org.apache.mahout.cf.taste.ejb;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
-import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
@@ -47,7 +47,7 @@ public class RecommenderEJBBean implements SessionBean {
     return recommender.recommend(userID, howMany);
   }
 
-  public List<RecommendedItem> recommend(long userID, int howMany, Rescorer<Long> rescorer)
+  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer)
           throws TasteException {
     return recommender.recommend(userID, howMany, rescorer);
   }

@@ -17,8 +17,8 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
-import org.apache.mahout.cf.taste.recommender.Rescorer;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -64,7 +64,7 @@ public final class RandomRecommender extends AbstractRecommender {
   }
 
   @Override
-  public List<RecommendedItem> recommend(long userID, int howMany, Rescorer<Long> rescorer) throws TasteException {
+  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
     DataModel dataModel = getDataModel();
     int numItems = dataModel.getNumItems();
     List<RecommendedItem> result = new ArrayList<RecommendedItem>(howMany);

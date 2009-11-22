@@ -25,9 +25,9 @@ import org.apache.mahout.cf.taste.impl.recommender.GenericUserBasedRecommender;
 import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
+import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
-import org.apache.mahout.cf.taste.recommender.Rescorer;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 import java.util.Collection;
@@ -53,7 +53,7 @@ public final class BookCrossingRecommender implements Recommender {
   }
 
   @Override
-  public List<RecommendedItem> recommend(long userID, int howMany, Rescorer<Long> rescorer)
+  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer)
           throws TasteException {
     return recommender.recommend(userID, howMany, rescorer);
   }

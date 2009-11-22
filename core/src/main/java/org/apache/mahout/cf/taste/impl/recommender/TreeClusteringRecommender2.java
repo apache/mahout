@@ -23,6 +23,7 @@ import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
+import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
@@ -146,7 +147,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
   }
 
   @Override
-  public List<RecommendedItem> recommend(long userID, int howMany, Rescorer<Long> rescorer)
+  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer)
       throws TasteException {
     if (howMany < 1) {
       throw new IllegalArgumentException("howMany must be at least 1");

@@ -18,25 +18,25 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
-import org.apache.mahout.cf.taste.recommender.Rescorer;
+import org.apache.mahout.cf.taste.recommender.IDRescorer;
 
 /** <p>Tests {@link NullRescorer}.</p> */
 public final class NullRescorerTest extends TasteTestCase {
 
   public void testItemRescorer() throws Exception {
-    Rescorer<Long> rescorer = NullRescorer.getItemInstance();
+    IDRescorer rescorer = NullRescorer.getItemInstance();
     assertNotNull(rescorer);
     assertEquals(1.0, rescorer.rescore(1L, 1.0));
-    assertEquals(1.0, rescorer.rescore(null, 1.0));
+    assertEquals(1.0, rescorer.rescore(0L, 1.0));
     assertEquals(0.0, rescorer.rescore(1L, 0.0));
     assertTrue(Double.isNaN(rescorer.rescore(1L, Double.NaN)));
   }
 
   public void testUserRescorer() throws Exception {
-    Rescorer<Long> rescorer = NullRescorer.getUserInstance();
+    IDRescorer rescorer = NullRescorer.getUserInstance();
     assertNotNull(rescorer);
     assertEquals(1.0, rescorer.rescore(1L, 1.0));
-    assertEquals(1.0, rescorer.rescore(null, 1.0));
+    assertEquals(1.0, rescorer.rescore(0L, 1.0));
     assertEquals(0.0, rescorer.rescore(1L, 0.0));
     assertTrue(Double.isNaN(rescorer.rescore(1L, Double.NaN)));
   }

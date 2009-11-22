@@ -18,8 +18,8 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
+import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.Recommender;
-import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -48,7 +48,7 @@ public final class CachingRecommenderTest extends TasteTestCase {
     assertEquals(5, recommendCount.get());
 
     // Results from this recommend() method can be cached...
-    Rescorer<Long> rescorer = NullRescorer.getItemInstance();
+    IDRescorer rescorer = NullRescorer.getItemInstance();
     cachingRecommender.refresh(null);
     cachingRecommender.recommend(1, 1, rescorer);
     assertEquals(6, recommendCount.get());

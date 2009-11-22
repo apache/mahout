@@ -17,8 +17,8 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
-import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -29,9 +29,9 @@ import java.util.Comparator;
  */
 final class ByRescoreComparator implements Comparator<RecommendedItem>, Serializable {
 
-  private final Rescorer<Long> rescorer;
+  private final IDRescorer rescorer;
 
-  ByRescoreComparator(Rescorer<Long> rescorer) {
+  ByRescoreComparator(IDRescorer rescorer) {
     this.rescorer = rescorer;
   }
 

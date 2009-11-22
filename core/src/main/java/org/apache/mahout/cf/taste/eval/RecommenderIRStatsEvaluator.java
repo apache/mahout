@@ -19,7 +19,7 @@ package org.apache.mahout.cf.taste.eval;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.recommender.Rescorer;
+import org.apache.mahout.cf.taste.recommender.IDRescorer;
 
 /**
  * <p>Implementations collect information retrieval-related statistics on a {@link
@@ -46,7 +46,7 @@ public interface RecommenderIRStatsEvaluator {
   IRStatistics evaluate(RecommenderBuilder recommenderBuilder,
                         DataModelBuilder dataModelBuilder,
                         DataModel dataModel,
-                        Rescorer<Long> rescorer,
+                        IDRescorer rescorer,
                         int at,
                         double relevanceThreshold,
                         double evaluationPercentage) throws TasteException;

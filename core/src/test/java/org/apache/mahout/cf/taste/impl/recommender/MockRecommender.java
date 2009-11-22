@@ -20,9 +20,9 @@ package org.apache.mahout.cf.taste.impl.recommender;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.model.DataModel;
+import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
-import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -46,7 +46,7 @@ final class MockRecommender implements Recommender {
   }
 
   @Override
-  public List<RecommendedItem> recommend(long userID, int howMany, Rescorer<Long> rescorer) {
+  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) {
     return recommend(userID, howMany);
   }
 

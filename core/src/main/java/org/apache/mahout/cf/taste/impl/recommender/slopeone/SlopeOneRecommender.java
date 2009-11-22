@@ -29,8 +29,8 @@ import org.apache.mahout.cf.taste.impl.recommender.AbstractRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
+import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
-import org.apache.mahout.cf.taste.recommender.Rescorer;
 import org.apache.mahout.cf.taste.recommender.slopeone.DiffStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,7 +95,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
   }
 
   @Override
-  public List<RecommendedItem> recommend(long userID, int howMany, Rescorer<Long> rescorer)
+  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer)
       throws TasteException {
     if (howMany < 1) {
       throw new IllegalArgumentException("howMany must be at least 1");

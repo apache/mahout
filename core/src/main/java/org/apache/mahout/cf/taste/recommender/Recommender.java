@@ -44,7 +44,7 @@ public interface Recommender extends Refreshable {
    * @return {@link List} of recommended {@link RecommendedItem}s, ordered from most strongly recommend to least
    * @throws TasteException if an error occurs while accessing the {@link DataModel}
    */
-  List<RecommendedItem> recommend(long userID, int howMany, Rescorer<Long> rescorer)
+  List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer)
           throws TasteException;
 
   /**

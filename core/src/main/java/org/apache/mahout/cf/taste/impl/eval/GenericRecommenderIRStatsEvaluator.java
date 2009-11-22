@@ -28,6 +28,7 @@ import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
+import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
@@ -38,7 +39,6 @@ import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
-import org.apache.mahout.cf.taste.recommender.Rescorer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +60,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
 
   /**
    * Pass as "relevanceThreshold" argument to
-   * {@link #evaluate(RecommenderBuilder, DataModelBuilder, DataModel, Rescorer, int, double, double)}
+   * {@link #evaluate(RecommenderBuilder, DataModelBuilder, DataModel, IDRescorer, int, double, double)}
    * to have it attempt to compute a reasonable threshold. Note that this will impact performance.
    */
   public static final double CHOOSE_THRESHOLD = Double.NaN;
@@ -75,7 +75,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
   public IRStatistics evaluate(RecommenderBuilder recommenderBuilder,
                                DataModelBuilder dataModelBuilder,
                                DataModel dataModel,
-                               Rescorer<Long> rescorer,
+                               IDRescorer rescorer,
                                int at,
                                double relevanceThreshold,
                                double evaluationPercentage) throws TasteException {

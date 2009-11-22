@@ -21,8 +21,8 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
 import org.apache.mahout.cf.taste.impl.similarity.GenericUserSimilarity;
+import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
-import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,7 +40,7 @@ public final class TopItems {
 
   public static List<RecommendedItem> getTopItems(int howMany,
                                                   LongPrimitiveIterator possibleItemIDs,
-                                                  Rescorer<Long> rescorer,
+                                                  IDRescorer rescorer,
                                                   Estimator<Long> estimator) throws TasteException {
     if (possibleItemIDs == null || estimator == null) {
       throw new IllegalArgumentException("argument is null");
@@ -73,7 +73,7 @@ public final class TopItems {
 
   public static long[] getTopUsers(int howMany,
                                    LongPrimitiveIterator allUserIDs,
-                                   Rescorer<Long> rescorer,
+                                   IDRescorer rescorer,
                                    Estimator<Long> estimator) throws TasteException {
     Queue<SimilarUser> topUsers = new PriorityQueue<SimilarUser>(howMany + 1, Collections.reverseOrder());
     boolean full = false;

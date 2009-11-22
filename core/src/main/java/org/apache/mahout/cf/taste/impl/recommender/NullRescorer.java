@@ -17,21 +17,22 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.common.LongPair;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 /** <p>A simple {@link Rescorer} which always returns the original score.</p> */
-public final class NullRescorer<T> implements Rescorer<T> {
+public final class NullRescorer<T> implements Rescorer<T>, IDRescorer {
 
-  private static final Rescorer<Long> userOrItemInstance = new NullRescorer<Long>();
+  private static final IDRescorer userOrItemInstance = new NullRescorer<Long>();
   private static final Rescorer<LongPair> itemItemPairInstance = new NullRescorer<LongPair>();
   private static final Rescorer<LongPair> userUserPairInstance = new NullRescorer<LongPair>();
 
-  public static Rescorer<Long> getItemInstance() {
+  public static IDRescorer getItemInstance() {
     return userOrItemInstance;
   }
 
-  public static Rescorer<Long> getUserInstance() {
+  public static IDRescorer getUserInstance() {
     return userOrItemInstance;
   }
 
@@ -59,6 +60,16 @@ public final class NullRescorer<T> implements Rescorer<T> {
 
   @Override
   public boolean isFiltered(T thing) {
+    return false;
+  }
+
+  @Override
+  public double rescore(long ID, double originalScore) {
+    return originalScore;
+  }
+
+  @Override
+  public boolean isFiltered(long ID) {
     return false;
   }
 

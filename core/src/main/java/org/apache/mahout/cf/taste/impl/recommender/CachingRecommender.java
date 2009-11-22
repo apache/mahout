@@ -20,13 +20,13 @@ package org.apache.mahout.cf.taste.impl.recommender;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.Cache;
+import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.common.LongPair;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
-import org.apache.mahout.cf.taste.recommender.Rescorer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +49,7 @@ public final class CachingRecommender implements Recommender {
   private final Cache<Long, Recommendations> recommendationCache;
   private final Cache<LongPair, Float> estimatedPrefCache;
   private final RefreshHelper refreshHelper;
-  private Rescorer<Long> currentRescorer;
+  private IDRescorer currentRescorer;
 
   public CachingRecommender(Recommender recommender) throws TasteException {
     if (recommender == null) {
@@ -73,11 +73,11 @@ public final class CachingRecommender implements Recommender {
     this.refreshHelper.addDependency(recommender);
   }
 
-  private synchronized Rescorer<Long> getCurrentRescorer() {
+  private synchronized IDRescorer getCurrentRescorer() {
     return currentRescorer;
   }
 
-  private synchronized void setCurrentRescorer(Rescorer<Long> rescorer) {
+  private synchronized void setCurrentRescorer(IDRescorer rescorer) {
     if (rescorer == null) {
       if (currentRescorer != null) {
         currentRescorer = null;
@@ -97,7 +97,7 @@ public final class CachingRecommender implements Recommender {
   }
 
   @Override
-  public List<RecommendedItem> recommend(long userID, int howMany, Rescorer<Long> rescorer)
+  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer)
       throws TasteException {
     if (howMany < 1) {
       throw new IllegalArgumentException("howMany must be at least 1");
@@ -186,7 +186,7 @@ public final class CachingRecommender implements Recommender {
     public Recommendations get(Long key) throws TasteException {
       log.debug("Retrieving new recommendations for user ID '{}'", key);
       int howMany = maxHowMany[0];
-      Rescorer<Long> rescorer = getCurrentRescorer();
+      IDRescorer rescorer = getCurrentRescorer();
       List<RecommendedItem> recommendations = rescorer == null ?
           recommender.recommend(key, howMany) :
           recommender.recommend(key, howMany, rescorer);

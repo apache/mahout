@@ -17,18 +17,29 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 
 /** <p>Simple {@link Rescorer} which negates the given score, thus reversing order of rankings.</p> */
-public final class ReversingRescorer<T> implements Rescorer<T> {
+public final class ReversingRescorer<T> implements Rescorer<T>, IDRescorer {
 
   @Override
   public double rescore(T thing, double originalScore) {
-    return Double.isNaN(originalScore) ? Double.NaN : -originalScore;
+    return -originalScore;
   }
 
   @Override
   public boolean isFiltered(T thing) {
+    return false;
+  }
+
+  @Override
+  public double rescore(long ID, double originalScore) {
+    return -originalScore;
+  }
+
+  @Override
+  public boolean isFiltered(long ID) {
     return false;
   }
 

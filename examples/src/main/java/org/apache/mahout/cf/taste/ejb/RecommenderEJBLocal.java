@@ -19,7 +19,7 @@ package org.apache.mahout.cf.taste.ejb;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.recommender.Rescorer;
+import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 
 import javax.ejb.EJBLocalObject;
@@ -40,9 +40,9 @@ public interface RecommenderEJBLocal extends EJBLocalObject {
   List<RecommendedItem> recommend(long userID, int howMany) throws TasteException;
 
   /**
-   * @see org.apache.mahout.cf.taste.recommender.Recommender#recommend(long, int, Rescorer)
+   * @see org.apache.mahout.cf.taste.recommender.Recommender#recommend(long, int, IDRescorer)
    */
-  List<RecommendedItem> recommend(long userID, int howMany, Rescorer<Long> rescorer) throws TasteException;
+  List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException;
 
   /**
    * @see org.apache.mahout.cf.taste.recommender.Recommender#estimatePreference(long, long)
