@@ -26,6 +26,7 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.common.IOUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -92,8 +93,22 @@ public abstract class RecommenderWrapper implements Recommender {
     delegate.refresh(alreadyRefreshed);
   }
 
-  protected static final File readResourceToTempFile(String resourceName) throws IOException {
+  /**
+   * Reads the given resource into a temporary file. This is intended to be used
+   * to read data files which are stored as a resource available on the classpath,
+   * such as in a JAR file. However for convenience the resource name will also
+   * be interpreted as a relative path to a local file, if no such resource is
+   * found. This facilitates testing.
+   *
+   * @param resourceName name of resource in classpath, or relative path to file
+   * @return temporary {@link File} with resource data
+   * @throws IOException if an error occurs while reading or writing data
+   */
+  public static File readResourceToTempFile(String resourceName) throws IOException {
     InputStream is = RecommenderWrapper.class.getResourceAsStream(resourceName);
+    if (is == null) {
+      is = new FileInputStream(resourceName);
+    }
     try {
       File tempFile = File.createTempFile("taste", null);
       tempFile.deleteOnExit();
