@@ -1,0 +1,142 @@
+<HTML><title>Function Objects</title>
+
+<BODY>
+<h2><a name="Transformation"></a>Example 1: Transformation </h2>
+
+<p>The following examples will often use prefabricated function objects from the
+  library <a href="../../../jet/math/Functions.html">org.apache.mahout.jet.math.Functions</a>
+  But you need not yet know all about that library, only that it exists. Let's
+  stay focused and browse through the examples. </p>
+<hr>
+<h2>Frequently Used Scaling <img src="../../doc-files/new.gif" width="32" height="22" align="bottom"></h2>
+
+<p>
+
+<p>
+<table width="100%" border="1" cellspacing="0">
+  <tr bgcolor="#339933">
+    <td width="19%">Operation</td>
+    <td width="35%">Method</td>
+    <td width="46%">Comment</td>
+  </tr>
+  <tr>
+    <td width="19%">elementwise scaling</td>
+    <td width="35%">assign(f) where f is one of {F.mult(a),F.div(a)}</td>
+    <td width="46%"><tt>x[i] = x[i] {*,/} a<br>
+      x[i,j] = x[i,j] {*,/} a</tt></td>
+  </tr>
+  <tr>
+    <td width="19%">elementwise scaling</td>
+    <td width="35%">assign(y,f) where f is one of {F.plus,F.minus, F.mult,F.div,
+      F.plusMult(a),F.minusMult(a)}
+    </td>
+    <td width="46%"><tt>x[i] = x[i] {+,-,*,/} y[i]<br>
+      x[i] = x[i] {+,-} y[i] {*,/} a<br>
+      <br>
+    </tt><tt>x[i,j] = x[i,j] {+,-,*,/} y[i,j]<br>
+      x[i,j] = x[i,j] {+,-} y[i,j] {*,/} a</tt></td>
+  </tr>
+</table>
+<p>Usually, assign operations are heavily optimized for function objects implementing
+  frequently used numerical scaling like plus,minus,mult,div,plusMult,minusMult,
+  etc. Here are idioms that make numerical codes efficient:</p>
+<pre>
+org.apache.mahout.jet.math.org.apache.mahout.jet.math cern.jet.math.Functions.functions; // naming shortcut (alias) saves some keystrokes:
+
+double a = 2;
+// x and y are 1,2 or 3-d matrices
+
+x.assign(F.mult(a));           // x[i] = x[i] * a
+x.assign(F.div(a));            // x[i] = x[i] / a
+
+x.assign(F.plus(a));           // x[i] = x[i] + a
+x.assign(F.minus(a));          // x[i] = x[i] - a
+
+
+x.assign(y, F.mult);           // x[i] = x[i] * y[i]
+x.assign(y, F.div);            // x[i] = x[i] / y[i]
+
+x.assign(y, F.plus);           // x[i] = x[i] + y[i]
+x.assign(y, F.minus);          // x[i] = x[i] - y[i]
+
+
+x.assign(y, F.plusMult(a));    // x[i] = x[i] + y[i]*a
+
+x.assign(y, F.plusMult(a));    // x[i,j] = x[i,j] + y[i,j]*a
+x.assign(y, F.minusMult(1/a)); // x[i,j] = x[i,j] - y[i,j]/a
+</pre>
+<p>Try the examples also on 2-d or 3-d matrices. They work without changes regardless
+  of dimensionality. </p>
+<hr>
+<h2>Transformation over one matrix </h2>
+
+<p>To prepare with, let's construct a 1-d matrix:
+<pre>double[] v1 = {0, 1, 2, 3}; <br>DoubleMatrix1D x = new DenseDoubleMatrix1D(v1); </pre>
+<p>Using a <tt>mult</tt> function object, we multiply the matrix with a scalar
+  <tt>c</tt> 
+<pre>// x[i] = x[i] * c<br>double c = 2;<br>x.assign(cern.jet.math.Functions.mult(c));
+System.out.println(x);
+--&gt; 0 2 4 6</pre>
+<p>It would be equivalent but more clumsy to write 
+<pre>x.assign( 
+   new DoubleFunction() {
+      public final double apply(double a) { return a*c); } 
+   }
+); 
+</pre>
+<p>Similarly, the <tt>sin</tt> function object is used to transform the matrix
+  to hold in each cell the sine of the former corresponding cell value: 
+<pre>// set each cell to its sine<br>System.out.println(x.assign(cern.jet.math.Functions.sin));
+
+// set each cell to random state uniform in (0,1)<br>x.assign(cern.jet.math.Functions.random()));<br>--&gt; 0.002489 0.793068 0.620307 0.35774 
+<br>// set each cell to random state uniform in (0,1)<br>System.out.println(x.assign(cern.jet.math.Functions.random()));<br>--&gt; 0.002489 0.793068 0.620307 0.35774 
+<br>// set each cell to random state uniform in (-0.5, 0.5)<br>int seed = 12345;<br>System.out.println(x.assign(new cern.jet.random.Uniform(-0.5, 0.5, seed)));<br>--&gt; 0.31733 0.499061 0.010354 -0.368467 
+
+// set each cell to random state from Poisson distribution with mean=2<br>System.out.println(x.assign(new cern.jet.random.Poisson(2, cern.jet.random.Poisson.makeDefaultGenerator()))); 
+--&gt; 9 6 2 2
+</pre>
+<hr>
+<h2>Transformation over two matrices</h2>
+
+<p>
+
+<p>To prepare with, let's construct two 1-d matrices: 
+<pre>double[] v1 = {0, 1, 2, 3}; <br>double[] v2 = {0, 2, 4, 6};
+DoubleMatrix1D x = new DenseDoubleMatrix1D(v1);
+DoubleMatrix1D y = new DenseDoubleMatrix1D(v2);
+</pre>
+<p><b><tt>x = x<sup>y</sup> &lt;==&gt; x[i] = x[i]<sup>y[i]</sup></tt></b> <b><tt>
+  for all i</tt></b>
+
+<p>A prefabricated <tt>pow</tt> function object is used to compute the power transformation:</p>
+<pre>// x[i] = Math.pow(x[i], y[i])
+System.out.println(x.assign(y, org.apache.mahout.jet.math.Functions.pow));
+--&amp;gt; 1 1 16 729
+</pre>
+<p>A prefabricated <tt>mult</tt> function does something similar:</p>
+<pre>// x[i] = x[i] * y[i]<br>System.out.println(x.assign(y, cern.jet.math.Functions.mult));
+--> 0 2 8 18
+</pre>
+<p>The naming shortcut (alias) saves some keystrokes:</p>
+<pre>org.apache.mahout.jet.math.org.apache.mahout.jet.math cern.jet.math.Functions.functions;</pre>
+<p>Chaining function objects yields more complex functions:</p>
+<pre>// x[i] = x[i] * y[i] * 3<br>System.out.println(x.assign(y, F.chain(F.mult,F.mult(3))));
+--> 0 6 24 54
+</pre>
+<p></p>
+
+<p>More complex transformation functions need to be written by hand:</p>
+<pre>m1.assign(m2,
+   new DoubleDoubleFunction() {
+      public double apply(double a, double b) { return Math.PI*Math.log(a-5)*Math.pow(a,b); }
+   }
+);
+</pre>
+<p> If we want to generate a third matrix holding the result of the power transformation,
+  and leave both source matrices unaffected, we make a copy first and then apply
+  the transformation on the copy: 
+<pre>// z[i] = Math.pow(x[i],y[i])<br>DoubleMatrix2D z = x.copy().assign(y, F.pow);
+System.out.println(z);
+</pre>
+</BODY>
+</HTML>

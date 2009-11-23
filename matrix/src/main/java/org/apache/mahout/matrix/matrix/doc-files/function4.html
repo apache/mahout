@@ -1,0 +1,67 @@
+<HTML><title>Function Objects</title>
+
+<BODY>
+<h1>Example 4: Sorting by user specified order </h1>
+
+<p>Assume, we would like to sort the rows of a 2d matrix by the the last column (representing "age"). This can be done
+  with
+<pre>
+// sort by last column
+sorted = matrix.viewSorted(matrix.columns()-1);
+</pre>
+<p>Or assume, we would like to sort the columns of a 2d matrix by the the last row.
+  Unfortunately, there is no convenience method to directly sort by row. So we need to view columns as rows and rows as
+  columns, then sort, then adjust our view again.
+<pre>
+// sort by last row
+int lastRow = matrix.rows()-1;
+sorted = matrix.viewDice().viewSorted(lastRow).viewDice();
+</pre>
+<p>Next, we would like to sort the rows of a 2d matrix by the aggregate sum
+  of values in a row. A <i>comparator</i> object is used to do the job: 
+<pre>// sort by sum of values in a row
+DoubleMatrix1DComparator comp = new DoubleMatrix1DComparator() {
+	public int compare(DoubleMatrix1D a, DoubleMatrix1D b) {
+		double as = a.zSum(); double bs = b.zSum();
+		return as < bs ? -1 : as == bs ? 0 : 1;
+	}
+};
+sorted = cern.colt.matrix.doublealgo.Sorting.quickSort(matrix,comp);
+</pre>
+<p>Further, we would like to sort the rows of a 2d matrix by the aggregate sum of
+  logarithms in a row (which is a way to achieve sorting by <i>geometric mean</i>
+  when viewing a row as a series of samples). A slightly more complex comparator
+  object is needed: 
+<pre>// sort by sum of logarithms in a row
+DoubleMatrix1DComparator comp = new DoubleMatrix1DComparator() {
+	public int compare(DoubleMatrix1D a, DoubleMatrix1D b) {
+		double as = a.aggregate(cern.jet.math.Functions.plus,cern.jet.math.Functions.log); <br>		double bs = b.aggregate(cern.jet.math.Functions.plus,cern.jet.math.Functions.log);
+		return as < bs ? -1 : as == bs ? 0 : 1;
+	}
+};
+sorted = cern.colt.matrix.doublealgo.Sorting.quickSort(matrix,comp);
+</pre>
+This is certainly not most efficient since row sums are recomputed many times
+(<tt>2*rows*log(rows)</tt> times, on average), but will suffice as an example.
+An efficient app will precompute the sums and use <tt>cern.colt.GenericSorting</tt>
+to sort the matrix. In general, if comparisons are expensive, precomputation boots
+performance by a factor <tt>2*log(rows)</tt>.
+<p><i><img src="../../doc-files/new.gif" width="32" height="22" align="bottom"></i>Recently,
+  two methods that do exactly that were added to <a href="../doublealgo/Sorting.html">cern.colt.matrix.doublealgo.Sorting</a>.
+  One of them works by filling a row into a so-called "bin", which is a multi-set
+  with statistics operations defined upon. Aggregate measures over the row are
+  then computed via a <a href="../../../jet/histo/BinFunction1D.html">BinFunction1D</a>.
+  Some prefabricated functions are contained in <a href="../../../jet/histo/BinFunctions1D.html">BinFunctions1D</a>
+  Here is how to solve the problem efficiently: 
+<pre>
+// sort by sum of logarithms in a row
+sorted = cern.colt.matrix.doublealgo.Sorting.quickSort(matrix,hep.aida.bin.BinFunctions1D.sumLog);
+
+// sort by median in a row
+sorted = cern.colt.matrix.doublealgo.Sorting.quickSort(matrix,hep.aida.bin.BinFunctions1D.median);
+
+// sort by maximum in a row
+sorted = cern.colt.matrix.doublealgo.Sorting.quickSort(matrix,hep.aida.bin.BinFunctions1D.max);
+</pre>
+</BODY>
+</HTML>

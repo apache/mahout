@@ -1,0 +1,41 @@
+<HTML><title></title>
+
+<BODY>
+<p>A few more words about sparse matrices. In practice, sparse matrices are used
+  for one of two reasons: To safe memory or to speed up computation. Hash based
+  sparse matrices are neither the smallest possible matrix representation nor
+  the fastest. They implement a reasonable trade-off between performance and memory:
+  Very good average performance on get/set operations at quite small memory footprint.
+  However, they are not particularly suited for special-purpose algorithms exploiting
+  explicit knowledge about what regions are zero and non-zero. For example, sparse
+  linear algebraic matrix multiplies, inversions, etc. better work on other sparse
+  matrix representations like, for example, Harwell-Boeing. Harwell-Boeing also
+  has smaller memory footprint. However, those alternative sparse matrix representations
+  are really only usable for special purposes, because their get/set performance
+  is typically very bad. In contrast, hash based sparse matrices are more generally
+  applicable data structures.<br>
+</p>
+
+<p>Finally note, that some algorithms exploiting sparsity can be expressed in
+  a generic manner, without needing to know or dictate a special internal storage
+  format. For example, in many linear algebraic operations (like the matrix multiply)
+  the dot product is in the inner-most loop of a cubic or quadratic loop, where
+  one operand of the dot product &quot;changes slowly&quot;. Detecting sparsity
+  in the blocked &quot;slow changing&quot; operand and using a quick generic dot
+  product algorithm summing only non-zero cells can drastically improve performance
+  without needing to resort to special storage formats. Imagine a 500 x 500 <tt>DenseDoubleMatrix2D</tt>
+  or <tt>SparseDoubleMatrix2D</tt> which is in fact populated with only one (or
+  few) non-zero cells per row. The innermost loop of the cubic matrix multiply
+  is reduced from 500 steps to 1 step, resulting in an algorithm that in benchmarks
+  runs about 50 times quicker (up to 500 &quot;virtual&quot; Mflops on a now outdated
+  processor Pentium 200Mhz, running NT, SunJDK1.2.2, java -classic, <tt>DenseDoubleMatrix2D</tt>.
+  The theoretical speedup of 500 cannot be achieved). Because the performance
+  overhead of sparsity detection is negligible (some 5%), this is the way the
+  linear algebraic matrix-matrix and matrix-vector multiplications of this toolkit
+  are implemented. </p>
+
+<p>To summarize, generic algorithms can often detect and exploit sparsity with
+  insignificant overhead, without needing to know or dictate a special matrix
+  storage format.</p>
+</BODY>
+</HTML>

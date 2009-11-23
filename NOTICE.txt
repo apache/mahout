@@ -46,3 +46,6 @@ UCI Machine Learning Repository [http://www.ics.uci.edu/~mlearn/MLRepository.htm
 
 This product contains parts of the Bayesian Logic (BLOG) Inference Engine.
 Copyright (c) 2005, Regents of the University of California
+
+This product contains code from the Colt Java matrix library (http://acs.lbl.gov/~hoschek/colt/)
+Copyright (c) 1999 CERN - European Organization for Nuclear Research.
