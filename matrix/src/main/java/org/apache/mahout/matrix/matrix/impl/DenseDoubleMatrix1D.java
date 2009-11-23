@@ -6,10 +6,10 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.impl;
+package org.apache.mahout.matrix.matrix.impl;
 
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /**
 Dense 1-d matrix (aka <i>vector</i>) holding <tt>double</tt> elements.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -127,7 +127,7 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @return <tt>this</tt> (for convenience only).
 @see org.apache.mahout.jet.math.Functions
 */
-public DoubleMatrix1D assign(org.apache.mahout.colt.function.DoubleFunction function) {
+public DoubleMatrix1D assign(org.apache.mahout.matrix.function.DoubleFunction function) {
 	int s=stride;
 	int i=index(0);
 	double[] elems = this.elements;
@@ -223,7 +223,7 @@ and as second argument the current cell's value of <tt>y</tt>,
 @throws	IllegalArgumentException if <tt>size() != y.size()</tt>.
 @see org.apache.mahout.jet.math.Functions
 */
-public DoubleMatrix1D assign(DoubleMatrix1D y, org.apache.mahout.colt.function.DoubleDoubleFunction function) {
+public DoubleMatrix1D assign(DoubleMatrix1D y, org.apache.mahout.matrix.function.DoubleDoubleFunction function) {
 	// overriden for performance only
 	if (! (y instanceof DenseDoubleMatrix1D)) {
 		return super.assign(y,function);

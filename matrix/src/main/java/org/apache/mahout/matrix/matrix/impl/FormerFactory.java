@@ -1,8 +1,8 @@
-package org.apache.mahout.colt.matrix.impl;
+package org.apache.mahout.matrix.matrix.impl;
 
 
 /**
- * Factory producing implementations of {@link org.apache.mahout.colt.matrix.impl.Former} via method create();
+ * Factory producing implementations of {@link org.apache.mahout.matrix.matrix.impl.Former} via method create();
  * Implementations of can use existing libraries such as PrintfFormat or Format or other.
  * Serves to isolate the interface of String formatting from the actual implementation.
  * If you want to plug in a different String formatting implementation, simply replace this class with your alternative.

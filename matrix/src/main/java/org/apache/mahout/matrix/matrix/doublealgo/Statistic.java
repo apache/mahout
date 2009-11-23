@@ -6,13 +6,13 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.doublealgo;
+package org.apache.mahout.matrix.matrix.doublealgo;
 
-import org.apache.mahout.colt.function.DoubleDoubleFunction;
-import org.apache.mahout.colt.matrix.DoubleFactory2D;
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
-import org.apache.mahout.colt.matrix.DoubleMatrix3D;
+import org.apache.mahout.matrix.function.DoubleDoubleFunction;
+import org.apache.mahout.matrix.matrix.DoubleFactory2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix3D;
 import org.apache.mahout.jet.random.engine.RandomEngine;
 /**
 Basic statistics operations on matrices.
@@ -131,7 +131,7 @@ public interface VectorVectorFunction {
  * @param y   the second argument vector passed to the function.
  * @return the result of the function.
  */
-abstract public double apply(org.apache.mahout.colt.matrix.DoubleMatrix1D x, org.apache.mahout.colt.matrix.DoubleMatrix1D y);
+abstract public double apply(org.apache.mahout.matrix.matrix.DoubleMatrix1D x, org.apache.mahout.matrix.matrix.DoubleMatrix1D y);
 }
 
 /**
@@ -154,7 +154,7 @@ protected Statistic() {}
 public static DoubleMatrix2D aggregate(DoubleMatrix2D matrix, hep.aida.bin.BinFunction1D[] aggr, DoubleMatrix2D result) {
 	DynamicBin1D bin = new DynamicBin1D();
 	double[] elements = new double[matrix.rows()];
-	org.apache.mahout.colt.list.DoubleArrayList values = new org.apache.mahout.colt.list.DoubleArrayList(elements);
+	org.apache.mahout.matrix.list.DoubleArrayList values = new org.apache.mahout.matrix.list.DoubleArrayList(elements);
 	for (int column=matrix.columns(); --column >= 0; ) {
 		matrix.viewColumn(column).toArray(elements); // copy column into values
 		bin.clear();
@@ -270,7 +270,7 @@ public static DoubleMatrix2D correlation(DoubleMatrix2D covariance) {
 public static DoubleMatrix2D covariance(DoubleMatrix2D matrix) {
 	int rows = matrix.rows();
 	int columns = matrix.columns();
-	DoubleMatrix2D covariance = new org.apache.mahout.colt.matrix.impl.DenseDoubleMatrix2D(columns,columns);
+	DoubleMatrix2D covariance = new org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix2D(columns,columns);
 	
 	double[] sums = new double[columns];
 	DoubleMatrix1D[] cols = new DoubleMatrix1D[columns];
@@ -329,9 +329,9 @@ public static hep.aida.IHistogram2D cube(DoubleMatrix1D x, DoubleMatrix1D y, Dou
 	if (x.size() != y.size() || y.size() != weights.size()) throw new IllegalArgumentException("vectors must have same size");
 	
 	double epsilon = 1.0E-9;
-	org.apache.mahout.colt.list.DoubleArrayList distinct = new org.apache.mahout.colt.list.DoubleArrayList();
+	org.apache.mahout.matrix.list.DoubleArrayList distinct = new org.apache.mahout.matrix.list.DoubleArrayList();
 	double[] vals = new double[x.size()];
-	org.apache.mahout.colt.list.DoubleArrayList sorted = new org.apache.mahout.colt.list.DoubleArrayList(vals);
+	org.apache.mahout.matrix.list.DoubleArrayList sorted = new org.apache.mahout.matrix.list.DoubleArrayList(vals);
 
 	// compute distinct values of x
 	x.toArray(vals); // copy x into vals
@@ -369,9 +369,9 @@ public static hep.aida.IHistogram3D cube(DoubleMatrix1D x, DoubleMatrix1D y, Dou
 	if (x.size() != y.size() || x.size() != z.size() || x.size() != weights.size()) throw new IllegalArgumentException("vectors must have same size");
 	
 	double epsilon = 1.0E-9;
-	org.apache.mahout.colt.list.DoubleArrayList distinct = new org.apache.mahout.colt.list.DoubleArrayList();
+	org.apache.mahout.matrix.list.DoubleArrayList distinct = new org.apache.mahout.matrix.list.DoubleArrayList();
 	double[] vals = new double[x.size()];
-	org.apache.mahout.colt.list.DoubleArrayList sorted = new org.apache.mahout.colt.list.DoubleArrayList(vals);
+	org.apache.mahout.matrix.list.DoubleArrayList sorted = new org.apache.mahout.matrix.list.DoubleArrayList(vals);
 
 	// compute distinct values of x
 	x.toArray(vals); // copy x into vals
@@ -422,10 +422,10 @@ System.out.println("\ncovar1="+covariance(A));
 //System.out.println(distance(A,EUCLID));
 
 
-//System.out.println(org.apache.mahout.colt.matrixpattern.Converting.toHTML(A.toString()));
-//System.out.println(org.apache.mahout.colt.matrixpattern.Converting.toHTML(covariance(A).toString()));
-//System.out.println(org.apache.mahout.colt.matrixpattern.Converting.toHTML(correlation(covariance(A)).toString()));
-//System.out.println(org.apache.mahout.colt.matrixpattern.Converting.toHTML(distance(A,EUCLID).toString()));
+//System.out.println(org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A.toString()));
+//System.out.println(org.apache.mahout.matrix.matrixpattern.Converting.toHTML(covariance(A).toString()));
+//System.out.println(org.apache.mahout.matrix.matrixpattern.Converting.toHTML(correlation(covariance(A)).toString()));
+//System.out.println(org.apache.mahout.matrix.matrixpattern.Converting.toHTML(distance(A,EUCLID).toString()));
 }
 /**
  * Demonstrates usage of this class.
@@ -440,7 +440,7 @@ DoubleMatrix2D A = factory.ascending(rows,columns);
 
 System.out.println("benchmarking correlation...");
 
-org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 DoubleMatrix2D corr = correlation(covariance(A));
 timer.stop().display();
 
@@ -482,7 +482,7 @@ System.out.println("\ndist="+distance(A,norm).viewDice());
  */
 public static DoubleMatrix2D distance(DoubleMatrix2D matrix, VectorVectorFunction distanceFunction) {
 	int columns = matrix.columns();
-	DoubleMatrix2D distance = new org.apache.mahout.colt.matrix.impl.DenseDoubleMatrix2D(columns,columns);
+	DoubleMatrix2D distance = new org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix2D(columns,columns);
 
 	// cache views
 	DoubleMatrix1D[] cols = new DoubleMatrix1D[columns];
@@ -763,7 +763,7 @@ private static DoubleMatrix2D xdistanceOld(DoubleMatrix2D matrix, int norm) {
 	/*
 	int rows = matrix.rows();
 	int columns = matrix.columns();
-	DoubleMatrix2D distance = new org.apache.mahout.colt.matrix.impl.DenseDoubleMatrix2D(columns,columns);
+	DoubleMatrix2D distance = new org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix2D(columns,columns);
 
 	// cache views
 	DoubleMatrix1D[] cols = new DoubleMatrix1D[columns];

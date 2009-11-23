@@ -6,10 +6,10 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix;
+package org.apache.mahout.matrix.matrix;
 
-import org.apache.mahout.colt.matrix.impl.DenseObjectMatrix1D;
-import org.apache.mahout.colt.matrix.impl.SparseObjectMatrix1D;
+import org.apache.mahout.matrix.matrix.impl.DenseObjectMatrix1D;
+import org.apache.mahout.matrix.matrix.impl.SparseObjectMatrix1D;
 /**
 Factory for convenient construction of 1-d matrices holding <tt>Object</tt> cells.
 Use idioms like <tt>ObjectFactory1D.dense.make(1000)</tt> to construct dense matrices, 
@@ -34,7 +34,7 @@ F.make(1000);
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class ObjectFactory1D extends org.apache.mahout.colt.PersistentObject {
+public class ObjectFactory1D extends org.apache.mahout.matrix.PersistentObject {
 	/**
 	 * A factory producing dense matrices.
 	 */
@@ -108,7 +108,7 @@ public ObjectMatrix1D make(int size, Object initialValue) {
  * @param values The values to be filled into the new matrix.
  * @return a new matrix.
  */
-public ObjectMatrix1D make(org.apache.mahout.colt.list.ObjectArrayList values) {
+public ObjectMatrix1D make(org.apache.mahout.matrix.list.ObjectArrayList values) {
 	int size = values.size();
 	ObjectMatrix1D vector = make(size);
 	for (int i=size; --i >= 0; ) vector.set(i, values.get(i));
@@ -138,9 +138,9 @@ public ObjectMatrix1D repeat(ObjectMatrix1D A, int repeat) {
  * @param values The values to be filled into the new list.
  * @return a new list.
  */
-public org.apache.mahout.colt.list.ObjectArrayList toList(ObjectMatrix1D values) {
+public org.apache.mahout.matrix.list.ObjectArrayList toList(ObjectMatrix1D values) {
 	int size = values.size();
-	org.apache.mahout.colt.list.ObjectArrayList list = new org.apache.mahout.colt.list.ObjectArrayList(size);
+	org.apache.mahout.matrix.list.ObjectArrayList list = new org.apache.mahout.matrix.list.ObjectArrayList(size);
 	list.setSize(size);
 	for (int i=size; --i >= 0; ) list.set(i, values.get(i));
 	return list;

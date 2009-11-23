@@ -6,12 +6,12 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.doublealgo;
+package org.apache.mahout.matrix.matrix.doublealgo;
 
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2DProcedure;
-import org.apache.mahout.colt.matrix.DoubleMatrix3D;
-import org.apache.mahout.colt.matrix.DoubleMatrix3DProcedure;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2DProcedure;
+import org.apache.mahout.matrix.matrix.DoubleMatrix3D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix3DProcedure;
 /**
 Stencil operations. For efficient finite difference operations.
 Applies a function to a moving <tt>3 x 3</tt> or <tt>3 x 3 x 3</tt> window.
@@ -45,7 +45,7 @@ Applies a function to a moving <tt>3 x 3 x 3</tt> window.
 	(Since a convergence may be expensive, you may want to do it only every 2,4 or 8 iterations.)
 @return the number of iterations actually executed. 
 */
-public static int stencil27(DoubleMatrix3D A, org.apache.mahout.colt.function.Double27Function function, int maxIterations, DoubleMatrix3DProcedure hasConverged, int convergenceIterations) {
+public static int stencil27(DoubleMatrix3D A, org.apache.mahout.matrix.function.Double27Function function, int maxIterations, DoubleMatrix3DProcedure hasConverged, int convergenceIterations) {
 	DoubleMatrix3D B = A.copy();
 	if (convergenceIterations <= 1) convergenceIterations=2;
 	if (convergenceIterations%2 != 0) convergenceIterations++; // odd -> make it even
@@ -74,7 +74,7 @@ Applies a function to a moving <tt>3 x 3</tt> window.
 	(Since a convergence may be expensive, you may want to do it only every 2,4 or 8 iterations.)
 @return the number of iterations actually executed. 
 */
-public static int stencil9(DoubleMatrix2D A, org.apache.mahout.colt.function.Double9Function function, int maxIterations, DoubleMatrix2DProcedure hasConverged, int convergenceIterations) {
+public static int stencil9(DoubleMatrix2D A, org.apache.mahout.matrix.function.Double9Function function, int maxIterations, DoubleMatrix2DProcedure hasConverged, int convergenceIterations) {
 	DoubleMatrix2D B = A.copy();
 	if (convergenceIterations <= 1) convergenceIterations=2;
 	if (convergenceIterations%2 != 0) convergenceIterations++; // odd -> make it even

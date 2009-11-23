@@ -6,7 +6,7 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.impl;
+package org.apache.mahout.matrix.matrix.impl;
 
 /** 
 Abstract base class for flexible, well human readable matrix print formatting.
@@ -26,7 +26,7 @@ For more info, see the concrete subclasses.
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public abstract class AbstractFormatter extends org.apache.mahout.colt.PersistentObject {
+public abstract class AbstractFormatter extends org.apache.mahout.matrix.PersistentObject {
  	/**
  	 * The alignment string aligning the cells of a column to the left.
  	 */
@@ -233,7 +233,7 @@ String[] formats =         {"%G", "%1.10G", "%f", "%1.2f", "%0.2e", null};
 
 // now the processing
 int size = formats.length;
-ObjectMatrix2D matrix = org.apache.mahout.colt.matrix.ObjectFactory2D.dense.make(values);
+ObjectMatrix2D matrix = org.apache.mahout.matrix.matrix.ObjectFactory2D.dense.make(values);
 String[] strings = new String[size];
 String[] sourceCodes = new String[size];
 String[] htmlStrings = new String[size];
@@ -245,8 +245,8 @@ for (int i=0; i<size; i++) {
 	sourceCodes[i] = toSourceCode(matrix,format);
 
 	// may not compile because of packages not included in the distribution
-	//htmlStrings[i] = org.apache.mahout.colt.matrixpattern.Converting.toHTML(strings[i]);
-	//htmlSourceCodes[i] = org.apache.mahout.colt.matrixpattern.Converting.toHTML(sourceCodes[i]);
+	//htmlStrings[i] = org.apache.mahout.matrix.matrixpattern.Converting.toHTML(strings[i]);
+	//htmlSourceCodes[i] = org.apache.mahout.matrix.matrixpattern.Converting.toHTML(sourceCodes[i]);
 }
 
 System.out.println("original:\n"+toString(matrix));

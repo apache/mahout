@@ -6,11 +6,11 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.list.adapter;
+package org.apache.mahout.matrix.list.adapter;
 
-import org.apache.mahout.colt.list.AbstractLongList;
+import org.apache.mahout.matrix.list.AbstractLongList;
 /**
- * Adapter that permits an {@link org.apache.mahout.colt.list.AbstractLongList} to be viewed and treated as a JDK 1.2 {@link java.util.AbstractList}.
+ * Adapter that permits an {@link org.apache.mahout.matrix.list.AbstractLongList} to be viewed and treated as a JDK 1.2 {@link java.util.AbstractList}.
  * Makes the contained list compatible with the JDK 1.2 Collections Framework.
  * <p>
  * Any attempt to pass elements other than <tt>java.lang.Number</tt> to setter methods will throw a <tt>java.lang.ClassCastException</tt>.

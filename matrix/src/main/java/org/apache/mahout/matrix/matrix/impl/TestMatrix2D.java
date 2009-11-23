@@ -6,21 +6,21 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.impl;
+package org.apache.mahout.matrix.matrix.impl;
 
-import org.apache.mahout.colt.function.DoubleDoubleFunction;
-import org.apache.mahout.colt.function.DoubleFunction;
-import org.apache.mahout.colt.list.IntArrayList;
-import org.apache.mahout.colt.map.AbstractIntDoubleMap;
-import org.apache.mahout.colt.map.OpenIntDoubleHashMap;
-import org.apache.mahout.colt.matrix.DoubleFactory2D;
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
-import org.apache.mahout.colt.matrix.DoubleMatrix3D;
-import org.apache.mahout.colt.matrix.doublealgo.DoubleMatrix2DComparator;
-import org.apache.mahout.colt.matrix.linalg.Algebra;
-import org.apache.mahout.colt.matrix.linalg.LUDecompositionQuick;
-import org.apache.mahout.colt.matrix.linalg.SeqBlas;
+import org.apache.mahout.matrix.function.DoubleDoubleFunction;
+import org.apache.mahout.matrix.function.DoubleFunction;
+import org.apache.mahout.matrix.list.IntArrayList;
+import org.apache.mahout.matrix.map.AbstractIntDoubleMap;
+import org.apache.mahout.matrix.map.OpenIntDoubleHashMap;
+import org.apache.mahout.matrix.matrix.DoubleFactory2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix3D;
+import org.apache.mahout.matrix.matrix.doublealgo.DoubleMatrix2DComparator;
+import org.apache.mahout.matrix.matrix.linalg.Algebra;
+import org.apache.mahout.matrix.matrix.linalg.LUDecompositionQuick;
+import org.apache.mahout.matrix.matrix.linalg.SeqBlas;
 /**
  * Quick and dirty tests.
  *
@@ -29,11 +29,11 @@ import org.apache.mahout.colt.matrix.linalg.SeqBlas;
  */
 class TestMatrix2D {
 	private static final org.apache.mahout.jet.math.Functions F = org.apache.mahout.jet.math.Functions.functions;
-	private static final org.apache.mahout.colt.matrix.DoubleFactory2D Factory2D = org.apache.mahout.colt.matrix.DoubleFactory2D.dense;
-	private static final org.apache.mahout.colt.matrix.DoubleFactory1D Factory1D = org.apache.mahout.colt.matrix.DoubleFactory1D.dense;
-	private static final org.apache.mahout.colt.matrix.linalg.Algebra LinearAlgebra = org.apache.mahout.colt.matrix.linalg.Algebra.DEFAULT;
-	private static final org.apache.mahout.colt.matrix.doublealgo.Transform Transform = org.apache.mahout.colt.matrix.doublealgo.Transform.transform;
-	private static final org.apache.mahout.colt.matrix.linalg.Property Property = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT;
+	private static final org.apache.mahout.matrix.matrix.DoubleFactory2D Factory2D = org.apache.mahout.matrix.matrix.DoubleFactory2D.dense;
+	private static final org.apache.mahout.matrix.matrix.DoubleFactory1D Factory1D = org.apache.mahout.matrix.matrix.DoubleFactory1D.dense;
+	private static final org.apache.mahout.matrix.matrix.linalg.Algebra LinearAlgebra = org.apache.mahout.matrix.matrix.linalg.Algebra.DEFAULT;
+	private static final org.apache.mahout.matrix.matrix.doublealgo.Transform Transform = org.apache.mahout.matrix.matrix.doublealgo.Transform.transform;
+	private static final org.apache.mahout.matrix.matrix.linalg.Property Property = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT;
 /**
  * Makes this class non instantiable, but still let's others inherit from it.
  */
@@ -184,7 +184,7 @@ System.out.println(matrix);
 
 // Sum( x[i]*x[i] ) 
 System.out.println(matrix.viewSelection(
-	new org.apache.mahout.colt.function.DoubleProcedure() {
+	new org.apache.mahout.matrix.function.DoubleProcedure() {
 		public final boolean apply(double a) { return a % 2 == 0; }
 	}
 ));
@@ -251,7 +251,7 @@ System.out.println(matrix.aggregate(otherMatrix1D, F.plus,
 )
 );
 
-DoubleMatrix3D x = org.apache.mahout.colt.matrix.DoubleFactory3D.dense.ascending(2,2,2);
+DoubleMatrix3D x = org.apache.mahout.matrix.matrix.DoubleFactory3D.dense.ascending(2,2,2);
 System.out.println(x);
 
 // Sum( x[slice,row,col]*x[slice,row,col] ) 
@@ -282,7 +282,7 @@ DoubleMatrix2D b = Transform.mult(DoubleFactory2D.dense.ascending(c,r2), -1);
 a.assign(0);
 b.assign(0);
 
-org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 LinearAlgebra.mult(a,b);
 timer.stop().display();
 }
@@ -309,7 +309,7 @@ A.viewRow(0).assign(value);
 
 
 //DoubleMatrix2D A = Factory2D.makeAscending(size,size).assign(new org.apache.mahout.jet.random.engine.MersenneTwister());
-org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 DoubleMatrix2D inv = null;
 for (int run=0; run<runs; run++) {
 	 inv = LinearAlgebra.inverse(A);
@@ -353,10 +353,10 @@ System.out.println("\n"+C);
 System.out.println("\n"+Factory2D.diag(A,B,C));
 */
 
-//System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A.toString()));
-//System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(B.toString()));
-//System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(C.toString()));
-//System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(Factory2D.diagonal(A,B,C).toString()));
+//System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A.toString()));
+//System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(B.toString()));
+//System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(C.toString()));
+//System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(Factory2D.diagonal(A,B,C).toString()));
 }
 /**
  */
@@ -403,17 +403,17 @@ System.out.println("\n"+A22);
 
 
 /*
-System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A00.toString()));
-System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A01.toString()));
-System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A02.toString()));
-System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A10.toString()));
-System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A11.toString()));
-System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A12.toString()));
-System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A20.toString()));
-System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A21.toString()));
-System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A22.toString()));
+System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A00.toString()));
+System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A01.toString()));
+System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A02.toString()));
+System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A10.toString()));
+System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A11.toString()));
+System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A12.toString()));
+System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A20.toString()));
+System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A21.toString()));
+System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A22.toString()));
 
-System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(Factory2D.make33(A00,A01,A02,A10,A11,A12,A20,A21,A22).toString()));
+System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(Factory2D.make33(A00,A01,A02,A10,A11,A12,A20,A21,A22).toString()));
 */
 }
 /**
@@ -433,14 +433,14 @@ double[][] values5 =
 	{ 0, 0, 0, 0 }
 };
 A = Factory2D.make(values5);
-k = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
-uk = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.upperBandwidth(A);
-lk = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.lowerBandwidth(A);
+k = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
+uk = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.upperBandwidth(A);
+lk = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.lowerBandwidth(A);
 
 System.out.println("\n\nupperBandwidth="+uk);
 System.out.println("lowerBandwidth="+lk);
 System.out.println("bandwidth="+k+" "+A);
-//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A.toString()));
+//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A.toString()));
 
 double[][] values4 = 
 {
@@ -450,13 +450,13 @@ double[][] values4 =
 	{ 0, 0, 0, 1 }
 };
 A = Factory2D.make(values4);
-k = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
-uk = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.upperBandwidth(A);
-lk = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.lowerBandwidth(A);
+k = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
+uk = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.upperBandwidth(A);
+lk = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.lowerBandwidth(A);
 System.out.println("\n\nupperBandwidth="+uk);
 System.out.println("lowerBandwidth="+lk);
 System.out.println("bandwidth="+k+" "+A);
-//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A.toString()));
+//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A.toString()));
 
 double[][] values1 = 
 {
@@ -466,13 +466,13 @@ double[][] values1 =
 	{ 0, 0, 1, 1 }
 };
 A = Factory2D.make(values1);
-k = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
-uk = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.upperBandwidth(A);
-lk = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.lowerBandwidth(A);
+k = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
+uk = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.upperBandwidth(A);
+lk = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.lowerBandwidth(A);
 System.out.println("\n\nupperBandwidth="+uk);
 System.out.println("lowerBandwidth="+lk);
 System.out.println("bandwidth="+k+" "+A);
-//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A.toString()));
+//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A.toString()));
 
 
 double[][] values6 = 
@@ -483,13 +483,13 @@ double[][] values6 =
 	{ 0, 0, 0, 1 }
 };
 A = Factory2D.make(values6);
-k = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
-uk = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.upperBandwidth(A);
-lk = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.lowerBandwidth(A);
+k = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
+uk = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.upperBandwidth(A);
+lk = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.lowerBandwidth(A);
 System.out.println("\n\nupperBandwidth="+uk);
 System.out.println("lowerBandwidth="+lk);
 System.out.println("bandwidth="+k+" "+A);
-//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A.toString()));
+//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A.toString()));
 
 double[][] values7 = 
 {
@@ -499,13 +499,13 @@ double[][] values7 =
 	{ 1, 1, 1, 1 }
 };
 A = Factory2D.make(values7);
-k = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
-uk = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.upperBandwidth(A);
-lk = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.lowerBandwidth(A);
+k = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
+uk = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.upperBandwidth(A);
+lk = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.lowerBandwidth(A);
 System.out.println("\n\nupperBandwidth="+uk);
 System.out.println("lowerBandwidth="+lk);
 System.out.println("bandwidth="+k+" "+A);
-//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A.toString()));
+//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A.toString()));
 
 
 double[][] values2 = 
@@ -516,13 +516,13 @@ double[][] values2 =
 	{ 1, 0, 1, 1 }
 };
 A = Factory2D.make(values2);
-k = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
-uk = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.upperBandwidth(A);
-lk = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.lowerBandwidth(A);
+k = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
+uk = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.upperBandwidth(A);
+lk = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.lowerBandwidth(A);
 System.out.println("\n\nupperBandwidth="+uk);
 System.out.println("lowerBandwidth="+lk);
 System.out.println("bandwidth="+k+" "+A);
-//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A.toString()));
+//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A.toString()));
 
 double[][] values3 = 
 {
@@ -532,13 +532,13 @@ double[][] values3 =
 	{ 0, 0, 1, 1 }
 };
 A = Factory2D.make(values3); 
-k = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
-uk = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.upperBandwidth(A);
-lk = org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.lowerBandwidth(A);
+k = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
+uk = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.upperBandwidth(A);
+lk = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.lowerBandwidth(A);
 System.out.println("\n\nupperBandwidth="+uk);
 System.out.println("lowerBandwidth="+lk);
 System.out.println("bandwidth="+k+" "+A);
-//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A.toString()));
+//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A.toString()));
 
 
 
@@ -590,17 +590,17 @@ System.out.println("\n"+A22);
 
 
 /*
-System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A00.toString()));
-System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A01.toString()));
-System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A02.toString()));
-System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A10.toString()));
-System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A11.toString()));
-System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A12.toString()));
-System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A20.toString()));
-System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A21.toString()));
-System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A22.toString()));
+System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A00.toString()));
+System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A01.toString()));
+System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A02.toString()));
+System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A10.toString()));
+System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A11.toString()));
+System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A12.toString()));
+System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A20.toString()));
+System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A21.toString()));
+System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A22.toString()));
 
-System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(Factory2D.make33(A00,A01,A02,A10,A11,A12,A20,A21,A22).toString()));
+System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(Factory2D.make33(A00,A01,A02,A10,A11,A12,A20,A21,A22).toString()));
 */
 }
 /**
@@ -647,7 +647,7 @@ double[][] values1 =
 A = Factory2D.make(values1);
 
 System.out.println("\n\n"+LinearAlgebra.toVerboseString(A));
-//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A.toString()));
+//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A.toString()));
 
 
 double[][] values2 =
@@ -662,7 +662,7 @@ double[][] values2 =
 A = Factory2D.make(values2);
 
 System.out.println("\n\n"+LinearAlgebra.toVerboseString(A));
-//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A.toString()));
+//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A.toString()));
 
 double[][] values3 =
 {
@@ -680,7 +680,7 @@ double[][] values3 =
 A = Factory2D.make(values3);
 
 System.out.println("\n\n"+LinearAlgebra.toVerboseString(A));
-//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A.toString()));
+//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A.toString()));
 
 //Exact eigenvalues from Westlake (1968), p.150 (ei'vectors given too):
 double a = Math.sqrt(10405); double b = Math.sqrt(26);
@@ -707,11 +707,11 @@ double[][] values1 =
 };
 A = Factory2D.make(values1);
 System.out.println(A);
-System.out.println(new org.apache.mahout.colt.matrix.doublealgo.Formatter(null).toString(A));
+System.out.println(new org.apache.mahout.matrix.matrix.doublealgo.Formatter(null).toString(A));
 
 //System.out.println("\n\n"+LinearAlgebra.toVerboseString(A));
 //System.out.println(new LUDecomposition(A));
-//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A.toString()));
+//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A.toString()));
 }
 /**
  */
@@ -740,7 +740,7 @@ System.out.println(Property.isDiagonallyDominantByColumn(A));
 
 //System.out.println("\n\n"+LinearAlgebra.toVerboseString(A));
 //System.out.println(new LUDecomposition(A));
-//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.colt.matrixpattern.Converting.toHTML(A.toString()));
+//System.out.println("\n\nbandwidth="+k+" "+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A.toString()));
 }
 /**
  */
@@ -776,7 +776,7 @@ solved = b.like();
 LUDecompositionQuick lu = new LUDecompositionQuick();
 
 System.out.println("benchmarking assignment...");
-org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 LU.assign(A);
 solved.assign(b);
 timer.stop().display();
@@ -820,12 +820,12 @@ final double alpha = omega * 0.25;
 final double beta = 1-omega;
 A = factory.make(size,size,value);
 
-org.apache.mahout.colt.function.Double9Function function = new org.apache.mahout.colt.function.Double9Function() {
+org.apache.mahout.matrix.function.Double9Function function = new org.apache.mahout.matrix.function.Double9Function() {
 	public final double apply(double a00, double a01, double a02, double a10, double a11, double a12, double a20, double a21, double a22) {
 		return alpha*a11 + beta*(a01+a10+a12+a21);
 	}
 };
-org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 
 System.out.println("benchmarking stencil...");
 for (int i=0; i<runs; i++) {
@@ -867,7 +867,7 @@ else
 double value = 0.5;
 A = factory.make(size,size,value);
 Property.generateNonSingular(A);
-org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 
 System.out.println(A);
 System.out.println(Algebra.ZERO.inverse(A));
@@ -895,7 +895,7 @@ else
 double value = 0.5;
 A = factory.make(size,size,value);
 Property.generateNonSingular(A);
-org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 
 DoubleMatrix2DComparator fun = new DoubleMatrix2DComparator() {
 	public int compare(DoubleMatrix2D a, DoubleMatrix2D b) {
@@ -1009,7 +1009,7 @@ DoubleMatrix2D C = Factory2D.dense.sample(size,size,value,1);
 
 A = factory.make(size,size);
 System.out.print("A assign C... ");
-org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 A.assign(C);
 timer.stop().display();
 
@@ -1067,7 +1067,7 @@ public static void doubleTest29(int size,DoubleFactory2D f) {
 	DoubleMatrix2D x = new DenseDoubleMatrix2D(size,size).assign(0.5);
 	DoubleMatrix2D matrix = f.sample(size,size,0.5,0.001);
 	
-	org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+	org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 	DoubleMatrix2D res = matrix.zMult(x,null);
 	timer.stop().display();
 	
@@ -1160,7 +1160,7 @@ int[] values = { 0, 2, 3, 5, 7};
 IntArrayList list = new IntArrayList(values);
 int val = 3;
 int sum=0;
-org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 for (int i=size; --i>=0; ) {
 	int k = list.binarySearchFromTo(val,0,values.length-1);
 	System.out.println(list+", "+val+" --> "+k);
@@ -1186,7 +1186,7 @@ double value = 0.5;
 DoubleMatrix2D C = Factory2D.dense.sample(size,size,value,0.01);
 
 A = factory.make(size,size);
-org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 A.assign(C);
 timer.stop().display();
 
@@ -1236,9 +1236,9 @@ int[] values = {2};
 IntArrayList list = new IntArrayList(values);
 int l = values.length-1;
 int sum=0;
-org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 for (int i=size; --i>=0; ) {
-	int k = org.apache.mahout.colt.Sorting.binarySearchFromTo(values,val,0,l);
+	int k = org.apache.mahout.matrix.Sorting.binarySearchFromTo(values,val,0,l);
 	//int k = list.binarySearchFromTo(val,0,l);
 	//System.out.println(list+", "+val+" --> i="+k+", -i-1="+(-k-1));
 	sum+=k;
@@ -1263,7 +1263,7 @@ double value = 0.5;
 DoubleMatrix2D C = Factory2D.dense.sample(size,size,value,0.01);
 
 A = factory.make(size,size);
-org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 A.assign(C);
 timer.stop().display();
 
@@ -1775,7 +1775,7 @@ public static void testMax() {
  
   DenseDoubleMatrix1D d1Double = new DenseDoubleMatrix1D(temp);
   
- // hep.aida.bin.DynamicBin1D d1ynamicBin = org.apache.mahout.colt.matrix.doublealgo.Statistic.bin(d1Double);
+ // hep.aida.bin.DynamicBin1D d1ynamicBin = org.apache.mahout.matrix.matrix.doublealgo.Statistic.bin(d1Double);
   
   double max = 0;//d1ynamicBin.max();
   

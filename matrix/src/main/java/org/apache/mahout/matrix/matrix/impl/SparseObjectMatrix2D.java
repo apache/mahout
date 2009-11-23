@@ -6,12 +6,12 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.impl;
+package org.apache.mahout.matrix.matrix.impl;
 
-import org.apache.mahout.colt.map.AbstractIntObjectMap;
-import org.apache.mahout.colt.map.OpenIntObjectHashMap;
-import org.apache.mahout.colt.matrix.ObjectMatrix1D;
-import org.apache.mahout.colt.matrix.ObjectMatrix2D;
+import org.apache.mahout.matrix.map.AbstractIntObjectMap;
+import org.apache.mahout.matrix.map.OpenIntObjectHashMap;
+import org.apache.mahout.matrix.matrix.ObjectMatrix1D;
+import org.apache.mahout.matrix.matrix.ObjectMatrix2D;
 /**
 Sparse hashed 2-d matrix holding <tt>Object</tt> elements.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -19,7 +19,7 @@ First see the <a href="package-summary.html">package summary</a> and javadoc <a 
 <b>Implementation:</b>
 <p>
 Note that this implementation is not synchronized.
-Uses a {@link org.apache.mahout.colt.map.OpenIntObjectHashMap}, which is a compact and performant hashing technique.
+Uses a {@link org.apache.mahout.matrix.map.OpenIntObjectHashMap}, which is a compact and performant hashing technique.
 <p>
 <b>Memory requirements:</b>
 <p>
@@ -65,8 +65,8 @@ is quicker than
 	}
 </pre>
 
-@see org.apache.mahout.colt.map
-@see org.apache.mahout.colt.map.OpenIntObjectHashMap
+@see org.apache.mahout.matrix.map
+@see org.apache.mahout.matrix.map.OpenIntObjectHashMap
 @author wolfgang.hoschek@cern.ch
 @version 1.0, 09/24/99
 */
@@ -106,7 +106,7 @@ public SparseObjectMatrix2D(int rows, int columns) {
 /**
  * Constructs a matrix with a given number of rows and columns using memory as specified.
  * All entries are initially <tt>null</tt>.
- * For details related to memory usage see {@link org.apache.mahout.colt.map.OpenIntObjectHashMap}.
+ * For details related to memory usage see {@link org.apache.mahout.matrix.map.OpenIntObjectHashMap}.
  * 
  * @param rows the number of rows the matrix shall have.
  * @param columns the number of columns the matrix shall have.

@@ -6,7 +6,7 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.bench;
+package org.apache.mahout.matrix.matrix.bench;
 
 /**
  * Interface that represents a procedure object: a procedure that takes 
@@ -24,7 +24,7 @@ interface TimerProcedure {
  * @param element   element passed to the procedure.
  * @return a flag  to inform the object calling the procedure.
  */
-public void apply(org.apache.mahout.colt.Timer element);
+public void apply(org.apache.mahout.matrix.Timer element);
 /**
  * Prepare parameters before calling apply()
  */

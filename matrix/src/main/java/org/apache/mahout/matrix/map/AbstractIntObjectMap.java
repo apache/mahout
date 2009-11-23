@@ -6,12 +6,12 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.map;
+package org.apache.mahout.matrix.map;
 
-import org.apache.mahout.colt.function.IntObjectProcedure;
-import org.apache.mahout.colt.function.IntProcedure;
-import org.apache.mahout.colt.list.IntArrayList;
-import org.apache.mahout.colt.list.ObjectArrayList;
+import org.apache.mahout.matrix.function.IntObjectProcedure;
+import org.apache.mahout.matrix.function.IntProcedure;
+import org.apache.mahout.matrix.list.IntArrayList;
+import org.apache.mahout.matrix.list.ObjectArrayList;
 /**
 Abstract base class for hash maps holding (key,value) associations of type <tt>(int-->Object)</tt>.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -311,7 +311,7 @@ public void pairsSortedByValue(final IntArrayList keyList, final ObjectArrayList
 	
 	final int[] k = keyList.elements();
 	final Object[] v = valueList.elements();
-	org.apache.mahout.colt.Swapper swapper = new org.apache.mahout.colt.Swapper() {
+	org.apache.mahout.matrix.Swapper swapper = new org.apache.mahout.matrix.Swapper() {
 		public void swap(int a, int b) {
 			int t2;	Object t1;
 			t1 = v[a]; v[a] = v[b]; v[b] = t1;
@@ -319,7 +319,7 @@ public void pairsSortedByValue(final IntArrayList keyList, final ObjectArrayList
 		}
 	}; 
 
-	org.apache.mahout.colt.function.IntComparator comp = new org.apache.mahout.colt.function.IntComparator() {
+	org.apache.mahout.matrix.function.IntComparator comp = new org.apache.mahout.matrix.function.IntComparator() {
 		public int compare(int a, int b) {
 			int ab = ((Comparable)v[a]).compareTo((Comparable)v[b]);
 			return ab<0 ? -1 : ab>0 ? 1 : (k[a]<k[b] ? -1 : (k[a]==k[b] ? 0 : 1));
@@ -327,7 +327,7 @@ public void pairsSortedByValue(final IntArrayList keyList, final ObjectArrayList
 		}
 	};
 
-	org.apache.mahout.colt.GenericSorting.quickSort(0,keyList.size(),comp,swapper);
+	org.apache.mahout.matrix.GenericSorting.quickSort(0,keyList.size(),comp,swapper);
 }
 /**
  * Associates the given key with the given value.

@@ -1,4 +1,4 @@
-package org.apache.mahout.colt.matrix.objectalgo;
+package org.apache.mahout.matrix.matrix.objectalgo;
 
 /*
 Copyright � 1999 CERN - European Organization for Nuclear Research.
@@ -8,17 +8,17 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-import org.apache.mahout.colt.matrix.ObjectMatrix1D;
-import org.apache.mahout.colt.matrix.ObjectMatrix2D;
-import org.apache.mahout.colt.matrix.ObjectMatrix3D;
-import org.apache.mahout.colt.matrix.impl.AbstractFormatter;
-import org.apache.mahout.colt.matrix.impl.AbstractMatrix1D;
-import org.apache.mahout.colt.matrix.impl.AbstractMatrix2D;
-import org.apache.mahout.colt.matrix.impl.Former;
+import org.apache.mahout.matrix.matrix.ObjectMatrix1D;
+import org.apache.mahout.matrix.matrix.ObjectMatrix2D;
+import org.apache.mahout.matrix.matrix.ObjectMatrix3D;
+import org.apache.mahout.matrix.matrix.impl.AbstractFormatter;
+import org.apache.mahout.matrix.matrix.impl.AbstractMatrix1D;
+import org.apache.mahout.matrix.matrix.impl.AbstractMatrix2D;
+import org.apache.mahout.matrix.matrix.impl.Former;
 /** 
 Flexible, well human readable matrix print formatting.
 Each cell is converted using {@link Object#toString()}.
-For examples see {@link org.apache.mahout.colt.matrix.doublealgo.Formatter doublealgo.Formatter} which is just the same except that it operates on doubles.
+For examples see {@link org.apache.mahout.matrix.matrix.doublealgo.Formatter doublealgo.Formatter} which is just the same except that it operates on doubles.
 
 @author wolfgang.hoschek@cern.ch
 @version 1.1, 11/22/99
@@ -182,7 +182,7 @@ public String toTitleString(ObjectMatrix2D matrix, String[] rowNames, String[] c
 	int width = c + columns;
 	
 	// make larger matrix holding original matrix and naming strings
-	org.apache.mahout.colt.matrix.ObjectMatrix2D titleMatrix = matrix.like(height, width);
+	org.apache.mahout.matrix.matrix.ObjectMatrix2D titleMatrix = matrix.like(height, width);
 	
 	// insert original matrix into larger matrix
 	titleMatrix.viewPart(r,c,rows,columns).assign(matrix);

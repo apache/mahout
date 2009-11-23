@@ -6,10 +6,10 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.impl;
+package org.apache.mahout.matrix.matrix.impl;
 
-import org.apache.mahout.colt.matrix.ObjectMatrix1D;
-import org.apache.mahout.colt.matrix.ObjectMatrix2D;
+import org.apache.mahout.matrix.matrix.ObjectMatrix1D;
+import org.apache.mahout.matrix.matrix.ObjectMatrix2D;
 /**
 Selection view on dense 1-d matrices holding <tt>Object</tt> elements.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.

@@ -8,10 +8,10 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.math;
 
-import org.apache.mahout.colt.function.DoubleDoubleFunction;
-import org.apache.mahout.colt.function.DoubleDoubleProcedure;
-import org.apache.mahout.colt.function.DoubleFunction;
-import org.apache.mahout.colt.function.DoubleProcedure;
+import org.apache.mahout.matrix.function.DoubleDoubleFunction;
+import org.apache.mahout.matrix.function.DoubleDoubleProcedure;
+import org.apache.mahout.matrix.function.DoubleFunction;
+import org.apache.mahout.matrix.function.DoubleProcedure;
 
 //import com.imsl.math.Sfun;
 /** 
@@ -23,11 +23,11 @@ Function objects to be passed to generic methods. Contains the functions of
   on some arguments. It has a minimal interface: a method <tt>apply</tt> that 
   takes the arguments, computes something and returns some result value. Function 
   objects are comparable to function pointers in C used for call-backs.
-<p>Unary functions are of type {@link org.apache.mahout.colt.function.DoubleFunction}, binary functions
-  of type {@link org.apache.mahout.colt.function.DoubleDoubleFunction}. All can be retrieved via <tt>public
+<p>Unary functions are of type {@link org.apache.mahout.matrix.function.DoubleFunction}, binary functions
+  of type {@link org.apache.mahout.matrix.function.DoubleDoubleFunction}. All can be retrieved via <tt>public
   static final</tt> variables named after the function. 
-Unary predicates are of type {@link org.apache.mahout.colt.function.DoubleProcedure}, binary predicates
-  of type {@link org.apache.mahout.colt.function.DoubleDoubleProcedure}. All can be retrieved via <tt>public
+Unary predicates are of type {@link org.apache.mahout.matrix.function.DoubleProcedure}, binary predicates
+  of type {@link org.apache.mahout.matrix.function.DoubleDoubleProcedure}. All can be retrieved via <tt>public
   static final</tt> variables named <tt>isXXX</tt>. 
 
 <p> Binary functions and predicates also exist as unary functions with the second argument being 
@@ -722,7 +722,7 @@ public static void demo2(int size) {
 	System.out.println(g.apply(a,b));
 
 	// emptyLoop
-	org.apache.mahout.colt.Timer emptyLoop = new org.apache.mahout.colt.Timer().start();
+	org.apache.mahout.matrix.Timer emptyLoop = new org.apache.mahout.matrix.Timer().start();
 	a = 0; b = 0;
 	double sum = 0;
 	for (int i=size; --i >= 0; ) {
@@ -733,7 +733,7 @@ public static void demo2(int size) {
 	emptyLoop.stop().display();
 	System.out.println("empty sum="+sum);
 	
-	org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+	org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 	a = 0; b = 0;
 	sum = 0;
 	for (int i=size; --i >= 0; ) {

@@ -6,10 +6,10 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.impl;
+package org.apache.mahout.matrix.matrix.impl;
 
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
-import org.apache.mahout.colt.matrix.DoubleMatrix3D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix3D;
 /**
 Dense 3-d matrix holding <tt>double</tt> elements.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -322,7 +322,7 @@ In case of overlapping views, behaviour is unspecified.
 final double alpha = 0.25;
 final double beta = 0.75;
 
-org.apache.mahout.colt.function.Double27Function f = new org.apache.mahout.colt.function.Double27Function() {
+org.apache.mahout.matrix.function.Double27Function f = new org.apache.mahout.matrix.function.Double27Function() {
 &nbsp;&nbsp;&nbsp;public final double apply(
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a000, double a001, double a002,
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a010, double a011, double a012,
@@ -346,7 +346,7 @@ A.zAssign27Neighbors(B,f);
 @throws NullPointerException if <tt>function==null</tt>.
 @throws IllegalArgumentException if <tt>rows() != B.rows() || columns() != B.columns() || slices() != B.slices() </tt>.
 */
-public void zAssign27Neighbors(DoubleMatrix3D B, org.apache.mahout.colt.function.Double27Function function) {
+public void zAssign27Neighbors(DoubleMatrix3D B, org.apache.mahout.matrix.function.Double27Function function) {
 	// overridden for performance only
 	if (!(B instanceof DenseDoubleMatrix3D)) {
 		super.zAssign27Neighbors(B, function);

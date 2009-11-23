@@ -6,10 +6,10 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.linalg;
+package org.apache.mahout.matrix.matrix.linalg;
 
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 
 /** 
 For an <tt>m x n</tt> matrix <tt>A</tt> with <tt>m >= n</tt>, the QR decomposition is an <tt>m x n</tt>
@@ -62,7 +62,7 @@ public QRDecomposition (DoubleMatrix2D A) {
 	n = A.columns();
 	Rdiag = A.like1D(n);
 	//Rdiag = new double[n];
-	org.apache.mahout.colt.function.DoubleDoubleFunction hypot = Algebra.hypotFunction();
+	org.apache.mahout.matrix.function.DoubleDoubleFunction hypot = Algebra.hypotFunction();
 	
 	// precompute and cache some views to avoid regenerating them time and again
 	DoubleMatrix1D[] QRcolumns = new DoubleMatrix1D[n];
@@ -258,7 +258,7 @@ public String toString() {
 	catch (IllegalArgumentException exc) { buf.append(unknown+exc.getMessage()); }
 	
 	buf.append("\n\npseudo inverse(A) = ");
-	try { buf.append(String.valueOf(this.solve(org.apache.mahout.colt.matrix.DoubleFactory2D.dense.identity(QR.rows()))));}
+	try { buf.append(String.valueOf(this.solve(org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.identity(QR.rows()))));}
 	catch (IllegalArgumentException exc) { buf.append(unknown+exc.getMessage()); }
 	
 	return buf.toString();

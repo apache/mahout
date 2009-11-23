@@ -1,8 +1,8 @@
-package org.apache.mahout.colt.matrix.impl;
+package org.apache.mahout.matrix.matrix.impl;
 
-import org.apache.mahout.colt.matrix.DoubleFactory2D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
-import org.apache.mahout.colt.matrix.linalg.Algebra;
+import org.apache.mahout.matrix.matrix.DoubleFactory2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.linalg.Algebra;
 
 //import Jama.Matrix.*;
 //import Jama.*;

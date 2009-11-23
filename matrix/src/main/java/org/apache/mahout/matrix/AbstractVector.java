@@ -450,7 +450,7 @@ public abstract class AbstractVector implements Vector {
     final int prime = 31;
     int result = prime + ((name == null) ? 0 : name.hashCode());
     result = prime * result + size();
-    Iterator<Element> iter = iterateNonZero();
+    Iterator<Element> iter = iterateNonZero(true);
     while (iter.hasNext()) {
       Element ele = iter.next();
       result = prime * result + ele.index();
@@ -460,6 +460,8 @@ public abstract class AbstractVector implements Vector {
 
     return result;
   }
+  
+  
 
   @Override
   public double get(String label) throws IndexException, UnboundLabelException {

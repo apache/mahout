@@ -32,12 +32,12 @@ package org.apache.mahout.jet.random.engine;
  * @see MersenneTwister64
  * @see java.util.Random
  */
-//public abstract class RandomEngine extends edu.cornell.lassp.houle.RngPack.RandomSeedable implements org.apache.mahout.colt.function.DoubleFunction, org.apache.mahout.colt.function.IntFunction {
+//public abstract class RandomEngine extends edu.cornell.lassp.houle.RngPack.RandomSeedable implements org.apache.mahout.matrix.function.DoubleFunction, org.apache.mahout.matrix.function.IntFunction {
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public abstract class RandomEngine extends org.apache.mahout.colt.PersistentObject implements org.apache.mahout.colt.function.DoubleFunction, org.apache.mahout.colt.function.IntFunction {
+public abstract class RandomEngine extends org.apache.mahout.matrix.PersistentObject implements org.apache.mahout.matrix.function.DoubleFunction, org.apache.mahout.matrix.function.IntFunction {
 /**
  * Makes this class non instantiable, but still let's others inherit from it.
  */

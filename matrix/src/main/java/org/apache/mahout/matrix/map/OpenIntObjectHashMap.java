@@ -6,13 +6,13 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.map;
+package org.apache.mahout.matrix.map;
 
-import org.apache.mahout.colt.function.IntObjectProcedure;
-import org.apache.mahout.colt.function.IntProcedure;
-import org.apache.mahout.colt.list.ByteArrayList;
-import org.apache.mahout.colt.list.IntArrayList;
-import org.apache.mahout.colt.list.ObjectArrayList;
+import org.apache.mahout.matrix.function.IntObjectProcedure;
+import org.apache.mahout.matrix.function.IntProcedure;
+import org.apache.mahout.matrix.list.ByteArrayList;
+import org.apache.mahout.matrix.list.IntArrayList;
+import org.apache.mahout.matrix.list.ObjectArrayList;
 /**
 Hash map holding (key,value) associations of type <tt>(int-->Object)</tt>; Automatically grows and shrinks as needed; Implemented using open addressing with double hashing.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.

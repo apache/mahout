@@ -6,7 +6,7 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.list;
+package org.apache.mahout.matrix.list;
 
 /**
 Abstract base class for resizable lists holding objects or primitive data types such as <code>int</code>, <code>float</code>, etc.

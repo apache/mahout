@@ -24,7 +24,7 @@ package org.apache.mahout.jet.math;
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public final class PlusMult implements org.apache.mahout.colt.function.DoubleDoubleFunction {
+public final class PlusMult implements org.apache.mahout.matrix.function.DoubleDoubleFunction {
 	/**
 	 * Public read/write access to avoid frequent object construction.
 	 */

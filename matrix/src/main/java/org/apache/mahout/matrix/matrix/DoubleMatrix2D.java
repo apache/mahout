@@ -6,13 +6,13 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix;
+package org.apache.mahout.matrix.matrix;
 
-import org.apache.mahout.colt.list.DoubleArrayList;
-import org.apache.mahout.colt.list.IntArrayList;
-import org.apache.mahout.colt.matrix.impl.AbstractMatrix2D;
-import org.apache.mahout.colt.matrix.impl.DenseDoubleMatrix1D;
-import org.apache.mahout.colt.matrix.impl.DenseDoubleMatrix2D;
+import org.apache.mahout.matrix.list.DoubleArrayList;
+import org.apache.mahout.matrix.list.IntArrayList;
+import org.apache.mahout.matrix.matrix.impl.AbstractMatrix2D;
+import org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix2D;
 /**
 Abstract base class for 2-d matrices holding <tt>double</tt> elements.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -58,7 +58,7 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @return the aggregated measure.
 @see org.apache.mahout.jet.math.Functions
 */
-public double aggregate(org.apache.mahout.colt.function.DoubleDoubleFunction aggr, org.apache.mahout.colt.function.DoubleFunction f) {
+public double aggregate(org.apache.mahout.matrix.function.DoubleDoubleFunction aggr, org.apache.mahout.matrix.function.DoubleFunction f) {
 	if (size()==0) return Double.NaN;
 	double a = f.apply(getQuick(rows-1,columns-1));
 	int d = 1; // last cell already done
@@ -101,7 +101,7 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @throws	IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
 @see org.apache.mahout.jet.math.Functions
 */
-public double aggregate(DoubleMatrix2D other, org.apache.mahout.colt.function.DoubleDoubleFunction aggr, org.apache.mahout.colt.function.DoubleDoubleFunction f) {
+public double aggregate(DoubleMatrix2D other, org.apache.mahout.matrix.function.DoubleDoubleFunction aggr, org.apache.mahout.matrix.function.DoubleDoubleFunction f) {
 	checkShape(other);
 	if (size()==0) return Double.NaN;
 	double a = f.apply(getQuick(rows-1,columns-1),other.getQuick(rows-1,columns-1));
@@ -175,7 +175,7 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @return <tt>this</tt> (for convenience only).
 @see org.apache.mahout.jet.math.Functions
 */
-public DoubleMatrix2D assign(org.apache.mahout.colt.function.DoubleFunction function) {
+public DoubleMatrix2D assign(org.apache.mahout.matrix.function.DoubleFunction function) {
 	for (int row=rows; --row >= 0; ) {
 		for (int column=columns; --column >= 0; ) {
 			setQuick(row,column, function.apply(getQuick(row,column)));
@@ -235,7 +235,7 @@ and as second argument the current cell's value of <tt>y</tt>,
 @throws	IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
 @see org.apache.mahout.jet.math.Functions
 */
-public DoubleMatrix2D assign(DoubleMatrix2D y, org.apache.mahout.colt.function.DoubleDoubleFunction function) {
+public DoubleMatrix2D assign(DoubleMatrix2D y, org.apache.mahout.matrix.function.DoubleDoubleFunction function) {
 	checkShape(y);
 	for (int row=rows; --row >= 0; ) {
 		for (int column=columns; --column >= 0; ) {
@@ -274,7 +274,7 @@ public DoubleMatrix2D copy() {
  * @return    <tt>true</tt> if all cells are equal to the given value, <tt>false</tt> otherwise.
  */
 public boolean equals(double value) {
-	return org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.equals(this,value);
+	return org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.equals(this,value);
 }
 /**
  * Compares this object against the specified object.
@@ -291,7 +291,7 @@ public boolean equals(Object obj) {
 	if (obj == null) return false;
 	if (!(obj instanceof DoubleMatrix2D)) return false;
 
-	return org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.equals(this,(DoubleMatrix2D) obj);
+	return org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.equals(this,(DoubleMatrix2D) obj);
 }
 /**
  * Assigns the result of a function to each <i>non-zero</i> cell; <tt>x[row,col] = function(x[row,col])</tt>.
@@ -303,7 +303,7 @@ public boolean equals(Object obj) {
  * @param function a function object taking as argument the current non-zero cell's row, column and value.
  * @return <tt>this</tt> (for convenience only).
  */
-public DoubleMatrix2D forEachNonZero(final org.apache.mahout.colt.function.IntIntDoubleFunction function) {
+public DoubleMatrix2D forEachNonZero(final org.apache.mahout.matrix.function.IntIntDoubleFunction function) {
 	for (int row=rows; --row >= 0;) {
 		for (int column=columns; --column >= 0;) {
 			double value = getQuick(row,column);
@@ -491,10 +491,10 @@ public double[][] toArray() {
 }
 /**
  * Returns a string representation using default formatting.
- * @see org.apache.mahout.colt.matrix.doublealgo.Formatter
+ * @see org.apache.mahout.matrix.matrix.doublealgo.Formatter
  */
 public String toString() {
-	return new org.apache.mahout.colt.matrix.doublealgo.Formatter().toString(this);
+	return new org.apache.mahout.matrix.matrix.doublealgo.Formatter().toString(this);
 }
 /**
  * Constructs and returns a new view equal to the receiver.
@@ -783,13 +783,13 @@ protected abstract DoubleMatrix2D viewSelectionLike(int[] rowOffsets, int[] colu
 /**
 Sorts the matrix rows into ascending order, according to the <i>natural ordering</i> of the matrix values in the given column.
 This sort is guaranteed to be <i>stable</i>.
-For further information, see {@link org.apache.mahout.colt.matrix.doublealgo.Sorting#sort(DoubleMatrix2D,int)}.
-For more advanced sorting functionality, see {@link org.apache.mahout.colt.matrix.doublealgo.Sorting}.
+For further information, see {@link org.apache.mahout.matrix.matrix.doublealgo.Sorting#sort(DoubleMatrix2D,int)}.
+For more advanced sorting functionality, see {@link org.apache.mahout.matrix.matrix.doublealgo.Sorting}.
 @return a new sorted vector (matrix) view.
 @throws IndexOutOfBoundsException if <tt>column < 0 || column >= columns()</tt>.
 */
 public DoubleMatrix2D viewSorted(int column) {
-	return org.apache.mahout.colt.matrix.doublealgo.Sorting.mergeSort.sort(this,column);
+	return org.apache.mahout.matrix.matrix.doublealgo.Sorting.mergeSort.sort(this,column);
 }
 /**
 Constructs and returns a new <i>stride view</i> which is a sub matrix consisting of every i-th cell.
@@ -821,7 +821,7 @@ public DoubleMatrix2D viewStrides(int rowStride, int columnStride) {
  * @param procedure a procedure object taking as argument the current cell's value. Stops iteration if the procedure returns <tt>false</tt>, otherwise continues. 
  * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise. 
  */
-private boolean xforEach(final org.apache.mahout.colt.function.DoubleProcedure procedure) {
+private boolean xforEach(final org.apache.mahout.matrix.function.DoubleProcedure procedure) {
 	for (int row=rows; --row >= 0;) {
 		for (int column=columns; --column >= 0;) {
 			if (!procedure.apply(getQuick(row,column))) return false;
@@ -856,7 +856,7 @@ final double alpha = 0.25;
 final double beta = 0.75;
 
 // 8 neighbors
-org.apache.mahout.colt.function.Double9Function f = new org.apache.mahout.colt.function.Double9Function() {
+org.apache.mahout.matrix.function.Double9Function f = new org.apache.mahout.matrix.function.Double9Function() {
 &nbsp;&nbsp;&nbsp;public final double apply(
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a00, double a01, double a02,
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a10, double a11, double a12,
@@ -867,7 +867,7 @@ org.apache.mahout.colt.function.Double9Function f = new org.apache.mahout.colt.f
 A.zAssign8Neighbors(B,f);
 
 // 4 neighbors
-org.apache.mahout.colt.function.Double9Function g = new org.apache.mahout.colt.function.Double9Function() {
+org.apache.mahout.matrix.function.Double9Function g = new org.apache.mahout.matrix.function.Double9Function() {
 &nbsp;&nbsp;&nbsp;public final double apply(
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a00, double a01, double a02,
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a10, double a11, double a12,
@@ -883,7 +883,7 @@ C.zAssign8Neighbors(B,g); // fast, even though it doesn't look like it
 @throws NullPointerException if <tt>function==null</tt>.
 @throws IllegalArgumentException if <tt>rows() != B.rows() || columns() != B.columns()</tt>.
 */
-public void zAssign8Neighbors(DoubleMatrix2D B, org.apache.mahout.colt.function.Double9Function function) {
+public void zAssign8Neighbors(DoubleMatrix2D B, org.apache.mahout.matrix.function.Double9Function function) {
 	if (function==null) throw new NullPointerException("function must not be null.");
 	checkShape(B);
 	if (rows<3 || columns<3) return; // nothing to do

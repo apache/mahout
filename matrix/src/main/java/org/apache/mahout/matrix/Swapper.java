@@ -6,12 +6,12 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt;
+package org.apache.mahout.matrix;
 
 /**
  * Interface for an object that knows how to swap elements at two positions (a,b).
  *
- * @see org.apache.mahout.colt.GenericSorting
+ * @see org.apache.mahout.matrix.GenericSorting
  *
  * @author wolfgang.hoschek@cern.ch
  * @version 1.0, 03-Jul-99

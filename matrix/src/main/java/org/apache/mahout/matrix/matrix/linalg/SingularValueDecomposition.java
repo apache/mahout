@@ -6,10 +6,10 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.linalg;
+package org.apache.mahout.matrix.matrix.linalg;
 
-import org.apache.mahout.colt.matrix.DoubleFactory2D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleFactory2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /** 
 For an <tt>m x n</tt> matrix <tt>A</tt> with <tt>m >= n</tt>, the singular value decomposition is
 an <tt>m x n</tt> orthogonal matrix <tt>U</tt>, an <tt>n x n</tt> diagonal matrix <tt>S</tt>, and

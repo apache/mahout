@@ -6,7 +6,7 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.map;
+package org.apache.mahout.matrix.map;
 
 /**
 Status: Experimental; Do not use for production yet. Hash map holding (key,value) associations of type <tt>(int-->int)</tt>; Automatically grows and shrinks as needed; Implemented using open addressing with double hashing.

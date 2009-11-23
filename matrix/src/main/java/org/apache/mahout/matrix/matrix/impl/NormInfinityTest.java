@@ -1,7 +1,7 @@
-package org.apache.mahout.colt.matrix.impl;
+package org.apache.mahout.matrix.matrix.impl;
 
-import org.apache.mahout.colt.matrix.*;
-import org.apache.mahout.colt.matrix.linalg.Algebra;
+import org.apache.mahout.matrix.matrix.*;
+import org.apache.mahout.matrix.matrix.linalg.Algebra;
 
 class NormInfinityTest {
 

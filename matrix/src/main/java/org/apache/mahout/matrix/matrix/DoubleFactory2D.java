@@ -6,11 +6,11 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix;
+package org.apache.mahout.matrix.matrix;
 
-import org.apache.mahout.colt.matrix.impl.DenseDoubleMatrix2D;
-import org.apache.mahout.colt.matrix.impl.RCDoubleMatrix2D;
-import org.apache.mahout.colt.matrix.impl.SparseDoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.impl.RCDoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.impl.SparseDoubleMatrix2D;
 /**
 Factory for convenient construction of 2-d matrices holding <tt>double</tt> 
   cells. Also provides convenient methods to compose (concatenate) and decompose 
@@ -78,7 +78,7 @@ F.random(4,4);
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class DoubleFactory2D extends org.apache.mahout.colt.PersistentObject {
+public class DoubleFactory2D extends org.apache.mahout.matrix.PersistentObject {
 	/**
 	 * A factory producing dense matrices.
 	 */
@@ -541,7 +541,7 @@ DoubleMatrix2D[][] parts1 =
 	{ null,        make(2,2,4), null        }
 };
 System.out.println("\n"+compose(parts1));
-//System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(make(parts1).toString()));
+//System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(make(parts1).toString()));
 
 /*
 //
@@ -562,7 +562,7 @@ DoubleMatrix2D[][] parts3 =
 	{ identity(3).viewRowFlip(), null                         }
 };
 System.out.println("\n"+compose(parts3));
-//System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(make(parts3).toString()));
+//System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(make(parts3).toString()));
 
 DoubleMatrix2D A = ascending(2,2);
 DoubleMatrix2D B = descending(2,2);
@@ -574,7 +574,7 @@ DoubleMatrix2D[][] parts4 =
 	{ _, A, _, B }
 };
 System.out.println("\n"+compose(parts4));
-//System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(make(parts4).toString()));
+//System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(make(parts4).toString()));
 
 }
 /**
@@ -601,7 +601,7 @@ System.out.println(A);
 System.out.println(B);
 System.out.println(C);
 System.out.println(D);
-//System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(make(parts1).toString()));
+//System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(make(parts1).toString()));
 
 /*
 //
@@ -623,7 +623,7 @@ DoubleMatrix2D[][] parts3 =
 	{ identity(3).viewRowFlip(), null                         }
 };
 System.out.println("\n"+make(parts3));
-//System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(make(parts3).toString()));
+//System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(make(parts3).toString()));
 
 DoubleMatrix2D A = ascending(2,2);
 DoubleMatrix2D B = descending(2,2);
@@ -635,7 +635,7 @@ DoubleMatrix2D[][] parts4 =
 	{ _, A, _, B }
 };
 System.out.println("\n"+make(parts4));
-//System.out.println("\n"+org.apache.mahout.colt.matrixpattern.Converting.toHTML(make(parts4).toString()));
+//System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(make(parts4).toString()));
 */
 }
 /**

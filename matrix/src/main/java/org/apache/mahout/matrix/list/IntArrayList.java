@@ -6,9 +6,9 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.list;
+package org.apache.mahout.matrix.list;
 
-import org.apache.mahout.colt.function.IntProcedure;
+import org.apache.mahout.matrix.function.IntProcedure;
 /**
 Resizable list holding <code>int</code> elements; implemented with arrays.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -105,11 +105,11 @@ public void beforeInsert(int index, int element) {
  *	       elements in the receiver are less than the specified key.  Note
  *	       that this guarantees that the return value will be &gt;= 0 if
  *	       and only if the key is found.
- * @see org.apache.mahout.colt.Sorting
+ * @see org.apache.mahout.matrix.Sorting
  * @see java.util.Arrays
  */
 public int binarySearchFromTo(int key, int from, int to) {
-	return org.apache.mahout.colt.Sorting.binarySearchFromTo(this.elements,key,from,to);
+	return org.apache.mahout.matrix.Sorting.binarySearchFromTo(this.elements,key,from,to);
 }
 /**
  * Returns a deep copy of the receiver. 
@@ -201,7 +201,7 @@ public AbstractIntList elements(int[] elements) {
  * @param   minCapacity   the desired minimum capacity.
  */
 public void ensureCapacity(int minCapacity) {
-	elements = org.apache.mahout.colt.Arrays.ensureCapacity(elements,minCapacity);
+	elements = org.apache.mahout.matrix.Arrays.ensureCapacity(elements,minCapacity);
 }
 /**
  * Compares the specified Object with the receiver.  
@@ -573,6 +573,6 @@ public void sortFromTo(int from, int to) {
  * storage of the receiver.
  */
 public void trimToSize() {
-	elements = org.apache.mahout.colt.Arrays.trimToCapacity(elements,size());
+	elements = org.apache.mahout.matrix.Arrays.trimToCapacity(elements,size());
 }
 }

@@ -6,10 +6,10 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix;
+package org.apache.mahout.matrix.matrix;
 
-import org.apache.mahout.colt.matrix.impl.DenseObjectMatrix3D;
-import org.apache.mahout.colt.matrix.impl.SparseObjectMatrix3D;
+import org.apache.mahout.matrix.matrix.impl.DenseObjectMatrix3D;
+import org.apache.mahout.matrix.matrix.impl.SparseObjectMatrix3D;
 /**
 Factory for convenient construction of 3-d matrices holding <tt>Object</tt> cells. 
 Use idioms like <tt>ObjectFactory3D.dense.make(4,4,4)</tt> to construct dense matrices, 
@@ -34,7 +34,7 @@ F.make(4,4,4);
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class ObjectFactory3D extends org.apache.mahout.colt.PersistentObject {
+public class ObjectFactory3D extends org.apache.mahout.matrix.PersistentObject {
 	/**
 	 * A factory producing dense matrices.
 	 */

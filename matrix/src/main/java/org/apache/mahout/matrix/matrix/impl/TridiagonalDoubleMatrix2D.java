@@ -6,10 +6,10 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.impl;
+package org.apache.mahout.matrix.matrix.impl;
 
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /**
 Tridiagonal 2-d matrix holding <tt>double</tt> elements.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -109,7 +109,7 @@ public DoubleMatrix2D assign(double value) {
 	else super.assign(value);
 	return this;
 }
-public DoubleMatrix2D assign(final org.apache.mahout.colt.function.DoubleFunction function) {
+public DoubleMatrix2D assign(final org.apache.mahout.matrix.function.DoubleFunction function) {
 	if (function instanceof org.apache.mahout.jet.math.Mult) { // x[i] = mult*x[i]
 		final double alpha = ((org.apache.mahout.jet.math.Mult) function).multiplicator;
 		if (alpha==1) return this;
@@ -124,7 +124,7 @@ public DoubleMatrix2D assign(final org.apache.mahout.colt.function.DoubleFunctio
 		*/
 
 		forEachNonZero(
-			new org.apache.mahout.colt.function.IntIntDoubleFunction() {
+			new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
 				public double apply(int i, int j, double value) {
 					return function.apply(value);
 				}
@@ -162,7 +162,7 @@ public DoubleMatrix2D assign(DoubleMatrix2D source) {
 	if (source instanceof RCDoubleMatrix2D || source instanceof SparseDoubleMatrix2D) {
 		assign(0);
 		source.forEachNonZero(
-			new org.apache.mahout.colt.function.IntIntDoubleFunction() {
+			new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
 				public double apply(int i, int j, double value) {
 					setQuick(i,j,value);
 					return value;
@@ -174,14 +174,14 @@ public DoubleMatrix2D assign(DoubleMatrix2D source) {
 	
 	return super.assign(source);
 }
-public DoubleMatrix2D assign(final DoubleMatrix2D y, org.apache.mahout.colt.function.DoubleDoubleFunction function) {
+public DoubleMatrix2D assign(final DoubleMatrix2D y, org.apache.mahout.matrix.function.DoubleDoubleFunction function) {
 	checkShape(y);
 
 	if (function instanceof org.apache.mahout.jet.math.PlusMult) { // x[i] = x[i] + alpha*y[i]
 		final double alpha = ((org.apache.mahout.jet.math.PlusMult) function).multiplicator;
 		if (alpha==0) return this; // nothing to do
 		y.forEachNonZero(
-			new org.apache.mahout.colt.function.IntIntDoubleFunction() {
+			new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
 				public double apply(int i, int j, double value) {
 					setQuick(i,j,getQuick(i,j) + alpha*value);
 					return value;
@@ -193,7 +193,7 @@ public DoubleMatrix2D assign(final DoubleMatrix2D y, org.apache.mahout.colt.func
 
 	if (function== org.apache.mahout.jet.math.Functions.mult) { // x[i] = x[i] * y[i]
 		forEachNonZero(
-			new org.apache.mahout.colt.function.IntIntDoubleFunction() {
+			new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
 				public double apply(int i, int j, double value) {
 					setQuick(i,j,getQuick(i,j) * y.getQuick(i,j));
 					return value;
@@ -205,7 +205,7 @@ public DoubleMatrix2D assign(final DoubleMatrix2D y, org.apache.mahout.colt.func
 	
 	if (function== org.apache.mahout.jet.math.Functions.div) { // x[i] = x[i] / y[i]
 		forEachNonZero(
-			new org.apache.mahout.colt.function.IntIntDoubleFunction() {
+			new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
 				public double apply(int i, int j, double value) {
 					setQuick(i,j,getQuick(i,j) / y.getQuick(i,j));
 					return value;
@@ -217,7 +217,7 @@ public DoubleMatrix2D assign(final DoubleMatrix2D y, org.apache.mahout.colt.func
 	
 	return super.assign(y,function);
 }
-public DoubleMatrix2D forEachNonZero(final org.apache.mahout.colt.function.IntIntDoubleFunction function) {
+public DoubleMatrix2D forEachNonZero(final org.apache.mahout.matrix.function.IntIntDoubleFunction function) {
 	for (int kind=0; kind<=2; kind++) {
 		int i=0,j=0;
 		switch (kind) {
@@ -449,7 +449,7 @@ public DoubleMatrix1D zMult(DoubleMatrix1D y, DoubleMatrix1D z, double alpha, do
 	if (yElements==null || zElements==null) throw new InternalError();
 
 	forEachNonZero(
-		new org.apache.mahout.colt.function.IntIntDoubleFunction() {
+		new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
 			public double apply(int i, int j, double value) {
 				if (transposeA) { int tmp=i; i=j; j=tmp; }
 				zElements[zi + zStride*i] += value * yElements[yi + yStride*j];
@@ -493,7 +493,7 @@ public DoubleMatrix2D zMult(DoubleMatrix2D B, DoubleMatrix2D C, final double alp
 	final org.apache.mahout.jet.math.PlusMult fun = org.apache.mahout.jet.math.PlusMult.plusMult(0);
 
 	forEachNonZero(
-		new org.apache.mahout.colt.function.IntIntDoubleFunction() {
+		new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
 			public double apply(int i, int j, double value) {
 				fun.multiplicator = value*alpha;
 				if (!transposeA)

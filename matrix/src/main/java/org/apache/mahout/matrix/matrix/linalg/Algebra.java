@@ -6,11 +6,11 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.linalg;
+package org.apache.mahout.matrix.matrix.linalg;
 
-import org.apache.mahout.colt.matrix.DoubleFactory2D;
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleFactory2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /**
  * Linear algebraic matrix operations operating on {@link DoubleMatrix2D}; concentrates most functionality of this package.
  *
@@ -21,7 +21,7 @@ import org.apache.mahout.colt.matrix.DoubleMatrix2D;
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class Algebra extends org.apache.mahout.colt.PersistentObject {
+public class Algebra extends org.apache.mahout.matrix.PersistentObject {
 	/**
 	 * A default Algebra object; has {@link Property#DEFAULT} attached for tolerance. 
 	 * Allows ommiting to construct an Algebra object time and again.
@@ -119,8 +119,8 @@ protected static double hypot(double a, double b) {
 /**
  * Returns sqrt(a^2 + b^2) without under/overflow.
  */
-protected static org.apache.mahout.colt.function.DoubleDoubleFunction hypotFunction() {
-	return new org.apache.mahout.colt.function.DoubleDoubleFunction() {
+protected static org.apache.mahout.matrix.function.DoubleDoubleFunction hypotFunction() {
+	return new org.apache.mahout.matrix.function.DoubleDoubleFunction() {
 		public final double apply(double a, double b) {
 			return hypot(a,b);
 		}
@@ -377,13 +377,13 @@ public DoubleMatrix2D permuteRows(final DoubleMatrix2D A, int[] indexes, int[] w
 		return A;
 	}
 
-	org.apache.mahout.colt.Swapper swapper = new org.apache.mahout.colt.Swapper() {
+	org.apache.mahout.matrix.Swapper swapper = new org.apache.mahout.matrix.Swapper() {
 		public void swap(int a, int b) {
 			A.viewRow(a).swap(A.viewRow(b));
 		}
 	};
 
-	org.apache.mahout.colt.GenericPermuting.permute(indexes, swapper, work, null);
+	org.apache.mahout.matrix.GenericPermuting.permute(indexes, swapper, work, null);
 	return A;
 }
 /**
@@ -418,7 +418,7 @@ public DoubleMatrix2D pow(DoubleMatrix2D A, int p) {
 		return T;
 	}
 
-	int k = org.apache.mahout.colt.bitvector.QuickBitVector.mostSignificantBit(p); // index of highest bit in state "true"
+	int k = org.apache.mahout.matrix.bitvector.QuickBitVector.mostSignificantBit(p); // index of highest bit in state "true"
 	
 	/*
 	this is the naive version:
@@ -430,7 +430,7 @@ public DoubleMatrix2D pow(DoubleMatrix2D A, int p) {
 	*/
 
 	// here comes the optimized version:
-	//org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+	//org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 
 	int i=0;
 	while (i<=k && (p & (1<<i)) == 0) { // while (bit i of p == false)
@@ -593,8 +593,8 @@ trace         : 0
 </pre>
 */
 public String toString(DoubleMatrix2D matrix) {
-	final org.apache.mahout.colt.list.ObjectArrayList names = new org.apache.mahout.colt.list.ObjectArrayList();
-	final org.apache.mahout.colt.list.ObjectArrayList values = new org.apache.mahout.colt.list.ObjectArrayList();
+	final org.apache.mahout.matrix.list.ObjectArrayList names = new org.apache.mahout.matrix.list.ObjectArrayList();
+	final org.apache.mahout.matrix.list.ObjectArrayList values = new org.apache.mahout.matrix.list.ObjectArrayList();
 	String unknown = "Illegal operation or error: ";
 
 	// determine properties
@@ -632,19 +632,19 @@ public String toString(DoubleMatrix2D matrix) {
 	
 	
 	// sort ascending by property name
-	org.apache.mahout.colt.function.IntComparator comp = new org.apache.mahout.colt.function.IntComparator() {
+	org.apache.mahout.matrix.function.IntComparator comp = new org.apache.mahout.matrix.function.IntComparator() {
 		public int compare(int a, int b) {
 			return Property.get(names,a).compareTo(Property.get(names,b));
 		}
 	};
-	org.apache.mahout.colt.Swapper swapper = new org.apache.mahout.colt.Swapper() {
+	org.apache.mahout.matrix.Swapper swapper = new org.apache.mahout.matrix.Swapper() {
 		public void swap(int a, int b) {
 			Object tmp;
 			tmp = names.get(a); names.set(a,names.get(b)); names.set(b,tmp);
 			tmp = values.get(a); values.set(a,values.get(b)); values.set(b,tmp);
 		}
 	};	
-	org.apache.mahout.colt.GenericSorting.quickSort(0,names.size(),comp,swapper);
+	org.apache.mahout.matrix.GenericSorting.quickSort(0,names.size(),comp,swapper);
 	
 	// determine padding for nice formatting
 	int maxLength = 0;
@@ -945,7 +945,7 @@ private DoubleMatrix2D xmultOuter(DoubleMatrix1D x, DoubleMatrix1D y) {
  * @throws IllegalArgumentException if <tt>!Testing.isSquare(A)</tt>.
  */
 private DoubleMatrix2D xpowSlow(DoubleMatrix2D A, int k) {
-	//org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+	//org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 	DoubleMatrix2D result = A.copy();
 	for (int i=0; i<k-1; i++) {
 		result = mult(result,A);

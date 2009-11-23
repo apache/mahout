@@ -6,11 +6,11 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix;
+package org.apache.mahout.matrix.matrix;
 
-import org.apache.mahout.colt.list.IntArrayList;
-import org.apache.mahout.colt.list.ObjectArrayList;
-import org.apache.mahout.colt.matrix.impl.AbstractMatrix2D;
+import org.apache.mahout.matrix.list.IntArrayList;
+import org.apache.mahout.matrix.list.ObjectArrayList;
+import org.apache.mahout.matrix.matrix.impl.AbstractMatrix2D;
 /**
 Abstract base class for 2-d matrices holding <tt>Object</tt> elements.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -56,7 +56,7 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @return the aggregated measure.
 @see org.apache.mahout.jet.math.Functions
 */
-public Object aggregate(org.apache.mahout.colt.function.ObjectObjectFunction aggr, org.apache.mahout.colt.function.ObjectFunction f) {
+public Object aggregate(org.apache.mahout.matrix.function.ObjectObjectFunction aggr, org.apache.mahout.matrix.function.ObjectFunction f) {
 	if (size()==0) return null;
 	Object a = f.apply(getQuick(rows-1,columns-1));
 	int d = 1; // last cell already done
@@ -99,7 +99,7 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @throws	IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
 @see org.apache.mahout.jet.math.Functions
 */
-public Object aggregate(ObjectMatrix2D other, org.apache.mahout.colt.function.ObjectObjectFunction aggr, org.apache.mahout.colt.function.ObjectObjectFunction f) {
+public Object aggregate(ObjectMatrix2D other, org.apache.mahout.matrix.function.ObjectObjectFunction aggr, org.apache.mahout.matrix.function.ObjectObjectFunction f) {
 	checkShape(other);
 	if (size()==0) return null;
 	Object a = f.apply(getQuick(rows-1,columns-1),other.getQuick(rows-1,columns-1));
@@ -156,7 +156,7 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @return <tt>this</tt> (for convenience only).
 @see org.apache.mahout.jet.math.Functions
 */
-public ObjectMatrix2D assign(org.apache.mahout.colt.function.ObjectFunction function) {
+public ObjectMatrix2D assign(org.apache.mahout.matrix.function.ObjectFunction function) {
 	for (int row=rows; --row >= 0; ) {
 		for (int column=columns; --column >= 0; ) {
 			setQuick(row,column, function.apply(getQuick(row,column)));
@@ -214,7 +214,7 @@ and as second argument the current cell's value of <tt>y</tt>,
 @throws	IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
 @see org.apache.mahout.jet.math.Functions
 */
-public ObjectMatrix2D assign(ObjectMatrix2D y, org.apache.mahout.colt.function.ObjectObjectFunction function) {
+public ObjectMatrix2D assign(ObjectMatrix2D y, org.apache.mahout.matrix.function.ObjectObjectFunction function) {
 	checkShape(y);
 	for (int row=rows; --row >= 0; ) {
 		for (int column=columns; --column >= 0; ) {
@@ -486,10 +486,10 @@ public Object[][] toArray() {
 }
 /**
  * Returns a string representation using default formatting.
- * @see org.apache.mahout.colt.matrix.objectalgo.Formatter
+ * @see org.apache.mahout.matrix.matrix.objectalgo.Formatter
  */
 public String toString() {
-	return new org.apache.mahout.colt.matrix.objectalgo.Formatter().toString(this);
+	return new org.apache.mahout.matrix.matrix.objectalgo.Formatter().toString(this);
 }
 /**
  * Constructs and returns a new view equal to the receiver.
@@ -778,13 +778,13 @@ protected abstract ObjectMatrix2D viewSelectionLike(int[] rowOffsets, int[] colu
 /**
 Sorts the matrix rows into ascending order, according to the <i>natural ordering</i> of the matrix values in the given column.
 This sort is guaranteed to be <i>stable</i>.
-For further information, see {@link org.apache.mahout.colt.matrix.objectalgo.Sorting#sort(ObjectMatrix2D,int)}.
-For more advanced sorting functionality, see {@link org.apache.mahout.colt.matrix.objectalgo.Sorting}.
+For further information, see {@link org.apache.mahout.matrix.matrix.objectalgo.Sorting#sort(ObjectMatrix2D,int)}.
+For more advanced sorting functionality, see {@link org.apache.mahout.matrix.matrix.objectalgo.Sorting}.
 @return a new sorted vector (matrix) view.
 @throws IndexOutOfBoundsException if <tt>column < 0 || column >= columns()</tt>.
 */
 public ObjectMatrix2D viewSorted(int column) {
-	return org.apache.mahout.colt.matrix.objectalgo.Sorting.mergeSort.sort(this,column);
+	return org.apache.mahout.matrix.matrix.objectalgo.Sorting.mergeSort.sort(this,column);
 }
 /**
 Constructs and returns a new <i>stride view</i> which is a sub matrix consisting of every i-th cell.
@@ -816,7 +816,7 @@ public ObjectMatrix2D viewStrides(int rowStride, int columnStride) {
  * @param procedure a procedure object taking as argument the current cell's value. Stops iteration if the procedure returns <tt>false</tt>, otherwise continues. 
  * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise. 
  */
-private boolean xforEach(final org.apache.mahout.colt.function.ObjectProcedure procedure) {
+private boolean xforEach(final org.apache.mahout.matrix.function.ObjectProcedure procedure) {
 	for (int row=rows; --row >= 0;) {
 		for (int column=columns; --column >= 0;) {
 			if (!procedure.apply(getQuick(row,column))) return false;

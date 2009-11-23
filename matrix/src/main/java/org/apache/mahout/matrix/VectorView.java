@@ -117,6 +117,11 @@ public class VectorView extends AbstractVector {
   }
 
   @Override
+  public java.util.Iterator<Vector.Element> iterateNonZero(boolean sorted) {
+    return new NonZeroIterator();
+  }
+
+  @Override
   public java.util.Iterator<Vector.Element> iterateAll() {
     return new AllIterator();
   }

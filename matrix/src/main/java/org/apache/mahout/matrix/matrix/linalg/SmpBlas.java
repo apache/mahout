@@ -6,10 +6,10 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.linalg;
+package org.apache.mahout.matrix.matrix.linalg;
 
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 import EDU.oswego.cs.dl.util.concurrent.FJTask;
 /**
 Parallel implementation of the Basic Linear Algebra System for symmetric multi processing boxes.
@@ -18,8 +18,8 @@ Parallelised are:
 <ul>
 <li>{@link #dgemm dgemm} (matrix-matrix multiplication)</li>
 <li>{@link #dgemv dgemv} (matrix-vector multiplication)</li>
-<li>{@link #assign(DoubleMatrix2D, org.apache.mahout.colt.function.DoubleFunction) assign(A,function)} (generalized matrix scaling/transform): Strong speedup only for expensive functions like logarithm, sin, etc.</li>
-<li>{@link #assign(DoubleMatrix2D,DoubleMatrix2D, org.apache.mahout.colt.function.DoubleDoubleFunction) assign(A,B,function)} (generalized matrix scaling/transform): Strong speedup only for expensive functions like pow etc.</li>
+<li>{@link #assign(DoubleMatrix2D, org.apache.mahout.matrix.function.DoubleFunction) assign(A,function)} (generalized matrix scaling/transform): Strong speedup only for expensive functions like logarithm, sin, etc.</li>
+<li>{@link #assign(DoubleMatrix2D,DoubleMatrix2D, org.apache.mahout.matrix.function.DoubleDoubleFunction) assign(A,B,function)} (generalized matrix scaling/transform): Strong speedup only for expensive functions like pow etc.</li>
 </ul>
 In all cases, no or only marginal speedup is seen for small problem sizes; they are detected and the sequential algorithm is used.
 
@@ -102,7 +102,7 @@ public static void allocateBlas(int maxThreads, Blas seqBlas) {
 		smpBlas = new SmpBlas(maxThreads, seqBlas);
 	}
 }
-public void assign(DoubleMatrix2D A, final org.apache.mahout.colt.function.DoubleFunction function) {
+public void assign(DoubleMatrix2D A, final org.apache.mahout.matrix.function.DoubleFunction function) {
 	run(A,false,
 		new Matrix2DMatrix2DFunction() {
 			public double apply(DoubleMatrix2D AA, DoubleMatrix2D BB) {
@@ -112,7 +112,7 @@ public void assign(DoubleMatrix2D A, final org.apache.mahout.colt.function.Doubl
 		}
 	);
 }
-public void assign(DoubleMatrix2D A, DoubleMatrix2D B, final org.apache.mahout.colt.function.DoubleDoubleFunction function) {
+public void assign(DoubleMatrix2D A, DoubleMatrix2D B, final org.apache.mahout.matrix.function.DoubleDoubleFunction function) {
 	run(A,B,false,
 		new Matrix2DMatrix2DFunction() {
 			public double apply(DoubleMatrix2D AA, DoubleMatrix2D BB) {

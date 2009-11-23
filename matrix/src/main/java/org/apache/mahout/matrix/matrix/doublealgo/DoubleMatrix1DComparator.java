@@ -6,13 +6,13 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.doublealgo;
+package org.apache.mahout.matrix.matrix.doublealgo;
 
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
 /**
  * A comparison function which imposes a <i>total ordering</i> on some
  * collection of elements.  Comparators can be passed to a sort method (such as
- * <tt>org.apache.mahout.colt.matrix.doublealgo.Sorting.quickSort</tt>) to allow precise control over the sort order.<p>
+ * <tt>org.apache.mahout.matrix.matrix.doublealgo.Sorting.quickSort</tt>) to allow precise control over the sort order.<p>
  *
  * Note: It is generally a good idea for comparators to implement
  * <tt>java.io.Serializable</tt>, as they may be used as ordering methods in
@@ -24,7 +24,7 @@ import org.apache.mahout.colt.matrix.DoubleMatrix1D;
  * @version 1.0, 09/24/99
  * @see java.util.Comparator
  * @see org.apache.mahout.colt
- * @see org.apache.mahout.colt.Sorting
+ * @see org.apache.mahout.matrix.Sorting
  */
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.

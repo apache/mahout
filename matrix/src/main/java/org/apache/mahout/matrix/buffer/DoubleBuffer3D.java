@@ -6,9 +6,9 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.buffer;
+package org.apache.mahout.matrix.buffer;
 
-import org.apache.mahout.colt.list.DoubleArrayList;
+import org.apache.mahout.matrix.list.DoubleArrayList;
 /**
  * Fixed sized (non resizable) streaming buffer connected to a target <tt>DoubleBuffer3DConsumer</tt> to which data is automatically flushed upon buffer overflow.
  *
@@ -19,7 +19,7 @@ import org.apache.mahout.colt.list.DoubleArrayList;
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class DoubleBuffer3D extends org.apache.mahout.colt.PersistentObject  implements DoubleBuffer3DConsumer {
+public class DoubleBuffer3D extends org.apache.mahout.matrix.PersistentObject  implements DoubleBuffer3DConsumer {
 	protected DoubleBuffer3DConsumer target;
 	protected double[] xElements;
 	protected double[] yElements;

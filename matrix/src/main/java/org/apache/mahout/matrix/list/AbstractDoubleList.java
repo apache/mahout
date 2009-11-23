@@ -6,10 +6,10 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.list;
+package org.apache.mahout.matrix.list;
 
-import org.apache.mahout.colt.function.DoubleComparator;
-import org.apache.mahout.colt.function.DoubleProcedure;
+import org.apache.mahout.matrix.function.DoubleComparator;
+import org.apache.mahout.matrix.function.DoubleProcedure;
 /**
 Abstract base class for resizable lists holding <code>double</code> elements; abstract.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -18,7 +18,7 @@ First see the <a href="package-summary.html">package summary</a> and javadoc <a 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public abstract class AbstractDoubleList extends AbstractList implements org.apache.mahout.colt.buffer.DoubleBufferConsumer {
+public abstract class AbstractDoubleList extends AbstractList implements org.apache.mahout.matrix.buffer.DoubleBufferConsumer {
 	/**
 	 * The size of the list.
 	 * This is a READ_ONLY variable for all methods but setSizeRaw(int newSize) !!!
@@ -372,7 +372,7 @@ public void mergeSortFromTo(int from, int to) {
 	checkRangeFromTo(from, to, mySize);
 	
 	double[] myElements = elements();
-	org.apache.mahout.colt.Sorting.mergeSort(myElements, from, to+1);
+	org.apache.mahout.matrix.Sorting.mergeSort(myElements, from, to+1);
 	elements(myElements);
 	setSizeRaw(mySize);
 }
@@ -410,7 +410,7 @@ public void mergeSortFromTo(int from, int to, DoubleComparator c) {
 	checkRangeFromTo(from, to, mySize);
 	
 	double[] myElements = elements();
-	org.apache.mahout.colt.Sorting.mergeSort(myElements, from, to+1, c);
+	org.apache.mahout.matrix.Sorting.mergeSort(myElements, from, to+1, c);
 	elements(myElements);
 	setSizeRaw(mySize);
 }
@@ -451,7 +451,7 @@ public void quickSortFromTo(int from, int to) {
 	
 	double[] myElements = elements();
 	java.util.Arrays.sort(myElements, from, to+1);
-	//org.apache.mahout.colt.Sorting.mergeSort(myElements, from, to+1); // TODO just for debugging
+	//org.apache.mahout.matrix.Sorting.mergeSort(myElements, from, to+1); // TODO just for debugging
 	
 	elements(myElements);
 	setSizeRaw(mySize);
@@ -488,7 +488,7 @@ public void quickSortFromTo(int from, int to, DoubleComparator c) {
 	checkRangeFromTo(from, to, mySize);
 	
 	double[] myElements = elements();
-	org.apache.mahout.colt.Sorting.quickSort(myElements, from, to+1,c);
+	org.apache.mahout.matrix.Sorting.quickSort(myElements, from, to+1,c);
 	elements(myElements);
 	setSizeRaw(mySize);
 }
@@ -786,6 +786,6 @@ public java.util.ArrayList toList() {
 * the String representation of each element.
 */
 public String toString() {
-	return org.apache.mahout.colt.Arrays.toString(partFromTo(0, size()-1).elements());
+	return org.apache.mahout.matrix.Arrays.toString(partFromTo(0, size()-1).elements());
 }
 }

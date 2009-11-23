@@ -8,7 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.stat.quantile;
 
-import org.apache.mahout.colt.list.DoubleArrayList;
+import org.apache.mahout.matrix.list.DoubleArrayList;
 /**
  * The interface shared by all quantile finders, no matter if they are exact or approximate.
  * It is usually completely sufficient to operate on this interface only.
@@ -29,7 +29,7 @@ public void add(double value);
  * Adds all values of the specified list to the receiver.
  * @param values the list of which all values shall be added.
  */
-public void addAllOf(org.apache.mahout.colt.list.DoubleArrayList values);
+public void addAllOf(org.apache.mahout.matrix.list.DoubleArrayList values);
 /**
  * Adds the part of the specified list between indexes <tt>from</tt> (inclusive) and <tt>to</tt> (inclusive) to the receiver.
  *
@@ -55,7 +55,7 @@ public abstract Object clone();
  * @param procedure    the procedure to be applied. Stops iteration if the procedure returns <tt>false</tt>, otherwise continues. 
  * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise. 
  */
-public boolean forEach(org.apache.mahout.colt.function.DoubleProcedure procedure);
+public boolean forEach(org.apache.mahout.matrix.function.DoubleProcedure procedure);
 /**
  * Returns the number of elements currently needed to store all contained elements.
  * This number usually differs from the results of method <tt>size()</tt>, according to the underlying datastructure.

@@ -6,12 +6,12 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.map;
+package org.apache.mahout.matrix.map;
 
-import org.apache.mahout.colt.function.IntDoubleProcedure;
-import org.apache.mahout.colt.function.IntProcedure;
-import org.apache.mahout.colt.list.DoubleArrayList;
-import org.apache.mahout.colt.list.IntArrayList;
+import org.apache.mahout.matrix.function.IntDoubleProcedure;
+import org.apache.mahout.matrix.function.IntProcedure;
+import org.apache.mahout.matrix.list.DoubleArrayList;
+import org.apache.mahout.matrix.list.IntArrayList;
 /**
 Abstract base class for hash maps holding (key,value) associations of type <tt>(int-->double)</tt>.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -40,9 +40,9 @@ Assigns the result of a function to each value; <tt>v[i] = function(v[i])</tt>.
 
 @param function a function object taking as argument the current association's value.
 */
-public void assign(final org.apache.mahout.colt.function.DoubleFunction function) {
+public void assign(final org.apache.mahout.matrix.function.DoubleFunction function) {
 	copy().forEachPair(
-		new org.apache.mahout.colt.function.IntDoubleProcedure() {
+		new org.apache.mahout.matrix.function.IntDoubleProcedure() {
 			public boolean apply(int key, double value) {
 				put(key,function.apply(value));
 				return true;
@@ -341,7 +341,7 @@ public void pairsSortedByValue(final IntArrayList keyList, final DoubleArrayList
 	
 	final int[] k = keyList.elements();
 	final double[] v = valueList.elements();
-	org.apache.mahout.colt.Swapper swapper = new org.apache.mahout.colt.Swapper() {
+	org.apache.mahout.matrix.Swapper swapper = new org.apache.mahout.matrix.Swapper() {
 		public void swap(int a, int b) {
 			int t2;	double t1;
 			t1 = v[a]; v[a] = v[b]; v[b] = t1;
@@ -349,13 +349,13 @@ public void pairsSortedByValue(final IntArrayList keyList, final DoubleArrayList
 		}
 	}; 
 
-	org.apache.mahout.colt.function.IntComparator comp = new org.apache.mahout.colt.function.IntComparator() {
+	org.apache.mahout.matrix.function.IntComparator comp = new org.apache.mahout.matrix.function.IntComparator() {
 		public int compare(int a, int b) {
 			return v[a]<v[b] ? -1 : v[a]>v[b] ? 1 : (k[a]<k[b] ? -1 : (k[a]==k[b] ? 0 : 1));
 		}
 	};
 
-	org.apache.mahout.colt.GenericSorting.quickSort(0,keyList.size(),comp,swapper);
+	org.apache.mahout.matrix.GenericSorting.quickSort(0,keyList.size(),comp,swapper);
 }
 /**
  * Associates the given key with the given value.

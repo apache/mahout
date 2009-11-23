@@ -6,12 +6,12 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.impl;
+package org.apache.mahout.matrix.matrix.impl;
 
-import org.apache.mahout.colt.list.DoubleArrayList;
-import org.apache.mahout.colt.list.IntArrayList;
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.list.DoubleArrayList;
+import org.apache.mahout.matrix.list.IntArrayList;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /**
 Sparse row-compressed-modified 2-d matrix holding <tt>double</tt> elements.
 @author wolfgang.hoschek@cern.ch
@@ -175,7 +175,7 @@ public void setQuick(int row, int column, double value) {
  * 
  * @throws IllegalArgumentException if <tt>A.columns() != y.size() || A.rows() > z.size())</tt>.
  */
-protected void zMult(final DoubleMatrix1D y, final DoubleMatrix1D z, org.apache.mahout.colt.list.IntArrayList nonZeroIndexes, DoubleMatrix1D[] allRows, final double alpha, final double beta) {
+protected void zMult(final DoubleMatrix1D y, final DoubleMatrix1D z, org.apache.mahout.matrix.list.IntArrayList nonZeroIndexes, DoubleMatrix1D[] allRows, final double alpha, final double beta) {
 	if (columns != y.size() || rows > z.size())	
 		throw new IllegalArgumentException("Incompatible args: "+toStringShort()+", "+y.toStringShort()+", "+z.toStringShort());
 

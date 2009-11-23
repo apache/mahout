@@ -6,10 +6,10 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix;
+package org.apache.mahout.matrix.matrix;
 
-import org.apache.mahout.colt.matrix.impl.DenseDoubleMatrix1D;
-import org.apache.mahout.colt.matrix.impl.SparseDoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.impl.SparseDoubleMatrix1D;
 /**
 Factory for convenient construction of 1-d matrices holding <tt>double</tt> cells.
 Use idioms like <tt>DoubleFactory1D.dense.make(1000)</tt> to construct dense matrices, 
@@ -36,7 +36,7 @@ F.random(3);
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class DoubleFactory1D extends org.apache.mahout.colt.PersistentObject {
+public class DoubleFactory1D extends org.apache.mahout.matrix.PersistentObject {
 	/**
 	 * A factory producing dense matrices.
 	 */
@@ -132,7 +132,7 @@ public DoubleMatrix1D make(int size, double initialValue) {
  * @param values The values to be filled into the new matrix.
  * @return a new matrix.
  */
-public DoubleMatrix1D make(org.apache.mahout.colt.list.AbstractDoubleList values) {
+public DoubleMatrix1D make(org.apache.mahout.matrix.list.AbstractDoubleList values) {
 	int size = values.size();
 	DoubleMatrix1D vector = make(size);
 	for (int i=size; --i >= 0; ) vector.set(i, values.get(i));
@@ -195,9 +195,9 @@ public DoubleMatrix1D sample(int size, double value, double nonZeroFraction)  {
  * @param values The values to be filled into the new list.
  * @return a new list.
  */
-public org.apache.mahout.colt.list.DoubleArrayList toList(DoubleMatrix1D values) {
+public org.apache.mahout.matrix.list.DoubleArrayList toList(DoubleMatrix1D values) {
 	int size = values.size();
-	org.apache.mahout.colt.list.DoubleArrayList list = new org.apache.mahout.colt.list.DoubleArrayList(size);
+	org.apache.mahout.matrix.list.DoubleArrayList list = new org.apache.mahout.matrix.list.DoubleArrayList(size);
 	list.setSize(size);
 	for (int i=size; --i >= 0; ) list.set(i, values.get(i));
 	return list;

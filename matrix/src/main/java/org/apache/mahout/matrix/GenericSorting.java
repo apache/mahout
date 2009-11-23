@@ -6,9 +6,9 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt;
+package org.apache.mahout.matrix;
 
-import org.apache.mahout.colt.function.IntComparator;
+import org.apache.mahout.matrix.function.IntComparator;
 /**
 Generically sorts arbitrary shaped data (for example multiple arrays, 1,2 or 3-d matrices, and so on) using a 
 quicksort or mergesort. This class addresses two problems, namely 
@@ -48,7 +48,7 @@ of temporary memory. Alternative 3 involves more swapping, more polymorphic mess
   <tt>(a,b)</tt>, namely an {@link IntComparator}. The comparison function determines 
   whether <tt>g[a]</tt> is equal, less or greater than <tt>g[b]</tt>. The sort, 
   depending on its implementation, can decide to swap the data at index <tt>a</tt> 
-  with the data at index <tt>b</tt>. It calls a user provided {@link org.apache.mahout.colt.Swapper}
+  with the data at index <tt>b</tt>. It calls a user provided {@link org.apache.mahout.matrix.Swapper}
   object that knows how to swap the data of these indexes. 
 <p>The following snippet shows how to solve the problem. 
 <table>
@@ -121,7 +121,7 @@ IntComparator comp = new IntComparator() {
 <p></p>
 <p> Sorts involving floating point data and not involving comparators, like, for 
   example provided in the JDK {@link java.util.Arrays} and in the Colt {@link 
-  org.apache.mahout.colt.Sorting} handle floating point numbers in special ways to guarantee
+  org.apache.mahout.matrix.Sorting} handle floating point numbers in special ways to guarantee
   that NaN's are swapped to the end and -0.0 comes before 0.0. Methods delegating 
   to comparators cannot do this. They rely on the comparator. Thus, if such boundary 
   cases are an issue for the application at hand, comparators explicitly need 
@@ -138,8 +138,8 @@ A stable sort is, for example, helpful, if matrices are sorted successively
 by multiple columns. It preserves the relative position of equal elements.
 
 @see java.util.Arrays
-@see org.apache.mahout.colt.Sorting
-@see org.apache.mahout.colt.matrix.doublealgo.Sorting
+@see org.apache.mahout.matrix.Sorting
+@see org.apache.mahout.matrix.matrix.doublealgo.Sorting
 
 @author wolfgang.hoschek@cern.ch
 @version 1.0, 03-Jul-99

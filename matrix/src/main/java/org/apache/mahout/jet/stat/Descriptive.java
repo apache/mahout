@@ -8,8 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.stat;
 
-import org.apache.mahout.colt.list.DoubleArrayList;
-import org.apache.mahout.colt.list.IntArrayList;
+import org.apache.mahout.matrix.list.DoubleArrayList;
+import org.apache.mahout.matrix.list.IntArrayList;
 /**
  * Basic descriptive statistics.
  *

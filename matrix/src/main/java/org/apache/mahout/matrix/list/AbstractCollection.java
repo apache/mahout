@@ -6,7 +6,7 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.list;
+package org.apache.mahout.matrix.list;
 
 /**
 Abstract base class for resizable collections holding objects or primitive data types such as <code>int</code>, <code>float</code>, etc.
@@ -25,7 +25,7 @@ First see the <a href="package-summary.html">package summary</a> and javadoc <a 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public abstract class AbstractCollection extends org.apache.mahout.colt.PersistentObject {
+public abstract class AbstractCollection extends org.apache.mahout.matrix.PersistentObject {
 /**
  * Makes this class non instantiable, but still let's others inherit from it.
  */

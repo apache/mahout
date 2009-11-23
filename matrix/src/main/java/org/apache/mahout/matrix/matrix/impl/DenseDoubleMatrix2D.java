@@ -6,10 +6,10 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.impl;
+package org.apache.mahout.matrix.matrix.impl;
 
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /**
 Dense 2-d matrix holding <tt>double</tt> elements.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -175,7 +175,7 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @return <tt>this</tt> (for convenience only).
 @see org.apache.mahout.jet.math.Functions
 */
-public DoubleMatrix2D assign(org.apache.mahout.colt.function.DoubleFunction function) {
+public DoubleMatrix2D assign(org.apache.mahout.matrix.function.DoubleFunction function) {
 	final double[] elems = this.elements;
 	if (elems==null) throw new InternalError();
 	int index = index(0,0);
@@ -287,7 +287,7 @@ and as second argument the current cell's value of <tt>y</tt>,
 @throws	IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
 @see org.apache.mahout.jet.math.Functions
 */
-public DoubleMatrix2D assign(DoubleMatrix2D y, org.apache.mahout.colt.function.DoubleDoubleFunction function) {
+public DoubleMatrix2D assign(DoubleMatrix2D y, org.apache.mahout.matrix.function.DoubleDoubleFunction function) {
 	// overriden for performance only
 	if (! (y instanceof DenseDoubleMatrix2D)) {
 		return super.assign(y, function);
@@ -520,7 +520,7 @@ final double alpha = 0.25;
 final double beta = 0.75;
 
 // 8 neighbors
-org.apache.mahout.colt.function.Double9Function f = new org.apache.mahout.colt.function.Double9Function() {
+org.apache.mahout.matrix.function.Double9Function f = new org.apache.mahout.matrix.function.Double9Function() {
 &nbsp;&nbsp;&nbsp;public final double apply(
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a00, double a01, double a02,
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a10, double a11, double a12,
@@ -531,7 +531,7 @@ org.apache.mahout.colt.function.Double9Function f = new org.apache.mahout.colt.f
 A.zAssign8Neighbors(B,f);
 
 // 4 neighbors
-org.apache.mahout.colt.function.Double9Function g = new org.apache.mahout.colt.function.Double9Function() {
+org.apache.mahout.matrix.function.Double9Function g = new org.apache.mahout.matrix.function.Double9Function() {
 &nbsp;&nbsp;&nbsp;public final double apply(
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a00, double a01, double a02,
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a10, double a11, double a12,
@@ -547,7 +547,7 @@ C.zAssign8Neighbors(B,g); // fast, even though it doesn't look like it
 @throws NullPointerException if <tt>function==null</tt>.
 @throws IllegalArgumentException if <tt>rows() != B.rows() || columns() != B.columns()</tt>.
 */
-public void zAssign8Neighbors(DoubleMatrix2D B, org.apache.mahout.colt.function.Double9Function function) {
+public void zAssign8Neighbors(DoubleMatrix2D B, org.apache.mahout.matrix.function.Double9Function function) {
 	// 1. using only 4-5 out of the 9 cells in "function" is *not* the limiting factor for performance.
 
 	// 2. if the "function" would be hardwired into the innermost loop, a speedup of 1.5-2.0 would be seen
@@ -683,7 +683,7 @@ public DoubleMatrix2D zMult(DoubleMatrix2D B, DoubleMatrix2D C, double alpha, do
 		/*
 		final RCDoubleMatrix2D transB = new RCDoubleMatrix2D(B.columns,B.rows);
 		B.forEachNonZero(
-			new org.apache.mahout.colt.function.IntIntDoubleFunction() {
+			new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
 				public double apply(int i, int j, double value) {
 					transB.setQuick(j,i,value);
 					return value;

@@ -6,13 +6,13 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt;
+package org.apache.mahout.matrix;
 
 /**
  * Array manipulations; complements <tt>java.util.Arrays</tt>.
  *
  * @see java.util.Arrays
- * @see org.apache.mahout.colt.Sorting
+ * @see org.apache.mahout.matrix.Sorting
  *
  * @author wolfgang.hoschek@cern.ch
  * @version 1.0, 03-Jul-99

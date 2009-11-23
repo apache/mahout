@@ -6,10 +6,10 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.impl;
+package org.apache.mahout.matrix.matrix.impl;
 
-import org.apache.mahout.colt.matrix.DoubleFactory2D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleFactory2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /**
 Benchmarks the performance of matrix algorithms.
 
@@ -30,16 +30,16 @@ public static void benchmark(int runs, int size, String kind, boolean print, int
 	// certain loops need to be constructed so that the jitter can't optimize them away and we get fantastic numbers.
 	// this involves primarly read-loops
 
-	org.apache.mahout.colt.Timer timer1 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer timer2 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer timer3 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer timer4 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer timer5 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer timer6 = new org.apache.mahout.colt.Timer();
+	org.apache.mahout.matrix.Timer timer1 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer timer2 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer timer3 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer timer4 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer timer5 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer timer6 = new org.apache.mahout.matrix.Timer();
 
 	DoubleMatrix2D  matrix = null;
 	if (kind.equals("sparse")) matrix = new SparseDoubleMatrix2D(size,size,initialCapacity,minLoadFactor,maxLoadFactor);
-	else if (kind.equals("dense")) matrix = org.apache.mahout.colt.matrix.DoubleFactory2D.dense.make(size,size);
+	else if (kind.equals("dense")) matrix = org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.make(size,size);
 	//else if (kind.equals("denseArray")) matrix = new DoubleArrayMatrix2D(size,size);
 	else throw new RuntimeException("unknown kind");
 	
@@ -133,7 +133,7 @@ public static void benchmark(int runs, int size, String kind, boolean print, int
 		DoubleMatrix2D C = Basic.product(A,B);
 		timer5.start();
 		for (int i=0; i<runs; i++) {
-			org.apache.mahout.colt.matrix.Blas.matrixMultiply(A,B,C);
+			org.apache.mahout.matrix.matrix.Blas.matrixMultiply(A,B,C);
 		}
 		timer5.stop();
 		timer5.display();

@@ -29,7 +29,7 @@ package org.apache.mahout.jet.stat.quantile;
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class EquiDepthHistogram extends org.apache.mahout.colt.PersistentObject {
+public class EquiDepthHistogram extends org.apache.mahout.matrix.PersistentObject {
 	protected float[] binBoundaries;
 /**
  * Constructs an equi-depth histogram with the given quantile elements.

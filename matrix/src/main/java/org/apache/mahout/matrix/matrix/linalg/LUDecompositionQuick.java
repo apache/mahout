@@ -6,10 +6,10 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.linalg;
+package org.apache.mahout.matrix.matrix.linalg;
 
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /** 
 A low level version of {@link LUDecomposition}, avoiding unnecessary memory allocation and copying.
 The input to <tt>decompose</tt> methods is overriden with the result (LU).
@@ -108,7 +108,7 @@ public void decompose(DoubleMatrix2D A) {
 	DoubleMatrix1D[] LUrows = new DoubleMatrix1D[m];
 	for (int i = 0; i < m; i++) LUrows[i] = LU.viewRow(i);
 	
-	org.apache.mahout.colt.list.IntArrayList nonZeroIndexes = new org.apache.mahout.colt.list.IntArrayList(); // sparsity
+	org.apache.mahout.matrix.list.IntArrayList nonZeroIndexes = new org.apache.mahout.matrix.list.IntArrayList(); // sparsity
 	DoubleMatrix1D LUcolj = LU.viewColumn(0).like();  // blocked column j
 	org.apache.mahout.jet.math.Mult multFunction = org.apache.mahout.jet.math.Mult.mult(0);
 
@@ -478,8 +478,8 @@ public void solve(DoubleMatrix2D B) {
 	org.apache.mahout.jet.math.Mult     div       = org.apache.mahout.jet.math.Mult.div(0);
 	org.apache.mahout.jet.math.PlusMult minusMult = org.apache.mahout.jet.math.PlusMult.minusMult(0);
 	
-	org.apache.mahout.colt.list.IntArrayList nonZeroIndexes = new org.apache.mahout.colt.list.IntArrayList(); // sparsity
-	DoubleMatrix1D Browk = org.apache.mahout.colt.matrix.DoubleFactory1D.dense.make(nx); // blocked row k
+	org.apache.mahout.matrix.list.IntArrayList nonZeroIndexes = new org.apache.mahout.matrix.list.IntArrayList(); // sparsity
+	DoubleMatrix1D Browk = org.apache.mahout.matrix.matrix.DoubleFactory1D.dense.make(nx); // blocked row k
 	
 	// Solve L*Y = B(piv,:)
 	for (int k = 0; k < n; k++) {
@@ -516,7 +516,7 @@ public void solve(DoubleMatrix2D B) {
 		Brows[k].assign(div);
 
 		// blocking
-		if (Browk==null) Browk = org.apache.mahout.colt.matrix.DoubleFactory1D.dense.make(B.columns());
+		if (Browk==null) Browk = org.apache.mahout.matrix.matrix.DoubleFactory1D.dense.make(B.columns());
 		Browk.assign(Brows[k]);
 
 		// sparsity detection
@@ -624,7 +624,7 @@ public String toString() {
 	catch (IllegalArgumentException exc) { buf.append(unknown+exc.getMessage()); }
 	
 	buf.append("\npivot = ");
-	try { buf.append(String.valueOf(new org.apache.mahout.colt.list.IntArrayList(this.getPivot())));}
+	try { buf.append(String.valueOf(new org.apache.mahout.matrix.list.IntArrayList(this.getPivot())));}
 	catch (IllegalArgumentException exc) { buf.append(unknown+exc.getMessage()); }
 	
 	buf.append("\n\nL = ");
@@ -636,7 +636,7 @@ public String toString() {
 	catch (IllegalArgumentException exc) { buf.append(unknown+exc.getMessage()); }
 	
 	buf.append("\n\ninverse(A) = ");
-	DoubleMatrix2D identity = org.apache.mahout.colt.matrix.DoubleFactory2D.dense.identity(LU.rows());
+	DoubleMatrix2D identity = org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.identity(LU.rows());
 	try { this.solve(identity); buf.append(String.valueOf(identity)); } 
 	catch (IllegalArgumentException exc) { buf.append(unknown+exc.getMessage()); }
 	

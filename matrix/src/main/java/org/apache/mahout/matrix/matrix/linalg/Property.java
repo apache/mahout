@@ -6,11 +6,11 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.linalg;
+package org.apache.mahout.matrix.matrix.linalg;
 
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
-import org.apache.mahout.colt.matrix.DoubleMatrix3D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix3D;
 /**
 Tests matrices for linear algebraic properties (equality, tridiagonality, symmetry, singularity, etc).
 <p>
@@ -172,7 +172,7 @@ Here are some example properties
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class Property extends org.apache.mahout.colt.PersistentObject {
+public class Property extends org.apache.mahout.matrix.PersistentObject {
 	/**
 	 * The default Property object; currently has <tt>tolerance()==1.0E-9</tt>.
 	 */
@@ -218,7 +218,7 @@ protected static String blanks(int length) {
  */
 public void checkRectangular(DoubleMatrix2D A) {
 	if (A.rows() < A.columns()) {
-		throw new IllegalArgumentException("Matrix must be rectangular: "+ org.apache.mahout.colt.matrix.doublealgo.Formatter.shape(A));
+		throw new IllegalArgumentException("Matrix must be rectangular: "+ org.apache.mahout.matrix.matrix.doublealgo.Formatter.shape(A));
 	}
 }
 /**
@@ -226,7 +226,7 @@ public void checkRectangular(DoubleMatrix2D A) {
  * @throws IllegalArgumentException if <tt>A.rows() != A.columns()</tt>.
  */
 public void checkSquare(DoubleMatrix2D A) {
-	if (A.rows() != A.columns()) throw new IllegalArgumentException("Matrix must be square: "+ org.apache.mahout.colt.matrix.doublealgo.Formatter.shape(A));
+	if (A.rows() != A.columns()) throw new IllegalArgumentException("Matrix must be square: "+ org.apache.mahout.matrix.matrix.doublealgo.Formatter.shape(A));
 }
 /**
  * Returns the matrix's fraction of non-zero cells; <tt>A.cardinality() / A.size()</tt>.
@@ -429,7 +429,7 @@ public void generateNonSingular(DoubleMatrix2D A) {
 }
 /**
  */
-protected static String get(org.apache.mahout.colt.list.ObjectArrayList list, int index) {
+protected static String get(org.apache.mahout.matrix.list.ObjectArrayList list, int index) {
 	return ((String) list.get(index));
 }
 /**
@@ -558,7 +558,7 @@ public boolean isNonNegative(DoubleMatrix2D A) {
  */
 public boolean isOrthogonal(DoubleMatrix2D A) {
 	checkSquare(A);
-	return equals(A.zMult(A,null,1,0,false,true), org.apache.mahout.colt.matrix.DoubleFactory2D.dense.identity(A.rows()));
+	return equals(A.zMult(A,null,1,0,false,true), org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.identity(A.rows()));
 }
 /**
  * A matrix <tt>A</tt> is <i>positive</i> if <tt>A[i,j] &gt; 0</tt> holds for all cells.
@@ -973,8 +973,8 @@ upperBandwidth               : Illegal operation or error: Matrix must be square
 </pre>
 */
 public String toString(DoubleMatrix2D A) {
-	final org.apache.mahout.colt.list.ObjectArrayList names = new org.apache.mahout.colt.list.ObjectArrayList();
-	final org.apache.mahout.colt.list.ObjectArrayList values = new org.apache.mahout.colt.list.ObjectArrayList();
+	final org.apache.mahout.matrix.list.ObjectArrayList names = new org.apache.mahout.matrix.list.ObjectArrayList();
+	final org.apache.mahout.matrix.list.ObjectArrayList values = new org.apache.mahout.matrix.list.ObjectArrayList();
 	String unknown = "Illegal operation or error: ";
 
 	// determine properties
@@ -1087,19 +1087,19 @@ public String toString(DoubleMatrix2D A) {
 
 	
 	// sort ascending by property name
-	org.apache.mahout.colt.function.IntComparator comp = new org.apache.mahout.colt.function.IntComparator() {
+	org.apache.mahout.matrix.function.IntComparator comp = new org.apache.mahout.matrix.function.IntComparator() {
 		public int compare(int a, int b) {
 			return get(names,a).compareTo(get(names,b));
 		}
 	};
-	org.apache.mahout.colt.Swapper swapper = new org.apache.mahout.colt.Swapper() {
+	org.apache.mahout.matrix.Swapper swapper = new org.apache.mahout.matrix.Swapper() {
 		public void swap(int a, int b) {
 			Object tmp;
 			tmp = names.get(a); names.set(a,names.get(b)); names.set(b,tmp);
 			tmp = values.get(a); values.set(a,values.get(b)); values.set(b,tmp);
 		}
 	};	
-	org.apache.mahout.colt.GenericSorting.quickSort(0,names.size(),comp,swapper);
+	org.apache.mahout.matrix.GenericSorting.quickSort(0,names.size(),comp,swapper);
 	
 	// determine padding for nice formatting
 	int maxLength = 0;

@@ -197,7 +197,7 @@ public boolean contains(double element) {
  * Iterates over the receiver in no particular order.
  * @param procedure    the procedure to be applied. Stops iteration if the procedure returns <tt>false</tt>, otherwise continues. 
  */
-public boolean forEach(org.apache.mahout.colt.function.DoubleProcedure procedure) {
+public boolean forEach(org.apache.mahout.matrix.function.DoubleProcedure procedure) {
 	for (int i=buffers.length; --i >=0; ) {
 		for (int w=buffers[i].weight(); --w >=0; ) {
 			if (! (buffers[i].values.forEach(procedure))) return false;

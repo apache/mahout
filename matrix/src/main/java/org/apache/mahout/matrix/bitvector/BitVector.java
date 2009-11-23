@@ -6,7 +6,7 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.bitvector;
+package org.apache.mahout.matrix.bitvector;
 
 /**
  * Fixed sized (non resizable) bitvector.
@@ -52,7 +52,7 @@ package org.apache.mahout.colt.bitvector;
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class BitVector extends org.apache.mahout.colt.PersistentObject {
+public class BitVector extends org.apache.mahout.matrix.PersistentObject {
 	/*
 	 * Bits are packed into arrays of "units."  Currently a unit is a long,
 	 * which consists of 64 bits, requiring 6 address bits.  The choice of unit
@@ -71,16 +71,16 @@ public class BitVector extends org.apache.mahout.colt.PersistentObject {
 	protected int nbits; //the size
 
 	// IntProcedure for method indexOfFromTo(...)
-	private class IndexProcedure implements org.apache.mahout.colt.function.IntProcedure {
+	private class IndexProcedure implements org.apache.mahout.matrix.function.IntProcedure {
 			private int foundPos = -1;
 			public boolean apply(int index) {
-				foundPos = index; 
+				foundPos = index;
 				return false;
 			}
 		}
 
 /**
- * You normally need not use this method. Use this method only if performance is critical. 
+ * You normally need not use this method. Use this method only if performance is critical.
  * Constructs a bit vector with the given backing bits and size.
  * <b>WARNING:</b> For efficiency reasons and to keep memory usage low, <b>the array is not copied</b>.
  * So if subsequently you modify the specified array directly via the [] operator, be sure you know what you're doing.
@@ -108,7 +108,7 @@ public BitVector(int size) {
 /**
  * Performs a logical <b>AND</b> of the receiver with another bit vector (A = A & B).
  * The receiver is modified so that a bit in it has the
- * value <code>true</code> if and only if it already had the 
+ * value <code>true</code> if and only if it already had the
  * value <code>true</code> and the corresponding bit in the other bit vector
  * argument has the value <code>true</code>.
  *
@@ -144,13 +144,13 @@ public int cardinality() {
 	int cardinality=0;
 	int fullUnits = numberOfFullUnits();
 	final int bitsPerUnit = QuickBitVector.BITS_PER_UNIT;
-	
+
 	// determine cardinality on full units
 	final long[] theBits=bits;
 	for(int i=fullUnits; --i >= 0;) {
 		long val = theBits[i];
 		if (val == -1L) { // all bits set?
-			cardinality += bitsPerUnit; 
+			cardinality += bitsPerUnit;
 		}
 		else if (val != 0L) { // more than one bit set?
 			for (int j=bitsPerUnit; --j >= 0; ) {
@@ -185,7 +185,7 @@ protected void checkSize(BitVector other) {
 public void clear() {
 	final long[] theBits = this.bits;
 	for (int i = theBits.length; --i >= 0 ;) theBits[i] = 0L;
-	
+
 	//new LongArrayList(bits).fillFromToWith(0,size()-1,0L);
 }
 /**
@@ -199,10 +199,10 @@ public void clear(int bitIndex) {
 	QuickBitVector.clear(bits, bitIndex);
 }
 /**
- * Cloning this <code>BitVector</code> produces a new <code>BitVector</code> 
+ * Cloning this <code>BitVector</code> produces a new <code>BitVector</code>
  * that is equal to it.
- * The clone of the bit vector is another bit vector that has exactly the 
- * same bits set to <code>true</code> as this bit vector and the same 
+ * The clone of the bit vector is another bit vector that has exactly the
+ * same bits set to <code>true</code> as this bit vector and the same
  * current size, but independent state.
  *
  * @return  a deep copy of this bit vector.
@@ -221,7 +221,7 @@ public BitVector copy() {
 	return (BitVector) clone();
 }
 /**
- * You normally need not use this method. Use this method only if performance is critical. 
+ * You normally need not use this method. Use this method only if performance is critical.
  * Returns the bit vector's backing bits.
  * <b>WARNING:</b> For efficiency reasons and to keep memory usage low, <b>the array is not copied</b>.
  * So if subsequently you modify the returned array directly via the [] operator, be sure you know what you're doing.
@@ -236,7 +236,7 @@ public long[] elements() {
 	return bits;
 }
 /**
- * You normally need not use this method. Use this method only if performance is critical. 
+ * You normally need not use this method. Use this method only if performance is critical.
  * Sets the bit vector's backing bits and size.
  * <b>WARNING:</b> For efficiency reasons and to keep memory usage low, <b>the array is not copied</b>.
  * So if subsequently you modify the specified array directly via the [] operator, be sure you know what you're doing.
@@ -258,11 +258,11 @@ public void elements(long[] bits, int size) {
 }
 /**
  * Compares this object against the specified object.
- * The result is <code>true</code> if and only if the argument is 
+ * The result is <code>true</code> if and only if the argument is
  * not <code>null</code> and is a <code>BitVector</code> object
- * that has the same size as the receiver and 
+ * that has the same size as the receiver and
  * the same bits set to <code>true</code> as the receiver.
- * That is, for every nonnegative <code>int</code> index <code>k</code>, 
+ * That is, for every nonnegative <code>int</code> index <code>k</code>,
  * <pre>((BitVector)obj).get(k) == this.get(k)</pre>
  * must be true.
  *
@@ -290,8 +290,8 @@ public boolean equals(Object obj) {
 		if (get(i) != other.get(i)) return false;
 		i++;
 	}
-		
-	return true;	
+
+	return true;
 }
 /**
  * Applies a procedure to each bit index within the specified range that holds a bit in the given state.
@@ -307,11 +307,11 @@ public boolean equals(Object obj) {
  * @param from the leftmost search position, inclusive.
  * @param to the rightmost search position, inclusive.
  * @param state element to search for.
- * @param procedure a procedure object taking as argument the current bit index. Stops iteration if the procedure returns <tt>false</tt>, otherwise continues. 
- * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise. 
+ * @param procedure a procedure object taking as argument the current bit index. Stops iteration if the procedure returns <tt>false</tt>, otherwise continues.
+ * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise.
  * @throws IndexOutOfBoundsException if (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
-public boolean forEachIndexFromToInState(int from, int to, boolean state, org.apache.mahout.colt.function.IntProcedure procedure) {
+public boolean forEachIndexFromToInState(int from, int to, boolean state, org.apache.mahout.matrix.function.IntProcedure procedure) {
 	/*
 	// this version is equivalent to the low level version below, but about 100 times slower for large ranges.
 	if (nbits==0) return true;

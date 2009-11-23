@@ -8,13 +8,13 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.stat.quantile;
 
-import org.apache.mahout.colt.list.DoubleArrayList;
-import org.apache.mahout.colt.list.ObjectArrayList;
+import org.apache.mahout.matrix.list.DoubleArrayList;
+import org.apache.mahout.matrix.list.ObjectArrayList;
 /**
   * The abstract base class for approximate quantile finders computing quantiles over a sequence of <tt>double</tt> elements.
   */
 //abstract class ApproximateDoubleQuantileFinder extends Object implements DoubleQuantileFinder {
-abstract class DoubleQuantileEstimator extends org.apache.mahout.colt.PersistentObject implements DoubleQuantileFinder {
+abstract class DoubleQuantileEstimator extends org.apache.mahout.matrix.PersistentObject implements DoubleQuantileFinder {
 	protected DoubleBufferSet bufferSet;
 	protected DoubleBuffer currentBufferToFill;
 	protected int totalElementsFilled;
@@ -151,7 +151,7 @@ public boolean contains(double element) {
  * @param procedure    the procedure to be applied. Stops iteration if the procedure returns <tt>false</tt>, otherwise continues. 
  * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise. 
  */
-public boolean forEach(org.apache.mahout.colt.function.DoubleProcedure procedure) {
+public boolean forEach(org.apache.mahout.matrix.function.DoubleProcedure procedure) {
 	return this.bufferSet.forEach(procedure);
 }
 /**
@@ -210,7 +210,7 @@ public DoubleArrayList quantileElements(DoubleArrayList phis) {
 		triggerPositions[i]=Utils.epsilonCeiling(phis.get(i) * totalSize)-1;
 	}
 
-	//System.out.println("triggerPositions="+org.apache.mahout.colt.Arrays.toString(triggerPositions));
+	//System.out.println("triggerPositions="+org.apache.mahout.matrix.Arrays.toString(triggerPositions));
 	//System.out.println("starting to determine quantiles...");
 	//System.out.println(bufferSet);
 

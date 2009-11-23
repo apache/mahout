@@ -1,4 +1,4 @@
-package org.apache.mahout.colt.map;
+package org.apache.mahout.matrix.map;
 
 /**
  * Not of interest for users; only for implementors of hashtables.
@@ -130,7 +130,7 @@ public class PrimeFinder extends Object {
 		// To find numbers fast, we sort them once and for all.
 		
 		java.util.Arrays.sort(primeCapacities);
-		//new org.apache.mahout.colt.list.IntArrayList(primeCapacities).mergeSort(); // for debug only, TODO
+		//new org.apache.mahout.matrix.list.IntArrayList(primeCapacities).mergeSort(); // for debug only, TODO
 	}
 	
 /**
@@ -157,7 +157,7 @@ protected static void main(String args[]) {
  */
 public static int nextPrime(int desiredCapacity) {
 	int i = java.util.Arrays.binarySearch(primeCapacities, desiredCapacity);
-	//int i = new org.apache.mahout.colt.list.IntArrayList(primeCapacities).binarySearch(desiredCapacity); // for debug only TODO
+	//int i = new org.apache.mahout.matrix.list.IntArrayList(primeCapacities).binarySearch(desiredCapacity); // for debug only TODO
 	if (i<0) {
 		// desired capacity not found, choose next prime greater than desired capacity
 		i = -i -1; // remember the semantics of binarySearch...

@@ -198,7 +198,8 @@ public class TestSparseVector extends TestCase {
 
   public void testDot() throws Exception {
     double res = test.dot(test);
-    assertEquals("dot", 1.1 * 1.1 + 2.2 * 2.2 + 3.3 * 3.3, res);
+    double expected = 3.3*3.3 + 2.2*2.2 + 1.1*1.1;
+    assertEquals("dot", expected, res);
   }
 
   public void testDotCardinality() {
@@ -364,7 +365,7 @@ public class TestSparseVector extends TestCase {
     test.assign(new NegateFunction());
     for (int i = 0; i < values.length; i++) {
       if (i == 0 || i == 4) {
-        assertEquals("get [" + i + ']', 0.0, test.getQuick(i));
+        assertEquals("get [" + i + ']', -0.0, test.getQuick(i));//odd
       } else {
         assertEquals("value[" + i + ']', -values[i - 1], test.getQuick(i));
       }

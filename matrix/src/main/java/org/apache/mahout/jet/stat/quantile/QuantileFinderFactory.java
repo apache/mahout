@@ -389,8 +389,8 @@ public static DoubleQuantileFinder newDoubleQuantileFinder(boolean known_N, long
  * This is simply a list of numbers with <tt>i / (double)quantiles</tt> for <tt>i={1,2,...,quantiles-1}</tt>.
  * @return the equi-depth phi's
  */
-public static org.apache.mahout.colt.list.DoubleArrayList newEquiDepthPhis(int quantiles) {
-	org.apache.mahout.colt.list.DoubleArrayList phis = new org.apache.mahout.colt.list.DoubleArrayList(quantiles-1);
+public static org.apache.mahout.matrix.list.DoubleArrayList newEquiDepthPhis(int quantiles) {
+	org.apache.mahout.matrix.list.DoubleArrayList phis = new org.apache.mahout.matrix.list.DoubleArrayList(quantiles-1);
 	for (int i=1; i<=quantiles-1; i++) phis.add(i / (double)quantiles);
 	return phis;
 }

@@ -6,17 +6,17 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.bench;
+package org.apache.mahout.matrix.matrix.bench;
 
-import org.apache.mahout.colt.matrix.DoubleFactory2D;
-import org.apache.mahout.colt.matrix.DoubleFactory3D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
-import org.apache.mahout.colt.matrix.DoubleMatrix3D;
+import org.apache.mahout.matrix.matrix.DoubleFactory2D;
+import org.apache.mahout.matrix.matrix.DoubleFactory3D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix3D;
 /**
 Configurable matrix benchmark.
 Runs the operations defined in main(args) or in the file specified by args.
-To get <a href="doc-files/usage.txt">this overall help</a> on usage type <tt>java org.apache.mahout.colt.matrix.bench.BenchmarkMatrix -help</tt>.
-To get help on usage of a given command, type <tt>java org.apache.mahout.colt.matrix.bench.BenchmarkMatrix -help &lt;command&gt;</tt>.
+To get <a href="doc-files/usage.txt">this overall help</a> on usage type <tt>java org.apache.mahout.matrix.matrix.bench.BenchmarkMatrix -help</tt>.
+To get help on usage of a given command, type <tt>java org.apache.mahout.matrix.matrix.bench.BenchmarkMatrix -help &lt;command&gt;</tt>.
 Here is the <a href="doc-files/usage_dgemm.txt">help ouput for the dgemm</a> command.
 <a href="../doc-files/dgemmColt1.0.1ibm1.3LxPIII_2.txt">Here</a> is a sample result.
 For more results see the <a href="../doc-files/performanceLog.html">performance log</a>.
@@ -63,7 +63,7 @@ protected static void bench_dgemm(String[] args) {
 		return;
 	}
 
-	org.apache.mahout.colt.matrix.linalg.SmpBlas.allocateBlas(cpus, org.apache.mahout.colt.matrix.linalg.SeqBlas.seqBlas);
+	org.apache.mahout.matrix.matrix.linalg.SmpBlas.allocateBlas(cpus, org.apache.mahout.matrix.matrix.linalg.SeqBlas.seqBlas);
 	Double2DProcedure fun = fun_dgemm(transposeA,transposeB);
 	String title = fun.toString();
 	String params = transposeA +", "+transposeB+", 1, A, B, 0, C";
@@ -98,7 +98,7 @@ protected static void bench_dgemv(String[] args) {
 		return;
 	}
 
-	org.apache.mahout.colt.matrix.linalg.SmpBlas.allocateBlas(cpus, org.apache.mahout.colt.matrix.linalg.SeqBlas.seqBlas);
+	org.apache.mahout.matrix.matrix.linalg.SmpBlas.allocateBlas(cpus, org.apache.mahout.matrix.matrix.linalg.SeqBlas.seqBlas);
 	Double2DProcedure fun = fun_dgemv(transposeA);
 	String title = fun.toString();
 	String params = transposeA +", 1, A, B, 0, C";
@@ -133,7 +133,7 @@ protected static void bench_pow(String[] args) {
 		return;
 	}
 
-	org.apache.mahout.colt.matrix.linalg.SmpBlas.allocateBlas(cpus, org.apache.mahout.colt.matrix.linalg.SeqBlas.seqBlas);
+	org.apache.mahout.matrix.matrix.linalg.SmpBlas.allocateBlas(cpus, org.apache.mahout.matrix.matrix.linalg.SeqBlas.seqBlas);
 	Double2DProcedure fun = fun_pow(exponent);
 	String title = fun.toString();
 	String params = "A,"+exponent;
@@ -166,7 +166,7 @@ protected static void benchGeneric(Double2DProcedure fun, String[] args) {
 		return;
 	}
 
-	org.apache.mahout.colt.matrix.linalg.SmpBlas.allocateBlas(cpus, org.apache.mahout.colt.matrix.linalg.SeqBlas.seqBlas);
+	org.apache.mahout.matrix.matrix.linalg.SmpBlas.allocateBlas(cpus, org.apache.mahout.matrix.matrix.linalg.SeqBlas.seqBlas);
 	String title = fun.toString();
 	run(minSecs,title,fun,types,sizes,densities);
 }
@@ -184,13 +184,13 @@ protected static Double2DProcedure fun_dgemm(final boolean transposeA, final boo
 		public String toString() { return "Blas matrix-matrix mult";	}
 		public void setParameters(DoubleMatrix2D G, DoubleMatrix2D H) {
 			super.setParameters(G,H);
-			D = new org.apache.mahout.colt.matrix.impl.DenseDoubleMatrix2D(A.rows(),A.columns()).assign(0.5);
+			D = new org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix2D(A.rows(),A.columns()).assign(0.5);
 			C = D.copy();
 			B = D.copy();
 		}
 		public void init() { C.assign(D); }
-		public void apply(org.apache.mahout.colt.Timer timer) {
-			org.apache.mahout.colt.matrix.linalg.SmpBlas.smpBlas.dgemm(transposeA,transposeB,1,A,B,0,C);
+		public void apply(org.apache.mahout.matrix.Timer timer) {
+			org.apache.mahout.matrix.matrix.linalg.SmpBlas.smpBlas.dgemm(transposeA,transposeB,1,A,B,0,C);
 		}
 		public double operations() { // Mflops
 			double m = A.rows();
@@ -208,13 +208,13 @@ protected static Double2DProcedure fun_dgemv(final boolean transposeA) {
 		public String toString() { return "Blas matrix-vector mult";	}
 		public void setParameters(DoubleMatrix2D G, DoubleMatrix2D H) {
 			super.setParameters(G,H);
-			D = new org.apache.mahout.colt.matrix.impl.DenseDoubleMatrix2D(A.rows(),A.columns()).assign(0.5);
+			D = new org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix2D(A.rows(),A.columns()).assign(0.5);
 			C = D.copy();
 			B = D.copy();
 		}
 		public void init() { C.viewRow(0).assign(D.viewRow(0)); }
-		public void apply(org.apache.mahout.colt.Timer timer) {
-			org.apache.mahout.colt.matrix.linalg.SmpBlas.smpBlas.dgemv(transposeA,1,A,B.viewRow(0),0,C.viewRow(0));
+		public void apply(org.apache.mahout.matrix.Timer timer) {
+			org.apache.mahout.matrix.matrix.linalg.SmpBlas.smpBlas.dgemv(transposeA,1,A,B.viewRow(0),0,C.viewRow(0));
 		}
 		public double operations() { // Mflops
 			double m = A.rows();
@@ -233,17 +233,17 @@ protected static Double2DProcedure fun_pow(final int k) {
 		public String toString() { return "matrix to the power of an exponent";	}
 		public void setParameters(DoubleMatrix2D A, DoubleMatrix2D B) {
 			if (k<0) { // must be nonsingular for inversion
-				if (!org.apache.mahout.colt.matrix.linalg.Property.ZERO.isDiagonallyDominantByRow(A) ||
-					!org.apache.mahout.colt.matrix.linalg.Property.ZERO.isDiagonallyDominantByColumn(A)) {
-						org.apache.mahout.colt.matrix.linalg.Property.ZERO.generateNonSingular(A);
+				if (!org.apache.mahout.matrix.matrix.linalg.Property.ZERO.isDiagonallyDominantByRow(A) ||
+					!org.apache.mahout.matrix.matrix.linalg.Property.ZERO.isDiagonallyDominantByColumn(A)) {
+						org.apache.mahout.matrix.matrix.linalg.Property.ZERO.generateNonSingular(A);
 					}
 				super.setParameters(A,B);
 			}
 		}
 
 		public void init() {}		
-		public void apply(org.apache.mahout.colt.Timer timer) {
-			org.apache.mahout.colt.matrix.linalg.Algebra.DEFAULT.pow(A,k);
+		public void apply(org.apache.mahout.matrix.Timer timer) {
+			org.apache.mahout.matrix.matrix.linalg.Algebra.DEFAULT.pow(A,k);
 		}
 		public double operations() { // Mflops
 			double m = A.rows();
@@ -272,7 +272,7 @@ protected static Double2DProcedure funAssign() {
 	return new Double2DProcedure() {
 		public String toString() { return "A.assign(B) [Mops/sec]";	}
 		public void init() { A.assign(0); }		
-		public void apply(org.apache.mahout.colt.Timer timer) {
+		public void apply(org.apache.mahout.matrix.Timer timer) {
 			A.assign(B);
 		}
 	};
@@ -284,7 +284,7 @@ protected static Double2DProcedure funAssignGetSet() {
 	return new Double2DProcedure() { 
 		public String toString() { return "A.assign(B) via get and set [Mops/sec]";	}
 		public void init() { A.assign(0); }		
-		public void apply(org.apache.mahout.colt.Timer timer) {
+		public void apply(org.apache.mahout.matrix.Timer timer) {
 			int rows=B.rows();
 			int columns=B.columns();
 			/*
@@ -309,7 +309,7 @@ protected static Double2DProcedure funAssignGetSetQuick() {
 	return new Double2DProcedure() { 
 		public String toString() { return "A.assign(B) via getQuick and setQuick [Mops/sec]";	}
 		public void init() { A.assign(0); }		
-		public void apply(org.apache.mahout.colt.Timer timer) {
+		public void apply(org.apache.mahout.matrix.Timer timer) {
 			int rows=B.rows();
 			int columns=B.columns();
 			//for (int row=rows; --row >= 0; ) {
@@ -329,8 +329,8 @@ protected static Double2DProcedure funAssignLog() {
 	return new Double2DProcedure() { 
 		public String toString() { return "A[i,j] = log(A[i,j]) via Blas.assign(fun) [Mflops/sec]";	}
 		public void init() { A.assign(C); }		
-		public void apply(org.apache.mahout.colt.Timer timer) {
-			org.apache.mahout.colt.matrix.linalg.SmpBlas.smpBlas.assign(A, org.apache.mahout.jet.math.Functions.log);
+		public void apply(org.apache.mahout.matrix.Timer timer) {
+			org.apache.mahout.matrix.matrix.linalg.SmpBlas.smpBlas.assign(A, org.apache.mahout.jet.math.Functions.log);
 		}
 	};
 }
@@ -341,8 +341,8 @@ protected static Double2DProcedure funAssignPlusMult() {
 	return new Double2DProcedure() { 
 		public String toString() { return "A[i,j] = A[i,j] + s*B[i,j] via Blas.assign(fun) [Mflops/sec]";	}
 		public void init() { A.assign(C); }		
-		public void apply(org.apache.mahout.colt.Timer timer) {
-			org.apache.mahout.colt.matrix.linalg.SmpBlas.smpBlas.assign(A,B, org.apache.mahout.jet.math.Functions.plusMult(0.5));
+		public void apply(org.apache.mahout.matrix.Timer timer) {
+			org.apache.mahout.matrix.matrix.linalg.SmpBlas.smpBlas.assign(A,B, org.apache.mahout.jet.math.Functions.plusMult(0.5));
 		}
 		public double operations() { // Mflops
 			double m = A.rows();
@@ -361,9 +361,9 @@ protected static Double2DProcedure funCorrelation() {
 		public void setParameters(DoubleMatrix2D A, DoubleMatrix2D B) {
 			super.setParameters(A.viewDice(),B); // transposed --> faster (memory aware) iteration in correlation algo
 		}
-		public void apply(org.apache.mahout.colt.Timer timer) {
-			org.apache.mahout.colt.matrix.doublealgo.Statistic.correlation(
-				org.apache.mahout.colt.matrix.doublealgo.Statistic.covariance(A));
+		public void apply(org.apache.mahout.matrix.Timer timer) {
+			org.apache.mahout.matrix.matrix.doublealgo.Statistic.correlation(
+				org.apache.mahout.matrix.matrix.doublealgo.Statistic.covariance(A));
 		}
 		public double operations() { // Mflops
 			double m = A.rows();
@@ -379,8 +379,8 @@ protected static Double2DProcedure funElementwiseMult() {
 	return new Double2DProcedure() { 
 		public String toString() { return "A.assign(F.mult(0.5)) via Blas [Mflops/sec]";	}
 		public void init() { A.assign(C); }		
-		public void apply(org.apache.mahout.colt.Timer timer) {
-			org.apache.mahout.colt.matrix.linalg.SmpBlas.smpBlas.assign(A, org.apache.mahout.jet.math.Functions.mult(0.5));
+		public void apply(org.apache.mahout.matrix.Timer timer) {
+			org.apache.mahout.matrix.matrix.linalg.SmpBlas.smpBlas.assign(A, org.apache.mahout.jet.math.Functions.mult(0.5));
 		}
 	};
 }
@@ -391,8 +391,8 @@ protected static Double2DProcedure funElementwiseMultB() {
 	return new Double2DProcedure() { 
 		public String toString() { return "A.assign(B,F.mult) via Blas [Mflops/sec]";	}
 		public void init() { A.assign(C); }		
-		public void apply(org.apache.mahout.colt.Timer timer) {
-			org.apache.mahout.colt.matrix.linalg.SmpBlas.smpBlas.assign(A,B, org.apache.mahout.jet.math.Functions.mult);
+		public void apply(org.apache.mahout.matrix.Timer timer) {
+			org.apache.mahout.matrix.matrix.linalg.SmpBlas.smpBlas.assign(A,B, org.apache.mahout.jet.math.Functions.mult);
 		}
 	};
 }
@@ -404,7 +404,7 @@ protected static Double2DProcedure funGetQuick() {
 		public double dummy;
 		public String toString() { return "xxxxxxx";	}
 		public void init() {}		
-		public void apply(org.apache.mahout.colt.Timer timer) {
+		public void apply(org.apache.mahout.matrix.Timer timer) {
 			int rows=B.rows();
 			int columns=B.columns();
 			double sum =0;
@@ -424,10 +424,10 @@ protected static Double2DProcedure funGetQuick() {
  */
 protected static Double2DProcedure funLUDecompose() {
 	return new Double2DProcedure() {
-		org.apache.mahout.colt.matrix.linalg.LUDecompositionQuick lu = new org.apache.mahout.colt.matrix.linalg.LUDecompositionQuick(0);
+		org.apache.mahout.matrix.matrix.linalg.LUDecompositionQuick lu = new org.apache.mahout.matrix.matrix.linalg.LUDecompositionQuick(0);
 		public String toString() { return "LU.decompose(A) [Mflops/sec]";	}
 		public void init() { A.assign(C); }
-		public void apply(org.apache.mahout.colt.Timer timer) {
+		public void apply(org.apache.mahout.matrix.Timer timer) {
 			lu.decompose(A);	
 		}
 		public double operations() { // Mflops
@@ -441,20 +441,20 @@ protected static Double2DProcedure funLUDecompose() {
  */
 protected static Double2DProcedure funLUSolve() {
 	return new Double2DProcedure() {
-		org.apache.mahout.colt.matrix.linalg.LUDecompositionQuick lu;
+		org.apache.mahout.matrix.matrix.linalg.LUDecompositionQuick lu;
 		public String toString() { return "LU.solve(A) [Mflops/sec]";	}
 		public void setParameters(DoubleMatrix2D A, DoubleMatrix2D B) {
 			lu = null;
-			if (!org.apache.mahout.colt.matrix.linalg.Property.ZERO.isDiagonallyDominantByRow(A) ||
-				!org.apache.mahout.colt.matrix.linalg.Property.ZERO.isDiagonallyDominantByColumn(A)) {
-					org.apache.mahout.colt.matrix.linalg.Property.ZERO.generateNonSingular(A);
+			if (!org.apache.mahout.matrix.matrix.linalg.Property.ZERO.isDiagonallyDominantByRow(A) ||
+				!org.apache.mahout.matrix.matrix.linalg.Property.ZERO.isDiagonallyDominantByColumn(A)) {
+					org.apache.mahout.matrix.matrix.linalg.Property.ZERO.generateNonSingular(A);
 				}
 			super.setParameters(A,B);
-			lu = new org.apache.mahout.colt.matrix.linalg.LUDecompositionQuick(0);
+			lu = new org.apache.mahout.matrix.matrix.linalg.LUDecompositionQuick(0);
 			lu.decompose(A);
 		}
 		public void init() { B.assign(D); }
-		public void apply(org.apache.mahout.colt.Timer timer) {
+		public void apply(org.apache.mahout.matrix.Timer timer) {
 			lu.solve(B);	
 		}
 		public double operations() { // Mflops
@@ -477,7 +477,7 @@ protected static Double2DProcedure funMatMultLarge() {
 			this.C = A.copy();
 		}
 		public void init() { C.assign(0); }
-		public void apply(org.apache.mahout.colt.Timer timer) { A.zMult(B,C); }
+		public void apply(org.apache.mahout.matrix.Timer timer) { A.zMult(B,C); }
 		public double operations() { // Mflops
 			double m = A.rows();
 			double n = A.columns();
@@ -494,12 +494,12 @@ protected static Double2DProcedure funMatVectorMult() {
 		public String toString() { return "xxxxxxx";	}
 		public void setParameters(DoubleMatrix2D G, DoubleMatrix2D H) {
 			super.setParameters(G,H);
-			D = new org.apache.mahout.colt.matrix.impl.DenseDoubleMatrix2D(A.rows(),A.columns()).assign(0.5);
+			D = new org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix2D(A.rows(),A.columns()).assign(0.5);
 			C = D.copy();
 			B = D.copy();
 		}
 		public void init() { C.viewRow(0).assign(D.viewRow(0)); }
-		public void apply(org.apache.mahout.colt.Timer timer) { A.zMult(B.viewRow(0),C.viewRow(0)); }
+		public void apply(org.apache.mahout.matrix.Timer timer) { A.zMult(B.viewRow(0),C.viewRow(0)); }
 		public double operations() { // Mflops
 			double m = A.rows();
 			double n = A.columns();
@@ -522,7 +522,7 @@ protected static Double2DProcedure funSetQuick() {
 			current = 4*seed+1;
 			density = A.cardinality() / (double) A.size();
 		}		
-		public void apply(org.apache.mahout.colt.Timer timer) {
+		public void apply(org.apache.mahout.matrix.Timer timer) {
 			int rows=B.rows();
 			int columns=B.columns();
 			//for (int row=rows; --row >= 0; ) {
@@ -551,7 +551,7 @@ protected static Double2DProcedure funSOR5() {
 		double omega = 1.25;
 		final double alpha = omega * 0.25;
 		final double beta = 1-omega;
-		org.apache.mahout.colt.function.Double9Function function = new org.apache.mahout.colt.function.Double9Function() {
+		org.apache.mahout.matrix.function.Double9Function function = new org.apache.mahout.matrix.function.Double9Function() {
 			public final double apply(	
 				double a00, double a01, double a02,
 				double a10, double a11, double a12,
@@ -561,7 +561,7 @@ protected static Double2DProcedure funSOR5() {
 		};
 		public String toString() { return "A.zAssign8Neighbors(5 point function) [Mflops/sec]";	}
 		public void init() { B.assign(D); }
-		public void apply(org.apache.mahout.colt.Timer timer) { A.zAssign8Neighbors(B,function); }
+		public void apply(org.apache.mahout.matrix.Timer timer) { A.zAssign8Neighbors(B,function); }
 		public double operations() { // Mflops
 			double n = A.columns();
 			double m = A.rows();
@@ -578,7 +578,7 @@ protected static Double2DProcedure funSOR8() {
 		double omega = 1.25;
 		final double alpha = omega * 0.25;
 		final double beta = 1-omega;
-		org.apache.mahout.colt.function.Double9Function function = new org.apache.mahout.colt.function.Double9Function() {
+		org.apache.mahout.matrix.function.Double9Function function = new org.apache.mahout.matrix.function.Double9Function() {
 			public final double apply(	
 				double a00, double a01, double a02,
 				double a10, double a11, double a12,
@@ -588,7 +588,7 @@ protected static Double2DProcedure funSOR8() {
 		};
 		public String toString() { return "A.zAssign8Neighbors(9 point function) [Mflops/sec]";	}
 		public void init() { B.assign(D); }
-		public void apply(org.apache.mahout.colt.Timer timer) { A.zAssign8Neighbors(B,function); }
+		public void apply(org.apache.mahout.matrix.Timer timer) { A.zAssign8Neighbors(B,function); }
 		public double operations() { // Mflops
 			double n = A.columns();
 			double m = A.rows();
@@ -603,7 +603,7 @@ protected static Double2DProcedure funSort() {
 	return new Double2DProcedure() { 
 		public String toString() { return "xxxxxxx";	}
 		public void init() { A.assign(C); }
-		public void apply(org.apache.mahout.colt.Timer timer) { A.viewSorted(0); }
+		public void apply(org.apache.mahout.matrix.Timer timer) { A.viewSorted(0); }
 	};
 }
 /**
@@ -665,7 +665,7 @@ protected static boolean handle(String[] params) {
 }
 /**
  * Runs the matrix benchmark operations defined in args or in the file specified by args0.
- * To get detailed help on usage type java org.apache.mahout.colt.matrix.bench.BenchmarkMatrix -help
+ * To get detailed help on usage type java org.apache.mahout.matrix.matrix.bench.BenchmarkMatrix -help
  */
 public static void main(String[] args) {
 	int n = args.length;
@@ -688,9 +688,9 @@ public static void main(String[] args) {
     // TODO print out real version info?
 	System.out.println("Colt Version is [unknown - now in Mahout]" + "\n");
 
-	org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+	org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 	if (!args[0].equals("-file")) { // interactive mode, commands supplied via java class args
-		System.out.println("\n\nExecuting command = "+new org.apache.mahout.colt.list.ObjectArrayList(args)+" ...");
+		System.out.println("\n\nExecuting command = "+new org.apache.mahout.matrix.list.ObjectArrayList(args)+" ...");
 		handle(args);
 	}
 	else { // batch mode, read commands from file
@@ -712,7 +712,7 @@ public static void main(String[] args) {
 		stream.slashSlashComments(true); // allow // comments
 		stream.slashStarComments(true);  // allow /* comments */
 		try {
-			org.apache.mahout.colt.list.ObjectArrayList words = new org.apache.mahout.colt.list.ObjectArrayList();
+			org.apache.mahout.matrix.list.ObjectArrayList words = new org.apache.mahout.matrix.list.ObjectArrayList();
 			int token;
 			while ((token = stream.nextToken()) != stream.TT_EOF) { // while not end of file
 				if (token == stream.TT_EOL) { // execute a command line at a time
@@ -729,7 +729,7 @@ public static void main(String[] args) {
 				}
 				else {
 					String word;
-					org.apache.mahout.colt.matrix.impl.Former formatter = new org.apache.mahout.colt.matrix.impl.FormerFactory().create("%G");
+					org.apache.mahout.matrix.matrix.impl.Former formatter = new org.apache.mahout.matrix.matrix.impl.FormerFactory().create("%G");
 					// ok: 2.0 -> 2   wrong: 2.0 -> 2.0 (kills Integer.parseInt())
 					if (token == stream.TT_NUMBER) 
 						word = formatter.form(stream.nval);
@@ -775,7 +775,7 @@ protected static void run(double minSeconds, String title, Double2DProcedure fun
 	//double[] densities = {0.1};
 
 	DoubleMatrix3D timings = DoubleFactory3D.dense.make(types.length,sizes.length,densities.length);
-	org.apache.mahout.colt.Timer runTime = new org.apache.mahout.colt.Timer().start();
+	org.apache.mahout.matrix.Timer runTime = new org.apache.mahout.matrix.Timer().start();
 	for (int k=0; k<types.length; k++) {
 		//DoubleFactory2D factory = (k==0 ? DoubleFactory2D.dense : k==1 ? DoubleFactory2D.sparse : DoubleFactory2D.rowCompressed);
 		//DoubleFactory2D factory = (k==0 ? DoubleFactory2D.dense : k==1 ? DoubleFactory2D.sparse : k==2 ? DoubleFactory2D.rowCompressed : DoubleFactory2D.rowCompressedModified);
@@ -834,11 +834,11 @@ protected static void run(double minSeconds, String title, Double2DProcedure fun
 	String tmp = rowAxisName; rowAxisName = colAxisName; colAxisName = tmp;
 	String[] tmp2 = rowNames; rowNames = colNames; colNames = tmp2;
 	timings = timings.viewDice(0,2,1);
-	//System.out.println(new org.apache.mahout.colt.matrix.doublealgo.Formatter("%1.3G").toTitleString(timings,sliceNames,rowNames,colNames,sliceAxisName,rowAxisName,colAxisName,"Performance of "+title,aggr));
+	//System.out.println(new org.apache.mahout.matrix.matrix.doublealgo.Formatter("%1.3G").toTitleString(timings,sliceNames,rowNames,colNames,sliceAxisName,rowAxisName,colAxisName,"Performance of "+title,aggr));
 	/*
 	title = "Speedup of dense over sparse";
-	DoubleMatrix2D speedup = org.apache.mahout.colt.matrix.doublealgo.Transform.div(timings.viewSlice(0).copy(),timings.viewSlice(1));
-	System.out.println("\n"+new org.apache.mahout.colt.matrix.doublealgo.Formatter("%1.3G").toTitleString(speedup,rowNames,colNames,rowAxisName,colAxisName,title,aggr));
+	DoubleMatrix2D speedup = org.apache.mahout.matrix.matrix.doublealgo.Transform.div(timings.viewSlice(0).copy(),timings.viewSlice(1));
+	System.out.println("\n"+new org.apache.mahout.matrix.matrix.doublealgo.Formatter("%1.3G").toTitleString(speedup,rowNames,colNames,rowAxisName,colAxisName,title,aggr));
 	*/
 	System.out.println("Run took a total of "+runTime+". End of run.");
 }
@@ -851,7 +851,7 @@ protected static void runSpecial(double minSeconds, String title, Double2DProced
 	boolean[] sparses  = {true};
 	
 	DoubleMatrix2D timings = DoubleFactory2D.dense.make(sizes.length,4);
-	org.apache.mahout.colt.Timer runTime = new org.apache.mahout.colt.Timer().start();
+	org.apache.mahout.matrix.Timer runTime = new org.apache.mahout.matrix.Timer().start();
 	for (int i=0; i<sizes.length; i++) {
 		int size = sizes[i];
 		double density = densities[i];
@@ -885,7 +885,7 @@ protected static void runSpecial(double minSeconds, String title, Double2DProced
 	String rowAxisName = null;
 	String colAxisName = null;
 	System.out.println("*");
-	//System.out.println(new org.apache.mahout.colt.matrix.doublealgo.Formatter("%1.3G").toTitleString(timings,rowNames,colNames,rowAxisName,colAxisName,title,aggr));
+	//System.out.println(new org.apache.mahout.matrix.matrix.doublealgo.Formatter("%1.3G").toTitleString(timings,rowNames,colNames,rowAxisName,colAxisName,title,aggr));
 
 	System.out.println("Run took a total of "+runTime+". End of run.");
 }
@@ -894,14 +894,14 @@ protected static void runSpecial(double minSeconds, String title, Double2DProced
  */
 protected static String usage() {
 	String usage = 
-"\nUsage (help): To get this help, type java org.apache.mahout.colt.matrix.bench.BenchmarkMatrix -help\n"+
-"To get help on a command's args, omit args and type java org.apache.mahout.colt.matrix.bench.BenchmarkMatrix -help <command>\n" +
+"\nUsage (help): To get this help, type java org.apache.mahout.matrix.matrix.bench.BenchmarkMatrix -help\n"+
+"To get help on a command's args, omit args and type java org.apache.mahout.matrix.matrix.bench.BenchmarkMatrix -help <command>\n" +
 "Available commands: "+commands()+"\n\n"+
 
-"Usage (direct): java org.apache.mahout.colt.matrix.bench.BenchmarkMatrix command {args}\n"+
+"Usage (direct): java org.apache.mahout.matrix.matrix.bench.BenchmarkMatrix command {args}\n"+
 "Example: dgemm dense 2 2.0 0.999 false true 5 10 25 50 100 250 500\n\n"+
 
-"Usage (batch mode): java org.apache.mahout.colt.matrix.bench.BenchmarkMatrix -file <file>\nwhere <file> is a text file with each line holding a command followed by appropriate args (comments and empty lines ignored).\n\n"+
+"Usage (batch mode): java org.apache.mahout.matrix.matrix.bench.BenchmarkMatrix -file <file>\nwhere <file> is a text file with each line holding a command followed by appropriate args (comments and empty lines ignored).\n\n"+
 "Example file's content:\n" +
 "dgemm dense 1 2.0 0.999 false true 5 10 25 50 100 250 500\n"+
 "dgemm dense 2 2.0 0.999 false true 5 10 25 50 100 250 500\n\n"+

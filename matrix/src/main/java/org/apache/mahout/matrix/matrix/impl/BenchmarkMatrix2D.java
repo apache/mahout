@@ -6,9 +6,9 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.impl;
+package org.apache.mahout.matrix.matrix.impl;
 
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /**
 Benchmarks the performance of matrices. Here are the results of some encouraging 
 measurements. Note that all benchmarks only measure the time spent in accessing 
@@ -173,12 +173,12 @@ public static void doubleBenchmark(int runs, int rows, int columns, String kind,
 	// certain loops need to be constructed so that the jitter can't optimize them away and we get fantastic numbers.
 	// this involves primarly read-loops
 
-	org.apache.mahout.colt.Timer timer1 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer timer2 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer timer3 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer timer4 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer emptyLoop = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer emptyLoop2 = new org.apache.mahout.colt.Timer();
+	org.apache.mahout.matrix.Timer timer1 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer timer2 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer timer3 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer timer4 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer emptyLoop = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer emptyLoop2 = new org.apache.mahout.matrix.Timer();
 
 	emptyLoop.start();
 	int dummy = 0;
@@ -328,8 +328,8 @@ public static void doubleBenchmarkMult(int runs, int rows, int columns, String k
 	// certain loops need to be constructed so that the jitter can't optimize them away and we get fantastic numbers.
 	// this involves primarly read-loops
 
-	org.apache.mahout.colt.Timer timer1 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer timer2 = new org.apache.mahout.colt.Timer();
+	org.apache.mahout.matrix.Timer timer1 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer timer2 = new org.apache.mahout.matrix.Timer();
 
 	long size = (((long)rows)*columns)*runs;
 
@@ -344,7 +344,7 @@ public static void doubleBenchmarkMult(int runs, int rows, int columns, String k
 	//if (kind.equals("sparse")) ((SparseDoubleMatrix2D)matrix).elements.hashCollisions = 0;
 	for (int i=0; i<runs; i++) {
 		timer1.start();
-		org.apache.mahout.colt.matrix.doublealgo.Transform.mult(matrix, 3);
+		org.apache.mahout.matrix.matrix.doublealgo.Transform.mult(matrix, 3);
 		timer1.stop();
 	}
 	timer1.display();
@@ -366,7 +366,7 @@ public static void doubleBenchmarkMult(int runs, int rows, int columns, String k
 	//if (kind.equals("sparse")) ((SparseDoubleMatrix2D)matrix).elements.hashCollisions = 0;
 	for (int i=0; i<runs; i++) {
 		timer2.start();
-		org.apache.mahout.colt.matrix.doublealgo.Transform.mult(matrix,3);
+		org.apache.mahout.matrix.matrix.doublealgo.Transform.mult(matrix,3);
 		timer2.stop();
 	}
 	timer2.display();
@@ -390,11 +390,11 @@ public static void doubleBenchmarkMult(int runs, int rows, int columns, String k
 public static void doubleBenchmarkPrimitive(int runs, int rows, int columns, boolean print) {
 	// certain loops need to be constructed so that the jitter can't optimize them away and we get fantastic numbers.
 	// this involves primarly read-loops
-	org.apache.mahout.colt.Timer timer1 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer timer2 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer timer3 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer emptyLoop = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer emptyLoop2 = new org.apache.mahout.colt.Timer();
+	org.apache.mahout.matrix.Timer timer1 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer timer2 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer timer3 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer emptyLoop = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer emptyLoop2 = new org.apache.mahout.matrix.Timer();
 
 	emptyLoop.start();
 	int dummy = 0;
@@ -513,11 +513,11 @@ public static void doubleBenchmarkPrimitive(int runs, int rows, int columns, boo
 public static void doubleBenchmarkPrimitiveOptimized(int runs, int rows, int columns, boolean print) {
 	// certain loops need to be constructed so that the jitter can't optimize them away and we get fantastic numbers.
 	// this involves primarly read-loops
-	org.apache.mahout.colt.Timer timer1 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer timer2 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer timer3 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer emptyLoop = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer emptyLoop2 = new org.apache.mahout.colt.Timer();
+	org.apache.mahout.matrix.Timer timer1 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer timer2 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer timer3 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer emptyLoop = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer emptyLoop2 = new org.apache.mahout.matrix.Timer();
 
 	emptyLoop.start();
 	int dummy = 0;
@@ -637,11 +637,11 @@ public static void intBenchmark(int runs, int rows, int columns, String kind, bo
 	// certain loops need to be constructed so that the jitter can't optimize them away and we get fantastic numbers.
 	// this involves primarly read-loops
 
-	org.apache.mahout.colt.Timer timer1 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer timer2 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer timer3 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer emptyLoop = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer emptyLoop2 = new org.apache.mahout.colt.Timer();
+	org.apache.mahout.matrix.Timer timer1 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer timer2 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer timer3 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer emptyLoop = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer emptyLoop2 = new org.apache.mahout.matrix.Timer();
 
 	emptyLoop.start();
 	int dummy = 0;
@@ -771,11 +771,11 @@ public static void intBenchmarkPrimitive(int runs, int rows, int columns, boolea
 	/*
 	// certain loops need to be constructed so that the jitter can't optimize them away and we get fantastic numbers.
 	// this involves primarly read-loops
-	org.apache.mahout.colt.Timer timer1 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer timer2 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer timer3 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer emptyLoop = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer emptyLoop2 = new org.apache.mahout.colt.Timer();
+	org.apache.mahout.matrix.Timer timer1 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer timer2 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer timer3 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer emptyLoop = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer emptyLoop2 = new org.apache.mahout.matrix.Timer();
 
 	emptyLoop.start();
 	int dummy = 0;
@@ -889,11 +889,11 @@ public static void intBenchmarkPrimitiveOptimized(int runs, int rows, int column
 	/*
 	// certain loops need to be constructed so that the jitter can't optimize them away and we get fantastic numbers.
 	// this involves primarly read-loops
-	org.apache.mahout.colt.Timer timer1 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer timer2 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer timer3 = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer emptyLoop = new org.apache.mahout.colt.Timer();
-	org.apache.mahout.colt.Timer emptyLoop2 = new org.apache.mahout.colt.Timer();
+	org.apache.mahout.matrix.Timer timer1 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer timer2 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer timer3 = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer emptyLoop = new org.apache.mahout.matrix.Timer();
+	org.apache.mahout.matrix.Timer emptyLoop2 = new org.apache.mahout.matrix.Timer();
 
 	emptyLoop.start();
 	int dummy = 0;

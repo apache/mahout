@@ -6,12 +6,12 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.doublealgo;
+package org.apache.mahout.matrix.matrix.doublealgo;
 
-import org.apache.mahout.colt.Swapper;
-import org.apache.mahout.colt.function.IntComparator;
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.Swapper;
+import org.apache.mahout.matrix.function.IntComparator;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /**
  * Given some interval boundaries, partitions matrices such that cell values falling into an interval are placed next to each other.
  * <p>
@@ -21,7 +21,7 @@ import org.apache.mahout.colt.matrix.DoubleMatrix2D;
  * Partitioning into k intervals is <tt>O( N * log(k))</tt>.
  * Constants factors are minimized. 
  *
- * @see org.apache.mahout.colt.Partitioning "Partitioning arrays (provides more documentation)"
+ * @see org.apache.mahout.matrix.Partitioning "Partitioning arrays (provides more documentation)"
  *
  * @author wolfgang.hoschek@cern.ch
  * @version 1.0, 09/24/99
@@ -36,7 +36,7 @@ public class Partitioning extends Object {
  */
 protected Partitioning() {}
 /**
-Same as {@link org.apache.mahout.colt.Partitioning#partition(int[],int,int,int[],int,int,int[])}
+Same as {@link org.apache.mahout.matrix.Partitioning#partition(int[],int,int,int[],int,int,int[])}
 except that it <i>synchronously</i> partitions the rows of the given matrix by the values of the given matrix column;
 This is essentially the same as partitioning a list of composite objects by some instance variable;
 In other words, two entire rows of the matrix are swapped, whenever two column values indicate so.
@@ -151,10 +151,10 @@ public static void partition(DoubleMatrix2D matrix, int[] rowIndexes, int rowFro
 	};
 
 	// generic partitioning does the main work of reordering row indexes
-	org.apache.mahout.colt.Partitioning.genericPartition(rowFrom,rowTo,splitFrom,splitTo,splitIndexes,comp,comp2,comp3,swapper);
+	org.apache.mahout.matrix.Partitioning.genericPartition(rowFrom,rowTo,splitFrom,splitTo,splitIndexes,comp,comp2,comp3,swapper);
 }
 /**
-Same as {@link org.apache.mahout.colt.Partitioning#partition(int[],int,int,int[],int,int,int[])}
+Same as {@link org.apache.mahout.matrix.Partitioning#partition(int[],int,int,int[],int,int,int[])}
 except that it <i>synchronously</i> partitions the rows of the given matrix by the values of the given matrix column;
 This is essentially the same as partitioning a list of composite objects by some instance variable;
 In other words, two entire rows of the matrix are swapped, whenever two column values indicate so.
@@ -317,7 +317,7 @@ private static void xPartitionOld(DoubleMatrix2D matrix, DoubleMatrix1D column, 
 		}
 		
 		// Find the splitter closest to the pivot, i.e. the splitter that best splits the list into two equal sized sublists.
-		medianIndex = org.apache.mahout.colt.Sorting.binarySearchFromTo(splitters,column.getQuick(m),splitFrom,splitTo);
+		medianIndex = org.apache.mahout.matrix.Sorting.binarySearchFromTo(splitters,column.getQuick(m),splitFrom,splitTo);
 		if (medianIndex < 0) medianIndex = -medianIndex - 1; // not found
 		if (medianIndex > splitTo) medianIndex = splitTo; // not found, one past the end
 		

@@ -6,7 +6,7 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.list;
+package org.apache.mahout.matrix.list;
 
 /**
 Resizable list holding <code>long</code> elements; implemented with arrays; not efficient; just to demonstrate which methods you must override to implement a fully functional list.
@@ -67,7 +67,7 @@ public SimpleLongArrayList(int initialCapacity) {
  * @param   minCapacity   the desired minimum capacity.
  */
 public void ensureCapacity(int minCapacity) {
-	elements = org.apache.mahout.colt.Arrays.ensureCapacity(elements,minCapacity);
+	elements = org.apache.mahout.matrix.Arrays.ensureCapacity(elements,minCapacity);
 }
 /**
  * Returns the element at the specified position in the receiver; <b>WARNING:</b> Does not check preconditions. 
@@ -98,6 +98,6 @@ protected void setQuick(int index, long element) {
 * storage of the receiver. 
 */
 public void trimToSize() {
-	elements = org.apache.mahout.colt.Arrays.trimToCapacity(elements,size());
+	elements = org.apache.mahout.matrix.Arrays.trimToCapacity(elements,size());
 }
 }

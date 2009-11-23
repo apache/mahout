@@ -6,7 +6,7 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.bench;
+package org.apache.mahout.matrix.matrix.bench;
 
 /**
  * Not yet documented.
@@ -83,7 +83,7 @@ public static String systemInfo() {
 	};
 
 	// build string matrix
-	org.apache.mahout.colt.matrix.ObjectMatrix2D matrix = new org.apache.mahout.colt.matrix.impl.DenseObjectMatrix2D(properties.length,2);
+	org.apache.mahout.matrix.matrix.ObjectMatrix2D matrix = new org.apache.mahout.matrix.matrix.impl.DenseObjectMatrix2D(properties.length,2);
 	matrix.viewColumn(0).assign(properties);
 
 	// retrieve property values
@@ -94,7 +94,7 @@ public static String systemInfo() {
 	}
 
 	// format matrix
-	org.apache.mahout.colt.matrix.objectalgo.Formatter formatter = new org.apache.mahout.colt.matrix.objectalgo.Formatter();
+	org.apache.mahout.matrix.matrix.objectalgo.Formatter formatter = new org.apache.mahout.matrix.matrix.objectalgo.Formatter();
 	formatter.setPrintShape(false);
 	return formatter.toString(matrix);
 }

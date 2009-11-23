@@ -6,7 +6,7 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt;
+package org.apache.mahout.matrix;
 
 /**
 Generically reorders (permutes) arbitrary shaped data (for example, an array, three arrays, a 2-d matrix, two linked lists) using an <i>in-place</i> swapping algorithm.
@@ -19,7 +19,7 @@ Then there holds <tt>after[i] == before[indexes[i]]</tt>.
 <p>
 Similar to {@link GenericSorting}, this class has no idea what kind of data it is reordering.
 It can decide to swap the data at index <tt>a</tt> with the data at index <tt>b</tt>. 
-It calls a user provided {@link org.apache.mahout.colt.Swapper} object that knows how to swap the data of these indexes.
+It calls a user provided {@link org.apache.mahout.matrix.Swapper} object that knows how to swap the data of these indexes.
 <p>
 For convenience, some non-generic variants are also provided.
 Further a method to generate the p-th lexicographical permutation indexes.
@@ -67,7 +67,7 @@ Swapper swapper = new Swapper() {
 &nbsp;&nbsp;&nbsp;}
 };
 
-// reordering the rows of a 2-d matrix (see {@link org.apache.mahout.colt.matrix})
+// reordering the rows of a 2-d matrix (see {@link org.apache.mahout.matrix.matrix})
 Swapper swapper = new Swapper() {
 &nbsp;&nbsp;&nbsp;public void swap(int a, int b) {
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;matrix.viewRow(a).swap(matrix.viewRow(b));
@@ -84,8 +84,8 @@ Swapper swapper = new Swapper() {
 </td>
 </table>
 
-@see org.apache.mahout.colt.Swapper
-@see org.apache.mahout.colt.GenericSorting
+@see org.apache.mahout.matrix.Swapper
+@see org.apache.mahout.matrix.GenericSorting
 
 @author wolfgang.hoschek@cern.ch
 @version 1.0, 10-Oct-99
@@ -211,7 +211,7 @@ In other words g[0]<--g[0], g[1]<--g[4], g[2]<--g[1], g[3]<--g[2], g[4]<--g[3].
 @param   swapper an object that knows how to swap two indexes a,b.
 @param   work the working storage, must satisfy <tt>work.length >= indexes.length</tt>; set <tt>work==null</tt> if you don't care about performance.
 */
-public static void permute(int[] indexes, org.apache.mahout.colt.Swapper swapper, int[] work) {
+public static void permute(int[] indexes, org.apache.mahout.matrix.Swapper swapper, int[] work) {
 	permute(indexes,swapper,work,null);
 }
 /**
@@ -237,7 +237,7 @@ In other words g[0]<--g[0], g[1]<--g[4], g[2]<--g[1], g[3]<--g[2], g[4]<--g[3].
 @param   work1 some working storage, must satisfy <tt>work1.length >= indexes.length</tt>; set <tt>work1==null</tt> if you don't care about performance.
 @param   work2 some working storage, must satisfy <tt>work2.length >= indexes.length</tt>; set <tt>work2==null</tt> if you don't care about performance.
 */
-public static void permute(int[] indexes, org.apache.mahout.colt.Swapper swapper, int[] work1, int[] work2) {
+public static void permute(int[] indexes, org.apache.mahout.matrix.Swapper swapper, int[] work1, int[] work2) {
 	// "tracks" and "pos" keeps track of the current indexes of the elements
 	// Example: We have a list==[A,B,C,D,E], indexes==[0,4,1,2,3] and swap B and E we need to know that the element formlerly at index 1 is now at index 4, and the one formerly at index 4 is now at index 1.
 	// Otherwise we stumble over our own feet and produce nonsense.

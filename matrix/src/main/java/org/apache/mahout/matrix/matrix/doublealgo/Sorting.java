@@ -6,15 +6,15 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.doublealgo;
+package org.apache.mahout.matrix.matrix.doublealgo;
 
-import org.apache.mahout.colt.function.IntComparator;
-import org.apache.mahout.colt.matrix.DoubleFactory2D;
-import org.apache.mahout.colt.matrix.DoubleFactory3D;
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
-import org.apache.mahout.colt.matrix.DoubleMatrix3D;
-import org.apache.mahout.colt.matrix.impl.DenseDoubleMatrix1D;
+import org.apache.mahout.matrix.function.IntComparator;
+import org.apache.mahout.matrix.matrix.DoubleFactory2D;
+import org.apache.mahout.matrix.matrix.DoubleFactory3D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix3D;
+import org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix1D;
 /**
 Matrix quicksorts and mergesorts.
 Use idioms like <tt>Sorting.quickSort.sort(...)</tt> and <tt>Sorting.mergeSort.sort(...)</tt>.
@@ -32,8 +32,8 @@ Mergesort is <i>stable</i> (by definition), while quicksort is not.
 A stable sort is, for example, helpful, if matrices are sorted successively 
 by multiple columns. It preserves the relative position of equal elements.
  
-@see org.apache.mahout.colt.GenericSorting
-@see org.apache.mahout.colt.Sorting
+@see org.apache.mahout.matrix.GenericSorting
+@see org.apache.mahout.matrix.Sorting
 @see java.util.Arrays
 
 @author wolfgang.hoschek@cern.ch
@@ -43,7 +43,7 @@ by multiple columns. It preserves the relative position of equal elements.
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class Sorting extends org.apache.mahout.colt.PersistentObject {
+public class Sorting extends org.apache.mahout.matrix.PersistentObject {
 	/**
 	 * A prefabricated quicksort.
 	 */
@@ -54,10 +54,10 @@ public class Sorting extends org.apache.mahout.colt.PersistentObject {
 	 */
 	public static final Sorting mergeSort = new Sorting() { // override quicksort with mergesort
 		protected void runSort(int[] a, int fromIndex, int toIndex, IntComparator c) {
-			org.apache.mahout.colt.Sorting.mergeSort(a,fromIndex,toIndex,c);
+			org.apache.mahout.matrix.Sorting.mergeSort(a,fromIndex,toIndex,c);
 		}
-		protected void runSort(int fromIndex, int toIndex, IntComparator c, org.apache.mahout.colt.Swapper swapper) {
-			org.apache.mahout.colt.GenericSorting.mergeSort(fromIndex, toIndex, c, swapper);
+		protected void runSort(int fromIndex, int toIndex, IntComparator c, org.apache.mahout.matrix.Swapper swapper) {
+			org.apache.mahout.matrix.GenericSorting.mergeSort(fromIndex, toIndex, c, swapper);
 		}
 	};
 /**
@@ -75,10 +75,10 @@ private static final int compareNaN(double a, double b) {
 	return -1; // e.g. 5 < NaN
 }
 protected void runSort(int[] a, int fromIndex, int toIndex, IntComparator c) {
-	org.apache.mahout.colt.Sorting.quickSort(a,fromIndex,toIndex,c);
+	org.apache.mahout.matrix.Sorting.quickSort(a,fromIndex,toIndex,c);
 }
-protected void runSort(int fromIndex, int toIndex, IntComparator c, org.apache.mahout.colt.Swapper swapper) {
-	org.apache.mahout.colt.GenericSorting.quickSort(fromIndex, toIndex, c, swapper);
+protected void runSort(int fromIndex, int toIndex, IntComparator c, org.apache.mahout.matrix.Swapper swapper) {
+	org.apache.mahout.matrix.GenericSorting.quickSort(fromIndex, toIndex, c, swapper);
 }
 /**
 Sorts the vector into ascending order, according to the <i>natural ordering</i>.
@@ -142,7 +142,7 @@ sorted = quickSort(vector,comp);
 @return a new matrix view sorted as specified.
 		<b>Note that the original vector (matrix) is left unaffected.</b>
 */
-public DoubleMatrix1D sort(final DoubleMatrix1D vector, final org.apache.mahout.colt.function.DoubleComparator c) {
+public DoubleMatrix1D sort(final DoubleMatrix1D vector, final org.apache.mahout.matrix.function.DoubleComparator c) {
 	int[] indexes = new int[vector.size()]; // row indexes to reorder instead of matrix itself
 	for (int i=indexes.length; --i >= 0; ) indexes[i] = i;
 
@@ -238,7 +238,7 @@ public DoubleMatrix2D sort(DoubleMatrix2D matrix, final double[] aggregates) {
 	for (int i=rows; --i >= 0; ) indexes[i] = i;
 
 	// compares two aggregates at a time
-	org.apache.mahout.colt.function.IntComparator comp = new org.apache.mahout.colt.function.IntComparator() {
+	org.apache.mahout.matrix.function.IntComparator comp = new org.apache.mahout.matrix.function.IntComparator() {
 		public int compare(int x, int y) {
 			double a = aggregates[x];
 			double b = aggregates[y];
@@ -247,7 +247,7 @@ public DoubleMatrix2D sort(DoubleMatrix2D matrix, final double[] aggregates) {
 		}
 	};
 	// swaps aggregates and reorders indexes
-	org.apache.mahout.colt.Swapper swapper = new org.apache.mahout.colt.Swapper() {
+	org.apache.mahout.matrix.Swapper swapper = new org.apache.mahout.matrix.Swapper() {
 		public void swap(int x, int y) {
 			int t1;	double t2;
 			t1 = indexes[x]; indexes[x] = indexes[y]; indexes[y] = t1;		
@@ -416,8 +416,8 @@ DoubleMatrix2D sorted = quickSort(matrix,hep.aida.bin.BinFunctions1D.median);
 // THE SLOW VERSION (takes some 300 secs)
 DoubleMatrix1DComparator comparator = new DoubleMatrix1DComparator() {
 &nbsp;&nbsp;&nbsp;public int compare(DoubleMatrix1D x, DoubleMatrix1D y) {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a = org.apache.mahout.colt.matrix.doublealgo.Statistic.bin(x).median();
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double b = org.apache.mahout.colt.matrix.doublealgo.Statistic.bin(y).median();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a = org.apache.mahout.matrix.matrix.doublealgo.Statistic.bin(x).median();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double b = org.apache.mahout.matrix.matrix.doublealgo.Statistic.bin(y).median();
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// double a = x.aggregate(F.plus,F.log);
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// double b = y.aggregate(F.plus,F.log);
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return a < b ? -1 : a==b ? 0 : 1;
@@ -572,7 +572,7 @@ public static void zdemo3() {
 	Sorting sort = quickSort;
 	double[] values = {0.5, 1.5, 2.5, 3.5};
 	DoubleMatrix1D matrix = new DenseDoubleMatrix1D(values);
-	org.apache.mahout.colt.function.DoubleComparator comp = new org.apache.mahout.colt.function.DoubleComparator() {
+	org.apache.mahout.matrix.function.DoubleComparator comp = new org.apache.mahout.matrix.function.DoubleComparator() {
 		public int compare(double a, double b) {
 			double as = Math.sin(a); double bs = Math.sin(b);
 			return as < bs ? -1 : as == bs ? 0 : 1;
@@ -587,7 +587,7 @@ public static void zdemo3() {
 	sorted.assign(org.apache.mahout.jet.math.Functions.sin);
 	/*
 	sorted.assign(
-		new org.apache.mahout.colt.function.DoubleFunction() {
+		new org.apache.mahout.matrix.function.DoubleFunction() {
 			public double apply(double arg) { return Math.sin(arg); }
 		}
 	);
@@ -609,7 +609,7 @@ protected static void zdemo4() {
 	
 	/*
 	matrix1.assign(matrix2,
-		new org.apache.mahout.colt.function.DoubleDoubleFunction() {
+		new org.apache.mahout.matrix.function.DoubleDoubleFunction() {
 			public double apply(double x, double y) { return Math.pow(x,y); }
 		}
 	);
@@ -626,10 +626,10 @@ public static void zdemo5(int rows, int columns, boolean print) {
 		
 	System.out.println("\n\n");
 	System.out.print("now initializing... ");
-	org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+	org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 		
 	final org.apache.mahout.jet.math.Functions F = org.apache.mahout.jet.math.Functions.functions;
-	DoubleMatrix2D A = org.apache.mahout.colt.matrix.DoubleFactory2D.dense.make(rows,columns);
+	DoubleMatrix2D A = org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.make(rows,columns);
 	A.assign(new org.apache.mahout.jet.random.engine.DRand()); // initialize randomly
 	timer.stop().display();
 
@@ -668,7 +668,7 @@ public static void zdemo5(int rows, int columns, boolean print) {
 		String[] columnNames = new String[columns];
 		for (int i=columns; --i >= 0; ) columnNames[i] = Integer.toString(i);
 		for (int i=r; --i >= 0; ) rowNames[i] = Integer.toString(i);
-		System.out.println("first part of sorted result = \n"+new org.apache.mahout.colt.matrix.doublealgo.Formatter("%G").toTitleString(
+		System.out.println("first part of sorted result = \n"+new org.apache.mahout.matrix.matrix.doublealgo.Formatter("%G").toTitleString(
 			A.viewPart(0,0,r,columns), rowNames, columnNames, null, null, null, funs
 		));
 	}
@@ -676,10 +676,10 @@ public static void zdemo5(int rows, int columns, boolean print) {
 
 	System.out.print("now sorting - slow version... ");
 	A = B;	
-	org.apache.mahout.colt.matrix.doublealgo.DoubleMatrix1DComparator fun = new org.apache.mahout.colt.matrix.doublealgo.DoubleMatrix1DComparator() {
+	org.apache.mahout.matrix.matrix.doublealgo.DoubleMatrix1DComparator fun = new org.apache.mahout.matrix.matrix.doublealgo.DoubleMatrix1DComparator() {
 		public int compare(DoubleMatrix1D x, DoubleMatrix1D y) {
-			double a = org.apache.mahout.colt.matrix.doublealgo.Statistic.bin(x).median();
-			double b = org.apache.mahout.colt.matrix.doublealgo.Statistic.bin(y).median();
+			double a = org.apache.mahout.matrix.matrix.doublealgo.Statistic.bin(x).median();
+			double b = org.apache.mahout.matrix.matrix.doublealgo.Statistic.bin(y).median();
 			//double a = x.aggregate(F.plus,F.log);
 			//double b = y.aggregate(F.plus,F.log);
 			return a < b ? -1 : (a==b) ? 0 : 1;
@@ -738,14 +738,14 @@ public static void zdemo7(int rows, int columns, boolean print) {
 	System.out.println("now initializing... ");
 		
 	final org.apache.mahout.jet.math.Functions F = org.apache.mahout.jet.math.Functions.functions;
-	DoubleMatrix2D A = org.apache.mahout.colt.matrix.DoubleFactory2D.dense.make(rows,columns);
+	DoubleMatrix2D A = org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.make(rows,columns);
 	A.assign(new org.apache.mahout.jet.random.engine.DRand()); // initialize randomly
 	DoubleMatrix2D B = A.copy();
 
 	double[] v1 = A.viewColumn(0).toArray();
 	double[] v2 = A.viewColumn(0).toArray();
 	System.out.print("now quick sorting... ");
-	org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+	org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 	quickSort.sort(A,0);
 	timer.stop().display();
 

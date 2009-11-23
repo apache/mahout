@@ -8,10 +8,10 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.math;
 
-import org.apache.mahout.colt.function.IntFunction;
-import org.apache.mahout.colt.function.IntIntFunction;
-import org.apache.mahout.colt.function.IntIntProcedure;
-import org.apache.mahout.colt.function.IntProcedure;
+import org.apache.mahout.matrix.function.IntFunction;
+import org.apache.mahout.matrix.function.IntIntFunction;
+import org.apache.mahout.matrix.function.IntIntProcedure;
+import org.apache.mahout.matrix.function.IntProcedure;
 /** 
 Integer Function objects to be passed to generic methods.
 Same as {@link Functions} except operating on integers.

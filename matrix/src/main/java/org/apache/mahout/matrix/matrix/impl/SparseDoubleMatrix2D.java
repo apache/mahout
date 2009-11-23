@@ -6,12 +6,12 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.impl;
+package org.apache.mahout.matrix.matrix.impl;
 
-import org.apache.mahout.colt.map.AbstractIntDoubleMap;
-import org.apache.mahout.colt.map.OpenIntDoubleHashMap;
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.map.AbstractIntDoubleMap;
+import org.apache.mahout.matrix.map.OpenIntDoubleHashMap;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /**
 Sparse hashed 2-d matrix holding <tt>double</tt> elements.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -19,7 +19,7 @@ First see the <a href="package-summary.html">package summary</a> and javadoc <a 
 <b>Implementation:</b>
 <p>
 Note that this implementation is not synchronized.
-Uses a {@link org.apache.mahout.colt.map.OpenIntDoubleHashMap}, which is a compact and performant hashing technique.
+Uses a {@link org.apache.mahout.matrix.map.OpenIntDoubleHashMap}, which is a compact and performant hashing technique.
 <p>
 <b>Memory requirements:</b>
 <p>
@@ -65,8 +65,8 @@ is quicker than
 	}
 </pre>
 
-@see org.apache.mahout.colt.map
-@see org.apache.mahout.colt.map.OpenIntDoubleHashMap
+@see org.apache.mahout.matrix.map
+@see org.apache.mahout.matrix.map.OpenIntDoubleHashMap
 @author wolfgang.hoschek@cern.ch
 @version 1.0, 09/24/99
 */
@@ -107,7 +107,7 @@ public SparseDoubleMatrix2D(int rows, int columns) {
 /**
  * Constructs a matrix with a given number of rows and columns using memory as specified.
  * All entries are initially <tt>0</tt>.
- * For details related to memory usage see {@link org.apache.mahout.colt.map.OpenIntDoubleHashMap}.
+ * For details related to memory usage see {@link org.apache.mahout.matrix.map.OpenIntDoubleHashMap}.
  * 
  * @param rows the number of rows the matrix shall have.
  * @param columns the number of columns the matrix shall have.
@@ -171,7 +171,7 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @return <tt>this</tt> (for convenience only).
 @see org.apache.mahout.jet.math.Functions
 */
-public DoubleMatrix2D assign(org.apache.mahout.colt.function.DoubleFunction function) {
+public DoubleMatrix2D assign(org.apache.mahout.matrix.function.DoubleFunction function) {
 	if (this.isNoView && function instanceof org.apache.mahout.jet.math.Mult) { // x[i] = mult*x[i]
 		this.elements.assign(function);
 	}
@@ -204,7 +204,7 @@ public DoubleMatrix2D assign(DoubleMatrix2D source) {
 	}
 	return super.assign(source);
 }
-public DoubleMatrix2D assign(final DoubleMatrix2D y, org.apache.mahout.colt.function.DoubleDoubleFunction function) {
+public DoubleMatrix2D assign(final DoubleMatrix2D y, org.apache.mahout.matrix.function.DoubleDoubleFunction function) {
 	if (!this.isNoView) return super.assign(y,function);
 	
 	checkShape(y);
@@ -213,7 +213,7 @@ public DoubleMatrix2D assign(final DoubleMatrix2D y, org.apache.mahout.colt.func
 		final double alpha = ((org.apache.mahout.jet.math.PlusMult) function).multiplicator;
 		if (alpha==0) return this; // nothing to do
 		y.forEachNonZero(
-			new org.apache.mahout.colt.function.IntIntDoubleFunction() {
+			new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
 				public double apply(int i, int j, double value) {
 					setQuick(i,j,getQuick(i,j) + alpha*value);
 					return value;
@@ -225,7 +225,7 @@ public DoubleMatrix2D assign(final DoubleMatrix2D y, org.apache.mahout.colt.func
 
 	if (function== org.apache.mahout.jet.math.Functions.mult) { // x[i] = x[i] * y[i]
 		this.elements.forEachPair(
-			new org.apache.mahout.colt.function.IntDoubleProcedure() {
+			new org.apache.mahout.matrix.function.IntDoubleProcedure() {
 				public boolean apply(int key, double value) {
 					int i = key/columns;
 					int j = key%columns;
@@ -239,7 +239,7 @@ public DoubleMatrix2D assign(final DoubleMatrix2D y, org.apache.mahout.colt.func
 	
 	if (function== org.apache.mahout.jet.math.Functions.div) { // x[i] = x[i] / y[i]
 		this.elements.forEachPair(
-			new org.apache.mahout.colt.function.IntDoubleProcedure() {
+			new org.apache.mahout.matrix.function.IntDoubleProcedure() {
 				public boolean apply(int key, double value) {
 					int i = key/columns;
 					int j = key%columns;
@@ -273,10 +273,10 @@ public int cardinality() {
 public void ensureCapacity(int minCapacity) {
 	this.elements.ensureCapacity(minCapacity);
 }
-public DoubleMatrix2D forEachNonZero(final org.apache.mahout.colt.function.IntIntDoubleFunction function) {
+public DoubleMatrix2D forEachNonZero(final org.apache.mahout.matrix.function.IntIntDoubleFunction function) {
 	if (this.isNoView) {
 		this.elements.forEachPair(
-			new org.apache.mahout.colt.function.IntDoubleProcedure() {
+			new org.apache.mahout.matrix.function.IntDoubleProcedure() {
 				public boolean apply(int key, double value) {
 					int i = key/columns;
 					int j = key%columns;
@@ -463,7 +463,7 @@ public DoubleMatrix1D zMult(DoubleMatrix1D y, DoubleMatrix1D z, double alpha, do
 	if (yElements==null || zElements==null) throw new InternalError();
 
 	this.elements.forEachPair(
-		new org.apache.mahout.colt.function.IntDoubleProcedure() {
+		new org.apache.mahout.matrix.function.IntDoubleProcedure() {
 			public boolean apply(int key, double value) {
 				int i = key/columns;
 				int j = key%columns;
@@ -477,7 +477,7 @@ public DoubleMatrix1D zMult(DoubleMatrix1D y, DoubleMatrix1D z, double alpha, do
 	
 	/*
 	forEachNonZero(
-		new org.apache.mahout.colt.function.IntIntDoubleFunction() {
+		new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
 			public double apply(int i, int j, double value) {
 				if (transposeA) { int tmp=i; i=j; j=tmp; }
 				zElements[zi + zStride*i] += value * yElements[yi + yStride*j];
@@ -525,7 +525,7 @@ public DoubleMatrix2D zMult(DoubleMatrix2D B, DoubleMatrix2D C, final double alp
 	final org.apache.mahout.jet.math.PlusMult fun = org.apache.mahout.jet.math.PlusMult.plusMult(0);
 
 	this.elements.forEachPair(
-		new org.apache.mahout.colt.function.IntDoubleProcedure() {
+		new org.apache.mahout.matrix.function.IntDoubleProcedure() {
 			public boolean apply(int key, double value) {
 				int i = key/columns;
 				int j = key%columns;

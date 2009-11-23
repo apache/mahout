@@ -110,7 +110,7 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class RandomSampler extends org.apache.mahout.colt.PersistentObject {
+public class RandomSampler extends org.apache.mahout.matrix.PersistentObject {
 //public class RandomSampler extends Object implements java.io.Serializable {
 	long my_n;
 	long my_N;
@@ -487,7 +487,7 @@ public static void test(long n, long N, long low, int chunkSize, int times) {
 	long[] values = new long[chunkSize];
 	long chunks = n/chunkSize;
 	
-	org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+	org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 	for (long t=times; --t >=0;) {
 		RandomSampler sampler = new RandomSampler(n,N,low, org.apache.mahout.jet.random.AbstractDistribution.makeDefaultGenerator());
 		for (long i=0; i<chunks; i++) {

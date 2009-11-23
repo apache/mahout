@@ -22,7 +22,7 @@ package org.apache.mahout.jet.math;
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public final class Mult implements org.apache.mahout.colt.function.DoubleFunction {
+public final class Mult implements org.apache.mahout.matrix.function.DoubleFunction {
 	/**
 	 * Public read/write access to avoid frequent object construction.
 	 */

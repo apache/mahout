@@ -6,12 +6,12 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.objectalgo;
+package org.apache.mahout.matrix.matrix.objectalgo;
 
-import org.apache.mahout.colt.function.IntComparator;
-import org.apache.mahout.colt.matrix.ObjectMatrix1D;
-import org.apache.mahout.colt.matrix.ObjectMatrix2D;
-import org.apache.mahout.colt.matrix.ObjectMatrix3D;
+import org.apache.mahout.matrix.function.IntComparator;
+import org.apache.mahout.matrix.matrix.ObjectMatrix1D;
+import org.apache.mahout.matrix.matrix.ObjectMatrix2D;
+import org.apache.mahout.matrix.matrix.ObjectMatrix3D;
 /**
 Matrix quicksorts and mergesorts.
 Use idioms like <tt>Sorting.quickSort.sort(...)</tt> and <tt>Sorting.mergeSort.sort(...)</tt>.
@@ -29,8 +29,8 @@ Mergesort is <i>stable</i> (by definition), while quicksort is not.
 A stable sort is, for example, helpful, if matrices are sorted successively 
 by multiple columns. It preserves the relative position of equal elements.
  
-@see org.apache.mahout.colt.GenericSorting
-@see org.apache.mahout.colt.Sorting
+@see org.apache.mahout.matrix.GenericSorting
+@see org.apache.mahout.matrix.Sorting
 @see java.util.Arrays
 
 @author wolfgang.hoschek@cern.ch
@@ -40,7 +40,7 @@ by multiple columns. It preserves the relative position of equal elements.
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class Sorting extends org.apache.mahout.colt.PersistentObject {
+public class Sorting extends org.apache.mahout.matrix.PersistentObject {
 	/**
 	 * A prefabricated quicksort.
 	 */
@@ -51,10 +51,10 @@ public class Sorting extends org.apache.mahout.colt.PersistentObject {
 	 */
 	public static final Sorting mergeSort = new Sorting() { // override quicksort with mergesort
 		protected void runSort(int[] a, int fromIndex, int toIndex, IntComparator c) {
-			org.apache.mahout.colt.Sorting.mergeSort(a,fromIndex,toIndex,c);
+			org.apache.mahout.matrix.Sorting.mergeSort(a,fromIndex,toIndex,c);
 		}
-		protected void runSort(int fromIndex, int toIndex, IntComparator c, org.apache.mahout.colt.Swapper swapper) {
-			org.apache.mahout.colt.GenericSorting.mergeSort(fromIndex, toIndex, c, swapper);
+		protected void runSort(int fromIndex, int toIndex, IntComparator c, org.apache.mahout.matrix.Swapper swapper) {
+			org.apache.mahout.matrix.GenericSorting.mergeSort(fromIndex, toIndex, c, swapper);
 		}
 	};
 /**
@@ -62,10 +62,10 @@ public class Sorting extends org.apache.mahout.colt.PersistentObject {
  */
 protected Sorting() {}
 protected void runSort(int[] a, int fromIndex, int toIndex, IntComparator c) {
-	org.apache.mahout.colt.Sorting.quickSort(a,fromIndex,toIndex,c);
+	org.apache.mahout.matrix.Sorting.quickSort(a,fromIndex,toIndex,c);
 }
-protected void runSort(int fromIndex, int toIndex, IntComparator c, org.apache.mahout.colt.Swapper swapper) {
-	org.apache.mahout.colt.GenericSorting.quickSort(fromIndex, toIndex, c, swapper);
+protected void runSort(int fromIndex, int toIndex, IntComparator c, org.apache.mahout.matrix.Swapper swapper) {
+	org.apache.mahout.matrix.GenericSorting.quickSort(fromIndex, toIndex, c, swapper);
 }
 /**
 Sorts the vector into ascending order, according to the <i>natural ordering</i>.

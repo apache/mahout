@@ -93,7 +93,7 @@ protected Benchmark() {
  * Benchmarks <tt>raw()</tt> for various uniform generation engines.
  */
 public static void benchmark(int times) {
-	org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer();
+	org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer();
 	RandomEngine gen;
 
 	timer.reset().start();
@@ -193,7 +193,7 @@ public static void test(int size, RandomEngine randomEngine) {
 	/*
 	System.out.println("raw():");
 	random = (RandomEngine) randomEngine.clone();
-	//org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+	//org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 	for (int j=0, i=size; --i>=0; j++) {
 		System.out.print(" "+random.raw());
 		if (j%8==7) System.out.println();
@@ -229,7 +229,7 @@ public static void test(int size, RandomEngine randomEngine) {
 private static void xtestRandomFromTo(long from, long to, int times) {
 	System.out.println("from="+from+", to="+to);
 	
-	//org.apache.mahout.colt.set.OpenMultiFloatHashSet multiset = new org.apache.mahout.colt.set.OpenMultiFloatHashSet();
+	//org.apache.mahout.matrix.set.OpenMultiFloatHashSet multiset = new org.apache.mahout.matrix.set.OpenMultiFloatHashSet();
 
 	java.util.Random randomJava = new java.util.Random();
 	//edu.cornell.lassp.houle.RngPack.RandomElement random = new edu.cornell.lassp.houle.RngPack.Ranecu();
@@ -237,7 +237,7 @@ private static void xtestRandomFromTo(long from, long to, int times) {
 	//edu.cornell.lassp.houle.RngPack.RandomElement random = new edu.stanford.mt.MersenneTwister();
 	RandomEngine random = new MersenneTwister();
 	int _from=(int)from, _to=(int)to;
-	org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+	org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 	for (int j=0, i=times; --i>=0; j++) {
 		//randomJava.nextInt(10000);
 		//Integers.randomFromTo(_from,_to);

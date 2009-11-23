@@ -6,9 +6,9 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt;
+package org.apache.mahout.matrix;
 
-import org.apache.mahout.colt.function.IntComparator;
+import org.apache.mahout.matrix.function.IntComparator;
 /**
 Demonstrates how to use {@link Sort}.
 
@@ -130,8 +130,8 @@ public static void testRandomly(int runs) {
 			to = gen.nextIntFromTo(Math.min(from,size-1),size-1);
 		}
 
-		org.apache.mahout.colt.matrix.DoubleMatrix2D A1 = new org.apache.mahout.colt.matrix.impl.DenseDoubleMatrix2D(size,size);
-		org.apache.mahout.colt.matrix.DoubleMatrix2D P1 = A1.viewPart(from,from,size-to,size-to);
+		org.apache.mahout.matrix.matrix.DoubleMatrix2D A1 = new org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix2D(size,size);
+		org.apache.mahout.matrix.matrix.DoubleMatrix2D P1 = A1.viewPart(from,from,size-to,size-to);
 
 		int intervalFrom = gen.nextIntFromTo(size/2,2*size);
 		int intervalTo = gen.nextIntFromTo(intervalFrom,2*size);
@@ -142,12 +142,12 @@ public static void testRandomly(int runs) {
 			}
 		}
 
-		org.apache.mahout.colt.matrix.DoubleMatrix2D A2 = A1.copy();
-		org.apache.mahout.colt.matrix.DoubleMatrix2D P2 = A2.viewPart(from,from,size-to,size-to);
+		org.apache.mahout.matrix.matrix.DoubleMatrix2D A2 = A1.copy();
+		org.apache.mahout.matrix.matrix.DoubleMatrix2D P2 = A2.viewPart(from,from,size-to,size-to);
 
 		int c = 0;
-		org.apache.mahout.colt.matrix.DoubleMatrix2D S1 = org.apache.mahout.colt.matrix.doublealgo.Sorting.quickSort.sort(P1,c);
-		org.apache.mahout.colt.matrix.DoubleMatrix2D S2 = org.apache.mahout.colt.matrix.doublealgo.Sorting.mergeSort.sort(P2,c);
+		org.apache.mahout.matrix.matrix.DoubleMatrix2D S1 = org.apache.mahout.matrix.matrix.doublealgo.Sorting.quickSort.sort(P1,c);
+		org.apache.mahout.matrix.matrix.DoubleMatrix2D S2 = org.apache.mahout.matrix.matrix.doublealgo.Sorting.mergeSort.sort(P2,c);
 
 		if (!(S1.viewColumn(c).equals(S2.viewColumn(c)))) throw new InternalError();
 	}

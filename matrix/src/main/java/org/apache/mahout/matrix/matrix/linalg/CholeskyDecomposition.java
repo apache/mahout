@@ -6,10 +6,10 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.linalg;
+package org.apache.mahout.matrix.matrix.linalg;
 
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /** 
 For a symmetric, positive definite matrix <tt>A</tt>, the Cholesky decomposition
 is a lower triangular matrix <tt>L</tt> so that <tt>A = L*L'</tt>;
@@ -209,7 +209,7 @@ public String toString() {
 	catch (IllegalArgumentException exc) { buf.append(unknown+exc.getMessage()); }
 	
 	buf.append("\n\ninverse(A) = ");
-	try { buf.append(String.valueOf(this.solve(org.apache.mahout.colt.matrix.DoubleFactory2D.dense.identity(L.rows()))));}
+	try { buf.append(String.valueOf(this.solve(org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.identity(L.rows()))));}
 	catch (IllegalArgumentException exc) { buf.append(unknown+exc.getMessage()); }
 	
 	return buf.toString();

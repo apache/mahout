@@ -6,11 +6,11 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix;
+package org.apache.mahout.matrix.matrix;
 
-import org.apache.mahout.colt.list.DoubleArrayList;
-import org.apache.mahout.colt.list.IntArrayList;
-import org.apache.mahout.colt.matrix.impl.AbstractMatrix1D;
+import org.apache.mahout.matrix.list.DoubleArrayList;
+import org.apache.mahout.matrix.list.IntArrayList;
+import org.apache.mahout.matrix.matrix.impl.AbstractMatrix1D;
 /**
 Abstract base class for 1-d matrices (aka <i>vectors</i>) holding <tt>double</tt> elements.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -52,7 +52,7 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @return the aggregated measure.
 @see org.apache.mahout.jet.math.Functions
 */
-public double aggregate(org.apache.mahout.colt.function.DoubleDoubleFunction aggr, org.apache.mahout.colt.function.DoubleFunction f) {
+public double aggregate(org.apache.mahout.matrix.function.DoubleDoubleFunction aggr, org.apache.mahout.matrix.function.DoubleFunction f) {
 	if (size==0) return Double.NaN;
 	double a = f.apply(getQuick(size-1));
 	for (int i=size-1; --i >= 0; ) {
@@ -86,7 +86,7 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @throws	IllegalArgumentException if <tt>size() != other.size()</tt>.
 @see org.apache.mahout.jet.math.Functions
 */
-public double aggregate(DoubleMatrix1D other, org.apache.mahout.colt.function.DoubleDoubleFunction aggr, org.apache.mahout.colt.function.DoubleDoubleFunction f) {
+public double aggregate(DoubleMatrix1D other, org.apache.mahout.matrix.function.DoubleDoubleFunction aggr, org.apache.mahout.matrix.function.DoubleDoubleFunction f) {
 	checkSize(other);
 	if (size==0) return Double.NaN;
 	double a = f.apply(getQuick(size-1),other.getQuick(size-1));
@@ -141,7 +141,7 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @return <tt>this</tt> (for convenience only).
 @see org.apache.mahout.jet.math.Functions
 */
-public DoubleMatrix1D assign(org.apache.mahout.colt.function.DoubleFunction function) {
+public DoubleMatrix1D assign(org.apache.mahout.matrix.function.DoubleFunction function) {
 	for (int i=size; --i >= 0; ) {
 		setQuick(i, function.apply(getQuick(i)));
 	}
@@ -187,7 +187,7 @@ and as second argument the current cell's value of <tt>y</tt>,
 @throws	IllegalArgumentException if <tt>size() != y.size()</tt>.
 @see org.apache.mahout.jet.math.Functions
 */
-public DoubleMatrix1D assign(DoubleMatrix1D y, org.apache.mahout.colt.function.DoubleDoubleFunction function) {
+public DoubleMatrix1D assign(DoubleMatrix1D y, org.apache.mahout.matrix.function.DoubleDoubleFunction function) {
 	checkSize(y);
 	for (int i=size; --i >= 0; ) {
 		setQuick(i, function.apply(getQuick(i), y.getQuick(i)));
@@ -223,7 +223,7 @@ and as second argument the current cell's value of <tt>y</tt>,
 @throws	IllegalArgumentException if <tt>size() != y.size()</tt>.
 @see org.apache.mahout.jet.math.Functions
 */
-public DoubleMatrix1D assign(DoubleMatrix1D y, org.apache.mahout.colt.function.DoubleDoubleFunction function, org.apache.mahout.colt.list.IntArrayList nonZeroIndexes) {
+public DoubleMatrix1D assign(DoubleMatrix1D y, org.apache.mahout.matrix.function.DoubleDoubleFunction function, org.apache.mahout.matrix.list.IntArrayList nonZeroIndexes) {
 	checkSize(y);
 	int[] nonZeroElements = nonZeroIndexes.elements();
 
@@ -307,7 +307,7 @@ public DoubleMatrix1D copy() {
  * @return    <tt>true</tt> if all cells are equal to the given value, <tt>false</tt> otherwise.
  */
 public boolean equals(double value) {
-	return org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.equals(this,value);
+	return org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.equals(this,value);
 }
 /**
  * Compares this object against the specified object.
@@ -324,7 +324,7 @@ public boolean equals(Object obj) {
 	if (obj == null) return false;
 	if (!(obj instanceof DoubleMatrix1D)) return false;
 
-	return org.apache.mahout.colt.matrix.linalg.Property.DEFAULT.equals(this,(DoubleMatrix1D) obj);
+	return org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.equals(this,(DoubleMatrix1D) obj);
 }
 /**
  * Returns the matrix cell value at coordinate <tt>index</tt>.
@@ -545,10 +545,10 @@ public void toArray(double[] values) {
 }
 /**
  * Returns a string representation using default formatting.
- * @see org.apache.mahout.colt.matrix.doublealgo.Formatter
+ * @see org.apache.mahout.matrix.matrix.doublealgo.Formatter
  */
 public String toString() {
-	return new org.apache.mahout.colt.matrix.doublealgo.Formatter().toString(this);
+	return new org.apache.mahout.matrix.matrix.doublealgo.Formatter().toString(this);
 }
 /**
  * Constructs and returns a new view equal to the receiver.
@@ -655,7 +655,7 @@ The returned view is backed by this matrix, so changes in the returned view are 
 @param  condition The condition to be matched.
 @return the new view.
 */
-public DoubleMatrix1D viewSelection(org.apache.mahout.colt.function.DoubleProcedure condition) {
+public DoubleMatrix1D viewSelection(org.apache.mahout.matrix.function.DoubleProcedure condition) {
 	IntArrayList matches = new IntArrayList();
 	for (int i=0; i < size; i++) {
 		if (condition.apply(getQuick(i))) matches.add(i);
@@ -673,12 +673,12 @@ protected abstract DoubleMatrix1D viewSelectionLike(int[] offsets);
 /**
 Sorts the vector into ascending order, according to the <i>natural ordering</i>.
 This sort is guaranteed to be <i>stable</i>.
-For further information, see {@link org.apache.mahout.colt.matrix.doublealgo.Sorting#sort(DoubleMatrix1D)}.
-For more advanced sorting functionality, see {@link org.apache.mahout.colt.matrix.doublealgo.Sorting}.
+For further information, see {@link org.apache.mahout.matrix.matrix.doublealgo.Sorting#sort(DoubleMatrix1D)}.
+For more advanced sorting functionality, see {@link org.apache.mahout.matrix.matrix.doublealgo.Sorting}.
 @return a new sorted vector (matrix) view.
 */
 public DoubleMatrix1D viewSorted() {
-	return org.apache.mahout.colt.matrix.doublealgo.Sorting.mergeSort.sort(this);
+	return org.apache.mahout.matrix.matrix.doublealgo.Sorting.mergeSort.sort(this);
 }
 /**
 Constructs and returns a new <i>stride view</i> which is a sub matrix consisting of every i-th cell.
@@ -707,7 +707,7 @@ public DoubleMatrix1D viewStrides(int stride) {
  * @param procedure a procedure object taking as argument the current cell's value. Stops iteration if the procedure returns <tt>false</tt>, otherwise continues. 
  * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise. 
  */
-private boolean xforEach(final org.apache.mahout.colt.function.DoubleProcedure procedure) {
+private boolean xforEach(final org.apache.mahout.matrix.function.DoubleProcedure procedure) {
 	for (int i=size; --i >= 0;) {
 		if (!procedure.apply(getQuick(i))) return false;
 	}

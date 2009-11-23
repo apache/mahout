@@ -134,4 +134,26 @@
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2</developerConnection>
     <url>https://svn.apache.org/repos/asf/lucene/mahout/mahout-colt</url>
   </scm>
+  <repositories>
+    <repository>
+      <id>Apache snapshots</id>
+      <url>http://people.apache.org/maven-snapshot-repository</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </repository>
+    <repository>
+      <id>gson</id>
+      <url>http://google-gson.googlecode.com/svn/mavenrepo</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+  </repositories>
 </project>

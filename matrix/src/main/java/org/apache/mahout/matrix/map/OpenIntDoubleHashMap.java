@@ -6,13 +6,13 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.map;
+package org.apache.mahout.matrix.map;
 
-import org.apache.mahout.colt.function.IntDoubleProcedure;
-import org.apache.mahout.colt.function.IntProcedure;
-import org.apache.mahout.colt.list.ByteArrayList;
-import org.apache.mahout.colt.list.DoubleArrayList;
-import org.apache.mahout.colt.list.IntArrayList;
+import org.apache.mahout.matrix.function.IntDoubleProcedure;
+import org.apache.mahout.matrix.function.IntProcedure;
+import org.apache.mahout.matrix.list.ByteArrayList;
+import org.apache.mahout.matrix.list.DoubleArrayList;
+import org.apache.mahout.matrix.list.IntArrayList;
 /**
 Hash map holding (key,value) associations of type <tt>(int-->double)</tt>; Automatically grows and shrinks as needed; Implemented using open addressing with double hashing.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -91,7 +91,7 @@ Assigns the result of a function to each value; <tt>v[i] = function(v[i])</tt>.
 
 @param function a function object taking as argument the current association's value.
 */
-public void assign(org.apache.mahout.colt.function.DoubleFunction function) {
+public void assign(org.apache.mahout.matrix.function.DoubleFunction function) {
 	// specialization for speed
 	if (function instanceof org.apache.mahout.jet.math.Mult) { // x[i] = mult*x[i]
 		double multiplicator = ((org.apache.mahout.jet.math.Mult)function).multiplicator;

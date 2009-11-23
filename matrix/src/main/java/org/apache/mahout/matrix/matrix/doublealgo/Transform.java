@@ -6,12 +6,12 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.doublealgo;
+package org.apache.mahout.matrix.matrix.doublealgo;
 
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /**
-Deprecated; Basic element-by-element transformations on {@link org.apache.mahout.colt.matrix.DoubleMatrix1D} and {@link org.apache.mahout.colt.matrix.DoubleMatrix2D}.
+Deprecated; Basic element-by-element transformations on {@link org.apache.mahout.matrix.matrix.DoubleMatrix1D} and {@link org.apache.mahout.matrix.matrix.DoubleMatrix2D}.
 All transformations modify the first argument matrix to hold the result of the transformation.
 Use idioms like <tt>result = mult(matrix.copy(),5)</tt> to leave source matrices unaffected.
 <p>
@@ -45,7 +45,7 @@ Thus, this class will soon be removed altogether.
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class Transform extends org.apache.mahout.colt.PersistentObject {
+public class Transform extends org.apache.mahout.matrix.PersistentObject {
 	/**
 	 * Little trick to allow for "aliasing", that is, renaming this class.
 	 * Normally you would write

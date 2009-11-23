@@ -6,11 +6,11 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt;
+package org.apache.mahout.matrix;
 
-import org.apache.mahout.colt.function.IntComparator;
-import org.apache.mahout.colt.list.DoubleArrayList;
-import org.apache.mahout.colt.list.IntArrayList;
+import org.apache.mahout.matrix.function.IntComparator;
+import org.apache.mahout.matrix.list.DoubleArrayList;
+import org.apache.mahout.matrix.list.IntArrayList;
 /**
  * Given some interval boundaries, partitions arrays such that all elements falling into an interval are placed next to each other.
  * <p>
@@ -33,7 +33,7 @@ import org.apache.mahout.colt.list.IntArrayList;
  * Constants factors are minimized.
  * No temporary memory is allocated; Partitioning is in-place.
  *
- * @see org.apache.mahout.colt.matrix.doublealgo.Partitioning
+ * @see org.apache.mahout.matrix.matrix.doublealgo.Partitioning
  *
  * @author wolfgang.hoschek@cern.ch
  * @version 1.0, 03-Jul-99
@@ -301,7 +301,7 @@ This class takes a user comparison function operating on two indexes
 The comparison function determines whether <tt>s[a]</tt> is equal, less or greater than <tt>g[b]</tt>. 
 This method can then decide to swap the data <tt>g[b]</tt> 
 with the data <tt>g[c]</tt> (yes, <tt>c</tt>, not <tt>a</tt>). 
-It calls a user provided {@link org.apache.mahout.colt.Swapper}
+It calls a user provided {@link org.apache.mahout.matrix.Swapper}
 object that knows how to swap the data of these two indexes.
 <p>
 Again, note the details: Comparisons compare <tt>s[a]</tt> with <tt>g[b]</tt>.
@@ -622,8 +622,8 @@ public static int partition(double[] list, int from, int to, double splitter) {
  * <p>
  * Tip: Normally you will have <tt>splitIndexes.length == splitters.length</tt> as well as <tt>from==0, to==list.length-1</tt> and <tt>splitFrom==0, splitTo==splitters.length-1</tt>.
  *
- * @see org.apache.mahout.colt.Arrays
- * @see org.apache.mahout.colt.GenericSorting
+ * @see org.apache.mahout.matrix.Arrays
+ * @see org.apache.mahout.matrix.GenericSorting
  * @see java.util.Arrays
  */
 public static void partition(int[] list, int from, int to, int[] splitters, int splitFrom, int splitTo, int[] splitIndexes) {

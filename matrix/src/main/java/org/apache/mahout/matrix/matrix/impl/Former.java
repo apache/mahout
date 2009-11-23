@@ -6,7 +6,7 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.impl;
+package org.apache.mahout.matrix.matrix.impl;
 
 /**
  * Formats a double into a string (like sprintf in C).
@@ -15,7 +15,7 @@ package org.apache.mahout.colt.matrix.impl;
  * @version 1.0, 21/07/00
  * @see java.util.Comparator
  * @see org.apache.mahout.colt
- * @see org.apache.mahout.colt.Sorting
+ * @see org.apache.mahout.matrix.Sorting
  */
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.

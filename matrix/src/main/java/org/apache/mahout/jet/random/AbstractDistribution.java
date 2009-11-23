@@ -47,7 +47,7 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public abstract class AbstractDistribution extends org.apache.mahout.colt.PersistentObject implements org.apache.mahout.colt.function.DoubleFunction, org.apache.mahout.colt.function.IntFunction {
+public abstract class AbstractDistribution extends org.apache.mahout.matrix.PersistentObject implements org.apache.mahout.matrix.function.DoubleFunction, org.apache.mahout.matrix.function.IntFunction {
 	protected RandomEngine randomGenerator;
 /**
  * Makes this class non instantiable, but still let's others inherit from it.

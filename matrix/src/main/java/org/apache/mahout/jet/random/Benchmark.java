@@ -19,7 +19,7 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class Benchmark extends org.apache.mahout.colt.PersistentObject {
+public class Benchmark extends org.apache.mahout.matrix.PersistentObject {
 	protected RandomEngine randomGenerator;
 /**
  * Makes this class non instantiable, but still let's others inherit from it.
@@ -47,7 +47,7 @@ org.apache.mahout.jet.random.AbstractDistribution dist = new org.apache.mahout.j
 
 // collect random numbers and print statistics
 int size = 100000;
-org.apache.mahout.colt.list.DoubleArrayList numbers = new org.apache.mahout.colt.list.DoubleArrayList(size);
+org.apache.mahout.matrix.list.DoubleArrayList numbers = new org.apache.mahout.matrix.list.DoubleArrayList(size);
 for (int i=0; i < size; i++) numbers.add(dist.nextDouble());
 
 //hep.aida.bin.DynamicBin1D bin = new hep.aida.bin.DynamicBin1D();
@@ -155,7 +155,7 @@ public static void random(int size, boolean print, double mean, String generator
  */
 public static void randomInstance(int size, boolean print, AbstractDistribution dist) {
 	System.out.print("\n"+dist+" ...");
-	org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+	org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 
 	for (int i=size; --i >= 0;) {
 		double rand = dist.nextDouble();
@@ -206,7 +206,7 @@ public static void test2(int size, AbstractDistribution a, AbstractDistribution 
 	System.out.println("\n\nBenchmarking frequencies...\n");
 	IntArrayList freq = new IntArrayList();
 	DoubleArrayList distinct = new DoubleArrayList();
-	org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer();
+	org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer();
 	timer.reset();
 	timer.start();
 	binA.frequencies(distinct,freq);

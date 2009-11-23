@@ -6,12 +6,12 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.impl;
+package org.apache.mahout.matrix.matrix.impl;
 
-import org.apache.mahout.colt.map.AbstractIntDoubleMap;
-import org.apache.mahout.colt.map.OpenIntDoubleHashMap;
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.map.AbstractIntDoubleMap;
+import org.apache.mahout.matrix.map.OpenIntDoubleHashMap;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /**
 Sparse hashed 1-d matrix (aka <i>vector</i>) holding <tt>double</tt> elements.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -19,7 +19,7 @@ First see the <a href="package-summary.html">package summary</a> and javadoc <a 
 <b>Implementation:</b>
 <p>
 Note that this implementation is not synchronized.
-Uses a {@link org.apache.mahout.colt.map.OpenIntDoubleHashMap}, which is a compact and performant hashing technique.
+Uses a {@link org.apache.mahout.matrix.map.OpenIntDoubleHashMap}, which is a compact and performant hashing technique.
 <p>
 <b>Memory requirements:</b>
 <p>
@@ -79,7 +79,7 @@ public SparseDoubleMatrix1D(int size) {
 /**
  * Constructs a matrix with a given number of parameters.
  * All entries are initially <tt>0</tt>.
- * For details related to memory usage see {@link org.apache.mahout.colt.map.OpenIntDoubleHashMap}.
+ * For details related to memory usage see {@link org.apache.mahout.matrix.map.OpenIntDoubleHashMap}.
  * 
  * @param size the number of cells the matrix shall have.
  * @param initialCapacity   the initial capacity of the hash map.

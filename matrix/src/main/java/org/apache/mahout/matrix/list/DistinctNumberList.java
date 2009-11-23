@@ -6,7 +6,7 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.list;
+package org.apache.mahout.matrix.list;
 
 /**
  * Resizable compressed list holding numbers; based on the fact that a number from a large list with few distinct values need not take more than <tt>log(distinctValues)</tt> bits; implemented with a <tt>MinMaxNumberList</tt>.
@@ -58,7 +58,7 @@ package org.apache.mahout.colt.list;
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class DistinctNumberList extends org.apache.mahout.colt.list.AbstractLongList {
+public class DistinctNumberList extends org.apache.mahout.matrix.list.AbstractLongList {
 	protected long[] distinctValues;
 	protected MinMaxNumberList elements;
 /**

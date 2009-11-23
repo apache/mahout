@@ -6,10 +6,10 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.linalg;
+package org.apache.mahout.matrix.matrix.linalg;
 
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /**
 Sequential implementation of the Basic Linear Algebra System.
 
@@ -39,10 +39,10 @@ public class SeqBlas implements Blas {
 Makes this class non instantiable, but still let's others inherit from it.
 */
 protected SeqBlas() {}
-public void assign(DoubleMatrix2D A, org.apache.mahout.colt.function.DoubleFunction function) {
+public void assign(DoubleMatrix2D A, org.apache.mahout.matrix.function.DoubleFunction function) {
 	A.assign(function);
 }
-public void assign(DoubleMatrix2D A, DoubleMatrix2D B, org.apache.mahout.colt.function.DoubleDoubleFunction function) {
+public void assign(DoubleMatrix2D A, DoubleMatrix2D B, org.apache.mahout.matrix.function.DoubleDoubleFunction function) {
 	A.assign(B,function);
 }
 public double dasum(DoubleMatrix1D x) {

@@ -23,11 +23,17 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import org.apache.mahout.matrix.function.IntDoubleProcedure;
+import org.apache.mahout.matrix.list.DoubleArrayList;
+import org.apache.mahout.matrix.list.IntArrayList;
+import org.apache.mahout.matrix.map.OpenIntDoubleHashMap;
+
+
 /** Implements vector that only stores non-zero doubles */
 public class SparseVector extends AbstractVector {
 
-  private OrderedIntDoubleMapping values;
-
+  private OpenIntDoubleHashMap values;
+  
   private int cardinality;
   private double lengthSquared = -1.0;
 
@@ -41,7 +47,7 @@ public class SparseVector extends AbstractVector {
 
   public SparseVector(String name, int cardinality, int size) {
     super(name);
-    values = new OrderedIntDoubleMapping(size);
+    values = new OpenIntDoubleHashMap(size);
     this.cardinality = cardinality;
   }
 
@@ -69,7 +75,7 @@ public class SparseVector extends AbstractVector {
   @Override
   public SparseVector clone() {
     SparseVector clone = (SparseVector) super.clone();
-    clone.values = values.clone();
+    clone.values = (OpenIntDoubleHashMap)values.clone();
     return clone;
   }
 
@@ -80,12 +86,12 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public void setQuick(int index, double value) {
-    values.set(index, value);
+    values.put(index, value);
   }
 
   @Override
   public int getNumNondefaultElements() {
-    return values.getNumMappings();
+    return values.size();
   }
 
   @Override
@@ -112,7 +118,7 @@ public class SparseVector extends AbstractVector {
   public SparseVector like() {
     int numValues = 256;
     if (values != null) {
-      numValues = values.getNumMappings();
+      numValues = values.size();
     }
     return new SparseVector(cardinality, numValues);
   }
@@ -121,7 +127,7 @@ public class SparseVector extends AbstractVector {
   public Vector like(int newCardinality) {
     int numValues = 256;
     if (values != null) {
-      numValues = values.getNumMappings();
+      numValues = values.size();
     }
     return new SparseVector(newCardinality, numValues);
   }
@@ -135,9 +141,14 @@ public class SparseVector extends AbstractVector {
    */
   @Override
   public java.util.Iterator<Vector.Element> iterateNonZero() {
-    return new NonZeroIterator();
+    return new NonZeroIterator(false);
   }
 
+  @Override
+  public java.util.Iterator<Vector.Element> iterateNonZero(boolean sorted) {
+    return new NonZeroIterator(sorted);
+  }  
+  
   @Override
   public Iterator<Vector.Element> iterateAll() {
     return new AllIterator();
@@ -212,15 +223,23 @@ public class SparseVector extends AbstractVector {
     private int offset = 0;
     private final Element element = new Element(0);
 
+    private IntArrayList intArrList =  values.keys();
+    
+    public NonZeroIterator(boolean sorted) {
+      if (sorted) {
+        intArrList.sort();
+      }      
+    }
+
     @Override
-    public boolean hasNext() {
-      return offset < values.getNumMappings();
+    public boolean hasNext() {      
+      return offset < intArrList.size();
     }
 
     @Override
     public Element next() {
-      if (offset < values.getNumMappings()) {
-        element.ind = values.getIndices()[offset++];
+      if (offset < intArrList.size()) {
+        element.ind = intArrList.get(offset++);
         return element;
       }
       throw new NoSuchElementException();
@@ -256,7 +275,7 @@ public class SparseVector extends AbstractVector {
 
     @Override
     public void set(double value) {
-      values.set(ind, value);
+      values.put(ind, value);
     }
   }
 
@@ -283,10 +302,12 @@ public class SparseVector extends AbstractVector {
     this.setName(dataInput.readUTF());
     int cardinality = dataInput.readInt();
     int size = dataInput.readInt();
-    OrderedIntDoubleMapping values = new OrderedIntDoubleMapping(size);
+    OpenIntDoubleHashMap values = new OpenIntDoubleHashMap((int)(size * 1.5));
     int i = 0;
     while (i < size) {
-      values.set(dataInput.readInt(), dataInput.readDouble());
+      int index = dataInput.readInt();
+      double value = dataInput.readDouble();
+      values.put(index, value);
       i++;
     }
     assert (i == size);
@@ -302,35 +323,60 @@ public class SparseVector extends AbstractVector {
       return lengthSquared;
     }
     double result = 0.0;
-    for (double val : values.getValues()) {
+    DoubleArrayList valueList = values.values();
+    for (int i = 0; i < valueList.size(); i++) {
+      double val = valueList.get(i);
       result += val * val;
     }
     lengthSquared = result;
     return result;
+  }
+  
+  private class DistanceSquared implements IntDoubleProcedure {
+    Vector v;
+    public double result = 0.0;
+
+    public DistanceSquared(Vector v) {
+      this.v = v;
+    }
+
+    @Override
+    public boolean apply(int key, double value) {
+      double centroidValue = v.get(key);
+      double delta = value - centroidValue;
+      result += (delta * delta) - (centroidValue * centroidValue);
+      return true;
+    }
   }
 
   @Override
   public double getDistanceSquared(Vector v) {
     //TODO: Check sizes?
 
-    double result = 0.0;
-    Iterator<Vector.Element> iter = iterateNonZero();
-    while (iter.hasNext()) {
-      Vector.Element elt = iter.next();
-      double centroidValue = v.getQuick(elt.index());
-      double delta = elt.get() - centroidValue;
-      result += (delta * delta) - (centroidValue * centroidValue);
-    }
+    DistanceSquared distanceSquared = new DistanceSquared(v);
+    values.forEachPair(distanceSquared);
+    double result = distanceSquared.result;    
     return result;
+  }
+
+  private class AddToVector implements IntDoubleProcedure {
+    Vector v;
+
+    public AddToVector(Vector v) {
+      this.v = v;
+    }
+
+    @Override
+    public boolean apply(int key, double value) {
+      v.set(key, value + v.get(key));
+      return true;
+    }
   }
 
   @Override
   public void addTo(Vector v) {
-    Iterator<Vector.Element> iter = iterateNonZero();
-    while (iter.hasNext()) {
-      Vector.Element elt = iter.next();
-      v.setQuick(elt.index(), elt.get() + v.get(elt.index()));
-    }
+    AddToVector addToVector = new AddToVector(v);
+    values.forEachPair(addToVector);
   }
 
 }

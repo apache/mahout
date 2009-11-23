@@ -11,5 +11,5 @@ package org.apache.mahout.jet.stat.quantile;
 /**
  * An abstract set of buffers; internally used for computing approximate quantiles.
  */
-abstract class BufferSet extends org.apache.mahout.colt.PersistentObject {
+abstract class BufferSet extends org.apache.mahout.matrix.PersistentObject {
 }

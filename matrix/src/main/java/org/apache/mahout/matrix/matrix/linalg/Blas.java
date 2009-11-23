@@ -6,10 +6,10 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.linalg;
+package org.apache.mahout.matrix.matrix.linalg;
 
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /**
 <p>
 Subset of the <A HREF="http://netlib2.cs.utk.edu/blas/faq.html">BLAS</A> (Basic Linear Algebra System); 
@@ -69,7 +69,7 @@ Assigns the result of a function to each cell; <tt>x[row,col] = function(x[row,c
 @param function a function object taking as argument the current cell's value.
 @see org.apache.mahout.jet.math.Functions
 */
-public void assign(DoubleMatrix2D A, org.apache.mahout.colt.function.DoubleFunction function);
+public void assign(DoubleMatrix2D A, org.apache.mahout.matrix.function.DoubleFunction function);
 /**
 Assigns the result of a function to each cell; <tt>x[row,col] = function(x[row,col],y[row,col])</tt>.
 
@@ -81,7 +81,7 @@ and as second argument the current cell's value of <tt>y</tt>,
 @throws	IllegalArgumentException if <tt>x.columns() != y.columns() || x.rows() != y.rows()</tt>
 @see org.apache.mahout.jet.math.Functions
 */
-public void assign(DoubleMatrix2D x,DoubleMatrix2D y, org.apache.mahout.colt.function.DoubleDoubleFunction function) ;
+public void assign(DoubleMatrix2D x,DoubleMatrix2D y, org.apache.mahout.matrix.function.DoubleDoubleFunction function) ;
 /**
 Returns the sum of absolute values; <tt>|x[0]| + |x[1]| + ... </tt>.
 In fact equivalent to <tt>x.aggregate(org.apache.mahout.jet.math.Functions.plus, org.apache.mahout.jet.math.Functions.abs)</tt>.

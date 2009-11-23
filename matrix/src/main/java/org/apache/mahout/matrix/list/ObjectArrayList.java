@@ -6,9 +6,9 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.list;
+package org.apache.mahout.matrix.list;
 
-import org.apache.mahout.colt.function.ObjectProcedure;
+import org.apache.mahout.matrix.function.ObjectProcedure;
 /**
 Resizable list holding <code>Object</code> elements; implemented with arrays.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -223,12 +223,12 @@ public int binarySearchFromTo(Object key, int from, int to) {
  *	       elements in the receiver are less than the specified key.  Note
  *	       that this guarantees that the return value will be &gt;= 0 if
  *	       and only if the key is found.
- * @see org.apache.mahout.colt.Sorting
+ * @see org.apache.mahout.matrix.Sorting
  * @see java.util.Arrays
  * @see java.util.Comparator
  */
 public int binarySearchFromTo(Object key, int from, int to, java.util.Comparator comparator) {
-	return org.apache.mahout.colt.Sorting.binarySearchFromTo(this.elements,key,from,to,comparator);
+	return org.apache.mahout.matrix.Sorting.binarySearchFromTo(this.elements,key,from,to,comparator);
 }
 /**
  * Returns a copy of the receiver such that the copy and the receiver <i>share</i> the same elements, but do not share the same array to index them;
@@ -312,7 +312,7 @@ public ObjectArrayList elements(Object[] elements) {
  * @param   minCapacity   the desired minimum capacity.
  */
 public void ensureCapacity(int minCapacity) {
-	elements = org.apache.mahout.colt.Arrays.ensureCapacity(elements,minCapacity);
+	elements = org.apache.mahout.matrix.Arrays.ensureCapacity(elements,minCapacity);
 }
 /**
 * Compares the specified Object with the receiver for equality.
@@ -631,7 +631,7 @@ public ObjectArrayList partFromTo(int from, int to) {
 public void quickSortFromTo(int from, int to) {
 	if (size==0) return;
 	checkRangeFromTo(from, to, size);
-	org.apache.mahout.colt.Sorting.quickSort(elements, from, to+1);
+	org.apache.mahout.matrix.Sorting.quickSort(elements, from, to+1);
 }
 /**
  * Sorts the receiver according
@@ -662,7 +662,7 @@ public void quickSortFromTo(int from, int to) {
 public void quickSortFromTo(int from, int to, java.util.Comparator c) {
 	if (size==0) return;
 	checkRangeFromTo(from, to, size);
-	org.apache.mahout.colt.Sorting.quickSort(elements, from, to+1, c);
+	org.apache.mahout.matrix.Sorting.quickSort(elements, from, to+1, c);
 }
 /**
 * Removes from the receiver all elements that are contained in the specified list.
@@ -976,7 +976,7 @@ public java.util.ArrayList toList() {
 * the String representation of each element.
 */
 public String toString() {
-	return org.apache.mahout.colt.Arrays.toString(partFromTo(0, size()-1).elements());
+	return org.apache.mahout.matrix.Arrays.toString(partFromTo(0, size()-1).elements());
 }
 /**
  * Trims the capacity of the receiver to be the receiver's current 
@@ -984,6 +984,6 @@ public String toString() {
  * storage of the receiver.
  */
 public void trimToSize() {
-	elements = org.apache.mahout.colt.Arrays.trimToCapacity(elements,size());
+	elements = org.apache.mahout.matrix.Arrays.trimToCapacity(elements,size());
 }
 }

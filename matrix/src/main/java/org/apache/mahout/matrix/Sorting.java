@@ -6,25 +6,25 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt;
+package org.apache.mahout.matrix;
 
 import java.util.Comparator;
 
-import org.apache.mahout.colt.function.ByteComparator;
-import org.apache.mahout.colt.function.CharComparator;
-import org.apache.mahout.colt.function.DoubleComparator;
-import org.apache.mahout.colt.function.FloatComparator;
-import org.apache.mahout.colt.function.IntComparator;
-import org.apache.mahout.colt.function.LongComparator;
-import org.apache.mahout.colt.function.ShortComparator;
+import org.apache.mahout.matrix.function.ByteComparator;
+import org.apache.mahout.matrix.function.CharComparator;
+import org.apache.mahout.matrix.function.DoubleComparator;
+import org.apache.mahout.matrix.function.FloatComparator;
+import org.apache.mahout.matrix.function.IntComparator;
+import org.apache.mahout.matrix.function.LongComparator;
+import org.apache.mahout.matrix.function.ShortComparator;
 /**
  * Quicksorts, mergesorts and binary searches; complements <tt>java.util.Arrays</tt>.
  * Contains, for example, the quicksort on Comparators and Comparables, which are still missing in <tt>java.util.Arrays</tt> of JDK 1.2.
  * Also provides mergesorts for types not supported in <tt>java.util.Arrays</tt>, as well as a couple of other methods for primitive arrays.
  * The quicksorts and mergesorts are the JDK 1.2 V1.26 algorithms, modified as necessary.
  *
- * @see org.apache.mahout.colt.GenericSorting
- * @see org.apache.mahout.colt.matrix.doublealgo.Sorting
+ * @see org.apache.mahout.matrix.GenericSorting
+ * @see org.apache.mahout.matrix.matrix.doublealgo.Sorting
  * @see java.util.Arrays
  *
  * @author wolfgang.hoschek@cern.ch
@@ -1416,7 +1416,7 @@ mergeSort1(aux, a, fromIndex, n);
 
 // Postprocessing phase: change 0.0's to -0.0's as required
 if (numNegZeros != 0) {
-	int j = new org.apache.mahout.colt.list.DoubleArrayList(a).binarySearchFromTo(0.0d, fromIndex, n-1); // posn of ANY zero
+	int j = new org.apache.mahout.matrix.list.DoubleArrayList(a).binarySearchFromTo(0.0d, fromIndex, n-1); // posn of ANY zero
 	do {
 		j--;
 	} while (j>=0 && a[j]==0.0d);
@@ -1459,7 +1459,7 @@ mergeSort1(aux, a, fromIndex, n);
 
 // Postprocessing phase: change 0.0's to -0.0's as required
 if (numNegZeros != 0) {
-	int j = new org.apache.mahout.colt.list.FloatArrayList(a).binarySearchFromTo(0.0f, fromIndex, n-1); // posn of ANY zero
+	int j = new org.apache.mahout.matrix.list.FloatArrayList(a).binarySearchFromTo(0.0f, fromIndex, n-1); // posn of ANY zero
 	do {
 		j--;
 	} while (j>=0 && a[j]==0.0f);

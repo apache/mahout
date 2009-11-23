@@ -6,7 +6,9 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.bitvector;
+package org.apache.mahout.matrix.bitvector;
+
+import org.apache.mahout.matrix.PersistentObject;
 
 import java.awt.Rectangle;
 /**
@@ -39,7 +41,7 @@ import java.awt.Rectangle;
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class BitMatrix extends org.apache.mahout.colt.PersistentObject {
+public class BitMatrix extends PersistentObject {
 	protected int columns;
 	protected int rows;
 
@@ -190,13 +192,13 @@ public boolean equals(Object obj) {
  * @param procedure a procedure object taking as first argument the current column and as second argument the current row. Stops iteration if the procedure returns <tt>false</tt>, otherwise continues. 
  * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise. 
  */
-public boolean forEachCoordinateInState(boolean state, final org.apache.mahout.colt.function.IntIntProcedure procedure) {
+public boolean forEachCoordinateInState(boolean state, final org.apache.mahout.matrix.function.IntIntProcedure procedure) {
 	/*
 	this is equivalent to the low level version below, apart from that it iterates in the reverse oder and is slower.
 	if (size()==0) return true;
 	BitVector vector = toBitVector();
 	return vector.forEachIndexFromToInState(0,size()-1,state,
-		new org.apache.mahout.colt.function.IntFunction() {
+		new org.apache.mahout.matrix.function.IntFunction() {
 			public boolean apply(int index) {
 				return function.apply(index%columns, index/columns);
 			}

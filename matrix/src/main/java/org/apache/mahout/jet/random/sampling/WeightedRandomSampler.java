@@ -8,7 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.random.sampling;
 
-import org.apache.mahout.colt.list.BooleanArrayList;
+import org.apache.mahout.matrix.list.BooleanArrayList;
 import org.apache.mahout.jet.random.Uniform;
 import org.apache.mahout.jet.random.engine.RandomEngine;
 /**
@@ -26,7 +26,7 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class WeightedRandomSampler extends org.apache.mahout.colt.PersistentObject {
+public class WeightedRandomSampler extends org.apache.mahout.matrix.PersistentObject {
 //public class BlockedRandomSampler extends Object implements java.io.Serializable {
 	protected int skip;
 	protected int nextTriggerPos;
@@ -117,7 +117,7 @@ public static void test(int weight, int size) {
 	WeightedRandomSampler sampler = new WeightedRandomSampler();
 	sampler.setWeight(weight);
 
-	org.apache.mahout.colt.list.IntArrayList sample = new org.apache.mahout.colt.list.IntArrayList();
+	org.apache.mahout.matrix.list.IntArrayList sample = new org.apache.mahout.matrix.list.IntArrayList();
 	for (int i=0; i<size; i++) {
 		if (sampler.sampleNextElement()) sample.add(i);
 	}

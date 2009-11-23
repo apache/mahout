@@ -8,7 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.random.sampling;
 
-import org.apache.mahout.colt.list.BooleanArrayList;
+import org.apache.mahout.matrix.list.BooleanArrayList;
 import org.apache.mahout.jet.random.engine.RandomEngine;
 /**
  * Conveniently computes a stable <i>Simple Random Sample Without Replacement (SRSWOR)</i> subsequence of <tt>n</tt> elements from a given input sequence of <tt>N</tt> elements;
@@ -25,7 +25,7 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class RandomSamplingAssistant extends org.apache.mahout.colt.PersistentObject {
+public class RandomSamplingAssistant extends org.apache.mahout.matrix.PersistentObject {
 //public class RandomSamplingAssistant extends Object implements java.io.Serializable {
 	protected RandomSampler sampler;
 	protected long[] buffer;
@@ -124,8 +124,8 @@ public boolean sampleNextElement() {
 public static void test(long n, long N) {
 	RandomSamplingAssistant assistant = new RandomSamplingAssistant(n,N,null);
 
-	org.apache.mahout.colt.list.LongArrayList sample = new org.apache.mahout.colt.list.LongArrayList((int)n);
-	org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+	org.apache.mahout.matrix.list.LongArrayList sample = new org.apache.mahout.matrix.list.LongArrayList((int)n);
+	org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 
 	for (long i=0; i<N; i++) {
 		if (assistant.sampleNextElement()) {
@@ -146,7 +146,7 @@ public static void testArraySampling(int n, int N) {
 	int[] elements = new int[N];
 	for (int i=0; i<N; i++) elements[i]=i;
 
-	org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer().start();
+	org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 
 	int[] sample = sampleArray(n, elements);
 

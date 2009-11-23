@@ -8,9 +8,9 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.stat.quantile;
 
-import org.apache.mahout.colt.Timer;
-import org.apache.mahout.colt.list.DoubleArrayList;
-import org.apache.mahout.colt.list.IntArrayList;
+import org.apache.mahout.matrix.Timer;
+import org.apache.mahout.matrix.list.DoubleArrayList;
+import org.apache.mahout.matrix.list.IntArrayList;
 /**
  * A class holding test cases for exact and approximate quantile finders.
  */
@@ -18,7 +18,7 @@ class QuantileFinderTest {
 /**
  * Finds the first and last indexes of a specific element within a sorted list.
  * @return int[]
- * @param list org.apache.mahout.colt.list.DoubleArrayList
+ * @param list org.apache.mahout.matrix.list.DoubleArrayList
  * @param element the element to search for
  */
 protected static IntArrayList binaryMultiSearch(DoubleArrayList list, double element) {
@@ -407,7 +407,7 @@ public static void testQuantileCalculation(String[] args) {
 		/*
 		final DoubleArrayList buffer = new DoubleArrayList((int)exactFinder.size());
 		exactFinder.forEach(
-			new org.apache.mahout.colt.function.DoubleFunction() {
+			new org.apache.mahout.matrix.function.DoubleFunction() {
 				public void apply(double element) {
 					buffer.add(element);
 				}

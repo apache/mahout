@@ -6,12 +6,12 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.impl;
+package org.apache.mahout.matrix.matrix.impl;
 
-import org.apache.mahout.colt.list.DoubleArrayList;
-import org.apache.mahout.colt.list.IntArrayList;
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.list.DoubleArrayList;
+import org.apache.mahout.matrix.list.IntArrayList;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /**
 Sparse row-compressed 2-d matrix holding <tt>double</tt> elements.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -20,7 +20,7 @@ First see the <a href="package-summary.html">package summary</a> and javadoc <a 
 <p>
 Internally uses the standard sparse row-compressed format, with two important differences that broaden the applicability of this storage format:
 <ul>
-<li>We use a {@link org.apache.mahout.colt.list.IntArrayList} and {@link org.apache.mahout.colt.list.DoubleArrayList} to hold the column indexes and nonzero values, respectively.
+<li>We use a {@link org.apache.mahout.matrix.list.IntArrayList} and {@link org.apache.mahout.matrix.list.DoubleArrayList} to hold the column indexes and nonzero values, respectively.
 This improves set(...) performance, because the standard way of using non-resizable primitive arrays causes excessive memory allocation, garbage collection and array copying.
 The small downside of this is that set(...,0) does not free memory (The capacity of an arraylist does not shrink upon element removal).
 <li>Column indexes are kept sorted within a row. This both improves get and set performance on rows with many non-zeros, because we can use a binary search. 
@@ -82,7 +82,7 @@ here is how a quite efficient user-level matrix-vector multiplication could look
 <pre>
 // Linear algebraic y = A * x
 A.forEachNonZero(
-&nbsp;&nbsp;&nbsp;new org.apache.mahout.colt.function.IntIntDoubleFunction() {
+&nbsp;&nbsp;&nbsp;new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public double apply(int row, int column, double value) {
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y.setQuick(row,y.getQuick(row) + value * x.getQuick(column));
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return value;
@@ -99,7 +99,7 @@ Here is how a a quite efficient user-level combined scaling operation could look
 <pre>
 // Elementwise A = A + alpha*B
 B.forEachNonZero(
-&nbsp;&nbsp;&nbsp;new org.apache.mahout.colt.function.IntIntDoubleFunction() {
+&nbsp;&nbsp;&nbsp;new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public double apply(int row, int column, double value) {
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A.setQuick(row,column,A.getQuick(row,column) + alpha*value);
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return value;
@@ -109,7 +109,7 @@ B.forEachNonZero(
 </pre>
 </td>
 </table>
-Method {@link #assign(DoubleMatrix2D, org.apache.mahout.colt.function.DoubleDoubleFunction)} does just that if you supply {@link org.apache.mahout.jet.math.Functions#plusMult} as argument.
+Method {@link #assign(DoubleMatrix2D, org.apache.mahout.matrix.function.DoubleDoubleFunction)} does just that if you supply {@link org.apache.mahout.jet.math.Functions#plusMult} as argument.
 
 
 @author wolfgang.hoschek@cern.ch
@@ -175,7 +175,7 @@ public DoubleMatrix2D assign(double value) {
 	else super.assign(value);
 	return this;
 }
-public DoubleMatrix2D assign(final org.apache.mahout.colt.function.DoubleFunction function) {
+public DoubleMatrix2D assign(final org.apache.mahout.matrix.function.DoubleFunction function) {
 	if (function instanceof org.apache.mahout.jet.math.Mult) { // x[i] = mult*x[i]
 		final double alpha = ((org.apache.mahout.jet.math.Mult) function).multiplicator;
 		if (alpha==1) return this;
@@ -189,7 +189,7 @@ public DoubleMatrix2D assign(final org.apache.mahout.colt.function.DoubleFunctio
 
 		/*
 		forEachNonZero(
-			new org.apache.mahout.colt.function.IntIntDoubleFunction() {
+			new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
 				public double apply(int i, int j, double value) {
 					return function.apply(value);
 				}
@@ -220,7 +220,7 @@ public DoubleMatrix2D assign(DoubleMatrix2D source) {
 
 		assign(0);
 		source.forEachNonZero(
-			new org.apache.mahout.colt.function.IntIntDoubleFunction() {
+			new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
 				public double apply(int i, int j, double value) {
 					setQuick(i,j,value);
 					return value;
@@ -259,14 +259,14 @@ public DoubleMatrix2D assign(DoubleMatrix2D source) {
 	
 	return this;
 }
-public DoubleMatrix2D assign(DoubleMatrix2D y, org.apache.mahout.colt.function.DoubleDoubleFunction function) {
+public DoubleMatrix2D assign(DoubleMatrix2D y, org.apache.mahout.matrix.function.DoubleDoubleFunction function) {
 	checkShape(y);
 
 	if (function instanceof org.apache.mahout.jet.math.PlusMult) { // x[i] = x[i] + alpha*y[i]
 		final double alpha = ((org.apache.mahout.jet.math.PlusMult) function).multiplicator;
 		if (alpha==0) return this; // nothing to do
 		y.forEachNonZero(
-			new org.apache.mahout.colt.function.IntIntDoubleFunction() {
+			new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
 				public double apply(int i, int j, double value) {
 					setQuick(i,j,getQuick(i,j) + alpha*value);
 					return value;
@@ -308,7 +308,7 @@ public DoubleMatrix2D assign(DoubleMatrix2D y, org.apache.mahout.colt.function.D
 	
 	return super.assign(y,function);
 }
-public DoubleMatrix2D forEachNonZero(final org.apache.mahout.colt.function.IntIntDoubleFunction function) {
+public DoubleMatrix2D forEachNonZero(final org.apache.mahout.matrix.function.IntIntDoubleFunction function) {
 	int[] idx = indexes.elements();
 	double[] vals = values.elements();
 
@@ -443,7 +443,7 @@ public DoubleMatrix1D zMult(DoubleMatrix1D y, DoubleMatrix1D z, double alpha, do
 
 	/*
 	forEachNonZero(
-		new org.apache.mahout.colt.function.IntIntDoubleFunction() {
+		new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
 			public double apply(int i, int j, double value) {
 				zElements[zi + zStride*i] += value * yElements[yi + yStride*j];
 				//z.setQuick(row,z.getQuick(row) + value * y.getQuick(column));

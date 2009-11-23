@@ -8,7 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.stat.quantile;
 
-import org.apache.mahout.colt.list.DoubleArrayList;
+import org.apache.mahout.matrix.list.DoubleArrayList;
 /**
  * Exact quantile finding algorithm for known and unknown <tt>N</tt> requiring large main memory; computes quantiles over a sequence of <tt>double</tt> elements.
  * The folkore algorithm: Keeps all elements in main memory, sorts the list, then picks the quantiles.
@@ -17,7 +17,7 @@ import org.apache.mahout.colt.list.DoubleArrayList;
  * @version 1.0, 09/24/99
  */
 //class ExactDoubleQuantileFinder extends Object implements DoubleQuantileFinder {
-class ExactDoubleQuantileFinder extends org.apache.mahout.colt.PersistentObject implements DoubleQuantileFinder {
+class ExactDoubleQuantileFinder extends org.apache.mahout.matrix.PersistentObject implements DoubleQuantileFinder {
 	protected DoubleArrayList buffer;
 	protected boolean isSorted;
 /**
@@ -85,7 +85,7 @@ public boolean contains(double element) {
  * @param procedure    the procedure to be applied. Stops iteration if the procedure returns <tt>false</tt>, otherwise continues. 
  * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise. 
  */
-public boolean forEach(org.apache.mahout.colt.function.DoubleProcedure procedure) {
+public boolean forEach(org.apache.mahout.matrix.function.DoubleProcedure procedure) {
 	double[] theElements = buffer.elements();
 	int theSize = (int) size();
 	

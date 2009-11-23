@@ -6,9 +6,9 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.list;
+package org.apache.mahout.matrix.list;
 
-import org.apache.mahout.colt.function.BooleanProcedure;
+import org.apache.mahout.matrix.function.BooleanProcedure;
 /**
 Abstract base class for resizable lists holding <code>boolean</code> elements; abstract.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -658,6 +658,6 @@ public java.util.ArrayList toList() {
 * the String representation of each element.
 */
 public String toString() {
-	return org.apache.mahout.colt.Arrays.toString(partFromTo(0, size()-1).elements());
+	return org.apache.mahout.matrix.Arrays.toString(partFromTo(0, size()-1).elements());
 }
 }

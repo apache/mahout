@@ -6,9 +6,9 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.buffer;
+package org.apache.mahout.matrix.buffer;
 
-import org.apache.mahout.colt.list.IntArrayList;
+import org.apache.mahout.matrix.list.IntArrayList;
 /**
  * Fixed sized (non resizable) streaming buffer connected to a target <tt>IntBufferConsumer</tt> to which data is automatically flushed upon buffer overflow.
  *
@@ -19,7 +19,7 @@ import org.apache.mahout.colt.list.IntArrayList;
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class IntBuffer extends org.apache.mahout.colt.PersistentObject implements IntBufferConsumer {
+public class IntBuffer extends org.apache.mahout.matrix.PersistentObject implements IntBufferConsumer {
 	protected IntBufferConsumer target;
 	protected int[] elements;
 

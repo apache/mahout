@@ -8,8 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.stat.quantile;
 
-import org.apache.mahout.colt.list.DoubleArrayList;
-import org.apache.mahout.colt.list.ObjectArrayList;
+import org.apache.mahout.matrix.list.DoubleArrayList;
+import org.apache.mahout.matrix.list.ObjectArrayList;
 import org.apache.mahout.jet.random.engine.RandomEngine;
 import org.apache.mahout.jet.random.sampling.WeightedRandomSampler;
 /**

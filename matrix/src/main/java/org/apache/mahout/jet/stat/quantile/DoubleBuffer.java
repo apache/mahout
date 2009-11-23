@@ -8,7 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.stat.quantile;
 
-import org.apache.mahout.colt.list.DoubleArrayList;
+import org.apache.mahout.matrix.list.DoubleArrayList;
 /**
  * A buffer holding <tt>double</tt> elements; internally used for computing approximate quantiles.
  */
@@ -96,7 +96,7 @@ public int memory() {
  * If no element is <= element, then the rank is zero.
  * If the element lies in between two contained elements, then uses linear interpolation.
  * @return the rank of the element.
- * @param list org.apache.mahout.colt.list.DoubleArrayList
+ * @param list org.apache.mahout.matrix.list.DoubleArrayList
  * @param element the element to search for
  */
 public double rank(double element) {

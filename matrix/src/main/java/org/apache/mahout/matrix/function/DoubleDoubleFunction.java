@@ -1,4 +1,4 @@
-package org.apache.mahout.colt.function;
+package org.apache.mahout.matrix.function;
 
 /*
 Copyright 1999 CERN - European Organization for Nuclear Research.

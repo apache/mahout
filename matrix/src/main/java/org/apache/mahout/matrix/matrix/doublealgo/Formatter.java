@@ -6,16 +6,16 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix.doublealgo;
+package org.apache.mahout.matrix.matrix.doublealgo;
 
-import org.apache.mahout.colt.matrix.DoubleMatrix1D;
-import org.apache.mahout.colt.matrix.DoubleMatrix2D;
-import org.apache.mahout.colt.matrix.DoubleMatrix3D;
-import org.apache.mahout.colt.matrix.impl.AbstractFormatter;
-import org.apache.mahout.colt.matrix.impl.AbstractMatrix1D;
-import org.apache.mahout.colt.matrix.impl.AbstractMatrix2D;
-import org.apache.mahout.colt.matrix.impl.DenseDoubleMatrix1D;
-import org.apache.mahout.colt.matrix.impl.Former;
+import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
+import org.apache.mahout.matrix.matrix.DoubleMatrix3D;
+import org.apache.mahout.matrix.matrix.impl.AbstractFormatter;
+import org.apache.mahout.matrix.matrix.impl.AbstractMatrix1D;
+import org.apache.mahout.matrix.matrix.impl.AbstractMatrix2D;
+import org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix1D;
+import org.apache.mahout.matrix.matrix.impl.Former;
 /** 
 Flexible, well human readable matrix print formatting; By default decimal point aligned. Build on top of the C-like <i>sprintf</i> functionality 
   provided by the Format class written by Cay Horstmann.
@@ -302,7 +302,7 @@ String[] formats =         {"%G", "%1.10G", "%f", "%1.2f", "%0.2e", null};
 
 // now the processing
 int size = formats.length;
-DoubleMatrix2D matrix = org.apache.mahout.colt.matrix.DoubleFactory2D.dense.make(values);
+DoubleMatrix2D matrix = org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.make(values);
 String[] strings = new String[size];
 String[] sourceCodes = new String[size];
 String[] htmlStrings = new String[size];
@@ -314,8 +314,8 @@ for (int i=0; i<size; i++) {
 	sourceCodes[i] = new Formatter(format).toSourceCode(matrix);
 
 	// may not compile because of packages not included in the distribution
-	//htmlStrings[i] = org.apache.mahout.colt.matrixpattern.Converting.toHTML(strings[i]);
-	//htmlSourceCodes[i] = org.apache.mahout.colt.matrixpattern.Converting.toHTML(sourceCodes[i]);
+	//htmlStrings[i] = org.apache.mahout.matrix.matrixpattern.Converting.toHTML(strings[i]);
+	//htmlSourceCodes[i] = org.apache.mahout.matrix.matrixpattern.Converting.toHTML(sourceCodes[i]);
 }
 
 System.out.println("original:\n"+new Formatter().toString(matrix));
@@ -372,10 +372,10 @@ for (int i=0; i<size; i++) {
  * Demonstrates how to use this class.
  */
 public static void demo3(int size, double value) {
-	org.apache.mahout.colt.Timer timer = new org.apache.mahout.colt.Timer();
+	org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer();
 	String s;
 	StringBuffer buf;
-	DoubleMatrix2D matrix = org.apache.mahout.colt.matrix.DoubleFactory2D.dense.make(size,size, value);
+	DoubleMatrix2D matrix = org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.make(size,size, value);
 
 	timer.reset().start();
 	buf = new StringBuffer();
@@ -388,7 +388,7 @@ public static void demo3(int size, double value) {
 	timer.stop().display();
 
 	timer.reset().start();
-	org.apache.mahout.colt.matrix.impl.Former format = new org.apache.mahout.colt.matrix.impl.FormerFactory().create("%G");
+	org.apache.mahout.matrix.matrix.impl.Former format = new org.apache.mahout.matrix.matrix.impl.FormerFactory().create("%G");
 	buf = new StringBuffer();
 	for (int i=size; --i >= 0; ) {
 		for (int j=size; --j >= 0; ) {
@@ -435,7 +435,7 @@ String[] rowNames = { "SunJDK1.2.2 classic", "IBMJDK1.1.8", "SunJDK1.3 Hotspot",
 //String[] columnNames = { "0.1", "0.3" };
 //String[] rowNames = { "SunJDK1.2.2 classic", "IBMJDK1.1.8"};
 
-DoubleMatrix2D matrix = org.apache.mahout.colt.matrix.DoubleFactory2D.dense.make(values);
+DoubleMatrix2D matrix = org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.make(values);
 System.out.println("\n\n"+new Formatter("%G").toTitleString(matrix,rowNames,columnNames,"rowAxis","colAxis","VM Performance: Provider vs. matrix density"));
 }
 /**
@@ -463,8 +463,8 @@ String[] rowNames = { "SunJDK1.2.2 classic", "IBMJDK1.1.8", "SunJDK1.3 Hotspot",
 //String[] columnNames = { "0.1", "0.3" };
 //String[] rowNames = { "SunJDK1.2.2 classic", "IBMJDK1.1.8"};
 
-System.out.println(org.apache.mahout.colt.matrix.DoubleFactory2D.dense.make(values));
-System.out.println(new Formatter("%G").toTitleString(org.apache.mahout.colt.matrix.DoubleFactory2D.dense.make(values),rowNames,columnNames,"vendor","density","title"));
+System.out.println(org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.make(values));
+System.out.println(new Formatter("%G").toTitleString(org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.make(values),rowNames,columnNames,"vendor","density","title"));
 }
 /**
  * Demonstrates how to use this class.
@@ -492,10 +492,10 @@ String[] rowNames = { "SunJDK1.2.2 classic", "IBMJDK1.1.8", "SunJDK1.3 Hotspot",
 //String[] columnNames = { "0.1", "0.3" };
 //String[] rowNames = { "SunJDK1.2.2 classic", "IBMJDK1.1.8"};
 
-//System.out.println(org.apache.mahout.colt.matrix.DoubleFactory2D.dense.make(values));
-//System.out.println(new Formatter().toSourceCode(org.apache.mahout.colt.matrix.DoubleFactory2D.dense.make(values)));
-System.out.println(new Formatter().toString(org.apache.mahout.colt.matrix.DoubleFactory2D.dense.make(values)));
-System.out.println(new Formatter().toTitleString(org.apache.mahout.colt.matrix.DoubleFactory2D.dense.make(values),rowNames,columnNames,"vendor","density","title"));
+//System.out.println(org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.make(values));
+//System.out.println(new Formatter().toSourceCode(org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.make(values)));
+System.out.println(new Formatter().toString(org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.make(values)));
+System.out.println(new Formatter().toTitleString(org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.make(values),rowNames,columnNames,"vendor","density","title"));
 }
 /**
  * Demonstrates how to use this class.
@@ -530,12 +530,12 @@ String format = "%1.2G";
 //String[] rowNames = { "SunJDK1.2.2 classic", "IBMJDK1.1.8", "SunJDK1.3 Hotspot", "other1", "other2", "mean", "median", "sum" };
 //hep.aida.bin.BinFunction1D[] aggr = {F.mean, F.median, F.sum};
 
-//System.out.println(org.apache.mahout.colt.matrix.DoubleFactory2D.dense.make(values));
-//System.out.println(new Formatter().toSourceCode(org.apache.mahout.colt.matrix.DoubleFactory2D.dense.make(values)));
-//System.out.println(new Formatter().toString(org.apache.mahout.colt.matrix.DoubleFactory2D.dense.make(values)));
-//System.out.println(new Formatter().toTitleString(org.apache.mahout.colt.matrix.DoubleFactory2D.dense.make(values),rowNames,columnNames,rowAxisName,columnAxisName,title));
-//System.out.println(new Formatter(format).toTitleString(org.apache.mahout.colt.matrix.DoubleFactory2D.dense.make(values),rowNames,columnNames,rowAxisName,columnAxisName,title, aggr));
-//System.out.println(org.apache.mahout.colt.matrixpattern.Converting.toHTML(new Formatter(format).toTitleString(org.apache.mahout.colt.matrix.DoubleFactory2D.dense.make(values),rowNames,columnNames,rowAxisName,columnAxisName,title, aggr)));
+//System.out.println(org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.make(values));
+//System.out.println(new Formatter().toSourceCode(org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.make(values)));
+//System.out.println(new Formatter().toString(org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.make(values)));
+//System.out.println(new Formatter().toTitleString(org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.make(values),rowNames,columnNames,rowAxisName,columnAxisName,title));
+//System.out.println(new Formatter(format).toTitleString(org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.make(values),rowNames,columnNames,rowAxisName,columnAxisName,title, aggr));
+//System.out.println(org.apache.mahout.matrix.matrixpattern.Converting.toHTML(new Formatter(format).toTitleString(org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.make(values),rowNames,columnNames,rowAxisName,columnAxisName,title, aggr)));
 }
 /**
  * Converts a given cell to a String; no alignment considered.
@@ -680,7 +680,7 @@ protected String toTitleString(DoubleMatrix2D matrix, String[] rowNames, String[
 	//this.alignment = DECIMAL;
 	align(s);
 	//this.alignment = oldAlignment;
-	return new org.apache.mahout.colt.matrix.objectalgo.Formatter().toTitleString(org.apache.mahout.colt.matrix.ObjectFactory2D.dense.make(s), rowNames,columnNames,rowAxisName,columnAxisName,title);
+	return new org.apache.mahout.matrix.matrix.objectalgo.Formatter().toTitleString(org.apache.mahout.matrix.matrix.ObjectFactory2D.dense.make(s), rowNames,columnNames,rowAxisName,columnAxisName,title);
 }
 /**
 Same as <tt>toTitleString</tt> except that additionally statistical aggregates (mean, median, sum, etc.) of rows and columns are printed.
@@ -704,8 +704,8 @@ public String toTitleString(DoubleMatrix2D matrix, String[] rowNames, String[] c
 	DoubleMatrix2D rowStats = matrix.like(matrix.rows(), aggr.length); // hold row aggregations
 	DoubleMatrix2D colStats = matrix.like(aggr.length, matrix.columns()); // hold column aggregations
 
-	org.apache.mahout.colt.matrix.doublealgo.Statistic.aggregate(matrix, aggr, colStats); // aggregate an entire column at a time
-	org.apache.mahout.colt.matrix.doublealgo.Statistic.aggregate(matrix.viewDice(), aggr, rowStats.viewDice()); // aggregate an entire row at a time
+	org.apache.mahout.matrix.matrix.doublealgo.Statistic.aggregate(matrix, aggr, colStats); // aggregate an entire column at a time
+	org.apache.mahout.matrix.matrix.doublealgo.Statistic.aggregate(matrix.viewDice(), aggr, rowStats.viewDice()); // aggregate an entire row at a time
 
 	// turn into strings
 	// tmp holds "matrix" plus "colStats" below (needed so that numbers in a columns can be decimal point aligned)
@@ -718,7 +718,7 @@ public String toTitleString(DoubleMatrix2D matrix, String[] rowNames, String[] c
 	String[][] s2 = format(rowStats); align(s2); rowStats = null;
 
 	// copy strings into a large matrix holding the source matrix and all aggregations
-	org.apache.mahout.colt.matrix.ObjectMatrix2D allStats = org.apache.mahout.colt.matrix.ObjectFactory2D.dense.make(matrix.rows()+aggr.length, matrix.columns()+aggr.length+1);
+	org.apache.mahout.matrix.matrix.ObjectMatrix2D allStats = org.apache.mahout.matrix.matrix.ObjectFactory2D.dense.make(matrix.rows()+aggr.length, matrix.columns()+aggr.length+1);
 	allStats.viewPart(0,0,matrix.rows()+aggr.length,matrix.columns()).assign(s1);
 	allStats.viewColumn(matrix.columns()).assign("|");
 	allStats.viewPart(0,matrix.columns()+1,matrix.rows(),aggr.length).assign(s2);
@@ -726,7 +726,7 @@ public String toTitleString(DoubleMatrix2D matrix, String[] rowNames, String[] c
 
 	// append a vertical "|" separator plus names of aggregation functions to line holding columnNames
 	if (columnNames!=null) {
-		org.apache.mahout.colt.list.ObjectArrayList list = new org.apache.mahout.colt.list.ObjectArrayList(columnNames);
+		org.apache.mahout.matrix.list.ObjectArrayList list = new org.apache.mahout.matrix.list.ObjectArrayList(columnNames);
 		list.add("|");
 		for (int i=0; i<aggr.length; i++) list.add(aggr[i].name()); // add names of aggregation functions
 		columnNames = new String[list.size()];
@@ -735,14 +735,14 @@ public String toTitleString(DoubleMatrix2D matrix, String[] rowNames, String[] c
 
 	// append names of aggregation functions to line holding rowNames
 	if (rowNames!=null) {
-		org.apache.mahout.colt.list.ObjectArrayList list = new org.apache.mahout.colt.list.ObjectArrayList(rowNames);
+		org.apache.mahout.matrix.list.ObjectArrayList list = new org.apache.mahout.matrix.list.ObjectArrayList(rowNames);
 		for (int i=0; i<aggr.length; i++) list.add(aggr[i].name()); // add names of aggregation functions
 		rowNames = new String[list.size()];
 		list.toArray(rowNames);
 	}	
 	
 	// turn large matrix into string
-	String s = new org.apache.mahout.colt.matrix.objectalgo.Formatter().toTitleString(allStats, rowNames,columnNames,rowAxisName,columnAxisName,title);
+	String s = new org.apache.mahout.matrix.matrix.objectalgo.Formatter().toTitleString(allStats, rowNames,columnNames,rowAxisName,columnAxisName,title);
 	
 	// insert a horizontal "----------------------" separation line above the column stats
 	// determine insertion position and line width

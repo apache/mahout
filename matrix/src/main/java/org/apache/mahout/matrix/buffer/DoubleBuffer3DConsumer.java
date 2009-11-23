@@ -6,9 +6,9 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.buffer;
+package org.apache.mahout.matrix.buffer;
 
-import org.apache.mahout.colt.list.DoubleArrayList;
+import org.apache.mahout.matrix.list.DoubleArrayList;
 /**
  * Target of a streaming <tt>DoubleBuffer3D</tt> into which data is flushed upon buffer overflow.
  *

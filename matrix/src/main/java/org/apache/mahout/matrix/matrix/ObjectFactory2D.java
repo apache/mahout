@@ -6,10 +6,10 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.matrix;
+package org.apache.mahout.matrix.matrix;
 
-import org.apache.mahout.colt.matrix.impl.DenseObjectMatrix2D;
-import org.apache.mahout.colt.matrix.impl.SparseObjectMatrix2D;
+import org.apache.mahout.matrix.matrix.impl.DenseObjectMatrix2D;
+import org.apache.mahout.matrix.matrix.impl.SparseObjectMatrix2D;
 /**
 Factory for convenient construction of 2-d matrices holding <tt>Object</tt> 
   cells. Also provides convenient methods to compose (concatenate) and decompose 
@@ -64,7 +64,7 @@ F.make(4,4);
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class ObjectFactory2D extends org.apache.mahout.colt.PersistentObject {
+public class ObjectFactory2D extends org.apache.mahout.matrix.PersistentObject {
 	/**
 	 * A factory producing dense matrices.
 	 */

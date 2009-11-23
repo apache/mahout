@@ -1,4 +1,4 @@
-package org.apache.mahout.colt.function;
+package org.apache.mahout.matrix.function;
 
 /*
 Copyright 1999 CERN - European Organization for Nuclear Research.
@@ -11,7 +11,7 @@ It is provided "as is" without expressed or implied warranty.
 /**
  * A comparison function which imposes a <i>total ordering</i> on some
  * collection of elements.  Comparators can be passed to a sort method (such as
- * <tt>org.apache.mahout.colt.Sorting.quickSort</tt>) to allow precise control over the sort order.<p>
+ * <tt>org.apache.mahout.matrix.Sorting.quickSort</tt>) to allow precise control over the sort order.<p>
  *
  * Note: It is generally a good idea for comparators to implement
  * <tt>java.io.Serializable</tt>, as they may be used as ordering methods in
@@ -22,7 +22,7 @@ It is provided "as is" without expressed or implied warranty.
  * @author  wolfgang.hoschek@cern.ch
  * @version 0.1 01/09/99
  * @see java.util.Comparator
- * @see org.apache.mahout.colt.Sorting
+ * @see org.apache.mahout.matrix.Sorting
  */
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.

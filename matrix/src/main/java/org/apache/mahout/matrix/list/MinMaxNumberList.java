@@ -6,12 +6,12 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.list;
+package org.apache.mahout.matrix.list;
 
-import org.apache.mahout.colt.bitvector.BitVector;
-import org.apache.mahout.colt.bitvector.QuickBitVector;
+import org.apache.mahout.matrix.bitvector.BitVector;
+import org.apache.mahout.matrix.bitvector.QuickBitVector;
 /**
- * Resizable compressed list holding numbers; based on the fact that a value in a given interval need not take more than <tt>log(max-min+1)</tt> bits; implemented with a <tt>org.apache.mahout.colt.bitvector.BitVector</tt>.
+ * Resizable compressed list holding numbers; based on the fact that a value in a given interval need not take more than <tt>log(max-min+1)</tt> bits; implemented with a <tt>org.apache.mahout.matrix.bitvector.BitVector</tt>.
  * First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
  * <p>
  * Numbers can be compressed when minimum and maximum of all values ever to be stored in the list are known.
@@ -69,7 +69,7 @@ import org.apache.mahout.colt.bitvector.QuickBitVector;
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class MinMaxNumberList extends org.apache.mahout.colt.list.AbstractLongList {
+public class MinMaxNumberList extends org.apache.mahout.matrix.list.AbstractLongList {
 	protected long minValue;
 	protected int bitsPerElement;
 	protected long[] bits;

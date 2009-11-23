@@ -27,7 +27,7 @@ package org.apache.mahout.jet.random.engine;
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
-public class RandomSeedGenerator extends org.apache.mahout.colt.PersistentObject {
+public class RandomSeedGenerator extends org.apache.mahout.matrix.PersistentObject {
 	protected int row;
 	protected int column;
 /**

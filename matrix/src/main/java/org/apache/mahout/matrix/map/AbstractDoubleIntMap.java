@@ -6,12 +6,12 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.colt.map;
+package org.apache.mahout.matrix.map;
 
-import org.apache.mahout.colt.function.DoubleIntProcedure;
-import org.apache.mahout.colt.function.DoubleProcedure;
-import org.apache.mahout.colt.list.DoubleArrayList;
-import org.apache.mahout.colt.list.IntArrayList;
+import org.apache.mahout.matrix.function.DoubleIntProcedure;
+import org.apache.mahout.matrix.function.DoubleProcedure;
+import org.apache.mahout.matrix.list.DoubleArrayList;
+import org.apache.mahout.matrix.list.IntArrayList;
 /**
 Abstract base class for hash maps holding (key,value) associations of type <tt>(double-->int)</tt>.
 First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -290,7 +290,7 @@ public void pairsSortedByKey(final DoubleArrayList keyList, final IntArrayList v
 	
 	final double[] k = keyList.elements();
 	final int[] v = valueList.elements();
-	org.apache.mahout.colt.Swapper swapper = new org.apache.mahout.colt.Swapper() {
+	org.apache.mahout.matrix.Swapper swapper = new org.apache.mahout.matrix.Swapper() {
 		public void swap(int a, int b) {
 			int t1;	double t2;
 			t1 = v[a]; v[a] = v[b]; v[b] = t1;
@@ -298,26 +298,26 @@ public void pairsSortedByKey(final DoubleArrayList keyList, final IntArrayList v
 		}
 	}; 
 
-	org.apache.mahout.colt.function.IntComparator comp = new org.apache.mahout.colt.function.IntComparator() {
+	org.apache.mahout.matrix.function.IntComparator comp = new org.apache.mahout.matrix.function.IntComparator() {
 		public int compare(int a, int b) {
 			return k[a]<k[b] ? -1 : k[a]==k[b] ? 0 : 1;
 		}
 	};
-	org.apache.mahout.colt.MultiSorting.sort(0,keyList.size(),comp,swapper);
+	org.apache.mahout.matrix.MultiSorting.sort(0,keyList.size(),comp,swapper);
 	*/	
 	
 
 	
 	// this variant may be quicker
-	//org.apache.mahout.colt.map.OpenDoubleIntHashMap.hashCollisions = 0;
-	//System.out.println("collisions="+org.apache.mahout.colt.map.OpenDoubleIntHashMap.hashCollisions);
+	//org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions = 0;
+	//System.out.println("collisions="+org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions);
 	keys(keyList);
 	keyList.sort();
 	valueList.setSize(keyList.size());
 	for (int i=keyList.size(); --i >= 0; ) {
 		valueList.setQuick(i,get(keyList.getQuick(i)));
 	}
-	//System.out.println("collisions="+org.apache.mahout.colt.map.OpenDoubleIntHashMap.hashCollisions);
+	//System.out.println("collisions="+org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions);
 	
 }
 /**
@@ -340,7 +340,7 @@ public void pairsSortedByValue(final DoubleArrayList keyList, final IntArrayList
 	
 	final double[] k = keyList.elements();
 	final int[] v = valueList.elements();
-	org.apache.mahout.colt.Swapper swapper = new org.apache.mahout.colt.Swapper() {
+	org.apache.mahout.matrix.Swapper swapper = new org.apache.mahout.matrix.Swapper() {
 		public void swap(int a, int b) {
 			int t1;	double t2;
 			t1 = v[a]; v[a] = v[b]; v[b] = t1;
@@ -348,15 +348,15 @@ public void pairsSortedByValue(final DoubleArrayList keyList, final IntArrayList
 		}
 	}; 
 
-	org.apache.mahout.colt.function.IntComparator comp = new org.apache.mahout.colt.function.IntComparator() {
+	org.apache.mahout.matrix.function.IntComparator comp = new org.apache.mahout.matrix.function.IntComparator() {
 		public int compare(int a, int b) {
 			return v[a]<v[b] ? -1 : v[a]>v[b] ? 1 : (k[a]<k[b] ? -1 : (k[a]==k[b] ? 0 : 1));
 		}
 	};
 
-	//org.apache.mahout.colt.map.OpenDoubleIntHashMap.hashCollisions = 0;
-	org.apache.mahout.colt.GenericSorting.quickSort(0,keyList.size(),comp,swapper);
-	//System.out.println("collisions="+org.apache.mahout.colt.map.OpenDoubleIntHashMap.hashCollisions);
+	//org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions = 0;
+	org.apache.mahout.matrix.GenericSorting.quickSort(0,keyList.size(),comp,swapper);
+	//System.out.println("collisions="+org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions);
 }
 /**
  * Associates the given key with the given value.
