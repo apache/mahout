@@ -11,8 +11,6 @@ package org.apache.mahout.jet.random;
 /**
  * Abstract base class for all continous distributions.
  *
- * @author wolfgang.hoschek@cern.ch
- * @version 1.0, 09/24/99
  */
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.

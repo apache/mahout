@@ -45,13 +45,13 @@ protected Polynomial() {}
  * @param N the degree of the polynomial.
  */
 public static double p1evl( double x, double coef[], int N ) throws ArithmeticException {
-	double ans;
+  double ans;
 
-	ans = x + coef[0];
+  ans = x + coef[0];
 
-	for(int i=1; i<N; i++) { ans = ans*x+coef[i]; }
+  for(int i=1; i<N; i++) { ans = ans*x+coef[i]; }
 
-	return ans;
+  return ans;
 }
 /**
  * Evaluates the given polynomial of degree <tt>N</tt> at <tt>x</tt>.
@@ -72,11 +72,11 @@ public static double p1evl( double x, double coef[], int N ) throws ArithmeticEx
  * @param N the degree of the polynomial.
  */
 public static double polevl( double x, double coef[], int N ) throws ArithmeticException {
-	double ans;
-	ans = coef[0];
+  double ans;
+  ans = coef[0];
 
-	for(int i=1; i<=N; i++) ans = ans*x+coef[i];
+  for(int i=1; i<=N; i++) ans = ans*x+coef[i];
 
-	return ans;
+  return ans;
 }
 }

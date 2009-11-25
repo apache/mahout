@@ -13,45 +13,45 @@ import org.apache.mahout.matrix.list.DoubleArrayList;
  * A buffer holding <tt>double</tt> elements; internally used for computing approximate quantiles.
  */
 class DoubleBuffer extends Buffer {
-	protected DoubleArrayList values;
-	protected boolean isSorted;
+  protected DoubleArrayList values;
+  protected boolean isSorted;
 /**
  * This method was created in VisualAge.
  * @param k int
  */
 public DoubleBuffer(int k) {
-	super(k);
-	this.values = new DoubleArrayList(0);
-	this.isSorted = false;
+  super(k);
+  this.values = new DoubleArrayList(0);
+  this.isSorted = false;
 }
 /**
  * Adds a value to the receiver.
  */
 public void add(double value) {
-	if (! isAllocated) allocate(); // lazy buffer allocation can safe memory.
-	values.add(value);
-	this.isSorted = false;
+  if (! isAllocated) allocate(); // lazy buffer allocation can safe memory.
+  values.add(value);
+  this.isSorted = false;
 }
 /**
  * Adds a value to the receiver.
  */
 public void addAllOfFromTo(DoubleArrayList elements,int from, int to) {
-	if (! isAllocated) allocate(); // lazy buffer allocation can safe memory.
-	values.addAllOfFromTo(elements,from,to);
-	this.isSorted = false;
+  if (! isAllocated) allocate(); // lazy buffer allocation can safe memory.
+  values.addAllOfFromTo(elements,from,to);
+  this.isSorted = false;
 }
 /**
  * Allocates the receiver.
  */
 protected void allocate() {
-	isAllocated = true;
-	values.ensureCapacity(k);
+  isAllocated = true;
+  values.ensureCapacity(k);
 }
 /**
  * Clears the receiver.
  */
 public void clear() {
-	values.clear();
+  values.clear();
 }
 /**
  * Returns a deep copy of the receiver.
@@ -59,35 +59,35 @@ public void clear() {
  * @return a deep copy of the receiver.
  */
 public Object clone() {
-	DoubleBuffer copy = (DoubleBuffer) super.clone();
-	if (this.values != null) copy.values = copy.values.copy();
-	return copy;
+  DoubleBuffer copy = (DoubleBuffer) super.clone();
+  if (this.values != null) copy.values = copy.values.copy();
+  return copy;
 }
 /**
  * Returns whether the specified element is contained in the receiver.
  */
 public boolean contains(double element) {
-	this.sort();
-	return values.contains(element);
+  this.sort();
+  return values.contains(element);
 }
 /**
  * Returns whether the receiver is empty.
  */
 public boolean isEmpty() {
-	return values.size()==0;
+  return values.size()==0;
 }
 /**
  * Returns whether the receiver is empty.
  */
 public boolean isFull() {
-	return values.size()==k;
+  return values.size()==k;
 }
 /**
  * Returns the number of elements currently needed to store all contained elements.
  * This number usually differs from the results of method <tt>size()</tt>, according to the underlying algorithm.
  */
 public int memory() {
-	return values.elements().length;
+  return values.elements().length;
 }
 /**
  * Returns the rank of a given element within the sorted sequence of the receiver.
@@ -100,35 +100,35 @@ public int memory() {
  * @param element the element to search for
  */
 public double rank(double element) {
-	this.sort();
-	return org.apache.mahout.jet.stat.Descriptive.rankInterpolated(this.values, element);
+  this.sort();
+  return org.apache.mahout.jet.stat.Descriptive.rankInterpolated(this.values, element);
 }
 /**
  * Returns the number of elements contained in the receiver.
  */
 public int size() {
-	return values.size();
+  return values.size();
 }
 /**
  * Sorts the receiver.
  */
 public void sort() {
-	if (! this.isSorted) {
-		// IMPORTANT: TO DO : replace mergeSort with quickSort!
-		// currently it is mergeSort only for debugging purposes (JDK 1.2 can't be imported into VisualAge).
-		values.sort();
-		//values.mergeSort();
-		this.isSorted = true;
-	}
+  if (! this.isSorted) {
+    // IMPORTANT: TO DO : replace mergeSort with quickSort!
+    // currently it is mergeSort only for debugging purposes (JDK 1.2 can't be imported into VisualAge).
+    values.sort();
+    //values.mergeSort();
+    this.isSorted = true;
+  }
 }
 /**
  * Returns a String representation of the receiver.
  */
 public String toString() {
-	return	"k="+this.k +
-			", w="+Long.toString(weight()) +
-			", l="+Integer.toString(level()) + 
-			", size=" + values.size();
-			//", v=" + values.toString();
+  return  "k="+this.k +
+      ", w="+Long.toString(weight()) +
+      ", l="+Integer.toString(level()) + 
+      ", size=" + values.size();
+      //", v=" + values.toString();
 }
 }

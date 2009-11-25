@@ -20,21 +20,19 @@ package org.apache.mahout.jet.random.engine;
  * Each generated sequence of seeds has a period of 10<sup>9</sup> numbers.
  * Internally uses {@link RandomSeedTable}.
  *
- * @author wolfgang.hoschek@cern.ch
- * @version 1.0, 09/24/99
  */
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
 public class RandomSeedGenerator extends org.apache.mahout.matrix.PersistentObject {
-	protected int row;
-	protected int column;
+  protected int row;
+  protected int column;
 /**
  * Constructs and returns a new seed generator.
  */
 public RandomSeedGenerator() {
-	this(0,0);
+  this(0,0);
 }
 /**
  * Constructs and returns a new seed generator; you normally won't need to use this method.
@@ -48,35 +46,35 @@ public RandomSeedGenerator() {
  * @param column should be in <tt>[0,RandomSeedTable.COLUMNS - 1]</tt>.
  */
 public RandomSeedGenerator(int row, int column) {
-	this.row = row;
-	this.column = column;
+  this.row = row;
+  this.column = column;
 }
 /**
  * Prints the generated seeds for the given input parameters.
  */
 public static void main(String args[]) {
-	int row = Integer.parseInt(args[0]);
-	int column = Integer.parseInt(args[1]);
-	int size = Integer.parseInt(args[2]);
-	new RandomSeedGenerator(row,column).print(size);
+  int row = Integer.parseInt(args[0]);
+  int column = Integer.parseInt(args[1]);
+  int size = Integer.parseInt(args[2]);
+  new RandomSeedGenerator(row,column).print(size);
 }
 /**
  * Returns the next seed.
  */
 public int nextSeed() {
-	return RandomSeedTable.getSeedAtRowColumn(row++, column);
+  return RandomSeedTable.getSeedAtRowColumn(row++, column);
 }
 /**
  * Prints the next <tt>size</tt> generated seeds.
  */
 public void print(int size) {
-	System.out.println("Generating "+size+" random seeds...");
-	RandomSeedGenerator copy = (RandomSeedGenerator) this.clone();
-	for (int i=0; i<size; i++) {
-		int seed = copy.nextSeed();
-		System.out.println(seed);
-	}
+  System.out.println("Generating "+size+" random seeds...");
+  RandomSeedGenerator copy = (RandomSeedGenerator) this.clone();
+  for (int i=0; i<size; i++) {
+    int seed = copy.nextSeed();
+    System.out.println(seed);
+  }
 
-	System.out.println("\ndone.");
+  System.out.println("\ndone.");
 }
 }

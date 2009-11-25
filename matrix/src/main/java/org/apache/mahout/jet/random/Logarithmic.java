@@ -27,33 +27,31 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
  * <p>
  * A.W. Kemp (1981): Efficient generation of logarithmically distributed pseudo-random variables, Appl. Statist. 30, 249-253.
  *
- * @author wolfgang.hoschek@cern.ch
- * @version 1.0, 09/24/99
  */
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
 public class Logarithmic extends AbstractContinousDistribution {
-	protected double my_p;
+  protected double my_p;
 
-	// cached vars for method nextDouble(a) (for performance only)
- 	private double t,h,a_prev = -1.0;
+  // cached vars for method nextDouble(a) (for performance only)
+   private double t,h,a_prev = -1.0;
 
- 	// The uniform random number generated shared by all <b>static</b> methods. 
-	protected static Logarithmic shared = new Logarithmic(0.5,makeDefaultGenerator());
+   // The uniform random number generated shared by all <b>static</b> methods. 
+  protected static Logarithmic shared = new Logarithmic(0.5,makeDefaultGenerator());
 /**
  * Constructs a Logarithmic distribution.
  */
 public Logarithmic(double p, RandomEngine randomGenerator) {
-	setRandomGenerator(randomGenerator);
-	setState(p);
+  setRandomGenerator(randomGenerator);
+  setState(p);
 }
 /**
  * Returns a random number from the distribution.
  */
 public double nextDouble() {
-	return nextDouble(this.my_p);
+  return nextDouble(this.my_p);
 }
 /**
  * Returns a random number from the distribution; bypasses the internal state.
@@ -92,66 +90,66 @@ public double nextDouble(double a) {
  *                unsigned long integer *seed.                    *
  *                                                                *
  ******************************************************************/
-	double u,v,p,q;
-	int k;
+  double u,v,p,q;
+  int k;
 
-	if (a != a_prev) {                   // Set-up
-		a_prev = a;
-		if (a<0.97) t = -a / Math.log(1.0 - a);
-		else h=Math.log(1.0 - a);
-	}
+  if (a != a_prev) {                   // Set-up
+    a_prev = a;
+    if (a<0.97) t = -a / Math.log(1.0 - a);
+    else h=Math.log(1.0 - a);
+  }
 
-	u=randomGenerator.raw();
-	if (a<0.97) {                        // Inversion/Chop-down 
-		k = 1;
-		p = t;
-		while (u > p) {
-			//System.out.println("u="+u+", p="+p);
-			u -= p;
-			k++;
-			p *= a * (k-1.0)/(double)k;
-		}
-		return k;
-	}
+  u=randomGenerator.raw();
+  if (a<0.97) {                        // Inversion/Chop-down 
+    k = 1;
+    p = t;
+    while (u > p) {
+      //System.out.println("u="+u+", p="+p);
+      u -= p;
+      k++;
+      p *= a * (k-1.0)/(double)k;
+    }
+    return k;
+  }
 
-	if (u > a) return 1;                 // Transformation
-	u=randomGenerator.raw();
-	v = u;
-	q = 1.0 - Math.exp(v * h);
-	if ( u <= q * q) {
-		k = (int) (1 + Math.log(u) / Math.log(q));
-		return k;
-	}
-	if (u > q) return 1;
-	return 2;
+  if (u > a) return 1;                 // Transformation
+  u=randomGenerator.raw();
+  v = u;
+  q = 1.0 - Math.exp(v * h);
+  if ( u <= q * q) {
+    k = (int) (1 + Math.log(u) / Math.log(q));
+    return k;
+  }
+  if (u > q) return 1;
+  return 2;
 }
 /**
  * Sets the distribution parameter.
  */
 public void setState(double p) {
-	this.my_p = p;
+  this.my_p = p;
 }
 /**
  * Returns a random number from the distribution.
  */
 public static double staticNextDouble(double p) {
-	synchronized (shared) {
-		return shared.nextDouble(p);
-	}
+  synchronized (shared) {
+    return shared.nextDouble(p);
+  }
 }
 /**
  * Returns a String representation of the receiver.
  */
 public String toString() {
-	return this.getClass().getName()+"("+my_p+")";
+  return this.getClass().getName()+"("+my_p+")";
 }
 /**
  * Sets the uniform random number generated shared by all <b>static</b> methods.
  * @param randomGenerator the new uniform random number generator to be shared.
  */
 private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-	synchronized (shared) {
-		shared.setRandomGenerator(randomGenerator);
-	}
+  synchronized (shared) {
+    shared.setRandomGenerator(randomGenerator);
+  }
 }
 }

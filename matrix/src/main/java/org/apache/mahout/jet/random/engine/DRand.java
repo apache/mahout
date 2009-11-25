@@ -33,8 +33,6 @@ import java.util.Date;
  * Note that this implementation is <b>not synchronized</b>.                                  
  * <p>
  * 
- * @author wolfgang.hoschek@cern.ch
- * @version 1.0, 09/24/99
  * @see MersenneTwister
  * @see java.util.Random
  */
@@ -43,20 +41,20 @@ import java.util.Date;
  */
 @Deprecated
 public class DRand extends RandomEngine {
-	private int current;
-	public static final int DEFAULT_SEED = 1;
+  private int current;
+  public static final int DEFAULT_SEED = 1;
 /**
  * Constructs and returns a random number generator with a default seed, which is a <b>constant</b>.
  */
 public DRand() {
-	this(DEFAULT_SEED);
+  this(DEFAULT_SEED);
 }
 /**
  * Constructs and returns a random number generator with the given seed.
  * @param seed should not be 0, in such a case <tt>DRand.DEFAULT_SEED</tt> is substituted.
  */
 public DRand(int seed) {
-	setSeed(seed);
+  setSeed(seed);
 }
 /**
  * Constructs and returns a random number generator seeded with the given date.
@@ -64,16 +62,16 @@ public DRand(int seed) {
  * @param d typically <tt>new java.util.Date()</tt>
  */
 public DRand(Date d) {
-	this((int)d.getTime());
+  this((int)d.getTime());
 }
 /**
  * Returns a 32 bit uniformly distributed random number in the closed interval <tt>[Integer.MIN_VALUE,Integer.MAX_VALUE]</tt> (including <tt>Integer.MIN_VALUE</tt> and <tt>Integer.MAX_VALUE</tt>).
  */
 public int nextInt() {
-	current *= 0x278DDE6D;     /* z(i+1)=a*z(i) (mod 2**32) */
-	// a == 0x278DDE6D == 663608941
-	
-	return current;
+  current *= 0x278DDE6D;     /* z(i+1)=a*z(i) (mod 2**32) */
+  // a == 0x278DDE6D == 663608941
+  
+  return current;
 }
 /**
  * Sets the receiver's seed. 
@@ -82,10 +80,10 @@ public int nextInt() {
  * @param seed if the above condition does not hold, a modified seed that meets the condition is silently substituted.
  */
 protected void setSeed(int seed) {
-	if (seed<0) seed = -seed;
-	int limit = (int)((Math.pow(2,32)-1) /4); // --> 536870911
-	if (seed >= limit) seed = seed >> 3;
+  if (seed<0) seed = -seed;
+  int limit = (int)((Math.pow(2,32)-1) /4); // --> 536870911
+  if (seed >= limit) seed = seed >> 3;
 
-	this.current = 4*seed+1;
+  this.current = 4*seed+1;
 }
 }

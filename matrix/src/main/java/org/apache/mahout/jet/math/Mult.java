@@ -23,33 +23,33 @@ package org.apache.mahout.jet.math;
  */
 @Deprecated
 public final class Mult implements org.apache.mahout.matrix.function.DoubleFunction {
-	/**
-	 * Public read/write access to avoid frequent object construction.
-	 */
-	public double multiplicator;
+  /**
+   * Public read/write access to avoid frequent object construction.
+   */
+  public double multiplicator;
 /**
  * Insert the method's description here.
  * Creation date: (8/10/99 19:12:09)
  */
 protected Mult(final double multiplicator) {
-	this.multiplicator = multiplicator;
+  this.multiplicator = multiplicator;
 }
 /**
  * Returns the result of the function evaluation.
  */
 public final double apply(double a) {
-	return a * multiplicator;
+  return a * multiplicator;
 }
 /**
  * <tt>a / constant</tt>.
  */
 public static Mult div(final double constant) {
-	return mult(1/constant);
+  return mult(1/constant);
 }
 /**
  * <tt>a * constant</tt>.
  */
 public static Mult mult(final double constant) {
-	return new Mult(constant);
+  return new Mult(constant);
 }
 }

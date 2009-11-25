@@ -75,8 +75,6 @@ package org.apache.mahout.jet.random.engine;
  *
  *
  * @see org.apache.mahout.jet.random
- * @author wolfgang.hoschek@cern.ch
- * @version 1.0, 09/24/99
  */
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
@@ -87,167 +85,167 @@ public class Benchmark {
  * Makes this class non instantiable, but still let's others inherit from it.
  */
 protected Benchmark() {
-	throw new RuntimeException("Non instantiable");
+  throw new RuntimeException("Non instantiable");
 }
 /**
  * Benchmarks <tt>raw()</tt> for various uniform generation engines.
  */
 public static void benchmark(int times) {
-	org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer();
-	RandomEngine gen;
+  org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer();
+  RandomEngine gen;
 
-	timer.reset().start();
-	for (int i=times; --i>=0; ) ; // no operation
-	timer.stop().display();
-	float emptyLoop = timer.elapsedTime();
-	System.out.println("empty loop timing done.");
-	
-	gen = new MersenneTwister();
-	System.out.println("\n MersenneTwister:");
-	timer.reset().start();
-	for (int i=times; --i>=0; ) gen.raw();
-	timer.stop().display();
-	System.out.println(times/(timer.elapsedTime()-emptyLoop)+ " numbers per second.");
+  timer.reset().start();
+  for (int i=times; --i>=0; ) ; // no operation
+  timer.stop().display();
+  float emptyLoop = timer.elapsedTime();
+  System.out.println("empty loop timing done.");
+  
+  gen = new MersenneTwister();
+  System.out.println("\n MersenneTwister:");
+  timer.reset().start();
+  for (int i=times; --i>=0; ) gen.raw();
+  timer.stop().display();
+  System.out.println(times/(timer.elapsedTime()-emptyLoop)+ " numbers per second.");
 
-	
-	gen = new MersenneTwister64();
-	System.out.println("\n MersenneTwister64:");
-	timer.reset().start();
-	for (int i=times; --i>=0; ) gen.raw();
-	timer.stop().display();
-	System.out.println(times/(timer.elapsedTime()-emptyLoop)+ " numbers per second.");
-	
-	/*
-	gen = new edu.stanford.mt.MersenneTwister();
-	System.out.println("\n edu.stanford.mt.MersenneTwister:");
-	timer.reset().start();
-	for (int i=times; --i>=0; ) gen.raw();
-	timer.stop().display();
-	System.out.println(times/(timer.elapsedTime()-emptyLoop)+ " numbers per second.");
-	*/
-	
-	
-	gen = new DRand();
-	System.out.println("\nDRand:");
-	timer.reset().start();
-	for (int i=times; --i>=0; ) gen.raw();
-	timer.stop().display();
-	System.out.println(times/(timer.elapsedTime()-emptyLoop)+ " numbers per second.");	
-	
+  
+  gen = new MersenneTwister64();
+  System.out.println("\n MersenneTwister64:");
+  timer.reset().start();
+  for (int i=times; --i>=0; ) gen.raw();
+  timer.stop().display();
+  System.out.println(times/(timer.elapsedTime()-emptyLoop)+ " numbers per second.");
+  
+  /*
+  gen = new edu.stanford.mt.MersenneTwister();
+  System.out.println("\n edu.stanford.mt.MersenneTwister:");
+  timer.reset().start();
+  for (int i=times; --i>=0; ) gen.raw();
+  timer.stop().display();
+  System.out.println(times/(timer.elapsedTime()-emptyLoop)+ " numbers per second.");
+  */
+  
+  
+  gen = new DRand();
+  System.out.println("\nDRand:");
+  timer.reset().start();
+  for (int i=times; --i>=0; ) gen.raw();
+  timer.stop().display();
+  System.out.println(times/(timer.elapsedTime()-emptyLoop)+ " numbers per second.");  
+  
 
-	java.util.Random javaGen = new java.util.Random();
-	System.out.println("\njava.util.Random.nextFloat():");
-	timer.reset().start();
-	for (int i=times; --i>=0; ) javaGen.nextFloat(); // nextDouble() is slower
-	timer.stop().display();
-	System.out.println(times/(timer.elapsedTime()-emptyLoop)+ " numbers per second.");
+  java.util.Random javaGen = new java.util.Random();
+  System.out.println("\njava.util.Random.nextFloat():");
+  timer.reset().start();
+  for (int i=times; --i>=0; ) javaGen.nextFloat(); // nextDouble() is slower
+  timer.stop().display();
+  System.out.println(times/(timer.elapsedTime()-emptyLoop)+ " numbers per second.");
 
-	/*
-	gen = new edu.cornell.lassp.houle.RngPack.Ranecu();
-	System.out.println("\nRanecu:");
-	timer.reset().start();
-	for (int i=times; --i>=0; ) gen.raw();
-	timer.stop().display();
-	System.out.println(times/(timer.elapsedTime()-emptyLoop)+ " numbers per second.");	
-	
-	gen = new edu.cornell.lassp.houle.RngPack.Ranmar();
-	System.out.println("\nRanmar:");
-	timer.reset().start();
-	for (int i=times; --i>=0; ) gen.raw();
-	timer.stop().display();
-	System.out.println(times/(timer.elapsedTime()-emptyLoop)+ " numbers per second.");
+  /*
+  gen = new edu.cornell.lassp.houle.RngPack.Ranecu();
+  System.out.println("\nRanecu:");
+  timer.reset().start();
+  for (int i=times; --i>=0; ) gen.raw();
+  timer.stop().display();
+  System.out.println(times/(timer.elapsedTime()-emptyLoop)+ " numbers per second.");  
+  
+  gen = new edu.cornell.lassp.houle.RngPack.Ranmar();
+  System.out.println("\nRanmar:");
+  timer.reset().start();
+  for (int i=times; --i>=0; ) gen.raw();
+  timer.stop().display();
+  System.out.println(times/(timer.elapsedTime()-emptyLoop)+ " numbers per second.");
 
-	gen = new edu.cornell.lassp.houle.RngPack.Ranlux();
-	System.out.println("\nRanlux:");
-	timer.reset().start();
-	for (int i=times; --i>=0; ) gen.raw();
-	timer.stop().display();
-	System.out.println(times/(timer.elapsedTime()-emptyLoop)+ " numbers per second.");
-	*/
+  gen = new edu.cornell.lassp.houle.RngPack.Ranlux();
+  System.out.println("\nRanlux:");
+  timer.reset().start();
+  for (int i=times; --i>=0; ) gen.raw();
+  timer.stop().display();
+  System.out.println(times/(timer.elapsedTime()-emptyLoop)+ " numbers per second.");
+  */
 
-	System.out.println("\nGood bye.\n");
-	
+  System.out.println("\nGood bye.\n");
+  
 }
 /**
  * Tests various methods of this class.
  */
 public static void main(String args[]) {
-	long from = Long.parseLong(args[0]);
-	long to = Long.parseLong(args[1]);
-	int times = Integer.parseInt(args[2]);
-	int runs = Integer.parseInt(args[3]);
-	//testRandomFromTo(from,to,times);
-	//benchmark(1000000);
-	//benchmark(1000000);
-	for (int i=0; i<runs; i++) {
-		benchmark(times);
-		//benchmarkSync(times);
-	}
+  long from = Long.parseLong(args[0]);
+  long to = Long.parseLong(args[1]);
+  int times = Integer.parseInt(args[2]);
+  int runs = Integer.parseInt(args[3]);
+  //testRandomFromTo(from,to,times);
+  //benchmark(1000000);
+  //benchmark(1000000);
+  for (int i=0; i<runs; i++) {
+    benchmark(times);
+    //benchmarkSync(times);
+  }
 }
 /**
  * Prints the first <tt>size</tt> random numbers generated by the given engine.
  */
 public static void test(int size, RandomEngine randomEngine) {
-	RandomEngine random;
+  RandomEngine random;
 
-	/*
-	System.out.println("raw():");
-	random = (RandomEngine) randomEngine.clone();
-	//org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
-	for (int j=0, i=size; --i>=0; j++) {
-		System.out.print(" "+random.raw());
-		if (j%8==7) System.out.println();
-	}
+  /*
+  System.out.println("raw():");
+  random = (RandomEngine) randomEngine.clone();
+  //org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
+  for (int j=0, i=size; --i>=0; j++) {
+    System.out.print(" "+random.raw());
+    if (j%8==7) System.out.println();
+  }
 
-	System.out.println("\n\nfloat():");
-	random = (RandomEngine) randomEngine.clone();
-	for (int j=0, i=size; --i>=0; j++) {
-		System.out.print(" "+random.nextFloat());
-		if (j%8==7) System.out.println();
-	}
+  System.out.println("\n\nfloat():");
+  random = (RandomEngine) randomEngine.clone();
+  for (int j=0, i=size; --i>=0; j++) {
+    System.out.print(" "+random.nextFloat());
+    if (j%8==7) System.out.println();
+  }
 
-	System.out.println("\n\ndouble():");
-	random = (RandomEngine) randomEngine.clone();
-	for (int j=0, i=size; --i>=0; j++) {
-		System.out.print(" "+random.nextDouble());
-		if (j%8==7) System.out.println();
-	}
-	*/
-	System.out.println("\n\nint():");
-	random = (RandomEngine) randomEngine.clone();
-	for (int j=0, i=size; --i>=0; j++) {
-		System.out.print(" "+random.nextInt());
-		if (j%8==7) System.out.println();
-	}
+  System.out.println("\n\ndouble():");
+  random = (RandomEngine) randomEngine.clone();
+  for (int j=0, i=size; --i>=0; j++) {
+    System.out.print(" "+random.nextDouble());
+    if (j%8==7) System.out.println();
+  }
+  */
+  System.out.println("\n\nint():");
+  random = (RandomEngine) randomEngine.clone();
+  for (int j=0, i=size; --i>=0; j++) {
+    System.out.print(" "+random.nextInt());
+    if (j%8==7) System.out.println();
+  }
 
-	//timer.stop().display();
-	System.out.println("\n\nGood bye.\n");
+  //timer.stop().display();
+  System.out.println("\n\nGood bye.\n");
 }
 /**
  * Tests various methods of this class.
  */
 private static void xtestRandomFromTo(long from, long to, int times) {
-	System.out.println("from="+from+", to="+to);
-	
-	//org.apache.mahout.matrix.set.OpenMultiFloatHashSet multiset = new org.apache.mahout.matrix.set.OpenMultiFloatHashSet();
+  System.out.println("from="+from+", to="+to);
+  
+  //org.apache.mahout.matrix.set.OpenMultiFloatHashSet multiset = new org.apache.mahout.matrix.set.OpenMultiFloatHashSet();
 
-	java.util.Random randomJava = new java.util.Random();
-	//edu.cornell.lassp.houle.RngPack.RandomElement random = new edu.cornell.lassp.houle.RngPack.Ranecu();
-	//edu.cornell.lassp.houle.RngPack.RandomElement random = new edu.cornell.lassp.houle.RngPack.MT19937B();
-	//edu.cornell.lassp.houle.RngPack.RandomElement random = new edu.stanford.mt.MersenneTwister();
-	RandomEngine random = new MersenneTwister();
-	int _from=(int)from, _to=(int)to;
-	org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
-	for (int j=0, i=times; --i>=0; j++) {
-		//randomJava.nextInt(10000);
-		//Integers.randomFromTo(_from,_to);
-		System.out.print(" "+random.raw());
-		if (j%8==7) System.out.println();
-		//multiset.add(nextIntFromTo(_from,_to));
-	}
+  java.util.Random randomJava = new java.util.Random();
+  //edu.cornell.lassp.houle.RngPack.RandomElement random = new edu.cornell.lassp.houle.RngPack.Ranecu();
+  //edu.cornell.lassp.houle.RngPack.RandomElement random = new edu.cornell.lassp.houle.RngPack.MT19937B();
+  //edu.cornell.lassp.houle.RngPack.RandomElement random = new edu.stanford.mt.MersenneTwister();
+  RandomEngine random = new MersenneTwister();
+  int _from=(int)from, _to=(int)to;
+  org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
+  for (int j=0, i=times; --i>=0; j++) {
+    //randomJava.nextInt(10000);
+    //Integers.randomFromTo(_from,_to);
+    System.out.print(" "+random.raw());
+    if (j%8==7) System.out.println();
+    //multiset.add(nextIntFromTo(_from,_to));
+  }
 
-	timer.stop().display();
-	//System.out.println(multiset); //check the distribution
-	System.out.println("Good bye.\n");
+  timer.stop().display();
+  //System.out.println(multiset); //check the distribution
+  System.out.println("Good bye.\n");
 }
 }

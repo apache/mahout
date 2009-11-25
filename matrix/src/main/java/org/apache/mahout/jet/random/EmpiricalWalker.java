@@ -37,19 +37,17 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
  * Computer Programming, Volume 2 (Seminumerical algorithms), 3rd
  * edition, Addison-Wesley (1997), p120.
  *
- * @author wolfgang.hoschek@cern.ch
- * @version 1.0, 09/24/99
  */
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
 public class EmpiricalWalker extends AbstractDiscreteDistribution {
-	protected int K;
-	protected int[] A;
-	protected double[] F;
+  protected int K;
+  protected int[] A;
+  protected double[] F;
 
-	protected double[] cdf; // cumulative distribution function
+  protected double[] cdf; // cumulative distribution function
 /*
  * James Theiler, jt@lanl.gov, the author of the GSL routine this port is based on, describes his approach as follows:
  * 
@@ -169,17 +167,17 @@ public class EmpiricalWalker extends AbstractDiscreteDistribution {
  * @throws IllegalArgumentException if at least one of the three conditions above is violated.
  */
 public EmpiricalWalker(double[] pdf, int interpolationType, RandomEngine randomGenerator) {
-	setRandomGenerator(randomGenerator);
-	setState(pdf,interpolationType);	
-	setState2(pdf);	
+  setRandomGenerator(randomGenerator);
+  setState(pdf,interpolationType);  
+  setState2(pdf);  
 }
 /**
  * Returns the cumulative distribution function.
  */
 public double cdf(int k) {
-	if (k < 0) return 0.0;
-	if (k >= cdf.length-1) return 1.0;
-	return cdf[k];
+  if (k < 0) return 0.0;
+  if (k >= cdf.length-1) return 1.0;
+  return cdf[k];
 }
 /**
  * Returns a deep copy of the receiver; the copy will produce identical sequences.
@@ -188,42 +186,42 @@ public double cdf(int k) {
  * @return a copy of the receiver.
  */
 public Object clone() {
-	EmpiricalWalker copy = (EmpiricalWalker) super.clone();
-	if (this.cdf != null) copy.cdf = (double[]) this.cdf.clone();
-	if (this.A != null) copy.A = (int[]) this.A.clone();
-	if (this.F != null) copy.F = (double[]) this.F.clone();
-	return copy;
+  EmpiricalWalker copy = (EmpiricalWalker) super.clone();
+  if (this.cdf != null) copy.cdf = (double[]) this.cdf.clone();
+  if (this.A != null) copy.A = (int[]) this.A.clone();
+  if (this.F != null) copy.F = (double[]) this.F.clone();
+  return copy;
 }
 /**
  * Returns a random integer <tt>k</tt> with probability <tt>pdf(k)</tt>.
  */
 public int nextInt() {
-	int c=0;
-	double u,f;
-	u = this.randomGenerator.raw();
+  int c=0;
+  double u,f;
+  u = this.randomGenerator.raw();
 //#if KNUTH_CONVENTION
 //    c = (int)(u*(g->K));
 //#else
-	u *= this.K;
-	c = (int)u;
-	u -= c;
+  u *= this.K;
+  c = (int)u;
+  u -= c;
 //#endif
-	f = this.F[c];
-	// fprintf(stderr,"c,f,u: %d %.4f %f\n",c,f,u); 
-	if (f == 1.0) return c;
-	if (u < f) {
-		return c;
-	}
-	else {
-		return this.A[c];
-	}
+  f = this.F[c];
+  // fprintf(stderr,"c,f,u: %d %.4f %f\n",c,f,u); 
+  if (f == 1.0) return c;
+  if (u < f) {
+    return c;
+  }
+  else {
+    return this.A[c];
+  }
 }
 /**
  * Returns the probability distribution function.
  */
 public double pdf(int k) {
-	if (k < 0 || k >= cdf.length-1) return 0.0;
-	return cdf[k-1] - cdf[k];
+  if (k < 0 || k >= cdf.length-1) return 0.0;
+  return cdf[k-1] - cdf[k];
 }
 /**
  * Sets the distribution parameters.
@@ -237,25 +235,25 @@ public double pdf(int k) {
  * @throws IllegalArgumentException if at least one of the three conditions above is violated.
  */
 public void setState(double[] pdf, int interpolationType) {
-	if (pdf==null || pdf.length==0) {
-		throw new IllegalArgumentException("Non-existing pdf");
-	}
+  if (pdf==null || pdf.length==0) {
+    throw new IllegalArgumentException("Non-existing pdf");
+  }
 
-	// compute cumulative distribution function (cdf) from probability distribution function (pdf)
-	int nBins = pdf.length;
-	this.cdf = new double[nBins+1];
-	
-	cdf[0] = 0;
-	for (int i = 0; i<nBins; i++ ) {
-		if (pdf[i] < 0.0) throw new IllegalArgumentException("Negative probability");
-		cdf[i+1] = cdf[i] + pdf[i];
-	}
-	if (cdf[nBins] <= 0.0) throw new IllegalArgumentException("At leat one probability must be > 0.0");
-	// now normalize to 1 (relative probabilities).
-	for (int i = 0; i < nBins+1; i++ ) {
-		cdf[i] /= cdf[nBins];
-	}
-	// cdf is now cached...
+  // compute cumulative distribution function (cdf) from probability distribution function (pdf)
+  int nBins = pdf.length;
+  this.cdf = new double[nBins+1];
+  
+  cdf[0] = 0;
+  for (int i = 0; i<nBins; i++ ) {
+    if (pdf[i] < 0.0) throw new IllegalArgumentException("Negative probability");
+    cdf[i+1] = cdf[i] + pdf[i];
+  }
+  if (cdf[nBins] <= 0.0) throw new IllegalArgumentException("At leat one probability must be > 0.0");
+  // now normalize to 1 (relative probabilities).
+  for (int i = 0; i < nBins+1; i++ ) {
+    cdf[i] /= cdf[nBins];
+  }
+  // cdf is now cached...
 }
 /**
  * Sets the distribution parameters.
@@ -268,136 +266,136 @@ public void setState(double[] pdf, int interpolationType) {
  * @throws IllegalArgumentException if at least one of the three conditions above is violated.
  */
 public void setState2(double[] pdf) {
-	int size = pdf.length;
-	int k,s,b;
-	int nBigs, nSmalls;
-	Stack Bigs;
-	Stack Smalls;
-	double[] E;
-	double pTotal=0;
-	double mean,d;
-	
-	//if (size < 1) {
-	//	throw new IllegalArgumentException("must have size greater than zero");
-	//}
-	/* Make sure elements of ProbArray[] are positive.
-	 * Won't enforce that sum is unity; instead will just normalize
-	 */
-	for (k=0; k<size; ++k) {
-		//if (pdf[k] < 0) {
-			//throw new IllegalArgumentException("Probabilities must be >= 0: "+pdf[k]);
-		//}
-		pTotal += pdf[k];
-	}
+  int size = pdf.length;
+  int k,s,b;
+  int nBigs, nSmalls;
+  Stack Bigs;
+  Stack Smalls;
+  double[] E;
+  double pTotal=0;
+  double mean,d;
+  
+  //if (size < 1) {
+  //  throw new IllegalArgumentException("must have size greater than zero");
+  //}
+  /* Make sure elements of ProbArray[] are positive.
+   * Won't enforce that sum is unity; instead will just normalize
+   */
+  for (k=0; k<size; ++k) {
+    //if (pdf[k] < 0) {
+      //throw new IllegalArgumentException("Probabilities must be >= 0: "+pdf[k]);
+    //}
+    pTotal += pdf[k];
+  }
 
-	/* Begin setting up the internal state */
-	this.K = size;
-	this.F = new double[size];
-	this.A = new int[size];
+  /* Begin setting up the internal state */
+  this.K = size;
+  this.F = new double[size];
+  this.A = new int[size];
 
-	// normalize to relative probability
-	E = new double[size];
-	for (k=0; k<size; ++k) { 
-		E[k] = pdf[k]/pTotal;
-	}
+  // normalize to relative probability
+  E = new double[size];
+  for (k=0; k<size; ++k) { 
+    E[k] = pdf[k]/pTotal;
+  }
 
-	/* Now create the Bigs and the Smalls */
-	mean = 1.0/size;
-	nSmalls=0;
-	nBigs=0;
-	for (k=0; k<size; ++k) {
-		if (E[k] < mean) ++nSmalls;
-		else             ++nBigs;
-	}
-	Bigs   = new Stack(nBigs);
-	Smalls = new Stack(nSmalls);
-	for (k=0; k<size; ++k) {
-		if (E[k] < mean) {
-			Smalls.push(k);
-		}
-		else {
-			Bigs.push(k);
-		}
-	}
-	/* Now work through the smalls */
-	while (Smalls.size() > 0) {
-		s = Smalls.pop();
-		if (Bigs.size() == 0) {
-			/* Then we are on our last value */
-			this.A[s]=s;
-			this.F[s]=1.0;
-			break;
-		}
-		b = Bigs.pop();
-		this.A[s]=b;
-		this.F[s]=size*E[s];
+  /* Now create the Bigs and the Smalls */
+  mean = 1.0/size;
+  nSmalls=0;
+  nBigs=0;
+  for (k=0; k<size; ++k) {
+    if (E[k] < mean) ++nSmalls;
+    else             ++nBigs;
+  }
+  Bigs   = new Stack(nBigs);
+  Smalls = new Stack(nSmalls);
+  for (k=0; k<size; ++k) {
+    if (E[k] < mean) {
+      Smalls.push(k);
+    }
+    else {
+      Bigs.push(k);
+    }
+  }
+  /* Now work through the smalls */
+  while (Smalls.size() > 0) {
+    s = Smalls.pop();
+    if (Bigs.size() == 0) {
+      /* Then we are on our last value */
+      this.A[s]=s;
+      this.F[s]=1.0;
+      break;
+    }
+    b = Bigs.pop();
+    this.A[s]=b;
+    this.F[s]=size*E[s];
 /*
 #if DEBUG
-		fprintf(stderr,"s=%2d, A=%2d, F=%.4f\n",s,(g->A)[s],(g->F)[s]);
+    fprintf(stderr,"s=%2d, A=%2d, F=%.4f\n",s,(g->A)[s],(g->F)[s]);
 #endif
 */
-		d = mean - E[s];
-		E[s] += d;              /* now E[s] == mean */
-		E[b] -= d;
-		if (E[b] < mean) {
-			Smalls.push(b); /* no longer big, join ranks of the small */
-		}
-		else if (E[b] > mean) {
-			Bigs.push(b); /* still big, put it back where you found it */
-		}
-		else {
-			/* E[b]==mean implies it is finished too */
-			this.A[b]=b;
-			this.F[b]=1.0;
-		}
-	}
-	while (Bigs.size() > 0) {
-		b = Bigs.pop();
-		this.A[b]=b;
-		this.F[b]=1.0;
-	}
-	/* Stacks have been emptied, and A and F have been filled */
+    d = mean - E[s];
+    E[s] += d;              /* now E[s] == mean */
+    E[b] -= d;
+    if (E[b] < mean) {
+      Smalls.push(b); /* no longer big, join ranks of the small */
+    }
+    else if (E[b] > mean) {
+      Bigs.push(b); /* still big, put it back where you found it */
+    }
+    else {
+      /* E[b]==mean implies it is finished too */
+      this.A[b]=b;
+      this.F[b]=1.0;
+    }
+  }
+  while (Bigs.size() > 0) {
+    b = Bigs.pop();
+    this.A[b]=b;
+    this.F[b]=1.0;
+  }
+  /* Stacks have been emptied, and A and F have been filled */
 
-	
+  
 //#if 0
-	/* if 1, then artificially set all F[k]'s to unity.  This will
-	 * give wrong answers, but you'll get them faster.  But, not
-	 * that much faster (I get maybe 20%); that's an upper bound
-	 * on what the optimal preprocessing would give.
-	 */
+  /* if 1, then artificially set all F[k]'s to unity.  This will
+   * give wrong answers, but you'll get them faster.  But, not
+   * that much faster (I get maybe 20%); that's an upper bound
+   * on what the optimal preprocessing would give.
+   */
 /*     
-	for (k=0; k<size; ++k) {
-		F[k] = 1.0;
-	}
+  for (k=0; k<size; ++k) {
+    F[k] = 1.0;
+  }
 //#endif
 */
 
 //#if KNUTH_CONVENTION
-	/* For convenience, set F'[k]=(k+F[k])/K */
-	/* This saves some arithmetic in gsl_ran_discrete(); I find that
-	 * it doesn't actually make much difference.
-	 */
-	 /*
-	for (k=0; k<size; ++k) {
-		F[k] += k;
-		F[k] /= size;
-	}
+  /* For convenience, set F'[k]=(k+F[k])/K */
+  /* This saves some arithmetic in gsl_ran_discrete(); I find that
+   * it doesn't actually make much difference.
+   */
+   /*
+  for (k=0; k<size; ++k) {
+    F[k] += k;
+    F[k] /= size;
+  }
 #endif
 */
-	/*
-	free_stack(Bigs);
-	free_stack(Smalls);
-	free((char *)E);
+  /*
+  free_stack(Bigs);
+  free_stack(Smalls);
+  free((char *)E);
 
-	return g;
-	*/
+  return g;
+  */
 
 }
 /**
  * Returns a String representation of the receiver.
  */
 public String toString() {
-	String interpolation = null;
-	return this.getClass().getName()+"("+ ((cdf!=null) ? cdf.length : 0)+")";
+  String interpolation = null;
+  return this.getClass().getName()+"("+ ((cdf!=null) ? cdf.length : 0)+")";
 }
 }

@@ -39,10 +39,10 @@ We have a Top K Parallel FPGrowth Implementation. What it means is that given a 
  FPGrowth&lt;String&gt; fp = new FPGrowth&lt;String&gt;();
  Set&lt;String&gt; features = new HashSet&lt;String&gt;();
  fp.generateTopKStringFrequentPatterns(
- 		new StringRecordIterator(new FileLineIterable(new File(input), encoding, false), pattern), 
+     new StringRecordIterator(new FileLineIterable(new File(input), encoding, false), pattern), 
         fp.generateFList(
-        	new StringRecordIterator(new FileLineIterable(new File(input), encoding, false), pattern), minSupport),
-       	minSupport,
+          new StringRecordIterator(new FileLineIterable(new File(input), encoding, false), pattern), minSupport),
+         minSupport,
         maxHeapSize, 
         features,
         new StringOutputConvertor(new SequenceFileOutputCollector&lt;Text, TopKStringPatterns&gt;(writer))

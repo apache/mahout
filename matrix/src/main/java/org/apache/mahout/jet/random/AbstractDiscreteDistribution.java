@@ -11,8 +11,6 @@ package org.apache.mahout.jet.random;
 /**
  * Abstract base class for all discrete distributions.
  *
- * @author wolfgang.hoschek@cern.ch
- * @version 1.0, 09/24/99
  */
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
@@ -27,7 +25,7 @@ protected AbstractDiscreteDistribution() {}
  * Returns a random number from the distribution; returns <tt>(double) nextInt()</tt>.
  */
 public double nextDouble() {
-	return (double) nextInt();
+  return (double) nextInt();
 }
 /**
  * Returns a random number from the distribution.

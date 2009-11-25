@@ -19,8 +19,6 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
  * weight == 1.0 --> all elements are picked (sampled). weight == 10.0 --> Picks one random element from successive blocks of 10 elements each. Etc.
  * The subsequence is guaranteed to be <i>stable</i>, i.e. elements never change position relative to each other.
  *
- * @author  wolfgang.hoschek@cern.ch
- * @version 1.0, 02/05/99
  */
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
@@ -28,18 +26,18 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
 @Deprecated
 public class WeightedRandomSampler extends org.apache.mahout.matrix.PersistentObject {
 //public class BlockedRandomSampler extends Object implements java.io.Serializable {
-	protected int skip;
-	protected int nextTriggerPos;
-	protected int nextSkip;
-	protected int weight;
-	protected Uniform generator;
+  protected int skip;
+  protected int nextTriggerPos;
+  protected int nextSkip;
+  protected int weight;
+  protected Uniform generator;
 
-	static final int UNDEFINED = -1;
+  static final int UNDEFINED = -1;
 /**
  * Calls <tt>BlockedRandomSampler(1,null)</tt>.
  */
 public WeightedRandomSampler() {
-	this(1,null);
+  this(1,null);
 }
 /**
  * Chooses exactly one random element from successive blocks of <tt>weight</tt> input elements each.
@@ -50,24 +48,24 @@ public WeightedRandomSampler() {
  * @param randomGenerator a random number generator. Set this parameter to <tt>null</tt> to use the default random number generator.
  */
 public WeightedRandomSampler(int weight, RandomEngine randomGenerator) {
-	if (randomGenerator==null) randomGenerator = org.apache.mahout.jet.random.AbstractDistribution.makeDefaultGenerator();
-	this.generator = new Uniform(randomGenerator);
-	setWeight(weight);
+  if (randomGenerator==null) randomGenerator = org.apache.mahout.jet.random.AbstractDistribution.makeDefaultGenerator();
+  this.generator = new Uniform(randomGenerator);
+  setWeight(weight);
 }
 /**
  * Returns a deep copy of the receiver.
  */
 public Object clone() {
-	WeightedRandomSampler copy = (WeightedRandomSampler) super.clone();
-	copy.generator = (Uniform) this.generator.clone();
-	return copy;
+  WeightedRandomSampler copy = (WeightedRandomSampler) super.clone();
+  copy.generator = (Uniform) this.generator.clone();
+  return copy;
 }
 /**
  * Not yet commented.
  * @param weight int
  */
 public int getWeight() {
-	return this.weight;
+  return this.weight;
 }
 /**
  * Chooses exactly one random element from successive blocks of <tt>weight</tt> input elements each.
@@ -76,53 +74,53 @@ public int getWeight() {
  * @return <tt>true</tt> if the next element shall be sampled (picked), <tt>false</tt> otherwise.
  */
 public boolean sampleNextElement() {
-	if (skip>0) { //reject
-		skip--; 
-		return false;
-	}
+  if (skip>0) { //reject
+    skip--; 
+    return false;
+  }
 
-	if (nextTriggerPos == UNDEFINED) {
-		if (weight == 1) nextTriggerPos = 0; // tuned for speed
-		else nextTriggerPos = generator.nextIntFromTo(0,weight-1);
+  if (nextTriggerPos == UNDEFINED) {
+    if (weight == 1) nextTriggerPos = 0; // tuned for speed
+    else nextTriggerPos = generator.nextIntFromTo(0,weight-1);
 
-		nextSkip = weight - 1 - nextTriggerPos;
-	}
+    nextSkip = weight - 1 - nextTriggerPos;
+  }
 
-	if (nextTriggerPos>0) { //reject
-		nextTriggerPos--; 
-		return false;
-	}
+  if (nextTriggerPos>0) { //reject
+    nextTriggerPos--; 
+    return false;
+  }
 
-	//accept
-	nextTriggerPos = UNDEFINED;
-	skip = nextSkip;
+  //accept
+  nextTriggerPos = UNDEFINED;
+  skip = nextSkip;
 
-	return true;
+  return true;
 }
 /**
  * Not yet commented.
  * @param weight int
  */
 public void setWeight(int weight) {
-	if (weight<1) throw new IllegalArgumentException("bad weight");
-	this.weight = weight;
-	this.skip = 0;
-	this.nextTriggerPos = UNDEFINED;
-	this.nextSkip = 0;
+  if (weight<1) throw new IllegalArgumentException("bad weight");
+  this.weight = weight;
+  this.skip = 0;
+  this.nextTriggerPos = UNDEFINED;
+  this.nextSkip = 0;
 }
 /**
  * Not yet commented.
  */
 public static void test(int weight, int size) {
-	WeightedRandomSampler sampler = new WeightedRandomSampler();
-	sampler.setWeight(weight);
+  WeightedRandomSampler sampler = new WeightedRandomSampler();
+  sampler.setWeight(weight);
 
-	org.apache.mahout.matrix.list.IntArrayList sample = new org.apache.mahout.matrix.list.IntArrayList();
-	for (int i=0; i<size; i++) {
-		if (sampler.sampleNextElement()) sample.add(i);
-	}
+  org.apache.mahout.matrix.list.IntArrayList sample = new org.apache.mahout.matrix.list.IntArrayList();
+  for (int i=0; i<size; i++) {
+    if (sampler.sampleNextElement()) sample.add(i);
+  }
 
-	System.out.println("Sample = "+sample);
+  System.out.println("Sample = "+sample);
 }
 /**
  * Chooses exactly one random element from successive blocks of <tt>weight</tt> input elements each.
@@ -131,33 +129,33 @@ public static void test(int weight, int size) {
  * @param acceptList a bitvector which will be filled with <tt>true</tt> where sampling shall occur and <tt>false</tt> where it shall not occur.
  */
 private void xsampleNextElements(BooleanArrayList acceptList) {
-	// manually inlined
-	int length = acceptList.size();
-	boolean[] accept = acceptList.elements();
-	for (int i=0; i<length; i++) {
-		if (skip>0) { //reject
-			skip--;
-			accept[i] = false;
-			continue;
-		}
+  // manually inlined
+  int length = acceptList.size();
+  boolean[] accept = acceptList.elements();
+  for (int i=0; i<length; i++) {
+    if (skip>0) { //reject
+      skip--;
+      accept[i] = false;
+      continue;
+    }
 
-		if (nextTriggerPos == UNDEFINED) {
-			if (weight == 1) nextTriggerPos = 0; // tuned for speed
-			else nextTriggerPos = generator.nextIntFromTo(0,weight-1);
+    if (nextTriggerPos == UNDEFINED) {
+      if (weight == 1) nextTriggerPos = 0; // tuned for speed
+      else nextTriggerPos = generator.nextIntFromTo(0,weight-1);
 
-			nextSkip = weight - 1 - nextTriggerPos;
-		}
+      nextSkip = weight - 1 - nextTriggerPos;
+    }
 
-		if (nextTriggerPos>0) { //reject
-			nextTriggerPos--; 
-			accept[i] = false;
-			continue;
-		}
+    if (nextTriggerPos>0) { //reject
+      nextTriggerPos--; 
+      accept[i] = false;
+      continue;
+    }
 
-		//accept
-		nextTriggerPos = UNDEFINED;
-		skip = nextSkip;
-		accept[i] = true;
-	}
+    //accept
+    nextTriggerPos = UNDEFINED;
+    skip = nextSkip;
+    accept[i] = true;
+  }
 }
 }

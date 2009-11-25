@@ -25,45 +25,45 @@ package org.apache.mahout.jet.math;
  */
 @Deprecated
 public final class PlusMult implements org.apache.mahout.matrix.function.DoubleDoubleFunction {
-	/**
-	 * Public read/write access to avoid frequent object construction.
-	 */
-	public double multiplicator;
+  /**
+   * Public read/write access to avoid frequent object construction.
+   */
+  public double multiplicator;
 /**
  * Insert the method's description here.
  * Creation date: (8/10/99 19:12:09)
  */
 protected PlusMult(final double multiplicator) {
-	this.multiplicator = multiplicator;
+  this.multiplicator = multiplicator;
 }
 /**
  * Returns the result of the function evaluation.
  */
 public final double apply(double a, double b) {
-	return a + b*multiplicator;
+  return a + b*multiplicator;
 }
 /**
  * <tt>a - b/constant</tt>.
  */
 public static PlusMult minusDiv(final double constant) {
-	return new PlusMult(-1/constant);
+  return new PlusMult(-1/constant);
 }
 /**
  * <tt>a - b*constant</tt>.
  */
 public static PlusMult minusMult(final double constant) {
-	return new PlusMult(-constant);
+  return new PlusMult(-constant);
 }
 /**
  * <tt>a + b/constant</tt>.
  */
 public static PlusMult plusDiv(final double constant) {
-	return new PlusMult(1/constant);
+  return new PlusMult(1/constant);
 }
 /**
  * <tt>a + b*constant</tt>.
  */
 public static PlusMult plusMult(final double constant) {
-	return new PlusMult(constant);
+  return new PlusMult(constant);
 }
 }
