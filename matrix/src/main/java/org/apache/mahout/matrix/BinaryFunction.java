@@ -22,6 +22,7 @@ package org.apache.mahout.matrix;
  * implementations.
  */
 public interface BinaryFunction {
+
   BinaryFunction plus = new PlusFunction();
   BinaryFunction times = new TimesFunction();
 

@@ -198,7 +198,7 @@ public class TestSparseVector extends TestCase {
 
   public void testDot() throws Exception {
     double res = test.dot(test);
-    double expected = 3.3*3.3 + 2.2*2.2 + 1.1*1.1;
+    double expected = 3.3 * 3.3 + 2.2 * 2.2 + 1.1 * 1.1;
     assertEquals("dot", expected, res);
   }
 

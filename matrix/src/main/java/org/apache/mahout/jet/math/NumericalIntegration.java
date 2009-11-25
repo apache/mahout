@@ -8,12 +8,10 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.math;
 
-/**
- * Not yet commented.
- */
+/** Not yet commented. */
 class NumericalIntegration extends Constants {
-/**
- * Makes this class non instantiable, but still let's others inherit from it.
- */
-protected NumericalIntegration() {}
+
+  /** Makes this class non instantiable, but still let's others inherit from it. */
+  protected NumericalIntegration() {
+  }
 }

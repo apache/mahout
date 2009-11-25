@@ -17,6 +17,7 @@
 package org.apache.mahout.matrix;
 
 public class TimesFunction implements BinaryFunction {
+
   /**
    * Computes the product of two numbers.
    *

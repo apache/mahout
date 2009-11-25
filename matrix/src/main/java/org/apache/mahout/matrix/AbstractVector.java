@@ -447,21 +447,20 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public int hashCode() {
-    final int prime = 31;
+    int prime = 31;
     int result = prime + ((name == null) ? 0 : name.hashCode());
     result = prime * result + size();
     Iterator<Element> iter = iterateNonZero(true);
     while (iter.hasNext()) {
       Element ele = iter.next();
       result = prime * result + ele.index();
-      long v = Double.doubleToLongBits(ele.get()); 
-      result = prime * result + (int)(v^(v>>32));
+      long v = Double.doubleToLongBits(ele.get());
+      result = prime * result + (int) (v ^ (v >> 32));
     }
 
     return result;
   }
-  
-  
+
 
   @Override
   public double get(String label) throws IndexException, UnboundLabelException {

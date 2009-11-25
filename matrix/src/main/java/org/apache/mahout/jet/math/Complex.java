@@ -8,12 +8,10 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.math;
 
-/**
- * Not yet commented.
- */
+/** Not yet commented. */
 class Complex extends Constants {
-/**
- * Makes this class non instantiable, but still let's others inherit from it.
- */
-protected Complex() {}
+
+  /** Makes this class non instantiable, but still let's others inherit from it. */
+  protected Complex() {
+  }
 }

@@ -18,6 +18,7 @@
 package org.apache.mahout.matrix;
 
 public class PlusWithScaleFunction implements BinaryFunction {
+
   private final double scale;
 
   public PlusWithScaleFunction(double scale) {

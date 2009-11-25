@@ -14,13 +14,11 @@ package org.apache.mahout.matrix;
  * @see org.apache.mahout.matrix.GenericSorting
  *
  */
-/** 
- * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
- */
+
+/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public interface Swapper {
-/**
- * Swaps the generic data g[a] with g[b].
- */
-public abstract void swap(int a, int b);
+
+  /** Swaps the generic data g[a] with g[b]. */
+  void swap(int a, int b);
 }

@@ -12,23 +12,22 @@ package org.apache.mahout.jet.random;
  * Abstract base class for all discrete distributions.
  *
  */
-/** 
- * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
- */
+
+/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public abstract class AbstractDiscreteDistribution extends AbstractDistribution {
-/**
- * Makes this class non instantiable, but still let's others inherit from it.
- */
-protected AbstractDiscreteDistribution() {}
-/**
- * Returns a random number from the distribution; returns <tt>(double) nextInt()</tt>.
- */
-public double nextDouble() {
-  return (double) nextInt();
-}
-/**
- * Returns a random number from the distribution.
- */
-public abstract int nextInt();
+
+  /** Makes this class non instantiable, but still let's others inherit from it. */
+  protected AbstractDiscreteDistribution() {
+  }
+
+  /** Returns a random number from the distribution; returns <tt>(double) nextInt()</tt>. */
+  @Override
+  public double nextDouble() {
+    return (double) nextInt();
+  }
+
+  /** Returns a random number from the distribution. */
+  @Override
+  public abstract int nextInt();
 }

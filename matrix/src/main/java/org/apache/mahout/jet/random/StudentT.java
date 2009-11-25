@@ -32,106 +32,116 @@ import org.apache.mahout.jet.stat.Probability;
  * <p>R.W. Bailey (1994): Polar generation of random variates with the t-distribution, Mathematics of Computation 62, 779-781.
  *
  */
-/** 
- * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
- */
+
+/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class StudentT extends AbstractContinousDistribution {
+
   protected double freedom;
 
   protected double TERM; // performance cache for pdf()
-   // The uniform random number generated shared by all <b>static</b> methods. 
-  protected static StudentT shared = new StudentT(1.0,makeDefaultGenerator());
-/**
- * Constructs a StudentT distribution.
- * Example: freedom=1.0.
- * @param freedom degrees of freedom.
- * @throws IllegalArgumentException if <tt>freedom &lt;= 0.0</tt>.
- */
-public StudentT(double freedom, RandomEngine randomGenerator) {
-  setRandomGenerator(randomGenerator);
-  setState(freedom);
-}
-/**
- * Returns the cumulative distribution function.
- */
-public double cdf(double x) {
-  return Probability.studentT(freedom,x);
-}
-/**
- * Returns a random number from the distribution.
- */
-public double nextDouble() {
-  return nextDouble(this.freedom);
-}
-/**
- * Returns a random number from the distribution; bypasses the internal state.
- * @param a degrees of freedom.
- * @throws IllegalArgumentException if <tt>a &lt;= 0.0</tt>.
- */
-public double nextDouble(double degreesOfFreedom) {
-  /*
-   * The polar method of Box/Muller for generating Normal variates 
-   * is adapted to the Student-t distribution. The two generated   
-   * variates are not independent and the expected no. of uniforms 
-   * per variate is 2.5464.
+  // The uniform random number generated shared by all <b>static</b> methods.
+  protected static StudentT shared = new StudentT(1.0, makeDefaultGenerator());
+
+  /**
+   * Constructs a StudentT distribution. Example: freedom=1.0.
    *
-   * REFERENCE :  - R.W. Bailey (1994): Polar generation of random  
-   *                variates with the t-distribution, Mathematics   
-   *                of Computation 62, 779-781.
+   * @param freedom degrees of freedom.
+   * @throws IllegalArgumentException if <tt>freedom &lt;= 0.0</tt>.
    */
-  if (degreesOfFreedom<=0.0) throw new IllegalArgumentException();
-  double u,v,w;
+  public StudentT(double freedom, RandomEngine randomGenerator) {
+    setRandomGenerator(randomGenerator);
+    setState(freedom);
+  }
 
-  do {
-    u = 2.0 * randomGenerator.raw() - 1.0;
-    v = 2.0 * randomGenerator.raw() - 1.0;
+  /** Returns the cumulative distribution function. */
+  public double cdf(double x) {
+    return Probability.studentT(freedom, x);
   }
-  while ((w = u * u + v * v) > 1.0);
 
-  return(u * Math.sqrt( degreesOfFreedom * ( Math.exp(- 2.0 / degreesOfFreedom * Math.log(w)) - 1.0) / w));
-}
-/**
- * Returns the probability distribution function.
- */
-public double pdf(double x) {
-  return this.TERM * Math.pow((1+ x*x/freedom), -(freedom+1) * 0.5);
-}
-/**
- * Sets the distribution parameter.
- * @param freedom degrees of freedom.
- * @throws IllegalArgumentException if <tt>freedom &lt;= 0.0</tt>.
- */
-public void setState(double freedom) {
-  if (freedom<=0.0) throw new IllegalArgumentException();
-  this.freedom = freedom;
-  
-  double val = Fun.logGamma((freedom+1)/2) - Fun.logGamma(freedom/2);
-  this.TERM = Math.exp(val)/Math.sqrt(Math.PI*freedom);
-}
-/**
- * Returns a random number from the distribution.
- * @param freedom degrees of freedom.
- * @throws IllegalArgumentException if <tt>freedom &lt;= 0.0</tt>.
- */
-public static double staticNextDouble(double freedom) {
-  synchronized (shared) {
-    return shared.nextDouble(freedom);
+  /** Returns a random number from the distribution. */
+  @Override
+  public double nextDouble() {
+    return nextDouble(this.freedom);
   }
-}
-/**
- * Returns a String representation of the receiver.
- */
-public String toString() {
-  return this.getClass().getName()+"("+freedom+")";
-}
-/**
- * Sets the uniform random number generated shared by all <b>static</b> methods.
- * @param randomGenerator the new uniform random number generator to be shared.
- */
-private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-  synchronized (shared) {
-    shared.setRandomGenerator(randomGenerator);
+
+  /**
+   * Returns a random number from the distribution; bypasses the internal state.
+   *
+   * @param a degrees of freedom.
+   * @throws IllegalArgumentException if <tt>a &lt;= 0.0</tt>.
+   */
+  public double nextDouble(double degreesOfFreedom) {
+    /*
+    * The polar method of Box/Muller for generating Normal variates
+    * is adapted to the Student-t distribution. The two generated
+    * variates are not independent and the expected no. of uniforms
+    * per variate is 2.5464.
+    *
+    * REFERENCE :  - R.W. Bailey (1994): Polar generation of random
+    *                variates with the t-distribution, Mathematics
+    *                of Computation 62, 779-781.
+    */
+    if (degreesOfFreedom <= 0.0) {
+      throw new IllegalArgumentException();
+    }
+    double u, v, w;
+
+    do {
+      u = 2.0 * randomGenerator.raw() - 1.0;
+      v = 2.0 * randomGenerator.raw() - 1.0;
+    }
+    while ((w = u * u + v * v) > 1.0);
+
+    return (u * Math.sqrt(degreesOfFreedom * (Math.exp(-2.0 / degreesOfFreedom * Math.log(w)) - 1.0) / w));
   }
-}
+
+  /** Returns the probability distribution function. */
+  public double pdf(double x) {
+    return this.TERM * Math.pow((1 + x * x / freedom), -(freedom + 1) * 0.5);
+  }
+
+  /**
+   * Sets the distribution parameter.
+   *
+   * @param freedom degrees of freedom.
+   * @throws IllegalArgumentException if <tt>freedom &lt;= 0.0</tt>.
+   */
+  public void setState(double freedom) {
+    if (freedom <= 0.0) {
+      throw new IllegalArgumentException();
+    }
+    this.freedom = freedom;
+
+    double val = Fun.logGamma((freedom + 1) / 2) - Fun.logGamma(freedom / 2);
+    this.TERM = Math.exp(val) / Math.sqrt(Math.PI * freedom);
+  }
+
+  /**
+   * Returns a random number from the distribution.
+   *
+   * @param freedom degrees of freedom.
+   * @throws IllegalArgumentException if <tt>freedom &lt;= 0.0</tt>.
+   */
+  public static double staticNextDouble(double freedom) {
+    synchronized (shared) {
+      return shared.nextDouble(freedom);
+    }
+  }
+
+  /** Returns a String representation of the receiver. */
+  public String toString() {
+    return this.getClass().getName() + "(" + freedom + ")";
+  }
+
+  /**
+   * Sets the uniform random number generated shared by all <b>static</b> methods.
+   *
+   * @param randomGenerator the new uniform random number generator to be shared.
+   */
+  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
+    synchronized (shared) {
+      shared.setRandomGenerator(randomGenerator);
+    }
+  }
 }

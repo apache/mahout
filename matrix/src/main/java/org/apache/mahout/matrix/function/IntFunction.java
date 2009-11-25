@@ -8,20 +8,22 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
+
 /**
- * Interface that represents a function object: a function that takes 
- * a single argument and returns a single value.
- */
-/** 
+ * Interface that represents a function object: a function that takes a single argument and returns a single value.
+ *
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
+
+/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public interface IntFunction {
-/**
- * Applies a function to an argument.
- *
- * @param argument   argument passed to the function.
- * @return the result of the function.
- */
-abstract public int apply(int argument);
+
+  /**
+   * Applies a function to an argument.
+   *
+   * @param argument argument passed to the function.
+   * @return the result of the function.
+   */
+  int apply(int argument);
 }

@@ -28,35 +28,33 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
  * A.W. Kemp (1981): Efficient generation of logarithmically distributed pseudo-random variables, Appl. Statist. 30, 249-253.
  *
  */
-/** 
- * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
- */
+
+/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class Logarithmic extends AbstractContinousDistribution {
+
   protected double my_p;
 
   // cached vars for method nextDouble(a) (for performance only)
-   private double t,h,a_prev = -1.0;
+  private double t, h, a_prev = -1.0;
 
-   // The uniform random number generated shared by all <b>static</b> methods. 
-  protected static Logarithmic shared = new Logarithmic(0.5,makeDefaultGenerator());
-/**
- * Constructs a Logarithmic distribution.
- */
-public Logarithmic(double p, RandomEngine randomGenerator) {
-  setRandomGenerator(randomGenerator);
-  setState(p);
-}
-/**
- * Returns a random number from the distribution.
- */
-public double nextDouble() {
-  return nextDouble(this.my_p);
-}
-/**
- * Returns a random number from the distribution; bypasses the internal state.
- */
-public double nextDouble(double a) {
+  // The uniform random number generated shared by all <b>static</b> methods.
+  protected static Logarithmic shared = new Logarithmic(0.5, makeDefaultGenerator());
+
+  /** Constructs a Logarithmic distribution. */
+  public Logarithmic(double p, RandomEngine randomGenerator) {
+    setRandomGenerator(randomGenerator);
+    setState(p);
+  }
+
+  /** Returns a random number from the distribution. */
+  @Override
+  public double nextDouble() {
+    return nextDouble(this.my_p);
+  }
+
+  /** Returns a random number from the distribution; bypasses the internal state. */
+  public double nextDouble(double a) {
 /******************************************************************
  *                                                                *
  *      Logarithmic Distribution - Inversion/Transformation       *
@@ -90,66 +88,71 @@ public double nextDouble(double a) {
  *                unsigned long integer *seed.                    *
  *                                                                *
  ******************************************************************/
-  double u,v,p,q;
-  int k;
 
-  if (a != a_prev) {                   // Set-up
-    a_prev = a;
-    if (a<0.97) t = -a / Math.log(1.0 - a);
-    else h=Math.log(1.0 - a);
-  }
-
-  u=randomGenerator.raw();
-  if (a<0.97) {                        // Inversion/Chop-down 
-    k = 1;
-    p = t;
-    while (u > p) {
-      //System.out.println("u="+u+", p="+p);
-      u -= p;
-      k++;
-      p *= a * (k-1.0)/(double)k;
+    if (a != a_prev) {                   // Set-up
+      a_prev = a;
+      if (a < 0.97) {
+        t = -a / Math.log(1.0 - a);
+      } else {
+        h = Math.log(1.0 - a);
+      }
     }
-    return k;
+
+    double u = randomGenerator.raw();
+    int k;
+    if (a < 0.97) {                        // Inversion/Chop-down
+      k = 1;
+      double p = t;
+      while (u > p) {
+        //System.out.println("u="+u+", p="+p);
+        u -= p;
+        k++;
+        p *= a * (k - 1.0) / (double) k;
+      }
+      return k;
+    }
+
+    if (u > a) {
+      return 1;
+    }                 // Transformation
+    u = randomGenerator.raw();
+    double v = u;
+    double q = 1.0 - Math.exp(v * h);
+    if (u <= q * q) {
+      k = (int) (1 + Math.log(u) / Math.log(q));
+      return k;
+    }
+    if (u > q) {
+      return 1;
+    }
+    return 2;
   }
 
-  if (u > a) return 1;                 // Transformation
-  u=randomGenerator.raw();
-  v = u;
-  q = 1.0 - Math.exp(v * h);
-  if ( u <= q * q) {
-    k = (int) (1 + Math.log(u) / Math.log(q));
-    return k;
+  /** Sets the distribution parameter. */
+  public void setState(double p) {
+    this.my_p = p;
   }
-  if (u > q) return 1;
-  return 2;
-}
-/**
- * Sets the distribution parameter.
- */
-public void setState(double p) {
-  this.my_p = p;
-}
-/**
- * Returns a random number from the distribution.
- */
-public static double staticNextDouble(double p) {
-  synchronized (shared) {
-    return shared.nextDouble(p);
+
+  /** Returns a random number from the distribution. */
+  public static double staticNextDouble(double p) {
+    synchronized (shared) {
+      return shared.nextDouble(p);
+    }
   }
-}
-/**
- * Returns a String representation of the receiver.
- */
-public String toString() {
-  return this.getClass().getName()+"("+my_p+")";
-}
-/**
- * Sets the uniform random number generated shared by all <b>static</b> methods.
- * @param randomGenerator the new uniform random number generator to be shared.
- */
-private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-  synchronized (shared) {
-    shared.setRandomGenerator(randomGenerator);
+
+  /** Returns a String representation of the receiver. */
+  public String toString() {
+    return this.getClass().getName() + "(" + my_p + ")";
   }
-}
+
+  /**
+   * Sets the uniform random number generated shared by all <b>static</b> methods.
+   *
+   * @param randomGenerator the new uniform random number generator to be shared.
+   */
+  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
+    synchronized (shared) {
+      shared.setRandomGenerator(randomGenerator);
+    }
+  }
 }

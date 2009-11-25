@@ -130,21 +130,21 @@ public class DenseVector extends AbstractVector {
    * @see java.lang.Iterable#iterator
    */
   @Override
-  public java.util.Iterator<Vector.Element> iterateNonZero() {
+  public Iterator<Vector.Element> iterateNonZero() {
     return new NonZeroIterator();
   }
 
   @Override
-  public java.util.Iterator<Vector.Element> iterateNonZero(boolean sorted) {
+  public Iterator<Vector.Element> iterateNonZero(boolean sorted) {
     return new NonZeroIterator();
   }
 
   @Override
-  public java.util.Iterator<Vector.Element> iterateAll() {
+  public Iterator<Vector.Element> iterateAll() {
     return new AllIterator();
   }
 
-  private class NonZeroIterator implements java.util.Iterator<Vector.Element> {
+  private class NonZeroIterator implements Iterator<Vector.Element> {
 
     private final Element element = new Element(0);
     private int offset;
@@ -181,7 +181,7 @@ public class DenseVector extends AbstractVector {
     }
   }
 
-  private class AllIterator implements java.util.Iterator<Vector.Element> {
+  private class AllIterator implements Iterator<Vector.Element> {
 
     private final Element element = new Element(-1);
 
@@ -206,6 +206,7 @@ public class DenseVector extends AbstractVector {
   }
 
   public class Element implements Vector.Element {
+
     private int ind;
 
     public Element(int ind) {
@@ -295,8 +296,6 @@ public class DenseVector extends AbstractVector {
 
     return true;
   }
-
-
 
 
   @Override

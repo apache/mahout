@@ -8,20 +8,18 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.random;
 
-/**
- * Not yet commented.
- */
+/** Not yet commented. */
 class Stack {
+
   int N;                      /* max number of elts on stack */
-  int[]v;                     /* array of values on the stack */
+  int[] v;                     /* array of values on the stack */
   int i;                      /* index of top of stack */
-/**
- * Constructs a new stack with the given capacity.
- */
-public Stack(int capacity) {
-  this.N = capacity;
-  this.i = -1; // indicates stack is empty
-  this.v = new int[N];
+
+  /** Constructs a new stack with the given capacity. */
+  Stack(int capacity) {
+    this.N = capacity;
+    this.i = -1; // indicates stack is empty
+    this.v = new int[N];
 /*
 static stack_t *
 new_stack(int N) {
@@ -60,28 +58,29 @@ static void free_stack(stack_t *s)
   free((char *)(s->v));
   free((char *)s);
 }
-*/  
-}
-/**
- * Returns the topmost element.
- */
-public int pop() {
-  if (this.i < 0) throw new InternalError("Cannot pop stack!");
-  this.i--;
-  return this.v[this.i+1];
-}
-/**
- * Places the given value on top of the stack.
- */
-public void push(int value) {
-  this.i++;
-  if (this.i >= this.N) throw new InternalError("Cannot push stack!");
-  this.v[this.i] = value;
-}
-/**
- * Returns the number of elements contained.
- */
-public int size() {
-  return i+1;
-}
+*/
+  }
+
+  /** Returns the topmost element. */
+  public int pop() {
+    if (this.i < 0) {
+      throw new InternalError("Cannot pop stack!");
+    }
+    this.i--;
+    return this.v[this.i + 1];
+  }
+
+  /** Places the given value on top of the stack. */
+  public void push(int value) {
+    this.i++;
+    if (this.i >= this.N) {
+      throw new InternalError("Cannot push stack!");
+    }
+    this.v[this.i] = value;
+  }
+
+  /** Returns the number of elements contained. */
+  public int size() {
+    return i + 1;
+  }
 }

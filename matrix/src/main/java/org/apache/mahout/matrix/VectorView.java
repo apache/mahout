@@ -112,22 +112,23 @@ public class VectorView extends AbstractVector {
   }
 
   @Override
-  public java.util.Iterator<Vector.Element> iterateNonZero() {
+  public Iterator<Vector.Element> iterateNonZero() {
     return new NonZeroIterator();
   }
 
   @Override
-  public java.util.Iterator<Vector.Element> iterateNonZero(boolean sorted) {
+  public Iterator<Vector.Element> iterateNonZero(boolean sorted) {
     return new NonZeroIterator();
   }
 
   @Override
-  public java.util.Iterator<Vector.Element> iterateAll() {
+  public Iterator<Vector.Element> iterateAll() {
     return new AllIterator();
   }
 
-  public class NonZeroIterator implements java.util.Iterator<Vector.Element> {
-    private final java.util.Iterator<Vector.Element> it;
+  public class NonZeroIterator implements Iterator<Vector.Element> {
+
+    private final Iterator<Vector.Element> it;
 
     private Vector.Element el;
 
@@ -185,8 +186,9 @@ public class VectorView extends AbstractVector {
     }
   }
 
-  public class AllIterator implements java.util.Iterator<Vector.Element> {
-    private final java.util.Iterator<Vector.Element> it;
+  public class AllIterator implements Iterator<Vector.Element> {
+
+    private final Iterator<Vector.Element> it;
 
     private Vector.Element el;
 
@@ -263,6 +265,7 @@ public class VectorView extends AbstractVector {
   }
 
   public class Element implements Vector.Element {
+
     private final int ind;
 
     public Element(int ind) {

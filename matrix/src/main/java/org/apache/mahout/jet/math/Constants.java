@@ -11,24 +11,23 @@ package org.apache.mahout.jet.math;
 /**
  * Defines some useful constants.
  */
-/** 
- * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
- */
+
+/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class Constants {
   /*
    * machine constants
    */
-  protected static final double MACHEP =  1.11022302462515654042E-16;
-  protected static final double MAXLOG =  7.09782712893383996732E2;
+  protected static final double MACHEP = 1.11022302462515654042E-16;
+  protected static final double MAXLOG = 7.09782712893383996732E2;
   protected static final double MINLOG = -7.451332191019412076235E2;
   protected static final double MAXGAM = 171.624376956302725;
-  protected static final double SQTPI  =  2.50662827463100050242E0;
-  protected static final double SQRTH  =  7.07106781186547524401E-1;
-  protected static final double LOGPI  =  1.14472988584940017414;
+  protected static final double SQTPI = 2.50662827463100050242E0;
+  protected static final double SQRTH = 7.07106781186547524401E-1;
+  protected static final double LOGPI = 1.14472988584940017414;
 
   protected static final double big = 4.503599627370496e15;
-  protected static final double biginv =  2.22044604925031308085e-16;
+  protected static final double biginv = 2.22044604925031308085e-16;
 
 
   /*
@@ -56,9 +55,8 @@ public class Constants {
  * THPIO4 =  2.35619449019234492885           3*pi/4
  * TWOOPI =  6.36619772367581343075535E-1     2/pi
  */
- 
-/**
- * Makes this class non instantiable, but still let's others inherit from it.
- */
-protected Constants() {}
+
+  /** Makes this class non instantiable, but still let's others inherit from it. */
+  protected Constants() {
+  }
 }

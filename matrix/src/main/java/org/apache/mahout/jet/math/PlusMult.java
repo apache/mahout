@@ -20,50 +20,49 @@ package org.apache.mahout.jet.math;
  * <tt>a</tt> and <tt>b</tt> are variables, <tt>constant</tt> is fixed, but for performance reasons publicly accessible.
  * Intended to be passed to <tt>matrix.assign(otherMatrix,function)</tt> methods.
  */
-/** 
- * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
- */
+
+/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public final class PlusMult implements org.apache.mahout.matrix.function.DoubleDoubleFunction {
-  /**
-   * Public read/write access to avoid frequent object construction.
-   */
-  public double multiplicator;
-/**
- * Insert the method's description here.
- * Creation date: (8/10/99 19:12:09)
- */
-protected PlusMult(final double multiplicator) {
-  this.multiplicator = multiplicator;
-}
-/**
- * Returns the result of the function evaluation.
- */
-public final double apply(double a, double b) {
-  return a + b*multiplicator;
-}
-/**
- * <tt>a - b/constant</tt>.
- */
-public static PlusMult minusDiv(final double constant) {
-  return new PlusMult(-1/constant);
-}
-/**
- * <tt>a - b*constant</tt>.
- */
-public static PlusMult minusMult(final double constant) {
-  return new PlusMult(-constant);
-}
-/**
- * <tt>a + b/constant</tt>.
- */
-public static PlusMult plusDiv(final double constant) {
-  return new PlusMult(1/constant);
-}
-/**
- * <tt>a + b*constant</tt>.
- */
-public static PlusMult plusMult(final double constant) {
-  return new PlusMult(constant);
-}
+
+  private double multiplicator;
+
+  /** Insert the method's description here. Creation date: (8/10/99 19:12:09) */
+  PlusMult(double multiplicator) {
+    this.multiplicator = multiplicator;
+  }
+
+  /** Returns the result of the function evaluation. */
+  @Override
+  public double apply(double a, double b) {
+    return a + b * multiplicator;
+  }
+
+  /** <tt>a - b/constant</tt>. */
+  public static PlusMult minusDiv(double constant) {
+    return new PlusMult(-1 / constant);
+  }
+
+  /** <tt>a - b*constant</tt>. */
+  public static PlusMult minusMult(double constant) {
+    return new PlusMult(-constant);
+  }
+
+  /** <tt>a + b/constant</tt>. */
+  public static PlusMult plusDiv(double constant) {
+    return new PlusMult(1 / constant);
+  }
+
+  /** <tt>a + b*constant</tt>. */
+  public static PlusMult plusMult(double constant) {
+    return new PlusMult(constant);
+  }
+
+  public double getMultiplicator() {
+    return multiplicator;
+  }
+
+  public void setMultiplicator(double multiplicator) {
+    this.multiplicator = multiplicator;
+  }
 }

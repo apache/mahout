@@ -98,20 +98,12 @@ public interface Matrix extends Cloneable, Writable {
    */
   int[] size();
 
-  /**
-   * Helper method to return the cardinality of the row dimension
-   * 
-   * @return
-   */
+  /** Helper method to return the cardinality of the row dimension */
   int numRows();
-  
-  /**
-   * Helper method to return the cardinality of the column dimension
-   * 
-   * @return
-   */
+
+  /** Helper method to return the cardinality of the column dimension */
   int numCols();
-  
+
   /**
    * Return a copy of the recipient
    *
@@ -249,8 +241,7 @@ public interface Matrix extends Cloneable, Writable {
   int[] getNumNondefaultElements();
 
   /**
-   * Return a new matrix containing the product of each value of the recipient 
-   * and the argument
+   * Return a new matrix containing the product of each value of the recipient and the argument
    *
    * @param x a double argument
    * @return a new Matrix
@@ -258,33 +249,30 @@ public interface Matrix extends Cloneable, Writable {
   Matrix times(double x);
 
   /**
-   * Return a new matrix containing the product of the recipient and 
-   * the argument
+   * Return a new matrix containing the product of the recipient and the argument
    *
    * @param x a Matrix argument
    * @return a new Matrix
    * @throws CardinalityException if the cardinalities are incompatible
    */
   Matrix times(Matrix x);
-  
+
   /**
-   * Return a new vector with cardinality equal to getNumRows() of this 
-   * matrix which is the matrix product of the recipient and the argument
-   * 
+   * Return a new vector with cardinality equal to getNumRows() of this matrix which is the matrix product of the
+   * recipient and the argument
+   *
    * @param v a vector with cardinality equal to getNumCols() of the recipient
    * @return a new vector (typically a DenseVector)
    * @throws CardinalityException if this.getNumRows() != v.size()
    */
   Vector times(Vector v);
-  
+
   /**
-   * Convenience method for producing this.transpose().times(this.times(v)), 
-   * which can be implemented with only one pass over the matrix, without 
-   * making the transpose() call (which can be expensive if the matrix is sparse)
-   * 
+   * Convenience method for producing this.transpose().times(this.times(v)), which can be implemented with only one pass
+   * over the matrix, without making the transpose() call (which can be expensive if the matrix is sparse)
+   *
    * @param v a vector with cardinality equal to getNumCols() of the recipient
-   * @return a new vector (typically a DenseVector) with cardinality equal to
-   * that of the argument.
+   * @return a new vector (typically a DenseVector) with cardinality equal to that of the argument.
    * @throws CardinalityException if this.getNumCols() != v.size()
    */
   Vector timesSquared(Vector v);

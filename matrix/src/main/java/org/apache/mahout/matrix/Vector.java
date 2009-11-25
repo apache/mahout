@@ -118,7 +118,7 @@ public interface Vector extends Cloneable, Writable {
    * Iterates over all elements <p/> * NOTE: Implementations may choose to reuse the Element returned for performance
    * reasons, so if you need a copy of it, you should call {@link #getElement} for the given index
    *
-   * @return An {@link java.util.Iterator} over all elements
+   * @return An {@link Iterator} over all elements
    */
   Iterator<Element> iterateAll();
 
@@ -126,14 +126,14 @@ public interface Vector extends Cloneable, Writable {
    * Iterates over all non-zero elements. <p/> NOTE: Implementations may choose to reuse the Element returned for
    * performance reasons, so if you need a copy of it, you should call {@link #getElement} for the given index
    *
-   * @return An {@link java.util.Iterator} over all non-zero elements
+   * @return An {@link Iterator} over all non-zero elements
    */
   Iterator<Element> iterateNonZero();
 
   /**
    * Iterate over all non-zero elements. The elements are ordered in ascending order of the index.
-   * @param sorted
-   * @return A sorted {@link Iterator} over all non-zeroElements.  
+   *
+   * @return A sorted {@link Iterator} over all non-zeroElements.
    */
   Iterator<Element> iterateNonZero(boolean sorted);
 
@@ -168,6 +168,7 @@ public interface Vector extends Cloneable, Writable {
    * may choose to reuse this element, so you may need to make a copy if you want to keep it
    */
   interface Element {
+
     /** @return the value of this vector element. */
     double get();
 
@@ -264,17 +265,13 @@ public interface Vector extends Cloneable, Writable {
   Vector normalize(double power);
 
   /**
-   * Return the k-norm of the vector. <p/> See 
-   * http://en.wikipedia.org/wiki/Lp_space <p/> Technically, when 
-   * 0 &gt; power &lt; 1, we don't have a norm, just a metric, but 
-   * we'll overload this here. Also supports power == 0 (number of non-zero elements) and
-   * power = {@link Double#POSITIVE_INFINITY} (max element). Again, see the Wikipedia page
-   * for more info.
+   * Return the k-norm of the vector. <p/> See http://en.wikipedia.org/wiki/Lp_space <p/> Technically, when 0 &gt; power
+   * &lt; 1, we don't have a norm, just a metric, but we'll overload this here. Also supports power == 0 (number of
+   * non-zero elements) and power = {@link Double#POSITIVE_INFINITY} (max element). Again, see the Wikipedia page for
+   * more info.
    *
    * @param power The power to use.
-   *
-   * @see #normalize(double) 
-   *
+   * @see #normalize(double)
    */
   double norm(double power);
 

@@ -439,17 +439,17 @@ public class VectorTest extends TestCase {
     // Make sure that hash([1,0,2]) != hash([1,2,0])
     SparseVector left = new SparseVector(3);
     SparseVector right = new SparseVector(3);
-    left.setQuick(0,1);
-    left.setQuick(2,2);
-    right.setQuick(0,1);
-    right.setQuick(1,2);
+    left.setQuick(0, 1);
+    left.setQuick(2, 2);
+    right.setQuick(0, 1);
+    right.setQuick(1, 2);
     assertFalse(left.equals(right));
     assertFalse(left.hashCode() == right.hashCode());
 
     // Make sure that hash([1,0,2,0,0,0]) != hash([1,0,2])
     right = new SparseVector(5);
-    right.setQuick(0,1);
-    right.setQuick(2,2);
+    right.setQuick(0, 1);
+    right.setQuick(2, 2);
     assertFalse(left.equals(right));
     assertFalse(left.hashCode() == right.hashCode());
   }

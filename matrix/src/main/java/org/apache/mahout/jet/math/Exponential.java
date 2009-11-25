@@ -8,12 +8,10 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.math;
 
-/**
- * Exponential functions.
- */
+/** Exponential functions. */
 class Exponential extends Constants {
-/**
- * Makes this class non instantiable, but still let's others inherit from it.
- */
-protected Exponential() {}
+
+  /** Makes this class non instantiable, but still let's others inherit from it. */
+  protected Exponential() {
+  }
 }

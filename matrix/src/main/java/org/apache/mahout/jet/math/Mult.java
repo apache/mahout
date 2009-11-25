@@ -18,38 +18,38 @@ package org.apache.mahout.jet.math;
  * <tt>a</tt> is variable, <tt>constant</tt> is fixed, but for performance reasons publicly accessible.
  * Intended to be passed to <tt>matrix.assign(function)</tt> methods.
  */
-/** 
- * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
- */
+
+/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public final class Mult implements org.apache.mahout.matrix.function.DoubleFunction {
-  /**
-   * Public read/write access to avoid frequent object construction.
-   */
-  public double multiplicator;
-/**
- * Insert the method's description here.
- * Creation date: (8/10/99 19:12:09)
- */
-protected Mult(final double multiplicator) {
-  this.multiplicator = multiplicator;
-}
-/**
- * Returns the result of the function evaluation.
- */
-public final double apply(double a) {
-  return a * multiplicator;
-}
-/**
- * <tt>a / constant</tt>.
- */
-public static Mult div(final double constant) {
-  return mult(1/constant);
-}
-/**
- * <tt>a * constant</tt>.
- */
-public static Mult mult(final double constant) {
-  return new Mult(constant);
-}
+
+  private double multiplicator;
+
+  Mult(double multiplicator) {
+    this.multiplicator = multiplicator;
+  }
+
+  /** Returns the result of the function evaluation. */
+  @Override
+  public double apply(double a) {
+    return a * multiplicator;
+  }
+
+  /** <tt>a / constant</tt>. */
+  public static Mult div(double constant) {
+    return mult(1 / constant);
+  }
+
+  /** <tt>a * constant</tt>. */
+  public static Mult mult(double constant) {
+    return new Mult(constant);
+  }
+
+  public double getMultiplicator() {
+    return multiplicator;
+  }
+
+  public void setMultiplicator(double multiplicator) {
+    this.multiplicator = multiplicator;
+  }
 }

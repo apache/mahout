@@ -13,14 +13,15 @@ import org.apache.mahout.matrix.list.DoubleArrayList;
  * Target of a streaming <tt>DoubleBuffer</tt> into which data is flushed upon buffer overflow.
  *
  */
-/** 
- * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
- */
+
+/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public interface DoubleBufferConsumer {
-/**
- * Adds all elements of the specified list to the receiver.
- * @param list the list of which all elements shall be added.
- */
-public void addAllOf(DoubleArrayList list);
+
+  /**
+   * Adds all elements of the specified list to the receiver.
+   *
+   * @param list the list of which all elements shall be added.
+   */
+  void addAllOf(DoubleArrayList list);
 }

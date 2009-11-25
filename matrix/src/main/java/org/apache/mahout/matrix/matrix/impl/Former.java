@@ -15,16 +15,17 @@ package org.apache.mahout.matrix.matrix.impl;
  * @see org.apache.mahout.colt
  * @see org.apache.mahout.matrix.Sorting
  */
-/** 
- * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
- */
+
+/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public interface Former {
-/** 
- * Formats a double into a string (like sprintf in C).
- * @param x the number to format
- * @return the formatted string 
- * @exception IllegalArgumentException if bad argument
- */
-String form(double value);
+
+  /**
+   * Formats a double into a string (like sprintf in C).
+   *
+   * @param x the number to format
+   * @return the formatted string
+   * @throws IllegalArgumentException if bad argument
+   */
+  String form(double value);
 }

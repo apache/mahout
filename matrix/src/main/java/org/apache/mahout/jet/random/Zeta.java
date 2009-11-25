@@ -31,31 +31,29 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
  * J. Dagpunar (1988): Principles of Random Variate  Generation, Clarendon Press, Oxford.   
  *
  */
-/** 
- * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
- */
+
+/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class Zeta extends AbstractDiscreteDistribution {
+
   protected double ro;
   protected double pk;
 
   // cached values (for performance)
-  protected double c,d,ro_prev = -1.0,pk_prev = -1.0;
+  protected double c, d, ro_prev = -1.0, pk_prev = -1.0;
   protected double maxlongint = Long.MAX_VALUE - 1.5;
 
   // The uniform random number generated shared by all <b>static</b> methods. 
-  protected static Zeta shared = new Zeta(1.0,1.0,makeDefaultGenerator());
-/**
- * Constructs a Zeta distribution.
- */
-public Zeta(double ro, double pk, RandomEngine randomGenerator) {
-  setRandomGenerator(randomGenerator);
-  setState(ro,pk);
-}
-/**
- * Returns a zeta distributed random number.
- */
-protected long generateZeta(double ro, double pk, RandomEngine randomGenerator) {
+  protected static Zeta shared = new Zeta(1.0, 1.0, makeDefaultGenerator());
+
+  /** Constructs a Zeta distribution. */
+  public Zeta(double ro, double pk, RandomEngine randomGenerator) {
+    setRandomGenerator(randomGenerator);
+    setState(ro, pk);
+  }
+
+  /** Returns a zeta distributed random number. */
+  protected long generateZeta(double ro, double pk, RandomEngine randomGenerator) {
 /******************************************************************
  *                                                                *
  *            Zeta Distribution - Acceptance Rejection            *
@@ -94,69 +92,69 @@ protected long generateZeta(double ro, double pk, RandomEngine randomGenerator) 
  *                Variate  Generation, Clarendon Press, Oxford.   *
  *                                                                *
  ******************************************************************/
-  double u,v,e,x;
-  long k;
 
-  if (ro != ro_prev || pk != pk_prev) {                   // Set-up 
-    ro_prev = ro;
-    pk_prev = pk;
-    if (ro<pk) {
-      c = pk-0.5;
-      d = 0;
+    if (ro != ro_prev || pk != pk_prev) {                   // Set-up
+      ro_prev = ro;
+      pk_prev = pk;
+      if (ro < pk) {
+        c = pk - 0.5;
+        d = 0;
+      } else {
+        c = ro - 0.5;
+        d = (1.0 + ro) * Math.log((1.0 + pk) / (1.0 + ro));
+      }
     }
-    else {
-      c = ro-0.5;
-      d = (1.0+ro)*Math.log((1.0+pk)/(1.0+ro));
-    }
-  }
-  do {
+    long k;
+    double x;
+    double e;
     do {
-      u=randomGenerator.raw();
-      v=randomGenerator.raw();
-      x = (c+0.5)*Math.exp(-Math.log(u)/ro) - c;
-    } while (x<=0.5 || x>=maxlongint);
-    
-    k = (int) (x+0.5);
-    e = -Math.log(v);
-  } while ( e < (1.0+ro)*Math.log((k+pk)/(x+c)) - d );
-  
-  return k;
-}
-/**
- * Returns a random number from the distribution.
- */
-public int nextInt() {
-  return (int) generateZeta(ro, pk, randomGenerator); 
-}
-/**
- * Sets the parameters.
- */
-public void setState(double ro, double pk) {
-  this.ro = ro;
-  this.pk = pk;
-}
-/**
- * Returns a random number from the distribution.
- */
-public static int staticNextInt(double ro, double pk) {
-  synchronized (shared) {
-    shared.setState(ro,pk);
-    return shared.nextInt();
+      double v;
+      do {
+        double u = randomGenerator.raw();
+        v = randomGenerator.raw();
+        x = (c + 0.5) * Math.exp(-Math.log(u) / ro) - c;
+      } while (x <= 0.5 || x >= maxlongint);
+
+      k = (int) (x + 0.5);
+      e = -Math.log(v);
+    } while (e < (1.0 + ro) * Math.log((k + pk) / (x + c)) - d);
+
+    return k;
   }
-}
-/**
- * Returns a String representation of the receiver.
- */
-public String toString() {
-  return this.getClass().getName()+"("+ro+","+pk+")";
-}
-/**
- * Sets the uniform random number generated shared by all <b>static</b> methods.
- * @param randomGenerator the new uniform random number generator to be shared.
- */
-private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-  synchronized (shared) {
-    shared.setRandomGenerator(randomGenerator);
+
+  /** Returns a random number from the distribution. */
+  @Override
+  public int nextInt() {
+    return (int) generateZeta(ro, pk, randomGenerator);
   }
-}
+
+  /** Sets the parameters. */
+  public void setState(double ro, double pk) {
+    this.ro = ro;
+    this.pk = pk;
+  }
+
+  /** Returns a random number from the distribution. */
+  public static int staticNextInt(double ro, double pk) {
+    synchronized (shared) {
+      shared.setState(ro, pk);
+      return shared.nextInt();
+    }
+  }
+
+  /** Returns a String representation of the receiver. */
+  public String toString() {
+    return this.getClass().getName() + "(" + ro + "," + pk + ")";
+  }
+
+  /**
+   * Sets the uniform random number generated shared by all <b>static</b> methods.
+   *
+   * @param randomGenerator the new uniform random number generator to be shared.
+   */
+  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
+    synchronized (shared) {
+      shared.setRandomGenerator(randomGenerator);
+    }
+  }
 }

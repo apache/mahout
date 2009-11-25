@@ -125,11 +125,13 @@ public abstract class AbstractMatrix implements Matrix {
 
   // index into int[2] for row value
   public static final int ROW = 0;
-  
+
+  @Override
   public int numRows() {
     return size()[ROW];
   }
-  
+
+  @Override
   public int numCols() {
     return size()[COL];
   }
@@ -407,31 +409,33 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
+  @Override
   public Vector times(Vector v) {
     int[] c = size();
-    if(c[COL] != v.size()) {
+    if (c[COL] != v.size()) {
       throw new CardinalityException();
     }
     Vector w = new DenseVector(c[ROW]);
-    for(int i=0; i<c[ROW]; i++) {
+    for (int i = 0; i < c[ROW]; i++) {
       w.setQuick(i, v.dot(getRow(i)));
     }
     return w;
   }
-  
+
+  @Override
   public Vector timesSquared(Vector v) {
     int[] c = size();
-    if(c[COL] != v.size()) {
+    if (c[COL] != v.size()) {
       throw new CardinalityException();
     }
     Vector w = new DenseVector(c[COL]);
-    for(int i=0; i<c[ROW]; i++) {
+    for (int i = 0; i < c[ROW]; i++) {
       Vector xi = getRow(i);
       w.assign(xi, new PlusWithScaleFunction(xi.dot(v)));
     }
     return w;
   }
-  
+
   @Override
   public Matrix transpose() {
     int[] card = size();

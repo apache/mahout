@@ -9,32 +9,27 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.matrix.matrix.linalg;
 
 import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
-/**
- * For diagonal matrices we can often do better.
- *
- */
+
+/** For diagonal matrices we can often do better. */
 class Diagonal {
-/**
- * Makes this class non instantiable, but still let's others inherit from it.
- */
-protected Diagonal() {
-  throw new RuntimeException("Non instantiable");
-}
-/**
- * Modifies A to hold its inverse.
- * @param x the first vector.
- * @param y the second vector.
- * @return isNonSingular.
- * @throws IllegalArgumentException if <tt>x.size() != y.size()</tt>.
- */
-public static boolean inverse(DoubleMatrix2D A) {
-  Property.DEFAULT.checkSquare(A);
-  boolean isNonSingular = true;
-  for (int i=A.rows(); --i >= 0;) {
-    double v = A.getQuick(i,i);
-    isNonSingular &= (v!=0);
-    A.setQuick(i,i, 1/v);
+
+  private Diagonal() {
   }
-  return isNonSingular;
-}
+
+  /**
+   * Modifies A to hold its inverse.
+   *
+   * @return isNonSingular.
+   * @throws IllegalArgumentException if <tt>x.size() != y.size()</tt>.
+   */
+  public static boolean inverse(DoubleMatrix2D A) {
+    Property.DEFAULT.checkSquare(A);
+    boolean isNonSingular = true;
+    for (int i = A.rows(); --i >= 0;) {
+      double v = A.getQuick(i, i);
+      isNonSingular &= (v != 0);
+      A.setQuick(i, i, 1 / v);
+    }
+    return isNonSingular;
+  }
 }

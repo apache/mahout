@@ -17,23 +17,23 @@
 
 package org.apache.mahout.matrix;
 
+import org.apache.mahout.matrix.function.IntDoubleProcedure;
+import org.apache.mahout.matrix.list.DoubleArrayList;
+import org.apache.mahout.matrix.list.IntArrayList;
+import org.apache.mahout.matrix.map.OpenIntDoubleHashMap;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import org.apache.mahout.matrix.function.IntDoubleProcedure;
-import org.apache.mahout.matrix.list.DoubleArrayList;
-import org.apache.mahout.matrix.list.IntArrayList;
-import org.apache.mahout.matrix.map.OpenIntDoubleHashMap;
-
 
 /** Implements vector that only stores non-zero doubles */
 public class SparseVector extends AbstractVector {
 
   private OpenIntDoubleHashMap values;
-  
+
   private int cardinality;
   private double lengthSquared = -1.0;
 
@@ -75,7 +75,7 @@ public class SparseVector extends AbstractVector {
   @Override
   public SparseVector clone() {
     SparseVector clone = (SparseVector) super.clone();
-    clone.values = (OpenIntDoubleHashMap)values.clone();
+    clone.values = (OpenIntDoubleHashMap) values.clone();
     return clone;
   }
 
@@ -140,15 +140,15 @@ public class SparseVector extends AbstractVector {
    * @see #getElement(int)
    */
   @Override
-  public java.util.Iterator<Vector.Element> iterateNonZero() {
+  public Iterator<Vector.Element> iterateNonZero() {
     return new NonZeroIterator(false);
   }
 
   @Override
-  public java.util.Iterator<Vector.Element> iterateNonZero(boolean sorted) {
+  public Iterator<Vector.Element> iterateNonZero(boolean sorted) {
     return new NonZeroIterator(sorted);
-  }  
-  
+  }
+
   @Override
   public Iterator<Vector.Element> iterateAll() {
     return new AllIterator();
@@ -194,7 +194,8 @@ public class SparseVector extends AbstractVector {
 
   }
 
-  private class AllIterator implements java.util.Iterator<Vector.Element> {
+  private class AllIterator implements Iterator<Vector.Element> {
+
     private int offset = 0;
     private final Element element = new Element(0);
 
@@ -219,20 +220,21 @@ public class SparseVector extends AbstractVector {
   }
 
 
-  private class NonZeroIterator implements java.util.Iterator<Vector.Element> {
+  private class NonZeroIterator implements Iterator<Vector.Element> {
+
     private int offset = 0;
     private final Element element = new Element(0);
 
-    private IntArrayList intArrList =  values.keys();
-    
-    public NonZeroIterator(boolean sorted) {
+    private final IntArrayList intArrList = values.keys();
+
+    private NonZeroIterator(boolean sorted) {
       if (sorted) {
         intArrList.sort();
-      }      
+      }
     }
 
     @Override
-    public boolean hasNext() {      
+    public boolean hasNext() {
       return offset < intArrList.size();
     }
 
@@ -257,6 +259,7 @@ public class SparseVector extends AbstractVector {
   }
 
   public class Element implements Vector.Element {
+
     private int ind;
 
     public Element(int ind) {
@@ -302,7 +305,7 @@ public class SparseVector extends AbstractVector {
     this.setName(dataInput.readUTF());
     int cardinality = dataInput.readInt();
     int size = dataInput.readInt();
-    OpenIntDoubleHashMap values = new OpenIntDoubleHashMap((int)(size * 1.5));
+    OpenIntDoubleHashMap values = new OpenIntDoubleHashMap((int) (size * 1.5));
     int i = 0;
     while (i < size) {
       int index = dataInput.readInt();
@@ -314,7 +317,6 @@ public class SparseVector extends AbstractVector {
     this.cardinality = cardinality;
     this.values = values;
   }
-
 
 
   @Override
@@ -331,12 +333,13 @@ public class SparseVector extends AbstractVector {
     lengthSquared = result;
     return result;
   }
-  
-  private class DistanceSquared implements IntDoubleProcedure {
-    Vector v;
-    public double result = 0.0;
 
-    public DistanceSquared(Vector v) {
+  private class DistanceSquared implements IntDoubleProcedure {
+
+    Vector v;
+    private double result = 0.0;
+
+    private DistanceSquared(Vector v) {
       this.v = v;
     }
 
@@ -355,14 +358,15 @@ public class SparseVector extends AbstractVector {
 
     DistanceSquared distanceSquared = new DistanceSquared(v);
     values.forEachPair(distanceSquared);
-    double result = distanceSquared.result;    
+    double result = distanceSquared.result;
     return result;
   }
 
   private class AddToVector implements IntDoubleProcedure {
+
     Vector v;
 
-    public AddToVector(Vector v) {
+    private AddToVector(Vector v) {
       this.v = v;
     }
 

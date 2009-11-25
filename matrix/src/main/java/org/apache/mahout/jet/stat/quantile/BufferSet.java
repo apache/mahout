@@ -8,8 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.stat.quantile;
 
-/**
- * An abstract set of buffers; internally used for computing approximate quantiles.
- */
+/** An abstract set of buffers; internally used for computing approximate quantiles. */
 abstract class BufferSet extends org.apache.mahout.matrix.PersistentObject {
+
 }

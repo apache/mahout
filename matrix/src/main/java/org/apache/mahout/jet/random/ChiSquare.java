@@ -33,46 +33,50 @@ import org.apache.mahout.jet.stat.Probability;
  * <p>J.F. Monahan (1987): An algorithm for generating chi random variables, ACM Trans. Math. Software 13, 168-172.
  *
  */
-/** 
- * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
- */
+
+/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class ChiSquare extends AbstractContinousDistribution {
+
   protected double freedom;
 
   // cached vars for method nextDouble(a) (for performance only)
-  private double freedom_in = -1.0,b,vm,vp,vd;
+  private double freedom_in = -1.0;
+  private double b;
+  private double vm;
+  private double vd;
 
-   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static ChiSquare shared = new ChiSquare(1.0,makeDefaultGenerator());
-/**
- * Constructs a ChiSquare distribution.
- * Example: freedom=1.0.
- * @param freedom degrees of freedom.
- * @throws IllegalArgumentException if <tt>freedom &lt; 1.0</tt>.
- */
-public ChiSquare(double freedom, RandomEngine randomGenerator) {
-  setRandomGenerator(randomGenerator);
-  setState(freedom);
-}
-/**
- * Returns the cumulative distribution function.
- */
-public double cdf(double x) {
-  return Probability.chiSquare(freedom,x);
-}
-/**
- * Returns a random number from the distribution.
- */
-public double nextDouble() {
-  return nextDouble(this.freedom);
-}
-/**
- * Returns a random number from the distribution; bypasses the internal state.
- * @param freedom degrees of freedom.
- * It should hold <tt>freedom &lt; 1.0</tt>.
- */
-public double nextDouble(double freedom) {
+  // The uniform random number generated shared by all <b>static</b> methods.
+  protected static ChiSquare shared = new ChiSquare(1.0, makeDefaultGenerator());
+
+  /**
+   * Constructs a ChiSquare distribution. Example: freedom=1.0.
+   *
+   * @param freedom degrees of freedom.
+   * @throws IllegalArgumentException if <tt>freedom &lt; 1.0</tt>.
+   */
+  public ChiSquare(double freedom, RandomEngine randomGenerator) {
+    setRandomGenerator(randomGenerator);
+    setState(freedom);
+  }
+
+  /** Returns the cumulative distribution function. */
+  public double cdf(double x) {
+    return Probability.chiSquare(freedom, x);
+  }
+
+  /** Returns a random number from the distribution. */
+  @Override
+  public double nextDouble() {
+    return nextDouble(this.freedom);
+  }
+
+  /**
+   * Returns a random number from the distribution; bypasses the internal state.
+   *
+   * @param freedom degrees of freedom. It should hold <tt>freedom &lt; 1.0</tt>.
+   */
+  public double nextDouble(double freedom) {
 /******************************************************************
  *                                                                *
  *        Chi Distribution - Ratio of Uniforms  with shift        *
@@ -90,87 +94,114 @@ public double nextDouble(double freedom) {
  * Implemented by R. Kremer, 1990                                 *
  ******************************************************************/
 
-  double u,v,z,zz,r;
+    double u, v, z, zz, r;
 
-  //if( a < 1 )  return (-1.0); // Check for invalid input value
+    //if( a < 1 )  return (-1.0); // Check for invalid input value
 
-  if (freedom == 1.0) {
-    for(;;) {
-      u = randomGenerator.raw();
-      v = randomGenerator.raw() * 0.857763884960707;
-      z = v / u;
-      if (z < 0) continue;
-      zz = z * z;
-      r = 2.5 - zz;
-      if (z < 0.0) r = r + zz * z / (3.0 * z);
-      if (u < r * 0.3894003915) return(z*z);
-      if (zz > (1.036961043 / u + 1.4)) continue;
-      if (2.0 * Math.log(u) < (- zz * 0.5 )) return(z*z);
+    if (freedom == 1.0) {
+      while (true) {
+        u = randomGenerator.raw();
+        v = randomGenerator.raw() * 0.857763884960707;
+        z = v / u;
+        if (z < 0) {
+          continue;
+        }
+        zz = z * z;
+        r = 2.5 - zz;
+        if (z < 0.0) {
+          r += zz * z / (3.0 * z);
+        }
+        if (u < r * 0.3894003915) {
+          return (z * z);
+        }
+        if (zz > (1.036961043 / u + 1.4)) {
+          continue;
+        }
+        if (2.0 * Math.log(u) < (-zz * 0.5)) {
+          return (z * z);
+        }
+      }
+    } else {
+      if (freedom != freedom_in) {
+        b = Math.sqrt(freedom - 1.0);
+        vm = -0.6065306597 * (1.0 - 0.25 / (b * b + 1.0));
+        vm = (-b > vm) ? -b : vm;
+        double vp = 0.6065306597 * (0.7071067812 + b) / (0.5 + b);
+        vd = vp - vm;
+        freedom_in = freedom;
+      }
+      while (true) {
+        u = randomGenerator.raw();
+        v = randomGenerator.raw() * vd + vm;
+        z = v / u;
+        if (z < -b) {
+          continue;
+        }
+        zz = z * z;
+        r = 2.5 - zz;
+        if (z < 0.0) {
+          r += zz * z / (3.0 * (z + b));
+        }
+        if (u < r * 0.3894003915) {
+          return ((z + b) * (z + b));
+        }
+        if (zz > (1.036961043 / u + 1.4)) {
+          continue;
+        }
+        if (2.0 * Math.log(u) < (Math.log(1.0 + z / b) * b * b - zz * 0.5 - z * b)) {
+          return ((z + b) * (z + b));
+        }
+      }
     }
   }
-  else {
-    if (freedom != freedom_in) {
-      b = Math.sqrt(freedom - 1.0);
-      vm = - 0.6065306597 * (1.0 - 0.25 / (b * b + 1.0));
-      vm = (-b > vm) ? -b : vm;
-      vp = 0.6065306597 * (0.7071067812 + b) / (0.5 + b);
-      vd = vp - vm;
-      freedom_in = freedom;
+
+  /** Returns the probability distribution function. */
+  public double pdf(double x) {
+    if (x <= 0.0) {
+      throw new IllegalArgumentException();
     }
-    for(;;) {
-      u = randomGenerator.raw();
-      v = randomGenerator.raw() * vd + vm;
-      z = v / u;
-      if (z < -b) continue;
-      zz = z * z;
-      r = 2.5 - zz;
-      if (z < 0.0) r = r + zz * z / (3.0 * (z + b));
-      if (u < r * 0.3894003915) return((z + b)*(z + b));
-      if (zz > (1.036961043 / u + 1.4)) continue;
-      if (2.0 * Math.log(u) < (Math.log(1.0 + z / b) * b * b - zz * 0.5 - z * b)) return((z + b)*(z + b));
+    double logGamma = Fun.logGamma(freedom / 2.0);
+    return Math.exp((freedom / 2.0 - 1.0) * Math.log(x / 2.0) - x / 2.0 - logGamma) / 2.0;
+  }
+
+  /**
+   * Sets the distribution parameter.
+   *
+   * @param freedom degrees of freedom.
+   * @throws IllegalArgumentException if <tt>freedom &lt; 1.0</tt>.
+   */
+  public void setState(double freedom) {
+    if (freedom < 1.0) {
+      throw new IllegalArgumentException();
+    }
+    this.freedom = freedom;
+  }
+
+  /**
+   * Returns a random number from the distribution.
+   *
+   * @param freedom degrees of freedom.
+   * @throws IllegalArgumentException if <tt>freedom &lt; 1.0</tt>.
+   */
+  public static double staticNextDouble(double freedom) {
+    synchronized (shared) {
+      return shared.nextDouble(freedom);
     }
   }
-}
-/**
- * Returns the probability distribution function.
- */
-public double pdf(double x) {
-  if (x <= 0.0) throw new IllegalArgumentException();
-  double logGamma = Fun.logGamma(freedom/2.0);
-  return Math.exp((freedom/2.0 - 1.0) * Math.log(x/2.0) - x/2.0 - logGamma) / 2.0;
-}
-/**
- * Sets the distribution parameter.
- * @param freedom degrees of freedom.
- * @throws IllegalArgumentException if <tt>freedom &lt; 1.0</tt>.
- */
-public void setState(double freedom) {
-  if (freedom<1.0) throw new IllegalArgumentException();
-  this.freedom = freedom;
-}
-/**
- * Returns a random number from the distribution.
- * @param freedom degrees of freedom.
- * @throws IllegalArgumentException if <tt>freedom &lt; 1.0</tt>.
- */
-public static double staticNextDouble(double freedom) {
-  synchronized (shared) {
-    return shared.nextDouble(freedom);
+
+  /** Returns a String representation of the receiver. */
+  public String toString() {
+    return this.getClass().getName() + "(" + freedom + ")";
   }
-}
-/**
- * Returns a String representation of the receiver.
- */
-public String toString() {
-  return this.getClass().getName()+"("+freedom+")";
-}
-/**
- * Sets the uniform random number generated shared by all <b>static</b> methods.
- * @param randomGenerator the new uniform random number generator to be shared.
- */
-private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-  synchronized (shared) {
-    shared.setRandomGenerator(randomGenerator);
+
+  /**
+   * Sets the uniform random number generated shared by all <b>static</b> methods.
+   *
+   * @param randomGenerator the new uniform random number generator to be shared.
+   */
+  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
+    synchronized (shared) {
+      shared.setRandomGenerator(randomGenerator);
+    }
   }
-}
 }

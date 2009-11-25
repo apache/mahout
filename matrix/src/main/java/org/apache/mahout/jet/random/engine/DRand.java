@@ -32,58 +32,69 @@ import java.util.Date;
  * <p>
  * Note that this implementation is <b>not synchronized</b>.                                  
  * <p>
- * 
+ *
  * @see MersenneTwister
  * @see java.util.Random
  */
-/** 
- * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
- */
+
+/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class DRand extends RandomEngine {
+
   private int current;
   public static final int DEFAULT_SEED = 1;
-/**
- * Constructs and returns a random number generator with a default seed, which is a <b>constant</b>.
- */
-public DRand() {
-  this(DEFAULT_SEED);
-}
-/**
- * Constructs and returns a random number generator with the given seed.
- * @param seed should not be 0, in such a case <tt>DRand.DEFAULT_SEED</tt> is substituted.
- */
-public DRand(int seed) {
-  setSeed(seed);
-}
-/**
- * Constructs and returns a random number generator seeded with the given date.
- *
- * @param d typically <tt>new java.util.Date()</tt>
- */
-public DRand(Date d) {
-  this((int)d.getTime());
-}
-/**
- * Returns a 32 bit uniformly distributed random number in the closed interval <tt>[Integer.MIN_VALUE,Integer.MAX_VALUE]</tt> (including <tt>Integer.MIN_VALUE</tt> and <tt>Integer.MAX_VALUE</tt>).
- */
-public int nextInt() {
-  current *= 0x278DDE6D;     /* z(i+1)=a*z(i) (mod 2**32) */
-  // a == 0x278DDE6D == 663608941
-  
-  return current;
-}
-/**
- * Sets the receiver's seed. 
- * This method resets the receiver's entire internal state.
- * The following condition must hold: <tt>seed &gt;= 0 && seed &lt; (2<sup>32</sup>-1) / 4</tt>.
- * @param seed if the above condition does not hold, a modified seed that meets the condition is silently substituted.
- */
-protected void setSeed(int seed) {
-  if (seed<0) seed = -seed;
-  int limit = (int)((Math.pow(2,32)-1) /4); // --> 536870911
-  if (seed >= limit) seed = seed >> 3;
 
-  this.current = 4*seed+1;
-}
+  /** Constructs and returns a random number generator with a default seed, which is a <b>constant</b>. */
+  public DRand() {
+    this(DEFAULT_SEED);
+  }
+
+  /**
+   * Constructs and returns a random number generator with the given seed.
+   *
+   * @param seed should not be 0, in such a case <tt>DRand.DEFAULT_SEED</tt> is substituted.
+   */
+  public DRand(int seed) {
+    setSeed(seed);
+  }
+
+  /**
+   * Constructs and returns a random number generator seeded with the given date.
+   *
+   * @param d typically <tt>new java.util.Date()</tt>
+   */
+  public DRand(Date d) {
+    this((int) d.getTime());
+  }
+
+  /**
+   * Returns a 32 bit uniformly distributed random number in the closed interval <tt>[Integer.MIN_VALUE,Integer.MAX_VALUE]</tt>
+   * (including <tt>Integer.MIN_VALUE</tt> and <tt>Integer.MAX_VALUE</tt>).
+   */
+  @Override
+  public int nextInt() {
+    current *= 0x278DDE6D;     /* z(i+1)=a*z(i) (mod 2**32) */
+    // a == 0x278DDE6D == 663608941
+
+    return current;
+  }
+
+  /**
+   * Sets the receiver's seed. This method resets the receiver's entire internal state. The following condition must
+   * hold: <tt>seed &gt;= 0 && seed &lt; (2<sup>32</sup>-1) / 4</tt>.
+   *
+   * @param seed if the above condition does not hold, a modified seed that meets the condition is silently
+   *             substituted.
+   */
+  protected void setSeed(int seed) {
+    if (seed < 0) {
+      seed = -seed;
+    }
+    int limit = (int) ((Math.pow(2, 32) - 1) / 4); // --> 536870911
+    if (seed >= limit) {
+      seed >>= 3;
+    }
+
+    this.current = 4 * seed + 1;
+  }
 }
