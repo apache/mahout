@@ -52,12 +52,12 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @return the aggregated measure.
 */
 public Object aggregate(org.apache.mahout.matrix.function.ObjectObjectFunction aggr, org.apache.mahout.matrix.function.ObjectFunction f) {
-	if (size==0) return null;
-	Object a = f.apply(getQuick(size-1));
-	for (int i=size-1; --i >= 0; ) {
-		a = aggr.apply(a, f.apply(getQuick(i)));
-	}
-	return a;
+  if (size==0) return null;
+  Object a = f.apply(getQuick(size-1));
+  for (int i=size-1; --i >= 0; ) {
+    a = aggr.apply(a, f.apply(getQuick(i)));
+  }
+  return a;
 }
 /**
 Applies a function to each corresponding cell of two matrices and aggregates the results.
@@ -82,16 +82,16 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @param aggr an aggregation function taking as first argument the current aggregation and as second argument the transformed current cell values.
 @param f a function transforming the current cell values.
 @return the aggregated measure.
-@throws	IllegalArgumentException if <tt>size() != other.size()</tt>.
+@throws  IllegalArgumentException if <tt>size() != other.size()</tt>.
 */
 public Object aggregate(ObjectMatrix1D other, org.apache.mahout.matrix.function.ObjectObjectFunction aggr, org.apache.mahout.matrix.function.ObjectObjectFunction f) {
-	checkSize(other);
-	if (size==0) return null;
-	Object a = f.apply(getQuick(size-1),other.getQuick(size-1));
-	for (int i=size-1; --i >= 0; ) {
-		a = aggr.apply(a, f.apply(getQuick(i),other.getQuick(i)));
-	}
-	return a;
+  checkSize(other);
+  if (size==0) return null;
+  Object a = f.apply(getQuick(size-1),other.getQuick(size-1));
+  for (int i=size-1; --i >= 0; ) {
+    a = aggr.apply(a, f.apply(getQuick(i),other.getQuick(i)));
+  }
+  return a;
 }
 /**
  * Sets all cells to the state specified by <tt>values</tt>.
@@ -104,11 +104,11 @@ public Object aggregate(ObjectMatrix1D other, org.apache.mahout.matrix.function.
  * @throws IllegalArgumentException if <tt>values.length != size()</tt>.
  */
 public ObjectMatrix1D assign(Object[] values) {
-	if (values.length != size) throw new IllegalArgumentException("Must have same number of cells: length="+values.length+", size()="+size());
-	for (int i=size; --i >= 0;) {
-		setQuick(i,values[i]);
-	}
-	return this;
+  if (values.length != size) throw new IllegalArgumentException("Must have same number of cells: length="+values.length+", size()="+size());
+  for (int i=size; --i >= 0;) {
+    setQuick(i,values[i]);
+  }
+  return this;
 }
 /**
 Assigns the result of a function to each cell; <tt>x[i] = function(x[i])</tt>.
@@ -129,10 +129,10 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @see org.apache.mahout.jet.math.Functions
 */
 public ObjectMatrix1D assign(org.apache.mahout.matrix.function.ObjectFunction function) {
-	for (int i=size; --i >= 0; ) {
-		setQuick(i, function.apply(getQuick(i)));
-	}
-	return this;
+  for (int i=size; --i >= 0; ) {
+    setQuick(i, function.apply(getQuick(i)));
+  }
+  return this;
 }
 /**
  * Replaces all cell values of the receiver with the values of another matrix.
@@ -141,17 +141,17 @@ public ObjectMatrix1D assign(org.apache.mahout.matrix.function.ObjectFunction fu
  *
  * @param     other   the source matrix to copy from (may be identical to the receiver).
  * @return <tt>this</tt> (for convenience only).
- * @throws	IllegalArgumentException if <tt>size() != other.size()</tt>.
+ * @throws  IllegalArgumentException if <tt>size() != other.size()</tt>.
  */
 public ObjectMatrix1D assign(ObjectMatrix1D other) {
-	if (other==this) return this;
-	checkSize(other);
-	if (haveSharedCells(other)) other = other.copy();
-	
-	for (int i=size; --i >= 0;) {
-		setQuick(i,other.getQuick(i));
-	}
-	return this;
+  if (other==this) return this;
+  checkSize(other);
+  if (haveSharedCells(other)) other = other.copy();
+  
+  for (int i=size; --i >= 0;) {
+    setQuick(i,other.getQuick(i));
+  }
+  return this;
 }
 /**
 Assigns the result of a function to each cell; <tt>x[i] = function(x[i],y[i])</tt>.
@@ -171,15 +171,15 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @param function a function object taking as first argument the current cell's value of <tt>this</tt>,
 and as second argument the current cell's value of <tt>y</tt>,
 @return <tt>this</tt> (for convenience only).
-@throws	IllegalArgumentException if <tt>size() != y.size()</tt>.
+@throws  IllegalArgumentException if <tt>size() != y.size()</tt>.
 @see org.apache.mahout.jet.math.Functions
 */
 public ObjectMatrix1D assign(ObjectMatrix1D y, org.apache.mahout.matrix.function.ObjectObjectFunction function) {
-	checkSize(y);
-	for (int i=size; --i >= 0; ) {
-		setQuick(i, function.apply(getQuick(i), y.getQuick(i)));
-	}
-	return this;
+  checkSize(y);
+  for (int i=size; --i >= 0; ) {
+    setQuick(i, function.apply(getQuick(i), y.getQuick(i)));
+  }
+  return this;
 }
 /**
  * Sets all cells to the state specified by <tt>value</tt>.
@@ -187,20 +187,20 @@ public ObjectMatrix1D assign(ObjectMatrix1D y, org.apache.mahout.matrix.function
  * @return <tt>this</tt> (for convenience only).
  */
 public ObjectMatrix1D assign(Object value) {
-	for (int i=size; --i >= 0;) {
-		setQuick(i,value);
-	}
-	return this;
+  for (int i=size; --i >= 0;) {
+    setQuick(i,value);
+  }
+  return this;
 }
 /**
  * Returns the number of cells having non-zero values; ignores tolerance.
  */
 public int cardinality() {
-	int cardinality = 0;
-	for (int i=size; --i >= 0;) {
-		if (getQuick(i) != null) cardinality++;
-	}
-	return cardinality;
+  int cardinality = 0;
+  for (int i=size; --i >= 0;) {
+    if (getQuick(i) != null) cardinality++;
+  }
+  return cardinality;
 }
 /**
  * Constructs and returns a deep copy of the receiver.
@@ -211,9 +211,9 @@ public int cardinality() {
  * @return  a deep copy of the receiver.
  */
 public ObjectMatrix1D copy() {
-	ObjectMatrix1D copy = like();
-	copy.assign(this);
-	return copy;
+  ObjectMatrix1D copy = like();
+  copy.assign(this);
+  return copy;
 }
 /**
 * Compares the specified Object with the receiver for equality.
@@ -223,7 +223,7 @@ public ObjectMatrix1D copy() {
 * @return true if the specified Object is equal to the receiver.
 */
 public boolean equals(Object otherObj) { //delta
-	return equals(otherObj, true);
+  return equals(otherObj, true);
 }
 /**
 * Compares the specified Object with the receiver for equality.
@@ -241,24 +241,24 @@ public boolean equals(Object otherObj) { //delta
 * @return true if the specified Object is equal to the receiver.
 */
 public boolean equals(Object otherObj, boolean testForEquality) { //delta
-	if (! (otherObj instanceof ObjectMatrix1D)) {return false;}
-	if (this==otherObj) return true;
-	if (otherObj==null) return false;
-	ObjectMatrix1D other = (ObjectMatrix1D) otherObj;
-	if (size!=other.size()) return false;
+  if (! (otherObj instanceof ObjectMatrix1D)) {return false;}
+  if (this==otherObj) return true;
+  if (otherObj==null) return false;
+  ObjectMatrix1D other = (ObjectMatrix1D) otherObj;
+  if (size!=other.size()) return false;
 
-	if (! testForEquality) {
-		for (int i=size; --i >= 0; ) {
-			if (getQuick(i) != other.getQuick(i)) return false;
-		}
-	}
-	else {
-		for (int i=size; --i >= 0; ) {
-			if (!(getQuick(i)==null ? other.getQuick(i)==null : getQuick(i).equals(other.getQuick(i)))) return false;
-		}
-	}
+  if (! testForEquality) {
+    for (int i=size; --i >= 0; ) {
+      if (getQuick(i) != other.getQuick(i)) return false;
+    }
+  }
+  else {
+    for (int i=size; --i >= 0; ) {
+      if (!(getQuick(i)==null ? other.getQuick(i)==null : getQuick(i).equals(other.getQuick(i)))) return false;
+    }
+  }
 
-	return true;
+  return true;
 
 }
 /**
@@ -266,18 +266,18 @@ public boolean equals(Object otherObj, boolean testForEquality) { //delta
  *
  * @param     index   the index of the cell.
  * @return    the value of the specified cell.
- * @throws	IndexOutOfBoundsException if <tt>index&lt;0 || index&gt;=size()</tt>.
+ * @throws  IndexOutOfBoundsException if <tt>index&lt;0 || index&gt;=size()</tt>.
  */
 public Object get(int index) {
-	if (index<0 || index>=size) checkIndex(index);
-	return getQuick(index);
+  if (index<0 || index>=size) checkIndex(index);
+  return getQuick(index);
 }
 /**
  * Returns the content of this matrix if it is a wrapper; or <tt>this</tt> otherwise.
  * Override this method in wrappers.
  */
 protected ObjectMatrix1D getContent() {
-	return this;
+  return this;
 }
 /**
 Fills the coordinates and values of cells having non-zero values into the specified lists.
@@ -303,18 +303,18 @@ In other words, <tt>get(2)==8, get(4)==7</tt>.
 @param valueList the list to be filled with values, can have any size.
 */
 public void getNonZeros(IntArrayList indexList, ObjectArrayList valueList) {
-	boolean fillIndexList = indexList != null;
-	boolean fillValueList = valueList != null;
-	if (fillIndexList) indexList.clear(); 
-	if (fillValueList) valueList.clear();
-	int s = size;
-	for (int i=0; i < s; i++) {
-		Object value = getQuick(i);
-		if (value != null) {
-			if (fillIndexList) indexList.add(i);
-			if (fillValueList) valueList.add(value);
-		}
-	}
+  boolean fillIndexList = indexList != null;
+  boolean fillValueList = valueList != null;
+  if (fillIndexList) indexList.clear(); 
+  if (fillValueList) valueList.clear();
+  int s = size;
+  for (int i=0; i < s; i++) {
+    Object value = getQuick(i);
+    if (value != null) {
+      if (fillIndexList) indexList.add(i);
+      if (fillValueList) valueList.add(value);
+    }
+  }
 }
 /**
  * Returns the matrix cell value at coordinate <tt>index</tt>.
@@ -331,16 +331,16 @@ public abstract Object getQuick(int index);
  * Returns <tt>true</tt> if both matrices share at least one identical cell.
  */
 protected boolean haveSharedCells(ObjectMatrix1D other) {
-	if (other==null) return false;
-	if (this==other) return true;
-	return getContent().haveSharedCellsRaw(other.getContent());
-}	
+  if (other==null) return false;
+  if (this==other) return true;
+  return getContent().haveSharedCellsRaw(other.getContent());
+}  
 /**
  * Returns <tt>true</tt> if both matrices share at least one identical cell.
  */
 protected boolean haveSharedCellsRaw(ObjectMatrix1D other) {
-	return false;
-}	
+  return false;
+}  
 /**
  * Construct and returns a new empty matrix <i>of the same dynamic type</i> as the receiver, having the same size.
  * For example, if the receiver is an instance of type <tt>DenseObjectMatrix1D</tt> the new matrix must also be of type <tt>DenseObjectMatrix1D</tt>,
@@ -350,7 +350,7 @@ protected boolean haveSharedCellsRaw(ObjectMatrix1D other) {
  * @return  a new empty matrix of the same dynamic type.
  */
 public ObjectMatrix1D like() {
-	return like(size);
+  return like(size);
 }
 /**
  * Construct and returns a new empty matrix <i>of the same dynamic type</i> as the receiver, having the specified size.
@@ -377,11 +377,11 @@ public abstract ObjectMatrix2D like2D(int rows, int columns);
  *
  * @param     index   the index of the cell.
  * @param    value the value to be filled into the specified cell.
- * @throws	IndexOutOfBoundsException if <tt>index&lt;0 || index&gt;=size()</tt>.
+ * @throws  IndexOutOfBoundsException if <tt>index&lt;0 || index&gt;=size()</tt>.
  */
 public void set(int index, Object value) {
-	if (index<0 || index>=size) checkIndex(index);
-	setQuick(index,value);
+  if (index<0 || index>=size) checkIndex(index);
+  setQuick(index,value);
 }
 /**
  * Sets the matrix cell at coordinate <tt>index</tt> to the specified value.
@@ -399,13 +399,13 @@ Swaps each element <tt>this[i]</tt> with <tt>other[i]</tt>.
 @throws IllegalArgumentException if <tt>size() != other.size()</tt>.
 */
 public void swap(ObjectMatrix1D other) {
-	checkSize(other);
-	for (int i=size; --i >= 0; ) {
-		Object tmp = getQuick(i);
-		setQuick(i, other.getQuick(i));
-		other.setQuick(i, tmp);
-	}
-	return;
+  checkSize(other);
+  for (int i=size; --i >= 0; ) {
+    Object tmp = getQuick(i);
+    setQuick(i, other.getQuick(i));
+    other.setQuick(i, tmp);
+  }
+  return;
 }
 /**
 Constructs and returns a 1-dimensional array containing the cell values.
@@ -417,9 +417,9 @@ The returned array <tt>values</tt> has the form
 @return an array filled with the values of the cells.
 */
 public Object[] toArray() {
-	Object[] values = new Object[size];
-	toArray(values);
-	return values;
+  Object[] values = new Object[size];
+  toArray(values);
+  return values;
 }
 /**
 Fills the cell values into the specified 1-dimensional array.
@@ -431,17 +431,17 @@ After this call returns the array <tt>values</tt> has the form
 @throws IllegalArgumentException if <tt>values.length < size()</tt>.
 */
 public void toArray(Object[] values) {
-	if (values.length < size) throw new IllegalArgumentException("values too small");
-	for (int i=size; --i >= 0; ) {
-		values[i] = getQuick(i);
-	}
+  if (values.length < size) throw new IllegalArgumentException("values too small");
+  for (int i=size; --i >= 0; ) {
+    values[i] = getQuick(i);
+  }
 }
 /**
  * Returns a string representation using default formatting.
  * @see org.apache.mahout.matrix.matrix.objectalgo.Formatter
  */
 public String toString() {
-	return new org.apache.mahout.matrix.matrix.objectalgo.Formatter().toString(this);
+  return new org.apache.mahout.matrix.matrix.objectalgo.Formatter().toString(this);
 }
 /**
  * Constructs and returns a new view equal to the receiver.
@@ -455,7 +455,7 @@ public String toString() {
  * @return  a new view of the receiver.
  */
 protected ObjectMatrix1D view() {
-	return (ObjectMatrix1D) clone();
+  return (ObjectMatrix1D) clone();
 }
 /**
 Constructs and returns a new <i>flip view</i>.
@@ -465,7 +465,7 @@ The returned view is backed by this matrix, so changes in the returned view are 
 @return a new flip view.
 */
 public ObjectMatrix1D viewFlip() {
-	return (ObjectMatrix1D) (view().vFlip());
+  return (ObjectMatrix1D) (view().vFlip());
 }
 /**
 Constructs and returns a new <i>sub-range view</i> that is a <tt>width</tt> sub matrix starting at <tt>index</tt>.
@@ -484,12 +484,12 @@ As usual, any attempt to access a cell at other coordinates will throw an <tt>In
 
 @param     index   The index of the first cell.
 @param     width   The width of the range.
-@throws	IndexOutOfBoundsException if <tt>index<0 || width<0 || index+width>size()</tt>.
+@throws  IndexOutOfBoundsException if <tt>index<0 || width<0 || index+width>size()</tt>.
 @return the new view.
-		
+    
 */
 public ObjectMatrix1D viewPart(int index, int width) {
-	return (ObjectMatrix1D) (view().vPart(index,width));
+  return (ObjectMatrix1D) (view().vPart(index,width));
 }
 /**
 Constructs and returns a new <i>selection view</i> that is a matrix holding the indicated cells.
@@ -512,18 +512,18 @@ The returned view is backed by this matrix, so changes in the returned view are 
 @throws IndexOutOfBoundsException if <tt>!(0 <= indexes[i] < size())</tt> for any <tt>i=0..indexes.length()-1</tt>.
 */
 public ObjectMatrix1D viewSelection(int[] indexes) {
-	// check for "all"
-	if (indexes==null) {
-		indexes = new int[size];
-		for (int i=size; --i >= 0; ) indexes[i] = i;
-	}
-	
-	checkIndexes(indexes);
-	int[] offsets = new int[indexes.length];
-	for (int i=indexes.length; --i >= 0; ) {
-		offsets[i] = index(indexes[i]);
-	}
-	return viewSelectionLike(offsets);
+  // check for "all"
+  if (indexes==null) {
+    indexes = new int[size];
+    for (int i=size; --i >= 0; ) indexes[i] = i;
+  }
+  
+  checkIndexes(indexes);
+  int[] offsets = new int[indexes.length];
+  for (int i=indexes.length; --i >= 0; ) {
+    offsets[i] = index(indexes[i]);
+  }
+  return viewSelectionLike(offsets);
 }
 /**
 Constructs and returns a new <i>selection view</i> that is a matrix holding the cells matching the given condition.
@@ -549,12 +549,12 @@ The returned view is backed by this matrix, so changes in the returned view are 
 @return the new view.
 */
 public ObjectMatrix1D viewSelection(org.apache.mahout.matrix.function.ObjectProcedure condition) {
-	IntArrayList matches = new IntArrayList();
-	for (int i=0; i < size; i++) {
-		if (condition.apply(getQuick(i))) matches.add(i);
-	}
-	matches.trimToSize();
-	return viewSelection(matches.elements());
+  IntArrayList matches = new IntArrayList();
+  for (int i=0; i < size; i++) {
+    if (condition.apply(getQuick(i))) matches.add(i);
+  }
+  matches.trimToSize();
+  return viewSelection(matches.elements());
 }
 /**
  * Construct and returns a new selection view.
@@ -571,19 +571,19 @@ For more advanced sorting functionality, see {@link org.apache.mahout.matrix.mat
 @return a new sorted vector (matrix) view.
 */
 public ObjectMatrix1D viewSorted() {
-	return org.apache.mahout.matrix.matrix.objectalgo.Sorting.mergeSort.sort(this);
+  return org.apache.mahout.matrix.matrix.objectalgo.Sorting.mergeSort.sort(this);
 }
 /**
 Constructs and returns a new <i>stride view</i> which is a sub matrix consisting of every i-th cell.
 More specifically, the view has size <tt>this.size()/stride</tt> holding cells <tt>this.get(i*stride)</tt> for all <tt>i = 0..size()/stride - 1</tt>.
 
 @param  stride  the step factor.
-@throws	IndexOutOfBoundsException if <tt>stride <= 0</tt>.
+@throws  IndexOutOfBoundsException if <tt>stride <= 0</tt>.
 @return the new view.
-		
+    
 */
 public ObjectMatrix1D viewStrides(int stride) {
-	return (ObjectMatrix1D) (view().vStrides(stride));
+  return (ObjectMatrix1D) (view().vStrides(stride));
 }
 /**
  * Applies a procedure to each cell's value.
@@ -601,9 +601,9 @@ public ObjectMatrix1D viewStrides(int stride) {
  * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise. 
  */
 private boolean xforEach(final org.apache.mahout.matrix.function.ObjectProcedure procedure) {
-	for (int i=size; --i >= 0;) {
-		if (!procedure.apply(getQuick(i))) return false;
-	}
-	return true;
+  for (int i=size; --i >= 0;) {
+    if (!procedure.apply(getQuick(i))) return false;
+  }
+  return true;
 }
 }

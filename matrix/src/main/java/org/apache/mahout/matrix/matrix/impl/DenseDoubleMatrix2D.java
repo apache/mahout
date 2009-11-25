@@ -35,17 +35,17 @@ Setting/getting values in a loop row-by-row is quicker than column-by-column.
 Thus
 <pre>
    for (int row=0; row < rows; row++) {
-	  for (int column=0; column < columns; column++) {
-		 matrix.setQuick(row,column,someValue);
-	  }
+    for (int column=0; column < columns; column++) {
+     matrix.setQuick(row,column,someValue);
+    }
    }
 </pre>
 is quicker than
 <pre>
    for (int column=0; column < columns; column++) {
-	  for (int row=0; row < rows; row++) {
-		 matrix.setQuick(row,column,someValue);
-	  }
+    for (int row=0; row < rows; row++) {
+     matrix.setQuick(row,column,someValue);
+    }
    }
 </pre>
 @author wolfgang.hoschek@cern.ch
@@ -56,16 +56,16 @@ is quicker than
  */
 @Deprecated
 public class DenseDoubleMatrix2D extends DoubleMatrix2D {
-	static final long serialVersionUID = 1020177651L;
-	/**
-	  * The elements of this matrix.
-	  * elements are stored in row major, i.e.
-	  * index==row*columns + column
-	  * columnOf(index)==index%columns
-	  * rowOf(index)==index/columns
-	  * i.e. {row0 column0..m}, {row1 column0..m}, ..., {rown column0..m}
-	  */
-	protected double[] elements;
+  static final long serialVersionUID = 1020177651L;
+  /**
+    * The elements of this matrix.
+    * elements are stored in row major, i.e.
+    * index==row*columns + column
+    * columnOf(index)==index%columns
+    * rowOf(index)==index/columns
+    * i.e. {row0 column0..m}, {row1 column0..m}, ..., {rown column0..m}
+    */
+  protected double[] elements;
 /**
  * Constructs a matrix with a copy of the given values.
  * <tt>values</tt> is required to have the form <tt>values[row][column]</tt>
@@ -77,19 +77,19 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
  * @throws IllegalArgumentException if <tt>for any 1 &lt;= row &lt; values.length: values[row].length != values[row-1].length</tt>.
  */
 public DenseDoubleMatrix2D(double[][] values) {
-	this(values.length, values.length==0 ? 0: values[0].length);
-	assign(values);
+  this(values.length, values.length==0 ? 0: values[0].length);
+  assign(values);
 }
 /**
  * Constructs a matrix with a given number of rows and columns.
  * All entries are initially <tt>0</tt>.
  * @param rows the number of rows the matrix shall have.
  * @param columns the number of columns the matrix shall have.
- * @throws	IllegalArgumentException if <tt>rows<0 || columns<0 || (double)columns*rows > Integer.MAX_VALUE</tt>.
+ * @throws  IllegalArgumentException if <tt>rows<0 || columns<0 || (double)columns*rows > Integer.MAX_VALUE</tt>.
  */
 public DenseDoubleMatrix2D(int rows, int columns) {
-	setUp(rows, columns);
-	this.elements = new double[rows*columns];
+  setUp(rows, columns);
+  this.elements = new double[rows*columns];
 }
 /**
  * Constructs a view with the given parameters.
@@ -100,12 +100,12 @@ public DenseDoubleMatrix2D(int rows, int columns) {
  * @param columnZero the position of the first element.
  * @param rowStride the number of elements between two rows, i.e. <tt>index(i+1,j)-index(i,j)</tt>.
  * @param columnStride the number of elements between two columns, i.e. <tt>index(i,j+1)-index(i,j)</tt>.
- * @throws	IllegalArgumentException if <tt>rows<0 || columns<0 || (double)columns*rows > Integer.MAX_VALUE</tt> or flip's are illegal.
+ * @throws  IllegalArgumentException if <tt>rows<0 || columns<0 || (double)columns*rows > Integer.MAX_VALUE</tt> or flip's are illegal.
  */
 protected DenseDoubleMatrix2D(int rows, int columns, double[] elements, int rowZero, int columnZero, int rowStride, int columnStride) {
-	setUp(rows,columns,rowZero,columnZero,rowStride,columnStride);
-	this.elements = elements;
-	this.isNoView = false;
+  setUp(rows,columns,rowZero,columnZero,rowStride,columnStride);
+  this.elements = elements;
+  this.isNoView = false;
 }
 /**
  * Sets all cells to the state specified by <tt>values</tt>.
@@ -119,20 +119,20 @@ protected DenseDoubleMatrix2D(int rows, int columns, double[] elements, int rowZ
  * @throws IllegalArgumentException if <tt>values.length != rows() || for any 0 &lt;= row &lt; rows(): values[row].length != columns()</tt>.
  */
 public DoubleMatrix2D assign(double[][] values) {
-	if (this.isNoView) {
-		if (values.length != rows) throw new IllegalArgumentException("Must have same number of rows: rows="+values.length+"rows()="+rows());
-		int i = columns*(rows-1);
-		for (int row=rows; --row >= 0;) {
-			double[] currentRow = values[row];
-			if (currentRow.length != columns) throw new IllegalArgumentException("Must have same number of columns in every row: columns="+currentRow.length+"columns()="+columns());			
-			System.arraycopy(currentRow, 0, this.elements, i, columns);
-			i -= columns;
-		}
-	}
-	else {
-		super.assign(values);
-	}
-	return this;
+  if (this.isNoView) {
+    if (values.length != rows) throw new IllegalArgumentException("Must have same number of rows: rows="+values.length+"rows()="+rows());
+    int i = columns*(rows-1);
+    for (int row=rows; --row >= 0;) {
+      double[] currentRow = values[row];
+      if (currentRow.length != columns) throw new IllegalArgumentException("Must have same number of columns in every row: columns="+currentRow.length+"columns()="+columns());      
+      System.arraycopy(currentRow, 0, this.elements, i, columns);
+      i -= columns;
+    }
+  }
+  else {
+    super.assign(values);
+  }
+  return this;
 }
 /**
  * Sets all cells to the state specified by <tt>value</tt>.
@@ -140,18 +140,18 @@ public DoubleMatrix2D assign(double[][] values) {
  * @return <tt>this</tt> (for convenience only).
  */
 public DoubleMatrix2D assign(double value) {
-	final double[] elems = this.elements;
-	int index = index(0,0);
-	int cs = this.columnStride;
-	int rs = this.rowStride;
-	for (int row=rows; --row >= 0; ) {
-		for (int i=index, column=columns; --column >= 0; ) {
-			elems[i] = value;
-			i += cs;
-		}
-		index += rs;
-	}
-	return this;
+  final double[] elems = this.elements;
+  int index = index(0,0);
+  int cs = this.columnStride;
+  int rs = this.rowStride;
+  for (int row=rows; --row >= 0; ) {
+    for (int i=index, column=columns; --column >= 0; ) {
+      elems[i] = value;
+      i += cs;
+    }
+    index += rs;
+  }
+  return this;
 }
 /**
 Assigns the result of a function to each cell; <tt>x[row,col] = function(x[row,col])</tt>.
@@ -176,35 +176,35 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @see org.apache.mahout.jet.math.Functions
 */
 public DoubleMatrix2D assign(org.apache.mahout.matrix.function.DoubleFunction function) {
-	final double[] elems = this.elements;
-	if (elems==null) throw new InternalError();
-	int index = index(0,0);
-	int cs = this.columnStride;
-	int rs = this.rowStride;
-	
-	// specialization for speed
-	if (function instanceof org.apache.mahout.jet.math.Mult) { // x[i] = mult*x[i]
-		double multiplicator = ((org.apache.mahout.jet.math.Mult)function).multiplicator;
-		if (multiplicator==1) return this;
-		if (multiplicator==0) return assign(0);
-		for (int row=rows; --row >= 0; ) { // the general case
-			for (int i=index, column=columns; --column >= 0; ) {
-				elems[i] *= multiplicator;
-				i += cs;
-			}
-			index += rs;
-		}
-	}
-	else { // the general case x[i] = f(x[i])
-		for (int row=rows; --row >= 0; ) { 
-			for (int i=index, column=columns; --column >= 0; ) {
-				elems[i] = function.apply(elems[i]);
-				i += cs;
-			}
-			index += rs;
-		}
-	}
-	return this;
+  final double[] elems = this.elements;
+  if (elems==null) throw new InternalError();
+  int index = index(0,0);
+  int cs = this.columnStride;
+  int rs = this.rowStride;
+  
+  // specialization for speed
+  if (function instanceof org.apache.mahout.jet.math.Mult) { // x[i] = mult*x[i]
+    double multiplicator = ((org.apache.mahout.jet.math.Mult)function).multiplicator;
+    if (multiplicator==1) return this;
+    if (multiplicator==0) return assign(0);
+    for (int row=rows; --row >= 0; ) { // the general case
+      for (int i=index, column=columns; --column >= 0; ) {
+        elems[i] *= multiplicator;
+        i += cs;
+      }
+      index += rs;
+    }
+  }
+  else { // the general case x[i] = f(x[i])
+    for (int row=rows; --row >= 0; ) { 
+      for (int i=index, column=columns; --column >= 0; ) {
+        elems[i] = function.apply(elems[i]);
+        i += cs;
+      }
+      index += rs;
+    }
+  }
+  return this;
 }
 /**
  * Replaces all cell values of the receiver with the values of another matrix.
@@ -213,50 +213,50 @@ public DoubleMatrix2D assign(org.apache.mahout.matrix.function.DoubleFunction fu
  *
  * @param     source   the source matrix to copy from (may be identical to the receiver).
  * @return <tt>this</tt> (for convenience only).
- * @throws	IllegalArgumentException if <tt>columns() != source.columns() || rows() != source.rows()</tt>
+ * @throws  IllegalArgumentException if <tt>columns() != source.columns() || rows() != source.rows()</tt>
  */
 public DoubleMatrix2D assign(DoubleMatrix2D source) {
-	// overriden for performance only
-	if (! (source instanceof DenseDoubleMatrix2D)) {
-		return super.assign(source);
-	}
-	DenseDoubleMatrix2D other = (DenseDoubleMatrix2D) source;
-	if (other==this) return this; // nothing to do
-	checkShape(other);
-	
-	if (this.isNoView && other.isNoView) { // quickest
-		System.arraycopy(other.elements, 0, this.elements, 0, this.elements.length);
-		return this;
-	}
-	
-	if (haveSharedCells(other)) {
-		DoubleMatrix2D c = other.copy();
-		if (! (c instanceof DenseDoubleMatrix2D)) { // should not happen
-			return super.assign(other);
-		}
-		other = (DenseDoubleMatrix2D) c;
-	}
-	
-	final double[] elems = this.elements;
-	final double[] otherElems = other.elements;
-	if (elems==null || otherElems==null) throw new InternalError();
-	int cs = this.columnStride;
-	int ocs = other.columnStride;
-	int rs = this.rowStride;
-	int ors = other.rowStride;
+  // overriden for performance only
+  if (! (source instanceof DenseDoubleMatrix2D)) {
+    return super.assign(source);
+  }
+  DenseDoubleMatrix2D other = (DenseDoubleMatrix2D) source;
+  if (other==this) return this; // nothing to do
+  checkShape(other);
+  
+  if (this.isNoView && other.isNoView) { // quickest
+    System.arraycopy(other.elements, 0, this.elements, 0, this.elements.length);
+    return this;
+  }
+  
+  if (haveSharedCells(other)) {
+    DoubleMatrix2D c = other.copy();
+    if (! (c instanceof DenseDoubleMatrix2D)) { // should not happen
+      return super.assign(other);
+    }
+    other = (DenseDoubleMatrix2D) c;
+  }
+  
+  final double[] elems = this.elements;
+  final double[] otherElems = other.elements;
+  if (elems==null || otherElems==null) throw new InternalError();
+  int cs = this.columnStride;
+  int ocs = other.columnStride;
+  int rs = this.rowStride;
+  int ors = other.rowStride;
 
-	int otherIndex = other.index(0,0);
-	int index = index(0,0);
-	for (int row=rows; --row >= 0; ) {
-		for (int i=index, j=otherIndex, column=columns; --column >= 0; ) {
-			elems[i] = otherElems[j];
-			i += cs;
-			j += ocs;
-		}
-		index += rs;
-		otherIndex += ors;
-	}
-	return this;
+  int otherIndex = other.index(0,0);
+  int index = index(0,0);
+  for (int row=rows; --row >= 0; ) {
+    for (int i=index, j=otherIndex, column=columns; --column >= 0; ) {
+      elems[i] = otherElems[j];
+      i += cs;
+      j += ocs;
+    }
+    index += rs;
+    otherIndex += ors;
+  }
+  return this;
 }
 /**
 Assigns the result of a function to each cell; <tt>x[row,col] = function(x[row,col],y[row,col])</tt>.
@@ -284,102 +284,102 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @param function a function object taking as first argument the current cell's value of <tt>this</tt>,
 and as second argument the current cell's value of <tt>y</tt>,
 @return <tt>this</tt> (for convenience only).
-@throws	IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
+@throws  IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
 @see org.apache.mahout.jet.math.Functions
 */
 public DoubleMatrix2D assign(DoubleMatrix2D y, org.apache.mahout.matrix.function.DoubleDoubleFunction function) {
-	// overriden for performance only
-	if (! (y instanceof DenseDoubleMatrix2D)) {
-		return super.assign(y, function);
-	}
-	DenseDoubleMatrix2D other = (DenseDoubleMatrix2D) y;
-	checkShape(y);
-	
-	final double[] elems = this.elements;
-	final double[] otherElems = other.elements;
-	if (elems==null || otherElems==null) throw new InternalError();
-	int cs = this.columnStride;
-	int ocs = other.columnStride;
-	int rs = this.rowStride;
-	int ors = other.rowStride;
+  // overriden for performance only
+  if (! (y instanceof DenseDoubleMatrix2D)) {
+    return super.assign(y, function);
+  }
+  DenseDoubleMatrix2D other = (DenseDoubleMatrix2D) y;
+  checkShape(y);
+  
+  final double[] elems = this.elements;
+  final double[] otherElems = other.elements;
+  if (elems==null || otherElems==null) throw new InternalError();
+  int cs = this.columnStride;
+  int ocs = other.columnStride;
+  int rs = this.rowStride;
+  int ors = other.rowStride;
 
-	int otherIndex = other.index(0,0);
-	int index = index(0,0);
+  int otherIndex = other.index(0,0);
+  int index = index(0,0);
 
-	// specialized for speed
-	if (function== org.apache.mahout.jet.math.Functions.mult) { // x[i] = x[i] * y[i]
-		for (int row=rows; --row >= 0; ) {
-			for (int i=index, j=otherIndex, column=columns; --column >= 0; ) {
-				elems[i] *= otherElems[j];
-				i += cs;
-				j += ocs;
-			}
-			index += rs;
-			otherIndex += ors;
-		}
-	}
-	else if (function== org.apache.mahout.jet.math.Functions.div) { // x[i] = x[i] / y[i]
-		for (int row=rows; --row >= 0; ) {
-			for (int i=index, j=otherIndex, column=columns; --column >= 0; ) {
-				elems[i] /= otherElems[j];
-				i += cs;
-				j += ocs;
-			}
-			index += rs;
-			otherIndex += ors;
-		}
-	}
-	else if (function instanceof org.apache.mahout.jet.math.PlusMult) {
-		double multiplicator = ((org.apache.mahout.jet.math.PlusMult) function).multiplicator;
-		if (multiplicator == 0) { // x[i] = x[i] + 0*y[i]
-			return this;
-		}
-		else if (multiplicator == 1) { // x[i] = x[i] + y[i]
-			for (int row=rows; --row >= 0; ) {
-				for (int i=index, j=otherIndex, column=columns; --column >= 0; ) {
-					elems[i] += otherElems[j];
-					i += cs;
-					j += ocs;
-				}
-				index += rs;
-				otherIndex += ors;
-			}
-		}
-		else if (multiplicator == -1) { // x[i] = x[i] - y[i]
-			for (int row=rows; --row >= 0; ) {
-				for (int i=index, j=otherIndex, column=columns; --column >= 0; ) {
-					elems[i] -= otherElems[j];
-					i += cs;
-					j += ocs;
-				}
-				index += rs;
-				otherIndex += ors;
-			}
-		}
-		else { // the general case
-			for (int row=rows; --row >= 0; ) { // x[i] = x[i] + mult*y[i]
-				for (int i=index, j=otherIndex, column=columns; --column >= 0; ) {
-					elems[i] += multiplicator*otherElems[j];
-					i += cs;
-					j += ocs;
-				}
-				index += rs;
-				otherIndex += ors;
-			}
-		}
-	}
-	else { // the general case x[i] = f(x[i],y[i])
-		for (int row=rows; --row >= 0; ) {
-			for (int i=index, j=otherIndex, column=columns; --column >= 0; ) {
-				elems[i] = function.apply(elems[i], otherElems[j]);
-				i += cs;
-				j += ocs;
-			}
-			index += rs;
-			otherIndex += ors;
-		}
-	}
-	return this;
+  // specialized for speed
+  if (function== org.apache.mahout.jet.math.Functions.mult) { // x[i] = x[i] * y[i]
+    for (int row=rows; --row >= 0; ) {
+      for (int i=index, j=otherIndex, column=columns; --column >= 0; ) {
+        elems[i] *= otherElems[j];
+        i += cs;
+        j += ocs;
+      }
+      index += rs;
+      otherIndex += ors;
+    }
+  }
+  else if (function== org.apache.mahout.jet.math.Functions.div) { // x[i] = x[i] / y[i]
+    for (int row=rows; --row >= 0; ) {
+      for (int i=index, j=otherIndex, column=columns; --column >= 0; ) {
+        elems[i] /= otherElems[j];
+        i += cs;
+        j += ocs;
+      }
+      index += rs;
+      otherIndex += ors;
+    }
+  }
+  else if (function instanceof org.apache.mahout.jet.math.PlusMult) {
+    double multiplicator = ((org.apache.mahout.jet.math.PlusMult) function).multiplicator;
+    if (multiplicator == 0) { // x[i] = x[i] + 0*y[i]
+      return this;
+    }
+    else if (multiplicator == 1) { // x[i] = x[i] + y[i]
+      for (int row=rows; --row >= 0; ) {
+        for (int i=index, j=otherIndex, column=columns; --column >= 0; ) {
+          elems[i] += otherElems[j];
+          i += cs;
+          j += ocs;
+        }
+        index += rs;
+        otherIndex += ors;
+      }
+    }
+    else if (multiplicator == -1) { // x[i] = x[i] - y[i]
+      for (int row=rows; --row >= 0; ) {
+        for (int i=index, j=otherIndex, column=columns; --column >= 0; ) {
+          elems[i] -= otherElems[j];
+          i += cs;
+          j += ocs;
+        }
+        index += rs;
+        otherIndex += ors;
+      }
+    }
+    else { // the general case
+      for (int row=rows; --row >= 0; ) { // x[i] = x[i] + mult*y[i]
+        for (int i=index, j=otherIndex, column=columns; --column >= 0; ) {
+          elems[i] += multiplicator*otherElems[j];
+          i += cs;
+          j += ocs;
+        }
+        index += rs;
+        otherIndex += ors;
+      }
+    }
+  }
+  else { // the general case x[i] = f(x[i],y[i])
+    for (int row=rows; --row >= 0; ) {
+      for (int i=index, j=otherIndex, column=columns; --column >= 0; ) {
+        elems[i] = function.apply(elems[i], otherElems[j]);
+        i += cs;
+        j += ocs;
+      }
+      index += rs;
+      otherIndex += ors;
+    }
+  }
+  return this;
 }
 /**
  * Returns the matrix cell value at coordinate <tt>[row,column]</tt>.
@@ -393,10 +393,10 @@ public DoubleMatrix2D assign(DoubleMatrix2D y, org.apache.mahout.matrix.function
  * @return    the value at the specified coordinate.
  */
 public double getQuick(int row, int column) {
-	//if (debug) if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
-	//return elements[index(row,column)];
-	//manually inlined:
-	return elements[rowZero + row*rowStride + columnZero + column*columnStride];
+  //if (debug) if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
+  //return elements[index(row,column)];
+  //manually inlined:
+  return elements[rowZero + row*rowStride + columnZero + column*columnStride];
 }
 /**
  * Returns <tt>true</tt> if both matrices share common cells.
@@ -408,15 +408,15 @@ public double getQuick(int row, int column) {
  * </ul>
  */
 protected boolean haveSharedCellsRaw(DoubleMatrix2D other) {
-	if (other instanceof SelectedDenseDoubleMatrix2D) {
-		SelectedDenseDoubleMatrix2D otherMatrix = (SelectedDenseDoubleMatrix2D) other;
-		return this.elements==otherMatrix.elements;
-	}
-	else if (other instanceof DenseDoubleMatrix2D) {
-		DenseDoubleMatrix2D otherMatrix = (DenseDoubleMatrix2D) other;
-		return this.elements==otherMatrix.elements;
-	}
-	return false;
+  if (other instanceof SelectedDenseDoubleMatrix2D) {
+    SelectedDenseDoubleMatrix2D otherMatrix = (SelectedDenseDoubleMatrix2D) other;
+    return this.elements==otherMatrix.elements;
+  }
+  else if (other instanceof DenseDoubleMatrix2D) {
+    DenseDoubleMatrix2D otherMatrix = (DenseDoubleMatrix2D) other;
+    return this.elements==otherMatrix.elements;
+  }
+  return false;
 }
 /**
  * Returns the position of the given coordinate within the (virtual or non-virtual) internal 1-dimensional array. 
@@ -425,9 +425,9 @@ protected boolean haveSharedCellsRaw(DoubleMatrix2D other) {
  * @param     column   the index of the column-coordinate.
  */
 protected int index(int row, int column) {
-	// return super.index(row,column);
-	// manually inlined for speed:
-	return rowZero + row*rowStride + columnZero + column*columnStride;
+  // return super.index(row,column);
+  // manually inlined for speed:
+  return rowZero + row*rowStride + columnZero + column*columnStride;
 }
 /**
  * Construct and returns a new empty matrix <i>of the same dynamic type</i> as the receiver, having the specified number of rows and columns.
@@ -440,7 +440,7 @@ protected int index(int row, int column) {
  * @return  a new empty matrix of the same dynamic type.
  */
 public DoubleMatrix2D like(int rows, int columns) {
-	return new DenseDoubleMatrix2D(rows, columns);
+  return new DenseDoubleMatrix2D(rows, columns);
 }
 /**
  * Construct and returns a new 1-d matrix <i>of the corresponding dynamic type</i>, entirelly independent of the receiver.
@@ -451,7 +451,7 @@ public DoubleMatrix2D like(int rows, int columns) {
  * @return  a new matrix of the corresponding dynamic type.
  */
 public DoubleMatrix1D like1D(int size) {
-	return new DenseDoubleMatrix1D(size);
+  return new DenseDoubleMatrix1D(size);
 }
 /**
  * Construct and returns a new 1-d matrix <i>of the corresponding dynamic type</i>, sharing the same cells.
@@ -464,7 +464,7 @@ public DoubleMatrix1D like1D(int size) {
  * @return  a new matrix of the corresponding dynamic type.
  */
 protected DoubleMatrix1D like1D(int size, int zero, int stride) {
-	return new DenseDoubleMatrix1D(size,this.elements,zero,stride);
+  return new DenseDoubleMatrix1D(size,this.elements,zero,stride);
 }
 /**
  * Sets the matrix cell at coordinate <tt>[row,column]</tt> to the specified value.
@@ -478,10 +478,10 @@ protected DoubleMatrix1D like1D(int size, int zero, int stride) {
  * @param    value the value to be filled into the specified cell.
  */
 public void setQuick(int row, int column, double value) {
-	//if (debug) if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
-	//elements[index(row,column)] = value;
-	//manually inlined:
-	elements[rowZero + row*rowStride + columnZero + column*columnStride] = value;
+  //if (debug) if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
+  //elements[index(row,column)] = value;
+  //manually inlined:
+  elements[rowZero + row*rowStride + columnZero + column*columnStride] = value;
 }
 /**
  * Construct and returns a new selection view.
@@ -491,7 +491,7 @@ public void setQuick(int row, int column, double value) {
  * @return  a new view.
  */
 protected DoubleMatrix2D viewSelectionLike(int[] rowOffsets, int[] columnOffsets) {
-	return new SelectedDenseDoubleMatrix2D(this.elements,rowOffsets,columnOffsets,0);
+  return new SelectedDenseDoubleMatrix2D(this.elements,rowOffsets,columnOffsets,0);
 }
 /**
 8 neighbor stencil transformation. For efficient finite difference operations.
@@ -541,277 +541,277 @@ org.apache.mahout.matrix.function.Double9Function g = new org.apache.mahout.matr
 C.zAssign8Neighbors(B,g); // fast, even though it doesn't look like it
 };
 </pre>
-	
+  
 @param B the matrix to hold the results.
 @param function the function to be applied to the 9 cells.
 @throws NullPointerException if <tt>function==null</tt>.
 @throws IllegalArgumentException if <tt>rows() != B.rows() || columns() != B.columns()</tt>.
 */
 public void zAssign8Neighbors(DoubleMatrix2D B, org.apache.mahout.matrix.function.Double9Function function) {
-	// 1. using only 4-5 out of the 9 cells in "function" is *not* the limiting factor for performance.
+  // 1. using only 4-5 out of the 9 cells in "function" is *not* the limiting factor for performance.
 
-	// 2. if the "function" would be hardwired into the innermost loop, a speedup of 1.5-2.0 would be seen
-	// but then the multi-purpose interface is gone...
+  // 2. if the "function" would be hardwired into the innermost loop, a speedup of 1.5-2.0 would be seen
+  // but then the multi-purpose interface is gone...
 
-	if (!(B instanceof DenseDoubleMatrix2D)) {
-		super.zAssign8Neighbors(B, function);
-		return;
-	}
-	if (function==null) throw new NullPointerException("function must not be null.");
-	checkShape(B);
-	int r = rows-1;
-	int c = columns-1;
-	if (rows<3 || columns<3) return; // nothing to do
+  if (!(B instanceof DenseDoubleMatrix2D)) {
+    super.zAssign8Neighbors(B, function);
+    return;
+  }
+  if (function==null) throw new NullPointerException("function must not be null.");
+  checkShape(B);
+  int r = rows-1;
+  int c = columns-1;
+  if (rows<3 || columns<3) return; // nothing to do
 
-	DenseDoubleMatrix2D BB = (DenseDoubleMatrix2D) B;
-	int A_rs = rowStride;
-	int B_rs = BB.rowStride;
-	int A_cs = columnStride;
-	int B_cs = BB.columnStride;
-	double[] elems = this.elements;
-	double[] B_elems = BB.elements;
-	if (elems == null || B_elems==null) throw new InternalError();
+  DenseDoubleMatrix2D BB = (DenseDoubleMatrix2D) B;
+  int A_rs = rowStride;
+  int B_rs = BB.rowStride;
+  int A_cs = columnStride;
+  int B_cs = BB.columnStride;
+  double[] elems = this.elements;
+  double[] B_elems = BB.elements;
+  if (elems == null || B_elems==null) throw new InternalError();
 
-	int A_index = index(1,1);
-	int B_index = BB.index(1,1);
-	for (int i=1; i<r; i++) {
-		double a00, a01, a02;
-		double a10, a11, a12;
-		double a20, a21, a22;
-		
-		int B11 = B_index;
+  int A_index = index(1,1);
+  int B_index = BB.index(1,1);
+  for (int i=1; i<r; i++) {
+    double a00, a01, a02;
+    double a10, a11, a12;
+    double a20, a21, a22;
+    
+    int B11 = B_index;
 
-		int A02 = A_index - A_rs - A_cs;
-		int A12 = A02 + A_rs;
-		int A22 = A12 + A_rs;
+    int A02 = A_index - A_rs - A_cs;
+    int A12 = A02 + A_rs;
+    int A22 = A12 + A_rs;
 
-		// in each step six cells can be remembered in registers - they don't need to be reread from slow memory
-		a00=elems[A02]; A02+=A_cs;   a01=elems[A02]; //A02+=A_cs;
-		a10=elems[A12]; A12+=A_cs;   a11=elems[A12]; //A12+=A_cs;
-		a20=elems[A22]; A22+=A_cs;   a21=elems[A22]; //A22+=A_cs; 
-		
-		for (int j=1; j<c; j++) {
-			//in each step 3 instead of 9 cells need to be read from memory.
-			a02=elems[A02+=A_cs]; 
-			a12=elems[A12+=A_cs]; 
-			a22=elems[A22+=A_cs]; 
-			
-			B_elems[B11] = function.apply(
-				a00, a01, a02,
-				a10, a11, a12,
-				a20, a21, a22);
-			B11 += B_cs;
-			
-			// move remembered cells
-			a00=a01; a01=a02;
-			a10=a11; a11=a12;
-			a20=a21; a21=a22;
-		}
-		A_index += A_rs;
-		B_index += B_rs;
-	}
+    // in each step six cells can be remembered in registers - they don't need to be reread from slow memory
+    a00=elems[A02]; A02+=A_cs;   a01=elems[A02]; //A02+=A_cs;
+    a10=elems[A12]; A12+=A_cs;   a11=elems[A12]; //A12+=A_cs;
+    a20=elems[A22]; A22+=A_cs;   a21=elems[A22]; //A22+=A_cs; 
+    
+    for (int j=1; j<c; j++) {
+      //in each step 3 instead of 9 cells need to be read from memory.
+      a02=elems[A02+=A_cs]; 
+      a12=elems[A12+=A_cs]; 
+      a22=elems[A22+=A_cs]; 
+      
+      B_elems[B11] = function.apply(
+        a00, a01, a02,
+        a10, a11, a12,
+        a20, a21, a22);
+      B11 += B_cs;
+      
+      // move remembered cells
+      a00=a01; a01=a02;
+      a10=a11; a11=a12;
+      a20=a21; a21=a22;
+    }
+    A_index += A_rs;
+    B_index += B_rs;
+  }
 
 }
 public DoubleMatrix1D zMult(DoubleMatrix1D y, DoubleMatrix1D z, double alpha, double beta, boolean transposeA) {
-	if (transposeA) return viewDice().zMult(y,z,alpha,beta,false);
-	if (z==null) z = new DenseDoubleMatrix1D(this.rows);
-	if (!(y instanceof DenseDoubleMatrix1D && z instanceof DenseDoubleMatrix1D)) return super.zMult(y,z,alpha,beta,transposeA);
-	
-	if (columns != y.size || rows > z.size)	
-		throw new IllegalArgumentException("Incompatible args: "+toStringShort()+", "+y.toStringShort()+", "+z.toStringShort());
+  if (transposeA) return viewDice().zMult(y,z,alpha,beta,false);
+  if (z==null) z = new DenseDoubleMatrix1D(this.rows);
+  if (!(y instanceof DenseDoubleMatrix1D && z instanceof DenseDoubleMatrix1D)) return super.zMult(y,z,alpha,beta,transposeA);
+  
+  if (columns != y.size || rows > z.size)  
+    throw new IllegalArgumentException("Incompatible args: "+toStringShort()+", "+y.toStringShort()+", "+z.toStringShort());
 
-	DenseDoubleMatrix1D yy = (DenseDoubleMatrix1D) y;
-	DenseDoubleMatrix1D zz = (DenseDoubleMatrix1D) z;
-	final double[] AElems = this.elements;
-	final double[] yElems = yy.elements;
-	final double[] zElems = zz.elements;
-	if (AElems==null || yElems==null || zElems==null) throw new InternalError();
-	int As = this.columnStride;
-	int ys = yy.stride;
-	int zs = zz.stride;
+  DenseDoubleMatrix1D yy = (DenseDoubleMatrix1D) y;
+  DenseDoubleMatrix1D zz = (DenseDoubleMatrix1D) z;
+  final double[] AElems = this.elements;
+  final double[] yElems = yy.elements;
+  final double[] zElems = zz.elements;
+  if (AElems==null || yElems==null || zElems==null) throw new InternalError();
+  int As = this.columnStride;
+  int ys = yy.stride;
+  int zs = zz.stride;
 
-	int indexA = index(0,0);
-	int indexY = yy.index(0);
-	int indexZ = zz.index(0);
+  int indexA = index(0,0);
+  int indexY = yy.index(0);
+  int indexZ = zz.index(0);
 
-	int cols = columns;
-	for (int row=rows; --row >= 0; ) {
-		double sum = 0;
+  int cols = columns;
+  for (int row=rows; --row >= 0; ) {
+    double sum = 0;
 
-		/*
-		// not loop unrolled
-		for (int i=indexA, j=indexY, column=columns; --column >= 0; ) {
-			sum += AElems[i] * yElems[j];
-			i += As;
-			j += ys;
-		}
-		*/
+    /*
+    // not loop unrolled
+    for (int i=indexA, j=indexY, column=columns; --column >= 0; ) {
+      sum += AElems[i] * yElems[j];
+      i += As;
+      j += ys;
+    }
+    */
 
-		// loop unrolled
-		int i = indexA - As;
-		int j = indexY - ys;	
-		for (int k=cols%4; --k >= 0; ) {
-			sum += AElems[i += As] * yElems[j += ys];
-		}
-		for (int k=cols/4; --k >= 0; ) { 
-			sum += AElems[i += As] * yElems[j += ys] + 
-				AElems[i += As] * yElems[j += ys] +
-				AElems[i += As] * yElems[j += ys] +
-				AElems[i += As] * yElems[j += ys];
-		}		
+    // loop unrolled
+    int i = indexA - As;
+    int j = indexY - ys;  
+    for (int k=cols%4; --k >= 0; ) {
+      sum += AElems[i += As] * yElems[j += ys];
+    }
+    for (int k=cols/4; --k >= 0; ) { 
+      sum += AElems[i += As] * yElems[j += ys] + 
+        AElems[i += As] * yElems[j += ys] +
+        AElems[i += As] * yElems[j += ys] +
+        AElems[i += As] * yElems[j += ys];
+    }    
 
-		zElems[indexZ] = alpha*sum + beta*zElems[indexZ];
-		indexA += this.rowStride;
-		indexZ += zs;
-	}
+    zElems[indexZ] = alpha*sum + beta*zElems[indexZ];
+    indexA += this.rowStride;
+    indexZ += zs;
+  }
 
-	return z;
+  return z;
 }
 public DoubleMatrix2D zMult(DoubleMatrix2D B, DoubleMatrix2D C, double alpha, double beta, boolean transposeA, boolean transposeB) {
-	// overriden for performance only
-	if (transposeA) return viewDice().zMult(B,C,alpha,beta,false,transposeB);
-	if (B instanceof SparseDoubleMatrix2D || B instanceof RCDoubleMatrix2D) {
-		// exploit quick sparse mult
-		// A*B = (B' * A')'
-		if (C==null) {
-			return B.zMult(this, null, alpha,beta,!transposeB,true).viewDice();
-		}
-		else {
-			B.zMult(this, C.viewDice(), alpha,beta,!transposeB,true);
-			return C;
-		}
-		/*
-		final RCDoubleMatrix2D transB = new RCDoubleMatrix2D(B.columns,B.rows);
-		B.forEachNonZero(
-			new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
-				public double apply(int i, int j, double value) {
-					transB.setQuick(j,i,value);
-					return value;
-				}
-			}
-		);
+  // overriden for performance only
+  if (transposeA) return viewDice().zMult(B,C,alpha,beta,false,transposeB);
+  if (B instanceof SparseDoubleMatrix2D || B instanceof RCDoubleMatrix2D) {
+    // exploit quick sparse mult
+    // A*B = (B' * A')'
+    if (C==null) {
+      return B.zMult(this, null, alpha,beta,!transposeB,true).viewDice();
+    }
+    else {
+      B.zMult(this, C.viewDice(), alpha,beta,!transposeB,true);
+      return C;
+    }
+    /*
+    final RCDoubleMatrix2D transB = new RCDoubleMatrix2D(B.columns,B.rows);
+    B.forEachNonZero(
+      new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
+        public double apply(int i, int j, double value) {
+          transB.setQuick(j,i,value);
+          return value;
+        }
+      }
+    );
 
-		return transB.zMult(this.viewDice(),C.viewDice()).viewDice();
-		*/
-	}
-	if (transposeB) return this.zMult(B.viewDice(),C,alpha,beta,transposeA,false);
-	
-	int m = rows;
-	int n = columns;
-	int p = B.columns;
-	if (C==null) C = new DenseDoubleMatrix2D(m,p);
-	if (!(C instanceof DenseDoubleMatrix2D)) return super.zMult(B,C,alpha,beta,transposeA,transposeB);
-	if (B.rows != n)
-		throw new IllegalArgumentException("Matrix2D inner dimensions must agree:"+toStringShort()+", "+B.toStringShort());
-	if (C.rows != m || C.columns != p)
-		throw new IllegalArgumentException("Incompatibel result matrix: "+toStringShort()+", "+B.toStringShort()+", "+C.toStringShort());
-	if (this == C || B == C)
-		throw new IllegalArgumentException("Matrices must not be identical");
+    return transB.zMult(this.viewDice(),C.viewDice()).viewDice();
+    */
+  }
+  if (transposeB) return this.zMult(B.viewDice(),C,alpha,beta,transposeA,false);
+  
+  int m = rows;
+  int n = columns;
+  int p = B.columns;
+  if (C==null) C = new DenseDoubleMatrix2D(m,p);
+  if (!(C instanceof DenseDoubleMatrix2D)) return super.zMult(B,C,alpha,beta,transposeA,transposeB);
+  if (B.rows != n)
+    throw new IllegalArgumentException("Matrix2D inner dimensions must agree:"+toStringShort()+", "+B.toStringShort());
+  if (C.rows != m || C.columns != p)
+    throw new IllegalArgumentException("Incompatibel result matrix: "+toStringShort()+", "+B.toStringShort()+", "+C.toStringShort());
+  if (this == C || B == C)
+    throw new IllegalArgumentException("Matrices must not be identical");
 
-	DenseDoubleMatrix2D BB = (DenseDoubleMatrix2D) B;
-	DenseDoubleMatrix2D CC = (DenseDoubleMatrix2D) C;
-	final double[] AElems = this.elements;
-	final double[] BElems = BB.elements;
-	final double[] CElems = CC.elements;
-	if (AElems==null || BElems==null || CElems==null) throw new InternalError();
+  DenseDoubleMatrix2D BB = (DenseDoubleMatrix2D) B;
+  DenseDoubleMatrix2D CC = (DenseDoubleMatrix2D) C;
+  final double[] AElems = this.elements;
+  final double[] BElems = BB.elements;
+  final double[] CElems = CC.elements;
+  if (AElems==null || BElems==null || CElems==null) throw new InternalError();
 
-	int cA = this.columnStride;
-	int cB = BB.columnStride;
-	int cC = CC.columnStride;
+  int cA = this.columnStride;
+  int cB = BB.columnStride;
+  int cC = CC.columnStride;
 
-	int rA = this.rowStride;
-	int rB = BB.rowStride;
-	int rC = CC.rowStride;
+  int rA = this.rowStride;
+  int rB = BB.rowStride;
+  int rC = CC.rowStride;
 
-	/*
-	A is blocked to hide memory latency
-			xxxxxxx B
-			xxxxxxx
-			xxxxxxx
-	A
-	xxx     xxxxxxx C
-	xxx     xxxxxxx
-	---     -------
-	xxx     xxxxxxx
-	xxx     xxxxxxx
-	---     -------
-	xxx     xxxxxxx
-	*/
-	final int BLOCK_SIZE = 30000; // * 8 == Level 2 cache in bytes
-	//if (n+p == 0) return C;
-	//int m_optimal = (BLOCK_SIZE - n*p) / (n+p);
-	int m_optimal = (BLOCK_SIZE - n) / (n+1);
-	if (m_optimal <= 0) m_optimal = 1;
-	int blocks = m/m_optimal;
-	int rr = 0;
-	if (m%m_optimal != 0) blocks++;
-	for (; --blocks >= 0; ) {
-		int jB = BB.index(0,0);
-		int indexA = index(rr,0);
-		int jC =  CC.index(rr,0);
-		rr += m_optimal;
-		if (blocks==0) m_optimal += m - rr;
-		
-		for (int j = p; --j >= 0; ) {
-			int iA = indexA;
-			int iC = jC;
-			for (int i = m_optimal; --i >= 0; ) {
-				int kA = iA;
-				int kB = jB;
-				double s = 0;
+  /*
+  A is blocked to hide memory latency
+      xxxxxxx B
+      xxxxxxx
+      xxxxxxx
+  A
+  xxx     xxxxxxx C
+  xxx     xxxxxxx
+  ---     -------
+  xxx     xxxxxxx
+  xxx     xxxxxxx
+  ---     -------
+  xxx     xxxxxxx
+  */
+  final int BLOCK_SIZE = 30000; // * 8 == Level 2 cache in bytes
+  //if (n+p == 0) return C;
+  //int m_optimal = (BLOCK_SIZE - n*p) / (n+p);
+  int m_optimal = (BLOCK_SIZE - n) / (n+1);
+  if (m_optimal <= 0) m_optimal = 1;
+  int blocks = m/m_optimal;
+  int rr = 0;
+  if (m%m_optimal != 0) blocks++;
+  for (; --blocks >= 0; ) {
+    int jB = BB.index(0,0);
+    int indexA = index(rr,0);
+    int jC =  CC.index(rr,0);
+    rr += m_optimal;
+    if (blocks==0) m_optimal += m - rr;
+    
+    for (int j = p; --j >= 0; ) {
+      int iA = indexA;
+      int iC = jC;
+      for (int i = m_optimal; --i >= 0; ) {
+        int kA = iA;
+        int kB = jB;
+        double s = 0;
 
-				/*
-				// not unrolled:
-				for (int k = n; --k >= 0; ) {
-					//s += getQuick(i,k) * B.getQuick(k,j);
-					s += AElems[kA] * BElems[kB];
-					kB += rB;
-					kA += cA;
-				}
-				*/
-				
-				// loop unrolled				
-				kA -= cA;
-				kB -= rB;
-				
-				for (int k=n%4; --k >= 0; ) {
-					s += AElems[kA += cA] * BElems[kB += rB];
-				}
-				for (int k=n/4; --k >= 0; ) { 
-					s += AElems[kA += cA] * BElems[kB += rB] + 
-						AElems[kA += cA] * BElems[kB += rB] +
-						AElems[kA += cA] * BElems[kB += rB] +
-						AElems[kA += cA] * BElems[kB += rB];
-				}		
+        /*
+        // not unrolled:
+        for (int k = n; --k >= 0; ) {
+          //s += getQuick(i,k) * B.getQuick(k,j);
+          s += AElems[kA] * BElems[kB];
+          kB += rB;
+          kA += cA;
+        }
+        */
+        
+        // loop unrolled        
+        kA -= cA;
+        kB -= rB;
+        
+        for (int k=n%4; --k >= 0; ) {
+          s += AElems[kA += cA] * BElems[kB += rB];
+        }
+        for (int k=n/4; --k >= 0; ) { 
+          s += AElems[kA += cA] * BElems[kB += rB] + 
+            AElems[kA += cA] * BElems[kB += rB] +
+            AElems[kA += cA] * BElems[kB += rB] +
+            AElems[kA += cA] * BElems[kB += rB];
+        }    
 
-				CElems[iC] = alpha*s + beta*CElems[iC];
-				iA += rA;
-				iC += rC;
-			}
-			jB += cB;
-			jC += cC;
-		}
-	}
-	return C;
+        CElems[iC] = alpha*s + beta*CElems[iC];
+        iA += rA;
+        iC += rC;
+      }
+      jB += cB;
+      jC += cC;
+    }
+  }
+  return C;
 }
 /**
  * Returns the sum of all cells; <tt>Sum( x[i,j] )</tt>.
  * @return the sum.
  */
 public double zSum() {
-	double sum = 0;
-	final double[] elems = this.elements;
-	if (elems==null) throw new InternalError();
-	int index = index(0,0);
-	int cs = this.columnStride;
-	int rs = this.rowStride;
-	for (int row=rows; --row >= 0; ) {
-		for (int i=index, column=columns; --column >= 0; ) {
-			sum += elems[i];
-			i += cs;
-		}
-		index += rs;
-	}
-	return sum;
+  double sum = 0;
+  final double[] elems = this.elements;
+  if (elems==null) throw new InternalError();
+  int index = index(0,0);
+  int cs = this.columnStride;
+  int rs = this.rowStride;
+  for (int row=rows; --row >= 0; ) {
+    for (int i=index, column=columns; --column >= 0; ) {
+      sum += elems[i];
+      i += cs;
+    }
+    index += rs;
+  }
+  return sum;
 }
 }

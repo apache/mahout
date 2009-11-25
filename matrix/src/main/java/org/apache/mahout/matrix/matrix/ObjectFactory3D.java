@@ -35,15 +35,15 @@ F.make(4,4,4);
  */
 @Deprecated
 public class ObjectFactory3D extends org.apache.mahout.matrix.PersistentObject {
-	/**
-	 * A factory producing dense matrices.
-	 */
-	public static final ObjectFactory3D dense  = new ObjectFactory3D();
+  /**
+   * A factory producing dense matrices.
+   */
+  public static final ObjectFactory3D dense  = new ObjectFactory3D();
 
-	/**
-	 * A factory producing sparse matrices.
-	 */
-	public static final ObjectFactory3D sparse = new ObjectFactory3D();
+  /**
+   * A factory producing sparse matrices.
+   */
+  public static final ObjectFactory3D sparse = new ObjectFactory3D();
 /**
  * Makes this class non instantiable, but still let's others inherit from it.
  */
@@ -61,20 +61,20 @@ protected ObjectFactory3D() {}
  * @throws IllegalArgumentException if <tt>for any 0 &lt;= column &lt; columns(): values[slice][row].length != columns()</tt>.
  */
 public ObjectMatrix3D make(Object[][][] values) {
-	if (this==sparse) return new SparseObjectMatrix3D(values);
-	return new DenseObjectMatrix3D(values);
+  if (this==sparse) return new SparseObjectMatrix3D(values);
+  return new DenseObjectMatrix3D(values);
 }
 /**
  * Constructs a matrix with the given shape, each cell initialized with zero.
  */
 public ObjectMatrix3D make(int slices, int rows, int columns) {
-	if (this==sparse) return new SparseObjectMatrix3D(slices,rows,columns);
-	return new DenseObjectMatrix3D(slices,rows,columns);
+  if (this==sparse) return new SparseObjectMatrix3D(slices,rows,columns);
+  return new DenseObjectMatrix3D(slices,rows,columns);
 }
 /**
  * Constructs a matrix with the given shape, each cell initialized with the given value.
  */
 public ObjectMatrix3D make(int slices, int rows, int columns, Object initialValue) {
-	return make(slices,rows,columns).assign(initialValue);
+  return make(slices,rows,columns).assign(initialValue);
 }
 }

@@ -35,17 +35,17 @@ Setting/getting values in a loop row-by-row is quicker than column-by-column.
 Thus
 <pre>
    for (int row=0; row < rows; row++) {
-	  for (int column=0; column < columns; column++) {
-		 matrix.setQuick(row,column,someValue);
-	  }
+    for (int column=0; column < columns; column++) {
+     matrix.setQuick(row,column,someValue);
+    }
    }
 </pre>
 is quicker than
 <pre>
    for (int column=0; column < columns; column++) {
-	  for (int row=0; row < rows; row++) {
-		 matrix.setQuick(row,column,someValue);
-	  }
+    for (int row=0; row < rows; row++) {
+     matrix.setQuick(row,column,someValue);
+    }
    }
 </pre>
 @author wolfgang.hoschek@cern.ch
@@ -56,15 +56,15 @@ is quicker than
  */
 @Deprecated
 public class DenseObjectMatrix2D extends ObjectMatrix2D {
-	/**
-	  * The elements of this matrix.
-	  * elements are stored in row major, i.e.
-	  * index==row*columns + column
-	  * columnOf(index)==index%columns
-	  * rowOf(index)==index/columns
-	  * i.e. {row0 column0..m}, {row1 column0..m}, ..., {rown column0..m}
-	  */
-	protected Object[] elements;
+  /**
+    * The elements of this matrix.
+    * elements are stored in row major, i.e.
+    * index==row*columns + column
+    * columnOf(index)==index%columns
+    * rowOf(index)==index/columns
+    * i.e. {row0 column0..m}, {row1 column0..m}, ..., {rown column0..m}
+    */
+  protected Object[] elements;
 /**
  * Constructs a matrix with a copy of the given values.
  * <tt>values</tt> is required to have the form <tt>values[row][column]</tt>
@@ -76,19 +76,19 @@ public class DenseObjectMatrix2D extends ObjectMatrix2D {
  * @throws IllegalArgumentException if <tt>for any 1 &lt;= row &lt; values.length: values[row].length != values[row-1].length</tt>.
  */
 public DenseObjectMatrix2D(Object[][] values) {
-	this(values.length, values.length==0 ? 0: values[0].length);
-	assign(values);
+  this(values.length, values.length==0 ? 0: values[0].length);
+  assign(values);
 }
 /**
  * Constructs a matrix with a given number of rows and columns.
  * All entries are initially <tt>0</tt>.
  * @param rows the number of rows the matrix shall have.
  * @param columns the number of columns the matrix shall have.
- * @throws	IllegalArgumentException if <tt>rows<0 || columns<0 || (Object)columns*rows > Integer.MAX_VALUE</tt>.
+ * @throws  IllegalArgumentException if <tt>rows<0 || columns<0 || (Object)columns*rows > Integer.MAX_VALUE</tt>.
  */
 public DenseObjectMatrix2D(int rows, int columns) {
-	setUp(rows, columns);
-	this.elements = new Object[rows*columns];
+  setUp(rows, columns);
+  this.elements = new Object[rows*columns];
 }
 /**
  * Constructs a view with the given parameters.
@@ -99,12 +99,12 @@ public DenseObjectMatrix2D(int rows, int columns) {
  * @param columnZero the position of the first element.
  * @param rowStride the number of elements between two rows, i.e. <tt>index(i+1,j)-index(i,j)</tt>.
  * @param columnStride the number of elements between two columns, i.e. <tt>index(i,j+1)-index(i,j)</tt>.
- * @throws	IllegalArgumentException if <tt>rows<0 || columns<0 || (Object)columns*rows > Integer.MAX_VALUE</tt> or flip's are illegal.
+ * @throws  IllegalArgumentException if <tt>rows<0 || columns<0 || (Object)columns*rows > Integer.MAX_VALUE</tt> or flip's are illegal.
  */
 protected DenseObjectMatrix2D(int rows, int columns, Object[] elements, int rowZero, int columnZero, int rowStride, int columnStride) {
-	setUp(rows,columns,rowZero,columnZero,rowStride,columnStride);
-	this.elements = elements;
-	this.isNoView = false;
+  setUp(rows,columns,rowZero,columnZero,rowStride,columnStride);
+  this.elements = elements;
+  this.isNoView = false;
 }
 /**
  * Sets all cells to the state specified by <tt>values</tt>.
@@ -118,20 +118,20 @@ protected DenseObjectMatrix2D(int rows, int columns, Object[] elements, int rowZ
  * @throws IllegalArgumentException if <tt>values.length != rows() || for any 0 &lt;= row &lt; rows(): values[row].length != columns()</tt>.
  */
 public ObjectMatrix2D assign(Object[][] values) {
-	if (this.isNoView) {
-		if (values.length != rows) throw new IllegalArgumentException("Must have same number of rows: rows="+values.length+"rows()="+rows());
-		int i = columns*(rows-1);
-		for (int row=rows; --row >= 0;) {
-			Object[] currentRow = values[row];
-			if (currentRow.length != columns) throw new IllegalArgumentException("Must have same number of columns in every row: columns="+currentRow.length+"columns()="+columns());			
-			System.arraycopy(currentRow, 0, this.elements, i, columns);
-			i -= columns;
-		}
-	}
-	else {
-		super.assign(values);
-	}
-	return this;
+  if (this.isNoView) {
+    if (values.length != rows) throw new IllegalArgumentException("Must have same number of rows: rows="+values.length+"rows()="+rows());
+    int i = columns*(rows-1);
+    for (int row=rows; --row >= 0;) {
+      Object[] currentRow = values[row];
+      if (currentRow.length != columns) throw new IllegalArgumentException("Must have same number of columns in every row: columns="+currentRow.length+"columns()="+columns());      
+      System.arraycopy(currentRow, 0, this.elements, i, columns);
+      i -= columns;
+    }
+  }
+  else {
+    super.assign(values);
+  }
+  return this;
 }
 /**
 Assigns the result of a function to each cell; <tt>x[row,col] = function(x[row,col])</tt>.
@@ -156,21 +156,21 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @see org.apache.mahout.jet.math.Functions
 */
 public ObjectMatrix2D assign(org.apache.mahout.matrix.function.ObjectFunction function) {
-	final Object[] elems = this.elements;
-	if (elems==null) throw new InternalError();
-	int index = index(0,0);
-	int cs = this.columnStride;
-	int rs = this.rowStride;
-	
-	// the general case x[i] = f(x[i])
-	for (int row=rows; --row >= 0; ) { 
-		for (int i=index, column=columns; --column >= 0; ) {
-			elems[i] = function.apply(elems[i]);
-			i += cs;
-		}
-		index += rs;
-	}
-	return this;
+  final Object[] elems = this.elements;
+  if (elems==null) throw new InternalError();
+  int index = index(0,0);
+  int cs = this.columnStride;
+  int rs = this.rowStride;
+  
+  // the general case x[i] = f(x[i])
+  for (int row=rows; --row >= 0; ) { 
+    for (int i=index, column=columns; --column >= 0; ) {
+      elems[i] = function.apply(elems[i]);
+      i += cs;
+    }
+    index += rs;
+  }
+  return this;
 }
 /**
  * Replaces all cell values of the receiver with the values of another matrix.
@@ -179,50 +179,50 @@ public ObjectMatrix2D assign(org.apache.mahout.matrix.function.ObjectFunction fu
  *
  * @param     source   the source matrix to copy from (may be identical to the receiver).
  * @return <tt>this</tt> (for convenience only).
- * @throws	IllegalArgumentException if <tt>columns() != source.columns() || rows() != source.rows()</tt>
+ * @throws  IllegalArgumentException if <tt>columns() != source.columns() || rows() != source.rows()</tt>
  */
 public ObjectMatrix2D assign(ObjectMatrix2D source) {
-	// overriden for performance only
-	if (! (source instanceof DenseObjectMatrix2D)) {
-		return super.assign(source);
-	}
-	DenseObjectMatrix2D other = (DenseObjectMatrix2D) source;
-	if (other==this) return this; // nothing to do
-	checkShape(other);
-	
-	if (this.isNoView && other.isNoView) { // quickest
-		System.arraycopy(other.elements, 0, this.elements, 0, this.elements.length);
-		return this;
-	}
-	
-	if (haveSharedCells(other)) {
-		ObjectMatrix2D c = other.copy();
-		if (! (c instanceof DenseObjectMatrix2D)) { // should not happen
-			return super.assign(other);
-		}
-		other = (DenseObjectMatrix2D) c;
-	}
-	
-	final Object[] elems = this.elements;
-	final Object[] otherElems = other.elements;
-	if (elements==null || otherElems==null) throw new InternalError();
-	int cs = this.columnStride;
-	int ocs = other.columnStride;
-	int rs = this.rowStride;
-	int ors = other.rowStride;
+  // overriden for performance only
+  if (! (source instanceof DenseObjectMatrix2D)) {
+    return super.assign(source);
+  }
+  DenseObjectMatrix2D other = (DenseObjectMatrix2D) source;
+  if (other==this) return this; // nothing to do
+  checkShape(other);
+  
+  if (this.isNoView && other.isNoView) { // quickest
+    System.arraycopy(other.elements, 0, this.elements, 0, this.elements.length);
+    return this;
+  }
+  
+  if (haveSharedCells(other)) {
+    ObjectMatrix2D c = other.copy();
+    if (! (c instanceof DenseObjectMatrix2D)) { // should not happen
+      return super.assign(other);
+    }
+    other = (DenseObjectMatrix2D) c;
+  }
+  
+  final Object[] elems = this.elements;
+  final Object[] otherElems = other.elements;
+  if (elements==null || otherElems==null) throw new InternalError();
+  int cs = this.columnStride;
+  int ocs = other.columnStride;
+  int rs = this.rowStride;
+  int ors = other.rowStride;
 
-	int otherIndex = other.index(0,0);
-	int index = index(0,0);
-	for (int row=rows; --row >= 0; ) {
-		for (int i=index, j=otherIndex, column=columns; --column >= 0; ) {
-			elems[i] = otherElems[j];
-			i += cs;
-			j += ocs;
-		}
-		index += rs;
-		otherIndex += ors;
-	}
-	return this;
+  int otherIndex = other.index(0,0);
+  int index = index(0,0);
+  for (int row=rows; --row >= 0; ) {
+    for (int i=index, j=otherIndex, column=columns; --column >= 0; ) {
+      elems[i] = otherElems[j];
+      i += cs;
+      j += ocs;
+    }
+    index += rs;
+    otherIndex += ors;
+  }
+  return this;
 }
 /**
 Assigns the result of a function to each cell; <tt>x[row,col] = function(x[row,col],y[row,col])</tt>.
@@ -250,39 +250,39 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @param function a function object taking as first argument the current cell's value of <tt>this</tt>,
 and as second argument the current cell's value of <tt>y</tt>,
 @return <tt>this</tt> (for convenience only).
-@throws	IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
+@throws  IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
 @see org.apache.mahout.jet.math.Functions
 */
 public ObjectMatrix2D assign(ObjectMatrix2D y, org.apache.mahout.matrix.function.ObjectObjectFunction function) {
-	// overriden for performance only
-	if (! (y instanceof DenseObjectMatrix2D)) {
-		return super.assign(y, function);
-	}
-	DenseObjectMatrix2D other = (DenseObjectMatrix2D) y;
-	checkShape(y);
-	
-	final Object[] elems = this.elements;
-	final Object[] otherElems = other.elements;
-	if (elems==null || otherElems==null) throw new InternalError();
-	int cs = this.columnStride;
-	int ocs = other.columnStride;
-	int rs = this.rowStride;
-	int ors = other.rowStride;
+  // overriden for performance only
+  if (! (y instanceof DenseObjectMatrix2D)) {
+    return super.assign(y, function);
+  }
+  DenseObjectMatrix2D other = (DenseObjectMatrix2D) y;
+  checkShape(y);
+  
+  final Object[] elems = this.elements;
+  final Object[] otherElems = other.elements;
+  if (elems==null || otherElems==null) throw new InternalError();
+  int cs = this.columnStride;
+  int ocs = other.columnStride;
+  int rs = this.rowStride;
+  int ors = other.rowStride;
 
-	int otherIndex = other.index(0,0);
-	int index = index(0,0);
+  int otherIndex = other.index(0,0);
+  int index = index(0,0);
 
-	// the general case x[i] = f(x[i],y[i])
-	for (int row=rows; --row >= 0; ) {
-		for (int i=index, j=otherIndex, column=columns; --column >= 0; ) {
-			elems[i] = function.apply(elems[i], otherElems[j]);
-			i += cs;
-			j += ocs;
-		}
-		index += rs;
-		otherIndex += ors;
-	}
-	return this;
+  // the general case x[i] = f(x[i],y[i])
+  for (int row=rows; --row >= 0; ) {
+    for (int i=index, j=otherIndex, column=columns; --column >= 0; ) {
+      elems[i] = function.apply(elems[i], otherElems[j]);
+      i += cs;
+      j += ocs;
+    }
+    index += rs;
+    otherIndex += ors;
+  }
+  return this;
 }
 /**
  * Returns the matrix cell value at coordinate <tt>[row,column]</tt>.
@@ -296,10 +296,10 @@ public ObjectMatrix2D assign(ObjectMatrix2D y, org.apache.mahout.matrix.function
  * @return    the value at the specified coordinate.
  */
 public Object getQuick(int row, int column) {
-	//if (debug) if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
-	//return elements[index(row,column)];
-	//manually inlined:
-	return elements[rowZero + row*rowStride + columnZero + column*columnStride];
+  //if (debug) if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
+  //return elements[index(row,column)];
+  //manually inlined:
+  return elements[rowZero + row*rowStride + columnZero + column*columnStride];
 }
 /**
  * Returns <tt>true</tt> if both matrices share common cells.
@@ -311,15 +311,15 @@ public Object getQuick(int row, int column) {
  * </ul>
  */
 protected boolean haveSharedCellsRaw(ObjectMatrix2D other) {
-	if (other instanceof SelectedDenseObjectMatrix2D) {
-		SelectedDenseObjectMatrix2D otherMatrix = (SelectedDenseObjectMatrix2D) other;
-		return this.elements==otherMatrix.elements;
-	}
-	else if (other instanceof DenseObjectMatrix2D) {
-		DenseObjectMatrix2D otherMatrix = (DenseObjectMatrix2D) other;
-		return this.elements==otherMatrix.elements;
-	}
-	return false;
+  if (other instanceof SelectedDenseObjectMatrix2D) {
+    SelectedDenseObjectMatrix2D otherMatrix = (SelectedDenseObjectMatrix2D) other;
+    return this.elements==otherMatrix.elements;
+  }
+  else if (other instanceof DenseObjectMatrix2D) {
+    DenseObjectMatrix2D otherMatrix = (DenseObjectMatrix2D) other;
+    return this.elements==otherMatrix.elements;
+  }
+  return false;
 }
 /**
  * Returns the position of the given coordinate within the (virtual or non-virtual) internal 1-dimensional array. 
@@ -328,9 +328,9 @@ protected boolean haveSharedCellsRaw(ObjectMatrix2D other) {
  * @param     column   the index of the column-coordinate.
  */
 protected int index(int row, int column) {
-	// return super.index(row,column);
-	// manually inlined for speed:
-	return rowZero + row*rowStride + columnZero + column*columnStride;
+  // return super.index(row,column);
+  // manually inlined for speed:
+  return rowZero + row*rowStride + columnZero + column*columnStride;
 }
 /**
  * Construct and returns a new empty matrix <i>of the same dynamic type</i> as the receiver, having the specified number of rows and columns.
@@ -343,7 +343,7 @@ protected int index(int row, int column) {
  * @return  a new empty matrix of the same dynamic type.
  */
 public ObjectMatrix2D like(int rows, int columns) {
-	return new DenseObjectMatrix2D(rows, columns);
+  return new DenseObjectMatrix2D(rows, columns);
 }
 /**
  * Construct and returns a new 1-d matrix <i>of the corresponding dynamic type</i>, entirelly independent of the receiver.
@@ -354,7 +354,7 @@ public ObjectMatrix2D like(int rows, int columns) {
  * @return  a new matrix of the corresponding dynamic type.
  */
 public ObjectMatrix1D like1D(int size) {
-	return new DenseObjectMatrix1D(size);
+  return new DenseObjectMatrix1D(size);
 }
 /**
  * Construct and returns a new 1-d matrix <i>of the corresponding dynamic type</i>, sharing the same cells.
@@ -367,7 +367,7 @@ public ObjectMatrix1D like1D(int size) {
  * @return  a new matrix of the corresponding dynamic type.
  */
 protected ObjectMatrix1D like1D(int size, int zero, int stride) {
-	return new DenseObjectMatrix1D(size,this.elements,zero,stride);
+  return new DenseObjectMatrix1D(size,this.elements,zero,stride);
 }
 /**
  * Sets the matrix cell at coordinate <tt>[row,column]</tt> to the specified value.
@@ -381,10 +381,10 @@ protected ObjectMatrix1D like1D(int size, int zero, int stride) {
  * @param    value the value to be filled into the specified cell.
  */
 public void setQuick(int row, int column, Object value) {
-	//if (debug) if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
-	//elements[index(row,column)] = value;
-	//manually inlined:
-	elements[rowZero + row*rowStride + columnZero + column*columnStride] = value;
+  //if (debug) if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
+  //elements[index(row,column)] = value;
+  //manually inlined:
+  elements[rowZero + row*rowStride + columnZero + column*columnStride] = value;
 }
 /**
  * Construct and returns a new selection view.
@@ -394,6 +394,6 @@ public void setQuick(int row, int column, Object value) {
  * @return  a new view.
  */
 protected ObjectMatrix2D viewSelectionLike(int[] rowOffsets, int[] columnOffsets) {
-	return new SelectedDenseObjectMatrix2D(this.elements,rowOffsets,columnOffsets,0);
+  return new SelectedDenseObjectMatrix2D(this.elements,rowOffsets,columnOffsets,0);
 }
 }

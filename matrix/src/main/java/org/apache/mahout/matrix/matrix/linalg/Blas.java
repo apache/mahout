@@ -29,28 +29,28 @@ This class implements the BLAS functions for operations on matrices from the
 <ol>
   <li>BLAS Level 1: Vector-Vector operations </li>
   <ul>
-	<li>ddot  : dot product of two vectors </li>
-	<li>daxpy : scalar times a vector plus a vector </li>
-	<li>drotg : construct a Givens plane rotation </li>
-	<li>drot  : apply a plane rotation </li>
-	<li>dcopy : copy vector X into vector Y </li>
-	<li>dswap : interchange vectors X and Y </li>
-	<li>dnrm2 : Euclidean norm of a vector </li>
-	<li>dasum : sum of absolute values of vector components </li>
-	<li>dscal : scale a vector by a scalar </li>
-	<li>idamax: index of element with maximum absolute value </li>
+  <li>ddot  : dot product of two vectors </li>
+  <li>daxpy : scalar times a vector plus a vector </li>
+  <li>drotg : construct a Givens plane rotation </li>
+  <li>drot  : apply a plane rotation </li>
+  <li>dcopy : copy vector X into vector Y </li>
+  <li>dswap : interchange vectors X and Y </li>
+  <li>dnrm2 : Euclidean norm of a vector </li>
+  <li>dasum : sum of absolute values of vector components </li>
+  <li>dscal : scale a vector by a scalar </li>
+  <li>idamax: index of element with maximum absolute value </li>
   </ul>
   <li>2.BLAS Level 2: Matrix-Vector operations </li>
   <ul>
-	<li>dgemv : matrix-vector multiply with general matrix </li>
-	<li>dger  : rank-1 update on general matrix </li>
-	<li>dsymv : matrix-vector multiply with symmetric matrix </li>
-	<li>dtrmv : matrix-vector multiply with triangular matrix </li>
+  <li>dgemv : matrix-vector multiply with general matrix </li>
+  <li>dger  : rank-1 update on general matrix </li>
+  <li>dsymv : matrix-vector multiply with symmetric matrix </li>
+  <li>dtrmv : matrix-vector multiply with triangular matrix </li>
   </ul>
   <li>3.BLAS Level 3: Matrix-Matrix operations 
-	<ul>
-	  <li>dgemm : matrix-matrix multiply with general matrices </li>
-	</ul>
+  <ul>
+    <li>dgemm : matrix-matrix multiply with general matrices </li>
+  </ul>
   </li>
 </ol>
 
@@ -78,7 +78,7 @@ Assigns the result of a function to each cell; <tt>x[row,col] = function(x[row,c
 @param function a function object taking as first argument the current cell's value of <tt>this</tt>,
 and as second argument the current cell's value of <tt>y</tt>,
 @return <tt>this</tt> (for convenience only).
-@throws	IllegalArgumentException if <tt>x.columns() != y.columns() || x.rows() != y.rows()</tt>
+@throws  IllegalArgumentException if <tt>x.columns() != y.columns() || x.rows() != y.rows()</tt>
 @see org.apache.mahout.jet.math.Functions
 */
 public void assign(DoubleMatrix2D x,DoubleMatrix2D y, org.apache.mahout.matrix.function.DoubleDoubleFunction function) ;

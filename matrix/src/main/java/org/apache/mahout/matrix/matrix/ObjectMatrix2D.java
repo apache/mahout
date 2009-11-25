@@ -57,16 +57,16 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @see org.apache.mahout.jet.math.Functions
 */
 public Object aggregate(org.apache.mahout.matrix.function.ObjectObjectFunction aggr, org.apache.mahout.matrix.function.ObjectFunction f) {
-	if (size()==0) return null;
-	Object a = f.apply(getQuick(rows-1,columns-1));
-	int d = 1; // last cell already done
-	for (int row=rows; --row >= 0; ) {
-		for (int column=columns-d; --column >= 0; ) {
-			a = aggr.apply(a, f.apply(getQuick(row,column)));
-		}
-		d = 0;
-	}
-	return a;
+  if (size()==0) return null;
+  Object a = f.apply(getQuick(rows-1,columns-1));
+  int d = 1; // last cell already done
+  for (int row=rows; --row >= 0; ) {
+    for (int column=columns-d; --column >= 0; ) {
+      a = aggr.apply(a, f.apply(getQuick(row,column)));
+    }
+    d = 0;
+  }
+  return a;
 }
 /**
 Applies a function to each corresponding cell of two matrices and aggregates the results.
@@ -96,21 +96,21 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @param aggr an aggregation function taking as first argument the current aggregation and as second argument the transformed current cell values.
 @param f a function transforming the current cell values.
 @return the aggregated measure.
-@throws	IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
+@throws  IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
 @see org.apache.mahout.jet.math.Functions
 */
 public Object aggregate(ObjectMatrix2D other, org.apache.mahout.matrix.function.ObjectObjectFunction aggr, org.apache.mahout.matrix.function.ObjectObjectFunction f) {
-	checkShape(other);
-	if (size()==0) return null;
-	Object a = f.apply(getQuick(rows-1,columns-1),other.getQuick(rows-1,columns-1));
-	int d = 1; // last cell already done
-	for (int row=rows; --row >= 0; ) {
-		for (int column=columns-d; --column >= 0; ) {
-			a = aggr.apply(a, f.apply(getQuick(row,column), other.getQuick(row,column)));
-		}
-		d = 0;
-	}
-	return a;
+  checkShape(other);
+  if (size()==0) return null;
+  Object a = f.apply(getQuick(rows-1,columns-1),other.getQuick(rows-1,columns-1));
+  int d = 1; // last cell already done
+  for (int row=rows; --row >= 0; ) {
+    for (int column=columns-d; --column >= 0; ) {
+      a = aggr.apply(a, f.apply(getQuick(row,column), other.getQuick(row,column)));
+    }
+    d = 0;
+  }
+  return a;
 }
 /**
  * Sets all cells to the state specified by <tt>values</tt>.
@@ -124,15 +124,15 @@ public Object aggregate(ObjectMatrix2D other, org.apache.mahout.matrix.function.
  * @throws IllegalArgumentException if <tt>values.length != rows() || for any 0 &lt;= row &lt; rows(): values[row].length != columns()</tt>.
  */
 public ObjectMatrix2D assign(Object[][] values) {
-	if (values.length != rows) throw new IllegalArgumentException("Must have same number of rows: rows="+values.length+"rows()="+rows());
-	for (int row=rows; --row >= 0;) {
-		Object[] currentRow = values[row];
-		if (currentRow.length != columns) throw new IllegalArgumentException("Must have same number of columns in every row: columns="+currentRow.length+"columns()="+columns());
-		for (int column=columns; --column >= 0;) {
-			setQuick(row,column,currentRow[column]);
-		}
-	}
-	return this;
+  if (values.length != rows) throw new IllegalArgumentException("Must have same number of rows: rows="+values.length+"rows()="+rows());
+  for (int row=rows; --row >= 0;) {
+    Object[] currentRow = values[row];
+    if (currentRow.length != columns) throw new IllegalArgumentException("Must have same number of columns in every row: columns="+currentRow.length+"columns()="+columns());
+    for (int column=columns; --column >= 0;) {
+      setQuick(row,column,currentRow[column]);
+    }
+  }
+  return this;
 }
 /**
 Assigns the result of a function to each cell; <tt>x[row,col] = function(x[row,col])</tt>.
@@ -157,12 +157,12 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @see org.apache.mahout.jet.math.Functions
 */
 public ObjectMatrix2D assign(org.apache.mahout.matrix.function.ObjectFunction function) {
-	for (int row=rows; --row >= 0; ) {
-		for (int column=columns; --column >= 0; ) {
-			setQuick(row,column, function.apply(getQuick(row,column)));
-		}
-	}
-	return this;
+  for (int row=rows; --row >= 0; ) {
+    for (int column=columns; --column >= 0; ) {
+      setQuick(row,column, function.apply(getQuick(row,column)));
+    }
+  }
+  return this;
 }
 /**
  * Replaces all cell values of the receiver with the values of another matrix.
@@ -171,19 +171,19 @@ public ObjectMatrix2D assign(org.apache.mahout.matrix.function.ObjectFunction fu
  *
  * @param     other   the source matrix to copy from (may be identical to the receiver).
  * @return <tt>this</tt> (for convenience only).
- * @throws	IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
+ * @throws  IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
  */
 public ObjectMatrix2D assign(ObjectMatrix2D other) {
-	if (other==this) return this;
-	checkShape(other);
-	if (haveSharedCells(other)) other = other.copy();
-	
-	for (int row=rows; --row >= 0;) {
-		for (int column=columns; --column >= 0;) {
-			setQuick(row,column,other.getQuick(row,column));
-		}
-	}
-	return this;
+  if (other==this) return this;
+  checkShape(other);
+  if (haveSharedCells(other)) other = other.copy();
+  
+  for (int row=rows; --row >= 0;) {
+    for (int column=columns; --column >= 0;) {
+      setQuick(row,column,other.getQuick(row,column));
+    }
+  }
+  return this;
 }
 /**
 Assigns the result of a function to each cell; <tt>x[row,col] = function(x[row,col],y[row,col])</tt>.
@@ -211,17 +211,17 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @param function a function object taking as first argument the current cell's value of <tt>this</tt>,
 and as second argument the current cell's value of <tt>y</tt>,
 @return <tt>this</tt> (for convenience only).
-@throws	IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
+@throws  IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
 @see org.apache.mahout.jet.math.Functions
 */
 public ObjectMatrix2D assign(ObjectMatrix2D y, org.apache.mahout.matrix.function.ObjectObjectFunction function) {
-	checkShape(y);
-	for (int row=rows; --row >= 0; ) {
-		for (int column=columns; --column >= 0; ) {
-			setQuick(row,column, function.apply(getQuick(row,column), y.getQuick(row,column)));
-		}
-	}
-	return this;
+  checkShape(y);
+  for (int row=rows; --row >= 0; ) {
+    for (int column=columns; --column >= 0; ) {
+      setQuick(row,column, function.apply(getQuick(row,column), y.getQuick(row,column)));
+    }
+  }
+  return this;
 }
 /**
  * Sets all cells to the state specified by <tt>value</tt>.
@@ -229,24 +229,24 @@ public ObjectMatrix2D assign(ObjectMatrix2D y, org.apache.mahout.matrix.function
  * @return <tt>this</tt> (for convenience only).
  */
 public ObjectMatrix2D assign(Object value) {
-	for (int row=rows; --row >= 0;) {
-		for (int column=columns; --column >= 0;) {
-			setQuick(row,column,value);
-		}
-	}
-	return this;
+  for (int row=rows; --row >= 0;) {
+    for (int column=columns; --column >= 0;) {
+      setQuick(row,column,value);
+    }
+  }
+  return this;
 }
 /**
  * Returns the number of cells having non-zero values; ignores tolerance.
  */
 public int cardinality() {
-	int cardinality = 0;
-	for (int row=rows; --row >= 0;) {
-		for (int column=columns; --column >= 0;) {
-			if (getQuick(row,column) != null) cardinality++;
-		}
-	}
-	return cardinality;
+  int cardinality = 0;
+  for (int row=rows; --row >= 0;) {
+    for (int column=columns; --column >= 0;) {
+      if (getQuick(row,column) != null) cardinality++;
+    }
+  }
+  return cardinality;
 }
 /**
  * Constructs and returns a deep copy of the receiver.
@@ -257,7 +257,7 @@ public int cardinality() {
  * @return  a deep copy of the receiver.
  */
 public ObjectMatrix2D copy() {
-	return like().assign(this);
+  return like().assign(this);
 }
 /**
 * Compares the specified Object with the receiver for equality.
@@ -267,7 +267,7 @@ public ObjectMatrix2D copy() {
 * @return true if the specified Object is equal to the receiver.
 */
 public boolean equals(Object otherObj) { //delta
-	return equals(otherObj, true);
+  return equals(otherObj, true);
 }
 /**
 * Compares the specified Object with the receiver for equality.
@@ -285,29 +285,29 @@ public boolean equals(Object otherObj) { //delta
 * @return true if the specified Object is equal to the receiver.
 */
 public boolean equals(Object otherObj, boolean testForEquality) { //delta
-	if (! (otherObj instanceof ObjectMatrix2D)) {return false;}
-	if (this==otherObj) return true;
-	if (otherObj==null) return false;
-	ObjectMatrix2D other = (ObjectMatrix2D) otherObj;
-	if (rows!=other.rows()) return false;
-	if (columns!=other.columns()) return false;
+  if (! (otherObj instanceof ObjectMatrix2D)) {return false;}
+  if (this==otherObj) return true;
+  if (otherObj==null) return false;
+  ObjectMatrix2D other = (ObjectMatrix2D) otherObj;
+  if (rows!=other.rows()) return false;
+  if (columns!=other.columns()) return false;
 
-	if (! testForEquality) {
-		for (int row=rows; --row >= 0; ) {
-			for (int column=columns; --column >= 0; ) {
-				if (getQuick(row,column) != other.getQuick(row,column)) return false;
-			}
-		}
-	}
-	else {
-		for (int row=rows; --row >= 0; ) {
-			for (int column=columns; --column >= 0; ) {
-				if (!(getQuick(row,column)==null ? other.getQuick(row,column)==null : getQuick(row,column).equals(other.getQuick(row,column)))) return false;
-			}
-		}
-	}
+  if (! testForEquality) {
+    for (int row=rows; --row >= 0; ) {
+      for (int column=columns; --column >= 0; ) {
+        if (getQuick(row,column) != other.getQuick(row,column)) return false;
+      }
+    }
+  }
+  else {
+    for (int row=rows; --row >= 0; ) {
+      for (int column=columns; --column >= 0; ) {
+        if (!(getQuick(row,column)==null ? other.getQuick(row,column)==null : getQuick(row,column).equals(other.getQuick(row,column)))) return false;
+      }
+    }
+  }
 
-	return true;
+  return true;
 
 }
 /**
@@ -316,18 +316,18 @@ public boolean equals(Object otherObj, boolean testForEquality) { //delta
  * @param     row   the index of the row-coordinate.
  * @param     column   the index of the column-coordinate.
  * @return    the value of the specified cell.
- * @throws	IndexOutOfBoundsException if <tt>column&lt;0 || column&gt;=columns() || row&lt;0 || row&gt;=rows()</tt>
+ * @throws  IndexOutOfBoundsException if <tt>column&lt;0 || column&gt;=columns() || row&lt;0 || row&gt;=rows()</tt>
  */
 public Object get(int row, int column) {
-	if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
-	return getQuick(row,column);
+  if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
+  return getQuick(row,column);
 }
 /**
  * Returns the content of this matrix if it is a wrapper; or <tt>this</tt> otherwise.
  * Override this method in wrappers.
  */
 protected ObjectMatrix2D getContent() {
-	return this;
+  return this;
 }
 /**
 Fills the coordinates and values of cells having non-zero values into the specified lists.
@@ -357,21 +357,21 @@ In other words, <tt>get(0,2)==8, get(1,1)==7</tt>.
 @param valueList the list to be filled with values, can have any size.
 */
 public void getNonZeros(IntArrayList rowList, IntArrayList columnList, ObjectArrayList valueList) {
-	rowList.clear(); 
-	columnList.clear(); 
-	valueList.clear();
-	int r = rows;
-	int c = columns;
-	for (int row=0; row < r; row++) {
-		for (int column=0; column < c; column++) {
-			Object value = getQuick(row,column);
-			if (value != null) {
-				rowList.add(row);
-				columnList.add(column);
-				valueList.add(value);
-			}
-		}
-	}
+  rowList.clear(); 
+  columnList.clear(); 
+  valueList.clear();
+  int r = rows;
+  int c = columns;
+  for (int row=0; row < r; row++) {
+    for (int column=0; column < c; column++) {
+      Object value = getQuick(row,column);
+      if (value != null) {
+        rowList.add(row);
+        columnList.add(column);
+        valueList.add(value);
+      }
+    }
+  }
 }
 /**
  * Returns the matrix cell value at coordinate <tt>[row,column]</tt>.
@@ -389,16 +389,16 @@ public abstract Object getQuick(int row, int column);
  * Returns <tt>true</tt> if both matrices share at least one identical cell.
  */
 protected boolean haveSharedCells(ObjectMatrix2D other) {
-	if (other==null) return false;
-	if (this==other) return true;
-	return getContent().haveSharedCellsRaw(other.getContent());
-}	
+  if (other==null) return false;
+  if (this==other) return true;
+  return getContent().haveSharedCellsRaw(other.getContent());
+}  
 /**
  * Returns <tt>true</tt> if both matrices share at least one identical cell.
  */
 protected boolean haveSharedCellsRaw(ObjectMatrix2D other) {
-	return false;
-}	
+  return false;
+}  
 /**
  * Construct and returns a new empty matrix <i>of the same dynamic type</i> as the receiver, having the same number of rows and columns.
  * For example, if the receiver is an instance of type <tt>DenseObjectMatrix2D</tt> the new matrix must also be of type <tt>DenseObjectMatrix2D</tt>,
@@ -408,7 +408,7 @@ protected boolean haveSharedCellsRaw(ObjectMatrix2D other) {
  * @return  a new empty matrix of the same dynamic type.
  */
 public ObjectMatrix2D like() {
-	return like(rows,columns);
+  return like(rows,columns);
 }
 /**
  * Construct and returns a new empty matrix <i>of the same dynamic type</i> as the receiver, having the specified number of rows and columns.
@@ -447,11 +447,11 @@ protected abstract ObjectMatrix1D like1D(int size, int zero, int stride);
  * @param     row   the index of the row-coordinate.
  * @param     column   the index of the column-coordinate.
  * @param    value the value to be filled into the specified cell.
- * @throws	IndexOutOfBoundsException if <tt>column&lt;0 || column&gt;=columns() || row&lt;0 || row&gt;=rows()</tt>
+ * @throws  IndexOutOfBoundsException if <tt>column&lt;0 || column&gt;=columns() || row&lt;0 || row&gt;=rows()</tt>
  */
 public void set(int row, int column, Object value) {
-	if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
-	setQuick(row,column,value);
+  if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
+  setQuick(row,column,value);
 }
 /**
  * Sets the matrix cell at coordinate <tt>[row,column]</tt> to the specified value.
@@ -475,21 +475,21 @@ public abstract void setQuick(int row, int column, Object value);
  * @return an array filled with the values of the cells.
  */
 public Object[][] toArray() {
-	Object[][] values = new Object[rows][columns];
-	for (int row=rows; --row >= 0;) {
-		Object[] currentRow = values[row];
-		for (int column=columns; --column >= 0;) {
-			currentRow[column] = getQuick(row,column);
-		}
-	}
-	return values;
+  Object[][] values = new Object[rows][columns];
+  for (int row=rows; --row >= 0;) {
+    Object[] currentRow = values[row];
+    for (int column=columns; --column >= 0;) {
+      currentRow[column] = getQuick(row,column);
+    }
+  }
+  return values;
 }
 /**
  * Returns a string representation using default formatting.
  * @see org.apache.mahout.matrix.matrix.objectalgo.Formatter
  */
 public String toString() {
-	return new org.apache.mahout.matrix.matrix.objectalgo.Formatter().toString(this);
+  return new org.apache.mahout.matrix.matrix.objectalgo.Formatter().toString(this);
 }
 /**
  * Constructs and returns a new view equal to the receiver.
@@ -503,7 +503,7 @@ public String toString() {
  * @return  a new view of the receiver.
  */
 protected ObjectMatrix2D view() {
-	return (ObjectMatrix2D) clone();
+  return (ObjectMatrix2D) clone();
 }
 /**
 Constructs and returns a new <i>slice view</i> representing the rows of the given column.
@@ -513,12 +513,12 @@ To obtain a slice view on subranges, construct a sub-ranging view (<tt>viewPart(
 <b>Example:</b> 
 <table border="0">
   <tr nowrap> 
-	<td valign="top">2 x 3 matrix: <br>
-	  1, 2, 3<br>
-	  4, 5, 6 </td>
-	<td>viewColumn(0) ==></td>
-	<td valign="top">Matrix1D of size 2:<br>
-	  1, 4</td>
+  <td valign="top">2 x 3 matrix: <br>
+    1, 2, 3<br>
+    4, 5, 6 </td>
+  <td>viewColumn(0) ==></td>
+  <td valign="top">Matrix1D of size 2:<br>
+    1, 4</td>
    </tr>
 </table>
 
@@ -528,11 +528,11 @@ To obtain a slice view on subranges, construct a sub-ranging view (<tt>viewPart(
 @see #viewRow(int)
 */
 public ObjectMatrix1D viewColumn(int column) {
-	checkColumn(column);
-	int viewSize = this.rows;
-	int viewZero = index(0,column);
-	int viewStride = this.rowStride;
-	return like1D(viewSize,viewZero,viewStride);
+  checkColumn(column);
+  int viewSize = this.rows;
+  int viewZero = index(0,column);
+  int viewStride = this.rowStride;
+  return like1D(viewSize,viewZero,viewStride);
 }
 /**
 Constructs and returns a new <i>flip view</i> along the column axis.
@@ -542,17 +542,17 @@ The returned view is backed by this matrix, so changes in the returned view are 
 <b>Example:</b> 
 <table border="0">
   <tr nowrap> 
-	<td valign="top">2 x 3 matrix: <br>
-	  1, 2, 3<br>
-	  4, 5, 6 </td>
-	<td>columnFlip ==></td>
-	<td valign="top">2 x 3 matrix:<br>
-	  3, 2, 1 <br>
-	  6, 5, 4</td>
-	<td>columnFlip ==></td>
-	<td valign="top">2 x 3 matrix: <br>
-	  1, 2, 3<br>
-	  4, 5, 6 </td>
+  <td valign="top">2 x 3 matrix: <br>
+    1, 2, 3<br>
+    4, 5, 6 </td>
+  <td>columnFlip ==></td>
+  <td valign="top">2 x 3 matrix:<br>
+    3, 2, 1 <br>
+    6, 5, 4</td>
+  <td>columnFlip ==></td>
+  <td valign="top">2 x 3 matrix: <br>
+    1, 2, 3<br>
+    4, 5, 6 </td>
   </tr>
 </table>
 
@@ -560,7 +560,7 @@ The returned view is backed by this matrix, so changes in the returned view are 
 @see #viewRowFlip()
 */
 public ObjectMatrix2D viewColumnFlip() {
-	return (ObjectMatrix2D) (view().vColumnFlip());
+  return (ObjectMatrix2D) (view().vColumnFlip());
 }
 /**
 Constructs and returns a new <i>dice (transposition) view</i>; Swaps axes; example: 3 x 4 matrix --> 4 x 3 matrix.
@@ -573,25 +573,25 @@ Use idioms like <tt>result = viewDice(A).copy()</tt> to generate an independent 
 <b>Example:</b> 
 <table border="0">
   <tr nowrap> 
-	<td valign="top">2 x 3 matrix: <br>
-	  1, 2, 3<br>
-	  4, 5, 6 </td>
-	<td>transpose ==></td>
-	<td valign="top">3 x 2 matrix:<br>
-	  1, 4 <br>
-	  2, 5 <br>
-	  3, 6</td>
-	<td>transpose ==></td>
-	<td valign="top">2 x 3 matrix: <br>
-	  1, 2, 3<br>
-	  4, 5, 6 </td>
+  <td valign="top">2 x 3 matrix: <br>
+    1, 2, 3<br>
+    4, 5, 6 </td>
+  <td>transpose ==></td>
+  <td valign="top">3 x 2 matrix:<br>
+    1, 4 <br>
+    2, 5 <br>
+    3, 6</td>
+  <td>transpose ==></td>
+  <td valign="top">2 x 3 matrix: <br>
+    1, 2, 3<br>
+    4, 5, 6 </td>
   </tr>
 </table>
 
 @return a new dice view.
 */
 public ObjectMatrix2D viewDice() {
-	return (ObjectMatrix2D) (view().vDice());
+  return (ObjectMatrix2D) (view().vDice());
 }
 /**
 Constructs and returns a new <i>sub-range view</i> that is a <tt>height x width</tt> sub matrix starting at <tt>[row,column]</tt>.
@@ -612,12 +612,12 @@ As usual, any attempt to access a cell at a coordinate <tt>column&lt;0 || column
 @param     column   The index of the column-coordinate.
 @param     height   The height of the box.
 @param     width   The width of the box.
-@throws	IndexOutOfBoundsException if <tt>column<0 || width<0 || column+width>columns() || row<0 || height<0 || row+height>rows()</tt>
+@throws  IndexOutOfBoundsException if <tt>column<0 || width<0 || column+width>columns() || row<0 || height<0 || row+height>rows()</tt>
 @return the new view.
-		
+    
 */
 public ObjectMatrix2D viewPart(int row, int column, int height, int width) {
-	return (ObjectMatrix2D) (view().vPart(row,column,height,width));
+  return (ObjectMatrix2D) (view().vPart(row,column,height,width));
 }
 /**
 Constructs and returns a new <i>slice view</i> representing the columns of the given row.
@@ -627,12 +627,12 @@ To obtain a slice view on subranges, construct a sub-ranging view (<tt>viewPart(
 <b>Example:</b> 
 <table border="0">
   <tr nowrap> 
-	<td valign="top">2 x 3 matrix: <br>
-	  1, 2, 3<br>
-	  4, 5, 6 </td>
-	<td>viewRow(0) ==></td>
-	<td valign="top">Matrix1D of size 3:<br>
-	  1, 2, 3</td>
+  <td valign="top">2 x 3 matrix: <br>
+    1, 2, 3<br>
+    4, 5, 6 </td>
+  <td>viewRow(0) ==></td>
+  <td valign="top">Matrix1D of size 3:<br>
+    1, 2, 3</td>
    </tr>
 </table>
 
@@ -642,11 +642,11 @@ To obtain a slice view on subranges, construct a sub-ranging view (<tt>viewPart(
 @see #viewColumn(int)
 */
 public ObjectMatrix1D viewRow(int row) {
-	checkRow(row);
-	int viewSize = this.columns;
-	int viewZero = index(row,0);
-	int viewStride = this.columnStride;
-	return like1D(viewSize,viewZero,viewStride);
+  checkRow(row);
+  int viewSize = this.columns;
+  int viewZero = index(row,0);
+  int viewStride = this.columnStride;
+  return like1D(viewSize,viewZero,viewStride);
 }
 /**
 Constructs and returns a new <i>flip view</i> along the row axis.
@@ -656,17 +656,17 @@ The returned view is backed by this matrix, so changes in the returned view are 
 <b>Example:</b> 
 <table border="0">
   <tr nowrap> 
-	<td valign="top">2 x 3 matrix: <br>
-	  1, 2, 3<br>
-	  4, 5, 6 </td>
-	<td>rowFlip ==></td>
-	<td valign="top">2 x 3 matrix:<br>
-	  4, 5, 6 <br>
-	  1, 2, 3</td>
-	<td>rowFlip ==></td>
-	<td valign="top">2 x 3 matrix: <br>
-	  1, 2, 3<br>
-	  4, 5, 6 </td>
+  <td valign="top">2 x 3 matrix: <br>
+    1, 2, 3<br>
+    4, 5, 6 </td>
+  <td>rowFlip ==></td>
+  <td valign="top">2 x 3 matrix:<br>
+    4, 5, 6 <br>
+    1, 2, 3</td>
+  <td>rowFlip ==></td>
+  <td valign="top">2 x 3 matrix: <br>
+    1, 2, 3<br>
+    4, 5, 6 </td>
   </tr>
 </table>
 
@@ -674,7 +674,7 @@ The returned view is backed by this matrix, so changes in the returned view are 
 @see #viewColumnFlip()
 */
 public ObjectMatrix2D viewRowFlip() {
-	return (ObjectMatrix2D) (view().vRowFlip());
+  return (ObjectMatrix2D) (view().vRowFlip());
 }
 /**
 Constructs and returns a new <i>selection view</i> that is a matrix holding the indicated cells.
@@ -704,27 +704,27 @@ To indicate "all" rows or "all columns", simply set the respective parameter
 @throws IndexOutOfBoundsException if <tt>!(0 <= columnIndexes[i] < columns())</tt> for any <tt>i=0..columnIndexes.length()-1</tt>.
 */
 public ObjectMatrix2D viewSelection(int[] rowIndexes, int[] columnIndexes) {
-	// check for "all"
-	if (rowIndexes==null) {
-		rowIndexes = new int[rows];
-		for (int i=rows; --i >= 0; ) rowIndexes[i] = i;
-	}
-	if (columnIndexes==null) {
-		columnIndexes = new int[columns];
-		for (int i=columns; --i >= 0; ) columnIndexes[i] = i;
-	}
-	
-	checkRowIndexes(rowIndexes);
-	checkColumnIndexes(columnIndexes);
-	int[] rowOffsets = new int[rowIndexes.length];
-	int[] columnOffsets = new int[columnIndexes.length];
-	for (int i=rowIndexes.length; --i >= 0; ) {
-		rowOffsets[i] = _rowOffset(_rowRank(rowIndexes[i]));
-	}
-	for (int i=columnIndexes.length; --i >= 0; ) {
-		columnOffsets[i] = _columnOffset(_columnRank(columnIndexes[i]));
-	}
-	return viewSelectionLike(rowOffsets,columnOffsets);
+  // check for "all"
+  if (rowIndexes==null) {
+    rowIndexes = new int[rows];
+    for (int i=rows; --i >= 0; ) rowIndexes[i] = i;
+  }
+  if (columnIndexes==null) {
+    columnIndexes = new int[columns];
+    for (int i=columns; --i >= 0; ) columnIndexes[i] = i;
+  }
+  
+  checkRowIndexes(rowIndexes);
+  checkColumnIndexes(columnIndexes);
+  int[] rowOffsets = new int[rowIndexes.length];
+  int[] columnOffsets = new int[columnIndexes.length];
+  for (int i=rowIndexes.length; --i >= 0; ) {
+    rowOffsets[i] = _rowOffset(_rowRank(rowIndexes[i]));
+  }
+  for (int i=columnIndexes.length; --i >= 0; ) {
+    columnOffsets[i] = _columnOffset(_columnRank(columnIndexes[i]));
+  }
+  return viewSelectionLike(rowOffsets,columnOffsets);
 }
 /**
 Constructs and returns a new <i>selection view</i> that is a matrix holding all <b>rows</b> matching the given condition.
@@ -759,13 +759,13 @@ The returned view is backed by this matrix, so changes in the returned view are 
 @return the new view.
 */
 public ObjectMatrix2D viewSelection(ObjectMatrix1DProcedure condition) {
-	IntArrayList matches = new IntArrayList();
-	for (int i=0; i < rows; i++) {
-		if (condition.apply(viewRow(i))) matches.add(i);
-	}
-	
-	matches.trimToSize();
-	return viewSelection(matches.elements(), null); // take all columns
+  IntArrayList matches = new IntArrayList();
+  for (int i=0; i < rows; i++) {
+    if (condition.apply(viewRow(i))) matches.add(i);
+  }
+  
+  matches.trimToSize();
+  return viewSelection(matches.elements(), null); // take all columns
 }
 /**
  * Construct and returns a new selection view.
@@ -784,7 +784,7 @@ For more advanced sorting functionality, see {@link org.apache.mahout.matrix.mat
 @throws IndexOutOfBoundsException if <tt>column < 0 || column >= columns()</tt>.
 */
 public ObjectMatrix2D viewSorted(int column) {
-	return org.apache.mahout.matrix.matrix.objectalgo.Sorting.mergeSort.sort(this,column);
+  return org.apache.mahout.matrix.matrix.objectalgo.Sorting.mergeSort.sort(this,column);
 }
 /**
 Constructs and returns a new <i>stride view</i> which is a sub matrix consisting of every i-th cell.
@@ -794,10 +794,10 @@ The returned view is backed by this matrix, so changes in the returned view are 
 @param rowStride the row step factor.
 @param columnStride the column step factor.
 @return a new view.
-@throws	IndexOutOfBoundsException if <tt>rowStride<=0 || columnStride<=0</tt>.
+@throws  IndexOutOfBoundsException if <tt>rowStride<=0 || columnStride<=0</tt>.
 */
 public ObjectMatrix2D viewStrides(int rowStride, int columnStride) {
-	return (ObjectMatrix2D) (view().vStrides(rowStride, columnStride));
+  return (ObjectMatrix2D) (view().vStrides(rowStride, columnStride));
 }
 /**
  * Applies a procedure to each cell's value.
@@ -817,11 +817,11 @@ public ObjectMatrix2D viewStrides(int rowStride, int columnStride) {
  * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise. 
  */
 private boolean xforEach(final org.apache.mahout.matrix.function.ObjectProcedure procedure) {
-	for (int row=rows; --row >= 0;) {
-		for (int column=columns; --column >= 0;) {
-			if (!procedure.apply(getQuick(row,column))) return false;
-		}
-	}
-	return true;
+  for (int row=rows; --row >= 0;) {
+    for (int column=columns; --column >= 0;) {
+      if (!procedure.apply(getQuick(row,column))) return false;
+    }
+  }
+  return true;
 }
 }

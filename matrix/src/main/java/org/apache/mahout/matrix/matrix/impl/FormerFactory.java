@@ -7,8 +7,6 @@ package org.apache.mahout.matrix.matrix.impl;
  * Serves to isolate the interface of String formatting from the actual implementation.
  * If you want to plug in a different String formatting implementation, simply replace this class with your alternative.
  *
- * @author wolfgang.hoschek@cern.ch
- * @version 1.0, 21/07/00
  */
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.

@@ -22,8 +22,8 @@ First see the <a href="package-summary.html">package summary</a> and javadoc <a 
  */
 @Deprecated
 public abstract class AbstractMatrix extends org.apache.mahout.matrix.PersistentObject {
-	protected boolean isNoView = true;
-	//public static boolean debug = true;
+  protected boolean isNoView = true;
+  //public static boolean debug = true;
 /**
  * Makes this class non instantiable, but still let's others inherit from it.
  */
@@ -41,7 +41,7 @@ public void ensureCapacity(int minNonZeros) {}
  * Returns whether the receiver is a view or not.
  */
 protected boolean isView() {
-	return ! this.isNoView;
+  return ! this.isNoView;
 }
 /**
  * Returns the number of cells.

@@ -9,12 +9,12 @@ import org.apache.mahout.matrix.matrix.linalg.Algebra;
 
 class QRTest {
 
-	/**
-	 * Constructor for QRTest.
-	 */
-	public QRTest() {
-		super();
-	}
+  /**
+   * Constructor for QRTest.
+   */
+  public QRTest() {
+    super();
+  }
 
     public static void main(String args[]) {
 
@@ -96,7 +96,7 @@ class QRTest {
        amatrix.print(8,5);
        bmatrix.print(8,5);
        cmatrix.print(8,5);
-		*/
+    */
     }
 
 

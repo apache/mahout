@@ -37,15 +37,15 @@ F.random(4,4,5);
  */
 @Deprecated
 public class DoubleFactory3D extends org.apache.mahout.matrix.PersistentObject {
-	/**
-	 * A factory producing dense matrices.
-	 */
-	public static final DoubleFactory3D dense  = new DoubleFactory3D();
+  /**
+   * A factory producing dense matrices.
+   */
+  public static final DoubleFactory3D dense  = new DoubleFactory3D();
 
-	/**
-	 * A factory producing sparse matrices.
-	 */
-	public static final DoubleFactory3D sparse = new DoubleFactory3D();
+  /**
+   * A factory producing sparse matrices.
+   */
+  public static final DoubleFactory3D sparse = new DoubleFactory3D();
 /**
  * Makes this class non instantiable, but still let's others inherit from it.
  */
@@ -55,24 +55,24 @@ protected DoubleFactory3D() {}
  * For debugging purposes.
  */
 public DoubleMatrix3D ascending(int slices, int rows, int columns) {
-	org.apache.mahout.jet.math.Functions F = org.apache.mahout.jet.math.Functions.functions;
-	return descending(slices,rows,columns).assign(F.chain(F.neg,F.minus(slices*rows*columns)));
+  org.apache.mahout.jet.math.Functions F = org.apache.mahout.jet.math.Functions.functions;
+  return descending(slices,rows,columns).assign(F.chain(F.neg,F.minus(slices*rows*columns)));
 }
 /**
  * Constructs a matrix with cells having descending values.
  * For debugging purposes.
  */
 public DoubleMatrix3D descending(int slices, int rows, int columns) {
-	DoubleMatrix3D matrix = make(slices,rows,columns);
-	int v = 0;
-	for (int slice=slices; --slice >= 0;) {
-		for (int row=rows; --row >= 0;) {
-			for (int column=columns; --column >= 0;) {
-				matrix.setQuick(slice, row, column, v++);
-			}
-		}
-	}
-	return matrix;
+  DoubleMatrix3D matrix = make(slices,rows,columns);
+  int v = 0;
+  for (int slice=slices; --slice >= 0;) {
+    for (int row=rows; --row >= 0;) {
+      for (int column=columns; --column >= 0;) {
+        matrix.setQuick(slice, row, column, v++);
+      }
+    }
+  }
+  return matrix;
 }
 /**
  * Constructs a matrix with the given cell values.
@@ -87,26 +87,26 @@ public DoubleMatrix3D descending(int slices, int rows, int columns) {
  * @throws IllegalArgumentException if <tt>for any 0 &lt;= column &lt; columns(): values[slice][row].length != columns()</tt>.
  */
 public DoubleMatrix3D make(double[][][] values) {
-	if (this==sparse) return new SparseDoubleMatrix3D(values);
-	return new DenseDoubleMatrix3D(values);
+  if (this==sparse) return new SparseDoubleMatrix3D(values);
+  return new DenseDoubleMatrix3D(values);
 }
 /**
  * Constructs a matrix with the given shape, each cell initialized with zero.
  */
 public DoubleMatrix3D make(int slices, int rows, int columns) {
-	if (this==sparse) return new SparseDoubleMatrix3D(slices,rows,columns);
-	return new DenseDoubleMatrix3D(slices,rows,columns);
+  if (this==sparse) return new SparseDoubleMatrix3D(slices,rows,columns);
+  return new DenseDoubleMatrix3D(slices,rows,columns);
 }
 /**
  * Constructs a matrix with the given shape, each cell initialized with the given value.
  */
 public DoubleMatrix3D make(int slices, int rows, int columns, double initialValue) {
-	return make(slices,rows,columns).assign(initialValue);
+  return make(slices,rows,columns).assign(initialValue);
 }
 /**
  * Constructs a matrix with uniformly distributed values in <tt>(0,1)</tt> (exclusive).
  */
 public DoubleMatrix3D random(int slices, int rows, int columns) {
-	return make(slices,rows,columns).assign(org.apache.mahout.jet.math.Functions.random());
+  return make(slices,rows,columns).assign(org.apache.mahout.jet.math.Functions.random());
 }
 }

@@ -44,21 +44,21 @@ Depends on the parent view holding cells.
 @version 1.0, 09/24/99
 */
 class SelectedSparseObjectMatrix2D extends ObjectMatrix2D {
-	/*
-	 * The elements of the matrix.
-	 */
-	protected AbstractIntObjectMap elements; 
-	
-	/**
-	  * The offsets of the visible cells of this matrix.
-	  */
-	protected int[] rowOffsets;
-	protected int[] columnOffsets;
-	
-	/**
-	  * The offset.
-	  */
-	protected int offset;	
+  /*
+   * The elements of the matrix.
+   */
+  protected AbstractIntObjectMap elements; 
+  
+  /**
+    * The offsets of the visible cells of this matrix.
+    */
+  protected int[] rowOffsets;
+  protected int[] columnOffsets;
+  
+  /**
+    * The offset.
+    */
+  protected int offset;  
 /**
  * Constructs a matrix view with the given parameters.
  * @param rows the number of rows the matrix shall have.
@@ -73,15 +73,15 @@ class SelectedSparseObjectMatrix2D extends ObjectMatrix2D {
  * @param  offset   
  */
 protected SelectedSparseObjectMatrix2D(int rows, int columns, AbstractIntObjectMap elements, int rowZero, int columnZero, int rowStride, int columnStride, int[] rowOffsets, int[] columnOffsets, int offset) {
-	// be sure parameters are valid, we do not check...
-	setUp(rows,columns,rowZero,columnZero,rowStride,columnStride);
-	
-	this.elements = elements;
-	this.rowOffsets = rowOffsets;
-	this.columnOffsets = columnOffsets;
-	this.offset = offset;
-	
-	this.isNoView = false;
+  // be sure parameters are valid, we do not check...
+  setUp(rows,columns,rowZero,columnZero,rowStride,columnStride);
+  
+  this.elements = elements;
+  this.rowOffsets = rowOffsets;
+  this.columnOffsets = columnOffsets;
+  this.offset = offset;
+  
+  this.isNoView = false;
 }
 /**
  * Constructs a matrix view with the given parameters.
@@ -91,7 +91,7 @@ protected SelectedSparseObjectMatrix2D(int rows, int columns, AbstractIntObjectM
  * @param  offset   
  */
 protected SelectedSparseObjectMatrix2D(AbstractIntObjectMap elements, int[] rowOffsets, int[] columnOffsets, int offset) {
-	this(rowOffsets.length,columnOffsets.length,elements,0,0,1,1,rowOffsets,columnOffsets,offset);
+  this(rowOffsets.length,columnOffsets.length,elements,0,0,1,1,rowOffsets,columnOffsets,offset);
 }
 /**
  * Returns the position of the given absolute rank within the (virtual or non-virtual) internal 1-dimensional array. 
@@ -101,7 +101,7 @@ protected SelectedSparseObjectMatrix2D(AbstractIntObjectMap elements, int[] rowO
  * @return the position.
  */
 protected int _columnOffset(int absRank) {
-	return columnOffsets[absRank];
+  return columnOffsets[absRank];
 }
 /**
  * Returns the position of the given absolute rank within the (virtual or non-virtual) internal 1-dimensional array. 
@@ -111,7 +111,7 @@ protected int _columnOffset(int absRank) {
  * @return the position.
  */
 protected int _rowOffset(int absRank) {
-	return rowOffsets[absRank];
+  return rowOffsets[absRank];
 }
 /**
  * Returns the matrix cell value at coordinate <tt>[row,column]</tt>.
@@ -125,10 +125,10 @@ protected int _rowOffset(int absRank) {
  * @return    the value at the specified coordinate.
  */
 public Object getQuick(int row, int column) {
-	//if (debug) if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
-	//return elements.get(index(row,column));
-	//manually inlined:
-	return elements.get(offset + rowOffsets[rowZero + row*rowStride] + columnOffsets[columnZero + column*columnStride]);
+  //if (debug) if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
+  //return elements.get(index(row,column));
+  //manually inlined:
+  return elements.get(offset + rowOffsets[rowZero + row*rowStride] + columnOffsets[columnZero + column*columnStride]);
 }
 /**
  * Returns <tt>true</tt> if both matrices share common cells.
@@ -140,15 +140,15 @@ public Object getQuick(int row, int column) {
  * </ul>
  */
 protected boolean haveSharedCellsRaw(ObjectMatrix2D other) {
-	if (other instanceof SelectedSparseObjectMatrix2D) {
-		SelectedSparseObjectMatrix2D otherMatrix = (SelectedSparseObjectMatrix2D) other;
-		return this.elements==otherMatrix.elements;
-	}
-	else if (other instanceof SparseObjectMatrix2D) {
-		SparseObjectMatrix2D otherMatrix = (SparseObjectMatrix2D) other;
-		return this.elements==otherMatrix.elements;
-	}
-	return false;
+  if (other instanceof SelectedSparseObjectMatrix2D) {
+    SelectedSparseObjectMatrix2D otherMatrix = (SelectedSparseObjectMatrix2D) other;
+    return this.elements==otherMatrix.elements;
+  }
+  else if (other instanceof SparseObjectMatrix2D) {
+    SparseObjectMatrix2D otherMatrix = (SparseObjectMatrix2D) other;
+    return this.elements==otherMatrix.elements;
+  }
+  return false;
 }
 /**
  * Returns the position of the given coordinate within the (virtual or non-virtual) internal 1-dimensional array. 
@@ -157,9 +157,9 @@ protected boolean haveSharedCellsRaw(ObjectMatrix2D other) {
  * @param     column   the index of the column-coordinate.
  */
 protected int index(int row, int column) {
-	//return this.offset + super.index(row,column);
-	//manually inlined:
-	return this.offset + rowOffsets[rowZero + row*rowStride] + columnOffsets[columnZero + column*columnStride];
+  //return this.offset + super.index(row,column);
+  //manually inlined:
+  return this.offset + rowOffsets[rowZero + row*rowStride] + columnOffsets[columnZero + column*columnStride];
 }
 /**
  * Construct and returns a new empty matrix <i>of the same dynamic type</i> as the receiver, having the specified number of rows and columns.
@@ -172,7 +172,7 @@ protected int index(int row, int column) {
  * @return  a new empty matrix of the same dynamic type.
  */
 public ObjectMatrix2D like(int rows, int columns) {
-	return new SparseObjectMatrix2D(rows, columns);
+  return new SparseObjectMatrix2D(rows, columns);
 }
 /**
  * Construct and returns a new 1-d matrix <i>of the corresponding dynamic type</i>, entirelly independent of the receiver.
@@ -183,7 +183,7 @@ public ObjectMatrix2D like(int rows, int columns) {
  * @return  a new matrix of the corresponding dynamic type.
  */
 public ObjectMatrix1D like1D(int size) {
-	return new SparseObjectMatrix1D(size);
+  return new SparseObjectMatrix1D(size);
 }
 /**
  * Construct and returns a new 1-d matrix <i>of the corresponding dynamic type</i>, sharing the same cells.
@@ -196,7 +196,7 @@ public ObjectMatrix1D like1D(int size) {
  * @return  a new matrix of the corresponding dynamic type.
  */
 protected ObjectMatrix1D like1D(int size, int zero, int stride) {
-	throw new InternalError(); // this method is never called since viewRow() and viewColumn are overridden properly.
+  throw new InternalError(); // this method is never called since viewRow() and viewColumn are overridden properly.
 }
 /**
  * Sets the matrix cell at coordinate <tt>[row,column]</tt> to the specified value.
@@ -210,40 +210,40 @@ protected ObjectMatrix1D like1D(int size, int zero, int stride) {
  * @param    value the value to be filled into the specified cell.
  */
 public void setQuick(int row, int column, Object value) {
-	//if (debug) if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
-	//int index =	index(row,column);
-	//manually inlined:
-	int index = offset + rowOffsets[rowZero + row*rowStride] + columnOffsets[columnZero + column*columnStride];
+  //if (debug) if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
+  //int index =  index(row,column);
+  //manually inlined:
+  int index = offset + rowOffsets[rowZero + row*rowStride] + columnOffsets[columnZero + column*columnStride];
 
-	if (value == null)
-		this.elements.removeKey(index);
-	else 
-		this.elements.put(index, value);
+  if (value == null)
+    this.elements.removeKey(index);
+  else 
+    this.elements.put(index, value);
 }
 /**
  * Sets up a matrix with a given number of rows and columns.
  * @param rows the number of rows the matrix shall have.
  * @param columns the number of columns the matrix shall have.
- * @throws	IllegalArgumentException if <tt>(Object)columns*rows > Integer.MAX_VALUE</tt>.
+ * @throws  IllegalArgumentException if <tt>(Object)columns*rows > Integer.MAX_VALUE</tt>.
  */
 protected void setUp(int rows, int columns) {
-	super.setUp(rows,columns);
-	this.rowStride = 1;
-	this.columnStride = 1;
-	this.offset = 0;
+  super.setUp(rows,columns);
+  this.rowStride = 1;
+  this.columnStride = 1;
+  this.offset = 0;
 }
 /**
 Self modifying version of viewDice().
 */
 protected AbstractMatrix2D vDice() {
-	super.vDice();
-	// swap
-	int[] tmp = rowOffsets; rowOffsets = columnOffsets; columnOffsets = tmp;
+  super.vDice();
+  // swap
+  int[] tmp = rowOffsets; rowOffsets = columnOffsets; columnOffsets = tmp;
 
-	// flips stay unaffected
+  // flips stay unaffected
 
-	this.isNoView = false;
-	return this;
+  this.isNoView = false;
+  return this;
 }
 /**
 Constructs and returns a new <i>slice view</i> representing the rows of the given column.
@@ -253,12 +253,12 @@ To obtain a slice view on subranges, construct a sub-ranging view (<tt>viewPart(
 <b>Example:</b> 
 <table border="0">
   <tr nowrap> 
-	<td valign="top">2 x 3 matrix: <br>
-	  1, 2, 3<br>
-	  4, 5, 6 </td>
-	<td>viewColumn(0) ==></td>
-	<td valign="top">Matrix1D of size 2:<br>
-	  1, 4</td>
+  <td valign="top">2 x 3 matrix: <br>
+    1, 2, 3<br>
+    4, 5, 6 </td>
+  <td>viewColumn(0) ==></td>
+  <td valign="top">Matrix1D of size 2:<br>
+    1, 4</td>
    </tr>
 </table>
 
@@ -268,13 +268,13 @@ To obtain a slice view on subranges, construct a sub-ranging view (<tt>viewPart(
 @see #viewRow(int)
 */
 public ObjectMatrix1D viewColumn(int column) {
-	checkColumn(column);
-	int viewSize = this.rows;
-	int viewZero = this.rowZero;
-	int viewStride = this.rowStride;
-	int[] viewOffsets = this.rowOffsets;
-	int viewOffset = this.offset + _columnOffset(_columnRank(column));
-	return new SelectedSparseObjectMatrix1D(viewSize,this.elements,viewZero,viewStride,viewOffsets,viewOffset);
+  checkColumn(column);
+  int viewSize = this.rows;
+  int viewZero = this.rowZero;
+  int viewStride = this.rowStride;
+  int[] viewOffsets = this.rowOffsets;
+  int viewOffset = this.offset + _columnOffset(_columnRank(column));
+  return new SelectedSparseObjectMatrix1D(viewSize,this.elements,viewZero,viewStride,viewOffsets,viewOffset);
 }
 /**
 Constructs and returns a new <i>slice view</i> representing the columns of the given row.
@@ -284,12 +284,12 @@ To obtain a slice view on subranges, construct a sub-ranging view (<tt>viewPart(
 <b>Example:</b> 
 <table border="0">
   <tr nowrap> 
-	<td valign="top">2 x 3 matrix: <br>
-	  1, 2, 3<br>
-	  4, 5, 6 </td>
-	<td>viewRow(0) ==></td>
-	<td valign="top">Matrix1D of size 3:<br>
-	  1, 2, 3</td>
+  <td valign="top">2 x 3 matrix: <br>
+    1, 2, 3<br>
+    4, 5, 6 </td>
+  <td>viewRow(0) ==></td>
+  <td valign="top">Matrix1D of size 3:<br>
+    1, 2, 3</td>
    </tr>
 </table>
 
@@ -299,13 +299,13 @@ To obtain a slice view on subranges, construct a sub-ranging view (<tt>viewPart(
 @see #viewColumn(int)
 */
 public ObjectMatrix1D viewRow(int row) {
-	checkRow(row);
-	int viewSize = this.columns;
-	int viewZero = columnZero;
-	int viewStride = this.columnStride;
-	int[] viewOffsets = this.columnOffsets;
-	int viewOffset = this.offset + _rowOffset(_rowRank(row));
-	return new SelectedSparseObjectMatrix1D(viewSize,this.elements,viewZero,viewStride,viewOffsets,viewOffset);
+  checkRow(row);
+  int viewSize = this.columns;
+  int viewZero = columnZero;
+  int viewStride = this.columnStride;
+  int[] viewOffsets = this.columnOffsets;
+  int viewOffset = this.offset + _rowOffset(_rowRank(row));
+  return new SelectedSparseObjectMatrix1D(viewSize,this.elements,viewZero,viewStride,viewOffsets,viewOffset);
 }
 /**
  * Construct and returns a new selection view.
@@ -315,6 +315,6 @@ public ObjectMatrix1D viewRow(int row) {
  * @return  a new view.
  */
 protected ObjectMatrix2D viewSelectionLike(int[] rowOffsets, int[] columnOffsets) {
-	return new SelectedSparseObjectMatrix2D(this.elements,rowOffsets,columnOffsets,this.offset);
+  return new SelectedSparseObjectMatrix2D(this.elements,rowOffsets,columnOffsets,this.offset);
 }
 }

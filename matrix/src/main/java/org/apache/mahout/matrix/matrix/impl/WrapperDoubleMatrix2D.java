@@ -17,10 +17,10 @@ import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 @version 1.0, 04/14/2000
 */
 class WrapperDoubleMatrix2D extends DoubleMatrix2D {
-	/*
-	 * The elements of the matrix.
-	 */
-	protected DoubleMatrix2D content;
+  /*
+   * The elements of the matrix.
+   */
+  protected DoubleMatrix2D content;
 /**
  * Constructs a matrix with a copy of the given values.
  * <tt>values</tt> is required to have the form <tt>values[row][column]</tt>
@@ -32,15 +32,15 @@ class WrapperDoubleMatrix2D extends DoubleMatrix2D {
  * @throws IllegalArgumentException if <tt>for any 1 &lt;= row &lt; values.length: values[row].length != values[row-1].length</tt>.
  */
 public WrapperDoubleMatrix2D(DoubleMatrix2D newContent) {
-	if (newContent != null) setUp(newContent.rows(),newContent.columns());
-	this.content = newContent;
+  if (newContent != null) setUp(newContent.rows(),newContent.columns());
+  this.content = newContent;
 }
 /**
  * Returns the content of this matrix if it is a wrapper; or <tt>this</tt> otherwise.
  * Override this method in wrappers.
  */
 protected DoubleMatrix2D getContent() {
-	return content;
+  return content;
 }
 /**
  * Returns the matrix cell value at coordinate <tt>[row,column]</tt>.
@@ -54,7 +54,7 @@ protected DoubleMatrix2D getContent() {
  * @return    the value at the specified coordinate.
  */
 public double getQuick(int row, int column) {
-	return content.getQuick(row,column);
+  return content.getQuick(row,column);
 }
 /**
  * Construct and returns a new empty matrix <i>of the same dynamic type</i> as the receiver, having the specified number of rows and columns.
@@ -67,7 +67,7 @@ public double getQuick(int row, int column) {
  * @return  a new empty matrix of the same dynamic type.
  */
 public DoubleMatrix2D like(int rows, int columns) {
-	return content.like(rows,columns);
+  return content.like(rows,columns);
 }
 /**
  * Construct and returns a new 1-d matrix <i>of the corresponding dynamic type</i>, entirelly independent of the receiver.
@@ -78,7 +78,7 @@ public DoubleMatrix2D like(int rows, int columns) {
  * @return  a new matrix of the corresponding dynamic type.
  */
 public DoubleMatrix1D like1D(int size) {
-	return content.like1D(size);
+  return content.like1D(size);
 }
 /**
  * Construct and returns a new 1-d matrix <i>of the corresponding dynamic type</i>, sharing the same cells.
@@ -91,7 +91,7 @@ public DoubleMatrix1D like1D(int size) {
  * @return  a new matrix of the corresponding dynamic type.
  */
 protected DoubleMatrix1D like1D(int size, int offset, int stride) {
-	throw new InternalError(); // should never get called
+  throw new InternalError(); // should never get called
 }
 /**
  * Sets the matrix cell at coordinate <tt>[row,column]</tt> to the specified value.
@@ -105,7 +105,7 @@ protected DoubleMatrix1D like1D(int size, int offset, int stride) {
  * @param    value the value to be filled into the specified cell.
  */
 public void setQuick(int row, int column, double value) {
-	content.setQuick(row,column, value);
+  content.setQuick(row,column, value);
 }
 /**
 Constructs and returns a new <i>slice view</i> representing the rows of the given column.
@@ -115,12 +115,12 @@ To obtain a slice view on subranges, construct a sub-ranging view (<tt>viewPart(
 <b>Example:</b> 
 <table border="0">
   <tr nowrap> 
-	<td valign="top">2 x 3 matrix: <br>
-	  1, 2, 3<br>
-	  4, 5, 6 </td>
-	<td>viewColumn(0) ==></td>
-	<td valign="top">Matrix1D of size 2:<br>
-	  1, 4</td>
+  <td valign="top">2 x 3 matrix: <br>
+    1, 2, 3<br>
+    4, 5, 6 </td>
+  <td>viewColumn(0) ==></td>
+  <td valign="top">Matrix1D of size 2:<br>
+    1, 4</td>
    </tr>
 </table>
 
@@ -130,7 +130,7 @@ To obtain a slice view on subranges, construct a sub-ranging view (<tt>viewPart(
 @see #viewRow(int)
 */
 public DoubleMatrix1D viewColumn(int column) {
-	return viewDice().viewRow(column);
+  return viewDice().viewRow(column);
 }
 /**
 Constructs and returns a new <i>flip view</i> along the column axis.
@@ -140,17 +140,17 @@ The returned view is backed by this matrix, so changes in the returned view are 
 <b>Example:</b> 
 <table border="0">
   <tr nowrap> 
-	<td valign="top">2 x 3 matrix: <br>
-	  1, 2, 3<br>
-	  4, 5, 6 </td>
-	<td>columnFlip ==></td>
-	<td valign="top">2 x 3 matrix:<br>
-	  3, 2, 1 <br>
-	  6, 5, 4</td>
-	<td>columnFlip ==></td>
-	<td valign="top">2 x 3 matrix: <br>
-	  1, 2, 3<br>
-	  4, 5, 6 </td>
+  <td valign="top">2 x 3 matrix: <br>
+    1, 2, 3<br>
+    4, 5, 6 </td>
+  <td>columnFlip ==></td>
+  <td valign="top">2 x 3 matrix:<br>
+    3, 2, 1 <br>
+    6, 5, 4</td>
+  <td>columnFlip ==></td>
+  <td valign="top">2 x 3 matrix: <br>
+    1, 2, 3<br>
+    4, 5, 6 </td>
   </tr>
 </table>
 
@@ -158,16 +158,16 @@ The returned view is backed by this matrix, so changes in the returned view are 
 @see #viewRowFlip()
 */
 public DoubleMatrix2D viewColumnFlip() {
-	if (columns==0) return this;
-	DoubleMatrix2D view = new WrapperDoubleMatrix2D(this) {
-		public double getQuick(int row, int column) {
-			return content.get(row,columns-1-column);
-		}
-		public void setQuick(int row, int column, double value) {
-			content.set(row,columns-1-column,value); 
-		}
-	};
-	return view;
+  if (columns==0) return this;
+  DoubleMatrix2D view = new WrapperDoubleMatrix2D(this) {
+    public double getQuick(int row, int column) {
+      return content.get(row,columns-1-column);
+    }
+    public void setQuick(int row, int column, double value) {
+      content.set(row,columns-1-column,value); 
+    }
+  };
+  return view;
 }
 /**
 Constructs and returns a new <i>dice (transposition) view</i>; Swaps axes; example: 3 x 4 matrix --> 4 x 3 matrix.
@@ -180,35 +180,35 @@ Use idioms like <tt>result = viewDice(A).copy()</tt> to generate an independent 
 <b>Example:</b> 
 <table border="0">
   <tr nowrap> 
-	<td valign="top">2 x 3 matrix: <br>
-	  1, 2, 3<br>
-	  4, 5, 6 </td>
-	<td>transpose ==></td>
-	<td valign="top">3 x 2 matrix:<br>
-	  1, 4 <br>
-	  2, 5 <br>
-	  3, 6</td>
-	<td>transpose ==></td>
-	<td valign="top">2 x 3 matrix: <br>
-	  1, 2, 3<br>
-	  4, 5, 6 </td>
+  <td valign="top">2 x 3 matrix: <br>
+    1, 2, 3<br>
+    4, 5, 6 </td>
+  <td>transpose ==></td>
+  <td valign="top">3 x 2 matrix:<br>
+    1, 4 <br>
+    2, 5 <br>
+    3, 6</td>
+  <td>transpose ==></td>
+  <td valign="top">2 x 3 matrix: <br>
+    1, 2, 3<br>
+    4, 5, 6 </td>
   </tr>
 </table>
 
 @return a new dice view.
 */
 public DoubleMatrix2D viewDice() {
-	DoubleMatrix2D view = new WrapperDoubleMatrix2D(this) {
-		public double getQuick(int row, int column) {
-			return content.get(column,row);
-		}
-		public void setQuick(int row, int column, double value) {
-			content.set(column,row,value); 
-		}
-	};
-	view.rows = columns;
-	view.columns = rows;
-	return view;
+  DoubleMatrix2D view = new WrapperDoubleMatrix2D(this) {
+    public double getQuick(int row, int column) {
+      return content.get(column,row);
+    }
+    public void setQuick(int row, int column, double value) {
+      content.set(column,row,value); 
+    }
+  };
+  view.rows = columns;
+  view.columns = rows;
+  return view;
 }
 /**
 Constructs and returns a new <i>sub-range view</i> that is a <tt>height x width</tt> sub matrix starting at <tt>[row,column]</tt>.
@@ -229,24 +229,24 @@ As usual, any attempt to access a cell at a coordinate <tt>column&lt;0 || column
 @param     column   The index of the column-coordinate.
 @param     height   The height of the box.
 @param     width   The width of the box.
-@throws	IndexOutOfBoundsException if <tt>column<0 || width<0 || column+width>columns() || row<0 || height<0 || row+height>rows()</tt>
+@throws  IndexOutOfBoundsException if <tt>column<0 || width<0 || column+width>columns() || row<0 || height<0 || row+height>rows()</tt>
 @return the new view.
-		
+    
 */
 public DoubleMatrix2D viewPart(final int row, final int column, int height, int width) {
-	checkBox(row,column,height,width);
-	DoubleMatrix2D view = new WrapperDoubleMatrix2D(this) {
-		public double getQuick(int i, int j) {
-			return content.get(row+i,column+j);
-		}
-		public void setQuick(int i, int j, double value) {
-			content.set(row+i,column+j,value); 
-		}
-	};
-	view.rows = height;
-	view.columns = width;
+  checkBox(row,column,height,width);
+  DoubleMatrix2D view = new WrapperDoubleMatrix2D(this) {
+    public double getQuick(int i, int j) {
+      return content.get(row+i,column+j);
+    }
+    public void setQuick(int i, int j, double value) {
+      content.set(row+i,column+j,value); 
+    }
+  };
+  view.rows = height;
+  view.columns = width;
 
-	return view;
+  return view;
 }
 /**
 Constructs and returns a new <i>slice view</i> representing the columns of the given row.
@@ -256,12 +256,12 @@ To obtain a slice view on subranges, construct a sub-ranging view (<tt>viewPart(
 <b>Example:</b> 
 <table border="0">
   <tr nowrap> 
-	<td valign="top">2 x 3 matrix: <br>
-	  1, 2, 3<br>
-	  4, 5, 6 </td>
-	<td>viewRow(0) ==></td>
-	<td valign="top">Matrix1D of size 3:<br>
-	  1, 2, 3</td>
+  <td valign="top">2 x 3 matrix: <br>
+    1, 2, 3<br>
+    4, 5, 6 </td>
+  <td>viewRow(0) ==></td>
+  <td valign="top">Matrix1D of size 3:<br>
+    1, 2, 3</td>
    </tr>
 </table>
 
@@ -271,8 +271,8 @@ To obtain a slice view on subranges, construct a sub-ranging view (<tt>viewPart(
 @see #viewColumn(int)
 */
 public DoubleMatrix1D viewRow(int row) {
-	checkRow(row);
-	return new DelegateDoubleMatrix1D(this,row);
+  checkRow(row);
+  return new DelegateDoubleMatrix1D(this,row);
 }
 /**
 Constructs and returns a new <i>flip view</i> along the row axis.
@@ -282,17 +282,17 @@ The returned view is backed by this matrix, so changes in the returned view are 
 <b>Example:</b> 
 <table border="0">
   <tr nowrap> 
-	<td valign="top">2 x 3 matrix: <br>
-	  1, 2, 3<br>
-	  4, 5, 6 </td>
-	<td>rowFlip ==></td>
-	<td valign="top">2 x 3 matrix:<br>
-	  4, 5, 6 <br>
-	  1, 2, 3</td>
-	<td>rowFlip ==></td>
-	<td valign="top">2 x 3 matrix: <br>
-	  1, 2, 3<br>
-	  4, 5, 6 </td>
+  <td valign="top">2 x 3 matrix: <br>
+    1, 2, 3<br>
+    4, 5, 6 </td>
+  <td>rowFlip ==></td>
+  <td valign="top">2 x 3 matrix:<br>
+    4, 5, 6 <br>
+    1, 2, 3</td>
+  <td>rowFlip ==></td>
+  <td valign="top">2 x 3 matrix: <br>
+    1, 2, 3<br>
+    4, 5, 6 </td>
   </tr>
 </table>
 
@@ -300,16 +300,16 @@ The returned view is backed by this matrix, so changes in the returned view are 
 @see #viewColumnFlip()
 */
 public DoubleMatrix2D viewRowFlip() {
-	if (rows==0) return this;
-	DoubleMatrix2D view = new WrapperDoubleMatrix2D(this) {
-		public double getQuick(int row, int column) {
-			return content.get(rows-1-row,column);
-		}
-		public void setQuick(int row, int column, double value) {
-			content.set(rows-1-row,column,value); 
-		}
-	};
-	return view;
+  if (rows==0) return this;
+  DoubleMatrix2D view = new WrapperDoubleMatrix2D(this) {
+    public double getQuick(int row, int column) {
+      return content.get(rows-1-row,column);
+    }
+    public void setQuick(int row, int column, double value) {
+      content.set(rows-1-row,column,value); 
+    }
+  };
+  return view;
 }
 /**
 Constructs and returns a new <i>selection view</i> that is a matrix holding the indicated cells.
@@ -339,33 +339,33 @@ To indicate "all" rows or "all columns", simply set the respective parameter
 @throws IndexOutOfBoundsException if <tt>!(0 <= columnIndexes[i] < columns())</tt> for any <tt>i=0..columnIndexes.length()-1</tt>.
 */
 public DoubleMatrix2D viewSelection(int[] rowIndexes, int[] columnIndexes) {
-	// check for "all"
-	if (rowIndexes==null) {
-		rowIndexes = new int[rows];
-		for (int i=rows; --i >= 0; ) rowIndexes[i] = i;
-	}
-	if (columnIndexes==null) {
-		columnIndexes = new int[columns];
-		for (int i=columns; --i >= 0; ) columnIndexes[i] = i;
-	}
-	
-	checkRowIndexes(rowIndexes);
-	checkColumnIndexes(columnIndexes);
-	final int[] rix = rowIndexes;
-	final int[] cix = columnIndexes;
-	
-	DoubleMatrix2D view = new WrapperDoubleMatrix2D(this) {
-		public double getQuick(int i, int j) {
-			return content.get(rix[i],cix[j]);
-		}
-		public void setQuick(int i, int j, double value) {
-			content.set(rix[i],cix[j],value); 
-		}
-	};
-	view.rows = rowIndexes.length;
-	view.columns = columnIndexes.length;
+  // check for "all"
+  if (rowIndexes==null) {
+    rowIndexes = new int[rows];
+    for (int i=rows; --i >= 0; ) rowIndexes[i] = i;
+  }
+  if (columnIndexes==null) {
+    columnIndexes = new int[columns];
+    for (int i=columns; --i >= 0; ) columnIndexes[i] = i;
+  }
+  
+  checkRowIndexes(rowIndexes);
+  checkColumnIndexes(columnIndexes);
+  final int[] rix = rowIndexes;
+  final int[] cix = columnIndexes;
+  
+  DoubleMatrix2D view = new WrapperDoubleMatrix2D(this) {
+    public double getQuick(int i, int j) {
+      return content.get(rix[i],cix[j]);
+    }
+    public void setQuick(int i, int j, double value) {
+      content.set(rix[i],cix[j],value); 
+    }
+  };
+  view.rows = rowIndexes.length;
+  view.columns = columnIndexes.length;
 
-	return view;
+  return view;
 }
 /**
  * Construct and returns a new selection view.
@@ -375,7 +375,7 @@ public DoubleMatrix2D viewSelection(int[] rowIndexes, int[] columnIndexes) {
  * @return  a new view.
  */
 protected DoubleMatrix2D viewSelectionLike(int[] rowOffsets, int[] columnOffsets) {
-	throw new InternalError(); // should never be called
+  throw new InternalError(); // should never be called
 }
 /**
 Constructs and returns a new <i>stride view</i> which is a sub matrix consisting of every i-th cell.
@@ -385,22 +385,22 @@ The returned view is backed by this matrix, so changes in the returned view are 
 @param rowStride the row step factor.
 @param columnStride the column step factor.
 @return a new view.
-@throws	IndexOutOfBoundsException if <tt>rowStride<=0 || columnStride<=0</tt>.
+@throws  IndexOutOfBoundsException if <tt>rowStride<=0 || columnStride<=0</tt>.
 */
 public DoubleMatrix2D viewStrides(final int _rowStride, final int _columnStride) {
-	if (_rowStride<=0 || _columnStride<=0) throw new IndexOutOfBoundsException("illegal stride");
-	DoubleMatrix2D view = new WrapperDoubleMatrix2D(this) {
-		public double getQuick(int row, int column) {
-			return content.get(_rowStride*row, _columnStride*column);
-		}
-		public void setQuick(int row, int column, double value) {
-			content.set(_rowStride*row, _columnStride*column, value); 
-		}
-	};
-	view.rows = rows;
-	view.columns = columns;
-	if (rows!=0) view.rows = (rows-1)/_rowStride +1;
-	if (columns!=0) view.columns = (columns-1)/_columnStride +1;
-	return view;
+  if (_rowStride<=0 || _columnStride<=0) throw new IndexOutOfBoundsException("illegal stride");
+  DoubleMatrix2D view = new WrapperDoubleMatrix2D(this) {
+    public double getQuick(int row, int column) {
+      return content.get(_rowStride*row, _columnStride*column);
+    }
+    public void setQuick(int row, int column, double value) {
+      content.set(_rowStride*row, _columnStride*column, value); 
+    }
+  };
+  view.rows = rows;
+  view.columns = columns;
+  if (rows!=0) view.rows = (rows-1)/_rowStride +1;
+  if (columns!=0) view.columns = (columns-1)/_columnStride +1;
+  return view;
 }
 }

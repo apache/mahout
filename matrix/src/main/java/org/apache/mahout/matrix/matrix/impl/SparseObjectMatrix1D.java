@@ -53,10 +53,10 @@ However, constant factors are considerably larger.
  */
 @Deprecated
 public class SparseObjectMatrix1D extends ObjectMatrix1D {
-	/*
-	 * The elements of the matrix.
-	 */
-	protected AbstractIntObjectMap elements; 
+  /*
+   * The elements of the matrix.
+   */
+  protected AbstractIntObjectMap elements; 
 /**
  * Constructs a matrix with a copy of the given values.
  * The values are copied. So subsequent changes in <tt>values</tt> are not reflected in the matrix, and vice-versa.
@@ -64,8 +64,8 @@ public class SparseObjectMatrix1D extends ObjectMatrix1D {
  * @param values The values to be filled into the new matrix.
  */
 public SparseObjectMatrix1D(Object[] values) {
-	this(values.length);
-	assign(values);
+  this(values.length);
+  assign(values);
 }
 /**
  * Constructs a matrix with a given number of cells.
@@ -74,7 +74,7 @@ public SparseObjectMatrix1D(Object[] values) {
  * @throws IllegalArgumentException if <tt>size<0</tt>.
  */
 public SparseObjectMatrix1D(int size) {
-	this(size,size/1000,0.2,0.5);
+  this(size,size/1000,0.2,0.5);
 }
 /**
  * Constructs a matrix with a given number of parameters.
@@ -86,12 +86,12 @@ public SparseObjectMatrix1D(int size) {
  *                          If not known, set <tt>initialCapacity=0</tt> or small.     
  * @param minLoadFactor        the minimum load factor of the hash map.
  * @param maxLoadFactor        the maximum load factor of the hash map.
- * @throws	IllegalArgumentException if <tt>initialCapacity < 0 || (minLoadFactor < 0.0 || minLoadFactor >= 1.0) || (maxLoadFactor <= 0.0 || maxLoadFactor >= 1.0) || (minLoadFactor >= maxLoadFactor)</tt>.
+ * @throws  IllegalArgumentException if <tt>initialCapacity < 0 || (minLoadFactor < 0.0 || minLoadFactor >= 1.0) || (maxLoadFactor <= 0.0 || maxLoadFactor >= 1.0) || (minLoadFactor >= maxLoadFactor)</tt>.
  * @throws IllegalArgumentException if <tt>size<0</tt>.
  */
 public SparseObjectMatrix1D(int size, int initialCapacity, double minLoadFactor, double maxLoadFactor) {
-	setUp(size);
-	this.elements = new OpenIntObjectHashMap(initialCapacity, minLoadFactor, maxLoadFactor);
+  setUp(size);
+  this.elements = new OpenIntObjectHashMap(initialCapacity, minLoadFactor, maxLoadFactor);
 }
 /**
  * Constructs a matrix view with a given number of parameters.
@@ -103,16 +103,16 @@ public SparseObjectMatrix1D(int size, int initialCapacity, double minLoadFactor,
  * @throws IllegalArgumentException if <tt>size<0</tt>.
  */
 protected SparseObjectMatrix1D(int size, AbstractIntObjectMap elements, int offset, int stride) {
-	setUp(size,offset,stride);
-	this.elements = elements;
-	this.isNoView = false;
+  setUp(size,offset,stride);
+  this.elements = elements;
+  this.isNoView = false;
 }
 /**
  * Returns the number of cells having non-zero values.
  */
 public int cardinality() {
-	if (this.isNoView) return this.elements.size();
-	else return super.cardinality();
+  if (this.isNoView) return this.elements.size();
+  else return super.cardinality();
 }
 /**
  * Ensures that the receiver can hold at least the specified number of non-zero cells without needing to allocate new internal memory.
@@ -125,7 +125,7 @@ public int cardinality() {
  * @param   minNonZeros   the desired minimum number of non-zero cells.
  */
 public void ensureCapacity(int minCapacity) {
-	this.elements.ensureCapacity(minCapacity);
+  this.elements.ensureCapacity(minCapacity);
 }
 /**
  * Returns the matrix cell value at coordinate <tt>index</tt>.
@@ -138,24 +138,24 @@ public void ensureCapacity(int minCapacity) {
  * @return    the value of the specified cell.
  */
 public Object getQuick(int index) {
-	//if (debug) if (index<0 || index>=size) checkIndex(index);
-	//return this.elements.get(index(index)); 
-	// manually inlined:
-	return elements.get(zero + index*stride);
+  //if (debug) if (index<0 || index>=size) checkIndex(index);
+  //return this.elements.get(index(index)); 
+  // manually inlined:
+  return elements.get(zero + index*stride);
 }
 /**
  * Returns <tt>true</tt> if both matrices share at least one identical cell.
  */
 protected boolean haveSharedCellsRaw(ObjectMatrix1D other) {
-	if (other instanceof SelectedSparseObjectMatrix1D) {
-		SelectedSparseObjectMatrix1D otherMatrix = (SelectedSparseObjectMatrix1D) other;
-		return this.elements==otherMatrix.elements;
-	}
-	else if (other instanceof SparseObjectMatrix1D) {
-		SparseObjectMatrix1D otherMatrix = (SparseObjectMatrix1D) other;
-		return this.elements==otherMatrix.elements;
-	}
-	return false;
+  if (other instanceof SelectedSparseObjectMatrix1D) {
+    SelectedSparseObjectMatrix1D otherMatrix = (SelectedSparseObjectMatrix1D) other;
+    return this.elements==otherMatrix.elements;
+  }
+  else if (other instanceof SparseObjectMatrix1D) {
+    SparseObjectMatrix1D otherMatrix = (SparseObjectMatrix1D) other;
+    return this.elements==otherMatrix.elements;
+  }
+  return false;
 }
 /**
  * Returns the position of the element with the given relative rank within the (virtual or non-virtual) internal 1-dimensional array.
@@ -164,9 +164,9 @@ protected boolean haveSharedCellsRaw(ObjectMatrix1D other) {
  * @param     rank   the rank of the element.
  */
 protected int index(int rank) {
-	// overriden for manual inlining only
-	//return _offset(_rank(rank));
-	return zero + rank*stride;
+  // overriden for manual inlining only
+  //return _offset(_rank(rank));
+  return zero + rank*stride;
 }
 /**
  * Construct and returns a new empty matrix <i>of the same dynamic type</i> as the receiver, having the specified size.
@@ -178,7 +178,7 @@ protected int index(int rank) {
  * @return  a new empty matrix of the same dynamic type.
  */
 public ObjectMatrix1D like(int size) {
-	return new SparseObjectMatrix1D(size);
+  return new SparseObjectMatrix1D(size);
 }
 /**
  * Construct and returns a new 2-d matrix <i>of the corresponding dynamic type</i>, entirelly independent of the receiver.
@@ -190,7 +190,7 @@ public ObjectMatrix1D like(int size) {
  * @return  a new matrix of the corresponding dynamic type.
  */
 public ObjectMatrix2D like2D(int rows, int columns) {
-	return new SparseObjectMatrix2D(rows,columns);
+  return new SparseObjectMatrix2D(rows,columns);
 }
 /**
  * Sets the matrix cell at coordinate <tt>index</tt> to the specified value.
@@ -203,14 +203,14 @@ public ObjectMatrix2D like2D(int rows, int columns) {
  * @param    value the value to be filled into the specified cell.
  */
 public void setQuick(int index, Object value) {
-	//if (debug) if (index<0 || index>=size) checkIndex(index);
-	//int i =	index(index);
-	// manually inlined:
-	int i = zero + index*stride;
-	if (value == null)
-		this.elements.removeKey(i);
-	else 
-		this.elements.put(i, value);
+  //if (debug) if (index<0 || index>=size) checkIndex(index);
+  //int i =  index(index);
+  // manually inlined:
+  int i = zero + index*stride;
+  if (value == null)
+    this.elements.removeKey(i);
+  else 
+    this.elements.put(i, value);
 }
 /**
  * Releases any superfluous memory created by explicitly putting zero values into cells formerly having non-zero values; 
@@ -230,7 +230,7 @@ public void setQuick(int index, Object value) {
  * Putting zeros into cells already containing zeros does not generate obsolete memory since no memory was allocated to them in the first place.
  */
 public void trimToSize() {
-	this.elements.trimToSize();
+  this.elements.trimToSize();
 }
 /**
  * Construct and returns a new selection view.
@@ -239,6 +239,6 @@ public void trimToSize() {
  * @return  a new view.
  */
 protected ObjectMatrix1D viewSelectionLike(int[] offsets) {
-	return new SelectedSparseObjectMatrix1D(this.elements,offsets);
+  return new SelectedSparseObjectMatrix1D(this.elements,offsets);
 }
 }

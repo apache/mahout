@@ -1,12 +1,12 @@
 <HTML>
 <BODY>
-<p>Linear Algebraic matrix computations operating on {@link cern.colt.matrix.DoubleMatrix2D}
-  and {@link cern.colt.matrix.DoubleMatrix1D}. </p>
+<p>Linear Algebraic matrix computations operating on {@link org.apache.mahout.matrix.matrix.DoubleMatrix2D}
+  and {@link org.apache.mahout.matrix.matrix.DoubleMatrix1D}. </p>
 
 <h1><a name="Overview"></a>Overview</h1>
 
 <p>The linalg package provides easy and performant access to compute intensive
-  Linear Algebra. Much functionality is concentrated in class {@link cern.colt.matrix.linalg.Algebra}.
+  Linear Algebra. Much functionality is concentrated in class {@link org.apache.mahout.matrix.matrix.linalg.Algebra}.
   Five fundamental matrix decompositions, which consist of pairs or triples of
   matrices, permutation vectors, and the like, produce results in five decomposition
   classes.&nbsp; These decompositions are accessed by the <tt>Algebra</tt> class
@@ -31,8 +31,8 @@
 
 <h2>Design Issues</h2>
 
-<p> Jama matrices are of type <tt>Jama.Matrix</tt>, Colt matrices of type <tt>cern.colt.matrix.DoubleMatrix1D</tt>,
-  <tt>cern.colt.matrix.DoubleMatrix2D</tt> and <tt>cern.colt.matrix.DoubleMatrix3D</tt>.
+<p> Jama matrices are of type <tt>Jama.Matrix</tt>, Colt matrices of type <tt>org.apache.mahout.matrix.matrix.DoubleMatrix1D</tt>,
+  <tt>org.apache.mahout.matrix.matrix.DoubleMatrix2D</tt> and <tt>org.apache.mahout.matrix.matrix.DoubleMatrix3D</tt>.
 
 <p><tt>Jama.Matrix</tt> is not a general-purpose array class. It is designed for
   a single special purpose: Linear algebra. Because of its limited scope, Jama

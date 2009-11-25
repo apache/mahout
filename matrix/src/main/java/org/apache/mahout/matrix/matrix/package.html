@@ -464,7 +464,7 @@ System.out.println(sum);
   <td>
     <p>Note that the result of a slicing operation is not a 2-d matrix with
       one row, but a true 1-d <b>type</b> with all capabilities of the type,
-      namely {@link cern.colt.matrix.DoubleMatrix1D}, generated in constant
+      namely {@link org.apache.mahout.matrix.matrix.DoubleMatrix1D}, generated in constant
       time.</p>
 
     <p>The slicing view is now fed into some external algorithm expecting a
@@ -561,9 +561,9 @@ System.out.println(sum);
   adhere to some common interface.</p>
 
 <p>The common interface for matrices is defined in abstract base classes (e.g.
-  {@link cern.colt.matrix.DoubleMatrix2D}). Note that looking at the documentation
-  of some concrete instantiable class (e.g. {@link cern.colt.matrix.impl.DenseDoubleMatrix2D},
-  {@link cern.colt.matrix.impl.SparseDoubleMatrix2D}, {@link cern.colt.matrix.impl.RCDoubleMatrix2D}<img
+  {@link org.apache.mahout.matrix.matrix.DoubleMatrix2D}). Note that looking at the documentation
+  of some concrete instantiable class (e.g. {@link org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix2D},
+  {@link org.apache.mahout.matrix.matrix.impl.SparseDoubleMatrix2D}, {@link org.apache.mahout.matrix.matrix.impl.RCDoubleMatrix2D}<img
           src="../doc-files/new.gif" width="32" height="22" align="top">)
   will not reveal more information than can be obtained by looking at the abstract
   base classes. The convention is that concrete classes <i>do no subsetting or
@@ -638,7 +638,7 @@ System.out.println(sum);
   over time, as more and more features are added. </p>
 
 <p>Some algorithms for formatting, sorting, statistics and partitioning, are,
-  for example, provided in the package {@link cern.colt.matrix.doublealgo}. </p>
+  for example, provided in the package {@link org.apache.mahout.matrix.matrix.doublealgo}. </p>
 
 <p><a href="#Overview">Back</a> to Overview</p>
 
@@ -646,7 +646,7 @@ System.out.println(sum);
 
 <h2><a name="LinearAlgebra"></a>7. Linear Algebra</h2>
 
-<p>See the documentation of the linear algebra package {@link cern.colt.matrix.linalg}.</p>
+<p>See the documentation of the linear algebra package {@link org.apache.mahout.matrix.matrix.linalg}.</p>
 
 <p><a href="#Overview">Back</a> to Overview </p>
 
@@ -659,20 +659,20 @@ System.out.println(sum);
   a common abstract base class named <tt>&lt;ValueType&gt;Matrix&lt;Rank&gt;D</tt>,
   which is in many ways equivalent to an &quot;interface&quot;. <b>99% of the
     time you will operate on these abstract classes only</b>. For example, all 2-dimensional
-  matrices operating on <tt>double</tt> values are derived from {@link cern.colt.matrix.DoubleMatrix2D}.
+  matrices operating on <tt>double</tt> values are derived from {@link org.apache.mahout.matrix.matrix.DoubleMatrix2D}.
   This is the interface to operate on.</p>
 
 <p>Class naming for concrete instantiable classes follows the schema <tt>&lt;Property&gt;&lt;ValueType&gt;Matrix&lt;Rank&gt;D</tt>.
-  For example, we have a {@link cern.colt.matrix.impl.DenseDoubleMatrix2D}, a
-  {@link cern.colt.matrix.impl.SparseDoubleMatrix2D}, a {@link cern.colt.matrix.impl.DenseIntMatrix3D},
+  For example, we have a {@link org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix2D}, a
+  {@link org.apache.mahout.matrix.matrix.impl.SparseDoubleMatrix2D}, a {@link org.apache.mahout.matrix.matrix.impl.DenseIntMatrix3D},
   and so on. All concrete instantiable classes are separated into an extra package,
-  {@link cern.colt.matrix.impl}, to clearly distinguish between interfaces and
+  {@link org.apache.mahout.matrix.matrix.impl}, to clearly distinguish between interfaces and
   implementations.</p>
 
-<p>{@link cern.colt.matrix.DoubleMatrix2D} in turn is derived from an abstract
+<p>{@link org.apache.mahout.matrix.matrix.DoubleMatrix2D} in turn is derived from an abstract
   base class tying together all 2-dimensional matrices regardless of value type,
-  {@link cern.colt.matrix.impl.AbstractMatrix2D}, which finally is rooted in grandmother
-  {@link cern.colt.matrix.impl.AbstractMatrix}.</p>
+  {@link org.apache.mahout.matrix.matrix.impl.AbstractMatrix2D}, which finally is rooted in grandmother
+  {@link org.apache.mahout.matrix.matrix.impl.AbstractMatrix}.</p>
 
 <p>The abstract base classes provide skeleton implementations for all but few
   methods. Experimental data layouts can easily be implemented and inherit a rich
@@ -697,7 +697,7 @@ System.out.println(sum);
   no methods to fill results into empty result matrices. Use idioms like <tt>result
     = matrix.copy().mult(5)</tt> to achieve the same functionality. Some convenience
   methods are provided in the factory classes as well as in external packages
-  like {@link cern.colt.matrix.doublealgo}.</p>
+  like {@link org.apache.mahout.matrix.matrix.doublealgo}.</p>
 
 <p><a href="#Overview">Back</a> to Overview
 

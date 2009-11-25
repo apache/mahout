@@ -37,10 +37,10 @@ Thus, a 1000000 matrix uses 8 MB.
  */
 @Deprecated
 public class DenseDoubleMatrix1D extends DoubleMatrix1D {
-	/**
-	  * The elements of this matrix.
-	  */
-	protected double[] elements;
+  /**
+    * The elements of this matrix.
+    */
+  protected double[] elements;
 /**
  * Constructs a matrix with a copy of the given values.
  * The values are copied. So subsequent changes in <tt>values</tt> are not reflected in the matrix, and vice-versa.
@@ -48,8 +48,8 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
  * @param values The values to be filled into the new matrix.
  */
 public DenseDoubleMatrix1D(double[] values) {
-	this(values.length);
-	assign(values);
+  this(values.length);
+  assign(values);
 }
 /**
  * Constructs a matrix with a given number of cells.
@@ -58,8 +58,8 @@ public DenseDoubleMatrix1D(double[] values) {
  * @throws IllegalArgumentException if <tt>size<0</tt>.
  */
 public DenseDoubleMatrix1D(int size) {
-	setUp(size);
-	this.elements = new double[size];
+  setUp(size);
+  this.elements = new double[size];
 }
 /**
  * Constructs a matrix view with the given parameters.
@@ -70,9 +70,9 @@ public DenseDoubleMatrix1D(int size) {
  * @throws IllegalArgumentException if <tt>size<0</tt>.
  */
 protected DenseDoubleMatrix1D(int size, double[] elements, int zero, int stride) {
-	setUp(size,zero,stride);
-	this.elements = elements;
-	this.isNoView = false;
+  setUp(size,zero,stride);
+  this.elements = elements;
+  this.isNoView = false;
 }
 /**
  * Sets all cells to the state specified by <tt>values</tt>.
@@ -85,14 +85,14 @@ protected DenseDoubleMatrix1D(int size, double[] elements, int zero, int stride)
  * @throws IllegalArgumentException if <tt>values.length != size()</tt>.
  */
 public DoubleMatrix1D assign(double[] values) {
-	if (isNoView) {
-		if (values.length != size) throw new IllegalArgumentException("Must have same number of cells: length="+values.length+"size()="+size());
-		System.arraycopy(values, 0, this.elements, 0, values.length);
-	}
-	else {
-		super.assign(values);
-	}
-	return this;
+  if (isNoView) {
+    if (values.length != size) throw new IllegalArgumentException("Must have same number of cells: length="+values.length+"size()="+size());
+    System.arraycopy(values, 0, this.elements, 0, values.length);
+  }
+  else {
+    super.assign(values);
+  }
+  return this;
 }
 /**
  * Sets all cells to the state specified by <tt>value</tt>.
@@ -100,14 +100,14 @@ public DoubleMatrix1D assign(double[] values) {
  * @return <tt>this</tt> (for convenience only).
  */
 public DoubleMatrix1D assign(double value) {
-	int index = index(0);
-	int s = this.stride;
-	double[] elems = this.elements;
-	for (int i=size; --i >= 0; ) {
-		elems[index] = value;
-		index += s;
-	}
-	return this;
+  int index = index(0);
+  int s = this.stride;
+  double[] elems = this.elements;
+  for (int i=size; --i >= 0; ) {
+    elems[index] = value;
+    index += s;
+  }
+  return this;
 }
 /**
 Assigns the result of a function to each cell; <tt>x[i] = function(x[i])</tt>.
@@ -128,27 +128,27 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @see org.apache.mahout.jet.math.Functions
 */
 public DoubleMatrix1D assign(org.apache.mahout.matrix.function.DoubleFunction function) {
-	int s=stride;
-	int i=index(0);
-	double[] elems = this.elements;
-	if (elems==null) throw new InternalError();
+  int s=stride;
+  int i=index(0);
+  double[] elems = this.elements;
+  if (elems==null) throw new InternalError();
 
-	// specialization for speed
-	if (function instanceof org.apache.mahout.jet.math.Mult) { // x[i] = mult*x[i]
-		double multiplicator = ((org.apache.mahout.jet.math.Mult)function).multiplicator;
-		if (multiplicator==1) return this;
-		for (int k=size; --k >= 0; ) {
-			elems[i] *= multiplicator;
-			i += s;
-		}
-	}
-	else { // the general case x[i] = f(x[i])
-		for (int k=size; --k >= 0; ) {
-			elems[i] = function.apply(elems[i]);
-			i += s;
-		}
-	}
-	return this;
+  // specialization for speed
+  if (function instanceof org.apache.mahout.jet.math.Mult) { // x[i] = mult*x[i]
+    double multiplicator = ((org.apache.mahout.jet.math.Mult)function).multiplicator;
+    if (multiplicator==1) return this;
+    for (int k=size; --k >= 0; ) {
+      elems[i] *= multiplicator;
+      i += s;
+    }
+  }
+  else { // the general case x[i] = f(x[i])
+    for (int k=size; --k >= 0; ) {
+      elems[i] = function.apply(elems[i]);
+      i += s;
+    }
+  }
+  return this;
 }
 /**
  * Replaces all cell values of the receiver with the values of another matrix.
@@ -157,42 +157,42 @@ public DoubleMatrix1D assign(org.apache.mahout.matrix.function.DoubleFunction fu
  *
  * @param     source   the source matrix to copy from (may be identical to the receiver).
  * @return <tt>this</tt> (for convenience only).
- * @throws	IllegalArgumentException if <tt>size() != other.size()</tt>.
+ * @throws  IllegalArgumentException if <tt>size() != other.size()</tt>.
  */
 public DoubleMatrix1D assign(DoubleMatrix1D source) {
-	// overriden for performance only
-	if (! (source instanceof DenseDoubleMatrix1D)) {
-		return super.assign(source);
-	}
-	DenseDoubleMatrix1D other = (DenseDoubleMatrix1D) source;
-	if (other==this) return this;
-	checkSize(other);
-	if (isNoView && other.isNoView) { // quickest
-		System.arraycopy(other.elements, 0, this.elements, 0, this.elements.length);
-		return this;
-	}
-	if (haveSharedCells(other)) {
-		DoubleMatrix1D c = other.copy();
-		if (! (c instanceof DenseDoubleMatrix1D)) { // should not happen
-			return super.assign(source);
-		}
-		other = (DenseDoubleMatrix1D) c;
-	}
+  // overriden for performance only
+  if (! (source instanceof DenseDoubleMatrix1D)) {
+    return super.assign(source);
+  }
+  DenseDoubleMatrix1D other = (DenseDoubleMatrix1D) source;
+  if (other==this) return this;
+  checkSize(other);
+  if (isNoView && other.isNoView) { // quickest
+    System.arraycopy(other.elements, 0, this.elements, 0, this.elements.length);
+    return this;
+  }
+  if (haveSharedCells(other)) {
+    DoubleMatrix1D c = other.copy();
+    if (! (c instanceof DenseDoubleMatrix1D)) { // should not happen
+      return super.assign(source);
+    }
+    other = (DenseDoubleMatrix1D) c;
+  }
 
-	final double[] elems = this.elements;
-	final double[] otherElems = other.elements;
-	if (elements==null || otherElems==null) throw new InternalError();
-	int s = this.stride;
-	int ys = other.stride;
+  final double[] elems = this.elements;
+  final double[] otherElems = other.elements;
+  if (elements==null || otherElems==null) throw new InternalError();
+  int s = this.stride;
+  int ys = other.stride;
 
-	int index = index(0);
-	int otherIndex = other.index(0);
-	for (int k=size; --k >= 0; ) {
-		elems[index] = otherElems[otherIndex];
-		index += s;
-		otherIndex += ys;
-	}
-	return this;
+  int index = index(0);
+  int otherIndex = other.index(0);
+  for (int k=size; --k >= 0; ) {
+    elems[index] = otherElems[otherIndex];
+    index += s;
+    otherIndex += ys;
+  }
+  return this;
 }
 /**
 Assigns the result of a function to each cell; <tt>x[i] = function(x[i],y[i])</tt>.
@@ -220,90 +220,90 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @param function a function object taking as first argument the current cell's value of <tt>this</tt>,
 and as second argument the current cell's value of <tt>y</tt>,
 @return <tt>this</tt> (for convenience only).
-@throws	IllegalArgumentException if <tt>size() != y.size()</tt>.
+@throws  IllegalArgumentException if <tt>size() != y.size()</tt>.
 @see org.apache.mahout.jet.math.Functions
 */
 public DoubleMatrix1D assign(DoubleMatrix1D y, org.apache.mahout.matrix.function.DoubleDoubleFunction function) {
-	// overriden for performance only
-	if (! (y instanceof DenseDoubleMatrix1D)) {
-		return super.assign(y,function);
-	}
-	DenseDoubleMatrix1D other = (DenseDoubleMatrix1D) y;
-	checkSize(y);
-	final double[] elems = this.elements;
-	final double[] otherElems = other.elements;
-	if (elems==null || otherElems==null) throw new InternalError();
-	int s = this.stride;
-	int ys = other.stride;
+  // overriden for performance only
+  if (! (y instanceof DenseDoubleMatrix1D)) {
+    return super.assign(y,function);
+  }
+  DenseDoubleMatrix1D other = (DenseDoubleMatrix1D) y;
+  checkSize(y);
+  final double[] elems = this.elements;
+  final double[] otherElems = other.elements;
+  if (elems==null || otherElems==null) throw new InternalError();
+  int s = this.stride;
+  int ys = other.stride;
 
-	int index = index(0);
-	int otherIndex = other.index(0);
+  int index = index(0);
+  int otherIndex = other.index(0);
 
-	// specialized for speed
-	if (function== org.apache.mahout.jet.math.Functions.mult) {  // x[i] = x[i] * y[i]
-		for (int k=size; --k >= 0; ) {
-			elems[index] *= otherElems[otherIndex];
-			index += s;
-			otherIndex += ys;
-		}
-	}
-	else if (function== org.apache.mahout.jet.math.Functions.div) { // x[i] = x[i] / y[i]
-		for (int k=size; --k >= 0; ) {
-			elems[index] /= otherElems[otherIndex];
-			index += s;
-			otherIndex += ys;
-		}
-	}
-	else if (function instanceof org.apache.mahout.jet.math.PlusMult) {
-		double multiplicator = ((org.apache.mahout.jet.math.PlusMult) function).multiplicator;
-		if (multiplicator == 0) { // x[i] = x[i] + 0*y[i]
-			return this;
-		}
-		else if (multiplicator == 1) { // x[i] = x[i] + y[i]
-			for (int k=size; --k >= 0; ) {
-				elems[index] += otherElems[otherIndex];
-				index += s;
-				otherIndex += ys;
-			}
-		}
-		else if (multiplicator == -1) { // x[i] = x[i] - y[i]
-			for (int k=size; --k >= 0; ) {
-				elems[index] -= otherElems[otherIndex];
-				index += s;
-				otherIndex += ys;
-			}
-		}
-		else { // the general case x[i] = x[i] + mult*y[i]		
-			for (int k=size; --k >= 0; ) {
-				elems[index] += multiplicator*otherElems[otherIndex];
-				index += s;
-				otherIndex += ys;
-			}
-		}
-	}
-	else { // the general case x[i] = f(x[i],y[i])		
-		for (int k=size; --k >= 0; ) {
-			elems[index] = function.apply(elems[index], otherElems[otherIndex]);
-			index += s;
-			otherIndex += ys;
-		}
-	}
-	return this;
+  // specialized for speed
+  if (function== org.apache.mahout.jet.math.Functions.mult) {  // x[i] = x[i] * y[i]
+    for (int k=size; --k >= 0; ) {
+      elems[index] *= otherElems[otherIndex];
+      index += s;
+      otherIndex += ys;
+    }
+  }
+  else if (function== org.apache.mahout.jet.math.Functions.div) { // x[i] = x[i] / y[i]
+    for (int k=size; --k >= 0; ) {
+      elems[index] /= otherElems[otherIndex];
+      index += s;
+      otherIndex += ys;
+    }
+  }
+  else if (function instanceof org.apache.mahout.jet.math.PlusMult) {
+    double multiplicator = ((org.apache.mahout.jet.math.PlusMult) function).multiplicator;
+    if (multiplicator == 0) { // x[i] = x[i] + 0*y[i]
+      return this;
+    }
+    else if (multiplicator == 1) { // x[i] = x[i] + y[i]
+      for (int k=size; --k >= 0; ) {
+        elems[index] += otherElems[otherIndex];
+        index += s;
+        otherIndex += ys;
+      }
+    }
+    else if (multiplicator == -1) { // x[i] = x[i] - y[i]
+      for (int k=size; --k >= 0; ) {
+        elems[index] -= otherElems[otherIndex];
+        index += s;
+        otherIndex += ys;
+      }
+    }
+    else { // the general case x[i] = x[i] + mult*y[i]    
+      for (int k=size; --k >= 0; ) {
+        elems[index] += multiplicator*otherElems[otherIndex];
+        index += s;
+        otherIndex += ys;
+      }
+    }
+  }
+  else { // the general case x[i] = f(x[i],y[i])    
+    for (int k=size; --k >= 0; ) {
+      elems[index] = function.apply(elems[index], otherElems[otherIndex]);
+      index += s;
+      otherIndex += ys;
+    }
+  }
+  return this;
 }
 /**
  * Returns the number of cells having non-zero values, but at most maxCardinality; ignores tolerance.
  */
 protected int cardinality(int maxCardinality) {
-	int cardinality = 0;
-	int index = index(0);
-	int s = this.stride;
-	double[] elems = this.elements;
-	int i=size; 
-	while (--i >= 0 && cardinality < maxCardinality) {
-		if (elems[index] != 0) cardinality++;
-		index += s;
-	}
-	return cardinality;
+  int cardinality = 0;
+  int index = index(0);
+  int s = this.stride;
+  double[] elems = this.elements;
+  int i=size; 
+  while (--i >= 0 && cardinality < maxCardinality) {
+    if (elems[index] != 0) cardinality++;
+    index += s;
+  }
+  return cardinality;
 }
 /**
  * Returns the matrix cell value at coordinate <tt>index</tt>.
@@ -316,24 +316,24 @@ protected int cardinality(int maxCardinality) {
  * @return    the value of the specified cell.
  */
 public double getQuick(int index) {
-	//if (debug) if (index<0 || index>=size) checkIndex(index);
-	//return elements[index(index)];
-	// manually inlined:
-	return elements[zero + index*stride];
+  //if (debug) if (index<0 || index>=size) checkIndex(index);
+  //return elements[index(index)];
+  // manually inlined:
+  return elements[zero + index*stride];
 }
 /**
  * Returns <tt>true</tt> if both matrices share at least one identical cell.
  */
 protected boolean haveSharedCellsRaw(DoubleMatrix1D other) {
-	if (other instanceof SelectedDenseDoubleMatrix1D) {
-		SelectedDenseDoubleMatrix1D otherMatrix = (SelectedDenseDoubleMatrix1D) other;
-		return this.elements==otherMatrix.elements;
-	}
-	else if (other instanceof DenseDoubleMatrix1D) {
-		DenseDoubleMatrix1D otherMatrix = (DenseDoubleMatrix1D) other;
-		return this.elements==otherMatrix.elements;
-	}
-	return false;
+  if (other instanceof SelectedDenseDoubleMatrix1D) {
+    SelectedDenseDoubleMatrix1D otherMatrix = (SelectedDenseDoubleMatrix1D) other;
+    return this.elements==otherMatrix.elements;
+  }
+  else if (other instanceof DenseDoubleMatrix1D) {
+    DenseDoubleMatrix1D otherMatrix = (DenseDoubleMatrix1D) other;
+    return this.elements==otherMatrix.elements;
+  }
+  return false;
 }
 /**
  * Returns the position of the element with the given relative rank within the (virtual or non-virtual) internal 1-dimensional array.
@@ -342,9 +342,9 @@ protected boolean haveSharedCellsRaw(DoubleMatrix1D other) {
  * @param     rank   the rank of the element.
  */
 protected int index(int rank) {
-	// overriden for manual inlining only
-	//return _offset(_rank(rank));
-	return zero + rank*stride;
+  // overriden for manual inlining only
+  //return _offset(_rank(rank));
+  return zero + rank*stride;
 }
 /**
  * Construct and returns a new empty matrix <i>of the same dynamic type</i> as the receiver, having the specified size.
@@ -356,7 +356,7 @@ protected int index(int rank) {
  * @return  a new empty matrix of the same dynamic type.
  */
 public DoubleMatrix1D like(int size) {
-	return new DenseDoubleMatrix1D(size);
+  return new DenseDoubleMatrix1D(size);
 }
 /**
  * Construct and returns a new 2-d matrix <i>of the corresponding dynamic type</i>, entirelly independent of the receiver.
@@ -368,7 +368,7 @@ public DoubleMatrix1D like(int size) {
  * @return  a new matrix of the corresponding dynamic type.
  */
 public DoubleMatrix2D like2D(int rows, int columns) {
-	return new DenseDoubleMatrix2D(rows,columns);
+  return new DenseDoubleMatrix2D(rows,columns);
 }
 /**
  * Sets the matrix cell at coordinate <tt>index</tt> to the specified value.
@@ -381,40 +381,40 @@ public DoubleMatrix2D like2D(int rows, int columns) {
  * @param    value the value to be filled into the specified cell.
  */
 public void setQuick(int index, double value) {
-	//if (debug) if (index<0 || index>=size) checkIndex(index);
-	//elements[index(index)] = value;
-	// manually inlined:
-	elements[zero + index*stride] = value;
+  //if (debug) if (index<0 || index>=size) checkIndex(index);
+  //elements[index(index)] = value;
+  // manually inlined:
+  elements[zero + index*stride] = value;
 }
 /**
 Swaps each element <tt>this[i]</tt> with <tt>other[i]</tt>.
 @throws IllegalArgumentException if <tt>size() != other.size()</tt>.
 */
 public void swap(DoubleMatrix1D other) {
-	// overriden for performance only
-	if (! (other instanceof DenseDoubleMatrix1D)) {
-		super.swap(other);
-	}
-	DenseDoubleMatrix1D y = (DenseDoubleMatrix1D) other;
-	if (y==this) return;
-	checkSize(y);
-	
-	final double[] elems = this.elements;
-	final double[] otherElems = y.elements;
-	if (elements==null || otherElems==null) throw new InternalError();
-	int s = this.stride;
-	int ys = y.stride;
+  // overriden for performance only
+  if (! (other instanceof DenseDoubleMatrix1D)) {
+    super.swap(other);
+  }
+  DenseDoubleMatrix1D y = (DenseDoubleMatrix1D) other;
+  if (y==this) return;
+  checkSize(y);
+  
+  final double[] elems = this.elements;
+  final double[] otherElems = y.elements;
+  if (elements==null || otherElems==null) throw new InternalError();
+  int s = this.stride;
+  int ys = y.stride;
 
-	int index = index(0);
-	int otherIndex = y.index(0);
-	for (int k=size; --k >= 0; ) {
-		double tmp = elems[index];
-		elems[index] = otherElems[otherIndex];
-		otherElems[otherIndex] = tmp;
-		index += s;
-		otherIndex += ys;
-	}
-	return;
+  int index = index(0);
+  int otherIndex = y.index(0);
+  for (int k=size; --k >= 0; ) {
+    double tmp = elems[index];
+    elems[index] = otherElems[otherIndex];
+    otherElems[otherIndex] = tmp;
+    index += s;
+    otherIndex += ys;
+  }
+  return;
 }
 /**
 Fills the cell values into the specified 1-dimensional array.
@@ -426,9 +426,9 @@ After this call returns the array <tt>values</tt> has the form
 @throws IllegalArgumentException if <tt>values.length < size()</tt>.
 */
 public void toArray(double[] values) {
-	if (values.length < size) throw new IllegalArgumentException("values too small");
-	if (this.isNoView) System.arraycopy(this.elements,0,values,0,this.elements.length);
-	else super.toArray(values);
+  if (values.length < size) throw new IllegalArgumentException("values too small");
+  if (this.isNoView) System.arraycopy(this.elements,0,values,0,this.elements.length);
+  else super.toArray(values);
 }
 /**
  * Construct and returns a new selection view.
@@ -437,7 +437,7 @@ public void toArray(double[] values) {
  * @return  a new view.
  */
 protected DoubleMatrix1D viewSelectionLike(int[] offsets) {
-	return new SelectedDenseDoubleMatrix1D(this.elements,offsets);
+  return new SelectedDenseDoubleMatrix1D(this.elements,offsets);
 }
 /**
  * Returns the dot product of two vectors x and y, which is <tt>Sum(x[i]*y[i])</tt>.
@@ -449,64 +449,64 @@ protected DoubleMatrix1D viewSelectionLike(int[] offsets) {
  * @return the sum of products; zero if <tt>from<0 || length<0</tt>.
  */
 public double zDotProduct(DoubleMatrix1D y, int from, int length) {
-	if (!(y instanceof DenseDoubleMatrix1D)) {
-		return super.zDotProduct(y, from, length);
-	}
-	DenseDoubleMatrix1D yy = (DenseDoubleMatrix1D) y;
-	
-	int tail = from + length;
-	if (from < 0 || length < 0) return 0;
-	if (size < tail) tail = size;
-	if (y.size < tail) tail = y.size;
-	int min = tail-from;
-	
-	int i = index(from);
-	int j = yy.index(from);
-	int s = stride;
-	int ys = yy.stride;
-	final double[] elems = this.elements;
-	final double[] yElems = yy.elements;
-	if (elems==null || yElems==null) throw new InternalError();
-	
-	double sum = 0;
-	/*
-	// unoptimized
-	for (int k = min; --k >= 0;) {
-		sum += elems[i] * yElems[j];
-		i += s;
-		j += ys;
-	}
-	*/
-	
-	// optimized
-	// loop unrolling
-	i -= s;
-	j -= ys;
-	for (int k=min/4; --k >= 0; ) { 
-		sum += elems[i += s] * yElems[j += ys] + 
-			elems[i += s] * yElems[j += ys] +
-			elems[i += s] * yElems[j += ys] +
-			elems[i += s] * yElems[j += ys];
-	}		
-	for (int k=min%4; --k >= 0; ) {
-		sum += elems[i += s] * yElems[j += ys];
-	}
-	return sum;
+  if (!(y instanceof DenseDoubleMatrix1D)) {
+    return super.zDotProduct(y, from, length);
+  }
+  DenseDoubleMatrix1D yy = (DenseDoubleMatrix1D) y;
+  
+  int tail = from + length;
+  if (from < 0 || length < 0) return 0;
+  if (size < tail) tail = size;
+  if (y.size < tail) tail = y.size;
+  int min = tail-from;
+  
+  int i = index(from);
+  int j = yy.index(from);
+  int s = stride;
+  int ys = yy.stride;
+  final double[] elems = this.elements;
+  final double[] yElems = yy.elements;
+  if (elems==null || yElems==null) throw new InternalError();
+  
+  double sum = 0;
+  /*
+  // unoptimized
+  for (int k = min; --k >= 0;) {
+    sum += elems[i] * yElems[j];
+    i += s;
+    j += ys;
+  }
+  */
+  
+  // optimized
+  // loop unrolling
+  i -= s;
+  j -= ys;
+  for (int k=min/4; --k >= 0; ) { 
+    sum += elems[i += s] * yElems[j += ys] + 
+      elems[i += s] * yElems[j += ys] +
+      elems[i += s] * yElems[j += ys] +
+      elems[i += s] * yElems[j += ys];
+  }    
+  for (int k=min%4; --k >= 0; ) {
+    sum += elems[i += s] * yElems[j += ys];
+  }
+  return sum;
 }
 /**
  * Returns the sum of all cells; <tt>Sum( x[i] )</tt>.
  * @return the sum.
  */
 public double zSum() {
-	double sum = 0;
-	int s=stride;
-	int i=index(0);
-	final double[] elems = this.elements;
-	if (elems==null) throw new InternalError();
-	for (int k=size; --k >= 0; ) {
-		sum += elems[i];
-		i += s;
-	}
-	return sum;
+  double sum = 0;
+  int s=stride;
+  int i=index(0);
+  final double[] elems = this.elements;
+  if (elems==null) throw new InternalError();
+  for (int k=size; --k >= 0; ) {
+    sum += elems[i];
+    i += s;
+  }
+  return sum;
 }
 }

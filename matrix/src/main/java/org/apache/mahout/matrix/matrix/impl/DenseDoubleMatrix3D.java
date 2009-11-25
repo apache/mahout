@@ -34,21 +34,21 @@ Setting/getting values in a loop slice-by-slice, row-by-row, column-by-column is
 Thus
 <pre>
    for (int slice=0; slice < slices; slice++) {
-	  for (int row=0; row < rows; row++) {
-	     for (int column=0; column < columns; column++) {
-			matrix.setQuick(slice,row,column,someValue);
-		 }		    
-	  }
+    for (int row=0; row < rows; row++) {
+       for (int column=0; column < columns; column++) {
+      matrix.setQuick(slice,row,column,someValue);
+     }        
+    }
    }
 </pre>
 is quicker than
 <pre>
    for (int column=0; column < columns; column++) {
-	  for (int row=0; row < rows; row++) {
-	     for (int slice=0; slice < slices; slice++) {
-			matrix.setQuick(slice,row,column,someValue);
-		 }
-	  }
+    for (int row=0; row < rows; row++) {
+       for (int slice=0; slice < slices; slice++) {
+      matrix.setQuick(slice,row,column,someValue);
+     }
+    }
    }
 </pre>
 @author wolfgang.hoschek@cern.ch
@@ -59,15 +59,15 @@ is quicker than
  */
 @Deprecated
 public class DenseDoubleMatrix3D extends DoubleMatrix3D {
-	/**
-	  * The elements of this matrix.
-	  * elements are stored in slice major, then row major, then column major, in order of significance, i.e.
-	  * index==slice*sliceStride+ row*rowStride + column*columnStride
-	  * i.e. {slice0 row0..m}, {slice1 row0..m}, ..., {sliceN row0..m}
-	  * with each row storead as 
-	  * {row0 column0..m}, {row1 column0..m}, ..., {rown column0..m}
-	  */
-	protected double[] elements;
+  /**
+    * The elements of this matrix.
+    * elements are stored in slice major, then row major, then column major, in order of significance, i.e.
+    * index==slice*sliceStride+ row*rowStride + column*columnStride
+    * i.e. {slice0 row0..m}, {slice1 row0..m}, ..., {sliceN row0..m}
+    * with each row storead as 
+    * {row0 column0..m}, {row1 column0..m}, ..., {rown column0..m}
+    */
+  protected double[] elements;
 /**
  * Constructs a matrix with a copy of the given values.
  * <tt>values</tt> is required to have the form <tt>values[slice][row][column]</tt>
@@ -80,8 +80,8 @@ public class DenseDoubleMatrix3D extends DoubleMatrix3D {
  * @throws IllegalArgumentException if <tt>for any 1 &lt;= row &lt; values[0].length: values[slice][row].length != values[slice][row-1].length</tt>.
  */
 public DenseDoubleMatrix3D(double[][][] values) {
-	this(values.length, (values.length==0 ? 0: values[0].length), (values.length==0 ? 0: values[0].length==0 ? 0 : values[0][0].length));
-	assign(values);
+  this(values.length, (values.length==0 ? 0: values[0].length), (values.length==0 ? 0: values[0].length==0 ? 0 : values[0][0].length));
+  assign(values);
 }
 /**
  * Constructs a matrix with a given number of slices, rows and columns.
@@ -89,12 +89,12 @@ public DenseDoubleMatrix3D(double[][][] values) {
  * @param slices the number of slices the matrix shall have.
  * @param rows the number of rows the matrix shall have.
  * @param columns the number of columns the matrix shall have.
- * @throws	IllegalArgumentException if <tt>(double)slices*columns*rows > Integer.MAX_VALUE</tt>.
- * @throws	IllegalArgumentException if <tt>slices<0 || rows<0 || columns<0</tt>.
+ * @throws  IllegalArgumentException if <tt>(double)slices*columns*rows > Integer.MAX_VALUE</tt>.
+ * @throws  IllegalArgumentException if <tt>slices<0 || rows<0 || columns<0</tt>.
  */
 public DenseDoubleMatrix3D(int slices, int rows, int columns) {
-	setUp(slices,rows, columns);
-	this.elements = new double[slices*rows*columns];
+  setUp(slices,rows, columns);
+  this.elements = new double[slices*rows*columns];
 }
 /**
  * Constructs a view with the given parameters.
@@ -108,13 +108,13 @@ public DenseDoubleMatrix3D(int slices, int rows, int columns) {
  * @param sliceStride the number of elements between two slices, i.e. <tt>index(k+1,i,j)-index(k,i,j)</tt>.
  * @param rowStride the number of elements between two rows, i.e. <tt>index(k,i+1,j)-index(k,i,j)</tt>.
  * @param columnnStride the number of elements between two columns, i.e. <tt>index(k,i,j+1)-index(k,i,j)</tt>.
- * @throws	IllegalArgumentException if <tt>(double)slices*columns*rows > Integer.MAX_VALUE</tt>.
- * @throws	IllegalArgumentException if <tt>slices<0 || rows<0 || columns<0</tt>.
+ * @throws  IllegalArgumentException if <tt>(double)slices*columns*rows > Integer.MAX_VALUE</tt>.
+ * @throws  IllegalArgumentException if <tt>slices<0 || rows<0 || columns<0</tt>.
  */
 protected DenseDoubleMatrix3D(int slices, int rows, int columns, double[] elements, int sliceZero, int rowZero, int columnZero, int sliceStride, int rowStride, int columnStride) {
-	setUp(slices,rows,columns,sliceZero,rowZero,columnZero,sliceStride,rowStride,columnStride);
-	this.elements = elements;
-	this.isNoView = false;
+  setUp(slices,rows,columns,sliceZero,rowZero,columnZero,sliceStride,rowStride,columnStride);
+  this.elements = elements;
+  this.isNoView = false;
 }
 /**
  * Sets all cells to the state specified by <tt>values</tt>.
@@ -129,24 +129,24 @@ protected DenseDoubleMatrix3D(int slices, int rows, int columns, double[] elemen
  * @throws IllegalArgumentException if <tt>for any 0 &lt;= column &lt; columns(): values[slice][row].length != columns()</tt>.
  */
 public DoubleMatrix3D assign(double[][][] values) {
-	if (this.isNoView) {
-		if (values.length != slices) throw new IllegalArgumentException("Must have same number of slices: slices="+values.length+"slices()="+slices());
-		int i=slices*rows*columns - columns;
-		for (int slice=slices; --slice >= 0;) {
-			double[][] currentSlice = values[slice];
-			if (currentSlice.length != rows) throw new IllegalArgumentException("Must have same number of rows in every slice: rows="+currentSlice.length+"rows()="+rows());
-			for (int row=rows; --row >= 0;) {
-				double[] currentRow = currentSlice[row];
-				if (currentRow.length != columns) throw new IllegalArgumentException("Must have same number of columns in every row: columns="+currentRow.length+"columns()="+columns());			
-				System.arraycopy(currentRow, 0, this.elements, i, columns);
-				i -= columns;
-			}
-		}
-	}
-	else {
-		super.assign(values);
-	}
-	return this;
+  if (this.isNoView) {
+    if (values.length != slices) throw new IllegalArgumentException("Must have same number of slices: slices="+values.length+"slices()="+slices());
+    int i=slices*rows*columns - columns;
+    for (int slice=slices; --slice >= 0;) {
+      double[][] currentSlice = values[slice];
+      if (currentSlice.length != rows) throw new IllegalArgumentException("Must have same number of rows in every slice: rows="+currentSlice.length+"rows()="+rows());
+      for (int row=rows; --row >= 0;) {
+        double[] currentRow = currentSlice[row];
+        if (currentRow.length != columns) throw new IllegalArgumentException("Must have same number of columns in every row: columns="+currentRow.length+"columns()="+columns());      
+        System.arraycopy(currentRow, 0, this.elements, i, columns);
+        i -= columns;
+      }
+    }
+  }
+  else {
+    super.assign(values);
+  }
+  return this;
 }
 /**
  * Replaces all cell values of the receiver with the values of another matrix.
@@ -155,29 +155,29 @@ public DoubleMatrix3D assign(double[][][] values) {
  *
  * @param     source   the source matrix to copy from (may be identical to the receiver).
  * @return <tt>this</tt> (for convenience only).
- * @throws	IllegalArgumentException if <tt>slices() != source.slices() || rows() != source.rows() || columns() != source.columns()</tt>
+ * @throws  IllegalArgumentException if <tt>slices() != source.slices() || rows() != source.rows() || columns() != source.columns()</tt>
  */
 public DoubleMatrix3D assign(DoubleMatrix3D source) {
-	// overriden for performance only
-	if (! (source instanceof DenseDoubleMatrix3D)) {
-		return super.assign(source);
-	}
-	DenseDoubleMatrix3D other = (DenseDoubleMatrix3D) source;
-	if (other==this) return this;
-	checkShape(other);
-	if (haveSharedCells(other)) {
-		DoubleMatrix3D c = other.copy();
-		if (! (c instanceof DenseDoubleMatrix3D)) { // should not happen
-			return super.assign(source);
-		}
-		other = (DenseDoubleMatrix3D) c;
-	}
+  // overriden for performance only
+  if (! (source instanceof DenseDoubleMatrix3D)) {
+    return super.assign(source);
+  }
+  DenseDoubleMatrix3D other = (DenseDoubleMatrix3D) source;
+  if (other==this) return this;
+  checkShape(other);
+  if (haveSharedCells(other)) {
+    DoubleMatrix3D c = other.copy();
+    if (! (c instanceof DenseDoubleMatrix3D)) { // should not happen
+      return super.assign(source);
+    }
+    other = (DenseDoubleMatrix3D) c;
+  }
 
-	if (this.isNoView && other.isNoView) { // quickest
-		System.arraycopy(other.elements, 0, this.elements, 0, this.elements.length);
-		return this;
-	}
-	return super.assign(other);
+  if (this.isNoView && other.isNoView) { // quickest
+    System.arraycopy(other.elements, 0, this.elements, 0, this.elements.length);
+    return this;
+  }
+  return super.assign(other);
 }
 /**
  * Returns the matrix cell value at coordinate <tt>[slice,row,column]</tt>.
@@ -192,10 +192,10 @@ public DoubleMatrix3D assign(DoubleMatrix3D source) {
  * @return    the value at the specified coordinate.
  */
 public double getQuick(int slice, int row, int column) {
-	//if (debug) if (slice<0 || slice>=slices || row<0 || row>=rows || column<0 || column>=columns) throw new IndexOutOfBoundsException("slice:"+slice+", row:"+row+", column:"+column);
-	//return elements[index(slice,row,column)];
-	//manually inlined:
-	return elements[sliceZero + slice*sliceStride + rowZero + row*rowStride + columnZero + column*columnStride];
+  //if (debug) if (slice<0 || slice>=slices || row<0 || row>=rows || column<0 || column>=columns) throw new IndexOutOfBoundsException("slice:"+slice+", row:"+row+", column:"+column);
+  //return elements[index(slice,row,column)];
+  //manually inlined:
+  return elements[sliceZero + slice*sliceStride + rowZero + row*rowStride + columnZero + column*columnStride];
 }
 /**
  * Returns <tt>true</tt> if both matrices share common cells.
@@ -207,15 +207,15 @@ public double getQuick(int slice, int row, int column) {
  * </ul>
  */
 protected boolean haveSharedCellsRaw(DoubleMatrix3D other) {
-	if (other instanceof SelectedDenseDoubleMatrix3D) {
-		SelectedDenseDoubleMatrix3D otherMatrix = (SelectedDenseDoubleMatrix3D) other;
-		return this.elements==otherMatrix.elements;
-	}
-	else if (other instanceof DenseDoubleMatrix3D) {
-		DenseDoubleMatrix3D otherMatrix = (DenseDoubleMatrix3D) other;
-		return this.elements==otherMatrix.elements;
-	}
-	return false;
+  if (other instanceof SelectedDenseDoubleMatrix3D) {
+    SelectedDenseDoubleMatrix3D otherMatrix = (SelectedDenseDoubleMatrix3D) other;
+    return this.elements==otherMatrix.elements;
+  }
+  else if (other instanceof DenseDoubleMatrix3D) {
+    DenseDoubleMatrix3D otherMatrix = (DenseDoubleMatrix3D) other;
+    return this.elements==otherMatrix.elements;
+  }
+  return false;
 }
 /**
  * Returns the position of the given coordinate within the (virtual or non-virtual) internal 1-dimensional array. 
@@ -225,9 +225,9 @@ protected boolean haveSharedCellsRaw(DoubleMatrix3D other) {
  * @param     column   the index of the third-coordinate.
  */
 protected int index(int slice, int row, int column) {
-	//return _sliceOffset(_sliceRank(slice)) + _rowOffset(_rowRank(row)) + _columnOffset(_columnRank(column));
-	//manually inlined:
-	return sliceZero + slice*sliceStride + rowZero + row*rowStride + columnZero + column*columnStride;	
+  //return _sliceOffset(_sliceRank(slice)) + _rowOffset(_rowRank(row)) + _columnOffset(_columnRank(column));
+  //manually inlined:
+  return sliceZero + slice*sliceStride + rowZero + row*rowStride + columnZero + column*columnStride;  
 }
 /**
  * Construct and returns a new empty matrix <i>of the same dynamic type</i> as the receiver, having the specified number of slices, rows and columns.
@@ -241,7 +241,7 @@ protected int index(int slice, int row, int column) {
  * @return  a new empty matrix of the same dynamic type.
  */
 public DoubleMatrix3D like(int slices, int rows, int columns) {
-	return new DenseDoubleMatrix3D(slices,rows,columns); 
+  return new DenseDoubleMatrix3D(slices,rows,columns); 
 }
 /**
  * Construct and returns a new 2-d matrix <i>of the corresponding dynamic type</i>, sharing the same cells.
@@ -257,7 +257,7 @@ public DoubleMatrix3D like(int slices, int rows, int columns) {
  * @return  a new matrix of the corresponding dynamic type.
  */
 protected DoubleMatrix2D like2D(int rows, int columns, int rowZero, int columnZero, int rowStride, int columnStride) {
-	return new DenseDoubleMatrix2D(rows,columns,this.elements,rowZero,columnZero,rowStride,columnStride);
+  return new DenseDoubleMatrix2D(rows,columns,this.elements,rowZero,columnZero,rowStride,columnStride);
 }
 /**
  * Sets the matrix cell at coordinate <tt>[slice,row,column]</tt> to the specified value.
@@ -272,10 +272,10 @@ protected DoubleMatrix2D like2D(int rows, int columns, int rowZero, int columnZe
  * @param    value the value to be filled into the specified cell.
  */
 public void setQuick(int slice, int row, int column, double value) {
-	//if (debug) if (slice<0 || slice>=slices || row<0 || row>=rows || column<0 || column>=columns) throw new IndexOutOfBoundsException("slice:"+slice+", row:"+row+", column:"+column);
-	//elements[index(slice,row,column)] = value;
-	//manually inlined:
-	elements[sliceZero + slice*sliceStride + rowZero + row*rowStride + columnZero + column*columnStride] = value;
+  //if (debug) if (slice<0 || slice>=slices || row<0 || row>=rows || column<0 || column>=columns) throw new IndexOutOfBoundsException("slice:"+slice+", row:"+row+", column:"+column);
+  //elements[index(slice,row,column)] = value;
+  //manually inlined:
+  elements[sliceZero + slice*sliceStride + rowZero + row*rowStride + columnZero + column*columnStride] = value;
 }
 /**
  * Construct and returns a new selection view.
@@ -286,7 +286,7 @@ public void setQuick(int slice, int row, int column, double value) {
  * @return  a new view.
  */
 protected DoubleMatrix3D viewSelectionLike(int[] sliceOffsets, int[] rowOffsets, int[] columnOffsets) {
-	return new SelectedDenseDoubleMatrix3D(this.elements,sliceOffsets,rowOffsets,columnOffsets,0);
+  return new SelectedDenseDoubleMatrix3D(this.elements,sliceOffsets,rowOffsets,columnOffsets,0);
 }
 /**
 27 neighbor stencil transformation. For efficient finite difference operations.
@@ -340,121 +340,121 @@ org.apache.mahout.matrix.function.Double27Function f = new org.apache.mahout.mat
 };
 A.zAssign27Neighbors(B,f);
 </pre>
-	
+  
 @param B the matrix to hold the results.
 @param function the function to be applied to the 27 cells.
 @throws NullPointerException if <tt>function==null</tt>.
 @throws IllegalArgumentException if <tt>rows() != B.rows() || columns() != B.columns() || slices() != B.slices() </tt>.
 */
 public void zAssign27Neighbors(DoubleMatrix3D B, org.apache.mahout.matrix.function.Double27Function function) {
-	// overridden for performance only
-	if (!(B instanceof DenseDoubleMatrix3D)) {
-		super.zAssign27Neighbors(B, function);
-		return;
-	}
-	if (function==null) throw new NullPointerException("function must not be null.");
-	checkShape(B);
-	int r = rows-1;
-	int c = columns-1;
-	if (rows<3 || columns<3 || slices<3) return; // nothing to do
+  // overridden for performance only
+  if (!(B instanceof DenseDoubleMatrix3D)) {
+    super.zAssign27Neighbors(B, function);
+    return;
+  }
+  if (function==null) throw new NullPointerException("function must not be null.");
+  checkShape(B);
+  int r = rows-1;
+  int c = columns-1;
+  if (rows<3 || columns<3 || slices<3) return; // nothing to do
 
-	DenseDoubleMatrix3D BB = (DenseDoubleMatrix3D) B;
-	int A_ss = sliceStride;
-	int A_rs = rowStride;
-	int B_rs = BB.rowStride;
-	int A_cs = columnStride;
-	int B_cs = BB.columnStride;
-	double[] elems = this.elements;
-	double[] B_elems = BB.elements;
-	if (elems == null || B_elems==null) throw new InternalError();
+  DenseDoubleMatrix3D BB = (DenseDoubleMatrix3D) B;
+  int A_ss = sliceStride;
+  int A_rs = rowStride;
+  int B_rs = BB.rowStride;
+  int A_cs = columnStride;
+  int B_cs = BB.columnStride;
+  double[] elems = this.elements;
+  double[] B_elems = BB.elements;
+  if (elems == null || B_elems==null) throw new InternalError();
 
-	for (int k=1; k<slices-1; k++) {
-		int A_index = index(k,1,1);
-		int B_index = BB.index(k,1,1);
+  for (int k=1; k<slices-1; k++) {
+    int A_index = index(k,1,1);
+    int B_index = BB.index(k,1,1);
 
-		for (int i=1; i<r; i++) {
-			int A002 = A_index - A_ss - A_rs - A_cs;
-			int A012 = A002 + A_rs;
-			int A022 = A012 + A_rs;
+    for (int i=1; i<r; i++) {
+      int A002 = A_index - A_ss - A_rs - A_cs;
+      int A012 = A002 + A_rs;
+      int A022 = A012 + A_rs;
 
-			int A102 = A002 + A_ss;
-			int A112 = A102 + A_rs;
-			int A122 = A112 + A_rs;
+      int A102 = A002 + A_ss;
+      int A112 = A102 + A_rs;
+      int A122 = A112 + A_rs;
 
-			int A202 = A102 + A_ss;
-			int A212 = A202 + A_rs;
-			int A222 = A212 + A_rs;
+      int A202 = A102 + A_ss;
+      int A212 = A202 + A_rs;
+      int A222 = A212 + A_rs;
 
-			double a000, a001, a002;
-			double a010, a011, a012;
-			double a020, a021, a022;
+      double a000, a001, a002;
+      double a010, a011, a012;
+      double a020, a021, a022;
 
-			double a100, a101, a102;
-			double a110, a111, a112;
-			double a120, a121, a122;
+      double a100, a101, a102;
+      double a110, a111, a112;
+      double a120, a121, a122;
 
-			double a200, a201, a202;
-			double a210, a211, a212;
-			double a220, a221, a222;
-	
-			a000=elems[A002]; A002+=A_cs;   a001=elems[A002];
-			a010=elems[A012]; A012+=A_cs;   a011=elems[A012]; 
-			a020=elems[A022]; A022+=A_cs;   a021=elems[A022]; 
+      double a200, a201, a202;
+      double a210, a211, a212;
+      double a220, a221, a222;
+  
+      a000=elems[A002]; A002+=A_cs;   a001=elems[A002];
+      a010=elems[A012]; A012+=A_cs;   a011=elems[A012]; 
+      a020=elems[A022]; A022+=A_cs;   a021=elems[A022]; 
 
-			a100=elems[A102]; A102+=A_cs;   a101=elems[A102]; 
-			a110=elems[A112]; A112+=A_cs;   a111=elems[A112]; 
-			a120=elems[A122]; A122+=A_cs;   a121=elems[A122]; 
+      a100=elems[A102]; A102+=A_cs;   a101=elems[A102]; 
+      a110=elems[A112]; A112+=A_cs;   a111=elems[A112]; 
+      a120=elems[A122]; A122+=A_cs;   a121=elems[A122]; 
 
-			a200=elems[A202]; A202+=A_cs;   a201=elems[A202];
-			a210=elems[A212]; A212+=A_cs;   a211=elems[A212]; 
-			a220=elems[A222]; A222+=A_cs;   a221=elems[A222]; 
+      a200=elems[A202]; A202+=A_cs;   a201=elems[A202];
+      a210=elems[A212]; A212+=A_cs;   a211=elems[A212]; 
+      a220=elems[A222]; A222+=A_cs;   a221=elems[A222]; 
 
-			int B11 = B_index;
-			for (int j=1; j<c; j++) {
-				// in each step 18 cells can be remembered in registers - they don't need to be reread from slow memory
-				// in each step 9 instead of 27 cells need to be read from memory.
-				a002=elems[A002+=A_cs]; 
-				a012=elems[A012+=A_cs]; 
-				a022=elems[A022+=A_cs]; 
+      int B11 = B_index;
+      for (int j=1; j<c; j++) {
+        // in each step 18 cells can be remembered in registers - they don't need to be reread from slow memory
+        // in each step 9 instead of 27 cells need to be read from memory.
+        a002=elems[A002+=A_cs]; 
+        a012=elems[A012+=A_cs]; 
+        a022=elems[A022+=A_cs]; 
 
-				a102=elems[A102+=A_cs]; 
-				a112=elems[A112+=A_cs]; 
-				a122=elems[A122+=A_cs]; 
+        a102=elems[A102+=A_cs]; 
+        a112=elems[A112+=A_cs]; 
+        a122=elems[A122+=A_cs]; 
 
-				a202=elems[A202+=A_cs]; 
-				a212=elems[A212+=A_cs]; 
-				a222=elems[A222+=A_cs]; 
+        a202=elems[A202+=A_cs]; 
+        a212=elems[A212+=A_cs]; 
+        a222=elems[A222+=A_cs]; 
 
-				B_elems[B11] = function.apply(
-					a000, a001, a002,
-					a010, a011, a012,
-					a020, a021, a022,
-					
-					a100, a101, a102,
-					a110, a111, a112,
-					a120, a121, a122,
-					
-					a200, a201, a202,
-					a210, a211, a212,
-					a220, a221, a222);
-				B11 += B_cs;
-				
-				// move remembered cells
-				a000=a001; a001=a002;
-				a010=a011; a011=a012;
-				a020=a021; a021=a022;
+        B_elems[B11] = function.apply(
+          a000, a001, a002,
+          a010, a011, a012,
+          a020, a021, a022,
+          
+          a100, a101, a102,
+          a110, a111, a112,
+          a120, a121, a122,
+          
+          a200, a201, a202,
+          a210, a211, a212,
+          a220, a221, a222);
+        B11 += B_cs;
+        
+        // move remembered cells
+        a000=a001; a001=a002;
+        a010=a011; a011=a012;
+        a020=a021; a021=a022;
 
-				a100=a101; a101=a102;
-				a110=a111; a111=a112;
-				a120=a121; a121=a122;
+        a100=a101; a101=a102;
+        a110=a111; a111=a112;
+        a120=a121; a121=a122;
 
-				a200=a201; a201=a202;
-				a210=a211; a211=a212;
-				a220=a221; a221=a222;			
-			}
-		A_index += A_rs;
-		B_index += B_rs;
-		}
-	}
+        a200=a201; a201=a202;
+        a210=a211; a211=a212;
+        a220=a221; a221=a222;      
+      }
+    A_index += A_rs;
+    B_index += B_rs;
+    }
+  }
 }
 }

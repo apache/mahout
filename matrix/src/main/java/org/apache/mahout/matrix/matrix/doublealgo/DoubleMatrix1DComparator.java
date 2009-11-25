@@ -20,8 +20,6 @@ import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
  * order for the data structure to serialize successfully, the comparator (if
  * provided) must implement <tt>Serializable</tt>.<p>
  *
- * @author wolfgang.hoschek@cern.ch
- * @version 1.0, 09/24/99
  * @see java.util.Comparator
  * @see org.apache.mahout.colt
  * @see org.apache.mahout.matrix.Sorting
@@ -51,8 +49,8 @@ public interface DoubleMatrix1DComparator {
  *
  * 
  * @return a negative integer, zero, or a positive integer as the
- * 	       first argument is less than, equal to, or greater than the
- *	       second. 
+ *          first argument is less than, equal to, or greater than the
+ *         second. 
  */
 int compare(DoubleMatrix1D o1, DoubleMatrix1D o2);
 /**
@@ -73,8 +71,8 @@ int compare(DoubleMatrix1D o1, DoubleMatrix1D o2);
  *
  * @param   obj   the reference object with which to compare.
  * @return  <code>true</code> only if the specified object is also
- *		a comparator and it imposes the same ordering as this
- *		comparator.
+ *    a comparator and it imposes the same ordering as this
+ *    comparator.
  * @see     java.lang.Object#equals(java.lang.Object)
  * @see java.lang.Object#hashCode()
  */

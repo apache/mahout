@@ -53,12 +53,12 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @see org.apache.mahout.jet.math.Functions
 */
 public double aggregate(org.apache.mahout.matrix.function.DoubleDoubleFunction aggr, org.apache.mahout.matrix.function.DoubleFunction f) {
-	if (size==0) return Double.NaN;
-	double a = f.apply(getQuick(size-1));
-	for (int i=size-1; --i >= 0; ) {
-		a = aggr.apply(a, f.apply(getQuick(i)));
-	}
-	return a;
+  if (size==0) return Double.NaN;
+  double a = f.apply(getQuick(size-1));
+  for (int i=size-1; --i >= 0; ) {
+    a = aggr.apply(a, f.apply(getQuick(i)));
+  }
+  return a;
 }
 /**
 Applies a function to each corresponding cell of two matrices and aggregates the results.
@@ -83,17 +83,17 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @param aggr an aggregation function taking as first argument the current aggregation and as second argument the transformed current cell values.
 @param f a function transforming the current cell values.
 @return the aggregated measure.
-@throws	IllegalArgumentException if <tt>size() != other.size()</tt>.
+@throws  IllegalArgumentException if <tt>size() != other.size()</tt>.
 @see org.apache.mahout.jet.math.Functions
 */
 public double aggregate(DoubleMatrix1D other, org.apache.mahout.matrix.function.DoubleDoubleFunction aggr, org.apache.mahout.matrix.function.DoubleDoubleFunction f) {
-	checkSize(other);
-	if (size==0) return Double.NaN;
-	double a = f.apply(getQuick(size-1),other.getQuick(size-1));
-	for (int i=size-1; --i >= 0; ) {
-		a = aggr.apply(a, f.apply(getQuick(i),other.getQuick(i)));
-	}
-	return a;
+  checkSize(other);
+  if (size==0) return Double.NaN;
+  double a = f.apply(getQuick(size-1),other.getQuick(size-1));
+  for (int i=size-1; --i >= 0; ) {
+    a = aggr.apply(a, f.apply(getQuick(i),other.getQuick(i)));
+  }
+  return a;
 }
 /**
  * Sets all cells to the state specified by <tt>values</tt>.
@@ -106,11 +106,11 @@ public double aggregate(DoubleMatrix1D other, org.apache.mahout.matrix.function.
  * @throws IllegalArgumentException if <tt>values.length != size()</tt>.
  */
 public DoubleMatrix1D assign(double[] values) {
-	if (values.length != size) throw new IllegalArgumentException("Must have same number of cells: length="+values.length+"size()="+size());
-	for (int i=size; --i >= 0;) {
-		setQuick(i,values[i]);
-	}
-	return this;
+  if (values.length != size) throw new IllegalArgumentException("Must have same number of cells: length="+values.length+"size()="+size());
+  for (int i=size; --i >= 0;) {
+    setQuick(i,values[i]);
+  }
+  return this;
 }
 /**
  * Sets all cells to the state specified by <tt>value</tt>.
@@ -118,10 +118,10 @@ public DoubleMatrix1D assign(double[] values) {
  * @return <tt>this</tt> (for convenience only).
  */
 public DoubleMatrix1D assign(double value) {
-	for (int i=size; --i >= 0;) {
-		setQuick(i,value);
-	}
-	return this;
+  for (int i=size; --i >= 0;) {
+    setQuick(i,value);
+  }
+  return this;
 }
 /**
 Assigns the result of a function to each cell; <tt>x[i] = function(x[i])</tt>.
@@ -142,10 +142,10 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @see org.apache.mahout.jet.math.Functions
 */
 public DoubleMatrix1D assign(org.apache.mahout.matrix.function.DoubleFunction function) {
-	for (int i=size; --i >= 0; ) {
-		setQuick(i, function.apply(getQuick(i)));
-	}
-	return this;
+  for (int i=size; --i >= 0; ) {
+    setQuick(i, function.apply(getQuick(i)));
+  }
+  return this;
 }
 /**
  * Replaces all cell values of the receiver with the values of another matrix.
@@ -154,17 +154,17 @@ public DoubleMatrix1D assign(org.apache.mahout.matrix.function.DoubleFunction fu
  *
  * @param     other   the source matrix to copy from (may be identical to the receiver).
  * @return <tt>this</tt> (for convenience only).
- * @throws	IllegalArgumentException if <tt>size() != other.size()</tt>.
+ * @throws  IllegalArgumentException if <tt>size() != other.size()</tt>.
  */
 public DoubleMatrix1D assign(DoubleMatrix1D other) {
-	if (other==this) return this;
-	checkSize(other);
-	if (haveSharedCells(other)) other = other.copy();
-	
-	for (int i=size; --i >= 0;) {
-		setQuick(i,other.getQuick(i));
-	}
-	return this;
+  if (other==this) return this;
+  checkSize(other);
+  if (haveSharedCells(other)) other = other.copy();
+  
+  for (int i=size; --i >= 0;) {
+    setQuick(i,other.getQuick(i));
+  }
+  return this;
 }
 /**
 Assigns the result of a function to each cell; <tt>x[i] = function(x[i],y[i])</tt>.
@@ -184,15 +184,15 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @param function a function object taking as first argument the current cell's value of <tt>this</tt>,
 and as second argument the current cell's value of <tt>y</tt>,
 @return <tt>this</tt> (for convenience only).
-@throws	IllegalArgumentException if <tt>size() != y.size()</tt>.
+@throws  IllegalArgumentException if <tt>size() != y.size()</tt>.
 @see org.apache.mahout.jet.math.Functions
 */
 public DoubleMatrix1D assign(DoubleMatrix1D y, org.apache.mahout.matrix.function.DoubleDoubleFunction function) {
-	checkSize(y);
-	for (int i=size; --i >= 0; ) {
-		setQuick(i, function.apply(getQuick(i), y.getQuick(i)));
-	}
-	return this;
+  checkSize(y);
+  for (int i=size; --i >= 0; ) {
+    setQuick(i, function.apply(getQuick(i), y.getQuick(i)));
+  }
+  return this;
 }
 /**
 Assigns the result of a function to each cell; <tt>x[i] = function(x[i],y[i])</tt>.
@@ -220,72 +220,72 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @param function a function object taking as first argument the current cell's value of <tt>this</tt>,
 and as second argument the current cell's value of <tt>y</tt>,
 @return <tt>this</tt> (for convenience only).
-@throws	IllegalArgumentException if <tt>size() != y.size()</tt>.
+@throws  IllegalArgumentException if <tt>size() != y.size()</tt>.
 @see org.apache.mahout.jet.math.Functions
 */
 public DoubleMatrix1D assign(DoubleMatrix1D y, org.apache.mahout.matrix.function.DoubleDoubleFunction function, org.apache.mahout.matrix.list.IntArrayList nonZeroIndexes) {
-	checkSize(y);
-	int[] nonZeroElements = nonZeroIndexes.elements();
+  checkSize(y);
+  int[] nonZeroElements = nonZeroIndexes.elements();
 
-	// specialized for speed
-	if (function== org.apache.mahout.jet.math.Functions.mult) {  // x[i] = x[i] * y[i]
-	    int j = 0;
-		for (int index=nonZeroIndexes.size(); --index >= 0; ) {
-			int i = nonZeroElements[index];
-			for (; j<i; j++) setQuick(j,0); // x[i] = 0 for all zeros
-			setQuick(i, getQuick(i) * y.getQuick(i));  // x[i] * y[i] for all nonZeros
-			j++;
-		}
-	}
-	else if (function instanceof org.apache.mahout.jet.math.PlusMult) {
-		double multiplicator = ((org.apache.mahout.jet.math.PlusMult) function).multiplicator;
-		if (multiplicator == 0) { // x[i] = x[i] + 0*y[i]
-			return this;
-		}
-		else if (multiplicator == 1) { // x[i] = x[i] + y[i]
-			for (int index=nonZeroIndexes.size(); --index >= 0; ) {
-				int i = nonZeroElements[index];
-				setQuick(i, getQuick(i) + y.getQuick(i));
-			}
-		}
-		else if (multiplicator == -1) { // x[i] = x[i] - y[i]
-			for (int index=nonZeroIndexes.size(); --index >= 0; ) {
-				int i = nonZeroElements[index];
-				setQuick(i, getQuick(i) - y.getQuick(i));
-			}
-		}
-		else { // the general case x[i] = x[i] + mult*y[i]
-			for (int index=nonZeroIndexes.size(); --index >= 0; ) {
-				int i = nonZeroElements[index];
-				setQuick(i, getQuick(i) + multiplicator*y.getQuick(i));
-			}
-		}
-	}
-	else { // the general case x[i] = f(x[i],y[i])
-		return assign(y,function);
-	}
-	return this;
+  // specialized for speed
+  if (function== org.apache.mahout.jet.math.Functions.mult) {  // x[i] = x[i] * y[i]
+      int j = 0;
+    for (int index=nonZeroIndexes.size(); --index >= 0; ) {
+      int i = nonZeroElements[index];
+      for (; j<i; j++) setQuick(j,0); // x[i] = 0 for all zeros
+      setQuick(i, getQuick(i) * y.getQuick(i));  // x[i] * y[i] for all nonZeros
+      j++;
+    }
+  }
+  else if (function instanceof org.apache.mahout.jet.math.PlusMult) {
+    double multiplicator = ((org.apache.mahout.jet.math.PlusMult) function).multiplicator;
+    if (multiplicator == 0) { // x[i] = x[i] + 0*y[i]
+      return this;
+    }
+    else if (multiplicator == 1) { // x[i] = x[i] + y[i]
+      for (int index=nonZeroIndexes.size(); --index >= 0; ) {
+        int i = nonZeroElements[index];
+        setQuick(i, getQuick(i) + y.getQuick(i));
+      }
+    }
+    else if (multiplicator == -1) { // x[i] = x[i] - y[i]
+      for (int index=nonZeroIndexes.size(); --index >= 0; ) {
+        int i = nonZeroElements[index];
+        setQuick(i, getQuick(i) - y.getQuick(i));
+      }
+    }
+    else { // the general case x[i] = x[i] + mult*y[i]
+      for (int index=nonZeroIndexes.size(); --index >= 0; ) {
+        int i = nonZeroElements[index];
+        setQuick(i, getQuick(i) + multiplicator*y.getQuick(i));
+      }
+    }
+  }
+  else { // the general case x[i] = f(x[i],y[i])
+    return assign(y,function);
+  }
+  return this;
 }
 /**
  * Returns the number of cells having non-zero values; ignores tolerance.
  */
 public int cardinality() {
-	int cardinality = 0;
-	for (int i=size; --i >= 0;) {
-		if (getQuick(i) != 0) cardinality++;
-	}
-	return cardinality;
+  int cardinality = 0;
+  for (int i=size; --i >= 0;) {
+    if (getQuick(i) != 0) cardinality++;
+  }
+  return cardinality;
 }
 /**
  * Returns the number of cells having non-zero values, but at most maxCardinality; ignores tolerance.
  */
 protected int cardinality(int maxCardinality) {
-	int cardinality = 0;
-	int i=size; 
-	while (--i >= 0 && cardinality < maxCardinality) {
-		if (getQuick(i) != 0) cardinality++;
-	}
-	return cardinality;
+  int cardinality = 0;
+  int i=size; 
+  while (--i >= 0 && cardinality < maxCardinality) {
+    if (getQuick(i) != 0) cardinality++;
+  }
+  return cardinality;
 }
 /**
  * Constructs and returns a deep copy of the receiver.
@@ -296,9 +296,9 @@ protected int cardinality(int maxCardinality) {
  * @return  a deep copy of the receiver.
  */
 public DoubleMatrix1D copy() {
-	DoubleMatrix1D copy = like();
-	copy.assign(this);
-	return copy;
+  DoubleMatrix1D copy = like();
+  copy.assign(this);
+  return copy;
 }
 /**
  * Returns whether all cells are equal to the given value.
@@ -307,7 +307,7 @@ public DoubleMatrix1D copy() {
  * @return    <tt>true</tt> if all cells are equal to the given value, <tt>false</tt> otherwise.
  */
 public boolean equals(double value) {
-	return org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.equals(this,value);
+  return org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.equals(this,value);
 }
 /**
  * Compares this object against the specified object.
@@ -320,29 +320,29 @@ public boolean equals(double value) {
  *          <code>false</code> otherwise.
  */
 public boolean equals(Object obj) {
-	if (this == obj) return true;
-	if (obj == null) return false;
-	if (!(obj instanceof DoubleMatrix1D)) return false;
+  if (this == obj) return true;
+  if (obj == null) return false;
+  if (!(obj instanceof DoubleMatrix1D)) return false;
 
-	return org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.equals(this,(DoubleMatrix1D) obj);
+  return org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.equals(this,(DoubleMatrix1D) obj);
 }
 /**
  * Returns the matrix cell value at coordinate <tt>index</tt>.
  *
  * @param     index   the index of the cell.
  * @return    the value of the specified cell.
- * @throws	IndexOutOfBoundsException if <tt>index&lt;0 || index&gt;=size()</tt>.
+ * @throws  IndexOutOfBoundsException if <tt>index&lt;0 || index&gt;=size()</tt>.
  */
 public double get(int index) {
-	if (index<0 || index>=size) checkIndex(index);
-	return getQuick(index);
+  if (index<0 || index>=size) checkIndex(index);
+  return getQuick(index);
 }
 /**
  * Returns the content of this matrix if it is a wrapper; or <tt>this</tt> otherwise.
  * Override this method in wrappers.
  */
 protected DoubleMatrix1D getContent() {
-	return this;
+  return this;
 }
 /**
 Fills the coordinates and values of cells having non-zero values into the specified lists.
@@ -368,18 +368,18 @@ In other words, <tt>get(2)==8, get(4)==7</tt>.
 @param valueList the list to be filled with values, can have any size.
 */
 public void getNonZeros(IntArrayList indexList, DoubleArrayList valueList) {
-	boolean fillIndexList = indexList != null;
-	boolean fillValueList = valueList != null;
-	if (fillIndexList) indexList.clear(); 
-	if (fillValueList) valueList.clear();
-	int s = size;
-	for (int i=0; i < s; i++) {
-		double value = getQuick(i);
-		if (value != 0) {
-			if (fillIndexList) indexList.add(i);
-			if (fillValueList) valueList.add(value);
-		}
-	}
+  boolean fillIndexList = indexList != null;
+  boolean fillValueList = valueList != null;
+  if (fillIndexList) indexList.clear(); 
+  if (fillValueList) valueList.clear();
+  int s = size;
+  for (int i=0; i < s; i++) {
+    double value = getQuick(i);
+    if (value != 0) {
+      if (fillIndexList) indexList.add(i);
+      if (fillValueList) valueList.add(value);
+    }
+  }
 }
 /**
 Fills the coordinates and values of cells having non-zero values into the specified lists.
@@ -405,23 +405,23 @@ In other words, <tt>get(2)==8, get(4)==7</tt>.
 @param valueList the list to be filled with values, can have any size.
 */
 public void getNonZeros(IntArrayList indexList, DoubleArrayList valueList, int maxCardinality) {
-	boolean fillIndexList = indexList != null;
-	boolean fillValueList = valueList != null;
-	int card = cardinality(maxCardinality);
-	if (fillIndexList) indexList.setSize(card);
-	if (fillValueList) valueList.setSize(card);
-	if (!(card<maxCardinality)) return;
+  boolean fillIndexList = indexList != null;
+  boolean fillValueList = valueList != null;
+  int card = cardinality(maxCardinality);
+  if (fillIndexList) indexList.setSize(card);
+  if (fillValueList) valueList.setSize(card);
+  if (!(card<maxCardinality)) return;
 
-	if (fillIndexList) indexList.setSize(0);
-	if (fillValueList) valueList.setSize(0);
-	int s = size;
-	for (int i=0; i < s; i++) {
-		double value = getQuick(i);
-		if (value != 0) {
-			if (fillIndexList) indexList.add(i);
-			if (fillValueList) valueList.add(value);
-		}
-	}
+  if (fillIndexList) indexList.setSize(0);
+  if (fillValueList) valueList.setSize(0);
+  int s = size;
+  for (int i=0; i < s; i++) {
+    double value = getQuick(i);
+    if (value != 0) {
+      if (fillIndexList) indexList.add(i);
+      if (fillValueList) valueList.add(value);
+    }
+  }
 }
 /**
  * Returns the matrix cell value at coordinate <tt>index</tt>.
@@ -438,16 +438,16 @@ public abstract double getQuick(int index);
  * Returns <tt>true</tt> if both matrices share at least one identical cell.
  */
 protected boolean haveSharedCells(DoubleMatrix1D other) {
-	if (other==null) return false;
-	if (this==other) return true;
-	return getContent().haveSharedCellsRaw(other.getContent());
-}	
+  if (other==null) return false;
+  if (this==other) return true;
+  return getContent().haveSharedCellsRaw(other.getContent());
+}  
 /**
  * Returns <tt>true</tt> if both matrices share at least one identical cell.
  */
 protected boolean haveSharedCellsRaw(DoubleMatrix1D other) {
-	return false;
-}	
+  return false;
+}  
 /**
  * Construct and returns a new empty matrix <i>of the same dynamic type</i> as the receiver, having the same size.
  * For example, if the receiver is an instance of type <tt>DenseDoubleMatrix1D</tt> the new matrix must also be of type <tt>DenseDoubleMatrix1D</tt>,
@@ -457,7 +457,7 @@ protected boolean haveSharedCellsRaw(DoubleMatrix1D other) {
  * @return  a new empty matrix of the same dynamic type.
  */
 public DoubleMatrix1D like() {
-	return like(size);
+  return like(size);
 }
 /**
  * Construct and returns a new empty matrix <i>of the same dynamic type</i> as the receiver, having the specified size.
@@ -484,11 +484,11 @@ public abstract DoubleMatrix2D like2D(int rows, int columns);
  *
  * @param     index   the index of the cell.
  * @param    value the value to be filled into the specified cell.
- * @throws	IndexOutOfBoundsException if <tt>index&lt;0 || index&gt;=size()</tt>.
+ * @throws  IndexOutOfBoundsException if <tt>index&lt;0 || index&gt;=size()</tt>.
  */
 public void set(int index, double value) {
-	if (index<0 || index>=size) checkIndex(index);
-	setQuick(index,value);
+  if (index<0 || index>=size) checkIndex(index);
+  setQuick(index,value);
 }
 /**
  * Sets the matrix cell at coordinate <tt>index</tt> to the specified value.
@@ -506,13 +506,13 @@ Swaps each element <tt>this[i]</tt> with <tt>other[i]</tt>.
 @throws IllegalArgumentException if <tt>size() != other.size()</tt>.
 */
 public void swap(DoubleMatrix1D other) {
-	checkSize(other);
-	for (int i=size; --i >= 0; ) {
-		double tmp = getQuick(i);
-		setQuick(i, other.getQuick(i));
-		other.setQuick(i, tmp);
-	}
-	return;
+  checkSize(other);
+  for (int i=size; --i >= 0; ) {
+    double tmp = getQuick(i);
+    setQuick(i, other.getQuick(i));
+    other.setQuick(i, tmp);
+  }
+  return;
 }
 /**
 Constructs and returns a 1-dimensional array containing the cell values.
@@ -524,9 +524,9 @@ The returned array <tt>values</tt> has the form
 @return an array filled with the values of the cells.
 */
 public double[] toArray() {
-	double[] values = new double[size];
-	toArray(values);
-	return values;
+  double[] values = new double[size];
+  toArray(values);
+  return values;
 }
 /**
 Fills the cell values into the specified 1-dimensional array.
@@ -538,17 +538,17 @@ After this call returns the array <tt>values</tt> has the form
 @throws IllegalArgumentException if <tt>values.length < size()</tt>.
 */
 public void toArray(double[] values) {
-	if (values.length < size) throw new IllegalArgumentException("values too small");
-	for (int i=size; --i >= 0; ) {
-		values[i] = getQuick(i);
-	}
+  if (values.length < size) throw new IllegalArgumentException("values too small");
+  for (int i=size; --i >= 0; ) {
+    values[i] = getQuick(i);
+  }
 }
 /**
  * Returns a string representation using default formatting.
  * @see org.apache.mahout.matrix.matrix.doublealgo.Formatter
  */
 public String toString() {
-	return new org.apache.mahout.matrix.matrix.doublealgo.Formatter().toString(this);
+  return new org.apache.mahout.matrix.matrix.doublealgo.Formatter().toString(this);
 }
 /**
  * Constructs and returns a new view equal to the receiver.
@@ -562,7 +562,7 @@ public String toString() {
  * @return  a new view of the receiver.
  */
 protected DoubleMatrix1D view() {
-	return (DoubleMatrix1D) clone();
+  return (DoubleMatrix1D) clone();
 }
 /**
 Constructs and returns a new <i>flip view</i>.
@@ -572,7 +572,7 @@ The returned view is backed by this matrix, so changes in the returned view are 
 @return a new flip view.
 */
 public DoubleMatrix1D viewFlip() {
-	return (DoubleMatrix1D) (view().vFlip());
+  return (DoubleMatrix1D) (view().vFlip());
 }
 /**
 Constructs and returns a new <i>sub-range view</i> that is a <tt>width</tt> sub matrix starting at <tt>index</tt>.
@@ -591,12 +591,12 @@ As usual, any attempt to access a cell at other coordinates will throw an <tt>In
 
 @param     index   The index of the first cell.
 @param     width   The width of the range.
-@throws	IndexOutOfBoundsException if <tt>index<0 || width<0 || index+width>size()</tt>.
+@throws  IndexOutOfBoundsException if <tt>index<0 || width<0 || index+width>size()</tt>.
 @return the new view.
-		
+    
 */
 public DoubleMatrix1D viewPart(int index, int width) {
-	return (DoubleMatrix1D) (view().vPart(index,width));
+  return (DoubleMatrix1D) (view().vPart(index,width));
 }
 /**
 Constructs and returns a new <i>selection view</i> that is a matrix holding the indicated cells.
@@ -619,18 +619,18 @@ The returned view is backed by this matrix, so changes in the returned view are 
 @throws IndexOutOfBoundsException if <tt>!(0 <= indexes[i] < size())</tt> for any <tt>i=0..indexes.length()-1</tt>.
 */
 public DoubleMatrix1D viewSelection(int[] indexes) {
-	// check for "all"
-	if (indexes==null) {
-		indexes = new int[size];
-		for (int i=size; --i >= 0; ) indexes[i] = i;
-	}
-	
-	checkIndexes(indexes);
-	int[] offsets = new int[indexes.length];
-	for (int i=indexes.length; --i >= 0; ) {
-		offsets[i] = index(indexes[i]);
-	}
-	return viewSelectionLike(offsets);
+  // check for "all"
+  if (indexes==null) {
+    indexes = new int[size];
+    for (int i=size; --i >= 0; ) indexes[i] = i;
+  }
+  
+  checkIndexes(indexes);
+  int[] offsets = new int[indexes.length];
+  for (int i=indexes.length; --i >= 0; ) {
+    offsets[i] = index(indexes[i]);
+  }
+  return viewSelectionLike(offsets);
 }
 /**
 Constructs and returns a new <i>selection view</i> that is a matrix holding the cells matching the given condition.
@@ -656,12 +656,12 @@ The returned view is backed by this matrix, so changes in the returned view are 
 @return the new view.
 */
 public DoubleMatrix1D viewSelection(org.apache.mahout.matrix.function.DoubleProcedure condition) {
-	IntArrayList matches = new IntArrayList();
-	for (int i=0; i < size; i++) {
-		if (condition.apply(getQuick(i))) matches.add(i);
-	}
-	matches.trimToSize();
-	return viewSelection(matches.elements());
+  IntArrayList matches = new IntArrayList();
+  for (int i=0; i < size; i++) {
+    if (condition.apply(getQuick(i))) matches.add(i);
+  }
+  matches.trimToSize();
+  return viewSelection(matches.elements());
 }
 /**
  * Construct and returns a new selection view.
@@ -678,19 +678,19 @@ For more advanced sorting functionality, see {@link org.apache.mahout.matrix.mat
 @return a new sorted vector (matrix) view.
 */
 public DoubleMatrix1D viewSorted() {
-	return org.apache.mahout.matrix.matrix.doublealgo.Sorting.mergeSort.sort(this);
+  return org.apache.mahout.matrix.matrix.doublealgo.Sorting.mergeSort.sort(this);
 }
 /**
 Constructs and returns a new <i>stride view</i> which is a sub matrix consisting of every i-th cell.
 More specifically, the view has size <tt>this.size()/stride</tt> holding cells <tt>this.get(i*stride)</tt> for all <tt>i = 0..size()/stride - 1</tt>.
 
 @param  stride  the step factor.
-@throws	IndexOutOfBoundsException if <tt>stride <= 0</tt>.
+@throws  IndexOutOfBoundsException if <tt>stride <= 0</tt>.
 @return the new view.
-		
+    
 */
 public DoubleMatrix1D viewStrides(int stride) {
-	return (DoubleMatrix1D) (view().vStrides(stride));
+  return (DoubleMatrix1D) (view().vStrides(stride));
 }
 /**
  * Applies a procedure to each cell's value.
@@ -708,10 +708,10 @@ public DoubleMatrix1D viewStrides(int stride) {
  * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise. 
  */
 private boolean xforEach(final org.apache.mahout.matrix.function.DoubleProcedure procedure) {
-	for (int i=size; --i >= 0;) {
-		if (!procedure.apply(getQuick(i))) return false;
-	}
-	return true;
+  for (int i=size; --i >= 0;) {
+    if (!procedure.apply(getQuick(i))) return false;
+  }
+  return true;
 }
 /**
  * Returns the dot product of two vectors x and y, which is <tt>Sum(x[i]*y[i])</tt>.
@@ -721,7 +721,7 @@ private boolean xforEach(final org.apache.mahout.matrix.function.DoubleProcedure
  * @return the sum of products.
  */
 public double zDotProduct(DoubleMatrix1D y) {
-	return zDotProduct(y,0,size);
+  return zDotProduct(y,0,size);
 }
 /**
  * Returns the dot product of two vectors x and y, which is <tt>Sum(x[i]*y[i])</tt>.
@@ -733,19 +733,19 @@ public double zDotProduct(DoubleMatrix1D y) {
  * @return the sum of products; zero if <tt>from<0 || length<0</tt>.
  */
 public double zDotProduct(DoubleMatrix1D y, int from, int length) {
-	if (from<0 || length<=0) return 0;
-	
-	int tail = from+length;
-	if (size < tail) tail = size;
-	if (y.size < tail) tail = y.size;
-	length = tail-from;
-	
-	double sum = 0;
-	int i = tail-1;
-	for (int k=length; --k >= 0; i--) {
-		sum += getQuick(i) * y.getQuick(i);
-	}
-	return sum;
+  if (from<0 || length<=0) return 0;
+  
+  int tail = from+length;
+  if (size < tail) tail = size;
+  if (y.size < tail) tail = y.size;
+  length = tail-from;
+  
+  double sum = 0;
+  int i = tail-1;
+  for (int k=length; --k >= 0; i--) {
+    sum += getQuick(i) * y.getQuick(i);
+  }
+  return sum;
 }
 /**
  * Returns the dot product of two vectors x and y, which is <tt>Sum(x[i]*y[i])</tt>.
@@ -755,32 +755,32 @@ public double zDotProduct(DoubleMatrix1D y, int from, int length) {
  * @return the sum of products.
  */
 public double zDotProduct(DoubleMatrix1D y, int from, int length, IntArrayList nonZeroIndexes) {
-	// determine minimum length
-	if (from<0 || length<=0) return 0;
-	
-	int tail = from+length;
-	if (size < tail) tail = size;
-	if (y.size < tail) tail = y.size;
-	length = tail-from;
-	if (length<=0) return 0;
+  // determine minimum length
+  if (from<0 || length<=0) return 0;
+  
+  int tail = from+length;
+  if (size < tail) tail = size;
+  if (y.size < tail) tail = y.size;
+  length = tail-from;
+  if (length<=0) return 0;
 
-	// setup
-	int[] nonZeroIndexElements = nonZeroIndexes.elements();
-	int index = 0;
-	int s = nonZeroIndexes.size();
-	
-	// skip to start	
-	while ((index < s) && nonZeroIndexElements[index]<from) index++; 
+  // setup
+  int[] nonZeroIndexElements = nonZeroIndexes.elements();
+  int index = 0;
+  int s = nonZeroIndexes.size();
+  
+  // skip to start  
+  while ((index < s) && nonZeroIndexElements[index]<from) index++; 
 
-	// now the sparse dot product
-	int i;
-	double sum = 0;
-	while ((--length >= 0) && (index < s) && ((i=nonZeroIndexElements[index]) < tail)) {
-		sum += getQuick(i) * y.getQuick(i);
-		index++;
-	}
-	
-	return sum;
+  // now the sparse dot product
+  int i;
+  double sum = 0;
+  while ((--length >= 0) && (index < s) && ((i=nonZeroIndexElements[index]) < tail)) {
+    sum += getQuick(i) * y.getQuick(i);
+    index++;
+  }
+  
+  return sum;
 }
 /**
  * Returns the dot product of two vectors x and y, which is <tt>Sum(x[i]*y[i])</tt>.
@@ -790,23 +790,23 @@ public double zDotProduct(DoubleMatrix1D y, int from, int length, IntArrayList n
  * @return the sum of products.
  */
 protected double zDotProduct(DoubleMatrix1D y, IntArrayList nonZeroIndexes) {
-	return zDotProduct(y,0,size,nonZeroIndexes);
-	/*
-	double sum = 0;
-	int[] nonZeroIndexElements = nonZeroIndexes.elements();
-	for (int index=nonZeroIndexes.size(); --index >= 0; ) {
-		int i = nonZeroIndexElements[index];
-		sum += getQuick(i) * y.getQuick(i);
-	}
-	return sum;
-	*/
+  return zDotProduct(y,0,size,nonZeroIndexes);
+  /*
+  double sum = 0;
+  int[] nonZeroIndexElements = nonZeroIndexes.elements();
+  for (int index=nonZeroIndexes.size(); --index >= 0; ) {
+    int i = nonZeroIndexElements[index];
+    sum += getQuick(i) * y.getQuick(i);
+  }
+  return sum;
+  */
 }
 /**
  * Returns the sum of all cells; <tt>Sum( x[i] )</tt>.
  * @return the sum.
  */
 public double zSum() {
-	if (size()==0) return 0;
-	return aggregate(org.apache.mahout.jet.math.Functions.plus, org.apache.mahout.jet.math.Functions.identity);
+  if (size()==0) return 0;
+  return aggregate(org.apache.mahout.jet.math.Functions.plus, org.apache.mahout.jet.math.Functions.identity);
 }
 }

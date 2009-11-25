@@ -17,20 +17,20 @@ import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 @version 1.0, 09/24/99
 */
 class DelegateDoubleMatrix1D extends WrapperDoubleMatrix1D {
-	/*
-	 * The elements of the matrix.
-	 */
-	protected DoubleMatrix2D content; 
-	/*
-	 * The row this view is bound to.
-	 */
-	protected int row; 
+  /*
+   * The elements of the matrix.
+   */
+  protected DoubleMatrix2D content; 
+  /*
+   * The row this view is bound to.
+   */
+  protected int row; 
 public DelegateDoubleMatrix1D(DoubleMatrix2D newContent, int row) {
-	super(null);
-	if (row < 0 || row >= newContent.rows()) throw new IllegalArgumentException();
-	setUp(newContent.columns());
-	this.row=row;
-	this.content = newContent;
+  super(null);
+  if (row < 0 || row >= newContent.rows()) throw new IllegalArgumentException();
+  setUp(newContent.columns());
+  this.row=row;
+  this.content = newContent;
 }
 /**
  * Returns the matrix cell value at coordinate <tt>index</tt>.
@@ -43,7 +43,7 @@ public DelegateDoubleMatrix1D(DoubleMatrix2D newContent, int row) {
  * @return    the value of the specified cell.
  */
 public double getQuick(int index) {
-	return content.getQuick(row,index);
+  return content.getQuick(row,index);
 }
 /**
  * Construct and returns a new empty matrix <i>of the same dynamic type</i> as the receiver, having the specified size.
@@ -55,7 +55,7 @@ public double getQuick(int index) {
  * @return  a new empty matrix of the same dynamic type.
  */
 public DoubleMatrix1D like(int size) {
-	return content.like1D(size);
+  return content.like1D(size);
 }
 /**
  * Construct and returns a new 2-d matrix <i>of the corresponding dynamic type</i>, entirelly independent of the receiver.
@@ -67,7 +67,7 @@ public DoubleMatrix1D like(int size) {
  * @return  a new matrix of the corresponding dynamic type.
  */
 public DoubleMatrix2D like2D(int rows, int columns) {
-	return content.like(rows,columns);
+  return content.like(rows,columns);
 }
 /**
  * Sets the matrix cell at coordinate <tt>index</tt> to the specified value.
@@ -80,6 +80,6 @@ public DoubleMatrix2D like2D(int rows, int columns) {
  * @param    value the value to be filled into the specified cell.
  */
 public void setQuick(int index, double value) {
-	content.setQuick(row,index, value);
+  content.setQuick(row,index, value);
 }
 }

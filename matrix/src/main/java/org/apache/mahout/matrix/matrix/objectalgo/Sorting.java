@@ -41,31 +41,31 @@ by multiple columns. It preserves the relative position of equal elements.
  */
 @Deprecated
 public class Sorting extends org.apache.mahout.matrix.PersistentObject {
-	/**
-	 * A prefabricated quicksort.
-	 */
-	public static final Sorting quickSort = new Sorting(); // already has quicksort implemented
+  /**
+   * A prefabricated quicksort.
+   */
+  public static final Sorting quickSort = new Sorting(); // already has quicksort implemented
 
-	/**
-	 * A prefabricated mergesort.
-	 */
-	public static final Sorting mergeSort = new Sorting() { // override quicksort with mergesort
-		protected void runSort(int[] a, int fromIndex, int toIndex, IntComparator c) {
-			org.apache.mahout.matrix.Sorting.mergeSort(a,fromIndex,toIndex,c);
-		}
-		protected void runSort(int fromIndex, int toIndex, IntComparator c, org.apache.mahout.matrix.Swapper swapper) {
-			org.apache.mahout.matrix.GenericSorting.mergeSort(fromIndex, toIndex, c, swapper);
-		}
-	};
+  /**
+   * A prefabricated mergesort.
+   */
+  public static final Sorting mergeSort = new Sorting() { // override quicksort with mergesort
+    protected void runSort(int[] a, int fromIndex, int toIndex, IntComparator c) {
+      org.apache.mahout.matrix.Sorting.mergeSort(a,fromIndex,toIndex,c);
+    }
+    protected void runSort(int fromIndex, int toIndex, IntComparator c, org.apache.mahout.matrix.Swapper swapper) {
+      org.apache.mahout.matrix.GenericSorting.mergeSort(fromIndex, toIndex, c, swapper);
+    }
+  };
 /**
  * Makes this class non instantiable, but still let's others inherit from it.
  */
 protected Sorting() {}
 protected void runSort(int[] a, int fromIndex, int toIndex, IntComparator c) {
-	org.apache.mahout.matrix.Sorting.quickSort(a,fromIndex,toIndex,c);
+  org.apache.mahout.matrix.Sorting.quickSort(a,fromIndex,toIndex,c);
 }
 protected void runSort(int fromIndex, int toIndex, IntComparator c, org.apache.mahout.matrix.Swapper swapper) {
-	org.apache.mahout.matrix.GenericSorting.quickSort(fromIndex, toIndex, c, swapper);
+  org.apache.mahout.matrix.GenericSorting.quickSort(fromIndex, toIndex, c, swapper);
 }
 /**
 Sorts the vector into ascending order, according to the <i>natural ordering</i>.
@@ -75,36 +75,36 @@ To sort ranges use sub-ranging views. To sort descending, use flip views ...
 <b>Example:</b> 
 <table border="1" cellspacing="0">
   <tr nowrap> 
-	<td valign="top"><tt> 7, 1, 3, 1<br>
-	  </tt></td>
-	<td valign="top"> 
-	  <p><tt> ==&gt; 1, 1, 3, 7<br>
-		The vector IS NOT SORTED.<br>
-		The new VIEW IS SORTED.</tt></p>
-	</td>
+  <td valign="top"><tt> 7, 1, 3, 1<br>
+    </tt></td>
+  <td valign="top"> 
+    <p><tt> ==&gt; 1, 1, 3, 7<br>
+    The vector IS NOT SORTED.<br>
+    The new VIEW IS SORTED.</tt></p>
+  </td>
   </tr>
 </table>
 
 @param vector the vector to be sorted.
 @return a new sorted vector (matrix) view. 
-		<b>Note that the original matrix is left unaffected.</b>
+    <b>Note that the original matrix is left unaffected.</b>
 */
 public ObjectMatrix1D sort(final ObjectMatrix1D vector) {
-	int[] indexes = new int[vector.size()]; // row indexes to reorder instead of matrix itself
-	for (int i=indexes.length; --i >= 0; ) indexes[i] = i;
+  int[] indexes = new int[vector.size()]; // row indexes to reorder instead of matrix itself
+  for (int i=indexes.length; --i >= 0; ) indexes[i] = i;
 
-	IntComparator comp = new IntComparator() {  
-		public int compare(int a, int b) {
-			Comparable av = (Comparable) (vector.getQuick(a));
-			Comparable bv = (Comparable) (vector.getQuick(b));
-			int r = av.compareTo(bv);
-			return r<0 ? -1 : (r>0 ? 1 : 0);
-		}
-	};
+  IntComparator comp = new IntComparator() {  
+    public int compare(int a, int b) {
+      Comparable av = (Comparable) (vector.getQuick(a));
+      Comparable bv = (Comparable) (vector.getQuick(b));
+      int r = av.compareTo(bv);
+      return r<0 ? -1 : (r>0 ? 1 : 0);
+    }
+  };
 
-	runSort(indexes,0,indexes.length,comp);
+  runSort(indexes,0,indexes.length,comp);
 
-	return vector.viewSelection(indexes);
+  return vector.viewSelection(indexes);
 }
 /**
 Sorts the vector into ascending order, according to the order induced by the specified comparator.
@@ -127,21 +127,21 @@ sorted = quickSort(vector,comp);
 @param vector the vector to be sorted.
 @param c the comparator to determine the order.
 @return a new matrix view sorted as specified.
-		<b>Note that the original vector (matrix) is left unaffected.</b>
+    <b>Note that the original vector (matrix) is left unaffected.</b>
 */
 public ObjectMatrix1D sort(final ObjectMatrix1D vector, final java.util.Comparator c) {
-	int[] indexes = new int[vector.size()]; // row indexes to reorder instead of matrix itself
-	for (int i=indexes.length; --i >= 0; ) indexes[i] = i;
+  int[] indexes = new int[vector.size()]; // row indexes to reorder instead of matrix itself
+  for (int i=indexes.length; --i >= 0; ) indexes[i] = i;
 
-	IntComparator comp = new IntComparator() {  
-		public int compare(int a, int b) {
-			return c.compare(vector.getQuick(a), vector.getQuick(b));
-		}
-	};
+  IntComparator comp = new IntComparator() {  
+    public int compare(int a, int b) {
+      return c.compare(vector.getQuick(a), vector.getQuick(b));
+    }
+  };
 
-	runSort(indexes,0,indexes.length,comp);
+  runSort(indexes,0,indexes.length,comp);
 
-	return vector.viewSelection(indexes);
+  return vector.viewSelection(indexes);
 }
 /**
 Sorts the matrix rows into ascending order, according to the <i>natural ordering</i> of the matrix values in the given column.
@@ -151,57 +151,57 @@ To sort ranges use sub-ranging views. To sort columns by rows, use dice views. T
 <b>Example:</b> 
 <table border="1" cellspacing="0">
   <tr nowrap> 
-	<td valign="top"><tt>4 x 2 matrix: <br>
-	  7, 6<br>
-	  5, 4<br>
-	  3, 2<br>
-	  1, 0 <br>
-	  </tt></td>
-	<td align="left" valign="top"> 
-	  <p><tt>column = 0;<br>
-		view = quickSort(matrix,column);<br>
-		System.out.println(view); </tt><tt><br>
-		==> </tt></p>
-	  </td>
-	<td valign="top"> 
-	  <p><tt>4 x 2 matrix:<br>
-		1, 0<br>
-		3, 2<br>
-		5, 4<br>
-		7, 6</tt><br>
-		The matrix IS NOT SORTED.<br>
-		The new VIEW IS SORTED.</p>
-	  </td>
+  <td valign="top"><tt>4 x 2 matrix: <br>
+    7, 6<br>
+    5, 4<br>
+    3, 2<br>
+    1, 0 <br>
+    </tt></td>
+  <td align="left" valign="top"> 
+    <p><tt>column = 0;<br>
+    view = quickSort(matrix,column);<br>
+    System.out.println(view); </tt><tt><br>
+    ==> </tt></p>
+    </td>
+  <td valign="top"> 
+    <p><tt>4 x 2 matrix:<br>
+    1, 0<br>
+    3, 2<br>
+    5, 4<br>
+    7, 6</tt><br>
+    The matrix IS NOT SORTED.<br>
+    The new VIEW IS SORTED.</p>
+    </td>
   </tr>
 </table>
 
 @param matrix the matrix to be sorted.
 @param column the index of the column inducing the order.
 @return a new matrix view having rows sorted by the given column.
-		<b>Note that the original matrix is left unaffected.</b>
+    <b>Note that the original matrix is left unaffected.</b>
 @throws IndexOutOfBoundsException if <tt>column < 0 || column >= matrix.columns()</tt>.
 */
 public ObjectMatrix2D sort(ObjectMatrix2D matrix, int column) {
-	if (column < 0 || column >= matrix.columns()) throw new IndexOutOfBoundsException("column="+column+", matrix="+Formatter.shape(matrix));
+  if (column < 0 || column >= matrix.columns()) throw new IndexOutOfBoundsException("column="+column+", matrix="+Formatter.shape(matrix));
 
-	int[] rowIndexes = new int[matrix.rows()]; // row indexes to reorder instead of matrix itself
-	for (int i=rowIndexes.length; --i >= 0; ) rowIndexes[i] = i;
+  int[] rowIndexes = new int[matrix.rows()]; // row indexes to reorder instead of matrix itself
+  for (int i=rowIndexes.length; --i >= 0; ) rowIndexes[i] = i;
 
-	final ObjectMatrix1D col = matrix.viewColumn(column);
-	IntComparator comp = new IntComparator() {  
-		public int compare(int a, int b) {
-			Comparable av = (Comparable) (col.getQuick(a));
-			Comparable bv = (Comparable) (col.getQuick(b));
-			int r = av.compareTo(bv);
-			return r<0 ? -1 : (r>0 ? 1 : 0);
-		}
-	};
+  final ObjectMatrix1D col = matrix.viewColumn(column);
+  IntComparator comp = new IntComparator() {  
+    public int compare(int a, int b) {
+      Comparable av = (Comparable) (col.getQuick(a));
+      Comparable bv = (Comparable) (col.getQuick(b));
+      int r = av.compareTo(bv);
+      return r<0 ? -1 : (r>0 ? 1 : 0);
+    }
+  };
 
-	runSort(rowIndexes,0,rowIndexes.length,comp);
+  runSort(rowIndexes,0,rowIndexes.length,comp);
 
-	// view the matrix according to the reordered row indexes
-	// take all columns in the original order
-	return matrix.viewSelection(rowIndexes,null);
+  // view the matrix according to the reordered row indexes
+  // take all columns in the original order
+  return matrix.viewSelection(rowIndexes,null);
 }
 /**
 Sorts the matrix rows according to the order induced by the specified comparator.
@@ -224,27 +224,27 @@ sorted = quickSort(matrix,comp);
 @param matrix the matrix to be sorted.
 @param c the comparator to determine the order.
 @return a new matrix view having rows sorted as specified.
-		<b>Note that the original matrix is left unaffected.</b>
+    <b>Note that the original matrix is left unaffected.</b>
 */
 public ObjectMatrix2D sort(final ObjectMatrix2D matrix, final ObjectMatrix1DComparator c) {
-	int[] rowIndexes = new int[matrix.rows()]; // row indexes to reorder instead of matrix itself
-	for (int i=rowIndexes.length; --i >= 0; ) rowIndexes[i] = i;
+  int[] rowIndexes = new int[matrix.rows()]; // row indexes to reorder instead of matrix itself
+  for (int i=rowIndexes.length; --i >= 0; ) rowIndexes[i] = i;
 
-	final ObjectMatrix1D[] views = new ObjectMatrix1D[matrix.rows()]; // precompute views for speed
-	for (int i=views.length; --i >= 0; ) views[i] = matrix.viewRow(i);
+  final ObjectMatrix1D[] views = new ObjectMatrix1D[matrix.rows()]; // precompute views for speed
+  for (int i=views.length; --i >= 0; ) views[i] = matrix.viewRow(i);
 
-	IntComparator comp = new IntComparator() {  
-		public int compare(int a, int b) {
-			//return c.compare(matrix.viewRow(a), matrix.viewRow(b));
-			return c.compare(views[a], views[b]);
-		}
-	};
+  IntComparator comp = new IntComparator() {  
+    public int compare(int a, int b) {
+      //return c.compare(matrix.viewRow(a), matrix.viewRow(b));
+      return c.compare(views[a], views[b]);
+    }
+  };
 
-	runSort(rowIndexes,0,rowIndexes.length,comp);
+  runSort(rowIndexes,0,rowIndexes.length,comp);
 
-	// view the matrix according to the reordered row indexes
-	// take all columns in the original order
-	return matrix.viewSelection(rowIndexes,null);
+  // view the matrix according to the reordered row indexes
+  // take all columns in the original order
+  return matrix.viewSelection(rowIndexes,null);
 }
 /**
 Sorts the matrix slices into ascending order, according to the <i>natural ordering</i> of the matrix values in the given <tt>[row,column]</tt> position.
@@ -264,31 +264,31 @@ Let <tt>A</tt> and <tt>B</tt> be two 2-d slices. Then we have the following rule
 @param row the index of the row inducing the order.
 @param column the index of the column inducing the order.
 @return a new matrix view having slices sorted by the values of the slice view <tt>matrix.viewRow(row).viewColumn(column)</tt>.
-		<b>Note that the original matrix is left unaffected.</b>
+    <b>Note that the original matrix is left unaffected.</b>
 @throws IndexOutOfBoundsException if <tt>row < 0 || row >= matrix.rows() || column < 0 || column >= matrix.columns()</tt>.
 */
 public ObjectMatrix3D sort(ObjectMatrix3D matrix, int row, int column) {
-	if (row < 0 || row >= matrix.rows()) throw new IndexOutOfBoundsException("row="+row+", matrix="+Formatter.shape(matrix));
-	if (column < 0 || column >= matrix.columns()) throw new IndexOutOfBoundsException("column="+column+", matrix="+Formatter.shape(matrix));
+  if (row < 0 || row >= matrix.rows()) throw new IndexOutOfBoundsException("row="+row+", matrix="+Formatter.shape(matrix));
+  if (column < 0 || column >= matrix.columns()) throw new IndexOutOfBoundsException("column="+column+", matrix="+Formatter.shape(matrix));
 
-	int[] sliceIndexes = new int[matrix.slices()]; // indexes to reorder instead of matrix itself
-	for (int i=sliceIndexes.length; --i >= 0; ) sliceIndexes[i] = i;
+  int[] sliceIndexes = new int[matrix.slices()]; // indexes to reorder instead of matrix itself
+  for (int i=sliceIndexes.length; --i >= 0; ) sliceIndexes[i] = i;
 
-	final ObjectMatrix1D sliceView = matrix.viewRow(row).viewColumn(column);
-	IntComparator comp = new IntComparator() {  
-		public int compare(int a, int b) {
-			Comparable av = (Comparable) (sliceView.getQuick(a));
-			Comparable bv = (Comparable) (sliceView.getQuick(b));
-			int r = av.compareTo(bv);
-			return r<0 ? -1 : (r>0 ? 1 : 0);
-		}
-	};
+  final ObjectMatrix1D sliceView = matrix.viewRow(row).viewColumn(column);
+  IntComparator comp = new IntComparator() {  
+    public int compare(int a, int b) {
+      Comparable av = (Comparable) (sliceView.getQuick(a));
+      Comparable bv = (Comparable) (sliceView.getQuick(b));
+      int r = av.compareTo(bv);
+      return r<0 ? -1 : (r>0 ? 1 : 0);
+    }
+  };
 
-	runSort(sliceIndexes,0,sliceIndexes.length,comp);
+  runSort(sliceIndexes,0,sliceIndexes.length,comp);
 
-	// view the matrix according to the reordered slice indexes
-	// take all rows and columns in the original order
-	return matrix.viewSelection(sliceIndexes,null,null);
+  // view the matrix according to the reordered slice indexes
+  // take all rows and columns in the original order
+  return matrix.viewSelection(sliceIndexes,null,null);
 }
 /**
 Sorts the matrix slices according to the order induced by the specified comparator.
@@ -311,26 +311,26 @@ sorted = quickSort(matrix,comp);
 @param matrix the matrix to be sorted.
 @param c the comparator to determine the order.
 @return a new matrix view having slices sorted as specified.
-		<b>Note that the original matrix is left unaffected.</b>
+    <b>Note that the original matrix is left unaffected.</b>
 */
 public ObjectMatrix3D sort(final ObjectMatrix3D matrix, final ObjectMatrix2DComparator c) {
-	int[] sliceIndexes = new int[matrix.slices()]; // indexes to reorder instead of matrix itself
-	for (int i=sliceIndexes.length; --i >= 0; ) sliceIndexes[i] = i;
+  int[] sliceIndexes = new int[matrix.slices()]; // indexes to reorder instead of matrix itself
+  for (int i=sliceIndexes.length; --i >= 0; ) sliceIndexes[i] = i;
 
-	final ObjectMatrix2D[] views = new ObjectMatrix2D[matrix.slices()]; // precompute views for speed
-	for (int i=views.length; --i >= 0; ) views[i] = matrix.viewSlice(i);
+  final ObjectMatrix2D[] views = new ObjectMatrix2D[matrix.slices()]; // precompute views for speed
+  for (int i=views.length; --i >= 0; ) views[i] = matrix.viewSlice(i);
 
-	IntComparator comp = new IntComparator() {  
-		public int compare(int a, int b) {
-			//return c.compare(matrix.viewSlice(a), matrix.viewSlice(b));
-			return c.compare(views[a], views[b]);
-		}
-	};
+  IntComparator comp = new IntComparator() {  
+    public int compare(int a, int b) {
+      //return c.compare(matrix.viewSlice(a), matrix.viewSlice(b));
+      return c.compare(views[a], views[b]);
+    }
+  };
 
-	runSort(sliceIndexes,0,sliceIndexes.length,comp);
+  runSort(sliceIndexes,0,sliceIndexes.length,comp);
 
-	// view the matrix according to the reordered slice indexes
-	// take all rows and columns in the original order
-	return matrix.viewSelection(sliceIndexes,null,null);
+  // view the matrix according to the reordered slice indexes
+  // take all rows and columns in the original order
+  return matrix.viewSelection(sliceIndexes,null,null);
 }
 }

@@ -37,15 +37,15 @@ F.random(3);
  */
 @Deprecated
 public class DoubleFactory1D extends org.apache.mahout.matrix.PersistentObject {
-	/**
-	 * A factory producing dense matrices.
-	 */
-	public static final DoubleFactory1D dense  = new DoubleFactory1D();
+  /**
+   * A factory producing dense matrices.
+   */
+  public static final DoubleFactory1D dense  = new DoubleFactory1D();
 
-	/**
-	 * A factory producing sparse matrices.
-	 */
-	public static final DoubleFactory1D sparse = new DoubleFactory1D();
+  /**
+   * A factory producing sparse matrices.
+   */
+  public static final DoubleFactory1D sparse = new DoubleFactory1D();
 /**
  * Makes this class non instantiable, but still let's others inherit from it.
  */
@@ -55,11 +55,11 @@ C = A||B; Constructs a new matrix which is the concatenation of two other matric
 Example: <tt>0 1</tt> append <tt>3 4</tt> --> <tt>0 1 3 4</tt>.
 */
 public DoubleMatrix1D append(DoubleMatrix1D A, DoubleMatrix1D B) {
-	// concatenate
-	DoubleMatrix1D matrix = make(A.size()+B.size());
-	matrix.viewPart(0,A.size()).assign(A);
-	matrix.viewPart(A.size(),B.size()).assign(B);
-	return matrix;
+  // concatenate
+  DoubleMatrix1D matrix = make(A.size()+B.size());
+  matrix.viewPart(0,A.size()).assign(A);
+  matrix.viewPart(A.size(),B.size()).assign(B);
+  return matrix;
 }
 /**
 Constructs a matrix with cells having ascending values.
@@ -67,8 +67,8 @@ For debugging purposes.
 Example: <tt>0 1 2</tt>
 */
 public DoubleMatrix1D ascending(int size) {
-	org.apache.mahout.jet.math.Functions F = org.apache.mahout.jet.math.Functions.functions;
-	return descending(size).assign(F.chain(F.neg,F.minus(size)));
+  org.apache.mahout.jet.math.Functions F = org.apache.mahout.jet.math.Functions.functions;
+  return descending(size).assign(F.chain(F.neg,F.minus(size)));
 }
 /**
 Constructs a matrix with cells having descending values.
@@ -76,12 +76,12 @@ For debugging purposes.
 Example: <tt>2 1 0</tt> 
 */
 public DoubleMatrix1D descending(int size) {
-	DoubleMatrix1D matrix = make(size);
-	int v = 0;
-	for (int i=size; --i >= 0;) {
-		matrix.setQuick(i, v++);
-	}
-	return matrix;
+  DoubleMatrix1D matrix = make(size);
+  int v = 0;
+  for (int i=size; --i >= 0;) {
+    matrix.setQuick(i, v++);
+  }
+  return matrix;
 }
 /**
  * Constructs a matrix with the given cell values.
@@ -90,40 +90,40 @@ public DoubleMatrix1D descending(int size) {
  * @param values The values to be filled into the new matrix.
  */
 public DoubleMatrix1D make(double[] values) {
-	if (this==sparse) return new SparseDoubleMatrix1D(values);
-	else return new DenseDoubleMatrix1D(values);
+  if (this==sparse) return new SparseDoubleMatrix1D(values);
+  else return new DenseDoubleMatrix1D(values);
 }
 /**
 Constructs a matrix which is the concatenation of all given parts.
 Cells are copied.
 */
 public DoubleMatrix1D make(DoubleMatrix1D[] parts) {
-	if (parts.length==0) return make(0);
-	
-	int size = 0;
-	for (int i=0; i < parts.length; i++) size += parts[i].size();
+  if (parts.length==0) return make(0);
+  
+  int size = 0;
+  for (int i=0; i < parts.length; i++) size += parts[i].size();
 
-	DoubleMatrix1D vector = make(size);
-	size = 0;
-	for (int i=0; i < parts.length; i++) {
-		vector.viewPart(size,parts[i].size()).assign(parts[i]);
-		size += parts[i].size();
-	}
+  DoubleMatrix1D vector = make(size);
+  size = 0;
+  for (int i=0; i < parts.length; i++) {
+    vector.viewPart(size,parts[i].size()).assign(parts[i]);
+    size += parts[i].size();
+  }
 
-	return vector;
+  return vector;
 }
 /**
  * Constructs a matrix with the given shape, each cell initialized with zero.
  */
 public DoubleMatrix1D make(int size) {
-	if (this==sparse) return new SparseDoubleMatrix1D(size);
-	return new DenseDoubleMatrix1D(size);
+  if (this==sparse) return new SparseDoubleMatrix1D(size);
+  return new DenseDoubleMatrix1D(size);
 }
 /**
  * Constructs a matrix with the given shape, each cell initialized with the given value.
  */
 public DoubleMatrix1D make(int size, double initialValue) {
-	return make(size).assign(initialValue);
+  return make(size).assign(initialValue);
 }
 /**
  * Constructs a matrix from the values of the given list.
@@ -133,16 +133,16 @@ public DoubleMatrix1D make(int size, double initialValue) {
  * @return a new matrix.
  */
 public DoubleMatrix1D make(org.apache.mahout.matrix.list.AbstractDoubleList values) {
-	int size = values.size();
-	DoubleMatrix1D vector = make(size);
-	for (int i=size; --i >= 0; ) vector.set(i, values.get(i));
-	return vector;
+  int size = values.size();
+  DoubleMatrix1D vector = make(size);
+  for (int i=size; --i >= 0; ) vector.set(i, values.get(i));
+  return vector;
 }
 /**
  * Constructs a matrix with uniformly distributed values in <tt>(0,1)</tt> (exclusive).
  */
 public DoubleMatrix1D random(int size) {
-	return make(size).assign(org.apache.mahout.jet.math.Functions.random());
+  return make(size).assign(org.apache.mahout.jet.math.Functions.random());
 }
 /**
 C = A||A||..||A; Constructs a new matrix which is concatenated <tt>repeat</tt> times.
@@ -154,12 +154,12 @@ repeat(3) -->
 </pre>
 */
 public DoubleMatrix1D repeat(DoubleMatrix1D A, int repeat) {
-	int size = A.size();
-	DoubleMatrix1D matrix = make(repeat * size);
-	for (int i=repeat; --i >= 0; ) {
-		matrix.viewPart(size*i,size).assign(A);
-	}
-	return matrix;
+  int size = A.size();
+  DoubleMatrix1D matrix = make(repeat * size);
+  for (int i=repeat; --i >= 0; ) {
+    matrix.viewPart(size*i,size).assign(A);
+  }
+  return matrix;
 }
 /**
  * Constructs a randomly sampled matrix with the given shape.
@@ -169,24 +169,24 @@ public DoubleMatrix1D repeat(DoubleMatrix1D A, int repeat) {
  * @see org.apache.mahout.jet.random.sampling.RandomSampler
  */
 public DoubleMatrix1D sample(int size, double value, double nonZeroFraction)  {
-	double epsilon = 1e-09;
-	if (nonZeroFraction < 0 - epsilon || nonZeroFraction > 1 + epsilon) throw new IllegalArgumentException();
-	if (nonZeroFraction < 0) nonZeroFraction = 0;
-	if (nonZeroFraction > 1) nonZeroFraction = 1;
-	
-	DoubleMatrix1D matrix = make(size);
+  double epsilon = 1e-09;
+  if (nonZeroFraction < 0 - epsilon || nonZeroFraction > 1 + epsilon) throw new IllegalArgumentException();
+  if (nonZeroFraction < 0) nonZeroFraction = 0;
+  if (nonZeroFraction > 1) nonZeroFraction = 1;
+  
+  DoubleMatrix1D matrix = make(size);
 
-	int n = (int) Math.round(size*nonZeroFraction);
-	if (n==0) return matrix;
+  int n = (int) Math.round(size*nonZeroFraction);
+  if (n==0) return matrix;
 
-	org.apache.mahout.jet.random.sampling.RandomSamplingAssistant sampler = new org.apache.mahout.jet.random.sampling.RandomSamplingAssistant(n,size,new org.apache.mahout.jet.random.engine.MersenneTwister());
-	for (int i=size; --i >=0; ) {
-		if (sampler.sampleNextElement()) {
-			matrix.set(i, value);
-		}
-	}
-	
-	return matrix;
+  org.apache.mahout.jet.random.sampling.RandomSamplingAssistant sampler = new org.apache.mahout.jet.random.sampling.RandomSamplingAssistant(n,size,new org.apache.mahout.jet.random.engine.MersenneTwister());
+  for (int i=size; --i >=0; ) {
+    if (sampler.sampleNextElement()) {
+      matrix.set(i, value);
+    }
+  }
+  
+  return matrix;
 }
 /**
  * Constructs a list from the given matrix.
@@ -196,10 +196,10 @@ public DoubleMatrix1D sample(int size, double value, double nonZeroFraction)  {
  * @return a new list.
  */
 public org.apache.mahout.matrix.list.DoubleArrayList toList(DoubleMatrix1D values) {
-	int size = values.size();
-	org.apache.mahout.matrix.list.DoubleArrayList list = new org.apache.mahout.matrix.list.DoubleArrayList(size);
-	list.setSize(size);
-	for (int i=size; --i >= 0; ) list.set(i, values.get(i));
-	return list;
+  int size = values.size();
+  org.apache.mahout.matrix.list.DoubleArrayList list = new org.apache.mahout.matrix.list.DoubleArrayList(size);
+  list.setSize(size);
+  for (int i=size; --i >= 0; ) list.set(i, values.get(i));
+  return list;
 }
 }

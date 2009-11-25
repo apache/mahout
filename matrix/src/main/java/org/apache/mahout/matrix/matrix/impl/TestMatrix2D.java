@@ -24,21 +24,19 @@ import org.apache.mahout.matrix.matrix.linalg.SeqBlas;
 /**
  * Quick and dirty tests.
  *
- * @author wolfgang.hoschek@cern.ch
- * @version 1.0, 09/24/99
  */
 class TestMatrix2D {
-	private static final org.apache.mahout.jet.math.Functions F = org.apache.mahout.jet.math.Functions.functions;
-	private static final org.apache.mahout.matrix.matrix.DoubleFactory2D Factory2D = org.apache.mahout.matrix.matrix.DoubleFactory2D.dense;
-	private static final org.apache.mahout.matrix.matrix.DoubleFactory1D Factory1D = org.apache.mahout.matrix.matrix.DoubleFactory1D.dense;
-	private static final org.apache.mahout.matrix.matrix.linalg.Algebra LinearAlgebra = org.apache.mahout.matrix.matrix.linalg.Algebra.DEFAULT;
-	private static final org.apache.mahout.matrix.matrix.doublealgo.Transform Transform = org.apache.mahout.matrix.matrix.doublealgo.Transform.transform;
-	private static final org.apache.mahout.matrix.matrix.linalg.Property Property = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT;
+  private static final org.apache.mahout.jet.math.Functions F = org.apache.mahout.jet.math.Functions.functions;
+  private static final org.apache.mahout.matrix.matrix.DoubleFactory2D Factory2D = org.apache.mahout.matrix.matrix.DoubleFactory2D.dense;
+  private static final org.apache.mahout.matrix.matrix.DoubleFactory1D Factory1D = org.apache.mahout.matrix.matrix.DoubleFactory1D.dense;
+  private static final org.apache.mahout.matrix.matrix.linalg.Algebra LinearAlgebra = org.apache.mahout.matrix.matrix.linalg.Algebra.DEFAULT;
+  private static final org.apache.mahout.matrix.matrix.doublealgo.Transform Transform = org.apache.mahout.matrix.matrix.doublealgo.Transform.transform;
+  private static final org.apache.mahout.matrix.matrix.linalg.Property Property = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT;
 /**
  * Makes this class non instantiable, but still let's others inherit from it.
  */
 protected TestMatrix2D() {
-	throw new RuntimeException("Non instantiable");
+  throw new RuntimeException("Non instantiable");
 }
 /**
  */
@@ -66,32 +64,32 @@ System.out.println("\n"+view2);
 /**
  */
 public static void doubleTest(int rows, int columns, int initialCapacity, double minLoadFactor, double maxLoadFactor) {
-	DoubleMatrix2D matrix = new SparseDoubleMatrix2D(rows,columns,initialCapacity,minLoadFactor,maxLoadFactor);
-	System.out.println(matrix);
-	
-	System.out.println("adding...");
-	int i=0;
-	for (int column=0; column < columns; column++) {
-		for (int row=0; row < rows; row++) {
-			//if (i%1000 == 0) { 
- 				matrix.set(row,column,i);
-			//}
-			i++;
-		}
-	}
-	System.out.println(matrix);
+  DoubleMatrix2D matrix = new SparseDoubleMatrix2D(rows,columns,initialCapacity,minLoadFactor,maxLoadFactor);
+  System.out.println(matrix);
+  
+  System.out.println("adding...");
+  int i=0;
+  for (int column=0; column < columns; column++) {
+    for (int row=0; row < rows; row++) {
+      //if (i%1000 == 0) { 
+         matrix.set(row,column,i);
+      //}
+      i++;
+    }
+  }
+  System.out.println(matrix);
 
-	System.out.println("removing...");
-	for (int column=0; column < columns; column++) {
-		for (int row=0; row < rows; row++) {
-			//if (i%1000 == 0) {
-				matrix.set(row,column,0);
-			//}
-		}
-	}
+  System.out.println("removing...");
+  for (int column=0; column < columns; column++) {
+    for (int row=0; row < rows; row++) {
+      //if (i%1000 == 0) {
+        matrix.set(row,column,0);
+      //}
+    }
+  }
 
-	System.out.println(matrix);
-	System.out.println("bye bye.");
+  System.out.println(matrix);
+  System.out.println("bye bye.");
 }
 /**
  */
@@ -184,9 +182,9 @@ System.out.println(matrix);
 
 // Sum( x[i]*x[i] ) 
 System.out.println(matrix.viewSelection(
-	new org.apache.mahout.matrix.function.DoubleProcedure() {
-		public final boolean apply(double a) { return a % 2 == 0; }
-	}
+  new org.apache.mahout.matrix.function.DoubleProcedure() {
+    public final boolean apply(double a) { return a % 2 == 0; }
+  }
 ));
 //--> 14
 
@@ -225,7 +223,7 @@ System.out.println(matrix.aggregate(F.mult,F.identity));
 // Product( x[i] ) of all x[i] > limit
 final double limit = 1;
 DoubleFunction f = new DoubleFunction() {
-	public final double apply(double a) { return a>limit ? a : 1; }
+  public final double apply(double a) { return a>limit ? a : 1; }
 };
 System.out.println(matrix.aggregate(F.mult,f));
 //--> 6
@@ -246,7 +244,7 @@ System.out.println(matrix.aggregate(otherMatrix1D, F.plus, F.chain(F.mult(Math.P
 // or, perhaps less error prone and more readable: 
 System.out.println(matrix.aggregate(otherMatrix1D, F.plus,
    new DoubleDoubleFunction() {
-	  public double apply(double a, double b) { return Math.PI*Math.log(b/a); }
+    public double apply(double a, double b) { return Math.PI*Math.log(b/a); }
    }
 )
 );
@@ -292,16 +290,16 @@ public static void doubleTest15(int size, int runs) {
 System.out.println("\n\n");
 double[][] values = 
 {
-	{ 0, 5, 9 },
-	{ 2, 6, 10 },
-	{ 3, 7, 11 }
+  { 0, 5, 9 },
+  { 2, 6, 10 },
+  { 3, 7, 11 }
 };
 
 //DoubleMatrix2D A = Factory2D.make(values);
 DoubleMatrix2D A = Factory2D.make(size,size);
 double value = 5;
 for (int i=size; --i >= 0; ) {
-	A.setQuick(i,i, value);
+  A.setQuick(i,i, value);
 }
 A.viewRow(0).assign(value);
 
@@ -312,14 +310,14 @@ A.viewRow(0).assign(value);
 org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 DoubleMatrix2D inv = null;
 for (int run=0; run<runs; run++) {
-	 inv = LinearAlgebra.inverse(A);
+   inv = LinearAlgebra.inverse(A);
 }
 timer.stop().display();
 
 /*
 timer.reset().start();
 for (int run=0; run<runs; run++) {
-	new Jama.Matrix(A.toArray()).inverse();
+  new Jama.Matrix(A.toArray()).inverse();
 }
 timer.stop().display();
 */
@@ -427,10 +425,10 @@ int lk;
 
 double[][] values5 = 
 {
-	{ 0, 0, 0, 0 },
-	{ 0, 0, 0, 0 },
-	{ 0, 0, 0, 0 },
-	{ 0, 0, 0, 0 }
+  { 0, 0, 0, 0 },
+  { 0, 0, 0, 0 },
+  { 0, 0, 0, 0 },
+  { 0, 0, 0, 0 }
 };
 A = Factory2D.make(values5);
 k = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
@@ -444,10 +442,10 @@ System.out.println("bandwidth="+k+" "+A);
 
 double[][] values4 = 
 {
-	{ 1, 0, 0, 0 },
-	{ 0, 0, 0, 0 },
-	{ 0, 0, 0, 0 },
-	{ 0, 0, 0, 1 }
+  { 1, 0, 0, 0 },
+  { 0, 0, 0, 0 },
+  { 0, 0, 0, 0 },
+  { 0, 0, 0, 1 }
 };
 A = Factory2D.make(values4);
 k = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
@@ -460,10 +458,10 @@ System.out.println("bandwidth="+k+" "+A);
 
 double[][] values1 = 
 {
-	{ 1, 1, 0, 0 },
-	{ 1, 1, 1, 0 },
-	{ 0, 1, 1, 1 },
-	{ 0, 0, 1, 1 }
+  { 1, 1, 0, 0 },
+  { 1, 1, 1, 0 },
+  { 0, 1, 1, 1 },
+  { 0, 0, 1, 1 }
 };
 A = Factory2D.make(values1);
 k = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
@@ -477,10 +475,10 @@ System.out.println("bandwidth="+k+" "+A);
 
 double[][] values6 = 
 {
-	{ 0, 1, 1, 1 },
-	{ 0, 1, 1, 1 },
-	{ 0, 0, 0, 1 },
-	{ 0, 0, 0, 1 }
+  { 0, 1, 1, 1 },
+  { 0, 1, 1, 1 },
+  { 0, 0, 0, 1 },
+  { 0, 0, 0, 1 }
 };
 A = Factory2D.make(values6);
 k = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
@@ -493,10 +491,10 @@ System.out.println("bandwidth="+k+" "+A);
 
 double[][] values7 = 
 {
-	{ 0, 0, 0, 0 },
-	{ 1, 1, 0, 0 },
-	{ 1, 1, 0, 0 },
-	{ 1, 1, 1, 1 }
+  { 0, 0, 0, 0 },
+  { 1, 1, 0, 0 },
+  { 1, 1, 0, 0 },
+  { 1, 1, 1, 1 }
 };
 A = Factory2D.make(values7);
 k = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
@@ -510,10 +508,10 @@ System.out.println("bandwidth="+k+" "+A);
 
 double[][] values2 = 
 {
-	{ 1, 1, 0, 0 },
-	{ 0, 1, 1, 0 },
-	{ 0, 1, 0, 1 },
-	{ 1, 0, 1, 1 }
+  { 1, 1, 0, 0 },
+  { 0, 1, 1, 0 },
+  { 0, 1, 0, 1 },
+  { 1, 0, 1, 1 }
 };
 A = Factory2D.make(values2);
 k = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
@@ -526,10 +524,10 @@ System.out.println("bandwidth="+k+" "+A);
 
 double[][] values3 = 
 {
-	{ 1, 1, 1, 0 },
-	{ 0, 1, 0, 0 },
-	{ 1, 1, 0, 1 },
-	{ 0, 0, 1, 1 }
+  { 1, 1, 1, 0 },
+  { 0, 1, 0, 0 },
+  { 1, 1, 0, 1 },
+  { 0, 0, 1, 1 }
 };
 A = Factory2D.make(values3); 
 k = org.apache.mahout.matrix.matrix.linalg.Property.DEFAULT.semiBandwidth(A);
@@ -639,10 +637,10 @@ int lk;
 
 double[][] values1 =
 {
-	{ 0, 1, 0, 0 },
-	{ 3, 0, 2, 0 },
-	{ 0, 2, 0, 3 },
-	{ 0, 0, 1, 0 }
+  { 0, 1, 0, 0 },
+  { 3, 0, 2, 0 },
+  { 0, 2, 0, 3 },
+  { 0, 0, 1, 0 }
 };
 A = Factory2D.make(values1);
 
@@ -652,11 +650,11 @@ System.out.println("\n\n"+LinearAlgebra.toVerboseString(A));
 
 double[][] values2 =
 {
-	{ 1.0000000000000167, -0.3623577544766736, -0.3623577544766736 },
-	{ 0                 ,  0.9320390859672374, -0.3377315902755755 },
-	{ 0                 ,  0                 ,  0.8686968577706282 },
-	{ 0                 ,  0                 ,  0                  },
-	{ 0                 ,  0                 ,  0                  }
+  { 1.0000000000000167, -0.3623577544766736, -0.3623577544766736 },
+  { 0                 ,  0.9320390859672374, -0.3377315902755755 },
+  { 0                 ,  0                 ,  0.8686968577706282 },
+  { 0                 ,  0                 ,  0                  },
+  { 0                 ,  0                 ,  0                  }
 };
 
 A = Factory2D.make(values2);
@@ -666,14 +664,14 @@ System.out.println("\n\n"+LinearAlgebra.toVerboseString(A));
 
 double[][] values3 =
 {
-	{ 611,  196, -192,  407,   -8,  -52,  -49,   29 },
-	{ 196,  899,  113, -192,  -71,  -43,   -8,  -44 },
-	{-192,  113,  899,  196,   61,   49,    8,   52 },
-	{ 407, -192,  196,  611,    8,   44,   59,  -23 },
-	{  -8,  -71,   61,    8,  411, -599,  208,  208 },
-	{ -52,  -43,   49,   44, -599,  411,  208,  208 },
-	{ -49,   -8,    8,   59,  208,  208,   99, -911 },
-	{  29,  -44,   52,  -23,  208,  208, -911,   99 }
+  { 611,  196, -192,  407,   -8,  -52,  -49,   29 },
+  { 196,  899,  113, -192,  -71,  -43,   -8,  -44 },
+  {-192,  113,  899,  196,   61,   49,    8,   52 },
+  { 407, -192,  196,  611,    8,   44,   59,  -23 },
+  {  -8,  -71,   61,    8,  411, -599,  208,  208 },
+  { -52,  -43,   49,   44, -599,  411,  208,  208 },
+  { -49,   -8,    8,   59,  208,  208,   99, -911 },
+  {  29,  -44,   52,  -23,  208,  208, -911,   99 }
 };
 
 
@@ -700,10 +698,10 @@ int lk;
 
 double[][] values1 =
 {
-	{ 1/3, 2/3, Math.PI, 0 },
-	{ 3, 9, 0, 0 },
-	{ 0, 2, 7, 0 },
-	{ 0, 0, 3, 9 }
+  { 1/3, 2/3, Math.PI, 0 },
+  { 3, 9, 0, 0 },
+  { 0, 2, 7, 0 },
+  { 0, 0, 3, 9 }
 };
 A = Factory2D.make(values1);
 System.out.println(A);
@@ -724,10 +722,10 @@ int lk;
 
 double[][] values1 =
 {
-	{ 1/3, 2/3, Math.PI, 0 },
-	{ 3, 9, 0, 0 },
-	{ 0, 2, 7, 0 },
-	{ 0, 0, 3, 9 }
+  { 1/3, 2/3, Math.PI, 0 },
+  { 3, 9, 0, 0 },
+  { 0, 2, 7, 0 },
+  { 0, 0, 3, 9 }
 };
 A = Factory2D.make(values1);
 System.out.println(A);
@@ -757,9 +755,9 @@ org.apache.mahout.jet.random.Normal random = new org.apache.mahout.jet.random.No
 System.out.println("sampling...");
 double value = 2;
 if (dense) 
-	A = Factory2D.dense.sample(size,size, value, nonZeroFraction);
+  A = Factory2D.dense.sample(size,size, value, nonZeroFraction);
 else
-	A = Factory2D.sparse.sample(size,size, value, nonZeroFraction);
+  A = Factory2D.sparse.sample(size,size, value, nonZeroFraction);
 b = A.like1D(size).assign(1);
 
 //A.assign(random);
@@ -787,11 +785,11 @@ lu.decompose(LU);
 System.out.println("benchmarking LU...");
 timer.reset().start();
 for (int i=runs; --i >=0; ) {
-	solved.assign(b);
-	//Inv.assign(I);
-	//lu.decompose(LU);
-	lu.solve(solved);
-	//lu.solve(Inv);
+  solved.assign(b);
+  //Inv.assign(I);
+  //lu.decompose(LU);
+  lu.solve(solved);
+  //lu.solve(Inv);
 }
 timer.stop().display();
 
@@ -800,7 +798,7 @@ timer.stop().display();
 //System.out.println("U="+lu.getU());
 //System.out.println("L="+lu.getL());
 System.out.println("done.");
-	
+  
 }
 /**
  */
@@ -810,10 +808,10 @@ System.out.println("initializing...");
 DoubleMatrix2D A;
 DoubleFactory2D factory;
 if (dense) 
-	factory = Factory2D.dense;
+  factory = Factory2D.dense;
 else 
-	factory = Factory2D.sparse;
-	
+  factory = Factory2D.sparse;
+  
 double value = 2;
 double omega = 1.25;
 final double alpha = omega * 0.25;
@@ -821,15 +819,15 @@ final double beta = 1-omega;
 A = factory.make(size,size,value);
 
 org.apache.mahout.matrix.function.Double9Function function = new org.apache.mahout.matrix.function.Double9Function() {
-	public final double apply(double a00, double a01, double a02, double a10, double a11, double a12, double a20, double a21, double a22) {
-		return alpha*a11 + beta*(a01+a10+a12+a21);
-	}
+  public final double apply(double a00, double a01, double a02, double a10, double a11, double a12, double a20, double a21, double a22) {
+    return alpha*a11 + beta*(a01+a10+a12+a21);
+  }
 };
 org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 
 System.out.println("benchmarking stencil...");
 for (int i=0; i<runs; i++) {
-	A.zAssign8Neighbors(A,function);
+  A.zAssign8Neighbors(A,function);
 }
 //A.zSum4Neighbors(A,alpha,beta,runs);
 timer.stop().display();
@@ -841,29 +839,29 @@ timer.reset().start();
 
 System.out.println("benchmarking stencil scimark...");
 for (int i=0; i<runs; i++) {
-//	jnt.scimark2.SOR.execute(omega, B, runs);
+//  jnt.scimark2.SOR.execute(omega, B, runs);
 }
 timer.stop().display();
 
 
 System.out.println("done.");
-	
+  
 }
 /**
  */
 public static void doubleTest25(int size) {
 
-	
+  
 System.out.println("\n\n");
 System.out.println("initializing...");
 boolean dense = true;
 DoubleMatrix2D A;
 DoubleFactory2D factory;
 if (dense) 
-	factory = Factory2D.dense;
+  factory = Factory2D.dense;
 else 
-	factory = Factory2D.sparse;
-	
+  factory = Factory2D.sparse;
+  
 double value = 0.5;
 A = factory.make(size,size,value);
 Property.generateNonSingular(A);
@@ -875,32 +873,32 @@ System.out.println(Algebra.ZERO.inverse(A));
 timer.stop().display();
 
 System.out.println("done.");
-	
+  
 }
 /**
  */
 public static void doubleTest26(int size) {
 
-	
+  
 System.out.println("\n\n");
 System.out.println("initializing...");
 boolean dense = true;
 DoubleMatrix2D A;
 DoubleFactory2D factory;
 if (dense) 
-	factory = Factory2D.dense;
+  factory = Factory2D.dense;
 else 
-	factory = Factory2D.sparse;
-	
+  factory = Factory2D.sparse;
+  
 double value = 0.5;
 A = factory.make(size,size,value);
 Property.generateNonSingular(A);
 org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 
 DoubleMatrix2DComparator fun = new DoubleMatrix2DComparator() {
-	public int compare(DoubleMatrix2D a, DoubleMatrix2D b) {
-		return a.zSum() == b.zSum() ? 1 : 0;
-	}
+  public int compare(DoubleMatrix2D a, DoubleMatrix2D b) {
+    return a.zSum() == b.zSum() ? 1 : 0;
+  }
 };
 
 System.out.println(A);
@@ -909,13 +907,13 @@ System.out.println(Algebra.ZERO.inverse(A));
 timer.stop().display();
 
 System.out.println("done.");
-	
+  
 }
 /**
  */
 public static void doubleTest27() {
 
-	
+  
 System.out.println("\n\n");
 System.out.println("initializing...");
 
@@ -939,9 +937,9 @@ patternMatrix = DoubleFactory2D.dense.make (rows, columns);
 
 // copy the patterns into the matrix
 for (patternIndex=0;patternIndex<columns;patternIndex++) {
-	for (unitIndex=0;unitIndex<rows;unitIndex++) {
-		patternMatrix.setQuick (unitIndex, patternIndex, trainingSet[patternIndex][unitIndex]);
-	}
+  for (unitIndex=0;unitIndex<rows;unitIndex++) {
+    patternMatrix.setQuick (unitIndex, patternIndex, trainingSet[patternIndex][unitIndex]);
+  }
 }
 
 transposeMatrix     = Algebra.DEFAULT.transpose (patternMatrix);
@@ -950,60 +948,60 @@ inverseQMatrix      = Algebra.DEFAULT.inverse (QMatrix);
 pseudoInverseMatrix = Algebra.DEFAULT.mult (inverseQMatrix,transposeMatrix);
 weightMatrix        = Algebra.DEFAULT.mult (patternMatrix,pseudoInverseMatrix);
 System.out.println("done.");
-	
+  
 }
 /**
  */
 public static void doubleTest28() {
-	double[] data={1,2,3,4,5,6};
-	double[][] arrMatrix = 
-	{ 
-		{ 1, 2, 3, 4, 5, 6},
-		{ 2, 3, 4, 5, 6, 7}
-	};
-	DoubleFactory2D f = DoubleFactory2D.dense;
-	DoubleMatrix1D vector = new DenseDoubleMatrix1D(data);
-	DoubleMatrix2D matrix = f.make(arrMatrix);
-	DoubleMatrix1D res = vector.like(matrix.rows());
-	
-	matrix.zMult(vector,res);
+  double[] data={1,2,3,4,5,6};
+  double[][] arrMatrix = 
+  { 
+    { 1, 2, 3, 4, 5, 6},
+    { 2, 3, 4, 5, 6, 7}
+  };
+  DoubleFactory2D f = DoubleFactory2D.dense;
+  DoubleMatrix1D vector = new DenseDoubleMatrix1D(data);
+  DoubleMatrix2D matrix = f.make(arrMatrix);
+  DoubleMatrix1D res = vector.like(matrix.rows());
+  
+  matrix.zMult(vector,res);
 
-	System.out.println(res);
+  System.out.println(res);
 }
 /**
  */
 public static void doubleTest28(DoubleFactory2D f) {
-	double[] data={1,2,3,4,5,6};
-	double[][] arrMatrix = 
-	{ 
-		{ 1, 2, 3, 4, 5, 6},
-		{ 2, 3, 4, 5, 6, 7}
-	};
-	
-	DoubleMatrix1D vector = new DenseDoubleMatrix1D(data);
-	DoubleMatrix2D matrix = f.make(arrMatrix);
-	DoubleMatrix1D res = vector.like(matrix.rows());
-	
-	matrix.zMult(vector,res);
+  double[] data={1,2,3,4,5,6};
+  double[][] arrMatrix = 
+  { 
+    { 1, 2, 3, 4, 5, 6},
+    { 2, 3, 4, 5, 6, 7}
+  };
+  
+  DoubleMatrix1D vector = new DenseDoubleMatrix1D(data);
+  DoubleMatrix2D matrix = f.make(arrMatrix);
+  DoubleMatrix1D res = vector.like(matrix.rows());
+  
+  matrix.zMult(vector,res);
 
-	System.out.println(res);
+  System.out.println(res);
 }
 /**
  */
 public static void doubleTest29(int size) {
 /*
-	
+  
 System.out.println("\n\n");
 System.out.println("initializing...");
 boolean dense = false;
 DoubleMatrix2D A;
 DoubleFactory2D factory;
 if (dense) 
-	factory = Factory2D.dense;
+  factory = Factory2D.dense;
 else 
-	factory = Factory2D.sparse;
-	
-double value = 0.5;	
+  factory = Factory2D.sparse;
+  
+double value = 0.5;  
 
 DoubleMatrix2D C = Factory2D.dense.sample(size,size,value,1);
 
@@ -1017,9 +1015,9 @@ System.out.print("A getquick... ");
 timer.reset().start();
 double sum=0;
 for (int i=0; i<size; i++) {
-	for (int j=0; j<size; j++ ) {
-		sum+=A.getQuick(i,j);
-	}
+  for (int j=0; j<size; j++ ) {
+    sum+=A.getQuick(i,j);
+  }
 }
 timer.stop().display();
 System.out.println(sum);
@@ -1029,11 +1027,11 @@ System.out.print("sci set3... ");
 JSci.maths.DoubleSparseMatrix B = new JSci.maths.DoubleSparseMatrix(size);
 timer.reset().start();
 //for (int i=size; --i>=0; ) {
-//	for (int j=size; --j>=0; ) {
+//  for (int j=size; --j>=0; ) {
 for (int i=0; i<size; i++) {
-	for (int j=0; j<size; j++ ) {
-		B.setElement3(i,j,C.getQuick(i,j));
-	}
+  for (int j=0; j<size; j++ ) {
+    B.setElement3(i,j,C.getQuick(i,j));
+  }
 }
 //System.out.println(A);
 timer.stop().display();
@@ -1042,9 +1040,9 @@ System.out.print("sci get3... ");
 timer.reset().start();
 sum=0;
 for (int i=0; i<size; i++) {
-	for (int j=0; j<size; j++ ) {
-		sum+=B.getElement3(i,j);
-	}
+  for (int j=0; j<size; j++ ) {
+    sum+=B.getElement3(i,j);
+  }
 }
 System.out.println(sum);
 timer.stop().display();
@@ -1058,46 +1056,46 @@ timer.stop().display();
 
 
 System.out.println("done.");
-*/	
+*/  
 }
 /**
  */
 public static void doubleTest29(int size,DoubleFactory2D f) {
-	
-	DoubleMatrix2D x = new DenseDoubleMatrix2D(size,size).assign(0.5);
-	DoubleMatrix2D matrix = f.sample(size,size,0.5,0.001);
-	
-	org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
-	DoubleMatrix2D res = matrix.zMult(x,null);
-	timer.stop().display();
-	
-	//System.out.println(res);
+  
+  DoubleMatrix2D x = new DenseDoubleMatrix2D(size,size).assign(0.5);
+  DoubleMatrix2D matrix = f.sample(size,size,0.5,0.001);
+  
+  org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
+  DoubleMatrix2D res = matrix.zMult(x,null);
+  timer.stop().display();
+  
+  //System.out.println(res);
 }
 /**
  */
 public static void doubleTest29(DoubleFactory2D f) {
-	double[][] data = 
-	{ 
-		{ 6, 5, 4 },
-		{ 7, 6, 3 },
-		{ 6, 5, 4 },
-		{ 7, 6, 3 },
-		{ 6, 5, 4 },
-		{ 7, 6, 3 }
-	};
-	
-	double[][] arrMatrix = 
-	{ 
-		{ 1, 2, 3, 4, 5, 6},
-		{ 2, 3, 4, 5, 6, 7}
-	};
-	
-	DoubleMatrix2D x = new DenseDoubleMatrix2D(data);
-	DoubleMatrix2D matrix = f.make(arrMatrix);
-	
-	DoubleMatrix2D res = matrix.zMult(x,null);
+  double[][] data = 
+  { 
+    { 6, 5, 4 },
+    { 7, 6, 3 },
+    { 6, 5, 4 },
+    { 7, 6, 3 },
+    { 6, 5, 4 },
+    { 7, 6, 3 }
+  };
+  
+  double[][] arrMatrix = 
+  { 
+    { 1, 2, 3, 4, 5, 6},
+    { 2, 3, 4, 5, 6, 7}
+  };
+  
+  DoubleMatrix2D x = new DenseDoubleMatrix2D(data);
+  DoubleMatrix2D matrix = f.make(arrMatrix);
+  
+  DoubleMatrix2D res = matrix.zMult(x,null);
 
-	System.out.println(res);
+  System.out.println(res);
 }
 /**
  */
@@ -1138,19 +1136,19 @@ System.out.println("\n"+view2);
 /**
  */
 public static void doubleTest30() {
-	double[][] data = 
-	{ 
-		{ 6, 5 },
-		{ 7, 6 },
-	};
-	
-	double[] x = { 1, 2 };
-	double[] y = { 3, 4 };
+  double[][] data = 
+  { 
+    { 6, 5 },
+    { 7, 6 },
+  };
+  
+  double[] x = { 1, 2 };
+  double[] y = { 3, 4 };
 
-	DoubleMatrix2D A = new DenseDoubleMatrix2D(data);
-	SeqBlas.seqBlas.dger(1,new DenseDoubleMatrix1D(x), new DenseDoubleMatrix1D(y), A);
+  DoubleMatrix2D A = new DenseDoubleMatrix2D(data);
+  SeqBlas.seqBlas.dger(1,new DenseDoubleMatrix1D(x), new DenseDoubleMatrix1D(y), A);
 
-	System.out.println(A);
+  System.out.println(A);
 }
 /**
  */
@@ -1162,9 +1160,9 @@ int val = 3;
 int sum=0;
 org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 for (int i=size; --i>=0; ) {
-	int k = list.binarySearchFromTo(val,0,values.length-1);
-	System.out.println(list+", "+val+" --> "+k);
-	sum+=k;
+  int k = list.binarySearchFromTo(val,0,values.length-1);
+  System.out.println(list+", "+val+" --> "+k);
+  sum+=k;
 }
 timer.stop().display();
 //System.out.println("sum = "+sum);
@@ -1177,11 +1175,11 @@ boolean dense = false;
 DoubleMatrix2D A;
 DoubleFactory2D factory;
 if (dense) 
-	factory = Factory2D.dense;
+  factory = Factory2D.dense;
 else 
-	factory = Factory2D.sparse;
-	
-double value = 0.5;	
+  factory = Factory2D.sparse;
+  
+double value = 0.5;  
 
 DoubleMatrix2D C = Factory2D.dense.sample(size,size,value,0.01);
 
@@ -1193,9 +1191,9 @@ timer.stop().display();
 timer.reset().start();
 double sum=0;
 for (int i=0; i<size; i++) {
-	for (int j=0; j<size; j++ ) {
-		sum+=A.getQuick(i,j);
-	}
+  for (int j=0; j<size; j++ ) {
+    sum+=A.getQuick(i,j);
+  }
 }
 timer.stop().display();
 System.out.println(sum);
@@ -1204,11 +1202,11 @@ System.out.println(sum);
 JSci.maths.DoubleSparseMatrix B = new JSci.maths.DoubleSparseMatrix(size);
 timer.reset().start();
 for (int i=size; --i>=0; ) {
-	for (int j=size; --j>=0; ) {
+  for (int j=size; --j>=0; ) {
 //for (int i=0; i<size; i++) {
-//	for (int j=0; j<size; j++ ) {
-		B.setElement2(i,j,C.getQuick(i,j));
-	}
+//  for (int j=0; j<size; j++ ) {
+    B.setElement2(i,j,C.getQuick(i,j));
+  }
 }
 //System.out.println(A);
 timer.stop().display();
@@ -1216,9 +1214,9 @@ timer.stop().display();
 timer.reset().start();
 sum=0;
 for (int i=0; i<size; i++) {
-	for (int j=0; j<size; j++ ) {
-		sum+=B.getElement2(i,j);
-	}
+  for (int j=0; j<size; j++ ) {
+    sum+=B.getElement2(i,j);
+  }
 }
 System.out.println(sum);
 timer.stop().display();
@@ -1238,10 +1236,10 @@ int l = values.length-1;
 int sum=0;
 org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
 for (int i=size; --i>=0; ) {
-	int k = org.apache.mahout.matrix.Sorting.binarySearchFromTo(values,val,0,l);
-	//int k = list.binarySearchFromTo(val,0,l);
-	//System.out.println(list+", "+val+" --> i="+k+", -i-1="+(-k-1));
-	sum+=k;
+  int k = org.apache.mahout.matrix.Sorting.binarySearchFromTo(values,val,0,l);
+  //int k = list.binarySearchFromTo(val,0,l);
+  //System.out.println(list+", "+val+" --> i="+k+", -i-1="+(-k-1));
+  sum+=k;
 }
 timer.stop().display();
 System.out.println("sum = "+sum);
@@ -1254,11 +1252,11 @@ boolean dense = false;
 DoubleMatrix2D A;
 DoubleFactory2D factory;
 if (dense) 
-	factory = Factory2D.dense;
+  factory = Factory2D.dense;
 else 
-	factory = Factory2D.sparse;
-	
-double value = 0.5;	
+  factory = Factory2D.sparse;
+  
+double value = 0.5;  
 
 DoubleMatrix2D C = Factory2D.dense.sample(size,size,value,0.01);
 
@@ -1270,9 +1268,9 @@ timer.stop().display();
 timer.reset().start();
 double sum=0;
 for (int i=0; i<size; i++) {
-	for (int j=0; j<size; j++ ) {
-		sum+=A.getQuick(i,j);
-	}
+  for (int j=0; j<size; j++ ) {
+    sum+=A.getQuick(i,j);
+  }
 }
 timer.stop().display();
 System.out.println(sum);
@@ -1281,11 +1279,11 @@ System.out.println(sum);
 JSci.maths.DoubleSparseMatrix B = new JSci.maths.DoubleSparseMatrix(size);
 timer.reset().start();
 for (int i=size; --i>=0; ) {
-	for (int j=size; --j>=0; ) {
+  for (int j=size; --j>=0; ) {
 //for (int i=0; i<size; i++) {
-//	for (int j=0; j<size; j++ ) {
-		B.setElement2(i,j,C.getQuick(i,j));
-	}
+//  for (int j=0; j<size; j++ ) {
+    B.setElement2(i,j,C.getQuick(i,j));
+  }
 }
 //System.out.println(A);
 timer.stop().display();
@@ -1293,9 +1291,9 @@ timer.stop().display();
 timer.reset().start();
 sum=0;
 for (int i=0; i<size; i++) {
-	for (int j=0; j<size; j++ ) {
-		sum+=B.getElement2(i,j);
-	}
+  for (int j=0; j<size; j++ ) {
+    sum+=B.getElement2(i,j);
+  }
 }
 System.out.println(sum);
 timer.stop().display();
@@ -1328,154 +1326,152 @@ System.out.println("done");
 /**
  */
 public static void doubleTest32() {
-	double[][] data = 
-	{ 
-		{ 1, 4, 0 },
-		{ 6, 2, 5 },
-		{ 0, 7, 3 },
-		{ 0, 0, 8 },
-		{ 0, 0, 0 },
-		{ 0, 0, 0 }
-	};
-	
-	DoubleMatrix2D x = new TridiagonalDoubleMatrix2D(data);
-	
+  double[][] data = 
+  { 
+    { 1, 4, 0 },
+    { 6, 2, 5 },
+    { 0, 7, 3 },
+    { 0, 0, 8 },
+    { 0, 0, 0 },
+    { 0, 0, 0 }
+  };
+  
+  DoubleMatrix2D x = new TridiagonalDoubleMatrix2D(data);
+  
 
-	System.out.println("\n\n\n"+x);
-	System.out.println("\n"+new DenseDoubleMatrix2D(data));
+  System.out.println("\n\n\n"+x);
+  System.out.println("\n"+new DenseDoubleMatrix2D(data));
 }
 /**
  */
 public static void doubleTest33() {
-	double nan = Double.NaN;
-	double inf = Double.POSITIVE_INFINITY;
-	double ninf = Double.NEGATIVE_INFINITY;
-	
-	double[][] data =
-	{{ ninf, nan}};
-	/*
-	{ 
-		{ 1, 4, 0 },
-		{ 6, 2, 5 },
-		{ 0, 7, 3 },
-		{ 0, 0, 8 },
-		{ 0, 0, 0 },
-		{ 0, 0, 0 }
-	};
-	*/
-	
-	DoubleMatrix2D x = new DenseDoubleMatrix2D(data);
+  double nan = Double.NaN;
+  double inf = Double.POSITIVE_INFINITY;
+  double ninf = Double.NEGATIVE_INFINITY;
+  
+  double[][] data =
+  {{ ninf, nan}};
+  /*
+  { 
+    { 1, 4, 0 },
+    { 6, 2, 5 },
+    { 0, 7, 3 },
+    { 0, 0, 8 },
+    { 0, 0, 0 },
+    { 0, 0, 0 }
+  };
+  */
+  
+  DoubleMatrix2D x = new DenseDoubleMatrix2D(data);
 
-	System.out.println("\n\n\n"+x);
-	System.out.println("\n"+ x.equals(ninf));
+  System.out.println("\n\n\n"+x);
+  System.out.println("\n"+ x.equals(ninf));
 }
 /**
  */
 public static void doubleTest34() {
-	double[][] data = 
-	{ 
-		{ 3, 0, 0, 0 },
-		{ 0, 4, 2, 0 },
-		{ 0, 0, 0, 0 },
-		{ 0, 0, 0, 0 },
-	};
-	
-	DoubleMatrix2D A = new DenseDoubleMatrix2D(data);
-	Property.DEFAULT.generateNonSingular(A);
-	DoubleMatrix2D inv = Algebra.DEFAULT.inverse(A);
+  double[][] data = 
+  { 
+    { 3, 0, 0, 0 },
+    { 0, 4, 2, 0 },
+    { 0, 0, 0, 0 },
+    { 0, 0, 0, 0 },
+  };
+  
+  DoubleMatrix2D A = new DenseDoubleMatrix2D(data);
+  Property.DEFAULT.generateNonSingular(A);
+  DoubleMatrix2D inv = Algebra.DEFAULT.inverse(A);
 
 
-	System.out.println("\n\n\n"+A);
-	System.out.println("\n"+inv);
-	DoubleMatrix2D B = A.zMult(inv,null);
-	System.out.println(B);
-	if (!(B.equals(DoubleFactory2D.dense.identity(A.rows)))) {
-		throw new InternalError();
-	}
+  System.out.println("\n\n\n"+A);
+  System.out.println("\n"+inv);
+  DoubleMatrix2D B = A.zMult(inv,null);
+  System.out.println(B);
+  if (!(B.equals(DoubleFactory2D.dense.identity(A.rows)))) {
+    throw new InternalError();
+  }
 }
 /**
  * Title:        Aero3D<p>
  * Description:  A Program to analyse aeroelestic evects in transonic wings<p>
  * Copyright:    Copyright (c) 1998<p>
  * Company:      PIERSOL Engineering Inc.<p>
- * @author John R. Piersol
  * @version
  */
 public static void doubleTest35() {
-	/*
-	final int DOF = 200;
-	final org.apache.mahout.jet.random.engine.MersenneTwister RANDOM = new org.apache.mahout.jet.random.engine.MersenneTwister();
-	final Algebra ALGEBRA = new Algebra();
-	
-	System.out.println("\n\n\nStarting...");
-	double[][] k = randomMatrix(DOF, RANDOM);
-	DoubleMatrix2D kd = new DenseDoubleMatrix2D(k);
-	Jama.Matrix km = new Jama.Matrix(k);
+  /*
+  final int DOF = 200;
+  final org.apache.mahout.jet.random.engine.MersenneTwister RANDOM = new org.apache.mahout.jet.random.engine.MersenneTwister();
+  final Algebra ALGEBRA = new Algebra();
+  
+  System.out.println("\n\n\nStarting...");
+  double[][] k = randomMatrix(DOF, RANDOM);
+  DoubleMatrix2D kd = new DenseDoubleMatrix2D(k);
+  Jama.Matrix km = new Jama.Matrix(k);
 
 
-	
+  
 
 
-	DoubleMatrix2D coltL = new LUDecomposition(kd).getL();
-	DoubleMatrix2D coltU = new LUDecomposition(kd).getU();
-	Jama.Matrix jamaL = new Jama.LUDecomposition(km).getL();
-	Jama.Matrix jamaU = new Jama.LUDecomposition(km).getU();
+  DoubleMatrix2D coltL = new LUDecomposition(kd).getL();
+  DoubleMatrix2D coltU = new LUDecomposition(kd).getU();
+  Jama.Matrix jamaL = new Jama.LUDecomposition(km).getL();
+  Jama.Matrix jamaU = new Jama.LUDecomposition(km).getU();
 
-	System.out.println(coltL.equals(kd.like().assign(jamaL.getArrayCopy())));
-	System.out.println(coltL.aggregate(F.plus,F.abs));
-	double s = 0;
-	double[] temp2 = jamaL.getColumnPackedCopy();
-	for (int i = 0, n = temp2.length; i < n; ++i) s += Math.abs(temp2[i]);
-	System.out.println(s);
+  System.out.println(coltL.equals(kd.like().assign(jamaL.getArrayCopy())));
+  System.out.println(coltL.aggregate(F.plus,F.abs));
+  double s = 0;
+  double[] temp2 = jamaL.getColumnPackedCopy();
+  for (int i = 0, n = temp2.length; i < n; ++i) s += Math.abs(temp2[i]);
+  System.out.println(s);
 
-	System.out.println(coltU.equals(kd.like().assign(jamaU.getArrayCopy())));
-	System.out.println(coltU.aggregate(F.plus,F.abs));
-	s = 0;
-	temp2 = jamaU.getColumnPackedCopy();
-	for (int i = 0, n = temp2.length; i < n; ++i) s += Math.abs(temp2[i]);
-	System.out.println(s);
+  System.out.println(coltU.equals(kd.like().assign(jamaU.getArrayCopy())));
+  System.out.println(coltU.aggregate(F.plus,F.abs));
+  s = 0;
+  temp2 = jamaU.getColumnPackedCopy();
+  for (int i = 0, n = temp2.length; i < n; ++i) s += Math.abs(temp2[i]);
+  System.out.println(s);
 
-	//System.out.println("colt="+new LUDecomposition(kd).toString());
-	//System.out.println("jama="+new Jama.LUDecomposition(km).toString());
+  //System.out.println("colt="+new LUDecomposition(kd).toString());
+  //System.out.println("jama="+new Jama.LUDecomposition(km).toString());
 
 
 
-	Jama.Matrix kmi = km.inverse();
+  Jama.Matrix kmi = km.inverse();
 
-	DoubleMatrix2D kdi = Algebra.DEFAULT.inverse(kd);
-	DoubleMatrix2D checkColt = Algebra.DEFAULT.mult(kd, kdi);
-	System.out.println("Colt checksum = " + checkColt.aggregate(F.plus,F.abs) + ", correct = " + DOF);
+  DoubleMatrix2D kdi = Algebra.DEFAULT.inverse(kd);
+  DoubleMatrix2D checkColt = Algebra.DEFAULT.mult(kd, kdi);
+  System.out.println("Colt checksum = " + checkColt.aggregate(F.plus,F.abs) + ", correct = " + DOF);
 
-	Jama.Matrix checkJama = kmi.times(km);
-	double checksum = 0;
-	double[] temp = checkJama.getColumnPackedCopy();
-	for (int i = 0, n = temp.length; i < n; ++i) checksum += Math.abs(temp[i]);
-	System.out.println("Jama checksum = " + checksum + ", correct = " + DOF);
+  Jama.Matrix checkJama = kmi.times(km);
+  double checksum = 0;
+  double[] temp = checkJama.getColumnPackedCopy();
+  for (int i = 0, n = temp.length; i < n; ++i) checksum += Math.abs(temp[i]);
+  System.out.println("Jama checksum = " + checksum + ", correct = " + DOF);
 
-	System.out.println("done\n");
-	*/
+  System.out.println("done\n");
+  */
 }
 /**
  * Title:        Aero3D<p>
  * Description:  A Program to analyse aeroelestic evects in transonic wings<p>
  * Copyright:    Copyright (c) 1998<p>
  * Company:      PIERSOL Engineering Inc.<p>
- * @author John R. Piersol
  * @version
  */
 public static void doubleTest36() {
-	double[] testSort = new double[5];
-	testSort[0] = 5;
-	testSort[1] = Double.NaN;
-	testSort[2] = 2;
-	testSort[3] = Double.NaN;
-	testSort[4] = 1;
-	DoubleMatrix1D doubleDense = new DenseDoubleMatrix1D(testSort);
-	System.out.println("orig = "+doubleDense);
-	doubleDense = doubleDense.viewSorted();
-	doubleDense.toArray(testSort);
-	System.out.println("sort = "+doubleDense);
-	System.out.println("done\n");
+  double[] testSort = new double[5];
+  testSort[0] = 5;
+  testSort[1] = Double.NaN;
+  testSort[2] = 2;
+  testSort[3] = Double.NaN;
+  testSort[4] = 1;
+  DoubleMatrix1D doubleDense = new DenseDoubleMatrix1D(testSort);
+  System.out.println("orig = "+doubleDense);
+  doubleDense = doubleDense.viewSorted();
+  doubleDense.toArray(testSort);
+  System.out.println("sort = "+doubleDense);
+  System.out.println("done\n");
 }
 /**
  */
@@ -1509,7 +1505,7 @@ System.out.println("\n"+view2);
 /**
  */
 public static void doubleTest5() {
-	/*
+  /*
 int rows = 4;
 int columns = 5; // make a 4*5 matrix
 DoubleMatrix2D master = new DenseDoubleMatrix2D(rows,columns);
@@ -1518,10 +1514,10 @@ master.assign(1); // set all cells to 1
 DoubleMatrix2D view = master.viewPart(2,0,2,3);
 view.assign(0);
 for (int i=0; i<rows; i++) {
-	for (int j=0; j<columns; j++) {
-		boolean hasIndex = view.hasIndex(master.index(i,j));
-		System.out.println("("+i+","+j+"):"+hasIndex);
-	}
+  for (int j=0; j<columns; j++) {
+    boolean hasIndex = view.hasIndex(master.index(i,j));
+    System.out.println("("+i+","+j+"):"+hasIndex);
+  }
 }
 System.out.println("\n"+master);
 System.out.println("\n"+view);
@@ -1641,93 +1637,93 @@ System.out.println("flip2 replaced"+view2);
 }
 public static void doubleTestQR() {
 // test case0...
-	double x0[] = { -6.221564, -9.002113, 2.678001, 6.483597, -7.934148 };
-	double y0[] = { -7.291898, -7.346928, 0.520158, 5.012548, -8.223725 };
-	double x1[] = { 1.185925, -2.523077, 0.135380 , 0.412556, -2.980280 };
-	double y1[] = {13.561087, -15.204410, 16.496829, 16.470860, 0.822198};
+  double x0[] = { -6.221564, -9.002113, 2.678001, 6.483597, -7.934148 };
+  double y0[] = { -7.291898, -7.346928, 0.520158, 5.012548, -8.223725 };
+  double x1[] = { 1.185925, -2.523077, 0.135380 , 0.412556, -2.980280 };
+  double y1[] = {13.561087, -15.204410, 16.496829, 16.470860, 0.822198};
 
-	solve(x1.length, x1, y1);
-	solve(x0.length, x0, y0);
+  solve(x1.length, x1, y1);
+  solve(x0.length, x0, y0);
 }   
 /**
  */
 public static void main(String[] args) {
-	int runs = Integer.parseInt(args[0]);
-	int val = Integer.parseInt(args[1]);
-	doubleTest30(runs, val);
-	/*
-	int runs = Integer.parseInt(args[0]);
-	int size = Integer.parseInt(args[1]);
-	double nonZeroFraction = new Double(args[2]).doubleValue();
-	boolean dense = args[3].equals("dense");
-	//doubleTest23(runs, size, nonZeroFraction, dense);
-	doubleTest24(runs, size, dense);
-	*/
+  int runs = Integer.parseInt(args[0]);
+  int val = Integer.parseInt(args[1]);
+  doubleTest30(runs, val);
+  /*
+  int runs = Integer.parseInt(args[0]);
+  int size = Integer.parseInt(args[1]);
+  double nonZeroFraction = new Double(args[2]).doubleValue();
+  boolean dense = args[3].equals("dense");
+  //doubleTest23(runs, size, nonZeroFraction, dense);
+  doubleTest24(runs, size, dense);
+  */
 }
 public static double[][] randomMatrix(int dof, org.apache.mahout.jet.random.engine.MersenneTwister RANDOM) {
-	double[][] m = new double[dof][dof];
-	/*
-	for (int i = 0; i < dof; ++i) {
-		for (int j = i - 1, n = i + 1; j <= n; ++j) {
-			if (j < dof && j > -1)
-				m[i][j] = RANDOM.nextDouble();
-		}
-	}
-	*/
-	for (int i = 0; i < dof; ++i) {
-		for (int j = 0; j < dof; j++) {
-			m[i][j] = 5;
-		}
-	}
-	//        for (int i = 0; i < dof; ++i)
-	//            for (int j = 0; j < dof; ++j) m[i][j] = RANDOM.nextDouble();
-	return m;
+  double[][] m = new double[dof][dof];
+  /*
+  for (int i = 0; i < dof; ++i) {
+    for (int j = i - 1, n = i + 1; j <= n; ++j) {
+      if (j < dof && j > -1)
+        m[i][j] = RANDOM.nextDouble();
+    }
+  }
+  */
+  for (int i = 0; i < dof; ++i) {
+    for (int j = 0; j < dof; j++) {
+      m[i][j] = 5;
+    }
+  }
+  //        for (int i = 0; i < dof; ++i)
+  //            for (int j = 0; j < dof; ++j) m[i][j] = RANDOM.nextDouble();
+  return m;
 }
 public static void solve(int numpnt, double x[], double y[]) {
-	/*
-	// create the matrix object
-	DoubleMatrix2D A = new DenseDoubleMatrix2D(numpnt, 5);
-	DoubleMatrix2D B = new DenseDoubleMatrix2D(numpnt, 1);
-	//fillout the matrix
-	for (int i = 0; i < numpnt; i++) {
-		A.setQuick(i, 0, x[i] * y[i]);
-		A.setQuick(i, 1, y[i] * y[i]);
-		A.setQuick(i, 2, x[i]);
-		A.setQuick(i, 3, y[i]);
-		A.setQuick(i, 4, 1.0);
-		B.setQuick(i, 0, -x[i] * x[i]);
-	}
-	System.out.println(A);
-	//test the matrix condition
-	SingularValueDecomposition svd = new SingularValueDecomposition(A);
-	System.out.println(svd);
-	// Using Algebra to solve the equation
-	Algebra alg = new Algebra();
-	DoubleMatrix2D resAlg = alg.solve(A.copy(), B.copy());
-	System.out.println("Using Algebra...");
-	System.out.println(resAlg);
-	// Using QRDecomposition to solve the problem..
-	QRDecomposition qrd = new QRDecomposition(A);
-	DoubleMatrix2D resQRD = qrd.solve(B);
-	System.out.println("Using QRDecomposition...");
-	System.out.println(resQRD);
-	// Using Jama.QRDecomposition to solve the problem..
-	Jama.QRDecomposition qrdJama = new Jama.QRDecomposition(new Jama.Matrix(A.toArray()));
-	resQRD = new DenseDoubleMatrix2D(qrdJama.solve(new Jama.Matrix(B.toArray())).getArrayCopy());
-	System.out.println("Using Jama.QRDecomposition...");
-	System.out.println(resQRD);
-	*/
+  /*
+  // create the matrix object
+  DoubleMatrix2D A = new DenseDoubleMatrix2D(numpnt, 5);
+  DoubleMatrix2D B = new DenseDoubleMatrix2D(numpnt, 1);
+  //fillout the matrix
+  for (int i = 0; i < numpnt; i++) {
+    A.setQuick(i, 0, x[i] * y[i]);
+    A.setQuick(i, 1, y[i] * y[i]);
+    A.setQuick(i, 2, x[i]);
+    A.setQuick(i, 3, y[i]);
+    A.setQuick(i, 4, 1.0);
+    B.setQuick(i, 0, -x[i] * x[i]);
+  }
+  System.out.println(A);
+  //test the matrix condition
+  SingularValueDecomposition svd = new SingularValueDecomposition(A);
+  System.out.println(svd);
+  // Using Algebra to solve the equation
+  Algebra alg = new Algebra();
+  DoubleMatrix2D resAlg = alg.solve(A.copy(), B.copy());
+  System.out.println("Using Algebra...");
+  System.out.println(resAlg);
+  // Using QRDecomposition to solve the problem..
+  QRDecomposition qrd = new QRDecomposition(A);
+  DoubleMatrix2D resQRD = qrd.solve(B);
+  System.out.println("Using QRDecomposition...");
+  System.out.println(resQRD);
+  // Using Jama.QRDecomposition to solve the problem..
+  Jama.QRDecomposition qrdJama = new Jama.QRDecomposition(new Jama.Matrix(A.toArray()));
+  resQRD = new DenseDoubleMatrix2D(qrdJama.solve(new Jama.Matrix(B.toArray())).getArrayCopy());
+  System.out.println("Using Jama.QRDecomposition...");
+  System.out.println(resQRD);
+  */
 }
 /**
  */
 public static void testLU() {
 double[][] vals = {
-	{-0.074683,  0.321248,-0.014656, 0.286586,0},
-	{-0.344852, -0.16278 , 0.173711, 0.00064 ,0},
-	{-0.181924, -0.092926, 0.184153, 0.177966,1},
-	{-0.166829, -0.10321 , 0.582301, 0.142583,0},
-	{ 0       , -0.112952,-0.04932 ,-0.700157,0},
-	{ 0       , 0        ,0        ,0        ,0}
+  {-0.074683,  0.321248,-0.014656, 0.286586,0},
+  {-0.344852, -0.16278 , 0.173711, 0.00064 ,0},
+  {-0.181924, -0.092926, 0.184153, 0.177966,1},
+  {-0.166829, -0.10321 , 0.582301, 0.142583,0},
+  { 0       , -0.112952,-0.04932 ,-0.700157,0},
+  { 0       , 0        ,0        ,0        ,0}
 };
  
 DoubleMatrix2D H = new DenseDoubleMatrix2D( vals ); // see values below...
@@ -1737,27 +1733,27 @@ DoubleMatrix2D Hplus = Algebra.DEFAULT.inverse(H.viewDice().zMult( H,null )).zMu
 Hplus.assign(org.apache.mahout.jet.math.Functions.round(1.0E-10));
 System.out.println("\nHplus="+Hplus);
 
-		/*
+    /*
 DoubleMatrix2D HtH = new DenseDoubleMatrix2D( 5, 5 );
 DoubleMatrix2D Hplus = new DenseDoubleMatrix2D( 5, 6 );
 LUDecompositionQuick LUD = new LUDecompositionQuick();
-		//H.zMult( H, HtH, 1, 0, true, false );
-		//DoubleMatrix2D res = Algebra.DEFAULT.inverse(HtH).zMult(H,null,1,0,false,true);
-		LUD.decompose( HtH );
-		// first fill Hplus with the transpose of H...
-		for (int i = 0; i < 6; i++ ) {
-			for ( int j = 0; j < 5; j++ ) {
-				Hplus.set( j, i, H.get( i, j ) );
-			}
-		}
-		LUD.solve( Hplus );
+    //H.zMult( H, HtH, 1, 0, true, false );
+    //DoubleMatrix2D res = Algebra.DEFAULT.inverse(HtH).zMult(H,null,1,0,false,true);
+    LUD.decompose( HtH );
+    // first fill Hplus with the transpose of H...
+    for (int i = 0; i < 6; i++ ) {
+      for ( int j = 0; j < 5; j++ ) {
+        Hplus.set( j, i, H.get( i, j ) );
+      }
+    }
+    LUD.solve( Hplus );
 
-		DoubleMatrix2D perm = Algebra.DEFAULT.permute(Hplus, null,LUD.getPivot());
-		DoubleMatrix2D inv = Algebra.DEFAULT.inverse(HtH);//.zMult(H,null,1,0,false,true);
-		*/
+    DoubleMatrix2D perm = Algebra.DEFAULT.permute(Hplus, null,LUD.getPivot());
+    DoubleMatrix2D inv = Algebra.DEFAULT.inverse(HtH);//.zMult(H,null,1,0,false,true);
+    */
 
-		// in matlab...
-		// Hplus = inv(H' * H) * H'
+    // in matlab...
+    // Hplus = inv(H' * H) * H'
 
 //System.out.println("\nLU="+LUD);
 //System.out.println("\nHplus="+Hplus);

@@ -11,8 +11,6 @@ package org.apache.mahout.matrix.matrix.impl;
 /**
  * Formats a double into a string (like sprintf in C).
  *
- * @author wolfgang.hoschek@cern.ch
- * @version 1.0, 21/07/00
  * @see java.util.Comparator
  * @see org.apache.mahout.colt
  * @see org.apache.mahout.matrix.Sorting

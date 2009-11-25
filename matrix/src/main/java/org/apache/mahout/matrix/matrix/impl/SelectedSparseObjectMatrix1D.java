@@ -44,20 +44,20 @@ Depends on the parent view holding cells.
 @version 1.0, 09/24/99
 */
 class SelectedSparseObjectMatrix1D extends ObjectMatrix1D {
-	/*
-	 * The elements of the matrix.
-	 */
-	protected AbstractIntObjectMap elements; 
-	
-	/**
-	  * The offsets of visible indexes of this matrix.
-	  */
-	protected int[] offsets;
+  /*
+   * The elements of the matrix.
+   */
+  protected AbstractIntObjectMap elements; 
+  
+  /**
+    * The offsets of visible indexes of this matrix.
+    */
+  protected int[] offsets;
 
-	/**
-	  * The offset.
-	  */
-	protected int offset;	
+  /**
+    * The offset.
+    */
+  protected int offset;  
 /**
  * Constructs a matrix view with the given parameters.
  * @param size the number of cells the matrix shall have.
@@ -68,12 +68,12 @@ class SelectedSparseObjectMatrix1D extends ObjectMatrix1D {
  * @param offset   
  */
 protected SelectedSparseObjectMatrix1D(int size, AbstractIntObjectMap elements, int zero, int stride, int[] offsets, int offset) {
-	setUp(size,zero,stride);
-	
-	this.elements = elements;
-	this.offsets = offsets;
-	this.offset = offset;
-	this.isNoView = false;
+  setUp(size,zero,stride);
+  
+  this.elements = elements;
+  this.offsets = offsets;
+  this.offset = offset;
+  this.isNoView = false;
 }
 /**
  * Constructs a matrix view with the given parameters.
@@ -81,7 +81,7 @@ protected SelectedSparseObjectMatrix1D(int size, AbstractIntObjectMap elements, 
  * @param  indexes   The indexes of the cells that shall be visible.
  */
 protected SelectedSparseObjectMatrix1D(AbstractIntObjectMap elements, int[] offsets) {
-	this(offsets.length,elements,0,1,offsets,0);
+  this(offsets.length,elements,0,1,offsets,0);
 }
 /**
  * Returns the position of the given absolute rank within the (virtual or non-virtual) internal 1-dimensional array. 
@@ -91,7 +91,7 @@ protected SelectedSparseObjectMatrix1D(AbstractIntObjectMap elements, int[] offs
  * @return the position.
  */
 protected int _offset(int absRank) {
-	return offsets[absRank];
+  return offsets[absRank];
 }
 /**
  * Returns the matrix cell value at coordinate <tt>index</tt>.
@@ -104,24 +104,24 @@ protected int _offset(int absRank) {
  * @return    the value of the specified cell.
  */
 public Object getQuick(int index) {
-	//if (debug) if (index<0 || index>=size) checkIndex(index);
-	//return elements.get(index(index));
-	//manually inlined:
-	return elements.get(offset + offsets[zero + index*stride]);
+  //if (debug) if (index<0 || index>=size) checkIndex(index);
+  //return elements.get(index(index));
+  //manually inlined:
+  return elements.get(offset + offsets[zero + index*stride]);
 }
 /**
  * Returns <tt>true</tt> if both matrices share at least one identical cell.
  */
 protected boolean haveSharedCellsRaw(ObjectMatrix1D other) {
-	if (other instanceof SelectedSparseObjectMatrix1D) {
-		SelectedSparseObjectMatrix1D otherMatrix = (SelectedSparseObjectMatrix1D) other;
-		return this.elements==otherMatrix.elements;
-	}
-	else if (other instanceof SparseObjectMatrix1D) {
-		SparseObjectMatrix1D otherMatrix = (SparseObjectMatrix1D) other;
-		return this.elements==otherMatrix.elements;
-	}
-	return false;
+  if (other instanceof SelectedSparseObjectMatrix1D) {
+    SelectedSparseObjectMatrix1D otherMatrix = (SelectedSparseObjectMatrix1D) other;
+    return this.elements==otherMatrix.elements;
+  }
+  else if (other instanceof SparseObjectMatrix1D) {
+    SparseObjectMatrix1D otherMatrix = (SparseObjectMatrix1D) other;
+    return this.elements==otherMatrix.elements;
+  }
+  return false;
 }
 /**
  * Returns the position of the element with the given relative rank within the (virtual or non-virtual) internal 1-dimensional array.
@@ -130,9 +130,9 @@ protected boolean haveSharedCellsRaw(ObjectMatrix1D other) {
  * @param     rank   the rank of the element.
  */
 protected int index(int rank) {
-	//return this.offset + super.index(rank);
-	// manually inlined:
-	return offset + offsets[zero + rank*stride];
+  //return this.offset + super.index(rank);
+  // manually inlined:
+  return offset + offsets[zero + rank*stride];
 }
 /**
  * Construct and returns a new empty matrix <i>of the same dynamic type</i> as the receiver, having the specified size.
@@ -144,7 +144,7 @@ protected int index(int rank) {
  * @return  a new empty matrix of the same dynamic type.
  */
 public ObjectMatrix1D like(int size) {
-	return new SparseObjectMatrix1D(size);
+  return new SparseObjectMatrix1D(size);
 }
 /**
  * Construct and returns a new 2-d matrix <i>of the corresponding dynamic type</i>, entirelly independent of the receiver.
@@ -156,7 +156,7 @@ public ObjectMatrix1D like(int size) {
  * @return  a new matrix of the corresponding dynamic type.
  */
 public ObjectMatrix2D like2D(int rows, int columns) {
-	return new SparseObjectMatrix2D(rows,columns);
+  return new SparseObjectMatrix2D(rows,columns);
 }
 /**
  * Sets the matrix cell at coordinate <tt>index</tt> to the specified value.
@@ -169,23 +169,23 @@ public ObjectMatrix2D like2D(int rows, int columns) {
  * @param    value the value to be filled into the specified cell.
  */
 public void setQuick(int index, Object value) {
-	//if (debug) if (index<0 || index>=size) checkIndex(index);
-	//int i =	index(index);
-	//manually inlined:
-	int i = offset + offsets[zero + index*stride];
-	if (value == null)
-		this.elements.removeKey(i);
-	else 
-		this.elements.put(i, value);
+  //if (debug) if (index<0 || index>=size) checkIndex(index);
+  //int i =  index(index);
+  //manually inlined:
+  int i = offset + offsets[zero + index*stride];
+  if (value == null)
+    this.elements.removeKey(i);
+  else 
+    this.elements.put(i, value);
 }
 /**
  * Sets up a matrix with a given number of cells.
  * @param size the number of cells the matrix shall have.
  */
 protected void setUp(int size) {
-	super.setUp(size);
-	this.stride = 1;
-	this.offset = 0;
+  super.setUp(size);
+  this.stride = 1;
+  this.offset = 0;
 }
 /**
  * Construct and returns a new selection view.
@@ -194,6 +194,6 @@ protected void setUp(int size) {
  * @return  a new view.
  */
 protected ObjectMatrix1D viewSelectionLike(int[] offsets) {
-	return new SelectedSparseObjectMatrix1D(this.elements,offsets);
+  return new SelectedSparseObjectMatrix1D(this.elements,offsets);
 }
 }

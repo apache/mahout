@@ -27,23 +27,23 @@ returns <tt>false</tt>.
  */
 @Deprecated
 public class QRDecomposition implements java.io.Serializable {
-	static final long serialVersionUID = 1020;
-	/** Array for internal storage of decomposition.
-	@serial internal array storage.
-	*/
-	private DoubleMatrix2D QR;
-	//private double[][] QR;
-	
-	/** Row and column dimensions.
-	@serial column dimension.
-	@serial row dimension.
-	*/
-	private int m, n;
-	
-	/** Array for internal storage of diagonal of R.
-	@serial diagonal of R.
-	*/
-	private DoubleMatrix1D Rdiag;
+  static final long serialVersionUID = 1020;
+  /** Array for internal storage of decomposition.
+  @serial internal array storage.
+  */
+  private DoubleMatrix2D QR;
+  //private double[][] QR;
+  
+  /** Row and column dimensions.
+  @serial column dimension.
+  @serial row dimension.
+  */
+  private int m, n;
+  
+  /** Array for internal storage of diagonal of R.
+  @serial diagonal of R.
+  */
+  private DoubleMatrix1D Rdiag;
 /** 
 Constructs and returns a new QR decomposition object;  computed by Householder reflections;
 The decomposed matrices can be retrieved via instance methods of the returned decomposition object.
@@ -53,130 +53,130 @@ The decomposed matrices can be retrieved via instance methods of the returned de
 */
 
 public QRDecomposition (DoubleMatrix2D A) {
-	Property.DEFAULT.checkRectangular(A);
+  Property.DEFAULT.checkRectangular(A);
 
-	org.apache.mahout.jet.math.Functions F = org.apache.mahout.jet.math.Functions.functions;
-	// Initialize.
-	QR = A.copy();
-	m = A.rows();
-	n = A.columns();
-	Rdiag = A.like1D(n);
-	//Rdiag = new double[n];
-	org.apache.mahout.matrix.function.DoubleDoubleFunction hypot = Algebra.hypotFunction();
-	
-	// precompute and cache some views to avoid regenerating them time and again
-	DoubleMatrix1D[] QRcolumns = new DoubleMatrix1D[n];
-	DoubleMatrix1D[] QRcolumnsPart = new DoubleMatrix1D[n];
-	for (int k = 0; k < n; k++) {
-		QRcolumns[k] = QR.viewColumn(k);
-		QRcolumnsPart[k] = QR.viewColumn(k).viewPart(k,m-k);
-	}
-	
-	// Main loop.
-	for (int k = 0; k < n; k++) {
-		//DoubleMatrix1D QRcolk = QR.viewColumn(k).viewPart(k,m-k);
-		// Compute 2-norm of k-th column without under/overflow.
-		double nrm = 0;
-		//if (k<m) nrm = QRcolumnsPart[k].aggregate(hypot,F.identity);
-		
-		for (int i = k; i < m; i++) { // fixes bug reported by hong.44@osu.edu
-			nrm = Algebra.hypot(nrm,QR.getQuick(i,k));
-		}
-		
-		
-		if (nrm != 0.0) {
-			// Form k-th Householder vector.
-			if (QR.getQuick(k,k) < 0) nrm = -nrm;
-			QRcolumnsPart[k].assign(org.apache.mahout.jet.math.Functions.div(nrm));
-			/*
-			for (int i = k; i < m; i++) {
-			   QR[i][k] /= nrm;
-			}
-			*/
-			
-			QR.setQuick(k,k, QR.getQuick(k,k) + 1);
-			
-			// Apply transformation to remaining columns.
-			for (int j = k+1; j < n; j++) {
-				DoubleMatrix1D QRcolj = QR.viewColumn(j).viewPart(k,m-k);
-				double s = QRcolumnsPart[k].zDotProduct(QRcolj);
-				/*
-				// fixes bug reported by John Chambers
-				DoubleMatrix1D QRcolj = QR.viewColumn(j).viewPart(k,m-k);
-				double s = QRcolumnsPart[k].zDotProduct(QRcolumns[j]);
-				double s = 0.0; 
-				for (int i = k; i < m; i++) {
-				  s += QR[i][k]*QR[i][j];
-				}
-				*/
-				s = -s / QR.getQuick(k,k);
-				//QRcolumnsPart[j].assign(QRcolumns[k], F.plusMult(s));
-				
-				for (int i = k; i < m; i++) {
-				  QR.setQuick(i,j, QR.getQuick(i,j) + s*QR.getQuick(i,k));
-				}
-				
-			}
-		}
-		Rdiag.setQuick(k, -nrm);
-	}
+  org.apache.mahout.jet.math.Functions F = org.apache.mahout.jet.math.Functions.functions;
+  // Initialize.
+  QR = A.copy();
+  m = A.rows();
+  n = A.columns();
+  Rdiag = A.like1D(n);
+  //Rdiag = new double[n];
+  org.apache.mahout.matrix.function.DoubleDoubleFunction hypot = Algebra.hypotFunction();
+  
+  // precompute and cache some views to avoid regenerating them time and again
+  DoubleMatrix1D[] QRcolumns = new DoubleMatrix1D[n];
+  DoubleMatrix1D[] QRcolumnsPart = new DoubleMatrix1D[n];
+  for (int k = 0; k < n; k++) {
+    QRcolumns[k] = QR.viewColumn(k);
+    QRcolumnsPart[k] = QR.viewColumn(k).viewPart(k,m-k);
+  }
+  
+  // Main loop.
+  for (int k = 0; k < n; k++) {
+    //DoubleMatrix1D QRcolk = QR.viewColumn(k).viewPart(k,m-k);
+    // Compute 2-norm of k-th column without under/overflow.
+    double nrm = 0;
+    //if (k<m) nrm = QRcolumnsPart[k].aggregate(hypot,F.identity);
+    
+    for (int i = k; i < m; i++) { // fixes bug reported by hong.44@osu.edu
+      nrm = Algebra.hypot(nrm,QR.getQuick(i,k));
+    }
+    
+    
+    if (nrm != 0.0) {
+      // Form k-th Householder vector.
+      if (QR.getQuick(k,k) < 0) nrm = -nrm;
+      QRcolumnsPart[k].assign(org.apache.mahout.jet.math.Functions.div(nrm));
+      /*
+      for (int i = k; i < m; i++) {
+         QR[i][k] /= nrm;
+      }
+      */
+      
+      QR.setQuick(k,k, QR.getQuick(k,k) + 1);
+      
+      // Apply transformation to remaining columns.
+      for (int j = k+1; j < n; j++) {
+        DoubleMatrix1D QRcolj = QR.viewColumn(j).viewPart(k,m-k);
+        double s = QRcolumnsPart[k].zDotProduct(QRcolj);
+        /*
+        // fixes bug reported by John Chambers
+        DoubleMatrix1D QRcolj = QR.viewColumn(j).viewPart(k,m-k);
+        double s = QRcolumnsPart[k].zDotProduct(QRcolumns[j]);
+        double s = 0.0; 
+        for (int i = k; i < m; i++) {
+          s += QR[i][k]*QR[i][j];
+        }
+        */
+        s = -s / QR.getQuick(k,k);
+        //QRcolumnsPart[j].assign(QRcolumns[k], F.plusMult(s));
+        
+        for (int i = k; i < m; i++) {
+          QR.setQuick(i,j, QR.getQuick(i,j) + s*QR.getQuick(i,k));
+        }
+        
+      }
+    }
+    Rdiag.setQuick(k, -nrm);
+  }
 }
 /** 
 Returns the Householder vectors <tt>H</tt>.
 @return A lower trapezoidal matrix whose columns define the householder reflections.
 */
 public DoubleMatrix2D getH () {
-	return Algebra.DEFAULT.trapezoidalLower(QR.copy());
+  return Algebra.DEFAULT.trapezoidalLower(QR.copy());
 }
 /** 
 Generates and returns the (economy-sized) orthogonal factor <tt>Q</tt>.
 @return <tt>Q</tt>
 */
 public DoubleMatrix2D getQ () {
-	org.apache.mahout.jet.math.Functions F = org.apache.mahout.jet.math.Functions.functions;
-	DoubleMatrix2D Q = QR.like();
-	//double[][] Q = X.getArray();
-	for (int k = n-1; k >= 0; k--) {
-		DoubleMatrix1D QRcolk = QR.viewColumn(k).viewPart(k,m-k);
-		Q.setQuick(k,k, 1);
-		for (int j = k; j < n; j++) {
-			if (QR.getQuick(k,k) != 0) {
-				DoubleMatrix1D Qcolj = Q.viewColumn(j).viewPart(k,m-k);
-				double s = QRcolk.zDotProduct(Qcolj);
-				s = -s / QR.getQuick(k,k);
-				Qcolj.assign(QRcolk, F.plusMult(s));
-			}
-		}
-	}
-	return Q;
+  org.apache.mahout.jet.math.Functions F = org.apache.mahout.jet.math.Functions.functions;
+  DoubleMatrix2D Q = QR.like();
+  //double[][] Q = X.getArray();
+  for (int k = n-1; k >= 0; k--) {
+    DoubleMatrix1D QRcolk = QR.viewColumn(k).viewPart(k,m-k);
+    Q.setQuick(k,k, 1);
+    for (int j = k; j < n; j++) {
+      if (QR.getQuick(k,k) != 0) {
+        DoubleMatrix1D Qcolj = Q.viewColumn(j).viewPart(k,m-k);
+        double s = QRcolk.zDotProduct(Qcolj);
+        s = -s / QR.getQuick(k,k);
+        Qcolj.assign(QRcolk, F.plusMult(s));
+      }
+    }
+  }
+  return Q;
 }
 /** 
 Returns the upper triangular factor, <tt>R</tt>.
 @return <tt>R</tt>
 */
 public DoubleMatrix2D getR() {
-	DoubleMatrix2D R = QR.like(n,n);
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < n; j++) {
-			if (i < j) 
-				R.setQuick(i,j, QR.getQuick(i,j));
-			else if (i == j) 
-				R.setQuick(i,j, Rdiag.getQuick(i));
-			else 
-				R.setQuick(i,j, 0);
-		}
-	}
-	return R;
+  DoubleMatrix2D R = QR.like(n,n);
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      if (i < j) 
+        R.setQuick(i,j, QR.getQuick(i,j));
+      else if (i == j) 
+        R.setQuick(i,j, Rdiag.getQuick(i));
+      else 
+        R.setQuick(i,j, 0);
+    }
+  }
+  return R;
 }
 /** 
 Returns whether the matrix <tt>A</tt> has full rank.
 @return true if <tt>R</tt>, and hence <tt>A</tt>, has full rank.
 */
 public boolean hasFullRank() {
-	for (int j = 0; j < n; j++) {
-		if (Rdiag.getQuick(j) == 0) return false;
-	}
-	return true;
+  for (int j = 0; j < n; j++) {
+    if (Rdiag.getQuick(j) == 0) return false;
+  }
+  return true;
 }
 /** 
 Least squares solution of <tt>A*X = B</tt>; <tt>returns X</tt>.
@@ -186,43 +186,43 @@ Least squares solution of <tt>A*X = B</tt>; <tt>returns X</tt>.
 @exception  IllegalArgumentException  if <tt>!this.hasFullRank()</tt> (<tt>A</tt> is rank deficient).
 */
 public DoubleMatrix2D solve(DoubleMatrix2D B) {
-	org.apache.mahout.jet.math.Functions F = org.apache.mahout.jet.math.Functions.functions;
-	if (B.rows() != m) {
-		throw new IllegalArgumentException("Matrix row dimensions must agree.");
-	}
-	if (!this.hasFullRank()) {
-		throw new IllegalArgumentException("Matrix is rank deficient.");
-	}
-	
-	// Copy right hand side
-	int nx = B.columns();
-	DoubleMatrix2D X = B.copy();
-	
-	// Compute Y = transpose(Q)*B
-	for (int k = 0; k < n; k++) {
-		for (int j = 0; j < nx; j++) {
-			double s = 0.0; 
-			for (int i = k; i < m; i++) {
-				s += QR.getQuick(i,k)*X.getQuick(i,j);
-			}
-			s = -s / QR.getQuick(k,k);
-			for (int i = k; i < m; i++) {
-				X.setQuick(i,j, X.getQuick(i,j) + s*QR.getQuick(i,k));
-			}
-		}
-	}
-	// Solve R*X = Y;
-	for (int k = n-1; k >= 0; k--) {
-		for (int j = 0; j < nx; j++) {
-			X.setQuick(k,j, X.getQuick(k,j) / Rdiag.getQuick(k));
-		}
-		for (int i = 0; i < k; i++) {
-			for (int j = 0; j < nx; j++) {
-				X.setQuick(i,j, X.getQuick(i,j) - X.getQuick(k,j)*QR.getQuick(i,k));
-			}
-		}
-	}
-	return X.viewPart(0,0,n,nx);
+  org.apache.mahout.jet.math.Functions F = org.apache.mahout.jet.math.Functions.functions;
+  if (B.rows() != m) {
+    throw new IllegalArgumentException("Matrix row dimensions must agree.");
+  }
+  if (!this.hasFullRank()) {
+    throw new IllegalArgumentException("Matrix is rank deficient.");
+  }
+  
+  // Copy right hand side
+  int nx = B.columns();
+  DoubleMatrix2D X = B.copy();
+  
+  // Compute Y = transpose(Q)*B
+  for (int k = 0; k < n; k++) {
+    for (int j = 0; j < nx; j++) {
+      double s = 0.0; 
+      for (int i = k; i < m; i++) {
+        s += QR.getQuick(i,k)*X.getQuick(i,j);
+      }
+      s = -s / QR.getQuick(k,k);
+      for (int i = k; i < m; i++) {
+        X.setQuick(i,j, X.getQuick(i,j) + s*QR.getQuick(i,k));
+      }
+    }
+  }
+  // Solve R*X = Y;
+  for (int k = n-1; k >= 0; k--) {
+    for (int j = 0; j < nx; j++) {
+      X.setQuick(k,j, X.getQuick(k,j) / Rdiag.getQuick(k));
+    }
+    for (int i = 0; i < k; i++) {
+      for (int j = 0; j < nx; j++) {
+        X.setQuick(i,j, X.getQuick(i,j) - X.getQuick(k,j)*QR.getQuick(i,k));
+      }
+    }
+  }
+  return X.viewPart(0,0,n,nx);
 }
 /**
 Returns a String with (propertyName, propertyValue) pairs.
@@ -234,33 +234,33 @@ trace         : 0
 </pre>
 */
 public String toString() {
-	StringBuffer buf = new StringBuffer();
-	String unknown = "Illegal operation or error: ";
+  StringBuffer buf = new StringBuffer();
+  String unknown = "Illegal operation or error: ";
 
-	buf.append("-----------------------------------------------------------------\n");
-	buf.append("QRDecomposition(A) --> hasFullRank(A), H, Q, R, pseudo inverse(A)\n");
-	buf.append("-----------------------------------------------------------------\n");
+  buf.append("-----------------------------------------------------------------\n");
+  buf.append("QRDecomposition(A) --> hasFullRank(A), H, Q, R, pseudo inverse(A)\n");
+  buf.append("-----------------------------------------------------------------\n");
 
-	buf.append("hasFullRank = ");
-	try { buf.append(String.valueOf(this.hasFullRank()));} 
-	catch (IllegalArgumentException exc) { buf.append(unknown+exc.getMessage()); }
-	
-	buf.append("\n\nH = ");
-	try { buf.append(String.valueOf(this.getH()));} 
-	catch (IllegalArgumentException exc) { buf.append(unknown+exc.getMessage()); }
-	
-	buf.append("\n\nQ = ");
-	try { buf.append(String.valueOf(this.getQ()));} 
-	catch (IllegalArgumentException exc) { buf.append(unknown+exc.getMessage()); }
-	
-	buf.append("\n\nR = ");
-	try { buf.append(String.valueOf(this.getR()));} 
-	catch (IllegalArgumentException exc) { buf.append(unknown+exc.getMessage()); }
-	
-	buf.append("\n\npseudo inverse(A) = ");
-	try { buf.append(String.valueOf(this.solve(org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.identity(QR.rows()))));}
-	catch (IllegalArgumentException exc) { buf.append(unknown+exc.getMessage()); }
-	
-	return buf.toString();
+  buf.append("hasFullRank = ");
+  try { buf.append(String.valueOf(this.hasFullRank()));} 
+  catch (IllegalArgumentException exc) { buf.append(unknown+exc.getMessage()); }
+  
+  buf.append("\n\nH = ");
+  try { buf.append(String.valueOf(this.getH()));} 
+  catch (IllegalArgumentException exc) { buf.append(unknown+exc.getMessage()); }
+  
+  buf.append("\n\nQ = ");
+  try { buf.append(String.valueOf(this.getQ()));} 
+  catch (IllegalArgumentException exc) { buf.append(unknown+exc.getMessage()); }
+  
+  buf.append("\n\nR = ");
+  try { buf.append(String.valueOf(this.getR()));} 
+  catch (IllegalArgumentException exc) { buf.append(unknown+exc.getMessage()); }
+  
+  buf.append("\n\npseudo inverse(A) = ");
+  try { buf.append(String.valueOf(this.solve(org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.identity(QR.rows()))));}
+  catch (IllegalArgumentException exc) { buf.append(unknown+exc.getMessage()); }
+  
+  return buf.toString();
 }
 }

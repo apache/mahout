@@ -12,15 +12,13 @@ import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /**
  * For diagonal matrices we can often do better.
  *
- * @author wolfgang.hoschek@cern.ch
- * @version 1.0, 09/24/99
  */
 class Diagonal {
 /**
  * Makes this class non instantiable, but still let's others inherit from it.
  */
 protected Diagonal() {
-	throw new RuntimeException("Non instantiable");
+  throw new RuntimeException("Non instantiable");
 }
 /**
  * Modifies A to hold its inverse.
@@ -30,13 +28,13 @@ protected Diagonal() {
  * @throws IllegalArgumentException if <tt>x.size() != y.size()</tt>.
  */
 public static boolean inverse(DoubleMatrix2D A) {
-	Property.DEFAULT.checkSquare(A);
-	boolean isNonSingular = true;
-	for (int i=A.rows(); --i >= 0;) {
-		double v = A.getQuick(i,i);
-		isNonSingular &= (v!=0);
-		A.setQuick(i,i, 1/v);
-	}
-	return isNonSingular;
+  Property.DEFAULT.checkSquare(A);
+  boolean isNonSingular = true;
+  for (int i=A.rows(); --i >= 0;) {
+    double v = A.getQuick(i,i);
+    isNonSingular &= (v!=0);
+    A.setQuick(i,i, 1/v);
+  }
+  return isNonSingular;
 }
 }

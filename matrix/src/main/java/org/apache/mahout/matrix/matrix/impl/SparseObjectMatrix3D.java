@@ -51,21 +51,21 @@ Setting/getting values in a loop slice-by-slice, row-by-row, column-by-column is
 Thus
 <pre>
    for (int slice=0; slice < slices; slice++) {
-	  for (int row=0; row < rows; row++) {
-	     for (int column=0; column < columns; column++) {
-			matrix.setQuick(slice,row,column,someValue);
-		 }		    
-	  }
+    for (int row=0; row < rows; row++) {
+       for (int column=0; column < columns; column++) {
+      matrix.setQuick(slice,row,column,someValue);
+     }        
+    }
    }
 </pre>
 is quicker than
 <pre>
    for (int column=0; column < columns; column++) {
-	  for (int row=0; row < rows; row++) {
-	     for (int slice=0; slice < slices; slice++) {
-			matrix.setQuick(slice,row,column,someValue);
-		 }
-	  }
+    for (int row=0; row < rows; row++) {
+       for (int slice=0; slice < slices; slice++) {
+      matrix.setQuick(slice,row,column,someValue);
+     }
+    }
    }
 </pre>
 
@@ -79,10 +79,10 @@ is quicker than
  */
 @Deprecated
 public class SparseObjectMatrix3D extends ObjectMatrix3D {
-	/*
-	 * The elements of the matrix.
-	 */
-	protected AbstractIntObjectMap elements; 
+  /*
+   * The elements of the matrix.
+   */
+  protected AbstractIntObjectMap elements; 
 /**
  * Constructs a matrix with a copy of the given values.
  * <tt>values</tt> is required to have the form <tt>values[slice][row][column]</tt>
@@ -95,8 +95,8 @@ public class SparseObjectMatrix3D extends ObjectMatrix3D {
  * @throws IllegalArgumentException if <tt>for any 1 &lt;= row &lt; values[0].length: values[slice][row].length != values[slice][row-1].length</tt>.
  */
 public SparseObjectMatrix3D(Object[][][] values) {
-	this(values.length, (values.length==0 ? 0: values[0].length), (values.length==0 ? 0: values[0].length==0 ? 0 : values[0][0].length));
-	assign(values);
+  this(values.length, (values.length==0 ? 0: values[0].length), (values.length==0 ? 0: values[0].length==0 ? 0 : values[0][0].length));
+  assign(values);
 }
 /**
  * Constructs a matrix with a given number of slices, rows and columns and default memory usage.
@@ -104,11 +104,11 @@ public SparseObjectMatrix3D(Object[][][] values) {
  * @param slices the number of slices the matrix shall have.
  * @param rows the number of rows the matrix shall have.
  * @param columns the number of columns the matrix shall have.
- * @throws	IllegalArgumentException if <tt>(double)slices*columns*rows > Integer.MAX_VALUE</tt>.
- * @throws	IllegalArgumentException if <tt>slices<0 || rows<0 || columns<0</tt>.
+ * @throws  IllegalArgumentException if <tt>(double)slices*columns*rows > Integer.MAX_VALUE</tt>.
+ * @throws  IllegalArgumentException if <tt>slices<0 || rows<0 || columns<0</tt>.
  */
 public SparseObjectMatrix3D(int slices, int rows, int columns) {
-	this(slices,rows,columns,slices*rows*(columns/1000),0.2,0.5);
+  this(slices,rows,columns,slices*rows*(columns/1000),0.2,0.5);
 }
 /**
  * Constructs a matrix with a given number of slices, rows and columns using memory as specified.
@@ -122,13 +122,13 @@ public SparseObjectMatrix3D(int slices, int rows, int columns) {
  *                          If not known, set <tt>initialCapacity=0</tt> or small.     
  * @param minLoadFactor        the minimum load factor of the hash map.
  * @param maxLoadFactor        the maximum load factor of the hash map.
- * @throws	IllegalArgumentException if <tt>initialCapacity < 0 || (minLoadFactor < 0.0 || minLoadFactor >= 1.0) || (maxLoadFactor <= 0.0 || maxLoadFactor >= 1.0) || (minLoadFactor >= maxLoadFactor)</tt>.
- * @throws	IllegalArgumentException if <tt>(double)slices*columns*rows > Integer.MAX_VALUE</tt>.
- * @throws	IllegalArgumentException if <tt>slices<0 || rows<0 || columns<0</tt>.
+ * @throws  IllegalArgumentException if <tt>initialCapacity < 0 || (minLoadFactor < 0.0 || minLoadFactor >= 1.0) || (maxLoadFactor <= 0.0 || maxLoadFactor >= 1.0) || (minLoadFactor >= maxLoadFactor)</tt>.
+ * @throws  IllegalArgumentException if <tt>(double)slices*columns*rows > Integer.MAX_VALUE</tt>.
+ * @throws  IllegalArgumentException if <tt>slices<0 || rows<0 || columns<0</tt>.
  */
 public SparseObjectMatrix3D(int slices, int rows, int columns, int initialCapacity, double minLoadFactor, double maxLoadFactor) {
-	setUp(slices,rows,columns);
-	this.elements = new OpenIntObjectHashMap(initialCapacity, minLoadFactor, maxLoadFactor);
+  setUp(slices,rows,columns);
+  this.elements = new OpenIntObjectHashMap(initialCapacity, minLoadFactor, maxLoadFactor);
 }
 /**
  * Constructs a view with the given parameters.
@@ -142,20 +142,20 @@ public SparseObjectMatrix3D(int slices, int rows, int columns, int initialCapaci
  * @param sliceStride the number of elements between two slices, i.e. <tt>index(k+1,i,j)-index(k,i,j)</tt>.
  * @param rowStride the number of elements between two rows, i.e. <tt>index(k,i+1,j)-index(k,i,j)</tt>.
  * @param columnnStride the number of elements between two columns, i.e. <tt>index(k,i,j+1)-index(k,i,j)</tt>.
- * @throws	IllegalArgumentException if <tt>(Object)slices*columns*rows > Integer.MAX_VALUE</tt>.
- * @throws	IllegalArgumentException if <tt>slices<0 || rows<0 || columns<0</tt>.
+ * @throws  IllegalArgumentException if <tt>(Object)slices*columns*rows > Integer.MAX_VALUE</tt>.
+ * @throws  IllegalArgumentException if <tt>slices<0 || rows<0 || columns<0</tt>.
  */
 protected SparseObjectMatrix3D(int slices, int rows, int columns, AbstractIntObjectMap elements, int sliceZero, int rowZero, int columnZero, int sliceStride, int rowStride, int columnStride) {
-	setUp(slices,rows,columns,sliceZero,rowZero,columnZero,sliceStride,rowStride,columnStride);
-	this.elements = elements;
-	this.isNoView = false;
+  setUp(slices,rows,columns,sliceZero,rowZero,columnZero,sliceStride,rowStride,columnStride);
+  this.elements = elements;
+  this.isNoView = false;
 }
 /**
  * Returns the number of cells having non-zero values.
  */
 public int cardinality() {
-	if (this.isNoView) return this.elements.size();
-	else return super.cardinality();
+  if (this.isNoView) return this.elements.size();
+  else return super.cardinality();
 }
 /**
  * Ensures that the receiver can hold at least the specified number of non-zero cells without needing to allocate new internal memory.
@@ -168,7 +168,7 @@ public int cardinality() {
  * @param   minNonZeros   the desired minimum number of non-zero cells.
  */
 public void ensureCapacity(int minCapacity) {
-	this.elements.ensureCapacity(minCapacity);
+  this.elements.ensureCapacity(minCapacity);
 }
 /**
  * Returns the matrix cell value at coordinate <tt>[slice,row,column]</tt>.
@@ -183,24 +183,24 @@ public void ensureCapacity(int minCapacity) {
  * @return    the value at the specified coordinate.
  */
 public Object getQuick(int slice, int row, int column) {
-	//if (debug) if (slice<0 || slice>=slices || row<0 || row>=rows || column<0 || column>=columns) throw new IndexOutOfBoundsException("slice:"+slice+", row:"+row+", column:"+column);
-	//return elements.get(index(slice,row,column));
-	//manually inlined:
-	return elements.get(sliceZero + slice*sliceStride + rowZero + row*rowStride + columnZero + column*columnStride);
+  //if (debug) if (slice<0 || slice>=slices || row<0 || row>=rows || column<0 || column>=columns) throw new IndexOutOfBoundsException("slice:"+slice+", row:"+row+", column:"+column);
+  //return elements.get(index(slice,row,column));
+  //manually inlined:
+  return elements.get(sliceZero + slice*sliceStride + rowZero + row*rowStride + columnZero + column*columnStride);
 }
 /**
  * Returns <tt>true</tt> if both matrices share at least one identical cell.
  */
 protected boolean haveSharedCellsRaw(ObjectMatrix3D other) {
-	if (other instanceof SelectedSparseObjectMatrix3D) {
-		SelectedSparseObjectMatrix3D otherMatrix = (SelectedSparseObjectMatrix3D) other;
-		return this.elements==otherMatrix.elements;
-	}
-	else if (other instanceof SparseObjectMatrix3D) {
-		SparseObjectMatrix3D otherMatrix = (SparseObjectMatrix3D) other;
-		return this.elements==otherMatrix.elements;
-	}
-	return false;
+  if (other instanceof SelectedSparseObjectMatrix3D) {
+    SelectedSparseObjectMatrix3D otherMatrix = (SelectedSparseObjectMatrix3D) other;
+    return this.elements==otherMatrix.elements;
+  }
+  else if (other instanceof SparseObjectMatrix3D) {
+    SparseObjectMatrix3D otherMatrix = (SparseObjectMatrix3D) other;
+    return this.elements==otherMatrix.elements;
+  }
+  return false;
 }
 /**
  * Returns the position of the given coordinate within the (virtual or non-virtual) internal 1-dimensional array. 
@@ -210,9 +210,9 @@ protected boolean haveSharedCellsRaw(ObjectMatrix3D other) {
  * @param     column   the index of the third-coordinate.
  */
 protected int index(int slice, int row, int column) {
-	//return _sliceOffset(_sliceRank(slice)) + _rowOffset(_rowRank(row)) + _columnOffset(_columnRank(column));
-	//manually inlined:
-	return sliceZero + slice*sliceStride + rowZero + row*rowStride + columnZero + column*columnStride;	
+  //return _sliceOffset(_sliceRank(slice)) + _rowOffset(_rowRank(row)) + _columnOffset(_columnRank(column));
+  //manually inlined:
+  return sliceZero + slice*sliceStride + rowZero + row*rowStride + columnZero + column*columnStride;  
 }
 /**
  * Construct and returns a new empty matrix <i>of the same dynamic type</i> as the receiver, having the specified number of slices, rows and columns.
@@ -226,7 +226,7 @@ protected int index(int slice, int row, int column) {
  * @return  a new empty matrix of the same dynamic type.
  */
 public ObjectMatrix3D like(int slices, int rows, int columns) {
-	return new SparseObjectMatrix3D(slices,rows,columns); 
+  return new SparseObjectMatrix3D(slices,rows,columns); 
 }
 /**
  * Construct and returns a new 2-d matrix <i>of the corresponding dynamic type</i>, sharing the same cells.
@@ -242,7 +242,7 @@ public ObjectMatrix3D like(int slices, int rows, int columns) {
  * @return  a new matrix of the corresponding dynamic type.
  */
 protected ObjectMatrix2D like2D(int rows, int columns, int rowZero, int columnZero, int rowStride, int columnStride) {
-	return new SparseObjectMatrix2D(rows,columns,this.elements,rowZero,columnZero,rowStride,columnStride);
+  return new SparseObjectMatrix2D(rows,columns,this.elements,rowZero,columnZero,rowStride,columnStride);
 }
 /**
  * Sets the matrix cell at coordinate <tt>[slice,row,column]</tt> to the specified value.
@@ -257,14 +257,14 @@ protected ObjectMatrix2D like2D(int rows, int columns, int rowZero, int columnZe
  * @param    value the value to be filled into the specified cell.
  */
 public void setQuick(int slice, int row, int column, Object value) {
-	//if (debug) if (slice<0 || slice>=slices || row<0 || row>=rows || column<0 || column>=columns) throw new IndexOutOfBoundsException("slice:"+slice+", row:"+row+", column:"+column);
-	//int index =	index(slice,row,column);
-	//manually inlined:
-	int index = sliceZero + slice*sliceStride + rowZero + row*rowStride + columnZero + column*columnStride;
-	if (value == null)
-		this.elements.removeKey(index);
-	else 
-		this.elements.put(index, value);
+  //if (debug) if (slice<0 || slice>=slices || row<0 || row>=rows || column<0 || column>=columns) throw new IndexOutOfBoundsException("slice:"+slice+", row:"+row+", column:"+column);
+  //int index =  index(slice,row,column);
+  //manually inlined:
+  int index = sliceZero + slice*sliceStride + rowZero + row*rowStride + columnZero + column*columnStride;
+  if (value == null)
+    this.elements.removeKey(index);
+  else 
+    this.elements.put(index, value);
 }
 /**
  * Releases any superfluous memory created by explicitly putting zero values into cells formerly having non-zero values; 
@@ -284,7 +284,7 @@ public void setQuick(int slice, int row, int column, Object value) {
  * Putting zeros into cells already containing zeros does not generate obsolete memory since no memory was allocated to them in the first place.
  */
 public void trimToSize() {
-	this.elements.trimToSize();
+  this.elements.trimToSize();
 }
 /**
  * Construct and returns a new selection view.
@@ -295,6 +295,6 @@ public void trimToSize() {
  * @return  a new view.
  */
 protected ObjectMatrix3D viewSelectionLike(int[] sliceOffsets, int[] rowOffsets, int[] columnOffsets) {
-	return new SelectedSparseObjectMatrix3D(this.elements,sliceOffsets,rowOffsets,columnOffsets,0);
+  return new SelectedSparseObjectMatrix3D(this.elements,sliceOffsets,rowOffsets,columnOffsets,0);
 }
 }

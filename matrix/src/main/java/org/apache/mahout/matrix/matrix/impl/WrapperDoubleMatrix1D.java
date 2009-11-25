@@ -17,20 +17,20 @@ import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 @version 1.0, 09/24/99
 */
 class WrapperDoubleMatrix1D extends DoubleMatrix1D {
-	/*
-	 * The elements of the matrix.
-	 */
-	protected DoubleMatrix1D content; 
+  /*
+   * The elements of the matrix.
+   */
+  protected DoubleMatrix1D content; 
 public WrapperDoubleMatrix1D(DoubleMatrix1D newContent) {
-	if (newContent != null) setUp(newContent.size());
-	this.content = newContent;
+  if (newContent != null) setUp(newContent.size());
+  this.content = newContent;
 }
 /**
  * Returns the content of this matrix if it is a wrapper; or <tt>this</tt> otherwise.
  * Override this method in wrappers.
  */
 protected DoubleMatrix1D getContent() {
-	return this.content;
+  return this.content;
 }
 /**
  * Returns the matrix cell value at coordinate <tt>index</tt>.
@@ -43,7 +43,7 @@ protected DoubleMatrix1D getContent() {
  * @return    the value of the specified cell.
  */
 public double getQuick(int index) {
-	return content.getQuick(index);
+  return content.getQuick(index);
 }
 /**
  * Construct and returns a new empty matrix <i>of the same dynamic type</i> as the receiver, having the specified size.
@@ -55,7 +55,7 @@ public double getQuick(int index) {
  * @return  a new empty matrix of the same dynamic type.
  */
 public DoubleMatrix1D like(int size) {
-	return content.like(size);
+  return content.like(size);
 }
 /**
  * Construct and returns a new 2-d matrix <i>of the corresponding dynamic type</i>, entirelly independent of the receiver.
@@ -67,7 +67,7 @@ public DoubleMatrix1D like(int size) {
  * @return  a new matrix of the corresponding dynamic type.
  */
 public DoubleMatrix2D like2D(int rows, int columns) {
-	return content.like2D(rows,columns);
+  return content.like2D(rows,columns);
 }
 /**
  * Sets the matrix cell at coordinate <tt>index</tt> to the specified value.
@@ -80,7 +80,7 @@ public DoubleMatrix2D like2D(int rows, int columns) {
  * @param    value the value to be filled into the specified cell.
  */
 public void setQuick(int index, double value) {
-	content.setQuick(index, value);
+  content.setQuick(index, value);
 }
 /**
 Constructs and returns a new <i>flip view</i>.
@@ -90,15 +90,15 @@ The returned view is backed by this matrix, so changes in the returned view are 
 @return a new flip view.
 */
 public DoubleMatrix1D viewFlip() {
-	DoubleMatrix1D view = new WrapperDoubleMatrix1D(this) {
-		public double getQuick(int index) {
-			return content.get(size-1-index);
-		}
-		public void setQuick(int index, double value) {
-			content.set(size-1-index,value); 
-		}
-	};
-	return view;
+  DoubleMatrix1D view = new WrapperDoubleMatrix1D(this) {
+    public double getQuick(int index) {
+      return content.get(size-1-index);
+    }
+    public void setQuick(int index, double value) {
+      content.set(size-1-index,value); 
+    }
+  };
+  return view;
 }
 /**
 Constructs and returns a new <i>sub-range view</i> that is a <tt>width</tt> sub matrix starting at <tt>index</tt>.
@@ -117,22 +117,22 @@ As usual, any attempt to access a cell at other coordinates will throw an <tt>In
 
 @param     index   The index of the first cell.
 @param     width   The width of the range.
-@throws	IndexOutOfBoundsException if <tt>index<0 || width<0 || index+width>size()</tt>.
+@throws  IndexOutOfBoundsException if <tt>index<0 || width<0 || index+width>size()</tt>.
 @return the new view.
-		
+    
 */
 public DoubleMatrix1D viewPart(final int index, int width) {
-	checkRange(index,width);
-	DoubleMatrix1D view = new WrapperDoubleMatrix1D(this) {
-		public double getQuick(int i) {
-			return content.get(index+i);
-		}
-		public void setQuick(int i, double value) {
-			content.set(index+i,value); 
-		}
-	};
-	view.size=width;
-	return view;
+  checkRange(index,width);
+  DoubleMatrix1D view = new WrapperDoubleMatrix1D(this) {
+    public double getQuick(int i) {
+      return content.get(index+i);
+    }
+    public void setQuick(int i, double value) {
+      content.set(index+i,value); 
+    }
+  };
+  view.size=width;
+  return view;
 }
 /**
 Constructs and returns a new <i>selection view</i> that is a matrix holding the indicated cells.
@@ -155,25 +155,25 @@ The returned view is backed by this matrix, so changes in the returned view are 
 @throws IndexOutOfBoundsException if <tt>!(0 <= indexes[i] < size())</tt> for any <tt>i=0..indexes.length()-1</tt>.
 */
 public DoubleMatrix1D viewSelection(int[] indexes) {
-	// check for "all"
-	if (indexes==null) {
-		indexes = new int[size];
-		for (int i=size; --i >= 0; ) indexes[i] = i;
-	}
-	
-	checkIndexes(indexes);
-	final int[] idx = indexes;
+  // check for "all"
+  if (indexes==null) {
+    indexes = new int[size];
+    for (int i=size; --i >= 0; ) indexes[i] = i;
+  }
+  
+  checkIndexes(indexes);
+  final int[] idx = indexes;
 
-	DoubleMatrix1D view = new WrapperDoubleMatrix1D(this) {
-		public double getQuick(int i) {
-			return content.get(idx[i]);
-		}
-		public void setQuick(int i, double value) {
-			content.set(idx[i],value); 
-		}
-	};
-	view.size=indexes.length;
-	return view;
+  DoubleMatrix1D view = new WrapperDoubleMatrix1D(this) {
+    public double getQuick(int i) {
+      return content.get(idx[i]);
+    }
+    public void setQuick(int i, double value) {
+      content.set(idx[i],value); 
+    }
+  };
+  view.size=indexes.length;
+  return view;
 }
 /**
  * Construct and returns a new selection view.
@@ -182,29 +182,29 @@ public DoubleMatrix1D viewSelection(int[] indexes) {
  * @return  a new view.
  */
 protected DoubleMatrix1D viewSelectionLike(int[] offsets) {
-	throw new InternalError(); // should never get called
+  throw new InternalError(); // should never get called
 }
 /**
 Constructs and returns a new <i>stride view</i> which is a sub matrix consisting of every i-th cell.
 More specifically, the view has size <tt>this.size()/stride</tt> holding cells <tt>this.get(i*stride)</tt> for all <tt>i = 0..size()/stride - 1</tt>.
 
 @param  stride  the step factor.
-@throws	IndexOutOfBoundsException if <tt>stride <= 0</tt>.
+@throws  IndexOutOfBoundsException if <tt>stride <= 0</tt>.
 @return the new view.
-		
+    
 */
 public DoubleMatrix1D viewStrides(final int _stride) {
-	if (stride<=0) throw new IndexOutOfBoundsException("illegal stride: "+stride);
-	DoubleMatrix1D view = new WrapperDoubleMatrix1D(this) {
-		public double getQuick(int index) {
-			return content.get(index*_stride);
-		}
-		public void setQuick(int index, double value) {
-			content.set(index*_stride,value); 
-		}
-	};
-	view.size = size;
-	if (size!=0) view.size = (size-1)/_stride +1;
-	return view;
+  if (stride<=0) throw new IndexOutOfBoundsException("illegal stride: "+stride);
+  DoubleMatrix1D view = new WrapperDoubleMatrix1D(this) {
+    public double getQuick(int index) {
+      return content.get(index*_stride);
+    }
+    public void setQuick(int index, double value) {
+      content.set(index*_stride,value); 
+    }
+  };
+  view.size = size;
+  if (size!=0) view.size = (size-1)/_stride +1;
+  return view;
 }
 }

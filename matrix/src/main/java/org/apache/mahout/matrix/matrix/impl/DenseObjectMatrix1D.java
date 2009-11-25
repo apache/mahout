@@ -37,10 +37,10 @@ Thus, a 1000000 matrix uses 8 MB.
  */
 @Deprecated
 public class DenseObjectMatrix1D extends ObjectMatrix1D {
-	/**
-	  * The elements of this matrix.
-	  */
-	protected Object[] elements;
+  /**
+    * The elements of this matrix.
+    */
+  protected Object[] elements;
 /**
  * Constructs a matrix with a copy of the given values.
  * The values are copied. So subsequent changes in <tt>values</tt> are not reflected in the matrix, and vice-versa.
@@ -48,8 +48,8 @@ public class DenseObjectMatrix1D extends ObjectMatrix1D {
  * @param values The values to be filled into the new matrix.
  */
 public DenseObjectMatrix1D(Object[] values) {
-	this(values.length);
-	assign(values);
+  this(values.length);
+  assign(values);
 }
 /**
  * Constructs a matrix with a given number of cells.
@@ -58,8 +58,8 @@ public DenseObjectMatrix1D(Object[] values) {
  * @throws IllegalArgumentException if <tt>size<0</tt>.
  */
 public DenseObjectMatrix1D(int size) {
-	setUp(size);
-	this.elements = new Object[size];
+  setUp(size);
+  this.elements = new Object[size];
 }
 /**
  * Constructs a matrix view with the given parameters.
@@ -70,9 +70,9 @@ public DenseObjectMatrix1D(int size) {
  * @throws IllegalArgumentException if <tt>size<0</tt>.
  */
 protected DenseObjectMatrix1D(int size, Object[] elements, int zero, int stride) {
-	setUp(size,zero,stride);
-	this.elements = elements;
-	this.isNoView = false;
+  setUp(size,zero,stride);
+  this.elements = elements;
+  this.isNoView = false;
 }
 /**
  * Sets all cells to the state specified by <tt>values</tt>.
@@ -85,14 +85,14 @@ protected DenseObjectMatrix1D(int size, Object[] elements, int zero, int stride)
  * @throws IllegalArgumentException if <tt>values.length != size()</tt>.
  */
 public ObjectMatrix1D assign(Object[] values) {
-	if (isNoView) {
-		if (values.length != size) throw new IllegalArgumentException("Must have same number of cells: length="+values.length+"size()="+size());
-		System.arraycopy(values, 0, this.elements, 0, values.length);
-	}
-	else {
-		super.assign(values);
-	}
-	return this;
+  if (isNoView) {
+    if (values.length != size) throw new IllegalArgumentException("Must have same number of cells: length="+values.length+"size()="+size());
+    System.arraycopy(values, 0, this.elements, 0, values.length);
+  }
+  else {
+    super.assign(values);
+  }
+  return this;
 }
 /**
 Assigns the result of a function to each cell; <tt>x[i] = function(x[i])</tt>.
@@ -113,17 +113,17 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @see org.apache.mahout.jet.math.Functions
 */
 public ObjectMatrix1D assign(org.apache.mahout.matrix.function.ObjectFunction function) {
-	int s=stride;
-	int i=index(0);
-	Object[] elems = this.elements;
-	if (elements==null) throw new InternalError();
+  int s=stride;
+  int i=index(0);
+  Object[] elems = this.elements;
+  if (elements==null) throw new InternalError();
 
-	// the general case x[i] = f(x[i])
-	for (int k=size; --k >= 0; ) {
-		elems[i] = function.apply(elems[i]);
-		i += s;
-	}
-	return this;
+  // the general case x[i] = f(x[i])
+  for (int k=size; --k >= 0; ) {
+    elems[i] = function.apply(elems[i]);
+    i += s;
+  }
+  return this;
 }
 /**
  * Replaces all cell values of the receiver with the values of another matrix.
@@ -132,42 +132,42 @@ public ObjectMatrix1D assign(org.apache.mahout.matrix.function.ObjectFunction fu
  *
  * @param     source   the source matrix to copy from (may be identical to the receiver).
  * @return <tt>this</tt> (for convenience only).
- * @throws	IllegalArgumentException if <tt>size() != other.size()</tt>.
+ * @throws  IllegalArgumentException if <tt>size() != other.size()</tt>.
  */
 public ObjectMatrix1D assign(ObjectMatrix1D source) {
-	// overriden for performance only
-	if (! (source instanceof DenseObjectMatrix1D)) {
-		return super.assign(source);
-	}
-	DenseObjectMatrix1D other = (DenseObjectMatrix1D) source;
-	if (other==this) return this;
-	checkSize(other);
-	if (isNoView && other.isNoView) { // quickest
-		System.arraycopy(other.elements, 0, this.elements, 0, this.elements.length);
-		return this;
-	}
-	if (haveSharedCells(other)) {
-		ObjectMatrix1D c = other.copy();
-		if (! (c instanceof DenseObjectMatrix1D)) { // should not happen
-			return super.assign(source);
-		}
-		other = (DenseObjectMatrix1D) c;
-	}
+  // overriden for performance only
+  if (! (source instanceof DenseObjectMatrix1D)) {
+    return super.assign(source);
+  }
+  DenseObjectMatrix1D other = (DenseObjectMatrix1D) source;
+  if (other==this) return this;
+  checkSize(other);
+  if (isNoView && other.isNoView) { // quickest
+    System.arraycopy(other.elements, 0, this.elements, 0, this.elements.length);
+    return this;
+  }
+  if (haveSharedCells(other)) {
+    ObjectMatrix1D c = other.copy();
+    if (! (c instanceof DenseObjectMatrix1D)) { // should not happen
+      return super.assign(source);
+    }
+    other = (DenseObjectMatrix1D) c;
+  }
 
-	final Object[] elems = this.elements;
-	final Object[] otherElems = other.elements;
-	if (elements==null || otherElems==null) throw new InternalError();
-	int s = this.stride;
-	int ys = other.stride;
+  final Object[] elems = this.elements;
+  final Object[] otherElems = other.elements;
+  if (elements==null || otherElems==null) throw new InternalError();
+  int s = this.stride;
+  int ys = other.stride;
 
-	int index = index(0);
-	int otherIndex = other.index(0);
-	for (int k=size; --k >= 0; ) {
-		elems[index] = otherElems[otherIndex];
-		index += s;
-		otherIndex += ys;
-	}
-	return this;
+  int index = index(0);
+  int otherIndex = other.index(0);
+  for (int k=size; --k >= 0; ) {
+    elems[index] = otherElems[otherIndex];
+    index += s;
+    otherIndex += ys;
+  }
+  return this;
 }
 /**
 Assigns the result of a function to each cell; <tt>x[i] = function(x[i],y[i])</tt>.
@@ -195,32 +195,32 @@ For further examples, see the <a href="package-summary.html#FunctionObjects">pac
 @param function a function object taking as first argument the current cell's value of <tt>this</tt>,
 and as second argument the current cell's value of <tt>y</tt>,
 @return <tt>this</tt> (for convenience only).
-@throws	IllegalArgumentException if <tt>size() != y.size()</tt>.
+@throws  IllegalArgumentException if <tt>size() != y.size()</tt>.
 @see org.apache.mahout.jet.math.Functions
 */
 public ObjectMatrix1D assign(ObjectMatrix1D y, org.apache.mahout.matrix.function.ObjectObjectFunction function) {
-	// overriden for performance only
-	if (! (y instanceof DenseObjectMatrix1D)) {
-		return super.assign(y,function);
-	}
-	DenseObjectMatrix1D other = (DenseObjectMatrix1D) y;
-	checkSize(y);
-	final Object[] elems = this.elements;
-	final Object[] otherElems = other.elements;
-	if (elements==null || otherElems==null) throw new InternalError();
-	int s = this.stride;
-	int ys = other.stride;
+  // overriden for performance only
+  if (! (y instanceof DenseObjectMatrix1D)) {
+    return super.assign(y,function);
+  }
+  DenseObjectMatrix1D other = (DenseObjectMatrix1D) y;
+  checkSize(y);
+  final Object[] elems = this.elements;
+  final Object[] otherElems = other.elements;
+  if (elements==null || otherElems==null) throw new InternalError();
+  int s = this.stride;
+  int ys = other.stride;
 
-	int index = index(0);
-	int otherIndex = other.index(0);
+  int index = index(0);
+  int otherIndex = other.index(0);
 
-	// the general case x[i] = f(x[i],y[i])		
-	for (int k=size; --k >= 0; ) {
-		elems[index] = function.apply(elems[index], otherElems[otherIndex]);
-		index += s;
-		otherIndex += ys;
-	}
-	return this;
+  // the general case x[i] = f(x[i],y[i])    
+  for (int k=size; --k >= 0; ) {
+    elems[index] = function.apply(elems[index], otherElems[otherIndex]);
+    index += s;
+    otherIndex += ys;
+  }
+  return this;
 }
 /**
  * Returns the matrix cell value at coordinate <tt>index</tt>.
@@ -233,24 +233,24 @@ public ObjectMatrix1D assign(ObjectMatrix1D y, org.apache.mahout.matrix.function
  * @return    the value of the specified cell.
  */
 public Object getQuick(int index) {
-	//if (debug) if (index<0 || index>=size) checkIndex(index);
-	//return elements[index(index)];
-	// manually inlined:
-	return elements[zero + index*stride];
+  //if (debug) if (index<0 || index>=size) checkIndex(index);
+  //return elements[index(index)];
+  // manually inlined:
+  return elements[zero + index*stride];
 }
 /**
  * Returns <tt>true</tt> if both matrices share at least one identical cell.
  */
 protected boolean haveSharedCellsRaw(ObjectMatrix1D other) {
-	if (other instanceof SelectedDenseObjectMatrix1D) {
-		SelectedDenseObjectMatrix1D otherMatrix = (SelectedDenseObjectMatrix1D) other;
-		return this.elements==otherMatrix.elements;
-	}
-	else if (other instanceof DenseObjectMatrix1D) {
-		DenseObjectMatrix1D otherMatrix = (DenseObjectMatrix1D) other;
-		return this.elements==otherMatrix.elements;
-	}
-	return false;
+  if (other instanceof SelectedDenseObjectMatrix1D) {
+    SelectedDenseObjectMatrix1D otherMatrix = (SelectedDenseObjectMatrix1D) other;
+    return this.elements==otherMatrix.elements;
+  }
+  else if (other instanceof DenseObjectMatrix1D) {
+    DenseObjectMatrix1D otherMatrix = (DenseObjectMatrix1D) other;
+    return this.elements==otherMatrix.elements;
+  }
+  return false;
 }
 /**
  * Returns the position of the element with the given relative rank within the (virtual or non-virtual) internal 1-dimensional array.
@@ -259,9 +259,9 @@ protected boolean haveSharedCellsRaw(ObjectMatrix1D other) {
  * @param     rank   the rank of the element.
  */
 protected int index(int rank) {
-	// overriden for manual inlining only
-	//return _offset(_rank(rank));
-	return zero + rank*stride;
+  // overriden for manual inlining only
+  //return _offset(_rank(rank));
+  return zero + rank*stride;
 }
 /**
  * Construct and returns a new empty matrix <i>of the same dynamic type</i> as the receiver, having the specified size.
@@ -273,7 +273,7 @@ protected int index(int rank) {
  * @return  a new empty matrix of the same dynamic type.
  */
 public ObjectMatrix1D like(int size) {
-	return new DenseObjectMatrix1D(size);
+  return new DenseObjectMatrix1D(size);
 }
 /**
  * Construct and returns a new 2-d matrix <i>of the corresponding dynamic type</i>, entirelly independent of the receiver.
@@ -285,7 +285,7 @@ public ObjectMatrix1D like(int size) {
  * @return  a new matrix of the corresponding dynamic type.
  */
 public ObjectMatrix2D like2D(int rows, int columns) {
-	return new DenseObjectMatrix2D(rows,columns);
+  return new DenseObjectMatrix2D(rows,columns);
 }
 /**
  * Sets the matrix cell at coordinate <tt>index</tt> to the specified value.
@@ -298,40 +298,40 @@ public ObjectMatrix2D like2D(int rows, int columns) {
  * @param    value the value to be filled into the specified cell.
  */
 public void setQuick(int index, Object value) {
-	//if (debug) if (index<0 || index>=size) checkIndex(index);
-	//elements[index(index)] = value;
-	// manually inlined:
-	elements[zero + index*stride] = value;
+  //if (debug) if (index<0 || index>=size) checkIndex(index);
+  //elements[index(index)] = value;
+  // manually inlined:
+  elements[zero + index*stride] = value;
 }
 /**
 Swaps each element <tt>this[i]</tt> with <tt>other[i]</tt>.
 @throws IllegalArgumentException if <tt>size() != other.size()</tt>.
 */
 public void swap(ObjectMatrix1D other) {
-	// overriden for performance only
-	if (! (other instanceof DenseObjectMatrix1D)) {
-		super.swap(other);
-	}
-	DenseObjectMatrix1D y = (DenseObjectMatrix1D) other;
-	if (y==this) return;
-	checkSize(y);
-	
-	final Object[] elems = this.elements;
-	final Object[] otherElems = y.elements;
-	if (elements==null || otherElems==null) throw new InternalError();
-	int s = this.stride;
-	int ys = y.stride;
+  // overriden for performance only
+  if (! (other instanceof DenseObjectMatrix1D)) {
+    super.swap(other);
+  }
+  DenseObjectMatrix1D y = (DenseObjectMatrix1D) other;
+  if (y==this) return;
+  checkSize(y);
+  
+  final Object[] elems = this.elements;
+  final Object[] otherElems = y.elements;
+  if (elements==null || otherElems==null) throw new InternalError();
+  int s = this.stride;
+  int ys = y.stride;
 
-	int index = index(0);
-	int otherIndex = y.index(0);
-	for (int k=size; --k >= 0; ) {
-		Object tmp = elems[index];
-		elems[index] = otherElems[otherIndex];
-		otherElems[otherIndex] = tmp;
-		index += s;
-		otherIndex += ys;
-	}
-	return;
+  int index = index(0);
+  int otherIndex = y.index(0);
+  for (int k=size; --k >= 0; ) {
+    Object tmp = elems[index];
+    elems[index] = otherElems[otherIndex];
+    otherElems[otherIndex] = tmp;
+    index += s;
+    otherIndex += ys;
+  }
+  return;
 }
 /**
 Fills the cell values into the specified 1-dimensional array.
@@ -343,9 +343,9 @@ After this call returns the array <tt>values</tt> has the form
 @throws IllegalArgumentException if <tt>values.length < size()</tt>.
 */
 public void toArray(Object[] values) {
-	if (values.length < size) throw new IllegalArgumentException("values too small");
-	if (this.isNoView) System.arraycopy(this.elements,0,values,0,this.elements.length);
-	else super.toArray(values);
+  if (values.length < size) throw new IllegalArgumentException("values too small");
+  if (this.isNoView) System.arraycopy(this.elements,0,values,0,this.elements.length);
+  else super.toArray(values);
 }
 /**
  * Construct and returns a new selection view.
@@ -354,6 +354,6 @@ public void toArray(Object[] values) {
  * @return  a new view.
  */
 protected ObjectMatrix1D viewSelectionLike(int[] offsets) {
-	return new SelectedDenseObjectMatrix1D(this.elements,offsets);
+  return new SelectedDenseObjectMatrix1D(this.elements,offsets);
 }
 }
