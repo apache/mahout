@@ -12,8 +12,6 @@ import org.apache.mahout.matrix.list.DoubleArrayList;
 /**
  * Target of a streaming <tt>DoubleBuffer3D</tt> into which data is flushed upon buffer overflow.
  *
- * @author wolfgang.hoschek@cern.ch
- * @version 1.0, 09/24/99
  */
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.

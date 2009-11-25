@@ -19,13 +19,13 @@ First see the <a href="package-summary.html">package summary</a> and javadoc <a 
  */
 @Deprecated
 public abstract class AbstractByteList extends AbstractList {
-	/**
-	 * The size of the list.
-	 * This is a READ_ONLY variable for all methods but setSizeRaw(int newSize) !!!
-	 * If you violate this principle in subclasses, you should exactly know what you are doing.
-	 * @serial
-	 */
-	protected int size;
+  /**
+   * The size of the list.
+   * This is a READ_ONLY variable for all methods but setSizeRaw(int newSize) !!!
+   * If you violate this principle in subclasses, you should exactly know what you are doing.
+   * @serial
+   */
+  protected int size;
 /**
  * Makes this class non instantiable, but still let's others inherit from it.
  */
@@ -36,7 +36,7 @@ protected AbstractByteList() {}
  * @param element element to be appended to this list.
  */
 public void add(byte element) {
-	beforeInsert(size,element);
+  beforeInsert(size,element);
 }
 /**
  * Appends the part of the specified list between <code>from</code> (inclusive) and <code>to</code> (inclusive) to the receiver.
@@ -47,7 +47,7 @@ public void add(byte element) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>other.size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=other.size())</tt>).
  */
 public void addAllOfFromTo(AbstractByteList other, int from, int to) {
-	beforeInsertAllOfFromTo(size,other,from,to);
+  beforeInsertAllOfFromTo(size,other,from,to);
 }
 /**
  * Inserts the specified element before the specified position into the receiver. 
@@ -59,8 +59,8 @@ public void addAllOfFromTo(AbstractByteList other, int from, int to) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>index &lt; 0 || index &gt; size()</tt>).
  */
 public void beforeInsert(int index, byte element) {
-	beforeInsertDummies(index,1);
-	set(index,element);
+  beforeInsertDummies(index,1);
+  set(index,element);
 }
 /**
  * Inserts the part of the specified list between <code>otherFrom</code> (inclusive) and <code>otherTo</code> (inclusive) before the specified position into the receiver. 
@@ -75,9 +75,9 @@ public void beforeInsert(int index, byte element) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>index &lt; 0 || index &gt; size()</tt>).
  */
 public void beforeInsertAllOfFromTo(int index, AbstractByteList other, int from, int to) {
-	int length=to-from+1;
-	this.beforeInsertDummies(index, length);
-	this.replaceFromToWithFrom(index, index+length-1, other, from);
+  int length=to-from+1;
+  this.beforeInsertDummies(index, length);
+  this.replaceFromToWithFrom(index, index+length-1, other, from);
 }
 /**
  * Inserts <tt>length</tt> dummy elements before the specified position into the receiver. 
@@ -90,13 +90,13 @@ public void beforeInsertAllOfFromTo(int index, AbstractByteList other, int from,
  * @throws IndexOutOfBoundsException if <tt>index &lt; 0 || index &gt; size()</tt>.
  */
 protected void beforeInsertDummies(int index, int length) {
-	if (index > size || index < 0) 
-		throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
-	if (length > 0) {
-		ensureCapacity(size + length);
-		setSizeRaw(size + length);
-		replaceFromToWithFrom(index+length,size-1,this,index);
-	}
+  if (index > size || index < 0) 
+    throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
+  if (length > 0) {
+    ensureCapacity(size + length);
+    setSizeRaw(size + length);
+    replaceFromToWithFrom(index+length,size-1,this,index);
+  }
 }
 /**
  * Searches the receiver for the specified value using
@@ -109,17 +109,17 @@ protected void beforeInsertDummies(int index, int length) {
  *
  * @param key the value to be searched for.
  * @return index of the search key, if it is contained in the receiver;
- *	       otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The <i>insertion
- *	       point</i> is defined as the the point at which the value would
- * 	       be inserted into the receiver: the index of the first
- *	       element greater than the key, or <tt>receiver.size()</tt>, if all
- *	       elements in the receiver are less than the specified key.  Note
- *	       that this guarantees that the return value will be &gt;= 0 if
- *	       and only if the key is found.
+ *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The <i>insertion
+ *         point</i> is defined as the the point at which the value would
+ *          be inserted into the receiver: the index of the first
+ *         element greater than the key, or <tt>receiver.size()</tt>, if all
+ *         elements in the receiver are less than the specified key.  Note
+ *         that this guarantees that the return value will be &gt;= 0 if
+ *         and only if the key is found.
  * @see java.util.Arrays
  */
 public int binarySearch(byte key) {
-	return this.binarySearchFromTo(key, 0, size-1);
+  return this.binarySearchFromTo(key, 0, size-1);
 }
 /**
  * Searches the receiver for the specified value using
@@ -134,27 +134,27 @@ public int binarySearch(byte key) {
  * @param from the leftmost search position, inclusive.
  * @param to the rightmost search position, inclusive.
  * @return index of the search key, if it is contained in the receiver;
- *	       otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The <i>insertion
- *	       point</i> is defined as the the point at which the value would
- * 	       be inserted into the receiver: the index of the first
- *	       element greater than the key, or <tt>receiver.size()</tt>, if all
- *	       elements in the receiver are less than the specified key.  Note
- *	       that this guarantees that the return value will be &gt;= 0 if
- *	       and only if the key is found.
+ *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The <i>insertion
+ *         point</i> is defined as the the point at which the value would
+ *          be inserted into the receiver: the index of the first
+ *         element greater than the key, or <tt>receiver.size()</tt>, if all
+ *         elements in the receiver are less than the specified key.  Note
+ *         that this guarantees that the return value will be &gt;= 0 if
+ *         and only if the key is found.
  * @see java.util.Arrays
  */
 public int binarySearchFromTo(byte key, int from, int to) {
-	int low=from;
-	int high=to;
-	while (low <= high) {
-		int mid =(low + high)/2;
-		byte midVal = get(mid);
+  int low=from;
+  int high=to;
+  while (low <= high) {
+    int mid =(low + high)/2;
+    byte midVal = get(mid);
 
-		if (midVal < key) low = mid + 1;
-		else if (midVal > key) high = mid - 1;
-		else return mid; // key found
-	}
-	return -(low + 1);  // key not found.
+    if (midVal < key) low = mid + 1;
+    else if (midVal > key) high = mid - 1;
+    else return mid; // key found
+  }
+  return -(low + 1);  // key not found.
 }
 /**
  * Returns a deep copy of the receiver. 
@@ -162,7 +162,7 @@ public int binarySearchFromTo(byte key, int from, int to) {
  * @return  a deep copy of the receiver.
  */
 public Object clone() {
-	return partFromTo(0,size-1);
+  return partFromTo(0,size-1);
 }
 /**
  * Returns true if the receiver contains the specified element.
@@ -170,7 +170,7 @@ public Object clone() {
  * @param element element whose presence in the receiver is to be tested.
  */
 public boolean contains(byte elem) {
-	return indexOfFromTo(elem,0,size-1) >=0;
+  return indexOfFromTo(elem,0,size-1) >=0;
 }
 /**
  * Deletes the first element from the receiver that is identical to the specified element.
@@ -179,8 +179,8 @@ public boolean contains(byte elem) {
  * @param element the element to be deleted.
  */
 public void delete(byte element) {
-	int index = indexOfFromTo(element, 0, size-1);
-	if (index>=0) remove(index);
+  int index = indexOfFromTo(element, 0, size-1);
+  if (index>=0) remove(index);
 }
 /**
  * Returns the elements currently stored, possibly including invalid elements between size and capacity.
@@ -191,9 +191,9 @@ public void delete(byte element) {
  * @return the elements currently stored.
  */
 public byte[] elements() {
-	byte[] myElements = new byte[size];
-	for (int i=size; --i >= 0; ) myElements[i]=getQuick(i);
-	return myElements;
+  byte[] myElements = new byte[size];
+  for (int i=size; --i >= 0; ) myElements[i]=getQuick(i);
+  return myElements;
 }
 /**
  * Sets the receiver's elements to be the specified array.
@@ -205,9 +205,9 @@ public byte[] elements() {
  * @return the receiver itself.
  */
 public AbstractByteList elements(byte[] elements) {
-	clear();
-	addAllOfFromTo(new ByteArrayList(elements),0,elements.length-1);
-	return this;
+  clear();
+  addAllOfFromTo(new ByteArrayList(elements),0,elements.length-1);
+  return this;
 }
 /**
  * Ensures that the receiver can hold at least the specified number of elements without needing to allocate new internal memory.
@@ -227,16 +227,16 @@ public abstract void ensureCapacity(int minCapacity);
  * @return true if the specified Object is equal to the receiver.
  */
 public boolean equals(Object otherObj) { //delta
-	if (! (otherObj instanceof AbstractByteList)) {return false;}
-	if (this==otherObj) return true;
-	if (otherObj==null) return false;
-	AbstractByteList other = (AbstractByteList) otherObj;
-	if (size()!=other.size()) return false;
+  if (! (otherObj instanceof AbstractByteList)) {return false;}
+  if (this==otherObj) return true;
+  if (otherObj==null) return false;
+  AbstractByteList other = (AbstractByteList) otherObj;
+  if (size()!=other.size()) return false;
 
-	for (int i=size(); --i >= 0; ) {
-	    if (getQuick(i) != other.getQuick(i)) return false;
-	}
-	return true;
+  for (int i=size(); --i >= 0; ) {
+      if (getQuick(i) != other.getQuick(i)) return false;
+  }
+  return true;
 }
 /**
  * Sets the specified range of elements in the specified array to the specified value.
@@ -246,8 +246,8 @@ public boolean equals(Object otherObj) { //delta
  * @param val the value to be stored in the specified elements of the receiver.
  */
 public void fillFromToWith(int from, int to, byte val) {
-	checkRangeFromTo(from,to,this.size);
-	for (int i=from; i<=to;) setQuick(i++,val); 
+  checkRangeFromTo(from,to,this.size);
+  for (int i=from; i<=to;) setQuick(i++,val); 
 }
 /**
  * Applies a procedure to each element of the receiver, if any.
@@ -256,20 +256,20 @@ public void fillFromToWith(int from, int to, byte val) {
  * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise. 
  */
 public boolean forEach(ByteProcedure procedure) {
-	for (int i=0; i<size;) if (! procedure.apply(get(i++))) return false;
-	return true;
+  for (int i=0; i<size;) if (! procedure.apply(get(i++))) return false;
+  return true;
 }
 /**
  * Returns the element at the specified position in the receiver.
  *
  * @param index index of element to return.
  * @throws IndexOutOfBoundsException index is out of range (index
- * 		  &lt; 0 || index &gt;= size()).
+ *       &lt; 0 || index &gt;= size()).
  */
 public byte get(int index) {
-	if (index >= size || index < 0)
-		throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
-	return getQuick(index);
+  if (index >= size || index < 0)
+    throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
+  return getQuick(index);
 }
 /**
  * Returns the element at the specified position in the receiver; <b>WARNING:</b> Does not check preconditions. 
@@ -291,7 +291,7 @@ protected abstract byte getQuick(int index);
  * @return  the index of the first occurrence of the element in the receiver; returns <code>-1</code> if the element is not found.
  */
 public int indexOf(byte element) { //delta
-	return indexOfFromTo(element, 0, size-1);
+  return indexOfFromTo(element, 0, size-1);
 }
 /**
  * Returns the index of the first occurrence of the specified
@@ -306,12 +306,12 @@ public int indexOf(byte element) { //delta
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public int indexOfFromTo(byte element, int from, int to) {
-	checkRangeFromTo(from, to, size);
+  checkRangeFromTo(from, to, size);
 
-	for (int i = from ; i <= to; i++) {
-	    if (element==getQuick(i)) return i; //found
-	}
-	return -1; //not found
+  for (int i = from ; i <= to; i++) {
+      if (element==getQuick(i)) return i; //found
+  }
+  return -1; //not found
 }
 /**
  * Returns the index of the last occurrence of the specified
@@ -321,7 +321,7 @@ public int indexOfFromTo(byte element, int from, int to) {
  * @return  the index of the last occurrence of the element in the receiver; returns <code>-1</code> if the element is not found.
  */
 public int lastIndexOf(byte element) {
-	return lastIndexOfFromTo(element, 0, size-1);
+  return lastIndexOfFromTo(element, 0, size-1);
 }
 /**
  * Returns the index of the last occurrence of the specified
@@ -336,12 +336,12 @@ public int lastIndexOf(byte element) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public int lastIndexOfFromTo(byte element, int from, int to) {
-	checkRangeFromTo(from, to, size());
+  checkRangeFromTo(from, to, size());
 
-	for (int i = to ; i >= from; i--) {
-	    if (element==getQuick(i)) return i; //found
-	}
-	return -1; //not found
+  for (int i = to ; i >= from; i--) {
+      if (element==getQuick(i)) return i; //found
+  }
+  return -1; //not found
 }
 /**
  * Sorts the specified range of the receiver into ascending order. 
@@ -360,13 +360,13 @@ public int lastIndexOfFromTo(byte element, int from, int to) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public void mergeSortFromTo(int from, int to) {
-	int mySize = size();
-	checkRangeFromTo(from, to, mySize);
-	
-	byte[] myElements = elements();
-	org.apache.mahout.matrix.Sorting.mergeSort(myElements, from, to+1);
-	elements(myElements);
-	setSizeRaw(mySize);
+  int mySize = size();
+  checkRangeFromTo(from, to, mySize);
+  
+  byte[] myElements = elements();
+  org.apache.mahout.matrix.Sorting.mergeSort(myElements, from, to+1);
+  elements(myElements);
+  setSizeRaw(mySize);
 }
 /**
  * Sorts the receiver according
@@ -390,21 +390,21 @@ public void mergeSortFromTo(int from, int to) {
  * @param to the index of the last element (inclusive) to be sorted.
  * @param c the comparator to determine the order of the receiver.
  * @throws ClassCastException if the array contains elements that are not
- *	       <i>mutually comparable</i> using the specified comparator.
+ *         <i>mutually comparable</i> using the specified comparator.
  * @throws IllegalArgumentException if <tt>fromIndex &gt; toIndex</tt>
  * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
- *	       <tt>toIndex &gt; a.length</tt>
+ *         <tt>toIndex &gt; a.length</tt>
  * @see Comparator
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public void mergeSortFromTo(int from, int to, ByteComparator c) {
-	int mySize = size();
-	checkRangeFromTo(from, to, mySize);
-	
-	byte[] myElements = elements();
-	org.apache.mahout.matrix.Sorting.mergeSort(myElements, from, to+1, c);
-	elements(myElements);
-	setSizeRaw(mySize);
+  int mySize = size();
+  checkRangeFromTo(from, to, mySize);
+  
+  byte[] myElements = elements();
+  org.apache.mahout.matrix.Sorting.mergeSort(myElements, from, to+1, c);
+  elements(myElements);
+  setSizeRaw(mySize);
 }
 /**
  * Returns a new list of the part of the receiver between <code>from</code>, inclusive, and <code>to</code>, inclusive.
@@ -414,12 +414,12 @@ public void mergeSortFromTo(int from, int to, ByteComparator c) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public AbstractByteList partFromTo(int from, int to) {
-	checkRangeFromTo(from, to, size);
+  checkRangeFromTo(from, to, size);
 
-	int length = to-from+1;
-	ByteArrayList part = new ByteArrayList(length);
-	part.addAllOfFromTo(this,from,to);
-	return part;
+  int length = to-from+1;
+  ByteArrayList part = new ByteArrayList(length);
+  part.addAllOfFromTo(this,from,to);
+  return part;
 }
 /**
  * Sorts the specified range of the receiver into
@@ -438,13 +438,13 @@ public AbstractByteList partFromTo(int from, int to) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public void quickSortFromTo(int from, int to) {
-	int mySize = size();
-	checkRangeFromTo(from, to, mySize);
-	
-	byte[] myElements = elements();
-	java.util.Arrays.sort(myElements, from, to+1);
-	elements(myElements);
-	setSizeRaw(mySize);
+  int mySize = size();
+  checkRangeFromTo(from, to, mySize);
+  
+  byte[] myElements = elements();
+  java.util.Arrays.sort(myElements, from, to+1);
+  elements(myElements);
+  setSizeRaw(mySize);
 }
 /**
  * Sorts the receiver according
@@ -466,21 +466,21 @@ public void quickSortFromTo(int from, int to) {
  * @param to the index of the last element (inclusive) to be sorted.
  * @param c the comparator to determine the order of the receiver.
  * @throws ClassCastException if the array contains elements that are not
- *	       <i>mutually comparable</i> using the specified comparator.
+ *         <i>mutually comparable</i> using the specified comparator.
  * @throws IllegalArgumentException if <tt>fromIndex &gt; toIndex</tt>
  * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
- *	       <tt>toIndex &gt; a.length</tt>
+ *         <tt>toIndex &gt; a.length</tt>
  * @see Comparator
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public void quickSortFromTo(int from, int to, ByteComparator c) {
-	int mySize = size();
-	checkRangeFromTo(from, to, mySize);
-	
-	byte[] myElements = elements();
-	org.apache.mahout.matrix.Sorting.quickSort(myElements, from, to+1,c);
-	elements(myElements);
-	setSizeRaw(mySize);
+  int mySize = size();
+  checkRangeFromTo(from, to, mySize);
+  
+  byte[] myElements = elements();
+  org.apache.mahout.matrix.Sorting.quickSort(myElements, from, to+1,c);
+  elements(myElements);
+  setSizeRaw(mySize);
 }
 /**
 * Removes from the receiver all elements that are contained in the specified list.
@@ -490,17 +490,17 @@ public void quickSortFromTo(int from, int to, ByteComparator c) {
 * @return <code>true</code> if the receiver changed as a result of the call.
 */
 public boolean removeAll(AbstractByteList other) {
-	if (other.size()==0) return false; //nothing to do
-	int limit = other.size()-1;
-	int j=0;
+  if (other.size()==0) return false; //nothing to do
+  int limit = other.size()-1;
+  int j=0;
 
-	for (int i=0; i<size ; i++) {
-		if (other.indexOfFromTo(getQuick(i), 0, limit) < 0) setQuick(j++,getQuick(i));
-	}
+  for (int i=0; i<size ; i++) {
+    if (other.indexOfFromTo(getQuick(i), 0, limit) < 0) setQuick(j++,getQuick(i));
+  }
 
-	boolean modified = (j!=size);
-	setSize(j);
-	return modified;
+  boolean modified = (j!=size);
+  setSize(j);
+  return modified;
 }
 /**
  * Removes from the receiver all elements whose index is between
@@ -513,14 +513,14 @@ public boolean removeAll(AbstractByteList other) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public void removeFromTo(int from, int to) {
-	checkRangeFromTo(from, to, size);
-	int numMoved = size - to - 1;
-	if (numMoved > 0) {
-		replaceFromToWithFrom(from, from-1+numMoved, this, to+1);
-		//fillFromToWith(from+numMoved, size-1, 0.0f); //delta
-	}
-	int width = to-from+1;
-	if (width>0) setSizeRaw(size-width);
+  checkRangeFromTo(from, to, size);
+  int numMoved = size - to - 1;
+  if (numMoved > 0) {
+    replaceFromToWithFrom(from, from-1+numMoved, this, to+1);
+    //fillFromToWith(from+numMoved, size-1, 0.0f); //delta
+  }
+  int width = to-from+1;
+  if (width>0) setSizeRaw(size-width);
 }
 /**
  * Replaces a number of elements in the receiver with the same number of elements of another list.
@@ -533,22 +533,22 @@ public void removeFromTo(int from, int to) {
  * @param otherFrom position of first element within other list to be copied.
  */
 public void replaceFromToWithFrom(int from, int to, AbstractByteList other, int otherFrom) {
-	int length=to-from+1;
-	if (length>0) {
-		checkRangeFromTo(from, to, size());
-		checkRangeFromTo(otherFrom,otherFrom+length-1,other.size());
+  int length=to-from+1;
+  if (length>0) {
+    checkRangeFromTo(from, to, size());
+    checkRangeFromTo(otherFrom,otherFrom+length-1,other.size());
 
-		// unambiguous copy (it may hold other==this)
-		if (from<=otherFrom) {
-			for (; --length >= 0; ) setQuick(from++,other.getQuick(otherFrom++));
-		}
-		else {
-			int otherTo = otherFrom+length-1;
-			for (; --length >= 0; ) setQuick(to--,other.getQuick(otherTo--));
-		}
+    // unambiguous copy (it may hold other==this)
+    if (from<=otherFrom) {
+      for (; --length >= 0; ) setQuick(from++,other.getQuick(otherFrom++));
+    }
+    else {
+      int otherTo = otherFrom+length-1;
+      for (; --length >= 0; ) setQuick(to--,other.getQuick(otherTo--));
+    }
 
-			
-	}
+      
+  }
 }
 /**
 * Replaces the part between <code>from</code> (inclusive) and <code>to</code> (inclusive) with the other list's
@@ -594,36 +594,36 @@ public void replaceFromToWithFrom(int from, int to, AbstractByteList other, int 
 * </pre>
 */
 public void replaceFromToWithFromTo(int from, int to, AbstractByteList other, int otherFrom, int otherTo) {
-	if (otherFrom>otherTo) {
-		throw new IndexOutOfBoundsException("otherFrom: "+otherFrom+", otherTo: "+otherTo);
-	}
+  if (otherFrom>otherTo) {
+    throw new IndexOutOfBoundsException("otherFrom: "+otherFrom+", otherTo: "+otherTo);
+  }
 
-	if (this==other && to-from!=otherTo-otherFrom) { // avoid stumbling over my own feet
-		replaceFromToWithFromTo(from, to, partFromTo(otherFrom, otherTo), 0, otherTo-otherFrom);
-		return;
-	}
-	
-	int length=otherTo-otherFrom+1;
-	int diff=length;
-	int theLast=from-1;
+  if (this==other && to-from!=otherTo-otherFrom) { // avoid stumbling over my own feet
+    replaceFromToWithFromTo(from, to, partFromTo(otherFrom, otherTo), 0, otherTo-otherFrom);
+    return;
+  }
+  
+  int length=otherTo-otherFrom+1;
+  int diff=length;
+  int theLast=from-1;
 
-	if (to>=from) {
-		diff -= (to-from+1);
-		theLast=to;
-	}
-	
-	if (diff>0) {
-		beforeInsertDummies(theLast+1, diff);
-	}
-	else {
-		if (diff<0) {
-			removeFromTo(theLast+diff, theLast-1);
-		}
-	}
+  if (to>=from) {
+    diff -= (to-from+1);
+    theLast=to;
+  }
+  
+  if (diff>0) {
+    beforeInsertDummies(theLast+1, diff);
+  }
+  else {
+    if (diff<0) {
+      removeFromTo(theLast+diff, theLast-1);
+    }
+  }
 
-	if (length>0) {
-		replaceFromToWithFrom(from,from+length-1,other,otherFrom);
-	}
+  if (length>0) {
+    replaceFromToWithFrom(from,from+length-1,other,otherFrom);
+  }
 }
 /**
  * Replaces the part of the receiver starting at <code>from</code> (inclusive) with all the elements of the specified collection.
@@ -635,12 +635,12 @@ public void replaceFromToWithFromTo(int from, int to, AbstractByteList other, in
  * @exception IndexOutOfBoundsException index is out of range (index &lt; 0 || index &gt;= size()).
  */
 public void replaceFromWith(int from, java.util.Collection other) {
-	checkRange(from,size());
-	java.util.Iterator e = other.iterator();
-	int index=from;
-	int limit = Math.min(size()-from, other.size());
-	for (int i=0; i<limit; i++)
-	    set(index++,((Number) e.next()).byteValue()); //delta
+  checkRange(from,size());
+  java.util.Iterator e = other.iterator();
+  int index=from;
+  int limit = Math.min(size()-from, other.size());
+  for (int i=0; i<limit; i++)
+      set(index++,((Number) e.next()).byteValue()); //delta
 }
 /**
 * Retains (keeps) only the elements in the receiver that are contained in the specified other list.
@@ -650,36 +650,36 @@ public void replaceFromWith(int from, java.util.Collection other) {
 * @return <code>true</code> if the receiver changed as a result of the call.
 */
 public boolean retainAll(AbstractByteList other) {
-	if (other.size()==0) {
-		if (size==0) return false;
-		setSize(0);
-		return true;
-	}
-	
-	int limit = other.size()-1;
-	int j=0;
-	for (int i=0; i<size ; i++) {
-		if (other.indexOfFromTo(getQuick(i), 0, limit) >= 0) setQuick(j++, getQuick(i));
-	}
+  if (other.size()==0) {
+    if (size==0) return false;
+    setSize(0);
+    return true;
+  }
+  
+  int limit = other.size()-1;
+  int j=0;
+  for (int i=0; i<size ; i++) {
+    if (other.indexOfFromTo(getQuick(i), 0, limit) >= 0) setQuick(j++, getQuick(i));
+  }
 
-	boolean modified = (j!=size);
-	setSize(j);
-	return modified;
+  boolean modified = (j!=size);
+  setSize(j);
+  return modified;
 }
 /**
  * Reverses the elements of the receiver.
  * Last becomes first, second last becomes second first, and so on.
  */
 public void reverse() {
-	byte tmp;
-	int limit=size()/2;
-	int j=size()-1;
+  byte tmp;
+  int limit=size()/2;
+  int j=size()-1;
 
-	for (int i=0; i<limit;) { //swap
-		tmp=getQuick(i);
-		setQuick(i++,getQuick(j));
-		setQuick(j--,tmp);
-	}
+  for (int i=0; i<limit;) { //swap
+    tmp=getQuick(i);
+    setQuick(i++,getQuick(j));
+    setQuick(j--,tmp);
+  }
 }
 /**
  * Replaces the element at the specified position in the receiver with the specified element.
@@ -689,9 +689,9 @@ public void reverse() {
  * @exception IndexOutOfBoundsException if <tt>index &lt; 0 || index &gt;= size()</tt>.
  */
 public void set(int index, byte element) {
-	if (index >= size || index < 0)
-		throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
-	setQuick(index,element);
+  if (index >= size || index < 0)
+    throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
+  setQuick(index,element);
 }
 /**
  * Replaces the element at the specified position in the receiver with the specified element; <b>WARNING:</b> Does not check preconditions.
@@ -722,7 +722,7 @@ protected abstract void setQuick(int index, byte element);
  * }
  */
 protected void setSizeRaw(int newSize) {
-	size = newSize;
+  size = newSize;
 }
 /**
  * Randomly permutes the part of the receiver between <code>from</code> (inclusive) and <code>to</code> (inclusive). 
@@ -731,17 +731,17 @@ protected void setSizeRaw(int newSize) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public void shuffleFromTo(int from, int to) {
-	checkRangeFromTo(from, to, size());
-	
-	org.apache.mahout.jet.random.Uniform gen = new org.apache.mahout.jet.random.Uniform(new org.apache.mahout.jet.random.engine.DRand(new java.util.Date()));
-	for (int i=from; i<to; i++) { 
-		int random = gen.nextIntFromTo(i, to);
+  checkRangeFromTo(from, to, size());
+  
+  org.apache.mahout.jet.random.Uniform gen = new org.apache.mahout.jet.random.Uniform(new org.apache.mahout.jet.random.engine.DRand(new java.util.Date()));
+  for (int i=from; i<to; i++) { 
+    int random = gen.nextIntFromTo(i, to);
 
-		//swap(i, random)
-		byte tmpElement = getQuick(random);
-		setQuick(random,getQuick(i)); 
-		setQuick(i,tmpElement); 
-	}  
+    //swap(i, random)
+    byte tmpElement = getQuick(random);
+    setQuick(random,getQuick(i)); 
+    setQuick(i,tmpElement); 
+  }  
 }
 /**
  * Returns the number of elements contained in the receiver.
@@ -749,33 +749,33 @@ public void shuffleFromTo(int from, int to) {
  * @returns  the number of elements contained in the receiver.
  */
 public int size() {
-	return size;
+  return size;
 }
 /**
  * Returns a list which is a concatenation of <code>times</code> times the receiver.
  * @param times the number of times the receiver shall be copied.
  */
 public AbstractByteList times(int times) {
-	AbstractByteList newList = new ByteArrayList(times*size());
-	for (int i=times; --i >= 0; ) {
-		newList.addAllOfFromTo(this,0,size()-1);
-	}
-	return newList;
+  AbstractByteList newList = new ByteArrayList(times*size());
+  for (int i=times; --i >= 0; ) {
+    newList.addAllOfFromTo(this,0,size()-1);
+  }
+  return newList;
 }
 /**
  * Returns a <code>java.util.ArrayList</code> containing all the elements in the receiver.
  */
 public java.util.ArrayList toList() {
-	int mySize = size();
-	java.util.ArrayList list = new java.util.ArrayList(mySize);
-	for (int i=0; i < mySize; i++) list.add(new Byte(get(i)));
-	return list;
+  int mySize = size();
+  java.util.ArrayList list = new java.util.ArrayList(mySize);
+  for (int i=0; i < mySize; i++) list.add(new Byte(get(i)));
+  return list;
 }
 /**
 * Returns a string representation of the receiver, containing
 * the String representation of each element.
 */
 public String toString() {
-	return org.apache.mahout.matrix.Arrays.toString(partFromTo(0, size()-1).elements());
+  return org.apache.mahout.matrix.Arrays.toString(partFromTo(0, size()-1).elements());
 }
 }

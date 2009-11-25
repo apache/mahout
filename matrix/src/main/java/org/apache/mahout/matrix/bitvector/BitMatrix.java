@@ -30,8 +30,6 @@ import java.awt.Rectangle;
  * <p>
  * <b>Note</b> that this implementation is not synchronized.
  *
- * @author wolfgang.hoschek@cern.ch
- * @version 1.0, 09/24/99
  * @see     BitVector
  * @see     QuickBitVector
  * @see     java.util.BitSet
@@ -42,17 +40,17 @@ import java.awt.Rectangle;
  */
 @Deprecated
 public class BitMatrix extends PersistentObject {
-	protected int columns;
-	protected int rows;
+  protected int columns;
+  protected int rows;
 
-	/*
-	 * The bits of this matrix.
-	 * bits are stored in row major, i.e.
-	 * bitIndex==row*columns + column
-	 * columnOf(bitIndex)==bitIndex%columns
-	 * rowOf(bitIndex)==bitIndex/columns
-	 */
-	protected long bits[]; 
+  /*
+   * The bits of this matrix.
+   * bits are stored in row major, i.e.
+   * bitIndex==row*columns + column
+   * columnOf(bitIndex)==bitIndex%columns
+   * rowOf(bitIndex)==bitIndex/columns
+   */
+  protected long bits[]; 
 /**
  * Constructs a bit matrix with a given number of columns and rows. All bits are initially <tt>false</tt>.
  * @param columns the number of columns the matrix shall have.
@@ -60,7 +58,7 @@ public class BitMatrix extends PersistentObject {
  * @throws IllegalArgumentException if <tt>columns &lt; 0 || rows &lt; 0</tt>.
  */
 public BitMatrix(int columns, int rows) {
-	elements(QuickBitVector.makeBitVector(columns*rows,1),columns,rows);
+  elements(QuickBitVector.makeBitVector(columns*rows,1),columns,rows);
 }
 /**
  * Performs a logical <b>AND</b> of the receiver with another bit matrix.
@@ -73,8 +71,8 @@ public BitMatrix(int columns, int rows) {
  * @throws IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>.
  */
 public void and(BitMatrix other) {
-	checkDimensionCompatibility(other);
-	toBitVector().and(other.toBitVector());
+  checkDimensionCompatibility(other);
+  toBitVector().and(other.toBitVector());
 }
 /**
  * Clears all of the bits in receiver whose corresponding
@@ -85,27 +83,27 @@ public void and(BitMatrix other) {
  * @throws IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>.
  */
 public void andNot(BitMatrix other) {
-	checkDimensionCompatibility(other);
-	toBitVector().andNot(other.toBitVector());
+  checkDimensionCompatibility(other);
+  toBitVector().andNot(other.toBitVector());
 }
 /**
  * Returns the number of bits currently in the <tt>true</tt> state.
  * Optimized for speed. Particularly quick if the receiver is either sparse or dense.
  */
 public int cardinality() {
-	return toBitVector().cardinality();
+  return toBitVector().cardinality();
 }
 /**
  * Sanity check for operations requiring matrices with the same number of columns and rows.
  */
 protected void checkDimensionCompatibility(BitMatrix other) {
-	if (columns != other.columns() || rows != other.rows()) throw new IllegalArgumentException("Incompatible dimensions: (columns,rows)=("+columns+","+rows+"), (other.columns,other.rows)=("+other.columns()+","+other.rows()+")");
+  if (columns != other.columns() || rows != other.rows()) throw new IllegalArgumentException("Incompatible dimensions: (columns,rows)=("+columns+","+rows+"), (other.columns,other.rows)=("+other.columns()+","+other.rows()+")");
 }
 /**
  * Clears all bits of the receiver.
  */
 public void clear() {
-	toBitVector().clear();
+  toBitVector().clear();
 }
 /**
  * Cloning this <code>BitMatrix</code> produces a new <code>BitMatrix</code> 
@@ -117,21 +115,21 @@ public void clear() {
  * @return  a clone of this bit matrix.
  */
 public Object clone() {
-	BitMatrix clone = (BitMatrix) super.clone();
-	if (this.bits != null) clone.bits = (long[]) this.bits.clone();
-	return clone;
+  BitMatrix clone = (BitMatrix) super.clone();
+  if (this.bits != null) clone.bits = (long[]) this.bits.clone();
+  return clone;
 }
 /**
  * Returns the number of columns of the receiver.
  */
 public int columns() {
-	return columns;
+  return columns;
 }
 /**
  * Checks whether the receiver contains the given box.
  */
 protected void containsBox(int column, int row, int width, int height) {
-	if (column<0 || column+width>columns || row<0 || row+height>rows) throw new IndexOutOfBoundsException("column:"+column+", row:"+row+" ,width:"+width+", height:"+height);
+  if (column<0 || column+width>columns || row<0 || row+height>rows) throw new IndexOutOfBoundsException("column:"+column+", row:"+row+" ,width:"+width+", height:"+height);
 }
 /**
  * Returns a shallow clone of the receiver; calls <code>clone()</code> and casts the result.
@@ -139,10 +137,10 @@ protected void containsBox(int column, int row, int width, int height) {
  * @return  a shallow clone of the receiver.
  */
 public BitMatrix copy() {
-	return (BitMatrix) clone();
+  return (BitMatrix) clone();
 }
 protected long[] elements() {
-	return bits;
+  return bits;
 }
 /**
  * You normally need not use this method. Use this method only if performance is critical. 
@@ -152,10 +150,10 @@ protected long[] elements() {
  * @throws IllegalArgumentException if <tt>columns &lt; 0 || rows &lt; 0 || columns*rows &gt; bits.length*64</tt>
  */
 protected void elements(long[] bits, int columns, int rows) {
-	if (columns<0 || columns<0 || columns*rows>bits.length*QuickBitVector.BITS_PER_UNIT) throw new IllegalArgumentException();
-	this.bits = bits;
-	this.columns = columns;
-	this.rows = rows;
+  if (columns<0 || columns<0 || columns*rows>bits.length*QuickBitVector.BITS_PER_UNIT) throw new IllegalArgumentException();
+  this.bits = bits;
+  this.columns = columns;
+  this.rows = rows;
 }
 /**
  * Compares this object against the specified object.
@@ -168,15 +166,15 @@ protected void elements(long[] bits, int columns, int rows) {
  *          <code>false</code> otherwise.
  */
 public boolean equals(Object obj) {
-	if (obj == null || !(obj instanceof BitMatrix))
-		return false;
-	if (this == obj)
-		return true;
+  if (obj == null || !(obj instanceof BitMatrix))
+    return false;
+  if (this == obj)
+    return true;
 
-	BitMatrix other = (BitMatrix) obj;
-	if (columns != other.columns() || rows != other.rows()) return false;
+  BitMatrix other = (BitMatrix) obj;
+  if (columns != other.columns() || rows != other.rows()) return false;
 
-	return toBitVector().equals(other.toBitVector());
+  return toBitVector().equals(other.toBitVector());
 }
 /**
  * Applies a procedure to each coordinate that holds a bit in the given state.
@@ -193,95 +191,95 @@ public boolean equals(Object obj) {
  * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise. 
  */
 public boolean forEachCoordinateInState(boolean state, final org.apache.mahout.matrix.function.IntIntProcedure procedure) {
-	/*
-	this is equivalent to the low level version below, apart from that it iterates in the reverse oder and is slower.
-	if (size()==0) return true;
-	BitVector vector = toBitVector();
-	return vector.forEachIndexFromToInState(0,size()-1,state,
-		new org.apache.mahout.matrix.function.IntFunction() {
-			public boolean apply(int index) {
-				return function.apply(index%columns, index/columns);
-			}
-		}
-	);
-	*/
+  /*
+  this is equivalent to the low level version below, apart from that it iterates in the reverse oder and is slower.
+  if (size()==0) return true;
+  BitVector vector = toBitVector();
+  return vector.forEachIndexFromToInState(0,size()-1,state,
+    new org.apache.mahout.matrix.function.IntFunction() {
+      public boolean apply(int index) {
+        return function.apply(index%columns, index/columns);
+      }
+    }
+  );
+  */
 
-	//low level implementation for speed.
-	if (size()==0) return true;
-	BitVector vector = new BitVector(bits,size());
+  //low level implementation for speed.
+  if (size()==0) return true;
+  BitVector vector = new BitVector(bits,size());
 
-	long[] theBits=bits;
+  long[] theBits=bits;
 
-	int column=columns-1;
-	int row=rows-1;
+  int column=columns-1;
+  int row=rows-1;
 
-	// for each coordinate of bits of partial unit
-	long val = theBits[bits.length-1];
-	for (int j=vector.numberOfBitsInPartialUnit(); --j >= 0; ) {
-		long mask = val & (1L << j);
-		if ((state && (mask!=0L)) || ((!state) && (mask==0L))) {
-			if (!procedure.apply(column,row)) return false;
-		}
-		if (--column < 0) {
-			column=columns-1;
-			--row;
-		}
-	}
-		
+  // for each coordinate of bits of partial unit
+  long val = theBits[bits.length-1];
+  for (int j=vector.numberOfBitsInPartialUnit(); --j >= 0; ) {
+    long mask = val & (1L << j);
+    if ((state && (mask!=0L)) || ((!state) && (mask==0L))) {
+      if (!procedure.apply(column,row)) return false;
+    }
+    if (--column < 0) {
+      column=columns-1;
+      --row;
+    }
+  }
+    
 
-	// for each coordinate of bits of full units
-	final int bitsPerUnit = QuickBitVector.BITS_PER_UNIT;
-	long comparator;
-	if (state) comparator = 0L;
-	else comparator = ~0L; // all 64 bits set
+  // for each coordinate of bits of full units
+  final int bitsPerUnit = QuickBitVector.BITS_PER_UNIT;
+  long comparator;
+  if (state) comparator = 0L;
+  else comparator = ~0L; // all 64 bits set
 
-	for(int i=vector.numberOfFullUnits(); --i >= 0;) {
-		val = theBits[i];
-		if (val != comparator) { 
-			// at least one element within current unit matches.
-			// iterate over all bits within current unit.
-			if (state) {
-				for (int j=bitsPerUnit; --j >= 0; ) {
-					if (((val & (1L << j))) != 0L) {
-						if (!procedure.apply(column,row)) return false;
-					}
-					if (--column < 0) {
-						column=columns-1;
-						--row;
-					}
-				}
-			}
-			else { // unrolled comparison for speed.
-				for (int j=bitsPerUnit; --j >= 0; ) {
-					if (((val & (1L << j))) == 0L) {
-						if (!procedure.apply(column,row)) return false;
-					}
-					if (--column < 0) {
-						column=columns-1;
-						--row;
-					}
-				}
-			}
-		
-		}
-		else { // no element within current unit matches --> skip unit
-			column -= bitsPerUnit;
-			if (column < 0) {
-				// avoid implementation with *, /, %
-				column += bitsPerUnit;
-				for (int j=bitsPerUnit; --j >= 0; ) {
-					if (--column < 0) {
-						column=columns-1;
-						--row;
-					}
-				}
-			}
-		}
-		
-	}
+  for(int i=vector.numberOfFullUnits(); --i >= 0;) {
+    val = theBits[i];
+    if (val != comparator) { 
+      // at least one element within current unit matches.
+      // iterate over all bits within current unit.
+      if (state) {
+        for (int j=bitsPerUnit; --j >= 0; ) {
+          if (((val & (1L << j))) != 0L) {
+            if (!procedure.apply(column,row)) return false;
+          }
+          if (--column < 0) {
+            column=columns-1;
+            --row;
+          }
+        }
+      }
+      else { // unrolled comparison for speed.
+        for (int j=bitsPerUnit; --j >= 0; ) {
+          if (((val & (1L << j))) == 0L) {
+            if (!procedure.apply(column,row)) return false;
+          }
+          if (--column < 0) {
+            column=columns-1;
+            --row;
+          }
+        }
+      }
+    
+    }
+    else { // no element within current unit matches --> skip unit
+      column -= bitsPerUnit;
+      if (column < 0) {
+        // avoid implementation with *, /, %
+        column += bitsPerUnit;
+        for (int j=bitsPerUnit; --j >= 0; ) {
+          if (--column < 0) {
+            column=columns-1;
+            --row;
+          }
+        }
+      }
+    }
+    
+  }
 
-	return true;
-	
+  return true;
+  
 }
 /**
  * Returns from the receiver the value of the bit at the specified coordinate.
@@ -290,11 +288,11 @@ public boolean forEachCoordinateInState(boolean state, final org.apache.mahout.m
  * @param     column   the index of the column-coordinate.
  * @param     row   the index of the row-coordinate.
  * @return    the value of the bit at the specified coordinate.
- * @throws	IndexOutOfBoundsException if <tt>column&lt;0 || column&gt;=columns() || row&lt;0 || row&gt;=rows()</tt>
+ * @throws  IndexOutOfBoundsException if <tt>column&lt;0 || column&gt;=columns() || row&lt;0 || row&gt;=rows()</tt>
  */
 public boolean get(int column, int row) {
-	if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("column:"+column+", row:"+row);
-	return QuickBitVector.get(bits, row*columns + column);
+  if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("column:"+column+", row:"+row);
+  return QuickBitVector.get(bits, row*columns + column);
 }
 /**
  * Returns from the receiver the value of the bit at the specified coordinate; <b>WARNING:</b> Does not check preconditions.
@@ -309,19 +307,19 @@ public boolean get(int column, int row) {
  * @return    the value of the bit at the specified coordinate.
  */
 public boolean getQuick(int column, int row) {
-	return QuickBitVector.get(bits, row*columns + column);
+  return QuickBitVector.get(bits, row*columns + column);
 }
 /**
  * Returns a hash code value for the receiver. 
  */
 public int hashCode() {
-	return toBitVector().hashCode();
+  return toBitVector().hashCode();
 }
 /**
  * Performs a logical <b>NOT</b> on the bits of the receiver.
  */
 public void not() {
-	toBitVector().not();
+  toBitVector().not();
 }
 /**
  * Performs a logical <b>OR</b> of the receiver with another bit matrix.
@@ -334,8 +332,8 @@ public void not() {
  * @throws IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>.
  */
 public void or(BitMatrix other) {
-	checkDimensionCompatibility(other);
-	toBitVector().or(other.toBitVector());
+  checkDimensionCompatibility(other);
+  toBitVector().or(other.toBitVector());
 }
 /**
  * Constructs and returns a new matrix with <tt>width</tt> columns and <tt>height</tt> rows which is a copy of the contents of the given box.
@@ -344,15 +342,15 @@ public void or(BitMatrix other) {
  * @param     row   the index of the row-coordinate.
  * @param     width   the width of the box.
  * @param     height   the height of the box.
- * @throws	IndexOutOfBoundsException if <tt>column&lt;0 || column+width&gt;columns() || row&lt;0 || row+height&gt;rows()</tt>
+ * @throws  IndexOutOfBoundsException if <tt>column&lt;0 || column+width&gt;columns() || row&lt;0 || row+height&gt;rows()</tt>
  */
 public BitMatrix part(int column, int row, int width, int height) {
-	if (column<0 || column+width>columns || row<0 || row+height>rows) throw new IndexOutOfBoundsException("column:"+column+", row:"+row+" ,width:"+width+", height:"+height);
-	if (width<=0 || height<=0) return new BitMatrix(0,0);
+  if (column<0 || column+width>columns || row<0 || row+height>rows) throw new IndexOutOfBoundsException("column:"+column+", row:"+row+" ,width:"+width+", height:"+height);
+  if (width<=0 || height<=0) return new BitMatrix(0,0);
 
-	BitMatrix subMatrix = new BitMatrix(width,height);
-	subMatrix.replaceBoxWith(0,0,width,height,this,column,row);
-	return subMatrix;
+  BitMatrix subMatrix = new BitMatrix(width,height);
+  subMatrix.replaceBoxWith(0,0,width,height,this,column,row);
+  return subMatrix;
 }
 /**
  * Sets the bit at the specified coordinate to the state specified by <tt>value</tt>.
@@ -360,11 +358,11 @@ public BitMatrix part(int column, int row, int width, int height) {
  * @param     column   the index of the column-coordinate.
  * @param     row   the index of the row-coordinate.
  * @param    value the value of the bit to be copied into the specified coordinate.
- * @throws	IndexOutOfBoundsException if <tt>column&lt;0 || column&gt;=columns() || row&lt;0 || row&gt;=rows()</tt>
+ * @throws  IndexOutOfBoundsException if <tt>column&lt;0 || column&gt;=columns() || row&lt;0 || row&gt;=rows()</tt>
  */
 public void put(int column, int row, boolean value) {
-	if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("column:"+column+", row:"+row);
-	QuickBitVector.put(bits, row*columns + column, value);
+  if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("column:"+column+", row:"+row);
+  QuickBitVector.put(bits, row*columns + column, value);
 }
 /**
  * Sets the bit at the specified coordinate to the state specified by <tt>value</tt>; <b>WARNING:</b> Does not check preconditions.
@@ -378,7 +376,7 @@ public void put(int column, int row, boolean value) {
  * @param    value the value of the bit to be copied into the specified coordinate.
  */
 public void putQuick(int column, int row, boolean value) {
-	QuickBitVector.put(bits, row*columns + column, value);
+  QuickBitVector.put(bits, row*columns + column, value);
 }
 /**
  * Replaces a box of the receiver with the contents of another matrix's box.
@@ -394,30 +392,30 @@ public void putQuick(int column, int row, boolean value) {
  * @param     source   the source matrix to copy from(may be identical to the receiver).
  * @param     sourceColumn   the index of the source column-coordinate.
  * @param     sourceRow   the index of the source row-coordinate.
- * @throws	IndexOutOfBoundsException if <tt>column&lt;0 || column+width&gt;columns() || row&lt;0 || row+height&gt;rows()</tt>
- * @throws	IndexOutOfBoundsException if <tt>sourceColumn&lt;0 || sourceColumn+width&gt;source.columns() || sourceRow&lt;0 || sourceRow+height&gt;source.rows()</tt>
+ * @throws  IndexOutOfBoundsException if <tt>column&lt;0 || column+width&gt;columns() || row&lt;0 || row+height&gt;rows()</tt>
+ * @throws  IndexOutOfBoundsException if <tt>sourceColumn&lt;0 || sourceColumn+width&gt;source.columns() || sourceRow&lt;0 || sourceRow+height&gt;source.rows()</tt>
  */
 public void replaceBoxWith(int column, int row, int width, int height, BitMatrix source, int sourceColumn, int sourceRow) {
-	this.containsBox(column,row,width,height);
-	source.containsBox(sourceColumn,sourceRow,width,height);
-	if (width<=0 || height<=0) return;
+  this.containsBox(column,row,width,height);
+  source.containsBox(sourceColumn,sourceRow,width,height);
+  if (width<=0 || height<=0) return;
 
-	if (source==this) {
-		Rectangle destRect = new Rectangle(column,row,width,height);
-		Rectangle sourceRect = new Rectangle(sourceColumn,sourceRow,width,height);
-		if (destRect.intersects(sourceRect)) { // dangerous intersection
-			source = source.copy();
-		}
-	}
+  if (source==this) {
+    Rectangle destRect = new Rectangle(column,row,width,height);
+    Rectangle sourceRect = new Rectangle(sourceColumn,sourceRow,width,height);
+    if (destRect.intersects(sourceRect)) { // dangerous intersection
+      source = source.copy();
+    }
+  }
 
-	BitVector sourceVector = source.toBitVector();
-	BitVector destVector = this.toBitVector();
-	int sourceColumns = source.columns();
-	for (; --height >=0; row++, sourceRow++) {
-		int offset = row*columns + column;
-		int sourceOffset = sourceRow*sourceColumns + sourceColumn;
-		destVector.replaceFromToWith(offset,offset+width-1,sourceVector,sourceOffset);
-	}
+  BitVector sourceVector = source.toBitVector();
+  BitVector destVector = this.toBitVector();
+  int sourceColumns = source.columns();
+  for (; --height >=0; row++, sourceRow++) {
+    int offset = row*columns + column;
+    int sourceOffset = sourceRow*sourceColumns + sourceColumn;
+    destVector.replaceFromToWith(offset,offset+width-1,sourceVector,sourceOffset);
+  }
 }
 /**
  * Sets the bits in the given box to the state specified by <tt>value</tt>.
@@ -428,29 +426,29 @@ public void replaceBoxWith(int column, int row, int width, int height, BitMatrix
  * @param     width   the width of the box.
  * @param     height   the height of the box.
  * @param    value the value of the bit to be copied into the bits of the specified box.
- * @throws	IndexOutOfBoundsException if <tt>column&lt;0 || column+width&gt;columns() || row&lt;0 || row+height&gt;rows()</tt>
+ * @throws  IndexOutOfBoundsException if <tt>column&lt;0 || column+width&gt;columns() || row&lt;0 || row+height&gt;rows()</tt>
  */
 public void replaceBoxWith(int column, int row, int width, int height, boolean value) {
-	containsBox(column,row,width,height);
-	if (width<=0 || height<=0) return;
-	
-	BitVector destVector = this.toBitVector();
-	for (; --height >= 0; row++) {
-		int offset = row*columns + column;
-		destVector.replaceFromToWith(offset, offset+width-1,value);
-	}
+  containsBox(column,row,width,height);
+  if (width<=0 || height<=0) return;
+  
+  BitVector destVector = this.toBitVector();
+  for (; --height >= 0; row++) {
+    int offset = row*columns + column;
+    destVector.replaceFromToWith(offset, offset+width-1,value);
+  }
 }
 /**
  * Returns the number of rows of the receiver.
  */
 public int rows() {
-	return rows;
+  return rows;
 }
 /**
  * Returns the size of the receiver which is <tt>columns()*rows()</tt>.
  */
 public int size() {
-	return columns*rows;
+  return columns*rows;
 }
 /**
  * Converts the receiver to a bitvector. 
@@ -460,13 +458,13 @@ public int size() {
  * If this behaviour is not what you want, you should first use <tt>copy()</tt> to make sure both objects use separate internal storage.
  */
 public BitVector toBitVector() {
-	return new BitVector(bits,size());
+  return new BitVector(bits,size());
 }
 /**
  * Returns a (very crude) string representation of the receiver.
  */
 public String toString() {
-	return toBitVector().toString();
+  return toBitVector().toString();
 }
 /**
  * Performs a logical <b>XOR</b> of the receiver with another bit matrix.
@@ -483,7 +481,7 @@ public String toString() {
  * @throws IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>.
  */
 public void xor(BitMatrix other) {
-	checkDimensionCompatibility(other);
-	toBitVector().xor(other.toBitVector());
+  checkDimensionCompatibility(other);
+  toBitVector().xor(other.toBitVector());
 }
 }

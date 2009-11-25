@@ -18,39 +18,39 @@ package org.apache.mahout.matrix;
  */
 @Deprecated
 public class Timer extends PersistentObject {
-	private long baseTime;
-	private long elapsedTime;
+  private long baseTime;
+  private long elapsedTime;
 
-	private static final long UNIT = 1000;
+  private static final long UNIT = 1000;
 /**
  * Constructs a new timer, initially not started. Use start() to start the timer.
  */
 public Timer() {
-	this.reset();
+  this.reset();
 }
 /**
  * Prints the elapsed time on System.out
  * @return <tt>this</tt> (for convenience only).
  */
 public Timer display() {
-	System.out.println(this);
-	return this;
+  System.out.println(this);
+  return this;
 }
 /**
  * Same as <tt>seconds()</tt>.
  */
 public float elapsedTime() {
-	return seconds();
+  return seconds();
 }
 /**
  * Returns the elapsed time in milli seconds; does not stop the timer, if started.
  */
 public long millis() {
-	long elapsed = elapsedTime;
-	if (baseTime!=0) { // we are started
-		elapsed += System.currentTimeMillis() - baseTime;
-	}
-	return elapsed;
+  long elapsed = elapsedTime;
+  if (baseTime!=0) { // we are started
+    elapsed += System.currentTimeMillis() - baseTime;
+  }
+  return elapsed;
 }
 /**
  * <tt>T = this - other</tt>; Constructs and returns a new timer which is the difference of the receiver and the other timer.
@@ -59,15 +59,15 @@ public long millis() {
  * @return a new timer.
  */
 public Timer minus(Timer other) {
-	Timer copy = new Timer();
-	copy.elapsedTime = millis() - other.millis();
-	return copy;
+  Timer copy = new Timer();
+  copy.elapsedTime = millis() - other.millis();
+  return copy;
 }
 /**
  * Returns the elapsed time in minutes; does not stop the timer, if started.
  */
 public float minutes() {
-	return seconds() / 60;
+  return seconds() / 60;
 }
 /**
  * <tt>T = this + other</tt>; Constructs and returns a new timer which is the sum of the receiver and the other timer.
@@ -76,91 +76,91 @@ public float minutes() {
  * @return a new timer.
  */
 public Timer plus(Timer other) {
-	Timer copy = new Timer();
-	copy.elapsedTime = millis() + other.millis();
-	return copy;
+  Timer copy = new Timer();
+  copy.elapsedTime = millis() + other.millis();
+  return copy;
 }
 /**
  * Resets the timer.
  * @return <tt>this</tt> (for convenience only).
  */
 public Timer reset() {
-	elapsedTime = 0;
-	baseTime=0;
-	return this;
+  elapsedTime = 0;
+  baseTime=0;
+  return this;
 }
 /**
  * Returns the elapsed time in seconds; does not stop the timer, if started.
  */
 public float seconds() {
-	return ((float) millis()) / UNIT;
+  return ((float) millis()) / UNIT;
 }
 /**
  * Starts the timer.
  * @return <tt>this</tt> (for convenience only).
  */
 public Timer start() {
-	baseTime = System.currentTimeMillis();
-	return this;
+  baseTime = System.currentTimeMillis();
+  return this;
 }
 /**
  * Stops the timer. You can start it again later, if necessary.
  * @return <tt>this</tt> (for convenience only).
  */
 public Timer stop() {
-	if (baseTime!=0) {
-		elapsedTime = elapsedTime + (System.currentTimeMillis() - baseTime);
-	}
-	baseTime = 0;
-	return this;
+  if (baseTime!=0) {
+    elapsedTime = elapsedTime + (System.currentTimeMillis() - baseTime);
+  }
+  baseTime = 0;
+  return this;
 }
 /**
  * Shows how to use a timer in convenient ways.
  */
 public static void test(int size) {
-	//benchmark this piece
-	Timer t = new Timer().start(); 
-	int j=0;
-	for (int i=0; i<size; i++) {
-		j++;
-	}
-	t.stop();
-	t.display();
-	System.out.println("I finished the test using "+t);
+  //benchmark this piece
+  Timer t = new Timer().start(); 
+  int j=0;
+  for (int i=0; i<size; i++) {
+    j++;
+  }
+  t.stop();
+  t.display();
+  System.out.println("I finished the test using "+t);
 
-	
+  
 
-	//do something we do not want to benchmark
-	j=0;
-	for (int i=0; i<size; i++) {
-		j++;
-	}
+  //do something we do not want to benchmark
+  j=0;
+  for (int i=0; i<size; i++) {
+    j++;
+  }
 
 
-	
-	//benchmark another piece and add to last benchmark
-	t.start();
-	j=0;
-	for (int i=0; i<size; i++) {
-		j++;
-	}
-	t.stop().display();
+  
+  //benchmark another piece and add to last benchmark
+  t.start();
+  j=0;
+  for (int i=0; i<size; i++) {
+    j++;
+  }
+  t.stop().display();
 
-	
+  
 
-	//benchmark yet another piece independently
-	t.reset(); //set timer to zero
-	t.start();
-	j=0;
-	for (int i=0; i<size; i++) {
-		j++;
-	}
-	t.stop().display();
+  //benchmark yet another piece independently
+  t.reset(); //set timer to zero
+  t.start();
+  j=0;
+  for (int i=0; i<size; i++) {
+    j++;
+  }
+  t.stop().display();
 }
 /**
  * Returns a String representation of the receiver.
  */
 public String toString() {
-	return "Time=" + Float.toString(this.elapsedTime()) + " secs";
+  return "Time=" + Float.toString(this.elapsedTime()) + " secs";
 }
 }

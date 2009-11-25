@@ -18,17 +18,17 @@ First see the <a href="package-summary.html">package summary</a> and javadoc <a 
  */
 @Deprecated
 public class DoubleArrayList extends AbstractDoubleList {
-	/**
-	 * The array buffer into which the elements of the list are stored.
-	 * The capacity of the list is the length of this array buffer.
-	 * @serial
-	 */
-	protected double[] elements;
+  /**
+   * The array buffer into which the elements of the list are stored.
+   * The capacity of the list is the length of this array buffer.
+   * @serial
+   */
+  protected double[] elements;
 /**
  * Constructs an empty list.
  */
 public DoubleArrayList() {
-	this(10);
+  this(10);
 }
 /**
  * Constructs a list containing the specified elements. 
@@ -40,7 +40,7 @@ public DoubleArrayList() {
  * @param elements the array to be backed by the the constructed list
  */
 public DoubleArrayList(double[] elements) {
-	elements(elements);
+  elements(elements);
 }
 /**
  * Constructs an empty list with the specified initial capacity.
@@ -48,8 +48,8 @@ public DoubleArrayList(double[] elements) {
  * @param   initialCapacity   the number of elements the receiver can hold without auto-expanding itself by allocating new internal memory.
  */
 public DoubleArrayList(int initialCapacity) {
-	this(new double[initialCapacity]);
-	setSizeRaw(0);
+  this(new double[initialCapacity]);
+  setSizeRaw(0);
 }
 /**
  * Appends the specified element to the end of this list.
@@ -57,9 +57,9 @@ public DoubleArrayList(int initialCapacity) {
  * @param element element to be appended to this list.
  */
 public void add(double element) {
-	// overridden for performance only.  
-	if (size == elements.length) ensureCapacity(size + 1); 
-	elements[size++] = element;
+  // overridden for performance only.  
+  if (size == elements.length) ensureCapacity(size + 1); 
+  elements[size++] = element;
 }
 /**
  * Inserts the specified element before the specified position into the receiver. 
@@ -71,17 +71,17 @@ public void add(double element) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>index &lt; 0 || index &gt; size()</tt>).
  */
 public void beforeInsert(int index, double element) {
-	// overridden for performance only.
-	if (size == index) {
-		add(element);
-		return;
-	}
-	if (index > size || index < 0) 
-		throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
-	ensureCapacity(size + 1);
-	System.arraycopy(elements, index, elements, index+1, size-index);
-	elements[index] = element;
-	size++;
+  // overridden for performance only.
+  if (size == index) {
+    add(element);
+    return;
+  }
+  if (index > size || index < 0) 
+    throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
+  ensureCapacity(size + 1);
+  System.arraycopy(elements, index, elements, index+1, size-index);
+  elements[index] = element;
+  size++;
 }
 /**
  * Searches the receiver for the specified value using
@@ -96,18 +96,18 @@ public void beforeInsert(int index, double element) {
  * @param from the leftmost search position, inclusive.
  * @param to the rightmost search position, inclusive.
  * @return index of the search key, if it is contained in the receiver;
- *	       otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The <i>insertion
- *	       point</i> is defined as the the point at which the value would
- * 	       be inserted into the receiver: the index of the first
- *	       element greater than the key, or <tt>receiver.size()</tt>, if all
- *	       elements in the receiver are less than the specified key.  Note
- *	       that this guarantees that the return value will be &gt;= 0 if
- *	       and only if the key is found.
+ *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The <i>insertion
+ *         point</i> is defined as the the point at which the value would
+ *          be inserted into the receiver: the index of the first
+ *         element greater than the key, or <tt>receiver.size()</tt>, if all
+ *         elements in the receiver are less than the specified key.  Note
+ *         that this guarantees that the return value will be &gt;= 0 if
+ *         and only if the key is found.
  * @see org.apache.mahout.matrix.Sorting
  * @see java.util.Arrays
  */
 public int binarySearchFromTo(double key, int from, int to) {
-	return org.apache.mahout.matrix.Sorting.binarySearchFromTo(this.elements,key,from,to);
+  return org.apache.mahout.matrix.Sorting.binarySearchFromTo(this.elements,key,from,to);
 }
 /**
  * Returns a deep copy of the receiver. 
@@ -115,10 +115,10 @@ public int binarySearchFromTo(double key, int from, int to) {
  * @return  a deep copy of the receiver.
  */
 public Object clone() {
-	// overridden for performance only.
-	DoubleArrayList clone = new DoubleArrayList((double[]) elements.clone());
-	clone.setSizeRaw(size);
-	return clone;
+  // overridden for performance only.
+  DoubleArrayList clone = new DoubleArrayList((double[]) elements.clone());
+  clone.setSizeRaw(size);
+  return clone;
 }
 /**
  * Returns a deep copy of the receiver; uses <code>clone()</code> and casts the result.
@@ -126,7 +126,7 @@ public Object clone() {
  * @return  a deep copy of the receiver.
  */
 public DoubleArrayList copy() {
-	return (DoubleArrayList) clone();
+  return (DoubleArrayList) clone();
 }
 /**
  * Returns the elements currently stored, including invalid elements between size and capacity, if any.
@@ -137,7 +137,7 @@ public DoubleArrayList copy() {
  * @return the elements currently stored.
  */
 public double[] elements() {
-	return elements;
+  return elements;
 }
 /**
  * Sets the receiver's elements to be the specified array (not a copy of it).
@@ -150,9 +150,9 @@ public double[] elements() {
  * @return the receiver itself.
  */
 public AbstractDoubleList elements(double[] elements) {
-	this.elements=elements;
-	this.size=elements.length;
-	return this;
+  this.elements=elements;
+  this.size=elements.length;
+  return this;
 }
 /**
  * Ensures that the receiver can hold at least the specified number of elements without needing to allocate new internal memory.
@@ -161,7 +161,7 @@ public AbstractDoubleList elements(double[] elements) {
  * @param   minCapacity   the desired minimum capacity.
  */
 public void ensureCapacity(int minCapacity) {
-	elements = org.apache.mahout.matrix.Arrays.ensureCapacity(elements,minCapacity);
+  elements = org.apache.mahout.matrix.Arrays.ensureCapacity(elements,minCapacity);
 }
 /**
  * Compares the specified Object with the receiver.  
@@ -174,19 +174,19 @@ public void ensureCapacity(int minCapacity) {
  * @return true if the specified Object is equal to the receiver.
  */
 public boolean equals(Object otherObj) { //delta
-	// overridden for performance only.
-	if (! (otherObj instanceof DoubleArrayList)) return super.equals(otherObj);
-	if (this==otherObj) return true;
-	if (otherObj==null) return false;
-	DoubleArrayList other = (DoubleArrayList) otherObj;
-	if (size()!=other.size()) return false;
+  // overridden for performance only.
+  if (! (otherObj instanceof DoubleArrayList)) return super.equals(otherObj);
+  if (this==otherObj) return true;
+  if (otherObj==null) return false;
+  DoubleArrayList other = (DoubleArrayList) otherObj;
+  if (size()!=other.size()) return false;
 
-	double[] theElements = elements();
-	double[] otherElements = other.elements();
-	for (int i=size(); --i >= 0; ) {
-	    if (theElements[i] != otherElements[i]) return false;
-	}
-	return true;
+  double[] theElements = elements();
+  double[] otherElements = other.elements();
+  for (int i=size(); --i >= 0; ) {
+      if (theElements[i] != otherElements[i]) return false;
+  }
+  return true;
 }
 /**
  * Applies a procedure to each element of the receiver, if any.
@@ -195,25 +195,25 @@ public boolean equals(Object otherObj) { //delta
  * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise. 
  */
 public boolean forEach(DoubleProcedure procedure) {
-	// overridden for performance only.
-	double[] theElements = elements;
-	int theSize = size;
-	
-	for (int i=0; i<theSize;) if (! procedure.apply(theElements[i++])) return false;
-	return true;
+  // overridden for performance only.
+  double[] theElements = elements;
+  int theSize = size;
+  
+  for (int i=0; i<theSize;) if (! procedure.apply(theElements[i++])) return false;
+  return true;
 }
 /**
  * Returns the element at the specified position in the receiver.
  *
  * @param index index of element to return.
  * @exception IndexOutOfBoundsException index is out of range (index
- * 		  &lt; 0 || index &gt;= size()).
+ *       &lt; 0 || index &gt;= size()).
  */
 public double get(int index) {
-	// overridden for performance only.
-	if (index >= size || index < 0)
-		throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
-	return elements[index];
+  // overridden for performance only.
+  if (index >= size || index < 0)
+    throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
+  return elements[index];
 }
 /**
  * Returns the element at the specified position in the receiver; <b>WARNING:</b> Does not check preconditions. 
@@ -224,7 +224,7 @@ public double get(int index) {
  * @param index index of element to return.
  */
 public double getQuick(int index) {
-	return elements[index];
+  return elements[index];
 }
 /**
  * Returns the index of the first occurrence of the specified
@@ -239,15 +239,15 @@ public double getQuick(int index) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public int indexOfFromTo(double element, int from, int to) {
-	// overridden for performance only.
-	if (size==0) return -1;
-	checkRangeFromTo(from, to, size);
+  // overridden for performance only.
+  if (size==0) return -1;
+  checkRangeFromTo(from, to, size);
 
-	double[] theElements = elements;
-	for (int i = from ; i <= to; i++) {
-	    if (element==theElements[i]) {return i;} //found
-	}
-	return -1; //not found
+  double[] theElements = elements;
+  for (int i = from ; i <= to; i++) {
+      if (element==theElements[i]) {return i;} //found
+  }
+  return -1; //not found
 }
 /**
  * Returns the index of the last occurrence of the specified
@@ -262,15 +262,15 @@ public int indexOfFromTo(double element, int from, int to) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public int lastIndexOfFromTo(double element, int from, int to) {
-	// overridden for performance only.
-	if (size==0) return -1;
-	checkRangeFromTo(from, to, size);
+  // overridden for performance only.
+  if (size==0) return -1;
+  checkRangeFromTo(from, to, size);
 
-	double[] theElements = elements;
-	for (int i = to ; i >= from; i--) {
-	    if (element==theElements[i]) {return i;} //found
-	}
-	return -1; //not found
+  double[] theElements = elements;
+  for (int i = to ; i >= from; i--) {
+      if (element==theElements[i]) {return i;} //found
+  }
+  return -1; //not found
 }
 /**
  * Returns a new list of the part of the receiver between <code>from</code>, inclusive, and <code>to</code>, inclusive.
@@ -280,13 +280,13 @@ public int lastIndexOfFromTo(double element, int from, int to) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public AbstractDoubleList partFromTo(int from, int to) {
-	if (size==0) return new DoubleArrayList(0);
+  if (size==0) return new DoubleArrayList(0);
 
-	checkRangeFromTo(from, to, size);
+  checkRangeFromTo(from, to, size);
 
-	double[] part = new double[to-from+1];
-	System.arraycopy(elements, from, part, 0, to-from+1);
-	return new DoubleArrayList(part);
+  double[] part = new double[to-from+1];
+  System.arraycopy(elements, from, part, 0, to-from+1);
+  return new DoubleArrayList(part);
 }
 /**
 * Removes from the receiver all elements that are contained in the specified list.
@@ -296,46 +296,46 @@ public AbstractDoubleList partFromTo(int from, int to) {
 * @return <code>true</code> if the receiver changed as a result of the call.
 */
 public boolean removeAll(AbstractDoubleList other) {
-	// overridden for performance only.
-	if (! (other instanceof DoubleArrayList))	return super.removeAll(other);
-	
-	/* There are two possibilities to do the thing
-	   a) use other.indexOf(...)
-	   b) sort other, then use other.binarySearch(...)
-	   
-	   Let's try to figure out which one is faster. Let M=size, N=other.size, then
-	   a) takes O(M*N) steps
-	   b) takes O(N*logN + M*logN) steps (sorting is O(N*logN) and binarySearch is O(logN))
+  // overridden for performance only.
+  if (! (other instanceof DoubleArrayList))  return super.removeAll(other);
+  
+  /* There are two possibilities to do the thing
+     a) use other.indexOf(...)
+     b) sort other, then use other.binarySearch(...)
+     
+     Let's try to figure out which one is faster. Let M=size, N=other.size, then
+     a) takes O(M*N) steps
+     b) takes O(N*logN + M*logN) steps (sorting is O(N*logN) and binarySearch is O(logN))
  
-	   Hence, if N*logN + M*logN < M*N, we use b) otherwise we use a).
-	*/
-	if (other.size()==0) {return false;} //nothing to do
-	int limit = other.size()-1;
-	int j=0;
-	double[] theElements = elements;
-	int mySize = size();
+     Hence, if N*logN + M*logN < M*N, we use b) otherwise we use a).
+  */
+  if (other.size()==0) {return false;} //nothing to do
+  int limit = other.size()-1;
+  int j=0;
+  double[] theElements = elements;
+  int mySize = size();
 
-	double N=(double) other.size();
-	double M=(double) mySize;
-	if ( (N+M)* org.apache.mahout.jet.math.Arithmetic.log2(N) < M*N ) {
-		// it is faster to sort other before searching in it
-		DoubleArrayList sortedList = (DoubleArrayList) other.clone();
-		sortedList.quickSort();
+  double N=(double) other.size();
+  double M=(double) mySize;
+  if ( (N+M)* org.apache.mahout.jet.math.Arithmetic.log2(N) < M*N ) {
+    // it is faster to sort other before searching in it
+    DoubleArrayList sortedList = (DoubleArrayList) other.clone();
+    sortedList.quickSort();
 
-		for (int i=0; i<mySize ; i++) {
-			if (sortedList.binarySearchFromTo(theElements[i], 0, limit) < 0) theElements[j++]=theElements[i];
-		}
-	}
-	else {
-		// it is faster to search in other without sorting
-		for (int i=0; i<mySize ; i++) {
-			if (other.indexOfFromTo(theElements[i], 0, limit) < 0) theElements[j++]=theElements[i];
-		}
-	}
+    for (int i=0; i<mySize ; i++) {
+      if (sortedList.binarySearchFromTo(theElements[i], 0, limit) < 0) theElements[j++]=theElements[i];
+    }
+  }
+  else {
+    // it is faster to search in other without sorting
+    for (int i=0; i<mySize ; i++) {
+      if (other.indexOfFromTo(theElements[i], 0, limit) < 0) theElements[j++]=theElements[i];
+    }
+  }
 
-	boolean modified = (j!=mySize);
-	setSize(j);
-	return modified;
+  boolean modified = (j!=mySize);
+  setSize(j);
+  return modified;
 }
 /**
  * Replaces a number of elements in the receiver with the same number of elements of another list.
@@ -348,18 +348,18 @@ public boolean removeAll(AbstractDoubleList other) {
  * @param otherFrom position of first element within other list to be copied.
  */
 public void replaceFromToWithFrom(int from, int to, AbstractDoubleList other, int otherFrom) {
-	// overridden for performance only.
-	if (! (other instanceof DoubleArrayList)) {
-		// slower
-		super.replaceFromToWithFrom(from,to,other,otherFrom);
-		return;
-	}
-	int length=to-from+1;
-	if (length>0) {
-		checkRangeFromTo(from, to, size());
-		checkRangeFromTo(otherFrom,otherFrom+length-1,other.size());
-		System.arraycopy(((DoubleArrayList) other).elements, otherFrom, elements, from, length);
-	}
+  // overridden for performance only.
+  if (! (other instanceof DoubleArrayList)) {
+    // slower
+    super.replaceFromToWithFrom(from,to,other,otherFrom);
+    return;
+  }
+  int length=to-from+1;
+  if (length>0) {
+    checkRangeFromTo(from, to, size());
+    checkRangeFromTo(otherFrom,otherFrom+length-1,other.size());
+    System.arraycopy(((DoubleArrayList) other).elements, otherFrom, elements, from, length);
+  }
 }
 /**
 * Retains (keeps) only the elements in the receiver that are contained in the specified other list.
@@ -369,62 +369,62 @@ public void replaceFromToWithFrom(int from, int to, AbstractDoubleList other, in
 * @return <code>true</code> if the receiver changed as a result of the call.
 */
 public boolean retainAll(AbstractDoubleList other) {
-	// overridden for performance only.
-	if (! (other instanceof DoubleArrayList))	return super.retainAll(other);
-	
-	/* There are two possibilities to do the thing
-	   a) use other.indexOf(...)
-	   b) sort other, then use other.binarySearch(...)
-	   
-	   Let's try to figure out which one is faster. Let M=size, N=other.size, then
-	   a) takes O(M*N) steps
-	   b) takes O(N*logN + M*logN) steps (sorting is O(N*logN) and binarySearch is O(logN))
+  // overridden for performance only.
+  if (! (other instanceof DoubleArrayList))  return super.retainAll(other);
+  
+  /* There are two possibilities to do the thing
+     a) use other.indexOf(...)
+     b) sort other, then use other.binarySearch(...)
+     
+     Let's try to figure out which one is faster. Let M=size, N=other.size, then
+     a) takes O(M*N) steps
+     b) takes O(N*logN + M*logN) steps (sorting is O(N*logN) and binarySearch is O(logN))
 
-	   Hence, if N*logN + M*logN < M*N, we use b) otherwise we use a).
-	*/
-	int limit = other.size()-1;
-	int j=0;
-	double[] theElements = elements;
-	int mySize = size();
+     Hence, if N*logN + M*logN < M*N, we use b) otherwise we use a).
+  */
+  int limit = other.size()-1;
+  int j=0;
+  double[] theElements = elements;
+  int mySize = size();
 
-	double N=(double) other.size();
-	double M=(double) mySize;
-	if ( (N+M)* org.apache.mahout.jet.math.Arithmetic.log2(N) < M*N ) {
-		// it is faster to sort other before searching in it
-		DoubleArrayList sortedList = (DoubleArrayList) other.clone();
-		sortedList.quickSort();
+  double N=(double) other.size();
+  double M=(double) mySize;
+  if ( (N+M)* org.apache.mahout.jet.math.Arithmetic.log2(N) < M*N ) {
+    // it is faster to sort other before searching in it
+    DoubleArrayList sortedList = (DoubleArrayList) other.clone();
+    sortedList.quickSort();
 
-		for (int i=0; i<mySize ; i++) {
-			if (sortedList.binarySearchFromTo(theElements[i], 0, limit) >= 0) theElements[j++]=theElements[i];
-		}
-	}
-	else {
-		// it is faster to search in other without sorting
-		for (int i=0; i<mySize ; i++) {
-			if (other.indexOfFromTo(theElements[i], 0, limit) >= 0) theElements[j++]=theElements[i];
-		}
-	}
+    for (int i=0; i<mySize ; i++) {
+      if (sortedList.binarySearchFromTo(theElements[i], 0, limit) >= 0) theElements[j++]=theElements[i];
+    }
+  }
+  else {
+    // it is faster to search in other without sorting
+    for (int i=0; i<mySize ; i++) {
+      if (other.indexOfFromTo(theElements[i], 0, limit) >= 0) theElements[j++]=theElements[i];
+    }
+  }
 
-	boolean modified = (j!=mySize);
-	setSize(j);
-	return modified;
+  boolean modified = (j!=mySize);
+  setSize(j);
+  return modified;
 }
 /**
  * Reverses the elements of the receiver.
  * Last becomes first, second last becomes second first, and so on.
  */
 public void reverse() {
-	// overridden for performance only.
-	double tmp;
-	int limit=size/2;
-	int j=size-1;
+  // overridden for performance only.
+  double tmp;
+  int limit=size/2;
+  int j=size-1;
 
-	double[] theElements = elements;
-	for (int i=0; i<limit;) { //swap
-		tmp=theElements[i];
-		theElements[i++]=theElements[j];
-		theElements[j--]=tmp;
-	}
+  double[] theElements = elements;
+  for (int i=0; i<limit;) { //swap
+    tmp=theElements[i];
+    theElements[i++]=theElements[j];
+    theElements[j--]=tmp;
+  }
 }
 /**
  * Replaces the element at the specified position in the receiver with the specified element.
@@ -432,13 +432,13 @@ public void reverse() {
  * @param index index of element to replace.
  * @param element element to be stored at the specified position.
  * @exception IndexOutOfBoundsException index is out of range (index
- * 		  &lt; 0 || index &gt;= size()).
+ *       &lt; 0 || index &gt;= size()).
  */
 public void set(int index, double element) {
-	// overridden for performance only.
-	if (index >= size || index < 0)
-		throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
-	elements[index] = element;
+  // overridden for performance only.
+  if (index >= size || index < 0)
+    throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
+  elements[index] = element;
 }
 /**
  * Replaces the element at the specified position in the receiver with the specified element; <b>WARNING:</b> Does not check preconditions.
@@ -450,7 +450,7 @@ public void set(int index, double element) {
  * @param element element to be stored at the specified position.
  */
 public void setQuick(int index, double element) {
-	elements[index] = element;
+  elements[index] = element;
 }
 /**
  * Randomly permutes the part of the receiver between <code>from</code> (inclusive) and <code>to</code> (inclusive). 
@@ -459,22 +459,22 @@ public void setQuick(int index, double element) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public void shuffleFromTo(int from, int to) {
-	// overridden for performance only.
-	if (size==0) {return;}
-	checkRangeFromTo(from, to, size);
+  // overridden for performance only.
+  if (size==0) {return;}
+  checkRangeFromTo(from, to, size);
 
-	org.apache.mahout.jet.random.Uniform gen = new org.apache.mahout.jet.random.Uniform(new org.apache.mahout.jet.random.engine.DRand(new java.util.Date()));
-	double tmpElement;
-	double[] theElements = elements;
-	int random;
-	for (int i=from; i<to; i++) { 
-		random = gen.nextIntFromTo(i, to);
+  org.apache.mahout.jet.random.Uniform gen = new org.apache.mahout.jet.random.Uniform(new org.apache.mahout.jet.random.engine.DRand(new java.util.Date()));
+  double tmpElement;
+  double[] theElements = elements;
+  int random;
+  for (int i=from; i<to; i++) { 
+    random = gen.nextIntFromTo(i, to);
 
-		//swap(i, random)
-		tmpElement = theElements[random];
-		theElements[random]=theElements[i]; 
-		theElements[i]=tmpElement; 
-	}  
+    //swap(i, random)
+    tmpElement = theElements[random];
+    theElements[random]=theElements[i]; 
+    theElements[i]=tmpElement; 
+  }  
 }
 /**
  * Trims the capacity of the receiver to be the receiver's current 
@@ -482,6 +482,6 @@ public void shuffleFromTo(int from, int to) {
  * storage of the receiver.
  */
 public void trimToSize() {
-	elements = org.apache.mahout.matrix.Arrays.trimToCapacity(elements,size());
+  elements = org.apache.mahout.matrix.Arrays.trimToCapacity(elements,size());
 }
 }

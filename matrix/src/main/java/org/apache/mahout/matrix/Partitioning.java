@@ -35,20 +35,18 @@ import org.apache.mahout.matrix.list.IntArrayList;
  *
  * @see org.apache.mahout.matrix.matrix.doublealgo.Partitioning
  *
- * @author wolfgang.hoschek@cern.ch
- * @version 1.0, 03-Jul-99
  */
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
 public class Partitioning extends Object {
-	private static final int SMALL = 7;
-	private static final int MEDIUM = 40;
+  private static final int SMALL = 7;
+  private static final int MEDIUM = 40;
 
-	// benchmark only
-	protected static int steps = 0;
-	public static int swappedElements = 0;
+  // benchmark only
+  protected static int steps = 0;
+  public static int swappedElements = 0;
 /**
  * Makes this class non instantiable, but still let's others inherit from it.
  */
@@ -59,119 +57,119 @@ Finds the given key "a" within some generic data using the binary search algorit
 @param from the leftmost search position, inclusive.
 @param to the rightmost search position, inclusive.
 @param comp the comparator determining the order of the generic data.
-	Takes as first argument the index <tt>a</tt> within the generic splitters <tt>s</tt>.
-	Takes as second argument the index <tt>b</tt> within the generic data <tt>g</tt>.
+  Takes as first argument the index <tt>a</tt> within the generic splitters <tt>s</tt>.
+  Takes as second argument the index <tt>b</tt> within the generic data <tt>g</tt>.
 @return index of the search key, if it is contained in the list;
-	       otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The <i>insertion
-	       point</i> is defined as the the point at which the value would
- 	       be inserted into the list: the index of the first
-	       element greater than the key, or <tt>list.length</tt>, if all
-	       elements in the list are less than the specified key.  Note
-	       that this guarantees that the return value will be &gt;= 0 if
-	       and only if the key is found.
+         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The <i>insertion
+         point</i> is defined as the the point at which the value would
+          be inserted into the list: the index of the first
+         element greater than the key, or <tt>list.length</tt>, if all
+         elements in the list are less than the specified key.  Note
+         that this guarantees that the return value will be &gt;= 0 if
+         and only if the key is found.
 */
 private static int binarySearchFromTo(int a, int from, int to, IntComparator comp) {
-	while (from <= to) {
-		int mid = (from + to) / 2;
-		int comparison = comp.compare(mid,a);
-		if (comparison < 0) from = mid + 1;
-		else if (comparison > 0) to = mid - 1;
-		else return mid; // key found
-	}
-	return -(from + 1);  // key not found.
+  while (from <= to) {
+    int mid = (from + to) / 2;
+    int comparison = comp.compare(mid,a);
+    if (comparison < 0) from = mid + 1;
+    else if (comparison > 0) to = mid - 1;
+    else return mid; // key found
+  }
+  return -(from + 1);  // key not found.
 }
 /**
  * Same as {@link #dualPartition(int[],int[],int,int,int[],int,int,int[])}
  * except that it <i>synchronously</i> partitions <tt>double[]</tt> rather than <tt>int[]</tt> arrays.
  */
 public static void dualPartition(double[] list, double[] secondary, int from, int to, double[] splitters, int splitFrom, int splitTo, int[] splitIndexes) {
-	double splitter; // int, double --> template type dependent
-	
-	if (splitFrom>splitTo) return; // nothing to do
-	if (from>to) { // all bins are empty
-		from--;
-		for (int i = splitFrom; i<=splitTo; ) splitIndexes[i++] = from;
-		return;
-	}
-	
-	// Choose a partition (pivot) index, m
-	// Ideally, the pivot should be the median, because a median splits a list into two equal sized sublists.
-	// However, computing the median is expensive, so we use an approximation.
-	int medianIndex;
-	if (splitFrom==splitTo) { // we don't really have a choice
-		medianIndex = splitFrom;
-	}
-	else { // we do have a choice
-		int m = (from+to) / 2;       // Small arrays, middle element
-		int len = to-from+1;
-		if (len > SMALL) {
-		    int l = from;
-		    int n = to;
-		    if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
-				int s = len/8;
-				l = med3(list, l,     l+s, l+2*s);
-				m = med3(list, m-s,   m,   m+s);
-				n = med3(list, n-2*s, n-s, n);
-		    }
-		    m = med3(list, l, m, n); // Mid-size, pseudomedian of 3
-		}
-		
-		// Find the splitter closest to the pivot, i.e. the splitter that best splits the list into two equal sized sublists.
-		medianIndex = Sorting.binarySearchFromTo(splitters,list[m],splitFrom,splitTo);
-		if (medianIndex < 0) medianIndex = -medianIndex - 1; // not found
-		if (medianIndex > splitTo) medianIndex = splitTo; // not found, one past the end
-		
-	}
-	splitter = splitters[medianIndex];
+  double splitter; // int, double --> template type dependent
+  
+  if (splitFrom>splitTo) return; // nothing to do
+  if (from>to) { // all bins are empty
+    from--;
+    for (int i = splitFrom; i<=splitTo; ) splitIndexes[i++] = from;
+    return;
+  }
+  
+  // Choose a partition (pivot) index, m
+  // Ideally, the pivot should be the median, because a median splits a list into two equal sized sublists.
+  // However, computing the median is expensive, so we use an approximation.
+  int medianIndex;
+  if (splitFrom==splitTo) { // we don't really have a choice
+    medianIndex = splitFrom;
+  }
+  else { // we do have a choice
+    int m = (from+to) / 2;       // Small arrays, middle element
+    int len = to-from+1;
+    if (len > SMALL) {
+        int l = from;
+        int n = to;
+        if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
+        int s = len/8;
+        l = med3(list, l,     l+s, l+2*s);
+        m = med3(list, m-s,   m,   m+s);
+        n = med3(list, n-2*s, n-s, n);
+        }
+        m = med3(list, l, m, n); // Mid-size, pseudomedian of 3
+    }
+    
+    // Find the splitter closest to the pivot, i.e. the splitter that best splits the list into two equal sized sublists.
+    medianIndex = Sorting.binarySearchFromTo(splitters,list[m],splitFrom,splitTo);
+    if (medianIndex < 0) medianIndex = -medianIndex - 1; // not found
+    if (medianIndex > splitTo) medianIndex = splitTo; // not found, one past the end
+    
+  }
+  splitter = splitters[medianIndex];
 
-	// Partition the list according to the splitter, i.e.
-	// Establish invariant: list[i] < splitter <= list[j] for i=from..medianIndex and j=medianIndex+1 .. to
-	int	splitIndex = dualPartition(list,secondary,from,to,splitter);
-	splitIndexes[medianIndex] = splitIndex;
+  // Partition the list according to the splitter, i.e.
+  // Establish invariant: list[i] < splitter <= list[j] for i=from..medianIndex and j=medianIndex+1 .. to
+  int  splitIndex = dualPartition(list,secondary,from,to,splitter);
+  splitIndexes[medianIndex] = splitIndex;
 
-	// Optimization: Handle special cases to cut down recursions.
-	if (splitIndex < from) { // no element falls into this bin
-		// all bins with splitters[i] <= splitter are empty
-		int i = medianIndex-1;
-		while (i>=splitFrom && (!(splitter < splitters[i]))) splitIndexes[i--] = splitIndex;
-		splitFrom = medianIndex+1;
-	}
-	else if (splitIndex >= to) { // all elements fall into this bin
-		// all bins with splitters[i] >= splitter are empty
-		int i = medianIndex+1;
-		while (i<=splitTo && (!(splitter > splitters[i]))) splitIndexes[i++] = splitIndex;
-		splitTo = medianIndex-1;
-	}
+  // Optimization: Handle special cases to cut down recursions.
+  if (splitIndex < from) { // no element falls into this bin
+    // all bins with splitters[i] <= splitter are empty
+    int i = medianIndex-1;
+    while (i>=splitFrom && (!(splitter < splitters[i]))) splitIndexes[i--] = splitIndex;
+    splitFrom = medianIndex+1;
+  }
+  else if (splitIndex >= to) { // all elements fall into this bin
+    // all bins with splitters[i] >= splitter are empty
+    int i = medianIndex+1;
+    while (i<=splitTo && (!(splitter > splitters[i]))) splitIndexes[i++] = splitIndex;
+    splitTo = medianIndex-1;
+  }
 
-	// recursively partition left half
-	if (splitFrom <= medianIndex-1) {
-		dualPartition(list, secondary, from,         splitIndex, splitters, splitFrom, medianIndex-1,  splitIndexes);
-	}
-	
-	// recursively partition right half
-	if (medianIndex+1 <= splitTo) {
-		dualPartition(list, secondary, splitIndex+1, to,         splitters, medianIndex+1,  splitTo,   splitIndexes);
-	}
+  // recursively partition left half
+  if (splitFrom <= medianIndex-1) {
+    dualPartition(list, secondary, from,         splitIndex, splitters, splitFrom, medianIndex-1,  splitIndexes);
+  }
+  
+  // recursively partition right half
+  if (medianIndex+1 <= splitTo) {
+    dualPartition(list, secondary, splitIndex+1, to,         splitters, medianIndex+1,  splitTo,   splitIndexes);
+  }
 }
 /**
  * Same as {@link #dualPartition(int[],int[],int,int,int)} 
  * except that it <i>synchronously</i> partitions <tt>double[]</tt> rather than <tt>int[]</tt> arrays.
  */
 public static int dualPartition(double[] list, double[] secondary, int from, int to, double splitter) {
-	double element;  // int, double --> template type dependent
-	for (int i=from-1; ++i<=to; ) {
-		element = list[i];
-		if (element < splitter) {
-			// swap x[i] with x[from]
-			list[i] = list[from];
-			list[from] = element;
+  double element;  // int, double --> template type dependent
+  for (int i=from-1; ++i<=to; ) {
+    element = list[i];
+    if (element < splitter) {
+      // swap x[i] with x[from]
+      list[i] = list[from];
+      list[from] = element;
 
-			element = secondary[i];
-			secondary[i] = secondary[from];
-			secondary[from++] = element;
-		}
-	}
-	return from-1;
+      element = secondary[i];
+      secondary[i] = secondary[from];
+      secondary[from++] = element;
+    }
+  }
+  return from-1;
 }
 /**
  * Same as {@link #partition(int[],int,int,int[],int,int,int[])} except that this method <i>synchronously</i> partitions two arrays at the same time;
@@ -192,73 +190,73 @@ public static int dualPartition(double[] list, double[] secondary, int from, int
  * Same as for single-partition methods.
  */
 public static void dualPartition(int[] list, int[] secondary, int from, int to, int[] splitters, int splitFrom, int splitTo, int[] splitIndexes) {
-	int splitter; // int, double --> template type dependent
-	
-	if (splitFrom>splitTo) return; // nothing to do
-	if (from>to) { // all bins are empty
-		from--;
-		for (int i = splitFrom; i<=splitTo; ) splitIndexes[i++] = from;
-		return;
-	}
-	
-	// Choose a partition (pivot) index, m
-	// Ideally, the pivot should be the median, because a median splits a list into two equal sized sublists.
-	// However, computing the median is expensive, so we use an approximation.
-	int medianIndex;
-	if (splitFrom==splitTo) { // we don't really have a choice
-		medianIndex = splitFrom;
-	}
-	else { // we do have a choice
-		int m = (from+to) / 2;       // Small arrays, middle element
-		int len = to-from+1;
-		if (len > SMALL) {
-		    int l = from;
-		    int n = to;
-		    if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
-				int s = len/8;
-				l = med3(list, l,     l+s, l+2*s);
-				m = med3(list, m-s,   m,   m+s);
-				n = med3(list, n-2*s, n-s, n);
-		    }
-		    m = med3(list, l, m, n); // Mid-size, pseudomedian of 3
-		}
-		
-		// Find the splitter closest to the pivot, i.e. the splitter that best splits the list into two equal sized sublists.
-		medianIndex = Sorting.binarySearchFromTo(splitters,list[m],splitFrom,splitTo);
-		if (medianIndex < 0) medianIndex = -medianIndex - 1; // not found
-		if (medianIndex > splitTo) medianIndex = splitTo; // not found, one past the end
-		
-	}
-	splitter = splitters[medianIndex];
+  int splitter; // int, double --> template type dependent
+  
+  if (splitFrom>splitTo) return; // nothing to do
+  if (from>to) { // all bins are empty
+    from--;
+    for (int i = splitFrom; i<=splitTo; ) splitIndexes[i++] = from;
+    return;
+  }
+  
+  // Choose a partition (pivot) index, m
+  // Ideally, the pivot should be the median, because a median splits a list into two equal sized sublists.
+  // However, computing the median is expensive, so we use an approximation.
+  int medianIndex;
+  if (splitFrom==splitTo) { // we don't really have a choice
+    medianIndex = splitFrom;
+  }
+  else { // we do have a choice
+    int m = (from+to) / 2;       // Small arrays, middle element
+    int len = to-from+1;
+    if (len > SMALL) {
+        int l = from;
+        int n = to;
+        if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
+        int s = len/8;
+        l = med3(list, l,     l+s, l+2*s);
+        m = med3(list, m-s,   m,   m+s);
+        n = med3(list, n-2*s, n-s, n);
+        }
+        m = med3(list, l, m, n); // Mid-size, pseudomedian of 3
+    }
+    
+    // Find the splitter closest to the pivot, i.e. the splitter that best splits the list into two equal sized sublists.
+    medianIndex = Sorting.binarySearchFromTo(splitters,list[m],splitFrom,splitTo);
+    if (medianIndex < 0) medianIndex = -medianIndex - 1; // not found
+    if (medianIndex > splitTo) medianIndex = splitTo; // not found, one past the end
+    
+  }
+  splitter = splitters[medianIndex];
 
-	// Partition the list according to the splitter, i.e.
-	// Establish invariant: list[i] < splitter <= list[j] for i=from..medianIndex and j=medianIndex+1 .. to
-	int	splitIndex = dualPartition(list,secondary,from,to,splitter);
-	splitIndexes[medianIndex] = splitIndex;
+  // Partition the list according to the splitter, i.e.
+  // Establish invariant: list[i] < splitter <= list[j] for i=from..medianIndex and j=medianIndex+1 .. to
+  int  splitIndex = dualPartition(list,secondary,from,to,splitter);
+  splitIndexes[medianIndex] = splitIndex;
 
-	// Optimization: Handle special cases to cut down recursions.
-	if (splitIndex < from) { // no element falls into this bin
-		// all bins with splitters[i] <= splitter are empty
-		int i = medianIndex-1;
-		while (i>=splitFrom && (!(splitter < splitters[i]))) splitIndexes[i--] = splitIndex;
-		splitFrom = medianIndex+1;
-	}
-	else if (splitIndex >= to) { // all elements fall into this bin
-		// all bins with splitters[i] >= splitter are empty
-		int i = medianIndex+1;
-		while (i<=splitTo && (!(splitter > splitters[i]))) splitIndexes[i++] = splitIndex;
-		splitTo = medianIndex-1;
-	}
+  // Optimization: Handle special cases to cut down recursions.
+  if (splitIndex < from) { // no element falls into this bin
+    // all bins with splitters[i] <= splitter are empty
+    int i = medianIndex-1;
+    while (i>=splitFrom && (!(splitter < splitters[i]))) splitIndexes[i--] = splitIndex;
+    splitFrom = medianIndex+1;
+  }
+  else if (splitIndex >= to) { // all elements fall into this bin
+    // all bins with splitters[i] >= splitter are empty
+    int i = medianIndex+1;
+    while (i<=splitTo && (!(splitter > splitters[i]))) splitIndexes[i++] = splitIndex;
+    splitTo = medianIndex-1;
+  }
 
-	// recursively partition left half
-	if (splitFrom <= medianIndex-1) {
-		dualPartition(list, secondary, from,         splitIndex, splitters, splitFrom, medianIndex-1,  splitIndexes);
-	}
-	
-	// recursively partition right half
-	if (medianIndex+1 <= splitTo) {
-		dualPartition(list, secondary, splitIndex+1, to,         splitters, medianIndex+1,  splitTo,   splitIndexes);
-	}
+  // recursively partition left half
+  if (splitFrom <= medianIndex-1) {
+    dualPartition(list, secondary, from,         splitIndex, splitters, splitFrom, medianIndex-1,  splitIndexes);
+  }
+  
+  // recursively partition right half
+  if (medianIndex+1 <= splitTo) {
+    dualPartition(list, secondary, splitIndex+1, to,         splitters, medianIndex+1,  splitTo,   splitIndexes);
+  }
 }
 /**
  * Same as {@link #partition(int[],int,int,int)} except that this method <i>synchronously</i> partitions two arrays at the same time;
@@ -270,20 +268,20 @@ public static void dualPartition(int[] list, int[] secondary, int from, int to, 
  * Same as for single-partition methods.
  */
 public static int dualPartition(int[] list, int[] secondary, int from, int to, int splitter) {
-	int element;  // int, double --> template type dependent
-	for (int i=from-1; ++i<=to; ) {
-		element = list[i];
-		if (element < splitter) {
-			// swap x[i] with x[from]
-			list[i] = list[from];
-			list[from] = element;
+  int element;  // int, double --> template type dependent
+  for (int i=from-1; ++i<=to; ) {
+    element = list[i];
+    if (element < splitter) {
+      // swap x[i] with x[from]
+      list[i] = list[from];
+      list[from] = element;
 
-			element = secondary[i];
-			secondary[i] = secondary[from];
-			secondary[from++] = element;
-		}
-	}
-	return from-1;
+      element = secondary[i];
+      secondary[i] = secondary[from];
+      secondary[from++] = element;
+    }
+  }
+  return from-1;
 }
 /**
 Same as {@link #partition(int[],int,int,int[],int,int,int[])}
@@ -323,17 +321,17 @@ Upon return <tt>splitIndexes[splitFrom..splitTo]</tt> will be set accordingly.
 Therefore, must satisfy <tt>splitIndexes.length > splitTo</tt>.
 
 @param comp the comparator comparing a splitter with an element of the generic data.
-	Takes as first argument the index <tt>a</tt> within the generic splitters <tt>s</tt>.
-	Takes as second argument the index <tt>b</tt> within the generic data <tt>g</tt>.
+  Takes as first argument the index <tt>a</tt> within the generic splitters <tt>s</tt>.
+  Takes as second argument the index <tt>b</tt> within the generic data <tt>g</tt>.
 @param comp2 the comparator to determine the order of the generic data.
-	Takes as first argument the index <tt>a</tt> within the generic data <tt>g</tt>.
-	Takes as second argument the index <tt>b</tt> within the generic data <tt>g</tt>.
+  Takes as first argument the index <tt>a</tt> within the generic data <tt>g</tt>.
+  Takes as second argument the index <tt>b</tt> within the generic data <tt>g</tt>.
 @param comp3 the comparator comparing a splitter with another splitter.
-	Takes as first argument the index <tt>a</tt> within the generic splitters <tt>s</tt>.
-	Takes as second argument the index <tt>b</tt> within the generic splitters <tt>g</tt>.
+  Takes as first argument the index <tt>a</tt> within the generic splitters <tt>s</tt>.
+  Takes as second argument the index <tt>b</tt> within the generic splitters <tt>g</tt>.
 @param swapper an object that knows how to swap the elements at any two indexes (a,b).
-	Takes as first argument the index <tt>b</tt> within the generic data <tt>g</tt>.
-	Takes as second argument the index <tt>c</tt> within the generic data <tt>g</tt>.
+  Takes as first argument the index <tt>b</tt> within the generic data <tt>g</tt>.
+  Takes as second argument the index <tt>c</tt> within the generic data <tt>g</tt>.
 
 <p>
 Tip: Normally you will have <tt>splitIndexes.length == s.length</tt> as well as <tt>from==0, to==g.length-1</tt> and <tt>splitFrom==0, splitTo==s.length-1</tt>.
@@ -343,216 +341,216 @@ Tip: Normally you will have <tt>splitIndexes.length == s.length</tt> as well as 
 @see Sorting#binarySearchFromTo(int,int,IntComparator)
 */
 public static void genericPartition(int from, int to, int splitFrom, int splitTo, int[] splitIndexes, IntComparator comp, IntComparator comp2, IntComparator comp3, Swapper swapper) {
-	int splitter; // int, double --> template type dependent
-	
-	if (splitFrom>splitTo) return; // nothing to do
-	if (from>to) { // all bins are empty
-		from--;
-		for (int i = splitFrom; i<=splitTo; ) splitIndexes[i++] = from;
-		return;
-	}
-	
-	// Choose a partition (pivot) index, m
-	// Ideally, the pivot should be the median, because a median splits a list into two equal sized sublists.
-	// However, computing the median is expensive, so we use an approximation.
-	int medianIndex;
-	if (splitFrom==splitTo) { // we don't really have a choice
-		medianIndex = splitFrom;
-	}
-	else { // we do have a choice
-		int m = (from+to) / 2;       // Small arrays, middle element
-		int len = to-from+1;
-		if (len > SMALL) {
-		    int l = from;
-		    int n = to;
-		    if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
-				int s = len/8;
-				l = med3(l,     l+s, l+2*s, comp2);
-				m = med3(m-s,   m,   m+s,   comp2);
-				n = med3(n-2*s, n-s, n,     comp2);
-		    }
-		    m = med3(l, m, n, comp2); // Mid-size, pseudomedian of 3
-		}
-		
-		// Find the splitter closest to the pivot, i.e. the splitter that best splits the list into two equal sized sublists.
-		medianIndex = binarySearchFromTo(m,splitFrom,splitTo,comp);
-		if (medianIndex < 0) medianIndex = -medianIndex - 1; // not found
-		if (medianIndex > splitTo) medianIndex = splitTo; // not found, one past the end
-		
-	}
-	splitter = medianIndex;
+  int splitter; // int, double --> template type dependent
+  
+  if (splitFrom>splitTo) return; // nothing to do
+  if (from>to) { // all bins are empty
+    from--;
+    for (int i = splitFrom; i<=splitTo; ) splitIndexes[i++] = from;
+    return;
+  }
+  
+  // Choose a partition (pivot) index, m
+  // Ideally, the pivot should be the median, because a median splits a list into two equal sized sublists.
+  // However, computing the median is expensive, so we use an approximation.
+  int medianIndex;
+  if (splitFrom==splitTo) { // we don't really have a choice
+    medianIndex = splitFrom;
+  }
+  else { // we do have a choice
+    int m = (from+to) / 2;       // Small arrays, middle element
+    int len = to-from+1;
+    if (len > SMALL) {
+        int l = from;
+        int n = to;
+        if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
+        int s = len/8;
+        l = med3(l,     l+s, l+2*s, comp2);
+        m = med3(m-s,   m,   m+s,   comp2);
+        n = med3(n-2*s, n-s, n,     comp2);
+        }
+        m = med3(l, m, n, comp2); // Mid-size, pseudomedian of 3
+    }
+    
+    // Find the splitter closest to the pivot, i.e. the splitter that best splits the list into two equal sized sublists.
+    medianIndex = binarySearchFromTo(m,splitFrom,splitTo,comp);
+    if (medianIndex < 0) medianIndex = -medianIndex - 1; // not found
+    if (medianIndex > splitTo) medianIndex = splitTo; // not found, one past the end
+    
+  }
+  splitter = medianIndex;
 
-	// Partition the list according to the splitter, i.e.
-	// Establish invariant: list[i] < splitter <= list[j] for i=from..medianIndex and j=medianIndex+1 .. to
-	int	splitIndex = genericPartition(from,to,splitter,comp,swapper);
-	splitIndexes[medianIndex] = splitIndex;
+  // Partition the list according to the splitter, i.e.
+  // Establish invariant: list[i] < splitter <= list[j] for i=from..medianIndex and j=medianIndex+1 .. to
+  int  splitIndex = genericPartition(from,to,splitter,comp,swapper);
+  splitIndexes[medianIndex] = splitIndex;
 
-	
-	// Optimization: Handle special cases to cut down recursions.
-	if (splitIndex < from) { // no element falls into this bin
-		// all bins with splitters[i] <= splitter are empty
-		int i = medianIndex-1;
-		while (i>=splitFrom && (!(comp3.compare(splitter,i) < 0))) splitIndexes[i--] = splitIndex;
-		splitFrom = medianIndex+1;
-	}
-	else if (splitIndex >= to) { // all elements fall into this bin
-		// all bins with splitters[i] >= splitter are empty
-		int i = medianIndex+1;
-		while (i<=splitTo && (!(comp3.compare(splitter,i) > 0))) splitIndexes[i++] = splitIndex;
-		splitTo = medianIndex-1;
-	}
-	
+  
+  // Optimization: Handle special cases to cut down recursions.
+  if (splitIndex < from) { // no element falls into this bin
+    // all bins with splitters[i] <= splitter are empty
+    int i = medianIndex-1;
+    while (i>=splitFrom && (!(comp3.compare(splitter,i) < 0))) splitIndexes[i--] = splitIndex;
+    splitFrom = medianIndex+1;
+  }
+  else if (splitIndex >= to) { // all elements fall into this bin
+    // all bins with splitters[i] >= splitter are empty
+    int i = medianIndex+1;
+    while (i<=splitTo && (!(comp3.compare(splitter,i) > 0))) splitIndexes[i++] = splitIndex;
+    splitTo = medianIndex-1;
+  }
+  
 
-	// recursively partition left half
-	if (splitFrom <= medianIndex-1) {
-		genericPartition(from,         splitIndex, splitFrom, medianIndex-1,  splitIndexes, comp, comp2, comp3, swapper);
-	}
-	
-	// recursively partition right half
-	if (medianIndex+1 <= splitTo) {
-		genericPartition(splitIndex+1, to,         medianIndex+1,  splitTo,   splitIndexes, comp, comp2, comp3, swapper);
-	}
+  // recursively partition left half
+  if (splitFrom <= medianIndex-1) {
+    genericPartition(from,         splitIndex, splitFrom, medianIndex-1,  splitIndexes, comp, comp2, comp3, swapper);
+  }
+  
+  // recursively partition right half
+  if (medianIndex+1 <= splitTo) {
+    genericPartition(splitIndex+1, to,         medianIndex+1,  splitTo,   splitIndexes, comp, comp2, comp3, swapper);
+  }
 }
 /**
 Same as {@link #partition(int[],int,int,int)} 
 except that it <i>generically</i> partitions arbitrary shaped data (for example matrices or multiple arrays) rather than <tt>int[]</tt> arrays.
 */
 private static int genericPartition(int from, int to, int splitter, IntComparator comp, Swapper swapper) {
-	for (int i=from-1; ++i<=to; ) {
-		if (comp.compare(splitter,i) > 0) {
-			// swap x[i] with x[from]
-			swapper.swap(i,from);
-			from++;
-		}
-	}
-	return from-1;
+  for (int i=from-1; ++i<=to; ) {
+    if (comp.compare(splitter,i) > 0) {
+      // swap x[i] with x[from]
+      swapper.swap(i,from);
+      from++;
+    }
+  }
+  return from-1;
 }
 /**
  * Returns the index of the median of the three indexed elements.
  */
 private static int med3(double x[], int a, int b, int c) {
-	return (x[a] < x[b] ?
-		(x[b] < x[c] ? b : x[a] < x[c] ? c : a) :
-		(x[b] > x[c] ? b : x[a] > x[c] ? c : a));
+  return (x[a] < x[b] ?
+    (x[b] < x[c] ? b : x[a] < x[c] ? c : a) :
+    (x[b] > x[c] ? b : x[a] > x[c] ? c : a));
 }
 /**
  * Returns the index of the median of the three indexed elements.
  */
 private static int med3(int x[], int a, int b, int c) {
-	return (x[a] < x[b] ?
-		(x[b] < x[c] ? b : x[a] < x[c] ? c : a) :
-		(x[b] > x[c] ? b : x[a] > x[c] ? c : a));
+  return (x[a] < x[b] ?
+    (x[b] < x[c] ? b : x[a] < x[c] ? c : a) :
+    (x[b] > x[c] ? b : x[a] > x[c] ? c : a));
 }
 /**
  * Returns the index of the median of the three indexed chars.
  */
 private static int med3(Object x[], int a, int b, int c, java.util.Comparator comp) {
-	int ab = comp.compare(x[a],x[b]);
-	int ac = comp.compare(x[a],x[c]);
-	int bc = comp.compare(x[b],x[c]);
-	return (ab<0 ?
-		(bc<0 ? b : ac<0 ? c : a) :
-		(bc>0 ? b : ac>0 ? c : a));
+  int ab = comp.compare(x[a],x[b]);
+  int ac = comp.compare(x[a],x[c]);
+  int bc = comp.compare(x[b],x[c]);
+  return (ab<0 ?
+    (bc<0 ? b : ac<0 ? c : a) :
+    (bc>0 ? b : ac>0 ? c : a));
 }
 /**
  * Returns the index of the median of the three indexed chars.
  */
 private static int med3(int a, int b, int c, IntComparator comp) {
-	int ab = comp.compare(a,b);
-	int ac = comp.compare(a,c);
-	int bc = comp.compare(b,c);
-	return (ab<0 ?
-		(bc<0 ? b : ac<0 ? c : a) :
-		(bc>0 ? b : ac>0 ? c : a));
+  int ab = comp.compare(a,b);
+  int ac = comp.compare(a,c);
+  int bc = comp.compare(b,c);
+  return (ab<0 ?
+    (bc<0 ? b : ac<0 ? c : a) :
+    (bc>0 ? b : ac>0 ? c : a));
 }
 /**
  * Same as {@link #partition(int[],int,int,int[],int,int,int[])}
  * except that it partitions <tt>double[]</tt> rather than <tt>int[]</tt> arrays.
  */
 public static void partition(double[] list, int from, int to, double[] splitters, int splitFrom, int splitTo, int[] splitIndexes) {
-	double splitter; // int, double --> template type dependent
-	
-	if (splitFrom>splitTo) return; // nothing to do
-	if (from>to) { // all bins are empty
-		from--;
-		for (int i = splitFrom; i<=splitTo; ) splitIndexes[i++] = from;
-		return;
-	}
-	
-	// Choose a partition (pivot) index, m
-	// Ideally, the pivot should be the median, because a median splits a list into two equal sized sublists.
-	// However, computing the median is expensive, so we use an approximation.
-	int medianIndex;
-	if (splitFrom==splitTo) { // we don't really have a choice
-		medianIndex = splitFrom;
-	}
-	else { // we do have a choice
-		int m = (from+to) / 2;       // Small arrays, middle element
-		int len = to-from+1;
-		if (len > SMALL) {
-		    int l = from;
-		    int n = to;
-		    if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
-				int s = len/8;
-				l = med3(list, l,     l+s, l+2*s);
-				m = med3(list, m-s,   m,   m+s);
-				n = med3(list, n-2*s, n-s, n);
-		    }
-		    m = med3(list, l, m, n); // Mid-size, pseudomedian of 3
-		}
-		
-		// Find the splitter closest to the pivot, i.e. the splitter that best splits the list into two equal sized sublists.
-		medianIndex = Sorting.binarySearchFromTo(splitters,list[m],splitFrom,splitTo);
-		if (medianIndex < 0) medianIndex = -medianIndex - 1; // not found
-		if (medianIndex > splitTo) medianIndex = splitTo; // not found, one past the end
-		
-	}
-	splitter = splitters[medianIndex];
+  double splitter; // int, double --> template type dependent
+  
+  if (splitFrom>splitTo) return; // nothing to do
+  if (from>to) { // all bins are empty
+    from--;
+    for (int i = splitFrom; i<=splitTo; ) splitIndexes[i++] = from;
+    return;
+  }
+  
+  // Choose a partition (pivot) index, m
+  // Ideally, the pivot should be the median, because a median splits a list into two equal sized sublists.
+  // However, computing the median is expensive, so we use an approximation.
+  int medianIndex;
+  if (splitFrom==splitTo) { // we don't really have a choice
+    medianIndex = splitFrom;
+  }
+  else { // we do have a choice
+    int m = (from+to) / 2;       // Small arrays, middle element
+    int len = to-from+1;
+    if (len > SMALL) {
+        int l = from;
+        int n = to;
+        if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
+        int s = len/8;
+        l = med3(list, l,     l+s, l+2*s);
+        m = med3(list, m-s,   m,   m+s);
+        n = med3(list, n-2*s, n-s, n);
+        }
+        m = med3(list, l, m, n); // Mid-size, pseudomedian of 3
+    }
+    
+    // Find the splitter closest to the pivot, i.e. the splitter that best splits the list into two equal sized sublists.
+    medianIndex = Sorting.binarySearchFromTo(splitters,list[m],splitFrom,splitTo);
+    if (medianIndex < 0) medianIndex = -medianIndex - 1; // not found
+    if (medianIndex > splitTo) medianIndex = splitTo; // not found, one past the end
+    
+  }
+  splitter = splitters[medianIndex];
 
-	// Partition the list according to the splitter, i.e.
-	// Establish invariant: list[i] < splitter <= list[j] for i=from..medianIndex and j=medianIndex+1 .. to
-	int	splitIndex = partition(list,from,to,splitter);
-	splitIndexes[medianIndex] = splitIndex;
+  // Partition the list according to the splitter, i.e.
+  // Establish invariant: list[i] < splitter <= list[j] for i=from..medianIndex and j=medianIndex+1 .. to
+  int  splitIndex = partition(list,from,to,splitter);
+  splitIndexes[medianIndex] = splitIndex;
 
-	// Optimization: Handle special cases to cut down recursions.
-	if (splitIndex < from) { // no element falls into this bin
-		// all bins with splitters[i] <= splitter are empty
-		int i = medianIndex-1;
-		while (i>=splitFrom && (!(splitter < splitters[i]))) splitIndexes[i--] = splitIndex;
-		splitFrom = medianIndex+1;
-	}
-	else if (splitIndex >= to) { // all elements fall into this bin
-		// all bins with splitters[i] >= splitter are empty
-		int i = medianIndex+1;
-		while (i<=splitTo && (!(splitter > splitters[i]))) splitIndexes[i++] = splitIndex;
-		splitTo = medianIndex-1;
-	}
+  // Optimization: Handle special cases to cut down recursions.
+  if (splitIndex < from) { // no element falls into this bin
+    // all bins with splitters[i] <= splitter are empty
+    int i = medianIndex-1;
+    while (i>=splitFrom && (!(splitter < splitters[i]))) splitIndexes[i--] = splitIndex;
+    splitFrom = medianIndex+1;
+  }
+  else if (splitIndex >= to) { // all elements fall into this bin
+    // all bins with splitters[i] >= splitter are empty
+    int i = medianIndex+1;
+    while (i<=splitTo && (!(splitter > splitters[i]))) splitIndexes[i++] = splitIndex;
+    splitTo = medianIndex-1;
+  }
 
-	// recursively partition left half
-	if (splitFrom <= medianIndex-1) {
-		partition(list, from,         splitIndex, splitters, splitFrom, medianIndex-1,  splitIndexes);
-	}
-	
-	// recursively partition right half
-	if (medianIndex+1 <= splitTo) {
-		partition(list, splitIndex+1, to,         splitters, medianIndex+1,  splitTo,   splitIndexes);
-	}
+  // recursively partition left half
+  if (splitFrom <= medianIndex-1) {
+    partition(list, from,         splitIndex, splitters, splitFrom, medianIndex-1,  splitIndexes);
+  }
+  
+  // recursively partition right half
+  if (medianIndex+1 <= splitTo) {
+    partition(list, splitIndex+1, to,         splitters, medianIndex+1,  splitTo,   splitIndexes);
+  }
 }
 /**
  * Same as {@link #partition(int[],int,int,int)}
  * except that it partitions <tt>double[]</tt> rather than <tt>int[]</tt> arrays.
  */
 public static int partition(double[] list, int from, int to, double splitter) {
-	double element;  // int, double --> template type dependent
-	for (int i=from-1; ++i<=to; ) {
-		element = list[i];
-		if (element < splitter) {
-			// swap x[i] with x[from]
-			list[i] = list[from];
-			list[from++] = element;
-		}
-	}
-	return from-1;
+  double element;  // int, double --> template type dependent
+  for (int i=from-1; ++i<=to; ) {
+    element = list[i];
+    if (element < splitter) {
+      // swap x[i] with x[from]
+      list[i] = list[from];
+      list[from++] = element;
+    }
+  }
+  return from-1;
 }
 /**
  * Partitions (partially sorts) the given list such that all elements falling into some intervals are placed next to each other.
@@ -627,133 +625,133 @@ public static int partition(double[] list, int from, int to, double splitter) {
  * @see java.util.Arrays
  */
 public static void partition(int[] list, int from, int to, int[] splitters, int splitFrom, int splitTo, int[] splitIndexes) {
-	int element,splitter; // int, double --> template type dependent
-	
-	if (splitFrom>splitTo) return; // nothing to do
-	if (from>to) { // all bins are empty
-		from--;
-		for (int i = splitFrom; i<=splitTo; ) splitIndexes[i++] = from;
-		return;
-	}
-	
-	// Choose a partition (pivot) index, m
-	// Ideally, the pivot should be the median, because a median splits a list into two equal sized sublists.
-	// However, computing the median is expensive, so we use an approximation.
-	int medianIndex;
-	if (splitFrom==splitTo) { // we don't really have a choice
-		medianIndex = splitFrom;
-	}
-	else { // we do have a choice
-		int m = (from+to) / 2;       // Small arrays, middle element
-		int len = to-from+1;
-		if (len > SMALL) {
-		    int l = from;
-		    int n = to;
-		    if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
-				int s = len/8;
-				l = med3(list, l,     l+s, l+2*s);
-				m = med3(list, m-s,   m,   m+s);
-				n = med3(list, n-2*s, n-s, n);
-		    }
-		    m = med3(list, l, m, n); // Mid-size, pseudomedian of 3
-		}
-		
-		// Find the splitter closest to the pivot, i.e. the splitter that best splits the list into two equal sized sublists.
-		medianIndex = Sorting.binarySearchFromTo(splitters,list[m],splitFrom,splitTo);
-				
-		//int key = list[m];
-		/*
-		if (splitTo-splitFrom+1 < 5) { // on short lists linear search is quicker
-			int i=splitFrom-1;
-			while (++i <= splitTo && list[i] < key);
-			if (i > splitTo || list[i] > key) i = -i-1; // not found
-			medianIndex = i;
-		}
-		*/
-		//else {
-		/*
-		
-			int low = splitFrom;
-			int high = splitTo;
-			int comparison;
-		
-			int mid=0;
-			while (low <= high) {
-				mid = (low + high) / 2;
-				comparison = splitters[mid]-key;
-				if (comparison < 0) low = mid + 1;
-				else if (comparison > 0) high = mid - 1;
-				else break; //return mid; // key found
-			}
-			medianIndex = mid;
-			if (low > high) medianIndex = -(medianIndex + 1);  // key not found.
-		//}
-		*/
-		
-		
-		if (medianIndex < 0) medianIndex = -medianIndex - 1; // not found
-		if (medianIndex > splitTo) medianIndex = splitTo; // not found, one past the end
-		
-	}
-	splitter = splitters[medianIndex];
+  int element,splitter; // int, double --> template type dependent
+  
+  if (splitFrom>splitTo) return; // nothing to do
+  if (from>to) { // all bins are empty
+    from--;
+    for (int i = splitFrom; i<=splitTo; ) splitIndexes[i++] = from;
+    return;
+  }
+  
+  // Choose a partition (pivot) index, m
+  // Ideally, the pivot should be the median, because a median splits a list into two equal sized sublists.
+  // However, computing the median is expensive, so we use an approximation.
+  int medianIndex;
+  if (splitFrom==splitTo) { // we don't really have a choice
+    medianIndex = splitFrom;
+  }
+  else { // we do have a choice
+    int m = (from+to) / 2;       // Small arrays, middle element
+    int len = to-from+1;
+    if (len > SMALL) {
+        int l = from;
+        int n = to;
+        if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
+        int s = len/8;
+        l = med3(list, l,     l+s, l+2*s);
+        m = med3(list, m-s,   m,   m+s);
+        n = med3(list, n-2*s, n-s, n);
+        }
+        m = med3(list, l, m, n); // Mid-size, pseudomedian of 3
+    }
+    
+    // Find the splitter closest to the pivot, i.e. the splitter that best splits the list into two equal sized sublists.
+    medianIndex = Sorting.binarySearchFromTo(splitters,list[m],splitFrom,splitTo);
+        
+    //int key = list[m];
+    /*
+    if (splitTo-splitFrom+1 < 5) { // on short lists linear search is quicker
+      int i=splitFrom-1;
+      while (++i <= splitTo && list[i] < key);
+      if (i > splitTo || list[i] > key) i = -i-1; // not found
+      medianIndex = i;
+    }
+    */
+    //else {
+    /*
+    
+      int low = splitFrom;
+      int high = splitTo;
+      int comparison;
+    
+      int mid=0;
+      while (low <= high) {
+        mid = (low + high) / 2;
+        comparison = splitters[mid]-key;
+        if (comparison < 0) low = mid + 1;
+        else if (comparison > 0) high = mid - 1;
+        else break; //return mid; // key found
+      }
+      medianIndex = mid;
+      if (low > high) medianIndex = -(medianIndex + 1);  // key not found.
+    //}
+    */
+    
+    
+    if (medianIndex < 0) medianIndex = -medianIndex - 1; // not found
+    if (medianIndex > splitTo) medianIndex = splitTo; // not found, one past the end
+    
+  }
+  splitter = splitters[medianIndex];
 
-	//System.out.println("medianIndex="+medianIndex);
-	// Partition the list according to the splitter, i.e.
-	// Establish invariant: list[i] < splitter <= list[j] for i=from..medianIndex and j=medianIndex+1 .. to
-	// Could simply call:
-	int	splitIndex = partition(list,from,to,splitter);
-	// but for speed the code is manually inlined.
-	/*
-	steps += to-from+1;
-	int head = from;
-	for (int i=from-1; ++i<=to; ) { // swap all elements < splitter to front
-		element = list[i];
-		if (element < splitter) {		
-			list[i] = list[head];
-			list[head++] = element;
-			//swappedElements++;
-		}
-	}
-	int splitIndex = head-1;
-	*/
-	
-	
-	
-	
+  //System.out.println("medianIndex="+medianIndex);
+  // Partition the list according to the splitter, i.e.
+  // Establish invariant: list[i] < splitter <= list[j] for i=from..medianIndex and j=medianIndex+1 .. to
+  // Could simply call:
+  int  splitIndex = partition(list,from,to,splitter);
+  // but for speed the code is manually inlined.
+  /*
+  steps += to-from+1;
+  int head = from;
+  for (int i=from-1; ++i<=to; ) { // swap all elements < splitter to front
+    element = list[i];
+    if (element < splitter) {    
+      list[i] = list[head];
+      list[head++] = element;
+      //swappedElements++;
+    }
+  }
+  int splitIndex = head-1;
+  */
+  
+  
+  
+  
 
 
-	
-	//System.out.println("splitIndex="+splitIndex);
-	splitIndexes[medianIndex] = splitIndex;
+  
+  //System.out.println("splitIndex="+splitIndex);
+  splitIndexes[medianIndex] = splitIndex;
 
-	//if (splitFrom == splitTo) return; // done
+  //if (splitFrom == splitTo) return; // done
 
-	// Optimization: Handle special cases to cut down recursions.
-	if (splitIndex < from) { // no element falls into this bin
-		// all bins with splitters[i] <= splitter are empty
-		int i = medianIndex-1;
-		while (i>=splitFrom && (!(splitter < splitters[i]))) splitIndexes[i--] = splitIndex;
-		splitFrom = medianIndex+1;
-	}
-	else if (splitIndex >= to) { // all elements fall into this bin
-		// all bins with splitters[i] >= splitter are empty
-		int i = medianIndex+1;
-		while (i<=splitTo && (!(splitter > splitters[i]))) splitIndexes[i++] = splitIndex;
-		splitTo = medianIndex-1;
-	}
+  // Optimization: Handle special cases to cut down recursions.
+  if (splitIndex < from) { // no element falls into this bin
+    // all bins with splitters[i] <= splitter are empty
+    int i = medianIndex-1;
+    while (i>=splitFrom && (!(splitter < splitters[i]))) splitIndexes[i--] = splitIndex;
+    splitFrom = medianIndex+1;
+  }
+  else if (splitIndex >= to) { // all elements fall into this bin
+    // all bins with splitters[i] >= splitter are empty
+    int i = medianIndex+1;
+    while (i<=splitTo && (!(splitter > splitters[i]))) splitIndexes[i++] = splitIndex;
+    splitTo = medianIndex-1;
+  }
 
-	// recursively partition left half
-	if (splitFrom <= medianIndex-1) {
-		//System.out.println("1.recursive: from="+from+", to="+splitIndex+", splitFrom="+splitFrom+", splitTo="+(medianIndex-1));		
-		partition(list, from,         splitIndex, splitters, splitFrom, medianIndex-1,  splitIndexes);
-	}
-	
-	// recursively partition right half
-	if (medianIndex+1 <= splitTo) {
-		//System.out.println("2.recursive: from="+(splitIndex+1)+", to="+to+", splitFrom="+(medianIndex+1)+", splitTo="+splitTo);
-		partition(list, splitIndex+1, to,         splitters, medianIndex+1,  splitTo,   splitIndexes);
-	}
-	//System.out.println("BACK TRACKING\n\n");
+  // recursively partition left half
+  if (splitFrom <= medianIndex-1) {
+    //System.out.println("1.recursive: from="+from+", to="+splitIndex+", splitFrom="+splitFrom+", splitTo="+(medianIndex-1));    
+    partition(list, from,         splitIndex, splitters, splitFrom, medianIndex-1,  splitIndexes);
+  }
+  
+  // recursively partition right half
+  if (medianIndex+1 <= splitTo) {
+    //System.out.println("2.recursive: from="+(splitIndex+1)+", to="+to+", splitFrom="+(medianIndex+1)+", splitTo="+splitTo);
+    partition(list, splitIndex+1, to,         splitters, medianIndex+1,  splitTo,   splitIndexes);
+  }
+  //System.out.println("BACK TRACKING\n\n");
 }
 /**
  * Partitions (partially sorts) the given list such that all elements falling into the given interval are placed next to each other.
@@ -800,345 +798,345 @@ public static void partition(int[] list, int from, int to, int[] splitters, int 
  * @return the index of the largest element falling into the interval <tt>[-infinity,splitter)</tt>, as seen after partitioning.
  */
 public static int partition(int[] list, int from, int to, int splitter) {
-	steps += to-from+1;
-	
-	/*
-	System.out.println();
-	if (from<=to) {
-		System.out.println("SORT WORKING: from="+from+", to="+to+", splitter="+splitter);
-	}
-	else {
-		System.out.println("SORT WORKING: NOTHING TO DO.");
-	}
-	*/
-	
-	
-	
-		
-	
-	// returns index of last element < splitter
+  steps += to-from+1;
+  
+  /*
+  System.out.println();
+  if (from<=to) {
+    System.out.println("SORT WORKING: from="+from+", to="+to+", splitter="+splitter);
+  }
+  else {
+    System.out.println("SORT WORKING: NOTHING TO DO.");
+  }
+  */
+  
+  
+  
+    
+  
+  // returns index of last element < splitter
 
-	
-	/*
-	for (int i=from-1; ++i<=to; ) {
-		if (list[i] < splitter) {
-			int element = list[i];
-			list[i] = list[from];
-			list[from++] = element;
-		}
-	}
-	*/
-	
-	
-	
-	
-	int element;
-	for (int i=from-1; ++i<=to; ) {
-		element = list[i];
-		if (element < splitter) {
-			// swap x[i] with x[from]
-			list[i] = list[from];
-			list[from++] = element;
-			//swappedElements++;
-		}
-	}
-	//if (from<=to) System.out.println("Swapped "+(head-from)+" elements");
-	
+  
+  /*
+  for (int i=from-1; ++i<=to; ) {
+    if (list[i] < splitter) {
+      int element = list[i];
+      list[i] = list[from];
+      list[from++] = element;
+    }
+  }
+  */
+  
+  
+  
+  
+  int element;
+  for (int i=from-1; ++i<=to; ) {
+    element = list[i];
+    if (element < splitter) {
+      // swap x[i] with x[from]
+      list[i] = list[from];
+      list[from++] = element;
+      //swappedElements++;
+    }
+  }
+  //if (from<=to) System.out.println("Swapped "+(head-from)+" elements");
+  
 
-	/*	
-	//JAL:
-	int first = from;
-	int last = to+1;
-	--first;
-	while (true) {
-		while (++first < last && list[first] < splitter);
-		while (first < --last && !(list[last] < splitter)); 
-		if (first >= last) return first-1;
-		int tmp = list[first];
-		list[first] = list[last];
-		list[last] = tmp;
-	}
-	*/
-	
-	
+  /*  
+  //JAL:
+  int first = from;
+  int last = to+1;
+  --first;
+  while (true) {
+    while (++first < last && list[first] < splitter);
+    while (first < --last && !(list[last] < splitter)); 
+    if (first >= last) return first-1;
+    int tmp = list[first];
+    list[first] = list[last];
+    list[last] = tmp;
+  }
+  */
+  
+  
 
-	/*
-	System.out.println("splitter="+splitter);
-	System.out.println("before="+new IntArrayList(list));
-	int head = from;
-	int trail = to;
-	int element;
-	while (head<=trail) {
-		head--;
-		while (++head < trail && list[head] < splitter);
-		
-		trail++;
-		while (--trail > head && list[trail] >= splitter);
+  /*
+  System.out.println("splitter="+splitter);
+  System.out.println("before="+new IntArrayList(list));
+  int head = from;
+  int trail = to;
+  int element;
+  while (head<=trail) {
+    head--;
+    while (++head < trail && list[head] < splitter);
+    
+    trail++;
+    while (--trail > head && list[trail] >= splitter);
 
-		if (head != trail) {		
-			element = list[head];
-			list[head] = list[trail];
-			list[trail] = element;
-		}
-		head++;
-		trail--;
-		System.out.println("after ="+new IntArrayList(list)+", head="+head);
-	}
-	*/
-		
+    if (head != trail) {    
+      element = list[head];
+      list[head] = list[trail];
+      list[trail] = element;
+    }
+    head++;
+    trail--;
+    System.out.println("after ="+new IntArrayList(list)+", head="+head);
+  }
+  */
+    
 
-	/*
-	//System.out.println("splitter="+splitter);
-	//System.out.println("before="+new IntArrayList(list));
-	to++;
-	//int head = from;
-	int element;
-	//int oldHead;
-	while (--to >= from) {
-		element = list[to];
-		if (element < splitter) {
-			from--;
-			while (++from < to && list[from] < splitter);
-			//if (head != to) {
-				list[to] = list[from];
-				list[from++] = element;
-				//oldHead = list[head];
-				//list[head] = element;
-				//list[i] = oldHead;
-				
-				//head++;
-			//}
-			//head++;
-		}
-		//System.out.println("after ="+new IntArrayList(list)+", head="+head);
-	}
-	*/
-	
-	/*
-	int i=from-1;
-	int head = from;
-	int trail = to;
-	while (++i <= trail) {
-		int element = list[i];
-		if (element < splitter) {
-			if (head == i) head++;
-			else {
-				// swap list[i] with list[from]
-				int oldHead = list[head];
-				int oldTrail = list[trail];
-				list[head++] = element;
-				list[i--] = oldTrail;
-				list[trail--] = oldHead;
-			}
-		}
-		//System.out.println(new IntArrayList(list));
-	
-	}
-	*/
-	
-	
-	return from-1;
-	//return head-1;
+  /*
+  //System.out.println("splitter="+splitter);
+  //System.out.println("before="+new IntArrayList(list));
+  to++;
+  //int head = from;
+  int element;
+  //int oldHead;
+  while (--to >= from) {
+    element = list[to];
+    if (element < splitter) {
+      from--;
+      while (++from < to && list[from] < splitter);
+      //if (head != to) {
+        list[to] = list[from];
+        list[from++] = element;
+        //oldHead = list[head];
+        //list[head] = element;
+        //list[i] = oldHead;
+        
+        //head++;
+      //}
+      //head++;
+    }
+    //System.out.println("after ="+new IntArrayList(list)+", head="+head);
+  }
+  */
+  
+  /*
+  int i=from-1;
+  int head = from;
+  int trail = to;
+  while (++i <= trail) {
+    int element = list[i];
+    if (element < splitter) {
+      if (head == i) head++;
+      else {
+        // swap list[i] with list[from]
+        int oldHead = list[head];
+        int oldTrail = list[trail];
+        list[head++] = element;
+        list[i--] = oldTrail;
+        list[trail--] = oldHead;
+      }
+    }
+    //System.out.println(new IntArrayList(list));
+  
+  }
+  */
+  
+  
+  return from-1;
+  //return head-1;
 }
 /**
  * Same as {@link #partition(int[],int,int,int[],int,int,int[])}
  * except that it partitions <tt>Object[]</tt> rather than <tt>int[]</tt> arrays.
  */
 public static void partition(Object[] list, int from, int to, Object[] splitters, int splitFrom, int splitTo, int[] splitIndexes, java.util.Comparator comp) {
-	Object splitter; // int, double --> template type dependent
-	
-	if (splitFrom>splitTo) return; // nothing to do
-	if (from>to) { // all bins are empty
-		from--;
-		for (int i = splitFrom; i<=splitTo; ) splitIndexes[i++] = from;
-		return;
-	}
-	
-	// Choose a partition (pivot) index, m
-	// Ideally, the pivot should be the median, because a median splits a list into two equal sized sublists.
-	// However, computing the median is expensive, so we use an approximation.
-	int medianIndex;
-	if (splitFrom==splitTo) { // we don't really have a choice
-		medianIndex = splitFrom;
-	}
-	else { // we do have a choice
-		int m = (from+to) / 2;       // Small arrays, middle element
-		int len = to-from+1;
-		if (len > SMALL) {
-		    int l = from;
-		    int n = to;
-		    if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
-				int s = len/8;
-				l = med3(list, l,     l+s, l+2*s, comp);
-				m = med3(list, m-s,   m,   m+s,   comp);
-				n = med3(list, n-2*s, n-s, n,     comp);
-		    }
-		    m = med3(list, l, m, n, comp); // Mid-size, pseudomedian of 3
-		}
-		
-		// Find the splitter closest to the pivot, i.e. the splitter that best splits the list into two equal sized sublists.
-		medianIndex = Sorting.binarySearchFromTo(splitters,list[m],splitFrom,splitTo,comp);
-		if (medianIndex < 0) medianIndex = -medianIndex - 1; // not found
-		if (medianIndex > splitTo) medianIndex = splitTo; // not found, one past the end
-		
-	}
-	splitter = splitters[medianIndex];
+  Object splitter; // int, double --> template type dependent
+  
+  if (splitFrom>splitTo) return; // nothing to do
+  if (from>to) { // all bins are empty
+    from--;
+    for (int i = splitFrom; i<=splitTo; ) splitIndexes[i++] = from;
+    return;
+  }
+  
+  // Choose a partition (pivot) index, m
+  // Ideally, the pivot should be the median, because a median splits a list into two equal sized sublists.
+  // However, computing the median is expensive, so we use an approximation.
+  int medianIndex;
+  if (splitFrom==splitTo) { // we don't really have a choice
+    medianIndex = splitFrom;
+  }
+  else { // we do have a choice
+    int m = (from+to) / 2;       // Small arrays, middle element
+    int len = to-from+1;
+    if (len > SMALL) {
+        int l = from;
+        int n = to;
+        if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
+        int s = len/8;
+        l = med3(list, l,     l+s, l+2*s, comp);
+        m = med3(list, m-s,   m,   m+s,   comp);
+        n = med3(list, n-2*s, n-s, n,     comp);
+        }
+        m = med3(list, l, m, n, comp); // Mid-size, pseudomedian of 3
+    }
+    
+    // Find the splitter closest to the pivot, i.e. the splitter that best splits the list into two equal sized sublists.
+    medianIndex = Sorting.binarySearchFromTo(splitters,list[m],splitFrom,splitTo,comp);
+    if (medianIndex < 0) medianIndex = -medianIndex - 1; // not found
+    if (medianIndex > splitTo) medianIndex = splitTo; // not found, one past the end
+    
+  }
+  splitter = splitters[medianIndex];
 
-	// Partition the list according to the splitter, i.e.
-	// Establish invariant: list[i] < splitter <= list[j] for i=from..medianIndex and j=medianIndex+1 .. to
-	int	splitIndex = partition(list,from,to,splitter,comp);
-	splitIndexes[medianIndex] = splitIndex;
+  // Partition the list according to the splitter, i.e.
+  // Establish invariant: list[i] < splitter <= list[j] for i=from..medianIndex and j=medianIndex+1 .. to
+  int  splitIndex = partition(list,from,to,splitter,comp);
+  splitIndexes[medianIndex] = splitIndex;
 
-	// Optimization: Handle special cases to cut down recursions.
-	if (splitIndex < from) { // no element falls into this bin
-		// all bins with splitters[i] <= splitter are empty
-		int i = medianIndex-1;
-		while (i>=splitFrom && (!(comp.compare(splitter,splitters[i]) < 0))) splitIndexes[i--] = splitIndex;
-		splitFrom = medianIndex+1;
-	}
-	else if (splitIndex >= to) { // all elements fall into this bin
-		// all bins with splitters[i] >= splitter are empty
-		int i = medianIndex+1;
-		while (i<=splitTo && (!(comp.compare(splitter,splitters[i]) > 0))) splitIndexes[i++] = splitIndex;
-		splitTo = medianIndex-1;
-	}
+  // Optimization: Handle special cases to cut down recursions.
+  if (splitIndex < from) { // no element falls into this bin
+    // all bins with splitters[i] <= splitter are empty
+    int i = medianIndex-1;
+    while (i>=splitFrom && (!(comp.compare(splitter,splitters[i]) < 0))) splitIndexes[i--] = splitIndex;
+    splitFrom = medianIndex+1;
+  }
+  else if (splitIndex >= to) { // all elements fall into this bin
+    // all bins with splitters[i] >= splitter are empty
+    int i = medianIndex+1;
+    while (i<=splitTo && (!(comp.compare(splitter,splitters[i]) > 0))) splitIndexes[i++] = splitIndex;
+    splitTo = medianIndex-1;
+  }
 
-	// recursively partition left half
-	if (splitFrom <= medianIndex-1) {
-		partition(list, from,         splitIndex, splitters, splitFrom, medianIndex-1,  splitIndexes, comp);
-	}
-	
-	// recursively partition right half
-	if (medianIndex+1 <= splitTo) {
-		partition(list, splitIndex+1, to,         splitters, medianIndex+1,  splitTo,   splitIndexes, comp);
-	}
+  // recursively partition left half
+  if (splitFrom <= medianIndex-1) {
+    partition(list, from,         splitIndex, splitters, splitFrom, medianIndex-1,  splitIndexes, comp);
+  }
+  
+  // recursively partition right half
+  if (medianIndex+1 <= splitTo) {
+    partition(list, splitIndex+1, to,         splitters, medianIndex+1,  splitTo,   splitIndexes, comp);
+  }
 }
 /**
  * Same as {@link #partition(int[],int,int,int)} 
  * except that it <i>synchronously</i> partitions the objects of the given list by the order of the given comparator.
  */
 public static int partition(Object[] list, int from, int to, Object splitter, java.util.Comparator comp) {
-	Object element;  // int, double --> template type dependent
-	for (int i=from-1; ++i<=to; ) {
-		element = list[i];
-		if (comp.compare(element,splitter) < 0) {
-			// swap x[i] with x[from]
-			list[i] = list[from];
-			list[from] = element;
-			from++;
-		}
-	}
-	return from-1;
+  Object element;  // int, double --> template type dependent
+  for (int i=from-1; ++i<=to; ) {
+    element = list[i];
+    if (comp.compare(element,splitter) < 0) {
+      // swap x[i] with x[from]
+      list[i] = list[from];
+      list[from] = element;
+      from++;
+    }
+  }
+  return from-1;
 }
 /**
  * Equivalent to <tt>partition(list.elements(), from, to, splitters.elements(), 0, splitters.size()-1, splitIndexes.elements())</tt>.
  */
 public static void partition(DoubleArrayList list, int from, int to, DoubleArrayList splitters, IntArrayList splitIndexes) {
-	partition(list.elements(),from,to,splitters.elements(),0,splitters.size()-1,splitIndexes.elements());
+  partition(list.elements(),from,to,splitters.elements(),0,splitters.size()-1,splitIndexes.elements());
 }
 /**
  * Equivalent to <tt>partition(list.elements(), from, to, splitters.elements(), 0, splitters.size()-1, splitIndexes.elements())</tt>.
  */
 public static void partition(IntArrayList list, int from, int to, IntArrayList splitters, IntArrayList splitIndexes) {
-	partition(list.elements(),from,to,splitters.elements(),0,splitters.size()-1,splitIndexes.elements());
+  partition(list.elements(),from,to,splitters.elements(),0,splitters.size()-1,splitIndexes.elements());
 }
 /**
  * Same as {@link #triplePartition(int[],int[],int[],int,int,int[],int,int,int[])}
  * except that it <i>synchronously</i> partitions <tt>double[]</tt> rather than <tt>int[]</tt> arrays.
  */
 public static void triplePartition(double[] list, double[] secondary, double[] tertiary, int from, int to, double[] splitters, int splitFrom, int splitTo, int[] splitIndexes) {
-	double splitter; // int, double --> template type dependent
-	
-	if (splitFrom>splitTo) return; // nothing to do
-	if (from>to) { // all bins are empty
-		from--;
-		for (int i = splitFrom; i<=splitTo; ) splitIndexes[i++] = from;
-		return;
-	}
-	
-	// Choose a partition (pivot) index, m
-	// Ideally, the pivot should be the median, because a median splits a list into two equal sized sublists.
-	// However, computing the median is expensive, so we use an approximation.
-	int medianIndex;
-	if (splitFrom==splitTo) { // we don't really have a choice
-		medianIndex = splitFrom;
-	}
-	else { // we do have a choice
-		int m = (from+to) / 2;       // Small arrays, middle element
-		int len = to-from+1;
-		if (len > SMALL) {
-		    int l = from;
-		    int n = to;
-		    if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
-				int s = len/8;
-				l = med3(list, l,     l+s, l+2*s);
-				m = med3(list, m-s,   m,   m+s);
-				n = med3(list, n-2*s, n-s, n);
-		    }
-		    m = med3(list, l, m, n); // Mid-size, pseudomedian of 3
-		}
-		
-		// Find the splitter closest to the pivot, i.e. the splitter that best splits the list into two equal sized sublists.
-		medianIndex = Sorting.binarySearchFromTo(splitters,list[m],splitFrom,splitTo);
-		if (medianIndex < 0) medianIndex = -medianIndex - 1; // not found
-		if (medianIndex > splitTo) medianIndex = splitTo; // not found, one past the end
-		
-	}
-	splitter = splitters[medianIndex];
+  double splitter; // int, double --> template type dependent
+  
+  if (splitFrom>splitTo) return; // nothing to do
+  if (from>to) { // all bins are empty
+    from--;
+    for (int i = splitFrom; i<=splitTo; ) splitIndexes[i++] = from;
+    return;
+  }
+  
+  // Choose a partition (pivot) index, m
+  // Ideally, the pivot should be the median, because a median splits a list into two equal sized sublists.
+  // However, computing the median is expensive, so we use an approximation.
+  int medianIndex;
+  if (splitFrom==splitTo) { // we don't really have a choice
+    medianIndex = splitFrom;
+  }
+  else { // we do have a choice
+    int m = (from+to) / 2;       // Small arrays, middle element
+    int len = to-from+1;
+    if (len > SMALL) {
+        int l = from;
+        int n = to;
+        if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
+        int s = len/8;
+        l = med3(list, l,     l+s, l+2*s);
+        m = med3(list, m-s,   m,   m+s);
+        n = med3(list, n-2*s, n-s, n);
+        }
+        m = med3(list, l, m, n); // Mid-size, pseudomedian of 3
+    }
+    
+    // Find the splitter closest to the pivot, i.e. the splitter that best splits the list into two equal sized sublists.
+    medianIndex = Sorting.binarySearchFromTo(splitters,list[m],splitFrom,splitTo);
+    if (medianIndex < 0) medianIndex = -medianIndex - 1; // not found
+    if (medianIndex > splitTo) medianIndex = splitTo; // not found, one past the end
+    
+  }
+  splitter = splitters[medianIndex];
 
-	// Partition the list according to the splitter, i.e.
-	// Establish invariant: list[i] < splitter <= list[j] for i=from..medianIndex and j=medianIndex+1 .. to
-	int	splitIndex = triplePartition(list,secondary,tertiary,from,to,splitter);
-	splitIndexes[medianIndex] = splitIndex;
+  // Partition the list according to the splitter, i.e.
+  // Establish invariant: list[i] < splitter <= list[j] for i=from..medianIndex and j=medianIndex+1 .. to
+  int  splitIndex = triplePartition(list,secondary,tertiary,from,to,splitter);
+  splitIndexes[medianIndex] = splitIndex;
 
-	// Optimization: Handle special cases to cut down recursions.
-	if (splitIndex < from) { // no element falls into this bin
-		// all bins with splitters[i] <= splitter are empty
-		int i = medianIndex-1;
-		while (i>=splitFrom && (!(splitter < splitters[i]))) splitIndexes[i--] = splitIndex;
-		splitFrom = medianIndex+1;
-	}
-	else if (splitIndex >= to) { // all elements fall into this bin
-		// all bins with splitters[i] >= splitter are empty
-		int i = medianIndex+1;
-		while (i<=splitTo && (!(splitter > splitters[i]))) splitIndexes[i++] = splitIndex;
-		splitTo = medianIndex-1;
-	}
+  // Optimization: Handle special cases to cut down recursions.
+  if (splitIndex < from) { // no element falls into this bin
+    // all bins with splitters[i] <= splitter are empty
+    int i = medianIndex-1;
+    while (i>=splitFrom && (!(splitter < splitters[i]))) splitIndexes[i--] = splitIndex;
+    splitFrom = medianIndex+1;
+  }
+  else if (splitIndex >= to) { // all elements fall into this bin
+    // all bins with splitters[i] >= splitter are empty
+    int i = medianIndex+1;
+    while (i<=splitTo && (!(splitter > splitters[i]))) splitIndexes[i++] = splitIndex;
+    splitTo = medianIndex-1;
+  }
 
-	// recursively partition left half
-	if (splitFrom <= medianIndex-1) {
-		triplePartition(list, secondary, tertiary, from,         splitIndex, splitters, splitFrom, medianIndex-1,  splitIndexes);
-	}
-	
-	// recursively partition right half
-	if (medianIndex+1 <= splitTo) {
-		triplePartition(list, secondary, tertiary, splitIndex+1, to,         splitters, medianIndex+1,  splitTo,   splitIndexes);
-	}
+  // recursively partition left half
+  if (splitFrom <= medianIndex-1) {
+    triplePartition(list, secondary, tertiary, from,         splitIndex, splitters, splitFrom, medianIndex-1,  splitIndexes);
+  }
+  
+  // recursively partition right half
+  if (medianIndex+1 <= splitTo) {
+    triplePartition(list, secondary, tertiary, splitIndex+1, to,         splitters, medianIndex+1,  splitTo,   splitIndexes);
+  }
 }
 /**
  * Same as {@link #triplePartition(int[],int[],int[],int,int,int)} 
  * except that it <i>synchronously</i> partitions <tt>double[]</tt> rather than <tt>int[]</tt> arrays.
  */
 public static int triplePartition(double[] list, double[] secondary, double[] tertiary, int from, int to, double splitter) {
-	double element;  // int, double --> template type dependent
-	for (int i=from-1; ++i<=to; ) {
-		element = list[i];
-		if (element < splitter) {
-			// swap x[i] with x[from]
-			list[i] = list[from];
-			list[from] = element;
+  double element;  // int, double --> template type dependent
+  for (int i=from-1; ++i<=to; ) {
+    element = list[i];
+    if (element < splitter) {
+      // swap x[i] with x[from]
+      list[i] = list[from];
+      list[from] = element;
 
-			element = secondary[i];
-			secondary[i] = secondary[from];
-			secondary[from] = element;
-			
-			element = tertiary[i];
-			tertiary[i] = tertiary[from];
-			tertiary[from++] = element;
-		}
-	}
+      element = secondary[i];
+      secondary[i] = secondary[from];
+      secondary[from] = element;
+      
+      element = tertiary[i];
+      tertiary[i] = tertiary[from];
+      tertiary[from++] = element;
+    }
+  }
 
-	return from-1;
+  return from-1;
 }
 /**
  * Same as {@link #partition(int[],int,int,int[],int,int,int[])} except that this method <i>synchronously</i> partitions three arrays at the same time;
@@ -1159,73 +1157,73 @@ public static int triplePartition(double[] list, double[] secondary, double[] te
  * Same as for single-partition methods.
  */
 public static void triplePartition(int[] list, int[] secondary, int[] tertiary, int from, int to, int[] splitters, int splitFrom, int splitTo, int[] splitIndexes) {
-	int splitter; // int, double --> template type dependent
-	
-	if (splitFrom>splitTo) return; // nothing to do
-	if (from>to) { // all bins are empty
-		from--;
-		for (int i = splitFrom; i<=splitTo; ) splitIndexes[i++] = from;
-		return;
-	}
-	
-	// Choose a partition (pivot) index, m
-	// Ideally, the pivot should be the median, because a median splits a list into two equal sized sublists.
-	// However, computing the median is expensive, so we use an approximation.
-	int medianIndex;
-	if (splitFrom==splitTo) { // we don't really have a choice
-		medianIndex = splitFrom;
-	}
-	else { // we do have a choice
-		int m = (from+to) / 2;       // Small arrays, middle element
-		int len = to-from+1;
-		if (len > SMALL) {
-		    int l = from;
-		    int n = to;
-		    if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
-				int s = len/8;
-				l = med3(list, l,     l+s, l+2*s);
-				m = med3(list, m-s,   m,   m+s);
-				n = med3(list, n-2*s, n-s, n);
-		    }
-		    m = med3(list, l, m, n); // Mid-size, pseudomedian of 3
-		}
-		
-		// Find the splitter closest to the pivot, i.e. the splitter that best splits the list into two equal sized sublists.
-		medianIndex = Sorting.binarySearchFromTo(splitters,list[m],splitFrom,splitTo);
-		if (medianIndex < 0) medianIndex = -medianIndex - 1; // not found
-		if (medianIndex > splitTo) medianIndex = splitTo; // not found, one past the end
-		
-	}
-	splitter = splitters[medianIndex];
+  int splitter; // int, double --> template type dependent
+  
+  if (splitFrom>splitTo) return; // nothing to do
+  if (from>to) { // all bins are empty
+    from--;
+    for (int i = splitFrom; i<=splitTo; ) splitIndexes[i++] = from;
+    return;
+  }
+  
+  // Choose a partition (pivot) index, m
+  // Ideally, the pivot should be the median, because a median splits a list into two equal sized sublists.
+  // However, computing the median is expensive, so we use an approximation.
+  int medianIndex;
+  if (splitFrom==splitTo) { // we don't really have a choice
+    medianIndex = splitFrom;
+  }
+  else { // we do have a choice
+    int m = (from+to) / 2;       // Small arrays, middle element
+    int len = to-from+1;
+    if (len > SMALL) {
+        int l = from;
+        int n = to;
+        if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
+        int s = len/8;
+        l = med3(list, l,     l+s, l+2*s);
+        m = med3(list, m-s,   m,   m+s);
+        n = med3(list, n-2*s, n-s, n);
+        }
+        m = med3(list, l, m, n); // Mid-size, pseudomedian of 3
+    }
+    
+    // Find the splitter closest to the pivot, i.e. the splitter that best splits the list into two equal sized sublists.
+    medianIndex = Sorting.binarySearchFromTo(splitters,list[m],splitFrom,splitTo);
+    if (medianIndex < 0) medianIndex = -medianIndex - 1; // not found
+    if (medianIndex > splitTo) medianIndex = splitTo; // not found, one past the end
+    
+  }
+  splitter = splitters[medianIndex];
 
-	// Partition the list according to the splitter, i.e.
-	// Establish invariant: list[i] < splitter <= list[j] for i=from..medianIndex and j=medianIndex+1 .. to
-	int	splitIndex = triplePartition(list,secondary,tertiary,from,to,splitter);
-	splitIndexes[medianIndex] = splitIndex;
+  // Partition the list according to the splitter, i.e.
+  // Establish invariant: list[i] < splitter <= list[j] for i=from..medianIndex and j=medianIndex+1 .. to
+  int  splitIndex = triplePartition(list,secondary,tertiary,from,to,splitter);
+  splitIndexes[medianIndex] = splitIndex;
 
-	// Optimization: Handle special cases to cut down recursions.
-	if (splitIndex < from) { // no element falls into this bin
-		// all bins with splitters[i] <= splitter are empty
-		int i = medianIndex-1;
-		while (i>=splitFrom && (!(splitter < splitters[i]))) splitIndexes[i--] = splitIndex;
-		splitFrom = medianIndex+1;
-	}
-	else if (splitIndex >= to) { // all elements fall into this bin
-		// all bins with splitters[i] >= splitter are empty
-		int i = medianIndex+1;
-		while (i<=splitTo && (!(splitter > splitters[i]))) splitIndexes[i++] = splitIndex;
-		splitTo = medianIndex-1;
-	}
+  // Optimization: Handle special cases to cut down recursions.
+  if (splitIndex < from) { // no element falls into this bin
+    // all bins with splitters[i] <= splitter are empty
+    int i = medianIndex-1;
+    while (i>=splitFrom && (!(splitter < splitters[i]))) splitIndexes[i--] = splitIndex;
+    splitFrom = medianIndex+1;
+  }
+  else if (splitIndex >= to) { // all elements fall into this bin
+    // all bins with splitters[i] >= splitter are empty
+    int i = medianIndex+1;
+    while (i<=splitTo && (!(splitter > splitters[i]))) splitIndexes[i++] = splitIndex;
+    splitTo = medianIndex-1;
+  }
 
-	// recursively partition left half
-	if (splitFrom <= medianIndex-1) {
-		triplePartition(list, secondary, tertiary, from,         splitIndex, splitters, splitFrom, medianIndex-1,  splitIndexes);
-	}
-	
-	// recursively partition right half
-	if (medianIndex+1 <= splitTo) {
-		triplePartition(list, secondary, tertiary, splitIndex+1, to,         splitters, medianIndex+1,  splitTo,   splitIndexes);
-	}
+  // recursively partition left half
+  if (splitFrom <= medianIndex-1) {
+    triplePartition(list, secondary, tertiary, from,         splitIndex, splitters, splitFrom, medianIndex-1,  splitIndexes);
+  }
+  
+  // recursively partition right half
+  if (medianIndex+1 <= splitTo) {
+    triplePartition(list, secondary, tertiary, splitIndex+1, to,         splitters, medianIndex+1,  splitTo,   splitIndexes);
+  }
 }
 /**
  * Same as {@link #partition(int[],int,int,int)} except that this method <i>synchronously</i> partitions three arrays at the same time;
@@ -1237,24 +1235,24 @@ public static void triplePartition(int[] list, int[] secondary, int[] tertiary, 
  * Same as for single-partition methods.
  */
 public static int triplePartition(int[] list, int[] secondary, int[] tertiary, int from, int to, int splitter) {
-	int element;  // int, double --> template type dependent
-	for (int i=from-1; ++i<=to; ) {
-		element = list[i];
-		if (element < splitter) {
-			// swap x[i] with x[from]
-			list[i] = list[from];
-			list[from] = element;
+  int element;  // int, double --> template type dependent
+  for (int i=from-1; ++i<=to; ) {
+    element = list[i];
+    if (element < splitter) {
+      // swap x[i] with x[from]
+      list[i] = list[from];
+      list[from] = element;
 
-			element = secondary[i];
-			secondary[i] = secondary[from];
-			secondary[from] = element;
-			
-			element = tertiary[i];
-			tertiary[i] = tertiary[from];
-			tertiary[from++] = element;
-		}
-	}
+      element = secondary[i];
+      secondary[i] = secondary[from];
+      secondary[from] = element;
+      
+      element = tertiary[i];
+      tertiary[i] = tertiary[from];
+      tertiary[from++] = element;
+    }
+  }
 
-	return from-1;
+  return from-1;
 }
 }

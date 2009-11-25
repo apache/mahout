@@ -18,12 +18,12 @@ import org.apache.mahout.matrix.list.ObjectArrayList;
  */
 @Deprecated
 public class ObjectListAdapter extends java.util.AbstractList implements java.util.List {
-	protected ObjectArrayList content;
+  protected ObjectArrayList content;
 /**
  * Constructs a list backed by the specified content list.
  */
 public ObjectListAdapter(ObjectArrayList content) {
-	this.content = content;
+  this.content = content;
 }
 /**
  * Inserts the specified element at the specified position in this list
@@ -35,15 +35,15 @@ public ObjectListAdapter(ObjectArrayList content) {
  * @param element element to be inserted.
  * 
  * @throws ClassCastException if the class of the specified element
- * 		  prevents it from being added to this list.
+ *       prevents it from being added to this list.
  * @throws IllegalArgumentException if some aspect of the specified
- *		  element prevents it from being added to this list.
+ *      element prevents it from being added to this list.
  * @throws IndexOutOfBoundsException index is out of range (<tt>index &lt;
- *		  0 || index &gt; size()</tt>).
+ *      0 || index &gt; size()</tt>).
  */
 public void add(int index, Object element) {
-	content.beforeInsert(index,element);
-	modCount++;
+  content.beforeInsert(index,element);
+  modCount++;
 }
 /**
  * Returns the element at the specified position in this list.
@@ -52,10 +52,10 @@ public void add(int index, Object element) {
  * 
  * @return the element at the specified position in this list.
  * @throws IndexOutOfBoundsException if the given index is out of range
- * 		  (<tt>index &lt; 0 || index &gt;= size()</tt>).
+ *       (<tt>index &lt; 0 || index &gt;= size()</tt>).
  */
 public Object get(int index) {
-	return content.get(index);
+  return content.get(index);
 }
 /**
  * Removes the element at the specified position in this list (optional
@@ -67,13 +67,13 @@ public Object get(int index) {
  * @return the element previously at the specified position.
  * 
  * @throws IndexOutOfBoundsException if the specified index is out of
- * 		  range (<tt>index &lt; 0 || index &gt;= size()</tt>).
+ *       range (<tt>index &lt; 0 || index &gt;= size()</tt>).
  */
 public Object remove(int index) {
-	Object old = get(index);
-	content.remove(index);
-	modCount++;
-	return old;
+  Object old = get(index);
+  content.remove(index);
+  modCount++;
+  return old;
 }
 /**
  * Replaces the element at the specified position in this list with the
@@ -84,18 +84,18 @@ public Object remove(int index) {
  * @return the element previously at the specified position.
  * 
  * @throws ClassCastException if the class of the specified element
- * 		  prevents it from being added to this list.
+ *       prevents it from being added to this list.
  * @throws IllegalArgumentException if some aspect of the specified
- *		  element prevents it from being added to this list.
+ *      element prevents it from being added to this list.
  * 
  * @throws IndexOutOfBoundsException if the specified index is out of
  *            range (<tt>index &lt; 0 || index &gt;= size()</tt>).
  */
 
 public Object set(int index, Object element) {
-	Object old = get(index);
-	content.set(index,element);
-	return old;
+  Object old = get(index);
+  content.set(index,element);
+  return old;
 }
 /**
  * Returns the number of elements in this list.
@@ -103,6 +103,6 @@ public Object set(int index, Object element) {
  * @return  the number of elements in this list.
  */
 public int size() {
-	return content.size();
+  return content.size();
 }
 }

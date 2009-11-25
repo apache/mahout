@@ -23,8 +23,8 @@ public interface Double9Function {
  * @return the result of the function.
  */
 abstract public double apply(
-	double a00, double a01, double a02,
-	double a10, double a11, double a12,
-	double a20, double a21, double a22
-	);
+  double a00, double a01, double a02,
+  double a10, double a11, double a12,
+  double a20, double a21, double a22
+  );
 }

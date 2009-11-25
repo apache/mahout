@@ -62,18 +62,16 @@ import org.apache.mahout.matrix.bitvector.QuickBitVector;
  * @see DistinctNumberList
  * @see java.lang.Float
  * @see java.lang.Double
- * @author wolfgang.hoschek@cern.ch
- * @version 1.0, 09/24/99
  */
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
 public class MinMaxNumberList extends org.apache.mahout.matrix.list.AbstractLongList {
-	protected long minValue;
-	protected int bitsPerElement;
-	protected long[] bits;
-	protected int capacity;
+  protected long minValue;
+  protected int bitsPerElement;
+  protected long[] bits;
+  protected int capacity;
 /**
  * Constructs an empty list with the specified initial capacity and the specified range of values allowed to be hold in this list.
  * Legal values are in the range [minimum,maximum], all inclusive.
@@ -82,7 +80,7 @@ public class MinMaxNumberList extends org.apache.mahout.matrix.list.AbstractLong
  * @param   initialCapacity   the number of elements the receiver can hold without auto-expanding itself by allocating new internal memory.
  */
 public MinMaxNumberList(long minimum, long maximum, int initialCapacity) {
-	this.setUp(minimum, maximum, initialCapacity);
+  this.setUp(minimum, maximum, initialCapacity);
 }
 /**
  * Appends the specified element to the end of this list.
@@ -90,13 +88,13 @@ public MinMaxNumberList(long minimum, long maximum, int initialCapacity) {
  * @param element element to be appended to this list.
  */
 public void add(long element) {
-	// overridden for performance only.
-	if (size == capacity) {
-		ensureCapacity(size + 1); 
-	}
-	int i=size*this.bitsPerElement;
-	QuickBitVector.putLongFromTo(this.bits, element-this.minValue,i,i+this.bitsPerElement-1);
-	size++;
+  // overridden for performance only.
+  if (size == capacity) {
+    ensureCapacity(size + 1); 
+  }
+  int i=size*this.bitsPerElement;
+  QuickBitVector.putLongFromTo(this.bits, element-this.minValue,i,i+this.bitsPerElement-1);
+  size++;
 }
 /**
  * Appends the elements <tt>elements[from]</tt> (inclusive), ..., <tt>elements[to]</tt> (inclusive) to the receiver.
@@ -105,44 +103,44 @@ public void add(long element) {
  * @param to the index of the last element to be appended (inclusive)
  */
 public void addAllOfFromTo(long[] elements, int from, int to) {
-	// cache some vars for speed.
-	int bitsPerElem = this.bitsPerElement;
-	int bitsPerElemMinusOne = bitsPerElem-1;
-	long min = this.minValue;
-	long[] theBits = this.bits;
+  // cache some vars for speed.
+  int bitsPerElem = this.bitsPerElement;
+  int bitsPerElemMinusOne = bitsPerElem-1;
+  long min = this.minValue;
+  long[] theBits = this.bits;
 
-	// now let's go.
-	ensureCapacity(this.size+to-from+1);
-	int firstBit = this.size*bitsPerElem;
-	int i=from;
-	for (int times=to-from+1; --times >=0; ) {
-		QuickBitVector.putLongFromTo(theBits, elements[i++]-min, firstBit, firstBit+bitsPerElemMinusOne);
-		firstBit += bitsPerElem;
-	}
-	this.size += (to-from+1); //*bitsPerElem;
+  // now let's go.
+  ensureCapacity(this.size+to-from+1);
+  int firstBit = this.size*bitsPerElem;
+  int i=from;
+  for (int times=to-from+1; --times >=0; ) {
+    QuickBitVector.putLongFromTo(theBits, elements[i++]-min, firstBit, firstBit+bitsPerElemMinusOne);
+    firstBit += bitsPerElem;
+  }
+  this.size += (to-from+1); //*bitsPerElem;
 }
 /**
  * Returns the number of bits necessary to store a single element.
  */
 public int bitsPerElement() {
-	return this.bitsPerElement;
+  return this.bitsPerElement;
 }
 /**
  * Returns the number of bits necessary to store values in the range <tt>[minimum,maximum]</tt>.
  */
 public static int bitsPerElement(long minimum, long maximum) {
-	int bits;
-	if (1+maximum-minimum > 0) {
-		bits=(int) Math.round(Math.ceil(org.apache.mahout.jet.math.Arithmetic.log(2,1+maximum-minimum)));
-	}
-	else {	
-		// overflow or underflow in calculating "1+maximum-minimum"
-		// happens if signed long representation is too short for doing unsigned calculations
-		// e.g. if minimum==LONG.MIN_VALUE, maximum==LONG.MAX_VALUE
-		// --> in such cases store all bits of values without any compression.
-		bits=64;
-	}
-	return bits;
+  int bits;
+  if (1+maximum-minimum > 0) {
+    bits=(int) Math.round(Math.ceil(org.apache.mahout.jet.math.Arithmetic.log(2,1+maximum-minimum)));
+  }
+  else {  
+    // overflow or underflow in calculating "1+maximum-minimum"
+    // happens if signed long representation is too short for doing unsigned calculations
+    // e.g. if minimum==LONG.MIN_VALUE, maximum==LONG.MAX_VALUE
+    // --> in such cases store all bits of values without any compression.
+    bits=64;
+  }
+  return bits;
 }
 /**
  * Ensures that the receiver can hold at least the specified number of elements without needing to allocate new internal memory.
@@ -151,15 +149,15 @@ public static int bitsPerElement(long minimum, long maximum) {
  * @param   minCapacity   the desired minimum capacity.
  */
 public void ensureCapacity(int minCapacity) {
-	int oldCapacity = capacity;
-	if (minCapacity > oldCapacity) {
-	    int newCapacity = (oldCapacity * 3)/2 + 1;
-		if (newCapacity < minCapacity)	newCapacity = minCapacity;
-		BitVector vector = toBitVector();
-		vector.setSize(newCapacity*bitsPerElement);
-		this.bits = vector.elements();
-		this.capacity = newCapacity;
-	}
+  int oldCapacity = capacity;
+  if (minCapacity > oldCapacity) {
+      int newCapacity = (oldCapacity * 3)/2 + 1;
+    if (newCapacity < minCapacity)  newCapacity = minCapacity;
+    BitVector vector = toBitVector();
+    vector.setSize(newCapacity*bitsPerElement);
+    this.bits = vector.elements();
+    this.capacity = newCapacity;
+  }
 }
 /**
  * Returns the element at the specified position in the receiver; <b>WARNING:</b> Does not check preconditions. 
@@ -170,8 +168,8 @@ public void ensureCapacity(int minCapacity) {
  * @param index index of element to return.
  */
 public long getQuick(int index) {
-	int i=index*this.bitsPerElement;
-	return this.minValue + QuickBitVector.getLongFromTo(this.bits, i,i+this.bitsPerElement-1);
+  int i=index*this.bitsPerElement;
+  return this.minValue + QuickBitVector.getLongFromTo(this.bits, i,i+this.bitsPerElement-1);
 }
 /**
  * Copies all elements between index <tt>from</tt> (inclusive) and <tt>to</tt> (inclusive) into <tt>part</tt>, starting at index <tt>partFrom</tt> within <tt>part</tt>.
@@ -185,29 +183,29 @@ public long getQuick(int index) {
  * </pre>
  */
 public void partFromTo(final int from, final int to, final BitVector qualificants, final int qualificantsFrom, long[] part, final int partFrom) {
-	int width = to-from+1;
-	if (from<0 || from>to || to>=size || qualificantsFrom<0 || (qualificants!=null && qualificantsFrom+width>qualificants.size())) {
-		throw new IndexOutOfBoundsException();
-	}
-	if (partFrom<0 || partFrom+width>part.length) {
-		throw new IndexOutOfBoundsException();
-	}
-	
-	long minVal = this.minValue;
-	int bitsPerElem = this.bitsPerElement;
-	long[] theBits = this.bits;
-	
-	int q = qualificantsFrom;
-	int p = partFrom;
-	int j=from*bitsPerElem;
+  int width = to-from+1;
+  if (from<0 || from>to || to>=size || qualificantsFrom<0 || (qualificants!=null && qualificantsFrom+width>qualificants.size())) {
+    throw new IndexOutOfBoundsException();
+  }
+  if (partFrom<0 || partFrom+width>part.length) {
+    throw new IndexOutOfBoundsException();
+  }
+  
+  long minVal = this.minValue;
+  int bitsPerElem = this.bitsPerElement;
+  long[] theBits = this.bits;
+  
+  int q = qualificantsFrom;
+  int p = partFrom;
+  int j=from*bitsPerElem;
 
-	//BitVector tmpBitVector = new BitVector(this.bits, this.size*bitsPerElem);
-	for (int i=from; i<=to; i++, q++, p++, j += bitsPerElem) {
-		if (qualificants==null || qualificants.get(q)) {
-			//part[p] = minVal + tmpBitVector.getLongFromTo(j, j+bitsPerElem-1);
-			part[p] = minVal + QuickBitVector.getLongFromTo(theBits, j, j+bitsPerElem-1);
-		}
-	}
+  //BitVector tmpBitVector = new BitVector(this.bits, this.size*bitsPerElem);
+  for (int i=from; i<=to; i++, q++, p++, j += bitsPerElem) {
+    if (qualificants==null || qualificants.get(q)) {
+      //part[p] = minVal + tmpBitVector.getLongFromTo(j, j+bitsPerElem-1);
+      part[p] = minVal + QuickBitVector.getLongFromTo(theBits, j, j+bitsPerElem-1);
+    }
+  }
 }
 /**
  * Replaces the element at the specified position in the receiver with the specified element; <b>WARNING:</b> Does not check preconditions. 
@@ -219,15 +217,15 @@ public void partFromTo(final int from, final int to, final BitVector qualificant
  * @param element element to be stored at the specified position.
  */
 public void setQuick(int index, long element) {
-	int i=index*this.bitsPerElement;
-	QuickBitVector.putLongFromTo(this.bits, element-this.minValue,i,i+this.bitsPerElement-1);
+  int i=index*this.bitsPerElement;
+  QuickBitVector.putLongFromTo(this.bits, element-this.minValue,i,i+this.bitsPerElement-1);
 }
 /**
  * Sets the size of the receiver without modifying it otherwise.
  * This method should not release or allocate new memory but simply set some instance variable like <tt>size</tt>.
  */
 protected void setSizeRaw(int newSize) {
-	super.setSizeRaw(newSize);
+  super.setSizeRaw(newSize);
 }
 /**
  * Sets the receiver to an empty list with the specified initial capacity and the specified range of values allowed to be hold in this list.
@@ -237,12 +235,12 @@ protected void setSizeRaw(int newSize) {
  * @param   initialCapacity   the number of elements the receiver can hold without auto-expanding itself by allocating new internal memory.
  */
 protected void setUp(long minimum, long maximum, int initialCapacity) {
-	setUpBitsPerEntry(minimum, maximum);
+  setUpBitsPerEntry(minimum, maximum);
 
-	//this.capacity=initialCapacity;
-	this.bits = QuickBitVector.makeBitVector(initialCapacity,this.bitsPerElement);
-	this.capacity = initialCapacity;
-	this.size=0;	
+  //this.capacity=initialCapacity;
+  this.bits = QuickBitVector.makeBitVector(initialCapacity,this.bitsPerElement);
+  this.capacity = initialCapacity;
+  this.size=0;  
 }
 /**
  * This method was created in VisualAge.
@@ -251,24 +249,24 @@ protected void setUp(long minimum, long maximum, int initialCapacity) {
  * @param initialCapacity int
  */
 protected void setUpBitsPerEntry(long minimum, long maximum) {
-	this.bitsPerElement=this.bitsPerElement(minimum, maximum);
-	if (this.bitsPerElement!=64) { 
-		this.minValue=minimum;	
-			// overflow or underflow in calculating "1+maxValue-minValue"
-			// happens if signed long representation is too short for doing unsigned calculations
-			// e.g. if minValue==LONG.MIN_VALUE, maxValue=LONG.MAX_VALUE
-			// --> in such cases store all bits of values without any en/decoding
-	}
-	else {
-		this.minValue=0;
-	};
+  this.bitsPerElement=this.bitsPerElement(minimum, maximum);
+  if (this.bitsPerElement!=64) { 
+    this.minValue=minimum;  
+      // overflow or underflow in calculating "1+maxValue-minValue"
+      // happens if signed long representation is too short for doing unsigned calculations
+      // e.g. if minValue==LONG.MIN_VALUE, maxValue=LONG.MAX_VALUE
+      // --> in such cases store all bits of values without any en/decoding
+  }
+  else {
+    this.minValue=0;
+  };
 }
 /**
  * Returns the receiver seen as bitvector.
  * WARNING: The bitvector and the receiver share the backing bits. Modifying one of them will affect the other.
  */
 public BitVector toBitVector() {
-	return new BitVector(this.bits, this.capacity*bitsPerElement);
+  return new BitVector(this.bits, this.capacity*bitsPerElement);
 }
 /**
  * Trims the capacity of the receiver to be the receiver's current 
@@ -276,13 +274,13 @@ public BitVector toBitVector() {
  * storage of the receiver. 
  */
 public void trimToSize() {
-	int oldCapacity = capacity;
-	if (size < oldCapacity) {
-		BitVector vector = toBitVector();
-		vector.setSize(size);
-		this.bits = vector.elements();
-		this.capacity = size;
-	}
+  int oldCapacity = capacity;
+  if (size < oldCapacity) {
+    BitVector vector = toBitVector();
+    vector.setSize(size);
+    this.bits = vector.elements();
+    this.capacity = size;
+  }
 }
 /**
  * deprecated
@@ -291,6 +289,6 @@ public void trimToSize() {
  * @deprecated
  */
 public long xminimum() {
-	return this.minValue;
+  return this.minValue;
 }
 }

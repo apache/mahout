@@ -13,8 +13,6 @@ package org.apache.mahout.matrix;
  *
  * @see org.apache.mahout.matrix.GenericSorting
  *
- * @author wolfgang.hoschek@cern.ch
- * @version 1.0, 03-Jul-99
  */
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.

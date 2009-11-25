@@ -51,16 +51,14 @@ package org.apache.mahout.matrix.list;
  * @see MinMaxNumberList
  * @see java.lang.Float
  * @see java.lang.Double
- * @author wolfgang.hoschek@cern.ch
- * @version 1.0, 09/24/99
  */
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
 public class DistinctNumberList extends org.apache.mahout.matrix.list.AbstractLongList {
-	protected long[] distinctValues;
-	protected MinMaxNumberList elements;
+  protected long[] distinctValues;
+  protected MinMaxNumberList elements;
 /**
  * Constructs an empty list with the specified initial capacity and the specified distinct values allowed to be hold in this list.
  *
@@ -68,7 +66,7 @@ public class DistinctNumberList extends org.apache.mahout.matrix.list.AbstractLo
  * @param   initialCapacity   the number of elements the receiver can hold without auto-expanding itself by allocating new internal memory.
  */
 public DistinctNumberList(long[] distinctValues, int initialCapacity) {
-	setUp(distinctValues,initialCapacity);
+  setUp(distinctValues,initialCapacity);
 }
 /**
  * Appends the specified element to the end of this list.
@@ -76,17 +74,17 @@ public DistinctNumberList(long[] distinctValues, int initialCapacity) {
  * @param element element to be appended to this list.
  */
 public void add(long element) {
-	//overridden for performance only.
-	elements.add(codeOf(element));
-	size++;
+  //overridden for performance only.
+  elements.add(codeOf(element));
+  size++;
 }
 /**
  * Returns the code that shall be stored for the given element.
  */
 protected int codeOf(long element) {
-	int index = java.util.Arrays.binarySearch(distinctValues,element);
-	if (index<0) throw new IllegalArgumentException("Element="+element+" not contained in distinct elements.");
-	return index;
+  int index = java.util.Arrays.binarySearch(distinctValues,element);
+  if (index<0) throw new IllegalArgumentException("Element="+element+" not contained in distinct elements.");
+  return index;
 }
 /**
  * Ensures that the receiver can hold at least the specified number of elements without needing to allocate new internal memory.
@@ -95,7 +93,7 @@ protected int codeOf(long element) {
  * @param   minCapacity   the desired minimum capacity.
  */
 public void ensureCapacity(int minCapacity) {
-	elements.ensureCapacity(minCapacity);
+  elements.ensureCapacity(minCapacity);
 }
 /**
  * Returns the element at the specified position in the receiver; <b>WARNING:</b> Does not check preconditions. 
@@ -106,7 +104,7 @@ public void ensureCapacity(int minCapacity) {
  * @param index index of element to return.
  */
 public long getQuick(int index) {
-	return distinctValues[(int)(elements.getQuick(index))];
+  return distinctValues[(int)(elements.getQuick(index))];
 }
 /**
  * Removes from the receiver all elements whose index is between
@@ -119,8 +117,8 @@ public long getQuick(int index) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public void removeFromTo(int from, int to) {
-	elements.removeFromTo(from,to);
-	size -= to-from+1;
+  elements.removeFromTo(from,to);
+  size -= to-from+1;
 }
 /**
  * Replaces the element at the specified position in the receiver with the specified element; <b>WARNING:</b> Does not check preconditions. 
@@ -132,15 +130,15 @@ public void removeFromTo(int from, int to) {
  * @param element element to be stored at the specified position.
  */
 public void setQuick(int index, long element) {
-	elements.setQuick(index,codeOf(element));
+  elements.setQuick(index,codeOf(element));
 }
 /**
  * Sets the size of the receiver without modifying it otherwise.
  * This method should not release or allocate new memory but simply set some instance variable like <tt>size</tt>.
  */
 protected void setSizeRaw(int newSize) {
-	super.setSizeRaw(newSize);
-	elements.setSizeRaw(newSize);
+  super.setSizeRaw(newSize);
+  elements.setSizeRaw(newSize);
 }
 /**
  * Sets the receiver to an empty list with the specified initial capacity and the specified distinct values allowed to be hold in this list.
@@ -149,9 +147,9 @@ protected void setSizeRaw(int newSize) {
  * @param   initialCapacity   the number of elements the receiver can hold without auto-expanding itself by allocating new internal memory.
  */
 protected void setUp(long[] distinctValues, int initialCapacity) {
-	this.distinctValues = distinctValues;
-	//java.util.Arrays.sort(this.distinctElements);
-	this.elements = new MinMaxNumberList(0,distinctValues.length-1,initialCapacity);
+  this.distinctValues = distinctValues;
+  //java.util.Arrays.sort(this.distinctElements);
+  this.elements = new MinMaxNumberList(0,distinctValues.length-1,initialCapacity);
 }
 /**
  * Trims the capacity of the receiver to be the receiver's current 
@@ -159,6 +157,6 @@ protected void setUp(long[] distinctValues, int initialCapacity) {
  * storage of the receiver. 
  */
 public void trimToSize() {
-	elements.trimToSize();
+  elements.trimToSize();
 }
 }

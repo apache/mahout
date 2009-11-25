@@ -21,48 +21,48 @@ Overrides many methods for performance reasons only.
 
 @author wolfgang.hoschek@cern.ch
 @version 1.0, 09/24/99
-@see	    java.util.HashMap
+@see      java.util.HashMap
 */
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
 public class OpenIntDoubleHashMap extends AbstractIntDoubleMap {
-	//public static int hashCollisions = 0;
-	/**
-	 * The hash table keys.
-	 * @serial
-	 */
-	protected int table[];
+  //public static int hashCollisions = 0;
+  /**
+   * The hash table keys.
+   * @serial
+   */
+  protected int table[];
 
-	 /**
-	 * The hash table values.
-	 * @serial
-	 */
-	protected double values[];
+   /**
+   * The hash table values.
+   * @serial
+   */
+  protected double values[];
 
-	/**
-	 * The state of each hash table entry (FREE, FULL, REMOVED).
-	 * @serial
-	 */
-	protected byte state[];
-	
-	/**
-	 * The number of table entries in state==FREE.
-	 * @serial
-	 */
-	protected int freeEntries;
+  /**
+   * The state of each hash table entry (FREE, FULL, REMOVED).
+   * @serial
+   */
+  protected byte state[];
+  
+  /**
+   * The number of table entries in state==FREE.
+   * @serial
+   */
+  protected int freeEntries;
 
-	
-	protected static final byte FREE = 0;
-	protected static final byte FULL = 1;
-	protected static final byte REMOVED = 2;
+  
+  protected static final byte FREE = 0;
+  protected static final byte FULL = 1;
+  protected static final byte REMOVED = 2;
 
 /**
  * Constructs an empty map with default capacity and default load factors.
  */
 public OpenIntDoubleHashMap() {
-	this(defaultCapacity);
+  this(defaultCapacity);
 }
 /**
  * Constructs an empty map with the specified initial capacity and default load factors.
@@ -72,7 +72,7 @@ public OpenIntDoubleHashMap() {
  *             than zero.
  */
 public OpenIntDoubleHashMap(int initialCapacity) {
-	this(initialCapacity, defaultMinLoadFactor, defaultMaxLoadFactor);
+  this(initialCapacity, defaultMinLoadFactor, defaultMaxLoadFactor);
 }
 /**
  * Constructs an empty map with
@@ -81,10 +81,10 @@ public OpenIntDoubleHashMap(int initialCapacity) {
  * @param      initialCapacity   the initial capacity.
  * @param      minLoadFactor        the minimum load factor.
  * @param      maxLoadFactor        the maximum load factor.
- * @throws	IllegalArgumentException if <tt>initialCapacity < 0 || (minLoadFactor < 0.0 || minLoadFactor >= 1.0) || (maxLoadFactor <= 0.0 || maxLoadFactor >= 1.0) || (minLoadFactor >= maxLoadFactor)</tt>.
+ * @throws  IllegalArgumentException if <tt>initialCapacity < 0 || (minLoadFactor < 0.0 || minLoadFactor >= 1.0) || (maxLoadFactor <= 0.0 || maxLoadFactor >= 1.0) || (minLoadFactor >= maxLoadFactor)</tt>.
  */
 public OpenIntDoubleHashMap(int initialCapacity, double minLoadFactor, double maxLoadFactor) {
-	setUp(initialCapacity,minLoadFactor,maxLoadFactor);
+  setUp(initialCapacity,minLoadFactor,maxLoadFactor);
 }
 /**
 Assigns the result of a function to each value; <tt>v[i] = function(v[i])</tt>.
@@ -92,23 +92,23 @@ Assigns the result of a function to each value; <tt>v[i] = function(v[i])</tt>.
 @param function a function object taking as argument the current association's value.
 */
 public void assign(org.apache.mahout.matrix.function.DoubleFunction function) {
-	// specialization for speed
-	if (function instanceof org.apache.mahout.jet.math.Mult) { // x[i] = mult*x[i]
-		double multiplicator = ((org.apache.mahout.jet.math.Mult)function).multiplicator;
-		if (multiplicator==1) return;
-		if (multiplicator==0) {
-			clear();
-			return;
-		}
-		for (int i = table.length ; i-- > 0 ;) {
-			if (state[i]==FULL) values[i] *= multiplicator;
-		}
-	}
-	else { // the general case x[i] = f(x[i])
-		for (int i = table.length ; i-- > 0 ;) {
-			if (state[i]==FULL) values[i] = function.apply(values[i]);
-		}
-	}
+  // specialization for speed
+  if (function instanceof org.apache.mahout.jet.math.Mult) { // x[i] = mult*x[i]
+    double multiplicator = ((org.apache.mahout.jet.math.Mult)function).multiplicator;
+    if (multiplicator==1) return;
+    if (multiplicator==0) {
+      clear();
+      return;
+    }
+    for (int i = table.length ; i-- > 0 ;) {
+      if (state[i]==FULL) values[i] *= multiplicator;
+    }
+  }
+  else { // the general case x[i] = f(x[i])
+    for (int i = table.length ; i-- > 0 ;) {
+      if (state[i]==FULL) values[i] = function.apply(values[i]);
+    }
+  }
 }
 /**
  * Clears the receiver, then adds all (key,value) pairs of <tt>other</tt>values to it.
@@ -116,43 +116,43 @@ public void assign(org.apache.mahout.matrix.function.DoubleFunction function) {
  * @param other the other map to be copied into the receiver.
  */
 public void assign(AbstractIntDoubleMap other) {
-	if (!(other instanceof OpenIntDoubleHashMap)) {
-		super.assign(other);
-		return;
-	}
-	OpenIntDoubleHashMap source = (OpenIntDoubleHashMap) other;
-	OpenIntDoubleHashMap copy = (OpenIntDoubleHashMap) source.copy();
-	this.values = copy.values;
-	this.table = copy.table;
-	this.state = copy.state;
-	this.freeEntries = copy.freeEntries;
-	this.distinct = copy.distinct;
-	this.lowWaterMark = copy.lowWaterMark;
-	this.highWaterMark = copy.highWaterMark;
-	this.minLoadFactor = copy.minLoadFactor;
-	this.maxLoadFactor = copy.maxLoadFactor;
+  if (!(other instanceof OpenIntDoubleHashMap)) {
+    super.assign(other);
+    return;
+  }
+  OpenIntDoubleHashMap source = (OpenIntDoubleHashMap) other;
+  OpenIntDoubleHashMap copy = (OpenIntDoubleHashMap) source.copy();
+  this.values = copy.values;
+  this.table = copy.table;
+  this.state = copy.state;
+  this.freeEntries = copy.freeEntries;
+  this.distinct = copy.distinct;
+  this.lowWaterMark = copy.lowWaterMark;
+  this.highWaterMark = copy.highWaterMark;
+  this.minLoadFactor = copy.minLoadFactor;
+  this.maxLoadFactor = copy.maxLoadFactor;
 }
 /**
  * Removes all (key,value) associations from the receiver.
  * Implicitly calls <tt>trimToSize()</tt>.
  */
 public void clear() {
-	new ByteArrayList(this.state).fillFromToWith(0, this.state.length-1, FREE);
-	//new DoubleArrayList(values).fillFromToWith(0, state.length-1, 0); // delta
-	
-	/*
-	if (debug) {
-		for (int i=table.length; --i >= 0; ) {
-		    state[i] = FREE;
-		    table[i]= Integer.MAX_VALUE;
-		    values[i]= Double.NaN;
-		}
-	}
-	*/
-	
-	this.distinct = 0;
-	this.freeEntries = table.length; // delta
-	trimToSize();
+  new ByteArrayList(this.state).fillFromToWith(0, this.state.length-1, FREE);
+  //new DoubleArrayList(values).fillFromToWith(0, state.length-1, 0); // delta
+  
+  /*
+  if (debug) {
+    for (int i=table.length; --i >= 0; ) {
+        state[i] = FREE;
+        table[i]= Integer.MAX_VALUE;
+        values[i]= Double.NaN;
+    }
+  }
+  */
+  
+  this.distinct = 0;
+  this.freeEntries = table.length; // delta
+  trimToSize();
 }
 /**
  * Returns a deep copy of the receiver.
@@ -160,11 +160,11 @@ public void clear() {
  * @return  a deep copy of the receiver.
  */
 public Object clone() {
-	OpenIntDoubleHashMap copy = (OpenIntDoubleHashMap) super.clone();
-	copy.table = (int[]) copy.table.clone();
-	copy.values = (double[]) copy.values.clone();
-	copy.state = (byte[]) copy.state.clone();
-	return copy;
+  OpenIntDoubleHashMap copy = (OpenIntDoubleHashMap) super.clone();
+  copy.table = (int[]) copy.table.clone();
+  copy.values = (double[]) copy.values.clone();
+  copy.state = (byte[]) copy.state.clone();
+  return copy;
 }
 /**
  * Returns <tt>true</tt> if the receiver contains the specified key.
@@ -172,7 +172,7 @@ public Object clone() {
  * @return <tt>true</tt> if the receiver contains the specified key.
  */
 public boolean containsKey(int key) {
-	return indexOfKey(key) >= 0;
+  return indexOfKey(key) >= 0;
 }
 /**
  * Returns <tt>true</tt> if the receiver contains the specified value.
@@ -180,7 +180,7 @@ public boolean containsKey(int key) {
  * @return <tt>true</tt> if the receiver contains the specified value.
  */
 public boolean containsValue(double value) {
-	return indexOfValue(value) >= 0;
+  return indexOfValue(value) >= 0;
 }
 /**
  * Ensures that the receiver can hold at least the specified number of associations without needing to allocate new internal memory.
@@ -193,10 +193,10 @@ public boolean containsValue(double value) {
  * @param   minCapacity   the desired minimum capacity.
  */
 public void ensureCapacity(int minCapacity) {
-	if (table.length < minCapacity) {
-		int newCapacity = nextPrime(minCapacity);
-		rehash(newCapacity);
-	}
+  if (table.length < minCapacity) {
+    int newCapacity = nextPrime(minCapacity);
+    rehash(newCapacity);
+  }
 }
 /**
  * Applies a procedure to each key of the receiver, if any.
@@ -209,10 +209,10 @@ public void ensureCapacity(int minCapacity) {
  * @return <tt>false</tt> if the procedure stopped before all keys where iterated over, <tt>true</tt> otherwise. 
  */
 public boolean forEachKey(IntProcedure procedure) {
-	for (int i = table.length ; i-- > 0 ;) {
-		if (state[i]==FULL) if (! procedure.apply(table[i])) return false;
-	}
-	return true;
+  for (int i = table.length ; i-- > 0 ;) {
+    if (state[i]==FULL) if (! procedure.apply(table[i])) return false;
+  }
+  return true;
 }
 /**
  * Applies a procedure to each (key,value) pair of the receiver, if any.
@@ -222,10 +222,10 @@ public boolean forEachKey(IntProcedure procedure) {
  * @return <tt>false</tt> if the procedure stopped before all keys where iterated over, <tt>true</tt> otherwise. 
  */
 public boolean forEachPair(final IntDoubleProcedure procedure) {
-	for (int i = table.length ; i-- > 0 ;) {
-		if (state[i]==FULL) if (! procedure.apply(table[i],values[i])) return false;
-	}
-	return true;
+  for (int i = table.length ; i-- > 0 ;) {
+    if (state[i]==FULL) if (! procedure.apply(table[i],values[i])) return false;
+  }
+  return true;
 }
 /**
  * Returns the value associated with the specified key.
@@ -235,9 +235,9 @@ public boolean forEachPair(final IntDoubleProcedure procedure) {
  * @return the value associated with the specified key; <tt>0</tt> if no such key is present.
  */
 public double get(int key) {
-	int i = indexOfKey(key);
-	if (i<0) return 0; //not contained
-	return values[i];
+  int i = indexOfKey(key);
+  if (i<0) return 0; //not contained
+  return values[i];
 }
 /**
  * @param key the key to be added to the receiver.
@@ -247,87 +247,87 @@ public double get(int key) {
  * If the returned index >= 0, then it is NOT already contained and should be inserted at slot index.
  */
 protected int indexOfInsertion(int key) {
-	final int tab[] = table;
-	final byte stat[] = state;
-	final int length = tab.length;
+  final int tab[] = table;
+  final byte stat[] = state;
+  final int length = tab.length;
 
-	final int hash = HashFunctions.hash(key) & 0x7FFFFFFF;
-	int i = hash % length;
-	int decrement = hash % (length-2); // double hashing, see http://www.eece.unm.edu/faculty/heileman/hash/node4.html
-	//int decrement = (hash / length) % length;
-	if (decrement == 0) decrement = 1;
+  final int hash = HashFunctions.hash(key) & 0x7FFFFFFF;
+  int i = hash % length;
+  int decrement = hash % (length-2); // double hashing, see http://www.eece.unm.edu/faculty/heileman/hash/node4.html
+  //int decrement = (hash / length) % length;
+  if (decrement == 0) decrement = 1;
 
-	// stop if we find a removed or free slot, or if we find the key itself
-	// do NOT skip over removed slots (yes, open addressing is like that...)
-	while (stat[i] == FULL && tab[i] != key) {
-		i -= decrement;
-		//hashCollisions++;
-		if (i<0) i+=length;
-	}
-	
-	if (stat[i] == REMOVED) {
-		// stop if we find a free slot, or if we find the key itself.
-		// do skip over removed slots (yes, open addressing is like that...)
-		// assertion: there is at least one FREE slot.
-		int j = i;
-		while (stat[i] != FREE && (stat[i] == REMOVED || tab[i] != key)) {
-			i -= decrement;
-			//hashCollisions++;
-			if (i<0) i+=length;
-		}
-		if (stat[i] == FREE) i = j;
-	}
-	
-	
-	if (stat[i] == FULL) {
-		// key already contained at slot i.
-		// return a negative number identifying the slot.
-		return -i-1;
-	}
-	// not already contained, should be inserted at slot i.
-	// return a number >= 0 identifying the slot.
-	return i; 
+  // stop if we find a removed or free slot, or if we find the key itself
+  // do NOT skip over removed slots (yes, open addressing is like that...)
+  while (stat[i] == FULL && tab[i] != key) {
+    i -= decrement;
+    //hashCollisions++;
+    if (i<0) i+=length;
+  }
+  
+  if (stat[i] == REMOVED) {
+    // stop if we find a free slot, or if we find the key itself.
+    // do skip over removed slots (yes, open addressing is like that...)
+    // assertion: there is at least one FREE slot.
+    int j = i;
+    while (stat[i] != FREE && (stat[i] == REMOVED || tab[i] != key)) {
+      i -= decrement;
+      //hashCollisions++;
+      if (i<0) i+=length;
+    }
+    if (stat[i] == FREE) i = j;
+  }
+  
+  
+  if (stat[i] == FULL) {
+    // key already contained at slot i.
+    // return a negative number identifying the slot.
+    return -i-1;
+  }
+  // not already contained, should be inserted at slot i.
+  // return a number >= 0 identifying the slot.
+  return i; 
 }
 /**
  * @param key the key to be searched in the receiver.
  * @return the index where the key is contained in the receiver, else returns -1.
  */
 protected int indexOfKey(int key) {
-	final int tab[] = table;
-	final byte stat[] = state;
-	final int length = tab.length;
+  final int tab[] = table;
+  final byte stat[] = state;
+  final int length = tab.length;
 
-	final int hash = HashFunctions.hash(key) & 0x7FFFFFFF;
-	int i = hash % length;
-	int decrement = hash % (length-2); // double hashing, see http://www.eece.unm.edu/faculty/heileman/hash/node4.html
-	//int decrement = (hash / length) % length;
-	if (decrement == 0) decrement = 1;
+  final int hash = HashFunctions.hash(key) & 0x7FFFFFFF;
+  int i = hash % length;
+  int decrement = hash % (length-2); // double hashing, see http://www.eece.unm.edu/faculty/heileman/hash/node4.html
+  //int decrement = (hash / length) % length;
+  if (decrement == 0) decrement = 1;
 
-	// stop if we find a free slot, or if we find the key itself.
-	// do skip over removed slots (yes, open addressing is like that...)
-	// assertion: there is at least one FREE slot.
-	while (stat[i] != FREE && (stat[i] == REMOVED || tab[i] != key)) {
-		i -= decrement;
-		//hashCollisions++;
-		if (i<0) i+=length;
-	}
-	
-	if (stat[i] == FREE) return -1; // not found
-	return i; //found, return index where key is contained
+  // stop if we find a free slot, or if we find the key itself.
+  // do skip over removed slots (yes, open addressing is like that...)
+  // assertion: there is at least one FREE slot.
+  while (stat[i] != FREE && (stat[i] == REMOVED || tab[i] != key)) {
+    i -= decrement;
+    //hashCollisions++;
+    if (i<0) i+=length;
+  }
+  
+  if (stat[i] == FREE) return -1; // not found
+  return i; //found, return index where key is contained
 }
 /**
  * @param value the value to be searched in the receiver.
  * @return the index where the value is contained in the receiver, returns -1 if the value was not found.
  */
 protected int indexOfValue(double value) {
-	final double val[] = values;
-	final byte stat[] = state;
+  final double val[] = values;
+  final byte stat[] = state;
 
-	for (int i=stat.length; --i >= 0;) {
-		if (stat[i]==FULL && val[i]==value) return i;
-	}
+  for (int i=stat.length; --i >= 0;) {
+    if (stat[i]==FULL && val[i]==value) return i;
+  }
 
-	return -1; // not found
+  return -1; // not found
 }
 /**
  * Returns the first key the given value is associated with.
@@ -336,13 +336,13 @@ protected int indexOfValue(double value) {
  *
  * @param value the value to search for.
  * @return the first key for which holds <tt>get(key) == value</tt>; 
- *		   returns <tt>Integer.MIN_VALUE</tt> if no such key exists.
+ *       returns <tt>Integer.MIN_VALUE</tt> if no such key exists.
  */
 public int keyOf(double value) {
-	//returns the first key found; there may be more matching keys, however.
-	int i = indexOfValue(value);
-	if (i<0) return Integer.MIN_VALUE;
-	return table[i];
+  //returns the first key found; there may be more matching keys, however.
+  int i = indexOfValue(value);
+  if (i<0) return Integer.MIN_VALUE;
+  return table[i];
 }
 /**
  * Fills all keys contained in the receiver into the specified list.
@@ -355,16 +355,16 @@ public int keyOf(double value) {
  * @param list the list to be filled, can have any size.
  */
 public void keys(IntArrayList list) {
-	list.setSize(distinct);
-	int[] elements = list.elements();
-	
-	int[] tab = table;
-	byte[] stat = state;
-	
-	int j=0;
-	for (int i = tab.length ; i-- > 0 ;) {
-		if (stat[i]==FULL) elements[j++]=tab[i];
-	}
+  list.setSize(distinct);
+  int[] elements = list.elements();
+  
+  int[] tab = table;
+  byte[] stat = state;
+  
+  int j=0;
+  for (int i = tab.length ; i-- > 0 ;) {
+    if (stat[i]==FULL) elements[j++]=tab[i];
+  }
 }
 /**
 Fills all pairs satisfying a given condition into the specified lists.
@@ -376,7 +376,7 @@ Iteration order is guaranteed to be <i>identical</i> to the order used by method
 <br>
 <pre>
 IntDoubleProcedure condition = new IntDoubleProcedure() { // match even keys only
-	public boolean apply(int key, double value) { return key%2==0; }
+  public boolean apply(int key, double value) { return key%2==0; }
 }
 keys = (8,7,6), values = (1,2,2) --> keyList = (6,8), valueList = (2,1)</tt>
 </pre>
@@ -386,15 +386,15 @@ keys = (8,7,6), values = (1,2,2) --> keyList = (6,8), valueList = (2,1)</tt>
 @param valueList the list to be filled with values, can have any size.
 */
 public void pairsMatching(final IntDoubleProcedure condition, final IntArrayList keyList, final DoubleArrayList valueList) {
-	keyList.clear();
-	valueList.clear();
-	
-	for (int i = table.length ; i-- > 0 ;) {
-		if (state[i]==FULL && condition.apply(table[i],values[i])) {
-			keyList.add(table[i]);
-			valueList.add(values[i]);
-		}
-	}
+  keyList.clear();
+  valueList.clear();
+  
+  for (int i = table.length ; i-- > 0 ;) {
+    if (state[i]==FULL && condition.apply(table[i],values[i])) {
+      keyList.add(table[i]);
+      valueList.add(values[i]);
+    }
+  }
 }
 /**
  * Associates the given key with the given value.
@@ -406,37 +406,37 @@ public void pairsMatching(final IntDoubleProcedure condition, final IntArrayList
  *         <tt>false</tt> if the receiver did already contain such a key - the new value has now replaced the formerly associated value.
  */
 public boolean put(int key, double value) {
-	int i = indexOfInsertion(key);	
-	if (i<0) { //already contained
-		i = -i -1;
-		//if (debug) if (this.state[i] != FULL) throw new InternalError();
-		//if (debug) if (this.table[i] != key) throw new InternalError();
-		this.values[i]=value;
-		return false;
-	}
+  int i = indexOfInsertion(key);  
+  if (i<0) { //already contained
+    i = -i -1;
+    //if (debug) if (this.state[i] != FULL) throw new InternalError();
+    //if (debug) if (this.table[i] != key) throw new InternalError();
+    this.values[i]=value;
+    return false;
+  }
 
-	if (this.distinct > this.highWaterMark) {
-		int newCapacity = chooseGrowCapacity(this.distinct+1,this.minLoadFactor, this.maxLoadFactor);
-		/*
-		System.out.print("grow rehashing ");
-		System.out.println("at distinct="+distinct+", capacity="+table.length+" to newCapacity="+newCapacity+" ...");
-		*/
-		rehash(newCapacity);
-		return put(key, value);
-	}
+  if (this.distinct > this.highWaterMark) {
+    int newCapacity = chooseGrowCapacity(this.distinct+1,this.minLoadFactor, this.maxLoadFactor);
+    /*
+    System.out.print("grow rehashing ");
+    System.out.println("at distinct="+distinct+", capacity="+table.length+" to newCapacity="+newCapacity+" ...");
+    */
+    rehash(newCapacity);
+    return put(key, value);
+  }
 
-	this.table[i]=key;
-	this.values[i]=value;
-	if (this.state[i]==FREE) this.freeEntries--;
-	this.state[i]=FULL;
-	this.distinct++;
+  this.table[i]=key;
+  this.values[i]=value;
+  if (this.state[i]==FREE) this.freeEntries--;
+  this.state[i]=FULL;
+  this.distinct++;
 
-	if (this.freeEntries < 1) { //delta
-		int newCapacity = chooseGrowCapacity(this.distinct+1,this.minLoadFactor, this.maxLoadFactor);
-		rehash(newCapacity);
-	}
-	
-	return true;
+  if (this.freeEntries < 1) { //delta
+    int newCapacity = chooseGrowCapacity(this.distinct+1,this.minLoadFactor, this.maxLoadFactor);
+    rehash(newCapacity);
+  }
+  
+  return true;
 }
 /**
  * Rehashes the contents of the receiver into a new table
@@ -445,40 +445,40 @@ public boolean put(int key, double value) {
  * number of keys in the receiver exceeds the high water mark or falls below the low water mark.
  */
 protected void rehash(int newCapacity) {
-	int oldCapacity = table.length;
-	//if (oldCapacity == newCapacity) return;
+  int oldCapacity = table.length;
+  //if (oldCapacity == newCapacity) return;
 
-	if (newCapacity<=this.distinct) throw new InternalError();	
-	//if (debug) check();
+  if (newCapacity<=this.distinct) throw new InternalError();  
+  //if (debug) check();
 
-	int oldTable[] = table;
-	double oldValues[] = values;
-	byte oldState[] = state;
+  int oldTable[] = table;
+  double oldValues[] = values;
+  byte oldState[] = state;
 
-	int newTable[] = new int[newCapacity];
-	double newValues[] = new double[newCapacity];
-	byte newState[] = new byte[newCapacity];
+  int newTable[] = new int[newCapacity];
+  double newValues[] = new double[newCapacity];
+  byte newState[] = new byte[newCapacity];
 
-	this.lowWaterMark  = chooseLowWaterMark(newCapacity,this.minLoadFactor);
-	this.highWaterMark = chooseHighWaterMark(newCapacity,this.maxLoadFactor);
+  this.lowWaterMark  = chooseLowWaterMark(newCapacity,this.minLoadFactor);
+  this.highWaterMark = chooseHighWaterMark(newCapacity,this.maxLoadFactor);
 
-	this.table = newTable;
-	this.values = newValues;
-	this.state = newState;
-	this.freeEntries = newCapacity-this.distinct; // delta
-	
-	for (int i = oldCapacity ; i-- > 0 ;) {
-		if (oldState[i]==FULL) {			
-			int element = oldTable[i];
-			int index = indexOfInsertion(element);
-			newTable[index]=element;
-			newValues[index]=oldValues[i];
-			newState[index]=FULL;
-			
-		}
-	}
+  this.table = newTable;
+  this.values = newValues;
+  this.state = newState;
+  this.freeEntries = newCapacity-this.distinct; // delta
+  
+  for (int i = oldCapacity ; i-- > 0 ;) {
+    if (oldState[i]==FULL) {      
+      int element = oldTable[i];
+      int index = indexOfInsertion(element);
+      newTable[index]=element;
+      newValues[index]=oldValues[i];
+      newState[index]=FULL;
+      
+    }
+  }
 
-	//if (debug) check();
+  //if (debug) check();
 }
 /**
  * Removes the given key with its associated element from the receiver, if present.
@@ -487,30 +487,30 @@ protected void rehash(int newCapacity) {
  * @return <tt>true</tt> if the receiver contained the specified key, <tt>false</tt> otherwise.
  */
 public boolean removeKey(int key) {
-	int i = indexOfKey(key);
-	if (i<0) return false; // key not contained
+  int i = indexOfKey(key);
+  if (i<0) return false; // key not contained
 
-	//if (debug) if (this.state[i] == FREE) throw new InternalError();
-	//if (debug) if (this.state[i] == REMOVED) throw new InternalError();
-	this.state[i]=REMOVED;
-	//this.values[i]=0; // delta
-	
-	//if (debug) this.table[i]=Integer.MAX_VALUE; // delta
-	//if (debug) this.values[i]=Double.NaN; // delta
-	this.distinct--;
+  //if (debug) if (this.state[i] == FREE) throw new InternalError();
+  //if (debug) if (this.state[i] == REMOVED) throw new InternalError();
+  this.state[i]=REMOVED;
+  //this.values[i]=0; // delta
+  
+  //if (debug) this.table[i]=Integer.MAX_VALUE; // delta
+  //if (debug) this.values[i]=Double.NaN; // delta
+  this.distinct--;
 
-	if (this.distinct < this.lowWaterMark) {
-		int newCapacity = chooseShrinkCapacity(this.distinct,this.minLoadFactor, this.maxLoadFactor);
-		/*
-		if (table.length != newCapacity) {
-			System.out.print("shrink rehashing ");
-			System.out.println("at distinct="+distinct+", capacity="+table.length+" to newCapacity="+newCapacity+" ...");
-		}
-		*/
-		rehash(newCapacity);
-	}
-	
-	return true;	
+  if (this.distinct < this.lowWaterMark) {
+    int newCapacity = chooseShrinkCapacity(this.distinct,this.minLoadFactor, this.maxLoadFactor);
+    /*
+    if (table.length != newCapacity) {
+      System.out.print("shrink rehashing ");
+      System.out.println("at distinct="+distinct+", capacity="+table.length+" to newCapacity="+newCapacity+" ...");
+    }
+    */
+    rehash(newCapacity);
+  }
+  
+  return true;  
 }
 /**
  * Initializes the receiver.
@@ -518,32 +518,32 @@ public boolean removeKey(int key) {
  * @param      initialCapacity   the initial capacity of the receiver.
  * @param      minLoadFactor        the minLoadFactor of the receiver.
  * @param      maxLoadFactor        the maxLoadFactor of the receiver.
- * @throws	IllegalArgumentException if <tt>initialCapacity < 0 || (minLoadFactor < 0.0 || minLoadFactor >= 1.0) || (maxLoadFactor <= 0.0 || maxLoadFactor >= 1.0) || (minLoadFactor >= maxLoadFactor)</tt>.
+ * @throws  IllegalArgumentException if <tt>initialCapacity < 0 || (minLoadFactor < 0.0 || minLoadFactor >= 1.0) || (maxLoadFactor <= 0.0 || maxLoadFactor >= 1.0) || (minLoadFactor >= maxLoadFactor)</tt>.
  */
 protected void setUp(int initialCapacity, double minLoadFactor, double maxLoadFactor) {
-	int capacity = initialCapacity;
-	super.setUp(capacity, minLoadFactor, maxLoadFactor);
-	capacity = nextPrime(capacity);
-	if (capacity==0) capacity=1; // open addressing needs at least one FREE slot at any time.
-	
-	this.table = new int[capacity];
-	this.values = new double[capacity];
-	this.state = new byte[capacity];
+  int capacity = initialCapacity;
+  super.setUp(capacity, minLoadFactor, maxLoadFactor);
+  capacity = nextPrime(capacity);
+  if (capacity==0) capacity=1; // open addressing needs at least one FREE slot at any time.
+  
+  this.table = new int[capacity];
+  this.values = new double[capacity];
+  this.state = new byte[capacity];
 
-	// memory will be exhausted long before this pathological case happens, anyway.
-	this.minLoadFactor = minLoadFactor;
-	if (capacity == PrimeFinder.largestPrime) this.maxLoadFactor = 1.0;
-	else this.maxLoadFactor = maxLoadFactor;
+  // memory will be exhausted long before this pathological case happens, anyway.
+  this.minLoadFactor = minLoadFactor;
+  if (capacity == PrimeFinder.largestPrime) this.maxLoadFactor = 1.0;
+  else this.maxLoadFactor = maxLoadFactor;
 
-	this.distinct = 0;
-	this.freeEntries = capacity; // delta
-	
-	// lowWaterMark will be established upon first expansion.
-	// establishing it now (upon instance construction) would immediately make the table shrink upon first put(...).
-	// After all the idea of an "initialCapacity" implies violating lowWaterMarks when an object is young.
-	// See ensureCapacity(...)
-	this.lowWaterMark = 0; 
-	this.highWaterMark = chooseHighWaterMark(capacity, this.maxLoadFactor);
+  this.distinct = 0;
+  this.freeEntries = capacity; // delta
+  
+  // lowWaterMark will be established upon first expansion.
+  // establishing it now (upon instance construction) would immediately make the table shrink upon first put(...).
+  // After all the idea of an "initialCapacity" implies violating lowWaterMarks when an object is young.
+  // See ensureCapacity(...)
+  this.lowWaterMark = 0; 
+  this.highWaterMark = chooseHighWaterMark(capacity, this.maxLoadFactor);
 }
 /**
  * Trims the capacity of the receiver to be the receiver's current 
@@ -551,12 +551,12 @@ protected void setUp(int initialCapacity, double minLoadFactor, double maxLoadFa
  * storage of the receiver.
  */
 public void trimToSize() {
-	// * 1.2 because open addressing's performance exponentially degrades beyond that point
-	// so that even rehashing the table can take very long
-	int newCapacity = nextPrime((int)(1 + 1.2*size()));
-	if (table.length > newCapacity) {
-		rehash(newCapacity);
-	}
+  // * 1.2 because open addressing's performance exponentially degrades beyond that point
+  // so that even rehashing the table can take very long
+  int newCapacity = nextPrime((int)(1 + 1.2*size()));
+  if (table.length > newCapacity) {
+    rehash(newCapacity);
+  }
 }
 /**
  * Fills all values contained in the receiver into the specified list.
@@ -569,15 +569,15 @@ public void trimToSize() {
  * @param list the list to be filled, can have any size.
  */
 public void values(DoubleArrayList list) {
-	list.setSize(distinct);
-	double[] elements = list.elements();
-	
-	double[] val = values;
-	byte[] stat = state;
-	
-	int j=0;
-	for (int i = stat.length ; i-- > 0 ;) {
-		if (stat[i]==FULL) elements[j++]=val[i];
-	}
+  list.setSize(distinct);
+  double[] elements = list.elements();
+  
+  double[] val = values;
+  byte[] stat = state;
+  
+  int j=0;
+  for (int i = stat.length ; i-- > 0 ;) {
+    if (stat[i]==FULL) elements[j++]=val[i];
+  }
 }
 }

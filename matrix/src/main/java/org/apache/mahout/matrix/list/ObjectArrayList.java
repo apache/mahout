@@ -18,23 +18,23 @@ First see the <a href="package-summary.html">package summary</a> and javadoc <a 
  */
 @Deprecated
 public class ObjectArrayList extends AbstractList {
-	/**
-	 * The array buffer into which the elements of the list are stored.
-	 * The capacity of the list is the length of this array buffer.
-	 * @serial
-	 */
-	protected Object[] elements;
-	
-	/**
-	 * The size of the list.
-	 * @serial
-	 */
-	protected int size;
+  /**
+   * The array buffer into which the elements of the list are stored.
+   * The capacity of the list is the length of this array buffer.
+   * @serial
+   */
+  protected Object[] elements;
+  
+  /**
+   * The size of the list.
+   * @serial
+   */
+  protected int size;
 /**
  * Constructs an empty list.
  */
 public ObjectArrayList() {
-	this(10);
+  this(10);
 }
 /**
  * Constructs a list containing the specified elements. 
@@ -46,7 +46,7 @@ public ObjectArrayList() {
  * @param elements the array to be backed by the the constructed list
  */
 public ObjectArrayList(Object[] elements) {
-	elements(elements);
+  elements(elements);
 }
 /**
  * Constructs an empty list with the specified initial capacity.
@@ -54,8 +54,8 @@ public ObjectArrayList(Object[] elements) {
  * @param   initialCapacity   the number of elements the receiver can hold without auto-expanding itself by allocating new internal memory.
  */
 public ObjectArrayList(int initialCapacity) {
-	this(new Object[initialCapacity]);
-	size=0;
+  this(new Object[initialCapacity]);
+  size=0;
 }
 /**
  * Appends the specified element to the end of this list.
@@ -63,8 +63,8 @@ public ObjectArrayList(int initialCapacity) {
  * @param element element to be appended to this list.
  */
 public void add(Object element) {
-	if (size == elements.length) ensureCapacity(size + 1); 
-	elements[size++] = element;
+  if (size == elements.length) ensureCapacity(size + 1); 
+  elements[size++] = element;
 }
 /**
  * Appends the part of the specified list between <code>from</code> (inclusive) and <code>to</code> (inclusive) to the receiver.
@@ -75,7 +75,7 @@ public void add(Object element) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>other.size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=other.size())</tt>).
  */
 public void addAllOfFromTo(ObjectArrayList other, int from, int to) {
-	beforeInsertAllOfFromTo(size, other, from, to);
+  beforeInsertAllOfFromTo(size, other, from, to);
 }
 /**
  * Inserts the specified element before the specified position into the receiver. 
@@ -87,13 +87,13 @@ public void addAllOfFromTo(ObjectArrayList other, int from, int to) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>index &lt; 0 || index &gt; size()</tt>).
  */
 public void beforeInsert(int index, Object element) {
-	// overridden for performance only.
-	if (index > size || index < 0) 
-		throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
-	ensureCapacity(size + 1);
-	System.arraycopy(elements, index, elements, index+1, size-index);
-	elements[index] = element;
-	size++;
+  // overridden for performance only.
+  if (index > size || index < 0) 
+    throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
+  ensureCapacity(size + 1);
+  System.arraycopy(elements, index, elements, index+1, size-index);
+  elements[index] = element;
+  size++;
 }
 /**
  * Inserts the part of the specified list between <code>otherFrom</code> (inclusive) and <code>otherTo</code> (inclusive) before the specified position into the receiver. 
@@ -108,9 +108,9 @@ public void beforeInsert(int index, Object element) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>index &lt; 0 || index &gt; size()</tt>).
  */
 public void beforeInsertAllOfFromTo(int index, ObjectArrayList other, int from, int to) {
-	int length=to-from+1;
-	this.beforeInsertDummies(index, length);
-	this.replaceFromToWithFrom(index, index+length-1, other, from);
+  int length=to-from+1;
+  this.beforeInsertDummies(index, length);
+  this.replaceFromToWithFrom(index, index+length-1, other, from);
 }
 /**
  * Inserts length dummies before the specified position into the receiver. 
@@ -121,13 +121,13 @@ public void beforeInsertAllOfFromTo(int index, ObjectArrayList other, int from, 
  * @param length number of dummies to be inserted.
  */
 protected void beforeInsertDummies(int index, int length) {
-	if (index > size || index < 0) 
-		throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
-	if (length > 0) {
-		ensureCapacity(size + length);
-	    System.arraycopy(elements, index, elements, index + length, size-index);
-		size += length;
-	}
+  if (index > size || index < 0) 
+    throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
+  if (length > 0) {
+    ensureCapacity(size + length);
+      System.arraycopy(elements, index, elements, index + length, size-index);
+    size += length;
+  }
 }
 /**
  * Searches the receiver for the specified value using
@@ -141,18 +141,18 @@ protected void beforeInsertDummies(int index, int length) {
  *
  * @param key the value to be searched for.
  * @return index of the search key, if it is contained in the receiver;
- *	       otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The <i>insertion
- *	       point</i> is defined as the the point at which the value would
- * 	       be inserted into the receiver: the index of the first
- *	       element greater than the key, or <tt>receiver.size()</tt>, if all
- *	       elements in the receiver are less than the specified key.  Note
- *	       that this guarantees that the return value will be &gt;= 0 if
- *	       and only if the key is found.
+ *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The <i>insertion
+ *         point</i> is defined as the the point at which the value would
+ *          be inserted into the receiver: the index of the first
+ *         element greater than the key, or <tt>receiver.size()</tt>, if all
+ *         elements in the receiver are less than the specified key.  Note
+ *         that this guarantees that the return value will be &gt;= 0 if
+ *         and only if the key is found.
  * @see Comparable
  * @see java.util.Arrays
  */
 public int binarySearch(Object key) {
-	return this.binarySearchFromTo(key, 0, size-1);
+  return this.binarySearchFromTo(key, 0, size-1);
 }
 /**
  * Searches the receiver for the specified value using
@@ -169,30 +169,30 @@ public int binarySearch(Object key) {
  * @param from the leftmost search position, inclusive.
  * @param to the rightmost search position, inclusive.
  * @return index of the search key, if it is contained in the receiver;
- *	       otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The <i>insertion
- *	       point</i> is defined as the the point at which the value would
- * 	       be inserted into the receiver: the index of the first
- *	       element greater than the key, or <tt>receiver.size()</tt>, if all
- *	       elements in the receiver are less than the specified key.  Note
- *	       that this guarantees that the return value will be &gt;= 0 if
- *	       and only if the key is found.
+ *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The <i>insertion
+ *         point</i> is defined as the the point at which the value would
+ *          be inserted into the receiver: the index of the first
+ *         element greater than the key, or <tt>receiver.size()</tt>, if all
+ *         elements in the receiver are less than the specified key.  Note
+ *         that this guarantees that the return value will be &gt;= 0 if
+ *         and only if the key is found.
  * @see Comparable
  * @see java.util.Arrays
  */
 public int binarySearchFromTo(Object key, int from, int to) {
-	int low = from;
-	int high = to;
+  int low = from;
+  int high = to;
 
-	while (low <= high) {
-		int mid =(low + high)/2;
-		Object midVal = elements[mid];
-		int cmp = ((Comparable)midVal).compareTo(key);
+  while (low <= high) {
+    int mid =(low + high)/2;
+    Object midVal = elements[mid];
+    int cmp = ((Comparable)midVal).compareTo(key);
 
-		if (cmp < 0) low = mid + 1;
-		else if (cmp > 0) high = mid - 1;
-		else return mid; // key found
-	}
-	return -(low + 1);  // key not found.
+    if (cmp < 0) low = mid + 1;
+    else if (cmp > 0) high = mid - 1;
+    else return mid; // key found
+  }
+  return -(low + 1);  // key not found.
 }
 /**
  * Searches the receiver for the specified value using
@@ -214,21 +214,21 @@ public int binarySearchFromTo(Object key, int from, int to) {
  * @param to the rightmost search position, inclusive.
  * @param comparator the comparator by which the receiver is sorted.
  * @throws ClassCastException if the receiver contains elements that are not
- *	       <i>mutually comparable</i> using the specified comparator.
+ *         <i>mutually comparable</i> using the specified comparator.
  * @return index of the search key, if it is contained in the receiver;
- *	       otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The <i>insertion
- *	       point</i> is defined as the the point at which the value would
- * 	       be inserted into the receiver: the index of the first
- *	       element greater than the key, or <tt>receiver.size()</tt>, if all
- *	       elements in the receiver are less than the specified key.  Note
- *	       that this guarantees that the return value will be &gt;= 0 if
- *	       and only if the key is found.
+ *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The <i>insertion
+ *         point</i> is defined as the the point at which the value would
+ *          be inserted into the receiver: the index of the first
+ *         element greater than the key, or <tt>receiver.size()</tt>, if all
+ *         elements in the receiver are less than the specified key.  Note
+ *         that this guarantees that the return value will be &gt;= 0 if
+ *         and only if the key is found.
  * @see org.apache.mahout.matrix.Sorting
  * @see java.util.Arrays
  * @see java.util.Comparator
  */
 public int binarySearchFromTo(Object key, int from, int to, java.util.Comparator comparator) {
-	return org.apache.mahout.matrix.Sorting.binarySearchFromTo(this.elements,key,from,to,comparator);
+  return org.apache.mahout.matrix.Sorting.binarySearchFromTo(this.elements,key,from,to,comparator);
 }
 /**
  * Returns a copy of the receiver such that the copy and the receiver <i>share</i> the same elements, but do not share the same array to index them;
@@ -238,9 +238,9 @@ public int binarySearchFromTo(Object key, int from, int to, java.util.Comparator
  * @return  a copy of the receiver.
  */
 public Object clone() {
-	ObjectArrayList v = (ObjectArrayList)super.clone();
-	v.elements = (Object[]) elements.clone();
-	return v;
+  ObjectArrayList v = (ObjectArrayList)super.clone();
+  v.elements = (Object[]) elements.clone();
+  return v;
 }
 /**
  * Returns true if the receiver contains the specified element.
@@ -250,7 +250,7 @@ public Object clone() {
  * @param testForEquality if true -> test for equality, otherwise for identity.
  */
 public boolean contains(Object elem, boolean testForEquality) {
-	return indexOfFromTo(elem,0,size-1, testForEquality) >=0;
+  return indexOfFromTo(elem,0,size-1, testForEquality) >=0;
 }
 /**
  * Returns a copy of the receiver; call <code>clone()</code> and casts the result.
@@ -261,7 +261,7 @@ public boolean contains(Object elem, boolean testForEquality) {
  * @return  a copy of the receiver.
  */
 public ObjectArrayList copy() {
-	return (ObjectArrayList) clone();
+  return (ObjectArrayList) clone();
 }
 /**
  * Deletes the first element from the receiver that matches the specified element.
@@ -276,8 +276,8 @@ public ObjectArrayList copy() {
  * @param element the element to be deleted.
  */
 public void delete(Object element, boolean testForEquality) {
-	int index = indexOfFromTo(element, 0, size-1, testForEquality);
-	if (index>=0) removeFromTo(index,index);
+  int index = indexOfFromTo(element, 0, size-1, testForEquality);
+  if (index>=0) removeFromTo(index,index);
 }
 /**
  * Returns the elements currently stored, including invalid elements between size and capacity, if any.
@@ -288,7 +288,7 @@ public void delete(Object element, boolean testForEquality) {
  * @return the elements currently stored.
  */
 public Object[] elements() {
-	return elements;
+  return elements;
 }
 /**
  * Sets the receiver's elements to be the specified array (not a copy of it).
@@ -301,9 +301,9 @@ public Object[] elements() {
  * @return the receiver itself.
  */
 public ObjectArrayList elements(Object[] elements) {
-	this.elements=elements;
-	this.size=elements.length;
-	return this;
+  this.elements=elements;
+  this.size=elements.length;
+  return this;
 }
 /**
  * Ensures that the receiver can hold at least the specified number of elements without needing to allocate new internal memory.
@@ -312,7 +312,7 @@ public ObjectArrayList elements(Object[] elements) {
  * @param   minCapacity   the desired minimum capacity.
  */
 public void ensureCapacity(int minCapacity) {
-	elements = org.apache.mahout.matrix.Arrays.ensureCapacity(elements,minCapacity);
+  elements = org.apache.mahout.matrix.Arrays.ensureCapacity(elements,minCapacity);
 }
 /**
 * Compares the specified Object with the receiver for equality.
@@ -328,7 +328,7 @@ public void ensureCapacity(int minCapacity) {
 * @return true if the specified Object is equal to the receiver.
 */
 public boolean equals(Object otherObj) { //delta
-	return equals(otherObj, true);
+  return equals(otherObj, true);
 }
 /**
 * Compares the specified Object with the receiver for equality.
@@ -346,27 +346,27 @@ public boolean equals(Object otherObj) { //delta
 * @return true if the specified Object is equal to the receiver.
 */
 public boolean equals(Object otherObj, boolean testForEquality) { //delta
-	if (! (otherObj instanceof ObjectArrayList)) {return false;}
-	if (this==otherObj) return true;
-	if (otherObj==null) return false;
-	ObjectArrayList other = (ObjectArrayList) otherObj;
-	if (elements==other.elements()) return true;
-	if (size!=other.size()) return false;
+  if (! (otherObj instanceof ObjectArrayList)) {return false;}
+  if (this==otherObj) return true;
+  if (otherObj==null) return false;
+  ObjectArrayList other = (ObjectArrayList) otherObj;
+  if (elements==other.elements()) return true;
+  if (size!=other.size()) return false;
 
-	Object[] otherElements = other.elements();
-	Object[] theElements = elements;
-	if (! testForEquality) {
-		for (int i=size; --i >= 0; ) {
-			if (theElements[i] != otherElements[i]) return false;
-		}
-	}
-	else {
-		for (int i=size; --i >= 0; ) {
-			if (!(theElements[i]==null ? otherElements[i]==null : theElements[i].equals(otherElements[i]))) return false;
-		}
-	}
+  Object[] otherElements = other.elements();
+  Object[] theElements = elements;
+  if (! testForEquality) {
+    for (int i=size; --i >= 0; ) {
+      if (theElements[i] != otherElements[i]) return false;
+    }
+  }
+  else {
+    for (int i=size; --i >= 0; ) {
+      if (!(theElements[i]==null ? otherElements[i]==null : theElements[i].equals(otherElements[i]))) return false;
+    }
+  }
 
-	return true;
+  return true;
 
 }
 /**
@@ -377,8 +377,8 @@ public boolean equals(Object otherObj, boolean testForEquality) { //delta
  * @param val the value to be stored in the specified elements of the receiver.
  */
 public void fillFromToWith(int from, int to, Object val) {
-	checkRangeFromTo(from,to,this.size);
-	for (int i=from; i<=to;) setQuick(i++,val); 
+  checkRangeFromTo(from,to,this.size);
+  for (int i=from; i<=to;) setQuick(i++,val); 
 }
 /**
  * Applies a procedure to each element of the receiver, if any.
@@ -387,11 +387,11 @@ public void fillFromToWith(int from, int to, Object val) {
  * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise. 
  */
 public boolean forEach(ObjectProcedure procedure) {
-	Object[] theElements = elements;
-	int theSize = size;
-	
-	for (int i=0; i<theSize;) if (! procedure.apply(theElements[i++])) return false;
-	return true;
+  Object[] theElements = elements;
+  int theSize = size;
+  
+  for (int i=0; i<theSize;) if (! procedure.apply(theElements[i++])) return false;
+  return true;
 }
 /**
  * Returns the element at the specified position in the receiver.
@@ -400,9 +400,9 @@ public boolean forEach(ObjectProcedure procedure) {
  * @exception IndexOutOfBoundsException index is out of range (index &lt; 0 || index &gt;= size()).
  */
 public Object get(int index) {
-	if (index >= size || index < 0)
-		throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
-	return elements[index];
+  if (index >= size || index < 0)
+    throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
+  return elements[index];
 }
 /**
  * Returns the element at the specified position in the receiver; <b>WARNING:</b> Does not check preconditions. 
@@ -413,7 +413,7 @@ public Object get(int index) {
  * @param index index of element to return.
  */
 public Object getQuick(int index) {
-	return elements[index];
+  return elements[index];
 }
 /**
  * Returns the index of the first occurrence of the specified
@@ -425,7 +425,7 @@ public Object getQuick(int index) {
  * @return  the index of the first occurrence of the element in the receiver; returns <code>-1</code> if the element is not found.
  */
 public int indexOf(Object element, boolean testForEquality) {
-	return this.indexOfFromTo(element, 0, size-1, testForEquality);
+  return this.indexOfFromTo(element, 0, size-1, testForEquality);
 }
 /**
  * Returns the index of the first occurrence of the specified
@@ -442,22 +442,22 @@ public int indexOf(Object element, boolean testForEquality) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public int indexOfFromTo(Object element, int from, int to, boolean testForEquality) {
-	if (size==0) return -1;
-	checkRangeFromTo(from, to, size);
+  if (size==0) return -1;
+  checkRangeFromTo(from, to, size);
 
-	Object[] theElements = elements;
-	if (testForEquality && element!=null) {
-		for (int i = from ; i <= to; i++) {
-		    if (element.equals(theElements[i])) {return i;} //found
-		}
+  Object[] theElements = elements;
+  if (testForEquality && element!=null) {
+    for (int i = from ; i <= to; i++) {
+        if (element.equals(theElements[i])) {return i;} //found
+    }
 
-	}
-	else {
-		for (int i = from ; i <= to; i++) {
-		    if (element==theElements[i]) {return i;} //found
-		}
-	}
-	return -1; //not found
+  }
+  else {
+    for (int i = from ; i <= to; i++) {
+        if (element==theElements[i]) {return i;} //found
+    }
+  }
+  return -1; //not found
 }
 /**
  * Determines whether the receiver is sorted ascending, according to the <i>natural ordering</i> of its
@@ -473,14 +473,14 @@ public int indexOfFromTo(Object element, int from, int to, boolean testForEquali
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public boolean isSortedFromTo(int from, int to) {
-	if (size==0) return true;
-	checkRangeFromTo(from, to, size);
-	
-	Object[] theElements = elements;
-	for (int i=from+1; i<=to; i++ ) {
-		if (((Comparable)theElements[i]).compareTo((Comparable) theElements[i-1]) < 0) return false;
-	}
-	return true;
+  if (size==0) return true;
+  checkRangeFromTo(from, to, size);
+  
+  Object[] theElements = elements;
+  for (int i=from+1; i<=to; i++ ) {
+    if (((Comparable)theElements[i]).compareTo((Comparable) theElements[i-1]) < 0) return false;
+  }
+  return true;
 }
 /**
  * Returns the index of the last occurrence of the specified
@@ -492,7 +492,7 @@ public boolean isSortedFromTo(int from, int to) {
  * @return  the index of the last occurrence of the element in the receiver; returns <code>-1</code> if the element is not found.
  */
 public int lastIndexOf(Object element, boolean testForEquality) {
-	return lastIndexOfFromTo(element, 0, size-1, testForEquality);
+  return lastIndexOfFromTo(element, 0, size-1, testForEquality);
 }
 /**
  * Returns the index of the last occurrence of the specified
@@ -508,22 +508,22 @@ public int lastIndexOf(Object element, boolean testForEquality) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public int lastIndexOfFromTo(Object element, int from, int to, boolean testForEquality) {
-	if (size==0) return -1;
-	checkRangeFromTo(from, to, size);
+  if (size==0) return -1;
+  checkRangeFromTo(from, to, size);
 
-	Object[] theElements = elements;
-	if (testForEquality && element!=null) {
-		for (int i = to ; i >= from; i--) {
-		    if (element.equals(theElements[i])) {return i;} //found
-		}
+  Object[] theElements = elements;
+  if (testForEquality && element!=null) {
+    for (int i = to ; i >= from; i--) {
+        if (element.equals(theElements[i])) {return i;} //found
+    }
 
-	}
-	else {
-		for (int i = to ; i >= from; i--) {
-		    if (element==theElements[i]) {return i;} //found
-		}
-	}
-	return -1; //not found
+  }
+  else {
+    for (int i = to ; i >= from; i--) {
+        if (element==theElements[i]) {return i;} //found
+    }
+  }
+  return -1; //not found
 }
 /**
  * Sorts the specified range of the receiver into
@@ -551,9 +551,9 @@ public int lastIndexOfFromTo(Object element, int from, int to, boolean testForEq
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public void mergeSortFromTo(int from, int to) {
-	if (size==0) return;
-	checkRangeFromTo(from, to, size);
-	java.util.Arrays.sort(elements, from, to+1);
+  if (size==0) return;
+  checkRangeFromTo(from, to, size);
+  java.util.Arrays.sort(elements, from, to+1);
 }
 /**
  * Sorts the receiver according
@@ -577,17 +577,17 @@ public void mergeSortFromTo(int from, int to) {
  * @param to the index of the last element (inclusive) to be sorted.
  * @param c the comparator to determine the order of the receiver.
  * @throws ClassCastException if the array contains elements that are not
- *	       <i>mutually comparable</i> using the specified comparator.
+ *         <i>mutually comparable</i> using the specified comparator.
  * @throws IllegalArgumentException if <tt>fromIndex &gt; toIndex</tt>
  * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
- *	       <tt>toIndex &gt; a.length</tt>
+ *         <tt>toIndex &gt; a.length</tt>
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  * @see Comparator
  */
 public void mergeSortFromTo(int from, int to, java.util.Comparator c) {
-	if (size==0) return;
-	checkRangeFromTo(from, to, size);
-	java.util.Arrays.sort(elements, from, to+1, c);
+  if (size==0) return;
+  checkRangeFromTo(from, to, size);
+  java.util.Arrays.sort(elements, from, to+1, c);
 }
 /**
  * Returns a new list of the part of the receiver between <code>from</code>, inclusive, and <code>to</code>, inclusive.
@@ -597,13 +597,13 @@ public void mergeSortFromTo(int from, int to, java.util.Comparator c) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
 */
 public ObjectArrayList partFromTo(int from, int to) {
-	if (size==0) return new ObjectArrayList(0);
+  if (size==0) return new ObjectArrayList(0);
 
-	checkRangeFromTo(from, to, size);
+  checkRangeFromTo(from, to, size);
 
-	Object[] part = new Object[to-from+1];
-	System.arraycopy(elements, from, part, 0, to-from+1);
-	return new ObjectArrayList(part);
+  Object[] part = new Object[to-from+1];
+  System.arraycopy(elements, from, part, 0, to-from+1);
+  return new ObjectArrayList(part);
 }
 /**
  * Sorts the specified range of the receiver into
@@ -629,9 +629,9 @@ public ObjectArrayList partFromTo(int from, int to) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public void quickSortFromTo(int from, int to) {
-	if (size==0) return;
-	checkRangeFromTo(from, to, size);
-	org.apache.mahout.matrix.Sorting.quickSort(elements, from, to+1);
+  if (size==0) return;
+  checkRangeFromTo(from, to, size);
+  org.apache.mahout.matrix.Sorting.quickSort(elements, from, to+1);
 }
 /**
  * Sorts the receiver according
@@ -652,17 +652,17 @@ public void quickSortFromTo(int from, int to) {
  * @param to the index of the last element (inclusive) to be sorted.
  * @param c the comparator to determine the order of the receiver.
  * @throws ClassCastException if the array contains elements that are not
- *	       <i>mutually comparable</i> using the specified comparator.
+ *         <i>mutually comparable</i> using the specified comparator.
  * @throws IllegalArgumentException if <tt>fromIndex &gt; toIndex</tt>
  * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
- *	       <tt>toIndex &gt; a.length</tt>
+ *         <tt>toIndex &gt; a.length</tt>
  * @see Comparator
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public void quickSortFromTo(int from, int to, java.util.Comparator c) {
-	if (size==0) return;
-	checkRangeFromTo(from, to, size);
-	org.apache.mahout.matrix.Sorting.quickSort(elements, from, to+1, c);
+  if (size==0) return;
+  checkRangeFromTo(from, to, size);
+  org.apache.mahout.matrix.Sorting.quickSort(elements, from, to+1, c);
 }
 /**
 * Removes from the receiver all elements that are contained in the specified list.
@@ -673,17 +673,17 @@ public void quickSortFromTo(int from, int to, java.util.Comparator c) {
 * @return <code>true</code> if the receiver changed as a result of the call.
 */
 public boolean removeAll(ObjectArrayList other, boolean testForEquality) {
-	if (other.size==0) return false; //nothing to do
-	int limit = other.size-1;
-	int j=0;
-	Object[] theElements = elements;
-	for (int i=0; i<size ; i++) {
-		if (other.indexOfFromTo(theElements[i], 0, limit, testForEquality) < 0) theElements[j++]=theElements[i];
-	}
+  if (other.size==0) return false; //nothing to do
+  int limit = other.size-1;
+  int j=0;
+  Object[] theElements = elements;
+  for (int i=0; i<size ; i++) {
+    if (other.indexOfFromTo(theElements[i], 0, limit, testForEquality) < 0) theElements[j++]=theElements[i];
+  }
 
-	boolean modified = (j!=size);
-	setSize(j);
-	return modified;
+  boolean modified = (j!=size);
+  setSize(j);
+  return modified;
 }
 /**
  * Removes from the receiver all elements whose index is between
@@ -696,14 +696,14 @@ public boolean removeAll(ObjectArrayList other, boolean testForEquality) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public void removeFromTo(int from, int to) {
-	checkRangeFromTo(from, to, size);
-	int numMoved = size - to - 1;
-	if (numMoved >= 0) {
-		System.arraycopy(elements, to+1, elements, from, numMoved);
-		fillFromToWith(from+numMoved, size-1, null); //delta
-	}
-	int width = to-from+1;
-	if (width>0) size -= width;
+  checkRangeFromTo(from, to, size);
+  int numMoved = size - to - 1;
+  if (numMoved >= 0) {
+    System.arraycopy(elements, to+1, elements, from, numMoved);
+    fillFromToWith(from+numMoved, size-1, null); //delta
+  }
+  int width = to-from+1;
+  if (width>0) size -= width;
 }
 /**
  * Replaces a number of elements in the receiver with the same number of elements of another list.
@@ -716,12 +716,12 @@ public void removeFromTo(int from, int to) {
  * @param otherFrom position of first element within other list to be copied.
  */
 public void replaceFromToWithFrom(int from, int to, ObjectArrayList other, int otherFrom) {
-	int length=to-from+1;
-	if (length>0) {
-		checkRangeFromTo(from, to, size);
-		checkRangeFromTo(otherFrom,otherFrom+length-1,other.size);
-		System.arraycopy(other.elements, otherFrom, elements, from, length);
-	}
+  int length=to-from+1;
+  if (length>0) {
+    checkRangeFromTo(from, to, size);
+    checkRangeFromTo(otherFrom,otherFrom+length-1,other.size);
+    System.arraycopy(other.elements, otherFrom, elements, from, length);
+  }
 }
 /**
 * Replaces the part between <code>from</code> (inclusive) and <code>to</code> (inclusive) with the other list's
@@ -767,39 +767,39 @@ public void replaceFromToWithFrom(int from, int to, ObjectArrayList other, int o
 * </pre>
 */
 public void replaceFromToWithFromTo(int from, int to, ObjectArrayList other, int otherFrom, int otherTo) {
-	if (otherFrom>otherTo) {
-		throw new IndexOutOfBoundsException("otherFrom: "+otherFrom+", otherTo: "+otherTo);
-	}
-	if (this==other && to-from!=otherTo-otherFrom) { // avoid stumbling over my own feet
-		replaceFromToWithFromTo(from, to, partFromTo(otherFrom, otherTo), 0, otherTo-otherFrom);
-		return;
-	}
-	
-	int length=otherTo-otherFrom+1;
-	int diff=length;
-	int theLast=from-1;
+  if (otherFrom>otherTo) {
+    throw new IndexOutOfBoundsException("otherFrom: "+otherFrom+", otherTo: "+otherTo);
+  }
+  if (this==other && to-from!=otherTo-otherFrom) { // avoid stumbling over my own feet
+    replaceFromToWithFromTo(from, to, partFromTo(otherFrom, otherTo), 0, otherTo-otherFrom);
+    return;
+  }
+  
+  int length=otherTo-otherFrom+1;
+  int diff=length;
+  int theLast=from-1;
 
-	//System.out.println("from="+from);
-	//System.out.println("to="+to);
-	//System.out.println("diff="+diff);
-	
-	if (to>=from) {
-		diff -= (to-from+1);
-		theLast=to;
-	}
-	
-	if (diff>0) {
-		beforeInsertDummies(theLast+1, diff);
-	}
-	else {
-		if (diff<0) {
-			removeFromTo(theLast+diff, theLast-1);
-		}
-	}
+  //System.out.println("from="+from);
+  //System.out.println("to="+to);
+  //System.out.println("diff="+diff);
+  
+  if (to>=from) {
+    diff -= (to-from+1);
+    theLast=to;
+  }
+  
+  if (diff>0) {
+    beforeInsertDummies(theLast+1, diff);
+  }
+  else {
+    if (diff<0) {
+      removeFromTo(theLast+diff, theLast-1);
+    }
+  }
 
-	if (length>0) {
-		System.arraycopy(other.elements, otherFrom, elements, from, length);
-	}
+  if (length>0) {
+    System.arraycopy(other.elements, otherFrom, elements, from, length);
+  }
 }
 /**
  * Replaces the part of the receiver starting at <code>from</code> (inclusive) with all the elements of the specified collection.
@@ -811,12 +811,12 @@ public void replaceFromToWithFromTo(int from, int to, ObjectArrayList other, int
  * @exception IndexOutOfBoundsException index is out of range (index &lt; 0 || index &gt;= size()).
  */
 public void replaceFromWith(int from, java.util.Collection other) {
-	checkRange(from,size);
-	java.util.Iterator e = other.iterator();
-	int index=from;
-	int limit = Math.min(size-from, other.size());
-	for (int i=0; i<limit; i++)
-	    elements[index++] = e.next(); //delta
+  checkRange(from,size);
+  java.util.Iterator e = other.iterator();
+  int index=from;
+  int limit = Math.min(size-from, other.size());
+  for (int i=0; i<limit; i++)
+      elements[index++] = e.next(); //delta
 }
 /**
 * Retains (keeps) only the elements in the receiver that are contained in the specified other list.
@@ -828,39 +828,39 @@ public void replaceFromWith(int from, java.util.Collection other) {
 * @return <code>true</code> if the receiver changed as a result of the call.
 */
 public boolean retainAll(ObjectArrayList other, boolean testForEquality) {
-	if (other.size==0) {
-		if (size==0) return false;
-		setSize(0);
-		return true;
-	}
-	
-	int limit = other.size-1;
-	int j=0;
-	Object[] theElements = elements;
+  if (other.size==0) {
+    if (size==0) return false;
+    setSize(0);
+    return true;
+  }
+  
+  int limit = other.size-1;
+  int j=0;
+  Object[] theElements = elements;
 
-	for (int i=0; i<size ; i++) {
-		if (other.indexOfFromTo(theElements[i], 0, limit, testForEquality) >= 0) theElements[j++]=theElements[i];
-	}
+  for (int i=0; i<size ; i++) {
+    if (other.indexOfFromTo(theElements[i], 0, limit, testForEquality) >= 0) theElements[j++]=theElements[i];
+  }
 
-	boolean modified = (j!=size);
-	setSize(j);
-	return modified;
+  boolean modified = (j!=size);
+  setSize(j);
+  return modified;
 }
 /**
  * Reverses the elements of the receiver.
  * Last becomes first, second last becomes second first, and so on.
  */
 public void reverse() {
-	Object tmp;
-	int limit=size/2;
-	int j=size-1;
-	
-	Object[] theElements = elements;
-	for (int i=0; i<limit;) { //swap
-		tmp=theElements[i];
-		theElements[i++]=theElements[j];
-		theElements[j--]=tmp;
-	}
+  Object tmp;
+  int limit=size/2;
+  int j=size-1;
+  
+  Object[] theElements = elements;
+  for (int i=0; i<limit;) { //swap
+    tmp=theElements[i];
+    theElements[i++]=theElements[j];
+    theElements[j--]=tmp;
+  }
 }
 /**
  * Replaces the element at the specified position in the receiver with the specified element.
@@ -868,12 +868,12 @@ public void reverse() {
  * @param index index of element to replace.
  * @param element element to be stored at the specified position.
  * @exception IndexOutOfBoundsException index is out of range (index
- * 		  &lt; 0 || index &gt;= size()).
+ *       &lt; 0 || index &gt;= size()).
 */
 public void set(int index, Object element) {
-	if (index >= size || index < 0)
-		throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
-	elements[index] = element;
+  if (index >= size || index < 0)
+    throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
+  elements[index] = element;
 }
 /**
  * Replaces the element at the specified position in the receiver with the specified element; <b>WARNING:</b> Does not check preconditions.
@@ -885,7 +885,7 @@ public void set(int index, Object element) {
  * @param element element to be stored at the specified position.
  */
 public void setQuick(int index, Object element) {
-	elements[index] = element;
+  elements[index] = element;
 }
 /**
  * Randomly permutes the part of the receiver between <code>from</code> (inclusive) and <code>to</code> (inclusive). 
@@ -894,21 +894,21 @@ public void setQuick(int index, Object element) {
  * @exception IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
  */
 public void shuffleFromTo(int from, int to) {
-	if (size == 0) return;
-	checkRangeFromTo(from, to, size);
-	
-	org.apache.mahout.jet.random.Uniform gen = new org.apache.mahout.jet.random.Uniform(new org.apache.mahout.jet.random.engine.DRand(new java.util.Date()));
-	Object tmpElement;
-	Object[] theElements = elements;
-	int random;
-	for (int i = from; i < to; i++) {
-		random = gen.nextIntFromTo(i, to);
+  if (size == 0) return;
+  checkRangeFromTo(from, to, size);
+  
+  org.apache.mahout.jet.random.Uniform gen = new org.apache.mahout.jet.random.Uniform(new org.apache.mahout.jet.random.engine.DRand(new java.util.Date()));
+  Object tmpElement;
+  Object[] theElements = elements;
+  int random;
+  for (int i = from; i < to; i++) {
+    random = gen.nextIntFromTo(i, to);
 
-		//swap(i, random)
-		tmpElement = theElements[random];
-		theElements[random] = theElements[i];
-		theElements[i] = tmpElement;
-	}
+    //swap(i, random)
+    tmpElement = theElements[random];
+    theElements[random] = theElements[i];
+    theElements[i] = tmpElement;
+  }
 }
 /**
  * Returns the number of elements contained in the receiver.
@@ -916,18 +916,18 @@ public void shuffleFromTo(int from, int to) {
  * @returns  the number of elements contained in the receiver.
  */
 public int size() {
-	return size;
+  return size;
 }
 /**
  * Returns a list which is a concatenation of <code>times</code> times the receiver.
  * @param times the number of times the receiver shall be copied.
  */
 public ObjectArrayList times(int times) {
-	ObjectArrayList newList = new ObjectArrayList(times*size);
-	for (int i=times; --i >= 0; ) {
-		newList.addAllOfFromTo(this,0,size()-1);
-	}
-	return newList;
+  ObjectArrayList newList = new ObjectArrayList(times*size);
+  for (int i=times; --i >= 0; ) {
+    newList.addAllOfFromTo(this,0,size()-1);
+  }
+  return newList;
 }
 /**
  * Returns an array containing all of the elements in the receiver in the
@@ -944,39 +944,39 @@ public ObjectArrayList times(int times) {
  * does not contain any null elements.
  *
  * @param array the array into which the elements of the receiver are to
- *		be stored, if it is big enough; otherwise, a new array of the
- * 		same runtime type is allocated for this purpose.
+ *    be stored, if it is big enough; otherwise, a new array of the
+ *     same runtime type is allocated for this purpose.
  * @return an array containing the elements of the receiver.
  * @exception ArrayStoreException the runtime type of <tt>array</tt> is not a supertype
  * of the runtime type of every element in the receiver.
  */
 public Object[] toArray(Object array[]) {
-	if (array.length < size)
-		array = (Object[])java.lang.reflect.Array.newInstance(array.getClass().getComponentType(), size);
+  if (array.length < size)
+    array = (Object[])java.lang.reflect.Array.newInstance(array.getClass().getComponentType(), size);
 
-	Object[] theElements = elements;
-	for (int i=size; --i >=0; ) array[i]=theElements[i];
+  Object[] theElements = elements;
+  for (int i=size; --i >=0; ) array[i]=theElements[i];
 
-	if (array.length > size) array[size] = null;
+  if (array.length > size) array[size] = null;
 
-	return array;
+  return array;
 }
 /**
  * Returns a <code>java.util.ArrayList</code> containing all the elements in the receiver.
  */
 public java.util.ArrayList toList() {
-	int mySize = size();
-	Object[] theElements = elements;
-	java.util.ArrayList list = new java.util.ArrayList(mySize);
-	for (int i=0; i < mySize; i++) list.add(theElements[i]);
-	return list;
+  int mySize = size();
+  Object[] theElements = elements;
+  java.util.ArrayList list = new java.util.ArrayList(mySize);
+  for (int i=0; i < mySize; i++) list.add(theElements[i]);
+  return list;
 }
 /**
 * Returns a string representation of the receiver, containing
 * the String representation of each element.
 */
 public String toString() {
-	return org.apache.mahout.matrix.Arrays.toString(partFromTo(0, size()-1).elements());
+  return org.apache.mahout.matrix.Arrays.toString(partFromTo(0, size()-1).elements());
 }
 /**
  * Trims the capacity of the receiver to be the receiver's current 
@@ -984,6 +984,6 @@ public String toString() {
  * storage of the receiver.
  */
 public void trimToSize() {
-	elements = org.apache.mahout.matrix.Arrays.trimToCapacity(elements,size());
+  elements = org.apache.mahout.matrix.Arrays.trimToCapacity(elements,size());
 }
 }

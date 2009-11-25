@@ -15,15 +15,13 @@ package org.apache.mahout.matrix.bitvector;
  * <b>WARNING: Methods of this class do not check preconditions.</b>
  * Provided with invalid parameters these method may return (or set) invalid values without throwing any exception.
  * <b>You should only use this class when performance is critical and you are absolutely sure that indexes are within bounds.</b>
- * <p>	 
+ * <p>   
  * A bitvector is modelled as a long array, i.e. <tt>long[] bits</tt> holds bits of a bitvector.
  * Each long value holds 64 bits.
  * The i-th bit is stored in bits[i/64] at
  * bit position i % 64 (where bit position 0 refers to the least
  * significant bit and 63 refers to the most significant bit).
  *
- * @author wolfgang.hoschek@cern.ch
- * @version 1.0, 09/24/99
  * @see     BitVector
  * @see     BitMatrix
  * @see     java.util.BitSet
@@ -33,11 +31,11 @@ package org.apache.mahout.matrix.bitvector;
  */
 @Deprecated
 public class QuickBitVector extends Object {
-	protected final static int ADDRESS_BITS_PER_UNIT = 6; // 64=2^6
-	protected final static int BITS_PER_UNIT = 64; // = 1 << ADDRESS_BITS_PER_UNIT
-	protected final static int BIT_INDEX_MASK = 63; // = BITS_PER_UNIT - 1;
-	
-	private static final long[] pows = precomputePows(); //precompute bitmasks for speed
+  protected final static int ADDRESS_BITS_PER_UNIT = 6; // 64=2^6
+  protected final static int BITS_PER_UNIT = 64; // = 1 << ADDRESS_BITS_PER_UNIT
+  protected final static int BIT_INDEX_MASK = 63; // = BITS_PER_UNIT - 1;
+  
+  private static final long[] pows = precomputePows(); //precompute bitmasks for speed
 /**
  * Makes this class non instantiable, but still inheritable.
  */
@@ -54,12 +52,12 @@ protected QuickBitVector() {
  * @return the bit mask having all bits between <tt>from</tt> and <tt>to</tt> set to 1.
  */
 public static final long bitMaskWithBitsSetFromTo(int from, int to) {
-	return pows[to-from+1] << from;
+  return pows[to-from+1] << from;
 
-	// This turned out to be slower:
-	// 0xffffffffffffffffL == ~0L == -1L == all 64 bits set.
-	// int width;
-	// return (width=to-from+1) == 0 ? 0L : (0xffffffffffffffffL >>> (BITS_PER_UNIT-width)) << from;
+  // This turned out to be slower:
+  // 0xffffffffffffffffL == ~0L == -1L == all 64 bits set.
+  // int width;
+  // return (width=to-from+1) == 0 ? 0L : (0xffffffffffffffffL >>> (BITS_PER_UNIT-width)) << from;
 }
 /**
  * Changes the bit with index <tt>bitIndex</tt> in the bitvector <tt>bits</tt> to the "clear" (<tt>false</tt>) state.
@@ -68,7 +66,7 @@ public static final long bitMaskWithBitsSetFromTo(int from, int to) {
  * @param     bitIndex   the index of the bit to be cleared.
  */
 public static void clear(long[] bits, int bitIndex) {
-	bits[bitIndex >> ADDRESS_BITS_PER_UNIT] &= ~(1L << (bitIndex & BIT_INDEX_MASK));
+  bits[bitIndex >> ADDRESS_BITS_PER_UNIT] &= ~(1L << (bitIndex & BIT_INDEX_MASK));
 }
 /**
  * Returns from the bitvector the value of the bit with the specified index.
@@ -80,7 +78,7 @@ public static void clear(long[] bits, int bitIndex) {
  * @return    the value of the bit with the specified index.
  */
 public static boolean get(long[] bits, int bitIndex) {
-	return ((bits[bitIndex >> ADDRESS_BITS_PER_UNIT] & (1L << (bitIndex & BIT_INDEX_MASK))) != 0);
+  return ((bits[bitIndex >> ADDRESS_BITS_PER_UNIT] & (1L << (bitIndex & BIT_INDEX_MASK))) != 0);
 }
 /**
  * Returns a long value representing bits of a bitvector from index <tt>from</tt> to index <tt>to</tt>.
@@ -94,37 +92,37 @@ public static boolean get(long[] bits, int bitIndex) {
  * @return the specified bits as long value.
  */
 public static long getLongFromTo(long[] bits, int from, int to) {
-	if (from>to) return 0L;
-	
-	final int fromIndex = from >> ADDRESS_BITS_PER_UNIT; //equivalent to from/64
-	final int toIndex = to >> ADDRESS_BITS_PER_UNIT;
-	final int fromOffset = from & BIT_INDEX_MASK; //equivalent to from%64
-	final int toOffset = to & BIT_INDEX_MASK;
-	//this is equivalent to the above, but slower:
-	//final int fromIndex=from/BITS_PER_UNIT;
-	//final int toIndex=to/BITS_PER_UNIT;
-	//final int fromOffset=from%BITS_PER_UNIT;
-	//final int toOffset=to%BITS_PER_UNIT;
+  if (from>to) return 0L;
+  
+  final int fromIndex = from >> ADDRESS_BITS_PER_UNIT; //equivalent to from/64
+  final int toIndex = to >> ADDRESS_BITS_PER_UNIT;
+  final int fromOffset = from & BIT_INDEX_MASK; //equivalent to from%64
+  final int toOffset = to & BIT_INDEX_MASK;
+  //this is equivalent to the above, but slower:
+  //final int fromIndex=from/BITS_PER_UNIT;
+  //final int toIndex=to/BITS_PER_UNIT;
+  //final int fromOffset=from%BITS_PER_UNIT;
+  //final int toOffset=to%BITS_PER_UNIT;
 
 
-	long mask;
-	if (fromIndex==toIndex) { //range does not cross unit boundaries; value to retrieve is contained in one single long value.
-		mask=bitMaskWithBitsSetFromTo(fromOffset, toOffset);
-		return (bits[fromIndex]	& mask) >>> fromOffset;
-		
-	}
+  long mask;
+  if (fromIndex==toIndex) { //range does not cross unit boundaries; value to retrieve is contained in one single long value.
+    mask=bitMaskWithBitsSetFromTo(fromOffset, toOffset);
+    return (bits[fromIndex]  & mask) >>> fromOffset;
+    
+  }
 
-	//range crosses unit boundaries; value to retrieve is spread over two long values.
-	//get part from first long value
-	mask=bitMaskWithBitsSetFromTo(fromOffset, BIT_INDEX_MASK);
-	final long x1=(bits[fromIndex] & mask) >>> fromOffset;
-	
-	//get part from second long value
-	mask=bitMaskWithBitsSetFromTo(0, toOffset);
-	final long x2=(bits[toIndex] & mask) << (BITS_PER_UNIT-fromOffset);
-	
-	//combine
-	return x1|x2;
+  //range crosses unit boundaries; value to retrieve is spread over two long values.
+  //get part from first long value
+  mask=bitMaskWithBitsSetFromTo(fromOffset, BIT_INDEX_MASK);
+  final long x1=(bits[fromIndex] & mask) >>> fromOffset;
+  
+  //get part from second long value
+  mask=bitMaskWithBitsSetFromTo(0, toOffset);
+  final long x2=(bits[toIndex] & mask) << (BITS_PER_UNIT-fromOffset);
+  
+  //combine
+  return x1|x2;
 }
 /**
 Returns the index of the least significant bit in state "true".
@@ -138,9 +136,9 @@ Examples:
 </pre>
 */
 static public int leastSignificantBit(int value) {
-	int i=-1;
-	while (++i < 32 && (((1<<i) & value)) == 0);
-	return i;
+  int i=-1;
+  while (++i < 32 && (((1<<i) & value)) == 0);
+  return i;
 }
 /**
  * Constructs a low level bitvector that holds <tt>size</tt> elements, with each element taking <tt>bitsPerElement</tt> bits.
@@ -150,10 +148,10 @@ static public int leastSignificantBit(int value) {
  * @return    a low level bitvector.
  */
 public static long[] makeBitVector(int size, int bitsPerElement) {
-	int nBits = size*bitsPerElement;
-	int unitIndex = (nBits-1) >> ADDRESS_BITS_PER_UNIT;
-	long[] bitVector = new long[unitIndex + 1];
-	return bitVector;
+  int nBits = size*bitsPerElement;
+  int unitIndex = (nBits-1) >> ADDRESS_BITS_PER_UNIT;
+  long[] bitVector = new long[unitIndex + 1];
+  return bitVector;
 }
 /**
 Returns the index of the most significant bit in state "true".
@@ -167,16 +165,16 @@ Examples:
 </pre>
 */
 static public int mostSignificantBit(int value) {
-	int i=32;
-	while (--i >=0 && (((1<<i) & value)) == 0);
-	return i;
+  int i=32;
+  while (--i >=0 && (((1<<i) & value)) == 0);
+  return i;
 }
 /**
  * Returns the index within the unit that contains the given bitIndex.
  */
 protected static int offset(int bitIndex) {
-	return bitIndex & BIT_INDEX_MASK;
-	//equivalent to bitIndex%64
+  return bitIndex & BIT_INDEX_MASK;
+  //equivalent to bitIndex%64
 }
 /**
  * Initializes a table with numbers having 1,2,3,...,64 bits set.
@@ -185,35 +183,35 @@ protected static int offset(int bitIndex) {
  * to speedup calculations in subsequent methods.
  */
 private static long[] precomputePows() {
-	long[] pows=new long[BITS_PER_UNIT+1];
-	long value = ~0L;
-	for (int i=BITS_PER_UNIT+1; --i >= 1; ) {
-		pows[i]=value >>> (BITS_PER_UNIT-i);
-		//System.out.println((i)+":"+pows[i]);
-	}
-	pows[0]=0L;
-	//System.out.println((0)+":"+pows[0]);
-	return pows;
+  long[] pows=new long[BITS_PER_UNIT+1];
+  long value = ~0L;
+  for (int i=BITS_PER_UNIT+1; --i >= 1; ) {
+    pows[i]=value >>> (BITS_PER_UNIT-i);
+    //System.out.println((i)+":"+pows[i]);
+  }
+  pows[0]=0L;
+  //System.out.println((0)+":"+pows[0]);
+  return pows;
 
-	//OLD STUFF
-	/*
-	for (int i=BITS_PER_UNIT+1; --i >= 0; ) {
-		pows[i]=value;
-		value = value >>> 1;
-		System.out.println((i)+":"+pows[i]);
-	}
-	*/
-	
-	/*
-	long[] pows=new long[BITS_PER_UNIT];
-	for (int i=0; i<BITS_PER_UNIT-1; i++) {
-		pows[i]=Math.round(Math.pow(2.0,i+1))-1;
-		System.out.println((i)+":"+pows[i]);
-	}
-	pows[BITS_PER_UNIT-1] = ~0L;
-	System.out.println((BITS_PER_UNIT-1)+":"+pows[BITS_PER_UNIT-1]);
-	return pows;
-	*/
+  //OLD STUFF
+  /*
+  for (int i=BITS_PER_UNIT+1; --i >= 0; ) {
+    pows[i]=value;
+    value = value >>> 1;
+    System.out.println((i)+":"+pows[i]);
+  }
+  */
+  
+  /*
+  long[] pows=new long[BITS_PER_UNIT];
+  for (int i=0; i<BITS_PER_UNIT-1; i++) {
+    pows[i]=Math.round(Math.pow(2.0,i+1))-1;
+    System.out.println((i)+":"+pows[i]);
+  }
+  pows[BITS_PER_UNIT-1] = ~0L;
+  System.out.println((BITS_PER_UNIT-1)+":"+pows[BITS_PER_UNIT-1]);
+  return pows;
+  */
 }
 /**
  * Sets the bit with index <tt>bitIndex</tt> in the bitvector <tt>bits</tt> to the state specified by <tt>value</tt>.
@@ -222,11 +220,11 @@ private static long[] precomputePows() {
  * @param     bitIndex   the index of the bit to be changed.
  * @param     value   the value to be stored in the bit.
  */
-public static void put(long[] bits, int bitIndex, boolean value) {	
-	if (value) 
-		set(bits, bitIndex);
-	else 
-		clear(bits, bitIndex);
+public static void put(long[] bits, int bitIndex, boolean value) {  
+  if (value) 
+    set(bits, bitIndex);
+  else 
+    clear(bits, bitIndex);
 }
 /**
  * Sets bits of a bitvector from index <code>from</code> to index <code>to</code> to the bits of <code>value</code>.
@@ -241,45 +239,45 @@ public static void put(long[] bits, int bitIndex, boolean value) {
  * @param to index of end bit (inclusive).
  */
 public static void putLongFromTo(long[] bits, long value, int from, int to) {
-	if (from>to) return;
-	
-	final int fromIndex=from >> ADDRESS_BITS_PER_UNIT; //equivalent to from/64
-	final int toIndex=to >> ADDRESS_BITS_PER_UNIT;
-	final int fromOffset=from & BIT_INDEX_MASK; //equivalent to from%64
-	final int toOffset=to & BIT_INDEX_MASK;
-	/*
-	this is equivalent to the above, but slower:
-	int fromIndex=from/BITS_PER_UNIT;
-	int toIndex=to/BITS_PER_UNIT;
-	int fromOffset=from%BITS_PER_UNIT;	
-	int toOffset=to%BITS_PER_UNIT;
-	*/
-	
-	//make sure all unused bits to the left are cleared.
-	long mask;
-	mask=bitMaskWithBitsSetFromTo(to-from+1, BIT_INDEX_MASK);
-	long cleanValue=value & (~mask);
+  if (from>to) return;
+  
+  final int fromIndex=from >> ADDRESS_BITS_PER_UNIT; //equivalent to from/64
+  final int toIndex=to >> ADDRESS_BITS_PER_UNIT;
+  final int fromOffset=from & BIT_INDEX_MASK; //equivalent to from%64
+  final int toOffset=to & BIT_INDEX_MASK;
+  /*
+  this is equivalent to the above, but slower:
+  int fromIndex=from/BITS_PER_UNIT;
+  int toIndex=to/BITS_PER_UNIT;
+  int fromOffset=from%BITS_PER_UNIT;  
+  int toOffset=to%BITS_PER_UNIT;
+  */
+  
+  //make sure all unused bits to the left are cleared.
+  long mask;
+  mask=bitMaskWithBitsSetFromTo(to-from+1, BIT_INDEX_MASK);
+  long cleanValue=value & (~mask);
 
-	long shiftedValue;
-	
-	if (fromIndex==toIndex) { //range does not cross unit boundaries; should go into one single long value.
-		shiftedValue=cleanValue << fromOffset;
-		mask=bitMaskWithBitsSetFromTo(fromOffset, toOffset);
-		bits[fromIndex] = (bits[fromIndex] & (~mask)) | shiftedValue;
-		return;
-		
-	}
+  long shiftedValue;
+  
+  if (fromIndex==toIndex) { //range does not cross unit boundaries; should go into one single long value.
+    shiftedValue=cleanValue << fromOffset;
+    mask=bitMaskWithBitsSetFromTo(fromOffset, toOffset);
+    bits[fromIndex] = (bits[fromIndex] & (~mask)) | shiftedValue;
+    return;
+    
+  }
 
-	//range crosses unit boundaries; value should go into two long values.
-	//copy into first long value.
-	shiftedValue=cleanValue << fromOffset;
-	mask=bitMaskWithBitsSetFromTo(fromOffset, BIT_INDEX_MASK);
-	bits[fromIndex] = (bits[fromIndex] & (~mask)) | shiftedValue;
-	
-	//copy into second long value.
-	shiftedValue=cleanValue >>> (BITS_PER_UNIT - fromOffset);
-	mask=bitMaskWithBitsSetFromTo(0, toOffset);
-	bits[toIndex] = (bits[toIndex] & (~mask)) | shiftedValue;
+  //range crosses unit boundaries; value should go into two long values.
+  //copy into first long value.
+  shiftedValue=cleanValue << fromOffset;
+  mask=bitMaskWithBitsSetFromTo(fromOffset, BIT_INDEX_MASK);
+  bits[fromIndex] = (bits[fromIndex] & (~mask)) | shiftedValue;
+  
+  //copy into second long value.
+  shiftedValue=cleanValue >>> (BITS_PER_UNIT - fromOffset);
+  mask=bitMaskWithBitsSetFromTo(0, toOffset);
+  bits[toIndex] = (bits[toIndex] & (~mask)) | shiftedValue;
 }
 /**
  * Changes the bit with index <tt>bitIndex</tt> in the bitvector <tt>bits</tt> to the "set" (<tt>true</tt>) state.
@@ -288,13 +286,13 @@ public static void putLongFromTo(long[] bits, long value, int from, int to) {
  * @param     bitIndex   the index of the bit to be set.
  */
 public static void set(long[] bits, int bitIndex) {
-	bits[bitIndex >> ADDRESS_BITS_PER_UNIT] |= 1L << (bitIndex & BIT_INDEX_MASK);           
+  bits[bitIndex >> ADDRESS_BITS_PER_UNIT] |= 1L << (bitIndex & BIT_INDEX_MASK);           
 }
 /**
  * Returns the index of the unit that contains the given bitIndex.
  */
 protected static int unit(int bitIndex) {
-	return bitIndex >> ADDRESS_BITS_PER_UNIT;
-	//equivalent to bitIndex/64
+  return bitIndex >> ADDRESS_BITS_PER_UNIT;
+  //equivalent to bitIndex/64
 }
 }

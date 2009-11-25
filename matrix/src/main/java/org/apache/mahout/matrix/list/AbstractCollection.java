@@ -17,8 +17,8 @@ First see the <a href="package-summary.html">package summary</a> and javadoc <a 
 @author wolfgang.hoschek@cern.ch
 @version 1.0, 09/24/99
 @see     java.util.ArrayList
-@see	    java.util.Vector
-@see	    java.util.Arrays
+@see      java.util.Vector
+@see      java.util.Arrays
 */
 //public abstract class AbstractCollection extends Object implements Cloneable, java.io.Serializable {
 /** 
@@ -42,7 +42,7 @@ public abstract void clear();
  *          <code>false</code> otherwise.
  */
 public boolean isEmpty() {
-	return size() == 0;
+  return size() == 0;
 }
 /**
  * Returns the number of elements contained in the receiver.
@@ -59,6 +59,6 @@ public abstract java.util.ArrayList toList();
 * the String representation of each element.
 */
 public String toString() {
-	return toList().toString();
+  return toList().toString();
 }
 }

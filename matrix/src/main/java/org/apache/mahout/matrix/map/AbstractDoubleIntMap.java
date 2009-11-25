@@ -23,14 +23,14 @@ As such they are fully functional, but inefficient. Override them in subclasses 
 
 @author wolfgang.hoschek@cern.ch
 @version 1.0, 09/24/99
-@see	    java.util.HashMap
+@see      java.util.HashMap
 */
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 @Deprecated
 public abstract class AbstractDoubleIntMap extends AbstractMap {
-	//public static int hashCollisions = 0; // for debug only
+  //public static int hashCollisions = 0; // for debug only
 /**
  * Makes this class non instantiable, but still let's others inherit from it.
  */
@@ -41,13 +41,13 @@ protected AbstractDoubleIntMap() {}
  * @return <tt>true</tt> if the receiver contains the specified key.
  */
 public boolean containsKey(final double key) {
-	return ! forEachKey(
-		new DoubleProcedure() {
-			public boolean apply(double iterKey) {
-				return (key != iterKey);
-			}
-		}
-	);
+  return ! forEachKey(
+    new DoubleProcedure() {
+      public boolean apply(double iterKey) {
+        return (key != iterKey);
+      }
+    }
+  );
 }
 /**
  * Returns <tt>true</tt> if the receiver contains the specified value.
@@ -55,13 +55,13 @@ public boolean containsKey(final double key) {
  * @return <tt>true</tt> if the receiver contains the specified value.
  */
 public boolean containsValue(final int value) {
-	return ! forEachPair( 
-		new DoubleIntProcedure() {
-			public boolean apply(double iterKey, int iterValue) {
-				return (value != iterValue);
-			}
-		}
-	);
+  return ! forEachPair( 
+    new DoubleIntProcedure() {
+      public boolean apply(double iterKey, int iterValue) {
+        return (value != iterValue);
+      }
+    }
+  );
 }
 /**
  * Returns a deep copy of the receiver; uses <code>clone()</code> and casts the result.
@@ -69,7 +69,7 @@ public boolean containsValue(final int value) {
  * @return  a deep copy of the receiver.
  */
 public AbstractDoubleIntMap copy() {
-	return (AbstractDoubleIntMap) clone();
+  return (AbstractDoubleIntMap) clone();
 }
 /**
  * Compares the specified object with this map for equality.  Returns
@@ -78,20 +78,20 @@ public AbstractDoubleIntMap copy() {
  * <tt>m2</tt> represent the same mappings iff
  * <pre>
  * m1.forEachPair(
- *		new DoubleIntProcedure() {
- *			public boolean apply(double key, int value) {
- *				return m2.containsKey(key) && m2.get(key) == value;
- *			}
- *		}
- *	)
+ *    new DoubleIntProcedure() {
+ *      public boolean apply(double key, int value) {
+ *        return m2.containsKey(key) && m2.get(key) == value;
+ *      }
+ *    }
+ *  )
  * &&
  * m2.forEachPair(
- *		new DoubleIntProcedure() {
- *			public boolean apply(double key, int value) {
- *				return m1.containsKey(key) && m1.get(key) == value;
- *			}
- *		}
- *	);
+ *    new DoubleIntProcedure() {
+ *      public boolean apply(double key, int value) {
+ *        return m1.containsKey(key) && m1.get(key) == value;
+ *      }
+ *    }
+ *  );
  * </pre>
  *
  * This implementation first checks if the specified object is this map;
@@ -103,28 +103,28 @@ public AbstractDoubleIntMap copy() {
  * @return <tt>true</tt> if the specified object is equal to this map.
  */
 public boolean equals(Object obj) {
-	if (obj == this) return true;
+  if (obj == this) return true;
 
-	if (!(obj instanceof AbstractDoubleIntMap)) return false;
-	final AbstractDoubleIntMap other = (AbstractDoubleIntMap) obj;
-	if (other.size() != size()) return false;
+  if (!(obj instanceof AbstractDoubleIntMap)) return false;
+  final AbstractDoubleIntMap other = (AbstractDoubleIntMap) obj;
+  if (other.size() != size()) return false;
 
-	return 
-		forEachPair(
-			new DoubleIntProcedure() {
-				public boolean apply(double key, int value) {
-					return other.containsKey(key) && other.get(key) == value;
-				}
-			}
-		)
-		&&
-		other.forEachPair(
-			new DoubleIntProcedure() {
-				public boolean apply(double key, int value) {
-					return containsKey(key) && get(key) == value;
-				}
-			}
-		);
+  return 
+    forEachPair(
+      new DoubleIntProcedure() {
+        public boolean apply(double key, int value) {
+          return other.containsKey(key) && other.get(key) == value;
+        }
+      }
+    )
+    &&
+    other.forEachPair(
+      new DoubleIntProcedure() {
+        public boolean apply(double key, int value) {
+          return containsKey(key) && get(key) == value;
+        }
+      }
+    );
 }
 /**
  * Applies a procedure to each key of the receiver, if any.
@@ -145,13 +145,13 @@ public abstract boolean forEachKey(DoubleProcedure procedure);
  * @return <tt>false</tt> if the procedure stopped before all keys where iterated over, <tt>true</tt> otherwise. 
  */
 public boolean forEachPair(final DoubleIntProcedure procedure) {
-	return forEachKey(
-		new DoubleProcedure() {
-			public boolean apply(double key) {
-				return procedure.apply(key,get(key));
-			}
-		}
-	);
+  return forEachKey(
+    new DoubleProcedure() {
+      public boolean apply(double key) {
+        return procedure.apply(key,get(key));
+      }
+    }
+  );
 }
 /**
  * Returns the value associated with the specified key.
@@ -168,21 +168,21 @@ public abstract int get(double key);
  *
  * @param value the value to search for.
  * @return the first key for which holds <tt>get(key) == value</tt>; 
- *		   returns <tt>Double.NaN</tt> if no such key exists.
+ *       returns <tt>Double.NaN</tt> if no such key exists.
  */
 public double keyOf(final int value) {
-	final double[] foundKey = new double[1];
-	boolean notFound = forEachPair(
-		new DoubleIntProcedure() {
-			public boolean apply(double iterKey, int iterValue) {
-				boolean found = value == iterValue;
-				if (found) foundKey[0] = iterKey;
-				return !found;
-			}
-		}
-	);
-	if (notFound) return Double.NaN;
-	return foundKey[0];
+  final double[] foundKey = new double[1];
+  boolean notFound = forEachPair(
+    new DoubleIntProcedure() {
+      public boolean apply(double iterKey, int iterValue) {
+        boolean found = value == iterValue;
+        if (found) foundKey[0] = iterKey;
+        return !found;
+      }
+    }
+  );
+  if (notFound) return Double.NaN;
+  return foundKey[0];
 }
 /**
  * Returns a list filled with all keys contained in the receiver.
@@ -195,9 +195,9 @@ public double keyOf(final int value) {
  * @return the keys.
  */
 public DoubleArrayList keys() {
-	DoubleArrayList list = new DoubleArrayList(size());
-	keys(list);
-	return list;
+  DoubleArrayList list = new DoubleArrayList(size());
+  keys(list);
+  return list;
 }
 /**
  * Fills all keys contained in the receiver into the specified list.
@@ -210,15 +210,15 @@ public DoubleArrayList keys() {
  * @param list the list to be filled, can have any size.
  */
 public void keys(final DoubleArrayList list) {
-	list.clear();
-	forEachKey(
-		new DoubleProcedure() {
-			public boolean apply(double key) {
-				list.add(key);
-				return true;
-			}
-		}
-	);
+  list.clear();
+  forEachKey(
+    new DoubleProcedure() {
+      public boolean apply(double key) {
+        list.add(key);
+        return true;
+      }
+    }
+  );
 }
 /**
  * Fills all keys <i>sorted ascending by their associated value</i> into the specified list.
@@ -234,7 +234,7 @@ public void keys(final DoubleArrayList list) {
  * @param keyList the list to be filled, can have any size.
  */
 public void keysSortedByValue(final DoubleArrayList keyList) {
-	pairsSortedByValue(keyList, new IntArrayList(size()));
+  pairsSortedByValue(keyList, new IntArrayList(size()));
 }
 /**
 Fills all pairs satisfying a given condition into the specified lists.
@@ -246,7 +246,7 @@ Iteration order is guaranteed to be <i>identical</i> to the order used by method
 <br>
 <pre>
 DoubleIntProcedure condition = new DoubleIntProcedure() { // match even values only
-	public boolean apply(double key, int value) { return value%2==0; }
+  public boolean apply(double key, int value) { return value%2==0; }
 }
 keys = (8,7,6), values = (1,2,2) --> keyList = (6,8), valueList = (2,1)</tt>
 </pre>
@@ -256,20 +256,20 @@ keys = (8,7,6), values = (1,2,2) --> keyList = (6,8), valueList = (2,1)</tt>
 @param valueList the list to be filled with values, can have any size.
 */
 public void pairsMatching(final DoubleIntProcedure condition, final DoubleArrayList keyList, final IntArrayList valueList) {
-	keyList.clear();
-	valueList.clear();
-	
-	forEachPair(
-		new DoubleIntProcedure() {
-			public boolean apply(double key, int value) {
-				if (condition.apply(key,value)) {
-					keyList.add(key);
-					valueList.add(value);
-				}
-				return true;
-			}
-		}
-	);
+  keyList.clear();
+  valueList.clear();
+  
+  forEachPair(
+    new DoubleIntProcedure() {
+      public boolean apply(double key, int value) {
+        if (condition.apply(key,value)) {
+          keyList.add(key);
+          valueList.add(value);
+        }
+        return true;
+      }
+    }
+  );
 }
 /**
  * Fills all keys and values <i>sorted ascending by key</i> into the specified lists.
@@ -284,41 +284,41 @@ public void pairsMatching(final DoubleIntProcedure condition, final DoubleArrayL
  * @param valueList the list to be filled with values, can have any size.
  */
 public void pairsSortedByKey(final DoubleArrayList keyList, final IntArrayList valueList) {
-	/*
-	keys(keyList); 
-	values(valueList);
-	
-	final double[] k = keyList.elements();
-	final int[] v = valueList.elements();
-	org.apache.mahout.matrix.Swapper swapper = new org.apache.mahout.matrix.Swapper() {
-		public void swap(int a, int b) {
-			int t1;	double t2;
-			t1 = v[a]; v[a] = v[b]; v[b] = t1;
-			t2 = k[a]; k[a] = k[b];	k[b] = t2;
-		}
-	}; 
+  /*
+  keys(keyList); 
+  values(valueList);
+  
+  final double[] k = keyList.elements();
+  final int[] v = valueList.elements();
+  org.apache.mahout.matrix.Swapper swapper = new org.apache.mahout.matrix.Swapper() {
+    public void swap(int a, int b) {
+      int t1;  double t2;
+      t1 = v[a]; v[a] = v[b]; v[b] = t1;
+      t2 = k[a]; k[a] = k[b];  k[b] = t2;
+    }
+  }; 
 
-	org.apache.mahout.matrix.function.IntComparator comp = new org.apache.mahout.matrix.function.IntComparator() {
-		public int compare(int a, int b) {
-			return k[a]<k[b] ? -1 : k[a]==k[b] ? 0 : 1;
-		}
-	};
-	org.apache.mahout.matrix.MultiSorting.sort(0,keyList.size(),comp,swapper);
-	*/	
-	
+  org.apache.mahout.matrix.function.IntComparator comp = new org.apache.mahout.matrix.function.IntComparator() {
+    public int compare(int a, int b) {
+      return k[a]<k[b] ? -1 : k[a]==k[b] ? 0 : 1;
+    }
+  };
+  org.apache.mahout.matrix.MultiSorting.sort(0,keyList.size(),comp,swapper);
+  */  
+  
 
-	
-	// this variant may be quicker
-	//org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions = 0;
-	//System.out.println("collisions="+org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions);
-	keys(keyList);
-	keyList.sort();
-	valueList.setSize(keyList.size());
-	for (int i=keyList.size(); --i >= 0; ) {
-		valueList.setQuick(i,get(keyList.getQuick(i)));
-	}
-	//System.out.println("collisions="+org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions);
-	
+  
+  // this variant may be quicker
+  //org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions = 0;
+  //System.out.println("collisions="+org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions);
+  keys(keyList);
+  keyList.sort();
+  valueList.setSize(keyList.size());
+  for (int i=keyList.size(); --i >= 0; ) {
+    valueList.setQuick(i,get(keyList.getQuick(i)));
+  }
+  //System.out.println("collisions="+org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions);
+  
 }
 /**
  * Fills all keys and values <i>sorted ascending by value</i> into the specified lists.
@@ -335,28 +335,28 @@ public void pairsSortedByKey(final DoubleArrayList keyList, final IntArrayList v
  * @param valueList the list to be filled with values, can have any size.
  */
 public void pairsSortedByValue(final DoubleArrayList keyList, final IntArrayList valueList) {
-	keys(keyList);
-	values(valueList);
-	
-	final double[] k = keyList.elements();
-	final int[] v = valueList.elements();
-	org.apache.mahout.matrix.Swapper swapper = new org.apache.mahout.matrix.Swapper() {
-		public void swap(int a, int b) {
-			int t1;	double t2;
-			t1 = v[a]; v[a] = v[b]; v[b] = t1;
-			t2 = k[a]; k[a] = k[b];	k[b] = t2;
-		}
-	}; 
+  keys(keyList);
+  values(valueList);
+  
+  final double[] k = keyList.elements();
+  final int[] v = valueList.elements();
+  org.apache.mahout.matrix.Swapper swapper = new org.apache.mahout.matrix.Swapper() {
+    public void swap(int a, int b) {
+      int t1;  double t2;
+      t1 = v[a]; v[a] = v[b]; v[b] = t1;
+      t2 = k[a]; k[a] = k[b];  k[b] = t2;
+    }
+  }; 
 
-	org.apache.mahout.matrix.function.IntComparator comp = new org.apache.mahout.matrix.function.IntComparator() {
-		public int compare(int a, int b) {
-			return v[a]<v[b] ? -1 : v[a]>v[b] ? 1 : (k[a]<k[b] ? -1 : (k[a]==k[b] ? 0 : 1));
-		}
-	};
+  org.apache.mahout.matrix.function.IntComparator comp = new org.apache.mahout.matrix.function.IntComparator() {
+    public int compare(int a, int b) {
+      return v[a]<v[b] ? -1 : v[a]>v[b] ? 1 : (k[a]<k[b] ? -1 : (k[a]==k[b] ? 0 : 1));
+    }
+  };
 
-	//org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions = 0;
-	org.apache.mahout.matrix.GenericSorting.quickSort(0,keyList.size(),comp,swapper);
-	//System.out.println("collisions="+org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions);
+  //org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions = 0;
+  org.apache.mahout.matrix.GenericSorting.quickSort(0,keyList.size(),comp,swapper);
+  //System.out.println("collisions="+org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions);
 }
 /**
  * Associates the given key with the given value.
@@ -380,42 +380,42 @@ public abstract boolean removeKey(double key);
  * the String representation of each key-value pair, sorted ascending by key.
  */
 public String toString() {
-	DoubleArrayList theKeys = keys();
-	theKeys.sort();
+  DoubleArrayList theKeys = keys();
+  theKeys.sort();
 
-	StringBuffer buf = new StringBuffer();
-	buf.append("[");
-	int maxIndex = theKeys.size() - 1;
-	for (int i = 0; i <= maxIndex; i++) {
-		double key = theKeys.get(i);
-	    buf.append(String.valueOf(key));
-		buf.append("->");
-	    buf.append(String.valueOf(get(key)));
-		if (i < maxIndex) buf.append(", ");
-	}
-	buf.append("]");
-	return buf.toString();
+  StringBuffer buf = new StringBuffer();
+  buf.append("[");
+  int maxIndex = theKeys.size() - 1;
+  for (int i = 0; i <= maxIndex; i++) {
+    double key = theKeys.get(i);
+      buf.append(String.valueOf(key));
+    buf.append("->");
+      buf.append(String.valueOf(get(key)));
+    if (i < maxIndex) buf.append(", ");
+  }
+  buf.append("]");
+  return buf.toString();
 }
 /**
  * Returns a string representation of the receiver, containing
  * the String representation of each key-value pair, sorted ascending by value.
  */
 public String toStringByValue() {
-	DoubleArrayList theKeys = new DoubleArrayList();
-	keysSortedByValue(theKeys);
+  DoubleArrayList theKeys = new DoubleArrayList();
+  keysSortedByValue(theKeys);
 
-	StringBuffer buf = new StringBuffer();
-	buf.append("[");
-	int maxIndex = theKeys.size() - 1;
-	for (int i = 0; i <= maxIndex; i++) {
-		double key = theKeys.get(i);
-	    buf.append(String.valueOf(key));
-		buf.append("->");
-	    buf.append(String.valueOf(get(key)));
-		if (i < maxIndex) buf.append(", ");
-	}
-	buf.append("]");
-	return buf.toString();
+  StringBuffer buf = new StringBuffer();
+  buf.append("[");
+  int maxIndex = theKeys.size() - 1;
+  for (int i = 0; i <= maxIndex; i++) {
+    double key = theKeys.get(i);
+      buf.append(String.valueOf(key));
+    buf.append("->");
+      buf.append(String.valueOf(get(key)));
+    if (i < maxIndex) buf.append(", ");
+  }
+  buf.append("]");
+  return buf.toString();
 }
 /**
  * Returns a list filled with all values contained in the receiver.
@@ -427,9 +427,9 @@ public String toStringByValue() {
  * @return the values.
  */
 public IntArrayList values() {
-	IntArrayList list = new IntArrayList(size());
-	values(list);
-	return list;
+  IntArrayList list = new IntArrayList(size());
+  values(list);
+  return list;
 }
 /**
  * Fills all values contained in the receiver into the specified list.
@@ -442,14 +442,14 @@ public IntArrayList values() {
  * @param list the list to be filled, can have any size.
  */
 public void values(final IntArrayList list) {
-	list.clear();
-	forEachKey(
-		new DoubleProcedure() {
-			public boolean apply(double key) {
-				list.add(get(key));
-				return true;
-			}
-		}
-	);
+  list.clear();
+  forEachKey(
+    new DoubleProcedure() {
+      public boolean apply(double key) {
+        list.add(get(key));
+        return true;
+      }
+    }
+  );
 }
 }

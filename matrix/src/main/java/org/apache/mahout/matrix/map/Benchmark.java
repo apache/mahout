@@ -12,8 +12,6 @@ import org.apache.mahout.matrix.Timer;
 /**
  * Benchmarks the classes of this package.
  *
- * @author wolfgang.hoschek@cern.ch
- * @version 1.0, 09/24/99
  */
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
@@ -27,69 +25,69 @@ protected Benchmark() {}
 /**
  */
 public static void benchmark(int runs, int size, String kind) {
-	QuickOpenIntIntHashMap map;
+  QuickOpenIntIntHashMap map;
 
-	System.out.println("initializing...");
-	map = new QuickOpenIntIntHashMap();
-	
-	//for (int i=size; --i >=0; ) {
-	for (int i=0; i < size; i++) {
-		map.put(i,i);
-	}
-	Runtime.getRuntime().gc();
-	try { Thread.currentThread().sleep(1000); } catch (InterruptedException exc) {};
-	
+  System.out.println("initializing...");
+  map = new QuickOpenIntIntHashMap();
+  
+  //for (int i=size; --i >=0; ) {
+  for (int i=0; i < size; i++) {
+    map.put(i,i);
+  }
+  Runtime.getRuntime().gc();
+  try { Thread.currentThread().sleep(1000); } catch (InterruptedException exc) {};
+  
 
-	System.out.println("Now benchmarking...");
-	int s=0;
-	Timer timer0 = new Timer();
-	Timer timer1 = new Timer();
-	Timer timer2 = new Timer();
-	//map.hashCollisions = 0;
-	for (int run=runs; --run >=0; ) {
-		if (kind.equals("add")) {
-			map.clear();
-			//map.ensureCapacity(size*3);
-			timer0.start();
-			for (int i=size; --i >=0; ) {
-				map.put(i,i);
-			}
-			timer0.stop();
-		}
-		if (kind.equals("get")) {
-			timer0.start();
-			for (int i=size; --i >=0; ) {
-				s += map.get(i);
-			}
-			timer0.stop();
-		}
-		else {
-			timer1.start();
-			map.rehash(PrimeFinder.nextPrime(size*2));
-			timer1.stop();
+  System.out.println("Now benchmarking...");
+  int s=0;
+  Timer timer0 = new Timer();
+  Timer timer1 = new Timer();
+  Timer timer2 = new Timer();
+  //map.hashCollisions = 0;
+  for (int run=runs; --run >=0; ) {
+    if (kind.equals("add")) {
+      map.clear();
+      //map.ensureCapacity(size*3);
+      timer0.start();
+      for (int i=size; --i >=0; ) {
+        map.put(i,i);
+      }
+      timer0.stop();
+    }
+    if (kind.equals("get")) {
+      timer0.start();
+      for (int i=size; --i >=0; ) {
+        s += map.get(i);
+      }
+      timer0.stop();
+    }
+    else {
+      timer1.start();
+      map.rehash(PrimeFinder.nextPrime(size*2));
+      timer1.stop();
 
-			timer2.start();
-			map.rehash(PrimeFinder.nextPrime((int) (size*1.5)));
-			timer2.stop();
-		}
-	}
+      timer2.start();
+      map.rehash(PrimeFinder.nextPrime((int) (size*1.5)));
+      timer2.stop();
+    }
+  }
 
-	System.out.println("adding: "+timer0);
-	System.out.println("growing: "+timer1);
-	System.out.println("shrinking: "+timer2);
-	System.out.println("total: "+(timer1.plus(timer2)));
-	//System.out.println("collisions="+map.hashCollisions);
-	System.out.print(s);
+  System.out.println("adding: "+timer0);
+  System.out.println("growing: "+timer1);
+  System.out.println("shrinking: "+timer2);
+  System.out.println("total: "+(timer1.plus(timer2)));
+  //System.out.println("collisions="+map.hashCollisions);
+  System.out.print(s);
 }
 /**
  * Tests various methods of this class.
  */
 public static void main(String args[]) {
-	int runs = Integer.parseInt(args[0]);
-	int size = Integer.parseInt(args[1]);
-	//boolean add = args[2].equals("add");
-	String kind = args[2];
-	benchmark(runs,size,kind);	 
+  int runs = Integer.parseInt(args[0]);
+  int size = Integer.parseInt(args[1]);
+  //boolean add = args[2].equals("add");
+  String kind = args[2];
+  benchmark(runs,size,kind);   
 }
 /**
  */
@@ -102,7 +100,7 @@ org.apache.mahout.jet.random.Uniform uniform = new org.apache.mahout.jet.random.
 int[]    keys   = new int[length];
 int to = 10000000;
 for (int i=0; i<length; i++) { 
-	keys[i] = uniform.nextIntFromTo(0,to);
+  keys[i] = uniform.nextIntFromTo(0,to);
 }
 int[] values = (int[]) keys.clone();
 
@@ -111,8 +109,8 @@ int size = keys.length;
 AbstractIntIntMap map = new OpenIntIntHashMap();
 
 for (int i=0; i<keys.length; i++) {
-	map.put(keys[i], (int)values[i]);
-	//System.out.println(map);
+  map.put(keys[i], (int)values[i]);
+  //System.out.println(map);
 }
 
 /*
@@ -131,7 +129,7 @@ System.out.println(map.keyOf((int)71.0));
 //System.out.println(map.values());
 /*
 if (map instanceof QuickOpenIntIntHashMap) {
-	System.out.println("totalProbesSaved="+((QuickOpenIntIntHashMap)map).totalProbesSaved);
+  System.out.println("totalProbesSaved="+((QuickOpenIntIntHashMap)map).totalProbesSaved);
 }
 System.out.println("probes="+map.hashCollisions);
 
@@ -139,8 +137,8 @@ map.hashCollisions = 0;
 */
 int sum=0;
 for (int i=0; i<keys.length; i++) {
-	sum += map.get(keys[i]);
-	//System.out.println(map);
+  sum += map.get(keys[i]);
+  //System.out.println(map);
 }
 //System.out.println("probes="+map.hashCollisions);
 

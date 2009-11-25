@@ -19,7 +19,7 @@ package org.apache.mahout.matrix;
  */
 @Deprecated
 public abstract class PersistentObject extends Object implements java.io.Serializable, Cloneable {
-	public static final long serialVersionUID = 1020L;
+  public static final long serialVersionUID = 1020L;
 /**
  * Not yet commented.
  */
@@ -32,10 +32,10 @@ protected PersistentObject() {
  * @return a copy of the receiver.
  */
 public Object clone() {
-	try {
-		return super.clone();
-	} catch (CloneNotSupportedException exc) {
-		throw new InternalError(); //should never happen since we are cloneable
-	}
+  try {
+    return super.clone();
+  } catch (CloneNotSupportedException exc) {
+    throw new InternalError(); //should never happen since we are cloneable
+  }
 }
 }

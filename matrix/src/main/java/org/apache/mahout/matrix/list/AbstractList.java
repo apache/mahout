@@ -17,8 +17,8 @@ First see the <a href="package-summary.html">package summary</a> and javadoc <a 
 @author wolfgang.hoschek@cern.ch
 @version 1.0, 09/24/99
 @see     java.util.ArrayList
-@see	    java.util.Vector
-@see	    java.util.Arrays
+@see      java.util.Vector
+@see      java.util.Arrays
 */
 /** 
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
@@ -37,7 +37,7 @@ protected AbstractList() {}
  * of the same parameter type of the receiver.
  */
 public void addAllOf(java.util.Collection collection) {
-	this.beforeInsertAllOf(size(), collection);
+  this.beforeInsertAllOf(size(), collection);
 }
 /** Inserts all elements of the specified collection before the specified position into the receiver. 
  * Shifts the element
@@ -51,8 +51,8 @@ public void addAllOf(java.util.Collection collection) {
  * @throws IndexOutOfBoundsException if <tt>index &lt; 0 || index &gt; size()</tt>.
  */
 public void beforeInsertAllOf(int index, java.util.Collection collection) {
-	this.beforeInsertDummies(index, collection.size());
-	this.replaceFromWith(index, collection);
+  this.beforeInsertDummies(index, collection.size());
+  this.replaceFromWith(index, collection);
 }
 /**
  * Inserts <tt>length</tt> dummy elements before the specified position into the receiver. 
@@ -69,24 +69,24 @@ protected abstract void beforeInsertDummies(int index, int length);
  * Checks if the given index is in range.
  */
 protected static void checkRange(int index, int theSize) {
-	if (index >= theSize || index < 0)
-		throw new IndexOutOfBoundsException("Index: "+index+", Size: "+theSize);
+  if (index >= theSize || index < 0)
+    throw new IndexOutOfBoundsException("Index: "+index+", Size: "+theSize);
 }
 /**
  * Checks if the given range is within the contained array's bounds.
  * @throws IndexOutOfBoundsException if <tt>to!=from-1 || from&lt;0 || from&gt;to || to&gt;=size()</tt>.
  */
 protected static void checkRangeFromTo(int from, int to, int theSize) {
-	if (to==from-1) return;
-	if (from<0 || from>to || to>=theSize)
-		throw new IndexOutOfBoundsException("from: "+from+", to: "+to+", size="+theSize);
+  if (to==from-1) return;
+  if (from<0 || from>to || to>=theSize)
+    throw new IndexOutOfBoundsException("from: "+from+", to: "+to+", size="+theSize);
 }
 /**
  * Removes all elements from the receiver.  The receiver will
  * be empty after this call returns, but keep its current capacity.
  */
 public void clear() {
-	removeFromTo(0,size()-1);
+  removeFromTo(0,size()-1);
 }
 /**
  * Sorts the receiver into ascending order.  
@@ -103,7 +103,7 @@ public void clear() {
  * It is generally better to call <tt>sort()</tt> or <tt>sortFromTo(...)</tt> instead, because those methods automatically choose the best sorting algorithm.
  */
 public final void mergeSort() {
-	mergeSortFromTo(0, size()-1);
+  mergeSortFromTo(0, size()-1);
 }
 /**
  * Sorts the receiver into ascending order.  
@@ -137,7 +137,7 @@ public abstract void mergeSortFromTo(int from, int to);
  * It is generally better to call <tt>sort()</tt> or <tt>sortFromTo(...)</tt> instead, because those methods automatically choose the best sorting algorithm.
  */
 public final void quickSort() {
-	quickSortFromTo(0, size()-1);
+  quickSortFromTo(0, size()-1);
 }
 /**
  * Sorts the specified range of the receiver into
@@ -164,7 +164,7 @@ public abstract void quickSortFromTo(int from, int to);
  * @throws IndexOutOfBoundsException if <tt>index &lt; 0 || index &gt;= size()</tt>.
  */
 public void remove(int index) {
-	removeFromTo(index, index);
+  removeFromTo(index, index);
 }
 /**
  * Removes from the receiver all elements whose index is between
@@ -201,19 +201,19 @@ public abstract void reverse();
  * @throws IndexOutOfBoundsException if <tt>newSize &lt; 0</tt>.
  */
 public void setSize(int newSize) {
-	if (newSize<0) throw new IndexOutOfBoundsException("newSize:"+newSize);
+  if (newSize<0) throw new IndexOutOfBoundsException("newSize:"+newSize);
 
-	int currentSize = size();
-	if (newSize!=currentSize) {
-		if (newSize>currentSize) beforeInsertDummies(currentSize,newSize-currentSize);
-		else if (newSize<currentSize) removeFromTo(newSize, currentSize-1);
-	}
+  int currentSize = size();
+  if (newSize!=currentSize) {
+    if (newSize>currentSize) beforeInsertDummies(currentSize,newSize-currentSize);
+    else if (newSize<currentSize) removeFromTo(newSize, currentSize-1);
+  }
 }
 /**
  * Randomly permutes the receiver. After invocation, all elements will be at random positions.
  */
 public final void shuffle() {
-	shuffleFromTo(0, size()-1);
+  shuffleFromTo(0, size()-1);
 }
 /**
  * Randomly permutes the receiver between <code>from</code> (inclusive) and <code>to</code> (inclusive). 
@@ -231,7 +231,7 @@ public abstract void shuffleFromTo(int from, int to);
  * Override <tt>sortFromTo(...)</tt> if you can determine which sort is most appropriate for the given data set.
  */
 public final void sort() {
-	sortFromTo(0, size()-1);
+  sortFromTo(0, size()-1);
 }
 /**
  * Sorts the specified range of the receiver into ascending order. 
@@ -245,7 +245,7 @@ public final void sort() {
  * @throws IndexOutOfBoundsException if <tt>(from&lt;0 || from&gt;to || to&gt;=size()) && to!=from-1</tt>.
  */
 public void sortFromTo(int from, int to) {
-	quickSortFromTo(from, to);
+  quickSortFromTo(from, to);
 }
 /**
  * Trims the capacity of the receiver to be the receiver's current 

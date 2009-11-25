@@ -17,23 +17,23 @@ First see the <a href="package-summary.html">package summary</a> and javadoc <a 
  */
 @Deprecated
 public class SimpleLongArrayList extends AbstractLongList {
-	/**
-	 * The array buffer into which the elements of the list are stored.
-	 * The capacity of the list is the length of this array buffer.
-	 * @serial
-	 */
-	protected long[] elements;
-	
-	/**
-	 * The size of the list.
-	 * @serial
-	 */
-	protected int size;
+  /**
+   * The array buffer into which the elements of the list are stored.
+   * The capacity of the list is the length of this array buffer.
+   * @serial
+   */
+  protected long[] elements;
+  
+  /**
+   * The size of the list.
+   * @serial
+   */
+  protected int size;
 /**
  * Constructs an empty list.
  */
 public SimpleLongArrayList() {
-	this(10);
+  this(10);
 }
 /**
  * Constructs a list containing the specified elements. 
@@ -45,7 +45,7 @@ public SimpleLongArrayList() {
  * @param elements the array to be backed by the the constructed list
  */
 public SimpleLongArrayList(long[] elements) {
-	elements(elements);
+  elements(elements);
 }
 /**
  * Constructs an empty list with the specified initial capacity.
@@ -53,12 +53,12 @@ public SimpleLongArrayList(long[] elements) {
  * @param   initialCapacity   the number of elements the receiver can hold without auto-expanding itself by allocating new internal memory.
  */
 public SimpleLongArrayList(int initialCapacity) {
-	super();
-	if (initialCapacity < 0)
-	   throw new IllegalArgumentException("Illegal Capacity: "+ initialCapacity);
+  super();
+  if (initialCapacity < 0)
+     throw new IllegalArgumentException("Illegal Capacity: "+ initialCapacity);
 
-	this.elements(new long[initialCapacity]);
-	size=0;
+  this.elements(new long[initialCapacity]);
+  size=0;
 }
 /**
  * Ensures that the receiver can hold at least the specified number of elements without needing to allocate new internal memory.
@@ -67,7 +67,7 @@ public SimpleLongArrayList(int initialCapacity) {
  * @param   minCapacity   the desired minimum capacity.
  */
 public void ensureCapacity(int minCapacity) {
-	elements = org.apache.mahout.matrix.Arrays.ensureCapacity(elements,minCapacity);
+  elements = org.apache.mahout.matrix.Arrays.ensureCapacity(elements,minCapacity);
 }
 /**
  * Returns the element at the specified position in the receiver; <b>WARNING:</b> Does not check preconditions. 
@@ -78,7 +78,7 @@ public void ensureCapacity(int minCapacity) {
  * @param index index of element to return.
  */
 protected long getQuick(int index) {
-	return elements[index];
+  return elements[index];
 }
 /**
  * Replaces the element at the specified position in the receiver with the specified element; <b>WARNING:</b> Does not check preconditions. 
@@ -90,7 +90,7 @@ protected long getQuick(int index) {
  * @param element element to be stored at the specified position.
  */
 protected void setQuick(int index, long element) {
-	elements[index] = element;
+  elements[index] = element;
 }
 /**
 * Trims the capacity of the receiver to be the receiver's current 
@@ -98,6 +98,6 @@ protected void setQuick(int index, long element) {
 * storage of the receiver. 
 */
 public void trimToSize() {
-	elements = org.apache.mahout.matrix.Arrays.trimToCapacity(elements,size());
+  elements = org.apache.mahout.matrix.Arrays.trimToCapacity(elements,size());
 }
 }
