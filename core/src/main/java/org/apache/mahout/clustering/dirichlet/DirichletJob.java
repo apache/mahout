@@ -28,15 +28,16 @@ import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.log4j.Logger;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class DirichletJob {
 
-  private static final Logger log = Logger.getLogger(DirichletJob.class);
+  private static final Logger log = LoggerFactory.getLogger(DirichletJob.class);
 
   private DirichletJob() {
   }

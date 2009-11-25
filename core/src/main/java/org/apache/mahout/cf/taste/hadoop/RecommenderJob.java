@@ -35,10 +35,11 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.util.StringUtils;
-import org.apache.log4j.Logger;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -106,7 +107,7 @@ import java.io.IOException;
  */
 public final class RecommenderJob extends Job {
 
-  private static final Logger log = Logger.getLogger(RecommenderJob.class);
+  private static final Logger log = LoggerFactory.getLogger(RecommenderJob.class);
 
   public RecommenderJob(Configuration jobConf) throws IOException {
     super(jobConf);

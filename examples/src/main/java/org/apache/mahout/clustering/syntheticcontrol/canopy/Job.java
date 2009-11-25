@@ -31,15 +31,16 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.log4j.Logger;
 import org.apache.mahout.clustering.canopy.CanopyClusteringJob;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.matrix.Vector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Job {
   /** Logger for this class.*/
-  private static final Logger LOG = Logger.getLogger(Job.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Job.class);
 
   private Job() {
   }

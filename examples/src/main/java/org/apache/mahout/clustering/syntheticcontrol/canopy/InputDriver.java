@@ -33,16 +33,17 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
-import org.apache.log4j.Logger;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.matrix.Vector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class InputDriver {
   /**Logger for this class.*/
-  private static final Logger LOG = Logger.getLogger(InputDriver.class);
+  private static final Logger LOG = LoggerFactory.getLogger(InputDriver.class);
 
   private InputDriver() {
   }

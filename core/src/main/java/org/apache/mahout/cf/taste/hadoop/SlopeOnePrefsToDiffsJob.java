@@ -38,16 +38,17 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.StringUtils;
-import org.apache.log4j.Logger;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public final class SlopeOnePrefsToDiffsJob extends Job {
 
   /** Logger for this class.*/
-  private static final Logger log = Logger.getLogger(SlopeOnePrefsToDiffsJob.class);
+  private static final Logger log = LoggerFactory.getLogger(SlopeOnePrefsToDiffsJob.class);
 
   private SlopeOnePrefsToDiffsJob(Configuration jobConf) throws IOException {
     super(jobConf);
