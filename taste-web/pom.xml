@@ -147,10 +147,6 @@
           <artifactId>commons-lang</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>log4j</groupId>
-          <artifactId>log4j</artifactId>
-        </exclusion>
-        <exclusion>
           <groupId>commons-httpclient</groupId>
           <artifactId>commons-httpclient</artifactId>
         </exclusion>
@@ -161,10 +157,6 @@
         <exclusion>
           <groupId>commons-pool</groupId>
           <artifactId>commons-pool</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>log4j</groupId>
-          <artifactId>log4j</artifactId>
         </exclusion>
         <exclusion>
           <groupId>commons-lang</groupId>
