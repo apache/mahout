@@ -24,6 +24,8 @@ import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.common.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,6 +44,8 @@ import java.util.List;
  * implement {@link #buildRecommender()}.
  */
 public abstract class RecommenderWrapper implements Recommender {
+
+  private static final Logger log = LoggerFactory.getLogger(RecommenderWrapper.class);
 
   private final Recommender delegate;
 
@@ -105,9 +109,13 @@ public abstract class RecommenderWrapper implements Recommender {
    * @throws IOException if an error occurs while reading or writing data
    */
   public static File readResourceToTempFile(String resourceName) throws IOException {
-    InputStream is = RecommenderWrapper.class.getResourceAsStream(resourceName);
+    String absoluteResource = resourceName.startsWith("/") ? resourceName : '/' + resourceName;
+    log.info("Loading resource {}", absoluteResource);
+    InputStream is = RecommenderWrapper.class.getResourceAsStream(absoluteResource);
     if (is == null) {
-      is = new FileInputStream(resourceName);
+      File resourceFile = new File(resourceName);
+      log.info("Falling back to load file {}", resourceFile.getAbsolutePath());
+      is = new FileInputStream(resourceFile);
     }
     try {
       File tempFile = File.createTempFile("taste", null);
