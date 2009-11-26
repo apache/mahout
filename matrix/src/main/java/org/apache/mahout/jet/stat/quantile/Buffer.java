@@ -13,7 +13,7 @@ abstract class Buffer extends org.apache.mahout.matrix.PersistentObject {
 
   protected int weight;
   protected int level;
-  protected int k;
+  protected final int k;
   protected boolean isAllocated;
 
   /**

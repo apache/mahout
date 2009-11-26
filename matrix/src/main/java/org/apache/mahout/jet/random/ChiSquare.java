@@ -191,7 +191,7 @@ public class ChiSquare extends AbstractContinousDistribution {
 
   /** Returns a String representation of the receiver. */
   public String toString() {
-    return this.getClass().getName() + "(" + freedom + ")";
+    return this.getClass().getName() + '(' + freedom + ')';
   }
 
   /**

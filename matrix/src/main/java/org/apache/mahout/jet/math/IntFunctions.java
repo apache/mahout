@@ -10,8 +10,7 @@ package org.apache.mahout.jet.math;
 
 import org.apache.mahout.matrix.function.IntFunction;
 import org.apache.mahout.matrix.function.IntIntFunction;
-import org.apache.mahout.matrix.function.IntIntProcedure;
-import org.apache.mahout.matrix.function.IntProcedure;
+
 /**
  Integer Function objects to be passed to generic methods.
  Same as {@link Functions} except operating on integers.
@@ -25,13 +24,6 @@ import org.apache.mahout.matrix.function.IntProcedure;
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class IntFunctions {
-  /**
-   * Little trick to allow for "aliasing", that is, renaming this class. Writing code like <p>
-   * <tt>IntFunctions.chain(IntFunctions.plus,IntFunctions.mult(3),IntFunctions.chain(IntFunctions.square,IntFunctions.div(2)));</tt>
-   * <p> is a bit awkward, to say the least. Using the aliasing you can instead write <p> <tt>IntFunctions F =
-   * IntFunctions.intFunctions; <br> F.chain(F.plus,F.mult(3),F.chain(F.square,F.div(2)));</tt> <p>
-   */
-  //public static final IntFunctions intFunctions = new IntFunctions();
 
   /*****************************
    * <H3>Unary functions</H3>
@@ -44,43 +36,11 @@ public class IntFunctions {
     }
   };
 
-  /** Function that returns <tt>a--</tt>. */
-  public static final IntFunction dec = new IntFunction() {
-    @Override
-    public int apply(int a) {
-      return a--;
-    }
-  };
-
-  /** Function that returns <tt>(int) Arithmetic.factorial(a)</tt>. */
-  public static final IntFunction factorial = new IntFunction() {
-    @Override
-    public int apply(int a) {
-      return (int) Arithmetic.factorial(a);
-    }
-  };
-
   /** Function that returns its argument. */
   public static final IntFunction identity = new IntFunction() {
     @Override
     public int apply(int a) {
       return a;
-    }
-  };
-
-  /** Function that returns <tt>a++</tt>. */
-  public static final IntFunction inc = new IntFunction() {
-    @Override
-    public int apply(int a) {
-      return a++;
-    }
-  };
-
-  /** Function that returns <tt>-a</tt>. */
-  public static final IntFunction neg = new IntFunction() {
-    @Override
-    public int apply(int a) {
-      return -a;
     }
   };
 
@@ -145,30 +105,6 @@ public class IntFunctions {
     }
   };
 
-  /** Function that returns <tt>a == b</tt>. */
-  public static final IntIntProcedure isEqual = new IntIntProcedure() {
-    @Override
-    public boolean apply(int a, int b) {
-      return a == b;
-    }
-  };
-
-  /** Function that returns <tt>a < b</tt>. */
-  public static final IntIntProcedure isLess = new IntIntProcedure() {
-    @Override
-    public boolean apply(int a, int b) {
-      return a < b;
-    }
-  };
-
-  /** Function that returns <tt>a > b</tt>. */
-  public static final IntIntProcedure isGreater = new IntIntProcedure() {
-    @Override
-    public boolean apply(int a, int b) {
-      return a > b;
-    }
-  };
-
   /** Function that returns <tt>Math.max(a,b)</tt>. */
   public static final IntIntFunction max = new IntIntFunction() {
     @Override
@@ -190,14 +126,6 @@ public class IntFunctions {
     @Override
     public int apply(int a, int b) {
       return a - b;
-    }
-  };
-
-  /** Function that returns <tt>a % b</tt>. */
-  public static final IntIntFunction mod = new IntIntFunction() {
-    @Override
-    public int apply(int a, int b) {
-      return a % b;
     }
   };
 
@@ -233,39 +161,6 @@ public class IntFunctions {
     }
   };
 
-  /** Function that returns <tt>a << b</tt>. */
-  public static final IntIntFunction shiftLeft = new IntIntFunction() {
-    @Override
-    public int apply(int a, int b) {
-      return a << b;
-    }
-  };
-
-
-  /** Function that returns <tt>a >> b</tt>. */
-  public static final IntIntFunction shiftRightSigned = new IntIntFunction() {
-    @Override
-    public int apply(int a, int b) {
-      return a >> b;
-    }
-  };
-
-  /** Function that returns <tt>a >>> b</tt>. */
-  public static final IntIntFunction shiftRightUnsigned = new IntIntFunction() {
-    @Override
-    public int apply(int a, int b) {
-      return a >>> b;
-    }
-  };
-
-  /** Function that returns <tt>a ^ b</tt>. */
-  public static final IntIntFunction xor = new IntIntFunction() {
-    @Override
-    public int apply(int a, int b) {
-      return a ^ b;
-    }
-  };
-
   /** Makes this class non instantiable, but still let's others inherit from it. */
   protected IntFunctions() {
   }
@@ -289,38 +184,6 @@ public class IntFunctions {
       @Override
       public int apply(int a) {
         return (from <= a && a <= to) ? 1 : 0;
-      }
-    };
-  }
-
-  /**
-   * Constructs a unary function from a binary function with the first operand (argument) fixed to the given constant
-   * <tt>c</tt>. The second operand is variable (free).
-   *
-   * @param function a binary function taking operands in the form <tt>function.apply(c,var)</tt>.
-   * @return the unary function <tt>function(c,var)</tt>.
-   */
-  public static IntFunction bindArg1(final IntIntFunction function, final int c) {
-    return new IntFunction() {
-      @Override
-      public int apply(int var) {
-        return function.apply(c, var);
-      }
-    };
-  }
-
-  /**
-   * Constructs a unary function from a binary function with the second operand (argument) fixed to the given constant
-   * <tt>c</tt>. The first operand is variable (free).
-   *
-   * @param function a binary function taking operands in the form <tt>function.apply(var,c)</tt>.
-   * @return the unary function <tt>function(var,c)</tt>.
-   */
-  public static IntFunction bindArg2(final IntIntFunction function, final int c) {
-    return new IntFunction() {
-      @Override
-      public int apply(int var) {
-        return function.apply(var, c);
       }
     };
   }
@@ -417,49 +280,6 @@ public class IntFunctions {
     };
   }
 
-  /**
-   * Constructs a function that returns <tt>from<=a && a<=to</tt>. <tt>a</tt> is a variable, <tt>from</tt> and
-   * <tt>to</tt> are fixed.
-   */
-  public static IntProcedure isBetween(final int from, final int to) {
-    return new IntProcedure() {
-      @Override
-      public boolean apply(int a) {
-        return from <= a && a <= to;
-      }
-    };
-  }
-
-  /** Constructs a function that returns <tt>a == b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
-  public static IntProcedure isEqual(final int b) {
-    return new IntProcedure() {
-      @Override
-      public boolean apply(int a) {
-        return a == b;
-      }
-    };
-  }
-
-  /** Constructs a function that returns <tt>a > b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
-  public static IntProcedure isGreater(final int b) {
-    return new IntProcedure() {
-      @Override
-      public boolean apply(int a) {
-        return a > b;
-      }
-    };
-  }
-
-  /** Constructs a function that returns <tt>a < b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
-  public static IntProcedure isLess(final int b) {
-    return new IntProcedure() {
-      @Override
-      public boolean apply(int a) {
-        return a < b;
-      }
-    };
-  }
-
   /** Constructs a function that returns <tt>Math.max(a,b)</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
   public static IntFunction max(final int b) {
     return new IntFunction() {
@@ -486,16 +306,6 @@ public class IntFunctions {
       @Override
       public int apply(int a) {
         return a - b;
-      }
-    };
-  }
-
-  /** Constructs a function that returns <tt>a % b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
-  public static IntFunction mod(final int b) {
-    return new IntFunction() {
-      @Override
-      public int apply(int a) {
-        return a % b;
       }
     };
   }
@@ -554,59 +364,4 @@ public class IntFunctions {
     return new org.apache.mahout.jet.random.engine.MersenneTwister(new java.util.Date());
   }
 
-  /** Constructs a function that returns <tt>a << b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
-  public static IntFunction shiftLeft(final int b) {
-    return new IntFunction() {
-      @Override
-      public int apply(int a) {
-        return a << b;
-      }
-    };
-  }
-
-  /** Constructs a function that returns <tt>a >> b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
-  public static IntFunction shiftRightSigned(final int b) {
-    return new IntFunction() {
-      @Override
-      public int apply(int a) {
-        return a >> b;
-      }
-    };
-  }
-
-  /** Constructs a function that returns <tt>a >>> b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
-  public static IntFunction shiftRightUnsigned(final int b) {
-    return new IntFunction() {
-      @Override
-      public int apply(int a) {
-        return a >>> b;
-      }
-    };
-  }
-
-  /**
-   * Constructs a function that returns <tt>function.apply(b,a)</tt>, i.e. applies the function with the first operand
-   * as second operand and the second operand as first operand.
-   *
-   * @param function a function taking operands in the form <tt>function.apply(a,b)</tt>.
-   * @return the binary function <tt>function(b,a)</tt>.
-   */
-  public static IntIntFunction swapArgs(final IntIntFunction function) {
-    return new IntIntFunction() {
-      @Override
-      public int apply(int a, int b) {
-        return function.apply(b, a);
-      }
-    };
-  }
-
-  /** Constructs a function that returns <tt>a | b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
-  public static IntFunction xor(final int b) {
-    return new IntFunction() {
-      @Override
-      public int apply(int a) {
-        return a ^ b;
-      }
-    };
-  }
 }

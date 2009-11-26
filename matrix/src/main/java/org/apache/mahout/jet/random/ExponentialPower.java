@@ -125,7 +125,7 @@ public class ExponentialPower extends AbstractContinousDistribution {
 
   /** Returns a String representation of the receiver. */
   public String toString() {
-    return this.getClass().getName() + "(" + tau + ")";
+    return this.getClass().getName() + '(' + tau + ')';
   }
 
   /**

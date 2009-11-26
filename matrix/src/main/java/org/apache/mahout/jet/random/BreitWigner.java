@@ -97,7 +97,7 @@ public class BreitWigner extends AbstractContinousDistribution {
 
   /** Returns a String representation of the receiver. */
   public String toString() {
-    return this.getClass().getName() + "(" + mean + "," + gamma + "," + cut + ")";
+    return this.getClass().getName() + '(' + mean + ',' + gamma + ',' + cut + ')';
   }
 
   /**

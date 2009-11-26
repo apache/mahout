@@ -309,7 +309,7 @@ public class Gamma extends AbstractContinousDistribution {
 
   /** Returns a String representation of the receiver. */
   public String toString() {
-    return this.getClass().getName() + "(" + alpha + "," + lambda + ")";
+    return this.getClass().getName() + '(' + alpha + ',' + lambda + ')';
   }
 
   /**

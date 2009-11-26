@@ -207,15 +207,10 @@ public class EmpiricalWalker extends AbstractDiscreteDistribution {
   @Override
   public int nextInt() {
     double u = this.randomGenerator.raw();
-//#if KNUTH_CONVENTION
-//    c = (int)(u*(g->K));
-//#else
     u *= this.K;
     int c = (int) u;
     u -= c;
-//#endif
     double f = this.F[c];
-    // fprintf(stderr,"c,f,u: %d %.4f %f\n",c,f,u);
     if (f == 1.0) {
       return c;
     }
@@ -338,11 +333,7 @@ public class EmpiricalWalker extends AbstractDiscreteDistribution {
       b = Bigs.pop();
       this.A[s] = b;
       this.F[s] = size * E[s];
-/*
-#if DEBUG
-    fprintf(stderr,"s=%2d, A=%2d, F=%.4f\n",s,(g->A)[s],(g->F)[s]);
-#endif
-*/
+
       double d = mean - E[s];
       E[s] += d;              /* now E[s] == mean */
       E[b] -= d;
@@ -361,47 +352,10 @@ public class EmpiricalWalker extends AbstractDiscreteDistribution {
       this.A[b] = b;
       this.F[b] = 1.0;
     }
-    /* Stacks have been emptied, and A and F have been filled */
-
-
-//#if 0
-    /* if 1, then artificially set all F[k]'s to unity.  This will
-    * give wrong answers, but you'll get them faster.  But, not
-    * that much faster (I get maybe 20%); that's an upper bound
-    * on what the optimal preprocessing would give.
-    */
-/*     
-  for (k=0; k<size; ++k) {
-    F[k] = 1.0;
-  }
-//#endif
-*/
-
-//#if KNUTH_CONVENTION
-    /* For convenience, set F'[k]=(k+F[k])/K */
-    /* This saves some arithmetic in gsl_ran_discrete(); I find that
-    * it doesn't actually make much difference.
-    */
-    /*
-      for (k=0; k<size; ++k) {
-        F[k] += k;
-        F[k] /= size;
-      }
-    #endif
-    */
-    /*
-    free_stack(Bigs);
-    free_stack(Smalls);
-    free((char *)E);
-
-    return g;
-    */
-
   }
 
   /** Returns a String representation of the receiver. */
   public String toString() {
-    String interpolation = null;
-    return this.getClass().getName() + "(" + ((cdf != null) ? cdf.length : 0) + ")";
+    return this.getClass().getName() + '(' + ((cdf != null) ? cdf.length : 0) + ')';
   }
 }

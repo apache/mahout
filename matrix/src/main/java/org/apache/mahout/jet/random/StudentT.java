@@ -68,7 +68,7 @@ public class StudentT extends AbstractContinousDistribution {
   /**
    * Returns a random number from the distribution; bypasses the internal state.
    *
-   * @param a degrees of freedom.
+   * @param degreesOfFreedom a degrees of freedom.
    * @throws IllegalArgumentException if <tt>a &lt;= 0.0</tt>.
    */
   public double nextDouble(double degreesOfFreedom) {
@@ -131,7 +131,7 @@ public class StudentT extends AbstractContinousDistribution {
 
   /** Returns a String representation of the receiver. */
   public String toString() {
-    return this.getClass().getName() + "(" + freedom + ")";
+    return this.getClass().getName() + '(' + freedom + ')';
   }
 
   /**

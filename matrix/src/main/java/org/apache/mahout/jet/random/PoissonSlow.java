@@ -164,7 +164,7 @@ public class PoissonSlow extends AbstractDiscreteDistribution {
 
   /** Returns a String representation of the receiver. */
   public String toString() {
-    return this.getClass().getName() + "(" + mean + ")";
+    return this.getClass().getName() + '(' + mean + ')';
   }
 
   /**

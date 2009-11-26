@@ -11,6 +11,8 @@ package org.apache.mahout.jet.random.sampling;
 import org.apache.mahout.jet.random.Uniform;
 import org.apache.mahout.jet.random.engine.RandomEngine;
 import org.apache.mahout.matrix.list.BooleanArrayList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * Conveniently computes a stable subsequence of elements from a given input sequence;
  * Picks (samples) exactly one random element from successive blocks of <tt>weight</tt> input elements each.
@@ -24,6 +26,10 @@ import org.apache.mahout.matrix.list.BooleanArrayList;
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class WeightedRandomSampler extends org.apache.mahout.matrix.PersistentObject {
+
+  private static final Logger log = LoggerFactory.getLogger(WeightedRandomSampler.class);
+
+
   //public class BlockedRandomSampler extends Object implements java.io.Serializable {
   protected int skip;
   protected int nextTriggerPos;
@@ -64,11 +70,6 @@ public class WeightedRandomSampler extends org.apache.mahout.matrix.PersistentOb
     return copy;
   }
 
-  /**
-   * Not yet commented.
-   *
-   * @param weight int
-   */
   public int getWeight() {
     return this.weight;
   }
@@ -135,7 +136,7 @@ public class WeightedRandomSampler extends org.apache.mahout.matrix.PersistentOb
       }
     }
 
-    System.out.println("Sample = " + sample);
+    log.info("Sample = " + sample);
   }
 
   /**

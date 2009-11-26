@@ -40,7 +40,7 @@ public class VonMises extends AbstractContinousDistribution {
   private double r;
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static VonMises shared = new VonMises(1.0, makeDefaultGenerator());
+  protected static final VonMises shared = new VonMises(1.0, makeDefaultGenerator());
 
   /**
    * Constructs a Von Mises distribution. Example: k=1.0.
@@ -135,7 +135,7 @@ public class VonMises extends AbstractContinousDistribution {
 
   /** Returns a String representation of the receiver. */
   public String toString() {
-    return this.getClass().getName() + "(" + my_k + ")";
+    return this.getClass().getName() + '(' + my_k + ')';
   }
 
   /**

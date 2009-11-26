@@ -78,7 +78,7 @@ public class Exponential extends AbstractContinousDistribution {
 
   /** Returns a String representation of the receiver. */
   public String toString() {
-    return this.getClass().getName() + "(" + lambda + ")";
+    return this.getClass().getName() + '(' + lambda + ')';
   }
 
   /**

@@ -155,7 +155,6 @@ public class Descriptive {
 
       // determine run length (number of equal elements)
       while (++i < size && sortedElements[i] == element) {
-        ;
       }
 
       int runLength = i - cursor;
@@ -287,7 +286,7 @@ public class Descriptive {
    * @param from  the index of the first element within <tt>data</tt> to consider.
    * @param to    the index of the last element within <tt>data</tt> to consider. The method incorporates elements
    *              <tt>data[from], ..., data[to]</tt>.
-   * @param inOut the old values of the sums in the following format: <ul> <li><tt>sumOfPowers[0]</tt> is the old
+   * @param sumOfPowers the old values of the sums in the following format: <ul> <li><tt>sumOfPowers[0]</tt> is the old
    *              <tt>Sum(data[i]<sup>fromSumIndex</sup>)</tt>. <li><tt>sumOfPowers[1]</tt> is the old
    *              <tt>Sum(data[i]<sup>fromSumIndex+1</sup>)</tt>. <li>... <li><tt>sumOfPowers[toSumIndex-fromSumIndex]</tt>
    *              is the old <tt>Sum(data[i]<sup>toSumIndex</sup>)</tt>. </ul> If no data sequence elements have so far

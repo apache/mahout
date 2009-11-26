@@ -8,8 +8,13 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.stat.quantile;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /** Computes b and k vor various parameters. */
 class QuantileCalc {
+
+  private static final Logger log = LoggerFactory.getLogger(QuantileCalc.class);
 
   private QuantileCalc() {
   }
@@ -61,7 +66,7 @@ class QuantileCalc {
    *                     (<tt>0 &lt;= delta &lt;= 1</tt>). To avoid probabilistic answers, set <tt>delta=0.0</tt>.
    * @param quantiles    the number of quantiles to be computed (e.g. <tt>100</tt>) (<tt>quantiles &gt;= 1</tt>). If
    *                     unknown in advance, set this number large, e.g. <tt>quantiles &gt;= 10000</tt>.
-   * @param samplingRate a <tt>double[1]</tt> where the sampling rate is to be filled in.
+   * @param returnSamplingRate a <tt>double[1]</tt> where the sampling rate is to be filled in.
    * @return <tt>long[2]</tt> - <tt>long[0]</tt>=the number of buffers, <tt>long[1]</tt>=the number of elements per
    *         buffer, <tt>returnSamplingRate[0]</tt>=the required sampling rate.
    */
@@ -197,7 +202,7 @@ class QuantileCalc {
    *                     (<tt>0 &lt;= delta &lt;= 1</tt>). To avoid probabilistic answers, set <tt>delta=0.0</tt>.
    * @param quantiles    the number of quantiles to be computed (e.g. <tt>100</tt>) (<tt>quantiles &gt;= 1</tt>). If
    *                     unknown in advance, set this number large, e.g. <tt>quantiles &gt;= 10000</tt>.
-   * @param samplingRate a <tt>double[1]</tt> where the sampling rate is to be filled in.
+   * @param returnSamplingRate a <tt>double[1]</tt> where the sampling rate is to be filled in.
    * @return <tt>long[2]</tt> - <tt>long[0]</tt>=the number of buffers, <tt>long[1]</tt>=the number of elements per
    *         buffer, <tt>returnSamplingRate[0]</tt>=the required sampling rate.
    */
@@ -307,24 +312,24 @@ class QuantileCalc {
     if (!known_N) {
       sizes = new long[]{0};
     }
-    System.out.println("\n\n");
+    log.info("\n\n");
     if (known_N) {
-      System.out.println("Computing b's and k's for KNOWN N");
+      log.info("Computing b's and k's for KNOWN N");
     } else {
-      System.out.println("Computing b's and k's for UNKNOWN N");
+      log.info("Computing b's and k's for UNKNOWN N");
     }
-    System.out.println("mem [elements/1024]");
-    System.out.println("***********************************");
+    log.info("mem [elements/1024]");
+    log.info("***********************************");
 
     for (int p : quantiles) {
-      System.out.println("------------------------------");
-      System.out.println("computing for p = " + p);
+      log.info("------------------------------");
+      log.info("computing for p = " + p);
       for (long N : sizes) {
-        System.out.println("   ------------------------------");
-        System.out.println("   computing for N = " + N);
+        log.info("   ------------------------------");
+        log.info("   computing for N = " + N);
         for (double delta : deltas) {
-          System.out.println("      ------------------------------");
-          System.out.println("      computing for delta = " + delta);
+          log.info("      ------------------------------");
+          log.info("      computing for delta = " + delta);
           for (double epsilon : epsilons) {
             double[] returnSamplingRate = new double[1];
             long[] result;
@@ -336,16 +341,16 @@ class QuantileCalc {
 
             long b = result[0];
             long k = result[1];
-            System.out.print("         (e,d,N,p)=(" + epsilon + "," + delta + "," + N + "," + p + ") --> ");
-            System.out.print("(b,k,mem");
+            log.info("         (e,d,N,p)=(" + epsilon + ',' + delta + ',' + N + ',' + p + ") --> ");
+            log.info("(b,k,mem");
             if (known_N) {
-              System.out.print(",sampling");
+              log.info(",sampling");
             }
-            System.out.print(")=(" + b + "," + k + "," + (b * k / 1024));
+            log.info(")=(" + b + ',' + k + ',' + (b * k / 1024));
             if (known_N) {
-              System.out.print("," + returnSamplingRate[0]);
+              log.info("," + returnSamplingRate[0]);
             }
-            System.out.println(")");
+            log.info(")");
           }
         }
       }
@@ -461,7 +466,7 @@ class QuantileCalc {
       } //end for b
 
       if (best_b == Long.MAX_VALUE) {
-        System.out.println("Warning: Computing b and k looks like a lot of work!");
+        log.info("Warning: Computing b and k looks like a lot of work!");
         // no solution found so far. very unlikely. Anyway, try again.
         max_b *= 2;
         max_h *= 2;

@@ -27,7 +27,7 @@ package org.apache.mahout.jet.random.engine;
 public class RandomSeedGenerator extends org.apache.mahout.matrix.PersistentObject {
 
   protected int row;
-  protected int column;
+  protected final int column;
 
   /** Constructs and returns a new seed generator. */
   public RandomSeedGenerator() {
@@ -50,28 +50,10 @@ public class RandomSeedGenerator extends org.apache.mahout.matrix.PersistentObje
     this.column = column;
   }
 
-  /** Prints the generated seeds for the given input parameters. */
-  public static void main(String[] args) {
-    int row = Integer.parseInt(args[0]);
-    int column = Integer.parseInt(args[1]);
-    int size = Integer.parseInt(args[2]);
-    new RandomSeedGenerator(row, column).print(size);
-  }
 
   /** Returns the next seed. */
   public int nextSeed() {
     return RandomSeedTable.getSeedAtRowColumn(row++, column);
   }
 
-  /** Prints the next <tt>size</tt> generated seeds. */
-  public void print(int size) {
-    System.out.println("Generating " + size + " random seeds...");
-    RandomSeedGenerator copy = (RandomSeedGenerator) this.clone();
-    for (int i = 0; i < size; i++) {
-      int seed = copy.nextSeed();
-      System.out.println(seed);
-    }
-
-    System.out.println("\ndone.");
-  }
 }

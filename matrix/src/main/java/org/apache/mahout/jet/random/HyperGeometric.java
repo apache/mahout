@@ -399,7 +399,7 @@ public class HyperGeometric extends AbstractDiscreteDistribution {
 
   /** Returns a String representation of the receiver. */
   public String toString() {
-    return this.getClass().getName() + "(" + my_N + "," + my_s + "," + my_n + ")";
+    return this.getClass().getName() + '(' + my_N + ',' + my_s + ',' + my_n + ')';
   }
 
   /**

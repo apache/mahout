@@ -111,7 +111,7 @@ public class NegativeBinomial extends AbstractDiscreteDistribution {
  ******************************************************************/
 
     double x = p / (1.0 - p);
-    double p1 = p;
+    //double p1 = p;
     double y = x * this.gamma.nextDouble(n, 1.0);
     return this.poisson.nextInt(y);
   }
@@ -149,7 +149,7 @@ public class NegativeBinomial extends AbstractDiscreteDistribution {
 
   /** Returns a String representation of the receiver. */
   public String toString() {
-    return this.getClass().getName() + "(" + n + "," + p + ")";
+    return this.getClass().getName() + '(' + n + ',' + p + ')';
   }
 
   /**

@@ -471,7 +471,7 @@ public class Beta extends AbstractContinousDistribution {
 
   /** Returns a String representation of the receiver. */
   public String toString() {
-    return this.getClass().getName() + "(" + alpha + "," + beta + ")";
+    return this.getClass().getName() + '(' + alpha + ',' + beta + ')';
   }
 
   /**

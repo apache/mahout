@@ -196,7 +196,7 @@ public class Empirical extends AbstractContinousDistribution {
     if (interpolationType == LINEAR_INTERPOLATION) {
       interpolation = "LINEAR_INTERPOLATION";
     }
-    return this.getClass().getName() + "(" + ((cdf != null) ? cdf.length : 0) + "," + interpolation + ")";
+    return this.getClass().getName() + '(' + ((cdf != null) ? cdf.length : 0) + ',' + interpolation + ')';
   }
 
   /**

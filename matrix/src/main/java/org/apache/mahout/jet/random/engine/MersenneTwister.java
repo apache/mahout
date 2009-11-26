@@ -254,7 +254,7 @@ public class MersenneTwister extends RandomEngine {
       mt[i] &= 0xffffffff;
       /* for >32 bit machines */
     }
-    //System.out.println("init done");
+    //log.info("init done");
     mti = N;
 
     /*
@@ -265,7 +265,7 @@ public class MersenneTwister extends RandomEngine {
       mt[i] |= (seed & 0xffff0000) >>> 16;
       seed = 69069 * seed + 1;
      }
-    //System.out.println("init done");
+    //log.info("init done");
     mti = N;
     */
   }

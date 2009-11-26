@@ -126,7 +126,7 @@ class ExactDoubleQuantileFinder extends org.apache.mahout.matrix.PersistentObjec
    * Returns how many percent of the elements contained in the receiver are <tt>&lt;= element</tt>. Does linear
    * interpolation if the element is not contained but lies in between two contained elements.
    *
-   * @param the element to search for.
+   * @param element the element to search for.
    * @return the percentage <tt>p</tt> of elements <tt>&lt;= element</tt> (<tt>0.0 &lt;= p &lt;=1.0)</tt>.
    */
   @Override
@@ -146,15 +146,6 @@ class ExactDoubleQuantileFinder extends org.apache.mahout.matrix.PersistentObjec
   public DoubleArrayList quantileElements(DoubleArrayList phis) {
     this.sort();
     return org.apache.mahout.jet.stat.Descriptive.quantiles(this.buffer, phis);
-    /*
-    int bufferSize = (int) this.size();
-    double[] quantileElements = new double[phis.size()];
-    for (int i=phis.size(); --i >=0;) {
-      int rank=(int)Utils.epsilonCeiling(phis.get(i)*bufferSize) -1;
-      quantileElements[i]=buffer.get(rank);
-    }
-    return new DoubleArrayList(quantileElements);
-    */
   }
 
   /**
@@ -181,15 +172,7 @@ class ExactDoubleQuantileFinder extends org.apache.mahout.matrix.PersistentObjec
   public String toString() {
     String s = this.getClass().getName();
     s = s.substring(s.lastIndexOf('.') + 1);
-    return s + "(mem=" + memory() + ", size=" + size() + ")";
+    return s + "(mem=" + memory() + ", size=" + size() + ')';
   }
 
-  /**
-   * Returns the number of elements currently needed to store all contained elements. This number usually differs from
-   * the results of method <tt>size()</tt>, according to the underlying datastructure.
-   */
-  @Override
-  public long totalMemory() {
-    return memory();
-  }
 }

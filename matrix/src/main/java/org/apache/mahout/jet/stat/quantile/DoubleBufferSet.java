@@ -244,7 +244,7 @@ class DoubleBufferSet extends BufferSet {
     //  throw new IllegalArgumentException("Oops! buffer.length==0.");
     //}
 
-    //System.out.println("triggers="+cern.it.util.Arrays.toString(positions));
+    //log.info("triggers="+cern.it.util.Arrays.toString(positions));
 
     //new DoubleArrayList(outputValues).fillFromToWith(0, outputValues.length-1, 0.0f);
     //delte the above line, it is only for testing
@@ -292,9 +292,9 @@ class DoubleBufferSet extends BufferSet {
     // fill all output values with equi-distant elements.
     long counter = 0;             //current position in sorted sequence
     while (j < triggerPositionsLength) {
-      //System.out.println("\nj="+j);
-      //System.out.println("counter="+counter);
-      //System.out.println("nextHit="+nextHit);
+      //log.info("\nj="+j);
+      //log.info("counter="+counter);
+      //log.info("nextHit="+nextHit);
 
       // determine buffer with smallest value at cursor position.
       double minValue = Double.POSITIVE_INFINITY;
@@ -319,7 +319,7 @@ class DoubleBufferSet extends BufferSet {
       counter += minBuffer.weight();
       while (counter > nextHit && j < triggerPositionsLength) {
         outputValues[j++] = minValue;
-        //System.out.println("adding to output="+minValue);
+        //log.info("adding to output="+minValue);
         if (j < triggerPositionsLength) {
           nextHit = triggerPositions[j];
         }
@@ -328,7 +328,7 @@ class DoubleBufferSet extends BufferSet {
 
       // that element has now been treated, move further.
       cursors[minBufferIndex]++;
-      //System.out.println("cursors="+cern.it.util.Arrays.toString(cursors));
+      //log.info("cursors="+cern.it.util.Arrays.toString(cursors));
 
     } //end while (j<k)
 
@@ -378,7 +378,7 @@ class DoubleBufferSet extends BufferSet {
    * Returns how many percent of the elements contained in the receiver are <tt>&lt;= element</tt>. Does linear
    * interpolation if the element is not contained but lies in between two contained elements.
    *
-   * @param the element to search for.
+   * @param element the element to search for.
    * @return the percentage <tt>p</tt> of elements <tt>&lt;= element</tt> (<tt>0.0 &lt;= p &lt;=1.0)</tt>.
    */
   public double phi(double element) {
@@ -398,7 +398,7 @@ class DoubleBufferSet extends BufferSet {
     for (int b = 0; b < this.b(); b++) {
       if (!buffers[b].isEmpty()) {
         buf.append("buffer#").append(b).append(" = ");
-        buf.append(buffers[b].toString()).append("\n");
+        buf.append(buffers[b].toString()).append('\n');
       }
     }
     return buf.toString();

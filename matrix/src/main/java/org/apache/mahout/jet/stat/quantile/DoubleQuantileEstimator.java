@@ -39,8 +39,6 @@ abstract class DoubleQuantileEstimator extends org.apache.mahout.matrix.Persiste
       return;
     }
 
-    //System.out.println("adding "+value);
-
     if (currentBufferToFill == null) {
       if (bufferSet._getFirstEmptyBuffer() == null) {
         collapse();
@@ -74,12 +72,6 @@ abstract class DoubleQuantileEstimator extends org.apache.mahout.matrix.Persiste
    */
   @Override
   public void addAllOfFromTo(DoubleArrayList values, int from, int to) {
-    /*
-    // the obvious version, but we can do quicker...
-    double[] theValues = values.elements();
-    int theSize=values.size();
-    for (int i=0; i<theSize; ) add(theValues[i++]);
-    */
 
     double[] valuesToAdd = values.elements();
     int k = this.bufferSet.k();
@@ -198,7 +190,7 @@ abstract class DoubleQuantileEstimator extends org.apache.mahout.matrix.Persiste
    * Returns how many percent of the elements contained in the receiver are <tt>&lt;= element</tt>. Does linear
    * interpolation if the element is not contained but lies in between two contained elements.
    *
-   * @param the element to search for.
+   * @param element the element to search for.
    * @return the percentage <tt>p</tt> of elements <tt>&lt;= element</tt> (<tt>0.0 &lt;= p &lt;=1.0)</tt>.
    */
   @Override
@@ -223,16 +215,6 @@ abstract class DoubleQuantileEstimator extends org.apache.mahout.matrix.Persiste
    */
   @Override
   public DoubleArrayList quantileElements(DoubleArrayList phis) {
-    /*
-    //check parameter
-    DoubleArrayList sortedPhiList = phis.copy();
-    sortedPhiList.sort();
-    if (! phis.equals(sortedPhiList)) {
-      throw new IllegalArgumentException("Phis must be sorted ascending.");
-    }
-    */
-
-    //System.out.println("starting to augment missing values, if necessary...");
 
     phis = preProcessPhis(phis);
 
@@ -242,12 +224,9 @@ abstract class DoubleQuantileEstimator extends org.apache.mahout.matrix.Persiste
       triggerPositions[i] = Utils.epsilonCeiling(phis.get(i) * totalSize) - 1;
     }
 
-    //System.out.println("triggerPositions="+org.apache.mahout.matrix.Arrays.toString(triggerPositions));
-    //System.out.println("starting to determine quantiles...");
-    //System.out.println(bufferSet);
 
     DoubleBuffer[] fullBuffers = bufferSet._getFullOrPartialBuffers();
-    double[] quantileElements = new double[phis.size()];
+    //double[] quantileElements = new double[phis.size()];
 
     //do the main work: determine values at given positions in sorted sequence
     return new DoubleArrayList(bufferSet.getValuesAtPositions(fullBuffers, triggerPositions));
@@ -281,15 +260,7 @@ abstract class DoubleQuantileEstimator extends org.apache.mahout.matrix.Persiste
     int b = bufferSet.b();
     int k = bufferSet.k();
     return s + "(mem=" + memory() + ", b=" + b + ", k=" + k + ", size=" + size() + ", totalSize=" +
-        this.bufferSet.totalSize() + ")";
+        this.bufferSet.totalSize() + ')';
   }
 
-  /**
-   * Returns the number of elements currently needed to store all contained elements. This number usually differs from
-   * the results of method <tt>size()</tt>, according to the underlying datastructure.
-   */
-  @Override
-  public long totalMemory() {
-    return bufferSet.b() * bufferSet.k();
-  }
 }

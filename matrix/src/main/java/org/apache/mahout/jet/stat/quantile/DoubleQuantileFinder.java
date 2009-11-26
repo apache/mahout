@@ -79,7 +79,7 @@ public interface DoubleQuantileFinder extends java.io.Serializable {
    * Writing a wrapper is a good idea if you can think of better ways of doing interpolation. Same if you want to keep
    * min,max and other such measures.
    *
-   * @param the element to search for.
+   * @param element the element to search for.
    * @return the percentage <tt>p</tt> of elements <tt>&lt;= element</tt> (<tt>0.0 &lt;= p &lt;=1.0)</tt>.
    */
   double phi(double element);
@@ -99,9 +99,4 @@ public interface DoubleQuantileFinder extends java.io.Serializable {
    */
   long size();
 
-  /**
-   * Returns the number of elements currently needed to store all contained elements. This number usually differs from
-   * the results of method <tt>size()</tt>, according to the underlying datastructure.
-   */
-  long totalMemory();
 }

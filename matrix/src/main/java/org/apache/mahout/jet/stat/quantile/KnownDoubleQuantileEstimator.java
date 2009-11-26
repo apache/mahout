@@ -37,7 +37,6 @@ import org.apache.mahout.matrix.list.DoubleArrayList;
  * HREF="http://www-cad.eecs.berkeley.edu/~manku"> here</A>.
  *
  * @see QuantileFinderFactory
- * @see UnknownApproximateDoubleQuantileFinder
  */
 class KnownDoubleQuantileEstimator extends DoubleQuantileEstimator {
 
@@ -46,8 +45,8 @@ class KnownDoubleQuantileEstimator extends DoubleQuantileEstimator {
   protected boolean weHadMoreThanOneEmptyBuffer;
 
   protected RandomSamplingAssistant samplingAssistant;
-  protected double samplingRate; // see method sampleNextElement()
-  protected long N; // see method sampleNextElement()
+  protected final double samplingRate; // see method sampleNextElement()
+  protected final long N; // see method sampleNextElement()
 
   /**
    * Constructs an approximate quantile finder with b buffers, each having k elements.
@@ -74,7 +73,7 @@ class KnownDoubleQuantileEstimator extends DoubleQuantileEstimator {
   }
 
   /**
-   * @param infinities the number of infinities to fill.
+   * @param missingInfinities the number of infinities to fill.
    * @param buffer     the buffer into which the infinities shall be filled.
    */
   protected void addInfinities(int missingInfinities, DoubleBuffer buffer) {
@@ -216,7 +215,7 @@ class KnownDoubleQuantileEstimator extends DoubleQuantileEstimator {
         throw new IllegalStateException("Oops! illegal missing values.");
       }
 
-      //System.out.println("adding "+missingValues+" infinity elements...");
+      //log.info("adding "+missingValues+" infinity elements...");
       this.addInfinities(missingValues, partial);
 
       //determine beta (N + Infinity values = beta * N)

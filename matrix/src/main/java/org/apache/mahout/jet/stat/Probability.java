@@ -747,7 +747,6 @@ public class Probability extends org.apache.mahout.jet.math.Constants {
   public static double studentTInverse(double alpha, int size) {
     double cumProb = 1 - alpha / 2; // Cumulative probability
 
-    cumProb = 1 - alpha / 2; // Cumulative probability
     double x1 = normalInverse(cumProb);
 
     // Return inverse of normal for large size

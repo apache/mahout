@@ -9,6 +9,8 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.jet.random.sampling;
 
 import org.apache.mahout.jet.random.engine.RandomEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * Space and time efficiently computes a sorted <i>Simple Random Sample Without Replacement (SRSWOR)</i>, that is, a sorted set of <tt>n</tt> random numbers from an interval of <tt>N</tt> numbers;
  * Example: Computing <tt>n=3</tt> random numbers from the interval <tt>[1,50]</tt> may yield the sorted random set <tt>(7,13,47)</tt>.
@@ -108,6 +110,9 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class RandomSampler extends org.apache.mahout.matrix.PersistentObject {
+
+  private static final Logger log = LoggerFactory.getLogger(RandomSampler.class);
+
   //public class RandomSampler extends Object implements java.io.Serializable {
   long my_n;
   long my_N;
@@ -233,8 +238,8 @@ public class RandomSampler extends org.apache.mahout.matrix.PersistentObject {
     //long threshold;
     long chosen = -1 + low;
 
-    long negalphainv =
-        -13;  //tuning paramter, determines when to switch from method D to method A. Dependent on programming language, platform, etc.
+    //long negalphainv =
+    //    -13;  //tuning paramter, determines when to switch from method D to method A. Dependent on programming language, platform, etc.
 
     double nreal = n;
     double ninv = 1.0 / nreal;
@@ -602,8 +607,8 @@ public class RandomSampler extends org.apache.mahout.matrix.PersistentObject {
       }
     }
     timer.stop();
-    System.out.println("single run took " + timer.elapsedTime() / times);
-    System.out.println("Good bye.\n");
+    log.info("single run took " + timer.elapsedTime() / times);
+    log.info("Good bye.\n");
   }
 
   /**
@@ -618,27 +623,27 @@ public class RandomSampler extends org.apache.mahout.matrix.PersistentObject {
     long[] alphas = {-104, -52, -26, -13, -8, -4, -2};
     for (int i=0; i<alphas.length; i++) {
       negalphainv = alphas[i];
-      System.out.println("\n\nnegalphainv="+negalphainv);
+      log.info("\n\nnegalphainv="+negalphainv);
 
-      System.out.print(" n="+N/80+" --> ");
+      log.info(" n="+N/80+" --> ");
       test(N/80,N,0,chunkSize);
 
-      System.out.print(" n="+N/40+" --> ");
+      log.info(" n="+N/40+" --> ");
       test(N/40,N,0,chunkSize);
 
-      System.out.print(" n="+N/20+" --> ");
+      log.info(" n="+N/20+" --> ");
       test(N/20,N,0,chunkSize);
 
-      System.out.print(" n="+N/10+" --> ");
+      log.info(" n="+N/10+" --> ");
       test(N/10,N,0,chunkSize);
 
-      System.out.print(" n="+N/5+" --> ");
+      log.info(" n="+N/5+" --> ");
       test(N/5,N,0,chunkSize);
 
-      System.out.print(" n="+N/2+" --> ");
+      log.info(" n="+N/2+" --> ");
       test(N/2,N,0,chunkSize);
 
-      System.out.print(" n="+(N-3)+" --> ");
+      log.info(" n="+(N-3)+" --> ");
       test(N-3,N,0,chunkSize);
     }
     */

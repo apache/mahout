@@ -331,7 +331,7 @@ public class Distributions {
     double b = Math.pow(2.0, z - 1.0);
     double constant = -1.0 / (z - 1.0);
 
-    int result = 0;
+    int result;
     while (true) {
       double u = randomGenerator.raw();
       double v = randomGenerator.raw();

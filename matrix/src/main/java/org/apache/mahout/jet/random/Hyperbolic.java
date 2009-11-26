@@ -79,7 +79,7 @@ public class Hyperbolic extends AbstractContinousDistribution {
     double b = beta;
 
     if ((a_setup != a) || (b_setup != b)) { // SET-UP
-      double pl;
+      //double pl;
       double amb = a * a - b * b;
       samb = Math.sqrt(amb);                                  // -log(f(mode))
       double mode = b / samb;
@@ -152,7 +152,7 @@ public class Hyperbolic extends AbstractContinousDistribution {
 
   /** Returns a String representation of the receiver. */
   public String toString() {
-    return this.getClass().getName() + "(" + alpha + "," + beta + ")";
+    return this.getClass().getName() + '(' + alpha + ',' + beta + ')';
   }
 
   /**

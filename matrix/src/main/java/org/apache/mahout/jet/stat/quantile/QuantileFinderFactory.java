@@ -12,6 +12,8 @@ package org.apache.mahout.jet.stat.quantile;
 
 import org.apache.mahout.jet.math.Arithmetic;
 import org.apache.mahout.jet.random.engine.RandomEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * Factory constructing exact and approximate quantile finders for both known and unknown <tt>N</tt>.
  * Also see {@link hep.aida.bin.QuantileBin1D}, demonstrating how this package can be used.
@@ -92,6 +94,8 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
 @Deprecated
 public class QuantileFinderFactory {
 
+  private static final Logger log = LoggerFactory.getLogger(QuantileFinderFactory.class);
+
   /** Make this class non instantiable. Let still allow others to inherit. */
   private QuantileFinderFactory() {
   }
@@ -110,7 +114,7 @@ public class QuantileFinderFactory {
    *                     (<tt>0 &lt;= delta &lt;= 1</tt>). To avoid probabilistic answers, set <tt>delta=0.0</tt>.
    * @param quantiles    the number of quantiles to be computed (e.g. <tt>100</tt>) (<tt>quantiles &gt;= 1</tt>). If
    *                     unknown in advance, set this number large, e.g. <tt>quantiles &gt;= 10000</tt>.
-   * @param samplingRate output parameter, a <tt>double[1]</tt> where the sampling rate is to be filled in.
+   * @param returnSamplingRate output parameter, a <tt>double[1]</tt> where the sampling rate is to be filled in.
    * @return <tt>long[2]</tt> - <tt>long[0]</tt>=the number of buffers, <tt>long[1]</tt>=the number of elements per
    *         buffer, <tt>returnSamplingRate[0]</tt>=the required sampling rate.
    */
@@ -253,7 +257,7 @@ public class QuantileFinderFactory {
    *                     (<tt>0 &lt;= delta &lt;= 1</tt>). To avoid probabilistic answers, set <tt>delta=0.0</tt>.
    * @param quantiles    the number of quantiles to be computed (e.g. <tt>100</tt>) (<tt>quantiles &gt;= 1</tt>). If
    *                     unknown in advance, set this number large, e.g. <tt>quantiles &gt;= 10000</tt>.
-   * @param samplingRate a <tt>double[1]</tt> where the sampling rate is to be filled in.
+   * @param returnSamplingRate a <tt>double[1]</tt> where the sampling rate is to be filled in.
    * @return <tt>long[2]</tt> - <tt>long[0]</tt>=the number of buffers, <tt>long[1]</tt>=the number of elements per
    *         buffer, <tt>returnSamplingRate[0]</tt>=the required sampling rate.
    */
@@ -376,7 +380,7 @@ public class QuantileFinderFactory {
       N = quantiles;
     }
 
-    KnownDoubleQuantileEstimator finder;
+    //KnownDoubleQuantileEstimator finder;
     if (known_N) {
       double[] samplingRate = new double[1];
       long[] resultKnown = known_N_compute_B_and_K(N, epsilon, delta, quantiles, samplingRate);
@@ -614,7 +618,7 @@ public class QuantileFinderFactory {
       } //end for b
 
       if (best_b == Long.MAX_VALUE) {
-        System.out.println("Warning: Computing b and k looks like a lot of work!");
+        log.warn("Computing b and k looks like a lot of work!");
         // no solution found so far. very unlikely. Anyway, try again.
         max_b *= 2;
         max_h *= 2;

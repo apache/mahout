@@ -128,10 +128,10 @@ public class Poisson extends AbstractDiscreteDistribution {
     RandomEngine gen = this.randomGenerator;
     double my = theMean;
 
-    double t, g, my_k;
+    //double t, g, my_k;
 
-    double gx, gy, px, py, e, x, xx, delta, v;
-    int sign;
+    //double gx, gy, px, py, e, x, xx, delta, v;
+    //int sign;
 
     //static double p,q,p0,pp[36];
     //static long ll,m;
@@ -347,7 +347,7 @@ public class Poisson extends AbstractDiscreteDistribution {
 
   /** Returns a String representation of the receiver. */
   public String toString() {
-    return this.getClass().getName() + "(" + mean + ")";
+    return this.getClass().getName() + '(' + mean + ')';
   }
 
   /**

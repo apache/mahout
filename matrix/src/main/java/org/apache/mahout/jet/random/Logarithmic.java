@@ -39,7 +39,7 @@ public class Logarithmic extends AbstractContinousDistribution {
   private double t, h, a_prev = -1.0;
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static Logarithmic shared = new Logarithmic(0.5, makeDefaultGenerator());
+  protected static final Logarithmic shared = new Logarithmic(0.5, makeDefaultGenerator());
 
   /** Constructs a Logarithmic distribution. */
   public Logarithmic(double p, RandomEngine randomGenerator) {
@@ -104,7 +104,7 @@ public class Logarithmic extends AbstractContinousDistribution {
       k = 1;
       double p = t;
       while (u > p) {
-        //System.out.println("u="+u+", p="+p);
+        //log.info("u="+u+", p="+p);
         u -= p;
         k++;
         p *= a * (k - 1.0) / (double) k;
@@ -142,7 +142,7 @@ public class Logarithmic extends AbstractContinousDistribution {
 
   /** Returns a String representation of the receiver. */
   public String toString() {
-    return this.getClass().getName() + "(" + my_p + ")";
+    return this.getClass().getName() + '(' + my_p + ')';
   }
 
   /**

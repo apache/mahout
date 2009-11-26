@@ -314,7 +314,7 @@ public class Binomial extends AbstractDiscreteDistribution {
 
   /** Returns a String representation of the receiver. */
   public String toString() {
-    return this.getClass().getName() + "(" + n + "," + p + ")";
+    return this.getClass().getName() + '(' + n + ',' + p + ')';
   }
 
   /**

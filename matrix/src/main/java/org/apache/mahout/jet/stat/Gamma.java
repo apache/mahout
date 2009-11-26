@@ -92,7 +92,7 @@ public class Gamma extends org.apache.mahout.jet.math.Constants {
         if (p == q) {
           throw new ArithmeticException("gamma: overflow");
         }
-        int i = (int) p;
+        //int i = (int) p;
         z = q - p;
         if (z > 0.5) {
           p += 1.0;

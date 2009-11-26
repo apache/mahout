@@ -13,6 +13,8 @@ import org.apache.mahout.jet.random.sampling.WeightedRandomSampler;
 import org.apache.mahout.matrix.list.DoubleArrayList;
 import org.apache.mahout.matrix.list.ObjectArrayList;
 
+import java.util.Comparator;
+
 /**
  * Approximate quantile finding algorithm for unknown <tt>N</tt> requiring only one pass and little main memory;
  * computes quantiles over a sequence of <tt>double</tt> elements. This algorithm requires at most two times the memory
@@ -37,14 +39,13 @@ import org.apache.mahout.matrix.list.ObjectArrayList;
  * Conf. on Management of Data, Paper (soon) available <A HREF="http://www-cad.eecs.berkeley.edu/~manku"> here</A>.
  *
  * @see QuantileFinderFactory
- * @see KnownApproximateDoubleQuantileFinder
  */
 class UnknownDoubleQuantileEstimator extends DoubleQuantileEstimator {
 
   protected int currentTreeHeight;
   protected final int treeHeightStartingSampling;
   protected WeightedRandomSampler sampler;
-  protected double precomputeEpsilon;
+  protected final double precomputeEpsilon;
 
   /**
    * Constructs an approximate quantile finder with b buffers, each having k elements.
@@ -142,13 +143,6 @@ class UnknownDoubleQuantileEstimator extends DoubleQuantileEstimator {
     }
 
     int quantilesToPrecompute = (int) Utils.epsilonCeiling(1.0 / precomputeEpsilon);
-    /*
-    if (phis.size() > quantilesToPrecompute) {
-      // illegal use case!
-      // we compute results, but loose explicit approximation guarantees.
-      return super.quantileElements(phis);
-    }
-    */
 
     //select that quantile from the precomputed set that corresponds to a position closest to phi.
     phis = phis.copy();
@@ -173,7 +167,7 @@ class UnknownDoubleQuantileEstimator extends DoubleQuantileEstimator {
   /** To do. This could faster be done without sorting (min and second min). */
   protected static void sortAscendingByLevel(DoubleBuffer[] fullBuffers) {
     new ObjectArrayList(fullBuffers).quickSortFromTo(0, fullBuffers.length - 1,
-        new java.util.Comparator() {
+        new Comparator<Object>() {
           @Override
           public int compare(Object o1, Object o2) {
             int l1 = ((Buffer) o1).level();
@@ -189,6 +183,6 @@ class UnknownDoubleQuantileEstimator extends DoubleQuantileEstimator {
     StringBuffer buf = new StringBuffer(super.toString());
     buf.setLength(buf.length() - 1);
     return buf + ", h=" + currentTreeHeight + ", hStartSampling=" + treeHeightStartingSampling +
-        ", precomputeEpsilon=" + precomputeEpsilon + ")";
+        ", precomputeEpsilon=" + precomputeEpsilon + ')';
   }
 }

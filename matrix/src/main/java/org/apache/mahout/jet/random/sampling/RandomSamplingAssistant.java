@@ -9,7 +9,6 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.jet.random.sampling;
 
 import org.apache.mahout.jet.random.engine.RandomEngine;
-import org.apache.mahout.matrix.list.BooleanArrayList;
 /**
  * Conveniently computes a stable <i>Simple Random Sample Without Replacement (SRSWOR)</i> subsequence of <tt>n</tt> elements from a given input sequence of <tt>N</tt> elements;
  * Example: Computing a sublist of <tt>n=3</tt> random elements from a list <tt>(1,...,50)</tt> may yield the sublist <tt>(7,13,47)</tt>.
@@ -25,7 +24,7 @@ import org.apache.mahout.matrix.list.BooleanArrayList;
 public class RandomSamplingAssistant extends org.apache.mahout.matrix.PersistentObject {
   //public class RandomSamplingAssistant extends Object implements java.io.Serializable {
   protected RandomSampler sampler;
-  protected long[] buffer;
+  protected final long[] buffer;
   protected int bufferPosition;
 
   protected long skip;
@@ -75,14 +74,6 @@ public class RandomSamplingAssistant extends org.apache.mahout.matrix.Persistent
     return this.sampler.my_RandomGenerator;
   }
 
-  /** Tests random sampling. */
-  public static void main(String[] args) {
-    long n = Long.parseLong(args[0]);
-    long N = Long.parseLong(args[1]);
-    //test(n,N);
-    testArraySampling((int) n, (int) N);
-  }
-
   /** Just shows how this class can be used; samples n elements from and int[] array. */
   public static int[] sampleArray(int n, int[] elements) {
     RandomSamplingAssistant assistant = new RandomSamplingAssistant(n, elements.length, null);
@@ -122,85 +113,4 @@ public class RandomSamplingAssistant extends org.apache.mahout.matrix.Persistent
     return true;
   }
 
-  /** Tests the methods of this class. To do benchmarking, comment the lines printing stuff to the console. */
-  public static void test(long n, long N) {
-    RandomSamplingAssistant assistant = new RandomSamplingAssistant(n, N, null);
-
-    org.apache.mahout.matrix.list.LongArrayList sample = new org.apache.mahout.matrix.list.LongArrayList((int) n);
-    org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
-
-    for (long i = 0; i < N; i++) {
-      if (assistant.sampleNextElement()) {
-        sample.add(i);
-      }
-
-    }
-
-    timer.stop().display();
-    System.out.println("sample=" + sample);
-    System.out.println("Good bye.\n");
-  }
-
-  /** Tests the methods of this class. To do benchmarking, comment the lines printing stuff to the console. */
-  public static void testArraySampling(int n, int N) {
-    int[] elements = new int[N];
-    for (int i = 0; i < N; i++) {
-      elements[i] = i;
-    }
-
-    org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
-
-    int[] sample = sampleArray(n, elements);
-
-    timer.stop().display();
-
-    /*
-    System.out.print("\nElements = [");
-    for (int i=0; i<N-1; i++) System.out.print(elements[i]+", ");
-    System.out.print(elements[N-1]);
-    System.out.println("]");
-
-
-    System.out.print("\nSample = [");
-    for (int i=0; i<n-1; i++) System.out.print(sample[i]+", ");
-    System.out.print(sample[n-1]);
-    System.out.println("]");
-    */
-
-    System.out.println("Good bye.\n");
-  }
-
-  /**
-   * Returns whether the next elements of the input sequence shall be sampled (picked) or not. one is chosen from the
-   * first block, one from the second, ..., one from the last block.
-   *
-   * @param acceptList a bitvector which will be filled with <tt>true</tt> where sampling shall occur and <tt>false</tt>
-   *                   where it shall not occur.
-   */
-  private void xsampleNextElements(BooleanArrayList acceptList) {
-    // manually inlined
-    int length = acceptList.size();
-    boolean[] accept = acceptList.elements();
-    for (int i = 0; i < length; i++) {
-      if (n == 0) {
-        accept[i] = false;
-        continue;
-      } //reject
-      if (skip-- > 0) {
-        accept[i] = false;
-        continue;
-      } //reject
-
-      //accept
-      n--;
-      if (bufferPosition < buffer.length - 1) {
-        skip = buffer[bufferPosition + 1] - buffer[bufferPosition++];
-        --skip;
-      } else {
-        fetchNextBlock();
-      }
-
-      accept[i] = true;
-    }
-  }
 }

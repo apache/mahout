@@ -102,7 +102,6 @@ class DoubleBuffer extends Buffer {
    * element. Ranks are of the form {1,2,...size()}. If no element is <= element, then the rank is zero. If the element
    * lies in between two contained elements, then uses linear interpolation.
    *
-   * @param list    org.apache.mahout.matrix.list.DoubleArrayList
    * @param element the element to search for
    * @return the rank of the element.
    */

@@ -13,8 +13,6 @@ import org.apache.mahout.matrix.function.DoubleDoubleProcedure;
 import org.apache.mahout.matrix.function.DoubleFunction;
 import org.apache.mahout.matrix.function.DoubleProcedure;
 
-//import com.imsl.math.Sfun;
-
 /**
  * Function objects to be passed to generic methods. Contains the functions of {@link java.lang.Math} as function
  * objects, as well as a few more basic functions. <p>Function objects conveniently allow to express arbitrary functions
@@ -58,14 +56,14 @@ import org.apache.mahout.matrix.function.DoubleProcedure;
  * double a = 0.5;
  * double b = 0.2;
  * double v = Math.sin(a) + Math.pow(Math.cos(b),2);
- * System.out.println(v);
+ * log.info(v);
  * Functions F = Functions.functions;
  * DoubleDoubleFunction f = F.chain(F.plus,F.sin,F.chain(F.square,F.cos));
- * System.out.println(f.apply(a,b));
+ * log.info(f.apply(a,b));
  * DoubleDoubleFunction g = new DoubleDoubleFunction() {
  * &nbsp;&nbsp;&nbsp;public double apply(double a, double b) { return Math.sin(a) + Math.pow(Math.cos(b),2); }
  * };
- * System.out.println(g.apply(a,b));
+ * log.info(g.apply(a,b));
  * </pre>
  * </td> </table>
  *
@@ -96,13 +94,6 @@ import org.apache.mahout.matrix.function.DoubleProcedure;
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class Functions {
-  /**
-   * Little trick to allow for "aliasing", that is, renaming this class. Writing code like <p>
-   * <tt>Functions.chain(Functions.plus,Functions.sin,Functions.chain(Functions.square,Functions.cos));</tt> <p> is a
-   * bit awkward, to say the least. Using the aliasing you can instead write <p> <tt>Functions F = Functions.functions;
-   * <br> F.chain(F.plus,F.sin,F.chain(F.square,F.cos));</tt>
-   */
-  //public static final Functions functions = new Functions();
 
   /*****************************
    * <H3>Unary functions</H3>
@@ -123,15 +114,6 @@ public class Functions {
     }
   };
 
-  /**
-   * Function that returns <tt>com.imsl.math.Sfun.acosh(a)</tt>.
-   */
-  /*
-  public static final DoubleFunction acosh = new DoubleFunction() {
-    public final double apply(double a) { return Sfun.acosh(a); }
-  };
-  */
-
   /** Function that returns <tt>Math.asin(a)</tt>. */
   public static final DoubleFunction asin = new DoubleFunction() {
     @Override
@@ -140,15 +122,6 @@ public class Functions {
     }
   };
 
-  /**
-   * Function that returns <tt>com.imsl.math.Sfun.asinh(a)</tt>.
-   */
-  /*
-  public static final DoubleFunction asinh = new DoubleFunction() {
-    public final double apply(double a) { return Sfun.asinh(a); }
-  };
-  */
-
   /** Function that returns <tt>Math.atan(a)</tt>. */
   public static final DoubleFunction atan = new DoubleFunction() {
     @Override
@@ -156,15 +129,6 @@ public class Functions {
       return Math.atan(a);
     }
   };
-
-  /**
-   * Function that returns <tt>com.imsl.math.Sfun.atanh(a)</tt>.
-   */
-  /*
-  public static final DoubleFunction atanh = new DoubleFunction() {
-    public final double apply(double a) { return Sfun.atanh(a); }
-  };
-  */
 
   /** Function that returns <tt>Math.ceil(a)</tt>. */
   public static final DoubleFunction ceil = new DoubleFunction() {
@@ -182,42 +146,6 @@ public class Functions {
     }
   };
 
-  /**
-   * Function that returns <tt>com.imsl.math.Sfun.cosh(a)</tt>.
-   */
-  /*
-  public static final DoubleFunction cosh = new DoubleFunction() {
-    public final double apply(double a) { return Sfun.cosh(a); }
-  };
-  */
-
-  /**
-   * Function that returns <tt>com.imsl.math.Sfun.cot(a)</tt>.
-   */
-  /*
-  public static final DoubleFunction cot = new DoubleFunction() {
-    public final double apply(double a) { return Sfun.cot(a); }
-  };
-  */
-
-  /**
-   * Function that returns <tt>com.imsl.math.Sfun.erf(a)</tt>.
-   */
-  /*
-  public static final DoubleFunction erf = new DoubleFunction() {
-    public final double apply(double a) { return Sfun.erf(a); }
-  };
-  */
-
-  /**
-   * Function that returns <tt>com.imsl.math.Sfun.erfc(a)</tt>.
-   */
-  /*
-  public static final DoubleFunction erfc = new DoubleFunction() {
-    public final double apply(double a) { return Sfun.erfc(a); }
-  };
-  */
-
   /** Function that returns <tt>Math.exp(a)</tt>. */
   public static final DoubleFunction exp = new DoubleFunction() {
     @Override
@@ -233,15 +161,6 @@ public class Functions {
       return Math.floor(a);
     }
   };
-
-  /**
-   * Function that returns <tt>com.imsl.math.Sfun.gamma(a)</tt>.
-   */
-  /*
-  public static final DoubleFunction gamma = new DoubleFunction() {
-    public final double apply(double a) { return Sfun.gamma(a); }
-  };
-  */
 
   /** Function that returns its argument. */
   public static final DoubleFunction identity = new DoubleFunction() {
@@ -260,40 +179,20 @@ public class Functions {
   };
 
   /** Function that returns <tt>Math.log(a)</tt>. */
-  public static final DoubleFunction log = new DoubleFunction() {
+  public static final DoubleFunction logarithm = new DoubleFunction() {
     @Override
     public double apply(double a) {
       return Math.log(a);
     }
   };
 
-  /**
-   * Function that returns <tt>com.imsl.math.Sfun.log10(a)</tt>.
-   */
-  /*
-  public static final DoubleFunction log10 = new DoubleFunction() {
-    public final double apply(double a) { return Sfun.log10(a); }
-  };
-  */
-
   /** Function that returns <tt>Math.log(a) / Math.log(2)</tt>. */
   public static final DoubleFunction log2 = new DoubleFunction() {
-    // 1.0 / Math.log(2) == 1.4426950408889634
-
     @Override
     public double apply(double a) {
       return Math.log(a) * 1.4426950408889634;
     }
   };
-
-  /**
-   * Function that returns <tt>com.imsl.math.Sfun.logGamma(a)</tt>.
-   */
-  /*
-  public static final DoubleFunction logGamma = new DoubleFunction() {
-    public final double apply(double a) { return Sfun.logGamma(a); }
-  };
-  */
 
   /** Function that returns <tt>-a</tt>. */
   public static final DoubleFunction neg = new DoubleFunction() {
@@ -327,15 +226,6 @@ public class Functions {
     }
   };
 
-  /**
-   * Function that returns <tt>com.imsl.math.Sfun.sinh(a)</tt>.
-   */
-  /*
-  public static final DoubleFunction sinh = new DoubleFunction() {
-    public final double apply(double a) { return Sfun.sinh(a); }
-  };
-  */
-
   /** Function that returns <tt>Math.sqrt(a)</tt>. */
   public static final DoubleFunction sqrt = new DoubleFunction() {
     @Override
@@ -359,33 +249,6 @@ public class Functions {
       return Math.tan(a);
     }
   };
-
-  /**
-   * Function that returns <tt>com.imsl.math.Sfun.tanh(a)</tt>.
-   */
-  /*
-  public static final DoubleFunction tanh = new DoubleFunction() {
-    public final double apply(double a) { return Sfun.tanh(a); }
-  };
-  */
-
-  /**
-   * Function that returns <tt>Math.toDegrees(a)</tt>.
-   */
-  /*
-  public static final DoubleFunction toDegrees = new DoubleFunction() {
-    public final double apply(double a) { return Math.toDegrees(a); }
-  };
-  */
-
-  /**
-   * Function that returns <tt>Math.toRadians(a)</tt>.
-   */
-  /*
-  public static final DoubleFunction toRadians = new DoubleFunction() {
-    public final double apply(double a) { return Math.toRadians(a); }
-  };    
-  */
 
 
   /*****************************
@@ -676,107 +539,6 @@ public class Functions {
     };
   }
 
-  /** Demonstrates usage of this class. */
-  public static void demo1() {
-    double a = 0.5;
-    double b = 0.2;
-    double v = Math.sin(a) + Math.pow(Math.cos(b), 2);
-    System.out.println(v);
-    DoubleDoubleFunction f = chain(plus, sin, chain(square, cos));
-    //DoubleDoubleFunction f = F.chain(plus,sin,F.chain(square,cos));
-    System.out.println(f.apply(a, b));
-    DoubleDoubleFunction g = new DoubleDoubleFunction() {
-      @Override
-      public double apply(double x, double y) {
-        return Math.sin(x) + Math.pow(Math.cos(y), 2);
-      }
-    };
-    System.out.println(g.apply(a, b));
-    DoubleFunction m = plus(3);
-    DoubleFunction n = plus(4);
-    System.out.println(m.apply(0));
-    System.out.println(n.apply(0));
-  }
-
-  /** Benchmarks and demonstrates usage of trivial and complex functions. */
-  public static void demo2(int size) {
-    System.out.println("\n\n");
-    double a = 0.0;
-    double b = 0.0;
-    double v = Math.abs(Math.sin(a) + Math.pow(Math.cos(b), 2));
-    //double v = Math.sin(a) + Math.pow(Math.cos(b),2);
-    //double v = a + b;
-    System.out.println(v);
-
-    //DoubleDoubleFunction f = F.chain(F.plus,F.identity,F.identity);
-    DoubleDoubleFunction f = chain(abs, chain(plus, sin, chain(square, cos)));
-    //DoubleDoubleFunction f = F.chain(F.plus,F.sin,F.chain(F.square,F.cos));
-    //DoubleDoubleFunction f = F.plus;
-
-    System.out.println(f.apply(a, b));
-    DoubleDoubleFunction g = new DoubleDoubleFunction() {
-      @Override
-      public double apply(double x, double y) {
-        return Math.abs(Math.sin(x) + Math.pow(Math.cos(y), 2));
-      }
-      //public final double apply(double x, double y) { return x+y; }
-    };
-    System.out.println(g.apply(a, b));
-
-    // emptyLoop
-    org.apache.mahout.matrix.Timer emptyLoop = new org.apache.mahout.matrix.Timer().start();
-    a = 0;
-    b = 0;
-    double sum = 0;
-    for (int i = size; --i >= 0;) {
-      sum += a;
-      a++;
-      b++;
-    }
-    emptyLoop.stop().display();
-    System.out.println("empty sum=" + sum);
-
-    org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
-    a = 0;
-    b = 0;
-    sum = 0;
-    for (int i = size; --i >= 0;) {
-      sum += Math.abs(Math.sin(a) + Math.pow(Math.cos(b), 2));
-      //sum += a + b;
-      a++;
-      b++;
-    }
-    timer.stop().display();
-    System.out.println("evals / sec = " + size / timer.minus(emptyLoop).seconds());
-    System.out.println("sum=" + sum);
-
-    timer.reset().start();
-    a = 0;
-    b = 0;
-    sum = 0;
-    for (int i = size; --i >= 0;) {
-      sum += f.apply(a, b);
-      a++;
-      b++;
-    }
-    timer.stop().display();
-    System.out.println("evals / sec = " + size / timer.minus(emptyLoop).seconds());
-    System.out.println("sum=" + sum);
-
-    timer.reset().start();
-    a = 0;
-    b = 0;
-    sum = 0;
-    for (int i = size; --i >= 0;) {
-      sum += g.apply(a, b);
-      a++;
-      b++;
-    }
-    timer.stop().display();
-    System.out.println("evals / sec = " + size / timer.minus(emptyLoop).seconds());
-    System.out.println("sum=" + sum);
-
-  }
 
   /** Constructs a function that returns <tt>a / b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
   public static DoubleFunction div(double b) {
@@ -882,13 +644,6 @@ public class Functions {
         return Math.log(a) * logInv;
       }
     };
-  }
-
-  /** Tests various methods of this class. */
-  protected static void main(String[] args) {
-    int size = Integer.parseInt(args[0]);
-    demo2(size);
-    //demo1();
   }
 
   /** Constructs a function that returns <tt>Math.max(a,b)</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */

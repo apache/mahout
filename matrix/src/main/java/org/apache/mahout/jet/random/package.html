@@ -27,7 +27,7 @@ for (int i=0; i < size; i++) numbers.add(dist.nextDouble());
 
 hep.aida.bin.DynamicBin1D bin = new hep.aida.bin.DynamicBin1D();
 bin.addAllOf(numbers);
-System.out.println(bin);
+log.info(bin);
 
 Will print something like
 

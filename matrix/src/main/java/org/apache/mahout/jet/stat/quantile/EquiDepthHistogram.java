@@ -28,7 +28,7 @@ package org.apache.mahout.jet.stat.quantile;
 @Deprecated
 public class EquiDepthHistogram extends org.apache.mahout.matrix.PersistentObject {
 
-  protected float[] binBoundaries;
+  protected final float[] binBoundaries;
 
   /**
    * Constructs an equi-depth histogram with the given quantile elements. Quantile elements must be sorted ascending and
@@ -91,7 +91,7 @@ public class EquiDepthHistogram extends org.apache.mahout.matrix.PersistentObjec
    * Returns how many percent of the elements contained in the receiver are <tt>&lt;= element</tt>. Does linear
    * interpolation.
    *
-   * @param the element to search for.
+   * @param element the element to search for.
    */
   public double phi(float element) {
     int size = binBoundaries.length;
@@ -132,11 +132,4 @@ public class EquiDepthHistogram extends org.apache.mahout.matrix.PersistentObjec
     return binBoundaries[binIndex];
   }
 
-  /** Not yet commented. */
-  public static void test(float element) {
-    float[] quantileElements =
-        {50.0f, 100.0f, 200.0f, 300.0f, 1400.0f, 1500.0f, 1600.0f, 1700.0f, 1800.0f, 1900.0f, 2000.0f};
-    EquiDepthHistogram histo = new EquiDepthHistogram(quantileElements);
-    System.out.println("elem=" + element + ", phi=" + histo.phi(element));
-  }
 }
