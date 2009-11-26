@@ -360,9 +360,9 @@ public class BitVector extends org.apache.mahout.matrix.PersistentObject {
       return true;
     }
     checkRangeFromTo(from, to, nbits);
-    //System.out.println("\n");
-    //System.out.println(this);
-    //System.out.println("from="+from+", to="+to+", bit="+state);
+    //log.info("\n");
+    //log.info(this);
+    //log.info("from="+from+", to="+to+", bit="+state);
 
     // Cache some vars for speed.
     long[] theBits = this.bits;
@@ -378,7 +378,7 @@ public class BitVector extends org.apache.mahout.matrix.PersistentObject {
     int partialWidth;
     if (bitIndex > 0) { // There exists a leading partial unit.
       partialWidth = Math.min(to - from + 1, bitsPerUnit - bitIndex);
-      //System.out.println("partialWidth1="+partialWidth);
+      //log.info("partialWidth1="+partialWidth);
       for (; --partialWidth >= 0; i++) {
         if (QuickBitVector.get(theBits, i) == state) {
           if (!procedure.apply(i)) {
@@ -401,7 +401,7 @@ public class BitVector extends org.apache.mahout.matrix.PersistentObject {
     } else {
       partialWidth = 0;
     }
-    //System.out.println("partialWidth2="+partialWidth);
+    //log.info("partialWidth2="+partialWidth);
 
     // Iterate over all full units, if any.
     // (It does not matter that iterating over partial units is a little bit slow,
@@ -413,7 +413,7 @@ public class BitVector extends org.apache.mahout.matrix.PersistentObject {
       comparator = ~0L;
     } // all 64 bits set
 
-    //System.out.println("fromUnit="+fromUnit+", toUnit="+toUnit);
+    //log.info("fromUnit="+fromUnit+", toUnit="+toUnit);
     for (int unit = fromUnit; unit <= toUnit; unit++) {
       long val = theBits[unit];
       if (val != comparator) {
@@ -441,7 +441,7 @@ public class BitVector extends org.apache.mahout.matrix.PersistentObject {
       }
     }
 
-    //System.out.println("trail with i="+i);
+    //log.info("trail with i="+i);
 
     // Iterate over trailing partial unit, if any.
     for (; --partialWidth >= 0; i++) {

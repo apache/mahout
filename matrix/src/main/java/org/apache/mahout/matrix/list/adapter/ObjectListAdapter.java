@@ -20,7 +20,7 @@ import java.util.AbstractList;
 @Deprecated
 public class ObjectListAdapter extends AbstractList<Object> {
 
-  protected ObjectArrayList content;
+  protected final ObjectArrayList content;
 
   /** Constructs a list backed by the specified content list. */
   public ObjectListAdapter(ObjectArrayList content) {

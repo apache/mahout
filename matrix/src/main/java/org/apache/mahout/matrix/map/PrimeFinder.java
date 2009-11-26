@@ -1,5 +1,10 @@
 package org.apache.mahout.matrix.map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
+
 /**
  * Not of interest for users; only for implementors of hashtables.
  * Used to keep hash table capacities prime numbers.
@@ -18,6 +23,8 @@ package org.apache.mahout.matrix.map;
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class PrimeFinder {
+
+  private static final Logger log = LoggerFactory.getLogger(PrimeFinder.class);
 
   /** The largest prime this class can generate; currently equal to <tt>Integer.MAX_VALUE</tt>. */
   public static final int largestPrime = Integer.MAX_VALUE; //yes, it is prime.
@@ -94,24 +101,6 @@ public class PrimeFinder {
       379, 761, 1523, 3049, 6101, 12203, 24407, 48817, 97649, 195311, 390647, 781301, 1562611,
       3125257, 6250537, 12501169, 25002389, 50004791, 100009607, 200019221, 400038451, 800076929,
       1600153859
-      /*
-      // some more chunks for the low range [3..1000]
-      //chunk #11
-      13,29,59,127,257,521,1049,2099,4201,8419,16843,33703,67409,134837,269683,
-      539389,1078787,2157587,4315183,8630387,17260781,34521589,69043189,138086407,
-      276172823,552345671,1104691373,
-
-      //chunk #12
-      19,41,83,167,337,677,
-      //1361,2729,5471,10949,21911,43853,87719,175447,350899,
-      //701819,1403641,2807303,5614657,11229331,22458671,44917381,89834777,179669557,
-      //359339171,718678369,1437356741,
-
-      //chunk #13
-      53,107,223,449,907,1823,3659,7321,14653,29311,58631,117269,
-      234539,469099,938207,1876417,3752839,7505681,15011389,30022781,
-      60045577,120091177,240182359,480364727,960729461,1921458943
-      */
   };
 
 
@@ -119,8 +108,7 @@ public class PrimeFinder {
     // The above prime numbers are formatted for human readability.
     // To find numbers fast, we sort them once and for all.
 
-    java.util.Arrays.sort(primeCapacities);
-    //new org.apache.mahout.matrix.list.IntArrayList(primeCapacities).mergeSort(); // for debug only, TODO
+    Arrays.sort(primeCapacities);
   }
 
   /** Makes this class non instantiable, but still let's others inherit from it. */
@@ -158,7 +146,7 @@ public class PrimeFinder {
     for (int i = 0; i < primeCapacities.length - 1; i++) {
       if (primeCapacities[i] >= primeCapacities[i + 1]) {
         throw new IllegalStateException(
-            "primes are unsorted or contain duplicates; detected at " + i + "@" + primeCapacities[i]);
+            "primes are unsorted or contain duplicates; detected at " + i + '@' + primeCapacities[i]);
       }
     }
 
@@ -167,12 +155,12 @@ public class PrimeFinder {
 
     for (int i = from; i <= to; i++) {
       int primeCapacity = nextPrime(i);
-      //System.out.println(primeCapacity);
+      //log.info(primeCapacity);
       double deviation = (primeCapacity - i) / (double) i;
 
       if (deviation > maxDeviation) {
         maxDeviation = deviation;
-        System.out.println("new maxdev @" + i + "@dev=" + maxDeviation);
+        log.info("new maxdev @" + i + "@dev=" + maxDeviation);
       }
 
       accDeviation += deviation;
@@ -180,8 +168,8 @@ public class PrimeFinder {
     long width = 1 + (long) to - (long) from;
 
     double meanDeviation = accDeviation / width;
-    System.out.println("Statistics for [" + from + "," + to + "] are as follows");
-    System.out.println("meanDeviation = " + (float) meanDeviation * 100 + " %");
-    System.out.println("maxDeviation = " + (float) maxDeviation * 100 + " %");
+    log.info("Statistics for [" + from + ',' + to + "] are as follows");
+    log.info("meanDeviation = " + (float) meanDeviation * 100 + " %");
+    log.info("maxDeviation = " + (float) maxDeviation * 100 + " %");
   }
 }

@@ -838,9 +838,9 @@ public class ObjectArrayList extends AbstractList<Object[]> {
     int diff = length;
     int theLast = from - 1;
 
-    //System.out.println("from="+from);
-    //System.out.println("to="+to);
-    //System.out.println("diff="+diff);
+    //log.info("from="+from);
+    //log.info("to="+to);
+    //log.info("diff="+diff);
 
     if (to >= from) {
       diff -= (to - from + 1);

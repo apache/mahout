@@ -377,7 +377,7 @@ public abstract class AbstractIntObjectMap extends AbstractMap {
     theKeys.sort();
 
     StringBuilder buf = new StringBuilder();
-    buf.append("[");
+    buf.append('[');
     int maxIndex = theKeys.size() - 1;
     for (int i = 0; i <= maxIndex; i++) {
       int key = theKeys.get(i);
@@ -388,7 +388,7 @@ public abstract class AbstractIntObjectMap extends AbstractMap {
         buf.append(", ");
       }
     }
-    buf.append("]");
+    buf.append(']');
     return buf.toString();
   }
 
@@ -401,7 +401,7 @@ public abstract class AbstractIntObjectMap extends AbstractMap {
     keysSortedByValue(theKeys);
 
     StringBuilder buf = new StringBuilder();
-    buf.append("[");
+    buf.append('[');
     int maxIndex = theKeys.size() - 1;
     for (int i = 0; i <= maxIndex; i++) {
       int key = theKeys.get(i);
@@ -412,7 +412,7 @@ public abstract class AbstractIntObjectMap extends AbstractMap {
         buf.append(", ");
       }
     }
-    buf.append("]");
+    buf.append(']');
     return buf.toString();
   }
 

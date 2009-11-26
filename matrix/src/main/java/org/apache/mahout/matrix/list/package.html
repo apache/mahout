@@ -103,7 +103,7 @@ list.shuffle();
 AbstractDoubleList part = list.partFromTo(0,list.size()/2 - 1);
 double sum = 0.0;
 for (int i=0; i&lt;part.size(); i++) { sum += part.get(i); }
-System.out.println(sum);
+log.info(sum);
 </pre>
   </td>
 </table>
@@ -135,7 +135,7 @@ list.shuffle();
 double sum = 0.0;
 int limit = values.length/2;
 for (int i=0; i&lt;limit; i++) { sum += values[i]; }
-System.out.println(sum);
+log.info(sum);
 </pre>
   </td>
 </table>
@@ -149,7 +149,7 @@ new DoubleArrayList(values).shuffle(); // zero-copy, shuffle via back door
 double sum = 0.0;
 int limit = values.length/2;
 for (int i=0; i&lt;limit; i++) { sum += values[i]; }
-System.out.println(sum);
+log.info(sum);
 </pre>
   </td>
 </table>

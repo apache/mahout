@@ -141,7 +141,6 @@ public class QuickBitVector {
   public static int leastSignificantBit(int value) {
     int i = -1;
     while (++i < 32 && (((1 << i) & value)) == 0) {
-      ;
     }
     return i;
   }
@@ -173,7 +172,6 @@ public class QuickBitVector {
   public static int mostSignificantBit(int value) {
     int i = 32;
     while (--i >= 0 && (((1 << i) & value)) == 0) {
-      ;
     }
     return i;
   }
@@ -193,10 +191,10 @@ public class QuickBitVector {
     long value = ~0L;
     for (int i = BITS_PER_UNIT + 1; --i >= 1;) {
       pows[i] = value >>> (BITS_PER_UNIT - i);
-      //System.out.println((i)+":"+pows[i]);
+      //log.info((i)+":"+pows[i]);
     }
     pows[0] = 0L;
-    //System.out.println((0)+":"+pows[0]);
+    //log.info((0)+":"+pows[0]);
     return pows;
 
     //OLD STUFF
@@ -204,7 +202,7 @@ public class QuickBitVector {
     for (int i=BITS_PER_UNIT+1; --i >= 0; ) {
       pows[i]=value;
       value = value >>> 1;
-      System.out.println((i)+":"+pows[i]);
+      log.info((i)+":"+pows[i]);
     }
     */
 
@@ -212,10 +210,10 @@ public class QuickBitVector {
     long[] pows=new long[BITS_PER_UNIT];
     for (int i=0; i<BITS_PER_UNIT-1; i++) {
       pows[i]=Math.round(Math.pow(2.0,i+1))-1;
-      System.out.println((i)+":"+pows[i]);
+      log.info((i)+":"+pows[i]);
     }
     pows[BITS_PER_UNIT-1] = ~0L;
-    System.out.println((BITS_PER_UNIT-1)+":"+pows[BITS_PER_UNIT-1]);
+    log.info((BITS_PER_UNIT-1)+":"+pows[BITS_PER_UNIT-1]);
     return pows;
     */
   }

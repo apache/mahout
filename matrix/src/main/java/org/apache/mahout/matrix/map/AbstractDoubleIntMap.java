@@ -327,14 +327,14 @@ public abstract class AbstractDoubleIntMap extends AbstractMap {
 
     // this variant may be quicker
     //org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions = 0;
-    //System.out.println("collisions="+org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions);
+    //log.info("collisions="+org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions);
     keys(keyList);
     keyList.sort();
     valueList.setSize(keyList.size());
     for (int i = keyList.size(); --i >= 0;) {
       valueList.setQuick(i, get(keyList.getQuick(i)));
     }
-    //System.out.println("collisions="+org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions);
+    //log.info("collisions="+org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions);
 
   }
 
@@ -375,7 +375,7 @@ public abstract class AbstractDoubleIntMap extends AbstractMap {
 
     //org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions = 0;
     org.apache.mahout.matrix.GenericSorting.quickSort(0, keyList.size(), comp, swapper);
-    //System.out.println("collisions="+org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions);
+    //log.info("collisions="+org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions);
   }
 
   /**
@@ -406,7 +406,7 @@ public abstract class AbstractDoubleIntMap extends AbstractMap {
     theKeys.sort();
 
     StringBuilder buf = new StringBuilder();
-    buf.append("[");
+    buf.append('[');
     int maxIndex = theKeys.size() - 1;
     for (int i = 0; i <= maxIndex; i++) {
       double key = theKeys.get(i);
@@ -417,7 +417,7 @@ public abstract class AbstractDoubleIntMap extends AbstractMap {
         buf.append(", ");
       }
     }
-    buf.append("]");
+    buf.append(']');
     return buf.toString();
   }
 
@@ -430,7 +430,7 @@ public abstract class AbstractDoubleIntMap extends AbstractMap {
     keysSortedByValue(theKeys);
 
     StringBuilder buf = new StringBuilder();
-    buf.append("[");
+    buf.append('[');
     int maxIndex = theKeys.size() - 1;
     for (int i = 0; i <= maxIndex; i++) {
       double key = theKeys.get(i);
@@ -441,7 +441,7 @@ public abstract class AbstractDoubleIntMap extends AbstractMap {
         buf.append(", ");
       }
     }
-    buf.append("]");
+    buf.append(']');
     return buf.toString();
   }
 

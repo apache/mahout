@@ -407,12 +407,12 @@ public abstract class AbstractIntDoubleMap extends AbstractMap {
    */
   public String toString() {
     IntArrayList theKeys = keys();
-    String tmp = theKeys.toString() + "\n";
+    String tmp = theKeys.toString() + '\n';
     theKeys.sort();
 
     StringBuilder buf = new StringBuilder(tmp);
     //StringBuffer buf = new StringBuffer();
-    buf.append("[");
+    buf.append('[');
     int maxIndex = theKeys.size() - 1;
     for (int i = 0; i <= maxIndex; i++) {
       int key = theKeys.get(i);
@@ -423,7 +423,7 @@ public abstract class AbstractIntDoubleMap extends AbstractMap {
         buf.append(", ");
       }
     }
-    buf.append("]");
+    buf.append(']');
     return buf.toString();
   }
 
@@ -436,7 +436,7 @@ public abstract class AbstractIntDoubleMap extends AbstractMap {
     keysSortedByValue(theKeys);
 
     StringBuilder buf = new StringBuilder();
-    buf.append("[");
+    buf.append('[');
     int maxIndex = theKeys.size() - 1;
     for (int i = 0; i <= maxIndex; i++) {
       int key = theKeys.get(i);
@@ -447,7 +447,7 @@ public abstract class AbstractIntDoubleMap extends AbstractMap {
         buf.append(", ");
       }
     }
-    buf.append("]");
+    buf.append(']');
     return buf.toString();
   }
 

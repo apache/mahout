@@ -100,8 +100,8 @@ public class BitMatrix extends PersistentObject {
   protected void checkDimensionCompatibility(BitMatrix other) {
     if (columns != other.columns() || rows != other.rows()) {
       throw new IllegalArgumentException(
-          "Incompatible dimensions: (columns,rows)=(" + columns + "," + rows + "), (other.columns,other.rows)=(" +
-              other.columns() + "," + other.rows() + ")");
+          "Incompatible dimensions: (columns,rows)=(" + columns + ',' + rows + "), (other.columns,other.rows)=(" +
+              other.columns() + ',' + other.rows() + ')');
     }
   }
 

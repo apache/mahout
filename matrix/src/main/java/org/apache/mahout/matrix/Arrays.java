@@ -268,7 +268,7 @@ public class Arrays {
    */
   public static String toString(byte[] array) {
     StringBuilder buf = new StringBuilder();
-    buf.append("[");
+    buf.append('[');
     int maxIndex = array.length - 1;
     for (int i = 0; i <= maxIndex; i++) {
       buf.append(array[i]);
@@ -276,7 +276,7 @@ public class Arrays {
         buf.append(", ");
       }
     }
-    buf.append("]");
+    buf.append(']');
     return buf.toString();
   }
 
@@ -289,7 +289,7 @@ public class Arrays {
    */
   public static String toString(char[] array) {
     StringBuilder buf = new StringBuilder();
-    buf.append("[");
+    buf.append('[');
     int maxIndex = array.length - 1;
     for (int i = 0; i <= maxIndex; i++) {
       buf.append(array[i]);
@@ -297,7 +297,7 @@ public class Arrays {
         buf.append(", ");
       }
     }
-    buf.append("]");
+    buf.append(']');
     return buf.toString();
   }
 
@@ -310,7 +310,7 @@ public class Arrays {
    */
   public static String toString(double[] array) {
     StringBuilder buf = new StringBuilder();
-    buf.append("[");
+    buf.append('[');
     int maxIndex = array.length - 1;
     for (int i = 0; i <= maxIndex; i++) {
       buf.append(array[i]);
@@ -318,7 +318,7 @@ public class Arrays {
         buf.append(", ");
       }
     }
-    buf.append("]");
+    buf.append(']');
     return buf.toString();
   }
 
@@ -331,7 +331,7 @@ public class Arrays {
    */
   public static String toString(float[] array) {
     StringBuilder buf = new StringBuilder();
-    buf.append("[");
+    buf.append('[');
     int maxIndex = array.length - 1;
     for (int i = 0; i <= maxIndex; i++) {
       buf.append(array[i]);
@@ -339,7 +339,7 @@ public class Arrays {
         buf.append(", ");
       }
     }
-    buf.append("]");
+    buf.append(']');
     return buf.toString();
   }
 
@@ -352,7 +352,7 @@ public class Arrays {
    */
   public static String toString(int[] array) {
     StringBuilder buf = new StringBuilder();
-    buf.append("[");
+    buf.append('[');
     int maxIndex = array.length - 1;
     for (int i = 0; i <= maxIndex; i++) {
       buf.append(array[i]);
@@ -360,7 +360,7 @@ public class Arrays {
         buf.append(", ");
       }
     }
-    buf.append("]");
+    buf.append(']');
     return buf.toString();
   }
 
@@ -373,7 +373,7 @@ public class Arrays {
    */
   public static String toString(long[] array) {
     StringBuilder buf = new StringBuilder();
-    buf.append("[");
+    buf.append('[');
     int maxIndex = array.length - 1;
     for (int i = 0; i <= maxIndex; i++) {
       buf.append(array[i]);
@@ -381,7 +381,7 @@ public class Arrays {
         buf.append(", ");
       }
     }
-    buf.append("]");
+    buf.append(']');
     return buf.toString();
   }
 
@@ -394,7 +394,7 @@ public class Arrays {
    */
   public static String toString(Object[] array) {
     StringBuilder buf = new StringBuilder();
-    buf.append("[");
+    buf.append('[');
     int maxIndex = array.length - 1;
     for (int i = 0; i <= maxIndex; i++) {
       buf.append(array[i]);
@@ -402,7 +402,7 @@ public class Arrays {
         buf.append(", ");
       }
     }
-    buf.append("]");
+    buf.append(']');
     return buf.toString();
   }
 
@@ -415,7 +415,7 @@ public class Arrays {
    */
   public static String toString(short[] array) {
     StringBuilder buf = new StringBuilder();
-    buf.append("[");
+    buf.append('[');
     int maxIndex = array.length - 1;
     for (int i = 0; i <= maxIndex; i++) {
       buf.append(array[i]);
@@ -423,7 +423,7 @@ public class Arrays {
         buf.append(", ");
       }
     }
-    buf.append("]");
+    buf.append(']');
     return buf.toString();
   }
 
@@ -436,7 +436,7 @@ public class Arrays {
    */
   public static String toString(boolean[] array) {
     StringBuilder buf = new StringBuilder();
-    buf.append("[");
+    buf.append('[');
     int maxIndex = array.length - 1;
     for (int i = 0; i <= maxIndex; i++) {
       buf.append(array[i]);
@@ -444,7 +444,7 @@ public class Arrays {
         buf.append(", ");
       }
     }
-    buf.append("]");
+    buf.append(']');
     return buf.toString();
   }
 

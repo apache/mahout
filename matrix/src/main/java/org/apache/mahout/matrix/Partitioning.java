@@ -620,7 +620,7 @@ public class Partitioning {
    */
   public static void partition(int[] list, int from, int to, int[] splitters, int splitFrom, int splitTo,
                                int[] splitIndexes) {
-    int element;  // int, double --> template type dependent
+    //int element;  // int, double --> template type dependent
 
     if (splitFrom > splitTo) {
       return;
@@ -697,7 +697,7 @@ public class Partitioning {
     }
     int splitter = splitters[medianIndex];
 
-    //System.out.println("medianIndex="+medianIndex);
+    //log.info("medianIndex="+medianIndex);
     // Partition the list according to the splitter, i.e.
     // Establish invariant: list[i] < splitter <= list[j] for i=from..medianIndex and j=medianIndex+1 .. to
     // Could simply call:
@@ -718,7 +718,7 @@ public class Partitioning {
     */
 
 
-    //System.out.println("splitIndex="+splitIndex);
+    //log.info("splitIndex="+splitIndex);
     splitIndexes[medianIndex] = splitIndex;
 
     //if (splitFrom == splitTo) return; // done
@@ -742,16 +742,16 @@ public class Partitioning {
 
     // recursively partition left half
     if (splitFrom <= medianIndex - 1) {
-      //System.out.println("1.recursive: from="+from+", to="+splitIndex+", splitFrom="+splitFrom+", splitTo="+(medianIndex-1));
+      //log.info("1.recursive: from="+from+", to="+splitIndex+", splitFrom="+splitFrom+", splitTo="+(medianIndex-1));
       partition(list, from, splitIndex, splitters, splitFrom, medianIndex - 1, splitIndexes);
     }
 
     // recursively partition right half
     if (medianIndex + 1 <= splitTo) {
-      //System.out.println("2.recursive: from="+(splitIndex+1)+", to="+to+", splitFrom="+(medianIndex+1)+", splitTo="+splitTo);
+      //log.info("2.recursive: from="+(splitIndex+1)+", to="+to+", splitFrom="+(medianIndex+1)+", splitTo="+splitTo);
       partition(list, splitIndex + 1, to, splitters, medianIndex + 1, splitTo, splitIndexes);
     }
-    //System.out.println("BACK TRACKING\n\n");
+    //log.info("BACK TRACKING\n\n");
   }
 
   /**
@@ -783,12 +783,12 @@ public class Partitioning {
     steps += to - from + 1;
 
     /*
-    System.out.println();
+    log.info();
     if (from<=to) {
-      System.out.println("SORT WORKING: from="+from+", to="+to+", splitter="+splitter);
+      log.info("SORT WORKING: from="+from+", to="+to+", splitter="+splitter);
     }
     else {
-      System.out.println("SORT WORKING: NOTHING TO DO.");
+      log.info("SORT WORKING: NOTHING TO DO.");
     }
     */
 
@@ -816,7 +816,7 @@ public class Partitioning {
         //swappedElements++;
       }
     }
-    //if (from<=to) System.out.println("Swapped "+(head-from)+" elements");
+    //if (from<=to) log.info("Swapped "+(head-from)+" elements");
 
 
     /*
@@ -836,8 +836,8 @@ public class Partitioning {
 
 
     /*
-    System.out.println("splitter="+splitter);
-    System.out.println("before="+new IntArrayList(list));
+    log.info("splitter="+splitter);
+    log.info("before="+new IntArrayList(list));
     int head = from;
     int trail = to;
     int element;
@@ -855,14 +855,14 @@ public class Partitioning {
       }
       head++;
       trail--;
-      System.out.println("after ="+new IntArrayList(list)+", head="+head);
+      log.info("after ="+new IntArrayList(list)+", head="+head);
     }
     */
 
 
     /*
-    //System.out.println("splitter="+splitter);
-    //System.out.println("before="+new IntArrayList(list));
+    //log.info("splitter="+splitter);
+    //log.info("before="+new IntArrayList(list));
     to++;
     //int head = from;
     int element;
@@ -883,7 +883,7 @@ public class Partitioning {
         //}
         //head++;
       }
-      //System.out.println("after ="+new IntArrayList(list)+", head="+head);
+      //log.info("after ="+new IntArrayList(list)+", head="+head);
     }
     */
 
@@ -904,7 +904,7 @@ public class Partitioning {
           list[trail--] = oldHead;
         }
       }
-      //System.out.println(new IntArrayList(list));
+      //log.info(new IntArrayList(list));
 
     }
     */

@@ -8,6 +8,9 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A handy stopwatch for benchmarking.
  * Like a real stop watch used on ancient running tracks you can start the watch, stop it,
@@ -17,6 +20,8 @@ package org.apache.mahout.matrix;
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class Timer extends PersistentObject {
+
+  private static final Logger log = LoggerFactory.getLogger(Timer.class);
 
   private long baseTime;
   private long elapsedTime;
@@ -34,7 +39,7 @@ public class Timer extends PersistentObject {
    * @return <tt>this</tt> (for convenience only).
    */
   public Timer display() {
-    System.out.println(this);
+    log.info(this.toString());
     return this;
   }
 
@@ -132,7 +137,7 @@ public class Timer extends PersistentObject {
     }
     t.stop();
     t.display();
-    System.out.println("I finished the test using " + t);
+    log.info("I finished the test using " + t);
 
 
     //do something we do not want to benchmark

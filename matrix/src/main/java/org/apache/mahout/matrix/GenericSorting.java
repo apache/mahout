@@ -79,18 +79,18 @@ import org.apache.mahout.matrix.function.IntComparator;
  &nbsp;&nbsp;&nbsp;}
  };
 
- System.out.println("before:");
- System.out.println("X="+Arrays.toString(x));
- System.out.println("Y="+Arrays.toString(y));
- System.out.println("Z="+Arrays.toString(z));
+ log.info("before:");
+ log.info("X="+Arrays.toString(x));
+ log.info("Y="+Arrays.toString(y));
+ log.info("Z="+Arrays.toString(z));
 
  GenericSorting.quickSort(0, X.length, comp, swapper);
  // GenericSorting.mergeSort(0, X.length, comp, swapper);
 
- System.out.println("after:");
- System.out.println("X="+Arrays.toString(x));
- System.out.println("Y="+Arrays.toString(y));
- System.out.println("Z="+Arrays.toString(z));
+ log.info("after:");
+ log.info("X="+Arrays.toString(x));
+ log.info("Y="+Arrays.toString(y));
+ log.info("Z="+Arrays.toString(z));
  </pre>
  </td>
  </table>
@@ -216,7 +216,6 @@ public class GenericSorting {
    * Performs a binary search on an already-sorted range: finds the first position where an element can be inserted
    * without violating the ordering. Sorting is by a user-supplied comparison function.
    *
-   * @param array Array containing the range.
    * @param first Beginning of the range.
    * @param last  One past the end of the range.
    * @param x     Element to be searched for.
@@ -224,8 +223,6 @@ public class GenericSorting {
    * @return The largest index i such that, for every j in the range <code>[first, i)</code>, <code>comp.apply(array[j],
    *         x)</code> is <code>true</code>.
    * @see Sorting#upper_bound
-   * @see Sorting#equal_range
-   * @see Sorting#binary_search
    */
   private static int lower_bound(int first, int last, int x, IntComparator comp) {
     //if (comp==null) throw new NullPointerException();
@@ -408,7 +405,6 @@ public class GenericSorting {
   /**
    * Reverses a sequence of elements.
    *
-   * @param array Array containing the sequence
    * @param first Beginning of the range
    * @param last  One past the end of the range
    * @throws ArrayIndexOutOfBoundsException If the range is invalid.
@@ -425,7 +421,6 @@ public class GenericSorting {
    * <code>array[middle+1]</code> is put in <code>array[first+1]</code>, etc.  Generally, the element in position
    * <code>i</code> is put into position <code>(i + (last-middle)) % (last-first)</code>.
    *
-   * @param array  Array containing the range
    * @param first  Beginning of the range
    * @param middle Index of the element that will be put in <code>array[first]</code>
    * @param last   One past the end of the range
@@ -443,7 +438,6 @@ public class GenericSorting {
    * Performs a binary search on an already-sorted range: finds the last position where an element can be inserted
    * without violating the ordering. Sorting is by a user-supplied comparison function.
    *
-   * @param array Array containing the range.
    * @param first Beginning of the range.
    * @param last  One past the end of the range.
    * @param x     Element to be searched for.
@@ -451,8 +445,6 @@ public class GenericSorting {
    * @return The largest index i such that, for every j in the range <code>[first, i)</code>, <code>comp.apply(x,
    *         array[j])</code> is <code>false</code>.
    * @see Sorting#lower_bound
-   * @see Sorting#equal_range
-   * @see Sorting#binary_search
    */
   private static int upper_bound(int first, int last, int x, IntComparator comp) {
     //if (comp==null) throw new NullPointerException();

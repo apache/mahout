@@ -38,13 +38,13 @@ package org.apache.mahout.matrix.list;
  * double d1 = 1.234;
  * list.add(Double.doubleToLongBits(d1));
  * double d2 = Double.longBitsToDouble(list.get(0));
- * if (d1!=d2) System.out.println("This is impossible!");
+ * if (d1!=d2) log.info("This is impossible!");
  *
  * DistinctNumberList list2 = ... instantiation goes here
  * float f1 = 1.234f;
  * list2.add((long) Float.floatToIntBits(f1));
  * float f2 = Float.intBitsToFloat((int)list2.get(0));
- * if (f1!=f2) System.out.println("This is impossible!");
+ * if (f1!=f2) log.info("This is impossible!");
  * </pre>
  *
  * @see LongArrayList

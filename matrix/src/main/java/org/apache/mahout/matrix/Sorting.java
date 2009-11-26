@@ -2339,7 +2339,7 @@ public class Sorting {
   private static void rangeCheck(int arrayLen, int fromIndex, int toIndex) {
     if (fromIndex > toIndex) {
       throw new IllegalArgumentException("fromIndex(" + fromIndex +
-          ") > toIndex(" + toIndex + ")");
+          ") > toIndex(" + toIndex + ')');
     }
     if (fromIndex < 0) {
       throw new ArrayIndexOutOfBoundsException(fromIndex);

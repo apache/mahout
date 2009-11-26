@@ -88,7 +88,7 @@ class QuickOpenIntIntHashMap extends OpenIntIntHashMap {
     if (decrement == 0) {
       decrement = 1;
     }
-    //System.out.println("insert search for (key,value)=("+key+","+value+") at i="+i+", dec="+decrement);
+    //log.info("insert search for (key,value)=("+key+","+value+") at i="+i+", dec="+decrement);
 
     // stop if we find a removed or free slot, or if we find the key itself
     // do NOT skip over removed slots (yes, open addressing is like that...)
@@ -103,7 +103,7 @@ class QuickOpenIntIntHashMap extends OpenIntIntHashMap {
         i += length;
       }
     }
-    //if (comparisons-comp>0) System.out.println("probed "+(comparisons-comp)+" slots.");
+    //if (comparisons-comp>0) log.info("probed "+(comparisons-comp)+" slots.");
     if (stat[i] == FULL) {
       // key already contained at slot i.
       this.values[i] = value;
@@ -114,8 +114,8 @@ class QuickOpenIntIntHashMap extends OpenIntIntHashMap {
     if (this.distinct > this.highWaterMark) {
       int newCapacity = chooseGrowCapacity(this.distinct + 1, this.minLoadFactor, this.maxLoadFactor);
 
-      //System.out.print("grow rehashing ");
-      //System.out.println("at distinct="+distinct+", capacity="+table.length+" to newCapacity="+newCapacity+" ...");
+      //log.info("grow rehashing ");
+      //log.info("at distinct="+distinct+", capacity="+table.length+" to newCapacity="+newCapacity+" ...");
 
       rehash(newCapacity);
       return put(key, value);
@@ -135,7 +135,7 @@ class QuickOpenIntIntHashMap extends OpenIntIntHashMap {
     Note: Under the great majority of insertions t<=1, so the loop is entered very infrequently.
     */
     while (t > 1) {
-      //System.out.println("t="+t);
+      //log.info("t="+t);
       int key0 = tab[p0];
       hash = HashFunctions.hash(key0) & 0x7FFFFFFF;
       decrement = (hash / length) % length;
@@ -151,7 +151,7 @@ class QuickOpenIntIntHashMap extends OpenIntIntHashMap {
         p0 = pc;
         t--;
       } else { // free or removed slot found, now move...
-        //System.out.println("copying p0="+p0+" to pc="+pc+", (key,val)=("+tab[p0]+","+values[p0]+"), saving "+(t-1)+" probes.");
+        //log.info("copying p0="+p0+" to pc="+pc+", (key,val)=("+tab[p0]+","+values[p0]+"), saving "+(t-1)+" probes.");
         //this.totalProbesSaved += (t - 1);
         tab[pc] = key0;
         stat[pc] = FULL;
@@ -161,7 +161,7 @@ class QuickOpenIntIntHashMap extends OpenIntIntHashMap {
       }
     }
 
-    //System.out.println("inserting at i="+i);
+    //log.info("inserting at i="+i);
     this.table[i] = key;
     this.values[i] = value;
     if (this.state[i] == FREE) {

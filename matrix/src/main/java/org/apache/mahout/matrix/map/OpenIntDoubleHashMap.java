@@ -466,8 +466,8 @@ public class OpenIntDoubleHashMap extends AbstractIntDoubleMap {
     if (this.distinct > this.highWaterMark) {
       int newCapacity = chooseGrowCapacity(this.distinct + 1, this.minLoadFactor, this.maxLoadFactor);
       /*
-      System.out.print("grow rehashing ");
-      System.out.println("at distinct="+distinct+", capacity="+table.length+" to newCapacity="+newCapacity+" ...");
+      log.info("grow rehashing ");
+      log.info("at distinct="+distinct+", capacity="+table.length+" to newCapacity="+newCapacity+" ...");
       */
       rehash(newCapacity);
       return put(key, value);
@@ -559,8 +559,8 @@ public class OpenIntDoubleHashMap extends AbstractIntDoubleMap {
       int newCapacity = chooseShrinkCapacity(this.distinct, this.minLoadFactor, this.maxLoadFactor);
       /*
       if (table.length != newCapacity) {
-        System.out.print("shrink rehashing ");
-        System.out.println("at distinct="+distinct+", capacity="+table.length+" to newCapacity="+newCapacity+" ...");
+        log.info("shrink rehashing ");
+        log.info("at distinct="+distinct+", capacity="+table.length+" to newCapacity="+newCapacity+" ...");
       }
       */
       rehash(newCapacity);
