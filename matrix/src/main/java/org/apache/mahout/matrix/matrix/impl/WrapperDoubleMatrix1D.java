@@ -219,29 +219,29 @@ class WrapperDoubleMatrix1D extends DoubleMatrix1D {
    * specifically, the view has size <tt>this.size()/stride</tt> holding cells <tt>this.get(i*stride)</tt> for all <tt>i
    * = 0..size()/stride - 1</tt>.
    *
-   * @param stride the step factor.
+   * @param theStride the step factor.
    * @return the new view.
    * @throws IndexOutOfBoundsException if <tt>stride <= 0</tt>.
    */
   @Override
-  public DoubleMatrix1D viewStrides(final int _stride) {
+  public DoubleMatrix1D viewStrides(final int theStride) {
     if (stride <= 0) {
       throw new IndexOutOfBoundsException("illegal stride: " + stride);
     }
     DoubleMatrix1D view = new WrapperDoubleMatrix1D(this) {
       @Override
       public double getQuick(int index) {
-        return content.get(index * _stride);
+        return content.get(index * theStride);
       }
 
       @Override
       public void setQuick(int index, double value) {
-        content.set(index * _stride, value);
+        content.set(index * theStride, value);
       }
     };
     view.size = size;
     if (size != 0) {
-      view.size = (size - 1) / _stride + 1;
+      view.size = (size - 1) / theStride + 1;
     }
     return view;
   }

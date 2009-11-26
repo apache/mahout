@@ -1011,7 +1011,6 @@ public class Algebra extends org.apache.mahout.matrix.PersistentObject {
    * Modifies the matrix to be a lower trapezoidal matrix.
    *
    * @return <tt>A</tt> (for convenience only).
-   * @see #triangulateLower(DoubleMatrix2D)
    */
   protected DoubleMatrix2D trapezoidalLower(DoubleMatrix2D A) {
     int rows = A.rows();

@@ -23,7 +23,7 @@ public interface Former {
   /**
    * Formats a double into a string (like sprintf in C).
    *
-   * @param x the number to format
+   * @param value the number to format
    * @return the formatted string
    * @throws IllegalArgumentException if bad argument
    */

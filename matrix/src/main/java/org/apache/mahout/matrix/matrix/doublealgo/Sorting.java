@@ -9,13 +9,10 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.matrix.matrix.doublealgo;
 
 import org.apache.mahout.matrix.function.IntComparator;
-import org.apache.mahout.matrix.matrix.DoubleFactory2D;
-import org.apache.mahout.matrix.matrix.DoubleFactory3D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix3D;
 import org.apache.mahout.matrix.matrix.impl.AbstractFormatter;
-import org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix1D;
 /**
  Matrix quicksorts and mergesorts.
  Use idioms like <tt>Sorting.quickSort.sort(...)</tt> and <tt>Sorting.mergeSort.sort(...)</tt>.
@@ -252,7 +249,7 @@ public class Sorting extends org.apache.mahout.matrix.PersistentObject {
    * matrix, and vice-versa. To sort ranges use sub-ranging views. To sort columns by rows, use dice views. To sort
    * descending, use flip views ... <p> <b>Example:</b> <table border="1" cellspacing="0"> <tr nowrap> <td
    * valign="top"><tt>4 x 2 matrix: <br> 7, 6<br> 5, 4<br> 3, 2<br> 1, 0 <br> </tt></td> <td align="left" valign="top">
-   * <p><tt>column = 0;<br> view = quickSort(matrix,column);<br> System.out.println(view); </tt><tt><br> ==> </tt></p>
+   * <p><tt>column = 0;<br> view = quickSort(matrix,column);<br> log.info(view); </tt><tt><br> ==> </tt></p>
    * </td> <td valign="top"> <p><tt>4 x 2 matrix:<br> 1, 0<br> 3, 2<br> 5, 4<br> 7, 6</tt><br> The matrix IS NOT
    * SORTED.<br> The new VIEW IS SORTED.</p> </td> </tr> </table>
    *
@@ -264,7 +261,7 @@ public class Sorting extends org.apache.mahout.matrix.PersistentObject {
    */
   public DoubleMatrix2D sort(DoubleMatrix2D matrix, int column) {
     if (column < 0 || column >= matrix.columns()) {
-      throw new IndexOutOfBoundsException("column=" + column + ", matrix=" + Formatter.shape(matrix));
+      throw new IndexOutOfBoundsException("column=" + column + ", matrix=" + AbstractFormatter.shape(matrix));
     }
 
     int[] rowIndexes = new int[matrix.rows()]; // row indexes to reorder instead of matrix itself
@@ -442,7 +439,7 @@ public class Sorting extends org.apache.mahout.matrix.PersistentObject {
       throw new IndexOutOfBoundsException("row=" + row + ", matrix=" + AbstractFormatter.shape(matrix));
     }
     if (column < 0 || column >= matrix.columns()) {
-      throw new IndexOutOfBoundsException("column=" + column + ", matrix=" + Formatter.shape(matrix));
+      throw new IndexOutOfBoundsException("column=" + column + ", matrix=" + AbstractFormatter.shape(matrix));
     }
 
     int[] sliceIndexes = new int[matrix.slices()]; // indexes to reorder instead of matrix itself
@@ -518,228 +515,4 @@ public class Sorting extends org.apache.mahout.matrix.PersistentObject {
     return matrix.viewSelection(sliceIndexes, null, null);
   }
 
-  /** Demonstrates advanced sorting. Sorts by sum of row. */
-  public static void zdemo1() {
-    Sorting sort = quickSort;
-    DoubleMatrix2D matrix = DoubleFactory2D.dense.descending(4, 3);
-    DoubleMatrix1DComparator comp = new DoubleMatrix1DComparator() {
-      @Override
-      public int compare(DoubleMatrix1D a, DoubleMatrix1D b) {
-        double as = a.zSum();
-        double bs = b.zSum();
-        return as < bs ? -1 : as == bs ? 0 : 1;
-      }
-    };
-    System.out.println("unsorted:" + matrix);
-    System.out.println("sorted  :" + sort.sort(matrix, comp));
-  }
-
-  /** Demonstrates advanced sorting. Sorts by sum of slice. */
-  public static void zdemo2() {
-    Sorting sort = quickSort;
-    DoubleMatrix3D matrix = DoubleFactory3D.dense.descending(4, 3, 2);
-    DoubleMatrix2DComparator comp = new DoubleMatrix2DComparator() {
-      @Override
-      public int compare(DoubleMatrix2D a, DoubleMatrix2D b) {
-        double as = a.zSum();
-        double bs = b.zSum();
-        return as < bs ? -1 : as == bs ? 0 : 1;
-      }
-    };
-    System.out.println("unsorted:" + matrix);
-    System.out.println("sorted  :" + sort.sort(matrix, comp));
-  }
-
-  /** Demonstrates advanced sorting. Sorts by sinus of cell values. */
-  public static void zdemo3() {
-    Sorting sort = quickSort;
-    double[] values = {0.5, 1.5, 2.5, 3.5};
-    DoubleMatrix1D matrix = new DenseDoubleMatrix1D(values);
-    org.apache.mahout.matrix.function.DoubleComparator comp = new org.apache.mahout.matrix.function.DoubleComparator() {
-      @Override
-      public int compare(double a, double b) {
-        double as = Math.sin(a);
-        double bs = Math.sin(b);
-        return as < bs ? -1 : as == bs ? 0 : 1;
-      }
-    };
-    System.out.println("unsorted:" + matrix);
-
-    DoubleMatrix1D sorted = sort.sort(matrix, comp);
-    System.out.println("sorted  :" + sorted);
-
-    // check whether it is really sorted
-    sorted.assign(org.apache.mahout.jet.math.Functions.sin);
-    /*
-    sorted.assign(
-      new org.apache.mahout.matrix.function.DoubleFunction() {
-        public double apply(double arg) { return Math.sin(arg); }
-      }
-    );
-    */
-    System.out.println("sined  :" + sorted);
-  }
-
-  /** Demonstrates applying functions. */
-  protected static void zdemo4() {
-    double[] values1 = {0, 1, 2, 3};
-    double[] values2 = {0, 2, 4, 6};
-    DoubleMatrix1D matrix1 = new DenseDoubleMatrix1D(values1);
-    DoubleMatrix1D matrix2 = new DenseDoubleMatrix1D(values2);
-    System.out.println("m1:" + matrix1);
-    System.out.println("m2:" + matrix2);
-
-    matrix1.assign(matrix2, org.apache.mahout.jet.math.Functions.pow);
-
-    /*
-    matrix1.assign(matrix2,
-      new org.apache.mahout.matrix.function.DoubleDoubleFunction() {
-        public double apply(double x, double y) { return Math.pow(x,y); }
-      }
-    );
-    */
-
-    System.out.println("applied:" + matrix1);
-  }
-/**
- * Demonstrates sorting with precomputation of aggregates (median and sum of logarithms).
- *
- public static void zdemo5(int rows, int columns, boolean print) {
- Sorting sort = quickSort;
- // for reliable benchmarks, call this method twice: once with small dummy parameters to "warm up" the jitter, then with your real work-load
-
- System.out.println("\n\n");
- System.out.print("now initializing... ");
- org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
-
- final org.apache.mahout.jet.math.Functions F = org.apache.mahout.jet.math.Functions.functions;
- DoubleMatrix2D A = org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.make(rows,columns);
- A.assign(new org.apache.mahout.jet.random.engine.DRand()); // initialize randomly
- timer.stop().display();
-
- // also benchmark copying in its several implementation flavours
- DoubleMatrix2D B = A.like();
- timer.reset().start();
- System.out.print("now copying... ");
- B.assign(A);
- timer.stop().display();
-
- timer.reset().start();
- System.out.print("now copying subrange... ");
- B.viewPart(0,0,rows,columns).assign(A.viewPart(0,0,rows,columns));
- timer.stop().display();
- //System.out.println(A);
-
- timer.reset().start();
- System.out.print("now copying selected... ");
- B.viewSelection(null,null).assign(A.viewSelection(null,null));
- timer.stop().display();
-
- System.out.print("now sorting - quick version with precomputation... ");
- timer.reset().start();
- // THE QUICK VERSION (takes some 10 secs)
- A = sort.sort(A,hep.aida.bin.BinFunctions1D.median);
- //A = sort.sort(A,hep.aida.bin.BinFunctions1D.sumLog);
- timer.stop().display();
-
- // check results for correctness
- // WARNING: be sure NOT TO PRINT huge matrices unless you have tons of main memory and time!!
- // so we just show the first 5 rows
- if (print) {
- int r = Math.min(rows,5);
- hep.aida.bin.BinFunction1D[] funs = {hep.aida.bin.BinFunctions1D.median, hep.aida.bin.BinFunctions1D.sumLog, hep.aida.bin.BinFunctions1D.geometricMean};
- String[] rowNames = new String[r];
- String[] columnNames = new String[columns];
- for (int i=columns; --i >= 0; ) columnNames[i] = Integer.toString(i);
- for (int i=r; --i >= 0; ) rowNames[i] = Integer.toString(i);
- System.out.println("first part of sorted result = \n"+new org.apache.mahout.matrix.matrix.doublealgo.Formatter("%G").toTitleString(
- A.viewPart(0,0,r,columns), rowNames, columnNames, null, null, null, funs
- ));
- }
-
-
- System.out.print("now sorting - slow version... ");
- A = B;
- org.apache.mahout.matrix.matrix.doublealgo.DoubleMatrix1DComparator fun = new org.apache.mahout.matrix.matrix.doublealgo.DoubleMatrix1DComparator() {
- public int compare(DoubleMatrix1D x, DoubleMatrix1D y) {
- double a = org.apache.mahout.matrix.matrix.doublealgo.Statistic.bin(x).median();
- double b = org.apache.mahout.matrix.matrix.doublealgo.Statistic.bin(y).median();
- //double a = x.aggregate(F.plus,F.log);
- //double b = y.aggregate(F.plus,F.log);
- return a < b ? -1 : (a==b) ? 0 : 1;
- }
- };
- timer.reset().start();
- A = sort.sort(A,fun);
- timer.stop().display();
- }
- */
-  /** Demonstrates advanced sorting. Sorts by sum of row. */
-  public static void zdemo6() {
-    Sorting sort = quickSort;
-    double[][] values = {
-        {3, 7, 0},
-        {2, 1, 0},
-        {2, 2, 0},
-        {1, 8, 0},
-        {2, 5, 0},
-        {7, 0, 0},
-        {2, 3, 0},
-        {1, 0, 0},
-        {4, 0, 0},
-        {2, 0, 0}
-    };
-    DoubleMatrix2D A = DoubleFactory2D.dense.make(values);
-    /*
-    DoubleMatrix1DComparator comp = new DoubleMatrix1DComparator() {
-      public int compare(DoubleMatrix1D a, DoubleMatrix1D b) {
-        double as = a.zSum(); double bs = b.zSum();
-        return as < bs ? -1 : as == bs ? 0 : 1;
-      }
-    };
-    */
-    System.out.println("\n\nunsorted:" + A);
-    DoubleMatrix2D B = quickSort.sort(A, 1);
-    DoubleMatrix2D C = quickSort.sort(B, 0);
-    System.out.println("quick sorted  :" + C);
-
-    B = mergeSort.sort(A, 1);
-    C = mergeSort.sort(B, 0);
-    System.out.println("merge sorted  :" + C);
-
-  }
-
-  /** Demonstrates sorting with precomputation of aggregates, comparing mergesort with quicksort. */
-  public static void zdemo7(int rows, int columns, boolean print) {
-    // for reliable benchmarks, call this method twice: once with small dummy parameters to "warm up" the jitter, then with your real work-load
-
-    System.out.println("\n\n");
-    System.out.println("now initializing... ");
-
-    DoubleMatrix2D A = org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.make(rows, columns);
-    A.assign(new org.apache.mahout.jet.random.engine.DRand()); // initialize randomly
-    DoubleMatrix2D B = A.copy();
-
-    double[] v1 = A.viewColumn(0).toArray();
-    double[] v2 = A.viewColumn(0).toArray();
-    System.out.print("now quick sorting... ");
-    org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
-    quickSort.sort(A, 0);
-    timer.stop().display();
-
-    System.out.print("now merge sorting... ");
-    timer.reset().start();
-    mergeSort.sort(A, 0);
-    timer.stop().display();
-
-    System.out.print("now quick sorting with simple aggregation... ");
-    timer.reset().start();
-    quickSort.sort(A, v1);
-    timer.stop().display();
-
-    System.out.print("now merge sorting with simple aggregation... ");
-    timer.reset().start();
-    mergeSort.sort(A, v2);
-    timer.stop().display();
-  }
 }

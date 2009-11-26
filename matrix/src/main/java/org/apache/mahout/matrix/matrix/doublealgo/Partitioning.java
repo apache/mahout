@@ -177,7 +177,7 @@ public class Partitioning {
   }
 
   /**
-   * Same as {@link #partition(int[],int,int,int[],int,int,int[])} except that it <i>synchronously</i> partitions the
+   * Same except that it <i>synchronously</i> partitions the
    * rows of the given matrix by the values of the given matrix column; This is essentially the same as partitioning a
    * list of composite objects by some instance variable; In other words, two entire rows of the matrix are swapped,
    * whenever two column values indicate so. <p> Let's say, a "row" is an "object" (tuple, d-dimensional point). A
@@ -267,7 +267,7 @@ public class Partitioning {
   }
 
   /**
-   * Same as {@link #partition(int[],int,int,int)} except that it <i>synchronously</i> partitions the rows of the given
+   * Same except that it <i>synchronously</i> partitions the rows of the given
    * matrix by the values of the given matrix column; This is essentially the same as partitioning a list of composite
    * objects by some instance variable; In other words, two entire rows of the matrix are swapped, whenever two column
    * values indicate so. <p> Let's say, a "row" is an "object" (tuple, d-dimensional point). A "column" is the list of

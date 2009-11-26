@@ -33,7 +33,7 @@ import org.apache.mahout.matrix.matrix.DoubleMatrix3D;
 class SelectedDenseDoubleMatrix3D extends DoubleMatrix3D {
 
   /** The elements of this matrix. */
-  protected double[] elements;
+  protected final double[] elements;
 
   /** The offsets of the visible cells of this matrix. */
   protected int[] sliceOffsets;
@@ -74,7 +74,7 @@ class SelectedDenseDoubleMatrix3D extends DoubleMatrix3D {
    * Returns the position of the given absolute rank within the (virtual or non-virtual) internal 1-dimensional array.
    * Default implementation. Override, if necessary.
    *
-   * @param rank the absolute rank of the element.
+   * @param absRank the absolute rank of the element.
    * @return the position.
    */
   @Override
@@ -86,7 +86,7 @@ class SelectedDenseDoubleMatrix3D extends DoubleMatrix3D {
    * Returns the position of the given absolute rank within the (virtual or non-virtual) internal 1-dimensional array.
    * Default implementation. Override, if necessary.
    *
-   * @param rank the absolute rank of the element.
+   * @param absRank the absolute rank of the element.
    * @return the position.
    */
   @Override
@@ -98,7 +98,7 @@ class SelectedDenseDoubleMatrix3D extends DoubleMatrix3D {
    * Returns the position of the given absolute rank within the (virtual or non-virtual) internal 1-dimensional array.
    * Default implementation. Override, if necessary.
    *
-   * @param rank the absolute rank of the element.
+   * @param absRank the absolute rank of the element.
    * @return the position.
    */
   @Override

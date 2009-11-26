@@ -33,10 +33,10 @@ import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 class SelectedDenseDoubleMatrix1D extends DoubleMatrix1D {
 
   /** The elements of this matrix. */
-  protected double[] elements;
+  protected final double[] elements;
 
   /** The offsets of visible indexes of this matrix. */
-  protected int[] offsets;
+  protected final int[] offsets;
 
   /** The offset. */
   protected int offset;
@@ -45,7 +45,7 @@ class SelectedDenseDoubleMatrix1D extends DoubleMatrix1D {
    * Constructs a matrix view with the given parameters.
    *
    * @param elements the cells.
-   * @param indexes  The indexes of the cells that shall be visible.
+   * @param offsets  The indexes of the cells that shall be visible.
    */
   protected SelectedDenseDoubleMatrix1D(double[] elements, int[] offsets) {
     this(offsets.length, elements, 0, 1, offsets, 0);
@@ -73,7 +73,7 @@ class SelectedDenseDoubleMatrix1D extends DoubleMatrix1D {
    * Returns the position of the given absolute rank within the (virtual or non-virtual) internal 1-dimensional array.
    * Default implementation. Override, if necessary.
    *
-   * @param rank the absolute rank of the element.
+   * @param absRank the absolute rank of the element.
    * @return the position.
    */
   @Override

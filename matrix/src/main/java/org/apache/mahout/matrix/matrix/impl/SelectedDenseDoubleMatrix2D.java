@@ -33,7 +33,7 @@ import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 class SelectedDenseDoubleMatrix2D extends DoubleMatrix2D {
 
   /** The elements of this matrix. */
-  protected double[] elements;
+  protected final double[] elements;
 
   /** The offsets of the visible cells of this matrix. */
   protected int[] rowOffsets;
@@ -84,7 +84,7 @@ class SelectedDenseDoubleMatrix2D extends DoubleMatrix2D {
    * Returns the position of the given absolute rank within the (virtual or non-virtual) internal 1-dimensional array.
    * Default implementation. Override, if necessary.
    *
-   * @param rank the absolute rank of the element.
+   * @param absRank the absolute rank of the element.
    * @return the position.
    */
   @Override
@@ -96,7 +96,7 @@ class SelectedDenseDoubleMatrix2D extends DoubleMatrix2D {
    * Returns the position of the given absolute rank within the (virtual or non-virtual) internal 1-dimensional array.
    * Default implementation. Override, if necessary.
    *
-   * @param rank the absolute rank of the element.
+   * @param absRank the absolute rank of the element.
    * @return the position.
    */
   @Override
@@ -256,7 +256,7 @@ class SelectedDenseDoubleMatrix2D extends DoubleMatrix2D {
    * sub-range view. <p> <b>Example:</b> <table border="0"> <tr nowrap> <td valign="top">2 x 3 matrix: <br> 1, 2, 3<br>
    * 4, 5, 6 </td> <td>viewColumn(0) ==></td> <td valign="top">Matrix1D of size 2:<br> 1, 4</td> </tr> </table>
    *
-   * @param the column to fix.
+   * @param column the column to fix.
    * @return a new slice view.
    * @throws IllegalArgumentException if <tt>column < 0 || column >= columns()</tt>.
    * @see #viewRow(int)
@@ -279,7 +279,7 @@ class SelectedDenseDoubleMatrix2D extends DoubleMatrix2D {
    * sub-range view. <p> <b>Example:</b> <table border="0"> <tr nowrap> <td valign="top">2 x 3 matrix: <br> 1, 2, 3<br>
    * 4, 5, 6 </td> <td>viewRow(0) ==></td> <td valign="top">Matrix1D of size 3:<br> 1, 2, 3</td> </tr> </table>
    *
-   * @param the row to fix.
+   * @param row the row to fix.
    * @return a new slice view.
    * @throws IndexOutOfBoundsException if <tt>row < 0 || row >= rows()</tt>.
    * @see #viewColumn(int)

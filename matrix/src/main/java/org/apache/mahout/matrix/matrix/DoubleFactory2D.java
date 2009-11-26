@@ -12,6 +12,8 @@ import org.apache.mahout.jet.math.Functions;
 import org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix2D;
 import org.apache.mahout.matrix.matrix.impl.RCDoubleMatrix2D;
 import org.apache.mahout.matrix.matrix.impl.SparseDoubleMatrix2D;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  Factory for convenient construction of 2-d matrices holding <tt>double</tt>
  cells. Also provides convenient methods to compose (concatenate) and decompose
@@ -79,6 +81,8 @@ sample} to construct random matrices. </td>
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class DoubleFactory2D extends org.apache.mahout.matrix.PersistentObject {
+
+  private static final Logger log = LoggerFactory.getLogger(DoubleFactory2D.class);  
 
   /** A factory producing dense matrices. */
   public static final DoubleFactory2D dense = new DoubleFactory2D();
@@ -228,7 +232,7 @@ public class DoubleFactory2D extends org.apache.mahout.matrix.PersistentObject {
    * &nbsp;&nbsp;&nbsp;{ make(4,4,2), null,        make(4,3,3) },
    * &nbsp;&nbsp;&nbsp;{ null,        make(2,2,4), null        }
    * };
-   * System.out.println(compose(parts1));
+   * log.info(compose(parts1));
    * </pre>
    * </td> <td><tt>8&nbsp;x&nbsp;9&nbsp;matrix<br> 0&nbsp;0&nbsp;0&nbsp;0&nbsp;1&nbsp;1&nbsp;0&nbsp;0&nbsp;0<br>
    * 0&nbsp;0&nbsp;0&nbsp;0&nbsp;1&nbsp;1&nbsp;0&nbsp;0&nbsp;0<br> 2&nbsp;2&nbsp;2&nbsp;2&nbsp;0&nbsp;0&nbsp;3&nbsp;3&nbsp;3<br>
@@ -242,7 +246,7 @@ public class DoubleFactory2D extends org.apache.mahout.matrix.PersistentObject {
    * &nbsp;&nbsp;&nbsp;{ null,                      identity(3).viewColumnFlip() },
    * &nbsp;&nbsp;&nbsp;{ identity(3).viewRowFlip(), null                         }
    * };
-   * System.out.println("\n"+make(parts3));
+   * log.info("\n"+make(parts3));
    * </pre>
    * </td> <td><tt>9&nbsp;x&nbsp;6&nbsp;matrix<br> 1&nbsp;0&nbsp;0&nbsp;0&nbsp;0&nbsp;0<br>
    * 0&nbsp;1&nbsp;0&nbsp;0&nbsp;0&nbsp;0<br> 0&nbsp;0&nbsp;1&nbsp;0&nbsp;0&nbsp;0<br>
@@ -260,7 +264,7 @@ public class DoubleFactory2D extends org.apache.mahout.matrix.PersistentObject {
    * &nbsp;&nbsp;&nbsp;{ A, _, A, _ },
    * &nbsp;&nbsp;&nbsp;{ _, A, _, B }
    * };
-   * System.out.println("\n"+make(parts4));
+   * log.info("\n"+make(parts4));
    * </pre>
    * </td> <td><tt>4&nbsp;x&nbsp;8&nbsp;matrix<br> 1&nbsp;2&nbsp;0&nbsp;0&nbsp;1&nbsp;2&nbsp;0&nbsp;0<br>
    * 3&nbsp;4&nbsp;0&nbsp;0&nbsp;3&nbsp;4&nbsp;0&nbsp;0<br> 0&nbsp;0&nbsp;1&nbsp;2&nbsp;0&nbsp;0&nbsp;3&nbsp;2<br>
@@ -272,7 +276,7 @@ public class DoubleFactory2D extends org.apache.mahout.matrix.PersistentObject {
    * &nbsp;&nbsp;&nbsp;{ make(4,4,2), null,        make(4,3,3) },
    * &nbsp;&nbsp;&nbsp;{ null,        make(2,3,4), null        }
    * };
-   * System.out.println("\n"+Factory2D.make(parts2));
+   * log.info("\n"+Factory2D.make(parts2));
    * </pre>
    * </td> <td><tt>IllegalArgumentException<br> A[0,1].cols != A[2,1].cols<br> (2 != 3)</tt></td> </tr> </table>
    *
@@ -416,10 +420,10 @@ public class DoubleFactory2D extends org.apache.mahout.matrix.PersistentObject {
    * &nbsp;&nbsp;&nbsp;{ _, D, _ }
    * };
    * decompose(parts,matrix);
-   * System.out.println(&quot;\nA = &quot;+A);
-   * System.out.println(&quot;\nB = &quot;+B);
-   * System.out.println(&quot;\nC = &quot;+C);
-   * System.out.println(&quot;\nD = &quot;+D);
+   * log.info(&quot;\nA = &quot;+A);
+   * log.info(&quot;\nB = &quot;+B);
+   * log.info(&quot;\nC = &quot;+C);
+   * log.info(&quot;\nD = &quot;+D);
    * </pre>
    * </td> <td><tt>8&nbsp;x&nbsp;9&nbsp;matrix<br> 9&nbsp;9&nbsp;9&nbsp;9&nbsp;1&nbsp;1&nbsp;9&nbsp;9&nbsp;9<br>
    * 9&nbsp;9&nbsp;9&nbsp;9&nbsp;1&nbsp;1&nbsp;9&nbsp;9&nbsp;9<br> 2&nbsp;2&nbsp;2&nbsp;2&nbsp;9&nbsp;9&nbsp;3&nbsp;3&nbsp;3<br>
@@ -508,118 +512,6 @@ public class DoubleFactory2D extends org.apache.mahout.matrix.PersistentObject {
       r += maxHeights[row];
     }
 
-  }
-
-  /** Demonstrates usage of this class. */
-  public void demo1() {
-    System.out.println("\n\n");
-    DoubleMatrix2D[][] parts1 =
-        {
-            {null, make(2, 2, 1), null},
-            {make(4, 4, 2), null, make(4, 3, 3)},
-            {null, make(2, 2, 4), null}
-        };
-    System.out.println("\n" + compose(parts1));
-//System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(make(parts1).toString()));
-
-/*
-//
-illegal 2 != 3
-DoubleMatrix2D[][] parts2 = 
-{
-  { null,        make(2,2,1), null        },
-  { make(4,4,2), null,        make(4,3,3) },
-  { null,        make(2,3,4), null        }
-};
-System.out.println("\n"+make(parts2));
-*/
-
-    DoubleMatrix2D[][] parts3 =
-        {
-            {identity(3), null,},
-            {null, identity(3).viewColumnFlip()},
-            {identity(3).viewRowFlip(), null}
-        };
-    System.out.println("\n" + compose(parts3));
-//System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(make(parts3).toString()));
-
-    DoubleMatrix2D A = ascending(2, 2);
-    DoubleMatrix2D B = descending(2, 2);
-    DoubleMatrix2D _ = null;
-
-    DoubleMatrix2D[][] parts4 =
-        {
-            {A, _, A, _},
-            {_, A, _, B}
-        };
-    System.out.println("\n" + compose(parts4));
-//System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(make(parts4).toString()));
-
-  }
-
-  /** Demonstrates usage of this class. */
-  public void demo2() {
-    System.out.println("\n\n");
-    DoubleMatrix2D E, F, G;
-    DoubleMatrix2D A = make(2, 2, 1);
-    DoubleMatrix2D B = make(4, 4, 2);
-    DoubleMatrix2D C = make(4, 3, 3);
-    DoubleMatrix2D D = make(2, 2, 4);
-    DoubleMatrix2D _ = null;
-    DoubleMatrix2D[][] parts1 =
-        {
-            {_, A, _},
-            {B, _, C},
-            {_, D, _}
-        };
-    DoubleMatrix2D matrix = compose(parts1);
-    System.out.println("\n" + matrix);
-
-    A.assign(9);
-    B.assign(9);
-    C.assign(9);
-    D.assign(9);
-    decompose(parts1, matrix);
-    System.out.println(A);
-    System.out.println(B);
-    System.out.println(C);
-    System.out.println(D);
-//System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(make(parts1).toString()));
-
-/*
-//
-illegal 2 != 3
-DoubleMatrix2D[][] parts2 = 
-{
-  { null,        make(2,2,1), null        },
-  { make(4,4,2), null,        make(4,3,3) },
-  { null,        make(2,3,4), null        }
-};
-System.out.println("\n"+Factory2D.make(parts2));
-*/
-
-/*
-DoubleMatrix2D[][] parts3 = 
-{
-  { identity(3),               null,                        },
-  { null,                      identity(3).viewColumnFlip() },
-  { identity(3).viewRowFlip(), null                         }
-};
-System.out.println("\n"+make(parts3));
-//System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(make(parts3).toString()));
-
-DoubleMatrix2D A = ascending(2,2);
-DoubleMatrix2D B = descending(2,2);
-DoubleMatrix2D _ = null;
-
-DoubleMatrix2D[][] parts4 = 
-{
-  { A, _, A, _ },
-  { _, A, _, B }
-};
-System.out.println("\n"+make(parts4));
-//System.out.println("\n"+org.apache.mahout.matrix.matrixpattern.Converting.toHTML(make(parts4).toString()));
-*/
   }
 
   /**

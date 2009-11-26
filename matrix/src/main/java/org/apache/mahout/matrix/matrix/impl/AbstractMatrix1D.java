@@ -54,7 +54,7 @@ public abstract class AbstractMatrix1D extends AbstractMatrix {
    * Returns the position of the given absolute rank within the (virtual or non-virtual) internal 1-dimensional array.
    * Default implementation. Override, if necessary.
    *
-   * @param rank the absolute rank of the element.
+   * @param absRank the absolute rank of the element.
    * @return the position.
    */
   protected int _offset(int absRank) {

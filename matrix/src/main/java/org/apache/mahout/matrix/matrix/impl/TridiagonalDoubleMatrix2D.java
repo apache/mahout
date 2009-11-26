@@ -23,7 +23,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
   /*
    * The non zero elements of the matrix: {lower, diagonal, upper}.
    */
-  protected double[] values;
+  protected final double[] values;
 
   /*
   * The startIndexes and number of non zeros: {lowerStart, diagonalStart, upperStart, values.length, lowerNonZeros, diagonalNonZeros, upperNonZeros}.
@@ -31,7 +31,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
   * diagonalStart = lowerStart + lower.length
   * upperStart = diagonalStart + diagonal.length
   */
-  protected int[] dims;
+  protected final int[] dims;
 
   protected static final int NONZERO = 4;
 
@@ -526,7 +526,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
             }
             zElements[zi + zStride * i] += value * yElements[yi + yStride * j];
             //z.setQuick(row,z.getQuick(row) + value * y.getQuick(column));
-            //System.out.println("["+i+","+j+"]-->"+value);
+            //log.info("["+i+","+j+"]-->"+value);
             return value;
           }
         }

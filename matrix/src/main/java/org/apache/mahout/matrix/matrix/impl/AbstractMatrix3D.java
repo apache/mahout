@@ -54,7 +54,7 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
    * Returns the position of the given absolute rank within the (virtual or non-virtual) internal 1-dimensional array.
    * Default implementation. Override, if necessary.
    *
-   * @param rank the absolute rank of the element.
+   * @param absRank the absolute rank of the element.
    * @return the position.
    */
   protected int _columnOffset(int absRank) {
@@ -75,7 +75,7 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
    * Returns the position of the given absolute rank within the (virtual or non-virtual) internal 1-dimensional array.
    * Default implementation. Override, if necessary.
    *
-   * @param rank the absolute rank of the element.
+   * @param absRank the absolute rank of the element.
    * @return the position.
    */
   protected int _rowOffset(int absRank) {
@@ -96,7 +96,7 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
    * Returns the position of the given absolute rank within the (virtual or non-virtual) internal 1-dimensional array.
    * Default implementation. Override, if necessary.
    *
-   * @param rank the absolute rank of the element.
+   * @param absRank the absolute rank of the element.
    * @return the position.
    */
   protected int _sliceOffset(int absRank) {
@@ -274,7 +274,7 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
    * @param columnZero    the position of the first element.
    * @param sliceStride   the number of elements between two slices, i.e. <tt>index(k+1,i,j)-index(k,i,j)</tt>.
    * @param rowStride     the number of elements between two rows, i.e. <tt>index(k,i+1,j)-index(k,i,j)</tt>.
-   * @param columnnStride the number of elements between two columns, i.e. <tt>index(k,i,j+1)-index(k,i,j)</tt>.
+   * @param columnStride  the number of elements between two columns, i.e. <tt>index(k,i,j+1)-index(k,i,j)</tt>.
    * @throws IllegalArgumentException if <tt>(double)slices*rows*columnss > Integer.MAX_VALUE</tt>.
    * @throws IllegalArgumentException if <tt>slices<0 || rows<0 || columns<0</tt>.
    */

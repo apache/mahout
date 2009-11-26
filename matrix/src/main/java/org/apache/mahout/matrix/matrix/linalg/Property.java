@@ -510,7 +510,7 @@ public class Property extends org.apache.mahout.matrix.PersistentObject {
    * Ignores tolerance.
    */
   public boolean isDiagonallyDominantByColumn(DoubleMatrix2D A) {
-    double epsilon = tolerance();
+    //double epsilon = tolerance();
     int min = Math.min(A.rows(), A.columns());
     for (int i = min; --i >= 0;) {
       double diag = Math.abs(A.getQuick(i, i));
@@ -529,7 +529,7 @@ public class Property extends org.apache.mahout.matrix.PersistentObject {
    * tolerance.
    */
   public boolean isDiagonallyDominantByRow(DoubleMatrix2D A) {
-    double epsilon = tolerance();
+    //double epsilon = tolerance();
     int min = Math.min(A.rows(), A.columns());
     for (int i = min; --i >= 0;) {
       double diag = Math.abs(A.getQuick(i, i));
@@ -661,7 +661,7 @@ public class Property extends org.apache.mahout.matrix.PersistentObject {
     checkSquare(A);
     double epsilon = tolerance();
     int rows = A.rows();
-    int columns = A.columns();
+    //int columns = A.columns();
     for (int row = rows; --row >= 0;) {
       for (int column = rows; --column >= 0;) {
         //if (A.getQuick(row,column) != -A.getQuick(column,row)) return false;

@@ -67,13 +67,13 @@ public class SmpBlas implements Blas {
    */
   private static Blas smpBlas = SeqBlas.seqBlas;
 
-  protected Blas seqBlas; // blocks are operated on in parallel; for each block this seq algo is used.
+  protected final Blas seqBlas; // blocks are operated on in parallel; for each block this seq algo is used.
 
-  protected Smp smp;
+  protected final Smp smp;
 
-  protected int maxThreads;
+  protected final int maxThreads;
 
-  protected static int NN_THRESHOLD = 30000;
+  protected static final int NN_THRESHOLD = 30000;
 
   public static Blas getSmpBlas() {
     return smpBlas;
@@ -260,7 +260,7 @@ public class SmpBlas implements Blas {
         @Override
         public void run() {
           seqBlas.dgemm(transposeA, transposeB, alpha, AA, BB, beta, CC);
-          //System.out.println("Hello "+offset);
+          //log.info("Hello "+offset);
         }
       };
     }
@@ -331,7 +331,7 @@ public class SmpBlas implements Blas {
         @Override
         public void run() {
           seqBlas.dgemv(transposeA, alpha, AA, x, beta, yy);
-          //System.out.println("Hello "+offset);
+          //log.info("Hello "+offset);
         }
       };
     }

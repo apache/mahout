@@ -47,22 +47,6 @@ import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 @Deprecated
 public class Transform extends org.apache.mahout.matrix.PersistentObject {
 
-  /**
-   * Little trick to allow for "aliasing", that is, renaming this class. Normally you would write
-   * <pre>
-   * Transform.mult(myMatrix,2);
-   * Transform.plus(myMatrix,5);
-   * </pre>
-   * Since this class has only static methods, but no instance methods you can also shorten the name "DoubleTransform"
-   * to a name that better suits you, for example "Trans".
-   * <pre>
-   * Transform T = Transform.transform; // kind of "alias"
-   * T.mult(myMatrix,2);
-   * T.plus(myMatrix,5);
-   * </pre>
-   */
-  public static final Transform transform = new Transform();
-
   /** Makes this class non instantiable, but still let's others inherit from it. */
   protected Transform() {
   }

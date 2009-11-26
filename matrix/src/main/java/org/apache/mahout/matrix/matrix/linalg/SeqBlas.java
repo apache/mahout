@@ -22,11 +22,6 @@ import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 @Deprecated
 public class SeqBlas implements Blas {
 
-  /**
-   * Little trick to allow for "aliasing", that is, renaming this class. Time and again writing code like <p>
-   * <tt>SeqBlas.blas.dgemm(...);</tt> <p> is a bit awkward. Using the aliasing you can instead write <p> <tt>Blas B =
-   * SeqBlas.blas; <br> B.dgemm(...);</tt>
-   */
   public static final Blas seqBlas = new SeqBlas();
 
   /** Makes this class non instantiable, but still let's others inherit from it. */

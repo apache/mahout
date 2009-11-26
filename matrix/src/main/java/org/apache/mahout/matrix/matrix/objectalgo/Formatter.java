@@ -97,8 +97,8 @@ public class Formatter extends AbstractFormatter {
     String b3 = blanks(3);
     copy.setPrintShape(false);
     copy.setColumnSeparator(", ");
-    copy.setRowSeparator("},\n" + b3 + "{");
-    String lead = "{\n" + b3 + "{";
+    copy.setRowSeparator("},\n" + b3 + '{');
+    String lead = "{\n" + b3 + '{';
     String trail = "}\n};";
     return lead + copy.toString(matrix) + trail;
   }
@@ -114,9 +114,9 @@ public class Formatter extends AbstractFormatter {
     String b6 = blanks(6);
     copy.setPrintShape(false);
     copy.setColumnSeparator(", ");
-    copy.setRowSeparator("},\n" + b6 + "{");
-    copy.setSliceSeparator("}\n" + b3 + "},\n" + b3 + "{\n" + b6 + "{");
-    String lead = "{\n" + b3 + "{\n" + b6 + "{";
+    copy.setRowSeparator("},\n" + b6 + '{');
+    copy.setSliceSeparator("}\n" + b3 + "},\n" + b3 + "{\n" + b6 + '{');
+    String lead = "{\n" + b3 + "{\n" + b6 + '{';
     String trail = "}\n" + b3 + "}\n}";
     return lead + copy.toString(matrix) + trail;
   }
@@ -168,7 +168,7 @@ public class Formatter extends AbstractFormatter {
     }
     this.printShape = oldPrintShape;
     if (printShape) {
-      buf.insert(0, shape(matrix) + "\n");
+      buf.insert(0, shape(matrix) + '\n');
     }
     return buf.toString();
   }
@@ -263,13 +263,13 @@ public class Formatter extends AbstractFormatter {
       if (c > 0) {
         s += "| ";
       }
-      s = s + columnAxisName + "\n";
+      s = s + columnAxisName + '\n';
       total.insert(0, s);
     }
 
     // insert title
     if (title != null) {
-      total.insert(0, title + "\n");
+      total.insert(0, title + '\n');
     }
 
     this.format = oldFormat;
@@ -303,7 +303,7 @@ public class Formatter extends AbstractFormatter {
         buf.append(sliceSeparator);
       }
       buf.append(toTitleString(matrix.viewSlice(i), rowNames, columnNames, rowAxisName, columnAxisName,
-          title + "\n" + sliceAxisName + "=" + sliceNames[i]));
+          title + '\n' + sliceAxisName + '=' + sliceNames[i]));
     }
     return buf.toString();
   }

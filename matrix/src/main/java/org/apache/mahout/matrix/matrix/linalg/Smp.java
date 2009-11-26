@@ -14,9 +14,9 @@ import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 
 class Smp {
 
-  protected FJTaskRunnerGroup taskGroup; // a very efficient and light weight thread pool
+  protected final FJTaskRunnerGroup taskGroup; // a very efficient and light weight thread pool
 
-  protected int maxThreads;
+  protected final int maxThreads;
 
   /** Constructs a new Smp using a maximum of <tt>maxThreads<tt> threads. */
   protected Smp(int maxThreads) {
@@ -50,7 +50,7 @@ class Smp {
           if (results != null) {
             results[k] = result;
           }
-          //System.out.print(".");
+          //log.info(".");
         }
       };
     }
@@ -120,7 +120,7 @@ class Smp {
         span = p - span * i;
       } // last span may be a bit larger
 
-      DoubleMatrix2D AA, BB, CC;
+      //DoubleMatrix2D AA, BB, CC;
       if (!splitHoriz) {   // split B along columns into blocks
         blocks[i] = A.viewPart(0, offset, A.rows(), span);
       } else { // split A along rows into blocks
@@ -189,12 +189,12 @@ class Smp {
     int span = p / noOfTasks;
     DoubleMatrix2D[] blocks = new DoubleMatrix2D[noOfTasks];
     for (int i = 0; i < noOfTasks; i++) {
-      int offset = i * span;
+      //int offset = i * span;
       if (i == noOfTasks - 1) {
         span = p - span * i;
       } // last span may be a bit larger
 
-      DoubleMatrix2D AA, BB, CC;
+      //DoubleMatrix2D AA, BB, CC;
       if (!splitHoriz) {
         // split B along columns into blocks
         blocks[i] = A.viewPart(0, i, A.rows(), A.columns() - i).viewStrides(1, noOfTasks);

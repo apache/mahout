@@ -514,7 +514,7 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
         public double apply(int i, int j, double value) {
           zElements[zi + zStride*i] += value * yElements[yi + yStride*j];
           //z.setQuick(row,z.getQuick(row) + value * y.getQuick(column));
-          //System.out.println("["+i+","+j+"]-->"+value);
+          //log.info("["+i+","+j+"]-->"+value);
           return value;
         }
       }

@@ -334,7 +334,7 @@ Note that d-dimensional and <tt>int</tt> based matrices are not yet provided.
       has same interface<br>
     </tt><tt>//matrix </tt><tt>= new RCDoubleMatrix2D(3,4);</tt><tt> </tt><tt>
       // has same interface<br>
-    </tt><tt></tt><tt>System.out.println(matrix); </tt></p>
+    </tt><tt></tt><tt>log.info(matrix); </tt></p>
   </td>
   <td nowrap><tt>3 x 4 matrix: <br>
     0 0 0 0 <br>
@@ -357,7 +357,7 @@ Note that d-dimensional and <tt>int</tt> based matrices are not yet provided.
       // From now on all instantiations will go via the factory -<br>
       // No explicit constructor calls anymore</tt><tt><br>
       DoubleMatrix2D matrix = factory.make(3,4);<br>
-      System.out.println(matrix);</tt></p>
+      log.info(matrix);</tt></p>
   </td>
   <td nowrap><tt>3 x 4 matrix: <br>
     0 0 0 0 <br>
@@ -378,7 +378,7 @@ Note that d-dimensional and <tt>int</tt> based matrices are not yet provided.
   <td>
     <p><tt>int row = 2, column = 0;<br>
     </tt><tt>matrix.set(row,column, 7);<br>
-      System.out.println(matrix.get(row,column));<br>
+      log.info(matrix.get(row,column));<br>
       // --&gt; 7</tt></p>
   </td>
   <td nowrap><tt>3 x 4 matrix <br>
@@ -400,7 +400,7 @@ for (int row=rows; --row &gt;= 0; ) {
       //sum += matrix.getQuick(row,column); // no bounds check
    }
 }
-System.out.println(sum); 
+log.info(sum);
 </pre>
   </tt></td>
   <td nowrap>&nbsp;</td>
@@ -414,7 +414,7 @@ System.out.println(sum);
 </tr>
 <tr>
   <td><tt>matrix.viewPart(1,0,2,2).assign(1);<br>
-    System.out.println(matrix); <br>
+    log.info(matrix); <br>
   </tt></td>
   <td nowrap><tt>3 x 4 matrix <br>
     0 0 0 0 <br>
@@ -429,7 +429,7 @@ System.out.println(sum);
   <td nowrap>&nbsp;</td>
 </tr>
 <tr>
-  <td><tt>System.out.println(matrix.viewDice())</tt></td>
+  <td><tt>log.info(matrix.viewDice())</tt></td>
   <td nowrap><tt>4 x 3 matrix <br>
     0 1 1 <br>
     0 1 1 <br>
@@ -443,7 +443,7 @@ System.out.println(sum);
   <td nowrap>&nbsp;</td>
 </tr>
 <tr>
-  <td><tt>System.out.println(matrix.viewColumnFlip());</tt></td>
+  <td><tt>log.info(matrix.viewColumnFlip());</tt></td>
   <td nowrap><tt>3 x 4 matrix <br>
     0 0 0 0 <br>
     0 0 1 1 <br>
@@ -456,7 +456,7 @@ System.out.println(sum);
   <td nowrap>&nbsp;</td>
 </tr>
 <tr>
-  <td><tt>System.out.println(matrix.viewRow(1)); </tt></td>
+  <td><tt>log.info(matrix.viewRow(1)); </tt></td>
   <td nowrap><tt>4 matrix <br>
     1 1 0 0 </tt></td>
 </tr>
@@ -487,7 +487,7 @@ System.out.println(sum);
   <td nowrap>&nbsp;</td>
 </tr>
 <tr>
-  <td><tt>System.out.println(matrix.viewStrides(1,2)); </tt></td>
+  <td><tt>log.info(matrix.viewStrides(1,2)); </tt></td>
   <td nowrap><tt>3 x 2 matrix <br>
     0 0<br>
     1 0<br>
@@ -505,7 +505,7 @@ System.out.println(sum);
 <tr>
   <td><tt>int[] rowIndexes = {0,2};<br>
     int[] columnIndexes = {2,3,1,1};<br>
-    System.out.println(matrix.viewSelection(rowIndexes,columnIndexes)); </tt></td>
+    log.info(matrix.viewSelection(rowIndexes,columnIndexes)); </tt></td>
   <td nowrap><tt>2 x 4 matrix <br>
     0 0 0 0 <br>
     0 0 1 1 </tt></td>
@@ -515,7 +515,7 @@ System.out.println(sum);
   <td nowrap>&nbsp;</td>
 </tr>
 <tr>
-  <td><tt>System.out.println(matrix.viewSorted(1).viewRowFlip()); </tt></td>
+  <td><tt>log.info(matrix.viewSorted(1).viewRowFlip()); </tt></td>
   <td nowrap><tt>3 x 4 matrix <br>
     1 1 0 0 <br>
     1 1 0 0 <br>
@@ -527,7 +527,7 @@ System.out.println(sum);
 </tr>
 <tr>
   <td><tt>matrix.viewPart(0,1,2,2).viewRowFlip().viewColumn(0).assign(2);<br>
-    System.out.println(matrix); <br>
+    log.info(matrix); <br>
   </tt></td>
   <td nowrap><tt>3 x 4 matrix <br>
     0 2 0 0 <br>

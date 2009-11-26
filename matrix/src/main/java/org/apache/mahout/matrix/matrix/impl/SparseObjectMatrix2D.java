@@ -162,7 +162,7 @@ public class SparseObjectMatrix2D extends ObjectMatrix2D {
    * number of non-zero values boosts performance, because the receiver will grow only once instead of potentially many
    * times and hash collisions get less probable.
    *
-   * @param minNonZeros the desired minimum number of non-zero cells.
+   * @param minCapacity the desired minimum number of non-zero cells.
    */
   @Override
   public void ensureCapacity(int minCapacity) {

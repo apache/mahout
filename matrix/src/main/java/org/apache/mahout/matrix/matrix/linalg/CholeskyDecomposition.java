@@ -161,7 +161,7 @@ public class CholeskyDecomposition implements java.io.Serializable {
 
     // Copy right hand side.
     DoubleMatrix2D X = B.copy();
-    int nx = B.columns();
+    //int nx = B.columns();
 
     // precompute and cache some views to avoid regenerating them time and again
     DoubleMatrix1D[] Xrows = new DoubleMatrix1D[n];

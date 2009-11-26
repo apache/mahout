@@ -66,7 +66,7 @@ class SelectedSparseObjectMatrix1D extends ObjectMatrix1D {
    * Constructs a matrix view with the given parameters.
    *
    * @param elements the cells.
-   * @param indexes  The indexes of the cells that shall be visible.
+   * @param offsets  The indexes of the cells that shall be visible.
    */
   protected SelectedSparseObjectMatrix1D(AbstractIntObjectMap elements, int[] offsets) {
     this(offsets.length, elements, 0, 1, offsets, 0);
@@ -76,7 +76,7 @@ class SelectedSparseObjectMatrix1D extends ObjectMatrix1D {
    * Returns the position of the given absolute rank within the (virtual or non-virtual) internal 1-dimensional array.
    * Default implementation. Override, if necessary.
    *
-   * @param rank the absolute rank of the element.
+   * @param absRank the absolute rank of the element.
    * @return the position.
    */
   @Override

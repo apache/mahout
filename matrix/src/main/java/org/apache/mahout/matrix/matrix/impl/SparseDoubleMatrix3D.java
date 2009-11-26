@@ -150,7 +150,7 @@ public class SparseDoubleMatrix3D extends DoubleMatrix3D {
    * @param columnZero    the position of the first element.
    * @param sliceStride   the number of elements between two slices, i.e. <tt>index(k+1,i,j)-index(k,i,j)</tt>.
    * @param rowStride     the number of elements between two rows, i.e. <tt>index(k,i+1,j)-index(k,i,j)</tt>.
-   * @param columnnStride the number of elements between two columns, i.e. <tt>index(k,i,j+1)-index(k,i,j)</tt>.
+   * @param columnStride the number of elements between two columns, i.e. <tt>index(k,i,j+1)-index(k,i,j)</tt>.
    * @throws IllegalArgumentException if <tt>(double)slices*columns*rows > Integer.MAX_VALUE</tt>.
    * @throws IllegalArgumentException if <tt>slices<0 || rows<0 || columns<0</tt>.
    */
@@ -195,7 +195,7 @@ public class SparseDoubleMatrix3D extends DoubleMatrix3D {
    * number of non-zero values boosts performance, because the receiver will grow only once instead of potentially many
    * times and hash collisions get less probable.
    *
-   * @param minNonZeros the desired minimum number of non-zero cells.
+   * @param minCapacity the desired minimum number of non-zero cells.
    */
   @Override
   public void ensureCapacity(int minCapacity) {

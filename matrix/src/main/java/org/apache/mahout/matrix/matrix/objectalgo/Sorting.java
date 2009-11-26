@@ -148,7 +148,7 @@ public class Sorting extends org.apache.mahout.matrix.PersistentObject {
    * matrix, and vice-versa. To sort ranges use sub-ranging views. To sort columns by rows, use dice views. To sort
    * descending, use flip views ... <p> <b>Example:</b> <table border="1" cellspacing="0"> <tr nowrap> <td
    * valign="top"><tt>4 x 2 matrix: <br> 7, 6<br> 5, 4<br> 3, 2<br> 1, 0 <br> </tt></td> <td align="left" valign="top">
-   * <p><tt>column = 0;<br> view = quickSort(matrix,column);<br> System.out.println(view); </tt><tt><br> ==> </tt></p>
+   * <p><tt>column = 0;<br> view = quickSort(matrix,column);<br> log.info(view); </tt><tt><br> ==> </tt></p>
    * </td> <td valign="top"> <p><tt>4 x 2 matrix:<br> 1, 0<br> 3, 2<br> 5, 4<br> 7, 6</tt><br> The matrix IS NOT
    * SORTED.<br> The new VIEW IS SORTED.</p> </td> </tr> </table>
    *

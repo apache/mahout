@@ -77,7 +77,7 @@ public class SparseDoubleMatrix2D extends DoubleMatrix2D {
   /*
    * The elements of the matrix.
    */
-  protected AbstractIntDoubleMap elements;
+  protected final AbstractIntDoubleMap elements;
   protected int dummy;
 
   /**
@@ -535,7 +535,7 @@ public class SparseDoubleMatrix2D extends DoubleMatrix2D {
               j = tmp;
             }
             zElements[zi + zStride * i] += value * yElements[yi + yStride * j];
-            //System.out.println("["+i+","+j+"]-->"+value);
+            //log.info("["+i+","+j+"]-->"+value);
             return true;
           }
         }
@@ -548,7 +548,7 @@ public class SparseDoubleMatrix2D extends DoubleMatrix2D {
           if (transposeA) { int tmp=i; i=j; j=tmp; }
           zElements[zi + zStride*i] += value * yElements[yi + yStride*j];
           //z.setQuick(row,z.getQuick(row) + value * y.getQuick(column));
-          //System.out.println("["+i+","+j+"]-->"+value);
+          //log.info("["+i+","+j+"]-->"+value);
           return value;
         }
       }

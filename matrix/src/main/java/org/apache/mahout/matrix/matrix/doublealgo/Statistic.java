@@ -11,7 +11,6 @@ package org.apache.mahout.matrix.matrix.doublealgo;
 import org.apache.mahout.jet.math.Functions;
 import org.apache.mahout.jet.random.engine.RandomEngine;
 import org.apache.mahout.matrix.function.DoubleDoubleFunction;
-import org.apache.mahout.matrix.matrix.DoubleFactory2D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix3D;
@@ -81,7 +80,7 @@ public class Statistic {
 
   /** Canberra distance function; <tt>Sum( abs(x[i]-y[i]) / abs(x[i]+y[i]) )</tt>. */
   public static final VectorVectorFunction CANBERRA = new VectorVectorFunction() {
-    DoubleDoubleFunction fun = new DoubleDoubleFunction() {
+    final DoubleDoubleFunction fun = new DoubleDoubleFunction() {
       @Override
       public double apply(double a, double b) {
         return Math.abs(a - b) / Math.abs(a + b);
@@ -164,7 +163,7 @@ return result;
  Fills all cell values of the given vector into a bin from which statistics measures can be retrieved efficiently.
  Cells values are copied.
  <br>
- Tip: Use <tt>System.out.println(bin(vector))</tt> to print most measures computed by the bin. Example:
+ Tip: Use <tt>log.info(bin(vector))</tt> to print most measures computed by the bin. Example:
  <table>
  <td class="PRE">
  <pre>
@@ -401,67 +400,7 @@ return result;
  return histogram(histo,x,y,z,weights);
  }
  */
-  /** Demonstrates usage of this class. */
-  public static void demo1() {
-    double[][] values = {
-        {1, 2, 3},
-        {2, 4, 6},
-        {3, 6, 9},
-        {4, -8, -10}
-    };
-    DoubleFactory2D factory = DoubleFactory2D.dense;
-    DoubleMatrix2D A = factory.make(values);
-    System.out.println("\n\nmatrix=" + A);
-    System.out.println("\ncovar1=" + covariance(A));
-//System.out.println(correlation(covariance(A)));
-//System.out.println(distance(A,EUCLID));
 
-
-//System.out.println(org.apache.mahout.matrix.matrixpattern.Converting.toHTML(A.toString()));
-//System.out.println(org.apache.mahout.matrix.matrixpattern.Converting.toHTML(covariance(A).toString()));
-//System.out.println(org.apache.mahout.matrix.matrixpattern.Converting.toHTML(correlation(covariance(A)).toString()));
-//System.out.println(org.apache.mahout.matrix.matrixpattern.Converting.toHTML(distance(A,EUCLID).toString()));
-  }
-
-  /** Demonstrates usage of this class. */
-  public static void demo2(int rows, int columns, boolean print) {
-    System.out.println("\n\ninitializing...");
-    DoubleFactory2D factory = DoubleFactory2D.dense;
-    DoubleMatrix2D A = factory.ascending(rows, columns);
-//double value = 1;
-//DoubleMatrix2D A = factory.make(rows,columns);
-//A.assign(value);
-
-    System.out.println("benchmarking correlation...");
-
-    org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
-    DoubleMatrix2D corr = correlation(covariance(A));
-    timer.stop().display();
-
-    if (print) {
-      System.out.println("printing result...");
-      System.out.println(corr);
-    }
-    System.out.println("done.");
-  }
-
-  /** Demonstrates usage of this class. */
-  public static void demo3(VectorVectorFunction norm) {
-    double[][] values = {
-        {-0.9611052, -0.25421095},
-        {0.4308269, -0.69932648},
-        {-1.2071029, 0.62030596},
-        {1.5345166, 0.02135884},
-        {-1.1341542, 0.20388430}
-    };
-
-    System.out.println("\n\ninitializing...");
-    DoubleFactory2D factory = DoubleFactory2D.dense;
-    DoubleMatrix2D A = factory.make(values).viewDice();
-
-    System.out.println("\nA=" + A.viewDice());
-    System.out.println("\ndist=" + distance(A, norm).viewDice());
-  }
 
   /**
    * Constructs and returns the distance matrix of the given matrix. The distance matrix is a square, symmetric matrix
@@ -494,50 +433,13 @@ return result;
     return distance;
   }
 
-  /**
-   * Fills all cells of the given vector into the given histogram.
-   *
-   * @return <tt>histo</tt> (for convenience only).
-   * @throws IllegalArgumentException if <tt>x.size() != y.size()</tt>.
-   *
-   *                                  public static hep.aida.IHistogram2D histogram(hep.aida.IHistogram2D histo,
-   *                                  DoubleMatrix1D x, DoubleMatrix1D y) { if (x.size() != y.size()) throw new
-   *                                  IllegalArgumentException("vectors must have same size"); for (int i=x.size(); --i
-   *                                  >= 0; ) { histo.fill(x.getQuick(i), y.getQuick(i)); } return histo; } * Fills all
-   *                                  cells of the given vectors into the given histogram.
-   * @throws IllegalArgumentException if <tt>x.size() != y.size() || y.size() != weights.size()</tt>.
-   *
-   *                                  public static hep.aida.IHistogram2D histogram(hep.aida.IHistogram2D histo,
-   *                                  DoubleMatrix1D x, DoubleMatrix1D y, DoubleMatrix1D weights) { if (x.size() !=
-   *                                  y.size() || y.size() != weights.size()) throw new IllegalArgumentException("vectors
-   *                                  must have same size"); for (int i=x.size(); --i >= 0; ) {
-   *                                  histo.fill(x.getQuick(i), y.getQuick(i), weights.getQuick(i)); } return histo; }
-   *
-   *                                  Fills all cells of the given vectors into the given histogram.
-   * @throws IllegalArgumentException if <tt>x.size() != y.size() || x.size() != z.size() || x.size() !=
-   *                                  weights.size()</tt>.
-   *
-   *                                  public static hep.aida.IHistogram3D histogram(hep.aida.IHistogram3D histo,
-   *                                  DoubleMatrix1D x, DoubleMatrix1D y, DoubleMatrix1D z, DoubleMatrix1D weights) { if
-   *                                  (x.size() != y.size() || x.size() != z.size() || x.size() != weights.size()) throw
-   *                                  new IllegalArgumentException("vectors must have same size"); for (int i=x.size();
-   *                                  --i >= 0; ) { histo.fill(x.getQuick(i), y.getQuick(i), z.getQuick(i),
-   *                                  weights.getQuick(i)); } return histo; } * Benchmarks covariance computation.
-   */
-  public static void main(String[] args) {
-    int rows = Integer.parseInt(args[0]);
-    int columns = Integer.parseInt(args[1]);
-    boolean print = args[2].equals("print");
-    demo2(rows, columns, print);
-  }
 
   /**
    * Constructs and returns a sampling view with a size of <tt>round(matrix.size() * fraction)</tt>. Samples "without
    * replacement" from the uniform distribution.
    *
    * @param matrix          any matrix.
-   * @param rowFraction     the percentage of rows to be included in the view.
-   * @param columnFraction  the percentage of columns to be included in the view.
+   * @param fraction     the percentage of rows to be included in the view.
    * @param randomGenerator a uniform random number generator; set this parameter to <tt>null</tt> to use a default
    *                        generator seeded with the current time.
    * @return the sampling view.

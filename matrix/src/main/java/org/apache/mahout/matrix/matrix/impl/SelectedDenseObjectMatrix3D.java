@@ -33,7 +33,7 @@ import org.apache.mahout.matrix.matrix.ObjectMatrix3D;
 class SelectedDenseObjectMatrix3D extends ObjectMatrix3D {
 
   /** The elements of this matrix. */
-  protected Object[] elements;
+  protected final Object[] elements;
 
   /** The offsets of the visible cells of this matrix. */
   protected int[] sliceOffsets;
@@ -74,7 +74,7 @@ class SelectedDenseObjectMatrix3D extends ObjectMatrix3D {
    * Returns the position of the given absolute rank within the (virtual or non-virtual) internal 1-dimensional array.
    * Default implementation. Override, if necessary.
    *
-   * @param rank the absolute rank of the element.
+   * @param absRank the absolute rank of the element.
    * @return the position.
    */
   @Override
@@ -86,7 +86,7 @@ class SelectedDenseObjectMatrix3D extends ObjectMatrix3D {
    * Returns the position of the given absolute rank within the (virtual or non-virtual) internal 1-dimensional array.
    * Default implementation. Override, if necessary.
    *
-   * @param rank the absolute rank of the element.
+   * @param absRank the absolute rank of the element.
    * @return the position.
    */
   @Override
@@ -98,7 +98,7 @@ class SelectedDenseObjectMatrix3D extends ObjectMatrix3D {
    * Returns the position of the given absolute rank within the (virtual or non-virtual) internal 1-dimensional array.
    * Default implementation. Override, if necessary.
    *
-   * @param rank the absolute rank of the element.
+   * @param absRank the absolute rank of the element.
    * @return the position.
    */
   @Override

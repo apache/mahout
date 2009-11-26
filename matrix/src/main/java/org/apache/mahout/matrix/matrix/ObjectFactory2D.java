@@ -194,7 +194,7 @@ public class ObjectFactory2D extends org.apache.mahout.matrix.PersistentObject {
    * &nbsp;&nbsp;&nbsp;{ make(4,4,2), null,        make(4,3,3) },
    * &nbsp;&nbsp;&nbsp;{ null,        make(2,2,4), null        }
    * };
-   * System.out.println(compose(parts1));
+   * log.info(compose(parts1));
    * </pre>
    * </td> <td><tt>8&nbsp;x&nbsp;9&nbsp;matrix<br> 0&nbsp;0&nbsp;0&nbsp;0&nbsp;1&nbsp;1&nbsp;0&nbsp;0&nbsp;0<br>
    * 0&nbsp;0&nbsp;0&nbsp;0&nbsp;1&nbsp;1&nbsp;0&nbsp;0&nbsp;0<br> 2&nbsp;2&nbsp;2&nbsp;2&nbsp;0&nbsp;0&nbsp;3&nbsp;3&nbsp;3<br>
@@ -208,7 +208,7 @@ public class ObjectFactory2D extends org.apache.mahout.matrix.PersistentObject {
    * &nbsp;&nbsp;&nbsp;{ null,                      identity(3).viewColumnFlip() },
    * &nbsp;&nbsp;&nbsp;{ identity(3).viewRowFlip(), null                         }
    * };
-   * System.out.println("\n"+make(parts3));
+   * log.info("\n"+make(parts3));
    * </pre>
    * </td> <td><tt>9&nbsp;x&nbsp;6&nbsp;matrix<br> 1&nbsp;0&nbsp;0&nbsp;0&nbsp;0&nbsp;0<br>
    * 0&nbsp;1&nbsp;0&nbsp;0&nbsp;0&nbsp;0<br> 0&nbsp;0&nbsp;1&nbsp;0&nbsp;0&nbsp;0<br>
@@ -226,7 +226,7 @@ public class ObjectFactory2D extends org.apache.mahout.matrix.PersistentObject {
    * &nbsp;&nbsp;&nbsp;{ A, _, A, _ },
    * &nbsp;&nbsp;&nbsp;{ _, A, _, B }
    * };
-   * System.out.println("\n"+make(parts4));
+   * log.info("\n"+make(parts4));
    * </pre>
    * </td> <td><tt>4&nbsp;x&nbsp;8&nbsp;matrix<br> 1&nbsp;2&nbsp;0&nbsp;0&nbsp;1&nbsp;2&nbsp;0&nbsp;0<br>
    * 3&nbsp;4&nbsp;0&nbsp;0&nbsp;3&nbsp;4&nbsp;0&nbsp;0<br> 0&nbsp;0&nbsp;1&nbsp;2&nbsp;0&nbsp;0&nbsp;3&nbsp;2<br>
@@ -238,7 +238,7 @@ public class ObjectFactory2D extends org.apache.mahout.matrix.PersistentObject {
    * &nbsp;&nbsp;&nbsp;{ make(4,4,2), null,        make(4,3,3) },
    * &nbsp;&nbsp;&nbsp;{ null,        make(2,3,4), null        }
    * };
-   * System.out.println("\n"+Factory2D.make(parts2));
+   * log.info("\n"+Factory2D.make(parts2));
    * </pre>
    * </td> <td><tt>IllegalArgumentException<br> A[0,1].cols != A[2,1].cols<br> (2 != 3)</tt></td> </tr> </table>
    *
@@ -382,10 +382,10 @@ public class ObjectFactory2D extends org.apache.mahout.matrix.PersistentObject {
    * &nbsp;&nbsp;&nbsp;{ _, D, _ }
    * };
    * decompose(parts,matrix);
-   * System.out.println(&quot;\nA = &quot;+A);
-   * System.out.println(&quot;\nB = &quot;+B);
-   * System.out.println(&quot;\nC = &quot;+C);
-   * System.out.println(&quot;\nD = &quot;+D);
+   * log.info(&quot;\nA = &quot;+A);
+   * log.info(&quot;\nB = &quot;+B);
+   * log.info(&quot;\nC = &quot;+C);
+   * log.info(&quot;\nD = &quot;+D);
    * </pre>
    * </td> <td><tt>8&nbsp;x&nbsp;9&nbsp;matrix<br> 9&nbsp;9&nbsp;9&nbsp;9&nbsp;1&nbsp;1&nbsp;9&nbsp;9&nbsp;9<br>
    * 9&nbsp;9&nbsp;9&nbsp;9&nbsp;1&nbsp;1&nbsp;9&nbsp;9&nbsp;9<br> 2&nbsp;2&nbsp;2&nbsp;2&nbsp;9&nbsp;9&nbsp;3&nbsp;3&nbsp;3<br>

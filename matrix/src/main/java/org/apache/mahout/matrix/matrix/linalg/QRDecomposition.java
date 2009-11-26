@@ -57,7 +57,7 @@ public class QRDecomposition implements java.io.Serializable {
     n = A.columns();
     Rdiag = A.like1D(n);
     //Rdiag = new double[n];
-    org.apache.mahout.matrix.function.DoubleDoubleFunction hypot = Algebra.hypotFunction();
+    //org.apache.mahout.matrix.function.DoubleDoubleFunction hypot = Algebra.hypotFunction();
 
     // precompute and cache some views to avoid regenerating them time and again
     DoubleMatrix1D[] QRcolumns = new DoubleMatrix1D[n];

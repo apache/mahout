@@ -148,7 +148,7 @@ public abstract class AbstractFormatter extends org.apache.mahout.matrix.Persist
 
   /** Modifies the strings the string matrix to be aligned (left,centered,right,decimal). */
   protected void alignRow(String[] row, int[] maxColWidth, int[] maxColLead) {
-    int align = alignmentCode(alignment); //{-1,0,1,2} = {left,centered,right,decimal point}
+    //int align = alignmentCode(alignment); //{-1,0,1,2} = {left,centered,right,decimal point}
     StringBuilder s = new StringBuilder();
 
     int columns = row.length;
@@ -199,93 +199,6 @@ public abstract class AbstractFormatter extends org.apache.mahout.matrix.Persist
       buf.append(' ');
     }
     return buf.toString();
-  }
-
-  /** Demonstrates how to use this class. */
-  public static void demo1() {
-/*
-// parameters
-Object[][] values = {
-  {3,     0,        -3.4, 0},
-  {5.1   ,0,        +3.0123456789, 0},
-  {16.37, 0.0,       2.5, 0},
-  {-16.3, 0,        -3.012345678E-4, -1},
-  {1236.3456789, 0,  7, -1.2}
-};
-String[] formats =         {"%G", "%1.10G", "%f", "%1.2f", "%0.2e", null};
-
-
-// now the processing
-int size = formats.length;
-ObjectMatrix2D matrix = org.apache.mahout.matrix.matrix.ObjectFactory2D.dense.make(values);
-String[] strings = new String[size];
-String[] sourceCodes = new String[size];
-String[] htmlStrings = new String[size];
-String[] htmlSourceCodes = new String[size];
-
-for (int i=0; i<size; i++) {
-  String format = formats[i];
-  strings[i] = toString(matrix,format);
-  sourceCodes[i] = toSourceCode(matrix,format);
-
-  // may not compile because of packages not included in the distribution
-  //htmlStrings[i] = org.apache.mahout.matrix.matrixpattern.Converting.toHTML(strings[i]);
-  //htmlSourceCodes[i] = org.apache.mahout.matrix.matrixpattern.Converting.toHTML(sourceCodes[i]);
-}
-
-System.out.println("original:\n"+toString(matrix));
-
-// may not compile because of packages not included in the distribution
-for (int i=0; i<size; i++) {
-  //System.out.println("\nhtmlString("+formats[i]+"):\n"+htmlStrings[i]);
-  //System.out.println("\nhtmlSourceCode("+formats[i]+"):\n"+htmlSourceCodes[i]);
-}
-
-for (int i=0; i<size; i++) {
-  System.out.println("\nstring("+formats[i]+"):\n"+strings[i]);
-  System.out.println("\nsourceCode("+formats[i]+"):\n"+sourceCodes[i]);
-}
-*/
-  }
-
-  /** Demonstrates how to use this class. */
-  public static void demo2() {
-/*
-// parameters
-Object[] values = {
-  //5, 0.0, -0.0, -Object.NaN, Object.NaN, 0.0/0.0, Object.NEGATIVE_INFINITY, Object.POSITIVE_INFINITY, Object.MIN_VALUE, Object.MAX_VALUE
-  5, 0.0, -0.0, -Object.NaN, Object.NaN, 0.0/0.0, Object.MIN_VALUE, Object.MAX_VALUE , Object.NEGATIVE_INFINITY, Object.POSITIVE_INFINITY
-  //Object.MIN_VALUE, Object.MAX_VALUE //, Object.NEGATIVE_INFINITY, Object.POSITIVE_INFINITY
-};
-//String[] formats =         {"%G", "%1.10G", "%f", "%1.2f", "%0.2e"};
-String[] formats =         {"%G", "%1.19G"};
-
-
-// now the processing
-int size = formats.length;
-ObjectMatrix1D matrix = new DenseObjectMatrix1D(values);
-
-String[] strings = new String[size];
-//String[] javaStrings = new String[size];
-
-for (int i=0; i<size; i++) {
-  String format = formats[i];
-  strings[i] = toString(matrix,format);
-  for (int j=0; j<matrix.size(); j++) {
-    System.out.println(String.valueOf(matrix.get(j)));
-  }
-}
-
-System.out.println("original:\n"+toString(matrix));
-
-for (int i=0; i<size; i++) {
-  System.out.println("\nstring("+formats[i]+"):\n"+strings[i]);
-}
-*/
-  }
-
-  /** Demonstrates how to use this class. */
-  public static void demo3(int size, Object value) {
   }
 
   /** Converts a given cell to a String; no alignment considered. */
@@ -405,7 +318,7 @@ for (int i=0; i<size; i++) {
     String str = buf.toString();
     for (int i = size; --i >= 0;) {
       blanksCache[i] = str.substring(0, i);
-      //System.out.println(i+"-"+blanksCache[i]+"-");
+      //log.info(i+"-"+blanksCache[i]+"-");
     }
   }
 
@@ -465,7 +378,7 @@ for (int i=0; i<size; i++) {
     align(strings);
     StringBuilder total = new StringBuilder(toString(strings));
     if (printShape) {
-      total.insert(0, shape(matrix) + "\n");
+      total.insert(0, shape(matrix) + '\n');
     }
     return total.toString();
   }

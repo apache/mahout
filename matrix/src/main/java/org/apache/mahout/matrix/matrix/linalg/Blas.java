@@ -213,7 +213,7 @@ public interface Blas {
    *
    * @param a        rotational elimination parameter a.
    * @param b        rotational elimination parameter b.
-   * @param rotvec[] Must be at least of length 4. On output contains the values <tt>{a,b,c,s}</tt>.
+   * @param rotvec Must be at least of length 4. On output contains the values <tt>{a,b,c,s}</tt>.
    */
   void drotg(double a, double b, double[] rotvec);
 
@@ -245,8 +245,8 @@ public interface Blas {
   /**
    * Swaps the elements of two matrices; <tt>B <==> A</tt>.
    *
-   * @param A the first matrix.
-   * @param B the second matrix.
+   * @param x the first matrix.
+   * @param y the second matrix.
    * @throws IllegalArgumentException if <tt>A.columns() != B.columns() || A.rows() != B.rows()</tt>.
    */
   void dswap(DoubleMatrix2D x, DoubleMatrix2D y);

@@ -29,7 +29,7 @@ class WrapperDoubleMatrix2D extends DoubleMatrix2D {
    * <tt>values[row][column]</tt> and have exactly the same number of columns in every row. <p> The values are copied.
    * So subsequent changes in <tt>values</tt> are not reflected in the matrix, and vice-versa.
    *
-   * @param values The values to be filled into the new matrix.
+   * @param newContent The values to be filled into the new matrix.
    * @throws IllegalArgumentException if <tt>for any 1 &lt;= row &lt; values.length: values[row].length !=
    *                                  values[row-1].length</tt>.
    */
@@ -380,34 +380,34 @@ class WrapperDoubleMatrix2D extends DoubleMatrix2D {
    * 0..columns()/columnStride - 1</tt>. The returned view is backed by this matrix, so changes in the returned view are
    * reflected in this matrix, and vice-versa.
    *
-   * @param rowStride    the row step factor.
-   * @param columnStride the column step factor.
+   * @param theRowStride    the row step factor.
+   * @param theColumnStride the column step factor.
    * @return a new view.
    * @throws IndexOutOfBoundsException if <tt>rowStride<=0 || columnStride<=0</tt>.
    */
   @Override
-  public DoubleMatrix2D viewStrides(final int _rowStride, final int _columnStride) {
-    if (_rowStride <= 0 || _columnStride <= 0) {
+  public DoubleMatrix2D viewStrides(final int theRowStride, final int theColumnStride) {
+    if (theRowStride <= 0 || theColumnStride <= 0) {
       throw new IndexOutOfBoundsException("illegal stride");
     }
     DoubleMatrix2D view = new WrapperDoubleMatrix2D(this) {
       @Override
       public double getQuick(int row, int column) {
-        return content.get(_rowStride * row, _columnStride * column);
+        return content.get(theRowStride * row, theColumnStride * column);
       }
 
       @Override
       public void setQuick(int row, int column, double value) {
-        content.set(_rowStride * row, _columnStride * column, value);
+        content.set(theRowStride * row, theColumnStride * column, value);
       }
     };
     view.rows = rows;
     view.columns = columns;
     if (rows != 0) {
-      view.rows = (rows - 1) / _rowStride + 1;
+      view.rows = (rows - 1) / theRowStride + 1;
     }
     if (columns != 0) {
-      view.columns = (columns - 1) / _columnStride + 1;
+      view.columns = (columns - 1) / theColumnStride + 1;
     }
     return view;
   }
