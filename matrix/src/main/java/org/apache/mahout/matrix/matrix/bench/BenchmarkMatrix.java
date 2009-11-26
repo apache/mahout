@@ -355,7 +355,7 @@ public class BenchmarkMatrix {
 
       @Override
       public void apply(org.apache.mahout.matrix.Timer timer) {
-        org.apache.mahout.matrix.matrix.linalg.SmpBlas.getSmpBlas().assign(A, org.apache.mahout.jet.math.Functions.log);
+        org.apache.mahout.matrix.matrix.linalg.SmpBlas.getSmpBlas().assign(A, org.apache.mahout.jet.math.Functions.logarithm);
       }
     };
   }
