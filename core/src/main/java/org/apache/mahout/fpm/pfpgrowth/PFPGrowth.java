@@ -399,7 +399,6 @@ public class PFPGrowth {
             "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
     DefaultStringifier<Map<String, Long>> mapStringifier = new DefaultStringifier<Map<String, Long>>(
         conf, GenericsUtil.getClass(map));
-    String serializedMapString = mapStringifier.toString(map);
-    return serializedMapString;
+    return mapStringifier.toString(map);
   }
 }

@@ -19,6 +19,7 @@ package org.apache.mahout.df.data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.StringTokenizer;
 
 import org.apache.mahout.df.data.Dataset.Attribute;
@@ -42,7 +43,7 @@ public class DescriptorUtils {
     Attribute[] attributes = new Attribute[tokenizer.countTokens()];
   
     for (int attr = 0; attr < attributes.length; attr++) {
-      String token = tokenizer.nextToken().toUpperCase();
+      String token = tokenizer.nextToken().toUpperCase(Locale.ENGLISH);
       if ("I".equals(token))
         attributes[attr] = Attribute.IGNORED;
       else if ("N".equals(token))

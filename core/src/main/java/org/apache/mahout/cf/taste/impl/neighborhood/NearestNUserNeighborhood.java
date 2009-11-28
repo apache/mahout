@@ -23,16 +23,12 @@ import org.apache.mahout.cf.taste.impl.common.SamplingLongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * <p>Computes a neighborhood consisting of the nearest n users to a given user. "Nearest" is defined by
  * the given {@link UserSimilarity}.</p>
  */
 public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
-
-  private static final Logger log = LoggerFactory.getLogger(NearestNUserNeighborhood.class);
 
   private final int n;
   private final double minSimilarity;

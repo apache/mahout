@@ -52,12 +52,10 @@ public final class GenericBooleanPrefUserBasedRecommender extends GenericUserBas
     float totalSimilarity = 0.0f;
     boolean foundAPref = false;
     for (long userID : theNeighborhood) {
-      if (userID != theUserID) {
-        // See GenericItemBasedRecommender.doEstimatePreference() too
-        if (dataModel.getPreferenceValue(userID, itemID) != null) {
-          foundAPref = true;
-          totalSimilarity += similarity.userSimilarity(theUserID, userID);
-        }
+      // See GenericItemBasedRecommender.doEstimatePreference() too
+      if (userID != theUserID && dataModel.getPreferenceValue(userID, itemID) != null) {
+        foundAPref = true;
+        totalSimilarity += similarity.userSimilarity(theUserID, userID);
       }
     }
     return foundAPref ? totalSimilarity : Float.NaN;

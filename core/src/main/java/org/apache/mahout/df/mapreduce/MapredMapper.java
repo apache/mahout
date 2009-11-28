@@ -23,16 +23,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.df.builder.TreeBuilder;
 import org.apache.mahout.df.data.Dataset;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Base class for Mapred mappers. Loads common parameters from the job
  */
 public class MapredMapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
     Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
-
-  private static final Logger log = LoggerFactory.getLogger(MapredMapper.class);
 
   private boolean noOutput;
 

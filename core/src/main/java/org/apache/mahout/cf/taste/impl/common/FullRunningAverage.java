@@ -73,17 +73,17 @@ public class FullRunningAverage implements RunningAverage, Serializable {
   }
 
   @Override
-  public int getCount() {
+  public synchronized int getCount() {
     return count;
   }
 
   @Override
-  public double getAverage() {
+  public synchronized double getAverage() {
     return average;
   }
 
   @Override
-  public String toString() {
+  public synchronized String toString() {
     return String.valueOf(average);
   }
 

@@ -154,10 +154,8 @@ public final class FastIDSet implements Serializable, Cloneable {
   public boolean addAll(FastIDSet c) {
     boolean changed = false;
     for (long k : c.keys) {
-      if (k != NULL && k != REMOVED) {
-        if (add(k)) {
-          changed = true;
-        }
+      if (k != NULL && k != REMOVED && add(k)) {
+        changed = true;
       }
     }
     return changed;
@@ -176,10 +174,8 @@ public final class FastIDSet implements Serializable, Cloneable {
   public boolean removeAll(FastIDSet c) {
     boolean changed = false;
     for (long k : c.keys) {
-      if (k != NULL && k != REMOVED) {
-        if (remove(k)) {
-          changed = true;
-        }
+      if (k != NULL && k != REMOVED && remove(k)) {
+        changed = true;
       }
     }
     return changed;

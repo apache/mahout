@@ -102,8 +102,9 @@ public class FrequentPatternMaxHeap {
           int cmp = treeSetComparator.compare(least, frequentPattern);
           if (cmp < 0)
             least = frequentPattern;
-        } else if (least == null)
+        } else {
           least = frequentPattern;
+        }
       }
     }
   }

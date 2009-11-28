@@ -28,7 +28,7 @@ public final class FullRunningAverageAndStdDev extends FullRunningAverage implem
   }
 
   @Override
-  public double getStandardDeviation() {
+  public synchronized double getStandardDeviation() {
     return stdDev;
   }
 
@@ -65,7 +65,7 @@ public final class FullRunningAverageAndStdDev extends FullRunningAverage implem
   }
 
   @Override
-  public String toString() {
+  public synchronized String toString() {
     return String.valueOf(String.valueOf(getAverage()) + ',' + stdDev);
   }
 

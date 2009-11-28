@@ -145,7 +145,7 @@ public class DecisionForest {
   public boolean equals(Object obj) {
     if (this == obj)
       return true;
-    if (obj==null || !(obj instanceof DecisionForest))
+    if (!(obj instanceof DecisionForest))
       return false;
     
     DecisionForest rf = (DecisionForest)obj;

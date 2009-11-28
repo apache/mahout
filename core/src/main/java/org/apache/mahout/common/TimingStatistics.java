@@ -40,31 +40,31 @@ public final class TimingStatistics implements Serializable {
     this.sumSquaredTime = sumSquaredTime;
   }
 
-  public int getNCalls() {
+  public synchronized int getNCalls() {
     return nCalls;
   }
 
-  public long getMinTime() {
+  public synchronized long getMinTime() {
     return Math.max(0, minTime);
   }
 
-  public long getMaxTime() {
+  public synchronized long getMaxTime() {
     return maxTime;
   }
 
-  public long getSumTime() {
+  public synchronized long getSumTime() {
     return sumTime;
   }
 
-  public double getSumSquaredTime() {
+  public synchronized double getSumSquaredTime() {
     return sumSquaredTime;
   }
 
-  public long getMeanTime() {
+  public synchronized long getMeanTime() {
     return nCalls == 0 ? 0 : sumTime / nCalls;
   }
 
-  public long getStdDevTime() {
+  public synchronized long getStdDevTime() {
     if (nCalls == 0)
       return 0;
     double mean = getMeanTime();
@@ -76,7 +76,7 @@ public final class TimingStatistics implements Serializable {
     return (long) Math.sqrt(variance);
   }
 
-  public String toString() {
+  public synchronized String toString() {
     return '\n' +
         "nCalls = " + nCalls + ";\n" +
         "sumTime = " + sumTime / 1000000000.0f + "s;\n" +
@@ -105,8 +105,7 @@ public final class TimingStatistics implements Serializable {
         if (elapsed > maxTime)
           maxTime = elapsed;
         sumTime += elapsed;
-        double elapsedFP = elapsed;
-        sumSquaredTime += elapsedFP * elapsedFP;
+        sumSquaredTime += (double) (elapsed * elapsed);
       }
     }
   }

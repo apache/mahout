@@ -72,23 +72,23 @@ public final class WeightedRunningAverage implements RunningAverage, Serializabl
     average += (delta * weight) / totalWeight;
   }
 
-  public double getTotalWeight() {
+  public synchronized  double getTotalWeight() {
     return totalWeight;
   }
 
   /** @return {@link #getTotalWeight()} */
   @Override
-  public int getCount() {
+  public synchronized  int getCount() {
     return (int) totalWeight;
   }
 
   @Override
-  public double getAverage() {
+  public synchronized double getAverage() {
     return average;
   }
 
   @Override
-  public String toString() {
+  public synchronized String toString() {
     return String.valueOf(average);
   }
 

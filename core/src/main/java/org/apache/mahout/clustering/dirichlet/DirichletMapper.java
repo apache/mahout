@@ -91,7 +91,13 @@ public class DirichletMapper extends MapReduceBase implements
       // TODO: with more than one mapper, they will all have different mixtures. Will this matter?
       state.setMixture(UncommonDistributions.rDirichlet(state.totalCounts()));
       return state;
-    } catch (Exception e) {
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException(e);
+    } catch (InstantiationException e) {
+      throw new IllegalStateException(e);
+    } catch (IllegalAccessException e) {
+      throw new IllegalStateException(e);
+    } catch (IOException e) {
       throw new IllegalStateException(e);
     }
   }

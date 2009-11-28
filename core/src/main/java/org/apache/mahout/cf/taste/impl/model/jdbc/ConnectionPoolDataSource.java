@@ -38,15 +38,7 @@ public final class ConnectionPoolDataSource implements DataSource {
     if (underlyingDataSource == null) {
       throw new IllegalArgumentException("underlyingDataSource is null");
     }
-    ConnectionFactory connectionFactory = new ConnectionFactory() {
-      @Override
-      public Connection createConnection() throws SQLException {
-        Connection connection = underlyingDataSource.getConnection();
-        connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-        connection.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
-        return connection;
-      }
-    };
+    ConnectionFactory connectionFactory = new ConfiguringConnectionFactory(underlyingDataSource);
     GenericObjectPool objectPool = new GenericObjectPool();
     objectPool.setTestOnBorrow(false);
     objectPool.setTestOnReturn(false);
@@ -96,6 +88,23 @@ public final class ConnectionPoolDataSource implements DataSource {
   @Override
   public boolean isWrapperFor(Class<?> iface) throws SQLException {
     return delegate.isWrapperFor(iface);
+  }
+
+  private static class ConfiguringConnectionFactory implements ConnectionFactory {
+
+    private final DataSource underlyingDataSource;
+
+    public ConfiguringConnectionFactory(DataSource underlyingDataSource) {
+      this.underlyingDataSource = underlyingDataSource;
+    }
+
+    @Override
+    public Connection createConnection() throws SQLException {
+      Connection connection = underlyingDataSource.getConnection();
+      connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+      connection.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
+      return connection;
+    }
   }
 
 }

@@ -47,7 +47,7 @@ public class ForestPredictions implements PredictionCallback {
   public boolean equals(Object obj) {
     if (this == obj)
       return true;
-    if (obj == null || !(obj instanceof ForestPredictions))
+    if (!(obj instanceof ForestPredictions))
       return false;
 
     ForestPredictions fp = (ForestPredictions) obj;

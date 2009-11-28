@@ -27,15 +27,11 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.KeyValueTextInputFormat;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.common.StringTuple;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 /** Create and run the Bayes Feature Reader Step. */
 public class BayesFeatureDriver implements BayesJob {
-
-  private static final Logger log = LoggerFactory.getLogger(BayesFeatureDriver.class);
 
   /**
    * Run the job
