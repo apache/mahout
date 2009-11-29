@@ -36,15 +36,18 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
 @Deprecated
 public class Zeta extends AbstractDiscreteDistribution {
 
-  protected double ro;
-  protected double pk;
+  private double ro;
+  private double pk;
 
   // cached values (for performance)
-  protected double c, d, ro_prev = -1.0, pk_prev = -1.0;
-  protected final double maxlongint = Long.MAX_VALUE - 1.5;
+  private double c;
+  private double d;
+  private double ro_prev = -1.0;
+  private double pk_prev = -1.0;
+  private static final double maxlongint = Long.MAX_VALUE - 1.5;
 
   // The uniform random number generated shared by all <b>static</b> methods. 
-  protected static final Zeta shared = new Zeta(1.0, 1.0, makeDefaultGenerator());
+  private static final Zeta shared = new Zeta(1.0, 1.0, makeDefaultGenerator());
 
   /** Constructs a Zeta distribution. */
   public Zeta(double ro, double pk, RandomEngine randomGenerator) {
@@ -147,14 +150,4 @@ public class Zeta extends AbstractDiscreteDistribution {
     return this.getClass().getName() + '(' + ro + ',' + pk + ')';
   }
 
-  /**
-   * Sets the uniform random number generated shared by all <b>static</b> methods.
-   *
-   * @param randomGenerator the new uniform random number generator to be shared.
-   */
-  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-    synchronized (shared) {
-      shared.setRandomGenerator(randomGenerator);
-    }
-  }
 }

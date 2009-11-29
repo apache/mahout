@@ -8,6 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.stat.quantile;
 
+import org.apache.mahout.matrix.PersistentObject;
+import org.apache.mahout.matrix.function.DoubleProcedure;
 import org.apache.mahout.matrix.list.DoubleArrayList;
 
 /**
@@ -16,10 +18,10 @@ import org.apache.mahout.matrix.list.DoubleArrayList;
  * list, then picks the quantiles.
  */
 //class ExactDoubleQuantileFinder extends Object implements DoubleQuantileFinder {
-class ExactDoubleQuantileFinder extends org.apache.mahout.matrix.PersistentObject implements DoubleQuantileFinder {
+class ExactDoubleQuantileFinder extends PersistentObject implements DoubleQuantileFinder {
 
-  protected DoubleArrayList buffer;
-  protected boolean isSorted;
+  private DoubleArrayList buffer;
+  private boolean isSorted;
 
   /** Constructs an empty exact quantile finder. */
   ExactDoubleQuantileFinder() {
@@ -101,7 +103,7 @@ class ExactDoubleQuantileFinder extends org.apache.mahout.matrix.PersistentObjec
    * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise.
    */
   @Override
-  public boolean forEach(org.apache.mahout.matrix.function.DoubleProcedure procedure) {
+  public boolean forEach(DoubleProcedure procedure) {
     double[] theElements = buffer.elements();
     int theSize = (int) size();
 

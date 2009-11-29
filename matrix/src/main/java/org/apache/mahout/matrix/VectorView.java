@@ -132,7 +132,7 @@ public class VectorView extends AbstractVector {
 
     private Vector.Element el;
 
-    public NonZeroIterator() {
+    private NonZeroIterator() {
       it = vector.iterateAll();
       buffer();
     }
@@ -192,7 +192,7 @@ public class VectorView extends AbstractVector {
 
     private Vector.Element el;
 
-    public AllIterator() {
+    private AllIterator() {
       it = vector.iterateAll();
       buffer();
     }
@@ -268,7 +268,7 @@ public class VectorView extends AbstractVector {
 
     private final int ind;
 
-    public Element(int ind) {
+    private Element(int ind) {
       this.ind = ind;
     }
 

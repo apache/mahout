@@ -8,6 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.random.engine;
 
+import org.apache.mahout.matrix.PersistentObject;
+
 /**
  * Deterministic seed generator for pseudo-random number generators.
  * The sole purpose of this class is to decorrelate seeds and uniform random number generators.
@@ -24,10 +26,10 @@ package org.apache.mahout.jet.random.engine;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class RandomSeedGenerator extends org.apache.mahout.matrix.PersistentObject {
+public class RandomSeedGenerator extends PersistentObject {
 
-  protected int row;
-  protected final int column;
+  private int row;
+  private final int column;
 
   /** Constructs and returns a new seed generator. */
   public RandomSeedGenerator() {

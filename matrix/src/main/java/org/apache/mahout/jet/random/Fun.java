@@ -8,6 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.random;
 
+import org.apache.mahout.jet.math.Arithmetic;
+
 /**
  * Contains various mathematical helper methods.
  *
@@ -377,16 +379,7 @@ class Fun {
 
   /** Returns <tt>n!</tt>. */
   public static long factorial(int n) {
-    return org.apache.mahout.jet.math.Arithmetic.longFactorial(n);
-    /*
-    long i,prod;
-
-    prod = 1;
-    if (n != 0) {
-      for (i = 2; i <= n; i++) prod *= i;
-    }
-    return prod;
-    */
+    return Arithmetic.longFactorial(n);
   }
 
   private static double fkt2_value(double lambda, double beta, double x_value) {

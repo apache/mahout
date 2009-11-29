@@ -8,6 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.matrix;
 
+import org.apache.mahout.matrix.PersistentObject;
 import org.apache.mahout.matrix.matrix.impl.DenseObjectMatrix3D;
 import org.apache.mahout.matrix.matrix.impl.SparseObjectMatrix3D;
 /**
@@ -33,7 +34,7 @@ import org.apache.mahout.matrix.matrix.impl.SparseObjectMatrix3D;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class ObjectFactory3D extends org.apache.mahout.matrix.PersistentObject {
+public class ObjectFactory3D extends PersistentObject {
 
   /** A factory producing dense matrices. */
   public static final ObjectFactory3D dense = new ObjectFactory3D();

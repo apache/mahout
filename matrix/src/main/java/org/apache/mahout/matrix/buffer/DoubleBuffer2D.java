@@ -8,6 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.buffer;
 
+import org.apache.mahout.matrix.PersistentObject;
 import org.apache.mahout.matrix.list.DoubleArrayList;
 /**
  * Fixed sized (non resizable) streaming buffer connected to a target <tt>DoubleBuffer2DConsumer</tt> to which data is automatically flushed upon buffer overflow.
@@ -16,17 +17,17 @@ import org.apache.mahout.matrix.list.DoubleArrayList;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class DoubleBuffer2D extends org.apache.mahout.matrix.PersistentObject implements DoubleBuffer2DConsumer {
+public class DoubleBuffer2D extends PersistentObject implements DoubleBuffer2DConsumer {
 
-  protected DoubleBuffer2DConsumer target;
-  protected double[] xElements;
-  protected double[] yElements;
+  private final DoubleBuffer2DConsumer target;
+  private final double[] xElements;
+  private final double[] yElements;
 
   // vars cached for speed
-  protected DoubleArrayList xList;
-  protected DoubleArrayList yList;
-  protected int capacity;
-  protected int size;
+  private final DoubleArrayList xList;
+  private final DoubleArrayList yList;
+  private final int capacity;
+  private int size;
 
   /**
    * Constructs and returns a new buffer with the given target.

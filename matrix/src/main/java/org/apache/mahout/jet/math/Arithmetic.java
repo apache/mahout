@@ -37,7 +37,7 @@ public class Arithmetic extends Constants {
 
   // for method logFactorial(...)
   // log(k!) for k = 0, ..., 29
-  protected static final double[] logFactorials = {
+  private static final double[] logFactorials = {
       0.00000000000000000, 0.00000000000000000, 0.69314718055994531,
       1.79175946922805500, 3.17805383034794562, 4.78749174278204599,
       6.57925121201010100, 8.52516136106541430, 10.60460290274525023,
@@ -51,7 +51,7 @@ public class Arithmetic extends Constants {
   };
 
   // k! for k = 0, ..., 20
-  protected static final long[] longFactorials = {
+  private static final long[] longFactorials = {
       1L,
       1L,
       2L,
@@ -76,7 +76,7 @@ public class Arithmetic extends Constants {
   };
 
   // k! for k = 21, ..., 170
-  protected static final double[] doubleFactorials = {
+  private static final double[] doubleFactorials = {
       5.109094217170944E19,
       1.1240007277776077E21,
       2.585201673888498E22,
@@ -402,7 +402,7 @@ public class Arithmetic extends Constants {
    *
    * @param k must hold <tt>k &gt;= 0</tt>.
    */
-  public static double factorial(int k) {
+  private static double factorial(int k) {
     if (k < 0) {
       throw new IllegalArgumentException();
     }
@@ -505,8 +505,4 @@ public class Arithmetic extends Constants {
     }
   }
 
-  /** Equivalent to <tt>Math.round(binomial(n,k))</tt>. */
-  private static long xlongBinomial(long n, long k) {
-    return Math.round(binomial(n, k));
-  }
 }

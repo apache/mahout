@@ -32,13 +32,13 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
 @Deprecated
 public class ExponentialPower extends AbstractContinousDistribution {
 
-  protected double tau;
+  private double tau;
 
   // cached vars for method nextDouble(tau) (for performance only)
   private double s, sm1, tau_set = -1.0;
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static ExponentialPower shared = new ExponentialPower(1.0, makeDefaultGenerator());
+  private static final ExponentialPower shared = new ExponentialPower(1.0, makeDefaultGenerator());
 
   /**
    * Constructs an Exponential Power distribution. Example: tau=1.0.
@@ -128,14 +128,4 @@ public class ExponentialPower extends AbstractContinousDistribution {
     return this.getClass().getName() + '(' + tau + ')';
   }
 
-  /**
-   * Sets the uniform random number generated shared by all <b>static</b> methods.
-   *
-   * @param randomGenerator the new uniform random number generator to be shared.
-   */
-  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-    synchronized (shared) {
-      shared.setRandomGenerator(randomGenerator);
-    }
-  }
 }

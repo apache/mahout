@@ -40,8 +40,8 @@ import java.awt.Rectangle;
 @Deprecated
 public class BitMatrix extends PersistentObject {
 
-  protected int columns;
-  protected int rows;
+  private int columns;
+  private int rows;
 
   /*
    * The bits of this matrix.
@@ -50,7 +50,7 @@ public class BitMatrix extends PersistentObject {
    * columnOf(bitIndex)==bitIndex%columns
    * rowOf(bitIndex)==bitIndex/columns
    */
-  protected long[] bits;
+  private long[] bits;
 
   /**
    * Constructs a bit matrix with a given number of columns and rows. All bits are initially <tt>false</tt>.
@@ -211,7 +211,7 @@ public class BitMatrix extends PersistentObject {
     if (size()==0) return true;
     BitVector vector = toBitVector();
     return vector.forEachIndexFromToInState(0,size()-1,state,
-      new org.apache.mahout.matrix.function.IntFunction() {
+      new IntFunction() {
         public boolean apply(int index) {
           return function.apply(index%columns, index/columns);
         }

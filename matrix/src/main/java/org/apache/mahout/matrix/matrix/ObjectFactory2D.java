@@ -8,6 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.matrix;
 
+import org.apache.mahout.matrix.PersistentObject;
 import org.apache.mahout.matrix.matrix.impl.DenseObjectMatrix2D;
 import org.apache.mahout.matrix.matrix.impl.SparseObjectMatrix2D;
 /**
@@ -63,7 +64,7 @@ composeDiagonal} to work with diagonal block matrices. </td>
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class ObjectFactory2D extends org.apache.mahout.matrix.PersistentObject {
+public class ObjectFactory2D extends PersistentObject {
 
   /** A factory producing dense matrices. */
   public static final ObjectFactory2D dense = new ObjectFactory2D();

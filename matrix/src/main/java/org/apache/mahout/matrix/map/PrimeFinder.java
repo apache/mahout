@@ -132,7 +132,7 @@ public class PrimeFinder {
    */
   public static int nextPrime(int desiredCapacity) {
     int i = java.util.Arrays.binarySearch(primeCapacities, desiredCapacity);
-    //int i = new org.apache.mahout.matrix.list.IntArrayList(primeCapacities).binarySearch(desiredCapacity); // for debug only TODO
+    //int i = new IntArrayList(primeCapacities).binarySearch(desiredCapacity); // for debug only TODO
     if (i < 0) {
       // desired capacity not found, choose next prime greater than desired capacity
       i = -i - 1; // remember the semantics of binarySearch...
@@ -141,7 +141,7 @@ public class PrimeFinder {
   }
 
   /** Tests correctness. */
-  protected static void statistics(int from, int to) {
+  private static void statistics(int from, int to) {
     // check that primes contain no accidental errors
     for (int i = 0; i < primeCapacities.length - 1; i++) {
       if (primeCapacities[i] >= primeCapacities[i + 1]) {

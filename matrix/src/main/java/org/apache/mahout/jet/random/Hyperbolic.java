@@ -32,17 +32,29 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
 @Deprecated
 public class Hyperbolic extends AbstractContinousDistribution {
 
-  protected double alpha;
-  protected double beta;
+  private double alpha;
+  private double beta;
 
   // cached values shared for generateHyperbolic(...)
-  protected double a_setup = 0.0, b_setup = -1.0;
-  protected double x, u, v, e;
-  protected double hr, hl, s, pm, pr, samb, pmr, mpa_1, mmb_1;
+  private double a_setup = 0.0;
+  private double b_setup = -1.0;
+  private double x;
+  private double u;
+  private double v;
+  private double e;
+  private double hr;
+  private double hl;
+  private double s;
+  private double pm;
+  private double pr;
+  private double samb;
+  private double pmr;
+  private double mpa_1;
+  private double mmb_1;
 
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static Hyperbolic shared = new Hyperbolic(10.0, 10.0, makeDefaultGenerator());
+  private static final Hyperbolic shared = new Hyperbolic(10.0, 10.0, makeDefaultGenerator());
 
   /** Constructs a Beta distribution. */
   public Hyperbolic(double alpha, double beta, RandomEngine randomGenerator) {
@@ -155,14 +167,4 @@ public class Hyperbolic extends AbstractContinousDistribution {
     return this.getClass().getName() + '(' + alpha + ',' + beta + ')';
   }
 
-  /**
-   * Sets the uniform random number generated shared by all <b>static</b> methods.
-   *
-   * @param randomGenerator the new uniform random number generator to be shared.
-   */
-  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-    synchronized (shared) {
-      shared.setRandomGenerator(randomGenerator);
-    }
-  }
 }

@@ -32,8 +32,8 @@ import org.apache.mahout.jet.stat.Probability;
 @Deprecated
 public class Binomial extends AbstractDiscreteDistribution {
 
-  protected int n;
-  protected double p;
+  private int n;
+  private double p;
 
   // cache vars for method generateBinomial(...)
   private int n_last = -1, n_prev = -1;
@@ -45,7 +45,7 @@ public class Binomial extends AbstractDiscreteDistribution {
   private double log_p, log_q, log_n;
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static Binomial shared = new Binomial(1, 0.5, makeDefaultGenerator());
+  private static final Binomial shared = new Binomial(1, 0.5, makeDefaultGenerator());
 
   /**
    * Constructs a binomial distribution. Example: n=1, p=0.5.
@@ -92,9 +92,9 @@ public class Binomial extends AbstractDiscreteDistribution {
    * computed recursively  * starting at the mode m.                                        * The acceptance test by
    * Stirling's formula is modified          * according to W. Hoermann (1992): The generation of binomial    * random
    * variates, to appear in J. Statist. Comput. Simul.       * If  p < .5  the algorithm is applied to parameters n, p.
-   *      * Otherwise p is replaced by 1-p, and k is replaced by n - k.    * * *****************************************************************
-   * * FUNCTION:    - samples a random number from the binomial       * distribution with parameters n and p  and is
-   * * valid for  n*min(p,1-p)  >  0. * REFERENCE:   - V. Kachitvichyanukul, B.W. Schmeiser (1988):    * Binomial random
+   * * Otherwise p is replaced by 1-p, and k is replaced by n - k.    * * *****************************************************************
+   * * FUNCTION:    - samples a random number from the binomial       * distribution with parameters n and p  and is *
+   * valid for  n*min(p,1-p)  >  0. * REFERENCE:   - V. Kachitvichyanukul, B.W. Schmeiser (1988):    * Binomial random
    * variate generation, * Communications of the ACM 31, 216-222.          * SUBPROGRAMS: - StirlingCorrection() * ...
    * Correction term of the Stirling * approximation for log(k!) * (series in 1/k or table values  * for small k) with
    * long int k    * - randomGenerator    ... (0,1)-Uniform engine * * ****************************************************************
@@ -317,14 +317,4 @@ public class Binomial extends AbstractDiscreteDistribution {
     return this.getClass().getName() + '(' + n + ',' + p + ')';
   }
 
-  /**
-   * Sets the uniform random number generated shared by all <b>static</b> methods.
-   *
-   * @param randomGenerator the new uniform random number generator to be shared.
-   */
-  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-    synchronized (shared) {
-      shared.setRandomGenerator(randomGenerator);
-    }
-  }
 }

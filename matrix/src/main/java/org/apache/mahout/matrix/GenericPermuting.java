@@ -8,6 +8,9 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix;
 
+import org.apache.mahout.jet.random.Uniform;
+import org.apache.mahout.jet.random.engine.MersenneTwister;
+
 /**
  Generically reorders (permutes) arbitrary shaped data (for example, an array, three arrays, a 2-d matrix, two linked lists) using an <i>in-place</i> swapping algorithm.
  Imagine having a couple of apples. For some reason you decide to reorder them. The green one before the red one. The pale one after the shiny one, etc. This class helps to do the job.
@@ -153,8 +156,7 @@ public class GenericPermuting {
       for (int i = N; --i >= 0;) {
         permutation[i] = i;
       }
-      org.apache.mahout.jet.random.Uniform gen =
-          new org.apache.mahout.jet.random.Uniform(new org.apache.mahout.jet.random.engine.MersenneTwister((int) p));
+      Uniform gen = new Uniform(new MersenneTwister((int) p));
       for (int i = 0; i < N - 1; i++) {
         int random = gen.nextIntFromTo(i, N - 1);
 

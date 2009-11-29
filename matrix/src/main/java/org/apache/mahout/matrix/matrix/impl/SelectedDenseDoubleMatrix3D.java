@@ -36,12 +36,12 @@ class SelectedDenseDoubleMatrix3D extends DoubleMatrix3D {
   protected final double[] elements;
 
   /** The offsets of the visible cells of this matrix. */
-  protected int[] sliceOffsets;
-  protected int[] rowOffsets;
-  protected int[] columnOffsets;
+  private int[] sliceOffsets;
+  private int[] rowOffsets;
+  private int[] columnOffsets;
 
   /** The offset. */
-  protected int offset;
+  private int offset;
 
   /**
    * Constructs a matrix view with the given parameters.

@@ -8,6 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.stat.quantile;
 
+import org.apache.mahout.matrix.function.DoubleProcedure;
 import org.apache.mahout.matrix.list.DoubleArrayList;
 /**
  * The interface shared by all quantile finders, no matter if they are exact or approximate.
@@ -32,7 +33,7 @@ public interface DoubleQuantileFinder extends java.io.Serializable {
    *
    * @param values the list of which all values shall be added.
    */
-  void addAllOf(org.apache.mahout.matrix.list.DoubleArrayList values);
+  void addAllOf(DoubleArrayList values);
 
   /**
    * Adds the part of the specified list between indexes <tt>from</tt> (inclusive) and <tt>to</tt> (inclusive) to the
@@ -64,7 +65,7 @@ public interface DoubleQuantileFinder extends java.io.Serializable {
    *                  continues.
    * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise.
    */
-  boolean forEach(org.apache.mahout.matrix.function.DoubleProcedure procedure);
+  boolean forEach(DoubleProcedure procedure);
 
   /**
    * Returns the number of elements currently needed to store all contained elements. This number usually differs from

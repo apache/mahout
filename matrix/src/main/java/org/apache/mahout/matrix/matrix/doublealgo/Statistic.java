@@ -9,11 +9,14 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.matrix.matrix.doublealgo;
 
 import org.apache.mahout.jet.math.Functions;
+import org.apache.mahout.jet.random.engine.MersenneTwister;
 import org.apache.mahout.jet.random.engine.RandomEngine;
+import org.apache.mahout.jet.random.sampling.RandomSampler;
 import org.apache.mahout.matrix.function.DoubleDoubleFunction;
 import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix3D;
+import org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix2D;
 /**
  Basic statistics operations on matrices.
  Computation of covariance, correlation, distance matrix.
@@ -80,7 +83,7 @@ public class Statistic {
 
   /** Canberra distance function; <tt>Sum( abs(x[i]-y[i]) / abs(x[i]+y[i]) )</tt>. */
   public static final VectorVectorFunction CANBERRA = new VectorVectorFunction() {
-    final DoubleDoubleFunction fun = new DoubleDoubleFunction() {
+    private final DoubleDoubleFunction fun = new DoubleDoubleFunction() {
       @Override
       public double apply(double a, double b) {
         return Math.abs(a - b) / Math.abs(a + b);
@@ -125,7 +128,7 @@ public class Statistic {
      * @param y the second argument vector passed to the function.
      * @return the result of the function.
      */
-    double apply(org.apache.mahout.matrix.matrix.DoubleMatrix1D x, org.apache.mahout.matrix.matrix.DoubleMatrix1D y);
+    double apply(DoubleMatrix1D x, org.apache.mahout.matrix.matrix.DoubleMatrix1D y);
   }
 
   /** Makes this class non instantiable, but still let's others inherit from it. */
@@ -147,7 +150,7 @@ public class Statistic {
 public static DoubleMatrix2D aggregate(DoubleMatrix2D matrix, hep.aida.bin.BinFunction1D[] aggr, DoubleMatrix2D result) {
 DynamicBin1D bin = new DynamicBin1D();
 double[] elements = new double[matrix.rows()];
-org.apache.mahout.matrix.list.DoubleArrayList values = new org.apache.mahout.matrix.list.DoubleArrayList(elements);
+org.apache.mahout.matrix.list.DoubleArrayList values = new DoubleArrayList(elements);
 for (int column=matrix.columns(); --column >= 0; ) {
 matrix.viewColumn(column).toArray(elements); // copy column into values
 bin.clear();
@@ -266,7 +269,7 @@ return result;
   public static DoubleMatrix2D covariance(DoubleMatrix2D matrix) {
     int rows = matrix.rows();
     int columns = matrix.columns();
-    DoubleMatrix2D covariance = new org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix2D(columns, columns);
+    DoubleMatrix2D covariance = new DenseDoubleMatrix2D(columns, columns);
 
     double[] sums = new double[columns];
     DoubleMatrix1D[] cols = new DoubleMatrix1D[columns];
@@ -325,9 +328,9 @@ return result;
  if (x.size() != y.size() || y.size() != weights.size()) throw new IllegalArgumentException("vectors must have same size");
 
  double epsilon = 1.0E-9;
- org.apache.mahout.matrix.list.DoubleArrayList distinct = new org.apache.mahout.matrix.list.DoubleArrayList();
+ org.apache.mahout.matrix.list.DoubleArrayList distinct = new DoubleArrayList();
  double[] vals = new double[x.size()];
- org.apache.mahout.matrix.list.DoubleArrayList sorted = new org.apache.mahout.matrix.list.DoubleArrayList(vals);
+ org.apache.mahout.matrix.list.DoubleArrayList sorted = new DoubleArrayList(vals);
 
  // compute distinct values of x
  x.toArray(vals); // copy x into vals
@@ -365,9 +368,9 @@ return result;
  if (x.size() != y.size() || x.size() != z.size() || x.size() != weights.size()) throw new IllegalArgumentException("vectors must have same size");
 
  double epsilon = 1.0E-9;
- org.apache.mahout.matrix.list.DoubleArrayList distinct = new org.apache.mahout.matrix.list.DoubleArrayList();
+ org.apache.mahout.matrix.list.DoubleArrayList distinct = new DoubleArrayList();
  double[] vals = new double[x.size()];
- org.apache.mahout.matrix.list.DoubleArrayList sorted = new org.apache.mahout.matrix.list.DoubleArrayList(vals);
+ org.apache.mahout.matrix.list.DoubleArrayList sorted = new DoubleArrayList(vals);
 
  // compute distinct values of x
  x.toArray(vals); // copy x into vals
@@ -414,7 +417,7 @@ return result;
    */
   public static DoubleMatrix2D distance(DoubleMatrix2D matrix, VectorVectorFunction distanceFunction) {
     int columns = matrix.columns();
-    DoubleMatrix2D distance = new org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix2D(columns, columns);
+    DoubleMatrix2D distance = new DenseDoubleMatrix2D(columns, columns);
 
     // cache views
     DoubleMatrix1D[] cols = new DoubleMatrix1D[columns];
@@ -439,7 +442,7 @@ return result;
    * replacement" from the uniform distribution.
    *
    * @param matrix          any matrix.
-   * @param fraction     the percentage of rows to be included in the view.
+   * @param fraction        the percentage of rows to be included in the view.
    * @param randomGenerator a uniform random number generator; set this parameter to <tt>null</tt> to use a default
    *                        generator seeded with the current time.
    * @return the sampling view.
@@ -461,7 +464,7 @@ return result;
 
     // random generator seeded with current time
     if (randomGenerator == null) {
-      randomGenerator = new org.apache.mahout.jet.random.engine.MersenneTwister((int) System.currentTimeMillis());
+      randomGenerator = new MersenneTwister((int) System.currentTimeMillis());
     }
 
     int ncols = (int) Math.round(matrix.size() * fraction);
@@ -471,7 +474,7 @@ return result;
     // sample
     int n = ncols;
     int N = matrix.size();
-    org.apache.mahout.jet.random.sampling.RandomSampler.sample(n, N, n, 0, selected, 0, randomGenerator);
+    RandomSampler.sample(n, N, n, 0, selected, 0, randomGenerator);
     int[] selectedCols = new int[n];
     for (int i = 0; i < n; i++) {
       selectedCols[i] = (int) selected[i];
@@ -538,7 +541,7 @@ return result;
 
     // random generator seeded with current time
     if (randomGenerator == null) {
-      randomGenerator = new org.apache.mahout.jet.random.engine.MersenneTwister((int) System.currentTimeMillis());
+      randomGenerator = new MersenneTwister((int) System.currentTimeMillis());
     }
 
     int nrows = (int) Math.round(matrix.rows() * rowFraction);
@@ -549,7 +552,7 @@ return result;
     // sample rows
     int n = nrows;
     int N = matrix.rows();
-    org.apache.mahout.jet.random.sampling.RandomSampler.sample(n, N, n, 0, selected, 0, randomGenerator);
+    RandomSampler.sample(n, N, n, 0, selected, 0, randomGenerator);
     int[] selectedRows = new int[n];
     for (int i = 0; i < n; i++) {
       selectedRows[i] = (int) selected[i];
@@ -558,7 +561,7 @@ return result;
     // sample columns
     n = ncols;
     N = matrix.columns();
-    org.apache.mahout.jet.random.sampling.RandomSampler.sample(n, N, n, 0, selected, 0, randomGenerator);
+    RandomSampler.sample(n, N, n, 0, selected, 0, randomGenerator);
     int[] selectedCols = new int[n];
     for (int i = 0; i < n; i++) {
       selectedCols[i] = (int) selected[i];
@@ -619,7 +622,7 @@ return result;
 
     // random generator seeded with current time
     if (randomGenerator == null) {
-      randomGenerator = new org.apache.mahout.jet.random.engine.MersenneTwister((int) System.currentTimeMillis());
+      randomGenerator = new MersenneTwister((int) System.currentTimeMillis());
     }
 
     int nslices = (int) Math.round(matrix.slices() * sliceFraction);
@@ -631,7 +634,7 @@ return result;
     // sample slices
     int n = nslices;
     int N = matrix.slices();
-    org.apache.mahout.jet.random.sampling.RandomSampler.sample(n, N, n, 0, selected, 0, randomGenerator);
+    RandomSampler.sample(n, N, n, 0, selected, 0, randomGenerator);
     int[] selectedSlices = new int[n];
     for (int i = 0; i < n; i++) {
       selectedSlices[i] = (int) selected[i];
@@ -640,7 +643,7 @@ return result;
     // sample rows
     n = nrows;
     N = matrix.rows();
-    org.apache.mahout.jet.random.sampling.RandomSampler.sample(n, N, n, 0, selected, 0, randomGenerator);
+    RandomSampler.sample(n, N, n, 0, selected, 0, randomGenerator);
     int[] selectedRows = new int[n];
     for (int i = 0; i < n; i++) {
       selectedRows[i] = (int) selected[i];
@@ -649,7 +652,7 @@ return result;
     // sample columns
     n = ncols;
     N = matrix.columns();
-    org.apache.mahout.jet.random.sampling.RandomSampler.sample(n, N, n, 0, selected, 0, randomGenerator);
+    RandomSampler.sample(n, N, n, 0, selected, 0, randomGenerator);
     int[] selectedCols = new int[n];
     for (int i = 0; i < n; i++) {
       selectedCols[i] = (int) selected[i];
@@ -658,108 +661,4 @@ return result;
     return matrix.viewSelection(selectedSlices, selectedRows, selectedCols);
   }
 
-  /**
-   * Constructs and returns the distance matrix of the given matrix. The distance matrix is a square, symmetric matrix
-   * consisting of nothing but distance coefficients. The rows and the columns represent the variables, the cells
-   * represent distance coefficients. The diagonal cells (i.e. the distance between a variable and itself) will be zero.
-   * Compares two column vectors at a time. Use dice views to compare two row vectors at a time.
-   *
-   * @param matrix any matrix; a column holds the values of a given variable (vector).
-   * @param norm   the kind of norm to be used (EUCLID, CANBERRA, ...).
-   * @return the distance matrix (<tt>n x n, n=matrix.columns</tt>).
-   */
-  private static DoubleMatrix2D xdistanceOld(DoubleMatrix2D matrix, int norm) {
-    /*
-    int rows = matrix.rows();
-    int columns = matrix.columns();
-    DoubleMatrix2D distance = new org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix2D(columns,columns);
-
-    // cache views
-    DoubleMatrix1D[] cols = new DoubleMatrix1D[columns];
-    for (int i=columns; --i >= 0; ) {
-      cols[i] = matrix.viewColumn(i);
-    }
-
-    // setup distance function
-    org.apache.mahout.jet.math.Functions F = org.apache.mahout.jet.math.Functions.functions;
-    DoubleDoubleFunction function = null;
-    //DoubleDoubleFunction function2 = null;
-    if (norm==EUCLID) function = F.chain(F.square,F.minus);
-    else if (norm==BRAY_CURTIS) function = F.chain(F.abs,F.minus);
-    else if (norm==CANBERRA) function = new DoubleDoubleFunction() {
-      public final double apply(double a, double b) {  return Math.abs(a-b) / Math.abs(a+b);}
-    };
-    else if (norm==MAXIMUM) function = F.chain(F.abs,F.minus);
-    else if (norm==MANHATTAN) function = F.chain(F.abs,F.minus);
-    else throw new IllegalArgumentException("Unknown norm");
-
-    // work out all permutations
-    for (int i=columns; --i >= 0; ) {
-      for (int j=i; --j >= 0; ) {
-        double d = 0;
-        if (norm==EUCLID) d = Math.sqrt(cols[i].aggregate(cols[j], F.plus, function));
-        else if (norm==BRAY_CURTIS) d = cols[i].aggregate(cols[j], F.plus, function) / cols[i].aggregate(cols[j], F.plus, F.plus);
-        else if (norm==CANBERRA) d = cols[i].aggregate(cols[j], F.plus, function);
-        else if (norm==MAXIMUM) d = cols[i].aggregate(cols[j], F.max, function);
-        else if (norm==MANHATTAN) d = cols[i].aggregate(cols[j], F.plus, function);
-        distance.setQuick(i,j,d);
-        distance.setQuick(j,i,d); // symmetric
-      }
-    }
-    return distance;
-    */
-    return null;
-  }
-
-  /**
-   * Constructs and returns the distance matrix of the given matrix. The distance matrix is a square, symmetric matrix
-   * consisting of nothing but distance coefficients. The rows and the columns represent the variables, the cells
-   * represent distance coefficients. The diagonal cells (i.e. the distance between a variable and itself) will be zero.
-   * Compares two column vectors at a time. Use dice views to compare two row vectors at a time.
-   *
-   * @param matrix any matrix; a column holds the values of a given variable (vector).
-   * @param norm   the kind of norm to be used (EUCLID, CANBERRA, ...).
-   * @return the distance matrix (<tt>n x n, n=matrix.columns</tt>).
-   */
-  private static DoubleMatrix2D xdistanceOld2(DoubleMatrix2D matrix, int norm) {
-    /*
-    // setup distance function
-    final org.apache.mahout.jet.math.Functions F = org.apache.mahout.jet.math.Functions.functions;
-    VectorVectorFunction function;
-    if (norm==EUCLID) function = new VectorVectorFunction() {
-      public final double apply(DoubleMatrix1D a, DoubleMatrix1D b) {
-        return Math.sqrt(a.aggregate(b, F.plus, F.chain(F.square,F.minus)));
-      }
-    };
-    else if (norm==BRAY_CURTIS) function = new VectorVectorFunction() {
-      public final double apply(DoubleMatrix1D a, DoubleMatrix1D b) {
-        return a.aggregate(b, F.plus, F.chain(F.abs,F.minus)) / a.aggregate(b, F.plus, F.plus);
-      }
-    };
-    else if (norm==CANBERRA) function = new VectorVectorFunction() {
-      DoubleDoubleFunction fun = new DoubleDoubleFunction() {
-        public final double apply(double a, double b) {
-          return Math.abs(a-b) / Math.abs(a+b);
-        }
-      };
-      public final double apply(DoubleMatrix1D a, DoubleMatrix1D b) {
-        return a.aggregate(b, F.plus, fun);
-      }
-    };
-    else if (norm==MAXIMUM) function = new VectorVectorFunction() {
-      public final double apply(DoubleMatrix1D a, DoubleMatrix1D b) {
-        return a.aggregate(b, F.max, F.chain(F.abs,F.minus));
-      }
-    };
-    else if (norm==MANHATTAN) function = new VectorVectorFunction() {
-      public final double apply(DoubleMatrix1D a, DoubleMatrix1D b) {
-        return a.aggregate(b, F.plus, F.chain(F.abs,F.minus));
-      }
-    };
-    else throw new IllegalArgumentException("Unknown norm");
-
-    return distance(matrix,function);
-    */
-    return null;
-  }
 }

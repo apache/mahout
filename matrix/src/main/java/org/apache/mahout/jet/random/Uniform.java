@@ -8,6 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.random;
 
+import org.apache.mahout.jet.random.engine.MersenneTwister;
 import org.apache.mahout.jet.random.engine.RandomEngine;
 /**
  * Uniform distribution; <A HREF="http://www.cern.ch/RD11/rkb/AN16pp/node292.html#SECTION0002920000000000000000"> Math definition</A>
@@ -23,8 +24,8 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
 @Deprecated
 public class Uniform extends AbstractContinousDistribution {
 
-  protected double min;
-  protected double max;
+  private double min;
+  private double max;
 
   // The uniform random number generated shared by all <b>static</b> methods.
   protected static final Uniform shared = new Uniform(makeDefaultGenerator());
@@ -34,7 +35,7 @@ public class Uniform extends AbstractContinousDistribution {
    * org.apache.mahout.jet.random.engine.MersenneTwister} seeded with the given seed.
    */
   public Uniform(double min, double max, int seed) {
-    this(min, max, new org.apache.mahout.jet.random.engine.MersenneTwister(seed));
+    this(min, max, new MersenneTwister(seed));
   }
 
   /** Constructs a uniform distribution with the given minimum and maximum. */

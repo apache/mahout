@@ -35,7 +35,7 @@ class SelectedSparseDoubleMatrix2D extends DoubleMatrix2D {
   /*
    * The elements of the matrix.
    */
-  protected AbstractIntDoubleMap elements;
+  protected final AbstractIntDoubleMap elements;
 
   /** The offsets of the visible cells of this matrix. */
   protected int[] rowOffsets;

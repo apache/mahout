@@ -33,14 +33,14 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
 @Deprecated
 public class VonMises extends AbstractContinousDistribution {
 
-  protected double my_k;
+  private double my_k;
 
   // cached vars for method nextDouble(a) (for performance only)
   private double k_set = -1.0;
   private double r;
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static final VonMises shared = new VonMises(1.0, makeDefaultGenerator());
+  private static final VonMises shared = new VonMises(1.0, makeDefaultGenerator());
 
   /**
    * Constructs a Von Mises distribution. Example: k=1.0.
@@ -138,14 +138,4 @@ public class VonMises extends AbstractContinousDistribution {
     return this.getClass().getName() + '(' + my_k + ')';
   }
 
-  /**
-   * Sets the uniform random number generated shared by all <b>static</b> methods.
-   *
-   * @param randomGenerator the new uniform random number generator to be shared.
-   */
-  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-    synchronized (shared) {
-      shared.setRandomGenerator(randomGenerator);
-    }
-  }
 }

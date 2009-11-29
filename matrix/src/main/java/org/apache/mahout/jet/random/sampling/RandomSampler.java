@@ -9,6 +9,8 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.jet.random.sampling;
 
 import org.apache.mahout.jet.random.engine.RandomEngine;
+import org.apache.mahout.matrix.PersistentObject;
+import org.apache.mahout.matrix.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -109,17 +111,15 @@ import org.slf4j.LoggerFactory;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class RandomSampler extends org.apache.mahout.matrix.PersistentObject {
+public class RandomSampler extends PersistentObject {
 
   private static final Logger log = LoggerFactory.getLogger(RandomSampler.class);
 
   //public class RandomSampler extends Object implements java.io.Serializable {
-  long my_n;
-  long my_N;
-  long my_low;
-  RandomEngine my_RandomGenerator;
-
-  //static long negalphainv; // just to determine once and for all the best value for negalphainv
+  private long n;
+  private long N;
+  private long low;
+  private RandomEngine randomGenerator;
 
   /**
    * Constructs a random sampler that computes and delivers sorted random sets in blocks. A set block can be retrieved
@@ -140,21 +140,25 @@ public class RandomSampler extends org.apache.mahout.matrix.PersistentObject {
     if (n > N) {
       throw new IllegalArgumentException("n must by <= N");
     }
-    this.my_n = n;
-    this.my_N = N;
-    this.my_low = low;
+    this.n = n;
+    this.N = N;
+    this.low = low;
 
     if (randomGenerator == null) {
       randomGenerator = org.apache.mahout.jet.random.AbstractDistribution.makeDefaultGenerator();
     }
-    this.my_RandomGenerator = randomGenerator;
+    this.randomGenerator = randomGenerator;
+  }
+
+  RandomEngine getRandomGenerator() {
+    return randomGenerator;
   }
 
   /** Returns a deep copy of the receiver. */
   @Override
   public Object clone() {
     RandomSampler copy = (RandomSampler) super.clone();
-    copy.my_RandomGenerator = (RandomEngine) this.my_RandomGenerator.clone();
+    copy.randomGenerator = (RandomEngine) this.randomGenerator.clone();
     return copy;
   }
 
@@ -183,7 +187,7 @@ public class RandomSampler extends org.apache.mahout.matrix.PersistentObject {
    * @param fromIndex the first index within <tt>values</tt> to be filled with numbers (inclusive).
    */
   public void nextBlock(int count, long[] values, int fromIndex) {
-    if (count > my_n) {
+    if (count > n) {
       throw new IllegalArgumentException("Random sample exhausted.");
     }
     if (count < 0) {
@@ -194,12 +198,12 @@ public class RandomSampler extends org.apache.mahout.matrix.PersistentObject {
       return;
     } //nothing to do
 
-    sample(my_n, my_N, count, my_low, values, fromIndex, my_RandomGenerator);
+    sample(n, N, count, low, values, fromIndex, randomGenerator);
 
     long lastSample = values[fromIndex + count - 1];
-    my_n -= count;
-    my_N = my_N - lastSample - 1 + my_low;
-    my_low = lastSample + 1;
+    n -= count;
+    N = N - lastSample - 1 + low;
+    low = lastSample + 1;
   }
 
   /**
@@ -571,81 +575,4 @@ public class RandomSampler extends org.apache.mahout.matrix.PersistentObject {
     }
   }
 
-  /** Tests the methods of this class. To do benchmarking, comment the lines printing stuff to the console. */
-  public static void test(long n, long N, long low, int chunkSize, int times) {
-    long[] values = new long[chunkSize];
-    long chunks = n / chunkSize;
-
-    org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
-    for (long t = times; --t >= 0;) {
-      RandomSampler sampler =
-          new RandomSampler(n, N, low, org.apache.mahout.jet.random.AbstractDistribution.makeDefaultGenerator());
-      for (long i = 0; i < chunks; i++) {
-        sampler.nextBlock(chunkSize, values, 0);
-
-        /*
-        Log.print("Chunk #"+i+" = [");
-        for (int j=0; j<chunkSize-1; j++) Log.print(values[j]+", ");
-        Log.print(String.valueOf(values[chunkSize-1]));
-        Log.println("]");
-        */
-
-      }
-
-      int toDo = (int) (n - chunkSize * chunks);
-      if (toDo > 0) { // sample remaining part, if necessary
-        sampler.nextBlock(toDo, values, 0);
-
-        /*
-        Log.print("Chunk #"+chunks+" = [");
-        for (int j=0; j<toDo-1; j++) Log.print(values[j]+", ");
-        Log.print(String.valueOf(values[toDo-1]));
-        Log.println("]");
-        */
-
-
-      }
-    }
-    timer.stop();
-    log.info("single run took " + timer.elapsedTime() / times);
-    log.info("Good bye.\n");
-  }
-
-  /**
-   * Tests different values for negaalphainv. Result: J.S. Vitter's recommendation for negalphainv=-13 is also good in
-   * the JDK 1.2 environment.
-   */
-  protected static void testNegAlphaInv(String[] args) {
-    /*
-    long N = Long.parseLong(args[0]);
-    int chunkSize = Integer.parseInt(args[1]);
-
-    long[] alphas = {-104, -52, -26, -13, -8, -4, -2};
-    for (int i=0; i<alphas.length; i++) {
-      negalphainv = alphas[i];
-      log.info("\n\nnegalphainv="+negalphainv);
-
-      log.info(" n="+N/80+" --> ");
-      test(N/80,N,0,chunkSize);
-
-      log.info(" n="+N/40+" --> ");
-      test(N/40,N,0,chunkSize);
-
-      log.info(" n="+N/20+" --> ");
-      test(N/20,N,0,chunkSize);
-
-      log.info(" n="+N/10+" --> ");
-      test(N/10,N,0,chunkSize);
-
-      log.info(" n="+N/5+" --> ");
-      test(N/5,N,0,chunkSize);
-
-      log.info(" n="+N/2+" --> ");
-      test(N/2,N,0,chunkSize);
-
-      log.info(" n="+(N-3)+" --> ");
-      test(N-3,N,0,chunkSize);
-    }
-    */
-  }
 }

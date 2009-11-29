@@ -29,21 +29,21 @@ import org.apache.mahout.matrix.list.ObjectArrayList;
 public class OpenIntObjectHashMap extends AbstractIntObjectMap {
 
   /** The hash table keys. */
-  protected int[] table;
+  private int[] table;
 
   /** The hash table values. */
-  protected Object[] values;
+  private Object[] values;
 
   /** The state of each hash table entry (FREE, FULL, REMOVED). */
-  protected byte[] state;
+  private byte[] state;
 
   /** The number of table entries in state==FREE. */
-  protected int freeEntries;
+  private int freeEntries;
 
 
-  protected static final byte FREE = 0;
-  protected static final byte FULL = 1;
-  protected static final byte REMOVED = 2;
+  private static final byte FREE = 0;
+  private static final byte FULL = 1;
+  private static final byte REMOVED = 2;
 
   /** Constructs an empty map with default capacity and default load factors. */
   public OpenIntObjectHashMap() {

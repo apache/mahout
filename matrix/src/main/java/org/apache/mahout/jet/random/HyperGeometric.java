@@ -38,9 +38,9 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
 @Deprecated
 public class HyperGeometric extends AbstractDiscreteDistribution {
 
-  protected int my_N;
-  protected int my_s;
-  protected int my_n;
+  private int my_N;
+  private int my_s;
+  private int my_n;
 
   // cached vars shared by hmdu(...) and hprs(...)
   private int N_last = -1, M_last = -1, n_last = -1;
@@ -57,7 +57,7 @@ public class HyperGeometric extends AbstractDiscreteDistribution {
 
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static HyperGeometric shared = new HyperGeometric(1, 1, 1, makeDefaultGenerator());
+  private static final HyperGeometric shared = new HyperGeometric(1, 1, 1, makeDefaultGenerator());
 
   /** Constructs a HyperGeometric distribution. */
   public HyperGeometric(int N, int s, int n, RandomEngine randomGenerator) {
@@ -402,14 +402,4 @@ public class HyperGeometric extends AbstractDiscreteDistribution {
     return this.getClass().getName() + '(' + my_N + ',' + my_s + ',' + my_n + ')';
   }
 
-  /**
-   * Sets the uniform random number generated shared by all <b>static</b> methods.
-   *
-   * @param randomGenerator the new uniform random number generator to be shared.
-   */
-  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-    synchronized (shared) {
-      shared.setRandomGenerator(randomGenerator);
-    }
-  }
 }

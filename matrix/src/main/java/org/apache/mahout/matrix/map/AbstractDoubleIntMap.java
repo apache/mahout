@@ -8,8 +8,11 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.map;
 
+import org.apache.mahout.matrix.GenericSorting;
+import org.apache.mahout.matrix.Swapper;
 import org.apache.mahout.matrix.function.DoubleIntProcedure;
 import org.apache.mahout.matrix.function.DoubleProcedure;
+import org.apache.mahout.matrix.function.IntComparator;
 import org.apache.mahout.matrix.list.DoubleArrayList;
 import org.apache.mahout.matrix.list.IntArrayList;
 /**
@@ -302,40 +305,12 @@ public abstract class AbstractDoubleIntMap extends AbstractMap {
    * @param valueList the list to be filled with values, can have any size.
    */
   public void pairsSortedByKey(DoubleArrayList keyList, IntArrayList valueList) {
-    /*
-    keys(keyList);
-    values(valueList);
-
-    final double[] k = keyList.elements();
-    final int[] v = valueList.elements();
-    org.apache.mahout.matrix.Swapper swapper = new org.apache.mahout.matrix.Swapper() {
-      public void swap(int a, int b) {
-        int t1;  double t2;
-        t1 = v[a]; v[a] = v[b]; v[b] = t1;
-        t2 = k[a]; k[a] = k[b];  k[b] = t2;
-      }
-    };
-
-    org.apache.mahout.matrix.function.IntComparator comp = new org.apache.mahout.matrix.function.IntComparator() {
-      public int compare(int a, int b) {
-        return k[a]<k[b] ? -1 : k[a]==k[b] ? 0 : 1;
-      }
-    };
-    org.apache.mahout.matrix.MultiSorting.sort(0,keyList.size(),comp,swapper);
-    */
-
-
-    // this variant may be quicker
-    //org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions = 0;
-    //log.info("collisions="+org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions);
     keys(keyList);
     keyList.sort();
     valueList.setSize(keyList.size());
     for (int i = keyList.size(); --i >= 0;) {
       valueList.setQuick(i, get(keyList.getQuick(i)));
     }
-    //log.info("collisions="+org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions);
-
   }
 
   /**
@@ -354,7 +329,7 @@ public abstract class AbstractDoubleIntMap extends AbstractMap {
 
     final double[] k = keyList.elements();
     final int[] v = valueList.elements();
-    org.apache.mahout.matrix.Swapper swapper = new org.apache.mahout.matrix.Swapper() {
+    Swapper swapper = new Swapper() {
       @Override
       public void swap(int a, int b) {
         int t1 = v[a];
@@ -366,7 +341,7 @@ public abstract class AbstractDoubleIntMap extends AbstractMap {
       }
     };
 
-    org.apache.mahout.matrix.function.IntComparator comp = new org.apache.mahout.matrix.function.IntComparator() {
+    IntComparator comp = new IntComparator() {
       @Override
       public int compare(int a, int b) {
         return v[a] < v[b] ? -1 : v[a] > v[b] ? 1 : (k[a] < k[b] ? -1 : (k[a] == k[b] ? 0 : 1));
@@ -374,7 +349,7 @@ public abstract class AbstractDoubleIntMap extends AbstractMap {
     };
 
     //org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions = 0;
-    org.apache.mahout.matrix.GenericSorting.quickSort(0, keyList.size(), comp, swapper);
+    GenericSorting.quickSort(0, keyList.size(), comp, swapper);
     //log.info("collisions="+org.apache.mahout.matrix.map.OpenDoubleIntHashMap.hashCollisions);
   }
 

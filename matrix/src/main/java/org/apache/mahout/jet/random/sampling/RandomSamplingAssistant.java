@@ -9,6 +9,7 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.jet.random.sampling;
 
 import org.apache.mahout.jet.random.engine.RandomEngine;
+import org.apache.mahout.matrix.PersistentObject;
 /**
  * Conveniently computes a stable <i>Simple Random Sample Without Replacement (SRSWOR)</i> subsequence of <tt>n</tt> elements from a given input sequence of <tt>N</tt> elements;
  * Example: Computing a sublist of <tt>n=3</tt> random elements from a list <tt>(1,...,50)</tt> may yield the sublist <tt>(7,13,47)</tt>.
@@ -21,16 +22,16 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class RandomSamplingAssistant extends org.apache.mahout.matrix.PersistentObject {
+public class RandomSamplingAssistant extends PersistentObject {
   //public class RandomSamplingAssistant extends Object implements java.io.Serializable {
-  protected RandomSampler sampler;
-  protected final long[] buffer;
-  protected int bufferPosition;
+  private RandomSampler sampler;
+  private final long[] buffer;
+  private int bufferPosition;
 
-  protected long skip;
-  protected long n;
+  private long skip;
+  private long n;
 
-  static final int MAX_BUFFER_SIZE = 200;
+  private static final int MAX_BUFFER_SIZE = 200;
 
   /**
    * Constructs a random sampler that samples <tt>n</tt> random elements from an input sequence of <tt>N</tt> elements.
@@ -71,7 +72,7 @@ public class RandomSamplingAssistant extends org.apache.mahout.matrix.Persistent
 
   /** Returns the used random generator. */
   public RandomEngine getRandomGenerator() {
-    return this.sampler.my_RandomGenerator;
+    return this.sampler.getRandomGenerator();
   }
 
   /** Just shows how this class can be used; samples n elements from and int[] array. */

@@ -25,12 +25,12 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
 @Deprecated
 public class BreitWigner extends AbstractContinousDistribution {
 
-  protected double mean;
-  protected double gamma;
-  protected double cut;
+  private double mean;
+  private double gamma;
+  private double cut;
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static BreitWigner shared = new BreitWigner(1.0, 0.2, 1.0, makeDefaultGenerator());
+  private static final BreitWigner shared = new BreitWigner(1.0, 0.2, 1.0, makeDefaultGenerator());
 
   /**
    * Constructs a BreitWigner distribution.
@@ -100,14 +100,4 @@ public class BreitWigner extends AbstractContinousDistribution {
     return this.getClass().getName() + '(' + mean + ',' + gamma + ',' + cut + ')';
   }
 
-  /**
-   * Sets the uniform random number generated shared by all <b>static</b> methods.
-   *
-   * @param randomGenerator the new uniform random number generator to be shared.
-   */
-  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-    synchronized (shared) {
-      shared.setRandomGenerator(randomGenerator);
-    }
-  }
 }

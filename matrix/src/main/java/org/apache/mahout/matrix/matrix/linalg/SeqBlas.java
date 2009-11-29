@@ -9,6 +9,8 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.matrix.matrix.linalg;
 
 import org.apache.mahout.jet.math.Functions;
+import org.apache.mahout.jet.math.PlusMult;
+import org.apache.mahout.matrix.function.DoubleDoubleFunction;
 import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /**
@@ -25,7 +27,7 @@ public class SeqBlas implements Blas {
   public static final Blas seqBlas = new SeqBlas();
 
   /** Makes this class non instantiable, but still let's others inherit from it. */
-  protected SeqBlas() {
+  private SeqBlas() {
   }
 
   @Override
@@ -35,7 +37,7 @@ public class SeqBlas implements Blas {
 
   @Override
   public void assign(DoubleMatrix2D A, DoubleMatrix2D B,
-                     org.apache.mahout.matrix.function.DoubleDoubleFunction function) {
+                     DoubleDoubleFunction function) {
     A.assign(B, function);
   }
 
@@ -83,7 +85,7 @@ public class SeqBlas implements Blas {
 
   @Override
   public void dger(double alpha, DoubleMatrix1D x, DoubleMatrix1D y, DoubleMatrix2D A) {
-    org.apache.mahout.jet.math.PlusMult fun = org.apache.mahout.jet.math.PlusMult.plusMult(0);
+    PlusMult fun = org.apache.mahout.jet.math.PlusMult.plusMult(0);
     for (int i = A.rows(); --i >= 0;) {
       fun.setMultiplicator(alpha * x.getQuick(i));
       A.viewRow(i).assign(y, fun);
@@ -190,7 +192,7 @@ public class SeqBlas implements Blas {
     }
     Property.DEFAULT.checkSquare(A);
     int size = A.rows();
-    if (size != x.size() || size != y.size()) {
+    if (size != x.size() && size != y.size()) {
       throw new IllegalArgumentException(A.toStringShort() + ", " + x.toStringShort() + ", " + y.toStringShort());
     }
     DoubleMatrix1D tmp = x.like();

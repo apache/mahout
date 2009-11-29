@@ -24,7 +24,7 @@ import java.util.AbstractList;
 @Deprecated
 public class FloatListAdapter extends AbstractList<Float> {
 
-  protected final AbstractFloatList content;
+  private final AbstractFloatList content;
 
   /** Constructs a list backed by the specified content list. */
   public FloatListAdapter(AbstractFloatList content) {

@@ -8,6 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.list;
 
+import org.apache.mahout.jet.math.Arithmetic;
 import org.apache.mahout.matrix.bitvector.BitVector;
 import org.apache.mahout.matrix.bitvector.QuickBitVector;
 /**
@@ -136,7 +137,7 @@ public class MinMaxNumberList extends org.apache.mahout.matrix.list.AbstractLong
   public static int bitsPerElement(long minimum, long maximum) {
     int bits;
     if (1 + maximum - minimum > 0) {
-      bits = (int) Math.round(Math.ceil(org.apache.mahout.jet.math.Arithmetic.log(2, 1 + maximum - minimum)));
+      bits = (int) Math.round(Math.ceil(Arithmetic.log(2, 1 + maximum - minimum)));
     } else {
       // overflow or underflow in calculating "1+maximum-minimum"
       // happens if signed long representation is too short for doing unsigned calculations
@@ -263,9 +264,7 @@ public class MinMaxNumberList extends org.apache.mahout.matrix.list.AbstractLong
     this.size = 0;
   }
 
-  /**
-   * This method was created in VisualAge.
-   */
+  /** This method was created in VisualAge. */
   protected void setUpBitsPerEntry(long minimum, long maximum) {
     this.bitsPerElement = bitsPerElement(minimum, maximum);
     if (this.bitsPerElement != 64) {

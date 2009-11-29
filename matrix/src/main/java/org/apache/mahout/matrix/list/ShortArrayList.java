@@ -8,7 +8,11 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.list;
 
+import org.apache.mahout.jet.random.Uniform;
+import org.apache.mahout.jet.random.engine.DRand;
 import org.apache.mahout.matrix.function.ShortProcedure;
+
+import java.util.Date;
 /**
  Resizable list holding <code>short</code> elements; implemented with arrays.
  First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -22,7 +26,7 @@ public class ShortArrayList extends AbstractShortList {
    * The array buffer into which the elements of the list are stored. The capacity of the list is the length of this
    * array buffer.
    */
-  protected short[] elements;
+  private short[] elements;
 
   /** Constructs an empty list. */
   public ShortArrayList() {
@@ -580,8 +584,7 @@ public class ShortArrayList extends AbstractShortList {
     }
     checkRangeFromTo(from, to, size);
 
-    org.apache.mahout.jet.random.Uniform gen =
-        new org.apache.mahout.jet.random.Uniform(new org.apache.mahout.jet.random.engine.DRand(new java.util.Date()));
+    Uniform gen = new Uniform(new DRand(new Date()));
     short[] theElements = elements;
     for (int i = from; i < to; i++) {
       int random = gen.nextIntFromTo(i, to);

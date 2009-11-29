@@ -8,6 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.matrix.impl;
 
+import org.apache.mahout.matrix.PersistentObject;
+
 /**
  Abstract base class for arbitrary-dimensional matrices holding objects or primitive data types such as <code>int</code>, <code>float</code>, etc.
  First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -20,7 +22,7 @@ package org.apache.mahout.matrix.matrix.impl;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public abstract class AbstractMatrix extends org.apache.mahout.matrix.PersistentObject {
+public abstract class AbstractMatrix extends PersistentObject {
 
   protected boolean isNoView = true;
 

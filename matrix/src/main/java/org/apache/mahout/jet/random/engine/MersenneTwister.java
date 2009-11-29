@@ -26,14 +26,14 @@ import java.util.Date;
  <pre>
  double sum = 0.0;
  for (int i=0; i<100000; ++i) {
- RandomElement twister = new MersenneTwister(new java.util.Date());
+ RandomElement twister = new MersenneTwister(new Date());
  sum += twister.raw();
  }
  </pre>
  will be wildly inefficient. Consider using
  <pre>
  double sum = 0.0;
- RandomElement twister = new MersenneTwister(new java.util.Date());
+ RandomElement twister = new MersenneTwister(new Date());
  for (int i=0; i<100000; ++i) {
  sum += twister.raw();
  }
@@ -135,7 +135,7 @@ public class MersenneTwister extends RandomEngine {
   //private static final int[] mag01=new int[] {0x0, MATRIX_A};
   /* mag01[x] = x * MATRIX_A  for x=0,1 */
 
-  public static final int DEFAULT_SEED = 4357;
+  private static final int DEFAULT_SEED = 4357;
 
   /**
    * Constructs and returns a random number generator with a default seed, which is a <b>constant</b>. Thus using this
@@ -154,7 +154,7 @@ public class MersenneTwister extends RandomEngine {
   /**
    * Constructs and returns a random number generator seeded with the given date.
    *
-   * @param d typically <tt>new java.util.Date()</tt>
+   * @param d typically <tt>new Date()</tt>
    */
   public MersenneTwister(Date d) {
     this((int) d.getTime());

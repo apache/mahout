@@ -8,6 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.buffer;
 
+import org.apache.mahout.matrix.PersistentObject;
 import org.apache.mahout.matrix.list.IntArrayList;
 /**
  * Fixed sized (non resizable) streaming buffer connected to a target <tt>IntBuffer3DConsumer</tt> to which data is automatically flushed upon buffer overflow.
@@ -16,19 +17,19 @@ import org.apache.mahout.matrix.list.IntArrayList;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class IntBuffer3D extends org.apache.mahout.matrix.PersistentObject implements IntBuffer3DConsumer {
+public class IntBuffer3D extends PersistentObject implements IntBuffer3DConsumer {
 
-  protected IntBuffer3DConsumer target;
-  protected int[] xElements;
-  protected int[] yElements;
-  protected int[] zElements;
+  private final IntBuffer3DConsumer target;
+  private final int[] xElements;
+  private final int[] yElements;
+  private final int[] zElements;
 
   // vars cached for speed
-  protected IntArrayList xList;
-  protected IntArrayList yList;
-  protected IntArrayList zList;
-  protected int capacity;
-  protected int size;
+  private final IntArrayList xList;
+  private final IntArrayList yList;
+  private final IntArrayList zList;
+  private final int capacity;
+  private int size;
 
   /**
    * Constructs and returns a new buffer with the given target.

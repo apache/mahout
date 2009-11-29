@@ -43,33 +43,55 @@ import org.apache.mahout.jet.stat.Probability;
 @Deprecated
 public class Poisson extends AbstractDiscreteDistribution {
 
-  protected double mean;
+  private double mean;
 
   // precomputed and cached values (for performance only)
   // cache for < SWITCH_MEAN
-  protected double my_old = -1.0;
-  protected double p, q, p0;
-  protected double[] pp = new double[36];
-  protected int llll;
+  private double my_old = -1.0;
+  private double p;
+  private double q;
+  private double p0;
+  private double[] pp = new double[36];
+  private int llll;
 
   // cache for >= SWITCH_MEAN
-  protected double my_last = -1.0;
-  protected double ll;
-  protected int k2, k4, k1, k5;
-  protected double dl, dr, r1, r2, r4, r5, lr, l_my, c_pm;
-  protected double f1, f2, f4, f5, p1, p2, p3, p4, p5, p6;
+  private double my_last = -1.0;
+  private double ll;
+  private int k2;
+  private int k4;
+  private int k1;
+  private int k5;
+  private double dl;
+  private double dr;
+  private double r1;
+  private double r2;
+  private double r4;
+  private double r5;
+  private double lr;
+  private double l_my;
+  private double c_pm;
+  private double f1;
+  private double f2;
+  private double f4;
+  private double f5;
+  private double p1;
+  private double p2;
+  private double p3;
+  private double p4;
+  private double p5;
+  private double p6;
 
   // cache for both;
-  protected int m;
+  private int m;
 
 
-  protected static final double MEAN_MAX = Integer.MAX_VALUE;
+  private static final double MEAN_MAX = Integer.MAX_VALUE;
   // for all means larger than that, we don't try to compute a poisson deviation, but return the mean.
-  protected static final double SWITCH_MEAN = 10.0; // switch from method A to method B
+  private static final double SWITCH_MEAN = 10.0; // switch from method A to method B
 
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static Poisson shared = new Poisson(0.0, makeDefaultGenerator());
+  private static final Poisson shared = new Poisson(0.0, makeDefaultGenerator());
 
   /** Constructs a poisson distribution. Example: mean=1.0. */
   public Poisson(double mean, RandomEngine randomGenerator) {
@@ -350,14 +372,4 @@ public class Poisson extends AbstractDiscreteDistribution {
     return this.getClass().getName() + '(' + mean + ')';
   }
 
-  /**
-   * Sets the uniform random number generated shared by all <b>static</b> methods.
-   *
-   * @param randomGenerator the new uniform random number generator to be shared.
-   */
-  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-    synchronized (shared) {
-      shared.setRandomGenerator(randomGenerator);
-    }
-  }
 }

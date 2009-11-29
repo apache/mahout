@@ -8,6 +8,9 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.matrix.impl;
 
+import org.apache.mahout.jet.math.Mult;
+import org.apache.mahout.jet.math.PlusMult;
+import org.apache.mahout.matrix.function.DoubleFunction;
 import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /**
@@ -38,7 +41,7 @@ import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 public class DenseDoubleMatrix1D extends DoubleMatrix1D {
 
   /** The elements of this matrix. */
-  protected double[] elements;
+  protected final double[] elements;
 
   /**
    * Constructs a matrix with a copy of the given values. The values are copied. So subsequent changes in
@@ -124,7 +127,7 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
    * <pre>
    * // change each cell to its sine
    * matrix =   0.5      1.5      2.5       3.5
-   * matrix.assign(org.apache.mahout.jet.math.Functions.sin);
+   * matrix.assign(Functions.sin);
    * -->
    * matrix ==  0.479426 0.997495 0.598472 -0.350783
    * </pre>
@@ -135,7 +138,7 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
    * @see org.apache.mahout.jet.math.Functions
    */
   @Override
-  public DoubleMatrix1D assign(org.apache.mahout.matrix.function.DoubleFunction function) {
+  public DoubleMatrix1D assign(DoubleFunction function) {
     int s = stride;
     int i = index(0);
     double[] elems = this.elements;
@@ -144,8 +147,8 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
     }
 
     // specialization for speed
-    if (function instanceof org.apache.mahout.jet.math.Mult) { // x[i] = mult*x[i]
-      double multiplicator = ((org.apache.mahout.jet.math.Mult) function).getMultiplicator();
+    if (function instanceof Mult) { // x[i] = mult*x[i]
+      double multiplicator = ((Mult) function).getMultiplicator();
       if (multiplicator == 1) {
         return this;
       }
@@ -271,8 +274,8 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
         index += s;
         otherIndex += ys;
       }
-    } else if (function instanceof org.apache.mahout.jet.math.PlusMult) {
-      double multiplicator = ((org.apache.mahout.jet.math.PlusMult) function).getMultiplicator();
+    } else if (function instanceof PlusMult) {
+      double multiplicator = ((PlusMult) function).getMultiplicator();
       if (multiplicator == 0) { // x[i] = x[i] + 0*y[i]
         return this;
       } else if (multiplicator == 1) { // x[i] = x[i] + y[i]

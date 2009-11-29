@@ -8,9 +8,13 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.matrix;
 
+import org.apache.mahout.matrix.function.ObjectFunction;
+import org.apache.mahout.matrix.function.ObjectObjectFunction;
+import org.apache.mahout.matrix.function.ObjectProcedure;
 import org.apache.mahout.matrix.list.IntArrayList;
 import org.apache.mahout.matrix.list.ObjectArrayList;
 import org.apache.mahout.matrix.matrix.impl.AbstractMatrix1D;
+import org.apache.mahout.matrix.matrix.objectalgo.Formatter;
 /**
  Abstract base class for 1-d matrices (aka <i>vectors</i>) holding <tt>Object</tt> elements.
  First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -51,8 +55,8 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @param f    a function transforming the current cell value.
    * @return the aggregated measure.
    */
-  public Object aggregate(org.apache.mahout.matrix.function.ObjectObjectFunction aggr,
-                          org.apache.mahout.matrix.function.ObjectFunction f) {
+  public Object aggregate(ObjectObjectFunction aggr,
+                          ObjectFunction f) {
     if (size == 0) {
       return null;
     }
@@ -89,7 +93,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @throws IllegalArgumentException if <tt>size() != other.size()</tt>.
    */
   public Object aggregate(ObjectMatrix1D other, org.apache.mahout.matrix.function.ObjectObjectFunction aggr,
-                          org.apache.mahout.matrix.function.ObjectObjectFunction f) {
+                          ObjectObjectFunction f) {
     checkSize(other);
     if (size == 0) {
       return null;
@@ -127,7 +131,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * <pre>
    * // change each cell to its sine
    * matrix =   0.5      1.5      2.5       3.5
-   * matrix.assign(org.apache.mahout.jet.math.Functions.sin);
+   * matrix.assign(Functions.sin);
    * -->
    * matrix ==  0.479426 0.997495 0.598472 -0.350783
    * </pre>
@@ -137,7 +141,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @return <tt>this</tt> (for convenience only).
    * @see org.apache.mahout.jet.math.Functions
    */
-  public ObjectMatrix1D assign(org.apache.mahout.matrix.function.ObjectFunction function) {
+  public ObjectMatrix1D assign(ObjectFunction function) {
     for (int i = size; --i >= 0;) {
       setQuick(i, function.apply(getQuick(i)));
     }
@@ -490,7 +494,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @see org.apache.mahout.matrix.matrix.objectalgo.Formatter
    */
   public String toString() {
-    return new org.apache.mahout.matrix.matrix.objectalgo.Formatter().toString(this);
+    return new Formatter().toString(this);
   }
 
   /**
@@ -592,7 +596,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @param condition The condition to be matched.
    * @return the new view.
    */
-  public ObjectMatrix1D viewSelection(org.apache.mahout.matrix.function.ObjectProcedure condition) {
+  public ObjectMatrix1D viewSelection(ObjectProcedure condition) {
     IntArrayList matches = new IntArrayList();
     for (int i = 0; i < size; i++) {
       if (condition.apply(getQuick(i))) {
@@ -635,27 +639,4 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
     return (ObjectMatrix1D) (view().vStrides(stride));
   }
 
-  /**
-   * Applies a procedure to each cell's value. Iterates downwards from <tt>[size()-1]</tt> to <tt>[0]</tt>, as
-   * demonstrated by this snippet:
-   * <pre>
-   * for (int i=size(); --i >=0;) {
-   *    if (!procedure.apply(getQuick(i))) return false;
-   * }
-   * return true;
-   * </pre>
-   * Note that an implementation may use more efficient techniques, but must not use any other order.
-   *
-   * @param procedure a procedure object taking as argument the current cell's value. Stops iteration if the procedure
-   *                  returns <tt>false</tt>, otherwise continues.
-   * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise.
-   */
-  private boolean xforEach(org.apache.mahout.matrix.function.ObjectProcedure procedure) {
-    for (int i = size; --i >= 0;) {
-      if (!procedure.apply(getQuick(i))) {
-        return false;
-      }
-    }
-    return true;
-  }
 }

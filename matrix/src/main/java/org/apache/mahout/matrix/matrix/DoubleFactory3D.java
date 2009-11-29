@@ -9,6 +9,7 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.matrix.matrix;
 
 import org.apache.mahout.jet.math.Functions;
+import org.apache.mahout.matrix.PersistentObject;
 import org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix3D;
 import org.apache.mahout.matrix.matrix.impl.SparseDoubleMatrix3D;
 /**
@@ -36,13 +37,13 @@ import org.apache.mahout.matrix.matrix.impl.SparseDoubleMatrix3D;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class DoubleFactory3D extends org.apache.mahout.matrix.PersistentObject {
+public class DoubleFactory3D extends PersistentObject {
 
   /** A factory producing dense matrices. */
   public static final DoubleFactory3D dense = new DoubleFactory3D();
 
   /** A factory producing sparse matrices. */
-  public static final DoubleFactory3D sparse = new DoubleFactory3D();
+  private static final DoubleFactory3D sparse = new DoubleFactory3D();
 
   /** Makes this class non instantiable, but still let's others inherit from it. */
   protected DoubleFactory3D() {
@@ -103,6 +104,6 @@ public class DoubleFactory3D extends org.apache.mahout.matrix.PersistentObject {
 
   /** Constructs a matrix with uniformly distributed values in <tt>(0,1)</tt> (exclusive). */
   public DoubleMatrix3D random(int slices, int rows, int columns) {
-    return make(slices, rows, columns).assign(org.apache.mahout.jet.math.Functions.random());
+    return make(slices, rows, columns).assign(Functions.random());
   }
 }

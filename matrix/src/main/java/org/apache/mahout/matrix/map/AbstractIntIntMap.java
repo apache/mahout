@@ -8,6 +8,9 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.map;
 
+import org.apache.mahout.matrix.GenericSorting;
+import org.apache.mahout.matrix.Swapper;
+import org.apache.mahout.matrix.function.IntComparator;
 import org.apache.mahout.matrix.function.IntIntProcedure;
 import org.apache.mahout.matrix.function.IntProcedure;
 import org.apache.mahout.matrix.list.IntArrayList;
@@ -323,7 +326,7 @@ public abstract class AbstractIntIntMap extends AbstractMap {
 
     final int[] k = keyList.elements();
     final int[] v = valueList.elements();
-    org.apache.mahout.matrix.Swapper swapper = new org.apache.mahout.matrix.Swapper() {
+    Swapper swapper = new Swapper() {
       @Override
       public void swap(int a, int b) {
         int t1 = v[a];
@@ -335,14 +338,14 @@ public abstract class AbstractIntIntMap extends AbstractMap {
       }
     };
 
-    org.apache.mahout.matrix.function.IntComparator comp = new org.apache.mahout.matrix.function.IntComparator() {
+    IntComparator comp = new IntComparator() {
       @Override
       public int compare(int a, int b) {
         return v[a] < v[b] ? -1 : v[a] > v[b] ? 1 : (k[a] < k[b] ? -1 : (k[a] == k[b] ? 0 : 1));
       }
     };
 
-    org.apache.mahout.matrix.GenericSorting.quickSort(0, keyList.size(), comp, swapper);
+    GenericSorting.quickSort(0, keyList.size(), comp, swapper);
   }
 
   /**

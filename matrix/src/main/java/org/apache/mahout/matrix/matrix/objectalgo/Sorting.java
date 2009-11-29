@@ -8,6 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.matrix.objectalgo;
 
+import org.apache.mahout.matrix.GenericSorting;
+import org.apache.mahout.matrix.PersistentObject;
 import org.apache.mahout.matrix.function.IntComparator;
 import org.apache.mahout.matrix.matrix.ObjectMatrix1D;
 import org.apache.mahout.matrix.matrix.ObjectMatrix2D;
@@ -42,7 +44,7 @@ import java.util.Comparator;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class Sorting extends org.apache.mahout.matrix.PersistentObject {
+public class Sorting extends PersistentObject {
 
   /** A prefabricated quicksort. */
   public static final Sorting quickSort = new Sorting(); // already has quicksort implemented
@@ -57,20 +59,20 @@ public class Sorting extends org.apache.mahout.matrix.PersistentObject {
 
     @Override
     protected void runSort(int fromIndex, int toIndex, IntComparator c, org.apache.mahout.matrix.Swapper swapper) {
-      org.apache.mahout.matrix.GenericSorting.mergeSort(fromIndex, toIndex, c, swapper);
+      GenericSorting.mergeSort(fromIndex, toIndex, c, swapper);
     }
   };
 
   /** Makes this class non instantiable, but still let's others inherit from it. */
-  protected Sorting() {
+  private Sorting() {
   }
 
-  protected void runSort(int[] a, int fromIndex, int toIndex, IntComparator c) {
+  private void runSort(int[] a, int fromIndex, int toIndex, IntComparator c) {
     org.apache.mahout.matrix.Sorting.quickSort(a, fromIndex, toIndex, c);
   }
 
   protected void runSort(int fromIndex, int toIndex, IntComparator c, org.apache.mahout.matrix.Swapper swapper) {
-    org.apache.mahout.matrix.GenericSorting.quickSort(fromIndex, toIndex, c, swapper);
+    GenericSorting.quickSort(fromIndex, toIndex, c, swapper);
   }
 
   /**
@@ -148,9 +150,9 @@ public class Sorting extends org.apache.mahout.matrix.PersistentObject {
    * matrix, and vice-versa. To sort ranges use sub-ranging views. To sort columns by rows, use dice views. To sort
    * descending, use flip views ... <p> <b>Example:</b> <table border="1" cellspacing="0"> <tr nowrap> <td
    * valign="top"><tt>4 x 2 matrix: <br> 7, 6<br> 5, 4<br> 3, 2<br> 1, 0 <br> </tt></td> <td align="left" valign="top">
-   * <p><tt>column = 0;<br> view = quickSort(matrix,column);<br> log.info(view); </tt><tt><br> ==> </tt></p>
-   * </td> <td valign="top"> <p><tt>4 x 2 matrix:<br> 1, 0<br> 3, 2<br> 5, 4<br> 7, 6</tt><br> The matrix IS NOT
-   * SORTED.<br> The new VIEW IS SORTED.</p> </td> </tr> </table>
+   * <p><tt>column = 0;<br> view = quickSort(matrix,column);<br> log.info(view); </tt><tt><br> ==> </tt></p> </td> <td
+   * valign="top"> <p><tt>4 x 2 matrix:<br> 1, 0<br> 3, 2<br> 5, 4<br> 7, 6</tt><br> The matrix IS NOT SORTED.<br> The
+   * new VIEW IS SORTED.</p> </td> </tr> </table>
    *
    * @param matrix the matrix to be sorted.
    * @param column the index of the column inducing the order.

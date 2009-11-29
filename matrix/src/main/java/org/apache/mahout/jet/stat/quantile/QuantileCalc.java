@@ -59,13 +59,14 @@ class QuantileCalc {
    * Assumes that quantiles are to be computed over N values. The required sampling rate is computed and stored in the
    * first element of the provided <tt>returnSamplingRate</tt> array, which, therefore must be at least of length 1.
    *
-   * @param N            the number of values over which quantiles shall be computed (e.g <tt>10^6</tt>).
-   * @param epsilon      the approximation error which is guaranteed not to be exceeded (e.g. <tt>0.001</tt>) (<tt>0
-   *                     &lt;= epsilon &lt;= 1</tt>). To get exact result, set <tt>epsilon=0.0</tt>;
-   * @param delta        the probability that the approximation error is more than than epsilon (e.g. <tt>0.0001</tt>)
-   *                     (<tt>0 &lt;= delta &lt;= 1</tt>). To avoid probabilistic answers, set <tt>delta=0.0</tt>.
-   * @param quantiles    the number of quantiles to be computed (e.g. <tt>100</tt>) (<tt>quantiles &gt;= 1</tt>). If
-   *                     unknown in advance, set this number large, e.g. <tt>quantiles &gt;= 10000</tt>.
+   * @param N                  the number of values over which quantiles shall be computed (e.g <tt>10^6</tt>).
+   * @param epsilon            the approximation error which is guaranteed not to be exceeded (e.g. <tt>0.001</tt>)
+   *                           (<tt>0 &lt;= epsilon &lt;= 1</tt>). To get exact result, set <tt>epsilon=0.0</tt>;
+   * @param delta              the probability that the approximation error is more than than epsilon (e.g.
+   *                           <tt>0.0001</tt>) (<tt>0 &lt;= delta &lt;= 1</tt>). To avoid probabilistic answers, set
+   *                           <tt>delta=0.0</tt>.
+   * @param quantiles          the number of quantiles to be computed (e.g. <tt>100</tt>) (<tt>quantiles &gt;= 1</tt>).
+   *                           If unknown in advance, set this number large, e.g. <tt>quantiles &gt;= 10000</tt>.
    * @param returnSamplingRate a <tt>double[1]</tt> where the sampling rate is to be filled in.
    * @return <tt>long[2]</tt> - <tt>long[0]</tt>=the number of buffers, <tt>long[1]</tt>=the number of elements per
    *         buffer, <tt>returnSamplingRate[0]</tt>=the required sampling rate.
@@ -195,13 +196,14 @@ class QuantileCalc {
    * N values. The required sampling rate is computed and stored in the first element of the provided
    * <tt>returnSamplingRate</tt> array, which, therefore must be at least of length 1.
    *
-   * @param N            the anticipated number of values over which quantiles shall be computed (e.g 10^6).
-   * @param epsilon      the approximation error which is guaranteed not to be exceeded (e.g. <tt>0.001</tt>) (<tt>0
-   *                     &lt;= epsilon &lt;= 1</tt>). To get exact result, set <tt>epsilon=0.0</tt>;
-   * @param delta        the probability that the approximation error is more than than epsilon (e.g. <tt>0.0001</tt>)
-   *                     (<tt>0 &lt;= delta &lt;= 1</tt>). To avoid probabilistic answers, set <tt>delta=0.0</tt>.
-   * @param quantiles    the number of quantiles to be computed (e.g. <tt>100</tt>) (<tt>quantiles &gt;= 1</tt>). If
-   *                     unknown in advance, set this number large, e.g. <tt>quantiles &gt;= 10000</tt>.
+   * @param N                  the anticipated number of values over which quantiles shall be computed (e.g 10^6).
+   * @param epsilon            the approximation error which is guaranteed not to be exceeded (e.g. <tt>0.001</tt>)
+   *                           (<tt>0 &lt;= epsilon &lt;= 1</tt>). To get exact result, set <tt>epsilon=0.0</tt>;
+   * @param delta              the probability that the approximation error is more than than epsilon (e.g.
+   *                           <tt>0.0001</tt>) (<tt>0 &lt;= delta &lt;= 1</tt>). To avoid probabilistic answers, set
+   *                           <tt>delta=0.0</tt>.
+   * @param quantiles          the number of quantiles to be computed (e.g. <tt>100</tt>) (<tt>quantiles &gt;= 1</tt>).
+   *                           If unknown in advance, set this number large, e.g. <tt>quantiles &gt;= 10000</tt>.
    * @param returnSamplingRate a <tt>double[1]</tt> where the sampling rate is to be filled in.
    * @return <tt>long[2]</tt> - <tt>long[0]</tt>=the number of buffers, <tt>long[1]</tt>=the number of elements per
    *         buffer, <tt>returnSamplingRate[0]</tt>=the required sampling rate.

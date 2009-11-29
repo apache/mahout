@@ -43,17 +43,17 @@ import org.apache.mahout.jet.stat.Probability;
 @Deprecated
 public class Normal extends AbstractContinousDistribution {
 
-  protected double mean;
-  protected double variance;
-  protected double standardDeviation;
+  private double mean;
+  private double variance;
+  private double standardDeviation;
 
-  protected double cache; // cache for Box-Mueller algorithm 
-  protected boolean cacheFilled; // Box-Mueller
+  private double cache; // cache for Box-Mueller algorithm
+  private boolean cacheFilled; // Box-Mueller
 
-  protected double SQRT_INV; // performance cache
+  private double SQRT_INV; // performance cache
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static final Normal shared = new Normal(0.0, 1.0, makeDefaultGenerator());
+  private static final Normal shared = new Normal(0.0, 1.0, makeDefaultGenerator());
 
   /** Constructs a normal (gauss) distribution. Example: mean=0.0, standardDeviation=1.0. */
   public Normal(double mean, double standardDeviation, RandomEngine randomGenerator) {
@@ -130,14 +130,4 @@ public class Normal extends AbstractContinousDistribution {
     return this.getClass().getName() + '(' + mean + ',' + standardDeviation + ')';
   }
 
-  /**
-   * Sets the uniform random number generated shared by all <b>static</b> methods.
-   *
-   * @param randomGenerator the new uniform random number generator to be shared.
-   */
-  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-    synchronized (shared) {
-      shared.setRandomGenerator(randomGenerator);
-    }
-  }
 }

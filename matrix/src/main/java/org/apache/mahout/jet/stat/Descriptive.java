@@ -282,15 +282,15 @@ public class Descriptive {
    * <br><tt>b(k,i) = </tt>{@link org.apache.mahout.jet.math.Arithmetic#binomial(long,long) binomial(k,i)} and
    * <br><tt>sumOfPowers(k) = Sum( data[i]<sup>k</sup> )</tt>. <p>
    *
-   * @param data  the additional elements to be incorporated into min, max, etc.
-   * @param from  the index of the first element within <tt>data</tt> to consider.
-   * @param to    the index of the last element within <tt>data</tt> to consider. The method incorporates elements
-   *              <tt>data[from], ..., data[to]</tt>.
+   * @param data        the additional elements to be incorporated into min, max, etc.
+   * @param from        the index of the first element within <tt>data</tt> to consider.
+   * @param to          the index of the last element within <tt>data</tt> to consider. The method incorporates elements
+   *                    <tt>data[from], ..., data[to]</tt>.
    * @param sumOfPowers the old values of the sums in the following format: <ul> <li><tt>sumOfPowers[0]</tt> is the old
-   *              <tt>Sum(data[i]<sup>fromSumIndex</sup>)</tt>. <li><tt>sumOfPowers[1]</tt> is the old
-   *              <tt>Sum(data[i]<sup>fromSumIndex+1</sup>)</tt>. <li>... <li><tt>sumOfPowers[toSumIndex-fromSumIndex]</tt>
-   *              is the old <tt>Sum(data[i]<sup>toSumIndex</sup>)</tt>. </ul> If no data sequence elements have so far
-   *              been recorded set all old values of the sums to <tt>0.0</tt>.
+   *                    <tt>Sum(data[i]<sup>fromSumIndex</sup>)</tt>. <li><tt>sumOfPowers[1]</tt> is the old
+   *                    <tt>Sum(data[i]<sup>fromSumIndex+1</sup>)</tt>. <li>... <li><tt>sumOfPowers[toSumIndex-fromSumIndex]</tt>
+   *                    is the old <tt>Sum(data[i]<sup>toSumIndex</sup>)</tt>. </ul> If no data sequence elements have
+   *                    so far been recorded set all old values of the sums to <tt>0.0</tt>.
    * @return the updated values filled into the <tt>sumOfPowers</tt> array.
    */
   public static void incrementalUpdateSumsOfPowers(DoubleArrayList data, int from, int to, int fromSumIndex,

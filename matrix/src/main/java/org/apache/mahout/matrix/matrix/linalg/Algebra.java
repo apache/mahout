@@ -8,6 +8,15 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.matrix.linalg;
 
+import org.apache.mahout.jet.math.Functions;
+import org.apache.mahout.matrix.GenericPermuting;
+import org.apache.mahout.matrix.GenericSorting;
+import org.apache.mahout.matrix.PersistentObject;
+import org.apache.mahout.matrix.Swapper;
+import org.apache.mahout.matrix.bitvector.QuickBitVector;
+import org.apache.mahout.matrix.function.DoubleDoubleFunction;
+import org.apache.mahout.matrix.function.IntComparator;
+import org.apache.mahout.matrix.list.ObjectArrayList;
 import org.apache.mahout.matrix.matrix.DoubleFactory2D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
@@ -18,7 +27,7 @@ import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class Algebra extends org.apache.mahout.matrix.PersistentObject {
+public class Algebra extends PersistentObject {
 
   /**
    * A default Algebra object; has {@link Property#DEFAULT} attached for tolerance. Allows ommiting to construct an
@@ -38,10 +47,10 @@ public class Algebra extends org.apache.mahout.matrix.PersistentObject {
    * <tt>setProperty</tt>), or to alter the tolerance of its property object (via <tt>property().setTolerance(...)</tt>)
    * will throw an exception.
    */
-  public static final Algebra ZERO;
+  private static final Algebra ZERO;
 
   /** The property object attached to this instance. */
-  protected Property property;
+  private Property property;
 
   static {
     // don't use new Algebra(Property.DEFAULT.tolerance()), because then property object would be mutable.
@@ -117,8 +126,8 @@ public class Algebra extends org.apache.mahout.matrix.PersistentObject {
   }
 
   /** Returns sqrt(a^2 + b^2) without under/overflow. */
-  protected static org.apache.mahout.matrix.function.DoubleDoubleFunction hypotFunction() {
-    return new org.apache.mahout.matrix.function.DoubleDoubleFunction() {
+  private static org.apache.mahout.matrix.function.DoubleDoubleFunction hypotFunction() {
+    return new DoubleDoubleFunction() {
       @Override
       public double apply(double a, double b) {
         return hypot(a, b);
@@ -222,7 +231,7 @@ public class Algebra extends org.apache.mahout.matrix.PersistentObject {
     if (x.size() == 0) {
       return 0;
     }
-    return x.aggregate(org.apache.mahout.jet.math.Functions.plus, org.apache.mahout.jet.math.Functions.abs);
+    return x.aggregate(Functions.plus, org.apache.mahout.jet.math.Functions.abs);
   }
 
   /** Returns the one-norm of matrix <tt>A</tt>, which is the maximum absolute column sum. */
@@ -258,9 +267,9 @@ public class Algebra extends org.apache.mahout.matrix.PersistentObject {
     if (x.size() == 0) {
       return 0;
     }
-    return x.aggregate(org.apache.mahout.jet.math.Functions.max, org.apache.mahout.jet.math.Functions.abs);
+    return x.aggregate(Functions.max, org.apache.mahout.jet.math.Functions.abs);
 //  if (x.size()==0) return 0;
-//  return x.aggregate(org.apache.mahout.jet.math.Functions.plus,org.apache.mahout.jet.math.Functions.abs);
+//  return x.aggregate(Functions.plus,org.apache.mahout.jet.math.Functions.abs);
 //  double max = 0;
 //  for (int i = x.size(); --i >= 0; ) {
 //    max = Math.max(max, x.getQuick(i));
@@ -401,14 +410,14 @@ public class Algebra extends org.apache.mahout.matrix.PersistentObject {
       return A;
     }
 
-    org.apache.mahout.matrix.Swapper swapper = new org.apache.mahout.matrix.Swapper() {
+    Swapper swapper = new Swapper() {
       @Override
       public void swap(int a, int b) {
         A.viewRow(a).swap(A.viewRow(b));
       }
     };
 
-    org.apache.mahout.matrix.GenericPermuting.permute(indexes, swapper, work, null);
+    GenericPermuting.permute(indexes, swapper, work, null);
     return A;
   }
 
@@ -444,8 +453,7 @@ public class Algebra extends org.apache.mahout.matrix.PersistentObject {
       return T;
     }
 
-    int k =
-        org.apache.mahout.matrix.bitvector.QuickBitVector.mostSignificantBit(p); // index of highest bit in state "true"
+    int k = QuickBitVector.mostSignificantBit(p); // index of highest bit in state "true"
 
     /*
     this is the naive version:
@@ -457,7 +465,7 @@ public class Algebra extends org.apache.mahout.matrix.PersistentObject {
     */
 
     // here comes the optimized version:
-    //org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
+    //org.apache.mahout.matrix.Timer timer = new Timer().start();
 
     int i = 0;
     while (i <= k && (p & (1 << i)) == 0) { // while (bit i of p == false)
@@ -647,8 +655,8 @@ public class Algebra extends org.apache.mahout.matrix.PersistentObject {
    * </pre>
    */
   public String toString(DoubleMatrix2D matrix) {
-    final org.apache.mahout.matrix.list.ObjectArrayList names = new org.apache.mahout.matrix.list.ObjectArrayList();
-    final org.apache.mahout.matrix.list.ObjectArrayList values = new org.apache.mahout.matrix.list.ObjectArrayList();
+    final org.apache.mahout.matrix.list.ObjectArrayList names = new ObjectArrayList();
+    final org.apache.mahout.matrix.list.ObjectArrayList values = new ObjectArrayList();
 
     // determine properties
     names.add("cond");
@@ -718,13 +726,13 @@ public class Algebra extends org.apache.mahout.matrix.PersistentObject {
 
 
     // sort ascending by property name
-    org.apache.mahout.matrix.function.IntComparator comp = new org.apache.mahout.matrix.function.IntComparator() {
+    IntComparator comp = new IntComparator() {
       @Override
       public int compare(int a, int b) {
         return Property.get(names, a).compareTo(Property.get(names, b));
       }
     };
-    org.apache.mahout.matrix.Swapper swapper = new org.apache.mahout.matrix.Swapper() {
+    Swapper swapper = new Swapper() {
       @Override
       public void swap(int a, int b) {
         Object tmp = names.get(a);
@@ -735,7 +743,7 @@ public class Algebra extends org.apache.mahout.matrix.PersistentObject {
         values.set(b, tmp);
       }
     };
-    org.apache.mahout.matrix.GenericSorting.quickSort(0, names.size(), comp, swapper);
+    GenericSorting.quickSort(0, names.size(), comp, swapper);
 
     // determine padding for nice formatting
     int maxLength = 0;
@@ -1025,34 +1033,4 @@ public class Algebra extends org.apache.mahout.matrix.PersistentObject {
     return A;
   }
 
-  /**
-   * Outer product of two vectors; Returns a matrix with <tt>A[i,j] = x[i] * y[j]</tt>.
-   *
-   * @param x the first source vector.
-   * @param y the second source vector.
-   * @return the outer product </tt>A</tt>.
-   */
-  private DoubleMatrix2D xmultOuter(DoubleMatrix1D x, DoubleMatrix1D y) {
-    DoubleMatrix2D A = x.like2D(x.size(), y.size());
-    multOuter(x, y, A);
-    return A;
-  }
-
-  /**
-   * Linear algebraic matrix power; <tt>B = A<sup>k</sup> <==> B = A*A*...*A</tt>.
-   *
-   * @param A the source matrix; must be square.
-   * @param k the exponent, can be any number.
-   * @return a new result matrix.
-   * @throws IllegalArgumentException if <tt>!Testing.isSquare(A)</tt>.
-   */
-  private DoubleMatrix2D xpowSlow(DoubleMatrix2D A, int k) {
-    //org.apache.mahout.matrix.Timer timer = new org.apache.mahout.matrix.Timer().start();
-    DoubleMatrix2D result = A.copy();
-    for (int i = 0; i < k - 1; i++) {
-      result = mult(result, A);
-    }
-    //timer.stop().display();
-    return result;
-  }
 }

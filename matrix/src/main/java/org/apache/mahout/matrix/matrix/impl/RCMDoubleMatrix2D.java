@@ -8,6 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.matrix.impl;
 
+import org.apache.mahout.jet.math.Functions;
 import org.apache.mahout.matrix.list.DoubleArrayList;
 import org.apache.mahout.matrix.list.IntArrayList;
 import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
@@ -23,8 +24,8 @@ class RCMDoubleMatrix2D extends WrapperDoubleMatrix2D {
   /*
    * The elements of the matrix.
    */
-  private IntArrayList[] indexes;
-  private DoubleArrayList[] values;
+  private final IntArrayList[] indexes;
+  private final DoubleArrayList[] values;
 
   /**
    * Constructs a matrix with a copy of the given values. <tt>values</tt> is required to have the form
@@ -207,7 +208,7 @@ class RCMDoubleMatrix2D extends WrapperDoubleMatrix2D {
           "Incompatible args: " + toStringShort() + ", " + y.toStringShort() + ", " + z.toStringShort());
     }
 
-    z.assign(org.apache.mahout.jet.math.Functions.mult(beta / alpha));
+    z.assign(Functions.mult(beta / alpha));
     for (int i = indexes.length; --i >= 0;) {
       if (indexes[i] != null) {
         for (int k = indexes[i].size(); --k >= 0;) {
@@ -218,6 +219,6 @@ class RCMDoubleMatrix2D extends WrapperDoubleMatrix2D {
       }
     }
 
-    z.assign(org.apache.mahout.jet.math.Functions.mult(alpha));
+    z.assign(Functions.mult(alpha));
   }
 }

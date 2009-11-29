@@ -24,10 +24,10 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
 @Deprecated
 public class BreitWignerMeanSquare extends BreitWigner {
 
-  protected Uniform uniform; // helper
+  private Uniform uniform; // helper
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static BreitWigner shared = new BreitWignerMeanSquare(1.0, 0.2, 1.0, makeDefaultGenerator());
+  private static final BreitWigner shared = new BreitWignerMeanSquare(1.0, 0.2, 1.0, makeDefaultGenerator());
 
   /**
    * Constructs a mean-squared BreitWigner distribution.
@@ -91,14 +91,4 @@ public class BreitWignerMeanSquare extends BreitWigner {
     }
   }
 
-  /**
-   * Sets the uniform random number generated shared by all <b>static</b> methods.
-   *
-   * @param randomGenerator the new uniform random number generator to be shared.
-   */
-  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-    synchronized (shared) {
-      shared.setRandomGenerator(randomGenerator);
-    }
-  }
 }

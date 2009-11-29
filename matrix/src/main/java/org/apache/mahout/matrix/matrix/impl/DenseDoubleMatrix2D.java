@@ -8,6 +8,9 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.matrix.impl;
 
+import org.apache.mahout.jet.math.Mult;
+import org.apache.mahout.jet.math.PlusMult;
+import org.apache.mahout.matrix.function.DoubleFunction;
 import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /**
@@ -171,7 +174,7 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
    * 2.5 3.5
    *
    * // change each cell to its sine
-   * matrix.assign(org.apache.mahout.jet.math.Functions.sin);
+   * matrix.assign(Functions.sin);
    * -->
    * 2 x 2 matrix
    * 0.479426  0.997495
@@ -184,7 +187,7 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
    * @see org.apache.mahout.jet.math.Functions
    */
   @Override
-  public DoubleMatrix2D assign(org.apache.mahout.matrix.function.DoubleFunction function) {
+  public DoubleMatrix2D assign(DoubleFunction function) {
     double[] elems = this.elements;
     if (elems == null) {
       throw new InternalError();
@@ -194,8 +197,8 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
     int rs = this.rowStride;
 
     // specialization for speed
-    if (function instanceof org.apache.mahout.jet.math.Mult) { // x[i] = mult*x[i]
-      double multiplicator = ((org.apache.mahout.jet.math.Mult) function).getMultiplicator();
+    if (function instanceof Mult) { // x[i] = mult*x[i]
+      double multiplicator = ((Mult) function).getMultiplicator();
       if (multiplicator == 1) {
         return this;
       }
@@ -351,8 +354,8 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
         index += rs;
         otherIndex += ors;
       }
-    } else if (function instanceof org.apache.mahout.jet.math.PlusMult) {
-      double multiplicator = ((org.apache.mahout.jet.math.PlusMult) function).getMultiplicator();
+    } else if (function instanceof PlusMult) {
+      double multiplicator = ((PlusMult) function).getMultiplicator();
       if (multiplicator == 0) { // x[i] = x[i] + 0*y[i]
         return this;
       } else if (multiplicator == 1) { // x[i] = x[i] + y[i]
@@ -545,14 +548,14 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
    * Make sure that cells of <tt>this</tt> and <tt>B</tt> do not overlap. In case of overlapping views, behaviour is
    * unspecified. </pre> <p> <b>Example:</b> <pre> final double alpha = 0.25; final double beta = 0.75;
    *
-   * // 8 neighbors org.apache.mahout.matrix.function.Double9Function f = new org.apache.mahout.matrix.function.Double9Function()
-   * { &nbsp;&nbsp;&nbsp;public final double apply( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a00, double a01, double
+   * // 8 neighbors org.apache.mahout.matrix.function.Double9Function f = new Double9Function() {
+   * &nbsp;&nbsp;&nbsp;public final double apply( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a00, double a01, double
    * a02, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a10, double a11, double a12, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double
    * a20, double a21, double a22) { &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return beta*a11 +
    * alpha*(a00+a01+a02 + a10+a12 + a20+a21+a22); &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} }; A.zAssign8Neighbors(B,f);
    *
-   * // 4 neighbors org.apache.mahout.matrix.function.Double9Function g = new org.apache.mahout.matrix.function.Double9Function()
-   * { &nbsp;&nbsp;&nbsp;public final double apply( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a00, double a01, double
+   * // 4 neighbors org.apache.mahout.matrix.function.Double9Function g = new Double9Function() {
+   * &nbsp;&nbsp;&nbsp;public final double apply( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a00, double a01, double
    * a02, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a10, double a11, double a12, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double
    * a20, double a21, double a22) { &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return beta*a11 + alpha*(a01+a10+a12+a21);
    * &nbsp;&nbsp;&nbsp;} C.zAssign8Neighbors(B,g); // fast, even though it doesn't look like it }; </pre>
@@ -677,16 +680,6 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
     int cols = columns;
     for (int row = rows; --row >= 0;) {
       double sum = 0;
-
-      /*
-      // not loop unrolled
-      for (int i=indexA, j=indexY, column=columns; --column >= 0; ) {
-        sum += AElems[i] * yElems[j];
-        i += As;
-        j += ys;
-      }
-      */
-
       // loop unrolled
       int i = indexA - As;
       int j = indexY - ys;
@@ -724,19 +717,6 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
         B.zMult(this, C.viewDice(), alpha, beta, !transposeB, true);
         return C;
       }
-      /*
-      final RCDoubleMatrix2D transB = new RCDoubleMatrix2D(B.columns,B.rows);
-      B.forEachNonZero(
-        new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
-          public double apply(int i, int j, double value) {
-            transB.setQuick(j,i,value);
-            return value;
-          }
-        }
-      );
-
-      return transB.zMult(this.viewDice(),C.viewDice()).viewDice();
-      */
     }
     if (transposeB) {
       return this.zMult(B.viewDice(), C, alpha, beta, transposeA, false);

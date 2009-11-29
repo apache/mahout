@@ -8,6 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.stat.quantile;
 
+import org.apache.mahout.matrix.PersistentObject;
+import org.apache.mahout.matrix.function.DoubleProcedure;
 import org.apache.mahout.matrix.list.DoubleArrayList;
 import org.apache.mahout.matrix.list.ObjectArrayList;
 
@@ -16,7 +18,7 @@ import org.apache.mahout.matrix.list.ObjectArrayList;
  * elements.
  */
 //abstract class ApproximateDoubleQuantileFinder extends Object implements DoubleQuantileFinder {
-abstract class DoubleQuantileEstimator extends org.apache.mahout.matrix.PersistentObject
+abstract class DoubleQuantileEstimator extends PersistentObject
     implements DoubleQuantileFinder {
 
   protected DoubleBufferSet bufferSet;
@@ -170,7 +172,7 @@ abstract class DoubleQuantileEstimator extends org.apache.mahout.matrix.Persiste
    * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise.
    */
   @Override
-  public boolean forEach(org.apache.mahout.matrix.function.DoubleProcedure procedure) {
+  public boolean forEach(DoubleProcedure procedure) {
     return this.bufferSet.forEach(procedure);
   }
 

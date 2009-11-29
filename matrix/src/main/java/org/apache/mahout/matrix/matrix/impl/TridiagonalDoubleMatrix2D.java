@@ -8,6 +8,11 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.matrix.impl;
 
+import org.apache.mahout.jet.math.Functions;
+import org.apache.mahout.jet.math.Mult;
+import org.apache.mahout.jet.math.PlusMult;
+import org.apache.mahout.matrix.function.DoubleDoubleFunction;
+import org.apache.mahout.matrix.function.IntIntDoubleFunction;
 import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 
@@ -23,7 +28,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
   /*
    * The non zero elements of the matrix: {lower, diagonal, upper}.
    */
-  protected final double[] values;
+  private final double[] values;
 
   /*
   * The startIndexes and number of non zeros: {lowerStart, diagonalStart, upperStart, values.length, lowerNonZeros, diagonalNonZeros, upperNonZeros}.
@@ -31,9 +36,9 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
   * diagonalStart = lowerStart + lower.length
   * upperStart = diagonalStart + diagonal.length
   */
-  protected final int[] dims;
+  private final int[] dims;
 
-  protected static final int NONZERO = 4;
+  private static final int NONZERO = 4;
 
   //protected double diagonal[];
   //protected double lower[];
@@ -83,14 +88,6 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
     int[] dimensions = {0, l, l + d, l + d + u, 0, 0,
         0}; // {lowerStart, diagonalStart, upperStart, values.length, lowerNonZeros, diagonalNonZeros, upperNonZeros}
     dims = dimensions;
-
-    //diagonal = new double[d];
-    //lower = new double[l];
-    //upper = new double[u];
-
-    //diagonalNonZeros = 0;
-    //lowerNonZeros = 0;
-    //upperNonZeros = 0;
   }
 
   /**
@@ -110,13 +107,6 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
         dims[i] = 0;
       }
 
-      //for (int i=diagonal.length; --i >= 0; ) diagonal[i]=0;
-      //for (int i=upper.length; --i >= 0; ) upper[i]=0;
-      //for (int i=lower.length; --i >= 0; ) lower[i]=0;
-
-      //diagonalNonZeros = 0;
-      //lowerNonZeros = 0;
-      //upperNonZeros = 0;
     } else {
       super.assign(value);
     }
@@ -125,8 +115,8 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
 
   @Override
   public DoubleMatrix2D assign(final org.apache.mahout.matrix.function.DoubleFunction function) {
-    if (function instanceof org.apache.mahout.jet.math.Mult) { // x[i] = mult*x[i]
-      double alpha = ((org.apache.mahout.jet.math.Mult) function).getMultiplicator();
+    if (function instanceof Mult) { // x[i] = mult*x[i]
+      double alpha = ((Mult) function).getMultiplicator();
       if (alpha == 1) {
         return this;
       }
@@ -137,15 +127,8 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
         return assign(alpha);
       } // the funny definition of isNaN(). This should better not happen.
 
-      /*
-      double[] vals = values.elements();
-      for (int j=values.size(); --j >= 0; ) {
-        vals[j] *= alpha;
-      }
-      */
-
       forEachNonZero(
-          new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
+          new IntIntDoubleFunction() {
             @Override
             public double apply(int i, int j, double value) {
               return function.apply(value);
@@ -188,7 +171,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
     if (source instanceof RCDoubleMatrix2D || source instanceof SparseDoubleMatrix2D) {
       assign(0);
       source.forEachNonZero(
-          new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
+          new IntIntDoubleFunction() {
             @Override
             public double apply(int i, int j, double value) {
               setQuick(i, j, value);
@@ -204,16 +187,16 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
 
   @Override
   public DoubleMatrix2D assign(final DoubleMatrix2D y,
-                               org.apache.mahout.matrix.function.DoubleDoubleFunction function) {
+                               DoubleDoubleFunction function) {
     checkShape(y);
 
-    if (function instanceof org.apache.mahout.jet.math.PlusMult) { // x[i] = x[i] + alpha*y[i]
-      final double alpha = ((org.apache.mahout.jet.math.PlusMult) function).getMultiplicator();
+    if (function instanceof PlusMult) { // x[i] = x[i] + alpha*y[i]
+      final double alpha = ((PlusMult) function).getMultiplicator();
       if (alpha == 0) {
         return this;
       } // nothing to do
       y.forEachNonZero(
-          new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
+          new IntIntDoubleFunction() {
             @Override
             public double apply(int i, int j, double value) {
               setQuick(i, j, getQuick(i, j) + alpha * value);
@@ -226,7 +209,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
 
     if (function == org.apache.mahout.jet.math.Functions.mult) { // x[i] = x[i] * y[i]
       forEachNonZero(
-          new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
+          new IntIntDoubleFunction() {
             @Override
             public double apply(int i, int j, double value) {
               setQuick(i, j, getQuick(i, j) * y.getQuick(i, j));
@@ -239,7 +222,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
 
     if (function == org.apache.mahout.jet.math.Functions.div) { // x[i] = x[i] / y[i]
       forEachNonZero(
-          new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
+          new IntIntDoubleFunction() {
             @Override
             public double apply(int i, int j, double value) {
               setQuick(i, j, getQuick(i, j) / y.getQuick(i, j));
@@ -254,7 +237,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
   }
 
   @Override
-  public DoubleMatrix2D forEachNonZero(org.apache.mahout.matrix.function.IntIntDoubleFunction function) {
+  public DoubleMatrix2D forEachNonZero(IntIntDoubleFunction function) {
     for (int kind = 0; kind <= 2; kind++) {
       int i = 0, j = 0;
       switch (kind) {
@@ -415,62 +398,6 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
               value);
     }
 
-    //int k = -1;
-    //int q = 0;
-
-    //if (i==j) { k=0; q=i; } // diagonal
-    //if (i==j+1) { k=1; q=j; } // lower diagonal
-    //if (i==j-1) { k=2; q=i; } // upper diagonal
-
-    //if (k>0) {
-    //int index = dims[k]+q;
-    //if (values[index]!=0) {
-    //if (isZero) dims[k+NONZERO]--; // one nonZero less
-    //}
-    //else {
-    //if (!isZero) dims[k+NONZERO]++; // one nonZero more
-    //}
-    //values[index] = value;
-    //return;
-    //}
-
-    //if (!isZero) throw new IllegalArgumentException("Can't store non-zero value to non-tridiagonal coordinate: row="+row+", column="+column+", value="+value);
-
-
-    //if (i==j) {
-    //if (diagonal[i]!=0) {
-    //if (isZero) diagonalNonZeros--;
-    //}
-    //else {
-    //if (!isZero) diagonalNonZeros++;
-    //}
-    //diagonal[i] = value;
-    //return;
-    //}
-
-    //if (i==j+1) {
-    //if (lower[j]!=0) {
-    //if (isZero) lowerNonZeros--;
-    //}
-    //else {
-    //if (!isZero) lowerNonZeros++;
-    //}
-    //lower[j] = value;
-    //return;
-    //}
-
-    //if (i==j-1) {
-    //if (upper[i]!=0) {
-    //if (isZero) upperNonZeros--;
-    //}
-    //else {
-    //if (!isZero) upperNonZeros++;
-    //}
-    //upper[i] = value;
-    //return;
-    //}
-
-    //if (!isZero) throw new IllegalArgumentException("Can't store non-zero value to non-tridiagonal coordinate: row="+row+", column="+column+", value="+value);
   }
 
   @Override
@@ -498,7 +425,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
     }
 
     if (!ignore) {
-      z.assign(org.apache.mahout.jet.math.Functions.mult(beta / alpha));
+      z.assign(Functions.mult(beta / alpha));
     }
 
     DenseDoubleMatrix1D zz = (DenseDoubleMatrix1D) z;
@@ -516,7 +443,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
     }
 
     forEachNonZero(
-        new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
+        new IntIntDoubleFunction() {
           @Override
           public double apply(int i, int j, double value) {
             if (transposeA) {
@@ -533,7 +460,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
     );
 
     if (alpha != 1) {
-      z.assign(org.apache.mahout.jet.math.Functions.mult(alpha));
+      z.assign(Functions.mult(alpha));
     }
     return z;
   }
@@ -570,7 +497,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
     }
 
     if (!ignore) {
-      C.assign(org.apache.mahout.jet.math.Functions.mult(beta));
+      C.assign(Functions.mult(beta));
     }
 
     // cache views
@@ -586,7 +513,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
     final org.apache.mahout.jet.math.PlusMult fun = org.apache.mahout.jet.math.PlusMult.plusMult(0);
 
     forEachNonZero(
-        new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
+        new IntIntDoubleFunction() {
           @Override
           public double apply(int i, int j, double value) {
             fun.setMultiplicator(value * alpha);

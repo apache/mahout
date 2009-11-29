@@ -74,7 +74,7 @@ class KnownDoubleQuantileEstimator extends DoubleQuantileEstimator {
 
   /**
    * @param missingInfinities the number of infinities to fill.
-   * @param buffer     the buffer into which the infinities shall be filled.
+   * @param buffer            the buffer into which the infinities shall be filled.
    */
   protected void addInfinities(int missingInfinities, DoubleBuffer buffer) {
     RandomSamplingAssistant oldAssistant = this.samplingAssistant;

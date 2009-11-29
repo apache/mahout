@@ -209,7 +209,7 @@ public class Formatter extends AbstractFormatter {
     int width = c + columns;
 
     // make larger matrix holding original matrix and naming strings
-    org.apache.mahout.matrix.matrix.ObjectMatrix2D titleMatrix = matrix.like(height, width);
+    ObjectMatrix2D titleMatrix = matrix.like(height, width);
 
     // insert original matrix into larger matrix
     titleMatrix.viewPart(r, c, rows, columns).assign(matrix);

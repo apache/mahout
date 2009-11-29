@@ -102,15 +102,15 @@ public class DenseDoubleMatrix3D extends DoubleMatrix3D {
   /**
    * Constructs a view with the given parameters.
    *
-   * @param slices        the number of slices the matrix shall have.
-   * @param rows          the number of rows the matrix shall have.
-   * @param columns       the number of columns the matrix shall have.
-   * @param elements      the cells.
-   * @param sliceZero     the position of the first element.
-   * @param rowZero       the position of the first element.
-   * @param columnZero    the position of the first element.
-   * @param sliceStride   the number of elements between two slices, i.e. <tt>index(k+1,i,j)-index(k,i,j)</tt>.
-   * @param rowStride     the number of elements between two rows, i.e. <tt>index(k,i+1,j)-index(k,i,j)</tt>.
+   * @param slices       the number of slices the matrix shall have.
+   * @param rows         the number of rows the matrix shall have.
+   * @param columns      the number of columns the matrix shall have.
+   * @param elements     the cells.
+   * @param sliceZero    the position of the first element.
+   * @param rowZero      the position of the first element.
+   * @param columnZero   the position of the first element.
+   * @param sliceStride  the number of elements between two slices, i.e. <tt>index(k+1,i,j)-index(k,i,j)</tt>.
+   * @param rowStride    the number of elements between two rows, i.e. <tt>index(k,i+1,j)-index(k,i,j)</tt>.
    * @param columnStride the number of elements between two columns, i.e. <tt>index(k,i,j+1)-index(k,i,j)</tt>.
    * @throws IllegalArgumentException if <tt>(double)slices*columns*rows > Integer.MAX_VALUE</tt>.
    * @throws IllegalArgumentException if <tt>slices<0 || rows<0 || columns<0</tt>.
@@ -353,10 +353,10 @@ public class DenseDoubleMatrix3D extends DoubleMatrix3D {
    * Make sure that cells of <tt>this</tt> and <tt>B</tt> do not overlap. In case of overlapping views, behaviour is
    * unspecified. </pre> <p> <b>Example:</b> <pre> final double alpha = 0.25; final double beta = 0.75;
    *
-   * org.apache.mahout.matrix.function.Double27Function f = new org.apache.mahout.matrix.function.Double27Function() {
-   * &nbsp;&nbsp;&nbsp;public final double apply( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a000, double a001, double
-   * a002, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a010, double a011, double a012,
-   * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a020, double a021, double a022,
+   * org.apache.mahout.matrix.function.Double27Function f = new Double27Function() { &nbsp;&nbsp;&nbsp;public final
+   * double apply( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a000, double a001, double a002,
+   * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a010, double a011, double a012, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double
+   * a020, double a021, double a022,
    *
    * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a100, double a101, double a102, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double
    * a110, double a111, double a112, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a120, double a121, double a122,

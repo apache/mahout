@@ -8,11 +8,13 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.stat.quantile;
 
+import org.apache.mahout.matrix.PersistentObject;
+
 /** A buffer holding elements; internally used for computing approximate quantiles. */
-abstract class Buffer extends org.apache.mahout.matrix.PersistentObject {
+abstract class Buffer extends PersistentObject {
 
   protected int weight;
-  protected int level;
+  private int level;
   protected final int k;
   protected boolean isAllocated;
 

@@ -34,7 +34,7 @@ import org.apache.mahout.matrix.matrix.DoubleMatrix3D;
 class SelectedSparseDoubleMatrix3D extends DoubleMatrix3D {
 
   /** The elements of this matrix. */
-  protected AbstractIntDoubleMap elements;
+  protected final AbstractIntDoubleMap elements;
 
   /** The offsets of the visible cells of this matrix. */
   protected int[] sliceOffsets;

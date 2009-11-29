@@ -336,7 +336,7 @@ public class SparseVector extends AbstractVector {
 
   private class DistanceSquared implements IntDoubleProcedure {
 
-    final Vector v;
+    private final Vector v;
     private double result = 0.0;
 
     private DistanceSquared(Vector v) {

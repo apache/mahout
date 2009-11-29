@@ -24,7 +24,7 @@ import java.util.AbstractList;
 @Deprecated
 public class DoubleListAdapter extends AbstractList<Double> {
 
-  protected final AbstractDoubleList content;
+  private final AbstractDoubleList content;
 
   /** Constructs a list backed by the specified content list. */
   public DoubleListAdapter(AbstractDoubleList content) {

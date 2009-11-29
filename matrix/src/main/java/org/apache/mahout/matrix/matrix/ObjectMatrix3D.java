@@ -8,9 +8,12 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.matrix;
 
+import org.apache.mahout.matrix.function.ObjectFunction;
+import org.apache.mahout.matrix.function.ObjectObjectFunction;
 import org.apache.mahout.matrix.list.IntArrayList;
 import org.apache.mahout.matrix.list.ObjectArrayList;
 import org.apache.mahout.matrix.matrix.impl.AbstractMatrix3D;
+import org.apache.mahout.matrix.matrix.objectalgo.Formatter;
 /**
  Abstract base class for 3-d matrices holding <tt>Object</tt> elements.
  First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -59,8 +62,8 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @return the aggregated measure.
    * @see org.apache.mahout.jet.math.Functions
    */
-  public Object aggregate(org.apache.mahout.matrix.function.ObjectObjectFunction aggr,
-                          org.apache.mahout.matrix.function.ObjectFunction f) {
+  public Object aggregate(ObjectObjectFunction aggr,
+                          ObjectFunction f) {
     if (size() == 0) {
       return null;
     }
@@ -116,7 +119,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @see org.apache.mahout.jet.math.Functions
    */
   public Object aggregate(ObjectMatrix3D other, org.apache.mahout.matrix.function.ObjectObjectFunction aggr,
-                          org.apache.mahout.matrix.function.ObjectObjectFunction f) {
+                          ObjectObjectFunction f) {
     checkShape(other);
     if (size() == 0) {
       return null;
@@ -181,7 +184,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * 2.5 3.5
    *
    * // change each cell to its sine
-   * matrix.assign(org.apache.mahout.jet.math.Functions.sin);
+   * matrix.assign(Functions.sin);
    * -->
    * 1 x 2 x 2 matrix
    * 0.479426  0.997495
@@ -193,7 +196,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @return <tt>this</tt> (for convenience only).
    * @see org.apache.mahout.jet.math.Functions
    */
-  public ObjectMatrix3D assign(org.apache.mahout.matrix.function.ObjectFunction function) {
+  public ObjectMatrix3D assign(ObjectFunction function) {
     for (int slice = slices; --slice >= 0;) {
       for (int row = rows; --row >= 0;) {
         for (int column = columns; --column >= 0;) {
@@ -581,7 +584,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @see org.apache.mahout.matrix.matrix.objectalgo.Formatter
    */
   public String toString() {
-    return new org.apache.mahout.matrix.matrix.objectalgo.Formatter().toString(this);
+    return new Formatter().toString(this);
   }
 
   /**
@@ -890,68 +893,4 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
     return (ObjectMatrix3D) (view().vStrides(sliceStride, rowStride, columnStride));
   }
 
-  /**
-   * Applies a procedure to each cell's value. Iterates downwards from <tt>[slices()-1,rows()-1,columns()-1]</tt> to
-   * <tt>[0,0,0]</tt>, as demonstrated by this snippet:
-   * <pre>
-   * for (int slice=slices; --slice >=0;) {
-   *    for (int row=rows; --row >= 0;) {
-   *       for (int column=columns; --column >= 0;) {
-   *           if (!procedure.apply(get(slice,row,column))) return false;
-   *       }
-   *    }
-   * }
-   * return true;
-   * </pre>
-   * Note that an implementation may use more efficient techniques, but must not use any other order.
-   *
-   * @param procedure a procedure object taking as argument the current cell's value. Stops iteration if the procedure
-   *                  returns <tt>false</tt>, otherwise continues.
-   * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise.
-   */
-  private boolean xforEach(org.apache.mahout.matrix.function.ObjectProcedure procedure) {
-    for (int slice = slices; --slice >= 0;) {
-      for (int row = rows; --row >= 0;) {
-        for (int column = columns; --column >= 0;) {
-          if (!procedure.apply(getQuick(slice, row, column))) {
-            return false;
-          }
-        }
-      }
-    }
-    return true;
-  }
-
-  /**
-   * Applies a procedure to each cell's coordinate. Iterates downwards from <tt>[slices()-1,rows()-1,columns()-1]</tt>
-   * to <tt>[0,0,0]</tt>, as demonstrated by this snippet:
-   * <pre>
-   * for (int slice=slices; --slice >=0;) {
-   *    for (int row=rows; --row >= 0;) {
-   *       for (int column=columns; --column >= 0;) {
-   *           if (!procedure.apply(slice,row,column)) return false;
-   *       }
-   *    }
-   * }
-   * return true;
-   * </pre>
-   * Note that an implementation may use more efficient techniques, but must not use any other order.
-   *
-   * @param procedure a procedure object taking as first argument the current slice, as second argument the current row,
-   *                  and as third argument the current column. Stops iteration if the procedure returns <tt>false</tt>,
-   *                  otherwise continues.
-   * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise.
-   */
-  private boolean xforEachCoordinate(org.apache.mahout.matrix.function.IntIntIntProcedure procedure) {
-    for (int column = columns; --column >= 0;) {
-      for (int slice = slices; --slice >= 0;) {
-        for (int row = rows; --row >= 0;) {
-          if (!procedure.apply(slice, row, column)) {
-            return false;
-          }
-        }
-      }
-    }
-    return true;
-  }
 }

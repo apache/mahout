@@ -8,8 +8,13 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.matrix;
 
+import org.apache.mahout.jet.math.Functions;
+import org.apache.mahout.matrix.function.DoubleDoubleFunction;
+import org.apache.mahout.matrix.function.DoubleFunction;
+import org.apache.mahout.matrix.function.IntIntDoubleFunction;
 import org.apache.mahout.matrix.list.DoubleArrayList;
 import org.apache.mahout.matrix.list.IntArrayList;
+import org.apache.mahout.matrix.matrix.doublealgo.Formatter;
 import org.apache.mahout.matrix.matrix.impl.AbstractMatrix2D;
 import org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix1D;
 import org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix2D;
@@ -58,8 +63,8 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * @return the aggregated measure.
    * @see org.apache.mahout.jet.math.Functions
    */
-  public double aggregate(org.apache.mahout.matrix.function.DoubleDoubleFunction aggr,
-                          org.apache.mahout.matrix.function.DoubleFunction f) {
+  public double aggregate(DoubleDoubleFunction aggr,
+                          DoubleFunction f) {
     if (size() == 0) {
       return Double.NaN;
     }
@@ -106,7 +111,7 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * @see org.apache.mahout.jet.math.Functions
    */
   public double aggregate(DoubleMatrix2D other, org.apache.mahout.matrix.function.DoubleDoubleFunction aggr,
-                          org.apache.mahout.matrix.function.DoubleDoubleFunction f) {
+                          DoubleDoubleFunction f) {
     checkShape(other);
     if (size() == 0) {
       return Double.NaN;
@@ -176,7 +181,7 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * 2.5 3.5
    *
    * // change each cell to its sine
-   * matrix.assign(org.apache.mahout.jet.math.Functions.sin);
+   * matrix.assign(Functions.sin);
    * -->
    * 2 x 2 matrix
    * 0.479426  0.997495
@@ -188,7 +193,7 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * @return <tt>this</tt> (for convenience only).
    * @see org.apache.mahout.jet.math.Functions
    */
-  public DoubleMatrix2D assign(org.apache.mahout.matrix.function.DoubleFunction function) {
+  public DoubleMatrix2D assign(DoubleFunction function) {
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
         setQuick(row, column, function.apply(getQuick(row, column)));
@@ -330,7 +335,7 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * @param function a function object taking as argument the current non-zero cell's row, column and value.
    * @return <tt>this</tt> (for convenience only).
    */
-  public DoubleMatrix2D forEachNonZero(org.apache.mahout.matrix.function.IntIntDoubleFunction function) {
+  public DoubleMatrix2D forEachNonZero(IntIntDoubleFunction function) {
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
         double value = getQuick(row, column);
@@ -539,7 +544,7 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * @see org.apache.mahout.matrix.matrix.doublealgo.Formatter
    */
   public String toString() {
-    return new org.apache.mahout.matrix.matrix.doublealgo.Formatter().toString(this);
+    return new Formatter().toString(this);
   }
 
   /**
@@ -804,34 +809,6 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
   }
 
   /**
-   * Applies a procedure to each cell's value. Iterates downwards from <tt>[rows()-1,columns()-1]</tt> to
-   * <tt>[0,0]</tt>, as demonstrated by this snippet:
-   * <pre>
-   * for (int row=rows; --row >=0;) {
-   *    for (int column=columns; --column >= 0;) {
-   *        if (!procedure.apply(getQuick(row,column))) return false;
-   *    }
-   * }
-   * return true;
-   * </pre>
-   * Note that an implementation may use more efficient techniques, but must not use any other order.
-   *
-   * @param procedure a procedure object taking as argument the current cell's value. Stops iteration if the procedure
-   *                  returns <tt>false</tt>, otherwise continues.
-   * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise.
-   */
-  private boolean xforEach(org.apache.mahout.matrix.function.DoubleProcedure procedure) {
-    for (int row = rows; --row >= 0;) {
-      for (int column = columns; --column >= 0;) {
-        if (!procedure.apply(getQuick(row, column))) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  /**
    * 8 neighbor stencil transformation. For efficient finite difference operations. Applies a function to a moving <tt>3
    * x 3</tt> window. Does nothing if <tt>rows() < 3 || columns() < 3</tt>.
    * <pre>
@@ -850,14 +827,14 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * Make sure that cells of <tt>this</tt> and <tt>B</tt> do not overlap. In case of overlapping views, behaviour is
    * unspecified. </pre> <p> <b>Example:</b> <pre> final double alpha = 0.25; final double beta = 0.75;
    *
-   * // 8 neighbors org.apache.mahout.matrix.function.Double9Function f = new org.apache.mahout.matrix.function.Double9Function()
-   * { &nbsp;&nbsp;&nbsp;public final double apply( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a00, double a01, double
+   * // 8 neighbors org.apache.mahout.matrix.function.Double9Function f = new Double9Function() {
+   * &nbsp;&nbsp;&nbsp;public final double apply( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a00, double a01, double
    * a02, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a10, double a11, double a12, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double
    * a20, double a21, double a22) { &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return beta*a11 +
    * alpha*(a00+a01+a02 + a10+a12 + a20+a21+a22); &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} }; A.zAssign8Neighbors(B,f);
    *
-   * // 4 neighbors org.apache.mahout.matrix.function.Double9Function g = new org.apache.mahout.matrix.function.Double9Function()
-   * { &nbsp;&nbsp;&nbsp;public final double apply( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a00, double a01, double
+   * // 4 neighbors org.apache.mahout.matrix.function.Double9Function g = new Double9Function() {
+   * &nbsp;&nbsp;&nbsp;public final double apply( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a00, double a01, double
    * a02, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a10, double a11, double a12, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double
    * a20, double a21, double a22) { &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return beta*a11 + alpha*(a01+a10+a12+a21);
    * &nbsp;&nbsp;&nbsp;} C.zAssign8Neighbors(B,g); // fast, even though it doesn't look like it }; </pre>
@@ -1017,6 +994,6 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
     if (size() == 0) {
       return 0;
     }
-    return aggregate(org.apache.mahout.jet.math.Functions.plus, org.apache.mahout.jet.math.Functions.identity);
+    return aggregate(Functions.plus, org.apache.mahout.jet.math.Functions.identity);
   }
 }

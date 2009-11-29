@@ -167,7 +167,7 @@ public class Bessel extends Constants {
   };
 
 
-  /** *********************************** COEFFICIENTS FOR METHODS k0, k0e  * ************************************** */
+  /** ********************************** COEFFICIENTS FOR METHODS k0, k0e  * ************************************** */
   /* Chebyshev coefficients for K0(x) + log(x/2) I0(x)
    * in the interval [0,2].  The odd order coefficients are all
    * zero; only the even order coefficients are listed.
@@ -221,7 +221,7 @@ public class Bessel extends Constants {
   };
 
 
-  /** *********************************** COEFFICIENTS FOR METHODS k1, k1e  * ************************************** */
+  /** ********************************** COEFFICIENTS FOR METHODS k1, k1e  * ************************************** */
   /* Chebyshev coefficients for x(K1(x) - log(x/2) I1(x))
    * in the interval [0,2].
    * 

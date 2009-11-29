@@ -55,7 +55,7 @@ public class SparseDoubleMatrix1D extends DoubleMatrix1D {
   /*
    * The elements of the matrix.
    */
-  protected AbstractIntDoubleMap elements;
+  protected final AbstractIntDoubleMap elements;
 
   /**
    * Constructs a matrix with a copy of the given values. The values are copied. So subsequent changes in

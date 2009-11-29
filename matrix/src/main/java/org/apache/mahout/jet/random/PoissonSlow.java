@@ -32,24 +32,24 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
 @Deprecated
 public class PoissonSlow extends AbstractDiscreteDistribution {
 
-  protected double mean;
+  private double mean;
 
   // precomputed and cached values (for performance only)
-  protected double cached_sq;
-  protected double cached_alxm;
-  protected double cached_g;
+  private double cached_sq;
+  private double cached_alxm;
+  private double cached_g;
 
-  protected static final double MEAN_MAX = Integer.MAX_VALUE;
+  private static final double MEAN_MAX = Integer.MAX_VALUE;
   // for all means larger than that, we don't try to compute a poisson deviation, but return the mean.
-  protected static final double SWITCH_MEAN = 12.0; // switch from method A to method B
+  private static final double SWITCH_MEAN = 12.0; // switch from method A to method B
 
-  protected static final double[] cof = { // for method logGamma() 
+  private static final double[] cof = { // for method logGamma()
       76.18009172947146, -86.50532032941677,
       24.01409824083091, -1.231739572450155,
       0.1208650973866179e-2, -0.5395239384953e-5};
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static PoissonSlow shared = new PoissonSlow(0.0, makeDefaultGenerator());
+  private static final PoissonSlow shared = new PoissonSlow(0.0, makeDefaultGenerator());
 
   /** Constructs a poisson distribution. Example: mean=1.0. */
   public PoissonSlow(double mean, RandomEngine randomGenerator) {
@@ -61,7 +61,7 @@ public class PoissonSlow extends AbstractDiscreteDistribution {
    * Returns the value ln(Gamma(xx) for xx > 0.  Full accuracy is obtained for xx > 1. For 0 < xx < 1. the reflection
    * formula (6.1.4) can be used first. (Adapted from Numerical Recipes in C)
    */
-  public static double logGamma(double xx) {
+  private static double logGamma(double xx) {
     double x = xx - 1.0;
     double tmp = x + 5.5;
     tmp -= (x + 0.5) * Math.log(tmp);
@@ -167,14 +167,4 @@ public class PoissonSlow extends AbstractDiscreteDistribution {
     return this.getClass().getName() + '(' + mean + ')';
   }
 
-  /**
-   * Sets the uniform random number generated shared by all <b>static</b> methods.
-   *
-   * @param randomGenerator the new uniform random number generator to be shared.
-   */
-  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-    synchronized (shared) {
-      shared.setRandomGenerator(randomGenerator);
-    }
-  }
 }

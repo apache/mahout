@@ -15,6 +15,8 @@ import org.apache.mahout.matrix.function.FloatComparator;
 import org.apache.mahout.matrix.function.IntComparator;
 import org.apache.mahout.matrix.function.LongComparator;
 import org.apache.mahout.matrix.function.ShortComparator;
+import org.apache.mahout.matrix.list.DoubleArrayList;
+import org.apache.mahout.matrix.list.FloatArrayList;
 
 import java.util.Comparator;
 /**
@@ -1388,7 +1390,7 @@ public class Sorting {
 
 // Postprocessing phase: change 0.0's to -0.0's as required
     if (numNegZeros != 0) {
-      int j = new org.apache.mahout.matrix.list.DoubleArrayList(a)
+      int j = new DoubleArrayList(a)
           .binarySearchFromTo(0.0d, fromIndex, n - 1); // posn of ANY zero
       do {
         j--;
@@ -1434,8 +1436,7 @@ public class Sorting {
 
 // Postprocessing phase: change 0.0's to -0.0's as required
     if (numNegZeros != 0) {
-      int j = new org.apache.mahout.matrix.list.FloatArrayList(a)
-          .binarySearchFromTo(0.0f, fromIndex, n - 1); // posn of ANY zero
+      int j = new FloatArrayList(a).binarySearchFromTo(0.0f, fromIndex, n - 1); // posn of ANY zero
       do {
         j--;
       } while (j >= 0 && a[j] == 0.0f);

@@ -8,10 +8,13 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.math;
 
+import org.apache.mahout.jet.random.engine.MersenneTwister;
 import org.apache.mahout.matrix.function.DoubleDoubleFunction;
 import org.apache.mahout.matrix.function.DoubleDoubleProcedure;
 import org.apache.mahout.matrix.function.DoubleFunction;
 import org.apache.mahout.matrix.function.DoubleProcedure;
+
+import java.util.Date;
 
 /**
  * Function objects to be passed to generic methods. Contains the functions of {@link java.lang.Math} as function
@@ -742,7 +745,7 @@ public class Functions {
    * evaluating methods.
    */
   public static DoubleFunction random() {
-    return new org.apache.mahout.jet.random.engine.MersenneTwister(new java.util.Date());
+    return new MersenneTwister(new Date());
   }
 
   /**

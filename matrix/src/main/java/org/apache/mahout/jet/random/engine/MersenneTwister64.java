@@ -36,7 +36,7 @@ public class MersenneTwister64 extends MersenneTwister {
   /**
    * Constructs and returns a random number generator seeded with the given date.
    *
-   * @param d typically <tt>new java.util.Date()</tt>
+   * @param d typically <tt>new Date()</tt>
    */
   public MersenneTwister64(Date d) {
     super(d);

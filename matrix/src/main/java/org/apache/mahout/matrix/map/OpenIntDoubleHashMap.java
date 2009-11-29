@@ -8,6 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.map;
 
+import org.apache.mahout.jet.math.Mult;
+import org.apache.mahout.matrix.function.DoubleFunction;
 import org.apache.mahout.matrix.function.IntDoubleProcedure;
 import org.apache.mahout.matrix.function.IntProcedure;
 import org.apache.mahout.matrix.list.ByteArrayList;
@@ -29,21 +31,21 @@ import org.apache.mahout.matrix.list.IntArrayList;
 public class OpenIntDoubleHashMap extends AbstractIntDoubleMap {
   //public static int hashCollisions = 0;
   /** The hash table keys. */
-  protected int[] table;
+  private int[] table;
 
   /** The hash table values. */
-  protected double[] values;
+  private double[] values;
 
   /** The state of each hash table entry (FREE, FULL, REMOVED). */
-  protected byte[] state;
+  private byte[] state;
 
   /** The number of table entries in state==FREE. */
-  protected int freeEntries;
+  private int freeEntries;
 
 
-  protected static final byte FREE = 0;
-  protected static final byte FULL = 1;
-  protected static final byte REMOVED = 2;
+  private static final byte FREE = 0;
+  private static final byte FULL = 1;
+  private static final byte REMOVED = 2;
 
   /** Constructs an empty map with default capacity and default load factors. */
   public OpenIntDoubleHashMap() {
@@ -80,10 +82,10 @@ public class OpenIntDoubleHashMap extends AbstractIntDoubleMap {
    * @param function a function object taking as argument the current association's value.
    */
   @Override
-  public void assign(org.apache.mahout.matrix.function.DoubleFunction function) {
+  public void assign(DoubleFunction function) {
     // specialization for speed
-    if (function instanceof org.apache.mahout.jet.math.Mult) { // x[i] = mult*x[i]
-      double multiplicator = ((org.apache.mahout.jet.math.Mult) function).getMultiplicator();
+    if (function instanceof Mult) { // x[i] = mult*x[i]
+      double multiplicator = ((Mult) function).getMultiplicator();
       if (multiplicator == 1) {
         return;
       }

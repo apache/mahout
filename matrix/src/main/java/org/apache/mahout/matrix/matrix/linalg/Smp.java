@@ -16,7 +16,7 @@ class Smp {
 
   protected final FJTaskRunnerGroup taskGroup; // a very efficient and light weight thread pool
 
-  protected final int maxThreads;
+  private final int maxThreads;
 
   /** Constructs a new Smp using a maximum of <tt>maxThreads<tt> threads. */
   protected Smp(int maxThreads) {

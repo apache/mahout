@@ -43,11 +43,11 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
 @Deprecated
 public class EmpiricalWalker extends AbstractDiscreteDistribution {
 
-  protected int K;
-  protected int[] A;
-  protected double[] F;
+  private int K;
+  private int[] A;
+  private double[] F;
 
-  protected double[] cdf; // cumulative distribution function
+  private double[] cdf; // cumulative distribution function
 
   /*
   * James Theiler, jt@lanl.gov, the author of the GSL routine this port is based on, describes his approach as follows:

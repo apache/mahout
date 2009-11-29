@@ -8,6 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.random.engine;
 
+import org.apache.mahout.matrix.PersistentObject;
+
 /**
  * Abstract base class for uniform pseudo-random number generating engines.
  * <p>
@@ -35,7 +37,7 @@ package org.apache.mahout.jet.random.engine;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public abstract class RandomEngine extends org.apache.mahout.matrix.PersistentObject
+public abstract class RandomEngine extends PersistentObject
     implements org.apache.mahout.matrix.function.DoubleFunction, org.apache.mahout.matrix.function.IntFunction {
 
   /** Makes this class non instantiable, but still let's others inherit from it. */
@@ -65,7 +67,7 @@ public abstract class RandomEngine extends org.apache.mahout.matrix.PersistentOb
    * org.apache.mahout.jet.random.engine.MersenneTwister}.
    */
   public static RandomEngine makeDefault() {
-    return new org.apache.mahout.jet.random.engine.MersenneTwister((int) System.currentTimeMillis());
+    return new MersenneTwister((int) System.currentTimeMillis());
   }
 
   /**

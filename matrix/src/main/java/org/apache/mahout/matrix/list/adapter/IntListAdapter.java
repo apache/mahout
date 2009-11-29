@@ -24,7 +24,7 @@ import java.util.AbstractList;
 @Deprecated
 public class IntListAdapter extends AbstractList<Integer> {
 
-  protected final AbstractIntList content;
+  private final AbstractIntList content;
 
   /** Constructs a list backed by the specified content list. */
   public IntListAdapter(AbstractIntList content) {

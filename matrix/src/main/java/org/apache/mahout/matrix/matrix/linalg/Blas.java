@@ -86,7 +86,7 @@ public interface Blas {
 
   /**
    * Returns the sum of absolute values; <tt>|x[0]| + |x[1]| + ... </tt>. In fact equivalent to
-   * <tt>x.aggregate(org.apache.mahout.jet.math.Functions.plus, org.apache.mahout.jet.math.Functions.abs)</tt>.
+   * <tt>x.aggregate(Functions.plus, org.apache.mahout.jet.math.Functions.abs)</tt>.
    *
    * @param x the first vector.
    */
@@ -211,14 +211,14 @@ public interface Blas {
    * Constructs a Givens plane rotation for <tt>(a,b)</tt>. Taken from the LINPACK translation from FORTRAN to Java,
    * interface slightly modified. In the LINPACK listing DROTG is attributed to Jack Dongarra
    *
-   * @param a        rotational elimination parameter a.
-   * @param b        rotational elimination parameter b.
+   * @param a      rotational elimination parameter a.
+   * @param b      rotational elimination parameter b.
    * @param rotvec Must be at least of length 4. On output contains the values <tt>{a,b,c,s}</tt>.
    */
   void drotg(double a, double b, double[] rotvec);
 
   /**
-   * Vector scaling; <tt>x = alpha*x</tt>. In fact equivalent to <tt>x.assign(org.apache.mahout.jet.math.Functions.mult(alpha))</tt>.
+   * Vector scaling; <tt>x = alpha*x</tt>. In fact equivalent to <tt>x.assign(Functions.mult(alpha))</tt>.
    *
    * @param alpha a scale factor.
    * @param x     the first vector.
@@ -226,7 +226,7 @@ public interface Blas {
   void dscal(double alpha, DoubleMatrix1D x);
 
   /**
-   * Matrix scaling; <tt>A = alpha*A</tt>. In fact equivalent to <tt>A.assign(org.apache.mahout.jet.math.Functions.mult(alpha))</tt>.
+   * Matrix scaling; <tt>A = alpha*A</tt>. In fact equivalent to <tt>A.assign(Functions.mult(alpha))</tt>.
    *
    * @param alpha a scale factor.
    * @param A     the matrix.

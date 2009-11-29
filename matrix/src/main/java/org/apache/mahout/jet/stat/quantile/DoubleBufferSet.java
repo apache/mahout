@@ -8,6 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.stat.quantile;
 
+import org.apache.mahout.matrix.function.DoubleProcedure;
+
 /** A set of buffers holding <tt>double</tt> elements; internally used for computing approximate quantiles. */
 class DoubleBufferSet extends BufferSet {
 
@@ -219,7 +221,7 @@ class DoubleBufferSet extends BufferSet {
    * @param procedure the procedure to be applied. Stops iteration if the procedure returns <tt>false</tt>, otherwise
    *                  continues.
    */
-  public boolean forEach(org.apache.mahout.matrix.function.DoubleProcedure procedure) {
+  public boolean forEach(DoubleProcedure procedure) {
     for (int i = buffers.length; --i >= 0;) {
       for (int w = buffers[i].weight(); --w >= 0;) {
         if (!(buffers[i].values.forEach(procedure))) {

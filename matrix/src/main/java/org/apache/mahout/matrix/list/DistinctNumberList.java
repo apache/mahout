@@ -55,10 +55,10 @@ package org.apache.mahout.matrix.list;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class DistinctNumberList extends org.apache.mahout.matrix.list.AbstractLongList {
+public class DistinctNumberList extends AbstractLongList {
 
-  protected long[] distinctValues;
-  protected MinMaxNumberList elements;
+  private long[] distinctValues;
+  private MinMaxNumberList elements;
 
   /**
    * Constructs an empty list with the specified initial capacity and the specified distinct values allowed to be hold

@@ -8,6 +8,9 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.map;
 
+import org.apache.mahout.matrix.GenericSorting;
+import org.apache.mahout.matrix.Swapper;
+import org.apache.mahout.matrix.function.IntComparator;
 import org.apache.mahout.matrix.function.LongObjectProcedure;
 import org.apache.mahout.matrix.function.LongProcedure;
 import org.apache.mahout.matrix.list.LongArrayList;
@@ -325,7 +328,7 @@ public abstract class AbstractLongObjectMap extends AbstractMap {
 
     final long[] k = keyList.elements();
     final Object[] v = valueList.elements();
-    org.apache.mahout.matrix.Swapper swapper = new org.apache.mahout.matrix.Swapper() {
+    Swapper swapper = new Swapper() {
       @Override
       public void swap(int a, int b) {
         Object t1 = v[a];
@@ -337,7 +340,7 @@ public abstract class AbstractLongObjectMap extends AbstractMap {
       }
     };
 
-    org.apache.mahout.matrix.function.IntComparator comp = new org.apache.mahout.matrix.function.IntComparator() {
+    IntComparator comp = new IntComparator() {
       @Override
       public int compare(int a, int b) {
         int ab = ((Comparable<Object>) v[a]).compareTo(v[b]);
@@ -346,7 +349,7 @@ public abstract class AbstractLongObjectMap extends AbstractMap {
       }
     };
 
-    org.apache.mahout.matrix.GenericSorting.quickSort(0, keyList.size(), comp, swapper);
+    GenericSorting.quickSort(0, keyList.size(), comp, swapper);
   }
 
   /**

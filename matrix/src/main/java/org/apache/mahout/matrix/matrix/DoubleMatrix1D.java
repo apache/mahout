@@ -8,8 +8,14 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.matrix;
 
+import org.apache.mahout.jet.math.Functions;
+import org.apache.mahout.jet.math.PlusMult;
+import org.apache.mahout.matrix.function.DoubleDoubleFunction;
+import org.apache.mahout.matrix.function.DoubleFunction;
+import org.apache.mahout.matrix.function.DoubleProcedure;
 import org.apache.mahout.matrix.list.DoubleArrayList;
 import org.apache.mahout.matrix.list.IntArrayList;
+import org.apache.mahout.matrix.matrix.doublealgo.Formatter;
 import org.apache.mahout.matrix.matrix.impl.AbstractMatrix1D;
 /**
  Abstract base class for 1-d matrices (aka <i>vectors</i>) holding <tt>double</tt> elements.
@@ -52,8 +58,8 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    * @return the aggregated measure.
    * @see org.apache.mahout.jet.math.Functions
    */
-  public double aggregate(org.apache.mahout.matrix.function.DoubleDoubleFunction aggr,
-                          org.apache.mahout.matrix.function.DoubleFunction f) {
+  public double aggregate(DoubleDoubleFunction aggr,
+                          DoubleFunction f) {
     if (size == 0) {
       return Double.NaN;
     }
@@ -91,7 +97,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    * @see org.apache.mahout.jet.math.Functions
    */
   public double aggregate(DoubleMatrix1D other, org.apache.mahout.matrix.function.DoubleDoubleFunction aggr,
-                          org.apache.mahout.matrix.function.DoubleDoubleFunction f) {
+                          DoubleDoubleFunction f) {
     checkSize(other);
     if (size == 0) {
       return Double.NaN;
@@ -142,7 +148,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    * <pre>
    * // change each cell to its sine
    * matrix =   0.5      1.5      2.5       3.5
-   * matrix.assign(org.apache.mahout.jet.math.Functions.sin);
+   * matrix.assign(Functions.sin);
    * -->
    * matrix ==  0.479426 0.997495 0.598472 -0.350783
    * </pre>
@@ -152,7 +158,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    * @return <tt>this</tt> (for convenience only).
    * @see org.apache.mahout.jet.math.Functions
    */
-  public DoubleMatrix1D assign(org.apache.mahout.matrix.function.DoubleFunction function) {
+  public DoubleMatrix1D assign(DoubleFunction function) {
     for (int i = size; --i >= 0;) {
       setQuick(i, function.apply(getQuick(i)));
     }
@@ -238,7 +244,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    * @see org.apache.mahout.jet.math.Functions
    */
   public DoubleMatrix1D assign(DoubleMatrix1D y, org.apache.mahout.matrix.function.DoubleDoubleFunction function,
-                               org.apache.mahout.matrix.list.IntArrayList nonZeroIndexes) {
+                               IntArrayList nonZeroIndexes) {
     checkSize(y);
     int[] nonZeroElements = nonZeroIndexes.elements();
 
@@ -253,8 +259,8 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
         setQuick(i, getQuick(i) * y.getQuick(i));  // x[i] * y[i] for all nonZeros
         j++;
       }
-    } else if (function instanceof org.apache.mahout.jet.math.PlusMult) {
-      double multiplicator = ((org.apache.mahout.jet.math.PlusMult) function).getMultiplicator();
+    } else if (function instanceof PlusMult) {
+      double multiplicator = ((PlusMult) function).getMultiplicator();
       if (multiplicator == 0) { // x[i] = x[i] + 0*y[i]
         return this;
       } else if (multiplicator == 1) { // x[i] = x[i] + y[i]
@@ -602,7 +608,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    * @see org.apache.mahout.matrix.matrix.doublealgo.Formatter
    */
   public String toString() {
-    return new org.apache.mahout.matrix.matrix.doublealgo.Formatter().toString(this);
+    return new Formatter().toString(this);
   }
 
   /**
@@ -704,7 +710,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    * @param condition The condition to be matched.
    * @return the new view.
    */
-  public DoubleMatrix1D viewSelection(org.apache.mahout.matrix.function.DoubleProcedure condition) {
+  public DoubleMatrix1D viewSelection(DoubleProcedure condition) {
     IntArrayList matches = new IntArrayList();
     for (int i = 0; i < size; i++) {
       if (condition.apply(getQuick(i))) {
@@ -745,30 +751,6 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    */
   public DoubleMatrix1D viewStrides(int stride) {
     return (DoubleMatrix1D) (view().vStrides(stride));
-  }
-
-  /**
-   * Applies a procedure to each cell's value. Iterates downwards from <tt>[size()-1]</tt> to <tt>[0]</tt>, as
-   * demonstrated by this snippet:
-   * <pre>
-   * for (int i=size(); --i >=0;) {
-   *    if (!procedure.apply(getQuick(i))) return false;
-   * }
-   * return true;
-   * </pre>
-   * Note that an implementation may use more efficient techniques, but must not use any other order.
-   *
-   * @param procedure a procedure object taking as argument the current cell's value. Stops iteration if the procedure
-   *                  returns <tt>false</tt>, otherwise continues.
-   * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise.
-   */
-  private boolean xforEach(org.apache.mahout.matrix.function.DoubleProcedure procedure) {
-    for (int i = size; --i >= 0;) {
-      if (!procedure.apply(getQuick(i))) {
-        return false;
-      }
-    }
-    return true;
   }
 
   /**
@@ -888,6 +870,6 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
     if (size() == 0) {
       return 0;
     }
-    return aggregate(org.apache.mahout.jet.math.Functions.plus, org.apache.mahout.jet.math.Functions.identity);
+    return aggregate(Functions.plus, org.apache.mahout.jet.math.Functions.identity);
   }
 }

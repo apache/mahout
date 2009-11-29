@@ -37,11 +37,11 @@ import org.apache.mahout.jet.stat.Probability;
 @Deprecated
 public class StudentT extends AbstractContinousDistribution {
 
-  protected double freedom;
+  private double freedom;
 
-  protected double TERM; // performance cache for pdf()
+  private double TERM; // performance cache for pdf()
   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static StudentT shared = new StudentT(1.0, makeDefaultGenerator());
+  private static final StudentT shared = new StudentT(1.0, makeDefaultGenerator());
 
   /**
    * Constructs a StudentT distribution. Example: freedom=1.0.
@@ -134,14 +134,4 @@ public class StudentT extends AbstractContinousDistribution {
     return this.getClass().getName() + '(' + freedom + ')';
   }
 
-  /**
-   * Sets the uniform random number generated shared by all <b>static</b> methods.
-   *
-   * @param randomGenerator the new uniform random number generator to be shared.
-   */
-  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-    synchronized (shared) {
-      shared.setRandomGenerator(randomGenerator);
-    }
-  }
 }

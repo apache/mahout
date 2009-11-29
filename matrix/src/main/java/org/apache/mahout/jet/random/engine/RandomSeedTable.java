@@ -24,7 +24,7 @@ package org.apache.mahout.jet.random.engine;
 public class RandomSeedTable {
 
   /** The number of columns of the matrix (currently COLUMNS = 2). */
-  public static final int COLUMNS = 2;
+  private static final int COLUMNS = 2;
 
   // a m*n matrix, just stored as one-dim array
   // 215 * 2 entries

@@ -8,6 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.matrix;
 
+import org.apache.mahout.matrix.PersistentObject;
+import org.apache.mahout.matrix.list.ObjectArrayList;
 import org.apache.mahout.matrix.matrix.impl.DenseObjectMatrix1D;
 import org.apache.mahout.matrix.matrix.impl.SparseObjectMatrix1D;
 /**
@@ -33,7 +35,7 @@ import org.apache.mahout.matrix.matrix.impl.SparseObjectMatrix1D;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class ObjectFactory1D extends org.apache.mahout.matrix.PersistentObject {
+public class ObjectFactory1D extends PersistentObject {
 
   /** A factory producing dense matrices. */
   public static final ObjectFactory1D dense = new ObjectFactory1D();
@@ -112,7 +114,7 @@ public class ObjectFactory1D extends org.apache.mahout.matrix.PersistentObject {
    * @param values The values to be filled into the new matrix.
    * @return a new matrix.
    */
-  public ObjectMatrix1D make(org.apache.mahout.matrix.list.ObjectArrayList values) {
+  public ObjectMatrix1D make(ObjectArrayList values) {
     int size = values.size();
     ObjectMatrix1D vector = make(size);
     for (int i = size; --i >= 0;) {
@@ -147,7 +149,7 @@ public class ObjectFactory1D extends org.apache.mahout.matrix.PersistentObject {
    */
   public org.apache.mahout.matrix.list.ObjectArrayList toList(ObjectMatrix1D values) {
     int size = values.size();
-    org.apache.mahout.matrix.list.ObjectArrayList list = new org.apache.mahout.matrix.list.ObjectArrayList(size);
+    ObjectArrayList list = new ObjectArrayList(size);
     list.setSize(size);
     for (int i = size; --i >= 0;) {
       list.set(i, values.get(i));

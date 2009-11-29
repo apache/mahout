@@ -141,15 +141,15 @@ public class SparseObjectMatrix3D extends ObjectMatrix3D {
   /**
    * Constructs a view with the given parameters.
    *
-   * @param slices        the number of slices the matrix shall have.
-   * @param rows          the number of rows the matrix shall have.
-   * @param columns       the number of columns the matrix shall have.
-   * @param elements      the cells.
-   * @param sliceZero     the position of the first element.
-   * @param rowZero       the position of the first element.
-   * @param columnZero    the position of the first element.
-   * @param sliceStride   the number of elements between two slices, i.e. <tt>index(k+1,i,j)-index(k,i,j)</tt>.
-   * @param rowStride     the number of elements between two rows, i.e. <tt>index(k,i+1,j)-index(k,i,j)</tt>.
+   * @param slices       the number of slices the matrix shall have.
+   * @param rows         the number of rows the matrix shall have.
+   * @param columns      the number of columns the matrix shall have.
+   * @param elements     the cells.
+   * @param sliceZero    the position of the first element.
+   * @param rowZero      the position of the first element.
+   * @param columnZero   the position of the first element.
+   * @param sliceStride  the number of elements between two slices, i.e. <tt>index(k+1,i,j)-index(k,i,j)</tt>.
+   * @param rowStride    the number of elements between two rows, i.e. <tt>index(k,i+1,j)-index(k,i,j)</tt>.
    * @param columnStride the number of elements between two columns, i.e. <tt>index(k,i,j+1)-index(k,i,j)</tt>.
    * @throws IllegalArgumentException if <tt>(Object)slices*columns*rows > Integer.MAX_VALUE</tt>.
    * @throws IllegalArgumentException if <tt>slices<0 || rows<0 || columns<0</tt>.

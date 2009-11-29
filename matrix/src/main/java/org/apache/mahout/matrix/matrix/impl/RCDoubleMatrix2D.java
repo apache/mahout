@@ -8,6 +8,11 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.matrix.impl;
 
+import org.apache.mahout.jet.math.Functions;
+import org.apache.mahout.jet.math.Mult;
+import org.apache.mahout.jet.math.PlusMult;
+import org.apache.mahout.matrix.function.DoubleFunction;
+import org.apache.mahout.matrix.function.IntIntDoubleFunction;
 import org.apache.mahout.matrix.list.DoubleArrayList;
 import org.apache.mahout.matrix.list.IntArrayList;
 import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
@@ -82,7 +87,7 @@ import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
  <pre>
  // Linear algebraic y = A * x
  A.forEachNonZero(
- &nbsp;&nbsp;&nbsp;new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
+ &nbsp;&nbsp;&nbsp;new IntIntDoubleFunction() {
  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public double apply(int row, int column, double value) {
  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y.setQuick(row,y.getQuick(row) + value * x.getQuick(column));
  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return value;
@@ -99,7 +104,7 @@ import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
  <pre>
  // Elementwise A = A + alpha*B
  B.forEachNonZero(
- &nbsp;&nbsp;&nbsp;new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
+ &nbsp;&nbsp;&nbsp;new IntIntDoubleFunction() {
  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public double apply(int row, int column, double value) {
  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A.setQuick(row,column,A.getQuick(row,column) + alpha*value);
  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return value;
@@ -122,9 +127,9 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
   /*
    * The elements of the matrix.
    */
-  protected IntArrayList indexes;
-  protected DoubleArrayList values;
-  protected int[] starts;
+  private IntArrayList indexes;
+  private DoubleArrayList values;
+  private int[] starts;
 
   //protected int N;
 
@@ -186,9 +191,9 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
   }
 
   @Override
-  public DoubleMatrix2D assign(org.apache.mahout.matrix.function.DoubleFunction function) {
-    if (function instanceof org.apache.mahout.jet.math.Mult) { // x[i] = mult*x[i]
-      double alpha = ((org.apache.mahout.jet.math.Mult) function).getMultiplicator();
+  public DoubleMatrix2D assign(DoubleFunction function) {
+    if (function instanceof Mult) { // x[i] = mult*x[i]
+      double alpha = ((Mult) function).getMultiplicator();
       if (alpha == 1) {
         return this;
       }
@@ -206,7 +211,7 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
 
       /*
       forEachNonZero(
-        new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
+        new IntIntDoubleFunction() {
           public double apply(int i, int j, double value) {
             return function.apply(value);
           }
@@ -241,7 +246,7 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
 
       assign(0);
       source.forEachNonZero(
-          new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
+          new IntIntDoubleFunction() {
             @Override
             public double apply(int i, int j, double value) {
               setQuick(i, j, value);
@@ -286,13 +291,13 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
   public DoubleMatrix2D assign(DoubleMatrix2D y, org.apache.mahout.matrix.function.DoubleDoubleFunction function) {
     checkShape(y);
 
-    if (function instanceof org.apache.mahout.jet.math.PlusMult) { // x[i] = x[i] + alpha*y[i]
-      final double alpha = ((org.apache.mahout.jet.math.PlusMult) function).getMultiplicator();
+    if (function instanceof PlusMult) { // x[i] = x[i] + alpha*y[i]
+      final double alpha = ((PlusMult) function).getMultiplicator();
       if (alpha == 0) {
         return this;
       } // nothing to do
       y.forEachNonZero(
-          new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
+          new IntIntDoubleFunction() {
             @Override
             public double apply(int i, int j, double value) {
               setQuick(i, j, getQuick(i, j) + alpha * value);
@@ -341,7 +346,7 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
   }
 
   @Override
-  public DoubleMatrix2D forEachNonZero(org.apache.mahout.matrix.function.IntIntDoubleFunction function) {
+  public DoubleMatrix2D forEachNonZero(IntIntDoubleFunction function) {
     int[] idx = indexes.elements();
     double[] vals = values.elements();
 
@@ -510,7 +515,7 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
 
     /*
     forEachNonZero(
-      new org.apache.mahout.matrix.function.IntIntDoubleFunction() {
+      new IntIntDoubleFunction() {
         public double apply(int i, int j, double value) {
           zElements[zi + zStride*i] += value * yElements[yi + yStride*j];
           //z.setQuick(row,z.getQuick(row) + value * y.getQuick(column));
@@ -538,7 +543,7 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
       }
     } else {
       if (!ignore) {
-        z.assign(org.apache.mahout.jet.math.Functions.mult(beta));
+        z.assign(Functions.mult(beta));
       }
       for (int i = 0; i < s; i++) {
         int high = starts[i + 1];
@@ -585,7 +590,7 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
     }
 
     if (!ignore) {
-      C.assign(org.apache.mahout.jet.math.Functions.mult(beta));
+      C.assign(Functions.mult(beta));
     }
 
     // cache views
@@ -598,7 +603,7 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
       Crows[i] = C.viewRow(i);
     }
 
-    org.apache.mahout.jet.math.PlusMult fun = org.apache.mahout.jet.math.PlusMult.plusMult(0);
+    PlusMult fun = org.apache.mahout.jet.math.PlusMult.plusMult(0);
 
     int[] idx = indexes.elements();
     double[] vals = values.elements();

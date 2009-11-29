@@ -30,14 +30,14 @@ import org.apache.mahout.jet.stat.Probability;
 @Deprecated
 public class NegativeBinomial extends AbstractDiscreteDistribution {
 
-  protected int n;
-  protected double p;
+  private int n;
+  private double p;
 
-  protected Gamma gamma;
-  protected Poisson poisson;
+  private Gamma gamma;
+  private Poisson poisson;
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static NegativeBinomial shared = new NegativeBinomial(1, 0.5, makeDefaultGenerator());
+  private static final NegativeBinomial shared = new NegativeBinomial(1, 0.5, makeDefaultGenerator());
 
   /**
    * Constructs a Negative Binomial distribution. Example: n=1, p=0.5.
@@ -152,14 +152,4 @@ public class NegativeBinomial extends AbstractDiscreteDistribution {
     return this.getClass().getName() + '(' + n + ',' + p + ')';
   }
 
-  /**
-   * Sets the uniform random number generated shared by all <b>static</b> methods.
-   *
-   * @param randomGenerator the new uniform random number generator to be shared.
-   */
-  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-    synchronized (shared) {
-      shared.setRandomGenerator(randomGenerator);
-    }
-  }
 }

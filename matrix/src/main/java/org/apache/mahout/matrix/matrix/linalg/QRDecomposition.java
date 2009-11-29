@@ -9,6 +9,7 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.matrix.matrix.linalg;
 
 import org.apache.mahout.jet.math.Functions;
+import org.apache.mahout.matrix.matrix.DoubleFactory2D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 
@@ -84,7 +85,7 @@ public class QRDecomposition implements java.io.Serializable {
         if (QR.getQuick(k, k) < 0) {
           nrm = -nrm;
         }
-        QRcolumnsPart[k].assign(org.apache.mahout.jet.math.Functions.div(nrm));
+        QRcolumnsPart[k].assign(Functions.div(nrm));
         /*
         for (int i = k; i < m; i++) {
            QR[i][k] /= nrm;
@@ -283,7 +284,7 @@ public class QRDecomposition implements java.io.Serializable {
 
     buf.append("\n\npseudo inverse(A) = ");
     try {
-      buf.append(String.valueOf(this.solve(org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.identity(QR.rows()))));
+      buf.append(String.valueOf(this.solve(DoubleFactory2D.dense.identity(QR.rows()))));
     }
     catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());

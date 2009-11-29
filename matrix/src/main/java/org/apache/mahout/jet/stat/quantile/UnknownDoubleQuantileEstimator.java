@@ -42,10 +42,10 @@ import java.util.Comparator;
  */
 class UnknownDoubleQuantileEstimator extends DoubleQuantileEstimator {
 
-  protected int currentTreeHeight;
-  protected final int treeHeightStartingSampling;
-  protected WeightedRandomSampler sampler;
-  protected final double precomputeEpsilon;
+  private int currentTreeHeight;
+  private final int treeHeightStartingSampling;
+  private WeightedRandomSampler sampler;
+  private final double precomputeEpsilon;
 
   /**
    * Constructs an approximate quantile finder with b buffers, each having k elements.
@@ -165,7 +165,7 @@ class UnknownDoubleQuantileEstimator extends DoubleQuantileEstimator {
   }
 
   /** To do. This could faster be done without sorting (min and second min). */
-  protected static void sortAscendingByLevel(DoubleBuffer[] fullBuffers) {
+  private static void sortAscendingByLevel(DoubleBuffer[] fullBuffers) {
     new ObjectArrayList(fullBuffers).quickSortFromTo(0, fullBuffers.length - 1,
         new Comparator<Object>() {
           @Override

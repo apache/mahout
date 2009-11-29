@@ -22,7 +22,7 @@ class WrapperDoubleMatrix2D extends DoubleMatrix2D {
   /*
    * The elements of the matrix.
    */
-  protected DoubleMatrix2D content;
+  protected final DoubleMatrix2D content;
 
   /**
    * Constructs a matrix with a copy of the given values. <tt>values</tt> is required to have the form

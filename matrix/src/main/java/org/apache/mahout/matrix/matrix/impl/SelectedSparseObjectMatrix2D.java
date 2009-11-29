@@ -35,7 +35,7 @@ class SelectedSparseObjectMatrix2D extends ObjectMatrix2D {
   /*
    * The elements of the matrix.
    */
-  protected AbstractIntObjectMap elements;
+  protected final AbstractIntObjectMap elements;
 
   /** The offsets of the visible cells of this matrix. */
   protected int[] rowOffsets;

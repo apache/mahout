@@ -8,6 +8,9 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.bitvector;
 
+import org.apache.mahout.matrix.PersistentObject;
+import org.apache.mahout.matrix.function.IntProcedure;
+
 /**
  * Fixed sized (non resizable) bitvector.
  * Upon instance construction a bitvector is told to hold a fixed number of bits - it's size.
@@ -49,7 +52,7 @@ package org.apache.mahout.matrix.bitvector;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class BitVector extends org.apache.mahout.matrix.PersistentObject {
+public class BitVector extends PersistentObject {
   /*
    * Bits are packed into arrays of "units."  Currently a unit is a long,
    * which consists of 64 bits, requiring 6 address bits.  The choice of unit
@@ -60,13 +63,13 @@ public class BitVector extends org.apache.mahout.matrix.PersistentObject {
    * The bits of this object.  The ith bit is stored in bits[i/64] at bit position i % 64 (where bit position 0 refers
    * to the least significant bit and 63 refers to the most significant bit).
    */
-  protected long[] bits;
+  private long[] bits;
 
-  protected int nbits; //the size
+  private int nbits; //the size
 
   // IntProcedure for method indexOfFromTo(...)
 
-  private static class IndexProcedure implements org.apache.mahout.matrix.function.IntProcedure {
+  private static class IndexProcedure implements IntProcedure {
 
     private int foundPos = -1;
 
@@ -174,7 +177,7 @@ public class BitVector extends org.apache.mahout.matrix.PersistentObject {
   }
 
   /** Checks if the given range is within the contained array's bounds. */
-  protected static void checkRangeFromTo(int from, int to, int theSize) {
+  private static void checkRangeFromTo(int from, int to, int theSize) {
     if (from < 0 || from > to || to >= theSize) {
       throw new IndexOutOfBoundsException("from: " + from + ", to: " + to + ", size=" + theSize);
     }
@@ -331,7 +334,7 @@ public class BitVector extends org.apache.mahout.matrix.PersistentObject {
    * @throws IndexOutOfBoundsException if (<tt>size()&gt;0 && (from&lt;0 || from&gt;to || to&gt;=size())</tt>).
    */
   public boolean forEachIndexFromToInState(int from, int to, boolean state,
-                                           org.apache.mahout.matrix.function.IntProcedure procedure) {
+                                           IntProcedure procedure) {
     /*
     // this version is equivalent to the low level version below, but about 100 times slower for large ranges.
     if (nbits==0) return true;

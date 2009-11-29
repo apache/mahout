@@ -8,6 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.matrix.impl;
 
+import org.apache.mahout.matrix.function.ObjectFunction;
 import org.apache.mahout.matrix.matrix.ObjectMatrix1D;
 import org.apache.mahout.matrix.matrix.ObjectMatrix2D;
 /**
@@ -38,7 +39,7 @@ import org.apache.mahout.matrix.matrix.ObjectMatrix2D;
 public class DenseObjectMatrix1D extends ObjectMatrix1D {
 
   /** The elements of this matrix. */
-  protected Object[] elements;
+  protected final Object[] elements;
 
   /**
    * Constructs a matrix with a copy of the given values. The values are copied. So subsequent changes in
@@ -106,7 +107,7 @@ public class DenseObjectMatrix1D extends ObjectMatrix1D {
    * <pre>
    * // change each cell to its sine
    * matrix =   0.5      1.5      2.5       3.5
-   * matrix.assign(org.apache.mahout.jet.math.Functions.sin);
+   * matrix.assign(Functions.sin);
    * -->
    * matrix ==  0.479426 0.997495 0.598472 -0.350783
    * </pre>
@@ -117,7 +118,7 @@ public class DenseObjectMatrix1D extends ObjectMatrix1D {
    * @see org.apache.mahout.jet.math.Functions
    */
   @Override
-  public ObjectMatrix1D assign(org.apache.mahout.matrix.function.ObjectFunction function) {
+  public ObjectMatrix1D assign(ObjectFunction function) {
     int s = stride;
     int i = index(0);
     Object[] elems = this.elements;

@@ -29,14 +29,14 @@ public class Probability extends org.apache.mahout.jet.math.Constants {
    * ***********************************************
    */
   /* approximation for 0 <= |y - 0.5| <= 3/8 */
-  protected static final double[] P0 = {
+  private static final double[] P0 = {
       -5.99633501014107895267E1,
       9.80010754185999661536E1,
       -5.66762857469070293439E1,
       1.39312609387279679503E1,
       -1.23916583867381258016E0,
   };
-  protected static final double[] Q0 = {
+  private static final double[] Q0 = {
       /* 1.00000000000000000000E0,*/
       1.95448858338141759834E0,
       4.67627912898881538453E0,
@@ -52,7 +52,7 @@ public class Probability extends org.apache.mahout.jet.math.Constants {
   /* Approximation for interval z = sqrt(-2 log y ) between 2 and 8
    * i.e., y between exp(-2) = .135 and exp(-32) = 1.27e-14.
    */
-  protected static final double[] P1 = {
+  private static final double[] P1 = {
       4.05544892305962419923E0,
       3.15251094599893866154E1,
       5.71628192246421288162E1,
@@ -63,7 +63,7 @@ public class Probability extends org.apache.mahout.jet.math.Constants {
       -3.50424626827848203418E-2,
       -8.57456785154685413611E-4,
   };
-  protected static final double[] Q1 = {
+  private static final double[] Q1 = {
       /*  1.00000000000000000000E0,*/
       1.57799883256466749731E1,
       4.53907635128879210584E1,
@@ -78,7 +78,7 @@ public class Probability extends org.apache.mahout.jet.math.Constants {
   /* Approximation for interval z = sqrt(-2 log y ) between 8 and 64
    * i.e., y between exp(-32) = 1.27e-14 and exp(-2048) = 3.67e-890.
    */
-  protected static final double[] P2 = {
+  private static final double[] P2 = {
       3.23774891776946035970E0,
       6.91522889068984211695E0,
       3.93881025292474443415E0,
@@ -89,7 +89,7 @@ public class Probability extends org.apache.mahout.jet.math.Constants {
       2.65806974686737550832E-6,
       6.23974539184983293730E-9,
   };
-  protected static final double[] Q2 = {
+  private static final double[] Q2 = {
       /*  1.00000000000000000000E0,*/
       6.02427039364742014255E0,
       3.67983563856160859403E0,

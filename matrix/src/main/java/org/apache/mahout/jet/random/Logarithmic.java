@@ -33,13 +33,13 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
 @Deprecated
 public class Logarithmic extends AbstractContinousDistribution {
 
-  protected double my_p;
+  private double my_p;
 
   // cached vars for method nextDouble(a) (for performance only)
   private double t, h, a_prev = -1.0;
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static final Logarithmic shared = new Logarithmic(0.5, makeDefaultGenerator());
+  private static final Logarithmic shared = new Logarithmic(0.5, makeDefaultGenerator());
 
   /** Constructs a Logarithmic distribution. */
   public Logarithmic(double p, RandomEngine randomGenerator) {
@@ -145,14 +145,4 @@ public class Logarithmic extends AbstractContinousDistribution {
     return this.getClass().getName() + '(' + my_p + ')';
   }
 
-  /**
-   * Sets the uniform random number generated shared by all <b>static</b> methods.
-   *
-   * @param randomGenerator the new uniform random number generator to be shared.
-   */
-  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-    synchronized (shared) {
-      shared.setRandomGenerator(randomGenerator);
-    }
-  }
 }

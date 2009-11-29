@@ -42,7 +42,7 @@ public class OpenIntIntHashMap extends org.apache.mahout.matrix.map.AbstractIntI
 
   protected static final byte FREE = 0;
   protected static final byte FULL = 1;
-  protected static final byte REMOVED = 2;
+  private static final byte REMOVED = 2;
 
   /** Constructs an empty map with default capacity and default load factors. */
   public OpenIntIntHashMap() {

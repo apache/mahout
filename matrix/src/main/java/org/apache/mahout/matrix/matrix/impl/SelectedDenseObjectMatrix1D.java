@@ -36,10 +36,10 @@ class SelectedDenseObjectMatrix1D extends ObjectMatrix1D {
   protected final Object[] elements;
 
   /** The offsets of visible indexes of this matrix. */
-  protected final int[] offsets;
+  private final int[] offsets;
 
   /** The offset. */
-  protected int offset;
+  private int offset;
 
   /**
    * Constructs a matrix view with the given parameters.

@@ -9,6 +9,7 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.matrix.matrix.doublealgo;
 
 import org.apache.mahout.jet.math.Functions;
+import org.apache.mahout.matrix.PersistentObject;
 import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /**
@@ -45,7 +46,7 @@ import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class Transform extends org.apache.mahout.matrix.PersistentObject {
+public class Transform extends PersistentObject {
 
   /** Makes this class non instantiable, but still let's others inherit from it. */
   protected Transform() {

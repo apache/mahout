@@ -31,9 +31,9 @@ package org.apache.mahout.matrix.bitvector;
 @Deprecated
 public class QuickBitVector {
 
-  protected static final int ADDRESS_BITS_PER_UNIT = 6; // 64=2^6
+  private static final int ADDRESS_BITS_PER_UNIT = 6; // 64=2^6
   protected static final int BITS_PER_UNIT = 64; // = 1 << ADDRESS_BITS_PER_UNIT
-  protected static final int BIT_INDEX_MASK = 63; // = BITS_PER_UNIT - 1;
+  private static final int BIT_INDEX_MASK = 63; // = BITS_PER_UNIT - 1;
 
   private static final long[] pows = precomputePows(); //precompute bitmasks for speed
 
@@ -50,7 +50,7 @@ public class QuickBitVector {
    * @param to   index of end bit (inclusive).
    * @return the bit mask having all bits between <tt>from</tt> and <tt>to</tt> set to 1.
    */
-  public static long bitMaskWithBitsSetFromTo(int from, int to) {
+  private static long bitMaskWithBitsSetFromTo(int from, int to) {
     return pows[to - from + 1] << from;
 
     // This turned out to be slower:

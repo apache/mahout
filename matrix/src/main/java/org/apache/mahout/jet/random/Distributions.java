@@ -18,10 +18,10 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
  * <p>
  * <b>Example usage:</b><pre>
  * org.apache.mahout.jet.random.engine.RandomEngine generator;
- * generator = new org.apache.mahout.jet.random.engine.MersenneTwister(new java.util.Date());
- * //generator = new edu.cornell.lassp.houle.RngPack.Ranecu(new java.util.Date());
- * //generator = new edu.cornell.lassp.houle.RngPack.Ranmar(new java.util.Date());
- * //generator = new edu.cornell.lassp.houle.RngPack.Ranlux(new java.util.Date());
+ * generator = new engine.MersenneTwister(new Date());
+ * //generator = new edu.cornell.lassp.houle.RngPack.Ranecu(new Date());
+ * //generator = new edu.cornell.lassp.houle.RngPack.Ranmar(new Date());
+ * //generator = new edu.cornell.lassp.houle.RngPack.Ranlux(new Date());
  * //generator = AbstractDistribution.makeDefaultGenerator();
  * for (int i=1000000; --i >=0; ) {
  *    int cauchy = Distributions.nextCauchy(generator);

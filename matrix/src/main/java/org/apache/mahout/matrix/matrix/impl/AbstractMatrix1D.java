@@ -32,20 +32,6 @@ public abstract class AbstractMatrix1D extends AbstractMatrix {
   /** the number of indexes between any two elements, i.e. <tt>index(i+1) - index(i)</tt>. */
   protected int stride;
 
-  /**
-   * Indicates non-flipped state (flip==1) or flipped state (flip==-1).
-   * see _setFlip() for further info.
-   */
-  //protected int flip;
-
-  /**
-   * Indicates non-flipped state or flipped state.
-   * see _setFlip() for further info.
-   */
-  //protected int flipMask;
-
-  // this.isNoView implies: offset==0, stride==1
-
   /** Makes this class non instantiable, but still let's others inherit from it. */
   protected AbstractMatrix1D() {
   }

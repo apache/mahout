@@ -38,7 +38,7 @@ import org.apache.mahout.jet.stat.Probability;
 @Deprecated
 public class ChiSquare extends AbstractContinousDistribution {
 
-  protected double freedom;
+  private double freedom;
 
   // cached vars for method nextDouble(a) (for performance only)
   private double freedom_in = -1.0;
@@ -47,7 +47,7 @@ public class ChiSquare extends AbstractContinousDistribution {
   private double vd;
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static ChiSquare shared = new ChiSquare(1.0, makeDefaultGenerator());
+  private static final ChiSquare shared = new ChiSquare(1.0, makeDefaultGenerator());
 
   /**
    * Constructs a ChiSquare distribution. Example: freedom=1.0.
@@ -194,14 +194,4 @@ public class ChiSquare extends AbstractContinousDistribution {
     return this.getClass().getName() + '(' + freedom + ')';
   }
 
-  /**
-   * Sets the uniform random number generated shared by all <b>static</b> methods.
-   *
-   * @param randomGenerator the new uniform random number generator to be shared.
-   */
-  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-    synchronized (shared) {
-      shared.setRandomGenerator(randomGenerator);
-    }
-  }
 }

@@ -8,6 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.list;
 
+import org.apache.mahout.matrix.PersistentObject;
+
 import java.util.List;
 
 /**
@@ -27,7 +29,7 @@ import java.util.List;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public abstract class AbstractCollection<T> extends org.apache.mahout.matrix.PersistentObject {
+public abstract class AbstractCollection<T> extends PersistentObject {
 
   /** Makes this class non instantiable, but still let's others inherit from it. */
   protected AbstractCollection() {

@@ -67,13 +67,13 @@ public class SmpBlas implements Blas {
    */
   private static Blas smpBlas = SeqBlas.seqBlas;
 
-  protected final Blas seqBlas; // blocks are operated on in parallel; for each block this seq algo is used.
+  private final Blas seqBlas; // blocks are operated on in parallel; for each block this seq algo is used.
 
-  protected final Smp smp;
+  private final Smp smp;
 
-  protected final int maxThreads;
+  private final int maxThreads;
 
-  protected static final int NN_THRESHOLD = 30000;
+  private static final int NN_THRESHOLD = 30000;
 
   public static Blas getSmpBlas() {
     return smpBlas;
@@ -448,20 +448,4 @@ public class SmpBlas implements Blas {
     }
   }
 
-  private double xsum(DoubleMatrix2D A) {
-    double[] sums = run(A, true,
-        new Matrix2DMatrix2DFunction() {
-          @Override
-          public double apply(DoubleMatrix2D AA, DoubleMatrix2D BB) {
-            return AA.zSum();
-          }
-        }
-    );
-
-    double sum = 0;
-    for (int i = sums.length; --i >= 0;) {
-      sum += sums[i];
-    }
-    return sum;
-  }
 }

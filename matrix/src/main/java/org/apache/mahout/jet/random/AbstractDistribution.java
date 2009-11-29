@@ -9,6 +9,7 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.jet.random;
 
 import org.apache.mahout.jet.random.engine.RandomEngine;
+import org.apache.mahout.matrix.PersistentObject;
 /**
  * Abstract base class for all random distributions.
  *
@@ -44,7 +45,7 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public abstract class AbstractDistribution extends org.apache.mahout.matrix.PersistentObject
+public abstract class AbstractDistribution extends PersistentObject
     implements org.apache.mahout.matrix.function.DoubleFunction, org.apache.mahout.matrix.function.IntFunction {
 
   protected RandomEngine randomGenerator;

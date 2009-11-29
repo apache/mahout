@@ -22,7 +22,7 @@ class WrapperDoubleMatrix1D extends DoubleMatrix1D {
   /*
    * The elements of the matrix.
    */
-  protected DoubleMatrix1D content;
+  protected final DoubleMatrix1D content;
 
   WrapperDoubleMatrix1D(DoubleMatrix1D newContent) {
     if (newContent != null) {

@@ -8,6 +8,9 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.matrix.linalg;
 
+import org.apache.mahout.jet.math.Mult;
+import org.apache.mahout.jet.math.PlusMult;
+import org.apache.mahout.matrix.list.IntArrayList;
 import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 /**
@@ -46,20 +49,20 @@ import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 public class LUDecompositionQuick implements java.io.Serializable {
 
   /** Array for internal storage of decomposition. */
-  protected DoubleMatrix2D LU;
+  private DoubleMatrix2D LU;
 
   /** pivot sign. */
-  protected int pivsign;
+  private int pivsign;
 
   /** Internal storage of pivot vector. */
-  protected int[] piv;
+  private int[] piv;
 
-  protected boolean isNonSingular;
+  private boolean isNonSingular;
 
-  protected Algebra algebra;
+  private final Algebra algebra;
 
-  protected transient double[] workDouble;
-  protected transient int[] work1;
+  private transient double[] workDouble;
+  private transient int[] work1;
   protected transient int[] work2;
 
   /**
@@ -107,10 +110,10 @@ public class LUDecompositionQuick implements java.io.Serializable {
       LUrows[i] = LU.viewRow(i);
     }
 
-    org.apache.mahout.matrix.list.IntArrayList nonZeroIndexes =
-        new org.apache.mahout.matrix.list.IntArrayList(); // sparsity
+    IntArrayList nonZeroIndexes =
+        new IntArrayList(); // sparsity
     DoubleMatrix1D LUcolj = LU.viewColumn(0).like();  // blocked column j
-    org.apache.mahout.jet.math.Mult multFunction = org.apache.mahout.jet.math.Mult.mult(0);
+    Mult multFunction = org.apache.mahout.jet.math.Mult.mult(0);
 
     // Outer loop.
     int CUT_OFF = 10;
@@ -492,11 +495,11 @@ public class LUDecompositionQuick implements java.io.Serializable {
     }
 
     // transformations
-    org.apache.mahout.jet.math.Mult div = org.apache.mahout.jet.math.Mult.div(0);
-    org.apache.mahout.jet.math.PlusMult minusMult = org.apache.mahout.jet.math.PlusMult.minusMult(0);
+    Mult div = org.apache.mahout.jet.math.Mult.div(0);
+    PlusMult minusMult = org.apache.mahout.jet.math.PlusMult.minusMult(0);
 
-    org.apache.mahout.matrix.list.IntArrayList nonZeroIndexes =
-        new org.apache.mahout.matrix.list.IntArrayList(); // sparsity
+    IntArrayList nonZeroIndexes =
+        new IntArrayList(); // sparsity
     DoubleMatrix1D Browk = org.apache.mahout.matrix.matrix.DoubleFactory1D.dense.make(nx); // blocked row k
 
     // Solve L*Y = B(piv,:)
@@ -660,7 +663,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
 
     buf.append("\npivot = ");
     try {
-      buf.append(String.valueOf(new org.apache.mahout.matrix.list.IntArrayList(this.getPivot())));
+      buf.append(String.valueOf(new IntArrayList(this.getPivot())));
     }
     catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
@@ -718,17 +721,4 @@ public class LUDecompositionQuick implements java.io.Serializable {
     return A;
   }
 
-  /**
-   * Returns pivot permutation vector as a one-dimensional double array
-   *
-   * @return (double) piv
-   */
-  private double[] xgetDoublePivot() {
-    int m = m();
-    double[] vals = new double[m];
-    for (int i = 0; i < m; i++) {
-      vals[i] = (double) piv[i];
-    }
-    return vals;
-  }
 }

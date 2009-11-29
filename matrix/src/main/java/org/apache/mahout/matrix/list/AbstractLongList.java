@@ -8,11 +8,15 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.list;
 
+import org.apache.mahout.jet.random.Uniform;
+import org.apache.mahout.jet.random.engine.DRand;
+import org.apache.mahout.matrix.Sorting;
 import org.apache.mahout.matrix.function.LongComparator;
 import org.apache.mahout.matrix.function.LongProcedure;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 /**
@@ -417,7 +421,7 @@ public abstract class AbstractLongList extends AbstractList<Long> {
     checkRangeFromTo(from, to, mySize);
 
     long[] myElements = elements();
-    org.apache.mahout.matrix.Sorting.mergeSort(myElements, from, to + 1);
+    Sorting.mergeSort(myElements, from, to + 1);
     elements(myElements);
     setSizeRaw(mySize);
   }
@@ -448,7 +452,7 @@ public abstract class AbstractLongList extends AbstractList<Long> {
     checkRangeFromTo(from, to, mySize);
 
     long[] myElements = elements();
-    org.apache.mahout.matrix.Sorting.mergeSort(myElements, from, to + 1, c);
+    Sorting.mergeSort(myElements, from, to + 1, c);
     elements(myElements);
     setSizeRaw(mySize);
   }
@@ -522,7 +526,7 @@ public abstract class AbstractLongList extends AbstractList<Long> {
     checkRangeFromTo(from, to, mySize);
 
     long[] myElements = elements();
-    org.apache.mahout.matrix.Sorting.quickSort(myElements, from, to + 1, c);
+    Sorting.quickSort(myElements, from, to + 1, c);
     elements(myElements);
     setSizeRaw(mySize);
   }
@@ -620,32 +624,41 @@ public abstract class AbstractLongList extends AbstractList<Long> {
    * @param otherTo   the last element of the other list (inclusive)
    *
    *                  <p><b>Examples:</b><pre>
-   *                                                    a=[0, 1, 2, 3, 4, 5, 6, 7]
-   *                                                    b=[50, 60, 70, 80, 90]
-   *                                                    a.R(...)=a.replaceFromToWithFromTo(...)
+   *                                                                     a=[0, 1, 2, 3, 4, 5, 6, 7]
+   *                                                                     b=[50, 60, 70, 80, 90]
+   *                                                                     a.R(...)=a.replaceFromToWithFromTo(...)
    *
-   *                                                    a.R(3,5,b,0,4)-->[0, 1, 2, 50, 60, 70, 80, 90, 6, 7]
-   *                                                    a.R(1,6,b,0,4)-->[0, 50, 60, 70, 80, 90, 7]
-   *                                                    a.R(0,6,b,0,4)-->[50, 60, 70, 80, 90, 7]
-   *                                                    a.R(3,5,b,1,2)-->[0, 1, 2, 60, 70, 6, 7]
-   *                                                    a.R(1,6,b,1,2)-->[0, 60, 70, 7]
-   *                                                    a.R(0,6,b,1,2)-->[60, 70, 7]
-   *                                                    a.R(5,3,b,0,4)-->[0, 1, 2, 3, 4, 50, 60, 70, 80, 90, 5, 6, 7]
-   *                                                    a.R(5,0,b,0,4)-->[0, 1, 2, 3, 4, 50, 60, 70, 80, 90, 5, 6, 7]
-   *                                                    a.R(5,3,b,1,2)-->[0, 1, 2, 3, 4, 60, 70, 5, 6, 7]
-   *                                                    a.R(5,0,b,1,2)-->[0, 1, 2, 3, 4, 60, 70, 5, 6, 7]
+   *                                                                     a.R(3,5,b,0,4)-->[0, 1, 2, 50, 60, 70, 80, 90,
+   *                  6, 7]
+   *                                                                     a.R(1,6,b,0,4)-->[0, 50, 60, 70, 80, 90, 7]
+   *                                                                     a.R(0,6,b,0,4)-->[50, 60, 70, 80, 90, 7]
+   *                                                                     a.R(3,5,b,1,2)-->[0, 1, 2, 60, 70, 6, 7]
+   *                                                                     a.R(1,6,b,1,2)-->[0, 60, 70, 7]
+   *                                                                     a.R(0,6,b,1,2)-->[60, 70, 7]
+   *                                                                     a.R(5,3,b,0,4)-->[0, 1, 2, 3, 4, 50, 60, 70,
+   *                  80, 90, 5, 6, 7]
+   *                                                                     a.R(5,0,b,0,4)-->[0, 1, 2, 3, 4, 50, 60, 70,
+   *                  80, 90, 5, 6, 7]
+   *                                                                     a.R(5,3,b,1,2)-->[0, 1, 2, 3, 4, 60, 70, 5, 6,
+   *                  7]
+   *                                                                     a.R(5,0,b,1,2)-->[0, 1, 2, 3, 4, 60, 70, 5, 6,
+   *                  7]
    *
-   *                                                    Extreme cases:
-   *                                                    a.R(5,3,b,0,0)-->[0, 1, 2, 3, 4, 50, 5, 6, 7]
-   *                                                    a.R(5,3,b,4,4)-->[0, 1, 2, 3, 4, 90, 5, 6, 7]
-   *                                                    a.R(3,5,a,0,1)-->[0, 1, 2, 0, 1, 6, 7]
-   *                                                    a.R(3,5,a,3,5)-->[0, 1, 2, 3, 4, 5, 6, 7]
-   *                                                    a.R(3,5,a,4,4)-->[0, 1, 2, 4, 6, 7]
-   *                                                    a.R(5,3,a,0,4)-->[0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 5, 6, 7]
-   *                                                    a.R(0,-1,b,0,4)-->[50, 60, 70, 80, 90, 0, 1, 2, 3, 4, 5, 6, 7]
-   *                                                    a.R(0,-1,a,0,4)-->[0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 5, 6, 7]
-   *                                                    a.R(8,0,a,0,4)-->[0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4]
-   *                                                    </pre>
+   *                                                                     Extreme cases:
+   *                                                                     a.R(5,3,b,0,0)-->[0, 1, 2, 3, 4, 50, 5, 6, 7]
+   *                                                                     a.R(5,3,b,4,4)-->[0, 1, 2, 3, 4, 90, 5, 6, 7]
+   *                                                                     a.R(3,5,a,0,1)-->[0, 1, 2, 0, 1, 6, 7]
+   *                                                                     a.R(3,5,a,3,5)-->[0, 1, 2, 3, 4, 5, 6, 7]
+   *                                                                     a.R(3,5,a,4,4)-->[0, 1, 2, 4, 6, 7]
+   *                                                                     a.R(5,3,a,0,4)-->[0, 1, 2, 3, 4, 0, 1, 2, 3, 4,
+   *                  5, 6, 7]
+   *                                                                     a.R(0,-1,b,0,4)-->[50, 60, 70, 80, 90, 0, 1, 2,
+   *                  3, 4, 5, 6, 7]
+   *                                                                     a.R(0,-1,a,0,4)-->[0, 1, 2, 3, 4, 0, 1, 2, 3,
+   *                  4, 5, 6, 7]
+   *                                                                     a.R(8,0,a,0,4)-->[0, 1, 2, 3, 4, 5, 6, 7, 0, 1,
+   *                  2, 3, 4]
+   *                                                                     </pre>
    */
   public void replaceFromToWithFromTo(int from, int to, AbstractLongList other, int otherFrom, int otherTo) {
     if (otherFrom > otherTo) {
@@ -795,8 +808,7 @@ public abstract class AbstractLongList extends AbstractList<Long> {
   public void shuffleFromTo(int from, int to) {
     checkRangeFromTo(from, to, size());
 
-    org.apache.mahout.jet.random.Uniform gen =
-        new org.apache.mahout.jet.random.Uniform(new org.apache.mahout.jet.random.engine.DRand(new java.util.Date()));
+    Uniform gen = new Uniform(new DRand(new Date()));
     for (int i = from; i < to; i++) {
       int random = gen.nextIntFromTo(i, to);
 

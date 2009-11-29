@@ -24,7 +24,7 @@ import java.util.AbstractList;
 @Deprecated
 public class LongListAdapter extends AbstractList<Long> {
 
-  protected final AbstractLongList content;
+  private final AbstractLongList content;
 
   /** Constructs a list backed by the specified content list. */
   public LongListAdapter(AbstractLongList content) {

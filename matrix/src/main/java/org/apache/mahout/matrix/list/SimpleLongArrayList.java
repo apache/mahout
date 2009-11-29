@@ -21,10 +21,10 @@ public class SimpleLongArrayList extends AbstractLongList {
    * The array buffer into which the elements of the list are stored. The capacity of the list is the length of this
    * array buffer.
    */
-  protected long[] elements;
+  private long[] elements;
 
   /** The size of the list. */
-  protected int size;
+  private int size;
 
   /** Constructs an empty list. */
   public SimpleLongArrayList() {
@@ -50,7 +50,7 @@ public class SimpleLongArrayList extends AbstractLongList {
    * @param initialCapacity the number of elements the receiver can hold without auto-expanding itself by allocating new
    *                        internal memory.
    */
-  public SimpleLongArrayList(int initialCapacity) {
+  private SimpleLongArrayList(int initialCapacity) {
     super();
     if (initialCapacity < 0) {
       throw new IllegalArgumentException("Illegal Capacity: " + initialCapacity);

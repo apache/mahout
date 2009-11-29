@@ -50,11 +50,11 @@ import org.apache.mahout.jet.stat.Probability;
 @Deprecated
 public class Gamma extends AbstractContinousDistribution {
 
-  protected double alpha;
-  protected double lambda;
+  private double alpha;
+  private double lambda;
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static Gamma shared = new Gamma(1.0, 1.0, makeDefaultGenerator());
+  private static final Gamma shared = new Gamma(1.0, 1.0, makeDefaultGenerator());
 
   /**
    * Constructs a Gamma distribution. Example: alpha=1.0, lambda=1.0.
@@ -312,14 +312,4 @@ public class Gamma extends AbstractContinousDistribution {
     return this.getClass().getName() + '(' + alpha + ',' + lambda + ')';
   }
 
-  /**
-   * Sets the uniform random number generated shared by all <b>static</b> methods.
-   *
-   * @param randomGenerator the new uniform random number generator to be shared.
-   */
-  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-    synchronized (shared) {
-      shared.setRandomGenerator(randomGenerator);
-    }
-  }
 }

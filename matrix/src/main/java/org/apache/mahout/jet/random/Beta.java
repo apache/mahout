@@ -42,29 +42,40 @@ import org.apache.mahout.jet.stat.Probability;
 @Deprecated
 public class Beta extends AbstractContinousDistribution {
 
-  protected double alpha;
-  protected double beta;
+  private double alpha;
+  private double beta;
 
-  double PDF_CONST; // cache to speed up pdf()
+  private double PDF_CONST; // cache to speed up pdf()
 
   // cached values shared by bXX
-  double a_last = 0.0, b_last = 0.0;
-  double a_, b_, t, fa, fb, p1, p2;
+  private double a_last = 0.0, b_last = 0.0;
+  private double a_, b_, t, fa, fb, p1, p2;
 
   // cached values for b00
-  double c;
 
   // chached values for b01
-  double ml, mu;
+  private double ml, mu;
 
   // chached values for b1prs
-  double p_last = 0.0, q_last = 0.0;
-  double a, b, s, m, D, Dl, x1, x2, x4, x5, f1, f2, f4, f5;
-  double ll, lr, z2, z4, p3, p4;
+  private double p_last = 0.0, q_last = 0.0;
+  private double a;
+  private double b;
+  private double m;
+  private double D;
+  private double Dl;
+  private double x1;
+  private double x2;
+  private double x4;
+  private double x5;
+  private double f1;
+  private double f2;
+  private double f4;
+  private double f5;
+  private double ll, lr, z2, z4, p3, p4;
 
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static Beta shared = new Beta(10.0, 10.0, makeDefaultGenerator());
+  private static final Beta shared = new Beta(10.0, 10.0, makeDefaultGenerator());
 
   /** Constructs a Beta distribution. */
   public Beta(double alpha, double beta, RandomEngine randomGenerator) {
@@ -83,7 +94,7 @@ public class Beta extends AbstractContinousDistribution {
 
       a_ = a - 1.0;
       b_ = b - 1.0;
-      c = (b * b_) / (a * a_);                            // b(1-b) / a(1-a)
+      double c = (b * b_) / (a * a_);
       t = (c == 1.0) ? 0.5 : (1.0 - Math.sqrt(c)) / (1.0 - c);  // t = t_opt
       fa = Math.exp(a_ * Math.log(t));
       fb = Math.exp(b_ * Math.log(1.0 - t));              // f(t) = fa * fb
@@ -207,7 +218,7 @@ public class Beta extends AbstractContinousDistribution {
 
       a = p - 1.0;
       b = q - 1.0;
-      s = a + b;
+      double s = a + b;
       m = a / s;
       if (a > 1.0 || b > 1.0) {
         D = Math.sqrt(m * (1.0 - m) / (s - 1.0));
@@ -474,14 +485,4 @@ public class Beta extends AbstractContinousDistribution {
     return this.getClass().getName() + '(' + alpha + ',' + beta + ')';
   }
 
-  /**
-   * Sets the uniform random number generated shared by all <b>static</b> methods.
-   *
-   * @param randomGenerator the new uniform random number generator to be shared.
-   */
-  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-    synchronized (shared) {
-      shared.setRandomGenerator(randomGenerator);
-    }
-  }
 }

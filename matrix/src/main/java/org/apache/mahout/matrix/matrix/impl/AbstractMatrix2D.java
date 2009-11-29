@@ -31,21 +31,8 @@ public abstract class AbstractMatrix2D extends AbstractMatrix {
   /** the number of elements between two columns, i.e. <tt>index(i,j+1,k) - index(i,j,k)</tt>. */
   protected int columnStride;
 
-
   /** the index of the first element */
   protected int rowZero, columnZero;
-
-  /**
-   * Indicates non-flipped state (flip==1) or flipped state (flip==-1).
-   * see _setFlip() for further info.
-   */
-  //protected int rowFlip, columnFlip;
-
-  /**
-   * Indicates non-flipped state or flipped state.
-   * see _setFlip() for further info.
-   */
-  //protected int rowFlipMask, columnFlipMask;
 
   /** Makes this class non instantiable, but still let's others inherit from it. */
   protected AbstractMatrix2D() {

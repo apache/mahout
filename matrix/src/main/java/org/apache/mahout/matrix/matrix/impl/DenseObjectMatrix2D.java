@@ -8,6 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.matrix.impl;
 
+import org.apache.mahout.matrix.function.ObjectFunction;
 import org.apache.mahout.matrix.matrix.ObjectMatrix1D;
 import org.apache.mahout.matrix.matrix.ObjectMatrix2D;
 /**
@@ -61,7 +62,7 @@ public class DenseObjectMatrix2D extends ObjectMatrix2D {
    * columnOf(index)==index%columns rowOf(index)==index/columns i.e. {row0 column0..m}, {row1 column0..m}, ..., {rown
    * column0..m}
    */
-  protected Object[] elements;
+  protected final Object[] elements;
 
   /**
    * Constructs a matrix with a copy of the given values. <tt>values</tt> is required to have the form
@@ -149,7 +150,7 @@ public class DenseObjectMatrix2D extends ObjectMatrix2D {
    * 2.5 3.5
    *
    * // change each cell to its sine
-   * matrix.assign(org.apache.mahout.jet.math.Functions.sin);
+   * matrix.assign(Functions.sin);
    * -->
    * 2 x 2 matrix
    * 0.479426  0.997495
@@ -162,7 +163,7 @@ public class DenseObjectMatrix2D extends ObjectMatrix2D {
    * @see org.apache.mahout.jet.math.Functions
    */
   @Override
-  public ObjectMatrix2D assign(org.apache.mahout.matrix.function.ObjectFunction function) {
+  public ObjectMatrix2D assign(ObjectFunction function) {
     Object[] elems = this.elements;
     if (elems == null) {
       throw new InternalError();

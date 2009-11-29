@@ -10,7 +10,8 @@ package org.apache.mahout.jet.random.sampling;
 
 import org.apache.mahout.jet.random.Uniform;
 import org.apache.mahout.jet.random.engine.RandomEngine;
-import org.apache.mahout.matrix.list.BooleanArrayList;
+import org.apache.mahout.matrix.PersistentObject;
+import org.apache.mahout.matrix.list.IntArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -25,19 +26,19 @@ import org.slf4j.LoggerFactory;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class WeightedRandomSampler extends org.apache.mahout.matrix.PersistentObject {
+public class WeightedRandomSampler extends PersistentObject {
 
   private static final Logger log = LoggerFactory.getLogger(WeightedRandomSampler.class);
 
 
   //public class BlockedRandomSampler extends Object implements java.io.Serializable {
-  protected int skip;
-  protected int nextTriggerPos;
-  protected int nextSkip;
-  protected int weight;
-  protected Uniform generator;
+  private int skip;
+  private int nextTriggerPos;
+  private int nextSkip;
+  private int weight;
+  private Uniform generator;
 
-  static final int UNDEFINED = -1;
+  private static final int UNDEFINED = -1;
 
   /** Calls <tt>BlockedRandomSampler(1,null)</tt>. */
   public WeightedRandomSampler() {
@@ -129,7 +130,7 @@ public class WeightedRandomSampler extends org.apache.mahout.matrix.PersistentOb
     WeightedRandomSampler sampler = new WeightedRandomSampler();
     sampler.setWeight(weight);
 
-    org.apache.mahout.matrix.list.IntArrayList sample = new org.apache.mahout.matrix.list.IntArrayList();
+    IntArrayList sample = new IntArrayList();
     for (int i = 0; i < size; i++) {
       if (sampler.sampleNextElement()) {
         sample.add(i);
@@ -139,45 +140,4 @@ public class WeightedRandomSampler extends org.apache.mahout.matrix.PersistentOb
     log.info("Sample = " + sample);
   }
 
-  /**
-   * Chooses exactly one random element from successive blocks of <tt>weight</tt> input elements each. For example, if
-   * weight==2, and the input is 5*2=10 elements long, then chooses 5 random elements from the 10 elements such that one
-   * is chosen from the first block, one from the second, ..., one from the last block.
-   *
-   * @param acceptList a bitvector which will be filled with <tt>true</tt> where sampling shall occur and <tt>false</tt>
-   *                   where it shall not occur.
-   */
-  private void xsampleNextElements(BooleanArrayList acceptList) {
-    // manually inlined
-    int length = acceptList.size();
-    boolean[] accept = acceptList.elements();
-    for (int i = 0; i < length; i++) {
-      if (skip > 0) { //reject
-        skip--;
-        accept[i] = false;
-        continue;
-      }
-
-      if (nextTriggerPos == UNDEFINED) {
-        if (weight == 1) {
-          nextTriggerPos = 0; // tuned for speed
-        } else {
-          nextTriggerPos = generator.nextIntFromTo(0, weight - 1);
-        }
-
-        nextSkip = weight - 1 - nextTriggerPos;
-      }
-
-      if (nextTriggerPos > 0) { //reject
-        nextTriggerPos--;
-        accept[i] = false;
-        continue;
-      }
-
-      //accept
-      nextTriggerPos = UNDEFINED;
-      skip = nextSkip;
-      accept[i] = true;
-    }
-  }
 }

@@ -8,8 +8,11 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.math;
 
+import org.apache.mahout.jet.random.engine.MersenneTwister;
 import org.apache.mahout.matrix.function.IntFunction;
 import org.apache.mahout.matrix.function.IntIntFunction;
+
+import java.util.Date;
 
 /**
  Integer Function objects to be passed to generic methods.
@@ -361,7 +364,7 @@ public class IntFunctions {
    * evaluating methods.
    */
   public static IntFunction random() {
-    return new org.apache.mahout.jet.random.engine.MersenneTwister(new java.util.Date());
+    return new MersenneTwister(new Date());
   }
 
 }

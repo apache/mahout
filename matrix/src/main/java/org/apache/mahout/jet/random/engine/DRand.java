@@ -42,7 +42,7 @@ import java.util.Date;
 public class DRand extends RandomEngine {
 
   private int current;
-  public static final int DEFAULT_SEED = 1;
+  private static final int DEFAULT_SEED = 1;
 
   /** Constructs and returns a random number generator with a default seed, which is a <b>constant</b>. */
   public DRand() {
@@ -61,7 +61,7 @@ public class DRand extends RandomEngine {
   /**
    * Constructs and returns a random number generator seeded with the given date.
    *
-   * @param d typically <tt>new java.util.Date()</tt>
+   * @param d typically <tt>new Date()</tt>
    */
   public DRand(Date d) {
     this((int) d.getTime());

@@ -8,6 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.jet.stat.quantile;
 
+import org.apache.mahout.matrix.PersistentObject;
+
 /**
  * Read-only equi-depth histogram for selectivity estimation.
  * Assume you have collected statistics over a data set, among them a one-dimensional equi-depth histogram (quantiles).
@@ -26,9 +28,9 @@ package org.apache.mahout.jet.stat.quantile;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class EquiDepthHistogram extends org.apache.mahout.matrix.PersistentObject {
+public class EquiDepthHistogram extends PersistentObject {
 
-  protected final float[] binBoundaries;
+  private final float[] binBoundaries;
 
   /**
    * Constructs an equi-depth histogram with the given quantile elements. Quantile elements must be sorted ascending and

@@ -36,11 +36,11 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
 @Deprecated
 public class Empirical extends AbstractContinousDistribution {
 
-  protected double[] cdf; // cumulative distribution function
-  protected int interpolationType;
+  private double[] cdf; // cumulative distribution function
+  private int interpolationType;
 
-  public static final int LINEAR_INTERPOLATION = 0;
-  public static final int NO_INTERPOLATION = 1;
+  private static final int LINEAR_INTERPOLATION = 0;
+  private static final int NO_INTERPOLATION = 1;
 
   /**
    * Constructs an Empirical distribution. The probability distribution function (pdf) is an array of positive real
@@ -199,12 +199,4 @@ public class Empirical extends AbstractContinousDistribution {
     return this.getClass().getName() + '(' + ((cdf != null) ? cdf.length : 0) + ',' + interpolation + ')';
   }
 
-  /**
-   * Not yet commented.
-   *
-   * @return int
-   */
-  private int xnBins() {
-    return cdf.length - 1;
-  }
 }

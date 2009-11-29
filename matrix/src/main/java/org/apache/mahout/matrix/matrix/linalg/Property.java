@@ -9,6 +9,12 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.matrix.matrix.linalg;
 
 import org.apache.mahout.jet.math.Functions;
+import org.apache.mahout.matrix.GenericSorting;
+import org.apache.mahout.matrix.PersistentObject;
+import org.apache.mahout.matrix.Swapper;
+import org.apache.mahout.matrix.function.IntComparator;
+import org.apache.mahout.matrix.list.ObjectArrayList;
+import org.apache.mahout.matrix.matrix.DoubleFactory2D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix3D;
@@ -173,7 +179,7 @@ import org.apache.mahout.matrix.matrix.impl.AbstractFormatter;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class Property extends org.apache.mahout.matrix.PersistentObject {
+public class Property extends PersistentObject {
 
   /** The default Property object; currently has <tt>tolerance()==1.0E-9</tt>. */
   public static final Property DEFAULT = new Property(1.0E-9);
@@ -184,7 +190,7 @@ public class Property extends org.apache.mahout.matrix.PersistentObject {
   /** A Property object with <tt>tolerance()==1.0E-12</tt>. */
   public static final Property TWELVE = new Property(1.0E-12);
 
-  protected double tolerance;
+  private double tolerance;
 
   /** Not instantiable by no-arg constructor. */
   private Property() {
@@ -480,7 +486,7 @@ public class Property extends org.apache.mahout.matrix.PersistentObject {
 
   /**
    */
-  protected static String get(org.apache.mahout.matrix.list.ObjectArrayList list, int index) {
+  protected static String get(ObjectArrayList list, int index) {
     return ((String) list.get(index));
   }
 
@@ -629,7 +635,7 @@ public class Property extends org.apache.mahout.matrix.PersistentObject {
   public boolean isOrthogonal(DoubleMatrix2D A) {
     checkSquare(A);
     return equals(A.zMult(A, null, 1, 0, false, true),
-        org.apache.mahout.matrix.matrix.DoubleFactory2D.dense.identity(A.rows()));
+        DoubleFactory2D.dense.identity(A.rows()));
   }
 
   /** A matrix <tt>A</tt> is <i>positive</i> if <tt>A[i,j] &gt; 0</tt> holds for all cells. <p> Note: Ignores tolerance. */
@@ -983,8 +989,8 @@ public class Property extends org.apache.mahout.matrix.PersistentObject {
    * </pre>
    */
   public String toString(DoubleMatrix2D A) {
-    final org.apache.mahout.matrix.list.ObjectArrayList names = new org.apache.mahout.matrix.list.ObjectArrayList();
-    final org.apache.mahout.matrix.list.ObjectArrayList values = new org.apache.mahout.matrix.list.ObjectArrayList();
+    final org.apache.mahout.matrix.list.ObjectArrayList names = new ObjectArrayList();
+    final org.apache.mahout.matrix.list.ObjectArrayList values = new ObjectArrayList();
 
     // determine properties
     names.add("density");
@@ -1201,13 +1207,13 @@ public class Property extends org.apache.mahout.matrix.PersistentObject {
 
 
     // sort ascending by property name
-    org.apache.mahout.matrix.function.IntComparator comp = new org.apache.mahout.matrix.function.IntComparator() {
+    IntComparator comp = new IntComparator() {
       @Override
       public int compare(int a, int b) {
         return get(names, a).compareTo(get(names, b));
       }
     };
-    org.apache.mahout.matrix.Swapper swapper = new org.apache.mahout.matrix.Swapper() {
+    Swapper swapper = new Swapper() {
       @Override
       public void swap(int a, int b) {
         Object tmp = names.get(a);
@@ -1218,12 +1224,12 @@ public class Property extends org.apache.mahout.matrix.PersistentObject {
         values.set(b, tmp);
       }
     };
-    org.apache.mahout.matrix.GenericSorting.quickSort(0, names.size(), comp, swapper);
+    GenericSorting.quickSort(0, names.size(), comp, swapper);
 
     // determine padding for nice formatting
     int maxLength = 0;
     for (int i = 0; i < names.size(); i++) {
-      int length = ((String) names.get(i)).length();
+      int length = ((CharSequence) names.get(i)).length();
       maxLength = Math.max(length, maxLength);
     }
 

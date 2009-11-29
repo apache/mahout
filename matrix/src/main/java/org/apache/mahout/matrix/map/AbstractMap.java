@@ -8,6 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.map;
 
+import org.apache.mahout.matrix.PersistentObject;
+
 /**
  Abstract base class for hash maps holding objects or primitive data types such as <code>int</code>, <code>float</code>, etc. as keys and/or values.
  First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -21,7 +23,7 @@ package org.apache.mahout.matrix.map;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public abstract class AbstractMap extends org.apache.mahout.matrix.PersistentObject {
+public abstract class AbstractMap extends PersistentObject {
   //public static boolean debug = false; // debug only
 
   /** The number of distinct associations in the map; its "size()". */

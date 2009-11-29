@@ -26,10 +26,10 @@ import org.apache.mahout.jet.random.engine.RandomEngine;
 @Deprecated
 public class Exponential extends AbstractContinousDistribution {
 
-  protected double lambda;
+  private double lambda;
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static Exponential shared = new Exponential(1.0, makeDefaultGenerator());
+  private static final Exponential shared = new Exponential(1.0, makeDefaultGenerator());
 
   /** Constructs a Negative Exponential distribution. */
   public Exponential(double lambda, RandomEngine randomGenerator) {
@@ -81,14 +81,4 @@ public class Exponential extends AbstractContinousDistribution {
     return this.getClass().getName() + '(' + lambda + ')';
   }
 
-  /**
-   * Sets the uniform random number generated shared by all <b>static</b> methods.
-   *
-   * @param randomGenerator the new uniform random number generator to be shared.
-   */
-  private static void xstaticSetRandomGenerator(RandomEngine randomGenerator) {
-    synchronized (shared) {
-      shared.setRandomGenerator(randomGenerator);
-    }
-  }
 }

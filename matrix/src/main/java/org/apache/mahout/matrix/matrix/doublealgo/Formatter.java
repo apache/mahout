@@ -11,6 +11,7 @@ package org.apache.mahout.matrix.matrix.doublealgo;
 import org.apache.mahout.matrix.matrix.DoubleMatrix1D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 import org.apache.mahout.matrix.matrix.DoubleMatrix3D;
+import org.apache.mahout.matrix.matrix.ObjectFactory2D;
 import org.apache.mahout.matrix.matrix.impl.AbstractFormatter;
 import org.apache.mahout.matrix.matrix.impl.AbstractMatrix1D;
 import org.apache.mahout.matrix.matrix.impl.AbstractMatrix2D;
@@ -363,8 +364,8 @@ public class Formatter extends AbstractFormatter {
     String b3 = blanks(3);
     copy.setPrintShape(false);
     copy.setColumnSeparator(", ");
-    copy.setRowSeparator("},\n" + b3 + "{");
-    String lead = "{\n" + b3 + "{";
+    copy.setRowSeparator("},\n" + b3 + '{');
+    String lead = "{\n" + b3 + '{';
     String trail = "}\n};";
     return lead + copy.toString(matrix) + trail;
   }
@@ -380,9 +381,9 @@ public class Formatter extends AbstractFormatter {
     String b6 = blanks(6);
     copy.setPrintShape(false);
     copy.setColumnSeparator(", ");
-    copy.setRowSeparator("},\n" + b6 + "{");
-    copy.setSliceSeparator("}\n" + b3 + "},\n" + b3 + "{\n" + b6 + "{");
-    String lead = "{\n" + b3 + "{\n" + b6 + "{";
+    copy.setRowSeparator("},\n" + b6 + '{');
+    copy.setSliceSeparator("}\n" + b3 + "},\n" + b3 + "{\n" + b6 + '{');
+    String lead = "{\n" + b3 + "{\n" + b6 + '{';
     String trail = "}\n" + b3 + "}\n}";
     return lead + copy.toString(matrix) + trail;
   }
@@ -424,7 +425,7 @@ public class Formatter extends AbstractFormatter {
     }
     this.printShape = oldPrintShape;
     if (printShape) {
-      buf.insert(0, shape(matrix) + "\n");
+      buf.insert(0, shape(matrix) + '\n');
     }
     return buf.toString();
   }
@@ -463,141 +464,7 @@ public class Formatter extends AbstractFormatter {
     align(s);
     //this.alignment = oldAlignment;
     return new org.apache.mahout.matrix.matrix.objectalgo.Formatter()
-        .toTitleString(org.apache.mahout.matrix.matrix.ObjectFactory2D.dense.make(s), rowNames, columnNames,
+        .toTitleString(ObjectFactory2D.dense.make(s), rowNames, columnNames,
             rowAxisName, columnAxisName, title);
-  }
-/**
- Same as <tt>toTitleString</tt> except that additionally statistical aggregates (mean, median, sum, etc.) of rows and columns are printed.
- Pass <tt>null</tt> to one or more parameters to indicate that the corresponding decoration element shall not appear in the string converted matrix.
-
- @param matrix The matrix to format.
- @param rowNames The headers of all rows (to be put to the left of the matrix).
- @param columnNames The headers of all columns (to be put to above the matrix).
- @param rowAxisName The label of the y-axis.
- @param columnAxisName The label of the x-axis.
- @param title The overall title of the matrix to be formatted.
- @param aggr the aggregation functions to be applied to columns and rows.
- @return the matrix converted to a string.
- @see hep.aida.bin.BinFunction1D
- @see hep.aida.bin.BinFunctions1D
-
- public String toTitleString(DoubleMatrix2D matrix, String[] rowNames, String[] columnNames, String rowAxisName, String columnAxisName, String title, hep.aida.bin.BinFunction1D[] aggr) {
- if (matrix.size()==0) return "Empty matrix";
- if (aggr==null || aggr.length==0) return toTitleString(matrix,rowNames,columnNames,rowAxisName,columnAxisName,title);
-
- DoubleMatrix2D rowStats = matrix.like(matrix.rows(), aggr.length); // hold row aggregations
- DoubleMatrix2D colStats = matrix.like(aggr.length, matrix.columns()); // hold column aggregations
-
- org.apache.mahout.matrix.matrix.doublealgo.Statistic.aggregate(matrix, aggr, colStats); // aggregate an entire column at a time
- org.apache.mahout.matrix.matrix.doublealgo.Statistic.aggregate(matrix.viewDice(), aggr, rowStats.viewDice()); // aggregate an entire row at a time
-
- // turn into strings
- // tmp holds "matrix" plus "colStats" below (needed so that numbers in a columns can be decimal point aligned)
- DoubleMatrix2D tmp = matrix.like(matrix.rows()+aggr.length, matrix.columns());
- tmp.viewPart(0,0,matrix.rows(),matrix.columns()).assign(matrix);
- tmp.viewPart(matrix.rows(),0,aggr.length,matrix.columns()).assign(colStats);
- colStats = null;
-
- String[][] s1 = format(tmp); align(s1); tmp = null;
- String[][] s2 = format(rowStats); align(s2); rowStats = null;
-
- // copy strings into a large matrix holding the source matrix and all aggregations
- org.apache.mahout.matrix.matrix.ObjectMatrix2D allStats = org.apache.mahout.matrix.matrix.ObjectFactory2D.dense.make(matrix.rows()+aggr.length, matrix.columns()+aggr.length+1);
- allStats.viewPart(0,0,matrix.rows()+aggr.length,matrix.columns()).assign(s1);
- allStats.viewColumn(matrix.columns()).assign("|");
- allStats.viewPart(0,matrix.columns()+1,matrix.rows(),aggr.length).assign(s2);
- s1 = null; s2 = null;
-
- // append a vertical "|" separator plus names of aggregation functions to line holding columnNames
- if (columnNames!=null) {
- org.apache.mahout.matrix.list.ObjectArrayList list = new org.apache.mahout.matrix.list.ObjectArrayList(columnNames);
- list.add("|");
- for (int i=0; i<aggr.length; i++) list.add(aggr[i].name()); // add names of aggregation functions
- columnNames = new String[list.size()];
- list.toArray(columnNames);
- }
-
- // append names of aggregation functions to line holding rowNames
- if (rowNames!=null) {
- org.apache.mahout.matrix.list.ObjectArrayList list = new org.apache.mahout.matrix.list.ObjectArrayList(rowNames);
- for (int i=0; i<aggr.length; i++) list.add(aggr[i].name()); // add names of aggregation functions
- rowNames = new String[list.size()];
- list.toArray(rowNames);
- }
-
- // turn large matrix into string
- String s = new org.apache.mahout.matrix.matrix.objectalgo.Formatter().toTitleString(allStats, rowNames,columnNames,rowAxisName,columnAxisName,title);
-
- // insert a horizontal "----------------------" separation line above the column stats
- // determine insertion position and line width
- int last = s.length()+1;
- int secondLast = last;
- int v = Math.max(0, rowAxisName==null ? 0 : rowAxisName.length()-matrix.rows()-aggr.length);
- for (int k=0; k<aggr.length+1+v; k++) { // scan "aggr.length+1+v" lines backwards
- secondLast = last;
- last = s.lastIndexOf(rowSeparator, last-1);
- }
- StringBuffer buf = new StringBuffer(s);
- buf.insert(secondLast,rowSeparator+repeat('-',secondLast-last-1));
-
- return buf.toString();
- }
- */
-/**
- Returns a string representation of the given matrix with axis as well as rows and columns labeled.
- Pass <tt>null</tt> to one or more parameters to indicate that the corresponding decoration element shall not appear in the string converted matrix.
-
- @param matrix The matrix to format.
- @param sliceNames The headers of all slices (to be put above each slice).
- @param rowNames The headers of all rows (to be put to the left of the matrix).
- @param columnNames The headers of all columns (to be put to above the matrix).
- @param sliceAxisName The label of the z-axis (to be put above each slice).
- @param rowAxisName The label of the y-axis.
- @param columnAxisName The label of the x-axis.
- @param title The overall title of the matrix to be formatted.
- @param aggr the aggregation functions to be applied to columns, rows.
- @return the matrix converted to a string.
- @see hep.aida.bin.BinFunction1D
- @see hep.aida.bin.BinFunctions1D
-
- public String toTitleString(DoubleMatrix3D matrix, String[] sliceNames, String[] rowNames, String[] columnNames, String sliceAxisName, String rowAxisName, String columnAxisName, String title, hep.aida.bin.BinFunction1D[] aggr) {
- if (matrix.size()==0) return "Empty matrix";
- StringBuffer buf = new StringBuffer();
- for (int i=0; i<matrix.slices(); i++) {
- if (i!=0) buf.append(sliceSeparator);
- buf.append(toTitleString(matrix.viewSlice(i),rowNames,columnNames,rowAxisName,columnAxisName,title+"\n"+sliceAxisName+"="+sliceNames[i],aggr));
- }
- return buf.toString();
- }
- */
-  /**
-   * Returns a string representation of the given matrix with axis as well as rows and columns labeled. Pass
-   * <tt>null</tt> to one or more parameters to indicate that the corresponding decoration element shall not appear in
-   * the string converted matrix.
-   *
-   * @param matrix         The matrix to format.
-   * @param sliceNames     The headers of all slices (to be put above each slice).
-   * @param rowNames       The headers of all rows (to be put to the left of the matrix).
-   * @param columnNames    The headers of all columns (to be put to above the matrix).
-   * @param sliceAxisName  The label of the z-axis (to be put above each slice).
-   * @param rowAxisName    The label of the y-axis.
-   * @param columnAxisName The label of the x-axis.
-   * @param title          The overall title of the matrix to be formatted.
-   * @return the matrix converted to a string.
-   */
-  private String xtoTitleString(DoubleMatrix3D matrix, String[] sliceNames, String[] rowNames, String[] columnNames,
-                                String sliceAxisName, String rowAxisName, String columnAxisName, String title) {
-    if (matrix.size() == 0) {
-      return "Empty matrix";
-    }
-    StringBuilder buf = new StringBuilder();
-    for (int i = 0; i < matrix.slices(); i++) {
-      if (i != 0) {
-        buf.append(sliceSeparator);
-      }
-      buf.append(toTitleString(matrix.viewSlice(i), rowNames, columnNames, rowAxisName, columnAxisName,
-          title + "\n" + sliceAxisName + "=" + sliceNames[i]));
-    }
-    return buf.toString();
   }
 }

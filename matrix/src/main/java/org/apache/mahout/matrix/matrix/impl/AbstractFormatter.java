@@ -8,6 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.matrix.impl;
 
+import org.apache.mahout.matrix.PersistentObject;
+
 /**
  Abstract base class for flexible, well human readable matrix print formatting.
  Value type independent.
@@ -25,7 +27,7 @@ package org.apache.mahout.matrix.matrix.impl;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public abstract class AbstractFormatter extends org.apache.mahout.matrix.PersistentObject {
+public abstract class AbstractFormatter extends PersistentObject {
 
   /** The alignment string aligning the cells of a column to the left. */
   public static final String LEFT = "left";
@@ -40,16 +42,16 @@ public abstract class AbstractFormatter extends org.apache.mahout.matrix.Persist
   public static final String DECIMAL = "decimal";
 
   /** The default minimum number of characters a column may have; currently <tt>1</tt>. */
-  public static final int DEFAULT_MIN_COLUMN_WIDTH = 1;
+  private static final int DEFAULT_MIN_COLUMN_WIDTH = 1;
 
   /** The default string separating any two columns from another; currently <tt>" "</tt>. */
-  public static final String DEFAULT_COLUMN_SEPARATOR = " ";
+  private static final String DEFAULT_COLUMN_SEPARATOR = " ";
 
   /** The default string separating any two rows from another; currently <tt>"\n"</tt>. */
-  public static final String DEFAULT_ROW_SEPARATOR = "\n";
+  private static final String DEFAULT_ROW_SEPARATOR = "\n";
 
   /** The default string separating any two slices from another; currently <tt>"\n\n"</tt>. */
-  public static final String DEFAULT_SLICE_SEPARATOR = "\n\n";
+  private static final String DEFAULT_SLICE_SEPARATOR = "\n\n";
 
 
   /** The default format string for formatting a single cell value; currently <tt>"%G"</tt>. */
@@ -59,10 +61,10 @@ public abstract class AbstractFormatter extends org.apache.mahout.matrix.Persist
   protected String format = "%G";
 
   /** The default minimum number of characters a column may have; currently <tt>1</tt>. */
-  protected int minColumnWidth = DEFAULT_MIN_COLUMN_WIDTH;
+  private int minColumnWidth = DEFAULT_MIN_COLUMN_WIDTH;
 
   /** The default string separating any two columns from another; currently <tt>" "</tt>. */
-  protected String columnSeparator = DEFAULT_COLUMN_SEPARATOR;
+  private String columnSeparator = DEFAULT_COLUMN_SEPARATOR;
 
   /** The default string separating any two rows from another; currently <tt>"\n"</tt>. */
   protected String rowSeparator = DEFAULT_ROW_SEPARATOR;
@@ -76,7 +78,7 @@ public abstract class AbstractFormatter extends org.apache.mahout.matrix.Persist
 
   private static String[] blanksCache; // for efficient String manipulations
 
-  protected static final FormerFactory factory = new FormerFactory();
+  private static final FormerFactory factory = new FormerFactory();
 
   static {
     setupBlanksCache();
@@ -305,7 +307,7 @@ public abstract class AbstractFormatter extends org.apache.mahout.matrix.Persist
   }
 
   /** Cache for faster string processing. */
-  protected static void setupBlanksCache() {
+  private static void setupBlanksCache() {
     // Pre-fabricate 40 static strings with 0,1,2,..,39 blanks, for usage within method blanks(length).
     // Now, we don't need to construct and fill them on demand, and garbage collect them again.
     // All 40 strings share the identical char[] array, only with different offset and length --> somewhat smaller static memory footprint

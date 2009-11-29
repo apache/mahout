@@ -36,12 +36,12 @@ class SelectedDenseObjectMatrix3D extends ObjectMatrix3D {
   protected final Object[] elements;
 
   /** The offsets of the visible cells of this matrix. */
-  protected int[] sliceOffsets;
-  protected int[] rowOffsets;
-  protected int[] columnOffsets;
+  private int[] sliceOffsets;
+  private int[] rowOffsets;
+  private int[] columnOffsets;
 
   /** The offset. */
-  protected int offset;
+  private int offset;
 
   /**
    * Constructs a matrix view with the given parameters.

@@ -9,6 +9,9 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.matrix.matrix;
 
 import org.apache.mahout.jet.math.Functions;
+import org.apache.mahout.jet.random.engine.MersenneTwister;
+import org.apache.mahout.jet.random.sampling.RandomSamplingAssistant;
+import org.apache.mahout.matrix.PersistentObject;
 import org.apache.mahout.matrix.matrix.impl.DenseDoubleMatrix2D;
 import org.apache.mahout.matrix.matrix.impl.RCDoubleMatrix2D;
 import org.apache.mahout.matrix.matrix.impl.SparseDoubleMatrix2D;
@@ -80,18 +83,18 @@ sample} to construct random matrices. </td>
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class DoubleFactory2D extends org.apache.mahout.matrix.PersistentObject {
+public class DoubleFactory2D extends PersistentObject {
 
-  private static final Logger log = LoggerFactory.getLogger(DoubleFactory2D.class);  
+  private static final Logger log = LoggerFactory.getLogger(DoubleFactory2D.class);
 
   /** A factory producing dense matrices. */
   public static final DoubleFactory2D dense = new DoubleFactory2D();
 
   /** A factory producing sparse hash matrices. */
-  public static final DoubleFactory2D sparse = new DoubleFactory2D();
+  private static final DoubleFactory2D sparse = new DoubleFactory2D();
 
   /** A factory producing sparse row compressed matrices. */
-  public static final DoubleFactory2D rowCompressed = new DoubleFactory2D();
+  private static final DoubleFactory2D rowCompressed = new DoubleFactory2D();
 
   /*
   * A factory producing sparse row compressed modified matrices.
@@ -203,7 +206,7 @@ public class DoubleFactory2D extends org.apache.mahout.matrix.PersistentObject {
    *
    * @throws IllegalArgumentException if the array is not rectangular.
    */
-  protected static void checkRectangularShape(DoubleMatrix2D[][] array) {
+  private static void checkRectangularShape(DoubleMatrix2D[][] array) {
     int columns = -1;
     for (int row = array.length; --row >= 0;) {
       if (array[row] != null) {
@@ -653,7 +656,7 @@ public class DoubleFactory2D extends org.apache.mahout.matrix.PersistentObject {
 
   /** Constructs a matrix with uniformly distributed values in <tt>(0,1)</tt> (exclusive). */
   public DoubleMatrix2D random(int rows, int columns) {
-    return make(rows, columns).assign(org.apache.mahout.jet.math.Functions.random());
+    return make(rows, columns).assign(Functions.random());
   }
 
   /**
@@ -726,9 +729,9 @@ public class DoubleFactory2D extends org.apache.mahout.matrix.PersistentObject {
       return matrix;
     }
 
-    org.apache.mahout.jet.random.sampling.RandomSamplingAssistant sampler =
-        new org.apache.mahout.jet.random.sampling.RandomSamplingAssistant(n, size,
-            new org.apache.mahout.jet.random.engine.MersenneTwister());
+    RandomSamplingAssistant sampler =
+        new RandomSamplingAssistant(n, size,
+            new MersenneTwister());
     for (int i = 0; i < size; i++) {
       if (sampler.sampleNextElement()) {
         int row = i / columns;

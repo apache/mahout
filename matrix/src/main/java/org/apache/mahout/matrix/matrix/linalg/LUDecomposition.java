@@ -26,7 +26,7 @@ import org.apache.mahout.matrix.matrix.DoubleMatrix2D;
 @Deprecated
 public class LUDecomposition implements java.io.Serializable {
 
-  protected final LUDecompositionQuick quick;
+  private final LUDecompositionQuick quick;
 
   /**
    * Constructs and returns a new LU Decomposition object; The decomposed matrices can be retrieved via instance methods

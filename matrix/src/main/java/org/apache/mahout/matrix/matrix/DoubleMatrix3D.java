@@ -8,8 +8,12 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.matrix.matrix;
 
+import org.apache.mahout.jet.math.Functions;
+import org.apache.mahout.matrix.function.DoubleDoubleFunction;
+import org.apache.mahout.matrix.function.DoubleFunction;
 import org.apache.mahout.matrix.list.DoubleArrayList;
 import org.apache.mahout.matrix.list.IntArrayList;
+import org.apache.mahout.matrix.matrix.doublealgo.Formatter;
 import org.apache.mahout.matrix.matrix.impl.AbstractMatrix3D;
 /**
  Abstract base class for 3-d matrices holding <tt>double</tt> elements.
@@ -59,8 +63,8 @@ public abstract class DoubleMatrix3D extends AbstractMatrix3D {
    * @return the aggregated measure.
    * @see org.apache.mahout.jet.math.Functions
    */
-  public double aggregate(org.apache.mahout.matrix.function.DoubleDoubleFunction aggr,
-                          org.apache.mahout.matrix.function.DoubleFunction f) {
+  public double aggregate(DoubleDoubleFunction aggr,
+                          DoubleFunction f) {
     if (size() == 0) {
       return Double.NaN;
     }
@@ -116,7 +120,7 @@ public abstract class DoubleMatrix3D extends AbstractMatrix3D {
    * @see org.apache.mahout.jet.math.Functions
    */
   public double aggregate(DoubleMatrix3D other, org.apache.mahout.matrix.function.DoubleDoubleFunction aggr,
-                          org.apache.mahout.matrix.function.DoubleDoubleFunction f) {
+                          DoubleDoubleFunction f) {
     checkShape(other);
     if (size() == 0) {
       return Double.NaN;
@@ -198,7 +202,7 @@ public abstract class DoubleMatrix3D extends AbstractMatrix3D {
    * 2.5 3.5
    *
    * // change each cell to its sine
-   * matrix.assign(org.apache.mahout.jet.math.Functions.sin);
+   * matrix.assign(Functions.sin);
    * -->
    * 1 x 2 x 2 matrix
    * 0.479426  0.997495
@@ -210,7 +214,7 @@ public abstract class DoubleMatrix3D extends AbstractMatrix3D {
    * @return <tt>this</tt> (for convenience only).
    * @see org.apache.mahout.jet.math.Functions
    */
-  public DoubleMatrix3D assign(org.apache.mahout.matrix.function.DoubleFunction function) {
+  public DoubleMatrix3D assign(DoubleFunction function) {
     for (int slice = slices; --slice >= 0;) {
       for (int row = rows; --row >= 0;) {
         for (int column = columns; --column >= 0;) {
@@ -547,7 +551,7 @@ public abstract class DoubleMatrix3D extends AbstractMatrix3D {
    * @see org.apache.mahout.matrix.matrix.doublealgo.Formatter
    */
   public String toString() {
-    return new org.apache.mahout.matrix.matrix.doublealgo.Formatter().toString(this);
+    return new Formatter().toString(this);
   }
 
   /**
@@ -857,71 +861,6 @@ public abstract class DoubleMatrix3D extends AbstractMatrix3D {
   }
 
   /**
-   * Applies a procedure to each cell's value. Iterates downwards from <tt>[slices()-1,rows()-1,columns()-1]</tt> to
-   * <tt>[0,0,0]</tt>, as demonstrated by this snippet:
-   * <pre>
-   * for (int slice=slices; --slice >=0;) {
-   *    for (int row=rows; --row >= 0;) {
-   *       for (int column=columns; --column >= 0;) {
-   *           if (!procedure.apply(get(slice,row,column))) return false;
-   *       }
-   *    }
-   * }
-   * return true;
-   * </pre>
-   * Note that an implementation may use more efficient techniques, but must not use any other order.
-   *
-   * @param procedure a procedure object taking as argument the current cell's value. Stops iteration if the procedure
-   *                  returns <tt>false</tt>, otherwise continues.
-   * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise.
-   */
-  private boolean xforEach(org.apache.mahout.matrix.function.DoubleProcedure procedure) {
-    for (int slice = slices; --slice >= 0;) {
-      for (int row = rows; --row >= 0;) {
-        for (int column = columns; --column >= 0;) {
-          if (!procedure.apply(getQuick(slice, row, column))) {
-            return false;
-          }
-        }
-      }
-    }
-    return true;
-  }
-
-  /**
-   * Applies a procedure to each cell's coordinate. Iterates downwards from <tt>[slices()-1,rows()-1,columns()-1]</tt>
-   * to <tt>[0,0,0]</tt>, as demonstrated by this snippet:
-   * <pre>
-   * for (int slice=slices; --slice >=0;) {
-   *    for (int row=rows; --row >= 0;) {
-   *       for (int column=columns; --column >= 0;) {
-   *           if (!procedure.apply(slice,row,column)) return false;
-   *       }
-   *    }
-   * }
-   * return true;
-   * </pre>
-   * Note that an implementation may use more efficient techniques, but must not use any other order.
-   *
-   * @param procedure a procedure object taking as first argument the current slice, as second argument the current row,
-   *                  and as third argument the current column. Stops iteration if the procedure returns <tt>false</tt>,
-   *                  otherwise continues.
-   * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise.
-   */
-  private boolean xforEachCoordinate(org.apache.mahout.matrix.function.IntIntIntProcedure procedure) {
-    for (int column = columns; --column >= 0;) {
-      for (int slice = slices; --slice >= 0;) {
-        for (int row = rows; --row >= 0;) {
-          if (!procedure.apply(slice, row, column)) {
-            return false;
-          }
-        }
-      }
-    }
-    return true;
-  }
-
-  /**
    * 27 neighbor stencil transformation. For efficient finite difference operations. Applies a function to a moving
    * <tt>3 x 3 x 3</tt> window. Does nothing if <tt>rows() < 3 || columns() < 3 || slices() < 3</tt>.
    * <pre>
@@ -948,10 +887,10 @@ public abstract class DoubleMatrix3D extends AbstractMatrix3D {
    * Make sure that cells of <tt>this</tt> and <tt>B</tt> do not overlap. In case of overlapping views, behaviour is
    * unspecified. </pre> <p> <b>Example:</b> <pre> final double alpha = 0.25; final double beta = 0.75;
    *
-   * org.apache.mahout.matrix.function.Double27Function f = new org.apache.mahout.matrix.function.Double27Function() {
-   * &nbsp;&nbsp;&nbsp;public final double apply( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a000, double a001, double
-   * a002, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a010, double a011, double a012,
-   * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a020, double a021, double a022,
+   * org.apache.mahout.matrix.function.Double27Function f = new Double27Function() { &nbsp;&nbsp;&nbsp;public final
+   * double apply( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a000, double a001, double a002,
+   * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a010, double a011, double a012, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double
+   * a020, double a021, double a022,
    *
    * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a100, double a101, double a102, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double
    * a110, double a111, double a112, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a120, double a121, double a122,
@@ -1063,6 +1002,6 @@ public abstract class DoubleMatrix3D extends AbstractMatrix3D {
     if (size() == 0) {
       return 0;
     }
-    return aggregate(org.apache.mahout.jet.math.Functions.plus, org.apache.mahout.jet.math.Functions.identity);
+    return aggregate(Functions.plus, org.apache.mahout.jet.math.Functions.identity);
   }
 }
