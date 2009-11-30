@@ -67,7 +67,7 @@ public class Sorting extends PersistentObject {
   private Sorting() {
   }
 
-  private void runSort(int[] a, int fromIndex, int toIndex, IntComparator c) {
+  protected void runSort(int[] a, int fromIndex, int toIndex, IntComparator c) {
     org.apache.mahout.matrix.Sorting.quickSort(a, fromIndex, toIndex, c);
   }
 

@@ -162,18 +162,6 @@ public class RandomSampler extends PersistentObject {
     return copy;
   }
 
-  /** Tests this class. */
-  public static void main(String[] args) {
-    long n = Long.parseLong(args[0]);
-    long N = Long.parseLong(args[1]);
-    long low = Long.parseLong(args[2]);
-    int chunkSize = Integer.parseInt(args[3]);
-    int times = Integer.parseInt(args[4]);
-
-    test(n, N, low, chunkSize, times);
-    //testNegAlphaInv(args);
-  }
-
   /**
    * Computes the next <tt>count</tt> random numbers of the sorted random set specified on instance construction and
    * fills them into <tt>values</tt>, starting at index <tt>fromIndex</tt>.
