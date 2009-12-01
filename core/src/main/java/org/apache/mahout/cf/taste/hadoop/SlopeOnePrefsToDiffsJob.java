@@ -30,13 +30,14 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.InputFormat;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.mapred.InputFormat;
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.Mapper;
+import org.apache.hadoop.mapred.OutputFormat;
+import org.apache.hadoop.mapred.Reducer;
+import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -45,13 +46,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public final class SlopeOnePrefsToDiffsJob extends Job {
+public final class SlopeOnePrefsToDiffsJob {
 
   /** Logger for this class.*/
   private static final Logger log = LoggerFactory.getLogger(SlopeOnePrefsToDiffsJob.class);
 
-  private SlopeOnePrefsToDiffsJob(Configuration jobConf) throws IOException {
-    super(jobConf);
+  private SlopeOnePrefsToDiffsJob() throws IOException {
   }
 
   public static void main(String[] args) throws Exception {
@@ -63,11 +63,15 @@ public final class SlopeOnePrefsToDiffsJob extends Job {
     .withArgument(abuilder.withName("input").withMinimum(1).withMaximum(1).create())
     .withDescription("The Path for input preferences file.").create();
 
+    Option jarFileOpt = obuilder.withLongName("jarFile").withRequired(true)
+      .withShortName("m").withArgument(abuilder.withName("jarFile").withMinimum(1)
+      .withMaximum(1).create()).withDescription("Implementation jar.").create();
+
     Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).create();
     Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
 
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt)
-        .withOption(helpOpt).create();
+        .withOption(jarFileOpt).withOption(helpOpt).create();
 
 
     try {
@@ -82,19 +86,20 @@ public final class SlopeOnePrefsToDiffsJob extends Job {
 
       String prefsFile = cmdLine.getValue(inputOpt).toString();
       String outputPath = cmdLine.getValue(outputOpt).toString();
-      Configuration jobConf = buildJobConf(prefsFile, outputPath);
-      Job job = new SlopeOnePrefsToDiffsJob(jobConf);
-      job.waitForCompletion(true);
+      String jarFile = cmdLine.getValue(jarFileOpt).toString();
+      JobConf jobConf = buildJobConf(prefsFile, outputPath, jarFile);
+      JobClient.runJob(jobConf);
     } catch (OptionException e) {
       log.error(e.getMessage());
       CommandLineUtil.printHelp(group);
     }
   }
 
-  public static Configuration buildJobConf(String prefsFile,
-                                           String outputPath) throws IOException {
+  public static JobConf buildJobConf(String prefsFile,
+                                     String outputPath,
+                                     String jarFile) throws IOException {
 
-    Configuration jobConf = new Configuration();
+    JobConf jobConf = new JobConf();
     FileSystem fs = FileSystem.get(jobConf);
 
     Path prefsFilePath = new Path(prefsFile).makeQualified(fs);
@@ -103,6 +108,9 @@ public final class SlopeOnePrefsToDiffsJob extends Job {
     if (fs.exists(outputPathPath)) {
       fs.delete(outputPathPath, true);
     }
+
+    jobConf.set("mapred.jar", jarFile);
+    jobConf.setJar(jarFile);
 
     jobConf.setClass("mapred.input.format.class", TextInputFormat.class, InputFormat.class);
     jobConf.set("mapred.input.dir", StringUtils.escapeString(prefsFilePath.toString()));

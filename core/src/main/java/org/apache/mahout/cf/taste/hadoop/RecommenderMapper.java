@@ -17,11 +17,13 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.Mapper;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -46,7 +48,8 @@ import java.util.List;
  * @see RecommenderJob
  */
 public final class RecommenderMapper
-    extends Mapper<LongWritable, LongWritable, LongWritable, RecommendedItemsWritable> {
+    extends MapReduceBase
+    implements Mapper<LongWritable, LongWritable, LongWritable, RecommendedItemsWritable> {
 
   static final String RECOMMENDER_CLASS_NAME = "recommenderClassName";
   static final String RECOMMENDATIONS_PER_USER = "recommendationsPerUser";
@@ -56,24 +59,7 @@ public final class RecommenderMapper
   private int recommendationsPerUser;
 
   @Override
-  protected void map(LongWritable key, LongWritable value,
-                     Context context) throws IOException, InterruptedException {
-    long userID = value.get();
-    List<RecommendedItem> recommendedItems;
-    try {
-      recommendedItems = recommender.recommend(userID, recommendationsPerUser);
-    } catch (TasteException te) {
-      throw new IllegalStateException(te);
-    }
-    RecommendedItemsWritable writable = new RecommendedItemsWritable(recommendedItems);
-    context.write(value, writable);
-    context.getCounter(ReducerMetrics.USERS_PROCESSED).increment(1L);
-    context.getCounter(ReducerMetrics.RECOMMENDATIONS_MADE).increment(recommendedItems.size());
-  }
-
-  @Override
-  protected void setup(Context context) {
-    Configuration jobConf = context.getConfiguration();
+  public void configure(org.apache.hadoop.mapred.JobConf jobConf) {
     String dataModelFile = jobConf.get(DATA_MODEL_FILE);
     String recommenderClassName = jobConf.get(RECOMMENDER_CLASS_NAME);
     FileDataModel fileDataModel;
@@ -107,4 +93,22 @@ public final class RecommenderMapper
     recommendationsPerUser = Integer.parseInt(jobConf.get(RECOMMENDATIONS_PER_USER));
   }
 
+
+  @Override
+  public void map(LongWritable key,
+                  LongWritable value,
+                  OutputCollector<LongWritable, RecommendedItemsWritable> output,
+                  Reporter reporter) throws IOException {
+    long userID = value.get();
+    List<RecommendedItem> recommendedItems;
+    try {
+      recommendedItems = recommender.recommend(userID, recommendationsPerUser);
+    } catch (TasteException te) {
+      throw new IllegalStateException(te);
+    }
+    RecommendedItemsWritable writable = new RecommendedItemsWritable(recommendedItems);
+    output.collect(value, writable);
+    reporter.getCounter(ReducerMetrics.USERS_PROCESSED).increment(1L);
+    reporter.getCounter(ReducerMetrics.RECOMMENDATIONS_MADE).increment(recommendedItems.size());
+  }
 }

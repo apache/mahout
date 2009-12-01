@@ -19,25 +19,30 @@ package org.apache.mahout.cf.taste.hadoop;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.Mapper;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.Reporter;
 
 import java.io.IOException;
 import java.util.regex.Pattern;
 
 public final class SlopeOnePrefsToDiffsMapper
-    extends Mapper<LongWritable, Text, LongWritable, ItemPrefWritable> {
+    extends MapReduceBase
+    implements Mapper<LongWritable, Text, LongWritable, ItemPrefWritable> {
 
   private static final Pattern COMMA = Pattern.compile(",");
 
   @Override
-  protected void map(LongWritable key, Text value,
-                     Context context) throws IOException, InterruptedException {
-    String line = value.toString();
-    String[] tokens = COMMA.split(line);
+  public void map(LongWritable key,
+                  Text value,
+                  OutputCollector<LongWritable, ItemPrefWritable> output,
+                  Reporter reporter) throws IOException {
+    String[] tokens = COMMA.split(value.toString());
     long userID = Long.parseLong(tokens[0]);
     long itemID = Long.parseLong(tokens[1]);
     float prefValue = Float.parseFloat(tokens[2]);
-    context.write(new LongWritable(userID), new ItemPrefWritable(itemID, prefValue));
+    output.collect(new LongWritable(userID), new ItemPrefWritable(itemID, prefValue));
   }
 
 }

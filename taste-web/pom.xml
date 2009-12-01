@@ -123,7 +123,7 @@
           <artifactId>hbase</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>org.apache.mahout.hadoop</groupId>
+          <groupId>org.apache.hadoop</groupId>
           <artifactId>hadoop-core</artifactId>
         </exclusion>
         <exclusion>

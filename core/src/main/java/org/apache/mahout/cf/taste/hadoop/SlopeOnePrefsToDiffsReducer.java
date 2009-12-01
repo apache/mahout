@@ -18,23 +18,30 @@
 package org.apache.mahout.cf.taste.hadoop;
 
 import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapred.Reducer;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 public final class SlopeOnePrefsToDiffsReducer
-    extends Reducer<Text, ItemPrefWritable, ItemItemWritable, FloatWritable> {
+    extends MapReduceBase
+    implements Reducer<LongWritable, ItemPrefWritable, ItemItemWritable, FloatWritable> {
 
   @Override
-  protected void reduce(Text key, Iterable<ItemPrefWritable> values, Context context)
-      throws IOException, InterruptedException {
+  public void reduce(LongWritable key,
+                     Iterator<ItemPrefWritable> values,
+                     OutputCollector<ItemItemWritable, FloatWritable> output,
+                     Reporter reporter) throws IOException {
     List<ItemPrefWritable> prefs = new ArrayList<ItemPrefWritable>();
-    for (ItemPrefWritable value : values) {
-      prefs.add(new ItemPrefWritable(value));
+    while (values.hasNext()) {
+      prefs.add(new ItemPrefWritable(values.next()));
     }
     Collections.sort(prefs, ByItemIDComparator.getInstance());
     int size = prefs.size();
@@ -46,7 +53,7 @@ public final class SlopeOnePrefsToDiffsReducer
         ItemPrefWritable second = prefs.get(j);
         long itemBID = second.getItemID();
         float itemBValue = second.getPrefValue();
-        context.write(new ItemItemWritable(itemAID, itemBID), new FloatWritable(itemBValue - itemAValue));
+        output.collect(new ItemItemWritable(itemAID, itemBID), new FloatWritable(itemBValue - itemAValue));
       }
     }
   }

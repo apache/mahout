@@ -25,15 +25,17 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.mapreduce.InputFormat;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapred.InputFormat;
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.Mapper;
+import org.apache.hadoop.mapred.OutputFormat;
+import org.apache.hadoop.mapred.Reducer;
+import org.apache.hadoop.mapred.TextInputFormat;
+import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.common.CommandLineUtil;
@@ -105,12 +107,11 @@ import java.io.IOException;
  *   10 input/users.txt input/input.csv recommender.jar output
  * }
  */
-public final class RecommenderJob extends Job {
+public final class RecommenderJob {
 
   private static final Logger log = LoggerFactory.getLogger(RecommenderJob.class);
 
-  public RecommenderJob(Configuration jobConf) throws IOException {
-    super(jobConf);
+  private RecommenderJob() {
   }
 
   public static void main(String[] args) throws Exception {
@@ -161,24 +162,23 @@ public final class RecommenderJob extends Job {
       String dataModelFile = cmdLine.getValue(dataModelFileOpt).toString();
       String jarFile = cmdLine.getValue(jarFileOpt).toString();
       String outputPath = cmdLine.getValue(outputOpt).toString();
-      Configuration jobConf =
+      JobConf jobConf =
           buildJobConf(recommendClassName, recommendationsPerUser, userIDFile, dataModelFile, jarFile, outputPath);
-      Job job = new RecommenderJob(jobConf);
-      job.waitForCompletion(true); 
+      JobClient.runJob(jobConf);
     } catch (OptionException e) {
       log.error(e.getMessage());
       CommandLineUtil.printHelp(group);
     }
   }
 
-  public static Configuration buildJobConf(String recommendClassName,
-                                           int recommendationsPerUser,
-                                           String userIDFile,
-                                           String dataModelFile,
-                                           String jarFile,
-                                           String outputPath) throws IOException {
+  public static JobConf buildJobConf(String recommendClassName,
+                                     int recommendationsPerUser,
+                                     String userIDFile,
+                                     String dataModelFile,
+                                     String jarFile,
+                                     String outputPath) throws IOException {
 
-    Configuration jobConf = new Configuration();
+    JobConf jobConf = new JobConf();
     FileSystem fs = FileSystem.get(jobConf);
 
     Path userIDFilePath = new Path(userIDFile).makeQualified(fs);
@@ -189,6 +189,7 @@ public final class RecommenderJob extends Job {
     }
 
     jobConf.set("mapred.jar", jarFile);
+    jobConf.setJar(jarFile);
 
     jobConf.set(RecommenderMapper.RECOMMENDER_CLASS_NAME, recommendClassName);
     jobConf.set(RecommenderMapper.RECOMMENDATIONS_PER_USER, String.valueOf(recommendationsPerUser));
@@ -205,7 +206,7 @@ public final class RecommenderJob extends Job {
     jobConf.setClass("mapred.output.key.class", LongWritable.class, Object.class);
     jobConf.setClass("mapred.output.value.class", RecommendedItemsWritable.class, Object.class);
 
-    //jobConf.setClass("mapred.output.format.class", TextOutputFormat.class, OutputFormat.class);
+    jobConf.setClass("mapred.output.format.class", TextOutputFormat.class, OutputFormat.class);
     jobConf.set("mapred.output.dir", StringUtils.escapeString(outputPathPath.toString()));
 
     return jobConf;

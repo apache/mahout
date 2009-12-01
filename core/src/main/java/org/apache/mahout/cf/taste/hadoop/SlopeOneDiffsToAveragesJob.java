@@ -25,17 +25,17 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.mapreduce.InputFormat;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.mapred.InputFormat;
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.Mapper;
+import org.apache.hadoop.mapred.OutputFormat;
+import org.apache.hadoop.mapred.Reducer;
+import org.apache.hadoop.mapred.SequenceFileInputFormat;
+import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -44,13 +44,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public final class SlopeOneDiffsToAveragesJob extends Job {
+public final class SlopeOneDiffsToAveragesJob {
 
   /** Logger for this class. */
   private static final Logger log = LoggerFactory.getLogger(SlopeOneDiffsToAveragesJob.class);
 
-  private SlopeOneDiffsToAveragesJob(Configuration jobConf) throws IOException {
-    super(jobConf);
+  private SlopeOneDiffsToAveragesJob() {
   }
 
   public static void main(String[] args) throws Exception {
@@ -64,8 +63,12 @@ public final class SlopeOneDiffsToAveragesJob extends Job {
     Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).create();
     Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
 
+    Option jarFileOpt = obuilder.withLongName("jarFile").withRequired(true)
+      .withShortName("m").withArgument(abuilder.withName("jarFile").withMinimum(1)
+      .withMaximum(1).create()).withDescription("Implementation jar.").create();
+
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt)
-        .withOption(helpOpt).create();
+        .withOption(jarFileOpt).withOption(helpOpt).create();
 
 
     try {
@@ -80,19 +83,20 @@ public final class SlopeOneDiffsToAveragesJob extends Job {
 
       String prefsFile = cmdLine.getValue(inputOpt).toString();
       String outputPath = cmdLine.getValue(outputOpt).toString();
-      Configuration jobConf = buildJobConf(prefsFile, outputPath);
-      Job job = new SlopeOneDiffsToAveragesJob(jobConf);
-      job.waitForCompletion(true);
+      String jarFile = cmdLine.getValue(jarFileOpt).toString();
+      JobConf jobConf = buildJobConf(prefsFile, outputPath, jarFile);
+      JobClient.runJob(jobConf);
     } catch (OptionException e) {
       log.error(e.getMessage());
       CommandLineUtil.printHelp(group);
     }
   }
 
-  public static Configuration buildJobConf(String prefsFile,
-                                           String outputPath) throws IOException {
+  public static JobConf buildJobConf(String prefsFile,
+                                     String outputPath,
+                                     String jarFile) throws IOException {
 
-    Configuration jobConf = new Configuration();
+    JobConf jobConf = new JobConf();
     FileSystem fs = FileSystem.get(jobConf);
 
     Path prefsFilePath = new Path(prefsFile).makeQualified(fs);
@@ -101,6 +105,9 @@ public final class SlopeOneDiffsToAveragesJob extends Job {
     if (fs.exists(outputPathPath)) {
       fs.delete(outputPathPath, true);
     }
+
+    jobConf.set("mapred.jar", jarFile);
+    jobConf.setJar(jarFile);
 
     jobConf.setClass("mapred.input.format.class", SequenceFileInputFormat.class, InputFormat.class);
     jobConf.set("mapred.input.dir", StringUtils.escapeString(prefsFilePath.toString()));

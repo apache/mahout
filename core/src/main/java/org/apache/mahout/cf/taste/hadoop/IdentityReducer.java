@@ -18,18 +18,24 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
-import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.Reducer;
+import org.apache.hadoop.mapred.Reporter;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 /** Copied from Hadoop 0.19. Replace when Hadoop 0.20+ makes Reducer non-abstract. */
-public class IdentityReducer<K, V> extends Reducer<K, V, K, V> {
+public class IdentityReducer<K, V> extends MapReduceBase implements Reducer<K, V, K, V> {
 
   @Override
-  protected void reduce(K key, Iterable<V> values, Context context
-  ) throws IOException, InterruptedException {
-    for (V value : values) {
-      context.write(key, value);
+  public void reduce(K key,
+                     Iterator<V> values,
+                     OutputCollector<K, V> output,
+                     Reporter reporter) throws IOException {
+    while (values.hasNext()) {
+      output.collect(key, values.next());
     }
   }
 
