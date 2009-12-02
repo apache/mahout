@@ -64,11 +64,15 @@ public final class RecommendedItemsWritable implements Writable {
       do {
         long itemID = in.readLong();
         float value = in.readFloat();
-        RecommendedItem recommendedItem = new GenericRecommendedItem(itemID, value);
-        recommended.add(recommendedItem);
+        if (!Float.isNaN(value)) {
+          RecommendedItem recommendedItem = new GenericRecommendedItem(itemID, value);
+          recommended.add(recommendedItem);
+        }
       } while (true);
     } catch (EOFException eofe) {
       // continue; done
+    } catch (ArrayIndexOutOfBoundsException aiooe) {
+      // bizarre ByteArrayInputStream bug? sometimes throws from read(); done
     }
   }
 
@@ -80,7 +84,7 @@ public final class RecommendedItemsWritable implements Writable {
 
   @Override
   public String toString() {
-    StringBuilder result = new StringBuilder();
+    StringBuilder result = new StringBuilder(100);
     result.append('[');
     boolean first = true;
     for (RecommendedItem item : recommended) {

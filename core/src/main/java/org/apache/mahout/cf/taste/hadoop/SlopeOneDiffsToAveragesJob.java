@@ -36,6 +36,7 @@ import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
+import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -112,7 +113,7 @@ public final class SlopeOneDiffsToAveragesJob {
     jobConf.setClass("mapred.input.format.class", SequenceFileInputFormat.class, InputFormat.class);
     jobConf.set("mapred.input.dir", StringUtils.escapeString(prefsFilePath.toString()));
 
-    jobConf.setClass("mapred.mapper.class", Mapper.class, Mapper.class);
+    jobConf.setClass("mapred.mapper.class", IdentityMapper.class, Mapper.class);
     jobConf.setClass("mapred.mapoutput.key.class", ItemItemWritable.class, Object.class);
     jobConf.setClass("mapred.mapoutput.value.class", FloatWritable.class, Object.class);
 

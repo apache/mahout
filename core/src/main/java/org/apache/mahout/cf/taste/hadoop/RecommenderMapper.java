@@ -20,6 +20,7 @@ package org.apache.mahout.cf.taste.hadoop;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -34,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -43,13 +45,13 @@ import java.util.List;
  *
  * <p>Note that there is no corresponding {@link org.apache.hadoop.mapreduce.Reducer}; this implementation can only
  * partially take advantage of the mapreduce paradigm and only really leverages it for easy parallelization. Therefore,
- * use the {@link IdentityReducer} when running this on Hadoop.</p>
+ * use the {@link org.apache.hadoop.mapred.lib.IdentityReducer} when running this on Hadoop.</p>
  *
  * @see RecommenderJob
  */
 public final class RecommenderMapper
     extends MapReduceBase
-    implements Mapper<LongWritable, LongWritable, LongWritable, RecommendedItemsWritable> {
+    implements Mapper<LongWritable, Text, LongWritable, RecommendedItemsWritable> {
 
   static final String RECOMMENDER_CLASS_NAME = "recommenderClassName";
   static final String RECOMMENDATIONS_PER_USER = "recommendationsPerUser";
@@ -96,18 +98,24 @@ public final class RecommenderMapper
 
   @Override
   public void map(LongWritable key,
-                  LongWritable value,
+                  Text value,
                   OutputCollector<LongWritable, RecommendedItemsWritable> output,
                   Reporter reporter) throws IOException {
-    long userID = value.get();
+    long userID = Long.parseLong(value.toString());
     List<RecommendedItem> recommendedItems;
     try {
       recommendedItems = recommender.recommend(userID, recommendationsPerUser);
     } catch (TasteException te) {
       throw new IllegalStateException(te);
     }
+    Iterator<RecommendedItem> it = recommendedItems.iterator();
+    while (it.hasNext()) {
+      if (Float.isNaN(it.next().getValue())) {
+        it.remove();
+      }
+    }
     RecommendedItemsWritable writable = new RecommendedItemsWritable(recommendedItems);
-    output.collect(value, writable);
+    output.collect(new LongWritable(userID), writable);
     reporter.getCounter(ReducerMetrics.USERS_PROCESSED).increment(1L);
     reporter.getCounter(ReducerMetrics.RECOMMENDATIONS_MADE).increment(recommendedItems.size());
   }

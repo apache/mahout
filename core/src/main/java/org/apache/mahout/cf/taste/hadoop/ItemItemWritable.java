@@ -67,16 +67,12 @@ public final class ItemItemWritable implements WritableComparable<ItemItemWritab
 
   @Override
   public int compareTo(ItemItemWritable that) {
-    if (this == that) {
-      return 0;
-    }
-    if (itemAID < that.getItemAID()) {
-      return -1;
-    } else if (itemAID > that.getItemAID()) {
-      return 1;
-    } else {
-      return itemBID < that.getItemBID() ? -1 : itemBID > that.getItemBID() ? 1 : 0;
-    }
+    int aCompare = compare(itemAID, that.getItemAID());
+    return aCompare == 0 ? compare(itemBID, that.getItemBID()) : aCompare;
+  }
+
+  private static int compare(long a, long b) {
+    return a < b ? -1 : a > b ? 1 : 0;
   }
 
   @Override
@@ -90,7 +86,7 @@ public final class ItemItemWritable implements WritableComparable<ItemItemWritab
       ItemItemWritable that = (ItemItemWritable) o;
       return itemAID == that.getItemAID() && itemBID == that.getItemBID();
     }
-    return false;
+    return false; 
   }
 
   @Override

@@ -36,6 +36,7 @@ import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
+import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.common.CommandLineUtil;
@@ -60,12 +61,14 @@ import java.io.IOException;
  *  <li>Location of a data model file containing preference data,
  *   suitable for use with {@link org.apache.mahout.cf.taste.impl.model.file.FileDataModel}</li>
  *  <li>Output path where reducer output should go</li>
+ *  <li>JAR file containing implementation code</li>
  * </ol>
  *
  * <p>Example arguments:</p>
  *
- * <p><code>org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender 10 path/to/users.txt
- * path/to/data.csv path/to/reducerOutputDir</code></p>
+ * <p><code>--recommenderClassName org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender
+ * --userRec 10 --userIdFile path/to/users.txt --dataModelFile path/to/data.csv
+ * --output path/to/reducerOutputDir --jarFile recommender.jar</code></p>
  *
  * <p>
  * Set up Hadoop in a pseudo-distributed manner: http://hadoop.apache.org/common/docs/current/quickstart.html
@@ -89,22 +92,29 @@ import java.io.IOException;
  * {@code
  * hadoop fs -put input.csv input/input.csv
  * hadoop fs -put users.txt input/users.txt
- * hadoop fs -mkdir output/
  * }
  *
  * <p>Now build Mahout code using your IDE, or Maven. Note where the compiled classes go. If you built with
  * Maven, it'll be like (Mahout directory)/core/target/classes/. Prepare a .jar file for Hadoop:</p>
  *
  * {@code
- * jar cvf recommender.jar -C (classes directory) .
+ * jar cf recommender.jar -C (Mahout classes directory) .
+ * }
+ *
+ * <p>Now add your own custom recommender code and dependencies. Your IDE produced compiled .class
+ * files somewhere and they need to be packaged up as well:</p>
+ *
+ * {@code
+ * jar uf recommender.jar -C (your classes directory) .
  * }
  *
  * <p>And launch:</p>
  *
  * {@code
  * hadoop jar recommender.jar org.apache.mahout.cf.taste.hadoop.RecommenderJob \
- *   org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender \
- *   10 input/users.txt input/input.csv recommender.jar output
+ *   --recommenderClassName org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender \
+ *   --userRec 10 --userIdFile input/users.txt --dataModelFile input/input.csv \
+ *   --output output --jarFile recommender.jar
  * }
  */
 public final class RecommenderJob {
@@ -143,7 +153,8 @@ public final class RecommenderJob {
     Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
 
     Group group = gbuilder.withName("Options").withOption(recommendClassOpt).withOption(userRecommendOpt)
-      .withOption(userIDFileOpt).withOption(dataModelFileOpt).withOption(outputOpt).withOption(helpOpt).create();
+      .withOption(userIDFileOpt).withOption(dataModelFileOpt).withOption(outputOpt)
+      .withOption(jarFileOpt).withOption(helpOpt).create();
 
 
     try {

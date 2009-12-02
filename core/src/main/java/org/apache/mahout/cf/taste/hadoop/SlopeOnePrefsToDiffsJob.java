@@ -29,6 +29,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.JobClient;
@@ -116,7 +117,7 @@ public final class SlopeOnePrefsToDiffsJob {
     jobConf.set("mapred.input.dir", StringUtils.escapeString(prefsFilePath.toString()));
 
     jobConf.setClass("mapred.mapper.class", SlopeOnePrefsToDiffsMapper.class, Mapper.class);
-    jobConf.setClass("mapred.mapoutput.key.class", Text.class, Object.class);
+    jobConf.setClass("mapred.mapoutput.key.class", LongWritable.class, Object.class);
     jobConf.setClass("mapred.mapoutput.value.class", ItemPrefWritable.class, Object.class);
 
     jobConf.setClass("mapred.reducer.class", SlopeOnePrefsToDiffsReducer.class, Reducer.class);
