@@ -15,15 +15,13 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.recommender.slopeone;
+package org.apache.mahout.cf.taste.impl.common;
 
-import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
-
-final class InvertedRunningAverageAndStdDev implements RunningAverageAndStdDev {
+public final class InvertedRunningAverageAndStdDev implements RunningAverageAndStdDev {
 
   private final RunningAverageAndStdDev delegate;
 
-  InvertedRunningAverageAndStdDev(RunningAverageAndStdDev delegate) {
+  public InvertedRunningAverageAndStdDev(RunningAverageAndStdDev delegate) {
     this.delegate = delegate;
   }
 

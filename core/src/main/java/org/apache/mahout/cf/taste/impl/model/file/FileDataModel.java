@@ -145,7 +145,7 @@ public class FileDataModel implements DataModel {
       iterator.next();
       firstLine = iterator.peek();
     }
-    char delimiter = determineDelimiter(firstLine);
+    char delimiter = determineDelimiter(firstLine, 2);
     boolean hasPrefValues = firstLine.indexOf(delimiter, firstLine.indexOf(delimiter) + 1) >= 0;
 
     if (hasPrefValues) {
@@ -186,7 +186,7 @@ public class FileDataModel implements DataModel {
     return updateFiles;
   }
 
-  private static char determineDelimiter(String line) {
+  public static char determineDelimiter(String line, int maxDelimiters) {
     char delimiter;
     if (line.indexOf(',') >= 0) {
       delimiter = ',';
@@ -200,8 +200,8 @@ public class FileDataModel implements DataModel {
     int nextDelimiter;
     while ((nextDelimiter = line.indexOf(delimiter, lastDelimiter + 1)) >= 0) {
       delimiterCount++;
-      if (delimiterCount == 3) {
-        throw new IllegalArgumentException("More than two delimiters per line");
+      if (delimiterCount > maxDelimiters) {
+        throw new IllegalArgumentException("More than " + maxDelimiters + " delimiters per line");
       }
       if (nextDelimiter == lastDelimiter + 1) {
         // empty field

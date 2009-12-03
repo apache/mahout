@@ -26,6 +26,8 @@ import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
+import org.apache.mahout.cf.taste.impl.common.InvertedRunningAverage;
+import org.apache.mahout.cf.taste.impl.common.InvertedRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
@@ -126,7 +128,13 @@ public final class MemoryDiffStorage implements DiffStorage {
       itemID2 = temp;
     }
 
-    FastByIDMap<RunningAverage> level2Map = averageDiffs.get(itemID1);
+    FastByIDMap<RunningAverage> level2Map;
+    try {
+      buildAverageDiffsLock.readLock().lock();
+      level2Map = averageDiffs.get(itemID1);
+    } finally {
+      buildAverageDiffsLock.readLock().unlock();
+    }
     RunningAverage average = null;
     if (level2Map != null) {
       average = level2Map.get(itemID2);
@@ -200,7 +208,13 @@ public final class MemoryDiffStorage implements DiffStorage {
 
   @Override
   public FastIDSet getRecommendableItemIDs(long userID) throws TasteException {
-    FastIDSet result = allRecommendableItemIDs.clone();
+    FastIDSet result;
+    try {
+      buildAverageDiffsLock.readLock().lock();
+      result = allRecommendableItemIDs.clone();
+    } finally {
+      buildAverageDiffsLock.readLock().unlock();
+    }
     Iterator<Long> it = result.iterator();
     while (it.hasNext()) {
       if (dataModel.getPreferenceValue(userID, it.next()) != null) {
