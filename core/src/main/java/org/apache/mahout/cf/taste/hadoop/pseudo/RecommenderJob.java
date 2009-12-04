@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop;
+package org.apache.mahout.cf.taste.hadoop.pseudo;
 
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -38,6 +38,7 @@ import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -47,6 +48,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 /**
+ * <p>This job runs a "pseudo-distributed" recommendation process on Hadoop.
+ * It merely runs many {@link Recommender} instances on Hadoop, where each instance
+ * is a normal non-distributed implementation.</p>
+ *
  * <p>This class configures and runs a {@link RecommenderMapper} using Hadoop.</p>
  *
  * <p>Command line arguments are:</p>
@@ -66,12 +71,14 @@ import java.io.IOException;
  *
  * <p>Example arguments:</p>
  *
- * <p><code>--recommenderClassName org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender
+ * {@code
+ * --recommenderClassName org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender
  * --userRec 10 --userIdFile path/to/users.txt --dataModelFile path/to/data.csv
- * --output path/to/reducerOutputDir --jarFile recommender.jar</code></p>
+ * --output path/to/reducerOutputDir --jarFile recommender.jar
+ * }
  *
- * <p>
- * Set up Hadoop in a pseudo-distributed manner: http://hadoop.apache.org/common/docs/current/quickstart.html
+ * <p>For example, to get started trying this out, set up Hadoop in a
+ * pseudo-distributed manner: http://hadoop.apache.org/common/docs/current/quickstart.html
  * You can stop at the point where it instructs you to copy files into HDFS. Instead, proceed as follow.</p>
  *
  * {@code
@@ -79,27 +86,18 @@ import java.io.IOException;
  * hadoop fs -mkdir output
  * }
  *
- * <p>We need to massage the BX input a little bit and also create a file of user IDs:</p>
- *
- * {@code
- * tail +2 BX-Book-Ratings.csv | tr -cd '[:digit:];\n' | tr ';' ',' | grep -v ',,' > input.csv
- * # Mac users: put "export LC_ALL=C;" at the front of this command. You may want to "unset LC_ALL" after.
- * cut -d, -f1 input.csv | uniq > users.txt
- * }
- *
- * <p>Now we put the file in input/ and prepare output/:</p>
+ * <p>Assume your preference data file is <code>input.csv</code>. You will also need to create a file
+ * containing all user IDs to write recommendations for, as something like <code>users.txt</code>.
+ * Place this input on HDFS like so:</p>
  *
  * {@code
  * hadoop fs -put input.csv input/input.csv
  * hadoop fs -put users.txt input/users.txt
  * }
  *
- * <p>Now build Mahout code using your IDE, or Maven. Note where the compiled classes go. If you built with
- * Maven, it'll be like (Mahout directory)/core/target/classes/. Prepare a .jar file for Hadoop:</p>
- *
- * {@code
- * jar cf recommender.jar -C (Mahout classes directory) .
- * }
+ * <p>Build Mahout code with <code>mvn package</code> in the core/ directory. Locate
+ * <code>target/mahout-core-X.Y-SNAPSHOT.job</code>. This is a JAR file; copy it out
+ * to a convenient location and name it <code>recommender.jar</code>.</p>
  *
  * <p>Now add your own custom recommender code and dependencies. Your IDE produced compiled .class
  * files somewhere and they need to be packaged up as well:</p>
@@ -112,7 +110,7 @@ import java.io.IOException;
  *
  * {@code
  * hadoop jar recommender.jar org.apache.mahout.cf.taste.hadoop.RecommenderJob \
- *   --recommenderClassName org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender \
+ *   --recommenderClassName your.project.Recommender \
  *   --userRec 10 --userIdFile input/users.txt --dataModelFile input/input.csv \
  *   --output output --jarFile recommender.jar
  * }

@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop;
+package org.apache.mahout.cf.taste.hadoop.slopeone;
+
+import org.apache.mahout.cf.taste.hadoop.ItemPrefWritable;
 
 import java.io.Serializable;
 import java.util.Comparator;

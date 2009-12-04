@@ -63,8 +63,7 @@ public class SparseVector extends AbstractVector {
 
   @Override
   protected Matrix matrixLike(int rows, int columns) {
-    int[] cardinality = {rows, columns};
-    return new SparseRowMatrix(cardinality);
+    return new SparseRowMatrix(new int[] {rows, columns});
   }
 
   @Override
@@ -303,7 +302,7 @@ public class SparseVector extends AbstractVector {
   @Override
   public void readFields(DataInput dataInput) throws IOException {
     this.setName(dataInput.readUTF());
-    int cardinality = dataInput.readInt();
+    this.cardinality = dataInput.readInt();
     int size = dataInput.readInt();
     OpenIntDoubleHashMap values = new OpenIntDoubleHashMap((int) (size * 1.5));
     int i = 0;
@@ -314,8 +313,8 @@ public class SparseVector extends AbstractVector {
       i++;
     }
     assert (i == size);
-    this.cardinality = cardinality;
     this.values = values;
+    this.lengthSquared = -1.0;
   }
 
 
@@ -358,13 +357,12 @@ public class SparseVector extends AbstractVector {
 
     DistanceSquared distanceSquared = new DistanceSquared(v);
     values.forEachPair(distanceSquared);
-    double result = distanceSquared.result;
-    return result;
+    return distanceSquared.result;
   }
 
   private class AddToVector implements IntDoubleProcedure {
 
-    final Vector v;
+    private final Vector v;
 
     private AddToVector(Vector v) {
       this.v = v;
@@ -379,8 +377,7 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public void addTo(Vector v) {
-    AddToVector addToVector = new AddToVector(v);
-    values.forEachPair(addToVector);
+    values.forEachPair(new AddToVector(v));
   }
 
 }

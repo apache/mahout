@@ -15,47 +15,33 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop;
+package org.apache.mahout.cf.taste.hadoop.slopeone;
 
 import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.Reducer;
+import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.cf.taste.hadoop.ItemItemWritable;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
-public final class SlopeOnePrefsToDiffsReducer
+public final class SlopeOneDiffsToAveragesReducer
     extends MapReduceBase
-    implements Reducer<LongWritable, ItemPrefWritable, ItemItemWritable, FloatWritable> {
+    implements Reducer<ItemItemWritable, FloatWritable, ItemItemWritable, FloatWritable> {
 
   @Override
-  public void reduce(LongWritable key,
-                     Iterator<ItemPrefWritable> values,
+  public void reduce(ItemItemWritable key,
+                     Iterator<FloatWritable> values,
                      OutputCollector<ItemItemWritable, FloatWritable> output,
                      Reporter reporter) throws IOException {
-    List<ItemPrefWritable> prefs = new ArrayList<ItemPrefWritable>();
+    int count = 0;
+    double total = 0.0;
     while (values.hasNext()) {
-      prefs.add(new ItemPrefWritable(values.next()));
+      total += values.next().get();
+      count++;
     }
-    Collections.sort(prefs, ByItemIDComparator.getInstance());
-    int size = prefs.size();
-    for (int i = 0; i < size; i++) {
-      ItemPrefWritable first = prefs.get(i);
-      long itemAID = first.getItemID();
-      float itemAValue = first.getPrefValue();
-      for (int j = i + 1; j < size; j++) {
-        ItemPrefWritable second = prefs.get(j);
-        long itemBID = second.getItemID();
-        float itemBValue = second.getPrefValue();
-        output.collect(new ItemItemWritable(itemAID, itemBID), new FloatWritable(itemBValue - itemAValue));
-      }
-    }
+    output.collect(key, new FloatWritable((float) (total / count)));
   }
-
 }

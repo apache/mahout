@@ -15,34 +15,38 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop;
+package org.apache.mahout.cf.taste.hadoop.item;
 
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.matrix.SparseVector;
+import org.apache.mahout.matrix.Vector;
 
 import java.io.IOException;
-import java.util.regex.Pattern;
+import java.util.Iterator;
 
-public final class SlopeOnePrefsToDiffsMapper
+public final class UserVectorToCooccurrenceReducer
     extends MapReduceBase
-    implements Mapper<LongWritable, Text, LongWritable, ItemPrefWritable> {
-
-  private static final Pattern COMMA = Pattern.compile(",");
+    implements Reducer<LongWritable, LongWritable, LongWritable, Vector> {
 
   @Override
-  public void map(LongWritable key,
-                  Text value,
-                  OutputCollector<LongWritable, ItemPrefWritable> output,
-                  Reporter reporter) throws IOException {
-    String[] tokens = COMMA.split(value.toString());
-    long userID = Long.parseLong(tokens[0]);
-    long itemID = Long.parseLong(tokens[1]);
-    float prefValue = Float.parseFloat(tokens[2]);
-    output.collect(new LongWritable(userID), new ItemPrefWritable(itemID, prefValue));
+  public void reduce(LongWritable itemID1,
+                     Iterator<LongWritable> itemID2s,
+                     OutputCollector<LongWritable, Vector> output,
+                     Reporter reporter) throws IOException {
+
+    if (itemID2s.hasNext()) {
+      Vector cooccurrenceRow = new SparseVector();
+      while (itemID2s.hasNext()) {
+        String label = String.valueOf(itemID2s.next());
+        cooccurrenceRow.set(label, cooccurrenceRow.get(label) + 1.0);
+      }
+      output.collect(itemID1, cooccurrenceRow);
+    }
+
   }
 
 }

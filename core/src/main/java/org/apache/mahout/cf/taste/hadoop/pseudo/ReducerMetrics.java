@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop;
+package org.apache.mahout.cf.taste.hadoop.pseudo;
 
 /** Custom metrics collected by {@link RecommenderMapper}. */
 public enum ReducerMetrics {

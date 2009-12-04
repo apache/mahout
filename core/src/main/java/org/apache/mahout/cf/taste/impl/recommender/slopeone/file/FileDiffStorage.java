@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl.recommender.slopeone.file;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
+import org.apache.mahout.cf.taste.hadoop.slopeone.SlopeOneDiffsToAveragesJob;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
@@ -48,7 +49,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * <p>Commas or tabs can be delimiters. This is intended for use in conjuction
  * with the output of
- * {@link org.apache.mahout.cf.taste.hadoop.SlopeOneDiffsToAveragesJob}.</p>
+ * {@link SlopeOneDiffsToAveragesJob}.</p>
  */
 public final class FileDiffStorage implements DiffStorage {
 

@@ -15,32 +15,42 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop;
+package org.apache.mahout.cf.taste.hadoop.item;
 
-import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.matrix.Vector;
 
 import java.io.IOException;
 import java.util.Iterator;
 
-public final class SlopeOneDiffsToAveragesReducer
+public final class UserVectorToCooccurrenceMapper
     extends MapReduceBase
-    implements Reducer<ItemItemWritable, FloatWritable, ItemItemWritable, FloatWritable> {
+    implements Mapper<LongWritable, Vector, LongWritable, LongWritable> {
 
   @Override
-  public void reduce(ItemItemWritable key,
-                     Iterator<FloatWritable> values,
-                     OutputCollector<ItemItemWritable, FloatWritable> output,
-                     Reporter reporter) throws IOException {
-    int count = 0;
-    double total = 0.0;
-    while (values.hasNext()) {
-      total += values.next().get();
-      count++;
+  public void map(LongWritable userID,
+                  Vector userVector,
+                  OutputCollector<LongWritable, LongWritable> output,
+                  Reporter reporter) throws IOException {
+
+    Iterator<Vector.Element> it = userVector.iterateNonZero();
+    while (it.hasNext()) {
+      long itemID1 = it.next().index();
+      Iterator<Vector.Element> it2 = userVector.iterateNonZero();
+      LongWritable itemWritable1 = new LongWritable(itemID1);
+      while (it2.hasNext()) {
+        long itemID2 = it2.next().index();
+        if (itemID1 != itemID2) {
+          output.collect(itemWritable1, new LongWritable(itemID2));
+        }
+      }
+
     }
-    output.collect(key, new FloatWritable((float) (total / count)));
+
   }
+
 }
