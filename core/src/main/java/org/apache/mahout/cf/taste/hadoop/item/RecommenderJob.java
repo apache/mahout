@@ -17,7 +17,9 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
-public final class RecommenderJob {
+import org.apache.mahout.cf.taste.hadoop.AbstractJob;
+
+public final class RecommenderJob extends AbstractJob {
 
   public static void main(String[] args) {
     

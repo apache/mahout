@@ -21,7 +21,8 @@ import org.apache.commons.cli2.Option;
 import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 
-public class DefaultOptionCreator {
+public final class DefaultOptionCreator {
+
   private DefaultOptionCreator() {
   }
 
@@ -29,8 +30,8 @@ public class DefaultOptionCreator {
    * Returns a default command line option for convergence delta specification.
    */
   public static DefaultOptionBuilder convergenceOption(
-      final DefaultOptionBuilder obuilder, final ArgumentBuilder abuilder) {
-    return obuilder.withLongName("convergencedelta")
+      DefaultOptionBuilder obuilder, ArgumentBuilder abuilder) {
+    return obuilder.withLongName("convergenceDelta")
         .withRequired(true).withShortName("v").withArgument(
             abuilder.withName("convergenceDelta").withMinimum(1).withMaximum(1)
                 .create()).withDescription("The convergence delta value.");
@@ -39,8 +40,8 @@ public class DefaultOptionCreator {
   /**
    * Returns a default command line option for output directory specification.
    */
-  public static DefaultOptionBuilder outputOption(final DefaultOptionBuilder obuilder,
-      final ArgumentBuilder abuilder) {
+  public static DefaultOptionBuilder outputOption(DefaultOptionBuilder obuilder,
+      ArgumentBuilder abuilder) {
     return obuilder.withLongName("output").withRequired(true)
         .withShortName("o").withArgument(
             abuilder.withName("output").withMinimum(1).withMaximum(1).create())
@@ -50,8 +51,8 @@ public class DefaultOptionCreator {
   /**
    * Returns a default command line option for input directory specification.
    */
-  public static DefaultOptionBuilder inputOption(final DefaultOptionBuilder obuilder,
-      final ArgumentBuilder abuilder) {
+  public static DefaultOptionBuilder inputOption(DefaultOptionBuilder obuilder,
+      ArgumentBuilder abuilder) {
     return obuilder
         .withLongName("input")
         .withRequired(true)
@@ -59,7 +60,7 @@ public class DefaultOptionCreator {
         .withArgument(
             abuilder.withName("input").withMinimum(1).withMaximum(1).create())
         .withDescription(
-            "The Path for input Vectors. Must be a SequenceFile of Writable, Vector.");
+            "Path to job input directory");
   }
 
   /**
@@ -74,7 +75,7 @@ public class DefaultOptionCreator {
         .withArgument(
             abuilder.withName("k").withMinimum(1).withMaximum(1).create())
         .withDescription(
-            "The k in k-Means.  If specified, then a random selection of k Vectors will be chosen as the Centroid and written to the clusters output path.")
+            "The k in k-Means. k random Vectors will be chosen as the Centroid and written to the clusters output path.")
         .withShortName("k");
   }
 
