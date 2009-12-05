@@ -60,7 +60,7 @@ public final class RecommenderMapper
       throw new IllegalStateException(ioe);
     }
     cooccurrencePath = new Path(jobConf.get(COOCCURRENCE_PATH)).makeQualified(fs);
-    recommendationsPerUser = Integer.parseInt(jobConf.get(RECOMMENDATIONS_PER_USER));
+    recommendationsPerUser = jobConf.getInt(RECOMMENDATIONS_PER_USER, 10);
   }
 
   @Override

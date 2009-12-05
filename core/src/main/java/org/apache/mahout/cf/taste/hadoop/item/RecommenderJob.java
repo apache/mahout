@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
+import org.apache.commons.cli2.Option;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
@@ -37,11 +38,14 @@ public final class RecommenderJob extends AbstractJob {
 
   public static void main(String[] args) throws Exception {
 
-    Map<String,Object> parsedArgs = parseArguments(args);
+    Option numReccomendationsOpt = buildOption("numRecommendations", "n", "Number of recommendations per user");
 
-    String prefsFile = parsedArgs.get("input").toString();
-    String outputPath = parsedArgs.get("output").toString();
-    String jarFile = parsedArgs.get("jarFile").toString();
+    Map<String,Object> parsedArgs = parseArguments(args, numReccomendationsOpt);
+
+    String prefsFile = parsedArgs.get("--input").toString();
+    String outputPath = parsedArgs.get("--output").toString();
+    String jarFile = parsedArgs.get("--jarFile").toString();
+    int recommendationsPerUser = Integer.parseInt((String) parsedArgs.get("--numRecommendations"));
     String userVectorPath = outputPath + "/userVectors";
     String cooccurrencePath = outputPath + "/cooccurrence";
 
@@ -82,6 +86,8 @@ public final class RecommenderJob extends AbstractJob {
                                              LongWritable.class,
                                              RecommendedItemsWritable.class,
                                              TextOutputFormat.class);
+    recommenderConf.set(RecommenderMapper.COOCCURRENCE_PATH, cooccurrencePath);
+    recommenderConf.setInt(RecommenderMapper.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
     JobClient.runJob(recommenderConf);
   }
 

@@ -94,7 +94,7 @@ public final class RecommenderMapper
     } catch (InvocationTargetException ite) {
       throw new IllegalStateException(ite.getCause());
     }
-    recommendationsPerUser = Integer.parseInt(jobConf.get(RECOMMENDATIONS_PER_USER));
+    recommendationsPerUser = jobConf.getInt(RECOMMENDATIONS_PER_USER, 10);
   }
 
 

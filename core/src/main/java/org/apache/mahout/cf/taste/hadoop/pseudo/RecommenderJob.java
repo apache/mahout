@@ -110,13 +110,13 @@ public final class RecommenderJob extends AbstractJob {
     Option dataModelFileOpt = buildOption("dataModelFile", "m", "File containing preference data");
 
     Map<String,Object> parsedArgs = parseArguments(args, recommendClassOpt, numReccomendationsOpt, dataModelFileOpt);
-    String userIDFile = parsedArgs.get("input").toString();
-    String outputPath = parsedArgs.get("output").toString();
-    String jarFile = parsedArgs.get("jarFile").toString();
+    String userIDFile = parsedArgs.get("--input").toString();
+    String outputPath = parsedArgs.get("--output").toString();
+    String jarFile = parsedArgs.get("--jarFile").toString();
 
-    String recommendClassName = parsedArgs.get("recommenderClassName").toString();
-    int recommendationsPerUser = ((Number) parsedArgs.get("numRecommendations")).intValue();
-    String dataModelFile = parsedArgs.get("dataModelFile").toString();
+    String recommendClassName = parsedArgs.get("--recommenderClassName").toString();
+    int recommendationsPerUser = Integer.parseInt((String) parsedArgs.get("--numRecommendations"));
+    String dataModelFile = parsedArgs.get("--dataModelFile").toString();
 
     JobConf jobConf = prepareJobConf(userIDFile,
                                      outputPath,
@@ -131,7 +131,7 @@ public final class RecommenderJob extends AbstractJob {
                                      TextOutputFormat.class);
 
     jobConf.set(RecommenderMapper.RECOMMENDER_CLASS_NAME, recommendClassName);
-    jobConf.set(RecommenderMapper.RECOMMENDATIONS_PER_USER, String.valueOf(recommendationsPerUser));
+    jobConf.setInt(RecommenderMapper.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
     jobConf.set(RecommenderMapper.DATA_MODEL_FILE, dataModelFile);
 
     JobClient.runJob(jobConf);
