@@ -17,7 +17,6 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
