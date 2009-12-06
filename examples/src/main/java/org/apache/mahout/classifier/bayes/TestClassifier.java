@@ -90,7 +90,7 @@ public class TestClassifier {
         .withDescription("The directory where test documents resides in")
         .withShortName("d").create();
 
-    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
+    Option helpOpt = DefaultOptionCreator.helpOption();
 
     Option encodingOpt = obuilder.withLongName("encoding").withArgument(
         abuilder.withName("encoding").withMinimum(1).withMaximum(1).create())

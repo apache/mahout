@@ -53,13 +53,13 @@ public class InputDriver {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder).withRequired(false).create();
-    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).withRequired(false).create();
+    Option inputOpt = DefaultOptionCreator.inputOption().withRequired(false).create();
+    Option outputOpt = DefaultOptionCreator.outputOption().withRequired(false).create();
     Option vectorOpt = obuilder.withLongName("vector").withRequired(false).withArgument(
         abuilder.withName("v").withMinimum(1).withMaximum(1).create()).withDescription(
         "The vector implementation to use.").withShortName("v").create();
 
-    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
+    Option helpOpt = DefaultOptionCreator.helpOption();
 
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(vectorOpt).withOption(helpOpt).create();
 

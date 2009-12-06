@@ -57,10 +57,10 @@ public class Job {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder).withRequired(false).create();
-    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).withRequired(false).create();
-    Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption(obuilder, abuilder).withRequired(false).create();
-    Option maxIterationsOpt = DefaultOptionCreator.maxIterOption(obuilder, abuilder).withRequired(false).create();
+    Option inputOpt = DefaultOptionCreator.inputOption().withRequired(false).create();
+    Option outputOpt = DefaultOptionCreator.outputOption().withRequired(false).create();
+    Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption().withRequired(false).create();
+    Option maxIterationsOpt = DefaultOptionCreator.maxIterOption().withRequired(false).create();
 
     Option measureClassOpt = obuilder.withLongName("distance").withRequired(false).withArgument(
         abuilder.withName("distance").withMinimum(1).withMaximum(1).create()).withDescription(
@@ -76,7 +76,7 @@ public class Job {
         abuilder.withName("vectorClass").withMinimum(1).withMaximum(1).create()).withDescription(
         "The Vector implementation class name.  Default is SparseVector.class").withShortName("v").create();
 
-    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
+    Option helpOpt = DefaultOptionCreator.helpOption();
 
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt)
         .withOption(measureClassOpt).withOption(convergenceDeltaOpt).withOption(maxIterationsOpt)

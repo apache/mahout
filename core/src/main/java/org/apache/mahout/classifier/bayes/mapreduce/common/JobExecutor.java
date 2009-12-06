@@ -20,8 +20,6 @@ import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
 import org.apache.commons.cli2.OptionException;
-import org.apache.commons.cli2.builder.ArgumentBuilder;
-import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
@@ -47,15 +45,13 @@ public class JobExecutor {
    * @param job the job to execute. 
    * @throws Exception any exception thrown at job execution.
    * */
-  public static void execute(final String[] args, final BayesJob job)
+  public static void execute(String[] args, BayesJob job)
       throws ClassNotFoundException, IOException, InterruptedException {
-    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
-    ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder).create();
-    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).create();
-    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
+    Option inputOpt = DefaultOptionCreator.inputOption().create();
+    Option outputOpt = DefaultOptionCreator.outputOption().create();
+    Option helpOpt = DefaultOptionCreator.helpOption();
 
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt)
         .withOption(helpOpt).create();

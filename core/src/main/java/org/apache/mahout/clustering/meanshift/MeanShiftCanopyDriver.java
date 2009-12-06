@@ -53,10 +53,10 @@ public class MeanShiftCanopyDriver {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder).create();
-    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).create();
-    Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption(obuilder, abuilder).create();
-    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);    
+    Option inputOpt = DefaultOptionCreator.inputOption().create();
+    Option outputOpt = DefaultOptionCreator.outputOption().create();
+    Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption().create();
+    Option helpOpt = DefaultOptionCreator.helpOption();
 
     Option modelOpt = obuilder.withLongName("distanceClass").withRequired(true).withShortName("d").
         withArgument(abuilder.withName("distanceClass").withMinimum(1).withMaximum(1).create()).

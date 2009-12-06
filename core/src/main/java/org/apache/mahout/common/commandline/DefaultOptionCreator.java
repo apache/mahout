@@ -29,36 +29,33 @@ public final class DefaultOptionCreator {
   /**
    * Returns a default command line option for convergence delta specification.
    */
-  public static DefaultOptionBuilder convergenceOption(
-      DefaultOptionBuilder obuilder, ArgumentBuilder abuilder) {
-    return obuilder.withLongName("convergenceDelta")
+  public static DefaultOptionBuilder convergenceOption() {
+    return new DefaultOptionBuilder().withLongName("convergenceDelta")
         .withRequired(true).withShortName("v").withArgument(
-            abuilder.withName("convergenceDelta").withMinimum(1).withMaximum(1)
+            new ArgumentBuilder().withName("convergenceDelta").withMinimum(1).withMaximum(1)
                 .create()).withDescription("The convergence delta value.");
   }
 
   /**
    * Returns a default command line option for output directory specification.
    */
-  public static DefaultOptionBuilder outputOption(DefaultOptionBuilder obuilder,
-      ArgumentBuilder abuilder) {
-    return obuilder.withLongName("output").withRequired(true)
+  public static DefaultOptionBuilder outputOption() {
+    return new DefaultOptionBuilder().withLongName("output").withRequired(true)
         .withShortName("o").withArgument(
-            abuilder.withName("output").withMinimum(1).withMaximum(1).create())
+            new ArgumentBuilder().withName("output").withMinimum(1).withMaximum(1).create())
         .withDescription("The directory pathname for output.");
   }
 
   /**
    * Returns a default command line option for input directory specification.
    */
-  public static DefaultOptionBuilder inputOption(DefaultOptionBuilder obuilder,
-      ArgumentBuilder abuilder) {
-    return obuilder
+  public static DefaultOptionBuilder inputOption() {
+    return new DefaultOptionBuilder()
         .withLongName("input")
         .withRequired(true)
         .withShortName("i")
         .withArgument(
-            abuilder.withName("input").withMinimum(1).withMaximum(1).create())
+            new ArgumentBuilder().withName("input").withMinimum(1).withMaximum(1).create())
         .withDescription(
             "Path to job input directory");
   }
@@ -67,13 +64,12 @@ public final class DefaultOptionCreator {
    * Returns a default command line option for specification of numbers of
    * clusters to create.
    */
-  public static DefaultOptionBuilder kOption(DefaultOptionBuilder obuilder,
-      ArgumentBuilder abuilder) {
-    return obuilder
+  public static DefaultOptionBuilder kOption() {
+    return new DefaultOptionBuilder()
         .withLongName("k")
         .withRequired(true)
         .withArgument(
-            abuilder.withName("k").withMinimum(1).withMaximum(1).create())
+            new ArgumentBuilder().withName("k").withMinimum(1).withMaximum(1).create())
         .withDescription(
             "The k in k-Means. k random Vectors will be chosen as the Centroid and written to the clusters output path.")
         .withShortName("k");
@@ -83,14 +79,13 @@ public final class DefaultOptionCreator {
    * Returns a default command line option for specification of max number of
    * iterations.
    */
-  public static DefaultOptionBuilder maxIterOption(DefaultOptionBuilder obuilder,
-      ArgumentBuilder abuilder) {
-    return obuilder
+  public static DefaultOptionBuilder maxIterOption() {
+    return new DefaultOptionBuilder()
         .withLongName("maxIter")
         .withRequired(true)
         .withShortName("x")
         .withArgument(
-            abuilder.withName("maxIter").withMinimum(1).withMaximum(1).create())
+            new ArgumentBuilder().withName("maxIter").withMinimum(1).withMaximum(1).create())
         .withDescription("The maximum number of iterations.");
   }
 
@@ -98,22 +93,21 @@ public final class DefaultOptionCreator {
    * Returns a default command line option for specification of distance measure
    * class to use.
    */
-  public static DefaultOptionBuilder distanceOption(DefaultOptionBuilder obuilder,
-      ArgumentBuilder abuilder) {
-    return obuilder
+  public static DefaultOptionBuilder distanceOption() {
+    return new DefaultOptionBuilder()
         .withLongName("measure")
         .withRequired(true)
         .withShortName("d")
         .withArgument(
-            abuilder.withName("measure").withMinimum(1).withMaximum(1).create())
+            new ArgumentBuilder().withName("measure").withMinimum(1).withMaximum(1).create())
         .withDescription("The classname of the DistanceMeasure.");
   }
 
   /**
    * Returns a default command line option for help.
    * */
-  public static Option helpOption(DefaultOptionBuilder obuilder) {
-    return obuilder.withLongName("help").withDescription("Print out help").withShortName("h").create();
+  public static Option helpOption() {
+    return new DefaultOptionBuilder().withLongName("help").withDescription("Print out help").withShortName("h").create();
   }
 
 }

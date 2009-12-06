@@ -53,11 +53,11 @@ public class Job {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder).withRequired(false).create();
-    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).withRequired(false).create();
-    Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption(obuilder, abuilder).withRequired(false).create();
-    Option maxIterOpt = DefaultOptionCreator.maxIterOption(obuilder, abuilder).withRequired(false).create();
-    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);    
+    Option inputOpt = DefaultOptionCreator.inputOption().withRequired(false).create();
+    Option outputOpt = DefaultOptionCreator.outputOption().withRequired(false).create();
+    Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption().withRequired(false).create();
+    Option maxIterOpt = DefaultOptionCreator.maxIterOption().withRequired(false).create();
+    Option helpOpt = DefaultOptionCreator.helpOption();    
 
     Option modelOpt = obuilder.withLongName("distanceClass").withRequired(false).withShortName("d").
         withArgument(abuilder.withName("distanceClass").withMinimum(1).withMaximum(1).create()).

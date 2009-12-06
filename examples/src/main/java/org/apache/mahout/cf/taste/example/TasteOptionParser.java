@@ -57,7 +57,7 @@ public final class TasteOptionParser {
             abuilder.withName("input").withMinimum(1).withMaximum(1).create())
         .withDescription("The Path for input data directory.").create();
 
-    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
+    Option helpOpt = DefaultOptionCreator.helpOption();
 
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(
         helpOpt).create();

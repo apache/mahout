@@ -61,10 +61,10 @@ public class Job {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder).withRequired(false).create();
-    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).withRequired(false).create();
-    Option maxIterOpt = DefaultOptionCreator.maxIterOption(obuilder, abuilder).withRequired(false).create();
-    Option topicsOpt = DefaultOptionCreator.kOption(obuilder, abuilder).withRequired(false).create();
+    Option inputOpt = DefaultOptionCreator.inputOption().withRequired(false).create();
+    Option outputOpt = DefaultOptionCreator.outputOption().withRequired(false).create();
+    Option maxIterOpt = DefaultOptionCreator.maxIterOption().withRequired(false).create();
+    Option topicsOpt = DefaultOptionCreator.kOption().withRequired(false).create();
 
     Option redOpt = obuilder.withLongName("reducerNum").withRequired(false).withArgument(
         abuilder.withName("r").withMinimum(1).withMaximum(1).create()).withDescription(
@@ -81,7 +81,7 @@ public class Job {
     Option modelOpt = obuilder.withLongName("modelClass").withRequired(false).withShortName("d").
         withArgument(abuilder.withName("modelClass").withMinimum(1).withMaximum(1).create()).
           withDescription("The ModelDistribution class name.").create();
-    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
+    Option helpOpt = DefaultOptionCreator.helpOption();
 
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(modelOpt).
         withOption(maxIterOpt).withOption(mOpt).withOption(topicsOpt).withOption(redOpt).withOption(helpOpt).create();

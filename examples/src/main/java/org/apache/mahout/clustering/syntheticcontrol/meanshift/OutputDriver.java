@@ -52,9 +52,9 @@ public class OutputDriver {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder).withRequired(false).create();
-    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).withRequired(false).create();
-    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
+    Option inputOpt = DefaultOptionCreator.inputOption().withRequired(false).create();
+    Option outputOpt = DefaultOptionCreator.outputOption().withRequired(false).create();
+    Option helpOpt = DefaultOptionCreator.helpOption();
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(helpOpt).create();
 
     try {

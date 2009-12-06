@@ -130,7 +130,7 @@ public class CDGA {
                     abuilder.withName("count").withMinimum(1).withMaximum(1).create())
             .withDescription("Generations count.").create();
 
-    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
+    Option helpOpt = DefaultOptionCreator.helpOption();
 
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(
             helpOpt).withOption(labelOpt).withOption(thresholdOpt).withOption(crosspntsOpt).

@@ -82,9 +82,9 @@ public class FPGrowthJob {
             "The Directory on HDFS containing the transaction files")
         .withShortName("i").create();
 
-    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).create();
+    Option outputOpt = DefaultOptionCreator.outputOption().create();
 
-    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
+    Option helpOpt = DefaultOptionCreator.helpOption();
 
     // minSupport(3), maxHeapSize(50), numGroups(1000)
     Option minSupportOpt = obuilder.withLongName("minSupport").withArgument(

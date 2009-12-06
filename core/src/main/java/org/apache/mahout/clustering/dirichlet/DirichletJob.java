@@ -48,11 +48,11 @@ public class DirichletJob {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder).create();
-    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).create();
-    Option maxIterOpt = DefaultOptionCreator.maxIterOption(obuilder, abuilder).create();
-    Option topicsOpt = DefaultOptionCreator.kOption(obuilder, abuilder).create();
-    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
+    Option inputOpt = DefaultOptionCreator.inputOption().create();
+    Option outputOpt = DefaultOptionCreator.outputOption().create();
+    Option maxIterOpt = DefaultOptionCreator.maxIterOption().create();
+    Option topicsOpt = DefaultOptionCreator.kOption().create();
+    Option helpOpt = DefaultOptionCreator.helpOption();
 
     Option mOpt = obuilder.withLongName("alpha").withRequired(true).withShortName("m").
         withArgument(abuilder.withName("alpha").withMinimum(1).withMaximum(1).create()).
