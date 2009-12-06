@@ -23,22 +23,21 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.matrix.SparseVector;
-import org.apache.mahout.matrix.Vector;
 
 import java.io.IOException;
 import java.util.Iterator;
 
 public final class UserVectorToCooccurrenceReducer
     extends MapReduceBase
-    implements Reducer<IntWritable, IntWritable, IntWritable, Vector> {
+    implements Reducer<IntWritable, IntWritable, IntWritable, SparseVector> {
 
   @Override
   public void reduce(IntWritable index1,
                      Iterator<IntWritable> index2s,
-                     OutputCollector<IntWritable, Vector> output,
+                     OutputCollector<IntWritable, SparseVector> output,
                      Reporter reporter) throws IOException {
     if (index2s.hasNext()) {
-      Vector cooccurrenceRow = new SparseVector(Integer.MAX_VALUE, 1000);
+      SparseVector cooccurrenceRow = new SparseVector(Integer.MAX_VALUE, 1000);
       while (index2s.hasNext()) {
         int index2 = index2s.next().get();
         cooccurrenceRow.set(index2, cooccurrenceRow.get(index2) + 1.0);

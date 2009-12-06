@@ -23,6 +23,7 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
 
 import java.io.IOException;
@@ -30,11 +31,11 @@ import java.util.Iterator;
 
 public final class UserVectorToCooccurrenceMapper
     extends MapReduceBase
-    implements Mapper<LongWritable, Vector, IntWritable, IntWritable> {
+    implements Mapper<LongWritable, SparseVector, IntWritable, IntWritable> {
 
   @Override
   public void map(LongWritable userID,
-                  Vector userVector,
+                  SparseVector userVector,
                   OutputCollector<IntWritable, IntWritable> output,
                   Reporter reporter) throws IOException {
 

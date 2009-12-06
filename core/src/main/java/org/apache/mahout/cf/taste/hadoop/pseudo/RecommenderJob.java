@@ -105,9 +105,9 @@ public final class RecommenderJob extends AbstractJob {
   @Override
   public int run(String[] args) throws IOException {
 
-    Option recommendClassOpt = buildOption("recommenderClassName", "r", "Name of recommender class to instantiate");
-    Option numReccomendationsOpt = buildOption("numRecommendations", "n", "Number of recommendations per user");
-    Option dataModelFileOpt = buildOption("dataModelFile", "m", "File containing preference data");
+    Option recommendClassOpt = buildOption("recommenderClassName", "r", "Name of recommender class to instantiate", true);
+    Option numReccomendationsOpt = buildOption("numRecommendations", "n", "Number of recommendations per user", true);
+    Option dataModelFileOpt = buildOption("dataModelFile", "m", "File containing preference data", true);
 
     Map<String,Object> parsedArgs = parseArguments(args, recommendClassOpt, numReccomendationsOpt, dataModelFileOpt);
     String userIDFile = parsedArgs.get("--input").toString();

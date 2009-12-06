@@ -32,7 +32,7 @@ import org.apache.mahout.cf.taste.hadoop.AbstractJob;
 import org.apache.mahout.cf.taste.hadoop.ItemPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.matrix.SparseVector;
 
 import java.io.IOException;
 import java.util.Map;
@@ -42,19 +42,20 @@ public final class RecommenderJob extends AbstractJob {
   @Override
   public int run(String[] args) throws IOException {
 
-    Option numReccomendationsOpt = buildOption("numRecommendations", "n", "Number of recommendations per user");
+    Option numReccomendationsOpt = buildOption("numRecommendations", "n", "Number of recommendations per user", true);
 
     Map<String,Object> parsedArgs = parseArguments(args, numReccomendationsOpt);
 
-    String prefsFile = parsedArgs.get("--input").toString();
+    String inputPath = parsedArgs.get("--input").toString();
+    String tempDirPath = parsedArgs.get("--tempDir").toString();
     String outputPath = parsedArgs.get("--output").toString();
     String jarFile = parsedArgs.get("--jarFile").toString();
     int recommendationsPerUser = Integer.parseInt((String) parsedArgs.get("--numRecommendations"));
-    String userVectorPath = outputPath + "/userVectors";
-    String itemIDIndexPath = outputPath + "/itemIDIndex";
-    String cooccurrencePath = outputPath + "/cooccurrence";
+    String userVectorPath = tempDirPath + "/userVectors";
+    String itemIDIndexPath = tempDirPath + "/itemIDIndex";
+    String cooccurrencePath = tempDirPath + "/cooccurrence";
 
-    JobConf itemIDIndexConf = prepareJobConf(prefsFile,
+    JobConf itemIDIndexConf = prepareJobConf(inputPath,
                                              itemIDIndexPath,
                                              jarFile,
                                              TextInputFormat.class,
@@ -67,7 +68,7 @@ public final class RecommenderJob extends AbstractJob {
                                              SequenceFileOutputFormat.class);
     JobClient.runJob(itemIDIndexConf);
 
-    JobConf toUserVectorConf = prepareJobConf(prefsFile,
+    JobConf toUserVectorConf = prepareJobConf(inputPath,
                                               userVectorPath,
                                               jarFile,
                                               TextInputFormat.class,
@@ -76,7 +77,7 @@ public final class RecommenderJob extends AbstractJob {
                                               ItemPrefWritable.class,
                                               ToUserVectorReducer.class,
                                               LongWritable.class,
-                                              Vector.class,
+                                              SparseVector.class,
                                               SequenceFileOutputFormat.class);
     JobClient.runJob(toUserVectorConf);
 
@@ -89,7 +90,7 @@ public final class RecommenderJob extends AbstractJob {
                                                 IntWritable.class,
                                                 UserVectorToCooccurrenceReducer.class,
                                                 IntWritable.class,
-                                                Vector.class,
+                                                SparseVector.class,
                                                 SequenceFileOutputFormat.class);
     JobClient.runJob(toCooccurrenceConf);
 

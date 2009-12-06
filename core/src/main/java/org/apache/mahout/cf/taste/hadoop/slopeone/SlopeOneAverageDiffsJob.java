@@ -45,7 +45,7 @@ public final class SlopeOneAverageDiffsJob extends AbstractJob {
     String prefsFile = parsedArgs.get("--input").toString();
     String outputPath = parsedArgs.get("--output").toString();
     String jarFile = parsedArgs.get("--jarFile").toString();
-    String averagesOutputPath = outputPath + "/averages";
+    String averagesOutputPath = parsedArgs.get("--tempDir").toString();
 
     JobConf prefsToDiffsJobConf = prepareJobConf(prefsFile,
                                                  averagesOutputPath,

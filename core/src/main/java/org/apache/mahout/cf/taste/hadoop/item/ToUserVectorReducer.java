@@ -24,22 +24,21 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.hadoop.ItemPrefWritable;
 import org.apache.mahout.matrix.SparseVector;
-import org.apache.mahout.matrix.Vector;
 
 import java.io.IOException;
 import java.util.Iterator;
 
 public final class ToUserVectorReducer
     extends MapReduceBase
-    implements Reducer<LongWritable, ItemPrefWritable, LongWritable, Vector> {
+    implements Reducer<LongWritable, ItemPrefWritable, LongWritable, SparseVector> {
 
   @Override
   public void reduce(LongWritable userID,
                      Iterator<ItemPrefWritable> itemPrefs,
-                     OutputCollector<LongWritable, Vector> output,
+                     OutputCollector<LongWritable, SparseVector> output,
                      Reporter reporter) throws IOException {
     if (itemPrefs.hasNext()) {
-      Vector userVector = new SparseVector(Integer.MAX_VALUE, 100);
+      SparseVector userVector = new SparseVector(Integer.MAX_VALUE, 100);
       while (itemPrefs.hasNext()) {
         ItemPrefWritable itemPref = itemPrefs.next();
         int index = ItemIDIndexMapper.itemIDToIndex(itemPref.getItemID());

@@ -45,7 +45,7 @@ import java.util.Queue;
 
 public final class RecommenderMapper
     extends MapReduceBase
-    implements Mapper<LongWritable, Vector, LongWritable, RecommendedItemsWritable> {
+    implements Mapper<LongWritable, SparseVector, LongWritable, RecommendedItemsWritable> {
 
   static final String COOCCURRENCE_PATH = "cooccurrencePath";
   static final String ITEMID_INDEX_PATH = "itemIDIndexPath";
@@ -82,7 +82,7 @@ public final class RecommenderMapper
 
   @Override
   public void map(LongWritable userID,
-                  Vector userVector,
+                  SparseVector userVector,
                   OutputCollector<LongWritable, RecommendedItemsWritable> output,
                   Reporter reporter) throws IOException {
 

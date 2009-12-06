@@ -61,27 +61,26 @@ public abstract class AbstractJob implements Tool {
     this.configuration = configuration;
   }
 
-  protected static Option buildOption(String name, String shortName, String description) {
-    return new DefaultOptionBuilder().withLongName(name).withRequired(true)
+  protected static Option buildOption(String name, String shortName, String description, boolean required) {
+    return new DefaultOptionBuilder().withLongName(name).withRequired(required)
       .withShortName(shortName).withArgument(new ArgumentBuilder().withName(name).withMinimum(1)
       .withMaximum(1).create()).withDescription(description).create();
   }
 
   protected static Map<String,Object> parseArguments(String[] args, Option... extraOpts) {
 
-    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
-    ArgumentBuilder abuilder = new ArgumentBuilder();
+    Option inputOpt = DefaultOptionCreator.inputOption().create();
+    Option tempDirOpt = buildOption("tempDir", "t", "Intermediate output directory", false);
+    Option outputOpt = DefaultOptionCreator.outputOption().create();
+    Option helpOpt = DefaultOptionCreator.helpOption();
+    Option jarFileOpt = buildOption("jarFile", "m", "Implementation jar", true);
 
-    Option inputOpt = DefaultOptionCreator.inputOption(obuilder, abuilder).create();
-    Option outputOpt = DefaultOptionCreator.outputOption(obuilder, abuilder).create();
-    Option helpOpt = DefaultOptionCreator.helpOption(obuilder);
-    Option jarFileOpt = buildOption("jarFile", "m", "Implementation jar");
-
-    GroupBuilder gBuilder = new GroupBuilder().withName("Options");
-    gBuilder = gBuilder.withOption(inputOpt);
-    gBuilder = gBuilder.withOption(outputOpt);
-    gBuilder = gBuilder.withOption(helpOpt);
-    gBuilder = gBuilder.withOption(jarFileOpt);
+    GroupBuilder gBuilder = new GroupBuilder().withName("Options")
+      .withOption(inputOpt)
+      .withOption(tempDirOpt)
+      .withOption(outputOpt)
+      .withOption(helpOpt)
+      .withOption(jarFileOpt);
 
     for (Option opt : extraOpts) {
       gBuilder = gBuilder.withOption(opt);
@@ -107,6 +106,7 @@ public abstract class AbstractJob implements Tool {
 
     Map<String,Object> result = new HashMap<String,Object>();
     result.put(inputOpt.getPreferredName(), cmdLine.getValue(inputOpt));
+    result.put(tempDirOpt.getPreferredName(), cmdLine.getValue(tempDirOpt));
     result.put(outputOpt.getPreferredName(), cmdLine.getValue(outputOpt));
     result.put(helpOpt.getPreferredName(), cmdLine.getValue(helpOpt));
     result.put(jarFileOpt.getPreferredName(), cmdLine.getValue(jarFileOpt));
@@ -134,10 +134,6 @@ public abstract class AbstractJob implements Tool {
 
     Path inputPathPath = new Path(inputPath).makeQualified(fs);
     Path outputPathPath = new Path(outputPath).makeQualified(fs);
-
-    if (fs.exists(outputPathPath)) {
-      fs.delete(outputPathPath, true);
-    }
 
     jobConf.set("mapred.jar", jarFile);
     jobConf.setJar(jarFile);
