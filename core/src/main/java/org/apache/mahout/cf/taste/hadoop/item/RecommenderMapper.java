@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.hadoop.item;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -53,7 +54,6 @@ public final class RecommenderMapper
 
   private FileSystem fs;
   private Path cooccurrencePath;
-  private Path itemIDIndexPath;
   private int recommendationsPerUser;
   private FastByIDMap<Long> indexItemIDMap;
 
@@ -65,15 +65,19 @@ public final class RecommenderMapper
       throw new IllegalStateException(ioe);
     }
     cooccurrencePath = new Path(jobConf.get(COOCCURRENCE_PATH)).makeQualified(fs);
-    itemIDIndexPath = new Path(jobConf.get(ITEMID_INDEX_PATH)).makeQualified(fs);
+    Path itemIDIndexPath = new Path(jobConf.get(ITEMID_INDEX_PATH)).makeQualified(fs);
     recommendationsPerUser = jobConf.getInt(RECOMMENDATIONS_PER_USER, 10);
     indexItemIDMap = new FastByIDMap<Long>();
     try {
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, itemIDIndexPath, new Configuration());
       IntWritable index = new IntWritable();
       LongWritable itemID = new LongWritable();
-      while (reader.next(index, itemID)) {
-        indexItemIDMap.put(index.get(), itemID.get());
+      Configuration conf = new Configuration();
+      for (FileStatus status : fs.listStatus(itemIDIndexPath)) {
+        SequenceFile.Reader reader = new SequenceFile.Reader(fs, status.getPath(), conf);
+        while (reader.next(index, itemID)) {
+          indexItemIDMap.put(index.get(), itemID.get());
+        }
+        reader.close();
       }
     } catch (IOException ioe) {
       throw new IllegalStateException(ioe);
@@ -85,19 +89,22 @@ public final class RecommenderMapper
                   SparseVector userVector,
                   OutputCollector<LongWritable, RecommendedItemsWritable> output,
                   Reporter reporter) throws IOException {
-
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, cooccurrencePath, new Configuration());
     IntWritable indexWritable = new IntWritable();
     Vector cooccurrenceVector = new SparseVector(Integer.MAX_VALUE, 1000);
+    Configuration conf = new Configuration();
     Queue<RecommendedItem> topItems =
         new PriorityQueue<RecommendedItem>(recommendationsPerUser + 1, Collections.reverseOrder());
-    while (reader.next(indexWritable, cooccurrenceVector)) {
-      Long itemID = indexItemIDMap.get(indexWritable.get());
-      if (itemID != null) {
-        processOneRecommendation(userVector, itemID, cooccurrenceVector, topItems);
-      } else {
-        throw new IllegalStateException("Found index without item ID: " + indexWritable.get());
+    for (FileStatus status : fs.listStatus(cooccurrencePath)) {
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, status.getPath(), conf);
+      while (reader.next(indexWritable, cooccurrenceVector)) {
+        Long itemID = indexItemIDMap.get(indexWritable.get());
+        if (itemID != null) {
+          processOneRecommendation(userVector, itemID, cooccurrenceVector, topItems);
+        } else {
+          throw new IllegalStateException("Found index without item ID: " + indexWritable.get());
+        }
       }
+      reader.close();
     }
     List<RecommendedItem> recommendations = new ArrayList<RecommendedItem>(topItems.size());
     recommendations.addAll(topItems);

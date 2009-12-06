@@ -37,6 +37,22 @@ import org.apache.mahout.matrix.SparseVector;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * Runs a completely distributed recommender job as a series of mapreduces.</p>
+ *
+ * <p>Command line arguments are:</p>
+ *
+ * <ol>
+ *  <li>numRecommendations: Number of recommendations to compute per user</li>
+ *  <li>input: Directory containing a text file containing user IDs
+ *   for which recommendations should be computed, one per line</li>
+ *  <li>output: output path where recommender output should go</li>
+ *  <li>jarFile: JAR file containing implementation code</li>
+ *  <li>tempDir: directory in which to place intermediate data files</li>
+ * </ol>
+ *
+ * @see org.apache.mahout.cf.taste.hadoop.pseudo.RecommenderJob
+ */
 public final class RecommenderJob extends AbstractJob {
 
   @Override
@@ -94,7 +110,7 @@ public final class RecommenderJob extends AbstractJob {
                                                 SequenceFileOutputFormat.class);
     JobClient.runJob(toCooccurrenceConf);
 
-    JobConf recommenderConf = prepareJobConf(cooccurrencePath,
+    JobConf recommenderConf = prepareJobConf(userVectorPath,
                                              outputPath,
                                              jarFile,
                                              SequenceFileInputFormat.class,
