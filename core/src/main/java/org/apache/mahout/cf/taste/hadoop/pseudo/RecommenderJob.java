@@ -24,10 +24,12 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.AbstractJob;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -100,10 +102,8 @@ import java.util.Map;
  */
 public final class RecommenderJob extends AbstractJob {
 
-  private RecommenderJob() {
-  }
-
-  public static void main(String[] args) throws Exception {
+  @Override
+  public int run(String[] args) throws IOException {
 
     Option recommendClassOpt = buildOption("recommenderClassName", "r", "Name of recommender class to instantiate");
     Option numReccomendationsOpt = buildOption("numRecommendations", "n", "Number of recommendations per user");
@@ -135,7 +135,11 @@ public final class RecommenderJob extends AbstractJob {
     jobConf.set(RecommenderMapper.DATA_MODEL_FILE, dataModelFile);
 
     JobClient.runJob(jobConf);
+    return 0;
+  }
 
+  public static void main(String[] args) throws Exception {
+    ToolRunner.run(new RecommenderJob(), args);
   }
 
 }

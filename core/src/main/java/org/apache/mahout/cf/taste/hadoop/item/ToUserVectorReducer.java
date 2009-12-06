@@ -39,10 +39,11 @@ public final class ToUserVectorReducer
                      OutputCollector<LongWritable, Vector> output,
                      Reporter reporter) throws IOException {
     if (itemPrefs.hasNext()) {
-      Vector userVector = new SparseVector();
+      Vector userVector = new SparseVector(Integer.MAX_VALUE, 100);
       while (itemPrefs.hasNext()) {
         ItemPrefWritable itemPref = itemPrefs.next();
-        userVector.set(String.valueOf(itemPref.getItemID()), itemPref.getPrefValue());
+        int index = ItemIDIndexMapper.itemIDToIndex(itemPref.getItemID());
+        userVector.set(index, itemPref.getPrefValue());
       }
       output.collect(userID, userVector);
     }

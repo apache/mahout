@@ -26,19 +26,19 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.AbstractJob;
 import org.apache.mahout.cf.taste.hadoop.ItemItemWritable;
 import org.apache.mahout.cf.taste.hadoop.ItemPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
 
+import java.io.IOException;
 import java.util.Map;
 
 public final class SlopeOneAverageDiffsJob extends AbstractJob {
 
-  private SlopeOneAverageDiffsJob() {
-  }
-
-  public static void main(String[] args) throws Exception {
+  @Override
+  public int run(String[] args) throws IOException {
 
     Map<String,Object> parsedArgs = parseArguments(args);
 
@@ -72,6 +72,11 @@ public final class SlopeOneAverageDiffsJob extends AbstractJob {
                                                     FloatWritable.class,
                                                     TextOutputFormat.class);
     JobClient.runJob(diffsToAveragesJobConf);
+    return 0;
+  }
+
+  public static void main(String[] args) throws Exception {
+    ToolRunner.run(new SlopeOneAverageDiffsJob(), args);
   }
 
 }

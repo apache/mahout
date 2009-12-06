@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.hadoop.item;
 
 import org.apache.commons.cli2.Option;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
@@ -26,17 +27,20 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.AbstractJob;
 import org.apache.mahout.cf.taste.hadoop.ItemPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
 import org.apache.mahout.matrix.Vector;
 
+import java.io.IOException;
 import java.util.Map;
 
 public final class RecommenderJob extends AbstractJob {
 
-  public static void main(String[] args) throws Exception {
+  @Override
+  public int run(String[] args) throws IOException {
 
     Option numReccomendationsOpt = buildOption("numRecommendations", "n", "Number of recommendations per user");
 
@@ -47,7 +51,21 @@ public final class RecommenderJob extends AbstractJob {
     String jarFile = parsedArgs.get("--jarFile").toString();
     int recommendationsPerUser = Integer.parseInt((String) parsedArgs.get("--numRecommendations"));
     String userVectorPath = outputPath + "/userVectors";
+    String itemIDIndexPath = outputPath + "/itemIDIndex";
     String cooccurrencePath = outputPath + "/cooccurrence";
+
+    JobConf itemIDIndexConf = prepareJobConf(prefsFile,
+                                             itemIDIndexPath,
+                                             jarFile,
+                                             TextInputFormat.class,
+                                             ItemIDIndexMapper.class,
+                                             IntWritable.class,
+                                             LongWritable.class,
+                                             ItemIDIndexReducer.class,
+                                             IntWritable.class,
+                                             LongWritable.class,
+                                             SequenceFileOutputFormat.class);
+    JobClient.runJob(itemIDIndexConf);
 
     JobConf toUserVectorConf = prepareJobConf(prefsFile,
                                               userVectorPath,
@@ -67,10 +85,10 @@ public final class RecommenderJob extends AbstractJob {
                                                 jarFile,
                                                 SequenceFileInputFormat.class,
                                                 UserVectorToCooccurrenceMapper.class,
-                                                LongWritable.class,
-                                                LongWritable.class,
+                                                IntWritable.class,
+                                                IntWritable.class,
                                                 UserVectorToCooccurrenceReducer.class,
-                                                LongWritable.class,
+                                                IntWritable.class,
                                                 Vector.class,
                                                 SequenceFileOutputFormat.class);
     JobClient.runJob(toCooccurrenceConf);
@@ -87,8 +105,14 @@ public final class RecommenderJob extends AbstractJob {
                                              RecommendedItemsWritable.class,
                                              TextOutputFormat.class);
     recommenderConf.set(RecommenderMapper.COOCCURRENCE_PATH, cooccurrencePath);
+    recommenderConf.set(RecommenderMapper.ITEMID_INDEX_PATH, itemIDIndexPath);    
     recommenderConf.setInt(RecommenderMapper.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
     JobClient.runJob(recommenderConf);
+    return 0;
+  }
+
+  public static void main(String[] args) throws Exception {
+    ToolRunner.run(new RecommenderJob(), args);
   }
 
 }

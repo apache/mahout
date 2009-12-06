@@ -25,6 +25,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
@@ -34,6 +35,7 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.hadoop.util.Tool;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
@@ -43,9 +45,21 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class AbstractJob {
+public abstract class AbstractJob implements Tool {
 
   private static final Logger log = LoggerFactory.getLogger(AbstractJob.class);
+
+  private Configuration configuration;
+
+  @Override
+  public Configuration getConf() {
+    return configuration;
+  }
+
+  @Override
+  public void setConf(Configuration configuration) {
+    this.configuration = configuration;
+  }
 
   protected static Option buildOption(String name, String shortName, String description) {
     return new DefaultOptionBuilder().withLongName(name).withRequired(true)

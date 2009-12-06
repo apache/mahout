@@ -20,6 +20,7 @@ package org.apache.mahout.cf.taste.hadoop.item;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapred.JobConf;
@@ -28,6 +29,7 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
+import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.matrix.SparseVector;
@@ -46,11 +48,14 @@ public final class RecommenderMapper
     implements Mapper<LongWritable, Vector, LongWritable, RecommendedItemsWritable> {
 
   static final String COOCCURRENCE_PATH = "cooccurrencePath";
+  static final String ITEMID_INDEX_PATH = "itemIDIndexPath";
   static final String RECOMMENDATIONS_PER_USER = "recommendationsPerUser";
 
   private FileSystem fs;
   private Path cooccurrencePath;
+  private Path itemIDIndexPath;
   private int recommendationsPerUser;
+  private FastByIDMap<Long> indexItemIDMap;
 
   @Override
   public void configure(JobConf jobConf) {
@@ -60,7 +65,19 @@ public final class RecommenderMapper
       throw new IllegalStateException(ioe);
     }
     cooccurrencePath = new Path(jobConf.get(COOCCURRENCE_PATH)).makeQualified(fs);
+    itemIDIndexPath = new Path(jobConf.get(ITEMID_INDEX_PATH)).makeQualified(fs);
     recommendationsPerUser = jobConf.getInt(RECOMMENDATIONS_PER_USER, 10);
+    indexItemIDMap = new FastByIDMap<Long>();
+    try {
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, itemIDIndexPath, new Configuration());
+      IntWritable index = new IntWritable();
+      LongWritable itemID = new LongWritable();
+      while (reader.next(index, itemID)) {
+        indexItemIDMap.put(index.get(), itemID.get());
+      }
+    } catch (IOException ioe) {
+      throw new IllegalStateException(ioe);
+    }
   }
 
   @Override
@@ -70,12 +87,17 @@ public final class RecommenderMapper
                   Reporter reporter) throws IOException {
 
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, cooccurrencePath, new Configuration());
-    LongWritable itemIDWritable = new LongWritable();
-    Vector cooccurrenceVector = new SparseVector();
+    IntWritable indexWritable = new IntWritable();
+    Vector cooccurrenceVector = new SparseVector(Integer.MAX_VALUE, 1000);
     Queue<RecommendedItem> topItems =
         new PriorityQueue<RecommendedItem>(recommendationsPerUser + 1, Collections.reverseOrder());
-    while (reader.next(itemIDWritable, cooccurrenceVector)) {
-      processOneRecommendation(userVector, itemIDWritable.get(), cooccurrenceVector, topItems);
+    while (reader.next(indexWritable, cooccurrenceVector)) {
+      Long itemID = indexItemIDMap.get(indexWritable.get());
+      if (itemID != null) {
+        processOneRecommendation(userVector, itemID, cooccurrenceVector, topItems);
+      } else {
+        throw new IllegalStateException("Found index without item ID: " + indexWritable.get());
+      }
     }
     List<RecommendedItem> recommendations = new ArrayList<RecommendedItem>(topItems.size());
     recommendations.addAll(topItems);

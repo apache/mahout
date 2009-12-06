@@ -18,32 +18,33 @@
 package org.apache.mahout.cf.taste.hadoop.item;
 
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.matrix.SparseVector;
-import org.apache.mahout.matrix.Vector;
 
 import java.io.IOException;
 import java.util.Iterator;
 
-public final class UserVectorToCooccurrenceReducer
+public final class ItemIDIndexReducer
     extends MapReduceBase
-    implements Reducer<IntWritable, IntWritable, IntWritable, Vector> {
+    implements Reducer<IntWritable, LongWritable, IntWritable, LongWritable> {
 
   @Override
-  public void reduce(IntWritable index1,
-                     Iterator<IntWritable> index2s,
-                     OutputCollector<IntWritable, Vector> output,
+  public void reduce(IntWritable index,
+                     Iterator<LongWritable> possibleItemIDs,
+                     OutputCollector<IntWritable, LongWritable> output,
                      Reporter reporter) throws IOException {
-    if (index2s.hasNext()) {
-      Vector cooccurrenceRow = new SparseVector(Integer.MAX_VALUE, 1000);
-      while (index2s.hasNext()) {
-        int index2 = index2s.next().get();
-        cooccurrenceRow.set(index2, cooccurrenceRow.get(index2) + 1.0);
+    if (possibleItemIDs.hasNext()) {
+      long minimumItemID = Long.MAX_VALUE;
+      while (possibleItemIDs.hasNext()) {
+        long itemID = possibleItemIDs.next().get();
+        if (itemID < minimumItemID) {
+          minimumItemID = itemID;
+        }
       }
-      output.collect(index1, cooccurrenceRow);
+      output.collect(index, new LongWritable(minimumItemID));
     }
   }
 

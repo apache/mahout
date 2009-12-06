@@ -18,33 +18,35 @@
 package org.apache.mahout.cf.taste.hadoop.item;
 
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.matrix.SparseVector;
-import org.apache.mahout.matrix.Vector;
 
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.regex.Pattern;
 
-public final class UserVectorToCooccurrenceReducer
+public final class ItemIDIndexMapper
     extends MapReduceBase
-    implements Reducer<IntWritable, IntWritable, IntWritable, Vector> {
+    implements Mapper<LongWritable, Text, IntWritable, LongWritable> {
+
+  private static final Pattern COMMA = Pattern.compile(",");
 
   @Override
-  public void reduce(IntWritable index1,
-                     Iterator<IntWritable> index2s,
-                     OutputCollector<IntWritable, Vector> output,
-                     Reporter reporter) throws IOException {
-    if (index2s.hasNext()) {
-      Vector cooccurrenceRow = new SparseVector(Integer.MAX_VALUE, 1000);
-      while (index2s.hasNext()) {
-        int index2 = index2s.next().get();
-        cooccurrenceRow.set(index2, cooccurrenceRow.get(index2) + 1.0);
-      }
-      output.collect(index1, cooccurrenceRow);
-    }
+  public void map(LongWritable key,
+                  Text value,
+                  OutputCollector<IntWritable, LongWritable> output,
+                  Reporter reporter) throws IOException {
+    String[] tokens = COMMA.split(value.toString());
+    long itemID = Long.parseLong(tokens[1]);
+    int index = itemIDToIndex(itemID);
+    output.collect(new IntWritable(index), new LongWritable(itemID));
+  }
+
+  static int itemIDToIndex(long itemID) {
+    return (int) (itemID) ^ (int) (itemID >>> 32);
   }
 
 }
