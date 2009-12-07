@@ -84,7 +84,7 @@ public final class RecommendedItemsWritable implements Writable {
 
   @Override
   public String toString() {
-    StringBuilder result = new StringBuilder(100);
+    StringBuilder result = new StringBuilder(200);
     result.append('[');
     boolean first = true;
     for (RecommendedItem item : recommended) {
@@ -95,7 +95,12 @@ public final class RecommendedItemsWritable implements Writable {
       }
       result.append(item.getItemID());
       result.append(':');
-      result.append(item.getValue());
+      String valueString = String.valueOf(item.getValue());
+      // Is this rounding too crude?
+      if (valueString.length() > 6) {
+        valueString = valueString.substring(0, 6);
+      }
+      result.append(valueString);
     }
     result.append(']');
     return result.toString();

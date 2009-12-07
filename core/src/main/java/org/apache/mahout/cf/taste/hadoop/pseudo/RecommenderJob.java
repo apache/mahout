@@ -19,11 +19,11 @@ package org.apache.mahout.cf.taste.hadoop.pseudo;
 
 import org.apache.commons.cli2.Option;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
-import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.AbstractJob;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
@@ -37,7 +37,7 @@ import java.util.Map;
  * It merely runs many {@link Recommender} instances on Hadoop, where each instance
  * is a normal non-distributed implementation.</p>
  *
- * <p>This class configures and runs a {@link RecommenderMapper} using Hadoop.</p>
+ * <p>This class configures and runs a {@link RecommenderReducer} using Hadoop.</p>
  *
  * <p>Command line arguments are:</p>
  *
@@ -46,9 +46,7 @@ import java.util.Map;
  *   recommendations. Note that it must have a constructor which takes a
  *   {@link org.apache.mahout.cf.taste.model.DataModel} argument.</li>
  *  <li>numRecommendations: Number of recommendations to compute per user</li>
- *  <li>input: Directory containing a text file containing user IDs
- *   for which recommendations should be computed, one per line</li>
- *  <li>dataModelFile: Location of a data model file containing preference data,
+ *  <li>input: Location of a data model file containing preference data,
  *   suitable for use with {@link org.apache.mahout.cf.taste.impl.model.file.FileDataModel}</li>
  *  <li>output: output path where recommender output should go</li>
  *  <li>jarFile: JAR file containing implementation code</li>
@@ -81,9 +79,9 @@ import java.util.Map;
  * <p>And launch:</p>
  *
  * {@code
- * hadoop jar recommender.jar org.apache.mahout.cf.taste.hadoop.RecommenderJob \
+ * hadoop jar recommender.jar org.apache.mahout.cf.taste.hadoop.pseudo.RecommenderJob \
  *   --recommenderClassName your.project.Recommender \
- *   --numRecommendations 10 --input input/users.txt --dataModelFile input/input.csv \
+ *   --numRecommendations 10 --input input/users.csv \
  *   --output output --jarFile recommender.jar
  * }
  */
@@ -92,34 +90,34 @@ public final class RecommenderJob extends AbstractJob {
   @Override
   public int run(String[] args) throws IOException {
 
-    Option recommendClassOpt = buildOption("recommenderClassName", "r", "Name of recommender class to instantiate", true);
-    Option numReccomendationsOpt = buildOption("numRecommendations", "n", "Number of recommendations per user", true);
-    Option dataModelFileOpt = buildOption("dataModelFile", "m", "File containing preference data", true);
+    Option recommendClassOpt =
+        buildOption("recommenderClassName", "r", "Name of recommender class to instantiate", true);
+    Option numReccomendationsOpt =
+        buildOption("numRecommendations", "n", "Number of recommendations per user", true);
 
-    Map<String,Object> parsedArgs = parseArguments(args, recommendClassOpt, numReccomendationsOpt, dataModelFileOpt);
-    String userIDFile = parsedArgs.get("--input").toString();
+    Map<String,Object> parsedArgs = parseArguments(args, recommendClassOpt, numReccomendationsOpt);
+    String inputFile = parsedArgs.get("--input").toString();
     String outputPath = parsedArgs.get("--output").toString();
     String jarFile = parsedArgs.get("--jarFile").toString();
 
     String recommendClassName = parsedArgs.get("--recommenderClassName").toString();
     int recommendationsPerUser = Integer.parseInt((String) parsedArgs.get("--numRecommendations"));
-    String dataModelFile = parsedArgs.get("--dataModelFile").toString();
 
-    JobConf jobConf = prepareJobConf(userIDFile,
+    JobConf jobConf = prepareJobConf(inputFile,
                                      outputPath,
                                      jarFile,
                                      TextInputFormat.class,
-                                     RecommenderMapper.class,
+                                     UserIDsMapper.class,
                                      LongWritable.class,
-                                     RecommendedItemsWritable.class,
-                                     IdentityReducer.class,
+                                     NullWritable.class,
+                                     RecommenderReducer.class,
                                      LongWritable.class,
                                      RecommendedItemsWritable.class,
                                      TextOutputFormat.class);
 
-    jobConf.set(RecommenderMapper.RECOMMENDER_CLASS_NAME, recommendClassName);
-    jobConf.setInt(RecommenderMapper.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
-    jobConf.set(RecommenderMapper.DATA_MODEL_FILE, dataModelFile);
+    jobConf.set(RecommenderReducer.RECOMMENDER_CLASS_NAME, recommendClassName);
+    jobConf.setInt(RecommenderReducer.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
+    jobConf.set(RecommenderReducer.DATA_MODEL_FILE, inputFile);
 
     JobClient.runJob(jobConf);
     return 0;

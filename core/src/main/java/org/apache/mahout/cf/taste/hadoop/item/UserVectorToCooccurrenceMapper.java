@@ -28,10 +28,14 @@ import org.apache.mahout.matrix.Vector;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 public final class UserVectorToCooccurrenceMapper
     extends MapReduceBase
     implements Mapper<LongWritable, SparseVector, IntWritable, IntWritable> {
+
+  private static final int MAX_PREFS_CONSIDERED = 50;
 
   @Override
   public void map(LongWritable userID,
@@ -39,20 +43,48 @@ public final class UserVectorToCooccurrenceMapper
                   OutputCollector<IntWritable, IntWritable> output,
                   Reporter reporter) throws IOException {
 
+    double cutoff = userVector.size() <= MAX_PREFS_CONSIDERED ?
+        Double.NEGATIVE_INFINITY : findTopNPrefsCutoff(MAX_PREFS_CONSIDERED, userVector);
+
+    Iterator<Vector.Element> it = userVector.iterateNonZero();
+
+    while (it.hasNext()) {
+      Vector.Element next1 = it.next();
+      if (next1.get() >= cutoff) {
+
+        int index1 = next1.index();
+        Iterator<Vector.Element> it2 = userVector.iterateNonZero();
+        IntWritable itemWritable1 = new IntWritable(index1);
+
+        while (it2.hasNext()) {
+          Vector.Element next2 = it2.next();
+          if (next2.get() >= cutoff) {
+
+            int index2 = next2.index();
+            if (index1 != index2) {
+              output.collect(itemWritable1, new IntWritable(index2));
+            }
+
+          }
+        }
+
+      }
+    }
+  }
+
+  private static double findTopNPrefsCutoff(int n, Vector userVector) {
+    Queue<Double> topPrefValues = new PriorityQueue<Double>(n + 1);
     Iterator<Vector.Element> it = userVector.iterateNonZero();
     while (it.hasNext()) {
-      int index1 = it.next().index();
-      Iterator<Vector.Element> it2 = userVector.iterateNonZero();
-      IntWritable itemWritable1 = new IntWritable(index1);
-      while (it2.hasNext()) {
-        int index2 = it2.next().index();
-        if (index1 != index2) {
-          output.collect(itemWritable1, new IntWritable(index2));
-        }
+      double prefValue = it.next().get();
+      if (topPrefValues.size() < n) {
+        topPrefValues.add(prefValue);
+      } else if (prefValue > topPrefValues.peek()) {
+        topPrefValues.add(prefValue);
+        topPrefValues.poll();
       }
-
     }
-
+    return topPrefValues.peek();
   }
 
 }

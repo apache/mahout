@@ -21,6 +21,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
@@ -52,6 +53,13 @@ public final class RecommenderMapper
   static final String ITEMID_INDEX_PATH = "itemIDIndexPath";
   static final String RECOMMENDATIONS_PER_USER = "recommendationsPerUser";
 
+  private static final PathFilter IGNORABLE_FILES_FILTER = new PathFilter() {
+    @Override
+    public boolean accept(Path path) {
+      return !path.getName().startsWith("_logs");
+    }
+  };
+
   private FileSystem fs;
   private Path cooccurrencePath;
   private int recommendationsPerUser;
@@ -72,7 +80,7 @@ public final class RecommenderMapper
       IntWritable index = new IntWritable();
       LongWritable itemID = new LongWritable();
       Configuration conf = new Configuration();
-      for (FileStatus status : fs.listStatus(itemIDIndexPath)) {
+      for (FileStatus status : fs.listStatus(itemIDIndexPath, IGNORABLE_FILES_FILTER)) {
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, status.getPath(), conf);
         while (reader.next(index, itemID)) {
           indexItemIDMap.put(index.get(), itemID.get());
@@ -94,7 +102,7 @@ public final class RecommenderMapper
     Configuration conf = new Configuration();
     Queue<RecommendedItem> topItems =
         new PriorityQueue<RecommendedItem>(recommendationsPerUser + 1, Collections.reverseOrder());
-    for (FileStatus status : fs.listStatus(cooccurrencePath)) {
+    for (FileStatus status : fs.listStatus(cooccurrencePath, IGNORABLE_FILES_FILTER)) {
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, status.getPath(), conf);
       while (reader.next(indexWritable, cooccurrenceVector)) {
         Long itemID = indexItemIDMap.get(indexWritable.get());

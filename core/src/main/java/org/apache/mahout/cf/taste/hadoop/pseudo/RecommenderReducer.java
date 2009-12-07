@@ -20,11 +20,12 @@ package org.apache.mahout.cf.taste.hadoop.pseudo;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
@@ -41,19 +42,15 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>The {@link Mapper} which takes as input a file of user IDs (treated as Strings, note), and for each unique user
+ * <p>The {@link Reducer} which takes as input the user IDs parsed out by the map phase, and for each unique user
  * ID, computes recommendations with the configured {@link Recommender}. The results are output as {@link
  * RecommendedItemsWritable}.</p>
  *
- * <p>Note that there is no corresponding {@link org.apache.hadoop.mapreduce.Reducer}; this implementation can only
- * partially take advantage of the mapreduce paradigm and only really leverages it for easy parallelization. Therefore,
- * use the {@link org.apache.hadoop.mapred.lib.IdentityReducer} when running this on Hadoop.</p>
- *
  * @see RecommenderJob
  */
-public final class RecommenderMapper
+public final class RecommenderReducer
     extends MapReduceBase
-    implements Mapper<LongWritable, Text, LongWritable, RecommendedItemsWritable> {
+    implements Reducer<LongWritable, NullWritable, LongWritable, RecommendedItemsWritable> {
 
   static final String RECOMMENDER_CLASS_NAME = "recommenderClassName";
   static final String RECOMMENDATIONS_PER_USER = "recommendationsPerUser";
@@ -97,13 +94,13 @@ public final class RecommenderMapper
     recommendationsPerUser = jobConf.getInt(RECOMMENDATIONS_PER_USER, 10);
   }
 
-
   @Override
-  public void map(LongWritable key,
-                  Text value,
-                  OutputCollector<LongWritable, RecommendedItemsWritable> output,
-                  Reporter reporter) throws IOException {
-    long userID = Long.parseLong(value.toString());
+  public void reduce(LongWritable key,
+                     Iterator<NullWritable> values,
+                     OutputCollector<LongWritable, RecommendedItemsWritable> output,
+                     Reporter reporter)
+      throws IOException {
+    long userID = key.get();
     List<RecommendedItem> recommendedItems;
     try {
       recommendedItems = recommender.recommend(userID, recommendationsPerUser);
