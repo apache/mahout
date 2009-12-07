@@ -41,8 +41,9 @@ public class SequenceFileVectorWriter implements VectorWriter {
       if (recNum >= maxDocs) {
         break;
       }
-      //point.write(dataOut);
-      writer.append(new LongWritable(recNum++), point);
+      if (point != null) {
+        writer.append(new LongWritable(recNum++), point);
+      }
 
     }
     return recNum;

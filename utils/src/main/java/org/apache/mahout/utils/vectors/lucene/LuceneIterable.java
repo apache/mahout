@@ -103,7 +103,11 @@ public class LuceneIterable implements Iterable<Vector> {
       //
       try {
         indexReader.getTermFreqVector(doc, field, mapper);
+        mapper.setDocumentNumber(doc);
         result = mapper.getVector();
+        if (result == null) {
+          return null;
+        }
         if (idField != null) {
           String id = indexReader.document(doc, idFieldSelector).get(idField);
           result.setName(id);
