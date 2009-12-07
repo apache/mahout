@@ -282,12 +282,11 @@ public final class LDADriver {
     conf.set(NUM_TOPICS_KEY, Integer.toString(numTopics));
     conf.set(NUM_WORDS_KEY, Integer.toString(numWords));
     conf.set(TOPIC_SMOOTHING_KEY, Double.toString(topicSmoothing));
-
+    
     Job job = new Job(conf);
 
     job.setOutputKeyClass(IntPairWritable.class);
     job.setOutputValueClass(DoubleWritable.class);
-
     FileInputFormat.addInputPaths(job, input);
     Path outPath = new Path(stateOut);
     FileOutputFormat.setOutputPath(job, outPath);
@@ -298,7 +297,8 @@ public final class LDADriver {
     job.setNumReduceTasks(numReducers);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setInputFormatClass(SequenceFileInputFormat.class);
-
+    job.setJarByClass(LDADriver.class);
+    
     job.waitForCompletion(true);
     return findLL(stateOut, conf);
   }
