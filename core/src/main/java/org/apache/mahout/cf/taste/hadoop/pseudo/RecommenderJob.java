@@ -20,6 +20,8 @@ package org.apache.mahout.cf.taste.hadoop.pseudo;
 import org.apache.commons.cli2.Option;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.TextInputFormat;
@@ -118,6 +120,7 @@ public final class RecommenderJob extends AbstractJob {
     jobConf.set(RecommenderReducer.RECOMMENDER_CLASS_NAME, recommendClassName);
     jobConf.setInt(RecommenderReducer.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
     jobConf.set(RecommenderReducer.DATA_MODEL_FILE, inputFile);
+    jobConf.setClass("mapred.output.compression.codec", GzipCodec.class, CompressionCodec.class);
 
     JobClient.runJob(jobConf);
     return 0;

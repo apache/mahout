@@ -19,6 +19,8 @@ package org.apache.mahout.cf.taste.hadoop.slopeone;
 
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
@@ -71,6 +73,7 @@ public final class SlopeOneAverageDiffsJob extends AbstractJob {
                                                     ItemItemWritable.class,
                                                     FloatWritable.class,
                                                     TextOutputFormat.class);
+    diffsToAveragesJobConf.setClass("mapred.output.compression.codec", GzipCodec.class, CompressionCodec.class);
     JobClient.runJob(diffsToAveragesJobConf);
     return 0;
   }
