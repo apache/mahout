@@ -39,6 +39,9 @@ public abstract class AbstractIDMigrator implements IDMigrator {
     }
   }
 
+  /**
+   * @return most significant 8 bytes of the MD5 hash of the string, as a long
+   */
   protected final long hash(String value) {
     byte[] md5hash;
     synchronized (md5Digest) {
@@ -54,18 +57,14 @@ public abstract class AbstractIDMigrator implements IDMigrator {
 
   @Override
   public long toLongID(String stringID) throws TasteException {
-    long longID = hash(stringID);
-    storeMapping(longID, stringID);
-    return longID;
+    return hash(stringID);
   }
 
   @Override
   public void initialize(Iterable<String> stringIDs) throws TasteException {
     for (String stringID : stringIDs) {
-      toLongID(stringID);
+      storeMapping(toLongID(stringID), stringID);
     }
   }
-
-  protected abstract void storeMapping(long longID, String stringID) throws TasteException;
 
 }

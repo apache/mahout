@@ -26,6 +26,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Implementation which stores the reverse long-to-String mapping
+ * in a database. Subclasses can override and configure the class to
+ * operate with particular databases by supplying appropriate SQL
+ * statements to the constructor.
+ */
 public abstract class AbstractJDBCIDMigrator extends AbstractIDMigrator {
 
   public static final String DEFAULT_MAPPING_TABLE = "taste_id_mapping";
@@ -36,6 +42,12 @@ public abstract class AbstractJDBCIDMigrator extends AbstractIDMigrator {
   private final String getStringIDSQL;
   private final String storeMappingSQL;
 
+  /**
+   * @param getStringIDSQL SQL statement which selects one column, the String ID, from a
+   *  mapping table. The statement should take one long parameter.
+   * @param storeMappingSQL SQL statement which saves a mapping from long to String.
+   *  It should take two parameters, a long and a String.
+   */
   protected AbstractJDBCIDMigrator(DataSource dataSource,
                                    String getStringIDSQL,
                                    String storeMappingSQL) {
@@ -45,7 +57,7 @@ public abstract class AbstractJDBCIDMigrator extends AbstractIDMigrator {
   }
 
   @Override
-  protected final void storeMapping(long longID, String stringID) throws TasteException {
+  public final void storeMapping(long longID, String stringID) throws TasteException {
     Connection conn = null;
     PreparedStatement stmt = null;
     try {

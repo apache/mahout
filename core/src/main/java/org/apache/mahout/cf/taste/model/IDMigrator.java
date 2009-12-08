@@ -56,6 +56,17 @@ public interface IDMigrator {
   String toStringID(long longID) throws TasteException;
 
   /**
+   * Stores the reverse long-to-String mapping in some kind of backing store. Note that this must
+   * be called directly (or indirectly through {@link #initialize(Iterable)}) for every String that
+   * might be encountered in the application, or else the mapping will not be known.
+   *
+   * @param longID long ID
+   * @param stringID string ID that maps to/from that long ID
+   * @throws TasteException if an error occurs while saving the mapping
+   */
+  void storeMapping(long longID, String stringID) throws TasteException;
+
+  /**
    * Make the mapping aware of the given string IDs.
    *
    * @throws TasteException if an error occurs while storing the mappings

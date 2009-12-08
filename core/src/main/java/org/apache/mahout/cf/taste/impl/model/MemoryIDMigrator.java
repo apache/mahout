@@ -19,6 +19,10 @@ package org.apache.mahout.cf.taste.impl.model;
 
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 
+/**
+ * Implementation which stores the reverse long-to-String mapping
+ * in memory.
+ */
 public final class MemoryIDMigrator extends AbstractIDMigrator {
 
   private final FastByIDMap<String> longToString;
@@ -28,7 +32,7 @@ public final class MemoryIDMigrator extends AbstractIDMigrator {
   }
 
   @Override
-  protected void storeMapping(long longID, String stringID) {
+  public void storeMapping(long longID, String stringID) {
     synchronized (longToString) {
       longToString.put(longID, stringID);
     }
