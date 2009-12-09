@@ -78,12 +78,5 @@ public class TFDFMapper extends VectorMapper {
   public boolean isIgnoringOffsets() {
     return true;
   }
-
-  @Override
-  public void setDocumentNumber(int documentNumber) {
-    this.vector = null;
-    super.setDocumentNumber(documentNumber);
-  }
-
   
 }

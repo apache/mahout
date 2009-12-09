@@ -69,6 +69,7 @@ public class LuceneIterableTest extends TestCase {
 
     //TODO: do something more meaningful here
     for (Vector vector : iterable) {
+      assertNotNull(vector);
       assertTrue("vector is not an instanceof " + SparseVector.class, vector instanceof SparseVector);
       assertTrue("vector Size: " + vector.size() + " is not greater than: " + 0, vector.size() > 0);
     }
