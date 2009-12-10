@@ -15,37 +15,18 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.common;
+package org.apache.mahout.common.iterator;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
-/** <p>An empty {@link Iterator}, which iterates over nothing.</p> */
-final class EmptyIterator<T> implements Iterator<T> {
-
-  /** @return false */
+public class TestFixedSizeSampler extends SamplerCase {
   @Override
-  public boolean hasNext() {
+  protected DelegatingIterator<Integer> createSampler(int n, Iterator<Integer> source) {
+    return new FixedSizeSamplingIterator<Integer>(n, source);
+  }
+
+  @Override
+  protected boolean isSorted() {
     return false;
   }
-
-  /** @return never returns anything */
-  @Override
-  public T next() {
-    throw new NoSuchElementException();
-  }
-
-  /**
-   * @throws UnsupportedOperationException
-   */
-  @Override
-  public void remove() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public String toString() {
-    return "EmptyIterator";
-  }
-
 }

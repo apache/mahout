@@ -15,31 +15,18 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.common;
+package org.apache.mahout.common.iterator;
 
 import java.util.Iterator;
 
-/**
- * Wraps an {@link Iterable} whose {@link Iterable#iterator()} returns only some subset of the elements that it would,
- * as determined by a sampling rate parameter.
- */
-public final class SamplingIterable<T> implements Iterable<T> {
-
-  private final Iterable<? extends T> delegate;
-  private final double samplingRate;
-
-  public SamplingIterable(Iterable<? extends T> delegate, double samplingRate) {
-    this.delegate = delegate;
-    this.samplingRate = samplingRate;
+public class TestStableFixedSizeSampler extends SamplerCase {
+  @Override
+  protected DelegatingIterator<Integer> createSampler(int n, Iterator<Integer> source) {
+    return new StableFixedSizeSamplingIterator<Integer>(n, source);
   }
 
   @Override
-  public Iterator<T> iterator() {
-    return new SamplingIterator<T>(delegate.iterator(), samplingRate);
+  protected boolean isSorted() {
+    return true;
   }
-
-  public static <T> Iterable<T> maybeWrapIterable(Iterable<T> delegate, double samplingRate) {
-    return samplingRate >= 1.0 ? delegate : new SamplingIterable<T>(delegate, samplingRate);
-  }
-
 }

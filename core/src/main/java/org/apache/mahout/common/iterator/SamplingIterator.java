@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.common;
+package org.apache.mahout.common.iterator;
 
+import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
 import org.apache.mahout.common.RandomUtils;
 
 import java.util.Iterator;
@@ -24,7 +25,7 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 
 /**
- * Wraps an {@link Iterator} and returns only some subset of the elements that it would, as determined by a sampling
+ * Wraps an {@link Iterator} and returns only some subset of the elements that it would, as determined by a iterator
  * rate parameter.
  */
 public final class SamplingIterator<T> implements Iterator<T> {

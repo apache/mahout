@@ -15,27 +15,43 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.common;
+package org.apache.mahout.common.iterator;
 
 import java.util.Iterator;
 
-/** <p>An {@link Iterable} over no elements: always produces an {@link Iterator} which iterates over nothing.</p> */
-public final class EmptyIterable<T> implements Iterable<T> {
+/**
+ * <p>Simple utility class that makes an {@link Iterator} {@link Iterable} by returning the {@link Iterator}
+ * itself.</p>
+ */
+public final class IteratorIterable<T> implements Iterable<T> {
 
-  private final Iterator<T> iterator;
+  private Iterator<T> iterator;
 
-  public EmptyIterable() {
-    iterator = new EmptyIterator<T>();
+  /**
+   * <p>Constructs an {@link IteratorIterable} for an {@link Iterator}.</p>
+   *
+   * @param iterator {@link Iterator} on which to base this {@link IteratorIterable}
+   */
+  public IteratorIterable(Iterator<T> iterator) {
+    if (iterator == null) {
+      throw new IllegalArgumentException("iterator is null");
+    }
+    this.iterator = iterator;
   }
 
   @Override
   public Iterator<T> iterator() {
-    return iterator;
+    if (iterator == null) {
+      throw new IllegalStateException("iterator() has already been called");
+    }
+    Iterator<T> result = iterator;
+    iterator = null;
+    return result;
   }
 
   @Override
   public String toString() {
-    return "EmptyIterable[iterator:" + iterator + ']';
+    return "IteratorIterable[iterator:" + iterator + ']';
   }
 
 }

@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.common;
+package org.apache.mahout.common.iterator;
+
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 
 import java.util.ArrayList;
 import java.util.Collection;
