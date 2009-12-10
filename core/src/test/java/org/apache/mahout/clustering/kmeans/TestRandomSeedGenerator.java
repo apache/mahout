@@ -1,0 +1,101 @@
+package org.apache.mahout.clustering.kmeans;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import junit.framework.TestCase;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.mahout.clustering.ClusteringTestUtils;
+import org.apache.mahout.matrix.SparseVector;
+import org.apache.mahout.matrix.Vector;
+
+public class TestRandomSeedGenerator extends TestCase {
+  
+  static final double[][] raw = {{1, 1}, {2, 1}, {1, 2}, {2, 2},
+    {3, 3}, {4, 4}, {5, 4}, {4, 5}, {5, 5}};
+  
+  FileSystem fs;
+  
+  private static List<Vector> getPoints(double[][] raw) {
+    List<Vector> points = new ArrayList<Vector>();
+    int i = 0;
+    for (double[] fr : raw) {
+      Vector vec = new SparseVector(String.valueOf(i++), fr.length);
+      vec.assign(fr);
+      points.add(vec);
+    }
+    return points;
+  }
+  
+  private static void rmr(String path) throws Exception {
+    File f = new File(path);
+    if (f.exists()) {
+      if (f.isDirectory()) {
+        String[] contents = f.list();
+        for (String content : contents) {
+          rmr(f.toString() + File.separator + content);
+        }
+      }
+      f.delete();
+    }
+  }
+  
+  public void setUp() throws Exception {
+    super.setUp();
+    rmr("testdata");
+    Configuration conf = new Configuration();
+    fs = FileSystem.get(conf);
+  }
+  
+  /** Story: test random seed generation generates 4 clusters with proper ids and data */
+  public void testRandomSeedGenerator() throws Exception {
+    List<Vector> points = getPoints(raw);
+    File testData = new File("testdata");
+    if (!testData.exists()) {
+      testData.mkdir();
+    }
+    
+    File randomOutput = new File("testdata/random-output");
+    if (!randomOutput.exists()) {
+      randomOutput.mkdir();
+    }
+    
+    JobConf job = new JobConf(RandomSeedGenerator.class);
+    ClusteringTestUtils.writePointsToFile(points, "testdata/random-input", fs, job);
+    
+    RandomSeedGenerator.buildRandom("testdata/random-input", "testdata/random-output", 4);
+    
+    SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path("testdata/random-output/part-randomSeed"), job);
+    Writable key = (Writable) reader.getKeyClass().newInstance();
+    Cluster value = (Cluster) reader.getValueClass().newInstance();
+    
+    int clusterCount = 0;
+    Set<Integer> set = new HashSet<Integer>();
+    while (reader.next(key, value)) {
+      clusterCount++;
+      int id = value.getId();
+      TestCase.assertTrue(set.add(id)); // validate unique id's
+      
+      Vector v = value.getCenter();
+      assertVectorEquals(raw[id], v); // validate values match
+    }
+    
+    TestCase.assertEquals(4, clusterCount); // validate sample count
+  }
+  
+  public void assertVectorEquals(double[] raw, Vector v) {
+    TestCase.assertEquals(raw.length, v.size());
+    for (int i=0; i < raw.length; i++) {
+      TestCase.assertEquals(raw[i], v.getQuick(i));
+    }
+  }
+}
