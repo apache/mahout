@@ -75,7 +75,6 @@ class DisplayCanopy extends DisplayDirichlet {
   static List<Canopy> populateCanopies(DistanceMeasure measure,
       List<Vector> points, double t1, double t2) {
     List<Canopy> canopies = new ArrayList<Canopy>();
-    Canopy.config(measure, t1, t2);
     /**
      * Reference Implementation: Given a distance metric, one can create
      * canopies as follows: Start with a list of the data points in any order,
@@ -86,11 +85,12 @@ class DisplayCanopy extends DisplayDirichlet {
      * the list all points that are within distance threshold T2. Repeat until
      * the list is empty.
      */
+    int nextCanopyId = 0;
     while (!points.isEmpty()) {
       Iterator<Vector> ptIter = points.iterator();
       Vector p1 = ptIter.next();
       ptIter.remove();
-      Canopy canopy = new Canopy(p1);
+      Canopy canopy = new Canopy(p1, nextCanopyId++);
       canopies.add(canopy);
       while (ptIter.hasNext()) {
         Vector p2 = ptIter.next();

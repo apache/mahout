@@ -30,6 +30,8 @@ import java.util.Iterator;
 public class FuzzyKMeansCombiner extends MapReduceBase implements
     Reducer<Text, FuzzyKMeansInfo, Text, FuzzyKMeansInfo> {
 
+  private FuzzyKMeansClusterer clusterer;
+  
   @Override
   public void reduce(Text key, Iterator<FuzzyKMeansInfo> values,
                      OutputCollector<Text, FuzzyKMeansInfo> output, Reporter reporter) throws IOException {
@@ -40,7 +42,7 @@ public class FuzzyKMeansCombiner extends MapReduceBase implements
 
       if (info.getCombinerPass() == 0) // first time thru combiner
       {
-        cluster.addPoint(info.getVector(), Math.pow(info.getProbability(), SoftCluster.getM()));
+        cluster.addPoint(info.getVector(), Math.pow(info.getProbability(), clusterer.getM()));
       } else {
         cluster.addPoints(info.getVector(), info.getProbability());
       }
@@ -53,7 +55,7 @@ public class FuzzyKMeansCombiner extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     super.configure(job);
-    SoftCluster.configure(job);
+    clusterer = new FuzzyKMeansClusterer(job);
   }
 
 }

@@ -73,8 +73,9 @@ public final class RandomSeedGenerator {
 
       List<Text> chosenTexts = new ArrayList<Text>(k);
       List<Cluster> chosenClusters = new ArrayList<Cluster>(k);
+      int nextClusterId = 0;
       while (reader.next(key, value)) {
-        Cluster newCluster = new Cluster(value);
+        Cluster newCluster = new Cluster(value, nextClusterId++);
         newCluster.addPoint(value);
         Text newText = new Text(key.toString());
         int currentSize = chosenTexts.size();

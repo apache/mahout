@@ -85,13 +85,14 @@ public class TestKmeansClustering extends TestCase {
    * @param clusters the initial List<Cluster> of clusters
    * @param measure  the DistanceMeasure to use
    * @param maxIter  the maximum number of iterations
+   * @param convergenceDelta threshold until cluster is considered stable
    */
   private static void referenceKmeans(List<Vector> points, List<Cluster> clusters,
-                               DistanceMeasure measure, int maxIter) {
+                               DistanceMeasure measure, int maxIter, double convergenceDelta) {
     boolean converged = false;
     int iteration = 0;
     while (!converged && iteration++ < maxIter) {
-      converged = iterateReference(points, clusters, measure);
+      converged = iterateReference(points, clusters, measure, convergenceDelta);
     }
   }
 
@@ -102,9 +103,10 @@ public class TestKmeansClustering extends TestCase {
    * @param points   the List<Vector> having the input points
    * @param clusters the List<Cluster> clusters
    * @param measure  a DistanceMeasure to use
+   * @param convergenceDelta threshold until cluster is considered stable
    */
   private static boolean iterateReference(List<Vector> points, List<Cluster> clusters,
-                                   DistanceMeasure measure) {
+                                   DistanceMeasure measure, double convergenceDelta) {
     // iterate through all points, assigning each to the nearest cluster
     for (Vector point : points) {
       Cluster closestCluster = null;
@@ -121,7 +123,7 @@ public class TestKmeansClustering extends TestCase {
     // test for convergence
     boolean converged = true;
     for (Cluster cluster : clusters) {
-      if (!cluster.computeConvergence()) {
+      if (!cluster.computeConvergence(measure, convergenceDelta)) {
         converged = false;
       }
     }
@@ -149,7 +151,6 @@ public class TestKmeansClustering extends TestCase {
   public void testReferenceImplementation() throws Exception {
     List<Vector> points = getPoints(reference);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
-    Cluster.config(measure, 0.001);
     // try all possible values of k
     for (int k = 0; k < points.size(); k++) {
       System.out.println("Test k=" + (k + 1) + ':');
@@ -161,7 +162,7 @@ public class TestKmeansClustering extends TestCase {
       }
       // iterate clusters until they converge
       int maxIter = 10;
-      referenceKmeans(points, clusters, measure, maxIter);
+      referenceKmeans(points, clusters, measure, maxIter, 0.001);
       for (int c = 0; c < clusters.size(); c++) {
         Cluster cluster = clusters.get(c);
         System.out.println(cluster.toString());
@@ -183,8 +184,11 @@ public class TestKmeansClustering extends TestCase {
   /** Story: test that the mapper will map input points to the nearest cluster */
   public void testKMeansMapper() throws Exception {
     KMeansMapper mapper = new KMeansMapper();
-    EuclideanDistanceMeasure euclideanDistanceMeasure = new EuclideanDistanceMeasure();
-    Cluster.config(euclideanDistanceMeasure, 0.001);
+    JobConf conf = new JobConf();
+    conf.set(KMeansConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
+    conf.set(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.001");
+    conf.set(KMeansConfigKeys.CLUSTER_PATH_KEY, "");
+    mapper.configure(conf);
     List<Vector> points = getPoints(reference);
     for (int k = 0; k < points.size(); k++) {
       // pick k initial cluster centers at random
@@ -192,21 +196,21 @@ public class TestKmeansClustering extends TestCase {
       List<Cluster> clusters = new ArrayList<Cluster>();
 
       for (int i = 0; i < k + 1; i++) {
-        Cluster cluster = new Cluster(points.get(i));
+        Cluster cluster = new Cluster(points.get(i), i);
         // add the center so the centroid will be correct upon output
         cluster.addPoint(cluster.getCenter());
         clusters.add(cluster);
       }
-
-      Map<String, Cluster> clusterMap = loadClusterMap(clusters);
       mapper.config(clusters);
+
       // map the data
       for (Vector point : points) {
-        mapper.map(new Text(), point, collector,
-            null);
+        mapper.map(new Text(), point, collector, null);
       }
       assertEquals("Number of map results", k + 1, collector.getData().size());
       // now verify that all points are correctly allocated
+      EuclideanDistanceMeasure euclideanDistanceMeasure = new EuclideanDistanceMeasure();
+      Map<String, Cluster> clusterMap = loadClusterMap(clusters);
       for (String key : collector.getKeys()) {
         Cluster cluster = clusterMap.get(key);
         List<KMeansInfo> values = collector.getValue(key);
@@ -225,8 +229,11 @@ public class TestKmeansClustering extends TestCase {
   /** Story: test that the combiner will produce partial cluster totals for all of the clusters and points that it sees */
   public void testKMeansCombiner() throws Exception {
     KMeansMapper mapper = new KMeansMapper();
-    EuclideanDistanceMeasure euclideanDistanceMeasure = new EuclideanDistanceMeasure();
-    Cluster.config(euclideanDistanceMeasure, 0.001);
+    JobConf conf = new JobConf();
+    conf.set(KMeansConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
+    conf.set(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.001");
+    conf.set(KMeansConfigKeys.CLUSTER_PATH_KEY, "");
+    mapper.configure(conf);
     List<Vector> points = getPoints(reference);
     for (int k = 0; k < points.size(); k++) {
       // pick k initial cluster centers at random
@@ -235,7 +242,7 @@ public class TestKmeansClustering extends TestCase {
       for (int i = 0; i < k + 1; i++) {
         Vector vec = points.get(i);
 
-        Cluster cluster = new Cluster(vec);
+        Cluster cluster = new Cluster(vec, i);
         // add the center so the centroid will be correct upon output
         cluster.addPoint(cluster.getCenter());
         clusters.add(cluster);
@@ -277,7 +284,11 @@ public class TestKmeansClustering extends TestCase {
   public void testKMeansReducer() throws Exception {
     KMeansMapper mapper = new KMeansMapper();
     EuclideanDistanceMeasure euclideanDistanceMeasure = new EuclideanDistanceMeasure();
-    Cluster.config(euclideanDistanceMeasure, 0.001);
+    JobConf conf = new JobConf();
+    conf.set(KMeansConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
+    conf.set(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.001");
+    conf.set(KMeansConfigKeys.CLUSTER_PATH_KEY, "");
+    mapper.configure(conf);
     List<Vector> points = getPoints(reference);
     for (int k = 0; k < points.size(); k++) {
       System.out.println("K = " + k);
@@ -307,6 +318,7 @@ public class TestKmeansClustering extends TestCase {
 
       // now reduce the data
       KMeansReducer reducer = new KMeansReducer();
+      reducer.configure(conf);
       reducer.config(clusters);
       DummyOutputCollector<Text, Cluster> collector3 = new DummyOutputCollector<Text, Cluster>();
       for (String key : collector2.getKeys()) {
@@ -323,7 +335,7 @@ public class TestKmeansClustering extends TestCase {
         reference.add(new Cluster(vec, i));
       }
       boolean converged = iterateReference(points, reference,
-          euclideanDistanceMeasure);
+          euclideanDistanceMeasure, 0.001);
       if (k == 8) {
         assertTrue("not converged? " + k, converged);
       } else {

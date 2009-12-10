@@ -86,39 +86,39 @@ public class TestFuzzyKmeansClustering extends TestCase {
 
   public static void referenceFuzzyKMeans(List<Vector> points,
                                           List<SoftCluster> clusterList, Map<String, String> pointClusterInfo,
-                                          String distanceMeasureClass, double threshold, int numIter)
+                                          String distanceMeasureClass, double threshold, double m, int numIter)
       throws Exception {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     Class<?> cl = ccl.loadClass(distanceMeasureClass);
 
     DistanceMeasure measure = (DistanceMeasure) cl.newInstance();
-    SoftCluster.config(measure, threshold);
+    FuzzyKMeansClusterer clusterer = new FuzzyKMeansClusterer(measure, threshold, m);
     boolean converged = false;
     for (int iter = 0; !converged && iter < numIter; iter++) {
-      converged = iterateReference(points, clusterList, measure);
+      converged = iterateReference(points, clusterList, clusterer);
     }
-    computeCluster(points, clusterList, measure, pointClusterInfo);
+    computeCluster(points, clusterList, clusterer, pointClusterInfo);
   }
 
   public static boolean iterateReference(List<Vector> points,
-                                         List<SoftCluster> clusterList, DistanceMeasure measure) {
+                                         List<SoftCluster> clusterList, FuzzyKMeansClusterer clusterer) {
     // for each
     for (Vector point : points) {
       List<Double> clusterDistanceList = new ArrayList<Double>();
       for (SoftCluster cluster : clusterList) {
-        clusterDistanceList.add(measure.distance(point, cluster.getCenter()));
+        clusterDistanceList.add(clusterer.getMeasure().distance(point, cluster.getCenter()));
       }
 
       for (int i = 0; i < clusterList.size(); i++) {
-        double probWeight = SoftCluster.computeProbWeight(clusterDistanceList
+        double probWeight = clusterer.computeProbWeight(clusterDistanceList
             .get(i), clusterDistanceList);
         clusterList.get(i).addPoint(point,
-            Math.pow(probWeight, SoftCluster.getM()));
+            Math.pow(probWeight, clusterer.getM()));
       }
     }
     boolean converged = true;
     for (SoftCluster cluster : clusterList) {
-      if (!cluster.computeConvergence()) {
+      if (!clusterer.computeConvergence(cluster)) {
         converged = false;
       }
     }
@@ -133,17 +133,17 @@ public class TestFuzzyKmeansClustering extends TestCase {
   }
 
   public static void computeCluster(List<Vector> points,
-                                    List<SoftCluster> clusterList, DistanceMeasure measure,
+                                    List<SoftCluster> clusterList, FuzzyKMeansClusterer clusterer,
                                     Map<String, String> pointClusterInfo) {
 
     for (Vector point : points) {
       StringBuilder outputValue = new StringBuilder("[");
       List<Double> clusterDistanceList = new ArrayList<Double>();
       for (SoftCluster cluster : clusterList) {
-        clusterDistanceList.add(measure.distance(point, cluster.getCenter()));
+        clusterDistanceList.add(clusterer.getMeasure().distance(point, cluster.getCenter()));
       }
       for (int i = 0; i < clusterList.size(); i++) {
-        double probWeight = SoftCluster.computeProbWeight(clusterDistanceList
+        double probWeight = clusterer.computeProbWeight(clusterDistanceList
             .get(i), clusterDistanceList);
         outputValue.append(clusterList.get(i).getClusterId()).append(':')
             .append(probWeight).append(' ');
@@ -174,7 +174,7 @@ public class TestFuzzyKmeansClustering extends TestCase {
       Map<String, String> pointClusterInfo = new HashMap<String, String>();
       // run reference FuzzyKmeans algorithm
       referenceFuzzyKMeans(points, clusterList, pointClusterInfo,
-          EuclideanDistanceMeasure.class.getName(), 0.001, 2);
+          EuclideanDistanceMeasure.class.getName(), 0.001, 2, 2);
 
       // iterate for each point
       for (String value : pointClusterInfo.values()) {
@@ -295,9 +295,6 @@ public class TestFuzzyKmeansClustering extends TestCase {
     List<Vector> points = TestKmeansClustering
         .getPoints(TestKmeansClustering.reference);
 
-    DistanceMeasure measure = new EuclideanDistanceMeasure();
-    SoftCluster.config(measure, 0.001);
-
     for (int k = 0; k < points.size(); k++) {
       System.out.println("testKFuzzyKMeansMRJob k= " + k);
       // pick k initial cluster centers at random
@@ -306,7 +303,7 @@ public class TestFuzzyKmeansClustering extends TestCase {
       for (int i = 0; i < k + 1; i++) {
         Vector vec = tweakValue(points.get(i));
 
-        SoftCluster cluster = new SoftCluster(vec);
+        SoftCluster cluster = new SoftCluster(vec, i);
         cluster.addPoint(cluster.getCenter(), 1);
         clusterList.add(cluster);
       }
@@ -314,11 +311,16 @@ public class TestFuzzyKmeansClustering extends TestCase {
       // run mapper
       FuzzyKMeansMapper mapper = new FuzzyKMeansMapper();
       mapper.config(clusterList);
-
+      
+      JobConf conf = new JobConf();
+      conf.set(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
+      conf.set(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.001");
+      conf.set(FuzzyKMeansConfigKeys.M_KEY, "2");
+      mapper.configure(conf);
+      
       DummyOutputCollector<Text, FuzzyKMeansInfo> mapCollector = new DummyOutputCollector<Text, FuzzyKMeansInfo>();
       for (Vector point : points) {
-        mapper.map(new Text(), point, mapCollector,
-            null);
+        mapper.map(new Text(), point, mapCollector, null);
       }
 
       // now verify mapper output
@@ -355,9 +357,6 @@ public class TestFuzzyKmeansClustering extends TestCase {
     List<Vector> points = TestKmeansClustering
         .getPoints(TestKmeansClustering.reference);
 
-    DistanceMeasure measure = new EuclideanDistanceMeasure();
-    SoftCluster.config(measure, 0.001);
-
     for (int k = 0; k < points.size(); k++) {
       System.out.println("testKFuzzyKMeansMRJob k= " + k);
       // pick k initial cluster centers at random
@@ -366,7 +365,7 @@ public class TestFuzzyKmeansClustering extends TestCase {
       for (int i = 0; i < k + 1; i++) {
         Vector vec = tweakValue(points.get(i));
 
-        SoftCluster cluster = new SoftCluster(vec);
+        SoftCluster cluster = new SoftCluster(vec, i);
         cluster.addPoint(cluster.getCenter(), 1);
         clusterList.add(cluster);
       }
@@ -375,6 +374,12 @@ public class TestFuzzyKmeansClustering extends TestCase {
       FuzzyKMeansMapper mapper = new FuzzyKMeansMapper();
       mapper.config(clusterList);
 
+      JobConf conf = new JobConf();
+      conf.set(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
+      conf.set(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.001");
+      conf.set(FuzzyKMeansConfigKeys.M_KEY, "2");
+      mapper.configure(conf);
+      
       DummyOutputCollector<Text, FuzzyKMeansInfo> mapCollector = new DummyOutputCollector<Text, FuzzyKMeansInfo>();
       for (Vector point : points) {
         mapper.map(new Text(), point, mapCollector,
@@ -384,7 +389,8 @@ public class TestFuzzyKmeansClustering extends TestCase {
       // run combiner
       DummyOutputCollector<Text, FuzzyKMeansInfo> combinerCollector = new DummyOutputCollector<Text, FuzzyKMeansInfo>();
       FuzzyKMeansCombiner combiner = new FuzzyKMeansCombiner();
-
+      combiner.configure(conf);
+      
       for (String key : mapCollector.getKeys()) {
 
         List<FuzzyKMeansInfo> values = mapCollector.getValue(key);
@@ -406,9 +412,6 @@ public class TestFuzzyKmeansClustering extends TestCase {
     List<Vector> points = TestKmeansClustering
         .getPoints(TestKmeansClustering.reference);
 
-    DistanceMeasure measure = new EuclideanDistanceMeasure();
-    SoftCluster.config(measure, 0.001);
-
     for (int k = 0; k < points.size(); k++) {
       System.out.println("testKFuzzyKMeansMRJob k= " + k);
       // pick k initial cluster centers at random
@@ -426,6 +429,12 @@ public class TestFuzzyKmeansClustering extends TestCase {
       FuzzyKMeansMapper mapper = new FuzzyKMeansMapper();
       mapper.config(clusterList);
 
+      JobConf conf = new JobConf();
+      conf.set(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
+      conf.set(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.001");
+      conf.set(FuzzyKMeansConfigKeys.M_KEY, "2");
+      mapper.configure(conf);
+      
       DummyOutputCollector<Text, FuzzyKMeansInfo> mapCollector = new DummyOutputCollector<Text, FuzzyKMeansInfo>();
       for (Vector point : points) {
         mapper.map(new Text(), point, mapCollector,
@@ -435,9 +444,9 @@ public class TestFuzzyKmeansClustering extends TestCase {
       // run combiner
       DummyOutputCollector<Text, FuzzyKMeansInfo> combinerCollector = new DummyOutputCollector<Text, FuzzyKMeansInfo>();
       FuzzyKMeansCombiner combiner = new FuzzyKMeansCombiner();
-
+      combiner.configure(conf);
+      
       for (String key : mapCollector.getKeys()) {
-
         List<FuzzyKMeansInfo> values = mapCollector.getValue(key);
         combiner.reduce(new Text(key), values.iterator(), combinerCollector,
             null);
@@ -447,7 +456,8 @@ public class TestFuzzyKmeansClustering extends TestCase {
       DummyOutputCollector<Text, SoftCluster> reducerCollector = new DummyOutputCollector<Text, SoftCluster>();
       FuzzyKMeansReducer reducer = new FuzzyKMeansReducer();
       reducer.config(clusterList);
-
+      reducer.configure(conf);
+      
       for (String key : combinerCollector.getKeys()) {
         List<FuzzyKMeansInfo> values = combinerCollector.getValue(key);
         reducer
@@ -463,7 +473,11 @@ public class TestFuzzyKmeansClustering extends TestCase {
         Vector vec = tweakValue(points.get(i));
         reference.add(new SoftCluster(vec, i));
       }
-      iterateReference(points, reference, measure);
+      
+      DistanceMeasure measure = new EuclideanDistanceMeasure();
+      FuzzyKMeansClusterer clusterer = new FuzzyKMeansClusterer(measure, 0.001, 2);
+      iterateReference(points, reference, clusterer);
+      
       for (SoftCluster key : reference) {
         String clusterId = key.getIdentifier();
         List<SoftCluster> values = reducerCollector.getValue(clusterId);
@@ -480,9 +494,6 @@ public class TestFuzzyKmeansClustering extends TestCase {
   public void testFuzzyKMeansClusterMapper() throws Exception {
     List<Vector> points = TestKmeansClustering
         .getPoints(TestKmeansClustering.reference);
-
-    DistanceMeasure measure = new EuclideanDistanceMeasure();
-    SoftCluster.config(measure, 0.001);
 
     for (int k = 0; k < points.size(); k++) {
       System.out.println("testKFuzzyKMeansMRJob k= " + k);
@@ -501,6 +512,12 @@ public class TestFuzzyKmeansClustering extends TestCase {
       FuzzyKMeansMapper mapper = new FuzzyKMeansMapper();
       mapper.config(clusterList);
 
+      JobConf conf = new JobConf();
+      conf.set(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
+      conf.set(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.001");
+      conf.set(FuzzyKMeansConfigKeys.M_KEY, "2");
+      mapper.configure(conf);
+      
       DummyOutputCollector<Text, FuzzyKMeansInfo> mapCollector = new DummyOutputCollector<Text, FuzzyKMeansInfo>();
       for (Vector point : points) {
         mapper.map(new Text(), point, mapCollector,
@@ -512,7 +529,8 @@ public class TestFuzzyKmeansClustering extends TestCase {
       // run combiner
       DummyOutputCollector<Text, FuzzyKMeansInfo> combinerCollector = new DummyOutputCollector<Text, FuzzyKMeansInfo>();
       FuzzyKMeansCombiner combiner = new FuzzyKMeansCombiner();
-      //combiner.configure();
+      combiner.configure(conf);
+      
       for (String key : mapCollector.getKeys()) {
 
         List<FuzzyKMeansInfo> values = mapCollector.getValue(key);
@@ -524,7 +542,8 @@ public class TestFuzzyKmeansClustering extends TestCase {
       DummyOutputCollector<Text, SoftCluster> reducerCollector = new DummyOutputCollector<Text, SoftCluster>();
       FuzzyKMeansReducer reducer = new FuzzyKMeansReducer();
       reducer.config(clusterList);
-
+      reducer.configure(conf);
+      
       for (String key : combinerCollector.getKeys()) {
         List<FuzzyKMeansInfo> values = combinerCollector.getValue(key);
         reducer
@@ -542,12 +561,15 @@ public class TestFuzzyKmeansClustering extends TestCase {
         softCluster.recomputeCenter();
       }
 
-      DummyOutputCollector<Text, FuzzyKMeansOutput> clusterMapperCollector = new DummyOutputCollector<Text, FuzzyKMeansOutput>();
+      DummyOutputCollector<Text, FuzzyKMeansOutput> clusterMapperCollector 
+        = new DummyOutputCollector<Text, FuzzyKMeansOutput>();
+      
       FuzzyKMeansClusterMapper clusterMapper = new FuzzyKMeansClusterMapper();
       clusterMapper.config(reducerCluster);
+      clusterMapper.configure(conf);
+      
       for (Vector point : points) {
-        clusterMapper.map(new Text(), point,
-            clusterMapperCollector, null);
+        clusterMapper.map(new Text(), point, clusterMapperCollector, null);
       }
 
       // now run for one iteration of referencefuzzykmeans and compare the
@@ -560,7 +582,7 @@ public class TestFuzzyKmeansClustering extends TestCase {
       }
       Map<String, String> pointClusterInfo = new HashMap<String, String>();
       referenceFuzzyKMeans(points, reference, pointClusterInfo,
-          EuclideanDistanceMeasure.class.getName(), 0.001, 1);
+          EuclideanDistanceMeasure.class.getName(), 0.001, 2, 1);
 
       // Now compare the clustermapper results with reducer
       for (String key : clusterMapperCollector.getKeys()) {

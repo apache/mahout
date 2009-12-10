@@ -90,7 +90,7 @@ public class MeanShiftCanopyDriver {
       double t1 = Double.parseDouble(cmdLine.getValue(threshold1Opt).toString());
       double t2 = Double.parseDouble(cmdLine.getValue(threshold2Opt).toString());
       double convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt).toString());
-      runJob(input, output, output + MeanShiftCanopy.CONTROL_PATH_KEY,
+      runJob(input, output, output + MeanShiftCanopyConfigKeys.CONTROL_PATH_KEY,
         measureClassName, t1, t2, convergenceDelta);
     } catch (OptionException e) {
       log.error("Exception parsing command line: ", e);
@@ -127,12 +127,11 @@ public class MeanShiftCanopyDriver {
     conf.setNumReduceTasks(1);
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
-    conf.set(MeanShiftCanopy.DISTANCE_MEASURE_KEY, measureClassName);
-    conf.set(MeanShiftCanopy.CLUSTER_CONVERGENCE_KEY, String
-        .valueOf(convergenceDelta));
-    conf.set(MeanShiftCanopy.T1_KEY, String.valueOf(t1));
-    conf.set(MeanShiftCanopy.T2_KEY, String.valueOf(t2));
-    conf.set(MeanShiftCanopy.CONTROL_PATH_KEY, control);
+    conf.set(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY, measureClassName);
+    conf.set(MeanShiftCanopyConfigKeys.CLUSTER_CONVERGENCE_KEY, String.valueOf(convergenceDelta));
+    conf.set(MeanShiftCanopyConfigKeys.T1_KEY, String.valueOf(t1));
+    conf.set(MeanShiftCanopyConfigKeys.T2_KEY, String.valueOf(t2));
+    conf.set(MeanShiftCanopyConfigKeys.CONTROL_PATH_KEY, control);
 
     client.setConf(conf);
     try {

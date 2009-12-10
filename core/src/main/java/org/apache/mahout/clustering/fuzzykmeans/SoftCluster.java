@@ -17,45 +17,17 @@
 
 package org.apache.mahout.clustering.fuzzykmeans;
 
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.SquareRootFunction;
 import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.common.distance.DistanceMeasure;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class SoftCluster implements Writable {
-
-  public static final String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.kmeans.measure";
-
-  public static final String CLUSTER_PATH_KEY = "org.apache.mahout.clustering.kmeans.path";
-
-  public static final String CLUSTER_CONVERGENCE_KEY = "org.apache.mahout.clustering.kmeans.convergence";
-
-  public static final String M_KEY = "org.apache.mahout.clustering.fuzzykmeans.m";
-
-  private static double m = 2.0; // default value
-
-  private static final double MINIMAL_VALUE = 0.0000000001; // using it for
-
-  // adding
-
-  // exception
-  // this value to any
-  // zero valued
-  // variable to avoid
-  // divide by Zero
-
-  private static int nextClusterId = 0;
 
   // this cluster's clusterId
   private int clusterId;
@@ -81,11 +53,7 @@ public class SoftCluster implements Writable {
   private Vector s1;
 
   private Vector s2;
-
-  private static DistanceMeasure measure;
-
-  private static double convergenceDelta = 0;
-
+  
   /**
    * Format the SoftCluster for output
    *
@@ -135,126 +103,12 @@ public class SoftCluster implements Writable {
     this.weightedPointTotal = center.like();
   }
 
-
-  /**
-   * Configure the distance measure from the job
-   *
-   * @param job the JobConf for the job
-   */
-  public static void configure(JobConf job) {
-    try {
-      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class<?> cl = ccl.loadClass(job.get(DISTANCE_MEASURE_KEY));
-      measure = (DistanceMeasure) cl.newInstance();
-      measure.configure(job);
-      convergenceDelta = Double.parseDouble(job.get(CLUSTER_CONVERGENCE_KEY));
-      nextClusterId = 0;
-      m = Double.parseDouble(job.get(M_KEY));
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
-    }
-  }
-
-  /**
-   * Configure the distance measure directly. Used by unit tests.
-   *
-   * @param aMeasure          the DistanceMeasure
-   * @param aConvergenceDelta the delta value used to define convergence
-   */
-  public static void config(DistanceMeasure aMeasure, double aConvergenceDelta) {
-    measure = aMeasure;
-    convergenceDelta = aConvergenceDelta;
-    nextClusterId = 0;
-  }
-
-  /**
-   * Emit the point and its probability of belongingness to each cluster
-   *
-   * @param point    a point
-   * @param clusters a List<SoftCluster>
-   * @param output   the OutputCollector to emit into
-   */
-  public static void emitPointProbToCluster(Vector point,
-                                            List<SoftCluster> clusters,
-                                            OutputCollector<Text, FuzzyKMeansInfo> output) throws IOException {
-    List<Double> clusterDistanceList = new ArrayList<Double>();
-    for (SoftCluster cluster : clusters) {
-      clusterDistanceList.add(measure.distance(cluster.getCenter(), point));
-    }
-
-    for (int i = 0; i < clusters.size(); i++) {
-      double probWeight = computeProbWeight(clusterDistanceList.get(i),
-          clusterDistanceList);
-      Text key = new Text(clusters.get(i).getIdentifier()); // just output the
-      // identifier,avoids
-      // too much data
-      // traffic
-      /*Text value = new Text(Double.toString(probWeight)
-          + FuzzyKMeansDriver.MAPPER_VALUE_SEPARATOR + values.toString());*/
-      FuzzyKMeansInfo value = new FuzzyKMeansInfo(probWeight, point);
-      output.collect(key, value);
-    }
-  }
-
-  /**
-   * Output point with cluster info (Cluster and probability)
-   *
-   * @param point    a point
-   * @param clusters a List<SoftCluster> to test
-   * @param output   the OutputCollector to emit into
-   */
-  public static void outputPointWithClusterProbabilities(String key,
-                                                         Vector point, List<SoftCluster> clusters,
-                                                         OutputCollector<Text, FuzzyKMeansOutput> output) throws IOException {
-    List<Double> clusterDistanceList = new ArrayList<Double>();
-
-    for (SoftCluster cluster : clusters) {
-      clusterDistanceList.add(measure.distance(point, cluster.getCenter()));
-    }
-    FuzzyKMeansOutput fOutput = new FuzzyKMeansOutput(clusters.size());
-    for (int i = 0; i < clusters.size(); i++) {
-      // System.out.print("cluster:" + i + "\t" + clusterDistanceList.get(i));
-
-      double probWeight = computeProbWeight(clusterDistanceList.get(i),
-          clusterDistanceList);
-      /*outputValue.append(clusters.get(i).clusterId).append(':').append(
-          probWeight).append(' ');*/
-      fOutput.add(i, clusters.get(i), probWeight);
-    }
-    String name = point.getName();
-    output.collect(new Text(name != null && name.length() != 0 ? name
-        : point.asFormatString()),
-        fOutput);
-  }
-
-  /** Computes the probability of a point belonging to a cluster */
-  public static double computeProbWeight(double clusterDistance,
-                                         List<Double> clusterDistanceList) {
-    if (clusterDistance == 0) {
-      clusterDistance = MINIMAL_VALUE;
-    }
-    double denom = 0.0;
-    for (double eachCDist : clusterDistanceList) {
-      if (eachCDist == 0.0) {
-        eachCDist = MINIMAL_VALUE;
-      }
-
-      denom += Math.pow(clusterDistance / eachCDist, 2.0 / (m - 1));
-
-    }
-    return 1.0 / denom;
-  }
-
   /**
    * Compute the centroid
    *
    * @return the new centroid
    */
-  private Vector computeCentroid() {
+  public Vector computeCentroid() {
     if (pointProbSum == 0) {
       return weightedPointTotal;
     } else if (centroid == null) {
@@ -274,7 +128,6 @@ public class SoftCluster implements Writable {
    * @param center the center point
    */
   public SoftCluster(Vector center) {
-    this.clusterId = nextClusterId++;
     this.center = center;
     this.pointProbSum = 0;
 
@@ -389,17 +242,6 @@ public class SoftCluster implements Writable {
     weightedPointTotal = center.like();
   }
 
-  /**
-   * Return if the cluster is converged by comparing its center and centroid.
-   *
-   * @return if the cluster is converged
-   */
-  public boolean computeConvergence() {
-    Vector centroid = computeCentroid();
-    converged = measure.distance(center, centroid) <= convergenceDelta;
-    return converged;
-  }
-
   public Vector getWeightedPointTotal() {
     return weightedPointTotal;
   }
@@ -412,7 +254,7 @@ public class SoftCluster implements Writable {
     return converged;
   }
 
-  private void setConverged(boolean converged) {
+  public void setConverged(boolean converged) {
     this.converged = converged;
   }
 
@@ -420,8 +262,6 @@ public class SoftCluster implements Writable {
     return clusterId;
   }
 
-  public static double getM() {
-    return m;
-  }
+
 
 }

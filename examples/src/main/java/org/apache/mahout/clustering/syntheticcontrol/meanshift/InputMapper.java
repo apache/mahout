@@ -36,7 +36,8 @@ public class InputMapper extends MapReduceBase implements
     Mapper<LongWritable, Text, Text, MeanShiftCanopy> {
 
   private static final Pattern SPACE = Pattern.compile(" ");
-
+  int nextCanopyId = 0;
+  
   @Override
   public void map(LongWritable key, Text values,
       OutputCollector<Text, MeanShiftCanopy> output, Reporter reporter) throws IOException {
@@ -51,7 +52,7 @@ public class InputMapper extends MapReduceBase implements
     int index = 0;
     for (Double d : doubles)
       point.set(index++, d);
-    MeanShiftCanopy canopy = new MeanShiftCanopy(point);
+    MeanShiftCanopy canopy = new MeanShiftCanopy(point, nextCanopyId++);
     output.collect(new Text(), canopy);
   }
 

@@ -22,6 +22,7 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.common.distance.DistanceMeasure;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,6 +35,8 @@ public class KMeansReducer extends MapReduceBase implements
     Reducer<Text, KMeansInfo, Text, Cluster> {
 
   private Map<String, Cluster> clusterMap;
+  private double convergenceDelta;
+  private DistanceMeasure measure;
 
   @Override
   public void reduce(Text key, Iterator<KMeansInfo> values,
@@ -45,7 +48,7 @@ public class KMeansReducer extends MapReduceBase implements
       cluster.addPoints(delta.getPoints(), delta.getPointTotal());
     }
     // force convergence calculation
-    cluster.computeConvergence();
+    cluster.computeConvergence(this.measure, this.convergenceDelta);
     output.collect(new Text(cluster.getIdentifier()), cluster);
   }
 
@@ -53,16 +56,33 @@ public class KMeansReducer extends MapReduceBase implements
   public void configure(JobConf job) {
 
     super.configure(job);
-    Cluster.configure(job);
-    clusterMap = new HashMap<String, Cluster>();
+    try {
+      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+      Class<?> cl = ccl.loadClass(job
+          .get(KMeansConfigKeys.DISTANCE_MEASURE_KEY));
+      this.measure = (DistanceMeasure) cl.newInstance();
+      this.measure.configure(job);
 
-    List<Cluster> clusters = new ArrayList<Cluster>();
-    KMeansUtil.configureWithClusterInfo(job.get(Cluster.CLUSTER_PATH_KEY),
-        clusters);
-    setClusterMap(clusters);
+      this.convergenceDelta = Double.parseDouble(job
+          .get(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY));
 
-    if (clusterMap.isEmpty()) {
-      throw new NullPointerException("Cluster is empty!!!");
+      this.clusterMap = new HashMap<String, Cluster>();
+
+      String path = job.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
+      if (job != null && path.length() > 0) {
+        List<Cluster> clusters = new ArrayList<Cluster>();
+        KMeansUtil.configureWithClusterInfo(path, clusters);
+        setClusterMap(clusters);
+        if (clusterMap.isEmpty()) {
+          throw new NullPointerException("Cluster is empty!");
+        }
+      }
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException(e);
+    } catch (IllegalAccessException e) {
+      throw new IllegalStateException(e);
+    } catch (InstantiationException e) {
+      throw new IllegalStateException(e);
     }
   }
 

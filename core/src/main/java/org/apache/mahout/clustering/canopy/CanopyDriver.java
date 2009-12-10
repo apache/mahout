@@ -134,11 +134,10 @@ public final class CanopyDriver {
     log.info("Input: " + input + " Out: " + output + " Measure: " + measureClassName + " t1: " + t1
         + " t2: " + t2 + " Vector Class: " + vectorClass.getSimpleName());
     JobClient client = new JobClient();
-    JobConf conf = new JobConf(
-        org.apache.mahout.clustering.canopy.CanopyDriver.class);
-    conf.set(Canopy.DISTANCE_MEASURE_KEY, measureClassName);
-    conf.set(Canopy.T1_KEY, String.valueOf(t1));
-    conf.set(Canopy.T2_KEY, String.valueOf(t2));
+    JobConf conf = new JobConf(CanopyDriver.class);
+    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measureClassName);
+    conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(t1));
+    conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(t2));
 
     conf.setInputFormat(SequenceFileInputFormat.class);
 

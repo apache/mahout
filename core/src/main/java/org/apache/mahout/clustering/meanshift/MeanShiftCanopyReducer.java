@@ -35,7 +35,7 @@ public class MeanShiftCanopyReducer extends MapReduceBase implements
     Reducer<Text, MeanShiftCanopy, Text, MeanShiftCanopy> {
 
   private final List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
-
+  private MeanShiftCanopyClusterer clusterer;
   private boolean allConverged = true;
 
   private JobConf conf;
@@ -47,11 +47,11 @@ public class MeanShiftCanopyReducer extends MapReduceBase implements
 
     while (values.hasNext()) {
       MeanShiftCanopy canopy = values.next();
-      MeanShiftCanopy.mergeCanopy(canopy.shallowCopy(), canopies);
+      clusterer.mergeCanopy(canopy.shallowCopy(), canopies);
     }
 
     for (MeanShiftCanopy canopy : canopies) {
-      allConverged = canopy.shiftToMean() && allConverged;
+      allConverged = clusterer.shiftToMean(canopy) && allConverged;
       output.collect(new Text(canopy.getIdentifier()), canopy);
     }
 
@@ -61,13 +61,13 @@ public class MeanShiftCanopyReducer extends MapReduceBase implements
   public void configure(JobConf job) {
     super.configure(job);
     this.conf = job;
-    MeanShiftCanopy.configure(job);
+    clusterer = new MeanShiftCanopyClusterer(job);
   }
 
   @Override
   public void close() throws IOException {
     if (allConverged) {
-      Path path = new Path(conf.get(MeanShiftCanopy.CONTROL_PATH_KEY));
+      Path path = new Path(conf.get(MeanShiftCanopyConfigKeys.CONTROL_PATH_KEY));
       FileSystem.get(conf).createNewFile(path);
     }
     super.close();

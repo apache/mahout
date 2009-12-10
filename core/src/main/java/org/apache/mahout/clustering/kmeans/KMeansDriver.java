@@ -230,11 +230,11 @@ public class KMeansDriver {
     conf.setCombinerClass(KMeansCombiner.class);
     conf.setReducerClass(KMeansReducer.class);
     conf.setNumReduceTasks(numReduceTasks);
-    conf.set(Cluster.CLUSTER_PATH_KEY, clustersIn);
-    conf.set(Cluster.DISTANCE_MEASURE_KEY, measureClass);
-    conf.set(Cluster.CLUSTER_CONVERGENCE_KEY, convergenceDelta);
-    conf.setInt(Cluster.ITERATION_NUMBER, iteration);
-
+    conf.set(KMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn);
+    conf.set(KMeansConfigKeys.DISTANCE_MEASURE_KEY, measureClass);
+    conf.set(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, convergenceDelta);
+    conf.set(KMeansConfigKeys.ITERATION_NUMBER, String.valueOf(iteration));
+    
     try {
       JobClient.runJob(conf);
       FileSystem fs = FileSystem.get(outPath.toUri(), conf);
@@ -277,9 +277,9 @@ public class KMeansDriver {
 
     conf.setMapperClass(KMeansClusterMapper.class);
     conf.setNumReduceTasks(0);
-    conf.set(Cluster.CLUSTER_PATH_KEY, clustersIn);
-    conf.set(Cluster.DISTANCE_MEASURE_KEY, measureClass);
-    conf.set(Cluster.CLUSTER_CONVERGENCE_KEY, convergenceDelta);
+    conf.set(KMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn);
+    conf.set(KMeansConfigKeys.DISTANCE_MEASURE_KEY, measureClass);
+    conf.set(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, convergenceDelta);
 
     try {
       JobClient.runJob(conf);

@@ -33,7 +33,8 @@ public class MeanShiftCanopyMapper extends MapReduceBase implements
     Mapper<WritableComparable<?>, MeanShiftCanopy, Text, MeanShiftCanopy> {
 
   private final List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
-
+  
+  private MeanShiftCanopyClusterer clusterer;
   private OutputCollector<Text, MeanShiftCanopy> output;
 
   @Override
@@ -41,13 +42,13 @@ public class MeanShiftCanopyMapper extends MapReduceBase implements
                   OutputCollector<Text, MeanShiftCanopy> output, Reporter reporter)
       throws IOException {
     this.output = output;
-    MeanShiftCanopy.mergeCanopy(canopy.shallowCopy(), canopies);
+    clusterer.mergeCanopy(canopy.shallowCopy(), canopies);
   }
 
   @Override
   public void close() throws IOException {
     for (MeanShiftCanopy canopy : canopies) {
-      canopy.shiftToMean();
+      clusterer.shiftToMean(canopy);
       output.collect(new Text("canopy"), canopy);
     }
     super.close();
@@ -56,7 +57,7 @@ public class MeanShiftCanopyMapper extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     super.configure(job);
-    MeanShiftCanopy.configure(job);
+    clusterer = new MeanShiftCanopyClusterer(job);
   }
 
 }

@@ -37,6 +37,7 @@ class DisplayMeanShift extends DisplayDirichlet {
     this.setTitle("Canopy Clusters (> 1.5% of population)");
   }
 
+  private static MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(new EuclideanDistanceMeasure(), 1.0, 0.05, 0.5);
   private static List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
 
   // TODO this is never queried?
@@ -51,8 +52,8 @@ class DisplayMeanShift extends DisplayDirichlet {
     // plot the axes
     g2.setColor(Color.BLACK);
     Vector dv = new DenseVector(2).assign(size / 2.0);
-    Vector dv1 = new DenseVector(2).assign(MeanShiftCanopy.getT1());
-    Vector dv2 = new DenseVector(2).assign(MeanShiftCanopy.getT2());
+    Vector dv1 = new DenseVector(2).assign(clusterer.getT1());
+    Vector dv2 = new DenseVector(2).assign(clusterer.getT2());
     plotRectangle(g2, new DenseVector(2).assign(2), dv);
     plotRectangle(g2, new DenseVector(2).assign(-2), dv);
 
@@ -73,10 +74,10 @@ class DisplayMeanShift extends DisplayDirichlet {
   }
 
   private static void testReferenceImplementation() {
-    MeanShiftCanopy.config(new EuclideanDistanceMeasure(), 1.0, 0.05, 0.5);
     // add all points to the canopies
+    int nextCanopyId = 0;
     for (Vector aRaw : sampleData) {
-      MeanShiftCanopy.mergeCanopy(new MeanShiftCanopy(aRaw), canopies);
+      clusterer.mergeCanopy(new MeanShiftCanopy(aRaw, nextCanopyId++), canopies);
     }
     boolean done = false;
     while (!done) {// shift canopies to their centroids
@@ -85,8 +86,8 @@ class DisplayMeanShift extends DisplayDirichlet {
       //List<Vector> centers = new ArrayList<Vector>();
       for (MeanShiftCanopy canopy : canopies) {
         //centers.add(canopy.getCenter());
-        done = canopy.shiftToMean() && done;
-        MeanShiftCanopy.mergeCanopy(canopy, migratedCanopies);
+        done = clusterer.shiftToMean(canopy) && done;
+        clusterer.mergeCanopy(canopy, migratedCanopies);
       }
       //iterationCenters.add(centers);
       canopies = migratedCanopies;

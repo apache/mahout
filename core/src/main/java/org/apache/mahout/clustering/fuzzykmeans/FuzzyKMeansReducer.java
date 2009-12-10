@@ -34,8 +34,9 @@ import java.util.Map;
 public class FuzzyKMeansReducer extends MapReduceBase implements
     Reducer<Text, FuzzyKMeansInfo, Text, SoftCluster> {
 
-  private Map<String, SoftCluster> clusterMap;
-
+  private final Map<String, SoftCluster> clusterMap = new HashMap<String, SoftCluster>();
+  private FuzzyKMeansClusterer clusterer; 
+  
   @Override
   public void reduce(Text key, Iterator<FuzzyKMeansInfo> values,
                      OutputCollector<Text, SoftCluster> output, Reporter reporter) throws IOException {
@@ -47,14 +48,14 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
 
       if (value.getCombinerPass() == 0) // escaped from combiner
       {
-        cluster.addPoint(value.getVector(), Math.pow(value.getProbability(), SoftCluster.getM()));
+        cluster.addPoint(value.getVector(), Math.pow(value.getProbability(), clusterer.getM()));
       } else {
         cluster.addPoints(value.getVector(), value.getProbability());
       }
 
     }
     // force convergence calculation
-    cluster.computeConvergence();
+    clusterer.computeConvergence(cluster);
     output.collect(new Text(cluster.getIdentifier()), cluster);
   }
 
@@ -62,21 +63,22 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
   public void configure(JobConf job) {
 
     super.configure(job);
-    SoftCluster.configure(job);
-    clusterMap = new HashMap<String, SoftCluster>();
+    clusterer = new FuzzyKMeansClusterer(job);
 
     List<SoftCluster> clusters = new ArrayList<SoftCluster>();
-    FuzzyKMeansUtil.configureWithClusterInfo(job
-        .get(SoftCluster.CLUSTER_PATH_KEY), clusters);
-    setClusterMap(clusters);
-
+    String clusterPath = job.get(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY);
+    if (clusterPath != null && clusterPath.length() > 0) {
+      FuzzyKMeansUtil.configureWithClusterInfo(clusterPath, clusters);
+      setClusterMap(clusters);
+    }
+    
     if (clusterMap.isEmpty()) {
       throw new NullPointerException("Cluster is empty!!!");
     }
   }
 
   private void setClusterMap(List<SoftCluster> clusters) {
-    clusterMap = new HashMap<String, SoftCluster>();
+    clusterMap.clear();
     for (SoftCluster cluster : clusters) {
       clusterMap.put(cluster.getIdentifier(), cluster);
     }
@@ -85,7 +87,6 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
 
   public void config(List<SoftCluster> clusters) {
     setClusterMap(clusters);
-
   }
 
 }

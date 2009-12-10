@@ -274,10 +274,10 @@ public class FuzzyKMeansDriver {
     conf.setNumMapTasks(numMapTasks);
     conf.setNumReduceTasks(numReduceTasks);
 
-    conf.set(SoftCluster.CLUSTER_PATH_KEY, clustersIn);
-    conf.set(SoftCluster.DISTANCE_MEASURE_KEY, measureClass);
-    conf.set(SoftCluster.CLUSTER_CONVERGENCE_KEY, String.valueOf(convergenceDelta));
-    conf.set(SoftCluster.M_KEY, String.valueOf(m));
+    conf.set(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn);
+    conf.set(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY, measureClass);
+    conf.set(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, String.valueOf(convergenceDelta));
+    conf.set(FuzzyKMeansConfigKeys.M_KEY, String.valueOf(m));
 
     // uncomment it to run locally
     // conf.set("mapred.job.tracker", "local");
@@ -327,10 +327,10 @@ public class FuzzyKMeansDriver {
     // conf.set("mapred.job.tracker", "local");
     conf.setNumMapTasks(numMapTasks);
     conf.setNumReduceTasks(0);
-    conf.set(SoftCluster.CLUSTER_PATH_KEY, clustersIn);
-    conf.set(SoftCluster.DISTANCE_MEASURE_KEY, measureClass);
-    conf.set(SoftCluster.CLUSTER_CONVERGENCE_KEY, String.valueOf(convergenceDelta));
-    conf.set(SoftCluster.M_KEY, String.valueOf(m));
+    conf.set(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn);
+    conf.set(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY, measureClass);
+    conf.set(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, String.valueOf(convergenceDelta));
+    conf.set(FuzzyKMeansConfigKeys.M_KEY, String.valueOf(m));
     try {
       JobClient.runJob(conf);
     } catch (IOException e) {

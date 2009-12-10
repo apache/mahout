@@ -103,17 +103,19 @@ public class TestMeanShift extends TestCase {
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path,
         LongWritable.class, MeanShiftCanopy.class);
     long recNum = 0;
+    int nextCanopyId = 0;
     for (Vector point : points) {
-      MeanShiftCanopy canopy = new MeanShiftCanopy(point);
+      MeanShiftCanopy canopy = new MeanShiftCanopy(point, nextCanopyId++);
       writer.append(new LongWritable(recNum++), canopy);
     }
     writer.close();
   }
 
   private List<MeanShiftCanopy> getInitialCanopies() {
+    int nextCanopyId = 0;
     List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
     for (Vector point : raw) {
-      canopies.add(new MeanShiftCanopy(point));
+      canopies.add(new MeanShiftCanopy(point, nextCanopyId++));
     }
     return canopies;
   }
@@ -147,11 +149,12 @@ public class TestMeanShift extends TestCase {
    * reasonable manner.
    */
   public void testReferenceImplementation() {
-    MeanShiftCanopy.config(new EuclideanDistanceMeasure(), 4.0, 1.0, 0.5);
+    MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(new EuclideanDistanceMeasure(), 4.0, 1.0, 0.5);
     List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
     // add all points to the canopies
+    int nextCanopyId = 0;
     for (Vector aRaw : raw) {
-      MeanShiftCanopy.mergeCanopy(new MeanShiftCanopy(aRaw), canopies);
+      clusterer.mergeCanopy(new MeanShiftCanopy(aRaw, nextCanopyId++), canopies);
     }
     boolean done = false;
     int iter = 1;
@@ -159,8 +162,8 @@ public class TestMeanShift extends TestCase {
       done = true;
       List<MeanShiftCanopy> migratedCanopies = new ArrayList<MeanShiftCanopy>();
       for (MeanShiftCanopy canopy : canopies) {
-        done = canopy.shiftToMean() && done;
-        MeanShiftCanopy.mergeCanopy(canopy, migratedCanopies);
+        done = clusterer.shiftToMean(canopy) && done;
+        clusterer.mergeCanopy(canopy, migratedCanopies);
       }
       canopies = migratedCanopies;
       printCanopies(canopies);
@@ -176,15 +179,23 @@ public class TestMeanShift extends TestCase {
   public void testCanopyMapperEuclidean() throws Exception {
     MeanShiftCanopyMapper mapper = new MeanShiftCanopyMapper();
     DummyOutputCollector<Text, MeanShiftCanopy> collector = new DummyOutputCollector<Text, MeanShiftCanopy>();
-    MeanShiftCanopy.config(euclideanDistanceMeasure, 4, 1, 0.5);
+    MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(euclideanDistanceMeasure, 4, 1, 0.5);
     // get the initial canopies
     List<MeanShiftCanopy> canopies = getInitialCanopies();
     // build the reference set
     List<MeanShiftCanopy> refCanopies = new ArrayList<MeanShiftCanopy>();
+    int nextCanopyId = 0;
     for (Vector aRaw : raw) {
-      MeanShiftCanopy.mergeCanopy(new MeanShiftCanopy(aRaw), refCanopies);
+      clusterer.mergeCanopy(new MeanShiftCanopy(aRaw, nextCanopyId++), refCanopies);
     }
 
+    JobConf conf = new JobConf();
+    conf.set(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
+    conf.set(MeanShiftCanopyConfigKeys.T1_KEY, "4");
+    conf.set(MeanShiftCanopyConfigKeys.T2_KEY, "1");
+    conf.set(MeanShiftCanopyConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.5");
+    mapper.configure(conf);
+    
     // map the data
     for (MeanShiftCanopy canopy : canopies) {
       mapper.map(new Text(), canopy, collector, null);
@@ -199,7 +210,7 @@ public class TestMeanShift extends TestCase {
     // add all points to the reference canopies
     Map<String, MeanShiftCanopy> refCanopyMap = new HashMap<String, MeanShiftCanopy>();
     for (MeanShiftCanopy canopy : refCanopies) {
-      canopy.shiftToMean();
+      clusterer.shiftToMean(canopy);
       refCanopyMap.put(canopy.getIdentifier(), canopy);
     }
     // build a map of the combiner output
@@ -213,8 +224,8 @@ public class TestMeanShift extends TestCase {
       MeanShiftCanopy ref = stringMeanShiftCanopyEntry.getValue();
 
       MeanShiftCanopy canopy = canopyMap.get((ref.isConverged() ? "V" : "C")
-          + (ref.getCanopyId() - raw.length));
-      assertEquals("ids", ref.getCanopyId(), canopy.getCanopyId() + 100);
+          + ref.getCanopyId());
+      assertEquals("ids", ref.getCanopyId(), canopy.getCanopyId());
       assertEquals("centers(" + ref.getIdentifier() + ')', ref.getCenter()
           .asFormatString(), canopy.getCenter().asFormatString());
       assertEquals("bound points", ref.getBoundPoints().size(), canopy
@@ -230,26 +241,34 @@ public class TestMeanShift extends TestCase {
     MeanShiftCanopyMapper mapper = new MeanShiftCanopyMapper();
     MeanShiftCanopyReducer reducer = new MeanShiftCanopyReducer();
     DummyOutputCollector<Text, MeanShiftCanopy> mapCollector = new DummyOutputCollector<Text, MeanShiftCanopy>();
-    MeanShiftCanopy.config(euclideanDistanceMeasure, 4, 1, 0.5);
+    MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(euclideanDistanceMeasure, 4, 1, 0.5);
     // get the initial canopies
     List<MeanShiftCanopy> canopies = getInitialCanopies();
     // build the mapper output reference set
     List<MeanShiftCanopy> mapperReference = new ArrayList<MeanShiftCanopy>();
+    int nextCanopyId = 0;
     for (Vector aRaw : raw) {
-      MeanShiftCanopy.mergeCanopy(new MeanShiftCanopy(aRaw), mapperReference);
+      clusterer.mergeCanopy(new MeanShiftCanopy(aRaw, nextCanopyId++), mapperReference);
     }
     for (MeanShiftCanopy canopy : mapperReference) {
-      canopy.shiftToMean();
+      clusterer.shiftToMean(canopy);
     }
     // build the reducer reference output set
     List<MeanShiftCanopy> reducerReference = new ArrayList<MeanShiftCanopy>();
     for (MeanShiftCanopy canopy : mapperReference) {
-      MeanShiftCanopy.mergeCanopy(canopy, reducerReference);
+      clusterer.mergeCanopy(canopy, reducerReference);
     }
     for (MeanShiftCanopy canopy : reducerReference) {
-      canopy.shiftToMean();
+      clusterer.shiftToMean(canopy);
     }
-
+    
+    JobConf conf = new JobConf();
+    conf.set(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
+    conf.set(MeanShiftCanopyConfigKeys.T1_KEY, "4");
+    conf.set(MeanShiftCanopyConfigKeys.T2_KEY, "1");
+    conf.set(MeanShiftCanopyConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.5");
+    mapper.configure(conf);
+    
     // map the data
     for (MeanShiftCanopy canopy : canopies) {
       mapper.map(new Text(), canopy, mapCollector, null);
@@ -259,6 +278,7 @@ public class TestMeanShift extends TestCase {
     assertEquals("Number of map results", 1, mapCollector.getData().size());
     // now reduce the mapper output
     DummyOutputCollector<Text, MeanShiftCanopy> reduceCollector = new DummyOutputCollector<Text, MeanShiftCanopy>();
+    reducer.configure(conf);
     reducer.reduce(new Text("canopy"), mapCollector.getValue("canopy")
         .iterator(), reduceCollector, null);
     reducer.close();
@@ -278,12 +298,10 @@ public class TestMeanShift extends TestCase {
       MeanShiftCanopy refCanopy = mapEntry.getValue();
 
       List<MeanShiftCanopy> values = reduceCollector.getValue((refCanopy
-          .isConverged() ? "V" : "C")
-          + (refCanopy.getCanopyId() - raw.length));
+          .isConverged() ? "V" : "C") + refCanopy.getCanopyId());
       assertEquals("values", 1, values.size());
       MeanShiftCanopy reducerCanopy = values.get(0);
-      assertEquals("ids", refCanopy.getCanopyId(),
-          reducerCanopy.getCanopyId() + 100);
+      assertEquals("ids", refCanopy.getCanopyId(), reducerCanopy.getCanopyId());
       int refNumPoints = refCanopy.getNumPoints();
       int reducerNumPoints = reducerCanopy.getNumPoints();
       assertEquals("numPoints", refNumPoints, reducerNumPoints);

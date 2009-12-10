@@ -37,17 +37,19 @@ public class CanopyMapper extends MapReduceBase implements
 
   private OutputCollector<Text, Vector> outputCollector;
 
+  private CanopyClusterer canopyClusterer;
+  
   @Override
   public void map(WritableComparable<?> key, Vector point,
                   OutputCollector<Text, Vector> output, Reporter reporter) throws IOException {
     outputCollector = output;
-    Canopy.addPointToCanopies(point, canopies);
+    canopyClusterer.addPointToCanopies(point, canopies);
   }
 
   @Override
   public void configure(JobConf job) {
     super.configure(job);
-    Canopy.configure(job);
+    canopyClusterer = new CanopyClusterer(job);
   }
 
   @Override

@@ -43,7 +43,7 @@ public abstract class ClusterBase implements Writable {
     return id;
   }
 
-  protected void setId(int id) {
+  public void setId(int id) {
     this.id = id;
   }
 
@@ -51,7 +51,7 @@ public abstract class ClusterBase implements Writable {
     return center;
   }
 
-  protected void setCenter(Vector center) {
+  public void setCenter(Vector center) {
     this.center = center;
   }
 
@@ -59,7 +59,7 @@ public abstract class ClusterBase implements Writable {
     return numPoints;
   }
 
-  protected void setNumPoints(int numPoints) {
+  public void setNumPoints(int numPoints) {
     this.numPoints = numPoints;
   }
 
@@ -67,7 +67,7 @@ public abstract class ClusterBase implements Writable {
     return pointTotal;
   }
 
-  protected void setPointTotal(Vector pointTotal) {
+  public void setPointTotal(Vector pointTotal) {
     this.pointTotal = pointTotal;
   }
 

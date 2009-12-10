@@ -172,7 +172,6 @@ public class TestCanopyCreation extends TestCase {
   static List<Canopy> populateCanopies(DistanceMeasure measure,
                                        List<Vector> points, double t1, double t2) {
     List<Canopy> canopies = new ArrayList<Canopy>();
-    Canopy.config(measure, t1, t2);
     /**
      * Reference Implementation: Given a distance metric, one can create
      * canopies as follows: Start with a list of the data points in any order,
@@ -183,11 +182,12 @@ public class TestCanopyCreation extends TestCase {
      * the list all points that are within distance threshold T2. Repeat until
      * the list is empty.
      */
+    int nextCanopyId = 0;
     while (!points.isEmpty()) {
       Iterator<Vector> ptIter = points.iterator();
       Vector p1 = ptIter.next();
       ptIter.remove();
-      Canopy canopy = new VisibleCanopy(p1);
+      Canopy canopy = new VisibleCanopy(p1, nextCanopyId++);
       canopies.add(canopy);
       while (ptIter.hasNext()) {
         Vector p2 = ptIter.next();
@@ -252,11 +252,11 @@ public class TestCanopyCreation extends TestCase {
   /** Story: User can cluster points without instantiating them all in memory at once */
   public void testIterativeManhattan() throws Exception {
     List<Vector> points = getPoints(raw);
-    Canopy.config(new ManhattanDistanceMeasure(), 3.1, 2.1);
+    CanopyClusterer clusterer = new CanopyClusterer(new ManhattanDistanceMeasure(), 3.1, 2.1);
 
     List<Canopy> canopies = new ArrayList<Canopy>();
     for (Vector point : points) {
-      Canopy.addPointToCanopies(point, canopies);
+      clusterer.addPointToCanopies(point, canopies);
     }
 
     System.out.println("testIterativeManhattan");
@@ -267,11 +267,11 @@ public class TestCanopyCreation extends TestCase {
   /** Story: User can cluster points without instantiating them all in memory at once */
   public void testIterativeEuclidean() throws Exception {
     List<Vector> points = getPoints(raw);
-    Canopy.config(new EuclideanDistanceMeasure(), 3.1, 2.1);
+    CanopyClusterer clusterer = new CanopyClusterer(new EuclideanDistanceMeasure(), 3.1, 2.1);
 
     List<Canopy> canopies = new ArrayList<Canopy>();
     for (Vector point : points) {
-      Canopy.addPointToCanopies(point, canopies);
+      clusterer.addPointToCanopies(point, canopies);
     }
 
     System.out.println("testIterativeEuclidean");
@@ -285,8 +285,13 @@ public class TestCanopyCreation extends TestCase {
    */
   public void testCanopyMapperManhattan() throws Exception {
     CanopyMapper mapper = new CanopyMapper();
+    JobConf conf = new JobConf();
+    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.ManhattanDistanceMeasure");
+    conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
+    conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
+    mapper.configure(conf);
+    
     DummyOutputCollector<Text, Vector> collector = new DummyOutputCollector<Text, Vector>();
-    Canopy.config(manhattanDistanceMeasure, (3.1), (2.1));
     List<Vector> points = getPoints(raw);
     // map the data
     for (Vector point : points) {
@@ -310,8 +315,13 @@ public class TestCanopyCreation extends TestCase {
    */
   public void testCanopyMapperEuclidean() throws Exception {
     CanopyMapper mapper = new CanopyMapper();
+    JobConf conf = new JobConf();
+    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
+    conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
+    conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
+    mapper.configure(conf);
+    
     DummyOutputCollector<Text, Vector> collector = new DummyOutputCollector<Text, Vector>();
-    Canopy.config(euclideanDistanceMeasure, (3.1), (2.1));
     List<Vector> points = getPoints(raw);
     // map the data
     for (Vector point : points) {
@@ -335,8 +345,13 @@ public class TestCanopyCreation extends TestCase {
    */
   public void testCanopyReducerManhattan() throws Exception {
     CanopyReducer reducer = new CanopyReducer();
+    JobConf conf = new JobConf();
+    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.ManhattanDistanceMeasure");
+    conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
+    conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
+    reducer.configure(conf);
+    
     DummyOutputCollector<Text, Canopy> collector = new DummyOutputCollector<Text, Canopy>();
-    Canopy.config(manhattanDistanceMeasure, (3.1), (2.1));
     List<Vector> points = getPoints(raw);
     reducer.reduce(new Text("centroid"), points.iterator(), collector, null);
     reducer.close();
@@ -356,8 +371,13 @@ public class TestCanopyCreation extends TestCase {
    */
   public void testCanopyReducerEuclidean() throws Exception {
     CanopyReducer reducer = new CanopyReducer();
+    JobConf conf = new JobConf();
+    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
+    conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
+    conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
+    reducer.configure(conf);
+    
     DummyOutputCollector<Text, Canopy> collector = new DummyOutputCollector<Text, Canopy>();
-    Canopy.config(euclideanDistanceMeasure, (3.1), (2.1));
     List<Vector> points = getPoints(raw);
     reducer.reduce(new Text("centroid"), points.iterator(), collector, null);
     reducer.close();
@@ -378,8 +398,7 @@ public class TestCanopyCreation extends TestCase {
     if (!testData.exists()) {
       testData.mkdir();
     }
-    JobConf job = new JobConf(
-        CanopyDriver.class);
+    JobConf job = new JobConf(CanopyDriver.class);
     ClusteringTestUtils.writePointsToFile(points, "testdata/file1", fs, job);
     ClusteringTestUtils.writePointsToFile(points, "testdata/file2", fs, job);
     // now run the Canopy Driver
@@ -413,8 +432,7 @@ public class TestCanopyCreation extends TestCase {
     if (!testData.exists()) {
       testData.mkdir();
     }
-    JobConf job = new JobConf(
-        CanopyDriver.class);
+    JobConf job = new JobConf(CanopyDriver.class);
     ClusteringTestUtils.writePointsToFile(points, "testdata/file1", fs, job);
     ClusteringTestUtils.writePointsToFile(points, "testdata/file2", fs, job);
     // now run the Canopy Driver
@@ -441,12 +459,18 @@ public class TestCanopyCreation extends TestCase {
 
   /** Story: User can cluster a subset of the points using a ClusterMapper and a ManhattanDistanceMeasure. */
   public void testClusterMapperManhattan() throws Exception {
-    Canopy.config(manhattanDistanceMeasure, (3.1), (2.1));
     ClusterMapper mapper = new ClusterMapper();
+    JobConf conf = new JobConf();
+    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.ManhattanDistanceMeasure");
+    conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
+    conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
+    mapper.configure(conf);
+    
     List<Canopy> canopies = new ArrayList<Canopy>();
     DummyOutputCollector<Text, Vector> collector = new DummyOutputCollector<Text, Vector>();
+    int nextCanopyId = 0;
     for (Vector centroid : manhattanCentroids) {
-      canopies.add(new Canopy(centroid));
+      canopies.add(new Canopy(centroid, nextCanopyId++));
     }
     mapper.config(canopies);
     List<Vector> points = getPoints(raw);
@@ -461,7 +485,7 @@ public class TestCanopyCreation extends TestCase {
       Canopy canopy = findCanopy(key, canopies);
       List<Vector> pts = stringListEntry.getValue();
       for (Vector ptDef : pts) {
-        assertTrue("Point not in canopy", canopy.covers(ptDef));
+        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef));
       }
     }
   }
@@ -477,12 +501,18 @@ public class TestCanopyCreation extends TestCase {
 
   /** Story: User can cluster a subset of the points using a ClusterMapper and a EuclideanDistanceMeasure. */
   public void testClusterMapperEuclidean() throws Exception {
-    Canopy.config(euclideanDistanceMeasure, (3.1), (2.1));
     ClusterMapper mapper = new ClusterMapper();
+    JobConf conf = new JobConf();
+    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
+    conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
+    conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
+    mapper.configure(conf);
+    
     List<Canopy> canopies = new ArrayList<Canopy>();
     DummyOutputCollector<Text, Vector> collector = new DummyOutputCollector<Text, Vector>();
+    int nextCanopyId = 0;
     for (Vector centroid : euclideanCentroids) {
-      canopies.add(new Canopy(centroid));
+      canopies.add(new Canopy(centroid, nextCanopyId++));
     }
     mapper.config(canopies);
     List<Vector> points = getPoints(raw);
@@ -497,19 +527,25 @@ public class TestCanopyCreation extends TestCase {
       Canopy canopy = findCanopy(key, canopies);
       List<Vector> pts = stringListEntry.getValue();
       for (Vector ptDef : pts) {
-        assertTrue("Point not in canopy", canopy.covers(ptDef));
+        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef));
       }
     }
   }
 
   /** Story: User can cluster a subset of the points using a ClusterReducer and a ManhattanDistanceMeasure. */
   public void testClusterReducerManhattan() throws Exception {
-    Canopy.config(manhattanDistanceMeasure, (3.1), (2.1));
     ClusterMapper mapper = new ClusterMapper();
+    JobConf conf = new JobConf();
+    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.ManhattanDistanceMeasure");
+    conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
+    conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
+    mapper.configure(conf);
+    
     List<Canopy> canopies = new ArrayList<Canopy>();
     DummyOutputCollector<Text, Vector> collector = new DummyOutputCollector<Text, Vector>();
+    int nextCanopyId = 0;
     for (Vector centroid : manhattanCentroids) {
-      canopies.add(new Canopy(centroid));
+      canopies.add(new Canopy(centroid, nextCanopyId++));
     }
     mapper.config(canopies);
     List<Vector> points = getPoints(raw);
@@ -535,19 +571,25 @@ public class TestCanopyCreation extends TestCase {
       Canopy canopy = findCanopy(key, canopies);
       List<Vector> pts = stringListEntry.getValue();
       for (Vector ptDef : pts) {
-        assertTrue("Point not in canopy", canopy.covers(ptDef));
+        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef));
       }
     }
   }
 
   /** Story: User can cluster a subset of the points using a ClusterReducer and a EuclideanDistanceMeasure. */
   public void testClusterReducerEuclidean() throws Exception {
-    Canopy.config(euclideanDistanceMeasure, (3.1), (2.1));
     ClusterMapper mapper = new ClusterMapper();
+    JobConf conf = new JobConf();
+    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
+    conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
+    conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
+    mapper.configure(conf);
+    
     List<Canopy> canopies = new ArrayList<Canopy>();
     DummyOutputCollector<Text, Vector> collector = new DummyOutputCollector<Text, Vector>();
+    int nextCanopyId = 0;
     for (Vector centroid : euclideanCentroids) {
-      canopies.add(new Canopy(centroid));
+      canopies.add(new Canopy(centroid, nextCanopyId++));
     }
     mapper.config(canopies);
     List<Vector> points = getPoints(raw);
@@ -573,7 +615,7 @@ public class TestCanopyCreation extends TestCase {
       Canopy canopy = findCanopy(key, canopies);
       List<Vector> pts = stringListEntry.getValue();
       for (Vector ptDef : pts) {
-        assertTrue("Point not in canopy", canopy.covers(ptDef));
+        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef));
       }
     }
   }
@@ -661,8 +703,7 @@ public class TestCanopyCreation extends TestCase {
         UserDefinedDistanceMeasure.class.getName(), 3.1, 2.1, SparseVector.class);
 
     // verify output from sequence file
-    JobConf job = new JobConf(
-        CanopyDriver.class);
+    JobConf job = new JobConf(CanopyDriver.class);
     Path path = new Path("output/canopies/part-00000");
     FileSystem fs = FileSystem.get(path.toUri(), job);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);

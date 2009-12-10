@@ -44,7 +44,6 @@ public class KMeansCombiner extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     super.configure(job);
-    Cluster.configure(job);
   }
 
 }

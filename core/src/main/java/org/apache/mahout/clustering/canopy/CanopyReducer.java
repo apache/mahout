@@ -35,12 +35,14 @@ public class CanopyReducer extends MapReduceBase implements
 
   private final List<Canopy> canopies = new ArrayList<Canopy>();
 
+  private CanopyClusterer canopyClusterer;
+  
   @Override
   public void reduce(Text key, Iterator<Vector> values,
                      OutputCollector<Text, Canopy> output, Reporter reporter) throws IOException {
     while (values.hasNext()) {
       Vector point = values.next();
-      Canopy.addPointToCanopies(point, canopies);
+      canopyClusterer.addPointToCanopies(point, canopies);
     }
     for (Canopy canopy : canopies) {
       output.collect(new Text(canopy.getIdentifier()), canopy);
@@ -50,7 +52,7 @@ public class CanopyReducer extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     super.configure(job);
-    Canopy.configure(job);
+    canopyClusterer = new CanopyClusterer(job);
   }
 
 }

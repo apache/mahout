@@ -64,8 +64,8 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
   }
 
   public static void referenceFuzzyKMeans(List<Vector> points,
-      DistanceMeasure measure, double threshold, int numIter) {
-    SoftCluster.config(measure, threshold);
+      DistanceMeasure measure, double threshold, double m, int numIter) {
+    FuzzyKMeansClusterer clusterer = new FuzzyKMeansClusterer(measure, threshold, m);
     boolean converged = false;
     int iteration = 0;
     for (int iter = 0; !converged && iter < numIter; iter++) {
@@ -74,7 +74,7 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
       for (SoftCluster c : cs)
         next.add(new SoftCluster(c.getCenter()));
       clusters.add(next);
-      converged = iterateReference(points, clusters.get(iteration), measure);
+      converged = iterateReference(points, clusters.get(iteration), clusterer);
     }
   }
 
@@ -88,24 +88,24 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
    * @return
    */
   public static boolean iterateReference(List<Vector> points,
-      List<SoftCluster> clusterList, DistanceMeasure measure) {
+      List<SoftCluster> clusterList, FuzzyKMeansClusterer clusterer) {
     // for each
     for (Vector point : points) {
       List<Double> clusterDistanceList = new ArrayList<Double>();
       for (SoftCluster cluster : clusterList) {
-        clusterDistanceList.add(measure.distance(point, cluster.getCenter()));
+        clusterDistanceList.add(clusterer.getMeasure().distance(point, cluster.getCenter()));
       }
 
       for (int i = 0; i < clusterList.size(); i++) {
-        double probWeight = SoftCluster.computeProbWeight(clusterDistanceList
+        double probWeight = clusterer.computeProbWeight(clusterDistanceList
             .get(i), clusterDistanceList);
         clusterList.get(i).addPoint(point,
-            Math.pow(probWeight, SoftCluster.getM()));
+            Math.pow(probWeight, clusterer.getM()));
       }
     }
     boolean converged = true;
     for (SoftCluster cluster : clusterList) {
-      if (!cluster.computeConvergence())
+      if (!clusterer.computeConvergence(cluster))
         converged = false;
     }
     // update the cluster centers
@@ -132,7 +132,6 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
   static List<Canopy> populateCanopies(DistanceMeasure measure,
       List<Vector> points, double t1, double t2) {
     List<Canopy> canopies = new ArrayList<Canopy>();
-    Canopy.config(measure, t1, t2);
     /**
      * Reference Implementation: Given a distance metric, one can create
      * canopies as follows: Start with a list of the data points in any order,
@@ -143,11 +142,12 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
      * the list all points that are within distance threshold T2. Repeat until
      * the list is empty.
      */
+    int nextCanopyId = 0;
     while (!points.isEmpty()) {
       Iterator<Vector> ptIter = points.iterator();
       Vector p1 = ptIter.next();
       ptIter.remove();
-      Canopy canopy = new Canopy(p1);
+      Canopy canopy = new Canopy(p1, nextCanopyId++);
       canopies.add(canopy);
       while (ptIter.hasNext()) {
         Vector p2 = ptIter.next();
@@ -170,13 +170,12 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
     points.addAll(sampleData);
     List<Canopy> canopies = populateCanopies(new ManhattanDistanceMeasure(), points, t1, t2);
     DistanceMeasure measure = new ManhattanDistanceMeasure();
-    Cluster.config(measure, 0.001);
     clusters = new ArrayList<List<SoftCluster>>();
     clusters.add(new ArrayList<SoftCluster>());
     for (Canopy canopy : canopies)
       if (canopy.getNumPoints() > 0.05 * sampleData.size())
         clusters.get(0).add(new SoftCluster(canopy.getCenter()));
-    referenceFuzzyKMeans(sampleData, measure, 0.001, 10);
+    referenceFuzzyKMeans(sampleData, measure, 0.001, 2, 10);
     new DisplayFuzzyKMeans();
   }
 }

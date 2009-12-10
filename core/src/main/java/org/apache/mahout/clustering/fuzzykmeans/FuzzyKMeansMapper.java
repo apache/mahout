@@ -37,12 +37,13 @@ public class FuzzyKMeansMapper extends MapReduceBase implements
 
   private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansMapper.class);
 
-  private List<SoftCluster> clusters;
-
+  private List<SoftCluster> clusters = new ArrayList<SoftCluster>();
+  private FuzzyKMeansClusterer clusterer; 
+  
   @Override
   public void map(WritableComparable<?> key, Vector point,
                   OutputCollector<Text, FuzzyKMeansInfo> output, Reporter reporter) throws IOException {
-    SoftCluster.emitPointProbToCluster(point, clusters, output);
+    clusterer.emitPointProbToCluster(point, clusters, output);
   }
 
   /**
@@ -51,21 +52,23 @@ public class FuzzyKMeansMapper extends MapReduceBase implements
    * @param clusters a List<Cluster>
    */
   void config(List<SoftCluster> clusters) {
-    this.clusters = clusters;
+    this.clusters.clear();
+    this.clusters.addAll(clusters);
   }
 
   @Override
   public void configure(JobConf job) {
 
     super.configure(job);
-    SoftCluster.configure(job);
+    clusterer = new FuzzyKMeansClusterer(job);
 
     log.info("In Mapper Configure:");
-    clusters = new ArrayList<SoftCluster>();
 
-    FuzzyKMeansUtil.configureWithClusterInfo(job
-        .get(SoftCluster.CLUSTER_PATH_KEY), clusters);
-
+    String clusterPath = job.get(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY);
+    if (clusterPath != null && clusterPath.length() > 0) {
+      FuzzyKMeansUtil.configureWithClusterInfo(clusterPath, clusters);
+    }
+    
     if (clusters.isEmpty()) {
       throw new NullPointerException("Cluster is empty!!!");
     }

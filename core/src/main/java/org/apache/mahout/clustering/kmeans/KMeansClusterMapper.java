@@ -24,6 +24,7 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.matrix.Vector;
 
 import java.io.IOException;
@@ -33,34 +34,52 @@ import java.util.List;
 public class KMeansClusterMapper extends MapReduceBase implements
     Mapper<WritableComparable<?>, Vector, Text, Text> {
 
-  private List<Cluster> clusters;
+  private final List<Cluster> clusters = new ArrayList<Cluster>();
+  private KMeansClusterer clusterer;
 
   @Override
-  public void map(WritableComparable<?> key, Vector point, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
-    Cluster.outputPointWithClusterInfo(point, clusters, output);
+  public void map(WritableComparable<?> key, Vector point,
+      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+    this.clusterer.outputPointWithClusterInfo(point, clusters, output);
   }
 
   /**
    * Configure the mapper by providing its clusters. Used by unit tests.
-   *
-   * @param clusters a List<Cluster>
+   * 
+   * @param clusters
+   *          a List<Cluster>
    */
   void config(List<Cluster> clusters) {
-    this.clusters = clusters;
+    this.clusters.clear();
+    this.clusters.addAll(clusters);
   }
 
   @Override
   public void configure(JobConf job) {
     super.configure(job);
-    Cluster.configure(job);
 
-    clusters = new ArrayList<Cluster>();
+    try {
+      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+      Class<?> cl = ccl.loadClass(job
+          .get(KMeansConfigKeys.DISTANCE_MEASURE_KEY));
+      DistanceMeasure measure = (DistanceMeasure) cl.newInstance();
+      measure.configure(job);
 
-    KMeansUtil.configureWithClusterInfo(job.get(Cluster.CLUSTER_PATH_KEY),
-        clusters);
+      String clusterPath = job.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
+      if (clusterPath != null && clusterPath.length() > 0) {
+        KMeansUtil.configureWithClusterInfo(clusterPath, clusters);
+        if (clusters.isEmpty()) {
+          throw new IllegalStateException("Cluster is empty!");
+        }
+      }
 
-    if (clusters.isEmpty()) {
-      throw new NullPointerException("Cluster is empty!!!");
+      this.clusterer = new KMeansClusterer(measure);
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException(e);
+    } catch (IllegalAccessException e) {
+      throw new IllegalStateException(e);
+    } catch (InstantiationException e) {
+      throw new IllegalStateException(e);
     }
   }
 

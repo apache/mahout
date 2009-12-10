@@ -36,12 +36,13 @@ import java.util.List;
 public class ClusterMapper extends MapReduceBase implements
     Mapper<WritableComparable<?>, Vector, Text, Vector> {
 
-  private List<Canopy> canopies;
+  private CanopyClusterer canopyClusterer;
+  private final List<Canopy> canopies = new ArrayList<Canopy>();
 
   @Override
   public void map(WritableComparable<?> key, Vector point,
                   OutputCollector<Text, Vector> output, Reporter reporter) throws IOException {
-    Canopy.emitPointToExistingCanopies(point, canopies, output);
+    canopyClusterer.emitPointToExistingCanopies(point, canopies, output);
   }
 
   /**
@@ -50,33 +51,42 @@ public class ClusterMapper extends MapReduceBase implements
    * @param canopies a List<Canopy>
    */
   public void config(List<Canopy> canopies) {
-    this.canopies = canopies;
+    this.canopies.clear();
+    this.canopies.addAll(canopies);
   }
 
   @Override
   public void configure(JobConf job) {
     super.configure(job);
-    Canopy.configure(job);
+    canopyClusterer = new CanopyClusterer(job);
 
-    String canopyPath = job.get(Canopy.CANOPY_PATH_KEY);
-    canopies = new ArrayList<Canopy>();
-
-    try {
-      Path path = new Path(canopyPath + "/part-00000");
-      FileSystem fs = FileSystem.get(path.toUri(), job);
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
+    String canopyPath = job.get(CanopyConfigKeys.CANOPY_PATH_KEY);
+    if (canopyPath != null && canopyPath.length() > 0) {
       try {
-        Text key = new Text();
-        Canopy value = new Canopy();
-        while (reader.next(key, value)) {
-          canopies.add(value);
-          value = new Canopy();
+        Path path = new Path(canopyPath + "/part-00000");
+        FileSystem fs = FileSystem.get(path.toUri(), job);
+        SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
+        try {
+          Text key = new Text();
+          Canopy value = new Canopy();
+          while (reader.next(key, value)) {
+            canopies.add(value);
+            value = new Canopy();
+          }
+        } finally {
+          reader.close();
         }
-      } finally {
-        reader.close();
+      } catch (IOException e) {
+        throw new IllegalStateException(e);
       }
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
+      
+      if (canopies.isEmpty()) {
+        throw new NullPointerException("Canopies are empty!");
+      }
     }
+  }
+
+  public boolean canopyCovers(Canopy canopy, Vector point) {
+    return canopyClusterer.canopyCovers(canopy, point);
   }
 }

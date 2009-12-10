@@ -140,13 +140,12 @@ public class ClusterDriver {
   public static void runJob(String points, String canopies, String output,
                             String measureClassName, double t1, double t2, Class<? extends Vector> vectorClass) throws IOException {
     JobClient client = new JobClient();
-    JobConf conf = new JobConf(
-        org.apache.mahout.clustering.canopy.ClusterDriver.class);
+    JobConf conf = new JobConf(ClusterDriver.class);
 
-    conf.set(Canopy.DISTANCE_MEASURE_KEY, measureClassName);
-    conf.set(Canopy.T1_KEY, String.valueOf(t1));
-    conf.set(Canopy.T2_KEY, String.valueOf(t2));
-    conf.set(Canopy.CANOPY_PATH_KEY, canopies);
+    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measureClassName);
+    conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(t1));
+    conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(t2));
+    conf.set(CanopyConfigKeys.CANOPY_PATH_KEY, canopies);
 
     conf.setInputFormat(SequenceFileInputFormat.class);
 

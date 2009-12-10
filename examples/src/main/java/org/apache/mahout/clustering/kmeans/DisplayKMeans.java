@@ -113,7 +113,7 @@ class DisplayKMeans extends DisplayDirichlet {
     // test for convergence
     boolean converged = true;
     for (Cluster cluster : clusters) {
-      if (!cluster.computeConvergence())
+      if (!cluster.computeConvergence(measure, 0.001))
         converged = false;
     }
     // update the cluster centers
@@ -139,7 +139,6 @@ class DisplayKMeans extends DisplayDirichlet {
   static List<Canopy> populateCanopies(DistanceMeasure measure,
       List<Vector> points, double t1, double t2) {
     List<Canopy> canopies = new ArrayList<Canopy>();
-    Canopy.config(measure, t1, t2);
     /**
      * Reference Implementation: Given a distance metric, one can create
      * canopies as follows: Start with a list of the data points in any order,
@@ -150,11 +149,12 @@ class DisplayKMeans extends DisplayDirichlet {
      * the list all points that are within distance threshold T2. Repeat until
      * the list is empty.
      */
+    int nextCanopyId = 0;
     while (!points.isEmpty()) {
       Iterator<Vector> ptIter = points.iterator();
       Vector p1 = ptIter.next();
       ptIter.remove();
-      Canopy canopy = new Canopy(p1);
+      Canopy canopy = new Canopy(p1, nextCanopyId++);
       canopies.add(canopy);
       while (ptIter.hasNext()) {
         Vector p2 = ptIter.next();
@@ -177,7 +177,6 @@ class DisplayKMeans extends DisplayDirichlet {
     points.addAll(sampleData);
     List<Canopy> canopies = populateCanopies(new ManhattanDistanceMeasure(), points, t1, t2);
     DistanceMeasure measure = new ManhattanDistanceMeasure();
-    Cluster.config(measure, 0.001);
     clusters = new ArrayList<List<Cluster>>();
     clusters.add(new ArrayList<Cluster>());
     for (Canopy canopy : canopies)
