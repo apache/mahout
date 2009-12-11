@@ -41,11 +41,11 @@ public final class ItemIDIndexMapper
                   Reporter reporter) throws IOException {
     String[] tokens = COMMA.split(value.toString());
     long itemID = Long.parseLong(tokens[1]);
-    int index = itemIDToIndex(itemID);
+    int index = idToIndex(itemID);
     output.collect(new IntWritable(index), new LongWritable(itemID));
   }
 
-  static int itemIDToIndex(long itemID) {
+  static int idToIndex(long itemID) {
     return (int) (itemID) ^ (int) (itemID >>> 32);
   }
 

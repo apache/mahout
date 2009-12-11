@@ -23,7 +23,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-/** A {@link Writable} encapsulating an item and a preference value. */
+/** A {@link Writable} encapsulating an item ID and a preference value. */
 public final class ItemPrefWritable implements Writable {
 
   private long itemID;

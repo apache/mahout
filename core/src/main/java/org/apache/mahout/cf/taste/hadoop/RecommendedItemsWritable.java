@@ -97,7 +97,9 @@ public final class RecommendedItemsWritable implements Writable {
       result.append(':');
       String valueString = String.valueOf(item.getValue());
       // Is this rounding too crude?
-      if (valueString.length() > 6) {
+      if (valueString.indexOf('E') >= 0) {
+        valueString = "0.0";
+      } else if (valueString.length() > 6) {
         valueString = valueString.substring(0, 6);
       }
       result.append(valueString);

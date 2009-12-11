@@ -24,6 +24,7 @@ import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.MapFileOutputFormat;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.TextInputFormat;
@@ -83,7 +84,7 @@ public final class RecommenderJob extends AbstractJob {
                                              ItemIDIndexReducer.class,
                                              IntWritable.class,
                                              LongWritable.class,
-                                             SequenceFileOutputFormat.class);
+                                             MapFileOutputFormat.class);
     JobClient.runJob(itemIDIndexConf);
 
     JobConf toUserVectorConf = prepareJobConf(inputPath,
@@ -109,7 +110,7 @@ public final class RecommenderJob extends AbstractJob {
                                                 UserVectorToCooccurrenceReducer.class,
                                                 IntWritable.class,
                                                 SparseVector.class,
-                                                SequenceFileOutputFormat.class);
+                                                MapFileOutputFormat.class);
     JobClient.runJob(toCooccurrenceConf);
 
     JobConf recommenderConf = prepareJobConf(userVectorPath,
