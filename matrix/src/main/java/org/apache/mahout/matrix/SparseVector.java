@@ -85,6 +85,7 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public void setQuick(int index, double value) {
+    lengthSquared = -1.0;
     values.put(index, value);
   }
 
@@ -277,6 +278,7 @@ public class SparseVector extends AbstractVector {
 
     @Override
     public void set(double value) {
+      lengthSquared = -1.0;
       values.put(ind, value);
     }
   }
@@ -370,6 +372,7 @@ public class SparseVector extends AbstractVector {
 
     @Override
     public boolean apply(int key, double value) {
+      lengthSquared = -1.0;
       v.set(key, value + v.get(key));
       return true;
     }

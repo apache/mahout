@@ -96,6 +96,7 @@ public class DenseVector extends AbstractVector {
 
   @Override
   public void setQuick(int index, double value) {
+    lengthSquared = -1.0;
     values[index] = value;
   }
 
@@ -225,6 +226,7 @@ public class DenseVector extends AbstractVector {
 
     @Override
     public void set(double value) {
+      lengthSquared = -1.0;
       values[ind] = value;
     }
   }
@@ -253,6 +255,7 @@ public class DenseVector extends AbstractVector {
       values[i] = dataInput.readDouble();
     }
     this.values = values;
+    lengthSquared = -1.0;
   }
 
   /**
