@@ -44,12 +44,6 @@ public class FPGrowthTest extends TestCase {
     super(s);
   }
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-
-  }
-
   public void testMaxHeapFPGrowth() throws IOException {
 
     FPGrowth<String> fp = new FPGrowth<String>();
@@ -64,10 +58,8 @@ public class FPGrowthTest extends TestCase {
     transactions.add(Arrays.asList("A", "D", "E"));
     transactions.add(Arrays.asList("B", "C"));
 
-    File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-    File tmpLoc = new File(tmpDir, "fpgrowthTest");
-    tmpLoc.mkdirs();
-    File tmpFile = File.createTempFile("fpgrowthTest", ".dat", tmpLoc);
+    File tmpFile = File.createTempFile("fpgrowthTest", ".dat");
+    tmpFile.deleteOnExit();
 
     Path path = new Path(tmpFile.getAbsolutePath());
     Configuration conf = new Configuration();
@@ -85,8 +77,6 @@ public class FPGrowthTest extends TestCase {
     List<Pair<String, TopKStringPatterns>> frequentPatterns = FPGrowth
         .readFrequentPattern(fs, conf, path);
     assertEquals(
-        frequentPatterns.toString()
-            + " is not equal to [(C,([B, C],3)), (E,([A, E],4), ([D, A, E],3), ([B, A, E],3)), (A,([A],5), ([B, A],4), ([D, A],4), ([A, E],4), ([B, D, A],3), ([D, A, E],3), ([B, A, E],3)), (D,([D],6), ([B, D],4), ([D, A],4), ([B, D, A],3), ([D, A, E],3)), (B,([B],6), ([B, D],4), ([B, A],4), ([B, D, A],3), ([B, A, E],3), ([B, C],3))]",
         "[(C,([B, C],3)), (E,([A, E],4), ([D, A, E],3), ([B, A, E],3)), (A,([A],5), ([B, A],4), ([D, A],4), ([A, E],4), ([B, D, A],3), ([D, A, E],3), ([B, A, E],3)), (D,([D],6), ([B, D],4), ([D, A],4), ([B, D, A],3), ([D, A, E],3)), (B,([B],6), ([B, D],4), ([B, A],4), ([B, D, A],3), ([B, A, E],3), ([B, C],3))]",
         frequentPatterns.toString());
 
