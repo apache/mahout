@@ -13,7 +13,7 @@
   </parent>
   <!-- Keep this in sync with the values in mahout-core pom.xml -->
   <properties>
-    <junit.version>3.8.2</junit.version>   
+    <junit.version>4.7</junit.version>   
     <tagBase>https://svn.apache.org/repos/asf/lucene/mahout</tagBase>
     <lucene.version>2.9.1</lucene.version>
   </properties>
