@@ -84,7 +84,7 @@ public class GenericSortingTest extends Assert {
 
 	@Test
 	public void testMergeSort() {
-		String[] sd = {"z", "a", "a", "q", "1"};
+		String[] sd = {new String("z"), new String("a"), new String("a"), new String("q"), new String("1")};
 		String[] correct = {sd[4], sd[1], sd[2], sd[3], sd[0]};
 
 		SomethingToSortStable sts = new SomethingToSortStable(sd);
