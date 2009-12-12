@@ -53,7 +53,7 @@ public final class ToUserVectorReducer
     extends MapReduceBase
     implements Reducer<LongWritable, ItemPrefWritable, LongWritable, SparseVector> {
 
-  public static final int MAX_PREFS_CONSIDERED = 50;
+  public static final int MAX_PREFS_CONSIDERED = 20;
 
   @Override
   public void reduce(LongWritable userID,

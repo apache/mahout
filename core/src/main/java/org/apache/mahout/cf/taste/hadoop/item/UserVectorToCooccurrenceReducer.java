@@ -23,6 +23,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.matrix.SparseVector;
+import org.apache.mahout.matrix.Vector;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -41,6 +42,13 @@ public final class UserVectorToCooccurrenceReducer
       while (index2s.hasNext()) {
         int index2 = index2s.next().get();
         cooccurrenceRow.set(index2, cooccurrenceRow.get(index2) + 1.0);
+      }
+      Iterator<Vector.Element> cooccurrences = cooccurrenceRow.iterateNonZero();
+      while (cooccurrences.hasNext()) {
+        Vector.Element element = cooccurrences.next();
+        if (element.get() <= 1.0) { // purge small values
+          element.set(0.0);
+        }
       }
       output.collect(index1, cooccurrenceRow);
     }

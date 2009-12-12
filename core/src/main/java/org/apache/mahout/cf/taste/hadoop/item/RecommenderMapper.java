@@ -27,8 +27,11 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.hadoop.MapFilesMap;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
+import org.apache.mahout.cf.taste.impl.common.Cache;
+import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.matrix.SparseVector;
@@ -53,6 +56,7 @@ public final class RecommenderMapper
   private int recommendationsPerUser;
   private MapFilesMap<IntWritable,LongWritable> indexItemIDMap;
   private MapFilesMap<IntWritable,Vector> cooccurrenceColumnMap;
+  private Cache<IntWritable,Vector> cooccurrenceColumnCache;
 
   @Override
   public void configure(JobConf jobConf) {
@@ -66,6 +70,7 @@ public final class RecommenderMapper
     } catch (IOException ioe) {
       throw new IllegalStateException(ioe);
     }
+    cooccurrenceColumnCache = new Cache<IntWritable,Vector>(new CooccurrenceCache(cooccurrenceColumnMap), 100);
   }
 
   @Override
@@ -76,12 +81,20 @@ public final class RecommenderMapper
 
     Iterator<Vector.Element> userVectorIterator = userVector.iterateNonZero();
     Vector recommendationVector = new SparseVector(Integer.MAX_VALUE, 1000);
-    Vector columnVector = new SparseVector(Integer.MAX_VALUE, 1000);
     while (userVectorIterator.hasNext()) {
       Vector.Element element = userVectorIterator.next();
       int index = element.index();
       double value = element.get();
-      cooccurrenceColumnMap.get(new IntWritable(index), columnVector);
+      Vector columnVector;
+      try {
+        columnVector = cooccurrenceColumnCache.get(new IntWritable(index));
+      } catch (TasteException te) {
+        if (te.getCause() instanceof IOException) {
+          throw (IOException) te.getCause();
+        } else {
+          throw new IOException(te.getCause());
+        }
+      }
       columnVector.times(value).addTo(recommendationVector);
     }
 
@@ -92,13 +105,16 @@ public final class RecommenderMapper
     LongWritable itemID = new LongWritable();
     while (recommendationVectorIterator.hasNext()) {
       Vector.Element element = recommendationVectorIterator.next();
-      if (topItems.size() < recommendationsPerUser) {
-        indexItemIDMap.get(new IntWritable(element.index()), itemID);
-        topItems.add(new GenericRecommendedItem(itemID.get(), (float) element.get()));
-      } else if (element.get() > topItems.peek().getValue()) {
-        indexItemIDMap.get(new IntWritable(element.index()), itemID);
-        topItems.add(new GenericRecommendedItem(itemID.get(), (float) element.get()));
-        topItems.poll();
+      int index = element.index();
+      if (userVector.get(index) != 0.0) {
+        if (topItems.size() < recommendationsPerUser) {
+          indexItemIDMap.get(new IntWritable(index), itemID);
+          topItems.add(new GenericRecommendedItem(itemID.get(), (float) element.get()));
+        } else if (element.get() > topItems.peek().getValue()) {
+          indexItemIDMap.get(new IntWritable(index), itemID);
+          topItems.add(new GenericRecommendedItem(itemID.get(), (float) element.get()));
+          topItems.poll();
+        }
       }
     }
 
@@ -114,4 +130,30 @@ public final class RecommenderMapper
     cooccurrenceColumnMap.close();
   }
 
+  private static class CooccurrenceCache implements Retriever<IntWritable,Vector> {
+
+    private final MapFilesMap<IntWritable,Vector> map;
+    private Vector columnVector;
+
+    private CooccurrenceCache(MapFilesMap<IntWritable,Vector> map) {
+      this.map = map;
+      columnVector = new SparseVector(Integer.MAX_VALUE, 1000);
+    }
+
+    @Override
+    public Vector get(IntWritable key) throws TasteException {
+      Vector value;
+      try {
+        value = map.get(key, columnVector);
+      } catch (IOException ioe) {
+        throw new TasteException(ioe);
+      }
+      if (value == null) {
+        return null;
+      }
+      columnVector = new SparseVector(Integer.MAX_VALUE, 1000);
+      return value;
+    }
+
+  }
 }
