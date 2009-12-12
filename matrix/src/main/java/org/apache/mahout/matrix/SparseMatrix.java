@@ -143,7 +143,7 @@ public class SparseMatrix extends AbstractMatrix {
       if (val != 0.0) {
         Vector r = rows.get(row);
         if (r == null) {
-          r = new SparseVector(cardinality[ROW]);
+          r = new SparseVector(cardinality[COL]);
           rows.put(row, r);
         }
         r.setQuick(column, val);
@@ -180,7 +180,7 @@ public class SparseMatrix extends AbstractMatrix {
     }
     Vector res = rows.get(row);
     if (res == null) {
-      res = new SparseVector(cardinality[ROW]);
+      res = new SparseVector(cardinality[COL]);
     }
     return res;
   }
