@@ -56,7 +56,7 @@ public abstract class AbstractIDMigrator implements IDMigrator {
   }
 
   @Override
-  public long toLongID(String stringID) throws TasteException {
+  public long toLongID(String stringID) {
     return hash(stringID);
   }
 
