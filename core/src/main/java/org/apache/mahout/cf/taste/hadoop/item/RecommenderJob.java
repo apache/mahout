@@ -46,12 +46,13 @@ import java.util.Map;
  * <p>Command line arguments are:</p>
  *
  * <ol>
- *  <li>numRecommendations: Number of recommendations to compute per user</li>
+ *  <li>numRecommendations: Number of recommendations to compute per user (optional; default 10)</li>
  *  <li>input: Directory containing a text file containing user IDs
  *   for which recommendations should be computed, one per line</li>
  *  <li>output: output path where recommender output should go</li>
  *  <li>jarFile: JAR file containing implementation code</li>
- *  <li>tempDir: directory in which to place intermediate data files</li>
+ *  <li>tempDir: directory in which to place intermediate data files (optional; default "temp")</li>
+ *  <li>usersFile: file containing user IDs to recommend for (optional)</li>
  * </ol>
  *
  * @see org.apache.mahout.cf.taste.hadoop.pseudo.RecommenderJob

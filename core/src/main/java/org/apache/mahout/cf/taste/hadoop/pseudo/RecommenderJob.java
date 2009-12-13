@@ -52,6 +52,7 @@ import java.util.Map;
  *   suitable for use with {@link org.apache.mahout.cf.taste.impl.model.file.FileDataModel}</li>
  *  <li>output: output path where recommender output should go</li>
  *  <li>jarFile: JAR file containing implementation code</li>
+ *  <li>usersFile: file containing user IDs to recommend for (optional)</li>
  * </ol>
  *
  * <p>For example, to get started trying this out, set up Hadoop in a
@@ -96,11 +97,14 @@ public final class RecommenderJob extends AbstractJob {
         buildOption("recommenderClassName", "r", "Name of recommender class to instantiate");
     Option numReccomendationsOpt =
         buildOption("numRecommendations", "n", "Number of recommendations per user");
+    Option usersFileOpt = buildOption("usersFile", "n", "Number of recommendations per user", null);
 
-    Map<String,String> parsedArgs = parseArguments(args, recommendClassOpt, numReccomendationsOpt);
+    Map<String,String> parsedArgs =
+        parseArguments(args, recommendClassOpt, numReccomendationsOpt, usersFileOpt);
     String inputFile = parsedArgs.get("--input");
     String outputPath = parsedArgs.get("--output");
     String jarFile = parsedArgs.get("--jarFile");
+    String usersFile = parsedArgs.get("--usersFile");
 
     String recommendClassName = parsedArgs.get("--recommenderClassName");
     int recommendationsPerUser = Integer.parseInt(parsedArgs.get("--numRecommendations"));
@@ -120,6 +124,7 @@ public final class RecommenderJob extends AbstractJob {
     jobConf.set(RecommenderReducer.RECOMMENDER_CLASS_NAME, recommendClassName);
     jobConf.setInt(RecommenderReducer.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
     jobConf.set(RecommenderReducer.DATA_MODEL_FILE, inputFile);
+    jobConf.set(RecommenderReducer.USERS_FILE, usersFile);
     jobConf.setClass("mapred.output.compression.codec", GzipCodec.class, CompressionCodec.class);
 
     JobClient.runJob(jobConf);
