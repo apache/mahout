@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
+import org.apache.commons.cli2.Argument;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -63,19 +64,35 @@ public abstract class AbstractJob implements Tool {
     this.configuration = configuration;
   }
 
-  protected static Option buildOption(String name, String shortName, String description, boolean required) {
-    return new DefaultOptionBuilder().withLongName(name).withRequired(required)
-      .withShortName(shortName).withArgument(new ArgumentBuilder().withName(name).withMinimum(1)
-      .withMaximum(1).create()).withDescription(description).create();
+  protected static Option buildOption(String name, String shortName, String description) {
+    return buildOption(name, shortName, description, true, null);
   }
 
-  protected static Map<String,Object> parseArguments(String[] args, Option... extraOpts) {
+  protected static Option buildOption(String name, String shortName, String description, String defaultValue) {
+    return buildOption(name, shortName, description, false, defaultValue);    
+  }
+
+  private static Option buildOption(String name,
+                                    String shortName,
+                                    String description,
+                                    boolean required,
+                                    String defaultValue) {
+    ArgumentBuilder argBuilder = new ArgumentBuilder().withName(name).withMinimum(1).withMaximum(1);
+    if (defaultValue != null) {
+      argBuilder = argBuilder.withDefault(defaultValue);
+    }
+    Argument arg = argBuilder.create();
+    return new DefaultOptionBuilder().withLongName(name).withRequired(required)
+      .withShortName(shortName).withArgument(arg).withDescription(description).create();
+  }
+
+  protected static Map<String,String> parseArguments(String[] args, Option... extraOpts) {
 
     Option inputOpt = DefaultOptionCreator.inputOption().create();
-    Option tempDirOpt = buildOption("tempDir", "t", "Intermediate output directory", false);
+    Option tempDirOpt = buildOption("tempDir", "t", "Intermediate output directory", "temp");
     Option outputOpt = DefaultOptionCreator.outputOption().create();
     Option helpOpt = DefaultOptionCreator.helpOption();
-    Option jarFileOpt = buildOption("jarFile", "m", "Implementation jar", true);
+    Option jarFileOpt = buildOption("jarFile", "m", "Implementation jar");
 
     GroupBuilder gBuilder = new GroupBuilder().withName("Options")
       .withOption(inputOpt)
@@ -106,17 +123,24 @@ public abstract class AbstractJob implements Tool {
       return null;
     }
 
-    Map<String,Object> result = new HashMap<String,Object>();
-    result.put(inputOpt.getPreferredName(), cmdLine.getValue(inputOpt));
-    result.put(tempDirOpt.getPreferredName(), cmdLine.getValue(tempDirOpt));
-    result.put(outputOpt.getPreferredName(), cmdLine.getValue(outputOpt));
-    result.put(helpOpt.getPreferredName(), cmdLine.getValue(helpOpt));
-    result.put(jarFileOpt.getPreferredName(), cmdLine.getValue(jarFileOpt));
+    Map<String,String> result = new HashMap<String,String>();
+    maybePut(result, cmdLine, inputOpt);
+    maybePut(result, cmdLine, tempDirOpt);
+    maybePut(result, cmdLine, outputOpt);
+    maybePut(result, cmdLine, helpOpt);
+    maybePut(result, cmdLine, jarFileOpt);
     for (Option opt : extraOpts) {
-      result.put(opt.getPreferredName(), cmdLine.getValue(opt));
+      maybePut(result, cmdLine, opt);
     }
 
     return result;    
+  }
+
+  private static void maybePut(Map<String,String> args, CommandLine cmdLine, Option opt) {
+    Object value = cmdLine.getValue(opt);
+    if (value != null) {
+      args.put(opt.getPreferredName(), value.toString());
+    }
   }
 
   protected static JobConf prepareJobConf(String inputPath,

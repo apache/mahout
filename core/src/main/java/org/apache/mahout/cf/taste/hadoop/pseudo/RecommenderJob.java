@@ -93,16 +93,16 @@ public final class RecommenderJob extends AbstractJob {
   public int run(String[] args) throws IOException {
 
     Option recommendClassOpt =
-        buildOption("recommenderClassName", "r", "Name of recommender class to instantiate", true);
+        buildOption("recommenderClassName", "r", "Name of recommender class to instantiate");
     Option numReccomendationsOpt =
-        buildOption("numRecommendations", "n", "Number of recommendations per user", true);
+        buildOption("numRecommendations", "n", "Number of recommendations per user");
 
-    Map<String,Object> parsedArgs = parseArguments(args, recommendClassOpt, numReccomendationsOpt);
-    String inputFile = parsedArgs.get("--input").toString();
-    String outputPath = parsedArgs.get("--output").toString();
-    String jarFile = parsedArgs.get("--jarFile").toString();
+    Map<String,String> parsedArgs = parseArguments(args, recommendClassOpt, numReccomendationsOpt);
+    String inputFile = parsedArgs.get("--input");
+    String outputPath = parsedArgs.get("--output");
+    String jarFile = parsedArgs.get("--jarFile");
 
-    String recommendClassName = parsedArgs.get("--recommenderClassName").toString();
+    String recommendClassName = parsedArgs.get("--recommenderClassName");
     int recommendationsPerUser = Integer.parseInt((String) parsedArgs.get("--numRecommendations"));
 
     JobConf jobConf = prepareJobConf(inputFile,

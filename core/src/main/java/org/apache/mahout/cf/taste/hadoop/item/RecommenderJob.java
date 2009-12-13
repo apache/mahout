@@ -61,15 +61,18 @@ public final class RecommenderJob extends AbstractJob {
   @Override
   public int run(String[] args) throws IOException {
 
-    Option numReccomendationsOpt = buildOption("numRecommendations", "n", "Number of recommendations per user", true);
+    Option numReccomendationsOpt = buildOption("numRecommendations", "n", "Number of recommendations per user", "10");
+    Option usersFileOpt = buildOption("usersFile", "n", "Number of recommendations per user", null);
 
-    Map<String,Object> parsedArgs = parseArguments(args, numReccomendationsOpt);
+    Map<String,String> parsedArgs = parseArguments(args, numReccomendationsOpt, usersFileOpt);
 
-    String inputPath = parsedArgs.get("--input").toString();
-    String tempDirPath = parsedArgs.get("--tempDir").toString();
-    String outputPath = parsedArgs.get("--output").toString();
-    String jarFile = parsedArgs.get("--jarFile").toString();
-    int recommendationsPerUser = Integer.parseInt((String) parsedArgs.get("--numRecommendations"));
+    String inputPath = parsedArgs.get("--input");
+    String tempDirPath = parsedArgs.get("--tempDir");
+    String outputPath = parsedArgs.get("--output");
+    String jarFile = parsedArgs.get("--jarFile");
+    int recommendationsPerUser = Integer.parseInt(parsedArgs.get("--numRecommendations"));
+    String usersFile = parsedArgs.get("--usersFile");
+
     String userVectorPath = tempDirPath + "/userVectors";
     String itemIDIndexPath = tempDirPath + "/itemIDIndex";
     String cooccurrencePath = tempDirPath + "/cooccurrence";
@@ -127,6 +130,7 @@ public final class RecommenderJob extends AbstractJob {
     recommenderConf.set(RecommenderMapper.COOCCURRENCE_PATH, cooccurrencePath);
     recommenderConf.set(RecommenderMapper.ITEMID_INDEX_PATH, itemIDIndexPath);    
     recommenderConf.setInt(RecommenderMapper.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
+    recommenderConf.set(RecommenderMapper.USERS_FILE, usersFile);
     recommenderConf.setClass("mapred.output.compression.codec", GzipCodec.class, CompressionCodec.class);
     JobClient.runJob(recommenderConf);
     return 0;

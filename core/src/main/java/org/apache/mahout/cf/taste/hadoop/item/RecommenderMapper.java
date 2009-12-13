@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.hadoop.item;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -31,13 +32,16 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.hadoop.MapFilesMap;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.impl.common.Cache;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
+import org.apache.mahout.common.FileLineIterable;
 import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -52,11 +56,13 @@ public final class RecommenderMapper
   static final String COOCCURRENCE_PATH = "cooccurrencePath";
   static final String ITEMID_INDEX_PATH = "itemIDIndexPath";
   static final String RECOMMENDATIONS_PER_USER = "recommendationsPerUser";
+  static final String USERS_FILE = "usersFile";
 
   private int recommendationsPerUser;
   private MapFilesMap<IntWritable,LongWritable> indexItemIDMap;
   private MapFilesMap<IntWritable,Vector> cooccurrenceColumnMap;
   private Cache<IntWritable,Vector> cooccurrenceColumnCache;
+  private FastIDSet usersToRecommendFor;
 
   @Override
   public void configure(JobConf jobConf) {
@@ -67,6 +73,17 @@ public final class RecommenderMapper
       recommendationsPerUser = jobConf.getInt(RECOMMENDATIONS_PER_USER, 10);
       indexItemIDMap = new MapFilesMap<IntWritable,LongWritable>(fs, itemIDIndexPath, new Configuration());
       cooccurrenceColumnMap = new MapFilesMap<IntWritable,Vector>(fs, cooccurrencePath, new Configuration());
+      String usersFilePathString = jobConf.get(USERS_FILE);
+      if (usersFilePathString == null) {
+        usersToRecommendFor = null;
+      } else {
+        usersToRecommendFor = new FastIDSet();
+        Path usersFilePath = new Path(usersFilePathString).makeQualified(fs);
+        FSDataInputStream in = fs.open(usersFilePath);
+        for (String line : new FileLineIterable(in)) {
+          usersToRecommendFor.add(Long.parseLong(line));
+        }
+      }
     } catch (IOException ioe) {
       throw new IllegalStateException(ioe);
     }
@@ -78,6 +95,10 @@ public final class RecommenderMapper
                   SparseVector userVector,
                   OutputCollector<LongWritable, RecommendedItemsWritable> output,
                   Reporter reporter) throws IOException {
+
+    if (usersToRecommendFor != null && !usersToRecommendFor.contains(userID.get())) {
+      return;
+    }
 
     Iterator<Vector.Element> userVectorIterator = userVector.iterateNonZero();
     Vector recommendationVector = new SparseVector(Integer.MAX_VALUE, 1000);
