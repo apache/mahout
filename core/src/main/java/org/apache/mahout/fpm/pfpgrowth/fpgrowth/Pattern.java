@@ -71,9 +71,7 @@ public class Pattern {
       return false;
     if (support != other.support)
       return false;
-    if (!Arrays.equals(pattern, other.pattern))
-      return false;
-    return true;
+    return Arrays.equals(pattern, other.pattern);
   }
 
   public final int[] getPattern() {

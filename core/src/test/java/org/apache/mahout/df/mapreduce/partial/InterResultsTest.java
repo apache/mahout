@@ -53,6 +53,7 @@ public class InterResultsTest extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
+    super.setUp();
     RandomUtils.useTestSeed();
     Random rng = RandomUtils.getRandom();
 
@@ -70,7 +71,7 @@ public class InterResultsTest extends TestCase {
     // prepare first step output
     keys = new TreeID[nbTrees];
     trees = new Node[nbTrees];
-    
+
     int treeIndex = 0;
     for (int partition = 0; partition < nbMappers; partition++) {
       int nbMapTrees = Step1Mapper.nbTrees(nbMappers, nbTrees, partition);

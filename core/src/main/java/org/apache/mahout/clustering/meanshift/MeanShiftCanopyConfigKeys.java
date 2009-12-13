@@ -1,6 +1,6 @@
 package org.apache.mahout.clustering.meanshift;
 
-public class MeanShiftCanopyConfigKeys {
+public interface MeanShiftCanopyConfigKeys {
 
   // keys used by Driver, Mapper, Combiner & Reducer
   public static final String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.canopy.measure";

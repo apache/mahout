@@ -21,7 +21,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import org.apache.mahout.clustering.ClusterBase;
-import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.matrix.AbstractVector;
 import org.apache.mahout.matrix.CardinalityException;
 import org.apache.mahout.matrix.DenseVector;

@@ -66,9 +66,6 @@ public abstract class Builder {
 
   private String outputDirName = "output";
 
-  private int numTrees;
-
-
   protected TreeBuilder getTreeBuilder() {
     return treeBuilder;
   }
@@ -285,7 +282,7 @@ public abstract class Builder {
 
   public DecisionForest build(int nbTrees, PredictionCallback callback)
       throws IOException, ClassNotFoundException, InterruptedException {
-    numTrees = getNbTrees(conf);
+    int numTrees = getNbTrees(conf);
 
     Path outputPath = getOutputPath(conf);
     FileSystem fs = outputPath.getFileSystem(conf);

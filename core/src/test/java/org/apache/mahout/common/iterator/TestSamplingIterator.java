@@ -27,6 +27,7 @@ public abstract class TestSamplingIterator extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
+    super.setUp();
     RandomUtils.useTestSeed();
   }
 

@@ -31,7 +31,6 @@ import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.recommender.ClusteringRecommender;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
-import org.apache.mahout.cf.taste.recommender.Rescorer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

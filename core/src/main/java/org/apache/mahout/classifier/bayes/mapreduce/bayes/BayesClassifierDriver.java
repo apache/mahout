@@ -51,7 +51,7 @@ public class BayesClassifierDriver {
    * 
    * @param params The Job parameters containing the gramSize, input output folders, defaultCat, encoding
    */
-  public static final void runJob(BayesParameters params) throws IOException {
+  public static void runJob(BayesParameters params) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(BayesClassifierDriver.class);
     conf.setJobName("Bayes Classifier Driver running over input: " + params.get("testDirPath"));

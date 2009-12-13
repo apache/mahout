@@ -55,7 +55,7 @@ public interface PreferenceArray extends Cloneable, Serializable, Iterable<Prefe
    * Sets user ID for preference at i.
    *
    * @param i index
-   * @param value new user ID
+   * @param userID new user ID
    */
   void setUserID(int i, long userID);
 
@@ -69,7 +69,7 @@ public interface PreferenceArray extends Cloneable, Serializable, Iterable<Prefe
    * Sets item ID for preference at i.
    *
    * @param i index
-   * @param value new item ID
+   * @param itemID new item ID
    */
   void setItemID(int i, long itemID);
 

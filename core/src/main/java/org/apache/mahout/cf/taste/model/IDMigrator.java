@@ -47,7 +47,7 @@ public interface IDMigrator {
    *  The reverse mapping is also stored.
    * @throws TasteException if an error occurs while storing the mapping
    */
-  long toLongID(String stringID) throws TasteException;
+  long toLongID(String stringID);
 
   /**
    * @return the string ID most recently associated with the given long ID, or null if doesn't exist

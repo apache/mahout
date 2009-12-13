@@ -29,8 +29,12 @@ import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 import org.apache.mahout.classifier.bayes.interfaces.Datastore;
 import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
 import org.apache.mahout.common.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InMemoryBayesDatastore implements Datastore {
+
+  private static final Logger log = LoggerFactory.getLogger(InMemoryBayesDatastore.class);
 
   private final Map<String, Map<String, Map<String, Double>>> matrices = new HashMap<String, Map<String, Map<String, Double>>>();
 
@@ -77,9 +81,11 @@ public class InMemoryBayesDatastore implements Datastore {
           "thetaNormalizer", label)));
     }
     for (String label : labels) {
-      System.out.println(label + ' ' + vectorGetCell("thetaNormalizer", label)
-          + ' ' + thetaNormalizer + ' '
-          + vectorGetCell("thetaNormalizer", label) / thetaNormalizer);
+      log.info("{} {} {} {}", new Object[] {
+               label,
+               vectorGetCell("thetaNormalizer", label),
+               thetaNormalizer,
+               vectorGetCell("thetaNormalizer", label) / thetaNormalizer});
     }
   }
 

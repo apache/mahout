@@ -44,7 +44,8 @@ public abstract class AbstractRecommender implements Recommender {
 
   /**
    * <p>Default implementation which just calls {@link Recommender#recommend(long, int,
-   * org.apache.mahout.cf.taste.recommender.Rescorer)}, with a {@link org.apache.mahout.cf.taste.recommender.Rescorer}
+   * org.apache.mahout.cf.taste.recommender.IDRescorer)},
+   * with a {@link org.apache.mahout.cf.taste.recommender.Rescorer}
    * that does nothing.</p>
    */
   @Override

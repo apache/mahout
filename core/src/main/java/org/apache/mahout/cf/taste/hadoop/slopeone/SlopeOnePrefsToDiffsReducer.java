@@ -23,7 +23,6 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.Reducer;
-import org.apache.mahout.cf.taste.hadoop.slopeone.ByItemIDComparator;
 import org.apache.mahout.cf.taste.hadoop.ItemItemWritable;
 import org.apache.mahout.cf.taste.hadoop.ItemPrefWritable;
 

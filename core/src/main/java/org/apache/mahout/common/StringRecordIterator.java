@@ -24,13 +24,14 @@ import java.util.regex.Pattern;
 
 public class StringRecordIterator implements Iterator<List<String>> {
  
-  private Iterator<String> lineIterator;
+  private final Iterator<String> lineIterator;
   private Pattern splitter = null;
-  public StringRecordIterator(FileLineIterable iterable, String pattern)
-  {
+
+  public StringRecordIterator(FileLineIterable iterable, String pattern) {
     this.lineIterator = iterable.iterator();
     this.splitter = Pattern.compile(pattern);
   }
+
   @Override
   public boolean hasNext() {
     return lineIterator.hasNext();

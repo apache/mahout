@@ -23,6 +23,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.matrix.Vector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class implements the k-means clustering algorithm. It uses
@@ -30,6 +32,8 @@ import org.apache.mahout.matrix.Vector;
  * a clustering job to be started as map/reduce job.
  * */
 public class KMeansClusterer {
+
+  private static final Logger log = LoggerFactory.getLogger(KMeansClusterer.class);
 
   /** Distance to use for point to cluster comparison. */
   private final DistanceMeasure measure;
@@ -39,11 +43,9 @@ public class KMeansClusterer {
    * 
    * @param measure
    *          The distance measure to use for comparing clusters against points.
-   * @param convergenceDelta
-   *          When do we define a cluster to have converged?
    * 
-   * */
-  public KMeansClusterer(final DistanceMeasure measure) {
+   */
+  public KMeansClusterer(DistanceMeasure measure) {
     this.measure = measure;
   }
 
@@ -65,7 +67,7 @@ public class KMeansClusterer {
       Vector clusterCenter = cluster.getCenter();
       double distance = this.measure.distance(clusterCenter.getLengthSquared(),
           clusterCenter, point);
-      System.out.println(distance + " Cluster: " + cluster.getId());
+      log.info("{} Cluster: {}", distance, cluster.getId());
       if (distance < nearestDistance || nearestCluster == null) {
         nearestCluster = cluster;
         nearestDistance = distance;
@@ -90,8 +92,7 @@ public class KMeansClusterer {
     }
     
     String name = point.getName();
-    String key = new String(name != null && name.length() != 0 ? name : point
-        .asFormatString());
+    String key = name != null && name.length() != 0 ? name : point.asFormatString();
     output.collect(new Text(key), new Text(String.valueOf(nearestCluster.getId())));
   }
 }

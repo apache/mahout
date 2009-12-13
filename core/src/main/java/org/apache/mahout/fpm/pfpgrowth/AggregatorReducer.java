@@ -22,7 +22,6 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.common.Parameters;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import java.io.IOException;
-import java.util.Iterator;
 
 /**
  * 

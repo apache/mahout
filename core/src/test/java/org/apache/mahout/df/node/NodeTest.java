@@ -39,8 +39,9 @@ public class NodeTest extends TestCase {
   
   @Override
   protected void setUp() throws Exception {
+    super.setUp();
     RandomUtils.useTestSeed();
-    
+
     rng = RandomUtils.getRandom();
 
     byteOutStream = new ByteArrayOutputStream();

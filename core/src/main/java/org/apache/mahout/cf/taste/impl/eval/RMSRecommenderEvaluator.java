@@ -17,17 +17,9 @@
 
 package org.apache.mahout.cf.taste.impl.eval;
 
-import org.apache.mahout.cf.taste.common.NoSuchItemException;
-import org.apache.mahout.cf.taste.common.NoSuchUserException;
-import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.PreferenceArray;
-import org.apache.mahout.cf.taste.recommender.Recommender;
-
-import java.util.Map;
 
 /**
  * <p>A {@link org.apache.mahout.cf.taste.eval.RecommenderEvaluator} which computes the "root mean squared" difference

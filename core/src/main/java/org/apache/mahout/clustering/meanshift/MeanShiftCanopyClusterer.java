@@ -105,8 +105,8 @@ public class MeanShiftCanopyClusterer {
   }
 
   /** Emit the new canopy to the collector, keyed by the canopy's Id */
-  void emitCanopy(MeanShiftCanopy canopy,
-                  OutputCollector<Text, WritableComparable<?>> collector)
+  static void emitCanopy(MeanShiftCanopy canopy,
+                         OutputCollector<Text, WritableComparable<?>> collector)
       throws IOException {
     String identifier = canopy.getIdentifier();
     collector.collect(new Text(identifier), new Text("new " + canopy.toString()));
@@ -115,7 +115,7 @@ public class MeanShiftCanopyClusterer {
   /**
    * Shift the center to the new centroid of the cluster
    *
-   * @param the canopy to shift.
+   * @param canopy the canopy to shift.
    * @return if the cluster is converged
    */
   public boolean shiftToMean(MeanShiftCanopy canopy) {

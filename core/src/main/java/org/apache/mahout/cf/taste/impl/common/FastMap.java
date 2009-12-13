@@ -104,22 +104,12 @@ public final class FastMap<K, V> implements Map<K, V>, Serializable, Cloneable {
     int hashSize = keys.length;
     int jump = 1 + theHashCode % (hashSize - 2);
     int index = theHashCode % hashSize;
-    int originalIndex = index; // TODO remove
     K currentKey = keys[index];
     while (currentKey != null && (currentKey == REMOVED || !key.equals(currentKey))) {
       if (index < jump) {
         index += hashSize - jump;
       } else {
         index -= jump;
-      }
-      if (index == originalIndex) {
-        // TODO remove
-        System.err.println("Bad FastMap state");
-        System.err.println("Jump: " + jump + ", size: " + keys.length + ", entries " + numEntries);
-        for (int i = 0; i < keys.length; i++) {
-          K theKey = keys[i];
-          System.err.println(theKey == REMOVED ? "REMOVED" : theKey);
-        }
       }
       currentKey = keys[index];
     }

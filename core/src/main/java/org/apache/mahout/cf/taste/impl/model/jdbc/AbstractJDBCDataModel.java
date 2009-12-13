@@ -26,7 +26,6 @@ import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
-import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
 import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
 import org.apache.mahout.cf.taste.impl.model.GenericItemPreferenceArray;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;

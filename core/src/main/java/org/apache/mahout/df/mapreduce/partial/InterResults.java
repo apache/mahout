@@ -73,14 +73,13 @@ public class InterResults {
       for (int index = 0; index < numTrees; index++) {
         key.readFields(in);
 
-        if (key.partition() != partition) {
-          keys[current] = key.clone();
-          trees[current] = Node.read(in);
-
-          current++;
-        } else {
+        if (key.partition() == partition) {
           // skip the trees of the current partition
           Node.read(in);
+        } else {
+          keys[current] = key.clone();
+          trees[current] = Node.read(in);
+          current++;
         }
       }
 

@@ -99,7 +99,7 @@ public class Describe {
 
       runTool(dataPath, descriptor, descPath);
     } catch (OptionException e) {
-      System.err.println("Exception : " + e);
+      log.warn(e.toString(), e);
       CommandLineUtil.printHelp(group);
     }
   }

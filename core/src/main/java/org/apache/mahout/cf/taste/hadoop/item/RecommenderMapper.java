@@ -41,7 +41,6 @@ import org.apache.mahout.matrix.SparseVector;
 import org.apache.mahout.matrix.Vector;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;

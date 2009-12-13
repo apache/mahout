@@ -29,8 +29,6 @@ import org.apache.mahout.df.data.Instance;
  */
 public abstract class Node implements Writable {
 
-  //protected static final String DELIMITER = ",";
-
   protected enum NODE_TYPE {
     MOCKLEAF, LEAF, NUMERICAL, CATEGORICAL
   }
