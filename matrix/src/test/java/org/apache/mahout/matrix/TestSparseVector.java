@@ -364,11 +364,7 @@ public class TestSparseVector extends TestCase {
   public void testAssignUnaryFunction() {
     test.assign(new NegateFunction());
     for (int i = 0; i < values.length; i++) {
-      if (i == 0 || i == 4) {
-        assertEquals("get [" + i + ']', -0.0, test.getQuick(i));//odd
-      } else {
-        assertEquals("value[" + i + ']', -values[i - 1], test.getQuick(i));
-      }
+      assertEquals("value[" + i + ']', -values[i], test.getQuick(i+1));
     }
   }
 
