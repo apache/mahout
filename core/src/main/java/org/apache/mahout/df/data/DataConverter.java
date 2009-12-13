@@ -18,14 +18,19 @@
 package org.apache.mahout.df.data;
 
 import java.util.StringTokenizer;
+import java.util.Arrays;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.mahout.matrix.DenseVector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Converts String to Instance using a Dataset
  */
 public class DataConverter {
+
+  private static final Logger log = LoggerFactory.getLogger(DataConverter.class);
 
   private final Dataset dataset;
 
@@ -48,7 +53,7 @@ public class DataConverter {
     int aId = 0;
     int label = -1;
     for (int attr = 0; attr < nball; attr++) {
-      String token = tokenizer.nextToken();
+      String token = tokenizer.nextToken().trim();
       
       if (ArrayUtils.contains(dataset.getIgnored(), attr)) {
         continue; // IGNORED
@@ -56,6 +61,11 @@ public class DataConverter {
       
       if (attr == dataset.getLabelId()) {
         label = dataset.labelCode(token);
+        if (label == -1) {
+          log.error(String.format("label token: %s\ndataset.labels: %s",
+                  token, Arrays.toString(dataset.labels())));
+          throw new IllegalStateException("Label value ("+token+") not known");
+        }
       } else if (dataset.isNumerical(aId)) {
         vector.set(aId++, Double.parseDouble(token));
       } else {
@@ -64,8 +74,10 @@ public class DataConverter {
       }
     }
 
-    if (label == -1)
+    if (label == -1) {
+      log.error(String.format("Label not found, instance id : %d, \nstring : %s", id, string));
       throw new IllegalStateException("Label not found!");
+    }
 
     return new Instance(id, vector, label);
   }

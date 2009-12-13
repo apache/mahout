@@ -77,7 +77,11 @@ public class Dataset implements Writable {
   
   /** number of instances in the dataset */
   private int nbInstances;
-  
+
+  public String[] labels() {
+    return Arrays.copyOf(labels, labels.length);
+  }
+
   public int nblabels() {
     return labels.length;
   }

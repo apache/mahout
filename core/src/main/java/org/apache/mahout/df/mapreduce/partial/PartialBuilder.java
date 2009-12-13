@@ -142,14 +142,18 @@ public class PartialBuilder extends Builder {
    * @param job
    * @param outputPath directory that contains the output of the job
    * @param firstIds partitions' first ids in hadoop's order
-   * @param keys
+   * @param keys can be null
+   * @param trees can be null
    * @param callback can be null
    * @throws IOException
    */
   protected static void processOutput(Job job, Path outputPath,
       int[] firstIds, TreeID[] keys, Node[] trees, PredictionCallback callback)
       throws IOException {
-    if (keys.length != trees.length) {
+    if ((keys != null && trees == null)||(keys == null && trees != null)) {
+      throw new IllegalArgumentException("if keys is null, trees should also be null");
+    }
+    if (keys != null && keys.length != trees.length) {
       throw new IllegalArgumentException("keys.length != trees.length");
     }
     
@@ -187,8 +191,8 @@ public class PartialBuilder extends Builder {
     }
 
     // make sure we got all the keys/values
-    if (index != keys.length) {
-      throw new IllegalStateException();
+    if (keys != null && index != keys.length) {
+      throw new IllegalStateException("Some key/values are missing from the output");
     }
   }
 
