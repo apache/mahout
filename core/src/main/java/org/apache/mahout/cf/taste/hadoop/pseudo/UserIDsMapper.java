@@ -28,7 +28,7 @@ import org.apache.hadoop.mapred.Reporter;
 import java.io.IOException;
 
 /**
- * Extracts and emits all user IDs from the input file.
+ * Extracts and emits all user IDs from the users file, or input file.
  */
 public final class UserIDsMapper
     extends MapReduceBase
@@ -40,7 +40,8 @@ public final class UserIDsMapper
                   OutputCollector<LongWritable, NullWritable> output,
                   Reporter reporter) throws IOException {
     String line = value.toString();
-    long userID = Long.parseLong(line.substring(0, line.indexOf(',')));
+    int comma = line.indexOf(',');
+    long userID = comma >= 0 ? Long.parseLong(line.substring(0, comma)) : Long.parseLong(line);
     output.collect(new LongWritable(userID), NullWritable.get());
   }
 
