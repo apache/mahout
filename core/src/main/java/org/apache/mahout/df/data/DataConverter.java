@@ -58,6 +58,11 @@ public class DataConverter {
       if (ArrayUtils.contains(dataset.getIgnored(), attr)) {
         continue; // IGNORED
       }
+
+      if ("?".equals(token)) {
+        // missing value
+        return null;
+      }
       
       if (attr == dataset.getLabelId()) {
         label = dataset.labelCode(token);
