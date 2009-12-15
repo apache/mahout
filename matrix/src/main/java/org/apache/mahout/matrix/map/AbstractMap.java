@@ -1,3 +1,19 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 /*
 Copyright 1999 CERN - European Organization for Nuclear Research.
 Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose 
@@ -12,7 +28,8 @@ import org.apache.mahout.matrix.PersistentObject;
 
 /**
  Abstract base class for hash maps holding objects or primitive data types such as <code>int</code>, <code>float</code>, etc. as keys and/or values.
- First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
+ First see the <a href="package-summary.html">package summary</a> 
+ and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
  <p>
  Note that implementations are not synchronized.
 
@@ -20,9 +37,6 @@ import org.apache.mahout.matrix.PersistentObject;
  @version 1.0, 09/24/99
  @see      java.util.HashMap
  */
-
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
 public abstract class AbstractMap extends PersistentObject {
   //public static boolean debug = false; // debug only
 
@@ -48,10 +62,6 @@ public abstract class AbstractMap extends PersistentObject {
   protected static final int defaultCapacity = 277;
   protected static final double defaultMinLoadFactor = 0.2;
   protected static final double defaultMaxLoadFactor = 0.5;
-
-  /** Makes this class non instantiable, but still let's others inherit from it. */
-  protected AbstractMap() {
-  }
 
   /**
    * Chooses a new prime table capacity optimized for growing that (approximately) satisfies the invariant <tt>c *
@@ -127,7 +137,7 @@ public abstract class AbstractMap extends PersistentObject {
    * @param desiredCapacity the capacity desired by the user.
    * @return the capacity which should be used for a hashtable.
    */
-  protected int nextPrime(int desiredCapacity) {
+protected int nextPrime(int desiredCapacity) {
     return PrimeFinder.nextPrime(desiredCapacity);
   }
 

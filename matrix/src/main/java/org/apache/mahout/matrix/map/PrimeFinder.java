@@ -19,9 +19,6 @@ import java.util.Arrays;
  * Memory requirements: 1 KB static memory.
  *
  */
-
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
 public class PrimeFinder {
 
   private static final Logger log = LoggerFactory.getLogger(PrimeFinder.class);
