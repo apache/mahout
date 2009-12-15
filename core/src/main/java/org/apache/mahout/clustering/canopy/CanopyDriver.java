@@ -25,6 +25,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -133,7 +134,7 @@ public final class CanopyDriver {
                             String measureClassName, double t1, double t2, Class<? extends Vector> vectorClass) throws IOException {
     log.info("Input: " + input + " Out: " + output + " Measure: " + measureClassName + " t1: " + t1
         + " t2: " + t2 + " Vector Class: " + vectorClass.getSimpleName());
-    JobClient client = new JobClient();
+    Configurable client = new JobClient();
     JobConf conf = new JobConf(CanopyDriver.class);
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measureClassName);
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(t1));

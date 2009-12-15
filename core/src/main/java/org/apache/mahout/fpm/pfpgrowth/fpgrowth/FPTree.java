@@ -74,8 +74,9 @@ public class FPTree {
   }
 
   private FPTree(int size, int headersize) {
-    if (size < DEFAULT_INITIAL_SIZE)
+    if (size < DEFAULT_INITIAL_SIZE) {
       size = DEFAULT_INITIAL_SIZE;
+    }
 
     parent = new int[size];
     next = new int[size];
@@ -151,8 +152,9 @@ public class FPTree {
   public final int childWithAttribute(int nodeId, int childAttribute) {
     int length = childCount[nodeId];
     for (int i = 0; i < length; i++) {
-      if (attribute[nodeChildren[nodeId][i]] == childAttribute)
+      if (attribute[nodeChildren[nodeId][i]] == childAttribute) {
         return nodeChildren[nodeId][i];
+      }
     }
     return -1;
   }
@@ -165,8 +167,9 @@ public class FPTree {
   }
 
   public final void clearConditional() {
-    for (int i = nodes - 1; i >= 0; i--)
+    for (int i = nodes - 1; i >= 0; i--) {
       conditional[i] = 0;
+    }
   }
 
   public final int conditional(int nodeId) {
@@ -188,8 +191,9 @@ public class FPTree {
     this.attribute[nodes] = attribute;
     nodeCount[nodes] = count;
 
-    if (nodeChildren[nodes] == null)
+    if (nodeChildren[nodes] == null) {
       nodeChildren[nodes] = new int[DEFAULT_CHILDREN_INITIAL_SIZE];
+    }
 
     int childNodeId = nodes++;
     return childNodeId;
@@ -207,8 +211,9 @@ public class FPTree {
     nodeCount[nodes] = count;
 
     conditional[nodes] = 0;
-    if (nodeChildren[nodes] == null)
+    if (nodeChildren[nodes] == null) {
       nodeChildren[nodes] = new int[DEFAULT_CHILDREN_INITIAL_SIZE];
+    }
 
     int childNodeId = nodes++;
     addChild(parentNodeId, childNodeId);
@@ -222,10 +227,10 @@ public class FPTree {
     parent[nodes] = 0;
     attribute[nodes] = -1;
     nodeCount[nodes] = 0;
-    if (nodeChildren[nodes] == null)
+    if (nodeChildren[nodes] == null) {
       nodeChildren[nodes] = new int[DEFAULT_CHILDREN_INITIAL_SIZE];
-    int childNodeId = nodes++;
-    return childNodeId;
+    }
+    return nodes++;
   }
 
   public final int getAttributeAtIndex(int index) {
@@ -308,15 +313,18 @@ public class FPTree {
   }
 
   private int getHeaderIndex(int attribute) {
-    if (attribute >= headerTableLookup.length)
+    if (attribute >= headerTableLookup.length) {
       resizeHeaderLookup(attribute);
+    }
     int index = headerTableLookup[attribute];
     if (index == -1) { // if attribute didnt exist;
-      if (headerTableCount >= headerTableAttributes.length)
+      if (headerTableCount >= headerTableAttributes.length) {
         resizeHeaderTable();
+      }
       headerTableAttributes[headerTableCount] = attribute;
-      if (headerTableProperties[headerTableCount] == null)
+      if (headerTableProperties[headerTableCount] == null) {
         headerTableProperties[headerTableCount] = new int[HEADERTABLEBLOCKSIZE];
+      }
       headerTableAttributeCount[headerTableCount] = 0;
       headerTableProperties[headerTableCount][HT_NEXT] = -1;
       headerTableProperties[headerTableCount][HT_LAST] = -1;
@@ -328,8 +336,9 @@ public class FPTree {
 
   private void resize() {
     int size = (int) (GROWTH_RATE * nodes);
-    if (size < DEFAULT_INITIAL_SIZE)
+    if (size < DEFAULT_INITIAL_SIZE) {
       size = DEFAULT_INITIAL_SIZE;
+    }
 
     int[] oldChildCount = childCount;
     int[] oldAttribute = attribute;
@@ -360,8 +369,9 @@ public class FPTree {
   private void resizeChildren(int nodeId) {
     int length = childCount[nodeId];
     int size = (int) (GROWTH_RATE * (length));
-    if (size < DEFAULT_CHILDREN_INITIAL_SIZE)
+    if (size < DEFAULT_CHILDREN_INITIAL_SIZE) {
       size = DEFAULT_CHILDREN_INITIAL_SIZE;
+    }
     int[] oldNodeChildren = nodeChildren[nodeId];
     nodeChildren[nodeId] = new int[size];
     System.arraycopy(oldNodeChildren, 0, this.nodeChildren[nodeId], 0, length);
@@ -377,8 +387,9 @@ public class FPTree {
 
   private void resizeHeaderTable() {
     int size = (int) (GROWTH_RATE * (headerTableCount));
-    if (size < DEFAULT_HEADER_TABLE_INITIAL_SIZE)
+    if (size < DEFAULT_HEADER_TABLE_INITIAL_SIZE) {
       size = DEFAULT_HEADER_TABLE_INITIAL_SIZE;
+    }
 
     int[] oldAttributes = headerTableAttributes;
     long[] oldAttributeCount = headerTableAttributeCount;
@@ -387,10 +398,10 @@ public class FPTree {
     headerTableAttributeCount = new long[size];
     headerTableProperties = new int[size][];
     System.arraycopy(oldAttributes, 0, this.headerTableAttributes, 0,
-        headerTableCount);
+                     headerTableCount);
     System.arraycopy(oldAttributeCount, 0, this.headerTableAttributeCount, 0,
-        headerTableCount);
+                     headerTableCount);
     System.arraycopy(oldProperties, 0, this.headerTableProperties, 0,
-        headerTableCount);
+                     headerTableCount);
   }
 }

@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
+import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
@@ -41,7 +42,7 @@ public class BayesWeightSummerDriver implements BayesJob {
    */
   @Override
   public void runJob(String input, String output, BayesParameters params) throws IOException {
-    JobClient client = new JobClient();
+    Configurable client = new JobClient();
     JobConf conf = new JobConf(BayesWeightSummerDriver.class);
     conf.setJobName("Bayes Weight Summer Driver running over input: " +  input);
 

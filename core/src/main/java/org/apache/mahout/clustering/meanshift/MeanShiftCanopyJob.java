@@ -25,6 +25,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
@@ -112,7 +113,7 @@ public class MeanShiftCanopyJob {
                             String measureClassName, double t1, double t2, double convergenceDelta,
                             int maxIterations) throws IOException {
     // delete the output directory
-    JobConf conf = new JobConf(MeanShiftCanopyDriver.class);
+    Configuration conf = new JobConf(MeanShiftCanopyDriver.class);
     Path outPath = new Path(output);
     FileSystem fs = FileSystem.get(outPath.toUri(), conf);
     if (fs.exists(outPath)) {

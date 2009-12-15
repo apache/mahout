@@ -17,9 +17,9 @@
 
 package org.apache.mahout.fpm.pfpgrowth.fpgrowth;
 
-import java.util.ArrayList;
-
 import org.apache.mahout.common.cache.LeastKCache;
+
+import java.util.ArrayList;
 
 public class FPTreeDepthCache {
 

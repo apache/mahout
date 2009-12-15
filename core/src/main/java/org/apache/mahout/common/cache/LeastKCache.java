@@ -31,7 +31,7 @@ public class LeastKCache<K extends Comparable<? super K>, V> implements
 
   private PriorityQueue<K> queue = null;
 
-  public LeastKCache(final int capacity) {
+  public LeastKCache(int capacity) {
 
     this.capacity = capacity;
 
@@ -48,17 +48,17 @@ public class LeastKCache<K extends Comparable<? super K>, V> implements
   }
 
   @Override
-  final public long capacity() {
+  public final long capacity() {
     return capacity;
   }
 
   @Override
-  final public V get(K key) {
+  public final V get(K key) {
     return cache.get(key);
   }
 
   @Override
-  final public void set(K key, V value) {
+  public final void set(K key, V value) {
     if (contains(key) == false) {
       queue.add(key);
     }
@@ -70,12 +70,12 @@ public class LeastKCache<K extends Comparable<? super K>, V> implements
   }
 
   @Override
-  final public long size() {
+  public final long size() {
     return cache.size();
   }
 
   @Override
-  final public boolean contains(K key) {
+  public final boolean contains(K key) {
     return (cache.containsKey(key));
   }
 

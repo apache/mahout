@@ -25,6 +25,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
@@ -103,7 +104,7 @@ public class DirichletJob {
       throws IOException, ClassNotFoundException, InstantiationException,
       IllegalAccessException {
     // delete the output directory
-    JobConf conf = new JobConf(DirichletJob.class);
+    Configuration conf = new JobConf(DirichletJob.class);
     Path outPath = new Path(output);
     FileSystem fs = FileSystem.get(outPath.toUri(), conf);
     if (fs.exists(outPath)) {

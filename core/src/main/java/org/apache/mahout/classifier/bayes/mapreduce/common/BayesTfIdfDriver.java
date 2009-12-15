@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
+import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -56,7 +57,7 @@ public class BayesTfIdfDriver implements BayesJob {
   @Override
   public void runJob(String input, String output, BayesParameters params) throws IOException {
 
-    JobClient client = new JobClient();
+    Configurable client = new JobClient();
     JobConf conf = new JobConf(BayesWeightSummerDriver.class);
     conf.setJobName("TfIdf Driver running over input: " + input);
 

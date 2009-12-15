@@ -20,6 +20,7 @@ package org.apache.mahout.clustering.lda;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.Serializable;
 
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
@@ -106,7 +107,7 @@ public class IntPairWritable implements WritableComparable<IntPairWritable> {
     WritableComparator.define(IntPairWritable.class, new Comparator());
   }
 
-  public static class Comparator extends WritableComparator {
+  public static class Comparator extends WritableComparator implements Serializable {
     public Comparator() {
       super(IntPairWritable.class);
     }

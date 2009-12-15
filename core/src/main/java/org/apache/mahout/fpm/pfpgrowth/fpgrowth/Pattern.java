@@ -42,16 +42,18 @@ public class Pattern {
   }
 
   private Pattern(int size) {
-    if (size < DEFAULT_INITIAL_SIZE)
+    if (size < DEFAULT_INITIAL_SIZE) {
       size = DEFAULT_INITIAL_SIZE;
+    }
     this.pattern = new int[size];
     this.supportValues = new long[size];
     dirty = true;
   }
 
   public final void add(int id, long support) {
-    if (length >= pattern.length)
+    if (length >= pattern.length) {
       resize();
+    }
     this.pattern[length] = id;
     this.supportValues[length++] = support;
     this.support = (support > this.support) ? this.support : support;
@@ -60,17 +62,22 @@ public class Pattern {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null) {
       return false;
-    if (getClass() != obj.getClass())
+    }
+    if (getClass() != obj.getClass()) {
       return false;
+    }
     Pattern other = (Pattern) obj;
-    if (length != other.length)
+    if (length != other.length) {
       return false;
-    if (support != other.support)
+    }
+    if (support != other.support) {
       return false;
+    }
     return Arrays.equals(pattern, other.pattern);
   }
 
@@ -79,13 +86,14 @@ public class Pattern {
   }
 
   public final Object[] getPatternWithSupport() {
-    return new Object[] { this.pattern, this.supportValues };
+    return new Object[]{this.pattern, this.supportValues};
   }
 
   @Override
   public int hashCode() {
-    if (dirty == false)
+    if (dirty == false) {
       return hashCode;
+    }
     int result = 1;
     int prime = 31;
     result = prime * result + Arrays.hashCode(pattern);
@@ -97,8 +105,9 @@ public class Pattern {
   public final boolean isSubPatternOf(Pattern frequentPattern) {
     int[] otherPattern = frequentPattern.getPattern();
     int otherLength = frequentPattern.length();
-    if (this.length() > frequentPattern.length())
+    if (this.length() > frequentPattern.length()) {
       return false;
+    }
     int i = 0;
     int otherI = 0;
     while (i < length && otherI < otherLength) {
@@ -107,8 +116,9 @@ public class Pattern {
         i++;
       } else if (otherPattern[otherI] < pattern[i]) {
         otherI++;
-      } else
+      } else {
         return false;
+      }
     }
     return otherI != otherLength || i == length;
   }
@@ -130,8 +140,9 @@ public class Pattern {
 
   private void resize() {
     int size = (int) (GROWTH_RATE * length);
-    if (size < DEFAULT_INITIAL_SIZE)
+    if (size < DEFAULT_INITIAL_SIZE) {
       size = DEFAULT_INITIAL_SIZE;
+    }
     int[] oldpattern = pattern;
     long[] oldSupport = supportValues;
     this.pattern = new int[size];

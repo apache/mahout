@@ -37,7 +37,7 @@ public class LDAState {
   }
 
   public double logProbWordGivenTopic(int word, int topic) {
-    final double logProb = topicWordProbabilities.getQuick(topic, word);
+    double logProb = topicWordProbabilities.getQuick(topic, word);
     return logProb == Double.NEGATIVE_INFINITY ? -100.0 
       : logProb - logTotals[topic];
   }

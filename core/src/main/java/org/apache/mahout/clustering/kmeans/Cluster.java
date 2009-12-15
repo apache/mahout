@@ -67,20 +67,20 @@ public class Cluster extends ClusterBase {
    *           when the string is wrongly formatted
    */
   public static Cluster decodeCluster(String formattedString) {
-    final int beginIndex = formattedString.indexOf('{');
+    int beginIndex = formattedString.indexOf('{');
     if (beginIndex <= 0) {
       throw new IllegalArgumentException(ERROR_UNKNOWN_CLUSTER_FORMAT
           + formattedString);
     }
-    final String id = formattedString.substring(0, beginIndex);
-    final String center = formattedString.substring(beginIndex);
-    final char firstChar = id.charAt(0);
-    final boolean startsWithV = firstChar == 'V';
-    final Cluster cluster;
+    String id = formattedString.substring(0, beginIndex);
+    String center = formattedString.substring(beginIndex);
+    char firstChar = id.charAt(0);
+    boolean startsWithV = firstChar == 'V';
+    Cluster cluster;
     if (firstChar == 'C' || startsWithV) {
-      final int clusterId = Integer.parseInt(formattedString.substring(1,
+      int clusterId = Integer.parseInt(formattedString.substring(1,
           beginIndex - 2));
-      final Vector clusterCenter = AbstractVector.decodeVector(center);
+      Vector clusterCenter = AbstractVector.decodeVector(center);
       cluster = new Cluster(clusterCenter, clusterId);
       cluster.setConverged(startsWithV);
     } else {
@@ -222,8 +222,8 @@ public class Cluster extends ClusterBase {
    *          the convergence delta to use for stopping.
    * @return if the cluster is converged
    */
-  public boolean computeConvergence(final DistanceMeasure measure,
-      final double convergenceDelta) {
+  public boolean computeConvergence(DistanceMeasure measure,
+      double convergenceDelta) {
     Vector centroid = computeCentroid();
     converged = measure.distance(centroid.getLengthSquared(), centroid,
         getCenter()) <= convergenceDelta;

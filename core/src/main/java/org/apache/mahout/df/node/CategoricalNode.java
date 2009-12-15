@@ -77,6 +77,11 @@ public class CategoricalNode extends Node {
   }
 
   @Override
+  protected Type getType() {
+    return Type.CATEGORICAL;
+  }
+
+  @Override
   public boolean equals(Object obj) {
     if (this == obj)
       return true;

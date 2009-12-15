@@ -38,7 +38,7 @@ public class FuzzyKMeansClusterer {
    *          When do we define a cluster to have converged?
    * 
    * */
-  public FuzzyKMeansClusterer(final DistanceMeasure measure, double convergenceDelta, double m) {
+  public FuzzyKMeansClusterer(DistanceMeasure measure, double convergenceDelta, double m) {
     this.measure = measure;
     this.convergenceDelta = convergenceDelta;
     this.m = m;

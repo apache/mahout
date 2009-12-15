@@ -17,6 +17,7 @@
 
 package org.apache.mahout.common.parameters;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.JobConf;
 
 import java.util.Collection;
@@ -53,7 +54,7 @@ public abstract class AbstractParameter<T> implements Parameter<T> {
     return Collections.emptyList();
   }
 
-  protected AbstractParameter(Class<T> type, String prefix, String name, JobConf jobConf, T defaultValue, String description) {
+  protected AbstractParameter(Class<T> type, String prefix, String name, Configuration jobConf, T defaultValue, String description) {
     this.type = type;
     this.name = name;
     this.description = description;

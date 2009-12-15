@@ -32,7 +32,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.CommandLineUtil;
-import org.apache.mahout.df.tools.FrequenciesJob;
 import org.apache.mahout.df.data.DataUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,7 +90,7 @@ public class Frequencies extends Configured implements Tool  {
 
       runTool(dataPath, datasetPath);
     } catch (OptionException e) {
-      System.err.println("Exception : " + e);
+      log.warn(e.toString(), e);
       CommandLineUtil.printHelp(group);
     }
 
@@ -114,7 +113,7 @@ public class Frequencies extends Configured implements Tool  {
 
     // compute the partitions' sizes
     int numPartitions = counts.length;
-    int[] sizes = new int[numPartitions];
+    int[] sizes = new int[numPartitions]; // TODO this isn't used?
     for (int p = 0; p < numPartitions; p++) {
       sizes[p] = DataUtils.sum(counts[p]);
     }

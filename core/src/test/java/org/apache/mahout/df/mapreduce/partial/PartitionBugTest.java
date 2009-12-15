@@ -146,6 +146,11 @@ public class PartitionBugTest extends TestCase {
     }
 
     @Override
+    protected Type getType() {
+      return Type.MOCKLEAF;
+    }
+
+    @Override
     public long nbNodes() {
       // TODO Auto-generated method stub
       return 0;

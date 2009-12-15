@@ -25,6 +25,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileInputFormat;
@@ -103,7 +104,7 @@ public class MeanShiftCanopyDriver {
    *
    * @param input            the input pathname String
    * @param output           the output pathname String
-   * @param control          TODO
+   * @param control          the control path
    * @param measureClassName the DistanceMeasure class name
    * @param t1               the T1 distance threshold
    * @param t2               the T2 distance threshold
@@ -112,7 +113,7 @@ public class MeanShiftCanopyDriver {
   public static void runJob(String input, String output, String control,
                             String measureClassName, double t1, double t2, double convergenceDelta) {
 
-    JobClient client = new JobClient();
+    Configurable client = new JobClient();
     JobConf conf = new JobConf(MeanShiftCanopyDriver.class);
 
     conf.setOutputKeyClass(Text.class);

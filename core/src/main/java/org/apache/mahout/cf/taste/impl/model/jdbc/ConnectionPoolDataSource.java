@@ -34,7 +34,7 @@ public final class ConnectionPoolDataSource implements DataSource {
 
   private final DataSource delegate;
 
-  public ConnectionPoolDataSource(final DataSource underlyingDataSource) {
+  public ConnectionPoolDataSource(DataSource underlyingDataSource) {
     if (underlyingDataSource == null) {
       throw new IllegalArgumentException("underlyingDataSource is null");
     }
@@ -94,7 +94,7 @@ public final class ConnectionPoolDataSource implements DataSource {
 
     private final DataSource underlyingDataSource;
 
-    public ConfiguringConnectionFactory(DataSource underlyingDataSource) {
+    ConfiguringConnectionFactory(DataSource underlyingDataSource) {
       this.underlyingDataSource = underlyingDataSource;
     }
 

@@ -25,6 +25,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
@@ -187,7 +188,7 @@ public class DirichletDriver {
   public static void runIteration(String input, String stateIn,
                                   String stateOut, String modelFactory, int numClusters, double alpha_0,
                                   int numReducers) {
-    JobClient client = new JobClient();
+    Configurable client = new JobClient();
     JobConf conf = new JobConf(DirichletDriver.class);
 
     conf.setOutputKeyClass(Text.class);
@@ -225,7 +226,7 @@ public class DirichletDriver {
    * @param output  the directory pathname for output points
    */
   public static void runClustering(String input, String stateIn, String output) {
-    JobClient client = new JobClient();
+    Configurable client = new JobClient();
     JobConf conf = new JobConf(DirichletDriver.class);
 
     conf.setOutputKeyClass(Text.class);

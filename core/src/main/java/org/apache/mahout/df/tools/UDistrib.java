@@ -26,12 +26,15 @@ import java.util.Random;
 import java.util.Scanner;
 
 /**
- * This tool is used to uniformely distribute the class of all the tuples of the dataset over a given number of
+ * This tool is used to uniformly distribute the class of all the tuples of the dataset over a given number of
  * partitions.
  */
 public class UDistrib {
 
   private static final Logger log = LoggerFactory.getLogger(UDistrib.class);
+
+  private UDistrib() {
+  }
 
   /**
    * Launch the uniform distribution tool. Requires the following command line arguments:<br>
@@ -90,7 +93,7 @@ public class UDistrib {
 
       runTool(data, dataset, output, numPartitions);
     } catch (OptionException e) {
-      System.err.println("Exception : " + e);
+      log.warn(e.toString(), e);
       CommandLineUtil.printHelp(group);
     }
 

@@ -148,6 +148,11 @@ public class PartitionBugTest extends TestCase {
     }
 
     @Override
+    protected Type getType() {
+      return Type.MOCKLEAF;
+    }
+
+    @Override
     public long nbNodes() {
       return 0;
     }

@@ -39,9 +39,9 @@ public class CanopyClusterer {
   // the distance measure
   private DistanceMeasure measure;
 
-  private int nextClusterId = 0;
+  //private int nextClusterId = 0;
   
-  public CanopyClusterer(final DistanceMeasure measure, final double t1, final double t2) {
+  public CanopyClusterer(DistanceMeasure measure, double t1, double t2) {
     this.t1 = t1;
     this.t2 = t2;
     this.measure = measure;

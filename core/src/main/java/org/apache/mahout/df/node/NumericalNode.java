@@ -68,6 +68,11 @@ public class NumericalNode extends Node {
   }
 
   @Override
+  protected Type getType() {
+    return Type.NUMERICAL;
+  }  
+
+  @Override
   public boolean equals(Object obj) {
     if (this == obj)
       return true;

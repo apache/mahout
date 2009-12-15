@@ -36,6 +36,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
@@ -117,7 +118,7 @@ public class Step0Job {
    * @return info for each partition in Hadoop's order
    * @throws IOException
    */
-  protected Step0Output[] parseOutput(Job job) throws IOException {
+  protected Step0Output[] parseOutput(JobContext job) throws IOException {
     Configuration conf = job.getConfiguration();
     
     log.info("mapred.map.tasks = " + conf.getInt("mapred.map.tasks", -1));

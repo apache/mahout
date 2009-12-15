@@ -21,13 +21,12 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
-/**
- * {@link FrequentPatternMaxHeap} keeps top K Attributes in a TreeSet
- * 
- */
+/** {@link FrequentPatternMaxHeap} keeps top K Attributes in a TreeSet */
 public class FrequentPatternMaxHeap {
+
   private final Comparator<Pattern> treeSetComparator = new Comparator<Pattern>() {
     @Override
     public int compare(Pattern cr1, Pattern cr2) {
@@ -39,13 +38,15 @@ public class FrequentPatternMaxHeap {
         if (length1 == length2) {// if they are of same length and support order
           // randomly
           return 1;
-        } else
+        } else {
           return length2 - length1;
+        }
       } else {
-        if (support2 - support1 > 0)
+        if (support2 - support1 > 0) {
           return 1;
-        else
+        } else {
           return -1;
+        }
       }
     }
   };
@@ -66,12 +67,13 @@ public class FrequentPatternMaxHeap {
   }
 
   public final boolean addable(long support) {
-    if (count < maxSize)
+    if (count < maxSize) {
       return true;
+    }
     return least.support() <= support;
   }
 
-  public final TreeSet<Pattern> getHeap() {
+  public final SortedSet<Pattern> getHeap() {
     return set;
   }
 
@@ -82,8 +84,9 @@ public class FrequentPatternMaxHeap {
   public final void insert(Pattern frequentPattern, boolean subPatternCheck) {
     if (subPatternCheck)// lazy initialization
     {
-      if (patternIndex == null)
+      if (patternIndex == null) {
         patternIndex = new HashMap<Long, Set<Pattern>>();
+      }
     }
     if (count == maxSize) {
       int cmp = treeSetComparator.compare(frequentPattern, least);
@@ -91,8 +94,9 @@ public class FrequentPatternMaxHeap {
         if (addPattern(frequentPattern, subPatternCheck)) {
           Pattern evictedItem = set.pollLast();
           least = set.last();
-          if (subPatternCheck)
+          if (subPatternCheck) {
             patternIndex.get(evictedItem.support()).remove(evictedItem);
+          }
         }
       }
     } else {
@@ -100,16 +104,17 @@ public class FrequentPatternMaxHeap {
         count++;
         if (least != null) {
           int cmp = treeSetComparator.compare(least, frequentPattern);
-          if (cmp < 0)
+          if (cmp < 0) {
             least = frequentPattern;
+          }
         } else {
           least = frequentPattern;
         }
       }
     }
   }
-  
-  public final int count(){
+
+  public final int count() {
     return count;
   }
 
@@ -118,8 +123,9 @@ public class FrequentPatternMaxHeap {
   }
 
   public final long leastSupport() {
-    if (least == null)
+    if (least == null) {
       return 0;
+    }
     return least.support();
   }
 
@@ -129,7 +135,7 @@ public class FrequentPatternMaxHeap {
   }
 
   private boolean addPattern(Pattern frequentPattern,
-      boolean subPatternCheck) {
+                             boolean subPatternCheck) {
     if (subPatternCheck == false) {
       set.add(frequentPattern);
       return true;
@@ -141,9 +147,9 @@ public class FrequentPatternMaxHeap {
         Pattern replacablePattern = null;
         for (Pattern p : indexSet) {
 
-          if (frequentPattern.isSubPatternOf(p))
+          if (frequentPattern.isSubPatternOf(p)) {
             return false;
-          else if (p.isSubPatternOf(frequentPattern)) {
+          } else if (p.isSubPatternOf(frequentPattern)) {
             replace = true;
             replacablePattern = p;
             break;
@@ -151,11 +157,13 @@ public class FrequentPatternMaxHeap {
         }
         if (replace) {
           indexSet.remove(replacablePattern);
-          if (set.remove(replacablePattern))
+          if (set.remove(replacablePattern)) {
             count--;
+          }
           if (indexSet.contains(frequentPattern) == false) {
-            if (set.add(frequentPattern))
+            if (set.add(frequentPattern)) {
               count++;
+            }
             indexSet.add(frequentPattern);
           }
           return false;

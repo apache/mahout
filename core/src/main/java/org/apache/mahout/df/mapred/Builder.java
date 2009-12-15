@@ -206,7 +206,7 @@ public abstract class Builder {
    * @return
    * @throws IOException
    */
-  public static Path getDistributedCacheFile(JobConf job, int index)
+  public static Path getDistributedCacheFile(Configuration job, int index)
       throws IOException {
     URI[] files = DistributedCache.getCacheFiles(job);
 

@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.bayes.mapreduce.bayes;
 
+import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -30,7 +31,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.KeyValueTextInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.classifier.ConfusionMatrix;
-import org.apache.mahout.classifier.bayes.common.BayesParameters;
+import org.apache.mahout.common.Parameters;
 import org.apache.mahout.common.StringTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +52,8 @@ public class BayesClassifierDriver {
    * 
    * @param params The Job parameters containing the gramSize, input output folders, defaultCat, encoding
    */
-  public static void runJob(BayesParameters params) throws IOException {
-    JobClient client = new JobClient();
+  public static void runJob(Parameters params) throws IOException {
+    Configurable client = new JobClient();
     JobConf conf = new JobConf(BayesClassifierDriver.class);
     conf.setJobName("Bayes Classifier Driver running over input: " + params.get("testDirPath"));
     conf.setOutputKeyClass(StringTuple.class);
@@ -69,7 +70,8 @@ public class BayesClassifierDriver {
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     
     conf.set("io.serializations",
-        "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
+        "org.apache.hadoop.io.serializer.JavaSerialization," +
+        "org.apache.hadoop.io.serializer.WritableSerialization");
 
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
     if (dfs.exists(outPath)) {
@@ -85,7 +87,10 @@ public class BayesClassifierDriver {
     log.info("{}",matrix.summarize());
   }
 
-  private static ConfusionMatrix readResult(FileSystem fs, Path pathPattern, Configuration conf, BayesParameters params)
+  private static ConfusionMatrix readResult(FileSystem fs,
+                                            Path pathPattern,
+                                            Configuration conf,
+                                            Parameters params)
       throws IOException {
    
     StringTuple key = new StringTuple();
@@ -101,8 +106,9 @@ public class BayesClassifierDriver {
         String correctLabel = key.stringAt(1);
         String classifiedLabel = key.stringAt(2);
         Map<String, Integer> rowMatrix = confusionMatrix.get(correctLabel);
-        if(rowMatrix == null)
-          rowMatrix = new HashMap<String, Integer>();        
+        if (rowMatrix == null) {
+          rowMatrix = new HashMap<String, Integer>();
+        }
         Integer count = Double.valueOf(value.get()).intValue();
         rowMatrix.put(classifiedLabel, count);
         confusionMatrix.put(correctLabel, rowMatrix);

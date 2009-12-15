@@ -17,6 +17,7 @@
 
 package org.apache.mahout.common;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
@@ -35,7 +36,7 @@ public final class HadoopUtil {
   }
 
   public static void overwriteOutput(String output) throws IOException {
-    JobConf conf = new JobConf(KMeansDriver.class);
+    Configuration conf = new JobConf(KMeansDriver.class);
     Path outPath = new Path(output);
     FileSystem fs = FileSystem.get(outPath.toUri(), conf);
     if (fs.exists(outPath)) {

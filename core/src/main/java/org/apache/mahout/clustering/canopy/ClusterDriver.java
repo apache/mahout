@@ -25,6 +25,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -139,7 +140,7 @@ public class ClusterDriver {
    */
   public static void runJob(String points, String canopies, String output,
                             String measureClassName, double t1, double t2, Class<? extends Vector> vectorClass) throws IOException {
-    JobClient client = new JobClient();
+    Configurable client = new JobClient();
     JobConf conf = new JobConf(ClusterDriver.class);
 
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measureClassName);

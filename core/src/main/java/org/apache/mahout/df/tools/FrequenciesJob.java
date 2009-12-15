@@ -27,6 +27,7 @@ import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -125,7 +126,7 @@ public class FrequenciesJob {
    * @return counts[partition][label] = num tuples from 'partition' with class == label
    * @throws java.io.IOException
    */
-  protected int[][] parseOutput(Job job) throws IOException {
+  protected int[][] parseOutput(JobContext job) throws IOException {
     Configuration conf = job.getConfiguration();
 
     int numMaps = conf.getInt("mapred.map.tasks", -1);
@@ -223,8 +224,7 @@ public class FrequenciesJob {
     }
 
     @Override
-    protected void reduce(LongWritable key, Iterable<IntWritable> values, Reducer<LongWritable,
-        IntWritable, LongWritable, Frequencies>.Context context) throws IOException, InterruptedException {
+    protected void reduce(LongWritable key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
       int[] counts = new int[nblabels];
       for (IntWritable value : values){
         counts[value.get()]++;

@@ -36,6 +36,7 @@ import org.apache.mahout.matrix.Vector;
 public class LDAInference {
 
   private static final double E_STEP_CONVERGENCE = 1.0E-6;
+  private static final int MAX_ITER = 20;
 
   public LDAInference(LDAState state) {
     this.state = state;
@@ -102,7 +103,6 @@ public class LDAInference {
     Map<Integer, Integer> columnMap = new HashMap<Integer, Integer>();
 
     int iteration = 0;
-    final int MAX_ITER = 20;
 
     boolean converged = false;
     double oldLL = 1;

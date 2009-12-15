@@ -31,6 +31,11 @@ public class MockLeaf extends Leaf {
   }
 
   @Override
+  protected Type getType() {
+    return Type.MOCKLEAF;
+  }
+
+  @Override
   protected String getString() {
     return "[MockLeaf]";
   }

@@ -29,7 +29,7 @@ import org.apache.mahout.df.data.Instance;
  */
 public abstract class Node implements Writable {
 
-  protected enum NODE_TYPE {
+  protected enum Type {
     MOCKLEAF, LEAF, NUMERICAL, CATEGORICAL
   }
 
@@ -55,28 +55,10 @@ public abstract class Node implements Writable {
    */
   public abstract long maxDepth();
 
-  /**
-   * converts the node implementation into an int code
-   * 
-   * @return
-   */
-  private int node2Type() {
-    if (this instanceof MockLeaf) {
-      return NODE_TYPE.MOCKLEAF.ordinal();
-    } else if (this instanceof Leaf) {
-      return NODE_TYPE.LEAF.ordinal();
-    } else if (this instanceof NumericalNode) {
-      return NODE_TYPE.NUMERICAL.ordinal();
-    } else if (this instanceof CategoricalNode) {
-      return NODE_TYPE.CATEGORICAL.ordinal();
-    } else {
-      throw new IllegalStateException(
-          "This implementation is not currently supported");
-    }
-  }
+  protected abstract Type getType();
 
   public static Node read(DataInput in) throws IOException {
-    NODE_TYPE type = NODE_TYPE.values()[in.readInt()];
+    Type type = Type.values()[in.readInt()];
     Node node;
 
     switch (type) {
@@ -104,14 +86,14 @@ public abstract class Node implements Writable {
 
   @Override
   public final String toString() {
-    return node2Type() + ":" + getString() + ';';
+    return getType() + ":" + getString() + ';';
   }
 
   protected abstract String getString();
 
   @Override
   public final void write(DataOutput out) throws IOException {
-    out.writeInt(node2Type());
+    out.writeInt(getType().ordinal());
     writeNode(out);
   }
 

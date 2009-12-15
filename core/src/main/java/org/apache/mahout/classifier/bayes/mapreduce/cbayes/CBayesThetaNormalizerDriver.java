@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.bayes.mapreduce.cbayes;
 
+import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DefaultStringifier;
@@ -51,7 +52,7 @@ public class CBayesThetaNormalizerDriver implements BayesJob {
    */
   @Override
   public void runJob(String input, String output, BayesParameters params) throws IOException {
-    JobClient client = new JobClient();
+    Configurable client = new JobClient();
     JobConf conf = new JobConf(CBayesThetaNormalizerDriver.class);
     conf.setJobName("Complementary Bayes Theta Normalizer Driver running over input: " +  input);
 

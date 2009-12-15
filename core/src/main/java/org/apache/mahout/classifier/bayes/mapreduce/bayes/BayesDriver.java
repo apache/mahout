@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.bayes.mapreduce.bayes;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
@@ -46,7 +47,7 @@ public class BayesDriver implements BayesJob {
   @Override
   public void runJob(String input, String output, BayesParameters params)
       throws IOException, InterruptedException, ClassNotFoundException {
-    JobConf conf = new JobConf(BayesDriver.class);
+    Configuration conf = new JobConf(BayesDriver.class);
     Path outPath = new Path(output);
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
     if (dfs.exists(outPath)) {

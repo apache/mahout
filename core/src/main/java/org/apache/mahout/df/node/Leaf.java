@@ -65,6 +65,11 @@ public class Leaf extends Node {
   }
 
   @Override
+  protected Type getType() {
+    return Type.LEAF;
+  }
+
+  @Override
   public boolean equals(Object obj) {
     if (this == obj)
       return true;
