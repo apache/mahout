@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <project name="Apache Mahout">
   <body>
-  <menu ref="parent"/>
   <menu ref="modules"/>
   <menu ref="reports"/>
 </body>

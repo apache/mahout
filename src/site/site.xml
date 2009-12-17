@@ -2,7 +2,6 @@
 <project name="Apache Mahout">
   <body>
   <menu ref="modules"/>
-  <menu ref="parent"/>
   <menu ref="reports"/>
 </body>
 </project>
