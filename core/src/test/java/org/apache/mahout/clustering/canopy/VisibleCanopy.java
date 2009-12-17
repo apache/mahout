@@ -17,7 +17,7 @@
 
 package org.apache.mahout.clustering.canopy;
 
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.Vector;
 
 import java.util.ArrayList;
 import java.util.List;

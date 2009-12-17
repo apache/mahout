@@ -17,8 +17,8 @@
 
 package org.apache.mahout.common.distance;
 
-import org.apache.mahout.matrix.DenseVector;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Vector;
 
 public abstract class DefaultWeightedDistanceMeasureTest extends DefaultDistanceMeasureTest {
 

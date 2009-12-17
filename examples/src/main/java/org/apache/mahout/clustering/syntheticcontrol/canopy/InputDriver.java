@@ -35,7 +35,7 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +74,7 @@ public class InputDriver {
 
       String input = cmdLine.getValue(inputOpt, "testdata").toString();
       String output = cmdLine.getValue(outputOpt, "output").toString();
-      String vectorClassName = cmdLine.getValue(vectorOpt, "org.apache.mahout.matrix.SparseVector").toString();
+      String vectorClassName = cmdLine.getValue(vectorOpt, "org.apache.mahout.math.SparseVector").toString();
       Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
       runJob(input, output, vectorClass);
     } catch (OptionException e) {

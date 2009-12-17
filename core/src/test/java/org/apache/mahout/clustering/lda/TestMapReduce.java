@@ -28,10 +28,10 @@ import org.apache.commons.math.distribution.PoissonDistributionImpl;
 import org.apache.commons.math.MathException;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.mahout.matrix.DenseMatrix;
-import org.apache.mahout.matrix.Matrix;
-import org.apache.mahout.matrix.SparseVector;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.DenseMatrix;
+import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.RandomUtils;
 
 import static org.easymock.classextension.EasyMock.*;

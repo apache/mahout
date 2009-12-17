@@ -18,7 +18,7 @@
 package org.apache.mahout.utils.vectors.lucene;
 
 import org.apache.lucene.index.TermVectorMapper;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.Vector;
 
 /**
  * Not thread-safe
@@ -26,7 +26,7 @@ import org.apache.mahout.matrix.Vector;
 public abstract class VectorMapper extends TermVectorMapper {
   /**
    * Can be called after the TermVector has been mapped
-   * @return The {@link org.apache.mahout.matrix.Vector}
+   * @return The {@link org.apache.mahout.math.Vector}
    *
    * @see #map(String, int, org.apache.lucene.index.TermVectorOffsetInfo[], int[])
    */

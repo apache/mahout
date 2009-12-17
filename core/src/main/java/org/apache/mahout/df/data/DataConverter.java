@@ -21,7 +21,7 @@ import java.util.StringTokenizer;
 import java.util.Arrays;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.mahout.matrix.DenseVector;
+import org.apache.mahout.math.DenseVector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

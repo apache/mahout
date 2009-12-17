@@ -22,8 +22,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.mahout.matrix.SparseVector;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.Vector;
 
 import java.io.File;
 import java.io.IOException;

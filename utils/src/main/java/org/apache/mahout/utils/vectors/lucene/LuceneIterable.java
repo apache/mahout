@@ -21,14 +21,14 @@ import org.apache.lucene.document.FieldSelector;
 import org.apache.lucene.document.SetBasedFieldSelector;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.TermDocs;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.Vector;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 
 /**
- * A LuceneIterable is an Iterable&lt;Vector&gt; that uses a Lucene index as the source for creating the {@link org.apache.mahout.matrix.Vector}.
+ * A LuceneIterable is an Iterable&lt;Vector&gt; that uses a Lucene index as the source for creating the {@link org.apache.mahout.math.Vector}.
  * The Field used to create the Vector currently must have Term Vectors stored for it.
  */
 public class LuceneIterable implements Iterable<Vector> {
@@ -53,7 +53,7 @@ public class LuceneIterable implements Iterable<Vector> {
    * @param reader    The {@link org.apache.lucene.index.IndexReader} to read the documents from.
    * @param idField   - The Field containing the id.  May be null
    * @param field     The field to use for the Vector
-   * @param mapper    The {@link org.apache.mahout.utils.vectors.lucene.VectorMapper} for creating {@link org.apache.mahout.matrix.Vector}s from Lucene's TermVectors.
+   * @param mapper    The {@link org.apache.mahout.utils.vectors.lucene.VectorMapper} for creating {@link org.apache.mahout.math.Vector}s from Lucene's TermVectors.
    * @param normPower The normalization value.  Must be greater than or equal to 0 or equal to {@link #NO_NORMALIZING}
    */
   public LuceneIterable(IndexReader reader, String idField, String field, VectorMapper mapper, double normPower) {

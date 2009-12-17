@@ -27,8 +27,8 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import org.apache.mahout.clustering.dirichlet.models.Model;
-import org.apache.mahout.matrix.JsonVectorAdapter;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.JsonVectorAdapter;
+import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

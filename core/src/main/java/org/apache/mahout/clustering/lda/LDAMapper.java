@@ -25,7 +25,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.Vector;
 
 /**
 * Runs inference on the input documents (which are

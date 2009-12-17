@@ -17,8 +17,8 @@
 
 package org.apache.mahout.clustering.dirichlet;
 
-import org.apache.mahout.matrix.DenseVector;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.RandomUtils;
 import org.uncommons.maths.random.GaussianGenerator;
 

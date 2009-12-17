@@ -9,7 +9,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.Vector;
 
 public class MeanShiftCanopyClusterer {
 

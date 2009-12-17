@@ -34,7 +34,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.canopy.CanopyClusteringJob;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.common.CommandLineUtil;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +96,7 @@ public class Job {
         String measureClass = cmdLine.getValue(
             measureClassOpt, "org.apache.mahout.common.distance.EuclideanDistanceMeasure").toString();
 
-        String className =  cmdLine.getValue(vectorClassOpt, "org.apache.mahout.matrix.SparseVector").toString();
+        String className =  cmdLine.getValue(vectorClassOpt, "org.apache.mahout.math.SparseVector").toString();
         Class<? extends Vector> vectorClass = Class.forName(className).asSubclass(Vector.class);
         double t1 = Double.parseDouble(cmdLine.getValue(t1Opt, "80").toString());
         double t2 = Double.parseDouble(cmdLine.getValue(t2Opt, "55").toString());

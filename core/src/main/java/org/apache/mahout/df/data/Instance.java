@@ -17,7 +17,7 @@
 
 package org.apache.mahout.df.data;
 
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.Vector;
 
 /**
  * Represents one data instance.

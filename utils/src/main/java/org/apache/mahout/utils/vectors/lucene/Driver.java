@@ -33,7 +33,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.mahout.matrix.SparseVector;
+import org.apache.mahout.math.SparseVector;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.utils.vectors.TF;
 import org.apache.mahout.utils.vectors.TFIDF;

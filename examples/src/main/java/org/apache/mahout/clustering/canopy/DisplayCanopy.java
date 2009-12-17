@@ -25,8 +25,8 @@ import java.util.List;
 
 import org.apache.mahout.clustering.dirichlet.DisplayDirichlet;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
-import org.apache.mahout.matrix.DenseVector;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.RandomUtils;

@@ -29,8 +29,8 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
-import org.apache.mahout.matrix.JsonVectorAdapter;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.JsonVectorAdapter;
+import org.apache.mahout.math.Vector;
 
 import java.lang.reflect.Type;
 import java.util.List;

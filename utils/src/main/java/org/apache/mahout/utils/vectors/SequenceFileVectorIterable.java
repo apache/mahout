@@ -19,16 +19,16 @@ package org.apache.mahout.utils.vectors;
 
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.Vector;
 
 import java.util.Iterator;
 import java.io.IOException;
 
 
 /**
- * Reads in a file containing {@link org.apache.mahout.matrix.Vector}s.
+ * Reads in a file containing {@link org.apache.mahout.math.Vector}s.
  * <p/>
- * The key is any {@link org.apache.hadoop.io.Writable} and the value is a {@link org.apache.mahout.matrix.Vector}.
+ * The key is any {@link org.apache.hadoop.io.Writable} and the value is a {@link org.apache.mahout.math.Vector}.
  * It can handle any class that implements Vector as long as it has a no-arg constructor.
  */
 public class SequenceFileVectorIterable implements Iterable<Vector> {

@@ -35,8 +35,8 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
-import org.apache.mahout.matrix.SparseVector;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.slf4j.Logger;
@@ -127,8 +127,8 @@ public final class CanopyDriver {
    * @param t1               the T1 distance threshold
    * @param t2               the T2 distance threshold
    * @param vectorClass      the {@link Class} of Vector to use for the Map Output Key.  Must be a concrete type
-   * @see org.apache.mahout.matrix.SparseVector
-   * @see org.apache.mahout.matrix.DenseVector
+   * @see org.apache.mahout.math.SparseVector
+   * @see org.apache.mahout.math.DenseVector
    */
   public static void runJob(String input, String output,
                             String measureClassName, double t1, double t2, Class<? extends Vector> vectorClass) throws IOException {

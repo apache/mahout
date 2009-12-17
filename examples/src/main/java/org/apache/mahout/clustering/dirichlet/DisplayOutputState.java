@@ -30,9 +30,9 @@ import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.NormalModel;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
-import org.apache.mahout.matrix.AbstractVector;
-import org.apache.mahout.matrix.DenseVector;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.AbstractVector;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.FileLineIterable;
 

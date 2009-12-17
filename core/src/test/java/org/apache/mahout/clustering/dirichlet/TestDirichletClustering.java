@@ -22,8 +22,8 @@ import org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDist
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution;
-import org.apache.mahout.matrix.DenseVector;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.RandomUtils;
 
 import java.util.ArrayList;

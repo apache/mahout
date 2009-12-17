@@ -17,7 +17,7 @@
 
 package org.apache.mahout.clustering.dirichlet.models;
 
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.Vector;
 
 public class SampledNormalModel extends NormalModel {
 

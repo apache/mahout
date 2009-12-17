@@ -17,7 +17,7 @@
 
 package org.apache.mahout.common.distance;
 
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.Vector;
 
 /**
  * This class implements a Euclidean distance metric by summing the square root of the squared differences between each

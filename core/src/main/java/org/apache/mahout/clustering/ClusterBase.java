@@ -18,8 +18,8 @@
 package org.apache.mahout.clustering;
 
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.matrix.SparseVector;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.Vector;
 
 import java.io.DataInput;
 import java.io.DataOutput;

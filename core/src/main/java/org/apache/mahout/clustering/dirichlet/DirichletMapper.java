@@ -29,9 +29,9 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputLogFilter;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.matrix.DenseVector;
-import org.apache.mahout.matrix.TimesFunction;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.TimesFunction;
+import org.apache.mahout.math.Vector;
 
 import java.io.IOException;
 

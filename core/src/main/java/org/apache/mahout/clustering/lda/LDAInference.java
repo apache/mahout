@@ -22,11 +22,11 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.math.special.Gamma;
-import org.apache.mahout.matrix.BinaryFunction;
-import org.apache.mahout.matrix.DenseMatrix;
-import org.apache.mahout.matrix.DenseVector;
-import org.apache.mahout.matrix.Matrix;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.BinaryFunction;
+import org.apache.mahout.math.DenseMatrix;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.Vector;
 
 /**
  * Class for performing infererence on a document, which involves

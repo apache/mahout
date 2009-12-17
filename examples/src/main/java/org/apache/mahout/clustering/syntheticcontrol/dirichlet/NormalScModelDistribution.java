@@ -21,8 +21,8 @@ import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
 import org.apache.mahout.clustering.dirichlet.models.NormalModel;
-import org.apache.mahout.matrix.DenseVector;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Vector;
 
 /**
  * An implementation of the ModelDistribution interface suitable for testing the

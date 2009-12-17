@@ -26,10 +26,10 @@ import org.apache.commons.math.distribution.PoissonDistribution;
 import org.apache.commons.math.distribution.PoissonDistributionImpl;
 import org.apache.commons.math.MathException;
 
-import org.apache.mahout.matrix.DenseMatrix;
-import org.apache.mahout.matrix.DenseVector;
-import org.apache.mahout.matrix.Matrix;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.DenseMatrix;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.RandomUtils;
 
 public class TestLDAInference extends TestCase {

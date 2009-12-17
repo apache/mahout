@@ -32,7 +32,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.jobcontrol.Job;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,8 +43,8 @@ import java.io.Writer;
 
 
 /**
- * Can read in a {@link org.apache.hadoop.io.SequenceFile} of {@link org.apache.mahout.matrix.Vector}s
- * and dump out the results using {@link org.apache.mahout.matrix.Vector#asFormatString()} to either the console
+ * Can read in a {@link org.apache.hadoop.io.SequenceFile} of {@link org.apache.mahout.math.Vector}s
+ * and dump out the results using {@link org.apache.mahout.math.Vector#asFormatString()} to either the console
  * or to a file.
  */
 public final class VectorDumper {

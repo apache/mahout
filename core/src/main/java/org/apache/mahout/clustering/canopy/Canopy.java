@@ -20,8 +20,8 @@ package org.apache.mahout.clustering.canopy;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.clustering.ClusterBase;
-import org.apache.mahout.matrix.AbstractVector;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.AbstractVector;
+import org.apache.mahout.math.Vector;
 
 import java.io.DataInput;
 import java.io.DataOutput;

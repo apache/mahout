@@ -17,9 +17,9 @@
 
 package org.apache.mahout.utils.vectors.arff;
 
-import org.apache.mahout.matrix.DenseVector;
-import org.apache.mahout.matrix.SparseVector;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.IOUtils;
 
 import java.io.BufferedReader;

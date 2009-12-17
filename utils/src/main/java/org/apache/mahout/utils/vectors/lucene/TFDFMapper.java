@@ -19,8 +19,8 @@ package org.apache.mahout.utils.vectors.lucene;
 
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.TermVectorOffsetInfo;
-import org.apache.mahout.matrix.SparseVector;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.utils.vectors.Weight;
 import org.apache.mahout.utils.vectors.TermEntry;
 import org.apache.mahout.utils.vectors.TermInfo;

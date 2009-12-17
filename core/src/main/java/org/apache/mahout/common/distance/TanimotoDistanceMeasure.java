@@ -17,7 +17,7 @@
 
 package org.apache.mahout.common.distance;
 
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.Vector;
 
 import java.util.Iterator;
 

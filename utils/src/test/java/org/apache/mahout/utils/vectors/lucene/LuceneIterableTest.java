@@ -28,8 +28,8 @@ import org.apache.lucene.util.Version;
 import org.apache.mahout.utils.vectors.Weight;
 import org.apache.mahout.utils.vectors.TFIDF;
 import org.apache.mahout.utils.vectors.TermInfo;
-import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.matrix.SparseVector;
+import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.Vector;
 
 public class LuceneIterableTest extends TestCase {
   private RAMDirectory directory;

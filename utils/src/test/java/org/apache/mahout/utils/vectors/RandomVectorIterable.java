@@ -17,10 +17,10 @@
 
 package org.apache.mahout.utils.vectors;
 
-import org.apache.mahout.matrix.Vector;
-import org.apache.mahout.matrix.DenseVector;
-import org.apache.mahout.matrix.UnaryFunction;
-import org.apache.mahout.matrix.SparseVector;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.UnaryFunction;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.RandomUtils;
 
 import java.util.Iterator;

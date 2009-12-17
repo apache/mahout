@@ -33,8 +33,8 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.ClusteringTestUtils;
-import org.apache.mahout.matrix.SparseVector;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.Vector;
 
 public class TestRandomSeedGenerator extends TestCase {
   

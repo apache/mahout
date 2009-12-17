@@ -17,7 +17,7 @@
 
 package org.apache.mahout.utils.vectors.io;
 
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.Vector;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.LongWritable;
 

@@ -18,8 +18,8 @@
 package org.apache.mahout.common.distance;
 
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.mahout.matrix.CardinalityException;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.CardinalityException;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.parameters.Parameter;
 
 import java.util.Collection;

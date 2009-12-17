@@ -16,7 +16,7 @@
  */
 package org.apache.mahout.clustering.lda;
 
-import org.apache.mahout.matrix.Matrix;
+import org.apache.mahout.math.Matrix;
 
 public class LDAState {
   public final int numTopics; 

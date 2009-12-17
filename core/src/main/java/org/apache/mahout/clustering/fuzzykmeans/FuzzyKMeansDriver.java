@@ -40,8 +40,8 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
-import org.apache.mahout.matrix.SparseVector;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
@@ -206,7 +206,7 @@ public class FuzzyKMeansDriver {
    * @param numMapTasks      the number of mapper tasks
    * @param numReduceTasks   the number of reduce tasks
    * @param m                the fuzzification factor, see http://en.wikipedia.org/wiki/Data_clustering#Fuzzy_c-means_clustering
-   * @param vectorClass      the {@link org.apache.mahout.matrix.Vector} implementation to use
+   * @param vectorClass      the {@link org.apache.mahout.math.Vector} implementation to use
    */
   public static void runJob(String input, String clustersIn, String output,
                             String measureClass, double convergenceDelta, int maxIterations,

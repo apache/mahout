@@ -26,7 +26,7 @@
 
   <modules>
     <module>maven</module>
-    <module>matrix</module>
+    <module>math</module>
     <module>core</module>
     <module>taste-web</module>
     <module>examples</module>
@@ -107,17 +107,6 @@
 
         </plugins>
       </build>
-    </profile>
-    <profile>
-      <id>colt</id>
-      <modules>
-        <module>maven</module>
-        <module>core</module>
-        <module>taste-web</module>
-        <module>examples</module>
-        <module>utils</module>
-        <module>colt</module>
-      </modules>
     </profile>
   </profiles>
 

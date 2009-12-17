@@ -17,7 +17,7 @@
 
 package org.apache.mahout.common.distance;
 
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.parameters.Parametered;
 
 /** This interface is used for objects which can determine a distance metric between two points */

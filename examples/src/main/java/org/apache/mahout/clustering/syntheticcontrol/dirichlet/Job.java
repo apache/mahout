@@ -41,7 +41,7 @@ import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +102,7 @@ public class Job {
       int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt, "5").toString());
       double alpha_0 = Double.parseDouble(cmdLine.getValue(mOpt, "1.0").toString());
       int numReducers = Integer.parseInt(cmdLine.getValue(redOpt, "1").toString());
-      String vectorClassName = cmdLine.getValue(vectorOpt, "org.apache.mahout.matrix.SparseVector").toString();
+      String vectorClassName = cmdLine.getValue(vectorOpt, "org.apache.mahout.math.SparseVector").toString();
       Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
       runJob(input, output, modelFactory, numModels, maxIterations, alpha_0, numReducers, vectorClass);
     } catch (OptionException e) {

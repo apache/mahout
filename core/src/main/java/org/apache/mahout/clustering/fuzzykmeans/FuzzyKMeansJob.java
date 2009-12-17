@@ -26,7 +26,7 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
-import org.apache.mahout.matrix.Vector;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.CommandLineUtil;

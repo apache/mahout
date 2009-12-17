@@ -18,8 +18,9 @@
 package org.apache.mahout.clustering.dirichlet;
 
 import junit.framework.TestCase;
-import org.apache.mahout.matrix.DenseVector;
-import org.apache.mahout.matrix.Vector;
+
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.RandomUtils;
 
 public class TestDistributions extends TestCase {
