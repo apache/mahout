@@ -160,7 +160,7 @@
               <id>validate</id>
               <phase>validate</phase>
               <configuration>
-                <configLocation>src/main/resources/mahout-checkstyle.xml</configLocation>
+                <configLocation>mahout-checkstyle.xml</configLocation>
                 <consoleOutput>true</consoleOutput>
                 <failsOnError>false</failsOnError>
                 <linkXRef>false</linkXRef>
@@ -282,7 +282,7 @@
       <plugin>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
-          <configLocation>src/main/resources/mahout-checkstyle.xml</configLocation>
+          <configLocation>mahout-checkstyle.xml</configLocation>
           <consoleOutput>true</consoleOutput>
         </configuration>
       </plugin>
