@@ -24,18 +24,18 @@
     <rule ref="rulesets/basic.xml/BooleanInstantiation"/>
     <rule ref="rulesets/basic.xml/CollapsibleIfStatements"/>
     <rule ref="rulesets/basic.xml/DoubleCheckedLocking"/>
-    <!--<rule ref="rulesets/basic.xml/EmptyCatchBlock"/>-->
-    <!--<rule ref="rulesets/basic.xml/EmptyFinallyBlock"/>-->
-    <!--<rule ref="rulesets/basic.xml/EmptyIfStmt"/>-->
+    <rule ref="rulesets/basic.xml/EmptyCatchBlock"/>
+    <rule ref="rulesets/basic.xml/EmptyFinallyBlock"/>
+    <rule ref="rulesets/basic.xml/EmptyIfStmt"/>
     <rule ref="rulesets/basic.xml/EmptyStatementNotInLoop"/>
     <!--<rule ref="rulesets/basic.xml/EmptyStaticInitializer"/>-->
     <!--<rule ref="rulesets/basic.xml/EmptySwitchStatements"/>-->
-    <!--<rule ref="rulesets/basic.xml/EmptySynchronizedBlock"/>-->
-    <!--<rule ref="rulesets/basic.xml/EmptyTryBlock"/>-->
+    <rule ref="rulesets/basic.xml/EmptySynchronizedBlock"/>
+    <rule ref="rulesets/basic.xml/EmptyTryBlock"/>
     <!--<rule ref="rulesets/basic.xml/EmptyWhileStmt"/>-->
     <rule ref="rulesets/basic.xml/ForLoopShouldBeWhileLoop"/>
     <rule ref="rulesets/basic.xml/JumbledIncrementer"/>
-    <!--<rule ref="rulesets/basic.xml/OverrideBothEqualsAndHashcode"/>-->
+    <rule ref="rulesets/basic.xml/OverrideBothEqualsAndHashcode"/>
     <rule ref="rulesets/basic.xml/ReturnFromFinallyBlock"/>
     <rule ref="rulesets/basic.xml/UnconditionalIfStatement"/>
     <rule ref="rulesets/basic.xml/UnnecessaryConversionTemporary"/>
@@ -52,11 +52,11 @@
     <!--<rule ref="rulesets/clone.xml/CloneThrowsCloneNotSupportedException"/>-->
     <!--<rule ref="rulesets/clone.xml/ProperCloneImplementation"/>-->
 
-    <!--<rule ref="rulesets/codesize.xml/CyclomaticComplexity"/>-->
-    <!--<rule ref="rulesets/codesize.xml/ExcessiveClassLength"/>-->
-    <!--<rule ref="rulesets/codesize.xml/ExcessiveMethodLength"/>-->
-    <!--<rule ref="rulesets/codesize.xml/ExcessiveParameterList"/>-->
-    <!--<rule ref="rulesets/codesize.xml/ExcessivePublicCount"/>-->
+    <rule ref="rulesets/codesize.xml/CyclomaticComplexity"/>
+    <rule ref="rulesets/codesize.xml/ExcessiveClassLength"/>
+    <rule ref="rulesets/codesize.xml/ExcessiveMethodLength"/>
+    <rule ref="rulesets/codesize.xml/ExcessiveParameterList"/>
+    <rule ref="rulesets/codesize.xml/ExcessivePublicCount"/>
     <!--<rule ref="rulesets/codesize.xml/TooManyFields"/>-->
 
     <!--<rule ref="rulesets/controversial.xml/AssignmentInOperand"/>-->
@@ -78,7 +78,7 @@
     <!--<rule ref="rulesets/design.xml/AbstractClassWithoutAbstractMethod"/>-->
     <!--<rule ref="rulesets/design.xml/AccessorClassGeneration"/>-->
     <!--<rule ref="rulesets/design.xml/AssignmentToNonFinalStatic"/>-->
-    <!--<rule ref="rulesets/design.xml/AvoidDeeplyNestedIfStmts"/>-->
+    <rule ref="rulesets/design.xml/AvoidDeeplyNestedIfStmts"/>
     <!--<rule ref="rulesets/design.xml/AvoidInstanceofChecksInCatchClause"/>-->
     <rule ref="rulesets/design.xml/AvoidProtectedFieldInFinalClass"/>
     <!--<rule ref="rulesets/design.xml/AvoidReassigningParameters"/>-->
@@ -99,7 +99,7 @@
     <!--<rule ref="rulesets/design.xml/NonStaticInitializer"/>-->
     <rule ref="rulesets/design.xml/OptimizableToArrayCall"/>
     <rule ref="rulesets/design.xml/PositionLiteralsFirstInComparisons"/>
-    <rule ref="rulesets/design.xml/SimplifyBooleanExpressions"/>
+    <!--rule ref="rulesets/design.xml/SimplifyBooleanExpressions"/-->
     <rule ref="rulesets/design.xml/SimplifyBooleanReturns"/>
     <rule ref="rulesets/design.xml/SimplifyConditional"/>
     <!--<rule ref="rulesets/design.xml/SwitchDensity"/>-->
@@ -114,12 +114,12 @@
     <!--<rule ref="rulesets/finalizers.xml/FinalizeOverloaded"/>-->
     <!--<rule ref="rulesets/finalizers.xml/FinalizeDoesNotCallSuperFinalize"/>-->
     <!--<rule ref="rulesets/finalizers.xml/FinalizeShouldBeProtected"/>-->
-    <!--<rule ref="rulesets/finalizers.xml/AvoidCallingFinalize"/>-->
+    <rule ref="rulesets/finalizers.xml/AvoidCallingFinalize"/>
 
-    <!--<rule ref="rulesets/imports.xml/DuplicateImports"/>-->
-    <!--<rule ref="rulesets/imports.xml/DontImportJavaLang"/>-->
-    <!--<rule ref="rulesets/imports.xml/UnusedImports"/>-->
-    <!--<rule ref="rulesets/imports.xml/ImportFromSamePackage"/>-->
+    <rule ref="rulesets/imports.xml/DuplicateImports"/>
+    <rule ref="rulesets/imports.xml/DontImportJavaLang"/>
+    <rule ref="rulesets/imports.xml/UnusedImports"/>
+    <rule ref="rulesets/imports.xml/ImportFromSamePackage"/>
 
     <!--<rule ref="rulesets/javabeans.xml/BeanMembersShouldSerialize"/>-->
     <!--<rule ref="rulesets/javabeans.xml/MissingSerialVersionUID"/>-->
@@ -127,13 +127,13 @@
     <!--<rule ref="rulesets/junit.xml/JUnitStaticSuite"/>-->
     <!--<rule ref="rulesets/junit.xml/JUnitSpelling"/>-->
     <!--<rule ref="rulesets/junit.xml/JUnitAssertionsShouldIncludeMessage"/>-->
-    <!--<rule ref="rulesets/junit.xml/JUnitTestsShouldIncludeAssert"/>-->
+    <rule ref="rulesets/junit.xml/JUnitTestsShouldIncludeAssert"/>
     <!--<rule ref="rulesets/junit.xml/TestClassWithoutTestCases"/>-->
     <!--<rule ref="rulesets/junit.xml/UnnecessaryBooleanAssertion"/>-->
     <!--<rule ref="rulesets/junit.xml/UseAssertEqualsInsteadOfAssertTrue"/>-->
     <!--<rule ref="rulesets/junit.xml/UseAssertSameInsteadOfAssertTrue"/>-->
 
-    <!--<rule ref="rulesets/logging-java.xml/AvoidPrintStackTrace"/>-->
+    <rule ref="rulesets/logging-java.xml/AvoidPrintStackTrace"/>
     <rule ref="rulesets/logging-java.xml/LoggerIsNotStaticFinal"/>
     <!--<rule ref="rulesets/logging-java.xml/MoreThanOneLogger"/>-->
     <!--<rule ref="rulesets/logging-java.xml/LoggerIsNotStaticFinal"/>-->
@@ -145,62 +145,45 @@
     <!--<rule ref="rulesets/naming.xml/ShortVariable"/>-->
     <!--<rule ref="rulesets/naming.xml/LongVariable"/>-->
     <!--<rule ref="rulesets/naming.xml/ShortMethodName"/>-->
-    <!--<rule ref="rulesets/naming.xml/VariableNamingConventions"/>-->
-    <!--<rule ref="rulesets/naming.xml/MethodNamingConventions"/>-->
-    <!--<rule ref="rulesets/naming.xml/ClassNamingConventions"/>-->
-    <!--<rule ref="rulesets/naming.xml/AbstractNaming"/>-->
+    <rule ref="rulesets/naming.xml/VariableNamingConventions"/>
+    <rule ref="rulesets/naming.xml/MethodNamingConventions"/>
+    <rule ref="rulesets/naming.xml/ClassNamingConventions"/>
+    <rule ref="rulesets/naming.xml/AbstractNaming"/>
     <!--<rule ref="rulesets/naming.xml/AvoidDollarSigns"/>-->
     <!--<rule ref="rulesets/naming.xml/MethodWithSameNameAsEnclosingClass"/>-->
     <!--<rule ref="rulesets/naming.xml/SuspiciousHashcodeMethodName"/>-->
     <!--<rule ref="rulesets/naming.xml/SuspiciousConstantFieldName"/>-->
-    <!--<rule ref="rulesets/naming.xml/AvoidFieldNameMatchingTypeName"/>-->
-    <!--<rule ref="rulesets/naming.xml/AvoidFieldNameMatchingMethodName"/>-->
-    <!--<rule ref="rulesets/naming.xml/AvoidNonConstructorMethodsWithClassName"/>-->
-    <!--<rule ref="rulesets/naming.xml/NoPackage"/>-->
-    <!--<rule ref="rulesets/naming.xml/PackageCase"/>-->
+    <rule ref="rulesets/naming.xml/AvoidFieldNameMatchingTypeName"/>
+    <rule ref="rulesets/naming.xml/AvoidFieldNameMatchingMethodName"/>
+    <!-- <rule ref="rulesets/naming.xml/AvoidNonConstructorMethodsWithClassName"/> -->
+    <rule ref="rulesets/naming.xml/NoPackage"/>
+    <rule ref="rulesets/naming.xml/PackageCase"/>
 
     <!--<rule ref="rulesets/optimizations.xml/LocalVariableCouldBeFinal"/>-->
     <!--<rule ref="rulesets/optimizations.xml/MethodArgumentCouldBeFinal"/>-->
     <!--<rule ref="rulesets/optimizations.xml/AvoidInstantiatingObjectsInLoops"/>-->
     <!--<rule ref="rulesets/optimizations.xml/UseArrayListInsteadOfVector"/>-->
-    <!--<rule ref="rulesets/optimizations.xml/SimplifyStartsWith"/>-->
-    <!--<rule ref="rulesets/optimizations.xml/UseStringBufferForStringAppends"/>-->
+    <rule ref="rulesets/optimizations.xml/SimplifyStartsWith"/>
+    <rule ref="rulesets/optimizations.xml/UseStringBufferForStringAppends"/>
 
     <!--<rule ref="rulesets/strictexception.xml/AvoidCatchingThrowable"/>-->
     <!--<rule ref="rulesets/strictexception.xml/SignatureDeclareThrowsException"/>-->
-    <!--<rule ref="rulesets/strictexception.xml/ExceptionAsFlowControl"/>-->
+    <rule ref="rulesets/strictexception.xml/ExceptionAsFlowControl"/>
     <!--<rule ref="rulesets/strictexception.xml/AvoidCatchingNPE"/>-->
     <!--<rule ref="rulesets/strictexception.xml/AvoidThrowingRawExceptionTypes"/>-->
     <!--<rule ref="rulesets/strictexception.xml/AvoidThrowingNullPointerException"/>-->
 
-    <!--<rule ref="rulesets/strings.xml/AvoidDuplicateLiterals"/>-->
-    <!--<rule ref="rulesets/strings.xml/StringInstantiation"/>-->
-    <!--<rule ref="rulesets/strings.xml/StringToString"/>-->
-    <!--<rule ref="rulesets/strings.xml/AvoidConcatenatingNonLiteralsInStringBuffer"/>-->
-    <!--<rule ref="rulesets/strings.xml/UnnecessaryCaseChange"/>-->
+    <rule ref="rulesets/strings.xml/AvoidDuplicateLiterals"/>
+    <rule ref="rulesets/strings.xml/StringInstantiation"/>
+    <rule ref="rulesets/strings.xml/StringToString"/>
+    <!-- <rule ref="rulesets/strings.xml/AvoidConcatenatingNonLiteralsInStringBuffer"/>-->
+    <rule ref="rulesets/strings.xml/UnnecessaryCaseChange"/>
 
-    <!--<rule ref="rulesets/sunsecure.xml/MethodReturnsInternalArray"/>-->
-    <!--<rule ref="rulesets/sunsecure.xml/ArrayIsStoredDirectly"/>-->
+    <rule ref="rulesets/sunsecure.xml/MethodReturnsInternalArray"/>
+    <rule ref="rulesets/sunsecure.xml/ArrayIsStoredDirectly"/>
 
     <rule ref="rulesets/unusedcode.xml/UnusedLocalVariable"/>
     <rule ref="rulesets/unusedcode.xml/UnusedPrivateField"/>
     <rule ref="rulesets/unusedcode.xml/UnusedPrivateMethod"/>
-    <!--<rule ref="rulesets/unusedcode.xml/UnusedFormalParameter"/>-->
-
-    <rule name="DontUseLoggerGetLogger"
-          message="Don't use Logger.getLogger(...), use LogUtils.getL7dLogger(....) instead"
-          class="net.sourceforge.pmd.rules.XPathRule">
-        <priority>2</priority>
-        <description>Don't use Logger.getLogger(...), use LogUtils.getL7dLogger(....) instead</description>
-        <properties>
-            <property name="xpath">
-                <value>
-<![CDATA[
-//PrimaryPrefix/Name[ends-with(@Image, 'Logger.getLogger') and //PackageDeclaration/Name[starts-with(@Image, 'org.apache.cxf')]]
-]]>
-                </value>
-            </property>
-        </properties>
-    </rule>
-
+    <rule ref="rulesets/unusedcode.xml/UnusedFormalParameter"/>
 </ruleset>

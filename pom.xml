@@ -126,5 +126,11 @@
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk</developerConnection>
     <url>https://svn.apache.org/repos/asf/lucene/mahout/mahout</url>
   </scm>
+  <distributionManagement>
+    <site>
+      <id>Website</id>
+      <url>scp://people.apache.org/home/isabel/public_html/mahout_site</url>
+    </site>
+  </distributionManagement>
 </project>
   

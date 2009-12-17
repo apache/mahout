@@ -33,28 +33,23 @@
 <module name="Checker">
 	<!-- Checks whether files end with a new line.                        -->
 	<!-- See http://checkstyle.sf.net/config_misc.html#NewlineAtEndOfFile -->
-	<!--
-		<module name="NewlineAtEndOfFile"/>
-	-->
+	<!-- <module name="NewlineAtEndOfFile"/> -->
 
 	<!-- Checks that property files contain the same keys.         -->
 	<!-- See http://checkstyle.sf.net/config_misc.html#Translation -->
 	<module name="Translation" />
-
-	<!--<module name="StrictDuplicateCode"/>-->
+        <!--<module name="StrictDuplicateCode"/>-->
 
 	<module name="TreeWalker">
 		<!-- Enable FileContentsHolder to allow us to in turn turn on suppression comments -->
 		<module name="FileContentsHolder" />
 		<!-- Checks for Javadoc comments.                     -->
 		<!-- See http://checkstyle.sf.net/config_javadoc.html -->
-		<!--
-			<module name="PackageHtml"/>
-			<module name="JavadocMethod"/>
-			<module name="JavadocType"/>
-			<module name="JavadocVariable"/>
-			<module name="JavadocStyle"/>
-		-->
+		<!-- <module name="PackageHtml"/> -->
+		<!--module name="JavadocMethod"/-->
+		<module name="JavadocType"/>
+		<!--module name="JavadocVariable"/-->
+		<!--module name="JavadocStyle"/-->
 
 
 		<!-- Checks for Naming Conventions.                  -->
@@ -70,33 +65,20 @@
 		<module name="TypeName" />
 
 		<!-- Header checks -->
-		<module name="Header">
+		<!--module name="Header">
 			<property name="header"
 				value="/**\n * Licensed to the Apache Software Foundation (ASF) under one\n * or more contributor license agreements. See the NOTICE file\n * distributed with this work for additional information\n * regarding copyright ownership. The ASF licenses this file\n * to you under the Apache License, Version 2.0 (the\n * &quot;License&quot;); you may not use this file except in compliance\n * with the License. You may obtain a copy of the License at\n *\n * http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing,\n * software distributed under the License is distributed on an\n * &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n * KIND, either express or implied. See the License for the\n * specific language governing permissions and limitations\n * under the License.\n */\n" />
-		</module>
+		</module-->
 		<!-- <module name="RegexpHeader"/> -->
 
 
 		<!-- Checks for imports                              -->
 		<!-- See http://checkstyle.sf.net/config_import.html -->
-		<module name="AvoidStarImport">
-			<property name="excludes"
-				value="java.io,java.util,java.net,java.nio,java.nio.channels,java.lang.reflect,org.w3c.dom,org.xml.sax,java.awt,javax.swing,junit.framework" />
-		</module>
-		<module name="IllegalImport" /><!-- defaults to sun.* packages -->
+		<module name="AvoidStarImport"/>
+		<module name="IllegalImport" />    <!-- defaults to sun.* packages -->
 		<module name="RedundantImport" />
 		<module name="UnusedImports" />
-		<module name="ImportOrder">
-			<property name="groups"
-				value="java,javax,org.w3c,org.xml,junit,antlr,com,net,org,org.junit" />
-			<property name="ordered" value="true" />
-		</module>
-		<!--
-			<module name="ImportControl">
-			<property name="file" value="etc/import-control.xml"/>
-			</module>
-		-->
-
+		<module name="ImportOrder"/>
 
 		<!-- Checks for Size Violations.                    -->
 		<!-- See http://checkstyle.sf.net/config_sizes.html -->
@@ -106,11 +88,11 @@
 		<module name="ExecutableStatementCount">
 			<property name="max" value="75" />
 		</module>
-		<module name="FileLength">
+		<!--<module name="FileLength">
 			<property name="max" value="3000" />
-		</module>
+		</module>-->
 		<module name="LineLength">
-			<property name="max" value="110" />
+			<property name="max" value="120" />
 		</module>
 		<module name="MethodLength">
 			<property name="max" value="150" />
@@ -133,7 +115,7 @@
 		<module name="OperatorWrap" />
 		<module name="ParenPad" />
 		<module name="TypecastParenPad" />
-		<module name="TabCharacter" />
+		<!--module name="TabCharacter" /-->
 		<module name="WhitespaceAfter">
 			<property name="tokens" value="COMMA, SEMI" />
 		</module>
@@ -158,7 +140,7 @@
 			<property name="option" value="text" />
 		</module>
 		<module name="LeftCurly" />
-		<module name="NeedBraces" />
+		<!-- <module name="NeedBraces" />-->
 		<module name="RightCurly" />
 
 
@@ -270,9 +252,9 @@
 			<property name="message" value="Line has trailing spaces."/>
 			</module>
 		-->
-		<module name="TodoComment">
+		<!--<module name="TodoComment">
 			<property name="format" value="WARNING" />
-		</module>
+		</module>-->
 
 		<module name="UpperEll" />
 
@@ -287,7 +269,8 @@
 		<!--<module name="UncommentedMain"/>-->
 		<!--module name="TrailingComment"/-->
 		<module name="Indentation">
-			<property name="caseIndent" value="0" />
+			<property name="caseIndent" value="2" />
+                        <property name="basicOffset" value="2" />
 		</module>
 		<!--<module name="RequiredRegexp">-->
 	</module>

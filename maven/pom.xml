@@ -16,7 +16,11 @@
     <junit.version>4.7</junit.version>   
     <tagBase>https://svn.apache.org/repos/asf/lucene/mahout</tagBase>
     <lucene.version>2.9.1</lucene.version>
+    <maven.clover.multiproject>true</maven.clover.multiproject>
   </properties>
+  <url>http://lucene.apache.org/mahout</url>
+  <description>Mahout's goal is to build scalable machine learning libraries. With scalable we mean: Scalable to reasonably large data sets. Our core algorithms for clustering, classfication and batch based collaborative filtering are implemented on top of Apache Hadoop using the map/reduce paradigm. However we do not restrict contributions to Hadoop based implementations: Contributions that run on a single node or on a non-Hadoop cluster are welcome as well. The core libraries are highly optimized to allow for good performance also for non-distributed algorithms. Scalable to support your business case. Mahout is distributed under a commercially friendly Apache Software license. Scalable community. The goal of Mahout is to build a vibrant, responsive, diverse community to facilitate discussions not only on the project itself but also on potential use cases. Come to the mailing lists to find out more. Currently Mahout supports mainly four use cases: Recommendation mining takes users' behavior and from that tries to find items users might like. Clustering takes e.g. text documents and groups them into groups of topically related documents. Classification learns from exisiting categorized documents what documents of a specific category look like and is able to assign unlabelled documents to the (hopefully) correct category. Frequent itemset mining takes a set of item groups (terms in a query session, shopping cart content) and identifies, which individual items usually appear together.
+  </description>
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
@@ -122,6 +126,23 @@
       <plugins>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clover-plugin</artifactId>
+          <configuration>
+            <licenseLocation>${maven.clover.license}</licenseLocation>
+            <jdk>1.5</jdk>
+          </configuration>
+          <executions>
+            <execution>
+              <phase>pre-site</phase>
+              <goals>
+                <goal>instrument</goal>
+                <goal>aggregate</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
           <version>2.2</version>
           <dependencies>
@@ -139,9 +160,9 @@
               <id>validate</id>
               <phase>validate</phase>
               <configuration>
-                <configLocation>mahout-checkstyle.xml</configLocation>
+                <configLocation>src/main/resources/mahout-checkstyle.xml</configLocation>
                 <consoleOutput>true</consoleOutput>
-                <failsOnError>true</failsOnError>
+                <failsOnError>false</failsOnError>
                 <linkXRef>false</linkXRef>
                 <sourceDirectory>${basedir}/src</sourceDirectory>
               </configuration>
@@ -151,7 +172,7 @@
             </execution>
           </executions>
         </plugin>
-        <plugin>
+        <!--plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-pmd-plugin</artifactId>
           <version>2.4</version>
@@ -164,7 +185,7 @@
           </dependencies>
           <configuration>
             <rulesets>
-              <ruleset>mahout-pmd-ruleset.xml</ruleset>
+              <ruleset>src/main/resources/mahout-pmd-ruleset.xml</ruleset>
             </rulesets>
             <sourceEncoding>UTF-8</sourceEncoding>
             <targetJdk>1.5</targetJdk>
@@ -181,7 +202,7 @@
               </goals>
             </execution>
           </executions>
-        </plugin>
+        </plugin-->
       </plugins>
     </pluginManagement>
     <plugins>
@@ -218,10 +239,17 @@
       <id>sourcecheck</id>
       <build>
         <plugins>
-          <plugin>
+          <!--plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-checkstyle-plugin</artifactId>
-          </plugin>
+              <configuration>
+                <configLocation>src/main/resources/mahout-checkstyle.xml</configLocation>
+                <consoleOutput>false</consoleOutput>
+                <failsOnError>false</failsOnError>
+                <linkXRef>false</linkXRef>
+                <sourceDirectory>${basedir}/src</sourceDirectory>
+              </configuration>
+          </plugin-->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
@@ -234,14 +262,121 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-pmd-plugin</artifactId>
+            <configuration>
+              <rulesets>
+                <ruleset>src/main/resources/mahout-pmd-ruleset.xml</ruleset>
+              </rulesets>
+              <sourceEncoding>UTF-8</sourceEncoding>
+              <targetJdk>1.5</targetJdk>
+              <linkXRef>false</linkXRef>
+              <includeTests>true</includeTests>
+              <verbose>true</verbose>
+            </configuration>
           </plugin>
         </plugins>
       </build>
     </profile>
   </profiles>
-  <!--
-   
-   -->
+  <reporting>
+    <plugins>
+      <plugin>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <configuration>
+          <configLocation>src/main/resources/mahout-checkstyle.xml</configLocation>
+          <consoleOutput>true</consoleOutput>
+        </configuration>
+      </plugin>
+      <!-- generate java doc -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+      <!-- surefire runs unit tests -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+      </plugin>
+      <!-- test coverage plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clover-plugin</artifactId>
+        <configuration>
+          <licenseLocation>${maven.clover.license}</licenseLocation>
+          <jdk>1.5</jdk>
+        </configuration>
+      </plugin>
+      <!-- code duplication - copy and paste detection -->
+      <plugin>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <configuration>
+          <rulesets>
+            <ruleset>src/main/resources/mahout-pmd-ruleset.xml</ruleset>
+          </rulesets>
+          <sourceEncoding>UTF-8</sourceEncoding>
+          <targetJdk>1.5</targetJdk>
+          <linkXRef>false</linkXRef>
+          <includeTests>true</includeTests>
+          <verbose>true</verbose>
+        </configuration>
+      </plugin>
+      <!-- catch code tags -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>taglist-maven-plugin</artifactId>
+        <configuration>
+          <tags>
+            <tag>TODO</tag>
+            <tag>todo</tag>
+          </tags>
+        </configuration>
+      </plugin>
+      <!-- findbugs -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>2.0.1</version>
+        <configuration>
+          <xmlOutput>true</xmlOutput>
+          <xmlOutputDirectory>target/findbugs</xmlOutputDirectory>
+          <outputDirectory>target/site/findbugs</outputDirectory>
+          <threshold>Low</threshold>
+          <effort>Default</effort>
+          <!--visitors>FindDeadLocalStores,UnreadFields</visitors-->
+          <!--omitVisitors>FindDeadLocalStores,UnreadFields</omitVisitors-->
+          <debug>true</debug>
+          <relaxed>true</relaxed>
+          <excludeFilterFile>../maven/src/main/resources/findbugs-exclude.xml</excludeFilterFile>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-changes-plugin</artifactId>
+        <version>2.2</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>jira-report</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.1.2</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>index</report>
+              <report>dependencies</report>
+              <report>dependency-convergence</report>
+              <report>dependency-management</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
   <dependencies>
     <dependency>
       <groupId>javax.mail</groupId>
@@ -249,4 +384,11 @@
       <version>1.4</version>
     </dependency>
   </dependencies>
+  <distributionManagement>
+    <site>
+      <id>website</id>
+      <name>website</name>
+      <url>scp://people.apache.org/home/isabel/public_html/mahout_site</url>
+    </site>
+  </distributionManagement>
 </project>
