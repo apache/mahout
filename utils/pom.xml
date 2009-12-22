@@ -30,7 +30,7 @@
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-utils</artifactId>
   <version>0.3-SNAPSHOT</version>
-  <name>Mahout utilities</name>
+  <name>Mahout Utilities</name>
   <description>Utilities for preparing content into formats for Mahout.</description>
 
   <packaging>jar</packaging>

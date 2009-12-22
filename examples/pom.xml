@@ -30,7 +30,7 @@
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-examples</artifactId>
   <version>0.3-SNAPSHOT</version>
-  <name>Mahout examples</name>
+  <name>Mahout Examples</name>
   <description>Scalable machine learning library examples</description>
 
   <packaging>jar</packaging>
@@ -163,11 +163,13 @@
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-benchmark</artifactId>
       <version>${lucene.version}</version>
     </dependency>
+
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
