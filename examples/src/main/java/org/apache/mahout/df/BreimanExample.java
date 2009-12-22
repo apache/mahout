@@ -81,7 +81,6 @@ public class BreimanExample extends Configured implements Tool {
    */
   protected static void runIteration(Data data, int m, int nbtrees) {
 
-    int dataSize = data.size();
     int nblabels = data.getDataset().nblabels();
 
     Random rng = RandomUtils.getRandom();
@@ -91,13 +90,13 @@ public class BreimanExample extends Configured implements Tool {
     
     int[] trainLabels = train.extractLabels();
     int[] testLabels = test.extractLabels();
-    
+
     DefaultTreeBuilder treeBuilder = new DefaultTreeBuilder();
     
     SequentialBuilder forestBuilder = new SequentialBuilder(rng, treeBuilder, train);
 
     // grow a forest with m = log2(M)+1
-    ForestPredictions errorM = new ForestPredictions(dataSize, nblabels); // oob error when using m = log2(M)+1
+    ForestPredictions errorM = new ForestPredictions(train.size(), nblabels); // oob error when using m = log2(M)+1
     treeBuilder.setM(m);
 
     long time = System.currentTimeMillis();
@@ -108,7 +107,7 @@ public class BreimanExample extends Configured implements Tool {
     double oobM = ErrorEstimate.errorRate(trainLabels, errorM.computePredictions(rng)); // oob error estimate when m = log2(M)+1
 
     // grow a forest with m=1
-    ForestPredictions errorOne = new ForestPredictions(dataSize, nblabels); // oob error when using m = 1
+    ForestPredictions errorOne = new ForestPredictions(train.size(), nblabels); // oob error when using m = 1
     treeBuilder.setM(1);
 
     time = System.currentTimeMillis();
@@ -120,11 +119,11 @@ public class BreimanExample extends Configured implements Tool {
 
     // compute the test set error (Selection Error), and mean tree error (One Tree Error),
     // using the lowest oob error forest
-    ForestPredictions testError = new ForestPredictions(dataSize, nblabels); // test set error
-    MeanTreeCollector treeError = new MeanTreeCollector(train, nbtrees); // mean tree error
+    ForestPredictions testError = new ForestPredictions(test.size(), nblabels); // test set error
+    MeanTreeCollector treeError = new MeanTreeCollector(test, nbtrees); // mean tree error
 
     // compute the test set error using m=1 (Single Input Error)
-    errorOne = new ForestPredictions(dataSize, nblabels);
+    errorOne = new ForestPredictions(test.size(), nblabels);
 
     if (oobM < oobOne) {
       forestM.classify(test, new MultiCallback(testError, treeError));
