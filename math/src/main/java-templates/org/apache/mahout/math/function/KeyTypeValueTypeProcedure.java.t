@@ -1,3 +1,21 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.apache.mahout.math.function;
 
 /*
@@ -12,12 +30,8 @@ It is provided "as is" without expressed or implied warranty.
 /**
  * Interface that represents a procedure object: a procedure that takes two arguments and does not return a value.
  *
- * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
-
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
-public interface IntIntProcedure {
+public interface ${keyTypeCap}${valueTypeCap}Procedure {
 
   /**
    * Applies a procedure to two arguments. Optionally can return a boolean flag to inform the object calling the
@@ -31,5 +45,5 @@ public interface IntIntProcedure {
    * @param second second argument passed to the procedure.
    * @return a flag  to inform the object calling the procedure.
    */
-  boolean apply(int first, int second);
+  boolean apply(${keyType} first, ${valueType} second);
 }
