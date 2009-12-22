@@ -105,15 +105,6 @@ public class MatrixView extends AbstractMatrix {
   }
 
   @Override
-  public boolean haveSharedCells(Matrix other) {
-    if (other instanceof MatrixView) {
-      return other == this || matrix.haveSharedCells(other);
-    } else {
-      return other.haveSharedCells(matrix);
-    }
-  }
-
-  @Override
   public Matrix assignColumn(int column, Vector other) {
     if (cardinality[ROW] != other.size()) {
       throw new CardinalityException();

@@ -164,14 +164,6 @@ public interface Matrix extends Cloneable, Writable {
   double getQuick(int row, int column);
 
   /**
-   * Return if the other matrix and the receiver share any underlying data cells
-   *
-   * @param other a Matrix
-   * @return true if the other matrix has common data cells
-   */
-  boolean haveSharedCells(Matrix other);
-
-  /**
    * Return an empty matrix of the same underlying class as the receiver
    *
    * @return a Matrix

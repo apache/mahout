@@ -214,14 +214,6 @@ public interface Vector extends Cloneable, Writable {
   double getQuick(int index);
 
   /**
-   * Return if the other matrix and the receiver share any underlying data cells
-   *
-   * @param other a Vector
-   * @return true if the other matrix has common data cells
-   */
-  boolean haveSharedCells(Vector other);
-
-  /**
    * Return an empty matrix of the same underlying class as the receiver
    *
    * @return a Vector

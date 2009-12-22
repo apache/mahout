@@ -372,23 +372,6 @@ public class TestDenseVector extends TestCase {
     }
   }
 
-  public void testThisHaveSharedCells() throws Exception {
-    assertTrue("test not shared?", test.haveSharedCells(test));
-  }
-
-  public void testViewHaveSharedCells() throws Exception {
-    Vector view = test.viewPart(1, 2);
-    assertTrue("view not shared?", view.haveSharedCells(test));
-    assertTrue("test not shared?", test.haveSharedCells(view));
-  }
-
-  public void testViewsHaveSharedCells() throws Exception {
-    Vector view1 = test.viewPart(0, 2);
-    Vector view2 = test.viewPart(1, 2);
-    assertTrue("view1 not shared?", view1.haveSharedCells(view2));
-    assertTrue("view2 not shared?", view2.haveSharedCells(view1));
-  }
-
   public void testLike() {
     assertTrue("not like", test.like() instanceof DenseVector);
   }

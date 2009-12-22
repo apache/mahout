@@ -110,15 +110,6 @@ public class SparseVector extends AbstractVector {
   }
 
   @Override
-  public boolean haveSharedCells(Vector other) {
-    if (other instanceof SparseVector) {
-      return other == this;
-    } else {
-      return other.haveSharedCells(this);
-    }
-  }
-
-  @Override
   public SparseVector like() {
     int numValues = 256;
     if (values != null) {

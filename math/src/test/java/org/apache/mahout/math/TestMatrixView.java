@@ -96,11 +96,6 @@ public class TestMatrixView extends TestCase {
     }
   }
 
-  public void testHaveSharedCells() {
-    assertTrue("same", test.haveSharedCells(test));
-    assertFalse("different", test.haveSharedCells(test.clone()));
-  }
-
   public void testLike() {
     Matrix like = test.like();
     assertTrue("type", like instanceof DenseMatrix);

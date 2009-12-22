@@ -91,11 +91,6 @@ public abstract class MatrixTest extends TestCase {
     }
   }
 
-  public void testHaveSharedCells() {
-    assertTrue("same", test.haveSharedCells(test));
-    assertFalse("different", test.haveSharedCells(test.clone()));
-  }
-
   public void testLike() {
     Matrix like = test.like();
     assertEquals("type", like.getClass(), test.getClass());

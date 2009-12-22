@@ -82,15 +82,6 @@ public class SparseMatrix extends AbstractMatrix {
   }
 
   @Override
-  public boolean haveSharedCells(Matrix other) {
-    if (other instanceof SparseMatrix) {
-      return other == this;
-    } else {
-      return other.haveSharedCells(this);
-    }
-  }
-
-  @Override
   public Matrix like() {
     return new SparseMatrix(cardinality);
   }

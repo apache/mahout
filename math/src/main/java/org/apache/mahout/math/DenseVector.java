@@ -116,15 +116,6 @@ public class DenseVector extends AbstractVector {
     return new VectorView(this, offset, length);
   }
 
-  @Override
-  public boolean haveSharedCells(Vector other) {
-    if (other instanceof DenseVector) {
-      return other == this;
-    } else {
-      return other.haveSharedCells(this);
-    }
-  }
-
   /**
    * Returns an iterator that traverses this Vector from 0 to cardinality-1, in that order.
    *

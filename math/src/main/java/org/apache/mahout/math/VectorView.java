@@ -97,15 +97,6 @@ public class VectorView extends AbstractVector {
     return new VectorView(vector, offset + this.offset, length);
   }
 
-  @Override
-  public boolean haveSharedCells(Vector other) {
-    if (other instanceof VectorView) {
-      return other == this || vector.haveSharedCells(other);
-    } else {
-      return other.haveSharedCells(vector);
-    }
-  }
-
   /** @return true if index is a valid index in the underlying Vector */
   private boolean isInView(int index) {
     return index >= offset && index < offset + cardinality;

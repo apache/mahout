@@ -81,15 +81,6 @@ public class DenseMatrix extends AbstractMatrix {
   }
 
   @Override
-  public boolean haveSharedCells(Matrix other) {
-    if (other instanceof DenseMatrix) {
-      return other == this;
-    } else {
-      return other.haveSharedCells(this);
-    }
-  }
-
-  @Override
   public Matrix like() {
     return like(rowSize(), columnSize());
   }
