@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>mahout-parent</artifactId>
+    <groupId>org.apache.mahout</groupId>
+    <version>0.3-SNAPSHOT</version>
+    <relativePath>../maven</relativePath>
+  </parent>
+  <groupId>org.apache.mahout</groupId>
+  <artifactId>mahout-collection-codegen-plugin</artifactId>
+  <version>0.3-SNAPSHOT</version>
+  <packaging>maven-plugin</packaging>
+  <name>Maven Mojo to generate code for collections</name>
+  <url>http://lucene.apache.org/mahout/</url>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-api</artifactId>
+      <scope>provided</scope>
+      <version>2.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-project</artifactId>
+      <scope>provided</scope>
+      <version>2.1.0</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.apache.maven.shared</groupId>
+	    <artifactId>file-management</artifactId>
+	    <version>1.2.1</version>
+	</dependency>
+   <dependency>
+    <groupId>velocity</groupId>
+    <artifactId>velocity</artifactId>
+    <version>1.5</version>
+	</dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>
