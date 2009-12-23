@@ -48,9 +48,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * <p>A {@link DataModel} backed by a comma-delimited file. This class typically expects a file where each line contains
  * a user ID, followed by item ID, followed by preferences value, separated by commas. You may also use tabs.</p>
  *
- * <p>The preference value is assumed to be parseable as a <code>double</code>. The user and item IDs are ready
- * literally as Strings and treated as such in the API. Note that this means that whitespace matters in the data file;
- * they will be treated as part of the ID values.</p>
+ * <p>The preference value is assumed to be parseable as a <code>double</code>. The user IDs and item IDs are read
+ * parsed as <code>long</code>s.</p>
  *
  * <p>This class will reload data from the data file when {@link #refresh(Collection)} is called, unless the file has
  * been reloaded very recently already.</p>
@@ -60,7 +59,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * in the main data file. This is a mechanism that allows an application to push updates to {@link FileDataModel}
  * without re-copying the entire data file.</p>
  *
- * <p>The line may contain a blank preference value (e.g. "123,ABC,"). This is interpreted to mean "delete preference",
+ * <p>The line may contain a blank preference value (e.g. "123,456,"). This is interpreted to mean "delete preference",
  * and is only useful in the context of an update delta file (see above). Note that if the line is empty or begins with
  * '#' it will be ignored as a comment.</p>
  *
@@ -68,7 +67,7 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * <p>Finally, for application that have no notion of a preference value (that is, the user simply expresses a
  * preference for an item, but no degree of preference), the caller can simply omit the third token in each line
- * altogether -- for example, "123,ABC".</p>
+ * altogether -- for example, "123,456".</p>
  *
  * <p>Note that it's all-or-nothing -- all of the items in the file must express no preference, or the all must.
  * These cannot be mixed. Put another way there will always be the same number of delimiters on every line of the
