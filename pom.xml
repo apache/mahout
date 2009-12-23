@@ -31,6 +31,7 @@
     <module>taste-web</module>
     <module>examples</module>
     <module>utils</module>
+    <module>collections-codegen-plugin</module>    
   </modules>
 
   <build>
