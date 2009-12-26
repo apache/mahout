@@ -61,8 +61,8 @@ public abstract class WeightedDistanceMeasure implements DistanceMeasure {
       ParameteredGeneralizations.configureParameters(this, jobConf);
     }
     try {
-      FileSystem fs = FileSystem.get(weightsFile.get().toUri(), jobConf);
       if (weightsFile.get() != null) {
+        FileSystem fs = FileSystem.get(weightsFile.get().toUri(), jobConf);
         Vector weights = (Vector) vectorClass.get().newInstance();
         if (!fs.exists(weightsFile.get())) {
           throw new FileNotFoundException(weightsFile.get().toString());
