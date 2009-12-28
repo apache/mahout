@@ -15,12 +15,8 @@ package org.apache.mahout.math;
  * @see org.apache.mahout.math.Sorting
  *
  */
+public final class Arrays {
 
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
-public class Arrays {
-
-  /** Makes this class non instantiable, but still let's others inherit from it. */
   private Arrays() {
   }
 

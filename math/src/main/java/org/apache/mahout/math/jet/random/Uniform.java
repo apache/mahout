@@ -11,8 +11,6 @@ package org.apache.mahout.math.jet.random;
 import org.apache.mahout.math.jet.random.engine.MersenneTwister;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
 public class Uniform extends AbstractContinousDistribution {
 
   private double min;
@@ -91,7 +89,8 @@ public class Uniform extends AbstractContinousDistribution {
   }
 
   /**
-   * Returns a uniformly distributed random number in the closed interval <tt>[from,to]</tt> (including <tt>from</tt>
+   * Returns a uniformly distributed random number in the closed interval
+   *  <tt>[from,to]</tt> (including <tt>from</tt>
    * and <tt>to</tt>). Pre conditions: <tt>from &lt;= to</tt>.
    */
   public int nextIntFromTo(int from, int to) {

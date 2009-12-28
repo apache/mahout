@@ -49,6 +49,16 @@
             <goals>
               <goal>generate</goal>
             </goals>
+            <configuration><!-- examples for future reference. 
+              <mainExcludes>
+                <mainExclude>**/AbstractBooleanList.java</mainExclude>
+                <mainExclude>**/BooleanArrayList.java</mainExclude>
+                <mainExclude>**/BooleanBufferConsumer.java</mainExclude>
+              </mainExcludes>
+              <testExcludes>
+                <testExclude>**/BooleanArrayListTest.java</testExclude>
+              </testExcludes>-->
+            </configuration>
           </execution>
         </executions>
       </plugin>

@@ -12,11 +12,7 @@ It is provided "as is" without expressed or implied warranty.
 /**
  * Interface that represents a procedure object: a procedure that takes a single argument and does not return a value.
  *
- * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
-
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
 public interface BooleanProcedure {
 
   /**

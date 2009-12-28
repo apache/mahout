@@ -8,6 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.map;
 
+import java.util.Arrays;
+
 import org.apache.mahout.math.function.LongObjectProcedure;
 import org.apache.mahout.math.function.LongProcedure;
 import org.apache.mahout.math.list.ByteArrayList;
@@ -68,7 +70,7 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
   @Override
   public void clear() {
     new ByteArrayList(this.state).fillFromToWith(0, this.state.length - 1, FREE);
-    new ObjectArrayList(values).fillFromToWith(0, state.length - 1, null); // delta
+    Arrays.fill(values, 0, state.length - 1, null); // delta
 
     this.distinct = 0;
     this.freeEntries = table.length; // delta

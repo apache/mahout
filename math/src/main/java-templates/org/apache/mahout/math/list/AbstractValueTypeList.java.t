@@ -1,4 +1,23 @@
-/*
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+ 
+ /*
 Copyright � 1999 CERN - European Organization for Nuclear Research.
 Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose 
 is hereby granted without fee, provided that the above copyright notice appear in all copies and 
@@ -7,26 +26,22 @@ CERN makes no representations about the suitability of this software for any pur
 It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.list;
-
+//CHECKSTYLE:OFF
 import org.apache.mahout.math.Sorting;
-import org.apache.mahout.math.function.ShortComparator;
-import org.apache.mahout.math.function.ShortProcedure;
+import org.apache.mahout.math.buffer.${valueTypeCap}BufferConsumer;
+import org.apache.mahout.math.function.${valueTypeCap}Comparator;
+import org.apache.mahout.math.function.${valueTypeCap}Procedure;
 import org.apache.mahout.math.jet.random.Uniform;
 import org.apache.mahout.math.jet.random.engine.DRand;
+//CHECKSTYLE:ON
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 /**
- Abstract base class for resizable lists holding <code>short</code> elements; abstract.
- First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
- */
-
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
-public abstract class AbstractShortList extends AbstractList<Short> {
+ Abstract base class for resizable lists holding <code>${valueType}</code> elements; abstract.
+*/
+public abstract class Abstract${valueTypeCap}List extends AbstractList implements ${valueTypeCap}BufferConsumer {
 
   /**
    * The size of the list. This is a READ_ONLY variable for all methods but setSizeRaw(int newSize) !!! If you violate
@@ -34,17 +49,22 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    */
   protected int size;
 
-  /** Makes this class non instantiable, but still let's others inherit from it. */
-  protected AbstractShortList() {
-  }
-
   /**
    * Appends the specified element to the end of this list.
    *
    * @param element element to be appended to this list.
    */
-  public void add(short element) {
+  public void add(${valueType} element) {
     beforeInsert(size, element);
+  }
+
+  /**
+   * Appends all elements of the specified list to the receiver.
+   *
+   * @param other the list of which all elements shall be appended.
+   */
+  public void addAllOf(Abstract${valueTypeCap}List other) {
+    addAllOfFromTo(other, 0, other.size() - 1);
   }
 
   /**
@@ -57,8 +77,17 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    * @throws IndexOutOfBoundsException index is out of range (<tt>other.size()&gt;0 && (from&lt;0 || from&gt;to ||
    *                                   to&gt;=other.size())</tt>).
    */
-  public void addAllOfFromTo(AbstractShortList other, int from, int to) {
+  public void addAllOfFromTo(Abstract${valueTypeCap}List other, int from, int to) {
     beforeInsertAllOfFromTo(size, other, from, to);
+  }
+  
+  /**
+   * Appends the specified list to the end of this list.
+   * @param other the list to be appended. 
+   **/
+  @Override
+  public void addAllOf(${valueTypeCap}ArrayList other) {
+	addAllOfFromTo(other, 0, other.size() - 1);
   }
 
   /**
@@ -69,7 +98,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    * @param element element to be inserted.
    * @throws IndexOutOfBoundsException index is out of range (<tt>index &lt; 0 || index &gt; size()</tt>).
    */
-  public void beforeInsert(int index, short element) {
+  public void beforeInsert(int index, ${valueType} element) {
     beforeInsertDummies(index, 1);
     set(index, element);
   }
@@ -87,7 +116,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    *                                   to&gt;=other.size())</tt>).
    * @throws IndexOutOfBoundsException index is out of range (<tt>index &lt; 0 || index &gt; size()</tt>).
    */
-  public void beforeInsertAllOfFromTo(int index, AbstractShortList other, int from, int to) {
+  public void beforeInsertAllOfFromTo(int index, Abstract${valueTypeCap}List other, int from, int to) {
     int length = to - from + 1;
     this.beforeInsertDummies(index, length);
     this.replaceFromToWithFrom(index, index + length - 1, other, from);
@@ -113,7 +142,6 @@ public abstract class AbstractShortList extends AbstractList<Short> {
       replaceFromToWithFrom(index + length, size - 1, this, index);
     }
   }
-
   /**
    * Searches the receiver for the specified value using the binary search algorithm.  The receiver must
    * <strong>must</strong> be sorted (as by the sort method) prior to making this call.  If it is not sorted, the
@@ -128,7 +156,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    *         will be &gt;= 0 if and only if the key is found.
    * @see java.util.Arrays
    */
-  public int binarySearch(short key) {
+  public int binarySearch(${valueType} key) {
     return this.binarySearchFromTo(key, 0, size - 1);
   }
 
@@ -148,12 +176,12 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    *         will be &gt;= 0 if and only if the key is found.
    * @see java.util.Arrays
    */
-  public int binarySearchFromTo(short key, int from, int to) {
+  public int binarySearchFromTo(${valueType} key, int from, int to) {
     int low = from;
     int high = to;
     while (low <= high) {
       int mid = (low + high) / 2;
-      short midVal = get(mid);
+      ${valueType} midVal = get(mid);
 
       if (midVal < key) {
         low = mid + 1;
@@ -181,7 +209,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    *
    * @param elem element whose presence in the receiver is to be tested.
    */
-  public boolean contains(short elem) {
+  public boolean contains(${valueType} elem) {
     return indexOfFromTo(elem, 0, size - 1) >= 0;
   }
 
@@ -191,7 +219,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    *
    * @param element the element to be deleted.
    */
-  public void delete(short element) {
+  public void delete(${valueType} element) {
     int index = indexOfFromTo(element, 0, size - 1);
     if (index >= 0) {
       remove(index);
@@ -207,8 +235,8 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    *
    * @return the elements currently stored.
    */
-  public short[] elements() {
-    short[] myElements = new short[size];
+  public ${valueType}[] elements() {
+    ${valueType}[] myElements = new ${valueType}[size];
     for (int i = size; --i >= 0;) {
       myElements[i] = getQuick(i);
     }
@@ -224,9 +252,9 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    * @param elements the new elements to be stored.
    * @return the receiver itself.
    */
-  public AbstractShortList elements(short[] elements) {
+  public Abstract${valueTypeCap}List elements(${valueType}[] elements) {
     clear();
-    addAllOfFromTo(new ShortArrayList(elements), 0, elements.length - 1);
+    addAllOfFromTo(new ${valueTypeCap}ArrayList(elements), 0, elements.length - 1);
     return this;
   }
 
@@ -248,7 +276,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    * @return true if the specified Object is equal to the receiver.
    */
   public boolean equals(Object otherObj) { //delta
-    if (!(otherObj instanceof AbstractShortList)) {
+    if (!(otherObj instanceof Abstract${valueTypeCap}List)) {
       return false;
     }
     if (this == otherObj) {
@@ -257,7 +285,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
     if (otherObj == null) {
       return false;
     }
-    AbstractShortList other = (AbstractShortList) otherObj;
+    Abstract${valueTypeCap}List other = (Abstract${valueTypeCap}List) otherObj;
     if (size() != other.size()) {
       return false;
     }
@@ -277,7 +305,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    * @param to   the index of the last element (inclusive) to be filled with the specified value.
    * @param val  the value to be stored in the specified elements of the receiver.
    */
-  public void fillFromToWith(int from, int to, short val) {
+  public void fillFromToWith(int from, int to, ${valueType} val) {
     checkRangeFromTo(from, to, this.size);
     for (int i = from; i <= to;) {
       setQuick(i++, val);
@@ -291,7 +319,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    *                  continues.
    * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise.
    */
-  public boolean forEach(ShortProcedure procedure) {
+  public boolean forEach(${valueTypeCap}Procedure procedure) {
     for (int i = 0; i < size;) {
       if (!procedure.apply(get(i++))) {
         return false;
@@ -306,7 +334,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    * @param index index of element to return.
    * @throws IndexOutOfBoundsException index is out of range (index &lt; 0 || index &gt;= size()).
    */
-  public short get(int index) {
+  public ${valueType} get(int index) {
     if (index >= size || index < 0) {
       throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
     }
@@ -325,7 +353,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    *
    * @param index index of element to return.
    */
-  protected abstract short getQuick(int index);
+  protected abstract ${valueType} getQuick(int index);
 
   /**
    * Returns the index of the first occurrence of the specified element. Returns <code>-1</code> if the receiver does
@@ -335,7 +363,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    * @return the index of the first occurrence of the element in the receiver; returns <code>-1</code> if the element is
    *         not found.
    */
-  public int indexOf(short element) { //delta
+  public int indexOf(${valueType} element) { //delta
     return indexOfFromTo(element, 0, size - 1);
   }
 
@@ -352,7 +380,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    * @throws IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to ||
    *                                   to&gt;=size())</tt>).
    */
-  public int indexOfFromTo(short element, int from, int to) {
+  public int indexOfFromTo(${valueType} element, int from, int to) {
     checkRangeFromTo(from, to, size);
 
     for (int i = from; i <= to; i++) {
@@ -371,7 +399,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    * @return the index of the last occurrence of the element in the receiver; returns <code>-1</code> if the element is
    *         not found.
    */
-  public int lastIndexOf(short element) {
+  public int lastIndexOf(${valueType} element) {
     return lastIndexOfFromTo(element, 0, size - 1);
   }
 
@@ -388,7 +416,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    * @throws IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to ||
    *                                   to&gt;=size())</tt>).
    */
-  public int lastIndexOfFromTo(short element, int from, int to) {
+  public int lastIndexOfFromTo(${valueType} element, int from, int to) {
     checkRangeFromTo(from, to, size());
 
     for (int i = to; i >= from; i--) {
@@ -420,7 +448,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
     int mySize = size();
     checkRangeFromTo(from, to, mySize);
 
-    short[] myElements = elements();
+    ${valueType}[] myElements = elements();
     Sorting.mergeSort(myElements, from, to + 1);
     elements(myElements);
     setSizeRaw(mySize);
@@ -447,11 +475,11 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    * @throws IndexOutOfBoundsException      index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to ||
    *                                        to&gt;=size())</tt>).
    */
-  public void mergeSortFromTo(int from, int to, ShortComparator c) {
+  public void mergeSortFromTo(int from, int to, ${valueTypeCap}Comparator c) {
     int mySize = size();
     checkRangeFromTo(from, to, mySize);
 
-    short[] myElements = elements();
+    ${valueType}[] myElements = elements();
     Sorting.mergeSort(myElements, from, to + 1, c);
     elements(myElements);
     setSizeRaw(mySize);
@@ -467,15 +495,15 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    * @throws IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to ||
    *                                   to&gt;=size())</tt>).
    */
-  public AbstractShortList partFromTo(int from, int to) {
+  public Abstract${valueTypeCap}List partFromTo(int from, int to) {
     checkRangeFromTo(from, to, size);
 
     int length = to - from + 1;
-    ShortArrayList part = new ShortArrayList(length);
+    ${valueTypeCap}ArrayList part = new ${valueTypeCap}ArrayList(length);
     part.addAllOfFromTo(this, from, to);
     return part;
   }
-
+  
   /**
    * Sorts the specified range of the receiver into ascending numerical order.  The sorting algorithm is a tuned
    * quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's "Engineering a Sort Function", Software-Practice
@@ -496,7 +524,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
     int mySize = size();
     checkRangeFromTo(from, to, mySize);
 
-    short[] myElements = elements();
+    ${valueType}[] myElements = elements();
     java.util.Arrays.sort(myElements, from, to + 1);
     elements(myElements);
     setSizeRaw(mySize);
@@ -521,11 +549,11 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    * @throws IndexOutOfBoundsException      index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to ||
    *                                        to&gt;=size())</tt>).
    */
-  public void quickSortFromTo(int from, int to, ShortComparator c) {
+  public void quickSortFromTo(int from, int to, ${valueTypeCap}Comparator c) {
     int mySize = size();
     checkRangeFromTo(from, to, mySize);
 
-    short[] myElements = elements();
+    ${valueType}[] myElements = elements();
     Sorting.quickSort(myElements, from, to + 1, c);
     elements(myElements);
     setSizeRaw(mySize);
@@ -537,7 +565,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    * @param other the other list.
    * @return <code>true</code> if the receiver changed as a result of the call.
    */
-  public boolean removeAll(AbstractShortList other) {
+  public boolean removeAll(Abstract${valueTypeCap}List other) {
     if (other.isEmpty()) {
       return false;
     } //nothing to do
@@ -565,7 +593,6 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    * @throws IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to ||
    *                                   to&gt;=size())</tt>).
    */
-  @Override
   public void removeFromTo(int from, int to) {
     checkRangeFromTo(from, to, size);
     int numMoved = size - to - 1;
@@ -589,7 +616,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    * @param other     list holding elements to be copied into the receiver.
    * @param otherFrom position of first element within other list to be copied.
    */
-  public void replaceFromToWithFrom(int from, int to, AbstractShortList other, int otherFrom) {
+  public void replaceFromToWithFrom(int from, int to, Abstract${valueTypeCap}List other, int otherFrom) {
     int length = to - from + 1;
     if (length > 0) {
       checkRangeFromTo(from, to, size());
@@ -606,8 +633,6 @@ public abstract class AbstractShortList extends AbstractList<Short> {
           setQuick(to--, other.getQuick(otherTo--));
         }
       }
-
-
     }
   }
 
@@ -660,7 +685,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    *                  2, 3, 4]
    *                                                                     </pre>
    */
-  public void replaceFromToWithFromTo(int from, int to, AbstractShortList other, int otherFrom, int otherTo) {
+  public void replaceFromToWithFromTo(int from, int to, Abstract${valueTypeCap}List other, int otherFrom, int otherTo) {
     if (otherFrom > otherTo) {
       throw new IndexOutOfBoundsException("otherFrom: " + otherFrom + ", otherTo: " + otherTo);
     }
@@ -691,27 +716,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
       replaceFromToWithFrom(from, from + length - 1, other, otherFrom);
     }
   }
-
-  /**
-   * Replaces the part of the receiver starting at <code>from</code> (inclusive) with all the elements of the specified
-   * collection. Does not alter the size of the receiver. Replaces exactly <tt>Math.max(0,Math.min(size()-from,
-   * other.size()))</tt> elements.
-   *
-   * @param from  the index at which to copy the first element from the specified collection.
-   * @param other Collection to replace part of the receiver
-   * @throws IndexOutOfBoundsException index is out of range (index &lt; 0 || index &gt;= size()).
-   */
-  @Override
-  public void replaceFromWith(int from, Collection<Short> other) {
-    checkRange(from, size());
-    Iterator<Short> e = other.iterator();
-    int index = from;
-    int limit = Math.min(size() - from, other.size());
-    for (int i = 0; i < limit; i++) {
-      set(index++, e.next());
-    } //delta
-  }
-
+  
   /**
    * Retains (keeps) only the elements in the receiver that are contained in the specified other list. In other words,
    * removes from the receiver all of its elements that are not contained in the specified other list.
@@ -719,7 +724,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    * @param other the other list to test against.
    * @return <code>true</code> if the receiver changed as a result of the call.
    */
-  public boolean retainAll(AbstractShortList other) {
+  public boolean retainAll(Abstract${valueTypeCap}List other) {
     if (other.isEmpty()) {
       if (size == 0) {
         return false;
@@ -740,7 +745,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
     setSize(j);
     return modified;
   }
-
+  
   /** Reverses the elements of the receiver. Last becomes first, second last becomes second first, and so on. */
   @Override
   public void reverse() {
@@ -748,7 +753,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
     int j = size() - 1;
 
     for (int i = 0; i < limit;) { //swap
-      short tmp = getQuick(i);
+      ${valueType} tmp = getQuick(i);
       setQuick(i++, getQuick(j));
       setQuick(j--, tmp);
     }
@@ -761,7 +766,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    * @param element element to be stored at the specified position.
    * @throws IndexOutOfBoundsException if <tt>index &lt; 0 || index &gt;= size()</tt>.
    */
-  public void set(int index, short element) {
+  public void set(int index, ${valueType} element) {
     if (index >= size || index < 0) {
       throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
     }
@@ -781,7 +786,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    * @param index   index of element to replace.
    * @param element element to be stored at the specified position.
    */
-  protected abstract void setQuick(int index, short element);
+  protected abstract void setQuick(int index, ${valueType} element);
 
   /**
    * Sets the size of the receiver without modifying it otherwise. This method should not release or allocate new memory
@@ -789,7 +794,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    *
    * If your subclass overrides and delegates size changing methods to some other object, you must make sure that those
    * overriding methods not only update the size of the delegate but also of this class. For example: public
-   * DatabaseList extends AbstractShortList { ... public void removeFromTo(int from,int to) {
+   * DatabaseList extends Abstract${valueTypeCap}List { ... public void removeFromTo(int from,int to) {
    * myDatabase.removeFromTo(from,to); this.setSizeRaw(size-(to-from+1)); } }
    */
   protected void setSizeRaw(int newSize) {
@@ -813,7 +818,7 @@ public abstract class AbstractShortList extends AbstractList<Short> {
       int random = gen.nextIntFromTo(i, to);
 
       //swap(i, random)
-      short tmpElement = getQuick(random);
+      ${valueType} tmpElement = getQuick(random);
       setQuick(random, getQuick(i));
       setQuick(i, tmpElement);
     }
@@ -830,8 +835,8 @@ public abstract class AbstractShortList extends AbstractList<Short> {
    *
    * @param times the number of times the receiver shall be copied.
    */
-  public AbstractShortList times(int times) {
-    AbstractShortList newList = new ShortArrayList(times * size());
+  public Abstract${valueTypeCap}List times(int times) {
+    Abstract${valueTypeCap}List newList = new ${valueTypeCap}ArrayList(times * size());
     for (int i = times; --i >= 0;) {
       newList.addAllOfFromTo(this, 0, size() - 1);
     }
@@ -839,10 +844,9 @@ public abstract class AbstractShortList extends AbstractList<Short> {
   }
 
   /** Returns a <code>ArrayList</code> containing all the elements in the receiver. */
-  @Override
-  public List<Short> toList() {
+  public List<${valueObjectType}> toList() {
     int mySize = size();
-    List<Short> list = new ArrayList<Short>(mySize);
+    List<${valueObjectType}> list = new ArrayList<${valueObjectType}>(mySize);
     for (int i = 0; i < mySize; i++) {
       list.add(get(i));
     }

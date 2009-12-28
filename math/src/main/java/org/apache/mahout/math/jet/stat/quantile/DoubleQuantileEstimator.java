@@ -11,7 +11,6 @@ package org.apache.mahout.math.jet.stat.quantile;
 import org.apache.mahout.math.PersistentObject;
 import org.apache.mahout.math.function.DoubleProcedure;
 import org.apache.mahout.math.list.DoubleArrayList;
-import org.apache.mahout.math.list.ObjectArrayList;
 
 /**
  * The abstract base class for approximate quantile finders computing quantiles over a sequence of <tt>double</tt>
@@ -141,8 +140,14 @@ abstract class DoubleQuantileEstimator extends PersistentObject
     if (this.bufferSet != null) {
       copy.bufferSet = (DoubleBufferSet) copy.bufferSet.clone();
       if (this.currentBufferToFill != null) {
-        int index = new ObjectArrayList(this.bufferSet.buffers).indexOf(this.currentBufferToFill, true);
-        copy.currentBufferToFill = copy.bufferSet.buffers[index];
+        int index;
+        for (index = 0; index < bufferSet.buffers.length; index ++) {
+          if (bufferSet.buffers[index].equals(currentBufferToFill)) {
+            copy.currentBufferToFill = copy.bufferSet.buffers[index];
+            return copy;
+          }
+        }
+        throw new IllegalStateException("current buffer not on the list.");
       }
     }
     return copy;

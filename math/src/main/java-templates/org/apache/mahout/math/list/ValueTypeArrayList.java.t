@@ -1,3 +1,21 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 /*
 Copyright � 1999 CERN - European Organization for Nuclear Research.
 Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose 
@@ -8,28 +26,25 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.list;
 
-import org.apache.mahout.math.function.ShortProcedure;
+import org.apache.mahout.math.function.${valueTypeCap}Procedure;
 import org.apache.mahout.math.jet.random.Uniform;
 import org.apache.mahout.math.jet.random.engine.DRand;
 
 import java.util.Date;
 /**
- Resizable list holding <code>short</code> elements; implemented with arrays.
- First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
- */
+ Resizable list holding <code>${valueType}</code> elements; implemented with arrays.
+*/
 
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
-public class ShortArrayList extends AbstractShortList {
+public class ${valueTypeCap}ArrayList extends Abstract${valueTypeCap}List {
 
   /**
    * The array buffer into which the elements of the list are stored. The capacity of the list is the length of this
    * array buffer.
    */
-  private short[] elements;
+  private ${valueType}[] elements;
 
   /** Constructs an empty list. */
-  public ShortArrayList() {
+  public ${valueTypeCap}ArrayList() {
     this(10);
   }
 
@@ -42,7 +57,7 @@ public class ShortArrayList extends AbstractShortList {
    *
    * @param elements the array to be backed by the the constructed list
    */
-  public ShortArrayList(short[] elements) {
+  public ${valueTypeCap}ArrayList(${valueType}[] elements) {
     elements(elements);
   }
 
@@ -52,8 +67,8 @@ public class ShortArrayList extends AbstractShortList {
    * @param initialCapacity the number of elements the receiver can hold without auto-expanding itself by allocating new
    *                        internal memory.
    */
-  public ShortArrayList(int initialCapacity) {
-    this(new short[initialCapacity]);
+  public ${valueTypeCap}ArrayList(int initialCapacity) {
+    this(new ${valueType}[initialCapacity]);
     setSizeRaw(0);
   }
 
@@ -62,8 +77,7 @@ public class ShortArrayList extends AbstractShortList {
    *
    * @param element element to be appended to this list.
    */
-  @Override
-  public void add(short element) {
+  public void add(${valueType} element) {
     // overridden for performance only.
     if (size == elements.length) {
       ensureCapacity(size + 1);
@@ -79,9 +93,12 @@ public class ShortArrayList extends AbstractShortList {
    * @param element element to be inserted.
    * @throws IndexOutOfBoundsException index is out of range (<tt>index &lt; 0 || index &gt; size()</tt>).
    */
-  @Override
-  public void beforeInsert(int index, short element) {
+  public void beforeInsert(int index, ${valueType} element) {
     // overridden for performance only.
+    if (size == index) {
+      add(element);
+      return;
+    }
     if (index > size || index < 0) {
       throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
     }
@@ -109,10 +126,10 @@ public class ShortArrayList extends AbstractShortList {
    * @see java.util.Arrays
    */
   @Override
-  public int binarySearchFromTo(short key, int from, int to) {
-    return org.apache.mahout.math.Sorting.binarySearchFromTo(this.elements, key, from, to);
+  public int binarySearchFromTo(${valueType} key, int from, int to) {
+    return org.apache.mahout.math.Sorting.binarySearchFromTo(elements, key, from, to);
   }
-
+  
   /**
    * Returns a deep copy of the receiver.
    *
@@ -121,7 +138,7 @@ public class ShortArrayList extends AbstractShortList {
   @Override
   public Object clone() {
     // overridden for performance only.
-    ShortArrayList clone = new ShortArrayList(elements.clone());
+    ${valueTypeCap}ArrayList clone = new ${valueTypeCap}ArrayList(elements.clone());
     clone.setSizeRaw(size);
     return clone;
   }
@@ -131,10 +148,11 @@ public class ShortArrayList extends AbstractShortList {
    *
    * @return a deep copy of the receiver.
    */
-  public ShortArrayList copy() {
-    return (ShortArrayList) clone();
+  public ${valueTypeCap}ArrayList copy() {
+    return (${valueTypeCap}ArrayList) clone();
   }
 
+  #if ($valueType != 'float' && $valueType != 'double' && $valueType != 'long') 
   /**
    * Sorts the specified range of the receiver into ascending numerical order.
    *
@@ -147,22 +165,22 @@ public class ShortArrayList extends AbstractShortList {
    * @param min  the smallest element contained in the range.
    * @param max  the largest element contained in the range.
    */
-  protected void countSortFromTo(int from, int to, short min, short max) {
+  protected void countSortFromTo(int from, int to, ${valueType} min, ${valueType} max) {
     if (size == 0) {
       return;
     }
     checkRangeFromTo(from, to, size);
 
-    int width = max - min + 1;
+    ${valueType} width = (${valueType})(max - min + 1);
 
     int[] counts = new int[width];
-    short[] theElements = elements;
+    ${valueType}[] theElements = elements;
     for (int i = from; i <= to;) {
       counts[(theElements[i++] - min)]++;
     }
 
     int fromIndex = from;
-    short val = min;
+    ${valueType} val = min;
     for (int i = 0; i < width; i++, val++) {
       int c = counts[i];
       if (c > 0) {
@@ -176,6 +194,7 @@ public class ShortArrayList extends AbstractShortList {
       }
     }
   }
+  #end
 
   /**
    * Returns the elements currently stored, including invalid elements between size and capacity, if any.
@@ -185,8 +204,7 @@ public class ShortArrayList extends AbstractShortList {
    *
    * @return the elements currently stored.
    */
-  @Override
-  public short[] elements() {
+  public ${valueType}[] elements() {
     return elements;
   }
 
@@ -200,8 +218,7 @@ public class ShortArrayList extends AbstractShortList {
    * @param elements the new elements to be stored.
    * @return the receiver itself.
    */
-  @Override
-  public AbstractShortList elements(short[] elements) {
+  public Abstract${valueTypeCap}List elements(${valueType}[] elements) {
     this.elements = elements;
     this.size = elements.length;
     return this;
@@ -213,7 +230,6 @@ public class ShortArrayList extends AbstractShortList {
    *
    * @param minCapacity the desired minimum capacity.
    */
-  @Override
   public void ensureCapacity(int minCapacity) {
     elements = org.apache.mahout.math.Arrays.ensureCapacity(elements, minCapacity);
   }
@@ -229,7 +245,7 @@ public class ShortArrayList extends AbstractShortList {
    */
   public boolean equals(Object otherObj) { //delta
     // overridden for performance only.
-    if (!(otherObj instanceof ShortArrayList)) {
+    if (!(otherObj instanceof ${valueTypeCap}ArrayList)) {
       return super.equals(otherObj);
     }
     if (this == otherObj) {
@@ -238,13 +254,13 @@ public class ShortArrayList extends AbstractShortList {
     if (otherObj == null) {
       return false;
     }
-    ShortArrayList other = (ShortArrayList) otherObj;
+    ${valueTypeCap}ArrayList other = (${valueTypeCap}ArrayList) otherObj;
     if (size() != other.size()) {
       return false;
     }
 
-    short[] theElements = elements();
-    short[] otherElements = other.elements();
+    ${valueType}[] theElements = elements();
+    ${valueType}[] otherElements = other.elements();
     for (int i = size(); --i >= 0;) {
       if (theElements[i] != otherElements[i]) {
         return false;
@@ -260,10 +276,9 @@ public class ShortArrayList extends AbstractShortList {
    *                  continues.
    * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise.
    */
-  @Override
-  public boolean forEach(ShortProcedure procedure) {
+  public boolean forEach(${valueTypeCap}Procedure procedure) {
     // overridden for performance only.
-    short[] theElements = elements;
+    ${valueType}[] theElements = elements;
     int theSize = size;
 
     for (int i = 0; i < theSize;) {
@@ -280,8 +295,7 @@ public class ShortArrayList extends AbstractShortList {
    * @param index index of element to return.
    * @throws IndexOutOfBoundsException index is out of range (index &lt; 0 || index &gt;= size()).
    */
-  @Override
-  public short get(int index) {
+  public ${valueType} get(int index) {
     // overridden for performance only.
     if (index >= size || index < 0) {
       throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
@@ -298,7 +312,7 @@ public class ShortArrayList extends AbstractShortList {
    * @param index index of element to return.
    */
   @Override
-  public short getQuick(int index) {
+  public ${valueType} getQuick(int index) {
     return elements[index];
   }
 
@@ -316,14 +330,14 @@ public class ShortArrayList extends AbstractShortList {
    *                                   to&gt;=size())</tt>).
    */
   @Override
-  public int indexOfFromTo(short element, int from, int to) {
+  public int indexOfFromTo(${valueType} element, int from, int to) {
     // overridden for performance only.
     if (size == 0) {
       return -1;
     }
     checkRangeFromTo(from, to, size);
 
-    short[] theElements = elements;
+    ${valueType}[] theElements = elements;
     for (int i = from; i <= to; i++) {
       if (element == theElements[i]) {
         return i;
@@ -346,14 +360,14 @@ public class ShortArrayList extends AbstractShortList {
    *                                   to&gt;=size())</tt>).
    */
   @Override
-  public int lastIndexOfFromTo(short element, int from, int to) {
+  public int lastIndexOfFromTo(${valueType} element, int from, int to) {
     // overridden for performance only.
     if (size == 0) {
       return -1;
     }
     checkRangeFromTo(from, to, size);
 
-    short[] theElements = elements;
+    ${valueType}[] theElements = elements;
     for (int i = to; i >= from; i--) {
       if (element == theElements[i]) {
         return i;
@@ -373,16 +387,16 @@ public class ShortArrayList extends AbstractShortList {
    *                                   to&gt;=size())</tt>).
    */
   @Override
-  public AbstractShortList partFromTo(int from, int to) {
+  public Abstract${valueTypeCap}List partFromTo(int from, int to) {
     if (size == 0) {
-      return new ShortArrayList(0);
+      return new ${valueTypeCap}ArrayList(0);
     }
 
     checkRangeFromTo(from, to, size);
 
-    short[] part = new short[to - from + 1];
+    ${valueType}[] part = new ${valueType}[to - from + 1];
     System.arraycopy(elements, from, part, 0, to - from + 1);
-    return new ShortArrayList(part);
+    return new ${valueTypeCap}ArrayList(part);
   }
 
   /**
@@ -392,9 +406,9 @@ public class ShortArrayList extends AbstractShortList {
    * @return <code>true</code> if the receiver changed as a result of the call.
    */
   @Override
-  public boolean removeAll(AbstractShortList other) {
+  public boolean removeAll(Abstract${valueTypeCap}List other) {
     // overridden for performance only.
-    if (!(other instanceof ShortArrayList)) {
+    if (!(other instanceof ${valueTypeCap}ArrayList)) {
       return super.removeAll(other);
     }
 
@@ -413,14 +427,14 @@ public class ShortArrayList extends AbstractShortList {
     } //nothing to do
     int limit = other.size() - 1;
     int j = 0;
-    short[] theElements = elements;
+    ${valueType}[] theElements = elements;
     int mySize = size();
 
     double N = (double) other.size();
     double M = (double) mySize;
     if ((N + M) * org.apache.mahout.math.jet.math.Arithmetic.log2(N) < M * N) {
       // it is faster to sort other before searching in it
-      ShortArrayList sortedList = (ShortArrayList) other.clone();
+      ${valueTypeCap}ArrayList sortedList = (${valueTypeCap}ArrayList) other.clone();
       sortedList.quickSort();
 
       for (int i = 0; i < mySize; i++) {
@@ -453,9 +467,9 @@ public class ShortArrayList extends AbstractShortList {
    * @param otherFrom position of first element within other list to be copied.
    */
   @Override
-  public void replaceFromToWithFrom(int from, int to, AbstractShortList other, int otherFrom) {
+  public void replaceFromToWithFrom(int from, int to, Abstract${valueTypeCap}List other, int otherFrom) {
     // overridden for performance only.
-    if (!(other instanceof ShortArrayList)) {
+    if (!(other instanceof ${valueTypeCap}ArrayList)) {
       // slower
       super.replaceFromToWithFrom(from, to, other, otherFrom);
       return;
@@ -464,7 +478,7 @@ public class ShortArrayList extends AbstractShortList {
     if (length > 0) {
       checkRangeFromTo(from, to, size());
       checkRangeFromTo(otherFrom, otherFrom + length - 1, other.size());
-      System.arraycopy(((ShortArrayList) other).elements, otherFrom, elements, from, length);
+      System.arraycopy(((${valueTypeCap}ArrayList) other).elements, otherFrom, elements, from, length);
     }
   }
 
@@ -476,9 +490,9 @@ public class ShortArrayList extends AbstractShortList {
    * @return <code>true</code> if the receiver changed as a result of the call.
    */
   @Override
-  public boolean retainAll(AbstractShortList other) {
+  public boolean retainAll(Abstract${valueTypeCap}List other) {
     // overridden for performance only.
-    if (!(other instanceof ShortArrayList)) {
+    if (!(other instanceof ${valueTypeCap}ArrayList)) {
       return super.retainAll(other);
     }
 
@@ -494,14 +508,14 @@ public class ShortArrayList extends AbstractShortList {
     */
     int limit = other.size() - 1;
     int j = 0;
-    short[] theElements = elements;
+    ${valueType}[] theElements = elements;
     int mySize = size();
 
     double N = (double) other.size();
     double M = (double) mySize;
     if ((N + M) * org.apache.mahout.math.jet.math.Arithmetic.log2(N) < M * N) {
       // it is faster to sort other before searching in it
-      ShortArrayList sortedList = (ShortArrayList) other.clone();
+      ${valueTypeCap}ArrayList sortedList = (${valueTypeCap}ArrayList) other.clone();
       sortedList.quickSort();
 
       for (int i = 0; i < mySize; i++) {
@@ -530,9 +544,9 @@ public class ShortArrayList extends AbstractShortList {
     int limit = size / 2;
     int j = size - 1;
 
-    short[] theElements = elements;
+    ${valueType}[] theElements = elements;
     for (int i = 0; i < limit;) { //swap
-      short tmp = theElements[i];
+      ${valueType} tmp = theElements[i];
       theElements[i++] = theElements[j];
       theElements[j--] = tmp;
     }
@@ -546,7 +560,7 @@ public class ShortArrayList extends AbstractShortList {
    * @throws IndexOutOfBoundsException index is out of range (index &lt; 0 || index &gt;= size()).
    */
   @Override
-  public void set(int index, short element) {
+  public void set(int index, ${valueType} element) {
     // overridden for performance only.
     if (index >= size || index < 0) {
       throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
@@ -564,7 +578,7 @@ public class ShortArrayList extends AbstractShortList {
    * @param element element to be stored at the specified position.
    */
   @Override
-  public void setQuick(int index, short element) {
+  public void setQuick(int index, ${valueType} element) {
     elements[index] = element;
   }
 
@@ -585,12 +599,12 @@ public class ShortArrayList extends AbstractShortList {
     checkRangeFromTo(from, to, size);
 
     Uniform gen = new Uniform(new DRand(new Date()));
-    short[] theElements = elements;
+    ${valueType}[] theElements = elements;
     for (int i = from; i < to; i++) {
       int random = gen.nextIntFromTo(i, to);
 
       //swap(i, random)
-      short tmpElement = theElements[random];
+      ${valueType} tmpElement = theElements[random];
       theElements[random] = theElements[i];
       theElements[i] = tmpElement;
     }
@@ -624,12 +638,12 @@ public class ShortArrayList extends AbstractShortList {
     checkRangeFromTo(from, to, size);
 
     // determine minimum and maximum.
-    short min = elements[from];
-    short max = elements[from];
+    ${valueType} min = elements[from];
+    ${valueType} max = elements[from];
 
-    short[] theElements = elements;
+    ${valueType}[] theElements = elements;
     for (int i = from + 1; i <= to;) {
-      short elem = theElements[i++];
+      ${valueType} elem = theElements[i++];
       if (elem > max) {
         max = elem;
       } else if (elem < min) {
@@ -637,6 +651,7 @@ public class ShortArrayList extends AbstractShortList {
       }
     }
 
+    #if ($valueType == 'byte' || $valueType == 'char' || $valueType == 'int') 
     // try to figure out which option is fastest.
     double N = (double) to - (double) from + 1.0;
     double quickSortEstimate = N * Math.log(N) / 0.6931471805599453; // O(N*log(N,base=2)) ; ln(2)=0.6931471805599453
@@ -650,10 +665,13 @@ public class ShortArrayList extends AbstractShortList {
     } else {
       quickSortFromTo(from, to);
     }
+    #else
+    quickSortFromTo(from, to);
+    #end
   }
 
   /**
-   * Trims the capacity of the receiver to be the receiver's current size. Releases any superfluos internal memory. An
+   * Trims the capacity of the receiver to be the receiver's current size. Releases any superfluous internal memory. An
    * application can use this operation to minimize the storage of the receiver.
    */
   @Override

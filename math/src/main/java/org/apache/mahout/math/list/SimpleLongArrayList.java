@@ -10,11 +10,7 @@ package org.apache.mahout.math.list;
 
 /**
  Resizable list holding <code>long</code> elements; implemented with arrays; not efficient; just to demonstrate which methods you must override to implement a fully functional list.
- First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
  */
-
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
 public class SimpleLongArrayList extends AbstractLongList {
 
   /**
@@ -22,9 +18,6 @@ public class SimpleLongArrayList extends AbstractLongList {
    * array buffer.
    */
   private long[] elements;
-
-  /** The size of the list. */
-  private int size;
 
   /** Constructs an empty list. */
   public SimpleLongArrayList() {

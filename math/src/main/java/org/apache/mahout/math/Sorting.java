@@ -1,4 +1,24 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /*
+
 Copyright � 1999 CERN - European Organization for Nuclear Research.
 Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose 
 is hereby granted without fee, provided that the above copyright notice appear in all copies and 
@@ -30,15 +50,11 @@ import java.util.Comparator;
  * @see java.util.Arrays
  *
  */
-
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
-public class Sorting {
+public final class Sorting {
 
   private static final int SMALL = 7;
   private static final int MEDIUM = 40;
 
-  /** Makes this class non instantiable, but still let's others inherit from it. */
   private Sorting() {
   }
 
@@ -267,10 +283,10 @@ public class Sorting {
    * @see java.util.Arrays
    * @see java.util.Comparator
    */
-  public static int binarySearchFromTo(Object[] list, Object key, int from, int to, Comparator<Object> comparator) {
+  public static <T> int binarySearchFromTo(T[] list, T key, int from, int to, Comparator<? super T> comparator) {
     while (from <= to) {
       int mid = (from + to) / 2;
-      Object midVal = list[mid];
+      T midVal = list[mid];
       int cmp = comparator.compare(midVal, key);
 
       if (cmp < 0) {
@@ -308,37 +324,6 @@ public class Sorting {
       if (midVal < key) {
         from = mid + 1;
       } else if (midVal > key) {
-        to = mid - 1;
-      } else {
-        return mid;
-      } // key found
-    }
-    return -(from + 1);  // key not found.
-  }
-
-  /**
-   * Generically searches the list for the specified value using the binary search algorithm.  The list must
-   * <strong>must</strong> be sorted (as by the sort method) prior to making this call.  If it is not sorted, the
-   * results are undefined: in particular, the call may enter an infinite loop.  If the list contains multiple elements
-   * equal to the specified key, there is no guarantee which of the multiple elements will be found.
-   *
-   * @param from the leftmost search position, inclusive.
-   * @param to   the rightmost search position, inclusive.
-   * @return index of the search key, if it is contained in the list; otherwise, <tt>(-(<i>insertion point</i>) -
-   *         1)</tt>. The <i>insertion point</i> is defined as the the point at which the value would be inserted into
-   *         the list: the index of the first element greater than the key, or <tt>list.length</tt>, if all elements in
-   *         the list are less than the specified key.  Note that this guarantees that the return value will be &gt;= 0
-   *         if and only if the key is found.
-   * @see java.util.Arrays
-   */
-  public static int binarySearchFromTo(int from, int to, IntComparator comp) {
-    int dummy = 0;
-    while (from <= to) {
-      int mid = (from + to) / 2;
-      int comparison = comp.compare(dummy, mid);
-      if (comparison < 0) {
-        from = mid + 1;
-      } else if (comparison > 0) {
         to = mid - 1;
       } else {
         return mid;
@@ -499,17 +484,17 @@ public class Sorting {
   }
 
   /** Returns the index of the median of the three indexed chars. */
-  private static int med3(Object[] x, int a, int b, int c) {
-    int ab = ((Comparable<Object>) x[a]).compareTo(x[b]);
-    int ac = ((Comparable<Object>) x[a]).compareTo(x[c]);
-    int bc = ((Comparable<Object>) x[b]).compareTo(x[c]);
+  private static <T extends Comparable<? super T>> int med3(T[] x, int a, int b, int c) {
+    int ab = x[a].compareTo(x[b]);
+    int ac = x[a].compareTo(x[c]);
+    int bc = x[b].compareTo(x[c]);
     return (ab < 0 ?
         (bc < 0 ? b : ac < 0 ? c : a) :
         (bc > 0 ? b : ac > 0 ? c : a));
   }
 
   /** Returns the index of the median of the three indexed chars. */
-  private static int med3(Object[] x, int a, int b, int c, Comparator<Object> comp) {
+  private static <T> int med3(T[] x, int a, int b, int c, Comparator<? super T> comp) {
     int ab = comp.compare(x[a], x[b]);
     int ac = comp.compare(x[a], x[c]);
     int bc = comp.compare(x[b], x[c]);
@@ -1449,53 +1434,6 @@ public class Sorting {
   }
 
   /**
-   * Sorts the specified range of the specified array of elements.
-   *
-   * <p>This sort is guaranteed to be <i>stable</i>:  equal elements will not be reordered as a result of the sort.<p>
-   *
-   * The sorting algorithm is a modified mergesort (in which the merge is omitted if the highest element in the low
-   * sublist is less than the lowest element in the high sublist).  This algorithm offers guaranteed n*log(n)
-   * performance, and can approach linear performance on nearly sorted lists.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   */
-  public static void mergeSortInPlace(int[] a, int fromIndex, int toIndex) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    int length = toIndex - fromIndex;
-
-    // Insertion sort on smallest arrays
-    if (length < SMALL) {
-      for (int i = fromIndex; i < toIndex; i++) {
-        for (int j = i; j > fromIndex && a[j - 1] > a[j]; j--) {
-          int tmp = a[j];
-          a[j] = a[j - 1];
-          a[j - 1] = tmp;
-        }
-      }
-      return;
-    }
-
-    // Recursively sort halves
-    int mid = (fromIndex + toIndex) / 2;
-    mergeSortInPlace(a, fromIndex, mid);
-    mergeSortInPlace(a, mid, toIndex);
-
-    // If list is already sorted, nothing left to do.  This is an
-    // optimization that results in faster sorts for nearly ordered lists.
-    if (a[mid - 1] <= a[mid]) {
-      return;
-    }
-
-    // Merge sorted halves
-    //jal.INT.Sorting.inplace_merge(a, fromIndex, mid, toIndex);
-    inplace_merge(a, fromIndex, mid, toIndex);
-  }
-
-  /**
    * Sorts the specified range of the specified array of elements according to the order induced by the specified
    * comparator.  All elements in the range must be <i>mutually comparable</i> by the specified comparator (that is,
    * <tt>c.compare(e1, e2)</tt> must not throw a <tt>ClassCastException</tt> for any elements <tt>e1</tt> and
@@ -1657,7 +1595,7 @@ public class Sorting {
    *
    * @param a the array to be sorted.
    */
-  public static void quickSort(Object[] a) {
+  public static <T extends Comparable<? super T>>  void quickSort(T[] a) {
     quickSort1(a, 0, a.length);
   }
 
@@ -1673,7 +1611,7 @@ public class Sorting {
    * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
    * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
    */
-  public static void quickSort(Object[] a, int fromIndex, int toIndex) {
+  public static <T extends Comparable<? super T>> void quickSort(T[] a, int fromIndex, int toIndex) {
     rangeCheck(a.length, fromIndex, toIndex);
     quickSort1(a, fromIndex, toIndex - fromIndex);
   }
@@ -1698,7 +1636,7 @@ public class Sorting {
    * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
    * @see Comparator
    */
-  public static void quickSort(Object[] a, int fromIndex, int toIndex, Comparator<Object> c) {
+  public static <T> void quickSort(T[] a, int fromIndex, int toIndex, Comparator<? super T> c) {
     rangeCheck(a.length, fromIndex, toIndex);
     quickSort1(a, fromIndex, toIndex - fromIndex, c);
   }
@@ -1720,7 +1658,7 @@ public class Sorting {
    * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
    * @see Comparator
    */
-  public static void quickSort(Object[] a, Comparator<Object> c) {
+  public static <T extends Comparable<? super T>> void quickSort(T[] a, Comparator<? super T> c) {
     quickSort1(a, 0, a.length, c);
   }
 
@@ -2142,11 +2080,11 @@ public class Sorting {
   }
 
   /** Sorts the specified sub-array of chars into ascending order. */
-  private static void quickSort1(Object[] x, int off, int len) {
+  private static <T extends Comparable<? super T>> void quickSort1(T[] x, int off, int len) {
     // Insertion sort on smallest arrays
     if (len < SMALL) {
       for (int i = off; i < len + off; i++) {
-        for (int j = i; j > off && ((Comparable<Object>) x[j - 1]).compareTo(x[j]) > 0; j--) {
+        for (int j = i; j > off && x[j - 1].compareTo(x[j]) > 0; j--) {
           swap(x, j, j - 1);
         }
       }
@@ -2166,19 +2104,19 @@ public class Sorting {
       }
       m = med3(x, l, m, n); // Mid-size, med of 3
     }
-    Comparable<?> v = (Comparable<?>) x[m];
+    T v = x[m];
 
     // Establish Invariant: v* (<v)* (>v)* v*
     int a = off, b = a, c = off + len - 1, d = c;
     while (true) {
       int comparison;
-      while (b <= c && (comparison = ((Comparable<Object>) x[b]).compareTo(v)) <= 0) {
+      while (b <= c && (comparison = x[b].compareTo(v)) <= 0) {
         if (comparison == 0) {
           swap(x, a++, b);
         }
         b++;
       }
-      while (c >= b && (comparison = ((Comparable<Object>) x[c]).compareTo(v)) >= 0) {
+      while (c >= b && (comparison = x[c].compareTo(v)) >= 0) {
         if (comparison == 0) {
           swap(x, c, d--);
         }
@@ -2207,7 +2145,7 @@ public class Sorting {
   }
 
   /** Sorts the specified sub-array of chars into ascending order. */
-  private static void quickSort1(Object[] x, int off, int len, Comparator<Object> comp) {
+  private static <T> void quickSort1(T[] x, int off, int len, Comparator<? super T> comp) {
     // Insertion sort on smallest arrays
     if (len < SMALL) {
       for (int i = off; i < len + off; i++) {
@@ -2231,7 +2169,7 @@ public class Sorting {
       }
       m = med3(x, l, m, n, comp); // Mid-size, med of 3
     }
-    Object v = x[m];
+    T v = x[m];
 
     // Establish Invariant: v* (<v)* (>v)* v*
     int a = off, b = a, c = off + len - 1, d = c;

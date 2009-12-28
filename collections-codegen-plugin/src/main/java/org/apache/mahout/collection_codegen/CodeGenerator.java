@@ -27,25 +27,29 @@ import org.apache.maven.shared.model.fileset.util.FileSetManager;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.codehaus.plexus.util.SelectorUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @description Generate java code with Velocity.
- * @goal generate 
+ * @goal generate
  * @phase generate-sources
  * @requiresProject true
  */
 public class CodeGenerator extends AbstractMojo {
   
-  private static final String[] NO_STRINGS = new String[] { null };
+  private static final String[] NO_STRINGS = new String[] {null};
   private static final Charset UTF8 = Charset.forName("utf-8");
-
+  private Map<String,String> typeToObjectTypeMap;
+  
   /**
    * @parameter default-value="${basedir}/src/test/java-templates"
    */
@@ -69,28 +73,75 @@ public class CodeGenerator extends AbstractMojo {
    * 
    * @parameter default-value="${project.build.directory}/generated-sources"
    */
-   private File outputDirectory;
+  private File outputDirectory;
   
-   /**
-    * Comma-separated list of value types.
-    * @parameter default-value="byte,char,int,long,float,double"
-    * @required
-    */
-   private String valueTypes;
-
-   /**
-    * Comma-separated list of key types.
-    * @parameter default-value="byte,char,int,long,float,double"
-    * @required
-    */
-   private String keyTypes;
+  /**
+   * Location of manually-mantained files. This plugin won't create a file that
+   * would compete with one of these.
+   * 
+   * @parameter default-value="${basedir}/src/main/java"
+   */
+  private File doNotReplaceMainDirectory;
+  
+  /**
+   * Location of manually-maintained files. This plugin won't create a file that
+   * would compete with one of these.
+   * 
+   * @parameter default-value="${basedir}/src/test/java"
+   */
+  private File doNotReplaceTestDirectory;
+  
+  /**
+   * Exclusion patterns -- files NOT to generate.
+   * 
+   * @parameter
+   */
+  private String[] mainExcludes;
+  
+  /**
+   * Exclusion patterns -- files NOT to generate.
+   * 
+   * @parameter
+   */
+  private String[] testExcludes;
+  
+  /**
+   * Comma-separated list of value types.
+   * 
+   * @parameter default-value="byte,char,int,short,long,float,double"
+   * @required
+   */
+  private String valueTypes;
+  
+  /**
+   * Comma-separated list of key types.
+   * 
+   * @parameter default-value="byte,char,int,short,long,float,double"
+   * @required
+   */
+  private String keyTypes;
   
   /**
    * @parameter expression="${project}"
    * @required
    */
   private MavenProject project;
-  private VelocityEngine velocityEngine;
+  private VelocityEngine mainVelocityEngine;
+  private VelocityEngine testVelocityEngine;
+  private FileSetManager fileSetManager;
+  
+  public CodeGenerator() {
+    typeToObjectTypeMap = new HashMap<String,String>();
+    typeToObjectTypeMap.put("boolean", "Boolean");
+    typeToObjectTypeMap.put("byte", "Byte");
+    typeToObjectTypeMap.put("char", "Character");
+    typeToObjectTypeMap.put("int", "Integer");
+    typeToObjectTypeMap.put("short", "Short");
+    typeToObjectTypeMap.put("long", "Long");
+    typeToObjectTypeMap.put("float", "Float");
+    typeToObjectTypeMap.put("double", "Double");
+    fileSetManager = new FileSetManager(getLog());
+  }
   
   public void execute() throws MojoExecutionException {
     File f = outputDirectory;
@@ -103,51 +154,73 @@ public class CodeGenerator extends AbstractMojo {
       testOutputDirectory.mkdirs();
     }
     
-    velocityEngine = new VelocityEngine();
-    // we want to use absolute paths.
-    velocityEngine.setProperty("file.resource.loader.path", "/");
+    mainVelocityEngine = new VelocityEngine();
+    mainVelocityEngine.setProperty("file.resource.loader.path", sourceTemplateRoot);
+    if (testTemplateRoot != null) {
+      testVelocityEngine = new VelocityEngine();
+      testVelocityEngine.setProperty("file.resource.loader.path", testTemplateRoot);
+    }
+
+    
     try {
-      velocityEngine.init();
+      mainVelocityEngine.init();
+      if (testVelocityEngine != null) {
+        testVelocityEngine.init();
+      }
     } catch (Exception e) {
       throw new MojoExecutionException("Unable to initialize velocity", e);
     }
     
     if (sourceTemplateRoot != null) {
-      runGeneration(sourceTemplateRoot, outputDirectory);
+      runGeneration(
+          sourceTemplateRoot, mainVelocityEngine, 
+          outputDirectory,
+          doNotReplaceMainDirectory, mainExcludes);
     }
     if (testTemplateRoot != null) {
-      runGeneration(testTemplateRoot, testOutputDirectory);
+      runGeneration(testTemplateRoot, 
+          testVelocityEngine,
+          testOutputDirectory,
+          doNotReplaceTestDirectory, testExcludes);
     }
     
     if (project != null && outputDirectory != null && outputDirectory.exists()) {
       project.addCompileSourceRoot(outputDirectory.getAbsolutePath());
-  }
-  if (project != null && testOutputDirectory != null && testOutputDirectory.exists()) {
+    }
+    if (project != null && testOutputDirectory != null
+        && testOutputDirectory.exists()) {
       project.addTestCompileSourceRoot(testOutputDirectory.getAbsolutePath());
+    }
+    
   }
-
-  }
-
-  private void runGeneration(String thisSourceRoot, File thisOutputDirectory) {
-    FileSetManager fileSetManager = new FileSetManager();
+  
+  private void runGeneration(String thisSourceRoot, 
+      VelocityEngine engine,
+      File thisOutputDirectory,
+      File thisDoNotReplaceDirectory, String[] excludes) throws MojoExecutionException {
     FileSet fileSet = new FileSet();
     fileSet.setDirectory(thisSourceRoot);
     List<String> includes = new ArrayList<String>();
     includes.add("**/*.java.t");
     fileSet.setIncludes(includes);
-
+    
     String[] includedFiles = fileSetManager.getIncludedFiles(fileSet);
     for (String template : includedFiles) {
       File templateFile = new File(thisSourceRoot, template);
-      File thisTemplateOutputDirectory = new File(thisOutputDirectory, templateFile.getParentFile().getPath().substring(fileSet.getDirectory().length()));
-      thisTemplateOutputDirectory.mkdirs();
-      processOneTemplate(templateFile, thisTemplateOutputDirectory);
+      String subpath = templateFile.getParentFile().getPath().substring(
+          fileSet.getDirectory().length());
+      thisOutputDirectory.mkdirs();
+      File thisDoNotReplaceFull = new File(thisDoNotReplaceDirectory, subpath);
+      processOneTemplate(engine, template, thisOutputDirectory,
+          thisDoNotReplaceFull, subpath.substring(1), excludes);
     }
   }
-
-  private void processOneTemplate(File templateFile, File thisOutputDirectory) {
-    boolean hasKey = templateFile.getName().contains("KeyType");
-    boolean hasValue = templateFile.getName().contains("ValueType");
+  
+  private void processOneTemplate(VelocityEngine engine,
+      String template, File thisOutputDirectory,
+      File thisDoNotReplaceDirectory, String packageDirectory, String[] excludes) throws MojoExecutionException {
+    boolean hasKey = template.contains("KeyType");
+    boolean hasValue = template.contains("ValueType");
     String[] keys;
     if (hasKey) {
       keys = keyTypes.split(",");
@@ -162,34 +235,71 @@ public class CodeGenerator extends AbstractMojo {
     }
     for (String key : keys) {
       for (String value : values) {
-        String outputName = templateFile.getName().replaceFirst("\\.java\\.t$", ".java");
-        String keyCap = null;
-        VelocityContext vc = new VelocityContext();
-        if (key != null) {
-          keyCap = key.toUpperCase().charAt(0) + key.substring(1);
-          outputName = outputName.replaceAll("KeyType", keyCap);
-          vc.put("keyType", key);
-          vc.put("keyTypeCap", keyCap);
-        }
-        String valueCap = null;
-        if (value != null) {
-          valueCap = value.toUpperCase().charAt(0) + value.substring(1);
-          outputName = outputName.replaceAll("ValueType", valueCap);
-          vc.put("valueType", value);
-          vc.put("valueTypeCap", valueCap);
-        }
-        try {
-          Template template = velocityEngine.getTemplate(templateFile.getCanonicalPath());
-          File outputFile = new File(thisOutputDirectory, outputName);
-          getLog().info("Writing to " + outputFile.getAbsolutePath());
-          FileOutputStream fos = new FileOutputStream(outputFile);
-          OutputStreamWriter osw = new OutputStreamWriter(fos, UTF8);
-          template.merge(vc, osw);
-          osw.close();
-        } catch (Exception e) {
-          getLog().error(e);
+        expandOneTemplate(engine, template, thisOutputDirectory,
+            thisDoNotReplaceDirectory, excludes, packageDirectory, key, value);
+      }
+    }
+  }
+  
+  private void expandOneTemplate(VelocityEngine engine, 
+      String templateName, 
+      File thisOutputDirectory,
+      File thisDoNotReplaceDirectory, String[] excludes,
+      String packageDirectory, String key, String value) throws MojoExecutionException {
+    String outputName = templateName.replaceFirst("\\.java\\.t$",
+        ".java");
+    String keyCap = null;
+    VelocityContext vc = new VelocityContext();
+    if (key != null) {
+      keyCap = key.toUpperCase().charAt(0) + key.substring(1);
+      outputName = outputName.replaceAll("KeyType", keyCap);
+      vc.put("keyType", key);
+      vc.put("keyTypeCap", keyCap);
+      vc.put("keyObjectType", typeToObjectTypeMap.get(key));
+      boolean floating = "float".equals(key) || "double".equals(key);
+      vc.put("keyTypeFloating", floating ? "true" : "false");
+    }
+    String valueCap = null;
+    if (value != null) {
+      valueCap = value.toUpperCase().charAt(0) + value.substring(1);
+      outputName = outputName.replaceAll("ValueType", valueCap);
+      vc.put("valueType", value);
+      vc.put("valueTypeCap", valueCap);
+      vc.put("valueObjectType", typeToObjectTypeMap.get(value));
+      boolean floating = "float".equals(value) || "double".equals(value);
+      vc.put("valueTypeFloating", floating ? "true" : "false");
+
+    }
+    File outputFile = new File(thisOutputDirectory, outputName);
+    if (thisDoNotReplaceDirectory != null) {
+      File dnrf = new File(thisDoNotReplaceDirectory, outputName);
+      if (dnrf.exists()) {
+        getLog().info("Deferring to " + dnrf.getPath());
+        return;
+      }
+    }
+    
+    if (excludes != null) {
+      for (String exclude : excludes) {
+        File excludeFile = new File(packageDirectory, outputName);
+        if (SelectorUtils.matchPath(exclude, excludeFile.getPath())) {
+          getLog().info("Excluding " + excludeFile.getPath());
+          return;
         }
       }
+    }
+    
+    try {
+      Template template = engine.getTemplate(templateName);
+      getLog().info("Writing to " + outputFile.getAbsolutePath());
+      outputFile.getParentFile().mkdirs();
+      FileOutputStream fos = new FileOutputStream(outputFile);
+      OutputStreamWriter osw = new OutputStreamWriter(fos, UTF8);
+      template.merge(vc, osw);
+      osw.close();
+    } catch (Exception e) {
+      getLog().error(e);
+      throw new MojoExecutionException("Failed to expand template", e);
     }
   }
 }
