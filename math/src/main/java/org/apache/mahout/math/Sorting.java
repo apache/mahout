@@ -28,6 +28,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math;
 
+import java.util.Comparator;
+
 import org.apache.mahout.math.function.ByteComparator;
 import org.apache.mahout.math.function.CharComparator;
 import org.apache.mahout.math.function.DoubleComparator;
@@ -35,2368 +37,2333 @@ import org.apache.mahout.math.function.FloatComparator;
 import org.apache.mahout.math.function.IntComparator;
 import org.apache.mahout.math.function.LongComparator;
 import org.apache.mahout.math.function.ShortComparator;
-import org.apache.mahout.math.list.DoubleArrayList;
-import org.apache.mahout.math.list.FloatArrayList;
 
-import java.util.Comparator;
-/**
- * Quicksorts, mergesorts and binary searches; complements <tt>java.util.Arrays</tt>.
- * Contains, for example, the quicksort on Comparators and Comparables, which are still missing in <tt>java.util.Arrays</tt> of JDK 1.2.
- * Also provides mergesorts for types not supported in <tt>java.util.Arrays</tt>, as well as a couple of other methods for primitive arrays.
- * The quicksorts and mergesorts are the JDK 1.2 V1.26 algorithms, modified as necessary.
- *
- * @see org.apache.mahout.math.GenericSorting
- * @see org.apache.mahout.math.matrix.doublealgo.Sorting
- * @see java.util.Arrays
- *
- */
+
 public final class Sorting {
-
-  private static final int SMALL = 7;
-  private static final int MEDIUM = 40;
-
+  
+  
+  /* Specifies when to switch to insertion sort */
+  private static final int SIMPLE_LENGTH = 7;
+  
   private Sorting() {
+  /* empty */
   }
-
+  
   /**
-   * Searches the list for the specified value using the binary search algorithm.  The list must <strong>must</strong>
-   * be sorted (as by the sort method) prior to making this call.  If it is not sorted, the results are undefined: in
-   * particular, the call may enter an infinite loop.  If the list contains multiple elements equal to the specified
-   * key, there is no guarantee which of the multiple elements will be found.
-   *
-   * @param list the list to be searched.
-   * @param key  the value to be searched for.
-   * @param from the leftmost search position, inclusive.
-   * @param to   the rightmost search position, inclusive.
-   * @return index of the search key, if it is contained in the list; otherwise, <tt>(-(<i>insertion point</i>) -
-   *         1)</tt>. The <i>insertion point</i> is defined as the the point at which the value would be inserted into
-   *         the list: the index of the first element greater than the key, or <tt>list.length</tt>, if all elements in
-   *         the list are less than the specified key.  Note that this guarantees that the return value will be &gt;= 0
-   *         if and only if the key is found.
-   * @see java.util.Arrays
+   * Performs a binary search for the specified element in the specified
+   * ascending sorted array. Searching in an unsorted array has an undefined
+   * result. It's also undefined which element is found if there are multiple
+   * occurrences of the same element.
+   * 
+   * @param array
+   *          the sorted {@code byte} array to search.
+   * @param value
+   *          the {@code byte} element to find.
+   * @param from
+   *          the first index to sort, inclusive.
+   * @param to
+   *          the last index to sort, inclusive.
+   * @return the non-negative index of the element, or a negative index which is
+   *         {@code -index - 1} where the element would be inserted.
    */
-  public static int binarySearchFromTo(byte[] list, byte key, int from, int to) {
+  public static int binarySearchFromTo(byte[] array, byte value, int from,
+      int to) {
+    int mid = -1;
     while (from <= to) {
-      int mid = (from + to) / 2;
-      byte midVal = list[mid];
-      if (midVal < key) {
+      mid = (from + to) >>> 1;
+      if (value > array[mid]) {
         from = mid + 1;
-      } else if (midVal > key) {
-        to = mid - 1;
-      } else {
+      } else if (value == array[mid]) {
         return mid;
-      } // key found
-    }
-    return -(from + 1);  // key not found.
-  }
-
-  /**
-   * Searches the list for the specified value using the binary search algorithm.  The list must <strong>must</strong>
-   * be sorted (as by the sort method) prior to making this call.  If it is not sorted, the results are undefined: in
-   * particular, the call may enter an infinite loop.  If the list contains multiple elements equal to the specified
-   * key, there is no guarantee which of the multiple elements will be found.
-   *
-   * @param list the list to be searched.
-   * @param key  the value to be searched for.
-   * @param from the leftmost search position, inclusive.
-   * @param to   the rightmost search position, inclusive.
-   * @return index of the search key, if it is contained in the list; otherwise, <tt>(-(<i>insertion point</i>) -
-   *         1)</tt>. The <i>insertion point</i> is defined as the the point at which the value would be inserted into
-   *         the list: the index of the first element greater than the key, or <tt>list.length</tt>, if all elements in
-   *         the list are less than the specified key.  Note that this guarantees that the return value will be &gt;= 0
-   *         if and only if the key is found.
-   * @see java.util.Arrays
-   */
-  public static int binarySearchFromTo(char[] list, char key, int from, int to) {
-    while (from <= to) {
-      int mid = (from + to) / 2;
-      char midVal = list[mid];
-      if (midVal < key) {
-        from = mid + 1;
-      } else if (midVal > key) {
+      } else {
         to = mid - 1;
-      } else {
-        return mid;
-      } // key found
-    }
-    return -(from + 1);  // key not found.
-  }
-
-  /**
-   * Searches the list for the specified value using the binary search algorithm.  The list must <strong>must</strong>
-   * be sorted (as by the sort method) prior to making this call.  If it is not sorted, the results are undefined: in
-   * particular, the call may enter an infinite loop.  If the list contains multiple elements equal to the specified
-   * key, there is no guarantee which of the multiple elements will be found.
-   *
-   * @param list the list to be searched.
-   * @param key  the value to be searched for.
-   * @param from the leftmost search position, inclusive.
-   * @param to   the rightmost search position, inclusive.
-   * @return index of the search key, if it is contained in the list; otherwise, <tt>(-(<i>insertion point</i>) -
-   *         1)</tt>. The <i>insertion point</i> is defined as the the point at which the value would be inserted into
-   *         the list: the index of the first element greater than the key, or <tt>list.length</tt>, if all elements in
-   *         the list are less than the specified key.  Note that this guarantees that the return value will be &gt;= 0
-   *         if and only if the key is found.
-   * @see java.util.Arrays
-   */
-  public static int binarySearchFromTo(double[] list, double key, int from, int to) {
-    while (from <= to) {
-      int mid = (from + to) / 2;
-      double midVal = list[mid];
-      if (midVal < key) {
-        from = mid + 1;
-      } else if (midVal > key) {
-        to = mid - 1;
-      } else {
-        return mid;
-      } // key found
-    }
-    return -(from + 1);  // key not found.
-  }
-
-  /**
-   * Searches the list for the specified value using the binary search algorithm.  The list must <strong>must</strong>
-   * be sorted (as by the sort method) prior to making this call.  If it is not sorted, the results are undefined: in
-   * particular, the call may enter an infinite loop.  If the list contains multiple elements equal to the specified
-   * key, there is no guarantee which of the multiple elements will be found.
-   *
-   * @param list the list to be searched.
-   * @param key  the value to be searched for.
-   * @param from the leftmost search position, inclusive.
-   * @param to   the rightmost search position, inclusive.
-   * @return index of the search key, if it is contained in the list; otherwise, <tt>(-(<i>insertion point</i>) -
-   *         1)</tt>. The <i>insertion point</i> is defined as the the point at which the value would be inserted into
-   *         the list: the index of the first element greater than the key, or <tt>list.length</tt>, if all elements in
-   *         the list are less than the specified key.  Note that this guarantees that the return value will be &gt;= 0
-   *         if and only if the key is found.
-   * @see java.util.Arrays
-   */
-  public static int binarySearchFromTo(float[] list, float key, int from, int to) {
-    while (from <= to) {
-      int mid = (from + to) / 2;
-      float midVal = list[mid];
-      if (midVal < key) {
-        from = mid + 1;
-      } else if (midVal > key) {
-        to = mid - 1;
-      } else {
-        return mid;
-      } // key found
-    }
-    return -(from + 1);  // key not found.
-  }
-
-  /**
-   * Searches the list for the specified value using the binary search algorithm.  The list must <strong>must</strong>
-   * be sorted (as by the sort method) prior to making this call.  If it is not sorted, the results are undefined: in
-   * particular, the call may enter an infinite loop.  If the list contains multiple elements equal to the specified
-   * key, there is no guarantee which of the multiple elements will be found.
-   *
-   * @param list the list to be searched.
-   * @param key  the value to be searched for.
-   * @param from the leftmost search position, inclusive.
-   * @param to   the rightmost search position, inclusive.
-   * @return index of the search key, if it is contained in the list; otherwise, <tt>(-(<i>insertion point</i>) -
-   *         1)</tt>. The <i>insertion point</i> is defined as the the point at which the value would be inserted into
-   *         the list: the index of the first element greater than the key, or <tt>list.length</tt>, if all elements in
-   *         the list are less than the specified key.  Note that this guarantees that the return value will be &gt;= 0
-   *         if and only if the key is found.
-   * @see java.util.Arrays
-   */
-  public static int binarySearchFromTo(int[] list, int key, int from, int to) {
-    while (from <= to) {
-      int mid = (from + to) / 2;
-      int midVal = list[mid];
-      if (midVal < key) {
-        from = mid + 1;
-      } else if (midVal > key) {
-        to = mid - 1;
-      } else {
-        return mid;
-      } // key found
-    }
-    return -(from + 1);  // key not found.
-
-    /*
-    // even for very short lists (0,1,2,3 elems) this is only 10% faster
-    while (from<=to && list[from++] < key) ;
-    if (from<=to) {
-      if (list[--from] == key) return from;
-    }
-    return -(from + 1);
-    */
-  }
-
-  /**
-   * Searches the list for the specified value using the binary search algorithm.  The list must <strong>must</strong>
-   * be sorted (as by the sort method) prior to making this call.  If it is not sorted, the results are undefined: in
-   * particular, the call may enter an infinite loop.  If the list contains multiple elements equal to the specified
-   * key, there is no guarantee which of the multiple elements will be found.
-   *
-   * @param list the list to be searched.
-   * @param key  the value to be searched for.
-   * @param from the leftmost search position, inclusive.
-   * @param to   the rightmost search position, inclusive.
-   * @return index of the search key, if it is contained in the list; otherwise, <tt>(-(<i>insertion point</i>) -
-   *         1)</tt>. The <i>insertion point</i> is defined as the the point at which the value would be inserted into
-   *         the list: the index of the first element greater than the key, or <tt>list.length</tt>, if all elements in
-   *         the list are less than the specified key.  Note that this guarantees that the return value will be &gt;= 0
-   *         if and only if the key is found.
-   * @see java.util.Arrays
-   */
-  public static int binarySearchFromTo(long[] list, long key, int from, int to) {
-    while (from <= to) {
-      int mid = (from + to) / 2;
-      long midVal = list[mid];
-      if (midVal < key) {
-        from = mid + 1;
-      } else if (midVal > key) {
-        to = mid - 1;
-      } else {
-        return mid;
-      } // key found
-    }
-    return -(from + 1);  // key not found.
-  }
-
-  /**
-   * Searches the list for the specified value using the binary search algorithm. The list must be sorted into ascending
-   * order according to the specified comparator.  All elements in the range must be <i>mutually comparable</i> by the
-   * specified comparator (that is, <tt>c.compare(e1, e2)</tt> must not throw a <tt>ClassCastException</tt> for any
-   * elements <tt>e1</tt> and <tt>e2</tt> in the range).<p>
-   *
-   * If the list is not sorted, the results are undefined: in particular, the call may enter an infinite loop.  If the
-   * list contains multiple elements equal to the specified key, there is no guarantee which instance will be found.
-   *
-   * @param list       the list to be searched.
-   * @param key        the value to be searched for.
-   * @param from       the leftmost search position, inclusive.
-   * @param to         the rightmost search position, inclusive.
-   * @param comparator the comparator by which the list is sorted.
-   * @return index of the search key, if it is contained in the list; otherwise, <tt>(-(<i>insertion point</i>) -
-   *         1)</tt>. The <i>insertion point</i> is defined as the the point at which the value would be inserted into
-   *         the list: the index of the first element greater than the key, or <tt>list.length</tt>, if all elements in
-   *         the list are less than the specified key.  Note that this guarantees that the return value will be &gt;= 0
-   *         if and only if the key is found.
-   * @throws ClassCastException if the list contains elements that are not <i>mutually comparable</i> using the
-   *                            specified comparator.
-   * @see java.util.Arrays
-   * @see java.util.Comparator
-   */
-  public static <T> int binarySearchFromTo(T[] list, T key, int from, int to, Comparator<? super T> comparator) {
-    while (from <= to) {
-      int mid = (from + to) / 2;
-      T midVal = list[mid];
-      int cmp = comparator.compare(midVal, key);
-
-      if (cmp < 0) {
-        from = mid + 1;
-      } else if (cmp > 0) {
-        to = mid - 1;
-      } else {
-        return mid;
-      } // key found
-    }
-    return -(from + 1);  // key not found.
-  }
-
-  /**
-   * Searches the list for the specified value using the binary search algorithm.  The list must <strong>must</strong>
-   * be sorted (as by the sort method) prior to making this call.  If it is not sorted, the results are undefined: in
-   * particular, the call may enter an infinite loop.  If the list contains multiple elements equal to the specified
-   * key, there is no guarantee which of the multiple elements will be found.
-   *
-   * @param list the list to be searched.
-   * @param key  the value to be searched for.
-   * @param from the leftmost search position, inclusive.
-   * @param to   the rightmost search position, inclusive.
-   * @return index of the search key, if it is contained in the list; otherwise, <tt>(-(<i>insertion point</i>) -
-   *         1)</tt>. The <i>insertion point</i> is defined as the the point at which the value would be inserted into
-   *         the list: the index of the first element greater than the key, or <tt>list.length</tt>, if all elements in
-   *         the list are less than the specified key.  Note that this guarantees that the return value will be &gt;= 0
-   *         if and only if the key is found.
-   * @see java.util.Arrays
-   */
-  public static int binarySearchFromTo(short[] list, short key, int from, int to) {
-    while (from <= to) {
-      int mid = (from + to) / 2;
-      short midVal = list[mid];
-      if (midVal < key) {
-        from = mid + 1;
-      } else if (midVal > key) {
-        to = mid - 1;
-      } else {
-        return mid;
-      } // key found
-    }
-    return -(from + 1);  // key not found.
-  }
-
-  private static int lower_bound(int[] array, int first, int last, int x) {
-    int len = last - first;
-    while (len > 0) {
-      int half = len / 2;
-      int middle = first + half;
-      if (array[middle] < x) {
-        first = middle + 1;
-        len -= half + 1;
-      } else {
-        len = half;
       }
     }
-    return first;
+    if (mid < 0) {
+      return -1;
+    }
+    
+    return -mid - (value < array[mid] ? 1 : 2);
   }
-
-  private static int upper_bound(int[] array, int first, int last, int x) {
-    int len = last - first;
-    while (len > 0) {
-      int half = len / 2;
-      int middle = first + half;
-      if (x < array[middle]) {
-        len = half;
+  
+  /**
+   * Performs a binary search for the specified element in the specified
+   * ascending sorted array. Searching in an unsorted array has an undefined
+   * result. It's also undefined which element is found if there are multiple
+   * occurrences of the same element.
+   * 
+   * @param array
+   *          the sorted {@code char} array to search.
+   * @param value
+   *          the {@code char} element to find.
+   * @param from
+   *          the first index to sort, inclusive.
+   * @param to
+   *          the last index to sort, inclusive.
+   * @return the non-negative index of the element, or a negative index which is
+   *         {@code -index - 1} where the element would be inserted.
+   */
+  public static int binarySearchFromTo(char[] array, char value, int from,
+      int to) {
+    int mid = -1;
+    while (from <= to) {
+      mid = (from + to) >>> 1;
+      if (value > array[mid]) {
+        from = mid + 1;
+      } else if (value == array[mid]) {
+        return mid;
       } else {
-        first = middle + 1;
-        len -= half + 1;
+        to = mid - 1;
       }
     }
-    return first;
+    if (mid < 0) {
+      return -1;
+    }
+    return -mid - (value < array[mid] ? 1 : 2);
   }
-
-  private static void inplace_merge(int[] array, int first, int middle, int last) {
-    if (first >= middle || middle >= last) {
+  
+  /**
+   * Performs a binary search for the specified element in the specified
+   * ascending sorted array. Searching in an unsorted array has an undefined
+   * result. It's also undefined which element is found if there are multiple
+   * occurrences of the same element.
+   * 
+   * @param array
+   *          the sorted {@code double} array to search.
+   * @param value
+   *          the {@code double} element to find.
+   * @param from
+   *          the first index to sort, inclusive.
+   * @param to
+   *          the last index to sort, inclusive.
+   * @return the non-negative index of the element, or a negative index which is
+   *         {@code -index - 1} where the element would be inserted.
+   */
+  public static int binarySearchFromTo(double[] array, double value, int from,
+      int to) {
+    long longBits = Double.doubleToLongBits(value);
+    int mid = -1;
+    while (from <= to) {
+      mid = (from + to) >>> 1;
+      if (lessThan(array[mid], value)) {
+        from = mid + 1;
+      } else if (longBits == Double.doubleToLongBits(array[mid])) {
+        return mid;
+      } else {
+        to = mid - 1;
+      }
+    }
+    if (mid < 0) {
+      return -1;
+    }
+    return -mid - (lessThan(value, array[mid]) ? 1 : 2);
+  }
+  
+  /**
+   * Performs a binary search for the specified element in the specified
+   * ascending sorted array. Searching in an unsorted array has an undefined
+   * result. It's also undefined which element is found if there are multiple
+   * occurrences of the same element.
+   * 
+   * @param array
+   *          the sorted {@code float} array to search.
+   * @param value
+   *          the {@code float} element to find.
+   * @param from
+   *          the first index to sort, inclusive.
+   * @param to
+   *          the last index to sort, inclusive.
+   * @return the non-negative index of the element, or a negative index which is
+   *         {@code -index - 1} where the element would be inserted.
+   */
+  public static int binarySearchFromTo(float[] array, float value, int from,
+      int to) {
+    int intBits = Float.floatToIntBits(value);
+    int mid = -1;
+    while (from <= to) {
+      mid = (from + to) >>> 1;
+      if (lessThan(array[mid], value)) {
+        from = mid + 1;
+      } else if (intBits == Float.floatToIntBits(array[mid])) {
+        return mid;
+      } else {
+        to = mid - 1;
+      }
+    }
+    if (mid < 0) {
+      return -1;
+    }
+    return -mid - (lessThan(value, array[mid]) ? 1 : 2);
+  }
+  
+  /**
+   * Performs a binary search for the specified element in the specified
+   * ascending sorted array. Searching in an unsorted array has an undefined
+   * result. It's also undefined which element is found if there are multiple
+   * occurrences of the same element.
+   * 
+   * @param array
+   *          the sorted {@code int} array to search.
+   * @param value
+   *          the {@code int} element to find.
+   * @param from
+   *          the first index to sort, inclusive.
+   * @param to
+   *          the last index to sort, inclusive.
+   * @return the non-negative index of the element, or a negative index which is
+   *         {@code -index - 1} where the element would be inserted.
+   */
+  public static int binarySearchFromTo(int[] array, int value, int from, int to) {
+    int mid = -1;
+    while (from <= to) {
+      mid = (from + to) >>> 1;
+      if (value > array[mid]) {
+        from = mid + 1;
+      } else if (value == array[mid]) {
+        return mid;
+      } else {
+        to = mid - 1;
+      }
+    }
+    if (mid < 0) {
+      return -1;
+    }
+    return -mid - (value < array[mid] ? 1 : 2);
+  }
+  
+  /**
+   * Performs a binary search for the specified element in the specified
+   * ascending sorted array. Searching in an unsorted array has an undefined
+   * result. It's also undefined which element is found if there are multiple
+   * occurrences of the same element.
+   * 
+   * @param array
+   *          the sorted {@code long} array to search.
+   * @param value
+   *          the {@code long} element to find.
+   * @param from
+   *          the first index to sort, inclusive.
+   * @param to
+   *          the last index to sort, inclusive.
+   * @return the non-negative index of the element, or a negative index which is
+   *         {@code -index - 1} where the element would be inserted.
+   */
+  public static int binarySearchFromTo(long[] array, long value, int from, int to) {
+    int mid = -1;
+    while (from <= to) {
+      mid = (from + to) >>> 1;
+      if (value > array[mid]) {
+        from = mid + 1;
+      } else if (value == array[mid]) {
+        return mid;
+      } else {
+        to = mid - 1;
+      }
+    }
+    if (mid < 0) {
+      return -1;
+    }
+    return -mid - (value < array[mid] ? 1 : 2);
+  }
+  
+  /**
+   * Performs a binary search for the specified element in the specified
+   * ascending sorted array. Searching in an unsorted array has an undefined
+   * result. It's also undefined which element is found if there are multiple
+   * occurrences of the same element.
+   * 
+   * @param array
+   *          the sorted {@code Object} array to search.
+   * @param object
+   *          the {@code Object} element to find
+   * @param from
+   *          the first index to sort, inclusive.
+   * @param to
+   *          the last index to sort, inclusive.
+   * @return the non-negative index of the element, or a negative index which is
+   *         {@code -index - 1} where the element would be inserted.
+   * 
+   */
+  public static <T extends Comparable<T>> int binarySearchFromTo(T[] array,
+      T object, int from, int to) {
+    if (array.length == 0) {
+      return -1;
+    }
+    
+    int mid = 0, result = 0;
+    while (from <= to) {
+      mid = (from + to) >>> 1;
+      if ((result = array[mid].compareTo(object)) < 0) {
+        from = mid + 1;
+      } else if (result == 0) {
+        return mid;
+      } else {
+        to = mid - 1;
+      }
+    }
+    return -mid - (result >= 0 ? 1 : 2);
+  }
+  
+  /**
+   * Performs a binary search for the specified element in the specified
+   * ascending sorted array using the {@code Comparator} to compare elements.
+   * Searching in an unsorted array has an undefined result. It's also undefined
+   * which element is found if there are multiple occurrences of the same
+   * element.
+   * 
+   * @param array
+   *          the sorted array to search
+   * @param object
+   *          the element to find
+   * @param from
+   *          the first index to sort, inclusive.
+   * @param to
+   *          the last index to sort, inclusive.
+   * @param comparator
+   *          the {@code Comparator} used to compare the elements.
+   * @return the non-negative index of the element, or a negative index which
+   */
+  public static <T> int binarySearchFromTo(T[] array, T object, int from,
+      int to, Comparator<? super T> comparator) {
+    int mid = 0, result = 0;
+    while (from <= to) {
+      mid = (from + to) >>> 1;
+      if ((result = comparator.compare(array[mid], object)) < 0) {
+        from = mid + 1;
+      } else if (result == 0) {
+        return mid;
+      } else {
+        to = mid - 1;
+      }
+    }
+    return -mid - (result >= 0 ? 1 : 2);
+  }
+  
+  /**
+   * Performs a binary search for the specified element in the specified
+   * ascending sorted array. Searching in an unsorted array has an undefined
+   * result. It's also undefined which element is found if there are multiple
+   * occurrences of the same element.
+   * 
+   * @param array
+   *          the sorted {@code short} array to search.
+   * @param value
+   *          the {@code short} element to find.
+   * @param from
+   *          the first index to sort, inclusive.
+   * @param to
+   *          the last index to sort, inclusive.
+   * @return the non-negative index of the element, or a negative index which is
+   *         {@code -index - 1} where the element would be inserted.
+   */
+  public static int binarySearchFromTo(short[] array, short value, int from, int to) {
+    int mid = -1;
+    while (from <= to) {
+      mid = (from + to) >>> 1;
+      if (value > array[mid]) {
+        from = mid + 1;
+      } else if (value == array[mid]) {
+        return mid;
+      } else {
+        to = mid - 1;
+      }
+    }
+    if (mid < 0) {
+      return -1;
+    }
+    return -mid - (value < array[mid] ? 1 : 2);
+  }
+  
+  private static boolean lessThan(double double1, double double2) {
+    // A slightly specialized version of
+    // Double.compare(double1, double2) < 0.
+    
+    // Non-zero and non-NaN checking.
+    if (double1 < double2) {
+      return true;
+    }
+    if (double1 > double2) {
+      return false;
+    }
+    if (double1 == double2 && 0.0d != double1) {
+      return false;
+    }
+    
+    // NaNs are equal to other NaNs and larger than any other double.
+    if (Double.isNaN(double1)) {
+      return false;
+    } else if (Double.isNaN(double2)) {
+      return true;
+    }
+    
+    // Deal with +0.0 and -0.0.
+    long d1 = Double.doubleToRawLongBits(double1);
+    long d2 = Double.doubleToRawLongBits(double2);
+    return d1 < d2;
+  }
+  
+  private static boolean lessThan(float float1, float float2) {
+    // A slightly specialized version of Float.compare(float1, float2) < 0.
+    
+    // Non-zero and non-NaN checking.
+    if (float1 < float2) {
+      return true;
+    }
+    if (float1 > float2) {
+      return false;
+    }
+    if (float1 == float2 && 0.0f != float1) {
+      return false;
+    }
+    
+    // NaNs are equal to other NaNs and larger than any other float
+    if (Float.isNaN(float1)) {
+      return false;
+    } else if (Float.isNaN(float2)) {
+      return true;
+    }
+    
+    // Deal with +0.0 and -0.0
+    int f1 = Float.floatToRawIntBits(float1);
+    int f2 = Float.floatToRawIntBits(float2);
+    return f1 < f2;
+  }
+  
+  private static <T> int med3(T[] array, int a, int b, int c, Comparator<T> comp) {
+    T x = array[a], y = array[b], z = array[c];
+    int comparisonxy = comp.compare(x, y);
+    int comparisonxz = comp.compare(x, z);
+    int comparisonyz = comp.compare(y, z);
+    return comparisonxy < 0 ? (comparisonyz < 0 ? b
+        : (comparisonxz < 0 ? c : a)) : (comparisonyz > 0 ? b
+        : (comparisonxz > 0 ? c : a));
+  }
+  
+  private static int med3(byte[] array, int a, int b, int c, ByteComparator comp) {
+    byte x = array[a], y = array[b], z = array[c];
+    int comparisonxy = comp.compare(x, y);
+    int comparisonxz = comp.compare(x, z);
+    int comparisonyz = comp.compare(y, z);
+    return comparisonxy < 0 ? (comparisonyz < 0 ? b
+        : (comparisonxz < 0 ? c : a)) : (comparisonyz > 0 ? b
+        : (comparisonxz > 0 ? c : a));
+  }
+  
+  private static int med3(char[] array, int a, int b, int c, CharComparator comp) {
+    char x = array[a], y = array[b], z = array[c];
+    int comparisonxy = comp.compare(x, y);
+    int comparisonxz = comp.compare(x, z);
+    int comparisonyz = comp.compare(y, z);
+    return comparisonxy < 0 ? (comparisonyz < 0 ? b
+        : (comparisonxz < 0 ? c : a)) : (comparisonyz > 0 ? b
+        : (comparisonxz > 0 ? c : a));
+  }
+  
+  private static int med3(double[] array, int a, int b, int c,
+      DoubleComparator comp) {
+    double x = array[a], y = array[b], z = array[c];
+    int comparisonxy = comp.compare(x, y);
+    int comparisonxz = comp.compare(x, z);
+    int comparisonyz = comp.compare(y, z);
+    return comparisonxy < 0 ? (comparisonyz < 0 ? b
+        : (comparisonxz < 0 ? c : a)) : (comparisonyz > 0 ? b
+        : (comparisonxz > 0 ? c : a));
+  }
+  
+  private static int med3(float[] array, int a, int b, int c,
+      FloatComparator comp) {
+    float x = array[a], y = array[b], z = array[c];
+    int comparisonxy = comp.compare(x, y);
+    int comparisonxz = comp.compare(x, z);
+    int comparisonyz = comp.compare(y, z);
+    return comparisonxy < 0 ? (comparisonyz < 0 ? b
+        : (comparisonxz < 0 ? c : a)) : (comparisonyz > 0 ? b
+        : (comparisonxz > 0 ? c : a));
+  }
+  
+  private static int med3(int[] array, int a, int b, int c, IntComparator comp) {
+    int x = array[a], y = array[b], z = array[c];
+    int comparisonxy = comp.compare(x, y);
+    int comparisonxz = comp.compare(x, z);
+    int comparisonyz = comp.compare(y, z);
+    return comparisonxy < 0 ? (comparisonyz < 0 ? b
+        : (comparisonxz < 0 ? c : a)) : (comparisonyz > 0 ? b
+        : (comparisonxz > 0 ? c : a));
+  }
+  
+  private static int med3(long[] array, int a, int b, int c, LongComparator comp) {
+    long x = array[a], y = array[b], z = array[c];
+    int comparisonxy = comp.compare(x, y);
+    int comparisonxz = comp.compare(x, z);
+    int comparisonyz = comp.compare(y, z);
+    return comparisonxy < 0 ? (comparisonyz < 0 ? b
+        : (comparisonxz < 0 ? c : a)) : (comparisonyz > 0 ? b
+        : (comparisonxz > 0 ? c : a));
+  }
+  
+  private static int med3(short[] array, int a, int b, int c,
+      ShortComparator comp) {
+    short x = array[a], y = array[b], z = array[c];
+    int comparisonxy = comp.compare(x, y);
+    int comparisonxz = comp.compare(x, z);
+    int comparisonyz = comp.compare(y, z);
+    return comparisonxy < 0 ? (comparisonyz < 0 ? b
+        : (comparisonxz < 0 ? c : a)) : (comparisonyz > 0 ? b
+        : (comparisonxz > 0 ? c : a));
+  }
+  
+  /**
+   * Sorts the specified range in the array in a specified order.
+   * 
+   * @param array
+   *          the {@code byte} array to be sorted.
+   * @param start
+   *          the start index to sort.
+   * @param end
+   *          the last + 1 index to sort.
+   * @param comp
+   *          the comparison that determines the sort.
+   * @throws IllegalArgumentException
+   *           if {@code start > end}.
+   * @throws ArrayIndexOutOfBoundsException
+   *           if {@code start < 0} or {@code end > array.length}.
+   */
+  public static void quickSort(byte[] array, int start, int end,
+      ByteComparator comp) {
+    if (array == null) {
+      throw new NullPointerException();
+    }
+    checkBounds(array.length, start, end);
+    quickSort0(start, end, array, comp);
+  }
+  
+  private static void checkBounds(int arrLength, int start, int end) {
+    if (start > end) {
+      // K0033=Start index ({0}) is greater than end index ({1})
+      throw new IllegalArgumentException("Start index " + start
+          + " is greater than end index " + end);
+    }
+    if (start < 0) {
+      throw new ArrayIndexOutOfBoundsException("Array index out of range "
+          + start);
+    }
+    if (end > arrLength) {
+      throw new ArrayIndexOutOfBoundsException("Array index out of range "
+          + end);
+    }
+  }
+  
+  private static void quickSort0(int start, int end, byte[] array,
+      ByteComparator comp) {
+    byte temp;
+    int length = end - start;
+    if (length < 7) {
+      for (int i = start + 1; i < end; i++) {
+        for (int j = i; j > start && comp.compare(array[j - 1], array[j]) > 0; j--) {
+          temp = array[j];
+          array[j] = array[j - 1];
+          array[j - 1] = temp;
+        }
+      }
       return;
     }
-    if (last - first == 2) {
-      if (array[middle] < array[first]) {
-        int tmp = array[first];
-        array[first] = array[middle];
-        array[middle] = tmp;
+    int middle = (start + end) / 2;
+    if (length > 7) {
+      int bottom = start;
+      int top = end - 1;
+      if (length > 40) {
+        length /= 8;
+        bottom = med3(array, bottom, bottom + length, bottom + (2 * length),
+            comp);
+        middle = med3(array, middle - length, middle, middle + length, comp);
+        top = med3(array, top - (2 * length), top - length, top, comp);
+      }
+      middle = med3(array, bottom, middle, top, comp);
+    }
+    byte partionValue = array[middle];
+    int a, b, c, d;
+    a = b = start;
+    c = d = end - 1;
+    while (true) {
+      int comparison;
+      while (b <= c && (comparison = comp.compare(array[b], partionValue)) <= 0) {
+        if (comparison == 0) {
+          temp = array[a];
+          array[a++] = array[b];
+          array[b] = temp;
+        }
+        b++;
+      }
+      while (c >= b && (comparison = comp.compare(array[c], partionValue)) >= 0) {
+        if (comparison == 0) {
+          temp = array[c];
+          array[c] = array[d];
+          array[d--] = temp;
+        }
+        c--;
+      }
+      if (b > c) {
+        break;
+      }
+      temp = array[b];
+      array[b++] = array[c];
+      array[c--] = temp;
+    }
+    length = a - start < b - a ? a - start : b - a;
+    int l = start;
+    int h = b - length;
+    while (length-- > 0) {
+      temp = array[l];
+      array[l++] = array[h];
+      array[h++] = temp;
+    }
+    length = d - c < end - 1 - d ? d - c : end - 1 - d;
+    l = b;
+    h = end - length;
+    while (length-- > 0) {
+      temp = array[l];
+      array[l++] = array[h];
+      array[h++] = temp;
+    }
+    if ((length = b - a) > 0) {
+      quickSort0(start, start + length, array, comp);
+    }
+    if ((length = d - c) > 0) {
+      quickSort0(end - length, end, array, comp);
+    }
+  }
+  
+  /**
+   * Sorts the specified range in the array in a specified order.
+   * 
+   * @param array
+   *          the {@code char} array to be sorted.
+   * @param start
+   *          the start index to sort.
+   * @param end
+   *          the last + 1 index to sort.
+   * @throws IllegalArgumentException
+   *           if {@code start > end}.
+   * @throws ArrayIndexOutOfBoundsException
+   *           if {@code start < 0} or {@code end > array.length}.
+   */
+  public static void quickSort(char[] array, int start, int end,
+      CharComparator comp) {
+    if (array == null) {
+      throw new NullPointerException();
+    }
+    checkBounds(array.length, start, end);
+    quickSort0(start, end, array, comp);
+  }
+  
+  private static void quickSort0(int start, int end, char[] array,
+      CharComparator comp) {
+    char temp;
+    int length = end - start;
+    if (length < 7) {
+      for (int i = start + 1; i < end; i++) {
+        for (int j = i; j > start && comp.compare(array[j - 1], array[j]) > 0; j--) {
+          temp = array[j];
+          array[j] = array[j - 1];
+          array[j - 1] = temp;
+        }
       }
       return;
     }
-    int firstCut;
-    int secondCut;
-    if (middle - first > last - middle) {
-      firstCut = first + (middle - first) / 2;
-      secondCut = lower_bound(array, middle, last, array[firstCut]);
+    int middle = (start + end) / 2;
+    if (length > 7) {
+      int bottom = start;
+      int top = end - 1;
+      if (length > 40) {
+        length /= 8;
+        bottom = med3(array, bottom, bottom + length, bottom + (2 * length),
+            comp);
+        middle = med3(array, middle - length, middle, middle + length, comp);
+        top = med3(array, top - (2 * length), top - length, top, comp);
+      }
+      middle = med3(array, bottom, middle, top, comp);
+    }
+    char partionValue = array[middle];
+    int a, b, c, d;
+    a = b = start;
+    c = d = end - 1;
+    while (true) {
+      int comparison;
+      while (b <= c && (comparison = comp.compare(array[b], partionValue)) <= 0) {
+        if (comparison == 0) {
+          temp = array[a];
+          array[a++] = array[b];
+          array[b] = temp;
+        }
+        b++;
+      }
+      while (c >= b && (comparison = comp.compare(array[c], partionValue)) >= 0) {
+        if (comparison == 0) {
+          temp = array[c];
+          array[c] = array[d];
+          array[d--] = temp;
+        }
+        c--;
+      }
+      if (b > c) {
+        break;
+      }
+      temp = array[b];
+      array[b++] = array[c];
+      array[c--] = temp;
+    }
+    length = a - start < b - a ? a - start : b - a;
+    int l = start;
+    int h = b - length;
+    while (length-- > 0) {
+      temp = array[l];
+      array[l++] = array[h];
+      array[h++] = temp;
+    }
+    length = d - c < end - 1 - d ? d - c : end - 1 - d;
+    l = b;
+    h = end - length;
+    while (length-- > 0) {
+      temp = array[l];
+      array[l++] = array[h];
+      array[h++] = temp;
+    }
+    if ((length = b - a) > 0) {
+      quickSort0(start, start + length, array, comp);
+    }
+    if ((length = d - c) > 0) {
+      quickSort0(end - length, end, array, comp);
+    }
+  }
+  
+  /**
+   * Sorts the specified range in the array in a specified order.
+   * 
+   * @param array
+   *          the {@code double} array to be sorted.
+   * @param start
+   *          the start index to sort.
+   * @param end
+   *          the last + 1 index to sort.
+   * @param comp
+   *          the comparison.
+   * @throws IllegalArgumentException
+   *           if {@code start > end}.
+   * @throws ArrayIndexOutOfBoundsException
+   *           if {@code start < 0} or {@code end > array.length}.
+   * @see Double#compareTo(Double)
+   */
+  public static void quickSort(double[] array, int start, int end,
+      DoubleComparator comp) {
+    if (array == null) {
+      throw new NullPointerException();
+    }
+    checkBounds(array.length, start, end);
+    quickSort0(start, end, array, comp);
+  }
+  
+  private static void quickSort0(int start, int end, double[] array,
+      DoubleComparator comp) {
+    double temp;
+    int length = end - start;
+    if (length < 7) {
+      for (int i = start + 1; i < end; i++) {
+        for (int j = i; j > start && comp.compare(array[j], array[j - 1]) < 0; j--) {
+          temp = array[j];
+          array[j] = array[j - 1];
+          array[j - 1] = temp;
+        }
+      }
+      return;
+    }
+    int middle = (start + end) / 2;
+    if (length > 7) {
+      int bottom = start;
+      int top = end - 1;
+      if (length > 40) {
+        length /= 8;
+        bottom = med3(array, bottom, bottom + length, bottom + (2 * length),
+            comp);
+        middle = med3(array, middle - length, middle, middle + length, comp);
+        top = med3(array, top - (2 * length), top - length, top, comp);
+      }
+      middle = med3(array, bottom, middle, top, comp);
+    }
+    double partionValue = array[middle];
+    int a, b, c, d;
+    a = b = start;
+    c = d = end - 1;
+    while (true) {
+      int comparison;
+      while (b <= c && (comparison = comp.compare(partionValue, array[b])) >= 0) {
+        if (comparison == 0) {
+          temp = array[a];
+          array[a++] = array[b];
+          array[b] = temp;
+        }
+        b++;
+      }
+      while (c >= b && (comparison = comp.compare(array[c], partionValue)) >= 0) {
+        if (comparison == 0) {
+          temp = array[c];
+          array[c] = array[d];
+          array[d--] = temp;
+        }
+        c--;
+      }
+      if (b > c) {
+        break;
+      }
+      temp = array[b];
+      array[b++] = array[c];
+      array[c--] = temp;
+    }
+    length = a - start < b - a ? a - start : b - a;
+    int l = start;
+    int h = b - length;
+    while (length-- > 0) {
+      temp = array[l];
+      array[l++] = array[h];
+      array[h++] = temp;
+    }
+    length = d - c < end - 1 - d ? d - c : end - 1 - d;
+    l = b;
+    h = end - length;
+    while (length-- > 0) {
+      temp = array[l];
+      array[l++] = array[h];
+      array[h++] = temp;
+    }
+    if ((length = b - a) > 0) {
+      quickSort0(start, start + length, array, comp);
+    }
+    if ((length = d - c) > 0) {
+      quickSort0(end - length, end, array, comp);
+    }
+  }
+  
+  /**
+   * Sorts the specified range in the array in a specified order.
+   * 
+   * @param array
+   *          the {@code float} array to be sorted.
+   * @param start
+   *          the start index to sort.
+   * @param end
+   *          the last + 1 index to sort.
+   * @param comp
+   *          the comparator.
+   * @throws IllegalArgumentException
+   *           if {@code start > end}.
+   * @throws ArrayIndexOutOfBoundsException
+   *           if {@code start < 0} or {@code end > array.length}.
+   */
+  public static void quickSort(float[] array, int start, int end,
+      FloatComparator comp) {
+    if (array == null) {
+      throw new NullPointerException();
+    }
+    checkBounds(array.length, start, end);
+    quickSort0(start, end, array, comp);
+  }
+  
+  private static void quickSort0(int start, int end, float[] array,
+      FloatComparator comp) {
+    float temp;
+    int length = end - start;
+    if (length < 7) {
+      for (int i = start + 1; i < end; i++) {
+        for (int j = i; j > start && comp.compare(array[j], array[j - 1]) < 0; j--) {
+          temp = array[j];
+          array[j] = array[j - 1];
+          array[j - 1] = temp;
+        }
+      }
+      return;
+    }
+    int middle = (start + end) / 2;
+    if (length > 7) {
+      int bottom = start;
+      int top = end - 1;
+      if (length > 40) {
+        length /= 8;
+        bottom = med3(array, bottom, bottom + length, bottom + (2 * length),
+            comp);
+        middle = med3(array, middle - length, middle, middle + length, comp);
+        top = med3(array, top - (2 * length), top - length, top, comp);
+      }
+      middle = med3(array, bottom, middle, top, comp);
+    }
+    float partionValue = array[middle];
+    int a, b, c, d;
+    a = b = start;
+    c = d = end - 1;
+    while (true) {
+      int comparison;
+      while (b <= c && (comparison = comp.compare(partionValue, array[b])) >= 0) {
+        if (comparison == 0) {
+          temp = array[a];
+          array[a++] = array[b];
+          array[b] = temp;
+        }
+        b++;
+      }
+      while (c >= b && (comparison = comp.compare(array[c], partionValue)) >= 0) {
+        if (comparison == 0) {
+          temp = array[c];
+          array[c] = array[d];
+          array[d--] = temp;
+        }
+        c--;
+      }
+      if (b > c) {
+        break;
+      }
+      temp = array[b];
+      array[b++] = array[c];
+      array[c--] = temp;
+    }
+    length = a - start < b - a ? a - start : b - a;
+    int l = start;
+    int h = b - length;
+    while (length-- > 0) {
+      temp = array[l];
+      array[l++] = array[h];
+      array[h++] = temp;
+    }
+    length = d - c < end - 1 - d ? d - c : end - 1 - d;
+    l = b;
+    h = end - length;
+    while (length-- > 0) {
+      temp = array[l];
+      array[l++] = array[h];
+      array[h++] = temp;
+    }
+    if ((length = b - a) > 0) {
+      quickSort0(start, start + length, array, comp);
+    }
+    if ((length = d - c) > 0) {
+      quickSort0(end - length, end, array, comp);
+    }
+  }
+  
+  /**
+   * Sorts the specified range in the array in a specified order.
+   * 
+   * @param array
+   *          the {@code int} array to be sorted.
+   * @param start
+   *          the start index to sort.
+   * @param end
+   *          the last + 1 index to sort.
+   * @param comp
+   *          the comparator.
+   * @throws IllegalArgumentException
+   *           if {@code start > end}.
+   * @throws ArrayIndexOutOfBoundsException
+   *           if {@code start < 0} or {@code end > array.length}.
+   */
+  public static void quickSort(int[] array, int start, int end,
+      IntComparator comp) {
+    if (array == null) {
+      throw new NullPointerException();
+    }
+    checkBounds(array.length, start, end);
+    quickSort0(start, end, array, comp);
+  }
+  
+  private static void quickSort0(int start, int end, int[] array,
+      IntComparator comp) {
+    int temp;
+    int length = end - start;
+    if (length < 7) {
+      for (int i = start + 1; i < end; i++) {
+        for (int j = i; j > start && comp.compare(array[j - 1], array[j]) > 0; j--) {
+          temp = array[j];
+          array[j] = array[j - 1];
+          array[j - 1] = temp;
+        }
+      }
+      return;
+    }
+    int middle = (start + end) / 2;
+    if (length > 7) {
+      int bottom = start;
+      int top = end - 1;
+      if (length > 40) {
+        length /= 8;
+        bottom = med3(array, bottom, bottom + length, bottom + (2 * length),
+            comp);
+        middle = med3(array, middle - length, middle, middle + length, comp);
+        top = med3(array, top - (2 * length), top - length, top, comp);
+      }
+      middle = med3(array, bottom, middle, top, comp);
+    }
+    int partionValue = array[middle];
+    int a, b, c, d;
+    a = b = start;
+    c = d = end - 1;
+    while (true) {
+      int comparison;
+      while (b <= c && (comparison = comp.compare(array[b], partionValue)) <= 0) {
+        if (comparison == 0) {
+          temp = array[a];
+          array[a++] = array[b];
+          array[b] = temp;
+        }
+        b++;
+      }
+      while (c >= b && (comparison = comp.compare(array[c], partionValue)) >= 0) {
+        if (comparison == 0) {
+          temp = array[c];
+          array[c] = array[d];
+          array[d--] = temp;
+        }
+        c--;
+      }
+      if (b > c) {
+        break;
+      }
+      temp = array[b];
+      array[b++] = array[c];
+      array[c--] = temp;
+    }
+    length = a - start < b - a ? a - start : b - a;
+    int l = start;
+    int h = b - length;
+    while (length-- > 0) {
+      temp = array[l];
+      array[l++] = array[h];
+      array[h++] = temp;
+    }
+    length = d - c < end - 1 - d ? d - c : end - 1 - d;
+    l = b;
+    h = end - length;
+    while (length-- > 0) {
+      temp = array[l];
+      array[l++] = array[h];
+      array[h++] = temp;
+    }
+    if ((length = b - a) > 0) {
+      quickSort0(start, start + length, array, comp);
+    }
+    if ((length = d - c) > 0) {
+      quickSort0(end - length, end, array, comp);
+    }
+  }
+  
+  /**
+   * Sorts the specified range in the array in a specified order.
+   * 
+   * @param array
+   *          the {@code long} array to be sorted.
+   * @param start
+   *          the start index to sort.
+   * @param end
+   *          the last + 1 index to sort.
+   * @param comp
+   *          the comparator.
+   * @throws IllegalArgumentException
+   *           if {@code start > end}.
+   * @throws ArrayIndexOutOfBoundsException
+   *           if {@code start < 0} or {@code end > array.length}.
+   */
+  public static void quickSort(long[] array, int start, int end,
+      LongComparator comp) {
+    if (array == null) {
+      throw new NullPointerException();
+    }
+    checkBounds(array.length, start, end);
+    quickSort0(start, end, array, comp);
+  }
+  
+  private static void quickSort0(int start, int end, long[] array,
+      LongComparator comp) {
+    long temp;
+    int length = end - start;
+    if (length < 7) {
+      for (int i = start + 1; i < end; i++) {
+        for (int j = i; j > start && comp.compare(array[j - 1], array[j]) > 0; j--) {
+          temp = array[j];
+          array[j] = array[j - 1];
+          array[j - 1] = temp;
+        }
+      }
+      return;
+    }
+    int middle = (start + end) / 2;
+    if (length > 7) {
+      int bottom = start;
+      int top = end - 1;
+      if (length > 40) {
+        length /= 8;
+        bottom = med3(array, bottom, bottom + length, bottom + (2 * length),
+            comp);
+        middle = med3(array, middle - length, middle, middle + length, comp);
+        top = med3(array, top - (2 * length), top - length, top, comp);
+      }
+      middle = med3(array, bottom, middle, top, comp);
+    }
+    long partionValue = array[middle];
+    int a, b, c, d;
+    a = b = start;
+    c = d = end - 1;
+    while (true) {
+      int comparison;
+      while (b <= c && (comparison = comp.compare(array[b], partionValue)) <= 0) {
+        if (comparison == 0) {
+          temp = array[a];
+          array[a++] = array[b];
+          array[b] = temp;
+        }
+        b++;
+      }
+      while (c >= b && (comparison = comp.compare(array[c], partionValue)) >= 0) {
+        if (comparison == 0) {
+          temp = array[c];
+          array[c] = array[d];
+          array[d--] = temp;
+        }
+        c--;
+      }
+      if (b > c) {
+        break;
+      }
+      temp = array[b];
+      array[b++] = array[c];
+      array[c--] = temp;
+    }
+    length = a - start < b - a ? a - start : b - a;
+    int l = start;
+    int h = b - length;
+    while (length-- > 0) {
+      temp = array[l];
+      array[l++] = array[h];
+      array[h++] = temp;
+    }
+    length = d - c < end - 1 - d ? d - c : end - 1 - d;
+    l = b;
+    h = end - length;
+    while (length-- > 0) {
+      temp = array[l];
+      array[l++] = array[h];
+      array[h++] = temp;
+    }
+    if ((length = b - a) > 0) {
+      quickSort0(start, start + length, array, comp);
+    }
+    if ((length = d - c) > 0) {
+      quickSort0(end - length, end, array, comp);
+    }
+  }
+  
+  /**
+   * Sorts the specified range in the array in a specified order.
+   * 
+   * @param array
+   *          the array to be sorted.
+   * @param start
+   *          the start index to sort.
+   * @param end
+   *          the last + 1 index to sort.
+   * @param comp
+   *          the comparator.
+   * @throws IllegalArgumentException
+   *           if {@code start > end}.
+   * @throws ArrayIndexOutOfBoundsException
+   *           if {@code start < 0} or {@code end > array.length}.
+   */
+  public static <T> void quickSort(T[] array, int start, int end,
+      Comparator<T> comp) {
+    if (array == null) {
+      throw new NullPointerException();
+    }
+    checkBounds(array.length, start, end);
+    quickSort0(start, end, array, comp);
+  }
+  
+  private final static class ComparableAdaptor<T extends Comparable<? super T>>
+      implements Comparator<T> {
+    
+    @Override
+    public int compare(T o1, T o2) {
+      return o1.compareTo(o2);
+    }
+    
+  }
+  
+  /**
+   * Sort the specified range of an array of object that implement the Comparable
+   * interface.
+   * @param <T> The type of object.
+   * @param array the array.
+   * @param start the first index.
+   * @param end the last index (exclusive).
+   */
+  public static <T extends Comparable<? super T>> void quickSort(T[] array,
+      int start, int end) {
+    quickSort(array, start, end, new ComparableAdaptor<T>());
+  }
+  
+  private static <T> void quickSort0(int start, int end, T[] array,
+      Comparator<T> comp) {
+    T temp;
+    int length = end - start;
+    if (length < 7) {
+      for (int i = start + 1; i < end; i++) {
+        for (int j = i; j > start && comp.compare(array[j - 1], array[j]) > 0; j--) {
+          temp = array[j];
+          array[j] = array[j - 1];
+          array[j - 1] = temp;
+        }
+      }
+      return;
+    }
+    int middle = (start + end) / 2;
+    if (length > 7) {
+      int bottom = start;
+      int top = end - 1;
+      if (length > 40) {
+        length /= 8;
+        bottom = med3(array, bottom, bottom + length, bottom + (2 * length),
+            comp);
+        middle = med3(array, middle - length, middle, middle + length, comp);
+        top = med3(array, top - (2 * length), top - length, top, comp);
+      }
+      middle = med3(array, bottom, middle, top, comp);
+    }
+    T partionValue = array[middle];
+    int a, b, c, d;
+    a = b = start;
+    c = d = end - 1;
+    while (true) {
+      int comparison;
+      while (b <= c && (comparison = comp.compare(array[b], partionValue)) <= 0) {
+        if (comparison == 0) {
+          temp = array[a];
+          array[a++] = array[b];
+          array[b] = temp;
+        }
+        b++;
+      }
+      while (c >= b && (comparison = comp.compare(array[c], partionValue)) >= 0) {
+        if (comparison == 0) {
+          temp = array[c];
+          array[c] = array[d];
+          array[d--] = temp;
+        }
+        c--;
+      }
+      if (b > c) {
+        break;
+      }
+      temp = array[b];
+      array[b++] = array[c];
+      array[c--] = temp;
+    }
+    length = a - start < b - a ? a - start : b - a;
+    int l = start;
+    int h = b - length;
+    while (length-- > 0) {
+      temp = array[l];
+      array[l++] = array[h];
+      array[h++] = temp;
+    }
+    length = d - c < end - 1 - d ? d - c : end - 1 - d;
+    l = b;
+    h = end - length;
+    while (length-- > 0) {
+      temp = array[l];
+      array[l++] = array[h];
+      array[h++] = temp;
+    }
+    if ((length = b - a) > 0) {
+      quickSort0(start, start + length, array, comp);
+    }
+    if ((length = d - c) > 0) {
+      quickSort0(end - length, end, array, comp);
+    }
+  }
+  
+  /**
+   * Sorts the specified range in the array in ascending numerical order.
+   * 
+   * @param array
+   *          the {@code short} array to be sorted.
+   * @param start
+   *          the start index to sort.
+   * @param end
+   *          the last + 1 index to sort.
+   * @throws IllegalArgumentException
+   *           if {@code start > end}.
+   * @throws ArrayIndexOutOfBoundsException
+   *           if {@code start < 0} or {@code end > array.length}.
+   */
+  public static void quickSort(short[] array, int start, int end,
+      ShortComparator comp) {
+    if (array == null) {
+      throw new NullPointerException();
+    }
+    checkBounds(array.length, start, end);
+    quickSort0(start, end, array, comp);
+  }
+  
+  private static void quickSort0(int start, int end, short[] array,
+      ShortComparator comp) {
+    short temp;
+    int length = end - start;
+    if (length < 7) {
+      for (int i = start + 1; i < end; i++) {
+        for (int j = i; j > start && comp.compare(array[j - 1], array[j]) > 0; j--) {
+          temp = array[j];
+          array[j] = array[j - 1];
+          array[j - 1] = temp;
+        }
+      }
+      return;
+    }
+    int middle = (start + end) / 2;
+    if (length > 7) {
+      int bottom = start;
+      int top = end - 1;
+      if (length > 40) {
+        length /= 8;
+        bottom = med3(array, bottom, bottom + length, bottom + (2 * length),
+            comp);
+        middle = med3(array, middle - length, middle, middle + length, comp);
+        top = med3(array, top - (2 * length), top - length, top, comp);
+      }
+      middle = med3(array, bottom, middle, top, comp);
+    }
+    short partionValue = array[middle];
+    int a, b, c, d;
+    a = b = start;
+    c = d = end - 1;
+    while (true) {
+      int comparison;
+      while (b <= c && (comparison = comp.compare(array[b], partionValue)) < 0) {
+        if (comparison == 0) {
+          temp = array[a];
+          array[a++] = array[b];
+          array[b] = temp;
+        }
+        b++;
+      }
+      while (c >= b && (comparison = comp.compare(array[c], partionValue)) > 0) {
+        if (comparison == 0) {
+          temp = array[c];
+          array[c] = array[d];
+          array[d--] = temp;
+        }
+        c--;
+      }
+      if (b > c) {
+        break;
+      }
+      temp = array[b];
+      array[b++] = array[c];
+      array[c--] = temp;
+    }
+    length = a - start < b - a ? a - start : b - a;
+    int l = start;
+    int h = b - length;
+    while (length-- > 0) {
+      temp = array[l];
+      array[l++] = array[h];
+      array[h++] = temp;
+    }
+    length = d - c < end - 1 - d ? d - c : end - 1 - d;
+    l = b;
+    h = end - length;
+    while (length-- > 0) {
+      temp = array[l];
+      array[l++] = array[h];
+      array[h++] = temp;
+    }
+    if ((length = b - a) > 0) {
+      quickSort0(start, start + length, array, comp);
+    }
+    if ((length = d - c) > 0) {
+      quickSort0(end - length, end, array, comp);
+    }
+  }
+
+  /**
+   * Perform a merge sort on the specified range of an array.
+   * 
+   * @param <T> the type of object in the array.
+   * @param array the array.
+   * @param start first index. 
+   * @param end last index (exclusive).
+   * @param comp comparator object.
+   */
+  @SuppressWarnings("unchecked") // required to make the temp array work, afaict.
+  public static <T> void mergeSort(T[] array, int start, int end,
+      Comparator<T> comp) {
+    checkBounds(array.length, start, end);
+    int length = end - start;
+    if (length <= 0) {
+      return;
+    }
+    
+    T[] out = (T[]) new Object[array.length];
+    System.arraycopy(array, start, out, start, length);
+    mergeSort(out, array, start, end, comp);
+  }
+  
+  /**
+   * Perform a merge sort of the specific range of an array of objects that implement
+   * Comparable.
+   * @param <T> the type of the objects in the array.
+   * @param array the array.
+   * @param start the first index.
+   * @param end the last index (exclusive).
+   */
+  public static <T extends Comparable<? super T>> void mergeSort(T[] array, int start, int end) {
+    mergeSort(array, start, end, new ComparableAdaptor<T>());
+  }
+  
+  /**
+   * Performs a sort on the section of the array between the given indices using
+   * a mergesort with exponential search algorithm (in which the merge is
+   * performed by exponential search). n*log(n) performance is guaranteed and in
+   * the average case it will be faster then any mergesort in which the merge is
+   * performed by linear search.
+   * 
+   * @param in
+   *          - the array for sorting.
+   * @param out
+   *          - the result, sorted array.
+   * @param start
+   *          the start index
+   * @param end
+   *          the end index + 1
+   * @param c
+   *          - the comparator to determine the order of the array.
+   */
+  private static <T> void mergeSort(T[] in, T[] out, int start, int end,
+      Comparator<T> c) {
+    int len = end - start;
+    // use insertion sort for small arrays
+    if (len <= SIMPLE_LENGTH) {
+      for (int i = start + 1; i < end; i++) {
+        T current = out[i];
+        T prev = out[i - 1];
+        if (c.compare(prev, current) > 0) {
+          int j = i;
+          do {
+            out[j--] = prev;
+          } while (j > start && (c.compare(prev = out[j - 1], current) > 0));
+          out[j] = current;
+        }
+      }
+      return;
+    }
+    int med = (end + start) >>> 1;
+    mergeSort(out, in, start, med, c);
+    mergeSort(out, in, med, end, c);
+    
+    // merging
+    
+    // if arrays are already sorted - no merge
+    if (c.compare(in[med - 1], in[med]) <= 0) {
+      System.arraycopy(in, start, out, start, len);
+      return;
+    }
+    int r = med, i = start;
+    
+    // use merging with exponential search
+    do {
+      T fromVal = in[start];
+      T rVal = in[r];
+      if (c.compare(fromVal, rVal) <= 0) {
+        int l_1 = find(in, rVal, -1, start + 1, med - 1, c);
+        int toCopy = l_1 - start + 1;
+        System.arraycopy(in, start, out, i, toCopy);
+        i += toCopy;
+        out[i++] = rVal;
+        r++;
+        start = l_1 + 1;
+      } else {
+        int r_1 = find(in, fromVal, 0, r + 1, end - 1, c);
+        int toCopy = r_1 - r + 1;
+        System.arraycopy(in, r, out, i, toCopy);
+        i += toCopy;
+        out[i++] = fromVal;
+        start++;
+        r = r_1 + 1;
+      }
+    } while ((end - r) > 0 && (med - start) > 0);
+    
+    // copy rest of array
+    if ((end - r) <= 0) {
+      System.arraycopy(in, start, out, i, med - start);
     } else {
-      secondCut = middle + (last - middle) / 2;
-      firstCut = upper_bound(array, first, middle, array[secondCut]);
+      System.arraycopy(in, r, out, i, end - r);
     }
-
-//rotate(array, firstCut, middle, secondCut);
-// is manually inlined for speed (jitter inlining seems to work only for small call depths, even if methods are "static private")
-// speedup = 1.7
-// begin inline
-    int first2 = firstCut;
-    int middle2 = middle;
-    int last2 = secondCut;
-    if (middle2 != first2 && middle2 != last2) {
-      int first1 = first2;
-      int last1 = middle2;
-      int tmp;
-      while (first1 < --last1) {
-        tmp = array[first1];
-        array[last1] = array[first1];
-        array[first1++] = tmp;
-      }
-      first1 = middle2;
-      last1 = last2;
-      while (first1 < --last1) {
-        tmp = array[first1];
-        array[last1] = array[first1];
-        array[first1++] = tmp;
-      }
-      first1 = first2;
-      last1 = last2;
-      while (first1 < --last1) {
-        tmp = array[first1];
-        array[last1] = array[first1];
-        array[first1++] = tmp;
-      }
-    }
-// end inline
-
-
-    middle = firstCut + (secondCut - middle);
-    inplace_merge(array, first, firstCut, middle);
-    inplace_merge(array, middle, secondCut, last);
   }
-
-  /** Returns the index of the median of the three indexed chars. */
-  private static int med3(byte[] x, int a, int b, int c, ByteComparator comp) {
-    int ab = comp.compare(x[a], x[b]);
-    int ac = comp.compare(x[a], x[c]);
-    int bc = comp.compare(x[b], x[c]);
-    return (ab < 0 ?
-        (bc < 0 ? b : ac < 0 ? c : a) :
-        (bc > 0 ? b : ac > 0 ? c : a));
-  }
-
-  /** Returns the index of the median of the three indexed chars. */
-  private static int med3(char[] x, int a, int b, int c, CharComparator comp) {
-    int ab = comp.compare(x[a], x[b]);
-    int ac = comp.compare(x[a], x[c]);
-    int bc = comp.compare(x[b], x[c]);
-    return (ab < 0 ?
-        (bc < 0 ? b : ac < 0 ? c : a) :
-        (bc > 0 ? b : ac > 0 ? c : a));
-  }
-
-  /** Returns the index of the median of the three indexed chars. */
-  private static int med3(double[] x, int a, int b, int c, DoubleComparator comp) {
-    int ab = comp.compare(x[a], x[b]);
-    int ac = comp.compare(x[a], x[c]);
-    int bc = comp.compare(x[b], x[c]);
-    return (ab < 0 ?
-        (bc < 0 ? b : ac < 0 ? c : a) :
-        (bc > 0 ? b : ac > 0 ? c : a));
-  }
-
-  /** Returns the index of the median of the three indexed chars. */
-  private static int med3(float[] x, int a, int b, int c, FloatComparator comp) {
-    int ab = comp.compare(x[a], x[b]);
-    int ac = comp.compare(x[a], x[c]);
-    int bc = comp.compare(x[b], x[c]);
-    return (ab < 0 ?
-        (bc < 0 ? b : ac < 0 ? c : a) :
-        (bc > 0 ? b : ac > 0 ? c : a));
-  }
-
-  /** Returns the index of the median of the three indexed chars. */
-  private static int med3(int[] x, int a, int b, int c, IntComparator comp) {
-    int ab = comp.compare(x[a], x[b]);
-    int ac = comp.compare(x[a], x[c]);
-    int bc = comp.compare(x[b], x[c]);
-    return (ab < 0 ?
-        (bc < 0 ? b : ac < 0 ? c : a) :
-        (bc > 0 ? b : ac > 0 ? c : a));
-  }
-
-  /** Returns the index of the median of the three indexed chars. */
-  private static int med3(long[] x, int a, int b, int c, LongComparator comp) {
-    int ab = comp.compare(x[a], x[b]);
-    int ac = comp.compare(x[a], x[c]);
-    int bc = comp.compare(x[b], x[c]);
-    return (ab < 0 ?
-        (bc < 0 ? b : ac < 0 ? c : a) :
-        (bc > 0 ? b : ac > 0 ? c : a));
-  }
-
-  /** Returns the index of the median of the three indexed chars. */
-  private static <T extends Comparable<? super T>> int med3(T[] x, int a, int b, int c) {
-    int ab = x[a].compareTo(x[b]);
-    int ac = x[a].compareTo(x[c]);
-    int bc = x[b].compareTo(x[c]);
-    return (ab < 0 ?
-        (bc < 0 ? b : ac < 0 ? c : a) :
-        (bc > 0 ? b : ac > 0 ? c : a));
-  }
-
-  /** Returns the index of the median of the three indexed chars. */
-  private static <T> int med3(T[] x, int a, int b, int c, Comparator<? super T> comp) {
-    int ab = comp.compare(x[a], x[b]);
-    int ac = comp.compare(x[a], x[c]);
-    int bc = comp.compare(x[b], x[c]);
-    return (ab < 0 ?
-        (bc < 0 ? b : ac < 0 ? c : a) :
-        (bc > 0 ? b : ac > 0 ? c : a));
-  }
-
-  /** Returns the index of the median of the three indexed chars. */
-  private static int med3(short[] x, int a, int b, int c, ShortComparator comp) {
-    int ab = comp.compare(x[a], x[b]);
-    int ac = comp.compare(x[a], x[c]);
-    int bc = comp.compare(x[b], x[c]);
-    return (ab < 0 ?
-        (bc < 0 ? b : ac < 0 ? c : a) :
-        (bc > 0 ? b : ac > 0 ? c : a));
-  }
-
+  
   /**
-   * Sorts the specified range of the specified array of elements.
-   *
-   * <p>This sort is guaranteed to be <i>stable</i>:  equal elements will not be reordered as a result of the sort.<p>
-   *
-   * The sorting algorithm is a modified mergesort (in which the merge is omitted if the highest element in the low
-   * sublist is less than the lowest element in the high sublist).  This algorithm offers guaranteed n*log(n)
-   * performance, and can approach linear performance on nearly sorted lists.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
+   * Finds the place of specified range of specified sorted array, where the
+   * element should be inserted for getting sorted array. Uses exponential
+   * search algorithm.
+   * 
+   * @param arr
+   *          - the array with already sorted range
+   * @param val
+   *          - object to be inserted
+   * @param l
+   *          - the start index
+   * @param r
+   *          - the end index
+   * @param bnd
+   *          - possible values 0,-1. "-1" - val is located at index more then
+   *          elements equals to val. "0" - val is located at index less then
+   *          elements equals to val.
+   * @param c
+   *          - the comparator used to compare Objects
    */
-  public static void mergeSort(byte[] a, int fromIndex, int toIndex) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    byte[] aux = a.clone();
-    mergeSort1(aux, a, fromIndex, toIndex);
-  }
-
-  /**
-   * Sorts the specified range of the specified array of elements according to the order induced by the specified
-   * comparator.  All elements in the range must be <i>mutually comparable</i> by the specified comparator (that is,
-   * <tt>c.compare(e1, e2)</tt> must not throw a <tt>ClassCastException</tt> for any elements <tt>e1</tt> and
-   * <tt>e2</tt> in the range).<p>
-   *
-   * This sort is guaranteed to be <i>stable</i>:  equal elements will not be reordered as a result of the sort.<p>
-   *
-   * The sorting algorithm is a modified mergesort (in which the merge is omitted if the highest element in the low
-   * sublist is less than the lowest element in the high sublist).  This algorithm offers guaranteed n*log(n)
-   * performance, and can approach linear performance on nearly sorted lists.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @param c         the comparator to determine the order of the array.
-   * @throws ClassCastException             if the array contains elements that are not <i>mutually comparable</i> using
-   *                                        the specified comparator.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   * @see Comparator
-   */
-  public static void mergeSort(byte[] a, int fromIndex, int toIndex, ByteComparator c) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    byte[] aux = a.clone();
-    mergeSort1(aux, a, fromIndex, toIndex, c);
-  }
-
-  /**
-   * Sorts the specified range of the specified array of elements.
-   *
-   * <p>This sort is guaranteed to be <i>stable</i>:  equal elements will not be reordered as a result of the sort.<p>
-   *
-   * The sorting algorithm is a modified mergesort (in which the merge is omitted if the highest element in the low
-   * sublist is less than the lowest element in the high sublist).  This algorithm offers guaranteed n*log(n)
-   * performance, and can approach linear performance on nearly sorted lists.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   */
-  public static void mergeSort(char[] a, int fromIndex, int toIndex) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    char[] aux = a.clone();
-    mergeSort1(aux, a, fromIndex, toIndex);
-  }
-
-  /**
-   * Sorts the specified range of the specified array of elements according to the order induced by the specified
-   * comparator.  All elements in the range must be <i>mutually comparable</i> by the specified comparator (that is,
-   * <tt>c.compare(e1, e2)</tt> must not throw a <tt>ClassCastException</tt> for any elements <tt>e1</tt> and
-   * <tt>e2</tt> in the range).<p>
-   *
-   * This sort is guaranteed to be <i>stable</i>:  equal elements will not be reordered as a result of the sort.<p>
-   *
-   * The sorting algorithm is a modified mergesort (in which the merge is omitted if the highest element in the low
-   * sublist is less than the lowest element in the high sublist).  This algorithm offers guaranteed n*log(n)
-   * performance, and can approach linear performance on nearly sorted lists.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @param c         the comparator to determine the order of the array.
-   * @throws ClassCastException             if the array contains elements that are not <i>mutually comparable</i> using
-   *                                        the specified comparator.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   * @see Comparator
-   */
-  public static void mergeSort(char[] a, int fromIndex, int toIndex, CharComparator c) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    char[] aux = a.clone();
-    mergeSort1(aux, a, fromIndex, toIndex, c);
-  }
-
-  /**
-   * Sorts the specified range of the specified array of elements.
-   *
-   * <p>This sort is guaranteed to be <i>stable</i>:  equal elements will not be reordered as a result of the sort.<p>
-   *
-   * The sorting algorithm is a modified mergesort (in which the merge is omitted if the highest element in the low
-   * sublist is less than the lowest element in the high sublist).  This algorithm offers guaranteed n*log(n)
-   * performance, and can approach linear performance on nearly sorted lists.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   */
-  public static void mergeSort(double[] a, int fromIndex, int toIndex) {
-    mergeSort2(a, fromIndex, toIndex);
-  }
-
-  /**
-   * Sorts the specified range of the specified array of elements according to the order induced by the specified
-   * comparator.  All elements in the range must be <i>mutually comparable</i> by the specified comparator (that is,
-   * <tt>c.compare(e1, e2)</tt> must not throw a <tt>ClassCastException</tt> for any elements <tt>e1</tt> and
-   * <tt>e2</tt> in the range).<p>
-   *
-   * This sort is guaranteed to be <i>stable</i>:  equal elements will not be reordered as a result of the sort.<p>
-   *
-   * The sorting algorithm is a modified mergesort (in which the merge is omitted if the highest element in the low
-   * sublist is less than the lowest element in the high sublist).  This algorithm offers guaranteed n*log(n)
-   * performance, and can approach linear performance on nearly sorted lists.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @param c         the comparator to determine the order of the array.
-   * @throws ClassCastException             if the array contains elements that are not <i>mutually comparable</i> using
-   *                                        the specified comparator.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   * @see Comparator
-   */
-  public static void mergeSort(double[] a, int fromIndex, int toIndex, DoubleComparator c) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    double[] aux = a.clone();
-    mergeSort1(aux, a, fromIndex, toIndex, c);
-  }
-
-  /**
-   * Sorts the specified range of the specified array of elements.
-   *
-   * <p>This sort is guaranteed to be <i>stable</i>:  equal elements will not be reordered as a result of the sort.<p>
-   *
-   * The sorting algorithm is a modified mergesort (in which the merge is omitted if the highest element in the low
-   * sublist is less than the lowest element in the high sublist).  This algorithm offers guaranteed n*log(n)
-   * performance, and can approach linear performance on nearly sorted lists.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   */
-  public static void mergeSort(float[] a, int fromIndex, int toIndex) {
-    mergeSort2(a, fromIndex, toIndex);
-  }
-
-  /**
-   * Sorts the specified range of the specified array of elements according to the order induced by the specified
-   * comparator.  All elements in the range must be <i>mutually comparable</i> by the specified comparator (that is,
-   * <tt>c.compare(e1, e2)</tt> must not throw a <tt>ClassCastException</tt> for any elements <tt>e1</tt> and
-   * <tt>e2</tt> in the range).<p>
-   *
-   * This sort is guaranteed to be <i>stable</i>:  equal elements will not be reordered as a result of the sort.<p>
-   *
-   * The sorting algorithm is a modified mergesort (in which the merge is omitted if the highest element in the low
-   * sublist is less than the lowest element in the high sublist).  This algorithm offers guaranteed n*log(n)
-   * performance, and can approach linear performance on nearly sorted lists.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @param c         the comparator to determine the order of the array.
-   * @throws ClassCastException             if the array contains elements that are not <i>mutually comparable</i> using
-   *                                        the specified comparator.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   * @see Comparator
-   */
-  public static void mergeSort(float[] a, int fromIndex, int toIndex, FloatComparator c) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    float[] aux = a.clone();
-    mergeSort1(aux, a, fromIndex, toIndex, c);
-  }
-
-  /**
-   * Sorts the specified range of the specified array of elements.
-   *
-   * <p>This sort is guaranteed to be <i>stable</i>:  equal elements will not be reordered as a result of the sort.<p>
-   *
-   * The sorting algorithm is a modified mergesort (in which the merge is omitted if the highest element in the low
-   * sublist is less than the lowest element in the high sublist).  This algorithm offers guaranteed n*log(n)
-   * performance, and can approach linear performance on nearly sorted lists.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   */
-  public static void mergeSort(int[] a, int fromIndex, int toIndex) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    int[] aux = a.clone();
-    mergeSort1(aux, a, fromIndex, toIndex);
-  }
-
-  /**
-   * Sorts the specified range of the specified array of elements according to the order induced by the specified
-   * comparator.  All elements in the range must be <i>mutually comparable</i> by the specified comparator (that is,
-   * <tt>c.compare(e1, e2)</tt> must not throw a <tt>ClassCastException</tt> for any elements <tt>e1</tt> and
-   * <tt>e2</tt> in the range).<p>
-   *
-   * This sort is guaranteed to be <i>stable</i>:  equal elements will not be reordered as a result of the sort.<p>
-   *
-   * The sorting algorithm is a modified mergesort (in which the merge is omitted if the highest element in the low
-   * sublist is less than the lowest element in the high sublist).  This algorithm offers guaranteed n*log(n)
-   * performance, and can approach linear performance on nearly sorted lists.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @param c         the comparator to determine the order of the array.
-   * @throws ClassCastException             if the array contains elements that are not <i>mutually comparable</i> using
-   *                                        the specified comparator.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   * @see Comparator
-   */
-  public static void mergeSort(int[] a, int fromIndex, int toIndex, IntComparator c) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    int[] aux = a.clone();
-    mergeSort1(aux, a, fromIndex, toIndex, c);
-  }
-
-  /**
-   * Sorts the specified range of the specified array of elements.
-   *
-   * <p>This sort is guaranteed to be <i>stable</i>:  equal elements will not be reordered as a result of the sort.<p>
-   *
-   * The sorting algorithm is a modified mergesort (in which the merge is omitted if the highest element in the low
-   * sublist is less than the lowest element in the high sublist).  This algorithm offers guaranteed n*log(n)
-   * performance, and can approach linear performance on nearly sorted lists.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   */
-  public static void mergeSort(long[] a, int fromIndex, int toIndex) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    long[] aux = a.clone();
-    mergeSort1(aux, a, fromIndex, toIndex);
-  }
-
-  /**
-   * Sorts the specified range of the specified array of elements according to the order induced by the specified
-   * comparator.  All elements in the range must be <i>mutually comparable</i> by the specified comparator (that is,
-   * <tt>c.compare(e1, e2)</tt> must not throw a <tt>ClassCastException</tt> for any elements <tt>e1</tt> and
-   * <tt>e2</tt> in the range).<p>
-   *
-   * This sort is guaranteed to be <i>stable</i>:  equal elements will not be reordered as a result of the sort.<p>
-   *
-   * The sorting algorithm is a modified mergesort (in which the merge is omitted if the highest element in the low
-   * sublist is less than the lowest element in the high sublist).  This algorithm offers guaranteed n*log(n)
-   * performance, and can approach linear performance on nearly sorted lists.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @param c         the comparator to determine the order of the array.
-   * @throws ClassCastException             if the array contains elements that are not <i>mutually comparable</i> using
-   *                                        the specified comparator.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   * @see Comparator
-   */
-  public static void mergeSort(long[] a, int fromIndex, int toIndex, LongComparator c) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    long[] aux = a.clone();
-    mergeSort1(aux, a, fromIndex, toIndex, c);
-  }
-
-  /**
-   * Sorts the specified range of the specified array of elements.
-   *
-   * <p>This sort is guaranteed to be <i>stable</i>:  equal elements will not be reordered as a result of the sort.<p>
-   *
-   * The sorting algorithm is a modified mergesort (in which the merge is omitted if the highest element in the low
-   * sublist is less than the lowest element in the high sublist).  This algorithm offers guaranteed n*log(n)
-   * performance, and can approach linear performance on nearly sorted lists.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   */
-  public static void mergeSort(short[] a, int fromIndex, int toIndex) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    short[] aux = a.clone();
-    mergeSort1(aux, a, fromIndex, toIndex);
-  }
-
-  /**
-   * Sorts the specified range of the specified array of elements according to the order induced by the specified
-   * comparator.  All elements in the range must be <i>mutually comparable</i> by the specified comparator (that is,
-   * <tt>c.compare(e1, e2)</tt> must not throw a <tt>ClassCastException</tt> for any elements <tt>e1</tt> and
-   * <tt>e2</tt> in the range).<p>
-   *
-   * This sort is guaranteed to be <i>stable</i>:  equal elements will not be reordered as a result of the sort.<p>
-   *
-   * The sorting algorithm is a modified mergesort (in which the merge is omitted if the highest element in the low
-   * sublist is less than the lowest element in the high sublist).  This algorithm offers guaranteed n*log(n)
-   * performance, and can approach linear performance on nearly sorted lists.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @param c         the comparator to determine the order of the array.
-   * @throws ClassCastException             if the array contains elements that are not <i>mutually comparable</i> using
-   *                                        the specified comparator.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   * @see Comparator
-   */
-  public static void mergeSort(short[] a, int fromIndex, int toIndex, ShortComparator c) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    short[] aux = a.clone();
-    mergeSort1(aux, a, fromIndex, toIndex, c);
-  }
-
-  private static void mergeSort1(byte[] src, byte[] dest, int low, int high) {
-    int length = high - low;
-
-    // Insertion sort on smallest arrays
-    if (length < SMALL) {
-      for (int i = low; i < high; i++) {
-        for (int j = i; j > low && dest[j - 1] > dest[j]; j--) {
-          swap(dest, j, j - 1);
-        }
-      }
-      return;
-    }
-
-    // Recursively sort halves of dest into src
-    int mid = (low + high) / 2;
-    mergeSort1(dest, src, low, mid);
-    mergeSort1(dest, src, mid, high);
-
-    // If list is already sorted, just copy from src to dest.  This is an
-    // optimization that results in faster sorts for nearly ordered lists.
-    if (src[mid - 1] <= src[mid]) {
-      System.arraycopy(src, low, dest, low, length);
-      return;
-    }
-
-    // Merge sorted halves (now in src) into dest
-    for (int i = low, p = low, q = mid; i < high; i++) {
-      if (q >= high || p < mid && src[p] <= src[q]) {
-        dest[i] = src[p++];
+  private static <T> int find(T[] arr, T val, int bnd, int l, int r,
+      Comparator<T> c) {
+    int m = l;
+    int d = 1;
+    while (m <= r) {
+      if (c.compare(val, arr[m]) > bnd) {
+        l = m + 1;
       } else {
-        dest[i] = src[q++];
-      }
-    }
-  }
-
-  private static void mergeSort1(byte[] src, byte[] dest, int low, int high, ByteComparator c) {
-    int length = high - low;
-
-    // Insertion sort on smallest arrays
-    if (length < SMALL) {
-      for (int i = low; i < high; i++) {
-        for (int j = i; j > low && c.compare(dest[j - 1], dest[j]) > 0; j--) {
-          swap(dest, j, j - 1);
-        }
-      }
-      return;
-    }
-
-    // Recursively sort halves of dest into src
-    int mid = (low + high) / 2;
-    mergeSort1(dest, src, low, mid, c);
-    mergeSort1(dest, src, mid, high, c);
-
-    // If list is already sorted, just copy from src to dest.  This is an
-    // optimization that results in faster sorts for nearly ordered lists.
-    if (c.compare(src[mid - 1], src[mid]) <= 0) {
-      System.arraycopy(src, low, dest, low, length);
-      return;
-    }
-
-    // Merge sorted halves (now in src) into dest
-    for (int i = low, p = low, q = mid; i < high; i++) {
-      if (q >= high || p < mid && c.compare(src[p], src[q]) <= 0) {
-        dest[i] = src[p++];
-      } else {
-        dest[i] = src[q++];
-      }
-    }
-  }
-
-  private static void mergeSort1(char[] src, char[] dest, int low, int high) {
-    int length = high - low;
-
-    // Insertion sort on smallest arrays
-    if (length < SMALL) {
-      for (int i = low; i < high; i++) {
-        for (int j = i; j > low && dest[j - 1] > dest[j]; j--) {
-          swap(dest, j, j - 1);
-        }
-      }
-      return;
-    }
-
-    // Recursively sort halves of dest into src
-    int mid = (low + high) / 2;
-    mergeSort1(dest, src, low, mid);
-    mergeSort1(dest, src, mid, high);
-
-    // If list is already sorted, just copy from src to dest.  This is an
-    // optimization that results in faster sorts for nearly ordered lists.
-    if (src[mid - 1] <= src[mid]) {
-      System.arraycopy(src, low, dest, low, length);
-      return;
-    }
-
-    // Merge sorted halves (now in src) into dest
-    for (int i = low, p = low, q = mid; i < high; i++) {
-      if (q >= high || p < mid && src[p] <= src[q]) {
-        dest[i] = src[p++];
-      } else {
-        dest[i] = src[q++];
-      }
-    }
-  }
-
-  private static void mergeSort1(char[] src, char[] dest, int low, int high, CharComparator c) {
-    int length = high - low;
-
-    // Insertion sort on smallest arrays
-    if (length < SMALL) {
-      for (int i = low; i < high; i++) {
-        for (int j = i; j > low && c.compare(dest[j - 1], dest[j]) > 0; j--) {
-          swap(dest, j, j - 1);
-        }
-      }
-      return;
-    }
-
-    // Recursively sort halves of dest into src
-    int mid = (low + high) / 2;
-    mergeSort1(dest, src, low, mid, c);
-    mergeSort1(dest, src, mid, high, c);
-
-    // If list is already sorted, just copy from src to dest.  This is an
-    // optimization that results in faster sorts for nearly ordered lists.
-    if (c.compare(src[mid - 1], src[mid]) <= 0) {
-      System.arraycopy(src, low, dest, low, length);
-      return;
-    }
-
-    // Merge sorted halves (now in src) into dest
-    for (int i = low, p = low, q = mid; i < high; i++) {
-      if (q >= high || p < mid && c.compare(src[p], src[q]) <= 0) {
-        dest[i] = src[p++];
-      } else {
-        dest[i] = src[q++];
-      }
-    }
-  }
-
-  private static void mergeSort1(double[] src, double[] dest, int low, int high) {
-    int length = high - low;
-
-    // Insertion sort on smallest arrays
-    if (length < SMALL) {
-      for (int i = low; i < high; i++) {
-        for (int j = i; j > low && dest[j - 1] > dest[j]; j--) {
-          swap(dest, j, j - 1);
-        }
-      }
-      return;
-    }
-
-    // Recursively sort halves of dest into src
-    int mid = (low + high) / 2;
-    mergeSort1(dest, src, low, mid);
-    mergeSort1(dest, src, mid, high);
-
-    // If list is already sorted, just copy from src to dest.  This is an
-    // optimization that results in faster sorts for nearly ordered lists.
-    if (src[mid - 1] <= src[mid]) {
-      System.arraycopy(src, low, dest, low, length);
-      return;
-    }
-
-    // Merge sorted halves (now in src) into dest
-    for (int i = low, p = low, q = mid; i < high; i++) {
-      if (q >= high || p < mid && src[p] <= src[q]) {
-        dest[i] = src[p++];
-      } else {
-        dest[i] = src[q++];
-      }
-    }
-  }
-
-  private static void mergeSort1(double[] src, double[] dest, int low, int high, DoubleComparator c) {
-    int length = high - low;
-
-    // Insertion sort on smallest arrays
-    if (length < SMALL) {
-      for (int i = low; i < high; i++) {
-        for (int j = i; j > low && c.compare(dest[j - 1], dest[j]) > 0; j--) {
-          swap(dest, j, j - 1);
-        }
-      }
-      return;
-    }
-
-    // Recursively sort halves of dest into src
-    int mid = (low + high) / 2;
-    mergeSort1(dest, src, low, mid, c);
-    mergeSort1(dest, src, mid, high, c);
-
-    // If list is already sorted, just copy from src to dest.  This is an
-    // optimization that results in faster sorts for nearly ordered lists.
-    if (c.compare(src[mid - 1], src[mid]) <= 0) {
-      System.arraycopy(src, low, dest, low, length);
-      return;
-    }
-
-    // Merge sorted halves (now in src) into dest
-    for (int i = low, p = low, q = mid; i < high; i++) {
-      if (q >= high || p < mid && c.compare(src[p], src[q]) <= 0) {
-        dest[i] = src[p++];
-      } else {
-        dest[i] = src[q++];
-      }
-    }
-  }
-
-  private static void mergeSort1(float[] src, float[] dest, int low, int high) {
-    int length = high - low;
-
-    // Insertion sort on smallest arrays
-    if (length < SMALL) {
-      for (int i = low; i < high; i++) {
-        for (int j = i; j > low && dest[j - 1] > dest[j]; j--) {
-          swap(dest, j, j - 1);
-        }
-      }
-      return;
-    }
-
-    // Recursively sort halves of dest into src
-    int mid = (low + high) / 2;
-    mergeSort1(dest, src, low, mid);
-    mergeSort1(dest, src, mid, high);
-
-    // If list is already sorted, just copy from src to dest.  This is an
-    // optimization that results in faster sorts for nearly ordered lists.
-    if (src[mid - 1] <= src[mid]) {
-      System.arraycopy(src, low, dest, low, length);
-      return;
-    }
-
-    // Merge sorted halves (now in src) into dest
-    for (int i = low, p = low, q = mid; i < high; i++) {
-      if (q >= high || p < mid && src[p] <= src[q]) {
-        dest[i] = src[p++];
-      } else {
-        dest[i] = src[q++];
-      }
-    }
-  }
-
-  private static void mergeSort1(float[] src, float[] dest, int low, int high, FloatComparator c) {
-    int length = high - low;
-
-    // Insertion sort on smallest arrays
-    if (length < SMALL) {
-      for (int i = low; i < high; i++) {
-        for (int j = i; j > low && c.compare(dest[j - 1], dest[j]) > 0; j--) {
-          swap(dest, j, j - 1);
-        }
-      }
-      return;
-    }
-
-    // Recursively sort halves of dest into src
-    int mid = (low + high) / 2;
-    mergeSort1(dest, src, low, mid, c);
-    mergeSort1(dest, src, mid, high, c);
-
-    // If list is already sorted, just copy from src to dest.  This is an
-    // optimization that results in faster sorts for nearly ordered lists.
-    if (c.compare(src[mid - 1], src[mid]) <= 0) {
-      System.arraycopy(src, low, dest, low, length);
-      return;
-    }
-
-    // Merge sorted halves (now in src) into dest
-    for (int i = low, p = low, q = mid; i < high; i++) {
-      if (q >= high || p < mid && c.compare(src[p], src[q]) <= 0) {
-        dest[i] = src[p++];
-      } else {
-        dest[i] = src[q++];
-      }
-    }
-  }
-
-  private static void mergeSort1(int[] src, int[] dest, int low, int high) {
-    int length = high - low;
-
-    // Insertion sort on smallest arrays
-    if (length < SMALL) {
-      for (int i = low; i < high; i++) {
-        for (int j = i; j > low && dest[j - 1] > dest[j]; j--) {
-          swap(dest, j, j - 1);
-        }
-      }
-      return;
-    }
-
-    // Recursively sort halves of dest into src
-    int mid = (low + high) / 2;
-    mergeSort1(dest, src, low, mid);
-    mergeSort1(dest, src, mid, high);
-
-    // If list is already sorted, just copy from src to dest.  This is an
-    // optimization that results in faster sorts for nearly ordered lists.
-    if (src[mid - 1] <= src[mid]) {
-      System.arraycopy(src, low, dest, low, length);
-      return;
-    }
-
-    // Merge sorted halves (now in src) into dest
-    for (int i = low, p = low, q = mid; i < high; i++) {
-      if (q >= high || p < mid && src[p] <= src[q]) {
-        dest[i] = src[p++];
-      } else {
-        dest[i] = src[q++];
-      }
-    }
-  }
-
-  private static void mergeSort1(int[] src, int[] dest, int low, int high, IntComparator c) {
-    int length = high - low;
-
-    // Insertion sort on smallest arrays
-    if (length < SMALL) {
-      for (int i = low; i < high; i++) {
-        for (int j = i; j > low && c.compare(dest[j - 1], dest[j]) > 0; j--) {
-          swap(dest, j, j - 1);
-        }
-      }
-      return;
-    }
-
-    // Recursively sort halves of dest into src
-    int mid = (low + high) / 2;
-    mergeSort1(dest, src, low, mid, c);
-    mergeSort1(dest, src, mid, high, c);
-
-    // If list is already sorted, just copy from src to dest.  This is an
-    // optimization that results in faster sorts for nearly ordered lists.
-    if (c.compare(src[mid - 1], src[mid]) <= 0) {
-      System.arraycopy(src, low, dest, low, length);
-      return;
-    }
-
-    // Merge sorted halves (now in src) into dest
-    for (int i = low, p = low, q = mid; i < high; i++) {
-      if (q >= high || p < mid && c.compare(src[p], src[q]) <= 0) {
-        dest[i] = src[p++];
-      } else {
-        dest[i] = src[q++];
-      }
-    }
-  }
-
-  private static void mergeSort1(long[] src, long[] dest, int low, int high) {
-    int length = high - low;
-
-    // Insertion sort on smallest arrays
-    if (length < SMALL) {
-      for (int i = low; i < high; i++) {
-        for (int j = i; j > low && dest[j - 1] > dest[j]; j--) {
-          swap(dest, j, j - 1);
-        }
-      }
-      return;
-    }
-
-    // Recursively sort halves of dest into src
-    int mid = (low + high) / 2;
-    mergeSort1(dest, src, low, mid);
-    mergeSort1(dest, src, mid, high);
-
-    // If list is already sorted, just copy from src to dest.  This is an
-    // optimization that results in faster sorts for nearly ordered lists.
-    if (src[mid - 1] <= src[mid]) {
-      System.arraycopy(src, low, dest, low, length);
-      return;
-    }
-
-    // Merge sorted halves (now in src) into dest
-    for (int i = low, p = low, q = mid; i < high; i++) {
-      if (q >= high || p < mid && src[p] <= src[q]) {
-        dest[i] = src[p++];
-      } else {
-        dest[i] = src[q++];
-      }
-    }
-  }
-
-  private static void mergeSort1(long[] src, long[] dest, int low, int high, LongComparator c) {
-    int length = high - low;
-
-    // Insertion sort on smallest arrays
-    if (length < SMALL) {
-      for (int i = low; i < high; i++) {
-        for (int j = i; j > low && c.compare(dest[j - 1], dest[j]) > 0; j--) {
-          swap(dest, j, j - 1);
-        }
-      }
-      return;
-    }
-
-    // Recursively sort halves of dest into src
-    int mid = (low + high) / 2;
-    mergeSort1(dest, src, low, mid, c);
-    mergeSort1(dest, src, mid, high, c);
-
-    // If list is already sorted, just copy from src to dest.  This is an
-    // optimization that results in faster sorts for nearly ordered lists.
-    if (c.compare(src[mid - 1], src[mid]) <= 0) {
-      System.arraycopy(src, low, dest, low, length);
-      return;
-    }
-
-    // Merge sorted halves (now in src) into dest
-    for (int i = low, p = low, q = mid; i < high; i++) {
-      if (q >= high || p < mid && c.compare(src[p], src[q]) <= 0) {
-        dest[i] = src[p++];
-      } else {
-        dest[i] = src[q++];
-      }
-    }
-  }
-
-  private static void mergeSort1(short[] src, short[] dest, int low, int high) {
-    int length = high - low;
-
-    // Insertion sort on smallest arrays
-    if (length < SMALL) {
-      for (int i = low; i < high; i++) {
-        for (int j = i; j > low && dest[j - 1] > dest[j]; j--) {
-          swap(dest, j, j - 1);
-        }
-      }
-      return;
-    }
-
-    // Recursively sort halves of dest into src
-    int mid = (low + high) / 2;
-    mergeSort1(dest, src, low, mid);
-    mergeSort1(dest, src, mid, high);
-
-    // If list is already sorted, just copy from src to dest.  This is an
-    // optimization that results in faster sorts for nearly ordered lists.
-    if (src[mid - 1] <= src[mid]) {
-      System.arraycopy(src, low, dest, low, length);
-      return;
-    }
-
-    // Merge sorted halves (now in src) into dest
-    for (int i = low, p = low, q = mid; i < high; i++) {
-      if (q >= high || p < mid && src[p] <= src[q]) {
-        dest[i] = src[p++];
-      } else {
-        dest[i] = src[q++];
-      }
-    }
-  }
-
-  private static void mergeSort1(short[] src, short[] dest, int low, int high, ShortComparator c) {
-    int length = high - low;
-
-    // Insertion sort on smallest arrays
-    if (length < SMALL) {
-      for (int i = low; i < high; i++) {
-        for (int j = i; j > low && c.compare(dest[j - 1], dest[j]) > 0; j--) {
-          swap(dest, j, j - 1);
-        }
-      }
-      return;
-    }
-
-    // Recursively sort halves of dest into src
-    int mid = (low + high) / 2;
-    mergeSort1(dest, src, low, mid, c);
-    mergeSort1(dest, src, mid, high, c);
-
-    // If list is already sorted, just copy from src to dest.  This is an
-    // optimization that results in faster sorts for nearly ordered lists.
-    if (c.compare(src[mid - 1], src[mid]) <= 0) {
-      System.arraycopy(src, low, dest, low, length);
-      return;
-    }
-
-    // Merge sorted halves (now in src) into dest
-    for (int i = low, p = low, q = mid; i < high; i++) {
-      if (q >= high || p < mid && c.compare(src[p], src[q]) <= 0) {
-        dest[i] = src[p++];
-      } else {
-        dest[i] = src[q++];
-      }
-    }
-  }
-
-  private static void mergeSort2(double[] a, int fromIndex, int toIndex) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    long NEG_ZERO_BITS = Double.doubleToLongBits(-0.0d);
-/*
- * The sort is done in three phases to avoid the expense of using
- * NaN and -0.0 aware comparisons during the main sort.
- */
-
-/*
- * Preprocessing phase:  Move any NaN's to end of array, count the
- * number of -0.0's, and turn them into 0.0's. 
- */
-    int numNegZeros = 0;
-    int i = fromIndex, n = toIndex;
-    while (i < n) {
-      if (a[i] != a[i]) {
-        a[i] = a[--n];
-        a[n] = Double.NaN;
-      } else {
-        if (a[i] == 0 && Double.doubleToLongBits(a[i]) == NEG_ZERO_BITS) {
-          a[i] = 0.0d;
-          numNegZeros++;
-        }
-        i++;
-      }
-    }
-
-// Main sort phase: mergesort everything but the NaN's
-    double[] aux = a.clone();
-    mergeSort1(aux, a, fromIndex, n);
-
-// Postprocessing phase: change 0.0's to -0.0's as required
-    if (numNegZeros != 0) {
-      int j = new DoubleArrayList(a)
-          .binarySearchFromTo(0.0d, fromIndex, n - 1); // posn of ANY zero
-      do {
-        j--;
-      } while (j >= 0 && a[j] == 0.0d);
-
-      // j is now one less than the index of the FIRST zero
-      for (int k = 0; k < numNegZeros; k++) {
-        a[++j] = -0.0d;
-      }
-    }
-  }
-
-  private static void mergeSort2(float[] a, int fromIndex, int toIndex) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    int NEG_ZERO_BITS = Float.floatToIntBits(-0.0f);
-/*
- * The sort is done in three phases to avoid the expense of using
- * NaN and -0.0 aware comparisons during the main sort.
- */
-
-/*
- * Preprocessing phase:  Move any NaN's to end of array, count the
- * number of -0.0's, and turn them into 0.0's. 
- */
-    int numNegZeros = 0;
-    int i = fromIndex, n = toIndex;
-    while (i < n) {
-      if (a[i] != a[i]) {
-        a[i] = a[--n];
-        a[n] = Float.NaN;
-      } else {
-        if (a[i] == 0 && Float.floatToIntBits(a[i]) == NEG_ZERO_BITS) {
-          a[i] = 0.0f;
-          numNegZeros++;
-        }
-        i++;
-      }
-    }
-
-// Main sort phase: mergesort everything but the NaN's
-    float[] aux = a.clone();
-    mergeSort1(aux, a, fromIndex, n);
-
-// Postprocessing phase: change 0.0's to -0.0's as required
-    if (numNegZeros != 0) {
-      int j = new FloatArrayList(a).binarySearchFromTo(0.0f, fromIndex, n - 1); // posn of ANY zero
-      do {
-        j--;
-      } while (j >= 0 && a[j] == 0.0f);
-
-      // j is now one less than the index of the FIRST zero
-      for (int k = 0; k < numNegZeros; k++) {
-        a[++j] = -0.0f;
-      }
-    }
-  }
-
-  /**
-   * Sorts the specified range of the specified array of elements according to the order induced by the specified
-   * comparator.  All elements in the range must be <i>mutually comparable</i> by the specified comparator (that is,
-   * <tt>c.compare(e1, e2)</tt> must not throw a <tt>ClassCastException</tt> for any elements <tt>e1</tt> and
-   * <tt>e2</tt> in the range).<p>
-   *
-   * The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's "Engineering a
-   * Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993).  This algorithm offers
-   * n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic performance.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @param c         the comparator to determine the order of the array.
-   * @throws ClassCastException             if the array contains elements that are not <i>mutually comparable</i> using
-   *                                        the specified comparator.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   * @see Comparator
-   */
-  public static void quickSort(byte[] a, int fromIndex, int toIndex, ByteComparator c) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    quickSort1(a, fromIndex, toIndex - fromIndex, c);
-  }
-
-  /**
-   * Sorts the specified range of the specified array of elements according to the order induced by the specified
-   * comparator.  All elements in the range must be <i>mutually comparable</i> by the specified comparator (that is,
-   * <tt>c.compare(e1, e2)</tt> must not throw a <tt>ClassCastException</tt> for any elements <tt>e1</tt> and
-   * <tt>e2</tt> in the range).<p>
-   *
-   * The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's "Engineering a
-   * Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993).  This algorithm offers
-   * n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic performance.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @param c         the comparator to determine the order of the array.
-   * @throws ClassCastException             if the array contains elements that are not <i>mutually comparable</i> using
-   *                                        the specified comparator.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   * @see Comparator
-   */
-  public static void quickSort(char[] a, int fromIndex, int toIndex, CharComparator c) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    quickSort1(a, fromIndex, toIndex - fromIndex, c);
-  }
-
-  /**
-   * Sorts the specified range of the specified array of elements according to the order induced by the specified
-   * comparator.  All elements in the range must be <i>mutually comparable</i> by the specified comparator (that is,
-   * <tt>c.compare(e1, e2)</tt> must not throw a <tt>ClassCastException</tt> for any elements <tt>e1</tt> and
-   * <tt>e2</tt> in the range).<p>
-   *
-   * The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's "Engineering a
-   * Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993).  This algorithm offers
-   * n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic performance.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @param c         the comparator to determine the order of the array.
-   * @throws ClassCastException             if the array contains elements that are not <i>mutually comparable</i> using
-   *                                        the specified comparator.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   * @see Comparator
-   */
-  public static void quickSort(double[] a, int fromIndex, int toIndex, DoubleComparator c) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    quickSort1(a, fromIndex, toIndex - fromIndex, c);
-  }
-
-  /**
-   * Sorts the specified range of the specified array of elements according to the order induced by the specified
-   * comparator.  All elements in the range must be <i>mutually comparable</i> by the specified comparator (that is,
-   * <tt>c.compare(e1, e2)</tt> must not throw a <tt>ClassCastException</tt> for any elements <tt>e1</tt> and
-   * <tt>e2</tt> in the range).<p>
-   *
-   * The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's "Engineering a
-   * Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993).  This algorithm offers
-   * n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic performance.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @param c         the comparator to determine the order of the array.
-   * @throws ClassCastException             if the array contains elements that are not <i>mutually comparable</i> using
-   *                                        the specified comparator.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   * @see Comparator
-   */
-  public static void quickSort(float[] a, int fromIndex, int toIndex, FloatComparator c) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    quickSort1(a, fromIndex, toIndex - fromIndex, c);
-  }
-
-  /**
-   * Sorts the specified range of the specified array of elements according to the order induced by the specified
-   * comparator.  All elements in the range must be <i>mutually comparable</i> by the specified comparator (that is,
-   * <tt>c.compare(e1, e2)</tt> must not throw a <tt>ClassCastException</tt> for any elements <tt>e1</tt> and
-   * <tt>e2</tt> in the range).<p>
-   *
-   * The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's "Engineering a
-   * Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993).  This algorithm offers
-   * n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic performance.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @param c         the comparator to determine the order of the array.
-   * @throws ClassCastException             if the array contains elements that are not <i>mutually comparable</i> using
-   *                                        the specified comparator.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   * @see Comparator
-   */
-  public static void quickSort(int[] a, int fromIndex, int toIndex, IntComparator c) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    quickSort1(a, fromIndex, toIndex - fromIndex, c);
-  }
-
-  /**
-   * Sorts the specified range of the specified array of elements according to the order induced by the specified
-   * comparator.  All elements in the range must be <i>mutually comparable</i> by the specified comparator (that is,
-   * <tt>c.compare(e1, e2)</tt> must not throw a <tt>ClassCastException</tt> for any elements <tt>e1</tt> and
-   * <tt>e2</tt> in the range).<p>
-   *
-   * The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's "Engineering a
-   * Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993).  This algorithm offers
-   * n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic performance.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @param c         the comparator to determine the order of the array.
-   * @throws ClassCastException             if the array contains elements that are not <i>mutually comparable</i> using
-   *                                        the specified comparator.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   * @see Comparator
-   */
-  public static void quickSort(long[] a, int fromIndex, int toIndex, LongComparator c) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    quickSort1(a, fromIndex, toIndex - fromIndex, c);
-  }
-
-  /**
-   * Sorts the specified range of the receiver into ascending order, according to the <i>natural ordering</i> of its
-   * elements.  All elements in this range must implement the <tt>Comparable</tt> interface.  Furthermore, all elements
-   * in this range must be <i>mutually comparable</i> (that is, <tt>e1.compareTo(e2)</tt> must not throw a
-   * <tt>ClassCastException</tt> for any elements <tt>e1</tt> and <tt>e2</tt> in the array).<p>
-   *
-   * The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's "Engineering a
-   * Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993).  This algorithm offers
-   * n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic performance.
-   *
-   * @param a the array to be sorted.
-   */
-  public static <T extends Comparable<? super T>>  void quickSort(T[] a) {
-    quickSort1(a, 0, a.length);
-  }
-
-  /**
-   * Sorts the specified range of the receiver into ascending order, according to the <i>natural ordering</i> of its
-   * elements.  All elements in this range must implement the <tt>Comparable</tt> interface.  Furthermore, all elements
-   * in this range must be <i>mutually comparable</i> (that is, <tt>e1.compareTo(e2)</tt> must not throw a
-   * <tt>ClassCastException</tt> for any elements <tt>e1</tt> and <tt>e2</tt> in the array).<p>
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   */
-  public static <T extends Comparable<? super T>> void quickSort(T[] a, int fromIndex, int toIndex) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    quickSort1(a, fromIndex, toIndex - fromIndex);
-  }
-
-  /**
-   * Sorts the specified range of the specified array according to the order induced by the specified comparator.  All
-   * elements in the range must be <i>mutually comparable</i> by the specified comparator (that is, <tt>c.compare(e1,
-   * e2)</tt> must not throw a <tt>ClassCastException</tt> for any elements <tt>e1</tt> and <tt>e2</tt> in the
-   * range).<p>
-   *
-   * The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's "Engineering a
-   * Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993).  This algorithm offers
-   * n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic performance.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @param c         the comparator to determine the order of the receiver.
-   * @throws ClassCastException             if the array contains elements that are not <i>mutually comparable</i> using
-   *                                        the specified comparator.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   * @see Comparator
-   */
-  public static <T> void quickSort(T[] a, int fromIndex, int toIndex, Comparator<? super T> c) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    quickSort1(a, fromIndex, toIndex - fromIndex, c);
-  }
-
-  /**
-   * Sorts the specified array according to the order induced by the specified comparator.  All elements in the range
-   * must be <i>mutually comparable</i> by the specified comparator (that is, <tt>c.compare(e1, e2)</tt> must not throw
-   * a <tt>ClassCastException</tt> for any elements <tt>e1</tt> and <tt>e2</tt> in the range).<p>
-   *
-   * The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's "Engineering a
-   * Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993).  This algorithm offers
-   * n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic performance.
-   *
-   * @param a the array to be sorted.
-   * @param c the comparator to determine the order of the receiver.
-   * @throws ClassCastException             if the array contains elements that are not <i>mutually comparable</i> using
-   *                                        the specified comparator.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   * @see Comparator
-   */
-  public static <T extends Comparable<? super T>> void quickSort(T[] a, Comparator<? super T> c) {
-    quickSort1(a, 0, a.length, c);
-  }
-
-  /**
-   * Sorts the specified range of the specified array of elements according to the order induced by the specified
-   * comparator.  All elements in the range must be <i>mutually comparable</i> by the specified comparator (that is,
-   * <tt>c.compare(e1, e2)</tt> must not throw a <tt>ClassCastException</tt> for any elements <tt>e1</tt> and
-   * <tt>e2</tt> in the range).<p>
-   *
-   * This sort is guaranteed to be <i>stable</i>:  equal elements will not be reordered as a result of the sort.<p>
-   *
-   * The sorting algorithm is a modified mergesort (in which the merge is omitted if the highest element in the low
-   * sublist is less than the lowest element in the high sublist).  This algorithm offers guaranteed n*log(n)
-   * performance, and can approach linear performance on nearly sorted lists.
-   *
-   * @param a         the array to be sorted.
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @param c         the comparator to determine the order of the array.
-   * @throws ClassCastException             if the array contains elements that are not <i>mutually comparable</i> using
-   *                                        the specified comparator.
-   * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
-   * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; a.length</tt>
-   * @see Comparator
-   */
-  public static void quickSort(short[] a, int fromIndex, int toIndex, ShortComparator c) {
-    rangeCheck(a.length, fromIndex, toIndex);
-    quickSort1(a, fromIndex, toIndex - fromIndex, c);
-  }
-
-  /** Sorts the specified sub-array of chars into ascending order. */
-  private static void quickSort1(byte[] x, int off, int len, ByteComparator comp) {
-    // Insertion sort on smallest arrays
-    if (len < SMALL) {
-      for (int i = off; i < len + off; i++) {
-        for (int j = i; j > off && comp.compare(x[j - 1], x[j]) > 0; j--) {
-          swap(x, j, j - 1);
-        }
-      }
-      return;
-    }
-
-    // Choose a partition element, v
-    int m = off + len / 2;       // Small arrays, middle element
-    if (len > SMALL) {
-      int l = off;
-      int n = off + len - 1;
-      if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
-        int s = len / 8;
-        l = med3(x, l, l + s, l + 2 * s, comp);
-        m = med3(x, m - s, m, m + s, comp);
-        n = med3(x, n - 2 * s, n - s, n, comp);
-      }
-      m = med3(x, l, m, n, comp); // Mid-size, med of 3
-    }
-    byte v = x[m];
-
-    // Establish Invariant: v* (<v)* (>v)* v*
-    int a = off, b = a, c = off + len - 1, d = c;
-    while (true) {
-      int comparison;
-      while (b <= c && (comparison = comp.compare(x[b], v)) <= 0) {
-        if (comparison == 0) {
-          swap(x, a++, b);
-        }
-        b++;
-      }
-      while (c >= b && (comparison = comp.compare(x[c], v)) >= 0) {
-        if (comparison == 0) {
-          swap(x, c, d--);
-        }
-        c--;
-      }
-      if (b > c) {
+        r = m - 1;
         break;
       }
-      swap(x, b++, c--);
+      m += d;
+      d <<= 1;
     }
-
-    // Swap partition elements back to middle
-    int n = off + len;
-    int s = Math.min(a - off, b - a);
-    vecswap(x, off, b - s, s);
-    s = Math.min(d - c, n - d - 1);
-    vecswap(x, b, n - s, s);
-
-    // Recursively sort non-partition-elements
-    if ((s = b - a) > 1) {
-      quickSort1(x, off, s, comp);
+    while (l <= r) {
+      m = (l + r) >>> 1;
+      if (c.compare(val, arr[m]) > bnd) {
+        l = m + 1;
+      } else {
+        r = m - 1;
+      }
     }
-    if ((s = d - c) > 1) {
-      quickSort1(x, n - s, s, comp);
-    }
+    return l - 1;
+  }
+  
+  private final static ByteComparator naturalByteComparison = new ByteComparator() {
+    @Override
+    public int compare(byte o1, byte o2) {
+      return o1 - o2;
+    }};
+    
+    /**
+     * Perform a merge sort on a range of a byte array, using numerical order.
+     * @param array the array.
+     * @param start the first index.
+     * @param end the last index (exclusive).
+     */
+  public static void mergeSort(byte[] array, int start, int end) {
+    mergeSort(array, start, end, naturalByteComparison);
+  }
+  
+  /**
+   * Perform a merge sort on a range of a byte array using a specified ordering.
+   * @param array the array.
+   * @param start the first index.
+   * @param end the last index (exclusive).
+   * @param comp the comparator object.
+   */
+  public static void mergeSort(byte[] array, int start, int end, ByteComparator comp) {
+    checkBounds(array.length, start, end);
+    byte[] out = java.util.Arrays.copyOf(array, array.length);
+    mergeSort(out, array, start, end, comp);
   }
 
-  /** Sorts the specified sub-array of chars into ascending order. */
-  private static void quickSort1(char[] x, int off, int len, CharComparator comp) {
-    // Insertion sort on smallest arrays
-    if (len < SMALL) {
-      for (int i = off; i < len + off; i++) {
-        for (int j = i; j > off && comp.compare(x[j - 1], x[j]) > 0; j--) {
-          swap(x, j, j - 1);
+  private static void mergeSort(byte[] in, byte[] out, int start, int end,
+      ByteComparator c) {
+    int len = end - start;
+    // use insertion sort for small arrays
+    if (len <= SIMPLE_LENGTH) {
+      for (int i = start + 1; i < end; i++) {
+        byte current = out[i];
+        byte prev = out[i - 1];
+        if (c.compare(prev, current) > 0) {
+          int j = i;
+          do {
+            out[j--] = prev;
+          } while (j > start && (c.compare(prev = out[j - 1], current) > 0));
+          out[j] = current;
         }
       }
       return;
     }
-
-    // Choose a partition element, v
-    int m = off + len / 2;       // Small arrays, middle element
-    if (len > SMALL) {
-      int l = off;
-      int n = off + len - 1;
-      if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
-        int s = len / 8;
-        l = med3(x, l, l + s, l + 2 * s, comp);
-        m = med3(x, m - s, m, m + s, comp);
-        n = med3(x, n - 2 * s, n - s, n, comp);
-      }
-      m = med3(x, l, m, n, comp); // Mid-size, med of 3
+    int med = (end + start) >>> 1;
+    mergeSort(out, in, start, med, c);
+    mergeSort(out, in, med, end, c);
+    
+    // merging
+    
+    // if arrays are already sorted - no merge
+    if (c.compare(in[med - 1], in[med]) <= 0) {
+      System.arraycopy(in, start, out, start, len);
+      return;
     }
-    char v = x[m];
-
-    // Establish Invariant: v* (<v)* (>v)* v*
-    int a = off, b = a, c = off + len - 1, d = c;
-    while (true) {
-      int comparison;
-      while (b <= c && (comparison = comp.compare(x[b], v)) <= 0) {
-        if (comparison == 0) {
-          swap(x, a++, b);
-        }
-        b++;
+    int r = med, i = start;
+    
+    // use merging with exponential search
+    do {
+      byte fromVal = in[start];
+      byte rVal = in[r];
+      if (c.compare(fromVal, rVal) <= 0) {
+        int l_1 = find(in, rVal, -1, start + 1, med - 1, c);
+        int toCopy = l_1 - start + 1;
+        System.arraycopy(in, start, out, i, toCopy);
+        i += toCopy;
+        out[i++] = rVal;
+        r++;
+        start = l_1 + 1;
+      } else {
+        int r_1 = find(in, fromVal, 0, r + 1, end - 1, c);
+        int toCopy = r_1 - r + 1;
+        System.arraycopy(in, r, out, i, toCopy);
+        i += toCopy;
+        out[i++] = fromVal;
+        start++;
+        r = r_1 + 1;
       }
-      while (c >= b && (comparison = comp.compare(x[c], v)) >= 0) {
-        if (comparison == 0) {
-          swap(x, c, d--);
-        }
-        c--;
-      }
-      if (b > c) {
-        break;
-      }
-      swap(x, b++, c--);
-    }
-
-    // Swap partition elements back to middle
-    int n = off + len;
-    int s = Math.min(a - off, b - a);
-    vecswap(x, off, b - s, s);
-    s = Math.min(d - c, n - d - 1);
-    vecswap(x, b, n - s, s);
-
-    // Recursively sort non-partition-elements
-    if ((s = b - a) > 1) {
-      quickSort1(x, off, s, comp);
-    }
-    if ((s = d - c) > 1) {
-      quickSort1(x, n - s, s, comp);
+    } while ((end - r) > 0 && (med - start) > 0);
+    
+    // copy rest of array
+    if ((end - r) <= 0) {
+      System.arraycopy(in, start, out, i, med - start);
+    } else {
+      System.arraycopy(in, r, out, i, end - r);
     }
   }
 
-  /** Sorts the specified sub-array of chars into ascending order. */
-  private static void quickSort1(double[] x, int off, int len, DoubleComparator comp) {
-    // Insertion sort on smallest arrays
-    if (len < SMALL) {
-      for (int i = off; i < len + off; i++) {
-        for (int j = i; j > off && comp.compare(x[j - 1], x[j]) > 0; j--) {
-          swap(x, j, j - 1);
+  private static int find(byte[] arr, byte val, int bnd, int l, int r,
+      ByteComparator c) {
+    int m = l;
+    int d = 1;
+    while (m <= r) {
+      if (c.compare(val, arr[m]) > bnd) {
+        l = m + 1;
+      } else {
+        r = m - 1;
+        break;
+      }
+      m += d;
+      d <<= 1;
+    }
+    while (l <= r) {
+      m = (l + r) >>> 1;
+      if (c.compare(val, arr[m]) > bnd) {
+        l = m + 1;
+      } else {
+        r = m - 1;
+      }
+    }
+    return l - 1;
+  }
+  
+  private final static CharComparator naturalCharComparison = new CharComparator() {
+    @Override
+    public int compare(char o1, char o2) {
+      return o1 - o2;
+    }};
+    
+    /**
+     * Perform a merge sort on a range of a char array, using numerical order.
+     * @param array the array.
+     * @param start the first index.
+     * @param end the last index (exclusive).
+     */
+  public static void mergeSort(char[] array, int start, int end) {
+    mergeSort(array, start, end, naturalCharComparison);
+  }
+
+  /**
+   * Perform a merge sort on a range of a char array using a specified ordering.
+   * @param array the array.
+   * @param start the first index.
+   * @param end the last index (exclusive).
+   * @param comp the comparator object.
+   */
+  public static void mergeSort(char[] array, int start, int end, CharComparator comp) {
+    checkBounds(array.length, start, end);
+    char[] out = java.util.Arrays.copyOf(array, array.length);
+    mergeSort(out, array, start, end, comp);
+  }
+
+  private static void mergeSort(char[] in, char[] out, int start, int end,
+      CharComparator c) {
+    int len = end - start;
+    // use insertion sort for small arrays
+    if (len <= SIMPLE_LENGTH) {
+      for (int i = start + 1; i < end; i++) {
+        char current = out[i];
+        char prev = out[i - 1];
+        if (c.compare(prev, current) > 0) {
+          int j = i;
+          do {
+            out[j--] = prev;
+          } while (j > start && (c.compare(prev = out[j - 1], current) > 0));
+          out[j] = current;
         }
       }
       return;
     }
-
-    // Choose a partition element, v
-    int m = off + len / 2;       // Small arrays, middle element
-    if (len > SMALL) {
-      int l = off;
-      int n = off + len - 1;
-      if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
-        int s = len / 8;
-        l = med3(x, l, l + s, l + 2 * s, comp);
-        m = med3(x, m - s, m, m + s, comp);
-        n = med3(x, n - 2 * s, n - s, n, comp);
-      }
-      m = med3(x, l, m, n, comp); // Mid-size, med of 3
+    int med = (end + start) >>> 1;
+    mergeSort(out, in, start, med, c);
+    mergeSort(out, in, med, end, c);
+    
+    // merging
+    
+    // if arrays are already sorted - no merge
+    if (c.compare(in[med - 1], in[med]) <= 0) {
+      System.arraycopy(in, start, out, start, len);
+      return;
     }
-    double v = x[m];
-
-    // Establish Invariant: v* (<v)* (>v)* v*
-    int a = off, b = a, c = off + len - 1, d = c;
-    while (true) {
-      int comparison;
-      while (b <= c && (comparison = comp.compare(x[b], v)) <= 0) {
-        if (comparison == 0) {
-          swap(x, a++, b);
-        }
-        b++;
+    int r = med, i = start;
+    
+    // use merging with exponential search
+    do {
+      char fromVal = in[start];
+      char rVal = in[r];
+      if (c.compare(fromVal, rVal) <= 0) {
+        int l_1 = find(in, rVal, -1, start + 1, med - 1, c);
+        int toCopy = l_1 - start + 1;
+        System.arraycopy(in, start, out, i, toCopy);
+        i += toCopy;
+        out[i++] = rVal;
+        r++;
+        start = l_1 + 1;
+      } else {
+        int r_1 = find(in, fromVal, 0, r + 1, end - 1, c);
+        int toCopy = r_1 - r + 1;
+        System.arraycopy(in, r, out, i, toCopy);
+        i += toCopy;
+        out[i++] = fromVal;
+        start++;
+        r = r_1 + 1;
       }
-      while (c >= b && (comparison = comp.compare(x[c], v)) >= 0) {
-        if (comparison == 0) {
-          swap(x, c, d--);
-        }
-        c--;
-      }
-      if (b > c) {
-        break;
-      }
-      swap(x, b++, c--);
-    }
-
-    // Swap partition elements back to middle
-    int n = off + len;
-    int s = Math.min(a - off, b - a);
-    vecswap(x, off, b - s, s);
-    s = Math.min(d - c, n - d - 1);
-    vecswap(x, b, n - s, s);
-
-    // Recursively sort non-partition-elements
-    if ((s = b - a) > 1) {
-      quickSort1(x, off, s, comp);
-    }
-    if ((s = d - c) > 1) {
-      quickSort1(x, n - s, s, comp);
+    } while ((end - r) > 0 && (med - start) > 0);
+    
+    // copy rest of array
+    if ((end - r) <= 0) {
+      System.arraycopy(in, start, out, i, med - start);
+    } else {
+      System.arraycopy(in, r, out, i, end - r);
     }
   }
 
-  /** Sorts the specified sub-array of chars into ascending order. */
-  private static void quickSort1(float[] x, int off, int len, FloatComparator comp) {
-    // Insertion sort on smallest arrays
-    if (len < SMALL) {
-      for (int i = off; i < len + off; i++) {
-        for (int j = i; j > off && comp.compare(x[j - 1], x[j]) > 0; j--) {
-          swap(x, j, j - 1);
+  private static int find(char[] arr, char val, int bnd, int l, int r,
+      CharComparator c) {
+    int m = l;
+    int d = 1;
+    while (m <= r) {
+      if (c.compare(val, arr[m]) > bnd) {
+        l = m + 1;
+      } else {
+        r = m - 1;
+        break;
+      }
+      m += d;
+      d <<= 1;
+    }
+    while (l <= r) {
+      m = (l + r) >>> 1;
+      if (c.compare(val, arr[m]) > bnd) {
+        l = m + 1;
+      } else {
+        r = m - 1;
+      }
+    }
+    return l - 1;
+  }
+  
+  private final static ShortComparator naturalShortComparison = new ShortComparator() {
+    @Override
+    public int compare(short o1, short o2) {
+      return o1 - o2;
+    }};
+    
+    /**
+     * Perform a merge sort on a range of a short array, using numerical order.
+     * @param array the array.
+     * @param start the first index.
+     * @param end the last index (exclusive).
+     */
+  public static void mergeSort(short[] array, int start, int end) {
+    mergeSort(array, start, end, naturalShortComparison);
+  }
+  
+  public static void mergeSort(short[] array, int start, int end, ShortComparator comp) {
+    checkBounds(array.length, start, end);
+    short[] out = java.util.Arrays.copyOf(array, array.length);
+    mergeSort(out, array, start, end, comp);
+  }
+
+  
+  /**
+   * Perform a merge sort on a range of a short array using a specified ordering.
+   * @param array the array.
+   * @param start the first index.
+   * @param end the last index (exclusive).
+   * @param comp the comparator object.
+   */
+  private static void mergeSort(short[] in, short[] out, int start, int end,
+      ShortComparator c) {
+    int len = end - start;
+    // use insertion sort for small arrays
+    if (len <= SIMPLE_LENGTH) {
+      for (int i = start + 1; i < end; i++) {
+        short current = out[i];
+        short prev = out[i - 1];
+        if (c.compare(prev, current) > 0) {
+          int j = i;
+          do {
+            out[j--] = prev;
+          } while (j > start && (c.compare(prev = out[j - 1], current) > 0));
+          out[j] = current;
         }
       }
       return;
     }
-
-    // Choose a partition element, v
-    int m = off + len / 2;       // Small arrays, middle element
-    if (len > SMALL) {
-      int l = off;
-      int n = off + len - 1;
-      if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
-        int s = len / 8;
-        l = med3(x, l, l + s, l + 2 * s, comp);
-        m = med3(x, m - s, m, m + s, comp);
-        n = med3(x, n - 2 * s, n - s, n, comp);
-      }
-      m = med3(x, l, m, n, comp); // Mid-size, med of 3
+    int med = (end + start) >>> 1;
+    mergeSort(out, in, start, med, c);
+    mergeSort(out, in, med, end, c);
+    
+    // merging
+    
+    // if arrays are already sorted - no merge
+    if (c.compare(in[med - 1], in[med]) <= 0) {
+      System.arraycopy(in, start, out, start, len);
+      return;
     }
-    float v = x[m];
-
-    // Establish Invariant: v* (<v)* (>v)* v*
-    int a = off, b = a, c = off + len - 1, d = c;
-    while (true) {
-      int comparison;
-      while (b <= c && (comparison = comp.compare(x[b], v)) <= 0) {
-        if (comparison == 0) {
-          swap(x, a++, b);
-        }
-        b++;
+    int r = med, i = start;
+    
+    // use merging with exponential search
+    do {
+      short fromVal = in[start];
+      short rVal = in[r];
+      if (c.compare(fromVal, rVal) <= 0) {
+        int l_1 = find(in, rVal, -1, start + 1, med - 1, c);
+        int toCopy = l_1 - start + 1;
+        System.arraycopy(in, start, out, i, toCopy);
+        i += toCopy;
+        out[i++] = rVal;
+        r++;
+        start = l_1 + 1;
+      } else {
+        int r_1 = find(in, fromVal, 0, r + 1, end - 1, c);
+        int toCopy = r_1 - r + 1;
+        System.arraycopy(in, r, out, i, toCopy);
+        i += toCopy;
+        out[i++] = fromVal;
+        start++;
+        r = r_1 + 1;
       }
-      while (c >= b && (comparison = comp.compare(x[c], v)) >= 0) {
-        if (comparison == 0) {
-          swap(x, c, d--);
-        }
-        c--;
-      }
-      if (b > c) {
-        break;
-      }
-      swap(x, b++, c--);
-    }
-
-    // Swap partition elements back to middle
-    int n = off + len;
-    int s = Math.min(a - off, b - a);
-    vecswap(x, off, b - s, s);
-    s = Math.min(d - c, n - d - 1);
-    vecswap(x, b, n - s, s);
-
-    // Recursively sort non-partition-elements
-    if ((s = b - a) > 1) {
-      quickSort1(x, off, s, comp);
-    }
-    if ((s = d - c) > 1) {
-      quickSort1(x, n - s, s, comp);
+    } while ((end - r) > 0 && (med - start) > 0);
+    
+    // copy rest of array
+    if ((end - r) <= 0) {
+      System.arraycopy(in, start, out, i, med - start);
+    } else {
+      System.arraycopy(in, r, out, i, end - r);
     }
   }
 
-  /** Sorts the specified sub-array of chars into ascending order. */
-  private static void quickSort1(int[] x, int off, int len, IntComparator comp) {
-    // Insertion sort on smallest arrays
-    if (len < SMALL) {
-      for (int i = off; i < len + off; i++) {
-        for (int j = i; j > off && comp.compare(x[j - 1], x[j]) > 0; j--) {
-          swap(x, j, j - 1);
+  private static int find(short[] arr, short val, int bnd, int l, int r,
+      ShortComparator c) {
+    int m = l;
+    int d = 1;
+    while (m <= r) {
+      if (c.compare(val, arr[m]) > bnd) {
+        l = m + 1;
+      } else {
+        r = m - 1;
+        break;
+      }
+      m += d;
+      d <<= 1;
+    }
+    while (l <= r) {
+      m = (l + r) >>> 1;
+      if (c.compare(val, arr[m]) > bnd) {
+        l = m + 1;
+      } else {
+        r = m - 1;
+      }
+    }
+    return l - 1;
+  }
+  
+  private final static IntComparator naturalIntComparison = new IntComparator() {
+    @Override
+    public int compare(int o1, int o2) {
+      return o1 < o2 ? -1 : o1 > o2 ? 1 : 0;
+    }};
+    
+  public static void mergeSort(int[] array, int start, int end) {
+    mergeSort(array, start, end, naturalIntComparison);
+  }
+
+  /**
+   * Perform a merge sort on a range of a int array using numerical order.
+   * @param array the array.
+   * @param start the first index.
+   * @param end the last index (exclusive).
+   * @param comp the comparator object.
+   */
+  public static void mergeSort(int[] array, int start, int end, IntComparator comp) {
+    checkBounds(array.length, start, end);
+    int[] out = java.util.Arrays.copyOf(array, array.length);
+    mergeSort(out, array, start, end, comp);
+  }
+
+  /**
+   * Perform a merge sort on a range of a int array using a specified ordering.
+   * @param array the array.
+   * @param start the first index.
+   * @param end the last index (exclusive).
+   * @param comp the comparator object.
+   */
+  private static void mergeSort(int[] in, int[] out, int start, int end,
+      IntComparator c) {
+    int len = end - start;
+    // use insertion sort for small arrays
+    if (len <= SIMPLE_LENGTH) {
+      for (int i = start + 1; i < end; i++) {
+        int current = out[i];
+        int prev = out[i - 1];
+        if (c.compare(prev, current) > 0) {
+          int j = i;
+          do {
+            out[j--] = prev;
+          } while (j > start && (c.compare(prev = out[j - 1], current) > 0));
+          out[j] = current;
         }
       }
       return;
     }
-
-    // Choose a partition element, v
-    int m = off + len / 2;       // Small arrays, middle element
-    if (len > SMALL) {
-      int l = off;
-      int n = off + len - 1;
-      if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
-        int s = len / 8;
-        l = med3(x, l, l + s, l + 2 * s, comp);
-        m = med3(x, m - s, m, m + s, comp);
-        n = med3(x, n - 2 * s, n - s, n, comp);
-      }
-      m = med3(x, l, m, n, comp); // Mid-size, med of 3
+    int med = (end + start) >>> 1;
+    mergeSort(out, in, start, med, c);
+    mergeSort(out, in, med, end, c);
+    
+    // merging
+    
+    // if arrays are already sorted - no merge
+    if (c.compare(in[med - 1], in[med]) <= 0) {
+      System.arraycopy(in, start, out, start, len);
+      return;
     }
-    int v = x[m];
-
-    // Establish Invariant: v* (<v)* (>v)* v*
-    int a = off, b = a, c = off + len - 1, d = c;
-    while (true) {
-      int comparison;
-      while (b <= c && (comparison = comp.compare(x[b], v)) <= 0) {
-        if (comparison == 0) {
-          swap(x, a++, b);
-        }
-        b++;
+    int r = med, i = start;
+    
+    // use merging with exponential search
+    do {
+      int fromVal = in[start];
+      int rVal = in[r];
+      if (c.compare(fromVal, rVal) <= 0) {
+        int l_1 = find(in, rVal, -1, start + 1, med - 1, c);
+        int toCopy = l_1 - start + 1;
+        System.arraycopy(in, start, out, i, toCopy);
+        i += toCopy;
+        out[i++] = rVal;
+        r++;
+        start = l_1 + 1;
+      } else {
+        int r_1 = find(in, fromVal, 0, r + 1, end - 1, c);
+        int toCopy = r_1 - r + 1;
+        System.arraycopy(in, r, out, i, toCopy);
+        i += toCopy;
+        out[i++] = fromVal;
+        start++;
+        r = r_1 + 1;
       }
-      while (c >= b && (comparison = comp.compare(x[c], v)) >= 0) {
-        if (comparison == 0) {
-          swap(x, c, d--);
-        }
-        c--;
-      }
-      if (b > c) {
-        break;
-      }
-      swap(x, b++, c--);
-    }
-
-    // Swap partition elements back to middle
-    int n = off + len;
-    int s = Math.min(a - off, b - a);
-    vecswap(x, off, b - s, s);
-    s = Math.min(d - c, n - d - 1);
-    vecswap(x, b, n - s, s);
-
-    // Recursively sort non-partition-elements
-    if ((s = b - a) > 1) {
-      quickSort1(x, off, s, comp);
-    }
-    if ((s = d - c) > 1) {
-      quickSort1(x, n - s, s, comp);
+    } while ((end - r) > 0 && (med - start) > 0);
+    
+    // copy rest of array
+    if ((end - r) <= 0) {
+      System.arraycopy(in, start, out, i, med - start);
+    } else {
+      System.arraycopy(in, r, out, i, end - r);
     }
   }
 
-  /** Sorts the specified sub-array of chars into ascending order. */
-  private static void quickSort1(long[] x, int off, int len, LongComparator comp) {
-    // Insertion sort on smallest arrays
-    if (len < SMALL) {
-      for (int i = off; i < len + off; i++) {
-        for (int j = i; j > off && comp.compare(x[j - 1], x[j]) > 0; j--) {
-          swap(x, j, j - 1);
+  private static int find(int[] arr, int val, int bnd, int l, int r,
+      IntComparator c) {
+    int m = l;
+    int d = 1;
+    while (m <= r) {
+      if (c.compare(val, arr[m]) > bnd) {
+        l = m + 1;
+      } else {
+        r = m - 1;
+        break;
+      }
+      m += d;
+      d <<= 1;
+    }
+    while (l <= r) {
+      m = (l + r) >>> 1;
+      if (c.compare(val, arr[m]) > bnd) {
+        l = m + 1;
+      } else {
+        r = m - 1;
+      }
+    }
+    return l - 1;
+  }
+  
+  private final static LongComparator naturalLongComparison = new LongComparator() {
+    @Override
+    public int compare(long o1, long o2) {
+      return o1 < o2 ? -1 : o1 > o2 ? 1 : 0;
+    }};
+    
+    /**
+     * Perform a merge sort on a range of a long array using numerical order.
+     * @param array the array.
+     * @param start the first index.
+     * @param end the last index (exclusive).
+     * @param comp the comparator object.
+     */
+  public static void mergeSort(long[] array, int start, int end) {
+    mergeSort(array, start, end, naturalLongComparison);
+  }
+
+  /**
+   * Perform a merge sort on a range of a long array using a specified ordering.
+   * @param array the array.
+   * @param start the first index.
+   * @param end the last index (exclusive).
+   * @param comp the comparator object.
+   */
+  public static void mergeSort(long[] array, int start, int end, LongComparator comp) {
+    checkBounds(array.length, start, end);
+    long[] out = java.util.Arrays.copyOf(array, array.length);
+    mergeSort(out, array, start, end, comp);
+  }
+
+  private static void mergeSort(long[] in, long[] out, int start, int end,
+      LongComparator c) {
+    int len = end - start;
+    // use insertion sort for small arrays
+    if (len <= SIMPLE_LENGTH) {
+      for (int i = start + 1; i < end; i++) {
+        long current = out[i];
+        long prev = out[i - 1];
+        if (c.compare(prev, current) > 0) {
+          int j = i;
+          do {
+            out[j--] = prev;
+          } while (j > start && (c.compare(prev = out[j - 1], current) > 0));
+          out[j] = current;
         }
       }
       return;
     }
-
-    // Choose a partition element, v
-    int m = off + len / 2;       // Small arrays, middle element
-    if (len > SMALL) {
-      int l = off;
-      int n = off + len - 1;
-      if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
-        int s = len / 8;
-        l = med3(x, l, l + s, l + 2 * s, comp);
-        m = med3(x, m - s, m, m + s, comp);
-        n = med3(x, n - 2 * s, n - s, n, comp);
-      }
-      m = med3(x, l, m, n, comp); // Mid-size, med of 3
+    int med = (end + start) >>> 1;
+    mergeSort(out, in, start, med, c);
+    mergeSort(out, in, med, end, c);
+    
+    // merging
+    
+    // if arrays are already sorted - no merge
+    if (c.compare(in[med - 1], in[med]) <= 0) {
+      System.arraycopy(in, start, out, start, len);
+      return;
     }
-    long v = x[m];
-
-    // Establish Invariant: v* (<v)* (>v)* v*
-    int a = off, b = a, c = off + len - 1, d = c;
-    while (true) {
-      int comparison;
-      while (b <= c && (comparison = comp.compare(x[b], v)) <= 0) {
-        if (comparison == 0) {
-          swap(x, a++, b);
-        }
-        b++;
+    int r = med, i = start;
+    
+    // use merging with exponential search
+    do {
+      long fromVal = in[start];
+      long rVal = in[r];
+      if (c.compare(fromVal, rVal) <= 0) {
+        int l_1 = find(in, rVal, -1, start + 1, med - 1, c);
+        int toCopy = l_1 - start + 1;
+        System.arraycopy(in, start, out, i, toCopy);
+        i += toCopy;
+        out[i++] = rVal;
+        r++;
+        start = l_1 + 1;
+      } else {
+        int r_1 = find(in, fromVal, 0, r + 1, end - 1, c);
+        int toCopy = r_1 - r + 1;
+        System.arraycopy(in, r, out, i, toCopy);
+        i += toCopy;
+        out[i++] = fromVal;
+        start++;
+        r = r_1 + 1;
       }
-      while (c >= b && (comparison = comp.compare(x[c], v)) >= 0) {
-        if (comparison == 0) {
-          swap(x, c, d--);
-        }
-        c--;
-      }
-      if (b > c) {
-        break;
-      }
-      swap(x, b++, c--);
-    }
-
-    // Swap partition elements back to middle
-    int n = off + len;
-    int s = Math.min(a - off, b - a);
-    vecswap(x, off, b - s, s);
-    s = Math.min(d - c, n - d - 1);
-    vecswap(x, b, n - s, s);
-
-    // Recursively sort non-partition-elements
-    if ((s = b - a) > 1) {
-      quickSort1(x, off, s, comp);
-    }
-    if ((s = d - c) > 1) {
-      quickSort1(x, n - s, s, comp);
+    } while ((end - r) > 0 && (med - start) > 0);
+    
+    // copy rest of array
+    if ((end - r) <= 0) {
+      System.arraycopy(in, start, out, i, med - start);
+    } else {
+      System.arraycopy(in, r, out, i, end - r);
     }
   }
 
-  /** Sorts the specified sub-array of chars into ascending order. */
-  private static <T extends Comparable<? super T>> void quickSort1(T[] x, int off, int len) {
-    // Insertion sort on smallest arrays
-    if (len < SMALL) {
-      for (int i = off; i < len + off; i++) {
-        for (int j = i; j > off && x[j - 1].compareTo(x[j]) > 0; j--) {
-          swap(x, j, j - 1);
+  private static int find(long[] arr, long val, int bnd, int l, int r,
+      LongComparator c) {
+    int m = l;
+    int d = 1;
+    while (m <= r) {
+      if (c.compare(val, arr[m]) > bnd) {
+        l = m + 1;
+      } else {
+        r = m - 1;
+        break;
+      }
+      m += d;
+      d <<= 1;
+    }
+    while (l <= r) {
+      m = (l + r) >>> 1;
+      if (c.compare(val, arr[m]) > bnd) {
+        l = m + 1;
+      } else {
+        r = m - 1;
+      }
+    }
+    return l - 1;
+  }
+  
+  private final static FloatComparator naturalFloatComparison = new FloatComparator() {
+    @Override
+    public int compare(float o1, float o2) {
+      return Float.compare(o1, o2);
+    }};
+    
+    /**
+     * Perform a merge sort on a range of a float array using Float.compare for an ordering.
+     * @param array the array.
+     * @param start the first index.
+     * @param end the last index (exclusive).
+     * @param comp the comparator object.
+     */
+  public static void mergeSort(float[] array, int start, int end) {
+    mergeSort(array, start, end, naturalFloatComparison);
+  }
+
+  /**
+   * Perform a merge sort on a range of a float array using a specified ordering.
+   * @param array the array.
+   * @param start the first index.
+   * @param end the last index (exclusive).
+   * @param comp the comparator object.
+   */
+  public static void mergeSort(float[] array, int start, int end, FloatComparator comp) {
+    checkBounds(array.length, start, end);
+    float[] out = java.util.Arrays.copyOf(array, array.length);
+    mergeSort(out, array, start, end, comp);
+  }
+
+  private static void mergeSort(float[] in, float[] out, int start, int end,
+      FloatComparator c) {
+    int len = end - start;
+    // use insertion sort for small arrays
+    if (len <= SIMPLE_LENGTH) {
+      for (int i = start + 1; i < end; i++) {
+        float current = out[i];
+        float prev = out[i - 1];
+        if (c.compare(prev, current) > 0) {
+          int j = i;
+          do {
+            out[j--] = prev;
+          } while (j > start && (c.compare(prev = out[j - 1], current) > 0));
+          out[j] = current;
         }
       }
       return;
     }
-
-    // Choose a partition element, v
-    int m = off + len / 2;       // Small arrays, middle element
-    if (len > SMALL) {
-      int l = off;
-      int n = off + len - 1;
-      if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
-        int s = len / 8;
-        l = med3(x, l, l + s, l + 2 * s);
-        m = med3(x, m - s, m, m + s);
-        n = med3(x, n - 2 * s, n - s, n);
-      }
-      m = med3(x, l, m, n); // Mid-size, med of 3
+    int med = (end + start) >>> 1;
+    mergeSort(out, in, start, med, c);
+    mergeSort(out, in, med, end, c);
+    
+    // merging
+    
+    // if arrays are already sorted - no merge
+    if (c.compare(in[med - 1], in[med]) <= 0) {
+      System.arraycopy(in, start, out, start, len);
+      return;
     }
-    T v = x[m];
-
-    // Establish Invariant: v* (<v)* (>v)* v*
-    int a = off, b = a, c = off + len - 1, d = c;
-    while (true) {
-      int comparison;
-      while (b <= c && (comparison = x[b].compareTo(v)) <= 0) {
-        if (comparison == 0) {
-          swap(x, a++, b);
-        }
-        b++;
+    int r = med, i = start;
+    
+    // use merging with exponential search
+    do {
+      float fromVal = in[start];
+      float rVal = in[r];
+      if (c.compare(fromVal, rVal) <= 0) {
+        int l_1 = find(in, rVal, -1, start + 1, med - 1, c);
+        int toCopy = l_1 - start + 1;
+        System.arraycopy(in, start, out, i, toCopy);
+        i += toCopy;
+        out[i++] = rVal;
+        r++;
+        start = l_1 + 1;
+      } else {
+        int r_1 = find(in, fromVal, 0, r + 1, end - 1, c);
+        int toCopy = r_1 - r + 1;
+        System.arraycopy(in, r, out, i, toCopy);
+        i += toCopy;
+        out[i++] = fromVal;
+        start++;
+        r = r_1 + 1;
       }
-      while (c >= b && (comparison = x[c].compareTo(v)) >= 0) {
-        if (comparison == 0) {
-          swap(x, c, d--);
-        }
-        c--;
-      }
-      if (b > c) {
-        break;
-      }
-      swap(x, b++, c--);
-    }
-
-    // Swap partition elements back to middle
-    int n = off + len;
-    int s = Math.min(a - off, b - a);
-    vecswap(x, off, b - s, s);
-    s = Math.min(d - c, n - d - 1);
-    vecswap(x, b, n - s, s);
-
-    // Recursively sort non-partition-elements
-    if ((s = b - a) > 1) {
-      quickSort1(x, off, s);
-    }
-    if ((s = d - c) > 1) {
-      quickSort1(x, n - s, s);
+    } while ((end - r) > 0 && (med - start) > 0);
+    
+    // copy rest of array
+    if ((end - r) <= 0) {
+      System.arraycopy(in, start, out, i, med - start);
+    } else {
+      System.arraycopy(in, r, out, i, end - r);
     }
   }
 
-  /** Sorts the specified sub-array of chars into ascending order. */
-  private static <T> void quickSort1(T[] x, int off, int len, Comparator<? super T> comp) {
-    // Insertion sort on smallest arrays
-    if (len < SMALL) {
-      for (int i = off; i < len + off; i++) {
-        for (int j = i; j > off && comp.compare(x[j - 1], x[j]) > 0; j--) {
-          swap(x, j, j - 1);
+  private static int find(float[] arr, float val, int bnd, int l, int r,
+      FloatComparator c) {
+    int m = l;
+    int d = 1;
+    while (m <= r) {
+      if (c.compare(val, arr[m]) > bnd) {
+        l = m + 1;
+      } else {
+        r = m - 1;
+        break;
+      }
+      m += d;
+      d <<= 1;
+    }
+    while (l <= r) {
+      m = (l + r) >>> 1;
+      if (c.compare(val, arr[m]) > bnd) {
+        l = m + 1;
+      } else {
+        r = m - 1;
+      }
+    }
+    return l - 1;
+  }
+  
+  private final static DoubleComparator naturalDoubleComparison = new DoubleComparator() {
+    @Override
+    public int compare(double o1, double o2) {
+      return Double.compare(o1, o2);
+    }};
+    
+    
+    /**
+     * Perform a merge sort on a range of a double array using a Double.compare as an ordering.
+     * @param array the array.
+     * @param start the first index.
+     * @param end the last index (exclusive).
+     * @param comp the comparator object.
+     */
+  public static void mergeSort(double[] array, int start, int end) {
+    mergeSort(array, start, end, naturalDoubleComparison);
+  }
+
+  /**
+   * Perform a merge sort on a range of a double array using a specified ordering.
+   * @param array the array.
+   * @param start the first index.
+   * @param end the last index (exclusive).
+   * @param comp the comparator object.
+   */
+  public static void mergeSort(double[] array, int start, int end, DoubleComparator comp) {
+    checkBounds(array.length, start, end);
+    double[] out = java.util.Arrays.copyOf(array, array.length);
+    mergeSort(out, array, start, end, comp);
+  }
+
+  private static void mergeSort(double[] in, double[] out, int start, int end,
+      DoubleComparator c) {
+    int len = end - start;
+    // use insertion sort for small arrays
+    if (len <= SIMPLE_LENGTH) {
+      for (int i = start + 1; i < end; i++) {
+        double current = out[i];
+        double prev = out[i - 1];
+        if (c.compare(prev, current) > 0) {
+          int j = i;
+          do {
+            out[j--] = prev;
+          } while (j > start && (c.compare(prev = out[j - 1], current) > 0));
+          out[j] = current;
         }
       }
       return;
     }
-
-    // Choose a partition element, v
-    int m = off + len / 2;       // Small arrays, middle element
-    if (len > SMALL) {
-      int l = off;
-      int n = off + len - 1;
-      if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
-        int s = len / 8;
-        l = med3(x, l, l + s, l + 2 * s, comp);
-        m = med3(x, m - s, m, m + s, comp);
-        n = med3(x, n - 2 * s, n - s, n, comp);
-      }
-      m = med3(x, l, m, n, comp); // Mid-size, med of 3
-    }
-    T v = x[m];
-
-    // Establish Invariant: v* (<v)* (>v)* v*
-    int a = off, b = a, c = off + len - 1, d = c;
-    while (true) {
-      int comparison;
-      while (b <= c && (comparison = comp.compare(x[b], v)) <= 0) {
-        if (comparison == 0) {
-          swap(x, a++, b);
-        }
-        b++;
-      }
-      while (c >= b && (comparison = comp.compare(x[c], v)) >= 0) {
-        if (comparison == 0) {
-          swap(x, c, d--);
-        }
-        c--;
-      }
-      if (b > c) {
-        break;
-      }
-      swap(x, b++, c--);
-    }
-
-    // Swap partition elements back to middle
-    int n = off + len;
-    int s = Math.min(a - off, b - a);
-    vecswap(x, off, b - s, s);
-    s = Math.min(d - c, n - d - 1);
-    vecswap(x, b, n - s, s);
-
-    // Recursively sort non-partition-elements
-    if ((s = b - a) > 1) {
-      quickSort1(x, off, s, comp);
-    }
-    if ((s = d - c) > 1) {
-      quickSort1(x, n - s, s, comp);
-    }
-  }
-
-  /** Sorts the specified sub-array of chars into ascending order. */
-  private static void quickSort1(short[] x, int off, int len, ShortComparator comp) {
-    // Insertion sort on smallest arrays
-    if (len < SMALL) {
-      for (int i = off; i < len + off; i++) {
-        for (int j = i; j > off && comp.compare(x[j - 1], x[j]) > 0; j--) {
-          swap(x, j, j - 1);
-        }
-      }
+    int med = (end + start) >>> 1;
+    mergeSort(out, in, start, med, c);
+    mergeSort(out, in, med, end, c);
+    
+    // merging
+    
+    // if arrays are already sorted - no merge
+    if (c.compare(in[med - 1], in[med]) <= 0) {
+      System.arraycopy(in, start, out, start, len);
       return;
     }
-
-    // Choose a partition element, v
-    int m = off + len / 2;       // Small arrays, middle element
-    if (len > SMALL) {
-      int l = off;
-      int n = off + len - 1;
-      if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
-        int s = len / 8;
-        l = med3(x, l, l + s, l + 2 * s, comp);
-        m = med3(x, m - s, m, m + s, comp);
-        n = med3(x, n - 2 * s, n - s, n, comp);
+    int r = med, i = start;
+    
+    // use merging with exponential search
+    do {
+      double fromVal = in[start];
+      double rVal = in[r];
+      if (c.compare(fromVal, rVal) <= 0) {
+        int l_1 = find(in, rVal, -1, start + 1, med - 1, c);
+        int toCopy = l_1 - start + 1;
+        System.arraycopy(in, start, out, i, toCopy);
+        i += toCopy;
+        out[i++] = rVal;
+        r++;
+        start = l_1 + 1;
+      } else {
+        int r_1 = find(in, fromVal, 0, r + 1, end - 1, c);
+        int toCopy = r_1 - r + 1;
+        System.arraycopy(in, r, out, i, toCopy);
+        i += toCopy;
+        out[i++] = fromVal;
+        start++;
+        r = r_1 + 1;
       }
-      m = med3(x, l, m, n, comp); // Mid-size, med of 3
+    } while ((end - r) > 0 && (med - start) > 0);
+    
+    // copy rest of array
+    if ((end - r) <= 0) {
+      System.arraycopy(in, start, out, i, med - start);
+    } else {
+      System.arraycopy(in, r, out, i, end - r);
     }
-    short v = x[m];
+  }
 
-    // Establish Invariant: v* (<v)* (>v)* v*
-    int a = off, b = a, c = off + len - 1, d = c;
-    while (true) {
-      int comparison;
-      while (b <= c && (comparison = comp.compare(x[b], v)) <= 0) {
-        if (comparison == 0) {
-          swap(x, a++, b);
-        }
-        b++;
-      }
-      while (c >= b && (comparison = comp.compare(x[c], v)) >= 0) {
-        if (comparison == 0) {
-          swap(x, c, d--);
-        }
-        c--;
-      }
-      if (b > c) {
+  private static int find(double[] arr, double val, int bnd, int l, int r,
+      DoubleComparator c) {
+    int m = l;
+    int d = 1;
+    while (m <= r) {
+      if (c.compare(val, arr[m]) > bnd) {
+        l = m + 1;
+      } else {
+        r = m - 1;
         break;
       }
-      swap(x, b++, c--);
+      m += d;
+      d <<= 1;
     }
-
-    // Swap partition elements back to middle
-    int n = off + len;
-    int s = Math.min(a - off, b - a);
-    vecswap(x, off, b - s, s);
-    s = Math.min(d - c, n - d - 1);
-    vecswap(x, b, n - s, s);
-
-    // Recursively sort non-partition-elements
-    if ((s = b - a) > 1) {
-      quickSort1(x, off, s, comp);
+    while (l <= r) {
+      m = (l + r) >>> 1;
+      if (c.compare(val, arr[m]) > bnd) {
+        l = m + 1;
+      } else {
+        r = m - 1;
+      }
     }
-    if ((s = d - c) > 1) {
-      quickSort1(x, n - s, s, comp);
-    }
+    return l - 1;
   }
 
-  /** Check that fromIndex and toIndex are in range, and throw an appropriate exception if they aren't. */
-  private static void rangeCheck(int arrayLen, int fromIndex, int toIndex) {
-    if (fromIndex > toIndex) {
-      throw new IllegalArgumentException("fromIndex(" + fromIndex +
-          ") > toIndex(" + toIndex + ')');
-    }
-    if (fromIndex < 0) {
-      throw new ArrayIndexOutOfBoundsException(fromIndex);
-    }
-    if (toIndex > arrayLen) {
-      throw new ArrayIndexOutOfBoundsException(toIndex);
-    }
-  }
-
-  /** Swaps x[a] with x[b]. */
-  private static void swap(byte[] x, int a, int b) {
-    byte t = x[a];
-    x[a] = x[b];
-    x[b] = t;
-  }
-
-  /** Swaps x[a] with x[b]. */
-  private static void swap(char[] x, int a, int b) {
-    char t = x[a];
-    x[a] = x[b];
-    x[b] = t;
-  }
-
-  /** Swaps x[a] with x[b]. */
-  private static void swap(double[] x, int a, int b) {
-    double t = x[a];
-    x[a] = x[b];
-    x[b] = t;
-  }
-
-  /** Swaps x[a] with x[b]. */
-  private static void swap(float[] x, int a, int b) {
-    float t = x[a];
-    x[a] = x[b];
-    x[b] = t;
-  }
-
-  /** Swaps x[a] with x[b]. */
-  private static void swap(int[] x, int a, int b) {
-    int t = x[a];
-    x[a] = x[b];
-    x[b] = t;
-  }
-
-  /** Swaps x[a] with x[b]. */
-  private static void swap(long[] x, int a, int b) {
-    long t = x[a];
-    x[a] = x[b];
-    x[b] = t;
-  }
-
-  /** Swaps x[a] with x[b]. */
-  private static void swap(Object[] x, int a, int b) {
-    Object t = x[a];
-    x[a] = x[b];
-    x[b] = t;
-  }
-
-  /** Swaps x[a] with x[b]. */
-  private static void swap(short[] x, int a, int b) {
-    short t = x[a];
-    x[a] = x[b];
-    x[b] = t;
-  }
-
-  /** Swaps x[a .. (a+n-1)] with x[b .. (b+n-1)]. */
-  private static void vecswap(byte[] x, int a, int b, int n) {
-    for (int i = 0; i < n; i++, a++, b++) {
-      swap(x, a, b);
-    }
-  }
-
-  /** Swaps x[a .. (a+n-1)] with x[b .. (b+n-1)]. */
-  private static void vecswap(char[] x, int a, int b, int n) {
-    for (int i = 0; i < n; i++, a++, b++) {
-      swap(x, a, b);
-    }
-  }
-
-  /** Swaps x[a .. (a+n-1)] with x[b .. (b+n-1)]. */
-  private static void vecswap(double[] x, int a, int b, int n) {
-    for (int i = 0; i < n; i++, a++, b++) {
-      swap(x, a, b);
-    }
-  }
-
-  /** Swaps x[a .. (a+n-1)] with x[b .. (b+n-1)]. */
-  private static void vecswap(float[] x, int a, int b, int n) {
-    for (int i = 0; i < n; i++, a++, b++) {
-      swap(x, a, b);
-    }
-  }
-
-  /** Swaps x[a .. (a+n-1)] with x[b .. (b+n-1)]. */
-  private static void vecswap(int[] x, int a, int b, int n) {
-    for (int i = 0; i < n; i++, a++, b++) {
-      swap(x, a, b);
-    }
-  }
-
-  /** Swaps x[a .. (a+n-1)] with x[b .. (b+n-1)]. */
-  private static void vecswap(long[] x, int a, int b, int n) {
-    for (int i = 0; i < n; i++, a++, b++) {
-      swap(x, a, b);
-    }
-  }
-
-  /** Swaps x[a .. (a+n-1)] with x[b .. (b+n-1)]. */
-  private static void vecswap(Object[] x, int a, int b, int n) {
-    for (int i = 0; i < n; i++, a++, b++) {
-      swap(x, a, b);
-    }
-  }
-
-  /** Swaps x[a .. (a+n-1)] with x[b .. (b+n-1)]. */
-  private static void vecswap(short[] x, int a, int b, int n) {
-    for (int i = 0; i < n; i++, a++, b++) {
-      swap(x, a, b);
-    }
-  }
 }
