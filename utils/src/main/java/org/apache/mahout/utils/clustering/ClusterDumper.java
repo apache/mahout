@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -61,9 +62,120 @@ public final class ClusterDumper {
   private static final String LINE_SEP = System.getProperty("line.separator");
   private static final Pattern TAB_PATTERN = Pattern.compile("\t");
 
-  private ClusterDumper() {
+  String seqFileDir;
+  String pointsDir;
+  String termDictionary;
+  String outputFile;
+  int subString = Integer.MAX_VALUE;
+  Map<String, List<String>> clusterIdToPoints = null;
+  
+  public ClusterDumper(String seqFileDir, String pointsDir) throws IOException {
+    this.seqFileDir = seqFileDir;
+    this.pointsDir = pointsDir;
+    init();
+  }
+  
+  private void init() throws IOException {
+    if (this.pointsDir != null) {
+      JobConf conf = new JobConf(Job.class);
+      //read in the points
+      clusterIdToPoints = readPoints(this.pointsDir, conf);
+    } else {
+      clusterIdToPoints = Collections.emptyMap();
+    }
   }
 
+  public void printClusters() throws IOException, InstantiationException, IllegalAccessException {
+    JobClient client = new JobClient();
+    JobConf conf = new JobConf(Job.class);
+    client.setConf(conf);
+    
+    ArrayList<String> dictionary = null;
+    if (this.termDictionary != null) {
+      dictionary = getTermDict(this.termDictionary);
+    }
+    
+    Writer writer = null;
+    if (this.outputFile != null){
+      writer = new FileWriter(this.outputFile);
+    } else {
+      writer = new OutputStreamWriter(System.out);
+    }
+    
+    File[] seqFileList = new File(this.seqFileDir).listFiles(new FilenameFilter(){
+      @Override
+      public boolean accept(File file, String name) {
+        return name.endsWith(".crc") == false;
+      }
+    });        
+    for (File seqFile : seqFileList) {
+      if (!seqFile.isFile()) {
+        continue;
+      }
+      Path path = new Path(seqFile.getAbsolutePath());
+      System.out.println("Input Path: " + path);
+      FileSystem fs = FileSystem.get(path.toUri(), conf);
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
+      Writable key = (Writable) reader.getKeyClass().newInstance();
+      ClusterBase value = (ClusterBase) reader.getValueClass().newInstance();
+      while (reader.next(key, value)){
+        Vector center = value.getCenter();
+        String fmtStr = center.asFormatString();
+        writer.append("Id: ").append(String.valueOf(value.getId())).append(":").append("name:")
+                .append(center.getName()).append(":").append(fmtStr.substring(0, Math.min(subString, fmtStr.length()))).append(LINE_SEP);
+        
+        if (dictionary != null) {
+          String topTerms = getTopFeatures(center, dictionary, 10);
+          writer.write("\tTop Terms: ");
+          writer.write(topTerms);
+          writer.write(LINE_SEP);
+        }
+        
+        List<String> points = clusterIdToPoints.get(String.valueOf(value.getId()));
+        if (points != null){
+          writer.write("\tPoints: ");
+          for (Iterator<String> iterator = points.iterator(); iterator.hasNext();) {
+            String point = iterator.next();
+            writer.append(point);
+            if (iterator.hasNext()){
+              writer.append(", ");
+            }
+          }
+          writer.write(LINE_SEP);
+        }
+        writer.flush();
+      }
+      reader.close();
+    }
+    if (this.outputFile != null){
+      writer.flush();
+      writer.close();
+    } 
+  }
+  
+  public String getOutputFile() {
+    return outputFile;
+  }
+  public void setOutputFile(String outputFile) {
+    this.outputFile = outputFile;
+  }
+  public int getSubString() {
+    return subString;
+  }
+  public void setSubString(int subString) {
+    this.subString = subString;
+  }
+  public Map<String, List<String>> getClusterIdToPoints() {
+    return clusterIdToPoints;
+  }
+  public String getTermDictionary() {
+    return termDictionary;
+  }
+  public void setTermDictionary(String termDictionary) {
+    this.termDictionary = termDictionary;
+  }
+  
+  
   public static void main(String[] args) throws IOException, IllegalAccessException, InstantiationException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
@@ -80,7 +192,8 @@ public final class ClusterDumper {
             withDescription("The number of chars of the asFormatString() to print").withShortName("b").create();
     Option pointsOpt = obuilder.withLongName("pointsDir").withRequired(false).withArgument(
             abuilder.withName("pointsDir").withMinimum(1).withMaximum(1).create()).
-            withDescription("The directory contaning points sequence files mapping input vectors to their cluster.  If specified, then the program will output the points associated with a cluster").withShortName("p").create();
+            withDescription("The directory containing points sequence files mapping input vectors to their cluster.  " +
+                    "If specified, then the program will output the points associated with a cluster").withShortName("p").create();
     Option dictOpt = obuilder.withLongName("dictionary").withRequired(false).withArgument(
         abuilder.withName("dictionary").withMinimum(1).withMaximum(1).create()).
         withDescription("The dictionary file. ").withShortName("d").create();
@@ -89,102 +202,65 @@ public final class ClusterDumper {
 
     Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt).withOption(substringOpt).withOption(pointsOpt).withOption(dictOpt).create();
 
+    
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
       CommandLine cmdLine = parser.parse(args);
-
       if (cmdLine.hasOption(helpOpt)) {
-
         CommandLineUtil.printHelp(group);
         return;
       }
-
-      ArrayList<String> dictionary = null;
+      if (!cmdLine.hasOption(seqOpt)) {
+        return;
+      }
+      String seqFileDir = cmdLine.getValue(seqOpt).toString();      
+      String termDictionary = null;
       if (cmdLine.hasOption(dictOpt)) {
-        dictionary = getTermDict(cmdLine.getValue(dictOpt).toString());
+        termDictionary = cmdLine.getValue(dictOpt).toString();
+      }
+
+      String pointsDir = null;
+      if (cmdLine.hasOption(pointsOpt)) {
+        pointsDir = cmdLine.getValue(pointsOpt).toString();
+      }
+      String outputFile = null;
+      if (cmdLine.hasOption(outputOpt)){
+        outputFile = cmdLine.getValue(outputOpt).toString();
+      }
+
+      int sub = -1;
+      if (cmdLine.hasOption(substringOpt)) {
+        sub = Integer.parseInt(cmdLine.getValue(substringOpt).toString());
       }
       
-      if (cmdLine.hasOption(seqOpt)) {
-        JobClient client = new JobClient();
-        JobConf conf = new JobConf(Job.class);
-        client.setConf(conf);
-        Map<String, List<String>> clusterIdToPoints;
-        if (cmdLine.hasOption(pointsOpt)) {
-          //read in the points
-          clusterIdToPoints = readPoints(cmdLine.getValue(pointsOpt).toString(), conf);
-        } else {
-          clusterIdToPoints = Collections.emptyMap();
-        }
-        Writer writer;
-        if (cmdLine.hasOption(outputOpt)){
-          writer = new FileWriter(cmdLine.getValue(outputOpt).toString());
-        } else {
-          writer = new OutputStreamWriter(System.out);
-        }
-        int sub = Integer.MAX_VALUE;
-        if (cmdLine.hasOption(substringOpt)) {
-          sub = Integer.parseInt(cmdLine.getValue(substringOpt).toString());
-        }
-        
-        String seqDir = cmdLine.getValue(seqOpt).toString();        
-        File[] seqFileList = new File(seqDir).listFiles();        
-        for (File seqFile : seqFileList) {          
-          if (!seqFile.isFile()) {
-            continue;
-          }          
-          Path path = new Path(seqFile.getAbsolutePath());
-          System.out.println("Input Path: " + path);
-          FileSystem fs = FileSystem.get(path.toUri(), conf);
-          SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-          Writable key = (Writable) reader.getKeyClass().newInstance();
-          ClusterBase value = (ClusterBase) reader.getValueClass().newInstance();
-          while (reader.next(key, value)){
-            Vector center = value.getCenter();
-            String fmtStr = center.asFormatString();
-            writer.append(String.valueOf(value.getId())).append(":").append("name:")
-                    .append(center.getName()).append(":").append(fmtStr.substring(0, Math.min(sub, fmtStr.length()))).append(LINE_SEP);
-            
-            if (dictionary != null) {
-              String topTerms = getTopFeatures(center, dictionary, 10);
-              writer.write("\tTop Terms: ");
-              writer.write(topTerms);
-              writer.write(LINE_SEP);
-            }
-            
-            List<String> points = clusterIdToPoints.get(String.valueOf(value.getId()));
-            if (points != null){
-              writer.write("\tPoints: ");
-              for (Iterator<String> iterator = points.iterator(); iterator.hasNext();) {
-                String point = iterator.next();
-                writer.append(point);
-                if (iterator.hasNext()){
-                  writer.append(", ");
-                }
-              }
-              writer.write(LINE_SEP);
-            }
-            writer.flush();
-          }
-          reader.close();
-        }
-        if (cmdLine.hasOption(outputOpt)){
-          writer.flush();
-          writer.close();
-        }
+      ClusterDumper clusterDumper = new ClusterDumper(seqFileDir, pointsDir);
+      
+      if (outputFile != null) {
+        clusterDumper.setOutputFile(outputFile);
       }
-
+      if (termDictionary != null) {
+        clusterDumper.setTermDictionary(termDictionary);
+      }
+      if (sub > 0) {
+        clusterDumper.setSubString(sub);
+      }      
+      clusterDumper.printClusters();      
     } catch (OptionException e) {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
-
   }
 
   private static Map<String, List<String>> readPoints(String pointsPathDir, JobConf conf) throws IOException {
     Map<String, List<String>> result = new HashMap<String, List<String>>();
     
-    File[] children = new File(pointsPathDir).listFiles();
+    File[] children = new File(pointsPathDir).listFiles(new FilenameFilter(){
+      @Override
+      public boolean accept(File file, String name) {
+        return name.endsWith(".crc") == false; 
+      }
+    });
     
     for (File file : children) {
       if (!file.isFile()) {
