@@ -54,6 +54,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 public final class ClusterDumper {
@@ -253,7 +255,7 @@ public final class ClusterDumper {
   }
 
   private static Map<String, List<String>> readPoints(String pointsPathDir, JobConf conf) throws IOException {
-    Map<String, List<String>> result = new HashMap<String, List<String>>();
+    SortedMap<String, List<String>> result = new TreeMap<String, List<String>>();
     
     File[] children = new File(pointsPathDir).listFiles(new FilenameFilter(){
       @Override
