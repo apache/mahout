@@ -142,10 +142,11 @@ public class ClusterLabels {
     }
 
     for (String clusterID : clusterIdToPoints.keySet()) {
-      List<TermInfoClusterInOut> termInfos = getClusterLabels(clusterID, clusterIdToPoints.get(clusterID));
+      List<String> ids = clusterIdToPoints.get(clusterID);
+      List<TermInfoClusterInOut> termInfos = getClusterLabels(clusterID, ids);
       if (termInfos != null) {
         writer.write(LINE_SEP);
-        writer.write("Top labels for Cluster " + clusterID);
+        writer.write("Top labels for Cluster " + clusterID + " containing " + ids.size() + " vectors");
         writer.write(LINE_SEP);
         writer.write("Term \t\t LLR \t\t In-ClusterDF \t\t Out-ClusterDF ");
         writer.write(LINE_SEP);
