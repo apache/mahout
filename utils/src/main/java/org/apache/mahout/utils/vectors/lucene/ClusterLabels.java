@@ -31,6 +31,8 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermDocs;
 import org.apache.lucene.index.TermEnum;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.OpenBitSet;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.utils.clustering.ClusterDumper;
@@ -38,6 +40,7 @@ import org.apache.mahout.utils.vectors.TermEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -170,13 +173,13 @@ public class ClusterLabels {
   protected List<TermInfoClusterInOut> getClusterLabels(String clusterID, List<String> ids) throws CorruptIndexException, IOException {
 
     if (ids.size() < minNumIds) {
-      log.info("Skipping small cluster " + clusterID);
+      log.info("Skipping small cluster " + clusterID + " with size: " + ids.size());
       return null;
     }
 
     log.info("Processing Cluster " + clusterID + " with " + ids.size() + " documents");
-
-    IndexReader reader = IndexReader.open(this.indexDir, false);
+    Directory dir = FSDirectory.open(new File(this.indexDir));
+    IndexReader reader = IndexReader.open(dir, false);
 
     log.info("# of documents in the index " + reader.numDocs());
 
