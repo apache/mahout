@@ -36,6 +36,7 @@ import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -70,10 +71,15 @@ public final class VectorDumper {
     Option outputOpt = obuilder.withLongName("output").withRequired(false).withArgument(
             abuilder.withName("output").withMinimum(1).withMaximum(1).create()).
             withDescription("The output file.  If not specified, dumps to the console").withShortName("o").create();
+    Option dictOpt = obuilder.withLongName("dictionary").withRequired(false).withArgument(
+            abuilder.withName("dictionary").withMinimum(1).withMaximum(1).create()).
+            withDescription("The dictionary file. ").withShortName("d").create();
+    Option centroidJSonOpt = obuilder.withLongName("json").withRequired(false).
+            withDescription("Output the centroid as JSON.  Otherwise it substitues in the terms for vector cell entries").withShortName("j").create();
     Option helpOpt = obuilder.withLongName("help").
             withDescription("Print out help").withShortName("h").create();
 
-    Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt)
+    Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt).withOption(dictOpt).withOption(centroidJSonOpt)
             .withOption(vectorAsKeyOpt).withOption(printKeyOpt).create();
 
     try {
@@ -93,6 +99,12 @@ public final class VectorDumper {
         JobClient client = new JobClient();
         JobConf conf = new JobConf(Job.class);
         client.setConf(conf);
+
+        String[] dictionary = null;
+        if (cmdLine.hasOption(dictOpt)) {
+          dictionary = VectorHelper.loadTermDictionary(new File(cmdLine.getValue(dictOpt).toString()));
+        }
+        boolean useJSON = cmdLine.hasOption(centroidJSonOpt);
         FileSystem fs = FileSystem.get(path.toUri(), conf);
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
         SequenceFileVectorIterable vectorIterable = new SequenceFileVectorIterable(reader, cmdLine.hasOption(vectorAsKeyOpt));
@@ -108,18 +120,20 @@ public final class VectorDumper {
         int i = 0;
         while (iterator.hasNext()) {
           Vector vector = iterator.next();
-          if (printKey){
+          if (printKey) {
             writer.write(iterator.key().toString());
             writer.write("\t");
           }
-          writer.write(vector.asFormatString());
+          String fmtStr = useJSON == true ? vector.asFormatString() : (dictionary != null ? VectorHelper.vectorToString(vector, dictionary) : vector.asFormatString());
+          writer.write(fmtStr);
           writer.write(LINE_SEP);
           i++;
         }
-        System.err.println("Dumped " + i + " Vectors");
+        writer.flush();
         if (cmdLine.hasOption(outputOpt)) {
           writer.close();
         }
+        System.err.println("Dumped " + i + " Vectors");
       }
 
     } catch (OptionException e) {
