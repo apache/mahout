@@ -36,7 +36,7 @@ import org.apache.hadoop.mapred.jobcontrol.Job;
 import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.CommandLineUtil;
-import org.apache.mahout.common.FileLineIterator;
+import org.apache.mahout.utils.vectors.VectorHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,20 +49,18 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.regex.Pattern;
 
 public final class ClusterDumper {
 
   private static final Logger log = LoggerFactory.getLogger(ClusterDumper.class);
   private static final String LINE_SEP = System.getProperty("line.separator");
-  private static final Pattern TAB_PATTERN = Pattern.compile("\t");
+
 
   String seqFileDir;
   String pointsDir;
@@ -70,7 +68,8 @@ public final class ClusterDumper {
   String outputFile;
   int subString = Integer.MAX_VALUE;
   Map<String, List<String>> clusterIdToPoints = null;
-  
+  private boolean useJSON = false;
+
   public ClusterDumper(String seqFileDir, String pointsDir) throws IOException {
     this.seqFileDir = seqFileDir;
     this.pointsDir = pointsDir;
@@ -92,9 +91,9 @@ public final class ClusterDumper {
     JobConf conf = new JobConf(Job.class);
     client.setConf(conf);
     
-    ArrayList<String> dictionary = null;
+    String[] dictionary = null;
     if (this.termDictionary != null) {
-      dictionary = getTermDict(this.termDictionary);
+      dictionary = VectorHelper.loadTermDictionary(new File(this.termDictionary));
     }
     
     Writer writer = null;
@@ -122,7 +121,7 @@ public final class ClusterDumper {
       ClusterBase value = (ClusterBase) reader.getValueClass().newInstance();
       while (reader.next(key, value)){
         Vector center = value.getCenter();
-        String fmtStr = center.asFormatString();
+        String fmtStr = useJSON == false ? VectorHelper.vectorToString(center, dictionary) : center.asFormatString();
         writer.append("Id: ").append(String.valueOf(value.getId())).append(":").append("name:")
                 .append(center.getName()).append(":").append(fmtStr.substring(0, Math.min(subString, fmtStr.length()))).append(LINE_SEP);
         
@@ -192,6 +191,8 @@ public final class ClusterDumper {
     Option substringOpt = obuilder.withLongName("substring").withRequired(false).withArgument(
             abuilder.withName("substring").withMinimum(1).withMaximum(1).create()).
             withDescription("The number of chars of the asFormatString() to print").withShortName("b").create();
+    Option centroidJSonOpt = obuilder.withLongName("json").withRequired(false).
+            withDescription("Output the centroid as JSON.  Otherwise it substitues in the terms for vector cell entries").withShortName("j").create();
     Option pointsOpt = obuilder.withLongName("pointsDir").withRequired(false).withArgument(
             abuilder.withName("pointsDir").withMinimum(1).withMaximum(1).create()).
             withDescription("The directory containing points sequence files mapping input vectors to their cluster.  " +
@@ -202,7 +203,7 @@ public final class ClusterDumper {
     Option helpOpt = obuilder.withLongName("help").
             withDescription("Print out help").withShortName("h").create();
 
-    Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt).withOption(substringOpt).withOption(pointsOpt).withOption(dictOpt).create();
+    Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt).withOption(substringOpt).withOption(pointsOpt).withOption(centroidJSonOpt).withOption(dictOpt).create();
 
     
     try {
@@ -235,9 +236,11 @@ public final class ClusterDumper {
       if (cmdLine.hasOption(substringOpt)) {
         sub = Integer.parseInt(cmdLine.getValue(substringOpt).toString());
       }
-      
       ClusterDumper clusterDumper = new ClusterDumper(seqFileDir, pointsDir);
-      
+      if (cmdLine.hasOption(centroidJSonOpt)) {
+        clusterDumper.setUseJSON(true);
+      }
+
       if (outputFile != null) {
         clusterDumper.setOutputFile(outputFile);
       }
@@ -252,6 +255,10 @@ public final class ClusterDumper {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
+  }
+
+  private void setUseJSON(boolean json) {
+    this.useJSON = json;
   }
 
   private static Map<String, List<String>> readPoints(String pointsPathDir, JobConf conf) throws IOException {
@@ -295,31 +302,7 @@ public final class ClusterDumper {
     return result;
   }
 
-  private static ArrayList<String> getTermDict(String dictFile) throws IOException {
-    FileLineIterator it = new FileLineIterator(new File(dictFile));
 
-    int numEntries = Integer.parseInt(it.next());
-    System.out.println(numEntries);
-    ArrayList<String> result = new ArrayList<String>();
-    
-    for (int i = 0; i < numEntries; i++) {
-      result.add("dummyentry");
-    }
-    
-    while (it.hasNext()) {
-      String line = it.next();
-      if (line.startsWith("#")) {
-        continue;
-      }
-      String[] tokens = TAB_PATTERN.split(line);
-      if (tokens.length < 3) {
-        continue;
-      }
-      int index = Integer.parseInt(tokens[2]);
-      result.set(index, tokens[0]);
-    }    
-    return result;
-  }
 
   static class TermIndexWeight {
     public int index = -1;
@@ -331,7 +314,7 @@ public final class ClusterDumper {
     }    
   }
 
-  private static String getTopFeatures(Vector vector, ArrayList<String> dictionary, int numTerms) {   
+  private static String getTopFeatures(Vector vector, String[] dictionary, int numTerms) {
 
     List<TermIndexWeight> vectorTerms = new ArrayList<TermIndexWeight>();
     
@@ -353,7 +336,7 @@ public final class ClusterDumper {
       
       for (int i = 0; i < vectorTerms.size() && i < numTerms; i++) {
         int index = vectorTerms.get(i).index;
-        String dictTerm = dictionary.get(index);
+        String dictTerm = dictionary[index];
         if (dictTerm == null) {
           log.error("Dictionary entry missing for "+ index);
           continue;
