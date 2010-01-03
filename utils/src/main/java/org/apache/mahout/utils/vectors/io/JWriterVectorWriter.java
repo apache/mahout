@@ -43,7 +43,7 @@ public class JWriterVectorWriter implements VectorWriter {
         break;
       }
       writer.write(vector.asFormatString());
-      writer.write("\n");
+      writer.write('\n');
 
       result++;
     }
@@ -52,6 +52,7 @@ public class JWriterVectorWriter implements VectorWriter {
 
   @Override
   public void close() throws IOException {
-
+    writer.flush();
+    writer.close();
   }
 }
