@@ -35,6 +35,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.OpenBitSet;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.math.stats.LogLikelihood;
 import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.apache.mahout.utils.vectors.TermEntry;
 import org.slf4j.Logger;
@@ -282,35 +283,11 @@ public class ClusterLabels {
     int k12 = clusterSize - inDF;
     int k22 = corpusSize - clusterSize - outDF;
 
-    return logLikelihoodRatio(inDF, k12, outDF, k22);
+    return LogLikelihood.logLikelihoodRatio(inDF, k12, outDF, k22);
   }
 
 
-  private double entropy(int ... elements) {
-    double sum = 0;
-    for (int element : elements) {
-      sum += element;
-    }
-    double result = 0.0;
-    for (int x : elements) {
-      if (x < 0) {
-        throw new IllegalArgumentException("Should not have negative count for entropy computation: (" + x + ")");
-      }
-      int zeroFlag = (x == 0 ? 1 : 0);
-      result += x * Math.log((x + zeroFlag) / sum);
-    }
-    return -result;
-  }
 
-  /**
-   * Calculate Log-likehood ratio for the given matrix.
-   */
-  private double logLikelihoodRatio(int k11, int k12, int k21, int k22) {
-    double rowEntropy = entropy(k11, k12) + entropy(k21, k22);
-    double columnEntropy = entropy(k11, k21) + entropy(k12, k22);
-    double matrixEntropy = entropy(k11, k12, k21, k22);
-    return 2 * (matrixEntropy - rowEntropy - columnEntropy);
-  }
 
   public String getIdField() {
     return idField;
