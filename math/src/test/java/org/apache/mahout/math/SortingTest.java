@@ -96,7 +96,7 @@ public class SortingTest extends Assert {
 
   @Before
   public void before() {
-    random = new Random();
+    random = new Random(0);
   }
   
   static class ForSorting implements Comparable<ForSorting> {
@@ -307,6 +307,36 @@ public class SortingTest extends Assert {
     for (int x = 100; x < (stuff.length - 1); x++) {
       assertTrue(stuff[x] >= stuff[x + 1]);
     }
+  }
+  
+  @Test
+  public void testQuickSortExternals() {
+    int stuff[] = randomInts();
+    final Integer[] bigInts = new Integer[stuff.length];
+    for (int x = 0; x < stuff.length; x ++) {
+      bigInts[x] = Integer.valueOf(stuff[x]);
+    }
+    
+    Sorting.quickSort(0, stuff.length, new IntComparator() {
+
+      @Override
+      public int compare(int o1, int o2) {
+        return bigInts[o1].compareTo(bigInts[o2]);
+      }}, 
+      
+      new Swapper() {
+
+        @Override
+        public void swap(int a, int b) {
+          Integer temp = bigInts[a];
+          bigInts[a] = bigInts[b];
+          bigInts[b] = temp;
+        }});
+    
+    for (int x = 0; x < (stuff.length - 1); x++) {
+      assertTrue("problem at index " + x, bigInts[x].compareTo(bigInts[x + 1]) <= 0);
+    }
+
   }
   
   @Test

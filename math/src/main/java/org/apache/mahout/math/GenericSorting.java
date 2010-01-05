@@ -1,3 +1,21 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 /*
 Copyright � 1999 CERN - European Organization for Nuclear Research.
 Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose 
@@ -10,14 +28,10 @@ package org.apache.mahout.math;
 
 import org.apache.mahout.math.function.IntComparator;
 
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
 public class GenericSorting {
 
   private static final int SMALL = 7;
-  private static final int MEDIUM = 40;
 
-  /** Makes this class non instantiable, but still let's others inherit from it. */
   private GenericSorting() {
   }
 
@@ -105,16 +119,6 @@ public class GenericSorting {
     return first;
   }
 
-  /** Returns the index of the median of the three indexed chars. */
-  private static int med3(int a, int b, int c, IntComparator comp) {
-    int ab = comp.compare(a, b);
-    int ac = comp.compare(a, c);
-    int bc = comp.compare(b, c);
-    return (ab < 0 ?
-        (bc < 0 ? b : ac < 0 ? c : a) :
-        (bc > 0 ? b : ac > 0 ? c : a));
-  }
-
   /**
    * Sorts the specified range of elements according to the order induced by the specified comparator.  All elements in
    * the range must be <i>mutually comparable</i> by the specified comparator (that is, <tt>c.compare(a, b)</tt> must
@@ -168,138 +172,6 @@ public class GenericSorting {
   }
 
   /**
-   * Sorts the specified range of elements according to the order induced by the specified comparator.  All elements in
-   * the range must be <i>mutually comparable</i> by the specified comparator (that is, <tt>c.compare(a, b)</tt> must
-   * not throw an exception for any indexes <tt>a</tt> and <tt>b</tt> in the range).<p>
-   *
-   * The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's "Engineering a
-   * Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993).  This algorithm offers
-   * n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic performance.
-   *
-   * @param fromIndex the index of the first element (inclusive) to be sorted.
-   * @param toIndex   the index of the last element (exclusive) to be sorted.
-   * @param c         the comparator to determine the order of the generic data.
-   * @param swapper   an object that knows how to swap the elements at any two indexes (a,b).
-   * @see IntComparator
-   * @see Swapper
-   */
-  public static void quickSort(int fromIndex, int toIndex, IntComparator c, Swapper swapper) {
-    quickSort1(fromIndex, toIndex - fromIndex, c, swapper);
-  }
-
-  /** Sorts the specified sub-array into ascending order. */
-  private static void quickSort1(int off, int len, IntComparator comp, Swapper swapper) {
-    // Insertion sort on smallest arrays
-    if (len < SMALL) {
-      for (int i = off; i < len + off; i++) {
-        for (int j = i; j > off && (comp.compare(j - 1, j) > 0); j--) {
-          swapper.swap(j, j - 1);
-        }
-      }
-      return;
-    }
-
-    // Choose a partition element, v
-    int m = off + len / 2;       // Small arrays, middle element
-    if (len > SMALL) {
-      int l = off;
-      int n = off + len - 1;
-      if (len > MEDIUM) {        // Big arrays, pseudomedian of 9
-        int s = len / 8;
-        l = med3(l, l + s, l + 2 * s, comp);
-        m = med3(m - s, m, m + s, comp);
-        n = med3(n - 2 * s, n - s, n, comp);
-      }
-      m = med3(l, m, n, comp); // Mid-size, med of 3
-    }
-    //long v = x[m];
-
-    // Establish Invariant: v* (<v)* (>v)* v*
-    int a = off, b = a, c = off + len - 1, d = c;
-    while (true) {
-      int comparison;
-      while (b <= c && ((comparison = comp.compare(b, m)) <= 0)) {
-        if (comparison == 0) {
-          if (a == m) {
-            m = b; // moving target; DELTA to JDK !!!
-          } else if (b == m) {
-            m = a;
-          } // moving target; DELTA to JDK !!!
-          swapper.swap(a++, b);
-        }
-        b++;
-      }
-      while (c >= b && ((comparison = comp.compare(c, m)) >= 0)) {
-        if (comparison == 0) {
-          if (c == m) {
-            m = d; // moving target; DELTA to JDK !!!
-          } else if (d == m) {
-            m = c;
-          } // moving target; DELTA to JDK !!!
-          swapper.swap(c, d--);
-        }
-        c--;
-      }
-      if (b > c) {
-        break;
-      }
-      if (b == m) {
-        m = d; // moving target; DELTA to JDK !!!
-      } else if (c == m) {
-        m = c;
-      } // moving target; DELTA to JDK !!!
-      swapper.swap(b++, c--);
-    }
-
-    // Swap partition elements back to middle
-    int n = off + len;
-    int s = Math.min(a - off, b - a);
-    vecswap(swapper, off, b - s, s);
-    s = Math.min(d - c, n - d - 1);
-    vecswap(swapper, b, n - s, s);
-
-    // Recursively sort non-partition-elements
-    if ((s = b - a) > 1) {
-      quickSort1(off, s, comp, swapper);
-    }
-    if ((s = d - c) > 1) {
-      quickSort1(n - s, s, comp, swapper);
-    }
-  }
-
-  /**
-   * Reverses a sequence of elements.
-   *
-   * @param first Beginning of the range
-   * @param last  One past the end of the range
-   * @throws ArrayIndexOutOfBoundsException If the range is invalid.
-   */
-  private static void reverse(int first, int last, Swapper swapper) {
-    // no more needed since manually inlined
-    while (first < --last) {
-      swapper.swap(first++, last);
-    }
-  }
-
-  /**
-   * Rotate a range in place: <code>array[middle]</code> is put in <code>array[first]</code>,
-   * <code>array[middle+1]</code> is put in <code>array[first+1]</code>, etc.  Generally, the element in position
-   * <code>i</code> is put into position <code>(i + (last-middle)) % (last-first)</code>.
-   *
-   * @param first  Beginning of the range
-   * @param middle Index of the element that will be put in <code>array[first]</code>
-   * @param last   One past the end of the range
-   */
-  private static void rotate(int first, int middle, int last, Swapper swapper) {
-    // no more needed since manually inlined
-    if (middle != first && middle != last) {
-      reverse(first, middle, swapper);
-      reverse(middle, last, swapper);
-      reverse(first, last, swapper);
-    }
-  }
-
-  /**
    * Performs a binary search on an already-sorted range: finds the last position where an element can be inserted
    * without violating the ordering. Sorting is by a user-supplied comparison function.
    *
@@ -325,12 +197,5 @@ public class GenericSorting {
       }
     }
     return first;
-  }
-
-  /** Swaps x[a .. (a+n-1)] with x[b .. (b+n-1)]. */
-  private static void vecswap(Swapper swapper, int a, int b, int n) {
-    for (int i = 0; i < n; i++, a++, b++) {
-      swapper.swap(a, b);
-    }
   }
 }

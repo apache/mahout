@@ -1,3 +1,22 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /*
 Copyright � 1999 CERN - European Organization for Nuclear Research.
 Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose 
@@ -8,32 +27,35 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.map;
 
-import org.apache.mahout.math.GenericSorting;
+import org.apache.mahout.math.Sorting;
 import org.apache.mahout.math.Swapper;
+import org.apache.mahout.math.function.${keyTypeCap}Comparator;
+import org.apache.mahout.math.function.${keyTypeCap}${valueTypeCap}Procedure;
+import org.apache.mahout.math.function.${keyTypeCap}Procedure;
+import org.apache.mahout.math.list.${keyTypeCap}ArrayList;
+#if (${keyType} != ${valueType})
+import org.apache.mahout.math.function.${valueTypeCap}Procedure;
+import org.apache.mahout.math.list.${valueTypeCap}ArrayList;
+#end
+#if (${keyType} != 'int')
 import org.apache.mahout.math.function.IntComparator;
-import org.apache.mahout.math.function.IntIntProcedure;
-import org.apache.mahout.math.function.IntProcedure;
-import org.apache.mahout.math.list.IntArrayList;
+#end
+#if (${valueTypeFloating} == 'true')
+import org.apache.mahout.math.function.${valueTypeCap}Function;
+#end
 
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
-public abstract class AbstractIntIntMap extends AbstractMap {
-  //public static int hashCollisions = 0; // for debug only
-
-  /** Makes this class non instantiable, but still let's others inherit from it. */
-  protected AbstractIntIntMap() {
-  }
+public abstract class Abstract${keyTypeCap}${valueTypeCap}Map extends AbstractMap {
 
   /**
    * Returns <tt>true</tt> if the receiver contains the specified key.
    *
    * @return <tt>true</tt> if the receiver contains the specified key.
    */
-  public boolean containsKey(final int key) {
+  public boolean containsKey(final ${keyType} key) {
     return !forEachKey(
-        new IntProcedure() {
+        new ${keyTypeCap}Procedure() {
           @Override
-          public boolean apply(int iterKey) {
+          public boolean apply(${keyType} iterKey) {
             return (key != iterKey);
           }
         }
@@ -45,11 +67,11 @@ public abstract class AbstractIntIntMap extends AbstractMap {
    *
    * @return <tt>true</tt> if the receiver contains the specified value.
    */
-  public boolean containsValue(final int value) {
+  public boolean containsValue(final ${valueType} value) {
     return !forEachPair(
-        new IntIntProcedure() {
+        new ${keyTypeCap}${valueTypeCap}Procedure() {
           @Override
-          public boolean apply(int iterKey, int iterValue) {
+          public boolean apply(${keyType} iterKey, ${valueType} iterValue) {
             return (value != iterValue);
           }
         }
@@ -61,8 +83,8 @@ public abstract class AbstractIntIntMap extends AbstractMap {
    *
    * @return a deep copy of the receiver.
    */
-  public AbstractIntIntMap copy() {
-    return (AbstractIntIntMap) clone();
+  public Abstract${keyTypeCap}${valueTypeCap}Map copy() {
+    return (Abstract${keyTypeCap}${valueTypeCap}Map) clone();
   }
 
   /**
@@ -71,16 +93,16 @@ public abstract class AbstractIntIntMap extends AbstractMap {
    * same mappings iff
    * <pre>
    * m1.forEachPair(
-   *    new IntIntProcedure() {
-   *      public boolean apply(int key, int value) {
+   *    new ${keyTypeCap}${valueTypeCap}Procedure() {
+   *      public boolean apply(${keyType} key, ${valueType} value) {
    *        return m2.containsKey(key) && m2.get(key) == value;
    *      }
    *    }
    *  )
    * &&
    * m2.forEachPair(
-   *    new IntIntProcedure() {
-   *      public boolean apply(int key, int value) {
+   *    new ${keyTypeCap}${valueTypeCap}Procedure() {
+   *      public boolean apply(${keyType} key, ${valueType} value) {
    *        return m1.containsKey(key) && m1.get(key) == value;
    *      }
    *    }
@@ -99,28 +121,28 @@ public abstract class AbstractIntIntMap extends AbstractMap {
       return true;
     }
 
-    if (!(obj instanceof AbstractIntIntMap)) {
+    if (!(obj instanceof Abstract${keyTypeCap}${valueTypeCap}Map)) {
       return false;
     }
-    final AbstractIntIntMap other = (AbstractIntIntMap) obj;
+    final Abstract${keyTypeCap}${valueTypeCap}Map other = (Abstract${keyTypeCap}${valueTypeCap}Map) obj;
     if (other.size() != size()) {
       return false;
     }
 
     return
         forEachPair(
-            new IntIntProcedure() {
+            new ${keyTypeCap}${valueTypeCap}Procedure() {
               @Override
-              public boolean apply(int key, int value) {
+              public boolean apply(${keyType} key, ${valueType} value) {
                 return other.containsKey(key) && other.get(key) == value;
               }
             }
         )
             &&
             other.forEachPair(
-                new IntIntProcedure() {
+                new ${keyTypeCap}${valueTypeCap}Procedure() {
                   @Override
-                  public boolean apply(int key, int value) {
+                  public boolean apply(${keyType} key, ${valueType} value) {
                     return containsKey(key) && get(key) == value;
                   }
                 }
@@ -138,7 +160,7 @@ public abstract class AbstractIntIntMap extends AbstractMap {
    *                  continues.
    * @return <tt>false</tt> if the procedure stopped before all keys where iterated over, <tt>true</tt> otherwise.
    */
-  public abstract boolean forEachKey(IntProcedure procedure);
+  public abstract boolean forEachKey(${keyTypeCap}Procedure procedure);
 
   /**
    * Applies a procedure to each (key,value) pair of the receiver, if any. Iteration order is guaranteed to be
@@ -148,11 +170,11 @@ public abstract class AbstractIntIntMap extends AbstractMap {
    *                  continues.
    * @return <tt>false</tt> if the procedure stopped before all keys where iterated over, <tt>true</tt> otherwise.
    */
-  public boolean forEachPair(final IntIntProcedure procedure) {
+  public boolean forEachPair(final ${keyTypeCap}${valueTypeCap}Procedure procedure) {
     return forEachKey(
-        new IntProcedure() {
+        new ${keyTypeCap}Procedure() {
           @Override
-          public boolean apply(int key) {
+          public boolean apply(${keyType} key) {
             return procedure.apply(key, get(key));
           }
         }
@@ -167,7 +189,7 @@ public abstract class AbstractIntIntMap extends AbstractMap {
    * @param key the key to be searched for.
    * @return the value associated with the specified key; <tt>0</tt> if no such key is present.
    */
-  public abstract int get(int key);
+  public abstract ${valueType} get(${keyType} key);
 
   /**
    * Returns the first key the given value is associated with. It is often a good idea to first check with {@link
@@ -175,15 +197,15 @@ public abstract class AbstractIntIntMap extends AbstractMap {
    * <i>identical</i> to the order used by method {@link #forEachKey(IntProcedure)}.
    *
    * @param value the value to search for.
-   * @return the first key for which holds <tt>get(key) == value</tt>; returns <tt>Integer.MIN_VALUE</tt> if no such key
+   * @return the first key for which holds <tt>get(key) == value</tt>; returns <tt>${keyObjectType}.MIN_VALUE</tt> if no such key
    *         exists.
    */
-  public int keyOf(final int value) {
-    final int[] foundKey = new int[1];
+  public ${keyType} keyOf(final ${valueType} value) {
+    final ${keyType}[] foundKey = new ${keyType}[1];
     boolean notFound = forEachPair(
-        new IntIntProcedure() {
+        new ${keyTypeCap}${valueTypeCap}Procedure() {
           @Override
-          public boolean apply(int iterKey, int iterValue) {
+          public boolean apply(${keyType} iterKey, ${valueType} iterValue) {
             boolean found = value == iterValue;
             if (found) {
               foundKey[0] = iterKey;
@@ -193,7 +215,7 @@ public abstract class AbstractIntIntMap extends AbstractMap {
         }
     );
     if (notFound) {
-      return Integer.MIN_VALUE;
+      return ${keyObjectType}.MIN_VALUE;
     }
     return foundKey[0];
   }
@@ -205,8 +227,8 @@ public abstract class AbstractIntIntMap extends AbstractMap {
    *
    * @return the keys.
    */
-  public IntArrayList keys() {
-    IntArrayList list = new IntArrayList(size());
+  public ${keyTypeCap}ArrayList keys() {
+    ${keyTypeCap}ArrayList list = new ${keyTypeCap}ArrayList(size());
     keys(list);
     return list;
   }
@@ -219,12 +241,12 @@ public abstract class AbstractIntIntMap extends AbstractMap {
    *
    * @param list the list to be filled, can have any size.
    */
-  public void keys(final IntArrayList list) {
+  public void keys(final ${keyTypeCap}ArrayList list) {
     list.clear();
     forEachKey(
-        new IntProcedure() {
+        new ${keyTypeCap}Procedure() {
           @Override
-          public boolean apply(int key) {
+          public boolean apply(${keyType} key) {
             list.add(key);
             return true;
           }
@@ -241,8 +263,8 @@ public abstract class AbstractIntIntMap extends AbstractMap {
    *
    * @param keyList the list to be filled, can have any size.
    */
-  public void keysSortedByValue(IntArrayList keyList) {
-    pairsSortedByValue(keyList, new IntArrayList(size()));
+  public void keysSortedByValue(${keyTypeCap}ArrayList keyList) {
+    pairsSortedByValue(keyList, new ${valueTypeCap}ArrayList(size()));
   }
 
   /**
@@ -262,14 +284,16 @@ public abstract class AbstractIntIntMap extends AbstractMap {
    * @param keyList   the list to be filled with keys, can have any size.
    * @param valueList the list to be filled with values, can have any size.
    */
-  public void pairsMatching(final IntIntProcedure condition, final IntArrayList keyList, final IntArrayList valueList) {
+  public void pairsMatching(final ${keyTypeCap}${valueTypeCap}Procedure condition, 
+                           final ${keyTypeCap}ArrayList keyList, 
+                           final ${valueTypeCap}ArrayList valueList) {
     keyList.clear();
     valueList.clear();
 
     forEachPair(
-        new IntIntProcedure() {
+        new ${keyTypeCap}${valueTypeCap}Procedure() {
           @Override
-          public boolean apply(int key, int value) {
+          public boolean apply(${keyType} key, ${valueType} value) {
             if (condition.apply(key, value)) {
               keyList.add(key);
               valueList.add(value);
@@ -288,7 +312,7 @@ public abstract class AbstractIntIntMap extends AbstractMap {
    * @param keyList   the list to be filled with keys, can have any size.
    * @param valueList the list to be filled with values, can have any size.
    */
-  public void pairsSortedByKey(IntArrayList keyList, IntArrayList valueList) {
+  public void pairsSortedByKey(${keyTypeCap}ArrayList keyList, ${valueTypeCap}ArrayList valueList) {
     keys(keyList);
     keyList.sort();
     valueList.setSize(keyList.size());
@@ -307,19 +331,19 @@ public abstract class AbstractIntIntMap extends AbstractMap {
    * @param keyList   the list to be filled with keys, can have any size.
    * @param valueList the list to be filled with values, can have any size.
    */
-  public void pairsSortedByValue(IntArrayList keyList, IntArrayList valueList) {
+  public void pairsSortedByValue(${keyTypeCap}ArrayList keyList, ${valueTypeCap}ArrayList valueList) {
     keys(keyList);
     values(valueList);
 
-    final int[] k = keyList.elements();
-    final int[] v = valueList.elements();
+    final ${keyType}[] k = keyList.elements();
+    final ${valueType}[] v = valueList.elements();
     Swapper swapper = new Swapper() {
       @Override
       public void swap(int a, int b) {
-        int t1 = v[a];
+        ${valueType} t1 = v[a];
         v[a] = v[b];
         v[b] = t1;
-        int t2 = k[a];
+        ${keyType} t2 = k[a];
         k[a] = k[b];
         k[b] = t2;
       }
@@ -332,7 +356,7 @@ public abstract class AbstractIntIntMap extends AbstractMap {
       }
     };
 
-    GenericSorting.quickSort(0, keyList.size(), comp, swapper);
+    Sorting.quickSort(0, keyList.size(), comp, swapper);
   }
 
   /**
@@ -344,7 +368,7 @@ public abstract class AbstractIntIntMap extends AbstractMap {
    * @return <tt>true</tt> if the receiver did not already contain such a key; <tt>false</tt> if the receiver did
    *         already contain such a key - the new value has now replaced the formerly associated value.
    */
-  public abstract boolean put(int key, int value);
+  public abstract boolean put(${keyType} key, ${valueType} value);
 
   /**
    * Removes the given key with its associated element from the receiver, if present.
@@ -352,21 +376,21 @@ public abstract class AbstractIntIntMap extends AbstractMap {
    * @param key the key to be removed from the receiver.
    * @return <tt>true</tt> if the receiver contained the specified key, <tt>false</tt> otherwise.
    */
-  public abstract boolean removeKey(int key);
+  public abstract boolean removeKey(${keyType} key);
 
   /**
    * Returns a string representation of the receiver, containing the String representation of each key-value pair,
    * sorted ascending by key.
    */
   public String toString() {
-    IntArrayList theKeys = keys();
+    ${keyTypeCap}ArrayList theKeys = keys();
     //theKeys.sort();
 
     StringBuilder buf = new StringBuilder();
     buf.append('[');
     int maxIndex = theKeys.size() - 1;
     for (int i = 0; i <= maxIndex; i++) {
-      int key = theKeys.get(i);
+      ${keyType} key = theKeys.get(i);
       buf.append(String.valueOf(key));
       buf.append("->");
       buf.append(String.valueOf(get(key)));
@@ -383,14 +407,14 @@ public abstract class AbstractIntIntMap extends AbstractMap {
    * sorted ascending by value.
    */
   public String toStringByValue() {
-    IntArrayList theKeys = new IntArrayList();
+    ${keyTypeCap}ArrayList theKeys = new ${keyTypeCap}ArrayList();
     keysSortedByValue(theKeys);
 
     StringBuilder buf = new StringBuilder();
     buf.append('[');
     int maxIndex = theKeys.size() - 1;
     for (int i = 0; i <= maxIndex; i++) {
-      int key = theKeys.get(i);
+      ${keyType} key = theKeys.get(i);
       buf.append(String.valueOf(key));
       buf.append("->");
       buf.append(String.valueOf(get(key)));
@@ -409,8 +433,8 @@ public abstract class AbstractIntIntMap extends AbstractMap {
    *
    * @return the values.
    */
-  public IntArrayList values() {
-    IntArrayList list = new IntArrayList(size());
+  public ${valueTypeCap}ArrayList values() {
+    ${valueTypeCap}ArrayList list = new ${valueTypeCap}ArrayList(size());
     values(list);
     return list;
   }
@@ -423,16 +447,53 @@ public abstract class AbstractIntIntMap extends AbstractMap {
    *
    * @param list the list to be filled, can have any size.
    */
-  public void values(final IntArrayList list) {
+  public void values(final ${valueTypeCap}ArrayList list) {
     list.clear();
     forEachKey(
-        new IntProcedure() {
+        new ${keyTypeCap}Procedure() {
           @Override
-          public boolean apply(int key) {
+          public boolean apply(${keyType} key) {
             list.add(get(key));
             return true;
           }
         }
     );
   }
+  
+  #if (${valueTypeFloating} == 'true')
+  /**
+   * Assigns the result of a function to each value; <tt>v[i] = function(v[i])</tt>.
+   *
+   * @param function a function object taking as argument the current association's value.
+   */
+  public void assign(final ${valueTypeCap}Function function) {
+    copy().forEachPair(
+        new ${keyTypeCap}${valueTypeCap}Procedure() {
+          @Override
+          public boolean apply(${keyType} key, ${valueType} value) {
+            put(key, function.apply(value));
+            return true;
+          }
+        }
+    );
+  }
+
+  /**
+   * Clears the receiver, then adds all (key,value) pairs of <tt>other</tt>values to it.
+   *
+   * @param other the other map to be copied into the receiver.
+   */
+  public void assign(Abstract${keyTypeCap}${valueTypeCap}Map other) {
+    clear();
+    other.forEachPair(
+        new ${keyTypeCap}${valueTypeCap}Procedure() {
+          @Override
+          public boolean apply(${keyType} key, ${valueType} value) {
+            put(key, value);
+            return true;
+          }
+        }
+    );
+  }
+  #end
 }

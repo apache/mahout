@@ -14,9 +14,6 @@ package org.apache.mahout.math;
  * @see org.apache.mahout.math.GenericSorting
  *
  */
-
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
 public interface Swapper {
 
   /** Swaps the generic data g[a] with g[b]. */

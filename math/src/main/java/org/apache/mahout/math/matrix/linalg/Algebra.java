@@ -11,6 +11,7 @@ package org.apache.mahout.math.matrix.linalg;
 import org.apache.mahout.math.GenericPermuting;
 import org.apache.mahout.math.GenericSorting;
 import org.apache.mahout.math.PersistentObject;
+import org.apache.mahout.math.Sorting;
 import org.apache.mahout.math.Swapper;
 import org.apache.mahout.math.bitvector.QuickBitVector;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
@@ -739,7 +740,7 @@ public class Algebra extends PersistentObject {
         values.set(b, tmp);
       }
     };
-    GenericSorting.quickSort(0, names.size(), comp, swapper);
+    Sorting.quickSort(0, names.size(), comp, swapper);
 
     // determine padding for nice formatting
     int maxLength = 0;

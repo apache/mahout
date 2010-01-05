@@ -10,6 +10,7 @@ package org.apache.mahout.math.matrix.linalg;
 
 import org.apache.mahout.math.GenericSorting;
 import org.apache.mahout.math.PersistentObject;
+import org.apache.mahout.math.Sorting;
 import org.apache.mahout.math.Swapper;
 import org.apache.mahout.math.function.IntComparator;
 import org.apache.mahout.math.jet.math.Functions;
@@ -1067,7 +1068,7 @@ public class Property extends PersistentObject {
         values.set(b, tmp);
       }
     };
-    GenericSorting.quickSort(0, names.size(), comp, swapper);
+    Sorting.quickSort(0, names.size(), comp, swapper);
 
     // determine padding for nice formatting
     int maxLength = 0;

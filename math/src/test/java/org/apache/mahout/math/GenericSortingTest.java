@@ -58,7 +58,7 @@ public class GenericSortingTest extends Assert {
 			td[x] = 20 - x;
 		}
 		SomethingToSort sts = new SomethingToSort(td);
-		GenericSorting.quickSort(0, 20, sts, sts);
+		Sorting.quickSort(0, 20, sts, sts);
 		for (int x = 0; x < 20; x ++) {
 			assertEquals(x+1, td[x]);
 		}
