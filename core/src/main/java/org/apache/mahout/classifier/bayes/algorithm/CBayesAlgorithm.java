@@ -30,17 +30,20 @@ import org.apache.mahout.classifier.bayes.common.ByScoreLabelResultComparator;
 import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 import org.apache.mahout.classifier.bayes.interfaces.Algorithm;
 import org.apache.mahout.classifier.bayes.interfaces.Datastore;
-
+/**
+ * Class implementing the Complementary Naive Bayes Classifier Algorithm
+ *
+ */
 public class CBayesAlgorithm implements Algorithm {
-
+  
   @Override
   public ClassifierResult classifyDocument(String[] document,
-      Datastore datastore, String defaultCategory)
-      throws InvalidDatastoreException {
+                                           Datastore datastore,
+                                           String defaultCategory) throws InvalidDatastoreException {
     ClassifierResult result = new ClassifierResult(defaultCategory);
     double max = Double.MIN_VALUE;
     Collection<String> categories = datastore.getKeys("labelWeight");
-
+    
     for (String category : categories) {
       double prob = documentWeight(datastore, category, document);
       if (max < prob) {
@@ -51,14 +54,15 @@ public class CBayesAlgorithm implements Algorithm {
     result.setScore(max);
     return result;
   }
-
+  
   @Override
   public ClassifierResult[] classifyDocument(String[] document,
-      Datastore datastore, String defaultCategory, int numResults)
-      throws InvalidDatastoreException {
+                                             Datastore datastore,
+                                             String defaultCategory,
+                                             int numResults) throws InvalidDatastoreException {
     Collection<String> categories = datastore.getKeys("labelWeight");
-    PriorityQueue<ClassifierResult> pq =
-        new PriorityQueue<ClassifierResult>(numResults, new ByScoreLabelResultComparator());
+    PriorityQueue<ClassifierResult> pq = new PriorityQueue<ClassifierResult>(
+        numResults, new ByScoreLabelResultComparator());
     for (String category : categories) {
       double prob = documentWeight(datastore, category, document);
       if (prob > 0.0) {
@@ -68,9 +72,9 @@ public class CBayesAlgorithm implements Algorithm {
         }
       }
     }
-
+    
     if (pq.isEmpty()) {
-      return new ClassifierResult[] { new ClassifierResult(defaultCategory, 0.0) };
+      return new ClassifierResult[] {new ClassifierResult(defaultCategory, 0.0)};
     } else {
       List<ClassifierResult> result = new ArrayList<ClassifierResult>(pq.size());
       while (pq.isEmpty() == false) {
@@ -80,63 +84,62 @@ public class CBayesAlgorithm implements Algorithm {
       return result.toArray(new ClassifierResult[pq.size()]);
     }
   }
-
+  
   @Override
-  public double featureWeight(Datastore datastore, String label, String feature)
-      throws InvalidDatastoreException {
-
+  public double featureWeight(Datastore datastore, String label, String feature) throws InvalidDatastoreException {
+    
     double result = datastore.getWeight("weight", feature, label);
     double vocabCount = datastore.getWeight("sumWeight", "vocabCount");
-
-    double sigma_j = datastore.getWeight("weight", feature, "sigma_j");
-    double sigma_jSigma_k = datastore.getWeight("sumWeight", "sigma_jSigma_k");
-    double sigma_k = datastore.getWeight("labelWeight", label);
-
+    
+    double featureSum = datastore.getWeight("weight", feature, "sigma_j");
+    double totalSum = datastore.getWeight("sumWeight", "sigma_jSigma_k");
+    double labelSum = datastore.getWeight("labelWeight", label);
+    
     double thetaNormalizer = datastore.getWeight("thetaNormalizer", label);
-
-    double numerator = sigma_j - result + datastore.getWeight("params", "alpha_i");
-    double denominator = (sigma_jSigma_k - sigma_k + vocabCount);
+    
+    double numerator = featureSum - result
+                       + datastore.getWeight("params", "alpha_i");
+    double denominator = totalSum - labelSum + vocabCount;
     
     double weight = Math.log(numerator / denominator);
-    //System.out.println(feature + " " + label+ "\t" +result + " " + vocabCount + " " + sigma_j + " " + sigma_k+ " " + sigma_jSigma_k+ " " + thetaNormalizer + " "+numerator + " " +denominator);
     
     result = weight / thetaNormalizer;
     
     return result;
   }
-
+  
   @Override
   public void initialize(Datastore datastore) throws InvalidDatastoreException {
     datastore.getWeight("weight", "test", "test");
     datastore.getWeight("labelWeight", "test");
     datastore.getWeight("thetaNormalizer", "test");
   }
-
+  
   @Override
-  public double documentWeight(Datastore datastore, String label,
-      String[] document) throws InvalidDatastoreException {
-    Map<String, int[]> wordList = new HashMap<String, int[]>(1000);
+  public double documentWeight(Datastore datastore,
+                               String label,
+                               String[] document) throws InvalidDatastoreException {
+    Map<String,int[]> wordList = new HashMap<String,int[]>(1000);
     for (String word : document) {
       int[] count = wordList.get(word);
       if (count == null) {
-        count = new int[] { 0 };
+        count = new int[] {0};
         wordList.put(word, count);
       }
       count[0]++;
     }
     double result = 0.0;
-    for (Map.Entry<String, int[]> entry : wordList.entrySet()) {
+    for (Map.Entry<String,int[]> entry : wordList.entrySet()) {
       String word = entry.getKey();
       int count = entry.getValue()[0];
       result += count * featureWeight(datastore, label, word);
     }
     return result;
   }
-
+  
   @Override
-  public Collection<String> getLabels(Datastore datastore)
-      throws InvalidDatastoreException {
+  public Collection<String> getLabels(Datastore datastore) throws InvalidDatastoreException {
     return datastore.getKeys("labelWeight");
   }
-
+  
 }

@@ -17,8 +17,6 @@
 
 package org.apache.mahout.common;
 
-import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
-
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
@@ -31,6 +29,8 @@ import java.nio.charset.Charset;
 import java.util.NoSuchElementException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipInputStream;
+
+import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
 
 /**
  * Iterates over the lines of a text file. This assumes the text file's lines are delimited in a manner consistent with

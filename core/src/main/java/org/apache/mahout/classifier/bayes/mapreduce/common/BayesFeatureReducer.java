@@ -17,6 +17,9 @@
 
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
+import java.io.IOException;
+import java.util.Iterator;
+
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -24,26 +27,24 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.common.StringTuple;
 
-import java.io.IOException;
-import java.util.Iterator;
-
 /** Can also be used as a local Combiner. A simple summing reducer */
-public class BayesFeatureReducer extends MapReduceBase
-    implements Reducer<StringTuple, DoubleWritable, StringTuple, DoubleWritable> {
-
+public class BayesFeatureReducer extends MapReduceBase implements
+    Reducer<StringTuple,DoubleWritable,StringTuple,DoubleWritable> {
+  
   @Override
   public void reduce(StringTuple key,
                      Iterator<DoubleWritable> values,
-                     OutputCollector<StringTuple, DoubleWritable> output,
+                     OutputCollector<StringTuple,DoubleWritable> output,
                      Reporter reporter) throws IOException {
-    //Key is label,word, value is the number of times we've seen this label word per local node.  Output is the same
-
+    // Key is label,word, value is the number of times we've seen this label
+    // word per local node. Output is the same
+    
     double sum = 0.0;
     while (values.hasNext()) {
-      reporter.setStatus("Feature Reducer:" + key);  
+      reporter.setStatus("Feature Reducer:" + key);
       sum += values.next().get();
     }
-    reporter.setStatus("Bayes Feature Reducer: " + key + " => " + sum);  
+    reporter.setStatus("Bayes Feature Reducer: " + key + " => " + sum);
     output.collect(key, new DoubleWritable(sum));
   }
 }

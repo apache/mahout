@@ -27,83 +27,82 @@ import org.apache.mahout.classifier.bayes.interfaces.Algorithm;
 import org.apache.mahout.classifier.bayes.model.ClassifierContext;
 
 public class CBayesClassifierTest extends TestCase {
-
+  
   protected Algorithm algorithm;
   protected InMemoryBayesDatastore store;
-
+  
   public CBayesClassifierTest(String s) {
     super(s);
   }
-
+  
   @Override
   protected void setUp() throws Exception {
     super.setUp();
     algorithm = new CBayesAlgorithm();
     store = new InMemoryBayesDatastore(new BayesParameters(1));
-    //String[] labels = new String[]{"a", "b", "c", "d", "e"};
-    //long[] labelCounts = new long[]{6, 20, 60, 100, 200};
-    //String[] features = new String[]{"aa", "bb", "cc", "dd", "ee"};
-    store.setSigma_jSigma_k(500.0);
-
+    // String[] labels = new String[]{"a", "b", "c", "d", "e"};
+    // long[] labelCounts = new long[]{6, 20, 60, 100, 200};
+    // String[] features = new String[]{"aa", "bb", "cc", "dd", "ee"};
+    store.setSigmaJSigmaK(500.0);
+    
     store.setSumFeatureWeight("aa", 80);
     store.setSumFeatureWeight("bb", 21);
     store.setSumFeatureWeight("cc", 60);
     store.setSumFeatureWeight("dd", 115);
     store.setSumFeatureWeight("ee", 100);
-
+    
     store.setSumLabelWeight("a", 100);
     store.setSumLabelWeight("b", 100);
     store.setSumLabelWeight("c", 100);
     store.setSumLabelWeight("d", 100);
     store.setSumLabelWeight("e", 100);
-
+    
     store.setThetaNormalizer("a", -100);
     store.setThetaNormalizer("b", -100);
     store.setThetaNormalizer("c", -100);
     store.setThetaNormalizer("d", -100);
     store.setThetaNormalizer("e", -100);
-
-
+    
     store.loadFeatureWeight("aa", "a", 5);
     store.loadFeatureWeight("bb", "a", 1);
-
+    
     store.loadFeatureWeight("bb", "b", 20);
-
+    
     store.loadFeatureWeight("cc", "c", 30);
     store.loadFeatureWeight("aa", "c", 25);
     store.loadFeatureWeight("dd", "c", 5);
-
+    
     store.loadFeatureWeight("dd", "d", 60);
     store.loadFeatureWeight("cc", "d", 40);
-
+    
     store.loadFeatureWeight("ee", "e", 100);
     store.loadFeatureWeight("aa", "e", 50);
     store.loadFeatureWeight("dd", "e", 50);
     store.updateVocabCount();
   }
-
+  
   public void test() throws InvalidDatastoreException {
     ClassifierContext classifier = new ClassifierContext(algorithm, store);
     String[] document = {"aa", "ff"};
-    ClassifierResult result = classifier.classifyDocument( document, "unknown");
+    ClassifierResult result = classifier.classifyDocument(document, "unknown");
     assertNotNull("category is null and it shouldn't be", result);
     assertEquals(result + " is not equal to e", "e", result.getLabel());
-
-    document = new String[]{"ff"};
+    
+    document = new String[] {"ff"};
     result = classifier.classifyDocument(document, "unknown");
     assertNotNull("category is null and it shouldn't be", result);
     assertEquals(result + " is not equal to d", "d", result.getLabel());
-
-    document = new String[]{"cc"};
-    result = classifier.classifyDocument( document, "unknown");
+    
+    document = new String[] {"cc"};
+    result = classifier.classifyDocument(document, "unknown");
     assertNotNull("category is null and it shouldn't be", result);
     assertEquals(result + " is not equal to d", "d", result.getLabel());
   }
-
+  
   public void testResults() throws Exception {
     ClassifierContext classifier = new ClassifierContext(algorithm, store);
     String[] document = {"aa", "ff"};
-    ClassifierResult result = classifier.classifyDocument( document, "unknown");
+    ClassifierResult result = classifier.classifyDocument(document, "unknown");
     assertNotNull("category is null and it shouldn't be", result);
     System.out.println("Result: " + result);
   }

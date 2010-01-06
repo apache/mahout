@@ -17,6 +17,10 @@
 
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.mapred.JobConf;
@@ -29,34 +33,36 @@ import org.apache.mahout.common.StringTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
+/**
+ * Naive Bayes Tfidf Mapper. Calculates per document statistics
+ * 
+ */
 public class BayesTfIdfMapper extends MapReduceBase implements
-    Mapper<StringTuple, DoubleWritable, StringTuple, DoubleWritable> {
-
+    Mapper<StringTuple,DoubleWritable,StringTuple,DoubleWritable> {
+  
   private static final Logger log = LoggerFactory
       .getLogger(BayesTfIdfMapper.class);
-
-  private Map<String, Double> labelDocumentCounts = null;
-
-  private static final StringTuple vocabCount = new StringTuple(
+  
+  private static final StringTuple VOCAB_COUNT = new StringTuple(
       BayesConstants.FEATURE_SET_SIZE);
-
-  private static final DoubleWritable one = new DoubleWritable(1.0);
-
+  
+  private static final DoubleWritable ONE = new DoubleWritable(1.0);
+  
+  private Map<String,Double> labelDocumentCounts;
+  
   /**
    * We need to calculate the Tf-Idf of each feature in each label
    * 
-   * @param key The label,feature pair (can either be the freq Count or the term
-   *        Document count
+   * @param key
+   *          The label,feature pair (can either be the freq Count or the term
+   *          Document count
    */
   @Override
-  public void map(StringTuple key, DoubleWritable value,
-      OutputCollector<StringTuple, DoubleWritable> output, Reporter reporter)
-      throws IOException {
-
+  public void map(StringTuple key,
+                  DoubleWritable value,
+                  OutputCollector<StringTuple,DoubleWritable> output,
+                  Reporter reporter) throws IOException {
+    
     if (key.length() == 3) {
       if (key.stringAt(0).equals(BayesConstants.WEIGHT)) {
         reporter.setStatus("Bayes TfIdf Mapper: Tf: " + key);
@@ -68,32 +74,30 @@ public class BayesTfIdfMapper extends MapReduceBase implements
         key.replaceAt(0, BayesConstants.WEIGHT);
         output.collect(key, new DoubleWritable(logIdf));
         reporter.setStatus("Bayes TfIdf Mapper: log(Idf): " + key);
-      } else
-        throw new IllegalArgumentException("Unrecognized Tuple: " + key);
+      } else throw new IllegalArgumentException("Unrecognized Tuple: " + key);
     } else if (key.length() == 2) {
       if (key.stringAt(0).equals(BayesConstants.FEATURE_COUNT)) {
-        output.collect(vocabCount, one);
+        output.collect(VOCAB_COUNT, ONE);
         reporter.setStatus("Bayes TfIdf Mapper: vocabCount");
-      } else
-        throw new IllegalArgumentException("Unexpected Tuple: " + key);
+      } else throw new IllegalArgumentException("Unexpected Tuple: " + key);
     }
-
+    
   }
-
+  
   @Override
   public void configure(JobConf job) {
     try {
       if (labelDocumentCounts == null) {
-        labelDocumentCounts = new HashMap<String, Double>();
-
-        DefaultStringifier<Map<String, Double>> mapStringifier = new DefaultStringifier<Map<String, Double>>(
+        labelDocumentCounts = new HashMap<String,Double>();
+        
+        DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(
             job, GenericsUtil.getClass(labelDocumentCounts));
-
+        
         String labelDocumentCountString = mapStringifier
             .toString(labelDocumentCounts);
         labelDocumentCountString = job.get("cnaivebayes.labelDocumentCounts",
-            labelDocumentCountString);
-
+          labelDocumentCountString);
+        
         labelDocumentCounts = mapStringifier
             .fromString(labelDocumentCountString);
       }
@@ -101,5 +105,5 @@ public class BayesTfIdfMapper extends MapReduceBase implements
       log.warn(ex.toString(), ex);
     }
   }
-
+  
 }

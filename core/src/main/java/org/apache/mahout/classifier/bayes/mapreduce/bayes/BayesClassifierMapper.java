@@ -17,6 +17,9 @@
 
 package org.apache.mahout.classifier.bayes.mapreduce.bayes;
 
+import java.io.IOException;
+import java.util.List;
+
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
@@ -24,7 +27,6 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.classifier.BayesFileFormatter;
 import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.classifier.bayes.algorithm.BayesAlgorithm;
 import org.apache.mahout.classifier.bayes.algorithm.CBayesAlgorithm;
@@ -41,46 +43,48 @@ import org.apache.mahout.common.nlp.NGrams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.List;
-
-/** Reads the input train set(preprocessed using the {@link BayesFileFormatter}). */
+/**
+ * Reads the input train set(preprocessed using the
+ * {@link org.apache.mahout.classifier.BayesFileFormatter}).
+ */
 public class BayesClassifierMapper extends MapReduceBase implements
-    Mapper<Text, Text, StringTuple, DoubleWritable> {
-
-  private static final Logger log = LoggerFactory.getLogger(BayesClassifierMapper.class);
-
+    Mapper<Text,Text,StringTuple,DoubleWritable> {
+  
+  private static final Logger log = LoggerFactory
+      .getLogger(BayesClassifierMapper.class);
+  
   private int gramSize = 1;
   
-  private ClassifierContext classifier = null;
+  private ClassifierContext classifier;
   
-  private String defaultCategory = null;
-
+  private String defaultCategory;
+  
   /**
    * Parallel Classification
-   *
-   * @param key      The label
-   * @param value    the features (all unique) associated w/ this label
-   * @param output   The OutputCollector to write the results to
-   * @param reporter Reports status back to hadoop
+   * 
+   * @param key
+   *          The label
+   * @param value
+   *          the features (all unique) associated w/ this label
+   * @param output
+   *          The OutputCollector to write the results to
+   * @param reporter
+   *          Reports status back to hadoop
    */
   @Override
-  public void map(Text key, Text value,
-                  OutputCollector<StringTuple, DoubleWritable> output, Reporter reporter)
-      throws IOException {
-    //String line = value.toString();
+  public void map(Text key,
+                  Text value,
+                  OutputCollector<StringTuple,DoubleWritable> output,
+                  Reporter reporter) throws IOException {
     String label = key.toString();
-
-
-    //StringBuilder builder = new StringBuilder(label);
-    //builder.ensureCapacity(32);// make sure we have a reasonably size buffer to
-                               // begin with
-    List<String> ngrams  = new NGrams(value.toString(), gramSize).generateNGramsWithoutLabel(); 
+    
+    List<String> ngrams = new NGrams(value.toString(), gramSize)
+        .generateNGramsWithoutLabel();
     
     try {
-      ClassifierResult result = classifier.classifyDocument( ngrams
+      ClassifierResult result = classifier.classifyDocument(ngrams
           .toArray(new String[ngrams.size()]), defaultCategory);
-     
+      
       String correctLabel = label;
       String classifiedLabel = result.getLabel();
       
@@ -93,16 +97,16 @@ public class BayesClassifierMapper extends MapReduceBase implements
       throw new IOException(e.toString());
     }
   }
-
+  
   @Override
   public void configure(JobConf job) {
     try {
       log.info("Bayes Parameter" + job.get("bayes.parameters"));
-      Parameters params = Parameters.fromString(job.get("bayes.parameters", ""));
+      Parameters params = Parameters
+          .fromString(job.get("bayes.parameters", ""));
       log.info("{}", params.print());
       Algorithm algorithm;
       Datastore datastore;
-
       
       if (params.get("dataSource").equals("hdfs")) {
         if (params.get("classifierType").equalsIgnoreCase("bayes")) {
@@ -115,9 +119,9 @@ public class BayesClassifierMapper extends MapReduceBase implements
           datastore = new InMemoryBayesDatastore(params);
         } else {
           throw new IllegalArgumentException("Unrecognized classifier type: "
-              + params.get("classifierType"));
+                                             + params.get("classifierType"));
         }
-
+        
       } else if (params.get("dataSource").equals("hbase")) {
         if (params.get("classifierType").equalsIgnoreCase("bayes")) {
           log.info("Testing Bayes Classifier");
@@ -129,16 +133,15 @@ public class BayesClassifierMapper extends MapReduceBase implements
           datastore = new HBaseBayesDatastore(params.get("basePath"), params);
         } else {
           throw new IllegalArgumentException("Unrecognized classifier type: "
-              + params.get("classifierType"));
+                                             + params.get("classifierType"));
         }
-
+        
       } else {
         throw new IllegalArgumentException("Unrecognized dataSource type: "
-            + params.get("dataSource"));
+                                           + params.get("dataSource"));
       }
       classifier = new ClassifierContext(algorithm, datastore);
       classifier.initialize();
-      
       
       defaultCategory = params.get("defaultCat");
       gramSize = Integer.valueOf(params.get("gramSize"));

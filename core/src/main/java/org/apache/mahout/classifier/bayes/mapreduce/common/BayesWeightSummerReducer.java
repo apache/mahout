@@ -17,6 +17,9 @@
 
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
+import java.io.IOException;
+import java.util.Iterator;
+
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
@@ -32,33 +35,32 @@ import org.apache.mahout.common.StringTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Iterator;
-
 /** Can also be used as a local Combiner */
 public class BayesWeightSummerReducer extends MapReduceBase implements
-    Reducer<StringTuple, DoubleWritable, StringTuple, DoubleWritable> {
-
-  private static final Logger log = LoggerFactory.getLogger(BayesWeightSummerReducer.class);
-
+    Reducer<StringTuple,DoubleWritable,StringTuple,DoubleWritable> {
+  
+  private static final Logger log = LoggerFactory
+      .getLogger(BayesWeightSummerReducer.class);
+  
   private HTable table;
-
-  private boolean useHbase = false;
-
+  
+  private boolean useHbase;
+  
   @Override
-  public void reduce(StringTuple key, Iterator<DoubleWritable> values,
-      OutputCollector<StringTuple, DoubleWritable> output, Reporter reporter)
-      throws IOException {
+  public void reduce(StringTuple key,
+                     Iterator<DoubleWritable> values,
+                     OutputCollector<StringTuple,DoubleWritable> output,
+                     Reporter reporter) throws IOException {
     // Key is label,word, value is the tfidf of the feature of times we've seen
     // this label word per local node. Output is the same
-
+    
     double sum = 0.0;
     while (values.hasNext()) {
       reporter.setStatus("Weight Summer Reducer: " + key);
       sum += values.next().get();
     }
     reporter.setStatus("Bayes Weight Summer Reducer: " + key + " => " + sum);
-    //char firstChar = key.toString().charAt(0);
+    // char firstChar = key.toString().charAt(0);
     if (useHbase) {
       if (key.stringAt(0).equals(BayesConstants.FEATURE_SUM)) { // sum of weight
         // for all
@@ -66,12 +68,12 @@ public class BayesWeightSummerReducer extends MapReduceBase implements
         // feature
         // Sigma_j
         String feature = key.stringAt(1);
-
+        
         Put bu = new Put(Bytes.toBytes(feature));
         bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes
             .toBytes(BayesConstants.FEATURE_SUM), Bytes.toBytes(sum));
         table.put(bu);
-
+        
       } else if (key.stringAt(0).equals(BayesConstants.LABEL_SUM)) {
         String label = key.stringAt(1);
         Put bu = new Put(Bytes.toBytes(BayesConstants.LABEL_SUM));
@@ -85,28 +87,26 @@ public class BayesWeightSummerReducer extends MapReduceBase implements
         table.put(bu);
       }
     }
-
+    
     output.collect(key, new DoubleWritable(sum));
   }
-
+  
   @Override
   public void configure(JobConf job) {
     try {
       Parameters params = Parameters
           .fromString(job.get("bayes.parameters", ""));
-      if (params.get("dataSource").equals("hbase"))
-        useHbase = true;
-      else
-        return;
-
-      HBaseConfiguration HBconf = new HBaseConfiguration(job);
-      table = new HTable(HBconf, job.get("output.table"));
+      if (params.get("dataSource").equals("hbase")) useHbase = true;
+      else return;
+      
+      HBaseConfiguration hBconf = new HBaseConfiguration(job);
+      table = new HTable(hBconf, job.get("output.table"));
     } catch (IOException e) {
       log.error("Unexpected error during configuration", e);
     }
-
+    
   }
-
+  
   @Override
   public void close() throws IOException {
     if (useHbase) {

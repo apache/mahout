@@ -17,6 +17,11 @@
 
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
@@ -24,50 +29,56 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.classifier.BayesFileFormatter;
 import org.apache.mahout.common.Parameters;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.common.nlp.NGrams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-/** Reads the input train set(preprocessed using the {@link BayesFileFormatter}). */
+/**
+ * Reads the input train set(preprocessed using the {@link org.apache.mahout.classifier.BayesFileFormatter}).
+ */
 public class BayesFeatureMapper extends MapReduceBase implements
-    Mapper<Text, Text, StringTuple, DoubleWritable> {
-
-  private static final Logger log = LoggerFactory.getLogger(BayesFeatureMapper.class);
-
-  private static final DoubleWritable one = new DoubleWritable(1.0);
-
+    Mapper<Text,Text,StringTuple,DoubleWritable> {
+  
+  private static final Logger log = LoggerFactory
+      .getLogger(BayesFeatureMapper.class);
+  
+  private static final DoubleWritable ONE = new DoubleWritable(1.0);
+  
   private int gramSize = 1;
-
+  
   /**
-   * We need to count the number of times we've seen a term with a given label and we need to output that. But this
-   * Mapper does more than just outputing the count. It first does weight normalisation. Secondly, it outputs for each
-   * unique word in a document value 1 for summing up as the Term Document Frequency. Which later is used to calculate
-   * the Idf Thirdly, it outputs for each label the number of times a document was seen(Also used in Idf Calculation)
-   *
-   * @param key      The label
-   * @param value    the features (all unique) associated w/ this label
-   * @param output   The OutputCollector to write the results to
-   * @param reporter Not used
+   * We need to count the number of times we've seen a term with a given label
+   * and we need to output that. But this Mapper does more than just outputing
+   * the count. It first does weight normalisation. Secondly, it outputs for
+   * each unique word in a document value 1 for summing up as the Term Document
+   * Frequency. Which later is used to calculate the Idf Thirdly, it outputs for
+   * each label the number of times a document was seen(Also used in Idf
+   * Calculation)
+   * 
+   * @param key
+   *          The label
+   * @param value
+   *          the features (all unique) associated w/ this label
+   * @param output
+   *          The OutputCollector to write the results to
+   * @param reporter
+   *          Not used
    */
   @Override
-  public void map(Text key, Text value,
-                  OutputCollector<StringTuple, DoubleWritable> output, Reporter reporter)
-      throws IOException {
-    //String line = value.toString();
+  public void map(Text key,
+                  Text value,
+                  OutputCollector<StringTuple,DoubleWritable> output,
+                  Reporter reporter) throws IOException {
+    // String line = value.toString();
     String label = key.toString();
-
-    Map<String, int[]> wordList = new HashMap<String, int[]>(1000);
-
-    List<String> ngrams  = new NGrams(value.toString(), gramSize).generateNGramsWithoutLabel(); 
-
+    
+    Map<String,int[]> wordList = new HashMap<String,int[]>(1000);
+    
+    List<String> ngrams = new NGrams(value.toString(), gramSize)
+        .generateNGramsWithoutLabel();
+    
     for (String ngram : ngrams) {
       int[] count = wordList.get(ngram);
       if (count == null) {
@@ -78,26 +89,27 @@ public class BayesFeatureMapper extends MapReduceBase implements
       count[0]++;
     }
     double lengthNormalisation = 0.0;
-    for (int[] D_kj : wordList.values()) {
+    for (int[] dKJ : wordList.values()) {
       // key is label,word
-      double dkjValue = (double) D_kj[0];
+      double dkjValue = (double) dKJ[0];
       lengthNormalisation += dkjValue * dkjValue;
     }
     lengthNormalisation = Math.sqrt(lengthNormalisation);
-
+    
     // Output Length Normalized + TF Transformed Frequency per Word per Class
     // Log(1 + D_ij)/SQRT( SIGMA(k, D_kj) )
-    for (Map.Entry<String, int[]> entry : wordList.entrySet()) {
+    for (Map.Entry<String,int[]> entry : wordList.entrySet()) {
       // key is label,word
       String token = entry.getKey();
       StringTuple tuple = new StringTuple();
       tuple.add(BayesConstants.WEIGHT);
       tuple.add(label);
       tuple.add(token);
-      DoubleWritable f = new DoubleWritable(Math.log(1.0 + entry.getValue()[0]) / lengthNormalisation);
+      DoubleWritable f = new DoubleWritable(Math.log(1.0 + entry.getValue()[0])
+                                            / lengthNormalisation);
       output.collect(tuple, f);
     }
-    reporter.setStatus("Bayes Feature Mapper: Document Label: " + label);  
+    reporter.setStatus("Bayes Feature Mapper: Document Label: " + label);
     
     // Output Document Frequency per Word per Class
     
@@ -107,31 +119,32 @@ public class BayesFeatureMapper extends MapReduceBase implements
       StringTuple dfTuple = new StringTuple();
       dfTuple.add(BayesConstants.DOCUMENT_FREQUENCY);
       dfTuple.add(label);
-      dfTuple.add(token);      
-      output.collect(dfTuple, one);
+      dfTuple.add(token);
+      output.collect(dfTuple, ONE);
       
       StringTuple tokenCountTuple = new StringTuple();
       tokenCountTuple.add(BayesConstants.FEATURE_COUNT);
       tokenCountTuple.add(token);
-      output.collect(tokenCountTuple, one);
-
+      output.collect(tokenCountTuple, ONE);
+      
     }
-
+    
     // output that we have seen the label to calculate the Count of Document per
     // class
     StringTuple labelCountTuple = new StringTuple();
     labelCountTuple.add(BayesConstants.LABEL_COUNT);
     labelCountTuple.add(label);
-    output.collect(labelCountTuple, one);
+    output.collect(labelCountTuple, ONE);
   }
-
+  
   @Override
   public void configure(JobConf job) {
     try {
       log.info("Bayes Parameter {}", job.get("bayes.parameters"));
-      Parameters params = Parameters.fromString(job.get("bayes.parameters",""));
+      Parameters params = Parameters
+          .fromString(job.get("bayes.parameters", ""));
       gramSize = Integer.valueOf(params.get("gramSize"));
-
+      
     } catch (IOException ex) {
       log.warn(ex.toString(), ex);
     }

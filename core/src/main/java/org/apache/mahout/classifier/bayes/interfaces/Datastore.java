@@ -19,7 +19,10 @@ package org.apache.mahout.classifier.bayes.interfaces;
 
 import java.util.Collection;
 import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
-
+/**
+ * The Datastore interface for the {@link Algorithm} to use
+ *
+ */
 public interface Datastore {
   /**
    * Gets a double value from the Matrix pointed to by the

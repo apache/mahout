@@ -27,15 +27,15 @@ import org.apache.mahout.classifier.bayes.interfaces.Algorithm;
 import org.apache.mahout.classifier.bayes.model.ClassifierContext;
 
 public class BayesClassifierTest extends TestCase {
-
+  
   protected Algorithm algorithm;
-
+  
   protected InMemoryBayesDatastore store;
-
+  
   public BayesClassifierTest(String s) {
     super(s);
   }
-
+  
   @Override
   protected void setUp() throws Exception {
     super.setUp();
@@ -44,69 +44,59 @@ public class BayesClassifierTest extends TestCase {
     // String[] labels = new String[]{"a", "b", "c", "d", "e"};
     // long[] labelCounts = new long[]{6, 20, 60, 100, 200};
     // String[] features = new String[]{"aa", "bb", "cc", "dd", "ee"};
-    store.setSigma_jSigma_k(100.0);
-
+    store.setSigmaJSigmaK(100.0);
+    
     store.setSumFeatureWeight("aa", 100);
     store.setSumFeatureWeight("bb", 100);
     store.setSumFeatureWeight("cc", 100);
     store.setSumFeatureWeight("dd", 100);
     store.setSumFeatureWeight("ee", 100);
-
+    
     store.setSumLabelWeight("a", 1);
     store.setSumLabelWeight("b", 1);
     store.setSumLabelWeight("c", 1);
     store.setSumLabelWeight("d", 1);
     store.setSumLabelWeight("e", 1);
-
+    
     store.loadFeatureWeight("aa", "a", 5);
     store.loadFeatureWeight("bb", "a", 1);
-
+    
     store.loadFeatureWeight("bb", "b", 20);
-
+    
     store.loadFeatureWeight("cc", "c", 30);
     store.loadFeatureWeight("aa", "c", 25);
     store.loadFeatureWeight("dd", "c", 5);
-
+    
     store.loadFeatureWeight("dd", "d", 60);
     store.loadFeatureWeight("cc", "d", 40);
-
+    
     store.loadFeatureWeight("ee", "e", 100);
     store.loadFeatureWeight("aa", "e", 50);
     store.loadFeatureWeight("dd", "e", 50);
     store.updateVocabCount();
   }
-
+  
   public void test() throws InvalidDatastoreException {
     ClassifierContext classifier = new ClassifierContext(algorithm, store);
-    String[] document = { "aa", "ff" };
+    String[] document = {"aa", "ff"};
     ClassifierResult result = classifier.classifyDocument(document, "unknown");
     assertNotNull("category is null and it shouldn't be", result);
     assertEquals(result + " is not equal to e", "e", result.getLabel());
-
-    document = new String[] { "ff" };
+    
+    document = new String[] {"ff"};
     result = classifier.classifyDocument(document, "unknown");
     assertNotNull("category is null and it shouldn't be", result);
-    assertEquals(result + " is not equal to d", "d", result.getLabel());// GSI:
-                                                                        // was
-                                                                        // unknown,
-                                                                        // but
-                                                                        // we
-                                                                        // now
-                                                                        // just
-                                                                        // pick
-                                                                        // the
-                                                                        // first
-                                                                        // cat
-
-    document = new String[] { "cc" };
+    assertEquals(result + " is not equal to d", "d", result.getLabel());
+    
+    document = new String[] {"cc"};
     result = classifier.classifyDocument(document, "unknown");
     assertNotNull("category is null and it shouldn't be", result);
     assertEquals(result + " is not equal to d", "d", result.getLabel());
   }
-
+  
   public void testResults() throws Exception {
     ClassifierContext classifier = new ClassifierContext(algorithm, store);
-    String[] document = { "aa", "ff" };
+    String[] document = {"aa", "ff"};
     ClassifierResult result = classifier.classifyDocument(document, "unknown");
     assertNotNull("category is null and it shouldn't be", result);
     System.out.println("Result: " + result);

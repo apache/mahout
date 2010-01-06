@@ -17,11 +17,14 @@
 
 package org.apache.mahout.classifier.bayes.exceptions;
 
+/**
+ * Exception thrown when illegal access is done on the datastore or when the
+ * backend storage goes down. Check inner exception for detail
+ */
 public final class InvalidDatastoreException extends Exception {
-
-  public InvalidDatastoreException() {
-  }
-
+  
+  public InvalidDatastoreException() { }
+  
   public InvalidDatastoreException(String message) {
     super(message);
   }

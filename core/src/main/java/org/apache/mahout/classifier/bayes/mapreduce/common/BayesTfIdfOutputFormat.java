@@ -17,6 +17,8 @@
 
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
+import java.io.IOException;
+
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
@@ -27,37 +29,36 @@ import org.apache.hadoop.mapred.lib.MultipleOutputFormat;
 import org.apache.hadoop.util.Progressable;
 import org.apache.mahout.common.StringTuple;
 
-import java.io.IOException;
-
 /**
  * This class extends the MultipleOutputFormat, allowing to write the output
  * data to different output files in sequence file output format.
  */
 public class BayesTfIdfOutputFormat extends
-    MultipleOutputFormat<WritableComparable<?>, Writable> {
-
-  private SequenceFileOutputFormat<WritableComparable<?>, Writable> theSequenceFileOutputFormat = null;
-
+    MultipleOutputFormat<WritableComparable<?>,Writable> {
+  
+  private SequenceFileOutputFormat<WritableComparable<?>,Writable> theSequenceFileOutputFormat;
+  
   @Override
-  protected RecordWriter<WritableComparable<?>, Writable> getBaseRecordWriter(
-      FileSystem fs, JobConf job, String name, Progressable arg3)
-      throws IOException {
+  protected RecordWriter<WritableComparable<?>,Writable> getBaseRecordWriter(FileSystem fs,
+                                                                             JobConf job,
+                                                                             String name,
+                                                                             Progressable arg3) throws IOException {
     if (theSequenceFileOutputFormat == null) {
-      theSequenceFileOutputFormat = new SequenceFileOutputFormat<WritableComparable<?>, Writable>();
+      theSequenceFileOutputFormat = new SequenceFileOutputFormat<WritableComparable<?>,Writable>();
     }
     return theSequenceFileOutputFormat.getRecordWriter(fs, job, name, arg3);
   }
-
+  
   @Override
   protected String generateFileNameForKeyValue(WritableComparable<?> k,
-      Writable v, String name) {
+                                               Writable v,
+                                               String name) {
     StringTuple key = (StringTuple) k;
-
+    
     if (key.length() == 1
-        && key.stringAt(0).equals(BayesConstants.FEATURE_SET_SIZE))
+        && key.stringAt(0).equals(BayesConstants.FEATURE_SET_SIZE)) {
       return "trainer-vocabCount/" + name;
-    else
-      return "trainer-tfIdf/" + name;
+    } else return "trainer-tfIdf/" + name;
   }
-
+  
 }

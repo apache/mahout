@@ -17,6 +17,8 @@
 
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -29,34 +31,35 @@ import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.common.StringTuple;
 
-import java.io.IOException;
-
 /** Create and run the Bayes Trainer. */
 public class BayesWeightSummerDriver implements BayesJob {
-
+  
   /**
    * Run the job
-   *
-   * @param input  the input pathname String
-   * @param output the output pathname String
+   * 
+   * @param input
+   *          the input pathname String
+   * @param output
+   *          the output pathname String
    */
   @Override
   public void runJob(String input, String output, BayesParameters params) throws IOException {
     Configurable client = new JobClient();
     JobConf conf = new JobConf(BayesWeightSummerDriver.class);
-    conf.setJobName("Bayes Weight Summer Driver running over input: " +  input);
-
-
+    conf.setJobName("Bayes Weight Summer Driver running over input: " + input);
+    
     conf.setOutputKeyClass(StringTuple.class);
     conf.setOutputValueClass(DoubleWritable.class);
-
-    FileInputFormat.addInputPath(conf, new Path(output + "/trainer-tfIdf/trainer-tfIdf"));
+    
+    FileInputFormat.addInputPath(conf, new Path(
+        output + "/trainer-tfIdf/trainer-tfIdf"));
     Path outPath = new Path(output + "/trainer-weights");
     FileOutputFormat.setOutputPath(conf, outPath);
-    //conf.setNumReduceTasks(1);
-    //conf.setNumMapTasks(100);
+    // conf.setNumReduceTasks(1);
+    // conf.setNumMapTasks(100);
     conf.setMapperClass(BayesWeightSummerMapper.class);
-    //see the javadoc for the spec for file input formats: first token is key, rest is input.  Whole document on one line
+    // see the javadoc for the spec for file input formats: first token is key,
+    // rest is input. Whole document on one line
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setCombinerClass(BayesWeightSummerReducer.class);
     conf.setReducerClass(BayesWeightSummerReducer.class);
@@ -66,11 +69,11 @@ public class BayesWeightSummerDriver implements BayesJob {
       dfs.delete(outPath, true);
     }
     conf.set("bayes.parameters", params.toString());
-
+    
     conf.set("output.table", output);
-
+    
     client.setConf(conf);
-
+    
     JobClient.runJob(conf);
   }
 }

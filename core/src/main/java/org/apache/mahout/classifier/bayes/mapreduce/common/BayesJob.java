@@ -16,22 +16,26 @@
  */
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
-import org.apache.mahout.classifier.bayes.common.BayesParameters;
-
 import java.io.IOException;
 
+import org.apache.mahout.classifier.bayes.common.BayesParameters;
+
 /**
- * Implementors of this interface provide a way for running bayes training jobs on
- * a hadoop cluster.
+ * Implementors of this interface provide a way for running bayes training jobs
+ * on a hadoop cluster.
  * */
 public interface BayesJob {
-
+  
   /**
    * Execute a classification job on a cluster.
-   * @param input path to training documents.
-   * @param output path to output directory.
+   * 
+   * @param input
+   *          path to training documents.
+   * @param output
+   *          path to output directory.
    * */
-  void runJob(String input, String output, BayesParameters params)
-      throws IOException, ClassNotFoundException, InterruptedException;
-
+  void runJob(String input, String output, BayesParameters params) throws IOException,
+                                                                  ClassNotFoundException,
+                                                                  InterruptedException;
+  
 }

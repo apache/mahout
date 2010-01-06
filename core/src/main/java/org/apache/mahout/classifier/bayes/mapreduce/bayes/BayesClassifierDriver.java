@@ -17,6 +17,10 @@
 
 package org.apache.mahout.classifier.bayes.mapreduce.bayes;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -36,16 +40,13 @@ import org.apache.mahout.common.StringTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 /** Create and run the Bayes Classifier */
-public class BayesClassifierDriver {
+public final class BayesClassifierDriver {
 
-  private static final Logger log = LoggerFactory.getLogger(BayesClassifierDriver.class);
-  private BayesClassifierDriver() {
-  }
+  private static final Logger log = LoggerFactory
+      .getLogger(BayesClassifierDriver.class);
+  
+  private BayesClassifierDriver() { }
 
   /**
    * Run the job
@@ -70,9 +71,9 @@ public class BayesClassifierDriver {
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     
     conf.set("io.serializations",
-        "org.apache.hadoop.io.serializer.JavaSerialization," +
-        "org.apache.hadoop.io.serializer.WritableSerialization");
-
+      "org.apache.hadoop.io.serializer.JavaSerialization,"
+          + "org.apache.hadoop.io.serializer.WritableSerialization");
+    
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
     if (dfs.exists(outPath)) {
       dfs.delete(outPath, true);
@@ -86,12 +87,11 @@ public class BayesClassifierDriver {
     ConfusionMatrix matrix = readResult(dfs, outputFiles, conf, params);
     log.info("{}",matrix.summarize());
   }
-
+  
   private static ConfusionMatrix readResult(FileSystem fs,
                                             Path pathPattern,
                                             Configuration conf,
-                                            Parameters params)
-      throws IOException {
+                                            Parameters params) throws IOException {
    
     StringTuple key = new StringTuple();
     DoubleWritable value = new DoubleWritable();
@@ -117,10 +117,9 @@ public class BayesClassifierDriver {
     }
     
     ConfusionMatrix matrix = new ConfusionMatrix(confusionMatrix.keySet(), defaultLabel);
-    for(Map.Entry<String, Map<String, Integer>> correctLabelSet:confusionMatrix.entrySet())
-    {
+    for (Map.Entry<String,Map<String,Integer>> correctLabelSet : confusionMatrix.entrySet())  {
       Map<String, Integer> rowMatrix = correctLabelSet.getValue();
-      for(Map.Entry<String, Integer> classifiedLabelSet : rowMatrix.entrySet())
+      for (Map.Entry<String, Integer> classifiedLabelSet : rowMatrix.entrySet())
       {
         matrix.addInstance(correctLabelSet.getKey(), classifiedLabelSet.getKey());
         matrix.putCount(correctLabelSet.getKey(), classifiedLabelSet.getKey(), classifiedLabelSet.getValue());

@@ -23,9 +23,12 @@ import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 import org.apache.mahout.classifier.bayes.interfaces.Algorithm;
 import org.apache.mahout.classifier.bayes.interfaces.Datastore;
-
+/**
+ * The Classifier Wrapper used for choosing the {@link Algorithm} and {@link Datastore}
+ *
+ */
 public class ClassifierContext {
-
+  
   private final Algorithm algorithm;
   private final Datastore datastore;
   
@@ -35,50 +38,62 @@ public class ClassifierContext {
   }
   
   /**
-   * Initializes the Context. Gets the necessary data and checks if the Datastore is valid 
+   * Initializes the Context. Gets the necessary data and checks if the
+   * Datastore is valid
+   * 
    * @throws InvalidDatastoreException
    */
-  public void initialize() throws InvalidDatastoreException{
+  public void initialize() throws InvalidDatastoreException {
     datastore.initialize();
     algorithm.initialize(this.datastore);
   }
   
   /**
    * Classify the document and return the Result
-   *
-   * @param document        The document to classify
-   * @param defaultCategory The default category to assign
-   * Ties are broken by comparing the category
-   * @return A Collection of {@link org.apache.mahout.classifier.ClassifierResult}s.
-   * @throws InvalidDatastoreException 
+   * 
+   * @param document
+   *          The document to classify
+   * @param defaultCategory
+   *          The default category to assign Ties are broken by comparing the
+   *          category
+   * @return A Collection of
+   *         {@link org.apache.mahout.classifier.ClassifierResult}s.
+   * @throws InvalidDatastoreException
    */
-  public ClassifierResult classifyDocument(String[] document, String defaultCategory)
-      throws InvalidDatastoreException {
-    return algorithm.classifyDocument(document, datastore, defaultCategory);   
+  public ClassifierResult classifyDocument(String[] document,
+                                           String defaultCategory) throws InvalidDatastoreException {
+    return algorithm.classifyDocument(document, datastore, defaultCategory);
   }
-
+  
   /**
    * Classify the document and return the top <code>numResults</code>
-   *
-   * @param document        The document to classify
-   * @param defaultCategory The default category to assign
-   * @param numResults      The maximum number of results to return, ranked by score.
-   * Ties are broken by comparing the category
-   * @return A Collection of {@link org.apache.mahout.classifier.ClassifierResult}s.
-   * @throws InvalidDatastoreException 
-   */ 
-  public ClassifierResult[] classifyDocument(String[] document, String defaultCategory, int numResults)
-      throws InvalidDatastoreException{
-    return algorithm.classifyDocument(document, datastore, defaultCategory, numResults);
+   * 
+   * @param document
+   *          The document to classify
+   * @param defaultCategory
+   *          The default category to assign
+   * @param numResults
+   *          The maximum number of results to return, ranked by score. Ties are
+   *          broken by comparing the category
+   * @return A Collection of
+   *         {@link org.apache.mahout.classifier.ClassifierResult}s.
+   * @throws InvalidDatastoreException
+   */
+  public ClassifierResult[] classifyDocument(String[] document,
+                                             String defaultCategory,
+                                             int numResults) throws InvalidDatastoreException {
+    return algorithm.classifyDocument(document, datastore, defaultCategory,
+      numResults);
   }
+  
   /**
    * Gets the labels in the given model
+   * 
    * @return Collection of Labels
-   * @throws InvalidDatastoreException 
+   * @throws InvalidDatastoreException
    */
   public Collection<String> getLabels() throws InvalidDatastoreException {
-   return algorithm.getLabels(datastore);
+    return algorithm.getLabels(datastore);
   }
-
   
 }

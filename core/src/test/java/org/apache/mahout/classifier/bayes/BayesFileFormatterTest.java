@@ -17,19 +17,20 @@
 
 package org.apache.mahout.classifier.bayes;
 
-import junit.framework.TestCase;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.WhitespaceAnalyzer;
-import org.apache.mahout.classifier.BayesFileFormatter;
-import org.apache.mahout.common.FileLineIterator;
-import org.apache.mahout.common.FileLineIterable;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+
+import junit.framework.TestCase;
+
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.WhitespaceAnalyzer;
+import org.apache.mahout.classifier.BayesFileFormatter;
+import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.FileLineIterator;
 
 public class BayesFileFormatterTest extends TestCase {
 

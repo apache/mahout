@@ -17,6 +17,8 @@
 
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
+import java.io.IOException;
+
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
@@ -24,34 +26,39 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.common.StringTuple;
 
-import java.io.IOException;
-
+/**
+ * 
+ * Calculates weight sum for a unique label, and feature
+ * 
+ */
 public class BayesWeightSummerMapper extends MapReduceBase implements
-    Mapper<StringTuple, DoubleWritable, StringTuple, DoubleWritable> {
-
+    Mapper<StringTuple,DoubleWritable,StringTuple,DoubleWritable> {
+  
   /**
    * We need to calculate the weight sums across each label and each feature
    * 
-   * @param key The label,feature tuple containing the tfidf value
+   * @param key
+   *          The label,feature tuple containing the tfidf value
    */
   @Override
-  public void map(StringTuple key, DoubleWritable value,
-      OutputCollector<StringTuple, DoubleWritable> output, Reporter reporter)
-      throws IOException {
+  public void map(StringTuple key,
+                  DoubleWritable value,
+                  OutputCollector<StringTuple,DoubleWritable> output,
+                  Reporter reporter) throws IOException {
     String label = key.stringAt(1);
     String feature = key.stringAt(2);
     reporter.setStatus("Bayes Weight Summer Mapper: " + key);
     StringTuple featureSum = new StringTuple(BayesConstants.FEATURE_SUM);
     featureSum.add(feature);
-    output.collect(featureSum, value);// sum of weight for all labels for a
-                                      // feature Sigma_j
+    output.collect(featureSum, value); // sum of weight for all labels for a
+                                       // feature Sigma_j
     StringTuple labelSum = new StringTuple(BayesConstants.LABEL_SUM);
     labelSum.add(label);
-    output.collect(labelSum, value);// sum of weight for all features for a
-                                    // label Sigma_k
+    output.collect(labelSum, value); // sum of weight for all features for a
+                                     // label Sigma_k
     StringTuple totalSum = new StringTuple(BayesConstants.TOTAL_SUM);
-    output.collect(totalSum, value);// sum of weight of all features for all
-                                    // label Sigma_kSigma_j
-
+    output.collect(totalSum, value); // sum of weight of all features for all
+                                     // label Sigma_kSigma_j
+    
   }
 }

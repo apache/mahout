@@ -17,6 +17,9 @@
 
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
+import java.io.IOException;
+import java.util.Iterator;
+
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
@@ -32,37 +35,36 @@ import org.apache.mahout.common.StringTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Iterator;
-
 /**
  * Can also be used as a local Combiner beacuse only two values should be there
  * inside the values
  */
 public class BayesTfIdfReducer extends MapReduceBase implements
-    Reducer<StringTuple, DoubleWritable, StringTuple, DoubleWritable> {
-
-  private static final Logger log = LoggerFactory.getLogger(BayesTfIdfReducer.class);
-
+    Reducer<StringTuple,DoubleWritable,StringTuple,DoubleWritable> {
+  
+  private static final Logger log = LoggerFactory
+      .getLogger(BayesTfIdfReducer.class);
+  
   private HTable table;
   
-  private boolean useHbase = false;
-
+  private boolean useHbase;
+  
   @Override
-  public void reduce(StringTuple key, Iterator<DoubleWritable> values,
-      OutputCollector<StringTuple, DoubleWritable> output, Reporter reporter)
-      throws IOException {
+  public void reduce(StringTuple key,
+                     Iterator<DoubleWritable> values,
+                     OutputCollector<StringTuple,DoubleWritable> output,
+                     Reporter reporter) throws IOException {
     // Key is label,word, value is the number of times we've seen this label
     // word per local node. Output is the same
-
+    
     if (key.stringAt(0).equals(BayesConstants.FEATURE_SET_SIZE)) {
       double vocabCount = 0.0;
-
+      
       while (values.hasNext()) {
         reporter.setStatus("Bayes TfIdf Reducer: vocabCount " + vocabCount);
         vocabCount += values.next().get();
       }
-
+      
       log.info("{}\t{}", key, vocabCount);
       if (useHbase) {
         Put bu = new Put(Bytes.toBytes(BayesConstants.HBASE_COUNTS_ROW));
@@ -73,10 +75,10 @@ public class BayesTfIdfReducer extends MapReduceBase implements
       }
       output.collect(key, new DoubleWritable(vocabCount));
     } else if (key.stringAt(0).equals(BayesConstants.WEIGHT)) {
-      double idfTimes_D_ij = 1.0;
+      double idfTimesDIJ = 1.0;
       int numberofValues = 0;
       while (values.hasNext()) {
-        idfTimes_D_ij *= values.next().get();
+        idfTimesDIJ *= values.next().get();
         numberofValues++;
       }
       if (numberofValues == 2) { // Found TFIdf
@@ -84,39 +86,38 @@ public class BayesTfIdfReducer extends MapReduceBase implements
         String feature = key.stringAt(2);
         if (useHbase) {
           Put bu = new Put(Bytes.toBytes(feature));
-          bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY),
-                 Bytes.toBytes(label), Bytes.toBytes(idfTimes_D_ij));
+          bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes
+              .toBytes(label), Bytes.toBytes(idfTimesDIJ));
           table.put(bu);
         }
-
+        
       }
-      reporter.setStatus("Bayes TfIdf Reducer: " + key + " => " + idfTimes_D_ij);
-      output.collect(key, new DoubleWritable(idfTimes_D_ij));
+      reporter
+          .setStatus("Bayes TfIdf Reducer: " + key + " => " + idfTimesDIJ);
+      output.collect(key, new DoubleWritable(idfTimesDIJ));
     } else {
       throw new IllegalArgumentException("Unexpected StringTuple: " + key);
     }
   }
-
+  
   @Override
   public void configure(JobConf job) {
     try {
       Parameters params = Parameters
           .fromString(job.get("bayes.parameters", ""));
-      if (params.get("dataSource").equals("hbase"))
-        useHbase = true;
-      else
-        return;
-
-      HBaseConfiguration HBconf = new HBaseConfiguration(job);
-
-      table = new HTable(HBconf, job.get("output.table"));
-
+      if (params.get("dataSource").equals("hbase")) useHbase = true;
+      else return;
+      
+      HBaseConfiguration hBconf = new HBaseConfiguration(job);
+      
+      table = new HTable(hBconf, job.get("output.table"));
+      
     } catch (IOException e) {
       log.error("Unexpected error during configuration", e);
     }
-
+    
   }
-
+  
   @Override
   public void close() throws IOException {
     if (useHbase) {

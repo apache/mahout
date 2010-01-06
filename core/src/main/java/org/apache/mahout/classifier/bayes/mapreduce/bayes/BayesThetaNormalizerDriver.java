@@ -17,6 +17,9 @@
 
 package org.apache.mahout.classifier.bayes.mapreduce.bayes;
 
+import java.io.IOException;
+import java.util.Map;
+
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -36,74 +39,83 @@ import org.apache.mahout.common.StringTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Map;
-
 /** Create and run the Bayes Theta Normalization Step. */
 public class BayesThetaNormalizerDriver implements BayesJob {
-
-  private static final Logger log = LoggerFactory.getLogger(BayesThetaNormalizerDriver.class);
-
+  
+  private static final Logger log = LoggerFactory
+      .getLogger(BayesThetaNormalizerDriver.class);
+  
   /**
    * Run the job
-   *
-   * @param input  the input pathname String
-   * @param output the output pathname String
+   * 
+   * @param input
+   *          the input pathname String
+   * @param output
+   *          the output pathname String
    */
   @Override
   public void runJob(String input, String output, BayesParameters params) throws IOException {
     Configurable client = new JobClient();
     JobConf conf = new JobConf(BayesThetaNormalizerDriver.class);
-
-    conf.setJobName("Bayes Theta Normalizer Driver running over input: " +  input);
-
+    
+    conf.setJobName("Bayes Theta Normalizer Driver running over input: "
+                    + input);
+    
     conf.setOutputKeyClass(StringTuple.class);
     conf.setOutputValueClass(DoubleWritable.class);
-    FileInputFormat.addInputPath(conf, new Path(output + "/trainer-tfIdf/trainer-tfIdf"));
+    FileInputFormat.addInputPath(conf, new Path(
+        output + "/trainer-tfIdf/trainer-tfIdf"));
     Path outPath = new Path(output + "/trainer-thetaNormalizer");
     FileOutputFormat.setOutputPath(conf, outPath);
-    //conf.setNumMapTasks(100);
-    //conf.setNumReduceTasks(1);
+    // conf.setNumMapTasks(100);
+    // conf.setNumReduceTasks(1);
     conf.setMapperClass(BayesThetaNormalizerMapper.class);
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setCombinerClass(BayesThetaNormalizerReducer.class);
     conf.setReducerClass(BayesThetaNormalizerReducer.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     conf.set("io.serializations",
-        "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
-    // Dont ever forget this. People should keep track of how hadoop conf parameters and make or break a piece of code
-
+      "org.apache.hadoop.io.serializer.JavaSerialization,"
+          + "org.apache.hadoop.io.serializer.WritableSerialization");
+    // Dont ever forget this. People should keep track of how hadoop conf
+    // parameters and make or break a piece of code
+    
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
     if (dfs.exists(outPath)) {
       dfs.delete(outPath, true);
     }
-
-    Path Sigma_kFiles = new Path(output + "/trainer-weights/Sigma_k/*");
-    Map<String, Double> labelWeightSum = SequenceFileModelReader.readLabelSums(dfs, Sigma_kFiles, conf);
-    DefaultStringifier<Map<String, Double>> mapStringifier =
-        new DefaultStringifier<Map<String, Double>>(conf, GenericsUtil.getClass(labelWeightSum));
+    
+    Path sigmaKFiles = new Path(output + "/trainer-weights/Sigma_k/*");
+    Map<String,Double> labelWeightSum = SequenceFileModelReader.readLabelSums(
+      dfs, sigmaKFiles, conf);
+    DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(
+        conf, GenericsUtil.getClass(labelWeightSum));
     String labelWeightSumString = mapStringifier.toString(labelWeightSum);
-
+    
     log.info("Sigma_k for Each Label");
-    Map<String, Double> c = mapStringifier.fromString(labelWeightSumString);
+    Map<String,Double> c = mapStringifier.fromString(labelWeightSumString);
     log.info("{}", c);
     conf.set("cnaivebayes.sigma_k", labelWeightSumString);
-
-
-    Path sigma_kSigma_jFile = new Path(output + "/trainer-weights/Sigma_kSigma_j/*");
-    double sigma_jSigma_k = SequenceFileModelReader.readSigma_jSigma_k(dfs, sigma_kSigma_jFile, conf);
-    DefaultStringifier<Double> stringifier = new DefaultStringifier<Double>(conf, Double.class);
-    String sigma_jSigma_kString = stringifier.toString(sigma_jSigma_k);
-
+    
+    Path sigmaJSigmaKFile = new Path(output
+                                     + "/trainer-weights/Sigma_kSigma_j/*");
+    double sigmaJSigmaK = SequenceFileModelReader.readSigmaJSigmaK(dfs,
+      sigmaJSigmaKFile, conf);
+    DefaultStringifier<Double> stringifier = new DefaultStringifier<Double>(
+        conf, Double.class);
+    String sigmaJSigmaKString = stringifier.toString(sigmaJSigmaK);
+    
     log.info("Sigma_kSigma_j for each Label and for each Features");
-    double retSigma_jSigma_k = stringifier.fromString(sigma_jSigma_kString);
-    log.info("{}", retSigma_jSigma_k);
-    conf.set("cnaivebayes.sigma_jSigma_k", sigma_jSigma_kString);
-
-    Path vocabCountFile = new Path(output + "/trainer-tfIdf/trainer-vocabCount/*");
-    double vocabCount = SequenceFileModelReader.readVocabCount(dfs, vocabCountFile, conf);
+    double retSigmaJSigmaK = stringifier.fromString(sigmaJSigmaKString);
+    log.info("{}", retSigmaJSigmaK);
+    conf.set("cnaivebayes.sigma_jSigma_k", sigmaJSigmaKString);
+    
+    Path vocabCountFile = new Path(output
+                                   + "/trainer-tfIdf/trainer-vocabCount/*");
+    double vocabCount = SequenceFileModelReader.readVocabCount(dfs,
+      vocabCountFile, conf);
     String vocabCountString = stringifier.toString(vocabCount);
-
+    
     log.info("Vocabulary Count");
     conf.set("cnaivebayes.vocabCount", vocabCountString);
     double retvocabCount = stringifier.fromString(vocabCountString);
@@ -111,8 +123,8 @@ public class BayesThetaNormalizerDriver implements BayesJob {
     conf.set("bayes.parameters", params.toString());
     conf.set("output.table", output);
     client.setConf(conf);
-
+    
     JobClient.runJob(conf);
-
+    
   }
 }

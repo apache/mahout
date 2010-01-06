@@ -17,13 +17,18 @@
 
 package org.apache.mahout.classifier.bayes.common;
 
-import org.apache.mahout.classifier.ClassifierResult;
-
 import java.io.Serializable;
 import java.util.Comparator;
 
-public final class ByScoreLabelResultComparator implements Comparator<ClassifierResult>, Serializable {
+import org.apache.mahout.classifier.ClassifierResult;
 
+/**
+ * Compare two results of classification and return the lowest valued one
+ * 
+ */
+public final class ByScoreLabelResultComparator implements
+    Comparator<ClassifierResult>, Serializable {
+  
   @Override
   public int compare(ClassifierResult cr1, ClassifierResult cr2) {
     double score1 = cr1.getScore();
@@ -36,5 +41,5 @@ public final class ByScoreLabelResultComparator implements Comparator<Classifier
       return cr1.getLabel().compareTo(cr2.getLabel());
     }
   }
-
+  
 }

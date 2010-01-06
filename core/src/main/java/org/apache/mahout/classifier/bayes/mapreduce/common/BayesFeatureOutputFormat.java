@@ -17,6 +17,8 @@
 
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
+import java.io.IOException;
+
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
@@ -27,44 +29,45 @@ import org.apache.hadoop.mapred.lib.MultipleOutputFormat;
 import org.apache.hadoop.util.Progressable;
 import org.apache.mahout.common.StringTuple;
 
-import java.io.IOException;
-
 /**
- * This class extends the MultipleOutputFormat, allowing to write the output data to different output files in sequence
- * file output format.
+ * This class extends the MultipleOutputFormat, allowing to write the output
+ * data to different output files in sequence file output format.
  */
-public class BayesFeatureOutputFormat extends MultipleOutputFormat<WritableComparable<?>, Writable> {
-
-  private SequenceFileOutputFormat<WritableComparable<?>, Writable> theSequenceFileOutputFormat = null;
-
+public class BayesFeatureOutputFormat extends
+    MultipleOutputFormat<WritableComparable<?>,Writable> {
+  
+  private SequenceFileOutputFormat<WritableComparable<?>,Writable> theSequenceFileOutputFormat;
+  
   @Override
-  protected RecordWriter<WritableComparable<?>, Writable> getBaseRecordWriter(
-      FileSystem fs, JobConf job, String name, Progressable arg3)
-      throws IOException {
+  protected RecordWriter<WritableComparable<?>,Writable> getBaseRecordWriter(FileSystem fs,
+                                                                             JobConf job,
+                                                                             String name,
+                                                                             Progressable arg3) throws IOException {
     if (theSequenceFileOutputFormat == null) {
-      theSequenceFileOutputFormat = new SequenceFileOutputFormat<WritableComparable<?>, Writable>();
+      theSequenceFileOutputFormat = new SequenceFileOutputFormat<WritableComparable<?>,Writable>();
     }
     return theSequenceFileOutputFormat.getRecordWriter(fs, job, name, arg3);
   }
-
+  
   @Override
-  protected String generateFileNameForKeyValue(WritableComparable<?> k, Writable v, String name) {
+  protected String generateFileNameForKeyValue(WritableComparable<?> k,
+                                               Writable v,
+                                               String name) {
     StringTuple key = (StringTuple) k;
-    if(key.length() == 3)
-    {
-      if(key.stringAt(0).equals(BayesConstants.WEIGHT))
+    if (key.length() == 3) {
+      if (key.stringAt(0).equals(BayesConstants.WEIGHT)) {
         return "trainer-wordFreq/" + name;
-      else if(key.stringAt(0).equals(BayesConstants.DOCUMENT_FREQUENCY))
+      } else if (key.stringAt(0).equals(BayesConstants.DOCUMENT_FREQUENCY)) {
         return "trainer-termDocCount/" + name;
-    }
-    else if(key.length() == 2)
-    {
-      if(key.stringAt(0).equals(BayesConstants.FEATURE_COUNT))
+      }
+    } else if (key.length() == 2) {
+      if (key.stringAt(0).equals(BayesConstants.FEATURE_COUNT)) {
         return "trainer-featureCount/" + name;
-      else if(key.stringAt(0).equals(BayesConstants.LABEL_COUNT))
+      } else if (key.stringAt(0).equals(BayesConstants.LABEL_COUNT)) {
         return "trainer-docCount/" + name;
+      }
     }
-    throw new RuntimeException("Unrecognized Tuple: " + key);    
+    throw new RuntimeException("Unrecognized Tuple: " + key);
   }
-
+  
 }
