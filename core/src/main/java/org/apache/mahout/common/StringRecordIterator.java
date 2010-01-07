@@ -22,31 +22,31 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public class StringRecordIterator implements Iterator<List<String>> {
- 
+public class StringRecordIterator implements Iterator<Pair<List<String>,Long>> {
+  
   private final Iterator<String> lineIterator;
   private Pattern splitter = null;
-
+  
   public StringRecordIterator(FileLineIterable iterable, String pattern) {
     this.lineIterator = iterable.iterator();
     this.splitter = Pattern.compile(pattern);
   }
-
+  
   @Override
   public boolean hasNext() {
     return lineIterator.hasNext();
   }
-
+  
   @Override
-  public List<String> next() {
+  public Pair<List<String>,Long> next() {
     String line = lineIterator.next();
     String[] items = splitter.split(line);
-    return Arrays.asList(items);
+    return new Pair<List<String>,Long>(Arrays.asList(items), Long.valueOf(1));
   }
-
+  
   @Override
   public void remove() {
     lineIterator.remove();
   }
-
+  
 }

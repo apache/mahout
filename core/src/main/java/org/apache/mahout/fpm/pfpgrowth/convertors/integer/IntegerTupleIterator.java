@@ -25,7 +25,7 @@ import org.apache.mahout.common.IntegerTuple;
 public final class IntegerTupleIterator implements Iterator<List<Integer>> {
 
   private Iterator<IntegerTuple> iterator = null;
-
+  
   public IntegerTupleIterator(Iterator<IntegerTuple> iterator) {
     this.iterator = iterator;
   }

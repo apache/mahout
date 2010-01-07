@@ -21,10 +21,29 @@ import org.apache.mahout.common.cache.LeastKCache;
 
 import java.util.ArrayList;
 
+import org.apache.mahout.common.cache.LeastKCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class FPTreeDepthCache {
 
   private static int firstLevelCacheSize = 5;
 
+  private static final Logger log = LoggerFactory.getLogger(FPTreeDepthCache.class);
+
+  private final LeastKCache<Integer, FPTree> firstLevelCache = new LeastKCache<Integer, FPTree>(
+      firstLevelCacheSize);
+
+  private int hits = 0;
+
+  private int misses = 0;
+
+  private final ArrayList<FPTree> treeCache = new ArrayList<FPTree>();
+
+  public FPTreeDepthCache() {
+    log.info("Initializing FPTreeCache with firstLevelCacheSize: {}", firstLevelCacheSize);
+  }
+  
   public static int getFirstLevelCacheSize() {
     return firstLevelCacheSize;
   }
@@ -32,25 +51,6 @@ public class FPTreeDepthCache {
   public static void setFirstLevelCacheSize(int firstLevelCacheSize) {
     FPTreeDepthCache.firstLevelCacheSize = firstLevelCacheSize;
   }
-
-  private final ArrayList<FPTree> treeCache = new ArrayList<FPTree>();
-
-  private final LeastKCache<Integer, FPTree> firstLevelCache = new LeastKCache<Integer, FPTree>(
-      firstLevelCacheSize);
-
-  public final FPTree getTree(int level) {
-    while (treeCache.size() < level + 1) {
-      FPTree cTree = new FPTree();
-      treeCache.add(cTree);
-    }
-    FPTree conditionalTree = treeCache.get(level);
-    conditionalTree.clear();
-    return conditionalTree;
-  }
-
-  private int hits = 0;
-
-  private int misses = 0;
 
   public final FPTree getFirstLevelTree(int attr) {
     Integer attribute = attr;
@@ -71,6 +71,16 @@ public class FPTreeDepthCache {
 
   public final int getMisses() {
     return misses;
+  }
+
+  public final FPTree getTree(int level) {
+    while (treeCache.size() < level + 1) {
+      FPTree cTree = new FPTree();
+      treeCache.add(cTree);
+    }
+    FPTree conditionalTree = treeCache.get(level);
+    conditionalTree.clear();
+    return conditionalTree;
   }
 
 }

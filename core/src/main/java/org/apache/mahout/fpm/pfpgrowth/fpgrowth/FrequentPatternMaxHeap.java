@@ -17,39 +17,14 @@
 
 package org.apache.mahout.fpm.pfpgrowth.fpgrowth;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /** {@link FrequentPatternMaxHeap} keeps top K Attributes in a TreeSet */
-public class FrequentPatternMaxHeap {
-
-  private final Comparator<Pattern> treeSetComparator = new Comparator<Pattern>() {
-    @Override
-    public int compare(Pattern cr1, Pattern cr2) {
-      long support2 = cr2.support();
-      long support1 = cr1.support();
-      int length2 = cr2.length();
-      int length1 = cr1.length();
-      if (support1 == support2) {
-        if (length1 == length2) {// if they are of same length and support order
-          // randomly
-          return 1;
-        } else {
-          return length2 - length1;
-        }
-      } else {
-        if (support2 - support1 > 0) {
-          return 1;
-        } else {
-          return -1;
-        }
-      }
-    }
-  };
+public final class FrequentPatternMaxHeap {
 
   private int count = 0;
 
@@ -57,54 +32,83 @@ public class FrequentPatternMaxHeap {
 
   private int maxSize = 0;
 
-  private HashMap<Long, Set<Pattern>> patternIndex = null;
+  private boolean subPatternCheck = false;
 
-  private TreeSet<Pattern> set = null;
+  private Map<Long, Set<Pattern>> patternIndex = null;
 
-  public FrequentPatternMaxHeap(int numResults) {
+  private PriorityQueue<Pattern> queue = null;
+
+  public FrequentPatternMaxHeap(int numResults, boolean subPatternCheck) {
     maxSize = numResults;
-    set = new TreeSet<Pattern>(treeSetComparator);
+    queue = new PriorityQueue<Pattern>(maxSize);
+    this.subPatternCheck = subPatternCheck;
+    patternIndex = new HashMap<Long, Set<Pattern>>();
+    for (Pattern p : queue) {
+      Long index = Long.valueOf(p.support());
+      Set<Pattern> patternList;
+      if (patternIndex.containsKey(index) == false) {
+        patternList = new HashSet<Pattern>();
+        patternIndex.put(index, patternList);
+      }
+      patternList = patternIndex.get(index);
+      patternList.add(p);
+
+    }
   }
 
-  public final boolean addable(long support) {
+  public boolean addable(long support) {
     if (count < maxSize) {
       return true;
     }
     return least.support() <= support;
   }
 
-  public final SortedSet<Pattern> getHeap() {
-    return set;
+  public PriorityQueue<Pattern> getHeap() {
+    if (subPatternCheck) {
+      PriorityQueue<Pattern> ret = new PriorityQueue<Pattern>(maxSize);
+      for (Pattern p : queue) {
+
+        if (patternIndex.get(p.support()).contains(p)) {
+          ret.add(p);
+        }
+      }
+      return ret;
+    } else {
+      return queue;
+    }
   }
 
-  public final void insert(Pattern frequentPattern) {
-    insert(frequentPattern, true);
-  }
-
-  public final void insert(Pattern frequentPattern, boolean subPatternCheck) {
-    if (subPatternCheck)// lazy initialization
-    {
-      if (patternIndex == null) {
-        patternIndex = new HashMap<Long, Set<Pattern>>();
+  public void addAll(FrequentPatternMaxHeap patterns, int attribute, long attributeSupport) {
+    for (Pattern pattern : patterns.getHeap()) {
+      long support = Math.min(attributeSupport, pattern.support());
+      if (this.addable(support)) {
+        pattern.add(attribute, support);
+        this.insert(pattern);
       }
     }
+  }
+
+  public void insert(Pattern frequentPattern) {
+    if (frequentPattern.length() == 0) {
+      return;
+      }
+    
     if (count == maxSize) {
-      int cmp = treeSetComparator.compare(frequentPattern, least);
-      if (cmp < 0) {
-        if (addPattern(frequentPattern, subPatternCheck)) {
-          Pattern evictedItem = set.pollLast();
-          least = set.last();
+      if (frequentPattern.compareTo(least) > 0) {
+        if (addPattern(frequentPattern)) {
+          Pattern evictedItem = queue.poll();
+          least = queue.peek();
           if (subPatternCheck) {
             patternIndex.get(evictedItem.support()).remove(evictedItem);
           }
+
         }
       }
     } else {
-      if (addPattern(frequentPattern, subPatternCheck)) {
+      if (addPattern(frequentPattern)) {
         count++;
         if (least != null) {
-          int cmp = treeSetComparator.compare(least, frequentPattern);
-          if (cmp < 0) {
+          if (least.compareTo(frequentPattern) < 0) {
             least = frequentPattern;
           }
         } else {
@@ -114,15 +118,15 @@ public class FrequentPatternMaxHeap {
     }
   }
 
-  public final int count() {
+  public int count() {
     return count;
   }
 
-  public final boolean isFull() {
+  public boolean isFull() {
     return count == maxSize;
   }
 
-  public final long leastSupport() {
+  public long leastSupport() {
     if (least == null) {
       return 0;
     }
@@ -130,14 +134,13 @@ public class FrequentPatternMaxHeap {
   }
 
   @Override
-  public final String toString() {
+  public String toString() {
     return super.toString();
   }
 
-  private boolean addPattern(Pattern frequentPattern,
-                             boolean subPatternCheck) {
+  private boolean addPattern(Pattern frequentPattern) {
     if (subPatternCheck == false) {
-      set.add(frequentPattern);
+      queue.add(frequentPattern);
       return true;
     } else {
       Long index = frequentPattern.support();
@@ -146,7 +149,6 @@ public class FrequentPatternMaxHeap {
         boolean replace = false;
         Pattern replacablePattern = null;
         for (Pattern p : indexSet) {
-
           if (frequentPattern.isSubPatternOf(p)) {
             return false;
           } else if (p.isSubPatternOf(frequentPattern)) {
@@ -157,22 +159,17 @@ public class FrequentPatternMaxHeap {
         }
         if (replace) {
           indexSet.remove(replacablePattern);
-          if (set.remove(replacablePattern)) {
-            count--;
-          }
-          if (indexSet.contains(frequentPattern) == false) {
-            if (set.add(frequentPattern)) {
-              count++;
-            }
+          if (indexSet.contains(frequentPattern) == false && queue.add(frequentPattern)) {
+            
             indexSet.add(frequentPattern);
           }
           return false;
         }
-        set.add(frequentPattern);
+        queue.add(frequentPattern);
         indexSet.add(frequentPattern);
         return true;
       } else {
-        set.add(frequentPattern);
+        queue.add(frequentPattern);
         Set<Pattern> patternList;
         if (patternIndex.containsKey(index) == false) {
           patternList = new HashSet<Pattern>();

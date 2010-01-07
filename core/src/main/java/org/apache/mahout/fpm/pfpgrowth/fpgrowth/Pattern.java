@@ -19,7 +19,7 @@ package org.apache.mahout.fpm.pfpgrowth.fpgrowth;
 
 import java.util.Arrays;
 
-public class Pattern {
+public class Pattern implements Comparable<Pattern> {
 
   private static final int DEFAULT_INITIAL_SIZE = 2;
 
@@ -50,13 +50,13 @@ public class Pattern {
     dirty = true;
   }
 
-  public final void add(int id, long support) {
+  public final void add(int id, long supportCount) {
     if (length >= pattern.length) {
       resize();
     }
     this.pattern[length] = id;
-    this.supportValues[length++] = support;
-    this.support = (support > this.support) ? this.support : support;
+    this.supportValues[length++] = supportCount;
+    this.support = (supportCount > this.support) ? this.support : supportCount;
     dirty = true;
   }
 
@@ -86,7 +86,7 @@ public class Pattern {
   }
 
   public final Object[] getPatternWithSupport() {
-    return new Object[]{this.pattern, this.supportValues};
+    return new Object[] {this.pattern, this.supportValues};
   }
 
   @Override
@@ -149,6 +149,26 @@ public class Pattern {
     this.supportValues = new long[size];
     System.arraycopy(oldpattern, 0, this.pattern, 0, length);
     System.arraycopy(oldSupport, 0, this.supportValues, 0, length);
+  }
+
+  @Override
+  public int compareTo(Pattern cr2) {
+    long support2 = cr2.support();
+    int length2 = cr2.length();
+    if (support == support2) {
+      if (length == length2) {
+        // if they are of same length and support order randomly
+        return 1;
+      } else {
+        return length - length2;
+      }
+    } else {
+      if (support > support2) {
+        return 1;
+      } else {
+        return -1;
+      }
+    }
   }
 
 }

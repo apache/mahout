@@ -25,8 +25,8 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ContextWriteOutputCollector<IK extends Writable, IV extends Writable, K extends Writable, V extends Writable>
-    implements OutputCollector<K, V> {
+public class ContextWriteOutputCollector<IK extends Writable, IV extends Writable,
+    K extends Writable, V extends Writable> implements OutputCollector<K, V> {
 
   private static final Logger log = LoggerFactory
       .getLogger(ContextWriteOutputCollector.class);

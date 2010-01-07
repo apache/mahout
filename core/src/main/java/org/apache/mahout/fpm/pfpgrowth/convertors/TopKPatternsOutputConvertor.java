@@ -19,40 +19,46 @@ package org.apache.mahout.fpm.pfpgrowth.convertors;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
+
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FrequentPatternMaxHeap;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.Pattern;
 
-public final class TopKPatternsOutputConvertor<A> implements
+public final class TopKPatternsOutputConvertor<A extends Comparable<? super A>> implements
     OutputCollector<Integer, FrequentPatternMaxHeap> {
 
   private OutputCollector<A, List<Pair<List<A>, Long>>> collector = null;
 
   private Map<Integer, A> reverseMapping = null;
 
-  public TopKPatternsOutputConvertor(
-      OutputCollector<A, List<Pair<List<A>, Long>>> collector,
+  public TopKPatternsOutputConvertor(OutputCollector<A, List<Pair<List<A>, Long>>> collector,
       Map<Integer, A> reverseMapping) {
     this.collector = collector;
     this.reverseMapping = reverseMapping;
   }
 
   @Override
-  public void collect(Integer key, FrequentPatternMaxHeap value)
-      throws IOException {
+  public void collect(Integer key, FrequentPatternMaxHeap value) throws IOException {
     List<Pair<List<A>, Long>> perAttributePatterns = new ArrayList<Pair<List<A>, Long>>();
-    for (Pattern itemSet : value.getHeap()) {
+    PriorityQueue<Pattern> t = value.getHeap();
+    while (t.size() > 0) {
+      Pattern itemSet = t.poll();
       List<A> frequentPattern = new ArrayList<A>();
       for (int j = 0; j < itemSet.length(); j++) {
         frequentPattern.add(reverseMapping.get(itemSet.getPattern()[j]));
       }
-      Pair<List<A>, Long> returnItemSet = new Pair<List<A>, Long>(
-          frequentPattern, itemSet.support());
+      Collections.sort(frequentPattern);
+
+      Pair<List<A>, Long> returnItemSet = new Pair<List<A>, Long>(frequentPattern, itemSet.support());
       perAttributePatterns.add(returnItemSet);
     }
+    Collections.reverse(perAttributePatterns);
+
     collector.collect(reverseMapping.get(key), perAttributePatterns);
   }
 }

@@ -42,7 +42,7 @@ public final class IntegerStringOutputConvertor implements
   @Override
   public void collect(Integer key, List<Pair<List<Integer>, Long>> value)
       throws IOException {
-    String StringKey = featureReverseMap.get(key);
+    String stringKey = featureReverseMap.get(key);
     List<Pair<List<String>, Long>> stringValues = new ArrayList<Pair<List<String>, Long>>();
     for (Pair<List<Integer>, Long> e : value) {
       List<String> pattern = new ArrayList<String>();
@@ -53,7 +53,7 @@ public final class IntegerStringOutputConvertor implements
     }
 
     collector
-        .collect(new Text(StringKey), new TopKStringPatterns(stringValues));
+        .collect(new Text(stringKey), new TopKStringPatterns(stringValues));
   }
 
 }

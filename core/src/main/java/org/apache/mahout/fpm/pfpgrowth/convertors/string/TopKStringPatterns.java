@@ -55,10 +55,12 @@ public final class TopKStringPatterns implements Writable {
     Pair<List<String>, Long> myItem = null;
     Pair<List<String>, Long> otherItem = null;
     for (int i = 0; i < heapSize; i++) {
-      if (myItem == null && myIterator.hasNext())
+      if (myItem == null && myIterator.hasNext()) {
         myItem = myIterator.next();
-      if (otherItem == null && otherIterator.hasNext())
+      }
+      if (otherItem == null && otherIterator.hasNext()) {
         otherItem = otherIterator.next();
+      }
       if (myItem != null && otherItem != null) {
         int cmp = myItem.getSecond().compareTo(otherItem.getSecond());
         if (cmp == 0) {
@@ -89,8 +91,9 @@ public final class TopKStringPatterns implements Writable {
       } else if (otherItem != null) {
         patterns.add(otherItem);
         otherItem = null;
-      } else
+      } else {
         break;
+      }
     }
     return new TopKStringPatterns(patterns);
   }

@@ -21,14 +21,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class TransactionIterator<AP> implements Iterator<int[]> {
+import org.apache.mahout.common.Pair;
+
+public class TransactionIterator<AP> implements Iterator<Pair<int[], Long>> {
   private Map<AP, Integer> attributeIdMapping = null;
 
-  private Iterator<List<AP>> iterator = null;
+  private Iterator<Pair<List<AP>, Long>> iterator = null;
 
   private int[] transactionBuffer = null;
 
-  public TransactionIterator(Iterator<List<AP>> iterator,
+  public TransactionIterator(Iterator<Pair<List<AP>, Long>> iterator,
       Map<AP, Integer> attributeIdMapping) {
     this.attributeIdMapping = attributeIdMapping;
     this.iterator = iterator;
@@ -41,18 +43,19 @@ public class TransactionIterator<AP> implements Iterator<int[]> {
   }
 
   @Override
-  public final int[] next() {
-    List<AP> transaction = iterator.next();
+  public final Pair<int[], Long> next() {
+    Pair<List<AP>, Long> transaction = iterator.next();
     int index = 0;
-    for (AP Attribute : transaction) {
-      if (attributeIdMapping.containsKey(Attribute)) {
-        transactionBuffer[index++] = attributeIdMapping.get(Attribute);
+
+    for (AP attribute : transaction.getFirst()) {
+      if (attributeIdMapping.containsKey(attribute)) {
+        transactionBuffer[index++] = attributeIdMapping.get(attribute);
       }
     }
 
     int[] transactionList = new int[index];
     System.arraycopy(transactionBuffer, 0, transactionList, 0, index);
-    return transactionList;
+    return new Pair<int[], Long>(transactionList, transaction.getSecond());
 
   }
 
