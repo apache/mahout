@@ -67,7 +67,7 @@ public class FPTree {
 
   private boolean singlePath;
 
-  private Set<Integer> sortedSet = new TreeSet<Integer>();
+  private final Set<Integer> sortedSet = new TreeSet<Integer>();
 
   public FPTree() {
     this(DEFAULT_INITIAL_SIZE, DEFAULT_HEADER_TABLE_INITIAL_SIZE);
@@ -201,8 +201,7 @@ public class FPTree {
       nodeChildren[nodes] = new int[DEFAULT_CHILDREN_INITIAL_SIZE];
     }
 
-    int childNodeId = nodes++;
-    return childNodeId;
+    return nodes++;
   }
 
   public final int createNode(int parentNodeId, int attributeValue, long count) {
@@ -236,8 +235,7 @@ public class FPTree {
     if (nodeChildren[nodes] == null) {
       nodeChildren[nodes] = new int[DEFAULT_CHILDREN_INITIAL_SIZE];
     }
-    int childNodeId = nodes++;
-    return childNodeId;
+    return nodes++;
   }
 
   public final int getAttributeAtIndex(int index) {

@@ -52,11 +52,11 @@ public class HBaseBayesDatastore implements Datastore {
   
   private HTable table;
   
-  private Cache<String,Result> tableCache;
+  private final Cache<String,Result> tableCache;
   
   private final String hbaseTable;
   
-  private Parameters parameters;
+  private final Parameters parameters;
   
   private double thetaNormalizer = 1.0;
   

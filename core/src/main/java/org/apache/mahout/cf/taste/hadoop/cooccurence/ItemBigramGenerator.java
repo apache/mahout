@@ -32,7 +32,6 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
@@ -45,6 +44,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 public final class ItemBigramGenerator extends Configured implements Tool {
+
+  private static final Logger log = LoggerFactory.getLogger(ItemBigramGenerator.class);
 
   public static class UserItemMapper extends MapReduceBase
       implements Mapper<LongWritable, Text, VIntWritable, VIntWritable> {
@@ -162,7 +163,7 @@ public final class ItemBigramGenerator extends Configured implements Tool {
   public int run(String[] args) throws IOException {
     // TODO use Commons CLI 2    
     if (args.length < 2) {
-      System.out.println("Usage: ItemBigramGemerator <input-dir> <output-dir> [reducers]");
+      log.error("Usage: ItemBigramGemerator <input-dir> <output-dir> [reducers]");
       ToolRunner.printGenericCommandUsage(System.out);
       return -1;
     }
@@ -171,7 +172,7 @@ public final class ItemBigramGenerator extends Configured implements Tool {
     Path outputPath = new Path(args[1]);
     int reducers = args.length > 2 ? Integer.parseInt(args[2]) : 1;
     JobConf jobConf = prepareJob(inputPaths, outputPath, reducers);
-    RunningJob job = JobClient.runJob(jobConf);
+    JobClient.runJob(jobConf);
     return 0;
   }
 

@@ -41,9 +41,4 @@ public class KMeansCombiner extends MapReduceBase implements
     output.collect(key, new KMeansInfo(cluster.getNumPoints(), cluster.getPointTotal()));
   }
 
-  @Override
-  public void configure(JobConf job) {
-    super.configure(job);
-  }
-
 }

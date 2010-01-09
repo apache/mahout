@@ -54,17 +54,17 @@ public class PartialSequentialBuilder extends PartialBuilder {
 
   private static final Logger log = LoggerFactory.getLogger(PartialSequentialBuilder.class);
 
-  protected PartialOutputCollector firstOutput;
+  private PartialOutputCollector firstOutput;
 
-  protected PartialOutputCollector secondOutput;
+  private PartialOutputCollector secondOutput;
 
-  protected final Dataset dataset;
+  private final Dataset dataset;
 
   /** first instance id in hadoop's order */
-  protected int[] firstIds;
+  private int[] firstIds;
   
   /** partitions' sizes in hadoop order */
-  protected int[] sizes;
+  private int[] sizes;
 
   public PartialSequentialBuilder(TreeBuilder treeBuilder, Path dataPath,
       Dataset dataset, long seed, Configuration conf) {

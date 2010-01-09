@@ -32,7 +32,6 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.TextInputFormat;
@@ -48,6 +47,8 @@ import java.util.Collection;
 import java.util.Iterator;
 
 public final class UserItemJoiner extends Configured implements Tool {
+
+  private static final Logger log = LoggerFactory.getLogger(UserItemJoiner.class);
 
   public static class JoinUserMapper extends MapReduceBase
       implements Mapper<LongWritable, Text, Bigram, TupleWritable> {
@@ -144,7 +145,7 @@ public final class UserItemJoiner extends Configured implements Tool {
 
   }
 
-  public JobConf prepareJob(Path userInputPath, Path itemInputPath, Path outputPath, int reducers) throws IOException {
+  public JobConf prepareJob(Path userInputPath, Path itemInputPath, Path outputPath, int reducers) {
     JobConf job = new JobConf(getConf());
     job.setJobName("User Item Joiner");
     job.setJarByClass(this.getClass());
@@ -178,9 +179,7 @@ public final class UserItemJoiner extends Configured implements Tool {
   public int run(String[] args) throws IOException {
     // TODO use Commons CLI 2
     if (args.length < 3) {
-      System.out
-          .println("UserItemJoiner <user-input-dirs> <item-input-dir> <output-dir> "
-              + "[reducers]");
+      log.error("UserItemJoiner <user-input-dirs> <item-input-dir> <output-dir> [reducers]");
       ToolRunner.printGenericCommandUsage(System.out);
       return -1;
     }
@@ -190,7 +189,7 @@ public final class UserItemJoiner extends Configured implements Tool {
     Path outputPath = new Path(args[2]);
     int reducers = args.length > 3 ? Integer.parseInt(args[3]) : 1;
     JobConf jobConf = prepareJob(userInputPath, itemInputPath, outputPath, reducers);
-    RunningJob job = JobClient.runJob(jobConf);
+    JobClient.runJob(jobConf);
     return 0;
   }
 

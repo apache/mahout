@@ -90,14 +90,15 @@ public final class Bigram implements WritableComparable<Bigram> {
 
   @Override
   public int compareTo(Bigram o) {
-    if (o == null) {
-      return 1;
+    if (first == o.first) {
+      if (second == o.second) {
+        return 0;
+      } else {
+        return second < o.second ? -1 : 1;
+      }
+    } else {
+      return first < o.first ? -1 : 1;
     }
-    int ret = first - o.first;
-    if (ret == 0) {
-      ret = second - o.second;
-    }
-    return ret;
   }
 
   @Override
@@ -116,7 +117,7 @@ public final class Bigram implements WritableComparable<Bigram> {
     @Override
     public int compare(byte[] b1, int s1, int l1,
                        byte[] b2, int s2, int l2) {
-      int ret = -1;
+      int ret;
       try {
         int firstb1 = WritableComparator.readVInt(b1, s1);
         int firstb2 = WritableComparator.readVInt(b2, s2);

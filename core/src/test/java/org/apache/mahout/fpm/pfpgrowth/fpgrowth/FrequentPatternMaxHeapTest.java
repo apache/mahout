@@ -18,16 +18,17 @@
 package org.apache.mahout.fpm.pfpgrowth.fpgrowth;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 
 import junit.framework.TestCase;
+import org.apache.mahout.common.RandomUtils;
 
 public class FrequentPatternMaxHeapTest extends TestCase {
 
   public void testMapHeap() {
-    Random gen = new Random(123L);
+    Random gen = RandomUtils.getRandom();
 
     FrequentPatternMaxHeap pq = new FrequentPatternMaxHeap(50, true);
     for (int i = 0; i < 20; i++) {
@@ -42,10 +43,10 @@ public class FrequentPatternMaxHeapTest extends TestCase {
     }
   }
 
-  public Pattern generateRandomPattern(Random gen) {
+  public static Pattern generateRandomPattern(Random gen) {
     int length = 1 + Math.abs(gen.nextInt() % 6);
     Pattern p = new Pattern();
-    Set<Integer> set = new HashSet<Integer>();
+    Collection<Integer> set = new HashSet<Integer>();
     for (int i = 0; i < length; i++) {
       int id = Math.abs(gen.nextInt() % 20);
       while (set.contains(id)) {

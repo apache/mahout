@@ -25,6 +25,7 @@ import java.util.Random;
 import junit.framework.TestCase;
 
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,13 +48,13 @@ public class TransactionTreeTest extends TestCase {
 
   private static final int SKIP_RATE = 10;
 
-  private Random gen = new Random();
+  private final Random gen = RandomUtils.getRandom();
 
   public List<Integer> generateRandomArray() {
     List<Integer> list = new ArrayList<Integer>();
     for (int i = 0; i < MAX_FEATURES; i++) {
       if (gen.nextInt() % SKIP_RATE == 0) {
-        list.add(Integer.valueOf(i));
+        list.add(i);
       }
     }
     return list;

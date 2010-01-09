@@ -51,7 +51,7 @@ public final class MultiTransactionTreeIterator implements Iterator<List<Integer
   public List<Integer> next() {
     List<Integer> returnable = currentPattern.getFirst();
     currentCount++;
-    if (currentCount == currentPattern.getSecond().longValue()) {
+    if (currentCount == currentPattern.getSecond()) {
       if (pIterator.hasNext()) {
         currentPattern = pIterator.next();
         currentCount = 0;

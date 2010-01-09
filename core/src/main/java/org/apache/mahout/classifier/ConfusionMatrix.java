@@ -36,7 +36,7 @@ public class ConfusionMatrix implements Summarizable {
   
   private final Map<String,Integer> labelMap = new HashMap<String,Integer>();
   
-  private int[][] confusionMatrix;
+  private final int[][] confusionMatrix;
   
   private String defaultLabel = "unknown";
   

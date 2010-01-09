@@ -28,7 +28,7 @@ public final class Integers {
   private Integers() {
   }
 
-  public static Iterator<Integer> iterator(final int n) {
+  public static Iterator<Integer> iterator(int n) {
     return new IntegerIterator(n);
   }
 

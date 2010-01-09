@@ -81,7 +81,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
       Pair<List<A>, Long> transaction = transactions.next();
       for (A attribute : transaction.getFirst()) {
         if (attributeSupport.containsKey(attribute) == false) {
-          attributeSupport.put(attribute, new MutableLong(transaction.getSecond().longValue()));
+          attributeSupport.put(attribute, new MutableLong(transaction.getSecond()));
         } else {
           attributeSupport.get(attribute).add(transaction.getSecond().longValue());
           // count++;
@@ -212,7 +212,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
     return patterns;
   }
 
-  private FrequentPatternMaxHeap generateSinglePathPatterns(FPTree tree, int k,
+  private static FrequentPatternMaxHeap generateSinglePathPatterns(FPTree tree, int k,
       MutableLong minSupportMutable) {
     FrequentPatternMaxHeap frequentPatterns = new FrequentPatternMaxHeap(k, false);
 
@@ -268,7 +268,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
       Pair<int[], Long> transaction = transactions.next();
       Arrays.sort(transaction.getFirst());
       // attribcount += transaction.length;
-      nodecount += treeAddCount(tree, transaction.getFirst(), transaction.getSecond().longValue(),
+      nodecount += treeAddCount(tree, transaction.getFirst(), transaction.getSecond(),
           minSupportMutable, attributeFrequency);
       i++;
       if (i % 10000 == 0) {
@@ -355,7 +355,6 @@ public class FPGrowth<A extends Comparable<? super A>> {
       return generateSinglePathPatterns(tree, k, minSupportMutable);
     }
 
-    FrequentPatternMaxHeap returnedPatterns;
     updater.update("Bottom Up FP Growth");
     for (int i = tree.getHeaderTableCount() - 1; i >= 0; i--) {
       int attribute = tree.getAttributeAtIndex(i);
@@ -365,6 +364,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
       }
       FPTree conditionalTree = treeCache.getTree(level);
 
+      FrequentPatternMaxHeap returnedPatterns;
       if (conditionalOfCurrentAttribute) {
         traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute), minSupportMutable,
             conditionalTree, tree);
@@ -424,8 +424,6 @@ public class FPGrowth<A extends Comparable<? super A>> {
 
     updater.update("Top Down Growth:");
 
-    FrequentPatternMaxHeap returnedPatterns;
-
     for (int i = 0; i < tree.getHeaderTableCount(); i++) {
       int attribute = tree.getAttributeAtIndex(i);
       long count = tree.getHeaderSupportCount(attribute);
@@ -435,6 +433,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
 
       FPTree conditionalTree = treeCache.getTree(level);
 
+      FrequentPatternMaxHeap returnedPatterns;
       if (conditionalOfCurrentAttribute) {
         traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute), minSupportMutable,
             conditionalTree, tree);
@@ -470,7 +469,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
     return frequentPatterns;
   }
 
-  private FrequentPatternMaxHeap mergeHeap(FrequentPatternMaxHeap frequentPatterns,
+  private static FrequentPatternMaxHeap mergeHeap(FrequentPatternMaxHeap frequentPatterns,
       FrequentPatternMaxHeap returnedPatterns, int attribute, long count, boolean addAttribute,
       boolean subPatternCheck) {
     frequentPatterns.addAll(returnedPatterns, attribute, count);
@@ -541,7 +540,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
 
   }
 
-  private void pruneFPTree(MutableLong minSupportMutable, FPTree tree) {
+  private static void pruneFPTree(MutableLong minSupportMutable, FPTree tree) {
     for (int i = 0; i < tree.getHeaderTableCount(); i++) {
       int currentAttribute = tree.getAttributeAtIndex(i);
       if (tree.getHeaderSupportCount(currentAttribute) < minSupportMutable.intValue()) {
@@ -606,7 +605,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
    * @param attributeFrequency the list of attributes and their frequency
    * @return the number of new nodes added
    */
-  private int treeAddCount(FPTree tree, int[] myList, long addCount, MutableLong minSupport,
+  private static int treeAddCount(FPTree tree, int[] myList, long addCount, MutableLong minSupport,
       long[] attributeFrequency) {
 
     int temp = FPTree.ROOTNODEID;

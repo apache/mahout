@@ -30,7 +30,7 @@ import org.apache.mahout.common.Summarizable;
  */
 public class ResultAnalyzer implements Summarizable {
   
-  private ConfusionMatrix confusionMatrix;
+  private final ConfusionMatrix confusionMatrix;
   
   /*
    * === Summary ===

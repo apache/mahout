@@ -49,7 +49,7 @@ import org.apache.mahout.df.DFUtils;
  * preparation step of the partial mapreduce builder. Computes some stats that
  * will be used by the builder.
  */
-public class Step0Job implements Cloneable {
+public class Step0Job {
 
   /** directory that will hold this job's output */
   private final Path outputPath;
@@ -245,7 +245,7 @@ public class Step0Job implements Cloneable {
    * 
    */
   public static class Step0Output implements Writable,
-      Comparable<Step0Output> {
+      Comparable<Step0Output>, Cloneable {
 
     /**
      * first key of the partition<br>

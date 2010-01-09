@@ -238,7 +238,7 @@ public class FrequenciesJob {
    *
    */
   protected static class Frequencies implements Writable,
-      Comparable<Frequencies> {
+      Comparable<Frequencies>, Cloneable {
 
     /**
      * first key of the partition<br>

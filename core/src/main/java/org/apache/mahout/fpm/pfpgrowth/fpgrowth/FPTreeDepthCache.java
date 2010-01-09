@@ -21,7 +21,6 @@ import org.apache.mahout.common.cache.LeastKCache;
 
 import java.util.ArrayList;
 
-import org.apache.mahout.common.cache.LeastKCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

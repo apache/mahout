@@ -55,12 +55,14 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
   }
   
   public double dot(Vector a, Vector b) {
+    boolean sameVector = a == b;
     Iterator<Vector.Element> it = a.iterateNonZero();
     Vector.Element el;
     Vector weights = getWeights();
     double dot = 0;
     while (it.hasNext() && (el = it.next()) != null) {
-      double value = el.get() * (a == b ? el.get() : b.getQuick(el.index()));
+      double elementValue = el.get();
+      double value = elementValue * (sameVector ? elementValue : b.getQuick(el.index()));
       if (weights != null) {
         value *= weights.getQuick(el.index());
       }

@@ -34,15 +34,17 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Partitioner;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.PriorityQueue;
+import java.util.Queue;
 
 
 /**
@@ -51,6 +53,8 @@ import java.util.PriorityQueue;
  * that each reducer sees all the bigrams for each unique first item.
  */
 public final class ItemSimilarityEstimator extends Configured implements Tool {
+
+  private static final Logger log = LoggerFactory.getLogger(ItemSimilarityEstimator.class);    
 
   /** Partition based on the first part of the bigram. */
   public static class FirstPartitioner implements Partitioner<Bigram, Writable> {
@@ -106,7 +110,7 @@ public final class ItemSimilarityEstimator extends Configured implements Tool {
   /** All sorted bigrams for item1 are recieved in reduce. <p/> K -> (item1, item2), V -> (FREQ) */
   public static class ItemItemReducer extends MapReduceBase implements Reducer<Bigram, Bigram, Bigram, DoubleWritable> {
 
-    private PriorityQueue<Bigram.Frequency> freqBigrams = new PriorityQueue<Bigram.Frequency>();
+    private final Queue<Bigram.Frequency> freqBigrams = new PriorityQueue<Bigram.Frequency>();
     private Bigram key = new Bigram();
     private DoubleWritable value = new DoubleWritable();
 
@@ -165,7 +169,7 @@ public final class ItemSimilarityEstimator extends Configured implements Tool {
   }
 
 
-  public JobConf prepareJob(String inputPaths, Path outputPath, int maxFreqItems, int reducers) throws IOException {
+  public JobConf prepareJob(String inputPaths, Path outputPath, int maxFreqItems, int reducers) {
     JobConf job = new JobConf(getConf());
     job.setJobName("Item Bigram Counter");
     job.setJarByClass(this.getClass());
@@ -200,9 +204,7 @@ public final class ItemSimilarityEstimator extends Configured implements Tool {
   public int run(String[] args) throws IOException {
     // TODO use Commons CLI 2
     if (args.length < 2) {
-      System.out
-          .println("ItemSimilarityEstimator <input-dirs> <output-dir> "
-              + "[max-frequent-items] [reducers]");
+      log.error("ItemSimilarityEstimator <input-dirs> <output-dir> [max-frequent-items] [reducers]");
       ToolRunner.printGenericCommandUsage(System.out);
       return -1;
     }
@@ -212,7 +214,7 @@ public final class ItemSimilarityEstimator extends Configured implements Tool {
     int maxFreqItems = args.length > 2 ? Integer.parseInt(args[2]) : 20;
     int reducers = args.length > 3 ? Integer.parseInt(args[3]) : 1;
     JobConf jobConf = prepareJob(inputPaths, outputPath, maxFreqItems, reducers);
-    RunningJob job = JobClient.runJob(jobConf);
+    JobClient.runJob(jobConf);
     return 0;
   }
 

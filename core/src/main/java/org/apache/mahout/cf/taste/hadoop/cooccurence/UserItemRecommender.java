@@ -29,11 +29,12 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -48,6 +49,8 @@ import java.util.Map;
 import java.util.TreeSet;
 
 public final class UserItemRecommender extends Configured implements Tool {
+
+  private static final Logger log = LoggerFactory.getLogger(UserItemRecommender.class);
 
   public static class RecommenderMapper extends MapReduceBase
       implements Mapper<VIntWritable, TupleWritable, Bigram, TupleWritable> {
@@ -142,8 +145,7 @@ public final class UserItemRecommender extends Configured implements Tool {
     }
   }
 
-  public JobConf prepareJob(String inputPaths, Path outputPath, int maxRecommendations, int reducers)
-      throws IOException {
+  public JobConf prepareJob(String inputPaths, Path outputPath, int maxRecommendations, int reducers) {
     JobConf job = new JobConf(getConf());
     job.setJobName("User Item Recommendations");
     job.setJarByClass(this.getClass());
@@ -172,9 +174,7 @@ public final class UserItemRecommender extends Configured implements Tool {
   public int run(String[] args) throws IOException {
     // TODO use Commons CLI 2
     if (args.length < 2) {
-      System.out
-          .println("UserItemRecommender <input-dirs> <output-dir> "
-              + "[max-recommendations] [reducers]");
+      log.error("UserItemRecommender <input-dirs> <output-dir> [max-recommendations] [reducers]");
       ToolRunner.printGenericCommandUsage(System.out);
       return -1;
     }
@@ -184,7 +184,7 @@ public final class UserItemRecommender extends Configured implements Tool {
     int maxRecommendations = args.length > 2 ? Integer.parseInt(args[2]) : 100;
     int reducers = args.length > 3 ? Integer.parseInt(args[3]) : 1;
     JobConf jobConf = prepareJob(inputPaths, outputPath, maxRecommendations, reducers);
-    RunningJob job = JobClient.runJob(jobConf);
+    JobClient.runJob(jobConf);
     return 0;
   }
 

@@ -40,11 +40,11 @@ import java.util.Map;
 
 public class TestMeanShift extends TestCase {
 
-  Vector[] raw = null;
+  private Vector[] raw = null;
 
-  static FileSystem fs;
+  private FileSystem fs;
 
-  static Configuration conf;
+  private Configuration conf;
 
   // DistanceMeasure manhattanDistanceMeasure = new ManhattanDistanceMeasure();
 
@@ -97,7 +97,7 @@ public class TestMeanShift extends TestCase {
     }
   }
 
-  private static void writePointsToFile(Vector[] points, String fileName)
+  private void writePointsToFile(Vector[] points, String fileName)
       throws IOException {
     Path path = new Path(fileName);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path,

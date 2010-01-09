@@ -23,7 +23,7 @@ import java.util.Iterator;
 
 import org.apache.mahout.common.RandomUtils;
 
-public abstract class TestSamplingIterator extends TestCase {
+public class TestSamplingIterator extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
@@ -70,7 +70,7 @@ public abstract class TestSamplingIterator extends TestCase {
       }
       double sd = Math.sqrt(0.9 * 0.1 * 1000);
       assertTrue(k >= 100 - 3 * sd);
-      assertTrue(k >= 100 + 3 * sd);
+      assertTrue(k <= 100 + 3 * sd);
     }
   }
 }

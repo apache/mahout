@@ -44,7 +44,7 @@ public final class FrequentPatternMaxHeap {
     this.subPatternCheck = subPatternCheck;
     patternIndex = new HashMap<Long, Set<Pattern>>();
     for (Pattern p : queue) {
-      Long index = Long.valueOf(p.support());
+      Long index = p.support();
       Set<Pattern> patternList;
       if (patternIndex.containsKey(index) == false) {
         patternList = new HashSet<Pattern>();
@@ -131,11 +131,6 @@ public final class FrequentPatternMaxHeap {
       return 0;
     }
     return least.support();
-  }
-
-  @Override
-  public String toString() {
-    return super.toString();
   }
 
   private boolean addPattern(Pattern frequentPattern) {

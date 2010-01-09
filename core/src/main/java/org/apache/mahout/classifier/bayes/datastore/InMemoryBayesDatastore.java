@@ -44,7 +44,7 @@ public class InMemoryBayesDatastore implements Datastore {
   
   private final Map<String,Map<String,Double>> vectors = new HashMap<String,Map<String,Double>>();
   
-  private Parameters params;
+  private final Parameters params;
   
   private double thetaNormalizer = 1.0;
 
@@ -110,8 +110,11 @@ public class InMemoryBayesDatastore implements Datastore {
       index)
                                                      / thetaNormalizer;
     else if (vectorName.equals("params")) {
-      if (index.equals("alpha_i")) return alphaI;
-      else throw new InvalidDatastoreException();
+      if (index.equals("alpha_i")) {
+        return alphaI;
+      } else {
+        throw new InvalidDatastoreException();
+      }
     }
     return vectorGetCell(vectorName, index);
   }

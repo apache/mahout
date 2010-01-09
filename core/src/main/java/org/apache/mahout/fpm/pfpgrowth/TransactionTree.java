@@ -42,7 +42,7 @@ public final class TransactionTree implements Writable {
 
   public final class TransactionTreeIterator implements Iterator<Pair<List<Integer>, Long>> {
 
-    Stack<int[]> depth = new Stack<int[]>();
+    private final Stack<int[]> depth = new Stack<int[]>();
 
     public TransactionTreeIterator() {
       depth.push(new int[] {0, -1});
@@ -50,17 +50,14 @@ public final class TransactionTree implements Writable {
 
     @Override
     public boolean hasNext() {
-      if (depth.isEmpty()) {
-        return false;
-      }
-      return true;
+      return !depth.isEmpty();
     }
 
     @Override
     public Pair<List<Integer>, Long> next() {
 
-      long sum = 0;
-      int childId = 0;
+      long sum;
+      int childId;
       do {
         int[] top = depth.peek();
         while (top[1] + 1 == childCount[top[0]]) {
@@ -177,10 +174,10 @@ public final class TransactionTree implements Writable {
   }
 
   public int addPattern(List<Integer> myList, long addCount) {
-    int temp = TransactionTree.ROOTNODEID;
+    int temp = ROOTNODEID;
     int ret = 0;
     boolean addCountMode = true;
-    int child = -1;
+    int child;
     for (int attributeValue : myList) {
 
       if (addCountMode) {
@@ -369,7 +366,7 @@ public final class TransactionTree implements Writable {
       for (int i = 0, j = transactionSet.size(); i < j; i++) {
         Pair<List<Integer>, Long> transaction = transactionSet.get(i);
 
-        vLong.set(transaction.getSecond().longValue());
+        vLong.set(transaction.getSecond());
         vLong.write(out);
 
         vInt.set(transaction.getFirst().size());
@@ -422,8 +419,7 @@ public final class TransactionTree implements Writable {
     if (nodeChildren[nodes] == null) {
       nodeChildren[nodes] = new int[DEFAULT_CHILDREN_INITIAL_SIZE];
     }
-    int childNodeId = nodes++;
-    return childNodeId;
+    return nodes++;
   }
 
   private void resize() {

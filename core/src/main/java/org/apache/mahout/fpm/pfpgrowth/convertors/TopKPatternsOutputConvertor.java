@@ -46,7 +46,7 @@ public final class TopKPatternsOutputConvertor<A extends Comparable<? super A>> 
   public void collect(Integer key, FrequentPatternMaxHeap value) throws IOException {
     List<Pair<List<A>, Long>> perAttributePatterns = new ArrayList<Pair<List<A>, Long>>();
     PriorityQueue<Pattern> t = value.getHeap();
-    while (t.size() > 0) {
+    while (!t.isEmpty()) {
       Pattern itemSet = t.poll();
       List<A> frequentPattern = new ArrayList<A>();
       for (int j = 0; j < itemSet.length(); j++) {
