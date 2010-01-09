@@ -9,10 +9,7 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.*;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.DataConverter;
@@ -22,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.File;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -103,14 +101,34 @@ public class UDistrib {
 
     Configuration conf = new Configuration();
 
-    // TODO exception if numPArtitions <= 0
+    if (numPartitions <= 0) {
+        throw new IllegalArgumentException("numPartitions <= 0");
+    }
 
-    // create a new file corresponding to each partition
+    // make sure the output file does not exist
     Path outputPath = new Path(output);
     FileSystem fs = outputPath.getFileSystem(conf);
+
+    if (fs.exists(outputPath)) {
+        throw new IllegalArgumentException("Output path already exists");
+    }
+
+    // create a new file corresponding to each partition
+//    Path workingDir = fs.getWorkingDirectory();
+//    FileSystem wfs = workingDir.getFileSystem(conf);
+//    File parentFile = new File(workingDir.toString());
+//    File tempFile = FileUtil.createLocalTempFile(parentFile, "Parts", true);
+//    File tempFile = File.createTempFile("df.tools.UDistrib","");
+//    tempFile.deleteOnExit();
+    File tempFile = FileUtil.createLocalTempFile(new File(""), "df.tools.UDistrib", true);
+    Path partsPath = new Path(tempFile.toString());
+    FileSystem pfs = partsPath.getFileSystem(conf);
+
+    Path[] partPaths = new Path[numPartitions];
     FSDataOutputStream[] files = new FSDataOutputStream[numPartitions];
     for (int p = 0; p < numPartitions; p++) {
-      files[p] = fs.create(new Path(outputPath, String.format("part-%03d.data", p)));
+      partPaths[p] = new Path(partsPath, String.format("part.%03d", p));
+      files[p] = pfs.create(partPaths[p]);
     }
 
     Path datasetPath = new Path(datasetStr);
@@ -131,11 +149,12 @@ public class UDistrib {
     FSDataInputStream input = ifs.open(dataPath);
     Scanner scanner = new Scanner(input);
     DataConverter converter = new DataConverter(dataset);
+    int nbInstances = dataset.nbInstances();
 
     int id = 0;
     while (scanner.hasNextLine()) {
       if ((id % 1000)==0) {
-        log.info("currentId : " + id);
+        log.info(String.format("progress : %d / %d", id, nbInstances));
       }
       
       String line = scanner.nextLine();
@@ -158,6 +177,24 @@ public class UDistrib {
     scanner.close();
     for (FSDataOutputStream file : files)
       file.close();
+
+    // merge all output files
+    FileUtil.copyMerge(pfs, partsPath, fs, outputPath, true, conf, null);
+/*
+    FSDataOutputStream joined = fs.create(new Path(outputPath, "uniform.data"));
+    for (int p = 0; p < numPartitions; p++) {
+        log.info("Joining part : " + p);
+        FSDataInputStream partStream = fs.open(partPaths[p]);
+
+        IOUtils.copyBytes(partStream, joined, conf, false);
+
+        partStream.close();
+    }
+
+    joined.close();
+
+    fs.delete(partsPath, true);
+*/
   }
 
 }

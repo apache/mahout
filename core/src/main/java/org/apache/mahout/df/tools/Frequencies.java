@@ -113,10 +113,10 @@ public class Frequencies extends Configured implements Tool  {
 
     // compute the partitions' sizes
     int numPartitions = counts.length;
-    int[] sizes = new int[numPartitions]; // TODO this isn't used?
-    for (int p = 0; p < numPartitions; p++) {
-      sizes[p] = DataUtils.sum(counts[p]);
-    }
+//    int[] sizes = new int[numPartitions]; // TODO this isn't used?
+//    for (int p = 0; p < numPartitions; p++) {
+//      sizes[p] = DataUtils.sum(counts[p]);
+//    }
 
     // outputing the frequencies
     log.info("counts[partition][class]");

@@ -64,6 +64,12 @@ public class Step0JobTest extends TestCase {
 
   Step0Context context;
 
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    RandomUtils.useTestSeed();
+  }
+
   /**
    * Computes the "mapred.max.split.size" that will generate the desired number
    * of input splits

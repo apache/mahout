@@ -55,6 +55,12 @@ public class Step0JobTest extends TestCase {
 
   private static final int numMaps = 5;
 
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    RandomUtils.useTestSeed();
+  }
+
   public void testStep0Mapper() throws Exception {
     Random rng = RandomUtils.getRandom();
 
