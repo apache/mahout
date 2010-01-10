@@ -178,7 +178,7 @@ public class LDAPrintTopics {
             abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
             "Output directory to write top words").withShortName("o").create();
 
-    Option wordOpt = obuilder.withLongName("words").withRequired(true).withArgument(
+    Option wordOpt = obuilder.withLongName("words").withRequired(false).withArgument(
             abuilder.withName("words").withMinimum(0).withMaximum(1).withDefault("20").create()).withDescription(
             "Number of words to print").withShortName("w").create();
 
@@ -228,6 +228,7 @@ public class LDAPrintTopics {
       }
 
     } catch (OptionException e) {
+      e.printStackTrace();
       CommandLineUtil.printHelp(group);
     }
   }
