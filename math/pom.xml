@@ -39,6 +39,8 @@
   <packaging>jar</packaging>
 
   <build>
+    <defaultGoal>install</defaultGoal>
+
     <plugins>
       <plugin>
         <groupId>org.apache.mahout</groupId>

@@ -29,17 +29,13 @@ package org.apache.mahout.math.map;
 
 import org.apache.mahout.math.Sorting;
 import org.apache.mahout.math.Swapper;
-import org.apache.mahout.math.function.${keyTypeCap}Comparator;
 import org.apache.mahout.math.function.${keyTypeCap}${valueTypeCap}Procedure;
 import org.apache.mahout.math.function.${keyTypeCap}Procedure;
 import org.apache.mahout.math.list.${keyTypeCap}ArrayList;
 #if (${keyType} != ${valueType})
-import org.apache.mahout.math.function.${valueTypeCap}Procedure;
 import org.apache.mahout.math.list.${valueTypeCap}ArrayList;
 #end
-#if (${keyType} != 'int')
 import org.apache.mahout.math.function.IntComparator;
-#end
 #if (${valueTypeFloating} == 'true')
 import org.apache.mahout.math.function.${valueTypeCap}Function;
 #end

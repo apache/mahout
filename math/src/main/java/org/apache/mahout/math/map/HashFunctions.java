@@ -12,12 +12,11 @@ package org.apache.mahout.math.map;
  * Provides various hash functions.
  *
  */
+public final class HashFunctions {
 
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
-public class HashFunctions {
-
-  /** Makes this class non instantiable, but still let's others inherit from it. */
+  /**
+   * Utility class pattern: all static members, no inheritance.
+   */
   private HashFunctions() {
   }
 

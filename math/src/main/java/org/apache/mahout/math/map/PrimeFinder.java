@@ -129,7 +129,6 @@ public class PrimeFinder {
    */
   public static int nextPrime(int desiredCapacity) {
     int i = java.util.Arrays.binarySearch(primeCapacities, desiredCapacity);
-    //int i = new IntArrayList(primeCapacities).binarySearch(desiredCapacity); // for debug only TODO
     if (i < 0) {
       // desired capacity not found, choose next prime greater than desired capacity
       i = -i - 1; // remember the semantics of binarySearch...

@@ -852,6 +852,20 @@ public abstract class Abstract${valueTypeCap}List extends AbstractList implement
     }
     return list;
   }
+  
+  public ${valueType}[] toArray(${valueType}[] values) {
+   int mySize = size();
+   ${valueType}[] myElements;
+   if (values.length >= mySize) {
+     myElements = values;
+   } else {
+     myElements = new ${valueType}[mySize];
+   }
+   for (int i = size; --i >= 0;) {
+      myElements[i] = getQuick(i);
+    }
+    return myElements;
+  }
 
   /** Returns a string representation of the receiver, containing the String representation of each element. */
   public String toString() {

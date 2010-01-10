@@ -59,9 +59,10 @@ public abstract class AbstractMap extends PersistentObject {
   /** The maximum load factor for the hashtable. */
   protected double maxLoadFactor;
 
-  protected static final int defaultCapacity = 277;
-  protected static final double defaultMinLoadFactor = 0.2;
-  protected static final double defaultMaxLoadFactor = 0.5;
+  // these are package access for unit tests.
+  static final int defaultCapacity = 277;
+  static final double defaultMinLoadFactor = 0.2;
+  static final double defaultMaxLoadFactor = 0.5;
 
   /**
    * Chooses a new prime table capacity optimized for growing that (approximately) satisfies the invariant <tt>c *
