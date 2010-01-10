@@ -62,10 +62,10 @@ public class LDAPrintTopics {
       this.score = score;
       this.word = word;
     }
-    
+
     @Override
     public int compareTo(StringDoublePair other) {
-      return Double.compare(score,other.score);
+      return Double.compare(score, other.score);
     }
 
     @Override
@@ -85,21 +85,21 @@ public class LDAPrintTopics {
   }
 
   public static List<List<String>> topWordsForTopics(String dir, Configuration job,
-      List<String> wordList, int numWordsToPrint) throws IOException {
+                                                     List<String> wordList, int numWordsToPrint) throws IOException {
     FileSystem fs = new Path(dir).getFileSystem(job);
 
     List<PriorityQueue<StringDoublePair>> queues = new ArrayList<PriorityQueue<StringDoublePair>>();
 
     IntPairWritable key = new IntPairWritable();
     DoubleWritable value = new DoubleWritable();
-    for (FileStatus status : fs.globStatus(new Path(dir, "*"))) { 
+    for (FileStatus status : fs.globStatus(new Path(dir, "*"))) {
       Path path = status.getPath();
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
       while (reader.next(key, value)) {
         int topic = key.getX();
         int word = key.getY();
 
-        ensureQueueSize(queues,topic);
+        ensureQueueSize(queues, topic);
         if (word >= 0 && topic >= 0) {
           double score = value.get();
           String realWord = wordList.get(word);
@@ -111,9 +111,9 @@ public class LDAPrintTopics {
 
     List<List<String>> result = new ArrayList<List<String>>();
     for (int i = 0; i < queues.size(); ++i) {
-      result.add(i,new LinkedList<String>());
-      for (StringDoublePair sdp: queues.get(i)) {
-        result.get(i).add(0,sdp.word); // prepend
+      result.add(i, new LinkedList<String>());
+      for (StringDoublePair sdp : queues.get(i)) {
+        result.get(i).add(0, sdp.word); // prepend
       }
     }
 
@@ -129,13 +129,13 @@ public class LDAPrintTopics {
 
   // Adds the word if the queue is below capacity, or the score is high enough
   private static void maybeEnqueue(Queue<StringDoublePair> q, String word,
-      double score, int numWordsToPrint) {
+                                   double score, int numWordsToPrint) {
     if (q.size() >= numWordsToPrint && score > q.peek().score) {
       q.poll();
     }
     if (q.size() < numWordsToPrint) {
-      q.add(new StringDoublePair(score,word));
-    } 
+      q.add(new StringDoublePair(score, word));
+    }
   }
 
   // Reads dictionary in created by the vector Driver in util
@@ -167,25 +167,25 @@ public class LDAPrintTopics {
     GroupBuilder gbuilder = new GroupBuilder();
 
     Option inputOpt = obuilder.withLongName("input").withRequired(true).withArgument(
-        abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
-        "Path to an LDA output (a state)").withShortName("i").create();
+            abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
+            "Path to an LDA output (a state)").withShortName("i").create();
 
     Option dictOpt = obuilder.withLongName("dict").withRequired(true).withArgument(
-        abuilder.withName("dict").withMinimum(1).withMaximum(1).create()).withDescription(
-        "Dictionary to read in, created by common.vector.Driver").withShortName("d").create();
+            abuilder.withName("dict").withMinimum(1).withMaximum(1).create()).withDescription(
+            "Dictionary to read in, in the same format as one created by org.apache.mahout.utils.vectors.lucene.Driver").withShortName("d").create();
 
     Option outOpt = obuilder.withLongName("output").withRequired(true).withArgument(
-        abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
-        "Output directory to write top words").withShortName("o").create();
+            abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
+            "Output directory to write top words").withShortName("o").create();
 
     Option wordOpt = obuilder.withLongName("words").withRequired(true).withArgument(
-        abuilder.withName("words").withMinimum(0).withMaximum(1).withDefault("20").create()).withDescription(
-        "Number of words to print").withShortName("w").create();
+            abuilder.withName("words").withMinimum(0).withMaximum(1).withDefault("20").create()).withDescription(
+            "Number of words to print").withShortName("w").create();
 
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h").create();
 
     Group group = gbuilder.withName("Options").withOption(dictOpt).withOption(outOpt).withOption(
-        wordOpt).withOption(inputOpt).create();
+            wordOpt).withOption(inputOpt).create();
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
@@ -196,9 +196,9 @@ public class LDAPrintTopics {
         return;
       }
 
-      String input   = cmdLine.getValue(inputOpt).toString();
+      String input = cmdLine.getValue(inputOpt).toString();
       File output = new File(cmdLine.getValue(outOpt).toString());
-      File dict   = new File(cmdLine.getValue(dictOpt).toString());
+      File dict = new File(cmdLine.getValue(dictOpt).toString());
       int numWords = 20;
       if (cmdLine.hasOption(wordOpt)) {
         numWords = Integer.parseInt(cmdLine.getValue(wordOpt).toString());
@@ -209,7 +209,7 @@ public class LDAPrintTopics {
       Configuration config = new Configuration();
       List<List<String>> topWords = topWordsForTopics(input, config, wordList, numWords);
 
-      if(!output.exists()) {
+      if (!output.exists()) {
         if (!output.mkdirs()) {
           throw new IOException("Could not create directory: " + output);
         }
@@ -217,11 +217,11 @@ public class LDAPrintTopics {
 
       for (int i = 0; i < topWords.size(); ++i) {
         List<String> topK = topWords.get(i);
-        File out = new File(output,"topic-"+i);
+        File out = new File(output, "topic-" + i);
         PrintWriter writer = new PrintWriter(new FileWriter(out));
         writer.println("Topic " + i);
         writer.println("===========");
-        for (String word: topK) {
+        for (String word : topK) {
           writer.println(word);
         }
         writer.close();
