@@ -35,6 +35,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.math.VectorWritable;
 
 class DisplayASNOutputState extends DisplayDirichlet {
   DisplayASNOutputState() {
@@ -50,10 +51,10 @@ class DisplayASNOutputState extends DisplayDirichlet {
 
     Vector dv = new DenseVector(2);
     int i = result.size() - 1;
-    for (Model<Vector>[] models : result) {
+    for (Model<VectorWritable>[] models : result) {
       g2.setStroke(new BasicStroke(i == 0 ? 3 : 1));
       g2.setColor(colors[Math.min(colors.length - 1, i--)]);
-      for (Model<Vector> m : models) {
+      for (Model<VectorWritable> m : models) {
         AsymmetricSampledNormalModel mm = (AsymmetricSampledNormalModel) m;
         dv.set(0, mm.getStdDev().get(0) * 3);
         dv.set(1, mm.getStdDev().get(1) * 3);
@@ -72,10 +73,10 @@ class DisplayASNOutputState extends DisplayDirichlet {
    * @throws IOException
    *             if there is an error
    */
-  public static List<Vector> readFile(String fileName) throws IOException {
-    List<Vector> results = new ArrayList<Vector>();
+  public static List<VectorWritable> readFile(String fileName) throws IOException {
+    List<VectorWritable> results = new ArrayList<VectorWritable>();
     for (String line : new FileLineIterable(new File(fileName))) {
-      results.add(AbstractVector.decodeVector(line));
+      results.add(new VectorWritable(AbstractVector.decodeVector(line)));
     }
     return results;
   }
@@ -87,7 +88,7 @@ class DisplayASNOutputState extends DisplayDirichlet {
   }
 
   private static void getResults() throws IOException {
-    result = new ArrayList<Model<Vector>[]>();
+    result = new ArrayList<Model<VectorWritable>[]>();
     JobConf conf = new JobConf(KMeansDriver.class);
     conf
         .set(DirichletDriver.MODEL_FACTORY_KEY,
@@ -97,8 +98,7 @@ class DisplayASNOutputState extends DisplayDirichlet {
     File f = new File("output");
     for (File g : f.listFiles()) {
       conf.set(DirichletDriver.STATE_IN_KEY, g.getCanonicalPath());
-      DirichletState<Vector> dirichletState = DirichletMapper
-          .getDirichletState(conf);
+      DirichletState<VectorWritable> dirichletState = DirichletMapper.getDirichletState(conf);
       result.add(dirichletState.getModels());
     }
   }

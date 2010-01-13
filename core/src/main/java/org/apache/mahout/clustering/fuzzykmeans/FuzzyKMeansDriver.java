@@ -45,6 +45,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
+import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -179,10 +180,10 @@ public class FuzzyKMeansDriver {
       }
 
       if (cmdLine.hasOption(clusteringOpt)) {
-        runClustering(input, clusters, output, measureClass, convergenceDelta, numMapTasks, m, vectorClass);
+        runClustering(input, clusters, output, measureClass, convergenceDelta, numMapTasks, m);
       } else {
         runJob(input, clusters, output, measureClass, convergenceDelta,
-            maxIterations, numMapTasks, numReduceTasks, m, vectorClass);
+            maxIterations, numMapTasks, numReduceTasks, m);
       }
 
 
@@ -206,11 +207,10 @@ public class FuzzyKMeansDriver {
    * @param numMapTasks      the number of mapper tasks
    * @param numReduceTasks   the number of reduce tasks
    * @param m                the fuzzification factor, see http://en.wikipedia.org/wiki/Data_clustering#Fuzzy_c-means_clustering
-   * @param vectorClass      the {@link org.apache.mahout.math.Vector} implementation to use
    */
   public static void runJob(String input, String clustersIn, String output,
                             String measureClass, double convergenceDelta, int maxIterations,
-                            int numMapTasks, int numReduceTasks, float m, Class<? extends Vector> vectorClass) {
+                            int numMapTasks, int numReduceTasks, float m) {
 
     boolean converged = false;
     int iteration = 0;
@@ -233,7 +233,7 @@ public class FuzzyKMeansDriver {
     log.info("Clustering ");
 
     runClustering(input, clustersIn, output + File.separator + "points",
-        measureClass, convergenceDelta, numMapTasks, m, vectorClass);
+        measureClass, convergenceDelta, numMapTasks, m);
   }
 
   /**
@@ -304,13 +304,13 @@ public class FuzzyKMeansDriver {
    */
   private static void runClustering(String input, String clustersIn,
                                     String output, String measureClass, double convergenceDelta,
-                                    int numMapTasks, float m, Class<? extends Vector> vectorClass) {
+                                    int numMapTasks, float m) {
 
     JobConf conf = new JobConf(FuzzyKMeansDriver.class);
     conf.setJobName("Fuzzy K Means Clustering");
 
     conf.setMapOutputKeyClass(Text.class);
-    conf.setMapOutputValueClass(vectorClass);
+    conf.setMapOutputValueClass(VectorWritable.class);
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(FuzzyKMeansOutput.class);
 

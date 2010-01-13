@@ -27,8 +27,8 @@ import java.util.NoSuchElementException;
 /** Implements vector as an array of doubles */
 public class DenseVector extends AbstractVector {
 
-  private double[] values;
-  private double lengthSquared = -1.0;
+  protected double[] values;
+  protected double lengthSquared = -1.0;
 
   /** For serialization purposes only */
   public DenseVector() {
@@ -56,6 +56,21 @@ public class DenseVector extends AbstractVector {
   public DenseVector(String name, int cardinality) {
     super(name);
     this.values = new double[cardinality];
+  }
+
+  /**
+   * Copy-constructor (for use in turning a SparseVector into a dense one, for example)
+   * @param vector
+   */
+  public DenseVector(Vector vector) {
+    super(vector.getName());
+    values = new double[vector.size()];
+    Iterator<Vector.Element> it = vector.iterateNonZero();
+    Vector.Element e = null;
+    while(it.hasNext()) {
+      e = it.next();
+      values[e.index()] = e.get();
+    }
   }
 
   @Override
@@ -225,28 +240,6 @@ public class DenseVector extends AbstractVector {
   @Override
   public Vector.Element getElement(int index) {
     return new Element(index);
-  }
-
-  @Override
-  public void write(DataOutput dataOutput) throws IOException {
-    dataOutput.writeUTF(this.getName() == null ? "" : this.getName());
-    dataOutput.writeInt(size());
-    Iterator<Vector.Element> iter = iterateAll();
-    while (iter.hasNext()) {
-      Vector.Element element = iter.next();
-      dataOutput.writeDouble(element.get());
-    }
-  }
-
-  @Override
-  public void readFields(DataInput dataInput) throws IOException {
-    this.setName(dataInput.readUTF());
-    double[] values = new double[dataInput.readInt()];
-    for (int i = 0; i < values.length; i++) {
-      values[i] = dataInput.readDouble();
-    }
-    this.values = values;
-    lengthSquared = -1.0;
   }
 
   /**

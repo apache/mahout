@@ -17,12 +17,10 @@
 
 package org.apache.mahout.math;
 
-import org.apache.hadoop.io.Writable;
-
 import java.util.Map;
 
 /** The basic interface including numerous convenience functions */
-public interface Matrix extends Cloneable, Writable {
+public interface Matrix extends Cloneable {
 
   /** @return a formatted String suitable for output */
   String asFormatString();

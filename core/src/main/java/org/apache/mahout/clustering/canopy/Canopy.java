@@ -22,6 +22,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.math.AbstractVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -54,13 +55,13 @@ public class Canopy extends ClusterBase {
   @Override
   public void write(DataOutput out) throws IOException {
     super.write(out);
-    AbstractVector.writeVector(out, computeCentroid());
+    VectorWritable.writeVector(out, computeCentroid());
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
-    this.setCenter(AbstractVector.readVector(in));
+    this.setCenter(VectorWritable.readVector(in));
     this.setPointTotal(getCenter().clone());
     this.setNumPoints(1);
   }

@@ -25,6 +25,7 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.math.SparseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.utils.vectors.io.SequenceFileVectorWriter;
 
 import java.io.File;
@@ -39,7 +40,7 @@ public class SequenceFileVectorIterableTest extends TestCase {
     Path path = new Path(tmpFile.getAbsolutePath());
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
-    SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, LongWritable.class, SparseVector.class);
+    SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, LongWritable.class, VectorWritable.class);
     SequenceFileVectorWriter writer = new SequenceFileVectorWriter(seqWriter);
     RandomVectorIterable iter = new RandomVectorIterable(50);
     writer.write(iter);

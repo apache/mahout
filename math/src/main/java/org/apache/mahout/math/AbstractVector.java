@@ -20,11 +20,6 @@ package org.apache.mahout.math;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import org.apache.hadoop.io.WritableComparable;
-
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -332,17 +327,6 @@ public abstract class AbstractVector implements Vector {
   }
 
   /**
-   * Decodes a point from its WritableComparable<?> representation.
-   *
-   * @param writableComparable a WritableComparable<?> produced by asWritableComparable. Note the payload remainder: it
-   *                           is optional, but can be present.
-   * @return the n-dimensional point
-   */
-  public static Vector decodeVector(WritableComparable<?> writableComparable) {
-    return decodeVector(writableComparable.toString());
-  }
-
-  /**
    * Decodes a point from its string representation.
    *
    * @param formattedString a formatted String produced by asFormatString. Note the payload remainder: it is optional,
@@ -504,42 +488,6 @@ public abstract class AbstractVector implements Vector {
     }
     bindings.put(label, index);
     set(index, value);
-  }
-
-  // cache most recent vector instance class name
-  private static String instanceClassName;
-
-  // cache most recent vector instance class
-  private static Class<? extends Vector> instanceClass;
-
-  /** Read and return a vector from the input */
-  public static Vector readVector(DataInput in) throws IOException {
-    String vectorClassName = in.readUTF();
-    Vector vector;
-    try {
-      if (!vectorClassName.equals(instanceClassName)) {
-        instanceClassName = vectorClassName;
-        instanceClass = Class.forName(vectorClassName).asSubclass(Vector.class);
-      }
-      vector = instanceClass.newInstance();
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
-    }
-    vector.readFields(in);
-    return vector;
-  }
-
-  /** Write the vector to the output */
-  public static void writeVector(DataOutput out, Vector vector)
-      throws IOException {
-    String vectorClassName = vector.getClass().getName();
-    out.writeUTF(vectorClassName);
-    vector.write(out);
-
   }
 
 }

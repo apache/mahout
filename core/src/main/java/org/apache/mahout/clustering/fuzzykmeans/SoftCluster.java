@@ -18,10 +18,7 @@
 package org.apache.mahout.clustering.fuzzykmeans;
 
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.math.AbstractVector;
-import org.apache.mahout.math.SparseVector;
-import org.apache.mahout.math.SquareRootFunction;
-import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.*;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -91,14 +88,14 @@ public class SoftCluster implements Writable {
     out.writeInt(clusterId);
     out.writeBoolean(converged);
     Vector vector = computeCentroid();
-    AbstractVector.writeVector(out, vector);
+    VectorWritable.writeVector(out, vector);
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
     clusterId = in.readInt();
     converged = in.readBoolean();
-    center = AbstractVector.readVector(in);
+    center = VectorWritable.readVector(in);
     this.pointProbSum = 0;
     this.weightedPointTotal = center.like();
   }

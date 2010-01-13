@@ -32,10 +32,10 @@ import java.util.NoSuchElementException;
 /** Implements vector that only stores non-zero doubles */
 public class SparseVector extends AbstractVector {
 
-  private OpenIntDoubleHashMap values;
+  protected OpenIntDoubleHashMap values;
 
-  private int cardinality;
-  private double lengthSquared = -1.0;
+  protected int cardinality;
+  protected double lengthSquared = -1.0;
 
   /** For serialization purposes only. */
   public SparseVector() {
@@ -277,43 +277,6 @@ public class SparseVector extends AbstractVector {
       values.put(ind, value);
     }
   }
-
-
-  @Override
-  public void write(DataOutput dataOutput) throws IOException {
-    dataOutput.writeUTF(this.getName() == null ? "" : this.getName());
-    dataOutput.writeInt(size());
-    int nde = getNumNondefaultElements();
-    dataOutput.writeInt(nde);
-    Iterator<Vector.Element> iter = iterateNonZero();
-    int count = 0;
-    while (iter.hasNext()) {
-      Vector.Element element = iter.next();
-      dataOutput.writeInt(element.index());
-      dataOutput.writeDouble(element.get());
-      count++;
-    }
-    assert (nde == count);
-  }
-
-  @Override
-  public void readFields(DataInput dataInput) throws IOException {
-    this.setName(dataInput.readUTF());
-    this.cardinality = dataInput.readInt();
-    int size = dataInput.readInt();
-    OpenIntDoubleHashMap values = new OpenIntDoubleHashMap((int) (size * 1.5));
-    int i = 0;
-    while (i < size) {
-      int index = dataInput.readInt();
-      double value = dataInput.readDouble();
-      values.put(index, value);
-      i++;
-    }
-    assert (i == size);
-    this.values = values;
-    this.lengthSquared = -1.0;
-  }
-
 
   @Override
   public double getLengthSquared() {

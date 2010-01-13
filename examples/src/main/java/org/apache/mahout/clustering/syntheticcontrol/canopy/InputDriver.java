@@ -36,6 +36,7 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,20 +76,19 @@ public class InputDriver {
       String input = cmdLine.getValue(inputOpt, "testdata").toString();
       String output = cmdLine.getValue(outputOpt, "output").toString();
       String vectorClassName = cmdLine.getValue(vectorOpt, "org.apache.mahout.math.SparseVector").toString();
-      Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
-      runJob(input, output, vectorClass);
+      runJob(input, output);
     } catch (OptionException e) {
       LOG.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
     }
   }
 
-  public static void runJob(String input, String output, Class<? extends Vector> vectorClass) throws IOException {
+  public static void runJob(String input, String output) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(InputDriver.class);
 
     conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(vectorClass);
+    conf.setOutputValueClass(VectorWritable.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     FileInputFormat.setInputPaths(conf, new Path(input));
     FileOutputFormat.setOutputPath(conf, new Path(output));

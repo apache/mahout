@@ -25,6 +25,7 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FuzzyKMeansMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, Vector, Text, FuzzyKMeansInfo> {
+    Mapper<WritableComparable<?>, VectorWritable, Text, FuzzyKMeansInfo> {
 
   private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansMapper.class);
 
@@ -41,9 +42,9 @@ public class FuzzyKMeansMapper extends MapReduceBase implements
   private FuzzyKMeansClusterer clusterer; 
   
   @Override
-  public void map(WritableComparable<?> key, Vector point,
+  public void map(WritableComparable<?> key, VectorWritable point,
                   OutputCollector<Text, FuzzyKMeansInfo> output, Reporter reporter) throws IOException {
-    clusterer.emitPointProbToCluster(point, clusters, output);
+    clusterer.emitPointProbToCluster(point.get(), clusters, output);
   }
 
   /**

@@ -21,12 +21,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import org.apache.mahout.clustering.ClusterBase;
-import org.apache.mahout.math.AbstractVector;
-import org.apache.mahout.math.CardinalityException;
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.JsonVectorAdapter;
-import org.apache.mahout.math.PlusFunction;
-import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.*;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -195,21 +190,21 @@ public class MeanShiftCanopy extends ClusterBase {
   @Override
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
-    this.setCenter(AbstractVector.readVector(in));
+    this.setCenter(VectorWritable.readVector(in));
     int numpoints = in.readInt();
     this.boundPoints = new ArrayList<Vector>();
     for (int i = 0; i < numpoints; i++) {
-      this.boundPoints.add(AbstractVector.readVector(in));
+      this.boundPoints.add(VectorWritable.readVector(in));
     }
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
     super.write(out);
-    AbstractVector.writeVector(out, computeCentroid());
+    VectorWritable.writeVector(out, computeCentroid());
     out.writeInt(boundPoints.size());
     for (Vector v : boundPoints) {
-      AbstractVector.writeVector(out, v);
+      VectorWritable.writeVector(out, v);
     }
   }
 

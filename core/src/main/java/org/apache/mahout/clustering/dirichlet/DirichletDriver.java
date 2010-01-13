@@ -42,6 +42,7 @@ import org.apache.mahout.math.SparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -148,7 +149,7 @@ public class DirichletDriver {
                                         String modelFactory, int numModels, double alpha_0)
       throws ClassNotFoundException, InstantiationException,
       IllegalAccessException, IOException {
-    DirichletState<Vector> state = createState(modelFactory, numModels, alpha_0);
+    DirichletState<VectorWritable> state = createState(modelFactory, numModels, alpha_0);
     JobConf job = new JobConf(KMeansDriver.class);
     Path outPath = new Path(output);
     FileSystem fs = FileSystem.get(outPath.toUri(), job);
@@ -162,15 +163,15 @@ public class DirichletDriver {
     }
   }
 
-  public static DirichletState<Vector> createState(String modelFactory,
+  public static DirichletState<VectorWritable> createState(String modelFactory,
                                                    int numModels, double alpha_0) throws ClassNotFoundException,
       InstantiationException, IllegalAccessException {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     Class<? extends ModelDistribution> cl =
         ccl.loadClass(modelFactory).asSubclass(ModelDistribution.class);
-    ModelDistribution<Vector> factory = (ModelDistribution<Vector>) cl
+    ModelDistribution<VectorWritable> factory = (ModelDistribution<VectorWritable>) cl
         .newInstance();
-    return new DirichletState<Vector>(factory,
+    return new DirichletState<VectorWritable>(factory,
         numModels, alpha_0, 1, 1);
   }
 
@@ -194,7 +195,7 @@ public class DirichletDriver {
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(DirichletCluster.class);
     conf.setMapOutputKeyClass(Text.class);
-    conf.setMapOutputValueClass(SparseVector.class);
+    conf.setMapOutputValueClass(VectorWritable.class);
 
     FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(stateOut);

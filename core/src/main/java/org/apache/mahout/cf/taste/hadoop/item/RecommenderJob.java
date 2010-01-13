@@ -36,6 +36,7 @@ import org.apache.mahout.cf.taste.hadoop.ItemPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
 import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
 import java.util.Map;
@@ -100,7 +101,7 @@ public final class RecommenderJob extends AbstractJob {
                                               ItemPrefWritable.class,
                                               ToUserVectorReducer.class,
                                               LongWritable.class,
-                                              SparseVector.class,
+                                              VectorWritable.class,
                                               SequenceFileOutputFormat.class);
     JobClient.runJob(toUserVectorConf);
 
@@ -113,7 +114,7 @@ public final class RecommenderJob extends AbstractJob {
                                                 IntWritable.class,
                                                 UserVectorToCooccurrenceReducer.class,
                                                 IntWritable.class,
-                                                SparseVector.class,
+                                                VectorWritable.class,
                                                 MapFileOutputFormat.class);
     JobClient.runJob(toCooccurrenceConf);
 

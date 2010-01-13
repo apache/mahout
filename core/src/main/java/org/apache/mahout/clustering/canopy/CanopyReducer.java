@@ -24,6 +24,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,17 +32,17 @@ import java.util.Iterator;
 import java.util.List;
 
 public class CanopyReducer extends MapReduceBase implements
-    Reducer<Text, Vector, Text, Canopy> {
+    Reducer<Text, VectorWritable, Text, Canopy> {
 
   private final List<Canopy> canopies = new ArrayList<Canopy>();
 
   private CanopyClusterer canopyClusterer;
   
   @Override
-  public void reduce(Text key, Iterator<Vector> values,
+  public void reduce(Text key, Iterator<VectorWritable> values,
                      OutputCollector<Text, Canopy> output, Reporter reporter) throws IOException {
     while (values.hasNext()) {
-      Vector point = values.next();
+      Vector point = values.next().get();
       canopyClusterer.addPointToCanopies(point, canopies);
     }
     for (Canopy canopy : canopies) {

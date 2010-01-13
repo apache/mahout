@@ -33,10 +33,7 @@ import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution;
 import org.apache.mahout.clustering.dirichlet.models.SampledNormalModel;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.JsonVectorAdapter;
-import org.apache.mahout.math.SparseVector;
-import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.*;
 import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.RandomUtils;
 
@@ -48,7 +45,7 @@ import java.util.Map;
 
 public class TestMapReduce extends TestCase {
 
-  private List<Vector> sampleData = new ArrayList<Vector>();
+  private List<VectorWritable> sampleData = new ArrayList<VectorWritable>();
 
   private FileSystem fs;
 
@@ -79,7 +76,7 @@ public class TestMapReduce extends TestCase {
     for (int j = 0; j < values.length; j++) {
       v.setQuick(j, values[j]);
     }
-    sampleData.add(v);
+    sampleData.add(new VectorWritable(v));
   }
 
   /**
@@ -114,16 +111,16 @@ public class TestMapReduce extends TestCase {
   /** Test the basic Mapper */
   public void testMapper() throws Exception {
     generateSamples(10, 0, 0, 1);
-    DirichletState<Vector> state = new DirichletState<Vector>(
+    DirichletState<VectorWritable> state = new DirichletState<VectorWritable>(
         new NormalModelDistribution(), 5, 1, 0, 0);
     DirichletMapper mapper = new DirichletMapper();
     mapper.configure(state);
 
-    DummyOutputCollector<Text, Vector> collector = new DummyOutputCollector<Text, Vector>();
-    for (Vector v : sampleData) {
+    DummyOutputCollector<Text, VectorWritable> collector = new DummyOutputCollector<Text, VectorWritable>();
+    for (VectorWritable v : sampleData) {
       mapper.map(null, v, collector, null);
     }
-    Map<String, List<Vector>> data = collector.getData();
+    Map<String, List<VectorWritable>> data = collector.getData();
     // this seed happens to produce two partitions, but they work
     assertEquals("output size", 3, data.size());
   }
@@ -134,37 +131,38 @@ public class TestMapReduce extends TestCase {
     generateSamples(100, 2, 0, 1);
     generateSamples(100, 0, 2, 1);
     generateSamples(100, 2, 2, 1);
-    DirichletState<Vector> state = new DirichletState<Vector>(
+    DirichletState<VectorWritable> state = new DirichletState<VectorWritable>(
         new SampledNormalDistribution(), 20, 1, 1, 0);
     DirichletMapper mapper = new DirichletMapper();
     mapper.configure(state);
 
-    DummyOutputCollector<Text, Vector> mapCollector = new DummyOutputCollector<Text, Vector>();
-    for (Vector v : sampleData) {
+    DummyOutputCollector<Text, VectorWritable> mapCollector = new DummyOutputCollector<Text, VectorWritable>();
+    for (VectorWritable v : sampleData) {
       mapper.map(null, v, mapCollector, null);
     }
-    Map<String, List<Vector>> data = mapCollector.getData();
+    Map<String, List<VectorWritable>> data = mapCollector.getData();
     // this seed happens to produce three partitions, but they work
     assertEquals("output size", 7, data.size());
 
     DirichletReducer reducer = new DirichletReducer();
     reducer.configure(state);
-    OutputCollector<Text, DirichletCluster<Vector>> reduceCollector = new DummyOutputCollector<Text, DirichletCluster<Vector>>();
+    OutputCollector<Text, DirichletCluster<VectorWritable>> reduceCollector =
+        new DummyOutputCollector<Text, DirichletCluster<VectorWritable>>();
     for (String key : mapCollector.getKeys()) {
       reducer.reduce(new Text(key), mapCollector.getValue(key).iterator(),
           reduceCollector, null);
     }
 
-    Model<Vector>[] newModels = reducer.getNewModels();
+    Model<VectorWritable>[] newModels = reducer.getNewModels();
     state.update(newModels);
   }
 
-  private static void printModels(Iterable<Model<Vector>[]> results, int significant) {
+  private static void printModels(Iterable<Model<VectorWritable>[]> results, int significant) {
     int row = 0;
-    for (Model<Vector>[] r : results) {
+    for (Model<VectorWritable>[] r : results) {
       System.out.print("sample[" + row++ + "]= ");
       for (int k = 0; k < r.length; k++) {
-        Model<Vector> model = r[k];
+        Model<VectorWritable> model = r[k];
         if (model.count() > significant) {
           System.out.print("m" + k + model.toString() + ", ");
         }
@@ -180,28 +178,29 @@ public class TestMapReduce extends TestCase {
     generateSamples(100, 2, 0, 1);
     generateSamples(100, 0, 2, 1);
     generateSamples(100, 2, 2, 1);
-    DirichletState<Vector> state = new DirichletState<Vector>(
+    DirichletState<VectorWritable> state = new DirichletState<VectorWritable>(
         new SampledNormalDistribution(), 20, 1.0, 1, 0);
 
-    List<Model<Vector>[]> models = new ArrayList<Model<Vector>[]>();
+    List<Model<VectorWritable>[]> models = new ArrayList<Model<VectorWritable>[]>();
 
     for (int iteration = 0; iteration < 10; iteration++) {
       DirichletMapper mapper = new DirichletMapper();
       mapper.configure(state);
-      DummyOutputCollector<Text, Vector> mapCollector = new DummyOutputCollector<Text, Vector>();
-      for (Vector v : sampleData) {
+      DummyOutputCollector<Text, VectorWritable> mapCollector = new DummyOutputCollector<Text, VectorWritable>();
+      for (VectorWritable v : sampleData) {
         mapper.map(null, v, mapCollector, null);
       }
 
       DirichletReducer reducer = new DirichletReducer();
       reducer.configure(state);
-      OutputCollector<Text,DirichletCluster<Vector>> reduceCollector = new DummyOutputCollector<Text, DirichletCluster<Vector>>();
+      OutputCollector<Text,DirichletCluster<VectorWritable>> reduceCollector =
+          new DummyOutputCollector<Text, DirichletCluster<VectorWritable>>();
       for (String key : mapCollector.getKeys()) {
         reducer.reduce(new Text(key), mapCollector.getValue(key).iterator(),
             reduceCollector, null);
       }
 
-      Model<Vector>[] newModels = reducer.getNewModels();
+      Model<VectorWritable>[] newModels = reducer.getNewModels();
       state.update(newModels);
       models.add(newModels);
     }
@@ -247,12 +246,12 @@ public class TestMapReduce extends TestCase {
 
   public void testSampledNormalDistributionSerialization() {
     SampledNormalDistribution dist = new SampledNormalDistribution();
-    Model<Vector>[] models = dist.sampleFromPrior(20);
+    Model<VectorWritable>[] models = dist.sampleFromPrior(20);
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();
     String jsonString = gson.toJson(models);
-    Model<Vector>[] models2 = gson.fromJson(jsonString, SampledNormalModel[].class);
+    Model<VectorWritable>[] models2 = gson.fromJson(jsonString, SampledNormalModel[].class);
     assertEquals("models", models.length, models2.length);
     for (int i = 0; i < models.length; i++) {
       assertEquals("model[" + i + ']', models[i].toString(), models2[i]
@@ -276,12 +275,12 @@ public class TestMapReduce extends TestCase {
 
   public void testAsymmetricSampledNormalDistributionSerialization() {
     AsymmetricSampledNormalDistribution dist = new AsymmetricSampledNormalDistribution();
-    Model<Vector>[] models = dist.sampleFromPrior(20);
+    Model<VectorWritable>[] models = dist.sampleFromPrior(20);
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();
     String jsonString = gson.toJson(models);
-    Model<Vector>[] models2 = gson.fromJson(jsonString,
+    Model<VectorWritable>[] models2 = gson.fromJson(jsonString,
         AsymmetricSampledNormalModel[].class);
     assertEquals("models", models.length, models2.length);
     for (int i = 0; i < models.length; i++) {
@@ -297,7 +296,7 @@ public class TestMapReduce extends TestCase {
         .registerTypeAdapter(ModelHolder.class, new JsonModelHolderAdapter());
     Gson gson = builder.create();
     double[] d = {1.1, 2.2};
-    ModelHolder<Vector> mh = new ModelHolder<Vector>(new NormalModel(new DenseVector(d), 3.3));
+    ModelHolder<VectorWritable> mh = new ModelHolder<VectorWritable>(new NormalModel(new DenseVector(d), 3.3));
     String format = gson.toJson(mh);
     ModelHolder<Vector> mh2 = gson.<ModelHolder<Vector>>fromJson(format, ModelHolder.class);
     assertEquals("mh", mh.getModel().toString(), mh2.getModel().toString());
@@ -311,7 +310,7 @@ public class TestMapReduce extends TestCase {
     Gson gson = builder.create();
     double[] d = {1.1, 2.2};
     double[] s = {3.3, 4.4};
-    ModelHolder<Vector> mh = new ModelHolder<Vector>(new AsymmetricSampledNormalModel(
+    ModelHolder<VectorWritable> mh = new ModelHolder<VectorWritable>(new AsymmetricSampledNormalModel(
         new DenseVector(d), new DenseVector(s)));
     String format = gson.toJson(mh);
     ModelHolder<Vector> mh2 = gson.<ModelHolder<Vector>>fromJson(format, ModelHolder.class);
@@ -323,7 +322,7 @@ public class TestMapReduce extends TestCase {
     builder.registerTypeAdapter(DirichletState.class,
         new JsonDirichletStateAdapter());
     Gson gson = builder.create();
-    DirichletState<Vector> state = new DirichletState<Vector>(new SampledNormalDistribution(),
+    DirichletState<VectorWritable> state = new DirichletState<VectorWritable>(new SampledNormalDistribution(),
         20, 1, 1, 0);
     String format = gson.toJson(state);
     DirichletState<?> state2 = gson.fromJson(format, DirichletState.class);
@@ -346,20 +345,17 @@ public class TestMapReduce extends TestCase {
     generateSamples(100, 2, 0, 0.2);
     generateSamples(100, 0, 2, 0.3);
     generateSamples(100, 2, 2, 1);
-    ClusteringTestUtils.writePointsToFile(sampleData, "input/data.txt", fs,
-        conf);
+    ClusteringTestUtils.writePointsToFile(sampleData, "input/data.txt", fs, conf);
     // Now run the driver
-    DirichletDriver
-        .runJob(
+    DirichletDriver.runJob(
             "input",
             "output",
             "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution",
             20, 10, 1.0, 1);
     // and inspect results
-    List<List<DirichletCluster<Vector>>> clusters = new ArrayList<List<DirichletCluster<Vector>>>();
+    List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     JobConf conf = new JobConf(KMeansDriver.class);
-    conf
-        .set(DirichletDriver.MODEL_FACTORY_KEY,
+    conf.set(DirichletDriver.MODEL_FACTORY_KEY,
             "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution");
     conf.set(DirichletDriver.NUM_CLUSTERS_KEY, Integer.toString(20));
     conf.set(DirichletDriver.ALPHA_0_KEY, Double.toString(1.0));
@@ -371,12 +367,12 @@ public class TestMapReduce extends TestCase {
   }
 
   private static void printResults(
-      List<List<DirichletCluster<Vector>>> clusters, int significant) {
+      List<List<DirichletCluster<VectorWritable>>> clusters, int significant) {
     int row = 0;
-    for (List<DirichletCluster<Vector>> r : clusters) {
+    for (List<DirichletCluster<VectorWritable>> r : clusters) {
       System.out.print("sample[" + row++ + "]= ");
       for (int k = 0; k < r.size(); k++) {
-        Model<Vector> model = r.get(k).getModel();
+        Model<VectorWritable> model = r.get(k).getModel();
         if (model.count() > significant) {
           int total = (int) r.get(k).getTotalCount();
           System.out.print("m" + k + '(' + total + ')' + model.toString()
@@ -403,7 +399,7 @@ public class TestMapReduce extends TestCase {
             "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution",
             20, 15, 1.0, 1);
     // and inspect results
-    List<List<DirichletCluster<Vector>>> clusters = new ArrayList<List<DirichletCluster<Vector>>>();
+    List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     JobConf conf = new JobConf(KMeansDriver.class);
     conf
         .set(DirichletDriver.MODEL_FACTORY_KEY,
@@ -421,15 +417,15 @@ public class TestMapReduce extends TestCase {
     generateSamples(500, 0, 0, 0.5);
     ClusteringTestUtils.writePointsToFile(sampleData, "input/data1.txt", fs,
         conf);
-    sampleData = new ArrayList<Vector>();
+    sampleData = new ArrayList<VectorWritable>();
     generateSamples(500, 2, 0, 0.2);
     ClusteringTestUtils.writePointsToFile(sampleData, "input/data2.txt", fs,
         conf);
-    sampleData = new ArrayList<Vector>();
+    sampleData = new ArrayList<VectorWritable>();
     generateSamples(500, 0, 2, 0.3);
     ClusteringTestUtils.writePointsToFile(sampleData, "input/data3.txt", fs,
         conf);
-    sampleData = new ArrayList<Vector>();
+    sampleData = new ArrayList<VectorWritable>();
     generateSamples(500, 2, 2, 1);
     ClusteringTestUtils.writePointsToFile(sampleData, "input/data4.txt", fs,
         conf);
@@ -450,7 +446,7 @@ public class TestMapReduce extends TestCase {
             "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution",
             20, 15, 1.0, 2);
     // and inspect results
-    List<List<DirichletCluster<Vector>>> clusters = new ArrayList<List<DirichletCluster<Vector>>>();
+    List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     JobConf conf = new JobConf(KMeansDriver.class);
     conf
         .set(DirichletDriver.MODEL_FACTORY_KEY,
@@ -473,15 +469,15 @@ public class TestMapReduce extends TestCase {
     generateSamples(500, 0, 0, 0.5, 1.0);
     ClusteringTestUtils.writePointsToFile(sampleData, "input/data1.txt", fs,
         conf);
-    sampleData = new ArrayList<Vector>();
+    sampleData = new ArrayList<VectorWritable>();
     generateSamples(500, 2, 0, 0.2);
     ClusteringTestUtils.writePointsToFile(sampleData, "input/data2.txt", fs,
         conf);
-    sampleData = new ArrayList<Vector>();
+    sampleData = new ArrayList<VectorWritable>();
     generateSamples(500, 0, 2, 0.3);
     ClusteringTestUtils.writePointsToFile(sampleData, "input/data3.txt", fs,
         conf);
-    sampleData = new ArrayList<Vector>();
+    sampleData = new ArrayList<VectorWritable>();
     generateSamples(500, 2, 2, 1);
     ClusteringTestUtils.writePointsToFile(sampleData, "input/data4.txt", fs,
         conf);
@@ -493,7 +489,7 @@ public class TestMapReduce extends TestCase {
             "org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDistribution",
             20, 15, 1.0, 2);
     // and inspect results
-    List<List<DirichletCluster<Vector>>> clusters = new ArrayList<List<DirichletCluster<Vector>>>();
+    List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     JobConf conf = new JobConf(KMeansDriver.class);
     conf
         .set(

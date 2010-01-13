@@ -25,25 +25,26 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CanopyMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, Vector, Text, Vector> {
+    Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
 
   private final List<Canopy> canopies = new ArrayList<Canopy>();
 
-  private OutputCollector<Text, Vector> outputCollector;
+  private OutputCollector<Text, VectorWritable> outputCollector;
 
   private CanopyClusterer canopyClusterer;
   
   @Override
-  public void map(WritableComparable<?> key, Vector point,
-                  OutputCollector<Text, Vector> output, Reporter reporter) throws IOException {
+  public void map(WritableComparable<?> key, VectorWritable point,
+                  OutputCollector<Text, VectorWritable> output, Reporter reporter) throws IOException {
     outputCollector = output;
-    canopyClusterer.addPointToCanopies(point, canopies);
+    canopyClusterer.addPointToCanopies(point.get(), canopies);
   }
 
   @Override
@@ -56,7 +57,9 @@ public class CanopyMapper extends MapReduceBase implements
   public void close() throws IOException {
     for (Canopy canopy : canopies) {
       Vector centroid = canopy.computeCentroid();
-      outputCollector.collect(new Text("centroid"), centroid);
+      VectorWritable vw = new VectorWritable();
+      vw.set(centroid);
+      outputCollector.collect(new Text("centroid"), vw);
     }
     super.close();
   }

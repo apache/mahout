@@ -18,21 +18,6 @@
 package org.apache.mahout.math;
 
 import junit.framework.TestCase;
-import org.apache.hadoop.io.DataOutputBuffer;
-import org.apache.mahout.math.AbstractMatrix;
-import org.apache.mahout.math.CardinalityException;
-import org.apache.mahout.math.DenseMatrix;
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.IndexException;
-import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.NegateFunction;
-import org.apache.mahout.math.PlusFunction;
-import org.apache.mahout.math.UnboundLabelException;
-import org.apache.mahout.math.Vector;
-
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -639,21 +624,5 @@ public abstract class MatrixTest extends TestCase {
     String json = m.asFormatString();
     Matrix mm = AbstractMatrix.decodeMatrix(json);
     assertEquals("Fee", m.get(0, 1), mm.get("Fee", "Bar"));
-  }
-
-  public void testMatrixWritable() throws IOException {
-    Matrix m = matrixFactory(new double[][]{{1, 3, 4}, {5, 2, 3},
-        {1, 4, 2}});
-    DataOutputBuffer out = new DataOutputBuffer();
-    m.write(out);
-    out.close();
-
-    DataInputStream in = new DataInputStream(new ByteArrayInputStream(out
-        .getData()));
-    Matrix m2 = m.like();
-    m2.readFields(in);
-    in.close();
-    assertEquals("row size", m.size()[ROW], m2.size()[ROW]);
-    assertEquals("col size", m.size()[COL], m2.size()[COL]);
   }
 }

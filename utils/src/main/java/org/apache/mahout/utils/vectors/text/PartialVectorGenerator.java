@@ -42,21 +42,24 @@ import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.VectorWritable;
 
 /**
  * Converts a document in to a SparseVector
  */
 public class PartialVectorGenerator extends MapReduceBase implements
-    Reducer<Text,Text,Text,SparseVector> {
+    Reducer<Text,Text,Text, VectorWritable> {
   private Analyzer analyzer;
   private Map<String,Integer> dictionary = new HashMap<String,Integer>();
   private FileSystem fs; // local filesystem
   private URI[] localFiles; // local filenames from the distributed cache
-  
+
+  private VectorWritable vectorWritable = new VectorWritable();
+
   @Override
   public void reduce(Text key,
                      Iterator<Text> values,
-                     OutputCollector<Text,SparseVector> output,
+                     OutputCollector<Text,VectorWritable> output,
                      Reporter reporter) throws IOException {
     
     if (values.hasNext()) {
@@ -71,6 +74,7 @@ public class PartialVectorGenerator extends MapReduceBase implements
       int count = 0;
       while ((token = ts.next(token)) != null) {
         String tk = new String(token.termBuffer(), 0, token.termLength());
+        if(dictionary.containsKey(tk) == false) continue;
         if (termFrequency.containsKey(tk) == false) {
           count += tk.length() + 1;
           termFrequency.put(tk, new MutableInt(0));
@@ -88,8 +92,8 @@ public class PartialVectorGenerator extends MapReduceBase implements
         vector.setQuick(dictionary.get(tk).intValue(), pair.getValue()
             .doubleValue());
       }
-      
-      output.collect(key, vector);
+      vectorWritable.set(vector);
+      output.collect(key, vectorWritable);
     }
   }
   

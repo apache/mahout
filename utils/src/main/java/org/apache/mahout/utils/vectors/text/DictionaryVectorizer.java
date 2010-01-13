@@ -44,6 +44,7 @@ import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.VectorWritable;
 
 /**
  * This class converts a set of input documents in the sequence file format to
@@ -157,8 +158,8 @@ public final class DictionaryVectorizer {
    * the speed of your disk read
    * 
    * @param minSupport
-   * @param filePath
-   * @param dictionaryPath
+   * @param wordCountPath
+   * @param dictionaryPathBase
    * @throws IOException
    */
   private static List<Path> createDictionaryChunks(int minSupport,
@@ -267,9 +268,9 @@ public final class DictionaryVectorizer {
         .setJobName("DictionaryVectorizer Vector generator to group Partial Vectors");
     
     conf.setMapOutputKeyClass(Text.class);
-    conf.setMapOutputValueClass(SparseVector.class);
+    conf.setMapOutputValueClass(VectorWritable.class);
     conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(SparseVector.class);
+    conf.setOutputValueClass(VectorWritable.class);
     
     FileInputFormat.setInputPaths(conf,
         getCommaSeparatedPaths(partialVectorPaths));
@@ -346,7 +347,7 @@ public final class DictionaryVectorizer {
     conf.setMapOutputKeyClass(Text.class);
     conf.setMapOutputValueClass(Text.class);
     conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(SparseVector.class);
+    conf.setOutputValueClass(VectorWritable.class);
     DistributedCache
         .setCacheFiles(new URI[] {dictionaryFilePath.toUri()}, conf);
     FileInputFormat.setInputPaths(conf, new Path(input));
@@ -371,7 +372,9 @@ public final class DictionaryVectorizer {
    * Count the frequencies of words in parallel using Map/Reduce. The input
    * documents have to be in {@link SequenceFile} format
    * 
-   * @param params
+   * @param input
+   * @param output
+   * @param analyzer
    * @throws IOException
    * @throws InterruptedException
    * @throws ClassNotFoundException

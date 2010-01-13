@@ -35,6 +35,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.math.SparseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 public class TestRandomSeedGenerator extends TestCase {
   
@@ -43,13 +44,13 @@ public class TestRandomSeedGenerator extends TestCase {
   
   private FileSystem fs;
   
-  private static List<Vector> getPoints(double[][] raw) {
-    List<Vector> points = new ArrayList<Vector>();
+  private static List<VectorWritable> getPoints(double[][] raw) {
+    List<VectorWritable> points = new ArrayList<VectorWritable>();
     int i = 0;
     for (double[] fr : raw) {
       Vector vec = new SparseVector(String.valueOf(i++), fr.length);
       vec.assign(fr);
-      points.add(vec);
+      points.add(new VectorWritable(vec));
     }
     return points;
   }
@@ -77,7 +78,7 @@ public class TestRandomSeedGenerator extends TestCase {
   
   /** Story: test random seed generation generates 4 clusters with proper ids and data */
   public void testRandomSeedGenerator() throws Exception {
-    List<Vector> points = getPoints(raw);
+    List<VectorWritable> points = getPoints(raw);
     File testData = new File("testdata");
     if (!testData.exists()) {
       testData.mkdir();

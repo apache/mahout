@@ -20,6 +20,7 @@ package org.apache.mahout.utils.vectors;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 import java.util.Iterator;
 import java.io.IOException;
@@ -82,7 +83,7 @@ public class SequenceFileVectorIterable implements Iterable<Vector> {
     @Override
     public Vector next() {
       
-      return transpose ? (Vector)key : (Vector)value;
+      return (transpose ? (VectorWritable)key : (VectorWritable)value).get();
     }
 
     /**

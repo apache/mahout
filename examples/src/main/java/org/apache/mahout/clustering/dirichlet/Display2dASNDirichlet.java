@@ -27,12 +27,12 @@ import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.VectorWritable;
 
 class Display2dASNDirichlet extends DisplayDirichlet {
   Display2dASNDirichlet() {
     initialize();
-    this
-        .setTitle("Dirichlet Process Clusters - 2-d Asymmetric Sampled Normal Distribution (>"
+    this.setTitle("Dirichlet Process Clusters - 2-d Asymmetric Sampled Normal Distribution (>"
             + (int) (significance * 100) + "% of population)");
   }
 
@@ -43,10 +43,10 @@ class Display2dASNDirichlet extends DisplayDirichlet {
 
     Vector dv = new DenseVector(2);
     int i = result.size() - 1;
-    for (Model<Vector>[] models : result) {
+    for (Model<VectorWritable>[] models : result) {
       g2.setStroke(new BasicStroke(i == 0 ? 3 : 1));
       g2.setColor(colors[Math.min(colors.length - 1, i--)]);
-      for (Model<Vector> m : models) {
+      for (Model<VectorWritable> m : models) {
         AsymmetricSampledNormalModel mm = (AsymmetricSampledNormalModel) m;
         dv.assign(mm.getStdDev().times(3));
         if (isSignificant(mm))

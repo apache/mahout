@@ -146,21 +146,4 @@ public class MatrixView extends AbstractMatrix {
         cardinality[COL]);
   }
 
-  @Override
-  public void readFields(DataInput in) throws IOException {
-    super.readFields(in);
-    this.offset = new int[]{in.readInt(), in.readInt()};
-    this.cardinality = new int[]{in.readInt(), in.readInt()};
-    this.matrix = readMatrix(in);
-  }
-
-  @Override
-  public void write(DataOutput out) throws IOException {
-    super.write(out);
-    out.writeInt(offset[ROW]);
-    out.writeInt(offset[COL]);
-    out.writeInt(cardinality[ROW]);
-    out.writeInt(cardinality[COL]);
-    writeMatrix(out, this.matrix);
-  }
 }

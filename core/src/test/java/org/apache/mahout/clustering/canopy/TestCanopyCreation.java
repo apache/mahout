@@ -34,6 +34,7 @@ import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.distance.UserDefinedDistanceMeasure;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -64,13 +65,13 @@ public class TestCanopyCreation extends TestCase {
     super(name);
   }
 
-  private static List<Vector> getPoints(double[][] raw) {
-    List<Vector> points = new ArrayList<Vector>();
+  private static List<VectorWritable> getPoints(double[][] raw) {
+    List<VectorWritable> points = new ArrayList<VectorWritable>();
     int i = 0;
     for (double[] fr : raw) {
       Vector vec = new SparseVector(String.valueOf(i++), fr.length);
       vec.assign(fr);
-      points.add(vec);
+      points.add(new VectorWritable(vec));
     }
     return points;
   }
@@ -170,7 +171,7 @@ public class TestCanopyCreation extends TestCase {
    * @return the List<Canopy> created
    */
   static List<Canopy> populateCanopies(DistanceMeasure measure,
-                                       List<Vector> points, double t1, double t2) {
+                                       List<VectorWritable> points, double t1, double t2) {
     List<Canopy> canopies = new ArrayList<Canopy>();
     /**
      * Reference Implementation: Given a distance metric, one can create
@@ -184,13 +185,13 @@ public class TestCanopyCreation extends TestCase {
      */
     int nextCanopyId = 0;
     while (!points.isEmpty()) {
-      Iterator<Vector> ptIter = points.iterator();
-      Vector p1 = ptIter.next();
+      Iterator<VectorWritable> ptIter = points.iterator();
+      Vector p1 = ptIter.next().get();
       ptIter.remove();
       Canopy canopy = new VisibleCanopy(p1, nextCanopyId++);
       canopies.add(canopy);
       while (ptIter.hasNext()) {
-        Vector p2 = ptIter.next();
+        Vector p2 = ptIter.next().get();
         double dist = measure.distance(p1, p2);
         // Put all points that are within distance threshold T1 into the canopy
         if (dist < t1) {
@@ -251,12 +252,12 @@ public class TestCanopyCreation extends TestCase {
 
   /** Story: User can cluster points without instantiating them all in memory at once */
   public void testIterativeManhattan() throws Exception {
-    List<Vector> points = getPoints(raw);
+    List<VectorWritable> points = getPoints(raw);
     CanopyClusterer clusterer = new CanopyClusterer(new ManhattanDistanceMeasure(), 3.1, 2.1);
 
     List<Canopy> canopies = new ArrayList<Canopy>();
-    for (Vector point : points) {
-      clusterer.addPointToCanopies(point, canopies);
+    for (VectorWritable point : points) {
+      clusterer.addPointToCanopies(point.get(), canopies);
     }
 
     System.out.println("testIterativeManhattan");
@@ -266,12 +267,12 @@ public class TestCanopyCreation extends TestCase {
 
   /** Story: User can cluster points without instantiating them all in memory at once */
   public void testIterativeEuclidean() throws Exception {
-    List<Vector> points = getPoints(raw);
+    List<VectorWritable> points = getPoints(raw);
     CanopyClusterer clusterer = new CanopyClusterer(new EuclideanDistanceMeasure(), 3.1, 2.1);
 
     List<Canopy> canopies = new ArrayList<Canopy>();
-    for (Vector point : points) {
-      clusterer.addPointToCanopies(point, canopies);
+    for (VectorWritable point : points) {
+      clusterer.addPointToCanopies(point.get(), canopies);
     }
 
     System.out.println("testIterativeEuclidean");
@@ -291,21 +292,21 @@ public class TestCanopyCreation extends TestCase {
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
     mapper.configure(conf);
     
-    DummyOutputCollector<Text, Vector> collector = new DummyOutputCollector<Text, Vector>();
-    List<Vector> points = getPoints(raw);
+    DummyOutputCollector<Text, VectorWritable> collector = new DummyOutputCollector<Text, VectorWritable>();
+    List<VectorWritable> points = getPoints(raw);
     // map the data
-    for (Vector point : points) {
+    for (VectorWritable point : points) {
       mapper.map(new Text(), point, collector, null);
     }
     mapper.close();
     assertEquals("Number of map results", 1, collector.getData().size());
     // now verify the output
-    List<Vector> data = collector.getValue("centroid");
+    List<VectorWritable> data = collector.getValue("centroid");
     assertEquals("Number of centroids", 3, data.size());
     for (int i = 0; i < data.size(); i++) {
       assertEquals("Centroid error",
-          manhattanCentroids.get(i).asFormatString(), data.get(i)
-              .asFormatString());
+          manhattanCentroids.get(i).asFormatString(),
+          data.get(i).get().asFormatString());
     }
   }
 
@@ -321,21 +322,21 @@ public class TestCanopyCreation extends TestCase {
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
     mapper.configure(conf);
     
-    DummyOutputCollector<Text, Vector> collector = new DummyOutputCollector<Text, Vector>();
-    List<Vector> points = getPoints(raw);
+    DummyOutputCollector<Text, VectorWritable> collector = new DummyOutputCollector<Text, VectorWritable>();
+    List<VectorWritable> points = getPoints(raw);
     // map the data
-    for (Vector point : points) {
+    for (VectorWritable point : points) {
       mapper.map(new Text(), point, collector, null);
     }
     mapper.close();
     assertEquals("Number of map results", 1, collector.getData().size());
     // now verify the output
-    List<Vector> data = collector.getValue("centroid");
+    List<VectorWritable> data = collector.getValue("centroid");
     assertEquals("Number of centroids", 3, data.size());
     for (int i = 0; i < data.size(); i++) {
       assertEquals("Centroid error",
-          euclideanCentroids.get(i).asFormatString(), data.get(i)
-              .asFormatString());
+          euclideanCentroids.get(i).asFormatString(),
+          data.get(i).get().asFormatString());
     }
   }
 
@@ -352,7 +353,7 @@ public class TestCanopyCreation extends TestCase {
     reducer.configure(conf);
     
     DummyOutputCollector<Text, Canopy> collector = new DummyOutputCollector<Text, Canopy>();
-    List<Vector> points = getPoints(raw);
+    List<VectorWritable> points = getPoints(raw);
     reducer.reduce(new Text("centroid"), points.iterator(), collector, null);
     reducer.close();
     Set<String> keys = collector.getKeys();
@@ -378,7 +379,7 @@ public class TestCanopyCreation extends TestCase {
     reducer.configure(conf);
     
     DummyOutputCollector<Text, Canopy> collector = new DummyOutputCollector<Text, Canopy>();
-    List<Vector> points = getPoints(raw);
+    List<VectorWritable> points = getPoints(raw);
     reducer.reduce(new Text("centroid"), points.iterator(), collector, null);
     reducer.close();
     Set<String> keys = collector.getKeys();
@@ -393,7 +394,7 @@ public class TestCanopyCreation extends TestCase {
 
   /** Story: User can produce final canopy centers using a Hadoop map/reduce job and a ManhattanDistanceMeasure. */
   public void testCanopyGenManhattanMR() throws Exception {
-    List<Vector> points = getPoints(raw);
+    List<VectorWritable> points = getPoints(raw);
     File testData = new File("testdata");
     if (!testData.exists()) {
       testData.mkdir();
@@ -402,8 +403,7 @@ public class TestCanopyCreation extends TestCase {
     ClusteringTestUtils.writePointsToFile(points, "testdata/file1", fs, job);
     ClusteringTestUtils.writePointsToFile(points, "testdata/file2", fs, job);
     // now run the Canopy Driver
-    CanopyDriver.runJob("testdata", "output/canopies",
-        ManhattanDistanceMeasure.class.getName(), 3.1, 2.1, SparseVector.class);
+    CanopyDriver.runJob("testdata", "output/canopies", ManhattanDistanceMeasure.class.getName(), 3.1, 2.1);
 
     // verify output from sequence file
     Path path = new Path("output/canopies/part-00000");
@@ -427,7 +427,7 @@ public class TestCanopyCreation extends TestCase {
 
   /** Story: User can produce final canopy centers using a Hadoop map/reduce job and a EuclideanDistanceMeasure. */
   public void testCanopyGenEuclideanMR() throws Exception {
-    List<Vector> points = getPoints(raw);
+    List<VectorWritable> points = getPoints(raw);
     File testData = new File("testdata");
     if (!testData.exists()) {
       testData.mkdir();
@@ -436,8 +436,7 @@ public class TestCanopyCreation extends TestCase {
     ClusteringTestUtils.writePointsToFile(points, "testdata/file1", fs, job);
     ClusteringTestUtils.writePointsToFile(points, "testdata/file2", fs, job);
     // now run the Canopy Driver
-    CanopyDriver.runJob("testdata", "output/canopies",
-        EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, SparseVector.class);
+    CanopyDriver.runJob("testdata", "output/canopies", EuclideanDistanceMeasure.class.getName(), 3.1, 2.1);
 
     // verify output from sequence file
     Path path = new Path("output/canopies/part-00000");
@@ -467,25 +466,25 @@ public class TestCanopyCreation extends TestCase {
     mapper.configure(conf);
     
     List<Canopy> canopies = new ArrayList<Canopy>();
-    DummyOutputCollector<Text, Vector> collector = new DummyOutputCollector<Text, Vector>();
+    DummyOutputCollector<Text, VectorWritable> collector = new DummyOutputCollector<Text, VectorWritable>();
     int nextCanopyId = 0;
     for (Vector centroid : manhattanCentroids) {
       canopies.add(new Canopy(centroid, nextCanopyId++));
     }
     mapper.config(canopies);
-    List<Vector> points = getPoints(raw);
+    List<VectorWritable> points = getPoints(raw);
     // map the data
-    for (Vector point : points) {
+    for (VectorWritable point : points) {
       mapper.map(new Text(), point, collector, null);
     }
-    Map<String, List<Vector>> data = collector.getData();
+    Map<String, List<VectorWritable>> data = collector.getData();
     assertEquals("Number of map results", canopies.size(), data.size());
-    for (Map.Entry<String, List<Vector>> stringListEntry : data.entrySet()) {
+    for (Map.Entry<String, List<VectorWritable>> stringListEntry : data.entrySet()) {
       String key = stringListEntry.getKey();
       Canopy canopy = findCanopy(key, canopies);
-      List<Vector> pts = stringListEntry.getValue();
-      for (Vector ptDef : pts) {
-        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef));
+      List<VectorWritable> pts = stringListEntry.getValue();
+      for (VectorWritable ptDef : pts) {
+        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef.get()));
       }
     }
   }
@@ -509,25 +508,25 @@ public class TestCanopyCreation extends TestCase {
     mapper.configure(conf);
     
     List<Canopy> canopies = new ArrayList<Canopy>();
-    DummyOutputCollector<Text, Vector> collector = new DummyOutputCollector<Text, Vector>();
+    DummyOutputCollector<Text, VectorWritable> collector = new DummyOutputCollector<Text, VectorWritable>();
     int nextCanopyId = 0;
     for (Vector centroid : euclideanCentroids) {
       canopies.add(new Canopy(centroid, nextCanopyId++));
     }
     mapper.config(canopies);
-    List<Vector> points = getPoints(raw);
+    List<VectorWritable> points = getPoints(raw);
     // map the data
-    for (Vector point : points) {
+    for (VectorWritable point : points) {
       mapper.map(new Text(), point, collector, null);
     }
-    Map<String, List<Vector>> data = collector.getData();
+    Map<String, List<VectorWritable>> data = collector.getData();
     assertEquals("Number of map results", canopies.size(), data.size());
-    for (Map.Entry<String, List<Vector>> stringListEntry : data.entrySet()) {
+    for (Map.Entry<String, List<VectorWritable>> stringListEntry : data.entrySet()) {
       String key = stringListEntry.getKey();
       Canopy canopy = findCanopy(key, canopies);
-      List<Vector> pts = stringListEntry.getValue();
-      for (Vector ptDef : pts) {
-        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef));
+      List<VectorWritable> pts = stringListEntry.getValue();
+      for (VectorWritable ptDef : pts) {
+        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef.get()));
       }
     }
   }
@@ -542,36 +541,36 @@ public class TestCanopyCreation extends TestCase {
     mapper.configure(conf);
     
     List<Canopy> canopies = new ArrayList<Canopy>();
-    DummyOutputCollector<Text, Vector> collector = new DummyOutputCollector<Text, Vector>();
+    DummyOutputCollector<Text, VectorWritable> collector = new DummyOutputCollector<Text, VectorWritable>();
     int nextCanopyId = 0;
     for (Vector centroid : manhattanCentroids) {
       canopies.add(new Canopy(centroid, nextCanopyId++));
     }
     mapper.config(canopies);
-    List<Vector> points = getPoints(raw);
+    List<VectorWritable> points = getPoints(raw);
     // map the data
-    for (Vector point : points) {
+    for (VectorWritable point : points) {
       mapper.map(new Text(), point, collector, null);
     }
-    Map<String, List<Vector>> data = collector.getData();
+    Map<String, List<VectorWritable>> data = collector.getData();
     assertEquals("Number of map results", canopies.size(), data.size());
 
     // reduce the data
-    Reducer<Text, Vector, Text, Vector> reducer = new IdentityReducer<Text, Vector>();
-    collector = new DummyOutputCollector<Text, Vector>();
-    for (Map.Entry<String, List<Vector>> stringListEntry : data.entrySet()) {
+    Reducer<Text, VectorWritable, Text, VectorWritable> reducer = new IdentityReducer<Text, VectorWritable>();
+    collector = new DummyOutputCollector<Text, VectorWritable>();
+    for (Map.Entry<String, List<VectorWritable>> stringListEntry : data.entrySet()) {
       reducer.reduce(new Text(stringListEntry.getKey()), stringListEntry
           .getValue().iterator(), collector, null);
     }
 
     // check the output
     data = collector.getData();
-    for (Map.Entry<String, List<Vector>> stringListEntry : data.entrySet()) {
+    for (Map.Entry<String, List<VectorWritable>> stringListEntry : data.entrySet()) {
       String key = stringListEntry.getKey();
       Canopy canopy = findCanopy(key, canopies);
-      List<Vector> pts = stringListEntry.getValue();
-      for (Vector ptDef : pts) {
-        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef));
+      List<VectorWritable> pts = stringListEntry.getValue();
+      for (VectorWritable ptDef : pts) {
+        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef.get()));
       }
     }
   }
@@ -586,43 +585,43 @@ public class TestCanopyCreation extends TestCase {
     mapper.configure(conf);
     
     List<Canopy> canopies = new ArrayList<Canopy>();
-    DummyOutputCollector<Text, Vector> collector = new DummyOutputCollector<Text, Vector>();
+    DummyOutputCollector<Text, VectorWritable> collector = new DummyOutputCollector<Text, VectorWritable>();
     int nextCanopyId = 0;
     for (Vector centroid : euclideanCentroids) {
       canopies.add(new Canopy(centroid, nextCanopyId++));
     }
     mapper.config(canopies);
-    List<Vector> points = getPoints(raw);
+    List<VectorWritable> points = getPoints(raw);
     // map the data
-    for (Vector point : points) {
+    for (VectorWritable point : points) {
       mapper.map(new Text(), point, collector, null);
     }
-    Map<String, List<Vector>> data = collector.getData();
+    Map<String, List<VectorWritable>> data = collector.getData();
 
     // reduce the data
-    Reducer<Text, Vector, Text, Vector> reducer = new IdentityReducer<Text, Vector>();
-    collector = new DummyOutputCollector<Text, Vector>();
-    for (Map.Entry<String, List<Vector>> stringListEntry : data.entrySet()) {
-      reducer.reduce(new Text(stringListEntry.getKey()), stringListEntry
-          .getValue().iterator(), collector, null);
+    Reducer<Text, VectorWritable, Text, VectorWritable> reducer = new IdentityReducer<Text, VectorWritable>();
+    collector = new DummyOutputCollector<Text, VectorWritable>();
+    for (Map.Entry<String, List<VectorWritable>> stringListEntry : data.entrySet()) {
+      reducer.reduce(new Text(stringListEntry.getKey()),
+          stringListEntry.getValue().iterator(), collector, null);
     }
 
     // check the output
     data = collector.getData();
     assertEquals("Number of map results", canopies.size(), data.size());
-    for (Map.Entry<String, List<Vector>> stringListEntry : data.entrySet()) {
+    for (Map.Entry<String, List<VectorWritable>> stringListEntry : data.entrySet()) {
       String key = stringListEntry.getKey();
       Canopy canopy = findCanopy(key, canopies);
-      List<Vector> pts = stringListEntry.getValue();
-      for (Vector ptDef : pts) {
-        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef));
+      List<VectorWritable> pts = stringListEntry.getValue();
+      for (VectorWritable ptDef : pts) {
+        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef.get()));
       }
     }
   }
 
   /** Story: User can produce final point clustering using a Hadoop map/reduce job and a ManhattanDistanceMeasure. */
   public void testClusteringManhattanMR() throws Exception {
-    List<Vector> points = getPoints(raw);
+    List<VectorWritable> points = getPoints(raw);
     File testData = new File("testdata");
     if (!testData.exists()) {
       testData.mkdir();
@@ -632,7 +631,7 @@ public class TestCanopyCreation extends TestCase {
     ClusteringTestUtils.writePointsToFile(points, "testdata/file2", fs, conf);
     // now run the Job
     CanopyClusteringJob.runJob("testdata", "output",
-        ManhattanDistanceMeasure.class.getName(), 3.1, 2.1, SparseVector.class);
+        ManhattanDistanceMeasure.class.getName(), 3.1, 2.1);
     //TODO: change
     Path path = new Path("output/clusters/part-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
@@ -642,10 +641,10 @@ public class TestCanopyCreation extends TestCase {
       count++;
     }*/
     Text txt = new Text();
-    SparseVector vector = new SparseVector();
+    VectorWritable vector = new VectorWritable();
     while (reader.next(txt, vector)) {
       count++;
-      System.out.println("Txt: " + txt + " Vec: " + vector.asFormatString());
+      System.out.println("Txt: " + txt + " Vec: " + vector.get().asFormatString());
     }
     // the point [3.0,3.0] is covered by both canopies
     assertEquals("number of points", 2 + 2 * points.size(), count);
@@ -654,7 +653,7 @@ public class TestCanopyCreation extends TestCase {
 
   /** Story: User can produce final point clustering using a Hadoop map/reduce job and a EuclideanDistanceMeasure. */
   public void testClusteringEuclideanMR() throws Exception {
-    List<Vector> points = getPoints(raw);
+    List<VectorWritable> points = getPoints(raw);
     File testData = new File("testdata");
     if (!testData.exists()) {
       testData.mkdir();
@@ -664,7 +663,7 @@ public class TestCanopyCreation extends TestCase {
     ClusteringTestUtils.writePointsToFile(points, "testdata/file2", fs, conf);
     // now run the Job
     CanopyClusteringJob.runJob("testdata", "output",
-        EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, SparseVector.class);
+        EuclideanDistanceMeasure.class.getName(), 3.1, 2.1);
     Path path = new Path("output/clusters/part-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
     int count = 0;
@@ -673,7 +672,7 @@ public class TestCanopyCreation extends TestCase {
       count++;
     }*/
     Text txt = new Text();
-    SparseVector can = new SparseVector();
+    VectorWritable can = new VectorWritable();
     while (reader.next(txt, can)) {
       count++;
     }
@@ -689,7 +688,7 @@ public class TestCanopyCreation extends TestCase {
 
   /** Story: Clustering algorithm must support arbitrary user defined distance measure */
   public void testUserDefinedDistanceMeasure() throws Exception {
-    List<Vector> points = getPoints(raw);
+    List<VectorWritable> points = getPoints(raw);
     File testData = new File("testdata");
     if (!testData.exists()) {
       testData.mkdir();
@@ -699,8 +698,7 @@ public class TestCanopyCreation extends TestCase {
     ClusteringTestUtils.writePointsToFile(points, "testdata/file2", fs, conf);
     // now run the Canopy Driver. User defined measure happens to be a Manhattan
     // subclass so results are same.
-    CanopyDriver.runJob("testdata", "output/canopies",
-        UserDefinedDistanceMeasure.class.getName(), 3.1, 2.1, SparseVector.class);
+    CanopyDriver.runJob("testdata", "output/canopies", UserDefinedDistanceMeasure.class.getName(), 3.1, 2.1);
 
     // verify output from sequence file
     JobConf job = new JobConf(CanopyDriver.class);

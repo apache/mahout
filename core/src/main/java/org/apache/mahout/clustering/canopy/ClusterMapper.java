@@ -28,21 +28,22 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ClusterMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, Vector, Text, Vector> {
+    Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
 
   private CanopyClusterer canopyClusterer;
   private final List<Canopy> canopies = new ArrayList<Canopy>();
 
   @Override
-  public void map(WritableComparable<?> key, Vector point,
-                  OutputCollector<Text, Vector> output, Reporter reporter) throws IOException {
-    canopyClusterer.emitPointToExistingCanopies(point, canopies, output);
+  public void map(WritableComparable<?> key, VectorWritable point,
+                  OutputCollector<Text, VectorWritable> output, Reporter reporter) throws IOException {
+    canopyClusterer.emitPointToExistingCanopies(point.get(), canopies, output);
   }
 
   /**

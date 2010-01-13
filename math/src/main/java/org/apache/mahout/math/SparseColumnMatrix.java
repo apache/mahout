@@ -171,26 +171,4 @@ public class SparseColumnMatrix extends AbstractMatrix {
     return new DenseVector(d);
   }
 
-  @Override
-  public void readFields(DataInput in) throws IOException {
-    super.readFields(in);
-    this.cardinality = new int[]{in.readInt(), in.readInt()};
-    int colSize = in.readInt();
-    this.columns = new Vector[colSize];
-    for (int col = 0; col < colSize; col++) {
-      columns[col] = AbstractVector.readVector(in);
-    }
-  }
-
-  @Override
-  public void write(DataOutput out) throws IOException {
-    super.write(out);
-    out.writeInt(cardinality[ROW]);
-    out.writeInt(cardinality[COL]);
-    out.writeInt(columns.length);
-    for (Vector col : columns) {
-      AbstractVector.writeVector(out, col);
-    }
-  }
-
 }

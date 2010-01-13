@@ -17,7 +17,6 @@
 
 package org.apache.mahout.math;
 
-import org.apache.hadoop.io.Writable;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -27,7 +26,7 @@ import java.util.Map;
  * constructor that takes an int for cardinality and a no-arg constructor that can be used for marshalling the Writable
  * instance <p/> NOTE: Implementations may choose to reuse the Vector.Element in the Iterable methods
  */
-public interface Vector extends Cloneable, Writable {
+public interface Vector extends Cloneable {
 
   /**
    * Vectors may have a name associated with them, which makes them easy to identify

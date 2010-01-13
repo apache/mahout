@@ -20,6 +20,7 @@ package org.apache.mahout.utils.vectors.io;
 import org.apache.mahout.math.Vector;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
 
@@ -42,7 +43,7 @@ public class SequenceFileVectorWriter implements VectorWriter {
         break;
       }
       if (point != null) {
-        writer.append(new LongWritable(recNum++), point);
+        writer.append(new LongWritable(recNum++), new VectorWritable(point));
       }
 
     }

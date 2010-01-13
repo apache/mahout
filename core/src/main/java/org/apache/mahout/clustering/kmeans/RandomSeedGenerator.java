@@ -25,6 +25,7 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +68,7 @@ public final class RandomSeedGenerator {
     if (newFile) {
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(input), conf);
       Writable key = (Writable) reader.getKeyClass().newInstance();
-      Vector value = (Vector) reader.getValueClass().newInstance();
+      VectorWritable value = (VectorWritable) reader.getValueClass().newInstance();
       SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, outFile, Text.class, Cluster.class);
       Random random = RandomUtils.getRandom();
 
@@ -75,8 +76,8 @@ public final class RandomSeedGenerator {
       List<Cluster> chosenClusters = new ArrayList<Cluster>(k);
       int nextClusterId = 0;
       while (reader.next(key, value)) {
-        Cluster newCluster = new Cluster(value, nextClusterId++);
-        newCluster.addPoint(value);
+        Cluster newCluster = new Cluster(value.get(), nextClusterId++);
+        newCluster.addPoint(value.get());
         Text newText = new Text(key.toString());
         int currentSize = chosenTexts.size();
         if (currentSize < k) {

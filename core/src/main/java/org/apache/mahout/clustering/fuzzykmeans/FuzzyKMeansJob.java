@@ -106,7 +106,7 @@ public class FuzzyKMeansJob {
       String vectorClassName = cmdLine.getValue(vectorClassOpt).toString();
       Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
       runJob(input, clusters, output, measureClass, convergenceDelta,
-          maxIterations, numMapTasks, numReduceTasks, doCanopy, m, vectorClass);
+          maxIterations, numMapTasks, numReduceTasks, doCanopy, m);
     } catch (OptionException e) {
       log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
@@ -128,18 +128,18 @@ public class FuzzyKMeansJob {
    */
   public static void runJob(String input, String clustersIn, String output,
                             String measureClass, double convergenceDelta, int maxIterations,
-                            int numMapTasks, int numReduceTasks, boolean doCanopy, float m, Class<? extends Vector> vectorClass)
+                            int numMapTasks, int numReduceTasks, boolean doCanopy, float m)
       throws IOException {
 
     // run canopy to find initial clusters
     if (doCanopy) {
       CanopyDriver.runJob(input, clustersIn, ManhattanDistanceMeasure.class
-          .getName(), 100.1, 50.1, vectorClass);
+          .getName(), 100.1, 50.1);
 
     }
     // run fuzzy k -means
     FuzzyKMeansDriver.runJob(input, clustersIn, output, measureClass,
-        convergenceDelta, maxIterations, numMapTasks, numReduceTasks, m, vectorClass);
+        convergenceDelta, maxIterations, numMapTasks, numReduceTasks, m);
 
   }
 }

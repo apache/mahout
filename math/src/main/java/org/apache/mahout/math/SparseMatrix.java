@@ -176,28 +176,4 @@ public class SparseMatrix extends AbstractMatrix {
     return res;
   }
 
-  @Override
-  public void readFields(DataInput in) throws IOException {
-    super.readFields(in);
-    this.cardinality = new int[]{in.readInt(), in.readInt()};
-    int rowsize = in.readInt();
-    this.rows = new HashMap<Integer, Vector>();
-    for (int row = 0; row < rowsize; row++) {
-      int key = in.readInt();
-      rows.put(key, AbstractVector.readVector(in));
-    }
-  }
-
-  @Override
-  public void write(DataOutput out) throws IOException {
-    super.write(out);
-    out.writeInt(cardinality[ROW]);
-    out.writeInt(cardinality[COL]);
-    out.writeInt(rows.size());
-    for (Map.Entry<Integer, Vector> integerVectorEntry : rows.entrySet()) {
-      out.writeInt(integerVectorEntry.getKey());
-      AbstractVector.writeVector(out, integerVectorEntry.getValue());
-    }
-  }
-
 }

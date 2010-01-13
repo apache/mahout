@@ -40,6 +40,7 @@ import org.apache.mahout.math.SparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
+import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,7 +118,7 @@ public class ClusterDriver {
       double t1 = Double.parseDouble(cmdLine.getValue(t1Opt).toString());
       double t2 = Double.parseDouble(cmdLine.getValue(t2Opt).toString());
 
-      runJob(points, canopies, output, measureClass, t1, t2, vectorClass);
+      runJob(points, canopies, output, measureClass, t1, t2);
 
     } catch (OptionException e) {
       log.error("Exception", e);
@@ -136,10 +137,9 @@ public class ClusterDriver {
    * @param measureClassName the DistanceMeasure class name
    * @param t1               the T1 distance threshold
    * @param t2               the T2 distance threshold
-   * @param vectorClass      The {@link Class} of Vector to use for the Output Value Class.  Must be concrete.
    */
   public static void runJob(String points, String canopies, String output,
-                            String measureClassName, double t1, double t2, Class<? extends Vector> vectorClass) throws IOException {
+                            String measureClassName, double t1, double t2) throws IOException {
     Configurable client = new JobClient();
     JobConf conf = new JobConf(ClusterDriver.class);
 
@@ -153,7 +153,7 @@ public class ClusterDriver {
     /*conf.setMapOutputKeyClass(Text.class);
     conf.setMapOutputValueClass(SparseVector.class);*/
     conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(vectorClass);
+    conf.setOutputValueClass(VectorWritable.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
 
     FileInputFormat.setInputPaths(conf, new Path(points));

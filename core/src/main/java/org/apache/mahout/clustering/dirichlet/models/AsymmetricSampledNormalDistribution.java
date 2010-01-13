@@ -20,6 +20,7 @@ package org.apache.mahout.clustering.dirichlet.models;
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 /**
  * An implementation of the ModelDistribution interface suitable for testing the DirichletCluster algorithm. Uses a
@@ -27,11 +28,11 @@ import org.apache.mahout.math.Vector;
  * assymetrical regions to be covered by a model.
  */
 public class AsymmetricSampledNormalDistribution implements
-    ModelDistribution<Vector> {
+    ModelDistribution<VectorWritable> {
 
   @Override
-  public Model<Vector>[] sampleFromPrior(int howMany) {
-    Model<Vector>[] result = new AsymmetricSampledNormalModel[howMany];
+  public Model<VectorWritable>[] sampleFromPrior(int howMany) {
+    Model<VectorWritable>[] result = new AsymmetricSampledNormalModel[howMany];
     for (int i = 0; i < howMany; i++) {
       double[] m = {UncommonDistributions.rNorm(0, 1),
           UncommonDistributions.rNorm(0, 1)};
@@ -45,8 +46,8 @@ public class AsymmetricSampledNormalDistribution implements
   }
 
   @Override
-  public Model<Vector>[] sampleFromPosterior(Model<Vector>[] posterior) {
-    Model<Vector>[] result = new AsymmetricSampledNormalModel[posterior.length];
+  public Model<VectorWritable>[] sampleFromPosterior(Model<VectorWritable>[] posterior) {
+    Model<VectorWritable>[] result = new AsymmetricSampledNormalModel[posterior.length];
     for (int i = 0; i < posterior.length; i++) {
       AsymmetricSampledNormalModel m = (AsymmetricSampledNormalModel) posterior[i];
       result[i] = m.sample();

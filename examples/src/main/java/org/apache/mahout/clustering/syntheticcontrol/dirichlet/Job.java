@@ -42,6 +42,7 @@ import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,7 +140,7 @@ public class Job {
     }
     fs.mkdirs(outPath);
     final String directoryContainingConvertedInput = output + DIRECTORY_CONTAINING_CONVERTED_INPUT;
-    InputDriver.runJob(input, directoryContainingConvertedInput, vectorClass);
+    InputDriver.runJob(input, directoryContainingConvertedInput);
     DirichletDriver.runJob(directoryContainingConvertedInput, output + "/state", modelFactory,
         numModels, maxIterations, alpha_0, numReducers);
     printResults(output + "/state", modelFactory, maxIterations, numModels,
@@ -156,7 +157,7 @@ public class Job {
    */
   public static void printResults(String output, String modelDistribution,
       int numIterations, int numModels, double alpha_0) {
-    List<List<DirichletCluster<Vector>>> clusters = new ArrayList<List<DirichletCluster<Vector>>>();
+    List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     JobConf conf = new JobConf(KMeansDriver.class);
     conf.set(DirichletDriver.MODEL_FACTORY_KEY, modelDistribution);
     conf.set(DirichletDriver.NUM_CLUSTERS_KEY, Integer.toString(numModels));
@@ -175,12 +176,12 @@ public class Job {
    * @param significant the minimum number of samples to enable printing a model
    */
   private static void printResults(
-      List<List<DirichletCluster<Vector>>> clusters, int significant) {
+      List<List<DirichletCluster<VectorWritable>>> clusters, int significant) {
     int row = 0;
-    for (List<DirichletCluster<Vector>> r : clusters) {
+    for (List<DirichletCluster<VectorWritable>> r : clusters) {
       System.out.print("sample[" + row++ + "]= ");
       for (int k = 0; k < r.size(); k++) {
-        Model<Vector> model = r.get(k).getModel();
+        Model<VectorWritable> model = r.get(k).getModel();
         if (model.count() > significant) {
           int total = (int) r.get(k).getTotalCount();
           System.out.print("m" + k + '(' + total + ')' + model.toString()

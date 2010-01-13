@@ -101,7 +101,7 @@ public class Job {
         double t1 = Double.parseDouble(cmdLine.getValue(t1Opt, "80").toString());
         double t2 = Double.parseDouble(cmdLine.getValue(t2Opt, "55").toString());
 
-        runJob(input, output, measureClass, t1, t2, vectorClass);
+        runJob(input, output, measureClass, t1, t2);
       } catch (OptionException e) {
         LOG.error("Exception", e);
         CommandLineUtil.printHelp(group);
@@ -131,8 +131,7 @@ public class Job {
    *          the canopy T2 threshold
    */
   private static void runJob(String input, String output,
-      String measureClassName, double t1, double t2,
-      Class<? extends Vector> vectorClass) throws IOException {
+      String measureClassName, double t1, double t2) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(Job.class);
 
@@ -143,9 +142,9 @@ public class Job {
       dfs.delete(outPath, true);
     String directoryContainingConvertedInput = output
         + Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
-    InputDriver.runJob(input, directoryContainingConvertedInput, vectorClass);
+    InputDriver.runJob(input, directoryContainingConvertedInput);
     CanopyClusteringJob.runJob(directoryContainingConvertedInput, output,
-        measureClassName, t1, t2, vectorClass);
+        measureClassName, t1, t2);
   }
 
 }

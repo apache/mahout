@@ -30,6 +30,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.VectorWritable;
 
 class DisplayMeanShift extends DisplayDirichlet {
   private DisplayMeanShift() {
@@ -60,8 +61,8 @@ class DisplayMeanShift extends DisplayDirichlet {
     // plot the sample data
     g2.setColor(Color.DARK_GRAY);
     dv.assign(0.03);
-    for (Vector v : sampleData)
-      plotRectangle(g2, v, dv);
+    for (VectorWritable v : sampleData)
+      plotRectangle(g2, v.get(), dv);
     int i = 0;
     for (MeanShiftCanopy canopy : canopies)
       if (canopy.getBoundPoints().size() > 0.015 * sampleData.size()) {
@@ -76,8 +77,8 @@ class DisplayMeanShift extends DisplayDirichlet {
   private static void testReferenceImplementation() {
     // add all points to the canopies
     int nextCanopyId = 0;
-    for (Vector aRaw : sampleData) {
-      clusterer.mergeCanopy(new MeanShiftCanopy(aRaw, nextCanopyId++), canopies);
+    for (VectorWritable aRaw : sampleData) {
+      clusterer.mergeCanopy(new MeanShiftCanopy(aRaw.get(), nextCanopyId++), canopies);
     }
     boolean done = false;
     while (!done) {// shift canopies to their centroids

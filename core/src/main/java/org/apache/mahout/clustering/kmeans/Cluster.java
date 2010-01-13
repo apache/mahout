@@ -21,6 +21,7 @@ import org.apache.mahout.math.AbstractVector;
 import org.apache.mahout.math.SquareRootFunction;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -94,14 +95,14 @@ public class Cluster extends ClusterBase {
   public void write(DataOutput out) throws IOException {
     super.write(out);
     out.writeBoolean(converged);
-    AbstractVector.writeVector(out, computeCentroid());
+    VectorWritable.writeVector(out, computeCentroid());
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
     this.converged = in.readBoolean();
-    this.setCenter(AbstractVector.readVector(in));
+    this.setCenter(VectorWritable.readVector(in));
     this.setNumPoints(0);
     this.setPointTotal(getCenter().like());
     this.pointSquaredTotal = getCenter().like();

@@ -25,6 +25,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 public class CanopyClusterer {
 
@@ -146,16 +147,18 @@ public class CanopyClusterer {
    * @param collector an OutputCollector in which to emit the point
    */
   public void emitPointToExistingCanopies(Vector point, List<Canopy> canopies,
-      OutputCollector<Text, Vector> collector) throws IOException {
+      OutputCollector<Text, VectorWritable> collector) throws IOException {
     double minDist = Double.MAX_VALUE;
     Canopy closest = null;
     boolean isCovered = false;
+    VectorWritable vw = new VectorWritable();
     for (Canopy canopy : canopies) {
       double dist = measure.distance(canopy.getCenter().getLengthSquared(),
           canopy.getCenter(), point);
       if (dist < t1) {
         isCovered = true;
-        collector.collect(new Text(canopy.getIdentifier()), point);
+        vw.set(point);
+        collector.collect(new Text(canopy.getIdentifier()), vw);
       } else if (dist < minDist) {
         minDist = dist;
         closest = canopy;
@@ -163,8 +166,9 @@ public class CanopyClusterer {
     }
     // if the point is not contained in any canopies (due to canopy centroid
     // clustering), emit the point to the closest covering canopy.
+    vw.set(point);
     if (!isCovered) {
-      collector.collect(new Text(closest.getIdentifier()), point);
+      collector.collect(new Text(closest.getIdentifier()), vw);
     }
   }
 

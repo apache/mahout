@@ -23,16 +23,17 @@ import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
 import org.apache.mahout.clustering.dirichlet.models.NormalModel;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 /**
  * An implementation of the ModelDistribution interface suitable for testing the
  * DirichletCluster algorithm. Uses a Normal Distribution
  */
-public class NormalScModelDistribution implements ModelDistribution<Vector> {
+public class NormalScModelDistribution implements ModelDistribution<VectorWritable> {
 
   @Override
-  public Model<Vector>[] sampleFromPrior(int howMany) {
-    Model<Vector>[] result = new NormalModel[howMany];
+  public Model<VectorWritable>[] sampleFromPrior(int howMany) {
+    Model<VectorWritable>[] result = new NormalModel[howMany];
     for (int i = 0; i < howMany; i++) {
       DenseVector mean = new DenseVector(60);
       for (int j = 0; j < 60; j++)
@@ -43,8 +44,8 @@ public class NormalScModelDistribution implements ModelDistribution<Vector> {
   }
 
   @Override
-  public Model<Vector>[] sampleFromPosterior(Model<Vector>[] posterior) {
-    Model<Vector>[] result = new NormalModel[posterior.length];
+  public Model<VectorWritable>[] sampleFromPosterior(Model<VectorWritable>[] posterior) {
+    Model<VectorWritable>[] result = new NormalModel[posterior.length];
     for (int i = 0; i < posterior.length; i++) {
       NormalModel m = (NormalModel) posterior[i];
       result[i] = m.sample();

@@ -26,26 +26,30 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.VectorWritable;
 
 /**
  * Converts a document in to a SparseVector
  */
 public class PartialVectorMerger extends MapReduceBase implements
-    Reducer<Text,SparseVector,Text,SparseVector> {
-  
+    Reducer<Text,VectorWritable,Text, VectorWritable> {
+
+  private VectorWritable vectorWritable = new VectorWritable();
+
   @Override
   public void reduce(Text key,
-                     Iterator<SparseVector> values,
-                     OutputCollector<Text,SparseVector> output,
+                     Iterator<VectorWritable> values,
+                     OutputCollector<Text,VectorWritable> output,
                      Reporter reporter) throws IOException {
     
     SparseVector vector =
         new SparseVector(key.toString(), Integer.MAX_VALUE, 10);
     while (values.hasNext()) {
-      SparseVector value = values.next();
-      value.addTo(vector);
+      VectorWritable value = values.next();
+      value.get().addTo(vector);
     }
-    output.collect(key, vector);
+    vectorWritable.set(vector);
+    output.collect(key, vectorWritable);
     
   }
   

@@ -32,17 +32,18 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.TimesFunction;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
 
 public class DirichletMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, Vector, Text, Vector> {
+    Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
 
-  private DirichletState<Vector> state;
+  private DirichletState<VectorWritable> state;
 
   @Override
-  public void map(WritableComparable<?> key, Vector v,
-                  OutputCollector<Text, Vector> output, Reporter reporter) throws IOException {
+  public void map(WritableComparable<?> key, VectorWritable v,
+                  OutputCollector<Text, VectorWritable> output, Reporter reporter) throws IOException {
     // compute a normalized vector of probabilities that v is described by each model
     Vector pi = normalizedProbabilities(state, v);
     // then pick one model by sampling a Multinomial distribution based upon them
@@ -51,7 +52,7 @@ public class DirichletMapper extends MapReduceBase implements
     output.collect(new Text(String.valueOf(k)), v);
   }
 
-  public void configure(DirichletState<Vector> state) {
+  public void configure(DirichletState<VectorWritable> state) {
     this.state = state;
   }
 
@@ -61,14 +62,14 @@ public class DirichletMapper extends MapReduceBase implements
     state = getDirichletState(job);
   }
 
-  public static DirichletState<Vector> getDirichletState(JobConf job) {
+  public static DirichletState<VectorWritable> getDirichletState(JobConf job) {
     String statePath = job.get(DirichletDriver.STATE_IN_KEY);
     String modelFactory = job.get(DirichletDriver.MODEL_FACTORY_KEY);
     String numClusters = job.get(DirichletDriver.NUM_CLUSTERS_KEY);
     String alpha_0 = job.get(DirichletDriver.ALPHA_0_KEY);
 
     try {
-      DirichletState<Vector> state = DirichletDriver.createState(modelFactory,
+      DirichletState<VectorWritable> state = DirichletDriver.createState(modelFactory,
           Integer.parseInt(numClusters), Double.parseDouble(alpha_0));
       Path path = new Path(statePath);
       FileSystem fs = FileSystem.get(path.toUri(), job);
@@ -78,11 +79,11 @@ public class DirichletMapper extends MapReduceBase implements
             job);
         try {
           Text key = new Text();
-          DirichletCluster<Vector> cluster = new DirichletCluster<Vector>();
+          DirichletCluster<VectorWritable> cluster = new DirichletCluster<VectorWritable>();
           while (reader.next(key, cluster)) {
             int index = Integer.parseInt(key.toString());
             state.getClusters().set(index, cluster);
-            cluster = new DirichletCluster<Vector>();
+            cluster = new DirichletCluster<VectorWritable>();
           }
         } finally {
           reader.close();
@@ -110,7 +111,7 @@ public class DirichletMapper extends MapReduceBase implements
    * @param v     an Vector
    * @return the Vector of probabilities
    */
-  private static Vector normalizedProbabilities(DirichletState<Vector> state, Vector v) {
+  private static Vector normalizedProbabilities(DirichletState<VectorWritable> state, VectorWritable v) {
     Vector pi = new DenseVector(state.getNumClusters());
     double max = 0;
     for (int k = 0; k < state.getNumClusters(); k++) {

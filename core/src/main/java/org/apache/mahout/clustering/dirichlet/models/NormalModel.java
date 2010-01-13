@@ -17,15 +17,15 @@
 
 package org.apache.mahout.clustering.dirichlet.models;
 
-import org.apache.mahout.math.AbstractVector;
 import org.apache.mahout.math.SquareRootFunction;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class NormalModel implements Model<Vector> {
+public class NormalModel implements Model<VectorWritable> {
 
   private static final double sqrt2pi = Math.sqrt(2.0 * Math.PI);
 
@@ -75,17 +75,18 @@ public class NormalModel implements Model<Vector> {
   }
 
   @Override
-  public void observe(Vector x) {
+  public void observe(VectorWritable x) {
     s0++;
+    Vector v = x.get();
     if (s1 == null) {
-      s1 = x.clone();
+      s1 = v.clone();
     } else {
-      s1 = s1.plus(x);
+      s1 = s1.plus(v);
     }
     if (s2 == null) {
-      s2 = x.times(x);
+      s2 = v.times(v);
     } else {
-      s2 = s2.plus(x.times(x));
+      s2 = s2.plus(v.times(v));
     }
   }
 
@@ -106,7 +107,8 @@ public class NormalModel implements Model<Vector> {
   }
 
   @Override
-  public double pdf(Vector x) {
+  public double pdf(VectorWritable v) {
+    Vector x = v.get();
     double sd2 = stdDev * stdDev;
     double exp = -(x.dot(x) - 2 * x.dot(mean) + mean.dot(mean)) / (2 * sd2);
     double ex = Math.exp(exp);
@@ -133,19 +135,19 @@ public class NormalModel implements Model<Vector> {
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    this.mean = AbstractVector.readVector(in);
+    this.mean = VectorWritable.readVector(in);
     this.stdDev = in.readDouble();
     this.s0 = in.readInt();
-    this.s1 = AbstractVector.readVector(in);
-    this.s2 = AbstractVector.readVector(in);
+    this.s1 = VectorWritable.readVector(in);
+    this.s2 = VectorWritable.readVector(in);
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
-    AbstractVector.writeVector(out, mean);
+    VectorWritable.writeVector(out, mean);
     out.writeDouble(stdDev);
     out.writeInt(s0);
-    AbstractVector.writeVector(out, s1);
-    AbstractVector.writeVector(out, s2);
+    VectorWritable.writeVector(out, s1);
+    VectorWritable.writeVector(out, s2);
   }
 }

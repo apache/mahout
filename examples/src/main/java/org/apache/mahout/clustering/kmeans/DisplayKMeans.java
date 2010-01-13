@@ -31,6 +31,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.VectorWritable;
 
 class DisplayKMeans extends DisplayDirichlet {
   DisplayKMeans() {
@@ -72,7 +73,7 @@ class DisplayKMeans extends DisplayDirichlet {
    * @param measure the DistanceMeasure to use
    * @param maxIter the maximum number of iterations
    */
-  private static void referenceKmeans(List<Vector> points,
+  private static void referenceKmeans(List<VectorWritable> points,
       List<List<Cluster>> clusters, DistanceMeasure measure, int maxIter) {
     boolean converged = false;
     int iteration = 0;
@@ -95,20 +96,20 @@ class DisplayKMeans extends DisplayDirichlet {
    * @param measure a DistanceMeasure to use
    * @return
    */
-  private static boolean iterateReference(List<Vector> points,
+  private static boolean iterateReference(List<VectorWritable> points,
       List<Cluster> clusters, DistanceMeasure measure) {
     // iterate through all points, assigning each to the nearest cluster
-    for (Vector point : points) {
+    for (VectorWritable point : points) {
       Cluster closestCluster = null;
       double closestDistance = Double.MAX_VALUE;
       for (Cluster cluster : clusters) {
-        double distance = measure.distance(cluster.getCenter(), point);
+        double distance = measure.distance(cluster.getCenter(), point.get());
         if (closestCluster == null || closestDistance > distance) {
           closestCluster = cluster;
           closestDistance = distance;
         }
       }
-      closestCluster.addPoint(point);
+      closestCluster.addPoint(point.get());
     }
     // test for convergence
     boolean converged = true;
@@ -137,7 +138,7 @@ class DisplayKMeans extends DisplayDirichlet {
    * @return the List<Canopy> created
    */
   static List<Canopy> populateCanopies(DistanceMeasure measure,
-      List<Vector> points, double t1, double t2) {
+      List<VectorWritable> points, double t1, double t2) {
     List<Canopy> canopies = new ArrayList<Canopy>();
     /**
      * Reference Implementation: Given a distance metric, one can create
@@ -151,13 +152,13 @@ class DisplayKMeans extends DisplayDirichlet {
      */
     int nextCanopyId = 0;
     while (!points.isEmpty()) {
-      Iterator<Vector> ptIter = points.iterator();
-      Vector p1 = ptIter.next();
+      Iterator<VectorWritable> ptIter = points.iterator();
+      Vector p1 = ptIter.next().get();
       ptIter.remove();
       Canopy canopy = new Canopy(p1, nextCanopyId++);
       canopies.add(canopy);
       while (ptIter.hasNext()) {
-        Vector p2 = ptIter.next();
+        Vector p2 = ptIter.next().get();
         double dist = measure.distance(p1, p2);
         // Put all points that are within distance threshold T1 into the canopy
         if (dist < t1)
@@ -173,7 +174,7 @@ class DisplayKMeans extends DisplayDirichlet {
   public static void main(String[] args) {
     RandomUtils.useTestSeed();
     generateSamples();
-    List<Vector> points = new ArrayList<Vector>();
+    List<VectorWritable> points = new ArrayList<VectorWritable>();
     points.addAll(sampleData);
     List<Canopy> canopies = populateCanopies(new ManhattanDistanceMeasure(), points, t1, t2);
     DistanceMeasure measure = new ManhattanDistanceMeasure();

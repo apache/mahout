@@ -18,8 +18,8 @@
 package org.apache.mahout.clustering.kmeans;
 
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.math.AbstractVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -49,12 +49,12 @@ public class KMeansInfo implements Writable {
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(points);
-    AbstractVector.writeVector(out, pointTotal);
+    VectorWritable.writeVector(out, pointTotal);
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
     this.points = in.readInt();
-    this.pointTotal = AbstractVector.readVector(in);
+    this.pointTotal = VectorWritable.readVector(in);
   }
 }

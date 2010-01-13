@@ -26,21 +26,22 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class KMeansClusterMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, Vector, Text, Text> {
+    Mapper<WritableComparable<?>, VectorWritable, Text, Text> {
 
   private final List<Cluster> clusters = new ArrayList<Cluster>();
   private KMeansClusterer clusterer;
 
   @Override
-  public void map(WritableComparable<?> key, Vector point,
+  public void map(WritableComparable<?> key, VectorWritable point,
       OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
-    this.clusterer.outputPointWithClusterInfo(point, clusters, output);
+    this.clusterer.outputPointWithClusterInfo(point.get(), clusters, output);
   }
 
   /**

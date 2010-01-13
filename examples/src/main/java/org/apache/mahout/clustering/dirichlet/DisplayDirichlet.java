@@ -37,6 +37,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.TimesFunction;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.VectorWritable;
 
 public class DisplayDirichlet extends Frame {
 
@@ -46,9 +47,9 @@ public class DisplayDirichlet extends Frame {
 
   protected static final int size = 8; // screen size in inches
 
-  protected static final List<Vector> sampleData = new ArrayList<Vector>();
+  protected static final List<VectorWritable> sampleData = new ArrayList<VectorWritable>();
 
-  protected static List<Model<Vector>[]> result;
+  protected static List<Model<VectorWritable>[]> result;
 
   protected static final double significance = 0.05;
 
@@ -133,8 +134,8 @@ public class DisplayDirichlet extends Frame {
     // plot the sample data
     g2.setColor(Color.DARK_GRAY);
     dv.assign(0.03);
-    for (Vector v : sampleData)
-      plotRectangle(g2, v, dv);
+    for (VectorWritable v : sampleData)
+      plotRectangle(g2, v.get(), dv);
   }
 
   /**
@@ -172,12 +173,12 @@ public class DisplayDirichlet extends Frame {
             * ds));
   }
 
-  private static void printModels(List<Model<Vector>[]> results, int significant) {
+  private static void printModels(List<Model<VectorWritable>[]> results, int significant) {
     int row = 0;
-    for (Model<Vector>[] r : results) {
+    for (Model<VectorWritable>[] r : results) {
       System.out.print("sample[" + row++ + "]= ");
       for (int k = 0; k < r.length; k++) {
-        Model<Vector> model = r[k];
+        Model<VectorWritable> model = r[k];
         if (model.count() > significant) {
           System.out.print("m" + k + model.toString() + ", ");
         }
@@ -212,9 +213,9 @@ public class DisplayDirichlet extends Frame {
     System.out.println("Generating " + num + " samples m=[" + mx + ", " + my
         + "] sd=" + sd);
     for (int i = 0; i < num; i++)
-      sampleData.add(new DenseVector(new double[] {
+      sampleData.add(new VectorWritable(new DenseVector(new double[] {
           UncommonDistributions.rNorm(mx, sd),
-          UncommonDistributions.rNorm(my, sd) }));
+          UncommonDistributions.rNorm(my, sd) })));
   }
 
   /**
@@ -232,19 +233,19 @@ public class DisplayDirichlet extends Frame {
     System.out.println("Generating " + num + " samples m=[" + mx + ", " + my
         + "] sd=[" + sdx + ", " + sdy + ']');
     for (int i = 0; i < num; i++)
-      sampleData.add(new DenseVector(new double[] {
+      sampleData.add(new VectorWritable(new DenseVector(new double[] {
           UncommonDistributions.rNorm(mx, sdx),
-          UncommonDistributions.rNorm(my, sdy) }));
+          UncommonDistributions.rNorm(my, sdy) })));
   }
 
-  public static void generateResults(ModelDistribution<Vector> modelDist) {
-    DirichletClusterer<Vector> dc = new DirichletClusterer<Vector>(sampleData,
+  public static void generateResults(ModelDistribution<VectorWritable> modelDist) {
+    DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(sampleData,
         modelDist, 1.0, 10, 2, 2);
     result = dc.cluster(20);
     printModels(result, 5);
   }
 
-  public static boolean isSignificant(Model<Vector> model) {
+  public static boolean isSignificant(Model<VectorWritable> model) {
     return (((double) model.count() / sampleData.size()) > significance);
   }
 

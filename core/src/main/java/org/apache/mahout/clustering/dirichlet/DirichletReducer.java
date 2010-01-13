@@ -25,38 +25,39 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
 import java.util.Iterator;
 
 public class DirichletReducer extends MapReduceBase implements
-    Reducer<Text, Vector, Text, DirichletCluster<Vector>> {
+    Reducer<Text, VectorWritable, Text, DirichletCluster<VectorWritable>> {
 
-  private DirichletState<Vector> state;
+  private DirichletState<VectorWritable> state;
 
-  private Model<Vector>[] newModels;
+  private Model<VectorWritable>[] newModels;
 
-  public Model<Vector>[] getNewModels() {
+  public Model<VectorWritable>[] getNewModels() {
     return newModels;
   }
 
   @Override
-  public void reduce(Text key, Iterator<Vector> values,
-                     OutputCollector<Text, DirichletCluster<Vector>> output, Reporter reporter)
+  public void reduce(Text key, Iterator<VectorWritable> values,
+                     OutputCollector<Text, DirichletCluster<VectorWritable>> output, Reporter reporter)
       throws IOException {
     int k = Integer.parseInt(key.toString());
-    Model<Vector> model = newModels[k];
+    Model<VectorWritable> model = newModels[k];
     while (values.hasNext()) {
-      Vector v = values.next();
+      VectorWritable v = values.next();
       model.observe(v);
     }
     model.computeParameters();
-    DirichletCluster<Vector> cluster = state.getClusters().get(k);
+    DirichletCluster<VectorWritable> cluster = state.getClusters().get(k);
     cluster.setModel(model);
     output.collect(key, cluster);
   }
 
-  public void configure(DirichletState<Vector> state) {
+  public void configure(DirichletState<VectorWritable> state) {
     this.state = state;
     this.newModels = state.getModelFactory().sampleFromPosterior(state.getModels());
   }

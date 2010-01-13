@@ -27,6 +27,7 @@ import org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.VectorWritable;
 
 class DisplaySNDirichlet extends DisplayDirichlet {
   DisplaySNDirichlet() {
@@ -42,10 +43,10 @@ class DisplaySNDirichlet extends DisplayDirichlet {
 
     Vector dv = new DenseVector(2);
     int i = result.size() - 1;
-    for (Model<Vector>[] models : result) {
+    for (Model<VectorWritable>[] models : result) {
       g2.setStroke(new BasicStroke(i == 0 ? 3 : 1));
       g2.setColor(colors[Math.min(colors.length - 1, i--)]);
-      for (Model<Vector> m : models) {
+      for (Model<VectorWritable> m : models) {
         NormalModel mm = (NormalModel) m;
         dv.assign(mm.getStdDev() * 3);
         if (isSignificant(mm))

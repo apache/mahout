@@ -114,7 +114,7 @@ public final class CanopyClusteringJob {
       double t1 = Double.parseDouble(cmdLine.getValue(t1Opt).toString());
       double t2 = Double.parseDouble(cmdLine.getValue(t2Opt).toString());
 
-      runJob(input, output, measureClass, t1, t2, vectorClass);
+      runJob(input, output, measureClass, t1, t2);
 
     } catch (OptionException e) {
       log.error("Exception", e);
@@ -132,9 +132,9 @@ public final class CanopyClusteringJob {
    * @param t2               the T2 distance threshold
    */
   public static void runJob(String input, String output,
-                            String measureClassName, double t1, double t2, Class<? extends Vector> vectorClass) throws IOException {
-    CanopyDriver.runJob(input, output + DEFAULT_CANOPIES_OUTPUT_DIRECTORY, measureClassName, t1, t2, vectorClass);
-    ClusterDriver.runJob(input, output + DEFAULT_CANOPIES_OUTPUT_DIRECTORY, output, measureClassName, t1, t2, vectorClass);
+                            String measureClassName, double t1, double t2) throws IOException {
+    CanopyDriver.runJob(input, output + DEFAULT_CANOPIES_OUTPUT_DIRECTORY, measureClassName, t1, t2);
+    ClusterDriver.runJob(input, output + DEFAULT_CANOPIES_OUTPUT_DIRECTORY, output, measureClassName, t1, t2);
   }
 
 }

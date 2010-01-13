@@ -17,15 +17,15 @@
 
 package org.apache.mahout.clustering.dirichlet.models;
 
-import org.apache.mahout.math.AbstractVector;
 import org.apache.mahout.math.SquareRootFunction;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class AsymmetricSampledNormalModel implements Model<Vector> {
+public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
 
   private static final double sqrt2pi = Math.sqrt(2.0 * Math.PI);
 
@@ -72,7 +72,8 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
   }
 
   @Override
-  public void observe(Vector x) {
+  public void observe(VectorWritable v) {
+    Vector x = v.get();
     s0++;
     if (s1 == null) {
       s1 = x.clone();
@@ -118,7 +119,8 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
   }
 
   @Override
-  public double pdf(Vector x) {
+  public double pdf(VectorWritable v) {
+    Vector x = v.get();
     // return the product of the two component pdfs
     if (x.getNumNondefaultElements() != 2) {
       throw new IllegalArgumentException();
@@ -156,19 +158,19 @@ public class AsymmetricSampledNormalModel implements Model<Vector> {
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    this.mean = AbstractVector.readVector(in);
-    this.stdDev = AbstractVector.readVector(in);
+    this.mean = VectorWritable.readVector(in);
+    this.stdDev = VectorWritable.readVector(in);
     this.s0 = in.readInt();
-    this.s1 = AbstractVector.readVector(in);
-    this.s2 = AbstractVector.readVector(in);
+    this.s1 = VectorWritable.readVector(in);
+    this.s2 = VectorWritable.readVector(in);
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
-    AbstractVector.writeVector(out, mean);
-    AbstractVector.writeVector(out, stdDev);
+    VectorWritable.writeVector(out, mean);
+    VectorWritable.writeVector(out, stdDev);
     out.writeInt(s0);
-    AbstractVector.writeVector(out, s1);
-    AbstractVector.writeVector(out, s2);
+    VectorWritable.writeVector(out, s1);
+    VectorWritable.writeVector(out, s2);
   }
 }

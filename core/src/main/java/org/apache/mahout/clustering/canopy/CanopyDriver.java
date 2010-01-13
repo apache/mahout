@@ -39,6 +39,7 @@ import org.apache.mahout.math.SparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
+import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,7 +111,7 @@ public final class CanopyDriver {
       double t1 = Double.parseDouble(cmdLine.getValue(t1Opt).toString());
       double t2 = Double.parseDouble(cmdLine.getValue(t2Opt).toString());
 
-      runJob(input, output, measureClass, t1, t2, vectorClass);
+      runJob(input, output, measureClass, t1, t2);
     } catch (OptionException e) {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);
@@ -126,14 +127,11 @@ public final class CanopyDriver {
    * @param measureClassName the DistanceMeasure class name
    * @param t1               the T1 distance threshold
    * @param t2               the T2 distance threshold
-   * @param vectorClass      the {@link Class} of Vector to use for the Map Output Key.  Must be a concrete type
-   * @see org.apache.mahout.math.SparseVector
-   * @see org.apache.mahout.math.DenseVector
    */
   public static void runJob(String input, String output,
-                            String measureClassName, double t1, double t2, Class<? extends Vector> vectorClass) throws IOException {
+                            String measureClassName, double t1, double t2) throws IOException {
     log.info("Input: " + input + " Out: " + output + " Measure: " + measureClassName + " t1: " + t1
-        + " t2: " + t2 + " Vector Class: " + vectorClass.getSimpleName());
+        + " t2: " + t2);
     Configurable client = new JobClient();
     JobConf conf = new JobConf(CanopyDriver.class);
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measureClassName);
@@ -143,7 +141,7 @@ public final class CanopyDriver {
     conf.setInputFormat(SequenceFileInputFormat.class);
 
     conf.setMapOutputKeyClass(Text.class);
-    conf.setMapOutputValueClass(vectorClass);
+    conf.setMapOutputValueClass(VectorWritable.class);
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(Canopy.class);
 

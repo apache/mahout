@@ -30,6 +30,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.VectorWritable;
 
 class DisplayCanopy extends DisplayDirichlet {
   DisplayCanopy() {
@@ -73,7 +74,7 @@ class DisplayCanopy extends DisplayDirichlet {
    * @return the List<Canopy> created
    */
   static List<Canopy> populateCanopies(DistanceMeasure measure,
-      List<Vector> points, double t1, double t2) {
+      List<VectorWritable> points, double t1, double t2) {
     List<Canopy> canopies = new ArrayList<Canopy>();
     /**
      * Reference Implementation: Given a distance metric, one can create
@@ -87,13 +88,13 @@ class DisplayCanopy extends DisplayDirichlet {
      */
     int nextCanopyId = 0;
     while (!points.isEmpty()) {
-      Iterator<Vector> ptIter = points.iterator();
-      Vector p1 = ptIter.next();
+      Iterator<VectorWritable> ptIter = points.iterator();
+      Vector p1 = ptIter.next().get();
       ptIter.remove();
       Canopy canopy = new Canopy(p1, nextCanopyId++);
       canopies.add(canopy);
       while (ptIter.hasNext()) {
-        Vector p2 = ptIter.next();
+        Vector p2 = ptIter.next().get();
         double dist = measure.distance(p1, p2);
         // Put all points that are within distance threshold T1 into the canopy
         if (dist < t1)
@@ -109,7 +110,7 @@ class DisplayCanopy extends DisplayDirichlet {
   public static void main(String[] args) {
     RandomUtils.useTestSeed();
     generateSamples();
-    List<Vector> points = new ArrayList<Vector>();
+    List<VectorWritable> points = new ArrayList<VectorWritable>();
     points.addAll(sampleData);
     canopies = populateCanopies(new ManhattanDistanceMeasure(), points, t1, t2);
     new DisplayCanopy();

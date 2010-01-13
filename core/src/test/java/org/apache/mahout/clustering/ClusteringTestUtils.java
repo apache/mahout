@@ -24,6 +24,7 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.math.SparseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,13 +34,12 @@ public class ClusteringTestUtils {
   private ClusteringTestUtils() {
   }
 
-  public static void writePointsToFile(List<Vector> points, String fileName, FileSystem fs, Configuration conf)
+  public static void writePointsToFile(List<VectorWritable> points, String fileName, FileSystem fs, Configuration conf)
       throws IOException {
     Path path = new Path(fileName);
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, LongWritable.class, SparseVector.class);
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, LongWritable.class, VectorWritable.class);
     long recNum = 0;
-    for (Vector point : points) {
-      //point.write(dataOut);
+    for (VectorWritable point : points) {
       writer.append(new LongWritable(recNum++), point);
     }
     writer.close();

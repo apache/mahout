@@ -100,7 +100,7 @@ public class Job {
       String className = cmdLine.getValue(vectorClassOpt, "org.apache.mahout.math.SparseVector").toString();
       Class<? extends Vector> vectorClass = Class.forName(className).asSubclass(Vector.class);
 
-      runJob(input, output, measureClass, t1, t2, convergenceDelta, maxIterations, vectorClass);
+      runJob(input, output, measureClass, t1, t2, convergenceDelta, maxIterations);
     } catch (OptionException e) {
       LOG.error("Exception", e);
       CommandLineUtil.printHelp(group);
@@ -127,8 +127,7 @@ public class Job {
    * @param maxIterations the int maximum number of iterations
    */
   private static void runJob(String input, String output, String measureClass,
-      double t1, double t2, double convergenceDelta, int maxIterations,
-      Class<? extends Vector> vectorClass) throws IOException {
+      double t1, double t2, double convergenceDelta, int maxIterations) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(Job.class);
 
@@ -140,14 +139,14 @@ public class Job {
     final String directoryContainingConvertedInput = output
         + DIRECTORY_CONTAINING_CONVERTED_INPUT;
     System.out.println("Preparing Input");
-    InputDriver.runJob(input, directoryContainingConvertedInput, vectorClass);
+    InputDriver.runJob(input, directoryContainingConvertedInput);
     System.out.println("Running Canopy to get initial clusters");
     CanopyDriver.runJob(directoryContainingConvertedInput, output
         + CanopyClusteringJob.DEFAULT_CANOPIES_OUTPUT_DIRECTORY, measureClass,
-        t1, t2, vectorClass);
+        t1, t2);
     System.out.println("Running KMeans");
     KMeansDriver.runJob(directoryContainingConvertedInput, output
         + CanopyClusteringJob.DEFAULT_CANOPIES_OUTPUT_DIRECTORY, output,
-        measureClass, convergenceDelta, maxIterations, 1, vectorClass);
+        measureClass, convergenceDelta, maxIterations, 1);
   }
 }

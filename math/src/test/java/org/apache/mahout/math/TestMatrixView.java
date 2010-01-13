@@ -18,22 +18,6 @@
 package org.apache.mahout.math;
 
 import junit.framework.TestCase;
-import org.apache.hadoop.io.DataOutputBuffer;
-import org.apache.mahout.math.AbstractMatrix;
-import org.apache.mahout.math.CardinalityException;
-import org.apache.mahout.math.DenseMatrix;
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.IndexException;
-import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.MatrixView;
-import org.apache.mahout.math.NegateFunction;
-import org.apache.mahout.math.PlusFunction;
-import org.apache.mahout.math.UnboundLabelException;
-import org.apache.mahout.math.Vector;
-
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -520,20 +504,6 @@ public class TestMatrixView extends TestCase {
     } catch (IndexException e) {
       assertTrue(true);
     }
-  }
-
-  public void testMatrixWritable() throws IOException {
-    DataOutputBuffer out = new DataOutputBuffer();
-    test.write(out);
-    out.close();
-
-    DataInputStream in = new DataInputStream(new ByteArrayInputStream(out
-        .getData()));
-    Matrix m2 = test.clone();
-    m2.readFields(in);
-    in.close();
-    assertEquals("row size", test.size()[ROW], m2.size()[ROW]);
-    assertEquals("col size", test.size()[COL], m2.size()[COL]);
   }
 
   public void testLabelBindings() {
