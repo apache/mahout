@@ -88,7 +88,6 @@ public class PartialVectorGenerator extends MapReduceBase implements
         vector.setQuick(dictionary.get(tk).intValue(), pair.getValue()
             .doubleValue());
       }
-      assert (vector.getNumNondefaultElements() == termFrequency.size());
       
       output.collect(key, vector);
     }
