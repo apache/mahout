@@ -26,13 +26,17 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
-import org.apache.mahout.math.*;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.math.AbstractVector;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -138,7 +142,7 @@ public class TestKmeansClustering extends TestCase {
     List<VectorWritable> points = new ArrayList<VectorWritable>();
     for (int i = 0; i < raw.length; i++) {
       double[] fr = raw[i];
-      Vector vec = new SparseVector(String.valueOf(i), fr.length);
+      Vector vec = new RandomAccessSparseVector(String.valueOf(i), fr.length);
       vec.assign(fr);
       points.add(new VectorWritable(vec));
     }

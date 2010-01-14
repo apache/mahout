@@ -24,45 +24,53 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Iterator;
 
-public class DenseVectorWritable extends DenseVector implements Writable {
 
-  public DenseVectorWritable() {
-    
+public class SequentialAccessSparseVectorWritable extends SequentialAccessSparseVector implements Writable {
+
+  public SequentialAccessSparseVectorWritable(SequentialAccessSparseVector vector) {
+    super(vector);
   }
 
-  public DenseVectorWritable(DenseVector v) {
-    setName(v.getName());
-    values = v.values;
-    lengthSquared = v.lengthSquared;
+  public SequentialAccessSparseVectorWritable() {
+    
   }
 
   @Override
   public void write(DataOutput dataOutput) throws IOException {
     dataOutput.writeUTF(getClass().getName());
-    dataOutput.writeUTF(this.getName() == null ? "" : this.getName());
+    dataOutput.writeUTF(getName() == null ? "" : getName());
     dataOutput.writeInt(size());
-    dataOutput.writeDouble(lengthSquared);
-    Iterator<Vector.Element> iter = iterateAll();
+    int nde = getNumNondefaultElements();
+    dataOutput.writeInt(nde);
+    Iterator<Element> iter = iterateNonZero();
+    int count = 0;
     while (iter.hasNext()) {
       Vector.Element element = iter.next();
+      dataOutput.writeInt(element.index());
       dataOutput.writeDouble(element.get());
+      count++;
     }
+    assert (nde == count);
   }
 
   @Override
   public void readFields(DataInput dataInput) throws IOException {
     final String className = dataInput.readUTF();
     if(className.equals(getClass().getName())) {
-      this.setName(dataInput.readUTF());
+      setName(dataInput.readUTF());
     } else {
       setName(className); // we have already read the class name in VectorWritable
     }
-    double[] values = new double[dataInput.readInt()];
-    lengthSquared = dataInput.readDouble();
-    for (int i = 0; i < values.length; i++) {
-      values[i] = dataInput.readDouble();
+    int cardinality = dataInput.readInt();
+    int size = dataInput.readInt();
+    OrderedIntDoubleMapping values = new OrderedIntDoubleMapping(size);
+    int i = 0;
+    for (; i < size; i++) {
+      values.set(dataInput.readInt(), dataInput.readDouble());
     }
+    assert (i == size);
     this.values = values;
   }
-  
+
+
 }

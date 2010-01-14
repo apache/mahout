@@ -33,7 +33,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.utils.vectors.TF;
 import org.apache.mahout.utils.vectors.TFIDF;
@@ -223,7 +223,7 @@ public class Driver {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
     //TODO: Make this parameter driven
-    SequenceFile.Writer seqWriter = SequenceFile.createWriter(fs, conf, path, LongWritable.class, SparseVector.class);
+    SequenceFile.Writer seqWriter = SequenceFile.createWriter(fs, conf, path, LongWritable.class, RandomAccessSparseVector.class);
 
     return new SequenceFileVectorWriter(seqWriter);
   }

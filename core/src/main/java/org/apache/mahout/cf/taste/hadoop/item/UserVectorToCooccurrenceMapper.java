@@ -23,26 +23,26 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.math.SparseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
 import java.util.Iterator;
 
 public final class UserVectorToCooccurrenceMapper
     extends MapReduceBase
-    implements Mapper<LongWritable, SparseVector, IntWritable, IntWritable> {
+    implements Mapper<LongWritable, VectorWritable, IntWritable, IntWritable> {
 
   @Override
   public void map(LongWritable userID,
-                  SparseVector userVector,
+                  VectorWritable userVector,
                   OutputCollector<IntWritable, IntWritable> output,
                   Reporter reporter) throws IOException {
-    Iterator<Vector.Element> it = userVector.iterateNonZero();
+    Iterator<Vector.Element> it = userVector.get().iterateNonZero();
     while (it.hasNext()) {
       Vector.Element next1 = it.next();
       int index1 = next1.index();
-      Iterator<Vector.Element> it2 = userVector.iterateNonZero();
+      Iterator<Vector.Element> it2 = userVector.get().iterateNonZero();
       IntWritable itemWritable1 = new IntWritable(index1);
       while (it2.hasNext()) {
         Vector.Element next2 = it2.next();

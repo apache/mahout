@@ -37,7 +37,7 @@ import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.common.FileLineIterable;
-import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -101,7 +101,7 @@ public final class RecommenderMapper
     }
     Vector userVector = vectorWritable.get();
     Iterator<Vector.Element> userVectorIterator = userVector.iterateNonZero();
-    Vector recommendationVector = new SparseVector(Integer.MAX_VALUE, 1000);
+    Vector recommendationVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 1000);
     while (userVectorIterator.hasNext()) {
       Vector.Element element = userVectorIterator.next();
       int index = element.index();
@@ -159,7 +159,7 @@ public final class RecommenderMapper
     private CooccurrenceCache(MapFilesMap<IntWritable,VectorWritable> map) {
       this.map = map;
       columnVector = new VectorWritable();
-      columnVector.set(new SparseVector(Integer.MAX_VALUE, 1000));
+      columnVector.set(new RandomAccessSparseVector(Integer.MAX_VALUE, 1000));
     }
 
     @Override
@@ -173,7 +173,8 @@ public final class RecommenderMapper
       if (value == null) {
         return null;
       }
-      columnVector.set(new SparseVector(Integer.MAX_VALUE, 1000));
+      columnVector = new VectorWritable();
+      columnVector.set(new RandomAccessSparseVector(Integer.MAX_VALUE, 1000));
       return value;
     }
 

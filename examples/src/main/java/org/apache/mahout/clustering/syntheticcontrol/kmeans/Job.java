@@ -74,7 +74,7 @@ public class Job {
         "The t2 value to use.").withShortName("m").create();
     Option vectorClassOpt = obuilder.withLongName("vectorClass").withRequired(false).withArgument(
         abuilder.withName("vectorClass").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The Vector implementation class name.  Default is SparseVector.class").withShortName("v").create();
+        "The Vector implementation class name.  Default is RandomAccessSparseVector.class").withShortName("v").create();
 
     Option helpOpt = DefaultOptionCreator.helpOption();
 
@@ -97,7 +97,7 @@ public class Job {
       double t2 = Double.parseDouble(cmdLine.getValue(t2Opt, "55").toString());
       double convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt, "0.5").toString());
       int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterationsOpt, 10).toString());
-      String className = cmdLine.getValue(vectorClassOpt, "org.apache.mahout.math.SparseVector").toString();
+      String className = cmdLine.getValue(vectorClassOpt, "org.apache.mahout.math.RandomAccessSparseVector").toString();
       Class<? extends Vector> vectorClass = Class.forName(className).asSubclass(Vector.class);
 
       runJob(input, output, measureClass, t1, t2, convergenceDelta, maxIterations);
@@ -139,7 +139,7 @@ public class Job {
     final String directoryContainingConvertedInput = output
         + DIRECTORY_CONTAINING_CONVERTED_INPUT;
     System.out.println("Preparing Input");
-    InputDriver.runJob(input, directoryContainingConvertedInput);
+    InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     System.out.println("Running Canopy to get initial clusters");
     CanopyDriver.runJob(directoryContainingConvertedInput, output
         + CanopyClusteringJob.DEFAULT_CANOPIES_OUTPUT_DIRECTORY, measureClass,

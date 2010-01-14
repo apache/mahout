@@ -75,21 +75,22 @@ public class InputDriver {
 
       String input = cmdLine.getValue(inputOpt, "testdata").toString();
       String output = cmdLine.getValue(outputOpt, "output").toString();
-      String vectorClassName = cmdLine.getValue(vectorOpt, "org.apache.mahout.math.SparseVector").toString();
-      runJob(input, output);
+      String vectorClassName = cmdLine.getValue(vectorOpt, "org.apache.mahout.math.RandomAccessSparseVector").toString();
+      runJob(input, output, vectorClassName);
     } catch (OptionException e) {
       LOG.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
     }
   }
 
-  public static void runJob(String input, String output) throws IOException {
+  public static void runJob(String input, String output, String vectorClassName) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(InputDriver.class);
 
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(VectorWritable.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
+    conf.set("vector.implementation.class.name", vectorClassName);
     FileInputFormat.setInputPaths(conf, new Path(input));
     FileOutputFormat.setOutputPath(conf, new Path(output));
 

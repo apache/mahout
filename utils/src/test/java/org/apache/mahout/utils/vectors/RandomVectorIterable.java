@@ -17,11 +17,11 @@
 
 package org.apache.mahout.utils.vectors;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.UnaryFunction;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.common.RandomUtils;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -64,7 +64,7 @@ public class RandomVectorIterable implements Iterable<Vector>{
       if (!hasNext()) {
         throw new NoSuchElementException();
       }
-      Vector result = type == VectorType.SPARSE ? new SparseVector(numItems) : new DenseVector(numItems);
+      Vector result = type == VectorType.SPARSE ? new RandomAccessSparseVector(numItems) : new DenseVector(numItems);
       result.assign(new UnaryFunction(){
         @Override
         public double apply(double arg1) {

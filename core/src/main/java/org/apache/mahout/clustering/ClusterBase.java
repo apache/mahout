@@ -18,7 +18,7 @@
 package org.apache.mahout.clustering;
 
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 
 import java.io.DataInput;
@@ -31,7 +31,7 @@ public abstract class ClusterBase implements Writable {
   private int id;
 
   // the current cluster center
-  private Vector center = new SparseVector(0);
+  private Vector center = new RandomAccessSparseVector(0);
 
   // the number of points in the cluster
   private int numPoints = 0;

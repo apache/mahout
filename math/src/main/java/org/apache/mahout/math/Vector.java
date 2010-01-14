@@ -130,13 +130,6 @@ public interface Vector extends Cloneable {
   Iterator<Element> iterateNonZero();
 
   /**
-   * Iterate over all non-zero elements. The elements are ordered in ascending order of the index.
-   *
-   * @return A sorted {@link Iterator} over all non-zeroElements.
-   */
-  Iterator<Element> iterateNonZero(boolean sorted);
-
-  /**
    * Return the value at the index defined by the label
    *
    * @param label a String label that maps to an index

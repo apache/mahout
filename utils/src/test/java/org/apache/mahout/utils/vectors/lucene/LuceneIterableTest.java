@@ -25,10 +25,10 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.util.Version;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.utils.vectors.Weight;
 import org.apache.mahout.utils.vectors.TFIDF;
 import org.apache.mahout.utils.vectors.TermInfo;
-import org.apache.mahout.math.SparseVector;
 import org.apache.mahout.math.Vector;
 
 public class LuceneIterableTest extends TestCase {
@@ -70,7 +70,7 @@ public class LuceneIterableTest extends TestCase {
     //TODO: do something more meaningful here
     for (Vector vector : iterable) {
       assertNotNull(vector);
-      assertTrue("vector is not an instanceof " + SparseVector.class, vector instanceof SparseVector);
+      assertTrue("vector is not an instanceof " + RandomAccessSparseVector.class, vector instanceof RandomAccessSparseVector);
       assertTrue("vector Size: " + vector.size() + " is not greater than: " + 0, vector.size() > 0);
     }
   }

@@ -40,7 +40,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
-import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
@@ -100,7 +100,7 @@ public class FuzzyKMeansDriver {
 
     Option vectorClassOpt = obuilder.withLongName("vectorClass").withRequired(false).withArgument(
         abuilder.withName("vectorClass").withMinimum(1).withMaximum(1).create()).
-        withDescription("The Vector implementation class name.  Default is SparseVector.class").withShortName("v").create();
+        withDescription("The Vector implementation class name.  Default is RandomAccessSparseVector.class").withShortName("v").create();
 
     Option helpOpt = obuilder.withLongName("help").
         withDescription("Print out help").withShortName("h").create();
@@ -151,7 +151,7 @@ public class FuzzyKMeansDriver {
       float m = Float.parseFloat(cmdLine.getValue(mOpt).toString());
 
       Class<? extends Vector> vectorClass = cmdLine.hasOption(vectorClassOpt) == false ?
-          SparseVector.class
+          RandomAccessSparseVector.class
           : (Class<? extends Vector>) Class.forName(cmdLine.getValue(vectorClassOpt).toString());
 
 

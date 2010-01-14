@@ -33,9 +33,13 @@ import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution;
 import org.apache.mahout.clustering.dirichlet.models.SampledNormalModel;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
-import org.apache.mahout.math.*;
 import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.JsonVectorAdapter;
+import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,7 +76,7 @@ public class TestMapReduce extends TestCase {
   }
 
   private void addSample(double[] values) {
-    Vector v = new SparseVector(2);
+    Vector v = new RandomAccessSparseVector(2);
     for (int j = 0; j < values.length; j++) {
       v.setQuick(j, values[j]);
     }

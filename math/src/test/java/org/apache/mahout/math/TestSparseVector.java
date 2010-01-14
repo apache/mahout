@@ -23,22 +23,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.mahout.math.AbstractVector;
-import org.apache.mahout.math.CardinalityException;
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.IndexException;
-import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.NegateFunction;
-import org.apache.mahout.math.PlusFunction;
-import org.apache.mahout.math.SparseVector;
-import org.apache.mahout.math.TimesFunction;
-import org.apache.mahout.math.Vector;
 
 public class TestSparseVector extends TestCase {
 
   final double[] values = {1.1, 2.2, 3.3};
   final double[] gold = {0, 1.1, 2.2, 3.3, 0};
-  final Vector test = new SparseVector(values.length + 2);
+  final Vector test = new RandomAccessSparseVector(values.length + 2);
 
   public TestSparseVector(String name) {
     super(name);
@@ -70,7 +60,7 @@ public class TestSparseVector extends TestCase {
     checkIterator(iterator, gold);
 
     double[] doubles = {0.0, 5.0, 0, 3.0};
-    SparseVector zeros = new SparseVector(doubles.length);
+    RandomAccessSparseVector zeros = new RandomAccessSparseVector(doubles.length);
     for (int i = 0; i < doubles.length; i++) {
       zeros.setQuick(i, doubles[i]);
     }
@@ -80,7 +70,7 @@ public class TestSparseVector extends TestCase {
     checkIterator(iterator, doubles);
 
     doubles = new double[]{0.0, 0.0, 0, 0.0};
-    zeros = new SparseVector(doubles.length);
+    zeros = new RandomAccessSparseVector(doubles.length);
     for (int i = 0; i < doubles.length; i++) {
       zeros.setQuick(i, doubles[i]);
     }
@@ -200,7 +190,7 @@ public class TestSparseVector extends TestCase {
   }
 
   public void testSparseDoubleVectorInt() throws Exception {
-    Vector val = new SparseVector(4);
+    Vector val = new RandomAccessSparseVector(4);
     assertEquals("size", 4, val.size());
     for (int i = 0; i < 4; i++) {
       assertEquals("get [" + i + ']', 0.0, val.get(i));
@@ -423,13 +413,13 @@ public class TestSparseVector extends TestCase {
 
   public void testLike() {
     Vector other = test.like();
-    assertTrue("not like", other instanceof SparseVector);
+    assertTrue("not like", other instanceof RandomAccessSparseVector);
     assertEquals("size", test.size(), other.size());
   }
 
   public void testLikeN() {
     Vector other = test.like(8);
-    assertTrue("not like", other instanceof SparseVector);
+    assertTrue("not like", other instanceof RandomAccessSparseVector);
     assertEquals("size", 8, other.size());
   }
 

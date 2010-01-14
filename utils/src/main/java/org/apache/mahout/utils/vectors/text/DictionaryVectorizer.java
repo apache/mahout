@@ -43,7 +43,6 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.mahout.math.SparseVector;
 import org.apache.mahout.math.VectorWritable;
 
 /**
@@ -96,13 +95,13 @@ public final class DictionaryVectorizer {
    * @param input
    *          input directory of the documents in {@link SequenceFile} format
    * @param output
-   *          output directory where {@link SparseVector}'s of the document are
+   *          output directory where {@link org.apache.mahout.math.RandomAccessSparseVector}'s of the document are
    *          generated
    * @param analyzer
    *          the Lucene {@link Analyzer} used to tokenize the UTF-8
    * @param minSupport
    *          the minimum frequency of the feature in the entire corpus to be
-   *          considered for inclusion in the SparseVector
+   *          considered for inclusion in the sparse vector
    * @param chunkSizeInMegabytes
    *          the size in MB of the feature => id chunk to be kept in memory at
    *          each node during Map/Reduce stage. Its recommended you calculated
@@ -238,8 +237,8 @@ public final class DictionaryVectorizer {
   }
   
   /**
-   * Merge all the partial {@link SparseVector}s into the complete Document
-   * {@link SparseVector}
+   * Merge all the partial {@link org.apache.mahout.math.RandomAccessSparseVector}s into the complete Document
+   * {@link org.apache.mahout.math.RandomAccessSparseVector}
    * 
    * @param partialVectorPaths
    *          input directory of the documents in {@link SequenceFile} format

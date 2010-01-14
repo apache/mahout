@@ -33,7 +33,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.ClusteringTestUtils;
-import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -48,7 +48,7 @@ public class TestRandomSeedGenerator extends TestCase {
     List<VectorWritable> points = new ArrayList<VectorWritable>();
     int i = 0;
     for (double[] fr : raw) {
-      Vector vec = new SparseVector(String.valueOf(i++), fr.length);
+      Vector vec = new RandomAccessSparseVector(String.valueOf(i++), fr.length);
       vec.assign(fr);
       points.add(new VectorWritable(vec));
     }
@@ -90,6 +90,7 @@ public class TestRandomSeedGenerator extends TestCase {
     }
     
     JobConf job = new JobConf(RandomSeedGenerator.class);
+    job.setMapOutputValueClass(VectorWritable.class);
     ClusteringTestUtils.writePointsToFile(points, "testdata/random-input", fs, job);
     
     RandomSeedGenerator.buildRandom("testdata/random-input", "testdata/random-output", 4);

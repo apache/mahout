@@ -19,25 +19,17 @@ package org.apache.mahout.utils.vectors.text;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Random;
 
 import junit.framework.TestCase;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.mutable.MutableInt;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.SimpleAnalyzer;
-import org.apache.lucene.analysis.Token;
-import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.mahout.math.SparseVector;
 
 /**
  * Test the dictionary Vector
@@ -141,111 +133,4 @@ public class DictionaryVectorizerTest extends TestCase {
     
     
   }
-
-  public void testPerf() throws Exception {
-    Analyzer analyzer = new SimpleAnalyzer();
-    String key = "key";
-    String value = "";
-    for(String doc : DOCS) value += doc + " ";
-    Map<String, Integer> dictionary = new HashMap<String,Integer>();
-
-    TokenStream ts = analyzer.tokenStream(key.toString(), new StringReader(value.toString()));
-
-    Token token = new Token();
-    int count = 0;
-    while ((token = ts.next(token)) != null) {
-      String tk = new String(token.termBuffer(), 0, token.termLength());
-      if(dictionary.containsKey(tk)) continue;
-      dictionary.put(tk, count++);
-    }
-
-
-    long vectorOnlyTotal = 0;
-    long total = 0;
-
-    Random rand = new Random(12345);
-    String[] docs = generateRandomText(1000);
-
-    for(int i=0; i<21000; i++) {
-
-      long time = System.nanoTime();
-
-      value = docs[rand.nextInt(docs.length)];
-      ts = analyzer.tokenStream(key.toString(), new StringReader(value.toString()));
-
-      SparseVector vector;
-      Map<String,MutableInt> termFrequency = new HashMap<String,MutableInt>();
-
-      token = new Token();
-      ts.reset();
-      while ((token = ts.next(token)) != null) {
-        String tk = new String(token.termBuffer(), 0, token.termLength());
-        if(dictionary.containsKey(tk) == false) continue;
-        if (termFrequency.containsKey(tk) == false) {
-          count += tk.length() + 1;
-          termFrequency.put(tk, new MutableInt(0));
-        }
-        termFrequency.get(tk).increment();
-      }
-
-      vector =
-          new SparseVector(key.toString(), Integer.MAX_VALUE, termFrequency.size());
-
-      for (Map.Entry<String,MutableInt> pair : termFrequency.entrySet()) {
-        String tk = pair.getKey();
-        if (dictionary.containsKey(tk) == false) continue;
-        vector.setQuick(dictionary.get(tk).intValue(), pair.getValue()
-            .doubleValue());
-      }
-      total += (i<1000?0:1)*(System.nanoTime() - time);
-
-      time = System.nanoTime();
-
-
-      value = docs[rand.nextInt(docs.length)];
-      ts = analyzer.tokenStream(key.toString(), new StringReader(value.toString()));
-      
-      vector =
-          new SparseVector(key.toString(), Integer.MAX_VALUE, 10);
-
-      token = new Token();
-      ts.reset();
-      while ((token = ts.next(token)) != null) {
-        String tk = new String(token.termBuffer(), 0, token.termLength());
-        if(dictionary.containsKey(tk) == false) continue;
-        int tokenKey = dictionary.get(tk);
-        vector.setQuick(tokenKey, vector.getQuick(tokenKey) + 1);
-      }
-      vectorOnlyTotal += (i<1000?0:1)*(System.nanoTime() - time);
-
-
-    }
-
-    System.out.println("With map: " + (total / 1e6) + "ms/KVect, with vector only: " + (vectorOnlyTotal/1e6) + "ms/KVect");
-
-  }
-  private static final String [] DOCS = {
-        "The quick red fox jumped over the lazy brown dogs.",
-        "Mary had a little lamb whose fleece was white as snow.",
-        "Moby Dick is a story of a whale and a man obsessed.",
-        "The robber wore a black fleece jacket and a baseball cap.",
-        "The English Springer Spaniel is the best of all dogs."
-    };
-
-  public static String[] generateRandomText(int docs) throws Exception {
-    String[] s = new String[docs];
-    Random r = new Random(1234);
-    for(int i=0; i<s.length; i++) {
-      String str = DOCS[i % DOCS.length];
-      String[] tokens = str.split(" ");
-      String[] other = DOCS[r.nextInt(DOCS.length)].split(" ");
-      List<String> l = new ArrayList<String>();
-      for(String t : tokens) {
-        l.add(r.nextBoolean() ? t : other[r.nextInt(other.length)]);
-      }
-      s[i] = StringUtils.join(l.toArray(new String[l.size()]), " ");
-    }
-    return s;
-  }
-  
 }

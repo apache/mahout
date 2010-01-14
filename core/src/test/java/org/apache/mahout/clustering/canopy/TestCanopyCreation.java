@@ -27,7 +27,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.mahout.clustering.ClusteringTestUtils;
-import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.DummyOutputCollector;
@@ -69,7 +69,7 @@ public class TestCanopyCreation extends TestCase {
     List<VectorWritable> points = new ArrayList<VectorWritable>();
     int i = 0;
     for (double[] fr : raw) {
-      Vector vec = new SparseVector(String.valueOf(i++), fr.length);
+      Vector vec = new RandomAccessSparseVector(String.valueOf(i++), fr.length);
       vec.assign(fr);
       points.add(new VectorWritable(vec));
     }
@@ -400,6 +400,7 @@ public class TestCanopyCreation extends TestCase {
       testData.mkdir();
     }
     JobConf job = new JobConf(CanopyDriver.class);
+    job.setMapOutputValueClass(points.get(0).getClass());
     ClusteringTestUtils.writePointsToFile(points, "testdata/file1", fs, job);
     ClusteringTestUtils.writePointsToFile(points, "testdata/file2", fs, job);
     // now run the Canopy Driver
@@ -626,7 +627,8 @@ public class TestCanopyCreation extends TestCase {
     if (!testData.exists()) {
       testData.mkdir();
     }
-    Configuration conf = new Configuration();
+    JobConf conf = new JobConf();
+    conf.setMapOutputValueClass(points.get(0).getClass());
     ClusteringTestUtils.writePointsToFile(points, "testdata/file1", fs, conf);
     ClusteringTestUtils.writePointsToFile(points, "testdata/file2", fs, conf);
     // now run the Job

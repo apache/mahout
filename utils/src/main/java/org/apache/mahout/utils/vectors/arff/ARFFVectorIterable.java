@@ -18,7 +18,7 @@
 package org.apache.mahout.utils.vectors.arff;
 
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.IOUtils;
 
@@ -187,7 +187,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
       if (line.startsWith(ARFFModel.ARFF_SPARSE)) {
         line = line.substring(1, line.length() - 1);
         String[] splits = COMMA_PATTERN.split(line);
-        result = new SparseVector(model.getLabelSize());
+        result = new RandomAccessSparseVector(model.getLabelSize());
         for (String split : splits) {
           String[] data = SPACE_PATTERN.split(split); // first is index, second is
           int idx = Integer.parseInt(data[0]);

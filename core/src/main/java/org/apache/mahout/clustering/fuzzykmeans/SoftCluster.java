@@ -18,7 +18,11 @@
 package org.apache.mahout.clustering.fuzzykmeans;
 
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.math.*;
+import org.apache.mahout.math.AbstractVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.SquareRootFunction;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -30,7 +34,7 @@ public class SoftCluster implements Writable {
   private int clusterId;
 
   // the current center
-  private Vector center = new SparseVector(0);
+  private Vector center = new RandomAccessSparseVector(0);
 
   // the current centroid is lazy evaluated and may be null
   private Vector centroid = null;

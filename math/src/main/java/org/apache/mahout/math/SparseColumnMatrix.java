@@ -17,10 +17,6 @@
 
 package org.apache.mahout.math;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-
 /**
  * sparse matrix with general element values whose columns are accessible quickly. Implemented as a column array of
  * SparseVectors.
@@ -39,9 +35,9 @@ public class SparseColumnMatrix extends AbstractMatrix {
    * Construct a matrix of the given cardinality with the given data columns
    *
    * @param cardinality the int[2] cardinality
-   * @param columns     a SparseVector[] array of columns
+   * @param columns     a RandomAccessSparseVector[] array of columns
    */
-  public SparseColumnMatrix(int[] cardinality, SparseVector[] columns) {
+  public SparseColumnMatrix(int[] cardinality, RandomAccessSparseVector[] columns) {
     this.cardinality = cardinality.clone();
     this.columns = columns.clone();
     for (int col = 0; col < cardinality[COL]; col++) {
@@ -56,9 +52,9 @@ public class SparseColumnMatrix extends AbstractMatrix {
    */
   public SparseColumnMatrix(int[] cardinality) {
     this.cardinality = cardinality.clone();
-    this.columns = new SparseVector[cardinality[COL]];
+    this.columns = new RandomAccessSparseVector[cardinality[COL]];
     for (int col = 0; col < cardinality[COL]; col++) {
-      this.columns[col] = new SparseVector(cardinality[ROW]);
+      this.columns[col] = new RandomAccessSparseVector(cardinality[ROW]);
     }
   }
 
@@ -103,7 +99,7 @@ public class SparseColumnMatrix extends AbstractMatrix {
   @Override
   public void setQuick(int row, int column, double value) {
     if (columns[column] == null) {
-      columns[column] = new SparseVector(cardinality[ROW]);
+      columns[column] = new RandomAccessSparseVector(cardinality[ROW]);
     }
     columns[column].setQuick(row, value);
   }

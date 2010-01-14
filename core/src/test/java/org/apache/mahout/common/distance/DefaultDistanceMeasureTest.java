@@ -20,7 +20,7 @@ package org.apache.mahout.common.distance;
 import junit.framework.TestCase;
 
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 
 public abstract class DefaultDistanceMeasureTest extends TestCase {
@@ -42,22 +42,22 @@ public abstract class DefaultDistanceMeasureTest extends TestCase {
 
     vectors = new Vector[4];
     
-    vectors[0] = new SparseVector(5);
+    vectors[0] = new RandomAccessSparseVector(5);
     vectors[0].setQuick(0, 1);
     vectors[0].setQuick(3, 1);
     vectors[0].setQuick(4, 1);
 
-    vectors[1] = new SparseVector(5);
+    vectors[1] = new RandomAccessSparseVector(5);
     vectors[1].setQuick(0, 2);
     vectors[1].setQuick(3, 2);
     vectors[1].setQuick(4, 2);
 
-    vectors[2] = new SparseVector(5);
+    vectors[2] = new RandomAccessSparseVector(5);
     vectors[2].setQuick(0, 6);
     vectors[2].setQuick(3, 6);
     vectors[2].setQuick(4, 6);
     
-    vectors[3] = new SparseVector(5);
+    vectors[3] = new RandomAccessSparseVector(5);
 
     compare(distanceMeasure, vectors);
   }

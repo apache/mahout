@@ -62,7 +62,7 @@ public class Job {
           withDescription("The Distance Measure to use.  Default is SquaredEuclidean").withShortName("m").create();
       Option vectorClassOpt = obuilder.withLongName("vectorClass").withRequired(false).withArgument(
           abuilder.withName("vectorClass").withMinimum(1).withMaximum(1).create()).
-          withDescription("The Vector implementation class name.  Default is SparseVector.class").withShortName("v").create();
+          withDescription("The Vector implementation class name.  Default is RandomAccessSparseVector.class").withShortName("v").create();
 
       Option t1Opt = obuilder.withLongName("t1").withRequired(false).withArgument(
           abuilder.withName("t1").withMinimum(1).withMaximum(1).create()).
@@ -96,7 +96,7 @@ public class Job {
         String measureClass = cmdLine.getValue(
             measureClassOpt, "org.apache.mahout.common.distance.EuclideanDistanceMeasure").toString();
 
-        String className =  cmdLine.getValue(vectorClassOpt, "org.apache.mahout.math.SparseVector").toString();
+        String className =  cmdLine.getValue(vectorClassOpt, "org.apache.mahout.math.RandomAccessSparseVector").toString();
         Class<? extends Vector> vectorClass = Class.forName(className).asSubclass(Vector.class);
         double t1 = Double.parseDouble(cmdLine.getValue(t1Opt, "80").toString());
         double t2 = Double.parseDouble(cmdLine.getValue(t2Opt, "55").toString());
@@ -142,7 +142,7 @@ public class Job {
       dfs.delete(outPath, true);
     String directoryContainingConvertedInput = output
         + Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
-    InputDriver.runJob(input, directoryContainingConvertedInput);
+    InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     CanopyClusteringJob.runJob(directoryContainingConvertedInput, output,
         measureClassName, t1, t2);
   }

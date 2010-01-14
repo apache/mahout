@@ -285,7 +285,11 @@
       <version>2.2</version>
       <scope>test</scope>
     </dependency>
-
+    <dependency>
+      <groupId>com.google.collections</groupId>
+      <artifactId>google-collections</artifactId>
+      <version>1.0-rc5</version>
+    </dependency>
   </dependencies>
   
   <repositories>

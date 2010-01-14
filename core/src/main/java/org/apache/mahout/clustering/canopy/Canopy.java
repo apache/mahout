@@ -130,7 +130,7 @@ public class Canopy extends ClusterBase {
   /**
    * Compute the centroid by averaging the pointTotals
    *
-   * @return a SparseVector (required by Mapper) which is the new centroid
+   * @return a RandomAccessSparseVector (required by Mapper) which is the new centroid
    */
   public Vector computeCentroid() {
     return getPointTotal().divide(getNumPoints());

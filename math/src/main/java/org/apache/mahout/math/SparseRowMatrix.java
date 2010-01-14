@@ -17,10 +17,6 @@
 
 package org.apache.mahout.math;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-
 /**
  * sparse matrix with general element values whose rows are accessible quickly. Implemented as a row array of
  * SparseVectors.
@@ -39,9 +35,9 @@ public class SparseRowMatrix extends AbstractMatrix {
    * Construct a matrix of the given cardinality with the given rows
    *
    * @param cardinality the int[2] cardinality desired
-   * @param rows        a SparseVector[] array of rows
+   * @param rows        a RandomAccessSparseVector[] array of rows
    */
-  public SparseRowMatrix(int[] cardinality, SparseVector[] rows) {
+  public SparseRowMatrix(int[] cardinality, RandomAccessSparseVector[] rows) {
     this.cardinality = cardinality.clone();
     this.rows = rows.clone();
     for (int row = 0; row < cardinality[ROW]; row++) {
@@ -56,9 +52,9 @@ public class SparseRowMatrix extends AbstractMatrix {
    */
   public SparseRowMatrix(int[] cardinality) {
     this.cardinality = cardinality.clone();
-    this.rows = new SparseVector[cardinality[ROW]];
+    this.rows = new RandomAccessSparseVector[cardinality[ROW]];
     for (int row = 0; row < cardinality[ROW]; row++) {
-      this.rows[row] = new SparseVector(cardinality[COL]);
+      this.rows[row] = new RandomAccessSparseVector(cardinality[COL]);
     }
   }
 

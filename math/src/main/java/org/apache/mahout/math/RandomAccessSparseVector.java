@@ -17,64 +17,61 @@
 
 package org.apache.mahout.math;
 
-import org.apache.mahout.math.function.IntDoubleProcedure;
-import org.apache.mahout.math.list.DoubleArrayList;
-import org.apache.mahout.math.list.IntArrayList;
-import org.apache.mahout.math.map.OpenIntDoubleHashMap;
-
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import org.apache.mahout.math.function.IntDoubleProcedure;
+import org.apache.mahout.math.list.IntArrayList;
+import org.apache.mahout.math.map.OpenIntDoubleHashMap;
+
 
 /** Implements vector that only stores non-zero doubles */
-public class SparseVector extends AbstractVector {
+public class RandomAccessSparseVector extends AbstractVector {
 
   protected OpenIntDoubleHashMap values;
 
-  protected int cardinality;
-  protected double lengthSquared = -1.0;
-
   /** For serialization purposes only. */
-  public SparseVector() {
+  public RandomAccessSparseVector() {
   }
 
-  public SparseVector(int cardinality, int size) {
-    this(null, cardinality, size);
-  }
-
-  public SparseVector(String name, int cardinality, int size) {
-    super(name);
-    values = new OpenIntDoubleHashMap(size);
-    this.cardinality = cardinality;
-  }
-
-  public SparseVector(String name, int cardinality) {
-    this(name, cardinality, cardinality / 8); // arbitrary estimate of
-    // 'sparseness'
-  }
-
-  public SparseVector(int cardinality) {
+  public RandomAccessSparseVector(int cardinality) {
     this(null, cardinality, cardinality / 8); // arbitrary estimate of
     // 'sparseness'
   }
 
+  public RandomAccessSparseVector(int cardinality, int size) {
+    this(null, cardinality, size);
+  }
+
+  public RandomAccessSparseVector(String name, int cardinality) {
+    this(name, cardinality, cardinality / 8); // arbitrary estimate of
+    // 'sparseness'
+  }
+
+  public RandomAccessSparseVector(String name, int cardinality, int size) {
+    super(name, cardinality);
+    values = new OpenIntDoubleHashMap(size);
+  }
+
+  public RandomAccessSparseVector(Vector other) {
+    this(other.getName(), other.size(), other.getNumNondefaultElements());
+    Iterator<Vector.Element> it = other.iterateNonZero();
+    Vector.Element e;
+    while(it.hasNext() && (e = it.next()) != null) {
+      values.put(e.index(), e.get());
+    }
+  }
+
   @Override
   protected Matrix matrixLike(int rows, int columns) {
-    return new SparseRowMatrix(new int[] {rows, columns});
+    int[] cardinality = {rows, columns};
+    return new SparseRowMatrix(cardinality);
   }
 
   @Override
-  public int size() {
-    return cardinality;
-  }
-
-  @Override
-  public SparseVector clone() {
-    SparseVector clone = (SparseVector) super.clone();
-    clone.values = (OpenIntDoubleHashMap) values.clone();
+  public RandomAccessSparseVector clone() {
+    RandomAccessSparseVector clone = (RandomAccessSparseVector) super.clone();
+    clone.values = (OpenIntDoubleHashMap)values.clone();
     return clone;
   }
 
@@ -85,12 +82,7 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public void setQuick(int index, double value) {
-    lengthSquared = -1.0;
-    if (value == 0.0) {
-      values.removeKey(index);
-    } else {
-      values.put(index, value);
-    }
+    values.put(index, value);
   }
 
   @Override
@@ -99,23 +91,12 @@ public class SparseVector extends AbstractVector {
   }
 
   @Override
-  public Vector viewPart(int offset, int length) {
-    if (length > cardinality) {
-      throw new CardinalityException();
-    }
-    if (offset < 0 || offset + length > cardinality) {
-      throw new IndexException();
-    }
-    return new VectorView(this, offset, length);
-  }
-
-  @Override
-  public SparseVector like() {
+  public RandomAccessSparseVector like() {
     int numValues = 256;
     if (values != null) {
       numValues = values.size();
     }
-    return new SparseVector(cardinality, numValues);
+    return new RandomAccessSparseVector(size(), numValues);
   }
 
   @Override
@@ -124,7 +105,7 @@ public class SparseVector extends AbstractVector {
     if (values != null) {
       numValues = values.size();
     }
-    return new SparseVector(newCardinality, numValues);
+    return new RandomAccessSparseVector(newCardinality, numValues);
   }
 
   /**
@@ -135,15 +116,10 @@ public class SparseVector extends AbstractVector {
    * @see #getElement(int)
    */
   @Override
-  public Iterator<Vector.Element> iterateNonZero() {
+  public java.util.Iterator<Vector.Element> iterateNonZero() {
     return new NonZeroIterator(false);
   }
-
-  @Override
-  public Iterator<Vector.Element> iterateNonZero(boolean sorted) {
-    return new NonZeroIterator(sorted);
-  }
-
+  
   @Override
   public Iterator<Vector.Element> iterateAll() {
     return new AllIterator();
@@ -180,28 +156,21 @@ public class SparseVector extends AbstractVector {
       return false;
     }
 
-    if (that instanceof SparseVector) {
-      return (values == null ? ((SparseVector) that).values == null : values
-          .equals(((SparseVector) that).values));
-    } else {
-      return equivalent(this, that);
-    }
-
+    return equivalent(this, that);
   }
 
-  private class AllIterator implements Iterator<Vector.Element> {
-
+  private class AllIterator implements java.util.Iterator<Vector.Element> {
     private int offset = 0;
     private final Element element = new Element(0);
 
     @Override
     public boolean hasNext() {
-      return offset < cardinality;
+      return offset < size();
     }
 
     @Override
     public Vector.Element next() {
-      if (offset >= cardinality) {
+      if (offset >= size()) {
         throw new NoSuchElementException();
       }
       element.ind = offset++;
@@ -215,17 +184,16 @@ public class SparseVector extends AbstractVector {
   }
 
 
-  private class NonZeroIterator implements Iterator<Vector.Element> {
-
+  private class NonZeroIterator implements java.util.Iterator<Vector.Element> {
     private int offset = 0;
     private final Element element = new Element(0);
 
-    private final IntArrayList intArrList = values.keys();
-
-    private NonZeroIterator(boolean sorted) {
+    private IntArrayList intArrList =  values.keys();
+    
+    public NonZeroIterator(boolean sorted) {
       if (sorted) {
         intArrList.sort();
-      }
+      }      
     }
 
     @Override
@@ -254,7 +222,6 @@ public class SparseVector extends AbstractVector {
   }
 
   public class Element implements Vector.Element {
-
     private int ind;
 
     public Element(int ind) {
@@ -273,32 +240,15 @@ public class SparseVector extends AbstractVector {
 
     @Override
     public void set(double value) {
-      lengthSquared = -1.0;
       values.put(ind, value);
     }
   }
 
-  @Override
-  public double getLengthSquared() {
-    if (lengthSquared >= 0.0) {
-      return lengthSquared;
-    }
-    double result = 0.0;
-    DoubleArrayList valueList = values.values();
-    for (int i = 0; i < valueList.size(); i++) {
-      double val = valueList.get(i);
-      result += val * val;
-    }
-    lengthSquared = result;
-    return result;
-  }
-
   private class DistanceSquared implements IntDoubleProcedure {
+    Vector v;
+    public double result = 0.0;
 
-    private final Vector v;
-    private double result = 0.0;
-
-    private DistanceSquared(Vector v) {
+    public DistanceSquared(Vector v) {
       this.v = v;
     }
 
@@ -317,14 +267,14 @@ public class SparseVector extends AbstractVector {
 
     DistanceSquared distanceSquared = new DistanceSquared(v);
     values.forEachPair(distanceSquared);
-    return distanceSquared.result;
+    double result = distanceSquared.result;    
+    return result;
   }
 
   private class AddToVector implements IntDoubleProcedure {
+    Vector v;
 
-    private final Vector v;
-
-    private AddToVector(Vector v) {
+    public AddToVector(Vector v) {
       this.v = v;
     }
 
@@ -337,7 +287,11 @@ public class SparseVector extends AbstractVector {
 
   @Override
   public void addTo(Vector v) {
-    values.forEachPair(new AddToVector(v));
+    if (v.size() != size()) {
+      throw new CardinalityException();
+    }
+    AddToVector addToVector = new AddToVector(v);
+    values.forEachPair(addToVector);
   }
 
 }

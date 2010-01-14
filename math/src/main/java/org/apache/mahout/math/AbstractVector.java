@@ -36,11 +36,21 @@ public abstract class AbstractVector implements Vector {
 
   private String name;
 
+  protected int size;
+
+  protected double lengthSquared = -1;
+
   protected AbstractVector() {
+    this(null, 0);
   }
 
   protected AbstractVector(String name) {
+    this(name, 0);
+  }
+
+  protected AbstractVector(String name, int size) {
     this.name = name;
+    this.size = size;
   }
 
   /**
@@ -52,6 +62,16 @@ public abstract class AbstractVector implements Vector {
    */
   protected abstract Matrix matrixLike(int rows, int columns);
 
+  @Override
+  public Vector viewPart(int offset, int length) {
+    if (length > size) {
+      throw new CardinalityException();
+    }
+    if (offset < 0 || offset + length > size) {
+      throw new IndexException();
+    }
+    return new VectorView(this, offset, length);
+  }
 
   @Override
   public Vector clone() {
@@ -161,6 +181,26 @@ public abstract class AbstractVector implements Vector {
   }
 
   @Override
+  public double getLengthSquared() {
+    if (lengthSquared >= 0.0) {
+      return lengthSquared;
+    }
+    return lengthSquared = dot(this);
+  }
+
+  @Override
+  public double getDistanceSquared(Vector v) {
+    double d = 0;
+    Iterator<Element> it = iterateNonZero();
+    Element e;
+    while(it.hasNext() && (e = it.next()) != null) {
+      final double diff = e.get() - v.getQuick(e.index());
+      d += (diff * diff);
+    }
+    return d;
+  }
+
+  @Override
   public double maxValue() {
     double result = Double.MIN_VALUE;
     for (int i = 0; i < size(); i++) {
@@ -208,6 +248,16 @@ public abstract class AbstractVector implements Vector {
     /*for (int i = 0; i < result.size(); i++)
       result.setQuick(i, getQuick(i) + x.getQuick(i));*/
     return result;
+  }
+
+  @Override
+  public void addTo(Vector v) {
+    Iterator<Element> it = iterateNonZero();
+    Element e;
+    while(it.hasNext() && (e = it.next()) != null) {
+      int i = e.index();
+      v.setQuick(i, v.getQuick(i) + e.get());
+    }
   }
 
   @Override
@@ -353,6 +403,11 @@ public abstract class AbstractVector implements Vector {
   }
 
   @Override
+  public int size() {
+    return size;  
+  }
+
+  @Override
   public String asFormatString() {
     Type vectorType = new TypeToken<Vector>() {
     }.getType();
@@ -431,19 +486,17 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public int hashCode() {
-    int prime = 31;
+    final int prime = 31;
     int result = prime + ((name == null) ? 0 : name.hashCode());
     result = prime * result + size();
-    Iterator<Element> iter = iterateNonZero(true);
+    Iterator<Element> iter = iterateNonZero();
     while (iter.hasNext()) {
       Element ele = iter.next();
-      result = prime * result + ele.index();
       long v = Double.doubleToLongBits(ele.get());
-      result = prime * result + (int) (v ^ (v >> 32));
+      result += (ele.index() * (int)(v^(v>>32)));
     }
-
     return result;
-  }
+   }
 
 
   @Override

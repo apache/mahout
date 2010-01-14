@@ -103,7 +103,7 @@ public class Job {
       int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt, "5").toString());
       double alpha_0 = Double.parseDouble(cmdLine.getValue(mOpt, "1.0").toString());
       int numReducers = Integer.parseInt(cmdLine.getValue(redOpt, "1").toString());
-      String vectorClassName = cmdLine.getValue(vectorOpt, "org.apache.mahout.math.SparseVector").toString();
+      String vectorClassName = cmdLine.getValue(vectorOpt, "org.apache.mahout.math.RandomAccessSparseVector").toString();
       Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
       runJob(input, output, modelFactory, numModels, maxIterations, alpha_0, numReducers, vectorClass);
     } catch (OptionException e) {
@@ -140,7 +140,7 @@ public class Job {
     }
     fs.mkdirs(outPath);
     final String directoryContainingConvertedInput = output + DIRECTORY_CONTAINING_CONVERTED_INPUT;
-    InputDriver.runJob(input, directoryContainingConvertedInput);
+    InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     DirichletDriver.runJob(directoryContainingConvertedInput, output + "/state", modelFactory,
         numModels, maxIterations, alpha_0, numReducers);
     printResults(output + "/state", modelFactory, maxIterations, numModels,

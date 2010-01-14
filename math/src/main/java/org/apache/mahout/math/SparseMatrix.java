@@ -17,13 +17,10 @@
 
 package org.apache.mahout.math;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Doubly sparse matrix. Implemented as a Map of SparseVector rows */
+/** Doubly sparse matrix. Implemented as a Map of RandomAccessSparseVector rows */
 public class SparseMatrix extends AbstractMatrix {
 
   private int[] cardinality;
@@ -38,12 +35,12 @@ public class SparseMatrix extends AbstractMatrix {
    * Construct a matrix of the given cardinality with the given row map
    *
    * @param cardinality the int[2] cardinality desired
-   * @param rows        a Map<Integer, SparseVector> of rows
+   * @param rows        a Map<Integer, RandomAccessSparseVector> of rows
    */
-  public SparseMatrix(int[] cardinality, Map<Integer, SparseVector> rows) {
+  public SparseMatrix(int[] cardinality, Map<Integer, RandomAccessSparseVector> rows) {
     this.cardinality = cardinality.clone();
     this.rows = new HashMap<Integer, Vector>();
-    for (Map.Entry<Integer, SparseVector> entry : rows.entrySet()) {
+    for (Map.Entry<Integer, RandomAccessSparseVector> entry : rows.entrySet()) {
       this.rows.put(entry.getKey(), entry.getValue().clone());
     }
   }
@@ -95,7 +92,7 @@ public class SparseMatrix extends AbstractMatrix {
   public void setQuick(int row, int column, double value) {
     Vector r = rows.get(row);
     if (r == null) {
-      r = new SparseVector(cardinality[COL]);
+      r = new RandomAccessSparseVector(cardinality[COL]);
       rows.put(row, r);
     }
     r.setQuick(column, value);
@@ -134,7 +131,7 @@ public class SparseMatrix extends AbstractMatrix {
       if (val != 0.0) {
         Vector r = rows.get(row);
         if (r == null) {
-          r = new SparseVector(cardinality[COL]);
+          r = new RandomAccessSparseVector(cardinality[COL]);
           rows.put(row, r);
         }
         r.setQuick(column, val);
@@ -171,7 +168,7 @@ public class SparseMatrix extends AbstractMatrix {
     }
     Vector res = rows.get(row);
     if (res == null) {
-      res = new SparseVector(cardinality[COL]);
+      res = new RandomAccessSparseVector(cardinality[COL]);
     }
     return res;
   }

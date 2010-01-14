@@ -22,23 +22,24 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
 import java.util.Iterator;
 
 public final class UserVectorToCooccurrenceReducer
     extends MapReduceBase
-    implements Reducer<IntWritable, IntWritable, IntWritable, SparseVector> {
-
+    implements Reducer<IntWritable, IntWritable, IntWritable, VectorWritable> {
+  private VectorWritable vectorWritable = new VectorWritable();
   @Override
   public void reduce(IntWritable index1,
                      Iterator<IntWritable> index2s,
-                     OutputCollector<IntWritable, SparseVector> output,
+                     OutputCollector<IntWritable, VectorWritable> output,
                      Reporter reporter) throws IOException {
     if (index2s.hasNext()) {
-      SparseVector cooccurrenceRow = new SparseVector(Integer.MAX_VALUE, 1000);
+      RandomAccessSparseVector cooccurrenceRow = new RandomAccessSparseVector(Integer.MAX_VALUE, 1000);
       while (index2s.hasNext()) {
         int index2 = index2s.next().get();
         cooccurrenceRow.set(index2, cooccurrenceRow.get(index2) + 1.0);
@@ -50,7 +51,8 @@ public final class UserVectorToCooccurrenceReducer
           element.set(0.0);
         }
       }
-      output.collect(index1, cooccurrenceRow);
+      vectorWritable.set(cooccurrenceRow);
+      output.collect(index1, vectorWritable);
     }
   }
 

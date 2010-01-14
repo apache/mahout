@@ -18,35 +18,40 @@
 package org.apache.mahout.math;
 
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.math.map.OpenIntDoubleHashMap;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Iterator;
 
-public class DenseVectorWritable extends DenseVector implements Writable {
 
-  public DenseVectorWritable() {
-    
+public class RandomAccessSparseVectorWritable extends RandomAccessSparseVector implements Writable {
+
+  public RandomAccessSparseVectorWritable(Vector v) {
+    super(v);
   }
 
-  public DenseVectorWritable(DenseVector v) {
-    setName(v.getName());
-    values = v.values;
-    lengthSquared = v.lengthSquared;
+  public RandomAccessSparseVectorWritable() {
+    
   }
 
   @Override
   public void write(DataOutput dataOutput) throws IOException {
     dataOutput.writeUTF(getClass().getName());
     dataOutput.writeUTF(this.getName() == null ? "" : this.getName());
+    int nde = getNumNondefaultElements();
     dataOutput.writeInt(size());
-    dataOutput.writeDouble(lengthSquared);
-    Iterator<Vector.Element> iter = iterateAll();
+    dataOutput.writeInt(nde);
+    Iterator<Vector.Element> iter = iterateNonZero();
+    int count = 0;
     while (iter.hasNext()) {
       Vector.Element element = iter.next();
+      dataOutput.writeInt(element.index());
       dataOutput.writeDouble(element.get());
+      count++;
     }
+    assert (nde == count);
   }
 
   @Override
@@ -57,12 +62,20 @@ public class DenseVectorWritable extends DenseVector implements Writable {
     } else {
       setName(className); // we have already read the class name in VectorWritable
     }
-    double[] values = new double[dataInput.readInt()];
-    lengthSquared = dataInput.readDouble();
-    for (int i = 0; i < values.length; i++) {
-      values[i] = dataInput.readDouble();
+    size = dataInput.readInt();
+    int cardinality = dataInput.readInt();
+    OpenIntDoubleHashMap values = new OpenIntDoubleHashMap(cardinality);
+    int i = 0;
+    while (i < cardinality) {
+      int index = dataInput.readInt();
+      double value = dataInput.readDouble();
+      values.put(index, value);
+      i++;
     }
+    assert (i == cardinality);
     this.values = values;
   }
+
   
+
 }

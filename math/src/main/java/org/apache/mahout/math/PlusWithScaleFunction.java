@@ -19,7 +19,9 @@ package org.apache.mahout.math;
 
 public class PlusWithScaleFunction implements BinaryFunction {
 
-  private final double scale;
+  private double scale;
+
+  public PlusWithScaleFunction() {}
 
   public PlusWithScaleFunction(double scale) {
     this.scale = scale;
@@ -28,5 +30,9 @@ public class PlusWithScaleFunction implements BinaryFunction {
   @Override
   public double apply(double arg1, double arg2) {
     return arg1 + scale * arg2;
+  }
+
+  public void setScale(double scale) {
+    this.scale = scale;
   }
 }

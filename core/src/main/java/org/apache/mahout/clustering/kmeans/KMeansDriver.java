@@ -36,7 +36,7 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
-import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
@@ -108,7 +108,7 @@ public class KMeansDriver {
 
     Option vectorClassOpt = obuilder.withLongName("vectorClass").withRequired(false).withArgument(
         abuilder.withName("vectorClass").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The Vector implementation class name.  Default is SparseVector.class").withShortName("v").create();
+        "The Vector implementation class name.  Default is RandomAccessSparseVector.class").withShortName("v").create();
 
     Option numReduceTasksOpt = obuilder.withLongName("numReduce").withRequired(false).withArgument(
         abuilder.withName("numReduce").withMinimum(1).withMaximum(1).create()).withDescription(
@@ -141,7 +141,7 @@ public class KMeansDriver {
         convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt).toString());
       }
 
-      Class<? extends Vector> vectorClass = cmdLine.hasOption(vectorClassOpt) == false ? SparseVector.class
+      Class<? extends Vector> vectorClass = cmdLine.hasOption(vectorClassOpt) == false ? RandomAccessSparseVector.class
           : (Class<? extends Vector>) Class.forName(cmdLine.getValue(vectorClassOpt).toString());
 
       int maxIterations = 20;

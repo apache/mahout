@@ -25,6 +25,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,15 +35,17 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 public class InputMapper extends MapReduceBase implements
-    Mapper<LongWritable, Text, Text, Vector> {
+    Mapper<LongWritable, Text, Text, VectorWritable> {
 
   private static final Pattern SPACE = Pattern.compile(" ");
 
   private Constructor<?> constructor;
 
+  private VectorWritable vectorWritable;
+
   @Override
   public void map(LongWritable key, Text values,
-      OutputCollector<Text, Vector> output, Reporter reporter) throws IOException {
+      OutputCollector<Text, VectorWritable> output, Reporter reporter) throws IOException {
     String[] numbers = SPACE.split(values.toString());
     // sometimes there are multiple separator spaces
     List<Double> doubles = new ArrayList<Double>();
@@ -51,11 +54,13 @@ public class InputMapper extends MapReduceBase implements
         doubles.add(Double.valueOf(value));
     }
     try {
-      Vector result = (Vector) constructor.newInstance(doubles.size());//new DenseVector(doubles.size());
+      Vector result = (Vector) constructor.newInstance(doubles.size());
       int index = 0;
-      for (Double d : doubles)
+      for (Double d : doubles) {
         result.set(index++, d);
-      output.collect(new Text(String.valueOf(index)), result);
+      }
+      vectorWritable.set(result);
+      output.collect(new Text(String.valueOf(index)), vectorWritable);
 
     } catch (InstantiationException e) {
       throw new IllegalStateException(e);
@@ -69,10 +74,14 @@ public class InputMapper extends MapReduceBase implements
 
   @Override
   public void configure(JobConf job) {
-    Class<? extends Vector> outputClass = (Class<? extends Vector>) job.getOutputValueClass();
+    vectorWritable = new VectorWritable();
+    String vectorImplClassName = job.get("vector.implementation.class.name");
     try {
+      Class<? extends Vector> outputClass = (Class<? extends Vector>) job.getClassByName(vectorImplClassName);
       constructor = outputClass.getConstructor(int.class);
     } catch (NoSuchMethodException e) {
+      throw new IllegalStateException(e);
+    } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
     }
 

@@ -41,11 +41,11 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VectorWritable;
 
 /**
- * Converts a document in to a SparseVector
+ * Converts a document in to a sparse vector
  */
 public class PartialVectorGenerator extends MapReduceBase implements
     Reducer<Text,Text,Text, VectorWritable> {
@@ -82,8 +82,8 @@ public class PartialVectorGenerator extends MapReduceBase implements
         termFrequency.get(tk).increment();
       }
       
-      SparseVector vector =
-          new SparseVector(key.toString(), Integer.MAX_VALUE, termFrequency
+      RandomAccessSparseVector vector =
+          new RandomAccessSparseVector(key.toString(), Integer.MAX_VALUE, termFrequency
               .size());
       
       for (Entry<String,MutableInt> pair : termFrequency.entrySet()) {

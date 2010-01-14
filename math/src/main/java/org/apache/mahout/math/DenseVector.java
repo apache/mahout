@@ -17,9 +17,6 @@
 
 package org.apache.mahout.math;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -59,7 +56,7 @@ public class DenseVector extends AbstractVector {
   }
 
   /**
-   * Copy-constructor (for use in turning a SparseVector into a dense one, for example)
+   * Copy-constructor (for use in turning a sparse vector into a dense one, for example)
    * @param vector
    */
   public DenseVector(Vector vector) {
@@ -138,11 +135,6 @@ public class DenseVector extends AbstractVector {
    */
   @Override
   public Iterator<Vector.Element> iterateNonZero() {
-    return new NonZeroIterator();
-  }
-
-  @Override
-  public Iterator<Vector.Element> iterateNonZero(boolean sorted) {
     return new NonZeroIterator();
   }
 
@@ -312,8 +304,11 @@ public class DenseVector extends AbstractVector {
 
   @Override
   public void addTo(Vector v) {
-    for (int i = 0; i < size(); i++) {
-      v.setQuick(i, get(i) + v.get(i));
+    if (v.size() != size()) {
+      throw new CardinalityException();
+    }
+    for (int i = 0; i < values.length; i++) {
+      v.setQuick(i, values[i] + v.getQuick(i));
     }
   }
 }

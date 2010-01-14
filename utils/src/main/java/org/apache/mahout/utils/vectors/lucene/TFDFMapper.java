@@ -19,7 +19,7 @@ package org.apache.mahout.utils.vectors.lucene;
 
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.TermVectorOffsetInfo;
-import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.utils.vectors.Weight;
 import org.apache.mahout.utils.vectors.TermEntry;
@@ -57,7 +57,7 @@ public class TFDFMapper extends VectorMapper {
   @Override
   public void setExpectations(String field, int numTerms, boolean storeOffsets, boolean storePositions) {
     this.field = field;
-    vector = new SparseVector(termInfo.totalTerms(field));
+    vector = new RandomAccessSparseVector(termInfo.totalTerms(field));
     this.numTerms = numTerms;
   }
 

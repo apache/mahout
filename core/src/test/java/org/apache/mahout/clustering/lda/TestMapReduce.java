@@ -30,7 +30,7 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.SparseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.RandomUtils;
 
@@ -48,8 +48,8 @@ public class TestMapReduce extends TestCase {
    * @param numWords int number of words in the vocabulary
    * @param numWords E[count] for each word
    */
-  private SparseVector generateRandomDoc(int numWords, double sparsity) throws MathException {
-    SparseVector v = new SparseVector(numWords,(int)(numWords * sparsity));
+  private RandomAccessSparseVector generateRandomDoc(int numWords, double sparsity) throws MathException {
+    RandomAccessSparseVector v = new RandomAccessSparseVector(numWords,(int)(numWords * sparsity));
     PoissonDistribution dist = new PoissonDistributionImpl(sparsity);
     for (int i = 0; i < numWords; i++) {
       // random integer
@@ -98,7 +98,7 @@ public class TestMapReduce extends TestCase {
     mapper.configure(state);
 
     for(int i = 0; i < NUM_TESTS; ++i) {
-      SparseVector v = generateRandomDoc(100,0.3);
+      RandomAccessSparseVector v = generateRandomDoc(100,0.3);
       int myNumWords = numNonZero(v);
       LDAMapper.Context mock = createMock(LDAMapper.Context.class);
 

@@ -108,11 +108,6 @@ public class VectorView extends AbstractVector {
   }
 
   @Override
-  public Iterator<Vector.Element> iterateNonZero(boolean sorted) {
-    return new NonZeroIterator();
-  }
-
-  @Override
   public Iterator<Vector.Element> iterateAll() {
     return new AllIterator();
   }
