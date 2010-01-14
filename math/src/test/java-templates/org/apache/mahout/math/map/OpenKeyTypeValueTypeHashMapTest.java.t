@@ -217,25 +217,6 @@ public class Open${keyTypeCap}${valueTypeCap}HashMapTest extends Assert {
     assertEquals(22, map.get(($keyType)11) ${valueEpsilon});
     assertEquals(0, map.get(($keyType)0) ${valueEpsilon});
   }
-
-  /*
-   * Note that the javadoc says 'first' but the order
-   * is not defined.
-   */
-  @Test
-  public void testKeyOf() {
-    Open${keyTypeCap}${valueTypeCap}HashMap map = new Open${keyTypeCap}${valueTypeCap}HashMap();
-    map.put(($keyType) 11, (${valueType}) 22);
-    map.put(($keyType) 12, (${valueType}) 22);
-    ${keyType} k = map.keyOf((${valueType})22);
-    assertTrue(k == 11 || k == 12);
-    k = map.keyOf((${valueType})101);
-#if (${keyTypeFloating} == 'true')
-    assertTrue(${keyTypeCap}.isNaN(k));
-#else
-    assertEquals(0, k ${keyEpsilon});
-#end
-  }
   
   @Test
   public void testKeys() {

@@ -1,3 +1,22 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /*
 Copyright � 1999 CERN - European Organization for Nuclear Research.
 Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose 
@@ -9,22 +28,23 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.map;
 
 import java.util.Arrays;
+import java.util.List;
 
-import org.apache.mahout.math.function.LongObjectProcedure;
-import org.apache.mahout.math.function.LongProcedure;
-import org.apache.mahout.math.list.ByteArrayList;
-import org.apache.mahout.math.list.LongArrayList;
-import org.apache.mahout.math.list.ObjectArrayList;
+import org.apache.mahout.math.function.${keyTypeCap}ObjectProcedure;
+import org.apache.mahout.math.function.${keyTypeCap}Procedure;
+import org.apache.mahout.math.list.${keyTypeCap}ArrayList;
 
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
-public class OpenLongObjectHashMap extends AbstractLongObjectMap {
+public class Open${keyTypeCap}ObjectHashMap<T> extends Abstract${keyTypeCap}ObjectMap<T> {
+
+  private static final byte FREE = 0;
+  private static final byte FULL = 1;
+  private static final byte REMOVED = 2;
 
   /** The hash table keys. */
-  private long[] table;
+  private ${keyType}[] table;
 
   /** The hash table values. */
-  private Object[] values;
+  private T[] values;
 
   /** The state of each hash table entry (FREE, FULL, REMOVED). */
   private byte[] state;
@@ -32,13 +52,8 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
   /** The number of table entries in state==FREE. */
   private int freeEntries;
 
-
-  private static final byte FREE = 0;
-  private static final byte FULL = 1;
-  private static final byte REMOVED = 2;
-
   /** Constructs an empty map with default capacity and default load factors. */
-  public OpenLongObjectHashMap() {
+  public Open${keyTypeCap}ObjectHashMap() {
     this(defaultCapacity);
   }
 
@@ -48,7 +63,7 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
    * @param initialCapacity the initial capacity of the map.
    * @throws IllegalArgumentException if the initial capacity is less than zero.
    */
-  public OpenLongObjectHashMap(int initialCapacity) {
+  public Open${keyTypeCap}ObjectHashMap(int initialCapacity) {
     this(initialCapacity, defaultMinLoadFactor, defaultMaxLoadFactor);
   }
 
@@ -62,14 +77,14 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
    *                                  (maxLoadFactor <= 0.0 || maxLoadFactor >= 1.0) || (minLoadFactor >=
    *                                  maxLoadFactor)</tt>.
    */
-  public OpenLongObjectHashMap(int initialCapacity, double minLoadFactor, double maxLoadFactor) {
+  public Open${keyTypeCap}ObjectHashMap(int initialCapacity, double minLoadFactor, double maxLoadFactor) {
     setUp(initialCapacity, minLoadFactor, maxLoadFactor);
   }
 
   /** Removes all (key,value) associations from the receiver. Implicitly calls <tt>trimToSize()</tt>. */
   @Override
   public void clear() {
-    new ByteArrayList(this.state).fillFromToWith(0, this.state.length - 1, FREE);
+    Arrays.fill(state, 0, this.state.length - 1, FREE);
     Arrays.fill(values, 0, state.length - 1, null); // delta
 
     this.distinct = 0;
@@ -82,9 +97,10 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
    *
    * @return a deep copy of the receiver.
    */
+  @SuppressWarnings("unchecked") 
   @Override
-  public Object clone() {
-    OpenLongObjectHashMap copy = (OpenLongObjectHashMap) super.clone();
+  public Open${keyTypeCap}ObjectHashMap<T> clone() {
+    Open${keyTypeCap}ObjectHashMap<T> copy = (Open${keyTypeCap}ObjectHashMap<T>) super.clone();
     copy.table = copy.table.clone();
     copy.values = copy.values.clone();
     copy.state = copy.state.clone();
@@ -97,7 +113,7 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
    * @return <tt>true</tt> if the receiver contains the specified key.
    */
   @Override
-  public boolean containsKey(long key) {
+  public boolean containsKey(${keyType} key) {
     return indexOfKey(key) >= 0;
   }
 
@@ -107,7 +123,7 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
    * @return <tt>true</tt> if the receiver contains the specified value.
    */
   @Override
-  public boolean containsValue(Object value) {
+  public boolean containsValue(T value) {
     return indexOfValue(value) >= 0;
   }
 
@@ -140,7 +156,7 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
    * @return <tt>false</tt> if the procedure stopped before all keys where iterated over, <tt>true</tt> otherwise.
    */
   @Override
-  public boolean forEachKey(LongProcedure procedure) {
+  public boolean forEachKey(${keyTypeCap}Procedure procedure) {
     for (int i = table.length; i-- > 0;) {
       if (state[i] == FULL) {
         if (!procedure.apply(table[i])) {
@@ -153,14 +169,14 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
 
   /**
    * Applies a procedure to each (key,value) pair of the receiver, if any. Iteration order is guaranteed to be
-   * <i>identical</i> to the order used by method {@link #forEachKey(LongProcedure)}.
+   * <i>identical</i> to the order used by method {@link #forEachKey(${keyTypeCap}Procedure)}.
    *
    * @param procedure the procedure to be applied. Stops iteration if the procedure returns <tt>false</tt>, otherwise
    *                  continues.
    * @return <tt>false</tt> if the procedure stopped before all keys where iterated over, <tt>true</tt> otherwise.
    */
   @Override
-  public boolean forEachPair(LongObjectProcedure procedure) {
+  public boolean forEachPair(${keyTypeCap}ObjectProcedure<T> procedure) {
     for (int i = table.length; i-- > 0;) {
       if (state[i] == FULL) {
         if (!procedure.apply(table[i], values[i])) {
@@ -173,14 +189,14 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
 
   /**
    * Returns the value associated with the specified key. It is often a good idea to first check with {@link
-   * #containsKey(long)} whether the given key has a value associated or not, i.e. whether there exists an association
+   * #containsKey(int)} whether the given key has a value associated or not, i.e. whether there exists an association
    * for the given key or not.
    *
    * @param key the key to be searched for.
    * @return the value associated with the specified key; <tt>null</tt> if no such key is present.
    */
   @Override
-  public Object get(long key) {
+  public T get(${keyType} key) {
     int i = indexOfKey(key);
     if (i < 0) {
       return null;
@@ -195,8 +211,8 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
    *         at slot -index-1. If the returned index >= 0, then it is NOT already contained and should be inserted at
    *         slot index.
    */
-  protected int indexOfInsertion(long key) {
-    long[] tab = table;
+  protected int indexOfInsertion(${keyType} key) {
+    ${keyType}[] tab = table;
     byte[] stat = state;
     int length = tab.length;
 
@@ -250,8 +266,8 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
    * @param key the key to be searched in the receiver.
    * @return the index where the key is contained in the receiver, returns -1 if the key was not found.
    */
-  protected int indexOfKey(long key) {
-    long[] tab = table;
+  protected int indexOfKey(${keyType} key) {
+    ${keyType}[] tab = table;
     byte[] stat = state;
     int length = tab.length;
 
@@ -283,8 +299,8 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
    * @param value the value to be searched in the receiver.
    * @return the index where the value is contained in the receiver, returns -1 if the value was not found.
    */
-  protected int indexOfValue(Object value) {
-    Object[] val = values;
+  protected int indexOfValue(T value) {
+    T[] val = values;
     byte[] stat = state;
 
     for (int i = stat.length; --i >= 0;) {
@@ -297,38 +313,19 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
   }
 
   /**
-   * Returns the first key the given value is associated with. It is often a good idea to first check with {@link
-   * #containsValue(Object)} whether there exists an association from a key to this value. Search order is guaranteed to
-   * be <i>identical</i> to the order used by method {@link #forEachKey(LongProcedure)}.
-   *
-   * @param value the value to search for.
-   * @return the first key for which holds <tt>get(key) == value</tt>; returns <tt>Long.MIN_VALUE</tt> if no such key
-   *         exists.
-   */
-  @Override
-  public long keyOf(Object value) {
-    //returns the first key found; there may be more matching keys, however.
-    int i = indexOfValue(value);
-    if (i < 0) {
-      return Long.MIN_VALUE;
-    }
-    return table[i];
-  }
-
-  /**
    * Fills all keys contained in the receiver into the specified list. Fills the list, starting at index 0. After this
    * call returns the specified list has a new size that equals <tt>this.size()</tt>. Iteration order is guaranteed to
-   * be <i>identical</i> to the order used by method {@link #forEachKey(LongProcedure)}. <p> This method can be used to
+   * be <i>identical</i> to the order used by method {@link #forEachKey(${keyTypeCap}Procedure)}. <p> This method can be used to
    * iterate over the keys of the receiver.
    *
    * @param list the list to be filled, can have any size.
    */
   @Override
-  public void keys(LongArrayList list) {
+  public void keys(${keyTypeCap}ArrayList list) {
     list.setSize(distinct);
-    long[] elements = list.elements();
+    ${keyType}[] elements = list.elements();
 
-    long[] tab = table;
+    ${keyType}[] tab = table;
     byte[] stat = state;
 
     int j = 0;
@@ -342,11 +339,11 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
   /**
    * Fills all pairs satisfying a given condition into the specified lists. Fills into the lists, starting at index 0.
    * After this call returns the specified lists both have a new size, the number of pairs satisfying the condition.
-   * Iteration order is guaranteed to be <i>identical</i> to the order used by method {@link
-   * #forEachKey(LongProcedure)}. <p> <b>Example:</b> <br>
+   * Iteration order is guaranteed to be <i>identical</i> to the order used by method {@link #forEachKey(${keyTypeCap}Procedure)}.
+   * <p> <b>Example:</b> <br>
    * <pre>
-   * LongObjectProcedure condition = new LongObjectProcedure() { // match even keys only
-   * public boolean apply(long key, Object value) { return key%2==0; }
+   * ${keyTypeCap}ObjectProcedure condition = new ${keyTypeCap}ObjectProcedure() { // match even keys only
+   * public boolean apply(${keyType} key, Object value) { return key%2==0; }
    * }
    * keys = (8,7,6), values = (1,2,2) --> keyList = (6,8), valueList = (2,1)</tt>
    * </pre>
@@ -357,7 +354,9 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
    * @param valueList the list to be filled with values, can have any size.
    */
   @Override
-  public void pairsMatching(LongObjectProcedure condition, LongArrayList keyList, ObjectArrayList valueList) {
+  public void pairsMatching(${keyTypeCap}ObjectProcedure<T> condition, 
+                            ${keyTypeCap}ArrayList keyList, 
+                            List<T> valueList) {
     keyList.clear();
     valueList.clear();
 
@@ -379,7 +378,7 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
    *         already contain such a key - the new value has now replaced the formerly associated value.
    */
   @Override
-  public boolean put(long key, Object value) {
+  public boolean put(${keyType} key, T value) {
     int i = indexOfInsertion(key);
     if (i < 0) { //already contained
       i = -i - 1;
@@ -414,16 +413,17 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
    * automatically when the number of keys in the receiver exceeds the high water mark or falls below the low water
    * mark.
    */
+  @SuppressWarnings("unchecked")
   protected void rehash(int newCapacity) {
     int oldCapacity = table.length;
     //if (oldCapacity == newCapacity) return;
 
-    long[] oldTable = table;
-    Object[] oldValues = values;
+    ${keyType}[] oldTable = table;
+    T[] oldValues = values;
     byte[] oldState = state;
 
-    long[] newTable = new long[newCapacity];
-    Object[] newValues = new Object[newCapacity];
+    ${keyType}[] newTable = new ${keyType}[newCapacity];
+    T[] newValues = (T[]) new Object[newCapacity];
     byte[] newState = new byte[newCapacity];
 
     this.lowWaterMark = chooseLowWaterMark(newCapacity, this.minLoadFactor);
@@ -436,7 +436,7 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
 
     for (int i = oldCapacity; i-- > 0;) {
       if (oldState[i] == FULL) {
-        long element = oldTable[i];
+        ${keyType} element = oldTable[i];
         int index = indexOfInsertion(element);
         newTable[index] = element;
         newValues[index] = oldValues[i];
@@ -452,7 +452,7 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
    * @return <tt>true</tt> if the receiver contained the specified key, <tt>false</tt> otherwise.
    */
   @Override
-  public boolean removeKey(long key) {
+  public boolean removeKey(${keyType} key) {
     int i = indexOfKey(key);
     if (i < 0) {
       return false;
@@ -480,6 +480,7 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
    *                                  (maxLoadFactor <= 0.0 || maxLoadFactor >= 1.0) || (minLoadFactor >=
    *                                  maxLoadFactor)</tt>.
    */
+  @SuppressWarnings("unchecked")
   @Override
   protected void setUp(int initialCapacity, double minLoadFactor, double maxLoadFactor) {
     int capacity = initialCapacity;
@@ -489,8 +490,8 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
       capacity = 1;
     } // open addressing needs at least one FREE slot at any time.
 
-    this.table = new long[capacity];
-    this.values = new Object[capacity];
+    this.table = new ${keyType}[capacity];
+    this.values = (T[]) new Object[capacity];
     this.state = new byte[capacity];
 
     // memory will be exhausted long before this pathological case happens, anyway.
@@ -529,24 +530,36 @@ public class OpenLongObjectHashMap extends AbstractLongObjectMap {
   /**
    * Fills all values contained in the receiver into the specified list. Fills the list, starting at index 0. After this
    * call returns the specified list has a new size that equals <tt>this.size()</tt>. Iteration order is guaranteed to
-   * be <i>identical</i> to the order used by method {@link #forEachKey(LongProcedure)}. <p> This method can be used to
+   * be <i>identical</i> to the order used by method {@link #forEachKey(${keyTypeCap}Procedure)}. <p> This method can be used to
    * iterate over the values of the receiver.
    *
    * @param list the list to be filled, can have any size.
    */
   @Override
-  public void values(ObjectArrayList list) {
-    list.setSize(distinct);
-    Object[] elements = list.elements();
+  public void values(List<T> list) {
+    list.clear();
 
-    Object[] val = values;
+    T[] val = values;
     byte[] stat = state;
 
-    int j = 0;
     for (int i = stat.length; i-- > 0;) {
       if (stat[i] == FULL) {
-        elements[j++] = val[i];
+        list.add(val[i]);
       }
     }
+  }
+  
+  /**
+   * Access for unit tests.
+   * @param capacity
+   * @param minLoadFactor
+   * @param maxLoadFactor
+   */
+  void getInternalFactors(int[] capacity, 
+      double[] minLoadFactor, 
+      double[] maxLoadFactor) {
+    capacity[0] = table.length;
+    minLoadFactor[0] = this.minLoadFactor;
+    maxLoadFactor[0] = this.maxLoadFactor;
   }
 }

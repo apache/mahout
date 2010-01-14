@@ -188,35 +188,6 @@ public abstract class Abstract${keyTypeCap}${valueTypeCap}Map extends AbstractMa
   public abstract ${valueType} get(${keyType} key);
 
   /**
-   * Returns the first key the given value is associated with. It is often a good idea to first check with {@link
-   * #containsValue(int)} whether there exists an association from a key to this value. Search order is guaranteed to be
-   * <i>identical</i> to the order used by method {@link #forEachKey(IntProcedure)}.
-   *
-   * @param value the value to search for.
-   * @return the first key for which holds <tt>get(key) == value</tt>; returns <tt>${keyObjectType}.MIN_VALUE</tt> if no such key
-   *         exists.
-   */
-  public ${keyType} keyOf(final ${valueType} value) {
-    final ${keyType}[] foundKey = new ${keyType}[1];
-    boolean notFound = forEachPair(
-        new ${keyTypeCap}${valueTypeCap}Procedure() {
-          @Override
-          public boolean apply(${keyType} iterKey, ${valueType} iterValue) {
-            boolean found = value == iterValue;
-            if (found) {
-              foundKey[0] = iterKey;
-            }
-            return !found;
-          }
-        }
-    );
-    if (notFound) {
-      return ${keyObjectType}.MIN_VALUE;
-    }
-    return foundKey[0];
-  }
-
-  /**
    * Returns a list filled with all keys contained in the receiver. The returned list has a size that equals
    * <tt>this.size()</tt>. Iteration order is guaranteed to be <i>identical</i> to the order used by method {@link
    * #forEachKey(IntProcedure)}. <p> This method can be used to iterate over the keys of the receiver.

@@ -323,26 +323,6 @@ public class Open${keyTypeCap}${valueTypeCap}HashMap extends Abstract${keyTypeCa
   }
 
   /**
-   * Returns the first key the given value is associated with. It is often a good idea to first check with {@link
-   * #containsValue(int)} whether there exists an association from a key to this value. Search order is guaranteed to be
-   * <i>identical</i> to the order used by method {@link #forEachKey(${keyTypeCap}Procedure)}.
-   *
-   * @param value the value to search for.
-   * @return the first key for which holds <tt>get(key) == value</tt>; 
-   * returns <tt>${noKeyComment}</tt> if no such key
-   *         exists.
-   */
-  @Override
-  public ${keyType} keyOf(${valueType} value) {
-    //returns the first key found; there may be more matching keys, however.
-    int i = indexOfValue(value);
-    if (i < 0) {
-      return NO_KEY_VALUE;
-    }
-    return table[i];
-  }
-
-  /**
    * Fills all keys contained in the receiver into the specified list. Fills the list, starting at index 0. After this
    * call returns the specified list has a new size that equals <tt>this.size()</tt>. Iteration order is guaranteed to
    * be <i>identical</i> to the order used by method {@link #forEachKey(${keyTypeCap}Procedure)}.
