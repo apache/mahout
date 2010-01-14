@@ -23,6 +23,7 @@ import java.util.Random;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.mahout.df.data.Data;
 import org.apache.mahout.df.data.Dataset;
+import org.apache.mahout.df.data.Instance;
 import org.apache.mahout.df.data.conditions.Condition;
 import org.apache.mahout.df.node.CategoricalNode;
 import org.apache.mahout.df.node.Leaf;
@@ -31,6 +32,8 @@ import org.apache.mahout.df.node.NumericalNode;
 import org.apache.mahout.df.split.IgSplit;
 import org.apache.mahout.df.split.OptIgSplit;
 import org.apache.mahout.df.split.Split;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Builds a Decision Tree <br>
@@ -40,6 +43,11 @@ import org.apache.mahout.df.split.Split;
  * http://www.cs.cmu.edu/~awm/tutorials
  */
 public class DefaultTreeBuilder implements TreeBuilder {
+
+  private static final Logger log = LoggerFactory.getLogger(DefaultTreeBuilder.class);
+
+  /** indicates which CATEGORICAL attributes have already been selected in the parent nodes */
+  private boolean[] selected;
 
   /** number of attributes to select randomly at each node */
   private int m = 1;
@@ -62,14 +70,18 @@ public class DefaultTreeBuilder implements TreeBuilder {
   @Override
   public Node build(Random rng, Data data) {
 
+    if (selected == null) {
+      selected = new boolean[data.getDataset().nbAttributes()];
+    }
+
     if (data.isEmpty())
       return new Leaf(-1);
-    if (data.isIdentical())
+    if (isIdentical(data))
       return new Leaf(data.majorityLabel(rng));
     if (data.identicalLabel())
       return new Leaf(data.get(0).label);
 
-    int[] attributes = randomAttributes(data.getDataset(), rng, m);
+    int[] attributes = randomAttributes(rng, selected, m);
 
     // find the best split
     Split best = null;
@@ -79,6 +91,14 @@ public class DefaultTreeBuilder implements TreeBuilder {
         best = split;
     }
 
+    boolean alreadySelected = selected[best.attr];
+    Node childNode = null;
+
+    if (alreadySelected) {
+      // attribute already selected
+      log.warn("attribute " + best.attr + " already selected in a parent node");
+    }
+    
     if (data.getDataset().isNumerical(best.attr)) {
       Data loSubset = data.subset(Condition.lesser(best.attr, best.split));
       Node loChild = build(rng, loSubset);
@@ -87,8 +107,10 @@ public class DefaultTreeBuilder implements TreeBuilder {
           best.split));
       Node hiChild = build(rng, hiSubset);
 
-      return new NumericalNode(best.attr, best.split, loChild, hiChild);
+      childNode = new NumericalNode(best.attr, best.split, loChild, hiChild);
     } else { // CATEGORICAL attribute
+      selected[best.attr] = true;
+      
       double[] values = data.values(best.attr);
       Node[] childs = new Node[values.length];
 
@@ -97,35 +119,82 @@ public class DefaultTreeBuilder implements TreeBuilder {
         childs[index] = build(rng, subset);
       }
 
-      return new CategoricalNode(best.attr, values, childs);
+      childNode = new CategoricalNode(best.attr, values, childs);
+
+      if (!alreadySelected) {
+        selected[best.attr] = false;
+      }
     }
+
+    return childNode;
+  }
+
+  /**
+   * checks if all the vectors have identical attribute values. Ignore selected attributes.
+   *
+   * @return true is all the vectors are identical or the data is empty<br>
+   *         false otherwise
+   */
+  private boolean isIdentical(Data data) {
+    if (data.isEmpty()) return true;
+
+    Instance instance = data.get(0);
+    for (int attr = 0; attr < selected.length; attr++) {
+    if (selected[attr]) continue;
+
+    for (int index = 1; index < data.size(); index++) {
+      if (data.get(index).get(attr) != instance.get(attr))
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /**
    * Randomly selects m attributes to consider for split, excludes IGNORED and
    * LABEL attributes
    * 
-   * @param dataset
-   * @param rng
-   * @param m number of attributes to select
+   * @param rng random-numbers generator
+   * @param selected attributes' state (selected or not)
+   * @param m number of attributes to choose
    * @return
    */
-  protected static int[] randomAttributes(Dataset dataset, Random rng, int m) {
-    if (m > dataset.nbAttributes()) {
-      throw new IllegalArgumentException("m > num attributes");
+  protected static int[] randomAttributes(Random rng, boolean[] selected, int m) {
+    int nbNonSelected = 0; // number of non selected attributes
+    for (boolean sel : selected) {
+      if (!sel) nbNonSelected++;
     }
 
-    int[] result = new int[m];
+    if (nbNonSelected == 0) {
+      log.warn("All attributes are selected !");
+    }
 
-    Arrays.fill(result, -1);
+    int[] result;
+    if (nbNonSelected <= m) {
+      // return all non selected attributes
+      result = new int[nbNonSelected];
+      int index = 0;
+      for (int attr = 0; attr < selected.length; attr++) {
+        if (!selected[attr]) result[index++] = attr;
+      }
+    } else {
+      result = new int[m];
+      for (int index = 0; index < m; index++) {
+        // randomly choose a "non selected" attribute
+        int rind;
+        do {
+          rind = rng.nextInt(selected.length);
+        } while (selected[rind]);
 
-    for (int index = 0; index < m; index++) {
-      int rvalue;
-      do {
-        rvalue = rng.nextInt(dataset.nbAttributes());
-      } while (ArrayUtils.contains(result, rvalue));
+        result[index] = rind;
+        selected[rind] = true; // temporarely set the choosen attribute to be selected
+      }
 
-      result[index] = rvalue;
+      // the choosen attributes are not yet selected
+      for (int attr : result) {
+        selected[attr] = false;
+      }
     }
 
     return result;

@@ -18,6 +18,7 @@
 package org.apache.mahout.df.builder;
 
 import java.util.Random;
+import java.util.Arrays;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.mahout.common.RandomUtils;
@@ -28,34 +29,52 @@ import junit.framework.TestCase;
 
 public class DefaultTreeBuilderTest extends TestCase {
 
+  @Override
+  protected void setUp() throws Exception {
+    RandomUtils.useTestSeed();
+  }
+
+  /**
+   * make sure that DefaultTreeBuilder.randomAttributes() returns the correct number of attributes, that have not been
+   * selected yet
+   *
+   * @throws Exception
+   */
   public void testRandomAttributes() throws Exception {
     Random rng = RandomUtils.getRandom();
-    int maxNbAttributes = 100;
-    int n = 100;
+    int nbAttributes = rng.nextInt(100) + 1;
+    boolean[] selected = new boolean[nbAttributes];
 
-    for (int nloop = 0; nloop < n; nloop++) {
-      int nbAttributes = rng.nextInt(maxNbAttributes) + 1;
+    for (int nloop = 0; nloop < 100; nloop++) {
+      Arrays.fill(selected, false);
 
-      // generate a small data, only to get the dataset
-      Data data = Utils.randomData(rng, nbAttributes, 1);
-      if (data.getDataset().nbAttributes() == 0)
-        continue;
+      // randomly select some attributes
+      int nbSelected = rng.nextInt(nbAttributes - 1);
+      for (int index = 0; index < nbSelected; index++) {
+        int attr;
+        do {
+          attr = rng.nextInt(nbAttributes);
+        } while (selected[attr]);
 
-      int m = rng.nextInt(data.getDataset().nbAttributes()) + 1;
+        selected[attr] = true;
+      }
 
-      int[] attrs = DefaultTreeBuilder.randomAttributes(data.getDataset(), rng, m);
+      int m = rng.nextInt(nbAttributes);
 
-      assertEquals(m, attrs.length);
+      int[] attrs = DefaultTreeBuilder.randomAttributes(rng, selected, m);
 
-      for (int index = 0; index < m; index++) {
-        int attr = attrs[index];
+      assertEquals(Math.min(m, nbAttributes - nbSelected), attrs.length);
+
+      for (int attr : attrs) {
+        // the attribute should not be already selected
+        assertFalse("an attribute has already been selected", selected[attr]);
 
         // each attribute should be in the range [0, nbAttributes[
         assertTrue(attr >= 0);
         assertTrue(attr < nbAttributes);
 
         // each attribute should appear only once
-        assertEquals(index, ArrayUtils.lastIndexOf(attrs, attr));
+        assertEquals(ArrayUtils.indexOf(attrs, attr), ArrayUtils.lastIndexOf(attrs, attr));
       }
     }
   }

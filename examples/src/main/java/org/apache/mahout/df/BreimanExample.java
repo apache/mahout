@@ -71,20 +71,26 @@ public class BreimanExample extends Configured implements Tool {
   /** mean time to build a forest with m=1 */
   private static long sumTimeOne;
 
+  /** mean number of nodes for all the trees grown with m=log2(M)+1 */
+  protected static long numNodesM;
+
+  /** mean number of nodes for all the trees grown with m=1 */
+  protected static long numNodesOne;
+
   /**
    * runs one iteration of the procedure.
    *
+   * @param rng random numbers generator
    * @param data training data
    * @param m number of random variables to select at each tree-node
    * @param nbtrees number of trees to grow
    * @throws Exception if an error occured while growing the trees
    */
-  protected static void runIteration(Data data, int m, int nbtrees) {
+  protected static void runIteration(Random rng, Data data, int m, int nbtrees) {
 
     int nblabels = data.getDataset().nblabels();
 
-    Random rng = RandomUtils.getRandom();
-
+    log.info("Splitting the data");
     Data train = data.clone();
     Data test = train.rsplit(rng, (int) (data.size() * 0.1));
     
@@ -103,6 +109,7 @@ public class BreimanExample extends Configured implements Tool {
     log.info("Growing a forest with m=" + m);
     DecisionForest forestM = forestBuilder.build(nbtrees, errorM);
     sumTimeM += System.currentTimeMillis() - time;
+    numNodesM += forestM.nbNodes();
 
     double oobM = ErrorEstimate.errorRate(trainLabels, errorM.computePredictions(rng)); // oob error estimate when m = log2(M)+1
 
@@ -114,7 +121,8 @@ public class BreimanExample extends Configured implements Tool {
     log.info("Growing a forest with m=1");
     DecisionForest forestOne = forestBuilder.build(nbtrees, errorOne);
     sumTimeOne += System.currentTimeMillis() - time;
-
+    numNodesOne += forestOne.nbNodes();
+    
     double oobOne = ErrorEstimate.errorRate(trainLabels, errorOne.computePredictions(rng)); // oob error estimate when m = 1
 
     // compute the test set error (Selection Error), and mean tree error (One Tree Error),
@@ -208,9 +216,10 @@ public class BreimanExample extends Configured implements Tool {
     // number of inputs
     int m = (int) Math.floor(Maths.log(2, data.getDataset().nbAttributes()) + 1);
 
+    Random rng = RandomUtils.getRandom();
     for (int iteration = 0; iteration < nbIterations; iteration++) {
       log.info("Iteration " + iteration);
-      runIteration(data, m, nbTrees);
+      runIteration(rng, data, m, nbTrees);
     }
 
     log.info("********************************************");
@@ -220,6 +229,9 @@ public class BreimanExample extends Configured implements Tool {
     log.info("");
     log.info("Mean Random Input Time : " + DFUtils.elapsedTime(sumTimeM / nbIterations));
     log.info("Mean Single Input Time : " + DFUtils.elapsedTime(sumTimeOne / nbIterations));
+    log.info("");
+    log.info("Mean Random Input Num Nodes : " + numNodesM / nbIterations);
+    log.info("Mean Single Input Num Nodes : " + numNodesOne / nbIterations);
 
     return 0;
   }
