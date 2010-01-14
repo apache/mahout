@@ -710,8 +710,10 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     }
 
     private void close() {
-      closed = true;
-      IOUtils.quietClose(resultSet, statement, connection);
+      if (!closed) {
+        closed = true;
+        IOUtils.quietClose(resultSet, statement, connection);
+      }
     }
 
     @Override
@@ -723,6 +725,15 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
           log.warn("Exception while iterating over items", sqle);
           close();
         }
+      }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+      try {
+        close();
+      } finally {
+        super.finalize();
       }
     }
 
