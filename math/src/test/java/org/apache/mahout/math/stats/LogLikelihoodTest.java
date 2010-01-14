@@ -65,4 +65,12 @@ llr(matrix(c(1000,1000,1000,99000), nrow=2))
     assertEquals(LogLikelihood.logLikelihoodRatio(1000,1000,1000, 99000), 5714.932, 0.001);
   }
 
+  @Test
+  public void testRootLogLikelihood() throws Exception {
+    // positive where k11 is bigger than expected.
+    assertTrue(LogLikelihood.rootLogLikelihoodRatio(904, 21060, 1144, 283012) > 0.0);
+    
+    // negative because k11 is lower than expected
+    assertTrue(LogLikelihood.rootLogLikelihoodRatio(36, 21928, 60280, 623876) < 0.0);
+  }
 }

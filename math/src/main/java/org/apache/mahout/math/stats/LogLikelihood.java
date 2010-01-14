@@ -43,7 +43,7 @@ public class LogLikelihood {
   }
 
   /**
-   * Calculate the Log-likelihood ratio for two events, call them A and B.  Then we have:
+   * Calculate the Raw Log-likelihood ratio for two events, call them A and B.  Then we have:
    * <p/>
    * <table border="1" cellpadding="5" cellspacing="0">
    * <tbody><tr><td>&nbsp;</td><td>Event A</td><td>Everything but A</td></tr>
@@ -55,7 +55,7 @@ public class LogLikelihood {
    * @param k12 The number of times the second event occurred WITHOUT the first event
    * @param k21 The number of times the first event occurred WITHOUT the second event
    * @param k22 The number of times something else occurred (i.e. was neither of these events
-   * @return The log-likelihood ratio
+   * @return The raw log-likelihood ratio
    *
    * <p/>
    * Credit to http://tdunning.blogspot.com/2008/03/surprise-and-coincidence.html for the table and the descriptions.
@@ -65,5 +65,25 @@ public class LogLikelihood {
     double columnEntropy = entropy(k11, k21) + entropy(k12, k22);
     double matrixEntropy = entropy(k11, k12, k21, k22);
     return 2 * (matrixEntropy - rowEntropy - columnEntropy);
+  }
+  
+  /** 
+   * Calculate the Root Log-likelihood ratio for two events.
+   * 
+   * @see #logLikelihoodRatio(int, int, int, int);
+
+   * @param k11 The number of times the two events occurred together
+   * @param k12 The number of times the second event occurred WITHOUT the first event
+   * @param k21 The number of times the first event occurred WITHOUT the second event
+   * @param k22 The number of times something else occurred (i.e. was neither of these events
+   * @return The root log-likelihood ratio
+   * 
+   * <p/>
+   * See discussion of raw vs. root LLR at 
+   * http://www.lucidimagination.com/search/document/6dc8709e65a7ced1/llr_scoring_question
+   */
+  public static double rootLogLikelihoodRatio(int k11, int k12, int k21, int k22) {
+    double llr = logLikelihoodRatio(k11, k12, k21, k22);
+    return Math.signum(((double) k11 / (k11+k12)) - ((double) k21 / (k21+k22))) * Math.sqrt(llr);
   }
 }
