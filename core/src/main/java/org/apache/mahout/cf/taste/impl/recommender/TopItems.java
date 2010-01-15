@@ -17,6 +17,8 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import org.apache.mahout.cf.taste.common.NoSuchItemException;
+import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
@@ -51,7 +53,12 @@ public final class TopItems {
     while (possibleItemIDs.hasNext()) {
       long itemID = possibleItemIDs.next();
       if (rescorer == null || !rescorer.isFiltered(itemID)) {
-        double preference = estimator.estimate(itemID);
+        double preference;
+        try {
+          preference = estimator.estimate(itemID);
+        } catch (NoSuchItemException nsie) {
+          continue;
+        }
         double rescoredPref = rescorer == null ? preference : rescorer.rescore(itemID, preference);
         if (!Double.isNaN(rescoredPref) && (!full || rescoredPref > lowestTopValue)) {
           topItems.add(new GenericRecommendedItem(itemID, (float) rescoredPref));
@@ -83,7 +90,12 @@ public final class TopItems {
       if (rescorer != null && rescorer.isFiltered(userID)) {
         continue;
       }
-      double similarity = estimator.estimate(userID);
+      double similarity;
+      try {
+        similarity = estimator.estimate(userID);
+      } catch (NoSuchUserException nsue) {
+        continue;
+      }
       double rescoredSimilarity = rescorer == null ? similarity : rescorer.rescore(userID, similarity);
       if (!Double.isNaN(rescoredSimilarity) && (!full || rescoredSimilarity > lowestTopValue)) {
         topUsers.add(new SimilarUser(userID, similarity));
