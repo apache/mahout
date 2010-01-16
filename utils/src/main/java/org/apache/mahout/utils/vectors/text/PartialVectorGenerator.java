@@ -18,14 +18,12 @@
 package org.apache.mahout.utils.vectors.text;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.StringTokenizer;
 
-import org.apache.commons.lang.mutable.MutableInt;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -38,9 +36,6 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.Token;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -48,64 +43,44 @@ import org.apache.mahout.math.VectorWritable;
  * Converts a document in to a sparse vector
  */
 public class PartialVectorGenerator extends MapReduceBase implements
-    Reducer<Text,Text,Text, VectorWritable> {
+    Reducer<Text,Text,Text,VectorWritable> {
   private Analyzer analyzer;
-  private Map<String,Integer> dictionary = new HashMap<String,Integer>();
+  private Map<String,int[]> dictionary = new HashMap<String,int[]>();
   private FileSystem fs; // local filesystem
   private URI[] localFiles; // local filenames from the distributed cache
-
+  
   private VectorWritable vectorWritable = new VectorWritable();
-
-  @Override
+  
   public void reduce(Text key,
                      Iterator<Text> values,
                      OutputCollector<Text,VectorWritable> output,
                      Reporter reporter) throws IOException {
+    if (values.hasNext() == false) return;
+    Text value = values.next();
+    String valueString = value.toString();
+    StringTokenizer stream = new StringTokenizer(valueString, " ");
     
-    if (values.hasNext()) {
-      Text value = values.next();
-      TokenStream ts =
-          analyzer.tokenStream(key.toString(), new StringReader(value
-              .toString()));
+    RandomAccessSparseVector vector =
+        new RandomAccessSparseVector(key.toString(), Integer.MAX_VALUE,
+            valueString.length() / 5); // guess at initial size
+    
+    while (stream.hasMoreTokens()) {
+      String tk = stream.nextToken();
+      if (dictionary.containsKey(tk) == false) continue;
+      int tokenKey = dictionary.get(tk)[0];
+      vector.setQuick(tokenKey, vector.getQuick(tokenKey) + 1);
       
-      Map<String,MutableInt> termFrequency = new HashMap<String,MutableInt>();
-      
-      Token token = new Token();
-      int count = 0;
-      while ((token = ts.next(token)) != null) {
-        String tk = new String(token.termBuffer(), 0, token.termLength());
-        if(dictionary.containsKey(tk) == false) continue;
-        if (termFrequency.containsKey(tk) == false) {
-          count += tk.length() + 1;
-          termFrequency.put(tk, new MutableInt(0));
-        }
-        termFrequency.get(tk).increment();
-      }
-      
-      RandomAccessSparseVector vector =
-          new RandomAccessSparseVector(key.toString(), Integer.MAX_VALUE, termFrequency
-              .size());
-      
-      for (Entry<String,MutableInt> pair : termFrequency.entrySet()) {
-        String tk = pair.getKey();
-        if (dictionary.containsKey(tk) == false) continue;
-        vector.setQuick(dictionary.get(tk).intValue(), pair.getValue()
-            .doubleValue());
-      }
-      vectorWritable.set(vector);
-      output.collect(key, vectorWritable);
     }
+    
+    vectorWritable.set(vector);
+    output.collect(key, vectorWritable);
+    
   }
   
   @Override
   public void configure(JobConf job) {
     super.configure(job);
     try {
-      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class<?> cl =
-          ccl.loadClass(job.get(DictionaryVectorizer.ANALYZER_CLASS,
-              StandardAnalyzer.class.getName()));
-      analyzer = (Analyzer) cl.newInstance();
       
       localFiles = DistributedCache.getCacheFiles(job);
       if (localFiles == null || localFiles.length < 1) {
@@ -121,15 +96,9 @@ public class PartialVectorGenerator extends MapReduceBase implements
       
       // key is word value is id
       while (reader.next(key, value)) {
-        dictionary.put(key.toString(), Long.valueOf(value.get()).intValue());
-        // System.out.println(key.toString() + "=>" + value.get());
+        dictionary.put(key.toString(), new int[] {Long.valueOf(value.get())
+            .intValue()});
       }
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }

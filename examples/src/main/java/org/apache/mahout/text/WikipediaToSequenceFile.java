@@ -104,7 +104,7 @@ public final class WikipediaToSequenceFile {
     
     Option allOpt =
         obuilder.withLongName("all").withDescription(
-            "If set, Select all files. Default is true").withShortName("all")
+            "If set, Select all files. Default is false").withShortName("all")
             .create();
     
     Option helpOpt =
@@ -133,9 +133,9 @@ public final class WikipediaToSequenceFile {
         catFile = (String) cmdLine.getValue(categoriesOpt);
       }
       
-      boolean all = true;
+      boolean all = false;
       if (cmdLine.hasOption(allOpt)) {
-        cmdLine.getValue(allOpt);
+        all = true;
       }
       runJob(inputPath, outputPath, catFile, cmdLine.hasOption(exactMatchOpt),
           all);
@@ -177,7 +177,7 @@ public final class WikipediaToSequenceFile {
           + " All Files: "
           + all);
     }
-    conf.set("xmlinput.start", "<page");
+    conf.set("xmlinput.start", "<page>");
     conf.set("xmlinput.end", "</page>");
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(Text.class);
@@ -193,7 +193,13 @@ public final class WikipediaToSequenceFile {
     conf.set("io.serializations",
         "org.apache.hadoop.io.serializer.JavaSerialization,"
             + "org.apache.hadoop.io.serializer.WritableSerialization");
-    
+
+    /*conf.set("mapred.compress.map.output", "true");
+    conf.set("mapred.map.output.compression.type", "BLOCK");
+    conf.set("mapred.output.compress", "true");
+    conf.set("mapred.output.compression.type", "BLOCK");
+    conf.set("mapred.output.compression.codec", "org.apache.hadoop.io.compress.GzipCodec");
+    */
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
     if (dfs.exists(outPath)) {
       dfs.delete(outPath, true);

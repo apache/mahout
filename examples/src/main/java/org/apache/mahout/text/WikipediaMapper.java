@@ -48,16 +48,15 @@ public class WikipediaMapper extends MapReduceBase implements
   private static final Logger log =
       LoggerFactory.getLogger(WikipediaMapper.class);
   private static final Pattern SPACE_NON_ALPHA_PATTERN =
-      Pattern.compile("[\\s\\W]");
+      Pattern.compile("[\\s]");
+  private static final String START_DOC = "<text xml:space=\"preserve\">";
+  private static final String END_DOC = "</text>";
+  private static final Pattern TITLE = Pattern.compile("<title>(.*)<\\/title>");
   
-  private static final Pattern DOCUMENT =
-      Pattern.compile("<text xml:space=\"preserve\">(.*)</text>");
-  private static final Pattern TITLE = Pattern.compile("<title>(.*)</title>");
-  
+  private static final String REDIRECT = "<redirect />";
   private Set<String> inputCategories;
   private boolean exactMatchOnly;
   private boolean all;
-  private Analyzer analyzer;
   
   @Override
   public void map(LongWritable key,
@@ -66,8 +65,16 @@ public class WikipediaMapper extends MapReduceBase implements
                   Reporter reporter) throws IOException {
     
     String content = value.toString();
-    String document = getDocument(content);
-    String title = getTitle(content);
+    if (content.indexOf(REDIRECT) != -1) return;
+    String document = "";
+    String title = "";
+    try {
+      document = getDocument(content);
+      title = getTitle(content);
+    } catch (Exception e) {
+      reporter.getCounter("Wikipedia", "Parse errors").increment(1);
+      return;
+    }
     
     if (!all) {
       String catMatch = findMatchingCategory(document);
@@ -81,13 +88,9 @@ public class WikipediaMapper extends MapReduceBase implements
   }
   
   private String getDocument(String xml) {
-    Matcher m = DOCUMENT.matcher(xml);
-    String ret = "";
-    if (m.find()) {
-      ret = m.group(1);
-    }
-    return ret;
-    
+    int start = xml.indexOf(START_DOC) + START_DOC.length();
+    int end = xml.indexOf(END_DOC, start);
+    return xml.substring(start, end);
   }
   
   private String getTitle(String xml) {
@@ -150,8 +153,6 @@ public class WikipediaMapper extends MapReduceBase implements
         + " All: "
         + all
         + " Exact Match: "
-        + exactMatchOnly
-        + " Analyzer: "
-        + analyzer.getClass().getName());
+        + exactMatchOnly);
   }
 }

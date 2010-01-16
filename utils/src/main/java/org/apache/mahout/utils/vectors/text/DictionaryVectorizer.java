@@ -42,7 +42,6 @@ import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.math.VectorWritable;
 
 /**
@@ -73,7 +72,7 @@ public final class DictionaryVectorizer {
   
   private static final String OUTPUT_FILES_PATTERN = "/part-*";
   
-  private static final int SEQUENCEFILE_BYTE_OVERHEAD = 4;
+  private static final int SEQUENCEFILE_BYTE_OVERHEAD = 45;
   
   private static final String VECTOR_OUTPUT_FOLDER = "/partial-vectors-";
   
@@ -117,7 +116,7 @@ public final class DictionaryVectorizer {
    */
   public static void createTermFrequencyVectors(String input,
                                                 String output,
-                                                Analyzer analyzer,
+                                                Class<? extends Analyzer> analyzerClass,
                                                 int minSupport,
                                                 int chunkSizeInMegabytes) throws IOException,
                                                                          InterruptedException,
@@ -132,7 +131,7 @@ public final class DictionaryVectorizer {
     Path inputPath = new Path(input);
     Path wordCountPath = new Path(output + WORDCOUNT_OUTPUT_FOLDER);
     
-    startWordCounting(inputPath, wordCountPath, analyzer);
+    startWordCounting(inputPath, analyzerClass, wordCountPath);
     List<Path> dictionaryChunks =
         createDictionaryChunks(minSupport, wordCountPath, output,
             chunkSizeInMegabytes);
@@ -143,8 +142,8 @@ public final class DictionaryVectorizer {
       Path partialVectorOutputPath =
           getPath(output + VECTOR_OUTPUT_FOLDER, partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
-      makePartialVectors(input, dictionaryChunk, partialVectorOutputPath,
-          analyzer);
+      makePartialVectors(input, dictionaryChunk, analyzerClass,
+          partialVectorOutputPath);
     }
     
     createVectorFromPartialVectors(partialVectorPaths, output
@@ -221,9 +220,8 @@ public final class DictionaryVectorizer {
         
         int fieldSize =
             SEQUENCEFILE_BYTE_OVERHEAD
-                + key.toString().getBytes(CHARSET).length
-                + Long.SIZE
-                / 8;
+                + (key.toString().length() * 2)
+                + (Long.SIZE / 8);
         currentChunkSize += fieldSize;
         writer.append(key, new LongWritable(i++));
         freqWriter.append(key, value);
@@ -261,8 +259,6 @@ public final class DictionaryVectorizer {
         "org.apache.hadoop.io.serializer.JavaSerialization,"
             + "org.apache.hadoop.io.serializer.WritableSerialization");
     // this conf parameter needs to be set enable serialisation of conf values
-    
-    conf.set(ANALYZER_CLASS, StandardAnalyzer.class.getName());
     conf
         .setJobName("DictionaryVectorizer Vector generator to group Partial Vectors");
     
@@ -324,11 +320,11 @@ public final class DictionaryVectorizer {
    */
   private static void makePartialVectors(String input,
                                          Path dictionaryFilePath,
-                                         Path output,
-                                         Analyzer analyzer) throws IOException,
-                                                           InterruptedException,
-                                                           ClassNotFoundException,
-                                                           URISyntaxException {
+                                         Class<? extends Analyzer> analyzerClass,
+                                         Path output) throws IOException,
+                                                     InterruptedException,
+                                                     ClassNotFoundException,
+                                                     URISyntaxException {
     
     Configurable client = new JobClient();
     JobConf conf = new JobConf(DictionaryVectorizer.class);
@@ -337,7 +333,7 @@ public final class DictionaryVectorizer {
             + "org.apache.hadoop.io.serializer.WritableSerialization");
     // this conf parameter needs to be set enable serialisation of conf values
     
-    conf.set(ANALYZER_CLASS, StandardAnalyzer.class.getName());
+    conf.set(ANALYZER_CLASS, analyzerClass.getName());
     conf.setJobName("DictionaryVectorizer Partial Vector running over input: "
         + input
         + " using dictionary file"
@@ -353,11 +349,10 @@ public final class DictionaryVectorizer {
     
     FileOutputFormat.setOutputPath(conf, output);
     
-    conf.setMapperClass(IdentityMapper.class);
+    conf.setMapperClass(DocumentTokenizerMapper.class);
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setReducerClass(PartialVectorGenerator.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
-    
     FileSystem dfs = FileSystem.get(output.toUri(), conf);
     if (dfs.exists(output)) {
       dfs.delete(output, true);
@@ -379,10 +374,10 @@ public final class DictionaryVectorizer {
    * @throws ClassNotFoundException
    */
   private static void startWordCounting(Path input,
-                                        Path output,
-                                        Analyzer analyzer) throws IOException,
-                                                          InterruptedException,
-                                                          ClassNotFoundException {
+                                        Class<? extends Analyzer> analyzerClass,
+                                        Path output) throws IOException,
+                                                    InterruptedException,
+                                                    ClassNotFoundException {
     
     Configurable client = new JobClient();
     JobConf conf = new JobConf(DictionaryVectorizer.class);
@@ -391,7 +386,7 @@ public final class DictionaryVectorizer {
             + "org.apache.hadoop.io.serializer.WritableSerialization");
     // this conf parameter needs to be set enable serialisation of conf values
     
-    conf.set(ANALYZER_CLASS, StandardAnalyzer.class.getName());
+    conf.set(ANALYZER_CLASS, analyzerClass.getName());
     conf.setJobName("DictionaryVectorizer Word Count running over input: "
         + input.toString());
     conf.setOutputKeyClass(Text.class);

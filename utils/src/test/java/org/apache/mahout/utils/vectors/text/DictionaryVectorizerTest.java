@@ -29,7 +29,9 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.util.Version;
 
 /**
  * Test the dictionary Vector
@@ -49,8 +51,8 @@ public class DictionaryVectorizerTest extends TestCase {
   
   public static final String DELIM = " .,?;:!\t\n\r";
   
-  public static final String ERRORSET = "`1234567890"
-                                        + "-=~@#$%^&*()_+[]{}'\"/<>|\\";
+  public static final String ERRORSET =
+      "`1234567890" + "-=~@#$%^&*()_+[]{}'\"/<>|\\";
   
   private static Random random = new Random();
   
@@ -60,20 +62,20 @@ public class DictionaryVectorizerTest extends TestCase {
     return DELIM.charAt(random.nextInt(DELIM.length()));
   }
   
-  private static String getRandomDocument() {
-    int length = (AVG_DOCUMENT_LENGTH >> 1)
-                 + random.nextInt(AVG_DOCUMENT_LENGTH);
-    StringBuilder sb = new StringBuilder(length * AVG_SENTENCE_LENGTH
-                                         * AVG_WORD_LENGTH);
+  public static String getRandomDocument() {
+    int length =
+        (AVG_DOCUMENT_LENGTH >> 1) + random.nextInt(AVG_DOCUMENT_LENGTH);
+    StringBuilder sb =
+        new StringBuilder(length * AVG_SENTENCE_LENGTH * AVG_WORD_LENGTH);
     for (int i = 0; i < length; i++) {
       sb.append(getRandomSentence());
     }
     return sb.toString();
   }
   
-  private static String getRandomSentence() {
-    int length = (AVG_SENTENCE_LENGTH >> 1)
-                 + random.nextInt(AVG_SENTENCE_LENGTH);
+  public static String getRandomSentence() {
+    int length =
+        (AVG_SENTENCE_LENGTH >> 1) + random.nextInt(AVG_SENTENCE_LENGTH);
     StringBuilder sb = new StringBuilder(length * AVG_WORD_LENGTH);
     for (int i = 0; i < length; i++) {
       sb.append(getRandomString()).append(' ');
@@ -82,7 +84,7 @@ public class DictionaryVectorizerTest extends TestCase {
     return sb.toString();
   }
   
-  private static String getRandomString() {
+  public static String getRandomString() {
     int length = (AVG_WORD_LENGTH >> 1) + random.nextInt(AVG_WORD_LENGTH);
     StringBuilder sb = new StringBuilder(length);
     for (int i = 0; i < length; i++) {
@@ -120,17 +122,18 @@ public class DictionaryVectorizerTest extends TestCase {
     Configuration conf = new Configuration();
     String pathString = "testdata/documents/docs.file";
     Path path = new Path(pathString);
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path,
-        Text.class, Text.class);
+    SequenceFile.Writer writer =
+        new SequenceFile.Writer(fs, conf, path, Text.class, Text.class);
     
     for (int i = 0; i < NUM_DOCS; i++) {
       writer.append(new Text("Document::ID::" + i), new Text(
           getRandomDocument()));
     }
     writer.close();
+    Class<? extends Analyzer> analyzer =
+        new StandardAnalyzer(Version.LUCENE_CURRENT).getClass();
     DictionaryVectorizer.createTermFrequencyVectors(pathString,
-      "output/wordcount", new StandardAnalyzer(), 2, 100);
-    
+        "output/wordcount", analyzer, 2, 100);
     
   }
 }

@@ -25,6 +25,7 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.utils.vectors.text.DictionaryVectorizer;
 
 /**
@@ -58,7 +59,7 @@ public final class SparseVectorsFromSequenceFiles {
             .create();
     
     Option analyzerNameOpt =
-        obuilder.withLongName("analyzerName").withRequired(true).withArgument(
+        obuilder.withLongName("analyzerName").withArgument(
             abuilder.withName("analyzerName").withMinimum(1).withMaximum(1)
                 .create()).withDescription("The class name of the analyzer")
             .withShortName("a").create();
@@ -93,9 +94,15 @@ public final class SparseVectorsFromSequenceFiles {
       minSupport = Integer.parseInt(minSupportString);
     }
     String analyzerName = (String) cmdLine.getValue(analyzerNameOpt);
-    Analyzer analyzer = (Analyzer) Class.forName(analyzerName).newInstance();
-    
+    Class<? extends Analyzer> analyzerClass = StandardAnalyzer.class;
+    if (cmdLine.hasOption(analyzerNameOpt)) {
+      String className = cmdLine.getValue(analyzerNameOpt).toString();
+      analyzerClass = (Class<? extends Analyzer>) Class.forName(className);
+      // try instantiating it, b/c there isn't any point in setting it if
+      // you can't instantiate it
+      analyzerClass.newInstance();
+    }
     DictionaryVectorizer.createTermFrequencyVectors(inputDir, outputDir,
-        analyzer, minSupport, chunkSize);
+        analyzerClass, minSupport, chunkSize);
   }
 }

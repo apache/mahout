@@ -39,38 +39,35 @@ import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 import org.apache.mahout.common.parameters.ClassParameter;
 
 /**
- * TextVectorizer Term Count Mapper. Tokenizes a text document and outputs the
- * count of the words
- * 
+ * TextVectorizer Term Count Mapper. Tokenizes a text document and outputs
+ * useful tokens space separated
  */
-public class TermCountMapper extends MapReduceBase implements
-    Mapper<Text,Text,Text,LongWritable> {
+public class DocumentTokenizerMapper extends MapReduceBase implements
+    Mapper<Text,Text,Text,Text> {
   
   private Analyzer analyzer;
-  
+  private StringBuilder document = new StringBuilder();
   @Override
   public void map(Text key,
                   Text value,
-                  OutputCollector<Text,LongWritable> output,
+                  OutputCollector<Text,Text> output,
                   Reporter reporter) throws IOException {
     TokenStream stream =
         analyzer
             .tokenStream(key.toString(), new StringReader(value.toString()));
-    Map<String,MutableLong> wordCount = new HashMap<String,MutableLong>();    
     TermAttribute termAtt =
         (TermAttribute) stream.addAttribute(TermAttribute.class);
+    document.setLength(0);
+    String sep = "";
     while (stream.incrementToken()) {
       String word = new String(termAtt.termBuffer(), 0, termAtt.termLength());
-      if (wordCount.containsKey(word) == false) {
-        wordCount.put(word, new MutableLong(0));
+      if (word != "") {
+        document.append(sep).append(word);
+        sep = " ";
       }
-      wordCount.get(word).increment();
     }
+    output.collect(key, new Text(document.toString()) );
     
-    for (Entry<String,MutableLong> entry : wordCount.entrySet()) {
-      output.collect(new Text(entry.getKey()), new LongWritable(entry
-          .getValue().longValue()));
-    }
   }
   
   @Override
