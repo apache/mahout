@@ -40,7 +40,9 @@ import org.apache.mahout.math.function.IntComparator;
 import org.apache.mahout.math.function.${valueTypeCap}Function;
 #end
 
-public abstract class Abstract${keyTypeCap}${valueTypeCap}Map extends AbstractMap {
+import org.apache.mahout.math.set.AbstractSet;
+
+public abstract class Abstract${keyTypeCap}${valueTypeCap}Map extends AbstractSet {
 
   /**
    * Returns <tt>true</tt> if the receiver contains the specified key.

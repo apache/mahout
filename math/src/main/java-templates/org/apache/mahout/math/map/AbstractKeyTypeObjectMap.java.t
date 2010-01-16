@@ -36,8 +36,9 @@ import org.apache.mahout.math.function.IntComparator;
 import org.apache.mahout.math.function.${keyTypeCap}ObjectProcedure;
 import org.apache.mahout.math.function.${keyTypeCap}Procedure;
 import org.apache.mahout.math.list.${keyTypeCap}ArrayList;
+import org.apache.mahout.math.set.AbstractSet;
 
-public abstract class Abstract${keyTypeCap}ObjectMap<T> extends AbstractMap {
+public abstract class Abstract${keyTypeCap}ObjectMap<T> extends AbstractSet {
 
   /**
    * Returns <tt>true</tt> if the receiver contains the specified key.

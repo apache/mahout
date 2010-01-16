@@ -22,22 +22,12 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.math.map;
+package org.apache.mahout.math.set;
 
 import org.apache.mahout.math.PersistentObject;
+import org.apache.mahout.math.map.PrimeFinder;
 
-/**
- Abstract base class for hash maps holding objects or primitive data types such as <code>int</code>, <code>float</code>, etc. as keys and/or values.
- First see the <a href="package-summary.html">package summary</a> 
- and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
- <p>
- Note that implementations are not synchronized.
-
- @author wolfgang.hoschek@cern.ch
- @version 1.0, 09/24/99
- @see      java.util.HashMap
- */
-public abstract class AbstractMap extends PersistentObject {
+public abstract class AbstractSet extends PersistentObject {
   //public static boolean debug = false; // debug only
 
   /** The number of distinct associations in the map; its "size()". */
@@ -59,10 +49,10 @@ public abstract class AbstractMap extends PersistentObject {
   /** The maximum load factor for the hashtable. */
   protected double maxLoadFactor;
 
-  // these are package access for unit tests.
-  static final int defaultCapacity = 277;
-  static final double defaultMinLoadFactor = 0.2;
-  static final double defaultMaxLoadFactor = 0.5;
+  // these are public access for unit tests.
+  static public final int defaultCapacity = 277;
+  static public final double defaultMinLoadFactor = 0.2;
+  static public final double defaultMaxLoadFactor = 0.5;
 
   /**
    * Chooses a new prime table capacity optimized for growing that (approximately) satisfies the invariant <tt>c *

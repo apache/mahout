@@ -33,6 +33,8 @@ import java.util.List;
 import org.apache.mahout.math.function.${keyTypeCap}ObjectProcedure;
 import org.apache.mahout.math.function.${keyTypeCap}Procedure;
 import org.apache.mahout.math.list.${keyTypeCap}ArrayList;
+import org.apache.mahout.math.set.AbstractSet;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -108,16 +110,16 @@ public class Open${keyTypeCap}ObjectHashMapTest extends Assert {
     double[] maxLoadFactor = new double[1];
     
     map.getInternalFactors(capacity, minLoadFactor, maxLoadFactor);
-    assertEquals(AbstractMap.defaultCapacity, capacity[0]);
-    assertEquals(AbstractMap.defaultMaxLoadFactor, maxLoadFactor[0], 0.001);
-    assertEquals(AbstractMap.defaultMinLoadFactor, minLoadFactor[0], 0.001);
+    assertEquals(AbstractSet.defaultCapacity, capacity[0]);
+    assertEquals(AbstractSet.defaultMaxLoadFactor, maxLoadFactor[0], 0.001);
+    assertEquals(AbstractSet.defaultMinLoadFactor, minLoadFactor[0], 0.001);
     int prime = PrimeFinder.nextPrime(907);
     map = new Open${keyTypeCap}ObjectHashMap<TestClass>(prime);
     
     map.getInternalFactors(capacity, minLoadFactor, maxLoadFactor);
     assertEquals(prime, capacity[0]);
-    assertEquals(AbstractMap.defaultMaxLoadFactor, maxLoadFactor[0], 0.001);
-    assertEquals(AbstractMap.defaultMinLoadFactor, minLoadFactor[0], 0.001);
+    assertEquals(AbstractSet.defaultMaxLoadFactor, maxLoadFactor[0], 0.001);
+    assertEquals(AbstractSet.defaultMinLoadFactor, minLoadFactor[0], 0.001);
     
     map = new Open${keyTypeCap}ObjectHashMap<TestClass>(prime, 0.4, 0.8);
     map.getInternalFactors(capacity, minLoadFactor, maxLoadFactor);

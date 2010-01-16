@@ -40,8 +40,9 @@ import org.apache.mahout.math.function.IntComparator;
 #if (${valueTypeFloating} == 'true')
 import org.apache.mahout.math.function.${valueTypeCap}Function;
 #end
+import org.apache.mahout.math.set.AbstractSet;
 
-public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractMap {
+public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
 
   /**
    * Returns <tt>true</tt> if the receiver contains the specified key.
