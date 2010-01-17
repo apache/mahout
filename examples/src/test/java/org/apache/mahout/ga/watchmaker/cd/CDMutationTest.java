@@ -18,21 +18,21 @@
 package org.apache.mahout.ga.watchmaker.cd;
 
 import junit.framework.Assert;
-import junit.framework.TestCase;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.ga.watchmaker.cd.utils.MockDataSet;
 import org.apache.mahout.common.RandomUtils;
 
 import java.util.Random;
 
-public class CDMutationTest extends TestCase {
+public class CDMutationTest extends MahoutTestCase {
 
   private Random rng;
 
   private MockDataSet mock;
 
   @Override
-  protected void setUp() {
-    RandomUtils.useTestSeed();
+  protected void setUp() throws Exception {
+    super.setUp();
     rng = RandomUtils.getRandom();
     mock = new MockDataSet(rng, 100);
   }

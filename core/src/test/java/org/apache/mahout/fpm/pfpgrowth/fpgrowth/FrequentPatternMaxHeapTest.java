@@ -22,10 +22,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Random;
 
-import junit.framework.TestCase;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 
-public class FrequentPatternMaxHeapTest extends TestCase {
+public class FrequentPatternMaxHeapTest extends MahoutTestCase {
 
   public void testMapHeap() {
     Random gen = RandomUtils.getRandom();

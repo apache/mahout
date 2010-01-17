@@ -19,12 +19,11 @@ package org.apache.mahout.df.mapreduce.partial;
 
 import java.util.Random;
 
-import junit.framework.TestCase;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.builder.TreeBuilder;
 import org.apache.mahout.df.data.Data;
@@ -34,7 +33,7 @@ import org.apache.mahout.df.data.Utils;
 import org.apache.mahout.df.node.Leaf;
 import org.apache.mahout.df.node.Node;
 
-public class Step1MapperTest extends TestCase {
+public class Step1MapperTest extends MahoutTestCase {
 
   /**
    * Make sure that the data used to build the trees is from the mapper's
@@ -82,12 +81,6 @@ public class Step1MapperTest extends TestCase {
 
   /** nb mappers to use */
   protected static final int nbMappers = 2;
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    RandomUtils.useTestSeed();
-  }
            
   public void testMapper() throws Exception {
     Long seed = null;

@@ -17,8 +17,8 @@
 
 package org.apache.mahout.ga.watchmaker.cd.hadoop;
 
-import junit.framework.TestCase;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 import org.apache.mahout.ga.watchmaker.cd.DataLine;
 import org.apache.mahout.ga.watchmaker.cd.Rule;
@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-public class CDMapperTest extends TestCase {
+public class CDMapperTest extends MahoutTestCase {
 
   private DataLine dl;
   private Rule rule;
@@ -40,6 +40,8 @@ public class CDMapperTest extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
+    super.setUp();
+
     // we assume 2 classes 0 and 1
     // their are 4 tests
     // TP: dataline label 1, rule returns 1
@@ -58,8 +60,6 @@ public class CDMapperTest extends TestCase {
     EasyMock.expect(rule.classify(dl)).andReturn(1);
     EasyMock.expect(rule.classify(dl)).andReturn(0);
     EasyMock.expect(rule.classify(dl)).andReturn(0);
-
-    super.setUp();
   }
 
   public void testEvaluate() {

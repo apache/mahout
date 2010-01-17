@@ -17,14 +17,14 @@
 
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
-import junit.framework.TestCase;
 import org.apache.hadoop.io.Text;
+import org.apache.mahout.common.MahoutTestCase;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-public class ToolCombinerTest extends TestCase {
+public class ToolCombinerTest extends MahoutTestCase {
 
   public void testCreateDescriptionNumerical() throws Exception {
     ToolCombiner combiner = new ToolCombiner();

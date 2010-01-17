@@ -17,12 +17,10 @@
 
 package org.apache.mahout.common;
 
-import junit.framework.TestCase;
-
 import java.util.Arrays;
 import java.util.List;
 
-public class StringUtilsTest extends TestCase {
+public class StringUtilsTest extends MahoutTestCase {
 
   private static class DummyTest {
     private int field;

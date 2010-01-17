@@ -17,27 +17,24 @@
 
 package org.apache.mahout.clustering.dirichlet;
 
-import junit.framework.TestCase;
 import org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDistribution;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.VectorWritable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestDirichletClustering extends TestCase {
+public class TestDirichletClustering extends MahoutTestCase {
 
   private List<VectorWritable> sampleData;
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    RandomUtils.useTestSeed();
     sampleData = new ArrayList<VectorWritable>();
   }
 

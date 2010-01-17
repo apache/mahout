@@ -23,16 +23,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.mahout.math.AbstractVector;
-import org.apache.mahout.math.CardinalityException;
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.IndexException;
-import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.NegateFunction;
-import org.apache.mahout.math.PlusFunction;
-import org.apache.mahout.math.TimesFunction;
-import org.apache.mahout.math.Vector;
-
 public class TestDenseVector extends TestCase {
 
   final double[] values = {1.1, 2.2, 3.3};

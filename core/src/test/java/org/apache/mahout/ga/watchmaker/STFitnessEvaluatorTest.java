@@ -17,14 +17,14 @@
 
 package org.apache.mahout.ga.watchmaker;
 
-import junit.framework.TestCase;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class STFitnessEvaluatorTest extends TestCase {
+public class STFitnessEvaluatorTest extends MahoutTestCase {
 
   private static class STFitnessEvaluatorMock<T> extends STFitnessEvaluator<T> {
     private int nbcalls;

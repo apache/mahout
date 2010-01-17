@@ -17,8 +17,7 @@
 
 package org.apache.mahout.utils.vectors.arff;
 
-import junit.framework.TestCase;
-
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -28,7 +27,7 @@ import java.text.DateFormat;
 import java.util.Iterator;
 import java.util.Map;
 
-public class ARFFVectorIterableTest extends TestCase {
+public class ARFFVectorIterableTest extends MahoutTestCase {
 
   public void testValues() throws Exception {
     StringBuilder builder = new StringBuilder();
@@ -116,7 +115,7 @@ public class ARFFVectorIterableTest extends TestCase {
     Map<String, Long> words = model.getWords();
     assertNotNull("words null", words);
     assertEquals(10, words.size());
-    System.out.println("Words: " + words);
+    //System.out.println("Words: " + words);
     Map<Integer, DateFormat> integerDateFormatMap = model.getDateMap();
     assertNotNull("date format null", integerDateFormatMap);
     assertEquals(1, integerDateFormatMap.size());
@@ -144,7 +143,7 @@ public class ARFFVectorIterableTest extends TestCase {
     Map<String, Long> words = model.getWords();
     assertNotNull("words null", words);
     assertEquals(10, words.size());
-    System.out.println("Words: " + words);
+    //System.out.println("Words: " + words);
     Map<Integer, DateFormat> integerDateFormatMap = model.getDateMap();
     assertNotNull("date format null", integerDateFormatMap);
     assertEquals(1, integerDateFormatMap.size());

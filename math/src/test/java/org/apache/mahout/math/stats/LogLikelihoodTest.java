@@ -19,36 +19,16 @@ package org.apache.mahout.math.stats;
 import org.junit.Assert;
 import org.junit.Test;
 
-/**
- *
- *
- **/
-public class LogLikelihoodTest extends Assert{
-  /*
-  *> entropy(c(1,1))
-[1] 1.386294
-llr(matrix(c(1,0,0,1), nrow=2))
-[1] 2.772589
-llr(matrix(c(10,0,0,10), nrow=2))
-[1] 27.72589
-llr(matrix(c(5,1995,0,100000), nrow=2))
-[1] 39.33052
-llr(matrix(c(1000,1995,1000,100000), nrow=2))
-[1] 4730.737
-llr(matrix(c(1000,1000,1000,100000), nrow=2))
-[1] 5734.343
-llr(matrix(c(1000,1000,1000,99000), nrow=2))
-[1] 5714.932
-*
-   */
+public class LogLikelihoodTest extends Assert {
+
   @Test
   public void testEntropy() throws Exception {
 
-    assertEquals(LogLikelihood.entropy(1, 1), 1.386294, 0.0001);
+    assertEquals(1.386294, LogLikelihood.entropy(1, 1), 0.0001);
     //TODO: more tests here
     try {
       LogLikelihood.entropy(-1, -1);//exception
-      assertFalse(true);
+      fail();
     } catch (IllegalArgumentException e) {
       
     }
@@ -57,12 +37,12 @@ llr(matrix(c(1000,1000,1000,99000), nrow=2))
   @Test
   public void testLogLikelihood() throws Exception {
     //TODO: check the epsilons
-    assertEquals(LogLikelihood.logLikelihoodRatio(1,0,0,1), 2.772589, 0.0001);
-    assertEquals(LogLikelihood.logLikelihoodRatio(10,0,0,10), 27.72589, 0.0001);
-    assertEquals(LogLikelihood.logLikelihoodRatio(5,1995,0,100000), 39.33052, 0.0001);
-    assertEquals(LogLikelihood.logLikelihoodRatio(1000,1995, 1000, 100000), 4730.737, 0.001);
-    assertEquals(LogLikelihood.logLikelihoodRatio(1000,1000,1000, 100000), 5734.343, 0.001);
-    assertEquals(LogLikelihood.logLikelihoodRatio(1000,1000,1000, 99000), 5714.932, 0.001);
+    assertEquals(2.772589, LogLikelihood.logLikelihoodRatio(1, 0, 0, 1), 0.0001);
+    assertEquals(27.72589, LogLikelihood.logLikelihoodRatio(10, 0, 0, 10), 0.0001);
+    assertEquals(39.33052, LogLikelihood.logLikelihoodRatio(5, 1995, 0, 100000), 0.0001);
+    assertEquals(4730.737, LogLikelihood.logLikelihoodRatio(1000, 1995, 1000, 100000), 0.001);
+    assertEquals(5734.343, LogLikelihood.logLikelihoodRatio(1000, 1000, 1000, 100000), 0.001);
+    assertEquals(5714.932, LogLikelihood.logLikelihoodRatio(1000, 1000, 1000, 99000), 0.001);
   }
 
   @Test

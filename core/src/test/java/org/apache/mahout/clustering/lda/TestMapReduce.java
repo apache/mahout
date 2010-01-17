@@ -20,14 +20,12 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Random;
 
-import junit.framework.TestCase;
-
-
 import org.apache.commons.math.distribution.PoissonDistribution;
 import org.apache.commons.math.distribution.PoissonDistributionImpl;
 import org.apache.commons.math.MathException;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -36,7 +34,7 @@ import org.apache.mahout.common.RandomUtils;
 
 import static org.easymock.classextension.EasyMock.*;
 
-public class TestMapReduce extends TestCase {
+public class TestMapReduce extends MahoutTestCase {
 
   private static final int NUM_TESTS = 10;
   private static final int NUM_TOPICS = 10;
@@ -81,7 +79,6 @@ public class TestMapReduce extends TestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    RandomUtils.useTestSeed();
     random = RandomUtils.getRandom();
     File f = new File("input");
     f.mkdir();

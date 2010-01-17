@@ -32,7 +32,7 @@ public abstract class MatrixTest extends TestCase {
 
   protected final double[] vectorAValues = {1.0 / 1.1, 2.0 / 1.1};
 
-  protected final double[] vectorBValues = {5.0, 10.0, 100.0};
+  //protected final double[] vectorBValues = {5.0, 10.0, 100.0};
 
   protected Matrix test;
 
@@ -57,7 +57,7 @@ public abstract class MatrixTest extends TestCase {
   public void testCopy() {
     int[] c = test.size();
     Matrix copy = test.clone();
-    assertEquals("wrong class", copy.getClass(), test.getClass());
+    assertSame("wrong class", copy.getClass(), test.getClass());
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
@@ -78,14 +78,14 @@ public abstract class MatrixTest extends TestCase {
 
   public void testLike() {
     Matrix like = test.like();
-    assertEquals("type", like.getClass(), test.getClass());
+    assertSame("type", like.getClass(), test.getClass());
     assertEquals("rows", test.size()[ROW], like.size()[ROW]);
     assertEquals("columns", test.size()[COL], like.size()[COL]);
   }
 
   public void testLikeIntInt() {
     Matrix like = test.like(4, 4);
-    assertEquals("type", like.getClass(), test.getClass());
+    assertSame("type", like.getClass(), test.getClass());
     assertEquals("rows", 4, like.size()[ROW]);
     assertEquals("columns", 4, like.size()[COL]);
   }

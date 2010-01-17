@@ -17,13 +17,12 @@
 
 package org.apache.mahout.common.distance;
 
-import junit.framework.TestCase;
-
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 
-public abstract class DefaultDistanceMeasureTest extends TestCase {
+public abstract class DefaultDistanceMeasureTest extends MahoutTestCase {
 
   public abstract DistanceMeasure distanceMeasureFactory();
 

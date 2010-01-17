@@ -17,9 +17,6 @@
 
 package org.apache.mahout.math;
 
-import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.SparseRowMatrix;
-
 public class TestSparseRowMatrix extends MatrixTest {
 
   public TestSparseRowMatrix(String name) {

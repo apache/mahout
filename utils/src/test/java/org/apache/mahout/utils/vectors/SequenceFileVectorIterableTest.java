@@ -17,19 +17,19 @@
 
 package org.apache.mahout.utils.vectors;
 
-import junit.framework.TestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.utils.vectors.io.SequenceFileVectorWriter;
 
 import java.io.File;
 
-public class SequenceFileVectorIterableTest extends TestCase {
+public class SequenceFileVectorIterableTest extends MahoutTestCase {
   public void testIterable() throws Exception {
     File tmpDir = new File(System.getProperty("java.io.tmpdir"));
     File tmpLoc = new File(tmpDir, "sfvit");

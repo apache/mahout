@@ -26,11 +26,10 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Random;
 
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 
-import junit.framework.TestCase;
-
-public class DatasetTest extends TestCase {
+public class DatasetTest extends MahoutTestCase {
 
   private static final int nbAttributes = 10;
 

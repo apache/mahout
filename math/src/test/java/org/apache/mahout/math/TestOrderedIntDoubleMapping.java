@@ -17,8 +17,6 @@
 
 package org.apache.mahout.math;
 
-import org.apache.mahout.math.OrderedIntDoubleMapping;
-
 import junit.framework.TestCase;
 
 public class TestOrderedIntDoubleMapping extends TestCase {

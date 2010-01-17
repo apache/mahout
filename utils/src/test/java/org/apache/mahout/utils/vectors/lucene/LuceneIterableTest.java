@@ -17,7 +17,6 @@
 
 package org.apache.mahout.utils.vectors.lucene;
 
-import junit.framework.TestCase;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexReader;
@@ -25,13 +24,14 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.util.Version;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.utils.vectors.Weight;
 import org.apache.mahout.utils.vectors.TFIDF;
 import org.apache.mahout.utils.vectors.TermInfo;
 import org.apache.mahout.math.Vector;
 
-public class LuceneIterableTest extends TestCase {
+public class LuceneIterableTest extends MahoutTestCase {
   private RAMDirectory directory;
 
   private static final String [] DOCS = {

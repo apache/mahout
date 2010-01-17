@@ -26,8 +26,9 @@ import org.apache.hadoop.mapred.LineRecordReader;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.TextInputFormat;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.StringUtils;
-import org.uncommons.maths.random.MersenneTwisterRNG;
+import org.uncommons.maths.random.RepeatableRNG;
 
 import java.io.IOException;
 import java.util.Random;
@@ -43,7 +44,7 @@ public class DatasetSplit {
 
   private static final String TRAINING = "traintest.training";
 
-  private final byte[] seed;
+  private final long seed;
 
   private final double threshold;
 
@@ -55,14 +56,14 @@ public class DatasetSplit {
    * @param threshold fraction of the total dataset that will be used for
    *        training
    */
-  public DatasetSplit(byte[] seed, double threshold) {
+  public DatasetSplit(long seed, double threshold) {
     this.seed = seed;
     this.threshold = threshold;
     this.training = true;
   }
 
   public DatasetSplit(double threshold) {
-    this(new MersenneTwisterRNG().getSeed(), threshold);
+    this(RandomUtils.seedBytesToLong(((RepeatableRNG) RandomUtils.getRandom()).getSeed()), threshold);
   }
 
   public DatasetSplit(JobConf conf) {
@@ -71,7 +72,7 @@ public class DatasetSplit {
     training = isTraining(conf);
   }
 
-  public byte[] getSeed() {
+  public long getSeed() {
     return seed;
   }
 
@@ -93,12 +94,12 @@ public class DatasetSplit {
     conf.setBoolean(TRAINING, training);
   }
 
-  static byte[] getSeed(JobConf conf) {
+  static long getSeed(JobConf conf) {
     String seedstr = conf.get(SEED);
     if (seedstr == null)
       throw new IllegalArgumentException("SEED job parameter not found");
 
-    return StringUtils.fromString(seedstr);
+    return StringUtils.<Long>fromString(seedstr);
   }
 
   static double getThreshold(JobConf conf) {
@@ -146,7 +147,7 @@ public class DatasetSplit {
 
       DatasetSplit split = new DatasetSplit(conf);
 
-      rng = new MersenneTwisterRNG(split.getSeed());
+      rng = RandomUtils.getRandom(split.getSeed());
       threshold = split.getThreshold();
       training = split.isTraining();
     }

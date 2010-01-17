@@ -27,16 +27,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
 import org.apache.hadoop.conf.Configuration;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.Parameters;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PFPGrowthTest extends TestCase {
+public class PFPGrowthTest extends MahoutTestCase {
 
   private static final Logger log = LoggerFactory.getLogger(PFPGrowthTest.class);
 

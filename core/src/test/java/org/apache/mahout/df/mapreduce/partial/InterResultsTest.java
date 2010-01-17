@@ -18,18 +18,17 @@ package org.apache.mahout.df.mapreduce.partial;
 
 import java.util.Random;
 
-import junit.framework.TestCase;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.Utils;
 import org.apache.mahout.df.node.Leaf;
 import org.apache.mahout.df.node.Node;
 
-public class InterResultsTest extends TestCase {
+public class InterResultsTest extends MahoutTestCase {
 
   /** nb attributes per generated data instance */
   protected static final int nbAttributes = 4;
@@ -54,7 +53,6 @@ public class InterResultsTest extends TestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    RandomUtils.useTestSeed();
     Random rng = RandomUtils.getRandom();
 
     // prepare the data

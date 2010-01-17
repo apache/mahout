@@ -34,6 +34,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.DecisionForest;
 import org.apache.mahout.df.ErrorEstimate;
 import org.apache.mahout.df.DFUtils;
@@ -202,10 +203,11 @@ public class BuildForest extends Configured implements Tool {
 
     if (isOob) {
       Random rng;
-      if (seed != null)
-        rng = new Random(seed);
-      else
-        rng = new Random();
+      if (seed != null) {
+        rng = RandomUtils.getRandom(seed);
+      } else {
+        rng = RandomUtils.getRandom();
+      }
 
       FileSystem fs = dataPath.getFileSystem(getConf());
       int[] labels = Data.extractLabels(dataset, fs, dataPath);

@@ -20,22 +20,15 @@ package org.apache.mahout.df.mapreduce.inmem;
 import java.util.List;
 import java.util.Random;
 
-import junit.framework.TestCase;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.mapreduce.Builder;
 import org.apache.mahout.df.mapreduce.inmem.InMemInputFormat.InMemInputSplit;
 import org.apache.mahout.df.mapreduce.inmem.InMemInputFormat.InMemRecordReader;
 
-public class InMemInputFormatTest extends TestCase {
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    RandomUtils.useTestSeed();
-  }
+public class InMemInputFormatTest extends MahoutTestCase {
 
   public void testSplits() throws Exception {
     int n = 1;

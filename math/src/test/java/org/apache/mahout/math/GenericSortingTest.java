@@ -17,8 +17,6 @@
 
 package org.apache.mahout.math;
 
-import org.apache.mahout.math.GenericSorting;
-import org.apache.mahout.math.Swapper;
 import org.apache.mahout.math.function.IntComparator;
 import org.junit.Assert;
 import org.junit.Test;

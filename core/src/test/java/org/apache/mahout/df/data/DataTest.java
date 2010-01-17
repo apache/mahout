@@ -21,12 +21,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.conditions.Condition;
 
-import junit.framework.TestCase;
-
-public class DataTest extends TestCase {
+public class DataTest extends MahoutTestCase {
 
   protected static final int nbAttributes = 10;
 
@@ -39,7 +38,6 @@ public class DataTest extends TestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    RandomUtils.useTestSeed();
     rng = RandomUtils.getRandom();
     data = Utils.randomData(rng, nbAttributes, datasize);
   }

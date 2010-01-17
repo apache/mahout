@@ -17,14 +17,13 @@
 
 package org.apache.mahout.common.iterator;
 
-import junit.framework.TestCase;
-
 import java.util.Iterator;
 import java.util.Arrays;
 
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 
-public abstract class SamplerCase extends TestCase {
+public abstract class SamplerCase extends MahoutTestCase {
   // these provide access to the underlying implementation
   protected abstract DelegatingIterator<Integer> createSampler(int n, Iterator<Integer> source);
 

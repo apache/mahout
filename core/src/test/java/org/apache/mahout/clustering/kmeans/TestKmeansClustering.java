@@ -17,7 +17,6 @@
 
 package org.apache.mahout.clustering.kmeans;
 
-import junit.framework.TestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -26,6 +25,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
@@ -44,7 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TestKmeansClustering extends TestCase {
+public class TestKmeansClustering extends MahoutTestCase {
 
   public static final double[][] reference = {{1, 1}, {2, 1}, {1, 2},
       {2, 2}, {3, 3}, {4, 4}, {5, 4}, {4, 5}, {5, 5}};

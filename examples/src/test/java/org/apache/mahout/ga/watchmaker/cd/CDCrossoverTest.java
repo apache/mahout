@@ -17,19 +17,14 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import junit.framework.TestCase;
+import org.apache.mahout.common.MahoutTestCase;
 import org.easymock.classextension.EasyMock;
 import org.apache.mahout.common.RandomUtils;
 
 import java.util.List;
 import java.util.Random;
 
-public class CDCrossoverTest extends TestCase {
-
-  @Override
-  public void setUp() {
-    RandomUtils.useTestSeed();
-  }
+public class CDCrossoverTest extends MahoutTestCase {
 
   /**
    * if the parents have different values for all their genes, then the

@@ -17,15 +17,15 @@
 
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
-import junit.framework.TestCase;
 import org.apache.hadoop.io.Text;
+import org.apache.mahout.common.MahoutTestCase;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public class ToolReducerTest extends TestCase {
+public class ToolReducerTest extends MahoutTestCase {
 
   public void testCreateDescriptionNumerical() throws Exception {
     ToolReducer reducer = new ToolReducer();

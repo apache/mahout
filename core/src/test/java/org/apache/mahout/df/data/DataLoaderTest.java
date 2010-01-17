@@ -21,22 +21,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import junit.framework.TestCase;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.Dataset.Attribute;
 
-public class DataLoaderTest extends TestCase {
+public class DataLoaderTest extends MahoutTestCase {
 
   protected Random rng;
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    RandomUtils.useTestSeed();
     rng = RandomUtils.getRandom();
   }
 

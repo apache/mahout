@@ -23,8 +23,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import junit.framework.TestCase;
-
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -32,6 +30,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.SequenceFile.Writer;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.builder.DefaultTreeBuilder;
 import org.apache.mahout.df.builder.TreeBuilder;
@@ -40,7 +39,7 @@ import org.apache.mahout.df.mapreduce.MapredOutput;
 import org.apache.mahout.df.node.Leaf;
 import org.apache.mahout.df.node.Node;
 
-public class PartialBuilderTest extends TestCase {
+public class PartialBuilderTest extends MahoutTestCase {
 
   protected static final int numMaps = 5;
 
@@ -48,12 +47,6 @@ public class PartialBuilderTest extends TestCase {
 
   /** instances per partition */
   protected static final int numInstances = 20;
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    RandomUtils.useTestSeed();
-  }
   
   public void testProcessOutput() throws Exception {
     Configuration conf = new Configuration();

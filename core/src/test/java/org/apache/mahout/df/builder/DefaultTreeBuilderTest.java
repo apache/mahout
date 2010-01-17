@@ -21,18 +21,10 @@ import java.util.Random;
 import java.util.Arrays;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.df.data.Data;
-import org.apache.mahout.df.data.Utils;
 
-import junit.framework.TestCase;
-
-public class DefaultTreeBuilderTest extends TestCase {
-
-  @Override
-  protected void setUp() throws Exception {
-    RandomUtils.useTestSeed();
-  }
+public class DefaultTreeBuilderTest extends MahoutTestCase {
 
   /**
    * make sure that DefaultTreeBuilder.randomAttributes() returns the correct number of attributes, that have not been

@@ -20,8 +20,6 @@ package org.apache.mahout.classifier.bayes;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
@@ -29,9 +27,10 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesFeatureMapper;
 import org.apache.mahout.common.DummyOutputCollector;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.StringTuple;
 
-public class BayesFeatureMapperTest extends TestCase {
+public class BayesFeatureMapperTest extends MahoutTestCase {
   
   public void test() throws Exception {
     BayesFeatureMapper mapper = new BayesFeatureMapper();

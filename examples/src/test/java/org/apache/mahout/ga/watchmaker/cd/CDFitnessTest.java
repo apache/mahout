@@ -17,17 +17,12 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import junit.framework.TestCase;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 
 import java.util.Random;
 
-public class CDFitnessTest extends TestCase {
-
-  @Override
-  public void setUp() {
-    RandomUtils.useTestSeed();
-  }
+public class CDFitnessTest extends MahoutTestCase {
 
   /**
    * Test method for {@link org.apache.mahout.ga.watchmaker.cd.CDFitness#get()}.

@@ -38,7 +38,7 @@ import org.slf4j.Logger;
  * Helper methods used by the tests
  *
  */
-public class Utils {
+public final class Utils {
   private Utils() {
   }
 
@@ -59,7 +59,7 @@ public class Utils {
   }
 
   /** Used when generating random CATEGORICAL values */
-  protected static final int CATEGORICAL_RANGE = 100;
+  static final int CATEGORICAL_RANGE = 100;
 
   /**
    * Generates a random list of tokens
@@ -197,7 +197,7 @@ public class Utils {
    * @param attrs attributes description
    * @return
    */
-  protected static double[] randomVector(Random rng, Attribute[] attrs) {
+  static double[] randomVector(Random rng, Attribute[] attrs) {
     double[] vector = new double[attrs.length];
 
     for (int attr = 0; attr < attrs.length; attr++) {
@@ -219,7 +219,7 @@ public class Utils {
    * @param v double array
    * @return comma-separated string
    */
-  protected static String double2String(double[] v) {
+  static String double2String(double[] v) {
     StringBuilder builder = new StringBuilder();
 
     for (double aV : v) {

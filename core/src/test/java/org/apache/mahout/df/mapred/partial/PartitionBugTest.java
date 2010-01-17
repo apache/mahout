@@ -22,11 +22,10 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Random;
 
-import junit.framework.TestCase;
-
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.builder.TreeBuilder;
 import org.apache.mahout.df.callback.PredictionCallback;
@@ -37,7 +36,7 @@ import org.apache.mahout.df.data.Instance;
 import org.apache.mahout.df.data.Utils;
 import org.apache.mahout.df.node.Node;
 
-public class PartitionBugTest extends TestCase {
+public class PartitionBugTest extends MahoutTestCase {
   static final int numAttributes = 40;
 
   static final int numInstances = 200;
@@ -45,12 +44,6 @@ public class PartitionBugTest extends TestCase {
   static final int numTrees = 10;
 
   static final int numMaps = 5;
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    RandomUtils.useTestSeed();
-  }
 
   /**
    * Make sure that the correct instance ids are being computed

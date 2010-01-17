@@ -19,23 +19,16 @@ package org.apache.mahout.df.split;
 
 import java.util.Random;
 
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.Data;
 import org.apache.mahout.df.data.Utils;
 
-import junit.framework.TestCase;
-
-public class OptIgSplitTest extends TestCase {
+public class OptIgSplitTest extends MahoutTestCase {
 
   protected static final int nbAttributes = 20;
 
   protected static final int numInstances = 100;
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    RandomUtils.useTestSeed();
-  }
  
   public void testComputeSplit() throws Exception {
     int n = 100;

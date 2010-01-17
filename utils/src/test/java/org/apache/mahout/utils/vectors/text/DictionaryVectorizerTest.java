@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Random;
 
-import junit.framework.TestCase;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -32,12 +30,13 @@ import org.apache.hadoop.io.Text;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
+import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.RandomUtils;
 
 /**
  * Test the dictionary Vector
- * 
  */
-public class DictionaryVectorizerTest extends TestCase {
+public class DictionaryVectorizerTest extends MahoutTestCase {
   
   public static final int AVG_DOCUMENT_LENGTH = 20;
   
@@ -54,7 +53,7 @@ public class DictionaryVectorizerTest extends TestCase {
   public static final String ERRORSET =
       "`1234567890" + "-=~@#$%^&*()_+[]{}'\"/<>|\\";
   
-  private static Random random = new Random();
+  private static final Random random = RandomUtils.getRandom();
   
   private FileSystem fs;
   
@@ -108,7 +107,9 @@ public class DictionaryVectorizerTest extends TestCase {
     }
   }
   
+  @Override
   public void setUp() throws Exception {
+    super.setUp();
     rmr("output");
     rmr("testdata");
     Configuration conf = new Configuration();

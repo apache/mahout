@@ -17,14 +17,14 @@
 
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
-import junit.framework.TestCase;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.common.DummyOutputCollector;
+import org.apache.mahout.common.MahoutTestCase;
 
 import java.util.List;
 
-public class ToolMapperTest extends TestCase {
+public class ToolMapperTest extends MahoutTestCase {
 
   public void testExtractAttributes() throws Exception {
     LongWritable key = new LongWritable();

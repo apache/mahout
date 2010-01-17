@@ -19,21 +19,14 @@ package org.apache.mahout.df.data;
 
 import java.util.Random;
 
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 
-import junit.framework.TestCase;
-
-public class DataConverterTest extends TestCase {
+public class DataConverterTest extends MahoutTestCase {
 
   private static final int nbAttributes = 10;
   
   private static final int nbInstances = 100;
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    RandomUtils.useTestSeed();
-  }
   
   public void testConvert() throws Exception {
     Random rng = RandomUtils.getRandom();

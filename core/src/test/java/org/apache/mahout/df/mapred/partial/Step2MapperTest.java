@@ -19,8 +19,6 @@ package org.apache.mahout.df.mapred.partial;
 
 import java.util.Random;
 
-import junit.framework.TestCase;
-
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -28,6 +26,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.DataLoader;
 import org.apache.mahout.df.data.Dataset;
@@ -37,7 +36,7 @@ import org.apache.mahout.df.mapreduce.partial.TreeID;
 import org.apache.mahout.df.node.Leaf;
 import org.apache.mahout.df.node.Node;
 
-public class Step2MapperTest extends TestCase {
+public class Step2MapperTest extends MahoutTestCase {
 
   /**
    * Special Step2Mapper that can be configured without using a Configuration
@@ -63,12 +62,6 @@ public class Step2MapperTest extends TestCase {
   /** nb mappers to use */
   protected static final int nbMappers = 5;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    RandomUtils.useTestSeed();
-  }
-               
   public void testMapper() throws Exception {
     Random rng = RandomUtils.getRandom();
 

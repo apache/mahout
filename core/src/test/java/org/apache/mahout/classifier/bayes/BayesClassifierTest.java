@@ -17,7 +17,6 @@
 
 package org.apache.mahout.classifier.bayes;
 
-import junit.framework.TestCase;
 import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.classifier.bayes.algorithm.BayesAlgorithm;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
@@ -25,16 +24,13 @@ import org.apache.mahout.classifier.bayes.datastore.InMemoryBayesDatastore;
 import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 import org.apache.mahout.classifier.bayes.interfaces.Algorithm;
 import org.apache.mahout.classifier.bayes.model.ClassifierContext;
+import org.apache.mahout.common.MahoutTestCase;
 
-public class BayesClassifierTest extends TestCase {
+public class BayesClassifierTest extends MahoutTestCase {
   
   protected Algorithm algorithm;
   
   protected InMemoryBayesDatastore store;
-  
-  public BayesClassifierTest(String s) {
-    super(s);
-  }
   
   @Override
   protected void setUp() throws Exception {

@@ -17,14 +17,14 @@
 
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
-import junit.framework.TestCase;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.ga.watchmaker.cd.tool.DescriptionUtils.Range;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class DescriptionUtilsTest extends TestCase {
+public class DescriptionUtilsTest extends MahoutTestCase {
 
   public void testCreateNominalDescription() {
     List<String> values = Arrays.asList("val1", "val2", "val3");

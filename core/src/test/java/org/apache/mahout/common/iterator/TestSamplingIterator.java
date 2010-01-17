@@ -17,19 +17,11 @@
 
 package org.apache.mahout.common.iterator;
 
-import junit.framework.TestCase;
-
 import java.util.Iterator;
 
-import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.common.MahoutTestCase;
 
-public class TestSamplingIterator extends TestCase {
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    RandomUtils.useTestSeed();
-  }
+public class TestSamplingIterator extends MahoutTestCase {
 
   public void testEmptyCase() {
     assertFalse(new SamplingIterator<Integer>(Integers.iterator(0), 0.9999).hasNext());

@@ -25,6 +25,7 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -38,7 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TestMeanShift extends TestCase {
+public class TestMeanShift extends MahoutTestCase {
 
   private Vector[] raw = null;
 
@@ -49,10 +50,6 @@ public class TestMeanShift extends TestCase {
   // DistanceMeasure manhattanDistanceMeasure = new ManhattanDistanceMeasure();
 
   final DistanceMeasure euclideanDistanceMeasure = new EuclideanDistanceMeasure();
-
-  public TestMeanShift(String name) {
-    super(name);
-  }
 
   /**
    * Print the canopies to the transcript

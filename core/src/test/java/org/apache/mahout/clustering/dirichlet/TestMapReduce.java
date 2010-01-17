@@ -18,7 +18,6 @@ package org.apache.mahout.clustering.dirichlet;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import junit.framework.TestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.Text;
@@ -34,6 +33,7 @@ import org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution;
 import org.apache.mahout.clustering.dirichlet.models.SampledNormalModel;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.common.DummyOutputCollector;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.JsonVectorAdapter;
@@ -47,7 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class TestMapReduce extends TestCase {
+public class TestMapReduce extends MahoutTestCase {
 
   private List<VectorWritable> sampleData = new ArrayList<VectorWritable>();
 

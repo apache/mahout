@@ -17,8 +17,8 @@
 
 package org.apache.mahout.ga.watchmaker.cd.hadoop;
 
-import junit.framework.TestCase;
 import org.apache.hadoop.fs.Path;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 import org.apache.mahout.ga.watchmaker.cd.Rule;
 import org.apache.mahout.ga.watchmaker.cd.utils.RandomRule;
@@ -29,12 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class CDMahoutEvaluatorTest extends TestCase {
-
-  @Override
-  public void setUp() {
-    RandomUtils.useTestSeed();
-  }
+public class CDMahoutEvaluatorTest extends MahoutTestCase {
 
   public void testEvaluate() throws Exception {
     int nbrules = 100;

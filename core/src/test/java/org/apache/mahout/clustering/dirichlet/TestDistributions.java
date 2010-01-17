@@ -17,19 +17,11 @@
 
 package org.apache.mahout.clustering.dirichlet;
 
-import junit.framework.TestCase;
-
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.common.RandomUtils;
 
-public class TestDistributions extends TestCase {
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    RandomUtils.useTestSeed();    
-  }
+public class TestDistributions extends MahoutTestCase {
 
   public void testRbeta() {
     for (double i = 0.01; i < 20; i += 0.25) {

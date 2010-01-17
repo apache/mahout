@@ -19,13 +19,14 @@ package org.apache.mahout.ga.watchmaker.cd;
 
 import junit.framework.TestCase;
 import junit.framework.Assert;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.ga.watchmaker.cd.utils.MockDataSet;
 import org.apache.mahout.common.RandomUtils;
 import org.easymock.classextension.EasyMock;
 
 import java.util.Random;
 
-public class CDRuleTest extends TestCase {
+public class CDRuleTest extends MahoutTestCase {
 
   private Random rng;
 
@@ -67,8 +68,8 @@ public class CDRuleTest extends TestCase {
   }
 
   @Override
-  protected void setUp() {
-    RandomUtils.useTestSeed();
+  protected void setUp() throws Exception {
+    super.setUp();
     rng = RandomUtils.getRandom();
     mock = new MockDataSet(rng, 50);
   }

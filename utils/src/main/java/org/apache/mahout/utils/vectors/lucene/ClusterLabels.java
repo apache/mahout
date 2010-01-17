@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.vectors.lucene;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -15,6 +14,8 @@ package org.apache.mahout.utils.vectors.lucene;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.utils.vectors.lucene;
 
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -87,16 +88,6 @@ public class ClusterLabels {
       }
       return res;
     }
-    /*
-    * new Comparator<TermInfoClusterInOut>() {
-              // sort in descending order on LLR value
-              @Override
-              public int compare(TermInfoClusterInOut arg0, TermInfoClusterInOut arg1) {
-                return new Double(arg1.logLikelihoodRatio).compareTo(arg0.logLikelihoodRatio);
-              }
-            }
-    *
-    * */
 
     public int getInClusterDiff() {
       return this.inClusterDF - this.outClusterDF;
@@ -105,16 +96,16 @@ public class ClusterLabels {
 
   private static final Logger log = LoggerFactory.getLogger(ClusterLabels.class);
   private static final String LINE_SEP = System.getProperty("line.separator");
-
-  String seqFileDir;
-  String pointsDir;
-  String indexDir;
-  String contentField;
-  String idField;
-  Map<String, List<String>> clusterIdToPoints = null;
-  String output;
   public static final int DEFAULT_MIN_IDS = 50;
   public static final int DEFAULT_MAX_LABELS = 25;
+
+  private String seqFileDir;
+  private String pointsDir;
+  private String indexDir;
+  private String contentField;
+  private String idField;
+  private Map<String, List<String>> clusterIdToPoints = null;
+  private String output;
   private int minNumIds = DEFAULT_MIN_IDS;
   private int maxLabels = DEFAULT_MAX_LABELS;
 
@@ -133,9 +124,9 @@ public class ClusterLabels {
     this.clusterIdToPoints = clusterDumper.getClusterIdToPoints();
   }
 
-  public void getLabels() throws CorruptIndexException, IOException {
+  public void getLabels() throws IOException {
 
-    Writer writer = null;
+    Writer writer;
     if (this.output != null) {
       writer = new FileWriter(this.output);
     } else {
@@ -256,7 +247,7 @@ public class ClusterLabels {
   }
 
 
-  private OpenBitSet getClusterDocBitset(IndexReader reader, Set<String> idSet, String idField) throws CorruptIndexException, IOException {
+  private OpenBitSet getClusterDocBitset(IndexReader reader, Set<String> idSet, String idField) throws IOException {
     int numDocs = reader.numDocs();
 
     OpenBitSet bitset = new OpenBitSet(numDocs);
@@ -286,9 +277,6 @@ public class ClusterLabels {
     return LogLikelihood.logLikelihoodRatio(inDF, k12, outDF, k22);
   }
 
-
-
-
   public String getIdField() {
     return idField;
   }
@@ -305,10 +293,6 @@ public class ClusterLabels {
     this.output = output;
   }
 
-  /**
-   * @param args
-   * @throws IOException
-   */
   public static void main(String[] args) {
 
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();

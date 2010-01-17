@@ -17,17 +17,17 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import junit.framework.TestCase;
 import junit.framework.Assert;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.MahoutTestCase;
 
 import java.io.IOException;
 import java.io.File;
 
-public class FileInfosDatasetTest extends TestCase {
+public class FileInfosDatasetTest extends MahoutTestCase {
 
   public void testRanges() throws IOException {
     Path inpath = new Path("target/test-classes/wdbc");

@@ -15,33 +15,16 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.df.mapreduce.partial;
+package org.apache.mahout.common;
 
-import java.util.Random;
+import junit.framework.TestCase;
 
-import org.apache.mahout.common.MahoutTestCase;
-import org.apache.mahout.common.RandomUtils;
+public abstract class MahoutTestCase extends TestCase {
 
-public class TreeIDTest extends MahoutTestCase {
-                
-  public void testTreeID() {
-    int n = 1000000;
-    Random rng = RandomUtils.getRandom();
-    
-    for (int nloop = 0; nloop < n; nloop++) {
-      int partition = Math.abs(rng.nextInt());
-      int treeId = rng.nextInt(TreeID.MAX_TREEID);
-      
-      TreeID t1 = new TreeID(partition, treeId);
-      
-      assertEquals(partition, t1.partition());
-      assertEquals(treeId, t1.treeId());
-      
-      TreeID t2 = new TreeID();
-      t2.set(partition, treeId);
-
-      assertEquals(partition, t2.partition());
-      assertEquals(treeId, t2.treeId());
-    }
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    RandomUtils.useTestSeed();
   }
+
 }

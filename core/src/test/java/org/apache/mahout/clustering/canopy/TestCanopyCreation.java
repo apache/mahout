@@ -17,7 +17,6 @@
 
 package org.apache.mahout.clustering.canopy;
 
-import junit.framework.TestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -27,6 +26,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.mahout.clustering.ClusteringTestUtils;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -43,7 +43,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class TestCanopyCreation extends TestCase {
+public class TestCanopyCreation extends MahoutTestCase {
+
   static final double[][] raw = {{1, 1}, {2, 1}, {1, 2}, {2, 2},
       {3, 3}, {4, 4}, {5, 4}, {4, 5}, {5, 5}};
 
@@ -60,10 +61,6 @@ public class TestCanopyCreation extends TestCase {
   List<Vector> euclideanCentroids;
 
   FileSystem fs;
-
-  public TestCanopyCreation(String name) {
-    super(name);
-  }
 
   private static List<VectorWritable> getPoints(double[][] raw) {
     List<VectorWritable> points = new ArrayList<VectorWritable>();

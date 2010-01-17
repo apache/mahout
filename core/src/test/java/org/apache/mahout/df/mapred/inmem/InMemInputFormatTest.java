@@ -19,25 +19,18 @@ package org.apache.mahout.df.mapred.inmem;
 
 import java.util.Random;
 
-import junit.framework.TestCase;
-
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.mapred.Builder;
 import org.apache.mahout.df.mapred.inmem.InMemInputFormat.InMemInputSplit;
 import org.apache.mahout.df.mapred.inmem.InMemInputFormat.InMemRecordReader;
 
-public class InMemInputFormatTest extends TestCase {
+public class InMemInputFormatTest extends MahoutTestCase {
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    RandomUtils.useTestSeed();
-  }
- 
   public void testSplits() throws Exception {
     int n = 1;
     int maxNumSplits = 100;

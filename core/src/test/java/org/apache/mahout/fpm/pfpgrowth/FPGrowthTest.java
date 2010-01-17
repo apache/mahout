@@ -25,13 +25,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.fpm.pfpgrowth.convertors.ContextStatusUpdater;
 import org.apache.mahout.fpm.pfpgrowth.convertors.SequenceFileOutputCollector;
@@ -39,11 +38,7 @@ import org.apache.mahout.fpm.pfpgrowth.convertors.string.StringOutputConvertor;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth;
 
-public class FPGrowthTest extends TestCase {
-
-  public FPGrowthTest(String s) {
-    super(s);
-  }
+public class FPGrowthTest extends MahoutTestCase {
 
   public void testMaxHeapFPGrowth() throws IOException {
 

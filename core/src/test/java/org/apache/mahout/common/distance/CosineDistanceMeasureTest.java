@@ -17,12 +17,11 @@
 
 package org.apache.mahout.common.distance;
 
-import junit.framework.TestCase;
-
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 
-public class CosineDistanceMeasureTest extends TestCase {
+public class CosineDistanceMeasureTest extends MahoutTestCase {
 
   public void testMeasure() {
 

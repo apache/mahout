@@ -17,12 +17,12 @@
 
 package org.apache.mahout.common.iterator;
 
-import org.apache.mahout.cf.taste.impl.TasteTestCase;
+import org.apache.mahout.common.MahoutTestCase;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public final class EmptyIteratorTest extends TasteTestCase {
+public final class EmptyIteratorTest extends MahoutTestCase {
 
   public void testIterator() {
     Iterator<Object> mock = new EmptyIterator<Object>();

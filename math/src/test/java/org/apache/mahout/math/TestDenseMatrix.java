@@ -17,9 +17,6 @@
 
 package org.apache.mahout.math;
 
-import org.apache.mahout.math.DenseMatrix;
-import org.apache.mahout.math.Matrix;
-
 public class TestDenseMatrix extends MatrixTest {
 
   public TestDenseMatrix(String name) {

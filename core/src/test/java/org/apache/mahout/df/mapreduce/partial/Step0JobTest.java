@@ -41,6 +41,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.DataConverter;
 import org.apache.mahout.df.data.DataLoader;
@@ -50,7 +51,7 @@ import org.apache.mahout.df.mapreduce.Builder;
 import org.apache.mahout.df.mapreduce.partial.Step0Job.Step0Mapper;
 import org.apache.mahout.df.mapreduce.partial.Step0Job.Step0Output;
 
-public class Step0JobTest extends TestCase {
+public class Step0JobTest extends MahoutTestCase {
 
   // the generated data must be big enough to be splited by FileInputFormat
 
@@ -58,17 +59,11 @@ public class Step0JobTest extends TestCase {
 
   static final int numInstances = 2000;
 
-  int numTrees = 10;
+  //int numTrees = 10;
 
   static final int numMaps = 5;
 
   Step0Context context;
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    RandomUtils.useTestSeed();
-  }
 
   /**
    * Computes the "mapred.max.split.size" that will generate the desired number

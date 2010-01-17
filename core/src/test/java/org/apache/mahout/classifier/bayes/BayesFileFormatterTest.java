@@ -24,23 +24,18 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
-import junit.framework.TestCase;
-
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
 import org.apache.mahout.classifier.BayesFileFormatter;
 import org.apache.mahout.common.FileLineIterable;
 import org.apache.mahout.common.FileLineIterator;
+import org.apache.mahout.common.MahoutTestCase;
 
-public class BayesFileFormatterTest extends TestCase {
+public class BayesFileFormatterTest extends MahoutTestCase {
 
   protected File input;
   protected File out;
   protected String[] words;
-
-  public BayesFileFormatterTest(String s) {
-    super(s);
-  }
 
   @Override
   protected void setUp() throws Exception {

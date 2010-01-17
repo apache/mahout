@@ -17,11 +17,11 @@
 
 package org.apache.mahout.ga.watchmaker.cd.hadoop;
 
-import junit.framework.TestCase;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.ga.watchmaker.cd.hadoop.DatasetSplit.RndLineRecordReader;
 import org.apache.mahout.common.RandomUtils;
 import org.uncommons.maths.random.MersenneTwisterRNG;
@@ -31,12 +31,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class DatasetSplitTest extends TestCase {
-
-  @Override
-  public void setUp() {
-    RandomUtils.useTestSeed();
-  }
+public class DatasetSplitTest extends MahoutTestCase {
 
   /**
    * Mock RecordReader that returns a sequence of keys in the range [0, size[
@@ -94,7 +89,6 @@ public class DatasetSplitTest extends TestCase {
 
     for (int nloop = 0; nloop < n; nloop++) {
       MersenneTwisterRNG rng = (MersenneTwisterRNG) RandomUtils.getRandom();
-      byte[] seed = rng.getSeed();
       double threshold = rng.nextDouble();
 
       JobConf conf = new JobConf();
@@ -102,7 +96,7 @@ public class DatasetSplitTest extends TestCase {
       LongWritable key = new LongWritable();
       Text value = new Text();
       
-      DatasetSplit split = new DatasetSplit(seed, threshold);
+      DatasetSplit split = new DatasetSplit(RandomUtils.seedBytesToLong(rng.getSeed()), threshold);
 
       // read the training set
       split.storeJobParameters(conf);
@@ -130,7 +124,7 @@ public class DatasetSplitTest extends TestCase {
     for (int nloop = 0; nloop < n; nloop++) {
       MersenneTwisterRNG rng = (MersenneTwisterRNG) RandomUtils.getRandom();
 
-      byte[] seed = rng.getSeed();
+      long seed = RandomUtils.seedBytesToLong(rng.getSeed());
       double threshold = rng.nextDouble();
       boolean training = rng.nextBoolean();
 
@@ -140,7 +134,7 @@ public class DatasetSplitTest extends TestCase {
       JobConf conf = new JobConf();
       split.storeJobParameters(conf);
 
-      assertTrue("bad seed", Arrays.equals(seed, DatasetSplit.getSeed(conf)));
+      assertEquals("bad seed", seed, DatasetSplit.getSeed(conf));
       assertEquals("bad threshold", threshold, DatasetSplit.getThreshold(conf));
       assertEquals("bad training", training, DatasetSplit.isTraining(conf));
     }

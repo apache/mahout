@@ -28,7 +28,7 @@ import java.util.Collections;
 import java.util.Iterator;
 
 /**
- * A LuceneIterable is an Iterable&lt;Vector&gt; that uses a Lucene index as the source for creating the {@link org.apache.mahout.math.Vector}.
+ * A LuceneIterable is an Iterable&lt;Vector&gt; that uses a Lucene index as the source for creating the {@link Vector}.
  * The Field used to create the Vector currently must have Term Vectors stored for it.
  */
 public class LuceneIterable implements Iterable<Vector> {

@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 
-import junit.framework.TestCase;
-
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -34,6 +32,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.TextInputFormat;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.DataConverter;
 import org.apache.mahout.df.data.DataLoader;
@@ -43,7 +42,7 @@ import org.apache.mahout.df.mapred.Builder;
 import org.apache.mahout.df.mapred.partial.Step0Job.Step0Mapper;
 import org.apache.mahout.df.mapred.partial.Step0Job.Step0Output;
 
-public class Step0JobTest extends TestCase {
+public class Step0JobTest extends MahoutTestCase {
 
   // the generated data must be big enough to be splited by FileInputFormat
 
@@ -54,12 +53,6 @@ public class Step0JobTest extends TestCase {
   //int numTrees = 10;
 
   private static final int numMaps = 5;
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    RandomUtils.useTestSeed();
-  }
 
   public void testStep0Mapper() throws Exception {
     Random rng = RandomUtils.getRandom();

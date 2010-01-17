@@ -17,13 +17,13 @@
 
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
-import junit.framework.TestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.mahout.ga.watchmaker.cd.tool.DescriptionUtils.Range;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.ga.watchmaker.cd.tool.DescriptionUtils.Range;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.io.BufferedWriter;
@@ -35,15 +35,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-public class CDInfosToolTest extends TestCase {
+public class CDInfosToolTest extends MahoutTestCase {
 
   /** max number of distinct values for any nominal attribute */
   private static final int MAX_NOMINAL_VALUES = 50;
   private Random rng;
 
   @Override
-  protected void setUp() {
-    RandomUtils.useTestSeed();
+  protected void setUp() throws Exception {
+    super.setUp();
     rng = RandomUtils.getRandom();
   }
 

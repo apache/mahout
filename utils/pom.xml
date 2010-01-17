@@ -118,6 +118,13 @@
       <artifactId>mahout-core</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-core</artifactId>
+      <version>${project.version}</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
 
     <dependency>
       <groupId>junit</groupId>
@@ -135,6 +142,11 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-jcl</artifactId>
       <version>1.5.8</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
     </dependency>
 
   </dependencies>

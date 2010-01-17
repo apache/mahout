@@ -19,19 +19,12 @@ package org.apache.mahout.df.data;
 
 import java.util.Random;
 
-import junit.framework.TestCase;
-
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.Dataset.Attribute;
 
-public class DescriptorUtilsTest extends TestCase {
+public class DescriptorUtilsTest extends MahoutTestCase {
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    RandomUtils.useTestSeed();
-  }
-       
   /**
    * Test method for
    * {@link org.apache.mahout.df.data.DescriptorUtils#parseDescriptor(java.lang.String)}.

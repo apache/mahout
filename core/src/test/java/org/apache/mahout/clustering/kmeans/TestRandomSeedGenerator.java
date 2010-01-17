@@ -23,9 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -33,11 +30,12 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.ClusteringTestUtils;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-public class TestRandomSeedGenerator extends TestCase {
+public class TestRandomSeedGenerator extends MahoutTestCase {
   
   static final double[][] raw = {{1, 1}, {2, 1}, {1, 2}, {2, 2},
     {3, 3}, {4, 4}, {5, 4}, {4, 5}, {5, 5}};
@@ -104,19 +102,19 @@ public class TestRandomSeedGenerator extends TestCase {
     while (reader.next(key, value)) {
       clusterCount++;
       int id = value.getId();
-      Assert.assertTrue(set.add(id)); // validate unique id's
+      assertTrue(set.add(id)); // validate unique id's
       
       Vector v = value.getCenter();
       assertVectorEquals(raw[id], v); // validate values match
     }
 
-    Assert.assertEquals(4, clusterCount); // validate sample count
+    assertEquals(4, clusterCount); // validate sample count
   }
   
   public static void assertVectorEquals(double[] raw, Vector v) {
-    Assert.assertEquals(raw.length, v.size());
+    assertEquals(raw.length, v.size());
     for (int i=0; i < raw.length; i++) {
-      Assert.assertEquals(raw[i], v.getQuick(i));
+      assertEquals(raw[i], v.getQuick(i));
     }
   }
 }

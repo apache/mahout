@@ -103,7 +103,7 @@ public class SortingTest extends Assert {
     private Integer i;
     
     ForSorting(int i) {
-      this.i = Integer.valueOf(i);
+      this.i = i;
     }
     
     @Override

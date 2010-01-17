@@ -30,6 +30,12 @@ import java.nio.charset.Charset;
  */
 public final class RandomUtils {
 
+  public static void main(String[] args) {
+    int i = 1;
+System.out.print(i += i++);
+System.out.print(i);
+  }
+
   private static final byte[] STANDARD_SEED = "Mahout=Hadoop+ML".getBytes(Charset.forName("US-ASCII"));
 
   private static boolean testSeed;
@@ -49,6 +55,10 @@ public final class RandomUtils {
   }
 
   public static Random getRandom(long seed) {
+    return new MersenneTwisterRNG(longSeedtoBytes(seed));
+  }
+
+  public static byte[] longSeedtoBytes(long seed) {
     byte[] seedBytes = new byte[16];
     seedBytes[0] = (byte) (seed >>> 56);
     seedBytes[1] = (byte) (seed >>> 48);
@@ -59,7 +69,19 @@ public final class RandomUtils {
     seedBytes[6] = (byte) (seed >>>  8);
     seedBytes[7] = (byte) seed;
     System.arraycopy(seedBytes, 0, seedBytes, 8, 8);
-    return new MersenneTwisterRNG(seedBytes);
+    return seedBytes;
+  }
+
+  public static long seedBytesToLong(byte[] seed) {
+    return
+        ((seed[0] & 0xFFL) << 56) |
+        ((seed[1] & 0xFFL) << 48) |
+        ((seed[2] & 0xFFL) << 40) |
+        ((seed[3] & 0xFFL) << 32) |
+        ((seed[4] & 0xFFL) << 24) |
+        ((seed[5] & 0xFFL) << 16) |
+        ((seed[6] & 0xFFL) <<  8) |
+         (seed[7] & 0xFFL);
   }
 
   /** @return what {@link Double#hashCode()} would return for the same value */

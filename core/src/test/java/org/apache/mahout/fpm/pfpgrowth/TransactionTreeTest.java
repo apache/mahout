@@ -24,12 +24,13 @@ import java.util.Random;
 
 import junit.framework.TestCase;
 
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TransactionTreeTest extends TestCase {
+public class TransactionTreeTest extends MahoutTestCase {
   private static final Logger log = LoggerFactory.getLogger(TransactionTreeTest.class);
 
   private static final int MAX_DUPLICATION = 50;
@@ -48,7 +49,13 @@ public class TransactionTreeTest extends TestCase {
 
   private static final int SKIP_RATE = 10;
 
-  private final Random gen = RandomUtils.getRandom();
+  private Random gen;
+
+  @Override
+  public void setUp() throws Exception {
+    super.setUp();
+    gen = RandomUtils.getRandom();
+  }
 
   public List<Integer> generateRandomArray() {
     List<Integer> list = new ArrayList<Integer>();

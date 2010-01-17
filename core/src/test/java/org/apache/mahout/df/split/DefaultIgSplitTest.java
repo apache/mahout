@@ -19,23 +19,16 @@ package org.apache.mahout.df.split;
 
 import java.util.Random;
 
-import junit.framework.TestCase;
-
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.Data;
 import org.apache.mahout.df.data.DataLoader;
 import org.apache.mahout.df.data.Dataset;
 import org.apache.mahout.df.data.Utils;
 
-public class DefaultIgSplitTest extends TestCase {
+public class DefaultIgSplitTest extends MahoutTestCase {
 
   protected static final int nbAttributes = 10;
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    RandomUtils.useTestSeed();
-  }
    
   public void testEntropy() throws Exception {
     Random rng = RandomUtils.getRandom();

@@ -21,17 +21,6 @@ import junit.framework.TestCase;
 
 import java.util.Iterator;
 
-import org.apache.mahout.math.AbstractVector;
-import org.apache.mahout.math.CardinalityException;
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.IndexException;
-import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.NegateFunction;
-import org.apache.mahout.math.PlusFunction;
-import org.apache.mahout.math.TimesFunction;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorView;
-
 public class TestVectorView extends TestCase {
 
   private static final int cardinality = 3;

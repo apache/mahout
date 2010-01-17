@@ -17,29 +17,22 @@
 
 package org.apache.mahout.ga.watchmaker;
 
-import junit.framework.TestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.ga.watchmaker.utils.DummyCandidate;
 import org.apache.mahout.ga.watchmaker.utils.DummyEvaluator;
 import org.apache.mahout.common.StringUtils;
 import org.apache.mahout.common.FileLineIterable;
-import org.apache.mahout.common.RandomUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collection;
 
-public class MahoutEvaluatorTest extends TestCase {
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    RandomUtils.useTestSeed();
-  }
+public class MahoutEvaluatorTest extends MahoutTestCase {
                                          
   public <T> void testEvaluate() throws Exception {
     // candidate population

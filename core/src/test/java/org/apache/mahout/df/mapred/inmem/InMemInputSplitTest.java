@@ -26,12 +26,11 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Random;
 
-import junit.framework.TestCase;
-
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.mapred.inmem.InMemInputFormat.InMemInputSplit;
 
-public class InMemInputSplitTest extends TestCase {
+public class InMemInputSplitTest extends MahoutTestCase {
 
   private Random rng;
 
@@ -41,7 +40,6 @@ public class InMemInputSplitTest extends TestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    RandomUtils.useTestSeed();
     rng = RandomUtils.getRandom();
 
     byteOutStream = new ByteArrayOutputStream();

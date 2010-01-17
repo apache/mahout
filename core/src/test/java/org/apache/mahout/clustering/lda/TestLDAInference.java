@@ -20,19 +20,18 @@ package org.apache.mahout.clustering.lda;
 import java.util.Iterator;
 import java.util.Random;
 
-import junit.framework.TestCase;
-
 import org.apache.commons.math.distribution.PoissonDistribution;
 import org.apache.commons.math.distribution.PoissonDistributionImpl;
 import org.apache.commons.math.MathException;
 
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.RandomUtils;
 
-public class TestLDAInference extends TestCase {
+public class TestLDAInference extends MahoutTestCase {
 
   private static final int NUM_TOPICS = 20;
 
@@ -41,7 +40,6 @@ public class TestLDAInference extends TestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    RandomUtils.useTestSeed();
     random = RandomUtils.getRandom();
   }
 

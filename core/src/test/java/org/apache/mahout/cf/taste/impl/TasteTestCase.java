@@ -17,9 +17,8 @@
 
 package org.apache.mahout.cf.taste.impl;
 
-import junit.framework.TestCase;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
-import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
@@ -30,16 +29,10 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class TasteTestCase extends TestCase {
+public abstract class TasteTestCase extends MahoutTestCase {
 
   /** "Close enough" value for floating-point comparisons. */
   public static final double EPSILON = 0.00001;
-
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    RandomUtils.useTestSeed();
-  }
 
   public static DataModel getDataModel(long[] userIDs, Double[][] prefValues) {
     FastByIDMap<PreferenceArray> result = new FastByIDMap<PreferenceArray>();

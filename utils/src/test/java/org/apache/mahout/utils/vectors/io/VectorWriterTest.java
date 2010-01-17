@@ -23,6 +23,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -33,7 +34,7 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.ArrayList;
 
-public class VectorWriterTest extends TestCase {
+public class VectorWriterTest extends MahoutTestCase {
 
   public void testSFVW() throws Exception {
     File tmpDir = new File(System.getProperty("java.io.tmpdir"));

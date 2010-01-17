@@ -26,11 +26,10 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Random;
 
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 
-import junit.framework.TestCase;
-
-public class NodeTest extends TestCase {
+public class NodeTest extends MahoutTestCase {
 
   private Random rng;
 
@@ -40,8 +39,6 @@ public class NodeTest extends TestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    RandomUtils.useTestSeed();
-
     rng = RandomUtils.getRandom();
 
     byteOutStream = new ByteArrayOutputStream();
