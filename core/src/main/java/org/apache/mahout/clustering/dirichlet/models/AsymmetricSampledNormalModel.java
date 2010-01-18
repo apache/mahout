@@ -93,7 +93,7 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
       return;
     }
     mean = s1.divide(s0);
-    // compute the two component stds
+    // compute the component stds
     if (s0 > 1) {
       stdDev = s2.times(s0).minus(s1.times(s1))
           .assign(new SquareRootFunction()).divide(s0);

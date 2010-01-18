@@ -100,7 +100,7 @@ public class NormalModel implements Model<VectorWritable> {
     if (s0 > 1) {
       Vector std = s2.times(s0).minus(s1.times(s1)).assign(
           new SquareRootFunction()).divide(s0);
-      stdDev = std.zSum() / s1.size();
+      stdDev = std.zSum() / std.size();
     } else {
       stdDev = Double.MIN_VALUE;
     }

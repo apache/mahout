@@ -97,8 +97,10 @@ class DisplayASNOutputState extends DisplayDirichlet {
     conf
         .set(DirichletDriver.MODEL_FACTORY_KEY,
             "org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDistribution");
-    conf.set(DirichletDriver.NUM_CLUSTERS_KEY, Integer.toString(20));
-    conf.set(DirichletDriver.ALPHA_0_KEY, Double.toString(1.0));
+    conf.set(DirichletDriver.MODEL_PROTOTYPE_KEY, "org.apache.mahout.math.DenseVector");
+    conf.set(DirichletDriver.PROTOTYPE_SIZE_KEY, "2");
+    conf.set(DirichletDriver.NUM_CLUSTERS_KEY, "20");
+    conf.set(DirichletDriver.ALPHA_0_KEY, "1.0");
     File f = new File("output");
     for (File g : f.listFiles()) {
       conf.set(DirichletDriver.STATE_IN_KEY, g.getCanonicalPath());
@@ -115,7 +117,7 @@ class DisplayASNOutputState extends DisplayDirichlet {
   }
 
   static void generateResults() {
-    DisplayDirichlet.generateResults(new NormalModelDistribution());
+    DisplayDirichlet.generateResults(new NormalModelDistribution(new VectorWritable(new DenseVector(2))));
   }
 
 }

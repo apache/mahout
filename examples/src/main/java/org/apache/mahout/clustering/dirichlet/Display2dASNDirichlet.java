@@ -32,8 +32,8 @@ import org.apache.mahout.math.VectorWritable;
 class Display2dASNDirichlet extends DisplayDirichlet {
   Display2dASNDirichlet() {
     initialize();
-    this.setTitle("Dirichlet Process Clusters - 2-d Asymmetric Sampled Normal Distribution (>"
-            + (int) (significance * 100) + "% of population)");
+    this.setTitle("Dirichlet Process Clusters - 2-d Asymmetric Sampled Normal Distribution (>" + (int) (significance * 100)
+        + "% of population)");
   }
 
   @Override
@@ -63,6 +63,6 @@ class Display2dASNDirichlet extends DisplayDirichlet {
   }
 
   private static void generateResults() {
-    DisplayDirichlet.generateResults(new AsymmetricSampledNormalDistribution());
+    DisplayDirichlet.generateResults(new AsymmetricSampledNormalDistribution(new VectorWritable(new DenseVector(2))));
   }
 }

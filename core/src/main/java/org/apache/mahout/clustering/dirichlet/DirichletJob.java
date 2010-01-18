@@ -44,8 +44,8 @@ public class DirichletJob {
   private DirichletJob() {
   }
 
-  public static void main(String[] args) throws IOException,
-      ClassNotFoundException, InstantiationException, IllegalAccessException, SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
+  public static void main(String[] args) throws IOException, ClassNotFoundException, InstantiationException,
+      IllegalAccessException, SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -56,16 +56,25 @@ public class DirichletJob {
     Option topicsOpt = DefaultOptionCreator.kOption().create();
     Option helpOpt = DefaultOptionCreator.helpOption();
 
-    Option mOpt = obuilder.withLongName("alpha").withRequired(true).withShortName("m").
-        withArgument(abuilder.withName("alpha").withMinimum(1).withMaximum(1).create()).
-        withDescription("The alpha0 value for the DirichletDistribution.").create();
+    Option mOpt = obuilder.withLongName("alpha").withRequired(true).withShortName("m").withArgument(
+        abuilder.withName("alpha").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The alpha0 value for the DirichletDistribution.").create();
 
-    Option modelOpt = obuilder.withLongName("modelClass").withRequired(true).withShortName("d").
-        withArgument(abuilder.withName("modelClass").withMinimum(1).withMaximum(1).create()).
-          withDescription("The ModelDistribution class name.").create();
+    Option modelOpt = obuilder.withLongName("modelClass").withRequired(true).withShortName("d").withArgument(
+        abuilder.withName("modelClass").withMinimum(1).withMaximum(1).create())
+        .withDescription("The ModelDistribution class name.").create();
 
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(modelOpt).
-        withOption(maxIterOpt).withOption(mOpt).withOption(topicsOpt).withOption(helpOpt).create();
+    Option prototypeOpt = obuilder.withLongName("modelPrototypeClass").withRequired(true).withShortName("p").withArgument(
+        abuilder.withName("prototypeClass").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The ModelDistribution prototype Vector class name.").create();
+
+    Option sizeOpt = obuilder.withLongName("prototypeSize").withRequired(true).withShortName("s").withArgument(
+        abuilder.withName("prototypeSize").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The ModelDistribution prototype Vector size.").create();
+
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(modelOpt).withOption(
+        prototypeOpt).withOption(sizeOpt).withOption(maxIterOpt).withOption(mOpt).withOption(topicsOpt).withOption(helpOpt)
+        .create();
 
     try {
       Parser parser = new Parser();
@@ -79,10 +88,12 @@ public class DirichletJob {
       String input = cmdLine.getValue(inputOpt).toString();
       String output = cmdLine.getValue(outputOpt).toString();
       String modelFactory = cmdLine.getValue(modelOpt).toString();
+      String modelPrototype = cmdLine.getValue(prototypeOpt).toString();
+      int prototypeSize = Integer.parseInt(cmdLine.getValue(sizeOpt).toString());
       int numModels = Integer.parseInt(cmdLine.getValue(topicsOpt).toString());
       int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt).toString());
       double alpha_0 = Double.parseDouble(cmdLine.getValue(mOpt).toString());
-      runJob(input, output, modelFactory, numModels, maxIterations, alpha_0);
+      runJob(input, output, modelFactory, modelPrototype, prototypeSize, numModels, maxIterations, alpha_0);
     } catch (OptionException e) {
       log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
@@ -96,6 +107,8 @@ public class DirichletJob {
    * @param input         the directory pathname for input points
    * @param output        the directory pathname for output points
    * @param modelFactory  the ModelDistribution class name
+   * @param modelPrototype the Vector class name used by the modelFactory
+   * @param prototypeSize the size of the prototype vector
    * @param numModels     the number of Models
    * @param maxIterations the maximum number of iterations
    * @param alpha_0       the alpha0 value for the DirichletDistribution
@@ -104,9 +117,8 @@ public class DirichletJob {
    * @throws IllegalArgumentException 
    * @throws SecurityException 
    */
-  public static void runJob(String input, String output, String modelFactory,
-                            int numModels, int maxIterations, double alpha_0)
-      throws IOException, ClassNotFoundException, InstantiationException,
+  public static void runJob(String input, String output, String modelFactory, String modelPrototype, int prototypeSize,
+      int numModels, int maxIterations, double alpha_0) throws IOException, ClassNotFoundException, InstantiationException,
       IllegalAccessException, SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
     // delete the output directory
     Configuration conf = new JobConf(DirichletJob.class);
@@ -116,7 +128,6 @@ public class DirichletJob {
       fs.delete(outPath, true);
     }
     fs.mkdirs(outPath);
-    DirichletDriver.runJob(input, output, modelFactory, numModels, maxIterations,
-        alpha_0, 1);
+    DirichletDriver.runJob(input, output, modelFactory, modelPrototype, prototypeSize, numModels, maxIterations, alpha_0, 1);
   }
 }

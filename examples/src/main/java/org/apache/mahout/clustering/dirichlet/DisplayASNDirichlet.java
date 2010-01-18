@@ -64,6 +64,6 @@ class DisplayASNDirichlet extends DisplayDirichlet {
   }
 
   static void generateResults() {
-    DisplayDirichlet.generateResults(new AsymmetricSampledNormalDistribution());
+    DisplayDirichlet.generateResults(new AsymmetricSampledNormalDistribution(new VectorWritable(new DenseVector(2))));
   }
 }

@@ -140,10 +140,10 @@ public class DisplayDirichlet extends Frame {
   }
 
   /**
-   * Plot the points on the graphics context
+   * Draw a rectangle on the graphics context
    * @param g2 a Graphics2D context
-   * @param v a Vector of rectangle centers
-   * @param dv a Vector of rectangle sizes
+   * @param v a Vector of rectangle center
+   * @param dv a Vector of rectangle dimensions
    */
   public static void plotRectangle(Graphics2D g2, Vector v, Vector dv) {
     double[] flip = { 1, -1 };
@@ -157,10 +157,10 @@ public class DisplayDirichlet extends Frame {
   }
 
   /**
-   * Plot the points on the graphics context
+   * Draw an ellipse on the graphics context
    * @param g2 a Graphics2D context
-   * @param v a Vector of rectangle centers
-   * @param dv a Vector of rectangle sizes
+   * @param v a Vector of ellipse center
+   * @param dv a Vector of ellipse dimensions
    */
   public static void plotEllipse(Graphics2D g2, Vector v, Vector dv) {
     double[] flip = { 1, -1 };

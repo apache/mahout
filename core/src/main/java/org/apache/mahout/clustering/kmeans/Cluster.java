@@ -244,7 +244,7 @@ public class Cluster extends ClusterBase {
     Vector stds = pointSquaredTotal.times(getNumPoints()).minus(
         getPointTotal().times(getPointTotal()))
         .assign(new SquareRootFunction()).divide(getNumPoints());
-    return stds.zSum() / 2;
+    return stds.zSum() / stds.size();
   }
 
 }

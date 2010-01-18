@@ -88,11 +88,20 @@ public class DirichletDriver {
         abuilder.withName("modelClass").withMinimum(1).withMaximum(1).create())
         .withDescription("The ModelDistribution class name.").create();
 
+    Option prototypeOpt = obuilder.withLongName("modelPrototypeClass").withRequired(true).withShortName("p").withArgument(
+        abuilder.withName("prototypeClass").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The ModelDistribution prototype Vector class name.").create();
+
+    Option sizeOpt = obuilder.withLongName("prototypeSize").withRequired(true).withShortName("s").withArgument(
+        abuilder.withName("prototypeSize").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The ModelDistribution prototype Vector size.").create();
+
     Option numRedOpt = obuilder.withLongName("maxRed").withRequired(true).withShortName("r").withArgument(
         abuilder.withName("maxRed").withMinimum(1).withMaximum(1).create()).withDescription("The number of reduce tasks.").create();
 
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(modelOpt).withOption(
-        maxIterOpt).withOption(mOpt).withOption(topicsOpt).withOption(helpOpt).withOption(numRedOpt).create();
+        prototypeOpt).withOption(sizeOpt).withOption(maxIterOpt).withOption(mOpt).withOption(topicsOpt).withOption(helpOpt)
+        .withOption(numRedOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -106,11 +115,13 @@ public class DirichletDriver {
       String input = cmdLine.getValue(inputOpt).toString();
       String output = cmdLine.getValue(outputOpt).toString();
       String modelFactory = cmdLine.getValue(modelOpt).toString();
+      String modelPrototype = cmdLine.getValue(prototypeOpt).toString();
+      int prototypeSize = Integer.parseInt(cmdLine.getValue(sizeOpt).toString());
       int numReducers = Integer.parseInt(cmdLine.getValue(numRedOpt).toString());
       int numModels = Integer.parseInt(cmdLine.getValue(topicsOpt).toString());
       int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt).toString());
       double alpha_0 = Double.parseDouble(cmdLine.getValue(mOpt).toString());
-      runJob(input, output, modelFactory, numModels, maxIterations, alpha_0, numReducers);
+      runJob(input, output, modelFactory, modelPrototype, prototypeSize, numModels, maxIterations, alpha_0, numReducers);
     } catch (OptionException e) {
       log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);

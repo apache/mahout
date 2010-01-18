@@ -63,6 +63,6 @@ class DisplayNDirichlet extends DisplayDirichlet {
   }
 
   static void generateResults() {
-    DisplayDirichlet.generateResults(new NormalModelDistribution());
+    DisplayDirichlet.generateResults(new NormalModelDistribution(new VectorWritable(new DenseVector(2))));
   }
 }
