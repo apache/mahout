@@ -30,12 +30,6 @@ import java.nio.charset.Charset;
  */
 public final class RandomUtils {
 
-  public static void main(String[] args) {
-    int i = 1;
-System.out.print(i += i++);
-System.out.print(i);
-  }
-
   private static final byte[] STANDARD_SEED = "Mahout=Hadoop+ML".getBytes(Charset.forName("US-ASCII"));
 
   private static boolean testSeed;
