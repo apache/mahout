@@ -175,4 +175,14 @@ protected int nextPrime(int desiredCapacity) {
    */
   public void trimToSize() {
   }
+  
+  protected static boolean equalsMindTheNull(Object a, Object b) {
+    if (a == null && b == null) {
+      return true;
+    }
+    if (a == null || b == null) {
+      return false;
+    }
+    return a.equals(b);
+  }
 }

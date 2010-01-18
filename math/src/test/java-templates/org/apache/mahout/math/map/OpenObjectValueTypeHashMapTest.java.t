@@ -68,24 +68,6 @@ public class OpenObject${valueTypeCap}HashMapTest extends Assert {
     }
   }
   
-   private static class ComparableKey extends NotComparableKey
-      implements Comparable<ComparableKey> {
-    public ComparableKey(int x) {
-      super(x);
-    }
-      
-    @Override
-    public String toString() {
-      return "[ck " + x + " ]";
-    }
-
-    @Override
-    public int compareTo(ComparableKey o) {
-
-      return (int)(x - o.x);
-    }
-  }
-  
   private NotComparableKey[] ncKeys = {
     new NotComparableKey(101),
     new NotComparableKey(99),
@@ -95,19 +77,9 @@ public class OpenObject${valueTypeCap}HashMapTest extends Assert {
     new NotComparableKey(5)
     };
   
-  private ComparableKey[] cKeys = {
-    new ComparableKey(101),
-    new ComparableKey(99),
-    new ComparableKey(2),
-    new ComparableKey(3),
-    new ComparableKey(4),
-    new ComparableKey(5)
-    };
-  
-
   @Test
   public void testConstructors() {
-    OpenObject${valueTypeCap}HashMap<ComparableKey> map = new OpenObject${valueTypeCap}HashMap<ComparableKey>();
+    OpenObject${valueTypeCap}HashMap<String> map = new OpenObject${valueTypeCap}HashMap<String>();
     int[] capacity = new int[1];
     double[] minLoadFactor = new double[1];
     double[] maxLoadFactor = new double[1];
@@ -117,14 +89,14 @@ public class OpenObject${valueTypeCap}HashMapTest extends Assert {
     assertEquals(AbstractSet.defaultMaxLoadFactor, maxLoadFactor[0], 0.001);
     assertEquals(AbstractSet.defaultMinLoadFactor, minLoadFactor[0], 0.001);
     int prime = PrimeFinder.nextPrime(907);
-    map = new OpenObject${valueTypeCap}HashMap<ComparableKey>(prime);
+    map = new OpenObject${valueTypeCap}HashMap<String>(prime);
     
     map.getInternalFactors(capacity, minLoadFactor, maxLoadFactor);
     assertEquals(prime, capacity[0]);
     assertEquals(AbstractSet.defaultMaxLoadFactor, maxLoadFactor[0], 0.001);
     assertEquals(AbstractSet.defaultMinLoadFactor, minLoadFactor[0], 0.001);
     
-    map = new OpenObject${valueTypeCap}HashMap<ComparableKey>(prime, 0.4, 0.8);
+    map = new OpenObject${valueTypeCap}HashMap<String>(prime, 0.4, 0.8);
     map.getInternalFactors(capacity, minLoadFactor, maxLoadFactor);
     assertEquals(prime, capacity[0]);
     assertEquals(0.4, minLoadFactor[0], 0.001);
@@ -133,7 +105,7 @@ public class OpenObject${valueTypeCap}HashMapTest extends Assert {
   
   @Test
   public void testEnsureCapacity() {
-    OpenObject${valueTypeCap}HashMap<ComparableKey> map = new OpenObject${valueTypeCap}HashMap<ComparableKey>();
+    OpenObject${valueTypeCap}HashMap<String> map = new OpenObject${valueTypeCap}HashMap<String>();
     int prime = PrimeFinder.nextPrime(907);
     
     map.ensureCapacity(prime);
@@ -147,8 +119,8 @@ public class OpenObject${valueTypeCap}HashMapTest extends Assert {
   
   @Test
   public void testClear() {
-    OpenObject${valueTypeCap}HashMap<ComparableKey> map = new OpenObject${valueTypeCap}HashMap<ComparableKey>();
-    map.put(cKeys[0], (${valueType})11); 
+    OpenObject${valueTypeCap}HashMap<String> map = new OpenObject${valueTypeCap}HashMap<String>();
+    map.put("Eleven", (${valueType})11); 
     assertEquals(1, map.size());
     map.clear();
     assertEquals(0, map.size());
@@ -157,60 +129,60 @@ public class OpenObject${valueTypeCap}HashMapTest extends Assert {
   @Test
   @SuppressWarnings("unchecked")
   public void testClone() {
-    OpenObject${valueTypeCap}HashMap<ComparableKey> map = new OpenObject${valueTypeCap}HashMap<ComparableKey>();
-    map.put(cKeys[0], (${valueType})11);
-    OpenObject${valueTypeCap}HashMap<ComparableKey> map2 = (OpenObject${valueTypeCap}HashMap<ComparableKey>) map.clone();
+    OpenObject${valueTypeCap}HashMap<String> map = new OpenObject${valueTypeCap}HashMap<String>();
+    map.put("Eleven", (${valueType})11);
+    OpenObject${valueTypeCap}HashMap<String> map2 = (OpenObject${valueTypeCap}HashMap<String>) map.clone();
     map.clear();
     assertEquals(1, map2.size());
   }
   
   @Test
   public void testContainsKey() {
-    OpenObject${valueTypeCap}HashMap<ComparableKey> map = new OpenObject${valueTypeCap}HashMap<ComparableKey>();
-    map.put(cKeys[0], (${valueType})11);
-    assertTrue(map.containsKey(cKeys[0]));
-    assertFalse(map.containsKey(cKeys[1]));
+    OpenObject${valueTypeCap}HashMap<String> map = new OpenObject${valueTypeCap}HashMap<String>();
+    map.put("Eleven", (${valueType})11);
+    assertTrue(map.containsKey("Eleven"));
+    assertTrue(map.containsKey(new String("Eleven")));
+    assertFalse(map.containsKey("Twelve"));
   }
   
   @Test
   public void testContainValue() {
-    OpenObject${valueTypeCap}HashMap<ComparableKey> map = new OpenObject${valueTypeCap}HashMap<ComparableKey>();
-    map.put(cKeys[0], (${valueType})11);
+    OpenObject${valueTypeCap}HashMap<String> map = new OpenObject${valueTypeCap}HashMap<String>();
+    map.put("Eleven", (${valueType})11);
     assertTrue(map.containsValue((${valueType})11));
     assertFalse(map.containsValue((${valueType})12));
   }
   
   @Test
   public void testForEachKey() {
-    final List<ComparableKey> keys = new ArrayList<ComparableKey>();
-    OpenObject${valueTypeCap}HashMap<ComparableKey> map = new OpenObject${valueTypeCap}HashMap<ComparableKey>();
-    map.put(cKeys[0], (${valueType}) 11);
-    map.put(cKeys[1], (${valueType}) 12);
-    map.put(cKeys[2], (${valueType}) 13);
-    map.put(cKeys[3], (${valueType}) 14);
-    map.removeKey(cKeys[2]);
-    map.forEachKey(new ObjectProcedure<ComparableKey>() {
+    final List<String> keys = new ArrayList<String>();
+    OpenObject${valueTypeCap}HashMap<String> map = new OpenObject${valueTypeCap}HashMap<String>();
+    map.put("Eleven", (${valueType}) 11);
+    map.put("Twelve", (${valueType}) 12);
+    map.put("Thirteen", (${valueType}) 13);
+    map.put("Fourteen", (${valueType}) 14);
+    map.removeKey("Thirteen");
+    map.forEachKey(new ObjectProcedure<String>() {
       
       @Override
-      public boolean apply(ComparableKey element) {
+      public boolean apply(String element) {
         keys.add(element);
         return true;
       }
     });
     
-    //2, 3, 1, 0
     assertEquals(3, keys.size());
     Collections.sort(keys);
-    assertSame(cKeys[3], keys.get(0));
-    assertSame(cKeys[1], keys.get(1));
-    assertSame(cKeys[0], keys.get(2));
+    assertSame("Fourteen", keys.get(1));
+    assertSame("Twelve", keys.get(2));
+    assertSame("Eleven", keys.get(0));
   }
   
   private static class Pair implements Comparable<Pair> {
     ${valueType} v;
-    ComparableKey k;
+    String k;
     
-    Pair(ComparableKey k, ${valueType} v) {
+    Pair(String k, ${valueType} v) {
       this.k = k;
       this.v = v;
     }
@@ -224,16 +196,16 @@ public class OpenObject${valueTypeCap}HashMapTest extends Assert {
   @Test
   public void testForEachPair() {
     final List<Pair> pairs = new ArrayList<Pair>();
-    OpenObject${valueTypeCap}HashMap<ComparableKey> map = new OpenObject${valueTypeCap}HashMap<ComparableKey>();
-    map.put(cKeys[0], (${valueType}) 11);
-    map.put(cKeys[1], (${valueType}) 12);
-    map.put(cKeys[2], (${valueType}) 13);
-    map.put(cKeys[3], (${valueType}) 14);
-    map.removeKey(cKeys[2]);
-    map.forEachPair(new Object${valueTypeCap}Procedure<ComparableKey>() {
+    OpenObject${valueTypeCap}HashMap<String> map = new OpenObject${valueTypeCap}HashMap<String>();
+    map.put("Eleven", (${valueType}) 11);
+    map.put("Twelve", (${valueType}) 12);
+    map.put("Thirteen", (${valueType}) 13);
+    map.put("Fourteen", (${valueType}) 14);
+    map.removeKey("Thirteen");
+    map.forEachPair(new Object${valueTypeCap}Procedure<String>() {
       
       @Override
-      public boolean apply(ComparableKey first, ${valueType} second) {
+      public boolean apply(String first, ${valueType} second) {
         pairs.add(new Pair(first, second));
         return true;
       }
@@ -241,19 +213,19 @@ public class OpenObject${valueTypeCap}HashMapTest extends Assert {
     
     Collections.sort(pairs);
     assertEquals(3, pairs.size());
-    assertEquals((${valueType})14, pairs.get(0).v ${valueEpsilon});
-    assertSame(cKeys[3], pairs.get(0).k);
-    assertEquals((${valueType}) 12, pairs.get(1).v ${valueEpsilon});
-    assertSame(cKeys[1], pairs.get(1).k);
-    assertEquals((${valueType}) 11, pairs.get(2).v ${valueEpsilon});
-    assertSame(cKeys[0], pairs.get(2).k);
+    assertEquals((${valueType})14, pairs.get(1).v ${valueEpsilon});
+    assertSame("Fourteen", pairs.get(1).k);
+    assertEquals((${valueType}) 12, pairs.get(2).v ${valueEpsilon});
+    assertSame("Twelve", pairs.get(2).k);
+    assertEquals((${valueType}) 11, pairs.get(0).v ${valueEpsilon});
+    assertSame("Eleven", pairs.get(0).k);
     
     pairs.clear();
-    map.forEachPair(new Object${valueTypeCap}Procedure<ComparableKey>() {
+    map.forEachPair(new Object${valueTypeCap}Procedure<String>() {
       int count = 0;
       
       @Override
-      public boolean apply(ComparableKey first, ${valueType} second) {
+      public boolean apply(String first, ${valueType} second) {
         pairs.add(new Pair(first, second));
         count++;
         return count < 2;
@@ -265,41 +237,41 @@ public class OpenObject${valueTypeCap}HashMapTest extends Assert {
   
   @Test
   public void testGet() {
-    OpenObject${valueTypeCap}HashMap<NotComparableKey> map = new OpenObject${valueTypeCap}HashMap<NotComparableKey>();
-    map.put(ncKeys[0], (${valueType}) 11);
-    map.put(ncKeys[1], (${valueType}) 12);
-    assertEquals((${valueType})11, map.get(ncKeys[0]) ${valueEpsilon});
+    OpenObject${valueTypeCap}HashMap<String> map = new OpenObject${valueTypeCap}HashMap<String>();
+    map.put("Eleven", (${valueType}) 11);
+    map.put("Twelve", (${valueType}) 12);
+    assertEquals((${valueType})11, map.get("Eleven") ${valueEpsilon});
   }
 
   @Test
   public void testKeys() {
-    OpenObject${valueTypeCap}HashMap<ComparableKey> map = new OpenObject${valueTypeCap}HashMap<ComparableKey>();
-    map.put(cKeys[0], (${valueType}) 11);
-    map.put(cKeys[1], (${valueType}) 12);
-    List<ComparableKey> keys = new ArrayList<ComparableKey>();
+    OpenObject${valueTypeCap}HashMap<String> map = new OpenObject${valueTypeCap}HashMap<String>();
+    map.put("Eleven", (${valueType}) 11);
+    map.put("Twelve", (${valueType}) 12);
+    List<String> keys = new ArrayList<String>();
     map.keys(keys);
     Collections.sort(keys);
-    assertSame(cKeys[1], keys.get(0));
-    assertSame(cKeys[0], keys.get(1));
-    List<ComparableKey> k2 = map.keys();
+    assertSame("Twelve", keys.get(1));
+    assertSame("Eleven", keys.get(0));
+    List<String> k2 = map.keys();
     Collections.sort(k2);
     assertEquals(keys, k2);
   }
   
   @Test
   public void testPairsMatching() {
-    List<ComparableKey> keyList = new ArrayList<ComparableKey>();
+    List<String> keyList = new ArrayList<String>();
     ${valueTypeCap}ArrayList valueList = new ${valueTypeCap}ArrayList();
-    OpenObject${valueTypeCap}HashMap<ComparableKey> map = new OpenObject${valueTypeCap}HashMap<ComparableKey>();
-    map.put(cKeys[0], (${valueType}) 11);
-    map.put(cKeys[1], (${valueType}) 12);
-    map.put(cKeys[2], (${valueType}) 13);
-    map.put(cKeys[3], (${valueType}) 14);
-    map.removeKey(cKeys[2]);
-    map.pairsMatching(new Object${valueTypeCap}Procedure<ComparableKey>() {
+    OpenObject${valueTypeCap}HashMap<String> map = new OpenObject${valueTypeCap}HashMap<String>();
+    map.put("Eleven", (${valueType}) 11);
+    map.put("Twelve", (${valueType}) 12);
+    map.put("Thirteen", (${valueType}) 13);
+    map.put("Fourteen", (${valueType}) 14);
+    map.removeKey("Thirteen");
+    map.pairsMatching(new Object${valueTypeCap}Procedure<String>() {
 
       @Override
-      public boolean apply(ComparableKey first, ${valueType} second) {
+      public boolean apply(String first, ${valueType} second) {
         return (second % 2) == 0;
       }},
         keyList, valueList);
@@ -307,20 +279,20 @@ public class OpenObject${valueTypeCap}HashMapTest extends Assert {
     valueList.sort();
     assertEquals(2, keyList.size());
     assertEquals(2, valueList.size());
-    assertSame(cKeys[3], keyList.get(0));
-    assertSame(cKeys[1], keyList.get(1));
+    assertSame("Fourteen", keyList.get(0));
+    assertSame("Twelve", keyList.get(1));
     assertEquals((${valueType})14, valueList.get(1) ${valueEpsilon});
     assertEquals((${valueType})12, valueList.get(0) ${valueEpsilon});
   }
   
   @Test
   public void testValues() {
-    OpenObject${valueTypeCap}HashMap<ComparableKey> map = new OpenObject${valueTypeCap}HashMap<ComparableKey>();
-    map.put(cKeys[0], (${valueType}) 11);
-    map.put(cKeys[1], (${valueType}) 12);
-    map.put(cKeys[2], (${valueType}) 13);
-    map.put(cKeys[3], (${valueType}) 14);
-    map.removeKey(cKeys[2]);
+    OpenObject${valueTypeCap}HashMap<String> map = new OpenObject${valueTypeCap}HashMap<String>();
+    map.put("Eleven", (${valueType}) 11);
+    map.put("Twelve", (${valueType}) 12);
+    map.put("Thirteen", (${valueType}) 13);
+    map.put("Fourteen", (${valueType}) 14);
+    map.removeKey("Thirteen");
     ${valueTypeCap}ArrayList values = new ${valueTypeCap}ArrayList(100);
     map.values(values);
     assertEquals(3, values.size());
@@ -334,9 +306,9 @@ public class OpenObject${valueTypeCap}HashMapTest extends Assert {
   
   @Test
   public void testCopy() {
-    OpenObject${valueTypeCap}HashMap<NotComparableKey> map = new OpenObject${valueTypeCap}HashMap<NotComparableKey>();
-    map.put(ncKeys[0], (${valueType})11);
-    OpenObject${valueTypeCap}HashMap<NotComparableKey> map2 = (OpenObject${valueTypeCap}HashMap<NotComparableKey>) map.copy();
+    OpenObject${valueTypeCap}HashMap<String> map = new OpenObject${valueTypeCap}HashMap<String>();
+    map.put("Eleven", (${valueType})11);
+    OpenObject${valueTypeCap}HashMap<String> map2 = (OpenObject${valueTypeCap}HashMap<String>) map.copy();
     map.clear();
     assertEquals(1, map2.size());
   }
@@ -346,18 +318,18 @@ public class OpenObject${valueTypeCap}HashMapTest extends Assert {
     // since there are no other subclasses of 
     // Abstractxxx available, we have to just test the
     // obvious.
-    OpenObject${valueTypeCap}HashMap<ComparableKey> map = new OpenObject${valueTypeCap}HashMap<ComparableKey>();
-    map.put(cKeys[0], (${valueType}) 11);
-    map.put(cKeys[1], (${valueType}) 12);
-    map.put(cKeys[2], (${valueType}) 13);
-    map.put(cKeys[3], (${valueType}) 14);
-    map.removeKey(cKeys[2]);
-    OpenObject${valueTypeCap}HashMap<ComparableKey> map2 = (OpenObject${valueTypeCap}HashMap<ComparableKey>) map.copy();
+    OpenObject${valueTypeCap}HashMap<String> map = new OpenObject${valueTypeCap}HashMap<String>();
+    map.put("Eleven", (${valueType}) 11);
+    map.put("Twelve", (${valueType}) 12);
+    map.put("Thirteen", (${valueType}) 13);
+    map.put("Fourteen", (${valueType}) 14);
+    map.removeKey("Thirteen");
+    OpenObject${valueTypeCap}HashMap<String> map2 = (OpenObject${valueTypeCap}HashMap<String>) map.copy();
     assertTrue(map.equals(map2));
     assertTrue(map2.equals(map));
     assertFalse("Hello Sailor".equals(map));
     assertFalse(map.equals("hello sailor"));
-    map2.removeKey(cKeys[0]);
+    map2.removeKey("Eleven");
     assertFalse(map.equals(map2));
     assertFalse(map2.equals(map));
   }
@@ -366,62 +338,74 @@ public class OpenObject${valueTypeCap}HashMapTest extends Assert {
   
   @Test
   public void testKeysSortedByValue() {
-    OpenObject${valueTypeCap}HashMap<ComparableKey> map = new OpenObject${valueTypeCap}HashMap<ComparableKey>();
-    map.put(cKeys[0], (${valueType}) 11);
-    map.put(cKeys[1], (${valueType}) 12);
-    map.put(cKeys[2], (${valueType}) 13);
-    map.put(cKeys[3], (${valueType}) 14);
-    map.removeKey(cKeys[2]);
-    List<ComparableKey> keys = new ArrayList<ComparableKey>();
+    OpenObject${valueTypeCap}HashMap<String> map = new OpenObject${valueTypeCap}HashMap<String>();
+    map.put("Eleven", (${valueType}) 11);
+    map.put("Twelve", (${valueType}) 12);
+    map.put("Thirteen", (${valueType}) 13);
+    map.put("Fourteen", (${valueType}) 14);
+    map.removeKey("Thirteen");
+    List<String> keys = new ArrayList<String>();
     map.keysSortedByValue(keys);
-    ComparableKey[] keysArray = keys.toArray(new ComparableKey[keys.size()]);
-    assertArrayEquals(new ComparableKey[] {cKeys[0], cKeys[1], cKeys[3]},
+    String[] keysArray = keys.toArray(new String[keys.size()]);
+    assertArrayEquals(new String[] {"Eleven", "Twelve", "Fourteen"},
         keysArray);
   }
   
   @Test
   public void testPairsSortedByKey() {
-    OpenObject${valueTypeCap}HashMap<ComparableKey> map = new OpenObject${valueTypeCap}HashMap<ComparableKey>();
-    map.put(cKeys[0], (${valueType}) 11);
-    map.put(cKeys[1], (${valueType}) 12);
-    map.put(cKeys[2], (${valueType}) 13);
-    map.put(cKeys[3], (${valueType}) 14);
+    OpenObject${valueTypeCap}HashMap<String> map = new OpenObject${valueTypeCap}HashMap<String>();
+    map.put("Eleven", (${valueType}) 11);
+    map.put("Twelve", (${valueType}) 12);
+    map.put("Thirteen", (${valueType}) 13);
+    map.put("Fourteen", (${valueType}) 14);
     
     ${valueTypeCap}ArrayList values = new ${valueTypeCap}ArrayList();
-    List<ComparableKey> keys = new ArrayList<ComparableKey>();
+    List<String> keys = new ArrayList<String>();
     map.pairsSortedByKey(keys, values);
     
     assertEquals(4, keys.size());
     assertEquals(4, values.size());
-    assertEquals((${valueType}) 13, values.get(0) ${valueEpsilon});
-    assertSame(cKeys[2], keys.get(0));
+    assertEquals((${valueType}) 11, values.get(0) ${valueEpsilon});
+    assertSame("Eleven", keys.get(0));
     assertEquals((${valueType}) 14, values.get(1) ${valueEpsilon});
-    assertSame(cKeys[3], keys.get(1));
-    assertEquals((${valueType}) 12, values.get(2) ${valueEpsilon});
-    assertSame(cKeys[1], keys.get(2));
-    assertEquals((${valueType}) 11, values.get(3) ${valueEpsilon});
-    assertSame(cKeys[0], keys.get(3));
+    assertSame("Fourteen", keys.get(1));
+    assertEquals((${valueType}) 13, values.get(2) ${valueEpsilon});
+    assertSame("Thirteen", keys.get(2));
+    assertEquals((${valueType}) 12, values.get(3) ${valueEpsilon});
+    assertSame("Twelve", keys.get(3));
+  }
+  
+  @Test(expected=UnsupportedOperationException.class)
+  public void testPairsSortedByKeyNotComparable() {
+    OpenObject${valueTypeCap}HashMap<NotComparableKey> map = new OpenObject${valueTypeCap}HashMap<NotComparableKey>();
+    map.put(ncKeys[0], (${valueType}) 11);
+    map.put(ncKeys[1], (${valueType}) 12);
+    map.put(ncKeys[2], (${valueType}) 13);
+    map.put(ncKeys[3], (${valueType}) 14);
+    ${valueTypeCap}ArrayList values = new ${valueTypeCap}ArrayList();
+    List<NotComparableKey> keys = new ArrayList<NotComparableKey>();
+    map.pairsSortedByKey(keys, values);
   }
   
   @Test
   public void testPairsSortedByValue() {
-    OpenObject${valueTypeCap}HashMap<ComparableKey> map = new OpenObject${valueTypeCap}HashMap<ComparableKey>();
-    map.put(cKeys[0], (${valueType}) 11);
-    map.put(cKeys[1], (${valueType}) 12);
-    map.put(cKeys[2], (${valueType}) 13);
-    map.put(cKeys[3], (${valueType}) 14);
+    OpenObject${valueTypeCap}HashMap<String> map = new OpenObject${valueTypeCap}HashMap<String>();
+    map.put("Eleven", (${valueType}) 11);
+    map.put("Twelve", (${valueType}) 12);
+    map.put("Thirteen", (${valueType}) 13);
+    map.put("Fourteen", (${valueType}) 14);
     
-    List<ComparableKey> keys = new ArrayList<ComparableKey>();
+    List<String> keys = new ArrayList<String>();
     ${valueTypeCap}ArrayList values = new ${valueTypeCap}ArrayList();
     map.pairsSortedByValue(keys, values);
     assertEquals((${valueType}) 11, values.get(0) ${valueEpsilon});
-    assertEquals(cKeys[0], keys.get(0));
+    assertEquals("Eleven", keys.get(0));
     assertEquals((${valueType}) 12, values.get(1) ${valueEpsilon});
-    assertEquals(cKeys[1], keys.get(1));
+    assertEquals("Twelve", keys.get(1));
     assertEquals((${valueType}) 13, values.get(2) ${valueEpsilon});
-    assertEquals(cKeys[2], keys.get(2));
+    assertEquals("Thirteen", keys.get(2));
     assertEquals((${valueType}) 14, values.get(3) ${valueEpsilon});
-    assertEquals(cKeys[3], keys.get(3));
+    assertEquals("Fourteen", keys.get(3));
   }
  
  }

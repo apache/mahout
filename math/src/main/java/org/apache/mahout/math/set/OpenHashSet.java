@@ -17,37 +17,29 @@
  * under the License.
  */
 
-/*
-Copyright � 1999 CERN - European Organization for Nuclear Research.
-Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose 
-is hereby granted without fee, provided that the above copyright notice appear in all copies and 
-that both that copyright notice and this permission notice appear in supporting documentation. 
-CERN makes no representations about the suitability of this software for any purpose. 
-It is provided "as is" without expressed or implied warranty.
-*/
-package org.apache.mahout.math.map;
+package org.apache.mahout.math.set;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
-import org.apache.mahout.math.function.Object${valueTypeCap}Procedure;
 import org.apache.mahout.math.function.ObjectProcedure;
-import org.apache.mahout.math.list.${valueTypeCap}ArrayList;
+import org.apache.mahout.math.map.PrimeFinder;
 
 /**
-  * Open hash map from Object keys to ${valueType} values.
+  * Open hashing alternative to java.util.HashSet.
  **/
-public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTypeCap}Map<T> {
+public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
   protected static final byte FREE = 0;
   protected static final byte FULL = 1;
   protected static final byte REMOVED = 2;
-  protected static final Object NO_KEY_VALUE = null;
+  protected static final char NO_KEY_VALUE = 0;
 
   /** The hash table keys. */
   protected Object[] table;
-
-  /** The hash table values. */
-  protected ${valueType}[] values;
 
   /** The state of each hash table entry (FREE, FULL, REMOVED). */
   protected byte[] state;
@@ -57,7 +49,7 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
 
 
   /** Constructs an empty map with default capacity and default load factors. */
-  public OpenObject${valueTypeCap}HashMap() {
+  public OpenHashSet() {
     this(defaultCapacity);
   }
 
@@ -67,7 +59,7 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
    * @param initialCapacity the initial capacity of the map.
    * @throws IllegalArgumentException if the initial capacity is less than zero.
    */
-  public OpenObject${valueTypeCap}HashMap(int initialCapacity) {
+  public OpenHashSet(int initialCapacity) {
     this(initialCapacity, defaultMinLoadFactor, defaultMaxLoadFactor);
   }
 
@@ -81,11 +73,11 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
    *                                  (maxLoadFactor <= 0.0 || maxLoadFactor >= 1.0) || (minLoadFactor >=
    *                                  maxLoadFactor)</tt>.
    */
-  public OpenObject${valueTypeCap}HashMap(int initialCapacity, double minLoadFactor, double maxLoadFactor) {
+  public OpenHashSet(int initialCapacity, double minLoadFactor, double maxLoadFactor) {
     setUp(initialCapacity, minLoadFactor, maxLoadFactor);
   }
 
-  /** Removes all (key,value) associations from the receiver. Implicitly calls <tt>trimToSize()</tt>. */
+  /** Removes all values associations from the receiver. Implicitly calls <tt>trimToSize()</tt>. */
   @Override
   public void clear() {
     Arrays.fill(this.state, 0, state.length - 1, FREE);
@@ -99,12 +91,11 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
    *
    * @return a deep copy of the receiver.
    */
-  @Override
   @SuppressWarnings("unchecked")
+  @Override
   public Object clone() {
-    OpenObject${valueTypeCap}HashMap copy = (OpenObject${valueTypeCap}HashMap) super.clone();
+    OpenHashSet copy = (OpenHashSet) super.clone();
     copy.table = copy.table.clone();
-    copy.values = copy.values.clone();
     copy.state = copy.state.clone();
     return copy;
   }
@@ -114,25 +105,15 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
    *
    * @return <tt>true</tt> if the receiver contains the specified key.
    */
-  @Override
-  public boolean containsKey(T key) {
-    return indexOfKey(key) >= 0;
-  }
-
-  /**
-   * Returns <tt>true</tt> if the receiver contains the specified value.
-   *
-   * @return <tt>true</tt> if the receiver contains the specified value.
-   */
-  @Override
-  public boolean containsValue(${valueType} value) {
-    return indexOfValue(value) >= 0;
+  @SuppressWarnings("unchecked")
+  public boolean contains(Object key) {
+    return indexOfKey((T)key) >= 0;
   }
 
   /**
    * Ensures that the receiver can hold at least the specified number of associations without needing to allocate new
    * internal memory. If necessary, allocates new internal memory and increases the capacity of the receiver. <p> This
-   * method never need be called; it is for performance tuning only. Calling this method before <tt>put()</tt>ing a
+   * method never need be called; it is for performance tuning only. Calling this method before <tt>add()</tt>ing a
    * large number of associations boosts performance, because the receiver will grow only once instead of potentially
    * many times and hash collisions get less probable.
    *
@@ -157,7 +138,6 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
    *                  continues.
    * @return <tt>false</tt> if the procedure stopped before all keys where iterated over, <tt>true</tt> otherwise.
    */
-  @Override
   @SuppressWarnings("unchecked")
   public boolean forEachKey(ObjectProcedure<T> procedure) {
     for (int i = table.length; i-- > 0;) {
@@ -168,44 +148,6 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
       }
     }
     return true;
-  }
-
-  /**
-   * Applies a procedure to each (key,value) pair of the receiver, if any. Iteration order is guaranteed to be
-   * <i>identical</i> to the order used by method {@link #forEachKey(ObjectProcedure)}.
-   *
-   * @param procedure the procedure to be applied. Stops iteration if the procedure returns <tt>false</tt>, otherwise
-   *                  continues.
-   * @return <tt>false</tt> if the procedure stopped before all keys where iterated over, <tt>true</tt> otherwise.
-   */
-  @Override
-  @SuppressWarnings("unchecked")
-  public boolean forEachPair(Object${valueTypeCap}Procedure<T> procedure) {
-    for (int i = table.length; i-- > 0;) {
-      if (state[i] == FULL) {
-        if (!procedure.apply((T)table[i], values[i])) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  /**
-   * Returns the value associated with the specified key. It is often a good idea to first check with {@link
-   * #containsKey(double)} whether the given key has a value associated or not, i.e. whether there exists an association
-   * for the given key or not.
-   *
-   * @param key the key to be searched for.
-   * @return the value associated with the specified key; <tt>0</tt> if no such key is present.
-   */
-  @Override
-  public ${valueType} get(T key) {
-    int i = indexOfKey(key);
-    if (i < 0) {
-      return 0;
-    } //not contained
-    return values[i];
   }
 
   /**
@@ -220,7 +162,7 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
     byte[] stat = state;
     int length = tab.length;
 
-    int hash = HashFunctions.hash(key) & 0x7FFFFFFF;
+    int hash = key.hashCode() & 0x7FFFFFFF;
     int i = hash % length;
     int decrement = hash % (length - 2); // double hashing, see http://www.eece.unm.edu/faculty/heileman/hash/node4.html
     //int decrement = (hash / length) % length;
@@ -230,7 +172,7 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
 
     // stop if we find a removed or free slot, or if we find the key itself
     // do NOT skip over removed slots (yes, open addressing is like that...)
-    while (stat[i] == FULL && equalsMindTheNull(tab[i], key)) {
+    while (stat[i] == FULL && tab[i] != key) {
       i -= decrement;
       //hashCollisions++;
       if (i < 0) {
@@ -243,7 +185,7 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
       // do skip over removed slots (yes, open addressing is like that...)
       // assertion: there is at least one FREE slot.
       int j = i;
-      while (stat[i] != FREE && (stat[i] == REMOVED || !equalsMindTheNull(tab[i], key))) {
+      while (stat[i] != FREE && (stat[i] == REMOVED || tab[i] != key)) {
         i -= decrement;
         //hashCollisions++;
         if (i < 0) {
@@ -275,7 +217,7 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
     byte[] stat = state;
     int length = tab.length;
 
-    int hash = HashFunctions.hash(key) & 0x7FFFFFFF;
+    int hash = key.hashCode() & 0x7FFFFFFF;
     int i = hash % length;
     int decrement = hash % (length - 2); // double hashing, see http://www.eece.unm.edu/faculty/heileman/hash/node4.html
     //int decrement = (hash / length) % length;
@@ -285,7 +227,7 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
 
     // stop if we find a free slot, or if we find the key itself.
     // do skip over removed slots (yes, open addressing is like that...)
-    while (stat[i] != FREE && (stat[i] == REMOVED || !equalsMindTheNull(tab[i], key))) {
+    while (stat[i] != FREE && (stat[i] == REMOVED || (!key.equals(tab[i])))) {
       i -= decrement;
       //hashCollisions++;
       if (i < 0) {
@@ -300,23 +242,6 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
   }
 
   /**
-   * @param value the value to be searched in the receiver.
-   * @return the index where the value is contained in the receiver, returns -1 if the value was not found.
-   */
-  protected int indexOfValue(${valueType} value) {
-    ${valueType}[] val = values;
-    byte[] stat = state;
-
-    for (int i = stat.length; --i >= 0;) {
-      if (stat[i] == FULL && val[i] == value) {
-        return i;
-      }
-    }
-
-    return -1; // not found
-  }
-
-  /**
    * Fills all keys contained in the receiver into the specified list. Fills the list, starting at index 0. After this
    * call returns the specified list has a new size that equals <tt>this.size()</tt>. 
    * This method can be used
@@ -324,7 +249,6 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
    *
    * @param list the list to be filled, can have any size.
    */
-  @Override
   @SuppressWarnings("unchecked")
   public void keys(List<T> list) {
     list.clear();
@@ -340,37 +264,6 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
     }
   }
 
-  /**
-   * Fills all pairs satisfying a given condition into the specified lists. Fills into the lists, starting at index 0.
-   * After this call returns the specified lists both have a new size, the number of pairs satisfying the condition.
-   *  <p> <b>Example:</b> <br>
-   * <pre>
-   * Object${valueTypeCap}Procedure<T> condition = new Object${valueTypeCap}Procedure<T>() { // match even values only
-   * public boolean apply(T key, ${valueType} value) { return value%2==0; }
-   * }
-   * keys = (8,7,6), values = (1,2,2) --> keyList = (6,8), valueList = (2,1)</tt>
-   * </pre>
-   *
-   * @param condition the condition to be matched. Takes the current key as first and the current value as second
-   *                  argument.
-   * @param keyList   the list to be filled with keys, can have any size.
-   * @param valueList the list to be filled with values, can have any size.
-   */
-  @Override
-  @SuppressWarnings("unchecked")
-  public void pairsMatching(Object${valueTypeCap}Procedure<T> condition, 
-                            List<T> keyList, 
-                            ${valueTypeCap}ArrayList valueList) {
-    keyList.clear();
-    valueList.clear();
-
-    for (int i = table.length; i-- > 0;) {
-      if (state[i] == FULL && condition.apply((T)table[i], values[i])) {
-        keyList.add((T)table[i]);
-        valueList.add(values[i]);
-      }
-    }
-  }
 
   /**
    * Associates the given key with the given value. Replaces any old <tt>(key,someOtherValue)</tt> association, if
@@ -381,12 +274,11 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
    * @return <tt>true</tt> if the receiver did not already contain such a key; <tt>false</tt> if the receiver did
    *         already contain such a key - the new value has now replaced the formerly associated value.
    */
+  @SuppressWarnings("unchecked")
   @Override
-  public boolean put(T key, ${valueType} value) {
-    int i = indexOfInsertion(key);
+  public boolean add(Object key) {
+    int i = indexOfInsertion((T)key);
     if (i < 0) { //already contained
-      i = -i - 1;
-      this.values[i] = value;
       return false;
     }
 
@@ -397,11 +289,10 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
       log.info("at distinct="+distinct+", capacity="+table.length+" to newCapacity="+newCapacity+" ...");
       */
       rehash(newCapacity);
-      return put(key, value);
+      return add(key);
     }
 
     this.table[i] = key;
-    this.values[i] = value;
     if (this.state[i] == FREE) {
       this.freeEntries--;
     }
@@ -411,8 +302,9 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
     if (this.freeEntries < 1) { //delta
       int newCapacity = chooseGrowCapacity(this.distinct + 1, this.minLoadFactor, this.maxLoadFactor);
       rehash(newCapacity);
+      return add(key);
     }
-
+    
     return true;
   }
 
@@ -427,18 +319,15 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
     //if (oldCapacity == newCapacity) return;
 
     Object[] oldTable = table;
-    ${valueType}[] oldValues = values;
     byte[] oldState = state;
 
     Object[] newTable = new Object[newCapacity];
-    ${valueType}[] newValues = new ${valueType}[newCapacity];
     byte[] newState = new byte[newCapacity];
 
     this.lowWaterMark = chooseLowWaterMark(newCapacity, this.minLoadFactor);
     this.highWaterMark = chooseHighWaterMark(newCapacity, this.maxLoadFactor);
 
     this.table = newTable;
-    this.values = newValues;
     this.state = newState;
     this.freeEntries = newCapacity - this.distinct; // delta
 
@@ -447,7 +336,6 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
         Object element = oldTable[i];
         int index = indexOfInsertion((T)element);
         newTable[index] = element;
-        newValues[index] = oldValues[i];
         newState[index] = FULL;
       }
     }
@@ -459,15 +347,15 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
    * @param key the key to be removed from the receiver.
    * @return <tt>true</tt> if the receiver contained the specified key, <tt>false</tt> otherwise.
    */
+  @SuppressWarnings("unchecked")
   @Override
-  public boolean removeKey(T key) {
-    int i = indexOfKey(key);
+  public boolean remove(Object key) {
+    int i = indexOfKey((T)key);
     if (i < 0) {
       return false;
     } // key not contained
 
     this.state[i] = REMOVED;
-    //this.values[i]=0; // delta
     this.distinct--;
 
     if (this.distinct < this.lowWaterMark) {
@@ -504,7 +392,6 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
     } // open addressing needs at least one FREE slot at any time.
 
     this.table = new Object[capacity];
-    this.values = new ${valueType}[capacity];
     this.state = new byte[capacity];
 
     // memory will be exhausted long before this pathological case happens, anyway.
@@ -541,30 +428,6 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
   }
 
   /**
-   * Fills all values contained in the receiver into the specified list. Fills the list, starting at index 0. After this
-   * call returns the specified list has a new size that equals <tt>this.size()</tt>. 
-   * <p> This method can be used
-   * to iterate over the values of the receiver.
-   *
-   * @param list the list to be filled, can have any size.
-   */
-  @Override
-  public void values(${valueTypeCap}ArrayList list) {
-    list.setSize(distinct);
-    ${valueType}[] elements = list.elements();
-
-    ${valueType}[] val = values;
-    byte[] stat = state;
-
-    int j = 0;
-    for (int i = stat.length; i-- > 0;) {
-      if (stat[i] == FULL) {
-        elements[j++] = val[i];
-      }
-    }
-  }
-  
-  /**
    * Access for unit tests.
    * @param capacity
    * @param minLoadFactor
@@ -576,5 +439,119 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
     capacity[0] = table.length;
     minLoadFactor[0] = this.minLoadFactor;
     maxLoadFactor[0] = this.maxLoadFactor;
+  }
+
+  @Override
+  public boolean isEmpty() {
+    return size() == 0;
+  }
+  
+  /**
+   * OpenHashSet instances are only equal to other OpenHashSet instances, not to 
+   * any other collection. Hypothetically, we should check for and permit
+   * equals on other Sets.
+   */
+  @SuppressWarnings("unchecked")
+  public boolean equals(Object obj) {
+    if (obj == this) {
+      return true;
+    }
+
+    if (!(obj instanceof OpenHashSet)) {
+      return false;
+    }
+    final OpenHashSet other = (OpenHashSet) obj;
+    if (other.size() != size()) {
+      return false;
+    }
+
+    return
+        forEachKey(
+            new ObjectProcedure<T>() {
+              @Override
+              public boolean apply(T key) {
+                return other.contains(key);
+              }
+            }
+        );
+  }
+  
+  /**
+   * Implement the standard Java Collections iterator. Note that 'remove' is silently
+   * ineffectual here. This method is provided for convenience, only.
+   */
+  @Override
+  public Iterator<T> iterator() {
+    List<T> keyList = new ArrayList<T>();
+    keys(keyList);
+    return keyList.iterator();
+  }
+
+  @Override
+  public Object[] toArray() {
+    List<T> keyList = new ArrayList<T>();
+    keys(keyList);
+    return keyList.toArray();
+  }
+
+  @Override
+  public boolean addAll(Collection<? extends T> c) {
+    boolean anyAdded = false;
+    for(T o : c) {
+      boolean added = add(o);
+      anyAdded |= added;
+    }
+    return anyAdded;
+  }
+
+  @Override
+  public boolean containsAll(Collection<?> c) {
+    for (Object o : c) {
+      if (!contains(o)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @Override
+  public boolean removeAll(Collection<?> c) {
+    boolean anyRemoved = false;
+    for(Object o : c) {
+      boolean removed = remove(o);
+      anyRemoved |= removed;
+    }
+    return anyRemoved;
+  }
+
+  @Override
+  public boolean retainAll(Collection<?> c) {
+    final Collection<?> finalCollection = c;
+    final boolean[] modified = new boolean[1];
+    modified[0] = false;
+    forEachKey(new ObjectProcedure<T>() {
+
+      @Override
+      public boolean apply(T element) {
+        if (!finalCollection.contains(element)) {
+          remove(element);
+          modified[0] = true;
+        }
+        return true;
+      }});
+    return modified[0];
+  }
+
+  @Override
+  public <T2> T2[] toArray(T2[] a) {
+    List<T> keys = new ArrayList<T>();
+    keys(keys);
+    return keys.toArray(a);
+  }
+
+  public List<T> keys() {
+    List<T> keys = new ArrayList<T>();
+    keys(keys);
+    return keys;
   }
 }
