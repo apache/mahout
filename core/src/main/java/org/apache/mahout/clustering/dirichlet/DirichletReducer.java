@@ -28,6 +28,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
 public class DirichletReducer extends MapReduceBase implements
@@ -65,7 +66,19 @@ public class DirichletReducer extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     super.configure(job);
-    state = DirichletMapper.getDirichletState(job);
+    try {
+      state = DirichletMapper.getDirichletState(job);
+    } catch (NumberFormatException e) {
+      throw new IllegalStateException(e);
+    } catch (SecurityException e) {
+      throw new IllegalStateException(e);
+    } catch (IllegalArgumentException e) {
+      throw new IllegalStateException(e);
+    } catch (NoSuchMethodException e) {
+      throw new IllegalStateException(e);
+    } catch (InvocationTargetException e) {
+      throw new IllegalStateException(e);
+    }
     this.newModels = state.getModelFactory().sampleFromPosterior(state.getModels());
   }
 

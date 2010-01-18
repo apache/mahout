@@ -18,7 +18,6 @@
 package org.apache.mahout.clustering.dirichlet.models;
 
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
-import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -27,26 +26,35 @@ import org.apache.mahout.math.VectorWritable;
  * Normal Distribution to sample the prior model values. Model values have a vector standard deviation, allowing
  * assymetrical regions to be covered by a model.
  */
-public class AsymmetricSampledNormalDistribution implements
-    ModelDistribution<VectorWritable> {
+public class AsymmetricSampledNormalDistribution extends VectorModelDistribution  {
+
+  public AsymmetricSampledNormalDistribution() {
+    super();
+  }
+
+  public AsymmetricSampledNormalDistribution(VectorWritable modelPrototype) {
+    super(modelPrototype);
+  }
 
   @Override
   public Model<VectorWritable>[] sampleFromPrior(int howMany) {
     Model<VectorWritable>[] result = new AsymmetricSampledNormalModel[howMany];
     for (int i = 0; i < howMany; i++) {
-      double[] m = {UncommonDistributions.rNorm(0, 1),
-          UncommonDistributions.rNorm(0, 1)};
-      DenseVector mean = new DenseVector(m);
-      double[] s = {UncommonDistributions.rNorm(1, 1),
-          UncommonDistributions.rNorm(1, 1)};
-      DenseVector sd = new DenseVector(s);
+      Vector prototype = getModelPrototype().get();
+      Vector mean = prototype.like();
+      for (int j = 0; j < prototype.size(); j++)
+        mean.set(j, UncommonDistributions.rNorm(0, 1));
+      Vector sd = prototype.like();
+      for (int j = 0; j < prototype.size(); j++)
+        sd.set(j, UncommonDistributions.rNorm(1, 1));
       result[i] = new AsymmetricSampledNormalModel(mean, sd);
     }
     return result;
   }
 
   @Override
-  public Model<VectorWritable>[] sampleFromPosterior(Model<VectorWritable>[] posterior) {
+  public Model<VectorWritable>[] sampleFromPosterior(
+      Model<VectorWritable>[] posterior) {
     Model<VectorWritable>[] result = new AsymmetricSampledNormalModel[posterior.length];
     for (int i = 0; i < posterior.length; i++) {
       AsymmetricSampledNormalModel m = (AsymmetricSampledNormalModel) posterior[i];

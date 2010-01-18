@@ -35,6 +35,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 public class DirichletMapper extends MapReduceBase implements
     Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
@@ -43,7 +44,8 @@ public class DirichletMapper extends MapReduceBase implements
 
   @Override
   public void map(WritableComparable<?> key, VectorWritable v,
-                  OutputCollector<Text, VectorWritable> output, Reporter reporter) throws IOException {
+      OutputCollector<Text, VectorWritable> output, Reporter reporter)
+      throws IOException {
     // compute a normalized vector of probabilities that v is described by each model
     Vector pi = normalizedProbabilities(state, v);
     // then pick one model by sampling a Multinomial distribution based upon them
@@ -59,17 +61,32 @@ public class DirichletMapper extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     super.configure(job);
-    state = getDirichletState(job);
+    try {
+      state = getDirichletState(job);
+    } catch (NumberFormatException e) {
+      throw new IllegalStateException(e);
+    } catch (SecurityException e) {
+      throw new IllegalStateException(e);
+    } catch (IllegalArgumentException e) {
+      throw new IllegalStateException(e);
+    } catch (NoSuchMethodException e) {
+      throw new IllegalStateException(e);
+    } catch (InvocationTargetException e) {
+      throw new IllegalStateException(e);
+    }
   }
 
-  public static DirichletState<VectorWritable> getDirichletState(JobConf job) {
+  public static DirichletState<VectorWritable> getDirichletState(JobConf job) throws NumberFormatException, SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
     String statePath = job.get(DirichletDriver.STATE_IN_KEY);
     String modelFactory = job.get(DirichletDriver.MODEL_FACTORY_KEY);
+    String modelPrototype = job.get(DirichletDriver.MODEL_PROTOTYPE_KEY);
+    String prototypeSize = job.get(DirichletDriver.PROTOTYPE_SIZE_KEY);
     String numClusters = job.get(DirichletDriver.NUM_CLUSTERS_KEY);
     String alpha_0 = job.get(DirichletDriver.ALPHA_0_KEY);
 
     try {
-      DirichletState<VectorWritable> state = DirichletDriver.createState(modelFactory,
+      DirichletState<VectorWritable> state = DirichletDriver.createState(
+          modelFactory, modelPrototype, Integer.parseInt(prototypeSize),
           Integer.parseInt(numClusters), Double.parseDouble(alpha_0));
       Path path = new Path(statePath);
       FileSystem fs = FileSystem.get(path.toUri(), job);
@@ -111,7 +128,8 @@ public class DirichletMapper extends MapReduceBase implements
    * @param v     an Vector
    * @return the Vector of probabilities
    */
-  private static Vector normalizedProbabilities(DirichletState<VectorWritable> state, VectorWritable v) {
+  private static Vector normalizedProbabilities(
+      DirichletState<VectorWritable> state, VectorWritable v) {
     Vector pi = new DenseVector(state.getNumClusters());
     double max = 0;
     for (int k = 0; k < state.getNumClusters(); k++) {

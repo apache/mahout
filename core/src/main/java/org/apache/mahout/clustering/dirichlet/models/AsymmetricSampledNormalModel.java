@@ -95,8 +95,8 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     mean = s1.divide(s0);
     // compute the two component stds
     if (s0 > 1) {
-      stdDev = s2.times(s0).minus(s1.times(s1)).assign(new SquareRootFunction())
-          .divide(s0);
+      stdDev = s2.times(s0).minus(s1.times(s1))
+          .assign(new SquareRootFunction()).divide(s0);
     } else {
       stdDev.assign(Double.MIN_NORMAL);
     }
@@ -109,9 +109,6 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
    * @param sd a double std deviation
    */
   private double pdf(Vector x, double sd) {
-    if (x.getNumNondefaultElements() != 2) {
-      throw new IllegalArgumentException();
-    }
     double sd2 = sd * sd;
     double exp = -(x.dot(x) - 2 * x.dot(mean) + mean.dot(mean)) / (2 * sd2);
     double ex = Math.exp(exp);
@@ -121,15 +118,12 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
   @Override
   public double pdf(VectorWritable v) {
     Vector x = v.get();
-    // return the product of the two component pdfs
-    if (x.getNumNondefaultElements() != 2) {
-      throw new IllegalArgumentException();
-    }
-    double pdf0 = pdf(x, stdDev.get(0));
-    double pdf1 = pdf(x, stdDev.get(1));
-    // if (pdf0 < 0 || pdf0 > 1 || pdf1 < 0 || pdf1 > 1)
-    // System.out.print("");
-    return pdf0 * pdf1;
+    // return the product of the component pdfs
+    // TODO: is this reasonable? correct?
+    double pdf = pdf(x, stdDev.get(0));
+    for (int i = 1; i < x.size(); i++)
+      pdf = pdf * pdf(x, stdDev.get(i));
+    return pdf;
   }
 
   @Override

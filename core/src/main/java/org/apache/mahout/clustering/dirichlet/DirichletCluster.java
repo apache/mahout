@@ -73,14 +73,6 @@ public class DirichletCluster<O> implements Writable {
   private static final Type typeOfModel = new TypeToken<DirichletCluster<Vector>>() {
   }.getType();
 
-  public String asFormatString() {
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
-    builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
-    Gson gson = builder.create();
-    return gson.toJson(this, typeOfModel);
-  }
-
   /** Reads a typed Model instance from the input stream */
   public static <O> Model<O> readModel(DataInput in) throws IOException {
     String modelClassName = in.readUTF();
@@ -103,14 +95,6 @@ public class DirichletCluster<O> implements Writable {
   public static void writeModel(DataOutput out, Model<?> model) throws IOException {
     out.writeUTF(model.getClass().getName());
     model.write(out);
-  }
-
-  public static DirichletCluster<Vector> fromFormatString(String formatString) {
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
-    builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
-    Gson gson = builder.create();
-    return gson.fromJson(formatString, typeOfModel);
   }
 
 }

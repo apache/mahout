@@ -17,7 +17,10 @@
 
 package org.apache.mahout.clustering.syntheticcontrol.dirichlet;
 
+import static org.apache.mahout.clustering.syntheticcontrol.Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
+
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,12 +44,9 @@ import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
-import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.mahout.clustering.syntheticcontrol.Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
 
 public class Job {
 
@@ -56,8 +56,8 @@ public class Job {
   private Job() {
   }
 
-  public static void main(String[] args) throws IOException,
-      ClassNotFoundException, InstantiationException, IllegalAccessException {
+  public static void main(String[] args) throws IOException, ClassNotFoundException, InstantiationException,
+      IllegalAccessException, SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -68,24 +68,24 @@ public class Job {
     Option topicsOpt = DefaultOptionCreator.kOption().withRequired(false).create();
 
     Option redOpt = obuilder.withLongName("reducerNum").withRequired(false).withArgument(
-        abuilder.withName("r").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The number of reducers to use.").withShortName("r").create();
+        abuilder.withName("r").withMinimum(1).withMaximum(1).create()).withDescription("The number of reducers to use.")
+        .withShortName("r").create();
 
     Option vectorOpt = obuilder.withLongName("vector").withRequired(false).withArgument(
-        abuilder.withName("v").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The vector implementation to use.").withShortName("v").create();
+        abuilder.withName("v").withMinimum(1).withMaximum(1).create()).withDescription("The vector implementation to use.")
+        .withShortName("v").create();
 
-    Option mOpt = obuilder.withLongName("alpha").withRequired(false).withShortName("m").
-        withArgument(abuilder.withName("alpha").withMinimum(1).withMaximum(1).create()).
-        withDescription("The alpha0 value for the DirichletDistribution.").create();
+    Option mOpt = obuilder.withLongName("alpha").withRequired(false).withShortName("m").withArgument(
+        abuilder.withName("alpha").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The alpha0 value for the DirichletDistribution.").create();
 
-    Option modelOpt = obuilder.withLongName("modelClass").withRequired(false).withShortName("d").
-        withArgument(abuilder.withName("modelClass").withMinimum(1).withMaximum(1).create()).
-          withDescription("The ModelDistribution class name.").create();
+    Option modelOpt = obuilder.withLongName("modelClass").withRequired(false).withShortName("d").withArgument(
+        abuilder.withName("modelClass").withMinimum(1).withMaximum(1).create())
+        .withDescription("The ModelDistribution class name.").create();
     Option helpOpt = DefaultOptionCreator.helpOption();
 
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(modelOpt).
-        withOption(maxIterOpt).withOption(mOpt).withOption(topicsOpt).withOption(redOpt).withOption(helpOpt).create();
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(modelOpt).withOption(
+        maxIterOpt).withOption(mOpt).withOption(topicsOpt).withOption(redOpt).withOption(helpOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -98,14 +98,14 @@ public class Job {
 
       String input = cmdLine.getValue(inputOpt, "testdata").toString();
       String output = cmdLine.getValue(outputOpt, "output").toString();
-      String modelFactory = cmdLine.getValue(modelOpt, "org.apache.mahout.clustering.syntheticcontrol.dirichlet.NormalScModelDistribution").toString();
+      String modelFactory = cmdLine.getValue(modelOpt,
+          "org.apache.mahout.clustering.syntheticcontrol.dirichlet.NormalScModelDistribution").toString();
       int numModels = Integer.parseInt(cmdLine.getValue(topicsOpt, "10").toString());
       int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt, "5").toString());
       double alpha_0 = Double.parseDouble(cmdLine.getValue(mOpt, "1.0").toString());
       int numReducers = Integer.parseInt(cmdLine.getValue(redOpt, "1").toString());
       String vectorClassName = cmdLine.getValue(vectorOpt, "org.apache.mahout.math.RandomAccessSparseVector").toString();
-      Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
-      runJob(input, output, modelFactory, numModels, maxIterations, alpha_0, numReducers, vectorClass);
+      runJob(input, output, modelFactory, numModels, maxIterations, alpha_0, numReducers, vectorClassName);
     } catch (OptionException e) {
       LOG.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
@@ -126,11 +126,14 @@ public class Job {
    * @throws IllegalAccessException 
    * @throws InstantiationException 
    * @throws ClassNotFoundException 
+   * @throws InvocationTargetException 
+   * @throws NoSuchMethodException 
+   * @throws IllegalArgumentException 
+   * @throws SecurityException 
    */
-  public static void runJob(String input, String output, String modelFactory,
-      int numModels, int maxIterations, double alpha_0, int numReducers, Class<? extends Vector> vectorClass)
-      throws IOException, ClassNotFoundException, InstantiationException,
-      IllegalAccessException {
+  public static void runJob(String input, String output, String modelFactory, int numModels, int maxIterations, double alpha_0,
+      int numReducers, String vectorClassName) throws IOException, ClassNotFoundException, InstantiationException,
+      IllegalAccessException, SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
     // delete the output directory
     JobConf conf = new JobConf(DirichletJob.class);
     Path outPath = new Path(output);
@@ -140,23 +143,29 @@ public class Job {
     }
     fs.mkdirs(outPath);
     final String directoryContainingConvertedInput = output + DIRECTORY_CONTAINING_CONVERTED_INPUT;
-    InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
-    DirichletDriver.runJob(directoryContainingConvertedInput, output + "/state", modelFactory,
-        numModels, maxIterations, alpha_0, numReducers);
-    printResults(output + "/state", modelFactory, maxIterations, numModels,
-        alpha_0);
+    InputDriver.runJob(input, directoryContainingConvertedInput, vectorClassName);
+    DirichletDriver.runJob(directoryContainingConvertedInput, output + "/state", modelFactory, vectorClassName, 60, numModels,
+        maxIterations, alpha_0, numReducers);
+    printResults(output + "/state", modelFactory, vectorClassName, 60, maxIterations, numModels, alpha_0);
   }
 
   /**
    * Prints out all of the clusters during each iteration
    * @param output the String output directory
    * @param modelDistribution the String class name of the ModelDistribution
+   * @param vectorClassName the String class name of the Vector to use
+   * @param prototypeSize the size of the Vector prototype for the Dirichlet Models
    * @param numIterations the int number of Iterations
    * @param numModels the int number of models
    * @param alpha_0 the double alpha_0 value
+   * @throws InvocationTargetException 
+   * @throws NoSuchMethodException 
+   * @throws IllegalArgumentException 
+   * @throws SecurityException 
+   * @throws NumberFormatException 
    */
-  public static void printResults(String output, String modelDistribution,
-      int numIterations, int numModels, double alpha_0) {
+  public static void printResults(String output, String modelDistribution, String vectorClassName, int prototypeSize,
+      int numIterations, int numModels, double alpha_0) throws NumberFormatException, SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     JobConf conf = new JobConf(KMeansDriver.class);
     conf.set(DirichletDriver.MODEL_FACTORY_KEY, modelDistribution);
@@ -164,6 +173,8 @@ public class Job {
     conf.set(DirichletDriver.ALPHA_0_KEY, Double.toString(alpha_0));
     for (int i = 0; i < numIterations; i++) {
       conf.set(DirichletDriver.STATE_IN_KEY, output + "/state-" + i);
+      conf.set(DirichletDriver.MODEL_PROTOTYPE_KEY, vectorClassName);
+      conf.set(DirichletDriver.PROTOTYPE_SIZE_KEY, Integer.toString(prototypeSize));
       clusters.add(DirichletMapper.getDirichletState(conf).getClusters());
     }
     printResults(clusters, 0);
@@ -175,8 +186,7 @@ public class Job {
    * @param clusters a List of Lists of DirichletClusters
    * @param significant the minimum number of samples to enable printing a model
    */
-  private static void printResults(
-      List<List<DirichletCluster<VectorWritable>>> clusters, int significant) {
+  private static void printResults(List<List<DirichletCluster<VectorWritable>>> clusters, int significant) {
     int row = 0;
     for (List<DirichletCluster<VectorWritable>> r : clusters) {
       System.out.print("sample[" + row++ + "]= ");
@@ -184,8 +194,7 @@ public class Job {
         Model<VectorWritable> model = r.get(k).getModel();
         if (model.count() > significant) {
           int total = (int) r.get(k).getTotalCount();
-          System.out.print("m" + k + '(' + total + ')' + model.toString()
-              + ", ");
+          System.out.print("m" + k + '(' + total + ')' + model.toString() + ", ");
         }
       }
       System.out.println();

@@ -18,7 +18,6 @@
 package org.apache.mahout.clustering.dirichlet.models;
 
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
-import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -28,20 +27,33 @@ import org.apache.mahout.math.VectorWritable;
  */
 public class SampledNormalDistribution extends NormalModelDistribution {
 
+  public SampledNormalDistribution() {
+    super();
+  }
+
+  public SampledNormalDistribution(VectorWritable modelPrototype) {
+    super(modelPrototype);
+  }
+
   @Override
   public Model<VectorWritable>[] sampleFromPrior(int howMany) {
     Model<VectorWritable>[] result = new SampledNormalModel[howMany];
     for (int i = 0; i < howMany; i++) {
-      double[] m = {UncommonDistributions.rNorm(0, 1),
-          UncommonDistributions.rNorm(0, 1)};
-      DenseVector mean = new DenseVector(m);
+      Vector prototype = getModelPrototype().get();
+      int card = prototype.size();
+      double[] m = new double[card];
+      for (int j = 0; j < card; j++)
+        m[j] = UncommonDistributions.rNorm(0, 1);
+      Vector mean = prototype.like();
+      mean.assign(m);
       result[i] = new SampledNormalModel(mean, 1);
     }
     return result;
   }
 
   @Override
-  public Model<VectorWritable>[] sampleFromPosterior(Model<VectorWritable>[] posterior) {
+  public Model<VectorWritable>[] sampleFromPosterior(
+      Model<VectorWritable>[] posterior) {
     Model<VectorWritable>[] result = new SampledNormalModel[posterior.length];
     for (int i = 0; i < posterior.length; i++) {
       SampledNormalModel m = (SampledNormalModel) posterior[i];

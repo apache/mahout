@@ -17,6 +17,9 @@
 
 package org.apache.mahout.clustering.dirichlet;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -34,8 +37,6 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
 public class DirichletJob {
 
   private static final Logger log = LoggerFactory.getLogger(DirichletJob.class);
@@ -44,7 +45,7 @@ public class DirichletJob {
   }
 
   public static void main(String[] args) throws IOException,
-      ClassNotFoundException, InstantiationException, IllegalAccessException {
+      ClassNotFoundException, InstantiationException, IllegalAccessException, SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -98,11 +99,15 @@ public class DirichletJob {
    * @param numModels     the number of Models
    * @param maxIterations the maximum number of iterations
    * @param alpha_0       the alpha0 value for the DirichletDistribution
+   * @throws InvocationTargetException 
+   * @throws NoSuchMethodException 
+   * @throws IllegalArgumentException 
+   * @throws SecurityException 
    */
   public static void runJob(String input, String output, String modelFactory,
                             int numModels, int maxIterations, double alpha_0)
       throws IOException, ClassNotFoundException, InstantiationException,
-      IllegalAccessException {
+      IllegalAccessException, SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
     // delete the output directory
     Configuration conf = new JobConf(DirichletJob.class);
     Path outPath = new Path(output);
