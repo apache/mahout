@@ -27,6 +27,7 @@ import java.awt.event.WindowEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.IOException;
@@ -97,7 +98,7 @@ public class DisplayDirichlet extends Frame {
     });
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, InvocationTargetException, NoSuchMethodException {
     RandomUtils.useTestSeed();
     generateSamples();
     new DisplayDirichlet();

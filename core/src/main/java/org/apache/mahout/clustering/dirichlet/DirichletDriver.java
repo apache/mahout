@@ -197,7 +197,7 @@ public class DirichletDriver {
    * 
    * @param modelFactory a String which is the class name of the model factory
    * @param modelPrototype a String which is the class name of the Vector used to initialize the factory
-   * @param prototypeSie an int number of dimensions of the model prototype vector
+   * @param prototypeSize an int number of dimensions of the model prototype vector
    * @param numModels an int number of models to be created
    * @param alpha_0 the double alpha_0 argument to the algorithm
    * @return an initialized DirichletState
@@ -214,7 +214,7 @@ public class DirichletDriver {
       SecurityException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     Class<? extends VectorModelDistribution> cl = ccl.loadClass(modelFactory).asSubclass(VectorModelDistribution.class);
-    VectorModelDistribution factory = (VectorModelDistribution) cl.newInstance();
+    VectorModelDistribution factory = cl.newInstance();
 
     Class<? extends Vector> vcl = ccl.loadClass(modelPrototype).asSubclass(Vector.class);
     Constructor<? extends Vector> v = vcl.getConstructor(int.class);

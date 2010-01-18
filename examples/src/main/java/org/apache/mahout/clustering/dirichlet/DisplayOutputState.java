@@ -22,6 +22,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,7 +87,7 @@ class DisplayOutputState extends DisplayDirichlet {
       sampleData.addAll(readFile(g.getCanonicalPath()));
   }
 
-  private static void getResults() throws IOException {
+  private static void getResults() throws IOException, InvocationTargetException, NoSuchMethodException {
     result = new ArrayList<Model<VectorWritable>[]>();
     JobConf conf = new JobConf(KMeansDriver.class);
     conf.set(DirichletDriver.MODEL_FACTORY_KEY,
@@ -101,7 +102,7 @@ class DisplayOutputState extends DisplayDirichlet {
     }
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, InvocationTargetException, NoSuchMethodException {
     RandomUtils.useTestSeed();
     getSamples();
     getResults();
