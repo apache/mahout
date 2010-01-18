@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class DummyOutputCollector<K extends WritableComparable<?>, V extends Writable>
+public class DummyOutputCollector<K extends WritableComparable, V extends Writable>
     implements OutputCollector<K, V> {
 
   private final Map<String, List<V>> data = new TreeMap<String, List<V>>();
