@@ -50,11 +50,12 @@ import org.apache.mahout.math.matrix.ObjectMatrix2D;
  * @author wolfgang.hoschek@cern.ch
  * @version 1.0, 09/24/99
  */
-class SelectedSparseObjectMatrix1D extends ObjectMatrix1D {
+@SuppressWarnings("deprecation")
+class SelectedSparseObjectMatrix1D<T> extends ObjectMatrix1D<T> {
   /*
    * The elements of the matrix.
    */
-  protected final AbstractIntObjectMap elements;
+  protected final AbstractIntObjectMap<T> elements;
 
   /** The offsets of visible indexes of this matrix. */
   protected final int[] offsets;
@@ -71,7 +72,9 @@ class SelectedSparseObjectMatrix1D extends ObjectMatrix1D {
    * @param stride   the number of indexes between any two elements, i.e. <tt>index(i+1)-index(i)</tt>.
    * @param offsets  the offsets of the cells that shall be visible.
    */
-  protected SelectedSparseObjectMatrix1D(int size, AbstractIntObjectMap elements, int zero, int stride, int[] offsets,
+  protected SelectedSparseObjectMatrix1D(int size, 
+                                         AbstractIntObjectMap<T> elements, 
+                                         int zero, int stride, int[] offsets,
                                          int offset) {
     setUp(size, zero, stride);
 
@@ -87,7 +90,7 @@ class SelectedSparseObjectMatrix1D extends ObjectMatrix1D {
    * @param elements the cells.
    * @param offsets  The indexes of the cells that shall be visible.
    */
-  protected SelectedSparseObjectMatrix1D(AbstractIntObjectMap elements, int[] offsets) {
+  protected SelectedSparseObjectMatrix1D(AbstractIntObjectMap<T> elements, int[] offsets) {
     this(offsets.length, elements, 0, 1, offsets, 0);
   }
 
@@ -114,7 +117,7 @@ class SelectedSparseObjectMatrix1D extends ObjectMatrix1D {
    * @return the value of the specified cell.
    */
   @Override
-  public Object getQuick(int index) {
+  public T getQuick(int index) {
     //if (debug) if (index<0 || index>=size) checkIndex(index);
     //return elements.get(index(index));
     //manually inlined:
@@ -122,8 +125,9 @@ class SelectedSparseObjectMatrix1D extends ObjectMatrix1D {
   }
 
   /** Returns <tt>true</tt> if both matrices share at least one identical cell. */
+  @SuppressWarnings("unchecked")
   @Override
-  protected boolean haveSharedCellsRaw(ObjectMatrix1D other) {
+  protected boolean haveSharedCellsRaw(ObjectMatrix1D<T> other) {
     if (other instanceof SelectedSparseObjectMatrix1D) {
       SelectedSparseObjectMatrix1D otherMatrix = (SelectedSparseObjectMatrix1D) other;
       return this.elements == otherMatrix.elements;
@@ -158,8 +162,8 @@ class SelectedSparseObjectMatrix1D extends ObjectMatrix1D {
    * @return a new empty matrix of the same dynamic type.
    */
   @Override
-  public ObjectMatrix1D like(int size) {
-    return new SparseObjectMatrix1D(size);
+  public ObjectMatrix1D<T> like(int size) {
+    return new SparseObjectMatrix1D<T>(size);
   }
 
   /**
@@ -173,8 +177,8 @@ class SelectedSparseObjectMatrix1D extends ObjectMatrix1D {
    * @return a new matrix of the corresponding dynamic type.
    */
   @Override
-  public ObjectMatrix2D like2D(int rows, int columns) {
-    return new SparseObjectMatrix2D(rows, columns);
+  public ObjectMatrix2D<T> like2D(int rows, int columns) {
+    return new SparseObjectMatrix2D<T>(rows, columns);
   }
 
   /**
@@ -188,7 +192,7 @@ class SelectedSparseObjectMatrix1D extends ObjectMatrix1D {
    * @param value the value to be filled into the specified cell.
    */
   @Override
-  public void setQuick(int index, Object value) {
+  public void setQuick(int index, T value) {
     //if (debug) if (index<0 || index>=size) checkIndex(index);
     //int i =  index(index);
     //manually inlined:
@@ -219,7 +223,7 @@ class SelectedSparseObjectMatrix1D extends ObjectMatrix1D {
    * @return a new view.
    */
   @Override
-  protected ObjectMatrix1D viewSelectionLike(int[] offsets) {
-    return new SelectedSparseObjectMatrix1D(this.elements, offsets);
+  protected ObjectMatrix1D<T> viewSelectionLike(int[] offsets) {
+    return new SelectedSparseObjectMatrix1D<T>(this.elements, offsets);
   }
 }

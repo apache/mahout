@@ -11,7 +11,6 @@ package org.apache.mahout.math.matrix.doublealgo;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 import org.apache.mahout.math.matrix.DoubleMatrix3D;
-import org.apache.mahout.math.matrix.ObjectFactory2D;
 import org.apache.mahout.math.matrix.impl.AbstractFormatter;
 import org.apache.mahout.math.matrix.impl.AbstractMatrix1D;
 import org.apache.mahout.math.matrix.impl.AbstractMatrix2D;
@@ -438,33 +437,5 @@ public class Formatter extends AbstractFormatter {
   @Override
   protected String toString(AbstractMatrix2D matrix) {
     return this.toString((DoubleMatrix2D) matrix);
-  }
-
-  /**
-   * Returns a string representation of the given matrix with axis as well as rows and columns labeled. Pass
-   * <tt>null</tt> to one or more parameters to indicate that the corresponding decoration element shall not appear in
-   * the string converted matrix.
-   *
-   * @param matrix         The matrix to format.
-   * @param rowNames       The headers of all rows (to be put to the left of the matrix).
-   * @param columnNames    The headers of all columns (to be put to above the matrix).
-   * @param rowAxisName    The label of the y-axis.
-   * @param columnAxisName The label of the x-axis.
-   * @param title          The overall title of the matrix to be formatted.
-   * @return the matrix converted to a string.
-   */
-  protected String toTitleString(DoubleMatrix2D matrix, String[] rowNames, String[] columnNames, String rowAxisName,
-                                 String columnAxisName, String title) {
-    if (matrix.size() == 0) {
-      return "Empty matrix";
-    }
-    String[][] s = format(matrix);
-    //String oldAlignment = this.alignment;
-    //this.alignment = DECIMAL;
-    align(s);
-    //this.alignment = oldAlignment;
-    return new org.apache.mahout.math.matrix.objectalgo.Formatter()
-        .toTitleString(ObjectFactory2D.dense.make(s), rowNames, columnNames,
-            rowAxisName, columnAxisName, title);
   }
 }

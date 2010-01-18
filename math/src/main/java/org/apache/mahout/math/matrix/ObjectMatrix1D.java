@@ -1,3 +1,22 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /*
 Copyright � 1999 CERN - European Organization for Nuclear Research.
 Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose 
@@ -8,17 +27,18 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix;
 
+import java.util.List;
+
 import org.apache.mahout.math.function.ObjectFunction;
 import org.apache.mahout.math.function.ObjectObjectFunction;
 import org.apache.mahout.math.function.ObjectProcedure;
 import org.apache.mahout.math.list.IntArrayList;
-import org.apache.mahout.math.list.ObjectArrayList;
 import org.apache.mahout.math.matrix.impl.AbstractMatrix1D;
 import org.apache.mahout.math.matrix.objectalgo.Formatter;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public abstract class ObjectMatrix1D extends AbstractMatrix1D {
+public abstract class ObjectMatrix1D<T> extends AbstractMatrix1D {
 
   /** Makes this class non instantiable, but still let's others inherit from it. */
   protected ObjectMatrix1D() {
@@ -43,12 +63,12 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @param f    a function transforming the current cell value.
    * @return the aggregated measure.
    */
-  public Object aggregate(ObjectObjectFunction aggr,
-                          ObjectFunction f) {
+  public T aggregate(ObjectObjectFunction<T> aggr,
+                          ObjectFunction<T> f) {
     if (size == 0) {
       return null;
     }
-    Object a = f.apply(getQuick(size - 1));
+    T a = f.apply(getQuick(size - 1));
     for (int i = size - 1; --i >= 0;) {
       a = aggr.apply(a, f.apply(getQuick(i)));
     }
@@ -80,13 +100,14 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @return the aggregated measure.
    * @throws IllegalArgumentException if <tt>size() != other.size()</tt>.
    */
-  public Object aggregate(ObjectMatrix1D other, org.apache.mahout.math.function.ObjectObjectFunction aggr,
-                          ObjectObjectFunction f) {
+  public T aggregate(ObjectMatrix1D<T> other, 
+                          ObjectObjectFunction<T> aggr,
+                          ObjectObjectFunction<T> f) {
     checkSize(other);
     if (size == 0) {
       return null;
     }
-    Object a = f.apply(getQuick(size - 1), other.getQuick(size - 1));
+    T a = f.apply(getQuick(size - 1), other.getQuick(size - 1));
     for (int i = size - 1; --i >= 0;) {
       a = aggr.apply(a, f.apply(getQuick(i), other.getQuick(i)));
     }
@@ -102,7 +123,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @return <tt>this</tt> (for convenience only).
    * @throws IllegalArgumentException if <tt>values.length != size()</tt>.
    */
-  public ObjectMatrix1D assign(Object[] values) {
+  public ObjectMatrix1D<T> assign(T[] values) {
     if (values.length != size) {
       throw new IllegalArgumentException(
           "Must have same number of cells: length=" + values.length + ", size()=" + size());
@@ -129,7 +150,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @return <tt>this</tt> (for convenience only).
    * @see org.apache.mahout.math.jet.math.Functions
    */
-  public ObjectMatrix1D assign(ObjectFunction function) {
+  public ObjectMatrix1D<T> assign(ObjectFunction<T> function) {
     for (int i = size; --i >= 0;) {
       setQuick(i, function.apply(getQuick(i)));
     }
@@ -145,7 +166,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @return <tt>this</tt> (for convenience only).
    * @throws IllegalArgumentException if <tt>size() != other.size()</tt>.
    */
-  public ObjectMatrix1D assign(ObjectMatrix1D other) {
+  public ObjectMatrix1D<T> assign(ObjectMatrix1D<T> other) {
     if (other == this) {
       return this;
     }
@@ -179,7 +200,8 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @throws IllegalArgumentException if <tt>size() != y.size()</tt>.
    * @see org.apache.mahout.math.jet.math.Functions
    */
-  public ObjectMatrix1D assign(ObjectMatrix1D y, org.apache.mahout.math.function.ObjectObjectFunction function) {
+  public ObjectMatrix1D<T> assign(ObjectMatrix1D<T> y, 
+                                  ObjectObjectFunction<T> function) {
     checkSize(y);
     for (int i = size; --i >= 0;) {
       setQuick(i, function.apply(getQuick(i), y.getQuick(i)));
@@ -193,7 +215,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @param value the value to be filled into the cells.
    * @return <tt>this</tt> (for convenience only).
    */
-  public ObjectMatrix1D assign(Object value) {
+  public ObjectMatrix1D<T> assign(T value) {
     for (int i = size; --i >= 0;) {
       setQuick(i, value);
     }
@@ -218,8 +240,8 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    *
    * @return a deep copy of the receiver.
    */
-  public ObjectMatrix1D copy() {
-    ObjectMatrix1D copy = like();
+  public ObjectMatrix1D<T> copy() {
+    ObjectMatrix1D<T> copy = like();
     copy.assign(this);
     return copy;
   }
@@ -246,6 +268,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @param testForEquality if true -> tests for equality, otherwise for identity.
    * @return true if the specified Object is equal to the receiver.
    */
+  @SuppressWarnings("unchecked")
   public boolean equals(Object otherObj, boolean testForEquality) { //delta
     if (!(otherObj instanceof ObjectMatrix1D)) {
       return false;
@@ -297,7 +320,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * Returns the content of this matrix if it is a wrapper; or <tt>this</tt> otherwise. Override this method in
    * wrappers.
    */
-  protected ObjectMatrix1D getContent() {
+  protected ObjectMatrix1D<T> getContent() {
     return this;
   }
 
@@ -319,7 +342,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @param indexList the list to be filled with indexes, can have any size.
    * @param valueList the list to be filled with values, can have any size.
    */
-  public void getNonZeros(IntArrayList indexList, ObjectArrayList valueList) {
+  public void getNonZeros(IntArrayList indexList, List<T> valueList) {
     boolean fillIndexList = indexList != null;
     boolean fillValueList = valueList != null;
     if (fillIndexList) {
@@ -330,7 +353,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
     }
     int s = size;
     for (int i = 0; i < s; i++) {
-      Object value = getQuick(i);
+      T value = getQuick(i);
       if (value != null) {
         if (fillIndexList) {
           indexList.add(i);
@@ -352,10 +375,10 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @param index the index of the cell.
    * @return the value of the specified cell.
    */
-  public abstract Object getQuick(int index);
+  public abstract T getQuick(int index);
 
   /** Returns <tt>true</tt> if both matrices share at least one identical cell. */
-  protected boolean haveSharedCells(ObjectMatrix1D other) {
+  protected boolean haveSharedCells(ObjectMatrix1D<T> other) {
     if (other == null) {
       return false;
     }
@@ -366,7 +389,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
   }
 
   /** Returns <tt>true</tt> if both matrices share at least one identical cell. */
-  protected boolean haveSharedCellsRaw(ObjectMatrix1D other) {
+  protected boolean haveSharedCellsRaw(ObjectMatrix1D<T> other) {
     return false;
   }
 
@@ -379,7 +402,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    *
    * @return a new empty matrix of the same dynamic type.
    */
-  public ObjectMatrix1D like() {
+  public ObjectMatrix1D<T> like() {
     return like(size);
   }
 
@@ -393,7 +416,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @param size the number of cell the matrix shall have.
    * @return a new empty matrix of the same dynamic type.
    */
-  public abstract ObjectMatrix1D like(int size);
+  public abstract ObjectMatrix1D<T> like(int size);
 
   /**
    * Construct and returns a new 2-d matrix <i>of the corresponding dynamic type</i>, entirelly independent of the
@@ -405,7 +428,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @param columns the number of columns the matrix shall have.
    * @return a new matrix of the corresponding dynamic type.
    */
-  public abstract ObjectMatrix2D like2D(int rows, int columns);
+  public abstract ObjectMatrix2D<T> like2D(int rows, int columns);
 
   /**
    * Sets the matrix cell at coordinate <tt>index</tt> to the specified value.
@@ -414,7 +437,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @param value the value to be filled into the specified cell.
    * @throws IndexOutOfBoundsException if <tt>index&lt;0 || index&gt;=size()</tt>.
    */
-  public void set(int index, Object value) {
+  public void set(int index, T value) {
     if (index < 0 || index >= size) {
       checkIndex(index);
     }
@@ -431,17 +454,17 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @param index the index of the cell.
    * @param value the value to be filled into the specified cell.
    */
-  public abstract void setQuick(int index, Object value);
+  public abstract void setQuick(int index, T value);
 
   /**
    * Swaps each element <tt>this[i]</tt> with <tt>other[i]</tt>.
    *
    * @throws IllegalArgumentException if <tt>size() != other.size()</tt>.
    */
-  public void swap(ObjectMatrix1D other) {
+  public void swap(ObjectMatrix1D<T> other) {
     checkSize(other);
     for (int i = size; --i >= 0;) {
-      Object tmp = getQuick(i);
+      T tmp = getQuick(i);
       setQuick(i, other.getQuick(i));
       other.setQuick(i, tmp);
     }
@@ -493,8 +516,9 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    *
    * @return a new view of the receiver.
    */
-  protected ObjectMatrix1D view() {
-    return (ObjectMatrix1D) clone();
+  @SuppressWarnings("unchecked")
+  protected ObjectMatrix1D<T> view() {
+    return (ObjectMatrix1D<T>) clone();
   }
 
   /**
@@ -504,8 +528,9 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    *
    * @return a new flip view.
    */
-  public ObjectMatrix1D viewFlip() {
-    return (ObjectMatrix1D) (view().vFlip());
+  @SuppressWarnings("unchecked")
+  public ObjectMatrix1D<T> viewFlip() {
+    return (ObjectMatrix1D<T>) (view().vFlip());
   }
 
   /**
@@ -524,8 +549,9 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @return the new view.
    * @throws IndexOutOfBoundsException if <tt>index<0 || width<0 || index+width>size()</tt>.
    */
-  public ObjectMatrix1D viewPart(int index, int width) {
-    return (ObjectMatrix1D) (view().vPart(index, width));
+  @SuppressWarnings("unchecked")
+  public ObjectMatrix1D<T> viewPart(int index, int width) {
+    return (ObjectMatrix1D<T>) (view().vPart(index, width));
   }
 
   /**
@@ -546,7 +572,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @return the new view.
    * @throws IndexOutOfBoundsException if <tt>!(0 <= indexes[i] < size())</tt> for any <tt>i=0..indexes.length()-1</tt>.
    */
-  public ObjectMatrix1D viewSelection(int[] indexes) {
+  public ObjectMatrix1D<T> viewSelection(int[] indexes) {
     // check for "all"
     if (indexes == null) {
       indexes = new int[size];
@@ -584,7 +610,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @param condition The condition to be matched.
    * @return the new view.
    */
-  public ObjectMatrix1D viewSelection(ObjectProcedure condition) {
+  public ObjectMatrix1D<T> viewSelection(ObjectProcedure<T> condition) {
     IntArrayList matches = new IntArrayList();
     for (int i = 0; i < size; i++) {
       if (condition.apply(getQuick(i))) {
@@ -601,7 +627,7 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @param offsets the offsets of the visible elements.
    * @return a new view.
    */
-  protected abstract ObjectMatrix1D viewSelectionLike(int[] offsets);
+  protected abstract ObjectMatrix1D<T> viewSelectionLike(int[] offsets);
 
   /**
    * Sorts the vector into ascending order, according to the <i>natural ordering</i>. This sort is guaranteed to be
@@ -610,7 +636,8 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    *
    * @return a new sorted vector (matrix) view.
    */
-  public ObjectMatrix1D viewSorted() {
+  @SuppressWarnings("unchecked")
+  public ObjectMatrix1D<T> viewSorted() {
     return org.apache.mahout.math.matrix.objectalgo.Sorting.mergeSort.sort(this);
   }
 
@@ -623,8 +650,9 @@ public abstract class ObjectMatrix1D extends AbstractMatrix1D {
    * @return the new view.
    * @throws IndexOutOfBoundsException if <tt>stride <= 0</tt>.
    */
-  public ObjectMatrix1D viewStrides(int stride) {
-    return (ObjectMatrix1D) (view().vStrides(stride));
+  @SuppressWarnings("unchecked")
+  public ObjectMatrix1D<T> viewStrides(int stride) {
+    return (ObjectMatrix1D<T>) (view().vStrides(stride));
   }
 
 }

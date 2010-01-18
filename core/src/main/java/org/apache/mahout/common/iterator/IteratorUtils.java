@@ -64,6 +64,7 @@ public final class IteratorUtils {
    * @return a {@link List} with the objects one gets by iterating over the given {@link Iterable}, sorted according to
    *         the given {@link Comparator}
    */
+  @SuppressWarnings("unchecked")
   public static <K> List<K> iterableToList(Iterable<K> iterable, Comparator<K> comparator) {
     if (iterable == null) {
       throw new IllegalArgumentException("iterable is null");

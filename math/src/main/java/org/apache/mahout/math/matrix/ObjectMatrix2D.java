@@ -1,3 +1,21 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 /*
 Copyright � 1999 CERN - European Organization for Nuclear Research.
 Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose 
@@ -8,20 +26,17 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix;
 
+import java.util.List;
+
 import org.apache.mahout.math.function.ObjectFunction;
 import org.apache.mahout.math.function.ObjectObjectFunction;
 import org.apache.mahout.math.list.IntArrayList;
-import org.apache.mahout.math.list.ObjectArrayList;
 import org.apache.mahout.math.matrix.impl.AbstractMatrix2D;
 import org.apache.mahout.math.matrix.objectalgo.Formatter;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public abstract class ObjectMatrix2D extends AbstractMatrix2D {
-
-  /** Makes this class non instantiable, but still let's others inherit from it. */
-  protected ObjectMatrix2D() {
-  }
+public abstract class ObjectMatrix2D<T> extends AbstractMatrix2D {
 
   /**
    * Applies a function to each cell and aggregates the results. Returns a value <tt>v</tt> such that
@@ -45,12 +60,12 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @return the aggregated measure.
    * @see org.apache.mahout.math.jet.math.Functions
    */
-  public Object aggregate(ObjectObjectFunction aggr,
-                          ObjectFunction f) {
+  public T aggregate(ObjectObjectFunction<T> aggr,
+                     ObjectFunction<T> f) {
     if (size() == 0) {
       return null;
     }
-    Object a = f.apply(getQuick(rows - 1, columns - 1));
+    T a = f.apply(getQuick(rows - 1, columns - 1));
     int d = 1; // last cell already done
     for (int row = rows; --row >= 0;) {
       for (int column = columns - d; --column >= 0;) {
@@ -92,13 +107,14 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @throws IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
    * @see org.apache.mahout.math.jet.math.Functions
    */
-  public Object aggregate(ObjectMatrix2D other, org.apache.mahout.math.function.ObjectObjectFunction aggr,
-                          ObjectObjectFunction f) {
+  public Object aggregate(ObjectMatrix2D<T> other, 
+                          ObjectObjectFunction<T> aggr,
+                          ObjectObjectFunction<T> f) {
     checkShape(other);
     if (size() == 0) {
       return null;
     }
-    Object a = f.apply(getQuick(rows - 1, columns - 1), other.getQuick(rows - 1, columns - 1));
+    T a = f.apply(getQuick(rows - 1, columns - 1), other.getQuick(rows - 1, columns - 1));
     int d = 1; // last cell already done
     for (int row = rows; --row >= 0;) {
       for (int column = columns - d; --column >= 0;) {
@@ -119,12 +135,12 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @throws IllegalArgumentException if <tt>values.length != rows() || for any 0 &lt;= row &lt; rows():
    *                                  values[row].length != columns()</tt>.
    */
-  public ObjectMatrix2D assign(Object[][] values) {
+  public ObjectMatrix2D<T> assign(T[][] values) {
     if (values.length != rows) {
       throw new IllegalArgumentException("Must have same number of rows: rows=" + values.length + "rows()=" + rows());
     }
     for (int row = rows; --row >= 0;) {
-      Object[] currentRow = values[row];
+      T[] currentRow = values[row];
       if (currentRow.length != columns) {
         throw new IllegalArgumentException(
             "Must have same number of columns in every row: columns=" + currentRow.length + "columns()=" + columns());
@@ -156,7 +172,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @return <tt>this</tt> (for convenience only).
    * @see org.apache.mahout.math.jet.math.Functions
    */
-  public ObjectMatrix2D assign(ObjectFunction function) {
+  public ObjectMatrix2D<T> assign(ObjectFunction<T> function) {
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
         setQuick(row, column, function.apply(getQuick(row, column)));
@@ -175,7 +191,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @return <tt>this</tt> (for convenience only).
    * @throws IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
    */
-  public ObjectMatrix2D assign(ObjectMatrix2D other) {
+  public ObjectMatrix2D<T> assign(ObjectMatrix2D<T> other) {
     if (other == this) {
       return this;
     }
@@ -220,7 +236,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @throws IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
    * @see org.apache.mahout.math.jet.math.Functions
    */
-  public ObjectMatrix2D assign(ObjectMatrix2D y, org.apache.mahout.math.function.ObjectObjectFunction function) {
+  public ObjectMatrix2D<T> assign(ObjectMatrix2D<T> y, ObjectObjectFunction<T> function) {
     checkShape(y);
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
@@ -236,7 +252,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @param value the value to be filled into the cells.
    * @return <tt>this</tt> (for convenience only).
    */
-  public ObjectMatrix2D assign(Object value) {
+  public ObjectMatrix2D<T> assign(T value) {
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
         setQuick(row, column, value);
@@ -265,7 +281,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    *
    * @return a deep copy of the receiver.
    */
-  public ObjectMatrix2D copy() {
+  public ObjectMatrix2D<T> copy() {
     return like().assign(this);
   }
 
@@ -291,6 +307,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @param testForEquality if true -> tests for equality, otherwise for identity.
    * @return true if the specified Object is equal to the receiver.
    */
+  @SuppressWarnings("unchecked")
   public boolean equals(Object otherObj, boolean testForEquality) { //delta
     if (!(otherObj instanceof ObjectMatrix2D)) {
       return false;
@@ -351,7 +368,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * Returns the content of this matrix if it is a wrapper; or <tt>this</tt> otherwise. Override this method in
    * wrappers.
    */
-  protected ObjectMatrix2D getContent() {
+  protected ObjectMatrix2D<T> getContent() {
     return this;
   }
 
@@ -377,7 +394,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @param columnList the list to be filled with column indexes, can have any size.
    * @param valueList  the list to be filled with values, can have any size.
    */
-  public void getNonZeros(IntArrayList rowList, IntArrayList columnList, ObjectArrayList valueList) {
+  public void getNonZeros(IntArrayList rowList, IntArrayList columnList, List<T> valueList) {
     rowList.clear();
     columnList.clear();
     valueList.clear();
@@ -385,7 +402,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
     int c = columns;
     for (int row = 0; row < r; row++) {
       for (int column = 0; column < c; column++) {
-        Object value = getQuick(row, column);
+        T value = getQuick(row, column);
         if (value != null) {
           rowList.add(row);
           columnList.add(column);
@@ -406,10 +423,10 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @param column the index of the column-coordinate.
    * @return the value at the specified coordinate.
    */
-  public abstract Object getQuick(int row, int column);
+  public abstract T getQuick(int row, int column);
 
   /** Returns <tt>true</tt> if both matrices share at least one identical cell. */
-  protected boolean haveSharedCells(ObjectMatrix2D other) {
+  protected boolean haveSharedCells(ObjectMatrix2D<T> other) {
     if (other == null) {
       return false;
     }
@@ -420,7 +437,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
   }
 
   /** Returns <tt>true</tt> if both matrices share at least one identical cell. */
-  protected boolean haveSharedCellsRaw(ObjectMatrix2D other) {
+  protected boolean haveSharedCellsRaw(ObjectMatrix2D<T> other) {
     return false;
   }
 
@@ -433,7 +450,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    *
    * @return a new empty matrix of the same dynamic type.
    */
-  public ObjectMatrix2D like() {
+  public ObjectMatrix2D<T> like() {
     return like(rows, columns);
   }
 
@@ -448,7 +465,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @param columns the number of columns the matrix shall have.
    * @return a new empty matrix of the same dynamic type.
    */
-  public abstract ObjectMatrix2D like(int rows, int columns);
+  public abstract ObjectMatrix2D<T> like(int rows, int columns);
 
   /**
    * Construct and returns a new 1-d matrix <i>of the corresponding dynamic type</i>, entirelly independent of the
@@ -459,7 +476,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @param size the number of cells the matrix shall have.
    * @return a new matrix of the corresponding dynamic type.
    */
-  public abstract ObjectMatrix1D like1D(int size);
+  public abstract ObjectMatrix1D<T> like1D(int size);
 
   /**
    * Construct and returns a new 1-d matrix <i>of the corresponding dynamic type</i>, sharing the same cells. For
@@ -472,7 +489,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @param stride the number of indexes between any two elements, i.e. <tt>index(i+1)-index(i)</tt>.
    * @return a new matrix of the corresponding dynamic type.
    */
-  protected abstract ObjectMatrix1D like1D(int size, int zero, int stride);
+  protected abstract ObjectMatrix1D<T> like1D(int size, int zero, int stride);
 
   /**
    * Sets the matrix cell at coordinate <tt>[row,column]</tt> to the specified value.
@@ -482,7 +499,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @param value  the value to be filled into the specified cell.
    * @throws IndexOutOfBoundsException if <tt>column&lt;0 || column&gt;=columns() || row&lt;0 || row&gt;=rows()</tt>
    */
-  public void set(int row, int column, Object value) {
+  public void set(int row, int column, T value) {
     if (column < 0 || column >= columns || row < 0 || row >= rows) {
       throw new IndexOutOfBoundsException("row:" + row + ", column:" + column);
     }
@@ -500,7 +517,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @param column the index of the column-coordinate.
    * @param value  the value to be filled into the specified cell.
    */
-  public abstract void setQuick(int row, int column, Object value);
+  public abstract void setQuick(int row, int column, T value);
 
   /**
    * Constructs and returns a 2-dimensional array containing the cell values. The returned array <tt>values</tt> has the
@@ -537,8 +554,9 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    *
    * @return a new view of the receiver.
    */
-  protected ObjectMatrix2D view() {
-    return (ObjectMatrix2D) clone();
+  @SuppressWarnings("unchecked")
+  protected ObjectMatrix2D<T> view() {
+    return (ObjectMatrix2D<T>) clone();
   }
 
   /**
@@ -553,7 +571,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @throws IndexOutOfBoundsException if <tt>column < 0 || column >= columns()</tt>.
    * @see #viewRow(int)
    */
-  public ObjectMatrix1D viewColumn(int column) {
+  public ObjectMatrix1D<T> viewColumn(int column) {
     checkColumn(column);
     int viewSize = this.rows;
     int viewZero = index(0, column);
@@ -572,8 +590,9 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @return a new flip view.
    * @see #viewRowFlip()
    */
-  public ObjectMatrix2D viewColumnFlip() {
-    return (ObjectMatrix2D) (view().vColumnFlip());
+  @SuppressWarnings("unchecked")
+  public ObjectMatrix2D<T> viewColumnFlip() {
+    return (ObjectMatrix2D<T>) (view().vColumnFlip());
   }
 
   /**
@@ -588,8 +607,9 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    *
    * @return a new dice view.
    */
-  public ObjectMatrix2D viewDice() {
-    return (ObjectMatrix2D) (view().vDice());
+  @SuppressWarnings("unchecked")
+  public ObjectMatrix2D<T> viewDice() {
+    return (ObjectMatrix2D<T>) (view().vDice());
   }
 
   /**
@@ -614,8 +634,9 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @throws IndexOutOfBoundsException if <tt>column<0 || width<0 || column+width>columns() || row<0 || height<0 ||
    *                                   row+height>rows()</tt>
    */
-  public ObjectMatrix2D viewPart(int row, int column, int height, int width) {
-    return (ObjectMatrix2D) (view().vPart(row, column, height, width));
+  @SuppressWarnings("unchecked")
+  public ObjectMatrix2D<T> viewPart(int row, int column, int height, int width) {
+    return (ObjectMatrix2D<T>) (view().vPart(row, column, height, width));
   }
 
   /**
@@ -630,7 +651,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @throws IndexOutOfBoundsException if <tt>row < 0 || row >= rows()</tt>.
    * @see #viewColumn(int)
    */
-  public ObjectMatrix1D viewRow(int row) {
+  public ObjectMatrix1D<T> viewRow(int row) {
     checkRow(row);
     int viewSize = this.columns;
     int viewZero = index(row, 0);
@@ -649,8 +670,9 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @return a new flip view.
    * @see #viewColumnFlip()
    */
-  public ObjectMatrix2D viewRowFlip() {
-    return (ObjectMatrix2D) (view().vRowFlip());
+  @SuppressWarnings("unchecked")
+  public ObjectMatrix2D<T> viewRowFlip() {
+    return (ObjectMatrix2D<T>) (view().vRowFlip());
   }
 
   /**
@@ -682,7 +704,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @throws IndexOutOfBoundsException if <tt>!(0 <= columnIndexes[i] < columns())</tt> for any
    *                                   <tt>i=0..columnIndexes.length()-1</tt>.
    */
-  public ObjectMatrix2D viewSelection(int[] rowIndexes, int[] columnIndexes) {
+  public ObjectMatrix2D<T> viewSelection(int[] rowIndexes, int[] columnIndexes) {
     // check for "all"
     if (rowIndexes == null) {
       rowIndexes = new int[rows];
@@ -740,7 +762,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @param condition The condition to be matched.
    * @return the new view.
    */
-  public ObjectMatrix2D viewSelection(ObjectMatrix1DProcedure condition) {
+  public ObjectMatrix2D<T> viewSelection(ObjectMatrix1DProcedure<T> condition) {
     IntArrayList matches = new IntArrayList();
     for (int i = 0; i < rows; i++) {
       if (condition.apply(viewRow(i))) {
@@ -759,7 +781,7 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @param columnOffsets the offsets of the visible elements.
    * @return a new view.
    */
-  protected abstract ObjectMatrix2D viewSelectionLike(int[] rowOffsets, int[] columnOffsets);
+  protected abstract ObjectMatrix2D<T> viewSelectionLike(int[] rowOffsets, int[] columnOffsets);
 
   /**
    * Sorts the matrix rows into ascending order, according to the <i>natural ordering</i> of the matrix values in the
@@ -770,7 +792,8 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @return a new sorted vector (matrix) view.
    * @throws IndexOutOfBoundsException if <tt>column < 0 || column >= columns()</tt>.
    */
-  public ObjectMatrix2D viewSorted(int column) {
+  @SuppressWarnings("unchecked")
+  public ObjectMatrix2D<T> viewSorted(int column) {
     return org.apache.mahout.math.matrix.objectalgo.Sorting.mergeSort.sort(this, column);
   }
 
@@ -786,8 +809,9 @@ public abstract class ObjectMatrix2D extends AbstractMatrix2D {
    * @return a new view.
    * @throws IndexOutOfBoundsException if <tt>rowStride<=0 || columnStride<=0</tt>.
    */
-  public ObjectMatrix2D viewStrides(int rowStride, int columnStride) {
-    return (ObjectMatrix2D) (view().vStrides(rowStride, columnStride));
+  @SuppressWarnings("unchecked")
+  public ObjectMatrix2D<T> viewStrides(int rowStride, int columnStride) {
+    return (ObjectMatrix2D<T>) (view().vStrides(rowStride, columnStride));
   }
 
 }

@@ -1,3 +1,21 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 /*
 Copyright � 1999 CERN - European Organization for Nuclear Research.
 Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose 
@@ -15,11 +33,11 @@ import org.apache.mahout.math.matrix.ObjectMatrix2D;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class SparseObjectMatrix2D extends ObjectMatrix2D {
+public class SparseObjectMatrix2D<T> extends ObjectMatrix2D<T> {
   /*
    * The elements of the matrix.
    */
-  protected final AbstractIntObjectMap elements;
+  protected final AbstractIntObjectMap<T> elements;
 
   /**
    * Constructs a matrix with a copy of the given values. <tt>values</tt> is required to have the form
@@ -30,7 +48,7 @@ public class SparseObjectMatrix2D extends ObjectMatrix2D {
    * @throws IllegalArgumentException if <tt>for any 1 &lt;= row &lt; values.length: values[row].length !=
    *                                  values[row-1].length</tt>.
    */
-  public SparseObjectMatrix2D(Object[][] values) {
+  public SparseObjectMatrix2D(T[][] values) {
     this(values.length, values.length == 0 ? 0 : values[0].length);
     assign(values);
   }
@@ -64,7 +82,7 @@ public class SparseObjectMatrix2D extends ObjectMatrix2D {
    */
   public SparseObjectMatrix2D(int rows, int columns, int initialCapacity, double minLoadFactor, double maxLoadFactor) {
     setUp(rows, columns);
-    this.elements = new OpenIntObjectHashMap(initialCapacity, minLoadFactor, maxLoadFactor);
+    this.elements = new OpenIntObjectHashMap<T>(initialCapacity, minLoadFactor, maxLoadFactor);
   }
 
   /**
@@ -80,7 +98,8 @@ public class SparseObjectMatrix2D extends ObjectMatrix2D {
    * @throws IllegalArgumentException if <tt>rows<0 || columns<0 || (double)columns*rows > Integer.MAX_VALUE</tt> or
    *                                  flip's are illegal.
    */
-  protected SparseObjectMatrix2D(int rows, int columns, AbstractIntObjectMap elements, int rowZero, int columnZero,
+  protected SparseObjectMatrix2D(int rows, int columns, 
+                                 AbstractIntObjectMap<T> elements, int rowZero, int columnZero,
                                  int rowStride, int columnStride) {
     setUp(rows, columns, rowZero, columnZero, rowStride, columnStride);
     this.elements = elements;
@@ -123,7 +142,7 @@ public class SparseObjectMatrix2D extends ObjectMatrix2D {
    * @return the value at the specified coordinate.
    */
   @Override
-  public Object getQuick(int row, int column) {
+  public T getQuick(int row, int column) {
     //if (debug) if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
     //return this.elements.get(index(row,column));
     //manually inlined:
@@ -135,8 +154,9 @@ public class SparseObjectMatrix2D extends ObjectMatrix2D {
    * the following conditions is met <ul> <li>the receiver is a view of the other matrix <li>the other matrix is a view
    * of the receiver <li><tt>this == other</tt> </ul>
    */
+  @SuppressWarnings("unchecked")
   @Override
-  protected boolean haveSharedCellsRaw(ObjectMatrix2D other) {
+  protected boolean haveSharedCellsRaw(ObjectMatrix2D<T> other) {
     if (other instanceof SelectedSparseObjectMatrix2D) {
       SelectedSparseObjectMatrix2D otherMatrix = (SelectedSparseObjectMatrix2D) other;
       return this.elements == otherMatrix.elements;
@@ -172,8 +192,8 @@ public class SparseObjectMatrix2D extends ObjectMatrix2D {
    * @return a new empty matrix of the same dynamic type.
    */
   @Override
-  public ObjectMatrix2D like(int rows, int columns) {
-    return new SparseObjectMatrix2D(rows, columns);
+  public ObjectMatrix2D<T> like(int rows, int columns) {
+    return new SparseObjectMatrix2D<T>(rows, columns);
   }
 
   /**
@@ -186,8 +206,8 @@ public class SparseObjectMatrix2D extends ObjectMatrix2D {
    * @return a new matrix of the corresponding dynamic type.
    */
   @Override
-  public ObjectMatrix1D like1D(int size) {
-    return new SparseObjectMatrix1D(size);
+  public ObjectMatrix1D<T> like1D(int size) {
+    return new SparseObjectMatrix1D<T>(size);
   }
 
   /**
@@ -202,8 +222,8 @@ public class SparseObjectMatrix2D extends ObjectMatrix2D {
    * @return a new matrix of the corresponding dynamic type.
    */
   @Override
-  protected ObjectMatrix1D like1D(int size, int offset, int stride) {
-    return new SparseObjectMatrix1D(size, this.elements, offset, stride);
+  protected ObjectMatrix1D<T> like1D(int size, int offset, int stride) {
+    return new SparseObjectMatrix1D<T>(size, this.elements, offset, stride);
   }
 
   /**
@@ -218,7 +238,7 @@ public class SparseObjectMatrix2D extends ObjectMatrix2D {
    * @param value  the value to be filled into the specified cell.
    */
   @Override
-  public void setQuick(int row, int column, Object value) {
+  public void setQuick(int row, int column, T value) {
     //if (debug) if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
     //int index =  index(row,column);
     //manually inlined:
@@ -255,7 +275,7 @@ public class SparseObjectMatrix2D extends ObjectMatrix2D {
    * @return a new view.
    */
   @Override
-  protected ObjectMatrix2D viewSelectionLike(int[] rowOffsets, int[] columnOffsets) {
-    return new SelectedSparseObjectMatrix2D(this.elements, rowOffsets, columnOffsets, 0);
+  protected ObjectMatrix2D<T> viewSelectionLike(int[] rowOffsets, int[] columnOffsets) {
+    return new SelectedSparseObjectMatrix2D<T>(this.elements, rowOffsets, columnOffsets, 0);
   }
 }

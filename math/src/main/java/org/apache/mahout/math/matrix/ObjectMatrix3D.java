@@ -1,3 +1,21 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 /*
 Copyright � 1999 CERN - European Organization for Nuclear Research.
 Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose 
@@ -8,6 +26,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix;
 
+import java.util.List;
+
 import org.apache.mahout.math.function.ObjectFunction;
 import org.apache.mahout.math.function.ObjectObjectFunction;
 import org.apache.mahout.math.list.IntArrayList;
@@ -17,11 +37,8 @@ import org.apache.mahout.math.matrix.objectalgo.Formatter;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public abstract class ObjectMatrix3D extends AbstractMatrix3D {
+public abstract class ObjectMatrix3D<T> extends AbstractMatrix3D {
 
-  /** Makes this class non instantiable, but still let's others inherit from it. */
-  protected ObjectMatrix3D() {
-  }
 
   /**
    * Applies a function to each cell and aggregates the results. Returns a value <tt>v</tt> such that
@@ -48,12 +65,12 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @return the aggregated measure.
    * @see org.apache.mahout.math.jet.math.Functions
    */
-  public Object aggregate(ObjectObjectFunction aggr,
-                          ObjectFunction f) {
+  public T aggregate(ObjectObjectFunction<T> aggr,
+                          ObjectFunction<T> f) {
     if (size() == 0) {
       return null;
     }
-    Object a = f.apply(getQuick(slices - 1, rows - 1, columns - 1));
+    T a = f.apply(getQuick(slices - 1, rows - 1, columns - 1));
     int d = 1; // last cell already done
     for (int slice = slices; --slice >= 0;) {
       for (int row = rows; --row >= 0;) {
@@ -104,13 +121,13 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    *                                  other.columns()</tt>
    * @see org.apache.mahout.math.jet.math.Functions
    */
-  public Object aggregate(ObjectMatrix3D other, org.apache.mahout.math.function.ObjectObjectFunction aggr,
-                          ObjectObjectFunction f) {
+  public T aggregate(ObjectMatrix3D<T> other, ObjectObjectFunction<T> aggr,
+                          ObjectObjectFunction<T> f) {
     checkShape(other);
     if (size() == 0) {
       return null;
     }
-    Object a = f.apply(getQuick(slices - 1, rows - 1, columns - 1), other.getQuick(slices - 1, rows - 1, columns - 1));
+    T a = f.apply(getQuick(slices - 1, rows - 1, columns - 1), other.getQuick(slices - 1, rows - 1, columns - 1));
     int d = 1; // last cell already done
     for (int slice = slices; --slice >= 0;) {
       for (int row = rows; --row >= 0;) {
@@ -136,19 +153,19 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @throws IllegalArgumentException if <tt>for any 0 &lt;= column &lt; columns(): values[slice][row].length !=
    *                                  columns()</tt>.
    */
-  public ObjectMatrix3D assign(Object[][][] values) {
+  public ObjectMatrix3D<T> assign(T[][][] values) {
     if (values.length != slices) {
       throw new IllegalArgumentException(
           "Must have same number of slices: slices=" + values.length + "slices()=" + slices());
     }
     for (int slice = slices; --slice >= 0;) {
-      Object[][] currentSlice = values[slice];
+      T[][] currentSlice = values[slice];
       if (currentSlice.length != rows) {
         throw new IllegalArgumentException(
             "Must have same number of rows in every slice: rows=" + currentSlice.length + "rows()=" + rows());
       }
       for (int row = rows; --row >= 0;) {
-        Object[] currentRow = currentSlice[row];
+        T[] currentRow = currentSlice[row];
         if (currentRow.length != columns) {
           throw new IllegalArgumentException(
               "Must have same number of columns in every row: columns=" + currentRow.length + "columns()=" + columns());
@@ -182,7 +199,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @return <tt>this</tt> (for convenience only).
    * @see org.apache.mahout.math.jet.math.Functions
    */
-  public ObjectMatrix3D assign(ObjectFunction function) {
+  public ObjectMatrix3D<T> assign(ObjectFunction<T> function) {
     for (int slice = slices; --slice >= 0;) {
       for (int row = rows; --row >= 0;) {
         for (int column = columns; --column >= 0;) {
@@ -204,7 +221,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @throws IllegalArgumentException if <tt>slices() != other.slices() || rows() != other.rows() || columns() !=
    *                                  other.columns()</tt>
    */
-  public ObjectMatrix3D assign(ObjectMatrix3D other) {
+  public ObjectMatrix3D<T> assign(ObjectMatrix3D<T> other) {
     if (other == this) {
       return this;
     }
@@ -252,7 +269,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    *                                  other.columns()</tt>
    * @see org.apache.mahout.math.jet.math.Functions
    */
-  public ObjectMatrix3D assign(ObjectMatrix3D y, org.apache.mahout.math.function.ObjectObjectFunction function) {
+  public ObjectMatrix3D<T> assign(ObjectMatrix3D<T> y, ObjectObjectFunction<T> function) {
     checkShape(y);
     for (int slice = slices; --slice >= 0;) {
       for (int row = rows; --row >= 0;) {
@@ -270,7 +287,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @param value the value to be filled into the cells.
    * @return <tt>this</tt> (for convenience only).
    */
-  public ObjectMatrix3D assign(Object value) {
+  public ObjectMatrix3D<T> assign(T value) {
     for (int slice = slices; --slice >= 0;) {
       for (int row = rows; --row >= 0;) {
         for (int column = columns; --column >= 0;) {
@@ -303,7 +320,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    *
    * @return a deep copy of the receiver.
    */
-  public ObjectMatrix3D copy() {
+  public ObjectMatrix3D<T> copy() {
     return like().assign(this);
   }
 
@@ -329,6 +346,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @param testForEquality if true -> tests for equality, otherwise for identity.
    * @return true if the specified Object is equal to the receiver.
    */
+  @SuppressWarnings("unchecked")
   public boolean equals(Object otherObj, boolean testForEquality) { //delta
     if (!(otherObj instanceof ObjectMatrix3D)) {
       return false;
@@ -394,7 +412,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * Returns the content of this matrix if it is a wrapper; or <tt>this</tt> otherwise. Override this method in
    * wrappers.
    */
-  protected ObjectMatrix3D getContent() {
+  protected ObjectMatrix3D<T> getContent() {
     return this;
   }
 
@@ -412,7 +430,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @param valueList  the list to be filled with values, can have any size.
    */
   public void getNonZeros(IntArrayList sliceList, IntArrayList rowList, IntArrayList columnList,
-                          ObjectArrayList valueList) {
+                          List<T> valueList) {
     sliceList.clear();
     rowList.clear();
     columnList.clear();
@@ -423,7 +441,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
     for (int slice = 0; slice < s; slice++) {
       for (int row = 0; row < r; row++) {
         for (int column = 0; column < c; column++) {
-          Object value = getQuick(slice, row, column);
+          T value = getQuick(slice, row, column);
           if (value != null) {
             sliceList.add(slice);
             rowList.add(row);
@@ -448,10 +466,10 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @param column the index of the column-coordinate.
    * @return the value at the specified coordinate.
    */
-  public abstract Object getQuick(int slice, int row, int column);
+  public abstract T getQuick(int slice, int row, int column);
 
   /** Returns <tt>true</tt> if both matrices share at least one identical cell. */
-  protected boolean haveSharedCells(ObjectMatrix3D other) {
+  protected boolean haveSharedCells(ObjectMatrix3D<T> other) {
     if (other == null) {
       return false;
     }
@@ -462,7 +480,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
   }
 
   /** Returns <tt>true</tt> if both matrices share at least one identical cell. */
-  protected boolean haveSharedCellsRaw(ObjectMatrix3D other) {
+  protected boolean haveSharedCellsRaw(ObjectMatrix3D<T> other) {
     return false;
   }
 
@@ -475,7 +493,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    *
    * @return a new empty matrix of the same dynamic type.
    */
-  public ObjectMatrix3D like() {
+  public ObjectMatrix3D<T> like() {
     return like(slices, rows, columns);
   }
 
@@ -492,7 +510,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @param columns the number of columns the matrix shall have.
    * @return a new empty matrix of the same dynamic type.
    */
-  public abstract ObjectMatrix3D like(int slices, int rows, int columns);
+  public abstract ObjectMatrix3D<T> like(int slices, int rows, int columns);
 
   /**
    * Construct and returns a new 2-d matrix <i>of the corresponding dynamic type</i>, sharing the same cells. For
@@ -508,7 +526,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @param columnStride the number of elements between two columns, i.e. <tt>index(i,j+1)-index(i,j)</tt>.
    * @return a new matrix of the corresponding dynamic type.
    */
-  protected abstract ObjectMatrix2D like2D(int rows, int columns, int rowZero, int columnZero, int rowStride,
+  protected abstract ObjectMatrix2D<T> like2D(int rows, int columns, int rowZero, int columnZero, int rowStride,
                                            int columnStride);
 
   /**
@@ -521,7 +539,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @throws IndexOutOfBoundsException if <tt>row&lt;0 || row&gt;=rows() || slice&lt;0 || slice&gt;=slices() ||
    *                                   column&lt;0 || column&gt;=column()</tt>.
    */
-  public void set(int slice, int row, int column, Object value) {
+  public void set(int slice, int row, int column, T value) {
     if (slice < 0 || slice >= slices || row < 0 || row >= rows || column < 0 || column >= columns) {
       throw new IndexOutOfBoundsException("slice:" + slice + ", row:" + row + ", column:" + column);
     }
@@ -541,7 +559,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @param column the index of the column-coordinate.
    * @param value  the value to be filled into the specified cell.
    */
-  public abstract void setQuick(int slice, int row, int column, Object value);
+  public abstract void setQuick(int slice, int row, int column, T value);
 
   /**
    * Constructs and returns a 2-dimensional array containing the cell values. The returned array <tt>values</tt> has the
@@ -581,8 +599,9 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    *
    * @return a new view of the receiver.
    */
-  protected ObjectMatrix3D view() {
-    return (ObjectMatrix3D) clone();
+  @SuppressWarnings("unchecked")
+  protected ObjectMatrix3D<T> view() {
+    return (ObjectMatrix3D<T>) clone();
   }
 
   /**
@@ -599,7 +618,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @see #viewSlice(int)
    * @see #viewRow(int)
    */
-  public ObjectMatrix2D viewColumn(int column) {
+  public ObjectMatrix2D<T> viewColumn(int column) {
     checkColumn(column);
     int sliceRows = this.slices;
     int sliceColumns = this.rows;
@@ -623,8 +642,9 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @see #viewSliceFlip()
    * @see #viewRowFlip()
    */
-  public ObjectMatrix3D viewColumnFlip() {
-    return (ObjectMatrix3D) (view().vColumnFlip());
+  @SuppressWarnings("unchecked")
+  public ObjectMatrix3D<T> viewColumnFlip() {
+    return (ObjectMatrix3D<T>) (view().vColumnFlip());
   }
 
   /**
@@ -639,8 +659,9 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @return a new dice view.
    * @throws IllegalArgumentException if some of the parameters are equal or not in range 0..2.
    */
-  public ObjectMatrix3D viewDice(int axis0, int axis1, int axis2) {
-    return (ObjectMatrix3D) (view().vDice(axis0, axis1, axis2));
+  @SuppressWarnings("unchecked")
+  public ObjectMatrix3D<T> viewDice(int axis0, int axis1, int axis2) {
+    return (ObjectMatrix3D<T>) view().vDice(axis0, axis1, axis2);
   }
 
   /**
@@ -659,8 +680,9 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @throws IndexOutOfBoundsException if <tt>slice<0 || depth<0 || slice+depth>slices() || row<0 || height<0 ||
    *                                   row+height>rows() || column<0 || width<0 || column+width>columns()</tt>
    */
-  public ObjectMatrix3D viewPart(int slice, int row, int column, int depth, int height, int width) {
-    return (ObjectMatrix3D) (view().vPart(slice, row, column, depth, height, width));
+  @SuppressWarnings("unchecked")
+  public ObjectMatrix3D<T> viewPart(int slice, int row, int column, int depth, int height, int width) {
+    return (ObjectMatrix3D<T>) view().vPart(slice, row, column, depth, height, width);
   }
 
   /**
@@ -677,7 +699,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @see #viewSlice(int)
    * @see #viewColumn(int)
    */
-  public ObjectMatrix2D viewRow(int row) {
+  public ObjectMatrix2D<T> viewRow(int row) {
     checkRow(row);
     int sliceRows = this.slices;
     int sliceColumns = this.columns;
@@ -700,8 +722,9 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @see #viewSliceFlip()
    * @see #viewColumnFlip()
    */
-  public ObjectMatrix3D viewRowFlip() {
-    return (ObjectMatrix3D) (view().vRowFlip());
+  @SuppressWarnings("unchecked")
+  public ObjectMatrix3D<T> viewRowFlip() {
+    return (ObjectMatrix3D<T>) view().vRowFlip();
   }
 
   /**
@@ -725,7 +748,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @throws IndexOutOfBoundsException if <tt>!(0 <= columnIndexes[i] < columns())</tt> for any
    *                                   <tt>i=0..columnIndexes.length()-1</tt>.
    */
-  public ObjectMatrix3D viewSelection(int[] sliceIndexes, int[] rowIndexes, int[] columnIndexes) {
+  public ObjectMatrix3D<T> viewSelection(int[] sliceIndexes, int[] rowIndexes, int[] columnIndexes) {
     // check for "all"
     if (sliceIndexes == null) {
       sliceIndexes = new int[slices];
@@ -785,7 +808,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @param condition The condition to be matched.
    * @return the new view.
    */
-  public ObjectMatrix3D viewSelection(ObjectMatrix2DProcedure condition) {
+  public ObjectMatrix3D<T> viewSelection(ObjectMatrix2DProcedure<T> condition) {
     IntArrayList matches = new IntArrayList();
     for (int i = 0; i < slices; i++) {
       if (condition.apply(viewSlice(i))) {
@@ -805,7 +828,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @param columnOffsets the offsets of the visible elements.
    * @return a new view.
    */
-  protected abstract ObjectMatrix3D viewSelectionLike(int[] sliceOffsets, int[] rowOffsets, int[] columnOffsets);
+  protected abstract ObjectMatrix3D<T> viewSelectionLike(int[] sliceOffsets, int[] rowOffsets, int[] columnOffsets);
 
   /**
    * Constructs and returns a new 2-dimensional <i>slice view</i> representing the rows and columns of the given slice.
@@ -821,7 +844,7 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @see #viewRow(int)
    * @see #viewColumn(int)
    */
-  public ObjectMatrix2D viewSlice(int slice) {
+  public ObjectMatrix2D<T> viewSlice(int slice) {
     checkSlice(slice);
     int sliceRows = this.rows;
     int sliceColumns = this.columns;
@@ -844,8 +867,9 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @see #viewRowFlip()
    * @see #viewColumnFlip()
    */
-  public ObjectMatrix3D viewSliceFlip() {
-    return (ObjectMatrix3D) (view().vSliceFlip());
+  @SuppressWarnings("unchecked")
+  public ObjectMatrix3D<T> viewSliceFlip() {
+    return (ObjectMatrix3D<T>) view().vSliceFlip();
   }
 
   /**
@@ -857,7 +881,8 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @return a new sorted vector (matrix) view.
    * @throws IndexOutOfBoundsException if <tt>row < 0 || row >= rows() || column < 0 || column >= columns()</tt>.
    */
-  public ObjectMatrix3D viewSorted(int row, int column) {
+  @SuppressWarnings("unchecked")
+  public ObjectMatrix3D<T> viewSorted(int row, int column) {
     return org.apache.mahout.math.matrix.objectalgo.Sorting.mergeSort.sort(this, row, column);
   }
 
@@ -875,8 +900,9 @@ public abstract class ObjectMatrix3D extends AbstractMatrix3D {
    * @return a new view.
    * @throws IndexOutOfBoundsException if <tt>sliceStride<=0 || rowStride<=0 || columnStride<=0</tt>.
    */
-  public ObjectMatrix3D viewStrides(int sliceStride, int rowStride, int columnStride) {
-    return (ObjectMatrix3D) (view().vStrides(sliceStride, rowStride, columnStride));
+  @SuppressWarnings("unchecked")
+  public ObjectMatrix3D<T> viewStrides(int sliceStride, int rowStride, int columnStride) {
+    return (ObjectMatrix3D<T>) view().vStrides(sliceStride, rowStride, columnStride);
   }
 
 }

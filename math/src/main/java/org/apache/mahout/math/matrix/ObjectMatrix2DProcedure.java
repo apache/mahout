@@ -15,7 +15,7 @@ package org.apache.mahout.math.matrix;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public interface ObjectMatrix2DProcedure {
+public interface ObjectMatrix2DProcedure<T> {
 
   /**
    * Applies a procedure to an argument. Optionally can return a boolean flag to inform the object calling the
@@ -28,5 +28,5 @@ public interface ObjectMatrix2DProcedure {
    * @param element element passed to the procedure.
    * @return a flag  to inform the object calling the procedure.
    */
-  boolean apply(ObjectMatrix2D element);
+  boolean apply(ObjectMatrix2D<T> element);
 }

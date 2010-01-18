@@ -1,3 +1,21 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 /*
 Copyright � 1999 CERN - European Organization for Nuclear Research.
 Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose 
@@ -15,11 +33,11 @@ import org.apache.mahout.math.matrix.ObjectMatrix3D;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class SparseObjectMatrix3D extends ObjectMatrix3D {
+public class SparseObjectMatrix3D<T> extends ObjectMatrix3D<T> {
   /*
    * The elements of the matrix.
    */
-  protected AbstractIntObjectMap elements;
+  protected AbstractIntObjectMap<T> elements;
 
   /**
    * Constructs a matrix with a copy of the given values. <tt>values</tt> is required to have the form
@@ -33,7 +51,7 @@ public class SparseObjectMatrix3D extends ObjectMatrix3D {
    * @throws IllegalArgumentException if <tt>for any 1 &lt;= row &lt; values[0].length: values[slice][row].length !=
    *                                  values[slice][row-1].length</tt>.
    */
-  public SparseObjectMatrix3D(Object[][][] values) {
+  public SparseObjectMatrix3D(T[][][] values) {
     this(values.length, (values.length == 0 ? 0 : values[0].length),
         (values.length == 0 ? 0 : values[0].length == 0 ? 0 : values[0][0].length));
     assign(values);
@@ -73,7 +91,7 @@ public class SparseObjectMatrix3D extends ObjectMatrix3D {
   public SparseObjectMatrix3D(int slices, int rows, int columns, int initialCapacity, double minLoadFactor,
                               double maxLoadFactor) {
     setUp(slices, rows, columns);
-    this.elements = new OpenIntObjectHashMap(initialCapacity, minLoadFactor, maxLoadFactor);
+    this.elements = new OpenIntObjectHashMap<T>(initialCapacity, minLoadFactor, maxLoadFactor);
   }
 
   /**
@@ -92,7 +110,7 @@ public class SparseObjectMatrix3D extends ObjectMatrix3D {
    * @throws IllegalArgumentException if <tt>(Object)slices*columns*rows > Integer.MAX_VALUE</tt>.
    * @throws IllegalArgumentException if <tt>slices<0 || rows<0 || columns<0</tt>.
    */
-  protected SparseObjectMatrix3D(int slices, int rows, int columns, AbstractIntObjectMap elements, int sliceZero,
+  protected SparseObjectMatrix3D(int slices, int rows, int columns, AbstractIntObjectMap<T> elements, int sliceZero,
                                  int rowZero, int columnZero, int sliceStride, int rowStride, int columnStride) {
     setUp(slices, rows, columns, sliceZero, rowZero, columnZero, sliceStride, rowStride, columnStride);
     this.elements = elements;
@@ -137,7 +155,7 @@ public class SparseObjectMatrix3D extends ObjectMatrix3D {
    * @return the value at the specified coordinate.
    */
   @Override
-  public Object getQuick(int slice, int row, int column) {
+  public T getQuick(int slice, int row, int column) {
     //if (debug) if (slice<0 || slice>=slices || row<0 || row>=rows || column<0 || column>=columns) throw new IndexOutOfBoundsException("slice:"+slice+", row:"+row+", column:"+column);
     //return elements.get(index(slice,row,column));
     //manually inlined:
@@ -146,8 +164,9 @@ public class SparseObjectMatrix3D extends ObjectMatrix3D {
   }
 
   /** Returns <tt>true</tt> if both matrices share at least one identical cell. */
+  @SuppressWarnings("unchecked")
   @Override
-  protected boolean haveSharedCellsRaw(ObjectMatrix3D other) {
+  protected boolean haveSharedCellsRaw(ObjectMatrix3D<T> other) {
     if (other instanceof SelectedSparseObjectMatrix3D) {
       SelectedSparseObjectMatrix3D otherMatrix = (SelectedSparseObjectMatrix3D) other;
       return this.elements == otherMatrix.elements;
@@ -186,8 +205,8 @@ public class SparseObjectMatrix3D extends ObjectMatrix3D {
    * @return a new empty matrix of the same dynamic type.
    */
   @Override
-  public ObjectMatrix3D like(int slices, int rows, int columns) {
-    return new SparseObjectMatrix3D(slices, rows, columns);
+  public ObjectMatrix3D<T> like(int slices, int rows, int columns) {
+    return new SparseObjectMatrix3D<T>(slices, rows, columns);
   }
 
   /**
@@ -205,8 +224,8 @@ public class SparseObjectMatrix3D extends ObjectMatrix3D {
    * @return a new matrix of the corresponding dynamic type.
    */
   @Override
-  protected ObjectMatrix2D like2D(int rows, int columns, int rowZero, int columnZero, int rowStride, int columnStride) {
-    return new SparseObjectMatrix2D(rows, columns, this.elements, rowZero, columnZero, rowStride, columnStride);
+  protected ObjectMatrix2D<T> like2D(int rows, int columns, int rowZero, int columnZero, int rowStride, int columnStride) {
+    return new SparseObjectMatrix2D<T>(rows, columns, this.elements, rowZero, columnZero, rowStride, columnStride);
   }
 
   /**
@@ -223,7 +242,7 @@ public class SparseObjectMatrix3D extends ObjectMatrix3D {
    * @param value  the value to be filled into the specified cell.
    */
   @Override
-  public void setQuick(int slice, int row, int column, Object value) {
+  public void setQuick(int slice, int row, int column, T value) {
     //if (debug) if (slice<0 || slice>=slices || row<0 || row>=rows || column<0 || column>=columns) throw new IndexOutOfBoundsException("slice:"+slice+", row:"+row+", column:"+column);
     //int index =  index(slice,row,column);
     //manually inlined:
@@ -260,7 +279,7 @@ public class SparseObjectMatrix3D extends ObjectMatrix3D {
    * @return a new view.
    */
   @Override
-  protected ObjectMatrix3D viewSelectionLike(int[] sliceOffsets, int[] rowOffsets, int[] columnOffsets) {
-    return new SelectedSparseObjectMatrix3D(this.elements, sliceOffsets, rowOffsets, columnOffsets, 0);
+  protected ObjectMatrix3D<T> viewSelectionLike(int[] sliceOffsets, int[] rowOffsets, int[] columnOffsets) {
+    return new SelectedSparseObjectMatrix3D<T>(this.elements, sliceOffsets, rowOffsets, columnOffsets, 0);
   }
 }
