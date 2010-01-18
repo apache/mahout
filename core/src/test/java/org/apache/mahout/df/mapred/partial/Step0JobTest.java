@@ -184,7 +184,7 @@ public class Step0JobTest extends MahoutTestCase {
         + Arrays.toString(actualIds), Arrays.equals(expectedIds, actualIds));
   }
 
-  protected static class Step0OutputCollector implements
+  static class Step0OutputCollector implements
       OutputCollector<IntWritable, Step0Output> {
 
     private final int[] keys;
@@ -193,7 +193,7 @@ public class Step0JobTest extends MahoutTestCase {
 
     private int index = 0;
 
-    protected Step0OutputCollector(int numMaps) {
+    Step0OutputCollector(int numMaps) {
       keys = new int[numMaps];
       values = new Step0Output[numMaps];
     }

@@ -27,7 +27,7 @@ import org.apache.mahout.df.mapreduce.MapredOutput;
 /**
  * Special implementation that collects the output of the mappers
  */
-public class MockContext extends Context {
+class MockContext extends Context {
 
   private final TreeID[] keys;
 

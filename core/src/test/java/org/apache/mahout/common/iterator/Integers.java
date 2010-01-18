@@ -23,16 +23,16 @@ import java.util.NoSuchElementException;
 /**
  * Handy source of well characterized Iterators and Iterables.
  */
-public final class Integers {
+final class Integers {
 
   private Integers() {
   }
 
-  public static Iterator<Integer> iterator(int n) {
+  static Iterator<Integer> iterator(int n) {
     return new IntegerIterator(n);
   }
 
-  public static Iterable<Integer> iterable(final int n) {
+  static Iterable<Integer> iterable(final int n) {
     return new Iterable<Integer>() {
       @Override
       public Iterator<Integer> iterator() {

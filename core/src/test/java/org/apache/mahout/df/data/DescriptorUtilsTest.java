@@ -82,7 +82,8 @@ public class DescriptorUtilsTest extends MahoutTestCase {
     }
   }
   
-  protected static void validate(String descriptor, String description) throws DescriptorException {
+  private static void validate(String descriptor, String description) throws DescriptorException {
     assertEquals(descriptor, DescriptorUtils.generateDescriptor(description));
   }
+
 }

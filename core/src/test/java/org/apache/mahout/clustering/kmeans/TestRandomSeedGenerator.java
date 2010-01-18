@@ -37,7 +37,7 @@ import org.apache.mahout.math.VectorWritable;
 
 public class TestRandomSeedGenerator extends MahoutTestCase {
   
-  static final double[][] raw = {{1, 1}, {2, 1}, {1, 2}, {2, 2},
+  private static final double[][] raw = {{1, 1}, {2, 1}, {1, 2}, {2, 2},
     {3, 3}, {4, 4}, {5, 4}, {4, 5}, {5, 5}};
   
   private FileSystem fs;
@@ -111,7 +111,7 @@ public class TestRandomSeedGenerator extends MahoutTestCase {
     assertEquals(4, clusterCount); // validate sample count
   }
   
-  public static void assertVectorEquals(double[] raw, Vector v) {
+  private static void assertVectorEquals(double[] raw, Vector v) {
     assertEquals(raw.length, v.size());
     for (int i=0; i < raw.length; i++) {
       assertEquals(raw[i], v.getQuick(i));

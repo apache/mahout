@@ -59,7 +59,7 @@ public final class Utils {
   }
 
   /** Used when generating random CATEGORICAL values */
-  static final int CATEGORICAL_RANGE = 100;
+  private static final int CATEGORICAL_RANGE = 100;
 
   /**
    * Generates a random list of tokens
@@ -197,7 +197,7 @@ public final class Utils {
    * @param attrs attributes description
    * @return
    */
-  static double[] randomVector(Random rng, Attribute[] attrs) {
+  private static double[] randomVector(Random rng, Attribute[] attrs) {
     double[] vector = new double[attrs.length];
 
     for (int attr = 0; attr < attrs.length; attr++) {
@@ -219,7 +219,7 @@ public final class Utils {
    * @param v double array
    * @return comma-separated string
    */
-  static String double2String(double[] v) {
+  private static String double2String(double[] v) {
     StringBuilder builder = new StringBuilder();
 
     for (double aV : v) {
@@ -280,7 +280,7 @@ public final class Utils {
     return ArrayUtils.indexOf(attrs, Attribute.LABEL);
   }
 
-  public static void writeDataToFile(String[] sData, Path path) throws IOException {
+  private static void writeDataToFile(String[] sData, Path path) throws IOException {
     BufferedWriter output = new BufferedWriter(new OutputStreamWriter(
         new FileOutputStream(path.toString()), Charset.forName("UTF-8")));
     try {

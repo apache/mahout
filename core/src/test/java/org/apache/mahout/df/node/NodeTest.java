@@ -67,7 +67,7 @@ public class NodeTest extends MahoutTestCase {
     assertEquals(root, readNode());
   }
 
-  protected Node readNode() throws IOException {
+  Node readNode() throws IOException {
     ByteArrayInputStream byteInStream = new ByteArrayInputStream(byteOutStream.toByteArray());
     DataInput in = new DataInputStream(byteInStream);
     return Node.read(in);

@@ -32,10 +32,10 @@ import org.apache.mahout.math.Vector;
 
 import java.lang.reflect.Type;
 
-public class JsonModelHolderAdapter implements JsonSerializer<ModelHolder<?>>,
+class JsonModelHolderAdapter implements JsonSerializer<ModelHolder<?>>,
     JsonDeserializer<ModelHolder<?>> {
 
-  final Type typeOfModel = new TypeToken<Model<Vector>>() {
+  private final Type typeOfModel = new TypeToken<Model<Vector>>() {
   }.getType();
 
   @Override

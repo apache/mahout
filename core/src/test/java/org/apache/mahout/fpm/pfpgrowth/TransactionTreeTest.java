@@ -22,8 +22,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
-import junit.framework.TestCase;
-
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.RandomUtils;

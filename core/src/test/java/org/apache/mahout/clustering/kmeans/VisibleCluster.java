@@ -26,11 +26,11 @@ import java.util.List;
  * This Cluster subclass maintains a list of points in the cluster so it can include them in its toString method. Useful
  * for debugging but not practical for production use since it holds onto all its points.
  */
-public class VisibleCluster extends Cluster {
+class VisibleCluster extends Cluster {
 
   private List<Vector> points;
 
-  public VisibleCluster(Vector point) {
+  VisibleCluster(Vector point) {
     super(point);
     points = new ArrayList<Vector>();
   }

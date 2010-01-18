@@ -237,7 +237,7 @@ public class Step0Job {
    * Output of the step0's mappers
    * 
    */
-  protected static class Step0Output implements Writable,
+  public static class Step0Output implements Writable,
       Comparable<Step0Output> {
 
     /**

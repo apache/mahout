@@ -28,9 +28,9 @@ import org.apache.mahout.common.MahoutTestCase;
 
 public class BayesClassifierTest extends MahoutTestCase {
   
-  protected Algorithm algorithm;
+  private Algorithm algorithm;
   
-  protected InMemoryBayesDatastore store;
+  private InMemoryBayesDatastore store;
   
   @Override
   protected void setUp() throws Exception {

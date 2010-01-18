@@ -30,7 +30,7 @@ import org.apache.mahout.df.data.Dataset.Attribute;
 
 public class DataLoaderTest extends MahoutTestCase {
 
-  protected Random rng;
+  private Random rng;
 
   @Override
   protected void setUp() throws Exception {
@@ -38,7 +38,7 @@ public class DataLoaderTest extends MahoutTestCase {
     rng = RandomUtils.getRandom();
   }
 
-  public void testLoadDataWithDescriptor() throws Exception {
+  public void testLoadDataWithDescriptor() throws DescriptorException {
     int nbAttributes = 10;
     int datasize = 100;
 

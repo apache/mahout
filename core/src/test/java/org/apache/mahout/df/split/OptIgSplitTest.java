@@ -26,9 +26,9 @@ import org.apache.mahout.df.data.Utils;
 
 public class OptIgSplitTest extends MahoutTestCase {
 
-  protected static final int nbAttributes = 20;
+  private static final int nbAttributes = 20;
 
-  protected static final int numInstances = 100;
+  private static final int numInstances = 100;
  
   public void testComputeSplit() throws Exception {
     int n = 100;

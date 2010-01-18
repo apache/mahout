@@ -28,8 +28,8 @@ import org.apache.mahout.common.MahoutTestCase;
 
 public class CBayesClassifierTest extends MahoutTestCase {
   
-  protected Algorithm algorithm;
-  protected InMemoryBayesDatastore store;
+  private Algorithm algorithm;
+  private InMemoryBayesDatastore store;
 
   @Override
   protected void setUp() throws Exception {

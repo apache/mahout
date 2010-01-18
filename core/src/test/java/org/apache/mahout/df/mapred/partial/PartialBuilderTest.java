@@ -154,26 +154,26 @@ public class PartialBuilderTest extends MahoutTestCase {
 
   protected static class PartialBuilderChecker extends PartialBuilder {
 
-    protected final Long _seed;
+    private final Long seed;
 
-    protected final TreeBuilder _treeBuilder;
+    private final TreeBuilder treeBuilder;
 
-    protected final Path _datasetPath;
+    private final Path datasetPath;
 
     protected PartialBuilderChecker(TreeBuilder treeBuilder, Path dataPath,
         Path datasetPath, Long seed) {
       super(treeBuilder, dataPath, datasetPath, seed);
 
-      _seed = seed;
-      _treeBuilder = treeBuilder;
-      _datasetPath = datasetPath;
+      this.seed = seed;
+      this.treeBuilder = treeBuilder;
+      this.datasetPath = datasetPath;
     }
 
     @Override
     protected void runJob(JobConf job) throws IOException {
       // no need to run the job, just check if the params are correct
 
-      assertEquals(_seed, getRandomSeed(job));
+      assertEquals(seed, getRandomSeed(job));
 
       // PartialBuilder should detect the 'local' mode and overrides the number
       // of map tasks
@@ -184,9 +184,9 @@ public class PartialBuilderTest extends MahoutTestCase {
       assertFalse(isOutput(job));
       assertTrue(isOobEstimate(job));
 
-      assertEquals(_treeBuilder, getTreeBuilder(job));
+      assertEquals(treeBuilder, getTreeBuilder(job));
 
-      assertEquals(_datasetPath, getDistributedCacheFile(job, 0));
+      assertEquals(datasetPath, getDistributedCacheFile(job, 0));
     }
 
   }
@@ -197,9 +197,9 @@ public class PartialBuilderTest extends MahoutTestCase {
    */
   protected static class TestCallback implements PredictionCallback {
 
-    protected final TreeID[] keys;
+    private final TreeID[] keys;
 
-    protected final MapredOutput[] values;
+    private final MapredOutput[] values;
 
     protected TestCallback(TreeID[] keys, MapredOutput[] values) {
       this.keys = keys;

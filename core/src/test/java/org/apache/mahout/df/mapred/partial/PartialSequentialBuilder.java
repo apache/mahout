@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * Simulates the Partial mapreduce implementation in a sequential manner. Must
  * receive a seed
  */
-public class PartialSequentialBuilder extends PartialBuilder {
+class PartialSequentialBuilder extends PartialBuilder {
 
   private static final Logger log = LoggerFactory.getLogger(PartialSequentialBuilder.class);
 
@@ -176,7 +176,7 @@ public class PartialSequentialBuilder extends PartialBuilder {
    * @param callback
    * @return
    */
-  protected DecisionForest processOutput(TreeID[] keys, MapredOutput[] values, PredictionCallback callback) {
+  DecisionForest processOutput(TreeID[] keys, MapredOutput[] values, PredictionCallback callback) {
     List<Node> trees = new ArrayList<Node>();
 
     for (int index = 0; index < keys.length; index++) {
@@ -202,7 +202,7 @@ public class PartialSequentialBuilder extends PartialBuilder {
    * @throws IOException
    * 
    */
-  protected void secondStep(JobConf job, Path forestPath,
+  void secondStep(JobConf job, Path forestPath,
       PredictionCallback callback) throws IOException {
     // retrieve the splits
     TextInputFormat input = (TextInputFormat) job.getInputFormat();
@@ -267,8 +267,8 @@ public class PartialSequentialBuilder extends PartialBuilder {
    * Special Step1Mapper that can be configured without using a Configuration
    * 
    */
-  protected static class MockStep1Mapper extends Step1Mapper {
-    protected MockStep1Mapper(TreeBuilder treeBuilder, Dataset dataset, Long seed,
+  static class MockStep1Mapper extends Step1Mapper {
+    MockStep1Mapper(TreeBuilder treeBuilder, Dataset dataset, Long seed,
         int partition, int numMapTasks, int numTrees) {
       configure(false, true, treeBuilder, dataset);
       configure(seed, partition, numMapTasks, numTrees);

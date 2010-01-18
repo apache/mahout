@@ -41,12 +41,12 @@ import org.apache.mahout.df.node.Node;
 
 public class PartialBuilderTest extends MahoutTestCase {
 
-  protected static final int numMaps = 5;
+  private static final int numMaps = 5;
 
-  protected static final int numTrees = 32;
+  private static final int numTrees = 32;
 
   /** instances per partition */
-  protected static final int numInstances = 20;
+  private static final int numInstances = 20;
   
   public void testProcessOutput() throws Exception {
     Configuration conf = new Configuration();
@@ -111,7 +111,7 @@ public class PartialBuilderTest extends MahoutTestCase {
    * @param values
    * @param firstIds partitions's first ids in hadoop's order
    */
-  protected static void randomKeyValues(Random rng, TreeID[] keys,
+  private static void randomKeyValues(Random rng, TreeID[] keys,
       MapredOutput[] values, int[] firstIds) {
     int index = 0;
     int firstId = 0;
@@ -143,7 +143,7 @@ public class PartialBuilderTest extends MahoutTestCase {
 
   }
 
-  protected static int[] nextIntArray(Random rng, int size) {
+  private static int[] nextIntArray(Random rng, int size) {
     int[] array = new int[size];
     for (int index = 0; index < size; index++) {
       array[index] = rng.nextInt(101) - 1;
@@ -152,15 +152,15 @@ public class PartialBuilderTest extends MahoutTestCase {
     return array;
   }
 
-  protected static class PartialBuilderChecker extends PartialBuilder {
+  static class PartialBuilderChecker extends PartialBuilder {
 
-    protected final Long _seed;
+    final Long _seed;
 
-    protected final TreeBuilder _treeBuilder;
+    final TreeBuilder _treeBuilder;
 
-    protected final Path _datasetPath;
+    final Path _datasetPath;
 
-    protected PartialBuilderChecker(TreeBuilder treeBuilder, Path dataPath,
+    PartialBuilderChecker(TreeBuilder treeBuilder, Path dataPath,
         Path datasetPath, Long seed) {
       super(treeBuilder, dataPath, datasetPath, seed);
 
@@ -199,13 +199,13 @@ public class PartialBuilderTest extends MahoutTestCase {
    * Mock Callback. Make sure that the callback receives the correct predictions
    * 
    */
-  protected static class TestCallback implements PredictionCallback {
+  static class TestCallback implements PredictionCallback {
 
-    protected final TreeID[] keys;
+    final TreeID[] keys;
 
-    protected final MapredOutput[] values;
+    final MapredOutput[] values;
 
-    protected TestCallback(TreeID[] keys, MapredOutput[] values) {
+    TestCallback(TreeID[] keys, MapredOutput[] values) {
       this.keys = keys;
       this.values = values;
     }

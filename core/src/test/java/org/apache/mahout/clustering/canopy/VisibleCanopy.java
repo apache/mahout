@@ -26,7 +26,7 @@ import java.util.List;
  * This Canopy subclass maintains a list of points in the canopy so it can include them in its toString method. Useful
  * for debugging but not practical for production use since it holds onto all its points.
  */
-public class VisibleCanopy extends Canopy {
+class VisibleCanopy extends Canopy {
 
   private final List<Vector> points = new ArrayList<Vector>();
 

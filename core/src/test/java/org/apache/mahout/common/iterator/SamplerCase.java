@@ -21,19 +21,12 @@ import java.util.Iterator;
 import java.util.Arrays;
 
 import org.apache.mahout.common.MahoutTestCase;
-import org.apache.mahout.common.RandomUtils;
 
 public abstract class SamplerCase extends MahoutTestCase {
   // these provide access to the underlying implementation
   protected abstract DelegatingIterator<Integer> createSampler(int n, Iterator<Integer> source);
 
   protected abstract boolean isSorted();
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    RandomUtils.useTestSeed();
-  }
 
   public void testEmptyCase() {
     assertFalse(createSampler(100, Integers.iterator(0)).hasNext());

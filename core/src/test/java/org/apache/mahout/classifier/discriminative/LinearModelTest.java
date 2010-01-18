@@ -24,14 +24,13 @@ import org.apache.mahout.math.Vector;
 public class LinearModelTest extends MahoutTestCase {
 
   private LinearModel model;
-  private Vector hyperplane;
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
     double[] values = {0.0, 1.0, 0.0, 1.0, 0.0};
-    this.hyperplane = new DenseVector(values);
-    this.model = new LinearModel(this.hyperplane, 0.1, 0.5);
+    Vector hyperplane = new DenseVector(values);
+    this.model = new LinearModel(hyperplane, 0.1, 0.5);
   }
 
   public void testClassify() {

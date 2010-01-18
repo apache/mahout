@@ -27,13 +27,13 @@ import org.apache.mahout.df.data.conditions.Condition;
 
 public class DataTest extends MahoutTestCase {
 
-  protected static final int nbAttributes = 10;
+  private static final int nbAttributes = 10;
 
-  protected static final int datasize = 100;
+  private static final int datasize = 100;
 
-  protected Random rng;
+  private Random rng;
 
-  protected Data data;
+  private Data data;
 
   @Override
   protected void setUp() throws Exception {
@@ -94,7 +94,7 @@ public class DataTest extends MahoutTestCase {
 
   }
 
-  public static int count(double[] values, double value) {
+  private static int count(double[] values, double value) {
     int count = 0;
     for (double v : values) {
       if (v == value)

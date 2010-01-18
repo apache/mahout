@@ -19,7 +19,7 @@ package org.apache.mahout.clustering.dirichlet;
 
 import org.apache.mahout.clustering.dirichlet.models.Model;
 
-final class ModelHolder<O> {
+public final class ModelHolder<O> {
 
   private Model<O> model;
 

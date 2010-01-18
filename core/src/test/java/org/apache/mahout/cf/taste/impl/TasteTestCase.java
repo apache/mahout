@@ -32,7 +32,7 @@ import java.util.List;
 public abstract class TasteTestCase extends MahoutTestCase {
 
   /** "Close enough" value for floating-point comparisons. */
-  public static final double EPSILON = 0.00001;
+  protected static final double EPSILON = 0.00001;
 
   public static DataModel getDataModel(long[] userIDs, Double[][] prefValues) {
     FastByIDMap<PreferenceArray> result = new FastByIDMap<PreferenceArray>();
@@ -50,7 +50,7 @@ public abstract class TasteTestCase extends MahoutTestCase {
     return new GenericDataModel(result);
   }
 
-  public static DataModel getDataModel() {
+  protected static DataModel getDataModel() {
     return getDataModel(
             new long[] {1, 2, 3, 4},
             new Double[][] {

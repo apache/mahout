@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
 import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
@@ -133,7 +134,7 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
     assertEquals(0, mostSimilar.length);
   }
 
-  private static UserBasedRecommender buildRecommender() throws Exception {
+  private static UserBasedRecommender buildRecommender() throws TasteException {
     DataModel dataModel = getDataModel();
     UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
     UserNeighborhood neighborhood = new NearestNUserNeighborhood(1, similarity, dataModel);

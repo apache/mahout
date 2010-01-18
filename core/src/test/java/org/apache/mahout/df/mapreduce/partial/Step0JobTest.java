@@ -23,8 +23,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import junit.framework.TestCase;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -55,15 +53,15 @@ public class Step0JobTest extends MahoutTestCase {
 
   // the generated data must be big enough to be splited by FileInputFormat
 
-  static final int numAttributes = 40;
+  private static final int numAttributes = 40;
 
-  static final int numInstances = 2000;
+  private static final int numInstances = 2000;
 
   //int numTrees = 10;
 
-  static final int numMaps = 5;
+  private static final int numMaps = 5;
 
-  Step0Context context;
+  private Step0Context context;
 
   /**
    * Computes the "mapred.max.split.size" that will generate the desired number
@@ -75,7 +73,7 @@ public class Step0JobTest extends MahoutTestCase {
    * @throws Exception
    */
   public static void setMaxSplitSize(Configuration conf, Path inputPath,
-      int numMaps) throws Exception {
+      int numMaps) throws IOException {
     FileSystem fs = inputPath.getFileSystem(conf);
     FileStatus status = fs.getFileStatus(inputPath);
     long goalSize = status.getLen() / numMaps;

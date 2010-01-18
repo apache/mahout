@@ -70,7 +70,7 @@ public class InMemInputSplitTest extends MahoutTestCase {
     assertEquals(split, readSplit());
   }
   
-  protected InMemInputSplit readSplit() throws IOException {
+  InMemInputSplit readSplit() throws IOException {
     ByteArrayInputStream byteInStream = new ByteArrayInputStream(byteOutStream.toByteArray());
     DataInput in = new DataInputStream(byteInStream);
     return InMemInputSplit.read(in);

@@ -42,7 +42,7 @@ public class Step1MapperTest extends MahoutTestCase {
    */
   private static class MockTreeBuilder implements TreeBuilder {
 
-    protected Data expected;
+    private Data expected;
 
     public void setExpected(Data data) {
       expected = data;
@@ -62,8 +62,8 @@ public class Step1MapperTest extends MahoutTestCase {
    * Special Step1Mapper that can be configured without using a Configuration
    * 
    */
-  protected static class MockStep1Mapper extends Step1Mapper {
-    protected MockStep1Mapper(TreeBuilder treeBuilder, Dataset dataset, Long seed,
+  static class MockStep1Mapper extends Step1Mapper {
+    MockStep1Mapper(TreeBuilder treeBuilder, Dataset dataset, Long seed,
         int partition, int numMapTasks, int numTrees) {
       configure(false, true, treeBuilder, dataset);
       configure(seed, partition, numMapTasks, numTrees);
@@ -72,16 +72,16 @@ public class Step1MapperTest extends MahoutTestCase {
   }
 
   /** nb attributes per generated data instance */
-  protected static final int nbAttributes = 4;
+  private static final int nbAttributes = 4;
 
   /** nb generated data instances */
-  protected static final int nbInstances = 100;
+  private static final int nbInstances = 100;
 
   /** nb trees to build */
-  protected static final int nbTrees = 10;
+  private static final int nbTrees = 10;
 
   /** nb mappers to use */
-  protected static final int nbMappers = 2;
+  private static final int nbMappers = 2;
 
   public void testMapper() throws Exception {
     Long seed = null;

@@ -45,22 +45,22 @@ import java.util.Set;
 
 public class TestCanopyCreation extends MahoutTestCase {
 
-  static final double[][] raw = {{1, 1}, {2, 1}, {1, 2}, {2, 2},
+  private static final double[][] raw = {{1, 1}, {2, 1}, {1, 2}, {2, 2},
       {3, 3}, {4, 4}, {5, 4}, {4, 5}, {5, 5}};
 
-  List<Canopy> referenceManhattan;
+  private List<Canopy> referenceManhattan;
 
-  final DistanceMeasure manhattanDistanceMeasure = new ManhattanDistanceMeasure();
+  private final DistanceMeasure manhattanDistanceMeasure = new ManhattanDistanceMeasure();
 
-  List<Vector> manhattanCentroids;
+  private List<Vector> manhattanCentroids;
 
-  List<Canopy> referenceEuclidean;
+  private List<Canopy> referenceEuclidean;
 
-  final DistanceMeasure euclideanDistanceMeasure = new EuclideanDistanceMeasure();
+  private final DistanceMeasure euclideanDistanceMeasure = new EuclideanDistanceMeasure();
 
-  List<Vector> euclideanCentroids;
+  private List<Vector> euclideanCentroids;
 
-  FileSystem fs;
+  private FileSystem fs;
 
   private static List<VectorWritable> getPoints(double[][] raw) {
     List<VectorWritable> points = new ArrayList<VectorWritable>();
@@ -116,7 +116,7 @@ public class TestCanopyCreation extends MahoutTestCase {
   }
 
 
-  private static void rmr(String path) throws Exception {
+  private static void rmr(String path) {
     File f = new File(path);
     if (f.exists()) {
       if (f.isDirectory()) {
@@ -150,7 +150,7 @@ public class TestCanopyCreation extends MahoutTestCase {
    * @param canopies a List<Canopy>
    * @return the List<Vector>
    */
-  static List<Vector> populateCentroids(List<Canopy> canopies) {
+  private static List<Vector> populateCentroids(List<Canopy> canopies) {
     List<Vector> result = new ArrayList<Vector>();
     for (Canopy canopy : canopies) {
       result.add(canopy.computeCentroid());
@@ -167,7 +167,7 @@ public class TestCanopyCreation extends MahoutTestCase {
    * @param t2      the T2 distance threshold
    * @return the List<Canopy> created
    */
-  static List<Canopy> populateCanopies(DistanceMeasure measure,
+  private static List<Canopy> populateCanopies(DistanceMeasure measure,
                                        List<VectorWritable> points, double t1, double t2) {
     List<Canopy> canopies = new ArrayList<Canopy>();
     /**

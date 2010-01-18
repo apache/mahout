@@ -33,9 +33,9 @@ import org.apache.mahout.common.MahoutTestCase;
 
 public class BayesFileFormatterTest extends MahoutTestCase {
 
-  protected File input;
-  protected File out;
-  protected String[] words;
+  private File input;
+  private File out;
+  private String[] words;
 
   @Override
   protected void setUp() throws Exception {

@@ -23,7 +23,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.df.mapreduce.MapredOutput;
 import org.apache.mahout.df.mapreduce.partial.TreeID;
 
-public class PartialOutputCollector implements OutputCollector<TreeID, MapredOutput> {
+class PartialOutputCollector implements OutputCollector<TreeID, MapredOutput> {
 
   private final TreeID[] keys;
 

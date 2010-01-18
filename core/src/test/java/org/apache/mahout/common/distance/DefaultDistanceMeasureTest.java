@@ -24,7 +24,7 @@ import org.apache.mahout.math.Vector;
 
 public abstract class DefaultDistanceMeasureTest extends MahoutTestCase {
 
-  public abstract DistanceMeasure distanceMeasureFactory();
+  protected abstract DistanceMeasure distanceMeasureFactory();
 
   public void testMeasure() {
 

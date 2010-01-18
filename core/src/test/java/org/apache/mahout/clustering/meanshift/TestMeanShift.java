@@ -17,7 +17,6 @@
 
 package org.apache.mahout.clustering.meanshift;
 
-import junit.framework.TestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -49,7 +48,7 @@ public class TestMeanShift extends MahoutTestCase {
 
   // DistanceMeasure manhattanDistanceMeasure = new ManhattanDistanceMeasure();
 
-  final DistanceMeasure euclideanDistanceMeasure = new EuclideanDistanceMeasure();
+  private final DistanceMeasure euclideanDistanceMeasure = new EuclideanDistanceMeasure();
 
   /**
    * Print the canopies to the transcript

@@ -40,9 +40,9 @@ import java.util.Map;
 
 public class TestFuzzyKmeansClustering extends MahoutTestCase {
 
-  FileSystem fs;
+  private FileSystem fs;
 
-  private static void rmr(String path) throws Exception {
+  private static void rmr(String path) {
     File f = new File(path);
     if (f.exists()) {
       if (f.isDirectory()) {
@@ -64,7 +64,7 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
     fs = FileSystem.get(conf);
   }
 
-  public static double round(double val, int places) {
+  private static double round(double val, int places) {
     long factor = (long) Math.pow(10, places);
 
     // Shift the decimal the correct number of places
@@ -79,12 +79,12 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
     return (double) tmp / factor;
   }
 
-  public static Vector tweakValue(Vector point) {
+  private static Vector tweakValue(Vector point) {
     return point.plus(0.1);
 
   }
 
-  public static void referenceFuzzyKMeans(List<VectorWritable> points,
+  private static void referenceFuzzyKMeans(List<VectorWritable> points,
                                           List<SoftCluster> clusterList, Map<String, String> pointClusterInfo,
                                           String distanceMeasureClass, double threshold, double m, int numIter)
       throws Exception {
@@ -100,7 +100,7 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
     computeCluster(points, clusterList, clusterer, pointClusterInfo);
   }
 
-  public static boolean iterateReference(List<VectorWritable> points,
+  private static boolean iterateReference(List<VectorWritable> points,
                                          List<SoftCluster> clusterList, FuzzyKMeansClusterer clusterer) {
     // for each
     for (VectorWritable pointWritable : points) {
@@ -133,7 +133,7 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
 
   }
 
-  public static void computeCluster(List<VectorWritable> points,
+  private static void computeCluster(List<VectorWritable> points,
                                     List<SoftCluster> clusterList, FuzzyKMeansClusterer clusterer,
                                     Map<String, String> pointClusterInfo) {
 

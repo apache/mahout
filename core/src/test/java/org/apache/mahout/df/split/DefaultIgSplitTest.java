@@ -28,7 +28,7 @@ import org.apache.mahout.df.data.Utils;
 
 public class DefaultIgSplitTest extends MahoutTestCase {
 
-  protected static final int nbAttributes = 10;
+  private static final int nbAttributes = 10;
    
   public void testEntropy() throws Exception {
     Random rng = RandomUtils.getRandom();

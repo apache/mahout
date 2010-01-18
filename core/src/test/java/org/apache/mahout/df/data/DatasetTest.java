@@ -33,10 +33,10 @@ public class DatasetTest extends MahoutTestCase {
 
   private static final int nbAttributes = 10;
 
-  protected ByteArrayOutputStream byteOutStream;
-  protected DataOutput out;
+  private ByteArrayOutputStream byteOutStream;
+  private DataOutput out;
 
-  protected static Dataset readDataset(byte[] bytes) throws IOException {
+  private static Dataset readDataset(byte[] bytes) throws IOException {
     ByteArrayInputStream byteInStream = new ByteArrayInputStream(bytes);
     DataInput in = new DataInputStream(byteInStream);
     return Dataset.read(in);

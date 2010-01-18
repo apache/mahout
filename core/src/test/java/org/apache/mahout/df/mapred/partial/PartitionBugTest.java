@@ -37,13 +37,13 @@ import org.apache.mahout.df.data.Utils;
 import org.apache.mahout.df.node.Node;
 
 public class PartitionBugTest extends MahoutTestCase {
-  static final int numAttributes = 40;
+  private static final int numAttributes = 40;
 
-  static final int numInstances = 200;
+  private static final int numInstances = 200;
 
-  static final int numTrees = 10;
+  private static final int numTrees = 10;
 
-  static final int numMaps = 5;
+  private static final int numMaps = 5;
 
   /**
    * Make sure that the correct instance ids are being computed

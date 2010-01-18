@@ -31,24 +31,24 @@ import org.apache.mahout.df.node.Node;
 public class InterResultsTest extends MahoutTestCase {
 
   /** nb attributes per generated data instance */
-  protected static final int nbAttributes = 4;
+  private static final int nbAttributes = 4;
 
   /** nb generated data instances */
-  protected static final int nbInstances = 100;
+  private static final int nbInstances = 100;
 
   /** nb trees to build */
-  protected static final int nbTrees = 11;
+  private static final int nbTrees = 11;
 
   /** nb mappers to use */
-  protected static final int nbMappers = 5;
+  private static final int nbMappers = 5;
 
-  protected String[][] splits;
+  private String[][] splits;
 
-  TreeID[] keys;
+  private TreeID[] keys;
 
-  Node[] trees;
+  private Node[] trees;
   
-  int[] sizes;
+  private int[] sizes;
 
   @Override
   protected void setUp() throws Exception {

@@ -32,10 +32,10 @@ import org.apache.mahout.df.mapreduce.inmem.InMemInputFormat.InMemInputSplit;
 
 public class InMemInputSplitTest extends MahoutTestCase {
 
-  protected Random rng;
+  private Random rng;
 
-  protected ByteArrayOutputStream byteOutStream;
-  protected DataOutput out;
+  private ByteArrayOutputStream byteOutStream;
+  private DataOutput out;
   
   @Override
   protected void setUp() throws Exception {

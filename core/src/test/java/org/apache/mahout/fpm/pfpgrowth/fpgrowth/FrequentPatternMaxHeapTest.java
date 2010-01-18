@@ -43,7 +43,7 @@ public class FrequentPatternMaxHeapTest extends MahoutTestCase {
     }
   }
 
-  public static Pattern generateRandomPattern(Random gen) {
+  private static Pattern generateRandomPattern(Random gen) {
     int length = 1 + Math.abs(gen.nextInt() % 6);
     Pattern p = new Pattern();
     Collection<Integer> set = new HashSet<Integer>();
