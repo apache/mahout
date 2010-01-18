@@ -465,4 +465,22 @@ public abstract class Abstract${keyTypeCap}${valueTypeCap}Map extends AbstractSe
     );
   }
   #end
+
+  /**
+    * Check the map for a key. If present, add an increment to the value. If absent,
+    * store a specified value.
+    * @param key the key.
+    * @param newValue the value to store if the key is not currently in the map.
+    * @param incrValue the value to be added to the current value in the map.
+   **/
+  public ${valueType} adjustOrPutValue(${keyType} key, ${valueType} newValue, ${valueType} incrValue) {
+      boolean present = containsKey(key);
+      if (present) {
+        newValue = (${valueType})(get(key) + incrValue);
+        put(key, newValue);
+      } else {
+        put(key, newValue);
+      }
+      return newValue;
+  }
 }

@@ -220,7 +220,7 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
     byte[] stat = state;
     int length = tab.length;
 
-    int hash = HashFunctions.hash(key) & 0x7FFFFFFF;
+    int hash = key.hashCode() & 0x7FFFFFFF;
     int i = hash % length;
     int decrement = hash % (length - 2); // double hashing, see http://www.eece.unm.edu/faculty/heileman/hash/node4.html
     //int decrement = (hash / length) % length;
@@ -230,7 +230,7 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
 
     // stop if we find a removed or free slot, or if we find the key itself
     // do NOT skip over removed slots (yes, open addressing is like that...)
-    while (stat[i] == FULL && equalsMindTheNull(tab[i], key)) {
+    while (stat[i] == FULL && !equalsMindTheNull(tab[i], key)) {
       i -= decrement;
       //hashCollisions++;
       if (i < 0) {
@@ -275,7 +275,7 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
     byte[] stat = state;
     int length = tab.length;
 
-    int hash = HashFunctions.hash(key) & 0x7FFFFFFF;
+    int hash = key.hashCode() & 0x7FFFFFFF;
     int i = hash % length;
     int decrement = hash % (length - 2); // double hashing, see http://www.eece.unm.edu/faculty/heileman/hash/node4.html
     //int decrement = (hash / length) % length;
@@ -415,6 +415,19 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
 
     return true;
   }
+  
+    @Override
+  public ${valueType} adjustOrPutValue(T key, ${valueType} newValue, ${valueType} incrValue) {
+    int i = indexOfInsertion(key);
+    if (i < 0) { //already contained
+      i = -i - 1;
+      this.values[i] += incrValue;
+      return this.values[i];
+    } else {
+        put(key, newValue);
+        return newValue;
+    }
+ }
 
   /**
    * Rehashes the contents of the receiver into a new table with a smaller or larger capacity. This method is called

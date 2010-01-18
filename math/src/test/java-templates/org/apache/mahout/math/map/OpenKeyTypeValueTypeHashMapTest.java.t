@@ -221,6 +221,19 @@ public class Open${keyTypeCap}${valueTypeCap}HashMapTest extends Assert {
   }
   
   @Test
+  public void testAdjustOrPutValue() {
+   Open${keyTypeCap}${valueTypeCap}HashMap map = new Open${keyTypeCap}${valueTypeCap}HashMap();
+    map.put(($keyType) 11, (${valueType}) 22);
+    map.put(($keyType) 12, (${valueType}) 23);
+    map.put(($keyType) 13, (${valueType}) 24);
+    map.put(($keyType) 14, (${valueType}) 25);
+    map.adjustOrPutValue((${keyType})11, (${valueType})1, (${valueType})3);
+    assertEquals(25, map.get((${keyType})11) ${valueEpsilon});
+    map.adjustOrPutValue((${keyType})15, (${valueType})1, (${valueType})3);
+    assertEquals(1, map.get((${keyType})15) ${valueEpsilon});
+  }
+  
+  @Test
   public void testKeys() {
     Open${keyTypeCap}${valueTypeCap}HashMap map = new Open${keyTypeCap}${valueTypeCap}HashMap();
     map.put(($keyType) 11, (${valueType}) 22);

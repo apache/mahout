@@ -259,6 +259,19 @@ public class OpenObject${valueTypeCap}HashMapTest extends Assert {
   }
   
   @Test
+  public void testAdjustOrPutValue() {
+    OpenObject${valueTypeCap}HashMap<String> map = new OpenObject${valueTypeCap}HashMap<String>();
+    map.put("Eleven", (${valueType}) 11);
+    map.put("Twelve", (${valueType}) 12);
+    map.put("Thirteen", (${valueType}) 13);
+    map.put("Fourteen", (${valueType}) 14);
+    map.adjustOrPutValue("Eleven", (${valueType})1, (${valueType})3);
+    assertEquals(14, map.get(new String("Eleven")) ${valueEpsilon});
+    map.adjustOrPutValue("Fifteen", (${valueType})1, (${valueType})3);
+    assertEquals(1, map.get("Fifteen") ${valueEpsilon});
+  }
+  
+  @Test
   public void testPairsMatching() {
     List<String> keyList = new ArrayList<String>();
     ${valueTypeCap}ArrayList valueList = new ${valueTypeCap}ArrayList();

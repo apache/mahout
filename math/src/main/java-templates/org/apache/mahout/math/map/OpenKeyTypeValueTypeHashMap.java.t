@@ -423,6 +423,19 @@ public class Open${keyTypeCap}${valueTypeCap}HashMap extends Abstract${keyTypeCa
     return true;
   }
 
+  @Override
+  public ${valueType} adjustOrPutValue(${keyType} key, ${valueType} newValue, ${valueType} incrValue) {
+    int i = indexOfInsertion(key);
+    if (i < 0) { //already contained
+      i = -i - 1;
+      this.values[i] += incrValue;
+      return this.values[i];
+    } else {
+        put(key, newValue);
+        return newValue;
+    }
+ }
+  
   /**
    * Rehashes the contents of the receiver into a new table with a smaller or larger capacity. This method is called
    * automatically when the number of keys in the receiver exceeds the high water mark or falls below the low water
