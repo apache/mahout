@@ -9,7 +9,6 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.matrix.linalg;
 
 import org.apache.mahout.math.GenericPermuting;
-import org.apache.mahout.math.GenericSorting;
 import org.apache.mahout.math.PersistentObject;
 import org.apache.mahout.math.Sorting;
 import org.apache.mahout.math.Swapper;

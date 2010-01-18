@@ -26,7 +26,6 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.objectalgo;
 
-import org.apache.mahout.math.GenericSorting;
 import org.apache.mahout.math.PersistentObject;
 import org.apache.mahout.math.function.IntComparator;
 import org.apache.mahout.math.matrix.ObjectMatrix1D;
@@ -77,7 +76,7 @@ public class Sorting extends PersistentObject {
 
     @Override
     protected void runSort(int fromIndex, int toIndex, IntComparator c, org.apache.mahout.math.Swapper swapper) {
-      GenericSorting.mergeSort(fromIndex, toIndex, c, swapper);
+      org.apache.mahout.math.Sorting.mergeSort(fromIndex, toIndex, c, swapper);
     }
   };
 
