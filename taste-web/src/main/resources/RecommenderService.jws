@@ -31,7 +31,7 @@ import java.util.List;
  *
  * <p>This class exposes a subset of the {@link Recommender} API. In particular it
  * does not support {@link Recommender#getDataModel()}
- * or {@link Recommender#recommend(long, int, org.apache.mahout.cf.taste.recommender.Rescorer)}
+ * or {@link Recommender#recommend(long, int, org.apache.mahout.cf.taste.recommender.IDRescorer)}
  * since these involve data types which can't be transmitted in a web service.</p>
  */
 public final class RecommenderService {
@@ -43,7 +43,7 @@ public final class RecommenderService {
 		recommender = RecommenderSingleton.getInstance().getRecommender();
 	}
 
-	public String[][] recommend(long userID, final int howMany) throws Exception {
+	public String[][] recommend(long userID, int howMany) throws Exception {
 		List<RecommendedItem> recommendations = recommender.recommend(userID, howMany);
 		String[][] itemIDsAndPrefs = new String[recommendations.size()][2];
 		int i = 0;
