@@ -20,10 +20,12 @@ package org.apache.mahout.clustering.dirichlet.models;
 import org.apache.mahout.math.SquareRootFunction;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.Vector.Element;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Iterator;
 
 public class NormalModel implements Model<VectorWritable> {
 
@@ -55,7 +57,7 @@ public class NormalModel implements Model<VectorWritable> {
   int getS0() {
     return s0;
   }
-  
+
   public Vector getMean() {
     return mean;
   }
@@ -63,7 +65,6 @@ public class NormalModel implements Model<VectorWritable> {
   public double getStdDev() {
     return stdDev;
   }
-
 
   /**
    * TODO: Return a proper sample from the posterior. For now, return an instance with the same parameters
@@ -98,8 +99,7 @@ public class NormalModel implements Model<VectorWritable> {
     mean = s1.divide(s0);
     // compute the average of the component stds
     if (s0 > 1) {
-      Vector std = s2.times(s0).minus(s1.times(s1)).assign(
-          new SquareRootFunction()).divide(s0);
+      Vector std = s2.times(s0).minus(s1.times(s1)).assign(new SquareRootFunction()).divide(s0);
       stdDev = std.zSum() / std.size();
     } else {
       stdDev = Double.MIN_VALUE;
@@ -124,9 +124,15 @@ public class NormalModel implements Model<VectorWritable> {
   public String toString() {
     StringBuilder buf = new StringBuilder();
     buf.append("nm{n=").append(s0).append(" m=[");
+    int nextIx = 0;
     if (mean != null) {
-      for (int i = 0; i < mean.size(); i++) {
-        buf.append(String.format("%.2f", mean.get(i))).append(", ");
+      // handle sparse Vectors gracefully, suppressing zero values
+      for (Iterator<Element> nzElems = mean.iterateNonZero(); nzElems.hasNext();) {
+        Element elem = nzElems.next();
+        if (elem.index() > nextIx)
+          buf.append("..{").append(elem.index()).append("}=");
+        buf.append(String.format("%.2f", mean.get(elem.index()))).append(", ");
+        nextIx = elem.index() + 1;
       }
     }
     buf.append("] sd=").append(String.format("%.2f", stdDev)).append('}');
