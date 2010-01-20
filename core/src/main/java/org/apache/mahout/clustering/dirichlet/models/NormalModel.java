@@ -127,12 +127,14 @@ public class NormalModel implements Model<VectorWritable> {
     int nextIx = 0;
     if (mean != null) {
       // handle sparse Vectors gracefully, suppressing zero values
-      for (Iterator<Element> nzElems = mean.iterateNonZero(); nzElems.hasNext();) {
-        Element elem = nzElems.next();
-        if (elem.index() > nextIx)
-          buf.append("..{").append(elem.index()).append("}=");
-        buf.append(String.format("%.2f", mean.get(elem.index()))).append(", ");
-        nextIx = elem.index() + 1;
+      for (int i = 0; i < mean.size(); i++) {
+        double elem = mean.get(i);
+        if (elem == 0.0)
+          continue;
+        if (i > nextIx)
+          buf.append("..{").append(i).append("}=");
+        buf.append(String.format("%.2f", elem)).append(", ");
+        nextIx = i + 1;
       }
     }
     buf.append("] sd=").append(String.format("%.2f", stdDev)).append('}');

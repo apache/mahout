@@ -22,38 +22,33 @@ import org.apache.mahout.math.VectorWritable;
 
 /**
  * An implementation of the ModelDistribution interface suitable for testing the DirichletCluster algorithm. Uses a
- * Normal Distribution
+ * L1Distribution
  */
-public class SparseNormalModelDistribution extends VectorModelDistribution {
+public class L1ModelDistribution extends VectorModelDistribution {
 
-  public SparseNormalModelDistribution(VectorWritable modelPrototype) {
+  public L1ModelDistribution(VectorWritable modelPrototype) {
     super(modelPrototype);
   }
 
-  public SparseNormalModelDistribution() {
+  public L1ModelDistribution() {
     super();
   }
 
   @Override
   public Model<VectorWritable>[] sampleFromPrior(int howMany) {
-    Model<VectorWritable>[] result = new NormalModel[howMany];
+    Model<VectorWritable>[] result = new L1Model[howMany];
     for (int i = 0; i < howMany; i++) {
       Vector prototype = getModelPrototype().get();
-      result[i] = new NormalModel(prototype.like(), 1);
+      result[i] = new L1Model(prototype.like());
     }
     return result;
   }
 
   @Override
   public Model<VectorWritable>[] sampleFromPosterior(Model<VectorWritable>[] posterior) {
-    Model<VectorWritable>[] result = new NormalModel[posterior.length];
+    Model<VectorWritable>[] result = new L1Model[posterior.length];
     for (int i = 0; i < posterior.length; i++) {
-      NormalModel m = ((NormalModel) posterior[i]).sample();
-      // trim insignificant mean elements from the posterior model to save sparse vector space
-      for (int j = 0; j < m.getMean().size(); j++)
-        if (Math.abs(m.getMean().get(j)) < 0.001)
-          m.getMean().set(j, 0.0d);
-      result[i] = m;
+      result[i] = ((L1Model) posterior[i]).sample();
     }
     return result;
   }
