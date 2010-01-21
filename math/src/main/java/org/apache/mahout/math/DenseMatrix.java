@@ -136,7 +136,11 @@ public class DenseMatrix extends AbstractMatrix {
     if (column < 0 || column >= columnSize()) {
       throw new IndexException();
     }
-    return new TransposeViewVector(this, column);
+    double[] col = new double[rowSize()];
+    for (int row = 0; row < rowSize(); row++) {
+      col[row] = values[row][column];
+    }
+    return new DenseVector(col);
   }
 
   @Override
@@ -144,7 +148,7 @@ public class DenseMatrix extends AbstractMatrix {
     if (row < 0 || row >= rowSize()) {
       throw new IndexException();
     }
-    return new DenseVector(values[row], true);
+    return new DenseVector(values[row]);
   }
   
 }

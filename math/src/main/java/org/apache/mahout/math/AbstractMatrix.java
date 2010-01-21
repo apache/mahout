@@ -21,9 +21,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /** A few universal implementations of convenience functions */
@@ -456,130 +458,6 @@ public abstract class AbstractMatrix implements Matrix {
       }
     }
     return result;
-  }
-
-  protected class TransposeViewVector extends AbstractVector {
-
-    protected Matrix matrix;
-    protected int transposeOffset;
-    protected int numCols;
-    private boolean rowToColumn;
-
-    public TransposeViewVector(Matrix m, int offset) {
-      this(m, offset, true);
-    }
-
-    public TransposeViewVector(Matrix m, int offset, boolean rowToColumn) {
-      matrix = m;
-      this.transposeOffset = offset;
-      this.rowToColumn = rowToColumn;
-      numCols = rowToColumn ? m.numCols() : m.numRows();
-      size = rowToColumn ? m.numRows() : m.numCols();
-    }
-
-    @Override
-    public Vector clone() {
-      Vector v = new DenseVector(size);
-      addTo(v);
-      return v;
-    }
-
-    @Override
-    protected Matrix matrixLike(int rows, int columns) {
-      return matrix.like(rows, columns);
-    }
-
-    @Override
-    public Iterator<Element> iterateAll() {
-      return new Iterator<Element>() {
-        int i = 0;
-        @Override
-        public boolean hasNext() {
-          return i < size;
-        }
-
-        @Override
-        public Element next() {
-          return getElement(i++);
-        }
-
-        @Override
-        public void remove() {
-          throw new UnsupportedOperationException("Element removal not supported");
-        }
-      };
-    }
-
-    /**
-     * Currently delegates to iterateAll.  TODO: This could be optimized to at least skip empty rows if there are
-     * many of them.
-     * @return an iterator (currently dense).
-     */
-    @Override
-    public Iterator<Element> iterateNonZero() {
-      return iterateAll();
-    }
-
-    @Override
-    public Element getElement(final int i) {
-      return new Element() {
-        @Override
-        public double get() {
-          return getQuick(i);
-        }
-
-        @Override
-        public int index() {
-          return i;
-        }
-
-        @Override
-        public void set(double value) {
-          setQuick(i, value);
-        }
-      };
-    }
-
-    @Override
-    public double getQuick(int index) {
-      Vector v = rowToColumn ? matrix.getRow(index) : matrix.getColumn(index);
-      return v == null ? 0 : v.getQuick(transposeOffset);
-    }
-
-    @Override
-    public void setQuick(int index, double value) {
-      Vector v = rowToColumn ? matrix.getRow(index) : matrix.getColumn(index);
-      if(v == null) {
-        v = newVector(numCols);
-        matrix.assignRow(index, v);
-      }
-      v.setQuick(transposeOffset, value);
-    }
-
-    protected Vector newVector(int cardinality)
-    {
-      return new DenseVector(cardinality);
-    }
-
-    @Override
-    public Vector like() {
-      return new DenseVector(size);
-    }
-
-    @Override
-    public Vector like(int cardinality) {
-      return new DenseVector(cardinality);
-    }
-
-    /**
-     * TODO: currently I don't know of an efficient way to get this value correctly.
-     *
-     * @return the number of nonzero entries
-     */
-    @Override
-    public int getNumNondefaultElements() {
-      return size;
-    }
   }
 
 }
