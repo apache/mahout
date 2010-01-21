@@ -97,7 +97,7 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
   /** Removes all (key,value) associations from the receiver. Implicitly calls <tt>trimToSize()</tt>. */
   @Override
   public void clear() {
-    Arrays.fill(this.state, 0, state.length - 1, FREE);
+    Arrays.fill(this.state, FREE);
     distinct = 0;
     freeEntries = table.length; // delta
     trimToSize();
