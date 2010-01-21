@@ -35,6 +35,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.utils.vectors.TF;
 import org.apache.mahout.utils.vectors.TFIDF;
 import org.apache.mahout.utils.vectors.TermInfo;
@@ -223,7 +224,7 @@ public class Driver {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
     //TODO: Make this parameter driven
-    SequenceFile.Writer seqWriter = SequenceFile.createWriter(fs, conf, path, LongWritable.class, RandomAccessSparseVector.class);
+    SequenceFile.Writer seqWriter = SequenceFile.createWriter(fs, conf, path, LongWritable.class, VectorWritable.class);
 
     return new SequenceFileVectorWriter(seqWriter);
   }
