@@ -111,7 +111,7 @@ public class Step2Mapper extends MapReduceBase implements
       numInstances = InterResults.load(fs, forestPath, numMaps, numTrees,
           p, keys, trees);
 
-      log.debug("partition: " + p + "numInstances: " + numInstances);
+      log.debug("partition: {} numInstances: {}", p, numInstances);
     } catch (IOException e) {
       throw new IllegalStateException("Exception while loading the forest : ", e);
     }

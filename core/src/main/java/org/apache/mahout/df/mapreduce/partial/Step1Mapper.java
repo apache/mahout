@@ -92,7 +92,7 @@ public class Step1Mapper extends
     converter = new DataConverter(getDataset());
 
     // prepare random-numders generator
-    log.debug("seed : " + seed);
+    log.debug("seed : {}", seed);
     if (seed == null)
       rng = RandomUtils.getRandom();
     else
@@ -113,9 +113,9 @@ public class Step1Mapper extends
       firstTreeId += nbTrees(numMapTasks, numTrees, p);
     }
 
-    log.debug("partition : " + partition);
-    log.debug("nbTrees : " + nbTrees);
-    log.debug("firstTreeId : " + firstTreeId);
+    log.debug("partition : {}", partition);
+    log.debug("nbTrees : {}", nbTrees);
+    log.debug("firstTreeId : {}", firstTreeId);
   }
 
   /**
@@ -146,18 +146,18 @@ public class Step1Mapper extends
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
     // prepare the data
-    log.debug("partition: " + partition + "numInstances: " + instances.size());
+    log.debug("partition: {} numInstances: {}", partition, instances.size());
 
     Data data = new Data(getDataset(), instances);
     Bagging bagging = new Bagging(getTreeBuilder(), data);
 
     TreeID key = new TreeID();
 
-    log.debug("Building " + nbTrees + " trees");
+    log.debug("Building {} trees", nbTrees);
     SingleTreePredictions callback = null;
     int[] predictions = null;
     for (int treeId = 0; treeId < nbTrees; treeId++) {
-      log.debug("Building tree N° : " + treeId);
+      log.debug("Building tree number : {}", treeId);
       if (isOobEstimate() && !isNoOutput()) {
         callback = new SingleTreePredictions(data.size());
         predictions = callback.getPredictions();

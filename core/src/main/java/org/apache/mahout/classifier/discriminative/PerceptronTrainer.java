@@ -54,11 +54,12 @@ public class PerceptronTrainer extends LinearTrainer {
    * vector (multiplied by the learning rate) is subtracted from the weight vector.
    * */
   @Override
-  protected void update(final double label, final Vector dataPoint,
-      final LinearModel model) {
+  protected void update(double label, Vector dataPoint,
+      LinearModel model) {
     double factor = 1.0;
-    if (label == 0.0)
+    if (label == 0.0) {
       factor = -1.0;
+    }
 
     Vector updateVector = dataPoint.times(factor).times(this.learningRate);
     LOG.debug("Updatevec: " + updateVector);

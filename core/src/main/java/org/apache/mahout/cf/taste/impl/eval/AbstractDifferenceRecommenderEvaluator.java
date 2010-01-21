@@ -106,7 +106,7 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
       throw new IllegalArgumentException("Invalid evaluationPercentage: " + evaluationPercentage);
     }
 
-    log.info("Beginning evaluation using " + trainingPercentage + " of " + dataModel);
+    log.info("Beginning evaluation using {} of {}", trainingPercentage, dataModel);
 
     int numUsers = dataModel.getNumUsers();
     FastByIDMap<PreferenceArray> trainingUsers =
@@ -129,7 +129,7 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     Recommender recommender = recommenderBuilder.buildRecommender(trainingModel);
 
     double result = getEvaluation(testUserPrefs, recommender);
-    log.info("Evaluation result: " + result);
+    log.info("Evaluation result: {}", result);
     return result;
   }
 

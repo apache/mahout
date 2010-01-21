@@ -99,7 +99,7 @@ public class PartialSequentialBuilder extends PartialBuilder {
     List<InputSplit> splits = input.getSplits(job);
     
     int nbSplits = splits.size();
-    log.debug("Nb splits : " + nbSplits);
+    log.debug("Nb splits : {}", nbSplits);
 
     InputSplit[] sorted = new InputSplit[nbSplits];
     splits.toArray(sorted);
@@ -140,14 +140,14 @@ public class PartialSequentialBuilder extends PartialBuilder {
       mapper.cleanup(firstOutput);
 
       time = System.currentTimeMillis() - time;
-      log.info("Duration : " + DFUtils.elapsedTime(time));
+      log.info("Duration : {}", DFUtils.elapsedTime(time));
 
       if (time > slowest) {
         slowest = time;
       }
     }
 
-    log.info("Longest duration : " + DFUtils.elapsedTime(slowest));
+    log.info("Longest duration : {}", DFUtils.elapsedTime(slowest));
     return true;
   }
 
@@ -216,7 +216,7 @@ public class PartialSequentialBuilder extends PartialBuilder {
     List<InputSplit> splits = input.getSplits(jobContext);
     
     int nbSplits = splits.size();
-    log.debug("Nb splits : " + nbSplits);
+    log.debug("Nb splits : {}", nbSplits);
 
     InputSplit[] sorted = new InputSplit[nbSplits];
     splits.toArray(sorted);
@@ -261,14 +261,14 @@ public class PartialSequentialBuilder extends PartialBuilder {
       mapper.cleanup(secondOutput);
 
       time = System.currentTimeMillis() - time;
-      log.info("Duration : " + DFUtils.elapsedTime(time));
+      log.info("Duration : {}", DFUtils.elapsedTime(time));
 
       if (time > slowest) {
         slowest = time;
       }
     }
 
-    log.info("Longest duration : " + DFUtils.elapsedTime(slowest));
+    log.info("Longest duration : {}", DFUtils.elapsedTime(slowest));
   }
 
   /**

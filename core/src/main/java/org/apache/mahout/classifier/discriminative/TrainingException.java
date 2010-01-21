@@ -12,7 +12,7 @@ public class TrainingException extends Exception {
   /**
    * Init with message string describing the cause of the exception.
    * */
-  public TrainingException(final String message) {
+  public TrainingException(String message) {
     super(message);
   }
 }

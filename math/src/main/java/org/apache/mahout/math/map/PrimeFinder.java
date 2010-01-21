@@ -112,14 +112,6 @@ public class PrimeFinder {
   private PrimeFinder() {
   }
 
-  /** Tests correctness. Try from=1000, to=10000 from=200,  to=1000 from=16,   to=1000 from=1000, to=Integer.MAX_VALUE */
-  protected static void main(String[] args) {
-    int from = Integer.parseInt(args[0]);
-    int to = Integer.parseInt(args[1]);
-
-    statistics(from, to);
-  }
-
   /**
    * Returns a prime number which is <code>&gt;= desiredCapacity</code> and very close to <code>desiredCapacity</code>
    * (within 11% if <code>desiredCapacity &gt;= 1000</code>).
@@ -156,7 +148,7 @@ public class PrimeFinder {
 
       if (deviation > maxDeviation) {
         maxDeviation = deviation;
-        log.info("new maxdev @" + i + "@dev=" + maxDeviation);
+        log.info("new maxdev @{}@dev={}", i, maxDeviation);
       }
 
       accDeviation += deviation;
@@ -164,8 +156,8 @@ public class PrimeFinder {
     long width = 1 + (long) to - (long) from;
 
     double meanDeviation = accDeviation / width;
-    log.info("Statistics for [" + from + ',' + to + "] are as follows");
-    log.info("meanDeviation = " + (float) meanDeviation * 100 + " %");
-    log.info("maxDeviation = " + (float) maxDeviation * 100 + " %");
+    log.info("Statistics for [{},{}] are as follows", from, to);
+    log.info("meanDeviation = {} %", (float) meanDeviation * 100);
+    log.info("maxDeviation = {} %", (float) maxDeviation * 100);
   }
 }

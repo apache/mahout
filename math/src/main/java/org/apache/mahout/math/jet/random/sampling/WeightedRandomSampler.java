@@ -12,8 +12,7 @@ import org.apache.mahout.math.PersistentObject;
 import org.apache.mahout.math.jet.random.Uniform;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.apache.mahout.math.list.IntArrayList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 /**
  * Conveniently computes a stable subsequence of elements from a given input sequence;
  * Picks (samples) exactly one random element from successive blocks of <tt>weight</tt> input elements each.
@@ -27,9 +26,6 @@ import org.slf4j.LoggerFactory;
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class WeightedRandomSampler extends PersistentObject {
-
-  private static final Logger log = LoggerFactory.getLogger(WeightedRandomSampler.class);
-
 
   //public class BlockedRandomSampler extends Object implements java.io.Serializable {
   private int skip;
@@ -136,8 +132,6 @@ public class WeightedRandomSampler extends PersistentObject {
         sample.add(i);
       }
     }
-
-    log.info("Sample = " + sample);
   }
 
 }

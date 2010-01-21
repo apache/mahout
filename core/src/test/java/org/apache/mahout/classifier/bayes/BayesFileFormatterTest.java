@@ -43,6 +43,8 @@ public class BayesFileFormatterTest extends MahoutTestCase {
     File tmpDir = new File(System.getProperty("java.io.tmpdir"));
     input = new File(tmpDir, "bayes/input");
     out = new File(tmpDir, "bayes/out");
+    input.deleteOnExit();
+    out.deleteOnExit();
     input.mkdirs();
     out.mkdirs();
     File[] files = out.listFiles();
@@ -56,6 +58,13 @@ public class BayesFileFormatterTest extends MahoutTestCase {
       writer.write(word);
       writer.close();
     }
+  }
+
+  @Override
+  public void tearDown() throws Exception {
+    input.delete();
+    out.delete();
+    super.tearDown();
   }
 
   public void test() throws IOException {

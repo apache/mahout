@@ -21,17 +21,10 @@ package org.apache.mahout.math.decomposer.hebbian;
 import org.apache.mahout.math.PlusFunction;
 import org.apache.mahout.math.PlusWithScaleFunction;
 import org.apache.mahout.math.Vector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 public class HebbianUpdater implements EigenUpdater {
 
-  /**
-   * Logger for this class.
-   */
-  private static final Logger log = LoggerFactory.getLogger(HebbianUpdater.class);
-
+  @Override
   public void update(Vector pseudoEigen,
                      Vector trainingVector,
                      TrainingState currentState) {
@@ -64,9 +57,9 @@ public class HebbianUpdater implements EigenUpdater {
     pseudoEigen.assign(trainingVector, new PlusWithScaleFunction(activation));
   }
 
-  private void updateTrainingProjectionsVector(TrainingState state,
-                                               Vector trainingVector,
-                                               int previousEigenIndex) {
+  private static void updateTrainingProjectionsVector(TrainingState state,
+                                                      Vector trainingVector,
+                                                      int previousEigenIndex) {
     Vector previousEigen = state.mostRecentEigen();
     Vector currentTrainingVectorProjection = state.currentTrainingProjection();
     double projection = previousEigen.dot(trainingVector);

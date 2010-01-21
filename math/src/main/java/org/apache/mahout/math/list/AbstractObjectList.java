@@ -66,18 +66,6 @@ public abstract class AbstractObjectList<T> extends AbstractList {
     this.replaceFromWith(index, collection);
   }
 
-
-  /**
-   * Removes from the receiver all elements whose index is between <code>from</code>, inclusive and <code>to</code>,
-   * inclusive.  Shifts any succeeding elements to the left (reduces their index). This call shortens the list by
-   * <tt>(to - from + 1)</tt> elements.
-   *
-   * @param fromIndex index of first element to be removed.
-   * @param toIndex   index of last element to be removed.
-   * @throws IndexOutOfBoundsException if <tt>(from&lt;0 || from&gt;to || to&gt;=size()) && to!=from-1</tt>.
-   */
-  public abstract void removeFromTo(int fromIndex, int toIndex);
-
   /**
    * Replaces the part of the receiver starting at <code>from</code> (inclusive) with all the elements of the specified
    * collection. Does not alter the size of the receiver. Replaces exactly <tt>Math.max(0,Math.min(size()-from,

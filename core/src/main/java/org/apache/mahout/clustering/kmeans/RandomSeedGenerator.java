@@ -23,7 +23,6 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
@@ -61,7 +60,7 @@ public final class RandomSeedGenerator {
     fs.mkdirs(outPath);
     Path outFile = new Path(outPath, "part-randomSeed");
     if (fs.exists(outFile)) {
-      log.warn("Deleting " + outFile);
+      log.warn("Deleting {}", outFile);
       fs.delete(outFile, false);
     }
     boolean newFile = fs.createNewFile(outFile);
@@ -94,7 +93,7 @@ public final class RandomSeedGenerator {
       for (int i = 0; i < k; i++) {
         writer.append(chosenTexts.get(i), chosenClusters.get(i));
       }
-      log.info("Wrote " + k + " vectors to " + outFile);
+      log.info("Wrote {} vectors to {}", k, outFile);
       reader.close();
       writer.close();
     }

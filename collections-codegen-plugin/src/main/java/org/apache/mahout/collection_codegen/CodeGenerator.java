@@ -27,6 +27,7 @@ import org.apache.maven.shared.model.fileset.util.FileSetManager;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.context.Context;
 import org.codehaus.plexus.util.SelectorUtils;
 
 import java.io.File;
@@ -46,7 +47,7 @@ import java.util.Map;
  */
 public class CodeGenerator extends AbstractMojo {
   
-  private static final String[] NO_STRINGS = new String[] {null};
+  private static final String[] NO_STRINGS = {null};
   private static final Charset UTF8 = Charset.forName("utf-8");
   private Map<String,String> typeToObjectTypeMap;
   
@@ -248,10 +249,9 @@ public class CodeGenerator extends AbstractMojo {
       String packageDirectory, String key, String value) throws MojoExecutionException {
     String outputName = templateName.replaceFirst("\\.java\\.t$",
         ".java");
-    String keyCap = null;
-    VelocityContext vc = new VelocityContext();
+    Context vc = new VelocityContext();
     if (key != null) {
-      keyCap = key.toUpperCase().charAt(0) + key.substring(1);
+      String keyCap = key.toUpperCase().charAt(0) + key.substring(1);
       outputName = outputName.replaceAll("KeyType", keyCap);
       vc.put("keyType", key);
       vc.put("keyTypeCap", keyCap);
@@ -259,9 +259,8 @@ public class CodeGenerator extends AbstractMojo {
       boolean floating = "float".equals(key) || "double".equals(key);
       vc.put("keyTypeFloating", floating ? "true" : "false");
     }
-    String valueCap = null;
     if (value != null) {
-      valueCap = value.toUpperCase().charAt(0) + value.substring(1);
+      String valueCap = value.toUpperCase().charAt(0) + value.substring(1);
       outputName = outputName.replaceAll("ValueType", valueCap);
       vc.put("valueType", value);
       vc.put("valueTypeCap", valueCap);

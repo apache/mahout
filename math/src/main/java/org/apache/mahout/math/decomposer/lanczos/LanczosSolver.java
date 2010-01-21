@@ -64,24 +64,29 @@ import org.slf4j.LoggerFactory;
  * Matrix.timesSquared(Vector) as a Map-Reduce call.  
  */
 public class LanczosSolver {
-  /**
-   * Logger for this class.
-   */
+
   private static final Logger log = LoggerFactory.getLogger(LanczosSolver.class);
 
-  public static double SAFE_MAX = 1e150;
+  public static final double SAFE_MAX = 1.0e150;
 
-  private static final double NANOS_IN_MILLI = 1e6;
+  private static final double NANOS_IN_MILLI = 1.0e6;
 
+  public enum TimingSection {
+    ITERATE, ORTHOGANLIZE, TRIDIAG_DECOMP, FINAL_EIGEN_CREATE
+  }
+
+  private final Map<TimingSection, Long> startTimes = new EnumMap<TimingSection, Long>(TimingSection.class);
+  private final Map<TimingSection, Long> times = new EnumMap<TimingSection, Long>(TimingSection.class);
   private double scaleFactor = 0;
 
   private static final class Scale implements UnaryFunction {
     private final double d;
 
-    public Scale(double d) {
+    private Scale(double d) {
       this.d = d;
     }
 
+    @Override
     public double apply(double arg1) {
       return arg1 * d;
     }
@@ -91,7 +96,7 @@ public class LanczosSolver {
                     int desiredRank,
                     Matrix eigenVectors,
                     List<Double> eigenValues) {
-    log.info("Finding " + desiredRank + " singular vectors of matrix with " + corpus.numRows() + " rows, via Lanczos");
+    log.info("Finding {} singular vectors of matrix with {} rows, via Lanczos", desiredRank, corpus.numRows());
     Vector currentVector = getInitialVector(corpus);
     Vector previousVector = new DenseVector(currentVector.size());
     Matrix basis = new SparseRowMatrix(new int[]{desiredRank, corpus.numCols()});
@@ -102,7 +107,7 @@ public class LanczosSolver {
     for (int i = 1; i < desiredRank; i++) {
       startTime(TimingSection.ITERATE);
       Vector nextVector = corpus.timesSquared(currentVector);
-      log.info(i + " passes through the corpus so far...");
+      log.info("{} passes through the corpus so far...", i);
       nextVector.assign(new Scale(1 / scaleFactor));
       nextVector.assign(previousVector, new PlusWithScaleFunction(-beta));
       // now orthogonalize
@@ -115,7 +120,7 @@ public class LanczosSolver {
       // and normalize
       beta = nextVector.norm(2);
       if (outOfRange(beta) || outOfRange(alpha)) {
-        log.warn("Lanczos parameters out of range: alpha = " + alpha + ", beta = " + beta + ".  Bailing out early!");
+        log.warn("Lanczos parameters out of range: alpha = {}, beta = {}.  Bailing out early!", alpha, beta);
         break;
       }
       final double b = beta;
@@ -151,7 +156,7 @@ public class LanczosSolver {
       }
       realEigen = realEigen.normalize();
       eigenVectors.assignRow(i, realEigen);
-      log.info("Eigenvector " + i + " found with eigenvalue " + eigenVals.get(i));
+      log.info("Eigenvector {} found with eigenvalue {}", i, eigenVals.get(i));
       eigenValues.add(eigenVals.get(i));
     }
     log.info("LanczosSolver finished.");
@@ -162,7 +167,7 @@ public class LanczosSolver {
     return Double.isNaN(d) || d > SAFE_MAX || -d > SAFE_MAX;
   }
 
-  private void orthoganalizeAgainstAllButLast(Vector nextVector, Matrix basis) {
+  private static void orthoganalizeAgainstAllButLast(Vector nextVector, Matrix basis) {
     for (int i = 0; i < basis.numRows() - 1; i++) {
       double alpha = nextVector.dot(basis.getRow(i));
       nextVector.assign(basis.getRow(i), new PlusWithScaleFunction(-alpha));
@@ -181,7 +186,7 @@ public class LanczosSolver {
         v.assign(vector, new PlusWithScaleFunction(1));
       }
     }
-    v.assign(new Scale(1d / v.norm(2)));
+    v.assign(new Scale(1.0 / v.norm(2)));
     return v;
   }
 
@@ -198,10 +203,4 @@ public class LanczosSolver {
     return ((double) times.get(section)) / NANOS_IN_MILLI;
   }
 
-  public static enum TimingSection {
-    ITERATE, ORTHOGANLIZE, TRIDIAG_DECOMP, FINAL_EIGEN_CREATE
-  }
-
-  private Map<TimingSection, Long> startTimes = new EnumMap<TimingSection, Long>(TimingSection.class);
-  private Map<TimingSection, Long> times = new EnumMap<TimingSection, Long>(TimingSection.class);
 }

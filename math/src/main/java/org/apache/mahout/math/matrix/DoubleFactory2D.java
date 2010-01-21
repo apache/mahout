@@ -249,7 +249,6 @@ public class DoubleFactory2D extends PersistentObject {
    * &nbsp;&nbsp;&nbsp;{ null,                      identity(3).viewColumnFlip() },
    * &nbsp;&nbsp;&nbsp;{ identity(3).viewRowFlip(), null                         }
    * };
-   * log.info("\n"+make(parts3));
    * </pre>
    * </td> <td><tt>9&nbsp;x&nbsp;6&nbsp;matrix<br> 1&nbsp;0&nbsp;0&nbsp;0&nbsp;0&nbsp;0<br>
    * 0&nbsp;1&nbsp;0&nbsp;0&nbsp;0&nbsp;0<br> 0&nbsp;0&nbsp;1&nbsp;0&nbsp;0&nbsp;0<br>
@@ -267,7 +266,6 @@ public class DoubleFactory2D extends PersistentObject {
    * &nbsp;&nbsp;&nbsp;{ A, _, A, _ },
    * &nbsp;&nbsp;&nbsp;{ _, A, _, B }
    * };
-   * log.info("\n"+make(parts4));
    * </pre>
    * </td> <td><tt>4&nbsp;x&nbsp;8&nbsp;matrix<br> 1&nbsp;2&nbsp;0&nbsp;0&nbsp;1&nbsp;2&nbsp;0&nbsp;0<br>
    * 3&nbsp;4&nbsp;0&nbsp;0&nbsp;3&nbsp;4&nbsp;0&nbsp;0<br> 0&nbsp;0&nbsp;1&nbsp;2&nbsp;0&nbsp;0&nbsp;3&nbsp;2<br>
@@ -279,7 +277,6 @@ public class DoubleFactory2D extends PersistentObject {
    * &nbsp;&nbsp;&nbsp;{ make(4,4,2), null,        make(4,3,3) },
    * &nbsp;&nbsp;&nbsp;{ null,        make(2,3,4), null        }
    * };
-   * log.info("\n"+Factory2D.make(parts2));
    * </pre>
    * </td> <td><tt>IllegalArgumentException<br> A[0,1].cols != A[2,1].cols<br> (2 != 3)</tt></td> </tr> </table>
    *
@@ -423,10 +420,6 @@ public class DoubleFactory2D extends PersistentObject {
    * &nbsp;&nbsp;&nbsp;{ _, D, _ }
    * };
    * decompose(parts,matrix);
-   * log.info(&quot;\nA = &quot;+A);
-   * log.info(&quot;\nB = &quot;+B);
-   * log.info(&quot;\nC = &quot;+C);
-   * log.info(&quot;\nD = &quot;+D);
    * </pre>
    * </td> <td><tt>8&nbsp;x&nbsp;9&nbsp;matrix<br> 9&nbsp;9&nbsp;9&nbsp;9&nbsp;1&nbsp;1&nbsp;9&nbsp;9&nbsp;9<br>
    * 9&nbsp;9&nbsp;9&nbsp;9&nbsp;1&nbsp;1&nbsp;9&nbsp;9&nbsp;9<br> 2&nbsp;2&nbsp;2&nbsp;2&nbsp;9&nbsp;9&nbsp;3&nbsp;3&nbsp;3<br>

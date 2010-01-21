@@ -144,15 +144,12 @@ public class ConfusionMatrix implements Summarizable {
   
   @Override
   public String summarize() {
-    String lineSep = System.getProperty("line.separator");
     StringBuilder returnString = new StringBuilder();
     returnString.append(
-        "=======================================================").append(
-        lineSep);
+        "=======================================================").append('\n');
     returnString.append("Confusion Matrix\n");
     returnString.append(
-        "-------------------------------------------------------").append(
-        lineSep);
+        "-------------------------------------------------------").append('\n');
     
     for (String correctLabel : this.labels) {
       returnString.append(
@@ -160,7 +157,7 @@ public class ConfusionMatrix implements Summarizable {
           .append('\t');
     }
     
-    returnString.append("<--Classified as").append(lineSep);
+    returnString.append("<--Classified as").append('\n');
     
     for (String correctLabel : this.labels) {
       int labelTotal = 0;
@@ -175,11 +172,11 @@ public class ConfusionMatrix implements Summarizable {
           .append(
               StringUtils
                   .rightPad(getSmallLabel(labelMap.get(correctLabel)), 5))
-          .append(" = ").append(correctLabel).append(lineSep);
+          .append(" = ").append(correctLabel).append('\n');
     }
     returnString.append("Default Category: ").append(defaultLabel).append(": ")
-        .append(labelMap.get(defaultLabel)).append(lineSep);
-    returnString.append(lineSep);
+        .append(labelMap.get(defaultLabel)).append('\n');
+    returnString.append('\n');
     return returnString.toString();
   }
   

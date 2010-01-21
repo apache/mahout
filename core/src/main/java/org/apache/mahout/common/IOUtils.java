@@ -40,7 +40,7 @@ public final class IOUtils {
       try {
         closeable.close();
       } catch (IOException ioe) {
-        log.warn("Unexpected exception while closing " + closeable + "; continuing", ioe);
+        log.warn("Unexpected exception while closing; continuing", ioe);
       }
     }
   }
@@ -52,7 +52,7 @@ public final class IOUtils {
       try {
         closeable.close();
       } catch (SQLException sqle) {
-        log.warn("Unexpected exception while closing " + closeable + "; continuing", sqle);
+        log.warn("Unexpected exception while closing; continuing", sqle);
       }
     }
   }
@@ -62,7 +62,7 @@ public final class IOUtils {
       try {
         closeable.close();
       } catch (SQLException sqle) {
-        log.warn("Unexpected exception while closing " + closeable + "; continuing", sqle);
+        log.warn("Unexpected exception while closing; continuing", sqle);
       }
     }
   }
@@ -72,7 +72,7 @@ public final class IOUtils {
       try {
         closeable.close();
       } catch (SQLException sqle) {
-        log.warn("Unexpected exception while closing " + closeable + "; continuing", sqle);
+        log.warn("Unexpected exception while closing; continuing", sqle);
       }
     }
   }

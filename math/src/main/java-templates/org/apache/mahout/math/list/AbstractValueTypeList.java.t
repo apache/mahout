@@ -41,7 +41,7 @@ import java.util.List;
 /**
  Abstract base class for resizable lists holding <code>${valueType}</code> elements; abstract.
 */
-public abstract class Abstract${valueTypeCap}List extends AbstractList implements ${valueTypeCap}BufferConsumer {
+public abstract class Abstract${valueTypeCap}List extends AbstractList implements ${valueTypeCap}BufferConsumer, Cloneable {
 
   /**
    * The size of the list. This is a READ_ONLY variable for all methods but setSizeRaw(int newSize) !!! If you violate
@@ -593,6 +593,7 @@ public abstract class Abstract${valueTypeCap}List extends AbstractList implement
    * @throws IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to ||
    *                                   to&gt;=size())</tt>).
    */
+  @Override
   public void removeFromTo(int from, int to) {
     checkRangeFromTo(from, to, size);
     int numMoved = size - to - 1;

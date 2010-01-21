@@ -130,7 +130,7 @@ public class FrequenciesJob {
     Configuration conf = job.getConfiguration();
 
     int numMaps = conf.getInt("mapred.map.tasks", -1);
-    log.info("mapred.map.tasks = " + numMaps);
+    log.info("mapred.map.tasks = {}", numMaps);
 
     FileSystem fs = outputPath.getFileSystem(conf);
 
@@ -188,7 +188,7 @@ public class FrequenciesJob {
      */
     protected void setup(Dataset dataset) {
       converter = new DataConverter(dataset);
-      // log.info("labels: " + Arrays.toString(dataset.labels()));
+      // log.info("labels: {}", Arrays.toString(dataset.labels()));
     }
 
     @Override

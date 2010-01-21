@@ -332,7 +332,6 @@ public final class LDADriver {
         } else if (topic == LOG_LIKELIHOOD_KEY) {
           ll = value.get();
         } else {
-          //System.out.println(topic + " " + word);
           if (!(topic >= 0 && word >= 0)) {
             throw new IllegalArgumentException(topic + " " + word);
           }

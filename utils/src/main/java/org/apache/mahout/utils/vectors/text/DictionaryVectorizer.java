@@ -96,7 +96,7 @@ public final class DictionaryVectorizer {
    * @param output
    *          output directory where {@link org.apache.mahout.math.RandomAccessSparseVector}'s of the document are
    *          generated
-   * @param analyzer
+   * @param analyzerClass
    *          the Lucene {@link Analyzer} used to tokenize the UTF-8
    * @param minSupport
    *          the minimum frequency of the feature in the entire corpus to be
@@ -248,10 +248,7 @@ public final class DictionaryVectorizer {
    * @throws URISyntaxException
    */
   private static void createVectorFromPartialVectors(List<Path> partialVectorPaths,
-                                                     String output) throws IOException,
-                                                                   InterruptedException,
-                                                                   ClassNotFoundException,
-                                                                   URISyntaxException {
+                                                     String output) throws IOException {
     
     Configurable client = new JobClient();
     JobConf conf = new JobConf(DictionaryVectorizer.class);
@@ -311,7 +308,7 @@ public final class DictionaryVectorizer {
    *          location of the chunk of features and the id's
    * @param output
    *          output directory were the partial vectors have to be created
-   * @param analyzer
+   * @param analyzerClass
    *          The Lucene {@link Analyzer} for tokenizing the text
    * @throws IOException
    * @throws InterruptedException
@@ -321,10 +318,7 @@ public final class DictionaryVectorizer {
   private static void makePartialVectors(String input,
                                          Path dictionaryFilePath,
                                          Class<? extends Analyzer> analyzerClass,
-                                         Path output) throws IOException,
-                                                     InterruptedException,
-                                                     ClassNotFoundException,
-                                                     URISyntaxException {
+                                         Path output) throws IOException {
     
     Configurable client = new JobClient();
     JobConf conf = new JobConf(DictionaryVectorizer.class);
@@ -365,19 +359,10 @@ public final class DictionaryVectorizer {
   /**
    * Count the frequencies of words in parallel using Map/Reduce. The input
    * documents have to be in {@link SequenceFile} format
-   * 
-   * @param input
-   * @param output
-   * @param analyzer
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
    */
   private static void startWordCounting(Path input,
                                         Class<? extends Analyzer> analyzerClass,
-                                        Path output) throws IOException,
-                                                    InterruptedException,
-                                                    ClassNotFoundException {
+                                        Path output) throws IOException {
     
     Configurable client = new JobClient();
     JobConf conf = new JobConf(DictionaryVectorizer.class);

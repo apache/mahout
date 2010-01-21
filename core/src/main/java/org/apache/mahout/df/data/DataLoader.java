@@ -63,7 +63,7 @@ public class DataLoader {
       List<String>[] values, String string) {
     StringTokenizer tokenizer = new StringTokenizer(string, ", ");
     if (tokenizer.countTokens() != attrs.length) {
-      log.error(id + ": " + string);
+      log.error("{}: {}", id, string);
       throw new IllegalArgumentException("Wrong number of attributes in the string");
     }
 
@@ -137,14 +137,14 @@ public class DataLoader {
     while (scanner.hasNextLine()) {
       String line = scanner.nextLine();
       if (line.isEmpty()) {
-        log.warn(instances.size() + ": empty string");
+        log.warn("{}: empty string", instances.size());
         continue;
       }
       
       Instance instance = converter.convert(instances.size(), line);
       if (instance == null) {
         // missing values found
-        log.warn(instances.size() + ": missing values");
+        log.warn("{}: missing values", instances.size());
         continue;
       }
       
@@ -166,14 +166,14 @@ public class DataLoader {
     
     for (String line : data) {
       if (line.isEmpty()) {
-        log.warn(instances.size() + ": empty string");
+        log.warn("{}: empty string", instances.size());
         continue;
       }
       
       Instance instance = converter.convert(instances.size(), line);
       if (instance == null) {
         // missing values found
-        log.warn(instances.size() + ": missing values");
+        log.warn("{}: missing values", instances.size());
         continue;
       }
       

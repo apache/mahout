@@ -21,7 +21,7 @@ public class DenseDoubleMatrix3D extends DoubleMatrix3D {
    * row0..m}, ..., {sliceN row0..m} with each row storead as {row0 column0..m}, {row1 column0..m}, ..., {rown
    * column0..m}
    */
-  protected double[] elements;
+  protected final double[] elements;
 
   /**
    * Constructs a matrix with a copy of the given values. <tt>values</tt> is required to have the form

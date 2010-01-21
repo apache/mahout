@@ -156,8 +156,7 @@ public class QuickBitVector {
   public static long[] makeBitVector(int size, int bitsPerElement) {
     int nBits = size * bitsPerElement;
     int unitIndex = (nBits - 1) >> ADDRESS_BITS_PER_UNIT;
-    long[] bitVector = new long[unitIndex + 1];
-    return bitVector;
+    return new long[unitIndex + 1];
   }
 
   /**
@@ -191,31 +190,9 @@ public class QuickBitVector {
     long value = ~0L;
     for (int i = BITS_PER_UNIT + 1; --i >= 1;) {
       pows[i] = value >>> (BITS_PER_UNIT - i);
-      //log.info((i)+":"+pows[i]);
     }
     pows[0] = 0L;
-    //log.info((0)+":"+pows[0]);
     return pows;
-
-    //OLD STUFF
-    /*
-    for (int i=BITS_PER_UNIT+1; --i >= 0; ) {
-      pows[i]=value;
-      value = value >>> 1;
-      log.info((i)+":"+pows[i]);
-    }
-    */
-
-    /*
-    long[] pows=new long[BITS_PER_UNIT];
-    for (int i=0; i<BITS_PER_UNIT-1; i++) {
-      pows[i]=Math.round(Math.pow(2.0,i+1))-1;
-      log.info((i)+":"+pows[i]);
-    }
-    pows[BITS_PER_UNIT-1] = ~0L;
-    log.info((BITS_PER_UNIT-1)+":"+pows[BITS_PER_UNIT-1]);
-    return pows;
-    */
   }
 
   /**

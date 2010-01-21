@@ -410,19 +410,6 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
       throw new InternalError();
     }
 
-    /*
-    forEachNonZero(
-      new IntIntDoubleFunction() {
-        public double apply(int i, int j, double value) {
-          zElements[zi + zStride*i] += value * yElements[yi + yStride*j];
-          //z.setQuick(row,z.getQuick(row) + value * y.getQuick(column));
-          //log.info("["+i+","+j+"]-->"+value);
-          return value;
-        }
-      }
-    );
-    */
-
 
     int[] idx = indexes.elements();
     double[] vals = values.elements();

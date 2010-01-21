@@ -88,7 +88,7 @@ public class Algebra extends PersistentObject {
   }
 
   /** Returns the condition of matrix <tt>A</tt>, which is the ratio of largest to smallest singular value. */
-  public double cond(DoubleMatrix2D A) {
+  public static double cond(DoubleMatrix2D A) {
     return svd(A).cond();
   }
 
@@ -97,7 +97,7 @@ public class Algebra extends PersistentObject {
    *
    * @return the determinant.
    */
-  public double det(DoubleMatrix2D A) {
+  public static double det(DoubleMatrix2D A) {
     return lu(A).det();
   }
 
@@ -162,7 +162,7 @@ public class Algebra extends PersistentObject {
    * @return the inner product.
    * @throws IllegalArgumentException if <tt>x.size() != y.size()</tt>.
    */
-  public double mult(DoubleMatrix1D x, DoubleMatrix1D y) {
+  public static double mult(DoubleMatrix1D x, DoubleMatrix1D y) {
     return x.zDotProduct(y);
   }
 
@@ -175,7 +175,7 @@ public class Algebra extends PersistentObject {
    * @return <tt>z</tt>; a new vector with <tt>z.size()==A.rows()</tt>.
    * @throws IllegalArgumentException if <tt>A.columns() != y.size()</tt>.
    */
-  public DoubleMatrix1D mult(DoubleMatrix2D A, DoubleMatrix1D y) {
+  public static DoubleMatrix1D mult(DoubleMatrix2D A, DoubleMatrix1D y) {
     return A.zMult(y, null);
   }
 
@@ -188,7 +188,7 @@ public class Algebra extends PersistentObject {
    * @return <tt>C</tt>; a new matrix holding the results, with <tt>C.rows()=A.rows(), C.columns()==B.columns()</tt>.
    * @throws IllegalArgumentException if <tt>B.rows() != A.columns()</tt>.
    */
-  public DoubleMatrix2D mult(DoubleMatrix2D A, DoubleMatrix2D B) {
+  public static DoubleMatrix2D mult(DoubleMatrix2D A, DoubleMatrix2D B) {
     return A.zMult(B, null);
   }
 
@@ -202,7 +202,7 @@ public class Algebra extends PersistentObject {
    * @return A (for convenience only).
    * @throws IllegalArgumentException if <tt>A.rows() != x.size() || A.columns() != y.size()</tt>.
    */
-  public DoubleMatrix2D multOuter(DoubleMatrix1D x, DoubleMatrix1D y, DoubleMatrix2D A) {
+  public static DoubleMatrix2D multOuter(DoubleMatrix1D x, DoubleMatrix1D y, DoubleMatrix2D A) {
     int rows = x.size();
     int columns = y.size();
     if (A == null) {
@@ -223,7 +223,7 @@ public class Algebra extends PersistentObject {
   }
 
   /** Returns the one-norm of vector <tt>x</tt>, which is <tt>Sum(abs(x[i]))</tt>. */
-  public double norm1(DoubleMatrix1D x) {
+  public static double norm1(DoubleMatrix1D x) {
     if (x.size() == 0) {
       return 0;
     }
@@ -245,12 +245,12 @@ public class Algebra extends PersistentObject {
   }
 
   /** Returns the two-norm of matrix <tt>A</tt>, which is the maximum singular value; obtained from SVD. */
-  public double norm2(DoubleMatrix2D A) {
+  public static double norm2(DoubleMatrix2D A) {
     return svd(A).norm2();
   }
 
   /** Returns the Frobenius norm of matrix <tt>A</tt>, which is <tt>Sqrt(Sum(A[i,j]<sup>2</sup>))</tt>. */
-  public double normF(DoubleMatrix2D A) {
+  public static double normF(DoubleMatrix2D A) {
     if (A.size() == 0) {
       return 0;
     }
@@ -258,7 +258,7 @@ public class Algebra extends PersistentObject {
   }
 
   /** Returns the infinity norm of vector <tt>x</tt>, which is <tt>Max(abs(x[i]))</tt>. */
-  public double normInfinity(DoubleMatrix1D x) {
+  public static double normInfinity(DoubleMatrix1D x) {
     // fix for bug reported by T.J.Hunt@open.ac.uk
     if (x.size() == 0) {
       return 0;
@@ -306,7 +306,7 @@ public class Algebra extends PersistentObject {
    * @return the modified <tt>A</tt> (for convenience only).
    * @throws IndexOutOfBoundsException if <tt>indexes.length != A.size()</tt>.
    */
-  public DoubleMatrix1D permute(DoubleMatrix1D A, int[] indexes, double[] work) {
+  public static DoubleMatrix1D permute(DoubleMatrix1D A, int[] indexes, double[] work) {
     // check validity
     int size = A.size();
     if (indexes.length != size) {
@@ -339,7 +339,7 @@ public class Algebra extends PersistentObject {
    *
    * @return the new permuted selection view.
    */
-  public DoubleMatrix2D permute(DoubleMatrix2D A, int[] rowIndexes, int[] columnIndexes) {
+  public static DoubleMatrix2D permute(DoubleMatrix2D A, int[] rowIndexes, int[] columnIndexes) {
     return A.viewSelection(rowIndexes, columnIndexes);
   }
 
@@ -510,7 +510,7 @@ public class Algebra extends PersistentObject {
   }
 
   /** Returns the effective numerical rank of matrix <tt>A</tt>, obtained from Singular Value Decomposition. */
-  public int rank(DoubleMatrix2D A) {
+  public static int rank(DoubleMatrix2D A) {
     return svd(A).rank();
   }
 
@@ -539,7 +539,7 @@ public class Algebra extends PersistentObject {
    *
    * @return X; a new independent matrix; solution if A is square, least squares solution otherwise.
    */
-  public DoubleMatrix2D solve(DoubleMatrix2D A, DoubleMatrix2D B) {
+  public static DoubleMatrix2D solve(DoubleMatrix2D A, DoubleMatrix2D B) {
     return (A.rows() == A.columns() ? (lu(A).solve(B)) : (qr(A).solve(B)));
   }
 
@@ -627,7 +627,7 @@ public class Algebra extends PersistentObject {
    * @throws IndexOutOfBoundsException if <tt>fromColumn<0 || toColumn-fromColumn+1<0 || toColumn>=A.columns() ||
    *                                   fromRow<0 || toRow-fromRow+1<0 || toRow>=A.rows()</tt>
    */
-  public DoubleMatrix2D subMatrix(DoubleMatrix2D A, int fromRow, int toRow, int fromColumn, int toColumn) {
+  public static DoubleMatrix2D subMatrix(DoubleMatrix2D A, int fromRow, int toRow, int fromColumn, int toColumn) {
     return A.viewPart(fromRow, fromColumn, toRow - fromRow + 1, toColumn - fromColumn + 1);
   }
 
@@ -651,8 +651,8 @@ public class Algebra extends PersistentObject {
    * </pre>
    */
   public String toString(DoubleMatrix2D matrix) {
-    final org.apache.mahout.math.list.ObjectArrayList names = new ObjectArrayList();
-    final org.apache.mahout.math.list.ObjectArrayList values = new ObjectArrayList();
+    final ObjectArrayList<String> names = new ObjectArrayList<String>();
+    final ObjectArrayList<String> values = new ObjectArrayList<String>();
 
     // determine properties
     names.add("cond");
@@ -731,7 +731,7 @@ public class Algebra extends PersistentObject {
     Swapper swapper = new Swapper() {
       @Override
       public void swap(int a, int b) {
-        Object tmp = names.get(a);
+        String tmp = names.get(a);
         names.set(a, names.get(b));
         names.set(b, tmp);
         tmp = values.get(a);
@@ -744,7 +744,7 @@ public class Algebra extends PersistentObject {
     // determine padding for nice formatting
     int maxLength = 0;
     for (int i = 0; i < names.size(); i++) {
-      int length = ((String) names.get(i)).length();
+      int length = (names.get(i)).length();
       maxLength = Math.max(length, maxLength);
     }
 
@@ -988,7 +988,7 @@ public class Algebra extends PersistentObject {
   }
 
   /** Returns the sum of the diagonal elements of matrix <tt>A</tt>; <tt>Sum(A[i,i])</tt>. */
-  public double trace(DoubleMatrix2D A) {
+  public static double trace(DoubleMatrix2D A) {
     double sum = 0;
     for (int i = Math.min(A.rows(), A.columns()); --i >= 0;) {
       sum += A.getQuick(i, i);
@@ -1007,7 +1007,7 @@ public class Algebra extends PersistentObject {
    *
    * @return a new transposed view.
    */
-  public DoubleMatrix2D transpose(DoubleMatrix2D A) {
+  public static DoubleMatrix2D transpose(DoubleMatrix2D A) {
     return A.viewDice();
   }
 
@@ -1016,7 +1016,7 @@ public class Algebra extends PersistentObject {
    *
    * @return <tt>A</tt> (for convenience only).
    */
-  protected DoubleMatrix2D trapezoidalLower(DoubleMatrix2D A) {
+  protected static DoubleMatrix2D trapezoidalLower(DoubleMatrix2D A) {
     int rows = A.rows();
     int columns = A.columns();
     for (int r = rows; --r >= 0;) {

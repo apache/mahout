@@ -111,7 +111,7 @@ public class FileDataModel implements DataModel {
       throw new FileNotFoundException(dataFile.toString());
     }
 
-    log.info("Creating FileDataModel for file " + dataFile);
+    log.info("Creating FileDataModel for file {}", dataFile);
 
     this.dataFile = dataFile.getAbsoluteFile();
     this.lastModified = dataFile.lastModified();

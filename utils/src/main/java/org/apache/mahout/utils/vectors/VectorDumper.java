@@ -51,7 +51,6 @@ import java.io.Writer;
 public final class VectorDumper {
 
   private static final Logger log = LoggerFactory.getLogger(VectorDumper.class);
-  private static final String LINE_SEP = System.getProperty("line.separator");
 
   private VectorDumper() {
   }
@@ -124,9 +123,9 @@ public final class VectorDumper {
             writer.write(iterator.key().toString());
             writer.write("\t");
           }
-          String fmtStr = useJSON == true ? vector.asFormatString() : (dictionary != null ? VectorHelper.vectorToString(vector, dictionary) : vector.asFormatString());
+          String fmtStr = useJSON ? vector.asFormatString() : (dictionary != null ? VectorHelper.vectorToString(vector, dictionary) : vector.asFormatString());
           writer.write(fmtStr);
-          writer.write(LINE_SEP);
+          writer.write('\n');
           i++;
         }
         writer.flush();

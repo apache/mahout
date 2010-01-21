@@ -67,9 +67,8 @@ public class DenseVector extends AbstractVector {
     super(vector.getName());
     values = new double[vector.size()];
     Iterator<Vector.Element> it = vector.iterateNonZero();
-    Vector.Element e = null;
     while(it.hasNext()) {
-      e = it.next();
+      Vector.Element e = it.next();
       values[e.index()] = e.get();
     }
   }
@@ -105,7 +104,7 @@ public class DenseVector extends AbstractVector {
 
   @Override
   public Vector like(int cardinality) {
-    DenseVector denseVector = new DenseVector(cardinality);
+    Vector denseVector = new DenseVector(cardinality);
     denseVector.setLabelBindings(getLabelBindings());
     return denseVector;
   }

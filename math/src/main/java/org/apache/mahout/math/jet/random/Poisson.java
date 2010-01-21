@@ -55,7 +55,6 @@ public class Poisson extends AbstractDiscreteDistribution {
   private double p6;
 
   // cache for both;
-  private int m;
 
 
   private static final double MEAN_MAX = Integer.MAX_VALUE;
@@ -131,6 +130,7 @@ public class Poisson extends AbstractDiscreteDistribution {
     //static double p,q,p0,pp[36];
     //static long ll,m;
 
+    int m;
     if (my < SWITCH_MEAN) { // CASE B: Inversion- start new table and calculate p0
       if (my != my_old) {
         my_old = my;

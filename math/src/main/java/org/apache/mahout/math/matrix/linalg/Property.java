@@ -19,6 +19,7 @@ import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 import org.apache.mahout.math.matrix.DoubleMatrix3D;
 import org.apache.mahout.math.matrix.impl.AbstractFormatter;
+import org.apache.mahout.math.matrix.impl.AbstractMatrix2D;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
@@ -62,7 +63,7 @@ public class Property extends PersistentObject {
    *
    * @throws IllegalArgumentException if <tt>A.rows() < A.columns()</tt>.
    */
-  public void checkRectangular(DoubleMatrix2D A) {
+  public void checkRectangular(AbstractMatrix2D A) {
     if (A.rows() < A.columns()) {
       throw new IllegalArgumentException("Matrix must be rectangular: " + AbstractFormatter.shape(A));
     }
@@ -73,7 +74,7 @@ public class Property extends PersistentObject {
    *
    * @throws IllegalArgumentException if <tt>A.rows() != A.columns()</tt>.
    */
-  public void checkSquare(DoubleMatrix2D A) {
+  public void checkSquare(AbstractMatrix2D A) {
     if (A.rows() != A.columns()) {
       throw new IllegalArgumentException("Matrix must be square: " + AbstractFormatter.shape(A));
     }
@@ -327,10 +328,8 @@ public class Property extends PersistentObject {
     }
   }
 
-  /**
-   */
-  protected static String get(ObjectArrayList list, int index) {
-    return ((String) list.get(index));
+  protected static String get(ObjectArrayList<String> list, int index) {
+    return (list.get(index));
   }
 
   /**
@@ -523,7 +522,7 @@ public class Property extends PersistentObject {
   }
 
   /** A matrix <tt>A</tt> is <i>square</i> if it has the same number of rows and columns. */
-  public boolean isSquare(DoubleMatrix2D A) {
+  public boolean isSquare(AbstractMatrix2D A) {
     return A.rows() == A.columns();
   }
 
@@ -832,8 +831,8 @@ public class Property extends PersistentObject {
    * </pre>
    */
   public String toString(DoubleMatrix2D A) {
-    final org.apache.mahout.math.list.ObjectArrayList names = new ObjectArrayList();
-    final org.apache.mahout.math.list.ObjectArrayList values = new ObjectArrayList();
+    final ObjectArrayList<String> names = new ObjectArrayList<String>();
+    final ObjectArrayList<String> values = new ObjectArrayList<String>();
 
     // determine properties
     names.add("density");
@@ -1059,7 +1058,7 @@ public class Property extends PersistentObject {
     Swapper swapper = new Swapper() {
       @Override
       public void swap(int a, int b) {
-        Object tmp = names.get(a);
+        String tmp = names.get(a);
         names.set(a, names.get(b));
         names.set(b, tmp);
         tmp = values.get(a);

@@ -32,7 +32,6 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.common.CommandLineUtil;
-import org.apache.mahout.utils.strings.StringUtil;
 import org.apache.mahout.utils.vectors.io.JWriterVectorWriter;
 import org.apache.mahout.utils.vectors.io.SequenceFileVectorWriter;
 import org.apache.mahout.utils.vectors.io.VectorWriter;
@@ -109,7 +108,7 @@ public class Driver {
           throw new IllegalArgumentException("maxDocs must be >= 0");
         }
         String outDir = cmdLine.getValue(outputOpt).toString();
-        log.info("Output Dir: " + outDir);
+        log.info("Output Dir: {}", outDir);
         String outWriter = null;
         if (cmdLine.hasOption(outWriterOpt)) {
           outWriter = cmdLine.getValue(outWriterOpt).toString();
@@ -131,11 +130,11 @@ public class Driver {
         } else {
           writeFile(outWriter, outDir, input, maxDocs, model);
         }
-        log.info("Dictionary Output file: " + dictOut);
+        log.info("Dictionary Output file: {}", dictOut);
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dictOut), Charset.forName("UTF8")));
         Map<String, Integer> labels = model.getLabelBindings();
         for (Map.Entry<String, Integer> entry : labels.entrySet()) {
-          writer.append(entry.getKey()).append(delimiter).append(String.valueOf(entry.getValue())).append(StringUtil.LINE_SEP);
+          writer.append(entry.getKey()).append(delimiter).append(String.valueOf(entry.getValue())).append('\n');
         }
         writer.close();
       }
@@ -148,7 +147,7 @@ public class Driver {
 
   private static void writeFile(String outWriter, String outDir, File file,
                                 long maxDocs, ARFFModel arffModel) throws IOException {
-    log.info("Converting File: " + file);
+    log.info("Converting File: {}", file);
     ARFFModel model = new MapBackedARFFModel(arffModel.getWords(), arffModel.getWordCount() + 1,
             arffModel.getNominalMap());
     ARFFVectorIterable iteratable = new ARFFVectorIterable(file, model);
@@ -168,7 +167,7 @@ public class Driver {
 
     long numDocs = vectorWriter.write(iteratable, maxDocs);
     vectorWriter.close();
-    log.info("Wrote: " + numDocs + " vectors");
+    log.info("Wrote: {} vectors", numDocs);
   }
 
   private static VectorWriter getSeqFileWriter(String outFile) throws IOException {

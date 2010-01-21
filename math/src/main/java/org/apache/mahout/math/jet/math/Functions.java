@@ -420,8 +420,7 @@ public class Functions {
     }
   };
 
-  /** Makes this class non instantiable, but still let's others inherit from it. */
-  protected Functions() {
+  private Functions() {
   }
 
   /**

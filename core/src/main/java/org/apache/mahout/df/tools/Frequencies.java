@@ -32,7 +32,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.CommandLineUtil;
-import org.apache.mahout.df.data.DataUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,8 +84,8 @@ public class Frequencies extends Configured implements Tool  {
       String dataPath = cmdLine.getValue(dataOpt).toString();
       String datasetPath = cmdLine.getValue(datasetOpt).toString();
 
-      log.debug("Data path : " + dataPath);
-      log.debug("Dataset path : " + datasetPath);
+      log.debug("Data path : {}", dataPath);
+      log.debug("Dataset path : {}", datasetPath);
 
       runTool(dataPath, datasetPath);
     } catch (OptionException e) {

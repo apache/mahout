@@ -241,18 +241,6 @@ class DoubleBufferSet extends BufferSet {
    * @return outputValues a list filled with the values at triggerPositions
    */
   protected double[] getValuesAtPositions(DoubleBuffer[] buffers, long[] triggerPositions) {
-    //if (buffers.length==0)
-    //{
-    //  throw new IllegalArgumentException("Oops! buffer.length==0.");
-    //}
-
-    //log.info("triggers="+cern.it.util.Arrays.toString(positions));
-
-    //new DoubleArrayList(outputValues).fillFromToWith(0, outputValues.length-1, 0.0f);
-    //delte the above line, it is only for testing
-
-    //cern.it.util.Log.println("\nEntering getValuesAtPositions...");
-    //cern.it.util.Log.println("hitPositions="+cern.it.util.Arrays.toString(positions));
 
     // sort buffers.
     for (int i = buffers.length; --i >= 0;) {
@@ -294,9 +282,6 @@ class DoubleBufferSet extends BufferSet {
     // fill all output values with equi-distant elements.
     long counter = 0;             //current position in sorted sequence
     while (j < triggerPositionsLength) {
-      //log.info("\nj="+j);
-      //log.info("counter="+counter);
-      //log.info("nextHit="+nextHit);
 
       // determine buffer with smallest value at cursor position.
       double minValue = Double.POSITIVE_INFINITY;
@@ -321,7 +306,6 @@ class DoubleBufferSet extends BufferSet {
       counter += minBuffer.weight();
       while (counter > nextHit && j < triggerPositionsLength) {
         outputValues[j++] = minValue;
-        //log.info("adding to output="+minValue);
         if (j < triggerPositionsLength) {
           nextHit = triggerPositions[j];
         }
@@ -330,7 +314,6 @@ class DoubleBufferSet extends BufferSet {
 
       // that element has now been treated, move further.
       cursors[minBufferIndex]++;
-      //log.info("cursors="+cern.it.util.Arrays.toString(cursors));
 
     } //end while (j<k)
 

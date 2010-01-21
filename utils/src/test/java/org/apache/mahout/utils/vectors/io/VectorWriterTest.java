@@ -17,7 +17,6 @@
 
 package org.apache.mahout.utils.vectors.io;
 
-import junit.framework.TestCase;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.conf.Configuration;
@@ -36,12 +35,28 @@ import java.util.ArrayList;
 
 public class VectorWriterTest extends MahoutTestCase {
 
-  public void testSFVW() throws Exception {
-    File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-    File tmpLoc = new File(tmpDir, "sfvwt");
-    tmpLoc.mkdirs();
-    File tmpFile = File.createTempFile("sfvwt", ".dat", tmpLoc);
+  private File tmpLoc;
+  private File tmpFile;
 
+  @Override
+  public void setUp() throws Exception {
+    super.setUp();
+    File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+    tmpLoc = new File(tmpDir, "sfvwt");
+    tmpLoc.deleteOnExit();
+    tmpLoc.mkdirs();
+    tmpFile = File.createTempFile("sfvwt", ".dat", tmpLoc);
+    tmpFile.deleteOnExit();
+  }
+
+  @Override
+  public void tearDown() throws Exception {
+    tmpFile.delete();
+    tmpLoc.delete();
+    super.tearDown();
+  }
+
+  public void testSFVW() throws Exception {
     Path path = new Path(tmpFile.getAbsolutePath());
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
@@ -72,7 +87,6 @@ public class VectorWriterTest extends MahoutTestCase {
     StringBuffer buffer = strWriter.getBuffer();
     assertNotNull(buffer);
     assertTrue(buffer.length() > 0);
-    System.out.println("Buffer: " + buffer);
 
   }
 }

@@ -94,7 +94,7 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
   @SuppressWarnings("unchecked")
   @Override
   public Object clone() {
-    OpenHashSet copy = (OpenHashSet) super.clone();
+    OpenHashSet<T> copy = (OpenHashSet<T>) super.clone();
     copy.table = copy.table.clone();
     copy.state = copy.state.clone();
     return copy;
@@ -105,6 +105,7 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
    *
    * @return <tt>true</tt> if the receiver contains the specified key.
    */
+  @Override
   @SuppressWarnings("unchecked")
   public boolean contains(Object key) {
     return indexOfKey((T)key) >= 0;
@@ -264,16 +265,6 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
     }
   }
 
-
-  /**
-   * Associates the given key with the given value. Replaces any old <tt>(key,someOtherValue)</tt> association, if
-   * existing.
-   *
-   * @param key   the key the value shall be associated with.
-   * @param value the value to be associated.
-   * @return <tt>true</tt> if the receiver did not already contain such a key; <tt>false</tt> if the receiver did
-   *         already contain such a key - the new value has now replaced the formerly associated value.
-   */
   @SuppressWarnings("unchecked")
   @Override
   public boolean add(Object key) {
@@ -284,10 +275,6 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
 
     if (this.distinct > this.highWaterMark) {
       int newCapacity = chooseGrowCapacity(this.distinct + 1, this.minLoadFactor, this.maxLoadFactor);
-      /*
-      log.info("grow rehashing ");
-      log.info("at distinct="+distinct+", capacity="+table.length+" to newCapacity="+newCapacity+" ...");
-      */
       rehash(newCapacity);
       return add(key);
     }
@@ -360,12 +347,6 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
 
     if (this.distinct < this.lowWaterMark) {
       int newCapacity = chooseShrinkCapacity(this.distinct, this.minLoadFactor, this.maxLoadFactor);
-      /*
-      if (table.length != newCapacity) {
-        log.info("shrink rehashing ");
-        log.info("at distinct="+distinct+", capacity="+table.length+" to newCapacity="+newCapacity+" ...");
-      }
-      */
       rehash(newCapacity);
     }
 
@@ -460,7 +441,7 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
     if (!(obj instanceof OpenHashSet)) {
       return false;
     }
-    final OpenHashSet other = (OpenHashSet) obj;
+    final OpenHashSet<T> other = (OpenHashSet<T>) obj;
     if (other.size() != size()) {
       return false;
     }

@@ -21,6 +21,10 @@ package org.apache.mahout.math.stats;
  * Utility methods for working with log-likelihood
  */
 public class LogLikelihood {
+
+  private LogLikelihood() {
+  }
+
   /**
    * Calculate the Shannon entropy.
    * @param elements TODO FILL IN HERE
@@ -34,7 +38,7 @@ public class LogLikelihood {
     double result = 0.0;
     for (int x : elements) {
       if (x < 0) {
-        throw new IllegalArgumentException("Should not have negative count for entropy computation: (" + x + ")");
+        throw new IllegalArgumentException("Should not have negative count for entropy computation: (" + x + ')');
       }
       int zeroFlag = (x == 0 ? 1 : 0);
       result += x * Math.log((x + zeroFlag) / sum);

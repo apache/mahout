@@ -399,10 +399,6 @@ public class Open${keyTypeCap}${valueTypeCap}HashMap extends Abstract${keyTypeCa
 
     if (this.distinct > this.highWaterMark) {
       int newCapacity = chooseGrowCapacity(this.distinct + 1, this.minLoadFactor, this.maxLoadFactor);
-      /*
-      log.info("grow rehashing ");
-      log.info("at distinct="+distinct+", capacity="+table.length+" to newCapacity="+newCapacity+" ...");
-      */
       rehash(newCapacity);
       return put(key, value);
     }
@@ -491,12 +487,6 @@ public class Open${keyTypeCap}${valueTypeCap}HashMap extends Abstract${keyTypeCa
 
     if (this.distinct < this.lowWaterMark) {
       int newCapacity = chooseShrinkCapacity(this.distinct, this.minLoadFactor, this.maxLoadFactor);
-      /*
-      if (table.length != newCapacity) {
-        log.info("shrink rehashing ");
-        log.info("at distinct="+distinct+", capacity="+table.length+" to newCapacity="+newCapacity+" ...");
-      }
-      */
       rehash(newCapacity);
     }
 

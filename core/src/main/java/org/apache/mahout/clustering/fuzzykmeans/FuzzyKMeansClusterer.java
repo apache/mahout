@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.clustering.fuzzykmeans;
 
 import java.io.IOException;
@@ -12,7 +29,6 @@ import org.apache.mahout.math.Vector;
 
 public class FuzzyKMeansClusterer {
 
-
   private static final double MINIMAL_VALUE = 0.0000000001; // using it for
   // adding
   // exception
@@ -21,7 +37,7 @@ public class FuzzyKMeansClusterer {
   // variable to avoid
   // divide by Zero
 
-  private int nextClusterId = 0;
+  //private int nextClusterId = 0;
   
   private DistanceMeasure measure;
 
@@ -57,7 +73,7 @@ public class FuzzyKMeansClusterer {
   private void config(DistanceMeasure aMeasure, double aConvergenceDelta) {
     measure = aMeasure;
     convergenceDelta = aConvergenceDelta;
-    nextClusterId = 0;
+    //nextClusterId = 0;
   }
   
   /**
@@ -72,7 +88,7 @@ public class FuzzyKMeansClusterer {
       measure = (DistanceMeasure) cl.newInstance();
       measure.configure(job);
       convergenceDelta = Double.parseDouble(job.get(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY));
-      nextClusterId = 0;
+      //nextClusterId = 0;
       m = Double.parseDouble(job.get(FuzzyKMeansConfigKeys.M_KEY));
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
@@ -130,12 +146,8 @@ public class FuzzyKMeansClusterer {
     }
     FuzzyKMeansOutput fOutput = new FuzzyKMeansOutput(clusters.size());
     for (int i = 0; i < clusters.size(); i++) {
-      // System.out.print("cluster:" + i + "\t" + clusterDistanceList.get(i));
-
       double probWeight = computeProbWeight(clusterDistanceList.get(i),
           clusterDistanceList);
-      /*outputValue.append(clusters.get(i).clusterId).append(':').append(
-          probWeight).append(' ');*/
       fOutput.add(i, clusters.get(i), probWeight);
     }
     String name = point.getName();
@@ -145,8 +157,7 @@ public class FuzzyKMeansClusterer {
   }
 
   /** Computes the probability of a point belonging to a cluster */
-  public double computeProbWeight(double clusterDistance,
-                                         List<Double> clusterDistanceList) {
+  public double computeProbWeight(double clusterDistance, List<Double> clusterDistanceList) {
     if (clusterDistance == 0) {
       clusterDistance = MINIMAL_VALUE;
     }

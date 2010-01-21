@@ -55,11 +55,8 @@ import org.slf4j.LoggerFactory;
  */
 public final class BayesFileFormatter {
   
-  private static final Logger log = LoggerFactory
-      .getLogger(BayesFileFormatter.class);
-  
-  private static final String LINE_SEP = System.getProperty("line.separator");
-  
+  private static final Logger log = LoggerFactory.getLogger(BayesFileFormatter.class);
+
   private BayesFileFormatter() { }
   
   /**
@@ -179,7 +176,7 @@ public final class BayesFileFormatter {
           writeFile(label, analyzer, file, charset, theWriter);
           if (writer != null) {
             // just write a new line
-            theWriter.write(LINE_SEP);
+            theWriter.write('\n');
           }
         } catch (IOException e) {
           // TODO: report failed files instead of throwing exception

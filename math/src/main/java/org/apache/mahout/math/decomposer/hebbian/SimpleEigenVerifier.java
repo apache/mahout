@@ -16,19 +16,12 @@
  */
 package org.apache.mahout.math.decomposer.hebbian;
 
-
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 public class SimpleEigenVerifier implements SingularVectorVerifier {
-  /**
-   * Logger for this class.
-   */
-  private static final Logger log = LoggerFactory.getLogger(SimpleEigenVerifier.class);
 
+  @Override
   public EigenStatus verify(Matrix eigenMatrix, Vector vector) {
     Vector resultantVector = eigenMatrix.timesSquared(vector);
     double newNorm = resultantVector.norm(2);

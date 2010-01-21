@@ -17,10 +17,6 @@
 
 package org.apache.mahout.math;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-
 /** Implements subset view of a Matrix */
 public class MatrixView extends AbstractMatrix {
 

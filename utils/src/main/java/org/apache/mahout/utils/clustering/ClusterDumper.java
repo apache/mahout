@@ -59,15 +59,13 @@ import java.util.TreeMap;
 public final class ClusterDumper {
 
   private static final Logger log = LoggerFactory.getLogger(ClusterDumper.class);
-  private static final String LINE_SEP = System.getProperty("line.separator");
 
-
-  String seqFileDir;
-  String pointsDir;
-  String termDictionary;
-  String outputFile;
-  int subString = Integer.MAX_VALUE;
-  Map<String, List<String>> clusterIdToPoints = null;
+  private final String seqFileDir;
+  private final String pointsDir;
+  private String termDictionary;
+  private String outputFile;
+  private int subString = Integer.MAX_VALUE;
+  private Map<String, List<String>> clusterIdToPoints = null;
   private boolean useJSON = false;
 
   public ClusterDumper(String seqFileDir, String pointsDir) throws IOException {
@@ -121,15 +119,15 @@ public final class ClusterDumper {
       ClusterBase value = (ClusterBase) reader.getValueClass().newInstance();
       while (reader.next(key, value)){
         Vector center = value.getCenter();
-        String fmtStr = useJSON == false ? VectorHelper.vectorToString(center, dictionary) : center.asFormatString();
+        String fmtStr = useJSON ? center.asFormatString() : VectorHelper.vectorToString(center, dictionary);
         writer.append("Id: ").append(String.valueOf(value.getId())).append(":").append("name:")
-                .append(center.getName()).append(":").append(fmtStr.substring(0, Math.min(subString, fmtStr.length()))).append(LINE_SEP);
+                .append(center.getName()).append(":").append(fmtStr.substring(0, Math.min(subString, fmtStr.length()))).append('\n');
         
         if (dictionary != null) {
           String topTerms = getTopFeatures(center, dictionary, 10);
           writer.write("\tTop Terms: ");
           writer.write(topTerms);
-          writer.write(LINE_SEP);
+          writer.write('\n');
         }
         
         List<String> points = clusterIdToPoints.get(String.valueOf(value.getId()));
@@ -142,7 +140,7 @@ public final class ClusterDumper {
               writer.append(", ");
             }
           }
-          writer.write(LINE_SEP);
+          writer.write('\n');
         }
         writer.flush();
       }
@@ -338,7 +336,7 @@ public final class ClusterDumper {
         int index = vectorTerms.get(i).index;
         String dictTerm = dictionary[index];
         if (dictTerm == null) {
-          log.error("Dictionary entry missing for "+ index);
+          log.error("Dictionary entry missing for {}", index);
           continue;
         }
         topTerms.add(dictTerm); 

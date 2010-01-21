@@ -217,8 +217,7 @@ public class Distributions {
     }
 
     double u = randomGenerator.raw();                           // U(0/1)
-    double x = l_sign * (Math.exp(Math.log(u) * l3) - Math.exp(Math.log(1.0 - u) * l4));
-    return x;
+    return l_sign * (Math.exp(Math.log(u) * l3) - Math.exp(Math.log(1.0 - u) * l4));
   }
 
   /**

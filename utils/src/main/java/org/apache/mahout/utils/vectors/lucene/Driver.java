@@ -182,7 +182,7 @@ public class Driver {
             iterable = new LuceneIterable(reader, idField, field, mapper, norm);
           }
           String outFile = cmdLine.getValue(outputOpt).toString();
-          log.info("Output File: " + outFile);
+          log.info("Output File: {}", outFile);
 
           VectorWriter vectorWriter;
           if (cmdLine.hasOption(outWriterOpt)) {
@@ -199,11 +199,11 @@ public class Driver {
 
           long numDocs = vectorWriter.write(iterable, maxDocs);
           vectorWriter.close();
-          log.info("Wrote: " + numDocs + " vectors");
+          log.info("Wrote: {} vectors", numDocs);
 
           String delimiter = cmdLine.hasOption(delimiterOpt) ? cmdLine.getValue(delimiterOpt).toString() : "\t";
           File dictOutFile = new File(cmdLine.getValue(dictOutOpt).toString());
-          log.info("Dictionary Output file: " + dictOutFile);
+          log.info("Dictionary Output file: {}", dictOutFile);
           BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dictOutFile), Charset.forName("UTF8")));
           JWriterTermInfoWriter tiWriter = new JWriterTermInfoWriter(writer, delimiter, field);
           tiWriter.write(termInfo);

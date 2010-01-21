@@ -23,7 +23,7 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
    * columnOf(index)==index%columns rowOf(index)==index/columns i.e. {row0 column0..m}, {row1 column0..m}, ..., {rown
    * column0..m}
    */
-  protected double[] elements;
+  protected final double[] elements;
 
   /**
    * Constructs a matrix with a copy of the given values. <tt>values</tt> is required to have the form

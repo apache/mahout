@@ -393,42 +393,31 @@ public class Beta extends AbstractContinousDistribution {
  *                with unsigned long integer *seed, double a, b.  *
  *                                                                *
  ******************************************************************/
-    double a = alpha;
-    double b = beta;
-    if (a > 1.0) {
-      if (b > 1.0) {
-        return (b1prs(a, b, randomGenerator));
+    if (alpha > 1.0) {
+      if (beta > 1.0) {
+        return (b1prs(alpha, beta, randomGenerator));
       }
-      if (b < 1.0) {
-        return (1.0 - b01(b, a, randomGenerator));
+      if (beta < 1.0) {
+        return (1.0 - b01(beta, alpha, randomGenerator));
       }
-      if (b == 1.0) {
-        return (Math.exp(Math.log(randomGenerator.raw()) / a));
-      }
+      return (Math.exp(Math.log(randomGenerator.raw()) / alpha));
     }
 
-    if (a < 1.0) {
-      if (b > 1.0) {
-        return (b01(a, b, randomGenerator));
+    if (alpha < 1.0) {
+      if (beta > 1.0) {
+        return (b01(alpha, beta, randomGenerator));
       }
-      if (b < 1.0) {
-        return (b00(a, b, randomGenerator));
+      if (beta < 1.0) {
+        return (b00(alpha, beta, randomGenerator));
       }
-      if (b == 1.0) {
-        return (Math.exp(Math.log(randomGenerator.raw()) / a));
-      }
+      return (Math.exp(Math.log(randomGenerator.raw()) / alpha));
     }
 
-    if (a == 1.0) {
-      if (b != 1.0) {
-        return (1.0 - Math.exp(Math.log(randomGenerator.raw()) / b));
-      }
-      if (b == 1.0) {
-        return (randomGenerator.raw());
-      }
+    if (beta != 1.0) {
+      return (1.0 - Math.exp(Math.log(randomGenerator.raw()) / beta));
+    } else {
+      return (randomGenerator.raw());
     }
-
-    return 0.0;
   }
 
   /** Returns the cumulative distribution function. */

@@ -177,9 +177,9 @@ public final class TransactionTree implements Writable {
     int temp = ROOTNODEID;
     int ret = 0;
     boolean addCountMode = true;
-    int child;
     for (int attributeValue : myList) {
 
+      int child;
       if (addCountMode) {
         child = childWithAttribute(temp, attributeValue);
         if (child == -1) {

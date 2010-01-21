@@ -32,7 +32,9 @@ import java.util.Iterator;
 public final class UserVectorToCooccurrenceReducer
     extends MapReduceBase
     implements Reducer<IntWritable, IntWritable, IntWritable, VectorWritable> {
-  private VectorWritable vectorWritable = new VectorWritable();
+
+  private final VectorWritable vectorWritable = new VectorWritable();
+
   @Override
   public void reduce(IntWritable index1,
                      Iterator<IntWritable> index2s,

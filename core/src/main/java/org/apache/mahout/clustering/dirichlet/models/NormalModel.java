@@ -20,12 +20,10 @@ package org.apache.mahout.clustering.dirichlet.models;
 import org.apache.mahout.math.SquareRootFunction;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.Vector.Element;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.Iterator;
 
 public class NormalModel implements Model<VectorWritable> {
 

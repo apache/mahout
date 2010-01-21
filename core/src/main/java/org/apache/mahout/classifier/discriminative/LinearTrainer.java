@@ -35,10 +35,9 @@ import org.slf4j.LoggerFactory;
 public abstract class LinearTrainer {
 
   /** Logger for this class. */
-  private static final Logger LOG = LoggerFactory
-      .getLogger(LinearTrainer.class);
+  private static final Logger LOG = LoggerFactory.getLogger(LinearTrainer.class);
   /** The model to train. */
-  private LinearModel model;
+  private final LinearModel model;
 
   /**
    * Initialize the trainer. Distance is initialized to cosine distance, all
@@ -54,8 +53,8 @@ public abstract class LinearTrainer {
    * @param initBias
    *          initial classification bias.
    * */
-  public LinearTrainer(final int dimension, final double threshold,
-      final double init, final double initBias) throws CardinalityException {
+  protected LinearTrainer(int dimension, double threshold,
+      double init, double initBias) throws CardinalityException {
     DenseVector initialWeights = new DenseVector(dimension);
     initialWeights.assign(init);
     this.model = new LinearModel(initialWeights, initBias, threshold);
@@ -74,7 +73,7 @@ public abstract class LinearTrainer {
    *          of data- and labelset do not match, a CardinalityException is
    *          thrown
    * */
-  public void train(final Vector labelset, final Matrix dataset)
+  public void train(Vector labelset, Matrix dataset)
       throws IndexException, CardinalityException, TrainingException {
     if (labelset.size() != dataset.size()[1]) {
       throw new CardinalityException();
@@ -83,9 +82,10 @@ public abstract class LinearTrainer {
     boolean converged = false;
     int iteration = 0;
     while (!converged) {
-      if (iteration > 1000)
+      if (iteration > 1000) {
         throw new TrainingException(
             "Too many iterations needed to find hyperplane.");
+      }
 
       converged = true;
       int columnCount = dataset.size()[1];
@@ -123,7 +123,7 @@ public abstract class LinearTrainer {
    * @param dataPoint
    *          the data point that was classified incorrectly.
    * */
-  protected abstract void update(final double label, final Vector dataPoint,
+  protected abstract void update(double label, Vector dataPoint,
       LinearModel model);
 
 }

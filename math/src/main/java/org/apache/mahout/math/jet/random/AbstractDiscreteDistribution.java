@@ -27,7 +27,4 @@ public abstract class AbstractDiscreteDistribution extends AbstractDistribution 
     return (double) nextInt();
   }
 
-  /** Returns a random number from the distribution. */
-  @Override
-  public abstract int nextInt();
 }

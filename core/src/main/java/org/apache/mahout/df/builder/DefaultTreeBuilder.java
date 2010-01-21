@@ -17,12 +17,9 @@
 
 package org.apache.mahout.df.builder;
 
-import java.util.Arrays;
 import java.util.Random;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.mahout.df.data.Data;
-import org.apache.mahout.df.data.Dataset;
 import org.apache.mahout.df.data.Instance;
 import org.apache.mahout.df.data.conditions.Condition;
 import org.apache.mahout.df.node.CategoricalNode;
@@ -92,13 +89,13 @@ public class DefaultTreeBuilder implements TreeBuilder {
     }
 
     boolean alreadySelected = selected[best.attr];
-    Node childNode = null;
 
     if (alreadySelected) {
       // attribute already selected
-      log.warn("attribute " + best.attr + " already selected in a parent node");
+      log.warn("attribute {} already selected in a parent node", best.attr);
     }
-    
+
+    Node childNode = null;
     if (data.getDataset().isNumerical(best.attr)) {
       Data loSubset = data.subset(Condition.lesser(best.attr, best.split));
       Node loChild = build(rng, loSubset);

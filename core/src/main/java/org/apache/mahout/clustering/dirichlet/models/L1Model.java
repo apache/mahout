@@ -27,7 +27,7 @@ import org.apache.mahout.math.VectorWritable;
 
 public class L1Model implements Model<VectorWritable> {
 
-  private static DistanceMeasure measure = new ManhattanDistanceMeasure();
+  private static final DistanceMeasure measure = new ManhattanDistanceMeasure();
 
   public L1Model() {
     super();
@@ -83,9 +83,9 @@ public class L1Model implements Model<VectorWritable> {
   public String toString() {
     StringBuilder buf = new StringBuilder();
     buf.append("l1m{n=").append(count).append(" c=[");
-    int nextIx = 0;
     if (coefficients != null) {
       // handle sparse Vectors gracefully, suppressing zero values
+      int nextIx = 0;
       for (int i = 0; i < coefficients.size(); i++) {
         double elem = coefficients.get(i);
         if (elem == 0.0)

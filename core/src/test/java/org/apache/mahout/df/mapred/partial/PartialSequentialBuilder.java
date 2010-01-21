@@ -94,7 +94,7 @@ class PartialSequentialBuilder extends PartialBuilder {
     // retrieve the splits
     TextInputFormat input = (TextInputFormat) job.getInputFormat();
     InputSplit[] splits = input.getSplits(job, job.getNumMapTasks());
-    log.debug("Nb splits : " + splits.length);
+    log.debug("Nb splits : {}", splits.length);
 
     InputSplit[] sorted = Arrays.copyOf(splits, splits.length);
     Builder.sortSplits(sorted);
@@ -134,14 +134,14 @@ class PartialSequentialBuilder extends PartialBuilder {
       mapper.close();
 
       time = System.currentTimeMillis() - time;
-      log.info("Duration : " + DFUtils.elapsedTime(time));
+      log.info("Duration : {}", DFUtils.elapsedTime(time));
 
       if (time > slowest) {
         slowest = time;
       }
     }
 
-    log.info("Longest duration : " + DFUtils.elapsedTime(slowest));
+    log.info("Longest duration : {}", DFUtils.elapsedTime(slowest));
   }
 
   @Override
@@ -207,7 +207,7 @@ class PartialSequentialBuilder extends PartialBuilder {
     // retrieve the splits
     TextInputFormat input = (TextInputFormat) job.getInputFormat();
     InputSplit[] splits = input.getSplits(job, job.getNumMapTasks());
-    log.debug("Nb splits : " + splits.length);
+    log.debug("Nb splits : {}", splits.length);
 
     Builder.sortSplits(splits);
 
@@ -253,14 +253,14 @@ class PartialSequentialBuilder extends PartialBuilder {
       mapper.close();
 
       time = System.currentTimeMillis() - time;
-      log.info("Duration : " + DFUtils.elapsedTime(time));
+      log.info("Duration : {}", DFUtils.elapsedTime(time));
 
       if (time > slowest) {
         slowest = time;
       }
     }
 
-    log.info("Longest duration : " + DFUtils.elapsedTime(slowest));
+    log.info("Longest duration : {}", DFUtils.elapsedTime(slowest));
   }
 
   /**

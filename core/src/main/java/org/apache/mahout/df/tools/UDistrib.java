@@ -9,7 +9,11 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.*;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileUtil;
+import org.apache.hadoop.fs.Path;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.DataConverter;
@@ -183,7 +187,7 @@ public class UDistrib {
 /*
     FSDataOutputStream joined = fs.create(new Path(outputPath, "uniform.data"));
     for (int p = 0; p < numPartitions; p++) {
-        log.info("Joining part : " + p);
+        log.info("Joining part : {}", p);
         FSDataInputStream partStream = fs.open(partPaths[p]);
 
         IOUtils.copyBytes(partStream, joined, conf, false);

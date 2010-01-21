@@ -50,9 +50,9 @@ public abstract class AbstractSet extends PersistentObject {
   protected double maxLoadFactor;
 
   // these are public access for unit tests.
-  static public final int defaultCapacity = 277;
-  static public final double defaultMinLoadFactor = 0.2;
-  static public final double defaultMaxLoadFactor = 0.5;
+  public static final int defaultCapacity = 277;
+  public static final double defaultMinLoadFactor = 0.2;
+  public static final double defaultMaxLoadFactor = 0.5;
 
   /**
    * Chooses a new prime table capacity optimized for growing that (approximately) satisfies the invariant <tt>c *
@@ -128,7 +128,7 @@ public abstract class AbstractSet extends PersistentObject {
    * @param desiredCapacity the capacity desired by the user.
    * @return the capacity which should be used for a hashtable.
    */
-protected int nextPrime(int desiredCapacity) {
+  protected int nextPrime(int desiredCapacity) {
     return PrimeFinder.nextPrime(desiredCapacity);
   }
 

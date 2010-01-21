@@ -56,12 +56,14 @@ public final class FileDataModelTest extends TasteTestCase {
 
   private DataModel model;
   private File testFile;
+  private File tmpLoc;
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
     File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-    File tmpLoc = new File(tmpDir, "fileDataModel");
+    tmpLoc = new File(tmpDir, "fileDataModel");
+    tmpLoc.deleteOnExit();
     if (tmpLoc.exists()) {
       if (tmpLoc.isFile()) {
         throw new IOException("Temp directory is a file");
@@ -83,6 +85,13 @@ public final class FileDataModelTest extends TasteTestCase {
       writer.close();
     }
     model = new FileDataModel(testFile);
+  }
+
+  @Override
+  public void tearDown() throws Exception {
+    testFile.delete();
+    tmpLoc.delete();
+    super.tearDown();
   }
 
   public void testFile() throws Exception {

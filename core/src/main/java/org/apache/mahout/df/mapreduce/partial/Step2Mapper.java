@@ -68,7 +68,7 @@ public class Step2Mapper extends Mapper<LongWritable, Text, TreeID, MapredOutput
     // get the cached files' paths
     URI[] files = DistributedCache.getCacheFiles(conf);
 
-    log.info("DistributedCache.getCacheFiles(): " + ArrayUtils.toString(files));
+    log.info("DistributedCache.getCacheFiles(): {}", ArrayUtils.toString(files));
     
     if (files == null || files.length < 2) {
       throw new IllegalArgumentException("missing paths from the DistributedCache");
@@ -95,7 +95,7 @@ public class Step2Mapper extends Mapper<LongWritable, Text, TreeID, MapredOutput
     int numInstances = InterResults.load(fs, forestPath, numMaps, numTrees,
         p, keys, trees);
 
-    log.debug("partition: " + p + "numInstances: " + numInstances);
+    log.debug("partition: {} numInstances: {}", p, numInstances);
     configure(p, dataset, keys, trees, numInstances);
   }
 

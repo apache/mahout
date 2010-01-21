@@ -194,7 +194,7 @@ public abstract class AbstractVector implements Vector {
     Iterator<Element> it = iterateNonZero();
     Element e;
     while(it.hasNext() && (e = it.next()) != null) {
-      final double diff = e.get() - v.getQuick(e.index());
+      double diff = e.get() - v.getQuick(e.index());
       d += (diff * diff);
     }
     return d;
@@ -486,7 +486,7 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public int hashCode() {
-    final int prime = 31;
+    int prime = 31;
     int result = prime + ((name == null) ? 0 : name.hashCode());
     result = prime * result + size();
     Iterator<Element> iter = iterateNonZero();

@@ -16,12 +16,9 @@
  */
 package org.apache.mahout.clustering.dirichlet;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.clustering.dirichlet.models.Model;
-import org.apache.mahout.math.JsonVectorAdapter;
 import org.apache.mahout.math.Vector;
 
 import java.io.DataInput;

@@ -100,7 +100,7 @@ public class SortingTest extends Assert {
   }
   
   static class ForSorting implements Comparable<ForSorting> {
-    private Integer i;
+    private final Integer i;
     
     ForSorting(int i) {
       this.i = i;
@@ -127,7 +127,7 @@ public class SortingTest extends Assert {
   
   @Test
   public void testBinarySearch() {
-    byte[] bytes = new byte[] {-5, -2, 0, 100, 103};
+    byte[] bytes = {-5, -2, 0, 100, 103};
     int x = Sorting.binarySearchFromTo(bytes, (byte) -6, 0, 4);
     assertEquals(-1, x);
     x = Sorting.binarySearchFromTo(bytes, (byte) 0, 0, 4);
@@ -137,7 +137,7 @@ public class SortingTest extends Assert {
     x = Sorting.binarySearchFromTo(bytes, (byte) 0, 3, 4);
     assertEquals(-4, x);
     
-    char[] chars = new char[] {1, 2, 5, 100, 103};
+    char[] chars = {1, 2, 5, 100, 103};
     x = Sorting.binarySearchFromTo(chars, (char) 0, 0, 4);
     assertEquals(-1, x);
     x = Sorting.binarySearchFromTo(chars, (char) 1, 0, 4);
@@ -147,7 +147,7 @@ public class SortingTest extends Assert {
     x = Sorting.binarySearchFromTo(chars, (char) 0, 3, 4);
     assertEquals(-4, x);
     
-    short[] shorts = new short[] {-5, -2, 0, 100, 103};
+    short[] shorts = {-5, -2, 0, 100, 103};
     x = Sorting.binarySearchFromTo(shorts, (short) -6, 0, 4);
     assertEquals(-1, x);
     x = Sorting.binarySearchFromTo(shorts, (short) 0, 0, 4);
@@ -157,7 +157,7 @@ public class SortingTest extends Assert {
     x = Sorting.binarySearchFromTo(shorts, (short) 0, 3, 4);
     assertEquals(-4, x);
     
-    int[] ints = new int[] {-5, -2, 0, 100, 103};
+    int[] ints = {-5, -2, 0, 100, 103};
     x = Sorting.binarySearchFromTo(ints, (int) -6, 0, 4);
     assertEquals(-1, x);
     x = Sorting.binarySearchFromTo(ints, (int) 0, 0, 4);
@@ -167,7 +167,7 @@ public class SortingTest extends Assert {
     x = Sorting.binarySearchFromTo(ints, (int) 0, 3, 4);
     assertEquals(-4, x);
     
-    long[] longs = new long[] {-5, -2, 0, 100, 103};
+    long[] longs = {-5, -2, 0, 100, 103};
     x = Sorting.binarySearchFromTo(longs, (long) -6, 0, 4);
     assertEquals(-1, x);
     x = Sorting.binarySearchFromTo(longs, (long) 0, 0, 4);
@@ -177,7 +177,7 @@ public class SortingTest extends Assert {
     x = Sorting.binarySearchFromTo(longs, (long) 0, 3, 4);
     assertEquals(-4, x);
     
-    float[] floats = new float[] {-5, -2, 0, 100, 103};
+    float[] floats = {-5, -2, 0, 100, 103};
     x = Sorting.binarySearchFromTo(floats, (float) -6, 0, 4);
     assertEquals(-1, x);
     x = Sorting.binarySearchFromTo(floats, (float) 0, 0, 4);
@@ -187,7 +187,7 @@ public class SortingTest extends Assert {
     x = Sorting.binarySearchFromTo(floats, (float) 0, 3, 4);
     assertEquals(-4, x);
     
-    double[] doubles = new double[] {-5, -2, 0, 100, 103};
+    double[] doubles = {-5, -2, 0, 100, 103};
     x = Sorting.binarySearchFromTo(doubles, (double) -6, 0, 4);
     assertEquals(-1, x);
     x = Sorting.binarySearchFromTo(doubles, (double) 0, 0, 4);
@@ -311,10 +311,10 @@ public class SortingTest extends Assert {
   
   @Test
   public void testQuickSortExternals() {
-    int stuff[] = randomInts();
+    int[] stuff = randomInts();
     final Integer[] bigInts = new Integer[stuff.length];
     for (int x = 0; x < stuff.length; x ++) {
-      bigInts[x] = Integer.valueOf(stuff[x]);
+      bigInts[x] = stuff[x];
     }
     
     Sorting.quickSort(0, stuff.length, new IntComparator() {

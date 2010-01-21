@@ -93,9 +93,9 @@ public class Describe {
       String descPath = cmdLine.getValue(descPathOpt).toString();
       List<String> descriptor = convert(cmdLine.getValues(descriptorOpt));
 
-      log.debug("Data path : " + dataPath);
-      log.debug("Descriptor path : " + descPath);
-      log.debug("Descriptor : " + descriptor);
+      log.debug("Data path : {}", dataPath);
+      log.debug("Descriptor path : {}", descPath);
+      log.debug("Descriptor : {}", descriptor);
 
       runTool(dataPath, descriptor, descPath);
     } catch (OptionException e) {

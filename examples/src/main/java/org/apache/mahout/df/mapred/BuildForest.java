@@ -137,13 +137,13 @@ public class BuildForest extends Configured implements Tool {
         seed = Long.valueOf(cmdLine.getValue(seedOpt).toString());
       }
 
-      log.debug("data : " + dataName);
-      log.debug("dataset : " + datasetName);
-      log.debug("m : " + m);
-      log.debug("seed : " + seed);
-      log.debug("nbtrees : " + nbTrees);
-      log.debug("isPartial : " + isPartial);
-      log.debug("isOob : " + isOob);
+      log.debug("data : {}", dataName);
+      log.debug("dataset : {}", datasetName);
+      log.debug("m : {}", m);
+      log.debug("seed : {}", seed);
+      log.debug("nbtrees : {}", nbTrees);
+      log.debug("isPartial : {}", isPartial);
+      log.debug("isOob : {}", isOob);
 
       dataPath = new Path(dataName);
       datasetPath = new Path(datasetName);
@@ -186,7 +186,7 @@ public class BuildForest extends Configured implements Tool {
     DecisionForest forest = forestBuilder.build(nbTrees, callback);
 
     time = System.currentTimeMillis() - time;
-    log.info("Build Time: " + DFUtils.elapsedTime(time));
+    log.info("Build Time: {}", DFUtils.elapsedTime(time));
 
     if (isOob) {
       Random rng;

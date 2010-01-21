@@ -33,7 +33,6 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.jobcontrol.Job;
-import org.apache.mahout.utils.strings.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,7 +94,7 @@ public class SequenceFileDumper {
         } else {
           writer = new OutputStreamWriter(System.out);
         }
-        writer.append("Input Path: ").append(String.valueOf(path)).append(StringUtil.LINE_SEP);
+        writer.append("Input Path: ").append(String.valueOf(path)).append('\n');
 
         int sub = Integer.MAX_VALUE;
         if (cmdLine.hasOption(substringOpt)) {
@@ -104,7 +103,8 @@ public class SequenceFileDumper {
         boolean countOnly = cmdLine.hasOption(countOpt);
         Writable key = (Writable) reader.getKeyClass().newInstance();
         Writable value = (Writable) reader.getValueClass().newInstance();
-        writer.append("Key class: ").append(String.valueOf(reader.getKeyClass())).append(" Value Class: ").append(String.valueOf(value.getClass())).append(StringUtil.LINE_SEP);
+        writer.append("Key class: ").append(String.valueOf(reader.getKeyClass())).append(" Value Class: ")
+            .append(String.valueOf(value.getClass())).append('\n');
         writer.flush();
         long count = 0;
         if (countOnly == false) {
@@ -112,16 +112,16 @@ public class SequenceFileDumper {
             writer.append("Key: ").append(String.valueOf(key));
             String str = value.toString();
             writer.append(": Value: ").append(str.length() > sub ? str.substring(0, sub) : str);
-            writer.write(StringUtil.LINE_SEP);
+            writer.write('\n');
             writer.flush();
             count++;
           }
-          writer.append("Count: ").append(String.valueOf(count)).append(StringUtil.LINE_SEP);
+          writer.append("Count: ").append(String.valueOf(count)).append('\n');
         } else {
           while (reader.next(key, value)) {
             count++;
           }
-          writer.append("Count: ").append(String.valueOf(count)).append(StringUtil.LINE_SEP);
+          writer.append("Count: ").append(String.valueOf(count)).append('\n');
         }
         writer.flush();
         if (cmdLine.hasOption(outputOpt)) {

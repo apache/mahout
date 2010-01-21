@@ -9,7 +9,6 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.jet.random.sampling;
 
 import org.apache.mahout.math.PersistentObject;
-import org.apache.mahout.math.Timer;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

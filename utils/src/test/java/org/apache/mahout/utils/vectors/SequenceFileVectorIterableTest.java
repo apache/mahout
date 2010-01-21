@@ -30,12 +30,29 @@ import org.apache.mahout.utils.vectors.io.SequenceFileVectorWriter;
 import java.io.File;
 
 public class SequenceFileVectorIterableTest extends MahoutTestCase {
-  public void testIterable() throws Exception {
-    File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-    File tmpLoc = new File(tmpDir, "sfvit");
-    tmpLoc.mkdirs();
-    File tmpFile = File.createTempFile("sfvit", ".dat", tmpLoc);
 
+  private File tmpLoc;
+  private File tmpFile;
+
+  @Override
+  public void setUp() throws Exception {
+    super.setUp();
+    File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+    tmpLoc = new File(tmpDir, "sfvit");
+    tmpLoc.deleteOnExit();
+    tmpLoc.mkdirs();
+    tmpFile = File.createTempFile("sfvit", ".dat", tmpLoc);
+    tmpFile.deleteOnExit();
+  }
+
+  @Override
+  public void tearDown() throws Exception {
+    tmpFile.delete();
+    tmpLoc.delete();
+    super.tearDown();
+  }
+
+  public void testIterable() throws Exception {
     Path path = new Path(tmpFile.getAbsolutePath());
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
@@ -49,10 +66,10 @@ public class SequenceFileVectorIterableTest extends MahoutTestCase {
     SequenceFileVectorIterable sfvi = new SequenceFileVectorIterable(seqReader);
     int count = 0;
     for (Vector vector : sfvi) {
-      System.out.println("Vec: " + vector.asFormatString());
+      //System.out.println("Vec: " + vector.asFormatString());
       count++;
     }
     seqReader.close();
-    assertEquals(count + " does not equal: " + 50, 50, count);
+    assertEquals(50, count);
   }
 }

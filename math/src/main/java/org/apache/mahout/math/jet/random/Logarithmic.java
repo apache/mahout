@@ -85,7 +85,6 @@ public class Logarithmic extends AbstractContinousDistribution {
       k = 1;
       double p = t;
       while (u > p) {
-        //log.info("u="+u+", p="+p);
         u -= p;
         k++;
         p *= a * (k - 1.0) / (double) k;

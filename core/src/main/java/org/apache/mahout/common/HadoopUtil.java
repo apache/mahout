@@ -40,7 +40,7 @@ public final class HadoopUtil {
     Path outPath = new Path(output);
     FileSystem fs = FileSystem.get(outPath.toUri(), conf);
     if (fs.exists(outPath)) {
-      log.warn("Deleting " + outPath);
+      log.warn("Deleting {}", outPath);
       fs.delete(outPath, true);
     }
     fs.mkdirs(outPath);

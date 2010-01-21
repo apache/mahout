@@ -69,9 +69,9 @@ import java.util.Set;
 public class ClusterLabels {
 
   class TermInfoClusterInOut implements Comparable<TermInfoClusterInOut> {
-    public String term;
-    public int inClusterDF;
-    public int outClusterDF;
+    public final String term;
+    public final int inClusterDF;
+    public final int outClusterDF;
     public double logLikelihoodRatio;
 
     public TermInfoClusterInOut(String term, int inClusterDF, int outClusterDF) {
@@ -95,14 +95,13 @@ public class ClusterLabels {
   }
 
   private static final Logger log = LoggerFactory.getLogger(ClusterLabels.class);
-  private static final String LINE_SEP = System.getProperty("line.separator");
   public static final int DEFAULT_MIN_IDS = 50;
   public static final int DEFAULT_MAX_LABELS = 25;
 
-  private String seqFileDir;
-  private String pointsDir;
-  private String indexDir;
-  private String contentField;
+  private final String seqFileDir;
+  private final String pointsDir;
+  private final String indexDir;
+  private final String contentField;
   private String idField;
   private Map<String, List<String>> clusterIdToPoints = null;
   private String output;
@@ -137,14 +136,14 @@ public class ClusterLabels {
       List<String> ids = clusterIdToPoints.get(clusterID);
       List<TermInfoClusterInOut> termInfos = getClusterLabels(clusterID, ids);
       if (termInfos != null) {
-        writer.write(LINE_SEP);
+        writer.write('\n');
         writer.write("Top labels for Cluster " + clusterID + " containing " + ids.size() + " vectors");
-        writer.write(LINE_SEP);
+        writer.write('\n');
         writer.write("Term \t\t LLR \t\t In-ClusterDF \t\t Out-ClusterDF ");
-        writer.write(LINE_SEP);
+        writer.write('\n');
         for (TermInfoClusterInOut termInfo : termInfos) {
           writer.write(termInfo.term + "\t\t" + termInfo.logLikelihoodRatio + "\t\t" + termInfo.inClusterDF + "\t\t" + termInfo.outClusterDF);
-          writer.write(LINE_SEP);
+          writer.write('\n');
         }
       }
     }
@@ -163,18 +162,18 @@ public class ClusterLabels {
    * @throws CorruptIndexException
    * @throws IOException
    */
-  protected List<TermInfoClusterInOut> getClusterLabels(String clusterID, List<String> ids) throws CorruptIndexException, IOException {
+  protected List<TermInfoClusterInOut> getClusterLabels(String clusterID, List<String> ids) throws IOException {
 
     if (ids.size() < minNumIds) {
-      log.info("Skipping small cluster " + clusterID + " with size: " + ids.size());
+      log.info("Skipping small cluster {} with size: {}", clusterID, ids.size());
       return null;
     }
 
-    log.info("Processing Cluster " + clusterID + " with " + ids.size() + " documents");
+    log.info("Processing Cluster {} with {} documents", clusterID, ids.size());
     Directory dir = FSDirectory.open(new File(this.indexDir));
     IndexReader reader = IndexReader.open(dir, false);
 
-    log.info("# of documents in the index " + reader.numDocs());
+    log.info("# of documents in the index {}", reader.numDocs());
 
     Set<String> idSet = new HashSet<String>();
     idSet.addAll(ids);
@@ -266,7 +265,7 @@ public class ClusterLabels {
         bitset.set(i);
       }
     }
-    log.info("Created bitset for in-cluster documents : " + bitset.cardinality());
+    log.info("Created bitset for in-cluster documents : {}", bitset.cardinality());
     return bitset;
   }
 

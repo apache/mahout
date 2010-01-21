@@ -167,8 +167,7 @@ public final class WikipediaDatasetCreatorDriver {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(WikipediaDatasetCreatorDriver.class);
     if (log.isInfoEnabled()) {
-      log.info("Input: " + input + " Out: " + output + " Categories: "
-               + catFile);
+      log.info("Input: {} Out: {} Categories: {}", new Object[] {input, output, catFile});
     }
     conf.set("key.value.separator.in.input.line", " ");
     conf.set("xmlinput.start", "<text xml:space=\"preserve\">");

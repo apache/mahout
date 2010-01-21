@@ -34,7 +34,7 @@ import org.apache.mahout.math.VectorWritable;
 public class PartialVectorMerger extends MapReduceBase implements
     Reducer<Text,VectorWritable,Text, VectorWritable> {
 
-  private VectorWritable vectorWritable = new VectorWritable();
+  private final VectorWritable vectorWritable = new VectorWritable();
 
   @Override
   public void reduce(Text key,

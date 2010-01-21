@@ -120,8 +120,7 @@ public class ObjectArrayList<T> extends AbstractObjectList<T> {
   @Override
   public Object clone() {
     // overridden for performance only.
-    ObjectArrayList<T> clone = new ObjectArrayList<T>((T[]) elements.clone());
-    return clone;
+    return new ObjectArrayList<T>((T[]) elements.clone());
   }
 
   /**
@@ -193,7 +192,7 @@ public class ObjectArrayList<T> extends AbstractObjectList<T> {
     if (otherObj == null) {
       return false;
     }
-    ObjectArrayList other = (ObjectArrayList) otherObj;
+    ObjectArrayList<?> other = (ObjectArrayList<?>) otherObj;
     if (size() != other.size()) {
       return false;
     }

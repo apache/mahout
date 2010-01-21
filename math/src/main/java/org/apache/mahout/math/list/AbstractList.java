@@ -44,7 +44,7 @@ import org.apache.mahout.math.PersistentObject;
 
  @author wolfgang.hoschek@cern.ch
  @version 1.0, 09/24/99
- @see     ArrayList
+ @see     java.util.ArrayList
  @see      java.util.Vector
  @see      java.util.Arrays
  */
@@ -53,7 +53,7 @@ public abstract class AbstractList extends PersistentObject {
   public abstract int size();
   
   public boolean isEmpty() {
-    return 0 == size();
+    return size() == 0;
   }
 
   /**

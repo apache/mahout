@@ -45,11 +45,11 @@ import org.apache.mahout.math.VectorWritable;
 public class PartialVectorGenerator extends MapReduceBase implements
     Reducer<Text,Text,Text,VectorWritable> {
   private Analyzer analyzer;
-  private Map<String,int[]> dictionary = new HashMap<String,int[]>();
+  private final Map<String,int[]> dictionary = new HashMap<String,int[]>();
   private FileSystem fs; // local filesystem
   private URI[] localFiles; // local filenames from the distributed cache
   
-  private VectorWritable vectorWritable = new VectorWritable();
+  private final VectorWritable vectorWritable = new VectorWritable();
   
   public void reduce(Text key,
                      Iterator<Text> values,

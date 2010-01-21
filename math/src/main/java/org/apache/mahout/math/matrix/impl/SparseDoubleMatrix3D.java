@@ -19,7 +19,7 @@ public class SparseDoubleMatrix3D extends DoubleMatrix3D {
   /*
    * The elements of the matrix.
    */
-  protected AbstractIntDoubleMap elements;
+  protected final AbstractIntDoubleMap elements;
 
   /**
    * Constructs a matrix with a copy of the given values. <tt>values</tt> is required to have the form

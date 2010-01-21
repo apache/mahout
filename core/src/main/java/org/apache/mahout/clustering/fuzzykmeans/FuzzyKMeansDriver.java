@@ -217,7 +217,7 @@ public class FuzzyKMeansDriver {
 
     // iterate until the clusters converge
     while (!converged && iteration < maxIterations) {
-      log.info("Iteration {" + iteration + '}');
+      log.info("Iteration {}", iteration);
 
       // point the output to a new directory per iteration
       String clustersOut = output + File.separator + "clusters-" + iteration;

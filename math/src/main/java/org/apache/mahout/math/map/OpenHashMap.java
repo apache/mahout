@@ -111,7 +111,7 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
   @Override
   @SuppressWarnings("unchecked")
   public Object clone() {
-    OpenHashMap copy = (OpenHashMap) super.clone();
+    OpenHashMap<K,V> copy = (OpenHashMap<K,V>) super.clone();
     copy.table = copy.table.clone();
     copy.values = copy.values.clone();
     copy.state = copy.state.clone();
@@ -362,20 +362,15 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
   @Override
   public V put(K key, V value) {
     int i = indexOfInsertion(key);
-    V previous = null;
     if (i < 0) { //already contained
       i = -i - 1;
-      previous = (V) this.values[i];
+      V previous = (V) this.values[i];
       this.values[i] = value;
       return previous;
     }
 
     if (this.distinct > this.highWaterMark) {
       int newCapacity = chooseGrowCapacity(this.distinct + 1, this.minLoadFactor, this.maxLoadFactor);
-      /*
-      log.info("grow rehashing ");
-      log.info("at distinct="+distinct+", capacity="+table.length+" to newCapacity="+newCapacity+" ...");
-      */
       rehash(newCapacity);
       return put(key, value);
     }
@@ -442,13 +437,12 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
   @SuppressWarnings("unchecked")
   @Override
   public V remove(Object key) {
-    V removed = null;
     int i = indexOfKey((K)key);
     if (i < 0) {
       return null;
-    } else {// key not contained
-      removed = (V)values[i];
     }
+    // key not contained
+    V removed = (V) values[i];
 
     this.state[i] = REMOVED;
     //this.values[i]=0; // delta
@@ -456,12 +450,6 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
 
     if (this.distinct < this.lowWaterMark) {
       int newCapacity = chooseShrinkCapacity(this.distinct, this.minLoadFactor, this.maxLoadFactor);
-      /*
-      if (table.length != newCapacity) {
-        log.info("shrink rehashing ");
-        log.info("at distinct="+distinct+", capacity="+table.length+" to newCapacity="+newCapacity+" ...");
-      }
-      */
       rehash(newCapacity);
     }
 
@@ -539,8 +527,8 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
   }
 
   private class MapEntry implements Map.Entry<K,V> {
-    private K key;
-    private V value;
+    private final K key;
+    private final V value;
     
     MapEntry(K key, V value) {
       this.key = key;
@@ -569,7 +557,7 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
    */
   @Override
   public Set<java.util.Map.Entry<K,V>> entrySet() {
-    final OpenHashSet<Map.Entry<K,V>> entries = new OpenHashSet<Map.Entry<K,V>>();
+    final Set<Entry<K, V>> entries = new OpenHashSet<Map.Entry<K,V>>();
     forEachPair(new ObjectObjectProcedure<K,V>() {
 
       @Override
@@ -586,7 +574,7 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
    */
   @Override
   public Set<K> keySet() {
-    final OpenHashSet<K> keys = new OpenHashSet<K>();
+    final Set<K> keys = new OpenHashSet<K>();
     forEachKey(new ObjectProcedure<K>() {
 
       @Override
@@ -627,7 +615,7 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
     if (! (obj instanceof OpenHashMap)) {
       return false;
     }
-    final OpenHashMap o = (OpenHashMap) obj;
+    final OpenHashMap<K,V> o = (OpenHashMap<K,V>) obj;
     if (o.size() != size()) {
       return false;
     }
@@ -650,19 +638,19 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
   @Override
   public String toString() {
     final StringBuilder sb = new StringBuilder();
-    sb.append("{");
+    sb.append('{');
     forEachPair(new ObjectObjectProcedure<K,V>() {
 
       @Override
       public boolean apply(K key, V value) {
-        sb.append("[");
+        sb.append('[');
         sb.append(key);
         sb.append(" -> ");
         sb.append(value);
         sb.append("] ");
         return true;
       }});
-    sb.append("}");
+    sb.append('}');
     return sb.toString();
   }
 }

@@ -164,8 +164,7 @@ public class IntFunctions {
     }
   };
 
-  /** Makes this class non instantiable, but still let's others inherit from it. */
-  protected IntFunctions() {
+  private IntFunctions() {
   }
 
   /** Constructs a function that returns <tt>a & b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */

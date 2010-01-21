@@ -143,8 +143,7 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
     } catch (InstantiationException e) {
       throw new IllegalStateException(e);
     }
-    log.info("Configure: Input Categories size: " + inputCategories.size()
-             + " Exact Match: " + exactMatchOnly + " Analyzer: "
-             + analyzer.getClass().getName());
+    log.info("Configure: Input Categories size: {} Exact Match: {} Analyzer: {}",
+             new Object[] {inputCategories.size(), exactMatchOnly, analyzer.getClass().getName()});
   }
 }

@@ -144,6 +144,7 @@ public class DirichletDriver {
    * @throws SecurityException 
    * @deprecated since it presumes 2-d, dense vector model prototypes
    */
+  @Deprecated
   public static void runJob(String input, String output, String modelFactory, int numClusters, int maxIterations, double alpha_0,
       int numReducers) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException,
       SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {

@@ -20,10 +20,6 @@ public class Hyperbolic extends AbstractContinousDistribution {
   // cached values shared for generateHyperbolic(...)
   private double a_setup = 0.0;
   private double b_setup = -1.0;
-  private double x;
-  private double u;
-  private double v;
-  private double e;
   private double hr;
   private double hl;
   private double s;
@@ -69,22 +65,20 @@ public class Hyperbolic extends AbstractContinousDistribution {
  *                unsigned long integer *seed.                    *
  *                                                                *
  ******************************************************************/
-    double a = alpha;
-    double b = beta;
 
-    if ((a_setup != a) || (b_setup != b)) { // SET-UP
+    if ((a_setup != alpha) || (b_setup != beta)) { // SET-UP
       //double pl;
-      double amb = a * a - b * b;
+      double amb = alpha * alpha - beta * beta;
       samb = Math.sqrt(amb);                                  // -log(f(mode))
-      double mode = b / samb;
-      double help_1 = a * Math.sqrt(2.0 * samb + 1.0);
-      double help_2 = b * (samb + 1.0);
+      double mode = beta / samb;
+      double help_1 = alpha * Math.sqrt(2.0 * samb + 1.0);
+      double help_2 = beta * (samb + 1.0);
       double mpa = (help_2 + help_1) / amb;
       double mmb = (help_2 - help_1) / amb;
       double a_ = mpa - mode;
       double b_ = -mmb + mode;
-      hr = -1.0 / (-a * mpa / Math.sqrt(1.0 + mpa * mpa) + b);
-      hl = 1.0 / (-a * mmb / Math.sqrt(1.0 + mmb * mmb) + b);
+      hr = -1.0 / (-alpha * mpa / Math.sqrt(1.0 + mpa * mpa) + beta);
+      hl = 1.0 / (-alpha * mmb / Math.sqrt(1.0 + mmb * mmb) + beta);
       double a_1 = a_ - hr;
       double b_1 = b_ - hl;
       mmb_1 = mode - b_1;                                     // lower border
@@ -95,33 +89,35 @@ public class Hyperbolic extends AbstractContinousDistribution {
       pr = hr / s;
       pmr = pm + pr;
 
-      a_setup = a;
-      b_setup = b;
+      a_setup = alpha;
+      b_setup = beta;
     }
 
     // GENERATOR
+    double x;
     while (true) {
-      u = randomGenerator.raw();
-      v = randomGenerator.raw();
+      double u = randomGenerator.raw();
+      double v = randomGenerator.raw();
       if (u <= pm) { // Rejection with a uniform majorizing function
         // over the body of the distribution
         x = mmb_1 + u * s;
-        if (Math.log(v) <= (-a * Math.sqrt(1.0 + x * x) + b * x + samb)) {
+        if (Math.log(v) <= (-alpha * Math.sqrt(1.0 + x * x) + beta * x + samb)) {
           break;
         }
       } else {
+        double e;
         if (u <= pmr) {  // Rejection with an exponential envelope on the
           // right side of the mode
           e = -Math.log((u - pm) / pr);
           x = mpa_1 + hr * e;
-          if ((Math.log(v) - e) <= (-a * Math.sqrt(1.0 + x * x) + b * x + samb)) {
+          if ((Math.log(v) - e) <= (-alpha * Math.sqrt(1.0 + x * x) + beta * x + samb)) {
             break;
           }
         } else {           // Rejection with an exponential envelope on the
           // left side of the mode
           e = Math.log((u - pmr) / (1.0 - pmr));
           x = mmb_1 + hl * e;
-          if ((Math.log(v) + e) <= (-a * Math.sqrt(1.0 + x * x) + b * x + samb)) {
+          if ((Math.log(v) + e) <= (-alpha * Math.sqrt(1.0 + x * x) + beta * x + samb)) {
             break;
           }
         }

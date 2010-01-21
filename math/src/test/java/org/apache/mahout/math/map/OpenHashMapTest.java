@@ -135,8 +135,8 @@ public class OpenHashMapTest extends Assert {
   }
   
   private static class Pair implements Comparable<Pair> {
-    String k;
-    String v;
+    final String k;
+    final String v;
     
     Pair(String k, String v) {
       this.k = k;

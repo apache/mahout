@@ -202,9 +202,9 @@ public class RandomAccessSparseVector extends AbstractVector {
     private int offset = 0;
     private final Element element = new Element(0);
 
-    private IntArrayList intArrList =  values.keys();
+    private final IntArrayList intArrList =  values.keys();
     
-    public NonZeroIterator(boolean sorted) {
+    private NonZeroIterator(boolean sorted) {
       if (sorted) {
         intArrList.sort();
       }      
@@ -259,10 +259,10 @@ public class RandomAccessSparseVector extends AbstractVector {
   }
 
   private class DistanceSquared implements IntDoubleProcedure {
-    Vector v;
+    final Vector v;
     public double result = 0.0;
 
-    public DistanceSquared(Vector v) {
+    DistanceSquared(Vector v) {
       this.v = v;
     }
 
@@ -281,14 +281,13 @@ public class RandomAccessSparseVector extends AbstractVector {
 
     DistanceSquared distanceSquared = new DistanceSquared(v);
     values.forEachPair(distanceSquared);
-    double result = distanceSquared.result;    
-    return result;
+    return distanceSquared.result;
   }
 
   private class AddToVector implements IntDoubleProcedure {
-    Vector v;
+    final Vector v;
 
-    public AddToVector(Vector v) {
+    private AddToVector(Vector v) {
       this.v = v;
     }
 
@@ -304,8 +303,7 @@ public class RandomAccessSparseVector extends AbstractVector {
     if (v.size() != size()) {
       throw new CardinalityException();
     }
-    AddToVector addToVector = new AddToVector(v);
-    values.forEachPair(addToVector);
+    values.forEachPair(new AddToVector(v));
   }
 
 }

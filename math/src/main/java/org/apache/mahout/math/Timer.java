@@ -137,7 +137,6 @@ public class Timer extends PersistentObject {
     }
     t.stop();
     t.display();
-    log.info("I finished the test using " + t);
 
 
     //do something we do not want to benchmark

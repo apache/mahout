@@ -290,7 +290,7 @@ public class Formatter extends AbstractFormatter {
   }
 
   /** Converts a given cell to a String; no alignment considered. */
-  protected String form(DoubleMatrix1D matrix, int index, Former formatter) {
+  protected static String form(DoubleMatrix1D matrix, int index, Former formatter) {
     return formatter.form(matrix.get(index));
   }
 
@@ -316,7 +316,7 @@ public class Formatter extends AbstractFormatter {
   }
 
   /** Returns the index of the decimal point. */
-  protected int indexOfDecimalPoint(String s) {
+  protected static int indexOfDecimalPoint(String s) {
     int i = s.lastIndexOf('.');
     if (i < 0) {
       i = s.lastIndexOf('e');

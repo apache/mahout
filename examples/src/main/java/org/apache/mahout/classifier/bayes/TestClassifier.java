@@ -261,7 +261,7 @@ public final class TestClassifier {
       
       for (File file : subdirs) {
         log.info("--------------");
-        log.info("Testing: " + file);
+        log.info("Testing: {}", file);
         String correctLabel = file.getName().split(".txt")[0];
         TimingStatistics operationStats = new TimingStatistics();
         
@@ -285,11 +285,14 @@ public final class TestClassifier {
               classifiedLabel);
             if (verbose) {
               // We have one document per line
-              log.info("Line Number: " + lineNum + " Line(30): "
-                       + (line.length() > 30 ? line.substring(0, 30) : line)
-                       + " Expected Label: " + correctLabel
-                       + " Classified Label: " + classifiedLabel.getLabel()
-                       + " Correct: " + correct);
+              log.info("Line Number: {} Line(30): {} Expected Label: {} Classified Label: {} Correct: {}",
+                       new Object[] {
+                           lineNum,
+                           (line.length() > 30 ? line.substring(0, 30) : line),
+                           correctLabel,
+                           classifiedLabel.getLabel(),
+                           correct,
+                       });
             }
             // log.info("{} {}", correctLabel, classifiedLabel);
             

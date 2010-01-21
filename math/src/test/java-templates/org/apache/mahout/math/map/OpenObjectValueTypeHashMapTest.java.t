@@ -63,12 +63,11 @@ public class OpenObject${valueTypeCap}HashMapTest extends Assert {
       if (obj == null) return false;
       if (getClass() != obj.getClass()) return false;
       NotComparableKey other = (NotComparableKey) obj;
-      if (x != other.x) return false;
-      return true;
+      return x == other.x;
     }
   }
   
-  private NotComparableKey[] ncKeys = {
+  private final NotComparableKey[] ncKeys = {
     new NotComparableKey(101),
     new NotComparableKey(99),
     new NotComparableKey(2),

@@ -18,6 +18,7 @@
 package org.apache.mahout.math;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /** Implements vector that only stores non-zero doubles */
 public class SequentialAccessSparseVector extends AbstractVector {
@@ -51,8 +52,8 @@ public class SequentialAccessSparseVector extends AbstractVector {
 
   public SequentialAccessSparseVector(Vector other) {
     this(other.getName(), other.size(), other.getNumNondefaultElements());
-    Iterator<Vector.Element> it = other.iterateNonZero();
-    Vector.Element e;
+    Iterator<Element> it = other.iterateNonZero();
+    Element e;
     while(it.hasNext() && (e = it.next()) != null) {
       set(e.index(), e.get());
     }
@@ -91,16 +92,16 @@ public class SequentialAccessSparseVector extends AbstractVector {
     return values.getNumMappings();
   }
 
-  private class DistanceSquarer implements Iterator<Element> {
-    Iterator<Element> it1;
-    Iterator<Element> it2;
+  private static class DistanceSquarer implements Iterator<Element> {
+    final Iterator<Element> it1;
+    final Iterator<Element> it2;
     Element e1 = null;
     Element e2 = null;
     boolean firstIteration = true;
     Iterator<Element> notExhausted = null;
     double v = 0;
 
-    public DistanceSquarer(Iterator<Element> it1, Iterator<Element> it2) {
+    DistanceSquarer(Iterator<Element> it1, Iterator<Element> it2) {
       this.it1 = it1;
       this.it2 = it2;
     }
@@ -207,12 +208,12 @@ public class SequentialAccessSparseVector extends AbstractVector {
   }
 
   @Override
-  public java.util.Iterator<Vector.Element> iterateNonZero() {
+  public java.util.Iterator<Element> iterateNonZero() {
     return new IntDoublePairIterator(values);
   }
 
   @Override
-  public Iterator<Vector.Element> iterateAll() {
+  public Iterator<Element> iterateAll() {
     return new IntDoublePairIterator(values, size());
   }
 
@@ -256,7 +257,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
 
   }
 
-  private static final class IntDoublePairIterator implements java.util.Iterator<Vector.Element> {
+  private static final class IntDoublePairIterator implements java.util.Iterator<Element> {
     private int offset = 0;
     private final AbstractElement element;
     private final int maxOffset;
@@ -275,7 +276,10 @@ public class SequentialAccessSparseVector extends AbstractVector {
     }
 
     @Override
-    public Vector.Element next() {
+    public Element next() {
+      if (offset >= maxOffset) {
+        throw new NoSuchElementException();
+      }
       element.offset = offset++;
       return element;
     }
@@ -287,18 +291,18 @@ public class SequentialAccessSparseVector extends AbstractVector {
   }
 
   @Override
-  public Vector.Element getElement(int index) {
+  public Element getElement(int index) {
     return new DenseElement(index, values);
   }
 
 
-  private static abstract class AbstractElement implements Vector.Element {
+  private abstract static class AbstractElement implements Element {
     int offset;
     final OrderedIntDoubleMapping mapping;
     final int[] indices;
     final double[] values;
 
-    public AbstractElement(int ind, OrderedIntDoubleMapping m) {
+    AbstractElement(int ind, OrderedIntDoubleMapping m) {
       offset = ind;
       mapping = m;
       values = m.getValues();
@@ -309,13 +313,13 @@ public class SequentialAccessSparseVector extends AbstractVector {
   private static final class DenseElement extends AbstractElement {
     int index;
 
-    public DenseElement(int ind, OrderedIntDoubleMapping mapping) {
+    DenseElement(int ind, OrderedIntDoubleMapping mapping) {
       super(ind, mapping);
       index = ind;
     }
 
     @Override
-    public final double get() {
+    public double get() {
       if(index >= indices.length) return 0.0;
       int cur = indices[index];
       while(cur < offset && index < indices.length - 1) cur = indices[++index];
@@ -324,34 +328,34 @@ public class SequentialAccessSparseVector extends AbstractVector {
     }
 
     @Override
-    public final int index() {
+    public int index() {
       return offset;
     }
 
     @Override
-    public final void set(double value) {
+    public void set(double value) {
       if(value != 0.0) mapping.set(indices[offset], value);
     }
   }
 
   private static final class SparseElement extends AbstractElement {
 
-    public SparseElement(int ind, OrderedIntDoubleMapping mapping) {
+    SparseElement(int ind, OrderedIntDoubleMapping mapping) {
       super(ind, mapping);
     }
 
     @Override
-    public final double get() {
+    public double get() {
       return values[offset];
     }
 
     @Override
-    public final int index() {
+    public int index() {
       return indices[offset];
     }
 
     @Override
-    public final void set(double value) {
+    public void set(double value) {
       values[offset] = value;
     }
   }

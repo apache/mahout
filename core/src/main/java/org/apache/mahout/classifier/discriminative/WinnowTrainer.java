@@ -21,23 +21,26 @@ import java.util.Iterator;
 import org.apache.mahout.math.CardinalityException;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class implements training according to the winnow update algorithm.
  */
 public class WinnowTrainer extends LinearTrainer {
 
+  private static final Logger log = LoggerFactory.getLogger(WinnowTrainer.class);
+
   /** Promotion step to multiply weights with on update. */
   private final double promotionStep;
 
-  public WinnowTrainer(final int dimension, final double promotionStep,
-      final double threshold, final double init, final double initBias) {
+  public WinnowTrainer(int dimension, double promotionStep,
+      double threshold, double init, double initBias) {
     super(dimension, threshold, init, initBias);
     this.promotionStep = promotionStep;
   }
 
-  /** {@inheritDoc} */
-  public WinnowTrainer(final int dimension, final double promotionStep)
+  public WinnowTrainer(int dimension, double promotionStep)
       throws CardinalityException {
     this(dimension, promotionStep, 0.5, 1, 0);
   }
@@ -48,7 +51,7 @@ public class WinnowTrainer extends LinearTrainer {
    * @param dimension
    *          number of features.
    * */
-  public WinnowTrainer(final int dimension) {
+  public WinnowTrainer(int dimension) {
     this(dimension, 2);
   }
 
@@ -64,12 +67,11 @@ public class WinnowTrainer extends LinearTrainer {
    * example are halfed.
    * */
   @Override
-  protected void update(final double label, final Vector dataPoint,
-      LinearModel model) {
+  protected void update(double label, Vector dataPoint, LinearModel model) {
     if (label > 0) {
       // case one
       Vector updateVector = dataPoint.times(1 / this.promotionStep);
-      System.out.println("Winnow update positive: " + updateVector);
+      log.info("Winnow update positive: {}", updateVector);
       Iterator<Element> iter = updateVector.iterateNonZero();
       while (iter.hasNext()) {
         Element element = iter.next();
@@ -78,13 +80,13 @@ public class WinnowTrainer extends LinearTrainer {
     } else {
       // case two
       Vector updateVector = dataPoint.times(1 / this.promotionStep);
-      System.out.println("Winnow update negative: " + updateVector);
+      log.info("Winnow update negative: {}", updateVector);
       Iterator<Element> iter = updateVector.iterateNonZero();
       while (iter.hasNext()) {
         Element element = iter.next();
         model.timesDelta(element.index(), element.get());
       }
     }
-    System.out.println(model);
+    log.info(model.toString());
   }
 }

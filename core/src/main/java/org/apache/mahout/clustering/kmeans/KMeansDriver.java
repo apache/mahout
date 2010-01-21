@@ -182,9 +182,9 @@ public class KMeansDriver {
     // iterate until the clusters converge
     String delta = Double.toString(convergenceDelta);
     if (log.isInfoEnabled()) {
-      log.info("Input: " + input + " Clusters In: " + clustersIn + " Out: " + output + " Distance: " + measureClass);
-      log.info("convergence: " + convergenceDelta + " max Iterations: " + maxIterations + " num Reduce Tasks: "
-          + numReduceTasks + " Input Vectors: " + VectorWritable.class.getName());
+      log.info("Input: {} Clusters In: {} Out: {} Distance: {}", new Object[] {input, clustersIn, output, measureClass});
+      log.info("convergence: {} max Iterations: {} num Reduce Tasks: {} Input Vectors: {}",
+               new Object[] {convergenceDelta, maxIterations, numReduceTasks, VectorWritable.class.getName()});
     }
     boolean converged = false;
     int iteration = 0;
@@ -259,8 +259,9 @@ public class KMeansDriver {
       String convergenceDelta) {
     if (log.isInfoEnabled()) {
       log.info("Running Clustering");
-      log.info("Input: " + input + " Clusters In: " + clustersIn + " Out: " + output + " Distance: " + measureClass);
-      log.info("convergence: " + convergenceDelta + " Input Vectors: " + VectorWritable.class.getName());
+      log.info("Input: {} Clusters In: {} Out: {} Distance: {}",
+               new Object[] {input, clustersIn, output, measureClass});
+      log.info("convergence: {} Input Vectors: {}", convergenceDelta, VectorWritable.class.getName());
     }
     JobConf conf = new JobConf(KMeansDriver.class);
     conf.setInputFormat(SequenceFileInputFormat.class);

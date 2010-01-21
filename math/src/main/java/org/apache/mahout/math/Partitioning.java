@@ -697,7 +697,7 @@ public class Partitioning {
     }
     int splitter = splitters[medianIndex];
 
-    //log.info("medianIndex="+medianIndex);
+
     // Partition the list according to the splitter, i.e.
     // Establish invariant: list[i] < splitter <= list[j] for i=from..medianIndex and j=medianIndex+1 .. to
     // Could simply call:
@@ -718,7 +718,7 @@ public class Partitioning {
     */
 
 
-    //log.info("splitIndex="+splitIndex);
+
     splitIndexes[medianIndex] = splitIndex;
 
     //if (splitFrom == splitTo) return; // done
@@ -742,13 +742,11 @@ public class Partitioning {
 
     // recursively partition left half
     if (splitFrom <= medianIndex - 1) {
-      //log.info("1.recursive: from="+from+", to="+splitIndex+", splitFrom="+splitFrom+", splitTo="+(medianIndex-1));
       partition(list, from, splitIndex, splitters, splitFrom, medianIndex - 1, splitIndexes);
     }
 
     // recursively partition right half
     if (medianIndex + 1 <= splitTo) {
-      //log.info("2.recursive: from="+(splitIndex+1)+", to="+to+", splitFrom="+(medianIndex+1)+", splitTo="+splitTo);
       partition(list, splitIndex + 1, to, splitters, medianIndex + 1, splitTo, splitIndexes);
     }
     //log.info("BACK TRACKING\n\n");
@@ -782,31 +780,6 @@ public class Partitioning {
   public static int partition(int[] list, int from, int to, int splitter) {
     steps += to - from + 1;
 
-    /*
-    log.info();
-    if (from<=to) {
-      log.info("SORT WORKING: from="+from+", to="+to+", splitter="+splitter);
-    }
-    else {
-      log.info("SORT WORKING: NOTHING TO DO.");
-    }
-    */
-
-
-    // returns index of last element < splitter
-
-
-    /*
-    for (int i=from-1; ++i<=to; ) {
-      if (list[i] < splitter) {
-        int element = list[i];
-        list[i] = list[from];
-        list[from++] = element;
-      }
-    }
-    */
-
-
     for (int i = from - 1; ++i <= to;) {
       int element = list[i];
       if (element < splitter) {
@@ -816,102 +789,8 @@ public class Partitioning {
         //swappedElements++;
       }
     }
-    //if (from<=to) log.info("Swapped "+(head-from)+" elements");
-
-
-    /*
-    //JAL:
-    int first = from;
-    int last = to+1;
-    --first;
-    while (true) {
-      while (++first < last && list[first] < splitter);
-      while (first < --last && !(list[last] < splitter));
-      if (first >= last) return first-1;
-      int tmp = list[first];
-      list[first] = list[last];
-      list[last] = tmp;
-    }
-    */
-
-
-    /*
-    log.info("splitter="+splitter);
-    log.info("before="+new IntArrayList(list));
-    int head = from;
-    int trail = to;
-    int element;
-    while (head<=trail) {
-      head--;
-      while (++head < trail && list[head] < splitter);
-
-      trail++;
-      while (--trail > head && list[trail] >= splitter);
-
-      if (head != trail) {
-        element = list[head];
-        list[head] = list[trail];
-        list[trail] = element;
-      }
-      head++;
-      trail--;
-      log.info("after ="+new IntArrayList(list)+", head="+head);
-    }
-    */
-
-
-    /*
-    //log.info("splitter="+splitter);
-    //log.info("before="+new IntArrayList(list));
-    to++;
-    //int head = from;
-    int element;
-    //int oldHead;
-    while (--to >= from) {
-      element = list[to];
-      if (element < splitter) {
-        from--;
-        while (++from < to && list[from] < splitter);
-        //if (head != to) {
-          list[to] = list[from];
-          list[from++] = element;
-          //oldHead = list[head];
-          //list[head] = element;
-          //list[i] = oldHead;
-
-          //head++;
-        //}
-        //head++;
-      }
-      //log.info("after ="+new IntArrayList(list)+", head="+head);
-    }
-    */
-
-    /*
-    int i=from-1;
-    int head = from;
-    int trail = to;
-    while (++i <= trail) {
-      int element = list[i];
-      if (element < splitter) {
-        if (head == i) head++;
-        else {
-          // swap list[i] with list[from]
-          int oldHead = list[head];
-          int oldTrail = list[trail];
-          list[head++] = element;
-          list[i--] = oldTrail;
-          list[trail--] = oldHead;
-        }
-      }
-      //log.info(new IntArrayList(list));
-
-    }
-    */
-
 
     return from - 1;
-    //return head-1;
   }
 
   /**

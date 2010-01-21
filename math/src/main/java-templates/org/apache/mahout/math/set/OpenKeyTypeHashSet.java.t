@@ -281,16 +281,12 @@ public class Open${keyTypeCap}HashSet extends Abstract${keyTypeCap}Set {
   public boolean add(${keyType} key) {
     int i = indexOfInsertion(key);
     if (i < 0) { //already contained
-      i = -i - 1;
+      //i = -i - 1;
       return false;
     }
 
     if (this.distinct > this.highWaterMark) {
       int newCapacity = chooseGrowCapacity(this.distinct + 1, this.minLoadFactor, this.maxLoadFactor);
-      /*
-      log.info("grow rehashing ");
-      log.info("at distinct="+distinct+", capacity="+table.length+" to newCapacity="+newCapacity+" ...");
-      */
       rehash(newCapacity);
       return add(key);
     }
@@ -360,12 +356,6 @@ public class Open${keyTypeCap}HashSet extends Abstract${keyTypeCap}Set {
 
     if (this.distinct < this.lowWaterMark) {
       int newCapacity = chooseShrinkCapacity(this.distinct, this.minLoadFactor, this.maxLoadFactor);
-      /*
-      if (table.length != newCapacity) {
-        log.info("shrink rehashing ");
-        log.info("at distinct="+distinct+", capacity="+table.length+" to newCapacity="+newCapacity+" ...");
-      }
-      */
       rehash(newCapacity);
     }
 

@@ -35,7 +35,7 @@ import java.util.Date;
  Resizable list holding <code>${valueType}</code> elements; implemented with arrays.
 */
 
-public class ${valueTypeCap}ArrayList extends Abstract${valueTypeCap}List {
+public class ${valueTypeCap}ArrayList extends Abstract${valueTypeCap}List implements Cloneable {
 
   /**
    * The array buffer into which the elements of the list are stored. The capacity of the list is the length of this

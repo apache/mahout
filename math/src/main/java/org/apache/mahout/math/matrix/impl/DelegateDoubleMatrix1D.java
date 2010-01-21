@@ -22,11 +22,11 @@ class DelegateDoubleMatrix1D extends WrapperDoubleMatrix1D {
   /*
    * The elements of the matrix.
    */
-  private DoubleMatrix2D content;
+  private final DoubleMatrix2D content;
   /*
   * The row this view is bound to.
   */
-  private int row;
+  private final int row;
 
   DelegateDoubleMatrix1D(DoubleMatrix2D newContent, int row) {
     super(null);

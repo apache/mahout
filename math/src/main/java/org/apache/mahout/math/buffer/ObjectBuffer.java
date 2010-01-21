@@ -19,7 +19,7 @@ public class ObjectBuffer extends PersistentObject implements ObjectBufferConsum
   private final Object[] elements;
 
   // vars cached for speed
-  private final ObjectArrayList list;
+  private final ObjectArrayList<Object> list;
   private final int capacity;
   private int size;
 
@@ -34,7 +34,7 @@ public class ObjectBuffer extends PersistentObject implements ObjectBufferConsum
     this.target = target;
     this.capacity = capacity;
     this.elements = new Object[capacity];
-    this.list = new ObjectArrayList(elements);
+    this.list = new ObjectArrayList<Object>(elements);
     this.size = 0;
   }
 

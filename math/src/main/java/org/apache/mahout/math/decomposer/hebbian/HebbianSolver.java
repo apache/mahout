@@ -41,18 +41,16 @@ import org.slf4j.LoggerFactory;
  */
 public class HebbianSolver {
 
-  /**
-   * Logger for this class.
-   */
   private static final Logger log = LoggerFactory.getLogger(HebbianSolver.class);
 
-  protected final EigenUpdater updater;
-  protected final SingularVectorVerifier verifier;
-  protected final double convergenceTarget;
-  protected final int maxPassesPerEigen;
+  private final EigenUpdater updater;
+  private final SingularVectorVerifier verifier;
+  private final double convergenceTarget;
+  private final int maxPassesPerEigen;
+  private final Random rng = new Random();
 
-  protected int numPasses = 0;
-  protected boolean debug = false;
+  private int numPasses = 0;
+  private final boolean debug = false;
 
   /**
    * Creates a new HebbianSolver
@@ -190,8 +188,10 @@ public class HebbianSolver {
             previousEigen = currentEigen.clone();
           } else {
             double dot = currentEigen.dot(previousEigen);
-            if (dot > 0) dot /= (currentEigen.norm(2) * previousEigen.norm(2));
-           // log.info("Current pass * previous pass = " + dot);
+            if (dot > 0) {
+              dot /= (currentEigen.norm(2) * previousEigen.norm(2));
+            }
+           // log.info("Current pass * previous pass = {}", dot);
           }
         }
       }
@@ -203,7 +203,7 @@ public class HebbianSolver {
       eigens.assignRow(i, currentEigen);
       eigenValues.add(eigenValue);
       state.setCurrentEigenValues(eigenValues);
-      log.info("Found eigenvector " + i + ", eigenvalue: " + eigenValue);
+      log.info("Found eigenvector {}, eigenvalue: {}", i, eigenValue);
 
       /**
        *  TODO: Persist intermediate output!
@@ -229,9 +229,9 @@ public class HebbianSolver {
    */
   private int getRandomStartingIndex(Matrix corpus, Matrix eigens) {
     int index;
-    Vector v = null;
+    Vector v;
     do {
-      double r = new Random(System.nanoTime()).nextDouble();
+      double r = rng.nextDouble();
       index = (int) (r * corpus.numRows());
       v = corpus.getRow(index);
     }
@@ -256,7 +256,7 @@ public class HebbianSolver {
       return true;
     }
     Matrix previousEigens = state.getCurrentEigens();
-    log.info("Have made " + numPasses + " passes through the corpus, checking convergence...");
+    log.info("Have made {} passes through the corpus, checking convergence...", numPasses);
     /*
      * Step 1: orthogonalize currentPseudoEigen by subtracting off eigen(i) * helper.get(i)
      * Step 2: zero-out the helper vector because it has already helped.
@@ -269,7 +269,7 @@ public class HebbianSolver {
     if (debug && currentPseudoEigen.norm(2) > 0) {
       for (int i = 0; i < state.getNumEigensProcessed(); i++) {
         Vector previousEigen = previousEigens.getRow(i);
-        log.info("dot with previous: " + (previousEigen.dot(currentPseudoEigen)) / currentPseudoEigen.norm(2));
+        log.info("dot with previous: {}", (previousEigen.dot(currentPseudoEigen)) / currentPseudoEigen.norm(2));
       }
     }
     /*
@@ -282,7 +282,7 @@ public class HebbianSolver {
     if (status.getCosAngle() == 0) {
       log.info("Verifier not finished, making another pass...");
     } else {
-      log.info("Has 1 - cosAngle: " + (1 - status.getCosAngle()) + ", convergence target is: " + convergenceTarget);
+      log.info("Has 1 - cosAngle: {}, convergence target is: {}", (1 - status.getCosAngle()), convergenceTarget);
       state.getStatusProgress().add(status);
     }
     return (state.getStatusProgress().size() <= maxPassesPerEigen && 1 - status.getCosAngle() > convergenceTarget);
@@ -292,16 +292,16 @@ public class HebbianSolver {
     return verifier.verify(corpus, currentPseudoEigen);
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     Properties props = new Properties();
     String propertiesFile = args.length > 0 ? args[0] : "config/solver.properties";
     //  props.load(new FileInputStream(propertiesFile));
 
     String corpusDir = props.getProperty("solver.input.dir");
     String outputDir = props.getProperty("solver.output.dir");
-    if (corpusDir == null || corpusDir.equals("") || outputDir == null || outputDir.equals("")) {
-      log.error(propertiesFile + " must contain values for solver.input.dir and solver.output.dir");
-      System.exit(1);
+    if (corpusDir == null || corpusDir.length() == 0 || outputDir == null || outputDir.length() == 0) {
+      log.error("{} must contain values for solver.input.dir and solver.output.dir", propertiesFile);
+      return;
     }
     int inBufferSize = Integer.parseInt(props.getProperty("solver.input.bufferSize"));
     int rank = Integer.parseInt(props.getProperty("solver.output.desiredRank"));
@@ -323,9 +323,9 @@ public class HebbianSolver {
     }
     long now = System.currentTimeMillis();
     TrainingState finalState = solver.solve(corpus, rank);
-    long time = (long) ((System.currentTimeMillis() - now) / 1000);
-    log.info("Solved " + finalState.getCurrentEigens().size()[AbstractMatrix.ROW] + " eigenVectors in " + time + " seconds.  Persisted to " + outputDir);
-    System.exit(0);
+    long time = (System.currentTimeMillis() - now) / 1000;
+    log.info("Solved {} eigenVectors in {} seconds.  Persisted to {}",
+             new Object[] {finalState.getCurrentEigens().size()[AbstractMatrix.ROW], time, outputDir});
   }
 
 }

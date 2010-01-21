@@ -130,8 +130,7 @@ public final class CanopyDriver {
    */
   public static void runJob(String input, String output,
                             String measureClassName, double t1, double t2) throws IOException {
-    log.info("Input: " + input + " Out: " + output + " Measure: " + measureClassName + " t1: " + t1
-        + " t2: " + t2);
+    log.info("Input: {} Out: {} Measure: {} t1: {} t2: {}", new Object[] {input, output, measureClassName, t1, t2});
     Configurable client = new JobClient();
     JobConf conf = new JobConf(CanopyDriver.class);
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measureClassName);

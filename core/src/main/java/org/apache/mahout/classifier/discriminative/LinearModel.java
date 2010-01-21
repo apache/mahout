@@ -33,12 +33,12 @@ public class LinearModel {
   /** Displacement of hyperplane from origin.*/
   private double bias;
   /** Classification threshold. */
-  private double threshold;
+  private final double threshold;
 
   /**
    * Init a linear model with a hyperplane, distance and displacement.
    * */
-  public LinearModel(final Vector hyperplane, final double displacement, final double threshold) {
+  public LinearModel(Vector hyperplane, double displacement, double threshold) {
     this.hyperplane = hyperplane;
     this.bias = displacement;
     this.threshold = threshold;
@@ -47,7 +47,7 @@ public class LinearModel {
   /**
    * Init a linear model with zero displacement and a threshold of 0.5.
    * */
-  public LinearModel(final Vector hyperplane) {
+  public LinearModel(Vector hyperplane) {
     this(hyperplane, 0, 0.5);
   }
 
@@ -56,7 +56,7 @@ public class LinearModel {
    * @param dataPoint the data point to classify.
    * @return returns true if data point should be classified as belonging to this model.
    * */
-  public boolean classify(final Vector dataPoint) throws CardinalityException, IndexException {
+  public boolean classify(Vector dataPoint) throws CardinalityException, IndexException {
     double product = this.hyperplane.dot(dataPoint);
     if (LOG.isDebugEnabled()) {
       LOG.debug("model: " + this + " product: " + product + " Bias: " + this.bias + " threshold: " + this.threshold);
@@ -68,7 +68,7 @@ public class LinearModel {
    * Update the hyperplane by adding delta.
    * @param delta the delta to add to the hyperplane vector.
    * */
-  public void addDelta(final Vector delta) {
+  public void addDelta(Vector delta) {
 	  this.hyperplane = this.hyperplane.plus(delta);
   }
 
@@ -87,7 +87,7 @@ public class LinearModel {
    * @param factor factor to multiply the bias by.
    * */
   public synchronized void shiftBias(double factor) {
-    this.bias = this.bias + factor;
+    this.bias += factor;
   }
 
   /**
@@ -97,7 +97,7 @@ public class LinearModel {
    * */
   public void timesDelta(int index, double delta) {
     double element = this.hyperplane.get(index);
-    element = element * delta;
+    element *= delta;
     this.hyperplane.setQuick(index, element);
   }
 }

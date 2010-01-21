@@ -126,9 +126,9 @@ public class BayesTfIdfDriver implements BayesJob {
       hcd.setBlockCacheEnabled(true);
       ht.addFamily(hcd);
       
-      log.info("{}", "Connecting to hbase...");
+      log.info("Connecting to hbase...");
       HBaseAdmin hba = new HBaseAdmin(hc);
-      log.info("{}", "Creating Table " + output);
+      log.info("Creating Table {}", output);
       
       if (hba.tableExists(output)) {
         hba.disableTable(output);

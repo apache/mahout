@@ -140,8 +140,7 @@ class Smp {
     if (blocksB == null) {
       return null;
     }
-    DoubleMatrix2D[][] blocks = {blocksA, blocksB};
-    return blocks;
+    return new DoubleMatrix2D[][]{blocksA, blocksB};
   }
 
   protected DoubleMatrix2D[] splitStridedNN(DoubleMatrix2D A, int threshold, long flops) {

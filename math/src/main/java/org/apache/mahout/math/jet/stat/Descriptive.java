@@ -470,8 +470,7 @@ public class Descriptive {
       v += (delta1 * delta1 - v) / (i + 1);
     }
 
-    double r1 = q / v;
-    return r1;
+    return q / v;
   }
 
   /** Returns the largest member of a data sequence. */

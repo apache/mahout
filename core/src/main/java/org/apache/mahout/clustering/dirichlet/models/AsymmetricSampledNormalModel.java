@@ -121,8 +121,9 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     // return the product of the component pdfs
     // TODO: is this reasonable? correct?
     double pdf = pdf(x, stdDev.get(0));
-    for (int i = 1; i < x.size(); i++)
-      pdf = pdf * pdf(x, stdDev.get(i));
+    for (int i = 1; i < x.size(); i++) {
+      pdf *= pdf(x, stdDev.get(i));
+    }
     return pdf;
   }
 

@@ -482,7 +482,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
     return frequentPatterns;
   }
 
-  private void traverseAndBuildConditionalFPTreeData(int firstConditionalNode,
+  private static void traverseAndBuildConditionalFPTreeData(int firstConditionalNode,
       MutableLong minSupportMutable, FPTree conditionalTree, FPTree tree) {
 
     // Build Subtable

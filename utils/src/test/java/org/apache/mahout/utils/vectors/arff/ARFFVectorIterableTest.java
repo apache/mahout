@@ -21,7 +21,6 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.utils.strings.StringUtil;
 
 import java.text.DateFormat;
 import java.util.Iterator;
@@ -31,16 +30,16 @@ public class ARFFVectorIterableTest extends MahoutTestCase {
 
   public void testValues() throws Exception {
     StringBuilder builder = new StringBuilder();
-    builder.append("%comments").append(StringUtil.LINE_SEP).append("@RELATION Mahout").append(StringUtil.LINE_SEP)
-            .append("@ATTRIBUTE foo numeric").append(StringUtil.LINE_SEP)
-            .append("@ATTRIBUTE bar numeric").append(StringUtil.LINE_SEP)
-            .append("@ATTRIBUTE timestamp DATE \"yyyy-MM-dd HH:mm:ss\"").append(StringUtil.LINE_SEP)
-            .append("@ATTRIBUTE junk string").append(StringUtil.LINE_SEP)
-            .append("@ATTRIBUTE theNominal {c,b,a}").append(StringUtil.LINE_SEP)
-            .append("@DATA").append(StringUtil.LINE_SEP)
-            .append("1,2, \"2009-01-01 5:55:55\", foo, c").append(StringUtil.LINE_SEP)
-            .append("2,3").append(StringUtil.LINE_SEP)
-            .append("{0 5,1 23}").append(StringUtil.LINE_SEP);
+    builder.append("%comments").append('\n').append("@RELATION Mahout").append('\n')
+            .append("@ATTRIBUTE foo numeric").append('\n')
+            .append("@ATTRIBUTE bar numeric").append('\n')
+            .append("@ATTRIBUTE timestamp DATE \"yyyy-MM-dd HH:mm:ss\"").append('\n')
+            .append("@ATTRIBUTE junk string").append('\n')
+            .append("@ATTRIBUTE theNominal {c,b,a}").append('\n')
+            .append("@DATA").append('\n')
+            .append("1,2, \"2009-01-01 5:55:55\", foo, c").append('\n')
+            .append("2,3").append('\n')
+            .append("{0 5,1 23}").append('\n');
     ARFFModel model = new MapBackedARFFModel();
     ARFFVectorIterable iterable = new ARFFVectorIterable(builder.toString(), model);
     assertEquals("Mahout", iterable.getModel().getRelation());

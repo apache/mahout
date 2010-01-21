@@ -215,7 +215,6 @@ class KnownDoubleQuantileEstimator extends DoubleQuantileEstimator {
         throw new IllegalStateException("Oops! illegal missing values.");
       }
 
-      //log.info("adding "+missingValues+" infinity elements...");
       this.addInfinities(missingValues, partial);
 
       //determine beta (N + Infinity values = beta * N)

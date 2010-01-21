@@ -66,11 +66,10 @@ public class Gamma extends AbstractContinousDistribution {
  *              - NORMAL(seed) ... Normal generator N(0,1).       *
  *                                                                *
  ******************************************************************/
-    double a = alpha;
 
     // Check for invalid input values
 
-    if (a <= 0.0) {
+    if (alpha <= 0.0) {
       throw new IllegalArgumentException();
     }
     if (lambda <= 0.0) {
@@ -79,18 +78,18 @@ public class Gamma extends AbstractContinousDistribution {
 
     double gds;
     double b = 0.0;
-    if (a < 1.0) { // CASE A: Acceptance rejection algorithm gs
-      b = 1.0 + 0.36788794412 * a;              // Step 1
+    if (alpha < 1.0) { // CASE A: Acceptance rejection algorithm gs
+      b = 1.0 + 0.36788794412 * alpha;              // Step 1
       while (true) {
         double p = b * randomGenerator.raw();
         if (p <= 1.0) {                       // Step 2. Case gds <= 1
-          gds = Math.exp(Math.log(p) / a);
+          gds = Math.exp(Math.log(p) / alpha);
           if (Math.log(randomGenerator.raw()) <= -gds) {
             return (gds / lambda);
           }
         } else {                                // Step 3. Case gds > 1
-          gds = -Math.log((b - p) / a);
-          if (Math.log(randomGenerator.raw()) <= ((a - 1.0) * Math.log(gds))) {
+          gds = -Math.log((b - p) / alpha);
+          if (Math.log(randomGenerator.raw()) <= ((alpha - 1.0) * Math.log(gds))) {
             return (gds / lambda);
           }
         }
@@ -100,9 +99,9 @@ public class Gamma extends AbstractContinousDistribution {
       double s = 0.0;
       double d = 0.0;
       double aa = -1.0;
-      if (a != aa) {                        // Step 1. Preparations
-        aa = a;
-        ss = a - 0.5;
+      if (alpha != aa) {                        // Step 1. Preparations
+        aa = alpha;
+        ss = alpha - 0.5;
         s = Math.sqrt(ss);
         d = 5.656854249 - 12.0 * s;
       }
@@ -130,9 +129,9 @@ public class Gamma extends AbstractContinousDistribution {
       double si = 0.0;
       double c = 0.0;
       double aaa = -1.0;
-      if (a != aaa) {                           // Step 4. Set-up for hat case
-        aaa = a;
-        double r = 1.0 / a;
+      if (alpha != aaa) {                           // Step 4. Set-up for hat case
+        aaa = alpha;
+        double r = 1.0 / alpha;
         double q9 = 0.0001710320;
         double q8 = -0.0004701849;
         double q7 = 0.0006053049;
@@ -144,8 +143,8 @@ public class Gamma extends AbstractContinousDistribution {
         double q1 = 0.0416666664;
         q0 = ((((((((q9 * r + q8) * r + q7) * r + q6) * r + q5) * r + q4) *
             r + q3) * r + q2) * r + q1) * r;
-        if (a > 3.686) {
-          if (a > 13.022) {
+        if (alpha > 3.686) {
+          if (alpha > 13.022) {
             b = 1.77;
             si = 0.75;
             c = 0.1515 / s;

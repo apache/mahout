@@ -83,7 +83,7 @@ public class InMemMapper extends MapredMapper implements
     throw new IllegalStateException("Exception caught while loading the data: "
         + StringUtils.stringifyException(e));
     }
-    log.info("Data loaded : " + data.size() + " instances");
+    log.info("Data loaded : {} instances", data.size());
 
     bagging = new Bagging(getTreeBuilder(), data);
   }
@@ -123,7 +123,7 @@ public class InMemMapper extends MapredMapper implements
   protected void initRandom(InMemInputSplit split) {
     if (rng == null) { // first execution of this mapper
       Long seed = split.getSeed();
-      log.debug("Initialising rng with seed : " + seed);
+      log.debug("Initialising rng with seed {}: ", seed);
 
       if (seed == null)
         rng = RandomUtils.getRandom();

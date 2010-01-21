@@ -325,13 +325,13 @@ class QuantileCalc {
 
     for (int p : quantiles) {
       log.info("------------------------------");
-      log.info("computing for p = " + p);
+      log.info("computing for p = {}", p);
       for (long N : sizes) {
         log.info("   ------------------------------");
-        log.info("   computing for N = " + N);
+        log.info("   computing for N = {}", N);
         for (double delta : deltas) {
           log.info("      ------------------------------");
-          log.info("      computing for delta = " + delta);
+          log.info("      computing for delta = {}", delta);
           for (double epsilon : epsilons) {
             double[] returnSamplingRate = new double[1];
             long[] result;
@@ -343,14 +343,14 @@ class QuantileCalc {
 
             long b = result[0];
             long k = result[1];
-            log.info("         (e,d,N,p)=(" + epsilon + ',' + delta + ',' + N + ',' + p + ") --> ");
+            log.info("         (e,d,N,p)=({},{},{},{}) --> ", new Object[] {epsilon, delta, N, p});
             log.info("(b,k,mem");
             if (known_N) {
               log.info(",sampling");
             }
-            log.info(")=(" + b + ',' + k + ',' + (b * k / 1024));
+            log.info(")=({},{},{}", new Object[] {b, k, (b * k / 1024)});
             if (known_N) {
-              log.info("," + returnSamplingRate[0]);
+              log.info(",{}", returnSamplingRate[0]);
             }
             log.info(")");
           }

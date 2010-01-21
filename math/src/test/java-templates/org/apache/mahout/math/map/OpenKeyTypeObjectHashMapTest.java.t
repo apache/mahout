@@ -66,8 +66,7 @@ public class Open${keyTypeCap}ObjectHashMapTest extends Assert {
       if (obj == null) return false;
       if (getClass() != obj.getClass()) return false;
       TestClass other = (TestClass) obj;
-      if (x != other.x) return false;
-      return true;
+      return x == other.x;
     }
 
     ${keyType} x;

@@ -75,10 +75,10 @@ public class TransactionTreeTest extends MahoutTestCase {
       nodes += tree.addPattern(array, 1 + gen.nextInt(MAX_DUPLICATION));
     }
 
-    log.info("Input integers: " + total);
-    log.info("Input data Size: " + total * SIZE_INT / (double) MEGABYTE);
-    log.info("Nodes in Tree: " + nodes);
-    log.info("Size of Tree: " + (nodes * SIZE_INT * NUM_OF_FPTREE_FIELDS + tree.childCount() * SIZE_INT)
+    log.info("Input integers: {}", total);
+    log.info("Input data Size: P{", total * SIZE_INT / (double) MEGABYTE);
+    log.info("Nodes in Tree: {}", nodes);
+    log.info("Size of Tree: {}", (nodes * SIZE_INT * NUM_OF_FPTREE_FIELDS + tree.childCount() * SIZE_INT)
         / (double) MEGABYTE);
     TransactionTree vtree = new TransactionTree();
     Iterator<Pair<List<Integer>, Long>> it = tree.getIterator();
@@ -94,9 +94,9 @@ public class TransactionTreeTest extends MahoutTestCase {
       sb.append(s);
 
     }
-    log.info("Number of transaction integers: " + items);
-    log.info("Size of Transactions: " + (items * SIZE_INT + count * SIZE_LONG) / (double) MEGABYTE);
-    log.info("Number of Transactions: " + count);
+    log.info("Number of transaction integers: {}", items);
+    log.info("Size of Transactions: {}", (items * SIZE_INT + count * SIZE_LONG) / (double) MEGABYTE);
+    log.info("Number of Transactions: {}", count);
     tree.getCompressedTree();
     it = vtree.getIterator();
     StringBuilder sb1 = new StringBuilder();

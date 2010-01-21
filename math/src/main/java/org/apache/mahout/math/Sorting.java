@@ -375,7 +375,7 @@ public final class Sorting {
     if (double1 > double2) {
       return false;
     }
-    if (double1 == double2 && 0.0d != double1) {
+    if (double1 == double2 && double1 != 0.0) {
       return false;
     }
     
@@ -402,7 +402,7 @@ public final class Sorting {
     if (float1 > float2) {
       return false;
     }
-    if (float1 == float2 && 0.0f != float1) {
+    if (float1 == float2 && float1 != 0.0f) {
       return false;
     }
     
@@ -491,13 +491,12 @@ public final class Sorting {
    * @return
    */
   private static int med3(int a, int b, int c, IntComparator comp) {
-    int x = a, y = b, z = c;
-    int comparisonxy = comp.compare(x, y);
-    int comparisonxz = comp.compare(x, z);
-    int comparisonyz = comp.compare(y, z);
-    return comparisonxy < 0 ? (comparisonyz < 0 ? b
-        : (comparisonxz < 0 ? c : a)) : (comparisonyz > 0 ? b
-        : (comparisonxz > 0 ? c : a));
+    int comparisonab = comp.compare(a, b);
+    int comparisonac = comp.compare(a, c);
+    int comparisonbc = comp.compare(b, c);
+    return comparisonab < 0 ?
+        (comparisonbc < 0 ? b : (comparisonac < 0 ? c : a)) :
+        (comparisonbc > 0 ? b : (comparisonac > 0 ? c : a));
   }
   
   private static int med3(long[] array, int a, int b, int c, LongComparator comp) {
@@ -1344,7 +1343,7 @@ public final class Sorting {
     quickSort0(start, end, array, comp);
   }
   
-  private final static class ComparableAdaptor<T extends Comparable<? super T>>
+  private static final class ComparableAdaptor<T extends Comparable<? super T>>
       implements Comparator<T> {
     
     @Override
@@ -1710,7 +1709,7 @@ public final class Sorting {
     return l - 1;
   }
   
-  private final static ByteComparator naturalByteComparison = new ByteComparator() {
+  private static final ByteComparator naturalByteComparison = new ByteComparator() {
     @Override
     public int compare(byte o1, byte o2) {
       return o1 - o2;
@@ -1826,7 +1825,7 @@ public final class Sorting {
     return l - 1;
   }
   
-  private final static CharComparator naturalCharComparison = new CharComparator() {
+  private static final CharComparator naturalCharComparison = new CharComparator() {
     @Override
     public int compare(char o1, char o2) {
       return o1 - o2;
@@ -1942,7 +1941,7 @@ public final class Sorting {
     return l - 1;
   }
   
-  private final static ShortComparator naturalShortComparison = new ShortComparator() {
+  private static final ShortComparator naturalShortComparison = new ShortComparator() {
     @Override
     public int compare(short o1, short o2) {
       return o1 - o2;
@@ -2059,7 +2058,7 @@ public final class Sorting {
     return l - 1;
   }
   
-  private final static IntComparator naturalIntComparison = new IntComparator() {
+  private static final IntComparator naturalIntComparison = new IntComparator() {
     @Override
     public int compare(int o1, int o2) {
       return o1 < o2 ? -1 : o1 > o2 ? 1 : 0;
@@ -2177,7 +2176,7 @@ public final class Sorting {
   }
   
   
-  private final static LongComparator naturalLongComparison = new LongComparator() {
+  private static final LongComparator naturalLongComparison = new LongComparator() {
     @Override
     public int compare(long o1, long o2) {
       return o1 < o2 ? -1 : o1 > o2 ? 1 : 0;
@@ -2294,7 +2293,7 @@ public final class Sorting {
     return l - 1;
   }
   
-  private final static FloatComparator naturalFloatComparison = new FloatComparator() {
+  private static final FloatComparator naturalFloatComparison = new FloatComparator() {
     @Override
     public int compare(float o1, float o2) {
       return Float.compare(o1, o2);
@@ -2411,7 +2410,7 @@ public final class Sorting {
     return l - 1;
   }
   
-  private final static DoubleComparator naturalDoubleComparison = new DoubleComparator() {
+  private static final DoubleComparator naturalDoubleComparison = new DoubleComparator() {
     @Override
     public int compare(double o1, double o2) {
       return Double.compare(o1, o2);

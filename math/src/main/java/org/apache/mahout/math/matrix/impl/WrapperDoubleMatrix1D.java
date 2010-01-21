@@ -109,7 +109,7 @@ class WrapperDoubleMatrix1D extends DoubleMatrix1D {
    */
   @Override
   public DoubleMatrix1D viewFlip() {
-    DoubleMatrix1D view = new WrapperDoubleMatrix1D(this) {
+    return new WrapperDoubleMatrix1D(WrapperDoubleMatrix1D.this) {
       @Override
       public double getQuick(int index) {
         return content.get(size - 1 - index);
@@ -120,7 +120,6 @@ class WrapperDoubleMatrix1D extends DoubleMatrix1D {
         content.set(size - 1 - index, value);
       }
     };
-    return view;
   }
 
   /**

@@ -320,12 +320,11 @@ public abstract class AbstractFormatter extends PersistentObject {
     String str = buf.toString();
     for (int i = size; --i >= 0;) {
       blanksCache[i] = str.substring(0, i);
-      //log.info(i+"-"+blanksCache[i]+"-");
     }
   }
 
   /** Returns a short string representation describing the shape of the matrix. */
-  public static String shape(AbstractMatrix1D matrix) {
+  public static String shape(AbstractMatrix matrix) {
     //return "Matrix1D of size="+matrix.size();
     //return matrix.size()+" element matrix";
     //return "matrix("+matrix.size()+")";

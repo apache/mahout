@@ -85,9 +85,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
     }
 
     values = new double[l + d + u]; // {lower, diagonal, upper}
-    int[] dimensions = {0, l, l + d, l + d + u, 0, 0,
-        0}; // {lowerStart, diagonalStart, upperStart, values.length, lowerNonZeros, diagonalNonZeros, upperNonZeros}
-    dims = dimensions;
+    dims = new int[]{0, l, l + d, l + d + u, 0, 0, 0};
   }
 
   /**
@@ -452,14 +450,12 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
               j = tmp;
             }
             zElements[zi + zStride * i] += value * yElements[yi + yStride * j];
-            //z.setQuick(row,z.getQuick(row) + value * y.getQuick(column));
-            //log.info("["+i+","+j+"]-->"+value);
             return value;
           }
         }
     );
 
-    if (alpha != 1) {
+    if (alpha != 1.0) {
       z.assign(Functions.mult(alpha));
     }
     return z;

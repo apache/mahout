@@ -25,10 +25,11 @@ import org.apache.mahout.math.Vector;
 
 
 public class MultiThreadedEigenVerifier extends SimpleEigenVerifier {
-  protected final Executor threadPool;
-  protected EigenStatus status = null;
-  protected boolean finished = false;
-  protected boolean started = false;
+
+  private final Executor threadPool;
+  private EigenStatus status = null;
+  private boolean finished = false;
+  private boolean started = false;
 
   public MultiThreadedEigenVerifier() {
     threadPool = Executors.newFixedThreadPool(1);
@@ -54,15 +55,16 @@ public class MultiThreadedEigenVerifier extends SimpleEigenVerifier {
     return super.verify(eigenMatrix, vector);
   }
 
-  protected class VerifierRunnable implements Runnable {
-    Matrix eigenMatrix;
-    Vector vector;
+  private class VerifierRunnable implements Runnable {
+    private final Matrix eigenMatrix;
+    private final Vector vector;
 
-    public VerifierRunnable(Matrix eigenMatrix, Vector vector) {
+    protected VerifierRunnable(Matrix eigenMatrix, Vector vector) {
       this.eigenMatrix = eigenMatrix;
       this.vector = vector;
     }
 
+    @Override
     public void run() {
       EigenStatus status = innerVerify(eigenMatrix, vector);
       synchronized (MultiThreadedEigenVerifier.this.status) {

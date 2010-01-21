@@ -121,7 +121,7 @@ public class Step0Job {
   protected Step0Output[] parseOutput(JobContext job) throws IOException {
     Configuration conf = job.getConfiguration();
     
-    log.info("mapred.map.tasks = " + conf.getInt("mapred.map.tasks", -1));
+    log.info("mapred.map.tasks = {}", conf.getInt("mapred.map.tasks", -1));
     
     FileSystem fs = outputPath.getFileSystem(conf);
 

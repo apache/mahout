@@ -286,7 +286,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
   @SuppressWarnings("unchecked")
   public void pairsSortedByKey(List<T> keyList, ${valueTypeCap}ArrayList valueList) {
     keys(keyList);
-    if (keyList.size() == 0) {
+    if (keyList.isEmpty()) {
        return;
     }
     T k = keyList.get(0);
@@ -294,9 +294,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
     if (!(k instanceof Comparable)) {
         throw new UnsupportedOperationException("The key type for this map does not implement comparable");
     }
-    // go raw
-    List rawKeyList = keyList;
-    Collections.sort(rawKeyList);
+    Collections.sort((List) keyList);
     valueList.setSize(keyList.size());
     for (int i = keyList.size(); --i >= 0;) {
       valueList.setQuick(i, get(keyList.get(i)));

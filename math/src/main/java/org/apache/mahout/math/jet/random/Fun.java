@@ -23,8 +23,7 @@ class Fun {
 
   private static double _fkt_value(double lambda, double z1, double z2, double x_value) {
 
-    double y_value = Math.cos(z1 * x_value) / (Math.pow((x_value * x_value + z2 * z2), (lambda + 0.5)));
-    return y_value;
+    return Math.cos(z1 * x_value) / (Math.pow((x_value * x_value + z2 * z2), (lambda + 0.5)));
   }
 
   public static double bessel2_fkt(double lambda, double beta) {
@@ -384,8 +383,7 @@ class Fun {
 
   private static double fkt2_value(double lambda, double beta, double x_value) {
 
-    double y_value = cosh(lambda * x_value) * Math.exp(-beta * cosh(x_value));
-    return y_value;
+    return cosh(lambda * x_value) * Math.exp(-beta * cosh(x_value));
   }
 
   private static double cosh(double x) {

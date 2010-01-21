@@ -363,9 +363,6 @@ public class BitVector extends PersistentObject {
       return true;
     }
     checkRangeFromTo(from, to, nbits);
-    //log.info("\n");
-    //log.info(this);
-    //log.info("from="+from+", to="+to+", bit="+state);
 
     // Cache some vars for speed.
     long[] theBits = this.bits;
@@ -381,7 +378,6 @@ public class BitVector extends PersistentObject {
     int partialWidth;
     if (bitIndex > 0) { // There exists a leading partial unit.
       partialWidth = Math.min(to - from + 1, bitsPerUnit - bitIndex);
-      //log.info("partialWidth1="+partialWidth);
       for (; --partialWidth >= 0; i++) {
         if (QuickBitVector.get(theBits, i) == state) {
           if (!procedure.apply(i)) {
@@ -404,7 +400,6 @@ public class BitVector extends PersistentObject {
     } else {
       partialWidth = 0;
     }
-    //log.info("partialWidth2="+partialWidth);
 
     // Iterate over all full units, if any.
     // (It does not matter that iterating over partial units is a little bit slow,
@@ -416,7 +411,6 @@ public class BitVector extends PersistentObject {
       comparator = ~0L;
     } // all 64 bits set
 
-    //log.info("fromUnit="+fromUnit+", toUnit="+toUnit);
     for (int unit = fromUnit; unit <= toUnit; unit++) {
       long val = theBits[unit];
       if (val != comparator) {
@@ -443,8 +437,6 @@ public class BitVector extends PersistentObject {
         i += bitsPerUnit;
       }
     }
-
-    //log.info("trail with i="+i);
 
     // Iterate over trailing partial unit, if any.
     for (; --partialWidth >= 0; i++) {

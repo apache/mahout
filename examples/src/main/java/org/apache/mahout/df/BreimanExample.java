@@ -106,7 +106,7 @@ public class BreimanExample extends Configured implements Tool {
     treeBuilder.setM(m);
 
     long time = System.currentTimeMillis();
-    log.info("Growing a forest with m=" + m);
+    log.info("Growing a forest with m={}", m);
     DecisionForest forestM = forestBuilder.build(nbtrees, errorM);
     sumTimeM += System.currentTimeMillis() - time;
     numNodesM += forestM.nbNodes();
@@ -218,20 +218,18 @@ public class BreimanExample extends Configured implements Tool {
 
     Random rng = RandomUtils.getRandom();
     for (int iteration = 0; iteration < nbIterations; iteration++) {
-      log.info("Iteration " + iteration);
+      log.info("Iteration {}", iteration);
       runIteration(rng, data, m, nbTrees);
     }
 
     log.info("********************************************");
-    log.info("Selection error : " + sumTestErr / nbIterations);
-    log.info("Single Input error : " + sumOneErr / nbIterations);
-    log.info("One Tree error : " + sumTreeErr / nbIterations);
-    log.info("");
-    log.info("Mean Random Input Time : " + DFUtils.elapsedTime(sumTimeM / nbIterations));
-    log.info("Mean Single Input Time : " + DFUtils.elapsedTime(sumTimeOne / nbIterations));
-    log.info("");
-    log.info("Mean Random Input Num Nodes : " + numNodesM / nbIterations);
-    log.info("Mean Single Input Num Nodes : " + numNodesOne / nbIterations);
+    log.info("Selection error : {}", sumTestErr / nbIterations);
+    log.info("Single Input error : {}", sumOneErr / nbIterations);
+    log.info("One Tree error : {}", sumTreeErr / nbIterations);
+    log.info("Mean Random Input Time : {}", DFUtils.elapsedTime(sumTimeM / nbIterations));
+    log.info("Mean Single Input Time : {}", DFUtils.elapsedTime(sumTimeOne / nbIterations));
+    log.info("Mean Random Input Num Nodes : {}", numNodesM / nbIterations);
+    log.info("Mean Single Input Num Nodes : {}", numNodesOne / nbIterations);
 
     return 0;
   }

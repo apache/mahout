@@ -484,27 +484,12 @@ public class SparseDoubleMatrix2D extends DoubleMatrix2D {
               j = tmp;
             }
             zElements[zi + zStride * i] += value * yElements[yi + yStride * j];
-            //log.info("["+i+","+j+"]-->"+value);
             return true;
           }
         }
     );
 
-    /*
-    forEachNonZero(
-      new IntIntDoubleFunction() {
-        public double apply(int i, int j, double value) {
-          if (transposeA) { int tmp=i; i=j; j=tmp; }
-          zElements[zi + zStride*i] += value * yElements[yi + yStride*j];
-          //z.setQuick(row,z.getQuick(row) + value * y.getQuick(column));
-          //log.info("["+i+","+j+"]-->"+value);
-          return value;
-        }
-      }
-    );
-    */
-
-    if (alpha != 1) {
+    if (alpha != 1.0) {
       z.assign(Functions.mult(alpha));
     }
     return z;

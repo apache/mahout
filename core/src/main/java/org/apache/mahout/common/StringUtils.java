@@ -29,7 +29,6 @@ public final class StringUtils {
 
   private static final XStream xstream = new XStream();
   private static final Pattern NEWLINE_PATTERN = Pattern.compile("\n");
-  public static final String LINE_SEP = System.getProperty("line.separator");
 
   private StringUtils() {
     // do nothing

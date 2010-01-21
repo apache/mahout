@@ -81,7 +81,7 @@ public final class FileDiffStorage implements DiffStorage {
       throw new IllegalArgumentException("maxEntries must be positive");
     }
 
-    log.info("Creating FileDataModel for file " + dataFile);
+    log.info("Creating FileDataModel for file {}", dataFile);
 
     this.dataFile = dataFile.getAbsoluteFile();
     this.lastModified = dataFile.lastModified();

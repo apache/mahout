@@ -140,8 +140,7 @@ abstract class DoubleQuantileEstimator extends PersistentObject
     if (this.bufferSet != null) {
       copy.bufferSet = (DoubleBufferSet) copy.bufferSet.clone();
       if (this.currentBufferToFill != null) {
-        int index;
-        for (index = 0; index < bufferSet.buffers.length; index ++) {
+        for (int index = 0; index < bufferSet.buffers.length; index ++) {
           if (bufferSet.buffers[index].equals(currentBufferToFill)) {
             copy.currentBufferToFill = copy.bufferSet.buffers[index];
             return copy;

@@ -216,7 +216,6 @@ public class SmpBlas implements Blas {
         @Override
         public void run() {
           seqBlas.dgemm(transposeA, transposeB, alpha, AA, BB, beta, CC);
-          //log.info("Hello "+offset);
         }
       };
     }
@@ -287,7 +286,6 @@ public class SmpBlas implements Blas {
         @Override
         public void run() {
           seqBlas.dgemv(transposeA, alpha, AA, x, beta, yy);
-          //log.info("Hello "+offset);
         }
       };
     }

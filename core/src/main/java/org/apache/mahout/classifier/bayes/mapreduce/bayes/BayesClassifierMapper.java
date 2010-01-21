@@ -101,7 +101,7 @@ public class BayesClassifierMapper extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     try {
-      log.info("Bayes Parameter" + job.get("bayes.parameters"));
+      log.info("Bayes Parameter {}", job.get("bayes.parameters"));
       Parameters params = Parameters
           .fromString(job.get("bayes.parameters", ""));
       log.info("{}", params.print());

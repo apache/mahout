@@ -188,8 +188,8 @@ class UnknownDoubleQuantileEstimator extends DoubleQuantileEstimator {
         new Comparator<DoubleBuffer>() {
           @Override
           public int compare(DoubleBuffer o1, DoubleBuffer o2) {
-            int l1 = ((Buffer) o1).level();
-            int l2 = ((Buffer) o2).level();
+            int l1 = o1.level();
+            int l2 = o2.level();
             return l1 < l2 ? -1 : l1 == l2 ? 0 : 1;
           }
         }

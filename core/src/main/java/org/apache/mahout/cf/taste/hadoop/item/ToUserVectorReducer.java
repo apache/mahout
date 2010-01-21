@@ -55,7 +55,9 @@ public final class ToUserVectorReducer
     implements Reducer<LongWritable, ItemPrefWritable, LongWritable, VectorWritable> {
 
   public static final int MAX_PREFS_CONSIDERED = 20;
-  private VectorWritable vectorWritable = new VectorWritable();
+
+  private final VectorWritable vectorWritable = new VectorWritable();
+
   @Override
   public void reduce(LongWritable userID,
                      Iterator<ItemPrefWritable> itemPrefs,

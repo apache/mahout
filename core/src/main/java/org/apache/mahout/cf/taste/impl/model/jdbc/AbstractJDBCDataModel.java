@@ -517,7 +517,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       rs.next();
       return rs.getInt(1);
     } catch (SQLException sqle) {
-      log.warn("Exception while retrieving number of " + name, sqle);
+      log.warn("Exception while retrieving number of {}", name, sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(rs, stmt, conn);
