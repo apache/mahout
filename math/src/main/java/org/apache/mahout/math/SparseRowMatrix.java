@@ -19,13 +19,15 @@ package org.apache.mahout.math;
 
 /**
  * sparse matrix with general element values whose rows are accessible quickly. Implemented as a row array of
- * SparseVectors.
+ * either SequentialAccessSparseVectors or RandomAccessSparseVectors.
  */
 public class SparseRowMatrix extends AbstractMatrix {
 
   private int[] cardinality;
 
   private Vector[] rows;
+
+  private boolean randomAccessRows;
 
   public SparseRowMatrix() {
     super();
@@ -35,27 +37,41 @@ public class SparseRowMatrix extends AbstractMatrix {
    * Construct a matrix of the given cardinality with the given rows
    *
    * @param cardinality the int[2] cardinality desired
-   * @param rows        a RandomAccessSparseVector[] array of rows
+   * @param rows        a Vector[] array of rows
    */
-  public SparseRowMatrix(int[] cardinality, RandomAccessSparseVector[] rows) {
+  public SparseRowMatrix(int[] cardinality, Vector[] rows) {
+    this(cardinality, rows, false, rows instanceof RandomAccessSparseVector[]);
+  }
+
+  public SparseRowMatrix(int[] cardinality, boolean randomAccess) {
+    this(cardinality, randomAccess
+                    ? new RandomAccessSparseVector[cardinality[ROW]]
+                    : new SequentialAccessSparseVector[cardinality[ROW]],
+        true,
+        randomAccess);
+  }
+  
+  public SparseRowMatrix(int[] cardinality, Vector[] rows, boolean shallowCopy, boolean randomAccess) {
     this.cardinality = cardinality.clone();
+    this.randomAccessRows = randomAccess;
     this.rows = rows.clone();
     for (int row = 0; row < cardinality[ROW]; row++) {
-      this.rows[row] = rows[row].clone();
+      if(rows[row] == null) {
+        rows[row] = randomAccess
+                  ? new RandomAccessSparseVector(numCols(), 10)
+                  : new SequentialAccessSparseVector(numCols(), 10);
+      }
+      this.rows[row] = shallowCopy ? rows[row] : rows[row].clone();
     }
   }
 
   /**
-   * Construct a matrix of the given cardinality
+   * Construct a matrix of the given cardinality, with rows defaulting to RandomAccessSparseVector implementation
    *
    * @param cardinality the int[2] cardinality desired
    */
   public SparseRowMatrix(int[] cardinality) {
-    this.cardinality = cardinality.clone();
-    this.rows = new RandomAccessSparseVector[cardinality[ROW]];
-    for (int row = 0; row < cardinality[ROW]; row++) {
-      this.rows[row] = new RandomAccessSparseVector(cardinality[COL]);
-    }
+    this(cardinality, true);
   }
 
   @Override
@@ -85,7 +101,7 @@ public class SparseRowMatrix extends AbstractMatrix {
 
   @Override
   public Matrix like() {
-    return new SparseRowMatrix(cardinality);
+    return new SparseRowMatrix(cardinality, randomAccessRows);
   }
 
   @Override
@@ -93,7 +109,7 @@ public class SparseRowMatrix extends AbstractMatrix {
     int[] c = new int[2];
     c[ROW] = rows;
     c[COL] = columns;
-    return new SparseRowMatrix(c);
+    return new SparseRowMatrix(c, randomAccessRows);
   }
 
   @Override
@@ -146,7 +162,7 @@ public class SparseRowMatrix extends AbstractMatrix {
   /**
    *
    * @param column an int column index
-   * @return a shallow view of the column of this row matrix.  
+   * @return a shallow view of the column
    */
   @Override
   public Vector getColumn(int column) {
@@ -156,7 +172,9 @@ public class SparseRowMatrix extends AbstractMatrix {
     return new TransposeViewVector(this, column) {
       @Override
       protected Vector newVector(int cardinality) {
-        return new RandomAccessSparseVector(cardinality, 10);
+        return randomAccessRows
+             ? new RandomAccessSparseVector(cardinality, 10)
+             : new SequentialAccessSparseVector(cardinality, 10);
       }
     };
   }
@@ -164,7 +182,7 @@ public class SparseRowMatrix extends AbstractMatrix {
   /**
    *
    * @param row an int row index
-   * @return a deep view of the Vector at specified row (ie you may mutate the original matrix using this row)
+   * @return a shallow view of the Vector at specified row (ie you may mutate the original matrix using this row)
    */
   @Override
   public Vector getRow(int row) {
