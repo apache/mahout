@@ -143,18 +143,35 @@ public class SparseRowMatrix extends AbstractMatrix {
     return this;
   }
 
+  /**
+   *
+   * @param column an int column index
+   * @return Currently: a full, dense copy of the column.  <b>You don't have the ability to mutate the original
+   * matrix with this "view", as it is a fresh copy of the data</b> TODO: Fix this (MAHOUT-211) 
+   */
   @Override
   public Vector getColumn(int column) {
     if (column < 0 || column >= cardinality[COL]) {
       throw new IndexException();
     }
-    double[] d = new double[cardinality[ROW]];
-    for (int row = 0; row < cardinality[ROW]; row++) {
-      d[row] = getQuick(row, column);
-    }
-    return new DenseVector(d);
+    return new TransposeViewVector(this, column) {
+      @Override
+      protected Vector newVector(int cardinality) {
+        return new RandomAccessSparseVector(cardinality, 10);
+      }
+    };
+    //double[] d = new double[cardinality[ROW]];
+    //for (int row = 0; row < cardinality[ROW]; row++) {
+    //  d[row] = getQuick(row, column);
+    //}
+    //return new DenseVector(d, true);  // no need to copy it after making it from scratch...
   }
 
+  /**
+   *
+   * @param row an int row index
+   * @return a deep view of the Vector at specified row (ie you may mutate the original matrix using this row)
+   */
   @Override
   public Vector getRow(int row) {
     if (row < 0 || row >= cardinality[ROW]) {

@@ -37,7 +37,11 @@ public class DenseVector extends AbstractVector {
 
   /** Construct a new instance using provided values */
   public DenseVector(double[] values) {
-    this.values = values.clone();
+    this(values, false);
+  }
+
+  public DenseVector(double[] values, boolean shallowCopy) {
+    this.values = shallowCopy ? values : values.clone();
   }
 
   public DenseVector(String name, double[] values) {

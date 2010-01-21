@@ -160,11 +160,7 @@ public class SparseColumnMatrix extends AbstractMatrix {
     if (row < 0 || row >= cardinality[ROW]) {
       throw new IndexException();
     }
-    double[] d = new double[cardinality[COL]];
-    for (int col = 0; col < cardinality[COL]; col++) {
-      d[col] = getQuick(row, col);
-    }
-    return new DenseVector(d);
+    return new TransposeViewVector(this, row, false);
   }
 
 }
