@@ -428,7 +428,7 @@ public abstract class AbstractMatrix implements Matrix {
     }
     Vector w = new DenseVector(c[COL]);
     for (int i = 0; i < c[ROW]; i++) {
-      Vector xi = getRow(i);+      
+      Vector xi = getRow(i);
       double d = xi.dot(v);
       if(d != 0)
         w.assign(xi, new PlusWithScaleFunction(d));
