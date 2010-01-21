@@ -143,18 +143,29 @@ public class SparseRowMatrix extends AbstractMatrix {
     return this;
   }
 
+  /**
+   *
+   * @param column an int column index
+   * @return a shallow view of the column of this row matrix.  
+   */
   @Override
   public Vector getColumn(int column) {
     if (column < 0 || column >= cardinality[COL]) {
       throw new IndexException();
     }
-    double[] d = new double[cardinality[ROW]];
-    for (int row = 0; row < cardinality[ROW]; row++) {
-      d[row] = getQuick(row, column);
-    }
-    return new DenseVector(d);
+    return new TransposeViewVector(this, column) {
+      @Override
+      protected Vector newVector(int cardinality) {
+        return new RandomAccessSparseVector(cardinality, 10);
+      }
+    };
   }
 
+  /**
+   *
+   * @param row an int row index
+   * @return a deep view of the Vector at specified row (ie you may mutate the original matrix using this row)
+   */
   @Override
   public Vector getRow(int row) {
     if (row < 0 || row >= cardinality[ROW]) {
