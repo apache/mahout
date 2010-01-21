@@ -76,6 +76,20 @@ public class RandomAccessSparseVector extends AbstractVector {
   }
 
   @Override
+  public Vector assign(Vector other) {
+    if (other.size() != size()) {
+      throw new CardinalityException();
+    }
+    values.clear();
+    Iterator<Vector.Element> it = other.iterateNonZero();
+    Vector.Element e;
+    while(it.hasNext() && (e = it.next()) != null) {
+      setQuick(e.index(), e.get());
+    }
+    return this;
+  }
+
+  @Override
   public double getQuick(int index) {
     return values.get(index);
   }
