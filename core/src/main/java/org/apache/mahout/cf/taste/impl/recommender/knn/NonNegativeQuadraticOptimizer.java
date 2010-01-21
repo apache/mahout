@@ -25,6 +25,9 @@ import java.util.Arrays;
  */
 public final class NonNegativeQuadraticOptimizer implements Optimizer {
 
+  private static final double EPSILON = 1.0e-10;
+  private static final double CONVERGENCE_LIMIT = 0.1;
+
   /**
    * Non-negative Quadratic Optimization.
    *
@@ -50,16 +53,17 @@ public final class NonNegativeQuadraticOptimizer implements Optimizer {
           sumAw += An[i] * x[i];
         }
         // r = b - Ax; // the residual, or 'steepest gradient'
-        r[n] = b[n] - sumAw;
+        double rn = b[n] - sumAw;
 
         // find active variables - those that are pinned due to
         // nonnegativity constraints; set respective ri's to zero
-        if ((x[n] < 1.0e-10) && (r[n] < 0.0)) {
-          r[n] = 0.0;
+        if ((x[n] < EPSILON) && (rn < 0.0)) {
+          rn = 0.0;
+        } else {
+          // max step size numerator
+          rdot += rn * rn;
         }
-
-        // max step size numerator
-        rdot += r[n] * r[n];
+        r[n] = rn;
       }
 
       // max step size denominator
@@ -90,7 +94,7 @@ public final class NonNegativeQuadraticOptimizer implements Optimizer {
       // update x values
       for (int n = 0; n < k; n++) {
         x[n] += stepSize * r[n];
-        if (x[n] < 1.0e-10) {
+        if (x[n] < EPSILON) {
           x[n] = 0.0;
         }
       }
@@ -100,7 +104,7 @@ public final class NonNegativeQuadraticOptimizer implements Optimizer {
         //TODO: do something in case of divergence
       }
        */
-    } while (rdot > 0.1);
+    } while (rdot > CONVERGENCE_LIMIT);
 
     return x;
   }

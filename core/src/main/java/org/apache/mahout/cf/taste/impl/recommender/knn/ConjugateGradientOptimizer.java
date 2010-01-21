@@ -21,6 +21,9 @@ import java.util.Arrays;
 
 public final class ConjugateGradientOptimizer implements Optimizer {
 
+  private static final double CONVERGENCE_LIMIT = 0.1;
+  private static final int MAX_ITERATIONS = 1000;
+
   /**
    * <p>Conjugate gradient optimization. Matlab code:</p>
    *
@@ -68,11 +71,12 @@ public final class ConjugateGradientOptimizer implements Optimizer {
       for (int j = 0; j < k; j++) {
         v += Ai[j] * x[j];
       }
-      r[i] = b[i] - v;
-      w[i] = -r[i];
+      double ri = b[i] - v;
+      r[i] = ri;
+      w[i] = -ri;
     }
 
-    while (true) {
+    for (int iteration = MAX_ITERATIONS; iteration > 0; iteration--) {
 
       // z = A*w;
       for (int i = 0; i < k; i++) {
@@ -103,9 +107,10 @@ public final class ConjugateGradientOptimizer implements Optimizer {
       // stop when residual is close to 0
       double rdot = 0.0;
       for (int i = 0; i < k; i++) {
-        rdot += r[i] * r[i];
+        double value = r[i];
+        rdot += value * value;
       }
-      if (rdot < 0.1) {
+      if (rdot <= CONVERGENCE_LIMIT) {
         break;
       }
 
@@ -113,8 +118,9 @@ public final class ConjugateGradientOptimizer implements Optimizer {
       double Bnum = 0.0;
       double Bden = 0.0;
       for (int i = 0; i < k; i++) {
-        Bnum += r[i] * z[i];
-        Bden += w[i] * z[i];
+        double zi = z[i];
+        Bnum += r[i] * zi;
+        Bden += w[i] * zi;
       }
       double B = Bnum / Bden;
 
