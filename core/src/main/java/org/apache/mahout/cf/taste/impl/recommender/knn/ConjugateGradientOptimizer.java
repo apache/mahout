@@ -76,7 +76,7 @@ public final class ConjugateGradientOptimizer implements Optimizer {
       w[i] = -ri;
     }
 
-    for (int iteration = MAX_ITERATIONS; iteration > 0; iteration--) {
+    for (int iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
 
       // z = A*w;
       for (int i = 0; i < k; i++) {
