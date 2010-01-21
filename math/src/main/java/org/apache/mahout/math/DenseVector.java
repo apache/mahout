@@ -117,6 +117,26 @@ public class DenseVector extends AbstractVector {
   }
 
   @Override
+  public Vector assign(Vector other, BinaryFunction function) {
+    if (other.size() != size()) {
+      throw new CardinalityException();
+    }
+    // is there some other way to know if function.apply(0, x) = x for all x?
+    if(function instanceof PlusFunction || function instanceof PlusWithScaleFunction) {
+      Iterator<Vector.Element> it = other.iterateNonZero();
+      Vector.Element e;
+      while(it.hasNext() && (e = it.next()) != null) {
+        values[e.index()] = function.apply(values[e.index()], e.get());
+      }
+    } else {
+      for (int i = 0; i < size(); i++) {
+        values[i] = function.apply(values[i], other.getQuick(i));
+      }
+    }
+    return this;
+  }
+
+  @Override
   public int getNumNondefaultElements() {
     return values.length;
   }
