@@ -34,8 +34,8 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 import org.apache.mahout.analysis.WikipediaAnalyzer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,9 +77,9 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
           .replaceAll(""));
       TokenStream stream = analyzer.tokenStream(catMatch, new StringReader(
           document));
-      Token token = new Token();
-      while ((token = stream.next(token)) != null) {
-        contents.append(token.termBuffer(), 0, token.termLength()).append(' ');
+      TermAttribute termAtt = (TermAttribute) stream.addAttribute(TermAttribute.class);
+      while (stream.incrementToken()) {
+        contents.append(termAtt.termBuffer(), 0, termAtt.termLength()).append(' ');
       }
       output.collect(new Text(SPACE_NON_ALPHA_PATTERN.matcher(catMatch)
           .replaceAll("_")), new Text(contents.toString()));

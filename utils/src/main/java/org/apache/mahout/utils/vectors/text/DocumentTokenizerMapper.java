@@ -19,12 +19,7 @@ package org.apache.mahout.utils.vectors.text;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import org.apache.commons.lang.mutable.MutableLong;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -32,11 +27,9 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
-import org.apache.mahout.common.parameters.ClassParameter;
 
 /**
  * TextVectorizer Term Count Mapper. Tokenizes a text document and outputs
@@ -44,9 +37,9 @@ import org.apache.mahout.common.parameters.ClassParameter;
  */
 public class DocumentTokenizerMapper extends MapReduceBase implements
     Mapper<Text,Text,Text,Text> {
-  
+
   private Analyzer analyzer;
-  private StringBuilder document = new StringBuilder();
+  private final StringBuilder document = new StringBuilder();
   @Override
   public void map(Text key,
                   Text value,
@@ -58,18 +51,17 @@ public class DocumentTokenizerMapper extends MapReduceBase implements
     TermAttribute termAtt =
         (TermAttribute) stream.addAttribute(TermAttribute.class);
     document.setLength(0);
-    String sep = "";
+    String sep = " ";
     while (stream.incrementToken()) {
-      String word = new String(termAtt.termBuffer(), 0, termAtt.termLength());
-      if (word != "") {
-        document.append(sep).append(word);
-        sep = " ";
+      if (termAtt.termLength() > 0) {
+        document.append(sep).append(termAtt.termBuffer(), 0,
+            termAtt.termLength());
       }
     }
     output.collect(key, new Text(document.toString()) );
-    
+
   }
-  
+
   @Override
   public void configure(JobConf job) {
     super.configure(job);
@@ -87,5 +79,5 @@ public class DocumentTokenizerMapper extends MapReduceBase implements
       throw new IllegalStateException(e);
     }
   }
-  
+
 }
