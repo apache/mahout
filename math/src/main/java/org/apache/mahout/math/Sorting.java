@@ -1734,7 +1734,7 @@ public final class Sorting {
    */
   public static void mergeSort(byte[] array, int start, int end, ByteComparator comp) {
     checkBounds(array.length, start, end);
-    byte[] out = java.util.Arrays.copyOf(array, array.length);
+    byte[] out = Arrays.copyOf(array, array.length);
     mergeSort(out, array, start, end, comp);
   }
 
@@ -1850,7 +1850,7 @@ public final class Sorting {
    */
   public static void mergeSort(char[] array, int start, int end, CharComparator comp) {
     checkBounds(array.length, start, end);
-    char[] out = java.util.Arrays.copyOf(array, array.length);
+    char[] out = Arrays.copyOf(array, array.length);
     mergeSort(out, array, start, end, comp);
   }
 
@@ -1959,17 +1959,17 @@ public final class Sorting {
   
   public static void mergeSort(short[] array, int start, int end, ShortComparator comp) {
     checkBounds(array.length, start, end);
-    short[] out = java.util.Arrays.copyOf(array, array.length);
+    short[] out = Arrays.copyOf(array, array.length);
     mergeSort(out, array, start, end, comp);
   }
 
   
   /**
    * Perform a merge sort on a range of a short array using a specified ordering.
-   * @param array the array.
+   * @param in the array.
    * @param start the first index.
    * @param end the last index (exclusive).
-   * @param comp the comparator object.
+   * @param c the comparator object.
    */
   private static void mergeSort(short[] in, short[] out, int start, int end,
       ShortComparator c) {
@@ -2077,16 +2077,16 @@ public final class Sorting {
    */
   public static void mergeSort(int[] array, int start, int end, IntComparator comp) {
     checkBounds(array.length, start, end);
-    int[] out = java.util.Arrays.copyOf(array, array.length);
+    int[] out = Arrays.copyOf(array, array.length);
     mergeSort(out, array, start, end, comp);
   }
 
   /**
    * Perform a merge sort on a range of a int array using a specified ordering.
-   * @param array the array.
+   * @param in the array.
    * @param start the first index.
    * @param end the last index (exclusive).
-   * @param comp the comparator object.
+   * @param c the comparator object.
    */
   private static void mergeSort(int[] in, int[] out, int start, int end,
       IntComparator c) {
@@ -2187,7 +2187,6 @@ public final class Sorting {
      * @param array the array.
      * @param start the first index.
      * @param end the last index (exclusive).
-     * @param comp the comparator object.
      */
   public static void mergeSort(long[] array, int start, int end) {
     mergeSort(array, start, end, naturalLongComparison);
@@ -2202,7 +2201,7 @@ public final class Sorting {
    */
   public static void mergeSort(long[] array, int start, int end, LongComparator comp) {
     checkBounds(array.length, start, end);
-    long[] out = java.util.Arrays.copyOf(array, array.length);
+    long[] out = Arrays.copyOf(array, array.length);
     mergeSort(out, array, start, end, comp);
   }
 
@@ -2304,7 +2303,6 @@ public final class Sorting {
      * @param array the array.
      * @param start the first index.
      * @param end the last index (exclusive).
-     * @param comp the comparator object.
      */
   public static void mergeSort(float[] array, int start, int end) {
     mergeSort(array, start, end, naturalFloatComparison);
@@ -2319,7 +2317,7 @@ public final class Sorting {
    */
   public static void mergeSort(float[] array, int start, int end, FloatComparator comp) {
     checkBounds(array.length, start, end);
-    float[] out = java.util.Arrays.copyOf(array, array.length);
+    float[] out = Arrays.copyOf(array, array.length);
     mergeSort(out, array, start, end, comp);
   }
 
@@ -2422,7 +2420,6 @@ public final class Sorting {
      * @param array the array.
      * @param start the first index.
      * @param end the last index (exclusive).
-     * @param comp the comparator object.
      */
   public static void mergeSort(double[] array, int start, int end) {
     mergeSort(array, start, end, naturalDoubleComparison);
@@ -2437,7 +2434,7 @@ public final class Sorting {
    */
   public static void mergeSort(double[] array, int start, int end, DoubleComparator comp) {
     checkBounds(array.length, start, end);
-    double[] out = java.util.Arrays.copyOf(array, array.length);
+    double[] out = Arrays.copyOf(array, array.length);
     mergeSort(out, array, start, end, comp);
   }
 

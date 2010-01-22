@@ -596,4 +596,67 @@ public final class Arrays {
     }
     return array;
   }
+
+  /**
+   * {@link java.util.Arrays#copyOf} compatibility with Java 1.5.
+   */
+  public static byte[] copyOf(byte[] src, int length) {
+      byte[] result = new byte [length];
+      System.arraycopy(src, 0, result, 0, Math.min(length, src.length));
+      return result;
+  }
+  
+  /**
+   * {@link java.util.Arrays#copyOf} compatibility with Java 1.5.
+   */
+  public static char[] copyOf(char[] src, int length) {
+      char[] result = new char [length];
+      System.arraycopy(src, 0, result, 0, Math.min(length, src.length));
+      return result;
+  }
+  
+  /**
+   * {@link java.util.Arrays#copyOf} compatibility with Java 1.5.
+   */
+  public static short[] copyOf(short[] src, int length) {
+      short[] result = new short [length];
+      System.arraycopy(src, 0, result, 0, Math.min(length, src.length));
+      return result;
+  }
+  
+  /**
+   * {@link java.util.Arrays#copyOf} compatibility with Java 1.5. 
+   */
+  public static int[] copyOf(int[] src, int length) {
+      int[] result = new int [length];
+      System.arraycopy(src, 0, result, 0, Math.min(length, src.length));
+      return result;
+  }
+  
+  /**
+   * {@link java.util.Arrays#copyOf} compatibility with Java 1.5.
+   */
+  public static float[] copyOf(float[] src, int length) {
+      float[] result = new float [length];
+      System.arraycopy(src, 0, result, 0, Math.min(length, src.length));
+      return result;
+  }
+
+  /**
+   * {@link java.util.Arrays#copyOf} compatibility with Java 1.5.
+   */
+  public static double[] copyOf(double[] src, int length) {
+      double[] result = new double [length];
+      System.arraycopy(src, 0, result, 0, Math.min(length, src.length));
+      return result;
+  }
+  
+  /**
+   * {@link java.util.Arrays#copyOf} compatibility with Java 1.5.
+   */
+  public static long[] copyOf(long[] src, int length) {
+      long[] result = new long [length];
+      System.arraycopy(src, 0, result, 0, Math.min(length, src.length));
+      return result;
+  }
 }
