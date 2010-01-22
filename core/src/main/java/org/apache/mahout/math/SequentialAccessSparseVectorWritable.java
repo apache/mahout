@@ -17,13 +17,12 @@
 
 package org.apache.mahout.math;
 
-import org.apache.hadoop.io.Writable;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.apache.hadoop.io.Writable;
 
 public class SequentialAccessSparseVectorWritable extends SequentialAccessSparseVector implements Writable {
 
@@ -45,7 +44,7 @@ public class SequentialAccessSparseVectorWritable extends SequentialAccessSparse
     Iterator<Element> iter = iterateNonZero();
     int count = 0;
     while (iter.hasNext()) {
-      Vector.Element element = iter.next();
+      Element element = iter.next();
       dataOutput.writeInt(element.index());
       dataOutput.writeDouble(element.get());
       count++;
@@ -61,14 +60,12 @@ public class SequentialAccessSparseVectorWritable extends SequentialAccessSparse
     } else {
       setName(className); // we have already read the class name in VectorWritable
     }
-    int cardinality = dataInput.readInt();
-    int size = dataInput.readInt();
-    OrderedIntDoubleMapping values = new OrderedIntDoubleMapping(size);
-    int i = 0;
-    for (; i < size; i++) {
+    size = dataInput.readInt();
+    int nde = dataInput.readInt();
+    OrderedIntDoubleMapping values = new OrderedIntDoubleMapping(nde);
+    for (int i = 0; i < nde; i++) {
       values.set(dataInput.readInt(), dataInput.readDouble());
     }
-    assert (i == size);
     this.values = values;
   }
 
