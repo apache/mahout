@@ -235,6 +235,12 @@
       <version>1.5.8</version>
     </dependency>
 
+    <dependency>
+      <groupId>net.java.dev.jets3t</groupId>
+      <artifactId>jets3t</artifactId>
+      <version>0.7.1</version>
+    </dependency>
+
   </dependencies>
 
 
