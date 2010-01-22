@@ -39,6 +39,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.BZip2Codec;
 import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.FileLineIterator;
 
 /**
@@ -65,7 +66,12 @@ public final class WikipediaXmlSplitter {
         .withRequired(true)
         .withArgument(
           abuilder.withName("outputDir").withMinimum(1).withMaximum(1).create())
-        .withDescription("The output directory to place the splits in")
+        .withDescription("The output directory to place the splits in:\n" +
+                    "local files:\n\t/var/data/wikipedia-xml-chunks or\n\tfile:///var/data/wikipedia-xml-chunks\n" +
+                    "Hadoop DFS:\n\thdfs://wikipedia-xml-chunks\n" +
+                    "AWS S3 (blocks):\n\ts3://bucket-name/wikipedia-xml-chunks\n" +
+                    "AWS S3 (native files):\n\ts3n://bucket-name/wikipedia-xml-chunks\n")
+
         .withShortName("o").create();
 
     Option s3IdOpt = obuilder
@@ -104,7 +110,14 @@ public final class WikipediaXmlSplitter {
     
     Parser parser = new Parser();
     parser.setGroup(group);
-    CommandLine cmdLine = parser.parse(args);
+    CommandLine cmdLine;
+    try {
+      cmdLine = parser.parse(args);
+    } catch (OptionException e) {
+      System.err.println(e.getMessage());
+      CommandLineUtil.printHelp(group);
+      return;
+    }
 
     Configuration conf = new Configuration();
     String dumpFilePath = (String) cmdLine.getValue(dumpFileOpt);
