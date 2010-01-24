@@ -54,7 +54,9 @@
 
 		<!-- Checks for Naming Conventions.                  -->
 		<!-- See http://checkstyle.sf.net/config_naming.html -->
-		<module name="ConstantName" />
+		<module name="ConstantName">
+			<property name="format" value="^([A-Z][A-Z0-9]*(_[A-Z0-9]+)*|log)$"/>
+		</module>
 		<module name="LocalFinalVariableName" />
 		<module name="LocalVariableName" />
 		<module name="MemberName" />
@@ -109,7 +111,7 @@
 		<module name="MethodParamPad" />
 		<module name="NoWhitespaceAfter">
 			<property name="tokens"
-				value="ARRAY_INIT,BNOT,DEC,DOT,INC,LNOT,UNARY_MINUS,UNARY_PLUS" />
+				value="ARRAY_INIT,BNOT,DEC,DOT,INC,LNOT,UNARY_MINUS,UNARY_PLUS,COMMA" />
 		</module>
 		<module name="NoWhitespaceBefore" />
 		<module name="OperatorWrap" />
@@ -117,7 +119,7 @@
 		<module name="TypecastParenPad" />
 		<!--module name="TabCharacter" /-->
 		<module name="WhitespaceAfter">
-			<property name="tokens" value="COMMA, SEMI" />
+			<property name="tokens" value="SEMI" />
 		</module>
 		<module name="WhitespaceAround">
 			<property name="tokens"
@@ -164,7 +166,7 @@
 		<!--<module name="MagicNumber"/>-->
 		<module name="MissingSwitchDefault" />
 		<!--module name="ModifiedControlVariable"/-->
-		<module name="SimplifyBooleanExpression" />
+		<!--<module name="SimplifyBooleanExpression" /> -->
 		<module name="SimplifyBooleanReturn" />
 		<module name="StringLiteralEquality" />
 		<module name="NestedIfDepth">
