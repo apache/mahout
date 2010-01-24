@@ -42,7 +42,7 @@ public class Step1MapperTest extends MahoutTestCase {
    */
   private static class MockTreeBuilder implements TreeBuilder {
 
-    protected Data expected;
+    private Data expected;
 
     public void setExpected(Data data) {
       expected = data;

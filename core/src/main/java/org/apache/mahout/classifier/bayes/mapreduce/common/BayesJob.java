@@ -34,8 +34,6 @@ public interface BayesJob {
    * @param output
    *          path to output directory.
    * */
-  void runJob(String input, String output, BayesParameters params) throws IOException,
-                                                                  ClassNotFoundException,
-                                                                  InterruptedException;
+  void runJob(String input, String output, BayesParameters params) throws IOException;
   
 }

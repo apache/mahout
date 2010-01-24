@@ -67,7 +67,7 @@ public class BayesFeatureOutputFormat extends
         return "trainer-docCount/" + name;
       }
     }
-    throw new RuntimeException("Unrecognized Tuple: " + key);
+    throw new IllegalArgumentException("Unrecognized Tuple: " + key);
   }
   
 }

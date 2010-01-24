@@ -66,13 +66,13 @@ class PartialSequentialBuilder extends PartialBuilder {
   /** partitions' sizes in hadoop order */
   private int[] sizes;
 
-  public PartialSequentialBuilder(TreeBuilder treeBuilder, Path dataPath,
+  PartialSequentialBuilder(TreeBuilder treeBuilder, Path dataPath,
       Dataset dataset, long seed, Configuration conf) {
     super(treeBuilder, dataPath, new Path("notUsed"), seed, conf);
     this.dataset = dataset;
   }
 
-  public PartialSequentialBuilder(TreeBuilder treeBuilder, Path dataPath,
+  PartialSequentialBuilder(TreeBuilder treeBuilder, Path dataPath,
       Dataset dataset, long seed) {
     this(treeBuilder, dataPath, dataset, seed, new Configuration());
   }

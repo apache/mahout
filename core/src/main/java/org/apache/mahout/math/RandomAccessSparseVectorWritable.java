@@ -56,7 +56,7 @@ public class RandomAccessSparseVectorWritable extends RandomAccessSparseVector i
 
   @Override
   public void readFields(DataInput dataInput) throws IOException {
-    final String className = dataInput.readUTF();
+    String className = dataInput.readUTF();
     if(className.equals(getClass().getName())) {
       this.setName(dataInput.readUTF());
     } else {

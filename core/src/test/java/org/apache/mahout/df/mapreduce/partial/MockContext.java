@@ -35,7 +35,7 @@ class MockContext extends Context {
 
   private int index = 0;
 
-  public MockContext(Mapper<?,?,?,?> mapper, Configuration conf, TaskAttemptID taskid,
+  MockContext(Mapper<?,?,?,?> mapper, Configuration conf, TaskAttemptID taskid,
       int nbTrees) throws IOException, InterruptedException {
     mapper.super(conf, taskid, null, null, null, null, null);
 

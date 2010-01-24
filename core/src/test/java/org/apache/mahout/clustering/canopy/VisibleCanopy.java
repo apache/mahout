@@ -30,7 +30,7 @@ class VisibleCanopy extends Canopy {
 
   private final List<Vector> points = new ArrayList<Vector>();
 
-  public VisibleCanopy(Vector point, int id) {
+  VisibleCanopy(Vector point, int id) {
     super(point, id);
     points.add(point);
   }

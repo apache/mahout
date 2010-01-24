@@ -57,8 +57,8 @@ public class MultiLabelVectorWritable extends VectorWritable {
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(labels.length);
-    for (int i = 0; i < labels.length; i++) {
-      out.writeInt(labels[i]);
+    for (int label : labels) {
+      out.writeInt(label);
     }
     super.write(out);
   }

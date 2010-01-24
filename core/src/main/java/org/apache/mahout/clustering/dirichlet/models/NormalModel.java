@@ -122,9 +122,9 @@ public class NormalModel implements Model<VectorWritable> {
   public String toString() {
     StringBuilder buf = new StringBuilder();
     buf.append("nm{n=").append(s0).append(" m=[");
-    int nextIx = 0;
     if (mean != null) {
       // handle sparse Vectors gracefully, suppressing zero values
+      int nextIx = 0;
       for (int i = 0; i < mean.size(); i++) {
         double elem = mean.get(i);
         if (elem == 0.0)

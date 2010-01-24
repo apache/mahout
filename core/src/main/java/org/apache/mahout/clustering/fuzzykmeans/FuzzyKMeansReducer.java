@@ -73,7 +73,7 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
     }
     
     if (clusterMap.isEmpty()) {
-      throw new NullPointerException("Cluster is empty!!!");
+      throw new IllegalStateException("Cluster is empty!!!");
     }
   }
 

@@ -21,11 +21,11 @@ import org.apache.mahout.math.VectorWritable;
 public abstract class VectorModelDistribution implements
     ModelDistribution<VectorWritable> {
 
-  public VectorModelDistribution() {
+  protected VectorModelDistribution() {
     super();
   }
 
-  public VectorModelDistribution(VectorWritable modelPrototype) {
+  protected VectorModelDistribution(VectorWritable modelPrototype) {
     super();
     this.modelPrototype = modelPrototype;
   }

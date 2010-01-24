@@ -35,9 +35,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 /**
- * Runs the {@link org.apache.mahout.clustering.canopy.CanopyDriver#runJob(String, String, String, double, double,
- * Class)} and then {@link org.apache.mahout.clustering.canopy.ClusterDriver#runJob(String, String, String, String,
- * double, double, Class)}.
+ * Runs the {@link org.apache.mahout.clustering.canopy.CanopyDriver#runJob(String, String, String, double, double)}
+ * and then {@link org.apache.mahout.clustering.canopy.ClusterDriver#runJob(String, String, String, String, double, double)}.
  */
 public final class CanopyClusteringJob {
 

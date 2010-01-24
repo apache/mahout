@@ -51,7 +51,7 @@ public class DenseVectorWritable extends DenseVector implements Writable {
 
   @Override
   public void readFields(DataInput dataInput) throws IOException {
-    final String className = dataInput.readUTF();
+    String className = dataInput.readUTF();
     if(className.equals(getClass().getName())) {
       this.setName(dataInput.readUTF());
     } else {

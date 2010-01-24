@@ -82,7 +82,7 @@ public class ClusterMapper extends MapReduceBase implements
       }
       
       if (canopies.isEmpty()) {
-        throw new NullPointerException("Canopies are empty!");
+        throw new IllegalStateException("Canopies are empty!");
       }
     }
   }

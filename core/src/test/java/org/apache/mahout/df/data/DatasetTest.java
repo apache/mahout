@@ -33,9 +33,6 @@ public class DatasetTest extends MahoutTestCase {
 
   private static final int nbAttributes = 10;
 
-  private ByteArrayOutputStream byteOutStream;
-  private DataOutput out;
-
   private static Dataset readDataset(byte[] bytes) throws IOException {
     ByteArrayInputStream byteInStream = new ByteArrayInputStream(bytes);
     DataInput in = new DataInputStream(byteInStream);
@@ -45,8 +42,8 @@ public class DatasetTest extends MahoutTestCase {
   public void testWritable() throws Exception {
 
     Random rng = RandomUtils.getRandom();
-    byteOutStream = new ByteArrayOutputStream();
-    out = new DataOutputStream(byteOutStream);
+    ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
+    DataOutput out = new DataOutputStream(byteOutStream);
 
     int n = 10;
     for (int nloop=0; nloop< n; nloop++) {

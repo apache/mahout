@@ -47,9 +47,7 @@ public class CBayesDriver implements BayesJob {
    * @throws InterruptedException
    */
   @Override
-  public void runJob(String input, String output, BayesParameters params) throws IOException,
-                                                                         InterruptedException,
-                                                                         ClassNotFoundException {
+  public void runJob(String input, String output, BayesParameters params) throws IOException {
     Configuration conf = new JobConf(CBayesDriver.class);
     Path outPath = new Path(output);
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
@@ -73,8 +71,7 @@ public class CBayesDriver implements BayesJob {
     BayesWeightSummerDriver summer = new BayesWeightSummerDriver();
     summer.runJob(input, output, params);
     
-    log
-        .info("Calculating the weight Normalisation factor for each complement class...");
+    log.info("Calculating the weight Normalisation factor for each complement class...");
     // Calculate the normalization factor Sigma_W_ij for each complement class.
     CBayesThetaNormalizerDriver normalizer = new CBayesThetaNormalizerDriver();
     normalizer.runJob(input, output, params);

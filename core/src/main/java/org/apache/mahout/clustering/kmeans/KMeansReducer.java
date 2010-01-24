@@ -69,12 +69,12 @@ public class KMeansReducer extends MapReduceBase implements
       this.clusterMap = new HashMap<String, Cluster>();
 
       String path = job.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
-      if (job != null && path.length() > 0) {
+      if (path.length() > 0) {
         List<Cluster> clusters = new ArrayList<Cluster>();
         KMeansUtil.configureWithClusterInfo(path, clusters);
         setClusterMap(clusters);
         if (clusterMap.isEmpty()) {
-          throw new NullPointerException("Cluster is empty!");
+          throw new IllegalStateException("Cluster is empty!");
         }
       }
     } catch (ClassNotFoundException e) {

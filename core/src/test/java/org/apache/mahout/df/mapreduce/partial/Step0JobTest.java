@@ -61,8 +61,6 @@ public class Step0JobTest extends MahoutTestCase {
 
   private static final int numMaps = 5;
 
-  private Step0Context context;
-
   /**
    * Computes the "mapred.max.split.size" that will generate the desired number
    * of input splits
@@ -106,14 +104,14 @@ public class Step0JobTest extends MahoutTestCase {
     splits.toArray(sorted);
     Builder.sortSplits(sorted);
 
-    context = new Step0Context(new Step0Mapper(), job.getConfiguration(),
-        new TaskAttemptID(), numMaps);
+    Step0Context context = new Step0Context(new Step0Mapper(), job.getConfiguration(),
+                                            new TaskAttemptID(), numMaps);
 
     for (int p = 0; p < numMaps; p++) {
       InputSplit split = sorted[p];
 
       RecordReader<LongWritable, Text> reader = input.createRecordReader(split,
-          context);
+                                                                         context);
       reader.initialize(split, context);
 
       Step0Mapper mapper = new Step0Mapper();

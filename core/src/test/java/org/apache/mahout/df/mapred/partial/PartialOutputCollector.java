@@ -31,7 +31,7 @@ class PartialOutputCollector implements OutputCollector<TreeID, MapredOutput> {
 
   private int index = 0;
 
-  public PartialOutputCollector(int nbTrees) {
+  PartialOutputCollector(int nbTrees) {
     keys = new TreeID[nbTrees];
     values = new MapredOutput[nbTrees];
   }
