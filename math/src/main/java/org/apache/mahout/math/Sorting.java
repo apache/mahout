@@ -691,8 +691,8 @@ public final class Sorting {
     while (b <= c) {
       // copy all values equal to the partition value to before a..b.  In the process, advance b
       // as long as values less than the partition or equal are found, also stop when a..b collides with c..d
-      int comparison = comp.compare(b, partitionIndex);
-      while (b <= c && comparison <= 0) {
+      int comparison;
+      while (b <= c && (comparison = comp.compare(b, partitionIndex)) <= 0) {
         if (comparison == 0) {
           if (a == partitionIndex) {
             partitionIndex = b;
@@ -704,13 +704,11 @@ public final class Sorting {
           a++;
         }
         b++;
-        comparison = comp.compare(b, partitionIndex);
       }
       // at this point [start..a) has partition values, [a..b) has values < partition
       // also, either b>c or v[b] > partition value
 
-      comparison = comp.compare(c, partitionIndex);
-      while (c >= b && comparison >= 0) {
+      while (c >= b && (comparison = comp.compare(c, partitionIndex)) >= 0) {
         if (comparison == 0) {
           if (c == partitionIndex) {
             partitionIndex = d;
@@ -722,7 +720,6 @@ public final class Sorting {
           d--;
         }
         c--;
-        comparison = comp.compare(c, partitionIndex);
       }
       // now we also know that [d..end] contains partition values,
       // [c..d) contains values > partition value
