@@ -44,7 +44,6 @@ public interface IDMigrator {
 
   /**
    * @return the top 8 bytes of the MD5 hash of the bytes of the given {@link String}'s UTF-8 encoding as a long.
-   *  The reverse mapping is also stored.
    * @throws TasteException if an error occurs while storing the mapping
    */
   long toLongID(String stringID);
@@ -67,7 +66,8 @@ public interface IDMigrator {
   void storeMapping(long longID, String stringID) throws TasteException;
 
   /**
-   * Make the mapping aware of the given string IDs.
+   * Make the mapping aware of the given string IDs. This must be called initially before
+   * the implementation is used, or else it will not be aware of reverse long-to-String mappings.
    *
    * @throws TasteException if an error occurs while storing the mappings
    */
