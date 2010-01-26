@@ -337,7 +337,7 @@ public class OpenObject${valueTypeCap}HashMapTest extends Assert {
     map.put("Fourteen", (${valueType}) 14);
     map.removeKey("Thirteen");
     OpenObject${valueTypeCap}HashMap<String> map2 = (OpenObject${valueTypeCap}HashMap<String>) map.copy();
-    assertTrue(map.equals(map2));
+    assertEquals(map, map2);
     assertTrue(map2.equals(map));
     assertFalse("Hello Sailor".equals(map));
     assertFalse(map.equals("hello sailor"));

@@ -92,18 +92,18 @@ public class ${valueTypeCap}ArrayListTest extends Assert {
   
   @Test 
   public void testElements() {
-    ${valueType}[] l = new ${valueType}[] { 12, 24, 36, 48 };
+    ${valueType}[] l = { 12, 24, 36, 48 };
     ${valueTypeCap}ArrayList lar = new ${valueTypeCap}ArrayList(l);
     assertEquals(4, lar.size());
     assertSame(l, lar.elements());
-    ${valueType}[] l2 = new ${valueType}[] { 3, 6, 9, 12 };
+    ${valueType}[] l2 = { 3, 6, 9, 12 };
     lar.elements(l2);
     assertSame(l2, lar.elements());
   }
   
   @Test
   public void testEquals() {
-    ${valueType}[] l = new ${valueType}[] { 12, 24, 36, 48 };
+    ${valueType}[] l = { 12, 24, 36, 48 };
     ${valueTypeCap}ArrayList lar = new ${valueTypeCap}ArrayList(l);
     ${valueTypeCap}ArrayList lar2 = new ${valueTypeCap}ArrayList();
     for (int x = 0; x < lar.size(); x++) {

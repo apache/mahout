@@ -315,7 +315,7 @@ public class Open${keyTypeCap}${valueTypeCap}HashMapTest extends Assert {
     map.put(($keyType) 14, (${valueType}) 25);
     map.removeKey(($keyType) 13);
     Open${keyTypeCap}${valueTypeCap}HashMap map2 = (Open${keyTypeCap}${valueTypeCap}HashMap) map.copy();
-    assertTrue(map.equals(map2));
+    assertEquals(map, map2);
     assertTrue(map2.equals(map));
     assertFalse("Hello Sailor".equals(map));
     assertFalse(map.equals("hello sailor"));

@@ -703,7 +703,7 @@ public class DoubleFactory2D extends PersistentObject {
   public DoubleMatrix2D sample(DoubleMatrix2D matrix, double value, double nonZeroFraction) {
     int rows = matrix.rows();
     int columns = matrix.columns();
-    double epsilon = 1e-09;
+    double epsilon = 1.0e-9;
     if (nonZeroFraction < 0 - epsilon || nonZeroFraction > 1 + epsilon) {
       throw new IllegalArgumentException();
     }

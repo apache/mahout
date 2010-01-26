@@ -26,13 +26,11 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
-
-/**
- *
- *
- **/
 public class VectorHelper {
   private static final Pattern TAB_PATTERN = Pattern.compile("\t");
+
+  private VectorHelper() {
+  }
 
 
   /**
@@ -44,14 +42,14 @@ public class VectorHelper {
   public static String vectorToString(Vector vector, String [] dictionary){
     StringBuilder bldr = new StringBuilder(2048);
     String name = vector.getName();
-    if (name != null && name.equals("") == false) {
+    if (name != null && name.length() > 0) {
       bldr.append("Name: ").append(name).append(' ');
     }
     bldr.append("elts: {");
     Iterator<Vector.Element> iter = vector.iterateNonZero();
     boolean first = true;
     while (iter.hasNext()) {
-      if (first == true){
+      if (first){
         first = false;
       } else {
         bldr.append(", ");

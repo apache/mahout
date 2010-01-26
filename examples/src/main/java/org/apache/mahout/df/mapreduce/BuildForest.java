@@ -219,7 +219,7 @@ public class BuildForest extends Configured implements Tool {
     return forest;
   }
 
-  protected Data loadData(Configuration conf, Path dataPath, Dataset dataset) throws IOException {
+  protected static Data loadData(Configuration conf, Path dataPath, Dataset dataset) throws IOException {
     log.info("Loading the data...");
     FileSystem fs = dataPath.getFileSystem(conf);
     Data data = DataLoader.loadData(dataset, fs, dataPath);

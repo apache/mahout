@@ -133,7 +133,7 @@ public abstract class AbstractFormatter extends PersistentObject {
   }
 
   /** Converts a row into a string. */
-  protected int alignmentCode(String alignment) {
+  protected static int alignmentCode(String alignment) {
     //{-1,0,1,2} = {left,centered,right,decimal point}
     if (alignment.equals(LEFT)) {
       return -1;
@@ -188,7 +188,7 @@ public abstract class AbstractFormatter extends PersistentObject {
   }
 
   /** Returns a String with <tt>length</tt> blanks. */
-  protected String blanks(int length) {
+  protected static String blanks(int length) {
     if (length < 0) {
       length = 0;
     }

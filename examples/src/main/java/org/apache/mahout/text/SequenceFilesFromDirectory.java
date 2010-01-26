@@ -67,14 +67,14 @@ public final class SequenceFilesFromDirectory {
     writer.close();
   }
   
-  public class ChunkedWriter implements Closeable {
-    int maxChunkSizeInBytes;
-    String outputDir;
-    SequenceFile.Writer writer;
-    int currentChunkID;
-    int currentChunkSize;
-    Configuration conf = new Configuration();
-    FileSystem fs;
+  public static class ChunkedWriter implements Closeable {
+    private final int maxChunkSizeInBytes;
+    private final String outputDir;
+    private SequenceFile.Writer writer;
+    private int currentChunkID;
+    private int currentChunkSize;
+    private final Configuration conf = new Configuration();
+    private final FileSystem fs;
     
     public ChunkedWriter(int chunkSizeInMB, String outputDir) throws IOException {
       if (chunkSizeInMB < 64) {
@@ -117,9 +117,9 @@ public final class SequenceFilesFromDirectory {
   }
   
   public class PrefixAdditionFilter implements FileFilter {
-    String prefix;
-    ChunkedWriter writer;
-    Charset charset;
+    private final String prefix;
+    private final ChunkedWriter writer;
+    private final Charset charset;
     
     public PrefixAdditionFilter(String prefix,
                                 ChunkedWriter writer,
@@ -137,11 +137,9 @@ public final class SequenceFilesFromDirectory {
             + current.getName(), writer, charset));
       } else {
         try {
-          FileLineIterable fit = new FileLineIterable(current, charset, false);
           StringBuilder file = new StringBuilder();
-          Iterator<String> it = fit.iterator();
-          while (it.hasNext()) {
-            file.append(it.next()).append("\n");
+          for (String aFit : new FileLineIterable(current, charset, false)) {
+            file.append(aFit).append('\n');
           }
           writer.write(prefix + File.separator + current.getName(), file
               .toString());
@@ -211,8 +209,7 @@ public final class SequenceFilesFromDirectory {
     
     int chunkSize = 64;
     if (cmdLine.hasOption(chunkSizeOpt)) {
-      chunkSize =
-          Integer.valueOf((String) cmdLine.getValue(chunkSizeOpt)).intValue();
+      chunkSize = Integer.parseInt((String) cmdLine.getValue(chunkSizeOpt));
     }
     
     String prefix = "";

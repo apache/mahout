@@ -40,6 +40,7 @@ public class KeyBasedStringTupleMapper extends Mapper<LongWritable, Text, Text, 
 
   private int[] groupingFields = null;
 
+  @Override
   protected void map(LongWritable key, Text value, Context context) throws IOException,
       InterruptedException {
     String[] fields = splitter.split(value.toString());
@@ -63,6 +64,7 @@ public class KeyBasedStringTupleMapper extends Mapper<LongWritable, Text, Text, 
 
   }
 
+  @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Parameters params = Parameters.fromString(context.getConfiguration().get("job.parameters", ""));

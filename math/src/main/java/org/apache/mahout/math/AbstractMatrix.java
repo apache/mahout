@@ -463,16 +463,16 @@ public abstract class AbstractMatrix implements Matrix {
 
   protected class TransposeViewVector extends AbstractVector {
 
-    protected Matrix matrix;
-    protected int transposeOffset;
-    protected int numCols;
-    private boolean rowToColumn;
+    private final Matrix matrix;
+    private final int transposeOffset;
+    private final int numCols;
+    private final boolean rowToColumn;
 
-    public TransposeViewVector(Matrix m, int offset) {
+    protected TransposeViewVector(Matrix m, int offset) {
       this(m, offset, true);
     }
 
-    public TransposeViewVector(Matrix m, int offset, boolean rowToColumn) {
+    protected TransposeViewVector(Matrix m, int offset, boolean rowToColumn) {
       matrix = m;
       this.transposeOffset = offset;
       this.rowToColumn = rowToColumn;

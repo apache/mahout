@@ -231,7 +231,7 @@ public class Algebra extends PersistentObject {
   }
 
   /** Returns the one-norm of matrix <tt>A</tt>, which is the maximum absolute column sum. */
-  public double norm1(DoubleMatrix2D A) {
+  public static double norm1(DoubleMatrix2D A) {
     double max = 0;
     for (int column = A.columns(); --column >= 0;) {
       max = Math.max(max, norm1(A.viewColumn(column)));
@@ -240,7 +240,7 @@ public class Algebra extends PersistentObject {
   }
 
   /** Returns the two-norm (aka <i>euclidean norm</i>) of vector <tt>x</tt>; equivalent to <tt>mult(x,x)</tt>. */
-  public double norm2(DoubleMatrix1D x) {
+  public static double norm2(DoubleMatrix1D x) {
     return mult(x, x);
   }
 
@@ -274,7 +274,7 @@ public class Algebra extends PersistentObject {
   }
 
   /** Returns the infinity norm of matrix <tt>A</tt>, which is the maximum absolute row sum. */
-  public double normInfinity(DoubleMatrix2D A) {
+  public static double normInfinity(DoubleMatrix2D A) {
     double max = 0;
     for (int row = A.rows(); --row >= 0;) {
       //max = Math.max(max, normInfinity(A.viewRow(row)));
@@ -356,7 +356,7 @@ public class Algebra extends PersistentObject {
    * @return the modified <tt>A</tt> (for convenience only).
    * @throws IndexOutOfBoundsException if <tt>indexes.length != A.columns()</tt>.
    */
-  public DoubleMatrix2D permuteColumns(DoubleMatrix2D A, int[] indexes, int[] work) {
+  public static DoubleMatrix2D permuteColumns(DoubleMatrix2D A, int[] indexes, int[] work) {
     return permuteRows(A.viewDice(), indexes, work);
   }
 
@@ -383,7 +383,7 @@ public class Algebra extends PersistentObject {
    * @return the modified <tt>A</tt> (for convenience only).
    * @throws IndexOutOfBoundsException if <tt>indexes.length != A.rows()</tt>.
    */
-  public DoubleMatrix2D permuteRows(final DoubleMatrix2D A, int[] indexes, int[] work) {
+  public static DoubleMatrix2D permuteRows(final DoubleMatrix2D A, int[] indexes, int[] work) {
     // check validity
     int size = A.rows();
     if (indexes.length != size) {
@@ -548,7 +548,7 @@ public class Algebra extends PersistentObject {
    *
    * @return X; a new independent matrix; solution if A is square, least squares solution otherwise.
    */
-  public DoubleMatrix2D solveTranspose(DoubleMatrix2D A, DoubleMatrix2D B) {
+  public static DoubleMatrix2D solveTranspose(DoubleMatrix2D A, DoubleMatrix2D B) {
     return solve(transpose(A), transpose(B));
   }
 
@@ -650,7 +650,7 @@ public class Algebra extends PersistentObject {
    * trace         : 0
    * </pre>
    */
-  public String toString(DoubleMatrix2D matrix) {
+  public static String toString(DoubleMatrix2D matrix) {
     final ObjectArrayList<String> names = new ObjectArrayList<String>();
     final ObjectArrayList<String> values = new ObjectArrayList<String>();
 
@@ -909,7 +909,7 @@ public class Algebra extends PersistentObject {
    * 0.631761  0.532513  0.563301
    * </pre>
    */
-  public String toVerboseString(DoubleMatrix2D matrix) {
+  public static String toVerboseString(DoubleMatrix2D matrix) {
 /*
   StringBuffer buf = new StringBuffer();
   String unknown = "Illegal operation or error: ";

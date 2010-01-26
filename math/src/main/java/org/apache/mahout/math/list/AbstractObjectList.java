@@ -36,7 +36,7 @@ import java.util.Collection;
 
  @author wolfgang.hoschek@cern.ch
  @version 1.0, 09/24/99
- @see     ArrayList
+ @see      java.util.ArrayList
  @see      java.util.Vector
  @see      java.util.Arrays
  */

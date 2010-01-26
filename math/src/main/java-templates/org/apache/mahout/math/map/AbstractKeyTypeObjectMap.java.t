@@ -290,8 +290,8 @@ public abstract class Abstract${keyTypeCap}ObjectMap<T> extends AbstractSet {
       tempValueList[i] = get(keyList.getQuick(i));
     }
     valueList.clear();
-    for (int i = 0; i < tempValueList.length; i ++) {
-      valueList.add(tempValueList[i]);
+    for (T value : tempValueList) {
+      valueList.add(value);
     }
     
   }
@@ -311,7 +311,7 @@ public abstract class Abstract${keyTypeCap}ObjectMap<T> extends AbstractSet {
     keys(keyList);
     values(valueList);
     
-    if (valueList.size() > 0 && !(valueList.get(0) instanceof Comparable)) {
+    if (!valueList.isEmpty() && !(valueList.get(0) instanceof Comparable)) {
       throw new UnsupportedOperationException("Cannot sort the values; " 
           + valueList.get(0).getClass()
           + " does not implement Comparable");

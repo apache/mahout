@@ -398,7 +398,7 @@ public abstract class MatrixTest extends TestCase {
         assertTrue("Matrix times transpose not correct: " + i + ", " + j
             + "\nexpected:\n\t" + expected.asFormatString() + "\nactual:\n\t"
             + value.asFormatString(),
-            Math.abs(expected.get(i, j) - value.get(i, j)) < 1e-12);
+            Math.abs(expected.get(i, j) - value.get(i, j)) < 1.0e-12);
       }
     }
 
@@ -413,7 +413,7 @@ public abstract class MatrixTest extends TestCase {
     Vector expected = new DenseVector(new double[]{5.0, 11.0, 17.0});
     assertTrue("Matrix times vector not equals: " + vectorA.asFormatString()
         + " != " + testTimesVectorA.asFormatString(),
-        expected.minus(testTimesVectorA).norm(2) < 1e-12);
+        expected.minus(testTimesVectorA).norm(2) < 1.0e-12);
     try {
       test.times(testTimesVectorA);
       fail("Cardinalities do not match, should throw exception");
@@ -428,7 +428,7 @@ public abstract class MatrixTest extends TestCase {
     Vector ttASlow = test.transpose().times(test.times(vectorA));
     assertTrue("M'Mv != M.timesSquared(v): " + ttA.asFormatString()
         + " != " + ttASlow.asFormatString(),
-        ttASlow.minus(ttA).norm(2) < 1e-12);
+        ttASlow.minus(ttA).norm(2) < 1.0e-12);
 
   }
 

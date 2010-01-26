@@ -30,7 +30,6 @@ import java.util.Arrays;
 import org.apache.mahout.math.function.${keyTypeCap}Procedure;
 import org.apache.mahout.math.list.${keyTypeCap}ArrayList;
 import org.apache.mahout.math.map.PrimeFinder;
-import org.apache.mahout.math.set.AbstractSet;
 
 import org.junit.Assert;
 import org.junit.Test;

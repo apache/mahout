@@ -28,12 +28,12 @@ import java.util.Random;
 
 public abstract class SolverTest extends TestCase {
 
-  public SolverTest(String name) {
+  protected SolverTest(String name) {
     super(name);
   }
 
   public static void assertOrthonormal(Matrix eigens) {
-    assertOrthonormal(eigens, 1e-6);
+    assertOrthonormal(eigens, 1.0e-6);
   }
 
   public static void assertOrthonormal(Matrix currentEigens, double errorMargin) {
@@ -41,12 +41,14 @@ public abstract class SolverTest extends TestCase {
       Vector ei = currentEigens.getRow(i);
       for (int j = 0; j <= i; j++) {
         Vector ej = currentEigens.getRow(j);
-        if (ei.norm(2) == 0 || ej.norm(2) == 0) continue;
+        if (ei.norm(2) == 0 || ej.norm(2) == 0) {
+          continue;
+        }
         double dot = ei.dot(ej);
         if (i == j) {
-          assertTrue("not norm 1 : " + dot + " (eigen #" + i + ")", (Math.abs(1 - dot) < errorMargin));
+          assertTrue("not norm 1 : " + dot + " (eigen #" + i + ')', (Math.abs(1 - dot) < errorMargin));
         } else {
-          assertTrue("not orthogonal : " + dot + " (eigens " + i + ", " + j + ")", Math.abs(dot) < errorMargin);
+          assertTrue("not orthogonal : " + dot + " (eigens " + i + ", " + j + ')', Math.abs(dot) < errorMargin);
         }
       }
     }

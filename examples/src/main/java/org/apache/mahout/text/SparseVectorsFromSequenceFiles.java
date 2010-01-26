@@ -33,7 +33,10 @@ import org.apache.mahout.utils.vectors.text.DictionaryVectorizer;
  * 
  */
 public final class SparseVectorsFromSequenceFiles {
-  
+
+  private SparseVectorsFromSequenceFiles() {
+  }
+
   public static void main(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
@@ -85,8 +88,7 @@ public final class SparseVectorsFromSequenceFiles {
     
     int chunkSize = 100;
     if (cmdLine.hasOption(chunkSizeOpt)) {
-      chunkSize =
-          Integer.valueOf((String) cmdLine.getValue(chunkSizeOpt)).intValue();
+      chunkSize = Integer.parseInt((String) cmdLine.getValue(chunkSizeOpt));
     }
     int minSupport = 2;
     if (cmdLine.hasOption(minSupportOpt)) {

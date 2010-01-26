@@ -154,7 +154,7 @@ public class DoubleFactory1D extends PersistentObject {
    * @see org.apache.mahout.math.jet.random.sampling.RandomSampler
    */
   public DoubleMatrix1D sample(int size, double value, double nonZeroFraction) {
-    double epsilon = 1e-09;
+    double epsilon = 1.0e-9;
     if (nonZeroFraction < 0 - epsilon || nonZeroFraction > 1 + epsilon) {
       throw new IllegalArgumentException();
     }

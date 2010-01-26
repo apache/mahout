@@ -74,7 +74,7 @@ public class ClusterLabels {
     public final int outClusterDF;
     public double logLikelihoodRatio;
 
-    public TermInfoClusterInOut(String term, int inClusterDF, int outClusterDF) {
+    TermInfoClusterInOut(String term, int inClusterDF, int outClusterDF) {
       this.term = term;
       this.inClusterDF = inClusterDF;
       this.outClusterDF = outClusterDF;
@@ -132,12 +132,12 @@ public class ClusterLabels {
       writer = new OutputStreamWriter(System.out);
     }
 
-    for (String clusterID : clusterIdToPoints.keySet()) {
-      List<String> ids = clusterIdToPoints.get(clusterID);
-      List<TermInfoClusterInOut> termInfos = getClusterLabels(clusterID, ids);
+    for (Map.Entry<String, List<String>> stringListEntry : clusterIdToPoints.entrySet()) {
+      List<String> ids = stringListEntry.getValue();
+      List<TermInfoClusterInOut> termInfos = getClusterLabels(stringListEntry.getKey(), ids);
       if (termInfos != null) {
         writer.write('\n');
-        writer.write("Top labels for Cluster " + clusterID + " containing " + ids.size() + " vectors");
+        writer.write("Top labels for Cluster " + stringListEntry.getKey() + " containing " + ids.size() + " vectors");
         writer.write('\n');
         writer.write("Term \t\t LLR \t\t In-ClusterDF \t\t Out-ClusterDF ");
         writer.write('\n');
@@ -246,7 +246,8 @@ public class ClusterLabels {
   }
 
 
-  private OpenBitSet getClusterDocBitset(IndexReader reader, Set<String> idSet, String idField) throws IOException {
+  private static OpenBitSet getClusterDocBitset(IndexReader reader, Set<String> idSet, String idField)
+      throws IOException {
     int numDocs = reader.numDocs();
 
     OpenBitSet bitset = new OpenBitSet(numDocs);
@@ -269,7 +270,7 @@ public class ClusterLabels {
     return bitset;
   }
 
-  private double scoreDocumentFrequencies(int inDF, int outDF, int clusterSize, int corpusSize) {
+  private static double scoreDocumentFrequencies(int inDF, int outDF, int clusterSize, int corpusSize) {
     int k12 = clusterSize - inDF;
     int k22 = corpusSize - clusterSize - outDF;
 
@@ -351,11 +352,11 @@ public class ClusterLabels {
 
 
       String idField = null;
-      String output = null;
 
       if (cmdLine.hasOption(idFieldOpt)) {
         idField = cmdLine.getValue(idFieldOpt).toString();
       }
+      String output = null;
       if (cmdLine.hasOption(outputOpt)) {
         output = cmdLine.getValue(outputOpt).toString();
       }

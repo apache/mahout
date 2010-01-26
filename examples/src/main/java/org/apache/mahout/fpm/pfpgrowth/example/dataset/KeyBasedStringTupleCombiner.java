@@ -27,6 +27,7 @@ import org.apache.mahout.common.StringTuple;
 public class KeyBasedStringTupleCombiner extends
     Reducer<Text, StringTuple, Text, StringTuple> {
 
+  @Override
   protected void reduce(Text key, Iterable<StringTuple> values,
       Context context) throws IOException, InterruptedException {
     HashSet<String> outputValues = new HashSet<String>();
@@ -34,6 +35,6 @@ public class KeyBasedStringTupleCombiner extends
       outputValues.addAll(value.getEntries());
     }
     context.write(key, new StringTuple(outputValues));
-  };
+  }
 }
 

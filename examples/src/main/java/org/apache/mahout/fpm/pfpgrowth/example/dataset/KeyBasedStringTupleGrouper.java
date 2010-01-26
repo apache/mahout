@@ -50,8 +50,7 @@ import org.apache.mahout.common.StringTuple;
 
 public class KeyBasedStringTupleGrouper {
 
-
-  public void startJob(Parameters params) throws IOException,
+  public static void startJob(Parameters params) throws IOException,
       InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     

@@ -240,7 +240,7 @@ class DoubleBufferSet extends BufferSet {
    * @param triggerPositions the positions of elements within the sorted sequence to be retrieved
    * @return outputValues a list filled with the values at triggerPositions
    */
-  protected double[] getValuesAtPositions(DoubleBuffer[] buffers, long[] triggerPositions) {
+  protected static double[] getValuesAtPositions(DoubleBuffer[] buffers, long[] triggerPositions) {
 
     // sort buffers.
     for (int i = buffers.length; --i >= 0;) {

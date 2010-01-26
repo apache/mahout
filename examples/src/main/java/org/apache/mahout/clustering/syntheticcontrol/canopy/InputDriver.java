@@ -35,7 +35,6 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
-import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

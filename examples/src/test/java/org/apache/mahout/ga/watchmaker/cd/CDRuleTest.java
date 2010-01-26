@@ -17,7 +17,6 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import junit.framework.TestCase;
 import junit.framework.Assert;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.ga.watchmaker.cd.utils.MockDataSet;

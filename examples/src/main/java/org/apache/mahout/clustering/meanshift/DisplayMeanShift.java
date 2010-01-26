@@ -38,7 +38,8 @@ class DisplayMeanShift extends DisplayDirichlet {
     this.setTitle("Canopy Clusters (> 1.5% of population)");
   }
 
-  private static MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(new EuclideanDistanceMeasure(), 1.0, 0.05, 0.5);
+  private static final MeanShiftCanopyClusterer clusterer =
+      new MeanShiftCanopyClusterer(new EuclideanDistanceMeasure(), 1.0, 0.05, 0.5);
   private static List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
 
   // TODO this is never queried?

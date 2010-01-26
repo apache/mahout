@@ -29,29 +29,27 @@ import org.apache.mahout.utils.vectors.lucene.CachedTermInfo;
 import org.apache.mahout.utils.vectors.lucene.LuceneIterable;
 import org.apache.mahout.utils.vectors.lucene.TFDFMapper;
 import org.apache.mahout.utils.vectors.lucene.VectorMapper;
-import org.junit.After;
 import org.junit.Before;
 
 
 public class TestL1ModelClustering extends MahoutTestCase {
 
   @SuppressWarnings("unchecked")
-  private class MapElement implements Comparable {
+  private class MapElement implements Comparable<MapElement> {
 
-    public MapElement(double pdf, String doc) {
+    MapElement(double pdf, String doc) {
       super();
       this.pdf = pdf;
       this.doc = doc;
     }
 
-    Double pdf;
+    private final Double pdf;
 
-    String doc;
+    private final String doc;
 
     @Override
     // reverse compare to sort in reverse order
-    public int compareTo(Object o) {
-      MapElement e = (MapElement) o;
+    public int compareTo(MapElement e) {
       if (e.pdf > pdf)
         return 1;
       else if (e.pdf < pdf)
@@ -61,7 +59,7 @@ public class TestL1ModelClustering extends MahoutTestCase {
     }
 
     public String toString() {
-      return pdf.toString() + " " + doc.toString();
+      return pdf.toString() + ' ' + doc.toString();
     }
 
   }
@@ -74,8 +72,6 @@ public class TestL1ModelClustering extends MahoutTestCase {
 
   private List<VectorWritable> sampleData;
 
-  private RAMDirectory directory;
-
   private static final String[] DOCS2 = { "The quick red fox jumped over the lazy brown dogs.",
       "The quick brown fox jumped over the lazy red dogs.", "The quick red cat jumped over the lazy brown dogs.",
       "The quick brown cat jumped over the lazy red dogs.", "Mary had a little lamb whose fleece was white as snow.",
@@ -85,15 +81,16 @@ public class TestL1ModelClustering extends MahoutTestCase {
       "The robber wore a black fleece jacket and a baseball cap.", "The robber wore a red fleece jacket and a baseball cap.",
       "The robber wore a white fleece jacket and a baseball cap.", "The English Springer Spaniel is the best of all dogs." };
 
+  @Override
   @Before
-  protected void setUp() throws Exception {
+  public void setUp() throws Exception {
     super.setUp();
     RandomUtils.useTestSeed();
   }
 
-  private void getSampleData(String[] docs2) throws CorruptIndexException, LockObtainFailedException, IOException {
+  private void getSampleData(String[] docs2) throws IOException {
     sampleData = new ArrayList<VectorWritable>();
-    directory = new RAMDirectory();
+    RAMDirectory directory = new RAMDirectory();
     IndexWriter writer = new IndexWriter(directory, new StandardAnalyzer(Version.LUCENE_CURRENT), true,
         IndexWriter.MaxFieldLength.UNLIMITED);
     for (int i = 0; i < docs2.length; i++) {
@@ -120,11 +117,7 @@ public class TestL1ModelClustering extends MahoutTestCase {
     }
   }
 
-  @After
-  protected void tearDown() throws Exception {
-  }
-
-  private String formatVector(Vector v) {
+  private static String formatVector(Vector v) {
     StringBuilder buf = new StringBuilder();
     int nzero = 0;
     Iterator<Element> iterateNonZero = v.iterateNonZero();
@@ -132,26 +125,24 @@ public class TestL1ModelClustering extends MahoutTestCase {
       iterateNonZero.next();
       nzero++;
     }
-    buf.append("(").append(nzero);
+    buf.append('(').append(nzero);
     buf.append("nz) [");
+    // handle sparse Vectors gracefully, suppressing zero values
     int nextIx = 0;
-    if (v != null) {
-      // handle sparse Vectors gracefully, suppressing zero values
-      for (int i = 0; i < v.size(); i++) {
-        double elem = v.get(i);
-        if (elem == 0.0)
-          continue;
-        if (i > nextIx)
-          buf.append("..{").append(i).append("}=");
-        buf.append(String.format("%.2f", elem)).append(", ");
-        nextIx = i + 1;
-      }
+    for (int i = 0; i < v.size(); i++) {
+      double elem = v.get(i);
+      if (elem == 0.0)
+        continue;
+      if (i > nextIx)
+        buf.append("..{").append(i).append("}=");
+      buf.append(String.format("%.2f", elem)).append(", ");
+      nextIx = i + 1;
     }
-    buf.append("]");
+    buf.append(']');
     return buf.toString();
   }
 
-  private void printSamples(List<Model<VectorWritable>[]> result, int significant) {
+  private static void printSamples(List<Model<VectorWritable>[]> result, int significant) {
     int row = 0;
     for (Model<VectorWritable>[] r : result) {
       int sig = 0;

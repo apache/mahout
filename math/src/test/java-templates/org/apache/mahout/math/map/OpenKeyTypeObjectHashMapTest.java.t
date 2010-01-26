@@ -43,7 +43,7 @@ public class Open${keyTypeCap}ObjectHashMapTest extends Assert {
   
   private static class TestClass implements Comparable<TestClass>{
     
-    public TestClass(${keyType} x) {
+    TestClass(${keyType} x) {
       this.x = x;
     }
     
@@ -354,7 +354,7 @@ public class Open${keyTypeCap}ObjectHashMapTest extends Assert {
     map.put((${keyType}) 14, anotherItem4);
     map.removeKey((${keyType}) 13);
     Open${keyTypeCap}ObjectHashMap<TestClass> map2 = (Open${keyTypeCap}ObjectHashMap<TestClass>) map.copy();
-    assertTrue(map.equals(map2));
+    assertEquals(map, map2);
     assertTrue(map2.equals(map));
     assertFalse("Hello Sailor".equals(map));
     assertFalse(map.equals("hello sailor"));

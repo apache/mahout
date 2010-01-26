@@ -19,14 +19,8 @@ package org.apache.mahout.math.decomposer.hebbian;
 
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.Vector;
 
-import junit.framework.TestCase;
 import org.apache.mahout.math.decomposer.SolverTest;
-import org.apache.mahout.math.decomposer.lanczos.LanczosSolver;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This test is woefully inadequate, and also requires tons of memory, because it's part
@@ -56,22 +50,21 @@ public class TestHebbianSolver extends SolverTest {
                                 int maxNumPasses,
                                 int desiredRank,
                                 TrainingState state) throws Exception {
-    long time = 0;
     HebbianUpdater updater = new HebbianUpdater();
     SingularVectorVerifier verifier = new MultiThreadedEigenVerifier();
-    HebbianSolver solver;
-    solver = new HebbianSolver(updater,
-        verifier,
-        convergence,
-        maxNumPasses);
+    HebbianSolver solver = new HebbianSolver(updater,
+                                             verifier,
+                                             convergence,
+                                             maxNumPasses);
     long start = System.nanoTime();
     TrainingState finalState = solver.solve(corpus, desiredRank);
     assertNotNull(finalState);
     state.setCurrentEigens(finalState.getCurrentEigens());
     state.setCurrentEigenValues(finalState.getCurrentEigenValues());
+    long time = 0;
     time += System.nanoTime() - start;
     assertEquals(state.getCurrentEigens().numRows(), desiredRank);
-    return (long) (time / 1e6);
+    return (long) (time / 1000000);
   }
 
 
@@ -97,7 +90,7 @@ public class TestHebbianSolver extends SolverTest {
                                     state);
     eigens = state.getCurrentEigens();
     assertEigen(eigens, corpus, 0.05);
-    assertOrthonormal(eigens, 1e-6);
+    assertOrthonormal(eigens, 1.0e-6);
     System.out.println("Avg solving (Hebbian) time in ms: " + optimizedTime);
   }
 

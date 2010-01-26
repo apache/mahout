@@ -63,7 +63,7 @@ public class Property extends PersistentObject {
    *
    * @throws IllegalArgumentException if <tt>A.rows() < A.columns()</tt>.
    */
-  public void checkRectangular(AbstractMatrix2D A) {
+  public static void checkRectangular(AbstractMatrix2D A) {
     if (A.rows() < A.columns()) {
       throw new IllegalArgumentException("Matrix must be rectangular: " + AbstractFormatter.shape(A));
     }
@@ -74,14 +74,14 @@ public class Property extends PersistentObject {
    *
    * @throws IllegalArgumentException if <tt>A.rows() != A.columns()</tt>.
    */
-  public void checkSquare(AbstractMatrix2D A) {
+  public static void checkSquare(AbstractMatrix2D A) {
     if (A.rows() != A.columns()) {
       throw new IllegalArgumentException("Matrix must be square: " + AbstractFormatter.shape(A));
     }
   }
 
   /** Returns the matrix's fraction of non-zero cells; <tt>A.cardinality() / A.size()</tt>. */
-  public double density(DoubleMatrix2D A) {
+  public static double density(DoubleMatrix2D A) {
     return A.cardinality() / (double) A.size();
   }
 
@@ -315,7 +315,7 @@ public class Property extends PersistentObject {
    * @param A the square matrix to modify.
    * @throws IllegalArgumentException if <tt>!isSquare(A)</tt>.
    */
-  public void generateNonSingular(DoubleMatrix2D A) {
+  public static void generateNonSingular(DoubleMatrix2D A) {
     checkSquare(A);
     int min = Math.min(A.rows(), A.columns());
     for (int i = min; --i >= 0;) {
@@ -357,7 +357,7 @@ public class Property extends PersistentObject {
    * true if for all i: abs(A[i,i]) &gt; Sum(abs(A[j,i])); j != i.</tt> Matrix may but need not be square. <p> Note:
    * Ignores tolerance.
    */
-  public boolean isDiagonallyDominantByColumn(DoubleMatrix2D A) {
+  public static boolean isDiagonallyDominantByColumn(DoubleMatrix2D A) {
     //double epsilon = tolerance();
     int min = Math.min(A.rows(), A.columns());
     for (int i = min; --i >= 0;) {
@@ -376,7 +376,7 @@ public class Property extends PersistentObject {
    * all i: abs(A[i,i]) &gt; Sum(abs(A[i,j])); j != i.</tt> Matrix may but need not be square. <p> Note: Ignores
    * tolerance.
    */
-  public boolean isDiagonallyDominantByRow(DoubleMatrix2D A) {
+  public static boolean isDiagonallyDominantByRow(DoubleMatrix2D A) {
     //double epsilon = tolerance();
     int min = Math.min(A.rows(), A.columns());
     for (int i = min; --i >= 0;) {
@@ -456,7 +456,7 @@ public class Property extends PersistentObject {
    * A matrix <tt>A</tt> is <i>non-negative</i> if <tt>A[i,j] &gt;= 0</tt> holds for all cells. <p> Note: Ignores
    * tolerance.
    */
-  public boolean isNonNegative(DoubleMatrix2D A) {
+  public static boolean isNonNegative(DoubleMatrix2D A) {
     int rows = A.rows();
     int columns = A.columns();
     for (int row = rows; --row >= 0;) {
@@ -481,7 +481,7 @@ public class Property extends PersistentObject {
   }
 
   /** A matrix <tt>A</tt> is <i>positive</i> if <tt>A[i,j] &gt; 0</tt> holds for all cells. <p> Note: Ignores tolerance. */
-  public boolean isPositive(DoubleMatrix2D A) {
+  public static boolean isPositive(DoubleMatrix2D A) {
     int rows = A.rows();
     int columns = A.columns();
     for (int row = rows; --row >= 0;) {
@@ -522,7 +522,7 @@ public class Property extends PersistentObject {
   }
 
   /** A matrix <tt>A</tt> is <i>square</i> if it has the same number of rows and columns. */
-  public boolean isSquare(AbstractMatrix2D A) {
+  public static boolean isSquare(AbstractMatrix2D A) {
     return A.rows() == A.columns();
   }
 

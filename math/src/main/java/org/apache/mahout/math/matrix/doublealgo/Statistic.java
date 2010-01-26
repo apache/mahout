@@ -409,7 +409,7 @@ return result;
    */
   public static DoubleMatrix1D viewSample(DoubleMatrix1D matrix, double fraction, RandomEngine randomGenerator) {
     // check preconditions and allow for a little tolerance
-    double epsilon = 1e-09;
+    double epsilon = 1.0e-09;
     if (fraction < 0 - epsilon || fraction > 1 + epsilon) {
       throw new IllegalArgumentException();
     }
@@ -476,7 +476,7 @@ return result;
   public static DoubleMatrix2D viewSample(DoubleMatrix2D matrix, double rowFraction, double columnFraction,
                                           RandomEngine randomGenerator) {
     // check preconditions and allow for a little tolerance
-    double epsilon = 1e-09;
+    double epsilon = 1.0e-09;
     if (rowFraction < 0 - epsilon || rowFraction > 1 + epsilon) {
       throw new IllegalArgumentException();
     }
@@ -547,7 +547,7 @@ return result;
   public static DoubleMatrix3D viewSample(DoubleMatrix3D matrix, double sliceFraction, double rowFraction,
                                           double columnFraction, RandomEngine randomGenerator) {
     // check preconditions and allow for a little tolerance
-    double epsilon = 1e-09;
+    double epsilon = 1.0e-09;
     if (sliceFraction < 0 - epsilon || sliceFraction > 1 + epsilon) {
       throw new IllegalArgumentException();
     }

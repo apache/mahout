@@ -27,7 +27,6 @@ import org.apache.mahout.common.RandomUtils;
 import org.uncommons.maths.random.MersenneTwisterRNG;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 

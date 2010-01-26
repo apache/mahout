@@ -175,8 +175,7 @@ public final class DictionaryVectorizer {
         fs
             .globStatus(new Path(wordCountPath.toString()
                 + OUTPUT_FILES_PATTERN));
-    
-    long i = 0;
+
     long chunkSizeLimit = chunkSizeInMegabytes * 1024 * 1024;
     int chunkIndex = 0;
     Path chunkPath = getPath(dictionaryPathBase + DICTIONARY_FILE, chunkIndex);
@@ -191,7 +190,8 @@ public final class DictionaryVectorizer {
             + FREQUENCY_FILE, chunkIndex), Text.class, LongWritable.class);
     
     long currentChunkSize = 0;
-    
+
+    long i = 0;
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);

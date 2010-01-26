@@ -50,7 +50,7 @@ public class HebbianSolver {
   private final Random rng = new Random();
 
   private int numPasses = 0;
-  private final boolean debug = false;
+  private static final boolean debug = false;
 
   /**
    * Creates a new HebbianSolver
@@ -142,7 +142,7 @@ public class HebbianSolver {
    *                          before the solver will move on to the next eigen-vector.
    */
   public HebbianSolver(int numPassesPerEigen) {
-    this(0d, numPassesPerEigen);
+    this(0.0, numPassesPerEigen);
   }
 
   /**

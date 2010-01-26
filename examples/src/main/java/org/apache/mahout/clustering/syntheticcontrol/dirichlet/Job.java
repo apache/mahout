@@ -160,12 +160,10 @@ public class Job {
    * @param alpha_0 the double alpha_0 value
    * @throws InvocationTargetException 
    * @throws NoSuchMethodException 
-   * @throws IllegalArgumentException 
-   * @throws SecurityException 
-   * @throws NumberFormatException 
+   * @throws SecurityException
    */
   public static void printResults(String output, String modelDistribution, String vectorClassName, int prototypeSize,
-      int numIterations, int numModels, double alpha_0) throws NumberFormatException, SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
+      int numIterations, int numModels, double alpha_0) throws SecurityException, NoSuchMethodException, InvocationTargetException {
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     JobConf conf = new JobConf(KMeansDriver.class);
     conf.set(DirichletDriver.MODEL_FACTORY_KEY, modelDistribution);

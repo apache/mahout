@@ -244,7 +244,7 @@ class KnownDoubleQuantileEstimator extends DoubleQuantileEstimator {
    * @param infinities the number of infinities previously filled.
    * @param buffer     the buffer into which the infinities were filled.
    */
-  protected void removeInfinitiesFrom(int infinities, DoubleBuffer buffer) {
+  protected static void removeInfinitiesFrom(int infinities, DoubleBuffer buffer) {
     int plusInf = 0;
     int minusInf = 0;
     // count them (this is not very clever but it's safe)

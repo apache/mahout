@@ -8,11 +8,12 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.stat;
 
+import org.apache.mahout.math.jet.math.Constants;
 import org.apache.mahout.math.jet.math.Polynomial;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class Probability extends org.apache.mahout.math.jet.math.Constants {
+public class Probability extends Constants {
 
   /**
    * ********************************************** COEFFICIENTS FOR METHOD  normalInverse()   *
@@ -766,7 +767,7 @@ public class Probability extends org.apache.mahout.math.jet.math.Constants {
 
       // Calculate function value at x3
       double f3 = studentT(size, x3) - cumProb;
-      if (Math.abs(f3) < 1e-8) { // This criteria needs to be very tight!
+      if (Math.abs(f3) < 1.0e-8) { // This criteria needs to be very tight!
         // We found a perfect value -> return
         return x3;
       }

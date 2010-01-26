@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.dirichlet.DisplayDirichlet;
-import org.apache.mahout.clustering.kmeans.Cluster;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.distance.DistanceMeasure;

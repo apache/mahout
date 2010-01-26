@@ -49,7 +49,7 @@ public class CodeGenerator extends AbstractMojo {
   
   private static final String[] NO_STRINGS = {null};
   private static final Charset UTF8 = Charset.forName("utf-8");
-  private Map<String,String> typeToObjectTypeMap;
+  private final Map<String,String> typeToObjectTypeMap;
   
   /**
    * @parameter default-value="${basedir}/src/test/java-templates"
@@ -127,9 +127,8 @@ public class CodeGenerator extends AbstractMojo {
    * @required
    */
   private MavenProject project;
-  private VelocityEngine mainVelocityEngine;
   private VelocityEngine testVelocityEngine;
-  private FileSetManager fileSetManager;
+  private final FileSetManager fileSetManager;
   
   public CodeGenerator() {
     typeToObjectTypeMap = new HashMap<String,String>();
@@ -144,6 +143,7 @@ public class CodeGenerator extends AbstractMojo {
     fileSetManager = new FileSetManager(getLog());
   }
   
+  @Override
   public void execute() throws MojoExecutionException {
     File f = outputDirectory;
     
@@ -154,8 +154,8 @@ public class CodeGenerator extends AbstractMojo {
     if (testOutputDirectory != null && !testOutputDirectory.exists()) {
       testOutputDirectory.mkdirs();
     }
-    
-    mainVelocityEngine = new VelocityEngine();
+
+    VelocityEngine mainVelocityEngine = new VelocityEngine();
     mainVelocityEngine.setProperty("file.resource.loader.path", sourceTemplateRoot);
     if (testTemplateRoot != null) {
       testVelocityEngine = new VelocityEngine();

@@ -110,7 +110,7 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
     while (x < 0.0) {
       if (x == 0.0) {
         throw new ArithmeticException("gamma: singular");
-      } else if (x > -1.E-9) {
+      } else if (x > -1.0e-9) {
         return (z / ((1.0 + 0.5772156649015329 * x) * x));
       }
       z /= x;
@@ -120,7 +120,7 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
     while (x < 2.0) {
       if (x == 0.0) {
         throw new ArithmeticException("gamma: singular");
-      } else if (x < 1.e-9) {
+      } else if (x < 1.0e-9) {
         return (z / ((1.0 + 0.5772156649015329 * x) * x));
       }
       z /= x;

@@ -33,7 +33,6 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.GenericsUtil;
-import org.apache.lucene.analysis.Analyzer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +64,7 @@ public class WikipediaMapper extends MapReduceBase implements
                   Reporter reporter) throws IOException {
     
     String content = value.toString();
-    if (content.indexOf(REDIRECT) != -1) return;
+    if (content.contains(REDIRECT)) return;
     String document = "";
     String title = "";
     try {
@@ -87,13 +86,13 @@ public class WikipediaMapper extends MapReduceBase implements
     
   }
   
-  private String getDocument(String xml) {
+  private static String getDocument(String xml) {
     int start = xml.indexOf(START_DOC) + START_DOC.length();
     int end = xml.indexOf(END_DOC, start);
     return xml.substring(start, end);
   }
   
-  private String getTitle(String xml) {
+  private static String getTitle(String xml) {
     Matcher m = TITLE.matcher(xml);
     String ret = "";
     if (m.find()) {

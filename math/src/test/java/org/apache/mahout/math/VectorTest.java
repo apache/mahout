@@ -60,47 +60,42 @@ public class VectorTest extends TestCase {
     assertEquals("equals didn't work", randomAccessLeft, right);
     assertEquals("equals didn't work", sequentialAccessLeft, right);
     assertEquals("equals didn't work", sequentialAccessLeft, randomAccessLeft);
-    assertEquals("equivalent didn't work", false,
-            AbstractVector.strictEquivalence(randomAccessLeft, right));
-    assertEquals("equivalent didn't work", false,
-            AbstractVector.strictEquivalence(randomAccessLeft, sequentialAccessLeft));
-    assertEquals("equivalent didn't work", false,
-            AbstractVector.strictEquivalence(sequentialAccessLeft, right));
+    assertFalse("equivalent didn't work", AbstractVector.strictEquivalence(randomAccessLeft, right));
+    assertFalse("equivalent didn't work", AbstractVector.strictEquivalence(randomAccessLeft, sequentialAccessLeft));
+    assertFalse("equivalent didn't work", AbstractVector.strictEquivalence(sequentialAccessLeft, right));
 
     DenseVector leftBar = new DenseVector("bar", 3);
     leftBar.setQuick(0, 1);
     leftBar.setQuick(1, 2);
     leftBar.setQuick(2, 3);
     assertTrue("equivalent didn't work", AbstractVector.equivalent(leftBar, right));
-    assertEquals("equals didn't work", false, leftBar.equals(right));
-    assertEquals("equivalent didn't work", false,
-            AbstractVector.strictEquivalence(randomAccessLeft, right));
-    assertEquals("equivalent didn't work", false,
-            AbstractVector.strictEquivalence(sequentialAccessLeft, right));
+    assertFalse("equals didn't work", leftBar.equals(right));
+    assertFalse("equivalent didn't work", AbstractVector.strictEquivalence(randomAccessLeft, right));
+    assertFalse("equivalent didn't work", AbstractVector.strictEquivalence(sequentialAccessLeft, right));
 
     RandomAccessSparseVector rightBar = new RandomAccessSparseVector("bar", 3);
     rightBar.setQuick(0, 1);
     rightBar.setQuick(1, 2);
     rightBar.setQuick(2, 3);
     assertTrue("equivalent didn't work", AbstractVector.equivalent(randomAccessLeft, rightBar));
-    assertEquals("equals didn't work", false, randomAccessLeft.equals(rightBar));
-    assertEquals("equivalent didn't work", false, AbstractVector.strictEquivalence(randomAccessLeft, rightBar));
+    assertFalse("equals didn't work", randomAccessLeft.equals(rightBar));
+    assertFalse("equivalent didn't work", AbstractVector.strictEquivalence(randomAccessLeft, rightBar));
 
     right.setQuick(2, 4);
-    assertEquals("equivalent didn't work", false, AbstractVector.equivalent(randomAccessLeft, right));
-    assertEquals("equals didn't work", false, randomAccessLeft.equals(right));
+    assertFalse("equivalent didn't work", AbstractVector.equivalent(randomAccessLeft, right));
+    assertFalse("equals didn't work", randomAccessLeft.equals(right));
     right = new DenseVector(4);
     right.setQuick(0, 1);
     right.setQuick(1, 2);
     right.setQuick(2, 3);
     right.setQuick(3, 3);
-    assertEquals("equivalent didn't work", false, AbstractVector.equivalent(randomAccessLeft, right));
-    assertEquals("equals didn't work", false, randomAccessLeft.equals(right));
+    assertFalse("equivalent didn't work", AbstractVector.equivalent(randomAccessLeft, right));
+    assertFalse("equals didn't work", randomAccessLeft.equals(right));
     randomAccessLeft = new RandomAccessSparseVector(2);
     randomAccessLeft.setQuick(0, 1);
     randomAccessLeft.setQuick(1, 2);
-    assertEquals("equivalent didn't work", false, AbstractVector.equivalent(randomAccessLeft, right));
-    assertEquals("equals didn't work", false, randomAccessLeft.equals(right));
+    assertFalse("equivalent didn't work", AbstractVector.equivalent(randomAccessLeft, right));
+    assertFalse("equals didn't work", randomAccessLeft.equals(right));
 
     DenseVector dense = new DenseVector(3);
     right = new DenseVector(3);
@@ -110,9 +105,8 @@ public class VectorTest extends TestCase {
     dense.setQuick(0, 1);
     dense.setQuick(1, 2);
     dense.setQuick(2, 3);
-    assertEquals("equivalent didn't work", true,
-            AbstractVector.equivalent(dense, right));
-    assertEquals("equals didn't work", true, dense.equals(right));
+    assertTrue("equivalent didn't work", AbstractVector.equivalent(dense, right));
+    assertTrue("equals didn't work", dense.equals(right));
 
     RandomAccessSparseVector sparse = new RandomAccessSparseVector(3);
     randomAccessLeft = new RandomAccessSparseVector(3);
@@ -122,21 +116,18 @@ public class VectorTest extends TestCase {
     randomAccessLeft.setQuick(0, 1);
     randomAccessLeft.setQuick(1, 2);
     randomAccessLeft.setQuick(2, 3);
-    assertEquals("equivalent didn't work", true,
-            AbstractVector.equivalent(sparse, randomAccessLeft));
-    assertEquals("equals didn't work", true, randomAccessLeft.equals(sparse));
+    assertTrue("equivalent didn't work", AbstractVector.equivalent(sparse, randomAccessLeft));
+    assertTrue("equals didn't work", randomAccessLeft.equals(sparse));
 
     VectorView v1 = new VectorView(randomAccessLeft, 0, 2);
     VectorView v2 = new VectorView(right, 0, 2);
-    assertEquals("equivalent didn't work", true,
-            AbstractVector.equivalent(v1, v2));
-    assertEquals("equals didn't work", true, v1.equals(v2));
+    assertTrue("equivalent didn't work", AbstractVector.equivalent(v1, v2));
+    assertTrue("equals didn't work", v1.equals(v2));
     sparse = new RandomAccessSparseVector(2);
     sparse.setQuick(0, 1);
     sparse.setQuick(1, 2);
-    assertEquals("equivalent didn't work", true,
-            AbstractVector.equivalent(v1, sparse));
-    assertEquals("equals didn't work", true, v1.equals(sparse));
+    assertTrue("equivalent didn't work", AbstractVector.equivalent(v1, sparse));
+    assertTrue("equals didn't work", v1.equals(sparse));
 
   }
 

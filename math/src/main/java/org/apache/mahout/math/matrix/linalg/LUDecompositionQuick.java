@@ -318,7 +318,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
    *
    * @return <tt>A</tt> (for convenience only).
    */
-  protected DoubleMatrix2D lowerTriangular(DoubleMatrix2D A) {
+  protected static DoubleMatrix2D lowerTriangular(DoubleMatrix2D A) {
     int rows = A.rows();
     int columns = A.columns();
     int min = Math.min(rows, columns);
@@ -338,16 +338,10 @@ public class LUDecompositionQuick implements java.io.Serializable {
     return A;
   }
 
-  /**
-   *
-   */
   protected int m() {
     return LU.rows();
   }
 
-  /**
-   *
-   */
   protected int n() {
     return LU.columns();
   }
@@ -673,7 +667,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
    *
    * @return <tt>A</tt> (for convenience only).
    */
-  protected DoubleMatrix2D upperTriangular(DoubleMatrix2D A) {
+  protected static DoubleMatrix2D upperTriangular(DoubleMatrix2D A) {
     int rows = A.rows();
     int columns = A.columns();
     int min = Math.min(rows, columns);

@@ -46,11 +46,10 @@ public class PartialVectorGenerator extends MapReduceBase implements
     Reducer<Text,Text,Text,VectorWritable> {
   private Analyzer analyzer;
   private final Map<String,int[]> dictionary = new HashMap<String,int[]>();
-  private FileSystem fs; // local filesystem
-  private URI[] localFiles; // local filenames from the distributed cache
-  
+
   private final VectorWritable vectorWritable = new VectorWritable();
   
+  @Override
   public void reduce(Text key,
                      Iterator<Text> values,
                      OutputCollector<Text,VectorWritable> output,
@@ -81,14 +80,14 @@ public class PartialVectorGenerator extends MapReduceBase implements
   public void configure(JobConf job) {
     super.configure(job);
     try {
-      
-      localFiles = DistributedCache.getCacheFiles(job);
+
+      URI[] localFiles = DistributedCache.getCacheFiles(job);
       if (localFiles == null || localFiles.length < 1) {
         throw new IllegalArgumentException(
             "missing paths from the DistributedCache");
       }
       Path dictionaryFile = new Path(localFiles[0].getPath());
-      fs = dictionaryFile.getFileSystem(job);
+      FileSystem fs = dictionaryFile.getFileSystem(job);
       SequenceFile.Reader reader =
           new SequenceFile.Reader(fs, dictionaryFile, job);
       Text key = new Text();
