@@ -57,6 +57,9 @@ public final class FastIDSet implements Serializable, Cloneable {
     Arrays.fill(keys, NULL);
   }
 
+  /**
+   * @see #findForAdd(long)
+   */
   private int find(long key) {
     int theHashCode = (int) key & 0x7FFFFFFF; // make sure it's positive
     long[] keys = this.keys;
@@ -64,7 +67,28 @@ public final class FastIDSet implements Serializable, Cloneable {
     int jump = 1 + theHashCode % (hashSize - 2);
     int index = theHashCode % hashSize;
     long currentKey = keys[index];
-    while (currentKey != NULL && (currentKey == REMOVED || key != currentKey)) {
+    while (currentKey != NULL && key != currentKey) { // note: true when currentKey == REMOVED
+      if (index < jump) {
+        index += hashSize - jump;
+      } else {
+        index -= jump;
+      }
+      currentKey = keys[index];
+    }
+    return index;
+  }
+
+  /**
+   * @see #find(long)
+   */
+  private int findForAdd(long key) {
+    int theHashCode = (int) key & 0x7FFFFFFF; // make sure it's positive
+    long[] keys = this.keys;
+    int hashSize = keys.length;
+    int jump = 1 + theHashCode % (hashSize - 2);
+    int index = theHashCode % hashSize;
+    long currentKey = keys[index];
+    while (currentKey != NULL && currentKey != REMOVED && key != currentKey) { // Different here
       if (index < jump) {
         index += hashSize - jump;
       } else {
@@ -102,11 +126,14 @@ public final class FastIDSet implements Serializable, Cloneable {
       }
     }
     // Here we may later consider implementing Brent's variation described on page 532
-    int index = find(key);
-    if (keys[index] == NULL) {
+    int index = findForAdd(key);
+    long keyIndex = keys[index];
+    if (keyIndex != key) {
       keys[index] = key;
       numEntries++;
-      numSlotsUsed++;
+      if (keyIndex == NULL) {
+        numSlotsUsed++;
+      }
       return true;
     }
     return false;

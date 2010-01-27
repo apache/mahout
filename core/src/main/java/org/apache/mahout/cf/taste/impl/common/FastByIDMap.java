@@ -86,6 +86,9 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     this.recentlyAccessed = countingAccesses ? new BitSet(hashSize) : null;
   }
 
+  /**
+   * @see #findForAdd(long)
+   */
   private int find(long key) {
     int theHashCode = (int) key & 0x7FFFFFFF; // make sure it's positive
     long[] keys = this.keys;
@@ -93,7 +96,28 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     int jump = 1 + theHashCode % (hashSize - 2);
     int index = theHashCode % hashSize;
     long currentKey = keys[index];
-    while (currentKey != NULL && (currentKey == REMOVED || key != currentKey)) {
+    while (currentKey != NULL && key != currentKey) {
+      if (index < jump) {
+        index += hashSize - jump;
+      } else {
+        index -= jump;
+      }
+      currentKey = keys[index];
+    }
+    return index;
+  }
+
+  /**
+   * @see #find(long)
+   */
+  private int findForAdd(long key) {
+    int theHashCode = (int) key & 0x7FFFFFFF; // make sure it's positive
+    long[] keys = this.keys;
+    int hashSize = keys.length;
+    int jump = 1 + theHashCode % (hashSize - 2);
+    int index = theHashCode % hashSize;
+    long currentKey = keys[index];
+    while (currentKey != NULL && currentKey != REMOVED && key != currentKey) { // Different here
       if (index < jump) {
         index += hashSize - jump;
       } else {
@@ -157,8 +181,13 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
       }
     }
     // Here we may later consider implementing Brent's variation described on page 532
-    int index = find(key);
-    if (keys[index] == NULL) {
+    int index = findForAdd(key);
+    long keyIndex = keys[index];
+    if (keyIndex == key) {
+      V oldValue = values[index];
+      values[index] = value;
+      return oldValue;
+    } else {
       // If size is limited,
       if (countingAccesses && numEntries >= maxSize) {
         // and we're too large, clear some old-ish entry
@@ -167,12 +196,10 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
       keys[index] = key;
       values[index] = value;
       numEntries++;
-      numSlotsUsed++;
+      if (keyIndex == NULL) {
+        numSlotsUsed++;
+      }
       return null;
-    } else {
-      V oldValue = values[index];
-      values[index] = value;
-      return oldValue;
     }
   }
 
