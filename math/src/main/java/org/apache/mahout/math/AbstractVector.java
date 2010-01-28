@@ -242,7 +242,8 @@ public abstract class AbstractVector implements Vector {
     while(it.hasNext() && (e = it.next()) != null) {
       d += e.get() * (e.get() - 2 * randomlyAccessed.getQuick(e.index()));
     }
-    return d;
+    assert(d > -1e-9); // round-off errors should never be too far off!
+    return Math.abs(d);
   }
 
   @Override
