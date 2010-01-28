@@ -20,6 +20,9 @@ package org.apache.mahout.math;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.UnaryFunction;
+
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -51,6 +54,22 @@ public abstract class AbstractVector implements Vector {
   protected AbstractVector(String name, int size) {
     this.name = name;
     this.size = size;
+  }
+
+  public double aggregate(BinaryFunction aggregator, UnaryFunction map) {
+    double result = 0;
+    for(int i=0; i<size(); i++) {
+      result = aggregator.apply(result, map.apply(getQuick(i)) );
+    }
+    return result;
+  }
+
+  public double aggregate(Vector other, BinaryFunction aggregator, BinaryFunction combiner) {
+    double result = 0;
+    for(int i=0; i<size(); i++) {
+      result = aggregator.apply(result, combiner.apply(getQuick(i), other.getQuick(i)));
+    }
+    return result;
   }
 
   /**
@@ -156,11 +175,21 @@ public abstract class AbstractVector implements Vector {
     }
     // we can special case certain powers
     if (Double.isInfinite(power)) {
-      return maxValue();
+      double val = 0.0;
+      Iterator<Element> iter = this.iterateNonZero();
+      while (iter.hasNext()) {
+        val = Math.max(val, Math.abs(iter.next().get()));
+      }
+      return val;
     } else if (power == 2.0) {
       return Math.sqrt(dot(this));
     } else if (power == 1.0) {
-      return zSum();
+      double val = 0.0;
+      Iterator<Element> iter = this.iterateNonZero();
+      while (iter.hasNext()) {
+        val += Math.abs(iter.next().get());
+      }
+      return val;
     } else if (power == 0.0) {
       // this is the number of non-zero elements
       double val = 0.0;
@@ -190,19 +219,32 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public double getDistanceSquared(Vector v) {
-    double d = 0;
-    Iterator<Element> it = iterateNonZero();
+    // if this and v has a cached lengthSquared, dot product is quickest way to compute this.
+    if(lengthSquared >= 0 && v instanceof AbstractVector && ((AbstractVector)v).lengthSquared >= 0) {
+      return lengthSquared + v.getLengthSquared() - 2 * this.dot(v);
+    }
+    Vector randomlyAccessed;
+    Iterator<Element> it;
     Element e;
+    double d = 0;
+    if(lengthSquared >= 0 ) {
+      it = v.iterateNonZero();
+      randomlyAccessed = this;
+      d += lengthSquared;
+    } else { // TODO: could be further optimized, figure out which one is smaller, etc
+      it = iterateNonZero();
+      randomlyAccessed = v;
+      d += v.getLengthSquared();
+    }
     while(it.hasNext() && (e = it.next()) != null) {
-      double diff = e.get() - v.getQuick(e.index());
-      d += (diff * diff);
+      d += e.get() * (e.get() - 2 * randomlyAccessed.getQuick(e.index()));
     }
     return d;
   }
 
   @Override
   public double maxValue() {
-    double result = Double.MIN_VALUE;
+    double result = Double.NEGATIVE_INFINITY;
     for (int i = 0; i < size(); i++) {
       result = Math.max(result, getQuick(i));
     }
@@ -212,7 +254,7 @@ public abstract class AbstractVector implements Vector {
   @Override
   public int maxValueIndex() {
     int result = -1;
-    double max = Double.MIN_VALUE;
+    double max = Double.NEGATIVE_INFINITY;
     for (int i = 0; i < size(); i++) {
       double tmp = getQuick(i);
       if (tmp > max) {
@@ -342,16 +384,30 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public Vector assign(BinaryFunction f, double y) {
-    for (int i = 0; i < size(); i++) {
-      setQuick(i, f.apply(getQuick(i), y));
+    Iterator<Element> it;
+    Element e;
+    if(f.apply(0, y) == 0) {
+      it = iterateNonZero();
+    } else {
+      it = iterateAll();
+    }
+    while(it.hasNext() && (e = it.next()) != null) {
+      e.set(f.apply(e.get(), y));
     }
     return this;
   }
 
   @Override
   public Vector assign(UnaryFunction function) {
-    for (int i = 0; i < size(); i++) {
-      setQuick(i, function.apply(getQuick(i)));
+    Iterator<Element> it;
+    Element e;
+    if(function.apply(0) == 0) {
+      it = iterateNonZero();
+    } else {
+      it = iterateAll();
+    }
+    while(it.hasNext() && (e = it.next()) != null) {
+      e.set(function.apply(e.get()));
     }
     return this;
   }

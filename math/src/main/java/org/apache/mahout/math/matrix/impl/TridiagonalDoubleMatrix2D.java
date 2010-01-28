@@ -8,11 +8,12 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.impl;
 
-import org.apache.mahout.math.function.DoubleDoubleFunction;
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.function.Mult;
+import org.apache.mahout.math.function.PlusMult;
+import org.apache.mahout.math.function.UnaryFunction;
 import org.apache.mahout.math.function.IntIntDoubleFunction;
-import org.apache.mahout.math.jet.math.Functions;
-import org.apache.mahout.math.jet.math.Mult;
-import org.apache.mahout.math.jet.math.PlusMult;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 
@@ -112,7 +113,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
   }
 
   @Override
-  public DoubleMatrix2D assign(final org.apache.mahout.math.function.DoubleFunction function) {
+  public DoubleMatrix2D assign(final UnaryFunction function) {
     if (function instanceof Mult) { // x[i] = mult*x[i]
       double alpha = ((Mult) function).getMultiplicator();
       if (alpha == 1) {
@@ -185,7 +186,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
 
   @Override
   public DoubleMatrix2D assign(final DoubleMatrix2D y,
-                               DoubleDoubleFunction function) {
+                               BinaryFunction function) {
     checkShape(y);
 
     if (function instanceof PlusMult) { // x[i] = x[i] + alpha*y[i]
@@ -205,7 +206,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
       return this;
     }
 
-    if (function == org.apache.mahout.math.jet.math.Functions.mult) { // x[i] = x[i] * y[i]
+    if (function == Functions.mult) { // x[i] = x[i] * y[i]
       forEachNonZero(
           new IntIntDoubleFunction() {
             @Override
@@ -218,7 +219,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
       return this;
     }
 
-    if (function == org.apache.mahout.math.jet.math.Functions.div) { // x[i] = x[i] / y[i]
+    if (function == Functions.div) { // x[i] = x[i] / y[i]
       forEachNonZero(
           new IntIntDoubleFunction() {
             @Override
@@ -506,7 +507,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
       Crows[i] = C.viewRow(i);
     }
 
-    final org.apache.mahout.math.jet.math.PlusMult fun = org.apache.mahout.math.jet.math.PlusMult.plusMult(0);
+    final PlusMult fun = PlusMult.plusMult(0);
 
     forEachNonZero(
         new IntIntDoubleFunction() {

@@ -8,9 +8,11 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.impl;
 
-import org.apache.mahout.math.function.DoubleFunction;
-import org.apache.mahout.math.jet.math.Mult;
-import org.apache.mahout.math.jet.math.PlusMult;
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.function.Mult;
+import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.PlusMult;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 
@@ -143,10 +145,10 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
    *
    * @param function a function object taking as argument the current cell's value.
    * @return <tt>this</tt> (for convenience only).
-   * @see org.apache.mahout.math.jet.math.Functions
+   * @see org.apache.mahout.math.function.Functions
    */
   @Override
-  public DoubleMatrix2D assign(DoubleFunction function) {
+  public DoubleMatrix2D assign(UnaryFunction function) {
     double[] elems = this.elements;
     if (elems == null) {
       throw new InternalError();
@@ -255,7 +257,7 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
    * 0 2
    * 4 6
    *
-   * m1.assign(m2, org.apache.mahout.math.jet.math.Functions.pow);
+   * m1.assign(m2, org.apache.mahout.math.function.Functions.pow);
    * -->
    * m1 == 2 x 2 matrix
    * 1   1
@@ -268,10 +270,10 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
    *                 argument the current cell's value of <tt>y</tt>,
    * @return <tt>this</tt> (for convenience only).
    * @throws IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
-   * @see org.apache.mahout.math.jet.math.Functions
+   * @see org.apache.mahout.math.function.Functions
    */
   @Override
-  public DoubleMatrix2D assign(DoubleMatrix2D y, org.apache.mahout.math.function.DoubleDoubleFunction function) {
+  public DoubleMatrix2D assign(DoubleMatrix2D y, BinaryFunction function) {
     // overriden for performance only
     if (!(y instanceof DenseDoubleMatrix2D)) {
       return super.assign(y, function);
@@ -293,7 +295,7 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
     int index = index(0, 0);
 
     // specialized for speed
-    if (function == org.apache.mahout.math.jet.math.Functions.mult) { // x[i] = x[i] * y[i]
+    if (function == Functions.mult) { // x[i] = x[i] * y[i]
       for (int row = rows; --row >= 0;) {
         for (int i = index, j = otherIndex, column = columns; --column >= 0;) {
           elems[i] *= otherElems[j];
@@ -303,7 +305,7 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
         index += rs;
         otherIndex += ors;
       }
-    } else if (function == org.apache.mahout.math.jet.math.Functions.div) { // x[i] = x[i] / y[i]
+    } else if (function == Functions.div) { // x[i] = x[i] / y[i]
       for (int row = rows; --row >= 0;) {
         for (int i = index, j = otherIndex, column = columns; --column >= 0;) {
           elems[i] /= otherElems[j];

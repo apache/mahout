@@ -8,9 +8,10 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.linalg;
 
-import org.apache.mahout.math.function.DoubleDoubleFunction;
-import org.apache.mahout.math.jet.math.Functions;
-import org.apache.mahout.math.jet.math.PlusMult;
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.function.PlusMult;
+import org.apache.mahout.math.function.UnaryFunction;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 
@@ -25,13 +26,13 @@ public class SeqBlas implements Blas {
   }
 
   @Override
-  public void assign(DoubleMatrix2D A, org.apache.mahout.math.function.DoubleFunction function) {
+  public void assign(DoubleMatrix2D A, UnaryFunction function) {
     A.assign(function);
   }
 
   @Override
   public void assign(DoubleMatrix2D A, DoubleMatrix2D B,
-                     DoubleDoubleFunction function) {
+                     BinaryFunction function) {
     A.assign(B, function);
   }
 
@@ -79,7 +80,7 @@ public class SeqBlas implements Blas {
 
   @Override
   public void dger(double alpha, DoubleMatrix1D x, DoubleMatrix1D y, DoubleMatrix2D A) {
-    PlusMult fun = org.apache.mahout.math.jet.math.PlusMult.plusMult(0);
+    PlusMult fun = PlusMult.plusMult(0);
     for (int i = A.rows(); --i >= 0;) {
       fun.setMultiplicator(alpha * x.getQuick(i));
       A.viewRow(i).assign(y, fun);

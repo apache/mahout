@@ -18,7 +18,11 @@
 package org.apache.mahout.math;
 
 import junit.framework.TestCase;
+
+import static org.apache.mahout.math.function.Functions.*;
+
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public abstract class MatrixTest extends TestCase {
@@ -63,6 +67,16 @@ public abstract class MatrixTest extends TestCase {
         assertEquals("value[" + row + "][" + col + ']',
             test.getQuick(row, col), copy.getQuick(row, col));
       }
+    }
+  }
+
+  public void testIterate() {
+    Iterator<MatrixSlice> it = test.iterator();
+    MatrixSlice m;
+    while(it.hasNext() && (m = it.next()) != null) {
+      Vector v = m.vector();
+      Vector w = test instanceof SparseColumnMatrix ? test.getColumn(m.index()) : test.getRow(m.index());
+      assertEquals("iterator: " + v.asFormatString() + ", randomAccess: " + w, v, w);
     }
   }
 
@@ -193,7 +207,7 @@ public abstract class MatrixTest extends TestCase {
 
   public void testAssignMatrixBinaryFunction() {
     int[] c = test.size();
-    test.assign(test, new PlusFunction());
+    test.assign(test, plus);
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']', 2 * values[row][col],
@@ -204,7 +218,7 @@ public abstract class MatrixTest extends TestCase {
 
   public void testAssignMatrixBinaryFunctionCardinality() {
     try {
-      test.assign(test.transpose(), new PlusFunction());
+      test.assign(test.transpose(), plus);
       fail("exception expected");
     } catch (CardinalityException e) {
       assertTrue(true);
@@ -234,7 +248,7 @@ public abstract class MatrixTest extends TestCase {
 
   public void testAssignUnaryFunction() {
     int[] c = test.size();
-    test.assign(new NegateFunction());
+    test.assign(mult(-1));
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']', -values[row][col], test

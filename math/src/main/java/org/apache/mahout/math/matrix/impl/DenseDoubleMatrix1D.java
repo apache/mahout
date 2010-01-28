@@ -8,9 +8,11 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.impl;
 
-import org.apache.mahout.math.function.DoubleFunction;
-import org.apache.mahout.math.jet.math.Mult;
-import org.apache.mahout.math.jet.math.PlusMult;
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.function.Mult;
+import org.apache.mahout.math.function.PlusMult;
+import org.apache.mahout.math.function.UnaryFunction;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 
@@ -113,10 +115,10 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
    *
    * @param function a function object taking as argument the current cell's value.
    * @return <tt>this</tt> (for convenience only).
-   * @see org.apache.mahout.math.jet.math.Functions
+   * @see org.apache.mahout.math.function.Functions
    */
   @Override
-  public DoubleMatrix1D assign(DoubleFunction function) {
+  public DoubleMatrix1D assign(UnaryFunction function) {
     int s = stride;
     int i = index(0);
     double[] elems = this.elements;
@@ -200,13 +202,13 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
    * // assign x[i] = x[i]<sup>y[i]</sup>
    * m1 = 0 1 2 3;
    * m2 = 0 2 4 6;
-   * m1.assign(m2, org.apache.mahout.math.jet.math.Functions.pow);
+   * m1.assign(m2, org.apache.mahout.math.function.Functions.pow);
    * -->
    * m1 == 1 1 16 729
    *
    * // for non-standard functions there is no shortcut:
    * m1.assign(m2,
-   * &nbsp;&nbsp;&nbsp;new DoubleDoubleFunction() {
+   * &nbsp;&nbsp;&nbsp;new BinaryFunction() {
    * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public double apply(double x, double y) { return Math.pow(x,y); }
    * &nbsp;&nbsp;&nbsp;}
    * );
@@ -218,10 +220,10 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
    *                 argument the current cell's value of <tt>y</tt>,
    * @return <tt>this</tt> (for convenience only).
    * @throws IllegalArgumentException if <tt>size() != y.size()</tt>.
-   * @see org.apache.mahout.math.jet.math.Functions
+   * @see org.apache.mahout.math.function.Functions
    */
   @Override
-  public DoubleMatrix1D assign(DoubleMatrix1D y, org.apache.mahout.math.function.DoubleDoubleFunction function) {
+  public DoubleMatrix1D assign(DoubleMatrix1D y, BinaryFunction function) {
     // overriden for performance only
     if (!(y instanceof DenseDoubleMatrix1D)) {
       return super.assign(y, function);
@@ -240,13 +242,13 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
     int otherIndex = other.index(0);
 
     // specialized for speed
-    if (function == org.apache.mahout.math.jet.math.Functions.mult) {  // x[i] = x[i] * y[i]
+    if (function == Functions.mult) {  // x[i] = x[i] * y[i]
       for (int k = size; --k >= 0;) {
         elems[index] *= otherElems[otherIndex];
         index += s;
         otherIndex += ys;
       }
-    } else if (function == org.apache.mahout.math.jet.math.Functions.div) { // x[i] = x[i] / y[i]
+    } else if (function == Functions.div) { // x[i] = x[i] / y[i]
       for (int k = size; --k >= 0;) {
         elems[index] /= otherElems[otherIndex];
         index += s;

@@ -8,10 +8,10 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix;
 
-import org.apache.mahout.math.function.DoubleDoubleFunction;
-import org.apache.mahout.math.function.DoubleFunction;
+import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.BinaryFunction;
 import org.apache.mahout.math.function.IntIntDoubleFunction;
-import org.apache.mahout.math.jet.math.Functions;
 import org.apache.mahout.math.list.DoubleArrayList;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.matrix.doublealgo.Formatter;
@@ -32,7 +32,7 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * <tt>v==a(size())</tt> where <tt>a(i) == aggr( a(i-1), f(get(row,column)) )</tt> and terminators are <tt>a(1) ==
    * f(get(0,0)), a(0)==Double.NaN</tt>. <p> <b>Example:</b>
    * <pre>
-   * org.apache.mahout.math.jet.math.Functions F = org.apache.mahout.math.jet.math.Functions.functions;
+   * org.apache.mahout.math.function.Functions F = org.apache.mahout.math.function.Functions.functions;
    * 2 x 2 matrix
    * 0 1
    * 2 3
@@ -47,10 +47,10 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    *             transformed current cell value.
    * @param f    a function transforming the current cell value.
    * @return the aggregated measure.
-   * @see org.apache.mahout.math.jet.math.Functions
+   * @see org.apache.mahout.math.function.Functions
    */
-  public double aggregate(DoubleDoubleFunction aggr,
-                          DoubleFunction f) {
+  public double aggregate(BinaryFunction aggr,
+                          UnaryFunction f) {
     if (size() == 0) {
       return Double.NaN;
     }
@@ -70,7 +70,7 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * <tt>v</tt> such that <tt>v==a(size())</tt> where <tt>a(i) == aggr( a(i-1), f(get(row,column),other.get(row,column))
    * )</tt> and terminators are <tt>a(1) == f(get(0,0),other.get(0,0)), a(0)==Double.NaN</tt>. <p> <b>Example:</b>
    * <pre>
-   * org.apache.mahout.math.jet.math.Functions F = org.apache.mahout.math.jet.math.Functions.functions;
+   * org.apache.mahout.math.function.Functions F = org.apache.mahout.math.function.Functions.functions;
    * x == 2 x 2 matrix
    * 0 1
    * 2 3
@@ -94,10 +94,10 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * @param f    a function transforming the current cell values.
    * @return the aggregated measure.
    * @throws IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
-   * @see org.apache.mahout.math.jet.math.Functions
+   * @see org.apache.mahout.math.function.Functions
    */
-  public double aggregate(DoubleMatrix2D other, org.apache.mahout.math.function.DoubleDoubleFunction aggr,
-                          DoubleDoubleFunction f) {
+  public double aggregate(DoubleMatrix2D other, BinaryFunction aggr,
+                          BinaryFunction f) {
     checkShape(other);
     if (size() == 0) {
       return Double.NaN;
@@ -177,9 +177,9 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    *
    * @param function a function object taking as argument the current cell's value.
    * @return <tt>this</tt> (for convenience only).
-   * @see org.apache.mahout.math.jet.math.Functions
+   * @see org.apache.mahout.math.function.Functions
    */
-  public DoubleMatrix2D assign(DoubleFunction function) {
+  public DoubleMatrix2D assign(UnaryFunction function) {
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
         setQuick(row, column, function.apply(getQuick(row, column)));
@@ -230,7 +230,7 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * 0 2
    * 4 6
    *
-   * m1.assign(m2, org.apache.mahout.math.jet.math.Functions.pow);
+   * m1.assign(m2, org.apache.mahout.math.function.Functions.pow);
    * -->
    * m1 == 2 x 2 matrix
    * 1   1
@@ -243,9 +243,9 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    *                 argument the current cell's value of <tt>y</tt>,
    * @return <tt>this</tt> (for convenience only).
    * @throws IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
-   * @see org.apache.mahout.math.jet.math.Functions
+   * @see org.apache.mahout.math.function.Functions
    */
-  public DoubleMatrix2D assign(DoubleMatrix2D y, org.apache.mahout.math.function.DoubleDoubleFunction function) {
+  public DoubleMatrix2D assign(DoubleMatrix2D y, BinaryFunction function) {
     checkShape(y);
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
@@ -980,6 +980,6 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
     if (size() == 0) {
       return 0;
     }
-    return aggregate(Functions.plus, org.apache.mahout.math.jet.math.Functions.identity);
+    return aggregate(Functions.plus, Functions.identity);
   }
 }

@@ -74,6 +74,23 @@ public class SparseColumnMatrix extends AbstractMatrix {
     return clone;
   }
 
+  /**
+   * Iterate over columns.
+   * @param index of the column number to grab as a vector (shallowly)
+   * @return the column vector at that index.
+   */
+  protected Vector slice(int index) {
+    return getColumn(index);
+  }
+
+  /**
+   * Abstracted out for the iterator
+   * @return numColumns()
+   */
+  public int numSlices() {
+    return numCols();
+  }
+
   @Override
   public double getQuick(int row, int column) {
     if (columns[column] == null) {

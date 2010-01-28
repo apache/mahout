@@ -9,7 +9,7 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.matrix.doublealgo;
 
 import org.apache.mahout.math.PersistentObject;
-import org.apache.mahout.math.jet.math.Functions;
+import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 

@@ -20,7 +20,7 @@ package org.apache.mahout.clustering.fuzzykmeans;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.math.AbstractVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.SquareRootFunction;
+import org.apache.mahout.math.function.SquareRootFunction;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 

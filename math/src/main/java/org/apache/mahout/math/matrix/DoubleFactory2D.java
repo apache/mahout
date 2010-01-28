@@ -9,7 +9,7 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.matrix;
 
 import org.apache.mahout.math.PersistentObject;
-import org.apache.mahout.math.jet.math.Functions;
+import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.jet.random.engine.MersenneTwister;
 import org.apache.mahout.math.jet.random.sampling.RandomSamplingAssistant;
 import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix2D;
@@ -179,7 +179,7 @@ public class DoubleFactory2D extends PersistentObject {
    * </pre>
    */
   public DoubleMatrix2D ascending(int rows, int columns) {
-    return descending(rows, columns).assign(Functions.chain(Functions.neg, Functions.minus(columns * rows)));
+    return descending(rows, columns).assign(Functions.chain(Functions.negate, Functions.minus(columns * rows)));
   }
 
   /**

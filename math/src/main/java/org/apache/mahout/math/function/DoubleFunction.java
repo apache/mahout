@@ -30,15 +30,16 @@ It is provided "as is" without expressed or implied warranty.
 
 /**
  * Interface that represents a function object: a function that takes a single argument and returns a single value.
- *
+ * @see org.apache.mahout.math.map
  */
 public interface DoubleFunction {
 
   /**
-   * Applies a function to an argument.
+   * Apply the function to the argument and return the result
    *
-   * @param argument argument passed to the function.
-   * @return the result of the function.
+   * @param arg1 double for the argument
+   * @return the result of applying the function
    */
-  double apply(double argument);
+  double apply(double arg1);
+
 }

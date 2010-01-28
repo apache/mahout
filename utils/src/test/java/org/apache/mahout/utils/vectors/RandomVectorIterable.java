@@ -20,7 +20,7 @@ package org.apache.mahout.utils.vectors;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.UnaryFunction;
+import org.apache.mahout.math.function.UnaryFunction;
 import org.apache.mahout.math.Vector;
 
 import java.util.Iterator;

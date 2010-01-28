@@ -18,7 +18,7 @@ package org.apache.mahout.clustering.kmeans;
 
 import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.math.AbstractVector;
-import org.apache.mahout.math.SquareRootFunction;
+import org.apache.mahout.math.function.SquareRootFunction;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.VectorWritable;

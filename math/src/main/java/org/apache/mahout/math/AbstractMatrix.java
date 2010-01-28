@@ -20,6 +20,9 @@ package org.apache.mahout.math;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.PlusMult;
+import org.apache.mahout.math.function.UnaryFunction;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -32,6 +35,51 @@ public abstract class AbstractMatrix implements Matrix {
   protected Map<String, Integer> columnLabelBindings;
 
   protected Map<String, Integer> rowLabelBindings;
+
+  @Override
+  public Iterator<MatrixSlice> iterator() {
+    return iterateAll();
+  }
+
+  @Override
+  public Iterator<MatrixSlice> iterateAll() {
+    return new Iterator<MatrixSlice>() {
+      int slice = 0;
+
+      @Override
+      public boolean hasNext() {
+        return slice < numSlices();
+      }
+
+      @Override
+      public MatrixSlice next() {
+        int i = slice++;
+        return new MatrixSlice(slice(i), i);
+      }
+
+      @Override
+      public void remove() {
+        throw new UnsupportedOperationException("remove() not supported for Matrix iterator");
+      }
+    };
+  }
+
+  /**
+   * Abstracted out for iterating over either rows or columns (default is rows).
+   * @param index the row or column number to grab as a vector (shallowly)
+   * @return the row or column vector at that index.
+   */
+  protected Vector slice(int index) {
+    return getRow(index);
+  }
+
+  /**
+   * Abstracted out for the iterator
+   * @return numRows() for row-based iterator, numColumns() for column-based.
+   */
+  public int numSlices() {
+    return numRows();
+  }
 
   @Override
   public double get(String rowLabel, String columnLabel) throws IndexException,
@@ -431,7 +479,7 @@ public abstract class AbstractMatrix implements Matrix {
       Vector xi = getRow(i);
       double d = xi.dot(v);
       if(d != 0)
-        w.assign(xi, new PlusWithScaleFunction(d));
+        w.assign(xi, new PlusMult(d));
 
     }
     return w;
@@ -575,7 +623,7 @@ public abstract class AbstractMatrix implements Matrix {
     }
 
     /**
-     * TODO: currently I don't know of an efficient way to get this value correctly.
+     * TODO: currently I don't know of an efficient way to getVector this value correctly.
      *
      * @return the number of nonzero entries
      */

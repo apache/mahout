@@ -27,12 +27,12 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.jet.random;
 
 import org.apache.mahout.math.PersistentObject;
-import org.apache.mahout.math.function.DoubleFunction;
+import org.apache.mahout.math.function.UnaryFunction;
 import org.apache.mahout.math.function.IntFunction;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 
 public abstract class AbstractDistribution extends PersistentObject
-    implements DoubleFunction, IntFunction {
+    implements UnaryFunction, IntFunction {
 
   protected RandomEngine randomGenerator;
 

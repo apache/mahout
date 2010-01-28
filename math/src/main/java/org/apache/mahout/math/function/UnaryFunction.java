@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math;
+package org.apache.mahout.math.function;
 
-public class SquareRootFunction implements UnaryFunction {
+/**
+ * This interface allows the formulation of unary functions to be applied to matrices inside the inner loops of their
+ * implementations.
+ */
+public interface UnaryFunction extends DoubleFunction {
 
-  @Override
-  public double apply(double arg1) {
-    return Math.sqrt(arg1);
-  }
 
 }

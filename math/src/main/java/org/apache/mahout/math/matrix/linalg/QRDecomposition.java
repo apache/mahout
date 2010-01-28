@@ -8,7 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.linalg;
 
-import org.apache.mahout.math.jet.math.Functions;
+import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.matrix.DoubleFactory2D;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
@@ -58,7 +58,7 @@ public class QRDecomposition implements java.io.Serializable {
     n = A.columns();
     Rdiag = A.like1D(n);
     //Rdiag = new double[n];
-    //org.apache.mahout.math.function.DoubleDoubleFunction hypot = Algebra.hypotFunction();
+    //org.apache.mahout.math.function.BinaryFunction hypot = Algebra.hypotFunction();
 
     // precompute and cache some views to avoid regenerating them time and again
     DoubleMatrix1D[] QRcolumns = new DoubleMatrix1D[n];

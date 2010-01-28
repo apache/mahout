@@ -8,13 +8,13 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.impl;
 
-import org.apache.mahout.math.function.DoubleDoubleFunction;
-import org.apache.mahout.math.function.DoubleFunction;
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.function.PlusMult;
+import org.apache.mahout.math.function.UnaryFunction;
 import org.apache.mahout.math.function.IntDoubleProcedure;
 import org.apache.mahout.math.function.IntIntDoubleFunction;
-import org.apache.mahout.math.jet.math.Functions;
-import org.apache.mahout.math.jet.math.Mult;
-import org.apache.mahout.math.jet.math.PlusMult;
+import org.apache.mahout.math.function.Mult;
 import org.apache.mahout.math.map.AbstractIntDoubleMap;
 import org.apache.mahout.math.map.OpenIntDoubleHashMap;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
@@ -130,10 +130,10 @@ public class SparseDoubleMatrix2D extends DoubleMatrix2D {
    *
    * @param function a function object taking as argument the current cell's value.
    * @return <tt>this</tt> (for convenience only).
-   * @see org.apache.mahout.math.jet.math.Functions
+   * @see org.apache.mahout.math.function.Functions
    */
   @Override
-  public DoubleMatrix2D assign(DoubleFunction function) {
+  public DoubleMatrix2D assign(UnaryFunction function) {
     if (this.isNoView && function instanceof Mult) { // x[i] = mult*x[i]
       this.elements.assign(function);
     } else {
@@ -173,7 +173,7 @@ public class SparseDoubleMatrix2D extends DoubleMatrix2D {
 
   @Override
   public DoubleMatrix2D assign(final DoubleMatrix2D y,
-                               DoubleDoubleFunction function) {
+                               BinaryFunction function) {
     if (!this.isNoView) {
       return super.assign(y, function);
     }
@@ -197,7 +197,7 @@ public class SparseDoubleMatrix2D extends DoubleMatrix2D {
       return this;
     }
 
-    if (function == org.apache.mahout.math.jet.math.Functions.mult) { // x[i] = x[i] * y[i]
+    if (function == Functions.mult) { // x[i] = x[i] * y[i]
       this.elements.forEachPair(
           new IntDoubleProcedure() {
             @Override
@@ -214,7 +214,7 @@ public class SparseDoubleMatrix2D extends DoubleMatrix2D {
       );
     }
 
-    if (function == org.apache.mahout.math.jet.math.Functions.div) { // x[i] = x[i] / y[i]
+    if (function == Functions.div) { // x[i] = x[i] / y[i]
       this.elements.forEachPair(
           new IntDoubleProcedure() {
             @Override
@@ -543,7 +543,7 @@ public class SparseDoubleMatrix2D extends DoubleMatrix2D {
       Crows[i] = C.viewRow(i);
     }
 
-    final org.apache.mahout.math.jet.math.PlusMult fun = org.apache.mahout.math.jet.math.PlusMult.plusMult(0);
+    final PlusMult fun = PlusMult.plusMult(0);
 
     this.elements.forEachPair(
         new IntDoubleProcedure() {

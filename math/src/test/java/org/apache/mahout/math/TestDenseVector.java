@@ -19,6 +19,8 @@ package org.apache.mahout.math;
 
 import junit.framework.TestCase;
 
+import static org.apache.mahout.math.function.Functions.*;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -282,6 +284,16 @@ public class TestDenseVector extends TestCase {
     assertEquals("wrong zSum", expected, test.zSum());
   }
 
+  public void testGetDistanceSquared() {
+    Vector other = new DenseVector(test.size());
+    other.set(0, -2);
+    other.set(1, -5);
+    other.set(2, -9);
+    double expected = test.minus(other).getLengthSquared();
+    assertTrue("a.getDistanceSquared(b) != a.minus(b).getLengthSquared",
+        Math.abs(expected - test.getDistanceSquared(other)) < 1e-6);
+  }
+  
   public void testAssignDouble() {
     test.assign(0);
     for (int i = 0; i < values.length; i++) {
@@ -326,28 +338,28 @@ public class TestDenseVector extends TestCase {
   }
 
   public void testAssignUnaryFunction() {
-    test.assign(new NegateFunction());
+    test.assign(mult(-1));
     for (int i = 0; i < values.length; i++) {
       assertEquals("value[" + i + ']', -values[i], test.getQuick(i));
     }
   }
 
   public void testAssignBinaryFunction() throws Exception {
-    test.assign(test, new PlusFunction());
+    test.assign(test, plus);
     for (int i = 0; i < values.length; i++) {
       assertEquals("value[" + i + ']', 2 * values[i], test.getQuick(i));
     }
   }
 
   public void testAssignBinaryFunction2() throws Exception {
-    test.assign(new PlusFunction(), 4);
+    test.assign(plus(4));
     for (int i = 0; i < values.length; i++) {
       assertEquals("value[" + i + ']', values[i] + 4, test.getQuick(i));
     }
   }
 
   public void testAssignBinaryFunction3() throws Exception {
-    test.assign(new TimesFunction(), 4);
+    test.assign(mult(4));
     for (int i = 0; i < values.length; i++) {
       assertEquals("value[" + i + ']', values[i] * 4, test.getQuick(i));
     }
@@ -355,7 +367,7 @@ public class TestDenseVector extends TestCase {
 
   public void testAssignBinaryFunctionCardinality() {
     try {
-      test.assign(test.like(2), new PlusFunction());
+      test.assign(test.like(2), plus);
       fail("Cardinality exception expected");
     } catch (CardinalityException e) {
       assertTrue(true);

@@ -8,11 +8,11 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix;
 
-import org.apache.mahout.math.function.DoubleDoubleFunction;
-import org.apache.mahout.math.function.DoubleFunction;
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.function.PlusMult;
+import org.apache.mahout.math.function.UnaryFunction;
 import org.apache.mahout.math.function.DoubleProcedure;
-import org.apache.mahout.math.jet.math.Functions;
-import org.apache.mahout.math.jet.math.PlusMult;
 import org.apache.mahout.math.list.DoubleArrayList;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.matrix.doublealgo.Formatter;
@@ -31,7 +31,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    * <tt>v==a(size())</tt> where <tt>a(i) == aggr( a(i-1), f(get(i)) )</tt> and terminators are <tt>a(1) == f(get(0)),
    * a(0)==Double.NaN</tt>. <p> <b>Example:</b>
    * <pre>
-   * org.apache.mahout.math.jet.math.Functions F = org.apache.mahout.math.jet.math.Functions.functions;
+   * org.apache.mahout.math.function.Functions F = org.apache.mahout.math.function.Functions.functions;
    * matrix = 0 1 2 3
    *
    * // Sum( x[i]*x[i] )
@@ -44,10 +44,10 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    *             transformed current cell value.
    * @param f    a function transforming the current cell value.
    * @return the aggregated measure.
-   * @see org.apache.mahout.math.jet.math.Functions
+   * @see org.apache.mahout.math.function.Functions
    */
-  public double aggregate(DoubleDoubleFunction aggr,
-                          DoubleFunction f) {
+  public double aggregate(BinaryFunction aggr,
+                          UnaryFunction f) {
     if (size == 0) {
       return Double.NaN;
     }
@@ -63,7 +63,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    * <tt>v</tt> such that <tt>v==a(size())</tt> where <tt>a(i) == aggr( a(i-1), f(get(i),other.get(i)) )</tt> and
    * terminators are <tt>a(1) == f(get(0),other.get(0)), a(0)==Double.NaN</tt>. <p> <b>Example:</b>
    * <pre>
-   * org.apache.mahout.math.jet.math.Functions F = org.apache.mahout.math.jet.math.Functions.functions;
+   * org.apache.mahout.math.function.Functions F = org.apache.mahout.math.function.Functions.functions;
    * x = 0 1 2 3
    * y = 0 1 2 3
    *
@@ -82,10 +82,10 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    * @param f    a function transforming the current cell values.
    * @return the aggregated measure.
    * @throws IllegalArgumentException if <tt>size() != other.size()</tt>.
-   * @see org.apache.mahout.math.jet.math.Functions
+   * @see org.apache.mahout.math.function.Functions
    */
-  public double aggregate(DoubleMatrix1D other, org.apache.mahout.math.function.DoubleDoubleFunction aggr,
-                          DoubleDoubleFunction f) {
+  public double aggregate(DoubleMatrix1D other, BinaryFunction aggr,
+                          BinaryFunction f) {
     checkSize(other);
     if (size == 0) {
       return Double.NaN;
@@ -144,9 +144,9 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    *
    * @param function a function object taking as argument the current cell's value.
    * @return <tt>this</tt> (for convenience only).
-   * @see org.apache.mahout.math.jet.math.Functions
+   * @see org.apache.mahout.math.function.Functions
    */
-  public DoubleMatrix1D assign(DoubleFunction function) {
+  public DoubleMatrix1D assign(UnaryFunction function) {
     for (int i = size; --i >= 0;) {
       setQuick(i, function.apply(getQuick(i)));
     }
@@ -183,7 +183,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    * // assign x[i] = x[i]<sup>y[i]</sup>
    * m1 = 0 1 2 3;
    * m2 = 0 2 4 6;
-   * m1.assign(m2, org.apache.mahout.math.jet.math.Functions.pow);
+   * m1.assign(m2, org.apache.mahout.math.function.Functions.pow);
    * -->
    * m1 == 1 1 16 729
    * </pre>
@@ -194,9 +194,9 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    *                 argument the current cell's value of <tt>y</tt>,
    * @return <tt>this</tt> (for convenience only).
    * @throws IllegalArgumentException if <tt>size() != y.size()</tt>.
-   * @see org.apache.mahout.math.jet.math.Functions
+   * @see org.apache.mahout.math.function.Functions
    */
-  public DoubleMatrix1D assign(DoubleMatrix1D y, org.apache.mahout.math.function.DoubleDoubleFunction function) {
+  public DoubleMatrix1D assign(DoubleMatrix1D y, BinaryFunction function) {
     checkSize(y);
     for (int i = size; --i >= 0;) {
       setQuick(i, function.apply(getQuick(i), y.getQuick(i)));
@@ -211,13 +211,13 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    * // assign x[i] = x[i]<sup>y[i]</sup>
    * m1 = 0 1 2 3;
    * m2 = 0 2 4 6;
-   * m1.assign(m2, org.apache.mahout.math.jet.math.Functions.pow);
+   * m1.assign(m2, org.apache.mahout.math.function.Functions.pow);
    * -->
    * m1 == 1 1 16 729
    *
    * // for non-standard functions there is no shortcut:
    * m1.assign(m2,
-   * &nbsp;&nbsp;&nbsp;new DoubleDoubleFunction() {
+   * &nbsp;&nbsp;&nbsp;new BinaryFunction() {
    * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public double apply(double x, double y) { return Math.pow(x,y); }
    * &nbsp;&nbsp;&nbsp;}
    * );
@@ -229,15 +229,15 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    *                 argument the current cell's value of <tt>y</tt>,
    * @return <tt>this</tt> (for convenience only).
    * @throws IllegalArgumentException if <tt>size() != y.size()</tt>.
-   * @see org.apache.mahout.math.jet.math.Functions
+   * @see org.apache.mahout.math.function.Functions
    */
-  public DoubleMatrix1D assign(DoubleMatrix1D y, org.apache.mahout.math.function.DoubleDoubleFunction function,
+  public DoubleMatrix1D assign(DoubleMatrix1D y, BinaryFunction function,
                                IntArrayList nonZeroIndexes) {
     checkSize(y);
     int[] nonZeroElements = nonZeroIndexes.elements();
 
     // specialized for speed
-    if (function == org.apache.mahout.math.jet.math.Functions.mult) {  // x[i] = x[i] * y[i]
+    if (function == Functions.mult) {  // x[i] = x[i] * y[i]
       int j = 0;
       for (int index = nonZeroIndexes.size(); --index >= 0;) {
         int i = nonZeroElements[index];
@@ -858,6 +858,6 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
     if (size() == 0) {
       return 0;
     }
-    return aggregate(Functions.plus, org.apache.mahout.math.jet.math.Functions.identity);
+    return aggregate(Functions.plus, Functions.identity);
   }
 }

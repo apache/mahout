@@ -30,8 +30,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.utils.vectors.io.JWriterVectorWriter;
 import org.apache.mahout.utils.vectors.io.SequenceFileVectorWriter;
 import org.apache.mahout.utils.vectors.io.VectorWriter;
@@ -174,7 +174,7 @@ public class Driver {
     Path path = new Path(outFile);
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
-    SequenceFile.Writer seqWriter = SequenceFile.createWriter(fs, conf, path, LongWritable.class, RandomAccessSparseVector.class);
+    SequenceFile.Writer seqWriter = SequenceFile.createWriter(fs, conf, path, LongWritable.class, VectorWritable.class);
     return new SequenceFileVectorWriter(seqWriter);
   }
 

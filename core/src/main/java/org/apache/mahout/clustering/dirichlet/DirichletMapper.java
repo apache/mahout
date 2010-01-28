@@ -30,7 +30,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputLogFilter;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.TimesFunction;
+import org.apache.mahout.math.function.TimesFunction;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 

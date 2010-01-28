@@ -10,6 +10,8 @@ package org.apache.mahout.math.matrix.linalg;
 
 import EDU.oswego.cs.dl.util.concurrent.FJTask;
 
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.UnaryFunction;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 
@@ -67,7 +69,7 @@ public class SmpBlas implements Blas {
   }
 
   @Override
-  public void assign(DoubleMatrix2D A, final org.apache.mahout.math.function.DoubleFunction function) {
+  public void assign(DoubleMatrix2D A, final UnaryFunction function) {
     run(A, false,
         new Matrix2DMatrix2DFunction() {
           @Override
@@ -81,7 +83,7 @@ public class SmpBlas implements Blas {
 
   @Override
   public void assign(DoubleMatrix2D A, DoubleMatrix2D B,
-                     final org.apache.mahout.math.function.DoubleDoubleFunction function) {
+                     final BinaryFunction function) {
     run(A, B, false,
         new Matrix2DMatrix2DFunction() {
           @Override

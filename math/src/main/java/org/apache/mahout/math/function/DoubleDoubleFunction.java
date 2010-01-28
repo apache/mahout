@@ -11,20 +11,15 @@ It is provided "as is" without expressed or implied warranty.
 
 /**
  * Interface that represents a function object: a function that takes two arguments and returns a single value.
- *
- * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
- */
-
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
+ **/
 public interface DoubleDoubleFunction {
 
   /**
-   * Applies a function to two arguments.
+   * Apply the function to the arguments and return the result
    *
-   * @param x the first argument passed to the function.
-   * @param y the second argument passed to the function.
-   * @return the result of the function.
+   * @param arg1 a double for the first argument
+   * @param arg2 a double for the second argument
+   * @return the result of applying the function
    */
-  double apply(double x, double y);
+  double apply(double arg1, double arg2);
 }

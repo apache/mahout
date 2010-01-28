@@ -27,9 +27,9 @@ import org.apache.mahout.math.AbstractMatrix;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.PlusWithScaleFunction;
-import org.apache.mahout.math.TimesFunction;
+import org.apache.mahout.math.function.TimesFunction;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.function.PlusMult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -263,7 +263,7 @@ public class HebbianSolver {
      */
     for (int i = 0; i < state.getNumEigensProcessed(); i++) {
       Vector previousEigen = previousEigens.getRow(i);
-      currentPseudoEigen.assign(previousEigen, new PlusWithScaleFunction(-state.getHelperVector().get(i)));
+      currentPseudoEigen.assign(previousEigen, new PlusMult(-state.getHelperVector().get(i)));
       state.getHelperVector().set(i, 0);
     }
     if (debug && currentPseudoEigen.norm(2) > 0) {

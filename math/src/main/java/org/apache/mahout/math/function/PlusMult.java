@@ -6,7 +6,9 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.math.jet.math;
+package org.apache.mahout.math.function;
+
+import org.apache.mahout.math.function.BinaryFunction;
 
 /**
  * Only for performance tuning of compute intensive linear algebraic computations.
@@ -21,14 +23,11 @@ package org.apache.mahout.math.jet.math;
  * Intended to be passed to <tt>matrix.assign(otherMatrix,function)</tt> methods.
  */
 
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
-public final class PlusMult implements org.apache.mahout.math.function.DoubleDoubleFunction {
+public final class PlusMult implements BinaryFunction {
 
   private double multiplicator;
 
-  /** Insert the method's description here. Creation date: (8/10/99 19:12:09) */
-  PlusMult(double multiplicator) {
+  public PlusMult(double multiplicator) {
     this.multiplicator = multiplicator;
   }
 

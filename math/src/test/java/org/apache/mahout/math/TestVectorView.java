@@ -18,6 +18,9 @@
 package org.apache.mahout.math;
 
 import junit.framework.TestCase;
+import org.apache.mahout.math.function.TimesFunction;
+
+import static org.apache.mahout.math.function.Functions.*;
 
 import java.util.Iterator;
 
@@ -303,21 +306,21 @@ public class TestVectorView extends TestCase {
   }
 
   public void testAssignUnaryFunction() {
-    test.assign(new NegateFunction());
+    test.assign(negate);
     for (int i = 0; i < test.size(); i++) {
       assertEquals("value[" + i + ']', -values[i + 1], test.getQuick(i));
     }
   }
 
   public void testAssignBinaryFunction() throws Exception {
-    test.assign(test, new PlusFunction());
+    test.assign(test, plus);
     for (int i = 0; i < test.size(); i++) {
       assertEquals("value[" + i + ']', 2 * values[i + 1], test.getQuick(i));
     }
   }
 
   public void testAssignBinaryFunction2() throws Exception {
-    test.assign(new PlusFunction(), 4);
+    test.assign(plus, 4);
     for (int i = 0; i < test.size(); i++) {
       assertEquals("value[" + i + ']', values[i + 1] + 4, test.getQuick(i));
     }
@@ -332,7 +335,7 @@ public class TestVectorView extends TestCase {
 
   public void testAssignBinaryFunctionCardinality() {
     try {
-      test.assign(test.like(2), new PlusFunction());
+      test.assign(test.like(2), plus);
       fail("Cardinality exception expected");
     } catch (CardinalityException e) {
       assertTrue(true);

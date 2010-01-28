@@ -169,7 +169,7 @@ public class Sorting extends PersistentObject {
    * // sort 10000 x 1000 matrix by sum of logarithms in a row (i.e. by geometric mean)
    * DoubleMatrix2D matrix = new DenseDoubleMatrix2D(10000,1000);
    * matrix.assign(new engine.MersenneTwister()); // initialized randomly
-   * org.apache.mahout.math.jet.math.Functions F = org.apache.mahout.math.jet.math.Functions.functions; // alias for convenience
+   * org.apache.mahout.math.function.Functions F = org.apache.mahout.math.function.Functions.functions; // alias for convenience
    *
    * // THE QUICK VERSION (takes some 3 secs)
    * // aggregates[i] = Sum(log(row));
@@ -374,7 +374,7 @@ public class Sorting extends PersistentObject {
  // sort 10000 x 1000 matrix by median or by sum of logarithms in a row (i.e. by geometric mean)
  DoubleMatrix2D matrix = new DenseDoubleMatrix2D(10000,1000);
  matrix.assign(new engine.MersenneTwister()); // initialized randomly
- org.apache.mahout.math.jet.math.Functions F = org.apache.mahout.math.jet.math.Functions.functions; // alias for convenience
+ org.apache.mahout.math.function.Functions F = org.apache.mahout.math.function.Functions.functions; // alias for convenience
 
  // THE QUICK VERSION (takes some 10 secs)
  DoubleMatrix2D sorted = quickSort(matrix,hep.aida.bin.BinFunctions1D.median);

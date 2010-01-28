@@ -22,7 +22,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.math.special.Gamma;
-import org.apache.mahout.math.BinaryFunction;
+import org.apache.mahout.math.function.BinaryFunction;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;

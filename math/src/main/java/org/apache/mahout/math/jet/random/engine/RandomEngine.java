@@ -27,7 +27,7 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.jet.random.engine;
 
 import org.apache.mahout.math.PersistentObject;
-import org.apache.mahout.math.function.DoubleFunction;
+import org.apache.mahout.math.function.UnaryFunction;
 import org.apache.mahout.math.function.IntFunction;
 
 /**
@@ -53,7 +53,7 @@ import org.apache.mahout.math.function.IntFunction;
  * @see java.util.Random
  */
 public abstract class RandomEngine extends PersistentObject
-    implements DoubleFunction, IntFunction {
+    implements UnaryFunction, IntFunction {
 
   /**
    * Equivalent to <tt>raw()</tt>. This has the effect that random engines can now be used as function objects,

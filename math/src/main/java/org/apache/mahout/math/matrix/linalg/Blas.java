@@ -8,6 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.linalg;
 
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.UnaryFunction;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 
@@ -20,9 +22,9 @@ public interface Blas {
    *
    * @param A        the matrix to modify.
    * @param function a function object taking as argument the current cell's value.
-   * @see org.apache.mahout.math.jet.math.Functions
+   * @see org.apache.mahout.math.function.Functions
    */
-  void assign(DoubleMatrix2D A, org.apache.mahout.math.function.DoubleFunction function);
+  void assign(DoubleMatrix2D A, UnaryFunction function);
 
   /**
    * Assigns the result of a function to each cell; <tt>x[row,col] = function(x[row,col],y[row,col])</tt>.
@@ -33,20 +35,20 @@ public interface Blas {
    *                 argument the current cell's value of <tt>y</tt>,
    * @return <tt>this</tt> (for convenience only).
    * @throws IllegalArgumentException if <tt>x.columns() != y.columns() || x.rows() != y.rows()</tt>
-   * @see org.apache.mahout.math.jet.math.Functions
+   * @see org.apache.mahout.math.function.Functions
    */
-  void assign(DoubleMatrix2D x, DoubleMatrix2D y, org.apache.mahout.math.function.DoubleDoubleFunction function);
+  void assign(DoubleMatrix2D x, DoubleMatrix2D y, BinaryFunction function);
 
   /**
    * Returns the sum of absolute values; <tt>|x[0]| + |x[1]| + ... </tt>. In fact equivalent to
-   * <tt>x.aggregate(Functions.plus, org.apache.mahout.math.jet.math.Functions.abs)</tt>.
+   * <tt>x.aggregate(Functions.plus, org.apache.mahout.math.function.Functions.abs)</tt>.
    *
    * @param x the first vector.
    */
   double dasum(DoubleMatrix1D x);
 
   /**
-   * Combined vector scaling; <tt>y = y + alpha*x</tt>. In fact equivalent to <tt>y.assign(x,org.apache.mahout.math.jet.math.Functions.plusMult(alpha))</tt>.
+   * Combined vector scaling; <tt>y = y + alpha*x</tt>. In fact equivalent to <tt>y.assign(x,org.apache.mahout.math.function.Functions.plusMult(alpha))</tt>.
    *
    * @param alpha a scale factor.
    * @param x     the first source vector.
@@ -56,7 +58,7 @@ public interface Blas {
   void daxpy(double alpha, DoubleMatrix1D x, DoubleMatrix1D y);
 
   /**
-   * Combined matrix scaling; <tt>B = B + alpha*A</tt>. In fact equivalent to <tt>B.assign(A,org.apache.mahout.math.jet.math.Functions.plusMult(alpha))</tt>.
+   * Combined matrix scaling; <tt>B = B + alpha*A</tt>. In fact equivalent to <tt>B.assign(A,org.apache.mahout.math.function.Functions.plusMult(alpha))</tt>.
    *
    * @param alpha a scale factor.
    * @param A     the first source matrix.

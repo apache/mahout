@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math;
+package org.apache.mahout.math.function;
 
-public class PlusFunction implements BinaryFunction {
+public class SquareRootFunction implements UnaryFunction {
 
   @Override
-  public double apply(double arg1, double arg2) {
-    return arg1 + arg2;
+  public double apply(double arg1) {
+    return Math.sqrt(arg1);
   }
 
 }

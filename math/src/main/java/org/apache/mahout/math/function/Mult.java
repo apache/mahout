@@ -6,7 +6,9 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
-package org.apache.mahout.math.jet.math;
+package org.apache.mahout.math.function;
+
+import org.apache.mahout.math.function.UnaryFunction;
 
 /**
  * Only for performance tuning of compute intensive linear algebraic computations.
@@ -19,9 +21,7 @@ package org.apache.mahout.math.jet.math;
  * Intended to be passed to <tt>matrix.assign(function)</tt> methods.
  */
 
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
-public final class Mult implements org.apache.mahout.math.function.DoubleFunction {
+public final class Mult implements UnaryFunction {
 
   private double multiplicator;
 

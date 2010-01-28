@@ -8,8 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.linalg;
 
-import org.apache.mahout.math.jet.math.Mult;
-import org.apache.mahout.math.jet.math.PlusMult;
+import org.apache.mahout.math.function.Mult;
+import org.apache.mahout.math.function.PlusMult;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
@@ -83,7 +83,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
     IntArrayList nonZeroIndexes =
         new IntArrayList(); // sparsity
     DoubleMatrix1D LUcolj = LU.viewColumn(0).like();  // blocked column j
-    Mult multFunction = org.apache.mahout.math.jet.math.Mult.mult(0);
+    Mult multFunction = Mult.mult(0);
 
     // Outer loop.
     int CUT_OFF = 10;
@@ -459,8 +459,8 @@ public class LUDecompositionQuick implements java.io.Serializable {
     }
 
     // transformations
-    Mult div = org.apache.mahout.math.jet.math.Mult.div(0);
-    PlusMult minusMult = org.apache.mahout.math.jet.math.PlusMult.minusMult(0);
+    Mult div = Mult.div(0);
+    PlusMult minusMult = PlusMult.minusMult(0);
 
     IntArrayList nonZeroIndexes =
         new IntArrayList(); // sparsity

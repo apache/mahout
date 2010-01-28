@@ -61,6 +61,6 @@ public class SquaredEuclideanDistanceMeasure implements DistanceMeasure {
     if (centroid.size() != v.size()) {
       throw new CardinalityException();
     }
-    return centroidLengthSquare + v.getDistanceSquared(centroid);
+    return centroidLengthSquare + v.getLengthSquared() - 2 * v.dot(centroid);
   }
 }

@@ -138,7 +138,7 @@ public class VectorView extends AbstractVector {
 
             @Override
             public void set(double value) {
-              el.set(value);
+              decorated.set(value);
             }
           };
           return;
@@ -198,7 +198,7 @@ public class VectorView extends AbstractVector {
 
             @Override
             public void set(double value) {
-              el.set(value);
+              decorated.set(value);
             }
           };
           return;

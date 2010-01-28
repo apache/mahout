@@ -13,9 +13,9 @@ import org.apache.mahout.math.PersistentObject;
 import org.apache.mahout.math.Sorting;
 import org.apache.mahout.math.Swapper;
 import org.apache.mahout.math.bitvector.QuickBitVector;
-import org.apache.mahout.math.function.DoubleDoubleFunction;
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.IntComparator;
-import org.apache.mahout.math.jet.math.Functions;
 import org.apache.mahout.math.list.ObjectArrayList;
 import org.apache.mahout.math.matrix.DoubleFactory2D;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
@@ -122,8 +122,8 @@ public class Algebra extends PersistentObject {
   }
 
   /** Returns sqrt(a^2 + b^2) without under/overflow. */
-  private static org.apache.mahout.math.function.DoubleDoubleFunction hypotFunction() {
-    return new DoubleDoubleFunction() {
+  private static BinaryFunction hypotFunction() {
+    return new BinaryFunction() {
       @Override
       public double apply(double a, double b) {
         return hypot(a, b);
@@ -217,7 +217,7 @@ public class Algebra extends PersistentObject {
     }
 
     for (int column = columns; --column >= 0;) {
-      A.viewColumn(column).assign(x, org.apache.mahout.math.jet.math.Functions.mult);
+      A.viewColumn(column).assign(x, Functions.mult);
     }
     return A;
   }
@@ -227,7 +227,7 @@ public class Algebra extends PersistentObject {
     if (x.size() == 0) {
       return 0;
     }
-    return x.aggregate(Functions.plus, org.apache.mahout.math.jet.math.Functions.abs);
+    return x.aggregate(Functions.plus, Functions.abs);
   }
 
   /** Returns the one-norm of matrix <tt>A</tt>, which is the maximum absolute column sum. */
@@ -254,7 +254,7 @@ public class Algebra extends PersistentObject {
     if (A.size() == 0) {
       return 0;
     }
-    return A.aggregate(hypotFunction(), org.apache.mahout.math.jet.math.Functions.identity);
+    return A.aggregate(hypotFunction(), Functions.identity);
   }
 
   /** Returns the infinity norm of vector <tt>x</tt>, which is <tt>Max(abs(x[i]))</tt>. */
@@ -263,9 +263,9 @@ public class Algebra extends PersistentObject {
     if (x.size() == 0) {
       return 0;
     }
-    return x.aggregate(Functions.max, org.apache.mahout.math.jet.math.Functions.abs);
+    return x.aggregate(Functions.max, Functions.abs);
 //  if (x.size()==0) return 0;
-//  return x.aggregate(Functions.plus,org.apache.mahout.math.jet.math.Functions.abs);
+//  return x.aggregate(Functions.plus,org.apache.mahout.math.function.Functions.abs);
 //  double max = 0;
 //  for (int i = x.size(); --i >= 0; ) {
 //    max = Math.max(max, x.getQuick(i));

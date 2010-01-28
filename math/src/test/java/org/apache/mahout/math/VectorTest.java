@@ -22,6 +22,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import junit.framework.TestCase;
 
+import static org.apache.mahout.math.function.Functions.*;
+
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -148,6 +150,47 @@ public class VectorTest extends TestCase {
         AbstractVector.equivalent(vec, left));
   }
 
+  public void testGetDistanceSquared() throws Exception {
+    Vector v = new DenseVector(5);
+    Vector w = new DenseVector(5);
+    setUpV(v);
+    setUpW(w);
+    doTestGetDistanceSquared(v, w);
+
+    v = new RandomAccessSparseVector(5);
+    w = new RandomAccessSparseVector(5);
+    setUpV(v);
+    setUpW(w);
+    doTestGetDistanceSquared(v, w);
+
+    v = new SequentialAccessSparseVector(5);
+    w = new SequentialAccessSparseVector(5);
+    setUpV(v);
+    setUpW(w);
+    doTestGetDistanceSquared(v, w);
+    
+  }
+
+  private void setUpV(Vector v) {
+    v.setQuick(1, 2);
+    v.setQuick(2, -4);
+    v.setQuick(3, -9);
+  }
+
+  private void setUpW(Vector w) {
+    w.setQuick(0, -5);
+    w.setQuick(1, -1);
+    w.setQuick(2, 9);
+    w.setQuick(3, 0.1);
+    w.setQuick(4, 2.1);
+  }
+
+  public void doTestGetDistanceSquared(Vector v, Vector w) throws Exception {
+    double expected = v.minus(w).getLengthSquared();
+    assertTrue("a.getDistanceSquared(b) != a.minus(b).getLengthSquared",
+        Math.abs(expected - v.getDistanceSquared(w)) < 1e-6);
+  }
+
   public void testNormalize() throws Exception {
     RandomAccessSparseVector vec1 = new RandomAccessSparseVector(3);
 
@@ -234,17 +277,41 @@ public class VectorTest extends TestCase {
   }
 
   public void testMax() throws Exception {
-    RandomAccessSparseVector vec1 = new RandomAccessSparseVector(3);
+    Vector vec1 = new RandomAccessSparseVector(3);
 
-    vec1.setQuick(0, 1);
-    vec1.setQuick(1, 3);
-    vec1.setQuick(2, 2);
+    vec1.setQuick(0, -1);
+    vec1.setQuick(1, -3);
+    vec1.setQuick(2, -2);
 
     double max = vec1.maxValue();
-    assertEquals(max + " does not equal: " + 3, 3, max, 0.0);
+    assertEquals(max + " does not equal: " + -1, -1, max, 0.0);
 
     int idx = vec1.maxValueIndex();
-    assertEquals(idx + " does not equal: " + 1, 1, idx);
+    assertEquals(idx + " does not equal: " + 0, 0, idx);
+
+    vec1 = new RandomAccessSparseVector(3);
+    max = vec1.maxValue();
+    assertEquals(max + " does not equal 0", 0d, max);
+
+    vec1 = new DenseVector(3);
+    max = vec1.maxValue();
+    assertEquals(max + " does not equal 0", 0d, max);
+
+    vec1 = new SequentialAccessSparseVector(3);
+    max = vec1.maxValue();
+    assertEquals(max + " does not equal 0", 0d, max);
+
+    vec1 = new RandomAccessSparseVector(0);
+    max = vec1.maxValue();
+    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max);
+
+    vec1 = new DenseVector(0);
+    max = vec1.maxValue();
+    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max);
+
+    vec1 = new SequentialAccessSparseVector(0);
+    max = vec1.maxValue();
+    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max);
 
   }
 
@@ -306,6 +373,58 @@ public class VectorTest extends TestCase {
     sparse.set(4, 4);
     doTestEnumeration(apriori, sparse);
 
+  }
+
+  public void testAggregation() throws Exception {
+    Vector v = new DenseVector(5);
+    Vector w = new DenseVector(5);
+    setUpFirstVector(v);
+    setUpSecondVector(w);
+    doTestAggregation(v, w);
+    v = new RandomAccessSparseVector(5);
+    w = new RandomAccessSparseVector(5);
+    setUpFirstVector(v);
+    doTestAggregation(v, w);
+    setUpSecondVector(w);
+    doTestAggregation(w, v);
+    v = new SequentialAccessSparseVector(5);
+    w = new SequentialAccessSparseVector(5);
+    setUpFirstVector(v);
+    doTestAggregation(v, w);
+    setUpSecondVector(w);
+    doTestAggregation(w, v);
+  }
+
+  private void doTestAggregation(Vector v, Vector w) throws Exception {
+    assertEquals("aggregate(plus, pow(2)) not equal to " + v.getLengthSquared(),
+        v.getLengthSquared(),
+        v.aggregate(plus, pow(2)));
+    assertEquals("aggregate(plus, abs) not equal to " + v.norm(1),
+        v.norm(1),
+        v.aggregate(plus, abs));
+    assertEquals("aggregate(max, abs) not equal to " + v.norm(Double.POSITIVE_INFINITY),
+        v.norm(Double.POSITIVE_INFINITY),
+        v.aggregate(max, abs));
+
+    assertEquals("v.dot(w) != v.aggregate(w, plus, mult)",
+        v.dot(w),
+        v.aggregate(w, plus, mult));
+    assertEquals("|(v-w)|^2 != v.aggregate(w, plus, chain(pow(2), minus))",
+        v.minus(w).dot(v.minus(w)),
+        v.aggregate(w, plus, chain(pow(2), minus)));
+  }
+
+  private void setUpFirstVector(Vector v) {
+    v.setQuick(1, 2);
+    v.setQuick(2, 0.5);
+    v.setQuick(3, -5);
+  }
+
+  private void setUpSecondVector(Vector v) {
+    v.setQuick(0, 3);
+    v.setQuick(1, -1.5);
+    v.setQuick(2, -5);
+    v.setQuick(3, 2);
   }
 
   /*public void testSparseVectorTimesX() {

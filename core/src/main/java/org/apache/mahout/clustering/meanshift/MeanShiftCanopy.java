@@ -24,7 +24,7 @@ import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.math.CardinalityException;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.JsonVectorAdapter;
-import org.apache.mahout.math.PlusFunction;
+import static org.apache.mahout.math.function.Functions.*;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -127,7 +127,7 @@ public class MeanShiftCanopy extends ClusterBase {
   public Vector computeBoundCentroid() {
     Vector result = new DenseVector(getCenter().size());
     for (Vector v : boundPoints) {
-      result.assign(v, new PlusFunction());
+      result.assign(v, plus);
     }
     return result.divide(boundPoints.size());
   }

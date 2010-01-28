@@ -18,9 +18,8 @@
 package org.apache.mahout.math.decomposer.hebbian;
 
 
-import org.apache.mahout.math.PlusFunction;
-import org.apache.mahout.math.PlusWithScaleFunction;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.function.PlusMult;
 
 public class HebbianUpdater implements EigenUpdater {
 
@@ -39,7 +38,7 @@ public class HebbianUpdater implements EigenUpdater {
     }
     if (currentState.getActivationDenominatorSquared() == 0 || trainingVectorNorm == 0) {
       if (currentState.getActivationDenominatorSquared() == 0) {
-        pseudoEigen.assign(trainingVector, new PlusFunction());
+        pseudoEigen.assign(trainingVector, new PlusMult(1));
         currentState.setHelperVector(currentState.currentTrainingProjection().clone());
         double helperNorm = currentState.getHelperVector().norm(2);
         currentState.setActivationDenominatorSquared(trainingVectorNorm * trainingVectorNorm - helperNorm * helperNorm);
@@ -53,8 +52,8 @@ public class HebbianUpdater implements EigenUpdater {
     currentState.setActivationDenominatorSquared(currentState.getActivationDenominatorSquared() + 2 * activation * currentState.getActivationNumerator()
         + (activation * activation) * (trainingVector.getLengthSquared() - currentState.currentTrainingProjection().getLengthSquared()));
     if (numPreviousEigens > 0)
-      currentState.getHelperVector().assign(currentState.currentTrainingProjection(), new PlusWithScaleFunction(activation));
-    pseudoEigen.assign(trainingVector, new PlusWithScaleFunction(activation));
+      currentState.getHelperVector().assign(currentState.currentTrainingProjection(), new PlusMult(activation));
+    pseudoEigen.assign(trainingVector, new PlusMult(activation));
   }
 
   private static void updateTrainingProjectionsVector(TrainingState state,

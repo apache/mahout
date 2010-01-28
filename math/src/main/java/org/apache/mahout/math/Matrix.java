@@ -17,10 +17,13 @@
 
 package org.apache.mahout.math;
 
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.UnaryFunction;
+
 import java.util.Map;
 
 /** The basic interface including numerous convenience functions */
-public interface Matrix extends Cloneable {
+public interface Matrix extends Cloneable, VectorIterable {
 
   /** @return a formatted String suitable for output */
   String asFormatString();
@@ -95,12 +98,6 @@ public interface Matrix extends Cloneable {
    * @return an int[2]
    */
   int[] size();
-
-  /** Helper method to return the cardinality of the row dimension */
-  int numRows();
-
-  /** Helper method to return the cardinality of the column dimension */
-  int numCols();
 
   /**
    * Return a copy of the recipient
@@ -248,26 +245,6 @@ public interface Matrix extends Cloneable {
   Matrix times(Matrix x);
 
   /**
-   * Return a new vector with cardinality equal to getNumRows() of this matrix which is the matrix product of the
-   * recipient and the argument
-   *
-   * @param v a vector with cardinality equal to getNumCols() of the recipient
-   * @return a new vector (typically a DenseVector)
-   * @throws CardinalityException if this.getNumRows() != v.size()
-   */
-  Vector times(Vector v);
-
-  /**
-   * Convenience method for producing this.transpose().times(this.times(v)), which can be implemented with only one pass
-   * over the matrix, without making the transpose() call (which can be expensive if the matrix is sparse)
-   *
-   * @param v a vector with cardinality equal to getNumCols() of the recipient
-   * @return a new vector (typically a DenseVector) with cardinality equal to that of the argument.
-   * @throws CardinalityException if this.getNumCols() != v.size()
-   */
-  Vector timesSquared(Vector v);
-
-  /**
    * Return a new matrix that is the transpose of the receiver
    *
    * @return the transpose
@@ -377,9 +354,9 @@ public interface Matrix extends Cloneable {
    */
   // void getNonZeros(IntArrayList jx, DoubleArrayList values);
   // void foreachNonZero(IntDoubleFunction f);
-  // double aggregate(DoubleDoubleFunction aggregator, DoubleFunction map);
-  // double aggregate(Matrix other, DoubleDoubleFunction aggregator,
-  // DoubleDoubleFunction map);
-  // NewMatrix assign(Matrix y, DoubleDoubleFunction function, IntArrayList
+  // double aggregate(BinaryFunction aggregator, UnaryFunction map);
+  // double aggregate(Matrix other, BinaryFunction aggregator,
+  // BinaryFunction map);
+  // NewMatrix assign(Matrix y, BinaryFunction function, IntArrayList
   // nonZeroIndexes);
 }

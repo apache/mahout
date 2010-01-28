@@ -18,6 +18,8 @@
 package org.apache.mahout.math;
 
 import junit.framework.TestCase;
+import static org.apache.mahout.math.function.Functions.*;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -197,7 +199,7 @@ public class TestMatrixView extends TestCase {
 
   public void testAssignMatrixBinaryFunction() throws Exception {
     int[] c = test.size();
-    test.assign(test, new PlusFunction());
+    test.assign(test, plus);
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
@@ -208,7 +210,7 @@ public class TestMatrixView extends TestCase {
 
   public void testAssignMatrixBinaryFunctionCardinality() {
     try {
-      test.assign(test.transpose(), new PlusFunction());
+      test.assign(test.transpose(), plus);
       fail("exception expected");
     } catch (CardinalityException e) {
       assertTrue(true);
@@ -238,7 +240,7 @@ public class TestMatrixView extends TestCase {
 
   public void testAssignUnaryFunction() {
     int[] c = test.size();
-    test.assign(new NegateFunction());
+    test.assign(negate);
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',

@@ -17,7 +17,7 @@
 
 package org.apache.mahout.clustering.dirichlet.models;
 
-import org.apache.mahout.math.SquareRootFunction;
+import org.apache.mahout.math.function.SquareRootFunction;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 

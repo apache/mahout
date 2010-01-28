@@ -9,7 +9,7 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.matrix;
 
 import org.apache.mahout.math.PersistentObject;
-import org.apache.mahout.math.jet.math.Functions;
+import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix3D;
 import org.apache.mahout.math.matrix.impl.SparseDoubleMatrix3D;
 
@@ -30,7 +30,7 @@ public class DoubleFactory3D extends PersistentObject {
   /** Constructs a matrix with cells having ascending values. For debugging purposes. */
   public DoubleMatrix3D ascending(int slices, int rows, int columns) {
     return descending(slices, rows, columns)
-        .assign(Functions.chain(Functions.neg, Functions.minus(slices * rows * columns)));
+        .assign(Functions.chain(Functions.negate, Functions.minus(slices * rows * columns)));
   }
 
   /** Constructs a matrix with cells having descending values. For debugging purposes. */

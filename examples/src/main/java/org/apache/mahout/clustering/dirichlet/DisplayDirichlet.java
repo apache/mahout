@@ -35,7 +35,7 @@ import java.io.IOException;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.TimesFunction;
+import org.apache.mahout.math.function.TimesFunction;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.VectorWritable;

@@ -16,7 +16,7 @@ import java.util.Date;
 
 /**
  Integer Function objects to be passed to generic methods.
- Same as {@link Functions} except operating on integers.
+ Same as {@link org.apache.mahout.math.function.Functions} except operating on integers.
  <p>
  For aliasing see {@link #intFunctions}.
 

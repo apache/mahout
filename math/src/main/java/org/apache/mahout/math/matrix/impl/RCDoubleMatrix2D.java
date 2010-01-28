@@ -8,11 +8,12 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.impl;
 
-import org.apache.mahout.math.function.DoubleFunction;
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.function.Mult;
+import org.apache.mahout.math.function.PlusMult;
+import org.apache.mahout.math.function.UnaryFunction;
 import org.apache.mahout.math.function.IntIntDoubleFunction;
-import org.apache.mahout.math.jet.math.Functions;
-import org.apache.mahout.math.jet.math.Mult;
-import org.apache.mahout.math.jet.math.PlusMult;
 import org.apache.mahout.math.list.DoubleArrayList;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
@@ -88,7 +89,7 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
   }
 
   @Override
-  public DoubleMatrix2D assign(DoubleFunction function) {
+  public DoubleMatrix2D assign(UnaryFunction function) {
     if (function instanceof Mult) { // x[i] = mult*x[i]
       double alpha = ((Mult) function).getMultiplicator();
       if (alpha == 1) {
@@ -185,7 +186,7 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
   }
 
   @Override
-  public DoubleMatrix2D assign(DoubleMatrix2D y, org.apache.mahout.math.function.DoubleDoubleFunction function) {
+  public DoubleMatrix2D assign(DoubleMatrix2D y, BinaryFunction function) {
     checkShape(y);
 
     if (function instanceof PlusMult) { // x[i] = x[i] + alpha*y[i]
@@ -205,7 +206,7 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
       return this;
     }
 
-    if (function == org.apache.mahout.math.jet.math.Functions.mult) { // x[i] = x[i] * y[i]
+    if (function == Functions.mult) { // x[i] = x[i] * y[i]
       int[] idx = indexes.elements();
       double[] vals = values.elements();
 
@@ -222,7 +223,7 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
       return this;
     }
 
-    if (function == org.apache.mahout.math.jet.math.Functions.div) { // x[i] = x[i] / y[i]
+    if (function == Functions.div) { // x[i] = x[i] / y[i]
       int[] idx = indexes.elements();
       double[] vals = values.elements();
 
@@ -487,7 +488,7 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
       Crows[i] = C.viewRow(i);
     }
 
-    PlusMult fun = org.apache.mahout.math.jet.math.PlusMult.plusMult(0);
+    PlusMult fun = PlusMult.plusMult(0);
 
     int[] idx = indexes.elements();
     double[] vals = values.elements();

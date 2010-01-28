@@ -18,6 +18,9 @@
 package org.apache.mahout.math;
 
 
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.UnaryFunction;
+
 import java.util.Iterator;
 import java.util.Map;
 
@@ -75,7 +78,7 @@ public interface Vector extends Cloneable {
   /**
    * Apply the function to each element of the receiver
    *
-   * @param function a DoubleFunction to apply
+   * @param function a UnaryFunction to apply
    * @return the modified receiver
    */
   Vector assign(UnaryFunction function);
@@ -84,7 +87,7 @@ public interface Vector extends Cloneable {
    * Apply the function to each element of the receiver and the corresponding element of the other argument
    *
    * @param other    a Vector containing the second arguments to the function
-   * @param function a DoubleDoubleFunction to apply
+   * @param function a BinaryFunction to apply
    * @return the modified receiver
    * @throws CardinalityException if the cardinalities differ
    */
@@ -379,12 +382,33 @@ public interface Vector extends Cloneable {
    */
   // void getNonZeros(IntArrayList jx, DoubleArrayList values);
   // void foreachNonZero(IntDoubleFunction f);
-  // double aggregate(DoubleDoubleFunction aggregator, DoubleFunction map);
-  // double aggregate(Vector other, DoubleDoubleFunction aggregator,
-  // DoubleDoubleFunction map);
-  // NewVector assign(Vector y, DoubleDoubleFunction function, IntArrayList
+  // BinaryFunction map);
+  // NewVector assign(Vector y, BinaryFunction function, IntArrayList
   // nonZeroIndexes);
 
+  /**
+   * Examples speak louder than words:  aggregate(plus, pow(2)) is another way to say
+   * getLengthSquared(), aggregate(max, abs) is norm(Double.POSITIVE_INFINITY).  To sum all of the postive values,
+   * aggregate(plus, max(0)).  
+   * @param aggregator used to combine the current value of the aggregation with the result of map.apply(nextValue)
+   * @param map a function to apply to each element of the vector in turn before passing to the aggregator
+   * @return the final aggregation
+   */
+  double aggregate(BinaryFunction aggregator, UnaryFunction map);
+
+  /**
+   * <p>Generalized inner product - take two vectors, iterate over them both, using the combiner to combine together
+   * (and possibly map in some way) each pair of values, which are then aggregated with the previous accumulated
+   * value in the combiner.</p>
+   * <p>
+   * Example: dot(other) could be expressed as aggregate(other, Plus, Times), and kernelized inner products (which
+   * are symmetric on the indices) work similarly.
+   * @param other a vector to aggregate in combination with
+   * @param aggregator
+   * @param combiner
+   * @return the final aggregation
+   */
+  double aggregate(Vector other, BinaryFunction aggregator, BinaryFunction combiner);
 
   /** Return the sum of squares of all elements in the vector. Square root of this value is the length of the vector. */
   double getLengthSquared();

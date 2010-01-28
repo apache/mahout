@@ -8,8 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.doublealgo;
 
-import org.apache.mahout.math.function.DoubleDoubleFunction;
-import org.apache.mahout.math.jet.math.Functions;
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.jet.random.engine.MersenneTwister;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.apache.mahout.math.jet.random.sampling.RandomSampler;
@@ -41,7 +41,7 @@ public class Statistic {
 
   /** Canberra distance function; <tt>Sum( abs(x[i]-y[i]) / abs(x[i]+y[i]) )</tt>. */
   public static final VectorVectorFunction CANBERRA = new VectorVectorFunction() {
-    private final DoubleDoubleFunction fun = new DoubleDoubleFunction() {
+    private final BinaryFunction fun = new BinaryFunction() {
       @Override
       public double apply(double a, double b) {
         return Math.abs(a - b) / Math.abs(a + b);

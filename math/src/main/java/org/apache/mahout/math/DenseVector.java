@@ -17,6 +17,9 @@
 
 package org.apache.mahout.math;
 
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.PlusMult;
+
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -25,7 +28,6 @@ import java.util.NoSuchElementException;
 public class DenseVector extends AbstractVector {
 
   protected double[] values;
-  protected double lengthSquared = -1.0;
 
   /** For serialization purposes only */
   public DenseVector() {
@@ -121,7 +123,7 @@ public class DenseVector extends AbstractVector {
       throw new CardinalityException();
     }
     // is there some other way to know if function.apply(0, x) = x for all x?
-    if(function instanceof PlusFunction || function instanceof PlusWithScaleFunction) {
+    if(function instanceof PlusMult) {
       Iterator<Vector.Element> it = other.iterateNonZero();
       Vector.Element e;
       while(it.hasNext() && (e = it.next()) != null) {
@@ -132,6 +134,7 @@ public class DenseVector extends AbstractVector {
         values[i] = function.apply(values[i], other.getQuick(i));
       }
     }
+    lengthSquared = -1;
     return this;
   }
 
@@ -312,16 +315,6 @@ public class DenseVector extends AbstractVector {
 
     }
     lengthSquared = result;
-    return result;
-  }
-
-  @Override
-  public double getDistanceSquared(Vector v) {
-    double result = 0.0;
-    for (int i = 0; i < values.length; i++) {
-      double delta = values[i] - v.getQuick(i);
-      result += delta * delta;
-    }
     return result;
   }
 

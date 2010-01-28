@@ -24,9 +24,9 @@ import java.util.Map;
 
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.PlusWithScaleFunction;
 import org.apache.mahout.math.SparseRowMatrix;
-import org.apache.mahout.math.UnaryFunction;
+import org.apache.mahout.math.function.PlusMult;
+import org.apache.mahout.math.function.UnaryFunction;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
@@ -109,10 +109,10 @@ public class LanczosSolver {
       Vector nextVector = corpus.timesSquared(currentVector);
       log.info("{} passes through the corpus so far...", i);
       nextVector.assign(new Scale(1 / scaleFactor));
-      nextVector.assign(previousVector, new PlusWithScaleFunction(-beta));
+      nextVector.assign(previousVector, new PlusMult(-beta));
       // now orthogonalize
       alpha = currentVector.dot(nextVector);
-      nextVector.assign(currentVector, new PlusWithScaleFunction(-alpha));
+      nextVector.assign(currentVector, new PlusMult(-alpha));
       endTime(TimingSection.ITERATE);
       startTime(TimingSection.ORTHOGANLIZE);
       orthoganalizeAgainstAllButLast(nextVector, basis);
@@ -152,7 +152,7 @@ public class LanczosSolver {
       DoubleMatrix1D ejCol = eigenVects.viewColumn(basis.numRows() - i - 1);
       for (int j = 0; j < ejCol.size(); j++) {
         double d = ejCol.getQuick(j);
-        realEigen.assign(basis.getRow(j), new PlusWithScaleFunction(d));
+        realEigen.assign(basis.getRow(j), new PlusMult(d));
       }
       realEigen = realEigen.normalize();
       eigenVectors.assignRow(i, realEigen);
@@ -170,7 +170,7 @@ public class LanczosSolver {
   private static void orthoganalizeAgainstAllButLast(Vector nextVector, Matrix basis) {
     for (int i = 0; i < basis.numRows() - 1; i++) {
       double alpha = nextVector.dot(basis.getRow(i));
-      nextVector.assign(basis.getRow(i), new PlusWithScaleFunction(-alpha));
+      nextVector.assign(basis.getRow(i), new PlusMult(-alpha));
     }
   }
 
@@ -183,7 +183,7 @@ public class LanczosSolver {
       if (v == null) {
         v = new DenseVector(vector.size()).plus(vector);
       } else {
-        v.assign(vector, new PlusWithScaleFunction(1));
+        v.assign(vector, new PlusMult(1));
       }
     }
     v.assign(new Scale(1.0 / v.norm(2)));

@@ -8,9 +8,9 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix;
 
-import org.apache.mahout.math.function.DoubleDoubleFunction;
-import org.apache.mahout.math.function.DoubleFunction;
-import org.apache.mahout.math.jet.math.Functions;
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.function.UnaryFunction;
 import org.apache.mahout.math.list.DoubleArrayList;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.matrix.doublealgo.Formatter;
@@ -29,7 +29,7 @@ public abstract class DoubleMatrix3D extends AbstractMatrix3D {
    * <tt>v==a(size())</tt> where <tt>a(i) == aggr( a(i-1), f(get(slice,row,column)) )</tt> and terminators are <tt>a(1)
    * == f(get(0,0,0)), a(0)==Double.NaN</tt>. <p> <b>Example:</b>
    * <pre>
-   * org.apache.mahout.math.jet.math.Functions F = org.apache.mahout.math.jet.math.Functions.functions;
+   * org.apache.mahout.math.function.Functions F = org.apache.mahout.math.function.Functions.functions;
    * 2 x 2 x 2 matrix
    * 0 1
    * 2 3
@@ -47,10 +47,10 @@ public abstract class DoubleMatrix3D extends AbstractMatrix3D {
    *             transformed current cell value.
    * @param f    a function transforming the current cell value.
    * @return the aggregated measure.
-   * @see org.apache.mahout.math.jet.math.Functions
+   * @see org.apache.mahout.math.function.Functions
    */
-  public double aggregate(DoubleDoubleFunction aggr,
-                          DoubleFunction f) {
+  public double aggregate(BinaryFunction aggr,
+                          UnaryFunction f) {
     if (size() == 0) {
       return Double.NaN;
     }
@@ -72,7 +72,7 @@ public abstract class DoubleMatrix3D extends AbstractMatrix3D {
    * <tt>v</tt> such that <tt>v==a(size())</tt> where <tt>a(i) == aggr( a(i-1), f(get(slice,row,column),other.get(slice,row,column))
    * )</tt> and terminators are <tt>a(1) == f(get(0,0,0),other.get(0,0,0)), a(0)==Double.NaN</tt>. <p> <b>Example:</b>
    * <pre>
-   * org.apache.mahout.math.jet.math.Functions F = org.apache.mahout.math.jet.math.Functions.functions;
+   * org.apache.mahout.math.function.Functions F = org.apache.mahout.math.function.Functions.functions;
    * x = 2 x 2 x 2 matrix
    * 0 1
    * 2 3
@@ -103,10 +103,10 @@ public abstract class DoubleMatrix3D extends AbstractMatrix3D {
    * @return the aggregated measure.
    * @throws IllegalArgumentException if <tt>slices() != other.slices() || rows() != other.rows() || columns() !=
    *                                  other.columns()</tt>
-   * @see org.apache.mahout.math.jet.math.Functions
+   * @see org.apache.mahout.math.function.Functions
    */
-  public double aggregate(DoubleMatrix3D other, org.apache.mahout.math.function.DoubleDoubleFunction aggr,
-                          DoubleDoubleFunction f) {
+  public double aggregate(DoubleMatrix3D other, BinaryFunction aggr,
+                          BinaryFunction f) {
     checkShape(other);
     if (size() == 0) {
       return Double.NaN;
@@ -198,9 +198,9 @@ public abstract class DoubleMatrix3D extends AbstractMatrix3D {
    *
    * @param function a function object taking as argument the current cell's value.
    * @return <tt>this</tt> (for convenience only).
-   * @see org.apache.mahout.math.jet.math.Functions
+   * @see org.apache.mahout.math.function.Functions
    */
-  public DoubleMatrix3D assign(DoubleFunction function) {
+  public DoubleMatrix3D assign(UnaryFunction function) {
     for (int slice = slices; --slice >= 0;) {
       for (int row = rows; --row >= 0;) {
         for (int column = columns; --column >= 0;) {
@@ -254,7 +254,7 @@ public abstract class DoubleMatrix3D extends AbstractMatrix3D {
    * 0 2
    * 4 6
    *
-   * m1.assign(m2, org.apache.mahout.math.jet.math.Functions.pow);
+   * m1.assign(m2, org.apache.mahout.math.function.Functions.pow);
    * -->
    * m1 == 1 x 2 x 2 matrix
    * 1   1
@@ -268,9 +268,9 @@ public abstract class DoubleMatrix3D extends AbstractMatrix3D {
    * @return <tt>this</tt> (for convenience only).
    * @throws IllegalArgumentException if <tt>slices() != other.slices() || rows() != other.rows() || columns() !=
    *                                  other.columns()</tt>
-   * @see org.apache.mahout.math.jet.math.Functions
+   * @see org.apache.mahout.math.function.Functions
    */
-  public DoubleMatrix3D assign(DoubleMatrix3D y, org.apache.mahout.math.function.DoubleDoubleFunction function) {
+  public DoubleMatrix3D assign(DoubleMatrix3D y, BinaryFunction function) {
     checkShape(y);
     for (int slice = slices; --slice >= 0;) {
       for (int row = rows; --row >= 0;) {
@@ -988,6 +988,6 @@ public abstract class DoubleMatrix3D extends AbstractMatrix3D {
     if (size() == 0) {
       return 0;
     }
-    return aggregate(Functions.plus, org.apache.mahout.math.jet.math.Functions.identity);
+    return aggregate(Functions.plus, Functions.identity);
   }
 }

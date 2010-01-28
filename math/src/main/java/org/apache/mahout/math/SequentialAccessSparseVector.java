@@ -92,103 +92,6 @@ public class SequentialAccessSparseVector extends AbstractVector {
     return values.getNumMappings();
   }
 
-  private static class DistanceSquarer implements Iterator<Element> {
-    final Iterator<Element> it1;
-    final Iterator<Element> it2;
-    Element e1 = null;
-    Element e2 = null;
-    boolean firstIteration = true;
-    Iterator<Element> notExhausted = null;
-    double v = 0;
-
-    DistanceSquarer(Iterator<Element> it1, Iterator<Element> it2) {
-      this.it1 = it1;
-      this.it2 = it2;
-    }
-
-    @Override
-    public boolean hasNext() {
-      return firstIteration || it1.hasNext() || it2.hasNext();
-    }
-
-    @Override
-    public Element next() {
-      if(firstIteration) {
-        e1 = it1.next();
-        e2 = it2.next();
-        firstIteration = false;
-      }
-      Iterator<Element> it;
-      Element e = null;
-      if(notExhausted != null) {
-        if(notExhausted.hasNext()) {
-          e = notExhausted.next();
-          v += e.get() * e.get();
-        }
-      } else if(e1.index() < e2.index()) {
-        v += e1.get() * e1.get();
-        e = e1;
-        if(it1.hasNext()) {
-          e1 = it1.next();
-        } else {
-          notExhausted = it2;
-        }
-      } else if(e1.index() > e2.index()) {
-        v += e2.get() * e2.get();
-        e = e2;
-        if(it2.hasNext()) {
-          e2 = it2.next();
-        } else {
-          notExhausted = it1;
-        }
-      } else {
-        double d = e1.get() - e2.get();
-        if(it1.hasNext()) {
-          e1 = it1.next();
-          e = e1;
-        } else if(it2.hasNext()) {
-          e2 = it2.next();
-          e = e2;
-        } else {
-          e = null;
-        }
-        v += d*d;
-      }
-      return e;
-    }
-
-    @Override
-    public void remove() {
-      // ignore
-    }
-
-    public double distanceSquared() {
-      return v;
-    }
-  }
-
-  @Override
-  public double getDistanceSquared(Vector v) {
-    if(v instanceof SequentialAccessSparseVector) {
-      Iterator<Element> it = iterateNonZero();
-      Iterator<Element> vIt = v.iterateNonZero();
-      if(!it.hasNext()) {
-        return v.dot(v);
-      }
-      if(!vIt.hasNext()) {
-        return this.dot(this);
-      }
-      DistanceSquarer d = new DistanceSquarer(it, vIt);
-      while(d.hasNext()) {
-        d.next();
-      }
-      return d.distanceSquared();
-    }
-    else {
-      return super.getDistanceSquared(v);
-    }
-  }
-
   @Override
   public SequentialAccessSparseVector like() {
     int numValues = 256;
@@ -209,12 +112,12 @@ public class SequentialAccessSparseVector extends AbstractVector {
 
   @Override
   public java.util.Iterator<Element> iterateNonZero() {
-    return new IntDoublePairIterator(values);
+    return new IntDoublePairIterator(this);
   }
 
   @Override
   public Iterator<Element> iterateAll() {
-    return new IntDoublePairIterator(values, size());
+    return new IntDoublePairIterator(this, size());
   }
 
   /**
@@ -262,12 +165,12 @@ public class SequentialAccessSparseVector extends AbstractVector {
     private final AbstractElement element;
     private final int maxOffset;
 
-    IntDoublePairIterator(OrderedIntDoubleMapping mapping) {
-      element = new SparseElement(offset, mapping);
-      maxOffset = mapping.getNumMappings();
+    IntDoublePairIterator(SequentialAccessSparseVector v) {
+      element = new SparseElement(offset, v);
+      maxOffset = v.values.getNumMappings();
     }
-    IntDoublePairIterator(OrderedIntDoubleMapping mapping, int cardinality) {
-      element = new DenseElement(offset, mapping);
+    IntDoublePairIterator(SequentialAccessSparseVector v, int cardinality) {
+      element = new DenseElement(offset, v);
       maxOffset = cardinality;
     }
     @Override
@@ -292,7 +195,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
 
   @Override
   public Element getElement(int index) {
-    return new DenseElement(index, values);
+    return new DenseElement(index, this);
   }
 
 
@@ -302,19 +205,20 @@ public class SequentialAccessSparseVector extends AbstractVector {
     final int[] indices;
     final double[] values;
 
-    AbstractElement(int ind, OrderedIntDoubleMapping m) {
+    AbstractElement(int ind, SequentialAccessSparseVector v) {
       offset = ind;
-      mapping = m;
-      values = m.getValues();
-      indices = m.getIndices();
+      mapping = v.values;
+      values = mapping.getValues();
+      indices = mapping.getIndices();
     }
   }
 
   private static final class DenseElement extends AbstractElement {
     int index;
-
-    DenseElement(int ind, OrderedIntDoubleMapping mapping) {
-      super(ind, mapping);
+    SequentialAccessSparseVector v;
+    DenseElement(int ind, SequentialAccessSparseVector v) {
+      super(ind, v);
+      this.v = v;
       index = ind;
     }
 
@@ -334,14 +238,15 @@ public class SequentialAccessSparseVector extends AbstractVector {
 
     @Override
     public void set(double value) {
+      v.lengthSquared = -1;
       if(value != 0.0) mapping.set(indices[offset], value);
     }
   }
 
   private static final class SparseElement extends AbstractElement {
 
-    SparseElement(int ind, OrderedIntDoubleMapping mapping) {
-      super(ind, mapping);
+    SparseElement(int ind, SequentialAccessSparseVector v) {
+      super(ind, v);
     }
 
     @Override
