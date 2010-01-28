@@ -219,6 +219,9 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public double getDistanceSquared(Vector v) {
+    if(v.size() != size()) {
+      throw new CardinalityException();
+    }
     // if this and v has a cached lengthSquared, dot product is quickest way to compute this.
     if(lengthSquared >= 0 && v instanceof AbstractVector && ((AbstractVector)v).lengthSquared >= 0) {
       return lengthSquared + v.getLengthSquared() - 2 * this.dot(v);

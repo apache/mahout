@@ -49,18 +49,11 @@ public class SquaredEuclideanDistanceMeasure implements DistanceMeasure {
 
   @Override
   public double distance(Vector v1, Vector v2) {
-    if (v1.size() != v2.size()) {
-      throw new CardinalityException();
-    }
-    Vector vector = v1.minus(v2);
-    return vector.dot(vector);
+    return v1.getDistanceSquared(v2);
   }
 
   @Override
   public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
-    if (centroid.size() != v.size()) {
-      throw new CardinalityException();
-    }
-    return centroidLengthSquare + v.getLengthSquared() - 2 * v.dot(centroid);
+    return centroidLengthSquare - 2 * v.dot(centroid) + v.getLengthSquared();
   }
 }
