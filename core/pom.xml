@@ -83,7 +83,6 @@
         </executions>
       </plugin>
 
-      
       <!-- Build the Job Jar -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -169,7 +168,7 @@
 
     </plugins>
   </build>
-  
+
   <dependencies>
     <dependency>
       <groupId>org.apache.mahout</groupId>
@@ -255,6 +254,11 @@
     </dependency>
 
     <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.apache.mahout.commons</groupId>
       <artifactId>commons-cli</artifactId>
       <version>2.0-mahout</version>
@@ -269,29 +273,25 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
-      <version>2.2</version>
-      <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymockclassextension</artifactId>
-      <version>2.2</version>
-      <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>com.google.collections</groupId>
       <artifactId>google-collections</artifactId>
       <version>1.0-rc5</version>
     </dependency>
   </dependencies>
-  
+
   <repositories>
     <repository>
       <id>Apache snapshots</id>
@@ -314,7 +314,6 @@
       </releases>
     </repository>
   </repositories>
-
 
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2-core</connection>

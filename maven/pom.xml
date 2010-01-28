@@ -13,7 +13,7 @@
   </parent>
   <!-- Keep this in sync with the values in mahout-core pom.xml -->
   <properties>
-    <junit.version>4.7</junit.version>   
+    <junit.version>4.7</junit.version>
     <tagBase>https://svn.apache.org/repos/asf/lucene/mahout</tagBase>
     <lucene.version>2.9.1</lucene.version>
     <hadoop.version>0.20.2-SNAPSHOT</hadoop.version>
@@ -125,6 +125,18 @@
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>${junit.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.easymock</groupId>
+        <artifactId>easymock</artifactId>
+        <version>2.5.2</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.easymock</groupId>
+        <artifactId>easymockclassextension</artifactId>
+        <version>2.5.2</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -325,6 +337,39 @@
     </plugins>
   </build>
   <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <inherited>true</inherited>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <inherited>true</inherited>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
     <profile>
       <id>sourcecheck</id>
       <build>
