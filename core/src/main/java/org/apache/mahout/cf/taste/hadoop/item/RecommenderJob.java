@@ -63,9 +63,12 @@ public final class RecommenderJob extends AbstractJob {
   public int run(String[] args) throws IOException {
 
     Option numReccomendationsOpt = buildOption("numRecommendations", "n", "Number of recommendations per user", "10");
-    Option usersFileOpt = buildOption("usersFile", "n", "Number of recommendations per user", null);
+    Option usersFileOpt = buildOption("usersFile", "u", "File of users to recommend for", null);
 
     Map<String,String> parsedArgs = parseArguments(args, numReccomendationsOpt, usersFileOpt);
+    if (parsedArgs == null) {
+      return -1;
+    }
 
     String inputPath = parsedArgs.get("--input");
     String tempDirPath = parsedArgs.get("--tempDir");

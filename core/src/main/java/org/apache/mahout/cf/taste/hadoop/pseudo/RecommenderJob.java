@@ -101,6 +101,9 @@ public final class RecommenderJob extends AbstractJob {
 
     Map<String,String> parsedArgs =
         parseArguments(args, recommendClassOpt, numReccomendationsOpt, usersFileOpt);
+    if (parsedArgs == null) {
+      return -1;
+    }
     String inputFile = parsedArgs.get("--input");
     String outputPath = parsedArgs.get("--output");
     String jarFile = parsedArgs.get("--jarFile");
