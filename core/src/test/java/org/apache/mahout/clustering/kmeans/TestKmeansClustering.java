@@ -446,7 +446,7 @@ public class TestKmeansClustering extends MahoutTestCase {
   }
 
   /** Story: User wants to use canopy clustering to input the initial clusters for kmeans job. */
-  public void textKMeansWithCanopyClusterInput() throws Exception {
+  public void testKMeansWithCanopyClusterInput() throws Exception {
     List<VectorWritable> points = getPoints(reference);
     File testData = new File("testdata");
     if (!testData.exists()) {
