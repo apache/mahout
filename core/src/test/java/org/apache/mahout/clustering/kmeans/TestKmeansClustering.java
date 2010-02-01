@@ -478,15 +478,21 @@ public class TestKmeansClustering extends MahoutTestCase {
     String[] outFiles = outDir.list();
     assertEquals("output dir files?", 4, outFiles.length);
     DummyOutputCollector<Text, Text> collector = new DummyOutputCollector<Text, Text>();
-    for (String line : new FileLineIterable(new File("output/points/part-00000"))) {
-      String[] lineParts = line.split("\t");
-      assertEquals("line parts", 2, lineParts.length);
-      String cl = line.substring(0, line.indexOf(':'));
-      collector.collect(new Text(cl), new Text(lineParts[1]));
+    SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path("output/points/part-00000"), conf);
+   
+    //The key is the name of the vector, or the vector itself
+    Text key = new Text();
+    //The value is the cluster id
+    Text value = new Text();
+    while (reader.next(key, value)) {
+      collector.collect(value, key);
+      key = new Text();
+      value = new Text();
+
     }
-    assertEquals("num points[V0]", 4, collector.getValue("V0").size());
-    assertEquals("num points[V1]", 5, collector.getValue("V1").size());
+    reader.close();
+    
+    assertEquals("num points[0]", 4, collector.getValue("0").size());
+    assertEquals("num points[1]", 5, collector.getValue("1").size());
   }
-
-
 }
