@@ -17,6 +17,7 @@
 
 package org.apache.mahout.clustering.kmeans;
 
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
@@ -65,36 +66,50 @@ public final class RandomSeedGenerator {
     }
     boolean newFile = fs.createNewFile(outFile);
     if (newFile) {
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(input), conf);
-      Writable key = (Writable) reader.getKeyClass().newInstance();
-      VectorWritable value = (VectorWritable) reader.getValueClass().newInstance();
+      Path inputPathPattern;
+      Path inputPath = new Path(input);
+      
+      if (fs.getFileStatus(inputPath).isDir() == true) {
+        inputPathPattern = new Path(inputPath.toString() + "/*");
+      } else {
+        inputPathPattern = inputPath;
+      }
+      
+      FileStatus[] inputFiles = fs.globStatus(inputPathPattern);
       SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, outFile, Text.class, Cluster.class);
       Random random = RandomUtils.getRandom();
-
       List<Text> chosenTexts = new ArrayList<Text>(k);
       List<Cluster> chosenClusters = new ArrayList<Cluster>(k);
       int nextClusterId = 0;
-      while (reader.next(key, value)) {
-        Cluster newCluster = new Cluster(value.get(), nextClusterId++);
-        newCluster.addPoint(value.get());
-        Text newText = new Text(key.toString());
-        int currentSize = chosenTexts.size();
-        if (currentSize < k) {
-          chosenTexts.add(newText);
-          chosenClusters.add(newCluster);
-        } else if (random.nextInt(currentSize + 1) == 0) { // with chance 1/(currentSize+1) pick new element
-          int indexToRemove = random.nextInt(currentSize); // evict one chosen randomly
-          chosenTexts.remove(indexToRemove);
-          chosenClusters.remove(indexToRemove);
-          chosenTexts.add(newText);
-          chosenClusters.add(newCluster);
+      
+      for (FileStatus fileStatus : inputFiles) {
+        if(fileStatus.isDir() == true) continue; // select only the top level files
+        SequenceFile.Reader reader = new SequenceFile.Reader(fs, fileStatus.getPath(), conf);
+        Writable key = (Writable) reader.getKeyClass().newInstance();
+        VectorWritable value = (VectorWritable) reader.getValueClass().newInstance();
+        while (reader.next(key, value)) {
+          Cluster newCluster = new Cluster(value.get(), nextClusterId++);
+          newCluster.addPoint(value.get());
+          Text newText = new Text(key.toString());
+          int currentSize = chosenTexts.size();
+          if (currentSize < k) {
+            chosenTexts.add(newText);
+            chosenClusters.add(newCluster);
+          } else if (random.nextInt(currentSize + 1) == 0) { // with chance 1/(currentSize+1) pick new element
+            int indexToRemove = random.nextInt(currentSize); // evict one chosen randomly
+            chosenTexts.remove(indexToRemove);
+            chosenClusters.remove(indexToRemove);
+            chosenTexts.add(newText);
+            chosenClusters.add(newCluster);
+          }
         }
+        reader.close();
       }
+      
       for (int i = 0; i < k; i++) {
         writer.append(chosenTexts.get(i), chosenClusters.get(i));
       }
       log.info("Wrote {} vectors to {}", k, outFile);
-      reader.close();
       writer.close();
     }
 
