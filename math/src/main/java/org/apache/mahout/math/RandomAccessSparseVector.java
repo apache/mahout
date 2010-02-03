@@ -63,6 +63,11 @@ public class RandomAccessSparseVector extends AbstractVector {
     }
   }
 
+  public RandomAccessSparseVector(RandomAccessSparseVector other, boolean shallowCopy) {
+    super(other.getName(), other.size());
+    values = shallowCopy ? other.values : (OpenIntDoubleHashMap)other.values.clone() ;
+  }
+
   @Override
   protected Matrix matrixLike(int rows, int columns) {
     int[] cardinality = {rows, columns};

@@ -59,6 +59,11 @@ public class SequentialAccessSparseVector extends AbstractVector {
     }
   }
 
+  public SequentialAccessSparseVector(SequentialAccessSparseVector other, boolean shallowCopy) {
+    super(other.getName(), other.size());
+    values = shallowCopy ? other.values : other.values.clone();
+  }
+
   public SequentialAccessSparseVector(SequentialAccessSparseVector other) {
     this(other.getName(), other.size(), other.getNumNondefaultElements());
     values = other.values.clone();
