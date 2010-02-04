@@ -281,7 +281,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
     return fpGrowth(tree, minSupportMutable, k, returnFeatures, topKPatternsOutputCollector, updater);
   }
 
-  private FrequentPatternMaxHeap growth(FPTree tree, MutableLong minSupportMutable, int k,
+  private static FrequentPatternMaxHeap growth(FPTree tree, MutableLong minSupportMutable, int k,
       FPTreeDepthCache treeCache, int level, int currentAttribute, StatusUpdater updater) {
 
     FrequentPatternMaxHeap frequentPatterns = new FrequentPatternMaxHeap(k, true);

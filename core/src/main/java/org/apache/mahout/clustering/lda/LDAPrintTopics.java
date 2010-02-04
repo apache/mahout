@@ -228,8 +228,8 @@ public class LDAPrintTopics {
       }
 
     } catch (OptionException e) {
-      e.printStackTrace();
       CommandLineUtil.printHelp(group);
+      throw e;
     }
   }
 
