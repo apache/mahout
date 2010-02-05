@@ -15,10 +15,9 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.utils.vectors.text;
+package org.apache.mahout.utils.vectors.text.term;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -26,15 +25,11 @@ import java.util.Map.Entry;
 import org.apache.commons.lang.mutable.MutableLong;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.analysis.tokenattributes.TermAttribute;
+import org.apache.mahout.common.StringTuple;
 
 /**
  * TextVectorizer Term Count Mapper. Tokenizes a text document and outputs the
@@ -42,23 +37,15 @@ import org.apache.lucene.analysis.tokenattributes.TermAttribute;
  * 
  */
 public class TermCountMapper extends MapReduceBase implements
-    Mapper<Text,Text,Text,LongWritable> {
-  
-  private Analyzer analyzer;
-  
+    Mapper<Text,StringTuple,Text,LongWritable> {
   @Override
   public void map(Text key,
-                  Text value,
+                  StringTuple value,
                   OutputCollector<Text,LongWritable> output,
                   Reporter reporter) throws IOException {
-    TokenStream stream =
-        analyzer
-            .tokenStream(key.toString(), new StringReader(value.toString()));
-    Map<String,MutableLong> wordCount = new HashMap<String,MutableLong>();    
-    TermAttribute termAtt =
-        (TermAttribute) stream.addAttribute(TermAttribute.class);
-    while (stream.incrementToken()) {
-      String word = new String(termAtt.termBuffer(), 0, termAtt.termLength());
+    
+    Map<String,MutableLong> wordCount = new HashMap<String,MutableLong>();
+    for (String word : value.getEntries()) {
       if (wordCount.containsKey(word) == false) {
         wordCount.put(word, new MutableLong(0));
       }
@@ -70,23 +57,4 @@ public class TermCountMapper extends MapReduceBase implements
           .getValue().longValue()));
     }
   }
-  
-  @Override
-  public void configure(JobConf job) {
-    super.configure(job);
-    try {
-      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class<?> cl =
-          ccl.loadClass(job.get(DictionaryVectorizer.ANALYZER_CLASS,
-              StandardAnalyzer.class.getName()));
-      analyzer = (Analyzer) cl.newInstance();
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    }
-  }
-  
 }

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.utils.vectors.text;
+package org.apache.mahout.utils.vectors.text.document;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -30,46 +30,43 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
+import org.apache.mahout.common.StringTuple;
+import org.apache.mahout.utils.vectors.text.DictionaryVectorizer;
+import org.apache.mahout.utils.vectors.text.DocumentProcessor;
 
 /**
- * TextVectorizer Term Count Mapper. Tokenizes a text document and outputs
- * useful tokens space separated
+ * Tokenizes a text document and outputs tokens in a StringTuple
  */
-public class DocumentTokenizerMapper extends MapReduceBase implements
-    Mapper<Text,Text,Text,Text> {
-
+public class SequenceFileTokenizerMapper extends MapReduceBase implements
+    Mapper<Text,Text,Text,StringTuple> {
+  
   private Analyzer analyzer;
-  private final StringBuilder document = new StringBuilder();
+  
   @Override
   public void map(Text key,
                   Text value,
-                  OutputCollector<Text,Text> output,
+                  OutputCollector<Text,StringTuple> output,
                   Reporter reporter) throws IOException {
-    TokenStream stream =
-        analyzer
-            .tokenStream(key.toString(), new StringReader(value.toString()));
-    TermAttribute termAtt =
-        (TermAttribute) stream.addAttribute(TermAttribute.class);
-    document.setLength(0);
-    String sep = " ";
+    TokenStream stream = analyzer.tokenStream(key.toString(), new StringReader(
+        value.toString()));
+    TermAttribute termAtt = (TermAttribute) stream
+        .addAttribute(TermAttribute.class);
+    StringTuple document = new StringTuple();
     while (stream.incrementToken()) {
       if (termAtt.termLength() > 0) {
-        document.append(sep).append(termAtt.termBuffer(), 0,
-            termAtt.termLength());
+        document.add(new String(termAtt.termBuffer(), 0, termAtt.termLength()));
       }
     }
-    output.collect(key, new Text(document.toString()) );
-
+    output.collect(key,document);
   }
-
+  
   @Override
   public void configure(JobConf job) {
     super.configure(job);
     try {
       ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class<?> cl =
-          ccl.loadClass(job.get(DictionaryVectorizer.ANALYZER_CLASS,
-              StandardAnalyzer.class.getName()));
+      Class<?> cl = ccl.loadClass(job.get(DocumentProcessor.ANALYZER_CLASS,
+        StandardAnalyzer.class.getName()));
       analyzer = (Analyzer) cl.newInstance();
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
@@ -79,5 +76,5 @@ public class DocumentTokenizerMapper extends MapReduceBase implements
       throw new IllegalStateException(e);
     }
   }
-
+  
 }

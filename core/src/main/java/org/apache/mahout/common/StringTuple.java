@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 
 /**
@@ -133,21 +133,20 @@ public final class StringTuple implements WritableComparable<StringTuple> {
   public void readFields(DataInput in) throws IOException {
     int len = in.readInt();
     tuple = new ArrayList<String>(len);
+    Text value = new Text();
     for (int i = 0; i < len; i++) {
-      int fieldLen = in.readInt();
-      byte[] entry = new byte[fieldLen];
-      in.readFully(entry);
-      tuple.add(Bytes.toString(entry));
+      value.readFields(in);
+      tuple.add(value.toString());
     }
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(tuple.size());
+    Text value = new Text();
     for (String entry : tuple) {
-      byte[] data = Bytes.toBytes(entry);
-      out.writeInt(data.length);
-      out.write(data);
+      value.set(entry);
+      value.write(out);
     }
   }
 

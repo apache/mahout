@@ -15,35 +15,33 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.utils.vectors.text;
+package org.apache.mahout.utils.vectors.text.term;
 
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 
 /**
- * Can also be used as a local Combiner. This accumulates all the words and the
- * weights and sums them up.
+ * Can also be used as a local Combiner. This accumulates all the features and
+ * the weights and sums them up.
  */
-public class TermCountReducer extends MapReduceBase implements
-    Reducer<Text,LongWritable,Text,LongWritable> {
+public class TermDocumentCountReducer extends MapReduceBase implements
+    Reducer<IntWritable,LongWritable,IntWritable,LongWritable> {
   
   @Override
-  public void reduce(Text key,
+  public void reduce(IntWritable key,
                      Iterator<LongWritable> values,
-                     OutputCollector<Text,LongWritable> output,
+                     OutputCollector<IntWritable,LongWritable> output,
                      Reporter reporter) throws IOException {
     long sum = 0;
     while (values.hasNext())
       sum += values.next().get();
     output.collect(key, new LongWritable(sum));
-    
   }
-  
 }

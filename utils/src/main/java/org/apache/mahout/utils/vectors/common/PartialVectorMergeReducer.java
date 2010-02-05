@@ -15,42 +15,55 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.utils.vectors.text;
+package org.apache.mahout.utils.vectors.common;
 
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 /**
- * Converts a document in to a sparse vector
+ * Merges partial vectors in to a full sparse vector
  */
-public class PartialVectorMerger extends MapReduceBase implements
-    Reducer<Text,VectorWritable,Text, VectorWritable> {
-
+public class PartialVectorMergeReducer extends MapReduceBase
+    implements
+    Reducer<WritableComparable<?>,VectorWritable,WritableComparable<?>,VectorWritable> {
+  
   private final VectorWritable vectorWritable = new VectorWritable();
-
+  
+  private double normPower;
+  
   @Override
-  public void reduce(Text key,
+  public void reduce(WritableComparable<?> key,
                      Iterator<VectorWritable> values,
-                     OutputCollector<Text,VectorWritable> output,
+                     OutputCollector<WritableComparable<?>,VectorWritable> output,
                      Reporter reporter) throws IOException {
     
-    RandomAccessSparseVector vector =
-        new RandomAccessSparseVector(key.toString(), Integer.MAX_VALUE, 10);
+    Vector vector = new RandomAccessSparseVector(key
+        .toString(), Integer.MAX_VALUE, 10);
     while (values.hasNext()) {
       VectorWritable value = values.next();
       value.get().addTo(vector);
     }
+    if (normPower != PartialVectorMerger.NO_NORMALIZING) {
+      vector = vector.normalize(normPower);
+    }
     vectorWritable.set(vector);
     output.collect(key, vectorWritable);
-    
   }
   
+  @Override
+  public void configure(JobConf job) {
+    super.configure(job);
+    normPower = job.getFloat(PartialVectorMerger.NORMALIZATION_POWER,
+      PartialVectorMerger.NO_NORMALIZING);
+  }
 }

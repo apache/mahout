@@ -201,7 +201,7 @@ public final class ClusterDumper {
     Option helpOpt = obuilder.withLongName("help").
             withDescription("Print out help").withShortName("h").create();
 
-    Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt).withOption(substringOpt).withOption(pointsOpt).withOption(centroidJSonOpt).withOption(dictOpt).create();
+    Group group = gbuilder.withName("Options").withOption(helpOpt).withOption(seqOpt).withOption(outputOpt).withOption(substringOpt).withOption(pointsOpt).withOption(centroidJSonOpt).withOption(dictOpt).create();
 
     
     try {

@@ -32,6 +32,7 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.utils.vectors.tfidf.TFIDFConverter;
 
 /**
  * Test the dictionary Vector
@@ -50,8 +51,8 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
   
   public static final String DELIM = " .,?;:!\t\n\r";
   
-  public static final String ERRORSET =
-      "`1234567890" + "-=~@#$%^&*()_+[]{}'\"/<>|\\";
+  public static final String ERRORSET = "`1234567890"
+                                        + "-=~@#$%^&*()_+[]{}'\"/<>|\\";
   
   private static final Random random = RandomUtils.getRandom();
   
@@ -62,10 +63,10 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
   }
   
   public static String getRandomDocument() {
-    int length =
-        (AVG_DOCUMENT_LENGTH >> 1) + random.nextInt(AVG_DOCUMENT_LENGTH);
-    StringBuilder sb =
-        new StringBuilder(length * AVG_SENTENCE_LENGTH * AVG_WORD_LENGTH);
+    int length = (AVG_DOCUMENT_LENGTH >> 1)
+                 + random.nextInt(AVG_DOCUMENT_LENGTH);
+    StringBuilder sb = new StringBuilder(length * AVG_SENTENCE_LENGTH
+                                         * AVG_WORD_LENGTH);
     for (int i = 0; i < length; i++) {
       sb.append(getRandomSentence());
     }
@@ -73,8 +74,8 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
   }
   
   public static String getRandomSentence() {
-    int length =
-        (AVG_SENTENCE_LENGTH >> 1) + random.nextInt(AVG_SENTENCE_LENGTH);
+    int length = (AVG_SENTENCE_LENGTH >> 1)
+                 + random.nextInt(AVG_SENTENCE_LENGTH);
     StringBuilder sb = new StringBuilder(length * AVG_WORD_LENGTH);
     for (int i = 0; i < length; i++) {
       sb.append(getRandomString()).append(' ');
@@ -123,18 +124,21 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
     Configuration conf = new Configuration();
     String pathString = "testdata/documents/docs.file";
     Path path = new Path(pathString);
-    SequenceFile.Writer writer =
-        new SequenceFile.Writer(fs, conf, path, Text.class, Text.class);
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path,
+        Text.class, Text.class);
     
     for (int i = 0; i < NUM_DOCS; i++) {
       writer.append(new Text("Document::ID::" + i), new Text(
           getRandomDocument()));
     }
     writer.close();
-    Class<? extends Analyzer> analyzer =
-        new StandardAnalyzer(Version.LUCENE_CURRENT).getClass();
-    DictionaryVectorizer.createTermFrequencyVectors(pathString,
-        "output/wordcount", analyzer, 2, 100);
+    Class<? extends Analyzer> analyzer = new StandardAnalyzer(
+        Version.LUCENE_CURRENT).getClass();
+    DocumentProcessor.tokenizeDocuments(pathString, analyzer,
+      "output/tokenized-documents");
+    DictionaryVectorizer.createTermFrequencyVectors("output/tokenized-documents",
+      "output/wordcount", 2, 100);
+    TFIDFConverter.processTfIdf("output/wordcount/vectors", "output/tfidf/", 100, 1, 99, 1.0f);
     
   }
 }

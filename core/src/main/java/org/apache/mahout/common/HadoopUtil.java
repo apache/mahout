@@ -17,6 +17,9 @@
 
 package org.apache.mahout.common;
 
+import java.io.IOException;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -25,16 +28,12 @@ import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
-
 public final class HadoopUtil {
-
+  
   private static final Logger log = LoggerFactory.getLogger(HadoopUtil.class);
-
-  private HadoopUtil() {
-  }
-
+  
+  private HadoopUtil() {}
+  
   public static void overwriteOutput(String output) throws IOException {
     Configuration conf = new JobConf(KMeansDriver.class);
     Path outPath = new Path(output);
@@ -43,7 +42,30 @@ public final class HadoopUtil {
       log.warn("Deleting {}", outPath);
       fs.delete(outPath, true);
     }
+    log.warn("Creating dir {}", outPath);
     fs.mkdirs(outPath);
-
+  }
+  
+  public static void deletePath(String output, FileSystem fs) throws IOException {
+    Path outPath = new Path(output);
+    if (fs.exists(outPath)) {
+      log.warn("Deleting {}", outPath);
+      fs.delete(outPath, true);
+    }
+  }
+  
+  public static void deletePaths(List<Path> paths, FileSystem fs) throws IOException {
+    for (int i = 0; i < paths.size(); i++) {
+      Path path = paths.get(i);
+      if (fs.exists(path)) {
+        log.warn("Deleting {}", path);
+        fs.delete(path, true);
+      }
+    }
+  }
+  
+  public static void rename(Path from, Path to, FileSystem fs) throws IOException {
+    log.warn("Renaming " + from.toUri() + " to " + to.toUri());
+    fs.rename(from, to);
   }
 }

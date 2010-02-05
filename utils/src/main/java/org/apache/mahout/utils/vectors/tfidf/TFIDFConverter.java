@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.utils.vectors.text;
+package org.apache.mahout.utils.vectors.tfidf;
 
 import java.io.IOException;
 import java.net.URI;
@@ -28,10 +28,11 @@ import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
@@ -40,27 +41,32 @@ import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.mahout.common.HadoopUtil;
-import org.apache.mahout.common.StringTuple;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.utils.vectors.common.PartialVectorMergeReducer;
 import org.apache.mahout.utils.vectors.common.PartialVectorMerger;
-import org.apache.mahout.utils.vectors.text.term.TFPartialVectorReducer;
-import org.apache.mahout.utils.vectors.text.term.TermCountMapper;
-import org.apache.mahout.utils.vectors.text.term.TermCountReducer;
+import org.apache.mahout.utils.vectors.text.term.TermDocumentCountMapper;
+import org.apache.mahout.utils.vectors.text.term.TermDocumentCountReducer;
 
 /**
- * This class converts a set of input documents in the sequence file format to
- * vectors. The Sequence file input should have a {@link Text} key containing
- * the unique document identifier and a {@link StringTuple} value containing the
- * tokenized document. You may use {@link DocumentProcessor} to tokenize the
- * document. This is a dictionary based Vectorizer.
+ * This class converts a set of input vectors with term frequencies to TfIdf
+ * vectors. The Sequence file input should have a {@link WritableComparable} key
+ * containing and a {@link VectorWritable} value containing the term frequency
+ * vector. This is conversion class uses multiple map/reduces to convert the
+ * vectors to TfIdf format
  * 
  */
-public final class DictionaryVectorizer {
+public final class TFIDFConverter {
   
-  public static final String DOCUMENT_VECTOR_OUTPUT_FOLDER = "/vectors";
+  public static final String VECTOR_COUNT = "vector.count";
   
-  private static final String DICTIONARY_FILE = "/dictionary.file-";
+  public static final String FEATURE_COUNT = "feature.count";
+  
+  public static final String MIN_DF = "min.df";
+  
+  public static final String MAX_DF_PERCENTAGE = "max.df.percentage";
+  
+  private static final String DOCUMENT_VECTOR_OUTPUT_FOLDER = "/vectors";
   
   private static final String FREQUENCY_FILE = "/frequency.file-";
   
@@ -74,30 +80,33 @@ public final class DictionaryVectorizer {
   
   private static final String VECTOR_OUTPUT_FOLDER = "/partial-vectors-";
   
-  private static final String WORDCOUNT_OUTPUT_FOLDER = "/wordcount";
+  private static final String WORDCOUNT_OUTPUT_FOLDER = "/df-count";
   
   /**
    * Cannot be initialized. Use the static functions
    */
-  private DictionaryVectorizer() {
+  private TFIDFConverter() {
 
   }
   
   /**
-   * Create Term Frequency (Tf) Vectors from the input set of documents in
-   * {@link SequenceFile} format. This tries to fix the maximum memory used by
-   * the feature chunk per node thereby splitting the process across multiple
-   * map/reduces.
+   * Create Term Frequency-Inverse Document Frequency (Tf-Idf) Vectors from the
+   * input set of vectors in {@link SequenceFile} format. This job uses a fixed
+   * limit on the maximum memory used by the feature chunk per node thereby
+   * splitting the process across multiple map/reduces.
    * 
    * @param input
-   *          input directory of the documents in {@link SequenceFile} format
+   *          input directory of the vectors in {@link SequenceFile} format
    * @param output
    *          output directory where
    *          {@link org.apache.mahout.math.RandomAccessSparseVector}'s of the
    *          document are generated
-   * @param minSupport
-   *          the minimum frequency of the feature in the entire corpus to be
-   *          considered for inclusion in the sparse vector
+   * @param minDf
+   *          The minimum document frequency. Default 1
+   * @param maxDFPercent
+   *          The max percentage of vectors for the DF. Can be used to remove
+   *          really high frequency features. Expressed as an integer between 0
+   *          and 100. Default 99
    * @param chunkSizeInMegabytes
    *          the size in MB of the feature => id chunk to be kept in memory at
    *          each node during Map/Reduce stage. Its recommended you calculated
@@ -108,30 +117,42 @@ public final class DictionaryVectorizer {
    *          thrashing the system due to increased swapping
    * @throws IOException
    */
-  public static void createTermFrequencyVectors(String input,
-                                                String output,
-                                                int minSupport,
-                                                int chunkSizeInMegabytes) throws IOException {
+  public static void processTfIdf(String input,
+                                  String output,
+                                  int chunkSizeInMegabytes,
+                                  int minDf,
+                                  int maxDFPercent,
+                                  float normPower) throws IOException {
     if (chunkSizeInMegabytes < MIN_CHUNKSIZE) {
       chunkSizeInMegabytes = MIN_CHUNKSIZE;
     } else if (chunkSizeInMegabytes > MAX_CHUNKSIZE) { // 10GB
       chunkSizeInMegabytes = MAX_CHUNKSIZE;
     }
     
+    if (normPower != PartialVectorMerger.NO_NORMALIZING && normPower < 0) {
+      throw new IllegalArgumentException("normPower must either be -1 or >= 0");
+    }
+    
+    if (minDf < 1) minDf = 1;
+    if (maxDFPercent < 0 || maxDFPercent > 100) maxDFPercent = 99;
+    
     Path inputPath = new Path(input);
     Path wordCountPath = new Path(output + WORDCOUNT_OUTPUT_FOLDER);
     
-    startWordCounting(inputPath, wordCountPath);
-    List<Path> dictionaryChunks = createDictionaryChunks(minSupport,
+    startDFCounting(inputPath, wordCountPath);
+    Pair<Long[],List<Path>> datasetFeatures = createDictionaryChunks(
       wordCountPath, output, chunkSizeInMegabytes);
     
     int partialVectorIndex = 0;
     List<Path> partialVectorPaths = new ArrayList<Path>();
+    List<Path> dictionaryChunks = datasetFeatures.getSecond();
     for (Path dictionaryChunk : dictionaryChunks) {
       Path partialVectorOutputPath = getPath(output + VECTOR_OUTPUT_FOLDER,
         partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
-      makePartialVectors(input, dictionaryChunk, partialVectorOutputPath);
+      makePartialVectors(input, datasetFeatures.getFirst()[0], datasetFeatures
+          .getFirst()[1], minDf, maxDFPercent, dictionaryChunk,
+        partialVectorOutputPath);
     }
     
     Configuration conf = new Configuration();
@@ -140,7 +161,7 @@ public final class DictionaryVectorizer {
     String outputDir = output + DOCUMENT_VECTOR_OUTPUT_FOLDER;
     if (dictionaryChunks.size() > 1) {
       PartialVectorMerger.mergePartialVectors(partialVectorPaths, outputDir,
-        -1);
+        normPower);
       HadoopUtil.deletePaths(partialVectorPaths, fs);
     } else {
       Path singlePartialVectorOutputPath = partialVectorPaths.get(0);
@@ -150,93 +171,92 @@ public final class DictionaryVectorizer {
   }
   
   /**
-   * Read the feature frequency List which is built at the end of the Word Count
-   * Job and assign ids to them. This will use constant memory and will run at
-   * the speed of your disk read
+   * Read the document frequency List which is built at the end of the DF Count
+   * Job. This will use constant memory and will run at the speed of your disk
+   * read
    * 
-   * @param minSupport
-   * @param wordCountPath
+   * @param featureCountPath
    * @param dictionaryPathBase
    * @throws IOException
    */
-  private static List<Path> createDictionaryChunks(int minSupport,
-                                                   Path wordCountPath,
-                                                   String dictionaryPathBase,
-                                                   int chunkSizeInMegabytes) throws IOException {
+  private static Pair<Long[],List<Path>> createDictionaryChunks(Path featureCountPath,
+                                                                String dictionaryPathBase,
+                                                                int chunkSizeInMegabytes) throws IOException {
     List<Path> chunkPaths = new ArrayList<Path>();
     
-    Writable key = new Text();
+    IntWritable key = new IntWritable();
     LongWritable value = new LongWritable();
     Configuration conf = new Configuration();
     
-    FileSystem fs = FileSystem.get(wordCountPath.toUri(), conf);
-    FileStatus[] outputFiles = fs.globStatus(new Path(wordCountPath.toString()
+    FileSystem fs = FileSystem.get(featureCountPath.toUri(), conf);
+    FileStatus[] outputFiles = fs.globStatus(new Path(featureCountPath
+        .toString()
                                                       + OUTPUT_FILES_PATTERN));
     
     long chunkSizeLimit = chunkSizeInMegabytes * 1024 * 1024;
     int chunkIndex = 0;
-    Path chunkPath = getPath(dictionaryPathBase + DICTIONARY_FILE, chunkIndex);
+    Path chunkPath = getPath(dictionaryPathBase + FREQUENCY_FILE, chunkIndex);
     chunkPaths.add(chunkPath);
-    
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, chunkPath,
-        Text.class, LongWritable.class);
-    
-    SequenceFile.Writer freqWriter = new SequenceFile.Writer(fs, conf, getPath(
-      dictionaryPathBase + FREQUENCY_FILE, chunkIndex), Text.class,
-        LongWritable.class);
+    SequenceFile.Writer freqWriter = new SequenceFile.Writer(fs, conf,
+        chunkPath, IntWritable.class, LongWritable.class);
     
     long currentChunkSize = 0;
-    
-    long i = 0;
+    long featureCount = 0;
+    long vectorCount = Long.MAX_VALUE;
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
       // key is feature value is count
       while (reader.next(key, value)) {
-        if (value.get() < minSupport) {
-          continue;
-        }
-        
         if (currentChunkSize > chunkSizeLimit) {
-          writer.close();
           freqWriter.close();
           chunkIndex++;
           
-          chunkPath = getPath(dictionaryPathBase + DICTIONARY_FILE, chunkIndex);
+          chunkPath = getPath(dictionaryPathBase + FREQUENCY_FILE, chunkIndex);
           chunkPaths.add(chunkPath);
           
-          writer = new SequenceFile.Writer(fs, conf, chunkPath, Text.class,
-              LongWritable.class);
-          freqWriter = new SequenceFile.Writer(fs, conf, getPath(
-            dictionaryPathBase + FREQUENCY_FILE, chunkIndex), Text.class,
-              LongWritable.class);
+          freqWriter = new SequenceFile.Writer(fs, conf, chunkPath,
+              IntWritable.class, LongWritable.class);
           currentChunkSize = 0;
         }
         
-        int fieldSize = SEQUENCEFILE_BYTE_OVERHEAD
-                        + (key.toString().length() * 2) + (Long.SIZE / 8);
+        int fieldSize = SEQUENCEFILE_BYTE_OVERHEAD + (Integer.SIZE / 8)
+                        + (Long.SIZE / 8);
         currentChunkSize += fieldSize;
-        writer.append(key, new LongWritable(i++));
-        freqWriter.append(key, value);
+        if (key.get() >= 0) {
+          freqWriter.append(key, value);
+        } else if (key.get() == -1) {
+          vectorCount = value.get();
+        }
+        featureCount++;
+        
       }
     }
-    
-    writer.close();
     freqWriter.close();
-    
-    return chunkPaths;
+    Long[] counts = {Long.valueOf(featureCount), Long.valueOf(vectorCount)};
+    return new Pair<Long[],List<Path>>(counts, chunkPaths);
   }
   
-  private static Path getPath(String basePath, int index) {
+  public static Path getPath(String basePath, int index) {
     return new Path(basePath + index);
   }
   
   /**
-   * Create a partial vector using a chunk of features from the input documents.
-   * The input documents has to be in the {@link SequenceFile} format
+   * Create a partial tfidf vector using a chunk of features from the input
+   * vectors. The input vectors has to be in the {@link SequenceFile} format
    * 
    * @param input
-   *          input directory of the documents in {@link SequenceFile} format
+   *          input directory of the vectors in {@link SequenceFile} format
+   * @param featureCount
+   *          Number of unique features in the dataset
+   * @param vectorCount
+   *          Number of vectors in the dataset
+   * @param minDf
+   *          The minimum document frequency. Default 1
+   * @param maxDFPercent
+   *          The max percentage of vectors for the DF. Can be used to remove
+   *          really high frequency features. Expressed as an integer between 0
+   *          and 100. Default 99
    * @param dictionaryFilePath
    *          location of the chunk of features and the id's
    * @param output
@@ -244,21 +264,27 @@ public final class DictionaryVectorizer {
    * @throws IOException
    */
   private static void makePartialVectors(String input,
+                                         Long featureCount,
+                                         Long vectorCount,
+                                         int minDf,
+                                         int maxDFPercent,
                                          Path dictionaryFilePath,
                                          Path output) throws IOException {
     
     Configurable client = new JobClient();
-    JobConf conf = new JobConf(DictionaryVectorizer.class);
+    JobConf conf = new JobConf(TFIDFConverter.class);
     conf.set("io.serializations",
       "org.apache.hadoop.io.serializer.JavaSerialization,"
           + "org.apache.hadoop.io.serializer.WritableSerialization");
     // this conf parameter needs to be set enable serialisation of conf values
     
-    conf.setJobName("DictionaryVectorizer::MakePartialVectors: input-folder: "
+    conf.setJobName("TFIDFConverter:: MakePartialVectors: input-folder: "
                     + input + ", dictionary-file: "
                     + dictionaryFilePath.toString());
-    conf.setMapOutputKeyClass(Text.class);
-    conf.setMapOutputValueClass(StringTuple.class);
+    conf.setLong(FEATURE_COUNT, featureCount.longValue());
+    conf.setLong(VECTOR_COUNT, vectorCount.longValue());
+    conf.setInt(MIN_DF, minDf);
+    conf.setInt(MAX_DF_PERCENTAGE, maxDFPercent);
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(VectorWritable.class);
     DistributedCache
@@ -269,7 +295,7 @@ public final class DictionaryVectorizer {
     
     conf.setMapperClass(IdentityMapper.class);
     conf.setInputFormat(SequenceFileInputFormat.class);
-    conf.setReducerClass(TFPartialVectorReducer.class);
+    conf.setReducerClass(TFIDFPartialVectorReducer.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     FileSystem dfs = FileSystem.get(output.toUri(), conf);
     if (dfs.exists(output)) {
@@ -281,39 +307,38 @@ public final class DictionaryVectorizer {
   }
   
   /**
-   * Count the frequencies of words in parallel using Map/Reduce. The input
-   * documents have to be in {@link SequenceFile} format
+   * Count the document frequencies of features in parallel using Map/Reduce.
+   * The input documents have to be in {@link SequenceFile} format
    */
-  private static void startWordCounting(Path input, Path output) throws IOException {
+  private static void startDFCounting(Path input, Path output) throws IOException {
     
     Configurable client = new JobClient();
-    JobConf conf = new JobConf(DictionaryVectorizer.class);
+    JobConf conf = new JobConf(TFIDFConverter.class);
     conf.set("io.serializations",
       "org.apache.hadoop.io.serializer.JavaSerialization,"
           + "org.apache.hadoop.io.serializer.WritableSerialization");
     // this conf parameter needs to be set enable serialisation of conf values
     
-    conf.setJobName("DictionaryVectorizer::WordCount: input-folder: "
+    conf.setJobName("VectorTfIdf Document Frequency Count running over input: "
                     + input.toString());
-    conf.setOutputKeyClass(Text.class);
+    conf.setOutputKeyClass(IntWritable.class);
     conf.setOutputValueClass(LongWritable.class);
     
     FileInputFormat.setInputPaths(conf, input);
     Path outPath = output;
     FileOutputFormat.setOutputPath(conf, outPath);
     
-    conf.setMapperClass(TermCountMapper.class);
+    conf.setMapperClass(TermDocumentCountMapper.class);
     
     conf.setInputFormat(SequenceFileInputFormat.class);
-    conf.setCombinerClass(TermCountReducer.class);
-    conf.setReducerClass(TermCountReducer.class);
+    conf.setCombinerClass(TermDocumentCountReducer.class);
+    conf.setReducerClass(TermDocumentCountReducer.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
     if (dfs.exists(outPath)) {
       dfs.delete(outPath, true);
     }
-    
     client.setConf(conf);
     JobClient.runJob(conf);
   }
