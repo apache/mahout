@@ -124,6 +124,13 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
     return (FastByIDMap<FastIDSet>) (FastByIDMap<?>) data;
   }
 
+  /**
+   * This is used mostly internally to the framework, and shouldn't be relied upon otherwise.
+   */
+  public FastByIDMap<FastIDSet> getRawUserData() {
+    return this.preferenceFromUsers;
+  }
+
   @Override
   public LongPrimitiveArrayIterator getUserIDs() {
     return new LongPrimitiveArrayIterator(userIDs);

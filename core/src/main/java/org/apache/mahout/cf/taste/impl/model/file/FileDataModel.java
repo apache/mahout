@@ -21,6 +21,7 @@ import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
+import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
 import org.apache.mahout.common.FileLineIterator;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.model.GenericBooleanPrefDataModel;
@@ -77,8 +78,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * that, a JDBC-backed {@link DataModel} and a database are more appropriate.</p>
  *
  * <p>It is possible and likely useful to subclass this class and customize its behavior to accommodate
- * application-specific needs and input formats. See {@link #processLine(String, FastByIDMap, char)} and
- * {@link #processLineWithoutID(String, FastByIDMap, char)}
+ * application-specific needs and input formats. See {@link #processLine(String, FastByIDMap)} and
+ * {@link #processLineWithoutID(String, FastByIDMap)}
  */
 public class FileDataModel implements DataModel {
 
@@ -89,6 +90,9 @@ public class FileDataModel implements DataModel {
 
   private final File dataFile;
   private long lastModified;
+  private long lastUpdateFileModified;
+  private final char delimiter;
+  private final boolean hasPrefValues;
   private boolean loaded;
   private DataModel delegate;
   private final ReentrantLock reloadLock;
@@ -98,12 +102,17 @@ public class FileDataModel implements DataModel {
    * @param dataFile file containing preferences data. If file is compressed (and name ends in .gz or .zip accordingly)
    *                 it will be decompressed as it is read)
    * @throws FileNotFoundException if dataFile does not exist
+   * @throws IOException if file can't be read
    */
-  public FileDataModel(File dataFile) throws FileNotFoundException {
+  public FileDataModel(File dataFile) throws IOException {
     this(dataFile, false);
   }
 
-  public FileDataModel(File dataFile, boolean transpose) throws FileNotFoundException {
+  /**
+   * @param transpose transposes user IDs and item IDs -- convenient for 'flipping' the data model this way
+   * @see #FileDataModel(File)
+   */
+  public FileDataModel(File dataFile, boolean transpose) throws IOException {
     if (dataFile == null) {
       throw new IllegalArgumentException("dataFile is null");
     }
@@ -115,12 +124,28 @@ public class FileDataModel implements DataModel {
 
     this.dataFile = dataFile.getAbsoluteFile();
     this.lastModified = dataFile.lastModified();
+    this.lastUpdateFileModified = readLastUpdateFileModified();
+
+    FileLineIterator iterator = new FileLineIterator(dataFile, false);
+    String firstLine = iterator.peek();
+    while (firstLine.length() == 0 || firstLine.charAt(0) == COMMENT_CHAR) {
+      iterator.next();
+      firstLine = iterator.peek();
+    }
+    iterator.close();
+    delimiter = determineDelimiter(firstLine, 2);
+    hasPrefValues = firstLine.indexOf(delimiter, firstLine.indexOf(delimiter) + 1) >= 0;
+
     this.reloadLock = new ReentrantLock();
     this.transpose = transpose;
   }
 
   public File getDataFile() {
     return dataFile;
+  }
+
+  public char getDelimiter() {
+    return delimiter;
   }
 
   protected void reload() {
@@ -138,29 +163,67 @@ public class FileDataModel implements DataModel {
   }
 
   protected DataModel buildModel() throws IOException {
-    FileLineIterator iterator = new FileLineIterator(dataFile, false);
-    String firstLine = iterator.peek();
-    while (firstLine.length() == 0 || firstLine.charAt(0) == COMMENT_CHAR) {
-      iterator.next();
-      firstLine = iterator.peek();
-    }
-    char delimiter = determineDelimiter(firstLine, 2);
-    boolean hasPrefValues = firstLine.indexOf(delimiter, firstLine.indexOf(delimiter) + 1) >= 0;
+
+    long newLastModified = dataFile.lastModified();
+    long newLastUpdateFileModified = readLastUpdateFileModified();
+
+    boolean loadFreshData = delegate == null || newLastModified > lastModified + MIN_RELOAD_INTERVAL_MS;
+
+    lastModified = newLastModified;
+    lastUpdateFileModified = newLastUpdateFileModified;
 
     if (hasPrefValues) {
-      FastByIDMap<Collection<Preference>> data = new FastByIDMap<Collection<Preference>>();
-      processFile(iterator, data, delimiter);
-      for (File updateFile : findUpdateFiles()) {
-        processFile(new FileLineIterator(updateFile, false), data, delimiter);
+      
+      if (loadFreshData) {
+
+        FastByIDMap<Collection<Preference>> data = new FastByIDMap<Collection<Preference>>();
+        FileLineIterator iterator = new FileLineIterator(dataFile, false);
+        processFile(iterator, data);
+
+        for (File updateFile : findUpdateFiles()) {
+          processFile(new FileLineIterator(updateFile, false), data);
+        }
+
+        return new GenericDataModel(GenericDataModel.toDataMap(data, true));
+
+      } else {
+
+        FastByIDMap<PreferenceArray> rawData = ((GenericDataModel) delegate).getRawUserData();
+
+        for (File updateFile : findUpdateFiles()) {
+          processFile(new FileLineIterator(updateFile, false), rawData);
+        }
+
+        return new GenericDataModel(rawData);
+
       }
-      return new GenericDataModel(GenericDataModel.toDataMap(data, true));
+
     } else {
-      FastByIDMap<FastIDSet> data = new FastByIDMap<FastIDSet>();
-      processFileWithoutID(iterator, data, delimiter);
-      for (File updateFile : findUpdateFiles()) {
-        processFileWithoutID(new FileLineIterator(updateFile, false), data, delimiter);
+
+      if (loadFreshData) {
+
+        FastByIDMap<FastIDSet> data = new FastByIDMap<FastIDSet>();
+        FileLineIterator iterator = new FileLineIterator(dataFile, false);
+        processFileWithoutID(iterator, data);
+
+        for (File updateFile : findUpdateFiles()) {
+          processFileWithoutID(new FileLineIterator(updateFile, false), data);
+        }
+
+        return new GenericBooleanPrefDataModel(data);
+
+      } else {
+
+        FastByIDMap<FastIDSet> rawData = ((GenericBooleanPrefDataModel) delegate).getRawUserData();
+
+        for (File updateFile : findUpdateFiles()) {
+          processFileWithoutID(new FileLineIterator(updateFile, false), rawData);
+        }
+
+        return new GenericBooleanPrefDataModel(rawData);
+
       }
-      return new GenericBooleanPrefDataModel(data);
+
     }
   }
 
@@ -183,6 +246,14 @@ public class FileDataModel implements DataModel {
     }
     Collections.sort(updateFiles);
     return updateFiles;
+  }
+
+  private long readLastUpdateFileModified() {
+    long mostRecentModification = Long.MIN_VALUE;
+    for (File updateFile : findUpdateFiles()) {
+      mostRecentModification = Math.max(mostRecentModification, updateFile.lastModified());
+    }
+    return mostRecentModification;
   }
 
   public static char determineDelimiter(String line, int maxDelimiters) {
@@ -212,14 +283,13 @@ public class FileDataModel implements DataModel {
   }
 
   protected void processFile(FileLineIterator dataOrUpdateFileIterator,
-                             FastByIDMap<Collection<Preference>> data,
-                             char delimiter) {
+                             FastByIDMap<?> data) {
     log.info("Reading file info...");
     AtomicInteger count = new AtomicInteger();
     while (dataOrUpdateFileIterator.hasNext()) {
       String line = dataOrUpdateFileIterator.next();
       if (line.length() > 0) {
-        processLine(line, data, delimiter);
+        processLine(line, data);
         int currentCount = count.incrementAndGet();
         if (currentCount % 1000000 == 0) {
           log.info("Processed {} lines", currentCount);
@@ -240,7 +310,7 @@ public class FileDataModel implements DataModel {
    * @param line      line from input data file
    * @param data      all data read so far, as a mapping from user IDs to preferences
    */
-  protected void processLine(String line, FastByIDMap<Collection<Preference>> data, char delimiter) {
+  protected void processLine(String line, FastByIDMap<?> data) {
 
     if (line.length() == 0 || line.charAt(0) == COMMENT_CHAR) {
       return;
@@ -274,37 +344,120 @@ public class FileDataModel implements DataModel {
       userID = itemID;
       itemID = tmp;
     }
-    Collection<Preference> prefs = data.get(userID);
-    if (prefs == null) {
-      prefs = new ArrayList<Preference>(2);
-      data.put(userID, prefs);
-    }
 
-    if (preferenceValueString.length() == 0) {
-      // remove pref
-      Iterator<Preference> prefsIterator = prefs.iterator();
-      while (prefsIterator.hasNext()) {
-        Preference pref = prefsIterator.next();
-        if (pref.getItemID() == itemID) {
-          prefsIterator.remove();
-          break;
+    // This is kind of gross but need to handle two types of storage
+    Object maybePrefs = data.get(userID);
+    if (maybePrefs instanceof PreferenceArray) {
+
+      PreferenceArray prefs = (PreferenceArray) maybePrefs;
+      if (preferenceValueString.length() == 0) {
+        if (prefs != null) {
+          boolean exists = false;
+          int length = prefs.length();
+          for (int i = 0; i < length; i++) {
+            if (prefs.getItemID(i) == itemID) {
+              exists = true;
+              break;
+            }
+          }
+          if (exists) {
+            if (length == 1) {
+              data.remove(userID);
+            } else {
+              PreferenceArray newPrefs = new GenericUserPreferenceArray(length - 1);
+              for (int i = 0, j = 0; i < length; i++, j++) {
+                if (prefs.getItemID(i) == itemID) {
+                  j--;
+                } else {
+                  newPrefs.set(j, prefs.get(i));
+                }
+              }
+            }
+          }
+        }
+
+      } else {
+
+        float preferenceValue = Float.parseFloat(preferenceValueString);
+
+        boolean exists = false;
+        if (prefs != null) {
+          for (int i = 0; i < prefs.length(); i++) {
+            if (prefs.getItemID(i) == itemID) {
+              exists = true;
+              prefs.setValue(i, preferenceValue);
+              break;
+            }
+          }
+        }
+
+        if (!exists) {
+          if (prefs == null) {
+            prefs = new GenericUserPreferenceArray(1);
+            ((FastByIDMap<PreferenceArray>) data).put(userID, prefs);
+          } else {
+            PreferenceArray newPrefs = new GenericUserPreferenceArray(prefs.length() + 1);
+            for (int i = 0, j = 1; i < prefs.length(); i++, j++) {
+              newPrefs.set(j, prefs.get(i));
+            }
+          }
+          prefs.setUserID(0, userID);
+          prefs.setItemID(0, itemID);
+          prefs.setValue(0, preferenceValue);
         }
       }
+
     } else {
-      float preferenceValue = Float.parseFloat(preferenceValueString);
-      prefs.add(new GenericPreference(userID, itemID, preferenceValue));
+
+      Collection<Preference> prefs = (Collection<Preference>) maybePrefs;
+
+      if (preferenceValueString.length() == 0) {
+        if (prefs != null) {
+          // remove pref
+          Iterator<Preference> prefsIterator = prefs.iterator();
+          while (prefsIterator.hasNext()) {
+            Preference pref = prefsIterator.next();
+            if (pref.getItemID() == itemID) {
+              prefsIterator.remove();
+              break;
+            }
+          }
+        }
+      } else {
+
+        float preferenceValue = Float.parseFloat(preferenceValueString);
+
+        boolean exists = false;
+        if (prefs != null) {
+          for (Preference pref : prefs) {
+            if (pref.getItemID() == itemID) {
+              exists = true;
+              pref.setValue(preferenceValue);
+              break;
+            }
+          }
+        }
+
+        if (!exists) {
+          if (prefs == null) {
+            prefs = new ArrayList<Preference>(2);
+            ((FastByIDMap<Collection<Preference>>) data).put(userID, prefs);
+          }
+          prefs.add(new GenericPreference(userID, itemID, preferenceValue));
+        }
+      }
+
     }
   }
 
   protected void processFileWithoutID(FileLineIterator dataOrUpdateFileIterator,
-                                      FastByIDMap<FastIDSet> data,
-                                      char delimiter) {
+                                      FastByIDMap<FastIDSet> data) {
     log.info("Reading file info...");
     AtomicInteger count = new AtomicInteger();
     while (dataOrUpdateFileIterator.hasNext()) {
       String line = dataOrUpdateFileIterator.next();
       if (line.length() > 0) {
-        processLineWithoutID(line, data, delimiter);
+        processLineWithoutID(line, data);
         int currentCount = count.incrementAndGet();
         if (currentCount % 100000 == 0) {
           log.info("Processed {} lines", currentCount);
@@ -314,7 +467,7 @@ public class FileDataModel implements DataModel {
     log.info("Read lines: {}", count.get());
   }
 
-  protected void processLineWithoutID(String line, FastByIDMap<FastIDSet> data, char delimiter) {
+  protected void processLineWithoutID(String line, FastByIDMap<FastIDSet> data) {
 
     if (line.length() == 0 || line.charAt(0) == COMMENT_CHAR) {
       return;
@@ -438,13 +591,9 @@ public class FileDataModel implements DataModel {
 
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    long mostRecentModification = dataFile.lastModified();
-    for (File updateFile : findUpdateFiles()) {
-      mostRecentModification = Math.max(mostRecentModification, updateFile.lastModified());
-    }
-    if (mostRecentModification > lastModified + MIN_RELOAD_INTERVAL_MS) {
+    if (dataFile.lastModified() > lastModified + MIN_RELOAD_INTERVAL_MS ||
+        readLastUpdateFileModified() > lastUpdateFileModified + MIN_RELOAD_INTERVAL_MS) {
       log.debug("File has changed; reloading...");
-      lastModified = mostRecentModification;
       reload();
     }
   }

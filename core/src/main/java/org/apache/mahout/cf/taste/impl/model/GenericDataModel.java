@@ -140,6 +140,13 @@ public final class GenericDataModel implements DataModel, Serializable {
     return data;
   }
 
+  /**
+   * This is used mostly internally to the framework, and shouldn't be relied upon otherwise.
+   */
+  public FastByIDMap<PreferenceArray> getRawUserData() {
+    return this.preferenceFromUsers;
+  }
+
   @Override
   public LongPrimitiveArrayIterator getUserIDs() {
     return new LongPrimitiveArrayIterator(userIDs);
