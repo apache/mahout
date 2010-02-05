@@ -35,51 +35,58 @@ import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.Parameters;
 
 /**
- * {@link TransactionSortingMapper} maps each transaction to all unique items groups in the transaction.
- * mapper outputs the group id as key and the transaction as value
+ * {@link TransactionSortingMapper} maps each transaction to all unique items
+ * groups in the transaction. mapper outputs the group id as key and the
+ * transaction as value
  * 
  */
-public class TransactionSortingMapper extends Mapper<LongWritable, Text, LongWritable, TransactionTree> {
-
-  private final Map<String, Integer> fMap = new HashMap<String, Integer>();
-
-  private Pattern splitter = null;
-
+public class TransactionSortingMapper extends
+    Mapper<LongWritable,Text,LongWritable,TransactionTree> {
+  
+  private final Map<String,Integer> fMap = new HashMap<String,Integer>();
+  
+  private Pattern splitter;
+  
   @Override
   protected void map(LongWritable offset, Text input, Context context) throws IOException,
-      InterruptedException {
-
+                                                                      InterruptedException {
+    
     String[] items = splitter.split(input.toString());
     Set<String> uniqueItems = new HashSet<String>(Arrays.asList(items));
-
+    
     List<Integer> itemSet = new ArrayList<Integer>();
     for (String item : uniqueItems) { // remove items not in the fList
       if (fMap.containsKey(item) && item.trim().length() != 0) {
         itemSet.add(fMap.get(item));
       }
     }
-
+    
     Collections.sort(itemSet);
-
+    
     Integer[] prunedItems = itemSet.toArray(new Integer[itemSet.size()]);
-
+    
     if (prunedItems.length > 0) {
-      context.write(new LongWritable(prunedItems[0]), new TransactionTree(prunedItems, 1L));
+      context.write(new LongWritable(prunedItems[0]), new TransactionTree(
+          prunedItems, 1L));
     }
-
+    
   }
-
+  
   @Override
-  protected void setup(Context context) throws IOException, InterruptedException {
+  protected void setup(Context context) throws IOException,
+                                       InterruptedException {
     super.setup(context);
-    Parameters params = Parameters.fromString(context.getConfiguration().get("pfp.parameters", ""));
-
+    Parameters params = Parameters.fromString(context.getConfiguration().get(
+      "pfp.parameters", ""));
+    
     int i = 0;
-    for (Pair<String, Long> e : PFPGrowth.deserializeList(params, "fList", context.getConfiguration())) {
+    for (Pair<String,Long> e : PFPGrowth.deserializeList(params, "fList",
+      context.getConfiguration())) {
       fMap.put(e.getFirst(), i++);
     }
-
-    splitter = Pattern.compile(params.get("splitPattern", PFPGrowth.SPLITTER.toString()));
-
+    
+    splitter = Pattern.compile(params.get("splitPattern", PFPGrowth.SPLITTER
+        .toString()));
+    
   }
 }

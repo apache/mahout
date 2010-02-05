@@ -28,32 +28,36 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.Pair;
 
+/**
+ * A class which collects Top K string patterns
+ *
+ */
 public final class TopKStringPatterns implements Writable {
-  private List<Pair<List<String>, Long>> frequentPatterns = null;
-
+  private List<Pair<List<String>,Long>> frequentPatterns;
+  
   public TopKStringPatterns() {
-    frequentPatterns = new ArrayList<Pair<List<String>, Long>>();
+    frequentPatterns = new ArrayList<Pair<List<String>,Long>>();
   }
-
-  public TopKStringPatterns(List<Pair<List<String>, Long>> patterns) {
-    frequentPatterns = new ArrayList<Pair<List<String>, Long>>();
+  
+  public TopKStringPatterns(List<Pair<List<String>,Long>> patterns) {
+    frequentPatterns = new ArrayList<Pair<List<String>,Long>>();
     frequentPatterns.addAll(patterns);
   }
-
-  public Iterator<Pair<List<String>, Long>> iterator() {
+  
+  public Iterator<Pair<List<String>,Long>> iterator() {
     return frequentPatterns.iterator();
   }
-
-  public List<Pair<List<String>, Long>> getPatterns() {
+  
+  public List<Pair<List<String>,Long>> getPatterns() {
     return frequentPatterns;
   }
-
+  
   public TopKStringPatterns merge(TopKStringPatterns pattern, int heapSize) {
-    List<Pair<List<String>, Long>> patterns = new ArrayList<Pair<List<String>, Long>>();
-    Iterator<Pair<List<String>, Long>> myIterator = frequentPatterns.iterator();
-    Iterator<Pair<List<String>, Long>> otherIterator = pattern.iterator();
-    Pair<List<String>, Long> myItem = null;
-    Pair<List<String>, Long> otherItem = null;
+    List<Pair<List<String>,Long>> patterns = new ArrayList<Pair<List<String>,Long>>();
+    Iterator<Pair<List<String>,Long>> myIterator = frequentPatterns.iterator();
+    Iterator<Pair<List<String>,Long>> otherIterator = pattern.iterator();
+    Pair<List<String>,Long> myItem = null;
+    Pair<List<String>,Long> otherItem = null;
     for (int i = 0; i < heapSize; i++) {
       if (myItem == null && myIterator.hasNext()) {
         myItem = myIterator.next();
@@ -68,7 +72,7 @@ public final class TopKStringPatterns implements Writable {
           if (cmp == 0) {
             for (int j = 0; j < myItem.getFirst().size(); j++) {
               cmp = myItem.getFirst().get(j).compareTo(
-                  otherItem.getFirst().get(j));
+                otherItem.getFirst().get(j));
               if (cmp != 0) {
                 break;
               }
@@ -97,7 +101,7 @@ public final class TopKStringPatterns implements Writable {
     }
     return new TopKStringPatterns(patterns);
   }
-
+  
   @Override
   public void readFields(DataInput in) throws IOException {
     frequentPatterns.clear();
@@ -112,14 +116,14 @@ public final class TopKStringPatterns implements Writable {
         in.readFully(data);
         items.add(Bytes.toString(data));
       }
-      frequentPatterns.add(new Pair<List<String>, Long>(items, support));
+      frequentPatterns.add(new Pair<List<String>,Long>(items, support));
     }
   }
-
+  
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(frequentPatterns.size());
-    for (Pair<List<String>, Long> pattern : frequentPatterns) {
+    for (Pair<List<String>,Long> pattern : frequentPatterns) {
       out.writeInt(pattern.getFirst().size());
       out.writeLong(pattern.getSecond());
       for (String item : pattern.getFirst()) {
@@ -129,18 +133,18 @@ public final class TopKStringPatterns implements Writable {
       }
     }
   }
-
+  
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     String sep = "";
-    for (Pair<List<String>, Long> pattern : frequentPatterns) {
+    for (Pair<List<String>,Long> pattern : frequentPatterns) {
       sb.append(sep);
       sb.append(pattern.toString());
       sep = ", ";
-
+      
     }
     return sb.toString();
-
+    
   }
 }

@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.Reducer;
+
 /**
  * {@link TransactionSortingReducer} takes each group of transactions and runs
  * Vanilla FPGrowth on it and outputs the the Top K frequent Patterns for each
@@ -29,14 +30,17 @@ import org.apache.hadoop.mapreduce.Reducer;
  */
 
 public class TransactionSortingReducer extends
-    Reducer<LongWritable, TransactionTree, LongWritable, TransactionTree> {
-
-  private static final LongWritable one = new LongWritable(1);
+    Reducer<LongWritable,TransactionTree,LongWritable,TransactionTree> {
+  
+  private static final LongWritable ONE = new LongWritable(1);
+  
   @Override
-  protected void reduce(LongWritable key, Iterable<TransactionTree> values,
-      Context context) throws IOException, InterruptedException {
+  protected void reduce(LongWritable key,
+                        Iterable<TransactionTree> values,
+                        Context context) throws IOException,
+                                        InterruptedException {
     for (TransactionTree tr : values) {
-      context.write(one, tr);
+      context.write(ONE, tr);
     }
   }
 }

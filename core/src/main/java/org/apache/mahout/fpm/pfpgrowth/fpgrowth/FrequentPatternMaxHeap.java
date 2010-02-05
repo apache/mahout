@@ -25,24 +25,24 @@ import java.util.Set;
 
 /** {@link FrequentPatternMaxHeap} keeps top K Attributes in a TreeSet */
 public final class FrequentPatternMaxHeap {
-
-  private int count = 0;
-
-  private Pattern least = null;
-
-  private int maxSize = 0;
-
-  private boolean subPatternCheck = false;
-
-  private Map<Long, Set<Pattern>> patternIndex = null;
-
-  private PriorityQueue<Pattern> queue = null;
-
+  
+  private int count;
+  
+  private Pattern least;
+  
+  private int maxSize;
+  
+  private boolean subPatternCheck;
+  
+  private Map<Long,Set<Pattern>> patternIndex;
+  
+  private PriorityQueue<Pattern> queue;
+  
   public FrequentPatternMaxHeap(int numResults, boolean subPatternCheck) {
     maxSize = numResults;
     queue = new PriorityQueue<Pattern>(maxSize);
     this.subPatternCheck = subPatternCheck;
-    patternIndex = new HashMap<Long, Set<Pattern>>();
+    patternIndex = new HashMap<Long,Set<Pattern>>();
     for (Pattern p : queue) {
       Long index = p.support();
       Set<Pattern> patternList;
@@ -52,22 +52,22 @@ public final class FrequentPatternMaxHeap {
       }
       patternList = patternIndex.get(index);
       patternList.add(p);
-
+      
     }
   }
-
+  
   public boolean addable(long support) {
     if (count < maxSize) {
       return true;
     }
     return least.support() <= support;
   }
-
+  
   public PriorityQueue<Pattern> getHeap() {
     if (subPatternCheck) {
       PriorityQueue<Pattern> ret = new PriorityQueue<Pattern>(maxSize);
       for (Pattern p : queue) {
-
+        
         if (patternIndex.get(p.support()).contains(p)) {
           ret.add(p);
         }
@@ -77,8 +77,10 @@ public final class FrequentPatternMaxHeap {
       return queue;
     }
   }
-
-  public void addAll(FrequentPatternMaxHeap patterns, int attribute, long attributeSupport) {
+  
+  public void addAll(FrequentPatternMaxHeap patterns,
+                     int attribute,
+                     long attributeSupport) {
     for (Pattern pattern : patterns.getHeap()) {
       long support = Math.min(attributeSupport, pattern.support());
       if (this.addable(support)) {
@@ -87,11 +89,11 @@ public final class FrequentPatternMaxHeap {
       }
     }
   }
-
+  
   public void insert(Pattern frequentPattern) {
     if (frequentPattern.length() == 0) {
       return;
-      }
+    }
     
     if (count == maxSize) {
       if (frequentPattern.compareTo(least) > 0) {
@@ -101,7 +103,7 @@ public final class FrequentPatternMaxHeap {
           if (subPatternCheck) {
             patternIndex.get(evictedItem.support()).remove(evictedItem);
           }
-
+          
         }
       }
     } else {
@@ -117,22 +119,22 @@ public final class FrequentPatternMaxHeap {
       }
     }
   }
-
+  
   public int count() {
     return count;
   }
-
+  
   public boolean isFull() {
     return count == maxSize;
   }
-
+  
   public long leastSupport() {
     if (least == null) {
       return 0;
     }
     return least.support();
   }
-
+  
   private boolean addPattern(Pattern frequentPattern) {
     if (subPatternCheck == false) {
       queue.add(frequentPattern);
@@ -154,7 +156,8 @@ public final class FrequentPatternMaxHeap {
         }
         if (replace) {
           indexSet.remove(replacablePattern);
-          if (indexSet.contains(frequentPattern) == false && queue.add(frequentPattern)) {
+          if (indexSet.contains(frequentPattern) == false
+              && queue.add(frequentPattern)) {
             
             indexSet.add(frequentPattern);
           }
@@ -172,7 +175,7 @@ public final class FrequentPatternMaxHeap {
         }
         patternList = patternIndex.get(index);
         patternList.add(frequentPattern);
-
+        
         return true;
       }
     }

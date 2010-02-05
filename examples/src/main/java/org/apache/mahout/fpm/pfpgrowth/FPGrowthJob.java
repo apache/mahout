@@ -45,7 +45,7 @@ import org.apache.mahout.common.StringRecordIterator;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.fpm.pfpgrowth.convertors.ContextStatusUpdater;
 import org.apache.mahout.fpm.pfpgrowth.convertors.SequenceFileOutputCollector;
-import org.apache.mahout.fpm.pfpgrowth.convertors.string.StringOutputConvertor;
+import org.apache.mahout.fpm.pfpgrowth.convertors.string.StringOutputConverter;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth;
 import org.slf4j.Logger;
@@ -201,7 +201,7 @@ public final class FPGrowthJob {
     fp.generateTopKFrequentPatterns(new StringRecordIterator(new FileLineIterable(new File(input),
         encoding, false), pattern), fp.generateFList(new StringRecordIterator(new FileLineIterable(
             new File(input), encoding, false), pattern), minSupport), minSupport, maxHeapSize, features,
-        new StringOutputConvertor(new SequenceFileOutputCollector<Text, TopKStringPatterns>(writer)),
+        new StringOutputConverter(new SequenceFileOutputCollector<Text, TopKStringPatterns>(writer)),
         new ContextStatusUpdater(null));
     writer.close();
 

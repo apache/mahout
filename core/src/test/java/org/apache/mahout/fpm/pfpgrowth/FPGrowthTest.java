@@ -34,7 +34,7 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.fpm.pfpgrowth.convertors.ContextStatusUpdater;
 import org.apache.mahout.fpm.pfpgrowth.convertors.SequenceFileOutputCollector;
-import org.apache.mahout.fpm.pfpgrowth.convertors.string.StringOutputConvertor;
+import org.apache.mahout.fpm.pfpgrowth.convertors.string.StringOutputConverter;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth;
 
@@ -64,7 +64,7 @@ public class FPGrowthTest extends MahoutTestCase {
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class,
         TopKStringPatterns.class);
     fp.generateTopKFrequentPatterns(transactions.iterator(), fp.generateFList(transactions.iterator(), 3),
-        3, 100, new HashSet<String>(), new StringOutputConvertor(
+        3, 100, new HashSet<String>(), new StringOutputConverter(
             new SequenceFileOutputCollector<Text, TopKStringPatterns>(writer)),
         new ContextStatusUpdater(null));
     writer.close();

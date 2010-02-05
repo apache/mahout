@@ -31,25 +31,27 @@ import org.apache.mahout.common.Pair;
  */
 
 public class ParallelFPGrowthCombiner extends
-    Reducer<LongWritable, TransactionTree, LongWritable, TransactionTree> {
-
+    Reducer<LongWritable,TransactionTree,LongWritable,TransactionTree> {
+  
   @Override
-  protected void reduce(LongWritable key, Iterable<TransactionTree> values,
-      Context context) throws IOException, InterruptedException {
+  protected void reduce(LongWritable key,
+                        Iterable<TransactionTree> values,
+                        Context context) throws IOException,
+                                        InterruptedException {
     TransactionTree cTree = new TransactionTree();
     int count = 0;
     int node = 0;
     for (TransactionTree tr : values) {
-      Iterator<Pair<List<Integer>, Long>> it = tr.getIterator();
+      Iterator<Pair<List<Integer>,Long>> it = tr.getIterator();
       while (it.hasNext()) {
-        Pair<List<Integer>, Long> p = it.next();
+        Pair<List<Integer>,Long> p = it.next();
         node += cTree.addPattern(p.getFirst(), p.getSecond());
         count++;
       }
     }
-
+    
     context.write(key, cTree.getCompressedTree());
-
+    
   }
-
+  
 }

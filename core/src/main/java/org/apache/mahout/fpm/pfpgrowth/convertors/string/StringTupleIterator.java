@@ -22,9 +22,13 @@ import java.util.List;
 
 import org.apache.mahout.common.StringTuple;
 
+/**
+ * Iterate over the StringTuple as an iterator of <code>List&lt;String&gt;</code>
+ *
+ */
 public final class StringTupleIterator implements Iterator<List<String>> {
 
-  private Iterator<StringTuple> iterator = null;
+  private Iterator<StringTuple> iterator;
 
   public StringTupleIterator(Iterator<StringTuple> iterator) {
     this.iterator = iterator;

@@ -26,15 +26,18 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.common.Parameters;
 import org.apache.mahout.common.StringTuple;
 
-public class KeyBasedStringTupleReducer extends Reducer<Text, StringTuple, Text, Text> {
-
+public class KeyBasedStringTupleReducer extends
+    Reducer<Text,StringTuple,Text,Text> {
+  
   private int maxTransactionLength = 100;
-
+  
   @Override
-  protected void reduce(Text key, Iterable<StringTuple> values, Context context) throws IOException,
-      InterruptedException {
+  protected void reduce(Text key,
+                        Iterable<StringTuple> values,
+                        Context context) throws IOException,
+                                        InterruptedException {
     Set<String> items = new HashSet<String>();
-
+    
     for (StringTuple value : values) {
       for (String field : value.getEntries()) {
         items.add(field);
@@ -52,23 +55,26 @@ public class KeyBasedStringTupleReducer extends Reducer<Text, StringTuple, Text,
           sb.replace(0, sb.length(), "");
           sep = "";
         }
-
+        
         sb.append(sep).append(field);
         sep = "\t";
-
+        
         i++;
-
+        
       }
       if (sb.length() > 0) {
         context.write(null, new Text(sb.toString()));
       }
     }
   }
-
+  
   @Override
-  protected void setup(Context context) throws IOException, InterruptedException {
+  protected void setup(Context context) throws IOException,
+                                       InterruptedException {
     super.setup(context);
-    Parameters params = Parameters.fromString(context.getConfiguration().get("job.parameters", ""));
-    maxTransactionLength = Integer.valueOf(params.get("maxTransactionLength", "100"));
+    Parameters params = Parameters.fromString(context.getConfiguration().get(
+      "job.parameters", ""));
+    maxTransactionLength = Integer.valueOf(params.get("maxTransactionLength",
+      "100"));
   }
 }

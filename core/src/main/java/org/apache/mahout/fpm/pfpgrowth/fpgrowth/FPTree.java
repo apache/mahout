@@ -21,86 +21,91 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 
+/**
+ * The Frequent Pattern Tree datastructure used for mining patterns using
+ * {@link FPGrowth} algorithm
+ * 
+ */
 public class FPTree {
-
+  
   public static final int ROOTNODEID = 0;
-
+  
   private static final int DEFAULT_CHILDREN_INITIAL_SIZE = 2;
-
+  
   private static final int DEFAULT_HEADER_TABLE_INITIAL_SIZE = 4;
-
+  
   private static final int DEFAULT_INITIAL_SIZE = 8;
-
+  
   private static final float GROWTH_RATE = 1.5f;
-
+  
   private static final int HEADERTABLEBLOCKSIZE = 2;
-
+  
   private static final int HT_LAST = 1;
-
+  
   private static final int HT_NEXT = 0;
-
+  
   private int[] attribute;
-
+  
   private int[] childCount;
-
+  
   private int[] conditional;
-
+  
   private long[] headerTableAttributeCount;
-
+  
   private int[] headerTableAttributes;
-
-  private int headerTableCount = 0;
-
+  
+  private int headerTableCount;
+  
   private int[] headerTableLookup;
-
+  
   private int[][] headerTableProperties;
-
+  
   private int[] next;
-
+  
   private int[][] nodeChildren;
-
+  
   private long[] nodeCount;
-
-  private int nodes = 0;
-
+  
+  private int nodes;
+  
   private int[] parent;
-
+  
   private boolean singlePath;
-
+  
   private final Set<Integer> sortedSet = new TreeSet<Integer>();
-
+  
   public FPTree() {
     this(DEFAULT_INITIAL_SIZE, DEFAULT_HEADER_TABLE_INITIAL_SIZE);
   }
-
+  
   public FPTree(int size) {
     this(size, DEFAULT_HEADER_TABLE_INITIAL_SIZE);
   }
-
+  
   private FPTree(int size, int headersize) {
     if (size < DEFAULT_INITIAL_SIZE) {
       size = DEFAULT_INITIAL_SIZE;
     }
-
+    
     parent = new int[size];
     next = new int[size];
     childCount = new int[size];
     attribute = new int[size];
     nodeCount = new long[size];
-
+    
     nodeChildren = new int[size][];
     conditional = new int[size];
-
+    
     headerTableAttributes = new int[DEFAULT_HEADER_TABLE_INITIAL_SIZE];
     headerTableAttributeCount = new long[DEFAULT_HEADER_TABLE_INITIAL_SIZE];
     headerTableLookup = new int[DEFAULT_HEADER_TABLE_INITIAL_SIZE];
     Arrays.fill(headerTableLookup, -1);
     headerTableProperties = new int[DEFAULT_HEADER_TABLE_INITIAL_SIZE][];
-
+    
     singlePath = true;
     createRootNode();
   }
-
+  
   public final void addChild(int parentNodeId, int childnodeId) {
     int length = childCount[parentNodeId];
     if (length >= nodeChildren[parentNodeId].length) {
@@ -108,12 +113,12 @@ public class FPTree {
     }
     nodeChildren[parentNodeId][length++] = childnodeId;
     childCount[parentNodeId] = length;
-
+    
     if (length > 1 && singlePath) {
       singlePath = false;
     }
   }
-
+  
   public final boolean addCount(int nodeId, long count) {
     if (nodeId < nodes) {
       this.nodeCount[nodeId] += count;
@@ -121,12 +126,12 @@ public class FPTree {
     }
     return false;
   }
-
+  
   public final void addHeaderCount(int attributeValue, long count) {
     int index = getHeaderIndex(attributeValue);
     headerTableAttributeCount[index] += count;
   }
-
+  
   public final void addHeaderNext(int attributeValue, int nodeId) {
     int index = getHeaderIndex(attributeValue);
     if (headerTableProperties[index][HT_NEXT] == -1) {
@@ -137,22 +142,22 @@ public class FPTree {
       headerTableProperties[index][HT_LAST] = nodeId;
     }
   }
-
+  
   public final int attribute(int nodeId) {
     return this.attribute[nodeId];
   }
-
+  
   public final int childAtIndex(int nodeId, int index) {
     if (childCount[nodeId] < index) {
       return -1;
     }
     return nodeChildren[nodeId][index];
   }
-
+  
   public final int childCount(int nodeId) {
     return childCount[nodeId];
   }
-
+  
   public final int childWithAttribute(int nodeId, int childAttribute) {
     int length = childCount[nodeId];
     for (int i = 0; i < length; i++) {
@@ -162,7 +167,7 @@ public class FPTree {
     }
     return -1;
   }
-
+  
   public final void clear() {
     nodes = 0;
     headerTableCount = 0;
@@ -171,21 +176,21 @@ public class FPTree {
     sortedSet.clear();
     createRootNode();
   }
-
+  
   public final void clearConditional() {
     for (int i = nodes - 1; i >= 0; i--) {
       conditional[i] = 0;
     }
   }
-
+  
   public final int conditional(int nodeId) {
     return this.conditional[nodeId];
   }
-
+  
   public final long count(int nodeId) {
     return nodeCount[nodeId];
   }
-
+  
   public final int createConditionalNode(int attributeValue, long count) {
     if (nodes >= this.attribute.length) {
       resize();
@@ -196,36 +201,36 @@ public class FPTree {
     conditional[nodes] = 0;
     this.attribute[nodes] = attributeValue;
     nodeCount[nodes] = count;
-
+    
     if (nodeChildren[nodes] == null) {
       nodeChildren[nodes] = new int[DEFAULT_CHILDREN_INITIAL_SIZE];
     }
-
+    
     return nodes++;
   }
-
+  
   public final int createNode(int parentNodeId, int attributeValue, long count) {
     if (nodes >= this.attribute.length) {
       resize();
     }
-
+    
     childCount[nodes] = 0;
     next[nodes] = -1;
     parent[nodes] = parentNodeId;
     this.attribute[nodes] = attributeValue;
     nodeCount[nodes] = count;
-
+    
     conditional[nodes] = 0;
     if (nodeChildren[nodes] == null) {
       nodeChildren[nodes] = new int[DEFAULT_CHILDREN_INITIAL_SIZE];
     }
-
+    
     int childNodeId = nodes++;
     addChild(parentNodeId, childNodeId);
     addHeaderNext(attributeValue, childNodeId);
     return childNodeId;
   }
-
+  
   public final int createRootNode() {
     childCount[nodes] = 0;
     next[nodes] = -1;
@@ -237,48 +242,48 @@ public class FPTree {
     }
     return nodes++;
   }
-
+  
   public final int getAttributeAtIndex(int index) {
     return headerTableAttributes[index];
   }
-
+  
   public final int getHeaderNext(int attributeValue) {
     int index = getHeaderIndex(attributeValue);
     return headerTableProperties[index][HT_NEXT];
   }
-
+  
   public final long getHeaderSupportCount(int attributeValue) {
     int index = getHeaderIndex(attributeValue);
     return headerTableAttributeCount[index];
   }
-
+  
   public final int[] getHeaderTableAttributes() {
     int[] attributes = new int[headerTableCount];
     System.arraycopy(headerTableAttributes, 0, attributes, 0, headerTableCount);
     return attributes;
   }
-
+  
   public final int getHeaderTableCount() {
     return headerTableCount;
   }
-
+  
   public final boolean isEmpty() {
     return nodes <= 1;
   }
-
+  
   public final int next(int nodeId) {
     return next[nodeId];
   }
-
+  
   public final int parent(int nodeId) {
     return parent[nodeId];
   }
-
+  
   public final void removeHeaderNext(int attributeValue) {
     int index = getHeaderIndex(attributeValue);
     headerTableProperties[index][HT_NEXT] = -1;
   }
-
+  
   public final void reorderHeaderTable() {
     // Arrays.sort(headerTableAttributes, 0, headerTableCount);
     int i = 0;
@@ -286,7 +291,7 @@ public class FPTree {
       headerTableAttributes[i++] = attr;
     }
   }
-
+  
   public void replaceChild(int parentNodeId, int replacableNode, int childnodeId) {
     for (int i = 0, j = childCount[parentNodeId]; i < j; i++) {
       if (nodeChildren[parentNodeId][i] == replacableNode) {
@@ -295,7 +300,7 @@ public class FPTree {
       }
     }
   }
-
+  
   public final boolean setConditional(int nodeId, int conditionalNode) {
     if (nodeId < nodes) {
       this.conditional[nodeId] = conditionalNode;
@@ -303,7 +308,7 @@ public class FPTree {
     }
     return false;
   }
-
+  
   public final boolean setNext(int nodeId, int nextNode) {
     if (nodeId < nodes) {
       this.next[nodeId] = nextNode;
@@ -311,11 +316,11 @@ public class FPTree {
     }
     return false;
   }
-
+  
   public final boolean setParent(int nodeId, int parentNode) {
     if (nodeId < nodes) {
       this.parent[nodeId] = parentNode;
-
+      
       int length = childCount[parentNode];
       if (length >= nodeChildren[parentNode].length) {
         resizeChildren(parentNode);
@@ -326,15 +331,15 @@ public class FPTree {
     }
     return false;
   }
-
+  
   public final void setSinglePath(boolean bit) {
     singlePath = bit;
   }
-
+  
   public final boolean singlePath() {
     return singlePath;
   }
-
+  
   private int getHeaderIndex(int attributeValue) {
     if (attributeValue >= headerTableLookup.length) {
       resizeHeaderLookup(attributeValue);
@@ -357,13 +362,13 @@ public class FPTree {
     }
     return index;
   }
-
+  
   private void resize() {
     int size = (int) (GROWTH_RATE * nodes);
     if (size < DEFAULT_INITIAL_SIZE) {
       size = DEFAULT_INITIAL_SIZE;
     }
-
+    
     int[] oldChildCount = childCount;
     int[] oldAttribute = attribute;
     long[] oldnodeCount = nodeCount;
@@ -371,16 +376,16 @@ public class FPTree {
     int[] oldNext = next;
     int[][] oldNodeChildren = nodeChildren;
     int[] oldConditional = conditional;
-
+    
     childCount = new int[size];
     attribute = new int[size];
     nodeCount = new long[size];
     parent = new int[size];
     next = new int[size];
-
+    
     nodeChildren = new int[size][];
     conditional = new int[size];
-
+    
     System.arraycopy(oldChildCount, 0, this.childCount, 0, nodes);
     System.arraycopy(oldAttribute, 0, this.attribute, 0, nodes);
     System.arraycopy(oldnodeCount, 0, this.nodeCount, 0, nodes);
@@ -389,7 +394,7 @@ public class FPTree {
     System.arraycopy(oldNodeChildren, 0, this.nodeChildren, 0, nodes);
     System.arraycopy(oldConditional, 0, this.conditional, 0, nodes);
   }
-
+  
   private void resizeChildren(int nodeId) {
     int length = childCount[nodeId];
     int size = (int) (GROWTH_RATE * length);
@@ -400,7 +405,7 @@ public class FPTree {
     nodeChildren[nodeId] = new int[size];
     System.arraycopy(oldNodeChildren, 0, this.nodeChildren[nodeId], 0, length);
   }
-
+  
   private void resizeHeaderLookup(int attributeValue) {
     int size = (int) (attributeValue * GROWTH_RATE);
     int[] oldLookup = headerTableLookup;
@@ -408,13 +413,13 @@ public class FPTree {
     Arrays.fill(headerTableLookup, oldLookup.length, size, -1);
     System.arraycopy(oldLookup, 0, this.headerTableLookup, 0, oldLookup.length);
   }
-
+  
   private void resizeHeaderTable() {
     int size = (int) (GROWTH_RATE * headerTableCount);
     if (size < DEFAULT_HEADER_TABLE_INITIAL_SIZE) {
       size = DEFAULT_HEADER_TABLE_INITIAL_SIZE;
     }
-
+    
     int[] oldAttributes = headerTableAttributes;
     long[] oldAttributeCount = headerTableAttributeCount;
     int[][] oldProperties = headerTableProperties;
@@ -422,10 +427,10 @@ public class FPTree {
     headerTableAttributeCount = new long[size];
     headerTableProperties = new int[size][];
     System.arraycopy(oldAttributes, 0, this.headerTableAttributes, 0,
-                     headerTableCount);
+      headerTableCount);
     System.arraycopy(oldAttributeCount, 0, this.headerTableAttributeCount, 0,
-                     headerTableCount);
+      headerTableCount);
     System.arraycopy(oldProperties, 0, this.headerTableProperties, 0,
-                     headerTableCount);
+      headerTableCount);
   }
 }

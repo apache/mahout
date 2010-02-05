@@ -36,7 +36,7 @@ import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.Parameters;
 import org.apache.mahout.fpm.pfpgrowth.convertors.ContextStatusUpdater;
 import org.apache.mahout.fpm.pfpgrowth.convertors.ContextWriteOutputCollector;
-import org.apache.mahout.fpm.pfpgrowth.convertors.integer.IntegerStringOutputConvertor;
+import org.apache.mahout.fpm.pfpgrowth.convertors.integer.IntegerStringOutputConverter;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPTreeDepthCache;
@@ -49,93 +49,92 @@ import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPTreeDepthCache;
  */
 
 public class ParallelFPGrowthReducer extends
-    Reducer<LongWritable, TransactionTree, Text, TopKStringPatterns> {
-
-  private final List<Pair<Integer, Long>> fList = new ArrayList<Pair<Integer, Long>>();
-
+    Reducer<LongWritable,TransactionTree,Text,TopKStringPatterns> {
+  
+  private final List<Pair<Integer,Long>> fList = new ArrayList<Pair<Integer,Long>>();
+  
   private final List<String> featureReverseMap = new ArrayList<String>();
-
-  private final Map<String, Integer> fMap = new HashMap<String, Integer>();
-
+  
+  private final Map<String,Integer> fMap = new HashMap<String,Integer>();
+  
   private final List<String> fRMap = new ArrayList<String>();
-
-  private final Map<Long, List<Integer>> groupFeatures = new HashMap<Long, List<Integer>>();
-
+  
+  private final Map<Long,List<Integer>> groupFeatures = new HashMap<Long,List<Integer>>();
+  
   private int maxHeapSize = 50;
-
+  
   private int minSupport = 3;
-
+  
   @Override
-  protected void reduce(LongWritable key, Iterable<TransactionTree> values,
-      Context context) throws IOException {
+  protected void reduce(LongWritable key,
+                        Iterable<TransactionTree> values,
+                        Context context) throws IOException {
     TransactionTree cTree = new TransactionTree();
     int nodes = 0;
     for (TransactionTree tr : values) {
-      Iterator<Pair<List<Integer>, Long>> it = tr.getIterator();
+      Iterator<Pair<List<Integer>,Long>> it = tr.getIterator();
       while (it.hasNext()) {
-        Pair<List<Integer>, Long> p = it.next();
+        Pair<List<Integer>,Long> p = it.next();
         nodes += cTree.addPattern(p.getFirst(), p.getSecond());
       }
     }
-   
-    List<Pair<Integer, Long>> localFList = new ArrayList<Pair<Integer, Long>>();
-    for (Entry<Integer, MutableLong> fItem : cTree.generateFList().entrySet()) {
-      localFList.add(new Pair<Integer, Long>(fItem.getKey(), fItem.getValue()
+    
+    List<Pair<Integer,Long>> localFList = new ArrayList<Pair<Integer,Long>>();
+    for (Entry<Integer,MutableLong> fItem : cTree.generateFList().entrySet()) {
+      localFList.add(new Pair<Integer,Long>(fItem.getKey(), fItem.getValue()
           .toLong()));
-     
+      
     }
-
-    Collections.sort(localFList, new Comparator<Pair<Integer, Long>>() {
-
+    
+    Collections.sort(localFList, new Comparator<Pair<Integer,Long>>() {
+      
       @Override
-      public int compare(Pair<Integer, Long> o1, Pair<Integer, Long> o2) {
+      public int compare(Pair<Integer,Long> o1, Pair<Integer,Long> o2) {
         int ret = o2.getSecond().compareTo(o1.getSecond());
         if (ret != 0) {
           return ret;
         }
         return o1.getFirst().compareTo(o2.getFirst());
       }
-
+      
     });
     
-
     FPGrowth<Integer> fpGrowth = new FPGrowth<Integer>();
-    fpGrowth
-        .generateTopKFrequentPatterns(
-            cTree.getIterator(),
-            localFList,
-            minSupport,
-            maxHeapSize,
-            new HashSet<Integer>(groupFeatures.get(key.get())),
-            new IntegerStringOutputConvertor(
-                new ContextWriteOutputCollector<LongWritable, TransactionTree, Text, TopKStringPatterns>(
-                    context), featureReverseMap),
-            new ContextStatusUpdater<LongWritable, TransactionTree, Text, TopKStringPatterns>(
-                context));
+    fpGrowth.generateTopKFrequentPatterns(
+        cTree.getIterator(),
+        localFList,
+        minSupport,
+        maxHeapSize,
+        new HashSet<Integer>(groupFeatures.get(key.get())),
+        new IntegerStringOutputConverter(
+            new ContextWriteOutputCollector<LongWritable,TransactionTree,Text,TopKStringPatterns>(
+                context), featureReverseMap),
+        new ContextStatusUpdater<LongWritable,TransactionTree,Text,TopKStringPatterns>(
+            context));
   }
-
+  
   @Override
   protected void setup(Context context) throws IOException,
-      InterruptedException {
-
+                                       InterruptedException {
+    
     super.setup(context);
     Parameters params = Parameters.fromString(context.getConfiguration().get(
-        "pfp.parameters", ""));
-
+      "pfp.parameters", ""));
+    
     int i = 0;
-    for (Pair<String, Long> e : PFPGrowth.deserializeList(params, "fList",
-        context.getConfiguration())) {
+    for (Pair<String,Long> e : PFPGrowth.deserializeList(params, "fList",
+      context.getConfiguration())) {
       featureReverseMap.add(e.getFirst());
       fMap.put(e.getFirst(), i);
       fRMap.add(e.getFirst());
-      fList.add(new Pair<Integer, Long>(i++, e.getSecond()));
-
+      fList.add(new Pair<Integer,Long>(i++, e.getSecond()));
+      
     }
-
-    Map<String, Long> gList = PFPGrowth.deserializeMap(params, "gList", context
+    
+    Map<String,Long> gList = PFPGrowth.deserializeMap(params, "gList", context
         .getConfiguration());
-
-    for (Entry<String, Long> entry : gList.entrySet()) {
+    
+    for (Entry<String,Long> entry : gList.entrySet()) {
       List<Integer> groupList = groupFeatures.get(entry.getValue());
       Integer itemInteger = fMap.get(entry.getKey());
       if (groupList != null) {
@@ -145,12 +144,12 @@ public class ParallelFPGrowthReducer extends
         groupList.add(itemInteger);
         groupFeatures.put(entry.getValue(), groupList);
       }
-
+      
     }
     maxHeapSize = Integer.valueOf(params.get("maxHeapSize", "50"));
     minSupport = Integer.valueOf(params.get("minSupport", "3"));
-    FPTreeDepthCache.setFirstLevelCacheSize(Integer.valueOf(params
-        .get("treeCacheSize", Integer
-            .toString(FPTreeDepthCache.getFirstLevelCacheSize()))));
+    FPTreeDepthCache.setFirstLevelCacheSize(Integer.valueOf(params.get(
+      "treeCacheSize", Integer.toString(FPTreeDepthCache
+          .getFirstLevelCacheSize()))));
   }
 }

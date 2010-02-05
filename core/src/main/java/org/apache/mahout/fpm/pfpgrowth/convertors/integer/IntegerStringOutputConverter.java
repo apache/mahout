@@ -25,35 +25,37 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 
-public final class IntegerStringOutputConvertor implements
-    OutputCollector<Integer, List<Pair<List<Integer>, Long>>> {
-
-  private OutputCollector<Text, TopKStringPatterns> collector = null;
-
-  private List<String> featureReverseMap = null;
-
-  public IntegerStringOutputConvertor(
-      OutputCollector<Text, TopKStringPatterns> collector,
-      List<String> featureReverseMap) {
+/**
+ * Collects the Patterns with Integer id and Long support and converts them to
+ * Pattern of Strings based on a reverse feature lookup map.
+ */
+public final class IntegerStringOutputConverter implements
+    OutputCollector<Integer,List<Pair<List<Integer>,Long>>> {
+  
+  private OutputCollector<Text,TopKStringPatterns> collector;
+  
+  private List<String> featureReverseMap;
+  
+  public IntegerStringOutputConverter(OutputCollector<Text,TopKStringPatterns> collector,
+                                      List<String> featureReverseMap) {
     this.collector = collector;
     this.featureReverseMap = featureReverseMap;
   }
-
+  
   @Override
-  public void collect(Integer key, List<Pair<List<Integer>, Long>> value)
-      throws IOException {
+  public void collect(Integer key, List<Pair<List<Integer>,Long>> value) throws IOException {
     String stringKey = featureReverseMap.get(key);
-    List<Pair<List<String>, Long>> stringValues = new ArrayList<Pair<List<String>, Long>>();
-    for (Pair<List<Integer>, Long> e : value) {
+    List<Pair<List<String>,Long>> stringValues = new ArrayList<Pair<List<String>,Long>>();
+    for (Pair<List<Integer>,Long> e : value) {
       List<String> pattern = new ArrayList<String>();
       for (Integer i : e.getFirst()) {
         pattern.add(featureReverseMap.get(i));
       }
-      stringValues.add(new Pair<List<String>, Long>(pattern, e.getSecond()));
+      stringValues.add(new Pair<List<String>,Long>(pattern, e.getSecond()));
     }
-
+    
     collector
         .collect(new Text(stringKey), new TopKStringPatterns(stringValues));
   }
-
+  
 }

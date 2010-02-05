@@ -27,34 +27,40 @@ import org.apache.mahout.common.Parameters;
 
 /**
  * 
- * {@link ParallelCountingMapper} maps all items in a particular transaction like the way it is done in Hadoop
- * WordCount example
+ * {@link ParallelCountingMapper} maps all items in a particular transaction
+ * like the way it is done in Hadoop WordCount example
  * 
  */
-public class ParallelCountingMapper extends Mapper<LongWritable, Text, Text, LongWritable> {
-
-  private static final LongWritable one = new LongWritable(1);
-
-  private Pattern splitter = null;
-
+public class ParallelCountingMapper extends
+    Mapper<LongWritable,Text,Text,LongWritable> {
+  
+  private static final LongWritable ONE = new LongWritable(1);
+  
+  private Pattern splitter;
+  
   @Override
-  protected void map(LongWritable offset, Text input, Context context) throws IOException,
-      InterruptedException {
-
+  protected void map(LongWritable offset,
+                     Text input,
+                     Context context) throws IOException,
+                                     InterruptedException {
+    
     String[] items = splitter.split(input.toString());
     for (String item : items) {
       if (item.trim().length() == 0) {
         continue;
       }
       context.setStatus("Parallel Counting Mapper: " + item);
-      context.write(new Text(item), one);
+      context.write(new Text(item), ONE);
     }
   }
-
+  
   @Override
-  protected void setup(Context context) throws IOException, InterruptedException {
+  protected void setup(Context context) throws IOException,
+                                       InterruptedException {
     super.setup(context);
-    Parameters params = Parameters.fromString(context.getConfiguration().get("pfp.parameters", ""));
-    splitter = Pattern.compile(params.get("splitPattern", PFPGrowth.SPLITTER.toString()));
+    Parameters params = Parameters.fromString(context.getConfiguration().get(
+      "pfp.parameters", ""));
+    splitter = Pattern.compile(params.get("splitPattern", PFPGrowth.SPLITTER
+        .toString()));
   }
 }
