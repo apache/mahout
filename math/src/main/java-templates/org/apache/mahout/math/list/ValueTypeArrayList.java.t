@@ -244,15 +244,15 @@ public class ${valueTypeCap}ArrayList extends Abstract${valueTypeCap}List implem
    * @return true if the specified Object is equal to the receiver.
    */
   public boolean equals(Object otherObj) { //delta
+    if (otherObj == null) {
+      return false;
+    }
     // overridden for performance only.
     if (!(otherObj instanceof ${valueTypeCap}ArrayList)) {
       return super.equals(otherObj);
     }
     if (this == otherObj) {
       return true;
-    }
-    if (otherObj == null) {
-      return false;
     }
     ${valueTypeCap}ArrayList other = (${valueTypeCap}ArrayList) otherObj;
     if (size() != other.size()) {

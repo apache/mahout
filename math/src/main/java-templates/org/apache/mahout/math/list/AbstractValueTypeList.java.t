@@ -276,14 +276,14 @@ public abstract class Abstract${valueTypeCap}List extends AbstractList implement
    * @return true if the specified Object is equal to the receiver.
    */
   public boolean equals(Object otherObj) { //delta
+    if (otherObj == null) {
+      return false;
+    }
     if (!(otherObj instanceof Abstract${valueTypeCap}List)) {
       return false;
     }
     if (this == otherObj) {
       return true;
-    }
-    if (otherObj == null) {
-      return false;
     }
     Abstract${valueTypeCap}List other = (Abstract${valueTypeCap}List) otherObj;
     if (size() != other.size()) {
