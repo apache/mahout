@@ -20,7 +20,7 @@
       <binaries>
         <outputDirectory/>
         <unpack>false</unpack>
-         <dependencySets>
+        <dependencySets>
           <dependencySet>
             <excludes>
               <exclude>org.apache.mahout:*</exclude>
@@ -71,6 +71,13 @@
         <include>LICENSE*</include>
         <include>NOTICE*</include>
         <include>KEYS</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>src/main/assembly</directory>
+      <outputDirectory>lib</outputDirectory>
+      <includes>
+        <include>*-LICENSE.txt</include>
       </includes>
     </fileSet>
   </fileSets>

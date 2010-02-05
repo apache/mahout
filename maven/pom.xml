@@ -208,6 +208,10 @@
             <groupId>net.java.dev.jets3t</groupId>
             <artifactId>jets3t</artifactId>
           </exclusion>
+          <exclusion>
+            <groupId>org.eclipse.jdt</groupId>
+            <artifactId>core</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
     </dependencies>
