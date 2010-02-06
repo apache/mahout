@@ -197,7 +197,7 @@ public class Open${keyTypeCap}ObjectHashMap<T> extends Abstract${keyTypeCap}Obje
    */
   @Override
   public T get(${keyType} key) {
-    int i = indexOfKey(key);
+    final int i = indexOfKey(key);
     if (i < 0) {
       return null;
     } //not contained
@@ -212,11 +212,9 @@ public class Open${keyTypeCap}ObjectHashMap<T> extends Abstract${keyTypeCap}Obje
    *         slot index.
    */
   protected int indexOfInsertion(${keyType} key) {
-    ${keyType}[] tab = table;
-    byte[] stat = state;
-    int length = tab.length;
+    final int length = table.length;
 
-    int hash = HashFunctions.hash(key) & 0x7FFFFFFF;
+    final int hash = HashFunctions.hash(key) & 0x7FFFFFFF;
     int i = hash % length;
     int decrement = hash % (length - 2); // double hashing, see http://www.eece.unm.edu/faculty/heileman/hash/node4.html
     //int decrement = (hash / length) % length;
@@ -226,7 +224,7 @@ public class Open${keyTypeCap}ObjectHashMap<T> extends Abstract${keyTypeCap}Obje
 
     // stop if we find a removed or free slot, or if we find the key itself
     // do NOT skip over removed slots (yes, open addressing is like that...)
-    while (stat[i] == FULL && tab[i] != key) {
+    while (state[i] == FULL && table[i] != key) {
       i -= decrement;
       //hashCollisions++;
       if (i < 0) {
@@ -234,25 +232,25 @@ public class Open${keyTypeCap}ObjectHashMap<T> extends Abstract${keyTypeCap}Obje
       }
     }
 
-    if (stat[i] == REMOVED) {
+    if (state[i] == REMOVED) {
       // stop if we find a free slot, or if we find the key itself.
       // do skip over removed slots (yes, open addressing is like that...)
       // assertion: there is at least one FREE slot.
-      int j = i;
-      while (stat[i] != FREE && (stat[i] == REMOVED || tab[i] != key)) {
+      final int j = i;
+      while (state[i] != FREE && (state[i] == REMOVED || table[i] != key)) {
         i -= decrement;
         //hashCollisions++;
         if (i < 0) {
           i += length;
         }
       }
-      if (stat[i] == FREE) {
+      if (state[i] == FREE) {
         i = j;
       }
     }
 
 
-    if (stat[i] == FULL) {
+    if (state[i] == FULL) {
       // key already contained at slot i.
       // return a negative number identifying the slot.
       return -i - 1;
@@ -267,11 +265,9 @@ public class Open${keyTypeCap}ObjectHashMap<T> extends Abstract${keyTypeCap}Obje
    * @return the index where the key is contained in the receiver, returns -1 if the key was not found.
    */
   protected int indexOfKey(${keyType} key) {
-    ${keyType}[] tab = table;
-    byte[] stat = state;
-    int length = tab.length;
+    final int length = table.length;
 
-    int hash = HashFunctions.hash(key) & 0x7FFFFFFF;
+    final int hash = HashFunctions.hash(key) & 0x7FFFFFFF;
     int i = hash % length;
     int decrement = hash % (length - 2); // double hashing, see http://www.eece.unm.edu/faculty/heileman/hash/node4.html
     //int decrement = (hash / length) % length;
@@ -281,7 +277,7 @@ public class Open${keyTypeCap}ObjectHashMap<T> extends Abstract${keyTypeCap}Obje
 
     // stop if we find a free slot, or if we find the key itself.
     // do skip over removed slots (yes, open addressing is like that...)
-    while (stat[i] != FREE && (stat[i] == REMOVED || tab[i] != key)) {
+    while (state[i] != FREE && (state[i] == REMOVED || table[i] != key)) {
       i -= decrement;
       //hashCollisions++;
       if (i < 0) {
@@ -289,7 +285,7 @@ public class Open${keyTypeCap}ObjectHashMap<T> extends Abstract${keyTypeCap}Obje
       }
     }
 
-    if (stat[i] == FREE) {
+    if (state[i] == FREE) {
       return -1;
     } // not found
     return i; //found, return index where key is contained
@@ -325,13 +321,10 @@ public class Open${keyTypeCap}ObjectHashMap<T> extends Abstract${keyTypeCap}Obje
     list.setSize(distinct);
     ${keyType}[] elements = list.elements();
 
-    ${keyType}[] tab = table;
-    byte[] stat = state;
-
     int j = 0;
-    for (int i = tab.length; i-- > 0;) {
-      if (stat[i] == FULL) {
-        elements[j++] = tab[i];
+    for (int i = table.length; i-- > 0;) {
+      if (state[i] == FULL) {
+        elements[j++] = table[i];
       }
     }
   }
@@ -422,25 +415,22 @@ public class Open${keyTypeCap}ObjectHashMap<T> extends Abstract${keyTypeCap}Obje
     T[] oldValues = values;
     byte[] oldState = state;
 
-    ${keyType}[] newTable = new ${keyType}[newCapacity];
-    T[] newValues = (T[]) new Object[newCapacity];
-    byte[] newState = new byte[newCapacity];
+    this.table = new ${keyType}[newCapacity];
+    this.values = (T[]) new Object[newCapacity];
+    this.state = new byte[newCapacity];
 
     this.lowWaterMark = chooseLowWaterMark(newCapacity, this.minLoadFactor);
     this.highWaterMark = chooseHighWaterMark(newCapacity, this.maxLoadFactor);
 
-    this.table = newTable;
-    this.values = newValues;
-    this.state = newState;
     this.freeEntries = newCapacity - this.distinct; // delta
 
     for (int i = oldCapacity; i-- > 0;) {
       if (oldState[i] == FULL) {
         ${keyType} element = oldTable[i];
         int index = indexOfInsertion(element);
-        newTable[index] = element;
-        newValues[index] = oldValues[i];
-        newState[index] = FULL;
+        this.table[index] = element;
+        this.values[index] = oldValues[i];
+        this.state[index] = FULL;
       }
     }
   }
@@ -539,12 +529,9 @@ public class Open${keyTypeCap}ObjectHashMap<T> extends Abstract${keyTypeCap}Obje
   public void values(List<T> list) {
     list.clear();
 
-    T[] val = values;
-    byte[] stat = state;
-
-    for (int i = stat.length; i-- > 0;) {
-      if (stat[i] == FULL) {
-        list.add(val[i]);
+    for (int i = state.length; i-- > 0;) {
+      if (state[i] == FULL) {
+        list.add(values[i]);
       }
     }
   }
@@ -555,7 +542,7 @@ public class Open${keyTypeCap}ObjectHashMap<T> extends Abstract${keyTypeCap}Obje
    * @param minLoadFactor
    * @param maxLoadFactor
    */
-  void getInternalFactors(int[] capacity, 
+  protected void getInternalFactors(int[] capacity, 
       double[] minLoadFactor, 
       double[] maxLoadFactor) {
     capacity[0] = table.length;
