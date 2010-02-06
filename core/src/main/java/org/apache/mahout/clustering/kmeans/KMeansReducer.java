@@ -48,7 +48,10 @@ public class KMeansReducer extends MapReduceBase implements
       cluster.addPoints(delta.getPoints(), delta.getPointTotal());
     }
     // force convergence calculation
-    cluster.computeConvergence(this.measure, this.convergenceDelta);
+    boolean converged = cluster.computeConvergence(this.measure, this.convergenceDelta);
+    if (converged) {
+      reporter.incrCounter("Clustering", "Converged Clusters", 1);
+    }
     output.collect(new Text(cluster.getIdentifier()), cluster);
   }
 

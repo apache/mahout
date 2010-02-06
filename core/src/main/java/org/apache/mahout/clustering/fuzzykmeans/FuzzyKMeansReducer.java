@@ -55,7 +55,10 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
 
     }
     // force convergence calculation
-    clusterer.computeConvergence(cluster);
+    boolean converged = clusterer.computeConvergence(cluster);
+    if (converged) {
+      reporter.incrCounter("Clustering", "Converged Clusters", 1);
+    }
     output.collect(new Text(cluster.getIdentifier()), cluster);
   }
 
