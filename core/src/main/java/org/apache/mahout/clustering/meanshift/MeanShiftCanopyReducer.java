@@ -51,7 +51,11 @@ public class MeanShiftCanopyReducer extends MapReduceBase implements
     }
 
     for (MeanShiftCanopy canopy : canopies) {
-      allConverged = clusterer.shiftToMean(canopy) && allConverged;
+      boolean converged = clusterer.shiftToMean(canopy);
+      if (converged) {
+        reporter.incrCounter("Clustering", "Converged Clusters", 1);
+      }
+      allConverged = converged && allConverged;
       output.collect(new Text(canopy.getIdentifier()), canopy);
     }
 

@@ -17,6 +17,12 @@
 
 package org.apache.mahout.clustering.kmeans;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -25,24 +31,18 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
+import org.apache.mahout.common.DummyOutputCollector;
+import org.apache.mahout.common.DummyReporter;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.DistanceMeasure;
-import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
-import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
-import org.apache.mahout.common.FileLineIterable;
 import org.apache.mahout.math.AbstractVector;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class TestKmeansClustering extends MahoutTestCase {
 
@@ -325,7 +325,7 @@ public class TestKmeansClustering extends MahoutTestCase {
       DummyOutputCollector<Text, Cluster> collector3 = new DummyOutputCollector<Text, Cluster>();
       for (String key : collector2.getKeys()) {
         reducer.reduce(new Text(key), collector2.getValue(key).iterator(),
-            collector3, null);
+            collector3, new DummyReporter());
       }
 
       assertEquals("Number of map results", k + 1, collector3.getData().size());

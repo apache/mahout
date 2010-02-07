@@ -25,6 +25,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.kmeans.TestKmeansClustering;
+import org.apache.mahout.common.DummyReporter;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -457,7 +458,7 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       for (String key : combinerCollector.getKeys()) {
         List<FuzzyKMeansInfo> values = combinerCollector.getValue(key);
         reducer
-            .reduce(new Text(key), values.iterator(), reducerCollector, null);
+            .reduce(new Text(key), values.iterator(), reducerCollector, new DummyReporter());
       }
 
       // now verify the reducer output

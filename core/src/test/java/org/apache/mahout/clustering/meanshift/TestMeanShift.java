@@ -24,6 +24,7 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.mahout.common.DummyReporter;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
@@ -276,7 +277,7 @@ public class TestMeanShift extends MahoutTestCase {
     DummyOutputCollector<Text, MeanShiftCanopy> reduceCollector = new DummyOutputCollector<Text, MeanShiftCanopy>();
     reducer.configure(conf);
     reducer.reduce(new Text("canopy"), mapCollector.getValue("canopy")
-        .iterator(), reduceCollector, null);
+        .iterator(), reduceCollector, new DummyReporter());
     reducer.close();
 
     // now verify the output
