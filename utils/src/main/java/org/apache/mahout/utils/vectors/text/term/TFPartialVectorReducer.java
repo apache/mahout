@@ -19,14 +19,12 @@ package org.apache.mahout.utils.vectors.text.term;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
@@ -39,6 +37,7 @@ import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
 /**
  * Converts a document in to a sparse vector
@@ -46,7 +45,7 @@ import org.apache.mahout.math.VectorWritable;
 public class TFPartialVectorReducer extends MapReduceBase implements
     Reducer<Text,StringTuple,Text,VectorWritable> {
   private Analyzer analyzer;
-  private final Map<String,int[]> dictionary = new HashMap<String,int[]>();
+  private final OpenObjectIntHashMap<String> dictionary = new OpenObjectIntHashMap<String>();
   
   private final VectorWritable vectorWritable = new VectorWritable();
   
@@ -61,10 +60,10 @@ public class TFPartialVectorReducer extends MapReduceBase implements
     Vector vector = new RandomAccessSparseVector(key.toString(),
         Integer.MAX_VALUE, value.length()); // guess at initial size
     
-    for (String tk : value.getEntries()) {
-      if (dictionary.containsKey(tk) == false) continue;
-      int tokenKey = dictionary.get(tk)[0];
-      vector.setQuick(tokenKey, vector.getQuick(tokenKey) + 1);
+    for (String term : value.getEntries()) {
+      if (dictionary.containsKey(term) == false) continue;
+      int termId = dictionary.get(term);
+      vector.setQuick(termId, vector.getQuick(termId) + 1);
     }
     
     vectorWritable.set(vector);
@@ -87,12 +86,11 @@ public class TFPartialVectorReducer extends MapReduceBase implements
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, dictionaryFile,
           job);
       Text key = new Text();
-      LongWritable value = new LongWritable();
+      IntWritable value = new IntWritable();
       
       // key is word value is id
       while (reader.next(key, value)) {
-        dictionary.put(key.toString(), new int[] {Long.valueOf(value.get())
-            .intValue()});
+        dictionary.put(key.toString(), value.get());
       }
     } catch (IOException e) {
       throw new IllegalStateException(e);

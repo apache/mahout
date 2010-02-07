@@ -28,6 +28,7 @@ import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
@@ -70,7 +71,8 @@ public final class DictionaryVectorizer {
   
   private static final String OUTPUT_FILES_PATTERN = "/part-*";
   
-  private static final int SEQUENCEFILE_BYTE_OVERHEAD = 45;
+  // 4 byte overhead for each entry in the OpenObjectIntHashMap
+  private static final int DICTIONARY_BYTE_OVERHEAD = 4;
   
   private static final String VECTOR_OUTPUT_FOLDER = "/partial-vectors-";
   
@@ -139,8 +141,8 @@ public final class DictionaryVectorizer {
     
     String outputDir = output + DOCUMENT_VECTOR_OUTPUT_FOLDER;
     if (dictionaryChunks.size() > 1) {
-      PartialVectorMerger.mergePartialVectors(partialVectorPaths, outputDir,
-        -1);
+      PartialVectorMerger
+          .mergePartialVectors(partialVectorPaths, outputDir, -1);
       HadoopUtil.deletePaths(partialVectorPaths, fs);
     } else {
       Path singlePartialVectorOutputPath = partialVectorPaths.get(0);
@@ -178,8 +180,8 @@ public final class DictionaryVectorizer {
     Path chunkPath = getPath(dictionaryPathBase + DICTIONARY_FILE, chunkIndex);
     chunkPaths.add(chunkPath);
     
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, chunkPath,
-        Text.class, LongWritable.class);
+    SequenceFile.Writer dictWriter = new SequenceFile.Writer(fs, conf,
+        chunkPath, Text.class, IntWritable.class);
     
     SequenceFile.Writer freqWriter = new SequenceFile.Writer(fs, conf, getPath(
       dictionaryPathBase + FREQUENCY_FILE, chunkIndex), Text.class,
@@ -187,7 +189,7 @@ public final class DictionaryVectorizer {
     
     long currentChunkSize = 0;
     
-    long i = 0;
+    int i = 0;
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
@@ -198,30 +200,30 @@ public final class DictionaryVectorizer {
         }
         
         if (currentChunkSize > chunkSizeLimit) {
-          writer.close();
+          dictWriter.close();
           freqWriter.close();
           chunkIndex++;
           
           chunkPath = getPath(dictionaryPathBase + DICTIONARY_FILE, chunkIndex);
           chunkPaths.add(chunkPath);
           
-          writer = new SequenceFile.Writer(fs, conf, chunkPath, Text.class,
-              LongWritable.class);
+          dictWriter = new SequenceFile.Writer(fs, conf, chunkPath, Text.class,
+              IntWritable.class);
           freqWriter = new SequenceFile.Writer(fs, conf, getPath(
             dictionaryPathBase + FREQUENCY_FILE, chunkIndex), Text.class,
               LongWritable.class);
           currentChunkSize = 0;
         }
         
-        int fieldSize = SEQUENCEFILE_BYTE_OVERHEAD
-                        + (key.toString().length() * 2) + (Long.SIZE / 8);
+        int fieldSize = DICTIONARY_BYTE_OVERHEAD
+                        + (key.toString().length() * 2) + (Integer.SIZE / 8);
         currentChunkSize += fieldSize;
-        writer.append(key, new LongWritable(i++));
+        dictWriter.append(key, new IntWritable(i++));
         freqWriter.append(key, value);
       }
     }
     
-    writer.close();
+    dictWriter.close();
     freqWriter.close();
     
     return chunkPaths;
