@@ -17,11 +17,11 @@
 
 package org.apache.mahout.fpm.pfpgrowth.fpgrowth;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
+
+import org.apache.mahout.math.map.OpenLongObjectHashMap;
 
 /** {@link FrequentPatternMaxHeap} keeps top K Attributes in a TreeSet */
 public final class FrequentPatternMaxHeap {
@@ -34,7 +34,7 @@ public final class FrequentPatternMaxHeap {
   
   private boolean subPatternCheck;
   
-  private Map<Long,Set<Pattern>> patternIndex;
+  private OpenLongObjectHashMap<Set<Pattern>> patternIndex;
   
   private PriorityQueue<Pattern> queue;
   
@@ -42,7 +42,7 @@ public final class FrequentPatternMaxHeap {
     maxSize = numResults;
     queue = new PriorityQueue<Pattern>(maxSize);
     this.subPatternCheck = subPatternCheck;
-    patternIndex = new HashMap<Long,Set<Pattern>>();
+    patternIndex = new OpenLongObjectHashMap<Set<Pattern>>();
     for (Pattern p : queue) {
       Long index = p.support();
       Set<Pattern> patternList;

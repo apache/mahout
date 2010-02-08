@@ -32,7 +32,6 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -44,7 +43,6 @@ import org.apache.mahout.math.map.OpenObjectIntHashMap;
  */
 public class TFPartialVectorReducer extends MapReduceBase implements
     Reducer<Text,StringTuple,Text,VectorWritable> {
-  private Analyzer analyzer;
   private final OpenObjectIntHashMap<String> dictionary = new OpenObjectIntHashMap<String>();
   
   private final VectorWritable vectorWritable = new VectorWritable();

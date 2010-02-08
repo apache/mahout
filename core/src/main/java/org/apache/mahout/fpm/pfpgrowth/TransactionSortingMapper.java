@@ -21,10 +21,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -33,6 +31,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.Parameters;
+import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
 /**
  * {@link TransactionSortingMapper} maps each transaction to all unique items
@@ -43,7 +42,7 @@ import org.apache.mahout.common.Parameters;
 public class TransactionSortingMapper extends
     Mapper<LongWritable,Text,LongWritable,TransactionTree> {
   
-  private final Map<String,Integer> fMap = new HashMap<String,Integer>();
+  private final OpenObjectIntHashMap<String> fMap = new OpenObjectIntHashMap<String>();
   
   private Pattern splitter;
   

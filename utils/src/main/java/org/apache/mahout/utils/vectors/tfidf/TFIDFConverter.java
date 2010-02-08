@@ -43,7 +43,6 @@ import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.utils.vectors.common.PartialVectorMergeReducer;
 import org.apache.mahout.utils.vectors.common.PartialVectorMerger;
 import org.apache.mahout.utils.vectors.text.term.TermDocumentCountMapper;
 import org.apache.mahout.utils.vectors.text.term.TermDocumentCountReducer;

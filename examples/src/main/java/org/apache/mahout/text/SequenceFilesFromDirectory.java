@@ -85,6 +85,7 @@ public final class SequenceFilesFromDirectory {
       maxChunkSizeInBytes = chunkSizeInMB * 1024 * 1024;
       this.outputDir = outputDir;
       fs = FileSystem.get(conf);
+      currentChunkID = 0;
       writer =
           new SequenceFile.Writer(fs, conf, getPath(currentChunkID),
               Text.class, Text.class);

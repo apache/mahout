@@ -31,7 +31,6 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 import org.apache.mahout.common.StringTuple;
-import org.apache.mahout.utils.vectors.text.DictionaryVectorizer;
 import org.apache.mahout.utils.vectors.text.DocumentProcessor;
 
 /**
@@ -57,7 +56,7 @@ public class SequenceFileTokenizerMapper extends MapReduceBase implements
         document.add(new String(termAtt.termBuffer(), 0, termAtt.termLength()));
       }
     }
-    output.collect(key,document);
+    output.collect(key, document);
   }
   
   @Override

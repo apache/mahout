@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -40,6 +39,9 @@ import org.apache.mahout.fpm.pfpgrowth.convertors.integer.IntegerStringOutputCon
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPTreeDepthCache;
+import org.apache.mahout.math.list.IntArrayList;
+import org.apache.mahout.math.map.OpenLongObjectHashMap;
+import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
 /**
  * {@link ParallelFPGrowthReducer} takes each group of transactions and runs
@@ -55,11 +57,11 @@ public class ParallelFPGrowthReducer extends
   
   private final List<String> featureReverseMap = new ArrayList<String>();
   
-  private final Map<String,Integer> fMap = new HashMap<String,Integer>();
+  private final OpenObjectIntHashMap<String> fMap = new OpenObjectIntHashMap<String>();
   
   private final List<String> fRMap = new ArrayList<String>();
   
-  private final Map<Long,List<Integer>> groupFeatures = new HashMap<Long,List<Integer>>();
+  private final OpenLongObjectHashMap<IntArrayList> groupFeatures = new OpenLongObjectHashMap<IntArrayList>();
   
   private int maxHeapSize = 50;
   
@@ -100,17 +102,18 @@ public class ParallelFPGrowthReducer extends
     });
     
     FPGrowth<Integer> fpGrowth = new FPGrowth<Integer>();
-    fpGrowth.generateTopKFrequentPatterns(
-        cTree.getIterator(),
-        localFList,
-        minSupport,
-        maxHeapSize,
-        new HashSet<Integer>(groupFeatures.get(key.get())),
-        new IntegerStringOutputConverter(
-            new ContextWriteOutputCollector<LongWritable,TransactionTree,Text,TopKStringPatterns>(
-                context), featureReverseMap),
-        new ContextStatusUpdater<LongWritable,TransactionTree,Text,TopKStringPatterns>(
-            context));
+    fpGrowth
+        .generateTopKFrequentPatterns(
+          cTree.getIterator(),
+          localFList,
+          minSupport,
+          maxHeapSize,
+          new HashSet<Integer>(groupFeatures.get(key.get()).toList()),
+          new IntegerStringOutputConverter(
+              new ContextWriteOutputCollector<LongWritable,TransactionTree,Text,TopKStringPatterns>(
+                  context), featureReverseMap),
+          new ContextStatusUpdater<LongWritable,TransactionTree,Text,TopKStringPatterns>(
+              context));
   }
   
   @Override
@@ -135,12 +138,12 @@ public class ParallelFPGrowthReducer extends
         .getConfiguration());
     
     for (Entry<String,Long> entry : gList.entrySet()) {
-      List<Integer> groupList = groupFeatures.get(entry.getValue());
+      IntArrayList groupList = groupFeatures.get(entry.getValue());
       Integer itemInteger = fMap.get(entry.getKey());
       if (groupList != null) {
         groupList.add(itemInteger);
       } else {
-        groupList = new ArrayList<Integer>();
+        groupList = new IntArrayList();
         groupList.add(itemInteger);
         groupFeatures.put(entry.getValue(), groupList);
       }

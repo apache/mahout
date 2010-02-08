@@ -18,8 +18,6 @@
 package org.apache.mahout.utils.vectors.text.term;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang.mutable.MutableLong;
@@ -30,6 +28,8 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.common.StringTuple;
+import org.apache.mahout.math.function.ObjectLongProcedure;
+import org.apache.mahout.math.map.OpenObjectLongHashMap;
 
 /**
  * TextVectorizer Term Count Mapper. Tokenizes a text document and outputs the
@@ -41,20 +41,24 @@ public class TermCountMapper extends MapReduceBase implements
   @Override
   public void map(Text key,
                   StringTuple value,
-                  OutputCollector<Text,LongWritable> output,
-                  Reporter reporter) throws IOException {
-    
-    Map<String,MutableLong> wordCount = new HashMap<String,MutableLong>();
+                  final OutputCollector<Text,LongWritable> output,
+                  final Reporter reporter) throws IOException {
+    OpenObjectLongHashMap<String> wordCount = new OpenObjectLongHashMap<String>();
     for (String word : value.getEntries()) {
       if (wordCount.containsKey(word) == false) {
-        wordCount.put(word, new MutableLong(0));
+        wordCount.put(word, 1);
+      } else wordCount.put(word, wordCount.get(word) + 1);
+    }
+    wordCount.forEachPair(new ObjectLongProcedure<String>() {
+      @Override
+      public boolean apply(String first, long second) {
+        try {
+          output.collect(new Text(first), new LongWritable(second));
+        } catch (IOException e) {
+          reporter.incrCounter("Exception", "Output IO Exception", 1);
+        }
+        return true;
       }
-      wordCount.get(word).increment();
-    }
-    
-    for (Entry<String,MutableLong> entry : wordCount.entrySet()) {
-      output.collect(new Text(entry.getKey()), new LongWritable(entry
-          .getValue().longValue()));
-    }
+    });
   }
 }
