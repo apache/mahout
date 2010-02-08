@@ -60,14 +60,14 @@ public class TFIDFPartialVectorReducer extends MapReduceBase
                      Iterator<VectorWritable> values,
                      OutputCollector<WritableComparable<?>,VectorWritable> output,
                      Reporter reporter) throws IOException {
-    if (values.hasNext() == false) return;
+    if (!values.hasNext()) return;
     Vector value = values.next().get();
     Iterator<Element> it = value.iterateNonZero();
     Vector vector = new RandomAccessSparseVector(key
         .toString(), Integer.MAX_VALUE, value.getNumNondefaultElements());
     while (it.hasNext()) {
       Element e = it.next();
-      if (dictionary.containsKey(e.index()) == false) continue;
+      if (!dictionary.containsKey(e.index())) continue;
       long df = dictionary.get(e.index());
       if (df / vectorCount > maxDfPercent) continue;
       if (df < minDf) df = minDf;
