@@ -86,9 +86,10 @@ public class DirichletMapper extends MapReduceBase implements
     String alpha_0 = job.get(DirichletDriver.ALPHA_0_KEY);
 
     try {
+      double alpha = Double.parseDouble(alpha_0);
       DirichletState<VectorWritable> state = DirichletDriver.createState(
           modelFactory, modelPrototype, Integer.parseInt(prototypeSize),
-          Integer.parseInt(numClusters), Double.parseDouble(alpha_0));
+          Integer.parseInt(numClusters), alpha);
       Path path = new Path(statePath);
       FileSystem fs = FileSystem.get(path.toUri(), job);
       FileStatus[] status = fs.listStatus(path, new OutputLogFilter());
@@ -108,7 +109,7 @@ public class DirichletMapper extends MapReduceBase implements
         }
       }
       // TODO: with more than one mapper, they will all have different mixtures. Will this matter?
-      state.setMixture(UncommonDistributions.rDirichlet(state.totalCounts()));
+      state.setMixture(UncommonDistributions.rDirichlet(state.totalCounts(), alpha));
       return state;
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);

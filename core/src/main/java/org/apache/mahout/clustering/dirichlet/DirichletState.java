@@ -35,21 +35,20 @@ public class DirichletState<O> {
 
   private Vector mixture; // the mixture vector
 
-  private double offset; // alpha_0 / numClusters
+  private double alpha_0; // alpha_0
 
   public DirichletState(ModelDistribution<O> modelFactory,
                         int numClusters, double alpha_0, int thin, int burnin) {
     this.numClusters = numClusters;
     this.modelFactory = modelFactory;
-    // initialize totalCounts
-    offset = alpha_0 / numClusters;
+    this.alpha_0 = alpha_0;
     // sample initial prior models
     clusters = new ArrayList<DirichletCluster<O>>();
     for (Model<O> m : modelFactory.sampleFromPrior(numClusters)) {
-      clusters.add(new DirichletCluster<O>(m, offset));
+      clusters.add(new DirichletCluster<O>(m, 0.0));
     }
     // sample the mixture parameters from a Dirichlet distribution on the totalCounts 
-    mixture = UncommonDistributions.rDirichlet(totalCounts());
+    mixture = UncommonDistributions.rDirichlet(totalCounts(), alpha_0);
   }
 
   public DirichletState() {
@@ -87,14 +86,6 @@ public class DirichletState<O> {
     this.mixture = mixture;
   }
 
-  public double getOffset() {
-    return offset;
-  }
-
-  public void setOffset(double offset) {
-    this.offset = offset;
-  }
-
   public Vector totalCounts() {
     Vector result = new DenseVector(numClusters);
     for (int i = 0; i < numClusters; i++) {
@@ -115,7 +106,7 @@ public class DirichletState<O> {
       clusters.get(i).setModel(newModels[i]);
     }
     // update the mixture
-    mixture = UncommonDistributions.rDirichlet(totalCounts());
+    mixture = UncommonDistributions.rDirichlet(totalCounts(), alpha_0);
   }
 
   /**
@@ -131,6 +122,7 @@ public class DirichletState<O> {
     return mix * pdf;
   }
 
+  @SuppressWarnings("unchecked")
   public Model<O>[] getModels() {
     Model<O>[] result = (Model<O>[]) new Model[numClusters];
     for (int i = 0; i < numClusters; i++) {

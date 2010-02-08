@@ -228,25 +228,26 @@ public final class UncommonDistributions {
   }
 
   /**
-   * Sample from a Dirichlet distribution over the given alpha, returning a vector of probabilities using a
+   * Sample from a Dirichlet distribution, returning a vector of probabilities using a
    * stick-breaking algorithm
    *
-   * @param alpha an unnormalized count Vector
+   * @param totalCounts an unnormalized count Vector
+   * @param alpha_0 a double
    * @return a Vector of probabilities
    */
-  public static Vector rDirichlet(Vector alpha) {
-    Vector r = alpha.like();
-    double total = alpha.zSum();
-    double remainder = 1;
-    for (int i = 0; i < r.size(); i++) {
-      double a = alpha.get(i);
-      total -= a;
-      double beta = rBeta(a, Math.max(0, total));
-      double p = beta * remainder;
-      r.set(i, p);
-      remainder -= p;
+  public static Vector rDirichlet(Vector totalCounts, double alpha_0) {
+    Vector pi = totalCounts.like();
+    double total = totalCounts.zSum();
+    double remainder = 1.0;
+    for (int k = 0; k < pi.size(); k++) {
+      double countK = totalCounts.get(k);
+      total -= countK;
+      double betaK = rBeta(1 + countK, Math.max(0, alpha_0 + total));
+      double piK = betaK * remainder;
+      pi.set(k, piK);
+      remainder -= piK;
     }
-    return r;
+    return pi;
   }
 
 }
