@@ -51,29 +51,6 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.apache.mahout</groupId>
-        <artifactId>mahout-collection-codegen-plugin</artifactId>
-        <version>${project.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-            <configuration><!-- examples for future reference. 
-              <mainExcludes>
-                <mainExclude>**/AbstractBooleanList.java</mainExclude>
-                <mainExclude>**/BooleanArrayList.java</mainExclude>
-                <mainExclude>**/BooleanBufferConsumer.java</mainExclude>
-              </mainExcludes>
-              <testExcludes>
-                <testExclude>**/BooleanArrayListTest.java</testExclude>
-              </testExcludes>-->
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>2.4</version>
       </plugin>
@@ -94,6 +71,16 @@
   </build>
 
   <dependencies>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-collections</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>concurrent</groupId>
+      <artifactId>concurrent</artifactId>
+      <version>1.3.4</version>
+    </dependency>
     <dependency>
       <groupId>concurrent</groupId>
       <artifactId>concurrent</artifactId>
@@ -128,9 +115,9 @@
   </dependencies>
 
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2-colt</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2</developerConnection>
-    <url>https://svn.apache.org/repos/asf/lucene/mahout/mahout-colt</url>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk/math</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk/math</developerConnection>
+    <url>https://svn.apache.org/repos/asf/lucene/mahout/math</url>
   </scm>
   <repositories>
     <repository>

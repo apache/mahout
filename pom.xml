@@ -26,12 +26,13 @@
 
   <modules>
     <module>maven</module>
+    <module>collections-codegen-plugin</module>
+    <module>collections</module>
     <module>math</module>
     <module>core</module>
     <module>taste-web</module>
     <module>examples</module>
     <module>utils</module>
-    <module>collections-codegen-plugin</module>
   </modules>
 
   <build>
