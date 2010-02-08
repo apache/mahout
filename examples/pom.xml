@@ -165,18 +165,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-benchmark</artifactId>
-      <version>${lucene.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-compress</artifactId>
-      <version>1.0</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.apache.openejb</groupId>
       <artifactId>javaee-api</artifactId>
       <version>5.0-1</version>
@@ -225,12 +213,6 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-jcl</artifactId>
       <version>1.5.8</version>
-    </dependency>
-
-    <dependency>
-      <groupId>net.java.dev.jets3t</groupId>
-      <artifactId>jets3t</artifactId>
-      <version>0.7.1</version>
     </dependency>
 
   </dependencies>
