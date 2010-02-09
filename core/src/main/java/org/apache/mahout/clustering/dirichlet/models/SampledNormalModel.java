@@ -47,7 +47,7 @@ public class SampledNormalModel extends NormalModel {
 
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder();
-    buf.append("nm{n=").append(getS0()).append(" m=");
+    buf.append("snm{n=").append(getS0()).append(" m=");
     if (getMean() != null) {
       buf.append(ClusterBase.formatVector(getMean(), bindings));
     }

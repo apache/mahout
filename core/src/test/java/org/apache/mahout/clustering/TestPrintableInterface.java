@@ -67,7 +67,7 @@ public class TestPrintableInterface extends TestCase {
     Vector m = new DenseVector(d);
     Printable model = new SampledNormalModel(m, 0.75);
     String format = model.asFormatString(null);
-    assertEquals("format", "nm{n=0 m=[1.100, 2.200, 3.300] sd=0.75}", format);
+    assertEquals("format", "snm{n=0 m=[1.100, 2.200, 3.300] sd=0.75}", format);
     String json = model.asJsonString();
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
