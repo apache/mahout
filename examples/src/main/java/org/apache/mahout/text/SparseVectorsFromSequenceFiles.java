@@ -29,7 +29,6 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.utils.vectors.common.PartialVectorMerger;
-import org.apache.mahout.utils.vectors.lucene.LuceneIterable;
 import org.apache.mahout.utils.vectors.text.DictionaryVectorizer;
 import org.apache.mahout.utils.vectors.text.DocumentProcessor;
 import org.apache.mahout.utils.vectors.tfidf.TFIDFConverter;
