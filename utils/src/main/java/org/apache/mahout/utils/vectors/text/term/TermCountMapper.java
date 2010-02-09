@@ -18,9 +18,7 @@
 package org.apache.mahout.utils.vectors.text.term;
 
 import java.io.IOException;
-import java.util.Map.Entry;
 
-import org.apache.commons.lang.mutable.MutableLong;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;

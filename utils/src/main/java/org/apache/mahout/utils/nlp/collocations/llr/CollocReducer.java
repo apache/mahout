@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
@@ -32,6 +33,12 @@ import org.apache.hadoop.mapred.Reporter;
  */
 public class CollocReducer extends MapReduceBase implements
     Reducer<Gram,Gram,Gram,Gram> {
+  public static enum Skipped {
+    LESS_THAN_MIN_SUPPORT;
+  };
+  
+  public static final String MIN_SUPPORT = "minSupport";
+  private int minSupport;
   
   /**
    * collocation finder: pass 1 reduce phase:
@@ -77,7 +84,17 @@ public class CollocReducer extends MapReduceBase implements
     key.setFrequency(subgramFrequency);
     
     for (Gram t : set.keySet()) {
+      if (t.getFrequency() < minSupport) {
+        reporter.incrCounter(Skipped.LESS_THAN_MIN_SUPPORT, 1);
+        continue;
+      }
       output.collect(t, key);
     }
+  }
+  
+  @Override
+  public void configure(JobConf job) {
+    super.configure(job);
+    this.minSupport = job.getInt(MIN_SUPPORT, 2);
   }
 }

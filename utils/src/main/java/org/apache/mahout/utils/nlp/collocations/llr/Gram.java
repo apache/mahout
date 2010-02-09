@@ -23,7 +23,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 
 /**
@@ -160,11 +160,9 @@ public class Gram implements WritableComparable<Gram> {
     
     if (head) position = Position.HEAD;
     else position = Position.TAIL;
-    
-    int fieldLen = in.readInt();
-    byte[] entry = new byte[fieldLen];
-    in.readFully(entry);
-    gram = Bytes.toString(entry);
+    Text data = new Text();
+    data.readFields(in);
+    gram = data.toString();
   }
   
   @Override
@@ -174,10 +172,8 @@ public class Gram implements WritableComparable<Gram> {
     if (position == Position.HEAD) out.writeBoolean(true);
     else out.writeBoolean(false);
     
-    byte[] data = Bytes.toBytes(gram);
-    out.writeInt(data.length);
-    out.write(data);
-    
+    Text data = new Text(gram);
+    data.write(out);
   }
   
   @Override

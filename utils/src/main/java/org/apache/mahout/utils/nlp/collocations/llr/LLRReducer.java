@@ -43,14 +43,17 @@ public class LLRReducer extends MapReduceBase implements
     EXTRA_HEAD,
     EXTRA_TAIL,
     MISSING_HEAD,
-    MISSING_TAIL;
+    MISSING_TAIL,
+    LESS_THAN_MIN_LLR;
   };
   
   private static final Logger log = LoggerFactory.getLogger(LLRReducer.class);
   
   public static final String NGRAM_TOTAL = "ngramTotal";
+  public static final String MIN_LLR = "minLLR";
   
-  long ngramTotal;
+  private long ngramTotal;
+  private float minLLRValue;
   private final LLCallback ll;
   
   public LLRReducer() {
@@ -72,6 +75,7 @@ public class LLRReducer extends MapReduceBase implements
   public void configure(JobConf job) {
     super.configure(job);
     this.ngramTotal = job.getLong(NGRAM_TOTAL, -1);
+    this.minLLRValue = job.getFloat(MIN_LLR, 0.0f);
     
     log.info("NGram Total is " + ngramTotal);
     
@@ -135,14 +139,18 @@ public class LLRReducer extends MapReduceBase implements
       return;
     }
     
-    int k11 = ngram.getFrequency(); /* a+b */
-    int k12 = gramFreq[0] - ngram.getFrequency(); /* a+!b */
-    int k21 = gramFreq[1] - ngram.getFrequency(); /* !b+a */
+    int k11 = ngram.getFrequency(); /* a&b */
+    int k12 = gramFreq[0] - ngram.getFrequency(); /* a&!b */
+    int k21 = gramFreq[1] - ngram.getFrequency(); /* !b&a */
     int k22 = (int) (ngramTotal - (gramFreq[0] + gramFreq[1] - ngram
-        .getFrequency())); /* !a+!b */
+        .getFrequency())); /* !a&!b */
     
     try {
       double llr = ll.logLikelihoodRatio(k11, k12, k21, k22);
+      if(llr < minLLRValue){
+        reporter.incrCounter(Skipped.LESS_THAN_MIN_LLR, 1);
+        return;
+      }
       DoubleWritable dd = new DoubleWritable(llr);
       Text t = new Text(ngram.getString());
       output.collect(dd, t);

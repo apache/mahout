@@ -74,23 +74,38 @@ public class CollocDriver {
         .withDescription("The Path write output to").withShortName("o")
         .create();
     
-    Option maxNGramSizeOpt = obuilder
-        .withLongName("maxNGramSize")
-        .withRequired(false)
-        .withArgument(
+    Option maxNGramSizeOpt = obuilder.withLongName("maxNGramSize")
+        .withRequired(false).withArgument(
           abuilder.withName("size").withMinimum(1).withMaximum(1).create())
         .withDescription(
-          "The maximum size of ngrams to create (2 = bigrams, 3 = trigrams, etc)")
+          "(Optional) The maximum size of ngrams to create"
+              + " (2 = bigrams, 3 = trigrams, etc) Default Value:2")
         .withShortName("n").create();
+    
+    Option minSupportOpt = obuilder.withLongName("minSupport").withArgument(
+      abuilder.withName("minSupport").withMinimum(1).withMaximum(1).create())
+        .withDescription("(Optional) Minimum Support. Default Value: 2")
+        .withShortName("s").create();
+    
+    Option minLLROpt = obuilder
+        .withLongName("minLLR")
+        .withRequired(false)
+        .withArgument(
+          abuilder.withName("minDF").withMinimum(1).withMaximum(1).create())
+        .withDescription(
+          "(Optional)The minimum Log Likelihood Ratio(Float)  Default is 0.00")
+        .withShortName("ml").create();
     
     Option overwriteOutput = obuilder.withLongName("overwrite").withRequired(
       false).withDescription("If set, overwrite the output directory")
         .withShortName("w").create();
     
     Option analyzerNameOpt = obuilder.withLongName("analyzerName")
-        .withRequired(false).withArgument(
+        .withRequired(false)
+        .withArgument(
           abuilder.withName("analyzerName").withMinimum(1).withMaximum(1)
-              .create()).withDescription(
+              .create())
+        .withDescription(
           "Class name of analyzer to use for tokenization").withShortName("a")
         .create();
     
@@ -99,7 +114,8 @@ public class CollocDriver {
     
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(
       outputOpt).withOption(maxNGramSizeOpt).withOption(overwriteOutput)
-        .withOption(analyzerNameOpt).withOption(helpOpt).create();
+        .withOption(analyzerNameOpt).withOption(minSupportOpt).withOption(
+          minLLROpt).withOption(helpOpt).create();
     
     try {
       Parser parser = new Parser();
@@ -134,11 +150,24 @@ public class CollocDriver {
         analyzerName = cmdLine.getValue(analyzerNameOpt).toString();
       }
       
+      int minSupport = 2;
+      if (cmdLine.hasOption(minSupportOpt)) {
+        minSupport = Integer.parseInt(cmdLine.getValue(minSupportOpt)
+            .toString());
+      }
+      
+      float minLLRValue = 1.0f;
+      if (cmdLine.hasOption(minLLROpt)) {
+        minLLRValue = Float
+            .parseFloat(cmdLine.getValue(minLLROpt).toString());
+      }
+      
       // parse input and extract collocations
-      long ngramCount = runPass1(input, output, maxNGramSize, analyzerName);
+      long ngramCount = runPass1(input, output, maxNGramSize, analyzerName,
+        minSupport);
       
       // tally collocations and perform LLR calculation
-      runPass2(ngramCount, output);
+      runPass2(ngramCount, output, minLLRValue);
       
     } catch (OptionException e) {
       log.error("Exception", e);
@@ -147,11 +176,14 @@ public class CollocDriver {
     
   }
   
-  /** pass1: generate collocations, ngrams */
+  /**
+   * pass1: generate collocations, ngrams
+   */
   public static long runPass1(String input,
                               String output,
                               int maxNGramSize,
-                              String analyzerClass) throws IOException {
+                              String analyzerClass,
+                              int minSupport) throws IOException {
     JobConf conf = new JobConf(CollocDriver.class);
     
     conf.setMapOutputKeyClass(Gram.class);
@@ -171,7 +203,8 @@ public class CollocDriver {
     
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     conf.setReducerClass(CollocReducer.class);
-    conf.set(NGramCollector.MAX_SHINGLE_SIZE, String.valueOf(maxNGramSize));
+    conf.setInt(NGramCollector.MAX_SHINGLE_SIZE, maxNGramSize);
+    conf.setInt(CollocReducer.MIN_SUPPORT, minSupport);
     
     if (analyzerClass != null) {
       conf.set(NGramCollector.ANALYZER_CLASS, analyzerClass);
@@ -181,8 +214,12 @@ public class CollocDriver {
     return job.getCounters().findCounter(NGRAM_TOTAL).getValue();
   }
   
-  /** pass2: perform the LLR calculation */
-  public static void runPass2(long nGramTotal, String output) throws IOException {
+  /**
+   * pass2: perform the LLR calculation
+   */
+  public static void runPass2(long nGramTotal,
+                              String output,
+                              float minLLRValue) throws IOException {
     JobConf conf = new JobConf(CollocDriver.class);
     conf.set(LLRReducer.NGRAM_TOTAL, String.valueOf(nGramTotal));
     
@@ -200,6 +237,8 @@ public class CollocDriver {
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setOutputFormat(TextOutputFormat.class);
     conf.setReducerClass(LLRReducer.class);
+    
+    conf.setFloat(LLRReducer.MIN_LLR, minLLRValue);
     JobClient.runJob(conf);
   }
 }
