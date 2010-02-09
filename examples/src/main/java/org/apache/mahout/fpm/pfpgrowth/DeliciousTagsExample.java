@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.fpm.pfpgrowth.example;
+package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.IOException;
 
@@ -30,7 +30,7 @@ import org.apache.commons.cli2.commandline.Parser;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.Parameters;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
-import org.apache.mahout.fpm.pfpgrowth.example.dataset.KeyBasedStringTupleGrouper;
+import org.apache.mahout.fpm.pfpgrowth.dataset.KeyBasedStringTupleGrouper;
 
 public final class DeliciousTagsExample {
   private DeliciousTagsExample() {

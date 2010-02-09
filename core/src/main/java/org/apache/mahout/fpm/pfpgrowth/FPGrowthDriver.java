@@ -51,11 +51,11 @@ import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class FPGrowthJob {
+public final class FPGrowthDriver {
 
-  private static final Logger log = LoggerFactory.getLogger(FPGrowthJob.class);
+  private static final Logger log = LoggerFactory.getLogger(FPGrowthDriver.class);
 
-  private FPGrowthJob() {
+  private FPGrowthDriver() {
   }
 
   /**

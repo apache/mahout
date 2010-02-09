@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.fpm.pfpgrowth.example.dataset;
+package org.apache.mahout.fpm.pfpgrowth.dataset;
 
 import java.io.IOException;
 import java.util.ArrayList;
