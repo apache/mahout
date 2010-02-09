@@ -124,7 +124,6 @@ public class Algebra extends PersistentObject {
   /** Returns sqrt(a^2 + b^2) without under/overflow. */
   private static BinaryFunction hypotFunction() {
     return new BinaryFunction() {
-      @Override
       public double apply(double a, double b) {
         return hypot(a, b);
       }
@@ -407,7 +406,6 @@ public class Algebra extends PersistentObject {
     }
 
     Swapper swapper = new Swapper() {
-      @Override
       public void swap(int a, int b) {
         A.viewRow(a).swap(A.viewRow(b));
       }
@@ -723,13 +721,11 @@ public class Algebra extends PersistentObject {
 
     // sort ascending by property name
     IntComparator comp = new IntComparator() {
-      @Override
       public int compare(int a, int b) {
         return Property.get(names, a).compareTo(Property.get(names, b));
       }
     };
     Swapper swapper = new Swapper() {
-      @Override
       public void swap(int a, int b) {
         String tmp = names.get(a);
         names.set(a, names.get(b));

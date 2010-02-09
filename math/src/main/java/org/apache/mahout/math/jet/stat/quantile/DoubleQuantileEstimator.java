@@ -33,7 +33,6 @@ abstract class DoubleQuantileEstimator extends PersistentObject
    *
    * @param value the value to add.
    */
-  @Override
   public void add(double value) {
     totalElementsFilled++;
     if (!sampleNextElement()) {
@@ -58,7 +57,6 @@ abstract class DoubleQuantileEstimator extends PersistentObject
    *
    * @param values the list of which all values shall be added.
    */
-  @Override
   public void addAllOf(DoubleArrayList values) {
     addAllOfFromTo(values, 0, values.size() - 1);
   }
@@ -71,7 +69,6 @@ abstract class DoubleQuantileEstimator extends PersistentObject
    * @param from   the index of the first element to be added (inclusive).
    * @param to     the index of the last element to be added (inclusive).
    */
-  @Override
   public void addAllOfFromTo(DoubleArrayList values, int from, int to) {
 
     double[] valuesToAdd = values.elements();
@@ -122,7 +119,6 @@ abstract class DoubleQuantileEstimator extends PersistentObject
    * Removes all elements from the receiver.  The receiver will be empty after this call returns, and its memory
    * requirements will be close to zero.
    */
-  @Override
   public void clear() {
     this.totalElementsFilled = 0;
     this.currentBufferToFill = null;
@@ -175,7 +171,6 @@ abstract class DoubleQuantileEstimator extends PersistentObject
    *                  continues.
    * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise.
    */
-  @Override
   public boolean forEach(DoubleProcedure procedure) {
     return this.bufferSet.forEach(procedure);
   }
@@ -184,7 +179,6 @@ abstract class DoubleQuantileEstimator extends PersistentObject
    * Returns the number of elements currently needed to store all contained elements. This number usually differs from
    * the results of method <tt>size()</tt>, according to the underlying datastructure.
    */
-  @Override
   public long memory() {
     return bufferSet.memory();
   }
@@ -199,7 +193,6 @@ abstract class DoubleQuantileEstimator extends PersistentObject
    * @param element the element to search for.
    * @return the percentage <tt>p</tt> of elements <tt>&lt;= element</tt> (<tt>0.0 &lt;= p &lt;=1.0)</tt>.
    */
-  @Override
   public double phi(double element) {
     return bufferSet.phi(element);
   }
@@ -219,7 +212,6 @@ abstract class DoubleQuantileEstimator extends PersistentObject
    *             <tt>phis</tt> must be sorted ascending.
    * @return the approximate quantile elements.
    */
-  @Override
   public DoubleArrayList quantileElements(DoubleArrayList phis) {
 
     phis = preProcessPhis(phis);
@@ -254,7 +246,6 @@ abstract class DoubleQuantileEstimator extends PersistentObject
    * Returns the number of elements currently contained in the receiver (identical to the number of values added so
    * far).
    */
-  @Override
   public long size() {
     return totalElementsFilled;
   }

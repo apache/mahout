@@ -55,7 +55,6 @@ public class SparseMatrix extends AbstractMatrix {
     this.rows = new HashMap<Integer, Vector>();
   }
 
-  @Override
   public int[] size() {
     return cardinality;
   }
@@ -68,7 +67,6 @@ public class SparseMatrix extends AbstractMatrix {
     return clone;
   }
 
-  @Override
   public double getQuick(int row, int column) {
     Vector r = rows.get(row);
     if (r == null) {
@@ -78,17 +76,14 @@ public class SparseMatrix extends AbstractMatrix {
     }
   }
 
-  @Override
   public Matrix like() {
     return new SparseMatrix(cardinality);
   }
 
-  @Override
   public Matrix like(int rows, int columns) {
     return new SparseMatrix(new int[]{rows, columns});
   }
 
-  @Override
   public void setQuick(int row, int column, double value) {
     Vector r = rows.get(row);
     if (r == null) {
@@ -98,7 +93,6 @@ public class SparseMatrix extends AbstractMatrix {
     r.setQuick(column, value);
   }
 
-  @Override
   public int[] getNumNondefaultElements() {
     int[] result = new int[2];
     result[ROW] = rows.size();
@@ -109,7 +103,6 @@ public class SparseMatrix extends AbstractMatrix {
     return result;
   }
 
-  @Override
   public Matrix viewPart(int[] offset, int[] size) {
     if (size[ROW] > cardinality[ROW] || size[COL] > cardinality[COL]) {
       throw new CardinalityException();
@@ -121,7 +114,6 @@ public class SparseMatrix extends AbstractMatrix {
     return new MatrixView(this, offset, size);
   }
 
-  @Override
   public Matrix assignColumn(int column, Vector other) {
     if (other.size() != cardinality[ROW] || column >= cardinality[COL]) {
       throw new CardinalityException();
@@ -140,7 +132,6 @@ public class SparseMatrix extends AbstractMatrix {
     return this;
   }
 
-  @Override
   public Matrix assignRow(int row, Vector other) {
     if (row >= cardinality[ROW] || other.size() != cardinality[COL]) {
       throw new CardinalityException();
@@ -149,7 +140,6 @@ public class SparseMatrix extends AbstractMatrix {
     return this;
   }
 
-  @Override
   public Vector getColumn(int column) {
     if (column < 0 || column >= cardinality[COL]) {
       throw new IndexException();
@@ -161,7 +151,6 @@ public class SparseMatrix extends AbstractMatrix {
     return new DenseVector(d);
   }
 
-  @Override
   public Vector getRow(int row) {
     if (row < 0 || row >= cardinality[ROW]) {
       throw new IndexException();

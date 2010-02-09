@@ -340,7 +340,7 @@ public class Partitioning {
    *
    *                     <p> Tip: Normally you will have <tt>splitIndexes.length == s.length</tt> as well as
    *                     <tt>from==0, to==g.length-1</tt> and <tt>splitFrom==0, splitTo==s.length-1</tt>.
-   * @see Sorting#binarySearchFromTo(int,int,IntComparator)
+   * @see Sorting#binarySearchFromTo(Object[], Object, int, int, Comparator)
    */
   public static void genericPartition(int from, int to, int splitFrom, int splitTo, int[] splitIndexes,
                                       IntComparator comp, IntComparator comp2, IntComparator comp3, Swapper swapper) {
@@ -615,7 +615,6 @@ public class Partitioning {
    *                     == splitters.length</tt> as well as <tt>from==0, to==list.length-1</tt> and <tt>splitFrom==0,
    *                     splitTo==splitters.length-1</tt>.
    * @see org.apache.mahout.math.Arrays
-   * @see org.apache.mahout.math.GenericSorting
    * @see java.util.Arrays
    */
   public static void partition(int[] list, int from, int to, int[] splitters, int splitFrom, int splitTo,

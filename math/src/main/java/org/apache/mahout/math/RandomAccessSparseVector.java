@@ -95,23 +95,19 @@ public class RandomAccessSparseVector extends AbstractVector {
     return this;
   }
 
-  @Override
   public double getQuick(int index) {
     return values.get(index);
   }
 
-  @Override
   public void setQuick(int index, double value) {
     lengthSquared = -1.0;
     values.put(index, value);
   }
 
-  @Override
   public int getNumNondefaultElements() {
     return values.size();
   }
 
-  @Override
   public RandomAccessSparseVector like() {
     int numValues = 256;
     if (values != null) {
@@ -120,7 +116,6 @@ public class RandomAccessSparseVector extends AbstractVector {
     return new RandomAccessSparseVector(size(), numValues);
   }
 
-  @Override
   public Vector like(int newCardinality) {
     int numValues = 256;
     if (values != null) {
@@ -136,12 +131,10 @@ public class RandomAccessSparseVector extends AbstractVector {
    * @return an {@link NonZeroIterator} over the Elements.
    * @see #getElement(int)
    */
-  @Override
   public java.util.Iterator<Vector.Element> iterateNonZero() {
     return new NonZeroIterator(false);
   }
   
-  @Override
   public Iterator<Vector.Element> iterateAll() {
     return new AllIterator();
   }
@@ -184,12 +177,10 @@ public class RandomAccessSparseVector extends AbstractVector {
     private int offset = 0;
     private final Element element = new Element(0);
 
-    @Override
     public boolean hasNext() {
       return offset < size();
     }
 
-    @Override
     public Vector.Element next() {
       if (offset >= size()) {
         throw new NoSuchElementException();
@@ -198,7 +189,6 @@ public class RandomAccessSparseVector extends AbstractVector {
       return element;
     }
 
-    @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
@@ -217,12 +207,10 @@ public class RandomAccessSparseVector extends AbstractVector {
       }      
     }
 
-    @Override
     public boolean hasNext() {
       return offset < intArrList.size();
     }
 
-    @Override
     public Element next() {
       if (offset < intArrList.size()) {
         element.ind = intArrList.get(offset++);
@@ -231,13 +219,11 @@ public class RandomAccessSparseVector extends AbstractVector {
       throw new NoSuchElementException();
     }
 
-    @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
   }
 
-  @Override
   public Vector.Element getElement(int index) {
     return new Element(index);
   }
@@ -249,17 +235,14 @@ public class RandomAccessSparseVector extends AbstractVector {
       this.ind = ind;
     }
 
-    @Override
     public double get() {
       return values.get(ind);
     }
 
-    @Override
     public int index() {
       return ind;
     }
 
-    @Override
     public void set(double value) {
       lengthSquared = -1.0;
       values.put(ind, value);
@@ -276,7 +259,6 @@ public class RandomAccessSparseVector extends AbstractVector {
       this.skipSet = skipSet;
     }
 
-    @Override
     public boolean apply(int key, double value) {
       if(skipSet.contains(key)) {
         // returning true is ok, yes?  It is ignored.
@@ -320,7 +302,6 @@ public class RandomAccessSparseVector extends AbstractVector {
       this.v = v;
     }
 
-    @Override
     public boolean apply(int key, double value) {
       v.set(key, value + v.get(key));
       return true;

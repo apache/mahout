@@ -21,7 +21,6 @@ import org.apache.mahout.math.Vector;
 
 public class SimpleEigenVerifier implements SingularVectorVerifier {
 
-  @Override
   public EigenStatus verify(Matrix eigenMatrix, Vector vector) {
     Vector resultantVector = eigenMatrix.timesSquared(vector);
     double newNorm = resultantVector.norm(2);

@@ -128,7 +128,6 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
 
       forEachNonZero(
           new IntIntDoubleFunction() {
-            @Override
             public double apply(int i, int j, double value) {
               return function.apply(value);
             }
@@ -171,7 +170,6 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
       assign(0);
       source.forEachNonZero(
           new IntIntDoubleFunction() {
-            @Override
             public double apply(int i, int j, double value) {
               setQuick(i, j, value);
               return value;
@@ -196,7 +194,6 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
       } // nothing to do
       y.forEachNonZero(
           new IntIntDoubleFunction() {
-            @Override
             public double apply(int i, int j, double value) {
               setQuick(i, j, getQuick(i, j) + alpha * value);
               return value;
@@ -209,7 +206,6 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
     if (function == Functions.mult) { // x[i] = x[i] * y[i]
       forEachNonZero(
           new IntIntDoubleFunction() {
-            @Override
             public double apply(int i, int j, double value) {
               setQuick(i, j, getQuick(i, j) * y.getQuick(i, j));
               return value;
@@ -222,7 +218,6 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
     if (function == Functions.div) { // x[i] = x[i] / y[i]
       forEachNonZero(
           new IntIntDoubleFunction() {
-            @Override
             public double apply(int i, int j, double value) {
               setQuick(i, j, getQuick(i, j) / y.getQuick(i, j));
               return value;
@@ -443,7 +438,6 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
 
     forEachNonZero(
         new IntIntDoubleFunction() {
-          @Override
           public double apply(int i, int j, double value) {
             if (transposeA) {
               int tmp = i;
@@ -511,7 +505,6 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
 
     forEachNonZero(
         new IntIntDoubleFunction() {
-          @Override
           public double apply(int i, int j, double value) {
             fun.setMultiplicator(value * alpha);
             if (!transposeA) {

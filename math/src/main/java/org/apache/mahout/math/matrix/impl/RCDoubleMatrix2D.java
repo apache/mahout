@@ -145,7 +145,6 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
       assign(0);
       source.forEachNonZero(
           new IntIntDoubleFunction() {
-            @Override
             public double apply(int i, int j, double value) {
               setQuick(i, j, value);
               return value;
@@ -196,7 +195,6 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
       } // nothing to do
       y.forEachNonZero(
           new IntIntDoubleFunction() {
-            @Override
             public double apply(int i, int j, double value) {
               setQuick(i, j, getQuick(i, j) + alpha * value);
               return value;

@@ -35,7 +35,6 @@ public class FormerFactory {
    */
   public Former create(String format) {
     return new Former() {
-      @Override
       public String form(double value) {
         return String.valueOf(value);
       }

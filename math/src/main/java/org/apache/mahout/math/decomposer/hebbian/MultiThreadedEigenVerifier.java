@@ -64,7 +64,6 @@ public class MultiThreadedEigenVerifier extends SimpleEigenVerifier {
       this.vector = vector;
     }
 
-    @Override
     public void run() {
       EigenStatus status = innerVerify(eigenMatrix, vector);
       synchronized (MultiThreadedEigenVerifier.this.status) {

@@ -1050,13 +1050,11 @@ public class Property extends PersistentObject {
 
     // sort ascending by property name
     IntComparator comp = new IntComparator() {
-      @Override
       public int compare(int a, int b) {
         return get(names, a).compareTo(get(names, b));
       }
     };
     Swapper swapper = new Swapper() {
-      @Override
       public void swap(int a, int b) {
         String tmp = names.get(a);
         names.set(a, names.get(b));

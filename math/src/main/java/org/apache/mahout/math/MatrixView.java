@@ -45,7 +45,6 @@ public class MatrixView extends AbstractMatrix {
     this.cardinality = cardinality;
   }
 
-  @Override
   public int[] size() {
     return cardinality;
   }
@@ -59,33 +58,27 @@ public class MatrixView extends AbstractMatrix {
     return clone;
   }
 
-  @Override
   public double getQuick(int row, int column) {
     return matrix.getQuick(offset[ROW] + row, offset[COL] + column);
   }
 
-  @Override
   public Matrix like() {
     return matrix.like(cardinality[ROW], cardinality[COL]);
   }
 
-  @Override
   public Matrix like(int rows, int columns) {
 
     return matrix.like(rows, columns);
   }
 
-  @Override
   public void setQuick(int row, int column, double value) {
     matrix.setQuick(offset[ROW] + row, offset[COL] + column, value);
   }
 
-  @Override
   public int[] getNumNondefaultElements() {
     return cardinality;
   }
 
-  @Override
   public Matrix viewPart(int[] offset, int[] size) {
     if (size[ROW] > cardinality[ROW] || size[COL] > cardinality[COL]) {
       throw new CardinalityException();
@@ -100,7 +93,6 @@ public class MatrixView extends AbstractMatrix {
     return new MatrixView(matrix, origin, size);
   }
 
-  @Override
   public Matrix assignColumn(int column, Vector other) {
     if (cardinality[ROW] != other.size()) {
       throw new CardinalityException();
@@ -112,7 +104,6 @@ public class MatrixView extends AbstractMatrix {
     return this;
   }
 
-  @Override
   public Matrix assignRow(int row, Vector other) {
     if (cardinality[COL] != other.size()) {
       throw new CardinalityException();
@@ -124,7 +115,6 @@ public class MatrixView extends AbstractMatrix {
     return this;
   }
 
-  @Override
   public Vector getColumn(int column) {
     if (column < 0 || column >= cardinality[COL]) {
       throw new IndexException();
@@ -133,7 +123,6 @@ public class MatrixView extends AbstractMatrix {
         cardinality[ROW]);
   }
 
-  @Override
   public Vector getRow(int row) {
     if (row < 0 || row >= cardinality[ROW]) {
       throw new IndexException();

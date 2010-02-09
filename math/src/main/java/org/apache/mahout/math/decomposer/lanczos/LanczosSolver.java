@@ -86,7 +86,6 @@ public class LanczosSolver {
       this.d = d;
     }
 
-    @Override
     public double apply(double arg1) {
       return arg1 * d;
     }

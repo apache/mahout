@@ -32,7 +32,7 @@ public abstract class Abstract${keyTypeCap}Set extends AbstractSet {
   public boolean contains(final ${keyType} key) {
     return !forEachKey(
         new ${keyTypeCap}Procedure() {
-          @Override
+
           public boolean apply(${keyType} iterKey) {
             return (key != iterKey);
           }
@@ -65,7 +65,7 @@ public abstract class Abstract${keyTypeCap}Set extends AbstractSet {
     return
         forEachKey(
             new ${keyTypeCap}Procedure() {
-              @Override
+
               public boolean apply(${keyType} key) {
                 return other.contains(key);
               }
@@ -111,7 +111,7 @@ public abstract class Abstract${keyTypeCap}Set extends AbstractSet {
     list.clear();
     forEachKey(
         new ${keyTypeCap}Procedure() {
-          @Override
+
           public boolean apply(${keyType} key) {
             list.add(key);
             return true;
@@ -124,7 +124,6 @@ public abstract class Abstract${keyTypeCap}Set extends AbstractSet {
    * existing.
    *
    * @param key   the key the value shall be associated with.
-   * @param value the value to be associated.
    * @return <tt>true</tt> if the receiver did not already contain such a key; <tt>false</tt> if the receiver did
    *         already contain such a key - the new value has now replaced the formerly associated value.
    */

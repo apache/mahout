@@ -52,7 +52,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
   public boolean containsKey(final T key) {
     return !forEachKey(
         new ObjectProcedure<T>() {
-          @Override
+
           public boolean apply(T iterKey) {
             return (key != iterKey);
           }
@@ -68,7 +68,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
   public boolean containsValue(final ${valueType} value) {
     return !forEachPair(
         new Object${valueTypeCap}Procedure<T>() {
-          @Override
+
           public boolean apply(T iterKey, ${valueType} iterValue) {
             return (value != iterValue);
           }
@@ -132,7 +132,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
     return
         forEachPair(
             new Object${valueTypeCap}Procedure<T>() {
-              @Override
+
               public boolean apply(T key, ${valueType} value) {
                 return other.containsKey(key) && other.get(key) == value;
               }
@@ -141,7 +141,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
             &&
             other.forEachPair(
                 new Object${valueTypeCap}Procedure<T>() {
-                  @Override
+
                   public boolean apply(T key, ${valueType} value) {
                     return containsKey(key) && get(key) == value;
                   }
@@ -173,7 +173,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
   public boolean forEachPair(final Object${valueTypeCap}Procedure<T> procedure) {
     return forEachKey(
         new ObjectProcedure<T>() {
-          @Override
+
           public boolean apply(T key) {
             return procedure.apply(key, get(key));
           }
@@ -216,7 +216,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
     list.clear();
     forEachKey(
         new ObjectProcedure<T>() {
-          @Override
+
           public boolean apply(T key) {
             list.add(key);
             return true;
@@ -263,7 +263,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
 
     forEachPair(
         new Object${valueTypeCap}Procedure<T>() {
-          @Override
+
           public boolean apply(T key, ${valueType} value) {
             if (condition.apply(key, value)) {
               keyList.add(key);
@@ -317,7 +317,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
 
     final ${valueType}[] v = valueList.elements();
     Swapper swapper = new Swapper() {
-      @Override
+
       public void swap(int a, int b) {
         ${valueType} t1 = v[a];
         v[a] = v[b];
@@ -329,7 +329,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
     };
 
     IntComparator comp = new IntComparator() {
-      @Override
+
       public int compare(int a, int b) {
         return v[a] < v[b] ? -1 : v[a] > v[b] ? 1 : 0;
       }
@@ -429,7 +429,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
     list.clear();
     forEachKey(
         new ObjectProcedure<T>() {
-          @Override
+
           public boolean apply(T key) {
             list.add(get(key));
             return true;
@@ -447,7 +447,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
   public void assign(final ${valueTypeCap}Function function) {
     copy().forEachPair(
         new  Object${valueTypeCap}Procedure<T>() {
-          @Override
+
           public boolean apply(T key, ${valueType} value) {
             put(key, function.apply(value));
             return true;
@@ -465,7 +465,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
     clear();
     other.forEachPair(
         new Object${valueTypeCap}Procedure<T>() {
-          @Override
+          
           public boolean apply(T key, ${valueType} value) {
             put(key, value);
             return true;

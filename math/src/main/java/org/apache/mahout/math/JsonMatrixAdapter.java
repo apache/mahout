@@ -39,7 +39,6 @@ public class JsonMatrixAdapter implements JsonSerializer<Matrix>,
   public static final String CLASS = "class";
   public static final String MATRIX = "matrix";
 
-  @Override
   public JsonElement serialize(Matrix src, Type typeOfSrc,
                                JsonSerializationContext context) {
     Type vectorType = new TypeToken<Vector>() {
@@ -56,7 +55,6 @@ public class JsonMatrixAdapter implements JsonSerializer<Matrix>,
     return obj;
   }
 
-  @Override
   public Matrix deserialize(JsonElement json, Type typeOfT,
                             JsonDeserializationContext context) throws JsonParseException {
     Type vectorType = new TypeToken<Vector>() {

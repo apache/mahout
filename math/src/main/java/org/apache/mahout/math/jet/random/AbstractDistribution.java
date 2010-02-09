@@ -44,7 +44,6 @@ public abstract class AbstractDistribution extends PersistentObject
    * Equivalent to <tt>nextDouble()</tt>. This has the effect that distributions can now be used as function objects,
    * returning a random number upon function evaluation.
    */
-  @Override
   public double apply(double dummy) {
     return nextDouble();
   }
@@ -53,7 +52,6 @@ public abstract class AbstractDistribution extends PersistentObject
    * Equivalent to <tt>nextInt()</tt>. This has the effect that distributions can now be used as function objects,
    * returning a random number upon function evaluation.
    */
-  @Override
   public int apply(int dummy) {
     return nextInt();
   }

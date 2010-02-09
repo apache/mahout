@@ -58,27 +58,22 @@ public class VectorView extends AbstractVector {
     return clone;
   }
 
-  @Override
   public double getQuick(int index) {
     return vector.getQuick(offset + index);
   }
 
-  @Override
   public Vector like() {
     return vector.like();
   }
 
-  @Override
   public Vector like(int cardinality) {
     return vector.like(cardinality);
   }
 
-  @Override
   public void setQuick(int index, double value) {
     vector.setQuick(offset + index, value);
   }
 
-  @Override
   public int getNumNondefaultElements() {
     return cardinality;
   }
@@ -99,12 +94,10 @@ public class VectorView extends AbstractVector {
     return index >= offset && index < offset + cardinality;
   }
 
-  @Override
   public Iterator<Vector.Element> iterateNonZero() {
     return new NonZeroIterator();
   }
 
-  @Override
   public Iterator<Vector.Element> iterateAll() {
     return new AllIterator();
   }
@@ -126,17 +119,14 @@ public class VectorView extends AbstractVector {
         if (isInView(el.index()) && el.get() != 0) {
           final Vector.Element decorated = vector.getElement(el.index());
           el = new Vector.Element() {
-            @Override
             public double get() {
               return decorated.get();
             }
 
-            @Override
             public int index() {
               return decorated.index() - offset;
             }
 
-            @Override
             public void set(double value) {
               decorated.set(value);
             }
@@ -147,7 +137,6 @@ public class VectorView extends AbstractVector {
       el = null; // No element was found
     }
 
-    @Override
     public Vector.Element next() {
       if (!hasNext()) {
         throw new NoSuchElementException();
@@ -157,13 +146,11 @@ public class VectorView extends AbstractVector {
       return buffer;
     }
 
-    @Override
     public boolean hasNext() {
       return el != null;
     }
 
     /** @throws UnsupportedOperationException all the time. method not implemented. */
-    @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
@@ -186,17 +173,14 @@ public class VectorView extends AbstractVector {
         if (isInView(el.index())) {
           final Vector.Element decorated = vector.getElement(el.index());
           el = new Vector.Element() {
-            @Override
             public double get() {
               return decorated.get();
             }
 
-            @Override
             public int index() {
               return decorated.index() - offset;
             }
 
-            @Override
             public void set(double value) {
               decorated.set(value);
             }
@@ -207,7 +191,6 @@ public class VectorView extends AbstractVector {
       el = null; // No element was found
     }
 
-    @Override
     public Vector.Element next() {
       if (!hasNext()) {
         throw new NoSuchElementException();
@@ -217,13 +200,11 @@ public class VectorView extends AbstractVector {
       return buffer;
     }
 
-    @Override
     public boolean hasNext() {
       return el != null;
     }
 
     /** @throws UnsupportedOperationException all the time. method not implemented. */
-    @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
@@ -242,7 +223,6 @@ public class VectorView extends AbstractVector {
     return result;
   }
 
-  @Override
   public Vector.Element getElement(int index) {
     return new Element(index);
   }
@@ -255,17 +235,14 @@ public class VectorView extends AbstractVector {
       this.ind = ind;
     }
 
-    @Override
     public double get() {
       return getQuick(ind);
     }
 
-    @Override
     public int index() {
       return ind;
     }
 
-    @Override
     public void set(double value) {
       setQuick(ind, value);
     }

@@ -36,28 +36,23 @@ public abstract class AbstractMatrix implements Matrix {
 
   protected Map<String, Integer> rowLabelBindings;
 
-  @Override
   public Iterator<MatrixSlice> iterator() {
     return iterateAll();
   }
 
-  @Override
   public Iterator<MatrixSlice> iterateAll() {
     return new Iterator<MatrixSlice>() {
       int slice = 0;
 
-      @Override
       public boolean hasNext() {
         return slice < numSlices();
       }
 
-      @Override
       public MatrixSlice next() {
         int i = slice++;
         return new MatrixSlice(slice(i), i);
       }
 
-      @Override
       public void remove() {
         throw new UnsupportedOperationException("remove() not supported for Matrix iterator");
       }
@@ -81,7 +76,6 @@ public abstract class AbstractMatrix implements Matrix {
     return numRows();
   }
 
-  @Override
   public double get(String rowLabel, String columnLabel) throws IndexException,
       UnboundLabelException {
     if (columnLabelBindings == null || rowLabelBindings == null) {
@@ -96,17 +90,14 @@ public abstract class AbstractMatrix implements Matrix {
     return get(row, col);
   }
 
-  @Override
   public Map<String, Integer> getColumnLabelBindings() {
     return columnLabelBindings;
   }
 
-  @Override
   public Map<String, Integer> getRowLabelBindings() {
     return rowLabelBindings;
   }
 
-  @Override
   public void set(String rowLabel, double[] rowData) {
     if (columnLabelBindings == null) {
       throw new UnboundLabelException();
@@ -118,7 +109,6 @@ public abstract class AbstractMatrix implements Matrix {
     set(row, rowData);
   }
 
-  @Override
   public void set(String rowLabel, int row, double[] rowData) {
     if (rowLabelBindings == null) {
       rowLabelBindings = new HashMap<String, Integer>();
@@ -127,7 +117,6 @@ public abstract class AbstractMatrix implements Matrix {
     set(row, rowData);
   }
 
-  @Override
   public void set(String rowLabel, String columnLabel, double value)
       throws IndexException, UnboundLabelException {
     if (columnLabelBindings == null || rowLabelBindings == null) {
@@ -141,7 +130,6 @@ public abstract class AbstractMatrix implements Matrix {
     set(row, col, value);
   }
 
-  @Override
   public void set(String rowLabel, String columnLabel, int row, int column,
                   double value) throws IndexException, UnboundLabelException {
     if (rowLabelBindings == null) {
@@ -156,12 +144,10 @@ public abstract class AbstractMatrix implements Matrix {
     set(row, column, value);
   }
 
-  @Override
   public void setColumnLabelBindings(Map<String, Integer> bindings) {
     columnLabelBindings = bindings;
   }
 
-  @Override
   public void setRowLabelBindings(Map<String, Integer> bindings) {
     rowLabelBindings = bindings;
   }
@@ -172,12 +158,10 @@ public abstract class AbstractMatrix implements Matrix {
   // index into int[2] for row value
   public static final int ROW = 0;
 
-  @Override
   public int numRows() {
     return size()[ROW];
   }
 
-  @Override
   public int numCols() {
     return size()[COL];
   }
@@ -194,7 +178,6 @@ public abstract class AbstractMatrix implements Matrix {
     return gson.fromJson(formatString, matrixType);
   }
 
-  @Override
   public String asFormatString() {
     Type vectorType = new TypeToken<Vector>() {
     }.getType();
@@ -207,7 +190,6 @@ public abstract class AbstractMatrix implements Matrix {
     return gson.toJson(this, matrixType);
   }
 
-  @Override
   public Matrix assign(double value) {
     int[] c = size();
     for (int row = 0; row < c[ROW]; row++) {
@@ -218,7 +200,6 @@ public abstract class AbstractMatrix implements Matrix {
     return this;
   }
 
-  @Override
   public Matrix assign(double[][] values) {
     int[] c = size();
     if (c[ROW] != values.length) {
@@ -236,7 +217,6 @@ public abstract class AbstractMatrix implements Matrix {
     return this;
   }
 
-  @Override
   public Matrix assign(Matrix other, BinaryFunction function) {
     int[] c = size();
     int[] o = other.size();
@@ -252,7 +232,6 @@ public abstract class AbstractMatrix implements Matrix {
     return this;
   }
 
-  @Override
   public Matrix assign(Matrix other) {
     int[] c = size();
     int[] o = other.size();
@@ -267,7 +246,6 @@ public abstract class AbstractMatrix implements Matrix {
     return this;
   }
 
-  @Override
   public Matrix assign(UnaryFunction function) {
     int[] c = size();
     for (int row = 0; row < c[ROW]; row++) {
@@ -278,7 +256,6 @@ public abstract class AbstractMatrix implements Matrix {
     return this;
   }
 
-  @Override
   public double determinant() {
     int[] card = size();
     int rowSize = card[ROW];
@@ -332,7 +309,6 @@ public abstract class AbstractMatrix implements Matrix {
     return clone;
   }
 
-  @Override
   public Matrix divide(double x) {
     Matrix result = clone();
     int[] c = size();
@@ -344,7 +320,6 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
-  @Override
   public double get(int row, int column) {
     int[] c = size();
     if (row < 0 || column < 0 || row >= c[ROW] || column >= c[COL]) {
@@ -353,7 +328,6 @@ public abstract class AbstractMatrix implements Matrix {
     return getQuick(row, column);
   }
 
-  @Override
   public Matrix minus(Matrix other) {
     int[] c = size();
     int[] o = other.size();
@@ -370,7 +344,6 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
-  @Override
   public Matrix plus(double x) {
     Matrix result = clone();
     int[] c = size();
@@ -382,7 +355,6 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
-  @Override
   public Matrix plus(Matrix other) {
     int[] c = size();
     int[] o = other.size();
@@ -399,7 +371,6 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
-  @Override
   public void set(int row, int column, double value) {
     int[] c = size();
     if (row < 0 || column < 0 || row >= c[ROW] || column >= c[COL]) {
@@ -408,7 +379,6 @@ public abstract class AbstractMatrix implements Matrix {
     setQuick(row, column, value);
   }
 
-  @Override
   public void set(int row, double[] data) {
     int[] c = size();
     if (c[COL] < data.length) {
@@ -423,7 +393,6 @@ public abstract class AbstractMatrix implements Matrix {
     }
   }
 
-  @Override
   public Matrix times(double x) {
     Matrix result = clone();
     int[] c = size();
@@ -435,7 +404,6 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
-  @Override
   public Matrix times(Matrix other) {
     int[] c = size();
     int[] o = other.size();
@@ -455,7 +423,6 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
-  @Override
   public Vector times(Vector v) {
     int[] c = size();
     if (c[COL] != v.size()) {
@@ -468,7 +435,6 @@ public abstract class AbstractMatrix implements Matrix {
     return w;
   }
 
-  @Override
   public Vector timesSquared(Vector v) {
     int[] c = size();
     if (c[COL] != v.size()) {
@@ -485,7 +451,6 @@ public abstract class AbstractMatrix implements Matrix {
     return w;
   }
 
-  @Override
   public Matrix transpose() {
     int[] card = size();
     Matrix result = like(card[COL], card[ROW]);
@@ -497,7 +462,6 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
-  @Override
   public double zSum() {
     double result = 0;
     int[] c = size();
@@ -540,21 +504,17 @@ public abstract class AbstractMatrix implements Matrix {
       return matrix.like(rows, columns);
     }
 
-    @Override
     public Iterator<Element> iterateAll() {
       return new Iterator<Element>() {
         int i = 0;
-        @Override
         public boolean hasNext() {
           return i < size;
         }
 
-        @Override
         public Element next() {
           return getElement(i++);
         }
 
-        @Override
         public void remove() {
           throw new UnsupportedOperationException("Element removal not supported");
         }
@@ -566,38 +526,31 @@ public abstract class AbstractMatrix implements Matrix {
      * many of them.
      * @return an iterator (currently dense).
      */
-    @Override
     public Iterator<Element> iterateNonZero() {
       return iterateAll();
     }
 
-    @Override
     public Element getElement(final int i) {
       return new Element() {
-        @Override
         public double get() {
           return getQuick(i);
         }
 
-        @Override
         public int index() {
           return i;
         }
 
-        @Override
         public void set(double value) {
           setQuick(i, value);
         }
       };
     }
 
-    @Override
     public double getQuick(int index) {
       Vector v = rowToColumn ? matrix.getRow(index) : matrix.getColumn(index);
       return v == null ? 0 : v.getQuick(transposeOffset);
     }
 
-    @Override
     public void setQuick(int index, double value) {
       Vector v = rowToColumn ? matrix.getRow(index) : matrix.getColumn(index);
       if(v == null) {
@@ -612,12 +565,10 @@ public abstract class AbstractMatrix implements Matrix {
       return new DenseVector(cardinality);
     }
 
-    @Override
     public Vector like() {
       return new DenseVector(size);
     }
 
-    @Override
     public Vector like(int cardinality) {
       return new DenseVector(cardinality);
     }
@@ -627,7 +578,6 @@ public abstract class AbstractMatrix implements Matrix {
      *
      * @return the number of nonzero entries
      */
-    @Override
     public int getNumNondefaultElements() {
       return size;
     }

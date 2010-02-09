@@ -96,7 +96,6 @@ public class Sorting extends PersistentObject {
     }
 
     IntComparator comp = new IntComparator() {
-      @Override
       public int compare(int a, int b) {
         double av = vector.getQuick(a);
         double bv = vector.getQuick(b);
@@ -139,7 +138,6 @@ public class Sorting extends PersistentObject {
     }
 
     IntComparator comp = new IntComparator() {
-      @Override
       public int compare(int a, int b) {
         return c.compare(vector.getQuick(a), vector.getQuick(b));
       }
@@ -208,7 +206,6 @@ public class Sorting extends PersistentObject {
 
     // compares two aggregates at a time
     IntComparator comp = new IntComparator() {
-      @Override
       public int compare(int x, int y) {
         double a = aggregates[x];
         double b = aggregates[y];
@@ -220,7 +217,6 @@ public class Sorting extends PersistentObject {
     };
     // swaps aggregates and reorders indexes
     Swapper swapper = new Swapper() {
-      @Override
       public void swap(int x, int y) {
         int t1 = indexes[x];
         indexes[x] = indexes[y];
@@ -267,7 +263,6 @@ public class Sorting extends PersistentObject {
 
     final DoubleMatrix1D col = matrix.viewColumn(column);
     IntComparator comp = new IntComparator() {
-      @Override
       public int compare(int a, int b) {
         double av = col.getQuick(a);
         double bv = col.getQuick(b);
@@ -319,7 +314,6 @@ public class Sorting extends PersistentObject {
     }
 
     IntComparator comp = new IntComparator() {
-      @Override
       public int compare(int a, int b) {
         //return c.compare(matrix.viewRow(a), matrix.viewRow(b));
         return c.compare(views[a], views[b]);
@@ -445,7 +439,6 @@ public class Sorting extends PersistentObject {
 
     final DoubleMatrix1D sliceView = matrix.viewRow(row).viewColumn(column);
     IntComparator comp = new IntComparator() {
-      @Override
       public int compare(int a, int b) {
         double av = sliceView.getQuick(a);
         double bv = sliceView.getQuick(b);
@@ -497,7 +490,6 @@ public class Sorting extends PersistentObject {
     }
 
     IntComparator comp = new IntComparator() {
-      @Override
       public int compare(int a, int b) {
         //return c.compare(matrix.viewSlice(a), matrix.viewSlice(b));
         return c.compare(views[a], views[b]);

@@ -8,8 +8,6 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.function;
 
-import org.apache.mahout.math.function.UnaryFunction;
-
 /**
  * Only for performance tuning of compute intensive linear algebraic computations.
  * Constructs functions that return one of
@@ -30,7 +28,6 @@ public final class Mult implements UnaryFunction {
   }
 
   /** Returns the result of the function evaluation. */
-  @Override
   public double apply(double a) {
     return a * multiplicator;
   }

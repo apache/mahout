@@ -68,11 +68,9 @@ public class SmpBlas implements Blas {
     }
   }
 
-  @Override
   public void assign(DoubleMatrix2D A, final UnaryFunction function) {
     run(A, false,
         new Matrix2DMatrix2DFunction() {
-          @Override
           public double apply(DoubleMatrix2D AA, DoubleMatrix2D BB) {
             seqBlas.assign(AA, function);
             return 0;
@@ -81,12 +79,10 @@ public class SmpBlas implements Blas {
     );
   }
 
-  @Override
   public void assign(DoubleMatrix2D A, DoubleMatrix2D B,
                      final BinaryFunction function) {
     run(A, B, false,
         new Matrix2DMatrix2DFunction() {
-          @Override
           public double apply(DoubleMatrix2D AA, DoubleMatrix2D BB) {
             seqBlas.assign(AA, BB, function);
             return 0;
@@ -95,37 +91,30 @@ public class SmpBlas implements Blas {
     );
   }
 
-  @Override
   public double dasum(DoubleMatrix1D x) {
     return seqBlas.dasum(x);
   }
 
-  @Override
   public void daxpy(double alpha, DoubleMatrix1D x, DoubleMatrix1D y) {
     seqBlas.daxpy(alpha, x, y);
   }
 
-  @Override
   public void daxpy(double alpha, DoubleMatrix2D A, DoubleMatrix2D B) {
     seqBlas.daxpy(alpha, A, B);
   }
 
-  @Override
   public void dcopy(DoubleMatrix1D x, DoubleMatrix1D y) {
     seqBlas.dcopy(x, y);
   }
 
-  @Override
   public void dcopy(DoubleMatrix2D A, DoubleMatrix2D B) {
     seqBlas.dcopy(A, B);
   }
 
-  @Override
   public double ddot(DoubleMatrix1D x, DoubleMatrix1D y) {
     return seqBlas.ddot(x, y);
   }
 
-  @Override
   public void dgemm(final boolean transposeA, final boolean transposeB, final double alpha, DoubleMatrix2D A,
                     DoubleMatrix2D B, final double beta, DoubleMatrix2D C) {
     /*
@@ -236,7 +225,6 @@ public class SmpBlas implements Blas {
     }
   }
 
-  @Override
   public void dgemv(final boolean transposeA, final double alpha, DoubleMatrix2D A, final DoubleMatrix1D x,
                     final double beta, DoubleMatrix1D y) {
     /*
@@ -306,59 +294,48 @@ public class SmpBlas implements Blas {
     }
   }
 
-  @Override
   public void dger(double alpha, DoubleMatrix1D x, DoubleMatrix1D y, DoubleMatrix2D A) {
     seqBlas.dger(alpha, x, y, A);
   }
 
-  @Override
   public double dnrm2(DoubleMatrix1D x) {
     return seqBlas.dnrm2(x);
   }
 
-  @Override
   public void drot(DoubleMatrix1D x, DoubleMatrix1D y, double c, double s) {
     seqBlas.drot(x, y, c, s);
   }
 
-  @Override
   public void drotg(double a, double b, double[] rotvec) {
     seqBlas.drotg(a, b, rotvec);
   }
 
-  @Override
   public void dscal(double alpha, DoubleMatrix1D x) {
     seqBlas.dscal(alpha, x);
   }
 
-  @Override
   public void dscal(double alpha, DoubleMatrix2D A) {
     seqBlas.dscal(alpha, A);
   }
 
-  @Override
   public void dswap(DoubleMatrix1D x, DoubleMatrix1D y) {
     seqBlas.dswap(x, y);
   }
 
-  @Override
   public void dswap(DoubleMatrix2D A, DoubleMatrix2D B) {
     seqBlas.dswap(A, B);
   }
 
-  @Override
   public void dsymv(boolean isUpperTriangular, double alpha, DoubleMatrix2D A, DoubleMatrix1D x, double beta,
                     DoubleMatrix1D y) {
     seqBlas.dsymv(isUpperTriangular, alpha, A, x, beta, y);
   }
 
-  @Override
   public void dtrmv(boolean isUpperTriangular, boolean transposeA, boolean isUnitTriangular, DoubleMatrix2D A,
                     DoubleMatrix1D x) {
     seqBlas.dtrmv(isUpperTriangular, transposeA, isUnitTriangular, A, x);
   }
 
-  @Override
   public int idamax(DoubleMatrix1D x) {
     return seqBlas.idamax(x);
   }

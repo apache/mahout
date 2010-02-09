@@ -266,7 +266,6 @@ public class Open${keyTypeCap}HashSet extends Abstract${keyTypeCap}Set {
    * existing.
    *
    * @param key   the key the value shall be associated with.
-   * @param value the value to be associated.
    * @return <tt>true</tt> if the receiver did not already contain such a key; <tt>false</tt> if the receiver did
    *         already contain such a key - the new value has now replaced the formerly associated value.
    */

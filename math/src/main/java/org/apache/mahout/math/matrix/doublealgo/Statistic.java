@@ -24,7 +24,6 @@ public class Statistic {
 
   /** Euclidean distance function; <tt>Sqrt(Sum( (x[i]-y[i])^2 ))</tt>. */
   public static final VectorVectorFunction EUCLID = new VectorVectorFunction() {
-    @Override
     public double apply(DoubleMatrix1D a, DoubleMatrix1D b) {
       return Math.sqrt(a.aggregate(b, Functions.plus, Functions.chain(Functions.square, Functions.minus)));
     }
@@ -32,7 +31,6 @@ public class Statistic {
 
   /** Bray-Curtis distance function; <tt>Sum( abs(x[i]-y[i]) )  /  Sum( x[i]+y[i] )</tt>. */
   public static final VectorVectorFunction BRAY_CURTIS = new VectorVectorFunction() {
-    @Override
     public double apply(DoubleMatrix1D a, DoubleMatrix1D b) {
       return a.aggregate(b, Functions.plus, Functions.chain(Functions.abs, Functions.minus)) /
           a.aggregate(b, Functions.plus, Functions.plus);
@@ -42,13 +40,11 @@ public class Statistic {
   /** Canberra distance function; <tt>Sum( abs(x[i]-y[i]) / abs(x[i]+y[i]) )</tt>. */
   public static final VectorVectorFunction CANBERRA = new VectorVectorFunction() {
     private final BinaryFunction fun = new BinaryFunction() {
-      @Override
       public double apply(double a, double b) {
         return Math.abs(a - b) / Math.abs(a + b);
       }
     };
 
-    @Override
     public double apply(DoubleMatrix1D a, DoubleMatrix1D b) {
       return a.aggregate(b, Functions.plus, fun);
     }
@@ -56,7 +52,6 @@ public class Statistic {
 
   /** Maximum distance function; <tt>Max( abs(x[i]-y[i]) )</tt>. */
   public static final VectorVectorFunction MAXIMUM = new VectorVectorFunction() {
-    @Override
     public double apply(DoubleMatrix1D a, DoubleMatrix1D b) {
       return a.aggregate(b, Functions.max, Functions.chain(Functions.abs, Functions.minus));
     }
@@ -64,7 +59,6 @@ public class Statistic {
 
   /** Manhattan distance function; <tt>Sum( abs(x[i]-y[i]) )</tt>. */
   public static final VectorVectorFunction MANHATTAN = new VectorVectorFunction() {
-    @Override
     public double apply(DoubleMatrix1D a, DoubleMatrix1D b) {
       return a.aggregate(b, Functions.plus, Functions.chain(Functions.abs, Functions.minus));
     }

@@ -25,60 +25,49 @@ public class SeqBlas implements Blas {
   private SeqBlas() {
   }
 
-  @Override
   public void assign(DoubleMatrix2D A, UnaryFunction function) {
     A.assign(function);
   }
 
-  @Override
   public void assign(DoubleMatrix2D A, DoubleMatrix2D B,
                      BinaryFunction function) {
     A.assign(B, function);
   }
 
-  @Override
   public double dasum(DoubleMatrix1D x) {
     return x.aggregate(Functions.plus, Functions.abs);
   }
 
-  @Override
   public void daxpy(double alpha, DoubleMatrix1D x, DoubleMatrix1D y) {
     y.assign(x, Functions.plusMult(alpha));
   }
 
-  @Override
   public void daxpy(double alpha, DoubleMatrix2D A, DoubleMatrix2D B) {
     B.assign(A, Functions.plusMult(alpha));
   }
 
-  @Override
   public void dcopy(DoubleMatrix1D x, DoubleMatrix1D y) {
     y.assign(x);
   }
 
-  @Override
   public void dcopy(DoubleMatrix2D A, DoubleMatrix2D B) {
     B.assign(A);
   }
 
-  @Override
   public double ddot(DoubleMatrix1D x, DoubleMatrix1D y) {
     return x.zDotProduct(y);
   }
 
-  @Override
   public void dgemm(boolean transposeA, boolean transposeB, double alpha, DoubleMatrix2D A, DoubleMatrix2D B,
                     double beta, DoubleMatrix2D C) {
     A.zMult(B, C, alpha, beta, transposeA, transposeB);
   }
 
-  @Override
   public void dgemv(boolean transposeA, double alpha, DoubleMatrix2D A, DoubleMatrix1D x, double beta,
                     DoubleMatrix1D y) {
     A.zMult(x, y, alpha, beta, transposeA);
   }
 
-  @Override
   public void dger(double alpha, DoubleMatrix1D x, DoubleMatrix1D y, DoubleMatrix2D A) {
     PlusMult fun = PlusMult.plusMult(0);
     for (int i = A.rows(); --i >= 0;) {
@@ -88,12 +77,10 @@ public class SeqBlas implements Blas {
     }
   }
 
-  @Override
   public double dnrm2(DoubleMatrix1D x) {
     return Math.sqrt(Algebra.DEFAULT.norm2(x));
   }
 
-  @Override
   public void drot(DoubleMatrix1D x, DoubleMatrix1D y, double c, double s) {
     x.checkSize(y);
     DoubleMatrix1D tmp = x.copy();
@@ -105,7 +92,6 @@ public class SeqBlas implements Blas {
     y.assign(tmp, Functions.minusMult(s));
   }
 
-  @Override
   public void drotg(double a, double b, double[] rotvec) {
 
     double roe = b;
@@ -155,22 +141,18 @@ public class SeqBlas implements Blas {
 
   }
 
-  @Override
   public void dscal(double alpha, DoubleMatrix1D x) {
     x.assign(Functions.mult(alpha));
   }
 
-  @Override
   public void dscal(double alpha, DoubleMatrix2D A) {
     A.assign(Functions.mult(alpha));
   }
 
-  @Override
   public void dswap(DoubleMatrix1D x, DoubleMatrix1D y) {
     y.swap(x);
   }
 
-  @Override
   public void dswap(DoubleMatrix2D A, DoubleMatrix2D B) {
     //B.swap(A); not yet implemented
     A.checkShape(B);
@@ -179,7 +161,6 @@ public class SeqBlas implements Blas {
     }
   }
 
-  @Override
   public void dsymv(boolean isUpperTriangular, double alpha, DoubleMatrix2D A, DoubleMatrix1D x, double beta,
                     DoubleMatrix1D y) {
     if (isUpperTriangular) {
@@ -204,7 +185,6 @@ public class SeqBlas implements Blas {
     y.assign(tmp);
   }
 
-  @Override
   public void dtrmv(boolean isUpperTriangular, boolean transposeA, boolean isUnitTriangular, DoubleMatrix2D A,
                     DoubleMatrix1D x) {
     if (transposeA) {
@@ -246,7 +226,6 @@ public class SeqBlas implements Blas {
     x.assign(b);
   }
 
-  @Override
   public int idamax(DoubleMatrix1D x) {
     int maxIndex = -1;
     double maxValue = Double.MIN_VALUE;

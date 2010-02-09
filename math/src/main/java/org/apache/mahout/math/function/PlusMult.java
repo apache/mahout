@@ -32,7 +32,6 @@ public final class PlusMult implements BinaryFunction {
   }
 
   /** Returns the result of the function evaluation. */
-  @Override
   public double apply(double a, double b) {
     return a + b * multiplicator;
   }

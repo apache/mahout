@@ -33,7 +33,7 @@ public class IntFunctions {
    *****************************/
   /** Function that returns <tt>Math.abs(a) == (a < 0) ? -a : a</tt>. */
   public static final IntFunction abs = new IntFunction() {
-    @Override
+
     public int apply(int a) {
       return (a < 0) ? -a : a;
     }
@@ -41,7 +41,7 @@ public class IntFunctions {
 
   /** Function that returns its argument. */
   public static final IntFunction identity = new IntFunction() {
-    @Override
+
     public int apply(int a) {
       return a;
     }
@@ -49,7 +49,7 @@ public class IntFunctions {
 
   /** Function that returns <tt>~a</tt>. */
   public static final IntFunction not = new IntFunction() {
-    @Override
+
     public int apply(int a) {
       return ~a;
     }
@@ -57,7 +57,7 @@ public class IntFunctions {
 
   /** Function that returns <tt>a < 0 ? -1 : a > 0 ? 1 : 0</tt>. */
   public static final IntFunction sign = new IntFunction() {
-    @Override
+
     public int apply(int a) {
       return a < 0 ? -1 : a > 0 ? 1 : 0;
     }
@@ -65,7 +65,7 @@ public class IntFunctions {
 
   /** Function that returns <tt>a * a</tt>. */
   public static final IntFunction square = new IntFunction() {
-    @Override
+
     public int apply(int a) {
       return a * a;
     }
@@ -78,7 +78,7 @@ public class IntFunctions {
 
   /** Function that returns <tt>a & b</tt>. */
   public static final IntIntFunction and = new IntIntFunction() {
-    @Override
+
     public int apply(int a, int b) {
       return a & b;
     }
@@ -86,7 +86,7 @@ public class IntFunctions {
 
   /** Function that returns <tt>a < b ? -1 : a > b ? 1 : 0</tt>. */
   public static final IntIntFunction compare = new IntIntFunction() {
-    @Override
+
     public int apply(int a, int b) {
       return a < b ? -1 : a > b ? 1 : 0;
     }
@@ -94,7 +94,7 @@ public class IntFunctions {
 
   /** Function that returns <tt>a / b</tt>. */
   public static final IntIntFunction div = new IntIntFunction() {
-    @Override
+
     public int apply(int a, int b) {
       return a / b;
     }
@@ -102,7 +102,7 @@ public class IntFunctions {
 
   /** Function that returns <tt>a == b ? 1 : 0</tt>. */
   public static final IntIntFunction equals = new IntIntFunction() {
-    @Override
+
     public int apply(int a, int b) {
       return a == b ? 1 : 0;
     }
@@ -110,7 +110,7 @@ public class IntFunctions {
 
   /** Function that returns <tt>Math.max(a,b)</tt>. */
   public static final IntIntFunction max = new IntIntFunction() {
-    @Override
+
     public int apply(int a, int b) {
       return (a >= b) ? a : b;
     }
@@ -118,7 +118,7 @@ public class IntFunctions {
 
   /** Function that returns <tt>Math.min(a,b)</tt>. */
   public static final IntIntFunction min = new IntIntFunction() {
-    @Override
+
     public int apply(int a, int b) {
       return (a <= b) ? a : b;
     }
@@ -126,7 +126,7 @@ public class IntFunctions {
 
   /** Function that returns <tt>a - b</tt>. */
   public static final IntIntFunction minus = new IntIntFunction() {
-    @Override
+
     public int apply(int a, int b) {
       return a - b;
     }
@@ -134,7 +134,7 @@ public class IntFunctions {
 
   /** Function that returns <tt>a * b</tt>. */
   public static final IntIntFunction mult = new IntIntFunction() {
-    @Override
+
     public int apply(int a, int b) {
       return a * b;
     }
@@ -142,7 +142,7 @@ public class IntFunctions {
 
   /** Function that returns <tt>a | b</tt>. */
   public static final IntIntFunction or = new IntIntFunction() {
-    @Override
+
     public int apply(int a, int b) {
       return a | b;
     }
@@ -150,7 +150,7 @@ public class IntFunctions {
 
   /** Function that returns <tt>a + b</tt>. */
   public static final IntIntFunction plus = new IntIntFunction() {
-    @Override
+
     public int apply(int a, int b) {
       return a + b;
     }
@@ -158,7 +158,7 @@ public class IntFunctions {
 
   /** Function that returns <tt>(int) Math.pow(a,b)</tt>. */
   public static final IntIntFunction pow = new IntIntFunction() {
-    @Override
+
     public int apply(int a, int b) {
       return (int) Math.pow(a, b);
     }
@@ -170,7 +170,7 @@ public class IntFunctions {
   /** Constructs a function that returns <tt>a & b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
   public static IntFunction and(final int b) {
     return new IntFunction() {
-      @Override
+
       public int apply(int a) {
         return a & b;
       }
@@ -183,7 +183,7 @@ public class IntFunctions {
    */
   public static IntFunction between(final int from, final int to) {
     return new IntFunction() {
-      @Override
+
       public int apply(int a) {
         return (from <= a && a <= to) ? 1 : 0;
       }
@@ -199,7 +199,7 @@ public class IntFunctions {
    */
   public static IntFunction chain(final IntFunction g, final IntFunction h) {
     return new IntFunction() {
-      @Override
+
       public int apply(int a) {
         return g.apply(h.apply(a));
       }
@@ -215,7 +215,7 @@ public class IntFunctions {
    */
   public static IntIntFunction chain(final IntFunction g, final IntIntFunction h) {
     return new IntIntFunction() {
-      @Override
+
       public int apply(int a, int b) {
         return g.apply(h.apply(a, b));
       }
@@ -232,7 +232,7 @@ public class IntFunctions {
    */
   public static IntIntFunction chain(final IntIntFunction f, final IntFunction g, final IntFunction h) {
     return new IntIntFunction() {
-      @Override
+
       public int apply(int a, int b) {
         return f.apply(g.apply(a), h.apply(b));
       }
@@ -245,7 +245,7 @@ public class IntFunctions {
    */
   public static IntFunction compare(final int b) {
     return new IntFunction() {
-      @Override
+
       public int apply(int a) {
         return a < b ? -1 : a > b ? 1 : 0;
       }
@@ -255,7 +255,7 @@ public class IntFunctions {
   /** Constructs a function that returns the constant <tt>c</tt>. */
   public static IntFunction constant(final int c) {
     return new IntFunction() {
-      @Override
+
       public int apply(int a) {
         return c;
       }
@@ -265,7 +265,7 @@ public class IntFunctions {
   /** Constructs a function that returns <tt>a / b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
   public static IntFunction div(final int b) {
     return new IntFunction() {
-      @Override
+
       public int apply(int a) {
         return a / b;
       }
@@ -275,7 +275,7 @@ public class IntFunctions {
   /** Constructs a function that returns <tt>a == b ? 1 : 0</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
   public static IntFunction equals(final int b) {
     return new IntFunction() {
-      @Override
+
       public int apply(int a) {
         return a == b ? 1 : 0;
       }
@@ -285,7 +285,7 @@ public class IntFunctions {
   /** Constructs a function that returns <tt>Math.max(a,b)</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
   public static IntFunction max(final int b) {
     return new IntFunction() {
-      @Override
+
       public int apply(int a) {
         return (a >= b) ? a : b;
       }
@@ -295,7 +295,7 @@ public class IntFunctions {
   /** Constructs a function that returns <tt>Math.min(a,b)</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
   public static IntFunction min(final int b) {
     return new IntFunction() {
-      @Override
+
       public int apply(int a) {
         return (a <= b) ? a : b;
       }
@@ -305,7 +305,7 @@ public class IntFunctions {
   /** Constructs a function that returns <tt>a - b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
   public static IntFunction minus(final int b) {
     return new IntFunction() {
-      @Override
+
       public int apply(int a) {
         return a - b;
       }
@@ -315,7 +315,7 @@ public class IntFunctions {
   /** Constructs a function that returns <tt>a * b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
   public static IntFunction mult(final int b) {
     return new IntFunction() {
-      @Override
+
       public int apply(int a) {
         return a * b;
       }
@@ -325,7 +325,7 @@ public class IntFunctions {
   /** Constructs a function that returns <tt>a | b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
   public static IntFunction or(final int b) {
     return new IntFunction() {
-      @Override
+
       public int apply(int a) {
         return a | b;
       }
@@ -335,7 +335,7 @@ public class IntFunctions {
   /** Constructs a function that returns <tt>a + b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
   public static IntFunction plus(final int b) {
     return new IntFunction() {
-      @Override
+
       public int apply(int a) {
         return a + b;
       }
@@ -345,7 +345,7 @@ public class IntFunctions {
   /** Constructs a function that returns <tt>(int) Math.pow(a,b)</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
   public static IntFunction pow(final int b) {
     return new IntFunction() {
-      @Override
+
       public int apply(int a) {
         return (int) Math.pow(a, b);
       }

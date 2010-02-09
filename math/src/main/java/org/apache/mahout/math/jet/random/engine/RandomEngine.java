@@ -59,7 +59,6 @@ public abstract class RandomEngine extends PersistentObject
    * Equivalent to <tt>raw()</tt>. This has the effect that random engines can now be used as function objects,
    * returning a random number upon function evaluation.
    */
-  @Override
   public double apply(double dummy) {
     return raw();
   }
@@ -68,7 +67,6 @@ public abstract class RandomEngine extends PersistentObject
    * Equivalent to <tt>nextInt()</tt>. This has the effect that random engines can now be used as function objects,
    * returning a random number upon function evaluation.
    */
-  @Override
   public int apply(int dummy) {
     return nextInt();
   }

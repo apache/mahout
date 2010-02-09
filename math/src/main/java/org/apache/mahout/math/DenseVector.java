@@ -96,26 +96,22 @@ public class DenseVector extends AbstractVector {
     return clone;
   }
 
-  @Override
   public double getQuick(int index) {
     return values[index];
   }
 
-  @Override
   public DenseVector like() {
     DenseVector denseVector = new DenseVector(size());
     denseVector.setLabelBindings(getLabelBindings());
     return denseVector;
   }
 
-  @Override
   public Vector like(int cardinality) {
     Vector denseVector = new DenseVector(cardinality);
     denseVector.setLabelBindings(getLabelBindings());
     return denseVector;
   }
 
-  @Override
   public void setQuick(int index, double value) {
     lengthSquared = -1.0;
     values[index] = value;
@@ -142,7 +138,6 @@ public class DenseVector extends AbstractVector {
     return this;
   }
 
-  @Override
   public int getNumNondefaultElements() {
     return values.length;
   }
@@ -161,14 +156,12 @@ public class DenseVector extends AbstractVector {
   /**
    * Returns an iterator that traverses this Vector from 0 to cardinality-1, in that order.
    *
-   * @see java.lang.Iterable#iterator
+   * @see Iterable#iterator
    */
-  @Override
   public Iterator<Vector.Element> iterateNonZero() {
     return new NonZeroIterator();
   }
 
-  @Override
   public Iterator<Vector.Element> iterateAll() {
     return new AllIterator();
   }
@@ -188,12 +181,10 @@ public class DenseVector extends AbstractVector {
       }
     }
 
-    @Override
     public boolean hasNext() {
       return offset < values.length;
     }
 
-    @Override
     public Vector.Element next() {
       if (offset >= values.length) {
         throw new NoSuchElementException();
@@ -204,7 +195,6 @@ public class DenseVector extends AbstractVector {
       return element;
     }
 
-    @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
@@ -214,12 +204,10 @@ public class DenseVector extends AbstractVector {
 
     private final Element element = new Element(-1);
 
-    @Override
     public boolean hasNext() {
       return element.ind + 1 < values.length;
     }
 
-    @Override
     public Vector.Element next() {
       if (!hasNext()) {
         throw new NoSuchElementException();
@@ -228,7 +216,6 @@ public class DenseVector extends AbstractVector {
       return element;
     }
 
-    @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
@@ -242,24 +229,20 @@ public class DenseVector extends AbstractVector {
       this.ind = ind;
     }
 
-    @Override
     public double get() {
       return values[ind];
     }
 
-    @Override
     public int index() {
       return ind;
     }
 
-    @Override
     public void set(double value) {
       lengthSquared = -1.0;
       values[ind] = value;
     }
   }
 
-  @Override
   public Vector.Element getElement(int index) {
     return new Element(index);
   }

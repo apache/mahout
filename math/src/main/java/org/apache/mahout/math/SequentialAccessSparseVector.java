@@ -82,22 +82,18 @@ public class SequentialAccessSparseVector extends AbstractVector {
     return clone;
   }
 
-  @Override
   public double getQuick(int index) {
     return values.get(index);
   }
 
-  @Override
   public void setQuick(int index, double value) {
     values.set(index, value);
   }
 
-  @Override
   public int getNumNondefaultElements() {
     return values.getNumMappings();
   }
 
-  @Override
   public SequentialAccessSparseVector like() {
     int numValues = 256;
     if (values != null) {
@@ -106,7 +102,6 @@ public class SequentialAccessSparseVector extends AbstractVector {
     return new SequentialAccessSparseVector(size(), numValues);
   }
 
-  @Override
   public Vector like(int newCardinality) {
     int numValues = 256;
     if (values != null) {
@@ -115,12 +110,10 @@ public class SequentialAccessSparseVector extends AbstractVector {
     return new SequentialAccessSparseVector(newCardinality, numValues);
   }
 
-  @Override
-  public java.util.Iterator<Element> iterateNonZero() {
+  public Iterator<Element> iterateNonZero() {
     return new IntDoublePairIterator(this);
   }
 
-  @Override
   public Iterator<Element> iterateAll() {
     return new IntDoublePairIterator(this, size());
   }
@@ -178,12 +171,11 @@ public class SequentialAccessSparseVector extends AbstractVector {
       element = new DenseElement(offset, v);
       maxOffset = cardinality;
     }
-    @Override
+
     public boolean hasNext() {
       return offset < maxOffset;
     }
 
-    @Override
     public Element next() {
       if (offset >= maxOffset) {
         throw new NoSuchElementException();
@@ -192,13 +184,11 @@ public class SequentialAccessSparseVector extends AbstractVector {
       return element;
     }
 
-    @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
   }
 
-  @Override
   public Element getElement(int index) {
     return new DenseElement(index, this);
   }
@@ -227,7 +217,6 @@ public class SequentialAccessSparseVector extends AbstractVector {
       index = ind;
     }
 
-    @Override
     public double get() {
       if(index >= indices.length) return 0.0;
       int cur = indices[index];
@@ -236,12 +225,10 @@ public class SequentialAccessSparseVector extends AbstractVector {
       return 0.0;
     }
 
-    @Override
     public int index() {
       return offset;
     }
 
-    @Override
     public void set(double value) {
       v.lengthSquared = -1;
       if(value != 0.0) mapping.set(indices[offset], value);
@@ -254,17 +241,14 @@ public class SequentialAccessSparseVector extends AbstractVector {
       super(ind, v);
     }
 
-    @Override
     public double get() {
       return values[offset];
     }
 
-    @Override
     public int index() {
       return indices[offset];
     }
 
-    @Override
     public void set(double value) {
       values[offset] = value;
     }

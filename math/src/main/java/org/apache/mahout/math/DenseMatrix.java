@@ -54,7 +54,6 @@ public class DenseMatrix extends AbstractMatrix {
     this.values = new double[rows][columns];
   }
 
-  @Override
   public int[] size() {
     int[] result = new int[2];
     result[ROW] = rowSize();
@@ -72,32 +71,26 @@ public class DenseMatrix extends AbstractMatrix {
     return clone;
   }
 
-  @Override
   public double getQuick(int row, int column) {
     return values[row][column];
   }
 
-  @Override
   public Matrix like() {
     return like(rowSize(), columnSize());
   }
 
-  @Override
   public Matrix like(int rows, int columns) {
     return new DenseMatrix(rows, columns);
   }
 
-  @Override
   public void setQuick(int row, int column, double value) {
     values[row][column] = value;
   }
 
-  @Override
   public int[] getNumNondefaultElements() {
     return size();
   }
 
-  @Override
   public Matrix viewPart(int[] offset, int[] size) {
     if (size[ROW] > rowSize() || size[COL] > columnSize()) {
       throw new CardinalityException();
@@ -109,7 +102,6 @@ public class DenseMatrix extends AbstractMatrix {
     return new MatrixView(this, offset, size);
   }
 
-  @Override
   public Matrix assignColumn(int column, Vector other) {
     if (other.size() != rowSize() || column >= columnSize()) {
       throw new CardinalityException();
@@ -120,7 +112,6 @@ public class DenseMatrix extends AbstractMatrix {
     return this;
   }
 
-  @Override
   public Matrix assignRow(int row, Vector other) {
     if (row >= rowSize() || other.size() != columnSize()) {
       throw new CardinalityException();
@@ -131,7 +122,6 @@ public class DenseMatrix extends AbstractMatrix {
     return this;
   }
 
-  @Override
   public Vector getColumn(int column) {
     if (column < 0 || column >= columnSize()) {
       throw new IndexException();
@@ -139,7 +129,6 @@ public class DenseMatrix extends AbstractMatrix {
     return new TransposeViewVector(this, column);
   }
 
-  @Override
   public Vector getRow(int row) {
     if (row < 0 || row >= rowSize()) {
       throw new IndexException();

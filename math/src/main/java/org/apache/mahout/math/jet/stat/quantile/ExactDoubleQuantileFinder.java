@@ -34,7 +34,6 @@ class ExactDoubleQuantileFinder extends PersistentObject implements DoubleQuanti
    *
    * @param value the value to add.
    */
-  @Override
   public void add(double value) {
     this.buffer.add(value);
     this.isSorted = false;
@@ -45,7 +44,6 @@ class ExactDoubleQuantileFinder extends PersistentObject implements DoubleQuanti
    *
    * @param values the list of which all values shall be added.
    */
-  @Override
   public void addAllOf(DoubleArrayList values) {
     addAllOfFromTo(values, 0, values.size() - 1);
   }
@@ -58,7 +56,6 @@ class ExactDoubleQuantileFinder extends PersistentObject implements DoubleQuanti
    * @param from   the index of the first element to be added (inclusive).
    * @param to     the index of the last element to be added (inclusive).
    */
-  @Override
   public void addAllOfFromTo(DoubleArrayList values, int from, int to) {
     buffer.addAllOfFromTo(values, from, to);
     this.isSorted = false;
@@ -68,7 +65,6 @@ class ExactDoubleQuantileFinder extends PersistentObject implements DoubleQuanti
    * Removes all elements from the receiver.  The receiver will be empty after this call returns, and its memory
    * requirements will be close to zero.
    */
-  @Override
   public void clear() {
     this.buffer.clear();
     this.buffer.trimToSize();
@@ -102,7 +98,6 @@ class ExactDoubleQuantileFinder extends PersistentObject implements DoubleQuanti
    *                  continues.
    * @return <tt>false</tt> if the procedure stopped before all elements where iterated over, <tt>true</tt> otherwise.
    */
-  @Override
   public boolean forEach(DoubleProcedure procedure) {
     double[] theElements = buffer.elements();
     int theSize = (int) size();
@@ -119,7 +114,6 @@ class ExactDoubleQuantileFinder extends PersistentObject implements DoubleQuanti
    * Returns the number of elements currently needed to store all contained elements. This number usually differs from
    * the results of method <tt>size()</tt>, according to the underlying datastructure.
    */
-  @Override
   public long memory() {
     return buffer.elements().length;
   }
@@ -131,7 +125,6 @@ class ExactDoubleQuantileFinder extends PersistentObject implements DoubleQuanti
    * @param element the element to search for.
    * @return the percentage <tt>p</tt> of elements <tt>&lt;= element</tt> (<tt>0.0 &lt;= p &lt;=1.0)</tt>.
    */
-  @Override
   public double phi(double element) {
     this.sort();
     return org.apache.mahout.math.jet.stat.Descriptive.rankInterpolated(buffer, element) / this.size();
@@ -144,7 +137,6 @@ class ExactDoubleQuantileFinder extends PersistentObject implements DoubleQuanti
    *             <tt>phis</tt> must be sorted ascending.
    * @return the exact quantile elements.
    */
-  @Override
   public DoubleArrayList quantileElements(DoubleArrayList phis) {
     this.sort();
     return org.apache.mahout.math.jet.stat.Descriptive.quantiles(this.buffer, phis);
@@ -154,7 +146,6 @@ class ExactDoubleQuantileFinder extends PersistentObject implements DoubleQuanti
    * Returns the number of elements currently contained in the receiver (identical to the number of values added so
    * far).
    */
-  @Override
   public long size() {
     return buffer.size();
   }

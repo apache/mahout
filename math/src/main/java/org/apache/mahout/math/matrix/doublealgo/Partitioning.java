@@ -73,7 +73,6 @@ public class Partitioning {
     // this one knows how to swap two row indexes (a,b)
     final int[] g = rowIndexes;
     Swapper swapper = new Swapper() {
-      @Override
       public void swap(int b, int c) {
         int tmp = g[b];
         g[b] = g[c];
@@ -84,7 +83,6 @@ public class Partitioning {
     // compare splitter[a] with columnView[rowIndexes[b]]
     final DoubleMatrix1D columnView = matrix.viewColumn(column);
     IntComparator comp = new IntComparator() {
-      @Override
       public int compare(int a, int b) {
         double av = splitters[a];
         double bv = columnView.getQuick(g[b]);
@@ -94,7 +92,6 @@ public class Partitioning {
 
     // compare columnView[rowIndexes[a]] with columnView[rowIndexes[b]]
     IntComparator comp2 = new IntComparator() {
-      @Override
       public int compare(int a, int b) {
         double av = columnView.getQuick(g[a]);
         double bv = columnView.getQuick(g[b]);
@@ -104,7 +101,6 @@ public class Partitioning {
 
     // compare splitter[a] with splitter[b]
     IntComparator comp3 = new IntComparator() {
-      @Override
       public int compare(int a, int b) {
         double av = splitters[a];
         double bv = splitters[b];

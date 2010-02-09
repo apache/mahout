@@ -85,7 +85,6 @@ public abstract class Abstract${valueTypeCap}List extends AbstractList implement
    * Appends the specified list to the end of this list.
    * @param other the list to be appended. 
    **/
-  @Override
   public void addAllOf(${valueTypeCap}ArrayList other) {
 	addAllOfFromTo(other, 0, other.size() - 1);
   }

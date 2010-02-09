@@ -186,7 +186,6 @@ class UnknownDoubleQuantileEstimator extends DoubleQuantileEstimator {
   private static void sortAscendingByLevel(DoubleBuffer[] fullBuffers) {
     Sorting.quickSort(fullBuffers, 0, fullBuffers.length - 1,
         new Comparator<DoubleBuffer>() {
-          @Override
           public int compare(DoubleBuffer o1, DoubleBuffer o2) {
             int l1 = o1.level();
             int l2 = o2.level();
