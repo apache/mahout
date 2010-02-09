@@ -11,6 +11,7 @@
   <moduleSets>
     <moduleSet>
       <includes>
+        <include>org.apache.mahout:mahout-collections</include>
         <include>org.apache.mahout:mahout-math</include>
         <include>org.apache.mahout:mahout-core</include>
         <include>org.apache.mahout:mahout-utils</include>
@@ -46,6 +47,10 @@
         <include>*.job</include>
       </includes>
       <outputDirectory/>
+    </fileSet>
+    <fileSet>
+      <directory>math/target/apidocs</directory>
+      <outputDirectory>docs/mahout-collections</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>math/target/apidocs</directory>
