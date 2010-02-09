@@ -17,13 +17,20 @@
 
 package org.apache.mahout.clustering.dirichlet.models;
 
+import org.apache.mahout.clustering.ClusterBase;
+import org.apache.mahout.clustering.dirichlet.JsonModelAdapter;
 import org.apache.mahout.math.function.SquareRootFunction;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 public class NormalModel implements Model<VectorWritable> {
 
@@ -40,6 +47,9 @@ public class NormalModel implements Model<VectorWritable> {
   private Vector s1;
 
   private Vector s2;
+
+  private static final Type modelType = new TypeToken<Model<Vector>>() {
+  }.getType();
 
   public NormalModel() {
   }
@@ -120,22 +130,16 @@ public class NormalModel implements Model<VectorWritable> {
 
   @Override
   public String toString() {
+    return asFormatString(null);
+  }
+
+  public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder();
-    buf.append("nm{n=").append(s0).append(" m=[");
+    buf.append("nm{n=").append(s0).append(" m=");
     if (mean != null) {
-      // handle sparse Vectors gracefully, suppressing zero values
-      int nextIx = 0;
-      for (int i = 0; i < mean.size(); i++) {
-        double elem = mean.get(i);
-        if (elem == 0.0)
-          continue;
-        if (i > nextIx)
-          buf.append("..{").append(i).append("}=");
-        buf.append(String.format("%.2f", elem)).append(", ");
-        nextIx = i + 1;
-      }
+      buf.append(ClusterBase.formatVector(mean, bindings));
     }
-    buf.append("] sd=").append(String.format("%.2f", stdDev)).append('}');
+    buf.append(" sd=").append(String.format("%.2f", stdDev)).append('}');
     return buf.toString();
   }
 
@@ -155,5 +159,13 @@ public class NormalModel implements Model<VectorWritable> {
     out.writeInt(s0);
     VectorWritable.writeVector(out, s1);
     VectorWritable.writeVector(out, s2);
+  }
+
+  @Override
+  public String asJsonString() {
+    GsonBuilder builder = new GsonBuilder();
+    builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
+    Gson gson = builder.create();
+    return gson.toJson(this, modelType);
   }
 }

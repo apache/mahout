@@ -19,11 +19,18 @@ package org.apache.mahout.clustering.dirichlet.models;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.lang.reflect.Type;
 
+import org.apache.mahout.clustering.ClusterBase;
+import org.apache.mahout.clustering.dirichlet.JsonModelAdapter;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 public class L1Model implements Model<VectorWritable> {
 
@@ -43,6 +50,9 @@ public class L1Model implements Model<VectorWritable> {
   private int count = 0;
 
   private Vector observed;
+
+  private static final Type modelType = new TypeToken<Model<Vector>>() {
+  }.getType();
 
   @Override
   public void computeParameters() {
@@ -81,23 +91,28 @@ public class L1Model implements Model<VectorWritable> {
 
   @Override
   public String toString() {
+    return asFormatString(null);
+  }
+
+  public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder();
-    buf.append("l1m{n=").append(count).append(" c=[");
+    buf.append("l1m{n=").append(count).append(" c=");
     if (coefficients != null) {
-      // handle sparse Vectors gracefully, suppressing zero values
-      int nextIx = 0;
-      for (int i = 0; i < coefficients.size(); i++) {
-        double elem = coefficients.get(i);
-        if (elem == 0.0)
-          continue;
-        if (i > nextIx)
-          buf.append("..{").append(i).append("}=");
-        buf.append(String.format("%.2f", elem)).append(", ");
-        nextIx = i + 1;
-      }
+      buf.append(ClusterBase.formatVector(coefficients, bindings));
     }
-    buf.append("]}");
+    buf.append("}");
     return buf.toString();
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.mahout.clustering.Printable#asJsonString()
+   */
+  @Override
+  public String asJsonString() {
+    GsonBuilder builder = new GsonBuilder();
+    builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
+    Gson gson = builder.create();
+    return gson.toJson(this, modelType);
   }
 
 }

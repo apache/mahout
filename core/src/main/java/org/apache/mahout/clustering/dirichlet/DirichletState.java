@@ -45,7 +45,7 @@ public class DirichletState<O> {
     // sample initial prior models
     clusters = new ArrayList<DirichletCluster<O>>();
     for (Model<O> m : modelFactory.sampleFromPrior(numClusters)) {
-      clusters.add(new DirichletCluster<O>(m, 0.0));
+      clusters.add(new DirichletCluster<O>(m));
     }
     // sample the mixture parameters from a Dirichlet distribution on the totalCounts 
     mixture = UncommonDistributions.rDirichlet(totalCounts(), alpha_0);

@@ -17,13 +17,20 @@
 
 package org.apache.mahout.clustering.dirichlet.models;
 
-import org.apache.mahout.math.function.SquareRootFunction;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorWritable;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.lang.reflect.Type;
+
+import org.apache.mahout.clustering.ClusterBase;
+import org.apache.mahout.clustering.dirichlet.JsonModelAdapter;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.function.SquareRootFunction;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
 
@@ -40,6 +47,10 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
   private Vector s1;
 
   private Vector s2;
+
+  
+  private static final Type modelType = new TypeToken<Model<Vector>>() {
+  }.getType();
 
   public AsymmetricSampledNormalModel() {
     super();
@@ -95,8 +106,7 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     mean = s1.divide(s0);
     // compute the component stds
     if (s0 > 1) {
-      stdDev = s2.times(s0).minus(s1.times(s1))
-          .assign(new SquareRootFunction()).divide(s0);
+      stdDev = s2.times(s0).minus(s1.times(s1)).assign(new SquareRootFunction()).divide(s0);
     } else {
       stdDev.assign(Double.MIN_NORMAL);
     }
@@ -134,20 +144,20 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
 
   @Override
   public String toString() {
+    return asFormatString(null);
+  }
+
+  public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder(50);
-    buf.append("asnm{n=").append(s0).append(" m=[");
+    buf.append("asnm{n=").append(s0).append(" m=");
     if (mean != null) {
-      for (int i = 0; i < mean.size(); i++) {
-        buf.append(String.format("%.2f", mean.get(i))).append(", ");
-      }
+      buf.append(ClusterBase.formatVector(mean, bindings));
     }
-    buf.append("] sd=[");
+    buf.append(" sd=");
     if (stdDev != null) {
-      for (int i = 0; i < stdDev.size(); i++) {
-        buf.append(String.format("%.2f", stdDev.get(i))).append(", ");
-      }
+      buf.append(ClusterBase.formatVector(stdDev, bindings));
     }
-    buf.append("]}");
+    buf.append("}");
     return buf.toString();
   }
 
@@ -167,5 +177,13 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     out.writeInt(s0);
     VectorWritable.writeVector(out, s1);
     VectorWritable.writeVector(out, s2);
+  }
+
+  @Override
+  public String asJsonString() {
+    GsonBuilder builder = new GsonBuilder();
+    builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
+    Gson gson = builder.create();
+    return gson.toJson(this, modelType);
   }
 }

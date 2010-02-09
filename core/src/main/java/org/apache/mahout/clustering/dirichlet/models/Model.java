@@ -18,12 +18,13 @@
 package org.apache.mahout.clustering.dirichlet.models;
 
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.clustering.Printable;
 
 /**
  * A model is a probability distribution over observed data points and allows the probability of any data point to be
  * computed.
  */
-public interface Model<O> extends Writable {
+public interface Model<O> extends Writable, Printable {
 
   /**
    * Observe the given observation, retaining information about it

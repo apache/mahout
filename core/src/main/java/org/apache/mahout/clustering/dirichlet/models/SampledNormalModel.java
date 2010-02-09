@@ -17,6 +17,7 @@
 
 package org.apache.mahout.clustering.dirichlet.models;
 
+import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.math.Vector;
 
 public class SampledNormalModel extends NormalModel {
@@ -31,15 +32,7 @@ public class SampledNormalModel extends NormalModel {
 
   @Override
   public String toString() {
-    StringBuilder buf = new StringBuilder();
-    buf.append("snm{n=").append(getS0()).append(" m=[");
-    if (getMean() != null) {
-      for (int i = 0; i < getMean().size(); i++) {
-        buf.append(String.format("%.2f", getMean().get(i))).append(", ");
-      }
-    }
-    buf.append("] sd=").append(String.format("%.2f", getStdDev())).append('}');
-    return buf.toString();
+    return asFormatString(null);
   }
 
   /**
@@ -50,5 +43,15 @@ public class SampledNormalModel extends NormalModel {
   @Override
   public NormalModel sample() {
     return new SampledNormalModel(getMean(), getStdDev());
+  }
+
+  public String asFormatString(String[] bindings) {
+    StringBuilder buf = new StringBuilder();
+    buf.append("nm{n=").append(getS0()).append(" m=");
+    if (getMean() != null) {
+      buf.append(ClusterBase.formatVector(getMean(), bindings));
+    }
+    buf.append(" sd=").append(String.format("%.2f", getStdDev())).append('}');
+    return buf.toString();
   }
 }

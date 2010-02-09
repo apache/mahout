@@ -17,15 +17,64 @@
 
 package org.apache.mahout.clustering;
 
-import org.apache.hadoop.io.Writable;
-import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.Vector;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.Iterator;
 
-public abstract class ClusterBase implements Writable {
+import org.apache.hadoop.io.Writable;
+import org.apache.mahout.math.JsonVectorAdapter;
+import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.Vector.Element;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
+public abstract class ClusterBase implements Writable, Printable {
+
+  /**
+   * Return a human-readable formatted string representation of the vector, not intended
+   * to be complete nor usable as an input/output representation such as Json
+   * 
+   * @param v a Vector
+   * @return a String
+   */
+  public static String formatVector(Vector v, String[] bindings) {
+    StringBuilder buf = new StringBuilder();
+    int nzero = 0;
+    Iterator<Element> iterateNonZero = v.iterateNonZero();
+    while (iterateNonZero.hasNext()) {
+      iterateNonZero.next();
+      nzero++;
+    }
+    // if vector is sparse or if we have bindings, use sparse notation
+    if (nzero < v.size() || bindings != null) {
+      buf.append('[');
+      for (int i = 0; i < v.size(); i++) {
+        double elem = v.get(i);
+        if (elem == 0.0)
+          continue;
+        String label = null;
+        if (bindings != null && (label = bindings[i]) != null)
+          buf.append(label).append(":");
+        else
+          buf.append(i).append(":");
+        buf.append(String.format("%.3f", elem)).append(", ");
+      }
+    } else {
+      buf.append('[');
+      for (int i = 0; i < v.size(); i++) {
+        double elem = v.get(i);
+        buf.append(String.format("%.3f", elem)).append(", ");
+      }
+    }
+    buf.setLength(buf.length() - 2);
+    buf.append(']');
+    return buf.toString();
+  }
 
   // this cluster's clusterId
   private int id;
@@ -71,7 +120,36 @@ public abstract class ClusterBase implements Writable {
     this.pointTotal = pointTotal;
   }
 
+  /**
+   * @deprecated
+   * @return
+   */
   public abstract String asFormatString();
+
+  /* (non-Javadoc)
+   * @see org.apache.mahout.clustering.Printable#asFormatString(java.lang.String[])
+   */
+  public String asFormatString(String[] bindings) {
+    StringBuilder buf = new StringBuilder();
+    buf.append(getIdentifier()).append(": ").append(formatVector(computeCentroid(), bindings));
+    return buf.toString();
+  }
+
+  public abstract Vector computeCentroid();
+
+  public abstract Object getIdentifier();
+
+  /* (non-Javadoc)
+   * @see org.apache.mahout.clustering.Printable#asJsonString(java.util.Map)
+   */
+  public String asJsonString() {
+    Type vectorType = new TypeToken<Vector>() {
+    }.getType();
+    GsonBuilder gBuilder = new GsonBuilder();
+    gBuilder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
+    Gson gson = gBuilder.create();
+    return gson.toJson(this, this.getClass());
+  }
 
   /**
    * Simply writes out the id, and that's it!

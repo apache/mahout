@@ -16,17 +16,21 @@
  */
 package org.apache.mahout.clustering.dirichlet;
 
-import com.google.gson.reflect.TypeToken;
-import org.apache.hadoop.io.Writable;
-import org.apache.mahout.clustering.dirichlet.models.Model;
-import org.apache.mahout.math.Vector;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-public class DirichletCluster<O> implements Writable {
+import org.apache.hadoop.io.Writable;
+import org.apache.mahout.clustering.Printable;
+import org.apache.mahout.clustering.dirichlet.models.Model;
+import org.apache.mahout.math.Vector;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
+public class DirichletCluster<O> implements Writable, Printable {
 
   @Override
   public void readFields(DataInput in) throws IOException {
@@ -50,6 +54,12 @@ public class DirichletCluster<O> implements Writable {
     this.totalCount = totalCount;
   }
 
+  public DirichletCluster(Model<O> model) {
+    super();
+    this.model = model;
+    this.totalCount = 0.0;
+  }
+
   public DirichletCluster() {
     super();
   }
@@ -67,16 +77,16 @@ public class DirichletCluster<O> implements Writable {
     return totalCount;
   }
 
-  private static final Type typeOfModel = new TypeToken<DirichletCluster<Vector>>() {
+  private static final Type clusterType = new TypeToken<DirichletCluster<Vector>>() {
   }.getType();
 
   /** Reads a typed Model instance from the input stream */
+  @SuppressWarnings("unchecked")
   public static <O> Model<O> readModel(DataInput in) throws IOException {
     String modelClassName = in.readUTF();
     Model<O> model;
     try {
-      model = (Model<O>) Class.forName(modelClassName).asSubclass(Model.class)
-          .newInstance();
+      model = (Model<O>) Class.forName(modelClassName).asSubclass(Model.class).newInstance();
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
     } catch (IllegalAccessException e) {
@@ -92,6 +102,19 @@ public class DirichletCluster<O> implements Writable {
   public static void writeModel(DataOutput out, Model<?> model) throws IOException {
     out.writeUTF(model.getClass().getName());
     model.write(out);
+  }
+
+  @Override
+  public String asFormatString(String[] bindings) {
+    return model.toString();
+  }
+
+  @Override
+  public String asJsonString() {
+    GsonBuilder builder = new GsonBuilder();
+    builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
+    Gson gson = builder.create();
+    return gson.toJson(this, clusterType);
   }
 
 }

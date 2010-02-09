@@ -113,7 +113,7 @@ public class Cluster extends ClusterBase {
    * 
    * @return the new centroid
    */
-  private Vector computeCentroid() {
+  public Vector computeCentroid() {
     if (getNumPoints() == 0) {
       return getCenter();
     } else if (centroid == null) {
