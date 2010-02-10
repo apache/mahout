@@ -27,7 +27,6 @@ import java.util.List;
 
 import org.apache.mahout.math.function.ObjectProcedure;
 import org.apache.mahout.math.map.PrimeFinder;
-import org.apache.mahout.math.set.AbstractSet;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -153,8 +152,8 @@ public class OpenHashSetTest extends Assert {
     map.add("14");
     map.remove("13");
     OpenHashSet<String> map2 = (OpenHashSet<String>) map.clone();
-    assertTrue(map.equals(map2));
-    assertTrue(map2.equals(map));
+    assertEquals(map, map2);
+    assertEquals(map2, map);
     assertFalse("Hello Sailor".equals(map));
     assertFalse(map.equals("hello sailor"));
     map2.remove("11");
