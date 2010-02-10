@@ -127,7 +127,7 @@ public final class RecommenderMapper
     while (recommendationVectorIterator.hasNext()) {
       Vector.Element element = recommendationVectorIterator.next();
       int index = element.index();
-      if (userVector.get(index) != 0.0) {
+      if (userVector.get(index) == 0.0) {
         if (topItems.size() < recommendationsPerUser) {
           indexItemIDMap.get(new IntWritable(index), itemID);
           topItems.add(new GenericRecommendedItem(itemID.get(), (float) element.get()));
