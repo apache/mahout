@@ -49,8 +49,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of PFGrowth Algorithm with FP-Bonsai pruning
  * 
- * @param A
- *          The object type used as the cell items in a transaction list
+ * Generic parameter A is the object type used as the cell items in a transaction list.
  */
 public class FPGrowth<A extends Comparable<? super A>> {
   

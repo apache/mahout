@@ -95,7 +95,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
       log.warn("attribute {} already selected in a parent node", best.attr);
     }
 
-    Node childNode = null;
+    Node childNode;
     if (data.getDataset().isNumerical(best.attr)) {
       Data loSubset = data.subset(Condition.lesser(best.attr, best.split));
       Node loChild = build(rng, loSubset);

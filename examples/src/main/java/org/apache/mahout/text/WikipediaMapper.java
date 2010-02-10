@@ -64,20 +64,22 @@ public class WikipediaMapper extends MapReduceBase implements
                   Reporter reporter) throws IOException {
     
     String content = value.toString();
-    if (content.contains(REDIRECT)) return;
-    String document = "";
-    String title = "";
+    if (content.contains(REDIRECT))
+      return;
+    String document;
+    String title;
     try {
       document = getDocument(content);
       title = getTitle(content);
-    } catch (Exception e) {
+    } catch (RuntimeException e) {
       reporter.getCounter("Wikipedia", "Parse errors").increment(1);
       return;
     }
     
     if (!all) {
       String catMatch = findMatchingCategory(document);
-      if (catMatch.equals("Unknown")) return;
+      if (catMatch.equals("Unknown"))
+        return;
     }
     document = StringEscapeUtils.unescapeHtml(document);
     

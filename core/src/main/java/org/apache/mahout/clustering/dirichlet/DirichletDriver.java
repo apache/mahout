@@ -68,8 +68,7 @@ public class DirichletDriver {
   private DirichletDriver() {
   }
 
-  public static void main(String[] args) throws InstantiationException, IllegalAccessException, ClassNotFoundException,
-      IOException, SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
+  public static void main(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -145,9 +144,15 @@ public class DirichletDriver {
    * @deprecated since it presumes 2-d, dense vector model prototypes
    */
   @Deprecated
-  public static void runJob(String input, String output, String modelFactory, int numClusters, int maxIterations, double alpha_0,
-      int numReducers) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException,
-      SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
+  public static void runJob(String input,
+                            String output,
+                            String modelFactory,
+                            int numClusters,
+                            int maxIterations,
+                            double alpha_0,
+                            int numReducers)
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException,
+             SecurityException, NoSuchMethodException, InvocationTargetException {
     runJob(input, output, modelFactory, "org.apache.mahout.math.DenseVector", 2, numClusters, maxIterations, alpha_0, numReducers);
   }
 
@@ -168,7 +173,7 @@ public class DirichletDriver {
    */
   public static void runJob(String input, String output, String modelFactory, String modelPrototype, int prototypeSize,
       int numClusters, int maxIterations, double alpha_0, int numReducers) throws ClassNotFoundException, InstantiationException,
-      IllegalAccessException, IOException, SecurityException, IllegalArgumentException, NoSuchMethodException,
+      IllegalAccessException, IOException, SecurityException, NoSuchMethodException,
       InvocationTargetException {
 
     String stateIn = output + "/state-0";
@@ -186,7 +191,7 @@ public class DirichletDriver {
 
   private static void writeInitialState(String output, String stateIn, String modelFactory, String modelPrototype,
       int prototypeSize, int numModels, double alpha_0) throws ClassNotFoundException, InstantiationException,
-      IllegalAccessException, IOException, SecurityException, IllegalArgumentException, NoSuchMethodException,
+      IllegalAccessException, IOException, SecurityException, NoSuchMethodException,
       InvocationTargetException {
 
     DirichletState<VectorWritable> state = createState(modelFactory, modelPrototype, prototypeSize, numModels, alpha_0);

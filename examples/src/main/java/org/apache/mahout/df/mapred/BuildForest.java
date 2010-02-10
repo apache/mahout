@@ -149,7 +149,7 @@ public class BuildForest extends Configured implements Tool {
       datasetPath = new Path(datasetName);
 
     } catch (OptionException e) {
-      System.err.println("Exception : " + e);
+      log.error("Error while parsing options", e);
       CommandLineUtil.printHelp(group);
       return -1;
     }
@@ -205,8 +205,7 @@ public class BuildForest extends Configured implements Tool {
     return forest;
   }
 
-  protected static Data loadData(Configuration conf, Path dataPath, Dataset dataset)
-      throws Exception {
+  protected static Data loadData(Configuration conf, Path dataPath, Dataset dataset) throws IOException {
     log.info("Loading the data...");
     FileSystem fs = dataPath.getFileSystem(conf);
     Data data = DataLoader.loadData(dataset, fs, dataPath);

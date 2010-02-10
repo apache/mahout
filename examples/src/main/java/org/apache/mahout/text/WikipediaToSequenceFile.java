@@ -206,7 +206,7 @@ public final class WikipediaToSequenceFile {
     }
     
     Set<String> categories = new HashSet<String>();
-    if (catFile.equals("") == false) {
+    if (catFile.length() > 0) {
       for (String line : new FileLineIterable(new File(catFile))) {
         categories.add(line.trim().toLowerCase());
       }

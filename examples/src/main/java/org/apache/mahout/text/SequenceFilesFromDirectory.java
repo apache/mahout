@@ -23,7 +23,6 @@ import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Iterator;
 
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -52,7 +51,7 @@ import org.apache.mahout.common.FileLineIterable;
  */
 public final class SequenceFilesFromDirectory {
   
-  private ChunkedWriter createNewChunkedWriter(int chunkSizeInMB,
+  private static ChunkedWriter createNewChunkedWriter(int chunkSizeInMB,
                                                String outputDir) throws IOException {
     return new ChunkedWriter(chunkSizeInMB, outputDir);
   }

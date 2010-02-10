@@ -18,7 +18,6 @@
 package org.apache.mahout.common;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -54,9 +53,8 @@ public final class HadoopUtil {
     }
   }
   
-  public static void deletePaths(List<Path> paths, FileSystem fs) throws IOException {
-    for (int i = 0; i < paths.size(); i++) {
-      Path path = paths.get(i);
+  public static void deletePaths(Iterable<Path> paths, FileSystem fs) throws IOException {
+    for (Path path : paths) {
       if (fs.exists(path)) {
         log.warn("Deleting {}", path);
         fs.delete(path, true);

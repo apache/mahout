@@ -181,7 +181,7 @@ public abstract class Abstract${keyTypeCap}${valueTypeCap}Map extends AbstractSe
 
   /**
    * Returns the value associated with the specified key. It is often a good idea to first check with {@link
-   * #containsKey(int)} whether the given key has a value associated or not, i.e. whether there exists an association
+   * #containsKey(${keyType})} whether the given key has a value associated or not, i.e. whether there exists an association
    * for the given key or not.
    *
    * @param key the key to be searched for.

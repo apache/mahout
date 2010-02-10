@@ -51,9 +51,7 @@ public final class JobExecutor {
    * @throws Exception
    *           any exception thrown at job execution.
    * */
-  public static void execute(String[] args, BayesJob job) throws ClassNotFoundException,
-                                                         IOException,
-                                                         InterruptedException {
+  public static void execute(String[] args, BayesJob job) throws IOException {
     GroupBuilder gbuilder = new GroupBuilder();
     
     Option inputOpt = DefaultOptionCreator.inputOption().create();

@@ -40,9 +40,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A compact representation of transactions modeled on the lines to
- * {@link FPTree} This reduces plenty of space and speeds up Map/Reduce of
+ * {@link org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPTree} This reduces plenty of space and speeds up Map/Reduce of
  * {@link PFPGrowth} algorithm by reducing data size passed from the Mapper to
- * the reducer where {@link FPGrowth} mining is done
+ * the reducer where {@link org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth} mining is done
  */
 public final class TransactionTree implements Writable {
   /**

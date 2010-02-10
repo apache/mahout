@@ -50,8 +50,8 @@ public class VectorWritable extends Configured implements Writable {
 
   @Override
   public void write(DataOutput out) throws IOException {
-    Writable w = null;
-    if(vector instanceof Writable) {
+    Writable w;
+    if (vector instanceof Writable) {
       w = (Writable) vector;
     } else if(vector instanceof RandomAccessSparseVector) {
       w = new RandomAccessSparseVectorWritable(vector);
@@ -67,7 +67,7 @@ public class VectorWritable extends Configured implements Writable {
   public void readFields(DataInput in) throws IOException {
     try {
       String vectorClassName = in.readUTF();
-      Class<? extends Vector> inputClass = (Class<? extends Vector>) getConf().getClassByName(vectorClassName);
+      Class<? extends Vector> inputClass = getConf().getClassByName(vectorClassName).asSubclass(Vector.class);
       Class<? extends Vector> vectorClass = getConf().getClass("vector.class", inputClass, Vector.class);
       vector = ReflectionUtils.newInstance(vectorClass, getConf());
       ((Writable)vector).readFields(in);

@@ -131,7 +131,7 @@ public class Job {
     if (dfs.exists(outPath)) {
       dfs.delete(outPath, true);
     }
-    final String directoryContainingConvertedInput = output + Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
+    String directoryContainingConvertedInput = output + Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
     InputDriver.runJob(input, directoryContainingConvertedInput);
     MeanShiftCanopyJob.runJob(directoryContainingConvertedInput, output + "/meanshift",
         measureClassName, t1, t2, convergenceDelta, maxIterations);

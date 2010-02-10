@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -115,7 +114,7 @@ public class TestMapReduce extends MahoutTestCase {
     for (VectorWritable v : sampleData) {
       mapper.map(null, v, collector, null);
     }
-    Map<String, List<VectorWritable>> data = collector.getData();
+    //Map<String, List<VectorWritable>> data = collector.getData();
     // this seed happens to produce two partitions, but they work
     //assertEquals("output size", 3, data.size());
   }
@@ -135,7 +134,7 @@ public class TestMapReduce extends MahoutTestCase {
     for (VectorWritable v : sampleData) {
       mapper.map(null, v, mapCollector, null);
     }
-    Map<String, List<VectorWritable>> data = mapCollector.getData();
+    //Map<String, List<VectorWritable>> data = mapCollector.getData();
     // this seed happens to produce three partitions, but they work
     //assertEquals("output size", 7, data.size());
 

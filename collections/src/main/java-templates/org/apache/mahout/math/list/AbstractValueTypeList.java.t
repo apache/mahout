@@ -34,8 +34,8 @@ import org.apache.mahout.math.function.${valueTypeCap}Procedure;
 //CHECKSTYLE:ON
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+
 /**
  Abstract base class for resizable lists holding <code>${valueType}</code> elements; abstract.
 */

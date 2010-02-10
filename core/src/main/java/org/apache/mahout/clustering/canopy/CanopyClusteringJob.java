@@ -25,8 +25,6 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
-import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.slf4j.Logger;
@@ -107,9 +105,9 @@ public final class CanopyClusteringJob {
         measureClass = cmdLine.getValue(measureClassOpt).toString();
       }
 
-      Class<? extends Vector> vectorClass = cmdLine.hasOption(vectorClassOpt) == false ?
-          RandomAccessSparseVector.class
-          : (Class<? extends Vector>) Class.forName(cmdLine.getValue(vectorClassOpt).toString());
+      //Class<? extends Vector> vectorClass = cmdLine.hasOption(vectorClassOpt) == false ?
+      //    RandomAccessSparseVector.class
+      //    : (Class<? extends Vector>) Class.forName(cmdLine.getValue(vectorClassOpt).toString());
       double t1 = Double.parseDouble(cmdLine.getValue(t1Opt).toString());
       double t2 = Double.parseDouble(cmdLine.getValue(t2Opt).toString());
 

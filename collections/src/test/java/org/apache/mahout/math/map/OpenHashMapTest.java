@@ -254,8 +254,8 @@ public class OpenHashMapTest extends Assert {
     map.put("Fourteen", "14");
     map.remove(new String("Thirteen"));
     OpenHashMap<String, String> map2 = (OpenHashMap<String, String>) map.clone();
-    assertTrue(map.equals(map2));
-    assertTrue(map2.equals(map));
+    assertEquals(map, map2);
+    assertEquals(map2, map);
     assertFalse("Hello Sailor".equals(map));
     assertFalse(map.equals("hello sailor"));
     map2.remove("Eleven");

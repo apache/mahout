@@ -27,10 +27,10 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.Counters.Counter;
 
 public class DummyReporter implements Reporter {
-  
-  private String status = "";
-  private Map<Enum<?>,MutableLong> count1 = new HashMap<Enum<?>,MutableLong>();
-  private Map<String,Map<String,MutableLong>> count2 = new HashMap<String,Map<String,MutableLong>>();
+
+  //private String status = "";
+  private final Map<Enum<?>,MutableLong> count1 = new HashMap<Enum<?>,MutableLong>();
+  private final Map<String,Map<String,MutableLong>> count2 = new HashMap<String,Map<String,MutableLong>>();
   
   @Override
   public Counter getCounter(Enum<?> name) {
@@ -69,7 +69,7 @@ public class DummyReporter implements Reporter {
   
   @Override
   public void setStatus(String status) {
-    this.status = status;
+    //this.status = status;
   }
   
   @Override

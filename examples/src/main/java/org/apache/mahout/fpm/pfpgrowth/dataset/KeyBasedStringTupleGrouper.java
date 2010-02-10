@@ -50,6 +50,9 @@ import org.apache.mahout.common.StringTuple;
 
 public class KeyBasedStringTupleGrouper {
 
+  private KeyBasedStringTupleGrouper() {
+  }
+
   public static void startJob(Parameters params) throws IOException,
       InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();

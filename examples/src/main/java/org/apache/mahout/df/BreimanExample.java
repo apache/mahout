@@ -57,25 +57,25 @@ public class BreimanExample extends Configured implements Tool {
   private static final Logger log = LoggerFactory.getLogger(BreimanExample.class);
 
   /** sum test error */
-  private static double sumTestErr;
+  private double sumTestErr;
 
   /** sum mean tree error */
-  private static double sumTreeErr;
+  private double sumTreeErr;
 
   /** sum test error with m=1 */
-  private static double sumOneErr = 0.0;
+  private double sumOneErr;
 
   /** mean time to build a forest with m=log2(M)+1 */
-  private static long sumTimeM;
+  private long sumTimeM;
 
   /** mean time to build a forest with m=1 */
-  private static long sumTimeOne;
+  private long sumTimeOne;
 
   /** mean number of nodes for all the trees grown with m=log2(M)+1 */
-  protected static long numNodesM;
+  private long numNodesM;
 
   /** mean number of nodes for all the trees grown with m=1 */
-  protected static long numNodesOne;
+  private long numNodesOne;
 
   /**
    * runs one iteration of the procedure.
@@ -86,7 +86,7 @@ public class BreimanExample extends Configured implements Tool {
    * @param nbtrees number of trees to grow
    * @throws Exception if an error occured while growing the trees
    */
-  protected static void runIteration(Random rng, Data data, int m, int nbtrees) {
+  private void runIteration(Random rng, Data data, int m, int nbtrees) {
 
     int nblabels = data.getDataset().nblabels();
 
@@ -202,7 +202,7 @@ public class BreimanExample extends Configured implements Tool {
       dataPath = new Path(dataName);
       datasetPath = new Path(datasetName);
     } catch (OptionException e) {
-      System.err.println("Exception : " + e);
+      log.error("Error while parsing options", e);
       CommandLineUtil.printHelp(group);
       return -1;
     }

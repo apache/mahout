@@ -164,7 +164,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
 
   /**
    * Applies a procedure to each (key,value) pair of the receiver, if any. Iteration order is guaranteed to be
-   * <i>identical</i> to the order used by method {@link #forEachKey(IntProcedure)}.
+   * <i>identical</i> to the order used by method {@link #forEachKey(ObjectProcedure)}.
    *
    * @param procedure the procedure to be applied. Stops iteration if the procedure returns <tt>false</tt>, otherwise
    *                  continues.
@@ -194,7 +194,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
   /**
    * Returns a list filled with all keys contained in the receiver. The returned list has a size that equals
    * <tt>this.size()</tt>. Iteration order is guaranteed to be <i>identical</i> to the order used by method {@link
-   * #forEachKey(IntProcedure)}. <p> This method can be used to iterate over the keys of the receiver.
+   * #forEachKey(ObjectProcedure)}. <p> This method can be used to iterate over the keys of the receiver.
    *
    * @return the keys.
    */
@@ -207,7 +207,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
   /**
    * Fills all keys contained in the receiver into the specified list. Fills the list, starting at index 0. After this
    * call returns the specified list has a new size that equals <tt>this.size()</tt>. Iteration order is guaranteed to
-   * be <i>identical</i> to the order used by method {@link #forEachKey(IntProcedure)}. <p> This method can be used to
+   * be <i>identical</i> to the order used by method {@link #forEachKey(ObjectProcedure)}. <p> This method can be used to
    * iterate over the keys of the receiver.
    *
    * @param list the list to be filled, can have any size.
@@ -241,7 +241,8 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
   /**
    * Fills all pairs satisfying a given condition into the specified lists. Fills into the lists, starting at index 0.
    * After this call returns the specified lists both have a new size, the number of pairs satisfying the condition.
-   * Iteration order is guaranteed to be <i>identical</i> to the order used by method {@link #forEachKey(IntProcedure)}.
+   * Iteration order is guaranteed to be <i>identical</i> to the order used by method
+   * {@link #forEachKey(ObjectProcedure)}.
    * <p> <b>Example:</b> <br>
    * <pre>
    * IntIntProcedure condition = new IntIntProcedure() { // match even keys only
@@ -407,7 +408,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
   /**
    * Returns a list filled with all values contained in the receiver. The returned list has a size that equals
    * <tt>this.size()</tt>. Iteration order is guaranteed to be <i>identical</i> to the order used by method {@link
-   * #forEachKey(IntProcedure)}. <p> This method can be used to iterate over the values of the receiver.
+   * #forEachKey(ObjectProcedure)}. <p> This method can be used to iterate over the values of the receiver.
    *
    * @return the values.
    */
@@ -420,7 +421,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
   /**
    * Fills all values contained in the receiver into the specified list. Fills the list, starting at index 0. After this
    * call returns the specified list has a new size that equals <tt>this.size()</tt>. Iteration order is guaranteed to
-   * be <i>identical</i> to the order used by method {@link #forEachKey(IntProcedure)}. <p> This method can be used to
+   * be <i>identical</i> to the order used by method {@link #forEachKey(ObjectProcedure)}. <p> This method can be used to
    * iterate over the values of the receiver.
    *
    * @param list the list to be filled, can have any size.

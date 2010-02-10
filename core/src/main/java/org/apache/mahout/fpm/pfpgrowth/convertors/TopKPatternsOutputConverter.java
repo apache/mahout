@@ -40,7 +40,7 @@ public final class TopKPatternsOutputConverter<A extends Comparable<? super A>>
   
   private OutputCollector<A,List<Pair<List<A>,Long>>> collector = null;
   
-  private Map<Integer,A> reverseMapping;
+  private final Map<Integer,A> reverseMapping;
   
   public TopKPatternsOutputConverter(OutputCollector<A,List<Pair<List<A>,Long>>> collector,
                                      Map<Integer,A> reverseMapping) {

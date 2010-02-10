@@ -167,7 +167,7 @@ public class CDGA {
 
       printElapsedTime(end - start);
     } catch (OptionException e) {
-      System.err.println("Exception : " + e);
+      log.error("Error while parsing options", e);
       CommandLineUtil.printHelp(group);
     }
   }

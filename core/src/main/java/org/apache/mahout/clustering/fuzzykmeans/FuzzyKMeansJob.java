@@ -26,7 +26,6 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
-import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.CommandLineUtil;
@@ -104,7 +103,7 @@ public class FuzzyKMeansJob {
       boolean doCanopy = Boolean.parseBoolean(cmdLine.getValue(doCanopyOpt).toString());
       float m = Float.parseFloat(cmdLine.getValue(mOpt).toString());
       String vectorClassName = cmdLine.getValue(vectorClassOpt).toString();
-      Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
+      //Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
       runJob(input, clusters, output, measureClass, convergenceDelta,
           maxIterations, numMapTasks, numReduceTasks, doCanopy, m);
     } catch (OptionException e) {

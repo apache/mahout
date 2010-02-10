@@ -97,7 +97,7 @@ public class Job {
             measureClassOpt, "org.apache.mahout.common.distance.EuclideanDistanceMeasure").toString();
 
         String className =  cmdLine.getValue(vectorClassOpt, "org.apache.mahout.math.RandomAccessSparseVector").toString();
-        Class<? extends Vector> vectorClass = Class.forName(className).asSubclass(Vector.class);
+        //Class<? extends Vector> vectorClass = Class.forName(className).asSubclass(Vector.class);
         double t1 = Double.parseDouble(cmdLine.getValue(t1Opt, "80").toString());
         double t2 = Double.parseDouble(cmdLine.getValue(t2Opt, "55").toString());
 

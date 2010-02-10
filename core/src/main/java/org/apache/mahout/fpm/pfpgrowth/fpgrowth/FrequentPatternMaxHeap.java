@@ -30,13 +30,13 @@ public final class FrequentPatternMaxHeap {
   
   private Pattern least;
   
-  private int maxSize;
+  private final int maxSize;
   
-  private boolean subPatternCheck;
+  private final boolean subPatternCheck;
   
-  private OpenLongObjectHashMap<Set<Pattern>> patternIndex;
+  private final OpenLongObjectHashMap<Set<Pattern>> patternIndex;
   
-  private PriorityQueue<Pattern> queue;
+  private final PriorityQueue<Pattern> queue;
   
   public FrequentPatternMaxHeap(int numResults, boolean subPatternCheck) {
     maxSize = numResults;

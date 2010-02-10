@@ -45,11 +45,7 @@ public final class PrepareTwentyNewsgroups {
   
   private PrepareTwentyNewsgroups() { }
   
-  public static void main(String[] args) throws IOException,
-                                        ClassNotFoundException,
-                                        InstantiationException,
-                                        IllegalAccessException,
-                                        OptionException {
+  public static void main(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();

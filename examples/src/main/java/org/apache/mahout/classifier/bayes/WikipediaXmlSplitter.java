@@ -41,6 +41,8 @@ import org.apache.hadoop.io.compress.BZip2Codec;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.FileLineIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Splits the wikipedia xml file in to chunks of size as specified by command
@@ -48,9 +50,12 @@ import org.apache.mahout.common.FileLineIterator;
  * 
  */
 public final class WikipediaXmlSplitter {
+
+  private static final Logger log = LoggerFactory.getLogger(WikipediaXmlSplitter.class);
+
   private WikipediaXmlSplitter() { }
   
-  public static void main(String[] args) throws IOException, OptionException {
+  public static void main(String[] args) throws IOException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -114,7 +119,7 @@ public final class WikipediaXmlSplitter {
     try {
       cmdLine = parser.parse(args);
     } catch (OptionException e) {
-      System.err.println(e.getMessage());
+      log.error("Error while parsing options", e);
       CommandLineUtil.printHelp(group);
       return;
     }

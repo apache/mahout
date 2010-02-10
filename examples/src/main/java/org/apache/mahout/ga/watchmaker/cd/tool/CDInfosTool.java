@@ -254,7 +254,7 @@ public class CDInfosTool {
       log.info("Storing Descriptions...");
       storeDescriptions(fs, inpath, descriptors, descriptions);
     } catch (OptionException e) {
-      System.err.println("Exception : " + e);
+      log.error("Error while parsing options", e);
       CommandLineUtil.printHelp(group);
     }
   }

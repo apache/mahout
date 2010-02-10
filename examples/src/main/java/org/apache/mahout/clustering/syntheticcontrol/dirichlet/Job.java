@@ -17,8 +17,6 @@
 
 package org.apache.mahout.clustering.syntheticcontrol.dirichlet;
 
-import static org.apache.mahout.clustering.syntheticcontrol.Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
-
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -41,6 +39,7 @@ import org.apache.mahout.clustering.dirichlet.DirichletJob;
 import org.apache.mahout.clustering.dirichlet.DirichletMapper;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
+import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -51,13 +50,12 @@ import org.slf4j.LoggerFactory;
 public class Job {
 
   /**Logger for this class.*/
-  private static final Logger LOG = LoggerFactory.getLogger(Job.class);
+  private static final Logger log = LoggerFactory.getLogger(Job.class);
 
   private Job() {
   }
 
-  public static void main(String[] args) throws IOException, ClassNotFoundException, InstantiationException,
-      IllegalAccessException, SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
+  public static void main(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -107,7 +105,7 @@ public class Job {
       String vectorClassName = cmdLine.getValue(vectorOpt, "org.apache.mahout.math.RandomAccessSparseVector").toString();
       runJob(input, output, modelFactory, numModels, maxIterations, alpha_0, numReducers, vectorClassName);
     } catch (OptionException e) {
-      LOG.error("Exception parsing command line: ", e);
+      log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
     }
   }
@@ -131,9 +129,16 @@ public class Job {
    * @throws IllegalArgumentException 
    * @throws SecurityException 
    */
-  public static void runJob(String input, String output, String modelFactory, int numModels, int maxIterations, double alpha_0,
-      int numReducers, String vectorClassName) throws IOException, ClassNotFoundException, InstantiationException,
-      IllegalAccessException, SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
+  public static void runJob(String input,
+                            String output,
+                            String modelFactory,
+                            int numModels,
+                            int maxIterations,
+                            double alpha_0,
+                            int numReducers,
+                            String vectorClassName)
+      throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
+      SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
     // delete the output directory
     JobConf conf = new JobConf(DirichletJob.class);
     Path outPath = new Path(output);
@@ -142,10 +147,17 @@ public class Job {
       fs.delete(outPath, true);
     }
     fs.mkdirs(outPath);
-    final String directoryContainingConvertedInput = output + DIRECTORY_CONTAINING_CONVERTED_INPUT;
+    String directoryContainingConvertedInput = output + Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
     InputDriver.runJob(input, directoryContainingConvertedInput, vectorClassName);
-    DirichletDriver.runJob(directoryContainingConvertedInput, output + "/state", modelFactory, vectorClassName, 60, numModels,
-        maxIterations, alpha_0, numReducers);
+    DirichletDriver.runJob(directoryContainingConvertedInput,
+                           output + "/state",
+                           modelFactory,
+                           vectorClassName,
+                           60,
+                           numModels,
+                           maxIterations,
+                           alpha_0,
+                           numReducers);
     printResults(output + "/state", modelFactory, vectorClassName, 60, maxIterations, numModels, alpha_0);
   }
 
@@ -186,17 +198,19 @@ public class Job {
    */
   private static void printResults(List<List<DirichletCluster<VectorWritable>>> clusters, int significant) {
     int row = 0;
+    StringBuilder result = new StringBuilder();
     for (List<DirichletCluster<VectorWritable>> r : clusters) {
-      System.out.print("sample[" + row++ + "]= ");
+      result.append("sample=").append(row++).append("]= ");
       for (int k = 0; k < r.size(); k++) {
         Model<VectorWritable> model = r.get(k).getModel();
         if (model.count() > significant) {
           int total = (int) r.get(k).getTotalCount();
-          System.out.print("m" + k + '(' + total + ')' + model.toString() + ", ");
+          result.append('m').append(k).append('(').append(total).append(')').append(model).append(", ");
         }
       }
-      System.out.println();
+      result.append('\n');
     }
-    System.out.println();
+    result.append('\n');
+    log.info(result.toString());
   }
 }

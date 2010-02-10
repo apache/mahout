@@ -50,27 +50,19 @@ public final class TrainClassifier {
   
   public static void trainNaiveBayes(String dir,
                                      String outputDir,
-                                     BayesParameters params) throws IOException,
-                                                            InterruptedException,
-                                                            ClassNotFoundException {
+                                     BayesParameters params) throws IOException {
     BayesDriver driver = new BayesDriver();
     driver.runJob(dir, outputDir, params);
   }
   
   public static void trainCNaiveBayes(String dir,
                                       String outputDir,
-                                      BayesParameters params) throws IOException,
-                                                             InterruptedException,
-                                                             ClassNotFoundException {
+                                      BayesParameters params) throws IOException {
     CBayesDriver driver = new CBayesDriver();
     driver.runJob(dir, outputDir, params);
   }
   
-  public static void main(String[] args) throws IOException,
-                                        NumberFormatException,
-                                        IllegalStateException,
-                                        InterruptedException,
-                                        ClassNotFoundException {
+  public static void main(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -158,9 +150,8 @@ public final class TrainClassifier {
           (String) cmdLine.getValue(outputOpt), params);
       }
     } catch (OptionException e) {
-      log.info("{}", e);
+      log.error("Error while parsing options", e);
       CommandLineUtil.printHelp(group);
-      return;
     }
   }
 }

@@ -85,12 +85,10 @@ public final class DeliciousTagsExample {
       params.set("selectedFieldCount", "1");
       params.set("field0", "3");
       params.set("maxTransactionLength", "100");
-      KeyBasedStringTupleGrouper dataGrouper = new KeyBasedStringTupleGrouper();
-      dataGrouper.startJob(params);
+      KeyBasedStringTupleGrouper.startJob(params);
 
     } catch (OptionException ex) {
       CommandLineUtil.printHelp(group);
-      return;
     }
 
   }

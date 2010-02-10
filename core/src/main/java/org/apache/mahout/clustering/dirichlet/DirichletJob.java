@@ -44,8 +44,7 @@ public class DirichletJob {
   private DirichletJob() {
   }
 
-  public static void main(String[] args) throws IOException, ClassNotFoundException, InstantiationException,
-      IllegalAccessException, SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
+  public static void main(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -119,7 +118,7 @@ public class DirichletJob {
    */
   public static void runJob(String input, String output, String modelFactory, String modelPrototype, int prototypeSize,
       int numModels, int maxIterations, double alpha_0) throws IOException, ClassNotFoundException, InstantiationException,
-      IllegalAccessException, SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
+      IllegalAccessException, SecurityException, NoSuchMethodException, InvocationTargetException {
     // delete the output directory
     Configuration conf = new JobConf(DirichletJob.class);
     Path outPath = new Path(output);

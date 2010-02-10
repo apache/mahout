@@ -36,8 +36,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
-import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.math.VectorWritable;
@@ -112,9 +110,9 @@ public class ClusterDriver {
       String output = cmdLine.getValue(outputOpt).toString();
       String canopies = cmdLine.getValue(canopiesOpt).toString();
       String points = cmdLine.getValue(pointsOpt).toString();
-      Class<? extends Vector> vectorClass = cmdLine.hasOption(vectorClassOpt) == false ?
-          RandomAccessSparseVector.class
-          : (Class<? extends Vector>) Class.forName(cmdLine.getValue(vectorClassOpt).toString());
+      //Class<? extends Vector> vectorClass = cmdLine.hasOption(vectorClassOpt) == false ?
+      //    RandomAccessSparseVector.class
+      //    : (Class<? extends Vector>) Class.forName(cmdLine.getValue(vectorClassOpt).toString());
       double t1 = Double.parseDouble(cmdLine.getValue(t1Opt).toString());
       double t2 = Double.parseDouble(cmdLine.getValue(t2Opt).toString());
 

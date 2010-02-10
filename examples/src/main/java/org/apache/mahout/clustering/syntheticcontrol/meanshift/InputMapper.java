@@ -36,7 +36,7 @@ public class InputMapper extends MapReduceBase implements
     Mapper<LongWritable, Text, Text, MeanShiftCanopy> {
 
   private static final Pattern SPACE = Pattern.compile(" ");
-  int nextCanopyId = 0;
+  private int nextCanopyId = 0;
   
   @Override
   public void map(LongWritable key, Text values,

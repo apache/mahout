@@ -30,11 +30,11 @@ import org.apache.mahout.common.Pair;
  * @param <AP>
  */
 public class TransactionIterator<AP> implements Iterator<Pair<int[],Long>> {
-  private Map<AP,Integer> attributeIdMapping;
+  private final Map<AP,Integer> attributeIdMapping;
   
-  private Iterator<Pair<List<AP>,Long>> iterator;
+  private final Iterator<Pair<List<AP>,Long>> iterator;
   
-  private int[] transactionBuffer;
+  private final int[] transactionBuffer;
   
   public TransactionIterator(Iterator<Pair<List<AP>,Long>> iterator,
                              Map<AP,Integer> attributeIdMapping) {

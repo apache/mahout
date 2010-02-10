@@ -32,9 +32,9 @@ import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 public final class IntegerStringOutputConverter implements
     OutputCollector<Integer,List<Pair<List<Integer>,Long>>> {
   
-  private OutputCollector<Text,TopKStringPatterns> collector;
+  private final OutputCollector<Text,TopKStringPatterns> collector;
   
-  private List<String> featureReverseMap;
+  private final List<String> featureReverseMap;
   
   public IntegerStringOutputConverter(OutputCollector<Text,TopKStringPatterns> collector,
                                       List<String> featureReverseMap) {

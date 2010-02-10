@@ -33,7 +33,7 @@ import org.apache.mahout.common.Pair;
  *
  */
 public final class TopKStringPatterns implements Writable {
-  private List<Pair<List<String>,Long>> frequentPatterns;
+  private final List<Pair<List<String>,Long>> frequentPatterns;
   
   public TopKStringPatterns() {
     frequentPatterns = new ArrayList<Pair<List<String>,Long>>();

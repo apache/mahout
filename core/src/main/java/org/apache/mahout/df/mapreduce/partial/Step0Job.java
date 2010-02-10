@@ -238,7 +238,7 @@ public class Step0Job {
    * 
    */
   public static class Step0Output implements Writable,
-      Comparable<Step0Output> {
+      Comparable<Step0Output>, Cloneable {
 
     /**
      * first key of the partition<br>

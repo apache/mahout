@@ -138,7 +138,7 @@ public final class SparseVectorsFromSequenceFiles {
       analyzerClass.newInstance();
     }
     
-    boolean processIdf = false;
+    boolean processIdf;
     
     if (cmdLine.hasOption(weightOpt)) {
       String wString = cmdLine.getValue(weightOpt).toString();

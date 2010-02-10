@@ -21,13 +21,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.mahout.common.IntegerTuple;
+
 /**
  * Iterates over an integer tuple and output it as a list
- *
  */
 public final class IntegerTupleIterator implements Iterator<List<Integer>> {
   
-  private Iterator<IntegerTuple> iterator;
+  private final Iterator<IntegerTuple> iterator;
   
   public IntegerTupleIterator(Iterator<IntegerTuple> iterator) {
     this.iterator = iterator;

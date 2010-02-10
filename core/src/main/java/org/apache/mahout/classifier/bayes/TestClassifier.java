@@ -197,11 +197,12 @@ public final class TestClassifier {
       params.set("alpha_i", alphaI);
       params.set("testDirPath", testDirPath);
       
-      if (classificationMethod.equalsIgnoreCase("sequential")) classifySequential(params);
-      else if (classificationMethod.equalsIgnoreCase("mapreduce")) classifyParallel(params);
+      if (classificationMethod.equalsIgnoreCase("sequential"))
+        classifySequential(params);
+      else if (classificationMethod.equalsIgnoreCase("mapreduce"))
+        classifyParallel(params);
     } catch (OptionException e) {
       CommandLineUtil.printHelp(group);
-      return;
     }
   }
   
