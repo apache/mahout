@@ -428,8 +428,11 @@ public class Algebra extends PersistentObject {
   public DoubleMatrix2D pow(DoubleMatrix2D A, int p) {
     // matrix multiplication based on log2 method: A*A*....*A is slow, ((A * A)^2)^2 * ... is faster
     // allocates two auxiliary matrices as work space
-
-    Blas blas = SmpBlas.getSmpBlas(); // for parallel matrix mult; if not initialized defaults to sequential blas
+    
+    // Could be replaced by parallel matrix mult libary
+    // Was: for parallel matrix mult; if not initialized defaults to sequential blas
+    Blas blas = SeqBlas.seqBlas;
+   
     Property.DEFAULT.checkSquare(A);
     if (p < 0) {
       A = inverse(A);
