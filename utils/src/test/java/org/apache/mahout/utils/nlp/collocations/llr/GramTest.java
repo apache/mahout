@@ -17,8 +17,8 @@
 
 package org.apache.mahout.utils.nlp.collocations.llr;
 
-import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Position.HEAD;
-import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Position.TAIL;
+import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.HEAD;
+import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.TAIL;
 
 import java.util.HashMap;
 

@@ -17,8 +17,9 @@
 
 package org.apache.mahout.utils.nlp.collocations.llr;
 
-import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Position.HEAD;
-import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Position.TAIL;
+import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.HEAD;
+import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.TAIL;
+import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.UNIGRAM;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -50,6 +51,7 @@ public class CollocReducerTest {
     // input[*][1..n] are the values passed in via
     // the iterator.
     Gram[][] input = new Gram[][] {
+        { new Gram("the",   UNIGRAM), new Gram("the", UNIGRAM), new Gram("the", UNIGRAM) },
         { new Gram("the",   HEAD), new Gram("the best"), new Gram("the worst") },
         { new Gram("of",    HEAD), new Gram("of times"), new Gram("of times") },
         { new Gram("times", TAIL), new Gram("of times"), new Gram("of times") }
@@ -57,6 +59,7 @@ public class CollocReducerTest {
 
     // expected results.
     Gram[][] values = new Gram[][] {
+        { new Gram("the", 4, UNIGRAM), new Gram("the", 2, UNIGRAM) },                             
         { new Gram("the best",  1), new Gram("the", 2,   HEAD) }, 
         { new Gram("the worst", 1), new Gram("the", 2,   HEAD) }, 
         { new Gram("of times",  2), new Gram("of",  2,   HEAD) }, 

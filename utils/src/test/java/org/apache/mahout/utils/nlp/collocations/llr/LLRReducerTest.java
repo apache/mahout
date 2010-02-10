@@ -17,8 +17,8 @@
 
 package org.apache.mahout.utils.nlp.collocations.llr;
 
-import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Position.HEAD;
-import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Position.TAIL;
+import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.HEAD;
+import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.TAIL;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -51,9 +51,9 @@ public class LLRReducerTest {
   LLCallback cl;
   // not verifying the llr algo output here, just the input, but it is handy
   // to see the values emitted.
-  OutputCollector<DoubleWritable,Text> collector = new OutputCollector<DoubleWritable, Text>() {
+  OutputCollector<Text,DoubleWritable> collector = new OutputCollector<Text,DoubleWritable>() {
     @Override
-    public void collect(DoubleWritable key, Text value) throws IOException {
+    public void collect(Text key, DoubleWritable value) throws IOException {
       log.info(key.toString() + " " + value.toString());
     }
   };

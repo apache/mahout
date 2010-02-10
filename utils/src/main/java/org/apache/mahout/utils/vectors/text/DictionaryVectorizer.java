@@ -28,6 +28,7 @@ import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
@@ -43,6 +44,7 @@ import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.utils.nlp.collocations.llr.CollocDriver;
 import org.apache.mahout.utils.vectors.common.PartialVectorMerger;
 import org.apache.mahout.utils.vectors.text.term.TFPartialVectorReducer;
 import org.apache.mahout.utils.vectors.text.term.TermCountMapper;
@@ -60,9 +62,13 @@ public final class DictionaryVectorizer {
   
   public static final String DOCUMENT_VECTOR_OUTPUT_FOLDER = "/vectors";
   
-  private static final String DICTIONARY_FILE = "/dictionary.file-";
+  public static final String MIN_SUPPORT = "min.support";
   
-  private static final String FREQUENCY_FILE = "/frequency.file-";
+  public static final String MAX_NGRAMS = "max.ngrams";
+  
+  public static final int DEFAULT_MIN_SUPPORT = 2;
+  
+  private static final String DICTIONARY_FILE = "/dictionary.file-";
   
   private static final int MAX_CHUNKSIZE = 10000;
   
@@ -75,7 +81,7 @@ public final class DictionaryVectorizer {
   
   private static final String VECTOR_OUTPUT_FOLDER = "/partial-vectors-";
   
-  private static final String WORDCOUNT_OUTPUT_FOLDER = "/wordcount";
+  private static final String DICTIONARY_JOB_FOLDER = "/wordcount";
   
   /**
    * Cannot be initialized. Use the static functions
@@ -99,6 +105,11 @@ public final class DictionaryVectorizer {
    * @param minSupport
    *          the minimum frequency of the feature in the entire corpus to be
    *          considered for inclusion in the sparse vector
+   * @param maxNGramSize
+   *          1 = unigram, 2 = unigram and bigram, 3 = unigram, bigrama and
+   *          trigram
+   * @param minLLRValue
+   *          minValue of log likelihood ratio to used to prune ngrams
    * @param chunkSizeInMegabytes
    *          the size in MB of the feature => id chunk to be kept in memory at
    *          each node during Map/Reduce stage. Its recommended you calculated
@@ -112,19 +123,32 @@ public final class DictionaryVectorizer {
   public static void createTermFrequencyVectors(String input,
                                                 String output,
                                                 int minSupport,
+                                                int maxNGramSize,
+                                                float minLLRValue,
+                                                int numReducers,
                                                 int chunkSizeInMegabytes) throws IOException {
     if (chunkSizeInMegabytes < MIN_CHUNKSIZE) {
       chunkSizeInMegabytes = MIN_CHUNKSIZE;
     } else if (chunkSizeInMegabytes > MAX_CHUNKSIZE) { // 10GB
       chunkSizeInMegabytes = MAX_CHUNKSIZE;
     }
+    if (minSupport < 0) minSupport = DEFAULT_MIN_SUPPORT;
     
     Path inputPath = new Path(input);
-    Path wordCountPath = new Path(output + WORDCOUNT_OUTPUT_FOLDER);
+    Path dictionaryJobPath = new Path(output + DICTIONARY_JOB_FOLDER);
     
-    startWordCounting(inputPath, wordCountPath);
-    List<Path> dictionaryChunks = createDictionaryChunks(minSupport,
-      wordCountPath, output, chunkSizeInMegabytes);
+    List<Path> dictionaryChunks;
+    if (maxNGramSize == 1) {
+      startWordCounting(inputPath, dictionaryJobPath, minSupport);
+      dictionaryChunks = createDictionaryChunks(minSupport, dictionaryJobPath,
+        output, chunkSizeInMegabytes, new LongWritable());
+    } else {
+      CollocDriver.generateAllGrams(inputPath.toString(), dictionaryJobPath
+          .toString(), maxNGramSize, minSupport, minLLRValue, numReducers);
+      dictionaryChunks = createDictionaryChunks(minSupport, new Path(
+          output + DICTIONARY_JOB_FOLDER + "/ngrams"), output,
+        chunkSizeInMegabytes, new DoubleWritable());
+    }
     
     int partialVectorIndex = 0;
     List<Path> partialVectorPaths = new ArrayList<Path>();
@@ -132,7 +156,8 @@ public final class DictionaryVectorizer {
       Path partialVectorOutputPath = getPath(output + VECTOR_OUTPUT_FOLDER,
         partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
-      makePartialVectors(input, dictionaryChunk, partialVectorOutputPath);
+      makePartialVectors(input, maxNGramSize, dictionaryChunk,
+        partialVectorOutputPath);
     }
     
     Configuration conf = new Configuration();
@@ -163,11 +188,11 @@ public final class DictionaryVectorizer {
   private static List<Path> createDictionaryChunks(int minSupport,
                                                    Path wordCountPath,
                                                    String dictionaryPathBase,
-                                                   int chunkSizeInMegabytes) throws IOException {
+                                                   int chunkSizeInMegabytes,
+                                                   Writable value) throws IOException {
     List<Path> chunkPaths = new ArrayList<Path>();
     
     Writable key = new Text();
-    LongWritable value = new LongWritable();
     Configuration conf = new Configuration();
     
     FileSystem fs = FileSystem.get(wordCountPath.toUri(), conf);
@@ -182,10 +207,6 @@ public final class DictionaryVectorizer {
     SequenceFile.Writer dictWriter = new SequenceFile.Writer(fs, conf,
         chunkPath, Text.class, IntWritable.class);
     
-    SequenceFile.Writer freqWriter = new SequenceFile.Writer(fs, conf, getPath(
-      dictionaryPathBase + FREQUENCY_FILE, chunkIndex), Text.class,
-        LongWritable.class);
-    
     long currentChunkSize = 0;
     
     int i = 0;
@@ -194,13 +215,8 @@ public final class DictionaryVectorizer {
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
       // key is feature value is count
       while (reader.next(key, value)) {
-        if (value.get() < minSupport) {
-          continue;
-        }
-        
         if (currentChunkSize > chunkSizeLimit) {
           dictWriter.close();
-          freqWriter.close();
           chunkIndex++;
           
           chunkPath = getPath(dictionaryPathBase + DICTIONARY_FILE, chunkIndex);
@@ -208,9 +224,6 @@ public final class DictionaryVectorizer {
           
           dictWriter = new SequenceFile.Writer(fs, conf, chunkPath, Text.class,
               IntWritable.class);
-          freqWriter = new SequenceFile.Writer(fs, conf, getPath(
-            dictionaryPathBase + FREQUENCY_FILE, chunkIndex), Text.class,
-              LongWritable.class);
           currentChunkSize = 0;
         }
         
@@ -218,12 +231,10 @@ public final class DictionaryVectorizer {
                         + (key.toString().length() * 2) + (Integer.SIZE / 8);
         currentChunkSize += fieldSize;
         dictWriter.append(key, new IntWritable(i++));
-        freqWriter.append(key, value);
       }
     }
     
     dictWriter.close();
-    freqWriter.close();
     
     return chunkPaths;
   }
@@ -238,6 +249,8 @@ public final class DictionaryVectorizer {
    * 
    * @param input
    *          input directory of the documents in {@link SequenceFile} format
+   * @param maxNGramSize
+   *          maximum size of ngrams to generate
    * @param dictionaryFilePath
    *          location of the chunk of features and the id's
    * @param output
@@ -245,6 +258,7 @@ public final class DictionaryVectorizer {
    * @throws IOException
    */
   private static void makePartialVectors(String input,
+                                         int maxNGramSize,
                                          Path dictionaryFilePath,
                                          Path output) throws IOException {
     
@@ -258,6 +272,8 @@ public final class DictionaryVectorizer {
     conf.setJobName("DictionaryVectorizer::MakePartialVectors: input-folder: "
                     + input + ", dictionary-file: "
                     + dictionaryFilePath.toString());
+    conf.setInt(MAX_NGRAMS, maxNGramSize);
+    
     conf.setMapOutputKeyClass(Text.class);
     conf.setMapOutputValueClass(StringTuple.class);
     conf.setOutputKeyClass(Text.class);
@@ -285,7 +301,7 @@ public final class DictionaryVectorizer {
    * Count the frequencies of words in parallel using Map/Reduce. The input
    * documents have to be in {@link SequenceFile} format
    */
-  private static void startWordCounting(Path input, Path output) throws IOException {
+  private static void startWordCounting(Path input, Path output, int minSupport) throws IOException {
     
     Configurable client = new JobClient();
     JobConf conf = new JobConf(DictionaryVectorizer.class);
@@ -296,6 +312,8 @@ public final class DictionaryVectorizer {
     
     conf.setJobName("DictionaryVectorizer::WordCount: input-folder: "
                     + input.toString());
+    conf.setInt(MIN_SUPPORT, minSupport);
+    
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(LongWritable.class);
     

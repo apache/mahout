@@ -17,14 +17,14 @@
 
 package org.apache.mahout.utils.nlp.collocations.llr;
 
-import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Position.HEAD;
-import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Position.TAIL;
-import static org.apache.mahout.utils.nlp.collocations.llr.NGramCollector.Count.NGRAM_TOTAL;
+import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.HEAD;
+import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.TAIL;
+import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.UNIGRAM;
 
 import java.io.Reader;
-import java.io.StringReader;
 import java.util.Collections;
 
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
@@ -32,16 +32,17 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
-import org.apache.mahout.utils.nlp.collocations.llr.Gram.Position;
+import org.apache.mahout.common.StringTuple;
+import org.apache.mahout.utils.nlp.collocations.llr.Gram.Type;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 
-/** Test for NGramCollectorTest
+/** Test for CollocMapper
  * FIXME: Add negative test cases
  */
 @SuppressWarnings("deprecation")
-public class NGramCollectorTest {
+public class CollocMapperTest {
 
   OutputCollector<Gram,Gram> collector;
   Reporter reporter;
@@ -56,7 +57,14 @@ public class NGramCollectorTest {
   @Test
   public void testCollectNgrams() throws Exception {
 
-    String input = "the best of times the worst of times";
+    Text key = new Text();
+    key.set("dummy-key");
+    
+    String[] input = {"the", "best", "of", "times", "the", "worst", "of", "times"};
+    StringTuple inputTuple = new StringTuple();
+    for (String i: input) {
+      inputTuple.add(i);
+    }
 
     String[][] values = 
       new String[][]{
@@ -76,28 +84,88 @@ public class NGramCollectorTest {
         {"t_times", "of times"}
     };
     // set up expectations for mocks. ngram max size = 2
-
-    // setup expectations
     for (String[] v: values) {
-      Position p = v[0].startsWith("h") ? HEAD : TAIL;
+      Type p = v[0].startsWith("h") ? HEAD : TAIL;
       Gram subgram = new Gram(v[0].substring(2), p);
       Gram ngram = new Gram(v[1]);
       collector.collect(subgram, ngram);
     }
+   
 
-    reporter.incrCounter(NGRAM_TOTAL, 7);
+    reporter.incrCounter(CollocMapper.Count.NGRAM_TOTAL, 7);
     EasyMock.replay(reporter, collector);
     
-    Reader r = new StringReader(input);
 
     JobConf conf = new JobConf();
-    conf.set(NGramCollector.MAX_SHINGLE_SIZE, "2");
-    conf.set(NGramCollector.ANALYZER_CLASS, TestAnalyzer.class.getName());
+    conf.set(CollocMapper.MAX_SHINGLE_SIZE, "2");
 
-    NGramCollector c = new NGramCollector();
+    CollocMapper c = new CollocMapper();
     c.configure(conf);
     
-    c.collectNgrams(r, collector, reporter);
+    c.map(key, inputTuple, collector, reporter);
+
+    EasyMock.verify(reporter, collector);
+  }
+  
+  @Test
+  public void testCollectNgramsWithUnigrams() throws Exception {
+
+    Text key = new Text();
+    key.set("dummy-key");
+    
+    String[] input = {"the", "best", "of", "times", "the", "worst", "of", "times"};
+    StringTuple inputTuple = new StringTuple();
+    for (String i: input) {
+      inputTuple.add(i);
+    }
+
+    String[][] values = 
+      new String[][]{
+        {"u_the", "the"},
+        {"h_the",   "the best"},
+        {"t_best",  "the best"},
+        {"u_best", "best"},
+        {"h_best",  "best of"},
+        {"t_of",    "best of"},
+        {"u_of", "of"},
+        {"h_of",    "of times"},
+        {"t_times", "of times"},
+        {"u_times", "times"},
+        {"h_times", "times the"},
+        {"t_the",   "times the"},
+        {"u_the", "the"},
+        {"h_the",   "the worst"},
+        {"t_worst", "the worst"},
+        {"u_worst", "worst"},
+        {"h_worst", "worst of"},
+        {"t_of",    "worst of"},
+        {"u_of", "of"},
+        {"h_of",    "of times"},
+        {"t_times", "of times"},
+        {"u_times", "times"},
+    };
+    // set up expectations for mocks. ngram max size = 2
+    for (String[] v: values) {
+      Type p = v[0].startsWith("h") ? HEAD : TAIL;
+      p = v[0].startsWith("u") ? UNIGRAM : p;
+      Gram subgram = new Gram(v[0].substring(2), p);
+      Gram ngram = new Gram(v[1]);
+      collector.collect(subgram, ngram);
+    }
+   
+
+    reporter.incrCounter(CollocMapper.Count.NGRAM_TOTAL, 7);
+    EasyMock.replay(reporter, collector);
+    
+
+    JobConf conf = new JobConf();
+    conf.set(CollocMapper.MAX_SHINGLE_SIZE, "2");
+    conf.setBoolean(CollocDriver.EMIT_UNIGRAMS, true);
+
+    CollocMapper c = new CollocMapper();
+    c.configure(conf);
+    
+    c.map(key, inputTuple, collector, reporter);
 
     EasyMock.verify(reporter, collector);
   }

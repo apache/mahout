@@ -17,9 +17,12 @@
 
 package org.apache.mahout.utils.nlp.collocations.llr;
 
+import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.HEAD;
+import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.TAIL;
+import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.UNIGRAM;
+
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
+import java.util.Iterator;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
@@ -27,6 +30,13 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.shingle.ShingleFilter;
+import org.apache.lucene.analysis.tokenattributes.TermAttribute;
+import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
+import org.apache.mahout.common.StringTuple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Runs pass 1 of the Collocation discovery job on input of
@@ -38,37 +48,127 @@ import org.apache.hadoop.mapred.Reporter;
  * @see org.apache.mahout.utils.nlp.collocations.llr.colloc.NGramCollector
  */
 public class CollocMapper extends MapReduceBase implements
-    Mapper<Text,Text,Gram,Gram> {
+    Mapper<Text,StringTuple,Gram,Gram> {
   
-  private final NGramCollector ngramCollector;
+  public static final String MAX_SHINGLE_SIZE = "maxShingleSize";
+  public static final int DEFAULT_MAX_SHINGLE_SIZE = 2;
   
-  public CollocMapper() {
-    ngramCollector = new NGramCollector();
+  public static enum Count {
+    NGRAM_TOTAL;
   }
+  
+  private static final Logger log = LoggerFactory.getLogger(CollocMapper.class);
+  
+  private int maxShingleSize;
+  private boolean emitUnigrams;
   
   @Override
   public void configure(JobConf job) {
     super.configure(job);
-    ngramCollector.configure(job);
+    
+    this.maxShingleSize = job.getInt(CollocMapper.MAX_SHINGLE_SIZE,
+      DEFAULT_MAX_SHINGLE_SIZE);
+    
+    this.emitUnigrams = job.getBoolean(CollocDriver.EMIT_UNIGRAMS,
+      CollocDriver.DEFAULT_EMIT_UNIGRAMS);
+    
+    if (log.isInfoEnabled()) {
+      log.info("Max Ngram size is {}", this.maxShingleSize);
+      log.info("Emit Unitgrams is {}", emitUnigrams);
+    }
   }
   
   /**
    * Collocation finder: pass 1 map phase.
    * 
-   * receives full documents in value and passes these to
-   * NGramCollector.collectNGrams.
+   * Receives a token stream which gets passed through the ShingleFilter. The
+   * ShingleFilter delivers ngrams of the appropriate size which are then
+   * decomposed into head and tail subgrams which are collected in the following
+   * manner
    * 
-   * @see org.apache.mahout.utils.nlp.collocations.llr.colloc.NGramCollector#collectNgrams(Reader,
-   *      OutputCollector, Reporter)
+   * k:h_subgram v:ngram k:t_subgram v:ngram
+   * 
+   * The 'h_' or 't_' prefix is used to specify whether the subgram in question
+   * is the head or tail of the ngram. In this implementation the head of the
+   * ngram is a (n-1)gram, and the tail is a (1)gram.
+   * 
+   * For example, given 'click and clack' and an ngram length of 3: k:'h_click
+   * and' v:'click and clack' k;'t_clack' v:'click and clack'
+   * 
+   * Also counts the total number of ngrams encountered and adds it to the
+   * counter CollocDriver.Count.NGRAM_TOTAL
+   * 
+   * @param r
+   *          The reader to read input from -- used to create a tokenstream from
+   *          the analyzer
+   * 
+   * @param collector
+   *          The collector to send output to
+   * 
+   * @param reporter
+   *          Used to deliver the final ngram-count.
+   * 
+   * @throws IOException
+   *           if there's a problem with the ShingleFilter reading data or the
+   *           collector collecting output.
    */
   @Override
   public void map(Text key,
-                  Text value,
+                  StringTuple value,
                   OutputCollector<Gram,Gram> collector,
                   Reporter reporter) throws IOException {
     
-    Reader r = new StringReader(value.toString());
-    ngramCollector.collectNgrams(r, collector, reporter);
+    ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value
+        .getEntries().iterator()), maxShingleSize);
+    int count = 0; // ngram count
     
+    do {
+      String term = ((TermAttribute) sf.getAttribute(TermAttribute.class))
+          .term();
+      String type = ((TypeAttribute) sf.getAttribute(TypeAttribute.class))
+          .type();
+      if ("shingle".equals(type)) {
+        count++;
+        Gram ngram = new Gram(term);
+        // obtain components, the leading (n-1)gram and the trailing unigram.
+        int i = term.lastIndexOf(' ');
+        if (i != -1) { // bigram, trigram etc
+          collector.collect(new Gram(term.substring(0, i), HEAD), ngram);
+          collector.collect(new Gram(term.substring(i + 1), TAIL), ngram);
+        }
+      } else if (emitUnigrams && term.length() > 0) { // unigram
+        Gram ngram = new Gram(term);
+        Gram unigram = new Gram(term, UNIGRAM);
+        collector.collect(unigram, ngram);
+      }
+    } while (sf.incrementToken());
+    
+    reporter.incrCounter(Count.NGRAM_TOTAL, count);
+    
+    sf.end();
+    sf.close();
+    
+  }
+  
+  /** Used to emit tokens from an input string array in the style of TokenStream */
+  public static class IteratorTokenStream extends TokenStream {
+    private final TermAttribute termAtt;
+    private final Iterator<String> iterator;
+    
+    public IteratorTokenStream(Iterator<String> iterator) {
+      this.iterator = iterator;
+      this.termAtt = (TermAttribute) addAttribute(TermAttribute.class);
+    }
+    
+    @Override
+    public boolean incrementToken() throws IOException {
+      if (iterator.hasNext()) {
+        clearAttributes();
+        termAtt.setTermBuffer(iterator.next());
+        return true;
+      } else {
+        return false;
+      }
+    }
   }
 }

@@ -22,10 +22,12 @@ import java.util.Iterator;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.utils.vectors.text.DictionaryVectorizer;
 
 /**
  * Can also be used as a local Combiner. This accumulates all the words and the
@@ -33,6 +35,8 @@ import org.apache.hadoop.mapred.Reporter;
  */
 public class TermCountReducer extends MapReduceBase implements
     Reducer<Text,LongWritable,Text,LongWritable> {
+  
+  private static int minSupport;
   
   @Override
   public void reduce(Text key,
@@ -42,8 +46,15 @@ public class TermCountReducer extends MapReduceBase implements
     long sum = 0;
     while (values.hasNext())
       sum += values.next().get();
-    output.collect(key, new LongWritable(sum));
-    
+    if (sum >= minSupport) {
+      output.collect(key, new LongWritable(sum));
+    }
   }
   
+  @Override
+  public void configure(JobConf job) {
+    super.configure(job);
+    minSupport = job.getInt(DictionaryVectorizer.MIN_SUPPORT,
+      DictionaryVectorizer.DEFAULT_MIN_SUPPORT);
+  }
 }

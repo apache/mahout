@@ -32,11 +32,15 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.lucene.analysis.shingle.ShingleFilter;
+import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
+import org.apache.mahout.utils.nlp.collocations.llr.CollocMapper.IteratorTokenStream;
+import org.apache.mahout.utils.vectors.text.DictionaryVectorizer;
 
 /**
  * Converts a document in to a sparse vector
@@ -46,6 +50,8 @@ public class TFPartialVectorReducer extends MapReduceBase implements
   private final OpenObjectIntHashMap<String> dictionary = new OpenObjectIntHashMap<String>();
   
   private final VectorWritable vectorWritable = new VectorWritable();
+  
+  private int maxNGramSize = 1;
   
   @Override
   public void reduce(Text key,
@@ -58,12 +64,31 @@ public class TFPartialVectorReducer extends MapReduceBase implements
     Vector vector = new RandomAccessSparseVector(key.toString(),
         Integer.MAX_VALUE, value.length()); // guess at initial size
     
-    for (String term : value.getEntries()) {
-      if (dictionary.containsKey(term) == false) continue;
-      int termId = dictionary.get(term);
-      vector.setQuick(termId, vector.getQuick(termId) + 1);
+    if (maxNGramSize >= 2) {
+      ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value
+          .getEntries().iterator()), maxNGramSize);
+      
+      do {
+        String term = ((TermAttribute) sf.getAttribute(TermAttribute.class))
+            .term();
+        if (term.length() > 0) { // ngram
+          if (dictionary.containsKey(term) == false) continue;
+          int termId = dictionary.get(term);
+          vector.setQuick(termId, vector.getQuick(termId) + 1);
+        }
+      } while (sf.incrementToken());
+      
+      sf.end();
+      sf.close();
+    } else {
+      for (String term : value.getEntries()) {
+        if (term.length() > 0) { // unigram
+          if (dictionary.containsKey(term) == false) continue;
+          int termId = dictionary.get(term);
+          vector.setQuick(termId, vector.getQuick(termId) + 1);
+        }
+      }
     }
-    
     vectorWritable.set(vector);
     output.collect(key, vectorWritable);
     
@@ -73,7 +98,7 @@ public class TFPartialVectorReducer extends MapReduceBase implements
   public void configure(JobConf job) {
     super.configure(job);
     try {
-      
+      maxNGramSize = job.getInt(DictionaryVectorizer.MAX_NGRAMS, maxNGramSize);
       URI[] localFiles = DistributedCache.getCacheFiles(job);
       if (localFiles == null || localFiles.length < 1) {
         throw new IllegalArgumentException(

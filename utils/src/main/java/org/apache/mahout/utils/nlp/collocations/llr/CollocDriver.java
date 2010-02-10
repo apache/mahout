@@ -17,8 +17,6 @@
 
 package org.apache.mahout.utils.nlp.collocations.llr;
 
-import static org.apache.mahout.utils.nlp.collocations.llr.NGramCollector.Count.NGRAM_TOTAL;
-
 import java.io.IOException;
 
 import org.apache.commons.cli2.CommandLine;
@@ -39,18 +37,24 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
-import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.utils.vectors.text.DictionaryVectorizer;
+import org.apache.mahout.utils.vectors.text.DocumentProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Driver for LLR collocation discovery mapreduce job */
 public class CollocDriver {
+  public static final String EMIT_UNIGRAMS = "emit-unigrams";
+  public static final boolean DEFAULT_EMIT_UNIGRAMS = false;
   
   public static final String DEFAULT_OUTPUT_DIRECTORY = "output";
   public static final int DEFAULT_MAX_NGRAM_SIZE = 2;
+  public static final int DEFAULT_PASS1_NUM_REDUCE_TASKS = 1;
   
   private static final Logger log = LoggerFactory.getLogger(CollocDriver.class);
   
@@ -74,48 +78,67 @@ public class CollocDriver {
         .withDescription("The Path write output to").withShortName("o")
         .create();
     
-    Option maxNGramSizeOpt = obuilder.withLongName("maxNGramSize")
-        .withRequired(false).withArgument(
-          abuilder.withName("size").withMinimum(1).withMaximum(1).create())
+    Option maxNGramSizeOpt = obuilder
+        .withLongName("maxNGramSize")
+        .withRequired(false)
+        .withArgument(
+          abuilder.withName("ngramSize").withMinimum(1).withMaximum(1).create())
         .withDescription(
           "(Optional) The maximum size of ngrams to create"
               + " (2 = bigrams, 3 = trigrams, etc) Default Value:2")
-        .withShortName("n").create();
+        .withShortName("ng").create();
     
     Option minSupportOpt = obuilder.withLongName("minSupport").withArgument(
       abuilder.withName("minSupport").withMinimum(1).withMaximum(1).create())
-        .withDescription("(Optional) Minimum Support. Default Value: 2")
-        .withShortName("s").create();
-    
-    Option minLLROpt = obuilder
-        .withLongName("minLLR")
-        .withRequired(false)
-        .withArgument(
-          abuilder.withName("minDF").withMinimum(1).withMaximum(1).create())
         .withDescription(
-          "(Optional)The minimum Log Likelihood Ratio(Float)  Default is 0.00")
-        .withShortName("ml").create();
+          "(Optional) Minimum Support. Default Value: "
+              + CollocReducer.DEFAULT_MIN_SUPPORT).withShortName("s").create();
+    
+    Option minLLROpt = obuilder.withLongName("minLLR").withRequired(false)
+        .withArgument(
+          abuilder.withName("minLLR").withMinimum(1).withMaximum(1).create())
+        .withDescription(
+          "(Optional)The minimum Log Likelihood Ratio(Float)  Default is "
+              + LLRReducer.DEFAULT_MIN_LLR).withShortName("ml").create();
+    
+    Option numReduceTasksOpt = obuilder.withLongName("numReducers")
+        .withArgument(
+          abuilder.withName("numReducers").withMinimum(1).withMaximum(1)
+              .create()).withDescription(
+          "(Optional) Number of reduce tasks. Default Value: "
+              + DEFAULT_PASS1_NUM_REDUCE_TASKS).withShortName("nr").create();
+    
+    Option preprocessOpt = obuilder.withLongName("preprocess").withRequired(
+      false).withDescription(
+      "If set, input is SequenceFile<Text,Text> where the value is the document, "
+          + " which will be tokenized using the specified analyzer.")
+        .withShortName("p").create();
+    
+    Option unigramOpt = obuilder
+        .withLongName("unigram")
+        .withRequired(false)
+        .withDescription(
+          "If set, unigrams will be emitted in the final output alongside collocations")
+        .withShortName("u").create();
     
     Option overwriteOutput = obuilder.withLongName("overwrite").withRequired(
       false).withDescription("If set, overwrite the output directory")
         .withShortName("w").create();
     
     Option analyzerNameOpt = obuilder.withLongName("analyzerName")
-        .withRequired(false)
         .withArgument(
           abuilder.withName("analyzerName").withMinimum(1).withMaximum(1)
-              .create())
-        .withDescription(
-          "Class name of analyzer to use for tokenization").withShortName("a")
-        .create();
+              .create()).withDescription("The class name of the analyzer")
+        .withShortName("a").create();
     
     Option helpOpt = obuilder.withLongName("help").withDescription(
       "Print out help").withShortName("h").create();
     
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(
       outputOpt).withOption(maxNGramSizeOpt).withOption(overwriteOutput)
-        .withOption(analyzerNameOpt).withOption(minSupportOpt).withOption(
-          minLLROpt).withOption(helpOpt).create();
+        .withOption(minSupportOpt).withOption(minLLROpt).withOption(
+          numReduceTasksOpt).withOption(analyzerNameOpt).withOption(
+          preprocessOpt).withOption(unigramOpt).withOption(helpOpt).create();
     
     try {
       Parser parser = new Parser();
@@ -140,34 +163,62 @@ public class CollocDriver {
           log.warn("Could not parse ngram size option");
         }
       }
+      log.info("Maximum n-gram size is: {}", maxNGramSize);
       
       if (cmdLine.hasOption(overwriteOutput) == true) {
         HadoopUtil.overwriteOutput(output);
       }
       
-      String analyzerName = null;
-      if (cmdLine.hasOption(analyzerNameOpt) == true) {
-        analyzerName = cmdLine.getValue(analyzerNameOpt).toString();
-      }
-      
-      int minSupport = 2;
+      int minSupport = CollocReducer.DEFAULT_MIN_SUPPORT;
+      ;
       if (cmdLine.hasOption(minSupportOpt)) {
         minSupport = Integer.parseInt(cmdLine.getValue(minSupportOpt)
             .toString());
       }
+      log.info("Minimum Support value: {}", minSupport);
       
-      float minLLRValue = 1.0f;
+      float minLLRValue = LLRReducer.DEFAULT_MIN_LLR;
       if (cmdLine.hasOption(minLLROpt)) {
-        minLLRValue = Float
-            .parseFloat(cmdLine.getValue(minLLROpt).toString());
+        minLLRValue = Float.parseFloat(cmdLine.getValue(minLLROpt).toString());
+      }
+      log.info("Minimum LLR value: {}", minLLRValue);
+      
+      int reduceTasks = DEFAULT_PASS1_NUM_REDUCE_TASKS;
+      if (cmdLine.hasOption(numReduceTasksOpt)) {
+        reduceTasks = Integer.parseInt(cmdLine.getValue(numReduceTasksOpt)
+            .toString());
+      }
+      log.info("Pass1 reduce tasks: {}", reduceTasks);
+      
+      boolean emitUnigrams = cmdLine.hasOption(unigramOpt);
+      
+      if (cmdLine.hasOption(preprocessOpt)) {
+        log.info("Input will be preprocessed");
+        
+        Class<? extends Analyzer> analyzerClass = StandardAnalyzer.class;
+        if (cmdLine.hasOption(analyzerNameOpt)) {
+          String className = cmdLine.getValue(analyzerNameOpt).toString();
+          analyzerClass = (Class<? extends Analyzer>) Class.forName(className);
+          // try instantiating it, b/c there isn't any point in setting it if
+          // you can't instantiate it
+          analyzerClass.newInstance();
+        }
+        
+        String tokenizedPath = output + "/tokenized-documents";
+        DocumentProcessor
+            .tokenizeDocuments(input, analyzerClass, tokenizedPath);
+        input = tokenizedPath;
+      } else {
+        log.info("Input will NOT be preprocessed");
       }
       
       // parse input and extract collocations
-      long ngramCount = runPass1(input, output, maxNGramSize, analyzerName,
-        minSupport);
+      long ngramCount = generateCollocations(input, output, emitUnigrams,
+        maxNGramSize, reduceTasks, minSupport);
       
       // tally collocations and perform LLR calculation
-      runPass2(ngramCount, output, minLLRValue);
+      computeNGramsPruneByLLR(ngramCount, output, emitUnigrams, minLLRValue,
+        reduceTasks);
       
     } catch (OptionException e) {
       log.error("Exception", e);
@@ -177,13 +228,45 @@ public class CollocDriver {
   }
   
   /**
+   * Generate all ngrams for the {@link DictionaryVectorizer} job
+   * 
+   * @param input
+   *          input path containing tokenized documents
+   * @param output
+   *          output path where ngrams are generated including unigrams
+   * @param maxNGramSize
+   *          minValue = 2.
+   * @param minSupport
+   *          minimum support to prune ngrams including unigrams
+   * @param minLLRValue
+   *          minimum threshold to prune ngrams
+   * @param reduceTasks
+   *          number of reducers used
+   * @throws IOException
+   */
+  public static void generateAllGrams(String input,
+                                      String output,
+                                      int maxNGramSize,
+                                      int minSupport,
+                                      float minLLRValue,
+                                      int reduceTasks) throws IOException {
+    // parse input and extract collocations
+    long ngramCount = generateCollocations(input, output, true, maxNGramSize,
+      reduceTasks, minSupport);
+    
+    // tally collocations and perform LLR calculation
+    computeNGramsPruneByLLR(ngramCount, output, true, minLLRValue, reduceTasks);
+  }
+  
+  /**
    * pass1: generate collocations, ngrams
    */
-  public static long runPass1(String input,
-                              String output,
-                              int maxNGramSize,
-                              String analyzerClass,
-                              int minSupport) throws IOException {
+  public static long generateCollocations(String input,
+                                          String output,
+                                          boolean emitUnigrams,
+                                          int maxNGramSize,
+                                          int reduceTasks,
+                                          int minSupport) throws IOException {
     JobConf conf = new JobConf(CollocDriver.class);
     
     conf.setMapOutputKeyClass(Gram.class);
@@ -194,8 +277,10 @@ public class CollocDriver {
     
     conf.setCombinerClass(CollocCombiner.class);
     
+    conf.setBoolean(CollocDriver.EMIT_UNIGRAMS, emitUnigrams);
+    
     FileInputFormat.setInputPaths(conf, new Path(input));
-    Path outPath = new Path(output + "/pass1");
+    Path outPath = new Path(output + "/subgrams");
     FileOutputFormat.setOutputPath(conf, outPath);
     
     conf.setInputFormat(SequenceFileInputFormat.class);
@@ -203,40 +288,43 @@ public class CollocDriver {
     
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     conf.setReducerClass(CollocReducer.class);
-    conf.setInt(NGramCollector.MAX_SHINGLE_SIZE, maxNGramSize);
+    conf.setInt(CollocMapper.MAX_SHINGLE_SIZE, maxNGramSize);
     conf.setInt(CollocReducer.MIN_SUPPORT, minSupport);
-    
-    if (analyzerClass != null) {
-      conf.set(NGramCollector.ANALYZER_CLASS, analyzerClass);
-    }
+    conf.setNumReduceTasks(reduceTasks);
     
     RunningJob job = JobClient.runJob(conf);
-    return job.getCounters().findCounter(NGRAM_TOTAL).getValue();
+    return job.getCounters().findCounter(CollocMapper.Count.NGRAM_TOTAL)
+        .getValue();
   }
   
   /**
    * pass2: perform the LLR calculation
    */
-  public static void runPass2(long nGramTotal,
-                              String output,
-                              float minLLRValue) throws IOException {
+  public static void computeNGramsPruneByLLR(long nGramTotal,
+                                             String output,
+                                             boolean emitUnigrams,
+                                             float minLLRValue,
+                                             int reduceTasks) throws IOException {
     JobConf conf = new JobConf(CollocDriver.class);
-    conf.set(LLRReducer.NGRAM_TOTAL, String.valueOf(nGramTotal));
+    
+    conf.setLong(LLRReducer.NGRAM_TOTAL, nGramTotal);
+    conf.setBoolean(CollocDriver.EMIT_UNIGRAMS, emitUnigrams);
     
     conf.setMapOutputKeyClass(Gram.class);
     conf.setMapOutputValueClass(Gram.class);
     
-    conf.setOutputKeyClass(DoubleWritable.class);
-    conf.setOutputValueClass(Text.class);
+    conf.setOutputKeyClass(Text.class);
+    conf.setOutputValueClass(DoubleWritable.class);
     
-    FileInputFormat.setInputPaths(conf, new Path(output + "/pass1"));
-    Path outPath = new Path(output + "/colloc");
+    FileInputFormat.setInputPaths(conf, new Path(output + "/subgrams"));
+    Path outPath = new Path(output + "/ngrams");
     FileOutputFormat.setOutputPath(conf, outPath);
     
     conf.setMapperClass(IdentityMapper.class);
     conf.setInputFormat(SequenceFileInputFormat.class);
-    conf.setOutputFormat(TextOutputFormat.class);
+    conf.setOutputFormat(SequenceFileOutputFormat.class);
     conf.setReducerClass(LLRReducer.class);
+    conf.setNumReduceTasks(reduceTasks);
     
     conf.setFloat(LLRReducer.MIN_LLR, minLLRValue);
     JobClient.runJob(conf);

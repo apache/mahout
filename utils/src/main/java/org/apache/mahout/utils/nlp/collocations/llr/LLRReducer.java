@@ -28,7 +28,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.stats.LogLikelihood;
-import org.apache.mahout.utils.nlp.collocations.llr.Gram.Position;
+import org.apache.mahout.utils.nlp.collocations.llr.Gram.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,23 +37,28 @@ import org.slf4j.LoggerFactory;
  * sub-ngram frequencies and performs the Log-likelihood ratio calculation.
  */
 public class LLRReducer extends MapReduceBase implements
-    Reducer<Gram,Gram,DoubleWritable,Text> {
+    Reducer<Gram,Gram,Text,DoubleWritable> {
   
   public static enum Skipped {
     EXTRA_HEAD,
     EXTRA_TAIL,
     MISSING_HEAD,
     MISSING_TAIL,
-    LESS_THAN_MIN_LLR;
+    LESS_THAN_MIN_LLR,
+    LLR_CALCULATION_ERROR,
+    UNIGRAM_COUNT
   };
   
   private static final Logger log = LoggerFactory.getLogger(LLRReducer.class);
   
   public static final String NGRAM_TOTAL = "ngramTotal";
   public static final String MIN_LLR = "minLLR";
+  public static final float DEFAULT_MIN_LLR = 1.0f;
   
   private long ngramTotal;
   private float minLLRValue;
+  private boolean emitUnigrams;
+  
   private final LLCallback ll;
   
   public LLRReducer() {
@@ -74,10 +79,18 @@ public class LLRReducer extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     super.configure(job);
-    this.ngramTotal = job.getLong(NGRAM_TOTAL, -1);
-    this.minLLRValue = job.getFloat(MIN_LLR, 0.0f);
     
-    log.info("NGram Total is " + ngramTotal);
+    this.ngramTotal = job.getLong(NGRAM_TOTAL, -1);
+    this.minLLRValue = job.getFloat(MIN_LLR, DEFAULT_MIN_LLR);
+    
+    this.emitUnigrams = job.getBoolean(CollocDriver.EMIT_UNIGRAMS,
+      CollocDriver.DEFAULT_EMIT_UNIGRAMS);
+    
+    if (log.isInfoEnabled()) {
+      log.info("NGram Total is {}", ngramTotal);
+      log.info("Min LLR value is {}", minLLRValue);
+      log.info("Emit Unitgrams is {}", emitUnigrams);
+    }
     
     if (ngramTotal == -1) {
       throw new RuntimeException("No NGRAM_TOTAL available in job config");
@@ -100,7 +113,7 @@ public class LLRReducer extends MapReduceBase implements
   @Override
   public void reduce(Gram key,
                      Iterator<Gram> values,
-                     OutputCollector<DoubleWritable,Text> output,
+                     OutputCollector<Text,DoubleWritable> output,
                      Reporter reporter) throws IOException {
     
     Gram ngram = key;
@@ -108,16 +121,22 @@ public class LLRReducer extends MapReduceBase implements
     int[] gramFreq = new int[2];
     gramFreq[0] = gramFreq[1] = -1;
     
+    if (ngram.getType() == Type.UNIGRAM && emitUnigrams) {
+      DoubleWritable dd = new DoubleWritable(ngram.getFrequency());
+      Text t = new Text(ngram.getString());
+      output.collect(t, dd);
+      return;
+    }
     // FIXME: better way to handle errors? Wouldn't an exception thrown here
     // cause hadoop to re-try the job?
     while (values.hasNext()) {
       Gram value = values.next();
       
-      int pos = (value.getPosition() == Position.HEAD ? 0 : 1);
+      int pos = (value.getType() == Type.HEAD ? 0 : 1);
       
       if (gramFreq[pos] != -1) {
-        log.warn("Extra {} for {}, skipping", value.getPosition(), ngram);
-        if (value.getPosition() == Position.HEAD) {
+        log.warn("Extra {} for {}, skipping", value.getType(), ngram);
+        if (value.getType() == Type.HEAD) {
           reporter.incrCounter(Skipped.EXTRA_HEAD, 1);
         } else {
           reporter.incrCounter(Skipped.EXTRA_TAIL, 1);
@@ -147,14 +166,15 @@ public class LLRReducer extends MapReduceBase implements
     
     try {
       double llr = ll.logLikelihoodRatio(k11, k12, k21, k22);
-      if(llr < minLLRValue){
+      if (llr < minLLRValue) {
         reporter.incrCounter(Skipped.LESS_THAN_MIN_LLR, 1);
         return;
       }
       DoubleWritable dd = new DoubleWritable(llr);
       Text t = new Text(ngram.getString());
-      output.collect(dd, t);
+      output.collect(t, dd);
     } catch (IllegalArgumentException ex) {
+      reporter.incrCounter(Skipped.LLR_CALCULATION_ERROR, 1);
       log.error("Problem calculating LLR ratio: " + ex.getMessage());
       log.error("NGram: " + ngram);
       log.error("HEAD: " + gram[0] + ":" + gramFreq[0]);

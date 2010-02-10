@@ -17,7 +17,7 @@
 
 package org.apache.mahout.utils.nlp.collocations.llr;
 
-import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Position.HEAD;
+import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.HEAD;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -35,14 +35,15 @@ import org.apache.hadoop.io.WritableComparable;
  */
 public class Gram implements WritableComparable<Gram> {
   
-  public static enum Position {
+  public static enum Type {
     HEAD,
-    TAIL
+    TAIL,
+    UNIGRAM
   };
   
   private String gram;
   private int frequency;
-  private Position position;
+  private Type type;
   
   public Gram() {
 
@@ -51,7 +52,7 @@ public class Gram implements WritableComparable<Gram> {
   public Gram(Gram other) {
     this.gram = other.gram;
     this.frequency = other.frequency;
-    this.position = other.position;
+    this.type = other.type;
   }
   
   /**
@@ -69,11 +70,12 @@ public class Gram implements WritableComparable<Gram> {
    * 
    * @param gram
    *          the gram string
-   * @param part
-   *          whether the gram is at the head of its text unit.
+   * @param type
+   *          whether the gram is at the head of its text unit or tail or
+   *          unigram
    */
-  public Gram(String ngram, Position position) {
-    this(ngram, 1, position);
+  public Gram(String ngram, Type type) {
+    this(ngram, 1, type);
   }
   
   /**
@@ -94,28 +96,30 @@ public class Gram implements WritableComparable<Gram> {
    *          the gram string
    * @param frequency
    *          the gram frequency
-   * @param part
-   *          whether the gram is at the head of its text unit.
+   * @param type
+   *          whether the gram is at the head of its text unit or tail or
+   *          unigram
    */
-  public Gram(String ngram, int frequency, Position position) {
+  public Gram(String ngram, int frequency, Type type) {
     this.gram = ngram;
     this.frequency = frequency;
-    this.position = position;
+    this.type = type;
   }
   
   /**
-   * @return position of gram in the text unit.
+   * @return the gram is at the head of its text unit or tail or unigram.
    */
-  public Position getPosition() {
-    return this.position;
+  public Type getType() {
+    return this.type;
   }
   
   /**
    * @param part
-   *          position of the gram in the text unit.
+   *          whether the gram is at the head of its text unit or tail or
+   *          unigram
    */
-  public void setPosition(Position position) {
-    this.position = position;
+  public void setType(Type type) {
+    this.type = type;
   }
   
   /**
@@ -156,10 +160,12 @@ public class Gram implements WritableComparable<Gram> {
   @Override
   public void readFields(DataInput in) throws IOException {
     frequency = in.readInt();
-    boolean head = in.readBoolean();
+    int typeValue = in.readUnsignedByte();
     
-    if (head) position = Position.HEAD;
-    else position = Position.TAIL;
+    if (typeValue == 0) type = Type.TAIL;
+    else if (typeValue == 1) type = Type.HEAD;
+    else type = Type.UNIGRAM;
+    
     Text data = new Text();
     data.readFields(in);
     gram = data.toString();
@@ -169,8 +175,9 @@ public class Gram implements WritableComparable<Gram> {
   public void write(DataOutput out) throws IOException {
     out.writeInt(frequency);
     
-    if (position == Position.HEAD) out.writeBoolean(true);
-    else out.writeBoolean(false);
+    if (type == Type.TAIL) out.writeByte(0);
+    else if (type == Type.HEAD) out.writeByte(1);
+    else out.writeByte(2);
     
     Text data = new Text(gram);
     data.write(out);
@@ -183,11 +190,19 @@ public class Gram implements WritableComparable<Gram> {
       return ret;
     }
     
-    if (this.position == Position.HEAD && other.position != Position.HEAD) {
+    if (this.type == Type.UNIGRAM && other.type != Type.UNIGRAM) {
       return -1;
     }
     
-    if (this.position != Position.HEAD && other.position == Position.HEAD) {
+    if (this.type != Type.UNIGRAM && other.type == Type.UNIGRAM) {
+      return 1;
+    }
+    
+    if (this.type == Type.HEAD && other.type != Type.HEAD) {
+      return -1;
+    }
+    
+    if (this.type != Type.HEAD && other.type == Type.HEAD) {
       return 1;
     }
     
@@ -200,7 +215,7 @@ public class Gram implements WritableComparable<Gram> {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((gram == null) ? 0 : gram.hashCode());
-    result = prime * result + ((position == null) ? 0 : position.hashCode());
+    result = prime * result + ((type == null) ? 0 : type.hashCode());
     return result;
   }
   
@@ -216,15 +231,16 @@ public class Gram implements WritableComparable<Gram> {
     if (gram == null) {
       if (other.gram != null) return false;
     } else if (!gram.equals(other.gram)) return false;
-    if (position == null) {
-      if (other.position != null) return false;
-    } else if (!position.equals(other.position)) return false;
+    if (type == null) {
+      if (other.type != null) return false;
+    } else if (!type.equals(other.type)) return false;
     return true;
   }
   
   @Override
   public String toString() {
-    return "'" + gram + "'[" + (position == Position.HEAD ? "h" : "t") + "]:"
+    return "'" + gram + "'["
+           + (type == Type.UNIGRAM ? "u" : (type == Type.HEAD ? "h" : "t")) + "]:"
            + frequency;
   }
   
