@@ -1,0 +1,204 @@
+#!/bin/bash
+# 
+# The Mahout command script
+#
+# Environment Variables
+#
+#   MAHOUT_JAVA_HOME   The java implementation to use.  Overrides JAVA_HOME.
+#
+#   MAHOUT_HEAPSIZE    The maximum amount of heap to use, in MB. 
+#                      Default is 1000.
+#
+#   HADOOP_CONFIF_DIR  The location of a hadoop config directory 
+#
+#   MAHOUT_OPTS        Extra Java runtime options.
+#
+#/**
+# * Licensed to the Apache Software Foundation (ASF) under one or more
+# * contributor license agreements.  See the NOTICE file distributed with
+# * this work for additional information regarding copyright ownership.
+# * The ASF licenses this file to You under the Apache License, Version 2.0
+# * (the "License"); you may not use this file except in compliance with
+# * the License.  You may obtain a copy of the License at
+# *
+# *     http://www.apache.org/licenses/LICENSE-2.0
+# *
+# * Unless required by applicable law or agreed to in writing, software
+# * distributed under the License is distributed on an "AS IS" BASIS,
+# * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# * See the License for the specific language governing permissions and
+# * limitations under the License.
+# */
+
+cygwin=false
+case "`uname`" in
+CYGWIN*) cygwin=true;;
+esac
+
+# resolve links - $0 may be a softlink
+THIS="$0"
+while [ -h "$THIS" ]; do
+  ls=`ls -ld "$THIS"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '.*/.*' > /dev/null; then
+    THIS="$link"
+  else
+    THIS=`dirname "$THIS"`/"$link"
+  fi
+done
+
+# if no args specified, show usage
+if [ $# = 0 ]; then
+  echo "NOTE: These parameters are subject to change in future releases"
+  echo "Usage: mahout [-core] COMMAND"
+  echo "where COMMAND is one of:"
+  echo "  vectordump            dump vectors from a sequence file"
+  echo "  clusterdump           dump clusters from a sequence file"
+  echo "  seqdump               dump a sequence files using the writable toString() method"
+  echo "  kmeans                run kmeans clustering"
+  echo "  fkmeans                run fuzzy kmeans clustering"
+  echo "  lda                run LDA clustering"
+  echo "  meanshift                run Mean Shift clustering"
+  echo "  canopy                run canopy clustering"
+  echo "  dirchlet              run Dirchlet clustering"
+  echo "  lucenevector          generate vectors from a lucene index"
+  echo "  seqdirectory          generate sequence files containing the documents beneathe a directory"
+  echo "  seqwiki               generate sequence files from a wikipedia dump file"
+  echo " or"
+  echo "  CLASSNAME         run the class named CLASSNAME"
+  echo "Most commands print help when invoked w/o parameters."
+  echo ""
+  echo "Expert: -core option is for developers only. It avoids building the job jar, "
+  echo "        instead it simply includes classes compiled with mvn package. "
+  echo "        NOTE: this works only for jobs executed in 'local' mode"
+  echo " Most algorithms should support using --help to get the full list of inputs."
+  exit 1
+fi
+
+IS_CORE=0
+#check for -core option
+if [ "$1" == "-core" ] ; then
+  IS_CORE=1
+  shift
+fi
+
+# get arguments
+COMMAND=$1
+shift
+
+# some directories
+THIS_DIR=`dirname "$THIS"`
+MAHOUT_HOME=`cd "$THIS_DIR/.." ; pwd`
+
+# some Java parameters
+if [ "$MAHOUT_JAVA_HOME" != "" ]; then
+  #echo "run java in $MAHOUT_JAVA_HOME"
+  JAVA_HOME=$MAHOUT_JAVA_HOME
+fi
+  
+if [ "$JAVA_HOME" = "" ]; then
+  echo "Error: JAVA_HOME is not set."
+  exit 1
+fi
+
+JAVA=$JAVA_HOME/bin/java
+JAVA_HEAP_MAX=-Xmx1000m 
+
+# check envvars which might override default args
+if [ "$MAHOUT_HEAPSIZE" != "" ]; then
+  #echo "run with heapsize $MAHOUT_HEAPSIZE"
+  JAVA_HEAP_MAX="-Xmx""$MAHOUT_HEAPSIZE""m"
+  #echo $JAVA_HEAP_MAX
+fi
+
+# CLASSPATH initially contains $MAHOUT_CONF_DIR, or defaults to $MAHOUT_HOME/conf
+CLASSPATH=${HADOOP_CONF_DIR:=$MAHOUT_HOME/conf}
+CLASSPATH=${CLASSPATH}:$JAVA_HOME/lib/tools.jar
+
+# so that filenames w/ spaces are handled correctly in loops below
+IFS=
+
+if [ $IS_CORE == 0 ] 
+then
+  for f in $MAHOUT_HOME/*/target/mahout-*.job; do
+    CLASSPATH=${CLASSPATH}:$f;
+  done
+
+  # for releases, add Mahout job to CLASSPATH
+  for f in $MAHOUT_HOME/mahout-*.job; do
+    CLASSPATH=${CLASSPATH}:$f;
+  done
+else
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/math/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/core/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/utils/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/examples/target/classes
+fi
+
+# add dependencies to CLASSPATH
+for f in $MAHOUT_HOME/examples/target/dependency/*.jar; do
+  CLASSPATH=${CLASSPATH}:$f;
+done
+
+# cygwin path translation
+if $cygwin; then
+  CLASSPATH=`cygpath -p -w "$CLASSPATH"`
+fi
+
+# restore ordinary behaviour
+unset IFS
+
+# default log directory & file
+if [ "$MAHOUT_LOG_DIR" = "" ]; then
+  MAHOUT_LOG_DIR="$MAHOUT_HOME/logs"
+fi
+if [ "$MAHOUT_LOGFILE" = "" ]; then
+  MAHOUT_LOGFILE='mahout.log'
+fi
+
+#Fix log path under cygwin
+if $cygwin; then
+  MAHOUT_LOG_DIR=`cygpath -p -w "$MAHOUT_LOG_DIR"`
+fi
+
+MAHOUT_OPTS="$MAHOUT_OPTS -Dhadoop.log.dir=$MAHOUT_LOG_DIR"
+MAHOUT_OPTS="$MAHOUT_OPTS -Dhadoop.log.file=$MAHOUT_LOGFILE"
+
+if [ "x$JAVA_LIBRARY_PATH" != "x" ]; then
+  MAHOUT_OPTS="$MAHOUT_OPTS -Djava.library.path=$JAVA_LIBRARY_PATH"
+fi
+
+# figure out which class to run
+if [ "$COMMAND" = "vectordump" ] ; then
+  CLASS=org.apache.mahout.utils.vectors.VectorDumper
+elif [ "$COMMAND" = "clusterdump" ] ; then
+  CLASS=org.apache.mahout.utils.clustering.ClusterDumper
+elif [ "$COMMAND" = "seqdump" ] ; then
+  CLASS=org.apache.mahout.utils.SequenceFileDumper
+elif [ "$COMMAND" = "kmeans" ] ; then
+  CLASS=org.apache.mahout.clustering.kmeans.KMeansDriver
+elif [ "$COMMAND" = "fkmeans" ] ; then
+  CLASS=org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver
+elif [ "$COMMAND" = "lda" ] ; then
+  CLASS=org.apache.mahout.clustering.lda.LDADriver
+elif [ "$COMMAND" = "dirichlet" ] ; then
+  CLASS=org.apache.mahout.clustering.dirichlet.DirichletDriver
+elif [ "$COMMAND" = "meanshift" ] ; then
+  CLASS=org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver  
+elif [ "$COMMAND" = "canopy" ] ; then
+  CLASS=org.apache.mahout.clustering.canopy.CanopyDriver
+elif [ "$COMMAND" = "lucenevector" ]; then
+  CLASS=org.apache.mahout.utils.vectors.lucene.Driver
+elif [ "$COMMAND" = "seqdirectory" ]; then
+  CLASS=org.apache.mahout.text.SequenceFilesFromDirectory
+elif [ "$COMMAND" = "seqwiki" ]; then
+  CLASS=org.apache.mahout.text.WikipediaToSequenceFile
+else
+  CLASS=$COMMAND
+fi
+
+#echo $CLASSPATH
+
+# run it
+exec "$JAVA" $JAVA_HEAP_MAX $MAHOUT_OPTS -classpath "$CLASSPATH" $CLASS "$@"
+
