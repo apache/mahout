@@ -20,19 +20,21 @@ package org.apache.mahout.classifier.bayes.algorithm;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.PriorityQueue;
 
+import org.apache.commons.lang.mutable.MutableDouble;
 import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.classifier.bayes.common.ByScoreLabelResultComparator;
 import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 import org.apache.mahout.classifier.bayes.interfaces.Algorithm;
 import org.apache.mahout.classifier.bayes.interfaces.Datastore;
+import org.apache.mahout.math.function.ObjectIntProcedure;
+import org.apache.mahout.math.map.OpenObjectIntHashMap;
+
 /**
  * Class implementing the Naive Bayes Classifier Algorithm
- *
+ * 
  */
 public class BayesAlgorithm implements Algorithm {
   
@@ -106,25 +108,33 @@ public class BayesAlgorithm implements Algorithm {
   }
   
   @Override
-  public double documentWeight(Datastore datastore,
-                               String label,
+  public double documentWeight(final Datastore datastore,
+                               final String label,
                                String[] document) throws InvalidDatastoreException {
-    Map<String,int[]> wordList = new HashMap<String,int[]>(1000);
+    OpenObjectIntHashMap<String> wordList = new OpenObjectIntHashMap<String>(
+        document.length / 2);
     for (String word : document) {
-      int[] count = wordList.get(word);
-      if (count == null) {
-        count = new int[] {0};
-        wordList.put(word, count);
+      if (wordList.containsKey(word) == false) {
+        wordList.put(word, 1);
+      } else {
+        wordList.put(word, wordList.get(word) + 1);
       }
-      count[0]++;
     }
-    double result = 0.0;
-    for (Map.Entry<String,int[]> entry : wordList.entrySet()) {
-      String word = entry.getKey();
-      int count = entry.getValue()[0];
-      result += count * featureWeight(datastore, label, word);
-    }
-    return result;
+    final MutableDouble result = new MutableDouble(0.0d);
+    
+    wordList.forEachPair(new ObjectIntProcedure<String>() {
+      
+      @Override
+      public boolean apply(String word, int frequency) {
+        try {
+          result.add(frequency * featureWeight(datastore, label, word));
+        } catch (InvalidDatastoreException e) {
+          throw new RuntimeException(e);
+        }
+        return true;
+      }
+    });
+    return result.doubleValue();
   }
   
   @Override

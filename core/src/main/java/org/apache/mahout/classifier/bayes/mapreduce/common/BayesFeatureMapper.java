@@ -18,10 +18,11 @@
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
+import org.apache.commons.lang.mutable.MutableDouble;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
@@ -29,14 +30,20 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.shingle.ShingleFilter;
+import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 import org.apache.mahout.common.Parameters;
 import org.apache.mahout.common.StringTuple;
-import org.apache.mahout.common.nlp.NGrams;
+import org.apache.mahout.math.function.ObjectIntProcedure;
+import org.apache.mahout.math.function.ObjectProcedure;
+import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Reads the input train set(preprocessed using the {@link org.apache.mahout.classifier.BayesFileFormatter}).
+ * Reads the input train set(preprocessed using the
+ * {@link org.apache.mahout.classifier.BayesFileFormatter}).
  */
 public class BayesFeatureMapper extends MapReduceBase implements
     Mapper<Text,Text,StringTuple,DoubleWritable> {
@@ -60,7 +67,8 @@ public class BayesFeatureMapper extends MapReduceBase implements
    * @param key
    *          The label
    * @param value
-   *          the features (all unique) associated w/ this label
+   *          the features (all unique) associated w/ this label in stringtuple
+   *          format
    * @param output
    *          The OutputCollector to write the results to
    * @param reporter
@@ -69,65 +77,91 @@ public class BayesFeatureMapper extends MapReduceBase implements
   @Override
   public void map(Text key,
                   Text value,
-                  OutputCollector<StringTuple,DoubleWritable> output,
+                  final OutputCollector<StringTuple,DoubleWritable> output,
                   Reporter reporter) throws IOException {
     // String line = value.toString();
-    String label = key.toString();
+    final String label = key.toString();
+    List<String> tokens = Arrays.asList(value.toString().split("[ ]+"));
+    OpenObjectIntHashMap<String> wordList = new OpenObjectIntHashMap<String>(
+        tokens.size() * gramSize);
     
-    Map<String,int[]> wordList = new HashMap<String,int[]>(1000);
-    
-    List<String> ngrams = new NGrams(value.toString(), gramSize)
-        .generateNGramsWithoutLabel();
-    
-    for (String ngram : ngrams) {
-      int[] count = wordList.get(ngram);
-      if (count == null) {
-        count = new int[1];
-        count[0] = 0;
-        wordList.put(ngram, count);
+    if (gramSize > 1) {
+      ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(tokens
+          .iterator()), gramSize);
+      do {
+        String term = ((TermAttribute) sf.getAttribute(TermAttribute.class))
+            .term();
+        if (term.length() > 0) {
+          if (wordList.containsKey(term) == false) {
+            wordList.put(term, 1);
+          } else {
+            wordList.put(term, 1 + wordList.get(term));
+          }
+        }
+      } while (sf.incrementToken());
+    } else {
+      for (String term : tokens) {
+        if (wordList.containsKey(term) == false) {
+          wordList.put(term, 1);
+        } else {
+          wordList.put(term, 1 + wordList.get(term));
+        }
       }
-      count[0]++;
     }
-    double lengthNormalisation = 0.0;
-    for (int[] dKJ : wordList.values()) {
-      // key is label,word
-      double dkjValue = (double) dKJ[0];
-      lengthNormalisation += dkjValue * dkjValue;
-    }
-    lengthNormalisation = Math.sqrt(lengthNormalisation);
+    final MutableDouble lengthNormalisationMut = new MutableDouble(0);
+    wordList.forEachPair(new ObjectIntProcedure<String>() {
+      @Override
+      public boolean apply(String word, int dKJ) {
+        lengthNormalisationMut.add(dKJ * dKJ);
+        return true;
+      }
+    });
+    
+    final double lengthNormalisation = Math.sqrt(lengthNormalisationMut
+        .doubleValue());
     
     // Output Length Normalized + TF Transformed Frequency per Word per Class
     // Log(1 + D_ij)/SQRT( SIGMA(k, D_kj) )
-    for (Map.Entry<String,int[]> entry : wordList.entrySet()) {
-      // key is label,word
-      String token = entry.getKey();
-      StringTuple tuple = new StringTuple();
-      tuple.add(BayesConstants.WEIGHT);
-      tuple.add(label);
-      tuple.add(token);
-      DoubleWritable f = new DoubleWritable(Math.log(1.0 + entry.getValue()[0])
-                                            / lengthNormalisation);
-      output.collect(tuple, f);
-    }
+    wordList.forEachPair(new ObjectIntProcedure<String>() {
+      @Override
+      public boolean apply(String token, int dKJ) {
+        try {
+          StringTuple tuple = new StringTuple();
+          tuple.add(BayesConstants.WEIGHT);
+          tuple.add(label);
+          tuple.add(token);
+          DoubleWritable f = new DoubleWritable(Math.log(1.0 + dKJ)
+                                                / lengthNormalisation);
+          output.collect(tuple, f);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+        return true;
+      }
+    });
     reporter.setStatus("Bayes Feature Mapper: Document Label: " + label);
     
     // Output Document Frequency per Word per Class
-    
-    for (String token : wordList.keySet()) {
-      // key is label,word
-      
-      StringTuple dfTuple = new StringTuple();
-      dfTuple.add(BayesConstants.DOCUMENT_FREQUENCY);
-      dfTuple.add(label);
-      dfTuple.add(token);
-      output.collect(dfTuple, ONE);
-      
-      StringTuple tokenCountTuple = new StringTuple();
-      tokenCountTuple.add(BayesConstants.FEATURE_COUNT);
-      tokenCountTuple.add(token);
-      output.collect(tokenCountTuple, ONE);
-      
-    }
+    wordList.forEachKey(new ObjectProcedure<String>() {
+      @Override
+      public boolean apply(String token) {
+        try {
+          StringTuple dfTuple = new StringTuple();
+          dfTuple.add(BayesConstants.DOCUMENT_FREQUENCY);
+          dfTuple.add(label);
+          dfTuple.add(token);
+          output.collect(dfTuple, ONE);
+          
+          StringTuple tokenCountTuple = new StringTuple();
+          tokenCountTuple.add(BayesConstants.FEATURE_COUNT);
+          tokenCountTuple.add(token);
+          output.collect(tokenCountTuple, ONE);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+        return true;
+      }
+    });
     
     // output that we have seen the label to calculate the Count of Document per
     // class
@@ -147,6 +181,28 @@ public class BayesFeatureMapper extends MapReduceBase implements
       
     } catch (IOException ex) {
       log.warn(ex.toString(), ex);
+    }
+  }
+  
+  /** Used to emit tokens from an input string array in the style of TokenStream */
+  public static class IteratorTokenStream extends TokenStream {
+    private final TermAttribute termAtt;
+    private final Iterator<String> iterator;
+    
+    public IteratorTokenStream(Iterator<String> iterator) {
+      this.iterator = iterator;
+      this.termAtt = (TermAttribute) addAttribute(TermAttribute.class);
+    }
+    
+    @Override
+    public boolean incrementToken() throws IOException {
+      if (iterator.hasNext()) {
+        clearAttributes();
+        termAtt.setTermBuffer(iterator.next());
+        return true;
+      } else {
+        return false;
+      }
     }
   }
 }

@@ -74,7 +74,7 @@ public class CBayesClassifierTest extends MahoutTestCase {
     store.loadFeatureWeight("ee", "e", 100);
     store.loadFeatureWeight("aa", "e", 50);
     store.loadFeatureWeight("dd", "e", 50);
-    store.updateVocabCount();
+    
   }
   
   public void test() throws InvalidDatastoreException {
@@ -84,7 +84,7 @@ public class CBayesClassifierTest extends MahoutTestCase {
     assertNotNull("category is null and it shouldn't be", result);
     assertEquals(result + " is not equal to e", "e", result.getLabel());
     
-    document = new String[] {"ff"};
+    document = new String[] {"dd"};
     result = classifier.classifyDocument(document, "unknown");
     assertNotNull("category is null and it shouldn't be", result);
     assertEquals(result + " is not equal to d", "d", result.getLabel());

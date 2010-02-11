@@ -19,8 +19,6 @@ package org.apache.mahout.classifier.bayes.datastore;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -29,45 +27,53 @@ import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 import org.apache.mahout.classifier.bayes.interfaces.Datastore;
 import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
 import org.apache.mahout.common.Parameters;
+import org.apache.mahout.math.SparseMatrix;
+import org.apache.mahout.math.map.OpenIntDoubleHashMap;
+import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * Class implementing the Datastore for Algorithms to read In-Memory model
  * 
  */
 public class InMemoryBayesDatastore implements Datastore {
-
-  private static final Logger log = LoggerFactory.getLogger(InMemoryBayesDatastore.class);
-
-  private final Map<String,Map<String,Map<String,Double>>> matrices 
-    = new HashMap<String,Map<String,Map<String,Double>>>();
   
-  private final Map<String,Map<String,Double>> vectors = new HashMap<String,Map<String,Double>>();
+  private static final Logger log = LoggerFactory
+      .getLogger(InMemoryBayesDatastore.class);
+  
+  private final OpenObjectIntHashMap<String> featureDictionary = new OpenObjectIntHashMap<String>();
+  
+  private final OpenObjectIntHashMap<String> labelDictionary = new OpenObjectIntHashMap<String>();
+  
+  private final OpenIntDoubleHashMap sigma_j = new OpenIntDoubleHashMap();
+  
+  private final OpenIntDoubleHashMap sigma_k = new OpenIntDoubleHashMap();
+  
+  private final OpenIntDoubleHashMap thetaNormalizerPerLabel = new OpenIntDoubleHashMap();
+  
+  private double sigma_jSigma_k = 1.0;
+  
+  private final SparseMatrix weightMatrix = new SparseMatrix(new int[] {1,0});
   
   private final Parameters params;
   
   private double thetaNormalizer = 1.0;
-
+  
   private double alphaI = 1.0;
-
+  
   public InMemoryBayesDatastore(Parameters params) {
-
-    matrices.put("weight", new HashMap<String, Map<String, Double>>());
-    vectors.put("sumWeight", new HashMap<String, Double>());
-    matrices.put("weight", new HashMap<String, Map<String, Double>>());
-    vectors.put("labelWeight", new HashMap<String, Double>());
-    vectors.put("thetaNormalizer", new HashMap<String, Double>());
     String basePath = params.get("basePath");
     this.params = params;
     params.set("sigma_j", basePath + "/trainer-weights/Sigma_j/part-*");
     params.set("sigma_k", basePath + "/trainer-weights/Sigma_k/part-*");
     params.set("sigma_kSigma_j", basePath
-        + "/trainer-weights/Sigma_kSigma_j/part-*");
+                                 + "/trainer-weights/Sigma_kSigma_j/part-*");
     params.set("thetaNormalizer", basePath + "/trainer-thetaNormalizer/part-*");
     params.set("weight", basePath + "/trainer-tfIdf/trainer-tfIdf/part-*");
     alphaI = Double.valueOf(params.get("alpha_i", "1.0"));
   }
-
+  
   @Override
   public void initialize() throws InvalidDatastoreException {
     Configuration conf = new Configuration();
@@ -78,129 +84,95 @@ public class InMemoryBayesDatastore implements Datastore {
     } catch (IOException e) {
       throw new InvalidDatastoreException(e.getMessage());
     }
-    updateVocabCount();
-    Collection<String> labels = getKeys("thetaNormalizer");
-    for (String label : labels) {
-      thetaNormalizer = Math.max(thetaNormalizer, Math.abs(vectorGetCell(
-          "thetaNormalizer", label)));
-    }
-    for (String label : labels) {
-      log.info("{} {} {} {}", new Object[] {label,
-                                            vectorGetCell("thetaNormalizer",
-                                              label),
+    for (String label : getKeys("")) {
+      log.info("{} {} {} {}", new Object[] {
+                                            label,
+                                            thetaNormalizerPerLabel
+                                                .get(getLabelID(label)),
                                             thetaNormalizer,
-                                            vectorGetCell("thetaNormalizer",
-                                              label) / thetaNormalizer});
+                                            thetaNormalizerPerLabel
+                                                .get(getLabelID(label))
+                                                / thetaNormalizer});
     }
   }
-
+  
   @Override
   public Collection<String> getKeys(String name) throws InvalidDatastoreException {
-    return vectors.get("labelWeight").keySet();
+    return labelDictionary.keys();
   }
   
   @Override
   public double getWeight(String matrixName, String row, String column) throws InvalidDatastoreException {
-    return matrixGetCell(matrixName, row, column);
+    if (matrixName.equals("weight")) {
+      if (column.equals("sigma_j")) {
+        return sigma_j.get(getFeatureID(row));
+      } else return weightMatrix.getQuick(getFeatureID(row), getLabelID(column));
+    } else throw new InvalidDatastoreException("Matrix not found: "
+                                               + matrixName);
   }
   
   @Override
   public double getWeight(String vectorName, String index) throws InvalidDatastoreException {
-    if (vectorName.equals("thetaNormalizer")) return vectorGetCell(vectorName,
-      index)
-                                                     / thetaNormalizer;
-    else if (vectorName.equals("params")) {
+    if (vectorName.equals("sumWeight")) {
+      if (index.equals("sigma_jSigma_k")) {
+        return sigma_jSigma_k;
+      } else if (index.equals("vocabCount")) {
+        return featureDictionary.size();
+      } else throw new InvalidDatastoreException();
+    } else if (vectorName.equals("thetaNormalizer")) {
+      return thetaNormalizerPerLabel.get(getLabelID(index)) / thetaNormalizer;
+    } else if (vectorName.equals("params")) {
       if (index.equals("alpha_i")) {
         return alphaI;
-      } else {
-        throw new InvalidDatastoreException();
-      }
-    }
-    return vectorGetCell(vectorName, index);
+      } else throw new InvalidDatastoreException();
+    } else if (vectorName.equals("labelWeight")) {
+      return sigma_k.get(getLabelID(index));
+    } else throw new InvalidDatastoreException();
   }
   
-  private double matrixGetCell(String matrixName, String row, String col) throws InvalidDatastoreException {
-    Map<String,Map<String,Double>> matrix = matrices.get(matrixName);
-    if (matrix == null) {
-      throw new InvalidDatastoreException();
+  private int getFeatureID(String feature) {
+    if (featureDictionary.containsKey(feature)) {
+      return featureDictionary.get(feature);
+    } else {
+      int id = featureDictionary.size();
+      featureDictionary.put(feature, id);
+      return id;
     }
-    Map<String,Double> rowVector = matrix.get(row);
-    if (rowVector == null) {
-      return 0.0;
-    }
-    return nullToZero(rowVector.get(col));
   }
   
-  private double vectorGetCell(String vectorName, String index) throws InvalidDatastoreException {
-    
-    Map<String,Double> vector = vectors.get(vectorName);
-    if (vector == null) {
-      throw new InvalidDatastoreException();
+  private int getLabelID(String label) {
+    if (labelDictionary.containsKey(label)) {
+      return labelDictionary.get(label);
+    } else {
+      int id = labelDictionary.size();
+      labelDictionary.put(label, id);
+      return id;
     }
-    return nullToZero(vector.get(index));
-  }
-  
-  private void matrixPutCell(String matrixName,
-                             String row,
-                             String col,
-                             double weight) {
-    Map<String,Map<String,Double>> matrix = matrices.get(matrixName);
-    if (matrix == null) {
-      matrix = new HashMap<String,Map<String,Double>>();
-      matrices.put(matrixName, matrix);
-    }
-    Map<String,Double> rowVector = matrix.get(row);
-    if (rowVector == null) {
-      rowVector = new HashMap<String,Double>();
-      matrix.put(row, rowVector);
-    }
-    rowVector.put(col, weight);
-  }
-  
-  private void vectorPutCell(String vectorName, String index, double weight) {
-    
-    Map<String,Double> vector = vectors.get(vectorName);
-    if (vector == null) {
-      vector = new HashMap<String,Double>();
-      vectors.put(vectorName, vector);
-    }
-    vector.put(index, weight);
-  }
-  
-  private long sizeOfMatrix(String matrixName) {
-    Map<String,Map<String,Double>> matrix = matrices.get(matrixName);
-    if (matrix == null) {
-      return 0;
-    }
-    return matrix.size();
   }
   
   public void loadFeatureWeight(String feature, String label, double weight) {
-    matrixPutCell("weight", feature, label, weight);
+    int fid = getFeatureID(feature);
+    int lid = getLabelID(label);
+    weightMatrix.setQuick(fid, lid, weight);
   }
   
   public void setSumFeatureWeight(String feature, double weight) {
-    matrixPutCell("weight", feature, "sigma_j", weight);
+    int fid = getFeatureID(feature);
+    sigma_j.put(fid, weight);
   }
   
   public void setSumLabelWeight(String label, double weight) {
-    vectorPutCell("labelWeight", label, weight);
+    int lid = getLabelID(label);
+    sigma_k.put(lid, weight);
   }
   
   public void setThetaNormalizer(String label, double weight) {
-    vectorPutCell("thetaNormalizer", label, weight);
+    int lid = getLabelID(label);
+    thetaNormalizerPerLabel.put(lid, weight);
+    thetaNormalizer = Math.max(thetaNormalizer, Math.abs(weight));
   }
   
   public void setSigmaJSigmaK(double weight) {
-    vectorPutCell("sumWeight", "sigma_jSigma_k", weight);
+    this.sigma_jSigma_k = weight;
   }
-  
-  public void updateVocabCount() {
-    vectorPutCell("sumWeight", "vocabCount", sizeOfMatrix("weight"));
-  }
-  
-  private static double nullToZero(Double value) {
-    return value == null ? 0.0 : value;
-  }
-  
 }

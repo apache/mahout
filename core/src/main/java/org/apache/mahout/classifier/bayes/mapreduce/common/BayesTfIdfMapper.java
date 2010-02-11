@@ -30,6 +30,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.mahout.common.StringTuple;
+import org.apache.mahout.math.map.OpenObjectDoubleHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,7 @@ public class BayesTfIdfMapper extends MapReduceBase implements
   
   private static final DoubleWritable ONE = new DoubleWritable(1.0);
   
-  private Map<String,Double> labelDocumentCounts;
+  private OpenObjectDoubleHashMap<String> labelDocumentCounts = new OpenObjectDoubleHashMap<String>();
   
   /**
    * We need to calculate the Tf-Idf of each feature in each label
@@ -87,20 +88,22 @@ public class BayesTfIdfMapper extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     try {
-      if (labelDocumentCounts == null) {
-        labelDocumentCounts = new HashMap<String,Double>();
-        
-        DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(
-            job, GenericsUtil.getClass(labelDocumentCounts));
-        
-        String labelDocumentCountString = mapStringifier
-            .toString(labelDocumentCounts);
-        labelDocumentCountString = job.get("cnaivebayes.labelDocumentCounts",
-          labelDocumentCountString);
-        
-        labelDocumentCounts = mapStringifier
-            .fromString(labelDocumentCountString);
+      this.labelDocumentCounts.clear();
+      Map<String,Double> labelDocCountTemp = new HashMap<String,Double>();
+      
+      DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(
+          job, GenericsUtil.getClass(labelDocCountTemp));
+      
+      String labelDocumentCountString = mapStringifier
+          .toString(labelDocCountTemp);
+      labelDocumentCountString = job.get("cnaivebayes.labelDocumentCounts",
+        labelDocumentCountString);
+      
+      labelDocCountTemp = mapStringifier.fromString(labelDocumentCountString);
+      for (String key : labelDocCountTemp.keySet()) {
+        this.labelDocumentCounts.put(key, labelDocCountTemp.get(key));
       }
+      
     } catch (IOException ex) {
       log.warn(ex.toString(), ex);
     }
