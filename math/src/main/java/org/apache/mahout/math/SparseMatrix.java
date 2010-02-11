@@ -17,56 +17,61 @@
 
 package org.apache.mahout.math;
 
-import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.mahout.math.map.OpenIntObjectHashMap;
 
 /** Doubly sparse matrix. Implemented as a Map of RandomAccessSparseVector rows */
 public class SparseMatrix extends AbstractMatrix {
-
+  
   private int[] cardinality;
-
-  private Map<Integer, Vector> rows;
-
+  
+  private OpenIntObjectHashMap<Vector> rows;
+  
   public SparseMatrix() {
     super();
   }
-
+  
   /**
    * Construct a matrix of the given cardinality with the given row map
-   *
-   * @param cardinality the int[2] cardinality desired
-   * @param rows        a Map<Integer, RandomAccessSparseVector> of rows
+   * 
+   * @param cardinality
+   *          the int[2] cardinality desired
+   * @param rows
+   *          a Map<Integer, RandomAccessSparseVector> of rows
    */
-  public SparseMatrix(int[] cardinality, Map<Integer, RandomAccessSparseVector> rows) {
+  public SparseMatrix(int[] cardinality,
+                      Map<Integer,RandomAccessSparseVector> rows) {
     this.cardinality = cardinality.clone();
-    this.rows = new HashMap<Integer, Vector>();
-    for (Map.Entry<Integer, RandomAccessSparseVector> entry : rows.entrySet()) {
+    this.rows = new OpenIntObjectHashMap<Vector>();
+    for (Map.Entry<Integer,RandomAccessSparseVector> entry : rows.entrySet()) {
       this.rows.put(entry.getKey(), entry.getValue().clone());
     }
   }
-
+  
   /**
    * Construct a matrix of the given cardinality
-   *
-   * @param cardinality the int[2] cardinality desired
+   * 
+   * @param cardinality
+   *          the int[2] cardinality desired
    */
   public SparseMatrix(int[] cardinality) {
     this.cardinality = cardinality.clone();
-    this.rows = new HashMap<Integer, Vector>();
+    this.rows = new OpenIntObjectHashMap<Vector>();
   }
-
+  
   public int[] size() {
     return cardinality;
   }
-
+  
   @Override
   public Matrix clone() {
     SparseMatrix clone = (SparseMatrix) super.clone();
     clone.cardinality = cardinality.clone();
-    clone.rows = (Map<Integer, Vector>) ((HashMap<Integer, Vector>) rows).clone();
+    clone.rows = rows.clone();
     return clone;
   }
-
+  
   public double getQuick(int row, int column) {
     Vector r = rows.get(row);
     if (r == null) {
@@ -75,15 +80,15 @@ public class SparseMatrix extends AbstractMatrix {
       return r.getQuick(column);
     }
   }
-
+  
   public Matrix like() {
     return new SparseMatrix(cardinality);
   }
-
+  
   public Matrix like(int rows, int columns) {
-    return new SparseMatrix(new int[]{rows, columns});
+    return new SparseMatrix(new int[] {rows, columns});
   }
-
+  
   public void setQuick(int row, int column, double value) {
     Vector r = rows.get(row);
     if (r == null) {
@@ -92,17 +97,17 @@ public class SparseMatrix extends AbstractMatrix {
     }
     r.setQuick(column, value);
   }
-
+  
   public int[] getNumNondefaultElements() {
     int[] result = new int[2];
     result[ROW] = rows.size();
-    for (Map.Entry<Integer, Vector> integerVectorEntry : rows.entrySet()) {
-      result[COL] = Math.max(result[COL], integerVectorEntry.getValue()
+    for (Vector vectorEntry : rows.values()) {
+      result[COL] = Math.max(result[COL], vectorEntry
           .getNumNondefaultElements());
     }
     return result;
   }
-
+  
   public Matrix viewPart(int[] offset, int[] size) {
     if (size[ROW] > cardinality[ROW] || size[COL] > cardinality[COL]) {
       throw new CardinalityException();
@@ -113,7 +118,7 @@ public class SparseMatrix extends AbstractMatrix {
     }
     return new MatrixView(this, offset, size);
   }
-
+  
   public Matrix assignColumn(int column, Vector other) {
     if (other.size() != cardinality[ROW] || column >= cardinality[COL]) {
       throw new CardinalityException();
@@ -131,7 +136,7 @@ public class SparseMatrix extends AbstractMatrix {
     }
     return this;
   }
-
+  
   public Matrix assignRow(int row, Vector other) {
     if (row >= cardinality[ROW] || other.size() != cardinality[COL]) {
       throw new CardinalityException();
@@ -139,7 +144,7 @@ public class SparseMatrix extends AbstractMatrix {
     rows.put(row, other);
     return this;
   }
-
+  
   public Vector getColumn(int column) {
     if (column < 0 || column >= cardinality[COL]) {
       throw new IndexException();
@@ -150,7 +155,7 @@ public class SparseMatrix extends AbstractMatrix {
     }
     return new DenseVector(d);
   }
-
+  
   public Vector getRow(int row) {
     if (row < 0 || row >= cardinality[ROW]) {
       throw new IndexException();
@@ -161,5 +166,5 @@ public class SparseMatrix extends AbstractMatrix {
     }
     return res;
   }
-
+  
 }
