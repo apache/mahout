@@ -35,6 +35,8 @@ import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.mahout.common.StringTuple;
+import org.apache.mahout.math.function.ObjectIntProcedure;
+import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,12 +117,16 @@ public class CollocMapper extends MapReduceBase implements
   @Override
   public void map(Text key,
                   StringTuple value,
-                  OutputCollector<Gram,Gram> collector,
+                  final OutputCollector<Gram,Gram> collector,
                   Reporter reporter) throws IOException {
     
     ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value
         .getEntries().iterator()), maxShingleSize);
     int count = 0; // ngram count
+    OpenObjectIntHashMap<String> ngrams = new OpenObjectIntHashMap<String>(
+        value.getEntries().size() * (maxShingleSize - 1));
+    OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(
+        value.getEntries().size());
     
     do {
       String term = ((TermAttribute) sf.getAttribute(TermAttribute.class))
@@ -129,19 +135,54 @@ public class CollocMapper extends MapReduceBase implements
           .type();
       if ("shingle".equals(type)) {
         count++;
-        Gram ngram = new Gram(term);
+        if (ngrams.containsKey(term) == false) {
+          ngrams.put(term, 1);
+        } else {
+          ngrams.put(term, 1 + ngrams.get(term));
+        }
+      } else if (emitUnigrams && term.length() > 0) { // unigram
+        if (unigrams.containsKey(term) == false) {
+          unigrams.put(term, 1);
+        } else {
+          unigrams.put(term, 1 + unigrams.get(term));
+        }
+      }
+    } while (sf.incrementToken());
+    
+    ngrams.forEachPair(new ObjectIntProcedure<String>() {
+      
+      @Override
+      public boolean apply(String term, int frequency) {
+        Gram ngram = new Gram(term, frequency);
         // obtain components, the leading (n-1)gram and the trailing unigram.
         int i = term.lastIndexOf(' ');
         if (i != -1) { // bigram, trigram etc
-          collector.collect(new Gram(term.substring(0, i), HEAD), ngram);
-          collector.collect(new Gram(term.substring(i + 1), TAIL), ngram);
+          try {
+            collector.collect(new Gram(term.substring(0, i), frequency, HEAD),
+              ngram);
+            collector.collect(new Gram(term.substring(i + 1), frequency, TAIL),
+              ngram);
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
         }
-      } else if (emitUnigrams && term.length() > 0) { // unigram
-        Gram ngram = new Gram(term);
-        Gram unigram = new Gram(term, UNIGRAM);
-        collector.collect(unigram, ngram);
+        return true;
       }
-    } while (sf.incrementToken());
+    });
+    
+    unigrams.forEachPair(new ObjectIntProcedure<String>() {
+      @Override
+      public boolean apply(String term, int frequency) {
+        try {
+          Gram ngram = new Gram(term, frequency);
+          Gram unigram = new Gram(term, frequency, UNIGRAM);
+          collector.collect(unigram, ngram);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+        return true;
+      }
+    });
     
     reporter.incrCounter(Count.NGRAM_TOTAL, count);
     

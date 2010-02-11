@@ -38,138 +38,126 @@ import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 
-/** Test for CollocMapper
- * FIXME: Add negative test cases
+/**
+ * Test for CollocMapper FIXME: Add negative test cases
  */
 @SuppressWarnings("deprecation")
 public class CollocMapperTest {
-
+  
   OutputCollector<Gram,Gram> collector;
   Reporter reporter;
-
+  
   @Before
   @SuppressWarnings("unchecked")
   public void setUp() {
     collector = EasyMock.createMock(OutputCollector.class);
-    reporter  = EasyMock.createMock(Reporter.class);
+    reporter = EasyMock.createMock(Reporter.class);
   }
-
+  
   @Test
   public void testCollectNgrams() throws Exception {
-
+    
     Text key = new Text();
     key.set("dummy-key");
     
-    String[] input = {"the", "best", "of", "times", "the", "worst", "of", "times"};
+    String[] input = {"the", "best", "of", "times", "the", "worst", "of",
+                      "times"};
     StringTuple inputTuple = new StringTuple();
-    for (String i: input) {
+    for (String i : input) {
       inputTuple.add(i);
     }
-
-    String[][] values = 
-      new String[][]{
-        {"h_the",   "the best"},
-        {"t_best",  "the best"},
-        {"h_best",  "best of"},
-        {"t_of",    "best of"},
-        {"h_of",    "of times"},
-        {"t_times", "of times"},
-        {"h_times", "times the"},
-        {"t_the",   "times the"},
-        {"h_the",   "the worst"},
-        {"t_worst", "the worst"},
-        {"h_worst", "worst of"},
-        {"t_of",    "worst of"},
-        {"h_of",    "of times"},
-        {"t_times", "of times"}
-    };
+    
+    String[][] values = new String[][] { {"h_the", "the best"},
+                                        {"t_best", "the best"},
+                                        {"h_of", "of times"},
+                                        {"t_times", "of times"},
+                                        {"h_best", "best of"},
+                                        {"t_of", "best of"},
+                                        {"h_the", "the worst"},
+                                        {"t_worst", "the worst"},
+                                        {"h_times", "times the"},
+                                        {"t_the", "times the"},
+                                        {"h_worst", "worst of"},
+                                        {"t_of", "worst of"},};
     // set up expectations for mocks. ngram max size = 2
-    for (String[] v: values) {
+    for (String[] v : values) {
       Type p = v[0].startsWith("h") ? HEAD : TAIL;
-      Gram subgram = new Gram(v[0].substring(2), p);
-      Gram ngram = new Gram(v[1]);
+      int frequency = 1;
+      if (v[1].equals("of times")) frequency = 2;
+      Gram subgram = new Gram(v[0].substring(2), frequency, p);
+      Gram ngram = new Gram(v[1], frequency);
       collector.collect(subgram, ngram);
     }
-   
-
+    
     reporter.incrCounter(CollocMapper.Count.NGRAM_TOTAL, 7);
     EasyMock.replay(reporter, collector);
     
-
     JobConf conf = new JobConf();
     conf.set(CollocMapper.MAX_SHINGLE_SIZE, "2");
-
+    
     CollocMapper c = new CollocMapper();
     c.configure(conf);
     
     c.map(key, inputTuple, collector, reporter);
-
+    
     EasyMock.verify(reporter, collector);
   }
   
   @Test
   public void testCollectNgramsWithUnigrams() throws Exception {
-
+    
     Text key = new Text();
     key.set("dummy-key");
     
-    String[] input = {"the", "best", "of", "times", "the", "worst", "of", "times"};
+    String[] input = {"the", "best", "of", "times", "the", "worst", "of",
+                      "times"};
     StringTuple inputTuple = new StringTuple();
-    for (String i: input) {
+    for (String i : input) {
       inputTuple.add(i);
     }
-
-    String[][] values = 
-      new String[][]{
-        {"u_the", "the"},
-        {"h_the",   "the best"},
-        {"t_best",  "the best"},
-        {"u_best", "best"},
-        {"h_best",  "best of"},
-        {"t_of",    "best of"},
-        {"u_of", "of"},
-        {"h_of",    "of times"},
-        {"t_times", "of times"},
-        {"u_times", "times"},
-        {"h_times", "times the"},
-        {"t_the",   "times the"},
-        {"u_the", "the"},
-        {"h_the",   "the worst"},
-        {"t_worst", "the worst"},
-        {"u_worst", "worst"},
-        {"h_worst", "worst of"},
-        {"t_of",    "worst of"},
-        {"u_of", "of"},
-        {"h_of",    "of times"},
-        {"t_times", "of times"},
-        {"u_times", "times"},
-    };
+    
+    String[][] values = new String[][] { {"h_the", "the best"},
+                                        {"t_best", "the best"},
+                                        {"h_of", "of times"},
+                                        {"t_times", "of times"},
+                                        {"h_best", "best of"},
+                                        {"t_of", "best of"},
+                                        {"h_the", "the worst"},
+                                        {"t_worst", "the worst"},
+                                        {"h_times", "times the"},
+                                        {"t_the", "times the"},
+                                        {"h_worst", "worst of"},
+                                        {"t_of", "worst of"},
+                                        {"u_worst", "worst"}, {"u_of", "of"},
+                                        {"u_the", "the"}, {"u_best", "best"},
+                                        {"u_times", "times"},};
     // set up expectations for mocks. ngram max size = 2
-    for (String[] v: values) {
+    for (String[] v : values) {
       Type p = v[0].startsWith("h") ? HEAD : TAIL;
       p = v[0].startsWith("u") ? UNIGRAM : p;
-      Gram subgram = new Gram(v[0].substring(2), p);
-      Gram ngram = new Gram(v[1]);
+      int frequency = 1;
+      if (v[1].equals("of times") || v[1].equals("of") || v[1].equals("times")
+          || v[1].equals("the")) frequency = 2;
+      Gram subgram = new Gram(v[0].substring(2), frequency, p);
+      Gram ngram = new Gram(v[1], frequency);
       collector.collect(subgram, ngram);
     }
-   
-
+    
     reporter.incrCounter(CollocMapper.Count.NGRAM_TOTAL, 7);
     EasyMock.replay(reporter, collector);
     
-
     JobConf conf = new JobConf();
     conf.set(CollocMapper.MAX_SHINGLE_SIZE, "2");
     conf.setBoolean(CollocDriver.EMIT_UNIGRAMS, true);
-
+    
     CollocMapper c = new CollocMapper();
     c.configure(conf);
     
     c.map(key, inputTuple, collector, reporter);
-
+    
     EasyMock.verify(reporter, collector);
   }
-
+  
   /** A lucene 2.9 standard analyzer with no stopwords. */
   public static class TestAnalyzer extends Analyzer {
     final Analyzer a;

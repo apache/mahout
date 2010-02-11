@@ -150,118 +150,119 @@ public final class SparseVectorsFromSequenceFiles {
         .withOption(minLLROpt).withOption(numReduceTasksOpt).withOption(
           maxNGramSizeOpt).withOption(overwriteOutput).withOption(helpOpt)
         .create();
-    
-    Parser parser = new Parser();
-    parser.setGroup(group);
-    CommandLine cmdLine = null;
-    
     try {
-      // standard help opt won't work because
-      // outputDir is required and exception will 
-      // be thrown if it is not present.
-      cmdLine = parser.parse(args);
-    }
-    catch (OptionException oe) {
-        System.out.println(oe.getMessage());
+      Parser parser = new Parser();
+      parser.setGroup(group);
+      CommandLine cmdLine = parser.parse(args);
+      
+      if (cmdLine.hasOption(helpOpt)) {
         CommandLineUtil.printHelp(group);
         return;
-    }
-    
-    String inputDir = (String) cmdLine.getValue(inputDirOpt);
-    String outputDir = (String) cmdLine.getValue(outputDirOpt);
-    
-    int chunkSize = 100;
-    if (cmdLine.hasOption(chunkSizeOpt)) {
-      chunkSize = Integer.parseInt((String) cmdLine.getValue(chunkSizeOpt));
-    }
-    int minSupport = 2;
-    if (cmdLine.hasOption(minSupportOpt)) {
-      String minSupportString = (String) cmdLine.getValue(minSupportOpt);
-      minSupport = Integer.parseInt(minSupportString);
-    }
-    
-    int maxNGramSize = 1;
-    
-    if (cmdLine.hasOption(maxNGramSizeOpt) == true) {
-      try {
-        maxNGramSize = Integer.parseInt(cmdLine.getValue(maxNGramSizeOpt)
+      }
+      
+      String inputDir = (String) cmdLine.getValue(inputDirOpt);
+      String outputDir = (String) cmdLine.getValue(outputDirOpt);
+      
+      int chunkSize = 100;
+      if (cmdLine.hasOption(chunkSizeOpt)) {
+        chunkSize = Integer.parseInt((String) cmdLine.getValue(chunkSizeOpt));
+      }
+      int minSupport = 2;
+      if (cmdLine.hasOption(minSupportOpt)) {
+        String minSupportString = (String) cmdLine.getValue(minSupportOpt);
+        minSupport = Integer.parseInt(minSupportString);
+      }
+      
+      int maxNGramSize = 1;
+      
+      if (cmdLine.hasOption(maxNGramSizeOpt) == true) {
+        try {
+          maxNGramSize = Integer.parseInt(cmdLine.getValue(maxNGramSizeOpt)
+              .toString());
+        } catch (NumberFormatException ex) {
+          log.warn("Could not parse ngram size option");
+        }
+      }
+      log.info("Maximum n-gram size is: {}", maxNGramSize);
+      
+      if (cmdLine.hasOption(overwriteOutput) == true) {
+        HadoopUtil.overwriteOutput(outputDir);
+      }
+      
+      float minLLRValue = LLRReducer.DEFAULT_MIN_LLR;
+      if (cmdLine.hasOption(minLLROpt)) {
+        minLLRValue = Float.parseFloat(cmdLine.getValue(minLLROpt).toString());
+      }
+      log.info("Minimum LLR value: {}", minLLRValue);
+      
+      int reduceTasks = 1;
+      if (cmdLine.hasOption(numReduceTasksOpt)) {
+        reduceTasks = Integer.parseInt(cmdLine.getValue(numReduceTasksOpt)
             .toString());
-      } catch (NumberFormatException ex) {
-        log.warn("Could not parse ngram size option");
       }
-    }
-    log.info("Maximum n-gram size is: {}", maxNGramSize);
-    
-    if (cmdLine.hasOption(overwriteOutput) == true) {
-      HadoopUtil.overwriteOutput(outputDir);
-    }
-    
-    float minLLRValue = LLRReducer.DEFAULT_MIN_LLR;
-    if (cmdLine.hasOption(minLLROpt)) {
-      minLLRValue = Float.parseFloat(cmdLine.getValue(minLLROpt).toString());
-    }
-    log.info("Minimum LLR value: {}", minLLRValue);
-    
-    int reduceTasks = 1;
-    if (cmdLine.hasOption(numReduceTasksOpt)) {
-      reduceTasks = Integer.parseInt(cmdLine.getValue(numReduceTasksOpt)
-          .toString());
-    }
-    log.info("Pass1 reduce tasks: {}", reduceTasks);
-    
-    Class<? extends Analyzer> analyzerClass = StandardAnalyzer.class;
-    if (cmdLine.hasOption(analyzerNameOpt)) {
-      String className = cmdLine.getValue(analyzerNameOpt).toString();
-      analyzerClass = (Class<? extends Analyzer>) Class.forName(className);
-      // try instantiating it, b/c there isn't any point in setting it if
-      // you can't instantiate it
-      analyzerClass.newInstance();
-    }
-    
-    boolean processIdf;
-    
-    if (cmdLine.hasOption(weightOpt)) {
-      String wString = cmdLine.getValue(weightOpt).toString();
-      if (wString.equalsIgnoreCase("tf")) {
-        processIdf = false;
-      } else if (wString.equalsIgnoreCase("tfidf")) {
+      log.info("Pass1 reduce tasks: {}", reduceTasks);
+      
+      Class<? extends Analyzer> analyzerClass = StandardAnalyzer.class;
+      if (cmdLine.hasOption(analyzerNameOpt)) {
+        String className = cmdLine.getValue(analyzerNameOpt).toString();
+        analyzerClass = (Class<? extends Analyzer>) Class.forName(className);
+        // try instantiating it, b/c there isn't any point in setting it if
+        // you can't instantiate it
+        analyzerClass.newInstance();
+      }
+      
+      boolean processIdf;
+      
+      if (cmdLine.hasOption(weightOpt)) {
+        String wString = cmdLine.getValue(weightOpt).toString();
+        if (wString.equalsIgnoreCase("tf")) {
+          processIdf = false;
+        } else if (wString.equalsIgnoreCase("tfidf")) {
+          processIdf = true;
+        } else {
+          throw new OptionException(weightOpt);
+        }
+      } else {
         processIdf = true;
-      } else {
-        throw new OptionException(weightOpt);
       }
-    } else {
-      processIdf = true;
-    }
-    
-    int minDf = 1;
-    if (cmdLine.hasOption(minDFOpt)) {
-      minDf = Integer.parseInt(cmdLine.getValue(minDFOpt).toString());
-    }
-    int maxDFPercent = 99;
-    if (cmdLine.hasOption(maxDFPercentOpt)) {
-      maxDFPercent = Integer.parseInt(cmdLine.getValue(maxDFPercentOpt)
-          .toString());
-    }
-    
-    float norm = PartialVectorMerger.NO_NORMALIZING;
-    if (cmdLine.hasOption(powerOpt)) {
-      String power = cmdLine.getValue(powerOpt).toString();
-      if (power.equals("INF")) {
-        norm = Float.POSITIVE_INFINITY;
-      } else {
-        norm = Float.parseFloat(power);
+      
+      int minDf = 1;
+      if (cmdLine.hasOption(minDFOpt)) {
+        minDf = Integer.parseInt(cmdLine.getValue(minDFOpt).toString());
       }
-    }
-    HadoopUtil.overwriteOutput(outputDir);
-    String tokenizedPath = outputDir + DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER;
-    DocumentProcessor.tokenizeDocuments(inputDir, analyzerClass, tokenizedPath);
-    
-    DictionaryVectorizer.createTermFrequencyVectors(tokenizedPath, outputDir,
-      minSupport, maxNGramSize, minLLRValue, reduceTasks, chunkSize);
-    if (processIdf) {
-      TFIDFConverter.processTfIdf(
-        outputDir + DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER,
-        outputDir + TFIDFConverter.TFIDF_OUTPUT_FOLDER, chunkSize, minDf, maxDFPercent, norm);
+      int maxDFPercent = 99;
+      if (cmdLine.hasOption(maxDFPercentOpt)) {
+        maxDFPercent = Integer.parseInt(cmdLine.getValue(maxDFPercentOpt)
+            .toString());
+      }
+      
+      float norm = PartialVectorMerger.NO_NORMALIZING;
+      if (cmdLine.hasOption(powerOpt)) {
+        String power = cmdLine.getValue(powerOpt).toString();
+        if (power.equals("INF")) {
+          norm = Float.POSITIVE_INFINITY;
+        } else {
+          norm = Float.parseFloat(power);
+        }
+      }
+      HadoopUtil.overwriteOutput(outputDir);
+      String tokenizedPath = outputDir
+                             + DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER;
+      DocumentProcessor.tokenizeDocuments(inputDir, analyzerClass,
+        tokenizedPath);
+      
+      DictionaryVectorizer.createTermFrequencyVectors(tokenizedPath, outputDir,
+        minSupport, maxNGramSize, minLLRValue, reduceTasks, chunkSize);
+      if (processIdf) {
+        TFIDFConverter.processTfIdf(
+          outputDir + DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER,
+          outputDir + TFIDFConverter.TFIDF_OUTPUT_FOLDER, chunkSize, minDf,
+          maxDFPercent, norm);
+      }
+    } catch (OptionException e) {
+      log.error("Exception", e);
+      CommandLineUtil.printHelp(group);
     }
   }
+  
 }
