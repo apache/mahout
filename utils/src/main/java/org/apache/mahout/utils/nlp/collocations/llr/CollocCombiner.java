@@ -28,10 +28,11 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.utils.nlp.collocations.llr.Gram.Type;
 
+/** Combiner for pass1 of the CollocationDriver */
 public class CollocCombiner extends MapReduceBase implements
-Reducer<Gram, Gram, Gram, Gram> {
+  Reducer<Gram, Gram, Gram, Gram> {
 
-  /** collocation finder: pass 1 collec phase:
+  /** collocation finder: pass 1 colloc phase:
    *  
    *  given input from the mapper,
    *  k:h_subgram:1 v:ngram:1
@@ -49,34 +50,34 @@ Reducer<Gram, Gram, Gram, Gram> {
    *  and move the count into the value?
    */
   @Override
-  public void reduce(Gram key, Iterator<Gram> value,
+  public void reduce(Gram subgramKey, Iterator<Gram> ngramValues,
       OutputCollector<Gram, Gram> output, Reporter reporter) throws IOException {
 
-    HashMap<Gram,Gram> set = new HashMap<Gram,Gram>();
+    HashMap<Gram,Gram> ngramSet = new HashMap<Gram,Gram>();
     int subgramFrequency = 0;
 
-    while (value.hasNext()) {
-      Gram t = value.next();
-      subgramFrequency += t.getFrequency();
+    while (ngramValues.hasNext()) {
+      Gram ngram = ngramValues.next();
+      subgramFrequency += ngram.getFrequency();
 
-      Gram s = set.get(t);
-      if (s == null) {
+      Gram ngramCanon = ngramSet.get(ngram);
+      if (ngramCanon == null) {
         // t is potentially reused, so create a new object to populate the HashMap
-        Gram e = new Gram(t);
-        set.put(e,e);
+        Gram ngramEntry = new Gram(ngram);
+        ngramSet.put(ngramEntry,ngramEntry);
       }
       else {
-        s.incrementFrequency(t.getFrequency());
+        ngramCanon.incrementFrequency(ngram.getFrequency());
       }
     }
 
     // emit subgram:subgramFreq ngram:ngramFreq pairs
-    key.setFrequency(subgramFrequency);
+    subgramKey.setFrequency(subgramFrequency);
 
-    for (Gram t: set.keySet()) {
-      if(key.getType() == Type.UNIGRAM)
-        t.setType(key.getType());
-      output.collect(key, t);
+    for (Gram ngram: ngramSet.keySet()) {
+      if(subgramKey.getType() == Type.UNIGRAM)
+        ngram.setType(subgramKey.getType());
+      output.collect(subgramKey, ngram);
     }
   }
 

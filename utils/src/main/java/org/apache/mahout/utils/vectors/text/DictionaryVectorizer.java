@@ -106,7 +106,7 @@ public final class DictionaryVectorizer {
    *          the minimum frequency of the feature in the entire corpus to be
    *          considered for inclusion in the sparse vector
    * @param maxNGramSize
-   *          1 = unigram, 2 = unigram and bigram, 3 = unigram, bigrama and
+   *          1 = unigram, 2 = unigram and bigram, 3 = unigram, bigram and
    *          trigram
    * @param minLLRValue
    *          minValue of log likelihood ratio to used to prune ngrams
@@ -146,7 +146,7 @@ public final class DictionaryVectorizer {
       CollocDriver.generateAllGrams(inputPath.toString(), dictionaryJobPath
           .toString(), maxNGramSize, minSupport, minLLRValue, numReducers);
       dictionaryChunks = createDictionaryChunks(minSupport, new Path(
-          output + DICTIONARY_JOB_FOLDER + "/ngrams"), output,
+          output + DICTIONARY_JOB_FOLDER, CollocDriver.NGRAM_OUTPUT_DIRECTORY), output,
         chunkSizeInMegabytes, new DoubleWritable());
     }
     

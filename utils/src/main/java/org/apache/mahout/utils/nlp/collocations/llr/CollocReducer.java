@@ -84,40 +84,40 @@ public class CollocReducer extends MapReduceBase implements
    * move the count into the value?
    */
   @Override
-  public void reduce(Gram key,
-                     Iterator<Gram> value,
+  public void reduce(Gram subgramKey,
+                     Iterator<Gram> ngramValues,
                      OutputCollector<Gram,Gram> output,
                      Reporter reporter) throws IOException {
     
-    HashMap<Gram,Gram> set = new HashMap<Gram,Gram>();
+    HashMap<Gram,Gram> ngramSet = new HashMap<Gram,Gram>();
     int subgramFrequency = 0;
     
-    while (value.hasNext()) {
-      Gram t = value.next();
-      subgramFrequency += t.getFrequency();
+    while (ngramValues.hasNext()) {
+      Gram ngram = ngramValues.next();
+      subgramFrequency += ngram.getFrequency();
       
-      Gram s = set.get(t);
-      if (s == null) {
+      Gram ngramCanon = ngramSet.get(ngram);
+      if (ngramCanon == null) {
         // t is potentially reused, so create a new object to populate the
         // HashMap
-        Gram e = new Gram(t);
-        set.put(e, e);
+        Gram ngramEntry = new Gram(ngram);
+        ngramSet.put(ngramEntry, ngramEntry);
       } else {
-        s.incrementFrequency(t.getFrequency());
+        ngramCanon.incrementFrequency(ngram.getFrequency());
       }
     }
     
     // emit ngram:ngramFreq, subgram:subgramFreq pairs.
-    key.setFrequency(subgramFrequency);
+    subgramKey.setFrequency(subgramFrequency);
     
-    for (Gram t : set.keySet()) {
-      if (t.getFrequency() < minSupport) {
+    for (Gram ngram : ngramSet.keySet()) {
+      if (ngram.getFrequency() < minSupport) {
         reporter.incrCounter(Skipped.LESS_THAN_MIN_SUPPORT, 1);
         continue;
       }
-      if(key.getType() == Type.UNIGRAM)
-        t.setType(key.getType());
-      output.collect(t, key);
+      if(subgramKey.getType() == Type.UNIGRAM)
+        ngram.setType(subgramKey.getType());
+      output.collect(ngram, subgramKey);
     }
   }
 }

@@ -153,11 +153,18 @@ public final class SparseVectorsFromSequenceFiles {
     
     Parser parser = new Parser();
     parser.setGroup(group);
-    CommandLine cmdLine = parser.parse(args);
+    CommandLine cmdLine = null;
     
-    if (cmdLine.hasOption(helpOpt)) {
-      CommandLineUtil.printHelp(group);
-      return;
+    try {
+      // standard help opt won't work because
+      // outputDir is required and exception will 
+      // be thrown if it is not present.
+      cmdLine = parser.parse(args);
+    }
+    catch (OptionException oe) {
+        System.out.println(oe.getMessage());
+        CommandLineUtil.printHelp(group);
+        return;
     }
     
     String inputDir = (String) cmdLine.getValue(inputDirOpt);
@@ -246,7 +253,7 @@ public final class SparseVectorsFromSequenceFiles {
       }
     }
     HadoopUtil.overwriteOutput(outputDir);
-    String tokenizedPath = outputDir + "/tokenized-documents";
+    String tokenizedPath = outputDir + DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER;
     DocumentProcessor.tokenizeDocuments(inputDir, analyzerClass, tokenizedPath);
     
     DictionaryVectorizer.createTermFrequencyVectors(tokenizedPath, outputDir,
@@ -254,7 +261,7 @@ public final class SparseVectorsFromSequenceFiles {
     if (processIdf) {
       TFIDFConverter.processTfIdf(
         outputDir + DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER,
-        outputDir + "/tfidf", chunkSize, minDf, maxDFPercent, norm);
+        outputDir + TFIDFConverter.TFIDF_OUTPUT_FOLDER, chunkSize, minDf, maxDFPercent, norm);
     }
   }
 }

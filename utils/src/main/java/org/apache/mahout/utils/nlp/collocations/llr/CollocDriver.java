@@ -49,10 +49,13 @@ import org.slf4j.LoggerFactory;
 
 /** Driver for LLR collocation discovery mapreduce job */
 public class CollocDriver {
+  public static final String DEFAULT_OUTPUT_DIRECTORY = "output";
+  public static final String SUBGRAM_OUTPUT_DIRECTORY = "subgrams";
+  public static final String NGRAM_OUTPUT_DIRECTORY   = "ngrams";
+  
   public static final String EMIT_UNIGRAMS = "emit-unigrams";
   public static final boolean DEFAULT_EMIT_UNIGRAMS = false;
   
-  public static final String DEFAULT_OUTPUT_DIRECTORY = "output";
   public static final int DEFAULT_MAX_NGRAM_SIZE = 2;
   public static final int DEFAULT_PASS1_NUM_REDUCE_TASKS = 1;
   
@@ -78,18 +81,17 @@ public class CollocDriver {
         .withDescription("The Path write output to").withShortName("o")
         .create();
     
-    Option maxNGramSizeOpt = obuilder
-        .withLongName("maxNGramSize")
-        .withRequired(false)
-        .withArgument(
+    Option maxNGramSizeOpt = obuilder.withLongName("maxNGramSize")
+        .withRequired(false).withArgument(
           abuilder.withName("ngramSize").withMinimum(1).withMaximum(1).create())
         .withDescription(
           "(Optional) The maximum size of ngrams to create"
               + " (2 = bigrams, 3 = trigrams, etc) Default Value:2")
         .withShortName("ng").create();
     
-    Option minSupportOpt = obuilder.withLongName("minSupport").withArgument(
-      abuilder.withName("minSupport").withMinimum(1).withMaximum(1).create())
+    Option minSupportOpt = obuilder.withLongName("minSupport")
+        .withRequired(false).withArgument(
+          abuilder.withName("minSupport").withMinimum(1).withMaximum(1).create())
         .withDescription(
           "(Optional) Minimum Support. Default Value: "
               + CollocReducer.DEFAULT_MIN_SUPPORT).withShortName("s").create();
@@ -102,14 +104,14 @@ public class CollocDriver {
               + LLRReducer.DEFAULT_MIN_LLR).withShortName("ml").create();
     
     Option numReduceTasksOpt = obuilder.withLongName("numReducers")
-        .withArgument(
+        .withRequired(false).withArgument(
           abuilder.withName("numReducers").withMinimum(1).withMaximum(1)
               .create()).withDescription(
           "(Optional) Number of reduce tasks. Default Value: "
               + DEFAULT_PASS1_NUM_REDUCE_TASKS).withShortName("nr").create();
     
-    Option preprocessOpt = obuilder.withLongName("preprocess").withRequired(
-      false).withDescription(
+    Option preprocessOpt = obuilder.withLongName("preprocess")
+        .withRequired(false).withDescription(
       "If set, input is SequenceFile<Text,Text> where the value is the document, "
           + " which will be tokenized using the specified analyzer.")
         .withShortName("p").create();
@@ -188,7 +190,7 @@ public class CollocDriver {
         reduceTasks = Integer.parseInt(cmdLine.getValue(numReduceTasksOpt)
             .toString());
       }
-      log.info("Pass1 reduce tasks: {}", reduceTasks);
+      log.info("Number of pass1 reduce tasks: {}", reduceTasks);
       
       boolean emitUnigrams = cmdLine.hasOption(unigramOpt);
       
@@ -204,7 +206,9 @@ public class CollocDriver {
           analyzerClass.newInstance();
         }
         
-        String tokenizedPath = output + "/tokenized-documents";
+        String tokenizedPath = 
+          output + DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER;
+        
         DocumentProcessor
             .tokenizeDocuments(input, analyzerClass, tokenizedPath);
         input = tokenizedPath;
@@ -280,7 +284,7 @@ public class CollocDriver {
     conf.setBoolean(CollocDriver.EMIT_UNIGRAMS, emitUnigrams);
     
     FileInputFormat.setInputPaths(conf, new Path(input));
-    Path outPath = new Path(output + "/subgrams");
+    Path outPath = new Path(output, SUBGRAM_OUTPUT_DIRECTORY);
     FileOutputFormat.setOutputPath(conf, outPath);
     
     conf.setInputFormat(SequenceFileInputFormat.class);
@@ -316,8 +320,8 @@ public class CollocDriver {
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(DoubleWritable.class);
     
-    FileInputFormat.setInputPaths(conf, new Path(output + "/subgrams"));
-    Path outPath = new Path(output + "/ngrams");
+    FileInputFormat.setInputPaths(conf, new Path(output, SUBGRAM_OUTPUT_DIRECTORY));
+    Path outPath = new Path(output, NGRAM_OUTPUT_DIRECTORY);
     FileOutputFormat.setOutputPath(conf, outPath);
     
     conf.setMapperClass(IdentityMapper.class);
