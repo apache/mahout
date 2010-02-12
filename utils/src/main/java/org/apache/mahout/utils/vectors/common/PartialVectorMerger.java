@@ -47,6 +47,10 @@ public final class PartialVectorMerger {
   public static final float NO_NORMALIZING = -1.0f;
   
   public static final String NORMALIZATION_POWER = "normalization.power";
+
+  public static final String DIMENSION = "vector.dimension";
+
+  public static final String SEQUENTIAL_ACCESS = "vector.sequentialAccess";
   
   /**
    * Cannot be initialized. Use the static functions
@@ -71,7 +75,9 @@ public final class PartialVectorMerger {
    */
   public static void mergePartialVectors(List<Path> partialVectorPaths,
                                          String output,
-                                         float normPower) throws IOException {
+                                         float normPower,
+                                         int dimension,
+                                         boolean sequentialAccess) throws IOException {
     if (normPower != NO_NORMALIZING && normPower < 0) {
       throw new IllegalArgumentException("normPower must either be -1 or >= 0");
     }
@@ -83,7 +89,8 @@ public final class PartialVectorMerger {
           + "org.apache.hadoop.io.serializer.WritableSerialization");
     // this conf parameter needs to be set enable serialisation of conf values
     conf.setJobName("PartialVectorMerger::MergePartialVectors");
-    
+    conf.setBoolean(SEQUENTIAL_ACCESS, sequentialAccess);
+    conf.setInt(DIMENSION, dimension);
     conf.setFloat(NORMALIZATION_POWER, normPower);
     
     conf.setOutputKeyClass(Text.class);

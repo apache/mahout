@@ -137,8 +137,8 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
     DocumentProcessor.tokenizeDocuments(pathString, analyzer,
       "output/tokenized-documents");
     DictionaryVectorizer.createTermFrequencyVectors("output/tokenized-documents",
-      "output/wordcount", 2, 1, 0.0f, 1, 100);
-    TFIDFConverter.processTfIdf("output/wordcount/vectors", "output/tfidf/", 100, 1, 99, 1.0f);
+      "output/wordcount", 2, 1, 0.0f, 1, 100, false);
+    TFIDFConverter.processTfIdf("output/wordcount/vectors", "output/tfidf/", 100, 1, 99, 1.0f, false);
     
   }
 }

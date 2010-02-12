@@ -36,9 +36,11 @@ import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
+import org.apache.mahout.utils.vectors.common.PartialVectorMerger;
 import org.apache.mahout.utils.nlp.collocations.llr.CollocMapper.IteratorTokenStream;
 import org.apache.mahout.utils.vectors.text.DictionaryVectorizer;
 
@@ -50,6 +52,9 @@ public class TFPartialVectorReducer extends MapReduceBase implements
   private final OpenObjectIntHashMap<String> dictionary = new OpenObjectIntHashMap<String>();
   
   private final VectorWritable vectorWritable = new VectorWritable();
+
+  private int dimension;
+  private boolean sequentialAccess;
   
   private int maxNGramSize = 1;
   
@@ -62,7 +67,8 @@ public class TFPartialVectorReducer extends MapReduceBase implements
     StringTuple value = values.next();
     
     Vector vector = new RandomAccessSparseVector(key.toString(),
-        Integer.MAX_VALUE, value.length()); // guess at initial size
+                                                 dimension,
+                                                 value.length()); // guess at initial size
     
     if (maxNGramSize >= 2) {
       ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value
@@ -89,6 +95,9 @@ public class TFPartialVectorReducer extends MapReduceBase implements
         }
       }
     }
+    if (sequentialAccess) {
+      vector = new SequentialAccessSparseVector(vector);
+    }
     vectorWritable.set(vector);
     output.collect(key, vectorWritable);
     
@@ -98,6 +107,8 @@ public class TFPartialVectorReducer extends MapReduceBase implements
   public void configure(JobConf job) {
     super.configure(job);
     try {
+      dimension = job.getInt(PartialVectorMerger.DIMENSION, Integer.MAX_VALUE);
+      sequentialAccess = job.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
       maxNGramSize = job.getInt(DictionaryVectorizer.MAX_NGRAMS, maxNGramSize);
       URI[] localFiles = DistributedCache.getCacheFiles(job);
       if (localFiles == null || localFiles.length < 1) {

@@ -27,6 +27,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -40,6 +41,8 @@ public class PartialVectorMergeReducer extends MapReduceBase
   private final VectorWritable vectorWritable = new VectorWritable();
   
   private double normPower;
+  private int dimension;
+  private boolean sequentialAccess;
   
   @Override
   public void reduce(WritableComparable<?> key,
@@ -47,14 +50,16 @@ public class PartialVectorMergeReducer extends MapReduceBase
                      OutputCollector<WritableComparable<?>,VectorWritable> output,
                      Reporter reporter) throws IOException {
     
-    Vector vector = new RandomAccessSparseVector(key
-        .toString(), Integer.MAX_VALUE, 10);
+    Vector vector = new RandomAccessSparseVector(key.toString(), dimension, 10);
     while (values.hasNext()) {
       VectorWritable value = values.next();
       value.get().addTo(vector);
     }
     if (normPower != PartialVectorMerger.NO_NORMALIZING) {
       vector = vector.normalize(normPower);
+    }
+    if (sequentialAccess) {
+      vector = new SequentialAccessSparseVector(vector);
     }
     vectorWritable.set(vector);
     output.collect(key, vectorWritable);
@@ -64,6 +69,8 @@ public class PartialVectorMergeReducer extends MapReduceBase
   public void configure(JobConf job) {
     super.configure(job);
     normPower = job.getFloat(PartialVectorMerger.NORMALIZATION_POWER,
-      PartialVectorMerger.NO_NORMALIZING);
+                             PartialVectorMerger.NO_NORMALIZING);
+    dimension = job.getInt(PartialVectorMerger.DIMENSION, Integer.MAX_VALUE);
+    sequentialAccess = job.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
   }
 }

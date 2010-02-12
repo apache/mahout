@@ -64,7 +64,7 @@ public class TFIDFPartialVectorReducer extends MapReduceBase
     Vector value = values.next().get();
     Iterator<Element> it = value.iterateNonZero();
     Vector vector = new RandomAccessSparseVector(key
-        .toString(), Integer.MAX_VALUE, value.getNumNondefaultElements());
+        .toString(), (int)featureCount, value.getNumNondefaultElements());
     while (it.hasNext()) {
       Element e = it.next();
       if (!dictionary.containsKey(e.index())) continue;

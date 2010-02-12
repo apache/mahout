@@ -123,7 +123,8 @@ public final class TFIDFConverter {
                                   int chunkSizeInMegabytes,
                                   int minDf,
                                   int maxDFPercent,
-                                  float normPower) throws IOException {
+                                  float normPower,
+                                  boolean sequentialAccessOutput) throws IOException {
     if (chunkSizeInMegabytes < MIN_CHUNKSIZE) {
       chunkSizeInMegabytes = MIN_CHUNKSIZE;
     } else if (chunkSizeInMegabytes > MAX_CHUNKSIZE) { // 10GB
@@ -151,9 +152,13 @@ public final class TFIDFConverter {
       Path partialVectorOutputPath = getPath(output + VECTOR_OUTPUT_FOLDER,
         partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
-      makePartialVectors(input, datasetFeatures.getFirst()[0], datasetFeatures
-          .getFirst()[1], minDf, maxDFPercent, dictionaryChunk,
-        partialVectorOutputPath);
+      makePartialVectors(input,
+                         datasetFeatures.getFirst()[0],
+                         datasetFeatures.getFirst()[1],
+                         minDf,
+                         maxDFPercent,
+                         dictionaryChunk,
+                         partialVectorOutputPath);
     }
     
     Configuration conf = new Configuration();
@@ -161,8 +166,11 @@ public final class TFIDFConverter {
     
     String outputDir = output + DOCUMENT_VECTOR_OUTPUT_FOLDER;
     if (dictionaryChunks.size() > 1) {
-      PartialVectorMerger.mergePartialVectors(partialVectorPaths, outputDir,
-        normPower);
+      PartialVectorMerger.mergePartialVectors(partialVectorPaths,
+                                              outputDir,
+                                              normPower,
+                                              (int)(long)datasetFeatures.getFirst()[0],
+                                              sequentialAccessOutput);
       HadoopUtil.deletePaths(partialVectorPaths, fs);
     } else {
       Path singlePartialVectorOutputPath = partialVectorPaths.get(0);

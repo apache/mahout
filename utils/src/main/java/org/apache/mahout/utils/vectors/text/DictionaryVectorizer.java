@@ -126,7 +126,8 @@ public final class DictionaryVectorizer {
                                                 int maxNGramSize,
                                                 float minLLRValue,
                                                 int numReducers,
-                                                int chunkSizeInMegabytes) throws IOException {
+                                                int chunkSizeInMegabytes,
+                                                boolean sequentialAccess) throws IOException {
     if (chunkSizeInMegabytes < MIN_CHUNKSIZE) {
       chunkSizeInMegabytes = MIN_CHUNKSIZE;
     } else if (chunkSizeInMegabytes > MAX_CHUNKSIZE) { // 10GB
@@ -136,18 +137,19 @@ public final class DictionaryVectorizer {
     
     Path inputPath = new Path(input);
     Path dictionaryJobPath = new Path(output + DICTIONARY_JOB_FOLDER);
-    
+
+    int[] maxTermDimension = new int[1];
     List<Path> dictionaryChunks;
     if (maxNGramSize == 1) {
       startWordCounting(inputPath, dictionaryJobPath, minSupport);
       dictionaryChunks = createDictionaryChunks(minSupport, dictionaryJobPath,
-        output, chunkSizeInMegabytes, new LongWritable());
+        output, chunkSizeInMegabytes, new LongWritable(), maxTermDimension);
     } else {
       CollocDriver.generateAllGrams(inputPath.toString(), dictionaryJobPath
           .toString(), maxNGramSize, minSupport, minLLRValue, numReducers);
       dictionaryChunks = createDictionaryChunks(minSupport, new Path(
           output + DICTIONARY_JOB_FOLDER, CollocDriver.NGRAM_OUTPUT_DIRECTORY), output,
-        chunkSizeInMegabytes, new DoubleWritable());
+        chunkSizeInMegabytes, new DoubleWritable(), maxTermDimension);
     }
     
     int partialVectorIndex = 0;
@@ -156,8 +158,12 @@ public final class DictionaryVectorizer {
       Path partialVectorOutputPath = getPath(output + VECTOR_OUTPUT_FOLDER,
         partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
-      makePartialVectors(input, maxNGramSize, dictionaryChunk,
-        partialVectorOutputPath);
+      makePartialVectors(input,
+                         maxNGramSize,
+                         dictionaryChunk,
+                         partialVectorOutputPath,
+                         maxTermDimension[0],
+                         sequentialAccess);
     }
     
     Configuration conf = new Configuration();
@@ -165,8 +171,11 @@ public final class DictionaryVectorizer {
     
     String outputDir = output + DOCUMENT_VECTOR_OUTPUT_FOLDER;
     if (dictionaryChunks.size() > 1) {
-      PartialVectorMerger
-          .mergePartialVectors(partialVectorPaths, outputDir, -1);
+      PartialVectorMerger.mergePartialVectors(partialVectorPaths,
+                                              outputDir,
+                                              -1,
+                                              maxTermDimension[0],
+                                              sequentialAccess);
       HadoopUtil.deletePaths(partialVectorPaths, fs);
     } else {
       Path singlePartialVectorOutputPath = partialVectorPaths.get(0);
@@ -189,7 +198,8 @@ public final class DictionaryVectorizer {
                                                    Path wordCountPath,
                                                    String dictionaryPathBase,
                                                    int chunkSizeInMegabytes,
-                                                   Writable value) throws IOException {
+                                                   Writable value,
+                                                   int[] maxTermDimension) throws IOException {
     List<Path> chunkPaths = new ArrayList<Path>();
     
     Writable key = new Text();
@@ -233,7 +243,7 @@ public final class DictionaryVectorizer {
         dictWriter.append(key, new IntWritable(i++));
       }
     }
-    
+    maxTermDimension[0] = (int)i;
     dictWriter.close();
     
     return chunkPaths;
@@ -260,7 +270,9 @@ public final class DictionaryVectorizer {
   private static void makePartialVectors(String input,
                                          int maxNGramSize,
                                          Path dictionaryFilePath,
-                                         Path output) throws IOException {
+                                         Path output,
+                                         int dimension,
+                                         boolean sequentialAccess) throws IOException {
     
     Configurable client = new JobClient();
     JobConf conf = new JobConf(DictionaryVectorizer.class);
@@ -272,14 +284,15 @@ public final class DictionaryVectorizer {
     conf.setJobName("DictionaryVectorizer::MakePartialVectors: input-folder: "
                     + input + ", dictionary-file: "
                     + dictionaryFilePath.toString());
+    conf.setInt(PartialVectorMerger.DIMENSION, dimension);
+    conf.setBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, sequentialAccess);
     conf.setInt(MAX_NGRAMS, maxNGramSize);
-    
+
     conf.setMapOutputKeyClass(Text.class);
     conf.setMapOutputValueClass(StringTuple.class);
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(VectorWritable.class);
-    DistributedCache
-        .setCacheFiles(new URI[] {dictionaryFilePath.toUri()}, conf);
+    DistributedCache.setCacheFiles(new URI[] {dictionaryFilePath.toUri()}, conf);
     FileInputFormat.setInputPaths(conf, new Path(input));
     
     FileOutputFormat.setOutputPath(conf, output);
