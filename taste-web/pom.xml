@@ -228,8 +228,8 @@
   </repositories>
 
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2-taste-webapp</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2-taste-webapp
+    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk/taste-webapp</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk/taste-webapp
     </developerConnection>
     <url>https://svn.apache.org/repos/asf/lucene/mahout/mahout-taste-webapp</url>
   </scm>

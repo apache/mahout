@@ -284,8 +284,8 @@
   </repositories>
 
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2-core</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2</developerConnection>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk/core</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk/core</developerConnection>
     <url>https://svn.apache.org/repos/asf/lucene/mahout/mahout-core</url>
   </scm>
 </project>

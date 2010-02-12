@@ -225,9 +225,8 @@
 
 
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2-examples</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.2-examples
-    </developerConnection>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk/examples</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk/examples </developerConnection>
     <url>https://svn.apache.org/repos/asf/lucene/mahout/mahout-examples</url>
   </scm>
 </project>
