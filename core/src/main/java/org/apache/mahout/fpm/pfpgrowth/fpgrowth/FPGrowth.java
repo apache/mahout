@@ -27,8 +27,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang.mutable.MutableLong;
 import org.apache.hadoop.conf.Configuration;
@@ -37,19 +37,20 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.fpm.pfpgrowth.convertors.StatusUpdater;
 import org.apache.mahout.fpm.pfpgrowth.convertors.TopKPatternsOutputConverter;
 import org.apache.mahout.fpm.pfpgrowth.convertors.TransactionIterator;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
+import org.apache.mahout.math.map.OpenIntIntHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of PFGrowth Algorithm with FP-Bonsai pruning
  * 
- * Generic parameter A is the object type used as the cell items in a transaction list.
+ * Generic parameter A is the object type used as the cell items in a
+ * transaction list.
  */
 public class FPGrowth<A extends Comparable<? super A>> {
   
@@ -653,7 +654,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
       int currentAttribute = tree.getAttributeAtIndex(i);
       int nextNode = tree.getHeaderNext(currentAttribute);
       
-      FastByIDMap<Integer> prevNode = new FastByIDMap<Integer>();
+      OpenIntIntHashMap prevNode = new OpenIntIntHashMap();
       int justPrevNode = -1;
       while (nextNode != -1) {
         
