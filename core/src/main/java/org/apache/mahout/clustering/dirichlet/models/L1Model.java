@@ -77,7 +77,9 @@ public class L1Model implements Model<VectorWritable> {
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    coefficients = VectorWritable.readVector(in);
+    VectorWritable temp = new VectorWritable();
+    temp.readFields(in);
+    coefficients = temp.get();
   }
 
   @Override
@@ -94,13 +96,14 @@ public class L1Model implements Model<VectorWritable> {
     return asFormatString(null);
   }
 
+  @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder();
     buf.append("l1m{n=").append(count).append(" c=");
     if (coefficients != null) {
       buf.append(ClusterBase.formatVector(coefficients, bindings));
     }
-    buf.append("}");
+    buf.append('}');
     return buf.toString();
   }
 

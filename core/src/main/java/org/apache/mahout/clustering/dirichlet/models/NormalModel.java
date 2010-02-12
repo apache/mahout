@@ -133,6 +133,7 @@ public class NormalModel implements Model<VectorWritable> {
     return asFormatString(null);
   }
 
+  @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder();
     buf.append("nm{n=").append(s0).append(" m=");
@@ -145,11 +146,15 @@ public class NormalModel implements Model<VectorWritable> {
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    this.mean = VectorWritable.readVector(in);
+    VectorWritable temp = new VectorWritable();
+    temp.readFields(in);
+    this.mean = temp.get();
     this.stdDev = in.readDouble();
     this.s0 = in.readInt();
-    this.s1 = VectorWritable.readVector(in);
-    this.s2 = VectorWritable.readVector(in);
+    temp.readFields(in);
+    this.s1 = temp.get();
+    temp.readFields(in);
+    this.s2 = temp.get();
   }
 
   @Override

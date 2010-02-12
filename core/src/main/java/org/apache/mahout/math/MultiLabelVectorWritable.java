@@ -69,7 +69,9 @@ public class MultiLabelVectorWritable extends VectorWritable {
     for (int i = 0; i < labelSize; i++) {
       labels[i] = in.readInt();
     }
-    Vector vector = VectorWritable.readVector(in);
+    VectorWritable temp = new VectorWritable();
+    temp.readFields(in);
+    Vector vector = temp.get();
     return new MultiLabelVectorWritable(vector, labels);
   }
 

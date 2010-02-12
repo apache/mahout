@@ -147,6 +147,7 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     return asFormatString(null);
   }
 
+  @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder(50);
     buf.append("asnm{n=").append(s0).append(" m=");
@@ -157,17 +158,22 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     if (stdDev != null) {
       buf.append(ClusterBase.formatVector(stdDev, bindings));
     }
-    buf.append("}");
+    buf.append('}');
     return buf.toString();
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    this.mean = VectorWritable.readVector(in);
-    this.stdDev = VectorWritable.readVector(in);
+    VectorWritable temp = new VectorWritable();
+    temp.readFields(in);
+    this.mean = temp.get();
+    temp.readFields(in);
+    this.stdDev = temp.get();
     this.s0 = in.readInt();
-    this.s1 = VectorWritable.readVector(in);
-    this.s2 = VectorWritable.readVector(in);
+    temp.readFields(in);
+    this.s1 = temp.get();
+    temp.readFields(in);
+    this.s2 = temp.get();
   }
 
   @Override

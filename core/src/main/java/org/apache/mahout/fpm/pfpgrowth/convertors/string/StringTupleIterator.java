@@ -28,7 +28,7 @@ import org.apache.mahout.common.StringTuple;
  */
 public final class StringTupleIterator implements Iterator<List<String>> {
 
-  private Iterator<StringTuple> iterator;
+  private final Iterator<StringTuple> iterator;
 
   public StringTupleIterator(Iterator<StringTuple> iterator) {
     this.iterator = iterator;

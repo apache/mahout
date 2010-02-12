@@ -122,7 +122,6 @@ public class DirichletState<O> {
     return mix * pdf;
   }
 
-  @SuppressWarnings("unchecked")
   public Model<O>[] getModels() {
     Model<O>[] result = (Model<O>[]) new Model[numClusters];
     for (int i = 0; i < numClusters; i++) {

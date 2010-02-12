@@ -137,6 +137,7 @@ public class MeanShiftCanopy extends ClusterBase {
    *
    * @return a Vector which is the new centroid
    */
+  @Override
   public Vector computeCentroid() {
     if (getNumPoints() == 0) {
       return getCenter();
@@ -153,8 +154,9 @@ public class MeanShiftCanopy extends ClusterBase {
     return getId();
   }
 
+  @Override
   public String getIdentifier() {
-    return converged ? "V" + getId() : "C" + getId();
+    return (converged ? "V" : "C") + getId();
   }
 
   void init(MeanShiftCanopy canopy) {
@@ -195,11 +197,14 @@ public class MeanShiftCanopy extends ClusterBase {
   @Override
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
-    this.setCenter(VectorWritable.readVector(in));
+    VectorWritable temp = new VectorWritable();
+    temp.readFields(in);
+    this.setCenter(temp.get());
     int numpoints = in.readInt();
     this.boundPoints = new ArrayList<Vector>();
     for (int i = 0; i < numpoints; i++) {
-      this.boundPoints.add(VectorWritable.readVector(in));
+      temp.readFields(in);
+      this.boundPoints.add(temp.get());
     }
   }
 

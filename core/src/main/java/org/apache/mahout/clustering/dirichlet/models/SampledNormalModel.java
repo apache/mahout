@@ -45,6 +45,7 @@ public class SampledNormalModel extends NormalModel {
     return new SampledNormalModel(getMean(), getStdDev());
   }
 
+  @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder();
     buf.append("snm{n=").append(getS0()).append(" m=");

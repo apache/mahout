@@ -55,6 +55,8 @@ public class KMeansInfo implements Writable {
   @Override
   public void readFields(DataInput in) throws IOException {
     this.points = in.readInt();
-    this.pointTotal = VectorWritable.readVector(in);
+    VectorWritable temp = new VectorWritable();
+    temp.readFields(in);
+    this.pointTotal = temp.get();
   }
 }

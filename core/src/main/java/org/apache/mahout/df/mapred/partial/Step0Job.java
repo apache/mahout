@@ -189,7 +189,7 @@ public class Step0Job {
    * Outputs the first key and the size of the partition
    * 
    */
-  protected static class Step0Mapper extends MapReduceBase implements
+  static class Step0Mapper extends MapReduceBase implements
       Mapper<LongWritable, Text, IntWritable, Step0Output> {
 
     private int partition;

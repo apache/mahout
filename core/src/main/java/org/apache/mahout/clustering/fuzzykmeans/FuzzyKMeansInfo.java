@@ -71,6 +71,8 @@ public class FuzzyKMeansInfo implements Writable {
   @Override
   public void readFields(DataInput in) throws IOException {
     this.probability = in.readDouble();
-    this.pointTotal = VectorWritable.readVector(in);
+    VectorWritable temp = new VectorWritable();
+    temp.readFields(in);
+    this.pointTotal = temp.get();
   }
 }

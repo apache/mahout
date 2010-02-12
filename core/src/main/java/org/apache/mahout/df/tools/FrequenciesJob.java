@@ -168,7 +168,7 @@ public class FrequenciesJob {
    * Outputs the first key and the label of each tuple
    *
    */
-  protected static class FrequenciesMapper extends
+  private static class FrequenciesMapper extends
       Mapper<LongWritable, Text, LongWritable, IntWritable> {
 
     private LongWritable firstId;
@@ -204,7 +204,7 @@ public class FrequenciesJob {
 
   }
 
-  protected static class FrequenciesReducer extends
+  private static class FrequenciesReducer extends
           Reducer<LongWritable, IntWritable, LongWritable, Frequencies> {
 
     private int nblabels;
@@ -237,7 +237,7 @@ public class FrequenciesJob {
    * Output of the job
    *
    */
-  protected static class Frequencies implements Writable,
+  private static class Frequencies implements Writable,
       Comparable<Frequencies>, Cloneable {
 
     /**

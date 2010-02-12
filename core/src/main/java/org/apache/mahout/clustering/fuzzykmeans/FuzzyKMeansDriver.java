@@ -62,7 +62,7 @@ public class FuzzyKMeansDriver {
   }
 
 
-  public static void main(String[] args) throws ClassNotFoundException, IOException, IllegalAccessException, InstantiationException {
+  public static void main(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();

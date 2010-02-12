@@ -156,13 +156,13 @@ public class DFUtils {
    */
   public static String elapsedTime(long milli) {
     long seconds = milli / 1000;
-    milli = milli % 1000;
+    milli %= 1000;
   
     long minutes = seconds / 60;
-    seconds = seconds % 60;
+    seconds %= 60;
   
     long hours = minutes / 60;
-    minutes = minutes % 60;
+    minutes %= 60;
   
     return hours + "h " + minutes + "m " + seconds + "s " + milli;
   }

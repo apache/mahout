@@ -31,7 +31,7 @@ import org.apache.mahout.common.Pair;
 public final class StringOutputConverter implements
     OutputCollector<String,List<Pair<List<String>,Long>>> {
   
-  private OutputCollector<Text,TopKStringPatterns> collector;
+  private final OutputCollector<Text,TopKStringPatterns> collector;
   
   public StringOutputConverter(OutputCollector<Text,TopKStringPatterns> collector) {
     this.collector = collector;

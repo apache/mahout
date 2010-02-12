@@ -275,7 +275,7 @@ public class PartialSequentialBuilder extends PartialBuilder {
    * Special Step1Mapper that can be configured without using a Configuration
    * 
    */
-  protected static class MockStep1Mapper extends Step1Mapper {
+  private static class MockStep1Mapper extends Step1Mapper {
     protected MockStep1Mapper(TreeBuilder treeBuilder, Dataset dataset, Long seed,
         int partition, int numMapTasks, int numTrees) {
       configure(false, true, treeBuilder, dataset);

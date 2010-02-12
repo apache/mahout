@@ -42,7 +42,7 @@ public class FuzzyKMeansJob {
   private FuzzyKMeansJob() {
   }
 
-  public static void main(String[] args) throws IOException, ClassNotFoundException {
+  public static void main(String[] args) throws IOException {
 
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
@@ -102,7 +102,7 @@ public class FuzzyKMeansJob {
       int numReduceTasks = Integer.parseInt(cmdLine.getValue(numRedOpt).toString());
       boolean doCanopy = Boolean.parseBoolean(cmdLine.getValue(doCanopyOpt).toString());
       float m = Float.parseFloat(cmdLine.getValue(mOpt).toString());
-      String vectorClassName = cmdLine.getValue(vectorClassOpt).toString();
+      //String vectorClassName = cmdLine.getValue(vectorClassOpt).toString();
       //Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
       runJob(input, clusters, output, measureClass, convergenceDelta,
           maxIterations, numMapTasks, numReduceTasks, doCanopy, m);

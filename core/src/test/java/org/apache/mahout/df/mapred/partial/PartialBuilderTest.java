@@ -152,7 +152,7 @@ public class PartialBuilderTest extends MahoutTestCase {
     return array;
   }
 
-  protected static class PartialBuilderChecker extends PartialBuilder {
+  private static class PartialBuilderChecker extends PartialBuilder {
 
     private final Long seed;
 
@@ -195,7 +195,7 @@ public class PartialBuilderTest extends MahoutTestCase {
    * Mock Callback. Make sure that the callback receives the correct predictions
    * 
    */
-  protected static class TestCallback implements PredictionCallback {
+  private static class TestCallback implements PredictionCallback {
 
     private final TreeID[] keys;
 

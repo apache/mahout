@@ -61,21 +61,8 @@ public final class FPGrowthDriver {
   
   /**
    * Run TopK FPGrowth given the input file,
-   * 
-   * @param args
-   * @throws IOException
-   * @throws OptionException
-   * @throws NumberFormatException
-   * @throws IllegalStateException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
    */
-  public static void main(String[] args) throws IOException,
-                                        OptionException,
-                                        NumberFormatException,
-                                        IllegalStateException,
-                                        InterruptedException,
-                                        ClassNotFoundException {
+  public static void main(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();

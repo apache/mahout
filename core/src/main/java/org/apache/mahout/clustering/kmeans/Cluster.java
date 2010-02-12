@@ -102,7 +102,9 @@ public class Cluster extends ClusterBase {
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
     this.converged = in.readBoolean();
-    this.setCenter(VectorWritable.readVector(in));
+    VectorWritable temp = new VectorWritable();
+    temp.readFields(in);
+    this.setCenter(temp.get());
     this.setNumPoints(0);
     this.setPointTotal(getCenter().like());
     this.pointSquaredTotal = getCenter().like();
@@ -113,6 +115,7 @@ public class Cluster extends ClusterBase {
    * 
    * @return the new centroid
    */
+  @Override
   public Vector computeCentroid() {
     if (getNumPoints() == 0) {
       return getCenter();
@@ -169,12 +172,9 @@ public class Cluster extends ClusterBase {
     return getIdentifier() + " - " + getCenter().asFormatString();
   }
 
+  @Override
   public String getIdentifier() {
-    if (converged) {
-      return "V" + getId();
-    } else {
-      return "C" + getId();
-    }
+    return (converged ? "V" : "C") + getId();
   }
 
   /**

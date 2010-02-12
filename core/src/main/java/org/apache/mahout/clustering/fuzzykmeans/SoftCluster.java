@@ -99,7 +99,9 @@ public class SoftCluster implements Writable {
   public void readFields(DataInput in) throws IOException {
     clusterId = in.readInt();
     converged = in.readBoolean();
-    center = VectorWritable.readVector(in);
+    VectorWritable temp = new VectorWritable();
+    temp.readFields(in);
+    center = temp.get();
     this.pointProbSum = 0;
     this.weightedPointTotal = center.like();
   }

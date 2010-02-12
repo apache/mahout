@@ -137,10 +137,6 @@ public class DirichletDriver {
    * @param maxIterations the maximum number of iterations
    * @param alpha_0       the alpha_0 value for the DirichletDistribution
    * @param numReducers   the number of Reducers desired
-   * @throws InvocationTargetException 
-   * @throws NoSuchMethodException 
-   * @throws IllegalArgumentException 
-   * @throws SecurityException 
    * @deprecated since it presumes 2-d, dense vector model prototypes
    */
   @Deprecated
@@ -166,15 +162,18 @@ public class DirichletDriver {
    * @param maxIterations the maximum number of iterations
    * @param alpha_0       the alpha_0 value for the DirichletDistribution
    * @param numReducers   the number of Reducers desired
-   * @throws InvocationTargetException 
-   * @throws NoSuchMethodException 
-   * @throws IllegalArgumentException 
-   * @throws SecurityException 
    */
-  public static void runJob(String input, String output, String modelFactory, String modelPrototype, int prototypeSize,
-      int numClusters, int maxIterations, double alpha_0, int numReducers) throws ClassNotFoundException, InstantiationException,
-      IllegalAccessException, IOException, SecurityException, NoSuchMethodException,
-      InvocationTargetException {
+  public static void runJob(String input,
+                            String output,
+                            String modelFactory,
+                            String modelPrototype,
+                            int prototypeSize,
+                            int numClusters,
+                            int maxIterations,
+                            double alpha_0,
+                            int numReducers)
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException,
+      SecurityException, NoSuchMethodException, InvocationTargetException {
 
     String stateIn = output + "/state-0";
     writeInitialState(output, stateIn, modelFactory, modelPrototype, prototypeSize, numClusters, alpha_0);
@@ -189,10 +188,15 @@ public class DirichletDriver {
     }
   }
 
-  private static void writeInitialState(String output, String stateIn, String modelFactory, String modelPrototype,
-      int prototypeSize, int numModels, double alpha_0) throws ClassNotFoundException, InstantiationException,
-      IllegalAccessException, IOException, SecurityException, NoSuchMethodException,
-      InvocationTargetException {
+  private static void writeInitialState(String output,
+                                        String stateIn,
+                                        String modelFactory,
+                                        String modelPrototype,
+                                        int prototypeSize,
+                                        int numModels,
+                                        double alpha_0)
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException,
+      SecurityException, NoSuchMethodException, InvocationTargetException {
 
     DirichletState<VectorWritable> state = createState(modelFactory, modelPrototype, prototypeSize, numModels, alpha_0);
     JobConf job = new JobConf(KMeansDriver.class);
@@ -218,17 +222,15 @@ public class DirichletDriver {
    * @param numModels an int number of models to be created
    * @param alpha_0 the double alpha_0 argument to the algorithm
    * @return an initialized DirichletState
-   * @throws ClassNotFoundException
-   * @throws InstantiationException
-   * @throws IllegalAccessException
-   * @throws NoSuchMethodException 
-   * @throws SecurityException 
-   * @throws InvocationTargetException 
-   * @throws IllegalArgumentException 
    */
-  public static DirichletState<VectorWritable> createState(String modelFactory, String modelPrototype, int prototypeSize,
-      int numModels, double alpha_0) throws ClassNotFoundException, InstantiationException, IllegalAccessException,
+  public static DirichletState<VectorWritable> createState(String modelFactory,
+                                                           String modelPrototype,
+                                                           int prototypeSize,
+                                                           int numModels,
+                                                           double alpha_0)
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException,
       SecurityException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
+
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     Class<? extends VectorModelDistribution> cl = ccl.loadClass(modelFactory).asSubclass(VectorModelDistribution.class);
     VectorModelDistribution factory = cl.newInstance();

@@ -61,7 +61,9 @@ public class Canopy extends ClusterBase {
   @Override
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
-    this.setCenter(VectorWritable.readVector(in));
+    VectorWritable temp = new VectorWritable();
+    temp.readFields(in);
+    this.setCenter(temp.get());
     this.setPointTotal(getCenter().clone());
     this.setNumPoints(1);
   }
@@ -122,6 +124,7 @@ public class Canopy extends ClusterBase {
     return getIdentifier() + " - " + getCenter().asFormatString();
   }
 
+  @Override
   public String getIdentifier() {
     return "C" + getId();
   }
@@ -132,6 +135,7 @@ public class Canopy extends ClusterBase {
    *
    * @return a RandomAccessSparseVector (required by Mapper) which is the new centroid
    */
+  @Override
   public Vector computeCentroid() {
     return getPointTotal().divide(getNumPoints());
   }

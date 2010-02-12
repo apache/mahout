@@ -57,11 +57,11 @@ public abstract class ClusterBase implements Writable, Printable {
         double elem = v.get(i);
         if (elem == 0.0)
           continue;
-        String label = null;
+        String label;
         if (bindings != null && (label = bindings[i]) != null)
-          buf.append(label).append(":");
+          buf.append(label).append(':');
         else
-          buf.append(i).append(":");
+          buf.append(i).append(':');
         buf.append(String.format("%.3f", elem)).append(", ");
       }
     } else {
@@ -124,11 +124,10 @@ public abstract class ClusterBase implements Writable, Printable {
    * @deprecated
    * @return
    */
+  @Deprecated
   public abstract String asFormatString();
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.Printable#asFormatString(java.lang.String[])
-   */
+  @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder();
     buf.append(getIdentifier()).append(": ").append(formatVector(computeCentroid(), bindings));
@@ -139,9 +138,7 @@ public abstract class ClusterBase implements Writable, Printable {
 
   public abstract Object getIdentifier();
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.Printable#asJsonString(java.util.Map)
-   */
+  @Override
   public String asJsonString() {
     Type vectorType = new TypeToken<Vector>() {
     }.getType();

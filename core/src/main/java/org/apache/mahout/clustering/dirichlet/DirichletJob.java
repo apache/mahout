@@ -111,13 +111,16 @@ public class DirichletJob {
    * @param numModels     the number of Models
    * @param maxIterations the maximum number of iterations
    * @param alpha_0       the alpha0 value for the DirichletDistribution
-   * @throws InvocationTargetException 
-   * @throws NoSuchMethodException 
-   * @throws IllegalArgumentException 
-   * @throws SecurityException 
    */
-  public static void runJob(String input, String output, String modelFactory, String modelPrototype, int prototypeSize,
-      int numModels, int maxIterations, double alpha_0) throws IOException, ClassNotFoundException, InstantiationException,
+  public static void runJob(String input,
+                            String output,
+                            String modelFactory,
+                            String modelPrototype,
+                            int prototypeSize,
+                            int numModels,
+                            int maxIterations,
+                            double alpha_0)
+      throws IOException, ClassNotFoundException, InstantiationException,
       IllegalAccessException, SecurityException, NoSuchMethodException, InvocationTargetException {
     // delete the output directory
     Configuration conf = new JobConf(DirichletJob.class);
