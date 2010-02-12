@@ -30,6 +30,7 @@ import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.common.RandomUtils;
 
 import static org.easymock.classextension.EasyMock.*;
@@ -93,7 +94,7 @@ public class TestMapReduce extends MahoutTestCase {
     LDAState state = generateRandomState(100,NUM_TOPICS);
     LDAMapper mapper = new LDAMapper();
     mapper.configure(state);
-
+    VectorWritable vw = new VectorWritable();
     for(int i = 0; i < NUM_TESTS; ++i) {
       RandomAccessSparseVector v = generateRandomDoc(100,0.3);
       int myNumWords = numNonZero(v);
@@ -102,8 +103,8 @@ public class TestMapReduce extends MahoutTestCase {
       mock.write(isA(IntPairWritable.class),isA(DoubleWritable.class));
       expectLastCall().times(myNumWords * NUM_TOPICS + NUM_TOPICS + 1);
       replay(mock);
-
-      mapper.map(new Text("tstMapper"), v, mock);
+      vw.set(v);
+      mapper.map(new Text("tstMapper"), vw, mock);
       verify(mock);
     }
   }

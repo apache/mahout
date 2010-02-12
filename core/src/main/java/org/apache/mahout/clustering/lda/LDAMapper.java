@@ -26,6 +26,7 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 /**
 * Runs inference on the input documents (which are
@@ -34,14 +35,15 @@ import org.apache.mahout.math.Vector;
 * assignments.
 */
 public class LDAMapper extends 
-    Mapper<WritableComparable<?>, Vector, IntPairWritable, DoubleWritable> {
+    Mapper<WritableComparable<?>, VectorWritable, IntPairWritable, DoubleWritable> {
 
   private LDAState state;
   private LDAInference infer;
 
   @Override
-  public void map(WritableComparable<?> key, Vector wordCounts, Context context)
+  public void map(WritableComparable<?> key, VectorWritable wordCountsWritable, Context context)
       throws IOException, InterruptedException {
+    Vector wordCounts = wordCountsWritable.get();
     LDAInference.InferredDocument doc = infer.infer(wordCounts);
 
     double[] logTotals = new double[state.numTopics];

@@ -136,11 +136,12 @@ public final class ClusterDumper {
         Vector center = value.getCenter();
         String fmtStr = useJSON ? center.asFormatString() : VectorHelper
             .vectorToString(center, dictionary);
-        writer.append("Id: ").append(String.valueOf(value.getId())).append(":")
-            .append("name:").append(center.getName()).append(":").append(
-              fmtStr.substring(0, Math.min(subString, fmtStr.length())))
-            .append('\n');
-        
+        writer.append("Id: ").append(String.valueOf(value.getId())).append(":");
+        writer.append("name:").append(center.getName());
+        if (subString > 0) writer.append(":").append(
+          fmtStr.substring(0, Math.min(subString, fmtStr.length())));
+        writer.append('\n');
+
         if (dictionary != null) {
           String topTerms = getTopFeatures(center, dictionary, 10);
           writer.write("\tTop Terms: ");
@@ -308,7 +309,7 @@ public final class ClusterDumper {
       if (termDictionary != null) {
         clusterDumper.setTermDictionary(termDictionary, dictionaryType);
       }
-      if (sub > 0) {
+      if (sub >= 0) {
         clusterDumper.setSubString(sub);
       }
       clusterDumper.printClusters();
