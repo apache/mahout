@@ -33,6 +33,7 @@ import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +47,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 public final class UserItemRecommender extends Configured implements Tool {
@@ -73,15 +75,15 @@ public final class UserItemRecommender extends Configured implements Tool {
     private int maxRecommendations;
 
     private final List<Integer> seenItems = new ArrayList<Integer>();
-    private final Map<Integer, Double> recommendations = new HashMap<Integer, Double>();
+    private final FastByIDMap<Double> recommendations = new FastByIDMap<Double>();
 
     private final Text user = new Text();
     private final Text recomScore = new Text();
 
-    private static class EntryValueComparator implements Comparator<Map.Entry<Integer, Double>>, Serializable {
+    private static class EntryValueComparator implements Comparator<Map.Entry<Long, Double>>, Serializable {
 
       @Override
-      public int compare(Map.Entry<Integer, Double> itemScore1, Map.Entry<Integer, Double> itemScore2) {
+      public int compare(Map.Entry<Long, Double> itemScore1, Map.Entry<Long, Double> itemScore2) {
         Double value1 = itemScore1.getValue();
         double val1 = (value1 == null) ? 0 : value1;
         Double value2 = itemScore2.getValue();
@@ -125,14 +127,14 @@ public final class UserItemRecommender extends Configured implements Tool {
       outputSorted(userId, recommendations.entrySet(), output);
     }
 
-    public void outputSorted(int userId, Collection<Map.Entry<Integer, Double>> recomSet, OutputCollector<Text, Text> output)
+    public void outputSorted(int userId, Collection<Map.Entry<Long, Double>> recomSet, OutputCollector<Text, Text> output)
         throws IOException {
       user.set(String.valueOf(userId));
       int N = maxRecommendations;
-      Collection<Map.Entry<Integer, Double>> sortedRecoms =
-          new TreeSet<Map.Entry<Integer, Double>>(new EntryValueComparator());
+      Collection<Map.Entry<Long, Double>> sortedRecoms =
+          new TreeSet<Map.Entry<Long, Double>>(new EntryValueComparator());
       sortedRecoms.addAll(recomSet);
-      for (Map.Entry<Integer, Double> recommendation : sortedRecoms) {
+      for (Map.Entry<Long, Double> recommendation : sortedRecoms) {
         recomScore.set(recommendation.getKey() + fieldSeparator + recommendation.getValue());
         output.collect(user, recomScore);
         N--;
