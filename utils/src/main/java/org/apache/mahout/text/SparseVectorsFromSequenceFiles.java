@@ -136,6 +136,10 @@ public final class SparseVectorsFromSequenceFiles {
           "(Optional) The maximum size of ngrams to create"
               + " (2 = bigrams, 3 = trigrams, etc) Default Value:2")
         .withShortName("ng").create();
+    Option sequentialAccessVectorOpt = obuilder.withLongName("sequentialAccessVector")
+        .withRequired(false)
+        .withDescription("(Optional) Whether output vectors should be SequentialAccessVectors If set true else false")
+        .withShortName("seq").create();
     
     Option overwriteOutput = obuilder.withLongName("overwrite").withRequired(
       false).withDescription("If set, overwrite the output directory")
@@ -149,6 +153,7 @@ public final class SparseVectorsFromSequenceFiles {
         .withOption(maxDFPercentOpt).withOption(weightOpt).withOption(powerOpt)
         .withOption(minLLROpt).withOption(numReduceTasksOpt).withOption(
           maxNGramSizeOpt).withOption(overwriteOutput).withOption(helpOpt)
+        .withOption(sequentialAccessVectorOpt)
         .create();
     try {
       Parser parser = new Parser();
@@ -250,14 +255,19 @@ public final class SparseVectorsFromSequenceFiles {
                              + DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER;
       DocumentProcessor.tokenizeDocuments(inputDir, analyzerClass,
         tokenizedPath);
+
+      boolean sequentialAccessOutput = false;
+      if (cmdLine.hasOption(sequentialAccessVectorOpt)) {
+        sequentialAccessOutput = true;
+      }
       
       DictionaryVectorizer.createTermFrequencyVectors(tokenizedPath, outputDir,
-        minSupport, maxNGramSize, minLLRValue, reduceTasks, chunkSize);
+        minSupport, maxNGramSize, minLLRValue, reduceTasks, chunkSize, sequentialAccessOutput);
       if (processIdf) {
         TFIDFConverter.processTfIdf(
           outputDir + DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER,
           outputDir + TFIDFConverter.TFIDF_OUTPUT_FOLDER, chunkSize, minDf,
-          maxDFPercent, norm);
+          maxDFPercent, norm, sequentialAccessOutput);
       }
     } catch (OptionException e) {
       log.error("Exception", e);
