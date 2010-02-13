@@ -19,14 +19,18 @@ package org.apache.mahout.math.decomposer.lanczos;
 
 
 import java.util.EnumMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.MatrixSlice;
 import org.apache.mahout.math.SparseRowMatrix;
+import org.apache.mahout.math.VectorIterable;
 import org.apache.mahout.math.function.PlusMult;
 import org.apache.mahout.math.function.UnaryFunction;
+import static org.apache.mahout.math.function.Functions.*;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
@@ -59,9 +63,6 @@ import org.slf4j.LoggerFactory;
  * This can be made smarter if (when!) this proves to be a major bottleneck.  Of course, this step can be parallelized
  * as well.
  * </p>
- * <p>TODO: The input corpus is only accessed in a semi-random-access fashion in the getInitialVector method, which
- * if it were refactored to act as an iterator, this entire class would be parallelized by simply implementing
- * Matrix.timesSquared(Vector) as a Map-Reduce call.  
  */
 public class LanczosSolver {
 
@@ -77,7 +78,7 @@ public class LanczosSolver {
 
   private final Map<TimingSection, Long> startTimes = new EnumMap<TimingSection, Long>(TimingSection.class);
   private final Map<TimingSection, Long> times = new EnumMap<TimingSection, Long>(TimingSection.class);
-  private double scaleFactor = 0;
+  protected double scaleFactor = 0;
 
   private static final class Scale implements UnaryFunction {
     private final double d;
@@ -91,7 +92,7 @@ public class LanczosSolver {
     }
   }
 
-  public void solve(Matrix corpus,
+  public void solve(VectorIterable corpus,
                     int desiredRank,
                     Matrix eigenVectors,
                     List<Double> eigenValues) {
@@ -107,6 +108,7 @@ public class LanczosSolver {
       startTime(TimingSection.ITERATE);
       Vector nextVector = corpus.timesSquared(currentVector);
       log.info("{} passes through the corpus so far...", i);
+      calculateScaleFactor(nextVector);
       nextVector.assign(new Scale(1 / scaleFactor));
       nextVector.assign(previousVector, new PlusMult(-beta));
       // now orthogonalize
@@ -162,30 +164,39 @@ public class LanczosSolver {
     endTime(TimingSection.FINAL_EIGEN_CREATE);
   }
 
+  protected void calculateScaleFactor(Vector nextVector) {
+    if(scaleFactor == 0) {
+      scaleFactor = nextVector.norm(2);
+    }
+  }
+
   private static boolean outOfRange(double d) {
     return Double.isNaN(d) || d > SAFE_MAX || -d > SAFE_MAX;
   }
 
   private static void orthoganalizeAgainstAllButLast(Vector nextVector, Matrix basis) {
     for (int i = 0; i < basis.numRows() - 1; i++) {
-      double alpha = nextVector.dot(basis.getRow(i));
+      double alpha = 0;
+      if(basis.getRow(i) == null || (alpha = nextVector.dot(basis.getRow(i))) == 0) continue;
       nextVector.assign(basis.getRow(i), new PlusMult(-alpha));
     }
   }
 
-  protected Vector getInitialVector(Matrix corpus) {
+  protected Vector getInitialVector(VectorIterable corpus) {
     Vector v = null;
-    for (int i = 0; i < corpus.numRows(); i++) {
-      Vector vector = corpus.getRow(i);
-      if (vector == null || vector.getLengthSquared() == 0) continue;
-      scaleFactor += vector.dot(vector);
+    Iterator<MatrixSlice> it = corpus.iterator();
+    while(it.hasNext()) {
+      MatrixSlice slice = it.next();
+      Vector vector;
+      if(slice == null || (vector = slice.vector()) == null || vector.getLengthSquared() == 0) continue;
+      scaleFactor += vector.getLengthSquared();
       if (v == null) {
         v = new DenseVector(vector.size()).plus(vector);
       } else {
-        v.assign(vector, new PlusMult(1));
+        v.assign(vector, plus);
       }
     }
-    v.assign(new Scale(1.0 / v.norm(2)));
+    v.assign(div(v.norm(2)));
     return v;
   }
 

@@ -22,6 +22,7 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.SparseRowMatrix;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorIterable;
 
 import java.util.Random;
 
@@ -54,8 +55,12 @@ public abstract class SolverTest extends TestCase {
     }
   }
 
-  public static void assertEigen(Matrix eigens, Matrix corpus, double errorMargin) {
-    for (int i = 0; i < eigens.numRows(); i++) {
+  public static void assertEigen(Matrix eigens, VectorIterable corpus, double errorMargin) {
+    assertEigen(eigens, corpus, eigens.numRows(), errorMargin);  
+  }
+
+  public static void assertEigen(Matrix eigens, VectorIterable corpus,  int numEigensToCheck, double errorMargin) {
+    for (int i = 0; i < numEigensToCheck; i++) {
       Vector e = eigens.getRow(i);
       if (e.norm(2) == 0) continue;
       Vector afterMultiply = corpus.timesSquared(e);
