@@ -171,7 +171,7 @@ public final class SequenceFilesFromDirectory {
         obuilder.withLongName("input").withRequired(true).withArgument(
             abuilder.withName("input").withMinimum(1).withMaximum(1).create())
             .withDescription("The input dir containing the documents")
-            .withShortName("p").create();
+            .withShortName("i").create();
     
     Option outputDirOpt =
         obuilder.withLongName("output").withRequired(true).withArgument(
