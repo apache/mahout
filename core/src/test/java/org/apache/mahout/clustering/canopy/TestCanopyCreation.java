@@ -352,7 +352,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     
     DummyOutputCollector<Text, Canopy> collector = new DummyOutputCollector<Text, Canopy>();
     List<VectorWritable> points = getPoints(raw);
-    reducer.reduce(new Text("centroid"), points.iterator(), collector, null);
+    reducer.reduce(new Text("centroid"), points.iterator(), collector, new DummyReporter());
     reducer.close();
     Set<String> keys = collector.getKeys();
     assertEquals("Number of centroids", 3, keys.size());
