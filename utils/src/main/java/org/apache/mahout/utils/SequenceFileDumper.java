@@ -67,7 +67,8 @@ public class SequenceFileDumper {
     Option helpOpt = obuilder.withLongName("help").
             withDescription("Print out help").withShortName("h").create();
 
-    Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt).withOption(substringOpt).withOption(countOpt).create();
+    Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt)
+    .withOption(substringOpt).withOption(countOpt).withOption(helpOpt).create();
 
     try {
       Parser parser = new Parser();
