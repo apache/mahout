@@ -17,6 +17,10 @@
 
 package org.apache.mahout.ga.watchmaker;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -26,42 +30,40 @@ import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.io.SequenceFile.Sorter;
 import org.apache.hadoop.mapred.JobConf;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 /** Utility Class that deals with the output. */
 public final class OutputUtils {
-
+  
   private OutputUtils() {
-    // do nothing
+  // do nothing
   }
-
+  
   /**
    * Removes the output directory if it already exists.
-   *
-   * @param fs <code>FileSystem</code> to use
+   * 
+   * @param fs
+   *          <code>FileSystem</code> to use
    * @return output <code>Path</code>
    */
   public static Path prepareOutput(FileSystem fs) throws IOException {
     Path outpath = new Path(fs.getWorkingDirectory(), "output");
-
+    
     if (fs.exists(outpath)) {
       fs.delete(outpath, true);
     }
-
+    
     return outpath;
   }
-
+  
   /**
    * Lists all files in the output <code>Path</code>
-   *
-   * @param fs      <code>FileSystem</code> to use
-   * @param outpath output <code>Path</code>
+   * 
+   * @param fs
+   *          <code>FileSystem</code> to use
+   * @param outpath
+   *          output <code>Path</code>
    * @return <code>Path</code> array
    */
-  public static Path[] listOutputFiles(FileSystem fs, Path outpath)
-      throws IOException {
+  public static Path[] listOutputFiles(FileSystem fs, Path outpath) throws IOException {
     FileStatus[] status = fs.listStatus(outpath);
     List<Path> outpaths = new ArrayList<Path>();
     for (FileStatus s : status) {
@@ -69,28 +71,29 @@ public final class OutputUtils {
         outpaths.add(s.getPath());
       }
     }
-
+    
     Path[] outfiles = new Path[outpaths.size()];
     outpaths.toArray(outfiles);
-
+    
     return outfiles;
   }
-
+  
   /**
    * Reads back the evaluations.
-   *
-   * @param outpath     output <code>Path</code>
-   * @param evaluations List of evaluations
+   * 
+   * @param outpath
+   *          output <code>Path</code>
+   * @param evaluations
+   *          List of evaluations
    */
-  public static void importEvaluations(FileSystem fs, JobConf conf,
-                                       Path outpath, List<Double> evaluations) throws IOException {
+  public static void importEvaluations(FileSystem fs, JobConf conf, Path outpath, List<Double> evaluations) throws IOException {
     Sorter sorter = new Sorter(fs, LongWritable.class, DoubleWritable.class, conf);
-
+    
     // merge and sort the outputs
-    Path[] outfiles = listOutputFiles(fs, outpath);
+    Path[] outfiles = OutputUtils.listOutputFiles(fs, outpath);
     Path output = new Path(outpath, "output.sorted");
     sorter.merge(outfiles, output);
-
+    
     // import the evaluations
     LongWritable key = new LongWritable();
     DoubleWritable value = new DoubleWritable();
@@ -103,5 +106,5 @@ public final class OutputUtils {
       reader.close();
     }
   }
-
+  
 }

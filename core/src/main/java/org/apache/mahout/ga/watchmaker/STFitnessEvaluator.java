@@ -17,18 +17,18 @@
 
 package org.apache.mahout.ga.watchmaker;
 
-import org.uncommons.watchmaker.framework.FitnessEvaluator;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import org.uncommons.watchmaker.framework.FitnessEvaluator;
+
 /** Special Fitness Evaluator that evaluates all the population ones. */
 public abstract class STFitnessEvaluator<T> implements FitnessEvaluator<T> {
-
+  
   private final List<Double> evaluations = new ArrayList<Double>();
-
+  
   private List<? extends T> population;
-
+  
   @Override
   public double getFitness(T candidate, List<? extends T> population) {
     // evaluate the population, when needed
@@ -37,15 +37,15 @@ public abstract class STFitnessEvaluator<T> implements FitnessEvaluator<T> {
       evaluate(population, evaluations);
       this.population = population;
     }
-
+    
     int index = population.indexOf(candidate);
     if (index == -1) {
       throw new IllegalArgumentException("Candidate is not part of the population");
     }
-
+    
     return evaluations.get(index);
   }
-
+  
   protected abstract void evaluate(List<? extends T> population, List<Double> evaluations);
-
+  
 }

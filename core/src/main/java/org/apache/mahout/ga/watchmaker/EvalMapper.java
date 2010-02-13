@@ -17,6 +17,8 @@
 
 package org.apache.mahout.ga.watchmaker;
 
+import java.io.IOException;
+
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -28,43 +30,45 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.common.StringUtils;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
-import java.io.IOException;
-
 /**
- * <p> Generic Mapper class for fitness evaluation. Works with the following : <code>&lt;key, candidate, key,
- * fitness&gt;</code>, where : </p> key: position of the current candidate in the input file. <br> candidate: candidate
- * solution to evaluate. <br> fitness: evaluated fitness for the given candidate.
+ * <p>
+ * Generic Mapper class for fitness evaluation. Works with the following : <code>&lt;key, candidate, key,
+ * fitness&gt;</code>, where :
+ * </p>
+ * key: position of the current candidate in the input file. <br>
+ * candidate: candidate solution to evaluate. <br>
+ * fitness: evaluated fitness for the given candidate.
  */
 public class EvalMapper extends MapReduceBase implements
-    Mapper<LongWritable, Text, LongWritable, DoubleWritable> {
-
+    Mapper<LongWritable,Text,LongWritable,DoubleWritable> {
+  
   /** Parameter used to store the "stringified" evaluator */
   public static final String MAHOUT_GA_EVALUATOR = "mahout.ga.evaluator";
-
+  
   private FitnessEvaluator<Object> evaluator = null;
-
+  
   @Override
   public void configure(JobConf job) {
-    String evlstr = job.get(MAHOUT_GA_EVALUATOR);
+    String evlstr = job.get(EvalMapper.MAHOUT_GA_EVALUATOR);
     if (evlstr == null) {
-      throw new IllegalArgumentException(
-          "'MAHOUT_GA_EVALUATOR' job parameter non found");
+      throw new IllegalArgumentException("'MAHOUT_GA_EVALUATOR' job parameter non found");
     }
-
+    
     evaluator = StringUtils.fromString(evlstr);
-
+    
     super.configure(job);
   }
-
+  
   @Override
-  public void map(LongWritable key, Text value,
-                  OutputCollector<LongWritable, DoubleWritable> output, Reporter reporter)
-      throws IOException {
+  public void map(LongWritable key,
+                  Text value,
+                  OutputCollector<LongWritable,DoubleWritable> output,
+                  Reporter reporter) throws IOException {
     Object candidate = StringUtils.fromString(value.toString());
-
+    
     double fitness = evaluator.getFitness(candidate, null);
-
+    
     output.collect(key, new DoubleWritable(fitness));
   }
-
+  
 }

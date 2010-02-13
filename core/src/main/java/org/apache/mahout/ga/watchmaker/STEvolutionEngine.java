@@ -17,6 +17,11 @@
 
 package org.apache.mahout.ga.watchmaker;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+
 import org.uncommons.watchmaker.framework.AbstractEvolutionEngine;
 import org.uncommons.watchmaker.framework.CandidateFactory;
 import org.uncommons.watchmaker.framework.EvaluatedCandidate;
@@ -24,35 +29,30 @@ import org.uncommons.watchmaker.framework.EvolutionaryOperator;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 import org.uncommons.watchmaker.framework.SelectionStrategy;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-
 /** Single Threaded Evolution Engine. */
 public class STEvolutionEngine<T> extends AbstractEvolutionEngine<T> {
-
+  
   public STEvolutionEngine(CandidateFactory<T> candidateFactory,
                            EvolutionaryOperator<T> evolutionScheme,
                            FitnessEvaluator<? super T> fitnessEvaluator,
-                           SelectionStrategy<? super T> selectionStrategy, Random rng) {
+                           SelectionStrategy<? super T> selectionStrategy,
+                           Random rng) {
     super(candidateFactory, evolutionScheme, fitnessEvaluator, selectionStrategy, rng);
   }
-
+  
   /** @see org.uncommons.watchmaker.framework.AbstractEvolutionEngine#evaluatePopulation(java.util.List) */
   @Override
   protected List<EvaluatedCandidate<T>> evaluatePopulation(List<T> population) {
     List<Double> evaluations = new ArrayList<Double>();
     STFitnessEvaluator<? super T> evaluator = (STFitnessEvaluator<? super T>) getFitnessEvaluator();
-
+    
     evaluator.evaluate(population, evaluations);
-
+    
     List<EvaluatedCandidate<T>> evaluatedPopulation = new ArrayList<EvaluatedCandidate<T>>();
     for (int index = 0; index < population.size(); index++) {
-      evaluatedPopulation.add(new EvaluatedCandidate<T>(population.get(index),
-          evaluations.get(index)));
+      evaluatedPopulation.add(new EvaluatedCandidate<T>(population.get(index), evaluations.get(index)));
     }
-
+    
     // Sort candidates in descending order according to fitness.
     if (getFitnessEvaluator().isNatural()) // Descending values for natural fitness.
     {
@@ -61,8 +61,8 @@ public class STEvolutionEngine<T> extends AbstractEvolutionEngine<T> {
     {
       Collections.sort(evaluatedPopulation);
     }
-
+    
     return evaluatedPopulation;
   }
-
+  
 }
