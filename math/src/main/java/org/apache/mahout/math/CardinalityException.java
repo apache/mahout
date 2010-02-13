@@ -19,5 +19,9 @@ package org.apache.mahout.math;
 
 /** Exception thrown when there is a cardinality mismatch in matrix operations */
 public class CardinalityException extends RuntimeException {
-
+  public CardinalityException(int myCard, int otherCard) {
+    super("My cardinality is: " + myCard + ", but the other is: " + otherCard);
+  }
+ 
+  public CardinalityException() { }
 }
