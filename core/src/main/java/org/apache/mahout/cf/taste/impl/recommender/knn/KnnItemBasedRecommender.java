@@ -17,9 +17,10 @@
 
 package org.apache.mahout.cf.taste.impl.recommender.knn;
 
+import java.util.List;
+
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
-import org.apache.mahout.common.LongPair;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
@@ -28,18 +29,19 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
-
-import java.util.List;
+import org.apache.mahout.common.LongPair;
 
 /**
- * <p>The weights to compute the final predicted preferences are calculated using linear interpolation, through an
- * {@link Optimizer}. This algorithm is based in the paper of Robert M. Bell and Yehuda Koren in ICDM '07.</p>
+ * <p>
+ * The weights to compute the final predicted preferences are calculated using linear interpolation, through
+ * an {@link Optimizer}. This algorithm is based in the paper of Robert M. Bell and Yehuda Koren in ICDM '07.
+ * </p>
  */
 public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
-
+  
   private final Optimizer optimizer;
   private final int neighborhoodSize;
-
+  
   public KnnItemBasedRecommender(DataModel dataModel,
                                  ItemSimilarity similarity,
                                  Optimizer optimizer,
@@ -48,27 +50,24 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
     this.optimizer = optimizer;
     this.neighborhoodSize = neighborhoodSize;
   }
-
+  
   private List<RecommendedItem> mostSimilarItems(long itemID,
                                                  LongPrimitiveIterator possibleItemIDs,
                                                  int howMany,
-                                                 Rescorer<LongPair> rescorer)
-          throws TasteException {
+                                                 Rescorer<LongPair> rescorer) throws TasteException {
     TopItems.Estimator<Long> estimator = new MostSimilarEstimator(itemID, getSimilarity(), rescorer);
     return TopItems.getTopItems(howMany, possibleItemIDs, null, estimator);
   }
-
-
-  private double[] getInterpolations(long itemID, long userID, long[] itemNeighborhood)
-          throws TasteException {
-
+  
+  private double[] getInterpolations(long itemID, long userID, long[] itemNeighborhood) throws TasteException {
+    
     int k = itemNeighborhood.length;
     double[][] A = new double[k][k];
     double[] b = new double[k];
     int i = 0;
-
+    
     DataModel dataModel = getDataModel();
-
+    
     int numUsers = getDataModel().getNumUsers();
     for (long iitem : itemNeighborhood) {
       PreferenceArray iPrefs = getDataModel().getPreferencesForItem(iitem);
@@ -91,7 +90,7 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
       }
       i++;
     }
-
+    
     PreferenceArray iPrefs = getDataModel().getPreferencesForItem(itemID);
     int iSize = iPrefs.length();
     i = 0;
@@ -110,46 +109,47 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
       b[i] = value / numUsers;
       i++;
     }
-
+    
     return optimizer.optimize(A, b);
   }
-
+  
   @Override
   protected float doEstimatePreference(long theUserID, long itemID) throws TasteException {
-
+    
     DataModel dataModel = getDataModel();
     PreferenceArray prefs = dataModel.getPreferencesFromUser(theUserID);
     int size = prefs.length();
-    FastIDSet possibleItemIDs = new FastIDSet(size);    
+    FastIDSet possibleItemIDs = new FastIDSet(size);
     for (int i = 0; i < size; i++) {
       possibleItemIDs.add(prefs.getItemID(i));
     }
     possibleItemIDs.remove(itemID);
-
-    List<RecommendedItem> mostSimilar = mostSimilarItems(itemID, possibleItemIDs.iterator(), neighborhoodSize, null);
+    
+    List<RecommendedItem> mostSimilar = mostSimilarItems(itemID, possibleItemIDs.iterator(),
+      neighborhoodSize, null);
     long[] theNeighborhood = new long[mostSimilar.size()];
     int nOffset = 0;
     for (RecommendedItem rec : mostSimilar) {
       theNeighborhood[nOffset++] = rec.getItemID();
     }
-
+    
     double[] weights = getInterpolations(itemID, theUserID, theNeighborhood);
-
+    
     int i = 0;
     double preference = 0.0;
     double totalSimilarity = 0.0;
     for (long jitem : theNeighborhood) {
-
+      
       Float pref = dataModel.getPreferenceValue(theUserID, jitem);
-
+      
       if (pref != null) {
         preference += pref * weights[i];
         totalSimilarity += weights[i];
       }
       i++;
-
+      
     }
     return totalSimilarity == 0.0 ? Float.NaN : (float) (preference / totalSimilarity);
   }
-
+  
 }

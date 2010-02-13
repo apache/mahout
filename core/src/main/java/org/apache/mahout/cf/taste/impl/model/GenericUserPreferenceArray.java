@@ -17,32 +17,34 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
-import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.PreferenceArray;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.apache.mahout.cf.taste.model.Preference;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
+
 /**
- * <p>This implementation maintains two parallel arrays, of user IDs and values. The idea is to save
- * allocating {@link Preference} objects themselves. This saves the overhead of {@link Preference} objects
- * but also duplicating the user ID value.</p>
- *
+ * <p>
+ * This implementation maintains two parallel arrays, of user IDs and values. The idea is to save allocating
+ * {@link Preference} objects themselves. This saves the overhead of {@link Preference} objects but also
+ * duplicating the user ID value.
+ * </p>
+ * 
  * @see BooleanUserPreferenceArray
  * @see GenericItemPreferenceArray
  * @see GenericPreference
  */
 public final class GenericUserPreferenceArray implements PreferenceArray {
-
+  
   private static final int ITEM = 1;
   private static final int VALUE = 2;
   private static final int VALUE_REVERSED = 3;
-
+  
   private final long[] IDs;
   private long id;
   private final float[] values;
-
+  
   public GenericUserPreferenceArray(int size) {
     if (size < 1) {
       throw new IllegalArgumentException("size is less than 1");
@@ -50,7 +52,7 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
     this.IDs = new long[size];
     values = new float[size];
   }
-
+  
   public GenericUserPreferenceArray(List<Preference> prefs) {
     this(prefs.size());
     for (int i = 0; i < prefs.size(); i++) {
@@ -60,7 +62,7 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
     }
     id = prefs.get(0).getUserID();
   }
-
+  
   /**
    * This is a private copy constructor for clone().
    */
@@ -69,83 +71,82 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
     this.id = id;
     this.values = values;
   }
-
+  
   @Override
   public int length() {
     return IDs.length;
   }
-
+  
   @Override
   public Preference get(int i) {
     return new PreferenceView(i);
   }
-
+  
   @Override
   public void set(int i, Preference pref) {
     id = pref.getUserID();
     IDs[i] = pref.getItemID();
     values[i] = pref.getValue();
   }
-
+  
   @Override
   public long getUserID(int i) {
     return id;
   }
-
+  
   /**
    * {@inheritDoc}
-   *
+   * 
    * Note that this method will actually set the user ID for <em>all</em> preferences.
    */
   @Override
   public void setUserID(int i, long userID) {
     id = userID;
   }
-
+  
   @Override
   public long getItemID(int i) {
     return IDs[i];
   }
-
+  
   @Override
   public void setItemID(int i, long itemID) {
     IDs[i] = itemID;
   }
-
+  
   @Override
   public float getValue(int i) {
     return values[i];
   }
-
+  
   @Override
   public void setValue(int i, float value) {
     values[i] = value;
   }
-
+  
   @Override
-  public void sortByUser() {
-  }
-
+  public void sortByUser() { }
+  
   @Override
   public void sortByItem() {
-    selectionSort(ITEM);
+    selectionSort(GenericUserPreferenceArray.ITEM);
   }
-
+  
   @Override
   public void sortByValue() {
-    selectionSort(VALUE);
+    selectionSort(GenericUserPreferenceArray.VALUE);
   }
-
+  
   @Override
   public void sortByValueReversed() {
-    selectionSort(VALUE_REVERSED);
+    selectionSort(GenericUserPreferenceArray.VALUE_REVERSED);
   }
-
+  
   @Override
   public boolean hasPrefWithUserID(long userID) {
     return id == userID;
   }
-
+  
   @Override
   public boolean hasPrefWithItemID(long itemID) {
     for (long id : IDs) {
@@ -155,13 +156,13 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
     }
     return false;
   }
-
+  
   private void selectionSort(int type) {
     // I think this sort will prove to be too dumb, but, it's in place and OK for tiny, mostly sorted data
     int max = length();
     boolean sorted = true;
     for (int i = 1; i < max; i++) {
-      if (isLess(i, i-1, type)) {
+      if (isLess(i, i - 1, type)) {
         sorted = false;
         break;
       }
@@ -181,7 +182,7 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
       }
     }
   }
-
+  
   private boolean isLess(int i, int j, int type) {
     switch (type) {
       case ITEM:
@@ -194,7 +195,7 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
         throw new IllegalStateException();
     }
   }
-
+  
   private void swap(int i, int j) {
     long temp1 = IDs[i];
     float temp2 = values[i];
@@ -203,23 +204,25 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
     IDs[j] = temp1;
     values[j] = temp2;
   }
-
+  
   @Override
   public GenericUserPreferenceArray clone() {
     return new GenericUserPreferenceArray(IDs.clone(), id, values.clone());
   }
-
+  
   @Override
   public Iterator<Preference> iterator() {
     return new PreferenceArrayIterator();
   }
-
+  
   private final class PreferenceArrayIterator implements Iterator<Preference> {
     private int i = 0;
+    
     @Override
     public boolean hasNext() {
       return i < length();
     }
+    
     @Override
     public Preference next() {
       if (i >= length()) {
@@ -227,40 +230,41 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
       }
       return new PreferenceView(i++);
     }
+    
     @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
   }
-
+  
   private final class PreferenceView implements Preference {
-
+    
     private final int i;
-
+    
     private PreferenceView(int i) {
       this.i = i;
     }
-
+    
     @Override
     public long getUserID() {
       return GenericUserPreferenceArray.this.getUserID(i);
     }
-
+    
     @Override
     public long getItemID() {
       return GenericUserPreferenceArray.this.getItemID(i);
     }
-
+    
     @Override
     public float getValue() {
       return values[i];
     }
-
+    
     @Override
     public void setValue(float value) {
       values[i] = value;
     }
-
+    
   }
-
+  
 }

@@ -25,32 +25,41 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 /**
- * <p>Computes a neighborhood consisting of the nearest n users to a given user. "Nearest" is defined by
- * the given {@link UserSimilarity}.</p>
+ * <p>
+ * Computes a neighborhood consisting of the nearest n users to a given user. "Nearest" is defined by the
+ * given {@link UserSimilarity}.
+ * </p>
  */
 public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
-
+  
   private final int n;
   private final double minSimilarity;
-
+  
   /**
-   * @param n              neighborhood size
-   * @param userSimilarity nearness metric
-   * @param dataModel      data model
-   * @throws IllegalArgumentException if n &lt; 1, or userSimilarity or dataModel are <code>null</code>
+   * @param n
+   *          neighborhood size
+   * @param userSimilarity
+   *          nearness metric
+   * @param dataModel
+   *          data model
+   * @throws IllegalArgumentException
+   *           if n &lt; 1, or userSimilarity or dataModel are <code>null</code>
    */
-  public NearestNUserNeighborhood(int n,
-                                  UserSimilarity userSimilarity,
-                                  DataModel dataModel) {
+  public NearestNUserNeighborhood(int n, UserSimilarity userSimilarity, DataModel dataModel) {
     this(n, Double.NEGATIVE_INFINITY, userSimilarity, dataModel, 1.0);
   }
-
+  
   /**
-   * @param n              neighborhood size
-   * @param minSimilarity  minimal similarity required for neighbors
-   * @param userSimilarity nearness metric
-   * @param dataModel      data model
-   * @throws IllegalArgumentException if n &lt; 1, or userSimilarity or dataModel are <code>null</code>
+   * @param n
+   *          neighborhood size
+   * @param minSimilarity
+   *          minimal similarity required for neighbors
+   * @param userSimilarity
+   *          nearness metric
+   * @param dataModel
+   *          data model
+   * @throws IllegalArgumentException
+   *           if n &lt; 1, or userSimilarity or dataModel are <code>null</code>
    */
   public NearestNUserNeighborhood(int n,
                                   double minSimilarity,
@@ -58,16 +67,22 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
                                   DataModel dataModel) {
     this(n, minSimilarity, userSimilarity, dataModel, 1.0);
   }
-
+  
   /**
-   * @param n              neighborhood size
-   * @param minSimilarity  minimal similarity required for neighbors
-   * @param userSimilarity nearness metric
-   * @param dataModel      data model
-   * @param samplingRate   percentage of users to consider when building neighborhood -- decrease to trade quality for
-   *                       performance
-   * @throws IllegalArgumentException if n &lt; 1 or samplingRate is NaN or not in (0,1], or userSimilarity or dataModel
-   *                                  are <code>null</code>
+   * @param n
+   *          neighborhood size
+   * @param minSimilarity
+   *          minimal similarity required for neighbors
+   * @param userSimilarity
+   *          nearness metric
+   * @param dataModel
+   *          data model
+   * @param samplingRate
+   *          percentage of users to consider when building neighborhood -- decrease to trade quality for
+   *          performance
+   * @throws IllegalArgumentException
+   *           if n &lt; 1 or samplingRate is NaN or not in (0,1], or userSimilarity or dataModel are
+   *           <code>null</code>
    */
   public NearestNUserNeighborhood(int n,
                                   double minSimilarity,
@@ -81,44 +96,44 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
     this.n = n;
     this.minSimilarity = minSimilarity;
   }
-
+  
   @Override
   public long[] getUserNeighborhood(long userID) throws TasteException {
-
+    
     DataModel dataModel = getDataModel();
     UserSimilarity userSimilarityImpl = getUserSimilarity();
-
+    
     TopItems.Estimator<Long> estimator = new Estimator(userSimilarityImpl, userID, minSimilarity);
-
-    LongPrimitiveIterator userIDs =
-            SamplingLongPrimitiveIterator.maybeWrapIterator(dataModel.getUserIDs(), getSamplingRate());
-
+    
+    LongPrimitiveIterator userIDs = SamplingLongPrimitiveIterator.maybeWrapIterator(dataModel.getUserIDs(),
+      getSamplingRate());
+    
     return TopItems.getTopUsers(n, userIDs, null, estimator);
   }
-
+  
   @Override
   public String toString() {
     return "NearestNUserNeighborhood";
   }
-
+  
   private static class Estimator implements TopItems.Estimator<Long> {
     private final UserSimilarity userSimilarityImpl;
     private final long theUserID;
     private final double minSim;
-
+    
     private Estimator(UserSimilarity userSimilarityImpl, long theUserID, double minSim) {
       this.userSimilarityImpl = userSimilarityImpl;
       this.theUserID = theUserID;
       this.minSim = minSim;
     }
-
+    
     @Override
     public double estimate(Long userID) throws TasteException {
       if (userID == theUserID) {
         return Double.NaN;
       }
       double sim = userSimilarityImpl.userSimilarity(theUserID, userID);
-      return (sim >= minSim) ? sim : Double.NaN;
+      return sim >= minSim ? sim : Double.NaN;
     }
   }
 }

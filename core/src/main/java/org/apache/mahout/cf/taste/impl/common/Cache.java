@@ -20,52 +20,69 @@ package org.apache.mahout.cf.taste.impl.common;
 import org.apache.mahout.cf.taste.common.TasteException;
 
 /**
- * <p>An efficient Map-like class which caches values for keys. Values are not "put" into a {@link Cache}; instead the
- * caller supplies the instance with an implementation of {@link Retriever} which can load the value for a given
- * key.</p>
- *
- * <p>The cache does not support <code>null</code> values or keys.</p>
- *
- * <p>Thanks to Amila Jayasooriya for helping evaluate performance of the rewrite of this class, as part of a Google
- * Summer of Code 2007 project.</p>
+ * <p>
+ * An efficient Map-like class which caches values for keys. Values are not "put" into a {@link Cache};
+ * instead the caller supplies the instance with an implementation of {@link Retriever} which can load the
+ * value for a given key.
+ * </p>
+ * 
+ * <p>
+ * The cache does not support <code>null</code> values or keys.
+ * </p>
+ * 
+ * <p>
+ * Thanks to Amila Jayasooriya for helping evaluate performance of the rewrite of this class, as part of a
+ * Google Summer of Code 2007 project.
+ * </p>
  */
-public final class Cache<K, V> implements Retriever<K, V> {
-
-  private final FastMap<K, V> cache;
-  private final Retriever<? super K, ? extends V> retriever;
-
+public final class Cache<K,V> implements Retriever<K,V> {
+  
+  private final FastMap<K,V> cache;
+  private final Retriever<? super K,? extends V> retriever;
+  
   /**
-   * <p>Creates a new cache based on the given {@link Retriever}.</p>
-   *
-   * @param retriever object which can retrieve values for keys
+   * <p>
+   * Creates a new cache based on the given {@link Retriever}.
+   * </p>
+   * 
+   * @param retriever
+   *          object which can retrieve values for keys
    */
-  public Cache(Retriever<? super K, ? extends V> retriever) {
+  public Cache(Retriever<? super K,? extends V> retriever) {
     this(retriever, FastMap.NO_MAX_SIZE);
   }
-
+  
   /**
-   * <p>Creates a new cache based on the given {@link Retriever} and with given maximum size.</p>
-   *
-   * @param retriever  object which can retrieve values for keys
-   * @param maxEntries maximum number of entries the cache will store before evicting some
+   * <p>
+   * Creates a new cache based on the given {@link Retriever} and with given maximum size.
+   * </p>
+   * 
+   * @param retriever
+   *          object which can retrieve values for keys
+   * @param maxEntries
+   *          maximum number of entries the cache will store before evicting some
    */
-  public Cache(Retriever<? super K, ? extends V> retriever, int maxEntries) {
+  public Cache(Retriever<? super K,? extends V> retriever, int maxEntries) {
     if (retriever == null) {
       throw new IllegalArgumentException("retriever is null");
     }
     if (maxEntries < 1) {
       throw new IllegalArgumentException("maxEntries must be at least 1");
     }
-    cache = new FastMap<K, V>(11, maxEntries);
+    cache = new FastMap<K,V>(11, maxEntries);
     this.retriever = retriever;
   }
-
+  
   /**
-   * <p>Returns cached value for a key. If it does not exist, it is loaded using a {@link Retriever}.</p>
-   *
-   * @param key cache key
+   * <p>
+   * Returns cached value for a key. If it does not exist, it is loaded using a {@link Retriever}.
+   * </p>
+   * 
+   * @param key
+   *          cache key
    * @return value for that key
-   * @throws TasteException if an exception occurs while retrieving a new cached value
+   * @throws TasteException
+   *           if an exception occurs while retrieving a new cached value
    */
   @Override
   public V get(K key) throws TasteException {
@@ -78,25 +95,32 @@ public final class Cache<K, V> implements Retriever<K, V> {
     }
     return value;
   }
-
+  
   /**
-   * <p>Uncaches any existing value for a given key.</p>
-   *
-   * @param key cache key
+   * <p>
+   * Uncaches any existing value for a given key.
+   * </p>
+   * 
+   * @param key
+   *          cache key
    */
   public void remove(K key) {
     synchronized (cache) {
       cache.remove(key);
     }
   }
-
-  /** <p>Clears the cache.</p> */
+  
+  /**
+   * <p>
+   * Clears the cache.
+   * </p>
+   */
   public void clear() {
     synchronized (cache) {
       cache.clear();
     }
   }
-
+  
   private V getAndCacheValue(K key) throws TasteException {
     V value = retriever.get(key);
     synchronized (cache) {
@@ -104,10 +128,10 @@ public final class Cache<K, V> implements Retriever<K, V> {
     }
     return value;
   }
-
+  
   @Override
   public String toString() {
     return "Cache[retriever:" + retriever + ']';
   }
-
+  
 }

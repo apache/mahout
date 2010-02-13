@@ -20,21 +20,23 @@ package org.apache.mahout.cf.taste.impl.recommender.knn;
 import java.util.Arrays;
 
 /**
- * Non-negative Quadratic Optimization. Based on the paper of Robert M. Bell and Yehuda Koren in ICDM '07. Thanks to Dan
- * Tillberg for the hints in the implementation.
+ * Non-negative Quadratic Optimization. Based on the paper of Robert M. Bell and Yehuda Koren in ICDM '07.
+ * Thanks to Dan Tillberg for the hints in the implementation.
  */
 public final class NonNegativeQuadraticOptimizer implements Optimizer {
-
+  
   private static final double EPSILON = 1.0e-10;
   private static final double CONVERGENCE_LIMIT = 0.1;
   private static final int MAX_ITERATIONS = 1000;
   private static final double DEFAULT_STEP = 0.001;
-
+  
   /**
    * Non-negative Quadratic Optimization.
-   *
-   * @param A matrix nxn positions
-   * @param b vector b, n positions
+   * 
+   * @param A
+   *          matrix nxn positions
+   * @param b
+   *          vector b, n positions
    * @return vector of n weights
    */
   @Override
@@ -42,10 +44,10 @@ public final class NonNegativeQuadraticOptimizer implements Optimizer {
     int k = b.length;
     double[] r = new double[k];
     double[] x = new double[k];
-    Arrays.fill(x, 3.0 / (double) k);
-
-    for (int iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
-
+    Arrays.fill(x, 3.0 / k);
+    
+    for (int iteration = 0; iteration < NonNegativeQuadraticOptimizer.MAX_ITERATIONS; iteration++) {
+      
       double rdot = 0.0;
       for (int n = 0; n < k; n++) {
         double sumAw = 0.0;
@@ -55,10 +57,10 @@ public final class NonNegativeQuadraticOptimizer implements Optimizer {
         }
         // r = b - Ax; // the residual, or 'steepest gradient'
         double rn = b[n] - sumAw;
-
+        
         // find active variables - those that are pinned due to
         // nonnegativity constraints; set respective ri's to zero
-        if ((x[n] < EPSILON) && (rn < 0.0)) {
+        if ((x[n] < NonNegativeQuadraticOptimizer.EPSILON) && (rn < 0.0)) {
           rn = 0.0;
         } else {
           // max step size numerator
@@ -66,11 +68,11 @@ public final class NonNegativeQuadraticOptimizer implements Optimizer {
         }
         r[n] = rn;
       }
-
-      if (rdot <= CONVERGENCE_LIMIT) {
+      
+      if (rdot <= NonNegativeQuadraticOptimizer.CONVERGENCE_LIMIT) {
         break;
       }
-
+      
       // max step size denominator
       double rArdotSum = 0.0;
       for (int n = 0; n < k; n++) {
@@ -81,14 +83,14 @@ public final class NonNegativeQuadraticOptimizer implements Optimizer {
         }
         rArdotSum += r[n] * SumAr;
       }
-
+      
       // max step size
       double stepSize = rdot / rArdotSum;
-
+      
       if (Double.isNaN(stepSize)) {
-        stepSize = DEFAULT_STEP;
+        stepSize = NonNegativeQuadraticOptimizer.DEFAULT_STEP;
       }
-
+      
       // adjust step size to prevent negative values
       for (int n = 0; n < k; n++) {
         if (r[n] < 0.0) {
@@ -96,19 +98,19 @@ public final class NonNegativeQuadraticOptimizer implements Optimizer {
           stepSize = Math.min(absStepSize, Math.abs(x[n] / r[n])) * stepSize / absStepSize;
         }
       }
-
+      
       // update x values
       for (int n = 0; n < k; n++) {
         x[n] += stepSize * r[n];
-        if (x[n] < EPSILON) {
+        if (x[n] < NonNegativeQuadraticOptimizer.EPSILON) {
           x[n] = 0.0;
         }
       }
-
-      //TODO: do something in case of divergence
+      
+      // TODO: do something in case of divergence
     }
-
+    
     return x;
   }
-
+  
 }

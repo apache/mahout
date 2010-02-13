@@ -17,37 +17,37 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
-import org.apache.mahout.common.RandomUtils;
-
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
+import org.apache.mahout.common.RandomUtils;
+
 /**
- * Wraps an {@link Iterator} and returns only some subset of the elements that it would, as determined by a sampling
- * rate parameter.
+ * Wraps an {@link Iterator} and returns only some subset of the elements that it would, as determined by a
+ * sampling rate parameter.
  */
 public final class SamplingLongPrimitiveIterator extends AbstractLongPrimitiveIterator {
-
+  
   private static final Random r = RandomUtils.getRandom();
-
+  
   private final LongPrimitiveIterator delegate;
   private final double samplingRate;
   private long next;
   private boolean hasNext;
-
+  
   public SamplingLongPrimitiveIterator(LongPrimitiveIterator delegate, double samplingRate) {
     this.delegate = delegate;
     this.samplingRate = samplingRate;
     this.hasNext = true;
     doNext();
   }
-
+  
   @Override
   public boolean hasNext() {
     return hasNext;
   }
-
+  
   @Override
   public long nextLong() {
     if (hasNext) {
@@ -57,7 +57,7 @@ public final class SamplingLongPrimitiveIterator extends AbstractLongPrimitiveIt
     }
     throw new NoSuchElementException();
   }
-
+  
   @Override
   public long peek() {
     if (hasNext) {
@@ -65,10 +65,10 @@ public final class SamplingLongPrimitiveIterator extends AbstractLongPrimitiveIt
     }
     throw new NoSuchElementException();
   }
-
+  
   private void doNext() {
     int toSkip = 0;
-    while (r.nextDouble() >= samplingRate) {
+    while (SamplingLongPrimitiveIterator.r.nextDouble() >= samplingRate) {
       toSkip++;
     }
     // Really, would be nicer to select value from geometric distribution, for small values of samplingRate
@@ -80,12 +80,12 @@ public final class SamplingLongPrimitiveIterator extends AbstractLongPrimitiveIt
       next = delegate.next();
       found = true;
     }
-
+    
     if (!found) {
       hasNext = false;
     }
   }
-
+  
   /**
    * @throws UnsupportedOperationException
    */
@@ -93,15 +93,14 @@ public final class SamplingLongPrimitiveIterator extends AbstractLongPrimitiveIt
   public void remove() {
     throw new UnsupportedOperationException();
   }
-
+  
   @Override
   public void skip(int n) {
     delegate.skip((int) (n / samplingRate)); // Kind of an approximation, but this is expected skip
   }
-
-
+  
   public static LongPrimitiveIterator maybeWrapIterator(LongPrimitiveIterator delegate, double samplingRate) {
     return samplingRate >= 1.0 ? delegate : new SamplingLongPrimitiveIterator(delegate, samplingRate);
   }
-
+  
 }

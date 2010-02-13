@@ -17,17 +17,21 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
-import org.apache.mahout.cf.taste.model.Preference;
-
 import java.io.Serializable;
 
-/** <p>A simple {@link Preference} encapsulating an item and preference value.</p> */
-public class GenericPreference implements Preference, Serializable {
+import org.apache.mahout.cf.taste.model.Preference;
 
+/**
+ * <p>
+ * A simple {@link Preference} encapsulating an item and preference value.
+ * </p>
+ */
+public class GenericPreference implements Preference, Serializable {
+  
   private final long userID;
   private final long itemID;
   private float value;
-
+  
   public GenericPreference(long userID, long itemID, float value) {
     if (Float.isNaN(value)) {
       throw new IllegalArgumentException("Invalid value: " + value);
@@ -36,22 +40,22 @@ public class GenericPreference implements Preference, Serializable {
     this.itemID = itemID;
     this.value = value;
   }
-
+  
   @Override
   public long getUserID() {
     return userID;
   }
-
+  
   @Override
   public long getItemID() {
     return itemID;
   }
-
+  
   @Override
   public float getValue() {
     return value;
   }
-
+  
   @Override
   public void setValue(float value) {
     if (Float.isNaN(value)) {
@@ -59,10 +63,10 @@ public class GenericPreference implements Preference, Serializable {
     }
     this.value = value;
   }
-
+  
   @Override
   public String toString() {
     return "GenericPreference[userID: " + userID + ", itemID:" + itemID + ", value:" + value + ']';
   }
-
+  
 }

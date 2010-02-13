@@ -17,27 +17,27 @@
 
 package org.apache.mahout.cf.taste.model;
 
+import javax.sql.DataSource;
+
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 
-import javax.sql.DataSource;
-
 public interface JDBCDataModel extends DataModel {
-
+  
   /**
    * @return {@link DataSource} underlying this model
    */
   DataSource getDataSource();
-
+  
   /**
-   * Hmm, should this exist elsewhere? seems like most relevant for a DB
-   * implementation, which is not in memory, which might want to export to memory.
-   *
+   * Hmm, should this exist elsewhere? seems like most relevant for a DB implementation, which is not in
+   * memory, which might want to export to memory.
+   * 
    * @return all user preference data
    */
   FastByIDMap<PreferenceArray> exportWithPrefs() throws TasteException;
-
+  
   FastByIDMap<FastIDSet> exportWithIDsOnly() throws TasteException;
-
+  
 }

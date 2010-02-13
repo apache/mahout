@@ -17,8 +17,6 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
-import org.apache.mahout.common.RandomUtils;
-
 import java.io.Serializable;
 import java.util.AbstractSet;
 import java.util.Arrays;
@@ -28,19 +26,21 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.apache.mahout.common.RandomUtils;
+
 /**
  * @see FastMap
  * @see FastIDSet
  */
 public final class FastByIDMap<V> implements Serializable, Cloneable {
-
+  
   public static final int NO_MAX_SIZE = Integer.MAX_VALUE;
   private static final double ALLOWED_LOAD_FACTOR = 1.5;
-
+  
   /** Dummy object used to represent a key that has been removed. */
   private static final long REMOVED = Long.MAX_VALUE;
   private static final long NULL = Long.MIN_VALUE;
-
+  
   private long[] keys;
   private V[] values;
   private int numEntries;
@@ -48,44 +48,48 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
   private int maxSize;
   private BitSet recentlyAccessed;
   private final boolean countingAccesses;
-
+  
   /** Creates a new {@link FastByIDMap} with default capacity. */
   public FastByIDMap() {
-    this(2, NO_MAX_SIZE);
+    this(2, FastByIDMap.NO_MAX_SIZE);
   }
-
+  
   public FastByIDMap(int size) {
-    this(size, NO_MAX_SIZE);
+    this(size, FastByIDMap.NO_MAX_SIZE);
   }
-
+  
   /**
-   * Creates a new {@link FastByIDMap} whose capacity can accommodate the given number of entries without rehash.</p>
-   *
-   * @param size    desired capacity
-   * @param maxSize max capacity
-   * @throws IllegalArgumentException if size is less than 0, maxSize is less than 1,
-   *  or at least half of {@link RandomUtils#MAX_INT_SMALLER_TWIN_PRIME}
+   * Creates a new {@link FastByIDMap} whose capacity can accommodate the given number of entries without
+   * rehash.</p>
+   * 
+   * @param size
+   *          desired capacity
+   * @param maxSize
+   *          max capacity
+   * @throws IllegalArgumentException
+   *           if size is less than 0, maxSize is less than 1, or at least half of
+   *           {@link RandomUtils#MAX_INT_SMALLER_TWIN_PRIME}
    */
   public FastByIDMap(int size, int maxSize) {
     if (size < 0) {
       throw new IllegalArgumentException("size must be at least 0");
     }
-    int max = (int) (RandomUtils.MAX_INT_SMALLER_TWIN_PRIME / ALLOWED_LOAD_FACTOR);
+    int max = (int) (RandomUtils.MAX_INT_SMALLER_TWIN_PRIME / FastByIDMap.ALLOWED_LOAD_FACTOR);
     if (size >= max) {
       throw new IllegalArgumentException("size must be less than " + max);
     }
     if (maxSize < 1) {
       throw new IllegalArgumentException("maxSize must be at least 1");
     }
-    int hashSize = RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * size));
+    int hashSize = RandomUtils.nextTwinPrime((int) (FastByIDMap.ALLOWED_LOAD_FACTOR * size));
     keys = new long[hashSize];
-    Arrays.fill(keys, NULL);
+    Arrays.fill(keys, FastByIDMap.NULL);
     values = (V[]) new Object[hashSize];
     this.maxSize = maxSize;
     this.countingAccesses = maxSize != Integer.MAX_VALUE;
     this.recentlyAccessed = countingAccesses ? new BitSet(hashSize) : null;
   }
-
+  
   /**
    * @see #findForAdd(long)
    */
@@ -96,7 +100,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     int jump = 1 + theHashCode % (hashSize - 2);
     int index = theHashCode % hashSize;
     long currentKey = keys[index];
-    while (currentKey != NULL && key != currentKey) {
+    while ((currentKey != FastByIDMap.NULL) && (key != currentKey)) {
       if (index < jump) {
         index += hashSize - jump;
       } else {
@@ -106,7 +110,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     }
     return index;
   }
-
+  
   /**
    * @see #find(long)
    */
@@ -117,7 +121,8 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     int jump = 1 + theHashCode % (hashSize - 2);
     int index = theHashCode % hashSize;
     long currentKey = keys[index];
-    while (currentKey != NULL && currentKey != REMOVED && key != currentKey) { // Different here
+    while ((currentKey != FastByIDMap.NULL) && (currentKey != FastByIDMap.REMOVED) && (key != currentKey)) { // Different
+                                                                                                             // here
       if (index < jump) {
         index += hashSize - jump;
       } else {
@@ -127,9 +132,9 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     }
     return index;
   }
-
+  
   public V get(long key) {
-    if (key == NULL) {
+    if (key == FastByIDMap.NULL) {
       return null;
     }
     int index = find(key);
@@ -138,42 +143,42 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     }
     return values[index];
   }
-
+  
   public int size() {
     return numEntries;
   }
-
+  
   public boolean isEmpty() {
     return numEntries == 0;
   }
-
+  
   public boolean containsKey(long key) {
-    return key != NULL && key != REMOVED && keys[find(key)] != NULL;
+    return (key != FastByIDMap.NULL) && (key != FastByIDMap.REMOVED) && (keys[find(key)] != FastByIDMap.NULL);
   }
-
+  
   public boolean containsValue(Object value) {
     if (value == null) {
       return false;
     }
     for (V theValue : values) {
-      if (theValue != null && value.equals(theValue)) {
+      if ((theValue != null) && value.equals(theValue)) {
         return true;
       }
     }
     return false;
   }
-
+  
   public V put(long key, V value) {
-    if (key == NULL || key == REMOVED) {
+    if ((key == FastByIDMap.NULL) || (key == FastByIDMap.REMOVED)) {
       throw new IllegalArgumentException();
     }
     if (value == null) {
       throw new NullPointerException();
     }
     // If less than half the slots are open, let's clear it up
-    if (numSlotsUsed * ALLOWED_LOAD_FACTOR >= keys.length) {
+    if (numSlotsUsed * FastByIDMap.ALLOWED_LOAD_FACTOR >= keys.length) {
       // If over half the slots used are actual entries, let's grow
-      if (numEntries * ALLOWED_LOAD_FACTOR >= numSlotsUsed) {
+      if (numEntries * FastByIDMap.ALLOWED_LOAD_FACTOR >= numSlotsUsed) {
         growAndRehash();
       } else {
         // Otherwise just rehash to clear REMOVED entries and don't grow
@@ -189,20 +194,20 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
       return oldValue;
     } else {
       // If size is limited,
-      if (countingAccesses && numEntries >= maxSize) {
+      if (countingAccesses && (numEntries >= maxSize)) {
         // and we're too large, clear some old-ish entry
         clearStaleEntry(index);
       }
       keys[index] = key;
       values[index] = value;
       numEntries++;
-      if (keyIndex == NULL) {
+      if (keyIndex == FastByIDMap.NULL) {
         numSlotsUsed++;
       }
       return null;
     }
   }
-
+  
   private void clearStaleEntry(int index) {
     while (true) {
       long currentKey;
@@ -213,7 +218,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
           index--;
         }
         currentKey = keys[index];
-      } while (currentKey == NULL || currentKey == REMOVED);
+      } while ((currentKey == FastByIDMap.NULL) || (currentKey == FastByIDMap.REMOVED));
       if (recentlyAccessed.get(index)) {
         recentlyAccessed.clear(index);
       } else {
@@ -221,20 +226,20 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
       }
     }
     // Delete the entry
-    keys[index] = REMOVED;
+    keys[index] = FastByIDMap.REMOVED;
     numEntries--;
     values[index] = null;
   }
-
+  
   public V remove(long key) {
-    if (key == NULL || key == REMOVED) {
+    if ((key == FastByIDMap.NULL) || (key == FastByIDMap.REMOVED)) {
       return null;
     }
     int index = find(key);
-    if (keys[index] == NULL) {
+    if (keys[index] == FastByIDMap.NULL) {
       return null;
     } else {
-      keys[index] = REMOVED;
+      keys[index] = FastByIDMap.REMOVED;
       numEntries--;
       V oldValue = values[index];
       values[index] = null;
@@ -243,36 +248,36 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     }
     // Could un-set recentlyAccessed's bit but doesn't matter
   }
-
+  
   public void clear() {
     numEntries = 0;
     numSlotsUsed = 0;
-    Arrays.fill(keys, NULL);
+    Arrays.fill(keys, FastByIDMap.NULL);
     Arrays.fill(values, null);
     if (countingAccesses) {
       recentlyAccessed.clear();
     }
   }
-
+  
   public LongPrimitiveIterator keySetIterator() {
     return new KeyIterator();
   }
-
-  public Set<Map.Entry<Long, V>> entrySet() {
+  
+  public Set<Map.Entry<Long,V>> entrySet() {
     return new EntrySet();
   }
-
+  
   public void rehash() {
-    rehash(RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * numEntries)));
+    rehash(RandomUtils.nextTwinPrime((int) (FastByIDMap.ALLOWED_LOAD_FACTOR * numEntries)));
   }
-
+  
   private void growAndRehash() {
-    if (keys.length * ALLOWED_LOAD_FACTOR >= RandomUtils.MAX_INT_SMALLER_TWIN_PRIME) {
+    if (keys.length * FastByIDMap.ALLOWED_LOAD_FACTOR >= RandomUtils.MAX_INT_SMALLER_TWIN_PRIME) {
       throw new IllegalStateException("Can't grow any more");
     }
-    rehash(RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * keys.length)));
+    rehash(RandomUtils.nextTwinPrime((int) (FastByIDMap.ALLOWED_LOAD_FACTOR * keys.length)));
   }
-
+  
   private void rehash(int newHashSize) {
     long[] oldKeys = keys;
     V[] oldValues = values;
@@ -282,17 +287,17 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
       recentlyAccessed = new BitSet(newHashSize);
     }
     keys = new long[newHashSize];
-    Arrays.fill(keys, NULL);
+    Arrays.fill(keys, FastByIDMap.NULL);
     values = (V[]) new Object[newHashSize];
     int length = oldKeys.length;
     for (int i = 0; i < length; i++) {
       long key = oldKeys[i];
-      if (key != NULL && key != REMOVED) {
+      if ((key != FastByIDMap.NULL) && (key != FastByIDMap.REMOVED)) {
         put(key, oldValues[i]);
       }
     }
   }
-
+  
   void iteratorRemove(int lastNext) {
     if (lastNext >= values.length) {
       throw new NoSuchElementException();
@@ -301,10 +306,10 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
       throw new IllegalStateException();
     }
     values[lastNext] = null;
-    keys[lastNext] = REMOVED;
+    keys[lastNext] = FastByIDMap.REMOVED;
     numEntries--;
   }
-
+  
   @Override
   public FastByIDMap<V> clone() {
     FastByIDMap<V> clone;
@@ -318,7 +323,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     clone.recentlyAccessed = countingAccesses ? new BitSet(keys.length) : null;
     return clone;
   }
-
+  
   @Override
   public String toString() {
     if (isEmpty()) {
@@ -328,25 +333,25 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     result.append('{');
     for (int i = 0; i < keys.length; i++) {
       long key = keys[i];
-      if (key != NULL && key != REMOVED) {
+      if ((key != FastByIDMap.NULL) && (key != FastByIDMap.REMOVED)) {
         result.append(key).append('=').append(values[i]).append(',');
       }
     }
     result.setCharAt(result.length() - 1, '}');
     return result.toString();
   }
-
+  
   private final class KeyIterator extends AbstractLongPrimitiveIterator {
-
+    
     private int position;
     private int lastNext = -1;
-
+    
     @Override
     public boolean hasNext() {
       goToNext();
       return position < keys.length;
     }
-
+    
     @Override
     public long nextLong() {
       goToNext();
@@ -356,7 +361,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
       }
       return keys[position++];
     }
-
+    
     @Override
     public long peek() {
       goToNext();
@@ -365,96 +370,96 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
       }
       return keys[position];
     }
-
+    
     private void goToNext() {
       int length = values.length;
-      while (position < length && values[position] == null) {
+      while ((position < length) && (values[position] == null)) {
         position++;
       }
     }
-
+    
     @Override
     public void remove() {
       iteratorRemove(lastNext);
     }
-
+    
     @Override
     public void skip(int n) {
       position += n;
     }
-
+    
   }
-
-  private final class EntrySet extends AbstractSet<Map.Entry<Long, V>> {
-
+  
+  private final class EntrySet extends AbstractSet<Map.Entry<Long,V>> {
+    
     @Override
     public int size() {
       return FastByIDMap.this.size();
     }
-
+    
     @Override
     public boolean isEmpty() {
       return FastByIDMap.this.isEmpty();
     }
-
+    
     @Override
     public boolean contains(Object o) {
       return containsKey((Long) o);
     }
-
+    
     @Override
-    public Iterator<Map.Entry<Long, V>> iterator() {
+    public Iterator<Map.Entry<Long,V>> iterator() {
       return new EntryIterator();
     }
-
+    
     @Override
-    public boolean add(Map.Entry<Long, V> t) {
+    public boolean add(Map.Entry<Long,V> t) {
       throw new UnsupportedOperationException();
     }
-
+    
     @Override
     public boolean remove(Object o) {
       throw new UnsupportedOperationException();
     }
-
+    
     @Override
-    public boolean addAll(Collection<? extends Map.Entry<Long, V>> ts) {
+    public boolean addAll(Collection<? extends Map.Entry<Long,V>> ts) {
       throw new UnsupportedOperationException();
     }
-
+    
     @Override
     public boolean retainAll(Collection<?> objects) {
       throw new UnsupportedOperationException();
     }
-
+    
     @Override
     public boolean removeAll(Collection<?> objects) {
       throw new UnsupportedOperationException();
     }
-
+    
     @Override
     public void clear() {
       FastByIDMap.this.clear();
     }
-
-    private final class MapEntry implements Map.Entry<Long, V> {
-
+    
+    private final class MapEntry implements Map.Entry<Long,V> {
+      
       private final int index;
-
+      
       private MapEntry(int index) {
         this.index = index;
       }
-
+      
       @Override
       public Long getKey() {
         return keys[index];
       }
-
+      
       @Override
       public V getValue() {
         return values[index];
       }
-
+      
       @Override
       public V setValue(V value) {
         if (value == null) {
@@ -465,20 +470,20 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
         return oldValue;
       }
     }
-
-    private final class EntryIterator implements Iterator<Map.Entry<Long, V>> {
-
+    
+    private final class EntryIterator implements Iterator<Map.Entry<Long,V>> {
+      
       private int position;
       private int lastNext = -1;
-
+      
       @Override
       public boolean hasNext() {
         goToNext();
         return position < keys.length;
       }
-
+      
       @Override
-      public Map.Entry<Long, V> next() {
+      public Map.Entry<Long,V> next() {
         goToNext();
         lastNext = position;
         if (position >= keys.length) {
@@ -486,20 +491,20 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
         }
         return new MapEntry(position++);
       }
-
+      
       private void goToNext() {
         int length = values.length;
-        while (position < length && values[position] == null) {
+        while ((position < length) && (values[position] == null)) {
           position++;
         }
       }
-
+      
       @Override
       public void remove() {
         iteratorRemove(lastNext);
       }
     }
-
+    
   }
-
+  
 }

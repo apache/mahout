@@ -16,6 +16,17 @@
  */
 package org.apache.mahout.cf.taste.hadoop.cooccurence;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
+
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -37,30 +48,19 @@ import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
 public final class UserItemRecommender extends Configured implements Tool {
-
+  
   private static final Logger log = LoggerFactory.getLogger(UserItemRecommender.class);
-
-  public static class RecommenderMapper extends MapReduceBase
-      implements Mapper<VIntWritable, TupleWritable, Bigram, TupleWritable> {
-
+  
+  public static class RecommenderMapper extends MapReduceBase implements
+      Mapper<VIntWritable,TupleWritable,Bigram,TupleWritable> {
+    
     private final Bigram userSeenItem = new Bigram();
-
+    
     @Override
-    public void map(VIntWritable user, TupleWritable tuple, OutputCollector<Bigram, TupleWritable> output,
+    public void map(VIntWritable user,
+                    TupleWritable tuple,
+                    OutputCollector<Bigram,TupleWritable> output,
                     Reporter reporter) throws IOException {
       int userId = user.get();
       int seenItemId = tuple.getInt(0);
@@ -68,43 +68,45 @@ public final class UserItemRecommender extends Configured implements Tool {
       output.collect(userSeenItem, tuple);
     }
   }
-
-  public static class RecommenderReducer extends MapReduceBase implements Reducer<Bigram, TupleWritable, Text, Text> {
-
+  
+  public static class RecommenderReducer extends MapReduceBase implements
+      Reducer<Bigram,TupleWritable,Text,Text> {
+    
     private String fieldSeparator;
     private int maxRecommendations;
-
+    
     private final List<Integer> seenItems = new ArrayList<Integer>();
     private final FastByIDMap<Double> recommendations = new FastByIDMap<Double>();
-
+    
     private final Text user = new Text();
     private final Text recomScore = new Text();
-
-    private static class EntryValueComparator implements Comparator<Map.Entry<Long, Double>>, Serializable {
-
+    
+    private static class EntryValueComparator implements Comparator<Map.Entry<Long,Double>>, Serializable {
+      
       @Override
-      public int compare(Map.Entry<Long, Double> itemScore1, Map.Entry<Long, Double> itemScore2) {
+      public int compare(Map.Entry<Long,Double> itemScore1, Map.Entry<Long,Double> itemScore2) {
         Double value1 = itemScore1.getValue();
-        double val1 = (value1 == null) ? 0 : value1;
+        double val1 = value1 == null ? 0 : value1;
         Double value2 = itemScore2.getValue();
-        double val2 = (value2 == null) ? 0 : value2;
+        double val2 = value2 == null ? 0 : value2;
         return val2 > val1 ? 1 : -1;
       }
     }
-
+    
     @Override
     public void configure(JobConf conf) {
       fieldSeparator = conf.get("user.preference.field.separator", "\t");
       maxRecommendations = conf.getInt("user.preference.max.recommendations", 100);
     }
-
+    
     @Override
-    public void reduce(Bigram userSeenItem, Iterator<TupleWritable> candTupleItr, OutputCollector<Text, Text> output,
-                       Reporter reporter)
-        throws IOException {
+    public void reduce(Bigram userSeenItem,
+                       Iterator<TupleWritable> candTupleItr,
+                       OutputCollector<Text,Text> output,
+                       Reporter reporter) throws IOException {
       int userId = userSeenItem.getFirst();
       int prevSeenItem = userSeenItem.getSecond();
-
+      
       while (candTupleItr.hasNext()) {
         TupleWritable tuple = candTupleItr.next();
         int curSeenItem = tuple.getInt(0);
@@ -123,18 +125,19 @@ public final class UserItemRecommender extends Configured implements Tool {
         }
       }
       recommendations.remove(prevSeenItem);
-      //Sort recommendations by count and output top-N
+      // Sort recommendations by count and output top-N
       outputSorted(userId, recommendations.entrySet(), output);
     }
-
-    public void outputSorted(int userId, Collection<Map.Entry<Long, Double>> recomSet, OutputCollector<Text, Text> output)
-        throws IOException {
+    
+    public void outputSorted(int userId,
+                             Collection<Map.Entry<Long,Double>> recomSet,
+                             OutputCollector<Text,Text> output) throws IOException {
       user.set(String.valueOf(userId));
       int N = maxRecommendations;
-      Collection<Map.Entry<Long, Double>> sortedRecoms =
-          new TreeSet<Map.Entry<Long, Double>>(new EntryValueComparator());
+      Collection<Map.Entry<Long,Double>> sortedRecoms = new TreeSet<Map.Entry<Long,Double>>(
+          new EntryValueComparator());
       sortedRecoms.addAll(recomSet);
-      for (Map.Entry<Long, Double> recommendation : sortedRecoms) {
+      for (Map.Entry<Long,Double> recommendation : sortedRecoms) {
         recomScore.set(recommendation.getKey() + fieldSeparator + recommendation.getValue());
         output.collect(user, recomScore);
         N--;
@@ -146,41 +149,42 @@ public final class UserItemRecommender extends Configured implements Tool {
       recommendations.clear();
     }
   }
-
+  
   public JobConf prepareJob(String inputPaths, Path outputPath, int maxRecommendations, int reducers) {
     JobConf job = new JobConf(getConf());
     job.setJobName("User Item Recommendations");
     job.setJarByClass(this.getClass());
-
+    
     job.setInputFormat(SequenceFileInputFormat.class);
     job.setOutputFormat(TextOutputFormat.class);
     job.setMapperClass(RecommenderMapper.class);
     job.setReducerClass(RecommenderReducer.class);
-
+    
     job.setMapOutputKeyClass(Bigram.class);
     job.setMapOutputValueClass(TupleWritable.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(Text.class);
-
+    
     job.setPartitionerClass(ItemSimilarityEstimator.FirstPartitioner.class);
     job.setOutputValueGroupingComparator(Bigram.FirstGroupingComparator.class);
-
+    
     job.setInt("user.preference.max.recommendations", maxRecommendations);
     job.setNumReduceTasks(reducers);
     FileInputFormat.addInputPaths(job, inputPaths);
     FileOutputFormat.setOutputPath(job, outputPath);
     return job;
   }
-
+  
   @Override
   public int run(String[] args) throws IOException {
     // TODO use Commons CLI 2
     if (args.length < 2) {
-      log.error("UserItemRecommender <input-dirs> <output-dir> [max-recommendations] [reducers]");
+      UserItemRecommender.log
+          .error("UserItemRecommender <input-dirs> <output-dir> [max-recommendations] [reducers]");
       ToolRunner.printGenericCommandUsage(System.out);
       return -1;
     }
-
+    
     String inputPaths = args[0];
     Path outputPath = new Path(args[1]);
     int maxRecommendations = args.length > 2 ? Integer.parseInt(args[2]) : 100;
@@ -189,5 +193,5 @@ public final class UserItemRecommender extends Configured implements Tool {
     JobClient.runJob(jobConf);
     return 0;
   }
-
+  
 }

@@ -17,22 +17,6 @@
 
 package org.apache.mahout.cf.taste.impl.model.file;
 
-import org.apache.mahout.cf.taste.common.Refreshable;
-import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
-import org.apache.mahout.cf.taste.impl.common.FastIDSet;
-import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
-import org.apache.mahout.common.FileLineIterator;
-import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
-import org.apache.mahout.cf.taste.impl.model.GenericBooleanPrefDataModel;
-import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
-import org.apache.mahout.cf.taste.impl.model.GenericPreference;
-import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.PreferenceArray;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -45,49 +29,85 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.mahout.cf.taste.common.Refreshable;
+import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
+import org.apache.mahout.cf.taste.impl.model.GenericBooleanPrefDataModel;
+import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
+import org.apache.mahout.cf.taste.impl.model.GenericPreference;
+import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
+import org.apache.mahout.cf.taste.model.DataModel;
+import org.apache.mahout.cf.taste.model.Preference;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
+import org.apache.mahout.common.FileLineIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
- * <p>A {@link DataModel} backed by a comma-delimited file. This class typically expects a file where each line contains
- * a user ID, followed by item ID, followed by preferences value, separated by commas. You may also use tabs.</p>
- *
- * <p>The preference value is assumed to be parseable as a <code>double</code>. The user IDs and item IDs are read
- * parsed as <code>long</code>s.</p>
- *
- * <p>This class will reload data from the data file when {@link #refresh(Collection)} is called, unless the file has
- * been reloaded very recently already.</p>
- *
- * <p>This class will also look for update "delta" files in the same directory, with file names that start the same way
- * (up to the first period). These files should have the same format, and provide updated data that supersedes what is
- * in the main data file. This is a mechanism that allows an application to push updates to {@link FileDataModel}
- * without re-copying the entire data file.</p>
- *
- * <p>The line may contain a blank preference value (e.g. "123,456,"). This is interpreted to mean "delete preference",
- * and is only useful in the context of an update delta file (see above). Note that if the line is empty or begins with
- * '#' it will be ignored as a comment.</p>
- *
- * <p>It is also acceptable for the lines to contain additional fields. Fields beyond the third will be ignored.</p>
- *
- * <p>Finally, for application that have no notion of a preference value (that is, the user simply expresses a
- * preference for an item, but no degree of preference), the caller can simply omit the third token in each line
- * altogether -- for example, "123,456".</p>
- *
- * <p>Note that it's all-or-nothing -- all of the items in the file must express no preference, or the all must.
- * These cannot be mixed. Put another way there will always be the same number of delimiters on every line of the
- * file!</p>
- *
- * <p>This class is not intended for use with very large amounts of data (over, say, tens of millions of rows). For
- * that, a JDBC-backed {@link DataModel} and a database are more appropriate.</p>
- *
- * <p>It is possible and likely useful to subclass this class and customize its behavior to accommodate
+ * <p>
+ * A {@link DataModel} backed by a comma-delimited file. This class typically expects a file where each line
+ * contains a user ID, followed by item ID, followed by preferences value, separated by commas. You may also
+ * use tabs.
+ * </p>
+ * 
+ * <p>
+ * The preference value is assumed to be parseable as a <code>double</code>. The user IDs and item IDs are
+ * read parsed as <code>long</code>s.
+ * </p>
+ * 
+ * <p>
+ * This class will reload data from the data file when {@link #refresh(Collection)} is called, unless the file
+ * has been reloaded very recently already.
+ * </p>
+ * 
+ * <p>
+ * This class will also look for update "delta" files in the same directory, with file names that start the
+ * same way (up to the first period). These files should have the same format, and provide updated data that
+ * supersedes what is in the main data file. This is a mechanism that allows an application to push updates to
+ * {@link FileDataModel} without re-copying the entire data file.
+ * </p>
+ * 
+ * <p>
+ * The line may contain a blank preference value (e.g. "123,456,"). This is interpreted to mean
+ * "delete preference", and is only useful in the context of an update delta file (see above). Note that if
+ * the line is empty or begins with '#' it will be ignored as a comment.
+ * </p>
+ * 
+ * <p>
+ * It is also acceptable for the lines to contain additional fields. Fields beyond the third will be ignored.
+ * </p>
+ * 
+ * <p>
+ * Finally, for application that have no notion of a preference value (that is, the user simply expresses a
+ * preference for an item, but no degree of preference), the caller can simply omit the third token in each
+ * line altogether -- for example, "123,456".
+ * </p>
+ * 
+ * <p>
+ * Note that it's all-or-nothing -- all of the items in the file must express no preference, or the all must.
+ * These cannot be mixed. Put another way there will always be the same number of delimiters on every line of
+ * the file!
+ * </p>
+ * 
+ * <p>
+ * This class is not intended for use with very large amounts of data (over, say, tens of millions of rows).
+ * For that, a JDBC-backed {@link DataModel} and a database are more appropriate.
+ * </p>
+ * 
+ * <p>
+ * It is possible and likely useful to subclass this class and customize its behavior to accommodate
  * application-specific needs and input formats. See {@link #processLine(String, FastByIDMap)} and
  * {@link #processLineWithoutID(String, FastByIDMap)}
  */
 public class FileDataModel implements DataModel {
-
+  
   private static final Logger log = LoggerFactory.getLogger(FileDataModel.class);
-
+  
   private static final long MIN_RELOAD_INTERVAL_MS = 60 * 1000L; // 1 minute?
   private static final char COMMENT_CHAR = '#';
-
+  
   private final File dataFile;
   private long lastModified;
   private long lastUpdateFileModified;
@@ -97,19 +117,23 @@ public class FileDataModel implements DataModel {
   private DataModel delegate;
   private final ReentrantLock reloadLock;
   private final boolean transpose;
-
+  
   /**
-   * @param dataFile file containing preferences data. If file is compressed (and name ends in .gz or .zip accordingly)
-   *                 it will be decompressed as it is read)
-   * @throws FileNotFoundException if dataFile does not exist
-   * @throws IOException if file can't be read
+   * @param dataFile
+   *          file containing preferences data. If file is compressed (and name ends in .gz or .zip
+   *          accordingly) it will be decompressed as it is read)
+   * @throws FileNotFoundException
+   *           if dataFile does not exist
+   * @throws IOException
+   *           if file can't be read
    */
   public FileDataModel(File dataFile) throws IOException {
     this(dataFile, false);
   }
-
+  
   /**
-   * @param transpose transposes user IDs and item IDs -- convenient for 'flipping' the data model this way
+   * @param transpose
+   *          transposes user IDs and item IDs -- convenient for 'flipping' the data model this way
    * @see #FileDataModel(File)
    */
   public FileDataModel(File dataFile, boolean transpose) throws IOException {
@@ -119,35 +143,35 @@ public class FileDataModel implements DataModel {
     if (!dataFile.exists() || dataFile.isDirectory()) {
       throw new FileNotFoundException(dataFile.toString());
     }
-
-    log.info("Creating FileDataModel for file {}", dataFile);
-
+    
+    FileDataModel.log.info("Creating FileDataModel for file {}", dataFile);
+    
     this.dataFile = dataFile.getAbsoluteFile();
     this.lastModified = dataFile.lastModified();
     this.lastUpdateFileModified = readLastUpdateFileModified();
-
+    
     FileLineIterator iterator = new FileLineIterator(dataFile, false);
     String firstLine = iterator.peek();
-    while (firstLine.length() == 0 || firstLine.charAt(0) == COMMENT_CHAR) {
+    while ((firstLine.length() == 0) || (firstLine.charAt(0) == FileDataModel.COMMENT_CHAR)) {
       iterator.next();
       firstLine = iterator.peek();
     }
     iterator.close();
-    delimiter = determineDelimiter(firstLine, 2);
+    delimiter = FileDataModel.determineDelimiter(firstLine, 2);
     hasPrefValues = firstLine.indexOf(delimiter, firstLine.indexOf(delimiter) + 1) >= 0;
-
+    
     this.reloadLock = new ReentrantLock();
     this.transpose = transpose;
   }
-
+  
   public File getDataFile() {
     return dataFile;
   }
-
+  
   public char getDelimiter() {
     return delimiter;
   }
-
+  
   protected void reload() {
     if (!reloadLock.isLocked()) {
       reloadLock.lock();
@@ -155,82 +179,84 @@ public class FileDataModel implements DataModel {
         delegate = buildModel();
         loaded = true;
       } catch (IOException ioe) {
-        log.warn("Exception while reloading", ioe);
+        FileDataModel.log.warn("Exception while reloading", ioe);
       } finally {
         reloadLock.unlock();
       }
     }
   }
-
+  
   protected DataModel buildModel() throws IOException {
-
+    
     long newLastModified = dataFile.lastModified();
     long newLastUpdateFileModified = readLastUpdateFileModified();
-
-    boolean loadFreshData = delegate == null || newLastModified > lastModified + MIN_RELOAD_INTERVAL_MS;
-
+    
+    boolean loadFreshData = (delegate == null)
+                            || (newLastModified > lastModified + FileDataModel.MIN_RELOAD_INTERVAL_MS);
+    
     lastModified = newLastModified;
     lastUpdateFileModified = newLastUpdateFileModified;
-
+    
     if (hasPrefValues) {
       
       if (loadFreshData) {
-
+        
         FastByIDMap<Collection<Preference>> data = new FastByIDMap<Collection<Preference>>();
         FileLineIterator iterator = new FileLineIterator(dataFile, false);
         processFile(iterator, data);
-
+        
         for (File updateFile : findUpdateFiles()) {
           processFile(new FileLineIterator(updateFile, false), data);
         }
-
+        
         return new GenericDataModel(GenericDataModel.toDataMap(data, true));
-
+        
       } else {
-
+        
         FastByIDMap<PreferenceArray> rawData = ((GenericDataModel) delegate).getRawUserData();
-
+        
         for (File updateFile : findUpdateFiles()) {
           processFile(new FileLineIterator(updateFile, false), rawData);
         }
-
+        
         return new GenericDataModel(rawData);
-
+        
       }
-
+      
     } else {
-
+      
       if (loadFreshData) {
-
+        
         FastByIDMap<FastIDSet> data = new FastByIDMap<FastIDSet>();
         FileLineIterator iterator = new FileLineIterator(dataFile, false);
         processFileWithoutID(iterator, data);
-
+        
         for (File updateFile : findUpdateFiles()) {
           processFileWithoutID(new FileLineIterator(updateFile, false), data);
         }
-
+        
         return new GenericBooleanPrefDataModel(data);
-
+        
       } else {
-
+        
         FastByIDMap<FastIDSet> rawData = ((GenericBooleanPrefDataModel) delegate).getRawUserData();
-
+        
         for (File updateFile : findUpdateFiles()) {
           processFileWithoutID(new FileLineIterator(updateFile, false), rawData);
         }
-
+        
         return new GenericBooleanPrefDataModel(rawData);
-
+        
       }
-
+      
     }
   }
-
+  
   /**
-   * Finds update delta files in the same directory as the data file. This finds any file whose name starts the same way
-   * as the data file (up to first period) but isn't the data file itself. For example, if the data file is
-   * /foo/data.txt.gz, you might place update files at /foo/data.1.txt.gz, /foo/data.2.txt.gz, etc.
+   * Finds update delta files in the same directory as the data file. This finds any file whose name starts
+   * the same way as the data file (up to first period) but isn't the data file itself. For example, if the
+   * data file is /foo/data.txt.gz, you might place update files at /foo/data.1.txt.gz, /foo/data.2.txt.gz,
+   * etc.
    */
   private Iterable<File> findUpdateFiles() {
     String dataFileName = dataFile.getName();
@@ -247,7 +273,7 @@ public class FileDataModel implements DataModel {
     Collections.sort(updateFiles);
     return updateFiles;
   }
-
+  
   private long readLastUpdateFileModified() {
     long mostRecentModification = Long.MIN_VALUE;
     for (File updateFile : findUpdateFiles()) {
@@ -255,7 +281,7 @@ public class FileDataModel implements DataModel {
     }
     return mostRecentModification;
   }
-
+  
   public static char determineDelimiter(String line, int maxDelimiters) {
     char delimiter;
     if (line.indexOf(',') >= 0) {
@@ -281,10 +307,9 @@ public class FileDataModel implements DataModel {
     }
     return delimiter;
   }
-
-  protected void processFile(FileLineIterator dataOrUpdateFileIterator,
-                             FastByIDMap<?> data) {
-    log.info("Reading file info...");
+  
+  protected void processFile(FileLineIterator dataOrUpdateFileIterator, FastByIDMap<?> data) {
+    FileDataModel.log.info("Reading file info...");
     AtomicInteger count = new AtomicInteger();
     while (dataOrUpdateFileIterator.hasNext()) {
       String line = dataOrUpdateFileIterator.next();
@@ -292,41 +317,48 @@ public class FileDataModel implements DataModel {
         processLine(line, data);
         int currentCount = count.incrementAndGet();
         if (currentCount % 1000000 == 0) {
-          log.info("Processed {} lines", currentCount);
+          FileDataModel.log.info("Processed {} lines", currentCount);
         }
       }
     }
-    log.info("Read lines: {}", count.get());
+    FileDataModel.log.info("Read lines: {}", count.get());
   }
-
+  
   /**
-   * <p>Reads one line from the input file and adds the data to a {@link Map} data structure which maps user IDs to
-   * preferences. This assumes that each line of the input file corresponds to one preference. After reading a line and
-   * determining which user and item the preference pertains to, the method should look to see if the data contains a
-   * mapping for the user ID already, and if not, add an empty {@link List} of {@link Preference}s to the data.</p>
-   *
-   * <p>Note that if the line is empty or begins with '#' it will be ignored as a comment.</p>
-   *
-   * @param line      line from input data file
-   * @param data      all data read so far, as a mapping from user IDs to preferences
+   * <p>
+   * Reads one line from the input file and adds the data to a {@link Map} data structure which maps user IDs
+   * to preferences. This assumes that each line of the input file corresponds to one preference. After
+   * reading a line and determining which user and item the preference pertains to, the method should look to
+   * see if the data contains a mapping for the user ID already, and if not, add an empty {@link List} of
+   * {@link Preference}s to the data.
+   * </p>
+   * 
+   * <p>
+   * Note that if the line is empty or begins with '#' it will be ignored as a comment.
+   * </p>
+   * 
+   * @param line
+   *          line from input data file
+   * @param data
+   *          all data read so far, as a mapping from user IDs to preferences
    */
   protected void processLine(String line, FastByIDMap<?> data) {
-
-    if (line.length() == 0 || line.charAt(0) == COMMENT_CHAR) {
+    
+    if ((line.length() == 0) || (line.charAt(0) == FileDataModel.COMMENT_CHAR)) {
       return;
     }
-
-    int delimiterOne = line.indexOf((int) delimiter);
+    
+    int delimiterOne = line.indexOf(delimiter);
     if (delimiterOne < 0) {
       throw new IllegalArgumentException("Bad line: " + line);
     }
-    int delimiterTwo = line.indexOf((int) delimiter, delimiterOne + 1);
+    int delimiterTwo = line.indexOf(delimiter, delimiterOne + 1);
     if (delimiterTwo < 0) {
       throw new IllegalArgumentException("Bad line: " + line);
     }
     // Look for beginning of additional, ignored fields:
-    int delimiterThree = line.indexOf((int) delimiter, delimiterTwo + 1);    
-
+    int delimiterThree = line.indexOf(delimiter, delimiterTwo + 1);
+    
     String userIDString = line.substring(0, delimiterOne);
     String itemIDString = line.substring(delimiterOne + 1, delimiterTwo);
     String preferenceValueString;
@@ -335,20 +367,20 @@ public class FileDataModel implements DataModel {
     } else {
       preferenceValueString = line.substring(delimiterTwo + 1);
     }
-
+    
     long userID = readUserIDFromString(userIDString);
     long itemID = readItemIDFromString(itemIDString);
-
+    
     if (transpose) {
       long tmp = userID;
       userID = itemID;
       itemID = tmp;
     }
-
+    
     // This is kind of gross but need to handle two types of storage
     Object maybePrefs = data.get(userID);
     if (maybePrefs instanceof PreferenceArray) {
-
+      
       PreferenceArray prefs = (PreferenceArray) maybePrefs;
       if (preferenceValueString.length() == 0) {
         if (prefs != null) {
@@ -375,11 +407,11 @@ public class FileDataModel implements DataModel {
             }
           }
         }
-
+        
       } else {
-
+        
         float preferenceValue = Float.parseFloat(preferenceValueString);
-
+        
         boolean exists = false;
         if (prefs != null) {
           for (int i = 0; i < prefs.length(); i++) {
@@ -390,7 +422,7 @@ public class FileDataModel implements DataModel {
             }
           }
         }
-
+        
         if (!exists) {
           if (prefs == null) {
             prefs = new GenericUserPreferenceArray(1);
@@ -406,11 +438,11 @@ public class FileDataModel implements DataModel {
           prefs.setValue(0, preferenceValue);
         }
       }
-
+      
     } else {
-
+      
       Collection<Preference> prefs = (Collection<Preference>) maybePrefs;
-
+      
       if (preferenceValueString.length() == 0) {
         if (prefs != null) {
           // remove pref
@@ -424,9 +456,9 @@ public class FileDataModel implements DataModel {
           }
         }
       } else {
-
+        
         float preferenceValue = Float.parseFloat(preferenceValueString);
-
+        
         boolean exists = false;
         if (prefs != null) {
           for (Preference pref : prefs) {
@@ -437,7 +469,7 @@ public class FileDataModel implements DataModel {
             }
           }
         }
-
+        
         if (!exists) {
           if (prefs == null) {
             prefs = new ArrayList<Preference>(2);
@@ -446,13 +478,12 @@ public class FileDataModel implements DataModel {
           prefs.add(new GenericPreference(userID, itemID, preferenceValue));
         }
       }
-
+      
     }
   }
-
-  protected void processFileWithoutID(FileLineIterator dataOrUpdateFileIterator,
-                                      FastByIDMap<FastIDSet> data) {
-    log.info("Reading file info...");
+  
+  protected void processFileWithoutID(FileLineIterator dataOrUpdateFileIterator, FastByIDMap<FastIDSet> data) {
+    FileDataModel.log.info("Reading file info...");
     AtomicInteger count = new AtomicInteger();
     while (dataOrUpdateFileIterator.hasNext()) {
       String line = dataOrUpdateFileIterator.next();
@@ -460,27 +491,27 @@ public class FileDataModel implements DataModel {
         processLineWithoutID(line, data);
         int currentCount = count.incrementAndGet();
         if (currentCount % 100000 == 0) {
-          log.info("Processed {} lines", currentCount);
+          FileDataModel.log.info("Processed {} lines", currentCount);
         }
       }
     }
-    log.info("Read lines: {}", count.get());
+    FileDataModel.log.info("Read lines: {}", count.get());
   }
-
+  
   protected void processLineWithoutID(String line, FastByIDMap<FastIDSet> data) {
-
-    if (line.length() == 0 || line.charAt(0) == COMMENT_CHAR) {
+    
+    if ((line.length() == 0) || (line.charAt(0) == FileDataModel.COMMENT_CHAR)) {
       return;
     }
-
-    int delimiterOne = line.indexOf((int) delimiter);
+    
+    int delimiterOne = line.indexOf(delimiter);
     if (delimiterOne < 0) {
       throw new IllegalArgumentException("Bad line: " + line);
     }
-
+    
     long userID = readUserIDFromString(line.substring(0, delimiterOne));
     long itemID = readItemIDFromString(line.substring(delimiterOne + 1));
-
+    
     if (transpose) {
       long tmp = userID;
       userID = itemID;
@@ -493,114 +524,115 @@ public class FileDataModel implements DataModel {
     }
     itemIDs.add(itemID);
   }
-
+  
   private void checkLoaded() {
     if (!loaded) {
       reload();
     }
   }
-
+  
   /**
-   * Subclasses may wish to override this if ID values in the file are not numeric. This
-   * provides a hook by which subclasses can inject an
-   * {@link org.apache.mahout.cf.taste.model.IDMigrator} to perform translation.
+   * Subclasses may wish to override this if ID values in the file are not numeric. This provides a hook by
+   * which subclasses can inject an {@link org.apache.mahout.cf.taste.model.IDMigrator} to perform
+   * translation.
    */
   protected long readUserIDFromString(String value) {
     return Long.parseLong(value);
   }
-
+  
   /**
-   * Subclasses may wish to override this if ID values in the file are not numeric. This
-   * provides a hook by which subclasses can inject an
-   * {@link org.apache.mahout.cf.taste.model.IDMigrator} to perform translation.
+   * Subclasses may wish to override this if ID values in the file are not numeric. This provides a hook by
+   * which subclasses can inject an {@link org.apache.mahout.cf.taste.model.IDMigrator} to perform
+   * translation.
    */
   protected long readItemIDFromString(String value) {
     return Long.parseLong(value);
   }
-
+  
   @Override
   public LongPrimitiveIterator getUserIDs() throws TasteException {
     checkLoaded();
     return delegate.getUserIDs();
   }
-
+  
   @Override
   public PreferenceArray getPreferencesFromUser(long userID) throws TasteException {
     checkLoaded();
     return delegate.getPreferencesFromUser(userID);
   }
-
+  
   @Override
   public FastIDSet getItemIDsFromUser(long userID) throws TasteException {
-    checkLoaded();    
+    checkLoaded();
     return delegate.getItemIDsFromUser(userID);
   }
-
+  
   @Override
   public LongPrimitiveIterator getItemIDs() throws TasteException {
     checkLoaded();
     return delegate.getItemIDs();
   }
-
+  
   @Override
   public PreferenceArray getPreferencesForItem(long itemID) throws TasteException {
     checkLoaded();
     return delegate.getPreferencesForItem(itemID);
   }
-
+  
   @Override
   public Float getPreferenceValue(long userID, long itemID) throws TasteException {
     return delegate.getPreferenceValue(userID, itemID);
   }
-
+  
   @Override
   public int getNumItems() throws TasteException {
     checkLoaded();
     return delegate.getNumItems();
   }
-
+  
   @Override
   public int getNumUsers() throws TasteException {
     checkLoaded();
     return delegate.getNumUsers();
   }
-
+  
   @Override
   public int getNumUsersWithPreferenceFor(long... itemIDs) throws TasteException {
     checkLoaded();
     return delegate.getNumUsersWithPreferenceFor(itemIDs);
   }
-
+  
   /**
-   * Note that this method only updates the in-memory preference data that this {@link FileDataModel} maintains; it does
-   * not modify any data on disk. Therefore any updates from this method are only temporary, and lost when data is
-   * reloaded from a file. This method should also be considered relatively slow.
+   * Note that this method only updates the in-memory preference data that this {@link FileDataModel}
+   * maintains; it does not modify any data on disk. Therefore any updates from this method are only
+   * temporary, and lost when data is reloaded from a file. This method should also be considered relatively
+   * slow.
    */
   @Override
   public void setPreference(long userID, long itemID, float value) throws TasteException {
     checkLoaded();
     delegate.setPreference(userID, itemID, value);
   }
-
+  
   /** See the warning at {@link #setPreference(long, long, float)}. */
   @Override
   public void removePreference(long userID, long itemID) throws TasteException {
     checkLoaded();
     delegate.removePreference(userID, itemID);
   }
-
+  
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    if (dataFile.lastModified() > lastModified + MIN_RELOAD_INTERVAL_MS ||
-        readLastUpdateFileModified() > lastUpdateFileModified + MIN_RELOAD_INTERVAL_MS) {
-      log.debug("File has changed; reloading...");
+    if ((dataFile.lastModified() > lastModified + FileDataModel.MIN_RELOAD_INTERVAL_MS)
+        || (readLastUpdateFileModified() > lastUpdateFileModified + FileDataModel.MIN_RELOAD_INTERVAL_MS)) {
+      FileDataModel.log.debug("File has changed; reloading...");
       reload();
     }
   }
-
+  
   @Override
   public String toString() {
     return "FileDataModel[dataFile:" + dataFile + ']';
   }
-
+  
 }

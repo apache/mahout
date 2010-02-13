@@ -17,6 +17,8 @@
 
 package org.apache.mahout.cf.taste.impl.neighborhood;
 
+import java.util.Collection;
+
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.Cache;
@@ -25,47 +27,44 @@ import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 
-import java.util.Collection;
-
 /** A caching wrapper around an underlying {@link UserNeighborhood} implementation. */
 public final class CachingUserNeighborhood implements UserNeighborhood {
-
+  
   private final UserNeighborhood neighborhood;
-  private final Cache<Long, long[]> neighborhoodCache;
-
+  private final Cache<Long,long[]> neighborhoodCache;
+  
   public CachingUserNeighborhood(UserNeighborhood neighborhood, DataModel dataModel) throws TasteException {
     if (neighborhood == null) {
       throw new IllegalArgumentException("neighborhood is null");
     }
     this.neighborhood = neighborhood;
     int maxCacheSize = dataModel.getNumUsers(); // just a dumb heuristic for sizing
-    this.neighborhoodCache = new Cache<Long, long[]>(
-            new NeighborhoodRetriever(neighborhood), maxCacheSize);
+    this.neighborhoodCache = new Cache<Long,long[]>(new NeighborhoodRetriever(neighborhood), maxCacheSize);
   }
-
+  
   @Override
   public long[] getUserNeighborhood(long userID) throws TasteException {
     return neighborhoodCache.get(userID);
   }
-
+  
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     neighborhoodCache.clear();
     alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
     RefreshHelper.maybeRefresh(alreadyRefreshed, neighborhood);
   }
-
-  private static final class NeighborhoodRetriever implements Retriever<Long, long[]> {
+  
+  private static final class NeighborhoodRetriever implements Retriever<Long,long[]> {
     private final UserNeighborhood neighborhood;
-
+    
     private NeighborhoodRetriever(UserNeighborhood neighborhood) {
       this.neighborhood = neighborhood;
     }
-
+    
     @Override
     public long[] get(Long key) throws TasteException {
       return neighborhood.getUserNeighborhood(key);
     }
   }
-
+  
 }

@@ -18,12 +18,11 @@
 package org.apache.mahout.cf.taste.common;
 
 public final class NoSuchUserException extends TasteException {
-
-  public NoSuchUserException() {
-  }
-
+  
+  public NoSuchUserException() { }
+  
   public NoSuchUserException(String message) {
     super(message);
   }
-
+  
 }

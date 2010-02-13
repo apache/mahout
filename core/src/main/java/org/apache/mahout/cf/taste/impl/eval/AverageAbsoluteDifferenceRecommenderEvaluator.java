@@ -22,33 +22,38 @@ import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.model.Preference;
 
 /**
- * <p>A {@link org.apache.mahout.cf.taste.eval.RecommenderEvaluator} which computes the average absolute difference
- * between predicted and actual ratings for users.</p>
- *
- * <p>This algorithm is also called "mean average error".</p>
+ * <p>
+ * A {@link org.apache.mahout.cf.taste.eval.RecommenderEvaluator} which computes the average absolute
+ * difference between predicted and actual ratings for users.
+ * </p>
+ * 
+ * <p>
+ * This algorithm is also called "mean average error".
+ * </p>
  */
-public final class AverageAbsoluteDifferenceRecommenderEvaluator extends AbstractDifferenceRecommenderEvaluator {
-
+public final class AverageAbsoluteDifferenceRecommenderEvaluator extends
+    AbstractDifferenceRecommenderEvaluator {
+  
   private RunningAverage average;
-
+  
   @Override
   void reset() {
     average = new FullRunningAverage();
   }
-
+  
   @Override
   void processOneEstimate(float estimatedPreference, Preference realPref) {
     average.addDatum(Math.abs(realPref.getValue() - estimatedPreference));
   }
-
+  
   @Override
   double computeFinalEvaluation() {
     return average.getAverage();
   }
-
+  
   @Override
   public String toString() {
     return "AverageAbsoluteDifferenceRecommenderEvaluator";
   }
-
+  
 }

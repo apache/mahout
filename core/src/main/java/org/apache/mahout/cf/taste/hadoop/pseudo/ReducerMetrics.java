@@ -19,10 +19,10 @@ package org.apache.mahout.cf.taste.hadoop.pseudo;
 
 /** Custom metrics collected by {@link RecommenderReducer}. */
 public enum ReducerMetrics {
-
+  
   /** Number of unique users for which recommendations were produced */
   USERS_PROCESSED,
   /** Number of items recommended to those users */
   RECOMMENDATIONS_MADE
-
+  
 }

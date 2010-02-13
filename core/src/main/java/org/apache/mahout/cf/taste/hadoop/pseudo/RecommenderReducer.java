@@ -17,6 +17,13 @@
 
 package org.apache.mahout.cf.taste.hadoop.pseudo;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -36,37 +43,31 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.common.FileLineIterable;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
-import java.util.List;
-
 /**
- * <p>The {@link Reducer} which takes as input the user IDs parsed out by the map phase, and for each unique user
- * ID, computes recommendations with the configured {@link Recommender}. The results are output as {@link
- * RecommendedItemsWritable}.</p>
- *
+ * <p>
+ * The {@link Reducer} which takes as input the user IDs parsed out by the map phase, and for each unique user
+ * ID, computes recommendations with the configured {@link Recommender}. The results are output as
+ * {@link RecommendedItemsWritable}.
+ * </p>
+ * 
  * @see RecommenderJob
  */
-public final class RecommenderReducer
-    extends MapReduceBase
-    implements Reducer<LongWritable, NullWritable, LongWritable, RecommendedItemsWritable> {
-
+public final class RecommenderReducer extends MapReduceBase implements
+    Reducer<LongWritable,NullWritable,LongWritable,RecommendedItemsWritable> {
+  
   static final String RECOMMENDER_CLASS_NAME = "recommenderClassName";
   static final String RECOMMENDATIONS_PER_USER = "recommendationsPerUser";
   static final String DATA_MODEL_FILE = "dataModelFile";
   static final String USERS_FILE = "usersFile";
-
+  
   private Recommender recommender;
   private int recommendationsPerUser;
   private FastIDSet usersToRecommendFor;
-
+  
   @Override
   public void configure(JobConf jobConf) {
-    String dataModelFile = jobConf.get(DATA_MODEL_FILE);
-    String recommenderClassName = jobConf.get(RECOMMENDER_CLASS_NAME);
+    String dataModelFile = jobConf.get(RecommenderReducer.DATA_MODEL_FILE);
+    String recommenderClassName = jobConf.get(RecommenderReducer.RECOMMENDER_CLASS_NAME);
     FileDataModel fileDataModel;
     try {
       Path dataModelPath = new Path(dataModelFile);
@@ -75,7 +76,7 @@ public final class RecommenderReducer
       tempDataFile.deleteOnExit();
       fs.copyToLocalFile(dataModelPath, new Path(tempDataFile.getAbsolutePath()));
       fileDataModel = new FileDataModel(tempDataFile);
-      String usersFilePathString = jobConf.get(USERS_FILE);
+      String usersFilePathString = jobConf.get(RecommenderReducer.USERS_FILE);
       if (usersFilePathString == null) {
         usersToRecommendFor = null;
       } else {
@@ -90,10 +91,9 @@ public final class RecommenderReducer
       throw new IllegalStateException(ioe);
     }
     try {
-      Class<? extends Recommender> recommenderClass =
-          Class.forName(recommenderClassName).asSubclass(Recommender.class);
-      Constructor<? extends Recommender> constructor =
-          recommenderClass.getConstructor(DataModel.class);
+      Class<? extends Recommender> recommenderClass = Class.forName(recommenderClassName).asSubclass(
+        Recommender.class);
+      Constructor<? extends Recommender> constructor = recommenderClass.getConstructor(DataModel.class);
       recommender = constructor.newInstance(fileDataModel);
     } catch (NoSuchMethodException nsme) {
       throw new IllegalStateException(nsme);
@@ -106,20 +106,19 @@ public final class RecommenderReducer
     } catch (InvocationTargetException ite) {
       throw new IllegalStateException(ite.getCause());
     }
-    recommendationsPerUser = jobConf.getInt(RECOMMENDATIONS_PER_USER, 10);
+    recommendationsPerUser = jobConf.getInt(RecommenderReducer.RECOMMENDATIONS_PER_USER, 10);
   }
-
+  
   @Override
   public void reduce(LongWritable key,
                      Iterator<NullWritable> values,
-                     OutputCollector<LongWritable, RecommendedItemsWritable> output,
-                     Reporter reporter)
-      throws IOException {
+                     OutputCollector<LongWritable,RecommendedItemsWritable> output,
+                     Reporter reporter) throws IOException {
     long userID = key.get();
-    if (usersToRecommendFor != null && !usersToRecommendFor.contains(userID)) {
+    if ((usersToRecommendFor != null) && !usersToRecommendFor.contains(userID)) {
       return;
     }
-
+    
     List<RecommendedItem> recommendedItems;
     try {
       recommendedItems = recommender.recommend(userID, recommendationsPerUser);

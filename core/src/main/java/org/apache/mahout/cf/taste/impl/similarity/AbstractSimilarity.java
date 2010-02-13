@@ -17,6 +17,9 @@
 
 package org.apache.mahout.cf.taste.impl.similarity;
 
+import java.util.Collection;
+import java.util.concurrent.Callable;
+
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Weighting;
@@ -29,27 +32,32 @@ import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
 import org.apache.mahout.cf.taste.transforms.SimilarityTransform;
 
-import java.util.Collection;
-import java.util.concurrent.Callable;
-
 /** Abstract superclass encapsulating functionality that is common to most implementations in this package. */
 abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
-
+  
   private final DataModel dataModel;
   private PreferenceInferrer inferrer;
   private PreferenceTransform prefTransform;
   private SimilarityTransform similarityTransform;
-  private boolean weighted;
+  private final boolean weighted;
   private int cachedNumItems;
   private int cachedNumUsers;
   private final RefreshHelper refreshHelper;
-
-  /** <p>Creates a normal (unweighted) {@link AbstractSimilarity}.</p> */
+  
+  /**
+   * <p>
+   * Creates a normal (unweighted) {@link AbstractSimilarity}.
+   * </p>
+   */
   AbstractSimilarity(DataModel dataModel) throws TasteException {
     this(dataModel, Weighting.UNWEIGHTED);
   }
-
-  /** <p>Creates a possibly weighted {@link AbstractSimilarity}.</p> */
+  
+  /**
+   * <p>
+   * Creates a possibly weighted {@link AbstractSimilarity}.
+   * </p>
+   */
   AbstractSimilarity(final DataModel dataModel, Weighting weighting) throws TasteException {
     if (dataModel == null) {
       throw new IllegalArgumentException("dataModel is null");
@@ -68,15 +76,15 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     });
     this.refreshHelper.addDependency(this.dataModel);
   }
-
+  
   final DataModel getDataModel() {
     return dataModel;
   }
-
+  
   final PreferenceInferrer getPreferenceInferrer() {
     return inferrer;
   }
-
+  
   @Override
   public final void setPreferenceInferrer(PreferenceInferrer inferrer) {
     if (inferrer == null) {
@@ -86,66 +94,75 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     refreshHelper.removeDependency(this.inferrer);
     this.inferrer = inferrer;
   }
-
+  
   public final PreferenceTransform getPrefTransform() {
     return prefTransform;
   }
-
+  
   public final void setPrefTransform(PreferenceTransform prefTransform) {
     refreshHelper.addDependency(prefTransform);
     refreshHelper.removeDependency(this.prefTransform);
     this.prefTransform = prefTransform;
   }
-
+  
   public final SimilarityTransform getSimilarityTransform() {
     return similarityTransform;
   }
-
+  
   public final void setSimilarityTransform(SimilarityTransform similarityTransform) {
     refreshHelper.addDependency(similarityTransform);
     refreshHelper.removeDependency(this.similarityTransform);
     this.similarityTransform = similarityTransform;
   }
-
+  
   final boolean isWeighted() {
     return weighted;
   }
-
+  
   /**
-   * <p>Several subclasses in this package implement this method to actually compute the similarity from figures
-   * computed over users or items. Note that the computations in this class "center" the data, such that X and Y's mean
-   * are 0.</p>
-   *
-   * <p>Note that the sum of all X and Y values must then be 0. This value isn't passed down into the standard
-   * similarity computations as a result.</p>
-   *
-   * @param n          total number of users or items
-   * @param sumXY      sum of product of user/item preference values, over all items/users prefererred by both
-   *                   users/items
-   * @param sumX2      sum of the square of user/item preference values, over the first item/user
-   * @param sumY2      sum of the square of the user/item preference values, over the second item/user
-   * @param sumXYdiff2 sum of squares of differences in X and Y values
-   * @return similarity value between -1.0 and 1.0, inclusive, or {@link Double#NaN} if no similarity can be computed
-   *         (e.g. when no items have been rated by both uesrs
+   * <p>
+   * Several subclasses in this package implement this method to actually compute the similarity from figures
+   * computed over users or items. Note that the computations in this class "center" the data, such that X and
+   * Y's mean are 0.
+   * </p>
+   * 
+   * <p>
+   * Note that the sum of all X and Y values must then be 0. This value isn't passed down into the standard
+   * similarity computations as a result.
+   * </p>
+   * 
+   * @param n
+   *          total number of users or items
+   * @param sumXY
+   *          sum of product of user/item preference values, over all items/users prefererred by both
+   *          users/items
+   * @param sumX2
+   *          sum of the square of user/item preference values, over the first item/user
+   * @param sumY2
+   *          sum of the square of the user/item preference values, over the second item/user
+   * @param sumXYdiff2
+   *          sum of squares of differences in X and Y values
+   * @return similarity value between -1.0 and 1.0, inclusive, or {@link Double#NaN} if no similarity can be
+   *         computed (e.g. when no items have been rated by both uesrs
    */
   abstract double computeResult(int n, double sumXY, double sumX2, double sumY2, double sumXYdiff2);
-
+  
   @Override
   public double userSimilarity(long userID1, long userID2) throws TasteException {
     PreferenceArray xPrefs = dataModel.getPreferencesFromUser(userID1);
     PreferenceArray yPrefs = dataModel.getPreferencesFromUser(userID2);
     int xLength = xPrefs.length();
     int yLength = yPrefs.length();
-
-    if (xLength == 0 || yLength == 0) {
+    
+    if ((xLength == 0) || (yLength == 0)) {
       return Double.NaN;
     }
-
+    
     long xIndex = xPrefs.getItemID(0);
     long yIndex = yPrefs.getItemID(0);
     int xPrefIndex = 0;
     int yPrefIndex = 0;
-
+    
     double sumX = 0.0;
     double sumX2 = 0.0;
     double sumY = 0.0;
@@ -153,13 +170,13 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     double sumXY = 0.0;
     double sumXYdiff2 = 0.0;
     int count = 0;
-
+    
     boolean hasInferrer = inferrer != null;
     boolean hasPrefTransform = prefTransform != null;
-
+    
     while (true) {
       int compare = xIndex < yIndex ? -1 : xIndex > yIndex ? 1 : 0;
-      if (hasInferrer || compare == 0) {
+      if (hasInferrer || (compare == 0)) {
         double x;
         double y;
         if (xIndex == yIndex) {
@@ -176,13 +193,15 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
           // as if the other user expressed that preference
           if (compare < 0) {
             // X has a value; infer Y's
-            x = hasPrefTransform ? prefTransform.getTransformedValue(xPrefs.get(xPrefIndex)) : xPrefs.getValue(xPrefIndex);
+            x = hasPrefTransform ? prefTransform.getTransformedValue(xPrefs.get(xPrefIndex)) : xPrefs
+                .getValue(xPrefIndex);
             y = inferrer.inferPreference(userID2, xIndex);
           } else {
             // compare > 0
             // Y has a value; infer X's
             x = inferrer.inferPreference(userID1, yIndex);
-            y = hasPrefTransform ? prefTransform.getTransformedValue(yPrefs.get(yPrefIndex)) : yPrefs.getValue(yPrefIndex);
+            y = hasPrefTransform ? prefTransform.getTransformedValue(yPrefs.get(yPrefIndex)) : yPrefs
+                .getValue(yPrefIndex);
           }
         }
         sumXY += x * y;
@@ -207,9 +226,9 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
         yIndex = yPrefs.getItemID(yPrefIndex);
       }
     }
-
+    
     // "Center" the data. If my math is correct, this'll do it.
-    double n = (double) count;
+    double n = count;
     double meanX = sumX / n;
     double meanY = sumY / n;
     // double centeredSumXY = sumXY - meanY * sumX - meanX * sumY + n * meanX * meanY;
@@ -218,35 +237,35 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     double centeredSumX2 = sumX2 - meanX * sumX;
     // double centeredSumY2 = sumY2 - 2.0 * meanY * sumY + n * meanY * meanY;
     double centeredSumY2 = sumY2 - meanY * sumY;
-
+    
     double result = computeResult(count, centeredSumXY, centeredSumX2, centeredSumY2, sumXYdiff2);
-
+    
     if (similarityTransform != null) {
       result = similarityTransform.transformSimilarity(userID1, userID2, result);
     }
-
+    
     if (!Double.isNaN(result)) {
       result = normalizeWeightResult(result, count, cachedNumItems);
     }
     return result;
   }
-
+  
   @Override
   public final double itemSimilarity(long itemID1, long itemID2) throws TasteException {
     PreferenceArray xPrefs = dataModel.getPreferencesForItem(itemID1);
     PreferenceArray yPrefs = dataModel.getPreferencesForItem(itemID2);
     int xLength = xPrefs.length();
     int yLength = yPrefs.length();
-
-    if (xLength == 0 || yLength == 0) {
+    
+    if ((xLength == 0) || (yLength == 0)) {
       return Double.NaN;
     }
-
+    
     long xIndex = xPrefs.getUserID(0);
     long yIndex = yPrefs.getUserID(0);
     int xPrefIndex = 0;
     int yPrefIndex = 0;
-
+    
     double sumX = 0.0;
     double sumX2 = 0.0;
     double sumY = 0.0;
@@ -254,9 +273,9 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     double sumXY = 0.0;
     double sumXYdiff2 = 0.0;
     int count = 0;
-
+    
     // No, pref inferrers and transforms don't appy here. I think.
-
+    
     while (true) {
       int compare = xIndex < yIndex ? -1 : xIndex > yIndex ? 1 : 0;
       if (compare == 0) {
@@ -285,9 +304,9 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
         yIndex = yPrefs.getUserID(yPrefIndex);
       }
     }
-
+    
     // See comments above on these computations
-    double n = (double) count;
+    double n = count;
     double meanX = sumX / n;
     double meanY = sumY / n;
     // double centeredSumXY = sumXY - meanY * sumX - meanX * sumY + n * meanX * meanY;
@@ -296,19 +315,19 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     double centeredSumX2 = sumX2 - meanX * sumX;
     // double centeredSumY2 = sumY2 - 2.0 * meanY * sumY + n * meanY * meanY;
     double centeredSumY2 = sumY2 - meanY * sumY;
-
+    
     double result = computeResult(count, centeredSumXY, centeredSumX2, centeredSumY2, sumXYdiff2);
-
+    
     if (similarityTransform != null) {
       result = similarityTransform.transformSimilarity(itemID1, itemID2, result);
     }
-
+    
     if (!Double.isNaN(result)) {
       result = normalizeWeightResult(result, count, cachedNumUsers);
     }
     return result;
   }
-
+  
   final double normalizeWeightResult(double result, int count, int num) {
     if (weighted) {
       double scaleFactor = 1.0 - (double) count / (double) (num + 1);
@@ -326,15 +345,15 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     }
     return result;
   }
-
+  
   @Override
   public final void refresh(Collection<Refreshable> alreadyRefreshed) {
     refreshHelper.refresh(alreadyRefreshed);
   }
-
+  
   @Override
   public final String toString() {
     return this.getClass().getSimpleName() + "[dataModel:" + dataModel + ",inferrer:" + inferrer + ']';
   }
-
+  
 }

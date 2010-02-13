@@ -17,6 +17,12 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -33,29 +39,25 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 /**
- * <p>Like {@link ItemAverageRecommender}, except that estimated preferences are adjusted for the users' average
- * preference value. For example, say user X has not rated item Y. Item Y's average preference value is 3.5. User X's
- * average preference value is 4.2, and the average over all preference values is 4.0. User X prefers items 0.2 higher
- * on average, so, the estimated preference for user X, item Y is 3.5 + 0.2 = 3.7.</p>
+ * <p>
+ * Like {@link ItemAverageRecommender}, except that estimated preferences are adjusted for the users' average
+ * preference value. For example, say user X has not rated item Y. Item Y's average preference value is 3.5.
+ * User X's average preference value is 4.2, and the average over all preference values is 4.0. User X prefers
+ * items 0.2 higher on average, so, the estimated preference for user X, item Y is 3.5 + 0.2 = 3.7.
+ * </p>
  */
 public final class ItemUserAverageRecommender extends AbstractRecommender {
-
+  
   private static final Logger log = LoggerFactory.getLogger(ItemUserAverageRecommender.class);
-
+  
   private final FastByIDMap<RunningAverage> itemAverages;
   private final FastByIDMap<RunningAverage> userAverages;
   private final RunningAverage overallAveragePrefValue;
   private boolean averagesBuilt;
   private final ReadWriteLock buildAveragesLock;
   private final RefreshHelper refreshHelper;
-
+  
   public ItemUserAverageRecommender(DataModel dataModel) {
     super(dataModel);
     this.itemAverages = new FastByIDMap<RunningAverage>();
@@ -71,26 +73,26 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
     });
     refreshHelper.addDependency(dataModel);
   }
-
+  
   @Override
-  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer)
-      throws TasteException {
+  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
     if (howMany < 1) {
       throw new IllegalArgumentException("howMany must be at least 1");
     }
-    log.debug("Recommending items for user ID '{}'", userID);
+    ItemUserAverageRecommender.log.debug("Recommending items for user ID '{}'", userID);
     checkAverageDiffsBuilt();
-
+    
     FastIDSet possibleItemIDs = getAllOtherItems(userID);
-
+    
     TopItems.Estimator<Long> estimator = new Estimator(userID);
-
-    List<RecommendedItem> topItems = TopItems.getTopItems(howMany, possibleItemIDs.iterator(), rescorer, estimator);
-
-    log.debug("Recommendations are: {}", topItems);
+    
+    List<RecommendedItem> topItems = TopItems.getTopItems(howMany, possibleItemIDs.iterator(), rescorer,
+      estimator);
+    
+    ItemUserAverageRecommender.log.debug("Recommendations are: {}", topItems);
     return topItems;
   }
-
+  
   @Override
   public float estimatePreference(long userID, long itemID) throws TasteException {
     DataModel dataModel = getDataModel();
@@ -101,7 +103,7 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
     checkAverageDiffsBuilt();
     return doEstimatePreference(userID, itemID);
   }
-
+  
   private float doEstimatePreference(long userID, long itemID) {
     buildAveragesLock.readLock().lock();
     try {
@@ -119,13 +121,13 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
       buildAveragesLock.readLock().unlock();
     }
   }
-
+  
   private void checkAverageDiffsBuilt() throws TasteException {
     if (!averagesBuilt) {
       buildAverageDiffs();
     }
   }
-
+  
   private void buildAverageDiffs() throws TasteException {
     try {
       buildAveragesLock.writeLock().lock();
@@ -138,8 +140,8 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
         for (int i = 0; i < size; i++) {
           long itemID = prefs.getItemID(i);
           float value = prefs.getValue(i);
-          addDatumAndCreateIfNeeded(itemID, value, itemAverages);
-          addDatumAndCreateIfNeeded(userID, value, userAverages);
+          ItemUserAverageRecommender.addDatumAndCreateIfNeeded(itemID, value, itemAverages);
+          ItemUserAverageRecommender.addDatumAndCreateIfNeeded(userID, value, userAverages);
           overallAveragePrefValue.addDatum(value);
         }
       }
@@ -148,10 +150,8 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
       buildAveragesLock.writeLock().unlock();
     }
   }
-
-  private static void addDatumAndCreateIfNeeded(long itemID,
-                                                float value,
-                                                FastByIDMap<RunningAverage> averages) {
+  
+  private static void addDatumAndCreateIfNeeded(long itemID, float value, FastByIDMap<RunningAverage> averages) {
     RunningAverage itemAverage = averages.get(itemID);
     if (itemAverage == null) {
       itemAverage = new FullRunningAverage();
@@ -159,7 +159,7 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
     }
     itemAverage.addDatum(value);
   }
-
+  
   @Override
   public void setPreference(long userID, long itemID, float value) throws TasteException {
     DataModel dataModel = getDataModel();
@@ -194,7 +194,7 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
       buildAveragesLock.writeLock().unlock();
     }
   }
-
+  
   @Override
   public void removePreference(long userID, long itemID) throws TasteException {
     DataModel dataModel = getDataModel();
@@ -219,29 +219,29 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
       }
     }
   }
-
+  
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     refreshHelper.refresh(alreadyRefreshed);
   }
-
+  
   @Override
   public String toString() {
     return "ItemUserAverageRecommender";
   }
-
+  
   private final class Estimator implements TopItems.Estimator<Long> {
-
+    
     private final long userID;
-
+    
     private Estimator(long userID) {
       this.userID = userID;
     }
-
+    
     @Override
     public double estimate(Long itemID) {
       return doEstimatePreference(userID, itemID);
     }
   }
-
+  
 }

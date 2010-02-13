@@ -17,24 +17,24 @@
 
 package org.apache.mahout.cf.taste.hadoop.slopeone;
 
-import org.apache.mahout.cf.taste.hadoop.ItemPrefWritable;
-
 import java.io.Serializable;
 import java.util.Comparator;
 
+import org.apache.mahout.cf.taste.hadoop.ItemPrefWritable;
+
 final class ByItemIDComparator implements Comparator<ItemPrefWritable>, Serializable {
-
+  
   private static final Comparator<ItemPrefWritable> instance = new ByItemIDComparator();
-
+  
   public static Comparator<ItemPrefWritable> getInstance() {
-    return instance;
+    return ByItemIDComparator.instance;
   }
-
+  
   @Override
   public int compare(ItemPrefWritable a, ItemPrefWritable b) {
     long idA = a.getItemID();
     long idB = b.getItemID();
     return idA < idB ? -1 : idA > idB ? 1 : 0;
   }
-
+  
 }

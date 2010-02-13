@@ -17,35 +17,40 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
-/** <p>Extends {@link CompactRunningAverage} to add a running standard deviation computation.</p> */
-public final class CompactRunningAverageAndStdDev extends CompactRunningAverage implements RunningAverageAndStdDev {
-
+/**
+ * <p>
+ * Extends {@link CompactRunningAverage} to add a running standard deviation computation.
+ * </p>
+ */
+public final class CompactRunningAverageAndStdDev extends CompactRunningAverage implements
+    RunningAverageAndStdDev {
+  
   private float stdDev;
   private float sumX2;
-
+  
   public CompactRunningAverageAndStdDev() {
     stdDev = Float.NaN;
   }
-
+  
   @Override
   public synchronized double getStandardDeviation() {
-    return (double) stdDev;
+    return stdDev;
   }
-
+  
   @Override
   public synchronized void addDatum(double datum) {
     super.addDatum(datum);
     sumX2 += (float) (datum * datum);
     recomputeStdDev();
   }
-
+  
   @Override
   public synchronized void removeDatum(double datum) {
     super.removeDatum(datum);
     sumX2 -= (float) (datum * datum);
     recomputeStdDev();
   }
-
+  
   /**
    * @throws UnsupportedOperationException
    */
@@ -53,20 +58,20 @@ public final class CompactRunningAverageAndStdDev extends CompactRunningAverage 
   public void changeDatum(double delta) {
     throw new UnsupportedOperationException();
   }
-
+  
   private synchronized void recomputeStdDev() {
     int count = getCount();
     if (count > 1) {
       double average = getAverage();
-      stdDev = (float) Math.sqrt(((double) sumX2 - average * average * (double) count) / (double) (count - 1));
+      stdDev = (float) Math.sqrt((sumX2 - average * average * count) / (count - 1));
     } else {
       stdDev = Float.NaN;
     }
   }
-
+  
   @Override
   public synchronized String toString() {
     return String.valueOf(String.valueOf(getAverage()) + ',' + stdDev);
   }
-
+  
 }

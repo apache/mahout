@@ -18,26 +18,30 @@
 package org.apache.mahout.cf.taste.recommender;
 
 /**
- * <p>A {@link Rescorer} which operates on {@code long} primitive IDs, rather than
- * arbitrary {@link Object}s. This is provided since most uses of this interface
- * in the framework take IDs (as {@code long}) as an argument, and so this
- * can be used to avoid unnecessary boxing/unboxing.</p>
+ * <p>
+ * A {@link Rescorer} which operates on {@code long} primitive IDs, rather than arbitrary {@link Object}s.
+ * This is provided since most uses of this interface in the framework take IDs (as {@code long}) as an
+ * argument, and so this can be used to avoid unnecessary boxing/unboxing.
+ * </p>
  */
 public interface IDRescorer {
-
+  
   /**
-   * @param ID ID of thing (user, item, etc.) to rescore
-   * @param originalScore original score
+   * @param ID
+   *          ID of thing (user, item, etc.) to rescore
+   * @param originalScore
+   *          original score
    * @return modified score, or {@link Double#NaN} to indicate that this should be excluded entirely
    */
   double rescore(long ID, double originalScore);
-
+  
   /**
    * Returns <code>true</code> to exclude the given thing.
-   *
-   * @param ID ID of thing (user, item, etc.) to rescore
+   * 
+   * @param ID
+   *          ID of thing (user, item, etc.) to rescore
    * @return <code>true</code> to exclude, <code>false</code> otherwise
    */
   boolean isFiltered(long ID);
-
+  
 }

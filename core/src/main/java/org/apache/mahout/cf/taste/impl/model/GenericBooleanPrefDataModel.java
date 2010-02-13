@@ -17,6 +17,12 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.Refreshable;
@@ -28,39 +34,37 @@ import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 /**
- * <p>A simple {@link DataModel} which uses a given {@link List} of users as its data source. This
- * implementation is mostly useful for small experiments and is not recommended for contexts where performance is
- * important.</p>
+ * <p>
+ * A simple {@link DataModel} which uses a given {@link List} of users as its data source. This implementation
+ * is mostly useful for small experiments and is not recommended for contexts where performance is important.
+ * </p>
  */
 public final class GenericBooleanPrefDataModel implements DataModel, Serializable {
-
+  
   private final long[] userIDs;
   private final FastByIDMap<FastIDSet> preferenceFromUsers;
   private final long[] itemIDs;
   private final FastByIDMap<FastIDSet> preferenceForItems;
-
+  
   /**
-   * <p>Creates a new {@link GenericDataModel} from the given users (and their preferences). This {@link
-   * DataModel} retains all this information in memory and is effectively immutable.</p>
-   *
-   * @param userData users to include
+   * <p>
+   * Creates a new {@link GenericDataModel} from the given users (and their preferences). This
+   * {@link DataModel} retains all this information in memory and is effectively immutable.
+   * </p>
+   * 
+   * @param userData
+   *          users to include
    */
   public GenericBooleanPrefDataModel(FastByIDMap<FastIDSet> userData) {
     if (userData == null) {
       throw new IllegalArgumentException("userData is null");
     }
-
+    
     this.preferenceFromUsers = userData;
     this.preferenceForItems = new FastByIDMap<FastIDSet>();
     FastIDSet itemIDSet = new FastIDSet();
-    for (Map.Entry<Long, FastIDSet> entry : preferenceFromUsers.entrySet()) {
+    for (Map.Entry<Long,FastIDSet> entry : preferenceFromUsers.entrySet()) {
       long userID = entry.getKey();
       FastIDSet itemIDs = entry.getValue();
       itemIDSet.addAll(itemIDs);
@@ -75,11 +79,11 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
         userIDs.add(userID);
       }
     }
-
+    
     this.itemIDs = itemIDSet.toArray();
     itemIDSet = null; // Might help GC -- this is big
     Arrays.sort(itemIDs);
-
+    
     this.userIDs = new long[userData.size()];
     int i = 0;
     LongPrimitiveIterator it = userData.keySetIterator();
@@ -87,20 +91,24 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
       userIDs[i++] = it.next();
     }
     Arrays.sort(userIDs);
-
+    
   }
-
+  
   /**
-   * <p>Creates a new {@link GenericDataModel} containing an immutable copy of the data from another given {@link
-   * DataModel}.</p>
-   *
-   * @param dataModel {@link DataModel} to copy
-   * @throws TasteException if an error occurs while retrieving the other {@link DataModel}'s users
+   * <p>
+   * Creates a new {@link GenericDataModel} containing an immutable copy of the data from another given
+   * {@link DataModel}.
+   * </p>
+   * 
+   * @param dataModel
+   *          {@link DataModel} to copy
+   * @throws TasteException
+   *           if an error occurs while retrieving the other {@link DataModel}'s users
    */
   public GenericBooleanPrefDataModel(DataModel dataModel) throws TasteException {
-    this(toDataMap(dataModel));
+    this(GenericBooleanPrefDataModel.toDataMap(dataModel));
   }
-
+  
   private static FastByIDMap<FastIDSet> toDataMap(DataModel dataModel) throws TasteException {
     FastByIDMap<FastIDSet> data = new FastByIDMap<FastIDSet>(dataModel.getNumUsers());
     LongPrimitiveIterator it = dataModel.getUserIDs();
@@ -110,9 +118,9 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
     }
     return data;
   }
-
+  
   public static FastByIDMap<FastIDSet> toDataMap(FastByIDMap<PreferenceArray> data) {
-    for (Map.Entry<Long, Object> entry : ((FastByIDMap<Object>) (FastByIDMap<?>) data).entrySet()) {
+    for (Map.Entry<Long,Object> entry : ((FastByIDMap<Object>) (FastByIDMap<?>) data).entrySet()) {
       PreferenceArray prefArray = (PreferenceArray) entry.getValue();
       int size = prefArray.length();
       FastIDSet itemIDs = new FastIDSet(size);
@@ -123,20 +131,23 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
     }
     return (FastByIDMap<FastIDSet>) (FastByIDMap<?>) data;
   }
-
+  
   /**
    * This is used mostly internally to the framework, and shouldn't be relied upon otherwise.
    */
   public FastByIDMap<FastIDSet> getRawUserData() {
     return this.preferenceFromUsers;
   }
-
+  
   @Override
   public LongPrimitiveArrayIterator getUserIDs() {
     return new LongPrimitiveArrayIterator(userIDs);
   }
-
-  /** @throws NoSuchUserException if there is no such user */
+  
+  /**
+   * @throws NoSuchUserException
+   *           if there is no such user
+   */
   @Override
   public PreferenceArray getPreferencesFromUser(long userID) throws NoSuchUserException {
     FastIDSet itemIDs = preferenceFromUsers.get(userID);
@@ -153,7 +164,7 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
     }
     return prefArray;
   }
-
+  
   @Override
   public FastIDSet getItemIDsFromUser(long userID) throws TasteException {
     FastIDSet itemIDs = preferenceFromUsers.get(userID);
@@ -162,12 +173,12 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
     }
     return itemIDs;
   }
-
+  
   @Override
   public LongPrimitiveArrayIterator getItemIDs() {
     return new LongPrimitiveArrayIterator(itemIDs);
   }
-
+  
   @Override
   public PreferenceArray getPreferencesForItem(long itemID) throws NoSuchItemException {
     FastIDSet userIDs = preferenceForItems.get(itemID);
@@ -184,7 +195,7 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
     }
     return prefArray;
   }
-
+  
   @Override
   public Float getPreferenceValue(long userID, long itemID) throws NoSuchUserException {
     FastIDSet itemIDs = preferenceFromUsers.get(userID);
@@ -196,17 +207,17 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
     }
     return null;
   }
-
+  
   @Override
   public int getNumItems() {
     return itemIDs.length;
   }
-
+  
   @Override
   public int getNumUsers() {
     return userIDs.length;
   }
-
+  
   @Override
   public int getNumUsersWithPreferenceFor(long... itemIDs) throws NoSuchItemException {
     if (itemIDs.length == 0) {
@@ -219,7 +230,7 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
     FastIDSet intersection = new FastIDSet(userIDs.size());
     intersection.addAll(userIDs);
     int i = 1;
-    while (!intersection.isEmpty() && i < itemIDs.length) {
+    while (!intersection.isEmpty() && (i < itemIDs.length)) {
       userIDs = preferenceForItems.get(itemIDs[i]);
       if (userIDs == null) {
         throw new NoSuchItemException();
@@ -229,22 +240,22 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
     }
     return intersection.size();
   }
-
+  
   @Override
   public void removePreference(long userID, long itemID) {
     throw new UnsupportedOperationException();
   }
-
+  
   @Override
   public void setPreference(long userID, long itemID, float value) {
     throw new UnsupportedOperationException();
   }
-
+  
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    // Does nothing
+  // Does nothing
   }
-
+  
   @Override
   public String toString() {
     StringBuilder result = new StringBuilder(200);
@@ -261,5 +272,5 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
     result.append(']');
     return result.toString();
   }
-
+  
 }

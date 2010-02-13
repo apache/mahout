@@ -17,6 +17,9 @@
 
 package org.apache.mahout.cf.taste.hadoop.slopeone;
 
+import java.io.IOException;
+import java.util.Iterator;
+
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -24,17 +27,13 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.hadoop.ItemItemWritable;
 
-import java.io.IOException;
-import java.util.Iterator;
-
-public final class SlopeOneDiffsToAveragesReducer
-    extends MapReduceBase
-    implements Reducer<ItemItemWritable, FloatWritable, ItemItemWritable, FloatWritable> {
-
+public final class SlopeOneDiffsToAveragesReducer extends MapReduceBase implements
+    Reducer<ItemItemWritable,FloatWritable,ItemItemWritable,FloatWritable> {
+  
   @Override
   public void reduce(ItemItemWritable key,
                      Iterator<FloatWritable> values,
-                     OutputCollector<ItemItemWritable, FloatWritable> output,
+                     OutputCollector<ItemItemWritable,FloatWritable> output,
                      Reporter reporter) throws IOException {
     int count = 0;
     double total = 0.0;

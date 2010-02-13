@@ -17,6 +17,9 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
+import java.io.IOException;
+import java.util.Iterator;
+
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -26,17 +29,13 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-import java.io.IOException;
-import java.util.Iterator;
-
-public final class UserVectorToCooccurrenceMapper
-    extends MapReduceBase
-    implements Mapper<LongWritable, VectorWritable, IntWritable, IntWritable> {
-
+public final class UserVectorToCooccurrenceMapper extends MapReduceBase implements
+    Mapper<LongWritable,VectorWritable,IntWritable,IntWritable> {
+  
   @Override
   public void map(LongWritable userID,
                   VectorWritable userVector,
-                  OutputCollector<IntWritable, IntWritable> output,
+                  OutputCollector<IntWritable,IntWritable> output,
                   Reporter reporter) throws IOException {
     Iterator<Vector.Element> it = userVector.get().iterateNonZero();
     while (it.hasNext()) {
@@ -53,5 +52,5 @@ public final class UserVectorToCooccurrenceMapper
       }
     }
   }
-
+  
 }

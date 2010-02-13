@@ -17,6 +17,11 @@
 
 package org.apache.mahout.cf.taste.impl.eval;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.eval.DataModelBuilder;
@@ -28,8 +33,6 @@ import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
-import org.apache.mahout.cf.taste.recommender.IDRescorer;
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
@@ -37,40 +40,39 @@ import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
+import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.apache.mahout.common.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
-
 /**
- * <p>For each user, these implementation determine the top <code>n</code> preferences, then evaluate the IR
- * statistics based on a {@link DataModel} that does not have these values. This number <code>n</code> is the "at"
- * value, as in "precision at 5". For example, this would mean precision evaluated by removing the top 5 preferences for
- * a user and then finding the percentage of those 5 items included in the top 5 recommendations for
- * that user.</p>
+ * <p>
+ * For each user, these implementation determine the top <code>n</code> preferences, then evaluate the IR
+ * statistics based on a {@link DataModel} that does not have these values. This number <code>n</code> is the
+ * "at" value, as in "precision at 5". For example, this would mean precision evaluated by removing the top 5
+ * preferences for a user and then finding the percentage of those 5 items included in the top 5
+ * recommendations for that user.
+ * </p>
  */
 public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRStatsEvaluator {
-
+  
   private static final Logger log = LoggerFactory.getLogger(GenericRecommenderIRStatsEvaluator.class);
-
+  
   /**
    * Pass as "relevanceThreshold" argument to
-   * {@link #evaluate(RecommenderBuilder, DataModelBuilder, DataModel, IDRescorer, int, double, double)}
-   * to have it attempt to compute a reasonable threshold. Note that this will impact performance.
+   * {@link #evaluate(RecommenderBuilder, DataModelBuilder, DataModel, IDRescorer, int, double, double)} to
+   * have it attempt to compute a reasonable threshold. Note that this will impact performance.
    */
   public static final double CHOOSE_THRESHOLD = Double.NaN;
-
+  
   private final Random random;
-
+  
   public GenericRecommenderIRStatsEvaluator() {
     random = RandomUtils.getRandom();
   }
-
+  
   @Override
   public IRStatistics evaluate(RecommenderBuilder recommenderBuilder,
                                DataModelBuilder dataModelBuilder,
@@ -79,7 +81,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
                                int at,
                                double relevanceThreshold,
                                double evaluationPercentage) throws TasteException {
-
+    
     if (recommenderBuilder == null) {
       throw new IllegalArgumentException("recommenderBuilder is null");
     }
@@ -89,10 +91,10 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
     if (at < 1) {
       throw new IllegalArgumentException("at must be at least 1");
     }
-    if (Double.isNaN(evaluationPercentage) || evaluationPercentage <= 0.0 || evaluationPercentage > 1.0) {
+    if (Double.isNaN(evaluationPercentage) || (evaluationPercentage <= 0.0) || (evaluationPercentage > 1.0)) {
       throw new IllegalArgumentException("Invalid evaluationPercentage: " + evaluationPercentage);
     }
-
+    
     int numItems = dataModel.getNumItems();
     RunningAverage precision = new FullRunningAverage();
     RunningAverage recall = new FullRunningAverage();
@@ -109,35 +111,36 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
           // Really not enough prefs to meaningfully evaluate this user
           continue;
         }
-
+        
         // List some most-preferred items that would count as (most) "relevant" results
-        double theRelevanceThreshold = Double.isNaN(relevanceThreshold) ? computeThreshold(prefs) : relevanceThreshold;
+        double theRelevanceThreshold = Double.isNaN(relevanceThreshold) ? GenericRecommenderIRStatsEvaluator
+            .computeThreshold(prefs) : relevanceThreshold;
         prefs.sortByValueReversed();
-        for (int i = 0; i < size && relevantItemIDs.size() < at; i++) {
+        for (int i = 0; (i < size) && (relevantItemIDs.size() < at); i++) {
           if (prefs.getValue(i) >= theRelevanceThreshold) {
             relevantItemIDs.add(prefs.getItemID(i));
           }
         }
         int numRelevantItems = relevantItemIDs.size();
         if (numRelevantItems > 0) {
-          FastByIDMap<PreferenceArray> trainingUsers =
-            new FastByIDMap<PreferenceArray>(dataModel.getNumUsers());
+          FastByIDMap<PreferenceArray> trainingUsers = new FastByIDMap<PreferenceArray>(dataModel
+              .getNumUsers());
           LongPrimitiveIterator it2 = dataModel.getUserIDs();
           while (it2.hasNext()) {
-            processOtherUser(userID, relevantItemIDs, trainingUsers, it2.nextLong(), dataModel);
+            GenericRecommenderIRStatsEvaluator.processOtherUser(userID, relevantItemIDs, trainingUsers, it2
+                .nextLong(), dataModel);
           }
-
-          DataModel trainingModel = dataModelBuilder == null ?
-            new GenericDataModel(trainingUsers) :
-            dataModelBuilder.buildDataModel(trainingUsers);
+          
+          DataModel trainingModel = dataModelBuilder == null ? new GenericDataModel(trainingUsers)
+              : dataModelBuilder.buildDataModel(trainingUsers);
           Recommender recommender = recommenderBuilder.buildRecommender(trainingModel);
-
+          
           try {
             trainingModel.getPreferencesFromUser(userID);
           } catch (NoSuchUserException nsee) {
             continue; // Oops we excluded all prefs for the user -- just move on
           }
-
+          
           int intersectionSize = 0;
           List<RecommendedItem> recommendedItems = recommender.recommend(userID, at, rescorer);
           for (RecommendedItem recommendedItem : recommendedItems) {
@@ -151,22 +154,22 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
           }
           recall.addDatum((double) intersectionSize / (double) numRelevantItems);
           if (numRelevantItems < size) {
-            fallOut.addDatum((double) (numRecommendedItems - intersectionSize) /
-                (double) (numItems - numRelevantItems));
+            fallOut.addDatum((double) (numRecommendedItems - intersectionSize)
+                             / (double) (numItems - numRelevantItems));
           }
-
+          
           long end = System.currentTimeMillis();
-          log.info("Evaluated with user {} in {}ms", userID, (end-start));
-          log.info("Precision/recall/fall-out: {} / {} / {}", new Object[]{
-              precision.getAverage(), recall.getAverage(), fallOut.getAverage()
-          });
+          GenericRecommenderIRStatsEvaluator.log
+              .info("Evaluated with user {} in {}ms", userID, (end - start));
+          GenericRecommenderIRStatsEvaluator.log.info("Precision/recall/fall-out: {} / {} / {}",
+            new Object[] {precision.getAverage(), recall.getAverage(), fallOut.getAverage()});
         }
       }
     }
-
+    
     return new IRStatisticsImpl(precision.getAverage(), recall.getAverage(), fallOut.getAverage());
   }
-
+  
   private static void processOtherUser(long id,
                                        FastIDSet relevantItemIDs,
                                        FastByIDMap<PreferenceArray> trainingUsers,
@@ -185,13 +188,13 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
         }
       }
       if (!prefs2.isEmpty()) {
-       trainingUsers.put(userID2, new GenericUserPreferenceArray(prefs2));
+        trainingUsers.put(userID2, new GenericUserPreferenceArray(prefs2));
       }
     } else {
       trainingUsers.put(userID2, prefs2Array);
     }
   }
-
+  
   private static double computeThreshold(PreferenceArray prefs) {
     if (prefs.length() < 2) {
       // Not enough data points -- return a threshold that allows everything
@@ -204,5 +207,5 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
     }
     return stdDev.getAverage() + stdDev.getStandardDeviation();
   }
-
+  
 }

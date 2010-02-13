@@ -17,46 +17,46 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
-import org.apache.mahout.common.RandomUtils;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import org.apache.mahout.common.RandomUtils;
+
 /**
  * @see FastByIDMap
  */
 public final class FastIDSet implements Serializable, Cloneable {
-
+  
   private static final double ALLOWED_LOAD_FACTOR = 1.5;
-
+  
   /** Dummy object used to represent a key that has been removed. */
   private static final long REMOVED = Long.MAX_VALUE;
   private static final long NULL = Long.MIN_VALUE;
-
+  
   private long[] keys;
   private int numEntries;
   private int numSlotsUsed;
-
+  
   /** Creates a new {@link FastIDSet} with default capacity. */
   public FastIDSet() {
     this(2);
   }
-
+  
   public FastIDSet(int size) {
     if (size < 0) {
       throw new IllegalArgumentException("size must be at least 0");
     }
-    int max = (int) (RandomUtils.MAX_INT_SMALLER_TWIN_PRIME / ALLOWED_LOAD_FACTOR);
+    int max = (int) (RandomUtils.MAX_INT_SMALLER_TWIN_PRIME / FastIDSet.ALLOWED_LOAD_FACTOR);
     if (size >= max) {
       throw new IllegalArgumentException("size must be less than " + max);
     }
-    int hashSize = RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * size));
+    int hashSize = RandomUtils.nextTwinPrime((int) (FastIDSet.ALLOWED_LOAD_FACTOR * size));
     keys = new long[hashSize];
-    Arrays.fill(keys, NULL);
+    Arrays.fill(keys, FastIDSet.NULL);
   }
-
+  
   /**
    * @see #findForAdd(long)
    */
@@ -67,7 +67,7 @@ public final class FastIDSet implements Serializable, Cloneable {
     int jump = 1 + theHashCode % (hashSize - 2);
     int index = theHashCode % hashSize;
     long currentKey = keys[index];
-    while (currentKey != NULL && key != currentKey) { // note: true when currentKey == REMOVED
+    while ((currentKey != FastIDSet.NULL) && (key != currentKey)) { // note: true when currentKey == REMOVED
       if (index < jump) {
         index += hashSize - jump;
       } else {
@@ -77,7 +77,7 @@ public final class FastIDSet implements Serializable, Cloneable {
     }
     return index;
   }
-
+  
   /**
    * @see #find(long)
    */
@@ -88,7 +88,8 @@ public final class FastIDSet implements Serializable, Cloneable {
     int jump = 1 + theHashCode % (hashSize - 2);
     int index = theHashCode % hashSize;
     long currentKey = keys[index];
-    while (currentKey != NULL && currentKey != REMOVED && key != currentKey) { // Different here
+    while ((currentKey != FastIDSet.NULL) && (currentKey != FastIDSet.REMOVED) && (key != currentKey)) { // Different
+                                                                                                         // here
       if (index < jump) {
         index += hashSize - jump;
       } else {
@@ -98,27 +99,27 @@ public final class FastIDSet implements Serializable, Cloneable {
     }
     return index;
   }
-
+  
   public int size() {
     return numEntries;
   }
-
+  
   public boolean isEmpty() {
     return numEntries == 0;
   }
-
+  
   public boolean contains(long key) {
-    return key != NULL && key != REMOVED && keys[find(key)] != NULL;
+    return (key != FastIDSet.NULL) && (key != FastIDSet.REMOVED) && (keys[find(key)] != FastIDSet.NULL);
   }
-
+  
   public boolean add(long key) {
-    if (key == NULL || key == REMOVED) {
+    if ((key == FastIDSet.NULL) || (key == FastIDSet.REMOVED)) {
       throw new IllegalArgumentException();
     }
     // If less than half the slots are open, let's clear it up
-    if (numSlotsUsed * ALLOWED_LOAD_FACTOR >= keys.length) {
+    if (numSlotsUsed * FastIDSet.ALLOWED_LOAD_FACTOR >= keys.length) {
       // If over half the slots used are actual entries, let's grow
-      if (numEntries * ALLOWED_LOAD_FACTOR >= numSlotsUsed) {
+      if (numEntries * FastIDSet.ALLOWED_LOAD_FACTOR >= numSlotsUsed) {
         growAndRehash();
       } else {
         // Otherwise just rehash to clear REMOVED entries and don't grow
@@ -131,43 +132,43 @@ public final class FastIDSet implements Serializable, Cloneable {
     if (keyIndex != key) {
       keys[index] = key;
       numEntries++;
-      if (keyIndex == NULL) {
+      if (keyIndex == FastIDSet.NULL) {
         numSlotsUsed++;
       }
       return true;
     }
     return false;
   }
-
+  
   public LongPrimitiveIterator iterator() {
     return new KeyIterator();
   }
-
+  
   public long[] toArray() {
     long[] result = new long[numEntries];
     for (int i = 0, position = 0; i < result.length; i++) {
-      while (keys[position] == NULL || keys[position] == REMOVED) {
+      while ((keys[position] == FastIDSet.NULL) || (keys[position] == FastIDSet.REMOVED)) {
         position++;
       }
       result[i] = keys[position++];
     }
     return result;
   }
-
+  
   public boolean remove(long key) {
-    if (key == NULL || key == REMOVED) {
+    if ((key == FastIDSet.NULL) || (key == FastIDSet.REMOVED)) {
       return false;
     }
     int index = find(key);
-    if (keys[index] == NULL) {
+    if (keys[index] == FastIDSet.NULL) {
       return false;
     } else {
-      keys[index] = REMOVED;
+      keys[index] = FastIDSet.REMOVED;
       numEntries--;
       return true;
     }
   }
-
+  
   public boolean addAll(long[] c) {
     boolean changed = false;
     for (long k : c) {
@@ -177,17 +178,17 @@ public final class FastIDSet implements Serializable, Cloneable {
     }
     return changed;
   }
-
+  
   public boolean addAll(FastIDSet c) {
     boolean changed = false;
     for (long k : c.keys) {
-      if (k != NULL && k != REMOVED && add(k)) {
+      if ((k != FastIDSet.NULL) && (k != FastIDSet.REMOVED) && add(k)) {
         changed = true;
       }
     }
     return changed;
   }
-
+  
   public boolean removeAll(long[] c) {
     boolean changed = false;
     for (long o : c) {
@@ -197,78 +198,79 @@ public final class FastIDSet implements Serializable, Cloneable {
     }
     return changed;
   }
-
+  
   public boolean removeAll(FastIDSet c) {
     boolean changed = false;
     for (long k : c.keys) {
-      if (k != NULL && k != REMOVED && remove(k)) {
+      if ((k != FastIDSet.NULL) && (k != FastIDSet.REMOVED) && remove(k)) {
         changed = true;
       }
     }
     return changed;
   }
-
+  
   public boolean retainAll(FastIDSet c) {
     boolean changed = false;
     for (int i = 0; i < keys.length; i++) {
       long k = keys[i];
-      if (k != NULL && k != REMOVED && !c.contains(k)) {
-        keys[i] = REMOVED;
+      if ((k != FastIDSet.NULL) && (k != FastIDSet.REMOVED) && !c.contains(k)) {
+        keys[i] = FastIDSet.REMOVED;
         numEntries--;
         changed = true;
       }
     }
     return changed;
   }
-
+  
   public void clear() {
     numEntries = 0;
     numSlotsUsed = 0;
-    Arrays.fill(keys, NULL);
+    Arrays.fill(keys, FastIDSet.NULL);
   }
-
+  
   private void growAndRehash() {
-    if (keys.length * ALLOWED_LOAD_FACTOR >= RandomUtils.MAX_INT_SMALLER_TWIN_PRIME) {
+    if (keys.length * FastIDSet.ALLOWED_LOAD_FACTOR >= RandomUtils.MAX_INT_SMALLER_TWIN_PRIME) {
       throw new IllegalStateException("Can't grow any more");
     }
-    rehash(RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * keys.length)));
+    rehash(RandomUtils.nextTwinPrime((int) (FastIDSet.ALLOWED_LOAD_FACTOR * keys.length)));
   }
-
+  
   public void rehash() {
-    rehash(RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * numEntries)));
+    rehash(RandomUtils.nextTwinPrime((int) (FastIDSet.ALLOWED_LOAD_FACTOR * numEntries)));
   }
-
+  
   private void rehash(int newHashSize) {
     long[] oldKeys = keys;
     numEntries = 0;
     numSlotsUsed = 0;
     keys = new long[newHashSize];
-    Arrays.fill(keys, NULL);
+    Arrays.fill(keys, FastIDSet.NULL);
     int length = oldKeys.length;
     for (int i = 0; i < length; i++) {
       long key = oldKeys[i];
-      if (key != NULL && key != REMOVED) {
+      if ((key != FastIDSet.NULL) && (key != FastIDSet.REMOVED)) {
         add(key);
       }
     }
   }
-
+  
   /**
    * Convenience method to quickly compute just the size of the intersection with another {@link FastIDSet}.
-   *
-   * @param other {@link FastIDSet} to intersect with
+   * 
+   * @param other
+   *          {@link FastIDSet} to intersect with
    * @return number of elements in intersection
    */
   public int intersectionSize(FastIDSet other) {
     int count = 0;
     for (long key : other.keys) {
-      if (key != NULL && key != REMOVED && keys[find(key)] != NULL) {
+      if ((key != FastIDSet.NULL) && (key != FastIDSet.REMOVED) && (keys[find(key)] != FastIDSet.NULL)) {
         count++;
       }
     }
     return count;
   }
-
+  
   @Override
   public FastIDSet clone() {
     FastIDSet clone;
@@ -280,7 +282,7 @@ public final class FastIDSet implements Serializable, Cloneable {
     clone.keys = keys.clone();
     return clone;
   }
-
+  
   @Override
   public String toString() {
     if (isEmpty()) {
@@ -289,25 +291,25 @@ public final class FastIDSet implements Serializable, Cloneable {
     StringBuilder result = new StringBuilder();
     result.append('[');
     for (long key : keys) {
-      if (key != NULL && key != REMOVED) {
+      if ((key != FastIDSet.NULL) && (key != FastIDSet.REMOVED)) {
         result.append(key).append(',');
       }
     }
     result.setCharAt(result.length() - 1, ']');
     return result.toString();
   }
-
+  
   private final class KeyIterator extends AbstractLongPrimitiveIterator {
-
+    
     private int position;
     private int lastNext = -1;
-
+    
     @Override
     public boolean hasNext() {
       goToNext();
       return position < keys.length;
     }
-
+    
     @Override
     public long nextLong() {
       goToNext();
@@ -317,7 +319,7 @@ public final class FastIDSet implements Serializable, Cloneable {
       }
       return keys[position++];
     }
-
+    
     @Override
     public long peek() {
       goToNext();
@@ -326,14 +328,15 @@ public final class FastIDSet implements Serializable, Cloneable {
       }
       return keys[position];
     }
-
+    
     private void goToNext() {
       int length = keys.length;
-      while (position < length && (keys[position] == NULL || keys[position] == REMOVED)) {
+      while ((position < length)
+             && ((keys[position] == FastIDSet.NULL) || (keys[position] == FastIDSet.REMOVED))) {
         position++;
       }
     }
-
+    
     @Override
     public void remove() {
       if (lastNext >= keys.length) {
@@ -342,19 +345,19 @@ public final class FastIDSet implements Serializable, Cloneable {
       if (lastNext < 0) {
         throw new IllegalStateException();
       }
-      keys[lastNext] = REMOVED;
+      keys[lastNext] = FastIDSet.REMOVED;
       numEntries--;
     }
-
+    
     public Iterator<Long> iterator() {
       return new KeyIterator();
     }
-
+    
     @Override
     public void skip(int n) {
       position += n;
     }
-
+    
   }
-
+  
 }

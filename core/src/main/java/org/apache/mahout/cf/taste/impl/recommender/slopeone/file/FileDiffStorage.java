@@ -17,6 +17,15 @@
 
 package org.apache.mahout.cf.taste.impl.recommender.slopeone.file;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
@@ -31,32 +40,26 @@ import org.apache.mahout.common.FileLineIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 /**
- * <p>{@link DiffStorage} which reads pre-computed diffs from a file and stores
- * in memory. The file should have one diff per line:</p>
- *
+ * <p>
+ * {@link DiffStorage} which reads pre-computed diffs from a file and stores in memory. The file should have
+ * one diff per line:
+ * </p>
+ * 
  * {@code itemID1,itemID2,diff}
- *
- * <p>Commas or tabs can be delimiters. This is intended for use in conjuction
- * with the output of
- * {@link org.apache.mahout.cf.taste.hadoop.slopeone.SlopeOneAverageDiffsJob}.</p>
+ * 
+ * <p>
+ * Commas or tabs can be delimiters. This is intended for use in conjuction with the output of
+ * {@link org.apache.mahout.cf.taste.hadoop.slopeone.SlopeOneAverageDiffsJob}.
+ * </p>
  */
 public final class FileDiffStorage implements DiffStorage {
-
+  
   private static final Logger log = LoggerFactory.getLogger(FileDiffStorage.class);
-
+  
   private static final long MIN_RELOAD_INTERVAL_MS = 60 * 1000L; // 1 minute?
   private static final char COMMENT_CHAR = '#';
-
+  
   private final File dataFile;
   private long lastModified;
   private boolean loaded;
@@ -64,11 +67,14 @@ public final class FileDiffStorage implements DiffStorage {
   private final FastByIDMap<FastByIDMap<RunningAverage>> averageDiffs;
   private final FastIDSet allRecommendableItemIDs;
   private final ReadWriteLock buildAverageDiffsLock;
-
+  
   /**
-   * @param dataFile diffs file
-   * @param maxEntries maximum number of diffs to store
-   * @throws FileNotFoundException if data file does not exist or is a directory
+   * @param dataFile
+   *          diffs file
+   * @param maxEntries
+   *          maximum number of diffs to store
+   * @throws FileNotFoundException
+   *           if data file does not exist or is a directory
    */
   public FileDiffStorage(File dataFile, long maxEntries) throws FileNotFoundException {
     if (dataFile == null) {
@@ -80,9 +86,9 @@ public final class FileDiffStorage implements DiffStorage {
     if (maxEntries <= 0L) {
       throw new IllegalArgumentException("maxEntries must be positive");
     }
-
-    log.info("Creating FileDataModel for file {}", dataFile);
-
+    
+    FileDiffStorage.log.info("Creating FileDataModel for file {}", dataFile);
+    
     this.dataFile = dataFile.getAbsoluteFile();
     this.lastModified = dataFile.lastModified();
     this.maxEntries = maxEntries;
@@ -90,17 +96,17 @@ public final class FileDiffStorage implements DiffStorage {
     this.allRecommendableItemIDs = new FastIDSet();
     this.buildAverageDiffsLock = new ReentrantReadWriteLock();
   }
-
+  
   private void buildDiffs() {
     if (buildAverageDiffsLock.writeLock().tryLock()) {
       try {
-
+        
         averageDiffs.clear();
         allRecommendableItemIDs.clear();
-
+        
         FileLineIterator iterator = new FileLineIterator(dataFile, false);
         String firstLine = iterator.peek();
-        while (firstLine.length() == 0 || firstLine.charAt(0) == COMMENT_CHAR) {
+        while ((firstLine.length() == 0) || (firstLine.charAt(0) == FileDiffStorage.COMMENT_CHAR)) {
           iterator.next();
           firstLine = iterator.peek();
         }
@@ -109,50 +115,50 @@ public final class FileDiffStorage implements DiffStorage {
         while (iterator.hasNext()) {
           averageCount = processLine(iterator.next(), delimiter, averageCount);
         }
-
+        
         pruneInconsequentialDiffs();
         updateAllRecommendableItems();
-
+        
       } catch (IOException ioe) {
-        log.warn("Exception while reloading", ioe);
+        FileDiffStorage.log.warn("Exception while reloading", ioe);
       } finally {
         buildAverageDiffsLock.writeLock().unlock();
       }
     }
   }
-
+  
   private long processLine(String line, char delimiter, long averageCount) {
-
-    if (line.length() == 0 || line.charAt(0) == COMMENT_CHAR) {
+    
+    if ((line.length() == 0) || (line.charAt(0) == FileDiffStorage.COMMENT_CHAR)) {
       return averageCount;
     }
-
-    int delimiterOne = line.indexOf((int) delimiter);
+    
+    int delimiterOne = line.indexOf(delimiter);
     if (delimiterOne < 0) {
       throw new IllegalArgumentException("Bad line: " + line);
     }
-    int delimiterTwo = line.indexOf((int) delimiter, delimiterOne + 1);
+    int delimiterTwo = line.indexOf(delimiter, delimiterOne + 1);
     if (delimiterTwo < 0) {
       throw new IllegalArgumentException("Bad line: " + line);
     }
-
+    
     long itemID1 = Long.parseLong(line.substring(0, delimiterOne));
     long itemID2 = Long.parseLong(line.substring(delimiterOne + 1, delimiterTwo));
     double diff = Double.parseDouble(line.substring(delimiterTwo + 1));
-
+    
     if (itemID1 > itemID2) {
       long temp = itemID1;
       itemID1 = itemID2;
       itemID2 = temp;
     }
-
+    
     FastByIDMap<RunningAverage> level1Map = averageDiffs.get(itemID1);
     if (level1Map == null) {
       level1Map = new FastByIDMap<RunningAverage>();
       averageDiffs.put(itemID1, level1Map);
     }
     RunningAverage average = level1Map.get(itemID2);
-    if (average == null && averageCount < maxEntries) {
+    if ((average == null) && (averageCount < maxEntries)) {
       average = new FullRunningAverage();
       level1Map.put(itemID2, average);
       averageCount++;
@@ -160,20 +166,20 @@ public final class FileDiffStorage implements DiffStorage {
     if (average != null) {
       average.addDatum(diff);
     }
-
+    
     allRecommendableItemIDs.add(itemID1);
     allRecommendableItemIDs.add(itemID2);
-
+    
     return averageCount;
   }
-
+  
   private void pruneInconsequentialDiffs() {
     // Go back and prune inconsequential diffs. "Inconsequential" means, here, only represented by one
     // data point, so possibly unreliable
-    Iterator<Map.Entry<Long, FastByIDMap<RunningAverage>>> it1 = averageDiffs.entrySet().iterator();
+    Iterator<Map.Entry<Long,FastByIDMap<RunningAverage>>> it1 = averageDiffs.entrySet().iterator();
     while (it1.hasNext()) {
       FastByIDMap<RunningAverage> map = it1.next().getValue();
-      Iterator<Map.Entry<Long, RunningAverage>> it2 = map.entrySet().iterator();
+      Iterator<Map.Entry<Long,RunningAverage>> it2 = map.entrySet().iterator();
       while (it2.hasNext()) {
         RunningAverage average = it2.next().getValue();
         if (average.getCount() <= 1) {
@@ -188,9 +194,9 @@ public final class FileDiffStorage implements DiffStorage {
     }
     averageDiffs.rehash();
   }
-
+  
   private void updateAllRecommendableItems() {
-    for (Map.Entry<Long, FastByIDMap<RunningAverage>> entry : averageDiffs.entrySet()) {
+    for (Map.Entry<Long,FastByIDMap<RunningAverage>> entry : averageDiffs.entrySet()) {
       allRecommendableItemIDs.add(entry.getKey());
       LongPrimitiveIterator it = entry.getValue().keySetIterator();
       while (it.hasNext()) {
@@ -199,18 +205,18 @@ public final class FileDiffStorage implements DiffStorage {
     }
     allRecommendableItemIDs.rehash();
   }
-
+  
   private void checkLoaded() {
     if (!loaded) {
       buildDiffs();
       loaded = true;
     }
   }
-
+  
   @Override
   public RunningAverage getDiff(long itemID1, long itemID2) {
     checkLoaded();
-
+    
     boolean inverted = false;
     if (itemID1 > itemID2) {
       inverted = true;
@@ -218,7 +224,7 @@ public final class FileDiffStorage implements DiffStorage {
       itemID1 = itemID2;
       itemID2 = temp;
     }
-
+    
     FastByIDMap<RunningAverage> level2Map;
     try {
       buildAverageDiffsLock.readLock().lock();
@@ -239,7 +245,7 @@ public final class FileDiffStorage implements DiffStorage {
       return average;
     }
   }
-
+  
   @Override
   public RunningAverage[] getDiffs(long userID, long itemID, PreferenceArray prefs) {
     checkLoaded();
@@ -255,21 +261,21 @@ public final class FileDiffStorage implements DiffStorage {
       buildAverageDiffsLock.readLock().unlock();
     }
   }
-
+  
   @Override
   public RunningAverage getAverageItemPref(long itemID) {
     checkLoaded();
     return null; // TODO can't do this without a DataModel
   }
-
+  
   @Override
   public void updateItemPref(long itemID, float prefDelta, boolean remove) {
     checkLoaded();
     try {
       buildAverageDiffsLock.readLock().lock();
-      for (Map.Entry<Long, FastByIDMap<RunningAverage>> entry : averageDiffs.entrySet()) {
+      for (Map.Entry<Long,FastByIDMap<RunningAverage>> entry : averageDiffs.entrySet()) {
         boolean matchesItemID1 = itemID == entry.getKey();
-        for (Map.Entry<Long, RunningAverage> entry2 : entry.getValue().entrySet()) {
+        for (Map.Entry<Long,RunningAverage> entry2 : entry.getValue().entrySet()) {
           RunningAverage average = entry2.getValue();
           if (matchesItemID1) {
             if (remove) {
@@ -286,15 +292,15 @@ public final class FileDiffStorage implements DiffStorage {
           }
         }
       }
-      //RunningAverage itemAverage = averageItemPref.get(itemID);
-      //if (itemAverage != null) {
-      //  itemAverage.changeDatum(prefDelta);
-      //}
+      // RunningAverage itemAverage = averageItemPref.get(itemID);
+      // if (itemAverage != null) {
+      // itemAverage.changeDatum(prefDelta);
+      // }
     } finally {
       buildAverageDiffsLock.readLock().unlock();
     }
   }
-
+  
   @Override
   public FastIDSet getRecommendableItemIDs(long userID) {
     checkLoaded();
@@ -305,15 +311,15 @@ public final class FileDiffStorage implements DiffStorage {
       buildAverageDiffsLock.readLock().unlock();
     }
   }
-
+  
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     long mostRecentModification = dataFile.lastModified();
-    if (mostRecentModification > lastModified + MIN_RELOAD_INTERVAL_MS) {
-      log.debug("File has changed; reloading...");
+    if (mostRecentModification > lastModified + FileDiffStorage.MIN_RELOAD_INTERVAL_MS) {
+      FileDiffStorage.log.debug("File has changed; reloading...");
       lastModified = mostRecentModification;
       buildDiffs();
     }
   }
-
+  
 }

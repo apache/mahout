@@ -17,81 +17,81 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
-import org.apache.hadoop.io.WritableComparable;
-import org.apache.mahout.common.RandomUtils;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.mahout.common.RandomUtils;
+
 /** A {@link WritableComparable} encapsulating two items. */
 public final class ItemItemWritable implements WritableComparable<ItemItemWritable> {
-
+  
   private long itemAID;
   private long itemBID;
-
+  
   public ItemItemWritable() {
-    // do nothing
+  // do nothing
   }
-
+  
   public ItemItemWritable(long itemAID, long itemBID) {
     this.itemAID = itemAID;
     this.itemBID = itemBID;
   }
-
+  
   public long getItemAID() {
     return itemAID;
   }
-
+  
   public long getItemBID() {
     return itemBID;
   }
-
+  
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeLong(itemAID);
     out.writeLong(itemBID);
   }
-
+  
   @Override
   public void readFields(DataInput in) throws IOException {
     itemAID = in.readLong();
     itemBID = in.readLong();
   }
-
+  
   public static ItemItemWritable read(DataInput in) throws IOException {
     ItemItemWritable writable = new ItemItemWritable();
     writable.readFields(in);
     return writable;
   }
-
+  
   @Override
   public int compareTo(ItemItemWritable that) {
-    int aCompare = compare(itemAID, that.getItemAID());
-    return aCompare == 0 ? compare(itemBID, that.getItemBID()) : aCompare;
+    int aCompare = ItemItemWritable.compare(itemAID, that.getItemAID());
+    return aCompare == 0 ? ItemItemWritable.compare(itemBID, that.getItemBID()) : aCompare;
   }
-
+  
   private static int compare(long a, long b) {
     return a < b ? -1 : a > b ? 1 : 0;
   }
-
+  
   @Override
   public int hashCode() {
     return RandomUtils.hashLong(itemAID) + 31 * RandomUtils.hashLong(itemBID);
   }
-
+  
   @Override
   public boolean equals(Object o) {
     if (o instanceof ItemItemWritable) {
       ItemItemWritable that = (ItemItemWritable) o;
-      return itemAID == that.getItemAID() && itemBID == that.getItemBID();
+      return (itemAID == that.getItemAID()) && (itemBID == that.getItemBID());
     }
-    return false; 
+    return false;
   }
-
+  
   @Override
   public String toString() {
     return itemAID + "\t" + itemBID;
   }
-
+  
 }

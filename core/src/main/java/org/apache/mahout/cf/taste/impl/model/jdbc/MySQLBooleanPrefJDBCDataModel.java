@@ -17,16 +17,22 @@
 
 package org.apache.mahout.cf.taste.impl.model.jdbc;
 
-import org.apache.mahout.cf.taste.common.TasteException;
-
-import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.sql.DataSource;
+
+import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
+
 /**
- * <p>See also {@link MySQLJDBCDataModel} -- same except deals with a table without preference info:</p>
- *
- * <p><pre>
+ * <p>
+ * See also {@link MySQLJDBCDataModel} -- same except deals with a table without preference info:
+ * </p>
+ * 
+ * <p>
+ * 
+ * <pre>
  * CREATE TABLE taste_preferences (
  *   user_id BIGINT NOT NULL,
  *   item_id BIGINT NOT NULL,
@@ -34,75 +40,87 @@ import java.sql.SQLException;
  *   INDEX (user_id),
  *   INDEX (item_id)
  * )
- * </pre></p>
+ * </pre>
+ * 
+ * </p>
  */
 public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataModel {
-
+  
   private static final String NO_SUCH_COLUMN = "NO_SUCH_COLUMN";
-
+  
   /**
-   * <p>Creates a {@link MySQLBooleanPrefJDBCDataModel} using the default {@link javax.sql.DataSource} (named {@link
-   * #DEFAULT_DATASOURCE_NAME} and default table/column names.</p>
-   *
+   * <p>
+   * Creates a {@link MySQLBooleanPrefJDBCDataModel} using the default {@link javax.sql.DataSource} (named
+   * {@link #DEFAULT_DATASOURCE_NAME} and default table/column names.
+   * </p>
+   * 
    * @throws org.apache.mahout.cf.taste.common.TasteException
-   *          if {@link javax.sql.DataSource} can't be found
+   *           if {@link javax.sql.DataSource} can't be found
    */
   public MySQLBooleanPrefJDBCDataModel() throws TasteException {
-    this(DEFAULT_DATASOURCE_NAME);
+    this(AbstractJDBCComponent.DEFAULT_DATASOURCE_NAME);
   }
-
+  
   /**
-   * <p>Creates a {@link MySQLBooleanPrefJDBCDataModel} using the default {@link javax.sql.DataSource} found under the
-   * given name, and using default table/column names.</p>
-   *
-   * @param dataSourceName name of {@link javax.sql.DataSource} to look up
+   * <p>
+   * Creates a {@link MySQLBooleanPrefJDBCDataModel} using the default {@link javax.sql.DataSource} found
+   * under the given name, and using default table/column names.
+   * </p>
+   * 
+   * @param dataSourceName
+   *          name of {@link javax.sql.DataSource} to look up
    * @throws org.apache.mahout.cf.taste.common.TasteException
-   *          if {@link javax.sql.DataSource} can't be found
+   *           if {@link javax.sql.DataSource} can't be found
    */
   public MySQLBooleanPrefJDBCDataModel(String dataSourceName) throws TasteException {
-    this(lookupDataSource(dataSourceName),
-        DEFAULT_PREFERENCE_TABLE,
-        DEFAULT_USER_ID_COLUMN,
-        DEFAULT_ITEM_ID_COLUMN);
+    this(AbstractJDBCComponent.lookupDataSource(dataSourceName),
+        AbstractJDBCDataModel.DEFAULT_PREFERENCE_TABLE, AbstractJDBCDataModel.DEFAULT_USER_ID_COLUMN,
+        AbstractJDBCDataModel.DEFAULT_ITEM_ID_COLUMN);
   }
-
+  
   /**
-   * <p>Creates a {@link MySQLBooleanPrefJDBCDataModel} using the given {@link javax.sql.DataSource} and default
-   * table/column names.</p>
-   *
-   * @param dataSource {@link javax.sql.DataSource} to use
+   * <p>
+   * Creates a {@link MySQLBooleanPrefJDBCDataModel} using the given {@link javax.sql.DataSource} and default
+   * table/column names.
+   * </p>
+   * 
+   * @param dataSource
+   *          {@link javax.sql.DataSource} to use
    */
   public MySQLBooleanPrefJDBCDataModel(DataSource dataSource) {
-    this(dataSource,
-        DEFAULT_PREFERENCE_TABLE,
-        DEFAULT_USER_ID_COLUMN,
-        DEFAULT_ITEM_ID_COLUMN);
+    this(dataSource, AbstractJDBCDataModel.DEFAULT_PREFERENCE_TABLE,
+        AbstractJDBCDataModel.DEFAULT_USER_ID_COLUMN, AbstractJDBCDataModel.DEFAULT_ITEM_ID_COLUMN);
   }
-
+  
   /**
-   * <p>Creates a {@link MySQLBooleanPrefJDBCDataModel} using the given {@link javax.sql.DataSource} and default
-   * table/column names.</p>
-   *
-   * @param dataSource      {@link javax.sql.DataSource} to use
-   * @param preferenceTable name of table containing preference data
-   * @param userIDColumn    user ID column name
-   * @param itemIDColumn    item ID column name
+   * <p>
+   * Creates a {@link MySQLBooleanPrefJDBCDataModel} using the given {@link javax.sql.DataSource} and default
+   * table/column names.
+   * </p>
+   * 
+   * @param dataSource
+   *          {@link javax.sql.DataSource} to use
+   * @param preferenceTable
+   *          name of table containing preference data
+   * @param userIDColumn
+   *          user ID column name
+   * @param itemIDColumn
+   *          item ID column name
    */
   public MySQLBooleanPrefJDBCDataModel(DataSource dataSource,
                                        String preferenceTable,
                                        String userIDColumn,
                                        String itemIDColumn) {
-    super(dataSource,
-        preferenceTable,
-        userIDColumn,
-        itemIDColumn,
-        NO_SUCH_COLUMN,
+    super(dataSource, preferenceTable, userIDColumn, itemIDColumn,
+        MySQLBooleanPrefJDBCDataModel.NO_SUCH_COLUMN,
         // getPreferenceSQL
         "SELECT 1 FROM " + preferenceTable + " WHERE " + userIDColumn + "=? AND " + itemIDColumn + "=?",
         // getUserSQL
-        "SELECT " + userIDColumn + ", " + itemIDColumn + " FROM " + preferenceTable + " WHERE " + userIDColumn + "=?",
+        "SELECT " + userIDColumn + ", " + itemIDColumn + " FROM " + preferenceTable + " WHERE "
+            + userIDColumn + "=?",
         // getAllUsersSQL
-        "SELECT " + userIDColumn + ", " + itemIDColumn + " FROM " + preferenceTable + " ORDER BY " + userIDColumn,
+        "SELECT " + userIDColumn + ", " + itemIDColumn + " FROM " + preferenceTable + " ORDER BY "
+            + userIDColumn,
         // getNumItemsSQL
         "SELECT COUNT(DISTINCT " + itemIDColumn + ") FROM " + preferenceTable,
         // getNumUsersSQL
@@ -116,28 +134,28 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
         // getItemsSQL
         "SELECT DISTINCT " + itemIDColumn + " FROM " + preferenceTable + " ORDER BY " + itemIDColumn,
         // getPrefsForItemSQL
-        "SELECT " + userIDColumn + ", " + itemIDColumn + " FROM " +
-            preferenceTable + " WHERE " + itemIDColumn + "=? ORDER BY " + userIDColumn,
+        "SELECT " + userIDColumn + ", " + itemIDColumn + " FROM " + preferenceTable + " WHERE "
+            + itemIDColumn + "=? ORDER BY " + userIDColumn,
         // getNumPreferenceForItemSQL
         "SELECT COUNT(1) FROM " + preferenceTable + " WHERE " + itemIDColumn + "=?",
         // getNumPreferenceForItemsSQL
-        "SELECT COUNT(1) FROM " + preferenceTable + " tp1 JOIN " + preferenceTable + " tp2 " +
-            "USING (" + userIDColumn + ") WHERE tp1." + itemIDColumn + "=? and tp2." + itemIDColumn + "=?");
+        "SELECT COUNT(1) FROM " + preferenceTable + " tp1 JOIN " + preferenceTable + " tp2 " + "USING ("
+            + userIDColumn + ") WHERE tp1." + itemIDColumn + "=? and tp2." + itemIDColumn + "=?");
   }
-
+  
   @Override
   protected int getFetchSize() {
     // Need to return this for MySQL Connector/J to make it use streaming mode
     return Integer.MIN_VALUE;
   }
-
+  
   @Override
   protected void advanceResultSet(ResultSet resultSet, int n) throws SQLException {
     // Can't use relative on MySQL Connector/J
     int i = 0;
-    while (i < n && resultSet.next()) {
+    while ((i < n) && resultSet.next()) {
       i++;
     }
   }
-
+  
 }

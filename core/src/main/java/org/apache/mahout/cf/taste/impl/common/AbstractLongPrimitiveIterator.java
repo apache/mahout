@@ -18,10 +18,10 @@
 package org.apache.mahout.cf.taste.impl.common;
 
 public abstract class AbstractLongPrimitiveIterator implements LongPrimitiveIterator {
-
+  
   @Override
   public Long next() {
     return nextLong();
   }
-
+  
 }

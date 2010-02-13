@@ -17,6 +17,9 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
+import java.io.IOException;
+import java.util.Iterator;
+
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -26,19 +29,15 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-import java.io.IOException;
-import java.util.Iterator;
-
-public final class UserVectorToCooccurrenceReducer
-    extends MapReduceBase
-    implements Reducer<IntWritable, IntWritable, IntWritable, VectorWritable> {
-
+public final class UserVectorToCooccurrenceReducer extends MapReduceBase implements
+    Reducer<IntWritable,IntWritable,IntWritable,VectorWritable> {
+  
   private final VectorWritable vectorWritable = new VectorWritable();
-
+  
   @Override
   public void reduce(IntWritable index1,
                      Iterator<IntWritable> index2s,
-                     OutputCollector<IntWritable, VectorWritable> output,
+                     OutputCollector<IntWritable,VectorWritable> output,
                      Reporter reporter) throws IOException {
     if (index2s.hasNext()) {
       RandomAccessSparseVector cooccurrenceRow = new RandomAccessSparseVector(Integer.MAX_VALUE, 1000);
@@ -57,5 +56,5 @@ public final class UserVectorToCooccurrenceReducer
       output.collect(index1, vectorWritable);
     }
   }
-
+  
 }

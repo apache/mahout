@@ -18,26 +18,50 @@
 package org.apache.mahout.cf.taste.eval;
 
 /**
- * <p>Implementations encapsulate information retrieval-related statistics about a {@link
- * org.apache.mahout.cf.taste.recommender.Recommender}'s recommendations.</p>
- *
- * <p>See <a href="http://en.wikipedia.org/wiki/Information_retrieval">Information retrieval</a>.</p>
+ * <p>
+ * Implementations encapsulate information retrieval-related statistics about a
+ * {@link org.apache.mahout.cf.taste.recommender.Recommender}'s recommendations.
+ * </p>
+ * 
+ * <p>
+ * See <a href="http://en.wikipedia.org/wiki/Information_retrieval">Information retrieval</a>.
+ * </p>
  */
 public interface IRStatistics {
-
-  /** <p>See <a href="http://en.wikipedia.org/wiki/Information_retrieval#Precision">Precision</a>.</p> */
+  
+  /**
+   * <p>
+   * See <a href="http://en.wikipedia.org/wiki/Information_retrieval#Precision">Precision</a>.
+   * </p>
+   */
   double getPrecision();
-
-  /** <p>See <a href="http://en.wikipedia.org/wiki/Information_retrieval#Recall">Recall</a>.</p> */
+  
+  /**
+   * <p>
+   * See <a href="http://en.wikipedia.org/wiki/Information_retrieval#Recall">Recall</a>.
+   * </p>
+   */
   double getRecall();
-
-  /** <p>See <a href="http://en.wikipedia.org/wiki/Information_retrieval#Fall-Out">Fall-Out</a>.</p> */
+  
+  /**
+   * <p>
+   * See <a href="http://en.wikipedia.org/wiki/Information_retrieval#Fall-Out">Fall-Out</a>.
+   * </p>
+   */
   double getFallOut();
-
-  /** <p>See <a href="http://en.wikipedia.org/wiki/Information_retrieval#F-measure">F-measure</a>.</p> */
+  
+  /**
+   * <p>
+   * See <a href="http://en.wikipedia.org/wiki/Information_retrieval#F-measure">F-measure</a>.
+   * </p>
+   */
   double getF1Measure();
-
-  /** <p>See <a href="http://en.wikipedia.org/wiki/Information_retrieval#F-measure">F-measure</a>.</p> */
+  
+  /**
+   * <p>
+   * See <a href="http://en.wikipedia.org/wiki/Information_retrieval#F-measure">F-measure</a>.
+   * </p>
+   */
   double getFNMeasure(double n);
-
+  
 }

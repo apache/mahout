@@ -16,6 +16,11 @@
  */
 package org.apache.mahout.cf.taste.hadoop.cooccurence;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
@@ -41,34 +46,31 @@ import org.apache.hadoop.util.ToolRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-
 public final class UserItemJoiner extends Configured implements Tool {
-
+  
   private static final Logger log = LoggerFactory.getLogger(UserItemJoiner.class);
-
-  public static class JoinUserMapper extends MapReduceBase
-      implements Mapper<LongWritable, Text, Bigram, TupleWritable> {
-
+  
+  public static class JoinUserMapper extends MapReduceBase implements
+      Mapper<LongWritable,Text,Bigram,TupleWritable> {
+    
     private static final Logger log = LoggerFactory.getLogger(JoinUserMapper.class);
-
+    
     private final Bigram joinKey = new Bigram();
     private final TupleWritable tuple = new TupleWritable(2);
     private final VIntWritable user = new VIntWritable();
-
+    
     private final VIntWritable keyID = new VIntWritable(1);
     private String fieldSeparator;
-
+    
     @Override
     public void configure(JobConf conf) {
       fieldSeparator = conf.get("user.preference.field.separator", "\t");
     }
-
+    
     @Override
-    public void map(LongWritable lineNumber, Text userPrefEntry, OutputCollector<Bigram, TupleWritable> output,
+    public void map(LongWritable lineNumber,
+                    Text userPrefEntry,
+                    OutputCollector<Bigram,TupleWritable> output,
                     Reporter reporter) throws IOException {
       String userPrefLine = userPrefEntry.toString();
       String[] prefFields = userPrefLine.split(fieldSeparator);
@@ -81,22 +83,24 @@ public final class UserItemJoiner extends Configured implements Tool {
         joinKey.set(itemId, keyID.get());
         output.collect(joinKey, tuple);
       } else {
-        log.warn("No preference found in record: {}", userPrefLine);
+        JoinUserMapper.log.warn("No preference found in record: {}", userPrefLine);
       }
     }
   }
-
-  public static class JoinItemMapper extends MapReduceBase
-      implements Mapper<Bigram, DoubleWritable, Bigram, TupleWritable> {
-
+  
+  public static class JoinItemMapper extends MapReduceBase implements
+      Mapper<Bigram,DoubleWritable,Bigram,TupleWritable> {
+    
     private final VIntWritable simItem = new VIntWritable();
     private final TupleWritable tuple = new TupleWritable(3);
     private final Bigram joinKey = new Bigram();
-
+    
     private final VIntWritable keyID = new VIntWritable(0);
-
+    
     @Override
-    public void map(Bigram itemBigram, DoubleWritable simScore, OutputCollector<Bigram, TupleWritable> output,
+    public void map(Bigram itemBigram,
+                    DoubleWritable simScore,
+                    OutputCollector<Bigram,TupleWritable> output,
                     Reporter reporter) throws IOException {
       joinKey.set(itemBigram.getFirst(), keyID.get());
       simItem.set(itemBigram.getSecond());
@@ -106,17 +110,19 @@ public final class UserItemJoiner extends Configured implements Tool {
       output.collect(joinKey, tuple);
     }
   }
-
-  public static class JoinItemUserReducer extends MapReduceBase
-      implements Reducer<Bigram, TupleWritable, VIntWritable, TupleWritable> {
-
+  
+  public static class JoinItemUserReducer extends MapReduceBase implements
+      Reducer<Bigram,TupleWritable,VIntWritable,TupleWritable> {
+    
     private final Collection<TupleWritable> cachedSimilarItems = new ArrayList<TupleWritable>();
-
+    
     private final VIntWritable user = new VIntWritable();
-
+    
     @Override
-    public void reduce(Bigram itemBigram, Iterator<TupleWritable> tuples,
-                       OutputCollector<VIntWritable, TupleWritable> output, Reporter reporter) throws IOException {
+    public void reduce(Bigram itemBigram,
+                       Iterator<TupleWritable> tuples,
+                       OutputCollector<VIntWritable,TupleWritable> output,
+                       Reporter reporter) throws IOException {
       int seenItem = itemBigram.getFirst();
       while (tuples.hasNext()) {
         TupleWritable curTuple = tuples.next();
@@ -135,55 +141,54 @@ public final class UserItemJoiner extends Configured implements Tool {
           user.set(userId);
           for (TupleWritable candItem : cachedSimilarItems) {
             output.collect(user, candItem);
-            //  System.out.println("User:" + user + "\tSeen:" + candItem.getInt(0) +
-            //     "\tSimilar:" + candItem.getInt(1) + "\tScore:" + candItem.getDouble(2));
+            // System.out.println("User:" + user + "\tSeen:" + candItem.getInt(0) +
+            // "\tSimilar:" + candItem.getInt(1) + "\tScore:" + candItem.getDouble(2));
           }
         }
       }
       cachedSimilarItems.clear();
     }
-
+    
   }
-
+  
   public JobConf prepareJob(Path userInputPath, Path itemInputPath, Path outputPath, int reducers) {
     JobConf job = new JobConf(getConf());
     job.setJobName("User Item Joiner");
     job.setJarByClass(this.getClass());
-
+    
     MultipleInputs.addInputPath(job, userInputPath, TextInputFormat.class, JoinUserMapper.class);
     MultipleInputs.addInputPath(job, itemInputPath, SequenceFileInputFormat.class, JoinItemMapper.class);
     job.setReducerClass(JoinItemUserReducer.class);
-
+    
     FileOutputFormat.setOutputPath(job, outputPath);
-
+    
     job.setMapOutputKeyClass(Bigram.class);
     job.setMapOutputValueClass(TupleWritable.class);
     job.setOutputKeyClass(VIntWritable.class);
     job.setOutputValueClass(TupleWritable.class);
-
+    
     job.setOutputFormat(SequenceFileOutputFormat.class);
     FileOutputFormat.setCompressOutput(job, true);
     FileOutputFormat.setOutputCompressorClass(job, GzipCodec.class);
-    SequenceFileOutputFormat.setOutputCompressionType(job,
-                                                      SequenceFile.CompressionType.BLOCK);
-
+    SequenceFileOutputFormat.setOutputCompressionType(job, SequenceFile.CompressionType.BLOCK);
+    
     job.setPartitionerClass(ItemSimilarityEstimator.FirstPartitioner.class);
     job.setOutputValueGroupingComparator(Bigram.FirstGroupingComparator.class);
-
+    
     job.setNumReduceTasks(reducers);
-
+    
     return job;
   }
-
+  
   @Override
   public int run(String[] args) throws IOException {
     // TODO use Commons CLI 2
     if (args.length < 3) {
-      log.error("UserItemJoiner <user-input-dirs> <item-input-dir> <output-dir> [reducers]");
+      UserItemJoiner.log.error("UserItemJoiner <user-input-dirs> <item-input-dir> <output-dir> [reducers]");
       ToolRunner.printGenericCommandUsage(System.out);
       return -1;
     }
-
+    
     Path userInputPath = new Path(args[0]);
     Path itemInputPath = new Path(args[1]);
     Path outputPath = new Path(args[2]);
@@ -192,5 +197,5 @@ public final class UserItemJoiner extends Configured implements Tool {
     JobClient.runJob(jobConf);
     return 0;
   }
-
+  
 }

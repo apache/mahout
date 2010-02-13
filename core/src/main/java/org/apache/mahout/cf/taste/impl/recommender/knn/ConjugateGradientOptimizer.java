@@ -20,20 +20,22 @@ package org.apache.mahout.cf.taste.impl.recommender.knn;
 import java.util.Arrays;
 
 public final class ConjugateGradientOptimizer implements Optimizer {
-
+  
   private static final double CONVERGENCE_LIMIT = 0.1;
   private static final int MAX_ITERATIONS = 1000;
-
+  
   /**
-   * <p>Conjugate gradient optimization. Matlab code:</p>
-   *
-   * <p><pre>
+   * <p>
+   * Conjugate gradient optimization. Matlab code:
+   * </p>
+   * 
+   * <p>
+   * 
+   * <pre>
    * function [x] = conjgrad(A,b,x0)
-   *
    *   x = x0;
    *   r = b - A*x0;
    *   w = -r;
-   *
    *   for i = 1:size(A);
    *      z = A*w;
    *      a = (r'*w)/(w'*z);
@@ -45,24 +47,27 @@ public final class ConjugateGradientOptimizer implements Optimizer {
    *      B = (r'*z)/(w'*z);
    *      w = -r + B*w;
    *   end
-   *
    * end
-   * </pre></p>
-   *
-   * @param A matrix nxn positions
-   * @param b vector b, n positions
+   * </pre>
+   * 
+   * </p>
+   * 
+   * @param A
+   *          matrix nxn positions
+   * @param b
+   *          vector b, n positions
    * @return vector of n weights
    */
   @Override
   public double[] optimize(double[][] A, double[] b) {
-
+    
     int k = b.length;
     double[] x = new double[k];
     double[] r = new double[k];
     double[] w = new double[k];
     double[] z = new double[k];
-    Arrays.fill(x, 3.0 / (double) k);
-
+    Arrays.fill(x, 3.0 / k);
+    
     // r = b - A*x0;
     // w = -r;
     for (int i = 0; i < k; i++) {
@@ -75,9 +80,9 @@ public final class ConjugateGradientOptimizer implements Optimizer {
       r[i] = ri;
       w[i] = -ri;
     }
-
-    for (int iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
-
+    
+    for (int iteration = 0; iteration < ConjugateGradientOptimizer.MAX_ITERATIONS; iteration++) {
+      
       // z = A*w;
       for (int i = 0; i < k; i++) {
         double v = 0.0;
@@ -87,7 +92,7 @@ public final class ConjugateGradientOptimizer implements Optimizer {
         }
         z[i] = v;
       }
-
+      
       // a = (r'*w)/(w'*z);
       double anum = 0.0;
       double aden = 0.0;
@@ -96,24 +101,24 @@ public final class ConjugateGradientOptimizer implements Optimizer {
         aden += w[i] * z[i];
       }
       double a = anum / aden;
-
+      
       // x = x + a*w;
       // r = r - a*z;
       for (int i = 0; i < k; i++) {
         x[i] += a * w[i];
         r[i] -= a * z[i];
       }
-
+      
       // stop when residual is close to 0
       double rdot = 0.0;
       for (int i = 0; i < k; i++) {
         double value = r[i];
         rdot += value * value;
       }
-      if (rdot <= CONVERGENCE_LIMIT) {
+      if (rdot <= ConjugateGradientOptimizer.CONVERGENCE_LIMIT) {
         break;
       }
-
+      
       // B = (r'*z)/(w'*z);
       double Bnum = 0.0;
       double Bden = 0.0;
@@ -123,15 +128,15 @@ public final class ConjugateGradientOptimizer implements Optimizer {
         Bden += w[i] * zi;
       }
       double B = Bnum / Bden;
-
+      
       // w = -r + B*w;
       for (int i = 0; i < k; i++) {
         w[i] = -r[i] + B * w[i];
       }
-
+      
     }
-
+    
     return x;
   }
-
+  
 }

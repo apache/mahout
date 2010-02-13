@@ -17,6 +17,9 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
+import java.io.IOException;
+import java.util.regex.Pattern;
+
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -24,38 +27,40 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 
-import java.io.IOException;
-import java.util.regex.Pattern;
-
 /**
  * <h1>Input</h1>
- *
- * <p>Intended for use with {@link org.apache.hadoop.mapred.TextInputFormat}; accepts
- * line number / line pairs as {@link LongWritable}/{@link Text} pairs.</p>
- *
- * <p>Each line is assumed to be of the form <code>userID,itemID,preference</code>.</p>
- *
+ * 
+ * <p>
+ * Intended for use with {@link org.apache.hadoop.mapred.TextInputFormat}; accepts line number / line pairs as
+ * {@link LongWritable}/{@link Text} pairs.
+ * </p>
+ * 
+ * <p>
+ * Each line is assumed to be of the form <code>userID,itemID,preference</code>.
+ * </p>
+ * 
  * <h1>Output</h1>
- *
- * <p>Outputs the user ID as a {@link LongWritable} mapped to the item ID and preference
- * as a {@link ItemPrefWritable}.</p>
+ * 
+ * <p>
+ * Outputs the user ID as a {@link LongWritable} mapped to the item ID and preference as a
+ * {@link ItemPrefWritable}.
+ * </p>
  */
-public final class ToItemPrefsMapper
-    extends MapReduceBase
-    implements Mapper<LongWritable, Text, LongWritable, ItemPrefWritable> {
-
+public final class ToItemPrefsMapper extends MapReduceBase implements
+    Mapper<LongWritable,Text,LongWritable,ItemPrefWritable> {
+  
   private static final Pattern COMMA = Pattern.compile(",");
-
+  
   @Override
   public void map(LongWritable key,
                   Text value,
-                  OutputCollector<LongWritable, ItemPrefWritable> output,
+                  OutputCollector<LongWritable,ItemPrefWritable> output,
                   Reporter reporter) throws IOException {
-    String[] tokens = COMMA.split(value.toString());
+    String[] tokens = ToItemPrefsMapper.COMMA.split(value.toString());
     long userID = Long.parseLong(tokens[0]);
     long itemID = Long.parseLong(tokens[1]);
     float prefValue = Float.parseFloat(tokens[2]);
     output.collect(new LongWritable(userID), new ItemPrefWritable(itemID, prefValue));
   }
-
+  
 }

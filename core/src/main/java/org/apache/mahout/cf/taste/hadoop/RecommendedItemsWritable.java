@@ -17,10 +17,6 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
-import org.apache.hadoop.io.Writable;
-import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
-import org.apache.mahout.cf.taste.recommender.RecommendedItem;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.EOFException;
@@ -28,35 +24,40 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.io.Writable;
+import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
+import org.apache.mahout.cf.taste.recommender.RecommendedItem;
+
 /**
- * A {@link Writable} which encapsulates a list of {@link RecommendedItem}s. This is the mapper (and reducer) output,
- * and represents items recommended to a user. The first item is the one whose estimated preference is highest.
+ * A {@link Writable} which encapsulates a list of {@link RecommendedItem}s. This is the mapper (and reducer)
+ * output, and represents items recommended to a user. The first item is the one whose estimated preference is
+ * highest.
  */
 public final class RecommendedItemsWritable implements Writable {
-
+  
   private List<RecommendedItem> recommended;
-
+  
   public RecommendedItemsWritable() {
-    // do nothing
+  // do nothing
   }
-
+  
   public RecommendedItemsWritable(List<RecommendedItem> recommended) {
     this.recommended = recommended;
   }
-
+  
   public List<RecommendedItem> getRecommendedItems() {
     return recommended;
   }
-
+  
   @Override
   public void write(DataOutput out) throws IOException {
     for (RecommendedItem item : recommended) {
       out.writeLong(item.getItemID());
       out.writeFloat(item.getValue());
     }
-
+    
   }
-
+  
   @Override
   public void readFields(DataInput in) throws IOException {
     recommended = new ArrayList<RecommendedItem>();
@@ -75,13 +76,13 @@ public final class RecommendedItemsWritable implements Writable {
       // bizarre ByteArrayInputStream bug? sometimes throws from read(); done
     }
   }
-
+  
   public static RecommendedItemsWritable read(DataInput in) throws IOException {
     RecommendedItemsWritable writable = new RecommendedItemsWritable();
     writable.readFields(in);
     return writable;
   }
-
+  
   @Override
   public String toString() {
     StringBuilder result = new StringBuilder(200);
@@ -107,5 +108,5 @@ public final class RecommendedItemsWritable implements Writable {
     result.append(']');
     return result.toString();
   }
-
+  
 }

@@ -17,22 +17,25 @@
 
 package org.apache.mahout.cf.taste.common;
 
-/** <p>An exception thrown when an error occurs inside the Taste engine.</p> */
+/**
+ * <p>
+ * An exception thrown when an error occurs inside the Taste engine.
+ * </p>
+ */
 public class TasteException extends Exception {
-
-  public TasteException() {
-  }
-
+  
+  public TasteException() { }
+  
   public TasteException(String message) {
     super(message);
   }
-
+  
   public TasteException(Throwable cause) {
     super(cause);
   }
-
+  
   public TasteException(String message, Throwable cause) {
     super(message, cause);
   }
-
+  
 }

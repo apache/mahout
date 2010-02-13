@@ -21,47 +21,47 @@ import org.apache.mahout.common.RandomUtils;
 
 /** Simply encapsulates a user and a similarity value. */
 public final class SimilarUser implements Comparable<SimilarUser> {
-
+  
   private final long userID;
   private final double similarity;
-
+  
   public SimilarUser(long userID, double similarity) {
     this.userID = userID;
     this.similarity = similarity;
   }
-
+  
   long getUserID() {
     return userID;
   }
-
+  
   double getSimilarity() {
     return similarity;
   }
-
+  
   @Override
   public int hashCode() {
     return (int) userID ^ RandomUtils.hashDouble(similarity);
   }
-
+  
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof SimilarUser)) {
       return false;
     }
     SimilarUser other = (SimilarUser) o;
-    return userID == other.getUserID() && similarity == other.getSimilarity();
+    return (userID == other.getUserID()) && (similarity == other.getSimilarity());
   }
-
+  
   @Override
   public String toString() {
     return "SimilarUser[user:" + userID + ", similarity:" + similarity + ']';
   }
-
+  
   /** Defines an ordering from most similar to least similar. */
   @Override
   public int compareTo(SimilarUser other) {
     double otherSimilarity = other.getSimilarity();
     return similarity > otherSimilarity ? -1 : similarity < otherSimilarity ? 1 : 0;
   }
-
+  
 }

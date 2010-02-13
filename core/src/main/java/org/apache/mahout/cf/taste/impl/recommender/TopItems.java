@@ -17,6 +17,12 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
+
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -26,33 +32,31 @@ import org.apache.mahout.cf.taste.impl.similarity.GenericUserSimilarity;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
-
-/** <p>A simple class that refactors the "find top N things" logic that is used in several places.</p> */
+/**
+ * <p>
+ * A simple class that refactors the "find top N things" logic that is used in several places.
+ * </p>
+ */
 public final class TopItems {
-
+  
   private static final long[] NO_IDS = new long[0];
-
-  private TopItems() {
-  }
-
+  
+  private TopItems() { }
+  
   public static List<RecommendedItem> getTopItems(int howMany,
                                                   LongPrimitiveIterator possibleItemIDs,
                                                   IDRescorer rescorer,
                                                   Estimator<Long> estimator) throws TasteException {
-    if (possibleItemIDs == null || estimator == null) {
+    if ((possibleItemIDs == null) || (estimator == null)) {
       throw new IllegalArgumentException("argument is null");
     }
-    Queue<RecommendedItem> topItems = new PriorityQueue<RecommendedItem>(howMany + 1, Collections.reverseOrder());
+    Queue<RecommendedItem> topItems = new PriorityQueue<RecommendedItem>(howMany + 1, Collections
+        .reverseOrder());
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
     while (possibleItemIDs.hasNext()) {
       long itemID = possibleItemIDs.next();
-      if (rescorer == null || !rescorer.isFiltered(itemID)) {
+      if ((rescorer == null) || !rescorer.isFiltered(itemID)) {
         double preference;
         try {
           preference = estimator.estimate(itemID);
@@ -60,7 +64,7 @@ public final class TopItems {
           continue;
         }
         double rescoredPref = rescorer == null ? preference : rescorer.rescore(itemID, preference);
-        if (!Double.isNaN(rescoredPref) && (!full || rescoredPref > lowestTopValue)) {
+        if (!Double.isNaN(rescoredPref) && (!full || (rescoredPref > lowestTopValue))) {
           topItems.add(new GenericRecommendedItem(itemID, (float) rescoredPref));
           if (full) {
             topItems.poll();
@@ -77,7 +81,7 @@ public final class TopItems {
     Collections.sort(result);
     return result;
   }
-
+  
   public static long[] getTopUsers(int howMany,
                                    LongPrimitiveIterator allUserIDs,
                                    IDRescorer rescorer,
@@ -87,7 +91,7 @@ public final class TopItems {
     double lowestTopValue = Double.NEGATIVE_INFINITY;
     while (allUserIDs.hasNext()) {
       long userID = allUserIDs.next();
-      if (rescorer != null && rescorer.isFiltered(userID)) {
+      if ((rescorer != null) && rescorer.isFiltered(userID)) {
         continue;
       }
       double similarity;
@@ -97,7 +101,7 @@ public final class TopItems {
         continue;
       }
       double rescoredSimilarity = rescorer == null ? similarity : rescorer.rescore(userID, similarity);
-      if (!Double.isNaN(rescoredSimilarity) && (!full || rescoredSimilarity > lowestTopValue)) {
+      if (!Double.isNaN(rescoredSimilarity) && (!full || (rescoredSimilarity > lowestTopValue))) {
         topUsers.add(new SimilarUser(userID, similarity));
         if (full) {
           topUsers.poll();
@@ -109,7 +113,7 @@ public final class TopItems {
       }
     }
     if (topUsers.isEmpty()) {
-      return NO_IDS;
+      return TopItems.NO_IDS;
     }
     List<SimilarUser> sorted = new ArrayList<SimilarUser>(topUsers.size());
     sorted.addAll(topUsers);
@@ -121,23 +125,25 @@ public final class TopItems {
     }
     return result;
   }
-
+  
   /**
-   * <p>Thanks to tsmorton for suggesting this functionality and writing part of the code.</p>
-   *
+   * <p>
+   * Thanks to tsmorton for suggesting this functionality and writing part of the code.
+   * </p>
+   * 
    * @see GenericItemSimilarity#GenericItemSimilarity(Iterable, int)
    * @see GenericItemSimilarity#GenericItemSimilarity(org.apache.mahout.cf.taste.similarity.ItemSimilarity,
    *      org.apache.mahout.cf.taste.model.DataModel, int)
    */
-  public static List<GenericItemSimilarity.ItemItemSimilarity> getTopItemItemSimilarities(
-      int howMany, Iterable<GenericItemSimilarity.ItemItemSimilarity> allSimilarities) {
-    Queue<GenericItemSimilarity.ItemItemSimilarity> topSimilarities =
-        new PriorityQueue<GenericItemSimilarity.ItemItemSimilarity>(howMany + 1, Collections.reverseOrder());
+  public static List<GenericItemSimilarity.ItemItemSimilarity> getTopItemItemSimilarities(int howMany,
+                                                                                          Iterable<GenericItemSimilarity.ItemItemSimilarity> allSimilarities) {
+    Queue<GenericItemSimilarity.ItemItemSimilarity> topSimilarities = new PriorityQueue<GenericItemSimilarity.ItemItemSimilarity>(
+        howMany + 1, Collections.reverseOrder());
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
     for (GenericItemSimilarity.ItemItemSimilarity similarity : allSimilarities) {
       double value = similarity.getValue();
-      if (!Double.isNaN(value) && (!full || value > lowestTopValue)) {
+      if (!Double.isNaN(value) && (!full || (value > lowestTopValue))) {
         topSimilarities.add(similarity);
         if (full) {
           topSimilarities.poll();
@@ -148,22 +154,22 @@ public final class TopItems {
         lowestTopValue = topSimilarities.peek().getValue();
       }
     }
-    List<GenericItemSimilarity.ItemItemSimilarity> result =
-        new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(topSimilarities.size());
+    List<GenericItemSimilarity.ItemItemSimilarity> result = new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(
+        topSimilarities.size());
     result.addAll(topSimilarities);
     Collections.sort(result);
     return result;
   }
-
-  public static List<GenericUserSimilarity.UserUserSimilarity> getTopUserUserSimilarities(
-      int howMany, Iterable<GenericUserSimilarity.UserUserSimilarity> allSimilarities) {
-    Queue<GenericUserSimilarity.UserUserSimilarity> topSimilarities =
-        new PriorityQueue<GenericUserSimilarity.UserUserSimilarity>(howMany + 1, Collections.reverseOrder());
+  
+  public static List<GenericUserSimilarity.UserUserSimilarity> getTopUserUserSimilarities(int howMany,
+                                                                                          Iterable<GenericUserSimilarity.UserUserSimilarity> allSimilarities) {
+    Queue<GenericUserSimilarity.UserUserSimilarity> topSimilarities = new PriorityQueue<GenericUserSimilarity.UserUserSimilarity>(
+        howMany + 1, Collections.reverseOrder());
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
     for (GenericUserSimilarity.UserUserSimilarity similarity : allSimilarities) {
       double value = similarity.getValue();
-      if (!Double.isNaN(value) && (!full || value > lowestTopValue)) {
+      if (!Double.isNaN(value) && (!full || (value > lowestTopValue))) {
         topSimilarities.add(similarity);
         if (full) {
           topSimilarities.poll();
@@ -174,15 +180,15 @@ public final class TopItems {
         lowestTopValue = topSimilarities.peek().getValue();
       }
     }
-    List<GenericUserSimilarity.UserUserSimilarity> result =
-        new ArrayList<GenericUserSimilarity.UserUserSimilarity>(topSimilarities.size());
+    List<GenericUserSimilarity.UserUserSimilarity> result = new ArrayList<GenericUserSimilarity.UserUserSimilarity>(
+        topSimilarities.size());
     result.addAll(topSimilarities);
     Collections.sort(result);
     return result;
   }
-
+  
   public interface Estimator<T> {
     double estimate(T thing) throws TasteException;
   }
-
+  
 }

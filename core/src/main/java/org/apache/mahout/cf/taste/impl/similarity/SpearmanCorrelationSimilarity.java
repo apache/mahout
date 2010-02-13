@@ -17,6 +17,8 @@
 
 package org.apache.mahout.cf.taste.impl.similarity;
 
+import java.util.Collection;
+
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
@@ -25,43 +27,43 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
-import java.util.Collection;
-
 /**
- * <p>Like {@link PearsonCorrelationSimilarity}, but compares relative ranking of preference values instead of
+ * <p>
+ * Like {@link PearsonCorrelationSimilarity}, but compares relative ranking of preference values instead of
  * preference values themselves. That is, each user's preferences are sorted and then assign a rank as their
- * preference value, with 1 being assigned to the least preferred item.</p>
+ * preference value, with 1 being assigned to the least preferred item.
+ * </p>
  */
 public final class SpearmanCorrelationSimilarity implements UserSimilarity {
-
+  
   private final DataModel dataModel;
-
+  
   public SpearmanCorrelationSimilarity(DataModel dataModel) {
     if (dataModel == null) {
       throw new IllegalArgumentException("dataModel is null");
     }
     this.dataModel = dataModel;
   }
-
+  
   @Override
   public double userSimilarity(long userID1, long userID2) throws TasteException {
     PreferenceArray xPrefs = dataModel.getPreferencesFromUser(userID1);
     PreferenceArray yPrefs = dataModel.getPreferencesFromUser(userID2);
     int xLength = xPrefs.length();
     int yLength = yPrefs.length();
-
-    if (xLength <= 1 || yLength <= 1) {
+    
+    if ((xLength <= 1) || (yLength <= 1)) {
       return Double.NaN;
     }
-
+    
     // Copy prefs since we need to modify pref values to ranks
     xPrefs = xPrefs.clone();
     yPrefs = yPrefs.clone();
-
+    
     // First sort by values from low to high
     xPrefs.sortByValue();
     yPrefs.sortByValue();
-
+    
     // Assign ranks from low to high
     float nextRank = 1.0f;
     for (int i = 0; i < xLength; i++) {
@@ -79,18 +81,18 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
         nextRank += 1.0f;
       }
     }
-
+    
     xPrefs.sortByItem();
     yPrefs.sortByItem();
-
+    
     long xIndex = xPrefs.getItemID(0);
     long yIndex = yPrefs.getItemID(0);
     int xPrefIndex = 0;
     int yPrefIndex = 0;
-
+    
     double sumXYRankDiff2 = 0.0;
     int count = 0;
-
+    
     while (true) {
       int compare = xIndex < yIndex ? -1 : xIndex > yIndex ? 1 : 0;
       if (compare == 0) {
@@ -111,24 +113,24 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
         yIndex = yPrefs.getItemID(yPrefIndex);
       }
     }
-
+    
     if (count <= 1) {
       return Double.NaN;
     }
-
+    
     // When ranks are unique, this formula actually gives the Pearson correlation
-    return 1.0 - (6.0 * sumXYRankDiff2 / (count * (count*count - 1)));
+    return 1.0 - 6.0 * sumXYRankDiff2 / (count * (count * count - 1));
   }
-
+  
   @Override
   public void setPreferenceInferrer(PreferenceInferrer inferrer) {
     throw new UnsupportedOperationException();
   }
-
+  
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
     RefreshHelper.maybeRefresh(alreadyRefreshed, dataModel);
   }
-
+  
 }

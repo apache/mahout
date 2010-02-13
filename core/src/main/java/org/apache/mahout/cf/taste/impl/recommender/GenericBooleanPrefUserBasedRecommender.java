@@ -24,26 +24,25 @@ import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 /**
- * A variant on {@link GenericUserBasedRecommender} which is appropriate for use when no notion of
- * preference value exists in the data.
+ * A variant on {@link GenericUserBasedRecommender} which is appropriate for use when no notion of preference
+ * value exists in the data.
  */
 public final class GenericBooleanPrefUserBasedRecommender extends GenericUserBasedRecommender {
-
+  
   public GenericBooleanPrefUserBasedRecommender(DataModel dataModel,
                                                 UserNeighborhood neighborhood,
                                                 UserSimilarity similarity) {
     super(dataModel, neighborhood, similarity);
   }
-
+  
   /**
-   * This computation is in a technical sense, wrong, since in the domain of "boolean preference users" where all
-   * preference values are 1, this method should only ever return 1.0 or NaN. This isn't terribly useful however since
-   * it means results can't be ranked by preference value (all are 1). So instead this returns a sum of similarities to
-   * any other user in the neighborhood who has also rated the item.
+   * This computation is in a technical sense, wrong, since in the domain of "boolean preference users" where
+   * all preference values are 1, this method should only ever return 1.0 or NaN. This isn't terribly useful
+   * however since it means results can't be ranked by preference value (all are 1). So instead this returns a
+   * sum of similarities to any other user in the neighborhood who has also rated the item.
    */
   @Override
-  protected float doEstimatePreference(long theUserID, long[] theNeighborhood, long itemID)
-      throws TasteException {
+  protected float doEstimatePreference(long theUserID, long[] theNeighborhood, long itemID) throws TasteException {
     if (theNeighborhood.length == 0) {
       return Float.NaN;
     }
@@ -53,17 +52,16 @@ public final class GenericBooleanPrefUserBasedRecommender extends GenericUserBas
     boolean foundAPref = false;
     for (long userID : theNeighborhood) {
       // See GenericItemBasedRecommender.doEstimatePreference() too
-      if (userID != theUserID && dataModel.getPreferenceValue(userID, itemID) != null) {
+      if ((userID != theUserID) && (dataModel.getPreferenceValue(userID, itemID) != null)) {
         foundAPref = true;
         totalSimilarity += similarity.userSimilarity(theUserID, userID);
       }
     }
     return foundAPref ? totalSimilarity : Float.NaN;
   }
-
+  
   @Override
-  protected FastIDSet getAllOtherItems(long[] theNeighborhood, long theUserID)
-      throws TasteException {
+  protected FastIDSet getAllOtherItems(long[] theNeighborhood, long theUserID) throws TasteException {
     DataModel dataModel = getDataModel();
     FastIDSet possibleItemIDs = new FastIDSet();
     for (long userID : theNeighborhood) {
@@ -72,11 +70,10 @@ public final class GenericBooleanPrefUserBasedRecommender extends GenericUserBas
     possibleItemIDs.removeAll(dataModel.getItemIDsFromUser(theUserID));
     return possibleItemIDs;
   }
-
-
+  
   @Override
   public String toString() {
     return "GenericBooleanPrefUserBasedRecommender";
   }
-
+  
 }

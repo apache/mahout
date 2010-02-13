@@ -17,6 +17,11 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.PriorityQueue;
+import java.util.Queue;
+
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -27,41 +32,40 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.PriorityQueue;
-import java.util.Queue;
-
 /**
  * <h1>Input</h1>
- *
- * <p>Takes user IDs as {@link LongWritable} mapped to all associated item IDs
- * and preference values, as {@link ItemPrefWritable}s.</p>
- *
+ * 
+ * <p>
+ * Takes user IDs as {@link LongWritable} mapped to all associated item IDs and preference values, as
+ * {@link ItemPrefWritable}s.
+ * </p>
+ * 
  * <h1>Output</h1>
- *
- * <p>The same user ID mapped to a {@link RandomAccessSparseVector} representation of the
- * same item IDs and preference values. Item IDs are used as vector indexes;
- * they are hashed into ints to work as indexes with
- * {@link ItemIDIndexMapper#idToIndex(long)}. The mapping is remembered for
- * later with a combination of {@link ItemIDIndexMapper} and {@link ItemIDIndexReducer}.</p>
- *
- * <p>The number of non-default elements actually retained in the user vector is capped
- * at {@link #MAX_PREFS_CONSIDERED}.</p>
- *
+ * 
+ * <p>
+ * The same user ID mapped to a {@link RandomAccessSparseVector} representation of the same item IDs and
+ * preference values. Item IDs are used as vector indexes; they are hashed into ints to work as indexes with
+ * {@link ItemIDIndexMapper#idToIndex(long)}. The mapping is remembered for later with a combination of
+ * {@link ItemIDIndexMapper} and {@link ItemIDIndexReducer}.
+ * </p>
+ * 
+ * <p>
+ * The number of non-default elements actually retained in the user vector is capped at
+ * {@link #MAX_PREFS_CONSIDERED}.
+ * </p>
+ * 
  */
-public final class ToUserVectorReducer
-    extends MapReduceBase
-    implements Reducer<LongWritable, ItemPrefWritable, LongWritable, VectorWritable> {
-
+public final class ToUserVectorReducer extends MapReduceBase implements
+    Reducer<LongWritable,ItemPrefWritable,LongWritable,VectorWritable> {
+  
   public static final int MAX_PREFS_CONSIDERED = 20;
-
+  
   private final VectorWritable vectorWritable = new VectorWritable();
-
+  
   @Override
   public void reduce(LongWritable userID,
                      Iterator<ItemPrefWritable> itemPrefs,
-                     OutputCollector<LongWritable, VectorWritable> output,
+                     OutputCollector<LongWritable,VectorWritable> output,
                      Reporter reporter) throws IOException {
     if (itemPrefs.hasNext()) {
       RandomAccessSparseVector userVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
@@ -70,10 +74,12 @@ public final class ToUserVectorReducer
         int index = ItemIDIndexMapper.idToIndex(itemPref.getItemID());
         userVector.set(index, itemPref.getPrefValue());
       }
-
-      if (userVector.getNumNondefaultElements() > MAX_PREFS_CONSIDERED) {
-        double cutoff = findTopNPrefsCutoff(MAX_PREFS_CONSIDERED, userVector);
-        RandomAccessSparseVector filteredVector = new RandomAccessSparseVector(Integer.MAX_VALUE, MAX_PREFS_CONSIDERED);
+      
+      if (userVector.getNumNondefaultElements() > ToUserVectorReducer.MAX_PREFS_CONSIDERED) {
+        double cutoff = ToUserVectorReducer.findTopNPrefsCutoff(ToUserVectorReducer.MAX_PREFS_CONSIDERED,
+          userVector);
+        RandomAccessSparseVector filteredVector = new RandomAccessSparseVector(Integer.MAX_VALUE,
+            ToUserVectorReducer.MAX_PREFS_CONSIDERED);
         Iterator<Vector.Element> it = userVector.iterateNonZero();
         while (it.hasNext()) {
           Vector.Element element = it.next();
@@ -83,12 +89,12 @@ public final class ToUserVectorReducer
         }
         userVector = filteredVector;
       }
-
+      
       vectorWritable.set(userVector);
       output.collect(userID, vectorWritable);
     }
   }
-
+  
   private static double findTopNPrefsCutoff(int n, Vector userVector) {
     Queue<Double> topPrefValues = new PriorityQueue<Double>(n + 1);
     Iterator<Vector.Element> it = userVector.iterateNonZero();
@@ -103,5 +109,5 @@ public final class ToUserVectorReducer
     }
     return topPrefValues.peek();
   }
-
+  
 }

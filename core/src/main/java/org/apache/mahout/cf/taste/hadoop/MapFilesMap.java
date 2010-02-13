@@ -17,6 +17,11 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -26,33 +31,26 @@ import org.apache.hadoop.io.MapFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Represents a series of {@link MapFile}s, from which one might want to look up values
- * based on keys. It just provides a simplified way to open them all up, and search
- * from all of them.
+ * Represents a series of {@link MapFile}s, from which one might want to look up values based on keys. It just
+ * provides a simplified way to open them all up, and search from all of them.
  */
-public final class MapFilesMap<K extends WritableComparable, V extends Writable> implements Closeable {
-
+@SuppressWarnings("unchecked")
+public final class MapFilesMap<K extends WritableComparable,V extends Writable> implements Closeable {
+  
   private static final PathFilter PARTS_FILTER = new PathFilter() {
     @Override
     public boolean accept(Path path) {
       return path.getName().startsWith("part-");
     }
   };
-
+  
   private final List<MapFile.Reader> readers;
-
-  public MapFilesMap(FileSystem fs,
-                     Path parentDir,
-                     Configuration conf) throws IOException {
+  
+  public MapFilesMap(FileSystem fs, Path parentDir, Configuration conf) throws IOException {
     readers = new ArrayList<MapFile.Reader>();
     try {
-      for (FileStatus status : fs.listStatus(parentDir, PARTS_FILTER)) {
+      for (FileStatus status : fs.listStatus(parentDir, MapFilesMap.PARTS_FILTER)) {
         readers.add(new MapFile.Reader(fs, status.getPath().toString(), conf));
       }
     } catch (IOException ioe) {
@@ -63,7 +61,7 @@ public final class MapFilesMap<K extends WritableComparable, V extends Writable>
       throw new IllegalArgumentException("No MapFiles found in " + parentDir);
     }
   }
-
+  
   /**
    * @return value reference if key is found, filled in with value data, or null if not found
    */
@@ -75,7 +73,7 @@ public final class MapFilesMap<K extends WritableComparable, V extends Writable>
     }
     return null;
   }
-
+  
   @Override
   public void close() {
     for (MapFile.Reader reader : readers) {

@@ -17,19 +17,19 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
-import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.model.IDMigrator;
-
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.model.IDMigrator;
+
 public abstract class AbstractIDMigrator implements IDMigrator {
-
+  
   private static final Charset UTF8_CHARSET = Charset.forName("UTF8");
-
+  
   private final MessageDigest md5Digest;
-
+  
   protected AbstractIDMigrator() {
     try {
       md5Digest = MessageDigest.getInstance("MD5");
@@ -38,33 +38,33 @@ public abstract class AbstractIDMigrator implements IDMigrator {
       throw new IllegalStateException(nsae);
     }
   }
-
+  
   /**
    * @return most significant 8 bytes of the MD5 hash of the string, as a long
    */
   protected final long hash(String value) {
     byte[] md5hash;
     synchronized (md5Digest) {
-      md5hash = md5Digest.digest(value.getBytes(UTF8_CHARSET));
+      md5hash = md5Digest.digest(value.getBytes(AbstractIDMigrator.UTF8_CHARSET));
       md5Digest.reset();
     }
     long hash = 0L;
     for (int i = 0; i < 8; i++) {
-      hash = (hash << 8) | (md5hash[i] & 0x00000000000000FFL);
+      hash = hash << 8 | md5hash[i] & 0x00000000000000FFL;
     }
     return hash;
   }
-
+  
   @Override
   public long toLongID(String stringID) {
     return hash(stringID);
   }
-
+  
   @Override
   public void initialize(Iterable<String> stringIDs) throws TasteException {
     for (String stringID : stringIDs) {
       storeMapping(toLongID(stringID), stringID);
     }
   }
-
+  
 }

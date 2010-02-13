@@ -17,29 +17,28 @@
 
 package org.apache.mahout.cf.taste.hadoop.slopeone;
 
-import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.mahout.cf.taste.hadoop.ItemItemWritable;
-import org.apache.mahout.cf.taste.hadoop.ItemPrefWritable;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-public final class SlopeOnePrefsToDiffsReducer
-    extends MapReduceBase
-    implements Reducer<LongWritable, ItemPrefWritable, ItemItemWritable, FloatWritable> {
+import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.Reducer;
+import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.cf.taste.hadoop.ItemItemWritable;
+import org.apache.mahout.cf.taste.hadoop.ItemPrefWritable;
 
+public final class SlopeOnePrefsToDiffsReducer extends MapReduceBase implements
+    Reducer<LongWritable,ItemPrefWritable,ItemItemWritable,FloatWritable> {
+  
   @Override
   public void reduce(LongWritable key,
                      Iterator<ItemPrefWritable> values,
-                     OutputCollector<ItemItemWritable, FloatWritable> output,
+                     OutputCollector<ItemItemWritable,FloatWritable> output,
                      Reporter reporter) throws IOException {
     List<ItemPrefWritable> prefs = new ArrayList<ItemPrefWritable>();
     while (values.hasNext()) {
@@ -59,5 +58,5 @@ public final class SlopeOnePrefsToDiffsReducer
       }
     }
   }
-
+  
 }

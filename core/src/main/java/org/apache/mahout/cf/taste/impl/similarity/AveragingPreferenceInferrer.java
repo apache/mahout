@@ -17,6 +17,8 @@
 
 package org.apache.mahout.cf.taste.impl.similarity;
 
+import java.util.Collection;
+
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.Cache;
@@ -27,46 +29,46 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 
-import java.util.Collection;
-
 /**
- * <p>Implementations of this interface compute an inferred preference for a user and an item that the
- * user has not expressed any preference for. This might be an average of other preferences scores from that user, for
- * example. This technique is sometimes called "default voting".</p>
+ * <p>
+ * Implementations of this interface compute an inferred preference for a user and an item that the user has
+ * not expressed any preference for. This might be an average of other preferences scores from that user, for
+ * example. This technique is sometimes called "default voting".
+ * </p>
  */
 public final class AveragingPreferenceInferrer implements PreferenceInferrer {
-
+  
   private static final Float ZERO = 0.0f;
-
+  
   private final DataModel dataModel;
-  private final Cache<Long, Float> averagePreferenceValue;
-
+  private final Cache<Long,Float> averagePreferenceValue;
+  
   public AveragingPreferenceInferrer(DataModel dataModel) throws TasteException {
     this.dataModel = dataModel;
-    Retriever<Long, Float> retriever = new PrefRetriever();
-    averagePreferenceValue = new Cache<Long, Float>(retriever, dataModel.getNumUsers());
+    Retriever<Long,Float> retriever = new PrefRetriever();
+    averagePreferenceValue = new Cache<Long,Float>(retriever, dataModel.getNumUsers());
     refresh(null);
   }
-
+  
   @Override
   public float inferPreference(long userID, long itemID) throws TasteException {
     return averagePreferenceValue.get(userID);
   }
-
+  
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     averagePreferenceValue.clear();
   }
-
-  private final class PrefRetriever implements Retriever<Long, Float> {
-
+  
+  private final class PrefRetriever implements Retriever<Long,Float> {
+    
     @Override
     public Float get(Long key) throws TasteException {
       RunningAverage average = new FullRunningAverage();
       PreferenceArray prefs = dataModel.getPreferencesFromUser(key);
       int size = prefs.length();
       if (size == 0) {
-        return ZERO;
+        return AveragingPreferenceInferrer.ZERO;
       }
       for (int i = 0; i < size; i++) {
         average.addDatum(prefs.getValue(i));
@@ -74,10 +76,10 @@ public final class AveragingPreferenceInferrer implements PreferenceInferrer {
       return (float) average.getAverage();
     }
   }
-
+  
   @Override
   public String toString() {
     return "AveragingPreferenceInferrer";
   }
-
+  
 }

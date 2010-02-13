@@ -17,6 +17,8 @@
 
 package org.apache.mahout.cf.taste.hadoop.pseudo;
 
+import java.io.IOException;
+
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -25,24 +27,21 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 
-import java.io.IOException;
-
 /**
  * Extracts and emits all user IDs from the users file, or input file.
  */
-public final class UserIDsMapper
-    extends MapReduceBase
-    implements Mapper<LongWritable, Text, LongWritable, NullWritable> {
-
+public final class UserIDsMapper extends MapReduceBase implements
+    Mapper<LongWritable,Text,LongWritable,NullWritable> {
+  
   @Override
   public void map(LongWritable key,
                   Text value,
-                  OutputCollector<LongWritable, NullWritable> output,
+                  OutputCollector<LongWritable,NullWritable> output,
                   Reporter reporter) throws IOException {
     String line = value.toString();
     int comma = line.indexOf(',');
     long userID = comma >= 0 ? Long.parseLong(line.substring(0, comma)) : Long.parseLong(line);
     output.collect(new LongWritable(userID), NullWritable.get());
   }
-
+  
 }

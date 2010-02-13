@@ -19,14 +19,20 @@ package org.apache.mahout.cf.taste.impl.common;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 
-/** <p>Implementations can retrieve a value for a given key.</p> */
-public interface Retriever<K, V> {
-
+/**
+ * <p>
+ * Implementations can retrieve a value for a given key.
+ * </p>
+ */
+public interface Retriever<K,V> {
+  
   /**
-   * @param key key for which a value should be retrieved
+   * @param key
+   *          key for which a value should be retrieved
    * @return value for key
-   * @throws TasteException if an error occurs while retrieving the value
+   * @throws TasteException
+   *           if an error occurs while retrieving the value
    */
   V get(K key) throws TasteException;
-
+  
 }

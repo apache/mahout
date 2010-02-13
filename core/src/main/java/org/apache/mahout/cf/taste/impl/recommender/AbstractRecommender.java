@@ -17,6 +17,8 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import java.util.List;
+
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
@@ -27,68 +29,74 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
 public abstract class AbstractRecommender implements Recommender {
-
+  
   private static final Logger log = LoggerFactory.getLogger(AbstractRecommender.class);
-
+  
   private final DataModel dataModel;
-
+  
   protected AbstractRecommender(DataModel dataModel) {
     if (dataModel == null) {
       throw new IllegalArgumentException("dataModel is null");
     }
     this.dataModel = dataModel;
   }
-
+  
   /**
-   * <p>Default implementation which just calls {@link Recommender#recommend(long, int,
-   * org.apache.mahout.cf.taste.recommender.IDRescorer)},
-   * with a {@link org.apache.mahout.cf.taste.recommender.Rescorer}
-   * that does nothing.</p>
+   * <p>
+   * Default implementation which just calls
+   * {@link Recommender#recommend(long, int, org.apache.mahout.cf.taste.recommender.IDRescorer)}, with a
+   * {@link org.apache.mahout.cf.taste.recommender.Rescorer} that does nothing.
+   * </p>
    */
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany) throws TasteException {
     return recommend(userID, howMany, null);
   }
-
+  
   /**
-   * <p>Default implementation which just calls {@link DataModel#setPreference(long, long, float)}.</p>
-   *
-   * @throws IllegalArgumentException if userID or itemID is <code>null</code>, or if value is {@link Double#NaN}
+   * <p>
+   * Default implementation which just calls {@link DataModel#setPreference(long, long, float)}.
+   * </p>
+   * 
+   * @throws IllegalArgumentException
+   *           if userID or itemID is <code>null</code>, or if value is {@link Double#NaN}
    */
   @Override
   public void setPreference(long userID, long itemID, float value) throws TasteException {
     if (Double.isNaN(value)) {
       throw new IllegalArgumentException("Invalid value: " + value);
     }
-    log.debug("Setting preference for user {}, item {}", userID, itemID);    
+    AbstractRecommender.log.debug("Setting preference for user {}, item {}", userID, itemID);
     dataModel.setPreference(userID, itemID, value);
   }
-
+  
   /**
-   * <p>Default implementation which just calls {@link DataModel#removePreference(long, long)} (Object,
-   * Object)}.</p>
-   *
-   * @throws IllegalArgumentException if userID or itemID is <code>null</code>
+   * <p>
+   * Default implementation which just calls {@link DataModel#removePreference(long, long)} (Object, Object)}.
+   * </p>
+   * 
+   * @throws IllegalArgumentException
+   *           if userID or itemID is <code>null</code>
    */
   @Override
   public void removePreference(long userID, long itemID) throws TasteException {
-    log.debug("Remove preference for user '{}', item '{}'", userID, itemID);
+    AbstractRecommender.log.debug("Remove preference for user '{}', item '{}'", userID, itemID);
     dataModel.removePreference(userID, itemID);
   }
-
+  
   @Override
   public DataModel getDataModel() {
     return dataModel;
   }
-
+  
   /**
-   * @param theUserID ID of user being evaluated
-   * @return all items in the {@link DataModel} for which the user has not expressed a preference
-   *  and could possibly be recommended to the user
-   * @throws TasteException if an error occurs while listing items
+   * @param theUserID
+   *          ID of user being evaluated
+   * @return all items in the {@link DataModel} for which the user has not expressed a preference and could
+   *         possibly be recommended to the user
+   * @throws TasteException
+   *           if an error occurs while listing items
    */
   protected FastIDSet getAllOtherItems(long theUserID) throws TasteException {
     FastIDSet possibleItemsIDs = new FastIDSet();
@@ -105,5 +113,5 @@ public abstract class AbstractRecommender implements Recommender {
     possibleItemsIDs.removeAll(itemIDs);
     return possibleItemsIDs;
   }
-
+  
 }

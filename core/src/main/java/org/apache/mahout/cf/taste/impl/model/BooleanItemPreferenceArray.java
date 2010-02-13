@@ -17,34 +17,36 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
-import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.PreferenceArray;
-
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.apache.mahout.cf.taste.model.Preference;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
+
 /**
- * <p>Like {@link BooleanUserPreferenceArray} but stores preferences for one item (all item IDs the same)
- * rather than one user.</p>
- *
+ * <p>
+ * Like {@link BooleanUserPreferenceArray} but stores preferences for one item (all item IDs the same) rather
+ * than one user.
+ * </p>
+ * 
  * @see BooleanPreference
  * @see BooleanUserPreferenceArray
  * @see GenericItemPreferenceArray
  */
 public final class BooleanItemPreferenceArray implements PreferenceArray {
-
+  
   private final long[] IDs;
   private long id;
-
+  
   public BooleanItemPreferenceArray(int size) {
     if (size < 1) {
       throw new IllegalArgumentException("size is less than 1");
     }
     this.IDs = new long[size];
   }
-
+  
   public BooleanItemPreferenceArray(List<Preference> prefs, boolean forOneUser) {
     this(prefs.size());
     for (int i = 0; i < prefs.size(); i++) {
@@ -53,7 +55,7 @@ public final class BooleanItemPreferenceArray implements PreferenceArray {
     }
     id = forOneUser ? prefs.get(0).getUserID() : prefs.get(0).getItemID();
   }
-
+  
   /**
    * This is a private copy constructor for clone().
    */
@@ -61,75 +63,72 @@ public final class BooleanItemPreferenceArray implements PreferenceArray {
     this.IDs = IDs;
     this.id = id;
   }
-
+  
   @Override
   public int length() {
     return IDs.length;
   }
-
+  
   @Override
   public Preference get(int i) {
     return new PreferenceView(i);
   }
-
+  
   @Override
   public void set(int i, Preference pref) {
     id = pref.getItemID();
     IDs[i] = pref.getUserID();
   }
-
+  
   @Override
   public long getUserID(int i) {
     return IDs[i];
   }
-
+  
   @Override
   public void setUserID(int i, long userID) {
     IDs[i] = userID;
   }
-
+  
   @Override
   public long getItemID(int i) {
     return id;
   }
-
+  
   /**
    * {@inheritDoc}
-   *
+   * 
    * Note that this method will actually set the item ID for <em>all</em> preferences.
    */
   @Override
   public void setItemID(int i, long itemID) {
     id = itemID;
   }
-
+  
   @Override
   public float getValue(int i) {
     return 1.0f;
   }
-
+  
   @Override
   public void setValue(int i, float value) {
     throw new UnsupportedOperationException();
   }
-
+  
   @Override
   public void sortByUser() {
     Arrays.sort(IDs);
   }
-
+  
   @Override
-  public void sortByItem() {
-  }
-
+  public void sortByItem() { }
+  
   @Override
-  public void sortByValue() {
-  }
-
+  public void sortByValue() { }
+  
   @Override
-  public void sortByValueReversed() {
-  }
-
+  public void sortByValueReversed() { }
+  
   @Override
   public boolean hasPrefWithUserID(long userID) {
     for (long id : IDs) {
@@ -139,28 +138,30 @@ public final class BooleanItemPreferenceArray implements PreferenceArray {
     }
     return false;
   }
-
+  
   @Override
   public boolean hasPrefWithItemID(long itemID) {
     return id == itemID;
   }
-
+  
   @Override
   public BooleanItemPreferenceArray clone() {
     return new BooleanItemPreferenceArray(IDs.clone(), id);
   }
-
+  
   @Override
   public Iterator<Preference> iterator() {
     return new PreferenceArrayIterator();
   }
-
+  
   private final class PreferenceArrayIterator implements Iterator<Preference> {
     private int i = 0;
+    
     @Override
     public boolean hasNext() {
       return i < length();
     }
+    
     @Override
     public Preference next() {
       if (i >= length()) {
@@ -168,40 +169,41 @@ public final class BooleanItemPreferenceArray implements PreferenceArray {
       }
       return new PreferenceView(i++);
     }
+    
     @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
   }
-
+  
   private final class PreferenceView implements Preference {
-
+    
     private final int i;
-
+    
     private PreferenceView(int i) {
       this.i = i;
     }
-
+    
     @Override
     public long getUserID() {
       return BooleanItemPreferenceArray.this.getUserID(i);
     }
-
+    
     @Override
     public long getItemID() {
       return BooleanItemPreferenceArray.this.getItemID(i);
     }
-
+    
     @Override
     public float getValue() {
       return 1.0f;
     }
-
+    
     @Override
     public void setValue(float value) {
       throw new UnsupportedOperationException();
     }
-
+    
   }
-
+  
 }

@@ -20,26 +20,35 @@ package org.apache.mahout.cf.taste.recommender;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 
-import java.util.Collection;
-
-/** <p>Interface implemented by "clustering" recommenders.</p> */
+/**
+ * <p>
+ * Interface implemented by "clustering" recommenders.
+ * </p>
+ */
 public interface ClusteringRecommender extends Recommender {
-
+  
   /**
-   * <p>Returns the cluster of users to which the given user, denoted by user ID, belongs.</p>
-   *
-   * @param userID user ID for which to find a cluster
+   * <p>
+   * Returns the cluster of users to which the given user, denoted by user ID, belongs.
+   * </p>
+   * 
+   * @param userID
+   *          user ID for which to find a cluster
    * @return {@link Collection} of IDs of users in the requested user's cluster
-   * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
+   * @throws TasteException
+   *           if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
   FastIDSet getCluster(long userID) throws TasteException;
-
+  
   /**
-   * <p>Returns all clusters of users.</p>
-   *
+   * <p>
+   * Returns all clusters of users.
+   * </p>
+   * 
    * @return {@link Collection} of {@link Collection}s of user IDs
-   * @throws TasteException if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
+   * @throws TasteException
+   *           if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
   FastIDSet[] getClusters() throws TasteException;
-
+  
 }

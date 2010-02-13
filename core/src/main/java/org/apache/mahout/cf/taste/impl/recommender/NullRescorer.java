@@ -18,64 +18,70 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
-import org.apache.mahout.common.LongPair;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
+import org.apache.mahout.common.LongPair;
 
-/** <p>A simple {@link Rescorer} which always returns the original score.</p> */
+/**
+ * <p>
+ * A simple {@link Rescorer} which always returns the original score.
+ * </p>
+ */
 public final class NullRescorer<T> implements Rescorer<T>, IDRescorer {
-
+  
   private static final IDRescorer userOrItemInstance = new NullRescorer<Long>();
   private static final Rescorer<LongPair> itemItemPairInstance = new NullRescorer<LongPair>();
   private static final Rescorer<LongPair> userUserPairInstance = new NullRescorer<LongPair>();
-
+  
   public static IDRescorer getItemInstance() {
-    return userOrItemInstance;
+    return NullRescorer.userOrItemInstance;
   }
-
+  
   public static IDRescorer getUserInstance() {
-    return userOrItemInstance;
+    return NullRescorer.userOrItemInstance;
   }
-
+  
   public static Rescorer<LongPair> getItemItemPairInstance() {
-    return itemItemPairInstance;
+    return NullRescorer.itemItemPairInstance;
   }
-
+  
   public static Rescorer<LongPair> getUserUserPairInstance() {
-    return userUserPairInstance;
+    return NullRescorer.userUserPairInstance;
   }
-
+  
   private NullRescorer() {
-    // do nothing
+  // do nothing
   }
-
+  
   /**
-   * @param thing         to rescore
-   * @param originalScore current score for item
+   * @param thing
+   *          to rescore
+   * @param originalScore
+   *          current score for item
    * @return same originalScore as new score, always
    */
   @Override
   public double rescore(T thing, double originalScore) {
     return originalScore;
   }
-
+  
   @Override
   public boolean isFiltered(T thing) {
     return false;
   }
-
+  
   @Override
   public double rescore(long ID, double originalScore) {
     return originalScore;
   }
-
+  
   @Override
   public boolean isFiltered(long ID) {
     return false;
   }
-
+  
   @Override
   public String toString() {
     return "NullRescorer";
   }
-
+  
 }

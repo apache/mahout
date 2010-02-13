@@ -17,48 +17,48 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
-import org.apache.mahout.cf.taste.model.Preference;
-
 import java.io.Serializable;
 
+import org.apache.mahout.cf.taste.model.Preference;
+
 /**
- * Encapsulates a simple boolean "preference" for an item whose value does not matter (is fixed at 1.0). This is
- * appropriate in situations where users conceptually have only a general "yes" preference for items, rather than a
- * spectrum of preference values.
+ * Encapsulates a simple boolean "preference" for an item whose value does not matter (is fixed at 1.0). This
+ * is appropriate in situations where users conceptually have only a general "yes" preference for items,
+ * rather than a spectrum of preference values.
  */
 public final class BooleanPreference implements Preference, Serializable {
-
+  
   private final long userID;
   private final long itemID;
-
+  
   public BooleanPreference(long userID, long itemID) {
     this.userID = userID;
     this.itemID = itemID;
   }
-
+  
   @Override
   public long getUserID() {
     return userID;
   }
-
+  
   @Override
   public long getItemID() {
     return itemID;
   }
-
+  
   @Override
   public float getValue() {
     return 1.0f;
   }
-
+  
   @Override
   public void setValue(float value) {
     throw new UnsupportedOperationException();
   }
-
+  
   @Override
   public String toString() {
     return "BooleanPreference[userID: " + userID + ", itemID:" + itemID + ']';
   }
-
+  
 }

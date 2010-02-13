@@ -17,30 +17,30 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
-import org.apache.mahout.cf.taste.recommender.IDRescorer;
-import org.apache.mahout.cf.taste.recommender.RecommendedItem;
-import org.apache.mahout.cf.taste.common.TasteException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Random;
+
 import org.apache.mahout.cf.taste.common.Refreshable;
+import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
-import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
+import org.apache.mahout.cf.taste.recommender.IDRescorer;
+import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.common.RandomUtils;
 
-import java.util.List;
-import java.util.Collection;
-import java.util.Random;
-import java.util.ArrayList;
-
 /**
- * Produces random recommendations and preference estimates. This is likely only useful as
- * a novelty and for benchmarking.
+ * Produces random recommendations and preference estimates. This is likely only useful as a novelty and for
+ * benchmarking.
  */
 public final class RandomRecommender extends AbstractRecommender {
-
+  
   private final Random random = RandomUtils.getRandom();
   private final float minPref;
   private final float maxPref;
-
+  
   public RandomRecommender(DataModel dataModel) throws TasteException {
     super(dataModel);
     float maxPref = Float.NEGATIVE_INFINITY;
@@ -62,7 +62,7 @@ public final class RandomRecommender extends AbstractRecommender {
     this.minPref = minPref;
     this.maxPref = maxPref;
   }
-
+  
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
     DataModel dataModel = getDataModel();
@@ -78,19 +78,19 @@ public final class RandomRecommender extends AbstractRecommender {
     }
     return result;
   }
-
+  
   @Override
   public float estimatePreference(long userID, long itemID) {
     return randomPref();
   }
-
+  
   private float randomPref() {
     return minPref + random.nextFloat() * (maxPref - minPref);
   }
-
+  
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     getDataModel().refresh(alreadyRefreshed);
   }
-
+  
 }

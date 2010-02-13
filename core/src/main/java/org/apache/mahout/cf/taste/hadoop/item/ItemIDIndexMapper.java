@@ -17,6 +17,9 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
+import java.io.IOException;
+import java.util.regex.Pattern;
+
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -25,28 +28,24 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 
-import java.io.IOException;
-import java.util.regex.Pattern;
-
-public final class ItemIDIndexMapper
-    extends MapReduceBase
-    implements Mapper<LongWritable, Text, IntWritable, LongWritable> {
-
+public final class ItemIDIndexMapper extends MapReduceBase implements
+    Mapper<LongWritable,Text,IntWritable,LongWritable> {
+  
   private static final Pattern COMMA = Pattern.compile(",");
-
+  
   @Override
   public void map(LongWritable key,
                   Text value,
-                  OutputCollector<IntWritable, LongWritable> output,
+                  OutputCollector<IntWritable,LongWritable> output,
                   Reporter reporter) throws IOException {
-    String[] tokens = COMMA.split(value.toString());
+    String[] tokens = ItemIDIndexMapper.COMMA.split(value.toString());
     long itemID = Long.parseLong(tokens[1]);
-    int index = idToIndex(itemID);
+    int index = ItemIDIndexMapper.idToIndex(itemID);
     output.collect(new IntWritable(index), new LongWritable(itemID));
   }
-
+  
   static int idToIndex(long itemID) {
-    return (int) (itemID) ^ (int) (itemID >>> 32);
+    return (int) itemID ^ (int) (itemID >>> 32);
   }
-
+  
 }

@@ -17,29 +17,31 @@
 
 package org.apache.mahout.cf.taste.impl.neighborhood;
 
+import java.util.Collection;
+
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
-import java.util.Collection;
-
-/** <p>Contains methods and resources useful to all classes in this package.</p> */
+/**
+ * <p>
+ * Contains methods and resources useful to all classes in this package.
+ * </p>
+ */
 abstract class AbstractUserNeighborhood implements UserNeighborhood {
-
+  
   private final UserSimilarity userSimilarity;
   private final DataModel dataModel;
   private final double samplingRate;
   private final RefreshHelper refreshHelper;
-
-  AbstractUserNeighborhood(UserSimilarity userSimilarity,
-                           DataModel dataModel,
-                           double samplingRate) {
-    if (userSimilarity == null || dataModel == null) {
+  
+  AbstractUserNeighborhood(UserSimilarity userSimilarity, DataModel dataModel, double samplingRate) {
+    if ((userSimilarity == null) || (dataModel == null)) {
       throw new IllegalArgumentException("userSimilarity or dataModel is null");
     }
-    if (Double.isNaN(samplingRate) || samplingRate <= 0.0 || samplingRate > 1.0) {
+    if (Double.isNaN(samplingRate) || (samplingRate <= 0.0) || (samplingRate > 1.0)) {
       throw new IllegalArgumentException("samplingRate must be in (0,1]");
     }
     this.userSimilarity = userSimilarity;
@@ -49,22 +51,22 @@ abstract class AbstractUserNeighborhood implements UserNeighborhood {
     this.refreshHelper.addDependency(this.dataModel);
     this.refreshHelper.addDependency(this.userSimilarity);
   }
-
+  
   final UserSimilarity getUserSimilarity() {
     return userSimilarity;
   }
-
+  
   final DataModel getDataModel() {
     return dataModel;
   }
-
+  
   final double getSamplingRate() {
     return samplingRate;
   }
-
+  
   @Override
   public final void refresh(Collection<Refreshable> alreadyRefreshed) {
     refreshHelper.refresh(alreadyRefreshed);
   }
-
+  
 }

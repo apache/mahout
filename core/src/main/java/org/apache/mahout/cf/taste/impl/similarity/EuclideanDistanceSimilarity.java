@@ -22,23 +22,24 @@ import org.apache.mahout.cf.taste.common.Weighting;
 import org.apache.mahout.cf.taste.model.DataModel;
 
 /**
- * <p>An implementation of a "similarity" based on the Euclidean "distance" between two 
- * users X and Y. Thinking of items as dimensions and preferences as points along
- * those dimensions, a distance is computed using all items (dimensions) where both users have expressed a preference
- * for that item. This is simply the square root of the sum of the squares of differences in position (preference) along
- * each dimension. The similarity is then computed as 1 / (1 + distance), so the resulting values are in the range
- * (0,1].</p>
+ * <p>
+ * An implementation of a "similarity" based on the Euclidean "distance" between two users X and Y. Thinking
+ * of items as dimensions and preferences as points along those dimensions, a distance is computed using all
+ * items (dimensions) where both users have expressed a preference for that item. This is simply the square
+ * root of the sum of the squares of differences in position (preference) along each dimension. The similarity
+ * is then computed as 1 / (1 + distance), so the resulting values are in the range (0,1].
+ * </p>
  */
 public final class EuclideanDistanceSimilarity extends AbstractSimilarity {
-
+  
   public EuclideanDistanceSimilarity(DataModel dataModel) throws TasteException {
     super(dataModel);
   }
-
+  
   public EuclideanDistanceSimilarity(DataModel dataModel, Weighting weighting) throws TasteException {
     super(dataModel, weighting);
   }
-
+  
   @Override
   double computeResult(int n, double sumXY, double sumX2, double sumY2, double sumXYdiff2) {
     if (n == 0) {
@@ -51,7 +52,7 @@ public final class EuclideanDistanceSimilarity extends AbstractSimilarity {
     // normalize a bit for magnitude
     sumXYdiff2 /= denominator;
     // divide by n below to not automatically give users with more overlap more similarity
-    return 1.0 / (1.0 + (Math.sqrt(sumXYdiff2) / (double) n));
+    return 1.0 / (1.0 + Math.sqrt(sumXYdiff2) / n);
   }
-
+  
 }

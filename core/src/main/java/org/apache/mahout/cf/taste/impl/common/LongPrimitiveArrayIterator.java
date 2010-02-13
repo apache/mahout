@@ -20,19 +20,21 @@ package org.apache.mahout.cf.taste.impl.common;
 import java.util.NoSuchElementException;
 
 /**
- * While long[] is an Iterable, it is not an Iterable&lt;Long&gt;. This adapter class
- * addresses that.
+ * While long[] is an Iterable, it is not an Iterable&lt;Long&gt;. This adapter class addresses that.
  */
 public final class LongPrimitiveArrayIterator implements LongPrimitiveIterator {
-
+  
   private final long[] array;
   private int position;
   private final int max;
-
+  
   /**
-   * <p>Creates an {@link LongPrimitiveArrayIterator} over an entire array.</p>
-   *
-   * @param array array to iterate over
+   * <p>
+   * Creates an {@link LongPrimitiveArrayIterator} over an entire array.
+   * </p>
+   * 
+   * @param array
+   *          array to iterate over
    */
   public LongPrimitiveArrayIterator(long[] array) {
     if (array == null) {
@@ -42,17 +44,17 @@ public final class LongPrimitiveArrayIterator implements LongPrimitiveIterator {
     this.position = 0;
     this.max = array.length;
   }
-
+  
   @Override
   public boolean hasNext() {
     return position < max;
   }
-
+  
   @Override
   public Long next() {
     return nextLong();
   }
-
+  
   @Override
   public long nextLong() {
     if (position >= array.length) {
@@ -60,7 +62,7 @@ public final class LongPrimitiveArrayIterator implements LongPrimitiveIterator {
     }
     return array[position++];
   }
-
+  
   @Override
   public long peek() {
     if (position >= array.length) {
@@ -68,7 +70,7 @@ public final class LongPrimitiveArrayIterator implements LongPrimitiveIterator {
     }
     return array[position];
   }
-
+  
   /**
    * @throws UnsupportedOperationException
    */
@@ -76,17 +78,17 @@ public final class LongPrimitiveArrayIterator implements LongPrimitiveIterator {
   public void remove() {
     throw new UnsupportedOperationException();
   }
-
+  
   @Override
   public void skip(int n) {
     if (n > 0) {
       position += n;
     }
   }
-
+  
   @Override
   public String toString() {
     return "LongPrimitiveArrayIterator";
   }
-
+  
 }

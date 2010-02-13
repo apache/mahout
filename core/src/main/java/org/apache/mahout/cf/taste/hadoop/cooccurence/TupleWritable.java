@@ -9,38 +9,33 @@ import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.io.Writable;
 
 public final class TupleWritable extends ArrayWritable {
-
+  
   public static class Field extends GenericWritable {
-
-    private static final Class<?>[] CLASSES = {
-        VIntWritable.class,
-        VLongWritable.class,
-        DoubleWritable.class,
-        Text.class
-    };
-
+    
+    private static final Class<?>[] CLASSES = {VIntWritable.class, VLongWritable.class, DoubleWritable.class,
+                                               Text.class};
+    
     @Override
     protected Class<? extends Writable>[] getTypes() {
-      return (Class<? extends Writable>[]) CLASSES;
+      return (Class<? extends Writable>[]) Field.CLASSES;
     }
-
-    public Field() {
-    }
-
+    
+    public Field() { }
+    
     public Field(Writable writable) {
       super.set(writable);
     }
   }
-
+  
   public TupleWritable() {
     super(Field.class);
   }
-
+  
   public TupleWritable(int size) {
     this();
     super.set(new Writable[size]);
   }
-
+  
   public TupleWritable(Writable... writables) {
     this();
     Writable[] fields = new Writable[writables.length];
@@ -50,26 +45,24 @@ public final class TupleWritable extends ArrayWritable {
     }
     super.set(fields);
   }
-
-
+  
   private boolean valid(int idx) {
     Writable[] fields = get();
-    int length = (fields == null) ? 0 : fields.length;
-    return (idx >= 0 && idx < length);
+    int length = fields == null ? 0 : fields.length;
+    return (idx >= 0) && (idx < length);
   }
-
-
+  
   private void allocateCapacity() {
     Writable[] oldFields = get();
     int oldCapacity = oldFields == null ? 0 : oldFields.length;
-    int newCapacity = (oldCapacity + 1) << 1;
+    int newCapacity = oldCapacity + 1 << 1;
     Writable[] newFields = new Writable[newCapacity];
-    if (oldFields != null && oldCapacity > 0) {
+    if ((oldFields != null) && (oldCapacity > 0)) {
       System.arraycopy(oldFields, 0, newFields, 0, oldFields.length);
     }
     set(newFields);
   }
-
+  
   public void set(int idx, Writable field) {
     if (!valid(idx)) {
       allocateCapacity();
@@ -77,15 +70,14 @@ public final class TupleWritable extends ArrayWritable {
     Writable[] fields = get();
     fields[idx] = new Field(field);
   }
-
-
+  
   public Field get(int idx) {
     if (!valid(idx)) {
       throw new IllegalArgumentException("Invalid index: " + idx);
     }
-    return (Field) (get()[idx]);
+    return (Field) get()[idx];
   }
-
+  
   public int getInt(int idx) {
     Field field = get(idx);
     Class<? extends Writable> wrappedClass = field.get().getClass();
@@ -95,7 +87,7 @@ public final class TupleWritable extends ArrayWritable {
       throw new IllegalArgumentException("Not an integer: " + wrappedClass);
     }
   }
-
+  
   public long getLong(int idx) {
     Field field = get(idx);
     Class<? extends Writable> wrappedClass = field.get().getClass();
@@ -105,7 +97,7 @@ public final class TupleWritable extends ArrayWritable {
       throw new IllegalArgumentException("Not a long: " + wrappedClass);
     }
   }
-
+  
   public double getDouble(int idx) {
     Field field = get(idx);
     Class<? extends Writable> wrappedClass = field.get().getClass();
@@ -115,7 +107,7 @@ public final class TupleWritable extends ArrayWritable {
       throw new IllegalArgumentException("Not an double: " + wrappedClass);
     }
   }
-
+  
   public Text getText(int idx) {
     Field field = get(idx);
     Class<? extends Writable> wrappedClass = field.get().getClass();
@@ -125,5 +117,5 @@ public final class TupleWritable extends ArrayWritable {
       throw new IllegalArgumentException("Not an double: " + wrappedClass);
     }
   }
-
+  
 }

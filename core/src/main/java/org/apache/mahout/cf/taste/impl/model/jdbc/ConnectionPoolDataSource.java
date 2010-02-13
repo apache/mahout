@@ -17,23 +17,28 @@
 
 package org.apache.mahout.cf.taste.impl.model.jdbc;
 
-import org.apache.commons.dbcp.ConnectionFactory;
-import org.apache.commons.dbcp.PoolableConnectionFactory;
-import org.apache.commons.dbcp.PoolingDataSource;
-import org.apache.commons.pool.impl.GenericObjectPool;
-import org.apache.commons.pool.PoolableObjectFactory;
-
-import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/** <p>A wrapper {@link DataSource} which pools connections.</p> */
+import javax.sql.DataSource;
+
+import org.apache.commons.dbcp.ConnectionFactory;
+import org.apache.commons.dbcp.PoolableConnectionFactory;
+import org.apache.commons.dbcp.PoolingDataSource;
+import org.apache.commons.pool.PoolableObjectFactory;
+import org.apache.commons.pool.impl.GenericObjectPool;
+
+/**
+ * <p>
+ * A wrapper {@link DataSource} which pools connections.
+ * </p>
+ */
 public final class ConnectionPoolDataSource implements DataSource {
-
+  
   private final DataSource delegate;
-
+  
   public ConnectionPoolDataSource(DataSource underlyingDataSource) {
     if (underlyingDataSource == null) {
       throw new IllegalArgumentException("underlyingDataSource is null");
@@ -44,60 +49,60 @@ public final class ConnectionPoolDataSource implements DataSource {
     objectPool.setTestOnReturn(false);
     objectPool.setTestWhileIdle(true);
     objectPool.setTimeBetweenEvictionRunsMillis(60 * 1000L);
-    PoolableObjectFactory factory =
-            new PoolableConnectionFactory(connectionFactory, objectPool, null, "SELECT 1", false, false);
+    PoolableObjectFactory factory = new PoolableConnectionFactory(connectionFactory, objectPool, null,
+        "SELECT 1", false, false);
     objectPool.setFactory(factory);
     delegate = new PoolingDataSource(objectPool);
   }
-
+  
   @Override
   public Connection getConnection() throws SQLException {
     return delegate.getConnection();
   }
-
+  
   @Override
   public Connection getConnection(String username, String password) throws SQLException {
     return delegate.getConnection(username, password);
   }
-
+  
   @Override
   public PrintWriter getLogWriter() throws SQLException {
     return delegate.getLogWriter();
   }
-
+  
   @Override
   public void setLogWriter(PrintWriter printWriter) throws SQLException {
     delegate.setLogWriter(printWriter);
   }
-
+  
   @Override
   public void setLoginTimeout(int timeout) throws SQLException {
     delegate.setLoginTimeout(timeout);
   }
-
+  
   @Override
   public int getLoginTimeout() throws SQLException {
     return delegate.getLoginTimeout();
   }
-
+  
   @Override
   public <T> T unwrap(Class<T> iface) throws SQLException {
     return delegate.unwrap(iface);
   }
-
+  
   @Override
   public boolean isWrapperFor(Class<?> iface) throws SQLException {
     return delegate.isWrapperFor(iface);
   }
-
+  
   private static class ConfiguringConnectionFactory implements ConnectionFactory {
-
+    
     private final DataSource underlyingDataSource;
-
+    
     ConfiguringConnectionFactory(DataSource underlyingDataSource) {
       this.underlyingDataSource = underlyingDataSource;
     }
-
+    
     @Override
     public Connection createConnection() throws SQLException {
       Connection connection = underlyingDataSource.getConnection();
@@ -106,5 +111,5 @@ public final class ConnectionPoolDataSource implements DataSource {
       return connection;
     }
   }
-
+  
 }

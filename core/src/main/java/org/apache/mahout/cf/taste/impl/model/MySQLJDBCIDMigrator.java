@@ -20,39 +20,48 @@ package org.apache.mahout.cf.taste.impl.model;
 import javax.sql.DataSource;
 
 /**
- * <p>An implementation for MySQL. The following statement would create a table suitable for use with
- * this class:</p>
+ * <p>
+ * An implementation for MySQL. The following statement would create a table suitable for use with this class:
+ * </p>
  * 
- * <p><pre>
+ * <p>
+ * 
+ * <pre>
  * CREATE TABLE taste_id_migration (
  *   long_id BIGINT NOT NULL,
  *   string_id VARCHAR(255) NOT NULL,
  *   PRIMARY KEY (long_id)
  * )
- * </pre></p>
- *
- * <p>Separately, note that in a MySQL database, the following function calls will convert a string value into
- * a numeric value in the same way that the standard implementations in this package do. This may
- * be useful in writing SQL statements for use with
+ * </pre>
+ * 
+ * </p>
+ * 
+ * <p>
+ * Separately, note that in a MySQL database, the following function calls will convert a string value into a
+ * numeric value in the same way that the standard implementations in this package do. This may be useful in
+ * writing SQL statements for use with
  * {@link org.apache.mahout.cf.taste.impl.model.jdbc.AbstractJDBCDataModel} subclasses which convert string
- * column values to appropriate numeric values -- though this should be viewed as a temporary
- * arrangement since it will impact performance:</p>
- *
- * <p><code>cast(conv(substring(md5([column name]),1,16),16,10) as signed)</code></p>
+ * column values to appropriate numeric values -- though this should be viewed as a temporary arrangement
+ * since it will impact performance:
+ * </p>
+ * 
+ * <p>
+ * <code>cast(conv(substring(md5([column name]),1,16),16,10) as signed)</code>
+ * </p>
  */
 public final class MySQLJDBCIDMigrator extends AbstractJDBCIDMigrator {
-
+  
   public MySQLJDBCIDMigrator(DataSource dataSource) {
-    this(dataSource, DEFAULT_MAPPING_TABLE, DEFAULT_LONG_ID_COLUMN, DEFAULT_STRING_ID_COLUMN);
+    this(dataSource, AbstractJDBCIDMigrator.DEFAULT_MAPPING_TABLE,
+        AbstractJDBCIDMigrator.DEFAULT_LONG_ID_COLUMN, AbstractJDBCIDMigrator.DEFAULT_STRING_ID_COLUMN);
   }
-
+  
   public MySQLJDBCIDMigrator(DataSource dataSource,
                              String mappingTable,
                              String longIDColumn,
                              String stringIDColumn) {
-    super(dataSource,
-          "SELECT " + stringIDColumn + " FROM " + mappingTable + " WHERE " + longIDColumn + "=?",
-          "REPLACE INTO " + mappingTable + " (" + longIDColumn + ',' + stringIDColumn + ") VALUES (?,?)");
+    super(dataSource, "SELECT " + stringIDColumn + " FROM " + mappingTable + " WHERE " + longIDColumn + "=?",
+        "REPLACE INTO " + mappingTable + " (" + longIDColumn + ',' + stringIDColumn + ") VALUES (?,?)");
   }
-
+  
 }

@@ -20,35 +20,35 @@ package org.apache.mahout.cf.taste.impl.common;
 import java.io.Serializable;
 
 public final class WeightedRunningAverage implements RunningAverage, Serializable {
-
+  
   private double totalWeight;
   private double average;
-
+  
   public WeightedRunningAverage() {
     totalWeight = 0.0;
     average = Double.NaN;
   }
-
+  
   @Override
   public synchronized void addDatum(double datum) {
     addDatum(datum, 1.0);
   }
-
+  
   public synchronized void addDatum(double datum, double weight) {
     double oldTotalWeight = totalWeight;
     totalWeight += weight;
     if (oldTotalWeight <= 0.0) {
       average = datum * weight;
     } else {
-      average = average * (oldTotalWeight / totalWeight) + datum / totalWeight;
+      average = average * oldTotalWeight / totalWeight + datum / totalWeight;
     }
   }
-
+  
   @Override
   public synchronized void removeDatum(double datum) {
     removeDatum(datum, 1.0);
   }
-
+  
   public synchronized void removeDatum(double datum, double weight) {
     double oldTotalWeight = totalWeight;
     totalWeight -= weight;
@@ -56,40 +56,40 @@ public final class WeightedRunningAverage implements RunningAverage, Serializabl
       average = Double.NaN;
       totalWeight = 0.0;
     } else {
-      average = average * (oldTotalWeight / totalWeight) - datum / totalWeight;
+      average = average * oldTotalWeight / totalWeight - datum / totalWeight;
     }
   }
-
+  
   @Override
   public synchronized void changeDatum(double delta) {
     changeDatum(delta, 1.0);
   }
-
+  
   public synchronized void changeDatum(double delta, double weight) {
     if (weight > totalWeight) {
       throw new IllegalArgumentException();
     }
-    average += (delta * weight) / totalWeight;
+    average += delta * weight / totalWeight;
   }
-
-  public synchronized  double getTotalWeight() {
+  
+  public synchronized double getTotalWeight() {
     return totalWeight;
   }
-
+  
   /** @return {@link #getTotalWeight()} */
   @Override
-  public synchronized  int getCount() {
+  public synchronized int getCount() {
     return (int) totalWeight;
   }
-
+  
   @Override
   public synchronized double getAverage() {
     return average;
   }
-
+  
   @Override
   public synchronized String toString() {
     return String.valueOf(average);
   }
-
+  
 }

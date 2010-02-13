@@ -17,24 +17,26 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
-import org.apache.mahout.cf.taste.recommender.IDRescorer;
-import org.apache.mahout.cf.taste.recommender.RecommendedItem;
-
 import java.io.Serializable;
 import java.util.Comparator;
 
+import org.apache.mahout.cf.taste.recommender.IDRescorer;
+import org.apache.mahout.cf.taste.recommender.RecommendedItem;
+
 /**
- * <p>Defines ordering on {@link RecommendedItem} by the rescored value of the recommendations' estimated preference
- * value, from high to low.</p>
+ * <p>
+ * Defines ordering on {@link RecommendedItem} by the rescored value of the recommendations' estimated
+ * preference value, from high to low.
+ * </p>
  */
 final class ByRescoreComparator implements Comparator<RecommendedItem>, Serializable {
-
+  
   private final IDRescorer rescorer;
-
+  
   ByRescoreComparator(IDRescorer rescorer) {
     this.rescorer = rescorer;
   }
-
+  
   @Override
   public int compare(RecommendedItem o1, RecommendedItem o2) {
     double rescored1;
@@ -54,10 +56,10 @@ final class ByRescoreComparator implements Comparator<RecommendedItem>, Serializ
       return 0;
     }
   }
-
+  
   @Override
   public String toString() {
     return "ByRescoreComparator[rescorer:" + rescorer + ']';
   }
-
+  
 }

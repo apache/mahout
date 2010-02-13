@@ -17,6 +17,9 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
+import java.io.IOException;
+import java.util.Iterator;
+
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -24,17 +27,13 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 
-import java.io.IOException;
-import java.util.Iterator;
-
-public final class ItemIDIndexReducer
-    extends MapReduceBase
-    implements Reducer<IntWritable, LongWritable, IntWritable, LongWritable> {
-
+public final class ItemIDIndexReducer extends MapReduceBase implements
+    Reducer<IntWritable,LongWritable,IntWritable,LongWritable> {
+  
   @Override
   public void reduce(IntWritable index,
                      Iterator<LongWritable> possibleItemIDs,
-                     OutputCollector<IntWritable, LongWritable> output,
+                     OutputCollector<IntWritable,LongWritable> output,
                      Reporter reporter) throws IOException {
     if (possibleItemIDs.hasNext()) {
       long minimumItemID = Long.MAX_VALUE;
@@ -47,5 +46,5 @@ public final class ItemIDIndexReducer
       output.collect(index, new LongWritable(minimumItemID));
     }
   }
-
+  
 }

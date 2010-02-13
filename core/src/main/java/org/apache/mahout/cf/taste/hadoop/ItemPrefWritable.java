@@ -17,55 +17,55 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
-import org.apache.hadoop.io.Writable;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import org.apache.hadoop.io.Writable;
+
 /** A {@link Writable} encapsulating an item ID and a preference value. */
 public final class ItemPrefWritable implements Writable {
-
+  
   private long itemID;
   private float prefValue;
-
+  
   public ItemPrefWritable() {
-    // do nothing
+  // do nothing
   }
-
+  
   public ItemPrefWritable(long itemID, float prefValue) {
     this.itemID = itemID;
     this.prefValue = prefValue;
   }
-
+  
   public ItemPrefWritable(ItemPrefWritable other) {
     this(other.getItemID(), other.getPrefValue());
   }
-
+  
   public long getItemID() {
     return itemID;
   }
-
+  
   public float getPrefValue() {
     return prefValue;
   }
-
+  
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeLong(itemID);
     out.writeFloat(prefValue);
   }
-
+  
   @Override
   public void readFields(DataInput in) throws IOException {
     itemID = in.readLong();
     prefValue = in.readFloat();
   }
-
+  
   public static ItemPrefWritable read(DataInput in) throws IOException {
     ItemPrefWritable writable = new ItemPrefWritable();
     writable.readFields(in);
     return writable;
   }
-
+  
 }

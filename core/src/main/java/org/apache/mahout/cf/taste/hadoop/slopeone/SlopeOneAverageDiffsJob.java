@@ -17,6 +17,9 @@
 
 package org.apache.mahout.cf.taste.hadoop.slopeone;
 
+import java.io.IOException;
+import java.util.Map;
+
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.compress.CompressionCodec;
@@ -34,55 +37,39 @@ import org.apache.mahout.cf.taste.hadoop.ItemItemWritable;
 import org.apache.mahout.cf.taste.hadoop.ItemPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
 
-import java.io.IOException;
-import java.util.Map;
-
 public final class SlopeOneAverageDiffsJob extends AbstractJob {
-
+  
   @Override
   public int run(String[] args) throws IOException {
-
-    Map<String,String> parsedArgs = parseArguments(args);
+    
+    Map<String,String> parsedArgs = AbstractJob.parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
-
+    
     String prefsFile = parsedArgs.get("--input");
     String outputPath = parsedArgs.get("--output");
     String jarFile = parsedArgs.get("--jarFile");
     String averagesOutputPath = parsedArgs.get("--tempDir");
-
-    JobConf prefsToDiffsJobConf = prepareJobConf(prefsFile,
-                                                 averagesOutputPath,
-                                                 jarFile,
-                                                 TextInputFormat.class,
-                                                 ToItemPrefsMapper.class,
-                                                 LongWritable.class,
-                                                 ItemPrefWritable.class,
-                                                 SlopeOnePrefsToDiffsReducer.class,
-                                                 ItemItemWritable.class,
-                                                 FloatWritable.class,
-                                                 SequenceFileOutputFormat.class);
+    
+    JobConf prefsToDiffsJobConf = AbstractJob.prepareJobConf(prefsFile, averagesOutputPath, jarFile,
+      TextInputFormat.class, ToItemPrefsMapper.class, LongWritable.class, ItemPrefWritable.class,
+      SlopeOnePrefsToDiffsReducer.class, ItemItemWritable.class, FloatWritable.class,
+      SequenceFileOutputFormat.class);
     JobClient.runJob(prefsToDiffsJobConf);
-
-    JobConf diffsToAveragesJobConf = prepareJobConf(averagesOutputPath,
-                                                    outputPath,
-                                                    jarFile,
-                                                    SequenceFileInputFormat.class,
-                                                    IdentityMapper.class,
-                                                    ItemItemWritable.class,
-                                                    FloatWritable.class,
-                                                    SlopeOneDiffsToAveragesReducer.class,
-                                                    ItemItemWritable.class,
-                                                    FloatWritable.class,
-                                                    TextOutputFormat.class);
-    diffsToAveragesJobConf.setClass("mapred.output.compression.codec", GzipCodec.class, CompressionCodec.class);
+    
+    JobConf diffsToAveragesJobConf = AbstractJob.prepareJobConf(averagesOutputPath, outputPath, jarFile,
+      SequenceFileInputFormat.class, IdentityMapper.class, ItemItemWritable.class, FloatWritable.class,
+      SlopeOneDiffsToAveragesReducer.class, ItemItemWritable.class, FloatWritable.class,
+      TextOutputFormat.class);
+    diffsToAveragesJobConf.setClass("mapred.output.compression.codec", GzipCodec.class,
+      CompressionCodec.class);
     JobClient.runJob(diffsToAveragesJobConf);
     return 0;
   }
-
+  
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new SlopeOneAverageDiffsJob(), args);
   }
-
+  
 }

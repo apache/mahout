@@ -20,66 +20,67 @@ package org.apache.mahout.cf.taste.impl.common;
 import java.io.Serializable;
 
 /**
- * <p>Like {@link org.apache.mahout.cf.taste.impl.common.FullRunningAverage} but uses smaller values (short, float) to
- * conserve memory. This is used in {@link org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender}
- * since it may allocate tens of millions of such objects.</p>
+ * <p>
+ * Like {@link org.apache.mahout.cf.taste.impl.common.FullRunningAverage} but uses smaller values (short,
+ * float) to conserve memory. This is used in
+ * {@link org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender} since it may allocate tens
+ * of millions of such objects.
+ * </p>
  */
 public class CompactRunningAverage implements RunningAverage, Serializable {
-
+  
   private char count;
   private float average;
-
+  
   public CompactRunningAverage() {
     count = (char) 0;
     average = Float.NaN;
   }
-
+  
   @Override
   public synchronized void addDatum(double datum) {
-    if ((int) count < 65535) { // = 65535 = 2^16 - 1
-      if ((int) ++count == 1) {
+    if (count < 65535) { // = 65535 = 2^16 - 1
+      if (++count == 1) {
         average = (float) datum;
       } else {
-        average = (float)
-            ((double) average * ((double) ((int) count - 1) / (double) count) + datum / (double) count);
+        average = (float) ((double) average * (double) (count - 1) / count + datum / count);
       }
     }
   }
-
+  
   @Override
   public synchronized void removeDatum(double datum) {
-    if ((int) count == 0) {
+    if (count == 0) {
       throw new IllegalStateException();
     }
-    if ((int) --count == 0) {
+    if (--count == 0) {
       average = Float.NaN;
     } else {
-      average = (float)
-          ((double) average * ((double) ((int) count + 1) / (double) count) - datum / (double) count);
+      average = (float) ((double) average * (double) (count + 1) / count - datum / count);
     }
   }
-
+  
   @Override
   public synchronized void changeDatum(double delta) {
-    if ((int) count == 0) {
+    if (count == 0) {
       throw new IllegalStateException();
     }
-    average += (float) (delta / (double) count);
+    average += (float) (delta / count);
   }
-
+  
   @Override
   public synchronized int getCount() {
-    return (int) count;
+    return count;
   }
-
+  
   @Override
   public synchronized double getAverage() {
-    return (double) average;
+    return average;
   }
-
+  
   @Override
   public synchronized String toString() {
     return String.valueOf(average);
   }
-
+  
 }

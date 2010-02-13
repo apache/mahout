@@ -18,36 +18,36 @@
 package org.apache.mahout.cf.taste.impl.common;
 
 public final class InvertedRunningAverage implements RunningAverage {
-
+  
   private final RunningAverage delegate;
-
+  
   public InvertedRunningAverage(RunningAverage delegate) {
     this.delegate = delegate;
   }
-
+  
   @Override
   public void addDatum(double datum) {
     throw new UnsupportedOperationException();
   }
-
+  
   @Override
   public void removeDatum(double datum) {
     throw new UnsupportedOperationException();
   }
-
+  
   @Override
   public void changeDatum(double delta) {
     throw new UnsupportedOperationException();
   }
-
+  
   @Override
   public int getCount() {
     return delegate.getCount();
   }
-
+  
   @Override
   public double getAverage() {
     return -delegate.getAverage();
   }
-
+  
 }

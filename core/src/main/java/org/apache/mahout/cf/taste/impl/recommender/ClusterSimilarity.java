@@ -22,21 +22,27 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 
 /**
- * <p>Returns the "similarity" between two clusters of users, according to some definition of similarity. Subclassses
- * define different notions of similarity.</p>
- *
+ * <p>
+ * Returns the "similarity" between two clusters of users, according to some definition of similarity.
+ * Subclassses define different notions of similarity.
+ * </p>
+ * 
  * @see TreeClusteringRecommender
  */
 public interface ClusterSimilarity extends Refreshable {
-
+  
   /**
-   * @param cluster1 first cluster of user IDs
-   * @param cluster2 second cluster of user IDs
+   * @param cluster1
+   *          first cluster of user IDs
+   * @param cluster2
+   *          second cluster of user IDs
    * @return "distance" between clusters; a bigger value means less similarity
-   * @throws TasteException           if an error occurs while computing similarity, such as errors accessing an
-   *                                  underlying {@link org.apache.mahout.cf.taste.model.DataModel}
-   * @throws IllegalArgumentException if either argument is null or empty
+   * @throws TasteException
+   *           if an error occurs while computing similarity, such as errors accessing an underlying
+   *           {@link org.apache.mahout.cf.taste.model.DataModel}
+   * @throws IllegalArgumentException
+   *           if either argument is null or empty
    */
   double getSimilarity(FastIDSet cluster1, FastIDSet cluster2) throws TasteException;
-
+  
 }

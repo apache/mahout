@@ -17,6 +17,14 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -41,39 +49,31 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
-
-public final class RecommenderMapper
-    extends MapReduceBase
-    implements Mapper<LongWritable, VectorWritable, LongWritable, RecommendedItemsWritable> {
-
+public final class RecommenderMapper extends MapReduceBase implements
+    Mapper<LongWritable,VectorWritable,LongWritable,RecommendedItemsWritable> {
+  
   static final String COOCCURRENCE_PATH = "cooccurrencePath";
   static final String ITEMID_INDEX_PATH = "itemIDIndexPath";
   static final String RECOMMENDATIONS_PER_USER = "recommendationsPerUser";
   static final String USERS_FILE = "usersFile";
-
+  
   private int recommendationsPerUser;
   private MapFilesMap<IntWritable,LongWritable> indexItemIDMap;
-  private MapFilesMap<IntWritable, VectorWritable> cooccurrenceColumnMap;
+  private MapFilesMap<IntWritable,VectorWritable> cooccurrenceColumnMap;
   private Cache<IntWritable,Vector> cooccurrenceColumnCache;
   private FastIDSet usersToRecommendFor;
-
+  
   @Override
   public void configure(JobConf jobConf) {
     try {
       FileSystem fs = FileSystem.get(jobConf);
-      Path cooccurrencePath = new Path(jobConf.get(COOCCURRENCE_PATH)).makeQualified(fs);
-      Path itemIDIndexPath = new Path(jobConf.get(ITEMID_INDEX_PATH)).makeQualified(fs);
-      recommendationsPerUser = jobConf.getInt(RECOMMENDATIONS_PER_USER, 10);
+      Path cooccurrencePath = new Path(jobConf.get(RecommenderMapper.COOCCURRENCE_PATH)).makeQualified(fs);
+      Path itemIDIndexPath = new Path(jobConf.get(RecommenderMapper.ITEMID_INDEX_PATH)).makeQualified(fs);
+      recommendationsPerUser = jobConf.getInt(RecommenderMapper.RECOMMENDATIONS_PER_USER, 10);
       indexItemIDMap = new MapFilesMap<IntWritable,LongWritable>(fs, itemIDIndexPath, new Configuration());
-      cooccurrenceColumnMap = new MapFilesMap<IntWritable,VectorWritable>(fs, cooccurrencePath, new Configuration());
-      String usersFilePathString = jobConf.get(USERS_FILE);
+      cooccurrenceColumnMap = new MapFilesMap<IntWritable,VectorWritable>(fs, cooccurrencePath,
+          new Configuration());
+      String usersFilePathString = jobConf.get(RecommenderMapper.USERS_FILE);
       if (usersFilePathString == null) {
         usersToRecommendFor = null;
       } else {
@@ -89,14 +89,14 @@ public final class RecommenderMapper
     }
     cooccurrenceColumnCache = new Cache<IntWritable,Vector>(new CooccurrenceCache(cooccurrenceColumnMap), 100);
   }
-
+  
   @Override
   public void map(LongWritable userID,
                   VectorWritable vectorWritable,
-                  OutputCollector<LongWritable, RecommendedItemsWritable> output,
+                  OutputCollector<LongWritable,RecommendedItemsWritable> output,
                   Reporter reporter) throws IOException {
-
-    if (usersToRecommendFor != null && !usersToRecommendFor.contains(userID.get())) {
+    
+    if ((usersToRecommendFor != null) && !usersToRecommendFor.contains(userID.get())) {
       return;
     }
     Vector userVector = vectorWritable.get();
@@ -118,10 +118,10 @@ public final class RecommenderMapper
       }
       columnVector.times(value).addTo(recommendationVector);
     }
-
-    Queue<RecommendedItem> topItems =
-      new PriorityQueue<RecommendedItem>(recommendationsPerUser + 1, Collections.reverseOrder());
-
+    
+    Queue<RecommendedItem> topItems = new PriorityQueue<RecommendedItem>(recommendationsPerUser + 1,
+        Collections.reverseOrder());
+    
     Iterator<Vector.Element> recommendationVectorIterator = recommendationVector.iterateNonZero();
     LongWritable itemID = new LongWritable();
     while (recommendationVectorIterator.hasNext()) {
@@ -138,30 +138,30 @@ public final class RecommenderMapper
         }
       }
     }
-
+    
     List<RecommendedItem> recommendations = new ArrayList<RecommendedItem>(topItems.size());
     recommendations.addAll(topItems);
     Collections.sort(recommendations);
     output.collect(userID, new RecommendedItemsWritable(recommendations));
   }
-
+  
   @Override
   public void close() {
     indexItemIDMap.close();
     cooccurrenceColumnMap.close();
   }
-
+  
   private static class CooccurrenceCache implements Retriever<IntWritable,Vector> {
-
+    
     private final MapFilesMap<IntWritable,VectorWritable> map;
     private VectorWritable columnVector;
-
+    
     private CooccurrenceCache(MapFilesMap<IntWritable,VectorWritable> map) {
       this.map = map;
       columnVector = new VectorWritable();
       columnVector.set(new RandomAccessSparseVector(Integer.MAX_VALUE, 1000));
     }
-
+    
     @Override
     public Vector get(IntWritable key) throws TasteException {
       Vector value;
@@ -177,6 +177,6 @@ public final class RecommenderMapper
       columnVector.set(new RandomAccessSparseVector(Integer.MAX_VALUE, 1000));
       return value;
     }
-
+    
   }
 }

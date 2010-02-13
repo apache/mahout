@@ -18,12 +18,14 @@
 package org.apache.mahout.cf.taste.common;
 
 /**
- * <p>A simple enum which gives symbolic names to the ideas of "weighted" and "unweighted", to make various API calls
- * which take a weighting parameter more readable.</p>
+ * <p>
+ * A simple enum which gives symbolic names to the ideas of "weighted" and "unweighted", to make various API
+ * calls which take a weighting parameter more readable.
+ * </p>
  */
 public enum Weighting {
-
+  
   WEIGHTED,
   UNWEIGHTED
-
+  
 }
