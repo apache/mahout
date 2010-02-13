@@ -294,7 +294,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     List<VectorWritable> points = getPoints(raw);
     // map the data
     for (VectorWritable point : points) {
-      mapper.map(new Text(), point, collector, null);
+      mapper.map(new Text(), point, collector, new DummyReporter());
     }
     mapper.close();
     assertEquals("Number of map results", 1, collector.getData().size());
@@ -324,7 +324,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     List<VectorWritable> points = getPoints(raw);
     // map the data
     for (VectorWritable point : points) {
-      mapper.map(new Text(), point, collector, null);
+      mapper.map(new Text(), point, collector, new DummyReporter());
     }
     mapper.close();
     assertEquals("Number of map results", 1, collector.getData().size());
@@ -378,7 +378,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     
     DummyOutputCollector<Text, Canopy> collector = new DummyOutputCollector<Text, Canopy>();
     List<VectorWritable> points = getPoints(raw);
-    reducer.reduce(new Text("centroid"), points.iterator(), collector, null);
+    reducer.reduce(new Text("centroid"), points.iterator(), collector, new DummyReporter());
     reducer.close();
     Set<String> keys = collector.getKeys();
     assertEquals("Number of centroids", 3, keys.size());
@@ -474,7 +474,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     List<VectorWritable> points = getPoints(raw);
     // map the data
     for (VectorWritable point : points) {
-      mapper.map(new Text(), point, collector, null);
+      mapper.map(new Text(), point, collector, new DummyReporter());
     }
     Map<String, List<VectorWritable>> data = collector.getData();
     assertEquals("Number of map results", canopies.size(), data.size());
@@ -516,7 +516,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     List<VectorWritable> points = getPoints(raw);
     // map the data
     for (VectorWritable point : points) {
-      mapper.map(new Text(), point, collector, null);
+      mapper.map(new Text(), point, collector, new DummyReporter());
     }
     Map<String, List<VectorWritable>> data = collector.getData();
     assertEquals("Number of map results", canopies.size(), data.size());
@@ -549,7 +549,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     List<VectorWritable> points = getPoints(raw);
     // map the data
     for (VectorWritable point : points) {
-      mapper.map(new Text(), point, collector, null);
+      mapper.map(new Text(), point, collector, new DummyReporter());
     }
     Map<String, List<VectorWritable>> data = collector.getData();
     assertEquals("Number of map results", canopies.size(), data.size());
