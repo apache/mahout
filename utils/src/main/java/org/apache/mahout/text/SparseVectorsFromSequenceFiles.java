@@ -61,10 +61,10 @@ public final class SparseVectorsFromSequenceFiles {
         .withShortName("i").create();
     
     Option outputDirOpt = obuilder
-        .withLongName("outputDir")
+        .withLongName("output")
         .withRequired(true)
         .withArgument(
-          abuilder.withName("outputDir").withMinimum(1).withMaximum(1).create())
+          abuilder.withName("output").withMinimum(1).withMaximum(1).create())
         .withDescription("The output directory").withShortName("o").create();
     Option minSupportOpt = obuilder.withLongName("minSupport").withArgument(
       abuilder.withName("minSupport").withMinimum(1).withMaximum(1).create())

@@ -64,6 +64,7 @@ if [ $# = 0 ]; then
   echo "  seqdirectory          generate sequence files containing the documents beneathe a directory"
   echo "  seqdump               dump a sequence files using the writable toString() method"
   echo "  seqwiki               generate sequence files from a wikipedia dump file"
+  echo "  seq2sparse            generate sparse vectors from a sequence file"
   echo "  vectordump            dump vectors from a sequence file"
   echo " or"
   echo "  CLASSNAME         run the class named CLASSNAME"
@@ -194,6 +195,8 @@ elif [ "$COMMAND" = "seqdirectory" ]; then
   CLASS=org.apache.mahout.text.SequenceFilesFromDirectory
 elif [ "$COMMAND" = "seqwiki" ]; then
   CLASS=org.apache.mahout.text.WikipediaToSequenceFile
+elif [ "$COMMAND" = "seq2sparse" ]; then
+  CLASS=org.apache.mahout.text.SparseVectorsFromSequenceFiles  
 else
   CLASS=$COMMAND
 fi
